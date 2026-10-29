@@ -30,6 +30,15 @@ function dashboardExample({ path, method }: Operation, baseUrl: string): string[
 
 function bearerExample({ path, method }: Operation, baseUrl: string): string[] {
   const curlMethod = method === "GET" ? "" : `-X ${method} `;
+  if (path === "/api/v1/video-bridge/drilldown" && ["GET", "DELETE"].includes(method)) {
+    return [
+      "# Set OMNIROUTE_VIDEO_HANDLE to one handle from the chat response's",
+      "# x-omniroute-video-drilldown header, obtained with the same API key.",
+      `curl --get ${curlMethod}${baseUrl}${path} \\`,
+      '  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \\',
+      '  --data-urlencode "handle=$OMNIROUTE_VIDEO_HANDLE"',
+    ];
+  }
   const hasJsonBody = ["POST", "PUT", "PATCH"].includes(method);
   return [
     `curl ${curlMethod}${baseUrl}${path} \\`,

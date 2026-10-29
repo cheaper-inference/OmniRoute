@@ -41,12 +41,16 @@ describe("ModalityBridgeVideoTab", () => {
   let failPatch = false;
   let failSettingsLoad = false;
   let runtimeMode: "ready" | "unavailable" | "network-error" = "ready";
+  let drilldownFromEnvironment = false;
+  let drilldownStats: { retainedEntries: unknown; retainedBytes: unknown };
 
   beforeEach(() => {
     (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     failPatch = false;
     failSettingsLoad = false;
     runtimeMode = "ready";
+    drilldownFromEnvironment = false;
+    drilldownStats = { retainedEntries: 2, retainedBytes: 1234 };
     fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/api/modality-bridge/video/runtime")) {
@@ -66,6 +70,11 @@ describe("ModalityBridgeVideoTab", () => {
       if (url.includes("/api/modality-bridge/stats")) {
         return Response.json({
           video: {
+            drilldown: {
+              ...drilldownStats,
+              enabled: drilldownFromEnvironment,
+              remoteEnabled: drilldownFromEnvironment,
+            },
             attempts: 4,
             successes: 3,
             bridged: 3,
@@ -154,6 +163,76 @@ describe("ModalityBridgeVideoTab", () => {
     expect(element.textContent).toContain("trafficInspector.timingTotalLatency: 400 ms");
     expect(element.textContent).toContain("avgLatency: 100 ms");
     expect(element.textContent).not.toContain("modalityBridgeVideoComingSoon");
+    expect(element.textContent).toContain("modalityBridgeVideoDrilldownUsage: 2 · 1234 B");
+  });
+
+  it.each([
+    [undefined, 1234],
+    [2, undefined],
+    ["2", 1234],
+    [2, "1234"],
+  ])("keeps base stats when retention counters are malformed (%s, %s)", async (entries, bytes) => {
+    drilldownStats = { retainedEntries: entries, retainedBytes: bytes };
+    const element = await render();
+    await waitFor(
+      () => element.textContent?.includes("4 requestlogger.attempts") ?? false,
+      "base video stats"
+    );
+    expect(element.textContent).toContain("3 modalityBridgeStatsBridged");
+    expect(element.textContent).toContain("trafficInspector.timingTotalLatency: 400 ms");
+    expect(element.textContent).not.toContain("modalityBridgeVideoDrilldownUsage:");
+  });
+
+  it("exposes separate disabled-by-default retention and remote-read switches", async () => {
+    const element = await render();
+    for (const key of [
+      "modalityBridgeVideoDrilldownEnabled",
+      "modalityBridgeVideoDrilldownRemoteEnabled",
+    ]) {
+      const toggle = element.querySelector(
+        `[role="switch"][aria-label="${key}"]`
+      ) as HTMLButtonElement | null;
+      expect(toggle, key).not.toBeNull();
+      expect(toggle?.getAttribute("aria-checked")).toBe("false");
+      await act(async () => toggle!.click());
+      await waitFor(
+        () =>
+          fetchMock.mock.calls.some(
+            ([, init]) =>
+              init?.method === "PATCH" &&
+              JSON.stringify(JSON.parse(String(init.body))) === JSON.stringify({ [key]: true })
+          ),
+        `${key} consent PATCH`
+      );
+      expect(toggle?.getAttribute("aria-checked")).toBe("true");
+    }
+    expect(fetchMock.mock.calls.some(([input]) => String(input).includes("/video/extract"))).toBe(
+      false
+    );
+  });
+
+  it("shows effective environment consent and allows explicit persisted revocation", async () => {
+    drilldownFromEnvironment = true;
+    const element = await render();
+    for (const key of [
+      "modalityBridgeVideoDrilldownEnabled",
+      "modalityBridgeVideoDrilldownRemoteEnabled",
+    ]) {
+      const toggle = element.querySelector(
+        `[role="switch"][aria-label="${key}"]`
+      ) as HTMLButtonElement;
+      expect(toggle.getAttribute("aria-checked")).toBe("true");
+      await act(async () => toggle.click());
+      await waitFor(
+        () =>
+          fetchMock.mock.calls.some(
+            ([, init]) =>
+              init?.method === "PATCH" &&
+              JSON.stringify(JSON.parse(String(init.body))) === JSON.stringify({ [key]: false })
+          ),
+        `${key} revocation PATCH`
+      );
+    }
   });
 
   it("labels runtime status as strict loopback without probing it from a LAN dashboard", async () => {
