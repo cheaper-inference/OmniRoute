@@ -168,7 +168,7 @@ Retries cannot switch to another account, including when that account is unavail
 Reusing a key with changed inputs returns 409. Supply a stable key for retryable
 client requests; a request without a key represents a new generation.
 After submission, pending or artifact-failure responses include `rosebud_usage.job_id`
-and return 409 so clients can retrieve the original job instead of submitting again.
+and return 422 with `x-should-retry: false` so clients can retrieve the original job instead of submitting again.
 Definitively unpaid transient failures may be retried with the same key.
 
 Every Rosebud HTTP operation requires authenticated management access even when

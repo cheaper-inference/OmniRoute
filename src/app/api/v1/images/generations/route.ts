@@ -569,7 +569,7 @@ async function postHandler(request, _context) {
     if (usage)
       return Response.json(
         { ...(await response.json()), rosebud_usage: usage },
-        { status: response.status }
+        { status: response.status, headers: { "x-should-retry": "false" } }
       );
   }
   return response;
