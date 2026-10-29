@@ -84,7 +84,7 @@ export async function handleRosebudImageGeneration(options: {
       ) {
         return {
           success: false as const,
-          status: 409,
+          status: 422,
           rosebudUsage: {
             job_id: job.id,
             status: job.status,
@@ -126,8 +126,8 @@ export async function handleRosebudImageGeneration(options: {
     return {
       success: false as const,
       status:
-        job && !(error instanceof z.ZodError)
-          ? 409
+        (job || (error instanceof RosebudError && error.jobId)) && !(error instanceof z.ZodError)
+          ? 422
           : error instanceof z.ZodError
             ? 400
             : error instanceof RosebudError

@@ -68,7 +68,7 @@ test("native image dispatch requires locality and uses the selected connected ac
       peerLocality: "lan",
       credentials: { connectionId: String(connection.id) },
     });
-    assert.equal(failedDownload.status, 409);
+    assert.equal(failedDownload.status, 422);
     assert.equal(failedDownload.rosebudUsage?.job_id, job.id);
     const controller = new AbortController();
     controller.abort();
@@ -96,4 +96,26 @@ test("native image dispatch requires locality and uses the selected connected ac
     else process.env.DATA_DIR = previous;
     await rm(folder, { recursive: true, force: true });
   }
+});
+
+test("OpenAI SDK does not automatically repeat a submitted Rosebud job error", async () => {
+  const { default: OpenAI } = await import("openai");
+  let calls = 0;
+  const client = new OpenAI({
+    apiKey: "test-only",
+    baseURL: "http://mock.invalid/v1",
+    maxRetries: 2,
+    fetch: async () => {
+      calls++;
+      return new Response(
+        JSON.stringify({
+          error: { message: "Job continues; retrieve its existing result", type: "provider_error" },
+          rosebud_usage: { job_id: "a".repeat(64) },
+        }),
+        { status: 422, headers: { "Content-Type": "application/json", "x-should-retry": "false" } }
+      );
+    },
+  });
+  await assert.rejects(client.images.generate({ model: "rosebud/test-image", prompt: "test" }));
+  assert.equal(calls, 1);
 });
