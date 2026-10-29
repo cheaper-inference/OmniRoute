@@ -25,6 +25,7 @@ import { HomeProviderTopologySection } from "./HomeProviderTopologySection";
 import { shouldShowProviderTopologyOnHome } from "./homeAppearance";
 import ManualUpdateCommand from "./ManualUpdateCommand";
 import HomeRecentRequests from "../home/HomeRecentRequests";
+import { isEnabledNoAuthProvider } from "../home/topologyUtils";
 
 type UpdateStep = {
   step: string;
@@ -228,6 +229,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
   // topology connection is never opened before we know the user wants it.
   const [showProviderTopologyOnHome, setShowProviderTopologyOnHome] = useState(false);
   const [appearanceSettingsLoaded, setAppearanceSettingsLoaded] = useState(false);
+  const [blockedProviders, setBlockedProviders] = useState<unknown>([]);
 
   useEffect(() => {
     // Fetch the pin settings (lightweight)
@@ -235,6 +237,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       .then((r) => (r.ok ? r.json() : {}))
       .then((data) => {
         if (data) {
+          setBlockedProviders(data.blockedProviders);
           if (typeof data.showQuickStartOnHome === "boolean") {
             setShowQuickStartOnHome(data.showQuickStartOnHome);
           }
@@ -488,10 +491,12 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     for (const stat of providerStats) {
       const canonical = normalizeProviderId(stat.id);
       if (!canonical) continue;
-      healthByProvider.set(
-        canonical,
-        stat.connected > 0 ? "active" : stat.errors > 0 ? "error" : "idle"
-      );
+      const health: ProviderHealth =
+        stat.connected > 0 ? "active" : stat.errors > 0 ? "error" : "idle";
+      // An enabled no-auth provider has no connections to test and is always reachable.
+      const noAuthHealthy =
+        stat.total === 0 && isEnabledNoAuthProvider(canonical, blockedProviders) ? "active" : null;
+      healthByProvider.set(canonical, noAuthHealthy ?? health);
     }
 
     const addProvider = (providerId?: string | null, name?: string) => {
@@ -501,10 +506,12 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
       const canonicalProviderId = normalizeProviderId(rawProviderId);
       if (!canonicalProviderId || byProvider.has(canonicalProviderId)) return;
 
-      // Exclude providers with no active connections (or where all connections are deactivated)
-      const hasActiveConn = providerConnections.some(
-        (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
-      );
+      // Exclude providers with no active connections (or where all connections are deactivated).
+      // No-auth providers have none: they count unless blocked.
+      const hasActiveConn =
+        providerConnections.some(
+          (c) => normalizeProviderId(c.provider) === canonicalProviderId && c.isActive !== false
+        ) || isEnabledNoAuthProvider(canonicalProviderId, blockedProviders);
       if (!hasActiveConn) return;
 
       const resolvedName =
@@ -528,7 +535,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
     Object.keys(providerMetrics).forEach((provider) => addProvider(provider));
 
     return Array.from(byProvider.values());
-  }, [providerStats, providerMetrics, providerNodes, providerConnections]);
+  }, [providerStats, providerMetrics, providerNodes, providerConnections, blockedProviders]);
 
   const { lastProvider, errorProvider } = providerTopology;
 

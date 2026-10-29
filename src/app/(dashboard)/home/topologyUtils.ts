@@ -2,6 +2,8 @@
  * Pure helpers for the home-page Provider Topology panel.
  */
 
+import { isNoAuthProviderBlocked, isNoAuthProviderKey } from "@/shared/utils/noAuthProviders";
+
 /** Minimal shape expected by <ProviderTopology activeRequests={...}> */
 export interface TopologyActiveRequest {
   provider: string;
@@ -24,4 +26,13 @@ interface InFlightRequest {
  */
 export function selectActiveRequests(requests: InFlightRequest[]): TopologyActiveRequest[] {
   return requests.map(({ provider, model }) => ({ provider, model }));
+}
+
+/**
+ * A no-auth provider has no connection rows: it is available unless the operator blocked
+ * it (by id or alias) in `blockedProviders`. The topology uses this where other providers
+ * need an active connection, so a no-auth provider that serves traffic gets its node.
+ */
+export function isEnabledNoAuthProvider(providerId: string, blockedProviders: unknown): boolean {
+  return isNoAuthProviderKey(providerId) && !isNoAuthProviderBlocked(blockedProviders, providerId);
 }
