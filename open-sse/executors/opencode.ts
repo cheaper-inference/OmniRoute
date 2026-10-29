@@ -18,6 +18,7 @@ import {
   runWithProxyContext,
   noteRotationAccount,
   noteAddedWait,
+  proxyFetch,
   resolveProxyForRequest,
   type AddedWaitCause,
 } from "../utils/proxyFetch.ts";
@@ -123,7 +124,12 @@ import {
   isOpencodePublishedCatalogRoutingEnabled,
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
-import { setPublishedCatalogRoutingGate } from "../utils/opencodePublishedCatalog.ts";
+import {
+  getPublishedBaseUrl,
+  setPublishedCatalogFetch,
+  setPublishedCatalogRoutingGate,
+} from "../utils/opencodePublishedCatalog.ts";
+import { setToolSchemaMemoryGate } from "./opencodeToolObservation.ts";
 import { rotatesEgressOnQuotaRefusal } from "../config/providerErrorRules.ts";
 import {
   BURST_PARK_THRESHOLD,
@@ -379,6 +385,11 @@ export function parseEffortLevel(model: string): { baseModel: string; effort: st
 // pipeline) hands it the OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED reader. Unregistered
 // (client bundle) reads as off.
 setPublishedCatalogRoutingGate(isOpencodePublishedCatalogRoutingEnabled);
+// The catalog read goes through the proxy-aware transport; the module itself cannot import
+// it (client-reachable). The same flag also turns on the client's own x-opencode-* header
+// relay and the accepted tool-schema memory.
+setPublishedCatalogFetch(proxyFetch);
+setToolSchemaMemoryGate(isOpencodePublishedCatalogRoutingEnabled);
 
 /**
  * Resolves the registry `targetFormat` for a model, aliasing `provider` first.
@@ -1526,10 +1537,12 @@ export class OpencodeExecutor extends BaseExecutor {
     void urlIndex;
     void credentials;
 
+    // Off, unpublished or invalid: the registered base URL. A gated free-tier request keeps
+    // the inference contract's constant and never consults the catalog.
     const base =
       Boolean(model) && isGatedFreeTierRequest(this._surface(), this.provider, model)
         ? FREE_TIER_INFERENCE_BASE_URL
-        : this.config.baseUrl;
+        : (getPublishedBaseUrl(this.provider) ?? this.config.baseUrl);
     switch (this._requestFormat) {
       case "claude":
         return `${base}/messages`;
@@ -1620,6 +1633,7 @@ export class OpencodeExecutor extends BaseExecutor {
         sessionBody: projectOpencodeSessionBody(body),
         reencodeSession: gatedScope,
         v2Fingerprint,
+        forwardAllOpencodeHeaders: isOpencodePublishedCatalogRoutingEnabled(),
       });
     }
 

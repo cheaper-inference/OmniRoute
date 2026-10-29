@@ -759,7 +759,7 @@ process.env[`${PROVIDER_ID}_USER_AGENT`]
 | `CLAUDE_CODE_CLIENT_BUILD_REVISION` | `1e2` | Override the 3-character suffix OmniRoute appends to `cc_version=` in the Claude billing block. Bump alongside `CLAUDE_CODE_CLIENT_VERSION` — pinning only the version advertises a `version.revision` pair no real binary emits. |
 | `GITHUB_COPILOT_CLI_VERSION` | `1.0.91` | Override advertised Copilot CLI version independently of `GITHUB_USER_AGENT` |
 | `GITHUB_USER_AGENT` | `GitHubCopilotChat/0.54.0` | When GitHub Copilot Chat updates |
-| `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 darwin/arm64` | When Antigravity IDE updates |
+| `ANTIGRAVITY_CLI_CL` | _(unset)_ | Override the Antigravity CLI (`agy`) Piper changelist reported as `cl=` in the CLI User-Agent. Not derivable from the version nor exposed by the public manifests; seeded per version from a live capture (1.4.4 → `1003595037`). Unset on an unknown version omits `cl=` instead of advertising another build's changelist. |
 | `KIRO_USER_AGENT` | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0` | When Kiro IDE updates |
 | `KIRO_OAUTH_CLIENT_ID` | `kiro-cli` | Override the Kiro social device-code `clientId` (public id) |
 | `KIRO_VERIFY_FULL_CRC` | `false` | Opt-in: full per-frame message CRC validation on the Kiro event stream (debug corrupted streams) |

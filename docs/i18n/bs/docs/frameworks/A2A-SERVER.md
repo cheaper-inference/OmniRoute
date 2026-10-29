@@ -199,13 +199,13 @@ JSON-RPC endpoint `/a2a` je kanonični A2A ulazni punkt. Ispod navedeni REST end
 
 ---
 
-## Dodavanje nove vještine (Skill)
+## Dodavanje nove vještine
 
 1. **Kreirajte datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezite async funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Pratite strukturu postojećih vještina kao što je `smartRouting.ts`.
+   Izvezite asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedite strukturu postojećih vještina, kao što je `smartRouting.ts`.
 
-2. **Registrujte handler:** u `src/lib/a2a/taskExecution.ts`, dodajte unos u `A2A_SKILL_HANDLERS`:
+2. **Registrujte obrađivač:** u `src/lib/a2a/taskExecution.ts` dodajte unos u `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -217,21 +217,21 @@ JSON-RPC endpoint `/a2a` je kanonični A2A ulazni punkt. Ispod navedeni REST end
    };
    ```
 
-3. **Izložite u Agent Card-u:** u `src/app/.well-known/agent.json/route.ts`, dodajte u `skills` niz:
+3. **Izložite u kartici agenta:** u `src/lib/a2a/agentCardMetadata.ts` (koju zajednički koriste `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodajte u niz `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Kratak opis fokusiran na namjeru",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Primjer poziva u prirodnom jeziku"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspješan put (happy path) + put greške (error path).
+4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Obuhvatite uspješan scenarij i scenarij s greškom.
 
-5. **Dokumentujte** novu vještinu u tabeli `Available Skills` unutar ove datoteke.
+5. **Dokumentujte** novu vještinu u tabeli `Available Skills` ove datoteke.
 
 ---
 

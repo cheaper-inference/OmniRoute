@@ -215,19 +215,19 @@ Koncový bod JSON-RPC `/a2a` je kanonickým vstupním bodem A2A. Níže uvedené
    };
    ```
 
-3. **Zveřejněte ji na kartě agenta:** v souboru `src/app/.well-known/agent.json/route.ts` ji přidejte do pole `skills`:
+3. **Zpřístupněte dovednost v kartě agenta:** v souboru `src/lib/a2a/agentCardMetadata.ts` (sdíleném koncovými body `/.well-known/agent.json` a `/.well-known/agent-card.json`) přidejte položku do pole `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Vaše dovednost",
+     "description": "Stručný popis zaměřený na záměr",
+     "tags": ["směrování", "kvóta"],
+     "examples": ["Ukázkové vyvolání v přirozeném jazyce"]
    }
    ```
 
-4. **Napište testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryjte úspěšný průchod i chybový scénář.
+4. **Napište testy:** `tests/unit/a2a-<your-skill>.test.ts`. Pokryjte úspěšný scénář i chybový scénář.
 
 5. **Zdokumentujte** novou dovednost v tabulce `Available Skills` v tomto souboru.
 

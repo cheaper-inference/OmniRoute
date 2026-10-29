@@ -199,37 +199,37 @@ JSON-RPC-i lõpp-punkt `/a2a` on kanoniline A2A sisenemispunkt. Allpool toodud R
 
 ## Uue oskuse lisamine
 
-1. **Loo oskuse fail:** `src/lib/a2a/skills/<teie-oskus>.ts`
+1. **Loo oskusefail:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspordi asünkroonne funktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgi olemasolevate oskuste struktuuri, nagu `smartRouting.ts`.
+   Ekspordi asünkroonne funktsioon `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Järgi olemasolevate oskuste, näiteks `smartRouting.ts`, struktuuri.
 
-2. **Registreeri käitleja:** `src/lib/a2a/taskExecution.ts` failis lisa kanne `A2A_SKILL_HANDLERS` objekti:
+2. **Registreeri töötleja:** lisa failis `src/lib/a2a/taskExecution.ts` kirje objekti `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...olemasolevad oskused
-     "teie-oskus": async (task) => {
+     "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
      },
    };
    ```
 
-3. **Näita Agent Card-is:** `src/app/.well-known/agent.json/route.ts` failis lisa `skills` massiivi lõppu:
+3. **Avalda agendikaardil:** lisa failis `src/lib/a2a/agentCardMetadata.ts` (mida kasutavad nii `/.well-known/agent.json` kui ka `/.well-known/agent-card.json`) massiivi `skills` järgmine kirje:
 
    ```json
    {
-     "id": "teie-oskus",
-     "name": "Teie Oskus",
-     "description": "Lühike, kavatsusele keskendunud kirjeldus",
-     "tags": ["marsruutimine", "kvooot"],
-     "examples": "Näidisloomuliku keele kutsed"]
+     "id": "your-skill",
+     "name": "Teie oskus",
+     "description": "Lühike kavatsusele keskenduv kirjeldus",
+     "tags": ["marsruutimine", "kvoot"],
+     "examples": ["Loomulikus keeles näidiskutse"]
    }
    ```
 
-4. **Kirjuta testid:** `tests/unit/a2a-<teie-oskus>.test.ts`. Katke edukas + vigane tee.
+4. **Kirjuta testid:** `tests/unit/a2a-<your-skill>.test.ts`. Kata edukas täitmistee ja veatee.
 
-5. **Dokumenteeri** uus oskus selle faili `Saadaolevad oskused` tabelis.
+5. **Dokumenteeri** uus oskus selle faili tabelis `Available Skills`.
 
 ---
 
