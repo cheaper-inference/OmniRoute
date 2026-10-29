@@ -849,47 +849,40 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## API пошуку
+## Пошук API
 
-Абстракція провайдерів вебпошуку (Tavily, Brave, Exa, Serper тощо).
+Абстракція провайдера Web/search (Tavily, Brave, Exa, Serper тощо).
 
-| Метод | Шлях                   | Опис                                                                                                           |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Список налаштованих провайдерів пошуку та їхніх можливостей                                                    |
-| POST  | `/v1/search`           | Виконання пошукового запиту — тіло перевіряється за допомогою `v1SearchSchema`, підтримує кешування/об’єднання |
-| GET   | `/v1/search/analytics` | Статистика влучань/затримки/кешу для кожного провайдера                                                        |
+| метод | шлях                   | опис                                                                                         |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Список налаштованих пошукових провайдерів можливостей +                                      |
+| POST  | `/v1/search`           | Запустіть пошуковий запит — body, перевірений `v1SearchSchema`, підтримує caching/coalescing |
+| GET   | `/v1/search/analytics` | Статистика hit/latency/cache для кожного постачальника                                       |
 
-**Автентифікація:** API-ключ Bearer (`extractApiKey` + `isValidApiKey`). Політика пошуку застосовується через `enforceApiKeyPolicy`.
+**авторизація:** Носійний ключ API (`extractApiKey` + `isValidApiKey`). Політика пошуку застосована через `enforceApiKeyPolicy`.
 
-### `provider_options` для Exa та Tavily
+### Exa і Tavily `provider_options`
 
-Exa та Tavily зчитують специфічні для провайдера поля з простору імен:
-`provider_options.exa` (або `provider_options["exa-search"]`) і `provider_options.tavily`
-(або `provider_options["tavily-search"]`). Передаються лише наведені нижче ключі. Кожен із них
-перевіряється за власною схемою Zod у `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-а ключ із неправильним типом відкидається. Усі інші ключі ігноруються, зокрема автентифікація, базова URL-адреса,
-`stream` і `outputSchema`. Плоскі ключі, які використовують інші провайдери (`cx`, `depth`, ...), працюють
-як і раніше.
+Exa та Tavily зчитують поля, пов’язані з провайдером, із пакета простору імен: `provider_options.exa` (або `provider_options["exa-search"]`) та `provider_options.tavily` (або `provider_options["tavily-search"]`). Пересилаються лише наведені нижче ключі. Кожен з них перевіряється на власну схему Zod у `open-sse/handlers/search/providerOptionsPassthrough.ts`, і ключ неправильного типу відкидається. Будь-який інший ключ ігнорується, включаючи auth, base URL, `stream` і `outputSchema`. Плоскі ключі, які використовуються іншими провайдерами (`cx`, `depth`, ...), працюють, як і раніше.
 
-| Провайдер | Поля верхнього рівня                                                                                                                                                                                                                                                                                                                                                      | Вкладені                                                                                                                                                                        |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоскі примітиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` об’єднується зі стандартним значенням `{ text: true, highlights: true }` |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                               |
+| Провайдер | Поля верхнього рівня                                                                                                                                                                                                                                                                                                                                                      | Вкладений                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоскі примітиви), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` об'єднано поверх `{ text: true, highlights: true }` за замовчуванням |
+| Тавіли    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
-Загальні поля завжди мають пріоритет: `query`, `max_results`, `filters` (домени), `country` і
-тема, отримана з `search_type`. Для Exa значення `search_type: "news"` зберігає `category: "news"`.
-Tavily також приймає `search_type: "finance"` (`topic: "finance"`).
+Завжди виграють загальні поля: `query`, `max_results`, `filters` (домени), `country` і тема, похідна від `search_type`. На Exa `search_type: "news"` зберігає `category: "news"`. Tavily також приймає `search_type: "finance"` (`topic: "finance"`).
 
-Загальне поле `time_range` тепер передається обом провайдерам: Exa отримує `startPublishedDate` (часова позначка
-ISO), а Tavily — `start_date` (`YYYY-MM-DD`). Явно задана дата в `provider_options`
-перевизначає зіставлене значення.
+Вартість пошуку Firecrawl реєструється за розпочатий блок із 10 отриманих результатів, 0,002 дол. США (2 кредити) за блок і принаймні один блок за виклик ( [оплата Firecrawl](https://docs.firecrawl.dev/billing) ): 11 результатів коштують 0,004 дол.
 
-Результати Exa зберігають `id`, `highlight_scores`, `summary`, `subpages`, `entities` і `extras` у
-`provider_raw`. Результати Tavily зберігають `images` і `favicon`.
+Загальний `time_range` тепер досягає обох постачальників: Exa отримує `startPublishedDate` (ISO timestamp), а Tavily отримує `start_date` (`YYYY-MM-DD`). Явна дата в `provider_options` замінює відображену.
 
-Облік вартості, як і раніше, використовує плоский реєстр `costPerQuery`. Tavily стягує
-більше кредитів за виклик для `search_depth: "advanced"`, і ця різниця не відображається в
-`usage.search_cost_usd`.
+Результати Exa зберігають `id`, `highlight_scores`, `summary`, `subpages`, `entities` та `extras` у `provider_raw`. Результати Tavily зберігають `images` і `favicon`.
+
+Вартість пошуку підключення зареєстрована на рівні 0,005 доларів США для `depth` `fast` і `standard` і 0,05 доларів США для `deep` ( [ціна підключення](https://docs.linkup.so/pages/documentation/development/pricing) ), незалежно від того, чи походить `depth` від `provider_options` чи налаштувань з’єднання.
+
+Exa `type: "lite"` (Exa 3.0) приймає менший набір полів і відхиляє весь запит, якщо встановлено будь-яке інше поле. Для lite `additionalQueries`, `systemPrompt` і всі ключі `contents` крім `text` і `highlights` видаляються перед викликом. Застарілі `subpages`, `subpageTarget`, `highlights.numSentences` та `highlights.highlightsPerUrl` більше не пересилаються.
+
+Облік витрат є єдиним реєстром `costPerQuery`, за винятком Exa, який дотримується власної ціни Exa: 0,007 дол. США за виклик для `auto` (і застарілої `fast`) або 0,004 дол. США для `lite` (і застарілої `instant`), охоплюючи 10 результатів; $0,001 за кожен наступний результат; і 0,001 $ за отриманий результат, якщо встановлено `contents.summary`. Tavily записується в 1 кредит (0,008 дол. США) для `search_depth` `basic`, `fast` та `ultra-fast` і 2 кредити (0,016 дол. США) для `advanced` ( [кредити Tavily API](https://docs.tavily.com/documentation/api-credits) ). Дзвінок із `auto_parameters: true`, який Tavily оновлює до розширеного, усе ще записується на 1 кредит.
 
 ---
 

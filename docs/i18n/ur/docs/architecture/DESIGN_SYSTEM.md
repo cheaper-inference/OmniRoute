@@ -51,9 +51,11 @@
 3. kit کی کمیوں کے workarounds اڈاپٹر میں رہتے ہیں (یا `globals.css` کے `@layer components` میں جب اصلاح اسٹائل کی ہو)، کبھی بھی `packages/ui-kit/src` میں نہیں۔
 4. `tests/unit/ui/adapters/<name>.test.tsx` شامل یا اپڈیٹ کریں۔ بہت سے callers والے اڈاپٹر کے لیے، تبدیلی سے پہلے اور بعد کے rendered markup کا موازنہ کریں — padding یا wrapper کی تبدیلیاں ہر سکرین تک پھیل جاتی ہیں۔
 
-## 5. kit کو اپڈیٹ کرنا
+## 5. کٹ کو اپ ڈیٹ کرنا
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` اس commit پر موجود upstream `src/` کو `packages/ui-kit/src` میں کاپی کرتا ہے اور واحد مجاز تبدیلی لاگو کرتا ہے (یہ relative imports سے `.js` لاحقہ ہٹا دیتا ہے)۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں تھیمز میں providers، settings، combos، usage اور endpoint کا بصری معائنہ کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور upstream changelog کے ساتھ PR کھولیں۔
+`npm run check:ui-kit-upstream` اپ اسٹریم ریپو کے تازہ ترین `v*` ٹیگ کے ساتھ `packages/ui-kit/UPSTREAM.md` میں پن کیے ہوئے ورژن کا موازنہ کرتا ہے اور جب کوئی ریلیز ہوتا ہے تو sync کمانڈ پرنٹ کرتا ہے۔ ہفتہ وار `UI Kit upstream watch` ورک فلو (`.github/workflows/ui-kit-upstream-watch.yml`) وہی چیک چلاتا ہے اور ایک ٹریکنگ ایشو کو کھلا رکھتا ہے جب کہ پن پیچھے ہوتا ہے۔ اپ اسٹریم ریپو پرائیویٹ ہے، اس لیے ورک فلو کو `UI_KIT_READ_TOKEN` سیکریٹ میں صرف پڑھنے کے لیے ٹوکن کی ضرورت ہوتی ہے اور وہ اس کے بغیر غیر فعال رہتا ہے۔
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` upstream `src/` اس کمٹ پر کاپی کرتا ہے (`latest` = جدید ترین `v*` ٹیگ) `packages/ui-kit/src` میں، واحد اجازت شدہ تبدیلی کو لاگو کرتا ہے (یہ متعلقہ درآمدات سے `.js` لاحقہ گرتا ہے)، اور `packages/ui-kit/package.json` اور `package-lock.json` میں ورک اسپیس ورژن کو اپ اسٹریم والے پر سیٹ کرتا ہے۔ پھر: `git diff packages/ui-kit` کا جائزہ لیں، دونوں تھیمز میں فراہم کنندگان، ترتیبات، کومبوز، استعمال اور اختتامی نقطہ پر ایک بصری پاس کریں، `npm run check:ui-kit-snapshot` اور `npm run test:vitest:ui` چلائیں، اور PR اپ اسٹریم چینج لاگ کے ساتھ کھولیں۔
 
 ## 6. README خاکے
 

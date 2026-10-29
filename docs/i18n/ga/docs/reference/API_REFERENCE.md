@@ -831,47 +831,40 @@ Diúltaíonn `GET /v1/batches` do ghlaoiteoir anaithnid le `401` fiú nuair atá
 
 ---
 
-## API Cuardaigh
+## Cuardaigh API
 
-Teibíocht soláthraí gréasáin/cuardaigh (Tavily, Brave, Exa, Serper, srl.).
+astarraingt soláthraí Web/search (Tavily, Brave, Exa, Serper, etc.).
 
-| Modh | Conair                 | Cur síos                                                                                                   |
-| ---- | ---------------------- | ---------------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | Liostaigh soláthraithe cuardaigh cumraithe + cumais                                                        |
-| POST | `/v1/search`           | Rith iarratas cuardaigh — corp bailíochtaithe ag `v1SearchSchema`, tacaíonn sé le taisceadh/comhchónascadh |
-| GET  | `/v1/search/analytics` | Staitisticí amas/folaighse/taisce de réir soláthraí                                                        |
+| Modh | Conair                 | Cur síos                                                                                            |
+| ---- | ---------------------- | --------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Liostaigh cumais + soláthraithe cuardaigh cumraithe                                                 |
+| POST | `/v1/search`           | Rith ceist chuardaigh comhlacht — arna bhailíochtú ag `v1SearchSchema`, tacaíonn caching/coalescing |
+| GET  | `/v1/search/analytics` | Staitisticí hit/latency/cache in aghaidh an tsoláthraí                                              |
 
-**Fíordheimhniú:** Eochair API Bearer (`extractApiKey` + `isValidApiKey`). Cuirtear an polasaí cuardaigh i bhfeidhm trí `enforceApiKeyPolicy`.
+**Údar:** Eochair API iompróra (`extractApiKey` + `isValidApiKey`). Beartas cuardaigh curtha i bhfeidhm trí `enforceApiKeyPolicy`.
 
-### `provider_options` Exa agus Tavily
+### Exa agus Tavily `provider_options`
 
-Léann Exa agus Tavily réimsí a bhaineann go sonrach le soláthraí ó mhála le hainmspás:
-`provider_options.exa` (nó `provider_options["exa-search"]`) agus `provider_options.tavily`
-(nó `provider_options["tavily-search"]`). Ní chuirtear ar aghaidh ach na heochracha thíos. Déantar gach ceann acu a
-sheiceáil i gcoinne a scéime Zod féin in `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-agus caitear eochair den chineál mícheart amach. Déantar neamhaird d’aon eochair eile, lena n-áirítear fíordheimhniú, bun-URL,
-`stream` agus `outputSchema`. Oibríonn na heochracha comhréidhe a úsáideann soláthraithe eile (`cx`, `depth`, ...) mar
-a bhí roimhe seo.
+Léann Exa agus Tavily réimsí a bhaineann go sonrach le soláthraí ó mhála le spásanna áirithe: `provider_options.exa` (nó `provider_options["exa-search"]`) agus `provider_options.tavily` (nó `provider_options["tavily-search"]`). Ní chuirtear ar aghaidh ach na heochracha thíos. Déantar gach ceann acu a sheiceáil i gcoinne a scéimre Zod féin in `open-sse/handlers/search/providerOptionsPassthrough.ts`, agus scaoiltear eochair leis an gcineál mícheart. Ní thugtar aird ar eochair ar bith eile, lena n-áirítear auth, base URL, `stream` agus `outputSchema`. Oibríonn na heochracha comhréidh a úsáideann soláthraithe eile (`cx`, `depth`, ...) mar a bhí roimhe seo.
 
-| Soláthraí | Réimsí barrleibhéil                                                                                                                                                                                                                                                                                                                                                       | Neadaithe                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitíbhaigh chomhréidhe), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` cumaiscthe thar an réamhshocrú `{ text: true, highlights: true }` |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Soláthraí | Réimsí barrleibhéil                                                                                                                                                                                                                                                                                                                                                       | neadaithe                                                                                                                                        |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitives árasán), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` chumasc thar an `{ text: true, highlights: true }` réamhshocraithe |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Bíonn tosaíocht i gcónaí ag na réimsí cineálacha: `query`, `max_results`, `filters` (fearainn), `country` agus an
-topaic a dhíorthaítear ó `search_type`. Ar Exa, coinníonn `search_type: "news"` `category: "news"`.
-Glacann Tavily le `search_type: "finance"` freisin (`topic: "finance"`).
+Bíonn bua ag na réimsí cineálacha i gcónaí: `query`, `max_results`, `filters` (fearainn), `country` agus an topaic a dhíorthaítear ó `search_type`. Ar Exa, coinníonn `search_type: "news"` `category: "news"`. Glacann Tavily freisin `search_type: "finance"` (`topic: "finance"`).
 
-Sroicheann an `time_range` cineálach an dá sholáthraí anois: faigheann Exa `startPublishedDate` (stampa ama ISO)
-agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn dáta sainráite in `provider_options`
-an ceann mapáilte.
+Taifeadtar costas cuardaigh Firecrawl in aghaidh an bhloc tosaithe de 10 dtorthaí a cuireadh ar ais, ag $0.002 (2 chreidmheas) an bloc agus bloc amháin ar a laghad in aghaidh an ghlao ( [Billeáil Firecrawl](https://docs.firecrawl.dev/billing) ): chosain 11 toradh $0.004.
 
-Coinníonn torthaí Exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` in
-`provider_raw`. Coinníonn torthaí Tavily `images` agus `favicon`.
+Sroicheann an `time_range` cineálach an dá sholáthraí anois: faigheann Exa `startPublishedDate` (stampa ama ISO ) agus faigheann Tavily `start_date` (`YYYY-MM-DD`). Sáraíonn dáta sainráite i `provider_options` an ceann léarscáilithe.
 
-Is é `costPerQuery`, an chlárlann chomhréidh, a úsáidtear fós le haghaidh cuntasaíocht costais. Gearrann Tavily
-níos mó creidmheasanna in aghaidh an ghlao ar `search_depth: "advanced"`, agus ní léirítear an difríocht sin in
-`usage.search_cost_usd`.
+Coinníonn torthaí exa `id`, `highlight_scores`, `summary`, `subpages`, `entities` agus `extras` i `provider_raw`. Coinníonn torthaí tavily `images` agus `favicon`.
+
+Taifeadtar costas cuardaigh Linkup ag $0.005 le haghaidh `depth` `fast` agus `standard` agus $0.05 le haghaidh `deep` ( [Praghsáil Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), cibé an dtagann `depth` ó `provider_options` nó ó shocruithe an naisc.
+
+Glacann Exa `type: "lite"` (Exa 3.0) le sraith réimsí níos lú agus diúltaíonn sé don iarratas iomlán nuair a shocraítear aon réimse eile. I gcás lite, scaoiltear `additionalQueries`, `systemPrompt` agus gach eochair `contents` seachas `text` agus `highlights` roimh an nglao. Ní chuirtear na `subpages`, `subpageTarget`, `highlights.numSentences` agus `highlights.highlightsPerUrl` ar aghaidh a thuilleadh.
+
+Is éard atá i gcuntasaíocht chostais ná an clárlann árasán `costPerQuery`, ach amháin Exa, a leanann praghsáil Exa féin: $0.007 in aghaidh an ghlao ar `auto` (agus an `fast` oidhreachta) nó $0.004 le haghaidh `lite` (agus an oidhreacht `instant`), ag clúdach 10 dtorthaí; $0.001 do gach toradh eile; agus $0.001 in aghaidh an toraidh a tugadh ar ais nuair a shocraítear `contents.summary`. Taifeadtar Tavily ag 1 chreidmheas ($0.008) le haghaidh `search_depth` `basic`, `fast` agus `ultra-fast`, agus 2 chreidmheas ($0.016) le haghaidh `advanced` ( [creidmheasanna Tavily API](https://docs.tavily.com/documentation/api-credits) ). Tá glao le `auto_parameters: true` a uasghrádaíonn Tavily go hardleibhéal fós taifeadta ag 1 chreidmheas.
 
 ---
 
