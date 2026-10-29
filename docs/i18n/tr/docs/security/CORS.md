@@ -36,11 +36,11 @@ Genel OWASP uyarısını ("wildcard CORS = herhangi bir site API'nizi çağırab
 
 `CORS_ALLOW_ALL=true` kullanıldığında bile bunun her yüzey için anlamı şöyledir:
 
-| Yüzey                                       | Kimlik doğrulama mekanizması | Wildcard CORS'un etkisi                                                                                                                                                                                                                                        |
-| ------------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`             | Cookie session               | Origin geri yansıtılır; ancak **`Allow-Credentials` olmadan** tarayıcı, kimlik bilgileri içeren okumayı **engeller**. Kötü amaçlı, origin'ler arası bir site kimliği doğrulanmış dashboard yanıtlarınızı **okuyamaz** ve session cookie'si açığa çıkmaz.       |
-| Client API `/v1/*`, `/v1beta/*`             | Bearer / `x-api-key` header  | Zaten **tasarım gereği** izin vericidir (`relaxForTokenAuth`): tarayıcılar `Authorization`/`x-api-key` değerini hiçbir zaman otomatik olarak eklemez, dolayısıyla saldırganın sayfası anahtarınızı sağlayamaz. `CORS_ALLOW_ALL` bunu daha geniş hâle getirmez. |
-| Herkese açık salt okunur (`/api/health`, …) | Yok                          | Hassas değildir; wildcard zararsızdır.                                                                                                                                                                                                                         |
+| Yüzey                                       | Kimlik doğrulama mekanizması | Wildcard CORS'un etkisi                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`             | Cookie session               | Origin geri yansıtılır; ancak **`Allow-Credentials` olmadan** tarayıcı, kimlik bilgileri içeren okumayı **engeller**. Kötü amaçlı, origin'ler arası bir site kimliği doğrulanmış dashboard yanıtlarınızı **okuyamaz** ve session cookie'si açığa çıkmaz.                                                                                                                                                |
+| Client API `/v1/*`, `/v1beta/*`             | Bearer / `x-api-key` header  | Zaten **tasarım gereği** izin vericidir (`relaxForTokenAuth`): tarayıcılar `Authorization`/`x-api-key` değerini hiçbir zaman otomatik olarak eklemez, dolayısıyla saldırganın sayfası anahtarınızı sağlayamaz. Origin yansıtma yalnızca sunulan anahtar doğrulandığında uygulanır; anonim yanıtlar (`REQUIRE_API_KEY=false`) izin listesine tabi kalır. `CORS_ALLOW_ALL` bunu daha geniş hâle getirmez. |
+| Herkese açık salt okunur (`/api/health`, …) | Yok                          | Hassas değildir; wildcard zararsızdır.                                                                                                                                                                                                                                                                                                                                                                  |
 
 Dolayısıyla `CORS_ALLOW_ALL=true` ayarından kaynaklanan **artık** risk şunlarla sınırlıdır: (a) zaten kimlik doğrulaması gerektirmeyen verilerin, kimlik bilgileri içermeyen origin'ler arası **okumaları** ve (b) yönetim route'larında CORS **preflight isteğinin geçmesine** izin verilmesi — bu route'lar yine de origin'ler arası bir sayfanın sağlayamayacağı kimlik doğrulamasını gerektirir. Paylaşılan CORS yolunda bu, bir session ele geçirme veya kimlik bilgisi çalma vektörü **değildir**.
 
@@ -92,10 +92,22 @@ ayarlanabilir.
   API anahtarıdır — bu nedenle söz konusu yüzey, tarayıcı ve Electron
   istemcilerinin zaten erişim hakkına sahip oldukları yanıtları okuyabilmesi için
   bilinçli olarak izin verici tutulur.
+  Gevşetilmiş origin yansıtma, header'ın salt varlığını değil doğrulanmış anahtarı esas alır: `REQUIRE_API_KEY=false` bir isteği anonim olarak sunduğunda, başarılı yanıtı varsayılan olarak erişimi reddeden izin listesine tabi kalır. Kimlik doğrulama retleri (401) okunabilir kalır; böylece istemciler iptal edilmiş veya yanlış yazılmış bir anahtarı kullanıcıya gösterebilir (#5242): pipeline'ın kendi 401 yanıtı origin yansıtmayı korur ve pipeline isteği anonim olarak sunduktan sonra anahtarı kendisi reddeden bir route (yönetim kimlik doğrulaması yapılandırılmışken `/v1/models` ve `/v1beta/models`, sahibe özgü `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ve auto-combo aday route'ları) bu 401 yanıtına origin yansıtmayı `credentialRejectionHeaders()` aracılığıyla ekler. Origin yansıtma, route'un bunlardan hangisini denetlediğine değil, isteğin bir kimlik bilgisi header'ı (`Authorization`, `x-api-key`, `x-goog-api-key` veya `auth_token` cookie'si) taşımasına bağlıdır ve hiçbir zaman `Access-Control-Allow-Credentials` ile birlikte gönderilmez; gövde sabit bir hata zarfıdır. `/api/v1/` altında `requireManagementAuth()` ile korunan yönetim route'ları (`/api/v1/management/*`, `/api/v1/registered-keys`) origin yansıtma eklemez: `REQUIRE_API_KEY=false` iken bu route'ların 401/403 yanıtları origin'ler arası okunamaz.
 - **Çerez oturumu (kontrol paneli):** güvenli biçimde kapalı varsayılan ayar
   **ve** paylaşılan yolda `Access-Control-Allow-Credentials` bulunmamasıyla
   korunur. Yönetim/kontrol paneli origin'lerini izin verici yapılandırmalardan
   uzak tutun; bunlar kesinlikle güvenli biçimde kapalı kalmalıdır.
+
+## WebSocket handshake'leri (`/v1/responses`, `/v1/ws`)
+
+Tarayıcılar WebSocket'e CORS uygulamaz; bu nedenle çıkarım çıktısı döndüren WebSocket taşımaları handshake'in `Origin` değerini kendileri denetler (`src/server/origin/wsOrigin.ts`): Responses WebSocket'i (`/v1/responses`) ve OmniRoute `npm start` / `npm run dev` ile çalıştığında, `/v1/chat/completions`, `/v1/messages` ve `/v1/responses` yanıtlarını frame'ler hâlinde aktaran `/v1/ws` ve `/api/v1/ws` köprüsü. Köprü, karar için `/api/v1/ws?handshake=1` adresine sorar ve bu route denetimi çalıştırmadıkça upgrade işlemini reddeder. Bir handshake şu durumlarda kabul edilir:
+
+- `Origin` header'ı yoksa (Codex CLI, SDK'lar ve tarayıcı olmayan diğer istemciler);
+- `Origin` yukarıdaki izin listesi tarafından kabul ediliyorsa (`CORS_ALLOWED_ORIGINS`, `corsOrigins` ayarı, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin`, OmniRoute'un kendi genel origin'lerinden biriyse (yapılandırılmış genel temel URL, güvenilen bir proxy'nin iletilen origin'i veya IP literal ya da `localhost` olarak verilen doğrudan bir loopback/LAN host'u — dashboard'un değişiklik denetiminin kullandığı adayların aynısı); ya da
+- HTTP `/v1/*` yüzeyinde olduğu gibi geçerli bir API anahtarı taşıyorsa.
+
+Bunların dışındaki her şey `403 ws_origin_forbidden` alır. Bir dashboard session cookie'si yabancı bir `Origin` için muafiyet sağlamaz, çünkü tarayıcı bu cookie'yi herhangi bir sayfanın socket'ine ekler. Başka bir porttaki `localhost` aynı origin sayılmaz; bu tür geliştirme origin'lerini `CORS_ALLOWED_ORIGINS` listesine ekleyin.
 
 ## Örnek: OmniRoute önünde ters proxy
 
@@ -131,6 +143,7 @@ Güvenlik sekmesi) ayarlayın.
 | Kontrol paneli uyarı banner'ı                               | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | İzin Verilen CORS Origin'leri alanı                         | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Cloud-Agent rota başına CORS (istisna)                      | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket handshake'i `Origin` denetimi                     | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Ayrıca bakınız
 

@@ -144,8 +144,8 @@ function getBufferTokens(): number {
 
 async function _loadBufferFromDb(): Promise<void> {
   try {
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = await getSettings();
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    const settings = await getCachedSettings();
     const val = settings.usageTokenBuffer;
     if (typeof val === "number" && val >= 0) {
       _cachedBuffer = val;

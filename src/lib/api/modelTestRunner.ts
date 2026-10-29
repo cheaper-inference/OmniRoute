@@ -35,6 +35,8 @@ const DOLA_PRO_TEST_TIMEOUT_MS = 90_000;
 const DOUBAO_WEB_PROVIDER_ID = "doubao-web";
 const ZAI_WEB_PROVIDER_ID = "zai-web";
 const ZAI_WEB_TEST_TIMEOUT_MS = 60_000;
+const CHATGPT_WEB_PROVIDER_ID = "chatgpt-web";
+const CHATGPT_WEB_TEST_TIMEOUT_MS = 90_000;
 const XIAOMI_MIMO_TOKEN_PLAN_PROVIDER_ID = "xiaomi-mimo-token-plan";
 const XIAOMI_MIMO_TOKEN_PLAN_TEST_TIMEOUT_MS = 60_000;
 const SLOW_WEB_TEST_MODELS = new Set(["dola-pro"]);
@@ -137,6 +139,10 @@ export function resolveModelTestTimeoutMs(
 
   if (normalizedProviderId === ZAI_WEB_PROVIDER_ID) {
     return Math.max(requestedTimeoutMs, ZAI_WEB_TEST_TIMEOUT_MS);
+  }
+
+  if (normalizedProviderId === CHATGPT_WEB_PROVIDER_ID) {
+    return Math.max(requestedTimeoutMs, CHATGPT_WEB_TEST_TIMEOUT_MS);
   }
 
   if (normalizedProviderId === XIAOMI_MIMO_TOKEN_PLAN_PROVIDER_ID) {

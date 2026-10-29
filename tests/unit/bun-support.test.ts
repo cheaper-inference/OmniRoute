@@ -96,15 +96,12 @@ test("createSyncDriverFactory prefers better-sqlite3 when running under Node", (
   }
 });
 
-// `OMNIROUTE_USE_TURBOPACK` is the operator's only control over the bundler:
-// Turbopack is the default and `0` is the documented escape hatch (webpack), taken
-// for Windows / native-binding trouble / RAM-constrained machines — see
-// docs/reference/ENVIRONMENT.md and #6409. Nothing sniffs the runtime, so pin that:
-// a hidden override would silently ignore an explicit `=1` from an operator who set
-// it on purpose (CI does, in build.yml / ci.yml / quality.yml).
-test("resolveNextBuildBundlerFlag is decided by OMNIROUTE_USE_TURBOPACK alone, not by the runtime", async () => {
+// Bun/Node detection must not silently override an explicit operator build choice.
+// Automatic low-memory webpack fallback only applies when the variable is unset.
+test("resolveNextBuildBundlerFlag uses the same memory and override rules under Bun and Node", async () => {
   const buildIsolated = await import("../../scripts/build/build-next-isolated.mjs");
   const originalBun = process.versions.bun;
+  const GiB = 1024 ** 3;
   try {
     for (const bun of [undefined, "1.1.20", "1.3.14"]) {
       if (bun === undefined) {
@@ -113,14 +110,15 @@ test("resolveNextBuildBundlerFlag is decided by OMNIROUTE_USE_TURBOPACK alone, n
         (process.versions as Record<string, string>).bun = bun;
       }
       const where = `bun=${bun ?? "absent"}`;
-      assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}), "--turbopack", where);
+      assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}, 8 * GiB), "--webpack", where);
+      assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}, 32 * GiB), "--turbopack", where);
       assert.equal(
-        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }),
+        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }, 8 * GiB),
         "--turbopack",
         where
       );
       assert.equal(
-        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "0" }),
+        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "0" }, 32 * GiB),
         "--webpack",
         where
       );

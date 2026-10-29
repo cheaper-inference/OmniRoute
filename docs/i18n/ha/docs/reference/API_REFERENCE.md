@@ -850,47 +850,40 @@ mai kira da ba na zaman ba (samu, sharewa, sokewa, da binciken `input_file_id` y
 
 ---
 
-## API na Bincike
+## Search API
 
-Tsarin haɗa masu samar da binciken yanar gizo/bincike (Tavily, Brave, Exa, Serper, da sauransu).
+abstraction mai bada Web/search (Tavily, Brave, Exa, Serper, da sauransu).
 
-| Hanya | Path                   | Bayani                                                                                                   |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Jera masu samar da bincike da aka saita + ƙwarewarsu                                                     |
-| POST  | `/v1/search`           | Gudanar da tambayar bincike — ana tantance body ta `v1SearchSchema`, yana goyon bayan caching/coalescing |
-| GET   | `/v1/search/analytics` | Ƙididdigar hit/latency/cache ta kowane mai samarwa                                                       |
+| Hanya | Hanya                  | Bayani                                                                                                    |
+| ----- | ---------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Lissafin da aka saita masu samar da bincike + iyawar                                                      |
+| POST  | `/v1/search`           | Gudun binciken binciken — jiki wanda aka inganta ta `v1SearchSchema`, yana goyan bayan caching/coalescing |
+| GET   | `/v1/search/analytics` | Mai bayarwa hit/latency/cache ƙididdiga                                                                   |
 
-**Tabbatar da izini:** Maɓallin Bearer API (`extractApiKey` + `isValidApiKey`). Ana tilasta manufofin bincike ta hanyar `enforceApiKeyPolicy`.
+**Gaskiya:** Mai ɗaukar maɓallin API (`extractApiKey` + `isValidApiKey`). An aiwatar da manufofin bincike ta hanyar `enforceApiKeyPolicy`.
 
-### `provider_options` na Exa da Tavily
+### Exa dan Tavily `provider_options`
 
-Exa da Tavily suna karanta filaye na musamman ga mai samarwa daga jakar namespace:
-`provider_options.exa` (ko `provider_options["exa-search"]`) da `provider_options.tavily`
-(ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kawai ake tura wa gaba. Ana
-tantance kowannensu da Zod schema nasa a `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-kuma ana watsar da maɓalli mai nau'in da bai dace ba. Ana yin watsi da duk wani maɓalli, ciki har da auth, base URL,
-`stream` da `outputSchema`. Maɓallan flat da sauran masu samarwa ke amfani da su (`cx`, `depth`, ...) suna aiki
-kamar yadda suke a baya.
+Exa da Tavily suna karanta takamaiman filayen mai bayarwa daga jakar da aka raba suna: `provider_options.exa` (ko `provider_options["exa-search"]`) da `provider_options.tavily` (ko `provider_options["tavily-search"]`). Maɓallan da ke ƙasa kawai ana tura su. Ana duba kowane ɗayan da nasa tsarin Zod a cikin `open-sse/handlers/search/providerOptionsPassthrough.ts`, kuma ana jefa maɓalli mai nau'in kuskure. Ana watsi da duk wani maɓalli, gami da auth, tushe URL, `stream` da `outputSchema`. Maɓallan lebur ɗin da wasu masu samarwa (`cx`, `depth`, ...) ke amfani da su suna aiki kamar da.
 
-| Mai samarwa | Filayen matakin sama                                                                                                                                                                                                                                                                                                                                                      | Na ciki                                                                                                                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Ana haɗa `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` a kan tsohon ƙimar `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                     |
+| Mai bayarwa | Manyan filayen                                                                                                                                                                                                                                                                                                                                                            | Gida                                                                                                                                 |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ya haɗu a kan tsoho `{ text: true, highlights: true }` |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                    |
 
-Filayen gama-gari kullum su ne ke da fifiko: `query`, `max_results`, `filters` (domains), `country` da
-topic da aka samo daga `search_type`. A Exa, `search_type: "news"` yana riƙe `category: "news"`.
-Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
+Filayen gabaɗaya koyaushe suna nasara: `query`, `max_results`, `filters` (yankuna), `country` da batun da aka samo daga `search_type`. A kan Exa, `search_type: "news"` yana kiyaye `category: "news"`. Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
 
-Yanzu `time_range` na gama-gari yana isa ga dukkan masu samarwar biyu: Exa yana samun `startPublishedDate` (ISO
-timestamp), Tavily kuma yana samun `start_date` (`YYYY-MM-DD`). Kwanan wata da aka fayyace kai tsaye a `provider_options`
-yana maye gurbin wanda aka tsara.
+Ana yin rikodin farashin binciken Firecrawl ga kowane farkon toshe na sakamakon 10 da aka dawo, a $0.002 (ƙididdigar ƙididdigewa 2) toshe kuma aƙalla toshe ɗaya a kowane kira ( [Billing na Firecrawl](https://docs.firecrawl.dev/billing) ): Sakamakon 11 ya kai $0.004.
 
-Sakamakon Exa yana riƙe `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin
-`provider_raw`. Sakamakon Tavily yana riƙe `images` da `favicon`.
+Jigon `time_range` yanzu ya isa duka masu samarwa: Exa yana samun `startPublishedDate` (ISO timestamp) da Tavily yana samun `start_date` (`YYYY-MM-DD`). Ƙayyadaddun kwanan wata a cikin `provider_options` ya soke wanda aka tsara.
 
-Lissafin kuɗi har yanzu yana amfani da flat registry `costPerQuery`. Tavily yana cajin
-`search_depth: "advanced"` da ƙarin credits a kowane kira, kuma ba a nuna wannan bambanci a cikin
-`usage.search_cost_usd`.
+Sakamako yana kiyaye `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin `provider_raw`. Sakamako a zahiri suna kiyaye `images` da `favicon`.
+
+Ana yin rikodin farashin neman haɗin kai a $0.005 don `depth` `fast` da `standard` da $0.05 don `deep` ( [Farashin haɗin gwiwa](https://docs.linkup.so/pages/documentation/development/pricing) ), ko `depth` ya fito daga `provider_options` ko saitunan haɗin.
+
+Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin saitin filayen kuma ya ƙi duk buƙatar lokacin da aka saita kowane filin. Don lite, `additionalQueries`, `systemPrompt` da kowane maɓallin `contents` banda `text` da `highlights` ana sauke kafin kiran. Ba a ƙara turawa da aka soke `subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl`.
+
+Kididdigar ƙididdigewa ita ce ɗakin rajistar `costPerQuery`, ban da Exa, wanda ya biyo bayan farashin kansa na Exa: $0.007 a kowane kira don `auto` (da `fast` na gado ) ko $0.004 don `lite` (da `instant` na gado), yana rufe sakamako 10; $0.001 ga kowane ƙarin sakamako; da $0.001 a kowane sakamakon da aka dawo lokacin da aka saita `contents.summary`. Ana yin rikodin Tavily a 1 kiredit ($0.008) don `search_depth` `basic`, `fast` da `ultra-fast`, da ƙididdiga 2 ($0.016) don `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Kira tare da `auto_parameters: true` wanda Tavily ya inganta zuwa ci gaba har yanzu ana yin rikodin shi a 1 kiredit.
 
 ---
 

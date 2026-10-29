@@ -34,7 +34,7 @@ export function createStreamFailureAborter(context: AborterContext) {
     controller: TransformStreamDefaultController<Uint8Array>,
     failure: StreamFailurePayload,
     publicMessage: string,
-    options: { notifyComplete?: boolean; preserveQueuedChunks?: boolean } = {}
+    options: { notifyComplete?: boolean; preserveQueuedChunks?: boolean; terminate?: boolean } = {}
   ): void => {
     let handled = false;
     context.timing.markInterrupted();
@@ -77,11 +77,17 @@ export function createStreamFailureAborter(context: AborterContext) {
     }
     context.clearIdleTimer();
     if (!handled) context.clearPendingRequest();
-    // At EOF the caller has already queued an explicit failure terminal. Let
-    // flush close normally: controller.error() would discard those queued
-    // deltas and the failure event before a slow reader can consume them.
+    // The caller has already queued an explicit failure terminal.
+    // controller.error() would discard those queued deltas and the failure
+    // event before a slow reader can consume them. At EOF (flush) the stream
+    // closes normally once the caller returns; mid-stream (transform) the
+    // caller asks for terminate(), which closes the readable side after the
+    // queued chunks and errors the writable side so no later chunk and no
+    // flush success path runs, and the upstream is cancelled.
     if (!options.preserveQueuedChunks) {
       controller.error(context.markPendingRequestCleared(new Error(safeMessage)));
+    } else if (options.terminate) {
+      controller.terminate();
     }
   };
 }

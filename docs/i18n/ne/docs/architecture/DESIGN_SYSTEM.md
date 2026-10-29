@@ -42,9 +42,11 @@
 3. किटका कमीहरूका workaroundहरू एडाप्टरमै रहन्छन् (वा समाधान स्टाइल सम्बन्धी भए `globals.css` को `@layer components` मा), कहिल्यै `packages/ui-kit/src` मा होइन।
 4. `tests/unit/ui/adapters/<name>.test.tsx` थप्नुहोस् वा अपडेट गर्नुहोस्। धेरै callerहरू भएको एडाप्टरको हकमा, परिवर्तनअघि र परिवर्तनपछिको rendered markup तुलना गर्नुहोस् — padding वा wrapper परिवर्तनहरू हरेक स्क्रिनमा फैलिन्छन्।
 
-## 5. किट अपडेट गर्ने
+## 5. किट अद्यावधिक गर्दै
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ले त्यस commit मा भएको upstream `src/` लाई `packages/ui-kit/src` मा कपी गर्छ र एकमात्र अनुमत रूपान्तरण लागू गर्छ (यसले relative importहरूबाट `.js` suffix हटाउँछ)। त्यसपछि: `git diff packages/ui-kit` समीक्षा गर्नुहोस्, दुवै थिममा providers, settings, combos, usage र endpoint को दृश्यात्मक जाँच गर्नुहोस्, `npm run check:ui-kit-snapshot` र `npm run test:vitest:ui` चलाउनुहोस्, र upstream changelog सहित PR खोल्नुहोस्।
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` मा पिन गरिएको संस्करणलाई अपस्ट्रिम रेपोको सबैभन्दा नयाँ `v*` ट्यागसँग तुलना गर्छ र रिलीज बाहिर हुँदा सिङ्क आदेश छाप्छ। साप्ताहिक `UI Kit upstream watch` कार्यप्रवाह (`.github/workflows/ui-kit-upstream-watch.yml`) ले उही जाँच चलाउँछ र पिन पछाडि हुँदा एउटा ट्र्याकिङ मुद्दा खुला राख्छ; अपस्ट्रीम रिपो निजी हो, त्यसैले कार्यप्रवाहलाई `UI_KIT_READ_TOKEN` गोप्यमा पढ्ने-मात्र टोकन चाहिन्छ र यो बिना निष्क्रिय रहन्छ।
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` अपस्ट्रिम `src/` त्यो कमिटमा (`latest` = सबैभन्दा नयाँ `v*` ट्याग) लाई `packages/ui-kit/src` मा प्रतिलिपि गर्दछ, एकल अनुमति दिइएको रूपान्तरण लागू गर्दछ (यसले सापेक्ष आयातबाट `.js` प्रत्यय छोड्छ), र कार्यस्थान संस्करणलाई `packages/ui-kit/package.json` र `package-lock.json` मा अपस्ट्रीममा सेट गर्दछ। त्यसपछि: `git diff packages/ui-kit` समीक्षा गर्नुहोस्, प्रदायकहरू, सेटिङहरू, कम्बोहरू, प्रयोग र दुवै थिमहरूमा अन्तिम बिन्दुमा भिजुअल पास गर्नुहोस्, `npm run check:ui-kit-snapshot` र `npm run test:vitest:ui` चलाउनुहोस्, र अपस्ट्रिम चेन्जलगको साथ PR खोल्नुहोस्।
 
 ## 6. README रेखाचित्र
 

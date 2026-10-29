@@ -62,7 +62,7 @@
   <g>
     <g opacity="0"><animate attributeName="opacity" values="0;1" dur="0.4s" begin="0.15s" fill="freeze"/>
       <text x="44" y="196" class="cell">Providers</text>
-      <text x="440" y="196" text-anchor="middle" class="h4">376</text>
+      <text x="440" y="196" text-anchor="middle" class="h4">377</text>
       <text x="604" y="196" text-anchor="middle" class="cell" style="fill:var(--muted)">40+</text>
       <text x="760" y="196" text-anchor="middle" class="cell" style="fill:var(--muted)">400+*</text>
       <text x="916" y="196" text-anchor="middle" class="cell" style="fill:var(--muted)">~5</text>

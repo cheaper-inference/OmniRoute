@@ -1,6 +1,7 @@
 import {
   finalizeMostRecentPendingRequest,
   finalizePendingRequestById,
+  type PendingRequestIdentity,
 } from "@/lib/usage/usageHistory.ts";
 
 import { HTTP_STATUS } from "../config/constants.ts";
@@ -228,7 +229,7 @@ export function finalizeStreamRequestLog({
   errorCode,
   onWarn,
 }: {
-  pendingRequestId: string;
+  pendingRequestId: PendingRequestIdentity;
   model: string;
   provider: string;
   connectionId: string | null;
