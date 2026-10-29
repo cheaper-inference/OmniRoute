@@ -43,7 +43,7 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
     }) as unknown as typeof fetch;
 
     const { default: ProviderStatsPage } = await import(PAGE);
-    render(<ProviderStatsPage />);
+    const { rerender } = render(<ProviderStatsPage />);
 
     const alert = await screen.findByRole("alert");
     expect(alert.textContent).toContain("providerStats.loadFailed");
@@ -52,6 +52,8 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
     fireEvent.click(screen.getByRole("button", { name: "common.close" }));
 
     await waitFor(() => expect(screen.queryByRole("alert")).toBeNull());
+    rerender(<ProviderStatsPage />);
+    expect(screen.queryByRole("alert")).toBeNull();
     // The frame survives the dismissal: title plus the header's refresh (retry) button.
     expect(screen.getByRole("heading", { level: 1 }).textContent).toBe("providerStats.title");
     const refresh = screen.getByRole("button", { name: "providerStats.refresh" });
@@ -62,5 +64,7 @@ describe("ProviderStatsPage error-only state (KEA-7886 lote 9, review I1)", () =
         (globalThis.fetch as unknown as ReturnType<typeof vi.fn>).mock.calls.length
       ).toBeGreaterThan(callsBefore)
     );
+    // Explicit refresh may show the same HTTP error again after dismissal.
+    await screen.findByRole("alert");
   });
 });

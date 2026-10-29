@@ -98,6 +98,7 @@ export default function ProviderStatsPage() {
     toolLatency: Record<string, ToolLatencyStat>;
   } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorDismissed, setErrorDismissed] = useState(false);
   const [lastRefresh, setLastRefresh] = useState<Date | null>(null);
   const [sortKey, setSortKey] = useState<SortKey>("totalRequests");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -115,6 +116,12 @@ export default function ProviderStatsPage() {
       setError(err instanceof Error ? err.message : t("unknownError"));
     }
   }, [t]);
+
+  // An explicit retry reopens a dismissed error; periodic polling does not.
+  const retry = () => {
+    setErrorDismissed(false);
+    void fetchData();
+  };
 
   useEffect(() => {
     // Async continuation — see react-hooks/set-state-in-effect.
@@ -189,7 +196,7 @@ export default function ProviderStatsPage() {
             variant="ghost"
             size="icon"
             icon="refresh"
-            onClick={fetchData}
+            onClick={retry}
             title={t("refresh")}
             aria-label={t("refresh")}
           />
@@ -202,20 +209,22 @@ export default function ProviderStatsPage() {
     return (
       <div className="space-y-6">
         {pageHeader}
-        {/* Re-keyed on the message: a new failure re-shows a dismissed alert. The header's
-            refresh button stays as the retry affordance after a dismiss. */}
-        <Alert
-          key={error}
-          variant="critical"
-          icon={<Icon name="error" size={20} />}
-          title={t("loadFailed", { error })}
-          dismissLabel={tc("close")}
-          actions={
-            <Button variant="secondary" size="sm" icon="refresh" onClick={fetchData}>
-              {t("retry")}
-            </Button>
-          }
-        />
+        {/* Keep dismissed errors hidden during polling. Explicit refresh resets dismissal. */}
+        {!errorDismissed && (
+          <Alert
+            key={error}
+            variant="critical"
+            icon={<Icon name="error" size={20} />}
+            title={t("loadFailed", { error })}
+            dismissLabel={tc("close")}
+            onDismiss={() => setErrorDismissed(true)}
+            actions={
+              <Button variant="secondary" size="sm" icon="refresh" onClick={retry}>
+                {t("retry")}
+              </Button>
+            }
+          />
+        )}
       </div>
     );
   }
