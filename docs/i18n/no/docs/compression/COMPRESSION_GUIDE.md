@@ -34,89 +34,89 @@ Klientforespørsel
 
 ### Av
 
-Ingen komprimering brukes. Alle meldinger sendes gjennom uendret.
+Ingen komprimering brukes. Alle meldinger går gjennom uendret.
 
-### Lett modus (~15 % besparelse, <1 ms ventetid)
+### Lite-modus (~15 % besparelse, <1 ms latens)
 
-Den sikreste modusen – ingen semantiske endringer, bare opprydding av formatering:
+Den sikreste modusen — null semantisk endring, kun rydding i formatering:
 
-| Teknikk                  | Beskrivelse                                                 |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Slå sammen påfølgende tomme linjer og avsluttende mellomrom |
-| `dedupSystemPrompt`      | Fjern dupliserte systemmeldinger                            |
-| `compressToolResults`    | Komprimer ordrike verktøy-/funksjonsutdata                  |
-| `removeRedundantContent` | Fjern gjentatte instruksjoner                               |
-| `replaceImageUrls`       | Forkort base64-bildedata-URI-er                             |
+| Teknikk                  | Beskrivelse                                                    |
+| ------------------------ | -------------------------------------------------------------- |
+| `collapseWhitespace`     | Slår sammen påfølgende tomme linjer og etterfølgende mellomrom |
+| `dedupSystemPrompt`      | Fjerner dupliserte systemmeldinger                             |
+| `compressToolResults`    | Komprimerer omstendelige verktøy-/funksjonsutdata              |
+| `removeRedundantContent` | Fjerner gjentatte instruksjoner                                |
+| `replaceImageUrls`       | Forkorter base64-bilde-data-URI-er                             |
 
-**Best for:** Kontinuerlig bruk og sikkerhetskritiske arbeidsflyter.
+**Best for:** Alltid-på-bruk, sikkerhetskritiske arbeidsflyter.
 
 ### Standardmodus (~30 % besparelse)
 
-Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) – fjerner fyllord og ordrike formuleringer samtidig som betydningen bevares:
+Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyllord og omstendelige formuleringer mens betydningen bevares:
 
-- Fjerner fyllord («please», «I think», «basically», «actually»)
-- Korter ned ordrike uttrykk («in order to» → «to», «as a result of» → «because»)
-- Fjerner høflige forbehold («Would you mind...», «If you could possibly...»)
-- Over 30 regex-regler tilpasset programmeringsprompter
+- Fjerner fyllord ("please", "I think", "basically", "actually")
+- Kondenserer omstendelige fraser ("in order to" → "to", "as a result of" → "because")
+- Fjerner høflige forbehold ("Would you mind...", "If you could possibly...")
+- 30+ regex-regler finjustert for kodeprompter
 
-**Best for:** Daglige programmeringsarbeidsflyter og kostnadsbevisste team.
+**Best for:** Daglige kodearbeidsflyter, kostnadsbevisste team.
 
 ### Aggressiv modus (~50 % besparelse)
 
 Smart historikkhåndtering for lange økter:
 
-- **Meldingsaldring** – eldre meldinger komprimeres gradvis
-- **Komprimering av verktøyresultater** – lange verktøyutdata avkortes eller utelates (første/siste linjer,
-  filtrering av samsvarende linjer, komprimering av JSON-nøkler)
-- **Vern av strukturell integritet** – sikrer at par med `tool_use` + `tool_result` forblir konsistente
-- **Bevissthet om kontekstvinduet** – respekterer tokengrensene for hver modell
+- **Meldingsaldring** — eldre meldinger komprimeres gradvis
+- **Komprimering av verktøyresultater** — lange verktøyutdata avkortes eller utelates (første/siste linjer,
+  filtrering av trefflinjer, kompaktering av JSON-nøkler)
+- **Strukturelle integritetsvakter** — sørger for at `tool_use` + `tool_result`-par forblir konsistente
+- **Kontekstvindubevissthet** — respekterer token-grenser per modell
 
-**Best for:** Langvarige feilsøkingsøkter og store kodebaser.
+**Best for:** Lange feilsøkingsøkter, store kodebaser.
 
 ### Ultra-modus (~75 % besparelse)
 
-Maksimal komprimering for scenarier med kritiske tokenbegrensninger:
+Maksimal komprimering for token-kritiske scenarier:
 
-- **Heuristisk beskjæring** – poengbasert tokenbeskjæring av prosa
-- **Bevaring av struktur** – inngjerdede kodeblokker, innebygd kode, URL-er og identifikatorer
-  erstattes midlertidig og settes inn igjen ordrett, og beskjæres aldri
-- **Valgfritt SLM-nivå** – en liten lokal modell kan finjustere beskjæringen når den er konfigurert
-- Uavhengig av Aggressiv modus: Den kjører ikke meldingsaldring, komprimering av verktøyresultater
-  eller reserveoppsummereren (bare en feil på SLM-nivået kan sende en reservepassering gjennom
-  Aggressiv)
+- **Heuristisk beskjæring** — scorebasert token-beskjæring av prosa
+- **Strukturbevaring** — inngjerdede kodeblokker, inline-kode, URL-er og identifikatorer erstattes med
+  plassholdere («tombstones») og sys sammen igjen ordrett — de beskjæres aldri
+- **Valgfritt SLM-nivå** — en liten lokal modell kan forbedre beskjæringen når den er konfigurert
+- Uavhengig av Aggressiv modus: den kjører ikke meldingsaldring, komprimering av verktøyresultater
+  eller fallback-oppsummereren (kun en feil i SLM-nivået kan rute en fallback-runde gjennom
+  aggressiv)
 
 **Best for:** Når du gjentatte ganger når kontekstgrensene.
 
-### RTK-modus (60–90 % oppstrømsintervall)
+### RTK-modus (60-90 % opptstrømsområde)
 
-RTK-modus er optimalisert for ordrike verktøyutdata som forekommer i økter med programmeringsagenter:
+RTK-modus er optimalisert for omstendelige verktøyutdata som dukker opp i kodeagentøkter:
 
-- Oppdager kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkjørere,
-  TypeScript/Vite/Webpack-bygg, ESLint/Biome/Prettier, npm-revisjoner/installasjoner, Docker-logger, infrastrukturutdata
-  og generelle shell-utdata
+- Gjenkjenner kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkjørere,
+  TypeScript/Vite/Webpack-bygg, ESLint/Biome/Prettier, npm audit/installasjoner, Docker-logger,
+  infrastrukturutdata og generell shell-utdata
 - Bruker JSON-filterpakker fra `open-sse/services/compression/engines/rtk/filters/`
-- Importerer RTK TOML schema v1-filtre fra prosjektets eller globale `filters.toml`-filer, med validering
-  av innebygde tester og tillitskontroll for prosjektfiler
-- Leveres med 55 innebygde filtre med innebygde verifiseringseksempler
-- Fjerner ANSI-kontrollsekvenser, fremdriftsindikatorer, gjentatte linjer og støy som ikke kan handles på
-- Bevarer feil, advarsler, endrede filer, sammendrag og slutten av lange utdata
-- Støtter tillitskontrollerte prosjektfiltre, globale filtre og valgfri gjenoppretting av sladdede råutdata
+- Importerer RTK TOML-skjema v1-filtre fra prosjekt- eller globale `filters.toml`-filer, med
+  validering via inline-tester og tillitskontroll for prosjektfiler
+- Leveres med 56 innebygde filtre med inline-verifiseringseksempler
+- Fjerner ANSI-kontrollsekvenser, fremdriftslinjer, gjentatte linjer og støy som ikke kan handles på
+- Bevarer feiltilfeller, feilmeldinger, advarsler, endrede filer, sammendrag og de siste linjene i lang utdata
+- Støtter tillitskontrollerte prosjektfiltre, globale filtre og valgfri gjenoppretting av redigert råutdata
 
-**Best for:** Agentøkter med shell-, bygg-, test-, git-, grep- og filutdatatranskripsjoner.
+**Best for:** Agentøkter med transkripsjoner fra shell, bygg, tester, git, grep og filutdata.
 
-### Stablet modus (78–95 % kvalifisert intervall)
+### Stablet modus (78-95 % kvalifisert område)
 
-Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standardpipelinen er:
+Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standard-pipelinen er:
 
 ```txt
 RTK -> Caveman
 ```
 
-Denne rekkefølgen komprimerer først terminal-/verktøyutdata og bruker deretter Caveman-semantisk kondensering på
-den gjenværende naturlige språkprompten. Stablede pipelines kan konfigureres globalt eller gjennom
-komprimeringskombinasjoner som tilordnes rutekombinasjoner.
+Den rekkefølgen holder terminal-/verktøyutdata kompakte først, og bruker deretter Cavemans semantiske
+kondensering på den gjenværende naturligspråklige prompten. Stablede pipelines kan konfigureres globalt
+eller gjennom komprimeringskombinasjoner tilordnet rutingskombinasjoner.
 
-**Best for:** Blandet kontekst med store verktøylogger samt menneskelige instruksjoner eller assistentsammendrag.
+**Best for:** Blandet kontekst med store verktøylogger pluss menneskelige instruksjoner eller assistentsammendrag.
 
 ---
 

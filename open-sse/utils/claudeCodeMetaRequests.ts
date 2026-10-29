@@ -1,6 +1,15 @@
 // Tools whose meaningful prefix is two words (verb + subcommand).
 const TWO_WORD_TOOLS = new Set([
-  "git", "npm", "docker", "kubectl", "cargo", "go", "pip", "yarn", "pnpm", "bun",
+  "git",
+  "npm",
+  "docker",
+  "kubectl",
+  "cargo",
+  "go",
+  "pip",
+  "yarn",
+  "pnpm",
+  "bun",
 ]);
 
 const ENV_ASSIGNMENT_RE = /^[A-Za-z_][A-Za-z0-9_]*=/;
@@ -19,7 +28,10 @@ function tokenize(command: string): string[] {
     } else if (ch === '"' || ch === "'") {
       quote = ch;
     } else if (/\s/.test(ch)) {
-      if (current) { tokens.push(current); current = ""; }
+      if (current) {
+        tokens.push(current);
+        current = "";
+      }
     } else {
       current += ch;
     }
@@ -52,6 +64,28 @@ const LISTING_COMMANDS = new Set(["ls", "dir", "find", "tree"]);
 // grep flags that consume the NEXT arg (so it is not a filepath).
 const GREP_ARG_FLAGS = new Set(["-e", "-f", "-m", "-A", "-B", "-C"]);
 
+function extractGrepFilepaths(tokens: string[]): string[] {
+  const files: string[] = [];
+  let patternConsumed = false;
+  for (let i = 1; i < tokens.length; i++) {
+    const tok = tokens[i];
+    if (tok.startsWith("-")) {
+      if (GREP_ARG_FLAGS.has(tok)) {
+        i++; // skip this flag's argument
+        // -e/-f supply the pattern itself, so the positional pattern is already consumed.
+        if (tok === "-e" || tok === "-f") patternConsumed = true;
+      }
+      continue;
+    }
+    if (!patternConsumed) {
+      patternConsumed = true;
+      continue;
+    } // first non-flag = pattern
+    files.push(tok);
+  }
+  return files;
+}
+
 export function extractFilepathsFromCommand(command: string, _output = ""): string[] {
   if (typeof command !== "string" || !command.trim()) return [];
   const tokens = tokenize(command);
@@ -59,25 +93,7 @@ export function extractFilepathsFromCommand(command: string, _output = ""): stri
   const head = tokens[0];
 
   if (LISTING_COMMANDS.has(head)) return [];
-
-  if (head === "grep") {
-    const files: string[] = [];
-    let patternConsumed = false;
-    for (let i = 1; i < tokens.length; i++) {
-      const tok = tokens[i];
-      if (tok.startsWith("-")) {
-        if (GREP_ARG_FLAGS.has(tok)) {
-          i++; // skip this flag's argument
-          // -e/-f supply the pattern itself, so the positional pattern is already consumed.
-          if (tok === "-e" || tok === "-f") patternConsumed = true;
-        }
-        continue;
-      }
-      if (!patternConsumed) { patternConsumed = true; continue; } // first non-flag = pattern
-      files.push(tok);
-    }
-    return files;
-  }
+  if (head === "grep") return extractGrepFilepaths(tokens);
 
   if (READ_COMMANDS.has(head)) {
     return tokens.slice(1).filter((t) => !t.startsWith("-"));

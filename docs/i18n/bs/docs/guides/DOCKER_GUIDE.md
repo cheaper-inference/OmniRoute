@@ -652,27 +652,29 @@ sudo systemctl enable --now omniroute-update.path
 Servis uklanja zahtjev prije preuzimanja kako se neuspjelo izvršavanje ne bi ponavljalo u petlji. Bez
 `DOCKER_UPDATE_TRIGGER_FILE` kontrolna ploča zadržava postupak s ručnom naredbom.
 
-## Dostupnost: zadani SQLite podržava samo jednu repliku
+## Dostupnost: default SQLite je jedna replika
 
-Standardna Docker/Kubernetes instalacija OmniRoutea sastoji se od **jednog Node procesa + jednog SQLite zapisivača**. Visoka dostupnost **nije podržana** na toj topologiji.
+Stock Docker / Kubernetes OmniRoute je** jedan čvor proces + jedan SQLite pisac** . Visoka dostupnost je** nije podržano** na toj topologiji.
 
-| Ograničenje                                                        | Posljedica                                                                                                                                                                                                                                                                                                                                             |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Jedan zapisivač                                                    | **Nemojte** pokretati više replika nad istom SQLite datotekom. To oštećuje bazu podataka.                                                                                                                                                                                                                                                              |
-| Ponovno kreiranje / ponovno pokretanje / prekid zbog HEALTHCHECK-a | **Potpuni prekid rada** aktivnih SSE veza, sesija kontrolne ploče i stanja u memoriji. Svaki povezani klijent gubi vezu. Novi zahtjevi tokom perioda bez dostupne krajnje tačke dobijaju od obrnutog proxyja odgovor **`502 Bad Gateway: Unknown error`**, a ne OmniRoute JSON — klijenti ga ne mogu razlikovati od greške pružatelja usluge (#11015). |
-| Ista petlja događaja kao `/healthz`                                | Zauzeta obrada kataloga ili ciklus kompresije mogu odgoditi provjere; kratko vremensko ograničenje zatim ponovo pokreće **jedinu** repliku.                                                                                                                                                                                                            |
+| Ograničenje                           | Posljedica                                                                                                                                                                                                                                                                                            |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jedan pisac                           | Uradi** ne** pokrenite više replika na istom SQLite fajlu. To kvari DB.                                                                                                                                                                                                                               |
+| Recreate / restart / HEALTHCHECK kill | **Puni prekid** SSE u letu, sesije nadzorne ploče i stanje u memoriji. Svaki povezani klijent pada. Novi zahtjevi tokom prozora prazne krajnje tačke dobijaju reverse-proxy**`502 Bad Gateway: Unknown error`** , ne OmniRoute JSON — klijenti ne mogu razlikovati ovo od greške provajdera (#11015). |
+| Ista petlja događaja kao `/healthz`   | Zauzet katalog ili kvačica kompresije mogu odgoditi sonde; kratko vremensko ograničenje zatim ponovo pokreće** samo** replika.                                                                                                                                                                        |
 
-**Matrica provjera** (pogledajte i [preporuke za Kubernetes provjere](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matrica sonde** (vidi i [preporuke Kubernetes sonde](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Provjera            | Cilj                                                     | Nemojte koristiti                                                                  |
-| ------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| Aktivnost           | TCP na `PORT` (zadano `20128`) ili blagi HTTP `/healthz` | `/api/monitoring/health`                                                           |
-| Spremnost           | HTTP `GET /healthz`                                      | Kratka vremenska ograničenja koja zauzetu petlju događaja tretiraju kao nedostupnu |
-| Dubinska / za ljude | `/api/monitoring/health`                                 | Automatizovanu kubelet provjeru aktivnosti                                         |
+| Sonda          | Target                                                   | Nemojte koristiti                                                 |
+| -------------- | -------------------------------------------------------- | ----------------------------------------------------------------- |
+| Živost         | TCP na `PORT` (zadano `20128`), ili meki HTTP `/healthz` | `/api/monitoring/health`                                          |
+| Spremnost      | HTTP `GET /healthz`                                      | Kratki tajm-auti koji tretiraju zauzetu petlju događaja kao mrtvu |
+| Duboko / ljudi | `/api/monitoring/health`                                 | Automatizovana živost kubeleta                                    |
 
-**Nadogradnje:** očekujte prekid svake sesije. Ako možete, postepeno odspojite klijente; kod zadanog SQLitea nema postupnog ažuriranja. Compose `restart: unless-stopped` zajedno s Docker `HEALTHCHECK` provjerom također će zamijeniti jedini proces kada kontejner postane nezdrav — uz isti opseg posljedica.
+**Nadogradnje:** očekujte pad svake sesije. Ispraznite klijente ako možete; nema tekućeg ažuriranja za default SQLite. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` će također zamijeniti jedini proces kada je kontejner Nezdrav - isti radijus eksplozije.
 
-Kubernetes isječak za **jednu repliku** (`Recreate` je obavezan; nemojte povećavati `replicas` nad jednom SQLite datotekom):
+Gotovi manifesti i Helm grafikon žive u `deploy/kubernetes/` i `deploy/helm/omniroute/` - pogledajte [vodič za implementaciju Kubernetesa](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes isječak za a** pojedinačna replika** (Ponovno kreiranje je potrebno; nemojte podizati `replicas` na jednu SQLite datoteku):
 
 ```yaml
 spec:
@@ -699,9 +701,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` pauza omogućava kubeu da ukloni krajnje tačke Servicea prije SIGTERM-a, tako da **novi** saobraćaj prestane stizati do procesa koji se gasi. Aktivni `/v1/responses` SSE zahtjevi dovršavaju se u roku do `SHUTDOWN_TIMEOUT_MS` (zadano 30 s) putem zahtjevnih ulaznih zakupa (#11015). Novi zahtjevi koji ipak stignu do procesa dobijaju `503` + `Retry-After: 5`. Recreate period bez krajnjih tačaka, sve dok zamjenska instanca ne bude Ready, i dalje predstavlja potpuni prekid rada — to je posljedica SQLite topologije, a ne pogrešne konfiguracije provjere.
+`preStop` sleep omogućava kube-u da ispusti krajnje tačke usluge prije SIGTERM a** novo** saobraćaj prestaje da utiče na proces odumiranja. U toku leta `/v1/responses` SSE se iscrpljuje do `SHUTDOWN_TIMEOUT_MS` (podrazumevano 30s) putem zakupa teške kategorije (#11015). Novi zahtjevi koji još uvijek stignu do procesa dobivaju `503` + `Retry-After: 5`. Ponovo kreiraj prazninu krajnje tačke dok zamena ne bude spremna ostaje težak prekid — to je SQLite topologija, a ne pogrešna konfiguracija sonde.
 
-Vanjski Postgres / HA s više instanci koje mogu pisati **nije** dokumentovana standardna opcija. Ako vam treba HA, zadržite jednu repliku ili koristite topologiju koju je projekt zasebno testirao i dokumentovao. Rad na podršci za Postgres/MySQL nalazi se u [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Dok to ne bude objavljeno, jedini podržani način povećanja kapaciteta za **velike** `/v1/responses` zahtjeve jeste korištenje N nezavisnih procesa (sljedeći odjeljak), a ne `replicas > 1` na jednom volumenu.
+Vanjski Postgres / multi-pisač HA je** ne** dokumentovani put zaliha. Ako vam je potreban HA, zadržite jednu repliku ili pokrenite topologiju koju je projekat testirao i dokumentovao zasebno. Postgres/MySQL rad živi u [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Dok se to ne isporuči, jedini podržani način množenja** veliki** `/v1/responses` kapacitet je N nezavisnih procesa (sljedeći odjeljak), a ne `replicas > 1` na jednom volumenu.
 
 ## Horizontalno skaliranje: N nezavisnih procesa
 

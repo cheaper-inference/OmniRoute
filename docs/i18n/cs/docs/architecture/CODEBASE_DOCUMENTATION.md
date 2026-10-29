@@ -21,27 +21,29 @@ aniž by vytvářel nové moduly.
 
 ## 1. Technologický stack
 
-| Oblast                | Volba                                                                                                                                    |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Webový framework      | **Next.js 16** (App Router, samostatný výstup, bez globálního middlewaru)                                                                |
-| Jazyk                 | **TypeScript 6.0+** — cíl `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                                       |
-| Běhové prostředí      | **Node.js** `>=22.22.2 <23` nebo `>=24.0.0 <27` (vynuceno prostřednictvím `engines` + `SUPPORTED_NODE_RANGE`)                            |
-| Databáze              | **SQLite** prostřednictvím `better-sqlite3` (singleton, žurnálování WAL)                                                                 |
-| Desktop               | **Electron 41** + `electron-builder` 26.10 (samostatný pracovní prostor v `electron/`)                                                   |
-| Testy                 | **Nativní testovací nástroj Node** (jednotkové/integrační), **Vitest** (MCP, autoCombo, mezipaměť), **Playwright** (e2e + protocols-e2e) |
-| Sestavení             | Samostatné sestavení Next.js prostřednictvím `scripts/build/build-next-isolated.mjs`                                                     |
-| Lintování/formátování | Plochá konfigurace ESLint + Prettier (`lint-staged` prostřednictvím pre-commitu Husky)                                                   |
-| Systém modulů         | Všude ESM (`"type": "module"`)                                                                                                           |
-| Pracovní prostory     | Pracovní prostor npm — `open-sse` je jediný dílčí pracovní prostor                                                                       |
+| Oblast                          | Volba                                                                                                                                    |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Webový framework                | **Next.js 16** (App Router, samostatný výstup, bez globálního middlewaru)                                                                |
+| Jazyk                           | **TypeScript 6.0+** — cíl `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                                       |
+| Běhové prostředí                | **Node.js** `>=22.22.2 <23` nebo `>=24.0.0 <27` (vynuceno pomocí `engines` + `SUPPORTED_NODE_RANGE`)                                     |
+| Databáze                        | **SQLite** prostřednictvím `better-sqlite3` (jediná instance, žurnálování WAL)                                                           |
+| Desktop                         | **Electron 41** + `electron-builder` 26.10 (samostatný pracovní prostor v `electron/`)                                                   |
+| Testy                           | **Nativní testovací nástroj Node** (jednotkové/integrační), **Vitest** (MCP, autoCombo, mezipaměť), **Playwright** (e2e + protocols-e2e) |
+| Sestavení                       | Samostatný výstup Next.js prostřednictvím `scripts/build/build-next-isolated.mjs`                                                        |
+| Lintování/formátování           | Plochá konfigurace ESLint + Prettier (`lint-staged` prostřednictvím Husky pre-commit)                                                    |
+| Modulový systém                 | Všude ESM (`"type": "module"`)                                                                                                           |
+| Uživatelské rozhraní dashboardu | **Tailwind CSS 4** + začleněný **Keak CI UI Kit** (`packages/ui-kit`), ikony Lucide — viz `DESIGN_SYSTEM.md`                             |
+| Pracovní prostory               | npm workspaces — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                                  |
 
 Aliasy cest (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-Výchozí port HTTP: **`20128`** (API a řídicí panel sdílejí stejný proces). Datový
-adresář se určuje proměnnou prostředí `DATA_DIR`; výchozí hodnota je `~/.omniroute/`.
+Výchozí port HTTP: **`20128`** (API a dashboard sdílejí stejný proces). Datový
+adresář určuje proměnná prostředí `DATA_DIR`, jejíž výchozí hodnota je `~/.omniroute/`.
 
 ---
 
@@ -49,21 +51,22 @@ adresář se určuje proměnnou prostředí `DATA_DIR`; výchozí hodnota je `~/
 
 ```
 OmniRoute/
-├── src/                  Aplikace Next.js (App Router, knihovny, doména, server, sdílené součásti)
+├── src/                  Aplikace Next.js (App Router, knihovny, doména, server, sdílené části)
 ├── open-sse/             Pracovní prostor streamovacího enginu (@omniroute/open-sse)
-├── electron/             Desktopová nadstavba (hlavní proces Electron 41 + preload)
+├── packages/             Pracovní prostory: ui-kit (přibalená sada Keak CI UI Kit), browser-pool
+├── electron/             Desktopový obal (hlavní proces Electron 41 + preload)
 ├── bin/                  Vstupní body CLI (omniroute, reset-password)
-├── tests/                Jednotkové, integrační, e2e, protocols-e2e, překladové a bezpečnostní testy a testovací data
-├── scripts/              Pomocné skripty pro sestavení, synchronizaci, kontroly, migraci a běhové prostředí
+├── tests/                Jednotkové, integrační, e2e, protocols-e2e, překladatelské a bezpečnostní testy, testovací data
+├── scripts/              Pomocné skripty pro sestavení, synchronizaci, kontrolu, migraci a běhové prostředí
 ├── docs/                 Veřejná dokumentace (tento adresář)
 ├── public/               Statické prostředky, manifest PWA, service worker
-├── config/               Ukázky konfigurace běhového prostředí
-├── images/               Marketingové materiály a snímky obrazovky
-├── _ideia/, _references/, _mono_repo/, _tasks/   Interní pracovní materiály / plánování (nejsou součástí distribuce)
+├── config/               Ukázky běhové konfigurace
+├── images/               Marketingové prostředky a snímky obrazovky
+├── _ideia/, _references/, _mono_repo/, _tasks/   Interní pracovní poznámky / plánování (nedistribuuje se)
 ├── CLAUDE.md             Pravidla repozitáře pro Claude Code
-├── AGENTS.md             Podrobnější referenční dokumentace architektury pro agenty
+├── AGENTS.md             Podrobnější architektonická reference pro agenty
 ├── package.json          v3.8.51, kořen pracovního prostoru
-└── tsconfig.json         Aliasy cest + základní volby kompilátoru
+└── tsconfig.json         Aliasy cest + základní možnosti kompilátoru
 ```
 
 ---
@@ -72,30 +75,30 @@ OmniRoute/
 
 ```
 src/
-├── app/                  Stránky App Routeru + API trasy
+├── app/                  Stránky App Routeru + trasy API
 ├── lib/                  Základní knihovny (DB, ověřování, OAuth, dovednosti, paměť, …)
 ├── domain/               Čistá doménová vrstva (zásady, záložní mechanismy, náklady, uzamčení, …)
 ├── server/               Moduly pouze pro server (autorizace, CORS, ověřování)
-├── shared/               Typy, konstanty, validace, kontrakty, nástroje (bezpečné napříč hranicemi)
+├── shared/               Typy, konstanty, validace, kontrakty, pomocné funkce (bezpečné napříč hranicemi)
 ├── mitm/                 Pomocné funkce proxy typu man-in-the-middle pro integraci CLI
-├── models/               Metadata / aliasy lokálních modelů
-├── sse/                  Starší obslužné rutiny SSE, které stále zůstávají v src/ (nikoli v open-sse/)
+├── models/               Metadata místních modelů / aliasy
+├── sse/                  Starší obslužné rutiny SSE, které stále zůstávají pod src/ (nikoli open-sse/)
 ├── store/                Úložiště stavu na straně klienta
-├── middleware/           Nástroje middlewaru na úrovni tras (nikoli globální middleware Next.js)
-├── scripts/              Skripty ve zdrojovém stromu, které lze importovat kódem aplikace
-├── types/                Globální a sdílené typy TS
-├── i18n/                 Lokalizační balíčky
+├── middleware/           Pomocné funkce middlewaru na úrovni tras (nikoli globální middleware Next.js)
+├── scripts/              Skripty ve stromu importovatelné kódem aplikace
+├── types/                Ambientní a sdílené typy TS
+├── i18n/                 Balíčky lokalizací
 ├── instrumentation.ts    Instrumentační hook Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              Pomocný modul pro zavedení proxy na nejvyšší úrovni
+└── proxy.ts              Pomocná funkce nejvyšší úrovně pro inicializaci proxy
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router zpřístupňuje jak uživatelské rozhraní řídicího panelu, tak veřejné/správcovské HTTP API.
+App Router zpřístupňuje uživatelské rozhraní řídicího panelu i veřejné/správcovské HTTP API.
 **Globální middleware neexistuje** — zachytávání se provádí pro každou trasu samostatně.
 
-Segmenty nejvyšší úrovně v `src/app/`:
+Segmenty nejvyšší úrovně pod `src/app/`:
 
 | Cesta                                                                         | Účel                                                                 |
 | ----------------------------------------------------------------------------- | -------------------------------------------------------------------- |
@@ -110,7 +113,7 @@ Segmenty nejvyšší úrovně v `src/app/`:
 | `privacy/`, `terms/`                                                          | Právní stránky                                                       |
 | `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statické chybové stránky                                             |
 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Hranice frameworku pro chyby/načítání                                |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Kořenový rámec                                                       |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Kořenový obal                                                        |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — Stránky uživatelského rozhraní
 
@@ -174,7 +177,7 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   Správa vestavěných služeb (9router, cliproxy) — LOCAL_ONLY
+├── services/   Správa integrovaných služeb (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         Veřejné API kompatibilní s OpenAI
@@ -183,11 +186,11 @@ src/app/api/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — Správa vestavěných služeb
+#### 3.1.2a `src/app/api/services/` — Správa integrovaných služeb
 
-Trasy pro instalaci, spouštění, zastavování a monitorování 9Router a CLIProxyAPI.
-Všechny cesty jsou klasifikovány jako **LOCAL_ONLY** (pouze loopback, pevné pravidlo č. 17), protože
-mohou spouštět `npm install` a vytvářet podřízené procesy.
+Trasy pro instalaci, spuštění, zastavení a monitorování 9Router a CLIProxyAPI.
+Všechny cesty jsou klasifikovány jako **LOCAL_ONLY** (pouze loopback, pevné pravidlo č. 17), protože mohou
+spouštět `npm install` a vytvářet podřízené procesy.
 
 ```
 src/app/api/services/
@@ -198,8 +201,8 @@ src/app/api/services/
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install novější verze
-│   ├── rotate-key/route.ts POST — vygenerování nového klíče API + restart
-│   ├── status/route.ts     GET  — aktuální stav + stav DB + metadata verze
+│   ├── rotate-key/route.ts POST — vygenerování nového API klíče + restart
+│   ├── status/route.ts     GET  — živý stav + stav DB + metadata verze
 │   └── auto-start/route.ts POST — přepnutí příznaku auto_start
 ├── cliproxy/
 │   ├── _lib.ts             pomocná funkce getOrInitSupervisor()
@@ -208,7 +211,7 @@ src/app/api/services/
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install novější verze
-│   ├── status/route.ts     GET  — aktuální stav + stav DB + metadata verze
+│   ├── status/route.ts     GET  — živý stav + stav DB + metadata verze
 │   └── auto-start/route.ts POST — přepnutí příznaku auto_start
 └── [name]/
     └── logs/route.ts       GET  — průběžný výpis protokolu přes SSE (sdílený všemi službami)
@@ -216,12 +219,12 @@ src/app/api/services/
 
 Odpovídající uživatelské rozhraní řídicího panelu:
 `src/app/(dashboard)/dashboard/providers/services/` — stránka se dvěma kartami (CLIProxyAPI + 9Router).
-Reverzní proxy pro vložené uživatelské rozhraní 9Router:
+Reverzní proxy pro integrované uživatelské rozhraní 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-Podrobný rozbor: `docs/frameworks/EMBEDDED-SERVICES.md`
+Podrobnosti: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-#### 3.1.3 `src/app/api/v1/` — Veřejné API kompatibilní s OpenAI
+#### 3.1.3 `src/app/api/v1/` — veřejné API kompatibilní s OpenAI
 
 ```
 v1/
@@ -232,12 +235,12 @@ v1/
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
 ├── chat/completions/                    Chat Completions (hlavní koncový bod)
 ├── completions/                         starší textová dokončování
-├── embeddings/                          vektorová vložení
+├── embeddings/                          vektorové reprezentace
 ├── files/[id]/, files/                  Files API
 ├── _helpers/                            sdílené pomocné funkce tras (bez veřejné URL)
 ├── images/{edits, generations}/         generování + úpravy obrázků
 ├── issues/                              pomocné koncové body pro třídění problémů
-├── management/{proxies}/                trasy se správním rozsahem uvnitř v1
+├── management/{proxies}/                trasy pro správu v rámci v1
 ├── messages/{count_tokens}/             kompatibilita zpráv ve stylu Anthropic
 ├── models/                              výpis modelů (`route.ts`, `catalog.ts`)
 ├── moderations/                         moderování
@@ -257,61 +260,61 @@ Každý soubor trasy používá stejný vzor:
 
 ```
 Trasa → předběžný požadavek CORS → validace těla pomocí Zod → volitelné ověření
-      → vynucení zásad klíče API → delegování obslužné rutině (open-sse)
+      → vynucení zásad API klíče → delegování obslužné rutině (open-sse)
 ```
 
-`v1beta/` je rozhraní kompatibility ve stylu Gemini (tenká obálka, která provádí překlad do
-stejného zpracovatelského řetězce `open-sse/handlers/`).
+`v1beta/` je rozhraní kompatibility ve stylu Gemini (tenká obálka, která převádí požadavky do
+stejného kanálu `open-sse/handlers/`).
 
 ### 3.2 `src/lib/` — Základní knihovny
 
 Data, synchronizaci, OAuth, dovednosti, paměť atd. vždy importujte prostřednictvím těchto modulů.
 Tabulka seskupuje skutečné adresáře a významné soubory nejvyšší úrovně.
 
-| Modul             | Účel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | Server protokolu A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 dovedností: analýza nákladů, zpráva o stavu, vyhledávání poskytovatelů, správa kvót, inteligentní směrování, výpis schopností)                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `api/`            | Pomocné funkce interního API: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `auth/`           | `managementPassword.ts` (resetování / hashování hesla)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `batches/`        | Služba OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `catalog/`        | Synchronizace katalogu OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `cloudAgent/`     | Registr cloudových agentů: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `combos/`         | Pomocné funkce pro vyhodnocování kombinací                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `compliance/`     | Audit + audit poskytovatelů: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `config/`         | Propojení konfigurace běhového prostředí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `db/`             | Doménové moduly SQLite (viz §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `display/`        | Pomocné funkce uživatelského rozhraní/zobrazení používané odpověďmi API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `embeddings/`     | Registr služeb vektorových reprezentací                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `env/`            | Načítání + introspekce prostředí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `evals/`          | Běhové prostředí evaluací                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `jobs/`           | Úlohy na pozadí (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `memory/`         | Trvalá paměť: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `oauth/`          | Moduly OAuth/importu poskytovatelů (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, plus `services/`, `utils/` a `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                         |
-| `plugins/`        | Načítání pluginů (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `providerModels/` | Spravovaný životní cyklus modelů: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `providers/`      | Pomocné funkce poskytovatelů: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `resilience/`     | `settings.ts` — nastavení pro jistič, dobu zklidnění a uzamčení                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `runtime/`        | Detekce funkcí běhového prostředí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `services/`       | Framework vestavěných služeb: `ServiceSupervisor.ts` (obecný správce podřízených procesů se zámkem operací, kruhovou vyrovnávací pamětí a kontrolou stavu), `bootstrap.ts` (registrace na úrovni procesu a automatické spuštění), `registry.ts` (mapování nástroj → správce), `apiKey.ts` (úložiště klíčů AES-256-GCM), `modelSync.ts` (pravidelná synchronizace modelů), `ringBuffer.ts` (5 MB kruhová vyrovnávací paměť protokolu), `healthCheck.ts` (HTTP sonda stavu), `types.ts`, `embedWsProxy.ts` (WebSocket proxy), `installers/{ninerouter,cliproxy}.ts`. Viz `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                             |
-| `agentSkills/`    | Katalog + generátor dovedností agentů: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → zapisuje `skills/{id}/SKILL.md`), `openapiParser.ts` (extrahuje koncové body REST ze specifikace OpenAPI), `cliRegistryParser.ts` (extrahuje podřízené příkazy CLI z bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Používají jej trasy REST (`/api/agent-skills/*`), nástroje MCP (`omniroute_agent_skills_*`) a dovednost A2A `list-capabilities`. Viz [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Framework dovedností: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` a `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `spend/`          | `batchWriter.ts` (vyrovnávací paměť pro odložený zápis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `sync/`           | `bundle.ts`, `tokens.ts` (cloudová synchronizace)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `system/`         | Pomocné funkce na systémové úrovni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `translator/`     | Propojení překladače nejvyšší úrovně (deleguje do `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `usage/`          | Účtování využití: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `versionManager/` | Automatické aktualizace + manifest verzí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `ws/`             | Most WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `zed-oauth/`      | Tok OAuth editoru Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Modul             | Účel                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | Server protokolu A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 dovedností: analýza nákladů, zpráva o stavu, vyhledávání poskytovatelů, správa kvót, inteligentní směrování, výpis možností)                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `api/`            | Interní pomocné nástroje API: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `auth/`           | `managementPassword.ts` (obnovení hesla / hashování)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `batches/`        | Služba API OpenAI Batches (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `catalog/`        | Synchronizace katalogu OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `cloudAgent/`     | Registr cloudových agentů: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `combos/`         | Pomocné nástroje pro vyhodnocování kombinací                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `compliance/`     | Audit + audit poskytovatele: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `config/`         | Propojení konfigurace za běhu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `db/`             | Doménové moduly SQLite (viz §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `display/`        | Pomocné nástroje pro uživatelské rozhraní/zobrazení používané odpověďmi API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `embeddings/`     | Registr služby pro vektorové reprezentace                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `env/`            | Načítání + introspekce prostředí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `evals/`          | Běhové prostředí evaluací                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `jobs/`           | Úlohy na pozadí (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `memory/`         | Trvalá paměť: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `oauth/`          | Moduly poskytovatelů OAuth/importu (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, plus `services/`, `utils/` a `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                        |
+| `plugins/`        | Načítání pluginů (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `providerModels/` | Spravovaný životní cyklus modelů: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `providers/`      | Pomocné nástroje poskytovatelů: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `resilience/`     | `settings.ts` — nastavení jističe, doby čekání a uzamčení                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `runtime/`        | Detekce funkcí běhového prostředí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `services/`       | Framework vestavěných služeb: `ServiceSupervisor.ts` (obecný správce podřízených procesů se zámkem operací, kruhovou vyrovnávací pamětí a kontrolou stavu), `bootstrap.ts` (registrace na úrovni procesu a automatické spuštění), `registry.ts` (mapování nástroje → správce), `apiKey.ts` (úložiště klíčů AES-256-GCM), `modelSync.ts` (pravidelná synchronizace modelů), `ringBuffer.ts` (kruhová vyrovnávací paměť protokolů o velikosti 5 MB), `healthCheck.ts` (HTTP kontrola stavu), `types.ts`, `embedWsProxy.ts` (WebSocket proxy), `installers/{ninerouter,cliproxy}.ts`. Viz `docs/frameworks/EMBEDDED-SERVICES.md`                                                                            |
+| `agentSkills/`    | Katalog a generátor dovedností agenta: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → zapisuje do `skills/{id}/SKILL.md`), `openapiParser.ts` (extrahuje koncové body REST ze specifikace OpenAPI), `cliRegistryParser.ts` (extrahuje dílčí příkazy CLI z bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Používají jej trasy REST (`/api/agent-skills/*`), nástroje MCP (`omniroute_agent_skills_*`) a dovednost A2A `list-capabilities`. Viz [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Framework dovedností: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` a také `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `spend/`          | `batchWriter.ts` (vyrovnávací paměť pro odložený zápis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `sync/`           | `bundle.ts`, `tokens.ts` (cloudová synchronizace)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `system/`         | Pomocné funkce na systémové úrovni                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `translator/`     | Propojení překladače nejvyšší úrovně (deleguje do `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `usage/`          | Účtování využití: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `versionManager/` | Automatická aktualizace + manifest verzí                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ws/`             | WebSocketový most                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `zed-oauth/`      | Tok OAuth editoru Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 
 Soubory nejvyšší úrovně v `src/lib/`:
 
-- Původní souhrnný modul `localDb.ts` byl odstraněn — konzumenti importují konkrétní moduly `src/lib/db/*` přímo.
+- Starý souhrnný modul `localDb.ts` byl odstraněn — spotřebitelé importují konkrétní moduly `src/lib/db/*` přímo.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -325,8 +328,8 @@ Soubory nejvyšší úrovně v `src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-Databáze SQLite implementovaná jako singleton (`getDbInstance()` v `core.ts`, žurnálování WAL).
-**Nikdy nezapisujte nezpracované SQL přímo do tras nebo obslužných rutin** — používejte tyto moduly.
+Singletonová databáze SQLite (`getDbInstance()` v `core.ts`, žurnálování WAL).
+**Nikdy nezapisujte nezpracované SQL do tras ani obslužných rutin** — používejte tyto moduly.
 
 ![Přehled databázového schématu (vybrané základní tabulky)](../diagrams/exported/db-schema-overview.svg)
 
@@ -365,29 +368,29 @@ Tabulky vytvořené napříč migracemi (celkem 123):
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (plus virtuální tabulky FTS5 pro vyhledávání v paměti).
+`webhooks` (a navíc virtuální tabulky FTS5 pro vyhledávání v paměti).
 
 ### 3.3 `src/domain/` — Doménová vrstva
 
-Čistá obchodní logika bez vstupu a výstupu. Importují ji trasy a obslužné rutiny.
+Čistá obchodní logika bez vstupních a výstupních operací. Importují ji trasy a obslužné rutiny.
 
-| Soubor                                     | Účel                                                  |
-| ------------------------------------------ | ----------------------------------------------------- |
-| `policyEngine.ts`                          | Hlavní překladač zásad                                |
-| `fallbackPolicy.ts`                        | Rozhodovací strom záložních možností                  |
-| `costRules.ts`                             | Pravidla výpočtu nákladů                              |
-| `lockoutPolicy.ts`                         | Rozhodnutí o blokování modelu                         |
-| `tagRouter.ts`                             | Směrování na základě značek                           |
-| `comboResolver.ts`                         | Překlad kombinace z požadavku → seznam cílů           |
-| `connectionModelRules.ts`                  | Filtry modelů pro jednotlivá připojení                |
-| `modelAvailability.ts`                     | Kontrola dostupnosti modelu                           |
-| `degradation.ts`                           | Přechody do degradovaného režimu                      |
-| `providerExpiration.ts`                    | Detekce účtů nebo klíčů s ukončenou platností         |
-| `quotaCache.ts`                            | Rozhodnutí o kvótách uložená v mezipaměti             |
-| `responses.ts`, `omnirouteResponseMeta.ts` | Pomocné funkce pro strukturu odpovědí                 |
-| `configAudit.ts`                           | Audit změn konfigurace                                |
-| `assessment/`                              | Hodnocení modelu (podle RFC, částečně implementováno) |
-| `types.ts`                                 | Sdílené doménové typy                                 |
+| Soubor                                     | Účel                                                |
+| ------------------------------------------ | --------------------------------------------------- |
+| `policyEngine.ts`                          | Nadřazené vyhodnocování zásad                       |
+| `fallbackPolicy.ts`                        | Rozhodovací strom záložních možností                |
+| `costRules.ts`                             | Pravidla výpočtu nákladů                            |
+| `lockoutPolicy.ts`                         | Rozhodování o uzamčení modelu                       |
+| `tagRouter.ts`                             | Směrování založené na značkách                      |
+| `comboResolver.ts`                         | Překlad kombinace z požadavku → seznam cílů         |
+| `connectionModelRules.ts`                  | Filtry modelů pro jednotlivá připojení              |
+| `modelAvailability.ts`                     | Kontrola dostupnosti modelu                         |
+| `degradation.ts`                           | Přechody do omezeného režimu                        |
+| `providerExpiration.ts`                    | Detekce účtů a klíčů s vypršenou platností          |
+| `quotaCache.ts`                            | Rozhodnutí o kvótách uložená v mezipaměti           |
+| `responses.ts`, `omnirouteResponseMeta.ts` | Pomocné funkce pro strukturu odpovědí               |
+| `configAudit.ts`                           | Audit změn konfigurace                              |
+| `assessment/`                              | Hodnocení modelu (dle RFC, částečně implementováno) |
+| `types.ts`                                 | Sdílené doménové typy                               |
 
 ### 3.4 `src/server/` — Pouze pro server
 
@@ -398,10 +401,10 @@ server/
 ├── auth/loginGuard.ts
 ├── authz/
 │   ├── classify.ts        Klasifikuje trasy jako veřejné nebo správcovské
-│   ├── assertAuth.ts      Pomocná funkce pro ověřování tvrzení
-│   ├── context.ts         Kontext autorizace pro jednotlivé požadavky
+│   ├── assertAuth.ts      Pomocná funkce pro aserce
+│   ├── context.ts         Autorizační kontext pro jednotlivé požadavky
 │   ├── headers.ts
-│   ├── pipeline.ts        Autorizační řetězec
+│   ├── pipeline.ts        Autorizační zpracovatelský řetězec
 │   ├── policies/          Konkrétní zásady
 │   └── types.ts
 └── cors/origins.ts        Seznam povolených zdrojů CORS
@@ -411,7 +414,7 @@ server/
 
 Rozděleno do účelově zaměřených podadresářů:
 
-- `constants/` — `providers.ts` (katalog poskytovatelů ověřovaný pomocí Zod), `models.ts`,
+- `constants/` — `providers.ts` (katalog poskytovatelů validovaný pomocí Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
   `headers.ts`, `upstreamHeaders.ts` (seznam zakázaných položek), `mcpScopes.ts`,
@@ -420,7 +423,7 @@ Rozděleno do účelově zaměřených podadresářů:
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
 - `validation/` — `schemas.ts` (~80 schémat Zod), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — veřejné kontrakty API distribuované prostřednictvím npm.
+- `contracts/` — kontrakty veřejného API publikované na npm.
 - `types/` — sdílené typy TS.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -429,152 +432,116 @@ Rozděleno do účelově zaměřených podadresářů:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts` a také hooky/komponenty řídicího panelu v adresářích `services/`, `network/`,
+  `a11yAudit.ts` a dále hooky a komponenty ovládacího panelu v adresářích `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — API komponent ovládacího panelu (souhrnný export `index.tsx`: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Základní komponenty jsou adaptéry nad
+  přibalenou sadou (`packages/ui-kit`, importovanou pomocí dílčí cesty komponenty, například
+  `@omniroute/ui-kit/button`), takže obrazovky si zachovávají své importy, zatímco značkování
+  pochází z této sady. Kontejner aplikace tvoří `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` ze sady) spolu se soubory `Sidebar.tsx` a `Header.tsx`; ikony jsou
+  zprostředkovány přes `Icon.tsx` a `constants/iconMap.ts`. Viz `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
-## 4. `open-sse/` — Pracovní prostor streamovacího enginu
+## 4. `open-sse/` — Pracovní prostor streamovacího modulu
 
-Samostatný pracovní prostor npm publikovaný jako `@omniroute/open-sse`. Zajišťuje zpracování
-požadavků, exekutory, překladače, služby, transformátor a server MCP.
+Samostatný pracovní prostor npm publikovaný jako `@omniroute/open-sse`. Vlastní zpracování požadavků, vykonavatele, překladatele, služby, transformátor a server MCP.
 
 ```
 open-sse/
-├── index.ts                Veřejné exporty
-├── package.json            Manifest pracovního prostoru
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Registry poskytovatelů, profily hlaviček, identita, …
-├── handlers/               Obslužné rutiny požadavků (chat, embeddingy, zvuk, obrázky, …)
-├── executors/              156 modulů exekutorů poskytovatelů (třídy exekutorů + pomocné funkce pro jednotlivé poskytovatele)
-├── translator/             Převod formátů (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Transformátor streamu Responses API ↔ Chat Completions
-├── services/               Více než 80 modulů služeb (kombinace, záložní postupy, kvóty, identita, …)
-├── utils/                  Pomocné funkce pro streamování, klient TLS, AWS SigV4, načítání přes proxy, …
-└── mcp-server/             Server MCP (3 transporty, 33 rozsahů, 110 nástrojů)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| Obslužná rutina         | Účel                                                                                             |
-| ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Hlavní chatovací pipeline (mezipaměť, omezení rychlosti, směrování kombinací, předání exekutoru) |
-| `responsesHandler.ts`   | Vstupní bod OpenAI Responses API                                                                 |
-| `embeddings.ts`         | Embeddingy                                                                                       |
-| `imageGeneration.ts`    | Generování obrázků                                                                               |
-| `audioSpeech.ts`        | Převod textu na řeč                                                                              |
-| `audioTranscription.ts` | Převod řeči na text                                                                              |
-| `videoGeneration.ts`    | Generování videa                                                                                 |
-| `musicGeneration.ts`    | Generování hudby                                                                                 |
-| `rerank.ts`             | Změna pořadí                                                                                     |
-| `moderations.ts`        | Moderování                                                                                       |
-| `search.ts`             | Vyhledávání na webu                                                                              |
-| `sseParser.ts`          | Parser událostí SSE                                                                              |
-| `usageExtractor.ts`     | Získávání počtů tokenů z upstreamových streamů                                                   |
-| `responseSanitizer.ts`  | Odstranění šumu specifického pro poskytovatele                                                   |
-| `responseTranslator.ts` | Propojení mezi odpovědí poskytovatele a překladovou vrstvou                                      |
+| Psovod                  | Účel                                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------ |
+| `chatCore.ts`           | Hlavní kanál chatu (mezipaměť, limit rychlosti, kombinované směrování, odeslání exekutora) |
+| `responsesHandler.ts`   | OpenAI Odpovídá vstupní bod API                                                            |
+| `embeddings.ts`         | Vložení                                                                                    |
+| `imageGeneration.ts`    | Generování obrazu                                                                          |
+| `audioSpeech.ts`        | Převod textu na řeč                                                                        |
+| `audioTranscription.ts` | Převod řeči na text                                                                        |
+| `videoGeneration.ts`    | Generování videa                                                                           |
+| `musicGeneration.ts`    | Hudební generace                                                                           |
+| `rerank.ts`             | Změna pořadí                                                                               |
+| `moderations.ts`        | Umírněnost                                                                                 |
+| `search.ts`             | vyhledávání na webu                                                                        |
+| `sseParser.ts`          | analyzátor událostí SSE                                                                    |
+| `usageExtractor.ts`     | Vytáhněte počty tokenů z upstream streamů                                                  |
+| `responseSanitizer.ts`  | Odstraňte hluk specifický pro poskytovatele                                                |
+| `responseTranslator.ts` | Lepidlo mezi odpovědí poskytovatele a vrstvou překladatele                                 |
 
 ### 4.2 `open-sse/executors/`
 
-156 modulů exekutorů nejvyšší úrovně (`*.ts` bez `base.ts`, `index.ts` a testů — tento počet
-měří `npm run check:docs-counts`). Každá třída exekutoru rozšiřuje `BaseExecutor` (`base.ts`),
-buď přímo, nebo prostřednictvím `DefaultExecutor` či jiného exekutoru; zbývající moduly jsou
-pomocné moduly pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, obsluha specifických odlišností). Mezi exekutory patří:
+156 spouštěcích modulů nejvyšší úrovně (`*.ts` minus `base.ts`, `index.ts` a testy — počet měření `npm run check:docs-counts` ). Každá třída exekutorů rozšiřuje `BaseExecutor` (`base.ts`), přímo nebo prostřednictvím `DefaultExecutor` nebo jiného exekutoru; zbývající moduly jsou pomocníci pro jednotlivé poskytovatele (schémata nástrojů, adaptéry fetch/TTS, quirk handlery). Mezi exekutory patří:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, dále `claudeIdentity.ts`
-(sdílená pomocná funkce pro identitu) a `index.ts` (registr).
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop`, identita plus `claudeIdentity.ts` `index.ts` (registr).
 
-> Poznámka: poskytovatele, kteří zde nejsou uvedeni, obsluhuje `default.ts` pomocí obecného
-> exekutoru kompatibilního s OpenAI. Kompletní katalog poskytovatelů (375 poskytovatelů) se nachází v
-> `src/shared/constants/providers.ts`.
+> Poznámka: Poskytovatelé, kteří zde nejsou uvedeni, jsou obsluhováni `default.ts` pomocí generického spouštěče kompatibilního s OpenAI. Úplný katalog poskytovatelů (377 poskytovatelů) žije v `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Překlad s architekturou hub-and-spoke (OpenAI je centrální uzel).
+Hub-and-spoke překlad (OpenAI je rozbočovač).
 
-- **9 překladačů požadavků** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
-- **9 překladačů odpovědí** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`.
-- **9 pomocných modulů** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` a
-  testy pomocných modulů.
-- **Pomocné moduly pro obrázky** (`translator/image/sizeMapper.ts`).
+- **9 žádostí překladatelů** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 překladatelů odpovědí** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **9 pomocníků** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, plus pomocné testy.
+- **Obrazoví pomocníci** (`translator/image/sizeMapper.ts`).
 - Nejvyšší úroveň: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — převodník Responses API ↔ Chat Completions založený na
-  `TransformStream` (používá jej záchytná route `responses/`).
+- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Konvertor dokončení chatu (používá se univerzálním zachytáváním trasy `responses/` ).
 
 ### 4.5 `open-sse/services/`
 
-Nejdůležitější položky (úplný seznam v `open-sse/services/`):
+Nejdůležitější (úplný seznam pod `open-sse/services/`):
 
-| Oblast                 | Soubory                                                                                                                                                                                                                                                  |
+| Znepokojení            | Soubory                                                                                                                                                                                                                                                  |
 | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Směrování Combo        | `combo.ts` (20 strategií), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
-| Engine Auto Combo      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Odolnost               | `accountFallback.ts` (doba čekání + uzamčení), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                     |
+| Kombinované směrování  | `combo.ts` (20 strategií), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                     |
+| Auto Combo motor       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Odolnost               | `accountFallback.ts` (uzamčení + po vychladnutí), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                  |
 | Kvóty                  | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Ukládání do mezipaměti | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Inteligentní směrování | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Práce s modely         | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Komprese               | `compression/` — kompletní zapojení kompresního enginu                                                                                                                                                                                                   |
-| Tokeny + relace        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Směrovací inteligence  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Manipulace s modelem   | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Komprese               | `compression/` — kompletní kabeláž kompresního motoru                                                                                                                                                                                                    |
+| Token relace +         | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Úroveň / manifest      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / síť               | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Dávky                  | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Využití                | `usage.ts`                                                                                                                                                                                                                                               |
+| Používání              | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 jedinečných nástrojů** zapojených v `server.ts` (45 kanonických v `schemas/tools.ts` +
-  moduly paměti, dovedností, GitHub dovedností, fondu, gamifikace, pluginů, Notionu, Obsidianu,
-  místního korpusu a komprese — sjednocení spočítané pomocí `countUniqueMcpTools`).
-- **3 transporty**: stdio, HTTP Streamable, SSE.
-- **33 rozsahů oprávnění** vynucovaných za běhu — základní seznam v `src/shared/constants/mcpScopes.ts`, úplná sada je sjednocením rozsahů deklarovaných jednotlivými moduly nástrojů.
-- Tabulka auditu: `mcp_tool_audit` (naplňovaná pomocí `audit.ts`).
-- Soubory: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  a dále testy v `__tests__/`.
-- Úplný katalog nástrojů naleznete v dokumentu [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
+- **110 unikátních nástrojů** zapojené v `server.ts` (45 kanonických v `schemas/tools.ts` + paměti, dovednostech, dovednostech GitHub, pool, gamifikace, plugin, Notion, Obsidian, lokální korpus a kompresní moduly – sjednocení počítáno `countUniqueMcpTools`).
+- **3 transporty** : stdio, HTTP Streamable, SSE.
+- **33 rozsahů** vynuceno za běhu — základní seznam v `src/shared/constants/mcpScopes.ts`, úplná sada je sjednocením rozsahů deklarovaných každým modulem nástroje.
+- Tabulka auditu: `mcp_tool_audit` (vyplněná `audit.ts`).
+- Soubory: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, plus testy pod `__tests__/`.
+- Úplný katalog nástrojů naleznete [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
-Registry poskytovatelů (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), registry modelů podle jednotlivých formátů (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-pomocné nástroje pro identitu (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-pomocné nástroje pro přihlašovací údaje (`credentialLoader.ts`, `codexClient.ts`) a cloudové
-adaptéry (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
+Registry poskytovatelů (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), registry modelu podle formátu (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), pomocníci s identitou (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts` `antigravityModelAliases.ts`, `cliFingerprints.ts`, `defaultThinkingSignature.ts`), cq, `toolCloaking.ts`, helpers (`credentialLoader.ts`, `codexClient.ts`) a cloudové adaptéry (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Streamovací primitiva a pomocné nástroje poskytovatelů: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+Streamovací primitiva a pomocníci poskytovatelů: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts` `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `requestLogger.ts` `urlSanitize.ts` `usageTracking.ts` `progressTracker.ts` `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`.
 
 ---
 

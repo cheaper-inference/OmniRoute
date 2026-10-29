@@ -1,0 +1,1 @@
+- **refactor(api):** the Radar intel and offers sync routes share one `handleRadarFeedSync()` handler (feature-flag gate, auth, bounded body validation and sanitized 500 unchanged; each route keeps its own callback, failure message and CORS preflight) ([#17371](https://github.com/diegosouzapw/OmniRoute/pull/17371)) — thanks @JxnLexn
