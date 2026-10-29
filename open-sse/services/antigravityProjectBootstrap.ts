@@ -136,7 +136,9 @@ async function tryLoadCodeAssist(
       const response = await fetchImpl(url, {
         method: "POST",
         headers,
-        body: JSON.stringify({ metadata: getAntigravityLoadCodeAssistMetadata() }),
+        body: JSON.stringify({
+          metadata: getAntigravityLoadCodeAssistMetadata(clientProfile),
+        }),
         signal: signal ? AbortSignal.any([signal, timeoutSignal]) : timeoutSignal,
       });
 
@@ -222,7 +224,7 @@ async function tryOnboardUser(
   const headers = getAntigravityContentHeaders(clientProfile, accessToken);
   const body = JSON.stringify({
     tier_id: tierId,
-    metadata: getAntigravityLoadCodeAssistMetadata(),
+    metadata: getAntigravityLoadCodeAssistMetadata(clientProfile),
   });
 
   for (const url of urls) {

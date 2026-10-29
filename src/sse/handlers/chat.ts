@@ -123,6 +123,7 @@ import {
   resolveClientSessionId,
   resolveConversationId,
 } from "@omniroute/open-sse/services/conversationTracker.ts";
+import { isRequestShapeError } from "../services/requestShape";
 import {
   classifyProviderBreakerResult,
   isAntigravityMissingProjectError,
@@ -2316,6 +2317,13 @@ async function handleSingleModelChat(
       // redispatch and repeat bootstrap within the same logical request.
       if (isAntigravityMissingProjectError(provider, result)) {
         markAntigravityMissingCloudCodeProject(credentials.connectionId);
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+      }
+
+      // A 422 body-deserialization rejection describes THIS request's shape, not the
+      // account. Cooling the connection down would make every other client routed to
+      // the same (often single) account fail with the stale error for ~1 minute.
+      if (isRequestShapeError(result.status, result.error, provider)) {
         return withSelectedConnectionHeader(result.response, credentials.connectionId);
       }
 

@@ -1,0 +1,1 @@
+- **fix(dev):** macOS development startup no longer fails with `EBADF` from Next's TypeScript CLI subprocess and static-path worker (in-process TypeScript config and thread workers, macOS dev only), and combo test messages keep model reasoning out of the visible test output ([#17955](https://github.com/cheaper-inference/OmniRoute/pull/17955)) — thanks @ahmedgo17390

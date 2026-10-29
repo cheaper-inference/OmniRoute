@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-25";
+export const FREE_CATALOG_CURATED_AT = "2026-10-28";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -473,6 +473,12 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "requesty", modelId: "openai/gpt-oss-120b", displayName: "GPT-OSS 120B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "ok" },
   { provider: "requesty", modelId: "mistral/leanstral-1-5", displayName: "Leanstral 1.5 (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "ok" },
   { provider: "requesty", modelId: "nvidia/nemotron-3-nano-30b-a3b", displayName: "Nemotron 3 Nano 30B (Requesty free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "requesty-free", tos: "ok" },
+  // Token Harbor's exact free-model id is explicitly priced free in the live
+  // catalog. Its rolling 7-day allowance is account-shared and has no published
+  // token count; the free note in the provider catalog describes that boundary.
+  // evidence: public-page tokenharbor.ai/docs/billing/cashback#free-model-access and
+  // tokenharbor.ai/models/claude-haiku-5.5:free (checked 2026-10-11).
+  { provider: "tokenharbor", modelId: "claude-haiku-5.5:free", displayName: "Claude Haiku 5.5 (Token Harbor free)", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "tokenharbor-free", tos: "caution" },
   { provider: "ovhcloud", modelId: "gpt-oss-120b", displayName: "GPT-OSS 120B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },
   { provider: "ovhcloud", modelId: "gpt-oss-20b", displayName: "GPT-OSS 20B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },
   { provider: "ovhcloud", modelId: "Qwen3.6-27B", displayName: "Qwen3.6 27B (OVH anonymous)", monthlyTokens: 0, creditTokens: 0, freeType: "keyless", poolKey: "ovhcloud-anon", tos: "ok" },

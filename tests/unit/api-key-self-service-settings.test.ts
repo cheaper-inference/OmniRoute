@@ -1,5 +1,5 @@
 /**
- * Per-key self-service settings (migration 218) end to end on a temp SQLite DB:
+ * Per-key self-service settings (migration 229) end to end on a temp SQLite DB:
  * the DB module, the Zod schemas, the admin routes (GET/PUT
  * /api/keys/[id]/self-service, GET /api/keys, PATCH/DELETE /api/keys/[id]),
  * GET /v1/me/status auth via Bearer or x-api-key, and the policy merge into
@@ -71,13 +71,13 @@ function assertNoStackLeak(body: unknown) {
 
 // ──────────────── DB module ────────────────
 
-test("self-service migration 218 coexists with upstream attempt timing migration 194", () => {
+test("self-service migration 229 coexists with upstream attempt timing migration 194", () => {
   // Regression: stale stack children reused 194 and collided with upstream schema updates.
   const db = core.getDbInstance();
   const applied = db
     .prepare("SELECT version FROM _omniroute_migrations WHERE name = ?")
     .all("api_key_self_service_settings");
-  assert.deepEqual(applied, [{ version: "218" }]);
+  assert.deepEqual(applied, [{ version: "229" }]);
   const timingColumns = db.prepare("PRAGMA table_info(proxy_logs)").all() as { name: string }[];
   assert.ok(timingColumns.some((column) => column.name === "headers_ms"));
   assert.deepEqual(

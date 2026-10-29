@@ -165,7 +165,7 @@ async function postExchangeAntigravity(
   tokens: AntigravityTokenPayload
 ): Promise<AntigravityPostExchange> {
   const headers = getPostExchangeHeaders(clientProfile, tokens.access_token);
-  const metadata = getAntigravityLoadCodeAssistMetadata();
+  const metadata = getAntigravityLoadCodeAssistMetadata(clientProfile);
   const userInfoResponse = await fetch(`${config.userInfoUrl}?alt=json`, {
     headers: { Authorization: `Bearer ${tokens.access_token}` },
     signal: AbortSignal.timeout(POSTEXCHANGE_TIMEOUT_MS),
@@ -297,9 +297,7 @@ export function createAntigravityOAuthProvider(
         // env-level custom client later on. Compare by value against the
         // embedded default: `config` may be the very same object as
         // ANTIGRAVITY_CONFIG when no runtime override exists.
-        oauthClient: isCustomAntigravityClient(config)
-          ? `custom:${config.clientId}`
-          : "builtin",
+        oauthClient: isCustomAntigravityClient(config) ? `custom:${config.clientId}` : "builtin",
       })),
     mapTokens: (tokens, extra) => mapAntigravityTokens(clientProfile, tokens, extra),
   };

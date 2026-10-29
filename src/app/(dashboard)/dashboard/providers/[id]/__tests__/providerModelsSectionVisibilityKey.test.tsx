@@ -218,4 +218,29 @@ describe("ProviderModelsSection visibility-toggle key (alias !== id)", () => {
     expect(handleBulkToggleModelHidden).toHaveBeenCalledWith(PROVIDER_ID, [MODEL_ID], true);
     expect(handleBulkToggleModelHidden).not.toHaveBeenCalledWith(STORAGE_ALIAS, [MODEL_ID], true);
   });
+
+  it("renders Clear All Models button for standard OAuth providers when syncedAvailableModels exist", () => {
+    const handleClearAllModels = vi.fn().mockResolvedValue(undefined);
+    render(
+      buildProps({
+        providerId: "agy",
+        providerAlias: "agy",
+        providerStorageAlias: "agy",
+        providerDisplayAlias: "agy",
+        isManagedAvailableModelsProvider: false,
+        providerInfo: { name: "AGY CLI", passthroughModels: false },
+        modelMeta: { customModels: [], modelCompatOverrides: [] },
+        providerAliasEntries: [],
+        syncedAvailableModels: [{ id: "claude-opus-5-5-high" }],
+        handleClearAllModels,
+      })
+    );
+
+    const clearBtn = Array.from(document.querySelectorAll("button")).find((button) =>
+      button.textContent?.includes("clearAllModels")
+    );
+    expect(clearBtn).toBeDefined();
+    act(() => clearBtn?.dispatchEvent(new MouseEvent("click", { bubbles: true })));
+    expect(handleClearAllModels).toHaveBeenCalledOnce();
+  });
 });

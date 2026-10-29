@@ -17,6 +17,12 @@ const DEFAULT_MAX_BUFFERED_CHOICES = 32;
 const DEFAULT_MAX_BUFFERED_BYTES = 65536;
 const MAX_PARTIAL_PROBE = 256;
 
+// Mirror of src/lib/guardrails/registry.ts: HeadersLike (kept local: the
+// symbol is not exported from that module). Used to type `args.headers` so it
+// is assignable both to the fake resolver signature (headers: unknown) and to
+// the production resolver imported from ./guardrails (headers: HeadersLike).
+type HeadersLike = Headers | Record<string, unknown> | null | undefined;
+
 function resolveWindowSize(options?: CredentialTransformOptions): number {
   if (options?.windowSize !== undefined) return Math.max(1, options.windowSize);
   return DEFAULT_WINDOW_SIZE;
@@ -58,7 +64,7 @@ export async function resolveCredentialGate(args: {
   }) => string[];
   apiKeyInfo?: unknown;
   body?: unknown;
-  headers?: unknown;
+  headers?: HeadersLike;
 }): Promise<CredentialGate> {
   let enabled = false;
   try {

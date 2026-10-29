@@ -134,6 +134,10 @@ export const NAMED_OPENAI_STYLE_PROVIDERS = new Set([
   // the dashboard only shows static seeds and cannot synchronize the live catalog
   // of vendor-qualified open-weight model IDs (#16979).
   "demonroute",
+  // Token Harbor is an OpenAI-compatible API-key gateway whose live catalog is
+  // served from its key-gated /v1/models endpoint; the registry seed stays as the
+  // offline fallback.
+  "tokenharbor",
 ]);
 
 export function isNamedOpenAIStyleProvider(provider: string): boolean {
