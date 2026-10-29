@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { Check, Copy } from "lucide-react";
 import { cn } from "./lib/utils";
 
@@ -10,6 +10,9 @@ export type CodePreviewTokenTone = "keyword" | "string" | "number" | "function" 
 export interface CodePreviewToken {
   text: string;
   tone?: CodePreviewTokenTone;
+  /** Optional grammar colors, separate from semantic fallback tones. */
+  color?: string;
+  darkColor?: string;
 }
 
 export interface CodePreviewProps extends Omit<ComponentProps<"section">, "onCopy"> {
@@ -136,7 +139,7 @@ export function CodePreview({
               {showLineNumbers && <span className="ci-code-preview__number" aria-hidden="true">{lineIndex + 1}</span>}
               <span className="ci-code-preview__source">
                 {line.map((token, tokenIndex) => (
-                  <span key={tokenIndex} data-tone={token.tone}>{token.text}</span>
+                  <span key={tokenIndex} data-tone={token.tone} data-syntax-color={token.color ? "" : undefined} style={token.color ? { "--ci-code-token-light": variant === "terminal" ? token.darkColor ?? token.color : token.color, "--ci-code-token-dark": token.darkColor ?? token.color } as CSSProperties : undefined}>{token.text}</span>
                 ))}
               </span>
             </span>

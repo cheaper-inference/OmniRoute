@@ -4,13 +4,7 @@
 
 ---
 
-> **ሁኔታ:** ዳሽቦርዱ በ**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ላይ የተገነባ ነው፣
-> እንደ workspace `packages/ui-kit` (`@omniroute/ui-kit`፤ የupstream snapshot በ`packages/ui-kit/UPSTREAM.md`
-> ውስጥ ተሰክቶ ተቆልፏል እና በ`npm run check:ui-kit-snapshot` ይጠበቃል) vendored ተደርጓል። Light
-> የመደበኛው (canonical) ገለጻ ነው፤ ነባሪ ምርጫው `system` ነው። አጽናኝ ቀለሙ Keak lime (`--ci-color-accent`) ነው።
-> Inter (letter-spacing 0፣ `--ci-letter-spacing-ui`) የUI ቅርጸ-ቁምፊ ቤተሰብ ነው፣ Instrument Serif ለትልቅ የተበተነ
-> የማሳያ ጽሑፍ ብቻ (`.ci-dashboard-display`)፣ IBM Plex Mono ደግሞ ለኮድ — ሁሉም በ`src/app/globals.css`
-> መጀመሪያ ላይ ባሉት `@fontsource/*` imports በራስ-አገልግሎት (self-hosted) ናቸው። እያንዳንዱ አዶ Lucide glyph ነው።
+> **ሁኔታ፡** ዳሽቦርዱ የተገነባው በ** Keak CI UI ኪት** (`@keak/cheaper-inference-ui-kit`)፣ እንደ የሥራ ቦታ `packages/ui-kit` (`@omniroute/ui-kit`) የሚሸጥ (zqe፣ የላይኛው ዥረት ቅጽበታዊ ገጽ እይታ በ `packages/ui-kit/UPSTREAM.md` የተሰካ እና በ `npm run check:ui-kit-snapshot` የተጠበቀ ነው)። ብርሃን ቀኖናዊ ጭብጥ ነው; ነባሪው ምርጫ `system` ነው። ዘዬው Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
 
 ## 1. ነገሮች የሚገኙበት ቦታ
 
@@ -24,35 +18,13 @@
 
 ## 2. ደንቦች
 
-1. ቶክኖች ብቻ፣ በቀጥታ የተጻፉ እሴቶች (literals) በፍጹም አይደሉም። በዓላማ የተጠበቁ ልዩነቶች፡ ሁልጊዜ ጨለማ
-   የሆነው የኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex
-   ለሚያስፈልጋቸው ጠሪዎች የ kit-ኑ የሁኔታ ፓሌት የተፈታ (resolved) hex መስታወት። የምድብ (categorical) ፓሌቶች
-   ከእንግዲህ ልዩነት አይደሉም፡ በ `src/shared/utils/categoricalPalette.ts` አማካኝነት በ kit-ኑ አምስት የቻርት
-   ቶክኖች (`--color-chart-1..5`) ላይ ይተካሉ፣ ለማዘዋወሪያ ስትራቴጂዎችም
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` በኩል፤ የ ReactFlow ጠርዞች (edges) እና የ
-   orchestration ካንቫስ ገጽታ-ንቁ የሆኑትን `--orch-status-*` ተለዋዋጮች ያነባሉ
-   (`src/shared/components/flow/edgeStyles.ts`)።
-2. `packages/ui-kit/src`ን በእጅ በፍጹም አትስራ፣ በ `scripts/dev/sync-ui-kit.sh <commit>` አመሳስል፤ የ
-   pre-commit በሩ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተሰነጠጠው (pinned) የ
-   upstream commit የሚለያይ ማንኛውንም byte ሲያገኝ ይውድቃል (የ upstream ክሎኑ፣ `UI_KIT_CLONE` ወይም
-   `_references/cheaper-inference-ui-kit`፣ ሲጎድል በማስጠንቀቂያ ይዝለላል)። kit-ኑ የሚጎድለው ነገር ሲኖር፣ በ
-   አዳፕተሩ ወይም በማያ ገጹ ውስጥ ሥራ-ዙር (workaround) አድርግ እና ከ upstream ጠይቅ።
-3. የ kit ጽሑፍ ነባሮች እንግሊዝኛ ናቸው (`label = "Loading"`፣ `loadingLabel = "Loading table"`…) — የ kit
-   ኮምፖነንት ጽሑፍ ሲያሳይ ሁልጊዜ ከ `useTranslations(...)` የተተረጎሙ ሕብረቁምፊዎችን አስተላልፍ።
-4. የ Tailwind utilities በ kit ኮምፖነንት ክላሶች ላይ ያሸንፋሉ (kit-ኑ `@layer theme, base, components, utilities`
-   ያውጃል እና ህጎቹ በ `components` ውስጥ ናቸው) — utilitiesን ለክፍተት (spacing) እና ለአቀማመጥ (layout)
-   ተጠቀም፣ የ kit ኮምፖነንቶችን እንደገና ለመቀለም አይደለም።
-5. አርዕስቶች፡ `.ci-heading` (Inter፣ tracking የለም) ለገጽ እና ለክፍል ርዕሶች፤ `.ci-dashboard-display`
-   (Instrument Serif) ለትላልቅ፣ ብዛት ለሌላቸው የማሳያ ጽሑፎች ብቻ — ለምሳሌ የስህተት-ገጹ ሁኔታ ኮድ።
-6. `tests/unit/dashboard-kit-sweep.test.ts` የ kit-ን ተቀባይነት ይጠብቃል፡ በ `src/app` ወይም
-   `src/shared/components` ስር ምንም የ Material ligature span የለም፤ በዳሽቦርድ ዛፉ (`src/app/(dashboard)`
-   እና `src/shared/components`) ውስጥ ምንም ያልተጠበቀ (raw) `<select>`፣ `<textarea>` ወይም `<table>`
-   እንዲሁም ከተዘረዘሩት ልዩነቶች ውጭ በእጅ የተሰራ `role="dialog"` የለም (የ `Select` አዳፕተሩ የትውልድ
-   ቅርንጫፍ፣ `RequestLoggerDetail`)፤ እዚያ ያለ እያንዳንዱ raw `<button>` ወይም `<input>` `kit-exception:`
-   የሚያካትት አስተያየት (ምክንያቱ ጋር) ከእሱ በላይ በብዛት 3 መስመሮች ርቆ መጨረስ አለበት፤ የፓሌት hues እና `dark:`
-   variants ሙከራው በሚዘረዝራቸው ፋይሎች ብቻ።
-7. ከ PR በፊት ሁለቱንም ገጽታዎች እና የ 390 px viewportን (በስክሪንሾት) አረጋግጥ፤ `tests/e2e/a11y.spec.ts`
-   axe ያሂዳል።
+1. ማስመሰያዎች፣ በጭራሽ ቃል በቃል። ሆን ተብሎ የተቀመጡ ልዩ ሁኔታዎች፡ ሁልጊዜ ጨለማ ያለው የኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`)፣ የተጠናቀቀ-ሄክስ መስታወት የኪት ሁኔታ ቤተ-ስዕል ቃል በቃል ሄክስ ለሚያስፈልጋቸው ጠሪዎች። የምድቡ ቤተ-ስዕሎች ከአሁን በኋላ ለየት ያሉ አይደሉም፡ በኪቲው አምስት ገበታ ቶከኖች (`--color-chart-1..5`) በ `src/shared/utils/categoricalPalette.ts` እና፣ ለመዘዋወር ስልቶች፣ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow ጠርዞች እና የኦርኬስትራ ሸራ ጭብጥን የሚያውቁ `--orch-status-*` ተለዋዋጮችን (`src/shared/components/flow/edgeStyles.ts`) ያንብቡ።
+2. `packages/ui-kit/src` በእጅ በጭራሽ አታጥፉ: ከ `scripts/dev/sync-ui-kit.sh <commit>` ጋር ያመሳስሉ; የቅድመ-ኮሚት በር `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተሰካው ወደ ላይ ካለው ቁርጠኝነት በሚለይ በማንኛውም ባይት ላይ አይሳካም (የላይኛው ክሎኑ፣ `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit` በማይኖርበት ጊዜ በማስጠንቀቂያ ይዘላል)። ኪቱ የሆነ ነገር ሲጎድል፣በአስማሚው ወይም በስክሪኑ ዙሪያ ይስሩ እና ወደላይ ይጠይቁት።
+3. የኪት ጽሑፍ ነባሪዎች እንግሊዝኛ ናቸው (`label = "Loading"`፣ `loadingLabel = "Loading table"`…) — የተተረጎሙ ሕብረቁምፊዎችን ከ `useTranslations(...)` ያሳልፉ።
+4. የጅራት ንፋስ መገልገያዎች በኪት መለዋወጫ ክፍሎች ላይ ያሸንፋሉ (ኪቱ ዝቃን `@layer theme, base, components, utilities` እና ደንቦቹ በ `components` ውስጥ ይኖራሉ) - መገልገያዎችን ለክፍተት እና አቀማመጥ ይጠቀሙ እንጂ የኪት ክፍሎችን ቀለም ለመቀባት አይደለም።
+5. ርዕሶች: `.ci-heading` ለገጽ እና ክፍል ርዕሶች; `.ci-dashboard-display` ለትልቅ፣ ትንሽ የማሳያ ጽሑፍ እንደ የስህተት ገጽ ሁኔታ ኮድ። ሁለቱም ስዊዘርላንድን ይጠቀማሉ።
+6. `tests/unit/dashboard-kit-sweep.test.ts` ኪት ጉዲፈቻን ይጠብቃል፡ በ `src/app` ወይም `src/shared/components` ስር ምንም የቁሳቁስ ጅማት ጊዜ የለም፤ በዳሽቦርዱ ዛፍ (`src/app/(dashboard)` እና `src/shared/components`) ውስጥ ምንም ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` እና በእጅ የሚጠቀለል `role="dialog"` የለም ከተዘረዘሩት ልዩ ሁኔታዎች ውጭ ( `Select` አስማሚው ተወላጅ ቅርንጫፍ፣ `RequestLoggerDetail`); እያንዳንዱ ጥሬ `<button>` ወይም `<input>` በዚያ ላይ ቢበዛ 3 መስመሮች የሚያልቅ `kit-exception:` (ምክንያት ጋር) የያዘ አስተያየት ያስፈልገዋል; የፓልቴል ቀለሞች እና `dark:` ልዩነቶች በፋይሎች ውስጥ ብቻ የሙከራ ዝርዝሮች።
+7. ሁለቱንም ገጽታዎች እና የ390 ፒክስል መመልከቻ ከ PR በፊት ያረጋግጡ (ቅጽበታዊ ገጽ እይታዎች)። `tests/e2e/a11y.spec.ts` መጥረቢያ ያስኬዳል.
 
 ## 3. ማያ ገጽ መጨመር
 
@@ -85,50 +57,22 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx`ን ይጨምሩ ወይም ያዘምኑ። ብዙ ጠሪዎች (callers) ላሉት አዳፕተር፣ ከለውጡ
    በፊት እና በኋላ የተሰራውን ማርክአፕ ያወዳድሩ — የpadding ወይም የማጠቂያ (wrapper) ለውጦች ወደ እያንዳንዱ ማያ ገጽ ይስፋፋሉ።
 
-## 5. ኪቱን ማዘመን
+## 5. ኪት ማዘመን
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` በዚያ ኮሚት ላይ ያለውን የupstream `src/`ን ወደ
-`packages/ui-kit/src` ይቀድዋል እና ብቸኛውን የተፈቀደ ለውጥ (transformation) ይተግብራል (ከአንፃራዊ ኢምፖርቶች ላይ የ `.js`
-ቅጥያን ያስወግዳል)። ከዚያ፡ `git diff packages/ui-kit`ን ይገምግሙ፣ በሁለቱም ገጽታዎች (themes) አቅራቢዎች (providers)፣
-ቅንብሮች (settings)፣ ጥምረቶች (combos)፣ አጠቃቀም (usage) እና ኢንድፖይንት (endpoint) ላይ የዓይን ግምገማ ያድርጉ፣
-`npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui`ን ያሂዱ፣ እና PRን ከupstream የለውጥ መዝገብ
-(changelog) ጋር ይክፈቱ።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል እና ያለሱ ንቁ ሆኖ ይቆያል።
 
-## 6. የ README ዳይግራሞች
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = the new `v*` tag) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
 
-root `README.md` የሚያካትታቸው አስራ ሁለት ዳይግራሞች (`docs/diagrams/*.svg`) ኪቱ በቋሚ ምስል ላይ የተተገበረ ነው፣ እና
-በእጅ የተሳሉ ሳይሆን የተፈጠሩ (generated) ናቸው፦ 13 ማመንጫ ፋይሎች በ `scripts/docs/gen-readme-*.mjs` (አስራ ሁለቱ
-ዳይግራሞች እና የ `gen-readme-diagrams.mjs` ነጂው) እና 12 የአሮጌነት (staleness) ሙከራዎች በ
-`tests/unit/docs/readme-*-svg.test.ts`፣ ለእያንዳንዱ ዳይግራም አንድ፣ እያንዳንዱ የተኮመተውን ፋይል ከማመንጫው ውጤት ጋር
-ባይት-ለ-ባይት ያወዳድራል (ሥራው `test-unit`)።
+## 6. README ንድፎችን
 
-- **ቶከኖች።** `scripts/docs/readme-diagram-theme.mjs` የቀለም ስብስቡን (palette) ከ
-  `packages/ui-kit/src/ci-tokens.css` ይቀድዋል (በ `tests/unit/docs/readme-diagram-theme.test.ts` ከዚያ ፋይል ጋር
-  የተሰካ) እና የጽሑፍ ሚናዎችን በኪቱ ቅርጸ-ቁምፊዎች ላይ ይገልጻል — Instrument Serif ለማሳያ (display)፣ Inter ለUI ጽሑፍ፣
-  IBM Plex Mono ለአሃዞች እና ለኮድ፣ `src/app/globals.css` ለዳሽቦርዱ የሚጫናቸው ተመሳሳይ `@fontsource` ፓኬጆች። የብርሃን
-  (light) እሴቶች በፋይሉ ውስጥ በ `:root` ላይ ይቀመጣሉ፣ የጨለማ (dark) እሴቶች ደግሞ ከ `prefers-color-scheme: dark`
-  ጀርባ፣ ስለዚህ እያንዳንዱ ምስል በGitHub ላይ የአያይውን አወቃቀር (scheme) ይከተላል።
-- **ቅርጸ-ቁምፊዎች።** `scripts/docs/readme-fonts.mjs` እነዚያን woff2 ፋይሎች እያንዳንዱ ዳይግራም ወደሚሳላቸው ግሊፎች ብቻ
-  ንዑስ ስብስብ (subset) ያደርጋል እና እንደ `@font-face` `data:` URIs ያካትታቸዋል — የኪት ታይፖግራፊ ወደ README ምስል
-  የሚደርስበት ብቸኛው መንገድ፣ GitHub Markdown ምንም CSS ስለማይሸከም እና camo ፕሮክሲ ሁሉንም የውጪ ጠይቆች (fetch) ስለሚከለክል
-  ነው። ንዑስ ስብስቦቹ ላቲን-ብቻ ናቸው፤ ወደ ስርዓቱ stack የሚመለሱ የምልክት ግሊፎች በ `SYMBOL_FALLBACKS` ውስጥ አንድ-አንድ
-  ተብለው ይፈቀዳሉ፣ እና ሌላ ማንኛውም ያልተሸፈነ ግሊፍ ስህተት ይጥላል (throws)።
-- **እንደገና ማመንጨት።** `npm run docs:readme-diagrams` አስራ ሁለቱንም በREADME ቅደም-ተከተል እንደገና ይጽፋቸዋል እና
-  ለእያንዳንዱ ፋይል ከመጠኑ ጋር አንድ መስመር ያትማል። ነጠላ ማመንጫም በራሱ ሊሠራ ይችላል (`node scripts/docs/gen-readme-<name>.mjs`፤
-  `free-tier-budget` `node --import tsx/esm`ን ይፈልጋል ምክንያቱም አሃዞቹ በ `open-sse/config/freeModelCatalog.ts`
-  ካለው ሕያው ካታሎግ ጫኚ (loader) ስለሚመነጩ ነው፤ የካታሎግ ለውጥ የCI ስሜት በ `docs/architecture/QUALITY_GATES.md` →
-  `docs-sync-strict` ውስጥ ነው)። ማመንጫውን እና SVGን አንድ ላይ ኮሚት ያድርጓቸው።
-- **ማረጋገጫ።** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ፋይሉን GitHub እንደሚያቀርበው መንገድ
-  ያቀርባል (renders) (አንድ `<img>` ታግ፣ የcamo `Content-Security-Policy`፣ `image/svg+xml`)፣ አንድ ብርሃን (light)
-  እና አንድ ጨለማ (dark) ፍሬም ይቀርጻል እና ገጹ የላካቸውን የውጪ የቅርጸ-ቁምፊ ጥያቄዎች ያሳውቃል (0 መሆን አለባቸው)።
-- **በጀት።** በፋይል ከ200 KB በታች (እያንዳንዱ የአሮጌነት ሙከራ ይህንን ያረጋግጣል)፤ 500 KB ለማንኛውም README ምስል የማይተላለፍ
-  (hard cap) ገደብ ነው (የSVG ስቱዲዮ ቫሊዴተር ህግ)።
-- **ቅጂው አይቀየር፣ ቆጠራዎች ከበሩ (gate)።** እንደገና-ምቅጥቃጡ (rebrand) የቀየረው ቅርጸ-ቁምፊን እና የቀለም ስብስብን ነው፣ ቃላትን
-  አይደለም፦ እያንዳንዱ ማመንጫ የዳይግራሙን ቅጂ (copy) በ `*_COPY` ቋሚ ውስጥ ይይዛል (ወይም ከሕያው ካታሎጉ ይገነባል)፣ ይህም የተሳለው
-  ጽሑፍም ሆነ የቅርጸ-ቁምፊ ንዑስ-ስብስብ ግብአት ነው። ቀኖኒካል አሃዞች በ `<text>` ኖዶች ውስጥ ይኖራሉ፣ በ `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`) ይነበባሉ፤ በሩ የሚያነባቸው ዳይግራሞች የአሮጌነት ሙከራዎች ደግሞ ቫሊዴተሮቹን
-  በተፈጠረው ፋይል ላይ ያሂዳሉ፣ ስለዚህ ከኮዱ የሚርቅ አሃዝ ሙከራውን ያሳልፋል — በሩ የሚያነበውን ምንጭ ያስተካክሉ፣ በማመንጫው ውስጥ
-  ያለውን ቁጥር ግን በፍጹም አይስተካከሉ።
+አሥራ ሁለቱ ሥዕላዊ መግለጫዎች `README.md` መክተቻ ሥር (`docs/diagrams/*.svg`) በማይንቀሳቀስ ምስል ላይ የሚተገበረው ኪት ናቸው፣ እና የሚመነጩ እንጂ በእጅ የተሳሉ አይደሉም፡ 13 የጄነሬተር ፋይሎች በ `scripts/docs/gen-readme-*.mjs` (አሥራ ሁለት ሥዕላዊ መግለጫዎች እና የ `gen-readme-diagrams.mjs` ሾፌር) እና 12 የዝግታ ፈተናዎች በ `tests/unit/docs/readme-*-svg.test.ts`፣ አንድ በሥዕላዊ መግለጫ፣ እያንዳንዱ ባይት-ውፅዓት ከጄኔሬተሩ ጋር በማወዳደር ( `test-unit`)።
+
+- **ማስመሰያዎች** `scripts/docs/readme-diagram-theme.mjs` ቤተ-ስዕሉን ከ `packages/ui-kit/src/ci-tokens.css` ይገለብጣል (በዚያ ፋይል ላይ በ `tests/unit/docs/readme-diagram-theme.test.ts` የተሰካ) እና የጽሑፍ ሚናዎች በመሳሪያው ቀደምት ፊቶች ላይ - Instrument Serif for display, Inter for UI text, IBM Plex Mono ለሥዕሎች እና ኮድ - ከ `@fontsource` ጥቅሎች (ዳሽቦርዱ ራሱ የኪት ስዊዘርን ከኪት 6 0.0 ጀምሮ ይጠቀማል)። የብርሃን እሴቶች በ `:root` ላይ ይቀመጣሉ፣ ጨለማ እሴቶች ከ `prefers-color-scheme: dark` ጀርባ፣ በፋይሉ ውስጥ፣ ስለዚህ እያንዳንዱ ምስል በ GitHub ላይ የተመልካቹን እቅድ ይከተላል።
+- **ቅርጸ ቁምፊዎች.** `scripts/docs/readme-fonts.mjs` እነዚያን woff2 ፋይሎችን ወደ ጂሊፍስ ያስቀምጣቸዋል እያንዳንዱ ሥዕላዊ መግለጫ እንደ `@font-face` `data:` URIs ይከተላቸዋል - የኪት ትየባ ወደ README ምስል የሚደርስበት ብቸኛው መንገድ GitHub Markdown ምንም CSS ስለማይወስድ እና camo proxy እያንዳንዱን የውጭ ማምጣትን ስለሚከለክል ነው። ንዑስ ስብስቦች ላቲን-ብቻ ናቸው; ወደ ስርዓቱ ቁልል የሚመለሱት የምልክት ግሊፎች አንድ በአንድ በ `SYMBOL_FALLBACKS` ውስጥ ይፈቀዳሉ፣ እና ማንኛውም ሌላ ያልተሸፈነ ግሊፍ መጣል።
+- **እንደገና ማመንጨት።** `npm run docs:readme-diagrams` አስራ ሁለቱን በ README ቅደም ተከተል እንደገና ይጽፋል እና በአንድ ፋይል አንድ መስመር በመጠን ያትማል። ነጠላ ጀነሬተር እንዲሁ በራሱ ይሰራል (`node scripts/docs/gen-readme-<name>.mjs`፣ `free-tier-budget` `node --import tsx/esm` ይፈልጋል ምክንያቱም አሃዞቹ በ `open-sse/config/freeModelCatalog.ts` ውስጥ ካለው የቀጥታ ካታሎግ ጫኝ ነው ፣ የካታሎግ ለውጥ የ CI ውጤት `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ውስጥ ነው)። ጄነሬተሩን እና SVG አንድ ላይ ያድርጉ።
+- **ማረጋገጫ።** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` አንድን ፋይል GitHub በሚያገለግልበት መንገድ (የ `<img>` መለያ፣ camo's `Content-Security-Policy`፣ `image/svg+xml`)፣ ብርሃን እና ጨለማ ፍሬም ይይዛል እና ገጹ የተሰራውን የውጭ ቅርጸ-ቁምፊ ጥያቄ ሪፖርት ያደርጋል (0 መሆን አለበት)።
+- **በጀት።** በአንድ ፋይል ከ 200 KB በታች (እያንዳንዱ የዝግታ ሙከራ ያረጋግጣል); 500 KB ለማንኛውም README ምስል (የ SVG ስቱዲዮ አረጋጋጭ ህግ) ጠንካራ ቆብ ነው።
+- **ቅዳ ሳይለወጥ፣ ከበሩ ላይ ይቆጠራል።** የዳግም ብራንድ ተቀይሯል አይነት እና ቤተ-ስዕል እንጂ ቃላት አይደለም፡ እያንዳንዱ ጀነሬተር የዲያግራሙን ግልባጭ በ `*_COPY` ቋሚ (ወይንም ከቀጥታ ካታሎግ ይገነባል) ይህም በተሳለው ጽሁፍ እና በቅርጸ ቁምፊ ንዑስ ስብስብ ግብአት ነው። ቀኖናዊ አኃዞች በ `<text>` ኖዶች ውስጥ ይቆያሉ፣ በ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ይነበባሉ; በሩ የሚያነቡት የሥዕላዊ መግለጫዎች የቆይታ ፈተናዎች አረጋጋጭዎቹን በተፈጠረው ፋይል ላይ ያካሂዳሉ፣ ስለዚህ ከኮዱ የወጣ አሃዝ ፈተናውን ወድቋል - በሩ የሚነበብበትን ምንጭ አስተካክል እንጂ በጄነሬተር ውስጥ ያለው ቁጥር የለም።
 
 ## 7. የማጣቀሻ ማውጫ
 

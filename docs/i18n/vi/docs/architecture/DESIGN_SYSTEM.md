@@ -4,13 +4,7 @@
 
 ---
 
-> **Trạng thái:** dashboard được xây dựng trên **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được đưa vào (vendor)
-> dưới dạng workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream được ghim trong
-> `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Light là theme chuẩn;
-> tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) là họ font chữ của UI, Instrument Serif chỉ dùng cho văn bản hiển thị lớn, thưa
-> (`.ci-dashboard-display`), IBM Plex Mono cho code — tất cả đều tự lưu trữ thông qua các import
-> `@fontsource/*` ở đầu file `src/app/globals.css`. Mọi biểu tượng đều là một glyph của Lucide.
+> **Trạng thái:** bảng điều khiển được xây dựng trên** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được bán dưới dạng không gian làm việc `packages/ui-kit` (`@omniroute/ui-kit`; ảnh chụp nhanh ngược dòng được ghim trong `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Ánh sáng là chủ đề kinh điển; tùy chọn mặc định là `system`. Giọng là Keak vôi (`--ci-color-accent`). Switzer là họ duy nhất cho UI, văn bản hiển thị và mã (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
 
 ## 1. Mọi thứ nằm ở đâu
 
@@ -82,33 +76,13 @@
 
 ## 2. Quy tắc
 
-1. Dùng token, tuyệt đối không dùng giá trị literal. Các ngoại lệ được giữ lại có chủ đích: terminal
-   console luôn ở chế độ tối và
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), bản sao dạng hex đã resolve của bảng màu trạng thái kit dành cho các caller cần một mã hex literal. Các bảng màu categorical không còn là ngoại lệ nữa:
-   chúng dựa trên năm token biểu đồ của kit (`--color-chart-1..5`) thông qua
-   `src/shared/utils/categoricalPalette.ts` và, đối với các chiến lược routing,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; các edge ReactFlow và canvas orchestration đọc các biến `--orch-status-*` nhận biết theme (`src/shared/components/flow/edgeStyles.ts`).
-2. Không bao giờ vá `packages/ui-kit/src` thủ công: hãy đồng bộ bằng `scripts/dev/sync-ui-kit.sh <commit>`;
-   cổng pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sẽ thất bại với bất kỳ byte nào
-   khác với commit upstream đã ghim (nó bỏ qua kèm cảnh báo khi không có bản clone upstream,
-   `UI_KIT_CLONE` hoặc `_references/cheaper-inference-ui-kit`). Khi kit thiếu thứ gì đó,
-   hãy xử lý thay thế trong adapter hoặc màn hình và yêu cầu upstream bổ sung.
-3. Văn bản mặc định của kit là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — hãy truyền
-   các chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào một component kit render văn bản.
-4. Các utility Tailwind thắng các class component của kit (kit khai báo
-   `@layer theme, base, components, utilities` và các quy tắc của nó nằm trong `components`) — dùng utility cho
-   khoảng cách và bố cục, không dùng để tô màu lại các component kit.
-5. Tiêu đề: `.ci-heading` (Inter, không tracking) cho tiêu đề trang và tiêu đề phần; `.ci-dashboard-display`
-   (Instrument Serif) chỉ dành cho văn bản hiển thị lớn, ít chữ chẳng hạn như mã trạng thái của trang lỗi.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kiểm soát việc áp dụng kit: không có span ligature Material nào dưới
-   `src/app` hoặc `src/shared/components`; trong cây dashboard (`src/app/(dashboard)` và
-   `src/shared/components`) không có `<select>`, `<textarea>` hoặc `<table>` thô và không có
-   `role="dialog"` tự viết ngoài các ngoại lệ được liệt kê (nhánh native của adapter `Select`,
-   `RequestLoggerDetail`); mọi `<button>` hoặc `<input>` thô ở đó cần một comment chứa
-   `kit-exception:` (kèm lý do) kết thúc tối đa 3 dòng phía trên nó; các sắc màu palette và biến thể
-   `dark:` chỉ được có trong các file mà test liệt kê.
-7. Kiểm tra cả hai theme và khung nhìn 390 px trước khi tạo PR (ảnh chụp màn hình); `tests/e2e/a11y.spec.ts` chạy
-   axe.
+1. Mã thông báo, không bao giờ theo nghĩa đen. Các ngoại lệ được giữ có mục đích: thiết bị đầu cuối bảng điều khiển luôn tối và `STATUS_HEX` (`src/shared/constants/statusColors.ts`), bản sao hex đã phân giải của bảng trạng thái kit dành cho người gọi cần hex theo nghĩa đen. Các bảng phân loại cũng không còn là ngoại lệ nữa: chúng dựa trên năm mã thông báo biểu đồ (`--color-chart-1..5`) của bộ công cụ cho đến `src/shared/utils/categoricalPalette.ts` và, đối với các chiến lược định tuyến, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; các cạnh ReactFlow và khung điều phối đọc các biến `--orch-status-*` nhận biết chủ đề (`src/shared/components/flow/edgeStyles.ts`).
+2. Không bao giờ vá `packages/ui-kit/src` bằng tay: đồng bộ hóa với `scripts/dev/sync-ui-kit.sh <commit>`; cổng xác nhận trước `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) không thành công trên bất kỳ byte nào khác với cam kết ngược dòng được ghim (nó bỏ qua với cảnh báo khi bản sao ngược dòng, `UI_KIT_CLONE` hoặc `_references/cheaper-inference-ui-kit`, không có). Khi bộ sản phẩm thiếu thứ gì đó, hãy xử lý nó trong bộ chuyển đổi hoặc màn hình và yêu cầu ngược dòng.
+3. Mặc định văn bản bộ công cụ là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) - chuyển các chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào thành phần bộ công cụ hiển thị văn bản.
+4. Các tiện ích của Tailwind giành chiến thắng trước các lớp thành phần của bộ công cụ (bộ công cụ khai báo `@layer theme, base, components, utilities` và các quy tắc của nó tồn tại trong `components`) - sử dụng các tiện ích về khoảng cách và bố cục, không phải để tô màu lại các thành phần của bộ công cụ.
+5. Tiêu đề: `.ci-heading` cho tiêu đề trang và phần; `.ci-dashboard-display` chỉ dành cho văn bản hiển thị lớn, thưa thớt, chẳng hạn như mã trạng thái trang lỗi. Cả hai đều sử dụng Swizer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bảo vệ việc áp dụng bộ công cụ: không có khoảng dây nối Vật liệu theo `src/app` hoặc `src/shared/components`; trong cây bảng điều khiển (`src/app/(dashboard)` và `src/shared/components`) không có `<select>`, `<textarea>` hoặc `<table>` thô và không có `role="dialog"` cuộn bằng tay bên ngoài các ngoại lệ được liệt kê (nhánh gốc của bộ chuyển đổi `Select`, `RequestLoggerDetail`); mỗi `<button>` hoặc `<input>` thô cần có một nhận xét chứa `kit-exception:` (có lý do) kết thúc tối đa 3 dòng phía trên nó; bảng màu và các biến thể `dark:` chỉ có trong các tệp trong danh sách kiểm tra.
+7. Xác minh cả chủ đề và chế độ xem 390 px trước PR (ảnh chụp màn hình); `tests/e2e/a11y.spec.ts` chạy axe.
 
 ## 3. Thêm một màn hình
 
@@ -140,50 +114,22 @@
 4. Thêm hoặc cập nhật `tests/unit/ui/adapters/<name>.test.tsx`. Với một adapter có nhiều caller, hãy so sánh
    markup được render trước và sau khi thay đổi — các thay đổi về padding hoặc wrapper sẽ lan ra mọi màn hình.
 
-## 5. Cập nhật kit
+## 5. Cập nhật bộ sản phẩm
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` sao chép `src/` từ upstream tại commit đó vào
-`packages/ui-kit/src` và áp dụng phép biến đổi duy nhất được phép (nó loại bỏ hậu tố `.js` khỏi các import
-tương đối). Sau đó: rà soát `git diff packages/ui-kit`, kiểm tra trực quan các trang providers, settings,
-combos, usage và endpoint ở cả hai theme, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui`,
-rồi mở PR kèm theo changelog của upstream.
+`npm run check:ui-kit-upstream` so sánh phiên bản được ghim trong `packages/ui-kit/UPSTREAM.md` với thẻ `v*` mới nhất của repo ngược dòng và in lệnh đồng bộ hóa khi hết bản phát hành. Quy trình làm việc `UI Kit upstream watch` hàng tuần (`.github/workflows/ui-kit-upstream-watch.yml`) chạy cùng một quy trình kiểm tra và giữ một vấn đề theo dõi ở trạng thái mở trong khi mã pin ở phía sau; kho lưu trữ ngược dòng là riêng tư, vì vậy quy trình làm việc cần có mã thông báo chỉ đọc trong bí mật `UI_KIT_READ_TOKEN` và vẫn trơ nếu không có mã thông báo đó.
 
-## 6. Sơ đồ README
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` sao chép `src/` ngược dòng tại cam kết đó (`latest` = thẻ `v*` mới nhất) vào `packages/ui-kit/src`, áp dụng phép biến đổi duy nhất được phép (nó loại bỏ hậu tố `.js` khỏi các lần nhập tương đối) và đặt phiên bản không gian làm việc trong `packages/ui-kit/package.json` và `package-lock.json` thành phiên bản ngược dòng. Sau đó: xem lại `git diff packages/ui-kit`, thực hiện chuyển đổi trực quan về nhà cung cấp, cài đặt, kết hợp, cách sử dụng và điểm cuối trong cả hai chủ đề, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui` và mở PR bằng nhật ký thay đổi ngược dòng.
 
-Mười hai sơ đồ mà `README.md` gốc nhúng (`docs/diagrams/*.svg`) là kit được áp dụng lên một ảnh tĩnh, và
-chúng được tạo ra bằng code chứ không vẽ tay: 13 file generator tại `scripts/docs/gen-readme-*.mjs` (mười hai
-sơ đồ cộng với driver `gen-readme-diagrams.mjs`) và 12 test kiểm tra độ lỗi thời (staleness) tại
-`tests/unit/docs/readme-*-svg.test.ts`, mỗi sơ đồ một test, mỗi test so sánh theo byte file đã commit với
-output của generator tương ứng (job `test-unit`).
+## 6. sơ đồ README
 
-- **Token.** `scripts/docs/readme-diagram-theme.mjs` sao chép bảng màu từ `packages/ui-kit/src/ci-tokens.css`
-  (được ghim với file đó bởi `tests/unit/docs/readme-diagram-theme.test.ts`) và định nghĩa các vai trò văn bản
-  trên các font chữ của kit — Instrument Serif cho chữ trình bày (display), Inter cho văn bản UI, IBM Plex
-  Mono cho số liệu và code, cùng các gói `@fontsource` mà `src/app/globals.css` nạp cho dashboard. Giá trị
-  sáng nằm ở `:root`, giá trị tối nằm sau `prefers-color-scheme: dark`, bên trong file, để mỗi ảnh tự theo
-  scheme của người xem trên GitHub.
-- **Font.** `scripts/docs/readme-fonts.mjs` cắt (subset) các file woff2 đó chỉ còn các glyph mà mỗi sơ đồ vẽ
-  và nhúng chúng dưới dạng URI `data:` trong `@font-face` — cách duy nhất để typography của kit đến được ảnh
-  README, vì GitHub Markdown không mang theo CSS và proxy camo chặn mọi yêu cầu nạp từ bên ngoài. Các subset
-  chỉ chứa ký tự latin; các glyph ký hiệu phải dự phòng về font hệ thống được cho phép từng cái một trong
-  `SYMBOL_FALLBACKS`, và bất kỳ glyph nào khác không được bao phủ sẽ ném lỗi.
-- **Tạo lại.** `npm run docs:readme-diagrams` ghi lại cả mười hai sơ đồ theo thứ tự trong README và in một
-  dòng cho mỗi file kèm kích thước. Một generator đơn lẻ cũng chạy được độc lập
-  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` cần `node --import tsx/esm` vì các số liệu
-  của nó đến từ bộ nạp catalog trực tiếp trong `open-sse/config/freeModelCatalog.ts`; hệ quả CI của một thay
-  đổi catalog nằm trong `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit generator và SVG
-  cùng nhau.
-- **Kiểm chứng.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` render một file theo đúng cách
-  GitHub phục vụ nó (thẻ `<img>`, `Content-Security-Policy` của camo, `image/svg+xml`), chụp một khung sáng
-  và một khung tối rồi báo cáo các yêu cầu font bên ngoài mà trang đã gửi (phải bằng 0).
-- **Ngân sách.** Dưới 200 KB mỗi file (mỗi test staleness đều khẳng định điều này); 500 KB là giới hạn cứng
-  cho bất kỳ ảnh README nào (quy tắc của trình kiểm tra SVG studio).
-- **Nội dung chữ giữ nguyên, số liệu lấy từ gate.** Việc rebrand đã đổi kiểu chữ và bảng màu, chứ không đổi
-  lời: mỗi generator mang nội dung chữ của sơ đồ trong một hằng `*_COPY` (hoặc xây dựng nó từ catalog trực
-  tiếp) vừa là văn bản được vẽ vừa là đầu vào cho việc cắt font. Các số liệu chuẩn nằm trong các node
-  `<text>`, được đọc bởi `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); các test staleness
-  của những sơ đồ mà gate đọc cũng chạy các trình kiểm tra của nó trên file được tạo, nên một số liệu lệch
-  khỏi code sẽ làm test thất bại — hãy sửa nguồn mà gate đọc, đừng bao giờ sửa con số trong generator.
+Mười hai sơ đồ mà `README.md` gốc nhúng (`docs/diagrams/*.svg`) là bộ công cụ được áp dụng cho một hình ảnh tĩnh và chúng được tạo chứ không phải được vẽ bằng tay: 13 tệp trình tạo tại `scripts/docs/gen-readme-*.mjs` (mười hai sơ đồ cộng với trình điều khiển `gen-readme-diagrams.mjs` ) và 12 bài kiểm tra độ ổn định tại `tests/unit/docs/readme-*-svg.test.ts`, một sơ đồ trên mỗi sơ đồ, mỗi byte so sánh tệp đã cam kết với đầu ra của trình tạo (job `test-unit`).
+
+- **Mã thông báo.** `scripts/docs/readme-diagram-theme.mjs` sao chép bảng màu từ `packages/ui-kit/src/ci-tokens.css` (được ghim vào tệp đó bởi `tests/unit/docs/readme-diagram-theme.test.ts`) và xác định vai trò văn bản trên các mặt trước đó của bộ công cụ — Instrument Serif để hiển thị, Inter cho văn bản UI, IBM Plex Mono cho số liệu và mã — từ các gói `@fontsource` (bản thân bảng điều khiển sử dụng Switzer của bộ công cụ kể từ bộ công cụ 0.0.66). Các giá trị sáng nằm trên `:root`, các giá trị tối nằm phía sau `prefers-color-scheme: dark`, bên trong tệp, vì vậy mỗi hình ảnh đều tuân theo sơ đồ của người xem trên GitHub.
+- **Phông chữ.** `scripts/docs/readme-fonts.mjs` tập hợp các tệp woff2 đó thành glyph mà mỗi sơ đồ vẽ và nhúng chúng dưới dạng `@font-face` `data:` URIs — cách duy nhất để kiểu chữ bộ tiếp cận hình ảnh README, vì GitHub Markdown không mang CSS và proxy camo chặn mọi tìm nạp bên ngoài. Các tập hợp con chỉ có tiếng Latin; các ký hiệu biểu tượng rơi trở lại ngăn xếp hệ thống được cho phép lần lượt trong `SYMBOL_FALLBACKS` và bất kỳ lần ném ký hiệu nào khác không được phát hiện.
+- **Tái sinh.** `npm run docs:readme-diagrams` viết lại tất cả mười hai theo thứ tự README và in một dòng trên mỗi tệp với kích thước của nó. Một trình tạo duy nhất cũng tự chạy (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` cần `node --import tsx/esm` vì số liệu của nó đến từ trình tải danh mục trực tiếp trong `open-sse/config/freeModelCatalog.ts`; hệ quả CI của việc thay đổi danh mục là `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Cam kết trình tạo và SVG cùng nhau.
+- **Bằng chứng.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` hiển thị một tệp theo cách GitHub phục vụ nó (thẻ `<img>`, `Content-Security-Policy` của camo, `image/svg+xml`), ghi lại khung sáng và tối và báo cáo phông chữ bên ngoài yêu cầu trang được tạo (phải là 0).
+- **Ngân sách.** Dưới 200 KB mỗi tệp (mỗi bài kiểm tra độ cứng đều khẳng định điều đó); 500 KB là giới hạn cứng cho bất kỳ hình ảnh README (quy tắc của trình xác thực studio SVG ).
+- **Sao chép không thay đổi, tính từ cổng.** Việc đổi tên thương hiệu đã thay đổi loại và bảng màu, không phải từ ngữ: mỗi trình tạo mang bản sao sơ đồ của nó trong hằng số `*_COPY` (hoặc xây dựng nó từ danh mục trực tiếp), vừa là văn bản được vẽ vừa là đầu vào tập hợp phông chữ. Các số liệu chuẩn nằm trong các nút `<text>`, được đọc bởi `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); các bài kiểm tra độ ổn định của các sơ đồ mà cổng đọc cũng chạy các trình xác nhận của nó trên tệp được tạo, do đó, một hình sai lệch khỏi mã sẽ không vượt qua bài kiểm tra - sửa nguồn mà cổng đọc, không bao giờ là số trong trình tạo.
 
 ## 7. Mục lục tham khảo
 

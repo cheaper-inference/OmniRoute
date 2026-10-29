@@ -28,7 +28,11 @@ const DEFAULT_ENDPOINT = "https://translate.googleapis.com/translate_a/t";
 const OFFICIAL_ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 const BATCH_CHARS = 4500;
 const BATCH_ITEMS = 100;
-const MAX_TRIES = 5;
+// The keyless endpoint drops ~1% of requests with a connection reset ("fetch failed") under a
+// 66-locale run (2026-10-28: 13 of 132 locales once, 1 of 198 another time); seven tries with a
+// capped, jittered backoff (~1 min in total) ride that out instead of failing the locale.
+const MAX_TRIES = 7;
+const MAX_BACKOFF_MS = 20000;
 
 // OmniRoute locale code → Google language code (identity when absent).
 const GOOGLE_LANG = {
@@ -92,10 +96,14 @@ function escapeRegExp(s) {
 }
 
 const INLINE_PATTERNS = [
+  /\u0001\d+\u0001/y, // ICU structure sentinels (translateStringsWithGoogle)
   /(`+)[\s\S]*?\1/y, // inline code (any backtick run)
   /!\[[^\]\n]*\]\([^)\n]*\)/y, // images: keep whole
   /\[[^\]\n]*\]\[[^\]\n]*\]/y, // reference links: keep whole
   /<https?:\/\/[^>\s]+>/y, // autolinks
+  // An HTML code span is a literal like a backtick span: the WHOLE element (tags and content)
+  // is one token, so the translator never sees `<code>any</code>`'s "any" (am translated it).
+  /<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>/iy,
   /<!--[\s\S]*?-->|<\/?[A-Za-z][^>\n]*>/y, // HTML comments / tags
   /https?:\/\/[^\s)<>\]]+/y, // bare URLs
   /\{[^{}\n]{1,80}\}|\$\{[^}\n]+\}|%[sd]|\$[A-Z_][A-Z0-9_]*/y, // ICU / shell placeholders
@@ -105,6 +113,13 @@ const INLINE_PATTERNS = [
   /(?<![\w-])--?[a-z][\w-]*(?![\w-])/y, // CLI flags
   /&[a-z]+;|&#\d+;/y, // literal entities in the source
   /[\p{Sm}\p{So}\uFE0F]+/uy, // math symbols / emoji (ko turned ∞ into a word; tests pin ∅ (∞))
+  // the em dash anchors README's database-row counts (check-docs reads the text after "—");
+  // de rewrote it to an en dash and the row failed the check
+  /\u2014/y,
+  // hyphenated identifiers carrying a digit: better-sqlite3 (am wrote የተሻለ-sqlite3), gpt-4o
+  /(?<![\w-])(?=[\w-]*\d)[A-Za-z][A-Za-z0-9]*(?:-[A-Za-z0-9]+)+(?![\w-])/y,
+  /(?<![\w-])[A-Z]{2,}[a-z][A-Za-z0-9]*(?![\w-])/y, // capitals then lower case: SQLite, JSONata
+  /(?<![\w-])[a-z]+[A-Z][A-Za-z0-9]*(?![\w-])/y, // lower-camel identifiers: macOS, iPhone, npmScripts
   /(?<![\w-])[A-Z][a-z0-9]+(?:[A-Z][a-z0-9]*)+(?![\w-])/y, // CamelCase brands: CodeBuddy, OpenAI, DeepSeek
   /(?<![\w-])[A-Z]{2,}[0-9]*s?(?![\w-])/y, // acronyms: TTL, PII, APIs
 ];
@@ -164,7 +179,26 @@ export const BRAND_TERMS = [
   "Obsidian",
   "Jules",
   "Devin",
+  "SQLite",
+  "LowDB",
+  "better-sqlite3",
+  "TypeScript",
+  "JavaScript",
+  "Tailwind",
+  "Turbopack",
+  "Electron",
+  "Docker",
+  "Playwright",
+  "Vitest",
 ];
+
+// A masked token that is a real HTML tag (not an autolink, not a whole code element). The
+// translator may move a code span or a product name, but never an HTML tag relative to another:
+// ja moved `</b>` past `</code>` and the row came back mis-nested.
+const isHtmlTagToken = (raw) =>
+  /^<\/?[A-Za-z][\w-]*(?=[\s/>])/.test(raw) && !/^<(?:code|kbd|samp)\b/i.test(raw);
+// A token id that escaped its span (ja echoed `zqi` / `zqo` as plain words).
+const BARE_TOKEN_ID = /(?<!\p{L})zq[a-z]+(?!\p{L})/u;
 const LINK = /\[([^\]\n]+)\]\(([^)\n]+)\)/y;
 const EMPHASIS = /\*\*|__|~~|\*/y;
 
@@ -189,6 +223,11 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
       )
     : null;
 
+  const tokenSpan = (raw, spaceBefore, spaceAfter) => {
+    tokens.push({ raw, spaceBefore, spaceAfter });
+    return SPAN(tokenId(tokens.length - 1));
+  };
+
   function build(src) {
     let html = "";
     let plain = "";
@@ -199,12 +238,11 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     };
     const pushToken = (raw, start, end) => {
       flushPlain();
-      tokens.push({
+      html += tokenSpan(
         raw,
-        spaceBefore: start > 0 && /\s/.test(src[start - 1]),
-        spaceAfter: end < src.length && /\s/.test(src[end]),
-      });
-      html += SPAN(tokenId(tokens.length - 1));
+        start > 0 && /\s/.test(src[start - 1]),
+        end < src.length && /\s/.test(src[end])
+      );
     };
     let pos = 0;
     outer: while (pos < src.length) {
@@ -259,6 +297,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
     let out = String(translated);
     // 1. tokens → private-use placeholders, keeping only source-side whitespace
     const seen = new Set();
+    const order = []; // token indices in the order the translator returned them
     out = out.replace(
       /(\s*)<span translate=\\?"no\\?"\s*>\s*(zq[a-z]+)\s*<\/span>(\s*)/g,
       (all, pre, id, post, offset, whole) => {
@@ -266,6 +305,7 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
         const t = tokens[i];
         if (!t) return all;
         seen.add(i);
+        order.push(i);
         const ph = String.fromCharCode(PUA_BASE + i);
         // Keep the translator's whitespace only where the source had some, or where it now
         // separates the token from a word (the translator dropped the punctuation between).
@@ -276,7 +316,13 @@ export function maskInline(text, { protectedTerms = [] } = {}) {
         return before + ph + after;
       }
     );
-    if (seen.size !== tokens.length) return null;
+    // every token exactly once: a missing one loses source text, a duplicate invents some
+    if (seen.size !== tokens.length || order.length !== tokens.length) return null;
+    // HTML tags keep their source order, so the rebuilt markup nests like the source
+    const tagOrder = order.filter((i) => isHtmlTagToken(tokens[i].raw));
+    if (tagOrder.some((i, k) => k > 0 && i < tagOrder[k - 1])) return null;
+    // the translator echoed a token id outside its span: the answer is corrupt, not prose
+    if (BARE_TOKEN_ID.test(out) && !BARE_TOKEN_ID.test(text)) return null;
     // 2. links and emphasis back to markdown
     out = out.replace(/<a href=\\?"#L(\d+)\\?"\s*>([\s\S]*?)<\/a>/g, (all, k, inner) => {
       const url = links[Number(k)];
@@ -346,9 +392,36 @@ export function splitCells(row) {
   return cells;
 }
 
+// Splits one HTML line into its tags (kept verbatim) and the text runs between them, which are
+// the only thing translated. A whole `<code>` / `<kbd>` / `<samp>` element stays INSIDE its run
+// and is masked there as one token. Before this the line was sent whole and every tag was a
+// movable token: the translator could swap them (ja) and rewrite code-span content (am).
+const HTML_PIECE =
+  /<!--[\s\S]*?-->|<(code|kbd|samp)\b[^>]*>[\s\S]*?<\/\1\s*>|<\/?[A-Za-z][\w-]*(?=[\s/>])[^>]*>/gi;
+export function splitHtmlLine(line) {
+  const pieces = [];
+  let text = "";
+  let last = 0;
+  for (const m of line.matchAll(HTML_PIECE)) {
+    text += line.slice(last, m.index);
+    last = m.index + m[0].length;
+    if (m[1]) {
+      text += m[0];
+      continue;
+    }
+    if (text) pieces.push({ text });
+    text = "";
+    pieces.push(m[0]);
+  }
+  text += line.slice(last);
+  if (text) pieces.push({ text });
+  return pieces;
+}
+
 /**
  * Turns a markdown chunk into ordered parts: verbatim strings, `{ pre, text, post }`
- * templates whose `text` is translated, or `{ cells }` table rows. Joining the rebuilt
+ * templates whose `text` is translated, `{ cells }` table rows, or `{ html }` lines whose
+ * text runs are translated between verbatim tags. Joining the rebuilt
  * parts with "\n" reproduces the chunk's structure. Soft-wrapped paragraph lines are
  * joined into one line (a sentence split across lines would otherwise be translated in
  * two halves).
@@ -443,7 +516,7 @@ export function segmentMarkdown(markdown) {
     }
     if (/^\s*</.test(line)) {
       flush();
-      parts.push({ pre: line.match(/^\s*/)[0], text: line.trim(), post: "" });
+      parts.push({ html: splitHtmlLine(line) });
       continue;
     }
     if (para && !para.quote && (/^\s+\S/.test(line) || para.pre.trim() === "")) {
@@ -542,7 +615,8 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         (err?.status ?? 0) >= 500 ||
         /fetch failed|ECONN|ENOTFOUND|network/i.test(String(err?.cause ?? err?.message));
       if (!retryable || attempt === MAX_TRIES) break;
-      await sleep(backoffMs * 2 ** (attempt - 1));
+      const wait = Math.min(MAX_BACKOFF_MS, backoffMs * 2 ** (attempt - 1));
+      await sleep(wait + Math.floor(Math.random() * Math.min(wait, 1000) * 0.25));
     } finally {
       clearTimeout(timer);
     }
@@ -595,6 +669,7 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
   for (const p of parts) {
     if (typeof p === "string") continue;
     if (p.cells) p.cells.forEach((c) => want(c.trim()));
+    else if (p.html) p.html.forEach((x) => typeof x !== "string" && want(x.text.trim()));
     else want(p.text);
   }
   // a segment made only of masked tokens / markup needs no request
@@ -630,18 +705,17 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
     }
     return r;
   };
+  // a cell or HTML text run: translated core, source whitespace around it
+  const pickPadded = (c) => {
+    if (!c.trim()) return c;
+    const lead = c.match(/^\s*/)[0];
+    const trail = c.match(/\s*$/)[0];
+    return lead + pick(c.trim()) + trail;
+  };
   const out = parts.map((p) => {
     if (typeof p === "string") return p;
-    if (p.cells) {
-      return p.cells
-        .map((c) => {
-          if (!c.trim()) return c;
-          const lead = c.match(/^\s*/)[0];
-          const trail = c.match(/\s*$/)[0];
-          return lead + pick(c.trim()) + trail;
-        })
-        .join("|");
-    }
+    if (p.cells) return p.cells.map(pickPadded).join("|");
+    if (p.html) return p.html.map((x) => (typeof x === "string" ? x : pickPadded(x.text))).join("");
     return p.pre + pick(p.text) + p.post;
   });
   const total = masks.size;
@@ -654,4 +728,216 @@ export async function translateMarkdownWithGoogle(markdown, localeCode, options 
     throw new Error(`google translate: ${untranslated}/${total} segments could not be restored`);
   }
   return out.join("\n");
+}
+
+// ----- ICU MessageFormat strings ------------------------------------------------------
+
+/**
+ * Parses an ICU message into nodes: { text } | { raw } (simple argument, `#`, quoted literal
+ * — kept verbatim) | { complex: { head, options: [{ head, message }], close } } for plural /
+ * select / selectordinal. Malformed input degrades to text.
+ */
+export function parseIcuMessage(source) {
+  let i = 0;
+  function matchBrace(from) {
+    let depth = 0;
+    for (let k = from; k < source.length; k++) {
+      if (source[k] === "{") depth++;
+      else if (source[k] === "}" && --depth === 0) return k;
+    }
+    return -1;
+  }
+  function message(depth, inPlural) {
+    const nodes = [];
+    const text = (ch) => {
+      const last = nodes[nodes.length - 1];
+      if (last && last.text !== undefined) last.text += ch;
+      else nodes.push({ text: ch });
+    };
+    while (i < source.length) {
+      const c = source[i];
+      // ICU quoting, incl. the '<literal>' escape intl-messageformat needs for angle spans
+      if (c === "'" && /[{}#|'<]/.test(source[i + 1] ?? "")) {
+        const close = source[i + 1] === "'" ? i + 1 : source.indexOf("'", i + 1);
+        const end = close < 0 ? source.length : close + 1;
+        nodes.push({ raw: source.slice(i, end) });
+        i = end;
+        continue;
+      }
+      if (c === "#" && inPlural) {
+        nodes.push({ raw: "#" });
+        i++;
+        continue;
+      }
+      if (c === "}" && depth > 0) return nodes;
+      // rich-text tag pair (<code>…</code>, <link>…</link>): its text is its own segment, so
+      // the translator can move the pair but never split or swap the two tags
+      if (c === "<") {
+        const open = /^<([A-Za-z][\w-]*)>/.exec(source.slice(i));
+        if (open) {
+          const closeTag = `</${open[1]}>`;
+          const end = source.indexOf(closeTag, i + open[0].length);
+          if (end >= 0) {
+            const inner = source.slice(i + open[0].length, end);
+            nodes.push({
+              complex: {
+                head: open[0],
+                options: [{ head: "", message: parseIcuMessage(inner) }],
+                close: closeTag,
+                tag: true,
+              },
+            });
+            i = end + closeTag.length;
+            continue;
+          }
+        }
+      }
+      if (c === "{") {
+        const head = /^\{\s*([^\s,{}]+)\s*(?:,\s*(\w+)\s*)?(,|\})/.exec(source.slice(i));
+        const end = matchBrace(i);
+        if (head && end >= 0) {
+          const type = head[2];
+          if (!type || !/^(plural|select|selectordinal)$/.test(type)) {
+            nodes.push({ raw: source.slice(i, end + 1) });
+            i = end + 1;
+            continue;
+          }
+          const complex = { head: head[0], options: [], close: "" };
+          i += head[0].length;
+          for (;;) {
+            const opt = /^\s*(?:offset:\d+\s*)?(=?[\w-]+)\s*\{/.exec(source.slice(i));
+            if (!opt) break;
+            i += opt[0].length;
+            const child = message(depth + 1, type !== "select");
+            complex.options.push({ head: opt[0], message: child });
+            if (source[i] === "}") i++;
+          }
+          const close = /^\s*\}/.exec(source.slice(i));
+          complex.close = close ? close[0] : "}";
+          if (close) i += close[0].length;
+          nodes.push({ complex });
+          continue;
+        }
+      }
+      text(c);
+      i++;
+    }
+    return nodes;
+  }
+  return message(0, false);
+}
+
+/**
+ * Translates UI strings (ICU MessageFormat) into `localeCode`. A plural / select is never sent
+ * as structure: the outer sentence travels with the whole argument as ONE opaque token (the
+ * translator may move it, which is a valid reorder), and every branch text is its own segment,
+ * so the `{count, plural, one {…} other {…}}` scaffolding is rebuilt from the source. Leading
+ * and trailing whitespace is kept. Returns one entry per input: the translation, or null when
+ * an answer could not be restored safely (the caller keeps its marker).
+ */
+export async function translateStringsWithGoogle(texts, localeCode, options = {}) {
+  const segments = []; // { text } — every translatable message of every string
+  const plans = texts.map((raw) => {
+    const lead = raw.match(/^\s*/)[0];
+    const trail = raw.slice(lead.length).match(/\s*$/)[0];
+    const core = raw.slice(lead.length, raw.length - trail.length);
+    // A message → { id, sentinels: Map(sentinel → node) }
+    const plan = (nodes) => {
+      let flat = "";
+      const sentinels = new Map();
+      for (const node of nodes) {
+        if (node.text !== undefined) flat += node.text;
+        else {
+          const key = `\u0001${sentinels.size}\u0001`;
+          sentinels.set(
+            key,
+            node.complex
+              ? { complex: node.complex, options: node.complex.options.map((o) => plan(o.message)) }
+              : node
+          );
+          flat += key;
+        }
+      }
+      segments.push(flat);
+      return { id: segments.length - 1, sentinels };
+    };
+    return { lead, trail, root: plan(parseIcuMessage(core)) };
+  });
+
+  const markdown = await translateSegmentsWithGoogle(segments, localeCode, options);
+
+  const render = (msgPlan) => {
+    let out = markdown[msgPlan.id];
+    if (out == null) return null;
+    // An ASCII apostrophe right before an argument / brace / tag starts an ICU quoted span and
+    // would swallow the argument (ko turned “{source}” into '{source}'): use the typographic one.
+    out = out.replace(/'(?=[{}#|<\u0001])/g, "\u2019");
+    // "# -Charge": the translator glued a hyphen onto the word after a masked `#` / argument
+    out = out.replace(/(\u0001\d+\u0001) -(?=\p{L})/gu, "$1 ");
+    for (const [key, node] of msgPlan.sentinels) {
+      let value;
+      if (node.complex) {
+        const parts = [];
+        for (let k = 0; k < node.complex.options.length; k++) {
+          const child = render(node.options[k]);
+          if (child == null) return null;
+          parts.push(node.complex.options[k].head + child + (node.complex.tag ? "" : "}"));
+        }
+        value = node.complex.head + parts.join("") + node.complex.close;
+      } else value = node.raw;
+      if (!out.includes(key)) return null;
+      out = out.replace(key, () => value);
+    }
+    return out;
+  };
+  return plans.map((p) => {
+    const body = render(p.root);
+    return body == null ? null : p.lead + body + p.trail;
+  });
+}
+
+/**
+ * Translates plain text segments (no markdown blocks): each one is masked, batched and
+ * restored like a table cell. Returns the translations, null where restore failed; segments
+ * without prose come back unchanged.
+ */
+export async function translateSegmentsWithGoogle(segments, localeCode, options = {}) {
+  const {
+    fetchImpl = globalThis.fetch,
+    apiKey = process.env.OMNIROUTE_TRANSLATION_GOOGLE_API_KEY || "",
+    concurrency = Number(process.env.OMNIROUTE_TRANSLATION_GOOGLE_CONCURRENCY || 6),
+    timeoutMs = Number(process.env.OMNIROUTE_TRANSLATION_GOOGLE_TIMEOUT_MS || 30000),
+    backoffMs = 1000,
+    protectedTerms = [],
+  } = options;
+  const target = googleLangFor(localeCode);
+  const results = segments.map(() => null);
+  const pending = [];
+  segments.forEach((text, idx) => {
+    const lead = text.match(/^\s*/)[0];
+    const trail = text.slice(lead.length).match(/\s*$/)[0];
+    const core = text.slice(lead.length, text.length - trail.length);
+    const mask = maskInline(core, { protectedTerms });
+    if (!mask.hasProse) results[idx] = text;
+    else pending.push({ idx, lead, trail, mask });
+  });
+  const run = limiterFor(Math.max(1, concurrency));
+  const groups = planBatches(pending.map((p) => p.mask.html));
+  let cursor = 0;
+  await Promise.all(
+    groups.map((group) => {
+      const slice = pending.slice(cursor, cursor + group.length);
+      cursor += group.length;
+      return run(() =>
+        requestBatch(group, target, { fetchImpl, apiKey, timeoutMs, backoffMs })
+      ).then((answers) => {
+        answers.forEach((ans, i) => {
+          const p = slice[i];
+          const restored = p.mask.restore(ans);
+          results[p.idx] = restored == null ? null : p.lead + restored + p.trail;
+        });
+      });
+    })
+  );
+  return results;
 }

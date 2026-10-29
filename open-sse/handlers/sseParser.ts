@@ -1,6 +1,15 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { pickResponsesSnapshot } from "./sseParser/responsesSnapshot.ts";
+import {
+  TRUNCATED_STREAM_CLAUDE_STOP_REASON,
+  TRUNCATED_STREAM_FINISH_REASON,
+  TRUNCATED_STREAM_RESPONSES_INCOMPLETE_REASON,
+  hasSseDoneMarker,
+  markTruncatedStreamBody,
+  isCompleteToolCallArguments,
+  withholdCutToolCalls,
+} from "./sseParser/truncation.ts";
 
 /**
  * Extract a provider error message from a buffered SSE stream that carries an
@@ -196,6 +205,7 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
   const accumulatedToolCalls = new Map<string, AccumulatedToolCall>();
   let unknownToolCallSeq = 0;
   let finishReason = "stop";
+  let sawFinishReason = false;
   let usage = null;
 
   const getToolCallKey = (toolCall: Record<string, unknown>) => {
@@ -263,10 +273,23 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
     if (choice?.finish_reason) {
       finishReason = choice.finish_reason;
+      sawFinishReason = true;
     }
     if (chunk?.usage && typeof chunk.usage === "object") {
       usage = chunk.usage;
     }
+  }
+
+  // #18432 — output but neither a finish_reason nor [DONE]: the upstream stream was
+  // cut, so do not report the partial answer as a clean stop.
+  const producedOutput =
+    contentParts.length > 0 ||
+    refusalParts.length > 0 ||
+    reasoningParts.length > 0 ||
+    accumulatedToolCalls.size > 0;
+  const streamCut = !sawFinishReason && producedOutput && !hasSseDoneMarker(rawSSE);
+  if (streamCut) {
+    finishReason = TRUNCATED_STREAM_FINISH_REASON;
   }
 
   const joinedContent = contentParts.length > 0 ? contentParts.join("").trim() : "";
@@ -282,11 +305,15 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     message.reasoning_content = joinedReasoning;
   }
 
-  const finalToolCalls = [...accumulatedToolCalls.values()].filter(Boolean).sort((a, b) => {
+  const sortedToolCalls = [...accumulatedToolCalls.values()].filter(Boolean).sort((a, b) => {
     const ai = Number.isInteger(a?.index) ? a.index : 0;
     const bi = Number.isInteger(b?.index) ? b.index : 0;
     return ai - bi;
   });
+  // #18460 follow-up — a cut stream must not present a half-written call as executable.
+  const finalToolCalls = withholdCutToolCalls(streamCut, sortedToolCalls, (toolCall) =>
+    isCompleteToolCallArguments(toolCall.function?.arguments)
+  );
   if (finalToolCalls.length > 0) {
     finishReason = "tool_calls"; // T18 normalization
     message.tool_calls = finalToolCalls;
@@ -310,7 +337,23 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     result.usage = usage;
   }
 
-  return result;
+  return markTruncatedStreamBody(result, streamCut);
+}
+
+/**
+ * Whether a buffered Claude tool_use block is complete (#18460 follow-up): its streamed
+ * `input_json_delta` text is a whole JSON object, or, when nothing was streamed, the
+ * upstream closed the block (`content_block_stop`) or the `content_block_start` already
+ * carried a non-empty `input`.
+ */
+function isClaudeToolUseComplete(
+  block: { inputJson: string; input: unknown },
+  closedByUpstream: boolean
+): boolean {
+  if (block.inputJson.trim().length > 0) {
+    return isCompleteToolCallArguments(block.inputJson);
+  }
+  return closedByUpstream || Object.keys(toRecord(block.input)).length > 0;
 }
 
 /**
@@ -332,6 +375,8 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
   let stopReason = "end_turn";
   let stopSequence = null;
   let sawClaudeEvent = false;
+  let sawClaudeTerminal = false;
+  const closedBlockIndexes = new Set<number>();
 
   const mergeUsage = (incoming) => {
     const usageRecord = toRecord(incoming);
@@ -450,9 +495,18 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
       continue;
     }
 
+    if (eventType === "content_block_stop") {
+      closedBlockIndexes.add(toNumber(payload.index, -1));
+    }
+
+    if (eventType === "message_stop") {
+      sawClaudeTerminal = true;
+    }
+
     if (eventType === "message_delta") {
       sawClaudeEvent = true;
       const delta = toRecord(payload.delta);
+      if (delta.stop_reason != null && delta.stop_reason !== "") sawClaudeTerminal = true;
       stopReason = toString(delta.stop_reason, stopReason);
       stopSequence =
         typeof delta.stop_sequence === "string" ? String(delta.stop_sequence) : stopSequence;
@@ -466,6 +520,7 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
   if (!sawClaudeEvent) return null;
 
   const content = [];
+  const toolUseCompleteness: boolean[] = [];
   for (const block of [...blocks.values()].sort((a, b) => a.index - b.index)) {
     if (block.type === "text") {
       if (block.text) content.push({ type: "text", text: block.text });
@@ -485,18 +540,33 @@ export function parseSSEToClaudeResponse(rawSSE, fallbackModel) {
 
     const input = block.inputJson.trim().length > 0 ? tryParseJson(block.inputJson) : block.input;
     content.push({ type: "tool_use", id: block.id, name: block.name, input });
+    toolUseCompleteness.push(isClaudeToolUseComplete(block, closedBlockIndexes.has(block.index)));
   }
 
-  return {
-    id: messageId || `msg_${Date.now()}`,
-    type: "message",
-    role,
-    model,
-    content,
-    stop_reason: stopReason,
-    ...(stopSequence ? { stop_sequence: stopSequence } : {}),
-    ...(Object.keys(usage).length > 0 ? { usage } : {}),
-  };
+  // #18432 — content but no message_stop / stop_reason / [DONE]: the stream was cut.
+  const streamCut = !sawClaudeTerminal && content.length > 0 && !hasSseDoneMarker(rawSSE);
+  if (streamCut) {
+    stopReason = TRUNCATED_STREAM_CLAUDE_STOP_REASON;
+  }
+  // #18460 follow-up — a tool_use cut mid input_json_delta must not reach the client.
+  const keptToolUses = withholdCutToolCalls(streamCut, toolUseCompleteness, Boolean);
+
+  return markTruncatedStreamBody(
+    {
+      id: messageId || `msg_${Date.now()}`,
+      type: "message",
+      role,
+      model,
+      content:
+        keptToolUses.length === toolUseCompleteness.length
+          ? content
+          : content.filter((block) => block.type !== "tool_use"),
+      stop_reason: stopReason,
+      ...(stopSequence ? { stop_sequence: stopSequence } : {}),
+      ...(Object.keys(usage).length > 0 ? { usage } : {}),
+    },
+    streamCut
+  );
 }
 
 /**
@@ -669,6 +739,70 @@ function mergeResponseItems(existing, incoming) {
         }
       : {}),
   };
+}
+
+function hasNonEmptyText(parts: unknown, field: string): boolean {
+  return (
+    Array.isArray(parts) &&
+    parts.some((part) => {
+      const value = toRecord(part)[field];
+      return typeof value === "string" && value.length > 0;
+    })
+  );
+}
+
+/** True when the output carries model content (text, refusal, reasoning or a call). */
+function responsesOutputHasContent(items: unknown[]): boolean {
+  return items.some((item) => {
+    const record = toRecord(item);
+    if (record.type === "message") {
+      return hasNonEmptyText(record.content, "text") || hasNonEmptyText(record.content, "refusal");
+    }
+    if (record.type === "reasoning") return hasNonEmptyText(record.summary, "text");
+    return typeof record.type === "string" && record.type.endsWith("_call");
+  });
+}
+
+/** Snapshot statuses that mean the response never settled. */
+const RESPONSES_UNSETTLED_STATUSES = new Set(["in_progress", "queued"]);
+
+/**
+ * Final `status` (+ `incomplete_details`) of a buffered Responses stream. A stream that
+ * produced output but closed before any terminal event, with its snapshot still
+ * unsettled, was cut (#18432): report it `incomplete` so the chat translation maps it to
+ * `length` instead of `stop`. A snapshot's own `incomplete_details` is preserved.
+ */
+function resolveResponsesTerminalStatus(
+  picked: Record<string, unknown>,
+  status: unknown,
+  sawTerminalEvent: boolean,
+  producedOutput: boolean
+): { status: unknown; incomplete_details?: unknown } {
+  if (!sawTerminalEvent && producedOutput && RESPONSES_UNSETTLED_STATUSES.has(String(status))) {
+    return {
+      status: "incomplete",
+      incomplete_details: { reason: TRUNCATED_STREAM_RESPONSES_INCOMPLETE_REASON },
+    };
+  }
+  return picked.incomplete_details != null
+    ? { status, incomplete_details: picked.incomplete_details }
+    : { status };
+}
+
+/**
+ * Output of a cut Responses stream without its unfinished calls (#18460 follow-up). A
+ * `function_call` is complete when its `arguments` is a whole JSON object, or empty with
+ * the item already `completed` by the upstream. Same all-or-nothing rule as the chat and
+ * Claude parsers (`withholdCutToolCalls`).
+ */
+function withholdCutResponsesFunctionCalls(streamCut: boolean, items: unknown[]): unknown[] {
+  const calls = items.filter((item) => toRecord(item).type === "function_call");
+  const kept = withholdCutToolCalls(streamCut, calls, (item) => {
+    const record = toRecord(item);
+    return isCompleteToolCallArguments(record.arguments, record.status === "completed");
+  });
+  if (kept.length === calls.length) return items;
+  return items.filter((item) => toRecord(item).type !== "function_call");
 }
 
 export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
@@ -876,22 +1010,35 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
               ? "completed"
               : "in_progress";
 
-  return {
-    id: picked.id != null ? String(picked.id) : `resp_${Date.now()}`,
-    object: picked.object || "response",
-    model: picked.model || fallbackModel || "unknown",
-    output: chosenOutput.map((item) => {
-      const record = toRecord(item);
-      return {
-        ...record,
-        id: record.id != null ? String(record.id) : record.id,
-        call_id: record.call_id != null ? String(record.call_id) : record.call_id,
-      };
-    }),
-    usage: picked.usage || null,
-    status: picked.status || statusFallback,
-    ...(picked.error != null ? { error: picked.error } : {}),
-    created_at: picked.created_at || Math.floor(Date.now() / 1000),
-    metadata: picked.metadata || {},
-  };
+  const terminalStatus = resolveResponsesTerminalStatus(
+    picked,
+    picked.status || statusFallback,
+    !!terminalResponse,
+    responsesOutputHasContent(chosenOutput)
+  );
+  // #18460 follow-up — a function_call cut mid arguments must not reach the client.
+  const streamCut = !terminalResponse && terminalStatus.status === "incomplete";
+  const finalOutput = withholdCutResponsesFunctionCalls(streamCut, chosenOutput);
+
+  return markTruncatedStreamBody(
+    {
+      id: picked.id != null ? String(picked.id) : `resp_${Date.now()}`,
+      object: picked.object || "response",
+      model: picked.model || fallbackModel || "unknown",
+      output: finalOutput.map((item) => {
+        const record = toRecord(item);
+        return {
+          ...record,
+          id: record.id != null ? String(record.id) : record.id,
+          call_id: record.call_id != null ? String(record.call_id) : record.call_id,
+        };
+      }),
+      usage: picked.usage || null,
+      ...terminalStatus,
+      ...(picked.error != null ? { error: picked.error } : {}),
+      created_at: picked.created_at || Math.floor(Date.now() / 1000),
+      metadata: picked.metadata || {},
+    },
+    streamCut
+  );
 }
