@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Plafonds de concurrence par modèle",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Facultatif : un modèle=plafond par ligne, comparé à l’identifiant exact du modèle chez le fournisseur. Les requêtes en excès sont mises en file d’attente localement ; vide signifie aucun plafond par modèle.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrée de concurrence par modèle non valide « {entry} » — utilisez modèle=plafond avec un entier de 1 à {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrée de concurrence par modèle non valide « {entry} » — utilisez modèle=plafond avec un entier de 1 à {max}.",
+    "usedInComboTooltip": "Utilisé dans {count} combinaison(s) : {combos}",
+    "openComboTooltip": "Ouvrir les Combinaisons — utilisé par {combo}"
   },
   "settings": {
     "title": "Paramètres",
@@ -8938,7 +8940,9 @@
         "financial": "Financier",
         "brazilian": "Brésilien",
         "usa": "États-Unis",
-        "full": "Complet"
+        "full": "Complet",
+        "gdpr": "RGPD (UE)",
+        "popia": "POPIA (Afrique du Sud)"
       },
       "builtinTypes": "Types intégrés",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adresses IPv4",
         "ipv6_address": "Adresses IPv6",
         "aws_key": "Clés d’accès AWS",
-        "api_key_generic": "Clés d’API et jetons"
+        "api_key_generic": "Clés d’API et jetons",
+        "iban": "Numéros de compte bancaire IBAN",
+        "eu_vat": "Numéros de TVA de l'UE",
+        "es_dni_nie": "DNI / NIE espagnol",
+        "it_codice_fiscale": "Codice Fiscale italien",
+        "pl_pesel": "PESEL polonais",
+        "nl_bsn": "BSN néerlandais",
+        "de_steuer_id": "Steuer-ID allemand",
+        "se_personnummer": "Personnummer suédois",
+        "za_id": "Numéros d'identité sud-africains",
+        "za_phone": "Numéros de téléphone sud-africains",
+        "za_vat": "Numéros de TVA sud-africains",
+        "za_tax_ref": "Références fiscales sud-africaines"
       },
       "customPatterns": "Motifs personnalisés",
       "customPatternsDesc": "Les correspondances sont remplacées par [CUSTOM_REDACTED]. Jusqu’à {max} motifs. Les motifs qui risquent un backtracking catastrophique sont refusés.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth n’est pas configuré. Enregistrez une application OAuth à l’adresse {applicationsUrl} avec l’URI de redirection {redirectUri} et les scopes « {scopes} », puis définissez {clientIdEnv} (et éventuellement {clientSecretEnv}) et redémarrez.",
     "gitlabDuoSetupDescription": "Après l’enregistrement de l’application et la définition des variables d’environnement sur cette instance OmniRoute, cliquez sur Continuer pour démarrer la connexion OAuth.",
     "continue": "Continuer",
+    "copilotPolicyTitle": "Fournisseur expérimental : le statut de la politique est ambigu",
+    "copilotPolicyLine1": "OmniRoute se connecte via api.githubcopilot.com, que GitHub n'a pas publié en tant qu'inférence tierce générale API. Cette intégration est expérimentale et peut changer sans préavis.",
+    "copilotPolicyLine2": "Seul votre propre compte GitHub peut être connecté. Ne partagez jamais vos informations d’identification, ne regroupez jamais de comptes et ne tentez jamais de dépasser les limites de votre forfait.",
+    "copilotPolicyLine3": "Les utilisateurs des forfaits Gratuit et Étudiant bénéficient uniquement de la sélection automatique du modèle. Les conditions de votre forfait Copilot et les éventuelles limites d'utilisation restent sous votre responsabilité.",
+    "copilotPolicyAcknowledge": "Je comprends, connecte-toi",
     "tabPasteSetupToken": "Jeton de configuration",
     "claudeSetupTokenDescription": "Exécutez `claude setup-token` dans un terminal et collez le jeton affiché. Il est valable un an et n'a pas de jeton d'actualisation. OmniRoute envoie une requête de test à Anthropic avant de l'enregistrer.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Statistiques des fournisseurs",
     "description": "Trafic, latence et taux de réussite par fournisseur et par modèle",
     "combo": "Combiné",
-    "toggleModels": "Afficher les modèles de {provider}"
+    "toggleModels": "Afficher les modèles de {provider}",
+    "windowSince": "Depuis {date}"
   },
   "relay": {
     "title": "Proxies relais serverless",

@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "حدود التزامن لكل نموذج",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "اختياري: model=cap واحد في كل سطر، يُطابَق مع معرّف نموذج المنبع بالضبط. تُوضع الطلبات الزائدة في طابور محلي؛ والفراغ يعني عدم وجود حد لكل نموذج.",
-    "rateLimitOverridesModelConcurrencyInvalid": "إدخال تزامن لكل نموذج غير صالح \"{entry}\" — استخدم model=cap حيث cap عدد صحيح من 1 إلى {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "إدخال تزامن لكل نموذج غير صالح \"{entry}\" — استخدم model=cap حيث cap عدد صحيح من 1 إلى {max}.",
+    "usedInComboTooltip": "مستخدم في {count} مجموعة: {combos}",
+    "openComboTooltip": "فتح المجموعات — مستخدم بواسطة {combo}"
   },
   "settings": {
     "title": "الإعدادات",
@@ -9015,7 +9017,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل"
+        "full": "كامل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (جنوب أفريقيا)"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "عناوين IPv4",
         "ipv6_address": "عناوين IPv6",
         "aws_key": "مفاتيح وصول AWS",
-        "api_key_generic": "مفاتيح API والرموز المميزة"
+        "api_key_generic": "مفاتيح API والرموز المميزة",
+        "iban": "أرقام الحسابات البنكية IBAN",
+        "eu_vat": "أرقام EU VAT",
+        "es_dni_nie": "الاسبانية DNI / NIE",
+        "it_codice_fiscale": "المخطوطة الإيطالية Fiscale",
+        "pl_pesel": "PESEL البولندية",
+        "nl_bsn": "BSN الهولندية",
+        "de_steuer_id": "معرف Steuer الألماني",
+        "se_personnummer": "رقم الشخص السويدي",
+        "za_id": "أرقام ID في جنوب أفريقيا",
+        "za_phone": "أرقام هواتف جنوب أفريقيا",
+        "za_vat": "أرقام VAT في جنوب أفريقيا",
+        "za_tax_ref": "المراجع الضريبية في جنوب أفريقيا"
       },
       "customPatterns": "أنماط مخصصة",
       "customPatternsDesc": "تُستبدل المطابقات بـ [CUSTOM_REDACTED]. حتى {max} نمطًا. تُرفض الأنماط المعرّضة لخطر التراجع الكارثي.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "لم يتم تكوين GitLab Duo OAuth. قم بتسجيل تطبيق OAuth على {applicationsUrl} مع URI إعادة التوجيه {redirectUri} والنطاقات \"{scopes}\"، ثم قم بتعيين {clientIdEnv} (ويمكنك أيضًا {clientSecretEnv}) وأعد التشغيل.",
     "gitlabDuoSetupDescription": "بعد تسجيل التطبيق وضبط متغيرات البيئة على هذه النسخة من OmniRoute، انقر على متابعة لبدء تسجيل الدخول عبر OAuth.",
     "continue": "تابع",
+    "copilotPolicyTitle": "المزود التجريبي: حالة السياسة غامضة",
+    "copilotPolicyLine1": "يتصل OmniRoute عبر api.githubcopilot.com، والذي لم ينشره GitHub باعتباره استدلالًا عامًا لجهة خارجية API. هذا التكامل تجريبي وقد يتغير دون إشعار.",
+    "copilotPolicyLine2": "يجوز ربط حساب GitHub الخاص بك فقط. لا تشارك أبدًا بيانات الاعتماد أو الحسابات المجمعة أو تحاول تجاوز حدود خطتك.",
+    "copilotPolicyLine3": "يتلقى مستخدمو الخطة المجانية وخطة الطلاب اختيارًا تلقائيًا للنموذج فقط. تظل شروط خطة Copilot الخاصة بك وأي حدود للاستخدام هي مسؤوليتك.",
+    "copilotPolicyAcknowledge": "أنا أفهم، الاتصال",
     "tabPasteSetupToken": "رمز الإعداد",
     "claudeSetupTokenDescription": "شغّل `claude setup-token` في الطرفية والصق الرمز الذي يطبعه. الرمز صالح لمدة عام واحد ولا يملك رمز تحديث. يرسل OmniRoute طلب اختبار واحدًا إلى Anthropic قبل حفظه.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "إحصاءات مزوّدي الخدمة",
     "description": "حركة المرور وزمن الاستجابة ومعدلات النجاح لكل مزوّد خدمة ولكل نموذج",
     "combo": "مركّب",
-    "toggleModels": "إظهار نماذج {provider}"
+    "toggleModels": "إظهار نماذج {provider}",
+    "windowSince": "منذ {date}"
   },
   "relay": {
     "title": "وكلاء الترحيل بلا خادم",

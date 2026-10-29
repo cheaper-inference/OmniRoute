@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Gelijktijdigheidslimieten per model",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optioneel: één model=cap per regel, vergeleken met de exacte upstream-model-id. Extra verzoeken wachten lokaal in de wachtrij; leeg betekent geen limiet per model.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Ongeldige gelijktijdigheidsinvoer per model \"{entry}\" — gebruik model=cap met een geheel getal van 1 tot {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Ongeldige gelijktijdigheidsinvoer per model \"{entry}\" — gebruik model=cap met een geheel getal van 1 tot {max}.",
+    "usedInComboTooltip": "Gebruikt in {count} combo('s): {combos}",
+    "openComboTooltip": "Combo's openen — gebruikt door {combo}"
   },
   "settings": {
     "title": "Instellingen",
@@ -8938,7 +8940,9 @@
         "financial": "Financieel",
         "brazilian": "Braziliaans",
         "usa": "VS",
-        "full": "Volledig"
+        "full": "Volledig",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Zuid-Afrika)"
       },
       "builtinTypes": "Ingebouwde typen",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4-adressen",
         "ipv6_address": "IPv6-adressen",
         "aws_key": "AWS-toegangssleutels",
-        "api_key_generic": "API-sleutels en tokens"
+        "api_key_generic": "API-sleutels en tokens",
+        "iban": "IBAN -bankrekeningnummers",
+        "eu_vat": "EU VAT -nummers",
+        "es_dni_nie": "Spaanse DNI / NIE",
+        "it_codice_fiscale": "Italiaanse Codice Fiscale",
+        "pl_pesel": "Poolse PESEL",
+        "nl_bsn": "Nederlandse BSN",
+        "de_steuer_id": "Duitse Steuer-ID",
+        "se_personnummer": "Zweeds persoonsnummer",
+        "za_id": "Zuid-Afrikaanse ID nummers",
+        "za_phone": "Zuid-Afrikaanse telefoonnummers",
+        "za_vat": "Zuid-Afrikaanse VAT nummers",
+        "za_tax_ref": "Zuid-Afrikaanse belastingreferenties"
       },
       "customPatterns": "Aangepaste patronen",
       "customPatternsDesc": "Overeenkomsten worden vervangen door [CUSTOM_REDACTED]. Maximaal {max} patronen. Patronen met risico op catastrofale backtracking worden geweigerd.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth is niet geconfigureerd. Registreer een OAuth-toepassing op {applicationsUrl} met omleidings-URI {redirectUri} en scopes \"{scopes}\", stel vervolgens {clientIdEnv} in (en optioneel {clientSecretEnv}) en herstart.",
     "gitlabDuoSetupDescription": "Nadat de applicatie is geregistreerd en de omgevingsvariabelen zijn ingesteld op deze OmniRoute-instantie, klik op Doorgaan om de OAuth-login te starten.",
     "continue": "Doorgaan",
+    "copilotPolicyTitle": "Experimentele aanbieder: de beleidsstatus is dubbelzinnig",
+    "copilotPolicyLine1": "OmniRoute maakt verbinding via api.githubcopilot.com, die GitHub niet heeft gepubliceerd als algemene gevolgtrekking van derden API. Deze integratie is experimenteel en kan zonder voorafgaande kennisgeving worden gewijzigd.",
+    "copilotPolicyLine2": "Alleen uw eigen GitHub account mag worden gekoppeld. Deel nooit inloggegevens, pool accounts en probeer nooit uw abonnementslimieten te overschrijden.",
+    "copilotPolicyLine3": "Gebruikers van het gratis abonnement en het studentenabonnement ontvangen alleen automatische modelselectie. De voorwaarden van uw Copilot -abonnement en eventuele gebruikslimieten blijven uw verantwoordelijkheid.",
+    "copilotPolicyAcknowledge": "Ik begrijp het, maak verbinding",
     "tabPasteSetupToken": "Setup-token",
     "claudeSetupTokenDescription": "Voer `claude setup-token` uit in een terminal en plak het token dat wordt getoond. Het is een jaar geldig en heeft geen vernieuwingstoken. OmniRoute stuurt één testverzoek naar Anthropic voordat het wordt opgeslagen.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Providerstatistieken",
     "description": "Verkeer, latentie en succespercentages per provider en per model",
     "combo": "Combinatie",
-    "toggleModels": "Modellen voor {provider} tonen"
+    "toggleModels": "Modellen voor {provider} tonen",
+    "windowSince": "Sinds {date}"
   },
   "relay": {
     "title": "Serverless relay-proxy's",

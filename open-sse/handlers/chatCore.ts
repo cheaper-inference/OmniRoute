@@ -1,4 +1,5 @@
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
+import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
@@ -375,6 +376,7 @@ async function handleChatCoreInner({
   managedLease = null,
   // Trusted management validation only; never populated from request body/headers.
   validationExecutorFence = null,
+  beforeUpstreamAttempt = undefined,
   // #12150 P1b: additive, optional video-bridge log/Memory shadow — shape is
   // VideoBridgeLogParam (defined near the top of this file). Built once in chat.ts from
   // preCallGuardrails.results (video-bridge guardrail meta) and threaded here
@@ -2425,8 +2427,8 @@ async function handleChatCoreInner({
   }
   // Get executor for this provider (with optional upstream proxy routing)
   const executor = await resolveExecutorWithProxy(provider);
-  const getExecutionCredentials = () =>
-    withApiKeyCodexServiceMode(
+  const getExecutionCredentials = () => {
+    const executionCredentials = withApiKeyCodexServiceMode(
       provider,
       withReasoningRuleContext(
         resolveExecutionCredentialsFor({
@@ -2443,6 +2445,9 @@ async function handleChatCoreInner({
       ),
       apiKeyCodexServiceMode
     );
+    beforeUpstreamAttempt?.(executionCredentials);
+    return executionCredentials;
+  };
 
   let onPipelineStreamError: streamFailure.PipelineStreamErrorHandler | null = null;
   let onClientDisconnectFinalize:
@@ -2688,7 +2693,7 @@ async function handleChatCoreInner({
         Object.assign(credentials, newCredentials);
       }
       const errorConnectionId = String(getCurrentConnectionId() || connectionId || "");
-      if (errorConnectionId) {
+      if (errorConnectionId && !isPassiveCodex(provider)) {
         updateProviderConnection(errorConnectionId, newCredentials).catch(() => {});
       }
       return newCredentials;
@@ -2698,6 +2703,7 @@ async function handleChatCoreInner({
 
   const handleCredentialsRefreshed = async (refreshed: Record<string, unknown>) => {
     Object.assign(credentials, refreshed);
+    if (isPassiveCodex(provider)) return;
     if (!credentialRefreshPersistRan && onCredentialsRefreshed) {
       credentialRefreshPersistRan = true;
       const targetConnectionId =
@@ -2719,6 +2725,8 @@ async function handleChatCoreInner({
       }
     }
   };
+
+  if (isPassiveCodex(provider)) executeProviderRequestDeps.onCredentialsRefreshed = handleCredentialsRefreshed;
 
   const applyProviderFailureClassification = async ({
     statusCode,

@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Limites de concorrência por modelo",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcional: um modelo=limite por linha, comparado com o ID exato do modelo no provedor. As solicitações excedentes ficam em fila localmente; em branco significa sem limite por modelo.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concorrência por modelo inválida \"{entry}\" — use modelo=limite com um número inteiro de 1 a {max}.",
+    "usedInComboTooltip": "Usado em {count} combinação(ões): {combos}",
+    "openComboTooltip": "Abrir Combinações — usado por {combo}"
   },
   "settings": {
     "title": "Configurações",
@@ -8938,7 +8940,9 @@
         "financial": "Financeiro",
         "brazilian": "Brasileiro",
         "usa": "EUA",
-        "full": "Completo"
+        "full": "Completo",
+        "gdpr": "GDPR (UE)",
+        "popia": "POPIA (África do Sul)"
       },
       "builtinTypes": "Tipos integrados",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Endereços IPv4",
         "ipv6_address": "Endereços IPv6",
         "aws_key": "Chaves de acesso da AWS",
-        "api_key_generic": "Chaves de API e tokens"
+        "api_key_generic": "Chaves de API e tokens",
+        "iban": "Números de conta bancária IBAN",
+        "eu_vat": "Números de IVA da UE",
+        "es_dni_nie": "DNI / NIE espanhol",
+        "it_codice_fiscale": "Codice Fiscale italiano",
+        "pl_pesel": "PESEL polonês",
+        "nl_bsn": "BSN holandês",
+        "de_steuer_id": "Steuer-ID alemão",
+        "se_personnummer": "Personnummer sueco",
+        "za_id": "Números de identidade sul-africanos",
+        "za_phone": "Números de telefone sul-africanos",
+        "za_vat": "Números de IVA sul-africanos",
+        "za_tax_ref": "Referências fiscais sul-africanas"
       },
       "customPatterns": "Padrões personalizados",
       "customPatternsDesc": "As ocorrências são substituídas por [CUSTOM_REDACTED]. Até {max} padrões. Padrões com risco de backtracking catastrófico são recusados.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "O OAuth Duo do GitLab não está configurado. Registre um aplicativo OAuth em {applicationsUrl} com a URI de redirecionamento {redirectUri} e escopos \"{scopes}\", em seguida, defina {clientIdEnv} (e opcionalmente {clientSecretEnv}) e reinicie.",
     "gitlabDuoSetupDescription": "Após o registro do aplicativo e a configuração das variáveis de ambiente nesta instância do OmniRoute, clique em Continuar para iniciar o login OAuth.",
     "continue": "Continuar",
+    "copilotPolicyTitle": "Provedor experimental — status da política é ambíguo",
+    "copilotPolicyLine1": "O OmniRoute se conecta via api.githubcopilot.com, uma API que o GitHub não publicou como uma API de inferência de terceiros de uso geral. Esta integração é experimental e pode mudar sem aviso prévio.",
+    "copilotPolicyLine2": "Apenas sua própria conta do GitHub pode ser conectada. Nunca compartilhe credenciais, agrupe contas ou tente exceder os limites do seu plano.",
+    "copilotPolicyLine3": "Usuários dos planos Free e Student recebem apenas seleção automática de modelo. Os termos do seu plano Copilot e quaisquer limites de uso continuam sendo de sua responsabilidade.",
+    "copilotPolicyAcknowledge": "Entendi — Conectar",
     "tabPasteSetupToken": "Token de configuração",
     "claudeSetupTokenDescription": "Execute `claude setup-token` em um terminal e cole o token que ele exibe. Ele é válido por um ano e não tem token de atualização. O OmniRoute envia uma requisição de teste à Anthropic antes de salvá-lo.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Estatísticas de provedores",
     "description": "Tráfego, latência e taxa de sucesso por provedor e por modelo",
     "combo": "Combo",
-    "toggleModels": "Mostrar modelos de {provider}"
+    "toggleModels": "Mostrar modelos de {provider}",
+    "windowSince": "Desde {date}"
   },
   "relay": {
     "title": "Proxies de Relay Serverless",

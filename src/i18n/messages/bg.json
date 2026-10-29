@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Използва се в {count} комбо: {combos}",
+    "openComboTooltip": "Отвори Комбота — използва се от {combo}"
   },
   "settings": {
     "title": "Настройки",
@@ -9015,7 +9017,9 @@
         "financial": "Финансов",
         "brazilian": "Бразилски",
         "usa": "САЩ",
-        "full": "Пълен"
+        "full": "Пълен",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Южна Африка)"
       },
       "builtinTypes": "Вградени типове",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 адреси",
         "ipv6_address": "IPv6 адреси",
         "aws_key": "Ключове за достъп до AWS",
-        "api_key_generic": "API ключове и токени"
+        "api_key_generic": "API ключове и токени",
+        "iban": "IBAN номера на банкови сметки",
+        "eu_vat": "EU VAT числа",
+        "es_dni_nie": "Испански DNI / NIE",
+        "it_codice_fiscale": "италиански Codice Fiscale",
+        "pl_pesel": "полски PESEL",
+        "nl_bsn": "Холандски BSN",
+        "de_steuer_id": "Немски Steuer-ID",
+        "se_personnummer": "Шведски personnummer",
+        "za_id": "Южноафрикански ID номера",
+        "za_phone": "Южноафрикански телефонни номера",
+        "za_vat": "Южноафрикански VAT номера",
+        "za_tax_ref": "Южноафрикански данъчни справки"
       },
       "customPatterns": "Персонализирани шаблони",
       "customPatternsDesc": "Съвпаденията се заменят с [CUSTOM_REDACTED]. До {max} шаблона. Шаблоните с риск от катастрофално връщане се отхвърлят.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth не е конфигуриран. Регистрирайте OAuth приложение на {applicationsUrl} с URI за пренасочване {redirectUri} и обхвати \"{scopes}\", след което задайте {clientIdEnv} (и по желание {clientSecretEnv}) и рестартирайте.",
     "gitlabDuoSetupDescription": "След като приложението е регистрирано и променливите на средата са зададени за този инстанция на OmniRoute, кликнете Продължи, за да започнете OAuth входа.",
     "continue": "Продължи",
+    "copilotPolicyTitle": "Експериментален доставчик: състоянието на правилата е двусмислено",
+    "copilotPolicyLine1": "OmniRoute се свързва чрез api.githubcopilot.com, който GitHub не е публикувал като общо заключение на трета страна API. Тази интеграция е експериментална и може да се промени без предупреждение.",
+    "copilotPolicyLine2": "Само вашият собствен GitHub акаунт може да бъде свързан. Никога не споделяйте идентификационни данни, пул акаунти или се опитвайте да надхвърлите лимитите на вашия план.",
+    "copilotPolicyLine3": "Потребителите на безплатен и студентски план получават само автоматичен избор на модел. Условията на вашия план за Copilot и всички ограничения за използване остават ваша отговорност.",
+    "copilotPolicyAcknowledge": "Разбирам, свържете се",
     "tabPasteSetupToken": "Токен за настройка",
     "claudeSetupTokenDescription": "Изпълнете `claude setup-token` в терминал и поставете токена, който отпечатва. Той е валиден една година и няма токен за опресняване. OmniRoute изпраща една тестова заявка към Anthropic, преди да го запази.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Статистика за доставчиците",
     "description": "Трафик, латентност и проценти на успеваемост по доставчик и модел",
     "combo": "Комбинация",
-    "toggleModels": "Показване на моделите за {provider}"
+    "toggleModels": "Показване на моделите за {provider}",
+    "windowSince": "От {date}"
   },
   "relay": {
     "title": "Serverless Relay проксита",

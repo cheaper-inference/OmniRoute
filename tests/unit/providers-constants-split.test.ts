@@ -58,8 +58,10 @@ const P = await import("../../src/shared/constants/providers.ts");
 // NaN.Builders adds one apikey/gateways entry — 250.
 // DaoXE adds one apikey/gateways entry — 251.
 // ainetcafe (#13862) adds one apikey/gateways entry — 253.
-// Token Harbor (#16315) adds one apikey/gateways entry — measured 254 on the merged tree.
-const APIKEY_PROVIDER_COUNT = 254;
+// Freebuff browser login dual-auth (#15336) moves `freebuff` from gateways into
+// OAUTH_PROVIDERS (same pattern as codebuddy-cn/muse-code) — 252.
+// Token Harbor (#16315) adds one apikey/gateways entry — 253.
+const APIKEY_PROVIDER_COUNT = 253;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [

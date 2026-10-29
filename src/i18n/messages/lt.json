@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Naudojama {count} kombinacijose: {combos}",
+    "openComboTooltip": "Atidaryti Kombinacijas — naudoja {combo}"
   },
   "settings": {
     "title": "Nustatymai",
@@ -8938,7 +8940,9 @@
         "financial": "Finansinis",
         "brazilian": "Brazilijos",
         "usa": "JAV",
-        "full": "Pilnas"
+        "full": "Pilnas",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Pietų Afrika)"
       },
       "builtinTypes": "Įtaisytieji tipai",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 adresai",
         "ipv6_address": "IPv6 adresai",
         "aws_key": "AWS prieigos raktai",
-        "api_key_generic": "API raktai ir žetonai"
+        "api_key_generic": "API raktai ir žetonai",
+        "iban": "IBAN banko sąskaitų numeriai",
+        "eu_vat": "EU VAT skaičiai",
+        "es_dni_nie": "ispanų DNI / NIE",
+        "it_codice_fiscale": "Itališkas Codice Fiscale",
+        "pl_pesel": "lenkiškas PESEL",
+        "nl_bsn": "olandų BSN",
+        "de_steuer_id": "Vokietijos Steuer-ID",
+        "se_personnummer": "Švedijos personalas",
+        "za_id": "Pietų Afrikos ID skaičiai",
+        "za_phone": "Pietų Afrikos telefonų numeriai",
+        "za_vat": "Pietų Afrikos VAT skaičiai",
+        "za_tax_ref": "Pietų Afrikos mokesčių nuorodos"
       },
       "customPatterns": "Pasirinktiniai šablonai",
       "customPatternsDesc": "Atitikmenys pakeičiami į [CUSTOM_REDACTED]. Iki {max} šablonų. Šablonai, keliantys katastrofinio grįžimo riziką, atmetami.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nesukonfigūruotas. Užregistruokite OAuth programą adresu {applicationsUrl}, nurodydami peradresavimo URI {redirectUri} ir aprėptis „{scopes}“, tada nustatykite {clientIdEnv} (ir pasirinktinai {clientSecretEnv}) bei paleiskite iš naujo.",
     "gitlabDuoSetupDescription": "Kai programa bus užregistruota ir šiame OmniRoute egzemplioriuje bus nustatyti aplinkos kintamieji, spustelėkite „Tęsti“, kad pradėtumėte OAuth prisijungimą.",
     "continue": "Tęsti",
+    "copilotPolicyTitle": "Eksperimentinis teikėjas: politikos būsena yra dviprasmiška",
+    "copilotPolicyLine1": "OmniRoute prisijungia per api.githubcopilot.com, kurio GitHub nepaskelbė kaip bendros trečiosios šalies išvados API. Ši integracija yra eksperimentinė ir gali keistis be įspėjimo.",
+    "copilotPolicyLine2": "Gali būti prijungta tik jūsų GitHub paskyra. Niekada nesidalykite kredencialais, nebendrinkite paskyrų ir nebandykite viršyti plano limitų.",
+    "copilotPolicyLine3": "Nemokamo ir Studento plano naudotojai gauna tik automatinį modelio pasirinkimą. Už Copilot plano sąlygas ir bet kokius naudojimo apribojimus atsakote jūs.",
+    "copilotPolicyAcknowledge": "Supratau, prisijunk",
     "tabPasteSetupToken": "Sąrankos žetonas",
     "claudeSetupTokenDescription": "Terminale paleiskite `claude setup-token` ir įklijuokite jo išspausdintą žetoną. Jis galioja vienerius metus ir neturi atnaujinimo žetono. Prieš išsaugodamas OmniRoute išsiunčia vieną bandomąją užklausą į Anthropic.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Teikėjų statistika",
     "description": "Kiekvieno teikėjo ir modelio srautas, delsa bei sėkmės rodikliai",
     "combo": "Derinys",
-    "toggleModels": "Rodyti {provider} modelius"
+    "toggleModels": "Rodyti {provider} modelius",
+    "windowSince": "Nuo {date}"
   },
   "relay": {
     "title": "Be serverių veikiantys perdavimo tarpiniai serveriai",

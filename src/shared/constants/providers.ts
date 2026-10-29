@@ -58,6 +58,7 @@ const DUAL_AUTH_PROVIDER_IDS = new Set([
   "muse-code",
   "cline",
   "kilocode",
+  "freebuff",
 ]);
 
 export function supportsDualAuthProvider(providerId: unknown): boolean {

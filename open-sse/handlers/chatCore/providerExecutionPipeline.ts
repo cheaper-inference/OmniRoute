@@ -1,3 +1,4 @@
+import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
@@ -489,6 +490,7 @@ export async function runProviderExecutionPipeline(
       typeof connection.refreshCredentials === "function" &&
       !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
     ) {
+      if (isPassiveCodex(target.provider)) recordRejectedToken(connection.getCredentials());
       const refreshed = await connection.refreshCredentials(connection.getCredentials());
       if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
         connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });

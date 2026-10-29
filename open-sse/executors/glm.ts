@@ -225,7 +225,8 @@ export function translateSseResponse(
   response: Response,
   provider: string,
   model: string,
-  suppressThinkClose: boolean = false
+  suppressThinkClose: boolean = false,
+  streamBufferBytes: number = GLM_STREAM_BUFFER_BYTES
 ): Response {
   if (!response.body) return response;
   // GLM is a high-throughput provider: a 64 KB queue budget keeps provider ->
@@ -251,7 +252,7 @@ export function translateSseResponse(
     undefined,
     undefined,
     null,
-    GLM_STREAM_BUFFER_BYTES
+    streamBufferBytes
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");

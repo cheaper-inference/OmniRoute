@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Used in {count} combo(s): {combos}",
+    "openComboTooltip": "Open Combos — used by {combo}"
   },
   "settings": {
     "title": "Settings",
@@ -9015,6 +9017,8 @@
         "financial": "Financial",
         "brazilian": "Brazilian",
         "usa": "USA",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)",
         "full": "Full"
       },
       "builtinTypes": "Built-in types",
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 addresses",
         "ipv6_address": "IPv6 addresses",
         "aws_key": "AWS access keys",
-        "api_key_generic": "API keys and tokens"
+        "api_key_generic": "API keys and tokens",
+        "iban": "IBAN bank account numbers",
+        "eu_vat": "EU VAT numbers",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Italian Codice Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "South African ID numbers",
+        "za_phone": "South African phone numbers",
+        "za_vat": "South African VAT numbers",
+        "za_tax_ref": "South African tax references"
       },
       "customPatterns": "Custom patterns",
       "customPatternsDesc": "Matches are replaced with [CUSTOM_REDACTED]. Up to {max} patterns. Patterns that risk catastrophic backtracking are refused.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth is not configured. Register an OAuth application at {applicationsUrl} with redirect URI {redirectUri} and scopes \"{scopes}\", then set {clientIdEnv} (and optionally {clientSecretEnv}) and restart.",
     "gitlabDuoSetupDescription": "After the application is registered and the env vars are set on this OmniRoute instance, click Continue to start the OAuth login.",
     "continue": "Continue",
+    "copilotPolicyTitle": "Experimental provider — policy status is ambiguous",
+    "copilotPolicyLine1": "OmniRoute connects via api.githubcopilot.com, which GitHub has not published as a general third-party inference API. This integration is experimental and may change without notice.",
+    "copilotPolicyLine2": "Only your own GitHub account may be connected. Never share credentials, pool accounts, or attempt to exceed your plan limits.",
+    "copilotPolicyLine3": "Free and Student plan users receive automatic model selection only. Your Copilot plan terms and any usage limits remain your responsibility.",
+    "copilotPolicyAcknowledge": "I understand — Connect",
     "tabPasteSetupToken": "Setup Token",
     "claudeSetupTokenDescription": "Run `claude setup-token` in a terminal and paste the token it prints. It is valid for one year and has no refresh token. OmniRoute sends one test request to Anthropic before saving it.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "Provider stats",
     "description": "Per-provider and per-model traffic, latency and success rates",
     "combo": "Combo",
-    "toggleModels": "Show models for {provider}"
+    "toggleModels": "Show models for {provider}",
+    "windowSince": "Since {date}"
   },
   "relay": {
     "title": "Serverless Relay Proxies",

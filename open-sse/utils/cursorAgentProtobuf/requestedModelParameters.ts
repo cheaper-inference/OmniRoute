@@ -1,6 +1,12 @@
-import { resolveCursorGrok47Variant } from "../../config/providers/registry/cursor/grok47.ts";
+import {
+  GROK_47_EFFORTS,
+  resolveCursorGrok47Variant,
+} from "../../config/providers/registry/cursor/grok47.ts";
+import { isCursorGrok47MaxEffortDropped } from "./grok47MaxEffort.ts";
 
 export const CURSOR_EFFORT_SUFFIXES = ["low", "medium", "high", "xhigh", "max"] as const;
+
+const GROK_47_ID_PATTERN = /^(?:cursor-)?grok-4\.7(?:-|$)/;
 
 type CursorRequestedModel = {
   modelId: string;
@@ -21,6 +27,15 @@ export function applyCursorReasoningEffort(
     id.startsWith(prefix)
   );
   const isGpt = id.startsWith("gpt-5.");
+  // Opt-in (CURSOR_GROK_47_DROP_MAX_EFFORT): Grok 4.7 exposes exactly GROK_47_EFFORTS (no "max");
+  // 4.5/4.6 keep the generic tiers.
+  if (
+    GROK_47_ID_PATTERN.test(id) &&
+    !GROK_47_EFFORTS.some((v) => v === effort) &&
+    isCursorGrok47MaxEffortDropped()
+  ) {
+    return requested;
+  }
   if (!(isGpt ? CURSOR_GPT_REASONING_LEVELS : CURSOR_EFFORT_SUFFIXES).some((v) => v === effort)) {
     return requested;
   }
