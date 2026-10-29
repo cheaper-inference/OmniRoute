@@ -490,7 +490,8 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     extraResultCost: 0.001,
   },
 
-  // Subscription-backed, not free: only auto-selected as a credentialed last resort.
+  // Subscription-backed, not free: auto-selected as a credentialed last resort only when
+  // CODEX_SEARCH_AUTO_FALLBACK_ENABLED is on (src/lib/search/codexSearchAutoFallback.ts).
   "codex-search": {
     id: "codex-search",
     name: "Codex Web Search (ChatGPT)",

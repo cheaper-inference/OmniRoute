@@ -3,6 +3,9 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
 process.env.API_KEY_SECRET = "codex-search-isolation-test-secret";
+// These isolation checks exercise the opted-in automatic Codex fallback
+// (CODEX_SEARCH_AUTO_FALLBACK_ENABLED, default off); routing tests cover the default.
+process.env.CODEX_SEARCH_AUTO_FALLBACK_ENABLED = "true";
 
 const core = await import("../../src/lib/db/core.ts");
 const providers = await import("../../src/lib/db/providers.ts");

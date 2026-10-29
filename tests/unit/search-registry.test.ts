@@ -178,8 +178,9 @@ test("zai-search config is correct", () => {
 
 test("getAllSearchProviders returns flat list", () => {
   const all = getAllSearchProviders();
-  assert.equal(all.length, 22);
+  assert.equal(all.length, 23);
   assert.ok(all.some((p) => p.id === "parallel-search"));
+  assert.ok(all.some((p) => p.id === "codex-search"));
   assert.ok(all.some((p) => p.id === "duckduckgo-free"));
   assert.ok(all.some((p) => p.id === "jina-search"));
   assert.ok(all.some((p) => p.id === "x-search"));

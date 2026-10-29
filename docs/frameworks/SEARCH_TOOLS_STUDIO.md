@@ -105,10 +105,15 @@ Runs the same query/URL across up to **4 providers in parallel** (D22):
 `ProviderCatalog.tsx` exposes the full provider list from `GET /api/search/providers`
 (extended in F4 to include fetch providers):
 
-| `kind` | `"search"` (22 providers) or `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (23 providers) or `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
 The status is **derived at request time** by checking whether credentials exist and whether
 all keys are currently in cooldown.
+
+`codex-search` (Codex Web Search) has no key of its own: it reuses a connected Codex
+(ChatGPT) account, so each search spends ChatGPT subscription quota and takes about
+10–40 s. It runs when a request names it; automatic selection needs the
+`CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag (off by default).
 
 ---
 

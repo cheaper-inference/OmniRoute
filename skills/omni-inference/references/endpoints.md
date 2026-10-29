@@ -174,7 +174,7 @@ curl http://localhost:20128/api/v1/search \
 
 Run a unified search
 
-Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Codex Web Search (`codex-search`, alias `codex_search`) reuses connected Codex (ChatGPT) accounts as a credentialed last resort before keyless search. It spends subscription quota (not a free API), typically takes 10–40 seconds, and uses a 60-second timeout unless the operator sets a lower search timeout. Time range and domain filters are instruction hints, not hard filters.
+Searches the web, news, or X through a configured provider. Set `provider` to `xquik-search` to use Xquik for X search. The aliases `xquik` and `xquik_search` resolve to the same provider. AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`) provides free fallback-only web search. Codex Web Search (`codex-search`, alias `codex_search`) reuses connected Codex (ChatGPT) accounts. Name it explicitly to use it; automatic selection (a credentialed last resort before keyless search) needs the `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` feature flag, off by default. It spends subscription quota (not a free API), typically takes 10–40 seconds, and uses a 60-second timeout unless the operator sets a lower search timeout. Time range and domain filters are instruction hints, not hard filters.
 
 ```bash
 curl -X POST http://localhost:20128/api/v1/search \

@@ -46,6 +46,7 @@ import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
+import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -307,19 +308,16 @@ async function postHandler(request: Request, context: unknown) {
     // duckduckgo-free) to the primary pick so out-of-the-box search works when
     // no credentialed provider is configured at all.
     if (!credentials) {
-      const fallbackProviders = Object.values(SEARCH_PROVIDERS)
-        .filter(
+      // Cost order; Codex's subscription fallback only when opted in (#17933).
+      const fallbackProviders = orderAutoSearchFallbacks(
+        Object.values(SEARCH_PROVIDERS).filter(
           (provider) =>
             provider.fallbackOnly &&
             supportsSearchType(provider, body.search_type) &&
             !isProviderBlockedByIdOrAlias(provider.id, blockedProviders)
-        )
-        // Preserve the base cost order except for Codex's subscription fallback.
-        .sort(
-          (a, b) =>
-            Number(b.id === "codex-search") - Number(a.id === "codex-search") ||
-            a.costPerQuery - b.costPerQuery
-        );
+        ),
+        (a, b) => a.costPerQuery - b.costPerQuery
+      );
 
       for (const fallbackProvider of fallbackProviders) {
         providerConfig = fallbackProvider;
@@ -384,9 +382,7 @@ async function postHandler(request: Request, context: unknown) {
     // failover so out-of-the-box search still works when no credentialed provider
     // is configured. Only used when no real alternate was found above.
     if (!alternateProviderId) {
-      for (const provider of Object.values(SEARCH_PROVIDERS).sort(
-        (a, b) => Number(b.id === "codex-search") - Number(a.id === "codex-search")
-      )) {
+      for (const provider of orderAutoSearchFallbacks(Object.values(SEARCH_PROVIDERS))) {
         if (!provider.fallbackOnly || provider.id === providerConfig.id) continue;
         if (isProviderBlockedByIdOrAlias(provider.id, blockedProviders)) continue;
         if (isUnconfiguredLoopbackSearchProvider(provider)) continue;
