@@ -203,7 +203,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
 
    Esporta una funzione asincrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Segui la struttura delle skill esistenti, come `smartRouting.ts`.
 
-2. **Registra il gestore:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
+2. **Registra l'handler:** in `src/lib/a2a/taskExecution.ts`, aggiungi una voce a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    };
    ```
 
-3. **Esponi nell'Agent Card:** in `src/app/.well-known/agent.json/route.ts`, aggiungi all'array `skills`:
+3. **Esponila nella Agent Card:** in `src/lib/a2a/agentCardMetadata.ts` (condiviso da `/.well-known/agent.json` e `/.well-known/agent-card.json`), aggiungila all'array `skills`:
 
    ```json
    {
@@ -227,7 +227,7 @@ L'endpoint JSON-RPC `/a2a` è il punto di ingresso A2A canonico. Gli endpoint RE
    }
    ```
 
-4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e il percorso di errore.
+4. **Scrivi i test:** `tests/unit/a2a-<your-skill>.test.ts`. Copri il percorso corretto e quello di errore.
 
 5. **Documenta** la nuova skill nella tabella `Available Skills` di questo file.
 

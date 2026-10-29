@@ -882,6 +882,10 @@ The generic fields always win: `query`, `max_results`, `filters` (domains), `cou
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
 Tavily also accepts `search_type: "finance"` (`topic: "finance"`).
 
+Firecrawl search cost is recorded per started block of 10 returned results, at $0.002 (2
+credits) a block and at least one block per call
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 results cost $0.004.
+
 The generic `time_range` now reaches both providers: Exa gets `startPublishedDate` (ISO
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
@@ -1023,6 +1027,27 @@ completion.
 | POST   | `/v1/issues/report` | Report a quota/key issuance failure to GitHub (requires `GITHUB_ISSUES_REPO` + token) |
 
 **Auth:** Bearer API key (`isAuthenticated`).
+
+### Quota session recovery (opt-in)
+
+A non-streaming `POST /v1/chat/completions` or `POST /v1/responses` that fails with a
+terminal quota error (`402`/`429`/`503` whose body says the quota or credits are exhausted)
+can be parked and replayed later instead of returning the error. The caller opts in per
+request with three headers:
+
+| Header                       | Value                                         |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id unique within the session (same rule) |
+
+Only `stream: false` turns with no tools, tool history or `previous_response_id`, and no
+`x-omniroute-connection` pin, are eligible, and `STORAGE_ENCRYPTION_KEY` must be set (the
+request is stored encrypted for up to 24 h). The response is then `202` with
+`recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` while pending, `200` with the
+recovered body when completed) or cancel with `DELETE`. Tickets are visible only to the API
+key that created them. A replay whose outcome is uncertain ends in `needs_confirmation`
+instead of being sent twice. Source: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 

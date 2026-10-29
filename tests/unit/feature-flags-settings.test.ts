@@ -58,8 +58,8 @@ const {
 // tool_call wrapper repair, default on) to 86.
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
-// UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 112.
-const EXPECTED_FEATURE_FLAG_COUNT = 112;
+// UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 113.
+const EXPECTED_FEATURE_FLAG_COUNT = 113;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
@@ -79,6 +79,7 @@ const EXPECTED_FEATURE_FLAG_COUNT = 112;
 // CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (#15917, default off) takes it to 88.
 // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
 // COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (#16305, default off) takes it to 88.
+// CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) takes it to 112.
 // default off) to 87; QUOTA_WINDOW_BOUNDED_PARK
 // (#17000, per-window quota policy honours the bounded park, default off) to 88.
 // default off) to 87; IMAGE_GENERATION_LONG_JOBS

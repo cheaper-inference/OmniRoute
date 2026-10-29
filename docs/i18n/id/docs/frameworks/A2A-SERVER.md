@@ -201,9 +201,9 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
 
 1. **Buat file skill:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Ekspor fungsi asinkron `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur skill yang sudah ada seperti `smartRouting.ts`.
+   Ekspor fungsi asinkron `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur skill yang sudah ada, seperti `smartRouting.ts`.
 
-2. **Daftarkan handler:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
+2. **Daftarkan handler:** di `src/lib/a2a/taskExecution.ts`, tambahkan entri ke `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,21 +215,21 @@ Endpoint JSON-RPC `/a2a` adalah titik masuk A2A kanonis. Endpoint REST di bawah 
    };
    ```
 
-3. **Ekspos dalam Agent Card:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan ke array `skills`:
+3. **Tampilkan di Agent Card:** di `src/lib/a2a/agentCardMetadata.ts` (digunakan bersama oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan ke array `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Skill Anda",
-     "description": "Deskripsi singkat yang berfokus pada tujuan",
-     "tags": ["perutean", "kuota"],
-     "examples": ["Contoh pemanggilan dengan bahasa alami"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Tulis pengujian:** `tests/unit/a2a-<your-skill>.test.ts`. Cakup alur sukses + alur kesalahan.
+4. **Tulis pengujian:** `tests/unit/a2a-<your-skill>.test.ts`. Cakup alur berhasil + alur kesalahan.
 
-5. **Dokumentasikan** skill baru dalam tabel `Available Skills` pada file ini.
+5. **Dokumentasikan** skill baru dalam tabel `Available Skills` di file ini.
 
 ---
 

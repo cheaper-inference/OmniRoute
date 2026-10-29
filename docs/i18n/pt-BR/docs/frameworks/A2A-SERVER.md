@@ -197,17 +197,17 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canônico. Os endpoints RES
 
 ---
 
-## Adicionando uma nova skill
+## Adicionando uma nova habilidade
 
-1. **Crie o arquivo da skill:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Crie o arquivo da habilidade:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga a estrutura das skills existentes, como `smartRouting.ts`.
+   Exporte uma função assíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga a estrutura das habilidades existentes, como `smartRouting.ts`.
 
-2. **Registre o handler:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
+2. **Registre o manipulador:** em `src/lib/a2a/taskExecution.ts`, adicione uma entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...skills existentes
+     // ...habilidades existentes
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ O endpoint JSON-RPC `/a2a` é o ponto de entrada A2A canônico. Os endpoints RES
    };
    ```
 
-3. **Exponha no Agent Card:** em `src/app/.well-known/agent.json/route.ts`, acrescente ao array `skills`:
+3. **Exponha no Cartão do Agente:** em `src/lib/a2a/agentCardMetadata.ts` (compartilhado por `/.well-known/agent.json` e `/.well-known/agent-card.json`), adicione ao array `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Sua habilidade",
+     "description": "Descrição breve e focada na intenção",
+     "tags": ["roteamento", "cota"],
+     "examples": ["Exemplo de invocação em linguagem natural"]
    }
    ```
 
 4. **Escreva testes:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra o caminho de sucesso e o caminho de erro.
 
-5. **Documente** a nova skill na tabela `Available Skills` deste arquivo.
+5. **Documente** a nova habilidade na tabela `Available Skills` deste arquivo.
 
 ---
 

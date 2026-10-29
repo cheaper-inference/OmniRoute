@@ -161,6 +161,10 @@ export async function getSettings() {
     disableSessionStickiness: false,
     // Global connection-aware expansion fallback for group-B combo strategies is opt-in.
     connectionAwareExpansion: false,
+    // Keep combo targets whose known output ceiling is below the request's
+    // max_tokens instead of treating output_tokens as a hard compatibility
+    // mismatch; the upstream then applies its own ceiling.
+    outputLimitAdvisory: false,
     promptCacheAffinityEnabled: true,
     geminiPromptCacheMode: "off",
     comboStrategy: "fallback",
