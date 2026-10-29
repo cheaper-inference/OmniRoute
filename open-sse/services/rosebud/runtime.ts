@@ -45,6 +45,11 @@ export type RosebudJob = {
 const PROCESS_INSTANCE = Symbol.for("omniroute.rosebud.processInstance");
 const processState = globalThis as typeof globalThis & { [PROCESS_INSTANCE]?: string };
 const processInstance = (processState[PROCESS_INSTANCE] ??= randomUUID());
+const REFRESHES = Symbol.for("omniroute.rosebud.refreshes");
+const refreshState = globalThis as typeof globalThis & {
+  [REFRESHES]?: Map<string, Promise<RosebudJob>>;
+};
+const refreshes = (refreshState[REFRESHES] ??= new Map<string, Promise<RosebudJob>>());
 const ordered = (input: JsonObject) =>
   Object.fromEntries(Object.entries(input).sort(([a], [b]) => a.localeCompare(b)));
 const hash = (text: string) => createHash("sha256").update(text).digest("hex");
@@ -260,17 +265,35 @@ export class RosebudRuntime {
     if (typeof result.status === "string") job.status = result.status;
     const asset = result.asset as JsonObject | undefined;
     if (asset && typeof asset.id === "string") job.assetId = asset.id;
-    if (typeof result.credits === "number") job.actualCredits = result.credits;
-    if (typeof result.credits_refunded === "number") job.refundedCredits = result.credits_refunded;
+    // `credits` is the reservation/quote; only charged_credits is actual spending.
+    if (typeof result.charged_credits === "number") job.actualCredits = result.charged_credits;
+    else delete job.actualCredits;
+    if (typeof result.refunded_credits === "number") job.refundedCredits = result.refunded_credits;
+    const error = result.error as JsonObject | undefined;
+    if (error && typeof error.code === "string" && /^[a-zA-Z0-9_-]{1,100}$/.test(error.code))
+      job.error = error.code;
   }
   async refresh(profile: string, id: string) {
-    const job = await this.read(profile, id);
-    if (job.upstreamId && !["succeeded", "failed", "cancelled"].includes(job.status)) {
-      this.apply(job, await this.run(profile, ["assets", "status", job.upstreamId]));
-      await this.save(job);
+    const key = JSON.stringify([profile, id]);
+    const existing = refreshes.get(key);
+    if (existing) return existing;
+    const pending = (async () => {
+      const job = await this.read(profile, id);
+      // Terminal jobs may receive later refunds; status reads must reconcile those too.
+      if (job.upstreamId) {
+        this.apply(job, await this.run(profile, ["assets", "status", job.upstreamId]));
+        await this.save(job);
+      }
+      return job;
+    })();
+    refreshes.set(key, pending);
+    try {
+      return await pending;
+    } finally {
+      if (refreshes.get(key) === pending) refreshes.delete(key);
     }
-    return job;
   }
+
   /** Re-run only the identical CLI command; its durable pending state owns the upstream idempotency key. */
   async recover(profile: string, id: string) {
     let job = await this.read(profile, id);

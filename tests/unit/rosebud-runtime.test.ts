@@ -50,10 +50,16 @@ test("durable jobs reuse a paid submission, bind account, and reject changed inp
     if (args[1] === "quote") return { credits: 250 };
     if (args[1] === "create") {
       submissions++;
-      return { id: "remote-job", status: "running", credits: 250 };
+      return { id: "remote-job", status: "running", credits: 250, charged_credits: 250 };
     }
     if (args[1] === "status")
-      return { id: "remote-job", status: "succeeded", asset: { id: "asset" }, credits: 250 };
+      return {
+        id: "remote-job",
+        status: "succeeded",
+        asset: { id: "asset" },
+        credits: 250,
+        charged_credits: 250,
+      };
     return {};
   };
   try {
@@ -268,6 +274,54 @@ test("concurrent artifact readers never observe a partially downloaded file", as
     assert.ok((await readFile(join(dir, "jobs", id, "artifact"))).equals(png));
   } finally {
     release();
+    if (previous === undefined) delete process.env.ROSEBUD_DATA_DIR;
+    else process.env.ROSEBUD_DATA_DIR = previous;
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("provider failure and late refunds use actual charges rather than reserved credits", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "rosebud-refund-test-"));
+  const previous = process.env.ROSEBUD_DATA_DIR;
+  process.env.ROSEBUD_DATA_DIR = dir;
+  let submissions = 0;
+  let refunded = false;
+  const runtime = new RosebudRuntime(async (_profile, args) => {
+    if (args[1] === "models") return { models: [model] };
+    if (args[1] === "quote") return { credits: 250 };
+    if (args[1] === "create") {
+      submissions++;
+      return {
+        id: "upstream",
+        status: "failed",
+        credits: 250,
+        charged_credits: 250,
+        refunded_credits: 0,
+        error: { code: "provider_failed" },
+      };
+    }
+    assert.equal(args[1], "status");
+    return {
+      id: "upstream",
+      status: "failed",
+      credits: 250,
+      charged_credits: refunded ? 0 : 250,
+      refunded_credits: refunded ? 250 : 0,
+      error: { code: "provider_failed" },
+    };
+  });
+  try {
+    const request = { model: "test-image", input: { prompt: "test" }, idempotencyKey: "refund" };
+    const first = await runtime.generate("account", request);
+    assert.equal(first.actualCredits, 250);
+    assert.equal(first.error, "provider_failed");
+    refunded = true;
+    const reconciled = await runtime.generate("account", request);
+    assert.equal(reconciled.status, "failed");
+    assert.equal(reconciled.actualCredits, 0);
+    assert.equal(reconciled.refundedCredits, 250);
+    assert.equal(submissions, 1);
+  } finally {
     if (previous === undefined) delete process.env.ROSEBUD_DATA_DIR;
     else process.env.ROSEBUD_DATA_DIR = previous;
     await rm(dir, { recursive: true, force: true });
