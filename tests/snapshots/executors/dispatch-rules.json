@@ -13,112 +13,112 @@
   },
   "searchGuard": {
     "anysearch-search": {
-      "message": "Provider \"anysearch-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"anysearch-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "brave-search": {
-      "message": "Provider \"brave-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"brave-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "context7": {
-      "message": "Provider \"context7\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"context7\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "duckduckgo-free": {
-      "message": "Provider \"duckduckgo-free\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"duckduckgo-free\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "exa-search": {
-      "message": "Provider \"exa-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"exa-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "firecrawl": {
-      "message": "Provider \"firecrawl\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"firecrawl\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "google-pse-search": {
-      "message": "Provider \"google-pse-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"google-pse-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "jina-search": {
-      "message": "Provider \"jina-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"jina-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "kimi-search": {
-      "message": "Provider \"kimi-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"kimi-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "linkup-search": {
-      "message": "Provider \"linkup-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"linkup-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "nimble-search": {
-      "message": "Provider \"nimble-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"nimble-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "ollama-search": {
-      "message": "Provider \"ollama-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"ollama-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "parallel-search": {
-      "message": "Provider \"parallel-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"parallel-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "perplexity-search": {
-      "message": "Provider \"perplexity-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"perplexity-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "searchapi-search": {
-      "message": "Provider \"searchapi-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"searchapi-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "searxng-search": {
-      "message": "Provider \"searxng-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"searxng-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "serper-search": {
-      "message": "Provider \"serper-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"serper-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "tavily-search": {
-      "message": "Provider \"tavily-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"tavily-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "x-search": {
-      "message": "Provider \"x-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"x-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "xquik-search": {
-      "message": "Provider \"xquik-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"xquik-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "youcom-search": {
-      "message": "Provider \"youcom-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"youcom-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     },
     "zai-search": {
-      "message": "Provider \"zai-search\" is a search provider and does not support chat completions; use the /v1/search endpoint instead.",
+      "message": "Provider \"zai-search\" is a search provider and does not support chat completions; use POST /v1/search instead.",
       "status": 400,
       "throws": true
     }

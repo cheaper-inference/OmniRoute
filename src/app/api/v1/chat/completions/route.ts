@@ -328,6 +328,7 @@ export async function POST(request) {
     const callerCorrelationId = resolveIncomingCorrelationId(
       request.headers.get("x-correlation-id")
     );
+    const reqId = callerCorrelationId ?? generateRequestId();
 
     // Bifrost Go sidecar fast-path routing check
     const relayBackend = resolveRelayRoutingBackend();
@@ -395,7 +396,6 @@ export async function POST(request) {
     };
 
     if (wantsStreaming) {
-      const reqId = callerCorrelationId ?? generateRequestId();
       const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
         createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
@@ -424,9 +424,7 @@ export async function POST(request) {
 
     return finishAdmission(
       withCompressionHeaderEcho(
-        applyFallbackHeaders(
-          await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined)
-        ),
+        applyFallbackHeaders(await handleChat(request, null, parsedBody, reqId)),
         compressionRequestHeader
       )
     );

@@ -226,6 +226,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "resource_exhausted",
   "resource_pressure",
   "risk_session_stale",
+  "search_provider_not_chat",
   "semaphore_queue_full",
   "semaphore_timeout",
   "server_error",
