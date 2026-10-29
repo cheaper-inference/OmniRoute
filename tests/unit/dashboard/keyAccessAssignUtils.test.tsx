@@ -23,7 +23,7 @@ import {
   summarizeKeyAccess,
   type AccessKey,
 } from "@/app/(dashboard)/dashboard/models/keyAccessAssignUtils";
-import * as sharedCandidates from "@/shared/utils/modelPermissionCandidates";
+import * as sharedCandidates from "@/domain/modelPermissions";
 import * as serverPermissions from "@/lib/db/apiKeys/modelPermissions";
 
 function key(overrides: Partial<AccessKey> & { id: string }): AccessKey {
@@ -212,6 +212,12 @@ describe("model access checks", () => {
     expect(countKeysAllowing([blockedAll, allKey], "models", "cx/gpt-5", "codex", NOW)).toBe(1);
   });
 
+  it("keeps a provider wildcard inside its provider, like the server matcher (#15415)", () => {
+    const clineKey = key({ id: "k-cline", allowedModels: ["cline/*"] });
+    expect(isModelAllowed(clineKey, "cline/deepseek/deepseek-v4-flash")).toBe(true);
+    expect(isModelAllowed(clineKey, "cline/openrouter/deepseek/deepseek-v4-flash")).toBe(false);
+  });
+
   it("reuses the server's pure candidate helpers instead of a copy", () => {
     expect(serverPermissions.addModelCandidate).toBe(sharedCandidates.addModelCandidate);
     expect(serverPermissions.stripExtendedContextSuffix).toBe(
@@ -223,6 +229,7 @@ describe("model access checks", () => {
     expect(serverPermissions.CLAUDE_CODE_PROVIDER_PREFIXES).toBe(
       sharedCandidates.CLAUDE_CODE_PROVIDER_PREFIXES
     );
+    expect(serverPermissions.modelPatternMatches).toBe(sharedCandidates.modelPatternMatches);
   });
 });
 

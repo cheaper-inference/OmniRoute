@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { ServiceStatusCard } from "../components/ServiceStatusCard";
 import { ServiceLifecycleButtons } from "../components/ServiceLifecycleButtons";
 import { ServiceLogsPanel } from "../components/ServiceLogsPanel";
@@ -15,7 +17,7 @@ export function OpenwaServiceTab() {
           in ServiceStatusCard.tsx. open-wa is unofficial and unaffiliated with
           WhatsApp; automating a personal number carries a ban risk. */}
       <p className="text-xs text-text-muted flex items-start gap-1">
-        <span className="material-symbols-outlined text-[14px] shrink-0 mt-0.5">warning</span>
+        <Icon name="warning" size={14} className="mt-0.5" />
         <span>
           open-wa (@open-wa/wa-automate) is an unofficial WhatsApp Web automation library, not
           affiliated with or endorsed by WhatsApp. The connected number can be banned by WhatsApp

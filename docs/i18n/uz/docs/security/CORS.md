@@ -45,11 +45,11 @@ OWASPning umumiy ogohlantirishini ("wildcard CORS = istalgan sayt API'ingizga mu
 
 Bu `CORS_ALLOW_ALL=true` boʻlganda ham har bir yuza uchun quyidagilarni anglatadi:
 
-| Yuza                                    | Autentifikatsiya mexanizmi      | Wildcard CORS taʼsiri                                                                                                                                                                                                                                                                        |
-| --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Boshqaruv paneli / MANAGEMENT `/api/*`  | Cookie seansi                   | Origin qaytariladi, ammo **`Allow-Credentials` boʻlmagani uchun** brauzer hisob maʼlumotlari bilan yuborilgan javobni oʻqishni **bloklaydi**. Zararli boshqa origin sayti autentifikatsiya qilingan boshqaruv paneli javoblaringizni **oʻqiy olmaydi** va seans cookie'si oshkor qilinmaydi. |
-| Mijoz API'si `/v1/*`, `/v1beta/*`       | Bearer / `x-api-key` sarlavhasi | Allaqachon **ataylab** ruxsatchan (`relaxForTokenAuth`): brauzerlar `Authorization`/`x-api-key` qiymatlarini hech qachon avtomatik biriktirmaydi, shuning uchun hujumchining sahifasi sizning kalitingizni taqdim eta olmaydi. `CORS_ALLOW_ALL` buni kengaytirmaydi.                         |
-| Ommaviy faqat oʻqish (`/api/health`, …) | Yoʻq                            | Maxfiy emas; wildcard zararsiz.                                                                                                                                                                                                                                                              |
+| Yuza                                    | Autentifikatsiya mexanizmi      | Wildcard CORS taʼsiri                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Boshqaruv paneli / MANAGEMENT `/api/*`  | Cookie seansi                   | Origin qaytariladi, ammo **`Allow-Credentials` boʻlmagani uchun** brauzer hisob maʼlumotlari bilan yuborilgan javobni oʻqishni **bloklaydi**. Zararli boshqa origin sayti autentifikatsiya qilingan boshqaruv paneli javoblaringizni **oʻqiy olmaydi** va seans cookie'si oshkor qilinmaydi.                                                                                                                              |
+| Mijoz API'si `/v1/*`, `/v1beta/*`       | Bearer / `x-api-key` sarlavhasi | Allaqachon **ataylab** ruxsatchan (`relaxForTokenAuth`): brauzerlar `Authorization`/`x-api-key` qiymatlarini hech qachon avtomatik biriktirmaydi, shuning uchun hujumchining sahifasi sizning kalitingizni taqdim eta olmaydi. Origin faqat taqdim etilgan kalit tasdiqlanganda qaytariladi; anonim javoblar (`REQUIRE_API_KEY=false`) ruxsat roʻyxatiga amal qilishda davom etadi. `CORS_ALLOW_ALL` buni kengaytirmaydi. |
+| Ommaviy faqat oʻqish (`/api/health`, …) | Yoʻq                            | Maxfiy emas; wildcard zararsiz.                                                                                                                                                                                                                                                                                                                                                                                           |
 
 Shunday qilib, `CORS_ALLOW_ALL=true` ning **qoldiq** taʼsiri quyidagilar bilan cheklangan: (a)
 allaqachon autentifikatsiya talab qilmaydigan maʼlumotlarni hisob maʼlumotlarisiz boshqa origindan **oʻqish** va (b)
@@ -108,11 +108,54 @@ belgilash mumkin.
   toʻsiq API kalitidir — shu sababli brauzer va Electron mijozlari oʻzlari allaqachon
   foydalanish huquqiga ega boʻlgan javoblarni oʻqiy olishi uchun ushbu interfeys
   ataylab erkin qilingan.
+  Erkin origin qaytarish faqat sarlavha mavjudligiga emas, balki tasdiqlangan kalitga
+  bogʻliq: `REQUIRE_API_KEY=false` soʻrovni anonim tarzda xizmat qilganda, uning
+  muvaffaqiyatli javobi xavfsiz tarzda rad etuvchi ruxsat roʻyxatini saqlab qoladi.
+  Autentifikatsiya rad javoblari (401) oʻqiladigan boʻlib qoladi, shunda mijozlar bekor
+  qilingan yoki xato yozilgan kalitni koʻrsata oladi (#5242): pipeline'ning oʻz 401 javobi
+  origin qaytarishni saqlaydi, pipeline soʻrovni anonim sifatida xizmat qilgandan keyin
+  kalitni oʻzi rad etadigan marshrut esa (boshqaruv autentifikatsiyasi sozlangan
+  `/v1/models` va `/v1beta/models`, egasiga bogʻlangan `/v1/files`, `/v1/batches`,
+  `/v1/media`, `/v1/session-leases` hamda auto-combo nomzod marshrutlari) shu 401 javobiga
+  `credentialRejectionHeaders()` orqali origin qaytarishni qoʻshadi. Qaytarish
+  soʻrovda hisob maʼlumotlari sarlavhasi (`Authorization`, `x-api-key`, `x-goog-api-key`
+  yoki `auth_token` cookie) borligiga bogʻliq, marshrut ulardan qaysi birini
+  tekshirganiga emas, va u hech qachon `Access-Control-Allow-Credentials` bilan birga
+  kelmaydi; javob tanasi qatʼiy xato konverti hisoblanadi. `/api/v1/` ostidagi
+  `requireManagementAuth()` bilan himoyalangan boshqaruv marshrutlari
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) origin qaytarishni qoʻshmaydi:
+  `REQUIRE_API_KEY=false` boʻlganda ularning 401/403 javoblarini boshqa origindan oʻqib
+  boʻlmaydi.
 - **Cookie seansi (boshqaruv paneli):** xavfsiz tarzda rad etuvchi standart sozlama
   **hamda** umumiy yoʻlda `Access-Control-Allow-Credentials` mavjud emasligi bilan
   himoyalangan. Boshqaruv/boshqaruv paneli manbalarini ruxsat beruvchi hech qanday
   konfiguratsiyaga kiritmang; ular aynan xavfsiz tarzda rad etuvchi holatda qolishi
   kerak.
+
+## WebSocket qoʻl siqishuvlari (`/v1/responses`, `/v1/ws`)
+
+Brauzerlar WebSocket'ga CORS qoʻllamaydi, shuning uchun inferensiya natijasini
+qaytaruvchi WebSocket transportlari qoʻl siqishuvdagi `Origin` qiymatini oʻzlari
+tekshiradi (`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`)
+va OmniRoute `npm start` / `npm run dev` orqali ishga tushirilganda `/v1/ws` hamda
+`/api/v1/ws` koʻprigi, u `/v1/chat/completions`, `/v1/messages` va `/v1/responses`
+javoblarini freymlar sifatida oqim bilan uzatadi. Koʻprik qarorni
+`/api/v1/ws?handshake=1` dan soʻraydi va oʻsha marshrut tekshiruvni bajarmagan
+boʻlsa, ulanishni yangilashni rad etadi. Qoʻl siqishuv quyidagi hollarda qabul qilinadi:
+
+- unda `Origin` sarlavhasi yoʻq (Codex CLI, SDK'lar va brauzer boʻlmagan boshqa mijozlar);
+- `Origin` yuqoridagi ruxsat roʻyxati tomonidan qabul qilingan (`CORS_ALLOWED_ORIGINS`,
+  `corsOrigins` sozlamasi, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` OmniRoute'ning oʻz ommaviy originlaridan biri (sozlangan ommaviy asosiy URL,
+  ishonchli proksi tomonidan uzatilgan origin yoki IP literal yoxud `localhost`
+  sifatida berilgan bevosita loopback/LAN xosti — boshqaruv paneli oʻzgartirish
+  tekshiruvi foydalanadigan nomzodlarning aynan oʻzi); yoki
+- unda HTTP `/v1/*` interfeysidagi kabi yaroqli API kaliti mavjud.
+
+Qolgan barcha holatlar `403 ws_origin_forbidden` oladi. Boshqaruv panelining seans
+cookie fayli begona `Origin` qiymatini istisno qilmaydi, chunki brauzer uni istalgan
+sahifaning socket'iga biriktiradi. Boshqa portdagi `localhost` bir xil origin deb
+hisoblanmaydi; bunday ishlab chiqish originlarini `CORS_ALLOWED_ORIGINS` ga qoʻshing.
 
 ## Misol: OmniRoute oldidagi teskari proksi
 
@@ -148,6 +191,7 @@ Security ichki oynasida) belgilang.
 | Boshqaruv panelidagi ogohlantirish banneri                  | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins maydoni                                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Har bir marshrut uchun Cloud-Agent CORS sozlamasi (istisno) | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket qoʻl siqishuvida `Origin` tekshiruvi              | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Shuningdek qarang
 

@@ -343,6 +343,7 @@ test("backendConfig reads OMNIROUTE_TRANSLATION_* and strips a trailing slash fr
         apiUrl: "http://translation.test/v1",
         apiKey: "sk-test",
         model: "test-model",
+        fallbackModels: [],
         timeoutMs: 60000,
       });
     }
@@ -538,6 +539,7 @@ test("backendConfig omits the key when the variable is unset, empty or blank", (
       apiUrl: "http://translation.test/v1",
       apiKey: "sk-test",
       model: "test-model",
+      fallbackModels: [],
       timeoutMs: 60000,
     });
   });
@@ -547,6 +549,7 @@ test("backendConfig omits the key when the variable is unset, empty or blank", (
         apiUrl: "http://translation.test/v1",
         apiKey: "sk-test",
         model: "test-model",
+        fallbackModels: [],
         timeoutMs: 60000,
       });
     });

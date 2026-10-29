@@ -21,46 +21,49 @@
 
 ## 1. ਤਕਨਾਲੋਜੀ ਸਟੈਕ
 
-| ਸਰੋਕਾਰ       | ਚੋਣ                                                                                                                  |
+| ਪੱਖ          | ਚੋਣ                                                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------------------------------- |
-| ਵੈੱਬ ਫਰੇਮਵਰਕ | **Next.js 16** (App Router, ਸਟੈਂਡਅਲੋਨ ਆਉਟਪੁੱਟ, ਕੋਈ ਗਲੋਬਲ ਮਿਡਲਵੇਅਰ ਨਹੀਂ)                                              |
+| ਵੈੱਬ ਫਰੇਮਵਰਕ | **Next.js 16** (App Router, standalone ਆਉਟਪੁੱਟ, ਕੋਈ ਗਲੋਬਲ middleware ਨਹੀਂ)                                           |
 | ਭਾਸ਼ਾ        | **TypeScript 6.0+** — ਟਾਰਗੇਟ `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                |
 | ਰਨਟਾਈਮ       | **Node.js** `>=22.22.2 <23` ਜਾਂ `>=24.0.0 <27` (`engines` + `SUPPORTED_NODE_RANGE` ਰਾਹੀਂ ਲਾਗੂ)                       |
 | ਡਾਟਾਬੇਸ      | `better-sqlite3` ਰਾਹੀਂ **SQLite** (ਸਿੰਗਲਟਨ, WAL ਜਰਨਲਿੰਗ)                                                             |
 | ਡੈਸਕਟਾਪ      | **Electron 41** + `electron-builder` 26.10 (`electron/` ਵਿੱਚ ਵੱਖਰਾ ਵਰਕਸਪੇਸ)                                          |
 | ਟੈਸਟ         | **Node ਨੇਟਿਵ ਟੈਸਟ ਰਨਰ** (ਯੂਨਿਟ/ਇੰਟੀਗ੍ਰੇਸ਼ਨ), **Vitest** (MCP, autoCombo, ਕੈਸ਼), **Playwright** (e2e + protocols-e2e) |
-| ਬਿਲਡ         | `scripts/build/build-next-isolated.mjs` ਰਾਹੀਂ Next.js ਸਟੈਂਡਅਲੋਨ                                                      |
-| ਲਿੰਟ/ਫਾਰਮੈਟ  | ESLint ਫਲੈਟ ਕੌਂਫਿਗ + Prettier (Husky ਪ੍ਰੀ-ਕਮਿਟ ਰਾਹੀਂ `lint-staged`)                                                  |
+| ਬਿਲਡ         | `scripts/build/build-next-isolated.mjs` ਰਾਹੀਂ Next.js standalone                                                     |
+| ਲਿੰਟ/ਫਾਰਮੈਟ  | ESLint ਫਲੈਟ ਕੌਂਫਿਗ + Prettier (Husky pre-commit ਰਾਹੀਂ `lint-staged`)                                                 |
 | ਮੋਡੀਊਲ ਸਿਸਟਮ | ਹਰ ਥਾਂ ESM (`"type": "module"`)                                                                                      |
-| ਵਰਕਸਪੇਸ      | npm ਵਰਕਸਪੇਸ — `open-sse` ਇਕੱਲਾ ਸਬ-ਵਰਕਸਪੇਸ ਹੈ                                                                         |
+| ਡੈਸ਼ਬੋਰਡ UI  | **Tailwind CSS 4** + ਵੈਂਡਰ ਕੀਤਾ **Keak CI UI Kit** (`packages/ui-kit`), Lucide ਆਇਕਨ — `DESIGN_SYSTEM.md` ਵੇਖੋ        |
+| ਵਰਕਸਪੇਸ      | npm ਵਰਕਸਪੇਸ — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                 |
 
 ਪਾਥ ਉਪਨਾਮ (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-ਡਿਫਾਲਟ HTTP ਪੋਰਟ: **`20128`** (API ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਇੱਕੋ ਪ੍ਰਕਿਰਿਆ ਸਾਂਝੀ ਕਰਦੇ ਹਨ)। ਡਾਟਾ
-ਡਾਇਰੈਕਟਰੀ `DATA_DIR` env var ਹੈ, ਜਿਸ ਦਾ ਡਿਫਾਲਟ `~/.omniroute/` ਹੈ।
+ਡਿਫੌਲਟ HTTP ਪੋਰਟ: **`20128`** (API ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਇੱਕੋ ਪ੍ਰਕਿਰਿਆ ਸਾਂਝੀ ਕਰਦੇ ਹਨ)। ਡਾਟਾ
+ਡਾਇਰੈਕਟਰੀ `DATA_DIR` env var ਹੈ, ਜੋ ਡਿਫੌਲਟ ਤੌਰ 'ਤੇ `~/.omniroute/` ਹੁੰਦੀ ਹੈ।
 
 ---
 
-## 2. ਰਿਪੋਜ਼ਟਰੀ ਲੇਆਉਟ
+## 2. ਰਿਪੋਜ਼ਟਰੀ ਸੰਰਚਨਾ
 
 ```
 OmniRoute/
-├── src/                  Next.js ਐਪਲੀਕੇਸ਼ਨ (App Router, ਲਾਇਬ੍ਰੇਰੀਆਂ, ਡੋਮੇਨ, ਸਰਵਰ, ਸਾਂਝੇ ਹਿੱਸੇ)
+├── src/                  Next.js ਐਪਲੀਕੇਸ਼ਨ (App Router, ਲਾਇਬ੍ਰੇਰੀਆਂ, ਡੋਮੇਨ, ਸਰਵਰ, ਸਾਂਝੇ ਭਾਗ)
 ├── open-sse/             ਸਟ੍ਰੀਮਿੰਗ ਇੰਜਣ ਵਰਕਸਪੇਸ (@omniroute/open-sse)
+├── packages/             ਵਰਕਸਪੇਸ: ui-kit (ਵੈਂਡਰ ਕੀਤਾ Keak CI UI Kit), browser-pool
 ├── electron/             ਡੈਸਕਟਾਪ ਰੈਪਰ (Electron 41 ਮੁੱਖ + ਪ੍ਰੀਲੋਡ)
 ├── bin/                  CLI ਐਂਟਰੀ ਪੁਆਇੰਟ (omniroute, reset-password)
 ├── tests/                ਯੂਨਿਟ, ਇੰਟੀਗ੍ਰੇਸ਼ਨ, e2e, protocols-e2e, ਅਨੁਵਾਦਕ, ਸੁਰੱਖਿਆ, ਫਿਕਸਚਰ
 ├── scripts/              ਬਿਲਡ, ਸਿੰਕ, ਜਾਂਚ, ਮਾਈਗ੍ਰੇਸ਼ਨ ਅਤੇ ਰਨਟਾਈਮ ਸਹਾਇਕ ਸਕ੍ਰਿਪਟਾਂ
 ├── docs/                 ਜਨਤਕ ਦਸਤਾਵੇਜ਼ (ਇਹ ਡਾਇਰੈਕਟਰੀ)
-├── public/               ਸਟੈਟਿਕ ਐਸੈੱਟ, PWA ਮੈਨੀਫੈਸਟ, ਸਰਵਿਸ ਵਰਕਰ
-├── config/               ਰਨਟਾਈਮ ਕੌਂਫਿਗ ਨਮੂਨੇ
+├── public/               ਸਥਿਰ ਐਸੈੱਟ, PWA ਮੈਨੀਫੈਸਟ, ਸਰਵਿਸ ਵਰਕਰ
+├── config/               ਰਨਟਾਈਮ ਸੰਰਚਨਾ ਦੇ ਨਮੂਨੇ
 ├── images/               ਮਾਰਕੀਟਿੰਗ/ਸਕ੍ਰੀਨਸ਼ਾਟ ਐਸੈੱਟ
-├── _ideia/, _references/, _mono_repo/, _tasks/   ਅੰਦਰੂਨੀ ਕੱਚਾ ਕੰਮ / ਯੋਜਨਾਬੰਦੀ (ਵੰਡ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ)
-├── CLAUDE.md             Claude Code ਲਈ ਰਿਪੋ ਨਿਯਮ
+├── _ideia/, _references/, _mono_repo/, _tasks/   ਅੰਦਰੂਨੀ ਅਸਥਾਈ ਕੰਮ / ਯੋਜਨਾਬੰਦੀ (ਸ਼ਿਪ ਨਹੀਂ ਕੀਤੇ ਜਾਂਦੇ)
+├── CLAUDE.md             Claude Code ਲਈ ਰਿਪੋਜ਼ਟਰੀ ਨਿਯਮ
 ├── AGENTS.md             ਏਜੰਟਾਂ ਲਈ ਵਧੇਰੇ ਡੂੰਘਾ ਆਰਕੀਟੈਕਚਰ ਹਵਾਲਾ
 ├── package.json          v3.8.51, ਵਰਕਸਪੇਸ ਰੂਟ
 └── tsconfig.json         ਪਾਥ ਉਪਨਾਮ + ਮੁੱਖ ਕੰਪਾਇਲਰ ਵਿਕਲਪ
@@ -75,29 +78,29 @@ src/
 ├── app/                  App Router ਪੰਨੇ + API ਰੂਟ
 ├── lib/                  ਮੁੱਖ ਲਾਇਬ੍ਰੇਰੀਆਂ (DB, ਪ੍ਰਮਾਣੀਕਰਨ, OAuth, ਹੁਨਰ, ਮੈਮੋਰੀ, …)
 ├── domain/               ਸ਼ੁੱਧ ਡੋਮੇਨ ਪਰਤ (ਨੀਤੀ, ਫਾਲਬੈਕ, ਲਾਗਤ, ਲਾਕਆਉਟ, …)
-├── server/               ਸਿਰਫ਼-ਸਰਵਰ ਮੋਡੀਊਲ (ਅਧਿਕਾਰ, cors, ਪ੍ਰਮਾਣੀਕਰਨ)
-├── shared/               ਕਿਸਮਾਂ, ਸਥਿਰਾਂਕ, ਪ੍ਰਮਾਣੀਕਰਨ, ਇਕਰਾਰਨਾਮੇ, ਉਪਯੋਗਤਾਵਾਂ (ਸੀਮਾਵਾਂ ਤੋਂ ਪਾਰ ਵਰਤੋਂ ਲਈ ਸੁਰੱਖਿਅਤ)
+├── server/               ਸਿਰਫ਼ ਸਰਵਰ ਵਾਲੇ ਮੋਡੀਊਲ (ਪ੍ਰਮਾਣੀਕਰਨ, cors, auth)
+├── shared/               ਕਿਸਮਾਂ, ਸਥਿਰਾਂਕ, ਪ੍ਰਮਾਣੀਕਰਨ, ਕੰਟਰੈਕਟ, ਯੂਟਿਲਿਟੀਆਂ (ਸੀਮਾ-ਪਾਰ ਵਰਤੋਂ ਲਈ ਸੁਰੱਖਿਅਤ)
 ├── mitm/                 CLI ਏਕੀਕਰਨ ਲਈ ਮੈਨ-ਇਨ-ਦ-ਮਿਡਲ ਪ੍ਰੌਕਸੀ ਸਹਾਇਕ
-├── models/               ਸਥਾਨਕ ਮਾਡਲ ਮੈਟਾਡੇਟਾ / ਉਪਨਾਮਕਰਨ
-├── sse/                  ਪੁਰਾਣੇ SSE ਹੈਂਡਲਰ ਜੋ ਹਾਲੇ ਵੀ src/ ਦੇ ਅਧੀਨ ਮੌਜੂਦ ਹਨ (open-sse/ ਨਹੀਂ)
-├── store/                ਕਲਾਇੰਟ-ਪਾਸੇ ਦੇ ਸਥਿਤੀ ਸਟੋਰ
-├── middleware/           ਰੂਟ-ਪੱਧਰੀ ਮਿਡਲਵੇਅਰ ਉਪਯੋਗਤਾਵਾਂ (Next.js ਗਲੋਬਲ ਮਿਡਲਵੇਅਰ ਨਹੀਂ)
+├── models/               ਲੋਕਲ ਮਾਡਲ ਮੈਟਾਡੇਟਾ / ਉਪਨਾਮਕਰਨ
+├── sse/                  ਪੁਰਾਣੇ SSE ਹੈਂਡਲਰ ਜੋ ਅਜੇ ਵੀ src/ ਅਧੀਨ ਹਨ (open-sse/ ਵਿੱਚ ਨਹੀਂ)
+├── store/                ਕਲਾਇੰਟ-ਸਾਈਡ ਸਥਿਤੀ ਸਟੋਰ
+├── middleware/           ਰੂਟ-ਪੱਧਰੀ ਮਿਡਲਵੇਅਰ ਯੂਟਿਲਿਟੀਆਂ (Next.js ਗਲੋਬਲ ਮਿਡਲਵੇਅਰ ਨਹੀਂ)
 ├── scripts/              ਇਨ-ਟ੍ਰੀ ਸਕ੍ਰਿਪਟਾਂ ਜਿਨ੍ਹਾਂ ਨੂੰ ਐਪ ਕੋਡ ਦੁਆਰਾ ਇੰਪੋਰਟ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ
 ├── types/                ਐਂਬੀਐਂਟ ਅਤੇ ਸਾਂਝੀਆਂ TS ਕਿਸਮਾਂ
 ├── i18n/                 ਲੋਕੇਲ ਬੰਡਲ
 ├── instrumentation.ts    Next.js ਇੰਸਟਰੂਮੈਂਟੇਸ਼ਨ ਹੁੱਕ
 ├── instrumentation-node.ts
-└── proxy.ts              ਉੱਪਰੀ-ਪੱਧਰੀ ਪ੍ਰੌਕਸੀ ਬੂਟਸਟਰੈਪ ਸਹਾਇਕ
+└── proxy.ts              ਉੱਚ-ਪੱਧਰੀ ਪ੍ਰੌਕਸੀ ਬੂਟਸਟਰੈਪ ਸਹਾਇਕ
 ```
 
 ### 3.1 `src/app/` — App Router
 
 App Router ਡੈਸ਼ਬੋਰਡ UI ਅਤੇ ਜਨਤਕ/ਪ੍ਰਬੰਧਨ HTTP API ਦੋਵਾਂ ਨੂੰ ਉਪਲਬਧ ਕਰਵਾਉਂਦਾ ਹੈ।
-ਇੱਥੇ **ਕੋਈ ਗਲੋਬਲ ਮਿਡਲਵੇਅਰ ਨਹੀਂ ਹੈ** — ਇੰਟਰਸੈਪਸ਼ਨ ਹਰ ਰੂਟ ਲਈ ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਇੱਥੇ **ਕੋਈ ਗਲੋਬਲ ਮਿਡਲਵੇਅਰ ਨਹੀਂ ਹੈ** — ਇੰਟਰਸੈਪਸ਼ਨ ਹਰ ਰੂਟ ਲਈ ਵੱਖਰੇ ਤੌਰ ’ਤੇ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
-`src/app/` ਦੇ ਅਧੀਨ ਉੱਪਰੀ-ਪੱਧਰੀ ਸੈਗਮੈਂਟ:
+`src/app/` ਅਧੀਨ ਉੱਚ-ਪੱਧਰੀ ਸੈਗਮੈਂਟ:
 
-| ਪਾਥ                                                                           | ਉਦੇਸ਼                                         |
+| ਮਾਰਗ                                                                          | ਉਦੇਸ਼                                         |
 | ----------------------------------------------------------------------------- | --------------------------------------------- |
 | `api/`                                                                        | ਸਾਰੇ HTTP API ਰੂਟ (ਹੇਠਾਂ ਵੇਰਵਾ ਦੇਖੋ)          |
 | `a2a/`                                                                        | A2A JSON-RPC 2.0 ਐਂਡਪੌਇੰਟ (`POST /a2a`)       |
@@ -109,7 +112,7 @@ App Router ਡੈਸ਼ਬੋਰਡ UI ਅਤੇ ਜਨਤਕ/ਪ੍ਰਬੰਧ
 | `status/`, `maintenance/`, `offline/`                                         | ਸੰਚਾਲਨ ਪੰਨੇ                                   |
 | `privacy/`, `terms/`                                                          | ਕਾਨੂੰਨੀ ਪੰਨੇ                                  |
 | `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | ਸਥਿਰ ਗਲਤੀ ਪੰਨੇ                                |
-| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | ਫਰੇਮਵਰਕ ਗਲਤੀ/ਲੋਡਿੰਗ ਸੀਮਾਵਾਂ                   |
+| `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | ਫ੍ਰੇਮਵਰਕ ਗਲਤੀ/ਲੋਡਿੰਗ ਸੀਮਾਵਾਂ                  |
 | `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | ਰੂਟ ਸ਼ੈੱਲ                                     |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — UI ਪੰਨੇ
@@ -121,7 +124,7 @@ App Router ਡੈਸ਼ਬੋਰਡ UI ਅਤੇ ਜਨਤਕ/ਪ੍ਰਬੰਧ
 `translator`, `usage`, `webhooks`, ਨਾਲ ਹੀ ਰੂਟ `page.tsx`, `HomePageClient.tsx`,
 `BootstrapBanner.tsx`।
 
-#### 3.1.2 `src/app/api/` — ਉੱਪਰੀ-ਪੱਧਰੀ API ਸਮੂਹ
+#### 3.1.2 `src/app/api/` — ਉੱਚ-ਪੱਧਰੀ API ਸਮੂਹ
 
 ```
 src/app/api/
@@ -174,7 +177,7 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   ਐਂਬੈਡ ਕੀਤੀ ਸੇਵਾ ਦਾ ਪ੍ਰਬੰਧਨ (9router, cliproxy) — LOCAL_ONLY
+├── services/   ਐਂਬੈਡ ਕੀਤੀਆਂ ਸੇਵਾਵਾਂ ਦਾ ਪ੍ਰਬੰਧਨ (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         OpenAI-ਅਨੁਕੂਲ ਜਨਤਕ API
@@ -186,8 +189,8 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — ਐਂਬੈਡ ਕੀਤੀਆਂ ਸੇਵਾਵਾਂ ਦਾ ਪ੍ਰਬੰਧਨ
 
 9Router ਅਤੇ CLIProxyAPI ਨੂੰ ਇੰਸਟਾਲ ਕਰਨ, ਸ਼ੁਰੂ ਕਰਨ, ਰੋਕਣ ਅਤੇ ਨਿਗਰਾਨੀ ਕਰਨ ਲਈ ਰੂਟ।
-ਸਾਰੇ ਪਾਥ **LOCAL_ONLY** (ਸਿਰਫ਼ ਲੂਪਬੈਕ, ਸਖ਼ਤ ਨਿਯਮ #17) ਵਜੋਂ ਵਰਗੀਕ੍ਰਿਤ ਹਨ, ਕਿਉਂਕਿ ਉਹ
-`npm install` ਚਲਾ ਸਕਦੇ ਹਨ ਅਤੇ ਚਾਈਲਡ ਪ੍ਰਕਿਰਿਆਵਾਂ ਪੈਦਾ ਕਰ ਸਕਦੇ ਹਨ।
+ਸਾਰੇ ਮਾਰਗ **LOCAL_ONLY** (ਸਿਰਫ਼ ਲੂਪਬੈਕ, ਸਖ਼ਤ ਨਿਯਮ #17) ਵਜੋਂ ਵਰਗੀਕ੍ਰਿਤ ਹਨ, ਕਿਉਂਕਿ ਉਹ
+`npm install` ਚਲਾ ਸਕਦੇ ਹਨ ਅਤੇ ਚਾਇਲਡ ਪ੍ਰੋਸੈਸ ਸ਼ੁਰੂ ਕਰ ਸਕਦੇ ਹਨ।
 
 ```
 src/app/api/services/
@@ -197,9 +200,9 @@ src/app/api/services/
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — ਨਵਾਂ ਵਰਜਨ npm install ਕਰੋ
+│   ├── update/route.ts     POST — ਨਵੇਂ ਵਰਜਨ ਲਈ npm install
 │   ├── rotate-key/route.ts POST — ਨਵੀਂ API ਕੁੰਜੀ ਬਣਾਓ + ਮੁੜ-ਚਾਲੂ ਕਰੋ
-│   ├── status/route.ts     GET  — ਲਾਈਵ + DB ਸਥਿਤੀ + ਵਰਜਨ ਮੈਟਾਡਾਟਾ
+│   ├── status/route.ts     GET  — ਲਾਈਵ + DB ਸਥਿਤੀ + ਵਰਜਨ ਮੈਟਾਡੇਟਾ
 │   └── auto-start/route.ts POST — auto_start ਫਲੈਗ ਟੌਗਲ ਕਰੋ
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() ਸਹਾਇਕ
@@ -207,26 +210,26 @@ src/app/api/services/
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — ਨਵਾਂ ਵਰਜਨ npm install ਕਰੋ
-│   ├── status/route.ts     GET  — ਲਾਈਵ + DB ਸਥਿਤੀ + ਵਰਜਨ ਮੈਟਾਡਾਟਾ
+│   ├── update/route.ts     POST — ਨਵੇਂ ਵਰਜਨ ਲਈ npm install
+│   ├── status/route.ts     GET  — ਲਾਈਵ + DB ਸਥਿਤੀ + ਵਰਜਨ ਮੈਟਾਡੇਟਾ
 │   └── auto-start/route.ts POST — auto_start ਫਲੈਗ ਟੌਗਲ ਕਰੋ
 └── [name]/
-    └── logs/route.ts       GET  — SSE ਲੌਗ ਟੇਲ (ਸਾਰੀਆਂ ਸੇਵਾਵਾਂ ਵੱਲੋਂ ਸਾਂਝਾ)
+    └── logs/route.ts       GET  — SSE ਲੌਗ ਟੇਲ (ਸਾਰੀਆਂ ਸੇਵਾਵਾਂ ਵੱਲੋਂ ਸਾਂਝੀ)
 ```
 
 ਸੰਬੰਧਿਤ ਡੈਸ਼ਬੋਰਡ UI:
-`src/app/(dashboard)/dashboard/providers/services/` — ਦੋ-ਟੈਬ ਪੰਨਾ (CLIProxyAPI + 9Router)।
+`src/app/(dashboard)/dashboard/providers/services/` — ਦੋ-ਟੈਬਾਂ ਵਾਲਾ ਪੰਨਾ (CLIProxyAPI + 9Router)।
 9Router ਦੇ ਐਮਬੈੱਡ ਕੀਤੇ UI ਲਈ ਰਿਵਰਸ ਪ੍ਰੌਕਸੀ:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
-ਡੂੰਘਾਈ ਨਾਲ ਜਾਣਕਾਰੀ: `docs/frameworks/EMBEDDED-SERVICES.md`
+ਡੂੰਘੀ ਜਾਣਕਾਰੀ: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 #### 3.1.3 `src/app/api/v1/` — OpenAI-ਅਨੁਕੂਲ ਜਨਤਕ API
 
 ```
 v1/
 ├── accounts/[id]/                       ਖਾਤਾ ਖੋਜ
-├── agents/tasks/[id]/, agents/tasks/    A2A-ਸ਼ੈਲੀ ਦੇ ਟਾਸਕ ਐਂਡਪੌਇੰਟ
+├── agents/tasks/[id]/, agents/tasks/    A2A-ਸ਼ੈਲੀ ਵਾਲੇ ਟਾਸਕ ਐਂਡਪੌਇੰਟ
 ├── api/                                 v1/api ਅਧੀਨ ਉਪਲਬਧ ਅੰਦਰੂਨੀ API ਸਹਾਇਕ
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
@@ -235,20 +238,20 @@ v1/
 ├── embeddings/                          ਐਮਬੈਡਿੰਗਾਂ
 ├── files/[id]/, files/                  Files API
 ├── _helpers/                            ਸਾਂਝੇ ਰੂਟ ਸਹਾਇਕ (ਕੋਈ ਜਨਤਕ URL ਨਹੀਂ)
-├── images/{edits, generations}/         ਚਿੱਤਰ ਜਨਰੇਸ਼ਨ + ਸੰਪਾਦਨ
+├── images/{edits, generations}/         ਚਿੱਤਰ ਬਣਾਉਣਾ + ਸੰਪਾਦਨ
 ├── issues/                              ਟ੍ਰਾਇਆਜ ਸਹਾਇਕ ਐਂਡਪੌਇੰਟ
 ├── management/{proxies}/                v1 ਦੇ ਅੰਦਰ ਪ੍ਰਬੰਧਨ-ਸਕੋਪ ਵਾਲੇ ਰੂਟ
-├── messages/{count_tokens}/             Anthropic-ਸ਼ੈਲੀ ਦੇ ਸੁਨੇਹਿਆਂ ਦੀ ਅਨੁਕੂਲਤਾ
-├── models/                              ਮਾਡਲ ਸੂਚੀਕਰਨ (`route.ts`, `catalog.ts`)
+├── messages/{count_tokens}/             Anthropic-ਸ਼ੈਲੀ ਸੁਨੇਹਾ ਅਨੁਕੂਲਤਾ
+├── models/                              ਮਾਡਲ ਸੂਚੀ (`route.ts`, `catalog.ts`)
 ├── moderations/                         ਮਾਡਰੇਸ਼ਨ
-├── music/                               ਸੰਗੀਤ ਜਨਰੇਸ਼ਨ
+├── music/                               ਸੰਗੀਤ ਬਣਾਉਣਾ
 ├── providers/[provider]/                ਹਰੇਕ ਪ੍ਰਦਾਤਾ ਲਈ ਕਾਰਵਾਈਆਂ
 ├── quotas/{check}                       ਕੋਟਾ ਜਾਂਚਾਂ
-├── registered-keys/                     ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ ਦਾ ਪ੍ਰਬੰਧਨ
+├── registered-keys/                     ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਦਾ ਪ੍ਰਬੰਧਨ
 ├── rerank/                              ਮੁੜ-ਰੈਂਕਿੰਗ
 ├── responses/[...path]/                 OpenAI Responses API (ਕੈਚ-ਆਲ)
 ├── search/                              ਵੈੱਬ ਖੋਜ
-├── videos/                              ਵੀਡੀਓ ਜਨਰੇਸ਼ਨ
+├── videos/                              ਵੀਡੀਓ ਬਣਾਉਣਾ
 ├── ws/                                  WebSocket ਬ੍ਰਿਜ
 └── route.ts                             ਇੰਡੈਕਸ ਹੈਂਡਲਰ
 ```
@@ -257,7 +260,7 @@ v1/
 
 ```
 ਰੂਟ → CORS ਪ੍ਰੀਫਲਾਈਟ → Zod ਬਾਡੀ ਪ੍ਰਮਾਣਿਕਤਾ → ਵਿਕਲਪਿਕ ਪ੍ਰਮਾਣੀਕਰਨ
-    → API ਕੁੰਜੀ ਨੀਤੀ ਲਾਗੂਕਰਨ → ਹੈਂਡਲਰ ਡੈਲੀਗੇਸ਼ਨ (open-sse)
+    → API ਕੁੰਜੀ ਨੀਤੀ ਲਾਗੂ ਕਰਨਾ → ਹੈਂਡਲਰ ਡੈਲੀਗੇਸ਼ਨ (open-sse)
 ```
 
 `v1beta/` Gemini-ਸ਼ੈਲੀ ਦੀ ਅਨੁਕੂਲਤਾ ਸਤਹ ਹੈ (ਇੱਕ ਪਤਲਾ ਰੈਪਰ ਜੋ ਉਸੇ
@@ -268,50 +271,50 @@ v1/
 ਡਾਟਾ, ਸਿੰਕ, OAuth, ਸਕਿੱਲ, ਮੈਮੋਰੀ ਆਦਿ ਨੂੰ ਹਮੇਸ਼ਾ ਇਨ੍ਹਾਂ ਮੋਡੀਊਲਾਂ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕਰੋ।
 ਸਾਰਣੀ ਅਸਲ ਡਾਇਰੈਕਟਰੀਆਂ ਅਤੇ ਮਹੱਤਵਪੂਰਨ ਸਿਖਰ-ਪੱਧਰੀ ਫਾਈਲਾਂ ਨੂੰ ਸਮੂਹਬੱਧ ਕਰਦੀ ਹੈ।
 
-| ਮੋਡੀਊਲ            | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A ਪ੍ਰੋਟੋਕੋਲ ਸਰਵਰ: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ਹੁਨਰ: ਲਾਗਤ ਵਿਸ਼ਲੇਸ਼ਣ, ਸਿਹਤ ਰਿਪੋਰਟ, ਪ੍ਰਦਾਤਾ ਖੋਜ, ਕੋਟਾ ਪ੍ਰਬੰਧਨ, ਸਮਾਰਟ ਰੂਟਿੰਗ, ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `acp/`            | ਏਜੰਟ-ਕੰਟਰੋਲ-ਪ੍ਰੋਟੋਕੋਲ: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `api/`            | ਅੰਦਰੂਨੀ API ਸਹਾਇਕ: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `auth/`           | `managementPassword.ts` (ਪਾਸਵਰਡ ਰੀਸੈੱਟ / ਹੈਸ਼ਿੰਗ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `batches/`        | OpenAI Batches API ਸੇਵਾ (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `catalog/`        | OpenRouter ਕੈਟਾਲਾਗ ਸਿੰਕ (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `cloudAgent/`     | ਕਲਾਉਡ ਏਜੰਟ ਰਜਿਸਟਰੀ: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `combos/`         | ਕੌਂਬੋ ਰਿਜ਼ੋਲਿਊਸ਼ਨ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `compliance/`     | ਆਡਿਟ + ਪ੍ਰਦਾਤਾ ਆਡਿਟ: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `config/`         | ਰਨਟਾਈਮ ਸੰਰਚਨਾ ਜੋੜ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `db/`             | SQLite ਡੋਮੇਨ ਮੋਡੀਊਲ (§3.2.1 ਵੇਖੋ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `display/`        | API ਜਵਾਬਾਂ ਵੱਲੋਂ ਵਰਤੇ ਜਾਂਦੇ UI/ਡਿਸਪਲੇ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `embeddings/`     | ਐਮਬੈਡਿੰਗ ਸੇਵਾ ਰਜਿਸਟਰੀ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `env/`            | ਵਾਤਾਵਰਣ ਲੋਡਿੰਗ + ਅੰਦਰੂਨੀ ਨਿਰੀਖਣ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `evals/`          | ਮੁਲਾਂਕਣ ਰਨਟਾਈਮ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `jobs/`           | ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬਾਂ (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `memory/`         | ਸਥਾਈ ਮੈਮੋਰੀ: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `oauth/`          | OAuth/ਆਯਾਤ ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ਨਾਲ ਹੀ `services/`, `utils/`, ਅਤੇ `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                         |
-| `plugins/`        | ਪਲੱਗਇਨ ਲੋਡਰ (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `providerModels/` | ਪ੍ਰਬੰਧਿਤ ਮਾਡਲ ਜੀਵਨ-ਚੱਕਰ: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `providers/`      | ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `resilience/`     | `settings.ts` — ਸਰਕਿਟ ਬ੍ਰੇਕਰ, ਕੂਲਡਾਊਨ ਅਤੇ ਲੌਕਆਊਟ ਲਈ ਸੈਟਿੰਗਾਂ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `runtime/`        | ਰਨਟਾਈਮ ਫੀਚਰ ਪਛਾਣ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `services/`       | ਐਮਬੈਡ ਕੀਤੀਆਂ ਸੇਵਾਵਾਂ ਦਾ ਫਰੇਮਵਰਕ: `ServiceSupervisor.ts` (ਓਪਰੇਸ਼ਨ ਲੌਕ, ਰਿੰਗ ਬਫਰ ਅਤੇ ਸਿਹਤ ਜਾਂਚਕਰਤਾ ਵਾਲਾ ਆਮ ਚਾਈਲਡ-ਪ੍ਰੋਸੈੱਸ ਸੁਪਰਵਾਈਜ਼ਰ), `bootstrap.ts` (ਪ੍ਰੋਸੈੱਸ-ਪੱਧਰੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਤੇ ਆਟੋ-ਸਟਾਰਟ), `registry.ts` (ਟੂਲ → ਸੁਪਰਵਾਈਜ਼ਰ ਮੈਪ), `apiKey.ts` (AES-256-GCM ਕੁੰਜੀ ਸਟੋਰ), `modelSync.ts` (ਆਵਰਤੀ ਮਾਡਲ ਸਿੰਕ), `ringBuffer.ts` (5 MB ਸਰਕੁਲਰ ਲੌਗ ਬਫਰ), `healthCheck.ts` (HTTP ਸਿਹਤ ਜਾਂਚ), `types.ts`, `embedWsProxy.ts` (WebSocket ਪ੍ਰੌਕਸੀ), `installers/{ninerouter,cliproxy}.ts`। `docs/frameworks/EMBEDDED-SERVICES.md` ਵੇਖੋ                                                                                                                                                         |
-| `agentSkills/`    | ਏਜੰਟ ਹੁਨਰ ਕੈਟਾਲਾਗ + ਜਨਰੇਟਰ: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` ਲਿਖਦਾ ਹੈ), `openapiParser.ts` (OpenAPI ਵਿਸ਼ੇਸ਼ਤਾ ਤੋਂ REST ਐਂਡਪੌਇੰਟ ਕੱਢਦਾ ਹੈ), `cliRegistryParser.ts` (bin/cli-registry ਤੋਂ CLI ਉਪ-ਕਮਾਂਡਾਂ ਕੱਢਦਾ ਹੈ), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport)। REST ਰੂਟਾਂ (`/api/agent-skills/*`), MCP ਟੂਲਾਂ (`omniroute_agent_skills_*`), ਅਤੇ A2A ਹੁਨਰ `list-capabilities` ਵੱਲੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ। [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) ਵੇਖੋ। |
-| `skills/`         | ਹੁਨਰ ਫਰੇਮਵਰਕ: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ਨਾਲ ਹੀ `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `spend/`          | `batchWriter.ts` (ਰਾਈਟ-ਬਿਹਾਈਂਡ ਬਫਰ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `sync/`           | `bundle.ts`, `tokens.ts` (ਕਲਾਉਡ ਸਿੰਕ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `system/`         | ਸਿਸਟਮ-ਪੱਧਰੀ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `translator/`     | ਉੱਚ-ਪੱਧਰੀ ਅਨੁਵਾਦਕ ਜੋੜ (`open-sse/translator/` ਨੂੰ ਸੌਂਪਦਾ ਹੈ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `usage/`          | ਵਰਤੋਂ ਲੇਖਾਕਾਰੀ: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `versionManager/` | ਆਟੋ-ਅੱਪਡੇਟ + ਵਰਜਨ ਮੈਨੀਫੈਸਟ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `ws/`             | WebSocket ਬ੍ਰਿਜ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `zed-oauth/`      | Zed ਐਡੀਟਰ OAuth ਪ੍ਰਵਾਹ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ਮੋਡੀਊਲ            | ਉਦੇਸ਼                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A ਪ੍ਰੋਟੋਕੋਲ ਸਰਵਰ: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ਹੁਨਰ: ਲਾਗਤ ਵਿਸ਼ਲੇਸ਼ਣ, ਸਿਹਤ ਰਿਪੋਰਟ, ਪ੍ਰਦਾਤਾ ਖੋਜ, ਕੋਟਾ ਪ੍ਰਬੰਧਨ, ਸਮਾਰਟ ਰਾਊਟਿੰਗ, ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `api/`            | ਅੰਦਰੂਨੀ API ਸਹਾਇਕ: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `auth/`           | `managementPassword.ts` (ਪਾਸਵਰਡ ਰੀਸੈੱਟ / ਹੈਸ਼ਿੰਗ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `batches/`        | OpenAI Batches API ਸੇਵਾ (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `catalog/`        | OpenRouter ਕੈਟਾਲਾਗ ਸਿੰਕ (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `cloudAgent/`     | ਕਲਾਉਡ ਏਜੰਟ ਰਜਿਸਟਰੀ: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `combos/`         | ਕੰਬੋ ਰਿਜ਼ੋਲਿਊਸ਼ਨ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `compliance/`     | ਆਡਿਟ + ਪ੍ਰਦਾਤਾ ਆਡਿਟ: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `config/`         | ਰਨਟਾਈਮ ਕੌਂਫਿਗ ਗਲੂ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `db/`             | SQLite ਡੋਮੇਨ ਮੋਡੀਊਲ (§3.2.1 ਵੇਖੋ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `display/`        | API ਜਵਾਬਾਂ ਦੁਆਰਾ ਵਰਤੇ ਜਾਂਦੇ UI/ਡਿਸਪਲੇ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `embeddings/`     | ਐਮਬੈਡਿੰਗ ਸੇਵਾ ਰਜਿਸਟਰੀ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `env/`            | Env ਲੋਡਿੰਗ + ਅੰਦਰੂਨੀ ਨਿਰੀਖਣ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `evals/`          | Eval ਰਨਟਾਈਮ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `jobs/`           | ਬੈਕਗ੍ਰਾਊਂਡ ਜੌਬਾਂ (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `memory/`         | ਸਥਾਈ ਮੈਮੋਰੀ: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `oauth/`          | OAuth/ਇੰਪੋਰਟ ਪ੍ਰਦਾਤਾ ਮੋਡੀਊਲ (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, ਨਾਲ ਹੀ `services/`, `utils/`, ਅਤੇ `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                               |
+| `plugins/`        | ਪਲੱਗਇਨ ਲੋਡਰ (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `providerModels/` | ਪ੍ਰਬੰਧਿਤ ਮਾਡਲ ਜੀਵਨ-ਚੱਕਰ: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `providers/`      | ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `resilience/`     | `settings.ts` — ਸਰਕਿਟ ਬ੍ਰੇਕਰ, ਕੂਲਡਾਊਨ ਅਤੇ ਲਾਕਆਉਟ ਲਈ ਸੈਟਿੰਗਾਂ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `runtime/`        | ਰਨਟਾਈਮ ਵਿਸ਼ੇਸ਼ਤਾ ਦੀ ਪਛਾਣ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `services/`       | ਏਮਬੈਡ ਕੀਤੀਆਂ ਸੇਵਾਵਾਂ ਦਾ ਫਰੇਮਵਰਕ: `ServiceSupervisor.ts` (ਓਪਰੇਸ਼ਨ ਲਾਕ, ਰਿੰਗ ਬਫ਼ਰ ਅਤੇ ਸਿਹਤ ਜਾਂਚਕਰਤਾ ਵਾਲਾ ਆਮ ਚਾਈਲਡ-ਪ੍ਰੋਸੈਸ ਸੁਪਰਵਾਈਜ਼ਰ), `bootstrap.ts` (ਪ੍ਰੋਸੈਸ-ਪੱਧਰੀ ਰਜਿਸਟ੍ਰੇਸ਼ਨ ਅਤੇ ਆਟੋਮੈਟਿਕ ਸ਼ੁਰੂਆਤ), `registry.ts` (ਟੂਲ → ਸੁਪਰਵਾਈਜ਼ਰ ਮੈਪ), `apiKey.ts` (AES-256-GCM ਕੁੰਜੀ ਸਟੋਰ), `modelSync.ts` (ਨਿਯਮਿਤ ਮਾਡਲ ਸਿੰਕ), `ringBuffer.ts` (5 MB ਸਰਕੂਲਰ ਲੌਗ ਬਫ਼ਰ), `healthCheck.ts` (HTTP ਸਿਹਤ ਪ੍ਰੋਬ), `types.ts`, `embedWsProxy.ts` (WebSocket ਪ੍ਰੌਕਸੀ), `installers/{ninerouter,cliproxy}.ts`। `docs/frameworks/EMBEDDED-SERVICES.md` ਵੇਖੋ                                                                                                                                                        |
+| `agentSkills/`    | Agent Skills ਕੈਟਾਲਾਗ + ਜਨਰੇਟਰ: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → `skills/{id}/SKILL.md` ਵਿੱਚ ਲਿਖਦਾ ਹੈ), `openapiParser.ts` (OpenAPI ਵਿਸ਼ੇਸ਼ਤਾ ਤੋਂ REST ਐਂਡਪੁਆਇੰਟ ਕੱਢਦਾ ਹੈ), `cliRegistryParser.ts` (bin/cli-registry ਤੋਂ CLI ਸਬਕਮਾਂਡਾਂ ਕੱਢਦਾ ਹੈ), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport)। REST ਰੂਟਾਂ (`/api/agent-skills/*`), MCP ਟੂਲਾਂ (`omniroute_agent_skills_*`) ਅਤੇ A2A ਸਕਿੱਲ `list-capabilities` ਵੱਲੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ। [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) ਵੇਖੋ। |
+| `skills/`         | ਸਕਿੱਲ ਫਰੇਮਵਰਕ: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, ਨਾਲ ਹੀ `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `spend/`          | `batchWriter.ts` (ਰਾਈਟ-ਬਿਹਾਈਂਡ ਬਫ਼ਰ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `sync/`           | `bundle.ts`, `tokens.ts` (ਕਲਾਉਡ ਸਿੰਕ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `system/`         | ਸਿਸਟਮ-ਪੱਧਰੀ ਸਹਾਇਕ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `translator/`     | ਉੱਚ-ਪੱਧਰੀ ਟ੍ਰਾਂਸਲੇਟਰ ਗਲੂ (`open-sse/translator/` ਨੂੰ ਸੌਂਪਦਾ ਹੈ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `usage/`          | ਵਰਤੋਂ ਦਾ ਲੇਖਾ-ਜੋਖਾ: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `versionManager/` | ਆਟੋ-ਅੱਪਡੇਟ + ਵਰਜਨ ਮੈਨੀਫੈਸਟ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `ws/`             | WebSocket ਬ੍ਰਿਜ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `zed-oauth/`      | Zed ਐਡੀਟਰ OAuth ਪ੍ਰਵਾਹ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 
 `src/lib/` ਵਿੱਚ ਉੱਚ-ਪੱਧਰੀ ਫ਼ਾਈਲਾਂ:
 
-- ਪੁਰਾਣਾ `localDb.ts` ਬੈਰਲ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ — ਉਪਭੋਗਤਾ ਖ਼ਾਸ `src/lib/db/*` ਮੋਡੀਊਲਾਂ ਨੂੰ ਸਿੱਧਾ ਇੰਪੋਰਟ ਕਰਦੇ ਹਨ।
+- ਪੁਰਾਣਾ `localDb.ts` ਬੈਰਲ ਹਟਾ ਦਿੱਤਾ ਗਿਆ ਸੀ — ਉਪਭੋਗਤਾ ਖਾਸ `src/lib/db/*` ਮੋਡੀਊਲਾਂ ਨੂੰ ਸਿੱਧਾ ਇੰਪੋਰਟ ਕਰਦੇ ਹਨ।
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,11 +331,11 @@ v1/
 ਸਿੰਗਲਟਨ SQLite ਡਾਟਾਬੇਸ (`core.ts` ਵਿੱਚ `getDbInstance()`, WAL ਜਰਨਲਿੰਗ)।
 **ਰੂਟਾਂ ਜਾਂ ਹੈਂਡਲਰਾਂ ਵਿੱਚ ਕਦੇ ਵੀ ਕੱਚੀ SQL ਨਾ ਲਿਖੋ** — ਇਨ੍ਹਾਂ ਮੋਡੀਊਲਾਂ ਰਾਹੀਂ ਕੰਮ ਕਰੋ।
 
-![ਡਾਟਾਬੇਸ ਸਕੀਮਾ ਦੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ (ਚੁਣੀਆਂ ਹੋਈਆਂ ਮੁੱਖ ਟੇਬਲਾਂ)](../diagrams/exported/db-schema-overview.svg)
+![ਡਾਟਾਬੇਸ ਸਕੀਮਾ ਦੀ ਸੰਖੇਪ ਝਲਕ (ਚੁਣੀਆਂ ਹੋਈਆਂ ਮੁੱਖ ਟੇਬਲਾਂ)](../diagrams/exported/db-schema-overview.svg)
 
 > ਸਰੋਤ: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-ਡੋਮੇਨ ਮੋਡੀਊਲ (ਹਰੇਕ ਇੱਕ ਜਾਂ ਵੱਧ ਟੇਬਲਾਂ ਦਾ ਮਾਲਕ ਹੈ): `apiKeys.ts`, `backup.ts`,
+ਡੋਮੇਨ ਮੋਡੀਊਲ (ਹਰ ਇੱਕ ਇੱਕ ਜਾਂ ਵੱਧ ਟੇਬਲਾਂ ਦਾ ਮਾਲਕ ਹੈ): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -346,8 +349,8 @@ v1/
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`।
 
-`migrations/` ਵਿੱਚ 168 ਵਰਜਨ ਵਾਲੀਆਂ `.sql` ਫ਼ਾਈਲਾਂ (ਆਈਡੈਮਪੋਟੈਂਟ, ਟ੍ਰਾਂਜ਼ੈਕਸ਼ਨਲ) ਹਨ ਅਤੇ
-ਬੂਟ ਸਮੇਂ `migrationRunner.ts` ਵੱਲੋਂ ਚਲਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ।
+`migrations/` ਵਿੱਚ 168 ਵਰਜਨ ਵਾਲੀਆਂ `.sql` ਫ਼ਾਈਲਾਂ (ਆਈਡੈਂਪੋਟੈਂਟ, ਟ੍ਰਾਂਜ਼ੈਕਸ਼ਨਲ) ਹਨ ਅਤੇ
+ਬੂਟ ਸਮੇਂ `migrationRunner.ts` ਦੁਆਰਾ ਚਲਾਈਆਂ ਜਾਂਦੀਆਂ ਹਨ।
 
 ਮਾਈਗ੍ਰੇਸ਼ਨਾਂ ਵਿੱਚ ਬਣਾਈਆਂ ਗਈਆਂ ਟੇਬਲਾਂ (ਕੁੱਲ 123):
 
@@ -365,31 +368,31 @@ v1/
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (ਮੈਮਰੀ ਖੋਜ ਲਈ FTS5 ਵਰਚੁਅਲ ਟੇਬਲਾਂ ਸਮੇਤ)।
+`webhooks` (ਨਾਲ ਹੀ ਮੈਮੋਰੀ ਖੋਜ ਲਈ FTS5 ਵਰਚੁਅਲ ਟੇਬਲਾਂ)।
 
 ### 3.3 `src/domain/` — ਡੋਮੇਨ ਪਰਤ
 
-ਸ਼ੁੱਧ ਵਪਾਰਕ ਤਰਕ, ਕੋਈ I/O ਨਹੀਂ। ਰੂਟਾਂ ਅਤੇ ਹੈਂਡਲਰਾਂ ਵੱਲੋਂ ਇੰਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਸ਼ੁੱਧ ਵਪਾਰਕ ਤਰਕ, ਕੋਈ I/O ਨਹੀਂ। ਰੂਟਾਂ ਅਤੇ ਹੈਂਡਲਰਾਂ ਦੁਆਰਾ ਇੰਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
 | ਫ਼ਾਈਲ                                      | ਉਦੇਸ਼                                                  |
 | ------------------------------------------ | ------------------------------------------------------ |
-| `policyEngine.ts`                          | ਉੱਚ-ਪੱਧਰੀ ਨੀਤੀ ਰਿਜ਼ਾਲਵਰ                                |
-| `fallbackPolicy.ts`                        | ਫ਼ਾਲਬੈਕ ਫ਼ੈਸਲਾ-ਟ੍ਰੀ                                    |
-| `costRules.ts`                             | ਲਾਗਤ ਗਣਨਾ ਦੇ ਨਿਯਮ                                      |
-| `lockoutPolicy.ts`                         | ਮਾਡਲ ਲਾਕਆਊਟ ਫ਼ੈਸਲੇ                                     |
+| `policyEngine.ts`                          | ਸਿਖਰਲੇ ਪੱਧਰ ਦਾ ਪਾਲਿਸੀ ਰਿਜ਼ਾਲਵਰ                         |
+| `fallbackPolicy.ts`                        | ਫਾਲਬੈਕ ਫ਼ੈਸਲਾ ਟ੍ਰੀ                                     |
+| `costRules.ts`                             | ਲਾਗਤ ਦੀ ਗਣਨਾ ਦੇ ਨਿਯਮ                                   |
+| `lockoutPolicy.ts`                         | ਮਾਡਲ ਲਾਕਆਉਟ ਫ਼ੈਸਲੇ                                     |
 | `tagRouter.ts`                             | ਟੈਗ-ਅਧਾਰਿਤ ਰੂਟਿੰਗ                                      |
-| `comboResolver.ts`                         | ਬੇਨਤੀ → ਟੀਚਾ ਸੂਚੀ ਤੋਂ ਕੌਂਬੋ ਰਿਜ਼ੋਲਿਊਸ਼ਨ                |
-| `connectionModelRules.ts`                  | ਪ੍ਰਤੀ-ਕਨੈਕਸ਼ਨ ਮਾਡਲ ਫ਼ਿਲਟਰ                              |
+| `comboResolver.ts`                         | ਬੇਨਤੀ → ਟਾਰਗੇਟ ਸੂਚੀ ਤੋਂ ਕਾਂਬੋ ਰਿਜ਼ੋਲਿਊਸ਼ਨ              |
+| `connectionModelRules.ts`                  | ਹਰੇਕ ਕਨੈਕਸ਼ਨ ਲਈ ਮਾਡਲ ਫਿਲਟਰ                             |
 | `modelAvailability.ts`                     | ਮਾਡਲ ਉਪਲਬਧਤਾ ਜਾਂਚ                                      |
-| `degradation.ts`                           | ਡਿਗਰੇਡਡ-ਮੋਡ ਤਬਦੀਲੀਆਂ                                   |
+| `degradation.ts`                           | ਘਟੇ ਹੋਏ ਮੋਡ ਦੇ ਟ੍ਰਾਂਜ਼ਿਸ਼ਨ                             |
 | `providerExpiration.ts`                    | ਮਿਆਦ ਪੁੱਗੇ ਖਾਤੇ/ਕੁੰਜੀ ਦੀ ਪਛਾਣ                          |
 | `quotaCache.ts`                            | ਕੈਸ਼ ਕੀਤੇ ਕੋਟਾ ਫ਼ੈਸਲੇ                                  |
-| `responses.ts`, `omnirouteResponseMeta.ts` | ਜਵਾਬ ਦੀ ਬਣਤਰ ਲਈ ਸਹਾਇਕ                                  |
+| `responses.ts`, `omnirouteResponseMeta.ts` | ਰਿਸਪਾਂਸ ਆਕਾਰ ਸਹਾਇਕ                                     |
 | `configAudit.ts`                           | ਕੌਂਫਿਗ ਤਬਦੀਲੀ ਆਡਿਟ                                     |
 | `assessment/`                              | ਮਾਡਲ ਮੁਲਾਂਕਣ (RFC ਅਨੁਸਾਰ, ਅੰਸ਼ਕ ਤੌਰ 'ਤੇ ਲਾਗੂ ਕੀਤਾ ਗਿਆ) |
 | `types.ts`                                 | ਸਾਂਝੀਆਂ ਡੋਮੇਨ ਕਿਸਮਾਂ                                   |
 
-### 3.4 `src/server/` — ਸਿਰਫ਼ ਸਰਵਰ ਲਈ
+### 3.4 `src/server/` — ਸਿਰਫ਼ ਸਰਵਰ
 
 ਕਲਾਇੰਟ ਕੰਪੋਨੈਂਟਾਂ ਤੋਂ ਇੰਪੋਰਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ।
 
@@ -397,14 +400,14 @@ v1/
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        ਰੂਟਾਂ ਨੂੰ ਜਨਤਕ ਬਨਾਮ ਪ੍ਰਬੰਧਨ ਵਜੋਂ ਵਰਗੀਕ੍ਰਿਤ ਕਰਦਾ ਹੈ
+│   ├── classify.ts        ਰੂਟਾਂ ਨੂੰ ਜਨਤਕ ਜਾਂ ਪ੍ਰਬੰਧਨ ਵਜੋਂ ਵਰਗੀਕ੍ਰਿਤ ਕਰਦਾ ਹੈ
 │   ├── assertAuth.ts      ਅਸਰਸ਼ਨ ਸਹਾਇਕ
-│   ├── context.ts         ਪ੍ਰਤੀ-ਬੇਨਤੀ authz ਸੰਦਰਭ
+│   ├── context.ts         ਹਰੇਕ ਬੇਨਤੀ ਲਈ authz ਸੰਦਰਭ
 │   ├── headers.ts
 │   ├── pipeline.ts        Authz ਪਾਈਪਲਾਈਨ
-│   ├── policies/          ਠੋਸ ਨੀਤੀਆਂ
+│   ├── policies/          ਠੋਸ ਪਾਲਿਸੀਆਂ
 │   └── types.ts
-└── cors/origins.ts        CORS ਮੂਲ-ਸਥਾਨ ਮਨਜ਼ੂਰੀ-ਸੂਚੀ
+└── cors/origins.ts        CORS ਓਰਿਜਿਨ ਮਨਜ਼ੂਰ-ਸੂਚੀ
 ```
 
 ### 3.5 `src/shared/` — ਸਾਂਝਾ ਕਰਨ ਲਈ ਸੁਰੱਖਿਅਤ
@@ -418,9 +421,9 @@ server/
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
   `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (~80 Zod ਸਕੀਮਾਵਾਂ), `compressionConfigSchemas.ts`,
+- `validation/` — `schemas.ts` (~80 Zod ਸਕੀਮਾਂ), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
-- `contracts/` — npm ਨਾਲ ਵੰਡੇ ਜਾਣ ਵਾਲੇ ਜਨਤਕ API ਇਕਰਾਰਨਾਮੇ।
+- `contracts/` — npm ਨਾਲ ਵੰਡੇ ਜਾਂਦੇ ਜਨਤਕ API ਇਕਰਾਰਨਾਮੇ।
 - `types/` — ਸਾਂਝੀਆਂ TS ਕਿਸਮਾਂ।
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
@@ -429,152 +432,116 @@ server/
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, ਨਾਲ ਹੀ `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/` ਦੇ ਅਧੀਨ ਡੈਸ਼ਬੋਰਡ ਹੁੱਕ/ਕੰਪੋਨੈਂਟ।
+  `a11yAudit.ts`, ਅਤੇ `services/`, `network/`, `middleware/`, `schemas/`, `hooks/`,
+  `components/` ਦੇ ਅਧੀਨ ਡੈਸ਼ਬੋਰਡ ਹੁੱਕ/ਕੰਪੋਨੈਂਟ।
+- `components/` — ਡੈਸ਼ਬੋਰਡ ਕੰਪੋਨੈਂਟ API (`index.tsx` ਬੈਰਲ: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …)। ਪ੍ਰਿਮਿਟਿਵਜ਼ ਵੇਂਡਰ ਕੀਤੀ ਕਿੱਟ ਉੱਤੇ ਅਡੈਪਟਰ ਹਨ
+  (`packages/ui-kit`, ਜਿਸ ਨੂੰ ਕੰਪੋਨੈਂਟ ਸਬਪਾਥ ਰਾਹੀਂ ਇੰਪੋਰਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਜਿਵੇਂ
+  `@omniroute/ui-kit/button`), ਤਾਂ ਜੋ ਸਕ੍ਰੀਨਾਂ ਆਪਣੇ ਇੰਪੋਰਟ ਬਰਕਰਾਰ ਰੱਖਣ ਜਦਕਿ ਮਾਰਕਅੱਪ
+  ਕਿੱਟ ਦਾ ਰਹੇ। ਸ਼ੈੱਲ `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (ਕਿੱਟ `SidebarProvider`/`SidebarInset`) ਹੈ, ਜਿਸ ਨਾਲ `Sidebar.tsx` ਅਤੇ `Header.tsx` ਹਨ; ਆਈਕਨ
+  `Icon.tsx` ਅਤੇ `constants/iconMap.ts` ਰਾਹੀਂ ਜਾਂਦੇ ਹਨ। `docs/architecture/DESIGN_SYSTEM.md` ਵੇਖੋ।
 
 ---
 
 ## 4. `open-sse/` — ਸਟ੍ਰੀਮਿੰਗ ਇੰਜਣ ਵਰਕਸਪੇਸ
 
-`@omniroute/open-sse` ਵਜੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ। ਇਹ ਬੇਨਤੀ
-ਪ੍ਰੋਸੈਸਿੰਗ, ਐਗਜ਼ਿਕਿਊਟਰਾਂ, ਟ੍ਰਾਂਸਲੇਟਰਾਂ, ਸੇਵਾਵਾਂ, ਟ੍ਰਾਂਸਫਾਰਮਰ ਅਤੇ MCP ਸਰਵਰ ਦਾ ਪ੍ਰਬੰਧ ਕਰਦਾ ਹੈ।
+`@omniroute/open-sse` ਵਜੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਵੱਖਰਾ npm ਵਰਕਸਪੇਸ। ਬੇਨਤੀ ਪ੍ਰੋਸੈਸਿੰਗ, ਐਗਜ਼ੀਕਿਊਟਰ, ਅਨੁਵਾਦਕ, ਸੇਵਾਵਾਂ, ਟ੍ਰਾਂਸਫਾਰਮਰ, ਅਤੇ MCP ਸਰਵਰ ਦਾ ਮਾਲਕ ਹੈ।
 
 ```
 open-sse/
-├── index.ts                ਜਨਤਕ ਐਕਸਪੋਰਟ
-├── package.json            ਵਰਕਸਪੇਸ ਮੈਨੀਫੈਸਟ
+├── index.ts                Public exports
+├── package.json            Workspace manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀਆਂ, ਹੈਡਰ ਪ੍ਰੋਫ਼ਾਈਲ, ਪਛਾਣ, …
-├── handlers/               ਬੇਨਤੀ ਹੈਂਡਲਰ (ਚੈਟ, ਐਂਬੈਡਿੰਗ, ਆਡੀਓ, ਚਿੱਤਰ, …)
-├── executors/              150 ਪ੍ਰਦਾਤਾ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (ਐਗਜ਼ਿਕਿਊਟਰ ਕਲਾਸਾਂ + ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ)
-├── translator/             ਫਾਰਮੈਟ ਰੂਪਾਂਤਰਨ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions ਸਟ੍ਰੀਮ ਟ੍ਰਾਂਸਫਾਰਮਰ
-├── services/               80+ ਸੇਵਾ ਮੋਡੀਊਲ (ਕੌਂਬੋ, ਫਾਲਬੈਕ, ਕੋਟੇ, ਪਛਾਣ, …)
-├── utils/                  ਸਟ੍ਰੀਮਿੰਗ ਸਹਾਇਕ, TLS ਕਲਾਇੰਟ, AWS SigV4, ਪ੍ਰੌਕਸੀ ਫੈਚ, …
-└── mcp-server/             MCP ਸਰਵਰ (3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, 110 ਟੂਲ)
+├── config/                 Provider registries, header profiles, identity, …
+├── handlers/               Request handlers (chat, embeddings, audio, image, …)
+├── executors/              156 provider executor modules (executor classes + per-provider helpers)
+├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions stream transformer
+├── services/               80+ service modules (combos, fallback, quotas, identity, …)
+├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
+└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ਹੈਂਡਲਰ                  | ਉਦੇਸ਼                                                              |
+| ਹੈਂਡਲਰ                  | ਮਕਸਦ                                                               |
 | ----------------------- | ------------------------------------------------------------------ |
-| `chatCore.ts`           | ਮੁੱਖ ਚੈਟ ਪਾਈਪਲਾਈਨ (ਕੈਸ਼, ਦਰ ਸੀਮਾ, ਕੌਂਬੋ ਰੂਟਿੰਗ, ਐਗਜ਼ਿਕਿਊਟਰ ਡਿਸਪੈਚ) |
-| `responsesHandler.ts`   | OpenAI Responses API ਦਾ ਐਂਟਰੀ ਪੁਆਇੰਟ                               |
-| `embeddings.ts`         | ਐਂਬੈਡਿੰਗ                                                           |
+| `chatCore.ts`           | ਮੁੱਖ ਚੈਟ ਪਾਈਪਲਾਈਨ (ਕੈਸ਼, ਰੇਟ ਸੀਮਾ, ਕੰਬੋ ਰੂਟਿੰਗ, ਐਗਜ਼ੀਕਿਊਟਰ ਡਿਸਪੈਚ) |
+| `responsesHandler.ts`   | OpenAI ਜਵਾਬ API ਐਂਟਰੀ ਪੁਆਇੰਟ                                       |
+| `embeddings.ts`         | ਏਮਬੈਡਿੰਗਸ                                                          |
 | `imageGeneration.ts`    | ਚਿੱਤਰ ਬਣਾਉਣਾ                                                       |
-| `audioSpeech.ts`        | ਟੈਕਸਟ-ਤੋਂ-ਬੋਲੀ                                                     |
-| `audioTranscription.ts` | ਬੋਲੀ-ਤੋਂ-ਟੈਕਸਟ                                                     |
-| `videoGeneration.ts`    | ਵੀਡੀਓ ਬਣਾਉਣਾ                                                       |
-| `musicGeneration.ts`    | ਸੰਗੀਤ ਬਣਾਉਣਾ                                                       |
-| `rerank.ts`             | ਮੁੜ-ਰੈਂਕਿੰਗ                                                        |
-| `moderations.ts`        | ਮਾਡਰੇਸ਼ਨ                                                           |
+| `audioSpeech.ts`        | ਟੈਕਸਟ-ਟੂ-ਸਪੀਚ                                                      |
+| `audioTranscription.ts` | ਸਪੀਚ-ਟੂ-ਟੈਕਸਟ                                                      |
+| `videoGeneration.ts`    | ਵੀਡੀਓ ਪੀੜ੍ਹੀ                                                       |
+| `musicGeneration.ts`    | ਸੰਗੀਤ ਪੀੜ੍ਹੀ                                                       |
+| `rerank.ts`             | ਮੁੜ ਦਰਜਾਬੰਦੀ                                                       |
+| `moderations.ts`        | ਸੰਜਮ                                                               |
 | `search.ts`             | ਵੈੱਬ ਖੋਜ                                                           |
 | `sseParser.ts`          | SSE ਇਵੈਂਟ ਪਾਰਸਰ                                                    |
-| `usageExtractor.ts`     | ਅੱਪਸਟ੍ਰੀਮ ਸਟ੍ਰੀਮਾਂ ਵਿੱਚੋਂ ਟੋਕਨ ਗਿਣਤੀਆਂ ਕੱਢਣਾ                       |
-| `responseSanitizer.ts`  | ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਗੈਰ-ਜ਼ਰੂਰੀ ਸਮੱਗਰੀ ਹਟਾਉਣਾ                           |
-| `responseTranslator.ts` | ਪ੍ਰਦਾਤਾ ਜਵਾਬ ਅਤੇ ਟ੍ਰਾਂਸਲੇਟਰ ਪਰਤ ਵਿਚਕਾਰ ਜੋੜ                         |
+| `usageExtractor.ts`     | ਟੋਕਨ ਗਿਣਤੀਆਂ ਨੂੰ ਅੱਪਸਟ੍ਰੀਮ ਸਟ੍ਰੀਮ ਤੋਂ ਬਾਹਰ ਕੱਢੋ                    |
+| `responseSanitizer.ts`  | ਸਟ੍ਰਿਪ ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਰੌਲਾ                                        |
+| `responseTranslator.ts` | ਪ੍ਰਦਾਤਾ ਜਵਾਬ ਅਤੇ ਅਨੁਵਾਦਕ ਪਰਤ ਵਿਚਕਾਰ ਗੂੰਦ                           |
 
 ### 4.2 `open-sse/executors/`
 
-150 ਸਿਖਰਲੇ-ਪੱਧਰ ਦੇ ਐਗਜ਼ਿਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਵਿੱਚੋਂ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟਾਂ ਨੂੰ ਛੱਡ ਕੇ — ਇਹ ਗਿਣਤੀ
-`npm run check:docs-counts` ਮਾਪਦਾ ਹੈ)। ਹਰ ਐਗਜ਼ਿਕਿਊਟਰ ਕਲਾਸ ਸਿੱਧੇ ਤੌਰ 'ਤੇ ਜਾਂ `DefaultExecutor`
-ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ਿਕਿਊਟਰ ਰਾਹੀਂ `BaseExecutor` (`base.ts`) ਨੂੰ ਐਕਸਟੈਂਡ ਕਰਦੀ ਹੈ; ਬਾਕੀ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ
-ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, ਫੈਚ/TTS ਅਡੈਪਟਰ, ਵਿਸ਼ੇਸ਼ਤਾ ਹੈਂਡਲਰ)। ਐਗਜ਼ਿਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
+156 ਸਿਖਰ-ਪੱਧਰ ਦੇ ਐਗਜ਼ੀਕਿਊਟਰ ਮੋਡੀਊਲ (`*.ts` ਮਾਇਨਸ `base.ts`, `index.ts` ਅਤੇ ਟੈਸਟ - `npm run check:docs-counts` ਮਾਪ ਦੀ ਗਿਣਤੀ)। ਹਰੇਕ ਐਗਜ਼ੀਕਿਊਟਰ ਕਲਾਸ `BaseExecutor` (`base.ts`), ਸਿੱਧੇ ਜਾਂ `DefaultExecutor` ਜਾਂ ਕਿਸੇ ਹੋਰ ਐਗਜ਼ੀਕਿਊਟਰ ਰਾਹੀਂ ਵਧਾਉਂਦਾ ਹੈ; ਬਾਕੀ ਬਚੇ ਮੋਡੀਊਲ ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ ਹਨ (ਟੂਲ ਸਕੀਮਾ, fetch/TTS ਅਡਾਪਟਰ, ਕੁਇਰਕ ਹੈਂਡਲਰ)। ਐਗਜ਼ੀਕਿਊਟਰਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਹਨ:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, ਨਾਲ ਹੀ `claudeIdentity.ts`
-(ਸਾਂਝਾ ਪਛਾਣ ਸਹਾਇਕ) ਅਤੇ `index.ts` (ਰਜਿਸਟਰੀ)।
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, ਪਲੱਸ `claudeIdentity.ts` (ਸਾਂਝੀ ਪਛਾਣ ਸਹਾਇਕ) ਅਤੇ `index.ts` (ਰਜਿਸਟਰੀ) `devin-desktop`
 
-> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਨਾ ਕੀਤੇ ਪ੍ਰਦਾਤਿਆਂ ਨੂੰ ਆਮ
-> OpenAI-ਅਨੁਕੂਲ ਐਗਜ਼ਿਕਿਊਟਰ ਦੀ ਵਰਤੋਂ ਕਰਕੇ `default.ts` ਦੁਆਰਾ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਪੂਰਾ ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (375 ਪ੍ਰਦਾਤਾ)
-> `src/shared/constants/providers.ts` ਵਿੱਚ ਮੌਜੂਦ ਹੈ।
+> ਨੋਟ: ਇੱਥੇ ਸੂਚੀਬੱਧ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ `default.ts` ਦੁਆਰਾ ਆਮ OpenAI- ਅਨੁਕੂਲ ਐਗਜ਼ੀਕਿਊਟਰ ਦੀ ਵਰਤੋਂ ਕਰਕੇ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਪੂਰਾ ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ (377 ਪ੍ਰਦਾਤਾ) `src/shared/constants/providers.ts` ਵਿੱਚ ਰਹਿੰਦਾ ਹੈ।
 
 ### 4.3 `open-sse/translator/`
 
-ਹੱਬ-ਅਤੇ-ਸਪੋਕ ਅਨੁਵਾਦ (OpenAI ਹੱਬ ਹੈ)।
+ਹੱਬ-ਐਂਡ-ਸਪੋਕ ਅਨੁਵਾਦ (OpenAI ਹੱਬ ਹੈ)।
 
-- **9 ਬੇਨਤੀ ਟ੍ਰਾਂਸਲੇਟਰ** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`।
-- **9 ਜਵਾਬ ਟ੍ਰਾਂਸਲੇਟਰ** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
-  `openai-to-claude`।
-- **9 ਸਹਾਇਕ** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ਨਾਲ ਹੀ
-  ਸਹਾਇਕ ਟੈਸਟ।
-- **ਚਿੱਤਰ ਸਹਾਇਕ** (`translator/image/sizeMapper.ts`)।
-- ਸਿਖਰਲਾ-ਪੱਧਰ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`।
+- **9 ਅਨੁਵਾਦਕਾਂ ਦੀ ਬੇਨਤੀ ਕਰੋ** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **9 ਜਵਾਬ ਅਨੁਵਾਦਕ** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **9 ਸਹਾਇਕ** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ਪਲੱਸ ਸਹਾਇਕ ਟੈਸਟ।
+- **ਚਿੱਤਰ ਸਹਾਇਕ** (`translator/image/sizeMapper.ts`)
+- ਸਿਖਰ-ਪੱਧਰ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream`-ਅਧਾਰਿਤ Responses API ↔ Chat
-  Completions ਕਨਵਰਟਰ (`responses/` ਰੂਟ ਕੈਚ-ਆਲ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ)।
+- `responsesTransformer.ts` — `TransformStream` -based ਜਵਾਬ API ↔ ਚੈਟ ਕੰਪਲੀਸ਼ਨ ਕਨਵਰਟਰ ( `responses/` ਰੂਟ ਕੈਚ-ਆਲ ਦੁਆਰਾ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ)।
 
 ### 4.5 `open-sse/services/`
 
-ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (ਪੂਰੀ ਸੂਚੀ `open-sse/services/` ਅਧੀਨ):
+ਹਾਈਲਾਈਟਸ ( `open-sse/services/` ਅਧੀਨ ਪੂਰੀ ਸੂਚੀ):
 
-| ਚਿੰਤਾ ਦਾ ਖੇਤਰ      | ਫ਼ਾਈਲਾਂ                                                                                                                                                                                                                                                  |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ਕੌਂਬੋ ਰਾਊਟਿੰਗ      | `combo.ts` (20 ਰਣਨੀਤੀਆਂ), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
-| ਆਟੋ ਕੌਂਬੋ ਇੰਜਣ     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ਲਚੀਲਾਪਣ            | `accountFallback.ts` (ਕੂਲਡਾਊਨ + ਲੌਕਆਊਟ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                           |
-| ਕੋਟੇ               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| ਕੈਸ਼ਿੰਗ            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| ਰਾਊਟਿੰਗ ਇੰਟੈਲੀਜੈਂਸ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| ਮਾਡਲ ਪ੍ਰਬੰਧਨ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ਕੰਪ੍ਰੈਸ਼ਨ          | `compression/` — ਪੂਰੀ ਕੰਪ੍ਰੈਸ਼ਨ ਇੰਜਣ ਵਾਇਰਿੰਗ                                                                                                                                                                                                             |
-| ਟੋਕਨ + ਸੈਸ਼ਨ       | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ਟੀਅਰ / ਮੈਨੀਫੈਸਟ    | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / ਨੈੱਟਵਰਕ       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| ਬੈਚ                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| ਵਰਤੋਂ              | `usage.ts`                                                                                                                                                                                                                                               |
+| ਚਿੰਤਾ             | ਫਾਈਲਾਂ                                                                                                                                                                                                                                                   |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ਕੰਬੋ ਰੂਟਿੰਗ       | `combo.ts` (20 ਰਣਨੀਤੀਆਂ), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| ਆਟੋ ਕੰਬੋ ਇੰਜਣ     | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ਲਚਕੀਲਾਪਨ          | `accountFallback.ts` (cooldown + ਲਾਕਆਉਟ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                          |
+| ਕੋਟਾ              | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| ਕੈਸ਼ਿੰਗ           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| ਰੂਟਿੰਗ ਇੰਟੈਲੀਜੈਂਸ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| ਮਾਡਲ ਹੈਂਡਲਿੰਗ     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| ਕੰਪਰੈਸ਼ਨ          | `compression/` — ਪੂਰੀ ਕੰਪਰੈਸ਼ਨ ਇੰਜਣ ਵਾਇਰਿੰਗ                                                                                                                                                                                                              |
+| ਟੋਕਨ + ਸੈਸ਼ਨ      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ਟੀਅਰ / ਪ੍ਰਗਟ      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / ਨੈੱਟਵਰਕ      | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| ਬੈਚ               | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| ਵਰਤੋਂ             | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` ਵਿੱਚ **110 ਵਿਲੱਖਣ ਟੂਲ** ਵਾਇਰ ਕੀਤੇ ਗਏ ਹਨ (`schemas/tools.ts` ਵਿੱਚ 45 ਕੈਨੋਨਿਕਲ +
-  ਮੈਮੋਰੀ, ਸਕਿੱਲਜ਼, GitHub-ਸਕਿੱਲਜ਼, ਪੂਲ, ਗੇਮੀਫਿਕੇਸ਼ਨ, ਪਲੱਗਇਨ, Notion, Obsidian,
-  ਲੋਕਲ-ਕੌਰਪਸ ਅਤੇ ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡੀਊਲ — ਯੂਨੀਅਨ ਨੂੰ `countUniqueMcpTools` ਦੁਆਰਾ ਗਿਣਿਆ ਗਿਆ ਹੈ)।
-- **3 ਟ੍ਰਾਂਸਪੋਰਟ**: stdio, HTTP Streamable, SSE।
-- ਰਨਟਾਈਮ 'ਤੇ **33 ਸਕੋਪ** ਲਾਗੂ ਕੀਤੇ ਜਾਂਦੇ ਹਨ — ਮੂਲ ਸੂਚੀ `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਹੈ, ਪੂਰਾ ਸੈੱਟ ਹਰੇਕ ਟੂਲ ਮੋਡੀਊਲ ਦੁਆਰਾ ਘੋਸ਼ਿਤ ਸਕੋਪਾਂ ਦਾ ਯੂਨੀਅਨ ਹੈ।
-- ਆਡਿਟ ਟੇਬਲ: `mcp_tool_audit` (`audit.ts` ਦੁਆਰਾ ਭਰੀ ਜਾਂਦੀ ਹੈ)।
-- ਫ਼ਾਈਲਾਂ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
-  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
-  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  ਅਤੇ `__tests__/` ਹੇਠ ਟੈਸਟ।
-- ਟੂਲਾਂ ਦੀ ਪੂਰੀ ਸੂਚੀ ਲਈ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਵੇਖੋ।
+- **110 ਵਿਲੱਖਣ ਸਾਧਨ** `server.ts` ਵਿੱਚ ਵਾਇਰਡ ( `schemas/tools.ts` + ਮੈਮੋਰੀ ਵਿੱਚ 45 ਕੈਨੋਨੀਕਲ, ਹੁਨਰ, GitHub-ਹੁਨਰ, ਪੂਲ, ਗੇਮੀਫਿਕੇਸ਼ਨ, ਪਲੱਗਇਨ, Notion, Obsidian, ਲੋਕਲ-ਕਾਰਪਸ ਅਤੇ ਕੰਪਰੈਸ਼ਨ ਮੋਡੀਊਲ — ਯੂਨੀਅਨ ਨੂੰ `countUniqueMcpTools` ਦੁਆਰਾ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ)।
+- **3 ਆਵਾਜਾਈ** : stdio, HTTP ਸਟ੍ਰੀਮ ਕਰਨ ਯੋਗ, SSE.
+- **33 ਸਕੋਪ** ਰਨਟਾਈਮ 'ਤੇ ਲਾਗੂ ਕੀਤਾ ਗਿਆ — `src/shared/constants/mcpScopes.ts` ਵਿੱਚ ਅਧਾਰ ਸੂਚੀ, ਪੂਰਾ ਸੈੱਟ ਹਰੇਕ ਟੂਲ ਮੋਡੀਊਲ ਦੁਆਰਾ ਘੋਸ਼ਿਤ ਕੀਤੇ ਗਏ ਸਕੋਪਾਂ ਦਾ ਯੂਨੀਅਨ ਹੈ।
+- ਆਡਿਟ ਟੇਬਲ: `mcp_tool_audit` ( `audit.ts` ਦੁਆਰਾ ਆਬਾਦੀ)।
+- ਫਾਈਲਾਂ: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`, ਪਲੱਸ `__tests__/` ਦੇ ਅਧੀਨ ਟੈਸਟ।
+- ਪੂਰੇ ਟੂਲ ਕੈਟਾਲਾਗ ਲਈ [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ਦੇਖੋ।
 
 ### 4.7 `open-sse/config/`
 
-ਪ੍ਰੋਵਾਈਡਰ ਰਜਿਸਟਰੀਆਂ (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ਹਰ ਫਾਰਮੈਟ ਲਈ ਮਾਡਲ ਰਜਿਸਟਰੀਆਂ (`audioRegistry.ts`,
-`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
-`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ਪਛਾਣ ਸਹਾਇਕ (`codexIdentity.ts`, `codexInstructions.ts`,
-`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
-`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਸਹਾਇਕ (`credentialLoader.ts`, `codexClient.ts`), ਅਤੇ ਕਲਾਉਡ
-ਅਡਾਪਟਰ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
-`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
-`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)।
+ਪ੍ਰਦਾਤਾ ਰਜਿਸਟਰੀਆਂ (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`), ਪ੍ਰਤੀ-ਫਾਰਮੈਟ ਮਾਡਲ ਰਜਿਸਟਰੀਆਂ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`), ਪਛਾਣ ਸਹਾਇਕ (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`, `cliFingerprints.ts` `defaultThinkingSignature.ts` `toolCloaking.ts`, ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਸਹਾਇਕ (`credentialLoader.ts`, `codexClient.ts`), ਅਤੇ ਕਲਾਉਡ ਅਡਾਪਟਰ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts` `watsonx.ts` `sap.ts`, `ollamaModels.ts`, `errorConfig.ts`, `constants.ts` `registryUtils.ts`
 
 ### 4.8 `open-sse/utils/`
 
-ਸਟ੍ਰੀਮਿੰਗ ਪ੍ਰਿਮਿਟਿਵ ਅਤੇ ਪ੍ਰੋਵਾਈਡਰ ਸਹਾਇਕ: `stream.ts`, `streamHandler.ts`,
-`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
-`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
-`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
-`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
-`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
-`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
-`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
-`ollamaTransform.ts`.
+ਸਟ੍ਰੀਮਿੰਗ ਮੁੱਢਲੇ ਅਤੇ ਪ੍ਰਦਾਤਾ ਸਹਾਇਕ: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`, `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `progressTracker.ts`, `cors.ts` `logger.ts` `error.ts` `requestLogger.ts`, `sleep.ts` `ollamaTransform.ts`
 
 ---
 

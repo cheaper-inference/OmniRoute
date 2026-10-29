@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations, useLocale } from "next-intl";
+import Icon from "@/shared/components/Icon";
 import { getActivityIcon } from "@/lib/audit/activityIcons";
 import { relativeTime } from "@/lib/audit/timeline";
 import type { AuditLogEntry } from "@/lib/compliance/index";
@@ -33,24 +34,17 @@ export default function ActivityItem({ entry, referenceNowMs }: ActivityItemProp
   }
 
   return (
-    <li className="flex items-start gap-3 px-4 py-3 hover:bg-[var(--color-bg-alt)] transition-colors">
-      <span
-        className="material-symbols-outlined flex-shrink-0 mt-0.5 text-[20px] text-[var(--color-accent)]"
-        aria-hidden="true"
-      >
-        {icon}
-      </span>
+    <li className="flex items-start gap-3 px-4 py-3 hover:bg-bg-subtle transition-colors">
+      <Icon name={icon} size={20} className="flex-shrink-0 mt-0.5 text-primary" />
       <div className="flex-1 min-w-0">
-        <p className="text-sm text-[var(--color-text-main)] truncate" title={phrase}>
+        <p className="text-sm text-text-main truncate" title={phrase}>
           {phrase}
         </p>
-        {target && (
-          <p className="text-xs text-[var(--color-text-muted)] truncate mt-0.5">{target}</p>
-        )}
+        {target && <p className="text-xs text-text-muted truncate mt-0.5">{target}</p>}
       </div>
       <time
         dateTime={timestamp}
-        className="flex-shrink-0 text-xs text-[var(--color-text-muted)] whitespace-nowrap mt-0.5"
+        className="flex-shrink-0 text-xs text-text-muted whitespace-nowrap mt-0.5"
         title={timestamp}
       >
         {timeAgo}

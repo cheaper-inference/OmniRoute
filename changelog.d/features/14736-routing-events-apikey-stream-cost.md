@@ -1,0 +1,1 @@
+- Enrich routing events with `apiKeyId` and the real streaming cost: OTel spans now carry `omniroute.api_key.id` and `gen_ai.usage.cost`/`.currency`, and the stream routing event is emitted once the cost lookup lands (null on failure). (#14736 — thanks @kenny000666)

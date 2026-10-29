@@ -1,4 +1,6 @@
 "use client";
+
+import Icon from "@/shared/components/Icon";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Badge, Input, Modal, Select, Toggle } from "@/shared/components";
@@ -232,11 +234,9 @@ export default function EditCompatibleNodeModal({
     >
       <div className="flex flex-col gap-4">
         {isCcCompatible && (
-          <div className="rounded-lg border border-amber-500/25 bg-amber-500/10 px-3 py-2 text-sm text-text-muted">
+          <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-sm text-text-muted">
             <div className="flex items-start gap-2">
-              <span className="material-symbols-outlined mt-0.5 text-[18px] text-amber-500">
-                warning
-              </span>
+              <Icon name="warning" size={18} className="mt-0.5 text-warning" />
               <p>{t("ccCompatibleValidationHint")}</p>
             </div>
           </div>
@@ -319,21 +319,21 @@ export default function EditCompatibleNodeModal({
           onChange={(patch) => setFormData({ ...formData, ...patch })}
           t={t}
         />
-        <button
-          type="button"
-          className="text-sm text-text-muted hover:text-text-primary flex items-center gap-1"
+        <Button
+          variant="ghost"
+          size="sm"
+          className="self-start"
           onClick={() => setShowAdvanced(!showAdvanced)}
           aria-expanded={showAdvanced}
           aria-controls="advanced-settings"
         >
-          <span
+          <Icon
+            name="chevron_right"
+            size={14}
             className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}
-            aria-hidden="true"
-          >
-            ▶
-          </span>
+          />
           {t("advancedSettings")}
-        </button>
+        </Button>
         {showAdvanced && (
           <div id="advanced-settings" className="flex flex-col gap-3 pl-2 border-l-2 border-border">
             <Input
@@ -408,7 +408,7 @@ export default function EditCompatibleNodeModal({
             </Badge>
             {validationResult.error && (
               <span
-                className={`text-sm ${validationResult.valid ? "text-text-muted" : "text-red-500"}`}
+                className={`text-sm ${validationResult.valid ? "text-text-muted" : "text-error"}`}
               >
                 {validationResult.error}
               </span>
@@ -419,7 +419,7 @@ export default function EditCompatibleNodeModal({
           <div
             role="alert"
             aria-live="assertive"
-            className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2"
+            className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2"
           >
             {saveError}
           </div>

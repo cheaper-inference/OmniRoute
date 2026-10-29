@@ -1,10 +1,10 @@
-import { modelPatternMatches } from "@/shared/utils/modelPermissionPatterns";
 import {
   CLAUDE_CODE_PROVIDER_PREFIXES,
   addModelCandidate,
   addProviderAliasScopedCandidates,
+  modelPatternMatches,
   stripExtendedContextSuffix,
-} from "@/shared/utils/modelPermissionCandidates";
+} from "@/domain/modelPermissions";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
 import { matchesSearch } from "@/shared/utils/turkishText";

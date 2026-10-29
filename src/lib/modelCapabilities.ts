@@ -24,7 +24,10 @@ import {
   getReasoningEffortsOverride,
 } from "@/lib/db/modelCapabilityOverrides";
 import { getModelCompatVisionOverride } from "@/lib/db/models/compat";
-import { getProviderNodePrefixSync } from "@/lib/db/providers/nodePrefix";
+import {
+  getProviderNodeIdByPrefixSync,
+  getProviderNodePrefixSync,
+} from "@/lib/db/providers/nodePrefix";
 import { getCustomModelVisionOverride, getSyncedAvailableModelVision } from "@/lib/db/models";
 import type { ModelCapabilityResolutionSnapshot } from "@/lib/modelCapabilityResolutionSnapshot";
 import { resolveAudioCapability, resolveVideoCapability } from "@/lib/modelCapabilityModalities";
@@ -187,7 +190,11 @@ function getRegistryModel(providerIdOrAlias: string | null, modelId: string | nu
   if (!Array.isArray(models)) return null;
   const normalizedModelId =
     providerAlias === "cnl" ? modelId.replace(/-(?:xhigh|high|medium|low)$/i, "") : modelId;
-  return models.find((model) => model?.id === normalizedModelId) || null;
+  return (
+    models.find(
+      (model) => model?.id === normalizedModelId || model?.aliases?.includes(normalizedModelId)
+    ) || null
+  );
 }
 
 /**
@@ -785,15 +792,22 @@ function getCompatVisionOverride(
   snapshot?: ModelCapabilityResolutionSnapshot | null
 ): boolean | null {
   if (!resolved.provider || !resolved.model) return null;
-  const providerCandidates = Array.from(
-    new Set(
-      [
-        ...getNoAuthHydrationProviderIds(resolved.provider),
-        resolved.rawProvider,
-        resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
-      ].filter((value): value is string => Boolean(value))
-    )
-  );
+  const directCandidates = [
+    ...getNoAuthHydrationProviderIds(resolved.provider),
+    resolved.rawProvider,
+    resolved.rawProvider ? resolveProviderAlias(resolved.rawProvider) : null,
+  ].filter((value): value is string => Boolean(value));
+  // A custom node is addressable both by its internal id (combo steps store it,
+  // #2778) and by its user-defined prefix (the catalog id and prefix-addressed
+  // requests use it, see catalog.ts's `alias = prefix || ...`). The override is
+  // keyed by whichever form PUT /api/provider-models was given — normally the
+  // node id — so map every candidate prefix back to its node id. Mapped ids go
+  // LAST: a direct key match always wins, so this can only ADD a resolution that
+  // the direct candidates missed.
+  const mappedNodeIds = directCandidates
+    .map((candidate) => getProviderNodeIdByPrefixSync(candidate))
+    .filter((value): value is string => Boolean(value));
+  const providerCandidates = Array.from(new Set([...directCandidates, ...mappedNodeIds]));
   const modelCandidates = Array.from(
     new Set([resolved.model, resolved.rawModel].filter((value): value is string => Boolean(value)))
   );
@@ -1001,6 +1015,16 @@ export function getResolvedModelCapabilities(
     compatVisionOverride,
     syncedAvailableModelVision
   );
+  // #17289: WorkBuddy's DeepSeek Flash endpoint was observed to accept image_url
+  // (unlike other gateways serving the same upstream id). Provider-scoped, not a
+  // global DeepSeek name heuristic, and only applied while the verdict is still
+  // unknown: an explicit operator override, synced denial or registry value wins.
+  const effectiveSupportsVision =
+    supportsVision === null &&
+    resolved.provider === "workbuddy" &&
+    /^(?:global:|cn:)?deepseek-v4\.1-flash$/i.test(resolved.model ?? "")
+      ? true
+      : supportsVision;
   const supportsAudio = resolveAudioCapability(spec, registryModel, modalitiesInput);
   const supportsVideo = resolveVideoCapability(spec, registryModel, modalitiesInput);
 
@@ -1024,7 +1048,7 @@ export function getResolvedModelCapabilities(
       resolveSyncedEffortTierFallback(synced?.reasoning_efforts),
     reasoningEffortsOverride: reasoningEffortsOverride !== null,
     supportsTools,
-    supportsVision,
+    supportsVision: effectiveSupportsVision,
     supportsAudio,
     supportsVideo,
     supportsMaxTokens: heuristicMaxTokens(lookupKey),

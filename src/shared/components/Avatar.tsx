@@ -1,81 +1,27 @@
 "use client";
 
-import { cn } from "@/shared/utils/cn";
+import { Avatar as KitAvatar, type AvatarSize } from "@omniroute/ui-kit/avatar";
 
-export default function Avatar({ src, alt = "Avatar", name, size = "md", className }) {
-  const sizes = {
-    xs: "size-6 text-xs",
-    sm: "size-8 text-sm",
-    md: "size-10 text-base",
-    lg: "size-12 text-lg",
-    xl: "size-16 text-xl",
-  };
+interface AvatarProps {
+  src?: string;
+  alt?: string;
+  name?: string;
+  size?: AvatarSize;
+  className?: string;
+}
 
-  // Get initials from name
-  const getInitials = (name) => {
-    if (!name) return "?";
-    const parts = name.split(" ");
-    if (parts.length >= 2) {
-      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-    }
-    return name.substring(0, 2).toUpperCase();
-  };
-
-  // Generate color from name
-  const getColorFromName = (name) => {
-    if (!name) return "bg-primary";
-    const colors = [
-      "bg-red-500",
-      "bg-orange-500",
-      "bg-amber-500",
-      "bg-yellow-500",
-      "bg-lime-500",
-      "bg-green-500",
-      "bg-emerald-500",
-      "bg-teal-500",
-      "bg-cyan-500",
-      "bg-sky-500",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-violet-500",
-      "bg-purple-500",
-      "bg-fuchsia-500",
-      "bg-pink-500",
-      "bg-rose-500",
-    ];
-    const index = name.charCodeAt(0) % colors.length;
-    return colors[index];
-  };
-
-  if (src) {
-    return (
-      <div
-        className={cn(
-          "rounded-full bg-cover bg-center bg-no-repeat",
-          "ring-2 ring-white dark:ring-surface-dark shadow-sm",
-          sizes[size],
-          className
-        )}
-        style={{ backgroundImage: `url(${src})` }}
-        role="img"
-        aria-label={alt}
-      />
-    );
-  }
-
+/** Avatar — adapter over the kit `Avatar` (KEA-7886): image, else initials from `name`. */
+export default function Avatar({ src, alt = "Avatar", name, size = "md", className }: AvatarProps) {
   return (
-    <div
-      className={cn(
-        "rounded-full flex items-center justify-center font-semibold text-white",
-        "ring-2 ring-white dark:ring-surface-dark shadow-sm",
-        sizes[size],
-        getColorFromName(name),
-        className
-      )}
-      role="img"
-      aria-label={alt}
-    >
-      {getInitials(name)}
-    </div>
+    <KitAvatar
+      src={src}
+      alt={alt}
+      name={name}
+      fallback={name ? undefined : "?"}
+      size={size}
+      className={className}
+      // Without an image the initials are the only content; name the avatar like the legacy one.
+      {...(src ? {} : { role: "img", "aria-label": alt })}
+    />
   );
 }

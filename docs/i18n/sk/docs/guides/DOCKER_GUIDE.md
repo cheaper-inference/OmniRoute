@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Služba odstráni požiadavku pred stiahnutím obrazu, aby sa neúspešné spustenie neopakovalo v slučke. Bez
 `DOCKER_UPDATE_TRIGGER_FILE` ovládací panel naďalej používa postup s manuálnym príkazom.
 
-## Dostupnosť: predvolená databáza SQLite podporuje jednu repliku
+## Dostupnosť: predvolená SQLite je jedna replika
 
-Štandardná konfigurácia OmniRoute pre Docker/Kubernetes pozostáva z **jedného procesu Node + jedného zapisovacieho procesu SQLite**. Vysoká dostupnosť **nie je v tejto topológii podporovaná**.
+Sklad Docker / Kubernetes OmniRoute je** jeden proces uzla + jeden zapisovač SQLite** . Vysoká dostupnosť je** nie je podporované** na tej topológii.
 
-| Obmedzenie                                            | Dôsledok                                                                                                                                                                                                                                                                                                                                                          |
-| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jeden zapisovací proces                               | **Nespúšťajte** viacero replík nad rovnakým súborom SQLite. Došlo by k poškodeniu databázy.                                                                                                                                                                                                                                                                       |
-| Opätovné vytvorenie/reštart/ukončenie cez HEALTHCHECK | **Úplný výpadok** prebiehajúcich spojení SSE, relácií ovládacieho panela a stavu v pamäti. Každý pripojený klient sa odpojí. Nové požiadavky počas obdobia bez dostupného koncového bodu dostanú od reverzného proxy servera odpoveď **`502 Bad Gateway: Unknown error`**, nie JSON z OmniRoute — klienti to nedokážu odlíšiť od zlyhania poskytovateľa (#11015). |
-| Rovnaká slučka udalostí ako `/healthz`                | Vyťažená operácia katalógu alebo kompresie môže oneskoriť sondy; krátky časový limit potom reštartuje **jedinú** repliku.                                                                                                                                                                                                                                         |
+| Obmedzenie                                       | Dôsledok                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jediný spisovateľ                                | Do** nie** spustiť viacero replík proti rovnakému súboru SQLite. To kazí DB.                                                                                                                                                                                                                                     |
+| Znovu vytvoriť / reštartovať / zabiť HEALTHCHECK | **Úplný výpadok** SSE počas letu, relácií hlavného panela a stavu v pamäti. Každý pripojený klient klesá. Nové požiadavky počas okna prázdneho koncového bodu získajú reverzný proxy**`502 Bad Gateway: Unknown error`** , nie OmniRoute JSON — klienti to nedokážu rozlíšiť od zlyhania poskytovateľa (#11015). |
+| Rovnaká slučka udalostí ako `/healthz`           | Zaneprázdnený katalóg alebo kompresia môže oneskoriť sondy; krátky časový limit a potom sa reštartuje** iba** replika.                                                                                                                                                                                           |
 
-**Matica sond** (pozrite si aj [odporúčania pre sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matrica sondy** (pozri tiež [odporúčania sondy Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Sonda                   | Cieľ                                                                | Nepoužívajte                                                               |
-| ----------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Životnosť               | TCP na `PORT` (predvolene `20128`) alebo jednoduché HTTP `/healthz` | `/api/monitoring/health`                                                   |
-| Pripravenosť            | HTTP `GET /healthz`                                                 | Krátke časové limity, ktoré považujú vyťaženú slučku udalostí za nefunkčnú |
-| Hĺbková/ľudská kontrola | `/api/monitoring/health`                                            | Automatizovanú kontrolu životnosti kubeletu                                |
+| Sonda          | Cieľ                                                            | Nepoužívajte                                                                    |
+| -------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| Živosť         | TCP na `PORT` (predvolené `20128`), alebo mäkké HTTP `/healthz` | `/api/monitoring/health`                                                        |
+| Pripravenosť   | HTTP `GET /healthz`                                             | Krátke časové limity, ktoré považujú slučku udalostí za zaneprázdnenú ako mŕtvu |
+| Hlboké / ľudia | `/api/monitoring/health`                                        | Automatizovaná živosť kubeletu                                                  |
 
-**Aktualizácie:** počítajte s ukončením každej relácie. Ak môžete, odpojte klientov riadeným spôsobom; s predvolenou databázou SQLite nie je priebežná aktualizácia možná. Nastavenie Compose `restart: unless-stopped` spolu s Docker `HEALTHCHECK` tiež nahradí jediný proces, keď kontajner prejde do stavu Unhealthy — s rovnakým rozsahom dopadu.
+**Inovácie:** očakávať, že každá relácia klesne. Vypustite klientov, ak môžete; v predvolenom SQLite nie je žiadna priebežná aktualizácia. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` tiež nahradí jediný proces, keď je kontajner nezdravý – rovnaký rádius výbuchu.
 
-Úryvok konfigurácie Kubernetes pre **jednu repliku** (vyžaduje sa Recreate; nezvyšujte hodnotu `replicas` pre jeden súbor SQLite):
+Hotové manifesty a graf Helm žijú v `deploy/kubernetes/` a `deploy/helm/omniroute/` – pozrite si [príručku nasadenia Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Útržok Kubernetes pre a** jediná replika** (Vyžaduje sa opätovné vytvorenie; nezvyšujte `replicas` proti jednému súboru SQLite ):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-Čakanie `preStop` umožní kube odstrániť koncové body Service pred SIGTERM, takže **nová** prevádzka prestane smerovať na ukončovaný proces. Prebiehajúce SSE `/v1/responses` sa dokončia najneskôr do uplynutia `SHUTDOWN_TIMEOUT_MS` (predvolene 30 s) pomocou oprávnení na prijímanie náročných požiadaviek (#11015). Nové požiadavky, ktoré sa napriek tomu dostanú k procesu, dostanú `503` + `Retry-After: 5`. Medzera s prázdnymi koncovými bodmi pri Recreate, kým nebude náhrada v stave Ready, zostáva úplným výpadkom — ide o topológiu SQLite, nie o nesprávnu konfiguráciu sondy.
+`preStop` spánok umožňuje kube zahodiť koncové body služby pred SIGTERM** nové** doprava prestane zasahovať do umierajúceho procesu. `/v1/responses` SSE počas letu je vyčerpaný až do `SHUTDOWN_TIMEOUT_MS` (predvolených 30 s) prostredníctvom prenájmu vstupného s vysokou gramážou (#11015). Nové požiadavky, ktoré sa stále dostanú do procesu, dostanú `503` + `Retry-After: 5`. Medzera Obnoviť prázdny koncový bod, kým nebude náhrada pripravená, zostáva ťažkým výpadkom – to je topológia SQLite, nie chybná konfigurácia sondy.
 
-Externý Postgres / HA s viacerými zapisujúcimi inštanciami **nie je** zdokumentovaný štandardne podporovaný spôsob nasadenia. Ak potrebujete HA, zachovajte jednu repliku alebo použite topológiu, ktorú projekt samostatne otestoval a zdokumentoval. Práce na podpore Postgres/MySQL sú sledované v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kým nebude táto podpora vydaná, jediným podporovaným spôsobom zvýšenia kapacity **veľkých** `/v1/responses` je N nezávislých procesov (ďalšia časť), nie `replicas > 1` na jednom zväzku.
+Externý Postgres / multi-writer HA je** nie** zdokumentovaná dráha zásob. Ak potrebujete HA, ponechajte si jednu repliku alebo spustite topológiu, ktorú projekt otestoval a zdokumentoval samostatne. Práca Postgres/MySQL žije v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Do tej doby je to jediný podporovaný spôsob množenia** veľký** Kapacita `/v1/responses` je N nezávislých procesov (ďalšia sekcia), nie `replicas > 1` na jednom zväzku.
 
 ## Horizontálne škálovanie: N nezávislých procesov
 

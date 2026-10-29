@@ -25,8 +25,8 @@ test("module exposes the matching helpers + Claude-Code alias sets", () => {
   assert.ok((M.CLAUDE_CODE_SHORT_ALIASES as Set<string>).has("sonnet"));
 });
 
-test("server facade preserves the shared segment wildcard helper", async () => {
-  const shared = await import("../../src/shared/utils/modelPermissionPatterns.ts");
+test("server facade re-exports the domain segment wildcard helper", async () => {
+  const shared = await import("../../src/domain/modelPermissions.ts");
   assert.equal(M.segmentMatchesWildcard, shared.segmentMatchesWildcard);
   assert.equal(M.segmentMatchesWildcard("gpt-*-mini", "gpt-4o-mini"), true);
   assert.equal(M.segmentMatchesWildcard("gpt-*-mini", "gpt-4o"), false);

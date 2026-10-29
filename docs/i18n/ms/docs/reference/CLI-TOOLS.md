@@ -6,15 +6,15 @@
 
 Kemas kini terakhir: 2026-08-23
 
-OmniRoute berintegrasi dengan tiga kategori alat CLI yang merangkumi tiga halaman papan pemuka khusus:
+OmniRoute menyepadukan dengan tiga kategori alat CLI yang tersebar di tiga halaman papan pemuka khusus:
 
-| Halaman        | Laluan                  | Konsep                                                                                   | Bilangan     |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------------------- | ------------ |
-| **CLI Code's** | `/dashboard/cli-code`   | Alat pengekodan yang anda arahkan ke OmniRoute (Klien → CLI → OmniRoute → Penyedia)      | 26           |
-| **CLI Agents** | `/dashboard/cli-agents` | Ejen berautonomi yang anda arahkan ke OmniRoute (aliran sama, skop lebih luas)           | 10           |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI yang OmniRoute mulakan sebagai bahagian belakang melalui stdio/ACP (aliran terbalik) | lihat daftar |
+| Halaman      | Laluan                  | Konsep                                                                                   | Kira              |
+| ------------ | ----------------------- | ---------------------------------------------------------------------------------------- | ----------------- |
+| **Kod CLI**  | `/dashboard/cli-code`   | Alat pengekodan yang anda tunjuk pada OmniRoute (Pembekal → CLI → OmniRoute → Pelanggan) | 26                |
+| **CLI Ejen** | `/dashboard/cli-agents` | Ejen autonomi yang anda tunjuk pada OmniRoute (aliran yang sama, skop yang lebih luas)   | 11                |
+| **ACP Ejen** | `/dashboard/acp-agents` | CLIs yang OmniRoute muncul sebagai hujung belakang melalui stdio/ACP (aliran terbalik)   | lihat pendaftaran |
 
-Laluan legasi diubah hala melalui 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Laluan lama diubah hala melalui 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents (aliran permulaan terbalik):
 
 ---
 
-## Konfigurasi automatik dengan `setup-*`
+## Autokonfigurasi dengan `setup-*`
 
-Anda tidak perlu menulis konfigurasi setiap alat secara manual. OmniRoute menyediakan satu arahan `setup-*`
-bagi setiap CLI yang disokong, yang membaca katalog model **langsung** daripada OmniRoute yang sedang berjalan
-(setempat atau jauh) dan menulis konfigurasi alat tersebut pada mesin anda:
+Anda tidak perlu menulis setiap konfigurasi alat dengan tangan. OmniRoute menghantar arahan `setup-*` setiap CLI yang disokong yang membaca** hidup** katalog model daripada OmniRoute yang sedang berjalan (tempatan atau jauh) dan menulis konfigurasi alat itu sendiri pada mesin anda:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Setiap arahan menerima `--remote <url> --api-key <key>` (konfigurasikan alat setempat untuk menggunakan
-OmniRoute jauh), `--dry-run` (pratonton tanpa menulis), dan `--port`. Alat
-tanpa penemuan automatik model (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) menerima
-`--model <id>` (dan `--yes` untuk pelaksanaan tidak interaktif). `setup-5dive` ialah satu-satunya
-resipi yang tidak menulis di bawah `$HOME`: ia mengkonfigurasi sekumpulan ejen 5dive dengan
-menulis profil pengesahan milik root pada hos kumpulan tersebut, jadi ia melaksanakan semula melalui `sudo`
-dan tidak mempunyai mod jauhnya sendiri. Untuk melancarkan CLI dengan
-persekitaran yang betul disuntik dan tanpa menulis sebarang konfigurasi, gunakan pelancar generik
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — sasaran dan alias berasal daripada `bin/cli/cli-manifest.mjs`); pelancar lama
-bagi setiap alat, `omniroute launch` (Claude Code) dan `omniroute launch-codex`
-(Codex), masih tersedia. Gemini CLI hanya boleh dilancarkan: ia merupakan sasaran `omniroute run`
-tetapi tidak mempunyai resipi `setup-*`/`configure`.
+Masing-masing menerima `--remote <url> --api-key <key>` (konfigurasikan alat setempat terhadap OmniRoute jauh ), `--dry-run` (pratonton tanpa menulis) dan `--port`. Alat tanpa penemuan auto model (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) mengambil `--model <id>` (dan `--yes` untuk larian bukan interaktif). `setup-5dive` ialah satu resipi yang tidak ditulis di bawah `$HOME`: ia mengkonfigurasi armada ejen 5dive dengan menulis profil pengesahan milik akar pada hos armada, jadi ia melaksanakan semula melalui `sudo` dan tidak mempunyai mod jauh sendiri. Untuk melancarkan CLI dengan env yang betul disuntik dan tiada konfigurasi ditulis sama sekali, gunakan pelancar `omniroute run <target>` generik (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — sasaran dan alias berasal dari `bin/cli/cli-manifest.mjs`); pelancar per-alat legasi `omniroute launch` ( Kod Claude ) dan `omniroute launch-codex` (Codex) kekal tersedia. Gemini CLI ialah pelancaran sahaja: ia ialah sasaran `omniroute run` tetapi tidak mempunyai resipi `setup-*`/`configure`.
 
-> **Rujukan lengkap:** jadual induk — perkara yang ditulis oleh setiap arahan, setiap pilihan,
-> setempat berbanding jauh, dan alat yang memerlukan akhiran `/v1` — tersedia dalam
-> **[Integrasi CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Rujukan penuh:** jadual induk — perkara yang ditulis oleh setiap arahan, setiap bendera, tempatan vs jauh, dan alatan yang mahukan akhiran `/v1` — tinggal di** [CLI Integrasi](../guides/CLI-INTEGRATIONS.md)** .
 
-### Menjalankan arahan ini di dalam bekas
+### Menjalankan ini di dalam bekas
 
-Arahan `setup-*` yang dilaksanakan di dalam bekas OmniRoute menulis ke dalam direktori utama
-bekas itu sendiri, yang tidak dibaca oleh mana-mana CLI hos dan akan hilang bersama
-bekas tersebut. OmniRoute mengesan keadaan itu dan keluar dengan kod `2` berserta arahan, bukannya
-menulis. Terdapat dua cara yang disokong untuk meneruskan — pasang CLI pada hos dan
-gunakan `omniroute connect` untuk menyambung ke bekas, atau lekap-ikat direktori konfigurasi dan tetapkan
-`CLI_CONFIG_HOME` (profil compose `host`). Setiap arahan `setup-*`, termasuk
-`omniroute configure` dan `omniroute config set`, menerima
-`--allow-container-write` apabila anda sememangnya mahu mengkonfigurasi CLI milik bekas
-itu sendiri; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` melakukan perkara yang sama untuk
-pelayan. Lihat
-[Panduan Docker → Mengkonfigurasi alat CLI hos](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Perintah `setup-*` yang dilaksanakan di dalam bekas OmniRoute menulis ke dalam rumah bekas itu sendiri, yang tidak dibaca oleh hos CLI dan yang hilang bersama bekas. OmniRoute mengesan itu dan keluar dari `2` dengan arahan dan bukannya menulis. Dua cara yang disokong ke hadapan — pasang CLI pada hos dan `omniroute connect` pada bekas, atau ikat-lekapkan dir konfigurasi dan tetapkan `CLI_CONFIG_HOME` (profil `host` karang). Setiap perintah `setup-*`, tambah `omniroute configure` dan `omniroute config set`, menerima `--allow-container-write` apabila mengkonfigurasi CLIs bekas sendiri ialah apa yang anda maksudkan sebenarnya; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` melakukan perkara yang sama untuk pelayan. Lihat [Panduan Docker → Mengkonfigurasi alat CLI hos](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Titik akhir penerapan** papan pemuka (`POST /api/cli-tools/apply`) menguatkuasakan
-perlindungan yang sama: di dalam bekas, operasi tulis yang sasarannya tidak dilekap-ikat daripada
-hos akan memberikan respons **`422`** dengan `containerEphemeralTarget: true`, teks ralat
-yang selamat dan — untuk alat yang mempunyai resipi hos (claude, codex, opencode, cline,
-kilo, continue) — `hostSetupCommand` (cth. `omniroute setup-opencode`) untuk dijalankan
-pada hos sebagai gantinya; tiada apa-apa yang ditulis. `dryRun: true` terus berfungsi dalam mod
-bekas dan mengembalikan pratonton yang disunting + laluan sasaran tanpa menyentuh cakera. Kandungan
-pratonton bukan konfigurasi yang mengandungi bukti kelayakan untuk disalin atau diimport. Terapkan dengan
-input alat/URL asas/kunci API/model yang asal pada hos, atau gunakan arahan persediaan
-pada hos yang dinyatakan. Lihat [Keselamatan konfigurasi CLI](../security/CLI-CONFIGURATION.md)
-untuk pengepala pratonton dan kontrak permintaan. Tingkah laku ini
-disengajakan dan dilindungi daripada regresi oleh
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — jangan sekali-kali "membaiki" ralat 422
-dengan membuang perlindungan tersebut.
+Papan pemuka itu** gunakan titik akhir** (`POST /api/cli-tools/apply`) menguatkuasakan pengawal yang sama: dalam bekas, tulisan yang sasarannya tidak diikat daripada hos menjawab**`422`** dengan `containerEphemeralTarget: true`, teks ralat selamat dan — untuk alatan dengan resipi hos (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (cth `omniroute setup-opencode`) untuk dijalankan pada hos sebaliknya; tiada yang tertulis. `dryRun: true` terus berfungsi dalam mod kontena dan mengembalikan laluan sasaran + pratonton yang telah disunting tanpa menyentuh cakera. Kandungan pratonton bukanlah konfigurasi yang mengandungi kelayakan untuk disalin atau diimport. Gunakan dengan input tool/base URL/API key/model asal pada hos, atau gunakan arahan persediaan sisi hos yang ditunjukkan. Lihat [keselamatan konfigurasi CLI](../security/CLI-CONFIGURATION.md) untuk pengepala pratonton dan kontrak permintaan. Tingkah laku ini disengajakan dan dikawal regresi oleh `tests/unit/api/cli-tools/apply-container-guard.test.ts` — jangan sekali-kali "membetulkan" a 422 dengan mengalih keluar pengawal.
 
 ---
 
@@ -182,22 +144,23 @@ Semua alat yang dipaparkan dalam `/dashboard/cli-code`. Alat dengan `baseUrlSupp
 Alat dengan `baseUrlSupport: "partial"` memaparkan lencana "⚠ URL Asas Separa" pada kad papan pemuka.
 ---
 
-## 2. Katalog Ejen CLI (10 alat)
+## 2. Katalog Ejen CLI (11 alatan)
 
-Ejen autonomi yang dipaparkan dalam `/dashboard/cli-agents`:
+Ejen autonomi yang muncul dalam `/dashboard/cli-agents`:
 
-| id           | nama             | vendor                   | sokonganBaseUrl | bolehDimulakanAcp |
-| ------------ | ---------------- | ------------------------ | --------------- | ----------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full            | false             |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full            | true              |
-| goose        | Goose            | Block / Linux Foundation | full            | true              |
-| interpreter  | Open Interpreter | OSS                      | full            | true              |
-| warp         | Warp AI          | Warp Inc.                | partial         | true              |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full            | false             |
-| omp          | Oh My Pi         | OSS                      | full            | true              |
-| letta        | Letta CLI        | Letta                    | full            | false             |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full            | false             |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full            | false             |
+| id          | nama               | vendor               | baseUrlSupport | acpSpawnable |
+| ----------- | ------------------ | -------------------- | -------------- | ------------ |
+| ejen hermes | Ejen Hermes        | Penyelidikan Nous    | penuh          | palsu        |
+| openclaw    | OpenClaw           | OSS (P. Steinberger) | penuh          | benar        |
+| angsa       | Angsa              | Yayasan Blok / Linux | penuh          | benar        |
+| jurubahasa  | Jurubahasa Terbuka | OSS                  | penuh          | benar        |
+| meledingkan | Warp AI            | Warp Inc.            | separa         | benar        |
+| dek ejen    | Dek Ejen           | asheshgoplani (OSS)  | penuh          | palsu        |
+| omp         | Oh My Pi           | OSS                  | penuh          | benar        |
+| letta       | Letta CLI          | Letta                | penuh          | palsu        |
+| ejen utama  | Ejen Perdana       | Akal Perdana (OSS)   | penuh          | palsu        |
+| 5menyelam   | 5menyelam          | OSS (5dive-ai)       | penuh          | palsu        |
+| whycodes    | WhyCodes           | Mengapa Perbadanan   | penuh          | palsu        |
 
 ---
 

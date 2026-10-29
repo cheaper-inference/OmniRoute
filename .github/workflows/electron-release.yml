@@ -81,6 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read # find + download the CI run's next-build artifact for this SHA (as npm-publish does)
     steps:
       - uses: actions/checkout@v7
         with:
@@ -96,7 +97,50 @@ jobs:
           ONNXRUNTIME_NODE_INSTALL: "skip"
           NPM_CONFIG_LEGACY_PEER_DEPS: true
 
-      - name: Build Next.js standalone
+      # The Next standalone is platform-independent, and `ci.yml` already built it for this
+      # exact commit on the omni-build runner (the `next-build` artifact every `main` push
+      # produces — the release squash included). Reusing it is what `npm-publish.yml` does
+      # (#8941): the hosted build below needs 18–20 GB and this runner has 16, which is why
+      # the legacy per-leg fallback cost 53 min on macOS-intel and 4h41 on macOS arm64 for
+      # v3.8.52. Only runs of THIS repository's CI are candidates (artifact-poisoning guard,
+      # as in npm-publish); a missing/expired artifact falls back to the full build.
+      - name: Reuse CI's next-build artifact for this commit
+        id: reuse
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          CANDIDATES=$(gh api "repos/$REPO/actions/runs?head_sha=$HEAD_SHA&per_page=100" \
+            --jq '[.workflow_runs[]
+                   | select(.name == "CI"
+                            and .head_repository.full_name == env.REPO)]
+                  | sort_by(.run_started_at) | reverse | .[0:5] | .[].id') || CANDIDATES=""
+          if [ -z "$CANDIDATES" ]; then
+            echo "::notice::no CI run from this repository for $HEAD_SHA — building the standalone here"
+            exit 0
+          fi
+          for candidate in $CANDIDATES; do
+            if gh run download "$candidate" --repo "$REPO" --name next-build --dir "$RUNNER_TEMP/next-build" 2>/dev/null; then
+              tar -xzf "$RUNNER_TEMP/next-build/e2e-build.tar.gz" -C .
+              rm -rf "$RUNNER_TEMP/next-build"
+              if [ -f .build/next/standalone/server.js ]; then
+                echo "reused=true" >> "$GITHUB_OUTPUT"
+                echo "✓ reused next-build from CI run $candidate"
+                exit 0
+              fi
+              echo "  run $candidate unpacked without .build/next/standalone/server.js — trying the next"
+              rm -rf .build/next
+            else
+              echo "  run $candidate carries no usable next-build — trying the next"
+            fi
+          done
+          echo "::notice::none of the candidate runs still carries next-build (1-day retention) — building the standalone here"
+
+      - name: Build Next.js standalone (fallback when no CI artifact)
+        if: steps.reuse.outputs.reused != 'true'
         # webpack, not Turbopack, for the same hosted-runner RAM reason as the
         # linux leg (see the long comment on the fallback step in `build`).
         env:
@@ -346,6 +390,12 @@ jobs:
             [ -f "$file" ] && cp "$file" ../../release-assets/
           done
 
+          # Publish exactly the content-addressed packs named by this build.
+          cd ../..
+          node scripts/release/collect-optional-packs.mjs \
+            .build/electron-standalone/optional-packs.index.json \
+            .build/optional-packs release-assets
+
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
@@ -447,6 +497,7 @@ jobs:
             release-assets/*.deb
             release-assets/*.blockmap
             release-assets/*.yml
+            release-assets/optional-pack-*.tar.gz
             release-assets/*.source.tar.gz
             release-assets/*.source.zip
         env:

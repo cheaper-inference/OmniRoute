@@ -3,6 +3,9 @@
 import { useCallback, useSyncExternalStore } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import Button from "@/shared/components/Button";
 
 const DISMISS_STORAGE_KEY = "omniroute-first-run-readiness-dismissed";
 
@@ -43,7 +46,11 @@ function getServerSnapshot(): boolean {
  */
 export default function FirstRunReadinessCard({ setupComplete }: FirstRunReadinessCardProps) {
   const t = useTranslations("home");
-  const dismissed = useSyncExternalStore(subscribeReadiness, isReadinessDismissed, getServerSnapshot);
+  const dismissed = useSyncExternalStore(
+    subscribeReadiness,
+    isReadinessDismissed,
+    getServerSnapshot
+  );
 
   const dismiss = useCallback(() => {
     try {
@@ -64,49 +71,49 @@ export default function FirstRunReadinessCard({ setupComplete }: FirstRunReadine
   ];
 
   return (
-    <div
+    <Alert
+      variant="info"
       role="region"
       aria-label={t("readinessTitle")}
-      className="mb-4 rounded-xl border border-blue-200 dark:border-blue-500/30 bg-blue-50 dark:bg-blue-500/10 px-5 py-4"
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium uppercase tracking-wide text-blue-700/80 dark:text-blue-300/80">
+      // The kit close button runs the same persisted dismissal as the "readinessDismiss" action.
+      dismissLabel={t("readinessDismiss")}
+      onDismiss={dismiss}
+      className="mb-4"
+      title={
+        <>
+          <span className="block text-xs font-medium uppercase tracking-wide text-info">
             {t("readinessEyebrow")}
-          </p>
-          <h2 className="mt-1 text-lg font-semibold text-blue-950 dark:text-blue-100">
+          </span>
+          <span className="mt-1 block text-lg font-semibold text-text-main">
             {t("readinessTitle")}
-          </h2>
-          <p className="mt-1 text-sm text-blue-900/80 dark:text-blue-200/80">
-            {t("readinessSubtitle")}
-          </p>
-          <ol className="mt-3 space-y-1.5 text-sm text-blue-900 dark:text-blue-100">
+          </span>
+        </>
+      }
+      description={
+        <>
+          <p className="text-sm text-text-muted">{t("readinessSubtitle")}</p>
+          <ol className="mt-3 space-y-1.5 text-sm text-text-main">
             {steps.map((label, index) => (
               <li key={label} className="flex items-center gap-2">
-                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-200/80 dark:bg-blue-400/20 text-xs font-semibold text-blue-800 dark:text-blue-200">
+                <span className="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-info/15 text-xs font-semibold text-info">
                   {index + 1}
                 </span>
                 <span>{label}</span>
               </li>
             ))}
           </ol>
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <Link
-              href="/dashboard/onboarding"
-              className="inline-flex items-center rounded-lg bg-blue-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-400"
-            >
-              {t("readinessContinue")}
-            </Link>
-            <button
-              type="button"
-              onClick={dismiss}
-              className="text-sm font-medium text-blue-800/80 hover:text-blue-950 dark:text-blue-200/80 dark:hover:text-blue-100"
-            >
-              {t("readinessDismiss")}
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+      actions={
+        <>
+          <Link href="/dashboard/onboarding" className={buttonVariants({ size: "sm" })}>
+            {t("readinessContinue")}
+          </Link>
+          <Button variant="ghost" size="sm" onClick={dismiss}>
+            {t("readinessDismiss")}
+          </Button>
+        </>
+      }
+    />
   );
 }
