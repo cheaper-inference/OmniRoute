@@ -152,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Tilgængelige færdigheder
 
-OmniRoute eksponerer 6 A2A-færdigheder, der er konfigureret i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul ligger i `src/lib/a2a/skills/`.
+OmniRoute afslører 6 A2A -færdigheder kablet i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Hvert færdighedsmodul lever i `src/lib/a2a/skills/`.
 
-| Færdighed          | ID                   | Beskrivelse                                                                                                                                          | Tags                       | Eksempler                                   |
-| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
-| Smart Routing      | `smart-routing`      | Dirigerer en prompt gennem den optimale udbyder/kombination ved hjælp af OmniRoutes combo-motor + scoring                                            | routing, providers         | "Dirigér denne prompt via den bedste model" |
-| Quota Management   | `quota-management`   | Rapporterer kvotetilstand pr. udbyder og hjælper kaldere med at beslutte, hvornår der skal begrænses/skiftes                                         | quota, providers           | "Tjek kvoten for anthropic"                 |
-| Provider Discovery | `provider-discovery` | Viser installerede udbydere med funktioner, free-tier-flag og OAuth-status                                                                           | providers, discovery       | "Hvilke udbydere er tilgængelige?"          |
-| Cost Analysis      | `cost-analysis`      | Estimerer omkostningerne ved en forespørgsel/samtale ud fra kataloget + det seneste forbrug                                                          | cost, usage                | "Estimér omkostningerne for denne samtale"  |
-| Health Report      | `health-report`      | Samler circuit breaker-, cooldown- og lockout-tilstand pr. udbyder                                                                                   | health, resilience         | "Vis sundhedsstatus for alle udbydere"      |
-| List Capabilities  | `list-capabilities`  | Returnerer hele Agent Skills-kataloget med 45 poster (23 API + 21 CLI + 1 config) som en markdown-tabel med rå SKILL.md-URL'er til kontekstinjektion | catalog, discovery, skills | "List alle OmniRoute-funktioner"            |
+| Dygtighed          | ID                   | Beskrivelse                                                                                                                                        | Tags                            | Eksempler                               |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
+| Smart Routing      | `smart-routing`      | Leder en prompt gennem den optimale provider/combo ved hjælp af OmniRoute's combo engine + scoring                                                 | routing, udbydere               | "Rut denne prompt via den bedste model" |
+| Kvotestyring       | `quota-management`   | Rapporterer kvotetilstand pr. udbyder, hjælper opkaldere med at beslutte, hvornår de skal throttle/switch                                          | kvote, udbydere                 | "Tjek kvote for antropisk"              |
+| Udbyder opdagelse  | `provider-discovery` | Viser installerede udbydere med funktioner, fritliggende flag, OAuth status                                                                        | udbydere, opdagelse             | "Hvilke udbydere er tilgængelige?"      |
+| Omkostningsanalyse | `cost-analysis`      | Anslår prisen på en request/conversation givet kataloget + seneste brug                                                                            | omkostninger, brug              | "Estimer pris for denne samtale"        |
+| Sundhedsrapport    | `health-report`      | Aggregerer strømafbryder, nedkøling, lockout-tilstand pr. udbyder                                                                                  | sundhed, robusthed              | "Vis sundhedsstatus for alle udbydere"  |
+| Liste muligheder   | `list-capabilities`  | Returnerer hele 45-indgange Agent Skills-katalog (23 API + 21 CLI + 1 config) som en nedskrivningstabel med rå SKILL.md URLs til kontekstinjektion | katalog, opdagelse, færdigheder | "List alle OmniRoute funktioner"        |
 
-> Agent Card bør holdes ajour med det aktuelle katalog over 375 udbydere; udbyderantal og free/no-auth-metadata hentes fra runtime-registret.
+> Agentkortet skal holdes på linje med det levende 377-udbyderkatalog; udbydertal og free/no-auth metadata hentes fra runtime-registret.
 
-### Detaljer om `list-capabilities`-færdigheden
+### `list-capabilities` Færdighedsdetaljer
 
-`list-capabilities`-færdigheden er særligt nyttig for eksterne agenter, der har brug for at opdage, hvad OmniRoute eksponerer, før de sender API-kald. Den returnerer en struktureret markdown-tabel som artefakt:
+`list-capabilities` færdigheden er især nyttig for eksterne agenter, der skal opdage, hvad OmniRoute afslører, før de sender API -opkald. Det returnerer en struktureret markdown-tabelartefakt:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ OmniRoute eksponerer 6 A2A-færdigheder, der er konfigureret i `src/lib/a2a/task
 ...
 ```
 
-Hver række indeholder kolonnen `rawUrl`, så agenter straks kan hente hele SKILL.md. Feltet `metadata.totalSkills` afspejler katalogstørrelsen (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Hver række inkluderer `rawUrl` kolonnen, så agenter straks kan hente den fulde SKILL.md. `metadata.totalSkills` feltet afspejler katalogstørrelsen (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se også [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -201,9 +201,9 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
 
 1. **Opret færdighedsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen i eksisterende færdigheder såsom `smartRouting.ts`.
+   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen for eksisterende færdigheder såsom `smartRouting.ts`.
 
-2. **Registrer handler:** Tilføj en post til `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registrér handler:** Tilføj en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    };
    ```
 
-3. **Eksponér på agentkortet:** Tilføj følgende til `skills`-arrayet i `src/app/.well-known/agent.json/route.ts`:
+3. **Eksponér i agentkortet:** Tilføj til arrayet `skills` i `src/lib/a2a/agentCardMetadata.ts` (som deles af `/.well-known/agent.json` og `/.well-known/agent-card.json`):
 
    ```json
    {
@@ -227,7 +227,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    }
    ```
 
-4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk det vellykkede forløb samt fejlforløbet.
+4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk både det forventede forløb og fejlforløbet.
 
 5. **Dokumentér** den nye færdighed i tabellen `Available Skills` i denne fil.
 
@@ -268,7 +268,7 @@ indsendt → under behandling → fuldført
 
 ## Integrationseksempler
 
-### Python (requests)
+### Python (anmodninger)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (hent)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

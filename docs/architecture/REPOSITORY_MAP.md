@@ -445,7 +445,7 @@ open-sse/
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK engines, registry contract |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema            |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Per-language rule pack inventory         |
-| `RTK_COMPRESSION.md`            | RTK declarative pipeline (49 filters)    |
+| `RTK_COMPRESSION.md`            | RTK declarative pipeline (56 filters)    |
 
 ### Deployment
 

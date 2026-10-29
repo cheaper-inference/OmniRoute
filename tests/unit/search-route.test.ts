@@ -60,6 +60,7 @@ test("v1 search GET lists all search providers", async () => {
     "exa-search",
     "tavily-search",
     "nimble-search",
+    "kimi-search",
     "firecrawl",
     "google-pse-search",
     "linkup-search",

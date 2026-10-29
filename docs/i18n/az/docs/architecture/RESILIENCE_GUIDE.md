@@ -60,179 +60,196 @@ Dördüncü, **seçimə bağlı** qat (`PROVIDER_COOLDOWN_ENABLED`, standart ola
 Həddin altında provayder soyuma hesab **edilmir**; uğurlu nəticə pəncərəni təmizləyir. Bağlantı səviyyəli qeydlər (`provider:connectionId`) əvəzində eksponensial `minRetryCooldownMs → maxRetryCooldownMs` geri çəkilməsini (backoff) saxlayır. Üstələmələr: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Reqressiya mühafizəsi: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Bağlantı soyuması
+## 2. Bağlantı üçün soyuma müddəti (Connection Cooldown)
 
 **Əhatə:** tək provayder bağlantısı/hesabı/açarı.
 
-**Məqsəd:** eyni provayderin digər bağlantıları xidmət göstərməyə davam edərkən problemli bir açarı atlamaq.
+**Məqsəd:** eyni provayder üçün digər bağlantılar xidmət göstərməyə davam edərkən bir qüsurlu açarı atlamaq.
 
-**İmplementasiya:**
+**Tətbiq:**
 
-- Əlçatmaz kimi işarələ: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Əlçatmaz kimi işarələmə: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Seçim: eyni faylda `getProviderCredentials*`
-- Soyuma hesablanması: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Soyuma müddətinin hesablanması: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Parametrlər: `src/lib/resilience/settings.ts`
 
-**Bağlantı üzrə sahələr:**
+**Hər bağlantı üçün sahələr:**
 
-- `rateLimitedUntil` — soyuma bitənə qədərki vaxt möhürü
+- `rateLimitedUntil` — soyuma müddətinin bitdiyi vaxt damğası
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — eksponensial geri çəkilmə sayğacı
+- `backoffLevel` — eksponensial geri çəkilmə (backoff) sayğacı
 
 **Defolt soyuma müddətləri:**
 
 - OAuth baza: 5s
 - API açarı baza: 3s
-- API açarı 429: yuxarı axının `Retry-After`/sıfırlanma başlıqlarını/təhlil edilə bilən sıfırlanma mətnini üstün tutur
+- API açarı 429: yuxarı axının `Retry-After`/reset başlıqlarına/təhlil edilə bilən reset mətninə üstünlük verir
 - Geri çəkilmə: `baseCooldownMs * 2 ** failureIndex`
 
-**Thundering-herd əleyhinə qoruyucu:** eyni vaxtda baş verən uğursuzluqların soyumanı həddindən artıq uzatmasının və ya `backoffLevel`-ı ikiqat artırmasının qarşısını alır.
+**Eyni anda hücum qarşısının alınması (anti-thundering-herd) mühafizəsi:** paralel uğursuzluqların soyuma müddətini həddindən artıq uzatmasının və ya `backoffLevel`-i iki dəfə artırmasının qarşısını alır.
 
-**Konkurentlik-limiti 429-ları geri çəkilmə pilləsini qalxmır.** Gövdəsində konkurentlik limiti bildirən ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) bir `429`, hesabın sağlam, lakin məşğul olduğunu göstərir.
-`checkFallbackError()` səbəb kimi `concurrency_limited` qaytarır: dərhal növbəti bağlantıya keçid et, bu bağlantını sabit `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) və ya yuxarı axının təkrar-cəhd göstərişi müddətində soyut, `backoffLevel`-ı dəyişməz saxla və `skipProviderBreaker` qoy.
-Aşkar kvota gövdəsi yenə də üstün gəlir, ona görə kvota nümunəsinə də uyğun gələn gövdə kvota qərarı olaraq qalır. Aşkarlama: `src/shared/utils/classify429.ts`-də `looksLikeConcurrencyLimit()`;
-qərar: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (breaker-in `FailureKind`-ı) dəyişilməyib və bu gövdələr üçün hələ də `rate_limit` oxuyur.
+**Paralellik limiti olan 429-lar geri çəkilmə pilləsini qalxmır.** Gövdəsində
+paralellik limiti bildirilən bir `429` ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) hesabın sağlam, lakin məşğul olduğu deməkdir.
+`checkFallbackError()` `concurrency_limited` səbəbini qaytarır: dərhal növbəti
+bağlantıya keç, bunu sabit `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) və ya
+yuxarı axının təkrar cəhdlə bağlı göstərişi qədər soyut, `backoffLevel`-i dəyişmə və
+`skipProviderBreaker` təyin et. Aşkar kvota gövdəsi yenə üstün gəlir, ona görə də
+həmçinin kvota nümunəsinə uyğun gələn gövdə kvota qərarı olaraq qalır.
+Aşkarlama: `src/shared/utils/classify429.ts` faylında `looksLikeConcurrencyLimit()`;
+qərar: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (breaker-in
+`FailureKind`-ı) dəyişməz qalır və bu gövdələr üçün hələ də `rate_limit` oxuyur.
 
-**Axın məzmunu dayanmaları hesabı soyutmur.** Məzmun-dayanma watchdog-u
-(`open-sse/utils/streamHandler.ts`) vaxtında heç bir model çıxışı göndərməyən axından əl çəkdikdə, `markAccountUnavailable()` xətanı bağlantıya qeyd edir, lakin soyuma təyin etmir: dayanma həmin sorğuya aiddir — çox vaxt bu, hələ heç bir çıxış verməmiş uzun bir reasoning dövrüdür. Operatorlar `resilienceSettings.streamStallCooldown.enabled` (defolt `false`) ilə bu davranışı yenidən aktivləşdirə bilərlər.
+**Axın məzmununun donması hesabı soyutmur.** Məzmun donması müşahidəçisi
+(`open-sse/utils/streamHandler.ts`) vaxtında heç bir model çıxışı göndərməmiş axından
+imtina etdikdə, `markAccountUnavailable()` xətanı bağlantıda qeyd edir, lakin heç bir
+soyuma müddəti təyin etmir: donma həmin sorğuya aiddir, çox vaxt bu, hələ
+çıxışı olmayan uzun bir düşünmə (reasoning) mərhələsidir. Operatorlar
+`resilienceSettings.streamStallCooldown.enabled` ilə yenidən aktivləşdirə bilərlər
+(defolt `false`).
 
-**Reasoning freymləri məzmun-dayanma büdcəsini yenidən başladır.** Reasoning modeli ilk görünən tokenindən əvvəl dəqiqələrlə düşünə bilər: Claude düşünmə mətni boş ola bilən `thinking_delta` freymləri axıdır, Responses API isə bir-birinin ardınca reasoning elementləri axıdır. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) bu freymləri tanıyır və watchdog dövrü ləğv etmək əvəzinə hər freymdə büdcəsini yenidən başladır. Onlar yenə də model çıxışı sayılmır, ona görə yalnız reasoning ilə başa çatan dövr boş kimi bildirilir, reasoning-i dayandırıb yalnız heartbeat göndərən dövr isə yenə watchdog-u işə salır.
+**`p2c` hesab seçimi üçün opt-in gecikmə (latency) siqnalı.** Göndərilən hər cəhd
+hər bağlantı (və hər bağlantı + model) üzrə ilk bayta qədər vaxtını və nəticəsini yaddaşda
+sürüşən pəncərədə qeyd edir: 15 dəqiqə ərzində son 20 nümunə
+(`open-sse/services/connectionLatencyTracker.ts`, `src/sse/handlers/chatHelpers.ts` faylında
+`safeLogEvents()`-dən qeyd edilir). `resilienceSettings.p2cLatency.weight` `0`-dan yuxarı olduqda
+(diapazon 0-20, defolt `0` = söndürülüb), `src/sse/services/auth.ts` faylındakı
+`compareP2CConnections()` cütlükdəki hər namizədə `weight` qədər bala qədər əlavə edir.
+Bunun yarısı daha sürətli namizədə nisbət olaraq gecikmədən (iki qat yavaş olmaq tam yarısını
+götürür), yarısı isə sürüşən xəta dərəcəsindən gəlir. Bu ifadə yalnız hər iki namizədin ən azı 3
+nümunəsi olduqda tətbiq olunur, ona görə də yeni hesablar cərimələnmir, və onun tavanı
+kvota-bloklanmış və kvota-tükənmiş cərimələrindən aşağı qalır. Özünə məxsus dövrə (circuit)
+əlavə etmir: uğursuz hesablar yenə də soyuma, kilidlənmə və breaker qatları tərəfindən idarə
+olunur. Bunu `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }` ilə təyin edin.
 
-Qeyri-boş imzalı Kiro binar `reasoningContentEvent` freymləri bu reasoning aktivliyini executor vasitəsilə boş `reasoning_content` deltası kimi qoruyub saxlayır. İmza ötürülmür. Metadata, natamam freymlər və boş imzalar məzmun büdcəsini yenidən başlatmır; müstəqil aktiv-axın taymautu və müştəri ləğvi yenə də qüvvədə qalır (`open-sse/executors/kiro/reasoning.ts`).
+**Düşünmə (reasoning) freymləri məzmun donması büdcəsini yenidən başladır.** Düşünmə modeli
+ilk görünən tokenindən əvvəl dəqiqələrlə düşünə bilər: Claude `thinking_delta` freymləri axıdır,
+onların düşünmə mətni boş ola bilər, və Responses API bir-birinin ardınca düşünmə elementləri
+axıdır. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) bu freymləri tanıyır,
+və müşahidəçi (watchdog) mərhələni ləğv etmək əvəzinə hər birində büdcəsini yenidən başladır.
+Onlar yenə də model çıxışı deyil, ona görə də yalnız düşünmə ilə bitən mərhələ yenə
+boş kimi bildirilir, və düşünməni dayandırıb yalnız heartbeat göndərən mərhələ yenə də
+müşahidəçini işə salır.
 
-**Terminal vəziyyətlər (soyuma DƏYİL):**
+Kiro-nun boş olmayan imzalı binar `reasoningContentEvent` freymləri bu düşünmə
+fəaliyyətini executor vasitəsilə boş `reasoning_content` deltası kimi saxlayır. İmza
+yönləndirilmir. Metadata, natamam freymlər və boş imzalar məzmun büdcəsini yenidən
+başlatmır; müstəqil aktiv-axın vaxt aşımı və müştəri ləğvi yenə də qüvvədədir
+(`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — qadağan açar söz / hesab-bloklanması aşkarlanması ilə təyin olunur (bax: [BAN_DETECTION](../security/BAN_DETECTION.md)), həmçinin üç ardıcıl yuxarı axın sorğu-səviyyəli rədd ilə (`request_rejected`, məs. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tək bir rədd bağlantını yalnız soyudur
-- `expired` (məhdud sayda təkrar cəhddən sonra — eksponensial geri çəkilmə ilə `EXPIRED_RETRY_MAX = 3` — terminal vəziyyətə keçir, belə ki, hesab həmişəlik deaktiv edilməzdən əvvəl keçici OAuth xətaları öz-özünə sağala bilər)
+**Terminal vəziyyətlər (soyuma müddəti DEYİL):**
+
+- `banned` — qadağan edilmiş açar söz / hesab-qadağası aşkarlaması tərəfindən təyin edilir (bax [BAN_DETECTION](../security/BAN_DETECTION.md)), və üç ardıcıl yuxarı axın sorğu səviyyəli rədd etmə ilə (`request_rejected`, məs. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tək bir rədd yalnız bağlantını soyudur
+- `expired` (məhdud sayda təkrar cəhddən sonra terminal vəziyyətə keçir — `EXPIRED_RETRY_MAX = 3` eksponensial geri çəkilmə ilə — belə ki, müvəqqəti OAuth xətaları hesab həmişəlik deaktivləşdirilməzdən əvvəl öz-özünə sağala bilsin)
 - `credits_exhausted`
 
-Bunlar etimadnamələr dəyişənə və ya operator onları sıfırlayana qədər qalır. Terminal vəziyyətləri keçici soyuma vəziyyəti ilə əvəz etməyin.
+Bunlar hüquqlar (credentials) dəyişənə və ya operator sıfırlayana qədər qalır. Terminal vəziyyətləri müvəqqəti soyuma vəziyyəti ilə üstələməyin.
 
-**Tənbəl (lazy) bərpa:** `rateLimitedUntil` vaxtı keçdikdə bağlantı yenidən uyğun olur. Uğurlu istifadə zamanı `clearAccountError()` bütün xəta sahələrini təmizləyir.
+**Tənbəl bərpa:** `rateLimitedUntil` keçdikdə, bağlantı yenidən uyğun olur. Uğurlu istifadədə, `clearAccountError()` bütün xəta sahələrini təmizləyir.
 
-### Claude OAuth istifadə divarı: aşağı prioritetli zolaq + sessiya limitinin sıfırlanması
+### Claude OAuth istifadə divarı: aşağı prioritetli zolaq + sessiya-limiti sıfırlanması
 
-**Əhatə:** bir Claude abunə (OAuth) bağlantısı. Hər iki xüsusiyyət **bağlantı üzrə könüllü (opt-in)** qoşulur (Bağlantını redaktə et → Claude bölməsi → `providerSpecificData` daxilində `lowPriorityMode` / `autoLimitReset`, hər ikisi defolt olaraq sönülüdür) və Claude Code-un `/low-priority` və `/limit-reset` əmrlərini əks etdirir (wire kontraktı Claude Code 2.1.263-dən götürülüb).
-
-**İmplementasiya:**
-
-- Vəziyyət maşını + cavab təsnifatı: `open-sse/services/claudeLowPriority.ts`
-- Sıfırlanma statusu/tələb klienti: `open-sse/services/claudeLimitReset.ts`
-- Executor hook-u (başlıq injeksiyası + eyni hesabla təkrar cəhd): `open-sse/executors/base.ts::execute()`
-- Könüllü qoşulmanın saxlanması: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
-
-**Tətik:** 5 saatlıq istifadə divarı — başlıqlarında `anthropic-ratelimit-unified-status: rejected` və hesab uyğun olduqda `anthropic-ratelimit-unified-slow-offer: treatment` daşıyan bir `429`. İlk divar 429-dan əvvəl heç nə göndərilmir; unified başlıqları olmayan partlayış 429-u normal soyuma yolundan keçir.
-
-**Aşağı prioritetli zolaq** (`lowPriorityMode`):
-
-- Divar 429 zamanı icraedici təklifi qəbul edir və dərhal **eyni**
-  hesabı `anthropic-usage-limit: slow` ilə yenidən sınayır; zolaq elan edilmiş
-  `anthropic-ratelimit-unified-reset` (+60 san. güzəşt) vaxtına qədər aktiv qalır və həmin
-  müddətdə hər sorğu başlığı daşıyır. Yaxalanmış 429 `handleChatCore`-a heç vaxt çatmır,
-  buna görə bağlantı **soyuma** vəziyyətinə keçirilməz və başqa bağlantı ilə əvəzlənməz.
-- Sonrakı cavablarda `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
-  zolağı saxlayır; `slot_busy` (429) və ya `529` serverin
-  `anthropic-ratelimit-unified-slow-retry-after` dəyəri qədər gözləyir (standart 20 san.,
-  5–600 san. aralığında məhdudlaşdırma, ±30% təsadüfi dəyişmə) və yenidən sınayır; bu,
-  `anthropic-ratelimit-unified-slow-max-wait` ilə məhdudlaşdırılır (standart 20 dəq.,
-  1 dəq.–6 saat aralığında məhdudlaşdırma) — bu müddət keçdikdə zolaq başa çatır və
-  yenidən qəbul edilməni 10 dəqiqəlik soyuma bloklayır. Gözləmə əlavə olaraq sorğunun öz
-  upstream başlanğıc vaxt aşımından (`resolveFetchStartTimeout`, standart olaraq 10 dəq.)
-  5 saniyəlik fərq çıxıldıqdan sonra qalan müddətlə də məhdudlaşdırılır: bu məhdudiyyət
-  olmasa, standart 20 dəqiqəlik maksimum gözləmə sorğunu keçər və yuxu gözləmə zamanı
-  yarıda dayandırılardı; nəticədə normal `max_wait` sonu və soyuma əvəzinə
-  `TimeoutError` üzə çıxardı.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 saatlıq pəncərənin
-  çevrilməsi və ya `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true`
-  (ödənişli artıq istifadə indi divarı qarşıladığı üçün istənilən statusda onu
-  `extra_usage` kimi başa çatdırır) zolağı bitirir; bundan sonra cavab adi soyuma yoluna
-  keçir. `budget_exhausted` elan edilmiş büdcə sıfırlanmasına qədər (≤ 8 gün)
-  yadda saxlanılır.
-- Divar yoxlaması icraedicinin öz 400 əsaslı cəhd-daxili yenidən sınamalarından
-  (kontekstin redaktəsi, thinking/effort məhdudiyyətləri, parametrlərin avtomatik
-  öyrənilməsi) sonra işləyir; buna görə yalnız həmin yenidən sınamalardan birində üzə çıxan
-  divar 429 da soyuma yoluna çatmadan yaxalanır.
-- Vəziyyət bağlantı üzrə yaddaşda saxlanılır (yenidən başlatma divarı yenidən qəbul etmək
-  üçün bir əlavə 429 tələb edir).
-
-**Sessiya limiti sıfırlaması** (`autoLimitReset`, hər ikisi aktiv olduqda zolaqdan əvvəl sınaqdan keçirilir):
-
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
-  bloku; `arm: "reset"` və `available: true` olduqda,
-  `{ "program": "juniper_tide" }` ilə `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`;
-  təşkilat UUID-si `providerSpecificData.organizationUUID` dəyərindən, olmadıqda
-  bootstrap ehtiyat variantından götürülür.
-- `result: reset|not_limited` → sorğu tam sürətlə yenidən sınanır (slow başlığı olmadan).
-  `already_used` / `not_offered` `next_available_at` dəyərini yadda saxlayır (standart olaraq
-  bir həftə); istənilən uğursuzluq 15 dəqiqəlik geriçəkmə tətbiq edir. Sıfırlama həftədə
-  bir dəfə mümkündür və yenə də həftəlik limitə hesablanır.
-
-Reqressiya qoruyucuları: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`,
-`tests/unit/claude-low-priority-executor.test.ts`.
-
-### Sessiya yaxınlığı (#7274)
-
-**Əhatə dairəsi:** istənilən provayder üçün bir müştəri sessiyası (`X-Session-Id` /
-`x-codex-session-id` / `x-omniroute-session` başlığı) bir bağlantıya bağlanır.
-
-**Məqsəd:** çoxaddımlı agenti (Claude Code, aider, xüsusi agentlər) sorğular arasında eyni
-hesabda saxlamaq, beləliklə hesablararası kontekst itkisini və hər hesab üzrə sessiya
-vəziyyəti olan provayderlərdə təkrarlanan soyuq başlanğıc 429-larını azaltmaq.
+**Əhatə:** bir Claude abunəlik (OAuth) bağlantısı. Hər iki xüsusiyyət **hər bağlantı üçün
+opt-in**-dir (Bağlantını redaktə et → Claude bölməsi → `providerSpecificData`-da
+`lowPriorityMode` / `autoLimitReset`, hər ikisi defolt olaraq söndürülüb) və Claude Code-un
+`/low-priority` və `/limit-reset` əmrlərini əks etdirir (kabel müqaviləsi Claude Code
+2.1.263-dən götürülüb).
 
 **Tətbiq:**
 
-- TTL-in həlli: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Bağlantının seçilməsi/yaradılması: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Başlığın çıxarılması (ümumi, istənilən provayder): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Saxlanılan bağlama cədvəli: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Tənzimləmə: `sessionAffinityTtlMs` (ms ilə qlobal TTL, `0` deaktiv edir) —
-  `src/lib/db/settings.ts`. Əvvəllər yalnız Codex üçün olan `codexSessionAffinityTtlMs`
-  adından `124_generic_session_affinity_ttl.sql` miqrasiyası ilə dəyişdirilib; bu miqrasiya
-  əvvəllər konfiqurasiya edilmiş istənilən Codex TTL dəyərini yeni standart kimi saxlayır.
+- Vəziyyət maşını + cavab klassifikasiyası: `open-sse/services/claudeLowPriority.ts`
+- Sıfırlama statusu/tələb müştərisi: `open-sse/services/claudeLimitReset.ts`
+- İcraçı hook-u (başlıq injeksiyası + eyni hesabla təkrar cəhd): `open-sse/executors/base.ts::execute()`
+- Opt-in davamlılıq: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-#7274-dən əvvəl `resolveSessionAffinityTtlMs()` `codex` istisna olmaqla hər bir provayder
-üçün dərhal `0` qaytarırdı; buna görə bağlama mexanizmi və başlığın çıxarılması artıq
-provayderdən asılı olmasa da, TTL tənzimləməsi (və sessiya başlıqları) başqa heç bir yerdə
-təsir göstərmirdi. Düzəliş bu erkən qaytarmanı aradan qaldırdı; TTL qlobal olaraq `0`-dan
-yuxarı təyin edildikdə artıq bütün provayderlərə eyni qaydada tətbiq olunur.
+**Tətik:** 5 saatlıq istifadə divarı — başlıqlarında
+`anthropic-ratelimit-unified-status: rejected` və hesab uyğun olduqda
+`anthropic-ratelimit-unified-slow-offer: treatment` daşıyan bir `429`. Həmin ilk divar
+429-dan əvvəl heç nə göndərilmir; vahid başlıqları olmayan ani 429 normal cooldown yolundan keçir.
 
-Üç sessiya yaxınlığı başlığı upstream-ə heç vaxt ötürülmür — icraedicilər müştəri başlıqlarını
-ötürmək əvəzinə öz upstream başlıqlarını sıfırdan qururlar; buna görə bu, yalnız daxili
-korrelyasiya identifikatoru olaraq qalır.
+**Aşağı prioritetli zolaq** (`lowPriorityMode`):
+
+- Divar 429-da icraçı təklifi qəbul edir və dərhal **eyni**
+  hesabla `anthropic-usage-limit: slow` başlığı ilə təkrar cəhd edir; zolaq elan edilmiş
+  `anthropic-ratelimit-unified-reset` vaxtına qədər (+60 saniyə güzəşt) aktiv qalır və həmin
+  pəncərədəki hər sorğu bu başlığı daşıyır. Ələ keçirilmiş 429 heç vaxt `handleChatCore`-a
+  çatmır, buna görə bağlantı cooldown-a **salınmır** və rotasiyadan kənarlaşdırılmır.
+- Sonrakı cavablarda `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
+  zolağı saxlayır; `slot_busy` (429) və ya `529` serverin
+  `anthropic-ratelimit-unified-slow-retry-after` dəyərini gözləyir (standart 20 san, clamp 5–600 san, ±30% jitter)
+  və təkrar cəhd edir, bu isə `anthropic-ratelimit-unified-slow-max-wait` ilə məhdudlaşır (standart 20 dəq,
+  clamp 1 dəq–6 saat) — bundan sonra zolaq bitir və 10 dəqiqəlik soyutma
+  yenidən qəbulu bloklayır. Gözləmə əlavə olaraq sorğunun öz upstream-başlama
+  timeout-unun qalan hissəsi ilə məhdudlaşır (`resolveFetchStartTimeout`, standart olaraq 10 dəq)
+  minus 5 saniyəlik ehtiyat: bu məhdudiyyət olmasa, 20 dəqiqəlik standart max-wait
+  sorğudan daha uzun yaşayardı və yuxu gözləmənin ortasında dayandırılardı, nəticədə zərif
+  `max_wait` sonu + soyutma əvəzinə `TimeoutError` üzə çıxardı.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 saatlıq pəncərənin yenilənməsi,
+  və ya `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ödənişli artıq istifadə
+  indi divarı örtdüyü üçün istənilən statusda onu `extra_usage` kimi bitirir) zolağı
+  sonlandırır; cavab sonra normal cooldown yoluna axır. `budget_exhausted` elan
+  edilmiş büdcə sıfırlanmasına qədər (≤ 8 gün) yadda saxlanılır.
+- Divar yoxlaması icraçının öz 400-əsaslı cəhd daxili təkrarlarından (kontekst
+  redaktəsi, thinking/effort clamp-ları, parametr avto-öyrənməsi) sonra işləyir, buna görə
+  yalnız həmin təkrarlardan birində üzə çıxan divar 429-u cooldown yoluna
+  çatmaq əvəzinə yenə də ələ keçirilir.
+- Vəziyyət hər bağlantı üçün yaddaşdadır (yenidən başlatma yenidən qəbul üçün bir əlavə divar 429-una başa gəlir).
+
+**Sessiya limitinin sıfırlanması** (`autoLimitReset`, hər ikisi aktiv olduqda zolaqdan əvvəl sınanır):
+
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
+  bloku; `arm: "reset"` və `available: true` olduqda,
+  `{ "program": "juniper_tide" }` ilə
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` (təşkilat
+  UUID-si `providerSpecificData.organizationUUID`-dən, bootstrap ehtiyatı).
+- `result: reset|not_limited` → sorğu tam sürətlə təkrarlanır (slow başlığı olmadan).
+  `already_used` / `not_offered` `next_available_at`-ı memoizasiya edir (standart bir həftə);
+  istənilən uğursuzluq 15 dəqiqə geri çəkilməyə səbəb olur. Sıfırlama həftədə bir dəfədir və yenə
+  də həftəlik limitə daxil edilir.
+
+Reqressiya qoruyucuları: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+
+### Sessiya yaxınlığı (#7274)
+
+**Əhatə:** bir müştəri sessiyası (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` başlığı) bir bağlantıya sabitlənmiş, **istənilən** provayder üçün.
+
+**Məqsəd:** çoxdövrəli agenti (Claude Code, aider, xüsusi agentlər) sorğular arasında eyni hesabda saxlamaq, hesablararası kontekst itirilməsini və hesab başına sessiya vəziyyəti olan provayderlərdə təkrarlanan soyuq başlanğıc 429-larını azaltmaq.
+
+**Tətbiq:**
+
+- TTL müəyyənləşdirilməsi: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- Pin seçimi/yaradılması: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Başlıq çıxarılması (ümumi, istənilən provayder): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Davamlı pin cədvəli: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Parametr: `sessionAffinityTtlMs` (ms-də qlobal TTL, `0` söndürür) — `src/lib/db/settings.ts`. `124_generic_session_affinity_ttl.sql` miqrasiyası ilə yalnız Codex-ə məxsus `codexSessionAffinityTtlMs`-dən yenidən adlandırılıb; həmin miqrasiya əvvəllər konfiqurasiya edilmiş istənilən Codex TTL-ni yeni standart kimi köçürür.
+
+#7274-dən əvvəl `resolveSessionAffinityTtlMs()` `codex` xaricində hər provayder üçün birbaşa `0` qaytarırdı, buna görə TTL parametri (və sessiya başlıqları) başqa yerdə heç bir təsir göstərmirdi, baxmayaraq ki, pin mexanizmi və başlıq çıxarılması artıq provayderdən asılı deyildi. Düzəliş həmin erkən qaytarmağı aradan qaldırdı; TTL indi qlobal olaraq `0`-dan yuxarı təyin edildikdə hər provayderə vahid şəkildə tətbiq olunur.
+
+Üç sessiya-yaxınlığı başlığı heç vaxt upstream-ə ötürülmür — icraçılar müştəri başlıqlarını ötürmək əvəzinə öz upstream başlıqlarını sıfırdan qururlar, buna görə bu yalnız daxili korrelyasiya identifikatoru kimi qalır.
 
 ### Eksklüziv idarə olunan sessiya bağlantısı icarələri
 
-**Əhatə dairəsi:** bir aktiv idarə olunan HTTP müştərisi/sessiyası bir uyğun OmniRoute
-bağlantısına sahib olur.
+**Əhatə:** bir aktiv idarə olunan HTTP müştəri/sessiyası bir uyğun OmniRoute bağlantısına sahibdir.
 
-**Məqsəd:** sorğular arasında sərt marşrutlaşdırma sərhədinə ehtiyacı olan müştərilər üçün
-davamlı, eksklüziv bağlantı sahibliyi təmin etməkdir. Bu, yumşaq davamlılıq üstünlüyü olan
-sessiya yaxınlığından fərqlənir: eksklüziv icarə həyat dövrü vəziyyətini SQLite-da saxlayır,
-aktiv sahibliyin və aktiv bağlantının qlobal unikallığını tətbiq edir və provayderə
-göndərilmədən əvvəl köhnə nəsli rədd edir.
+**Məqsəd:** sorğular arasında sərt marşrutlaşdırma
+məhəccərinə ehtiyacı olan müştərilər üçün davamlı eksklüziv bağlantı sahibliyi təmin etmək.
+Bu, yumşaq davamlılıq üstünlüyü olan sessiya yaxınlığından fərqlənir:
+eksklüziv icarə həyat dövrü vəziyyətini SQLite-də saxlayır, qlobal aktiv sahib və
+aktiv bağlantı unikallığını tətbiq edir və provayderə göndərmədən əvvəl köhnəlmiş generasiyanı rədd edir.
 
-Bu funksiya API açarı üzrə könüllü aktivləşdirilir. İdarə olunan açar `lease:exclusive`
-əhatə dairəsinə və açıq, boş olmayan `allowedConnections` siyahısına malik olmalıdır.
-İstənilən HTTP müştərisi həyat dövrü endpoint-indən istifadə edə bilər; müştəri adı,
-user-agent, provayder, OAuth metodu və ya model tələb olunmur. İcarə modelə deyil,
-bağlantıya sahib olur; buna görə bağlantı adi qaydada uyğun olaraq qaldığı müddətdə modelin
-dəyişdirilməsi bağlamanı saxlayır. Adi model, kvota, sağlamlıq, soyuma və icazə siyahısı
-qaydaları yenə də əsas qüvvəyə malikdir və eyni nəsli başqa boş, uyğun bağlantıya keçirə
-bilər.
+Bu funksiya hər API açarı üzrə seçim əsasında (opt-in) aktivləşdirilir. İdarə olunan açar `lease:exclusive` səlahiyyət dairəsinə və açıq şəkildə göstərilmiş, boş olmayan `allowedConnections` siyahısına malik olmalıdır. İstənilən HTTP klienti lifecycle endpointindən istifadə edə bilər; klient adı, user-agent, provayder, OAuth metodu və ya model tələb olunmur. İcarə (lease) modelə yox, bağlantıya sahiblik edir, buna görə də bağlantı adi qaydada uyğun qaldığı müddətcə model dəyişikliyi bağlılığı qoruyur. Standart model, kvota, sağlamlıq, cooldown və allowlist qaydaları səlahiyyətli qalır və eyni nəsli başqa bir boş uyğun bağlantıya köçürə bilər.
 
-Həyat dövrü `POST /api/v1/session-leases` endpointi üzərində JSON `acquire`, `renew` və `release` əməliyyatları ilə idarə olunur. İdarə olunan inferens sorğuları qeyri-şəffaf `X-OmniRoute-Lease-Owner` dəyərini və dəqiq `X-OmniRoute-Lease-Generation` dəyərini təqdim edir. Sahib `vlo_` ilə başlayır və ardınca 43 base64url simvolu gəlir; yalnız onun SHA-256 heşi saxlanılır. Hər yekun göndərmə baryeri həmçinin autentifikasiya olunmuş API açarı ID-sini və aktiv bağlantı ID-sini əlaqələndirir. Lizinq idarəetmə başlıqları loqlardan, saxlanılan sorğu anlıq görüntülərindən və yuxarı axın icraçı başlıqlarından çıxarılır.
+Lifecycle — `acquire`, `renew` və `release` JSON əməliyyatları ilə `POST /api/v1/session-leases` vasitəsilə həyata keçirilir. İdarə olunan inference sorğuları qeyri-şəffaf `X-OmniRoute-Lease-Owner` dəyərini və dəqiq `X-OmniRoute-Lease-Generation` dəyərini təqdim edir. Sahib `vlo_` ilə başlayır və ardınca 43 base64url simvolu gəlir; yalnız onun SHA-256 heşi saxlanılır. Hər bir son dispatch səddi (fence) həmçinin autentifikasiya olunmuş API açar ID-sini və aktiv bağlantı ID-sini bağlayır. İcarə idarəetmə başlıqları jurnallardan, saxlanılan sorğu snapshotlarından və upstream executor başlıqlarından silinir.
 
-Adi marşrutlaşdırmada uyğun idarə olunan namizədlər varsa, lakin hər boş namizəd yad aktiv lizinq tərəfindən tutulubsa, OmniRoute HTTP `429`, lease-capacity-unavailable kodu, waiting-for-capacity vəziyyəti və ən erkən müvafiq bitmə vaxtından hesablanmış məhdud `Retry-After` qaytarır. Adi halda uyğun namizədlərin olmaması lizinq rəqabəti sayılmır və mövcud marşrutlaşdırma xətası semantikasını saxlayır.
+Əgər adi marşrutlaşdırmada uyğun idarə olunan namizədlər varsa, lakin bütün boş namizədlər xarici aktiv icarə tərəfindən tutulubsa, OmniRoute HTTP `429`, lease-capacity-unavailable kodu, waiting-for-capacity vəziyyəti və ən erkən müvafiq bitmə vaxtından törədilmiş məhdudlaşdırılmış `Retry-After` qaytarır. Adi boş uyğunluq icarə rəqabəti sayılmır və mövcud marşrutlaşdırma xətası semantikasını saxlayır.
 
-Əlaqəli mexanizmlər ayrı qalır:
+Əlaqəli mexanizmlər ayrılıqda qalır:
 
-- OAuth sessiya məşğulluğu OAuth hesabları üçün prosesdaxili yumşaq paylamadır.
-- Hesab semaforları sorğu paralelliyi icazələri verir və sorğu tamamlandıqda bitir.
-- Eksklüziv idarə olunan sessiya lizinqiləri generasiya baryeri ilə davamlı həyat dövrü sahibliyidir.
-
----
+- OAuth sessiya məşğulluğu OAuth hesabları üçün proses-daxili yumşaq paylama mexanizmidir.
+- Hesab semaforları sorğu paralelliyi icazələri verir və sorğu tamamlandıqda sona çatır.
+- Eksklüziv idarə olunan sessiya icarələri nəsil səddi (generation fence) ilə davamlı lifecycle sahibliyidir.
 
 ## 3. Model kilidlənməsi
 

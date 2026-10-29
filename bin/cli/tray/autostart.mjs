@@ -3,6 +3,7 @@ import { execFileSync, execSync } from "node:child_process";
 import { homedir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveTrayPreference, saveTrayPreference } from "./preferences.mjs";
 
 const APP_LABEL = "com.omniroute.autostart";
 const WIN_REG_VALUE = "OmniRoute";
@@ -44,7 +45,7 @@ function quoteExecArg(value) {
 
 function buildServeExecLine(cliPath, { tray = false } = {}) {
   const parts = [quoteExecArg(process.execPath), quoteExecArg(cliPath), "serve", "--no-open"];
-  if (tray) parts.push("--tray");
+  parts.push(tray ? "--tray" : "--no-tray");
   return parts.join(" ");
 }
 
@@ -112,9 +113,7 @@ function tryEnableLinger() {
   }
 }
 
-function writeLinuxSystemdUnit(cliPath) {
-  const unitDir = dirname(linuxSystemdUnitPath());
-  mkdirSync(unitDir, { recursive: true });
+export function buildLinuxSystemdUnitContent(cliPath) {
   const envFile = join(userHomeDir(), ".omniroute", ".env");
   const nodeBinDir = dirname(process.execPath);
   const userLocalBin = join(userHomeDir(), ".local", "bin");
@@ -143,24 +142,32 @@ function writeLinuxSystemdUnit(cliPath) {
   ];
   if (existsSync(envFile)) lines.push(`EnvironmentFile=-${envFile}`);
   lines.push("", "[Install]", "WantedBy=default.target", "");
-  writeFileSync(linuxSystemdUnitPath(), `${lines.join("\n")}\n`, { mode: 0o644 });
+  return `${lines.join("\n")}\n`;
 }
 
-function writeLinuxDesktopEntry(cliPath) {
-  const dir = dirname(linuxDesktopPath());
-  mkdirSync(dir, { recursive: true });
-  const desktop =
+function writeLinuxSystemdUnit(cliPath) {
+  mkdirSync(dirname(linuxSystemdUnitPath()), { recursive: true });
+  writeFileSync(linuxSystemdUnitPath(), buildLinuxSystemdUnitContent(cliPath), { mode: 0o644 });
+}
+
+export function buildLinuxDesktopContent(cliPath, { tray = true } = {}) {
+  return (
     [
       "[Desktop Entry]",
       "Type=Application",
       "Name=OmniRoute",
       "Comment=AI proxy router with auto fallback",
-      `Exec=${buildServeExecLine(cliPath, { tray: true })}`,
+      `Exec=${buildServeExecLine(cliPath, { tray })}`,
       "Terminal=false",
       "Hidden=false",
       "X-GNOME-Autostart-enabled=true",
-    ].join("\n") + "\n";
-  writeFileSync(linuxDesktopPath(), desktop, { mode: 0o644 });
+    ].join("\n") + "\n"
+  );
+}
+
+function writeLinuxDesktopEntry(cliPath, options) {
+  mkdirSync(dirname(linuxDesktopPath()), { recursive: true });
+  writeFileSync(linuxDesktopPath(), buildLinuxDesktopContent(cliPath, options), { mode: 0o644 });
 }
 
 export function getAutostartStatus() {
@@ -203,11 +210,24 @@ function tryReadLingerEnabled() {
   }
 }
 
-export function enable() {
-  if (process.platform === "darwin") return enableMac();
-  if (process.platform === "win32") return enableWin();
-  if (process.platform === "linux") return enableLinux();
-  return false;
+export function enable(options = {}) {
+  const tray = resolveTrayPreference(options, true);
+  let enabled = false;
+  if (process.platform === "darwin") enabled = enableMac({ tray });
+  if (process.platform === "win32") enabled = enableWin({ tray });
+  if (process.platform === "linux") enabled = enableLinux({ tray });
+  if (enabled && typeof options.tray === "boolean") {
+    try {
+      saveTrayPreference(options.tray);
+    } catch {
+      throw new Error(
+        "Autostart was enabled, but the tray preference could not be saved. " +
+          "Use `omniroute autostart status` to inspect registration, fix access to " +
+          "tray-preferences.json, then retry `omniroute autostart enable` with the desired tray flag."
+      );
+    }
+  }
+  return enabled;
 }
 
 export function disable() {
@@ -286,33 +306,46 @@ function isDetachedTrayWorker() {
   return process.argv.includes("--tray-worker");
 }
 
-function enableMac() {
-  const plistDir = join(homedir(), "Library", "LaunchAgents");
-  mkdirSync(plistDir, { recursive: true });
-  const plistPath = join(plistDir, `${APP_LABEL}.plist`);
-  const cliPath = resolveCliPath();
-  if (!cliPath) return false;
-  const plist = `<?xml version="1.0" encoding="UTF-8"?>
+function escapeXml(value) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&apos;");
+}
+
+export function buildMacPlistContent(cliPath, { tray = true } = {}) {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0"><dict>
   <key>Label</key><string>${APP_LABEL}</string>
   <key>ProgramArguments</key><array>
-    <string>${process.execPath}</string>
-    <string>${cliPath}</string>
+    <string>${escapeXml(process.execPath)}</string>
+    <string>${escapeXml(cliPath)}</string>
     <string>serve</string>
-    <string>--tray</string>
+    <string>${tray ? "--tray" : "--no-tray"}</string>
     <string>--no-open</string>
   </array>
   <key>RunAtLoad</key><true/>
   <key>KeepAlive</key><false/>
 </dict></plist>`;
+}
+
+function enableMac({ tray }) {
+  const plistDir = join(homedir(), "Library", "LaunchAgents");
+  mkdirSync(plistDir, { recursive: true });
+  const plistPath = join(plistDir, `${APP_LABEL}.plist`);
+  const cliPath = resolveCliPath();
+  if (!cliPath) return false;
+  const plist = buildMacPlistContent(cliPath, { tray });
   writeFileSync(plistPath, plist, { mode: 0o644 });
   // If we're already the running agent, launchctl load/unload would SIGTERM us.
   // The plist is updated on disk and launchd already has us loaded under our own
   // PID — nothing more to do for the current session.
   if (isAgentSelfMac() || isDetachedTrayWorker()) return existsSync(plistPath);
   try {
-    execSync("launchctl load -w " + JSON.stringify(plistPath), { stdio: "ignore" });
+    execFileSync("launchctl", ["load", "-w", plistPath], { stdio: "ignore" });
   } catch {}
   return existsSync(plistPath);
 }
@@ -325,7 +358,7 @@ function disableMac() {
   // Removing the plist file is enough to stop the agent at the next login.
   if (!isAgentSelfMac() && !isDetachedTrayWorker()) {
     try {
-      execSync("launchctl unload -w " + JSON.stringify(plistPath), { stdio: "ignore" });
+      execFileSync("launchctl", ["unload", "-w", plistPath], { stdio: "ignore" });
     } catch {}
   }
   try {
@@ -366,6 +399,10 @@ function winStartupPath() {
   return dir ? join(dir, WIN_STARTUP_FILE) : null;
 }
 
+function quoteWindowsArg(value) {
+  return `"${value.replace(/(\\*)"/g, '$1$1\\"').replace(/(\\+)$/g, "$1$1")}"`;
+}
+
 /**
  * Builds the VBScript source that launches OmniRoute with WSH's Run method
  * using SW_HIDE (0) so no console window appears.
@@ -374,8 +411,14 @@ function winStartupPath() {
  * WScript.Shell.Run with window style 0 (hidden). This avoids the console
  * window flash that HKCU\Run causes for console-mode node.exe.
  */
-function buildWinVbsContent(cliPath) {
-  const execLine = buildServeExecLine(cliPath, { tray: true });
+export function buildWinVbsContent(cliPath, { tray = true } = {}) {
+  const execLine = [
+    quoteWindowsArg(process.execPath),
+    quoteWindowsArg(cliPath),
+    "serve",
+    "--no-open",
+    tray ? "--tray" : "--no-tray",
+  ].join(" ");
   // VBScript doubles `"` inside a string to escape them. The execLine already
   // contains quoted paths; escape each `"` to `""` so the VBS parser reads
   // them as literal quote characters in the command string passed to Run().
@@ -403,14 +446,14 @@ function cleanLegacyWinReg() {
   }
 }
 
-function enableWin() {
+function enableWin({ tray }) {
   const cliPath = resolveCliPath();
   if (!cliPath) return false;
   const vbsPath = winStartupPath();
   if (!vbsPath) return false;
   const dir = dirname(vbsPath);
   mkdirSync(dir, { recursive: true });
-  writeFileSync(vbsPath, buildWinVbsContent(cliPath), { mode: 0o644 });
+  writeFileSync(vbsPath, buildWinVbsContent(cliPath, { tray }), { mode: 0o644 });
   // Migrate away from the legacy HKCU\Run entry — it launches node.exe with
   // a visible console window. The VBS approach is the replacement.
   cleanLegacyWinReg();
@@ -449,7 +492,7 @@ function isEnabledWin() {
   }
 }
 
-function enableLinux() {
+function enableLinux({ tray }) {
   const cliPath = resolveCliPath();
   if (!cliPath) return false;
 
@@ -463,7 +506,7 @@ function enableLinux() {
   let ok = false;
 
   if (graphicalSession) {
-    writeLinuxDesktopEntry(cliPath);
+    writeLinuxDesktopEntry(cliPath, { tray });
     ok = true;
   } else if (systemdAvailable) {
     writeLinuxSystemdUnit(cliPath);

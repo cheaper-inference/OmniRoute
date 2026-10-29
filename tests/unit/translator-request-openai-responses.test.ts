@@ -12,6 +12,12 @@ import assert from "node:assert/strict";
 const { openaiResponsesToOpenAIRequest, openaiToOpenAIResponsesRequest } =
   await import("../../open-sse/translator/request/openai-responses.ts");
 
+function asRecord(value: unknown): Record<string, unknown> {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+}
+
 type ChatMsg = { role: string; tool_call_id?: string; content?: unknown };
 
 test("Responses -> OpenAI: orphaned function_call_output is stripped", () => {
@@ -127,4 +133,65 @@ test("OpenAI -> Responses: whitespace-padded matching call ids stay paired (not 
     call!.call_id,
     "the function_call_output call_id must equal its paired function_call id"
   );
+});
+
+test("Codex model with reasoning_effort gets effort-only reasoning (no summary, no encrypted_content include)", () => {
+  for (const model of [
+    "codex/gpt-6.1-sol",
+    "cx/gpt-6.1-sol-ultra",
+    "gpt-6.1-sol",
+    "gpt-5.6-sol-medium",
+  ]) {
+    const out = asRecord(
+      openaiToOpenAIResponsesRequest(
+        model,
+        { messages: [{ role: "user", content: "hi" }], reasoning_effort: "high" },
+        false,
+        {}
+      )
+    ) as { reasoning?: { effort?: string; summary?: string }; include?: unknown[] };
+
+    assert.equal(out.reasoning?.effort, "high", `${model}: effort preserved`);
+    assert.equal(out.reasoning?.summary, undefined, `${model}: no defaulted summary for Codex`);
+    assert.equal(out.include, undefined, `${model}: no encrypted_content include for Codex`);
+  }
+});
+
+test("Non-Codex model with reasoning_effort keeps summary + encrypted_content include", () => {
+  const out = asRecord(
+    openaiToOpenAIResponsesRequest(
+      "openai/gpt-5",
+      { messages: [{ role: "user", content: "hi" }], reasoning_effort: "low" },
+      false,
+      {}
+    )
+  ) as { reasoning?: { effort?: string; summary?: string }; include?: unknown[] };
+
+  assert.equal(out.reasoning?.effort, "low", "effort preserved for non-Codex");
+  assert.equal(out.reasoning?.summary, "auto", "defaulted summary for non-Codex");
+  assert.ok(
+    out.include?.includes("reasoning.encrypted_content"),
+    "encrypted_content include added for non-Codex"
+  );
+});
+
+test("Explicit reasoning object is preserved unchanged for all models", () => {
+  const explicit = { effort: "max", summary: "concise" };
+  for (const model of ["codex/gpt-6.1-sol", "openai/gpt-5"]) {
+    const out = asRecord(
+      openaiToOpenAIResponsesRequest(
+        model,
+        { messages: [{ role: "user", content: "hi" }], reasoning: explicit },
+        false,
+        {}
+      )
+    ) as { reasoning?: { effort?: string; summary?: string }; include?: unknown[] };
+
+    assert.deepEqual(out.reasoning, explicit, `${model}: explicit reasoning untouched`);
+    assert.equal(
+      out.include,
+      undefined,
+      `${model}: no implicit include added when reasoning is explicit`
+    );
+  }
 });

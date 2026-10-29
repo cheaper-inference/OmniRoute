@@ -1,0 +1,1 @@
+- fix(providers): store non-streaming Gemini/Vertex thought signatures under the connection+family namespace so tool-call history is replayed instead of repeating the call (#17912)

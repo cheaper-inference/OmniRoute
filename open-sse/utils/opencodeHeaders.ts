@@ -243,6 +243,13 @@ const OPENCODE_HEADER_KEYS = [
 ] as const;
 
 /**
+ * Client headers never relayed by the prefix rule below. `x-opencode-org-id` selects a
+ * workspace upstream (a foreign one answers 403 "Workspace access denied"), and the gateway's
+ * own workspace must not be addressable by a client.
+ */
+const OPENCODE_HEADER_DENY = new Set(["x-opencode-org-id"]);
+
+/**
  * Common agent-metadata headers used by non-OpenCode clients (custom agents/
  * providers) for upstream request tracking and attribution. Forwarded the same
  * way as the x-opencode-* set (case-insensitive lookup, client value wins,
@@ -308,6 +315,10 @@ function findHeader(headers: Record<string, string>, name: string): string | und
  *   `x-opencode-request` is dropped and the session is mirrored onto
  *   `x-opencode-session-id` / `x-session-affinity` / `x-session-id`, as the v2 CLI sends it.
  *   Off: unchanged.
+ * @param options.forwardAllOpencodeHeaders - Opt-in (`OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED`):
+ *   also relay every other client header whose name starts with `x-opencode-`, minus
+ *   `x-opencode-org-id`, so a header the client adds reaches the upstream without a release.
+ *   Omitted by every call site that predates the flag, so the default list is unchanged.
  */
 export function forwardOpencodeClientHeaders(
   headers: Record<string, string>,
@@ -320,6 +331,7 @@ export function forwardOpencodeClientHeaders(
     forwardUserAgent?: boolean;
     reencodeSession?: boolean;
     v2Fingerprint?: boolean;
+    forwardAllOpencodeHeaders?: boolean;
   }
 ): void {
   // 1. Forward User-Agent (opt-out for generic providers, #15632)
@@ -334,6 +346,13 @@ export function forwardOpencodeClientHeaders(
     if (value) {
       setForwardedHeader(headers, headerName, value);
     }
+  }
+
+  // 2a. Opt-in: the client's own x-opencode-* headers beyond the four known ones (e.g.
+  //     x-opencode-session-id), except the workspace selector. Runs before the synthesis
+  //     below, so a client value keeps winning over a default.
+  if (options?.forwardAllOpencodeHeaders === true) {
+    forwardExtraOpencodeHeaders(headers, clientHeaders);
   }
 
   // 2b. Forward agent-metadata headers (x-session-id, x-title, http-referer) — 9router#2413.
@@ -364,6 +383,23 @@ export function forwardOpencodeClientHeaders(
       options.reencodeSession === true,
       options.v2Fingerprint === true
     );
+  }
+}
+
+/**
+ * Relay the client's own `x-opencode-*` headers beyond the four known keys, minus the
+ * workspace selector. Values are copied as sent: the upstream accepts what the client
+ * already declared, and a header the client adds today reaches it without a release.
+ */
+function forwardExtraOpencodeHeaders(
+  headers: Record<string, string>,
+  clientHeaders: Record<string, string>
+): void {
+  for (const [name, value] of Object.entries(clientHeaders)) {
+    const lower = name.toLowerCase();
+    if (!lower.startsWith("x-opencode-") || OPENCODE_HEADER_DENY.has(lower)) continue;
+    if (typeof value !== "string" || !value) continue;
+    setForwardedHeader(headers, lower, value);
   }
 }
 

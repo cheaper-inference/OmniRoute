@@ -48,10 +48,11 @@ const route = await import("../../src/app/api/search/providers/route.ts");
 // Constants
 // ---------------------------------------------------------------------------
 
-// 22 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
+// 23 search-kind providers: serper, brave, perplexity, exa, tavily, nimble-search, firecrawl,
 // google-pse, linkup, searchapi, youcom, searxng, ollama, zai, jina-search, anysearch-search,
-// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, codex-search.
-const EXPECTED_SEARCH_COUNT = 22;
+// context7 (#11140), duckduckgo-free, x-search, xquik-search, parallel-search, kimi-search,
+// codex-search.
+const EXPECTED_SEARCH_COUNT = 23;
 const EXPECTED_FETCH_COUNT = 7;
 const EXPECTED_TOTAL = EXPECTED_SEARCH_COUNT + EXPECTED_FETCH_COUNT;
 

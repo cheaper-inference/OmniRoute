@@ -16,7 +16,11 @@ export async function getCacheControlSettings(): Promise<CacheControlMode> {
   }
 
   const settings = await getSettings();
-  cachedSettings = (settings.alwaysPreserveClientCache as CacheControlMode) || "auto";
+  const configured = settings.alwaysPreserveClientCache;
+  cachedSettings =
+    configured === "auto" || configured === "always" || configured === "never"
+      ? configured
+      : "auto";
   return cachedSettings;
 }
 

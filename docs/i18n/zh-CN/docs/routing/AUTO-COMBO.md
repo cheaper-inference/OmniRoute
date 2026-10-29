@@ -434,13 +434,13 @@ Auto Combo 引擎不需要预定义组合。相反，`open-sse/services/autoComb
 
 ## API
 
-**不存在专用的 `POST /api/combos/auto` 端点**——Auto-Combo 通过两种方式使用：
+**不存在专用的 `POST /api/combos/auto` 端点**——Auto-Combo 通过以下两种方式使用：
 
-1. **零配置（推荐）：** 发送任意聊天补全请求，并将 `model` 设置为 `"auto"` 或 `"auto/<variant>"`。虚拟工厂会为每个请求构建组合——无需持久化，也无需调用 API。
+1. **零配置（推荐）：** 发送任意聊天补全请求，并将 `model: "auto"` 或 `model: "auto/<variant>"`。虚拟工厂会为每个请求构建组合——无需持久化，也无需调用 API。
 
 2. **使用 `strategy: "auto"` 的持久化组合：** 通过 `POST /api/combos` 创建常规组合，并设置 `strategy: "auto"`，以及 `config.auto.weights` / `config.auto.candidatePool`。它使用相同的评分引擎；组合会存储在 `combos` 中，并可通过 ID 重复使用。
 
-对于发现功能，`GET /api/combos/auto` 会列出每个变体及其解析后的候选池，以及 `context_length` / `max_output_tokens`——即候选池窗口中的最大值。客户端（例如 opencode 插件）必须公布这些值，而不是 `0`：上下文为零会完全禁用 opencode 的自动压缩，导致会话持续增长，直到网关的历史记录清除机制破坏上下文。公布最大值是安全的，因为 Auto-Combo 上下文预过滤器会将超大请求路由到具有大窗口的候选项。
+对于发现功能，`GET /api/combos/auto` 会列出每个变体及其解析后的候选池，以及 `context_length` / `max_output_tokens`——即候选池窗口中的最大值。客户端（例如 opencode 插件）必须公布这些值，而不是 `0`：上下文为零会完全禁用 opencode 的自动压缩，使会话不断增长，直到网关的历史记录清理机制破坏上下文。公布最大值是安全的，因为 Auto-Combo 上下文预筛选会将超大请求路由至具有大窗口的候选项。
 
 ```bash
 # 零配置用法（无需创建组合）
@@ -455,34 +455,34 @@ curl -X POST http://localhost:20128/api/combos \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### 自动路由策略
+### 自动路由器策略
 
 持久化的 `strategy: "auto"` 组合可将 `config.routerStrategy`（或旧版
 `config.auto.routerStrategy`）设置为以下值之一：
 
-- `rules` — 默认的加权评分
-- `score` — 选择配置的加权分数最高者。分数完全相同时，保持配置的
-  候选项顺序；现有的 `explorationRate` 会从完整的排序池中采样。
-- `cost` / `eco` — 最便宜的健康提供者
-- `latency` / `fast` — 具有可靠性惩罚的最低 p95 延迟
-- `sla-aware` / `sla` — 优先选择满足 p95 延迟、错误率及可选
+- `rules`——默认加权评分
+- `score`——选择配置的加权分数最高的候选项。分数完全相同时保留配置的
+  候选项顺序；现有的 `explorationRate` 会从完整的排序候选池中采样。
+- `cost` / `eco`——成本最低的健康提供者
+- `latency` / `fast`——具有可靠性惩罚的最低 p95 延迟
+- `sla-aware` / `sla`——优先选择满足 p95 延迟、错误率和可选
   成本 SLO 的候选项
-- `lkgp` — 优先使用最后一个已知良好的提供者
-- `nadir` — 询问 [Nadir](https://getnadir.com) 的决策 API，确定池中的哪个模型是
-  提示所需的模型；需选择启用，失败时开放回退至 `rules`
+- `lkgp`——优先使用最后一个已知良好的提供者
+- `nadir`——询问 [Nadir](https://getnadir.com) 的决策 API，确定池中的哪个模型适合该
+  提示词；需主动启用，失败时开放回退至 `rules`
 
-### 路由策略详解
+### 路由器策略详解
 
-Auto-Combo 引擎提供了 7 种可插拔的 **RouterStrategy** 实现，
+Auto-Combo 引擎公开了 7 种可插拔的 **RouterStrategy** 实现，
 你可以通过 `config.routerStrategy`（或旧版 `config.auto.routerStrategy`）进行切换。
 每种策略都会根据 `RoutingContext`
-（任务类型、工具/视觉提示、令牌估算值、可选的 SLA 策略、可选的
-最后一个已知良好提供者）从候选池中选出一个提供者。
+（任务类型、工具/视觉提示、token 估算、可选 SLA 策略、可选的
+最后一个已知良好提供者）从候选池中选择一个提供者。
 
-#### 1. `rules`（默认）— 16 因子加权评分
+#### 1. `rules`（默认）——16 因子加权评分
 
-封装现有的评分引擎。先过滤掉断路器状态为 `OPEN` 的
-候选项，然后使用当前任务类型和 `getTaskFitness()` 运行 `scorePool()`，
+封装现有评分引擎。先筛除断路器状态为 `OPEN` 的
+候选项，然后结合当前任务类型和 `getTaskFitness()` 运行 `scorePool()`，
 选择得分最高的提供者。
 
 ```ts
@@ -503,16 +503,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**适用场景**：默认策略。适用于希望在所有信号之间取得平衡权衡的情况。
+**适用场景**：默认策略。适用于希望在所有信号之间取得均衡权衡的情况。
 
-**别名**：`rules`（无别名）
+**别名**：`rules`（无其他别名）
 
 ---
 
-#### 2. `cost` / `eco` — 最便宜的健康提供者
+#### 2. `cost` / `eco`——成本最低的健康提供者
 
-按 `costPer1MTokens`（升序）对候选池进行排序，并选择最便宜的提供者。
-会先过滤掉状态为 `OPEN` 的候选项。
+按 `costPer1MTokens`（升序）对候选池排序，并选择成本最低的候选项。
+首先筛除状态为 `OPEN` 的候选项。
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -527,16 +527,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**适用场景**：成本敏感型工作负载、批处理或后台作业。
+**适用场景**：成本敏感型工作负载、批处理或后台任务。
 
 **别名**：`cost`、`eco`
 
 ---
 
-#### 3. `latency` / `fast` — 具有可靠性惩罚的最低 p95 延迟
+#### 3. `latency` / `fast`——具有可靠性惩罚的最低 p95 延迟
 
 按 `p95LatencyMs + (errorRate * 1000)` 排序。错误率惩罚可确保
-不可靠的提供者即使名义延迟较低，也会获得较低的排名。
+不可靠的提供者即使标称延迟较低，其排名也会更低。
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -560,29 +560,30 @@ class LatencyStrategyImpl implements RouterStrategy {
 
 ---
 
-#### 4. `sla-aware` / `sla` — 延迟/错误/成本 SLO 合规性
+#### 4. `sla-aware` / `sla`——符合延迟/错误/成本 SLO
 
-根据每个候选项满足所配置 SLO 策略的程度进行评分：
+根据每个候选项满足已配置 SLO 策略的程度进行评分：
 
-| 因素       | 权重 | 公式                                              |
-| ---------- | ---- | ------------------------------------------------- |
-| 延迟得分   | 35%  | `threshold / max(value, ε)`                       |
-| 错误得分   | 35%  | `threshold / max(value, ε)`                       |
-| 健康度得分 | 15%  | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
-| 成本得分   | 10%  | `threshold / max(value, ε)` 或反向归一化          |
-| 稳定性得分 | 5%   | 延迟标准差的反向归一化值                          |
+| 因素       | 权重 | 公式                                               |
+| ---------- | ---- | -------------------------------------------------- |
+| 延迟分数   | 35%  | `threshold / max(value, ε)`                        |
+| 错误分数   | 35%  | `threshold / max(value, ε)`                        |
+| 健康分数   | 15%  | `1.0`（CLOSED）/ `0.5`（HALF_OPEN）/ `0.0`（OPEN） |
+| 成本分数   | 10%  | `threshold / max(value, ε)` 或反向归一化           |
+| 稳定性分数 | 5%   | 延迟标准差的反向归一化                             |
 
-当 `hardConstraints: true` 时，候选项首先按**违规得分**
-（超出任意 SLO 的程度）排序，然后按综合得分排序。否则仅按
-综合得分排序。
+当 `hardConstraints: true` 时，候选项主要按**违规分数**
+（超出任一 SLO 的程度）排序，然后按综合分数排序。否则，仅按
+综合分数排序。
 
 ```ts
 class SLAStrategyImpl implements RouterStrategy {
   readonly name = "sla-aware";
-  readonly description = "选择最有可能满足延迟、错误率和成本 SLO 的提供者";
+  readonly description =
+    "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 根据策略为每个候选项评分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... 根据策略对每个候选项评分：{ targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -611,13 +612,13 @@ class SLAStrategyImpl implements RouterStrategy {
 #### 5. `lkgp` — 优先使用最后一个已知良好的提供者
 
 首先尝试**最后一个已知良好的提供者**（如果已设置），然后回退到
-`rules` 策略。适用于会话粘性——由同一个提供者处理
+`rules` 策略。这对于保持会话粘性很有用——由同一个提供者处理
 对话中的后续请求。
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
   readonly name = "lkgp";
-  readonly description = "优先尝试最后一个已知良好的提供者，然后回退到 rules";
+  readonly description = "Tries last known good provider first, then falls back to rules";
 
   select(pool, context) {
     if (context.lkgpEnabled === false) {
@@ -639,20 +640,20 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**适用场景**：希望由同一提供者处理后续请求的多轮对话
-（例如为了缓存、上下文连续性或定价一致性）。
+**适用场景**：希望由同一个提供者处理后续请求的多轮对话
+（例如，为了保持缓存、上下文连续性或定价一致性）。
 
 **别名**：`lkgp`（无其他别名）
 
 ---
 
-#### 6. `nadir` — 通过 Nadir 感知提示词并选择模型
+#### 6. `nadir` — 通过 Nadir 根据提示词选择模型
 
-上述每种策略都根据自身的遥测数据对候选项进行排名；它们均不会读取
+上述每种策略都根据各自的遥测数据对候选项进行排名；它们都不会读取
 请求。`nadir` 会将最后一轮用户消息以及池中的模型 ID 发送到
 [Nadir](https://getnadir.com) 的决策 API（`POST /v1/bucket`），并路由到 Nadir
-从该选项列表中选择的模型（`simple` → 能够胜任的最便宜模型，`complex` →
-前沿模型）。提供该模型服务的连接仍由 `rules` 选择，因此配额、
+从该菜单中选择的模型（`simple` → 能胜任任务的最便宜模型，`complex` →
+前沿模型）。承载该模型的连接仍由 `rules` 选择，因此配额、
 健康状况和成本仍会决定使用哪个账户。
 
 ```json
@@ -669,29 +670,31 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` 和 `OMNIROUTE_NADIR_BASE_URL` 是这两个字符串对应的
-环境变量回退值。仅在使用自托管 Nadir 时才需要 `baseUrl`（允许以 `/v1` 结尾）。
-无密钥调用会进入 Nadir 的匿名层级，该层级按 IP 限制速率。
+`OMNIROUTE_NADIR_API_KEY` 和 `OMNIROUTE_NADIR_BASE_URL` 是这两个字符串的环境变量
+回退值。只有自行托管 Nadir 时才需要 `baseUrl`（允许尾部带有 `/v1`）。
+无密钥调用会进入 Nadir 的匿名层级，该层级按 IP 限流。使用密钥
+（[创建密钥](https://app.getnadir.com/dashboard/api-keys)）后，每次决策都会
+记录到你的 Nadir 仪表板中。完整的设置和验证说明：
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/)。
 
-发送到外部的数据：最后一条用户消息的文本（前 16k 个字符）、候选
-模型 ID，以及 `source: "omniroute"` 渠道标签。不包含系统提示词、历史记录、工具或
+会传出以下内容：最后一条用户消息的文本（前 16k 个字符）、候选
+模型 ID，以及 `source: "omniroute"` 渠道标签。不会传出系统提示词、历史记录、工具或
 请求头。
 
-失败行为为故障开放：超时（默认 2000 ms）、非 2xx 响应、主机不可达、
-响应格式错误或选择了池外模型时，均会采用 `rules`
-的决策，并为原因添加前缀 `NadirStrategy: fallback (…)`。一次调用失败后，
-该策略将在 30 秒内跳过网络请求，因此服务中断的代价是每 30 秒发生一次超时，而不是
-每个请求都发生一次。仅当 Nadir 实际做出选择时，路由事件才会报告
-`strategy: "nadir"`。
+失败行为采用故障开放模式：超时（默认 2000 ms）、非 2xx 响应、主机不可达、
+响应格式错误或选择了池外模型时，都会使用 `rules`
+的决策，并为原因添加前缀 `NadirStrategy: fallback (…)`。调用失败后，该
+策略将在 30 秒内跳过网络请求，因此服务中断时每 30 秒只会产生一次超时，而不是
+每个请求都超时。仅当 Nadir 实际做出选择时，路由事件才会报告 `strategy: "nadir"`。
 
-**适用场景**：模型池跨越多个模型层级（小型、中型和
-前沿模型）的混合难度流量，目标是降低始终使用前沿模型所产生的成本。
+**适用场景**：模型池横跨多个模型层级（小型、中型和
+前沿模型）的混合难度流量，并且你希望降低始终使用前沿模型所产生的成本。
 
 **别名**：`nadir`（无其他别名）
 
 ---
 
-### 自定义路由器策略
+### 自定义路由策略
 
 你可以通过公共 API 注册自己的 `RouterStrategy` 实现：
 
@@ -703,10 +706,10 @@ import {
 
 class MyCustomStrategy implements RouterStrategy {
   readonly name = "my-custom";
-  readonly description = "我的自定义路由策略";
+  readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // 在此编写你的路由逻辑
+    // 在此处编写你的路由逻辑
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -734,16 +737,16 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ---
 
-### 路由器策略选择指南
+### 路由策略选择指南
 
-| 使用场景     | 策略        | 原因                           |
-| ------------ | ----------- | ------------------------------ |
-| 均衡工作负载 | `rules`     | 默认策略——综合考虑所有因素     |
-| 最小化成本   | `cost`      | 始终选择最便宜的选项           |
-| 最小化延迟   | `latency`   | 选择速度最快且可靠的提供者     |
-| 严格的 SLO   | `sla-aware` | 按 p95/错误率/成本阈值筛选     |
-| 多轮聊天     | `lkgp`      | 会话粘性                       |
-| 混合难度     | `nadir`     | 根据每个提示词选择对应模型层级 |
+| 使用场景         | 策略        | 原因                           |
+| ---------------- | ----------- | ------------------------------ |
+| 均衡工作负载     | `rules`     | 默认策略——综合考虑所有因素     |
+| 最大限度降低成本 | `cost`      | 始终选择最便宜的提供者         |
+| 最大限度降低延迟 | `latency`   | 选择速度最快且可靠的提供者     |
+| 严格的 SLO       | `sla-aware` | 按 p95/错误率/成本阈值进行筛选 |
+| 多轮对话         | `lkgp`      | 会话粘性                       |
+| 混合难度         | `nadir`     | 根据每个提示选择模型层级       |
 
 SLA 感知字段：
 

@@ -1,0 +1,1 @@
+- **fix(authz):** harden the CLIENT_API CORS relax: the cross-origin Origin echo now follows a validated API key, and anonymous responses on installs with `REQUIRE_API_KEY=false` keep the fail-closed allowlist; a route-level 401 that refuses a presented key stays readable to browser and Electron clients (#0000)
