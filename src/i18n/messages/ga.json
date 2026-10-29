@@ -14040,6 +14040,10 @@
         "label": "Stadanna Bonneagair Tosaíochta Cosanta mar 502",
         "description": "Tabhair freagra 502 in ionad 503 nuair a stopann sprioc tosaíochta le cúltaca cuóta amháin an teaglama ar chúis ar féidir a chruthú nach mbaineann sí le cuóta: scoradán ciorcaid oscailte soláthraí nó scipeáil thuarthach de bharr aga folaigh."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polasaí Buiséid Úsáide Gan Phraghas",
+        "description": "Conas a láimhseálann teorainneacha USD laethúla/seachtainiúla in aghaidh eochair úsáid rathúil nach bhfuil sraith phraghsála ag an soláthraí nó an múnla aige. fail_closed (réamhshocraithe) déanann sé an fhuinneog a mharcáil mar sroichte, mar sin ní rachaidh costas anaithnid riamh thart ar chaip dhian. count_as_zero cuireann an úsáid sin san áireamh mar $0 agus leanann sé ar aghaidh ag cur i bhfeidhm an chaitheamh phraghsáilte. Tá múnlaí gan phraghas liostaithe ar leathanach baile an phainéil i ngach cás."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logáil ID áicse",
         "description": "Áirítear réamhghluaiste áicse i línte loga AUTH (m.sh. \"Á úsáid áicse '<provider>' áicse: abc12345...\"). Díchumaithe go réamhshocraithe chun náisiúntais áicse a chomhaireachtáil ó chomhtharláithíocht / iad logaíochtaí próisis il-tennant. Neamhspleách ó Mhódúgh Dúille; ní féidir é seo a léiriú trí Mhódúgh Dúille a chaitheamh."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",
         "description": "Nuair a bhíonn gach cuntas i dtréimhse fhuaraigh agus gurbh é 403 (rochtain diúltaithe) nó 410 (imithe) ba chúis leis an tréimhse fhuaraigh a chríochnaíonn ar dtús, seol an diúltú sin ar ais láithreach in ionad fanacht go dtiocfaidh deireadh leis an tréimhse fhuaraigh agus an t-iarratas a athsheoladh; buanaítear cuóta 403 athnuachana le scóip cheangail agentrouter ansin le errorCode 429 ionas go bhfanfaidh sé in-atriallta. Múchta de réir réamhshocraithe: ní scipeálann ach 401 an feitheamh, agus buanaítear gach diúltú leis an stádas a tháinig leis."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Polasaí Buiséid Úsáide Gan Phraghas",
-        "description": "Conas a láimhseálann teorainneacha USD laethúla/seachtainiúla in aghaidh eochair úsáid rathúil nach bhfuil sraith phraghsála ag an soláthraí nó an múnla aige. fail_closed (réamhshocraithe) déanann sé an fhuinneog a mharcáil mar sroichte, mar sin ní rachaidh costas anaithnid riamh thart ar chaip dhian. count_as_zero cuireann an úsáid sin san áireamh mar $0 agus leanann sé ar aghaidh ag cur i bhfeidhm an chaitheamh phraghsáilte. Tá múnlaí gan phraghas liostaithe ar leathanach baile an phainéil i ngach cás."
       }
     }
   },

@@ -14040,6 +14040,10 @@
         "label": "Infrastrukturbedingte Stopps mit geschützter Priorität als 502",
         "description": "Mit 502 statt 503 antworten, wenn ein Prioritätsziel mit ausschließlich kontingentbedingtem Fallback die Combo aus einem nachweislich nicht kontingentbedingten Grund stoppt: ein offener Circuit Breaker des Anbieters oder ein prädiktives Überspringen aufgrund der Latenz."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Richtlinie für nicht bepreiste Nutzung",
+        "description": "Wie sich USD-Limits pro Schlüssel (täglich/wöchentlich) gegenüber erfolgreicher Nutzung verhalten, deren Anbieter/Modell keine Preiszeile hat. fail_closed (Standard) markiert das Fenster als überschritten, sodass ein unbekannter Kostenpunkt niemals an einer festen Obergrenze vorbeigelangen kann. count_as_zero wertet diese Nutzung als $0 und setzt die Durchsetzung der bepreisten Ausgaben fort. Unpreisige Modelle werden in jedem Fall auf der Dashboard-Startseite aufgeführt."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Konten-IDs protokollieren",
         "description": "Kontenpräfix in AUTH-Protokollierzeilen einbinden (z. B. \"'<provider>'“-Konto wird verwendet: abc12345...). Standardmäßig deaktiviert, damit Kontenkennzeichnungen aus geteilten bzw. Multi-Tenant-Prozessprotokollen herausgefiltert werden. Unabhängig vom Debug-Modus; das Umschalten des Debug-Modus zeigt diese Information nicht an."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-Wiederholung: 403/410-Ablehnungen überspringen",
         "description": "Wenn sich alle Konten im Cooldown befinden und der Cooldown, der als erster endet, durch einen 403 (Zugriff verweigert) oder einen 410 (nicht mehr vorhanden) verursacht wurde, wird diese Ablehnung sofort zurückgegeben, anstatt den Cooldown abzuwarten und die Anfrage erneut zu senden; ein sich erneuernder verbindungsspezifischer agentrouter-Quota-403 wird dann mit errorCode 429 gespeichert, damit er wiederholbar bleibt. Standardmäßig deaktiviert: Nur ein 401 überspringt die Wartezeit, und jede Ablehnung wird mit dem Status gespeichert, mit dem sie empfangen wurde."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Richtlinie für nicht bepreiste Nutzung",
-        "description": "Wie sich USD-Limits pro Schlüssel (täglich/wöchentlich) gegenüber erfolgreicher Nutzung verhalten, deren Anbieter/Modell keine Preiszeile hat. fail_closed (Standard) markiert das Fenster als überschritten, sodass ein unbekannter Kostenpunkt niemals an einer festen Obergrenze vorbeigelangen kann. count_as_zero wertet diese Nutzung als $0 und setzt die Durchsetzung der bepreisten Ausgaben fort. Unpreisige Modelle werden in jedem Fall auf der Dashboard-Startseite aufgeführt."
       }
     }
   },

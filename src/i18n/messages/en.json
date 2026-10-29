@@ -3373,17 +3373,17 @@
     "cliproxyapiUpdate": "Update",
     "cliproxyapiUpdateAvailable": "Update available: v{current} → v{latest}",
     "cliproxyapiVersion": "Version",
-    "customUrl": "Custom URL",
-    "customEndpointAria": "Custom endpoint",
-    "useDefaultKey": "Use the OmniRoute default key",
-    "mainModelAria": "Main model",
-    "manualConfigTitle": "Grok Build manual config",
     "piInstallTitle": "Install Pi Coding Agent",
     "piInstallInstructions": "Install the Pi CLI, then return here to connect it to OmniRoute.",
     "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Use the URL reachable from the machine running Pi. The OpenAI-compatible /v1 endpoint is added automatically.",
     "piManualMergeHint": "Preview only. Merge this providers.omniroute entry into models.json so your other providers and settings stay intact.",
+    "customUrl": "Custom URL",
+    "customEndpointAria": "Custom endpoint",
+    "useDefaultKey": "Use the OmniRoute default key",
+    "mainModelAria": "Main model",
+    "manualConfigTitle": "Grok Build manual config",
     "removeMapping": "Remove mapping"
   },
   "modelCatalog": {
@@ -14117,6 +14117,10 @@
         "label": "Protected-Priority Infra Stops as 502",
         "description": "Answer 502 instead of 503 when a quota-only-fallback priority target stops the combo for a cause that is provably not quota: an open provider circuit breaker or a predictive latency skip."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Unpriced Usage Budget Policy",
+        "description": "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. fail_closed (default) marks the window as exceeded, so an unknown cost can never slip past a hard cap. count_as_zero counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log Account IDs",
         "description": "Include account prefix in AUTH log lines (e.g. \"Using '<provider>' account: abc12345...\"). Disabled by default so account identifiers are redacted from shared/multi-tenant process logs. Independent from Debug Mode; flipping Debug Mode does not reveal this."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Refusals",
         "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Unpriced Usage Budget Policy",
-        "description": "How per-key daily/weekly USD limits treat successful usage whose provider/model has no pricing row. fail_closed (default) marks the window as exceeded, so an unknown cost can never slip past a hard cap. count_as_zero counts that usage as $0 and keeps enforcing the priced spend. Unpriced models are listed on the dashboard home page either way."
       }
     }
   },

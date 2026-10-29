@@ -14040,6 +14040,10 @@
         "label": "Apsaugoto prioriteto infrastruktūros sustabdymai pateikiami kaip 502",
         "description": "Grąžinti 502, o ne 503, kai prioritetinis tik atsarginiam perėjimui dėl kvotos skirtas tikslas sustabdo derinį dėl priežasties, kuri akivaizdžiai nesusijusi su kvota: atviro teikėjo grandinės pertraukiklio arba praleidimo dėl prognozuojamos delsos."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Neįkainoto naudojimo biudžeto politika",
+        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Įrašyti paskyros ID",
         "description": "Įtraukti paskyros prefiksą į AUTENTIKAVIMO žurnalo eilutes (pvz., „Naudojamas „'<provider>'“ paskyros: abc12345...“). Numatyta, kad paskyrų identifikatoriai nėra rodomi bendra naudojamuose / daugelio nuomininkų procesų žurnaluose. Nepriklauso nuo atsekimo režimo; atsekimo režimo įjungimas to nepadaro."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atvėsimo pakartotinis bandymas: praleisti 403/410 atmetimus",
         "description": "Kai visos paskyros yra atvėsimo būsenoje ir anksčiausiai pasibaigiantis atvėsimas kilo dėl 403 (prieiga atmesta) arba 410 (nebeegzistuoja), iš karto grąžinti šį atmetimą, užuot laukus atvėsimo pabaigos ir iš naujo siuntus užklausą; atsinaujinantis agentrouter ryšio aprėpties kvotos 403 atsakymas tuomet išsaugomas su errorCode 429, kad išliktų kartojamas. Pagal numatytuosius nustatymus išjungta: tik 401 praleidžia laukimą, o kiekvienas atmetimas išsaugomas su ta būsena, su kuria buvo gautas."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Neįkainoto naudojimo biudžeto politika",
-        "description": "Kaip kiekvieno rakto dieniniai/savaitiniai USD limitai traktuoja sėkmingą naudojimą, kurio tiekėjas ar modelis neturi kainos įrašo. fail_closed (numatytasis) pažymi langą kaip viršytą, todėl nežinoma kaina niekada nepraslys per griežtą ribą. count_as_zero skaičiuoja tą naudojimą kaip $0 ir toliau taiko apribojimus pagal apibrėžtas kainas. Neįkainoti modeliai bet kuriuo atveju yra išvardyti pagrindiniame informacijos suvestinės puslapyje."
       }
     }
   },

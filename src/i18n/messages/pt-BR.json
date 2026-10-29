@@ -3296,17 +3296,17 @@
     "cliproxyapiUpdate": "Atualizar",
     "cliproxyapiUpdateAvailable": "Atualização disponível: v{current} → v{latest}",
     "cliproxyapiVersion": "Versão",
-    "customUrl": "URL personalizada",
-    "customEndpointAria": "Endpoint personalizado",
-    "useDefaultKey": "Usar a chave padrão da OmniRoute",
-    "mainModelAria": "Modelo principal",
-    "manualConfigTitle": "Configuração manual do Grok Build",
     "piInstallTitle": "Instale o agente de codificação Pi",
     "piInstallInstructions": "Instale o Pi CLI e retorne aqui para conectá-lo ao OmniRoute.",
     "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Use o URL acessível na máquina que executa o Pi. O endpoint /v1 compatível com OpenAI é adicionado automaticamente.",
     "piManualMergeHint": "Apenas visualização. Mescle esta entrada providers.omniroute com models.json para que seus outros provedores e configurações permaneçam intactos.",
+    "customUrl": "URL personalizada",
+    "customEndpointAria": "Endpoint personalizado",
+    "useDefaultKey": "Usar a chave padrão da OmniRoute",
+    "mainModelAria": "Modelo principal",
+    "manualConfigTitle": "Configuração manual do Grok Build",
     "removeMapping": "Remover mapeamento"
   },
   "modelCatalog": {
@@ -14040,6 +14040,10 @@
         "label": "Interrupções de infraestrutura com prioridade protegida como 502",
         "description": "Responda com 502 em vez de 503 quando um destino prioritário com fallback apenas por cota interromper o combo por uma causa comprovadamente não relacionada à cota: um disjuntor de provedor aberto ou uma omissão preditiva por latência."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de Orçamento de Uso Sem Preço",
+        "description": "Como os limites diários/semanais por chave em USD tratam o uso bem-sucedido cujo provedor/modelo não tem uma linha de precificação. fail_closed (padrão) marca a janela como excedida, de modo que um custo desconhecido nunca ultrapasse um limite rígido. count_as_zero conta esse uso como $0 e continua aplicando o gasto precificado. Modelos sem preço são listados na página inicial do painel de qualquer forma."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Registrar IDs de Conta",
         "description": "Incluir prefixo da conta nas linhas de log de AUTH (ex.: \"Usando a conta '<provider>': abc12345...'). Desativado por padrão para que identificadores de conta sejam ocultados em logs compartilhados/de múltiplos tenants. Independente do Modo de Depuração; alternar o Modo de Depuração não revela isso."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa de cooldown: ignorar recusas 403/410",
         "description": "Quando todas as contas estiverem em cooldown e o cooldown que terminar primeiro tiver sido causado por um 403 (acesso recusado) ou um 410 (removido), retorna essa recusa imediatamente em vez de aguardar o término do cooldown e reenviar a requisição; um 403 de cota com escopo de conexão do agentrouter em renovação é então persistido com errorCode 429 para que continue passível de nova tentativa. Desativado por padrão: apenas um 401 ignora a espera, e cada recusa é persistida com o status com o qual chegou."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Política de Orçamento de Uso Sem Preço",
-        "description": "Como os limites diários/semanais por chave em USD tratam o uso bem-sucedido cujo provedor/modelo não tem uma linha de precificação. fail_closed (padrão) marca a janela como excedida, de modo que um custo desconhecido nunca ultrapasse um limite rígido. count_as_zero conta esse uso como $0 e continua aplicando o gasto precificado. Modelos sem preço são listados na página inicial do painel de qualquer forma."
       }
     }
   },

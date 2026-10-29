@@ -14117,6 +14117,10 @@
         "label": "Qorunan prioritetli infrastruktur dayanmalarının 502 kimi qaytarılması",
         "description": "Yalnız kvota üzrə ehtiyat variant kimi istifadə olunan prioritet hədəf combo-nu kvota ilə əlaqəli olmadığı sübuta yetirilən səbəbdən — provayderin açıq dövrəqırıcısı və ya proqnozlaşdırılan gecikməyə görə ötürülmə — dayandırdıqda 503 əvəzinə 502 cavabı verin."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Qiymətsiz İstifadə Büdcə Siyasəti",
+        "description": "Bir-açar günlük/həftəlik USD limitləri provideri/modeli üçün qiymət sətri olmayan uğurlu istifadəni necə idarə edir. fail_closed (varsayılan) pəncərəni aşılmış kimi qeyd edir, beləliklə naməlum xərc heç vaxt sərt limiti keçə bilməz. count_as_zero həmin istifadəni $0 kimi hesablayır və qiymətlənmiş xərclərin tətbiqini davam etdirir. Qiyməti təyin olunmamış modellər hər halda panelin ana səhifəsində siyahılanır."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Hesab kimliklərini qeydə alın",
         "description": "AUTH jurnal sətirlərində hesab prefixini daxil edin (məs. \"'<provider>' hesabından istifadə olunur: abc12345...\"). Ortaq/multi-tenant proses jurnallarından hesab identifikatorlarının redaktələnmiş halda saxlanması üçün defolt olaraq söndürülüb. Keşf Xüsusiyyətlərindən asılı deyil; Keşf Xüsusiyyəti aktiv olduqda belə bu xüsuliyyət açılmır."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",
         "description": "Bütün hesablar soyuma rejimində olduqda və ən tez bitən soyuma müddətinə 403 (giriş rədd edildi) və ya 410 (artıq mövcud deyil) səbəb olduqda, soyuma müddətinin bitməsini gözləyib sorğunu yenidən göndərmək əvəzinə, həmin imtina dərhal qaytarılır; yenilənən agentrouter bağlantı səviyyəli kvota 403 xətası isə təkrar cəhd edilə bilən qalması üçün errorCode 429 ilə saxlanılır. Defolt olaraq qeyri-aktivdir: yalnız 401 gözləməni keçir və hər bir imtina daxil olduğu status ilə saxlanılır."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Qiymətsiz İstifadə Büdcə Siyasəti",
-        "description": "Bir-açar günlük/həftəlik USD limitləri provideri/modeli üçün qiymət sətri olmayan uğurlu istifadəni necə idarə edir. fail_closed (varsayılan) pəncərəni aşılmış kimi qeyd edir, beləliklə naməlum xərc heç vaxt sərt limiti keçə bilməz. count_as_zero həmin istifadəni $0 kimi hesablayır və qiymətlənmiş xərclərin tətbiqini davam etdirir. Qiyməti təyin olunmamış modellər hər halda panelin ana səhifəsində siyahılanır."
       }
     }
   },

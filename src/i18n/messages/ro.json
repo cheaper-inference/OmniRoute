@@ -14040,6 +14040,10 @@
         "label": "Opriri de infrastructură cu prioritate protejată returnate ca 502",
         "description": "Răspunde cu 502 în loc de 503 atunci când o țintă prioritară cu fallback exclusiv pentru cotă oprește combinația dintr-o cauză care, în mod demonstrabil, nu ține de cotă: un întrerupător de circuit deschis al furnizorului sau o omitere predictivă bazată pe latență."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politica bugetului pentru utilizare fără preț",
+        "description": "Cum tratează limitele zilnice/săptămânale în USD pe cheie utilizarea reușită pentru care furnizorul/modelul nu are o linie de preț. fail_closed (implicit) marchează fereastra ca depășită, astfel încât un cost necunoscut să nu poată trece peste un plafon strict. count_as_zero contabilizează acea utilizare ca $0 și continuă să aplice cheltuielile cu preț. Modelele fără preț sunt listate oricum pe pagina principală a tabloului de bord."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Jurnalez identificatoarele conturilor",
         "description": "Include sufixul contului în liniile de jurnal AUTH (ex. \"Se folosește contul '<provider>': abc12345...\"). Dezactivat implicit, astfel încât identificatoarele conturilor să fie mascate din jurnalele de proces partajate/ multi-tenant. Independent de Modul de Depanare; comutarea Modulului de Depanare nu dezvăluie acest lucru."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reîncercare cooldown: Omite refuzurile 403/410",
         "description": "Când toate conturile sunt în cooldown, iar cooldown-ul care se termină primul a fost cauzat de un 403 (acces refuzat) sau un 410 (dispărut), returnează imediat acel refuz în loc să aștepți expirarea cooldown-ului și să retrimiți cererea; un 403 de cotă la nivel de conexiune agentrouter care se reînnoiește este apoi salvat cu errorCode 429, astfel încât să rămână reîncercabil. Dezactivat în mod prestabilit: doar un 401 omite așteptarea, iar fiecare refuz este salvat cu statusul cu care a sosit."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politica bugetului pentru utilizare fără preț",
-        "description": "Cum tratează limitele zilnice/săptămânale în USD pe cheie utilizarea reușită pentru care furnizorul/modelul nu are o linie de preț. fail_closed (implicit) marchează fereastra ca depășită, astfel încât un cost necunoscut să nu poată trece peste un plafon strict. count_as_zero contabilizează acea utilizare ca $0 și continuă să aplice cheltuielile cu preț. Modelele fără preț sunt listate oricum pe pagina principală a tabloului de bord."
       }
     }
   },

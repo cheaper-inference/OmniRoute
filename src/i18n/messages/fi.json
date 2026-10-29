@@ -14040,6 +14040,10 @@
         "label": "Suojatun prioriteetin infrastruktuurikeskeytykset 502-virheinä",
         "description": "Palauta 502 koodin 503 sijaan, kun prioriteettikohde, jota käytetään varavaihtoehtona vain kiintiötilanteessa, pysäyttää yhdistelmän syystä, jonka voidaan varmasti osoittaa olevan muu kuin kiintiö: palveluntarjoajan avoin katkaisija tai ennakoituun viiveeseen perustuva ohitus."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnoittelemattoman käytön budjettikäytäntö",
+        "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Kirjaa tilitunnukset",
         "description": "Sisällytä tilin etuliite AUTH-lokiriveihin (esim. \"Using '<provider>' account: abc12345...\"). Oletuksena pois käytöstä, jotta tilitunnisteet peitetään jaetuista/monivuokraajaympäristön prosessilokeista. Riippumaton virheenkorjaustilasta; virheenkorjaustilan vaihtaminen ei paljasta tätä."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jäähtymisajan uudelleenyritys: Ohita 403/410-hylkäykset",
         "description": "Kun kaikki tilit ovat jäähtymässä ja ensimmäisenä päättyvän jäähtymisajan aiheutti 403 (pääsy evätty) tai 410 (poistunut), palauta kyseinen hylkäys heti sen sijaan, että odotettaisiin jäähtymisajan päättymistä ja lähetettäisiin pyyntö uudelleen; uusiutuva agentrouter-yhteyskohtainen kiintiö-403 tallennetaan tällöin koodilla errorCode 429, jotta se pysyy uudelleen yritettävissä. Oletuksena pois käytöstä: vain 401 ohittaa odotuksen, ja jokainen hylkäys tallennetaan sillä tilalla, jolla se saapui."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Hinnoittelemattoman käytön budjettikäytäntö",
-        "description": "Miten avainkohtaiset päivä- ja viikkokohtaiset USD-rajoitukset käsittelevät onnistunutta käyttöä, jolla tarjoajalla tai mallilla ei ole hintariviä. fail_closed (oletus) merkitsee ikkunan ylittäneeksi, joten tuntematon kustannus ei voi koskaan päästä kiinteän ylärajan ohi. count_as_zero laskee käytön arvoksi $0 ja jatkaa hinnoitellun käytön valvontaa. Hinnoittelemattomat mallit listataan joka tapauksessa kojelaudan etusivulle."
       }
     }
   },

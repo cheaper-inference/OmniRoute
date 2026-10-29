@@ -14040,6 +14040,10 @@
         "label": "Zatrzymania infrastruktury o chronionym priorytecie jako 502",
         "description": "Zwracaj 502 zamiast 503, gdy priorytetowy cel z mechanizmem rezerwowym wyłącznie na wypadek wyczerpania limitu zatrzymuje combo z przyczyny, która w sposób możliwy do udowodnienia nie jest związana z limitem: otwarty wyłącznik obwodu dostawcy lub predykcyjne pominięcie z powodu opóźnienia."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Polityka budżetu dla użycia bez ceny",
+        "description": "Jak dzienne/tygodniowe limity USD na klucz traktują udane użycie, dla którego dostawca/model nie ma wiersza cenowego. fail_closed (domyślnie) oznacza okno jako przekroczone, więc nieznany koszt nie może ominąć twardego limitu. count_as_zero liczy to użycie jako $0 i nadal egzekwuje wydatki wycenione. Modele bez ceny i tak są wymienione na stronie głównej panelu."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Identyfikatory kont",
         "description": "Włącz prefiks konta w liniach logów AUTH (np. \"Wykorzystywanie konta '<provider>': abc12345...\"). Wyłączone domyślnie, aby identyfikatory kont były redagowane z logów procesów współdzielonych/wielodostępnych. Niezależne od trybu Debug; przełączanie trybu Debug nie ujawnia tej informacji."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponawianie w okresie schładzania: pomijaj odmowy 403/410",
         "description": "Gdy wszystkie konta są w okresie schładzania, a okres schładzania, który kończy się jako pierwszy, został wywołany przez błąd 403 (odmowa dostępu) lub 410 (usunięto), zwróć tę odmowę natychmiast, zamiast czekać na zakończenie okresu schładzania i ponowne wysłanie żądania; odnawiający się błąd 403 limitu przydziału o zasięgu połączenia agentrouter jest wówczas zapisywany z errorCode 429, dzięki czemu zachowuje możliwość ponowienia. Domyślnie wyłączone: tylko błąd 401 pomija oczekiwanie, a każda odmowa jest zapisywana ze statusem, z jakim nadeszła."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Polityka budżetu dla użycia bez ceny",
-        "description": "Jak dzienne/tygodniowe limity USD na klucz traktują udane użycie, dla którego dostawca/model nie ma wiersza cenowego. fail_closed (domyślnie) oznacza okno jako przekroczone, więc nieznany koszt nie może ominąć twardego limitu. count_as_zero liczy to użycie jako $0 i nadal egzekwuje wydatki wycenione. Modele bez ceny i tak są wymienione na stronie głównej panelu."
       }
     }
   },

@@ -14040,6 +14040,10 @@
         "label": "Korumalı Öncelikli Altyapı Durdurmaları 502 Olarak Döndürülür",
         "description": "Yalnızca kota durumunda yedeğe geçen öncelikli bir hedef, kota olmadığı kanıtlanabilen bir nedenle (açık bir sağlayıcı devre kesicisi veya tahmine dayalı gecikme atlaması) combo'yu durdurduğunda 503 yerine 502 yanıtı verin."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Fiyatlandırılmamış Kullanım Bütçe Politikası",
+        "description": "Anahtar başına günlük/haftalık USD limitlerinin, sağlayıcısı/modeli için fiyat satırı olmayan başarılı kullanımı nasıl ele aldığı. fail_closed (varsayılan) pencereyi aşılmış olarak işaretler; böylece bilinmeyen bir maliyet sert bir üst sınırı aşamaz. count_as_zero bu kullanımı $0 olarak sayar ve fiyatlandırılmış harcamayı uygulamaya devam eder. Fiyatlandırılmamış modeller her durumda pano ana sayfasında listelenir."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Hesap Kimliklerini Kaydet",
         "description": "AUTH log satırlarında hesap önekinin dahil edilmesine izin ver (ör. \"'<provider>' hesabı kullanılıyor: abc12345...\"). Paylaşılan/çok kiracılı süreç loglarından hesap tanımlayıcılarının kısaltılması için varsayılan olarak devre dışıdır. Hata Ayıklama Modundan bağımsızdır; Hata Ayıklama Modunun değiştirilmesi bu ayarı açığa çıkarmaz."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soğuma Yeniden Denemesi: 403/410 Redlerini Atla",
         "description": "Tüm hesaplar soğuma modundayken ve en kısa sürede bitecek soğumanın bir 403 (erişim reddedildi) veya 410 (kaynak yok) hatasından kaynaklanması durumunda, soğuma süresini bekleyip isteği yeniden göndermek yerine o reddi anında geri döndürün; bu durumda, yenidenlanan agentrouter bağlantı kapsamındaki kota 403 hatası, yeniden denenebilir kalması için errorCode 429 ile kalıcı hale getirilir. Varsayılan olarak kapalıdır: yalnızca 401 bekleme adımını atlar ve her red, geldiği durum koduyla kalıcı hale getirilir."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Fiyatlandırılmamış Kullanım Bütçe Politikası",
-        "description": "Anahtar başına günlük/haftalık USD limitlerinin, sağlayıcısı/modeli için fiyat satırı olmayan başarılı kullanımı nasıl ele aldığı. fail_closed (varsayılan) pencereyi aşılmış olarak işaretler; böylece bilinmeyen bir maliyet sert bir üst sınırı aşamaz. count_as_zero bu kullanımı $0 olarak sayar ve fiyatlandırılmış harcamayı uygulamaya devam eder. Fiyatlandırılmamış modeller her durumda pano ana sayfasında listelenir."
       }
     }
   },

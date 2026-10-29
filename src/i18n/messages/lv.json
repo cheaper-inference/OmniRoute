@@ -14040,6 +14040,10 @@
         "label": "Aizsargātās prioritātes infrastruktūras apturēšana kā 502",
         "description": "Atbildēt ar 502, nevis 503, ja prioritārais mērķis ar rezerves variantu tikai kvotas izsmelšanas gadījumā aptur Combo tāda iemesla dēļ, kas pierādāmi nav saistīts ar kvotu: atvērts pakalpojumu sniedzēja ķēdes pārtraucējs vai izlaišana prognozēta latentuma dēļ."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budžeta politika par necenotu izmantošanu",
+        "description": "Kā viena atslēgas diennakts vai nedēļas USD limiti izturas pret veiksmīgu izmantošanu, kurai pakalpojuma sniedzējam vai modelim nav cenas rindas. fail_closed (noklusējums) atzīmē logu kā pārsniegtu, tāpēc nezināmas izmaksas nekad nevar izsprukt ārpus stingra limita. count_as_zero uzskaita šo izmantošanu kā $0 un turpina piemērot cenas pamatotos izdevumus. Necenoti modeļi jebkurā gadījumā tiek parādīti paneļa sākumlapā."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reģistrēt konta ID",
         "description": "Iekļaut konta prefiksu AUTH reģistra rindās (piem., \"Izmanto '<provider>' kontu: abc12345...\"). Pēc noklusējuma atspējots, lai konta identifikatori netiktu izlaukti koplietojamos/vairāku īpašnieku procesu reģistros. Neatkarīgi no Atkodašanas režīma; Atkodašanas režīma pārslēgšana to neatklāj."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",
         "description": "Kad visiem kontiem ir atdzišanas periods un atdzišanu, kas beidzas vispirms, izraisīja 403 (piekļuve atteikta) vai 410 (vairs nepastāv), nekavējoties atgriezt šo atteikumu, nevis nogaidīt atdzišanas beigas un atkārtoti nosūtīt pieprasījumu; atjaunojošs agentrouter savienojuma tvēruma kvotas 403 atteikums tad tiek saglabāts ar errorCode 429, lai tas paliktu atkārtojams. Pēc noklusējuma izslēgts: tikai 401 izlaiž gaidīšanu, un katrs atteikums tiek saglabāts ar statusu, ar kādu tas tika saņemts."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Budžeta politika par necenotu izmantošanu",
-        "description": "Kā viena atslēgas diennakts vai nedēļas USD limiti izturas pret veiksmīgu izmantošanu, kurai pakalpojuma sniedzējam vai modelim nav cenas rindas. fail_closed (noklusējums) atzīmē logu kā pārsniegtu, tāpēc nezināmas izmaksas nekad nevar izsprukt ārpus stingra limita. count_as_zero uzskaita šo izmantošanu kā $0 un turpina piemērot cenas pamatotos izdevumus. Necenoti modeļi jebkurā gadījumā tiek parādīti paneļa sākumlapā."
       }
     }
   },

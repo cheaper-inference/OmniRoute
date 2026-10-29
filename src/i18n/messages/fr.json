@@ -14040,6 +14040,10 @@
         "label": "Arrêts d’infrastructure à priorité protégée en tant que 502",
         "description": "Répondre avec 502 au lieu de 503 lorsqu’une cible prioritaire avec repli uniquement en cas de quota arrête la combinaison pour une cause dont il est démontré qu’elle n’est pas liée au quota : un disjoncteur de fournisseur ouvert ou un saut prédictif dû à la latence."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politique de budget pour utilisation non tarifée",
+        "description": "Comment les limites USD journalières/hebdomadaires par clé traitent l’utilisation réussie dont le fournisseur/le modèle n’a pas de ligne de tarification. fail_closed (par défaut) marque la fenêtre comme dépassée, empêchant ainsi qu’un coût inconnu dépasse un plafond strict. count_as_zero compte cette utilisation comme $0 et continue d’appliquer les dépenses tarifées. Les modèles sans prix sont listés sur la page d’accueil du tableau de bord dans les deux cas."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Journée des identifiants de compte",
         "description": "Inclure le préfixe de compte dans les lignes de journal AUTH (ex. : « Utilisation du compte '<provider>' : abc12345... »). Désactivé par défaut pour masquer les identifiants de compte dans les journaux de processus partagés/multi-locataires. Indépendant du Mode Debug ; l’activation du Mode Debug ne révèle pas cet élément."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Réessai lors du cooldown : ignorer les refus 403/410",
         "description": "Lorsque tous les comptes sont en cooldown et que le cooldown qui se termine en premier a été causé par une erreur 403 (accès refusé) ou une erreur 410 (disparu), renvoie immédiatement ce refus au lieu d'attendre la fin du cooldown et de renvoyer la requête ; une erreur 403 de quota agentrouter à portée de connexion en cours de renouvellement est alors persistée avec errorCode 429 afin de rester réessayable. Désactivé par défaut : seule une erreur 401 évite l'attente, et chaque refus est persisté avec le statut avec lequel il est arrivé."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politique de budget pour utilisation non tarifée",
-        "description": "Comment les limites USD journalières/hebdomadaires par clé traitent l’utilisation réussie dont le fournisseur/le modèle n’a pas de ligne de tarification. fail_closed (par défaut) marque la fenêtre comme dépassée, empêchant ainsi qu’un coût inconnu dépasse un plafond strict. count_as_zero compte cette utilisation comme $0 et continue d’appliquer les dépenses tarifées. Les modèles sans prix sont listés sur la page d’accueil du tableau de bord dans les deux cas."
       }
     }
   },

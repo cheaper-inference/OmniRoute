@@ -14040,6 +14040,10 @@
         "label": "Védett prioritású infrastruktúra-leállások 502-es hibaként",
         "description": "503 helyett 502-es választ adjon, amikor egy csak kvóta esetén tartalékként használt prioritási cél olyan okból állítja le a kombinációt, amely bizonyíthatóan nem kvótával kapcsolatos: nyitott szolgáltatói megszakító vagy prediktív késleltetés miatti kihagyás."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Árazatlan használati költségpolitika",
+        "description": "Hogyan kezelik a kulcsonkénti napi/hetentei USD-korlátok a sikeres használatot, amelynél a szolgáltatónál vagy a modellnél nincs árazási bejegyzés. fail_closed (alapértelmezett) a periódust túllépettnek jelöli, így egy ismeretlen költség soha nem kerülhet át a kemény plafonon. count_as_zero ezt a használatot $0-ként számolja, és továbbra is érvényesíti a beárazott költést. Az árazatlan modelleket mindenesetre listázza a műszerfal kezdőlapja."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Fiókonkódok naplózása",
         "description": "Az AUTH-naplósorokba kerüljön be az előtagú fiókonkód (pl. \"'<provider>' fiók használata: abc12345...'). Alaphelyzetben kikapcsolva van, így a megosztott/több bérlős folyamatnaplóból a fiókonkódok elrejtett maradnak. Független a Hibakeresési módtól; a Hibakeresési mód bekapcsolása nem jeleníti meg ezt az opciót."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown újrapróbálkozás: 403/410 elutasítások kihagyása",
         "description": "Amikor minden fiók cooldown alatt van, és a legkorábban lejáró cooldownt egy 403 (hozzáférés megtagadva) vagy egy 410 (megszűnt) okozta, azonnal adja vissza ezt az elutasítást ahelyett, hogy megvárná a cooldown lejárását és újraküldené a kérést; egy megújuló agentrouter kapcsolati hatókörű kvóta 403 ekkor 429-es errorCode-dal kerül mentésre, így újrapróbálható marad. Alapértelmezés szerint kikapcsolva: csak a 401 hagyja ki a várakozást, és minden elutasítás azzal a státusszal kerül mentésre, amellyel érkezett."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Árazatlan használati költségpolitika",
-        "description": "Hogyan kezelik a kulcsonkénti napi/hetentei USD-korlátok a sikeres használatot, amelynél a szolgáltatónál vagy a modellnél nincs árazási bejegyzés. fail_closed (alapértelmezett) a periódust túllépettnek jelöli, így egy ismeretlen költség soha nem kerülhet át a kemény plafonon. count_as_zero ezt a használatot $0-ként számolja, és továbbra is érvényesíti a beárazott költést. Az árazatlan modelleket mindenesetre listázza a műszerfal kezdőlapja."
       }
     }
   },

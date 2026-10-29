@@ -14040,6 +14040,10 @@
         "label": "Detenciones de infraestructura de prioridad protegida como 502",
         "description": "Responde con 502 en lugar de 503 cuando un destino prioritario con alternativa solo por cuota detenga el combo por una causa que se pueda demostrar que no está relacionada con la cuota: un disyuntor abierto del proveedor o una omisión predictiva por latencia."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de presupuesto de uso sin precio",
+        "description": "Cómo los límites diarios/semanales por clave en USD tratan el uso exitoso cuyo proveedor/modelo no tiene una fila de precios. fail_closed (predeterminado) marca la ventana como excedida, de modo que un coste desconocido nunca puede eludir un tope estricto. count_as_zero cuenta ese uso como $0 y mantiene la aplicación del gasto tarifado. Los modelos sin precio se muestran en la página principal del panel de control de todas formas."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Registrar IDs de cuenta",
         "description": "Incluir el prefijo de la cuenta en las líneas del registro AUTH (p. ej., \"Usando cuenta de '<provider>': abc12345...\"). Desactivado de forma predeterminada para que los identificadores de cuenta se oculten de los registros de procesos compartidos o de varios inquilinos. Independiente del Modo Depuración; alternar el Modo Depuración no revela esta opción."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Reintento de enfriamiento: omitir rechazos 403/410",
         "description": "Cuando todas las cuentas están en enfriamiento y el enfriamiento que termina primero fue causado por un 403 (acceso denegado) o un 410 (ya no disponible), devuelve ese rechazo de inmediato en lugar de esperar a que termine el enfriamiento y reenviar la solicitud; un 403 de cuota con ámbito de conexión de agentrouter en renovación se persiste entonces con errorCode 429 para que siga siendo reintentable. Desactivado por defecto: solo un 401 omite la espera, y cada rechazo se persiste con el estado con el que llegó."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Política de presupuesto de uso sin precio",
-        "description": "Cómo los límites diarios/semanales por clave en USD tratan el uso exitoso cuyo proveedor/modelo no tiene una fila de precios. fail_closed (predeterminado) marca la ventana como excedida, de modo que un coste desconocido nunca puede eludir un tope estricto. count_as_zero cuenta ese uso como $0 y mantiene la aplicación del gasto tarifado. Los modelos sin precio se muestran en la página principal del panel de control de todas formas."
       }
     }
   },

@@ -14117,6 +14117,10 @@
         "label": "Zaustavljanja infrastrukture sa zaštićenim prioritetom kao 502",
         "description": "Odgovori sa 502 umjesto 503 kada prioritetna meta samo za fallback kvote zaustavi combo iz razloga koji dokazivo nije kvota: otvoreni circuit breaker provajdera ili prediktivno preskakanje latencije."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika budžeta za neprocijenjenu upotrebu",
+        "description": "Kako dnevna/sedmična USD ograničenja po ključu tretiraju uspješnu upotrebu čiji provajder/model nema konfiguriranu cijenu. fail_closed (zadano) označava prozor kao prekoračen, pa nepoznat trošak ne može proći pored stroge granice. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati cjenovnu potrošnju. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "ID-je naloga u dnevniku",
         "description": "Uključi prefiks naloga u linije dnevnika za AUTH (npr. \"Korišten je nalog '<provider>': abc12345...\"). Isključeno po zadanoj postavci kako bi se identifikatori naloga prikrili iz dijeljenih logova procesa s više zakupača. Neovisno o načinu debugovanja; promjena načina debugovanja ovo ne otkriva."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",
         "description": "Kada su svi računi u periodu hlađenja i period hlađenja koji prvi završava je uzrokovan statusom 403 (pristup odbijen) ili 410 (nestalo), odmah vrati to odbijanje umjesto čekanja da period hlađenja istekne i ponovnog slanja zahtjeva; obnavljajući agentrouter 403 za kvotu na nivou konekcije se zatim sprema uz errorCode 429 kako bi se mogao ponovo pokušati. Podrazumijevano isključeno: samo 401 preskače čekanje, a svako odbijanje se sprema sa statusom s kojim je stiglo."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika budžeta za neprocijenjenu upotrebu",
-        "description": "Kako dnevna/sedmična USD ograničenja po ključu tretiraju uspješnu upotrebu čiji provajder/model nema konfiguriranu cijenu. fail_closed (zadano) označava prozor kao prekoračen, pa nepoznat trošak ne može proći pored stroge granice. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati cjenovnu potrošnju. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
       }
     }
   },

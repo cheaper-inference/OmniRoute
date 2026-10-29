@@ -14117,6 +14117,10 @@
         "label": "Zastavení kvůli infrastruktuře u chráněné priority jako 502",
         "description": "Odpovědět stavem 502 namísto 503, když prioritní cíl s náhradním řešením pouze při vyčerpání kvóty zastaví kombinaci z důvodu, který prokazatelně nesouvisí s kvótou: rozpojený jistič poskytovatele nebo prediktivní přeskočení kvůli latenci."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Zásada rozpočtu pro nepřiřazené ceny",
+        "description": "Jak denní/týdenní USD limity na klíč zacházejí s úspěšným použitím, pro které poskytovatel/model nemá záznam o ceně. fail_closed (výchozí) označí okno jako překročené, takže neznámý náklad nikdy neprojde tvrdým limitem. count_as_zero započítá toto použití jako $0 a zachová vynucování oceněných výdajů. Modely bez ceny jsou tak či tak uvedeny na domovské stránce dashboardu."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Protokolovat ID účtů",
         "description": "Zahrnout předponu účtu do záznamů AUTH v protokolu (např. \"Používám účet '<provider>': abc12345...\"). Ve výchozím stavu je deaktivováno, aby byly identifikátory účtů utajeny z sdílených/protokolů více nájemníků. Nezávisí na režimu Lalování; přepnutí režimu Lalování toto nezobrazí."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Opakování při cooldownu: Přeskočit odmítnutí 403/410",
         "description": "Pokud jsou všechny účty v cooldownu a cooldown, který skončí jako první, byl způsoben kódem 403 (přístup odepřen) nebo 410 (již není k dispozici), vrátí se toto odmítnutí ihned namísto čekání na vypršení cooldownu a opětovného odeslání požadavku; obnovující se kód 403 kvóty na úrovni připojení pro agentrouter je poté uložen s errorCode 429, aby bylo možné pokus opakovat. Ve výchozím nastavení vypnuto: čekání přeskočí pouze kód 401 a každé odmítnutí je uloženo se stavem, se kterým přišlo."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Zásada rozpočtu pro nepřiřazené ceny",
-        "description": "Jak denní/týdenní USD limity na klíč zacházejí s úspěšným použitím, pro které poskytovatel/model nemá záznam o ceně. fail_closed (výchozí) označí okno jako překročené, takže neznámý náklad nikdy neprojde tvrdým limitem. count_as_zero započítá toto použití jako $0 a zachová vynucování oceněných výdajů. Modely bez ceny jsou tak či tak uvedeny na domovské stránce dashboardu."
       }
     }
   },

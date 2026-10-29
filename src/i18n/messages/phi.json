@@ -14040,6 +14040,10 @@
         "label": "Humihinto bilang 502 ang Protektadong-Priyoridad na Imprastraktura",
         "description": "Ibalik ang 502 sa halip na 503 kapag pinahinto ng isang priyoridad na target na may fallback para lamang sa quota ang kumbinasyon dahil sa isang sanhi na mapatutunayang hindi quota: isang bukas na circuit breaker ng provider o paglaktaw batay sa hinulaang latency."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
+        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Mga ID ng Account sa Log",
         "description": "Kasama ang prefix ng account sa mga linya ng AUTH log (hal. \"Ginagamit ang account ni '<provider>': abc12345...\"). Disabled sa default upang ang mga identifier ng account ay nakatago sa mga log ng process na nakahati o multi-tenant. Hiwalay sa Debug Mode; ang pagpapalit sa Debug Mode ay hindi ipapakita ito."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",
         "description": "Kapag ang bawat account ay nasa cooldown at ang cooldown na unang magtatapos ay sanhi ng 403 (tinanggihan ang access) o 410 (wala na), ibalik agad ang pagtangging iyon sa halip na hintaying matapos ang cooldown at muling ipadala ang kahilingan; ang isang nagre-renew na agentrouter connection-scoped quota 403 ay pananatilihin gamit ang errorCode 429 upang manatili itong puwedeng subukang muli. Naka-off bilang default: 401 lamang ang lumalaktaw sa paghihintay, at ang bawat pagtanggi ay pinananatili gamit ang status na kasama nitong dumating."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
-        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
       }
     }
   },

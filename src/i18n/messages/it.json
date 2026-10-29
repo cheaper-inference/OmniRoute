@@ -14117,6 +14117,10 @@
         "label": "Arresti dell'infrastruttura con priorità protetta come 502",
         "description": "Rispondi con 502 anziché 503 quando una destinazione prioritaria con fallback basato esclusivamente sulla quota interrompe la combo per una causa dimostrabilmente non correlata alla quota: un circuit breaker del provider aperto o un'esclusione predittiva dovuta alla latenza."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politica per il budget di utilizzo non prezzato",
+        "description": "Come i limiti giornalieri/settimanali in USD per chiave trattano l’utilizzo riuscito il cui provider/modello non ha una riga di prezzo. fail_closed (predefinito) marca la finestra come superata, così un costo sconosciuto non può mai oltrepassare un limite rigido. count_as_zero conta quell’utilizzo come $0 e continua a far valere la spesa prezzata. I modelli senza prezzo sono comunque elencati nella pagina principale della dashboard."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "ID account di log",
         "description": "Includi il prefisso dellaccount nelle righe di log AUTH (ad es. \"Utilizzo account '<provider>': abc12345...\"). Disabilitato di default in modo che gli identificatori degli account vengano oscurati dai log di processo condivisi/multi-tenant. Indipendente dalla Modalità Debug; lattivazione della Modalità Debug non rivela questa opzione."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Riprova durante il cooldown: Salta i rifiuti 403/410",
         "description": "Quando tutti gli account sono in cooldown e il cooldown che termina per primo è stato causato da un 403 (accesso rifiutato) o da un 410 (non più disponibile), restituisci subito tale rifiuto invece di attendere la fine del cooldown e inviare nuovamente la richiesta; un 403 di quota con ambito di connessione per un agentrouter in rinnovo viene quindi salvato con errorCode 429 affinché rimanga ritentabile. Disattivato per impostazione predefinita: solo un 401 salta l'attesa e ogni rifiuto viene salvato con lo stato con cui è arrivato."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politica per il budget di utilizzo non prezzato",
-        "description": "Come i limiti giornalieri/settimanali in USD per chiave trattano l’utilizzo riuscito il cui provider/modello non ha una riga di prezzo. fail_closed (predefinito) marca la finestra come superata, così un costo sconosciuto non può mai oltrepassare un limite rigido. count_as_zero conta quell’utilizzo come $0 e continua a far valere la spesa prezzata. I modelli senza prezzo sono comunque elencati nella pagina principale della dashboard."
       }
     }
   },

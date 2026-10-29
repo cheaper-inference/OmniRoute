@@ -14040,6 +14040,10 @@
         "label": "Infrastructuurstops met beschermde prioriteit als 502",
         "description": "Antwoord met 502 in plaats van 503 wanneer een prioriteitsdoel met uitsluitend quota als fallback de combo stopt vanwege een oorzaak waarvan aantoonbaar is dat die niet quotagerelateerd is: een open circuitbreaker van een provider of het overslaan vanwege voorspelde latentie."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Budgetbeleid voor ongeprijsd gebruik",
+        "description": "Hoe per-sleutel dagelijkse/wekelijkse USD-limieten succesvol gebruik behandelen waarvan de provider of het model geen prijsregel heeft. fail_closed (standaard) markeert het venster als overschreden, zodat een onbekende kost nooit langs een harde limiet kan glippen. count_as_zero telt dat gebruik als $0 en blijft de geprijsde uitgaven afdwingen. Ongeprijsde modellen worden in beide gevallen op de startpagina van het dashboard vermeld."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Account-ids registreren",
         "description": "Accountprefix in AUTH-logregels opnemen (bv. \"Account '<provider>' in gebruik: abc12345...\"). Standaard uitgeschakeld, zodat accountidentifiers uit gedeelde/multi-tenant proceslogs worden geredacted. Onafhankelijk van Debug Mode; het inschakelen van Debug Mode onthult dit niet."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-retry: 403/410-weigeringen overslaan",
         "description": "Wanneer elk account in een afkoelperiode zit en de afkoelperiode die het eerst afloopt werd veroorzaakt door een 403 (toegang geweigerd) of een 410 (verdwenen), retourneer die weigering dan direct in plaats van de afkoelperiode af te wachten en het verzoek opnieuw te verzenden; een vernieuwende agentrouter connection-scoped quota-403 wordt dan opgeslagen met errorCode 429, zodat een nieuwe poging mogelijk blijft. Standaard uitgeschakeld: alleen een 401 slaat de wachttijd over en elke weigering wordt opgeslagen met de status waarmee deze is ontvangen."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Budgetbeleid voor ongeprijsd gebruik",
-        "description": "Hoe per-sleutel dagelijkse/wekelijkse USD-limieten succesvol gebruik behandelen waarvan de provider of het model geen prijsregel heeft. fail_closed (standaard) markeert het venster als overschreden, zodat een onbekende kost nooit langs een harde limiet kan glippen. count_as_zero telt dat gebruik als $0 en blijft de geprijsde uitgaven afdwingen. Ongeprijsde modellen worden in beide gevallen op de startpagina van het dashboard vermeld."
       }
     }
   },

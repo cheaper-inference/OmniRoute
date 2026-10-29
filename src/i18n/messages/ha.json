@@ -14040,6 +14040,10 @@
         "label": "Tsayawar Infra na Protected-Priority a matsayin 502",
         "description": "A ba da amsar 502 maimakon 503 lokacin da maƙasudin fifiko na quota-only-fallback ya dakatar da combo saboda dalilin da aka tabbatar ba quota ba ne: buɗaɗɗen circuit breaker na provider ko tsallakewa bisa hasashen latency."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Manufa ta Kasafin Amfani Maras Farashi",
+        "description": "Yadda iyakokin USD na kullum/mako-mako na kowane maɓalli ke ɗaukar amfani mai nasara idan mai samarwa ko samfurin ba su da layin farashi. fail_closed (na asali) yana alamar cewa taga ya wuce ƙima, don haka farashin da ba a sani ba ba zai taɓa wuce iyaka mai tsauri ba. count_as_zero yana ƙididdige wannan amfani a matsayin $0 kuma yana ci gaba da tilasta kashe kuɗin da aka saita. A kowane hali, an jera samfura maras farashi a shafin gida na dashboard."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Ayyana ID na Asusun Kai",
         "description": "Haɗa shafin asusun kai a layukan log na AUTH (misali \"Ana amfani da asusun kai na '<provider>': abc12345...\"). A kashe yake ta tsohuwa don fayyada ma'ana na asusun kai daga log na tsaro da tsarin masu amfani da tsaki. Ba ya dogara da Yakin Gwajima; shigar da Yakin Gwajima ba ya shawarwa wannan."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Sake Gwajin Cooldown: Tsallake Ƙin Karɓa na 403/410",
         "description": "Yayin da kowane asusu ke cikin cooldown kuma cooldown ɗin da zai fara ƙarewa ya samo asali ne daga 403 (an hana izini) ko 410 (babu shi), mayar da wannan ƙin amincewar nan take maimakon jiran cooldown ɗin ya ƙare sannan a sake aika buƙatar; daga nan ana adana 403 na kason haɗin agentrouter mai sabuntawa tare da errorCode 429 domin ya ci gaba da kasancewa mai yiwuwar sake gwadawa. A kashe yake a asali: 401 kawai ke tsallake jiran, kuma ana adana kowane ƙin amincewa tare da matsayin da ya zo da shi."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Manufa ta Kasafin Amfani Maras Farashi",
-        "description": "Yadda iyakokin USD na kullum/mako-mako na kowane maɓalli ke ɗaukar amfani mai nasara idan mai samarwa ko samfurin ba su da layin farashi. fail_closed (na asali) yana alamar cewa taga ya wuce ƙima, don haka farashin da ba a sani ba ba zai taɓa wuce iyaka mai tsauri ba. count_as_zero yana ƙididdige wannan amfani a matsayin $0 kuma yana ci gaba da tilasta kashe kuɗin da aka saita. A kowane hali, an jera samfura maras farashi a shafin gida na dashboard."
       }
     }
   },

@@ -14040,6 +14040,10 @@
         "label": "Àwọn Ìdádúró Amáyédẹrùn Tó Ní Ààyò Ààbò Gẹ́gẹ́ Bí 502",
         "description": "Dáhùn pẹ̀lú 502 dípò 503 nígbà tí ibi-àfojúsùn tó ní ààyò, tí ìfàsẹ́yìn rẹ̀ jẹ́ fún quota nìkan, bá dá combo dúró nítorí ohun tí a lè fi ẹ̀rí hàn pé kì í ṣe quota: provider circuit breaker tó ṣí tàbí fífo nítorí ìdádúró àsọtẹ́lẹ̀."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Ilana Isuna Ìlò Aláìníye",
+        "description": "Bá ìwọn USD ọjọ́/ọ̀sẹ̀ fún bọtini kọọkan ṣe tọju ìlò tí ó ṣeyebíye tí olupese/módelì rẹ̀ kò ní ìkọ̀ọ́kan ìye. fail_closed (aìyipada) máa samisi àkókò náà gẹ́gẹ́ bí ti kọjá, nítorí náà iye tí a kò mọ̀ kò ní lè kọjá ẹ̀dá àgbára ìdínà. count_as_zero kà ìlò yẹn sí $0 kí ó sì tẹ̀síwájú ní mímú ìnáwó tí a ti ṣètò. Àwọn módelì aláìníye wà ní àtòkọ lórí ojú-ìwé ilé dasibọ́ọdu ní gbogbo ọ̀nà."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Ṣàkàn Ẹ̀kọ́ àwọn ID iṣẹ́",
         "description": "Àfikún àwọn prefix iṣẹ́ nínpo àwọn ohun-ọrọ̀ log AUTH (ọ. d. \"Nílò iṣẹ́ '<provider>': abc12345...\"). Ó wà ní pípa ní àkọ́kọ́ láti yọ àwọn idénà iṣẹ́ kúrò nínpo àwọn log ọ̀rẹ́/àwọn olùtẹ́jọ ẹ̀yà méjì. Ó dúró sí oríṣiṣe; lílo Debug Mode kò fi e dá wọ́le."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ìdíwàpadà Ìdíwàpadà: Yẹra 403/410 Ìṣàkóso",
         "description": "When every account is cooling down and the cooldown that ends first was caused by a 403 (access refused) or a 410 (gone), return that refusal at once instead of waiting the cooldown out and re-sending the request; a renewing agentrouter connection-scoped quota 403 is then persisted with errorCode 429 so it stays retryable. Off by default: only a 401 skips the wait, and every refusal is persisted with the status it arrived with."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Ilana Isuna Ìlò Aláìníye",
-        "description": "Bá ìwọn USD ọjọ́/ọ̀sẹ̀ fún bọtini kọọkan ṣe tọju ìlò tí ó ṣeyebíye tí olupese/módelì rẹ̀ kò ní ìkọ̀ọ́kan ìye. fail_closed (aìyipada) máa samisi àkókò náà gẹ́gẹ́ bí ti kọjá, nítorí náà iye tí a kò mọ̀ kò ní lè kọjá ẹ̀dá àgbára ìdínà. count_as_zero kà ìlò yẹn sí $0 kí ó sì tẹ̀síwájú ní mímú ìnáwó tí a ti ṣètò. Àwọn módelì aláìníye wà ní àtòkọ lórí ojú-ìwé ilé dasibọ́ọdu ní gbogbo ọ̀nà."
       }
     }
   },

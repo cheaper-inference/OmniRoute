@@ -14040,6 +14040,10 @@
         "label": "Kaitstud prioriteediga taristu peatamised kui 502",
         "description": "Vasta 503 asemel 502-ga, kui ainult kvoodipõhise varuvariandiga prioriteetne sihtmärk peatab combo põhjusel, mis pole tõendatavalt kvoodiga seotud: teenusepakkuja avatud kaitselüliti või prognoosiv latentsuse tõttu vahelejätmine."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Hinnastamata kasutuse eelarvepoliitika",
+        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logi konto ID-d",
         "description": "Kaasa konto eesliide AUTH logirindadesse (nt \"Kasutatakse '<provider>' kontot: abc12345...\"). Vaikimisi keelustatud, et konto identifikaatorid jääks jagatud/mitme tenanti protsessilogidest varjatud. Sõltumatu Debug režiimist; Debug režiimi lülitamine seda ei avalda."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jahtumisaja korduskatse: jäta 403/410 keeldumised vahele",
         "description": "Kui kõik kontod on jahtumisolekus ning esimesena lõppeva jahtumisaja põhjustas 403 (juurdepääsust keeldutud) või 410 (kadunud), tagasta see keeldumine kohe, selle asemel et jahtumisaeg ära oodata ja päring uuesti saata; uuenev agentrouter ühendusepõhise kvoodi 403 talletatakse seejärel koodiga errorCode 429, et see jääks uuesti proovitavaks. Vaikimisi väljas: ainult 401 jätab ootamise vahele ja iga keeldumine talletatakse staatusega, millega see saabus."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Hinnastamata kasutuse eelarvepoliitika",
-        "description": "Kuidas per‑võtme päevased või nädalased USD‑limiidid käsitlevad edukat kasutust, mille teenusepakkujal või mudelil puudub hinnakirje. fail_closed (vaikimisi) märgib akna ületatuks, nii et tundmatu kulu ei pääse kunagi kõva limiidi alt läbi. count_as_zero arvestab selle kasutuse $0‑ks ja jätkab hinnastatud kulude piirangute rakendamist. Hinnastamata mudelid kuvatakse igal juhul juhtpaneeli avalehel."
       }
     }
   },

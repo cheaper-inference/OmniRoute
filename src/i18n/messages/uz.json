@@ -14040,6 +14040,10 @@
         "label": "Himoyalangan ustuvorlikdagi infratuzilma toʻxtashlariga 502 javobi",
         "description": "Faqat kvota sababli zaxira variantga oʻtadigan ustuvor maqsad comboʼni kvotaga aloqador emasligi isbotlangan sabab — provayderning ochiq circuit breakerʼi yoki bashorat qilingan kechikish tufayli oʻtkazib yuborish — bilan toʻxtatsa, 503 oʻrniga 502 javobini bering."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Narxi belgilanmagan foydalanish byudjet siyosati",
+        "description": "Har bir kalit uchun kunlik/haftalik USD limitlar provayder/model uchun narx satri yo’q bo’lgan muvaffaqiyatli foydalanishni qanday hisoblashini ko’rsatadi. fail_closed (odatiy) oynani ortiqcha deb belgilaydi, shuning uchun noma’lum xarajat qattiq cheklovdan o’tib ketmaydi. count_as_zero ushbu foydalanishni $0 deb hisoblaydi va narxlangan sarfni majburan nazorat qilishni davom ettiradi. Narxi belgilanmagan modellar har holda boshqaruv paneli bosh sahifasida ko’rsatiladi."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Hisob identifikatorlarini yozib olish",
         "description": "AUTH jurnallash qatorlariga hisob raqami prefiksini kiritish (masalan, \"«'<provider>'» hisobdan foydalanilmoqda: abc12345...\"). Boshqacha aytilmasa, ulashilgan/koʻp ijarogar jarayon jurnallarida hisob identifikatorlarini yashirish uchun oʻchirilgan holatda ishga tushiriladi. Debug rejimidan mustaqil; Debug rejimini yoqish/soʻndirish bu sozlamani namoyon qilmaydi."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Poxatona takrorlash: 403/410 radlarini oʻtkazib yuborish",
         "description": "Agar barcha hisoblar poxatona holatida boʻlsa va birinchi tugaydigan poxatona 403 (kirish rad etildi) yoki 410 (yoʻq qilindi) tufayli yuzaga kelgan boʻlsa, soʻrovni kutib qayta yuborishning oʻrniga shu radni darhol qaytariladi; yangilanayotgan agentrouter ulanish-scopeli kvota 403 endi errorCode 429 bilan saqlanadi, shunda u qayta urinish uchun saqlanib qoladi. Standart holdan o'chirilgan: faqat 401 kutishni oʻtkazib yuboradi va har bir rad kelgan holat kodida saqlanadi."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Narxi belgilanmagan foydalanish byudjet siyosati",
-        "description": "Har bir kalit uchun kunlik/haftalik USD limitlar provayder/model uchun narx satri yo’q bo’lgan muvaffaqiyatli foydalanishni qanday hisoblashini ko’rsatadi. fail_closed (odatiy) oynani ortiqcha deb belgilaydi, shuning uchun noma’lum xarajat qattiq cheklovdan o’tib ketmaydi. count_as_zero ushbu foydalanishni $0 deb hisoblaydi va narxlangan sarfni majburan nazorat qilishni davom ettiradi. Narxi belgilanmagan modellar har holda boshqaruv paneli bosh sahifasida ko’rsatiladi."
       }
     }
   },

@@ -14040,6 +14040,10 @@
         "label": "Kusimamishwa kwa Miundombinu ya Kipaumbele Kilicholindwa kama 502",
         "description": "Jibu 502 badala ya 503 wakati lengo la kipaumbele lenye mbadala wa mgawo pekee linaposimamisha mseto kwa sababu ambayo kwa hakika si mgawo: kivunja saketi cha mtoa huduma kilicho wazi au urukaji unaotabiriwa kutokana na muda wa kusubiri."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Sera ya bajeti ya matumizi isiyo na bei",
+        "description": "Jinsi vikwazo vya USD vya kila ufunguo vya kila siku/kila wiki vinavyoshughulikia matumizi yaliyofanikiwa ambayo muuzaji/modeli hana safu ya bei. fail_closed (chaguo-msingi) inaweka dirisha kuwa limevuka, kwa hivyo gharama isiyojulikana haiwezi kupita kikomo thabiti. count_as_zero inahesabu matumizi hayo kama $0 na inaendelea kutekeleza matumizi yenye bei. Modeli zisizo na bei zinaorodheshwa kwenye ukurasa wa nyumbani wa dashibodi kwa njia yoyote."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Rejeshi wa ID za Akaunti",
         "description": "Taja awali ya akaunti kwenye mistari ya logi ya AUTH (mfano: \"Inatumia akaunti ya '<provider>': abc12345...\"). Imezimwa kwa chaguo-msingi ili vichujio vya akaunti vifichwe kutoka kwenye logi za ushirikiano/akili nyingi. Inaitiliana na Hali ya Uchunguzi; kubadilisha Hali ya Uchunguzi haionyeshi hii."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jaribio Tena la Kupumzika: Kuzima Ukwilizaji wa 403/410",
         "description": "Kitambaa kama akaunti zote zipo katika muda wa kupumzika na muda wa kupumzika unaomalizika kwanza ulisababishwa na 403 (ufikaji ukikata tamaa) au 410 (imeondoka), kurudi uasi huo mara moja badala ya kusubiri kupumzika kunakamilika na kutuma tena ombi; kuota ya mwingiliano wa agentrouter inayohakikisha 403 ya mpango wa mwingiliano inahifadhiwa na errorCode 429 ili ibaki iwezekan kufanya upya. Imezimwa kwa chaguo-msingi: 401 pekee ndio inayozima usubiri, na uasi wote unahifadhiwa na hali aliyoingia nayo."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Sera ya bajeti ya matumizi isiyo na bei",
-        "description": "Jinsi vikwazo vya USD vya kila ufunguo vya kila siku/kila wiki vinavyoshughulikia matumizi yaliyofanikiwa ambayo muuzaji/modeli hana safu ya bei. fail_closed (chaguo-msingi) inaweka dirisha kuwa limevuka, kwa hivyo gharama isiyojulikana haiwezi kupita kikomo thabiti. count_as_zero inahesabu matumizi hayo kama $0 na inaendelea kutekeleza matumizi yenye bei. Modeli zisizo na bei zinaorodheshwa kwenye ukurasa wa nyumbani wa dashibodi kwa njia yoyote."
       }
     }
   },

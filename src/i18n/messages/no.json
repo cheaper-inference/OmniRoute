@@ -14040,6 +14040,10 @@
         "label": "Infrastrukturstopp med beskyttet prioritet som 502",
         "description": "Svar med 502 i stedet for 503 når et prioritetsmål med reserve kun ved kvoteproblemer stopper kombinasjonen av en årsak som beviselig ikke skyldes kvoten: en åpen kretsbryter hos leverandøren eller at målet hoppes over på grunn av predikert latenstid."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Retningslinje for budsjett ved bruk uten pris",
+        "description": "Hvordan USD-grenser per nøkkel (daglig/ukentlig) behandler vellykket bruk der leverandør/modell ikke har en prisrad. fail_closed (standard) markerer vinduet som overskredet, slik at en ukjent kostnad aldri kan passere et hardt tak. count_as_zero teller denne bruken som $0 og fortsetter å håndheve priset forbruk. Modeller uten pris listes på dashbordets forside uansett."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logger kontoids",
         "description": "Inkluder kontoprefiks i AUTH-loglinjer (f.eks. «Bruker '<provider>'-konto: abc12345...»). Deaktivert som standard slik at konto-ID-er slipes fra felles-/multi-tenant-prosesslogger. Uavhengig av feilsøknadmodus; endring av feilsøknadmodus avslører ikke dette."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Gjenforsøk ved nedkjøling: Hopp over 403/410-avvisninger",
         "description": "Når alle kontoer er i nedkjøling og nedkjølingen som utløper først skyldtes en 403 (tilgang avvist) eller en 410 (borte), returner denne avvisningen umiddelbart i stedet for å vente ut nedkjølingen og sende forespørselen på nytt; en fornyende tilkoblingsavgrenset agentrouter-kvote-403 lagres deretter med errorCode 429 slik at den fortsatt kan prøves på nytt. Deaktivert som standard: bare en 401 hopper over ventetiden, og hver avvisning lagres med statusen den ankom med."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Retningslinje for budsjett ved bruk uten pris",
-        "description": "Hvordan USD-grenser per nøkkel (daglig/ukentlig) behandler vellykket bruk der leverandør/modell ikke har en prisrad. fail_closed (standard) markerer vinduet som overskredet, slik at en ukjent kostnad aldri kan passere et hardt tak. count_as_zero teller denne bruken som $0 og fortsetter å håndheve priset forbruk. Modeller uten pris listes på dashbordets forside uansett."
       }
     }
   },

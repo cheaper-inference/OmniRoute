@@ -14040,6 +14040,10 @@
         "label": "Penghentian Infrastruktur Prioritas Terlindungi sebagai 502",
         "description": "Berikan respons 502 alih-alih 503 ketika target prioritas dengan fallback khusus kuota menghentikan combo karena penyebab yang terbukti bukan kuota: circuit breaker penyedia yang terbuka atau pelompatan berdasarkan prediksi latensi."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Kebijakan Anggaran Penggunaan Tanpa Harga",
+        "description": "Bagaimana batas USD harian/mingguan per-kunci memperlakukan penggunaan yang berhasil apabila penyedia/modelnya tidak memiliki baris harga. fail_closed (bawaan) menandai jendela sebagai terlampaui, sehingga biaya yang tidak diketahui tidak pernah bisa melewati batas keras. count_as_zero menghitung penggunaan itu sebagai $0 dan terus menegakkan pengeluaran yang diberi harga. Model tanpa harga tetap ditampilkan di halaman utama dasbor dalam kedua kasus."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "ID Akun Log",
         "description": "Sertakan prefiks akun di baris log AUTH (mis. \"Menggunakan akun '<provider>': abc12345...\"). Nonaktif secara default sehingga identifikasi akun disamarkan dari log proses bersama/multi-tenant. Independen dari Mode Debug; mengubah Mode Debug tidak akan mengungkap ini."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",
         "description": "Ketika semua akun sedang dalam masa cooldown dan cooldown yang selesai lebih awal disebabkan oleh 403 (akses ditolak) atau 410 (hilang), segera kembalikan penolakan tersebut alih-alih menunggu masa cooldown selesai dan mengirim ulang permintaan; kuota 403 connection-scoped agentrouter yang diperbarui kemudian disimpan dengan errorCode 429 agar tetap dapat dicoba ulang. Nonaktif secara default: hanya 401 yang melewati waktu tunggu, dan setiap penolakan disimpan dengan status saat diterima."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Kebijakan Anggaran Penggunaan Tanpa Harga",
-        "description": "Bagaimana batas USD harian/mingguan per-kunci memperlakukan penggunaan yang berhasil apabila penyedia/modelnya tidak memiliki baris harga. fail_closed (bawaan) menandai jendela sebagai terlampaui, sehingga biaya yang tidak diketahui tidak pernah bisa melewati batas keras. count_as_zero menghitung penggunaan itu sebagai $0 dan terus menegakkan pengeluaran yang diberi harga. Model tanpa harga tetap ditampilkan di halaman utama dasbor dalam kedua kasus."
       }
     }
   },

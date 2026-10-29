@@ -14117,6 +14117,10 @@
         "label": "Waqfiet tal-Infrastruttura bi Prijorità Protetta bħala 502",
         "description": "Wieġeb b’502 minflok 503 meta mira ta’ prijorità b’fallback għall-kwota biss twaqqaf il-combo għal kawża li jista’ jiġi ppruvat li mhijiex relatata mal-kwota: circuit breaker miftuħ tal-fornitur jew qbiż predittiv minħabba l-latenza."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika tal-baġit għall-użu mingħajr prezz",
+        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Reġistra l-IDs tal-Kontijiet",
         "description": "Inkludi l-prefix tal-kont fil-linji tal-log tal-AUTH (eż. \"Għaddi l-kont ta '<provider>': abc12345...\"). Mitfi b'mod awtomatiku biex l-identifikaturi tal-kontijiet jiġu rrifjutati mill-log ta' proċessi kondiviżi/multi-tenant. Indipendenti minn Debug Mode; il-bidla ta' Debug Mode ma tagħżilx dan."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Pruwa mill-Ġdid tal-Cooldown: Aqbeż ir-Rifjuti 403/410",
         "description": "Meta kull kont ikun f'cooldown u l-cooldown li jintemm l-ewwel kien ikkawżat minn 403 (aċċess irrifjutat) jew 410 (m'għadux jeżisti), irritorna dak ir-rifjut minnufih minflok ma tistenna li jintemm il-cooldown u terġa' tibgħat it-talba; 403 ta' kwota b'ambitu ta' konnessjoni ta' agentrouter li qed tiġġedded imbagħad jiġi ppersistit b'errorCode 429 sabiex jibqa' jista' jerġa' jiġi ppruvat. Iddiżattivat b'mod awtomatiku: 401 biss jaqbeż l-istennija, u kull rifjut jiġi ppersistit bl-istatus li jkun wasal bih."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika tal-baġit għall-użu mingħajr prezz",
-        "description": "Kif il-limiti USD ta’ kuljum/ta’ kull ġimgħa għal kull ċavetta jitrattaw użu b’suċċess li l-fornitur/mudell tiegħu m’għandux riga ta’ prezz. fail_closed (predefinit) jimmarka l-perjodu bħala mgħaddija mill-limitu, sabiex spiża mhux magħrufa qatt ma tista’ tgħaddi mill-limitu strett. count_as_zero jikkontabilizza dak l-użu bħala $0 u jkompli jissalvagwardja l-ispejjeż b’prezz. Il-mudelli mingħajr prezz huma elenkati fil-paġna ewlenija tad-dashboard f’kull każ."
       }
     }
   },

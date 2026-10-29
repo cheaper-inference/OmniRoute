@@ -3296,17 +3296,17 @@
     "cliproxyapiUpdate": "Cập nhật",
     "cliproxyapiUpdateAvailable": "Có bản cập nhật: v{current} → v{latest}",
     "cliproxyapiVersion": "Phiên bản",
-    "customUrl": "URL tùy chỉnh",
-    "customEndpointAria": "Điểm cuối tùy chỉnh",
-    "useDefaultKey": "Sử dụng khóa mặc định của OmniRoute",
-    "mainModelAria": "Mô hình chính",
-    "manualConfigTitle": "Cấu hình thủ công cho Grok Build",
     "piInstallTitle": "Cài đặt tác nhân mã hóa Pi",
     "piInstallInstructions": "Cài đặt Pi CLI, sau đó quay lại đây để kết nối với OmniRoute.",
     "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
     "piEndpoint": "OmniRoute URL",
     "piEndpointHelp": "Sử dụng URL có thể truy cập được từ máy chạy Pi. Điểm cuối /v1 tương thích với OpenAI được thêm tự động.",
     "piManualMergeHint": "Chỉ xem trước. Hợp nhất mục nhập providers.omniroute này vào models.json để các nhà cung cấp và cài đặt khác của bạn được giữ nguyên.",
+    "customUrl": "URL tùy chỉnh",
+    "customEndpointAria": "Điểm cuối tùy chỉnh",
+    "useDefaultKey": "Sử dụng khóa mặc định của OmniRoute",
+    "mainModelAria": "Mô hình chính",
+    "manualConfigTitle": "Cấu hình thủ công cho Grok Build",
     "removeMapping": "Xóa ánh xạ"
   },
   "modelCatalog": {
@@ -14040,6 +14040,10 @@
         "label": "Các điểm dừng do hạ tầng ở mức ưu tiên được bảo vệ trả về 502",
         "description": "Trả về 502 thay vì 503 khi một mục tiêu ưu tiên chỉ dùng hạn mức làm phương án dự phòng dừng combo vì một nguyên nhân được chứng minh là không liên quan đến hạn mức: bộ ngắt mạch của nhà cung cấp đang mở hoặc bị bỏ qua do dự đoán độ trễ."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Chính sách ngân sách cho sử dụng chưa định giá",
+        "description": "Cách giới hạn USD hàng ngày/hàng tuần theo mỗi khóa xử lý lượng sử dụng thành công khi nhà cung cấp/mô hình không có dòng giá. fail_closed (mặc định) đánh dấu cửa sổ là đã vượt, nên một chi phí không xác định sẽ không bao giờ vượt qua giới hạn cứng. count_as_zero tính lượng sử dụng đó là $0 và tiếp tục áp dụng chi tiêu đã định giá. Các mô hình chưa có giá vẫn được liệt kê trên trang chính của bảng điều khiển trong mọi trường hợp."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Truy cập ID tài khoản",
         "description": "Đưa tiền tố tài khoản vào dòng nhật ký AUTH (ví dụ: \"Đang sử dụng tài khoản '<provider>': abc12345...\"). Mặc định bị vô hiệu hóa để che giấu định danh tài khoản khỏi các nhật ký quy trình chia sẻ/đa thuê bao. Độc lập với Chế độ Gỡ lỗi; bật tắt Chế độ Gỡ lỗi sẽ không hiển thị thông tin này."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Chờ thử lại: Bỏ qua các từ chối 403/410",
         "description": "Khi tất cả các tài khoản đều đang trong thời gian chờ và thời gian chờ kết thúc sớm nhất do một lỗi 403 (từ chối truy cập) hoặc 410 (không còn tồn tại), hệ thống sẽ trả về sự từ chối đó ngay lập tức thay vì chờ hết thời gian và gửi lại yêu cầu; một giới hạn (quota) theo phạm vi kết nối agentrouter được làm mới có mã lỗi 403 sau đó sẽ được lưu trữ với mã errorCode 429 để giữ khả năng thử lại. Tắt mặc định: chỉ có lỗi 401 mới bỏ qua bước chờ, và mọi sự từ chối đều được lưu trữ với mã trạng thái ban đầu khi nhận được."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Chính sách ngân sách cho sử dụng chưa định giá",
-        "description": "Cách giới hạn USD hàng ngày/hàng tuần theo mỗi khóa xử lý lượng sử dụng thành công khi nhà cung cấp/mô hình không có dòng giá. fail_closed (mặc định) đánh dấu cửa sổ là đã vượt, nên một chi phí không xác định sẽ không bao giờ vượt qua giới hạn cứng. count_as_zero tính lượng sử dụng đó là $0 và tiếp tục áp dụng chi tiêu đã định giá. Các mô hình chưa có giá vẫn được liệt kê trên trang chính của bảng điều khiển trong mọi trường hợp."
       }
     }
   },

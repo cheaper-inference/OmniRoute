@@ -14117,6 +14117,10 @@
         "label": "Paragens de infraestrutura com prioridade protegida como 502",
         "description": "Responder com 502 em vez de 503 quando um destino prioritário com fallback apenas em caso de quota interrompe a combinação por uma causa que comprovadamente não está relacionada com a quota: um disjuntor de fornecedor aberto ou uma omissão preditiva devido à latência."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Política de Orçamento de Utilização sem Preço",
+        "description": "Como os limites diários/semanais por chave em USD tratam utilização bem-sucedida cujo fornecedor/modelo não tem uma linha de preços. fail_closed (predefinido) marca a janela como excedida, de modo que um custo desconhecido nunca possa ultrapassar um limite rígido. count_as_zero conta essa utilização como $0 e continua a aplicar o gasto tarifado. Os modelos sem preço são listados na página inicial do painel de qualquer forma."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Registar IDs de Conta",
         "description": "Incluir o prefixo da conta nas linhas de registo de AUTENTICAÇÃO (ex.: \"A usar a conta '<provider>': abc12345...\"). Desativado por predefinição para que os identificadores de conta sejam omitidos dos registos de processo partilhados/multiinquilino. Independente do Modo de Depuração; ativar o Modo de Depuração não revela isto."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Nova tentativa em arrefecimento: ignorar recusas 403/410",
         "description": "Quando todas as contas estão em arrefecimento e o arrefecimento que termina primeiro foi causado por um 403 (acesso recusado) ou um 410 (removido), devolve essa recusa de imediato em vez de aguardar pelo fim do arrefecimento e reenviar o pedido; um 403 de quota com âmbito de ligação do agentrouter em renovação é então persistido com o errorCode 429 para permanecer passível de nova tentativa. Desativado por predefinição: apenas um 401 ignora a espera e cada recusa é persistida com o estado com que chegou."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Política de Orçamento de Utilização sem Preço",
-        "description": "Como os limites diários/semanais por chave em USD tratam utilização bem-sucedida cujo fornecedor/modelo não tem uma linha de preços. fail_closed (predefinido) marca a janela como excedida, de modo que um custo desconhecido nunca possa ultrapassar um limite rígido. count_as_zero conta essa utilização como $0 e continua a aplicar o gasto tarifado. Os modelos sem preço são listados na página inicial do painel de qualquer forma."
       }
     }
   },

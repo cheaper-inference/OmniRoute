@@ -14040,6 +14040,10 @@
         "label": "Infrastrukturne zaustavitve z zaščiteno prioriteto kot 502",
         "description": "Odgovori s 502 namesto 503, ko prednostni cilj z nadomestno uporabo samo ob izčrpani kvoti ustavi kombinacijo zaradi vzroka, ki dokazljivo ni povezan s kvoto: odprtega odklopnika ponudnika ali preskoka zaradi napovedane zakasnitve."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika proračuna za neocenjeno uporabo",
+        "description": "Kako dnevne/tedenske omejitve (v USD) za posamezen ključ obravnavajo uspešno uporabo, pri kateri ponudnik/model nima vnesene cene. fail_closed (privzeto) označi okno kot prekoračeno, zato neznan strošek nikoli ne more zaobiti trde omejitve. count_as_zero šteje to uporabo kot $0 in še naprej uveljavlja porabo s ceno. Modeli brez cene so v vsakem primeru navedeni na domači strani nadzorne plošče."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "IDs računa za dnevnike",
         "description": "Vključi predpono računa v vrstice dnevnika AUTH (npr. \"Uporaba računa '<provider>': abc12345...\"). Privzeto je izklopljeno, da se identifikatorji računov brišejo iz posnetih/multi-tenant dnevnikov. Samostojno od Debug Mode; preklop Debug Mode tega ne izpostavi."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovna poskusa po čakanju: Preskoči zavrge 403/410",
         "description": "Ko so vse račune v stanju čakanja in je najprej končano čakanje povzročilo 403 (dostop zavrnjen) ali 410 (odstranjeno), takoj vrnite to zavrnitev namesto da bi čakali, da se čakanje konča, in ponovno poslali zahtevo; obnavljajoča se povezava agentroutera z omejeno kvoto 403 se nato shranjuje s kodo napake 429, da ostane ponovno poskusna. Privzeto izklopljeno: le 401 preskoči čakanje, vsaka zavrnitev pa se shrani s stanjem, s katerim je prišla."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika proračuna za neocenjeno uporabo",
-        "description": "Kako dnevne/tedenske omejitve (v USD) za posamezen ključ obravnavajo uspešno uporabo, pri kateri ponudnik/model nima vnesene cene. fail_closed (privzeto) označi okno kot prekoračeno, zato neznan strošek nikoli ne more zaobiti trde omejitve. count_as_zero šteje to uporabo kot $0 in še naprej uveljavlja porabo s ceno. Modeli brez cene so v vsakem primeru navedeni na domači strani nadzorne plošče."
       }
     }
   },

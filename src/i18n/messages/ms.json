@@ -14040,6 +14040,10 @@
         "label": "Penghentian Infrastruktur Keutamaan Terlindung sebagai 502",
         "description": "Berikan respons 502 dan bukannya 503 apabila sasaran keutamaan yang sandarannya hanya dicetuskan oleh kuota menghentikan gabungan atas sebab yang dapat dibuktikan tidak berkaitan dengan kuota: pemutus litar penyedia yang terbuka atau pelangkauan latensi ramalan."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Dasar Bajet Penggunaan Tanpa Harga",
+        "description": "Bagaimana had USD harian/mingguan setiap kunci mengendalikan penggunaan yang berjaya apabila pembekal/model tidak mempunyai baris harga. fail_closed (lalai) menandakan jendela sebagai telah terlampaui, jadi kos yang tidak diketahui tidak akan dapat melepasi had keras. count_as_zero mengira penggunaan itu sebagai $0 dan terus menguatkuasakan perbelanjaan yang mempunyai harga. Model tanpa harga tetap disenaraikan di halaman utama papan pemuka."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Log ID Akaun",
         "description": "Sertakan awalan akaun dalam baris log AUTH (cth. \"Menggunakan akaun '<provider>': abc12345...\"). Dinonaktifkan secara lalai supaya pengenal akaun disamarkan daripada log proses berkongsi/berbilang penyewa. Bebas dari Mod Imbangan; penukaran Mod Imbangan tidak mendedahkan ini."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Percubaan Semula Tempoh Bertenang: Langkau Penolakan 403/410",
         "description": "Apabila setiap akaun sedang dalam tempoh bertenang dan tempoh bertenang yang tamat terlebih dahulu disebabkan oleh 403 (akses ditolak) atau 410 (tiada lagi), kembalikan penolakan tersebut serta-merta dan bukannya menunggu tempoh bertenang tamat lalu menghantar semula permintaan; kuota 403 berskop sambungan agentrouter yang memperbaharui kemudiannya dikekalkan dengan errorCode 429 supaya ia kekal boleh dicuba semula. Dimatikan secara lalai: hanya 401 yang melangkau penantian, dan setiap penolakan dikekalkan dengan status yang diterimanya."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Dasar Bajet Penggunaan Tanpa Harga",
-        "description": "Bagaimana had USD harian/mingguan setiap kunci mengendalikan penggunaan yang berjaya apabila pembekal/model tidak mempunyai baris harga. fail_closed (lalai) menandakan jendela sebagai telah terlampaui, jadi kos yang tidak diketahui tidak akan dapat melepasi had keras. count_as_zero mengira penggunaan itu sebagai $0 dan terus menguatkuasakan perbelanjaan yang mempunyai harga. Model tanpa harga tetap disenaraikan di halaman utama papan pemuka."
       }
     }
   },

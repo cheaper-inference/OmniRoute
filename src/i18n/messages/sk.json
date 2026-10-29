@@ -14040,6 +14040,10 @@
         "label": "Infraštruktúrne zastavenia s chránenou prioritou ako 502",
         "description": "Odpovedať kódom 502 namiesto 503, keď prioritný cieľ so záložnou možnosťou iba pri vyčerpaní kvóty zastaví kombináciu z dôvodu, ktorý preukázateľne nesúvisí s kvótou: otvorený istič poskytovateľa alebo prediktívne preskočenie z dôvodu latencie."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika rozpočtu pre použitie bez ceny",
+        "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logovať ID účtov",
         "description": "Zahrnúť predponu účtu v riadkoch AUTH logu (napr. \"Používam účet '<provider>': abc12345...\"). Predvolene vypnuté, aby sa identifikátory účtov maskovali v zdieľaných / multi-tenant procesových logoch. Nezávislé od režimu ladenia; prepnutie režimu ladenia to nezodpoveda."
@@ -14303,10 +14307,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: Skip 403/410 Odmietnutia",
         "description": "Keď sú všetky účty v chladiacom režime a najskôr končiace cooldown bol spôsobený 403 (prístup odmietnutý) alebo 410 (prejdené), vráť to odmietnutie ihneď namiesto čakania na koniec cooldownu a opätovného odosielania požiadavky; obnovovaný agentrouter spojené kvóty 403 sa potom zachovávajú s errorCode 429, aby zostali znova vykonateľné. Predvolene vypnuté: iba 401 preskočí čakanie a každý odmietnutý požiadavka sa uchováva so statusom, s ktorým prišla."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politika rozpočtu pre použitie bez ceny",
-        "description": "Ako denné/týždenné USD limity na kľúč zaobchádzajú s úspešným použitím, ktorého poskytovateľ/model nemá položku ceny. fail_closed (predvolené) označí okno za prekročené, takže neznáma cena nikdy nemôže obísť tvrdý limit. count_as_zero započítava takéto použitie ako $0 a naďalej vynucuje výdavky na modely s nastavenou cenou. Modely bez ceny sú v každom prípade uvedené na domovskej stránke panela."
       }
     }
   },

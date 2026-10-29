@@ -14117,6 +14117,10 @@
         "label": "Infrastrukturstop med beskyttet prioritet som 502",
         "description": "Svar med 502 i stedet for 503, når et prioriteret mål med fallback kun ved kvoteproblemer stopper kombinationen af en årsag, der beviseligt ikke skyldes kvoten: en åben circuit breaker hos udbyderen eller en prædiktiv overspringning på grund af latenstid."
       },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politik for uprissat forbrugsbudget",
+        "description": "Hvordan per-nøgle daglige/ugentlige USD-grænser behandler vellykket brug, hvor leverandøren/modellen ikke har en prissætningspost. fail_closed (standard) markerer vinduet som overskredet, så en ukendt omkostning aldrig kan slippe forbi et hårdt loft. count_as_zero tæller den brug som $0 og fortsætter med at håndhæve det prissatte forbrug. Uprissatte modeller vises på dashboardets startside under alle omstændigheder."
+      },
       "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
         "label": "Logger kontoid",
         "description": "Inkluder kontoprefiks i AUTH-loglinjer (f.eks. \"Bruger '<provider>'-konto: abc12345...\"). Deaktiveret som standard, så kontoidentifierer redderes fra faldende/multitenant processlogs. Uafhængigt af Fejlfindings Tilstand; at slå Fejlfindings Tilstand til/afrækker ikke dette."
@@ -14380,10 +14384,6 @@
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Genforsøg ved nedkøling: Spring 403/410-afvisninger over",
         "description": "Når alle konti er i nedkøling, og den nedkøling, der udløber først, skyldtes en 403 (adgang afvist) eller en 410 (borte), returneres denne afvisning straks i stedet for at afvente nedkølingen og gensende anmodningen; en fornyende forbindelsesafgrænset agentrouter-kvote-403 gemmes derefter med errorCode 429, så den fortsat kan genforsøges. Deaktiveret som standard: Kun en 401 springer ventetiden over, og enhver afvisning gemmes med den status, den ankom med."
-      },
-      "UNPRICED_USAGE_BUDGET_POLICY": {
-        "label": "Politik for uprissat forbrugsbudget",
-        "description": "Hvordan per-nøgle daglige/ugentlige USD-grænser behandler vellykket brug, hvor leverandøren/modellen ikke har en prissætningspost. fail_closed (standard) markerer vinduet som overskredet, så en ukendt omkostning aldrig kan slippe forbi et hårdt loft. count_as_zero tæller den brug som $0 og fortsætter med at håndhæve det prissatte forbrug. Uprissatte modeller vises på dashboardets startside under alle omstændigheder."
       }
     }
   },
