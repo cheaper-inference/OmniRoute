@@ -380,6 +380,15 @@ export const DEFAULT_PRICING_INFERENCE = {
     "nvidia/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    // #18418: emergency fallback default (free endpoint). Without a row, usage is
+    // unpriced and USD-limited API keys fail closed (#12341) after one fallback.
+    "nvidia/nemotron-3.5-super-vl-120b-a12b": {
+      input: 0,
+      output: 0,
+      cached: 0,
+      reasoning: 0,
+      cache_creation: 0,
+    },
     "moonshotai/kimi-k2.5": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "z-ai/glm4.7": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
     "deepseek-ai/deepseek-v3.2": {

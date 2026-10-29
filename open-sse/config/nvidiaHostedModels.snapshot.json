@@ -1,7 +1,4 @@
 [
-  "moonshotai/kimi-k3",
-  "deepseek-ai/deepseek-v4-pro-0813",
-  "deepseek-ai/deepseek-v4-flash-0731",
   "meta/muse-glimmer-30b",
   "poolside/laguna-xs-2.1",
   "google/gemma-4-31b-it",
@@ -9,6 +6,5 @@
   "nvidia/nemotron-3-ultra-550b-a55b",
   "nvidia/nemotron-3.5-super-vl-120b-a12b",
   "nvidia/nemotron-3.5-lightning-30b-a3b",
-  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
-  "openai/gpt-oss-120b"
+  "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 ]

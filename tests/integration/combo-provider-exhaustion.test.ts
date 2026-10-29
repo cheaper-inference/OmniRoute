@@ -594,7 +594,7 @@ test("allow rate-limited connections after transient 429 on subsequent targets i
 
 test("emergency fallback never sends the failing provider's credentials to another provider's endpoint", async () => {
   // Single-model request (no combo). On a quota/billing 429 the emergency
-  // fallback redirects to nvidia/openai/gpt-oss-120b. The hop must go through
+  // fallback redirects to the NVIDIA free default (EMERGENCY_FALLBACK_CONFIG). The hop must go through
   // credential selection for the EMERGENCY provider — it must never re-send
   // the exhausted provider's API key to a different provider's URL (the old
   // executor-level hop shipped the OpenAI key to integrate.api.nvidia.com).

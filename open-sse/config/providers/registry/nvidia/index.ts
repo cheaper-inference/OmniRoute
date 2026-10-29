@@ -17,17 +17,10 @@ export const nvidiaProvider: RegistryEntry = {
   // hasPerModelQuota doc comment; matches modelscope/synthetic/kilo-gateway).
   passthroughModels: true,
   models: [
-    { id: "moonshotai/kimi-k3", name: "Kimi K3" },
-    {
-      id: "deepseek-ai/deepseek-v4-pro-0813",
-      name: "DeepSeek V4 Pro 0813",
-      supportsReasoning: true,
-    },
-    {
-      id: "deepseek-ai/deepseek-v4-flash-0731",
-      name: "DeepSeek V4 Flash 0731",
-      supportsReasoning: true,
-    },
+    // #18418: NVIDIA retired the free endpoints for moonshotai/kimi-k3 (2026-10-15),
+    // deepseek-ai/deepseek-v4-pro-0813 (2026-09-14), deepseek-ai/deepseek-v4-flash-0731
+    // (2026-09-21) and openai/gpt-oss-120b (2026-09-03); each now answers 410 "reached its
+    // end of life", so they are no longer listed here.
     { id: "meta/muse-glimmer-30b", name: "Muse Glimmer 30B" },
     { id: "poolside/laguna-xs-2.1", name: "Laguna XS 2.1" },
     { id: "google/gemma-4-31b-it", name: "Gemma 4 31B" },
@@ -50,6 +43,5 @@ export const nvidiaProvider: RegistryEntry = {
       supportsReasoning: true,
       supportsVision: true,
     },
-    { id: "openai/gpt-oss-120b", name: "GPT OSS 120B", toolCalling: false },
   ],
 };

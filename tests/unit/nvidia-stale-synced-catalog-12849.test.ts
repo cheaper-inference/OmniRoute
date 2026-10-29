@@ -24,15 +24,14 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "nvidia-stale-12849-t
 const core = await import("../../src/lib/db/core.ts");
 const { replaceSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");
 const { getModelInfo } = await import("../../src/sse/services/model.ts");
-const { nvidiaProvider } = await import(
-  "../../open-sse/config/providers/registry/nvidia/index.ts"
-);
+const { nvidiaProvider } = await import("../../open-sse/config/providers/registry/nvidia/index.ts");
 
 const PROVIDER = "nvidia";
 const CONNECTION_ID = "nvidia-stale-catalog-12849";
 // Live upstream + present in the current static registry (asserted below), but
 // deliberately absent from the small "historical sync" catalog seeded here.
-const LIVE_MODEL = "moonshotai/kimi-k3";
+// (#18418 retired moonshotai/kimi-k3 on NVIDIA, so this now uses Gemma 4 31B.)
+const LIVE_MODEL = "google/gemma-4-31b-it";
 const STALE_SYNC_ONLY_MODEL = "some-retired-model-that-no-longer-exists";
 
 function connectionRow(): { syncedModelsAt: string | null } {
@@ -87,7 +86,10 @@ test.after(() => {
 test("#12849: a fresh synced catalog still gates — a model missing from it is rejected", async () => {
   // Sanity: touchConnectionSyncedModelsAt stamped this sync as fresh already.
   const { syncedModelsAt } = connectionRow();
-  assert.ok(syncedModelsAt, "replaceSyncedAvailableModelsForConnection must stamp synced_models_at");
+  assert.ok(
+    syncedModelsAt,
+    "replaceSyncedAvailableModelsForConnection must stamp synced_models_at"
+  );
 
   const resolved = await getModelInfo(`${PROVIDER}/${LIVE_MODEL}`);
 
