@@ -58,7 +58,8 @@ const P = await import("../../src/shared/constants/providers.ts");
 // NaN.Builders adds one apikey/gateways entry — 250.
 // DaoXE adds one apikey/gateways entry — 251.
 // ainetcafe (#13862) adds one apikey/gateways entry — 253.
-const APIKEY_PROVIDER_COUNT = 253;
+// ParalonCloud (#16587) adds one apikey entry in its own extract, apikey/paraloncloud.ts — 254.
+const APIKEY_PROVIDER_COUNT = 254;
 
 test("barrel still exports every catalog + key helpers", () => {
   for (const name of [
@@ -94,6 +95,7 @@ test(`APIKEY_PROVIDERS merges the 6 family files plus the beatapi extract into $
   const families: [string, string][] = [
     ["gateways", "APIKEY_PROVIDERS_GATEWAYS"],
     ["beatapi", "APIKEY_PROVIDERS_BEATAPI"],
+    ["paraloncloud", "APIKEY_PROVIDERS_PARALONCLOUD"],
     ["frontier-labs", "APIKEY_PROVIDERS_FRONTIER"],
     ["inference-hosts", "APIKEY_PROVIDERS_INFERENCE"],
     ["enterprise-cloud", "APIKEY_PROVIDERS_ENTERPRISE"],
