@@ -35,8 +35,8 @@ export interface FlowMediaResult {
   b64_json?: string;
 }
 
-async function syncRotatedCookies(context: any): Promise<void> {
-  if (!context) return;
+async function syncRotatedCookies(context: any, connectionId?: string): Promise<void> {
+  if (!context || !connectionId) return;
   try {
     const cookies = await context.cookies();
     if (!Array.isArray(cookies) || cookies.length === 0) return;
@@ -72,11 +72,15 @@ async function syncRotatedCookies(context: any): Promise<void> {
 
     const Database = (await import("better-sqlite3")).default;
     const db = new Database("/app/data/storage.sqlite");
-    db.prepare(
-      "UPDATE provider_connections SET api_key = ?, updated_at = ? WHERE provider = 'googleflow-web' AND is_active = 1"
-    ).run(encrypted, new Date().toISOString());
+    db.prepare("UPDATE provider_connections SET api_key = ?, updated_at = ? WHERE id = ?").run(
+      encrypted,
+      new Date().toISOString(),
+      connectionId
+    );
     db.close();
-    console.log("[FLOW_DEBUG] Automatically synced rotated session cookies to storage.sqlite");
+    console.log(
+      `[FLOW_DEBUG] Automatically synced rotated session cookies for connection ${connectionId} to storage.sqlite`
+    );
   } catch (err) {
     console.error("[FLOW_DEBUG] Failed to auto-sync rotated cookies:", err);
   }
@@ -600,7 +604,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
-      await syncRotatedCookies(context).catch(() => {});
+      await syncRotatedCookies(context, (opts.credentials as any)?.connectionId).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});
@@ -859,7 +863,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     };
   } finally {
     if (context) {
-      await syncRotatedCookies(context).catch(() => {});
+      await syncRotatedCookies(context, (opts.credentials as any)?.connectionId).catch(() => {});
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});

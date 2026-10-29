@@ -45,9 +45,15 @@ export async function handleGoogleFlowWebVideoGeneration({
     const aspectRatio = normalizeVideoAspectRatio(rawAspect);
 
     const creds = {
-      apiKey: typeof credentials?.apiKey === "string" ? credentials.apiKey : undefined,
+      apiKey: typeof credentials?.apiKey === "string" ? credentials.apiKey : "",
       accessToken:
         typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
+      connectionId:
+        typeof (credentials as any)?.connectionId === "string"
+          ? (credentials as any).connectionId
+          : typeof (credentials as any)?.id === "string"
+            ? (credentials as any).id
+            : undefined,
     };
 
     log?.info?.(
