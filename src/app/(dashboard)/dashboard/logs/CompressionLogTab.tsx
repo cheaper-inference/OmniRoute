@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card } from "@/shared/components";
+import { Badge, Card, Skeleton } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { useTranslations } from "next-intl";
 
 interface CompressionStats {
@@ -40,8 +41,9 @@ export default function CompressionLogTab() {
 
   if (loading) {
     return (
-      <Card className="p-6">
-        <p className="text-sm text-text-muted">{t("loading")}</p>
+      <Card className="p-6" aria-busy="true">
+        <span className="ci-sr-only">{t("loading")}</span>
+        <Skeleton className="h-16 w-full" />
       </Card>
     );
   }
@@ -50,7 +52,7 @@ export default function CompressionLogTab() {
     return (
       <Card className="p-6">
         <div className="flex items-center gap-3 mb-4">
-          <span className="material-symbols-outlined text-blue-500 text-[20px]">compress</span>
+          <Icon name="compress" size={20} className="text-info" />
           <h3 className="text-lg font-semibold">{t("compressionLogTitle")}</h3>
         </div>
         <p className="text-sm text-text-muted">{t("compressionLogEmpty")}</p>
@@ -61,7 +63,7 @@ export default function CompressionLogTab() {
   return (
     <Card className="p-6">
       <div className="flex items-center gap-3 mb-5">
-        <span className="material-symbols-outlined text-blue-500 text-[20px]">compress</span>
+        <Icon name="compress" size={20} className="text-info" />
         <h3 className="text-lg font-semibold">{t("compressionLogTitle")}</h3>
       </div>
 
@@ -73,16 +75,16 @@ export default function CompressionLogTab() {
           return (
             <div
               key={entry.id}
-              className="p-3 rounded-lg border border-border/50 bg-surface/30 space-y-2"
+              className="space-y-2 rounded-lg border border-border bg-bg-subtle p-3"
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-sm">
                   <span className="font-mono text-text-main">
                     {entry.provider}/{entry.model}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-medium bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                  <Badge size="sm" variant="info">
                     {stats.mode}
-                  </span>
+                  </Badge>
                 </div>
                 <div className="flex items-center gap-3 text-xs text-text-muted">
                   <span>
@@ -91,9 +93,9 @@ export default function CompressionLogTab() {
                   <span
                     className={`font-medium ${
                       stats.savingsPercent >= 25
-                        ? "text-emerald-400"
+                        ? "text-success"
                         : stats.savingsPercent >= 10
-                          ? "text-yellow-400"
+                          ? "text-warning"
                           : "text-text-muted"
                     }`}
                   >
@@ -106,12 +108,9 @@ export default function CompressionLogTab() {
               {stats.techniquesUsed.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {stats.techniquesUsed.map((technique) => (
-                    <span
-                      key={technique}
-                      className="px-1.5 py-0.5 rounded text-[10px] bg-surface text-text-muted border border-border/30"
-                    >
+                    <Badge key={technique} size="sm">
                       {technique}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               )}
@@ -119,12 +118,13 @@ export default function CompressionLogTab() {
               {stats.rulesApplied && stats.rulesApplied.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {stats.rulesApplied.map((rule) => (
-                    <span
+                    <Badge
                       key={rule}
-                      className="px-1.5 py-0.5 rounded text-[10px] bg-purple-500/10 text-purple-400 border border-purple-500/20"
+                      size="sm"
+                      className="border-chart-3/20 bg-chart-3/10 text-chart-3"
                     >
                       {rule.replace(/_/g, " ")}
-                    </span>
+                    </Badge>
                   ))}
                 </div>
               )}

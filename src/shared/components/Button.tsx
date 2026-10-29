@@ -1,30 +1,43 @@
 "use client";
 
+import { forwardRef } from "react";
+import {
+  Button as KitButton,
+  type ButtonSize as KitSize,
+  type ButtonVariant as KitVariant,
+} from "@omniroute/ui-kit/button";
 import { cn } from "@/shared/utils/cn";
+import Icon from "./Icon";
 
-const variants = {
-  primary: "bg-[image:var(--grad-brand)] text-white shadow-sm hover:brightness-105",
-  accent: "bg-accent text-white shadow-sm hover:bg-accent-hover",
-  secondary:
-    "bg-white dark:bg-white/10 border border-black/10 dark:border-white/10 text-text-main hover:bg-black/5 dark:hover:bg-white/5",
-  outline: "border border-black/15 dark:border-white/15 text-text-main hover:bg-black/5",
-  ghost: "text-text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-text-main",
-  warning: "bg-amber-500 text-white hover:bg-amber-600 shadow-sm",
-  danger: "bg-red-500 text-white hover:bg-red-600 shadow-sm",
+/** Legacy variant vocabulary — kept because 150+ call sites and Modal.tsx type against it. */
+export type ButtonVariant =
+  "primary" | "accent" | "secondary" | "outline" | "ghost" | "warning" | "danger";
+export type ButtonSize = "sm" | "md" | "lg" | "icon" | "icon-sm";
+
+const VARIANT_TO_KIT: Record<ButtonVariant, { variant: KitVariant; className?: string }> = {
+  primary: { variant: "default" },
+  accent: { variant: "default" },
+  secondary: { variant: "secondary" },
+  outline: { variant: "outline" },
+  ghost: { variant: "ghost" },
+  danger: { variant: "destructive" },
+  // kit has no warning button: outline + the `.ci-button--warning` extension in globals.css
+  warning: { variant: "outline", className: "ci-button--warning" },
 };
 
-export type ButtonVariant = keyof typeof variants;
-
-const sizes = {
-  sm: "h-7 px-3 text-xs rounded-control",
-  md: "h-9 px-4 text-sm rounded-control",
-  lg: "h-11 px-6 text-sm rounded-control",
+const SIZE_TO_KIT: Record<ButtonSize, KitSize> = {
+  sm: "sm",
+  md: "default",
+  lg: "lg",
+  icon: "icon",
+  "icon-sm": "icon-sm",
 };
 
-interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   children?: React.ReactNode;
   variant?: ButtonVariant;
-  size?: keyof typeof sizes;
+  size?: ButtonSize;
+  /** Material Symbols name (resolved through <Icon>). */
   icon?: string;
   iconRight?: string;
   loading?: boolean;
@@ -32,57 +45,45 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   className?: string;
 }
 
-export default function Button({
-  children,
-  variant = "primary",
-  size = "md",
-  icon,
-  iconRight,
-  disabled = false,
-  loading = false,
-  fullWidth = false,
-  className,
-  ...props
-}: ButtonProps) {
+const ICON_SIZE: Record<ButtonSize, number> = { sm: 14, md: 16, lg: 18, icon: 20, "icon-sm": 16 };
+
+const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
+  {
+    children,
+    variant = "primary",
+    size = "md",
+    icon,
+    iconRight,
+    disabled = false,
+    loading = false,
+    fullWidth = false,
+    className,
+    type = "button",
+    ...props
+  },
+  ref
+) {
+  // Unknown variant/size strings (untyped JS callers, stale data) fall back to the defaults
+  // instead of throwing on `undefined.variant`.
+  const kit = VARIANT_TO_KIT[variant] ?? VARIANT_TO_KIT.primary;
+  const kitSize = SIZE_TO_KIT[size] ?? SIZE_TO_KIT.md;
+  const iconSize = ICON_SIZE[size] ?? ICON_SIZE.md;
   return (
-    <button
-      type="button"
-      className={cn(
-        "inline-flex items-center justify-center gap-2 font-medium transition-all duration-200 cursor-pointer",
-        "active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
-        variants[variant],
-        sizes[size],
-        fullWidth && "w-full",
-        className
-      )}
+    <KitButton
+      ref={ref}
+      type={type}
+      variant={kit.variant}
+      size={kitSize}
+      loading={loading}
       disabled={disabled || loading}
-      aria-busy={loading || undefined}
+      className={cn(kit.className, fullWidth && "w-full", className)}
       {...props}
     >
-      {loading ? (
-        <span
-          className="material-symbols-outlined animate-spin text-[18px] pointer-events-none"
-          aria-hidden="true"
-        >
-          progress_activity
-        </span>
-      ) : icon ? (
-        <span
-          className="material-symbols-outlined text-[18px] pointer-events-none"
-          aria-hidden="true"
-        >
-          {icon}
-        </span>
-      ) : null}
+      {!loading && icon ? <Icon name={icon} size={iconSize} /> : null}
       {children}
-      {iconRight && !loading && (
-        <span
-          className="material-symbols-outlined text-[18px] pointer-events-none"
-          aria-hidden="true"
-        >
-          {iconRight}
-        </span>
-      )}
-    </button>
+      {!loading && iconRight ? <Icon name={iconRight} size={iconSize} /> : null}
+    </KitButton>
   );
-}
+});
+
+export default Button;

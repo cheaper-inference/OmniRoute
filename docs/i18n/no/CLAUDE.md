@@ -11,17 +11,18 @@ AI-assistenter (arkitektur, konvensjoner, testing, kvalitetsporter, git-arbeidsf
 lærdom om PII). Les hele filen; ikke legg til prosjektreglene her på nytt. Alt nedenfor gjelder KUN
 for Claude Code — operasjonelle presiseringer av regler som allerede er definert i `AGENTS.md`.
 
-## Worktree-isolasjon — spesifikt for Claude Code
+## Worktree-isolering — spesifikt for Claude Code
 
-Den fullstendige obligatoriske worktree-protokollen (bekreftelse av basisgren, `.claude/worktrees/` som kanonisk
-sti, `cp -al` for node_modules, regler for opprydding) finnes i `AGENTS.md` → Git-arbeidsflyt → «Worktree-
-isolasjon». Punkter som er spesifikke for Claude Code:
+Hele den obligatoriske worktree-protokollen (bekreftelse av basisgren, `.claude/worktrees/` som
+kanonisk sti, `cp -al` node_modules, regler for opprydding) finnes i
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (oppsummert i `AGENTS.md` →
+Git-arbeidsflyt → "Worktree-isolering"). Punkter spesifikke for Claude Code:
 
 - Bekreft basisgrenen med operatøren via `AskUserQuestion` (hard regel nr. 19), med mindre de
-  allerede har oppgitt den.
+  allerede har fortalt deg det.
 - Foretrekk det innebygde `EnterWorktree`-verktøyet — det oppretter allerede worktrees under
-  `.claude/worktrees/` (den kanoniske stien). Opprett worktree-et med den dokumenterte `git
-worktree add`-kommandoen, og kall deretter `EnterWorktree` med dets `path`.
+  `.claude/worktrees/` (den kanoniske stien). Opprett worktree-en med den dokumenterte `git
+worktree add`-kommandoen, og kall deretter `EnterWorktree` med tilhørende `path`.
 
 ## Sikkerhet på tvers av økter — spesifikt for Claude Code
 

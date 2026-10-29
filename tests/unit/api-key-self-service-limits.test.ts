@@ -12,6 +12,7 @@ import {
 } from "../../src/shared/constants/selfServiceScopes.ts";
 import { buildApiKeySelfServiceStatus } from "../../src/lib/usage/apiKeySelfService.ts";
 import { createQuotaRefreshTracker } from "../../src/lib/usage/apiKeySelfServiceAccounts.ts";
+import { createListPriceCache } from "../../src/lib/usage/apiKeySelfServiceListPrice.ts";
 
 // Wednesday 2026-05-27 15:30 UTC.
 const NOW = Date.UTC(2026, 4, 27, 15, 30, 0);
@@ -92,6 +93,10 @@ function makeDeps(overrides: Record<string, unknown> = {}) {
     getWindowUsage: () => 0,
     resetWindowIfElapsed: () => ({ periodStartAt: 0, nextResetAt: 0 }),
     getKeyQuotaStatus: () => disabledKeyQuota,
+    listApiKeyUsageSlices: () => [],
+    calculateCostDetailed: async () => ({ costUsd: 0, priced: true }),
+    getPricingTable: async () => ({}),
+    listPriceCache: createListPriceCache(),
     ...overrides,
   };
 }
@@ -146,6 +151,8 @@ test("usage.daily is the UTC calendar day and usage.weekly the UTC ISO week, wit
     costUsd: 1.234568,
     requests: 4,
     tokens: { input: 100, output: 20, cacheRead: 5, cacheCreation: 3, reasoning: 2, total: 130 },
+    listPriceUsd: 0,
+    unpricedRequests: 0,
   });
   assert.deepEqual(status.usage.weekly, {
     periodStartAt: weekStart,
@@ -153,6 +160,8 @@ test("usage.daily is the UTC calendar day and usage.weekly the UTC ISO week, wit
     costUsd: 7.5,
     requests: 9,
     tokens: { input: 700, output: 80, cacheRead: 10, cacheCreation: 6, reasoning: 4, total: 800 },
+    listPriceUsd: 0,
+    unpricedRequests: 0,
   });
   assert.deepEqual(
     windowQueries.map((params) => params[0]),
@@ -435,7 +444,9 @@ test("admin preview skips the self:usage scope check and always includes filtere
       { id: "conn-claude", provider: "claude", isActive: true, name: "Claude team" },
     ],
     getProviderLimitsCache: () => ({
-      quotas: { session: { used: 10, remaining: 90, resetAt: "2026-05-27T18:00:00.000Z" } },
+      quotas: {
+        session: { used: 10, total: 100, remaining: 90, resetAt: "2026-05-27T18:00:00.000Z" },
+      },
       plan: "Claude Max",
       fetchedAt: "2026-05-27T15:29:00.000Z",
     }),

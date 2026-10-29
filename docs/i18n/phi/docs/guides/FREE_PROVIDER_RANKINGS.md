@@ -13,31 +13,17 @@
 
 ## Ano Ito
 
-Nagrerehistro ang OmniRoute ng 374 na provider, kabilang ang 155 entry sa catalog na minarkahang **libre/walang-auth**
-(walang-auth,
-libreng-tier na OAuth, o libreng-tier na API key — tingnan ang
-[Gabay sa Mga Libreng Tier](../getting-started/FREE-TIERS-GUIDE.md) at ang kumpletong
-[Direktoryo ng Mga Libreng Tier](../reference/FREE_TIERS.md)). Ang problema: malaki ang
-pagkakaiba-iba ng kalidad ng modelo sa mga libreng provider. Higit na kapaki-pakinabang
-ang isang provider na walang-auth na naghahatid ng frontier model kaysa sa naghahatid
-ng maliit na legacy model.
+Nagrerehistro ang OmniRoute 377 provider, kasama ang 155 na mga entry sa catalog na minarkahan**free/no-auth** (no-auth, free-tier OAuth, o free-tier API key — tingnan ang [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) at ang buong [Free Tiers na direktoryo](../reference/FREE_TIERS.md) ). Ang catch: ang mga libreng provider ay nag-iiba-iba sa kalidad ng modelo. Ang isang walang-auth provider na naghahatid ng isang frontier na modelo ay higit na kapaki-pakinabang kaysa sa isang naghahatid ng isang maliit na legacy na modelo.
 
-Sinasagot ng **Mga Ranggo ng Libreng Provider** ang "**aling libreng provider ang nagbibigay sa akin ng pinakamahusay na modelo?**" sa pamamagitan ng
-pagsasama ng catalog ng bawat libreng provider sa **mga marka ng kalidad na nagmula sa komunidad** mula sa
-**leaderboard ng Arena AI** (ELO batay sa kagustuhan ng tao, ang parehong konsepto sa likod ng LMArena
-chatbot arena). Pagkatapos, niraranggo ang mga provider batay sa husay ng kanilang **pinakamahusay na libreng modelo**.
+**Libreng Ranggo ng Provider** mga sagot"** aling libreng provider ang nagbibigay sa akin ng pinakamahusay na modelo?** " sa pamamagitan ng pagsali sa katalogo ng bawat libreng provider na may** mga marka ng kalidad na pinagmumulan ng karamihan** mula sa** Arena AI leaderboard** (human-preference ELO, ang parehong ideya sa likod ng LMArena chatbot arena). Ang mga provider ay niraranggo ayon sa lakas ng kanilang** pinakamahusay na libreng modelo** .
 
-Kinukuwenta ang ranggo mula sa tatlong tunay na source:
+Ang ranggo ay kinakalkula mula sa tatlong tunay na mapagkukunan:
 
-1. Ang mga listahan ng libreng provider — `NOAUTH_PROVIDERS`, kasama ang mga entry sa `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` na may flag na `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Ang catalog ng modelo ng bawat provider mula sa provider registry
-   (`open-sse/config/providerRegistry.ts`).
-3. Mga score ng pagiging angkop sa gawain na hinango mula sa ELO at naka-store sa `model_intelligence` DB table ng
-   Arena ELO sync engine (`src/lib/arenaEloSync.ts`).
+1. Ang mga listahan ng libreng provider — `NOAUTH_PROVIDERS`, kasama ang `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` na mga entry na na-flag `hasFree` (`src/shared/constants/providers.ts`).
+2. Ang katalogo ng modelo ng bawat provider mula sa registry ng provider (`open-sse/config/providerRegistry.ts`).
+3. Mga marka ng task-fit na nagmula sa ELO na iniimbak sa `model_intelligence` DB table ng Arena ELO sync engine (`src/lib/arenaEloSync.ts`).
 
-Makikita ang lohika ng pagsasama sa `src/lib/freeProviderRankings.ts`.
+Ang join logic ay nabubuhay sa `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -123,34 +109,39 @@ Ang `eloRaw` ay ang orihinal na Arena ELO value; ang `score` ay ang na-normalize
 
 ## Paano Gumagana ang mga Score
 
-### Pinagmulan: leaderboard ng Arena AI
+### Pinagmulan: Arena AI leaderboard
 
-Kinukuha ng Arena ELO sync engine (`src/lib/arenaEloSync.ts`) ang dalawang leaderboard — `text`
-at `code` — mula sa Arena AI leaderboard API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Ang bawat entry sa leaderboard
-ay naglalaman ng pangalan ng modelo, vendor, ELO `score`, confidence interval, at bilang ng boto.
+Ang Arena ELO sync engine (`src/lib/arenaEloSync.ts`) ay kumukuha ng dalawang leaderboard —
+`text` at `code` — mula sa Arena AI leaderboard API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kapag walang nagbabalik na
+magagamit na board ang API na iyon, babagsak ang engine sa opisyal na
+`lmarena-ai/leaderboard-dataset` sa Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`,
+CC-BY-4.0; `overall` → `text`, `coding` → `code`); iniulat ng `GET /api/intelligence/sync`
+ang `activeSource`, `lastError` at `lastFailedAt`. Ang bawat entry sa leaderboard ay
+nagdadala ng pangalan ng modelo, vendor, ELO `score`, confidence interval, at bilang ng boto.
 
-Ang mga kategorya ng leaderboard ay itinutugma sa mga kategorya ng gawain ng OmniRoute:
+Ang mga kategorya ng leaderboard ay tumutugma sa mga kategorya ng gawain ng OmniRoute:
 
 | Arena leaderboard | Mga kategorya ng gawain ng OmniRoute              |
 | ----------------- | ------------------------------------------------- |
 | `text`            | `default`, `review`, `documentation`, `debugging` |
 | `code`            | `coding`                                          |
 
-### Normalisasyon (score ng pagiging angkop sa gawain)
+### Normalisasyon (task-fit na score)
 
-Ang mga raw na ELO score ay ginagawang normal kada leaderboard bilang isang **task-fit value sa `[0.4, 0.98]`**:
+Ang mga hilaw na ELO score ay nino-normalize bawat leaderboard tungo sa isang **task-fit na halaga sa `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Hindi kailanman umaabot sa `0` o `1` ang score, upang mag-iwan ng puwang para sa mga override ng user. Ito ang
-`score` field na makikita mo sa tugon ng API at ang label na ipinapakita sa dashboard.
+Ang score ay hindi kailanman umaabot sa `0` o `1`, na nag-iiwan ng puwang para sa mga
+override ng gumagamit. Ito ang `score` field na nakikita mo sa tugon ng API at ang label
+na ipinapakita sa dashboard.
 
 ### Kumpiyansa
 
-Ang bawat entry ay binibigyan ng antas ng kumpiyansa batay sa bilang ng boto sa Arena:
+Ang bawat entry ay nakakakuha ng antas ng kumpiyansa batay sa bilang ng boto ng Arena:
 
 | Kumpiyansa | Mga boto |
 | ---------- | -------- |
@@ -158,65 +149,72 @@ Ang bawat entry ay binibigyan ng antas ng kumpiyansa batay sa bilang ng boto sa 
 | `medium`   | ≥ 1,000  |
 | `low`      | < 1,000  |
 
-### Pag-iimbak at pagiging napapanahon
+### Imbakan at pagiging sariwa
 
-Isinusulat ang mga na-normalize na entry sa `model_intelligence` DB table na may
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ang mga entry ay **nag-e-expire pagkalipas ng
-7 araw**, kaya ang provider na tumigil sa pag-sync ay kalaunang inaalis sa halip na maghatid
-ng lipas na data.
+Ang mga na-normalize na entry ay isinusulat sa `model_intelligence` DB table na may
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ang mga entry ay
+**nag-e-expire pagkatapos ng 7 araw**, kaya ang isang provider na huminto sa pag-sync ay
+tuluyang mawawala sa halip na maghatid ng lipas nang datos.
 
-**Naka-on bilang default** ang pag-sync:
+Ang sync ay tumatakbo **naka-on bilang default**:
 
-- Tumatakbo ito nang isang beses sa pagsisimula ng server at pagkatapos ay sa pana-panahong timer
-  (`src/lib/arenaEloSync.ts`, na nakakonekta mula sa `src/instrumentation-node.ts`).
-- Ito ay **non-blocking at hindi kailanman fatal** — kung mabigo ang pagkuha mula sa upstream, patuloy na
-  tumatakbo ang OmniRoute at ipinapakita lamang ng mga ranking ang huling wastong data (o isang walang-lamang estado).
+- Tumatakbo ito nang isang beses sa pagsisimula ng server at pagkatapos ay sa isang
+  pana-panahong timer (`src/lib/arenaEloSync.ts`, naka-wire mula sa
+  `src/instrumentation-node.ts`).
+- Ito ay **non-blocking at hindi kailanman fatal** — kung mabigo ang upstream fetch,
+  patuloy na tumatakbo ang OmniRoute at ipinapakita lamang ng mga ranking ang huling
+  maayos na datos (o isang walang-laman na estado).
 
 Dalawang environment variable ang kumokontrol dito (nakadokumento sa
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variable                  | Default       | Layunin                                                |
-| ------------------------- | ------------- | ------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Itakda sa `false` upang hindi sumali sa outbound sync. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Agwat ng pag-sync, sa mga segundo.                     |
+| Variable                  | Default       | Layunin                                               |
+| ------------------------- | ------------- | ----------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Itakda sa `false` upang mag-opt out sa outbound sync. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Agwat ng sync, sa mga segundo.                        |
 
-### Manu-manong pag-sync / status / pag-clear
+### Manu-manong sync / status / pag-clear
 
-Para sa mga operator, nagbibigay ang isang authenticated management endpoint ng manu-manong kontrol
-(`src/app/api/intelligence/sync/route.ts` — nangangailangan ng management auth):
+Para sa mga operator, isang authenticated na management endpoint ang nagbibigay ng
+manu-manong kontrol (`src/app/api/intelligence/sync/route.ts` — nangangailangan ng
+management auth):
 
 ```
-GET    /api/intelligence/sync          # kasalukuyang status ng pag-sync (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # mag-trigger ng manu-manong pag-sync; body: { "dryRun": true } upang i-preview nang hindi nagsusulat
+GET    /api/intelligence/sync          # kasalukuyang status ng sync (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # mag-trigger ng manu-manong sync; body: { "dryRun": true } para mag-preview nang walang pagsulat
 DELETE /api/intelligence/sync          # i-clear ang lahat ng naka-sync na arena_elo intelligence entry
 ```
 
-Kung walang laman ang pahina ng mga ranking, muli itong mapupunan ng manu-manong `POST /api/intelligence/sync` (o simpleng
-pag-restart ng server).
+Kung walang laman ang pahina ng mga ranking, ang manu-manong `POST /api/intelligence/sync`
+(o simpleng pag-restart ng server) ay muling magpapuno nito.
 
 ### Pagtutugma ng mga modelo sa leaderboard
 
-Hindi palaging eksaktong magkatugma ang mga registry model ID at mga pangalan ng modelo sa Arena. Gumagamit ang ranking ng
-flexible matching (`findMatchingIntelligence` sa `src/lib/freeProviderRankings.ts`):
+Ang mga registry model ID at mga pangalan ng modelo ng Arena ay hindi palaging eksaktong
+tumutugma. Ang ranking ay gumagamit ng flexible na pagtutugma (`findMatchingIntelligence`
+sa `src/lib/freeProviderRankings.ts`):
 
 1. Eksaktong tugma sa na-normalize na model ID.
-2. Pagtutugma matapos alisin ang version suffix sa dulo (hal. `kimi-k2.6` → `kimi-k2`).
-3. Prefix match (ang pangalan ng modelo sa leaderboard ay prefix ng registry ID).
+2. Tugma matapos alisin ang panulay na version suffix (hal. `kimi-k2.6` → `kimi-k2`).
+3. Prefix na tugma (ang pangalan ng modelo ng leaderboard ay prefix ng registry ID).
 
-Sa panig ng pag-sync, inaalis ang mga kilalang vendor prefix (`anthropic/`, `openai/`, `google/`, …)
-at pinapalawak ng isang maliit na alias map ang mga canonical name sa mga variant na ginagamit ng OmniRoute
-sa loob, upang manatiling nahahanap ang mga modelo sa ilalim ng anumang pangalan.
+Sa panig ng sync, ang mga kilalang vendor prefix (`anthropic/`, `openai/`, `google/`, …)
+ay inaalis at isang maliit na alias map ang nagpapalawak ng mga canonical na pangalan
+tungo sa mga variant na ginagamit ng OmniRoute sa loob, kaya ang mga modelo ay
+nananatiling mahahanap sa ilalim ng anumang pangalan.
 
 ### Paano niraranggo ang isang provider
 
-Para sa bawat libreng provider, binibigyan ng engine ng score ang bawat modelo sa catalog nito, pagkatapos:
+Para sa bawat libreng provider, binibigyan ng engine ng score ang bawat modelo sa katalogo
+nito, pagkatapos:
 
 - **Nangungunang Modelo** = ang modelo ng provider na may pinakamataas na score.
-- **Average na Score** = ang mean score ng lahat ng modelo ng provider na nabigyan ng score.
+- **Average na Score** = ang mean na score sa lahat ng na-score na modelo ng provider na iyon.
 - **Mga Modelo** = kung ilan sa mga modelo ng provider ang may Arena score.
 
-Inaayos muna ang mga provider ayon sa **score ng nangungunang modelo**, pagkatapos ay ayon sa average na score. Ginagantimpalaan nito ang
-provider na nag-aalok ng kahit isang mahusay na libreng modelo.
+Ang mga provider ay inuuri ayon sa **score ng nangungunang modelo** muna, pagkatapos ay
+ayon sa average na score. Ginagantimpalaan nito ang isang provider na naglalabas ng kahit
+isang malakas na libreng modelo.
 
 ---
 

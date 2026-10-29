@@ -226,6 +226,7 @@ test("Read path/filePath aliases are normalized to file_path; file_path wins", (
     inputJsonByBlock(aliased).get(toolUseStarts(aliased)[0].index) || ""
   );
   assert.equal(aliasedArgs.file_path, "/a.txt");
+  assert.equal(aliasedArgs.filePath, "/a.txt", "schemaless fallback mirrors filePath (#17294)");
   assert.equal("path" in aliasedArgs, false);
 
   const camel = run([
@@ -236,7 +237,7 @@ test("Read path/filePath aliases are normalized to file_path; file_path wins", (
   ]);
   const camelArgs = JSON.parse(inputJsonByBlock(camel).get(toolUseStarts(camel)[0].index) || "");
   assert.equal(camelArgs.file_path, "/b.txt");
-  assert.equal("filePath" in camelArgs, false);
+  assert.equal(camelArgs.filePath, "/b.txt", "schemaless fallback mirrors filePath (#17294)");
 
   const both = run([
     toolChunk([
@@ -250,7 +251,8 @@ test("Read path/filePath aliases are normalized to file_path; file_path wins", (
   ]);
   const bothArgs = JSON.parse(inputJsonByBlock(both).get(toolUseStarts(both)[0].index) || "");
   assert.equal(bothArgs.file_path, "/real");
-  assert.equal(bothArgs.path, "/other", "an explicit file_path leaves other keys untouched");
+  assert.equal(bothArgs.filePath, "/real", "schemaless fallback mirrors filePath (#17294)");
+  assert.equal("path" in bothArgs, false, "the legacy fallback drops the conflicting path alias");
 });
 
 test("stream that ends without finish_reason closes open blocks and emits an error event", () => {

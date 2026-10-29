@@ -48,15 +48,11 @@ sinusuri ang kalagayan ng server, at ine-exec ang `claude`.
 
 ---
 
-## Mga discovery alias — ipakita ang mga modelong hindi Claude sa `/model` picker
+## Mga discovery alias — paglalantad ng mga non-Claude na modelo sa `/model` picker
 
-Ang gateway model discovery ng Claude Code ay naglilista lamang ng mga id na nagsisimula sa `claude`
-o `anthropic`, kaya kapag `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, karaniwang ipinapakita ng native
-na `/model` picker ang **mga Claude/Anthropic model lamang** ng OmniRoute — ang
-`kimi/kimi-k2.6` o `glm/glm-5.2` ay hindi kailanman lilitaw, kahit maayos naman itong nairuruta.
+Ang gateway model discovery ng Claude Code ay naglilista lamang ng mga id na nagsisimula sa `claude` o `anthropic`, kaya kapag `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, ang native na `/model` picker ay karaniwang nagpapakita **lamang** ng mga Claude/Anthropic na modelo ng OmniRoute — ang `kimi/kimi-k2.6` o `glm/glm-5.2` ay hindi kailanman lumilitaw, kahit na maayos naman itong naire-route.
 
-Maaaring i-mirror ng OmniRoute ang anumang naka-enable na modelo (at combo) sa ilalim ng isang `claude/…` id upang
-makapasa ito sa filter na iyon at lumitaw sa picker:
+Maaaring i-mirror ng OmniRoute ang anumang naka-enable na modelo (at combo) sa ilalim ng isang `claude/…` na id upang makapasa ito sa filter na iyon at lumitaw sa picker:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,31 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kapag pumili ka ng isa sa mga ito sa Claude Code, inaalis ng OmniRoute ang `claude/` wrapper
-upang maibalik ang tunay na id bago mag-route — ang tunay na `claude/<real-claude-model>` id
-(ang aktuwal na Claude OAuth provider) ay palaging hindi ginagalaw.
+Kapag pinili mo ang isa sa mga ito sa Claude Code, inaalis ng OmniRoute ang `claude/` na wrapper pabalik sa totoong id bago ang routing — ang tunay na `claude/<real-claude-model>` na id (ang aktuwal na Claude OAuth provider) ay laging hindi binabago.
 
-**Naka-off ito bilang default** at kinokontrol ng tatlong antas na gate (ang pinakaspesipiko ang
-mananaig), kaya hindi kailanman dinodoble ng karaniwang OmniRoute ang catalog nito para sa mga client na hindi gumagamit ng
-Claude Code:
+Bilang default, tanging mga base id ang nire-mirror. Kapag naka-on ang opt-in na feature flag na `CATALOG_MIRROR_REFINEMENTS_ENABLED`, ang mga reasoning-effort variant na nakalista na sa catalog (hal. `codex/gpt-6-sol-high`) ay nire-mirror tulad ng anumang ibang id, kaya maaaring pumili ang Claude Code ng explicit na effort level, at ang mga built-in na `auto/*` na id na hindi kayang i-materialize ng request path ay hindi nire-mirror. Kung nakalista man ang mga effort variant ay pinamamahalaan pa rin ng `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — hindi kailanman nagdaragdag ang mirror ng variant na wala sa base catalog.
 
-| Antas    | Saan                                                                                          |
-| -------- | --------------------------------------------------------------------------------------------- |
-| Modelo   | Pahina ng detalye ng provider → toggle na "Expose in Claude Code" para sa bawat modelo        |
-| Provider | Pahina ng detalye ng provider → toggle sa antas ng provider (saklaw ang lahat ng modelo nito) |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (naka-off bilang default)            |
+**Naka-off ito bilang default** at kontrolado ng three-level na gate (ang pinaka-specific ang nananalo), kaya ang simpleng OmniRoute ay hindi kailanman dinodoble ang sariling catalog nito para sa mga client na hindi gumagamit ng Claude Code:
 
-Pinipilit ng `EXPOSE_CC_DISCOVERY_ALIASES` environment variable na i-on ang global na antas
-at inuuna ito kaysa sa override ng dashboard (nagpapakita ang screen ng Feature Flags
-ng paalalang "active via environment variable" kapag ganito). Mula roon, higit pang nililinaw ng mga toggle
-para sa bawat provider at bawat modelo ang saklaw — hal. kapag naka-off ang global + naka-on ang Kimi provider, mga
-modelo lamang ng Kimi ang inilalantad.
+| Antas    | Saan                                                                              |
+| -------- | --------------------------------------------------------------------------------- |
+| Modelo   | Provider detail page → per-model na "Expose in Claude Code" na toggle             |
+| Provider | Provider detail page → provider-level na toggle (saklaw ang lahat ng modelo nito) |
+| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default na naka-off)    |
 
-> ⚠️ **Hindi pagtutugma ng window sa mga modelong hindi Claude.** Ipinagpapalagay ng Claude Code ang 200K context
-> window para sa anumang id na hindi nito nakikilala (hindi nito mababasa ang tunay na window mula sa
-> `/v1/models`). Para sa modelong may mas malaking window (hal. ang 256K ng Kimi K2), itakda ang
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa halagang mas mababa sa tunay na window ng modelo upang
-> hindi mangyari nang masyadong maaga ang awtomatikong compaction. Ginagawa na ito para sa bawat modelo ng mga profile na binuo sa itaas.
+Ang environment variable na `EXPOSE_CC_DISCOVERY_ALIASES` ay pinipilit na i-on ang global na antas at may precedence sa dashboard override (ang Feature Flags na screen ay nagpapakita ng "active via environment variable" na tala kapag ganoon). Ang mga per-provider at per-model na toggle ay nagre-refine mula doon — hal. global off + Kimi provider on ay naglalantad lamang ng mga modelo ng Kimi.
+
+> ⚠️ **Window mismatch sa mga non-Claude na modelo.** Ipinapalagay ng Claude Code ang 200K context window para sa anumang id na hindi nito nakikilala (hindi nito mababasa ang totoong window mula sa `/v1/models`). Para sa modelong may mas malaking window (hal. 256K ng Kimi K2), itakda ang `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa halagang mas mababa sa totoong window ng modelo upang hindi maagang mag-trigger ang auto-compaction. Ang mga nabuo na profile sa itaas ay ginagawa na ito para sa bawat modelo.
 
 ---
 

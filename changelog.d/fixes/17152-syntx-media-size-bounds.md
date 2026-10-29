@@ -1,0 +1,1 @@
+- **fix(syntx):** SYNTX media fetched by URL and the data-URL reference decodes are now capped at 50 MiB, so an oversized or hostile media answer fails fast with a bounded 413/400/499 instead of growing unbounded in memory ([#17152](https://github.com/diegosouzapw/OmniRoute/pull/17152)) — thanks @maxmad64bis

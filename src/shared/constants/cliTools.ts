@@ -914,7 +914,7 @@ OPENAI_API_KEY: "{{apiKey}}"`,
     ],
   },
 
-  /** ★ 5dive agent fleets (diegosouzapw/OmniRoute#11578) — 2026-08-28 */
+  /** ★ 5dive agent fleets (cheaper-inference/OmniRoute#11578) — 2026-08-28 */
   "5dive": {
     id: "5dive",
     name: "5dive",
@@ -949,6 +949,61 @@ OPENAI_API_KEY: "{{apiKey}}"`,
       {
         type: "warning",
         text: "Writing a 5dive auth profile is root-only, and each agent's own runtime model pin outranks the profile's model default — pass --agent <name> to pin the seats too.",
+      },
+    ],
+  },
+
+  /** ★ WhyCodes CLI agent (diegosouzapw/OmniRoute#14096) — 2026-09-18 */
+  whycodes: {
+    id: "whycodes",
+    name: "WhyCodes",
+    icon: "terminal",
+    color: "#2563EB",
+    description:
+      "WhyCodes — broad-purpose autonomous CLI agent (TUI, named agents, tools, memory); OpenAI-compatible base URL points at OmniRoute",
+    docsUrl: "https://github.com/whycorporation/whycodes",
+    configType: "custom",
+    category: "agent",
+    vendor: "Why Corporation",
+    acpSpawnable: false,
+    baseUrlSupport: "full",
+    defaultCommand: "whycodes",
+    settingsFile: "$WHYCODES_HOME/config.toml",
+    guideSteps: [
+      {
+        step: 1,
+        title: "Install WhyCodes",
+        desc: "Install WhyCodes with Homebrew (brew tap whycorporation/whycodes https://github.com/whycorporation/whycodes && brew install whycorporation/whycodes/whycodes), a release binary, or cargo — see https://github.com/whycorporation/whycodes#installation",
+      },
+      { step: 2, title: "API Key", type: "apiKeySelector" },
+      { step: 3, title: "Base URL", value: "{{baseUrl}}", copyable: true },
+      { step: 4, title: "Select Model", type: "modelSelector" },
+      {
+        step: 5,
+        title: "Write the provider",
+        desc: "omniroute setup-whycodes --model <id>   (or: whycodes provider add omniroute --api-key <key> --base-url <origin>/v1)",
+      },
+    ],
+    codeBlock: {
+      language: "toml",
+      code: `[providers.omniroute]
+name = "omniroute"
+base_url = "{{baseUrl}}"
+api_key = "{{apiKey}}"
+
+[default_model]
+provider_id = "omniroute"
+model_id = "{{model}}"
+supports_tools = true`,
+    },
+    notes: [
+      {
+        type: "info",
+        text: "WhyCodes talks Chat Completions at /v1/chat/completions. Config lives at $WHYCODES_HOME/config.toml, or ~/.whycodes/config.toml (%USERPROFILE%\\.whycodes on Windows); `whycodes config path` prints it.",
+      },
+      {
+        type: "warning",
+        text: "whycodes acp is not implemented — this card is not ACP-spawnable.",
       },
     ],
   },

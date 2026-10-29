@@ -15,7 +15,7 @@ export default function ApiExplorerPage() {
   const t = useTranslations("docs");
   return (
     <div>
-      <h1 className="text-3xl font-bold text-text-main mb-2">{t("apiExplorerTitle")}</h1>
+      <h1 className="ci-heading text-3xl mb-2">{t("apiExplorerTitle")}</h1>
       <p className="text-text-muted mb-8">{t("apiExplorerDescription")}</p>
       <ApiExplorerClient />
     </div>

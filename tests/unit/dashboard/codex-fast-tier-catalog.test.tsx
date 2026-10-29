@@ -5,6 +5,7 @@ import { CODEX_FAST_TIER_DEFAULT_SUPPORTED_MODELS } from "@/lib/providers/codexF
 
 // Load the real controls without importing unrelated dashboard features from the barrel.
 vi.mock("@/shared/components", async () => ({
+  Button: (await import("@/shared/components/Button")).default,
   Card: (await import("@/shared/components/Card")).default,
   Toggle: (await import("@/shared/components/Toggle")).default,
   Select: (await import("@/shared/components/Select")).default,

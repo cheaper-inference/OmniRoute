@@ -28,7 +28,7 @@ export function ProxyBatchActions({
     <>
       {selectedCount > 0 && (
         <>
-          <span className="text-xs text-text-muted">
+          <span className="text-xs text-text-muted" role="status">
             {t("batchSelectedCount", { count: selectedCount })}
           </span>
           <Button
@@ -43,11 +43,10 @@ export function ProxyBatchActions({
           </Button>
           <Button
             size="sm"
-            variant="secondary"
+            variant="danger"
             icon="delete"
             onClick={onBatchDelete}
             loading={batchDeleting}
-            className="!text-red-400 !border-red-500/30"
             data-testid="proxy-registry-batch-delete"
           >
             {t("batchDeleteSelected", { count: selectedCount })}

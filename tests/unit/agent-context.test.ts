@@ -7,6 +7,8 @@ import assert from "node:assert/strict";
 const { extractAgentContext, hasAgentIdentity, projectNameFromPath, resolveUsageAgentContext } =
   await import("../../open-sse/handlers/chatCore/agentContext.ts");
 const { forwardOpencodeClientHeaders } = await import("../../open-sse/utils/opencodeHeaders.ts");
+const { clientSessionIdFromRawRequest } =
+  await import("../../open-sse/handlers/chatCore/clientSessionId.ts");
 
 const CLAUDE_SESSION = "fedc860f-461d-4b8b-866d-77477e1d4872";
 
@@ -100,12 +102,60 @@ test("Codex environment_context in a Responses input yields project and session"
   };
   const context = extractAgentContext(body, {
     "user-agent": "codex_cli_rs/0.40.0 (Mac OS 15.1; arm64)",
-    "x-codex-session-id": "codex-123",
+    session_id: "codex-123",
   });
   assert.equal(context.client, "codex");
   assert.equal(context.clientSessionId, "codex-123");
   assert.equal(context.projectName, "billing");
   assert.equal(context.projectPath, "/home/dev/billing");
+});
+
+test("agent session id is the same client session id that call logs record", () => {
+  // agent_sessions.client_session_id must join call_logs.client_session_id (#17125), so both
+  // read the id through the same resolver for every supported client.
+  const requests: Array<{ client: string; headers: Record<string, string>; body: unknown }> = [
+    { client: "claude-code (header)", headers: claudeHeaders, body: claudeCodeBody("/srv/app") },
+    {
+      client: "claude-code (metadata only)",
+      headers: { "user-agent": "claude-cli/2.1.282 (external, cli)" },
+      body: claudeCodeBody("/srv/app"),
+    },
+    {
+      client: "opencode",
+      headers: { "user-agent": "opencode/1.2.3", "x-opencode-session": "ses_opencode_1" },
+      body: { messages: [{ role: "user", content: "hi" }] },
+    },
+    {
+      client: "codex",
+      headers: { "user-agent": "codex_cli_rs/0.40.0", session_id: "codex-session-9" },
+      body: { input: [] },
+    },
+  ];
+  for (const request of requests) {
+    const callLogId = clientSessionIdFromRawRequest({
+      headers: request.headers,
+      body: request.body,
+    });
+    assert.ok(callLogId, request.client);
+    assert.equal(
+      extractAgentContext(request.body, request.headers).clientSessionId,
+      callLogId,
+      request.client
+    );
+    assert.equal(
+      extractAgentContext(request.body, new Headers(request.headers)).clientSessionId,
+      callLogId,
+      request.client
+    );
+  }
+});
+
+test("an explicit x-omniroute-session-id still wins over the client's own session id", () => {
+  const context = extractAgentContext(claudeCodeBody("/srv/app"), {
+    ...claudeHeaders,
+    "x-omniroute-session-id": "pinned-session",
+  });
+  assert.equal(context.clientSessionId, "pinned-session");
 });
 
 test("working directory is read from the top-level system field of older builds", () => {

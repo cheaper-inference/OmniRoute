@@ -1,0 +1,1 @@
+- **fix(sse):** the JSON-schema fallback for kilocode / `openai-compatible-*` and opencode-zen's DeepSeek models no longer writes its instruction into the caller's system content, so a 429 retry inside one request stops sending it twice; `response_format: { type: "text" }` and other non-JSON formats no longer get the JSON instruction (kilocode still drops the field) (#18241).
