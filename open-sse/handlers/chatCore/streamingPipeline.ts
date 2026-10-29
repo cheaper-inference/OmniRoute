@@ -20,7 +20,11 @@ import {
   wantsProgress as defaultWantsProgress,
 } from "../../utils/progressTracker.ts";
 import { createPiiSseTransform as defaultPiiSse } from "@/lib/streamingPiiTransform";
-import { isPiiTransformEnabled } from "@/lib/streamingPiiTransform";
+import { isPiiTransformEnabled, resolvePiiGate } from "@/lib/streamingPiiTransform";
+
+// Single seam to the PII stream module: streamingTail resolves the per-request gate through this
+// file instead of importing src/ itself (boundary ratchet, quality-baseline.json).
+export { resolvePiiGate };
 import {
   createCredentialSseTransform as defaultCredentialSse,
   isCredentialTransformEnabled,
@@ -88,6 +92,9 @@ export function assembleStreamingPipeline(
      * request's pre-handoff readiness gate, so slow-first-content reasoning
      * models keep the same generous budget in both phases. */
     contentStallTimeoutMs?: number;
+    /** Total lifetime budget for this stream (see resolveStreamActiveTimeoutMs).
+     * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
+    activeTimeoutMs?: number;
   },
   deps: StreamingPipelineDeps = DEFAULT_DEPS
 ) {
@@ -103,7 +110,10 @@ export function assembleStreamingPipeline(
     args.providerResponse,
     args.transformStream,
     args.streamController,
-    { contentStallTimeoutMs: args.contentStallTimeoutMs }
+    {
+      contentStallTimeoutMs: args.contentStallTimeoutMs,
+      activeTimeoutMs: args.activeTimeoutMs,
+    }
   );
   if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
     if (typeof args.createPiiTransform === "function") {

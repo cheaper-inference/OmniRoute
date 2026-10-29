@@ -29,6 +29,7 @@ const {
   CLINE_CONFIG,
   CODEX_CONFIG,
   CODEBUDDY_CN_CONFIG,
+  FREEBUFF_CONFIG,
   CODEBUDDY_INTL_CONFIG,
   WORKBUDDY_CONFIG,
   DEVIN_DESKTOP_CONFIG,
@@ -82,6 +83,7 @@ const EXPECTED_PROVIDER_KEYS = [
   "xai-oauth",
   "openference",
   "codebuddy-cn",
+  "freebuff",
   "codebuddy-intl",
   "workbuddy",
   "zed",
@@ -119,6 +121,7 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
+  freebuff: FREEBUFF_CONFIG,
   "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
   workbuddy: WORKBUDDY_CONFIG,
   zed: ZED_CONFIG,
@@ -471,6 +474,7 @@ test("device and import-token providers expose the flow-specific fields expected
     "kilocode",
     "workbuddy",
     "muse-code",
+    "freebuff",
   ];
 
   for (const providerId of deviceProviders) {

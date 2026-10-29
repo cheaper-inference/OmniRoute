@@ -20,27 +20,15 @@ lastUpdated: 2026-06-28
 
 ## Co to jest
 
-OmniRoute rejestruje 376 dostawców, w tym 155 wpisów katalogu oznaczonych jako **free/no-auth**
-(no-auth, OAuth z darmowym poziomem lub klucz API z darmowym poziomem — zobacz
-[Przewodnik po darmowych poziomach](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
-[katalog darmowych poziomów](../reference/FREE_TIERS.md)). Haczek polega na tym, że darmowi
-dostawcy różnią się diametralnie jakością modeli. Dostawca no-auth oferujący model z czołówki
-jest znacznie bardziej użyteczny niż taki, który serwuje mały, przestarzały model.
+OmniRoute rejestruje 377 dostawców, w tym 155 zaznaczonych wpisów w katalogu**free/no-auth** (no-auth, free-tier OAuth lub free-tier API key — zobacz [Przewodnik po bezpłatnych poziomach](../getting-started/FREE-TIERS-GUIDE.md) i pełny [katalog bezpłatnych poziomów](../reference/FREE_TIERS.md) ). Haczyk: bezpłatni dostawcy różnią się znacznie jakością modeli. Dostawca bez uwierzytelnienia obsługujący model graniczny jest znacznie bardziej przydatny niż dostawca obsługujący mały, starszy model.
 
-**Rankingi darmowych dostawców** odpowiadają na pytanie „**który darmowy dostawca daje mi najlepszy model?**",
-łącząc katalog każdego darmowego dostawcy z **crowdsourcingowymi ocenami jakości** z
-**rankingu Arena AI** (ELO oparte na ludzkich preferencjach — ta sama idea, która leży u podstaw
-areny chatbotów LMArena). Dostawcy są następnie rankowani według siły swojego **najlepszego darmowego modelu**.
+**Darmowe rankingi dostawców** odpowiedzi”** który bezpłatny dostawca oferuje mi najlepszy model?** ", dołączając do katalogu każdego bezpłatnego dostawcy za pomocą** Wyniki jakości pochodzące z crowdsourcingu** z** Tablica liderów areny AI** (human-preference ELO, ten sam pomysł stojący za areną chatbotów LMArena). Dostawcy są następnie uszeregowani według siły swoich usług** najlepszy darmowy model** .
 
-Ranking jest obliczany na podstawie trzech rzeczywistych źródeł:
+Ranking tworzony jest na podstawie trzech rzeczywistych źródeł:
 
-1. Listy darmowych dostawców — `NOAUTH_PROVIDERS`, a także wpisy `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` oznaczone flagą `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katalog modeli każdego dostawcy z rejestru dostawców
-   (`open-sse/config/providerRegistry.ts`).
-3. Wyniki dopasowania do zadań (task-fit) wyprowadzone z ELO, przechowywane w tabeli bazy danych
-   `model_intelligence` przez silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Listy bezpłatnych dostawców — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` oznaczone jako `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalog modeli każdego dostawcy z rejestru dostawców (`open-sse/config/providerRegistry.ts`).
+3. Wyniki dopasowania zadań pochodzące z ELO przechowywane w tabeli `model_intelligence` DB przez silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
 
 Logika łączenia znajduje się w `src/lib/freeProviderRankings.ts`.
 

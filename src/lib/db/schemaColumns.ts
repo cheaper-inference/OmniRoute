@@ -145,6 +145,14 @@ export function ensureUsageHistoryColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE usage_history ADD COLUMN account_label_priority INTEGER DEFAULT 0");
       console.log("[DB] Added usage_history.account_label_priority column");
     }
+    if (!columnNames.has("billing_team_id")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN billing_team_id TEXT");
+      console.log("[DB] Added usage_history.billing_team_id column");
+    }
+    if (!columnNames.has("team_rollup_processed_at")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN team_rollup_processed_at TEXT");
+      console.log("[DB] Added usage_history.team_rollup_processed_at column");
+    }
     db.exec(
       "CREATE INDEX IF NOT EXISTS idx_uh_provider_model_timestamp ON usage_history(provider, model, timestamp)"
     );

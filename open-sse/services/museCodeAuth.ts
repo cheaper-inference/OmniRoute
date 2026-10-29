@@ -4,6 +4,17 @@ import {
   normalizeMuseBaseUrl,
 } from "../config/museCode.ts";
 
+/** Mint failure carrying the upstream HTTP status so callers can separate a dead
+ * OIDC token (401/403 → re-login) from a transient failure (keep the stored key). */
+export class MuseCodeMintError extends Error {
+  readonly status?: number;
+  constructor(message: string, status?: number) {
+    super(message);
+    this.name = "MuseCodeMintError";
+    this.status = status;
+  }
+}
+
 export type MuseMintedKey = {
   apiKey: string;
   baseUrl: string;
@@ -31,6 +42,8 @@ export async function mintMuseApiKey(
   }
   const response = await fetch(mintUrl, {
     method: "POST",
+    redirect: "error",
+    signal: AbortSignal.timeout(20000),
     headers: museCodeHeaders({
       Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
@@ -39,7 +52,10 @@ export async function mintMuseApiKey(
   });
   const text = await response.text();
   if (!response.ok) {
-    throw new Error(`Muse Code key mint failed (HTTP ${response.status}).`);
+    throw new MuseCodeMintError(
+      `Muse Code key mint failed (HTTP ${response.status}).`,
+      response.status
+    );
   }
   let data: Record<string, unknown>;
   try {

@@ -78,6 +78,10 @@ import {
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
+  isTruncatedComboAttempt,
+  recordTruncatedStreamAttempt,
+} from "./truncatedStreamFailover.ts";
+import {
   isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
 } from "./quotaExhaustion.ts";
@@ -354,6 +358,19 @@ export async function executeTargetAttempt(
 
     // Success — validate response quality before returning
     if (result.ok) {
+      // #18460 follow-up — a cut buffered stream is a retryable attempt failure.
+      if (isTruncatedComboAttempt(result, deps, protectedPriorityTarget)) {
+        recordTruncatedStreamAttempt({
+          result,
+          modelStr,
+          provider,
+          targetIndex: i,
+          target,
+          state,
+          deps,
+        });
+        return null;
+      }
       const selectedConnectionId =
         result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
         result.headers?.get("x-omniroute-selected-connection-id") ||
@@ -885,6 +902,7 @@ export async function executeTargetAttempt(
     const {
       target: targetWithConnection,
       providerExhausted,
+      durableExhaustion,
       isModelScopedClaudeQuota,
       isConnectionScopedClaudeQuota,
       modelScopedClaudeCooldownMs,
@@ -894,6 +912,17 @@ export async function executeTargetAttempt(
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
     // rather than waiting for the next turn's lazy headroom/status recheck.
+    // Record the durable exhaustion so the next set retry skips the same
+    // provider or connection instead of replaying a dead call.
+    if (durableExhaustion) {
+      if (durableExhaustion.scope === "connection") {
+        (state.durableExhaustedConnections ??= new Set()).add(
+          `${durableExhaustion.provider}:${durableExhaustion.connectionId}`
+        );
+      } else {
+        (state.durableExhaustedProviders ??= new Set()).add(durableExhaustion.provider);
+      }
+    }
     deps.releaseStickyPinOnFailure(deps.sticky.messageHash, targetWithConnection.connectionId);
     if (
       providerExhausted ||

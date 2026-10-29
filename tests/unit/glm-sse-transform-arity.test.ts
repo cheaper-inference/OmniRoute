@@ -11,7 +11,7 @@ import { dirname, join } from "node:path";
  * #12925 gave the helper a trailing streamBufferBytes parameter.
  *
  * Guard the call site in source: its arity matches the helper, and the
- * buffer budget lands in streamBufferBytes through GLM_STREAM_BUFFER_BYTES.
+ * buffer budget lands in streamBufferBytes, defaulting to GLM_STREAM_BUFFER_BYTES.
  */
 const root = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -60,7 +60,10 @@ test("GLM translateSseResponse fills the buffer-size slot with the named constan
 
   assert.equal(args.length, params.length, `GLM must match the helper arity:\n${call}`);
   assert.equal(params.at(-1), "streamBufferBytes");
-  assert.equal(args.at(-1), "GLM_STREAM_BUFFER_BYTES");
+  // #18190 made the budget a parameter so the ZCode gateway can lower its
+  // read-ahead; every GLM caller still gets the named 64 KB constant by default.
+  assert.equal(args.at(-1), "streamBufferBytes");
+  assert.match(body, /streamBufferBytes:\s*number\s*=\s*GLM_STREAM_BUFFER_BYTES\s*\)/);
   assert.equal(args[params.indexOf("suppressThinkClose")], "suppressThinkClose");
   assert.match(src, /const GLM_STREAM_BUFFER_BYTES = 65536;/);
 });

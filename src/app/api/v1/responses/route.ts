@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -242,7 +243,14 @@ async function postHandler(request: any) {
       });
     }
 
-    return finishAdmission(await handleChat(resolved, null, resolvedBody, correlationId));
+    const handlerResponse = await handleChat(resolved, null, resolvedBody, correlationId);
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request: resolved,
+      body: resolvedBody,
+      response: handlerResponse,
+      endpoint: "responses",
+    });
+    return finishAdmission(recoveryResponse);
   } catch (error) {
     admission.lease?.release();
     throw error;

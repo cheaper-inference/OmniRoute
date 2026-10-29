@@ -5,6 +5,7 @@ import {
   isDashboardSessionAuthenticated,
   isLoopbackRequest,
 } from "@/shared/utils/apiAuth";
+import { credentialRejectionCorsHeaders } from "@/server/cors/origins";
 import { extractApiKey } from "@/sse/services/auth";
 
 // Request-scoped catalog helpers: API-key auth gating for `/v1/models` and Codex
@@ -66,7 +67,9 @@ export async function getModelCatalogAuthRejection(
       },
       {
         status: 401,
-        headers,
+        // The middleware served this key as anonymous (REQUIRE_API_KEY=false),
+        // so it did not echo the Origin; restore it on the refusal (#5242).
+        headers: { ...headers, ...credentialRejectionCorsHeaders(request) },
       }
     );
   }

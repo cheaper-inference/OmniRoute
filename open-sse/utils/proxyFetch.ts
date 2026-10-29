@@ -95,23 +95,6 @@ function isTlsFingerprintEnabled() {
   return process.env.ENABLE_TLS_FINGERPRINT === "true";
 }
 
-/**
- * Per-provider TLS impersonation profile. Most providers use the default
- * Chrome/macOS wreq profile; providers that must match a specific browser
- * fingerprint (e.g. MaxAI expects a Windows Firefox-150 client) override it here.
- * Returns undefined to keep the tlsClient default (chrome_124 / macos).
- */
-const TLS_PROVIDER_PROFILE: Record<string, { browser: string; os: string }> = {
-  maxai: { browser: "firefox_150", os: "windows" },
-};
-
-type TlsProfileResult = { browserProfile?: string; os?: string };
-function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
-  if (!provider) return {};
-  const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
-  return p ? { browserProfile: p.browser, os: p.os } : {};
-}
-
 type TlsClientLike = {
   available: boolean;
   fetch: (url: string, options?: TlsFetchOptions) => Promise<Response>;
@@ -767,7 +750,6 @@ async function patchedFetchUnrecorded(
           signal: getEffectiveSignal(input, options),
           proxy: null,
           sessionScope: tlsStore?.sessionScope,
-          ...tlsProfileForProvider(tlsStore?.provider),
         });
         if (tlsStore) tlsStore.used = true;
         return await guardTlsFirstByte(response);
@@ -1096,7 +1078,6 @@ async function patchedFetchUnrecorded(
         signal: getEffectiveSignal(input, options),
         proxy: proxyUrl,
         sessionScope: tlsStore?.sessionScope,
-        ...tlsProfileForProvider(tlsStore?.provider),
       });
       if (tlsStore) tlsStore.used = true;
       return await guardTlsFirstByte(response);

@@ -1409,6 +1409,23 @@ export function createSSEStream(options: StreamOptions = {}) {
     model,
   });
 
+  // Keep queued chunks only once client-visible content was forwarded. A
+  // pre-content failure must still reject the stream, while a post-content
+  // failure leaves its queued terminal for slow readers instead of truncating.
+  const shouldPreserveQueuedChunks = (): boolean =>
+    totalContentLength > 0 || passthroughHasToolCalls || forwardedValuableChunk;
+
+  // Set once flush() starts. A preserved failure inside flush() ends the stream
+  // by returning; inside transform() the stream would keep running (later chunks,
+  // then flush()'s success path with finish_reason/[DONE] and a 200 onComplete),
+  // so a transform-time failure must also terminate(): the readable side closes
+  // after the queued terminal and the writable side errors, cancelling upstream.
+  let flushing = false;
+  const failureBoundaryOptions = (): { preserveQueuedChunks: boolean; terminate: boolean } => {
+    const preserveQueuedChunks = shouldPreserveQueuedChunks();
+    return { preserveQueuedChunks, terminate: preserveQueuedChunks && !flushing };
+  };
+
   const emitTranslatedFailureAndAbort = (
     controller: TransformStreamDefaultController<Uint8Array>,
     payload: unknown
@@ -1424,6 +1441,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     doneSent = true;
     abortStreamFailure(controller, failure.internalFailure, failure.publicMessage, {
       notifyComplete: true,
+      ...failureBoundaryOptions(),
     });
     return true;
   };
@@ -2260,7 +2278,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   if (isFinishChunk) {
                     if (passthroughSawFinishReason) continue;
                     if (nativeFailure && !totalContentLength && !passthroughHasToolCalls)
-                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message);
+                      return abortStreamFailure(controller, nativeFailure, nativeFailure.message, {
+                        ...failureBoundaryOptions(),
+                      });
                     passthroughSawFinishReason = true;
                   }
 
@@ -2348,7 +2368,8 @@ export function createSSEStream(options: StreamOptions = {}) {
               abortStreamFailure(
                 controller,
                 failurePayload,
-                publicFailureMessage || "Upstream failure"
+                publicFailureMessage || "Upstream failure",
+                failureBoundaryOptions()
               );
               return;
             }
@@ -2601,6 +2622,7 @@ export function createSSEStream(options: StreamOptions = {}) {
       },
 
       async flush(controller) {
+        flushing = true;
         // Clean up idle watchdog timer
         if (idleTimer) {
           clearIdleTimer();
@@ -2690,7 +2712,9 @@ export function createSSEStream(options: StreamOptions = {}) {
               restoreOpenAIToolNames: (parsed: JsonRecord) =>
                 restoreOpenAIToolNames(parsed, toolNameMap),
               abortFailure: (failure: StreamFailurePayload, publicMessage: string) =>
-                abortStreamFailure(controller, failure, publicMessage),
+                abortStreamFailure(controller, failure, publicMessage, {
+                  ...failureBoundaryOptions(),
+                }),
             };
 
             for (const line of normalizedTailLines) {
@@ -2773,7 +2797,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                 abortStreamFailure(
                   controller,
                   bufferedProjectedFailure.internalFailure,
-                  bufferedProjectedFailure.publicMessage
+                  bufferedProjectedFailure.publicMessage,
+                  failureBoundaryOptions()
                 );
                 return;
               }
@@ -3155,14 +3180,18 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
               }
             } catch {
-              // Swallow flush errors — the controller.error below is the
-              // terminal signal for the client.
+              // Swallow flush errors — the failure abort below is the terminal
+              // signal for the client (controller.error before any content, or
+              // the queued error event once content was forwarded).
             }
 
             const errorBody = buildErrorBody(err.status, err.message);
             const publicErrorMessage = errorBody.error.message;
             err.streamSnapshot ??= buildStreamFailureSnapshot(providerPayloadCollector);
-            abortStreamFailure(controller, err, publicErrorMessage, { notifyComplete: true });
+            abortStreamFailure(controller, err, publicErrorMessage, {
+              notifyComplete: true,
+              ...failureBoundaryOptions(),
+            });
             return;
           }
 

@@ -58,9 +58,10 @@ export function hasMcpHttpAuthContext(): boolean {
  * request carries no resolvable API key (no header, invalid key, or the
  * DB/auth backend throws) — callers MUST treat `undefined` as "no per-key
  * authInfo available", NOT as "zero scopes", so `scopeEnforcement.ts` falls
- * through to its existing `meta` → env fallback chain unchanged. Only the
- * HTTP/SSE transports call this; stdio has no per-caller identity and stays
- * on the env fallback (see `docs/frameworks/MCP-SERVER.md`).
+ * through to its `meta` → env fallback chain — where `_meta` is honored only
+ * inside an HTTP auth context. Only the HTTP/SSE transports call this; stdio
+ * has no per-caller identity, ignores client `_meta` scopes (#15159) and
+ * resolves from the env key alone (see `docs/frameworks/MCP-SERVER.md`).
  */
 export async function resolveMcpCallerAuthInfo(
   request: Request

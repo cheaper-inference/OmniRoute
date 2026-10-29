@@ -773,47 +773,40 @@ sessiyası olmayan hər bir çağırışçı üçün əlçatmazdır (əldə etm�
 
 ---
 
-## Search API-si
+## API axtar
 
-Veb/axtarış provayderi abstraksiyası (Tavily, Brave, Exa, Serper və s.).
+Web/search provayderi abstraksiya (Tavily, Brave, Exa, Serper və s.).
 
-| Metod | Yol                    | Təsvir                                                                                                 |
-| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET   | `/v1/search`           | Konfiqurasiya edilmiş axtarış provayderlərini və imkanlarını sadalayır                                 |
-| POST  | `/v1/search`           | Axtarış sorğusunu icra edir — gövdə `v1SearchSchema` ilə yoxlanılır, keşləmə/birləşdirməni dəstəkləyir |
-| GET   | `/v1/search/analytics` | Provayder üzrə nəticə/işləmə müddəti/keş statistikası                                                  |
+| Metod | Yol                    | Təsvir                                                                                                       |
+| ----- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
+| GET   | `/v1/search`           | Konfiqurasiya edilmiş axtarış provayderlərinin + imkanlarını sadalayın                                       |
+| POST  | `/v1/search`           | `v1SearchSchema` tərəfindən təsdiqlənmiş — bədən axtarış sorğusunu işə salın, caching/coalescing dəstəkləyir |
+| GET   | `/v1/search/analytics` | Hər provayder üzrə hit/latency/cache statistikası                                                            |
 
-**Autentifikasiya:** Bearer API açarı (`extractApiKey` + `isValidApiKey`). Axtarış siyasəti `enforceApiKeyPolicy` vasitəsilə tətbiq edilir.
+**Auth:** Daşıyıcı API açarı (`extractApiKey` + `isValidApiKey`). Axtarış siyasəti `enforceApiKeyPolicy` vasitəsilə həyata keçirilir.
 
-### Exa və Tavily üçün `provider_options`
+### Exa və Tavily `provider_options`
 
-Exa və Tavily provayderə xas sahələri ad məkanı ilə ayrılmış konteynerdən oxuyur:
-`provider_options.exa` (və ya `provider_options["exa-search"]`) və `provider_options.tavily`
-(və ya `provider_options["tavily-search"]`). Yalnız aşağıdakı açarlar ötürülür. Hər biri
-`open-sse/handlers/search/providerOptionsPassthrough.ts` daxilində öz Zod sxeminə uyğun
-yoxlanılır və yanlış tipə malik açar silinir. Autentifikasiya, baza URL-i,
-`stream` və `outputSchema` daxil olmaqla, istənilən digər açar nəzərə alınmır. Digər provayderlərin
-istifadə etdiyi yastı açarlar (`cx`, `depth`, ...) əvvəlki kimi işləyir.
+Exa və Tavily ad boşluqlu çantadan provayderə məxsus sahələri oxuyur: `provider_options.exa` (və ya `provider_options["exa-search"]`) və `provider_options.tavily` (və ya `provider_options["tavily-search"]`). Yalnız aşağıdakı düymələr yönləndirilir. Hər biri `open-sse/handlers/search/providerOptionsPassthrough.ts` də öz Zod sxemi ilə yoxlanılır və səhv tipli açar atılır. auth, base URL, `stream` və `outputSchema` daxil olmaqla istənilən digər açar nəzərə alınmır. Digər provayderlər tərəfindən istifadə olunan düz düymələr (`cx`, `depth`, ...) əvvəlki kimi işləyir.
 
-| Provayder | Üst səviyyəli sahələr                                                                                                                                                                                                                                                                                                                                                     | İç-içə                                                                                                                                                                   |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (yastı primitivlər), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` üzərinə birləşdirilir |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Provayder | Ən yüksək səviyyəli sahələr                                                                                                                                                                                                                                                                                                                                               | İç-içə                                                                                                                                           |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| məsələn   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (düz primitivlər), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` üzərində birləşdirildi |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Ümumi sahələr həmişə üstünlük təşkil edir: `query`, `max_results`, `filters` (domenlər), `country` və
-`search_type` əsasında müəyyən edilən mövzu. Exa-da `search_type: "news"` parametrinin istifadəsi `category: "news"` dəyərini saxlayır.
-Tavily həmçinin `search_type: "finance"` (`topic: "finance"`) dəyərini qəbul edir.
+Ümumi sahələr həmişə qalib gəlir: `query`, `max_results`, `filters` (domenlər), `country` və `search_type` dən əldə edilən mövzu. Exa-da `search_type: "news"` `category: "news"` saxlayır. Tavily də `search_type: "finance"` (`topic: "finance"`) qəbul edir.
 
-Ümumi `time_range` artıq hər iki provayderə ötürülür: Exa `startPublishedDate` (ISO
-zaman möhürü), Tavily isə `start_date` (`YYYY-MM-DD`) alır. `provider_options` daxilində açıq şəkildə göstərilmiş tarix
-xəritələnmiş tarixi əvəz edir.
+Firecrawl axtarış dəyəri 10 qaytarılmış nəticənin hər bloku üçün 0,002 ABŞ dolları (2 kredit) və hər zəng üçün ən azı bir blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ) ilə qeydə alınır: 11 nəticə 0,004 dollara başa gəlir.
 
-Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` və `extras` sahələrini
-`provider_raw` daxilində saxlayır. Tavily nəticələri `images` və `favicon` sahələrini saxlayır.
+Ümumi `time_range` indi hər iki provayderə çatır: Exa `startPublishedDate` (ISO vaxt damgası) və Tavily `start_date` (`YYYY-MM-DD`) alır. `provider_options` açıq-aşkar tarix xəritədə göstərilən tarixə üstünlük verir.
 
-Xərclərin uçotu hələ də yastı `costPerQuery` reyestri vasitəsilə aparılır. Tavily
-`search_depth: "advanced"` üçün hər çağırışa görə daha çox kredit hesablayır və bu fərq
-`usage.search_cost_usd` daxilində əks olunmur.
+Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` və `extras` `provider_raw` də saxlayır . Tavily nəticələri `images` və `favicon` saxlayır.
+
+Linkup axtarış dəyəri `depth` `fast` və `standard` üçün 0,005 ABŞ dolları və `deep` üçün 0,05 ABŞ dolları ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` və ya əlaqə parametrlərindən gəlir olsun, qeydə alınır.
+
+Exa `type: "lite"` (Exa 3.0) daha kiçik sahələr dəstini qəbul edir və hər hansı digər sahə təyin edildikdə bütün sorğunu rədd edir. Lite üçün `additionalQueries`, `systemPrompt` və `text` və `highlights` istisna olmaqla hər `contents` düyməsi zəngdən əvvəl atılır. Köhnəlmiş `subpages`, `subpageTarget`, `highlights.numSentences` və `highlights.highlightsPerUrl` artıq yönləndirilmir.
+
+Xərclərin uçotu Exa-nın öz qiymətinə uyğun gələn Exa istisna olmaqla, düz reyestr `costPerQuery`: `auto` (və köhnə `fast`) üçün hər zəng üçün $0,007 və ya `lite` (və köhnə `instant`) üçün $0,004, 10 nəticəni əhatə edir; Hər sonrakı nəticə üçün $0,001; və `contents.summary` təyin edildikdə hər qaytarılmış nəticə üçün $0,001. Tavily `search_depth` `basic`, `fast` və `ultra-fast` üçün 1 kreditlə ($0,008), `advanced` ( [Tavily API kreditləri](https://docs.tavily.com/documentation/api-credits) ) üçün isə 2 kreditlə ($0,016) qeydə alınır. Tavilinin qabaqcıl səviyyəyə yüksəltdiyi `auto_parameters: true` ilə zəng hələ də 1 kreditlə qeydə alınır.
 
 ---
 

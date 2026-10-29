@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { betterSqlite3AliasFor } from "./scripts/build/better-sqlite3-stub-flag.mjs";
 import { mitmManagerAliasFor } from "./scripts/build/mitm-stub-flag.mjs";
 import { normalizeBasePath } from "./scripts/build/normalizeBasePath.mjs";
+import { macosDevExperimentalOverrides } from "./scripts/build/macosDevWorkaround.mjs";
 import {
   buildSecurityHeaderRules,
   nonPageRoutePrefixes,
@@ -201,6 +202,9 @@ const nextConfig = {
   // accept for image-bearing requests; tune via env if a deployment needs
   // more.
   experimental: {
+    // macOS development only: avoid the EBADF spawn failures of Next's TypeScript
+    // CLI and static-path worker (see scripts/build/macosDevWorkaround.mjs).
+    ...macosDevExperimentalOverrides(),
     serverActions: {
       bodySizeLimit: process.env.OMNIROUTE_SERVER_ACTIONS_BODY_LIMIT || "50mb",
     },
@@ -367,6 +371,16 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   webpack(config, { dev, webpack }) {
+    // Production webpack builds skip the persistent filesystem cache unless
+    // OMNIROUTE_WEBPACK_BUILD_CACHE=1. With the cache on, webpack keeps every
+    // module's build and codegen result in memory and then serializes the whole
+    // graph to .build/next/cache/webpack; measured on this repo that adds about
+    // 2.5 GB to peak build RSS at a 6144 MB heap cap. A clean CI or Docker build
+    // starts with an empty cache and never reads it back; only repeat builds on the
+    // same tree or BuildKit host do.
+    if (!dev && process.env.OMNIROUTE_WEBPACK_BUILD_CACHE !== "1") {
+      config.cache = false;
+    }
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
       isNextIntlExtractorDynamicImportWarning,

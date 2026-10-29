@@ -45,6 +45,9 @@ export interface LegacyJsonData {
   usageHistory?: Record<string, unknown>[];
   domainCostHistory?: Record<string, unknown>[];
   domainBudgets?: Record<string, unknown>[];
+  teams?: Record<string, unknown>[];
+  apiKeyBillingTeamHistory?: Record<string, unknown>[];
+  dailyTeamUsageSummary?: Record<string, unknown>[];
 }
 
 /**
@@ -64,6 +67,9 @@ export function runJsonMigration(
   usageHistory: number;
   domainCostHistory: number;
   domainBudgets: number;
+  teams: number;
+  apiKeyBillingTeamHistory: number;
+  dailyTeamUsageSummary: number;
 } {
   const insertNode = db.prepare(`
     INSERT OR REPLACE INTO provider_nodes (id, type, name, prefix, api_type, base_url, created_at, updated_at)
@@ -83,6 +89,51 @@ export function runJsonMigration(
   // restored too (jsonMigration/columnUpsert.ts).
   const connectionColumns = getTableColumns(db, "provider_connections");
   const apiKeyColumns = getApiKeyImportColumns(db);
+
+  // UPSERT, not INSERT OR REPLACE: REPLACE deletes the parent row first and
+  // api_key_billing_team_history / daily_team_usage_summary reference teams(id) with
+  // ON DELETE RESTRICT, so restoring a backup over a live team would fail.
+  const insertTeam = db.prepare(`
+    INSERT INTO teams (
+      id, name, description, status, max_budget_usd, budget_duration,
+      budget_reset_at, created_at, updated_at, archived_at
+    ) VALUES (
+      @id, @name, @description, @status, @maxBudgetUsd, @budgetDuration,
+      @budgetResetAt, @createdAt, @updatedAt, @archivedAt
+    )
+    ON CONFLICT(id) DO UPDATE SET
+      name = excluded.name,
+      description = excluded.description,
+      status = excluded.status,
+      max_budget_usd = excluded.max_budget_usd,
+      budget_duration = excluded.budget_duration,
+      budget_reset_at = excluded.budget_reset_at,
+      created_at = excluded.created_at,
+      updated_at = excluded.updated_at,
+      archived_at = excluded.archived_at
+  `);
+  const insertBillingHistory = db.prepare(`
+    INSERT OR REPLACE INTO api_key_billing_team_history (
+      id, api_key_id, team_id, valid_from, valid_to, created_at
+    ) VALUES (@id, @apiKeyId, @teamId, @validFrom, @validTo, @createdAt)
+  `);
+  const insertDailyTeamUsage = db.prepare(`
+    INSERT OR REPLACE INTO daily_team_usage_summary (
+      team_id, api_key_id, api_key_name, provider, model, service_tier, date,
+      total_requests, successful_requests, total_input_tokens, total_output_tokens,
+      total_cache_read_tokens, total_cache_creation_tokens, total_reasoning_tokens,
+      successful_input_tokens, successful_output_tokens, successful_cache_read_tokens,
+      successful_cache_creation_tokens, successful_reasoning_tokens,
+      token_shapes_json, successful_token_shapes_json
+    ) VALUES (
+      @team_id, @api_key_id, @api_key_name, @provider, @model, @service_tier, @date,
+      @total_requests, @successful_requests, @total_input_tokens, @total_output_tokens,
+      @total_cache_read_tokens, @total_cache_creation_tokens, @total_reasoning_tokens,
+      @successful_input_tokens, @successful_output_tokens, @successful_cache_read_tokens,
+      @successful_cache_creation_tokens, @successful_reasoning_tokens,
+      @token_shapes_json, @successful_token_shapes_json
+    )
+  `);
 
   const migrate = db.transaction(() => {
     // 1. Provider Connections — credentials encrypted like normal writes; existing rows
@@ -163,8 +214,62 @@ export function runJsonMigration(
     for (const apiKey of data.apiKeys ?? []) {
       importApiKeyRecord(db, apiKeyColumns, apiKey);
     }
-
-    // 7. Usage History
+    // 7. Teams and temporal API-key billing ownership
+    for (const team of data.teams ?? []) {
+      insertTeam.run({
+        id: team.id,
+        name: team.name,
+        description: team.description ?? "",
+        status: team.status === "archived" ? "archived" : "active",
+        maxBudgetUsd: team.maxBudgetUsd ?? null,
+        budgetDuration: team.budgetDuration ?? null,
+        budgetResetAt: team.budgetResetAt ?? null,
+        createdAt: team.createdAt ?? new Date().toISOString(),
+        updatedAt: team.updatedAt ?? team.createdAt ?? new Date().toISOString(),
+        archivedAt: team.archivedAt ?? null,
+      });
+    }
+    for (const binding of data.apiKeyBillingTeamHistory ?? []) {
+      insertBillingHistory.run({
+        id: binding.id,
+        apiKeyId: binding.apiKeyId,
+        teamId: binding.teamId,
+        validFrom: binding.validFrom,
+        validTo: binding.validTo ?? null,
+        createdAt: binding.createdAt ?? binding.validFrom,
+      });
+    }
+    for (const row of data.dailyTeamUsageSummary ?? []) {
+      insertDailyTeamUsage.run({
+        team_id: row.team_id ?? row.teamId,
+        api_key_id: row.api_key_id ?? row.apiKeyId,
+        api_key_name: row.api_key_name ?? row.apiKeyName ?? null,
+        provider: row.provider,
+        model: row.model,
+        service_tier: row.service_tier ?? row.serviceTier ?? "standard",
+        date: row.date,
+        total_requests: row.total_requests ?? row.totalRequests ?? 0,
+        successful_requests: row.successful_requests ?? row.successfulRequests ?? 0,
+        total_input_tokens: row.total_input_tokens ?? row.totalInputTokens ?? 0,
+        total_output_tokens: row.total_output_tokens ?? row.totalOutputTokens ?? 0,
+        total_cache_read_tokens: row.total_cache_read_tokens ?? row.totalCacheReadTokens ?? 0,
+        total_cache_creation_tokens:
+          row.total_cache_creation_tokens ?? row.totalCacheCreationTokens ?? 0,
+        total_reasoning_tokens: row.total_reasoning_tokens ?? row.totalReasoningTokens ?? 0,
+        successful_input_tokens: row.successful_input_tokens ?? row.successfulInputTokens ?? 0,
+        successful_output_tokens: row.successful_output_tokens ?? row.successfulOutputTokens ?? 0,
+        successful_cache_read_tokens:
+          row.successful_cache_read_tokens ?? row.successfulCacheReadTokens ?? 0,
+        successful_cache_creation_tokens:
+          row.successful_cache_creation_tokens ?? row.successfulCacheCreationTokens ?? 0,
+        successful_reasoning_tokens:
+          row.successful_reasoning_tokens ?? row.successfulReasoningTokens ?? 0,
+        token_shapes_json: row.token_shapes_json ?? row.tokenShapesJson ?? null,
+        successful_token_shapes_json:
+          row.successful_token_shapes_json ?? row.successfulTokenShapesJson ?? null,
+      });
+    }
+    // 8. Usage History
     if (data.usageHistory && data.usageHistory.length > 0) {
       const importedConnections = new Map(
         (data.providerConnections ?? []).map((connection) => [connection.id, connection])
@@ -172,13 +277,14 @@ export function runJsonMigration(
       const insertUsageHistory = db.prepare(`
         INSERT OR REPLACE INTO usage_history (
           id, provider, model, connection_id, account_key, account_label, account_label_priority,
-          api_key_id, api_key_name, tokens_input, tokens_output, tokens_cache_read,
-          tokens_cache_creation, tokens_reasoning, status, success, latency_ms, ttft_ms,
-          error_code, combo_strategy, timestamp
+          api_key_id, api_key_name, billing_team_id, team_rollup_processed_at,
+          tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
+          service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, timestamp
         ) VALUES (
           @id, @provider, @model, @connection_id, @account_key, @account_label,
-          @account_label_priority, @api_key_id, @api_key_name, @tokens_input, @tokens_output,
-          @tokens_cache_read, @tokens_cache_creation, @tokens_reasoning, @status, @success,
+          @account_label_priority, @api_key_id, @api_key_name, @billing_team_id,
+          @team_rollup_processed_at, @tokens_input, @tokens_output, @tokens_cache_read,
+          @tokens_cache_creation, @tokens_reasoning, @service_tier, @status, @success,
           @latency_ms, @ttft_ms, @error_code, @combo_strategy, @timestamp
         )
       `);
@@ -198,12 +304,16 @@ export function runJsonMigration(
           account_label: identity.accountLabel,
           account_label_priority: identity.accountLabelPriority,
           api_key_id: row.api_key_id ?? null,
-          api_key_name: row.api_key_name ?? null,
-          tokens_input: row.tokens_input ?? 0,
-          tokens_output: row.tokens_output ?? 0,
-          tokens_cache_read: row.tokens_cache_read ?? 0,
-          tokens_cache_creation: row.tokens_cache_creation ?? 0,
-          tokens_reasoning: row.tokens_reasoning ?? 0,
+          api_key_name: row.api_key_name ?? row.apiKeyName ?? null,
+          billing_team_id: row.billing_team_id ?? row.billingTeamId ?? null,
+          team_rollup_processed_at:
+            row.team_rollup_processed_at ?? row.teamRollupProcessedAt ?? null,
+          tokens_input: row.tokens_input ?? row.tokensInput ?? 0,
+          tokens_output: row.tokens_output ?? row.tokensOutput ?? 0,
+          tokens_cache_read: row.tokens_cache_read ?? row.tokensCacheRead ?? 0,
+          tokens_cache_creation: row.tokens_cache_creation ?? row.tokensCacheCreation ?? 0,
+          tokens_reasoning: row.tokens_reasoning ?? row.tokensReasoning ?? 0,
+          service_tier: row.service_tier ?? row.serviceTier ?? "standard",
           status: row.status ?? null,
           success: row.success ?? 1,
           latency_ms: row.latency_ms ?? 0,
@@ -215,7 +325,7 @@ export function runJsonMigration(
       }
     }
 
-    // 8. Domain Cost History
+    // 9. Domain Cost History
     if (data.domainCostHistory && data.domainCostHistory.length > 0) {
       const insertCostHistory = db.prepare(`
         INSERT OR REPLACE INTO domain_cost_history (
@@ -233,7 +343,7 @@ export function runJsonMigration(
         });
       }
     }
-    // 9. Domain Budgets
+    // 10. Domain Budgets
     if (data.domainBudgets && data.domainBudgets.length > 0) {
       const insertBudgets = db.prepare(`
         INSERT OR REPLACE INTO domain_budgets (
@@ -274,5 +384,8 @@ export function runJsonMigration(
     usageHistory: (data.usageHistory ?? []).length,
     domainCostHistory: (data.domainCostHistory ?? []).length,
     domainBudgets: (data.domainBudgets ?? []).length,
+    teams: (data.teams ?? []).length,
+    apiKeyBillingTeamHistory: (data.apiKeyBillingTeamHistory ?? []).length,
+    dailyTeamUsageSummary: (data.dailyTeamUsageSummary ?? []).length,
   };
 }
