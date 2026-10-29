@@ -1613,4 +1613,19 @@ export const APIKEY_PROVIDERS_GATEWAYS = {
     apiHint:
       "Create an API token at https://daoxe.com/token, then paste it here as a Bearer token. OpenAI-compatible base URL: https://api.daoxe.com/v1.",
   },
+  // LLMTR (https://llmtr.com) — OpenAI-compatible gateway. /v1/models is public;
+  // chat uses a Bearer key. Ids that already start with llmtr/ keep that prefix.
+  llmtr: {
+    id: "llmtr",
+    serviceKinds: ["llm"],
+    alias: "llmtr",
+    name: "LLMTR",
+    icon: "hub",
+    color: "#0369A1",
+    textIcon: "LT",
+    passthroughModels: true,
+    website: "https://llmtr.com",
+    apiHint:
+      "Create an API key at https://llmtr.com, then paste it here as a Bearer token. OpenAI-compatible base URL: https://llmtr.com/v1.",
+  },
 };

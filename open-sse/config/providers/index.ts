@@ -290,6 +290,7 @@ import { twinmindProvider } from "./registry/twinmind/index.ts";
 import { syntxProvider } from "./registry/syntx/index.ts";
 import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
+import { llmtrProvider } from "./registry/llmtr/index.ts";
 
 export const REGISTRY: Record<string, RegistryEntry> = {
   aimlapi: aimlapiProvider,
@@ -584,4 +585,5 @@ export const REGISTRY: Record<string, RegistryEntry> = {
   syntx: syntxProvider,
   daoxe: daoxeProvider,
   demonroute: demonrouteProvider,
+  llmtr: llmtrProvider,
 };
