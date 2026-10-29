@@ -46,7 +46,8 @@ test.describe("Compression Studio (Tela A)", () => {
     const compareTab = page.locator('[data-testid="tab-compare"]');
     await expect(compareTab).toBeVisible({ timeout: 30_000 });
     await compareTab.click();
-    await expect(compareTab).toHaveAttribute("aria-pressed", "true");
+    // KEA-7886: the studio views are kit Tabs (role="tab"), so the selection is aria-selected.
+    await expect(compareTab).toHaveAttribute("aria-selected", "true");
     // Compare view mounted → its load control is present.
     await expect(page.locator('[data-testid="compare-load"]').first()).toBeVisible({
       timeout: 30_000,

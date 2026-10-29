@@ -37,13 +37,13 @@ Comparación objetiva de características frente a routers de IA de código abie
 | **Compatibilidad con túneles (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |         ❌          |        n/a        |     n/a     |
 | **Licencia**                                                   |                      MIT                       |         MIT         |    propietaria    | propietaria |
 
-## Cuándo elegir OmniRoute
+## Cuando elegir OmniRoute
 
-- Te autoalojas y quieres **la máxima cobertura de proveedores** (375 proveedores, 155 entradas de catálogo gratuitas/sin autenticación)
-- Necesitas un **servidor MCP integrado** (herramientas de LLM, memoria y habilidades expuestas como herramientas)
-- Necesitas el **protocolo A2A** para flujos de trabajo entre agentes
-- Quieres **sigilo de huella digital** (JA3/JA4) para evitar la detección por parte de los CAPTCHAs del proveedor upstream
-- Necesitas **funciones empresariales** (guardrails, evaluaciones, registro de auditoría) sin una factura de SaaS
+- Eres autohospedador y quieres** cobertura máxima del proveedor** (377 proveedores, 155 entradas de catálogo free/no-auth )
+- Necesitas un** servidor MCP incorporado** (herramientas LLM, memoria, habilidades expuestas como herramientas)
+- necesitas** protocolo A2A** para flujos de trabajo de agente a agente
+- Quieres** sigilo de huellas dactilares** (JA3/JA4) para evitar la detección por CAPTCHAs ascendente
+- necesitas** características empresariales** (barandillas, evaluaciones, seguimiento de auditoría) sin factura SaaS
 
 ## Cuándo elegir LiteLLM
 

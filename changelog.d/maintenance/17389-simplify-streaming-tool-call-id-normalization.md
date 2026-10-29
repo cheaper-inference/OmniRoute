@@ -1,0 +1,1 @@
+- **refactor(sse):** delta tool-call ID normalization is extracted from the final OpenAI stream chunk normalizer, with identical in-place conversion and finish-reason detection and lower cognitive complexity ([#17389](https://github.com/diegosouzapw/OmniRoute/pull/17389) - thanks @JxnLexn)

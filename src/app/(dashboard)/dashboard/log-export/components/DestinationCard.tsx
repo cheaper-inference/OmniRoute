@@ -1,6 +1,8 @@
 "use client";
 
-import { Badge, Button, Card } from "@/shared/components";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
 import type { LogExportDestination } from "../types";
 
 interface DestinationCardProps {
@@ -53,11 +55,11 @@ export function DestinationCard({
           </div>
           <p className="mt-1 text-xs text-text-muted">
             Last run {formatTimestamp(destination.lastRunAt)} · exported{" "}
-            {destination.exportedTotal.toLocaleString()} rows · {destination.pending.toLocaleString()}{" "}
-            pending · cursor {destination.cursorRowId}
+            {destination.exportedTotal.toLocaleString()} rows ·{" "}
+            {destination.pending.toLocaleString()} pending · cursor {destination.cursorRowId}
           </p>
           {destination.lastError ? (
-            <p className="mt-2 rounded-control bg-red-500/10 p-2 text-xs text-red-600 dark:text-red-400">
+            <p className="mt-2 rounded-control bg-error-bg p-2 text-xs text-error">
               {destination.lastError}
             </p>
           ) : null}

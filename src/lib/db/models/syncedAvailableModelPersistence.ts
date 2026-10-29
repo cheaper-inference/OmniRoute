@@ -20,18 +20,58 @@ type ModelNormalizer<T> = (models: unknown) => T[];
 // never blocked (dynamic import: `contextWindowResolver` reads this module via
 // `getAllSyncedAvailableModels`, so a static import would be circular).
 let reconcileAfterSyncTimer: ReturnType<typeof setTimeout> | null = null;
+const pendingReconcileProviders = new Set<string>();
 
-function scheduleReconcileAfterSyncWrite(): void {
-  if (reconcileAfterSyncTimer) return; // debounce bursty multi-connection writes
-  reconcileAfterSyncTimer = setTimeout(() => {
-    reconcileAfterSyncTimer = null;
-    void import("../../contextWindowResolver")
-      .then((m) => m.runContextWindowReconcile())
-      .catch(() => {
-        // Swallow — the periodic reconcile still runs; sync must never fail on it.
-      });
-  }, 0);
+// #18048: a real trailing debounce. The old `setTimeout(0)` ran one GLOBAL pass per
+// changed write, so a 100-connection cycle chained many multi-second event-loop
+// blocks. Now a burst collapses into one pass restricted to the touched providers.
+export const POST_SYNC_RECONCILE_DEBOUNCE_MS = 5000;
+
+function flushPostSyncReconcile(): void {
+  reconcileAfterSyncTimer = null;
+  const providers = Array.from(pendingReconcileProviders);
+  pendingReconcileProviders.clear();
+  if (providers.length === 0) return;
+  void import("../../contextWindowResolver")
+    .then((m) => m.runContextWindowReconcile({ providers }))
+    .catch(() => {
+      // Swallow — the periodic reconcile still runs; sync must never fail on it.
+    });
+}
+
+export function scheduleReconcileAfterSyncWrite(
+  providerId: string,
+  debounceMs: number = POST_SYNC_RECONCILE_DEBOUNCE_MS
+): void {
+  pendingReconcileProviders.add(providerId);
+  if (reconcileAfterSyncTimer) clearTimeout(reconcileAfterSyncTimer);
+  reconcileAfterSyncTimer = setTimeout(flushPostSyncReconcile, debounceMs);
   reconcileAfterSyncTimer.unref?.();
+}
+
+/** Providers waiting for the next debounced post-sync reconcile (test hook). */
+export function getPendingPostSyncReconcileProviders(): string[] {
+  return Array.from(pendingReconcileProviders);
+}
+
+/** Cancel the pending post-sync reconcile and forget its providers (test hook). */
+export function cancelPendingPostSyncReconcile(): void {
+  if (reconcileAfterSyncTimer) clearTimeout(reconcileAfterSyncTimer);
+  reconcileAfterSyncTimer = null;
+  pendingReconcileProviders.clear();
+}
+
+type WindowCarrier = { id?: unknown; contextWindow?: unknown; inputTokenLimit?: unknown };
+
+/** id→window signature: the only fields the context-window reconcile reads. */
+function windowSignature(models: unknown[] | null): string {
+  if (!models) return "";
+  const entries: string[] = [];
+  for (const m of models as WindowCarrier[]) {
+    const w = m?.contextWindow ?? m?.inputTokenLimit;
+    if (typeof w === "number") entries.push(`${String(m.id)}=${w}`);
+  }
+  return entries.sort().join("|");
 }
 
 export function finishSyncedAvailableModelsWrite(): void {
@@ -92,6 +132,9 @@ export function persistCanonicalSyncedAvailableModels<T>(
     ).run(key, JSON.stringify(normalizedModels));
   }
   finishSyncedAvailableModelsWrite();
-  scheduleReconcileAfterSyncWrite();
+  // Skip when no declared window changed: the reconcile would only re-scan for nothing.
+  if (windowSignature(existingModels) !== windowSignature(normalizedModels)) {
+    scheduleReconcileAfterSyncWrite(key.split(":")[0]);
+  }
   return true;
 }

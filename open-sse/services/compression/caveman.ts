@@ -345,7 +345,20 @@ export function cavemanCompress(
   const customPreservation = compileUserPreservePatterns(config.preservePatterns ?? []);
   validationWarnings.push(...customPreservation.warnings);
 
-  const compressedMessages = body.messages.map((msg): ChatMessage => {
+  // The latest user turn is the one being answered. Clients append context to
+  // that same message (memory blocks, quoted history), which pushes it past
+  // minMessageLength and lets the rules delete words the user typed. Leave it as
+  // written whenever the request already carries earlier turns. A one-shot body
+  // (a single prompt, or the slices progressive aging compresses one at a time)
+  // has no earlier turn and keeps compressing.
+  const lastUserIndex = body.messages.findLastIndex((msg) => msg.role === "user");
+  const hasEarlierTurn =
+    lastUserIndex > 0 &&
+    body.messages
+      .slice(0, lastUserIndex)
+      .some((msg) => msg.role === "user" || msg.role === "assistant");
+
+  const compressedMessages = body.messages.map((msg, index): ChatMessage => {
     if (typeof msg.content !== "string" && !Array.isArray(msg.content)) {
       return msg;
     }
@@ -362,6 +375,11 @@ export function cavemanCompress(
             .filter(Boolean)
             .join("\n");
     totalOriginalTokens += estimateCompressionTokens(contentStr);
+
+    if (index === lastUserIndex && hasEarlierTurn) {
+      totalCompressedTokens += estimateCompressionTokens(contentStr);
+      return msg;
+    }
 
     if (!contentStr || contentStr.length < config.minMessageLength) {
       totalCompressedTokens += estimateCompressionTokens(contentStr);

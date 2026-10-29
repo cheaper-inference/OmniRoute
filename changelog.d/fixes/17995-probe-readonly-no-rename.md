@@ -1,0 +1,1 @@
+- fix(db): READONLY and exhausted transient probe errors no longer rename a healthy storage.sqlite; startup fails closed with a typed probe result (#17995)

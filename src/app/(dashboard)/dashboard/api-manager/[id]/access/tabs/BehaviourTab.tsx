@@ -1,5 +1,9 @@
 "use client";
 
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+import Toggle from "@/shared/components/Toggle";
+
 import { useTranslations } from "next-intl";
 import { ApiKeyCompressionToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ApiKeyCompressionToggle";
 import { ChaosModeAccessToggle } from "@/app/(dashboard)/dashboard/api-manager/components/ChaosModeAccessToggle";
@@ -26,7 +30,6 @@ type BehaviourSectionProps<K extends keyof BehaviourTabProps> = Pick<
 
 function PayloadPrivacyToggle({ formState, setNoLog }: BehaviourSectionProps<"setNoLog">) {
   const t = useTranslations("apiManager");
-  const tc = useTranslations("common");
 
   return (
     <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
@@ -36,29 +39,19 @@ function PayloadPrivacyToggle({ formState, setNoLog }: BehaviourSectionProps<"se
           Disable request/response payload persistence for this API key.
         </p>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={formState.noLog}
-        onClick={() => setNoLog(!formState.noLog)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-          formState.noLog
-            ? "bg-violet-500/15 text-violet-700 dark:text-violet-300 border border-violet-500/30"
-            : "bg-black/5 dark:bg-white/5 text-text-muted border border-border"
-        }`}
-      >
-        <span className="material-symbols-outlined text-[14px]">
-          {formState.noLog ? "visibility_off" : "visibility"}
-        </span>
-        {formState.noLog ? tc("enabled") : tc("disabled")}
-      </button>
+      <Toggle
+        size="sm"
+        className="shrink-0"
+        checked={formState.noLog}
+        onChange={() => setNoLog(!formState.noLog)}
+        ariaLabel={t("noLogPayloadPrivacy")}
+      />
     </div>
   );
 }
 
 function AutoResolveToggle({ formState, setAutoResolve }: BehaviourSectionProps<"setAutoResolve">) {
   const t = useTranslations("apiManager");
-  const tc = useTranslations("common");
 
   return (
     <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
@@ -66,22 +59,13 @@ function AutoResolveToggle({ formState, setAutoResolve }: BehaviourSectionProps<
         <p className="text-sm font-medium text-text-main">{t("autoResolve")}</p>
         <p className="text-xs text-text-muted">{t("autoResolveDesc")}</p>
       </div>
-      <button
-        type="button"
-        role="switch"
-        aria-checked={formState.autoResolve}
-        onClick={() => setAutoResolve(!formState.autoResolve)}
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-          formState.autoResolve
-            ? "bg-cyan-500/15 text-cyan-700 dark:text-cyan-300 border border-cyan-500/30"
-            : "bg-black/5 dark:bg-white/5 text-text-muted border border-border"
-        }`}
-      >
-        <span className="material-symbols-outlined text-[14px]">
-          {formState.autoResolve ? "auto_fix_high" : "auto_fix_normal"}
-        </span>
-        {formState.autoResolve ? tc("enabled") : tc("disabled")}
-      </button>
+      <Toggle
+        size="sm"
+        className="shrink-0"
+        checked={formState.autoResolve}
+        onChange={() => setAutoResolve(!formState.autoResolve)}
+        ariaLabel={t("autoResolve")}
+      />
     </div>
   );
 }
@@ -99,30 +83,26 @@ function StreamDefaultModeSelector({
         <p className="text-xs text-text-muted">{t("streamDefaultModeDesc")}</p>
       </div>
       <div className="flex gap-1 p-0.5 bg-surface rounded-md shrink-0 w-full sm:w-auto">
-        <button
-          type="button"
+        <Button
+          size="sm"
+          variant={formState.streamDefaultMode === "legacy" ? "primary" : "ghost"}
+          aria-pressed={formState.streamDefaultMode === "legacy"}
           onClick={() => setStreamDefaultMode("legacy")}
-          className={`inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${
-            formState.streamDefaultMode === "legacy"
-              ? "bg-primary text-white"
-              : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-          }`}
+          className="gap-1.5 text-xs flex-1 sm:flex-none justify-center"
         >
-          <span className="material-symbols-outlined text-[14px]">settings_backup_restore</span>
+          <Icon name="settings_backup_restore" size={14} />
           {t("streamDefaultLegacy")}
-        </button>
-        <button
-          type="button"
+        </Button>
+        <Button
+          size="sm"
+          variant={formState.streamDefaultMode === "json" ? "primary" : "ghost"}
+          aria-pressed={formState.streamDefaultMode === "json"}
           onClick={() => setStreamDefaultMode("json")}
-          className={`inline-flex flex-1 sm:flex-none items-center justify-center gap-1.5 px-3 py-1.5 rounded text-xs font-semibold transition-all ${
-            formState.streamDefaultMode === "json"
-              ? "bg-primary text-white"
-              : "text-text-muted hover:bg-black/5 dark:hover:bg-white/5"
-          }`}
+          className="gap-1.5 text-xs flex-1 sm:flex-none justify-center"
         >
-          <span className="material-symbols-outlined text-[14px]">data_object</span>
+          <Icon name="data_object" size={14} />
           {t("streamDefaultJson")}
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -140,7 +120,6 @@ export default function BehaviourTab({
   errors,
 }: BehaviourTabProps) {
   const t = useTranslations("apiManager");
-  const tc = useTranslations("common");
 
   return (
     <div className="flex flex-col gap-5">
@@ -176,20 +155,13 @@ export default function BehaviourTab({
           <p className="text-sm font-medium text-text-main">{t("localUsageCommand")}</p>
           <p className="text-xs text-text-muted">{t("localUsageCommandDesc")}</p>
         </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={formState.allowUsageCommand}
-          onClick={() => setAllowUsageCommand(!formState.allowUsageCommand)}
-          className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-xs font-semibold transition-colors ${
-            formState.allowUsageCommand
-              ? "bg-sky-500/15 text-sky-700 dark:text-sky-300 border border-sky-500/30"
-              : "bg-black/5 dark:bg-white/5 text-text-muted border border-border"
-          }`}
-        >
-          <span className="material-symbols-outlined text-[14px]">terminal</span>
-          {formState.allowUsageCommand ? tc("enabled") : tc("disabled")}
-        </button>
+        <Toggle
+          size="sm"
+          className="shrink-0"
+          checked={formState.allowUsageCommand}
+          onChange={() => setAllowUsageCommand(!formState.allowUsageCommand)}
+          ariaLabel={t("localUsageCommand")}
+        />
       </div>
 
       {/* Advanced Provider Quota Policy Override */}

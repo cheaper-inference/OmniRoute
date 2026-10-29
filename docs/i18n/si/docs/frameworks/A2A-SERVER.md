@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## පවතින කුසලතා
+## ලබා ගත හැකි කුසලතා
 
-OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි සම්බන්ධ කර ඇති A2A කුසලතා 6ක් නිරාවරණය කරයි. සෑම කුසලතා මොඩියුලයක්ම `src/lib/a2a/skills/` හි පිහිටා ඇත.
+OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි රැහැන්ගත A2A කුසලතා 6ක් හෙළි කරයි. සෑම කුසලතා මොඩියුලයක්ම `src/lib/a2a/skills/` හි ජීවත් වේ.
 
-| කුසලතාවය           | ID                   | විස්තරය                                                                                                                                              | ටැග                        | උදාහරණ                                        |
-| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------- |
-| Smart Routing      | `smart-routing`      | OmniRoute හි combo engine + scoring භාවිතයෙන් prompt එකක් ප්රශස්ත provider/combo එක හරහා යොමු කරයි                                                   | routing, providers         | "මෙම prompt එක හොඳම model එක හරහා යොමු කරන්න" |
-| Quota Management   | `quota-management`   | එක් එක් provider සඳහා quota තත්ත්වය වාර්තා කරයි, ඇමතුම්කරුවන්ට throttle/switch කළ යුත්තේ කවදාද යනු තීරණය කිරීමට උදව් වේ                              | quota, providers           | "anthropic සඳහා quota පරීක්ෂා කරන්න"          |
-| Provider Discovery | `provider-discovery` | ස්ථාපිත providers, හැකියාවන්, free-tier ධජ, OAuth තත්ත්වය සමඟ ලැයිස්තුගත කරයි                                                                        | providers, discovery       | "පවතින providers මොනවාද?"                     |
-| Cost Analysis      | `cost-analysis`      | catalog එක + මෑත භාවිතය සලකා request/conversation එකක පිරිවැය ඇස්තමේන්තු කරයි                                                                        | cost, usage                | "මෙම සංවාදය සඳහා පිරිවැය ඇස්තමේන්තු කරන්න"    |
-| Health Report      | `health-report`      | එක් එක් provider සඳහා circuit breaker, cooldown, lockout තත්ත්ව එකතු කරයි                                                                            | health, resilience         | "සියලුම providers හි සෞඛ්ය තත්ත්වය පෙන්වන්න"  |
-| List Capabilities  | `list-capabilities`  | සම්පූර්ණ Agent Skills catalog එක (entries 45: API 23 + CLI 21 + config 1) context injection සඳහා අමු SKILL.md URLs සහිත markdown වගුවක් ලෙස ලබා දෙයි | catalog, discovery, skills | "සියලුම OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න" |
+| දක්ෂතාවය                   | ID                   | විස්තරය                                                                                                                                                               | ටැග්                         | උදාහරණ                                         |
+| :------------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :--------------------------------------------- |
+| Smart Routing              | `smart-routing`      | OmniRoute's combo engine + ලකුණු කිරීම භාවිතයෙන් ප්‍රශස්ත provider/combo හරහා ප්‍රේරකයක් යොමු කරයි                                                                    | මාර්ගගත කිරීම, සපයන්නන්      | "හොඳම මාදිලිය හරහා මෙම විමසුම මෙහෙයවන්න"       |
+| කෝටා කළමනාකරණය             | `quota-management`   | එක් සැපයුම්කරුවෙකුගේ කෝටා තත්ත්වය වාර්තා කරයි, throttle/switch කළ යුත්තේ කවදාදැයි තීරණය කිරීමට ඇමතුම්කරුවන්ට උදවු කරයි                                                | කෝටාව, සපයන්නන්              | "මානව සඳහා කෝටාව පරීක්ෂා කරන්න"                |
+| සැපයුම්කරු සොයාගැනීම       | `provider-discovery` | හැකියාවන්, නිදහස් ස්ථර ධජ, OAuth තත්ත්වය සහිත ස්ථාපිත සැපයුම්කරුවන් ලැයිස්තුගත කරයි                                                                                   | සපයන්නන්, සොයා ගැනීම         | "ලබා ගත හැකි සැපයුම්කරුවන් මොනවාද?"            |
+| පිරිවැය විශ්ලේෂණය          | `cost-analysis`      | + මෑත භාවිතයේ නාමාවලිය ලබා දී request/conversation හි පිරිවැය ඇස්තමේන්තු කරයි                                                                                         | පිරිවැය, භාවිතය              | "මෙම සංවාදය සඳහා ඇස්තමේන්තුගත පිරිවැය"         |
+| සෞඛ්ය වාර්තාව              | `health-report`      | එක් සැපයුම්කරුවෙකු සඳහා පරිපථ කඩනය, සිසිල් කිරීම, අගුලු දැමීමේ තත්වය එකතු කරයි                                                                                        | සෞඛ්යය, ඔරොත්තු දීමේ හැකියාව | "සියලු සැපයුම්කරුවන්ගේ සෞඛ්ය තත්ත්වය පෙන්වන්න" |
+| හැකියාවන් ලැයිස්තුගත කරන්න | `list-capabilities`  | සන්දර්භය එන්නත් කිරීම සඳහා raw SKILL.md URLs සමඟ ලකුණු සටහන් වගුවක් ලෙස සම්පූර්ණ ඇතුළත් කිරීම් 45 නියෝජිත නිපුණතා නාමාවලිය (23 API + 21 CLI + 1 config) ආපසු ලබා දෙයි | නාමාවලිය, සොයාගැනීම්, කුසලතා | "සියලු OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න"   |
 
-> Agent Card එක සජීවී providers 375ක catalog එක සමඟ ගැලපෙන පරිදි තබා ගත යුතුය; provider ගණන සහ free/no-auth metadata runtime registry එකෙන් ලබාගැනේ.
+> නියෝජිත කාඩ්පත සජීවී 377 සපයන්නන්ගේ නාමාවලිය සමඟ පෙළගස්වා තිබිය යුතුය; සපයන්නන්ගේ ගණන් සහ free/no-auth පාරදත්ත ධාවන කාල රෙජිස්ට්‍රියෙන් ලබා ගනී.
 
 ### `list-capabilities` කුසලතා විස්තර
 
-`list-capabilities` කුසලතාවය, API ඇමතුම් යැවීමට පෙර OmniRoute නිරාවරණය කරන දේ සොයා ගැනීමට අවශ්ය බාහිර agents සඳහා විශේෂයෙන් ප්රයෝජනවත් වේ. එය ව්යුහගත markdown වගු artifact එකක් ලබා දෙයි:
+API ඇමතුම් යැවීමට පෙර OmniRoute නිරාවරණය කරන දේ සොයා ගැනීමට අවශ්‍ය බාහිර නියෝජිතයන් සඳහා `list-capabilities` කුසලතාව විශේෂයෙන් ප්‍රයෝජනවත් වේ. එය ව්‍යුහගත සලකුණු වගු පුරාවස්තුවක් ලබා දෙයි:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි සම්�
 ...
 ```
 
-සෑම පේළියක්ම `rawUrl` තීරය ඇතුළත් කරයි, එබැවින් agents වලට සම්පූර්ණ SKILL.md එක වහාම ලබා ගත හැක. `metadata.totalSkills` ක්ෂේත්රය catalog ප්රමාණය පිළිබිඹු කරයි (අද 45). ක්රියාත්මක කිරීම: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) ද බලන්න.
+සෑම පේළියකටම `rawUrl` තීරුව ඇතුළත් වන නිසා නියෝජිතයින්ට වහාම සම්පූර්ණ SKILL.md ලබා ගත හැක. `metadata.totalSkills` ක්ෂේත්‍රය නාමාවලි ප්‍රමාණය පිළිබිඹු කරයි (අද 45). ක්රියාත්මක කිරීම: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) ද බලන්න.
 
 ---
 
@@ -268,7 +268,7 @@ JSON-RPC අන්ත ලක්ෂ්යය වන `/a2a`, සම්මත A2A �
 
 ## ඒකාබද්ධ කිරීමේ උදාහරණ
 
-### Python (requests)
+### පයිතන් (ඉල්ලීම්)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ගෙන එන්න)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

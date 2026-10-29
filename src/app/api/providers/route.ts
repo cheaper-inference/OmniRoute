@@ -1,4 +1,9 @@
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import {
+  getDiscoveryStatesForConnections,
+  type DiscoveryStateEntry,
+  type DiscoveryStateRecord,
+} from "@/lib/db/discoveryState";
 import { NextResponse } from "next/server";
 import { getSettings } from "@/lib/db/settings";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
@@ -146,6 +151,19 @@ export async function GET(request: Request) {
 
     // Hide or mask sensitive fields
     const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
+    // The outcome of the last model discovery of each connection. A read
+    // failure must not break the connection list: an unknown outcome simply
+    // reads as "unknown".
+    let discoveryStates = new Map<string, DiscoveryStateRecord>();
+    try {
+      const discoveryEntries: DiscoveryStateEntry[] = connections.map((c) => ({
+        provider: String(c.provider ?? ""),
+        id: String(c.id ?? ""),
+      }));
+      discoveryStates = getDiscoveryStatesForConnections(discoveryEntries);
+    } catch (error) {
+      console.error("Failed to read the stored discovery outcomes:", error);
+    }
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
         ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
@@ -160,6 +178,10 @@ export async function GET(request: Request) {
         // #16940: the row mapper drops null columns; keep "never synced" an
         // explicit null so the dashboard contract does not depend on absence.
         syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        // Same contract for the discovery outcome: absent means "unknown",
+        // never "healthy".
+        discoveryState:
+          discoveryStates.get(`${String(c.provider ?? "")}:${String(c.id ?? "")}`) ?? null,
         rateLimitAutoProtected: isConnectionAutoProtected(
           {
             provider: String(c.provider),

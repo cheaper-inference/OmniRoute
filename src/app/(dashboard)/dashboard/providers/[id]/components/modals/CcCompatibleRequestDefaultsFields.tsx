@@ -18,7 +18,7 @@ export default function CcCompatibleRequestDefaultsFields(
   const t = useTranslations("providers");
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+    <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
       <Toggle
         checked={props.values.ccCompatibleContext1m}
         onChange={(checked) => props.onChange({ ccCompatibleContext1m: checked })}

@@ -48,7 +48,11 @@ describe("batch CSV header mapping", () => {
     act(() => root.render(<Harness />));
     const selects = container.querySelectorAll("select");
     expect(selects).toHaveLength(2);
-    expect(selects[1].parentElement?.querySelector("span")?.textContent).toBe(header);
+    // Each mapping select sits in the Select adapter's kit Field (KEA-7886); the column
+    // header span is a sibling of that Field in the mapping row.
+    expect(
+      selects[1].closest('[data-slot="field"]')?.parentElement?.querySelector("span")?.textContent
+    ).toBe(header);
     act(() => {
       selects[0].value = "custom_id";
       selects[0].dispatchEvent(new Event("change", { bubbles: true }));

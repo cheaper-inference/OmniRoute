@@ -117,7 +117,9 @@ describe("CodexToolCard wire API default", () => {
     await waitFor(() => wireApiSelect(container)?.value === "chat");
 
     const reset = Array.from(container.querySelectorAll("button")).find(
-      (button) => button.textContent?.trim() === "restorereset"
+      (button) =>
+        button.textContent?.trim() === "reset" &&
+        button.querySelector('svg.oi-icon[data-icon="restore"]') !== null
     );
     expect(reset).toBeDefined();
 
