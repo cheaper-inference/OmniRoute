@@ -1,0 +1,1 @@
+- **fix(codex):** Codex accounts with the paid-credits opt-in are used only after every other account's 5h/weekly subscription quota for the request is spent, instead of competing with accounts that still have free quota; and an OAuth re-login no longer silently switches the opt-in off ([#18561](https://github.com/cheaper-inference/OmniRoute/pull/18561) — thanks @feci).
