@@ -1,3 +1,4 @@
+import { transformStreamWithCancel } from "./cancelableTransformStream.ts";
 /**
  * Progress Tracker — Phase 9.3
  *
@@ -38,7 +39,7 @@ export function createProgressTransform({
     tokenCount += text.split("\n").filter((line) => line.startsWith("data: ")).length;
   };
 
-  return new TransformStream(
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
     {
       start(controller) {
         writer = controller;

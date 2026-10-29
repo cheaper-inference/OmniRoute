@@ -1,3 +1,4 @@
+import { transformStreamWithCancel } from "../utils/cancelableTransformStream.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
@@ -631,7 +632,7 @@ export function createResponsesApiTransformStream(
   // goes through the normal per-message path instead of being silently dropped.
   const SSE_MESSAGE_TERMINATOR = encoder.encode("\n\n");
 
-  return new TransformStream(
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
     {
       start(controller) {
         // Periodic keepalive heartbeat to prevent client timeouts (Codex CLI #2544)
