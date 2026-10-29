@@ -11,6 +11,10 @@
 import { extractApiKey } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
+import {
+  getApiKeySelfServiceSettings,
+  type AnthropicRateLimitHeaderMode,
+} from "@/lib/db/apiKeySelfServiceSettings";
 import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
 import { checkBudget } from "@/domain/costRules";
@@ -110,6 +114,9 @@ export interface ApiKeyMetadata {
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
   forcedModel?: string | null;
+  /** Self-service settings (db/apiKeySelfServiceSettings). null = all providers. */
+  sharedQuotaProviders?: string[] | null;
+  anthropicRateLimitHeaders?: AnthropicRateLimitHeaderMode;
 }
 
 /**
@@ -879,6 +886,38 @@ function extractUngatedClientApiKey(request: Request): string | null {
 }
 
 /**
+ * Merge the key's self-service settings into its metadata so downstream
+ * apiKeyInfo consumers (upstream header policy) see them. Never mutates the
+ * cached metadata object. The env key has no DB row: it belongs to the deployment
+ * owner, so upstream anthropic account headers keep flowing to it unchanged.
+ */
+function withSelfServiceSettings(apiKeyInfo: ApiKeyMetadata): ApiKeyMetadata {
+  if (apiKeyInfo.id === "env-key") return { ...apiKeyInfo, anthropicRateLimitHeaders: "forward" };
+  if (!apiKeyInfo.id) return apiKeyInfo;
+  try {
+    const settings = getApiKeySelfServiceSettings(apiKeyInfo.id);
+    return {
+      ...apiKeyInfo,
+      sharedQuotaProviders: settings.sharedQuotaProviders,
+      anthropicRateLimitHeaders: settings.anthropicRateLimitHeaders,
+    };
+  } catch (error) {
+    log.warn(
+      "API_POLICY",
+      "API key self-service settings unavailable; withholding account quotas.",
+      {
+        error,
+      }
+    );
+    return {
+      ...apiKeyInfo,
+      sharedQuotaProviders: [],
+      anthropicRateLimitHeaders: "strip",
+    };
+  }
+}
+
+/**
  * The API key the policy layer evaluates for a request. The credential that
  * actually validated wins (a stale Bearer sent next to a valid x-api-key must
  * not hide that key's policy); then a real bearer key; then a bare
@@ -1048,6 +1087,7 @@ export async function enforceApiKeyPolicy(
   if (!apiKeyInfo) {
     return { apiKey, apiKeyInfo: null, rejection: unresolvedScopedKeyRejection(selfLoopScope) };
   }
+  apiKeyInfo = withSelfServiceSettings(apiKeyInfo);
 
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
