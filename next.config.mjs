@@ -762,6 +762,12 @@ const nextConfig = {
         source: "/v1",
         destination: "/api/v1",
       },
+      // CLIProxyAPI management compatibility (T3 Code `cliproxy` usage source and other
+      // CLIProxyAPI management clients). Authz: src/proxy.ts matcher + classify.ts alias.
+      {
+        source: "/v0/management/:path*",
+        destination: "/api/v0/management/:path*",
+      },
       {
         source: "/v1beta/:path*",
         destination: "/api/v1beta/:path*",

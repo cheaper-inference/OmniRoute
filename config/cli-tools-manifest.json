@@ -517,6 +517,18 @@
         "generate": false
       }
     },
+    "openclaude": {
+      "displayName": "OpenClaude",
+      "aliases": [],
+      "binaries": ["openclaude"],
+      "surfaces": {
+        "catalog": true,
+        "detect": false,
+        "run": false,
+        "configure": false,
+        "generate": false
+      }
+    },
     "openclaw": {
       "displayName": "Open Claw",
       "aliases": [],

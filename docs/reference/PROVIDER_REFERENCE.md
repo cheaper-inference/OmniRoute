@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-28
+lastUpdated: 2026-10-29
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-28
+> **Last generated:** 2026-10-29
 
-Total providers: **377**. See category breakdown below.
+Total providers: **378**. See category breakdown below.
 
 ## Categories
 
@@ -68,7 +68,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `ghe-copilot` | `ghe-copilot` | GitHub Enterprise Copilot | OAuth | — | Enter your GHE instance URL (e.g., https://ghe.company.com) in provider settings, then authenticate via device flow. |
 | `github` | `gh` | GitHub Copilot | OAuth | — | — |
 | `gitlab-duo` | `gitlab-duo` | GitLab Duo | OAuth | [link](https://docs.gitlab.com/user/duo_agent_platform/code_suggestions/) | GitLab Duo OAuth is not configured. Register an OAuth application at https://gitlab.com/-/profile/applications with redirect URI http://localhost:20128/callback and scopes "ai_features read_user", then set GITLAB_DUO_OAUTH_CLIENT_ID (and optionally GITLAB_DUO_OAUTH_CLIENT_SECRET) and restart. |
-| `grok-cli` | `gc` | Grok Build | OAuth | — | Sign in with your browser, or paste your ~/.grok/auth.json (or the JWT access token) from the Grok Build CLI; refresh_token is rotated automatically either way. |
+| `grok-cli` | `gc` | Grok Build | OAuth | — | Sign in with your browser, or paste your ~/.grok/auth.json (or the JWT access token) from the Grok Build CLI; refresh_token is rotated automatically either way. Imagine image/video and TTS/STT reuse this login where your account is entitled. |
 | `kilocode` | `kc` | Kilo Code | OAuth | — | Sign in with your Kilo Code account (device-code OAuth), or paste a direct API key from app.kilo.ai → Settings → API Keys. Multiple API keys are supported and rotated automatically — add each as a separate connection. Without any connection, free anonymous models are available via the anonymousFallback. |
 | `kimi-coding` | `kmc` | Kimi Code CLI | OAuth | [link](https://www.kimi.ai/code?aff=omniroute) | Sign in with the same Kimi account used by Kimi Code CLI. OmniRoute uses the CLI OAuth flow and Kimi Coding Plan endpoints. |
 | `kiro` | `kr` | Kiro AI | OAuth | — | Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use. |
@@ -123,7 +123,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (252)
+## API Key Providers (paid / paid-with-free-credits) (253)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -342,6 +342,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `tinyfish` | `tf` | TinyFish Fetch | API key | [link](https://docs.tinyfish.ai/fetch-api) | X-API-Key from agent.tinyfish.ai/api-keys |
 | `together` | `together` | Together AI | API key, video | [link](https://www.together.ai) | — |
 | `token-kiosk` | `tk` | Token Kiosk | API key | [link](https://agent-router.gaib.ai) | Use your Token Kiosk API key in Authorization: Bearer <key>. Fully OpenAI-compatible gateway. API base URL: https://agent-router.gaib.ai/v1. |
+| `tokenharbor` | `tokenharbor` | Token Harbor | API key, aggregator | [link](https://tokenharbor.ai) | Create a Token Harbor account and copy your Universal Key from https://tokenharbor.ai/dashboard. |
 | `tokenmarket` | `tokenmarket` | Token Market | API key, aggregator | [link](https://www.tokensmarket.ai) | Create an API key in the Token Market console, then paste it here as a Bearer token. |
 | `tokenreply` | `tokenreply` | TokenReply | API key, aggregator | [link](https://www.tokenreply.com) | Free-tagged models have model- and campaign-specific daily limits; no fixed global free quota is published. |
 | `tokenrouter` | `trk` | TokenRouter | API key | [link](https://tokenrouter.com) | Use your TokenRouter API key in Authorization: Bearer <key>. Fully OpenAI-compatible. API base URL: https://api.tokenrouter.com/v1. |
@@ -465,7 +466,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 
 - Catalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - Registry (per-model details): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (156 implementations)
+- Executors: [`open-sse/executors/`](../../open-sse/executors/) (158 implementations)
 - Translators: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## See Also
