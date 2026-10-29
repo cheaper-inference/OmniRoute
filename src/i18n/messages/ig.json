@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Ejiri ya mee ihe na combo {count}: {combos}",
+    "openComboTooltip": "Mepee Combo — {combo} na-eji ya"
   },
   "settings": {
     "title": "Ntọala",
@@ -8938,7 +8940,9 @@
         "financial": "Ego",
         "brazilian": "Brazil",
         "usa": "Amerịka",
-        "full": "Zuru oke"
+        "full": "Zuru oke",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (South Africa)"
       },
       "builtinTypes": "Ụdị arụnyere",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Adreesị IPv4",
         "ipv6_address": "Adreesị IPv6",
         "aws_key": "Igodo nnweta AWS",
-        "api_key_generic": "Igodo API na tokin"
+        "api_key_generic": "Igodo API na tokin",
+        "iban": "IBAN nọmba akaụntụ akụ",
+        "eu_vat": "VAT EU",
+        "es_dni_nie": "Spanish DNI / NIE",
+        "it_codice_fiscale": "Ịtali Codece Fiscale",
+        "pl_pesel": "Polish PESEL",
+        "nl_bsn": "Dutch BSN",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "Onye ọrụ Swedish",
+        "za_id": "South African ID nọmba",
+        "za_phone": "Nọmba ekwentị South Africa",
+        "za_vat": "South African VAT nọmba",
+        "za_tax_ref": "Ntuziaka ụtụ isi South Africa"
       },
       "customPatterns": "Usoro ahaziri",
       "customPatternsDesc": "A na-eji [CUSTOM_REDACTED] dochie ihe dabara. Ruo usoro {max}. A na-ajụ usoro nwere ihe ize ndụ nke ịlaghachi azụ ọdachi.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "Ahazibeghị GitLab Duo OAuth. Debanye ngwa OAuth na {applicationsUrl} site na iji redirect URI {redirectUri} na scopes \"{scopes}\", wee tọọ {clientIdEnv} (yana {clientSecretEnv} ma ọ bụrụ na ịchọrọ) ma malitegharịa.",
     "gitlabDuoSetupDescription": "Mgbe e debanyere ngwa ahụ ma tọọ env vars na OmniRoute instance a, pịa Gaa n'ihu iji malite nbanye OAuth.",
     "continue": "Gaa n'ihu",
+    "copilotPolicyTitle": "Onye na-eweta nnwale: ọnọdụ amụma enweghị isi",
+    "copilotPolicyLine1": "OmniRoute na-ejikọ site na api.githubcopilot.com, nke GitHub ebipụtabeghị dị ka ntụnye izugbe API. Njikọ a bụ nnwale ma nwee ike ịgbanwe na-enweghị ọkwa.",
+    "copilotPolicyLine2": "Naanị akaụntụ GitHub nke gị nwere ike jikọọ. Ekekọrịtala nzere, akaụntụ ọdọ mmiri, ma ọ bụ nwaa ịgafe oke atụmatụ gị.",
+    "copilotPolicyLine3": "Ndị ọrụ atụmatụ efu na ụmụ akwụkwọ na-enweta naanị nhọrọ ụdị akpaka. Usoro atụmatụ Copilot gị na oke ojiji ọ bụla ka bụ ọrụ gị.",
+    "copilotPolicyAcknowledge": "Aghọtara m, jikọọ",
     "tabPasteSetupToken": "Tokin nhazi",
     "claudeSetupTokenDescription": "Gbaa `claude setup-token` na timinal ma mado tokin ọ bipụtara. Ọ dị irè otu afọ, ọ nweghịkwa tokin mmeghari. OmniRoute na-ezipụ otu arịrịọ nnwale na Anthropic tupu ọ chekwaa ya.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Ọnụọgụgụ ndị na-eweta",
     "description": "Ngagharị data, oge igbu oge na ọnụego ihe ịga nke ọma nke onye na-eweta ọ bụla na ụdị ọ bụla",
     "combo": "Ngwakọta",
-    "toggleModels": "Gosi ụdị nke {provider}"
+    "toggleModels": "Gosi ụdị nke {provider}",
+    "windowSince": "Kemgbe {date}"
   },
   "relay": {
     "title": "Proksi Relay Serverless",

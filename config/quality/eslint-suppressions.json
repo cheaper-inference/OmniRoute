@@ -593,11 +593,6 @@
       "count": 1
     }
   },
-  "open-sse/translator/webTools.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 2
-    }
-  },
   "open-sse/types.d.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
@@ -1014,11 +1009,6 @@
     }
   },
   "src/app/api/v1/audio/speech/route.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
-  "src/app/api/v1/chat/completions/route.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1
     }

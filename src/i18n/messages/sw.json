@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Inatumika katika michanganyiko {count}: {combos}",
+    "openComboTooltip": "Fungua Michanganyiko — inatumiwa na {combo}"
   },
   "settings": {
     "title": "Mipangilio",
@@ -8938,7 +8940,9 @@
         "financial": "Kifedha",
         "brazilian": "Kibrazili",
         "usa": "Marekani",
-        "full": "Kamili"
+        "full": "Kamili",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Afrika Kusini)"
       },
       "builtinTypes": "Aina zilizojengwa ndani",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Anwani za IPv4",
         "ipv6_address": "Anwani za IPv6",
         "aws_key": "Funguo za ufikiaji za AWS",
-        "api_key_generic": "Funguo za API na tokeni"
+        "api_key_generic": "Funguo za API na tokeni",
+        "iban": "IBAN nambari za akaunti ya benki",
+        "eu_vat": "nambari EU VAT",
+        "es_dni_nie": "Kihispania DNI / NIE",
+        "it_codice_fiscale": "Ufadhili wa Codice wa Italia",
+        "pl_pesel": "PESEL ya Kipolishi",
+        "nl_bsn": "Kiholanzi BSN",
+        "de_steuer_id": "Kijerumani Steuer-ID",
+        "se_personnummer": "Mtu wa Kiswidi",
+        "za_id": "Nambari za ID Afrika Kusini",
+        "za_phone": "Nambari za simu za Afrika Kusini",
+        "za_vat": "Nambari za VAT Afrika Kusini",
+        "za_tax_ref": "Marejeleo ya ushuru ya Afrika Kusini"
       },
       "customPatterns": "Ruwaza maalum",
       "customPatternsDesc": "Zinazolingana hubadilishwa na [CUSTOM_REDACTED]. Hadi ruwaza {max}. Ruwaza zenye hatari ya urudishaji nyuma wa maafa hukataliwa.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth haijasanidiwa. Jisajili programu ya OAuth kwenye {applicationsUrl} na URI ya kurejea {redirectUri} na mipango \"{scopes}\", kisha weka {clientIdEnv} (na hiari {clientSecretEnv}) na uanzishe upya.",
     "gitlabDuoSetupDescription": "Baada ya programu kuandikishwa na vigezo vya mazingira kuwekwa kwenye mfano huu wa OmniRoute, bonyeza Endelea kuanza kuingia kwa OAuth.",
     "continue": "Endelea",
+    "copilotPolicyTitle": "Mtoa huduma wa majaribio: hali ya sera haina utata",
+    "copilotPolicyLine1": "OmniRoute inaunganisha kupitia api.githubcopilot.com, ambayo GitHub haijachapisha kama makisio ya jumla ya mtu wa tatu API. Ujumuishaji huu ni wa majaribio na unaweza kubadilika bila taarifa.",
+    "copilotPolicyLine2": "Ni akaunti yako GitHub pekee ndiyo inaweza kuunganishwa. Kamwe usishiriki kitambulisho, akaunti pamoja, au kujaribu kuvuka mipaka ya mpango wako.",
+    "copilotPolicyLine3": "Watumiaji wa mpango bila malipo na Wanafunzi hupokea uteuzi wa kiotomatiki wa muundo pekee. Masharti yako ya mpango wa Copilot na vikomo vya matumizi vinasalia kuwa jukumu lako.",
+    "copilotPolicyAcknowledge": "Ninaelewa, unganisha",
     "tabPasteSetupToken": "Tokeni ya usanidi",
     "claudeSetupTokenDescription": "Endesha `claude setup-token` kwenye terminal na ubandike tokeni inayochapisha. Ni halali kwa mwaka mmoja na haina tokeni ya kuonyesha upya. OmniRoute hutuma ombi moja la majaribio kwa Anthropic kabla ya kuihifadhi.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Takwimu za mtoa huduma",
     "description": "Trafiki, muda wa kusubiri na viwango vya mafanikio kwa kila mtoa huduma na kila modeli",
     "combo": "Mchanganyiko",
-    "toggleModels": "Onyesha modeli za {provider}"
+    "toggleModels": "Onyesha modeli za {provider}",
+    "windowSince": "Tangu {date}"
   },
   "relay": {
     "title": "Proksi za Relay Zisizo na Seva",

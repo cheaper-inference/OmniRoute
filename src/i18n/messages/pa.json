@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} ਕੰਬੋ ਵਿੱਚ ਵਰਤਿਆ ਗਿਆ: {combos}",
+    "openComboTooltip": "ਕੰਬੋਜ਼ ਖੋਲ੍ਹੋ — {combo} ਦੁਆਰਾ ਵਰਤਿਆ ਗਿਆ"
   },
   "settings": {
     "title": "ਸੈਟਿੰਗਾਂ",
@@ -9015,7 +9017,9 @@
         "financial": "ਵਿੱਤੀ",
         "brazilian": "ਬ੍ਰਾਜ਼ੀਲੀ",
         "usa": "ਅਮਰੀਕਾ",
-        "full": "ਪੂਰਾ"
+        "full": "ਪੂਰਾ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (ਦੱਖਣੀ ਅਫਰੀਕਾ)"
       },
       "builtinTypes": "ਬਿਲਟ-ਇਨ ਕਿਸਮਾਂ",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 ਪਤੇ",
         "ipv6_address": "IPv6 ਪਤੇ",
         "aws_key": "AWS ਪਹੁੰਚ ਕੁੰਜੀਆਂ",
-        "api_key_generic": "API ਕੁੰਜੀਆਂ ਅਤੇ ਟੋਕਨ"
+        "api_key_generic": "API ਕੁੰਜੀਆਂ ਅਤੇ ਟੋਕਨ",
+        "iban": "IBAN ਬੈਂਕ ਖਾਤਾ ਨੰਬਰ",
+        "eu_vat": "EU VAT ਨੰਬਰ",
+        "es_dni_nie": "ਸਪੇਨੀ DNI / NIE",
+        "it_codice_fiscale": "ਇਤਾਲਵੀ ਕੋਡਿਸ ਫਿਸਕੇਲ",
+        "pl_pesel": "ਪੋਲਿਸ਼ PESEL",
+        "nl_bsn": "ਡੱਚ BSN",
+        "de_steuer_id": "ਜਰਮਨ Steuer-ID",
+        "se_personnummer": "ਸਵੀਡਿਸ਼ ਵਿਅਕਤੀ ਨੰਬਰ",
+        "za_id": "ਦੱਖਣੀ ਅਫ਼ਰੀਕੀ ID ਨੰਬਰ",
+        "za_phone": "ਦੱਖਣੀ ਅਫ਼ਰੀਕੀ ਫ਼ੋਨ ਨੰਬਰ",
+        "za_vat": "ਦੱਖਣੀ ਅਫ਼ਰੀਕੀ VAT ਨੰਬਰ",
+        "za_tax_ref": "ਦੱਖਣੀ ਅਫ਼ਰੀਕੀ ਟੈਕਸ ਹਵਾਲੇ"
       },
       "customPatterns": "ਕਸਟਮ ਪੈਟਰਨ",
       "customPatternsDesc": "ਮੇਲ [CUSTOM_REDACTED] ਨਾਲ ਬਦਲੇ ਜਾਂਦੇ ਹਨ। ਵੱਧ ਤੋਂ ਵੱਧ {max} ਪੈਟਰਨ। ਤਬਾਹਕੁਨ ਬੈਕਟ੍ਰੈਕਿੰਗ ਦੇ ਖ਼ਤਰੇ ਵਾਲੇ ਪੈਟਰਨ ਰੱਦ ਕੀਤੇ ਜਾਂਦੇ ਹਨ।",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਗਿਆ ਹੈ। {applicationsUrl} 'ਤੇ ਰੀਡਾਇਰੈਕਟ URI {redirectUri} ਅਤੇ ਸਕੋਪਾਂ \"{scopes}\" ਨਾਲ ਇੱਕ OAuth ਐਪਲੀਕੇਸ਼ਨ ਰਜਿਸਟਰ ਕਰੋ, ਫਿਰ {clientIdEnv} (ਅਤੇ ਵਿਕਲਪਿਕ ਤੌਰ 'ਤੇ {clientSecretEnv}) ਸੈੱਟ ਕਰਕੇ ਮੁੜ ਸ਼ੁਰੂ ਕਰੋ।",
     "gitlabDuoSetupDescription": "ਇਸ OmniRoute ਇੰਸਟੈਂਸ 'ਤੇ ਐਪਲੀਕੇਸ਼ਨ ਰਜਿਸਟਰ ਹੋਣ ਅਤੇ env vars ਸੈੱਟ ਹੋਣ ਤੋਂ ਬਾਅਦ, OAuth ਲੌਗਇਨ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਜਾਰੀ ਰੱਖੋ 'ਤੇ ਕਲਿੱਕ ਕਰੋ।",
     "continue": "ਜਾਰੀ ਰੱਖੋ",
+    "copilotPolicyTitle": "ਪ੍ਰਯੋਗਾਤਮਕ ਪ੍ਰਦਾਤਾ: ਨੀਤੀ ਸਥਿਤੀ ਅਸਪਸ਼ਟ ਹੈ",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com ਰਾਹੀਂ ਜੁੜਦਾ ਹੈ, ਜਿਸ ਨੂੰ GitHub ਨੇ ਇੱਕ ਆਮ ਤੀਜੀ-ਧਿਰ ਦੇ ਅਨੁਮਾਨ API ਵਜੋਂ ਪ੍ਰਕਾਸ਼ਿਤ ਨਹੀਂ ਕੀਤਾ ਹੈ। ਇਹ ਏਕੀਕਰਣ ਪ੍ਰਯੋਗਾਤਮਕ ਹੈ ਅਤੇ ਬਿਨਾਂ ਨੋਟਿਸ ਦੇ ਬਦਲ ਸਕਦਾ ਹੈ।",
+    "copilotPolicyLine2": "ਸਿਰਫ਼ ਤੁਹਾਡਾ ਆਪਣਾ GitHub ਖਾਤਾ ਕਨੈਕਟ ਕੀਤਾ ਜਾ ਸਕਦਾ ਹੈ। ਕਦੇ ਵੀ ਪ੍ਰਮਾਣ ਪੱਤਰ, ਪੂਲ ਖਾਤੇ ਸਾਂਝੇ ਨਾ ਕਰੋ, ਜਾਂ ਆਪਣੀ ਯੋਜਨਾ ਦੀਆਂ ਸੀਮਾਵਾਂ ਨੂੰ ਪਾਰ ਕਰਨ ਦੀ ਕੋਸ਼ਿਸ਼ ਨਾ ਕਰੋ।",
+    "copilotPolicyLine3": "ਮੁਫਤ ਅਤੇ ਵਿਦਿਆਰਥੀ ਯੋਜਨਾ ਉਪਭੋਗਤਾ ਸਿਰਫ ਆਟੋਮੈਟਿਕ ਮਾਡਲ ਚੋਣ ਪ੍ਰਾਪਤ ਕਰਦੇ ਹਨ। ਤੁਹਾਡੀ Copilot ਯੋਜਨਾ ਦੀਆਂ ਸ਼ਰਤਾਂ ਅਤੇ ਵਰਤੋਂ ਦੀਆਂ ਕੋਈ ਵੀ ਸੀਮਾਵਾਂ ਤੁਹਾਡੀ ਜ਼ਿੰਮੇਵਾਰੀ ਬਣਦੀਆਂ ਹਨ।",
+    "copilotPolicyAcknowledge": "ਮੈਂ ਸਮਝਦਾ ਹਾਂ, ਜੁੜਦਾ ਹਾਂ",
     "tabPasteSetupToken": "ਸੈੱਟਅੱਪ ਟੋਕਨ",
     "claudeSetupTokenDescription": "ਟਰਮੀਨਲ ਵਿੱਚ `claude setup-token` ਚਲਾਓ ਅਤੇ ਇਸ ਵੱਲੋਂ ਛਾਪਿਆ ਟੋਕਨ ਪੇਸਟ ਕਰੋ। ਇਹ ਇੱਕ ਸਾਲ ਲਈ ਵੈਧ ਹੈ ਅਤੇ ਇਸਦਾ ਕੋਈ ਰਿਫ੍ਰੈਸ਼ ਟੋਕਨ ਨਹੀਂ ਹੈ। ਸੇਵ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ OmniRoute Anthropic ਨੂੰ ਇੱਕ ਟੈਸਟ ਬੇਨਤੀ ਭੇਜਦਾ ਹੈ।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "ਪ੍ਰਦਾਤਾ ਅੰਕੜੇ",
     "description": "ਹਰ ਪ੍ਰਦਾਤਾ ਅਤੇ ਹਰ ਮਾਡਲ ਮੁਤਾਬਕ ਟ੍ਰੈਫਿਕ, ਲੇਟੈਂਸੀ ਅਤੇ ਸਫਲਤਾ ਦਰਾਂ",
     "combo": "ਕੌਂਬੋ",
-    "toggleModels": "{provider} ਲਈ ਮਾਡਲ ਦਿਖਾਓ"
+    "toggleModels": "{provider} ਲਈ ਮਾਡਲ ਦਿਖਾਓ",
+    "windowSince": "{date} ਤੋਂ"
   },
   "relay": {
     "title": "ਸਰਵਰਲੈੱਸ ਰੀਲੇ ਪ੍ਰਾਕਸੀ",

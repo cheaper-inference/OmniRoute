@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} कम्बोमा प्रयोग गरिएको: {combos}",
+    "openComboTooltip": "कम्बोहरू खोल्नुहोस् — {combo} ले प्रयोग गरेको"
   },
   "settings": {
     "title": "सेटिङहरू",
@@ -8938,7 +8940,9 @@
         "financial": "वित्तीय",
         "brazilian": "ब्राजिली",
         "usa": "अमेरिका",
-        "full": "पूर्ण"
+        "full": "पूर्ण",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (दक्षिण अफ्रिका)"
       },
       "builtinTypes": "निर्मित प्रकारहरू",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 ठेगानाहरू",
         "ipv6_address": "IPv6 ठेगानाहरू",
         "aws_key": "AWS पहुँच कुञ्जीहरू",
-        "api_key_generic": "API कुञ्जी र टोकनहरू"
+        "api_key_generic": "API कुञ्जी र टोकनहरू",
+        "iban": "IBAN बैंक खाता नम्बरहरू",
+        "eu_vat": "EU VAT नम्बरहरू",
+        "es_dni_nie": "स्पेनिश DNI / NIE",
+        "it_codice_fiscale": "इटालियन कोडिस फिस्केल",
+        "pl_pesel": "पोलिश PESEL",
+        "nl_bsn": "डच BSN",
+        "de_steuer_id": "जर्मन Steuer-ID",
+        "se_personnummer": "स्विडेनी व्यक्ति संख्या",
+        "za_id": "दक्षिण अफ्रिकी ID नम्बरहरू",
+        "za_phone": "दक्षिण अफ्रिकी फोन नम्बरहरू",
+        "za_vat": "दक्षिण अफ्रिकी VAT नम्बरहरू",
+        "za_tax_ref": "दक्षिण अफ्रिकी कर सन्दर्भ"
       },
       "customPatterns": "अनुकूल ढाँचाहरू",
       "customPatternsDesc": "मेलहरू [CUSTOM_REDACTED] ले प्रतिस्थापन गरिन्छन्। बढीमा {max} ढाँचा। विनाशकारी ब्याकट्र्याकिङको जोखिम भएका ढाँचाहरू अस्वीकार गरिन्छन्।",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth कन्फिगर गरिएको छैन। रिडाइरेक्ट URI {redirectUri} र स्कोपहरू \"{scopes}\" सहित {applicationsUrl} मा OAuth अनुप्रयोग दर्ता गर्नुहोस्, त्यसपछि {clientIdEnv} (र वैकल्पिक रूपमा {clientSecretEnv}) सेट गरेर पुनः सुरु गर्नुहोस्।",
     "gitlabDuoSetupDescription": "अनुप्रयोग दर्ता भएपछि र यस OmniRoute इन्स्ट्यान्समा वातावरणीय चरहरू सेट गरिएपछि, OAuth लगइन सुरु गर्न जारी राख्नुहोस् क्लिक गर्नुहोस्।",
     "continue": "जारी राख्नुहोस्",
+    "copilotPolicyTitle": "प्रयोगात्मक प्रदायक: नीति स्थिति अस्पष्ट छ",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com मार्फत जडान हुन्छ, जुन GitHub सामान्य तेस्रो-पक्ष अनुमान API को रूपमा प्रकाशित गरेको छैन। यो एकीकरण प्रयोगात्मक छ र सूचना बिना परिवर्तन हुन सक्छ।",
+    "copilotPolicyLine2": "केवल तपाईंको आफ्नै GitHub खाता जडान हुन सक्छ। प्रमाणहरू, पूल खाताहरू, वा तपाईंको योजना सीमा नाघ्ने प्रयास कहिल्यै नगर्नुहोस्।",
+    "copilotPolicyLine3": "नि: शुल्क र विद्यार्थी योजना प्रयोगकर्ताहरूले स्वचालित मोडेल चयन मात्र प्राप्त गर्छन्। तपाईंको Copilot योजना सर्तहरू र कुनै पनि उपयोग सीमा तपाईंको जिम्मेवारी रहन्छ।",
+    "copilotPolicyAcknowledge": "मैले बुझें, जडान गर्नुहोस्",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनलमा `claude setup-token` चलाउनुहोस् र यसले छाप्ने टोकन टाँस्नुहोस्। यो एक वर्षका लागि मान्य छ र यसमा रिफ्रेस टोकन छैन। सुरक्षित गर्नुअघि OmniRoute ले Anthropic मा एउटा परीक्षण अनुरोध पठाउँछ।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "प्रदायकका तथ्याङ्कहरू",
     "description": "प्रत्येक प्रदायक र प्रत्येक मोडेलअनुसारको ट्राफिक, विलम्बता र सफलता दरहरू",
     "combo": "संयोजन",
-    "toggleModels": "{provider} का मोडेलहरू देखाउनुहोस्"
+    "toggleModels": "{provider} का मोडेलहरू देखाउनुहोस्",
+    "windowSince": "{date} देखि"
   },
   "relay": {
     "title": "सर्भरलेस रिले प्रोक्सीहरू",

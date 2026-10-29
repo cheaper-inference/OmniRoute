@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "გამოიყენება {count} კომბინაციაში: {combos}",
+    "openComboTooltip": "კომბინაციების გახსნა — იყენებს {combo}"
   },
   "settings": {
     "title": "პარამეტრები",
@@ -9015,7 +9017,9 @@
         "financial": "ფინანსური",
         "brazilian": "ბრაზილიური",
         "usa": "აშშ",
-        "full": "სრული"
+        "full": "სრული",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (სამხრეთ აფრიკა)"
       },
       "builtinTypes": "ჩაშენებული ტიპები",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 მისამართები",
         "ipv6_address": "IPv6 მისამართები",
         "aws_key": "AWS წვდომის გასაღებები",
-        "api_key_generic": "API გასაღებები და ტოკენები"
+        "api_key_generic": "API გასაღებები და ტოკენები",
+        "iban": "IBAN საბანკო ანგარიშის ნომრები",
+        "eu_vat": "EU VAT ნომრები",
+        "es_dni_nie": "ესპანური DNI / NIE",
+        "it_codice_fiscale": "იტალიური კოდექსი Fiscale",
+        "pl_pesel": "პოლონური PESEL",
+        "nl_bsn": "ჰოლანდიური BSN",
+        "de_steuer_id": "გერმანული Steuer-ID",
+        "se_personnummer": "შვედური პერსონალის ნომერი",
+        "za_id": "სამხრეთ აფრიკის ID ნომრები",
+        "za_phone": "სამხრეთ აფრიკის ტელეფონის ნომრები",
+        "za_vat": "სამხრეთ აფრიკის VAT ნომრები",
+        "za_tax_ref": "სამხრეთ აფრიკის საგადასახადო მითითებები"
       },
       "customPatterns": "მორგებული შაბლონები",
       "customPatternsDesc": "დამთხვევები იცვლება [CUSTOM_REDACTED]-ით. მაქსიმუმ {max} შაბლონი. კატასტროფული უკუსვლის რისკის მქონე შაბლონები უარყოფილია.",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth კონფიგურირებული არ არის. დაარეგისტრირეთ OAuth აპლიკაცია მისამართზე {applicationsUrl}, უკუგადამისამართების URI-ით {redirectUri} და წვდომის სფეროებით „{scopes}“, შემდეგ დააყენეთ {clientIdEnv} (და სურვილისამებრ {clientSecretEnv}) და გადატვირთეთ.",
     "gitlabDuoSetupDescription": "აპლიკაციის რეგისტრაციისა და ამ OmniRoute ინსტანციაში გარემოს ცვლადების დაყენების შემდეგ OAuth-ით შესვლის დასაწყებად დააწკაპუნეთ „გაგრძელება“-ზე.",
     "continue": "გაგრძელება",
+    "copilotPolicyTitle": "ექსპერიმენტული პროვაიდერი: პოლიტიკის სტატუსი ბუნდოვანია",
+    "copilotPolicyLine1": "OmniRoute აკავშირებს api.githubcopilot.com-ის საშუალებით, რომელიც GitHub არ გამოუქვეყნებია, როგორც მესამე მხარის ზოგადი დასკვნა API. ეს ინტეგრაცია ექსპერიმენტულია და შეიძლება შეიცვალოს გაფრთხილების გარეშე.",
+    "copilotPolicyLine2": "მხოლოდ თქვენი საკუთარი GitHub ანგარიში შეიძლება იყოს დაკავშირებული. არასოდეს გააზიაროთ რწმუნებათა სიგელები, აუზის ანგარიშები და ნუ ეცდებით თქვენი გეგმის ლიმიტების გადაჭარბებას.",
+    "copilotPolicyLine3": "უფასო და სტუდენტური გეგმის მომხმარებლები იღებენ მხოლოდ ავტომატურ მოდელის შერჩევას. თქვენი Copilot გეგმის პირობები და გამოყენების ნებისმიერი შეზღუდვა რჩება თქვენს პასუხისმგებლობაში.",
+    "copilotPolicyAcknowledge": "მესმის, დაკავშირება",
     "tabPasteSetupToken": "დაყენების ტოკენი",
     "claudeSetupTokenDescription": "გაუშვით `claude setup-token` ტერმინალში და ჩასვით ტოკენი, რომელსაც ის ბეჭდავს. ის მოქმედებს ერთი წლის განმავლობაში და არ აქვს განახლების ტოკენი. შენახვამდე OmniRoute Anthropic-ს ერთ სატესტო მოთხოვნას უგზავნის.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "პროვაიდერის სტატისტიკა",
     "description": "ტრაფიკი, დაყოვნება და წარმატების მაჩვენებლები თითოეული პროვაიდერისა და მოდელისთვის",
     "combo": "კომბო",
-    "toggleModels": "{provider}-ის მოდელების ჩვენება"
+    "toggleModels": "{provider}-ის მოდელების ჩვენება",
+    "windowSince": "{date}-დან"
   },
   "relay": {
     "title": "უსერვერო რელე-პროქსიები",

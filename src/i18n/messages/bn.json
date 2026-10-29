@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count}টি কম্বোতে ব্যবহৃত: {combos}",
+    "openComboTooltip": "কম্বো খুলুন — {combo} দ্বারা ব্যবহৃত"
   },
   "settings": {
     "title": "সেটিংস",
@@ -9015,7 +9017,9 @@
         "financial": "আর্থিক",
         "brazilian": "ব্রাজিলীয়",
         "usa": "যুক্তরাষ্ট্র",
-        "full": "সম্পূর্ণ"
+        "full": "সম্পূর্ণ",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (দক্ষিণ আফ্রিকা)"
       },
       "builtinTypes": "অন্তর্নির্মিত ধরন",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 ঠিকানা",
         "ipv6_address": "IPv6 ঠিকানা",
         "aws_key": "AWS অ্যাক্সেস কী",
-        "api_key_generic": "API কী ও টোকেন"
+        "api_key_generic": "API কী ও টোকেন",
+        "iban": "IBAN ব্যাঙ্ক অ্যাকাউন্ট নম্বর",
+        "eu_vat": "EU VAT সংখ্যা",
+        "es_dni_nie": "স্প্যানিশ DNI / NIE",
+        "it_codice_fiscale": "ইতালীয় কোডিস ফিসকেল",
+        "pl_pesel": "পোলিশ PESEL",
+        "nl_bsn": "ডাচ BSN",
+        "de_steuer_id": "জার্মান স্ট্যুয়ার-আইডি",
+        "se_personnummer": "সুইডিশ ব্যক্তি সংখ্যা",
+        "za_id": "দক্ষিণ আফ্রিকার ID সংখ্যা",
+        "za_phone": "দক্ষিণ আফ্রিকার ফোন নম্বর",
+        "za_vat": "দক্ষিণ আফ্রিকার VAT সংখ্যা",
+        "za_tax_ref": "দক্ষিণ আফ্রিকার ট্যাক্স রেফারেন্স"
       },
       "customPatterns": "কাস্টম প্যাটার্ন",
       "customPatternsDesc": "মিলগুলো [CUSTOM_REDACTED] দিয়ে প্রতিস্থাপিত হয়। সর্বোচ্চ {max}টি প্যাটার্ন। বিপর্যয়কর ব্যাকট্র্যাকিংয়ের ঝুঁকিপূর্ণ প্যাটার্ন প্রত্যাখ্যান করা হয়।",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth কনফিগার করা হয়নি। {applicationsUrl} এ একটি OAuth অ্যাপ্লিকেশন নিবন্ধন করুন যার রিডাইরেক্ট URI {redirectUri} এবং স্কোপগুলি \"{scopes}\"। তারপর {clientIdEnv} (এবং ঐচ্ছিকভাবে {clientSecretEnv}) সেট করুন এবং পুনরায় চালু করুন।",
     "gitlabDuoSetupDescription": "অ্যাপ্লিকেশন নিবন্ধিত হওয়ার পর এবং এই OmniRoute উদাহরণে env vars সেট করার পর, OAuth লগইন শুরু করতে Continue ক্লিক করুন।",
     "continue": "চালিয়ে যান",
+    "copilotPolicyTitle": "পরীক্ষামূলক প্রদানকারী: নীতির অবস্থা অস্পষ্ট",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com এর মাধ্যমে সংযোগ করে, যা GitHub সাধারণ তৃতীয় পক্ষের অনুমান API হিসাবে প্রকাশ করেনি। এই ইন্টিগ্রেশন পরীক্ষামূলক এবং বিজ্ঞপ্তি ছাড়াই পরিবর্তন হতে পারে।",
+    "copilotPolicyLine2": "শুধুমাত্র আপনার নিজস্ব GitHub অ্যাকাউন্ট সংযুক্ত হতে পারে। শংসাপত্র, পুল অ্যাকাউন্ট বা আপনার পরিকল্পনার সীমা অতিক্রম করার চেষ্টা করবেন না।",
+    "copilotPolicyLine3": "বিনামূল্যে এবং ছাত্র পরিকল্পনা ব্যবহারকারীরা শুধুমাত্র স্বয়ংক্রিয় মডেল নির্বাচন পাবেন। আপনার Copilot প্ল্যানের শর্তাবলী এবং ব্যবহার সীমা আপনার দায়িত্ব থেকে যায়।",
+    "copilotPolicyAcknowledge": "আমি বুঝতে পারছি, সংযোগ",
     "tabPasteSetupToken": "সেটআপ টোকেন",
     "claudeSetupTokenDescription": "টার্মিনালে `claude setup-token` চালান এবং এটি যে টোকেন প্রিন্ট করে তা পেস্ট করুন। এটি এক বছরের জন্য বৈধ এবং এর কোনো রিফ্রেশ টোকেন নেই। সংরক্ষণের আগে OmniRoute Anthropic-এ একটি পরীক্ষামূলক অনুরোধ পাঠায়।",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "প্রোভাইডারের পরিসংখ্যান",
     "description": "প্রোভাইডার ও মডেলভিত্তিক ট্র্যাফিক, লেটেন্সি এবং সাফল্যের হার",
     "combo": "কম্বো",
-    "toggleModels": "{provider}-এর মডেলগুলো দেখান"
+    "toggleModels": "{provider}-এর মডেলগুলো দেখান",
+    "windowSince": "{date} থেকে"
   },
   "relay": {
     "title": "সার্ভারলেস রিলে প্রক্সি",

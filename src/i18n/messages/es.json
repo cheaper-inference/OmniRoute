@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Límites de concurrencia por modelo",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Opcional: un modelo=límite por línea, comparado con el id exacto del modelo en el proveedor. Las solicitudes excedentes se ponen en cola localmente; en blanco significa sin límite por modelo.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concurrencia por modelo no válida \"{entry}\": usa modelo=límite con un número entero de 1 a {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Entrada de concurrencia por modelo no válida \"{entry}\": usa modelo=límite con un número entero de 1 a {max}.",
+    "usedInComboTooltip": "Usado en {count} combinación(es): {combos}",
+    "openComboTooltip": "Abrir Combinaciones — usado por {combo}"
   },
   "settings": {
     "title": "Configuración",
@@ -8938,7 +8940,9 @@
         "financial": "Financiera",
         "brazilian": "Brasileña",
         "usa": "EE. UU.",
-        "full": "Completa"
+        "full": "Completa",
+        "gdpr": "RGPD (UE)",
+        "popia": "POPIA (Sudáfrica)"
       },
       "builtinTypes": "Tipos integrados",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "Direcciones IPv4",
         "ipv6_address": "Direcciones IPv6",
         "aws_key": "Claves de acceso de AWS",
-        "api_key_generic": "Claves de API y tokens"
+        "api_key_generic": "Claves de API y tokens",
+        "iban": "Números de cuenta bancaria IBAN",
+        "eu_vat": "Números de IVA de la UE",
+        "es_dni_nie": "DNI / NIE español",
+        "it_codice_fiscale": "Codice Fiscale italiano",
+        "pl_pesel": "PESEL polaco",
+        "nl_bsn": "BSN neerlandés",
+        "de_steuer_id": "Steuer-ID alemán",
+        "se_personnummer": "Personnummer sueco",
+        "za_id": "Números de identidad sudafricanos",
+        "za_phone": "Números de teléfono sudafricanos",
+        "za_vat": "Números de IVA sudafricanos",
+        "za_tax_ref": "Referencias fiscales sudafricanas"
       },
       "customPatterns": "Patrones personalizados",
       "customPatternsDesc": "Las coincidencias se reemplazan por [CUSTOM_REDACTED]. Hasta {max} patrones. Se rechazan los patrones con riesgo de backtracking catastrófico.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth no está configurado. Registra una aplicación OAuth en {applicationsUrl} con la URI de redirección {redirectUri} y los alcances \"{scopes}\", luego establece {clientIdEnv} (y opcionalmente {clientSecretEnv}) y reinicia.",
     "gitlabDuoSetupDescription": "Después de que la aplicación esté registrada y las variables de entorno estén configuradas en esta instancia de OmniRoute, haz clic en Continuar para iniciar la sesión de OAuth.",
     "continue": "Continuar",
+    "copilotPolicyTitle": "Proveedor experimental: el estado de la política es ambiguo",
+    "copilotPolicyLine1": "OmniRoute se conecta a través de api.githubcopilot.com, que GitHub no ha publicado como una inferencia general de terceros API. Esta integración es experimental y puede cambiar sin previo aviso.",
+    "copilotPolicyLine2": "Sólo se puede conectar su propia cuenta GitHub. Nunca comparta credenciales, agrupe cuentas ni intente exceder los límites de su plan.",
+    "copilotPolicyLine3": "Los usuarios de los planes Gratuito y Estudiante reciben únicamente la selección automática de modelo. Los términos de su plan Copilot y los límites de uso siguen siendo su responsabilidad.",
+    "copilotPolicyAcknowledge": "Entiendo, conéctate",
     "tabPasteSetupToken": "Token de configuración",
     "claudeSetupTokenDescription": "Ejecuta `claude setup-token` en una terminal y pega el token que imprime. Es válido durante un año y no tiene token de actualización. OmniRoute envía una solicitud de prueba a Anthropic antes de guardarlo.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Estadísticas de proveedores",
     "description": "Tráfico, latencia y tasas de éxito por proveedor y por modelo",
     "combo": "Combinado",
-    "toggleModels": "Mostrar modelos de {provider}"
+    "toggleModels": "Mostrar modelos de {provider}",
+    "windowSince": "Desde {date}"
   },
   "relay": {
     "title": "Proxies de retransmisión sin servidor",

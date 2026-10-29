@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "已在 {count} 个组合中使用：{combos}",
+    "openComboTooltip": "打开组合 — 被 {combo} 使用"
   },
   "settings": {
     "title": "设置",
@@ -9015,7 +9017,9 @@
         "financial": "金融",
         "brazilian": "巴西",
         "usa": "美国",
-        "full": "全部"
+        "full": "全部",
+        "gdpr": "GDPR（欧盟）",
+        "popia": "POPIA（南非）"
       },
       "builtinTypes": "内置类型",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 地址",
         "ipv6_address": "IPv6 地址",
         "aws_key": "AWS 访问密钥",
-        "api_key_generic": "API 密钥和令牌"
+        "api_key_generic": "API 密钥和令牌",
+        "iban": "IBAN 银行账号",
+        "eu_vat": "欧盟增值税号",
+        "es_dni_nie": "西班牙 DNI / NIE",
+        "it_codice_fiscale": "意大利 Codice Fiscale",
+        "pl_pesel": "波兰 PESEL",
+        "nl_bsn": "荷兰 BSN",
+        "de_steuer_id": "德国 Steuer-ID",
+        "se_personnummer": "瑞典 personnummer",
+        "za_id": "南非身份证号码",
+        "za_phone": "南非电话号码",
+        "za_vat": "南非增值税号",
+        "za_tax_ref": "南非税务参考号"
       },
       "customPatterns": "自定义模式",
       "customPatternsDesc": "匹配项会被替换为 [CUSTOM_REDACTED]。最多 {max} 个模式。存在灾难性回溯风险的模式会被拒绝。",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth 尚未配置。在 {applicationsUrl} 注册一个 OAuth 应用，使用重定向 URI {redirectUri} 和范围 \"{scopes}\"，然后设置 {clientIdEnv}（可选地设置 {clientSecretEnv}）并重启。",
     "gitlabDuoSetupDescription": "在应用程序注册并在此 OmniRoute 实例上设置环境变量后，单击继续以开始 OAuth 登录。",
     "continue": "继续",
+    "copilotPolicyTitle": "实验提供商：政策状态不明确",
+    "copilotPolicyLine1": "OmniRoute通过 api.githubcopilot.com 连接， GitHub尚未将其发布为通用第三方推理API。此集成是实验性的，可能会发生更改，恕不另行通知。",
+    "copilotPolicyLine2": "只能连接您自己的GitHub帐户。切勿共享凭据、池帐户或尝试超出您的计划限制。",
+    "copilotPolicyLine3": "免费和学生计划用户只能收到自动模型选择。您的Copilot计划条款和任何使用限制仍由您负责。",
+    "copilotPolicyAcknowledge": "我明白了，连接",
     "tabPasteSetupToken": "设置令牌",
     "claudeSetupTokenDescription": "在终端中运行 `claude setup-token`，然后粘贴它输出的令牌。该令牌有效期为一年，没有刷新令牌。OmniRoute 会在保存前向 Anthropic 发送一次测试请求。",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "提供者统计信息",
     "description": "按提供者和模型统计的流量、延迟和成功率",
     "combo": "组合",
-    "toggleModels": "显示 {provider} 的模型"
+    "toggleModels": "显示 {provider} 的模型",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "Serverless 中继代理",

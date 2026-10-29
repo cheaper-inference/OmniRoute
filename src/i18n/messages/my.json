@@ -6912,7 +6912,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "ပေါင်းစပ်မှု {count} ခုတွင် အသုံးပြုထားသည်- {combos}",
+    "openComboTooltip": "ပေါင်းစပ်မှုများကို ဖွင့်ရန် — {combo} က အသုံးပြုထားသည်"
   },
   "settings": {
     "title": "ဆက်တင်များ",
@@ -9015,7 +9017,9 @@
         "financial": "ငွေကြေး",
         "brazilian": "ဘရာဇီး",
         "usa": "အမေရိကန်",
-        "full": "အပြည့်အစုံ"
+        "full": "အပြည့်အစုံ",
+        "gdpr": "GDPR (ဥရောပသမဂ္ဂ)",
+        "popia": "POPIA (တောင်အာဖရိက)"
       },
       "builtinTypes": "မူလပါဝင်သော အမျိုးအစားများ",
       "types": {
@@ -9029,7 +9033,19 @@
         "ip_address": "IPv4 လိပ်စာများ",
         "ipv6_address": "IPv6 လိပ်စာများ",
         "aws_key": "AWS ဝင်ရောက်ခွင့် ကီးများ",
-        "api_key_generic": "API ကီးများနှင့် တိုကင်များ"
+        "api_key_generic": "API ကီးများနှင့် တိုကင်များ",
+        "iban": "IBAN ဘဏ်အကောင့်နံပါတ်များ",
+        "eu_vat": "EU VAT နံပါတ်များ",
+        "es_dni_nie": "စပိန် DNI / NIE",
+        "it_codice_fiscale": "အီတလီ Codice Fiscale",
+        "pl_pesel": "ပိုလန် PESEL",
+        "nl_bsn": "ဒတ်ခ်ျ BSN",
+        "de_steuer_id": "ဂျာမန် Steuer-ID",
+        "se_personnummer": "ဆွီဒင် personnummer",
+        "za_id": "တောင်အာဖရိက မှတ်ပုံတင်နံပါတ်များ",
+        "za_phone": "တောင်အာဖရိက ဖုန်းနံပါတ်များ",
+        "za_vat": "တောင်အာဖရိက VAT နံပါတ်များ",
+        "za_tax_ref": "တောင်အာဖရိက အခွန်ကိုးကားနံပါတ်များ"
       },
       "customPatterns": "စိတ်ကြိုက် ပုံစံများ",
       "customPatternsDesc": "ကိုက်ညီမှုများကို [CUSTOM_REDACTED] ဖြင့် အစားထိုးသည်။ ပုံစံ {max} ခုအထိ။ ဆိုးရွားသော backtracking အန္တရာယ်ရှိသော ပုံစံများကို ငြင်းပယ်သည်။",
@@ -11531,6 +11547,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ကို ပြင်ဆင်သတ်မှတ်ထားခြင်း မရှိသေးပါ။ redirect URI {redirectUri} နှင့် scope များ \"{scopes}\" ကို အသုံးပြု၍ {applicationsUrl} တွင် OAuth application တစ်ခု မှတ်ပုံတင်ပါ၊ ထို့နောက် {clientIdEnv} (နှင့် လိုအပ်ပါက {clientSecretEnv}) ကို သတ်မှတ်ပြီး ပြန်လည်စတင်ပါ။",
     "gitlabDuoSetupDescription": "Application ကို မှတ်ပုံတင်ပြီး ဤ OmniRoute instance တွင် env var များကို သတ်မှတ်ပြီးပါက OAuth အကောင့်ဝင်ခြင်းကို စတင်ရန် ဆက်လုပ်ရန် ခလုတ်ကို နှိပ်ပါ။",
     "continue": "ဆက်လုပ်ရန်",
+    "copilotPolicyTitle": "စမ်းသပ်ပံ့ပိုးပေးသူ- မူဝါဒအခြေအနေသည် ရှုပ်ထွေးနေပါသည်။",
+    "copilotPolicyLine1": "OmniRoute သည် api.githubcopilot.com မှတစ်ဆင့် ချိတ်ဆက်ပါသည်။ ၎င်းကို GitHub က ယေဘုယျ ပြင်ပအဖွဲ့ inference API အဖြစ် ထုတ်ပြန်ထားခြင်း မရှိပါ။ ဤပေါင်းစပ်မှုသည် စမ်းသပ်ဆဲဖြစ်ပြီး ကြိုတင်အသိပေးခြင်းမရှိဘဲ ပြောင်းလဲနိုင်ပါသည်။",
+    "copilotPolicyLine2": "သင့်ကိုယ်ပိုင် GitHub အကောင့်ကိုသာ ချိတ်ဆက်နိုင်ပါသည်။ အထောက်အထားများ၊ စုပေါင်းအကောင့်များကို မျှဝေခြင်း သို့မဟုတ် သင့်အစီအစဉ်ကန့်သတ်ချက်များကို ကျော်လွန်ရန် ဘယ်သောအခါမှ မကြိုးစားပါနှင့်။",
+    "copilotPolicyLine3": "အခမဲ့နှင့် Student plan အသုံးပြုသူများသည် အလိုအလျောက် မော်ဒယ်ရွေးချယ်မှုသာ ရရှိသည်။ သင်၏ Copilot အစီအစဉ် စည်းကမ်းချက်များနှင့် အသုံးပြုမှု ကန့်သတ်ချက်များသည် သင့်တွင် တာဝန်ရှိပါသည်။",
+    "copilotPolicyAcknowledge": "နားလည်တယ်၊ ချိတ်ဆက်တယ်။",
     "tabPasteSetupToken": "စနစ်ထည့်သွင်းမှု တိုကင်",
     "claudeSetupTokenDescription": "တာမီနယ်တွင် `claude setup-token` ကို လုပ်ဆောင်ပြီး ၎င်းထုတ်ပြသော တိုကင်ကို ကူးထည့်ပါ။ ၎င်းသည် တစ်နှစ်အထိ အကျုံးဝင်ပြီး ပြန်လည်စတင်ရန် တိုကင် မရှိပါ။ မသိမ်းဆည်းမီ OmniRoute သည် Anthropic သို့ စမ်းသပ်တောင်းဆိုမှု တစ်ခု ပို့ပါသည်။",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12883,7 +12904,8 @@
     "title": "ပံ့ပိုးသူ စာရင်းအင်းများ",
     "description": "ပံ့ပိုးသူတစ်ဦးချင်းနှင့် မော်ဒယ်တစ်ခုချင်းအလိုက် လမ်းကြောင်းပမာဏ၊ တုံ့ပြန်ကြာချိန်နှင့် အောင်မြင်မှုနှုန်းများ",
     "combo": "ပေါင်းစပ်",
-    "toggleModels": "{provider} အတွက် မော်ဒယ်များကို ပြရန်"
+    "toggleModels": "{provider} အတွက် မော်ဒယ်များကို ပြရန်",
+    "windowSince": "{date} မှစ၍"
   },
   "relay": {
     "title": "ဆာဗာမဲ့ Relay ပရောက်စီများ",

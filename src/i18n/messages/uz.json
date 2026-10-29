@@ -6835,7 +6835,9 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "{count} ta kombinatsiyada ishlatiladi: {combos}",
+    "openComboTooltip": "Kombinatsiyalarni ochish — {combo} ishlatadi"
   },
   "settings": {
     "title": "Sozlamalar",
@@ -8938,7 +8940,9 @@
         "financial": "Moliyaviy",
         "brazilian": "Braziliya",
         "usa": "AQSH",
-        "full": "To'liq"
+        "full": "To'liq",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Janubiy Afrika)"
       },
       "builtinTypes": "O'rnatilgan turlar",
       "types": {
@@ -8952,7 +8956,19 @@
         "ip_address": "IPv4 manzillari",
         "ipv6_address": "IPv6 manzillari",
         "aws_key": "AWS kirish kalitlari",
-        "api_key_generic": "API kalitlari va tokenlar"
+        "api_key_generic": "API kalitlari va tokenlar",
+        "iban": "IBAN bank hisob raqamlari",
+        "eu_vat": "EU VAT raqamlari",
+        "es_dni_nie": "Ispan DNI / NIE",
+        "it_codice_fiscale": "Italiya Kodeksi Fiscale",
+        "pl_pesel": "Polsha PESEL",
+        "nl_bsn": "Gollandiyalik BSN",
+        "de_steuer_id": "Germaniya Steuer-ID",
+        "se_personnummer": "Shvetsiya xodimi",
+        "za_id": "Janubiy Afrika ID raqamlari",
+        "za_phone": "Janubiy Afrika telefon raqamlari",
+        "za_vat": "Janubiy Afrika VAT raqamlari",
+        "za_tax_ref": "Janubiy Afrika soliq ma'lumotnomalari"
       },
       "customPatterns": "Maxsus andozalar",
       "customPatternsDesc": "Mosliklar [CUSTOM_REDACTED] bilan almashtiriladi. Ko'pi bilan {max} ta andoza. Halokatli orqaga qaytish xavfi bor andozalar rad etiladi.",
@@ -11454,6 +11470,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth sozlanmagan. {applicationsUrl} manzilida qayta yoʻnaltirish URI manzili sifatida {redirectUri} va ruxsat doiralari sifatida \"{scopes}\" bilan OAuth ilovasini roʻyxatdan oʻtkazing, soʻng {clientIdEnv} (va ixtiyoriy ravishda {clientSecretEnv}) ni sozlab, qayta ishga tushiring.",
     "gitlabDuoSetupDescription": "Ilova roʻyxatdan oʻtkazilib, ushbu OmniRoute instansiyasida muhit oʻzgaruvchilari sozlangach, OAuth orqali kirishni boshlash uchun Davom etish tugmasini bosing.",
     "continue": "Davom etish",
+    "copilotPolicyTitle": "Eksperimental provayder: siyosat holati noaniq",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com orqali ulanadi, bu GitHub umumiy uchinchi tomon xulosasi sifatida e'lon qilinmagan API. Ushbu integratsiya eksperimental hisoblanadi va ogohlantirmasdan o'zgarishi mumkin.",
+    "copilotPolicyLine2": "Faqat shaxsiy GitHub hisobingiz ulanishi mumkin. Hech qachon hisobga olish ma'lumotlarini, pul hisoblarini baham ko'rmang yoki rejangiz chegarasidan oshib ketishga urinmang.",
+    "copilotPolicyLine3": "Bepul va Talaba tarif rejasi foydalanuvchilari faqat avtomatik model tanlashni oladi. Sizning Copilot rejasi shartlari va har qanday foydalanish cheklovlari sizning javobgarligingiz bo'lib qoladi.",
+    "copilotPolicyAcknowledge": "Tushundim, ulaning",
     "tabPasteSetupToken": "Sozlash tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` buyrug'ini ishga tushiring va u chiqargan tokenni joylashtiring. U bir yil amal qiladi va yangilash tokeniga ega emas. OmniRoute saqlashdan oldin Anthropic'ga bitta sinov so'rovini yuboradi.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -12806,7 +12827,8 @@
     "title": "Provayder statistikasi",
     "description": "Har bir provayder va model boʻyicha trafik, kechikish va muvaffaqiyat koʻrsatkichlari",
     "combo": "Kombinatsiya",
-    "toggleModels": "{provider} modellarini koʻrsatish"
+    "toggleModels": "{provider} modellarini koʻrsatish",
+    "windowSince": "{date} dan beri"
   },
   "relay": {
     "title": "Serversiz rele proksilari",
