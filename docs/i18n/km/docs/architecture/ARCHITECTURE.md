@@ -1,0 +1,1127 @@
+# OmniRoute Architecture (ខ្មែរ)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
+
+---
+
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
+
+_បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ៖ 2026-06-28_
+
+## សង្ខេបប្រតិបត្តិ
+
+OmniRoute គឺជាច្រកចេញដំណើរតាមទីតាំង AI និងផ្ទាំងគ្រប់គ្រងដែលបានបង្កើតឡើងនៅលើ Next.js។ វាផ្តល់នូវចំណុចបញ្ចប់ដែលត្រូវគ្នាជាមួយ OpenAI តែមួយ (`/v1/*`) និងបញ្ជូនចរាចរឆ្លងកាត់អ្នកផ្តល់សេវាខាងលើជាច្រើនជាមួយនឹងការបកប្រែ ការធ្លាក់ចុះ ការធ្វើឱ្យស្រស់សញ្ញាសម្ងាត់ និងការតាមដានការប្រើប្រាស់។
+
+សមត្ថភាពស្នូល៖
+
+- ផ្ទៃ API ដែលត្រូវគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (អ្នកផ្តល់សេវា 377, ម៉ូឌុលប្រតិបត្តិ 156)
+- ការបកប្រែRequest/response ឆ្លងកាត់ទម្រង់អ្នកផ្តល់សេវា
+- បន្សំគំរូថយក្រោយ (លំដាប់ច្រើនម៉ូដែល)
+- ជំហានបន្សំដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយនឹងការបញ្ជាពេលវេលាដំណើរការដោយ `compositeTiers`
+- ការថយក្រោយកម្រិតគណនី (គណនីច្រើនក្នុងមួយអ្នកផ្តល់សេវា)
+- Quota preflight និង quota-aware P2C ការជ្រើសរើសគណនីនៅក្នុងផ្លូវជជែកសំខាន់
+- OAuth + ការគ្រប់គ្រងការតភ្ជាប់អ្នកផ្តល់សេវាគន្លឹះ API (ម៉ូឌុលអ្នកផ្តល់សេវា OAuth 27)
+- ការបញ្ចូលជំនាន់តាមរយៈ `/v1/embeddings` (អ្នកផ្តល់សេវា 18 នាក់)
+- ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (អ្នកផ្តល់សេវា 10 +, 20 គំរូ+ )
+- ការចម្លងសំឡេងតាមរយៈ `/v1/audio/transcriptions` (អ្នកផ្តល់សេវា 18 នាក់)
+- អត្ថបទទៅការនិយាយតាមរយៈ `/v1/audio/speech` (អ្នកផ្តល់សេវាដែលភ្ជាប់មកជាមួយ 24)
+- ការបង្កើតវីដេអូតាមរយៈ `/v1/videos/generations` (ComfyUI + SD WebUI)
+- ការបង្កើតតន្ត្រីតាមរយៈ `/v1/music/generations` (ComfyUI)
+- ការស្វែងរកតាមអ៊ីនធឺណិតតាមរយៈ `/v1/search` (អ្នកផ្តល់សេវាចំនួន 20)
+- ការសម្របសម្រួលតាមរយៈ `/v1/moderations`
+- ចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
+- គិតការញែកស្លាក (`<think>...</think>`) សម្រាប់គំរូហេតុផល
+- ការឆ្លើយតបអនាម័យសម្រាប់ភាពឆបគ្នា OpenAI SDK ដ៏តឹងរឹង
+- ការធ្វើឱ្យមុខងារធម្មតា (ប្រព័ន្ធ → អ្នកអភិវឌ្ឍន៍ អ្នកប្រើប្រាស់ប្រព័ន្ធ →) សម្រាប់ភាពឆបគ្នារវាងអ្នកផ្តល់សេវាឆ្លង
+- ការបម្លែងលទ្ធផលដែលមានរចនាសម្ព័ន្ធ (json_schema → Gemini responseSchema)
+- ការតស៊ូក្នុងតំបន់សម្រាប់អ្នកផ្តល់សេវា កូនសោ ឈ្មោះក្លែងក្លាយ បន្សំ ការកំណត់ តម្លៃ (ម៉ូឌុល DB 122)
+- Usage/cost តាមដាននិងស្នើសុំការកាប់ឈើ
+- សមកាលកម្មពពកស្រេចចិត្តសម្រាប់ការធ្វើសមកាលកម្ម multi-device/state
+- IP allowlist/blocklist សម្រាប់ការគ្រប់គ្រងការចូលប្រើ API
+- ការគ្រប់គ្រងថវិកាគិត (passthrough/auto/custom/adaptive)
+- ការចាក់បញ្ចូលប្រព័ន្ធសកល
+- ការតាមដានវគ្គ និងការបោះពុម្ពស្នាមម្រាមដៃ
+- ការកំណត់អត្រាការធ្វើឱ្យប្រសើរឡើងក្នុងមួយគណនីជាមួយនឹងទម្រង់ជាក់លាក់របស់អ្នកផ្តល់សេវា
+- គំរូឧបករណ៍បំលែងសៀគ្វីសម្រាប់ភាពធន់របស់អ្នកផ្តល់សេវា
+- ការការពារហ្វូងសត្វផ្គរលាន់ជាមួយនឹងការចាក់សោ mutex
+- ឃ្លាំងសម្ងាត់ការដកស្ទួនសំណើផ្អែកលើហត្ថលេខា
+- ស្រទាប់ដែន៖ ច្បាប់ចំណាយ គោលការណ៍ថយក្រោយ គោលការណ៍ចាក់សោ
+- ការបញ្ជូនបន្តតាមបរិបទ៖ វគ្គសង្ខេបការបញ្ជូនបន្តសម្រាប់វគ្គបន្តនៃការបង្វិលគណនី
+- ភាពស្ថិតស្ថេរនៃរដ្ឋដែន (SQLite សរសេរតាមរយៈឃ្លាំងសម្ងាត់សម្រាប់ការធ្លាក់ចុះ ថវិកា ការចាក់សោរ ឧបករណ៍បំបែកសៀគ្វី)
+- ម៉ាស៊ីនគោលការណ៍សម្រាប់ការវាយតម្លៃសំណើកណ្តាល (ចាក់សោរ → ថវិកា → ថយក្រោយ)
+- ស្នើសុំ telemetry ជាមួយ p50/p95/p99 latency សរុប
+- ការរួមបញ្ចូលគ្នានៃ telemetry គោលដៅ និងសុខភាពគោលដៅបន្សំជាប្រវត្តិសាស្ត្រតាមរយៈ `combo_execution_key` / `combo_step_id`
+- ទំនាក់ទំនង ID (X-Request-Id) សម្រាប់ការតាមដានពីចុងដល់ចប់
+- ការចុះកំណត់ហេតុសវនកម្មអនុលោមភាពជាមួយនឹងការបដិសេធក្នុងមួយគ្រាប់ចុច API
+- ក្របខ័ណ្ឌ Eval សម្រាប់ការធានាគុណភាព LLM
+- ផ្ទាំងគ្រប់គ្រងសុខភាពជាមួយនឹងស្ថានភាពឧបករណ៍បំប្លែងសៀគ្វីរបស់អ្នកផ្តល់សេវាតាមពេលវេលាជាក់ស្តែង
+- ម៉ាស៊ីនមេMCP (110 ឧបករណ៍) ជាមួយនឹងការដឹកជញ្ជូន 3 (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) ជាមួយនឹងជំនាញ និងវដ្តជីវិតការងារ
+- ប្រព័ន្ធសតិ (ស្រង់ចេញ ចាក់ ទាញយកមកវិញ សង្ខេប)
+- ប្រព័ន្ធជំនាញ (បញ្ជីឈ្មោះ ប្រតិបត្តិករ ប្រអប់ខ្សាច់ ជំនាញដែលភ្ជាប់មកជាមួយ)
+- MITM ប្រូកស៊ីជាមួយការគ្រប់គ្រងវិញ្ញាបនបត្រនិងការគ្រប់គ្រង DNS
+- ជំរុញអ្នកការពារផ្នែកកណ្តាល
+- ជម្រុញបំពង់បង្ហាប់ជាមួយ Caveman, RTK, បំពង់ដាក់ជង់, បន្សំបង្ហាប់, កញ្ចប់ភាសា និងការវិភាគ
+- ACP (ពិធីសារទំនាក់ទំនងភ្នាក់ងារ) បញ្ជីឈ្មោះ
+- អ្នកផ្តល់សេវា OAuth ម៉ូឌុល (ម៉ូឌុលបុគ្គលចំនួន 22 នៅក្រោម `src/lib/oauth/providers/`)
+- ស្គ្រីប Uninstall/full-uninstall
+- សកម្មភាពជួសជុលបរិស្ថាន OAuth
+- ស្ពាន WebSocket សម្រាប់អតិថិជន WS ដែលត្រូវគ្នាជាមួយ OpenAI (`/v1/ws`)
+- ការគ្រប់គ្រងនិមិត្តសញ្ញាសមកាលកម្ម (issue/revoke, ETag-versioned config bundle download)
+- GLM Thinking (`glmt`) កំណត់ជាមុនអ្នកផ្តល់សេវាលំដាប់ទីមួយ
+- ការរាប់និមិត្តសញ្ញាកូនកាត់ ( `/messages/count_tokens` ខាងអ្នកផ្តល់សេវាជាមួយនឹងការប៉ាន់ស្មានថយក្រោយ)
+- គំរូឈ្មោះក្លែងក្លាយការបណ្ដុះដោយស្វ័យប្រវត្តិ (ការធ្វើឱ្យប្រក្រតីនៃគ្រាមភាសាឆ្លងប្រូកស៊ី 30 + ពេលចាប់ផ្ដើម)
+- ការនាំយកចេញដោយសុវត្ថិភាពជាមួយនឹង SSRF guard ការទប់ស្កាត់ URL ឯកជន និងការព្យាយាមម្ដងទៀតដែលអាចកំណត់រចនាសម្ព័ន្ធបាន។
+- Cooldown-aware Chat ព្យាយាមម្តងទៀតជាមួយនឹង `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន។
+- ការផ្ទៀងផ្ទាត់បរិស្ថានពេលដំណើរការជាមួយ Zod នៅពេលចាប់ផ្តើម
+- សវនកម្មអនុលោមភាព v2 ជាមួយនឹងការបិទទំព័រ ព្រឹត្តិការណ៍ CRUD អ្នកផ្តល់សេវា និងការកត់ត្រាសុពលភាពដែលត្រូវបានទប់ស្កាត់ SSRF
+
+គំរូពេលវេលាដំណើរការបឋម៖
+
+- ផ្លូវកម្មវិធីNext.js ក្រោម `src/app/api/*` អនុវត្តទាំងផ្ទាំងគ្រប់គ្រង APIs និងភាពឆបគ្នា APIs
+- ស្នូល SSE/routing ចែករំលែកនៅក្នុង `src/sse/*` + `open-sse/*` គ្រប់គ្រងការប្រតិបត្តិ ការបកប្រែ ការចាក់ផ្សាយ ការធ្លាក់ចុះ និងការប្រើប្រាស់របស់អ្នកផ្តល់សេវា
+
+## ដ្យាក្រាមយោង
+
+ប្រភព Mermaid ស្តង់ដារ ដែលគ្រប់គ្រងកំណែសម្រាប់វេទិកា v3.8.0 មាននៅក្នុង
+[`docs/diagrams/`](../diagrams/README.md)។ ដ្យាក្រាមចំនួនពីរត្រូវបានបង្ហាញឡើងវិញខាងក្រោម ដើម្បីផ្តល់ទិដ្ឋភាពទូទៅ;
+ដ្យាក្រាមដែលនៅសល់ត្រូវបានភ្ជាប់ពីមគ្គុទ្ទេសក៍ជាក់លាក់តាមផ្នែករបស់ពួកវា។
+
+![បំពង់ដំណើរការសំណើ (/v1/chat/completions)](../diagrams/exported/request-pipeline.svg)
+
+> ប្រភព៖ [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
+
+![គំរូភាពធន់ 3 ស្រទាប់](../diagrams/exported/resilience-3layers.svg)
+
+> ប្រភព៖ [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) — ត្រូវបានភ្ជាប់ផងដែរពី
+> [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) និងឯកសារយោងអំពីភាពធន់ក្នុង `CLAUDE.md`។
+
+## វិសាលភាព និងព្រំដែន
+
+### ស្ថិតក្នុងវិសាលភាព
+
+- ការដំណើរការ gateway ក្នុងមូលដ្ឋាន
+- API សម្រាប់គ្រប់គ្រង dashboard
+- ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ provider និងការធ្វើឱ្យ token ស្រស់
+- ការបម្លែងសំណើ និងការផ្សាយ SSE
+- ស្ថានភាពក្នុងមូលដ្ឋាន + ការរក្សាទុកទិន្នន័យប្រើប្រាស់
+- ការសម្របសម្រួលការធ្វើសមកាលកម្មជាមួយ cloud ជាជម្រើស
+
+### មិនស្ថិតក្នុងវិសាលភាព
+
+- ការអនុវត្តសេវា cloud ដែលនៅពីក្រោយ `NEXT_PUBLIC_CLOUD_URL`
+- SLA/control plane របស់ provider ដែលនៅក្រៅ process ក្នុងមូលដ្ឋាន
+- ឯកសារប្រតិបត្តិ CLI ខាងក្រៅផ្ទាល់ (Claude CLI, Codex CLI ជាដើម)
+
+## ផ្ទៃ Dashboard (បច្ចុប្បន្ន)
+
+ទំព័រសំខាន់ៗនៅក្រោម `src/app/(dashboard)/dashboard/`៖
+
+- `/dashboard` — ការចាប់ផ្ដើមរហ័ស + ទិដ្ឋភាពទូទៅនៃអ្នកផ្ដល់សេវា
+- `/dashboard/endpoint` — ផ្ទាំង endpoint proxy + MCP + A2A + API endpoint
+- `/dashboard/providers` — ការតភ្ជាប់ និងព័ត៌មានសម្ងាត់របស់អ្នកផ្ដល់សេវា
+- `/dashboard/combos` — យុទ្ធសាស្ត្រ combo, template, កម្មវិធីបង្កើតតាមជំហាន, ច្បាប់កំណត់ផ្លូវ model និងលំដាប់ដែលបានរក្សាទុកដោយដៃ
+- `/dashboard/auto-combo` — Auto Combo Engine៖ ទម្ងន់ពិន្ទុ, mode pack, virtual factory preset និង telemetry
+- `/dashboard/costs` — ការបូកសរុបចំណាយ និងការមើលឃើញតម្លៃ
+- `/dashboard/analytics` — ការវិភាគការប្រើប្រាស់, ការវាយតម្លៃ និងស្ថានភាពគោលដៅ combo
+- `/dashboard/limits` — ការគ្រប់គ្រងកូតា/អត្រា
+- `/dashboard/cli-tools` — ការណែនាំចាប់ផ្ដើម CLI, ការរកឃើញ runtime និងការបង្កើតការកំណត់រចនាសម្ព័ន្ធ
+- `/dashboard/agents` — ACP agent ដែលបានរកឃើញ + ការចុះឈ្មោះ agent ផ្ទាល់ខ្លួន
+- `/dashboard/cloud-agents` — កិច្ចការរបស់ agent ដែលបង្ហោះលើ cloud (Codex Cloud, Devin, Jules) និងវដ្តជីវិតកិច្ចការ
+- `/dashboard/skills` — បញ្ជីជំនាញ A2A, ការប្រតិបត្តិក្នុង sandbox និងកាតាឡុកជំនាញដែលភ្ជាប់មកជាមួយ
+- `/dashboard/memory` — ការត្រួតពិនិត្យ និងការទាញយកអង្គចងចាំសន្ទនាអចិន្ត្រៃយ៍
+- `/dashboard/webhooks` — ការជាវ webhook ចេញ, ការប្ដូរ secret និងស្ថិតិនៃការព្យាយាមឡើងវិញ
+- `/dashboard/batch` — ការដាក់ស្នើ batch job និងវឌ្ឍនភាព
+- `/dashboard/cache` — ស្ថិតិ read-through cache និង reasoning cache ព្រមទាំងការគ្រប់គ្រងការបណ្ដេញទិន្នន័យ
+- `/dashboard/playground` — ទីលានសាកល្បងជជែកអន្តរកម្មជាមួយ combo/model ដែលបានកំណត់រចនាសម្ព័ន្ធណាមួយ
+- `/dashboard/changelog` — កម្មវិធីមើលបញ្ជីផ្លាស់ប្ដូរនៅក្នុងកម្មវិធី (បង្ហាញ `CHANGELOG.md`)
+- `/dashboard/system` — ការវិនិច្ឆ័យ runtime, ព័ត៌មានកំណែ និងផ្ទៃផ្ទៀងផ្ទាត់បរិស្ថាន
+- `/dashboard/onboarding` — អ្នកជំនួយការរៀបចំសម្រាប់ការដំណើរការលើកដំបូងនៃការដំឡើងថ្មី
+- `/dashboard/media` — ទីលានសាកល្បងរូបភាព/វីដេអូ/តន្ត្រី
+- `/dashboard/search-tools` — ការសាកល្បងអ្នកផ្ដល់សេវាស្វែងរក និងប្រវត្តិ
+- `/dashboard/health` — រយៈពេលដំណើរការ, circuit breaker, ដែនកំណត់អត្រា និង session ដែលត្រូវបានត្រួតពិនិត្យកូតា
+- `/dashboard/logs` — កំណត់ហេតុ request/proxy/audit/console
+- `/dashboard/settings` — ផ្ទាំងការកំណត់ប្រព័ន្ធ (ទូទៅ, ការកំណត់ផ្លូវ, លំនាំដើម combo ជាដើម)
+- `/dashboard/context/caveman` — ច្បាប់បង្ហាប់ Caveman, language pack, ការមើលជាមុន និងទម្រង់ output
+- `/dashboard/context/rtk` — តម្រង output របស់ command RTK, ការមើលជាមុន និងការកំណត់សុវត្ថិភាព runtime
+- `/dashboard/context/combos` — pipeline បង្ហាប់ដែលមានឈ្មោះ និងត្រូវបានចាត់តាំងទៅ routing combo
+- `/dashboard/translator` — ការត្រួតពិនិត្យកម្មវិធីបកប្រែ និងការមើលជាមុននៃការបម្លែងទម្រង់ request
+- `/dashboard/audit` — កម្មវិធីរុករកកំណត់ហេតុសវនកម្មអនុលោមភាព ដែលមានការបែងចែកទំព័រ និង metadata មានរចនាសម្ព័ន្ធ
+- `/dashboard/usage` — កម្មវិធីរុករកការប្រើប្រាស់សម្រាប់ request នីមួយៗ ដែលភ្ជាប់ជាមួយ `usage_history`
+- `/dashboard/compression` — ការវិភាគការបង្ហាប់, ស្ថិតិ និងការចាត់តាំង pipeline
+- `/dashboard/api-manager` — វដ្តជីវិត API key និងសិទ្ធិប្រើប្រាស់ model
+
+ស្រទាប់ UI៖ គ្រប់ទំព័រទាំងអស់ត្រូវបានបង្ហាញនៅក្នុង shell តែមួយ — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` របស់ kit និង
+`Sidebar.tsx` ព្រមទាំង `Header.tsx` របស់ OmniRoute)។ ទំព័រនានា import ផ្នែកស្ថាបនារបស់ខ្លួនពី
+`@/shared/components` (adapter លើ Keak CI UI Kit ដែលបានបញ្ចូលក្នុង
+`packages/ui-kit`) ឬពី subpath នៃ component របស់ kit (`@omniroute/ui-kit/table`, `…/page-header`) ហើយ
+icon តាមរយៈ `<Icon>` (`ICON_MAP` → Lucide)។ Theme (`system` ជាលំនាំដើម, light/dark) និង token មកពី
+kit តាមរយៈ bridge នៅក្នុង `src/app/globals.css`។ ព័ត៌មានលម្អិត៖ `docs/architecture/DESIGN_SYSTEM.md`។
+
+## បរិបទប្រព័ន្ធកម្រិតខ្ពស់
+
+```mermaid
+flowchart LR
+    subgraph Clients[កម្មវិធីម៉ាស៊ីនភ្ញៀវសម្រាប់អ្នកអភិវឌ្ឍន៍]
+        C1[Claude Code]
+        C2[Codex CLI]
+        C3[OpenClaw / Droid / Cline / Continue / Roo]
+        C4[កម្មវិធីម៉ាស៊ីនភ្ញៀវដែលត្រូវគ្នាជាមួយ OpenAI តាមតម្រូវការ]
+        BROWSER[ផ្ទាំងគ្រប់គ្រងលើកម្មវិធីរុករក]
+    end
+
+    subgraph Router[ដំណើរការមូលដ្ឋាន OmniRoute]
+        API[API ភាពត្រូវគ្នា V1\n/v1/*]
+        DASH[ផ្ទាំងគ្រប់គ្រង + API គ្រប់គ្រង\n/api/*]
+        CORE[ស្នូល SSE + ការបម្លែង\nopen-sse + src/sse]
+        DB[(storage.sqlite)]
+        UDB[(តារាងការប្រើប្រាស់ + វត្ថុបង្កើតកំណត់ហេតុ)]
+    end
+
+    subgraph Upstreams[អ្នកផ្តល់សេវាខ្សែខាងលើ]
+        P1[អ្នកផ្តល់សេវា OAuth\nClaude/Codex/Gemini/Qoder/GitHub/Kiro/Cursor/Antigravity]
+        P2[អ្នកផ្តល់សេវា API Key\nOpenAI/Anthropic/OpenRouter/GLM/Kimi/MiniMax\nDeepSeek/Groq/xAI/Mistral/Perplexity\nTogether/Fireworks/Cerebras/Cohere/NVIDIA]
+        P3[ណូដដែលត្រូវគ្នា\nត្រូវគ្នាជាមួយ OpenAI / ត្រូវគ្នាជាមួយ Anthropic]
+    end
+
+    subgraph Cloud[ការធ្វើសមកាលកម្ម Cloud ជាជម្រើស]
+        CLOUD[ចំណុចចុងនៃការធ្វើសមកាលកម្ម Cloud\nNEXT_PUBLIC_CLOUD_URL]
+    end
+
+    C1 --> API
+    C2 --> API
+    C3 --> API
+    C4 --> API
+    BROWSER --> DASH
+
+    API --> CORE
+    DASH --> DB
+    CORE --> DB
+    CORE --> UDB
+
+    CORE --> P1
+    CORE --> P2
+    CORE --> P3
+
+    DASH --> CLOUD
+```
+
+## សមាសភាគដំណើរការស្នូល
+
+## 1) ស្រទាប់ API និងការកំណត់ផ្លូវ (Next.js App Routes)
+
+ថតឯកសារចម្បង៖
+
+- `src/app/api/v1/*` និង `src/app/api/v1beta/*` សម្រាប់ API ភាពត្រូវគ្នា
+- `src/app/api/*` សម្រាប់ API គ្រប់គ្រង/កំណត់រចនាសម្ព័ន្ធ
+- ការសរសេរផ្លូវឡើងវិញរបស់ Next នៅក្នុង `next.config.mjs` ផ្គូផ្គង `/v1/*` ទៅនឹង `/api/v1/*`
+
+ផ្លូវភាពត្រូវគ្នាសំខាន់ៗ៖
+
+- `src/app/api/v1/chat/completions/route.ts`
+- `src/app/api/v1/messages/route.ts`
+- `src/app/api/v1/responses/route.ts`
+- `src/app/api/v1/models/route.ts` — រួមបញ្ចូលម៉ូដែលតាមតម្រូវការដែលមាន `custom: true`
+- `src/app/api/v1/embeddings/route.ts` — ការបង្កើត embedding (អ្នកផ្តល់សេវា 6)
+- `src/app/api/v1/images/generations/route.ts` — ការបង្កើតរូបភាព (អ្នកផ្តល់សេវា 4+ រួមទាំង Antigravity/Nebius)
+- `src/app/api/v1/messages/count_tokens/route.ts`
+- `src/app/api/v1/providers/[provider]/chat/completions/route.ts` — ការជជែកដាច់ដោយឡែកសម្រាប់អ្នកផ្តល់សេវានីមួយៗ
+- `src/app/api/v1/providers/[provider]/embeddings/route.ts` — embedding ដាច់ដោយឡែកសម្រាប់អ្នកផ្តល់សេវានីមួយៗ
+- `src/app/api/v1/providers/[provider]/images/generations/route.ts` — រូបភាពដាច់ដោយឡែកសម្រាប់អ្នកផ្តល់សេវានីមួយៗ
+- `src/app/api/v1beta/models/route.ts`
+- `src/app/api/v1beta/models/[...path]/route.ts`
+
+ដែនគ្រប់គ្រង៖
+
+- ការផ្ទៀងផ្ទាត់/ការកំណត់៖ `src/app/api/auth/*`, `src/app/api/settings/*`
+- អ្នកផ្តល់សេវា/ការតភ្ជាប់៖ `src/app/api/providers*`
+- ណូដអ្នកផ្តល់សេវា៖ `src/app/api/provider-nodes*`
+- ម៉ូដែលតាមតម្រូវការ៖ `src/app/api/provider-models` (GET/POST/DELETE)
+- កាតាឡុកម៉ូដែល៖ `src/app/api/models/route.ts` (GET)
+- ការកំណត់រចនាសម្ព័ន្ធប្រូកស៊ី៖ `src/app/api/settings/proxy` (GET/PUT/DELETE) + `src/app/api/settings/proxy/test` (POST)
+- OAuth៖ `src/app/api/oauth/*`
+- សោ/ឈ្មោះក្លែងក្លាយ/បន្សំ/តម្លៃ៖ `src/app/api/keys*`, `src/app/api/models/alias`, `src/app/api/combos*`, `src/app/api/pricing`
+- ការប្រើប្រាស់៖ `src/app/api/usage/*`
+- ការធ្វើសមកាលកម្ម/Cloud៖ `src/app/api/sync/*`, `src/app/api/cloud/*`
+- ឧបករណ៍ជំនួយសម្រាប់ CLI៖ `src/app/api/cli-tools/*`
+- តម្រង IP៖ `src/app/api/settings/ip-filter` (GET/PUT)
+- កម្រិតថវិកាសម្រាប់ការគិត៖ `src/app/api/settings/thinking-budget` (GET/PUT)
+- ប្រអប់បញ្ចូលរបស់ប្រព័ន្ធ៖ `src/app/api/settings/system-prompt` (GET/PUT)
+- ការបង្ហាប់៖ `src/app/api/settings/compression`, `src/app/api/compression/*`, និង
+  `src/app/api/context/*`
+- សម័យ៖ `src/app/api/sessions` (GET)
+- ដែនកំណត់អត្រា៖ `src/app/api/rate-limits` (GET)
+- ភាពធន់៖ `src/app/api/resilience` (GET/PATCH) — ជួរសំណើ រយៈពេលរង់ចាំនៃការតភ្ជាប់ ឧបករណ៍ផ្តាច់សៀគ្វីអ្នកផ្តល់សេវា និងការកំណត់រចនាសម្ព័ន្ធរង់ចាំរយៈពេល cooldown
+- កំណត់ភាពធន់ឡើងវិញ៖ `src/app/api/resilience/reset` (POST) — កំណត់ឧបករណ៍ផ្តាច់សៀគ្វីអ្នកផ្តល់សេវាឡើងវិញ
+- ស្ថិតិ cache៖ `src/app/api/cache/stats` (GET/DELETE)
+- ទិន្នន័យតេឡេមេទ្រី៖ `src/app/api/telemetry/summary` (GET)
+- ថវិកា៖ `src/app/api/usage/budget` (GET/POST)
+- ខ្សែសង្វាក់ fallback៖ `src/app/api/fallback/chains` (GET/POST/DELETE)
+- សវនកម្មអនុលោមភាព៖ `src/app/api/compliance/audit-log` (GET, ជាមួយការបែងចែកទំព័រ + metadata ដែលមានរចនាសម្ព័ន្ធ)
+- ការវាយតម្លៃ៖ `src/app/api/evals` (GET/POST), `src/app/api/evals/[suiteId]` (GET)
+- គោលការណ៍៖ `src/app/api/policies` (GET/POST)
+- ថូខឹនធ្វើសមកាលកម្ម៖ `src/app/api/sync/tokens` (GET/POST), `src/app/api/sync/tokens/[id]` (GET/DELETE)
+- កញ្ចប់កំណត់រចនាសម្ព័ន្ធ៖ `src/app/api/sync/bundle` (GET, រូបថតចម្លងដែលកំណត់កំណែដោយ ETag នៃការកំណត់/អ្នកផ្តល់សេវា/បន្សំ/សោ)
+- WebSocket៖ `src/app/api/v1/ws/route.ts` — កម្មវិធីដោះស្រាយ Upgrade សម្រាប់កម្មវិធីម៉ាស៊ីនភ្ញៀវ WS ដែលត្រូវគ្នាជាមួយ OpenAI
+
+## 2) SSE + ស្នូលបកប្រែ
+
+ម៉ូឌុលលំហូរចម្បង៖
+
+- ចំណុចចូល៖ `src/sse/handlers/chat.ts`
+- ការសម្របសម្រួលស្នូល៖ `open-sse/handlers/chatCore.ts`
+- អាដាប់ទ័រប្រតិបត្តិរបស់អ្នកផ្តល់សេវា៖ `open-sse/executors/*`
+- ការរកឃើញទម្រង់/ការកំណត់រចនាសម្ព័ន្ធអ្នកផ្តល់សេវា៖ `open-sse/services/provider.ts`
+- ការញែក/ដោះស្រាយម៉ូដែល៖ `src/sse/services/model.ts`, `open-sse/services/model.ts`
+- ឡូជីខលបម្រុងទុកគណនី៖ `open-sse/services/accountFallback.ts`
+- បញ្ជីចុះឈ្មោះកម្មវិធីបកប្រែ៖ `open-sse/translator/index.ts`
+- ការបំប្លែងស្ទ្រីម៖ `open-sse/utils/stream.ts`, `open-sse/utils/streamHandler.ts`
+- ការស្រង់ចេញ/ការធ្វើឱ្យការប្រើប្រាស់មានស្តង់ដារ៖ `open-sse/utils/usageTracking.ts`
+- កម្មវិធីញែកស្លាក Think៖ `open-sse/utils/thinkTagParser.ts`
+- កម្មវិធីដោះស្រាយ Embedding៖ `open-sse/handlers/embeddings.ts`
+- បញ្ជីចុះឈ្មោះអ្នកផ្តល់សេវា Embedding៖ `open-sse/config/embeddingRegistry.ts`
+- កម្មវិធីដោះស្រាយការបង្កើតរូបភាព៖ `open-sse/handlers/imageGeneration.ts`
+- បញ្ជីចុះឈ្មោះអ្នកផ្តល់សេវារូបភាព៖ `open-sse/config/imageRegistry.ts`
+- ការសម្អាតចម្លើយ៖ `open-sse/handlers/responseSanitizer.ts`
+- ការធ្វើឱ្យតួនាទីមានស្តង់ដារ៖ `open-sse/services/roleNormalizer.ts`
+
+សេវាកម្ម (ឡូជីខលអាជីវកម្ម)៖
+
+- ការជ្រើសរើស/ការដាក់ពិន្ទុគណនី៖ `open-sse/services/accountSelector.ts`
+- ការគ្រប់គ្រងវដ្តជីវិតបរិបទ៖ `open-sse/services/contextManager.ts`
+- ការអនុវត្តតម្រង IP៖ `open-sse/services/ipFilter.ts`
+- ការតាមដានសម័យ៖ `open-sse/services/sessionManager.ts`
+- ការលុបសំណើស្ទួន៖ `open-sse/services/signatureCache.ts`
+- ការបញ្ចូលប្រអប់បញ្ចូលប្រព័ន្ធ៖ `open-sse/services/systemPrompt.ts`
+- ការគ្រប់គ្រងថវិកាគិត៖ `open-sse/services/thinkingBudget.ts`
+- ការកំណត់ផ្លូវម៉ូដែលដោយតួអក្សរជំនួស៖ `open-sse/services/wildcardRouter.ts`
+- ការគ្រប់គ្រងដែនកំណត់អត្រា៖ `open-sse/services/rateLimitManager.ts`
+- ឧបករណ៍ផ្តាច់សៀគ្វី៖ `src/shared/utils/circuitBreaker.ts`
+- ការផ្ទេរបរិបទ៖ `open-sse/services/contextHandoff.ts` — ការបង្កើត និងការបញ្ចូលសេចក្តីសង្ខេបនៃការផ្ទេរ សម្រាប់យុទ្ធសាស្ត្របញ្ជូនបន្តបរិបទ
+- ការបង្ហាប់៖ `open-sse/services/compression/*` — ការបង្ហាប់ជាមុន មុនការបកប្រែដោយអ្នកផ្តល់សេវា;
+  រួមមានច្បាប់ Caveman, តម្រង RTK, ខ្សែដំណើរការដាក់ជាន់គ្នា, បន្សំការបង្ហាប់, ស្ថិតិ និងការធ្វើសុពលកម្ម
+- កម្មវិធីទាញយកកូតា Codex៖ `open-sse/services/codexQuotaFetcher.ts` — ទាញយកកូតា Codex សម្រាប់ការសម្រេចចិត្តផ្ទេរបរិបទ
+- ការព្យាយាមឡើងវិញដោយគិតគូរពីរយៈពេលរង់ចាំ៖ `src/sse/services/cooldownAwareRetry.ts` — ការព្យាយាមឡើងវិញតាមម៉ូដែលនីមួយៗ ដោយមានរយៈពេលរង់ចាំ និងអាចកំណត់ `requestRetry` / `maxRetryIntervalSec`
+- ការទាញយកទៅខាងក្រៅដោយសុវត្ថិភាព៖ `src/shared/network/safeOutboundFetch.ts` — ការទាញយកអ្នកផ្តល់សេវា/ម៉ូដែលដែលមានការការពារ ដោយមានរបាំងការពារ SSRF, ការទប់ស្កាត់ URL ឯកជន, ការព្យាយាមឡើងវិញ និងពេលកំណត់
+- របាំងការពារ URL ចេញក្រៅ៖ `src/shared/network/outboundUrlGuard.ts` — ការត្រួតពិនិត្យម៉ាស៊ីនបង្ហោះលើ URL របស់អ្នកផ្តល់សេវា; `src/shared/network/outboundUrlGuardPolicy.ts` ជ្រើសរើសរបៀបពី `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`, `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS` និងប៊ូតុងបិទបើករបស់ពួកវានៅលើផ្ទាំងគ្រប់គ្រង (សូមមើល `docs/reference/ENVIRONMENT.md`)
+- តម្លៃលំនាំដើមនៃសំណើអ្នកផ្តល់សេវា៖ `open-sse/services/providerRequestDefaults.ts` — តម្លៃលំនាំដើមកម្រិតអ្នកផ្តល់សេវាសម្រាប់ `maxTokens`, `temperature`, `thinkingBudgetTokens`
+- ថេររបស់អ្នកផ្តល់សេវា GLM៖ `open-sse/config/glmProvider.ts` — ម៉ូដែល GLM, URL កូតា និងពេលកំណត់/តម្លៃលំនាំដើម GLMT ដែលប្រើរួមគ្នា
+- ប្រភពខាងលើ Antigravity៖ `open-sse/config/antigravityUpstream.ts` — URL មូលដ្ឋាន និងថេរផ្លូវស្វែងរក
+- ថេររបស់ម៉ាស៊ីនភ្ញៀវ Codex៖ `open-sse/config/codexClient.ts` — តម្លៃ user-agent និង client-version ដែលមានកំណែ
+- ទិន្នន័យដំបូងសម្រាប់ឈ្មោះក្លែងក្លាយរបស់ម៉ូដែល៖ `src/lib/modelAliasSeed.ts` — បញ្ចូលឈ្មោះក្លែងក្លាយឆ្លងកាត់គ្រាមភាសាប្រូកស៊ីជាង 30 នៅពេលចាប់ផ្តើម
+
+ម៉ូឌុលស្រទាប់ដែន៖
+
+- ច្បាប់ចំណាយ/ថវិកា៖ `src/domain/costRules.ts`
+- គោលការណ៍បម្រុងទុក៖ `src/domain/fallbackPolicy.ts`
+- កម្មវិធីដោះស្រាយបន្សំ៖ `src/domain/comboResolver.ts`
+- គោលការណ៍ចាក់សោ៖ `src/domain/lockoutPolicy.ts`
+- ម៉ាស៊ីនគោលការណ៍៖ `src/domain/policyEngine.ts` — ការវាយតម្លៃការចាក់សោ → ថវិកា → ការបម្រុងទុក ដែលបានផ្តុំជាកណ្តាល
+- កាតាឡុកកូដកំហុស៖ `src/shared/constants/errorCodes.ts`
+- លេខសម្គាល់សំណើ៖ `src/shared/utils/requestId.ts`
+- ពេលកំណត់សម្រាប់ការទាញយក៖ `src/shared/utils/fetchTimeout.ts`
+- ទិន្នន័យតេឡេមេទ្រីរបស់សំណើ៖ `src/shared/utils/requestTelemetry.ts`
+- ការអនុលោម/សវនកម្ម៖ `src/lib/compliance/index.ts`
+- កម្មវិធីដំណើរការវាយតម្លៃ៖ `src/lib/evals/evalRunner.ts`
+- ការរក្សាទុកស្ថានភាពដែន៖ `src/lib/db/domainState.ts` — ប្រតិបត្តិការ SQLite CRUD សម្រាប់ខ្សែសង្វាក់បម្រុងទុក, ថវិកា, ប្រវត្តិចំណាយ, ស្ថានភាពចាក់សោ និងឧបករណ៍ផ្តាច់សៀគ្វី
+
+ម៉ូឌុលអ្នកផ្តល់សេវា OAuth (ឯកសារដាច់ដោយឡែកចំនួន 27 ក្រោម `src/lib/oauth/providers/`)៖
+
+- លិបិក្រមបញ្ជីចុះឈ្មោះ៖ `src/lib/oauth/providers/index.ts`
+- អ្នកផ្តល់សេវានីមួយៗ៖ `agy.ts`, `antigravity.ts`, `claude.ts`, `cline.ts`, `codebuddy-cn.ts`, `codebuddy-intl.ts`, `codex.ts`, `cursor.ts`, `devin-desktop.ts`, `ghe-copilot.ts`, `github.ts`, `gitlab-duo.ts`, `grok-cli-oauth.ts`, `grok-cli.ts`, `kilocode.ts`, `kimi-coding.ts`, `kiro.ts`, `muse-code.ts`, `openference.ts`, `qoder.ts`, `trae.ts`, `workbuddy.ts`, `xai-oauth.ts`, `zed-hosted.ts`, `zed.ts`
+- មុខងារជំនួយរួម៖ `codebuddyDeviceAuth.ts` (លំហូរឧបករណ៍ CodeBuddy CN/intl), `museCodeDeviceResponse.ts`
+- ស្រោមរុំស្តើង៖ `src/lib/oauth/providers.ts` — នាំចេញឡើងវិញពីម៉ូឌុលនីមួយៗ
+
+## 5) សេវាដែលបានបង្កប់ (v3.8.4)
+
+OmniRoute អាចដំឡើង ត្រួតពិនិត្យ និងបញ្ជូនផ្លូវទៅកាន់ដំណើរការឧបករណ៍ AI ដែលកំពុងដំណើរការក្នុងម៉ាស៊ីន
+ដែលហៅថា **សេវាដែលបានបង្កប់**។ មានសេវាចំនួនប្រាំត្រូវបានផ្ដល់មកជាមួយ៖ 9Router, CLIProxyAPI, Bifrost, Mux និង Dario។
+
+ស្រទាប់ស្ថាបត្យកម្ម៖
+
+- **UI** (`/dashboard/providers/services`) — ទំព័រដែលមានពីរផ្ទាំង ជាមួយនឹងការគ្រប់គ្រងវដ្តជីវិត
+  ការផ្សាយកំណត់ហេតុផ្ទាល់ ការគ្រប់គ្រង API key និង (សម្រាប់ 9Router) UI ដើមដែលបានបង្កប់តាមរយៈ
+  reverse proxy ខាងក្នុង។
+- **API** (`/api/services/{name}/*`) — endpoint ចំនួន 11 សម្រាប់ 9Router, 10 សម្រាប់ CLIProxyAPI និង 8 រៀងៗខ្លួនសម្រាប់ Bifrost / Mux / Dario
+  ដែលទាំងអស់ត្រូវបានចាត់ថ្នាក់ជា **LOCAL_ONLY** (វិធានដាច់ខាត #17)។ endpoint SSE រួមមួយ `GET /api/services/[name]/logs`
+  បម្រើសេវាទាំងពីរ។
+- **កម្មវិធីត្រួតពិនិត្យ** (`src/lib/services/`) — class ទូទៅ `ServiceSupervisor` រុំ
+  `child_process.spawn` រក្សាទុក ring buffer ទំហំ 5 MB សម្រាប់ការផ្សាយកំណត់ហេតុ SSE មានរង្វិលជុំត្រួតពិនិត្យ
+  សុខភាព សោប្រតិបត្តិការអាតូមិក និងការបិទដោយរលូនពី SIGTERM→SIGKILL។
+  `bootstrap.ts` ភ្ជាប់សេវាដែលបានកំណត់រចនាសម្ព័ន្ធទាំងអស់នៅពេលដំណើរការចាប់ផ្ដើម។
+- **Provider/executor** (`open-sse/executors/ninerouter.ts`) — 9Router ត្រូវបានបង្ហាញជា
+  provider ពិតប្រាកដមួយ។ ម៉ូដែលត្រូវបានដាក់បុព្វបទ `9router/{sub}/{model}` និងធ្វើសមកាលកម្មរៀងរាល់ 5 នាទី
+  ពី endpoint `/v1/models` របស់ 9Router។
+
+ការពន្យល់ស៊ីជម្រៅ៖ `docs/frameworks/EMBEDDED-SERVICES.md`
+
+## ប្រព័ន្ធរងសំខាន់ៗ (v3.8.0)
+
+### ក. ម៉ាស៊ីនបន្សំស្វ័យប្រវត្តិ
+
+Auto Combo ផ្តល់ពិន្ទុជាឌីណាមិក និងជ្រើសរើសគោលដៅកំណត់ទិសដៅនៅពេលស្នើសុំ ជាជាងការពឹងផ្អែកលើនិយមន័យបន្សំឋិតិវន្ត។ វាផ្តល់ថាមពលដល់គ្រួសារបុព្វបទគំរូ `auto/*` ។
+
+- ធាតុម៉ាស៊ីន៖ `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- ដំណោះស្រាយ៖ `src/domain/comboResolver.ts` (ការរកឃើញដោយស្វ័យប្រវត្តិនៃបុព្វបទ `auto/` )
+- ផ្ទាំងគ្រប់គ្រង៖ `/dashboard/auto-combo`
+- Telemetry: តារាង `auto_combo_decisions` SQLite
+
+សមត្ថភាពសំខាន់ៗ៖
+
+- **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** (អាទិភាព, ទម្ងន់, បំពេញដំបូង, ជុំ-រ៉ូប៊ីន, P2C, ចៃដន្យ, ប្រើតិចបំផុត, ធ្វើឱ្យប្រសើរថ្លៃដើម, កំណត់ដឹងឡើងវិញ, កំណត់បង្អួចឡើងវិញ, បន្ទប់ក្បាល, ទម្ងន់កូតា, តឹងរ៉ឹង-ចៃដន្យ,** ស្វ័យប្រវត្តិ** , lkgp, context-optimized, cache-optimized, context-relay,** ការលាយបញ្ចូលគ្នា** , pipeline) — auto គឺជាការបន្ថែមចំណងជើងនៅក្នុង v3.8.0; `fusion` (panel fan-out + judge synthesis, `open-sse/services/fusion.ts`) គឺថ្មីនៅក្នុង v3.8.36 ។
+- **ពិន្ទុ ១៦ កត្តា** ៖ កូតា, សុខភាព, ថ្លៃដើមបញ្ច្រាស, ភាពយឺតយ៉ាវបញ្ច្រាស, បំពេញកិច្ចការ និងដប់បន្ថែមទៀត។ តារាង Canonical នៃកត្តា និងទម្ងន់លំនាំដើមរបស់ពួកគេរស់នៅក្នុង [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — ការស្ដារវានៅទីនេះនឹងផ្តល់ឱ្យវានូវកន្លែងទីពីរដើម្បីបាត់បង់។
+- **រោងចក្រនិម្មិត** បង្កើតបន្សំមិនទៀងទាត់ នៅពេលដែលមិនមានបន្សំឈ្មោះដែលត្រូវគ្នា ស្វែងរកបេក្ខជនពីការតភ្ជាប់អ្នកផ្តល់សេវាសកម្មដែលមានសុខភាពល្អ។
+- **បុព្វបទស្វ័យប្រវត្តិ** ៖ `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — នីមួយៗគាំទ្រដោយទម្រង់ទម្ងន់ដែលបានកែសម្រួល។
+- **កញ្ចប់ 6 របៀប** ៖ `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` និង `chaos-mode` — ការកំណត់រចនាសម្ព័ន្ធទម្ងន់កំណត់ជាមុនដែលអាចហៅបានពីផ្ទាំងគ្រប់គ្រង។ (មិនត្រូវច្រឡំជាមួយបុព្វបទ `auto/*` ខាងលើ ដែលជាវ៉ារ្យ៉ង់ពេលវេលាស្នើសុំ។ )
+
+សម្រាប់ព័ត៌មានលម្អិតអំពីក្បួនដោះស្រាយពេញលេញ (រូបមន្តកត្តា ការលៃតម្រូវទម្ងន់) សូមមើល [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ។
+
+### ខ. ភ្នាក់ងារពពក
+
+Cloud Agents គ្របដណ្តប់វេទិកាភ្នាក់ងារកូដដែលបង្ហោះដោយភាគីទីបី (Codex Cloud, Devin, Jules) នៅពីក្រោយវដ្តជីវិតការងារដែលគាំទ្រដោយ DB ឯកសណ្ឋាន។ ចំណុចបញ្ចប់ creation/inspection ទាំងអស់តម្រូវឱ្យមានការផ្ទៀងផ្ទាត់ការគ្រប់គ្រង។
+
+- ឫសម៉ូឌុល៖ `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, បូកថតរងភ្នាក់ងារក្រោម `agents/`)
+- ការអនុវត្តភ្នាក់ងារនីមួយៗ៖ `agents/codex/`, `agents/devin/`, `agents/jules/`
+- ចំណុចបញ្ចប់សាធារណៈ៖ `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- ចំណុចបញ្ចប់នៃការគ្រប់គ្រង៖ `/api/cloud/*` (ការផ្តល់ ស្ថានភាព បាច់)
+- ផ្ទាំងគ្រប់គ្រង៖ `/dashboard/cloud-agents`
+- ការផ្ទុក: តារាង `cloud_agent_tasks`
+
+សម្រាប់ការផ្តល់ភ្នាក់ងារនីមួយៗ និងព័ត៌មានលម្អិត OAuth សូមមើល [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ។
+
+### C. Guardrails
+
+ម៉ូឌុល guardrails គឺជាស្រទាប់ឧបករណ៍កណ្តាលដែលអាចផ្ទុកឡើងវិញបានយ៉ាងក្តៅគគុក ដែលត្រួតពិនិត្យសំណើ និងការឆ្លើយតបសម្រាប់ PII ការចាក់បញ្ចូលភ្លាមៗ និងខ្លឹមសារនៃចក្ខុវិស័យដែលមិនមានសុវត្ថិភាព។ ការរំលោភលើសៀគ្វីខ្លីនៃសំណើជាមួយ HTTP** ៥០៣** បូកនឹងកូដកំហុសដែលមានរចនាសម្ព័ន្ធ អនុញ្ញាតឱ្យអ្នកហៅទូរសព្ទខាងក្រោមព្យាយាមម្តងទៀត ឬសាខា។
+
+- ឫសម៉ូឌុល៖ `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- ផ្ទុកឡើងវិញយ៉ាងក្តៅគគុក៖ នាឡិកាចុះបញ្ជីសម្រាប់ការផ្លាស់ប្តូរការកំណត់ និងបង្កើតខ្សែសង្វាក់ឡើងវិញនៅនឹងកន្លែង
+- ចំណុចភ្ជាប់៖ ធាតុកម្មវិធីគ្រប់គ្រងការជជែក អ្នកគ្រប់គ្រងបង្កើតរូបភាព ទឹកអនាម័យឆ្លើយតប
+- កិច្ចសន្យាHTTP ៖ បំពានលើផ្ទៃដូច `503` ជាមួយ `error.code = "GUARDRAIL_VIOLATION"`
+
+សម្រាប់ការកំណត់ច្បាប់ និងការកំណត់កម្រិត សូមមើល [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ។
+
+### ឃ. ស្រទាប់ដែន
+
+ចន្លោះឈ្មោះ `src/domain/` ផ្តោតសំខាន់លើការសម្រេចចិត្តគោលនយោបាយ ដូច្នេះអ្នកដោះស្រាយផ្លូវមិនត្រូវប្រមូលផ្តុំតក្កវិជ្ជា lockout/budget/fallback ខ្លួនឯងទេ។
+
+- ម៉ាស៊ីនគោលការណ៍៖ ចំណុចចូលតែមួយ `src/domain/policyEngine.ts` — សម្រាប់ការវាយតម្លៃមុនការប្រតិបត្តិ (ការចាក់សោរ → ថវិកា → ការបញ្ជាទិញធ្លាក់ចុះ)
+- ច្បាប់ចំណាយ៖ `src/domain/costRules.ts`
+- គោលការណ៍ថយក្រោយ៖ `src/domain/fallbackPolicy.ts`
+- គោលការណ៍ចាក់សោរ៖ `src/domain/lockoutPolicy.ts`
+- ផ្លូវដែលមានមូលដ្ឋានលើស្លាក៖ `src/domain/tagRouter.ts`
+- ដំណោះស្រាយបន្សំ៖ `src/domain/comboResolver.ts` — ដោះស្រាយឈ្មោះបន្សំ បុព្វបទស្វ័យប្រវត្តិ/\* និងគោលដៅគំរូតួអក្សរជំនួសចំពោះផែនការអនុវត្តជាក់ស្តែង
+- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
+- រូបថតបង្ហាញពីភាពអាចរកបាននៃម៉ូដែល៖ `src/domain/modelAvailability.ts`
+- ការតាមដានការផុតកំណត់របស់អ្នកផ្តល់សេវា៖ `src/domain/providerExpiration.ts`
+- ឃ្លាំងសម្ងាត់កូតា៖ `src/domain/quotaCache.ts`
+- ស្ថានភាពរិចរិល៖ `src/domain/degradation.ts`
+- សវនកម្មការកំណត់រចនាសម្ព័ន្ធ៖ `src/domain/configAudit.ts`
+- អ្នកបង្កើតទិន្នន័យមេតាឆ្លើយតប OmniRoute ៖ `src/domain/omnirouteResponseMeta.ts`
+- ប្រព័ន្ធរងការវាយតម្លៃ៖ ការងារវាយតម្លៃតាមកាលកំណត់ `src/domain/assessment/` —
+
+### E. បំពង់អនុញ្ញាត
+
+បំពង់ផ្តល់ការអនុញ្ញាត ចាត់ថ្នាក់រាល់ការស្នើសុំចូល និងអនុវត្តខ្សែសង្វាក់គោលនយោបាយសមស្របមុនពេលបញ្ជូន។
+
+- ច្រកចូលបំពង់៖ `src/server/authz/pipeline.ts`
+- សំណើចាត់ថ្នាក់៖ `src/server/authz/classify.ts` — បែងចែកផ្លូវត្រូវគ្នាជាសាធារណៈពីផ្លូវគ្រប់គ្រង
+- សារពើភ័ណ្ឌផ្លូវសាធារណៈ៖ `src/shared/constants/publicApiRoutes.ts`
+- គោលការណ៍៖ `src/server/authz/policies/` — composable predicates (`requireApiKey`, `requireManagement`, `requireFreshAuth`, etc.)
+- ឧបករណ៍ប្រើប្រាស់បឋមកថា: `src/server/authz/headers.ts`
+- ជំនួយការអះអាង៖ `src/server/authz/assertAuth.ts`
+- ស្នើសុំបរិបទ៖ `src/server/authz/context.ts`
+
+ផ្លូវសាធារណៈទល់នឹងការគ្រប់គ្រងគឺជាព្រំដែនរឹង៖ agent/cooldown APIs និងការផ្លាស់ប្តូរអ្នកផ្តល់សេវាទាមទារសិទ្ធិគ្រប់គ្រង (HTTP 401 ប្រសិនបើបាត់)។
+
+សម្រាប់ច្បាប់ចំណាត់ថ្នាក់ផ្លូវពេញលេញ សូមមើល [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ។
+
+### F. Workflow FSM និង Task-Aware Router
+
+រ៉ោតទ័រដែលជំរុញដោយម៉ាស៊ីនដែលមានកម្រិតកំណត់នៅខាងលើការជ្រើសរើសបន្សំដើម្បីចរាចរដោយផ្ទាល់ដោយផ្អែកលើដំណាក់កាលនៃដំណើរការការងារដែលបានរកឃើញ (ការធ្វើផែនការ ការប្រតិបត្តិ ការពិនិត្យឡើងវិញ) និងភាពពាក់ព័ន្ធនៃកិច្ចការផ្ទៃខាងក្រោយ។
+
+- លំហូរការងារ FSM: `open-sse/services/workflowFSM.ts`
+- រ៉ោតទ័រដែលដឹងអំពីកិច្ចការ៖ `open-sse/services/taskAwareRouter.ts`
+- ឧបករណ៍ចាប់កិច្ចការផ្ទៃខាងក្រោយ៖ `open-sse/services/backgroundTaskDetector.ts`
+- អ្នកចាត់ថ្នាក់ចេតនា៖ `open-sse/services/intentClassifier.ts`
+
+ការផ្លាស់ប្តូរ FSM បញ្ចូលទៅក្នុងការដាក់ពិន្ទុរបស់ Auto Combo ដោយលំអៀងទៅរកម៉ូដែលថោកជាងសម្រាប់ភារកិច្ច background/automation និងឆ្ពោះទៅរកគំរូខ្លាំងជាងមុនសម្រាប់ការផ្លាស់ប្តូរ planning/review អន្តរកម្ម។
+
+### G. ភាពធន់នឹងអ្នកផ្តល់សេវាជាក់លាក់
+
+អ្នកផ្តល់សេវាជាច្រើនបានបញ្ជូនម៉ូឌុលធន់ទ្រាំ និងបំបាំងកាយដែលយកចិត្តទុកដាក់ដែល piggy-back នៅលើឧបករណ៍បំបែកសៀគ្វីសកល / ការតភ្ជាប់ cooldown / ស្រទាប់ចាក់សោម៉ូដែល:
+
+- ម៉ាស៊ីន Antigravity 429៖ `open-sse/services/antigravity429Engine.ts` (បង្វិលអត្តសញ្ញាណ ក្បាលក្បាលឆ្លើយតប ដុសខាត់ការតាមដាន credits/version តាមរយៈ `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (ថវិកាតាមសំណើរនៃ 429s ខាងលើនៅទូទាំង hosts ទាំងអស់ `ANTIGRAVITY_MAX_429_ATTEMPTS`; ការបញ្ជូនសារឡើងវិញដូចគ្នាបេះបិទនៃតួដែលត្រូវបានបដិសេធត្រូវបានឆ្លើយតបក្នុងមូលដ្ឋាន; `src/sse/handlers/chat.ts` មិនចាប់ផ្តើមសំណើបែបនេះឡើងវិញតាមរយៈការព្យាយាម cooldown-aware ម្តងទៀត)
+- គោលនយោបាយកូតាModelScope ៖ `open-sse/services/modelscopePolicy.ts`
+- Claude កូដ CCH (ភាពឆបគ្នានៃឆានែលការចាប់ដៃ): `open-sse/services/claudeCodeCCH.ts` បូក `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Code ទម្រង់ស្នាមម្រាមដៃ៖ `open-sse/services/claudeCodeFingerprint.ts`
+- Claude ការយល់ច្រឡំលេខកូដ៖ `open-sse/services/claudeCodeObfuscation.ts`
+
+សម្រាប់សៀវភៅបំបាំងកាយពេញលេញ និងការណែនាំអំពីប្រតិបត្តិការ សូមមើល `docs/security/STEALTH_GUIDE.md` (git; មិនត្រូវបានចងក្រងជា `/docs`)។
+
+### H. Webhooks, Reasoning Cache, Read Cache
+
+- **គេហទំព័រ** ការបញ្ជូនចេញទៅក្រៅប្រទេស — សម្រាប់ព្រឹត្តិការណ៍ provider/account/task ។
+  - អ្នកចែកចាយ៖ `src/lib/webhookDispatcher.ts`
+  - ការផ្ទុក៖ តារាង `webhooks` SQLite (តាមរយៈ `src/lib/db/webhooks.ts`)
+  - ផ្ទាំងគ្រប់គ្រង៖ `/dashboard/webhooks` (ការជាវ អាថ៌កំបាំង ប្រវត្តិព្យាយាមម្តងទៀត)
+  - សម្រាប់ការចាត់ថ្នាក់ព្រឹត្តិការណ៍ និងសាកល្បងន័យវិទ្យាឡើងវិញ សូមមើល [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ។
+- **ឃ្លាំងសម្ងាត់ហេតុផល** — ប្លុកហេតុផលដែលអាចចាក់ឡើងវិញបានសម្រាប់អ្នកផ្តល់សេវាដែលបញ្ចេញសញ្ញាគិត (Claude, GLMT, ល។ ) ដូច្នេះវេនជាប់ៗគ្នាអាចរំលងការគិតឡើងវិញ។
+  - ស្រទាប់DB : `src/lib/db/reasoningCache.ts`
+  - ស្រទាប់សេវាកម្ម៖ `open-sse/services/reasoningCache.ts`
+  - សម្រាប់ការចាក់សារឡើងវិញ សូមមើល [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ។
+- **អានឃ្លាំងសម្ងាត់** — ឃ្លាំងសម្ងាត់ការឆ្លើយតបរយៈពេលខ្លីត្រូវបានចាក់សោដោយហត្ថលេខា និងប្រើដើម្បីបង្រួមការព្យាយាមដូចគ្នាបេះបិទពី SDKs ខាងលើដែលខូច។
+  - ស្រទាប់DB : `src/lib/db/readCache.ts`
+  - ចំណុចបញ្ចប់នៃស្ថិតិ៖ `GET /api/cache/stats`, ផ្ទាំងគ្រប់គ្រងនៅ `/dashboard/cache`
+
+## 3) ស្រទាប់រក្សាទុកទិន្នន័យ
+
+មូលដ្ឋានទិន្នន័យស្ថានភាពចម្បង (SQLite)៖
+
+- ហេដ្ឋារចនាសម្ព័ន្ធស្នូល៖ `src/lib/db/core.ts` (better-sqlite3, migrations, WAL)
+- ការចូលប្រើ DB៖ នាំចូលម៉ូឌុល `src/lib/db/*` ជាក់លាក់ដោយផ្ទាល់ (`localDb.ts` barrel ចាស់ត្រូវបានដកចេញ)
+- ឯកសារ៖ `${DATA_DIR}/storage.sqlite` (ឬ `$XDG_CONFIG_HOME/omniroute/storage.sqlite` នៅពេលបានកំណត់ បើមិនដូច្នោះទេប្រើ `~/.omniroute/storage.sqlite`)
+- អង្គភាព (តារាង + KV namespaces)៖ providerConnections, providerNodes, modelAliases, combos, apiKeys, settings, pricing, **customModels**, **proxyConfig**, **ipFilter**, **thinkingBudget**, **systemPrompt**
+
+ការរក្សាទុកទិន្នន័យប្រើប្រាស់៖
+
+- facade៖ `src/lib/usageDb.ts` (ម៉ូឌុលដែលបានបំបែកនៅក្នុង `src/lib/usage/*`)
+- តារាង SQLite ក្នុង `storage.sqlite`៖ `usage_history`, `call_logs`, `proxy_logs`
+- វត្ថុឯកសារជាជម្រើសនៅតែរក្សាទុកសម្រាប់ភាពឆបគ្នា/ការបំបាត់កំហុស (`${DATA_DIR}/log.txt`, `${DATA_DIR}/call_logs/`, `<repo>/logs/...`)
+- ឯកសារ JSON ចាស់ៗត្រូវបានផ្ទេរទៅ SQLite ដោយ migrations នៅពេលចាប់ផ្ដើម ប្រសិនបើមានវត្តមាន
+
+មូលដ្ឋានទិន្នន័យស្ថានភាពដែន (SQLite)៖
+
+- `src/lib/db/domainState.ts` — ប្រតិបត្តិការ CRUD សម្រាប់ស្ថានភាពដែន
+- តារាង (បង្កើតនៅក្នុង `src/lib/db/core.ts`)៖ `domain_fallback_chains`, `domain_budgets`, `domain_cost_history`, `domain_lockout_state`, `domain_circuit_breakers`
+- លំនាំឃ្លាំងសម្ងាត់ write-through៖ Maps ក្នុងអង្គចងចាំជាប្រភពត្រឹមត្រូវនៅពេលដំណើរការ; ការផ្លាស់ប្ដូរត្រូវបានសរសេរទៅ SQLite ជាសមកាលកម្ម; ស្ថានភាពត្រូវបានស្ដារពី DB នៅពេលចាប់ផ្ដើមត្រជាក់
+
+## 4) ផ្ទៃប្រើប្រាស់សម្រាប់ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ + សុវត្ថិភាព
+
+- ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណរបស់ Dashboard តាមរយៈ cookie៖ `src/proxy.ts`, `src/app/api/auth/login/route.ts`
+- ការបង្កើត/ផ្ទៀងផ្ទាត់ API key៖ `src/shared/utils/apiKey.ts`
+- ព័ត៌មានសម្ងាត់របស់ Provider ត្រូវបានរក្សាទុកជាប់លាប់ក្នុងធាតុ `providerConnections`
+- ការគាំទ្រ proxy ចេញក្រៅតាមរយៈ `open-sse/utils/proxyFetch.ts` (អថេរបរិស្ថាន) និង `open-sse/utils/networkProxy.ts` (អាចកំណត់រចនាសម្ព័ន្ធតាម Provider នីមួយៗ ឬជាសកល)
+- ឧបករណ៍ការពារ SSRF / URL ចេញក្រៅ៖ `src/shared/network/outboundUrlGuard.ts` — ពិនិត្យ host លើការហៅទៅកាន់ Provider និងគោលដៅ webhook; របៀបដំណើរការមកពី `src/shared/network/outboundUrlGuardPolicy.ts` (ទង់កំណត់ក្នុង `docs/reference/ENVIRONMENT.md`)
+- ការផ្ទៀងផ្ទាត់អថេរបរិស្ថាននៅពេលដំណើរការ៖ `src/lib/env/runtimeEnv.ts` — Zod schema សម្រាប់អថេរបរិស្ថានទាំងអស់ ដែលបង្ហាញជាកំហុស/ការព្រមាននៅពេលចាប់ផ្ដើម
+- ថូខិនធ្វើសមកាលកម្ម៖ `src/lib/db/syncTokens.ts` — ថូខិនដែលបានកំណត់វិសាលភាពសម្រាប់ endpoint ទាញយកកញ្ចប់ការកំណត់រចនាសម្ព័ន្ធ; គាំទ្រដោយតារាង SQLite `sync_tokens` (migration `024_create_sync_tokens.sql`)
+- ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណពេលចាប់ដៃ WebSocket៖ `src/lib/ws/handshake.ts` — ផ្ទៀងផ្ទាត់សំណើដំឡើងកម្រិត WS តាមរយៈ API key ឬ session cookie
+- ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ WebSocket ផ្ទាល់របស់ Dashboard៖ `src/server/ws/liveServer.ts` — sidecar (port `LIVE_WS_PORT`) ទទួលយក session cookie របស់ Dashboard ឬ Bearer API key ដែលមានវិសាលភាពគ្រប់គ្រង (`manage`/`admin`); key ដែលសម្រាប់តែ inference ត្រូវបានបដិសេធ។ endpoint ផ្សព្វផ្សាយខាងក្នុង `POST /__omniroute_event` របស់វាទទួលយកតែ peer ពី loopback ប៉ុណ្ណោះ នៅពេលមិនមាន header ឆ្លងកាត់ proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
+
+## 5) ការធ្វើសមកាលកម្ម Cloud
+
+- ការចាប់ផ្ដើមកម្មវិធីកំណត់កាលវិភាគ៖ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ភារកិច្ចតាមកាលកំណត់៖ `src/shared/services/cloudSyncScheduler.ts`
+- ភារកិច្ចតាមកាលកំណត់៖ `src/shared/services/modelSyncScheduler.ts`
+- route សម្រាប់គ្រប់គ្រង៖ `src/app/api/sync/cloud/route.ts`
+
+## វដ្តជីវិតនៃសំណើ (`/v1/chat/completions`)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Client as ម៉ាស៊ីនភ្ញៀវ CLI/SDK
+    participant Route as /api/v1/chat/completions
+    participant Chat as src/sse/handlers/chat
+    participant Core as open-sse/handlers/chatCore
+    participant Model as កម្មវិធីដោះស្រាយម៉ូដែល
+    participant Auth as កម្មវិធីជ្រើសរើសព័ត៌មានសម្គាល់អត្តសញ្ញាណ
+    participant Exec as កម្មវិធីប្រតិបត្តិរបស់អ្នកផ្តល់សេវា
+    participant Prov as អ្នកផ្តល់សេវាខាងលើ
+    participant Stream as កម្មវិធីបកប្រែស្ទ្រីម
+    participant Usage as usageDb
+
+    Client->>Route: POST /v1/chat/completions
+    Route->>Chat: handleChat(request)
+    Chat->>Model: ញែក/ដោះស្រាយម៉ូដែល ឬបន្សំម៉ូដែល
+
+    alt ម៉ូដែលបន្សំ
+        Chat->>Chat: ធ្វើម្តងហើយម្តងទៀតលើម៉ូដែលបន្សំ (handleComboChat)
+    end
+
+    Chat->>Auth: getProviderCredentials(provider)
+    Auth-->>Chat: គណនីសកម្ម + token/API key
+
+    Chat->>Core: handleChatCore(body, modelInfo, credentials)
+    Core->>Core: រកឃើញទម្រង់ប្រភព
+    Core->>Core: បម្លែងសំណើទៅជាទម្រង់គោលដៅ
+    Core->>Exec: execute(provider, transformedBody)
+    Exec->>Prov: ការហៅ API ខាងលើ
+    Prov-->>Exec: ការឆ្លើយតប SSE/JSON
+    Exec-->>Core: ការឆ្លើយតប + metadata
+
+    alt 401/403
+        Core->>Exec: refreshCredentials()
+        Exec-->>Core: token ដែលបានធ្វើបច្ចុប្បន្នភាព
+        Core->>Exec: ព្យាយាមសំណើម្តងទៀត
+    end
+
+    Core->>Stream: បម្លែង/ធ្វើឱ្យស្ទ្រីមមានស្តង់ដារទៅជាទម្រង់របស់ម៉ាស៊ីនភ្ញៀវ
+    Stream-->>Client: បំណែក SSE / ការឆ្លើយតប JSON
+
+    Stream->>Usage: ស្រង់ទិន្នន័យការប្រើប្រាស់ + រក្សាទុកប្រវត្តិ/កំណត់ហេតុ
+```
+
+## លំហូរ Combo + ការប្ដូរទៅគណនីបម្រុង
+
+```mermaid
+flowchart TD
+    A[ខ្សែអក្សរម៉ូដែលចូលមក] --> B{ជាឈ្មោះ combo មែនទេ?}
+    B -- បាទ/ចាស --> C[ផ្ទុកលំដាប់ម៉ូដែលរបស់ combo]
+    B -- ទេ --> D[ផ្លូវម៉ូដែលតែមួយ]
+
+    C --> E[សាកល្បងម៉ូដែល N]
+    E --> F[កំណត់ provider/model]
+    D --> F
+
+    F --> G[ជ្រើសរើសព័ត៌មានសម្ងាត់គណនី]
+    G --> H{មានព័ត៌មានសម្ងាត់ទេ?}
+    H -- ទេ --> I[ត្រឡប់ថា provider មិនអាចប្រើបាន]
+    H -- បាទ/ចាស --> J[ប្រតិបត្តិសំណើ]
+
+    J --> K{ជោគជ័យទេ?}
+    K -- បាទ/ចាស --> L[ត្រឡប់ការឆ្លើយតប]
+    K -- ទេ --> M{កំហុសដែលអាចប្ដូរទៅជម្រើសបម្រុងបាន?}
+
+    M -- ទេ --> N[ត្រឡប់កំហុស]
+    M -- បាទ/ចាស --> O[សម្គាល់គណនីថាមិនអាចប្រើបានក្នុងរយៈពេល cooldown]
+    O --> P{មានគណនីផ្សេងទៀតសម្រាប់ provider ទេ?}
+    P -- បាទ/ចាស --> G
+    P -- ទេ --> Q{ស្ថិតក្នុង combo ដែលមានម៉ូដែលបន្ទាប់ទេ?}
+    Q -- បាទ/ចាស --> E
+    Q -- ទេ --> R[ត្រឡប់ថាទាំងអស់មិនអាចប្រើបាន]
+```
+
+ការសម្រេចចិត្តប្ដូរទៅជម្រើសបម្រុងត្រូវបានកំណត់ដោយ `open-sse/services/accountFallback.ts` ដោយប្រើកូដស្ថានភាព និងការវិនិច្ឆ័យផ្អែកលើសារកំហុស។ ការកំណត់ផ្លូវរបស់ Combo បន្ថែមលក្ខខណ្ឌការពារមួយទៀត៖ កំហុស 400 ដែលមានវិសាលភាពត្រឹម provider ដូចជា ការរារាំងខ្លឹមសារពី upstream និងការបរាជ័យក្នុងការផ្ទៀងផ្ទាត់តួនាទី ត្រូវបានចាត់ទុកថាជាការបរាជ័យមូលដ្ឋានរបស់ម៉ូដែល ដើម្បីឱ្យគោលដៅបន្ទាប់ៗក្នុង combo នៅតែអាចដំណើរការបាន។
+
+## វដ្តជីវិតនៃការចាប់ផ្ដើមប្រើ OAuth និងការធ្វើឱ្យ Token ស្រស់ឡើងវិញ
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as UI ផ្ទាំងគ្រប់គ្រង
+    participant OAuth as /api/oauth/[provider]/[action]
+    participant ProvAuth as ម៉ាស៊ីនមេផ្ទៀងផ្ទាត់អត្តសញ្ញាណរបស់ Provider
+    participant DB as localDb
+    participant Test as /api/providers/[id]/test
+    participant Exec as កម្មវិធីប្រតិបត្តិរបស់ Provider
+
+    UI->>OAuth: GET ការអនុញ្ញាត ឬកូដឧបករណ៍
+    OAuth->>ProvAuth: បង្កើតលំហូរផ្ទៀងផ្ទាត់អត្តសញ្ញាណ/ឧបករណ៍
+    ProvAuth-->>OAuth: URL ផ្ទៀងផ្ទាត់អត្តសញ្ញាណ ឬទិន្នន័យកូដឧបករណ៍
+    OAuth-->>UI: ទិន្នន័យលំហូរ
+
+    UI->>OAuth: POST ការប្ដូរ ឬការស្ទង់ពិនិត្យ
+    OAuth->>ProvAuth: ការប្ដូរ token/ការស្ទង់ពិនិត្យ
+    ProvAuth-->>OAuth: access/refresh tokens
+    OAuth->>DB: createProviderConnection(ទិន្នន័យ oauth)
+    OAuth-->>UI: ជោគជ័យ + លេខសម្គាល់ការតភ្ជាប់
+
+    UI->>Test: POST /api/providers/[id]/test
+    Test->>Exec: ផ្ទៀងផ្ទាត់ព័ត៌មានសម្ងាត់ / ធ្វើឱ្យស្រស់ឡើងវិញជាជម្រើស
+    Exec-->>Test: ព័ត៌មាន token ដែលមានសុពលភាព ឬត្រូវបានធ្វើឱ្យស្រស់ឡើងវិញ
+    Test->>DB: ធ្វើបច្ចុប្បន្នភាពស្ថានភាព/tokens/កំហុស
+    Test-->>UI: លទ្ធផលផ្ទៀងផ្ទាត់
+```
+
+ការធ្វើឱ្យស្រស់ឡើងវិញក្នុងអំឡុងពេលចរាចរណ៍ផ្ទាល់ ត្រូវបានប្រតិបត្តិនៅខាងក្នុង `open-sse/handlers/chatCore.ts` តាមរយៈ `refreshCredentials()` របស់កម្មវិធីប្រតិបត្តិ។
+
+## វដ្តជីវិតនៃការធ្វើសមកាលកម្ម Cloud (បើក / ធ្វើសមកាលកម្ម / បិទ)
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant UI as UI ទំព័រ Endpoint
+    participant Sync as /api/sync/cloud
+    participant DB as localDb
+    participant Cloud as ការធ្វើសមកាលកម្ម Cloud ខាងក្រៅ
+    participant Claude as ~/.claude/settings.json
+
+    UI->>Sync: POST action=enable
+    Sync->>DB: កំណត់ cloudEnabled=true
+    Sync->>DB: ធានាថាមាន API key
+    Sync->>Cloud: POST /sync/{machineId} (providers/aliases/combos/keys)
+    Cloud-->>Sync: លទ្ធផលសមកាលកម្ម
+    Sync->>Cloud: GET /{machineId}/v1/verify
+    Sync-->>UI: បានបើក + ស្ថានភាពផ្ទៀងផ្ទាត់
+
+    UI->>Sync: POST action=sync
+    Sync->>Cloud: POST /sync/{machineId}
+    Cloud-->>Sync: ទិន្នន័យពីចម្ងាយ
+    Sync->>DB: ធ្វើបច្ចុប្បន្នភាព tokens/ស្ថានភាពមូលដ្ឋានដែលថ្មីជាង
+    Sync-->>UI: បានធ្វើសមកាលកម្ម
+
+    UI->>Sync: POST action=disable
+    Sync->>DB: កំណត់ cloudEnabled=false
+    Sync->>Cloud: DELETE /sync/{machineId}
+    Sync->>Claude: ប្ដូរ ANTHROPIC_BASE_URL ត្រឡប់ទៅ local (ប្រសិនបើចាំបាច់)
+    Sync-->>UI: បានបិទ
+```
+
+ការធ្វើសមកាលកម្មតាមកាលកំណត់ត្រូវបានចាប់ផ្ដើមដោយ `CloudSyncScheduler` នៅពេលបើក cloud។
+
+## ម៉ូដែលទិន្នន័យ និងផែនទីការផ្ទុក
+
+```mermaid
+erDiagram
+    SETTINGS ||--o{ PROVIDER_CONNECTION : controls
+    PROVIDER_NODE ||--o{ PROVIDER_CONNECTION : backs_compatible_provider
+    PROVIDER_CONNECTION ||--o{ USAGE_ENTRY : emits_usage
+
+    SETTINGS {
+      boolean cloudEnabled
+      number stickyRoundRobinLimit
+      boolean requireLogin
+      string password_hash
+      string fallbackStrategy
+      json rateLimitDefaults
+      json providerProfiles
+    }
+
+    PROVIDER_CONNECTION {
+      string id
+      string provider
+      string authType
+      string name
+      number priority
+      boolean isActive
+      string apiKey
+      string accessToken
+      string refreshToken
+      string expiresAt
+      string testStatus
+      string lastError
+      string rateLimitedUntil
+      json providerSpecificData
+    }
+
+    PROVIDER_NODE {
+      string id
+      string type
+      string name
+      string prefix
+      string apiType
+      string baseUrl
+    }
+
+    MODEL_ALIAS {
+      string alias
+      string targetModel
+    }
+
+    COMBO {
+      string id
+      string name
+      string[] models
+    }
+
+    API_KEY {
+      string id
+      string name
+      string key
+      string machineId
+    }
+
+    USAGE_ENTRY {
+      string provider
+      string model
+      number prompt_tokens
+      number completion_tokens
+      string connectionId
+      string timestamp
+    }
+
+    CUSTOM_MODEL {
+      string id
+      string name
+      string providerId
+    }
+
+    PROXY_CONFIG {
+      string global
+      json providers
+    }
+
+    IP_FILTER {
+      string mode
+      string[] allowlist
+      string[] blocklist
+    }
+
+    THINKING_BUDGET {
+      string mode
+      number customBudget
+      string effortLevel
+    }
+
+    SYSTEM_PROMPT {
+      boolean enabled
+      string prompt
+      string position
+    }
+```
+
+ឯកសារផ្ទុកជាក់ស្តែង៖
+
+- មូលដ្ឋានទិន្នន័យ runtime ចម្បង៖ `${DATA_DIR}/storage.sqlite`
+- បន្ទាត់កំណត់ហេតុសំណើ៖ `${DATA_DIR}/log.txt` (វត្ថុបន្សំសម្រាប់ភាពឆបគ្នា/ការបំបាត់កំហុស)
+- បណ្ណសាររចនាសម្ព័ន្ធនៃ payload ការហៅ៖ `${DATA_DIR}/call_logs/`
+- សម័យបំបាត់កំហុសជាជម្រើសសម្រាប់កម្មវិធីបកប្រែ/សំណើ៖ `<repo>/logs/...`
+
+## តូប៉ូឡូស៊ីនៃការដាក់ឱ្យប្រើប្រាស់
+
+```mermaid
+flowchart LR
+    subgraph LocalHost[ម៉ាស៊ីនរបស់អ្នកអភិវឌ្ឍន៍]
+        CLI[ឧបករណ៍ CLI]
+        Browser[កម្មវិធីរុករកផ្ទាំងគ្រប់គ្រង]
+    end
+
+    subgraph ContainerOrProcess[បរិស្ថានប្រតិបត្តិការ OmniRoute]
+        Next[ម៉ាស៊ីនបម្រើ Next.js\nPORT=20128]
+        Core[ស្នូល SSE + កម្មវិធីប្រតិបត្តិ]
+        MainDB[(storage.sqlite)]
+        UsageDB[(តារាងទិន្នន័យប្រើប្រាស់ + វត្ថុបង្កើតកំណត់ហេតុ)]
+    end
+
+    subgraph External[សេវាកម្មខាងក្រៅ]
+        Providers[អ្នកផ្តល់សេវា AI]
+        SyncCloud[សេវាធ្វើសមកាលកម្មលើក្លោដ]
+    end
+
+    CLI --> Next
+    Browser --> Next
+    Next --> Core
+    Next --> MainDB
+    Core --> MainDB
+    Core --> UsageDB
+    Core --> Providers
+    Next --> SyncCloud
+```
+
+## ការផ្គូផ្គងម៉ូឌុល (សំខាន់សម្រាប់ការសម្រេចចិត្ត)
+
+### ម៉ូឌុល Route និង API
+
+- `src/app/api/v1/*`, `src/app/api/v1beta/*`៖ API សម្រាប់ភាពឆបគ្នា
+- `src/app/api/v1/providers/[provider]/*`៖ route ដាច់ដោយឡែកសម្រាប់ provider នីមួយៗ (ការជជែក, embeddings, រូបភាព)
+- `src/app/api/providers*`៖ CRUD, ការផ្ទៀងផ្ទាត់ និងការធ្វើតេស្ត provider
+- `src/app/api/provider-nodes*`៖ ការគ្រប់គ្រង node ឆបគ្នាផ្ទាល់ខ្លួន
+- `src/app/api/provider-models`៖ ការគ្រប់គ្រងម៉ូដែលផ្ទាល់ខ្លួន (CRUD)
+- `src/app/api/models/route.ts`៖ API កាតាឡុកម៉ូដែល (alias + ម៉ូដែលផ្ទាល់ខ្លួន)
+- `src/app/api/oauth/*`៖ លំហូរ OAuth/device-code
+- `src/app/api/keys*`៖ វដ្តជីវិត API key មូលដ្ឋាន
+- `src/app/api/models/alias`៖ ការគ្រប់គ្រង alias
+- `src/app/api/combos*`៖ ការគ្រប់គ្រង fallback combo
+- `src/app/api/pricing`៖ ការកំណត់តម្លៃជំនួសសម្រាប់ការគណនាចំណាយ
+- `src/app/api/settings/proxy`៖ ការកំណត់រចនាសម្ព័ន្ធ proxy (GET/PUT/DELETE)
+- `src/app/api/settings/proxy/test`៖ ការធ្វើតេស្តការតភ្ជាប់ proxy ចេញក្រៅ (POST)
+- `src/app/api/usage/*`៖ API សម្រាប់ការប្រើប្រាស់ និងកំណត់ហេតុ
+- `src/app/api/sync/*` + `src/app/api/cloud/*`៖ ការធ្វើសមកាលកម្ម cloud និងឧបករណ៍ជំនួយដែលទាក់ទងនឹង cloud
+- `src/app/api/cli-tools/*`៖ ឧបករណ៍សរសេរ/ត្រួតពិនិត្យការកំណត់រចនាសម្ព័ន្ធ CLI មូលដ្ឋាន
+- `src/app/api/settings/ip-filter`៖ IP allowlist/blocklist (GET/PUT)
+- `src/app/api/settings/thinking-budget`៖ ការកំណត់រចនាសម្ព័ន្ធថវិកា thinking token (GET/PUT)
+- `src/app/api/settings/system-prompt`៖ system prompt សកល (GET/PUT)
+- `src/app/api/settings/compression`៖ ការកំណត់ការបង្ហាប់សកល (GET/PUT)
+- `src/app/api/compression/*`៖ ការមើលការបង្ហាប់ជាមុន, metadata នៃច្បាប់ និងកញ្ចប់ភាសា
+- `src/app/api/context/caveman/config`៖ alias សម្រាប់ការកំណត់ Caveman (GET/PUT)
+- `src/app/api/context/rtk/*`៖ ការកំណត់ RTK, កាតាឡុកតម្រង, endpoint សាកល្បង និងការសង្គ្រោះ raw-output
+- `src/app/api/context/combos*`៖ CRUD នៃ compression combo និងការចាត់តាំង routing-combo
+- `src/app/api/context/analytics`៖ alias សម្រាប់ការវិភាគការបង្ហាប់
+- `src/app/api/sessions`៖ បញ្ជីសម័យដែលកំពុងសកម្ម (GET)
+- `src/app/api/rate-limits`៖ ស្ថានភាពដែនកំណត់អត្រាតាមគណនី (GET)
+- `src/app/api/sync/tokens`៖ CRUD នៃ sync token (GET/POST)
+- `src/app/api/sync/tokens/[id]`៖ ទាញយក/លុប sync token (GET/DELETE)
+- `src/app/api/sync/bundle`៖ ទាញយកកញ្ចប់ការកំណត់រចនាសម្ព័ន្ធ (GET, ការកំណត់កំណែដោយ ETag)
+- `src/app/api/v1/ws`៖ handler សម្រាប់ការដំឡើងកម្រិត WebSocket សម្រាប់ client WS ដែលឆបគ្នាជាមួយ OpenAI
+
+### ស្នូលនៃការ Routing និងការប្រតិបត្តិ
+
+- `src/sse/handlers/chat.ts`៖ ញែកសំណើ, ដោះស្រាយ combo និងរង្វិលជុំជ្រើសរើសគណនី
+- `open-sse/handlers/chatCore.ts`៖ ការបកប្រែ, បញ្ជូនទៅ executor, ដោះស្រាយការព្យាយាមឡើងវិញ/ការធ្វើឱ្យថ្មី និងការរៀបចំ stream
+- `open-sse/executors/*`៖ ឥរិយាបថបណ្តាញ និងទម្រង់ជាក់លាក់សម្រាប់ provider
+
+### Registry ការបកប្រែ និងកម្មវិធីបម្លែងទម្រង់
+
+- `open-sse/translator/index.ts`: បញ្ជីចុះឈ្មោះ និងការសម្របសម្រួលកម្មវិធីបកប្រែ
+- កម្មវិធីបកប្រែសំណើ៖ `open-sse/translator/request/*` (9 ម៉ូឌុល — `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`)
+- កម្មវិធីបកប្រែការឆ្លើយតប៖ `open-sse/translator/response/*` (11 ម៉ូឌុល — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`, `openai-to-gemini`, `openai-to-gemini-sse`, `responsesToolItem`)
+- មុខងារជំនួយ៖ `open-sse/translator/helpers/*` (12 ម៉ូឌុល — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `jsonUtil`, `markdownBoundary`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `strictSystemHoist`, `toolCallHelper`, `toolCallShim`)
+- ថេរទម្រង់៖ `open-sse/translator/formats.ts`
+- ការចាប់ផ្ដើម និងបញ្ជីចុះឈ្មោះ៖ `open-sse/translator/bootstrap.ts`, `open-sse/translator/registry.ts`
+- មុខងារជំនួយទម្រង់រូបភាព៖ `open-sse/translator/image/`
+
+### ការរក្សាទុកទិន្នន័យ
+
+- `src/lib/db/*`: ការកំណត់រចនាសម្ព័ន្ធ/ស្ថានភាពជាប់លាប់ និងការរក្សាទុកទិន្នន័យដែននៅលើ SQLite
+- `src/lib/db/*`: នាំចូលម៉ូឌុលជាក់លាក់ដោយផ្ទាល់ — មិនប្រើ barrel ទេ (ស្រទាប់នាំចេញបន្ត `localDb.ts` ចាស់ត្រូវបានដកចេញ)
+- `src/lib/usageDb.ts`: ចំណុចប្រទាក់សម្រាប់ប្រវត្តិការប្រើប្រាស់/កំណត់ហេតុការហៅនៅលើតារាង SQLite
+
+## វិសាលភាព Executor របស់ Provider (លំនាំ Strategy)
+
+Provider នីមួយៗមាន executor ឯកទេសមួយដែលពង្រីកពី `BaseExecutor` (នៅក្នុង `open-sse/executors/base.ts`) ដែលផ្តល់នូវការបង្កើត URL, ការស្ថាបនា header, ការព្យាយាមម្តងទៀតដោយប្រើ exponential backoff, hooks សម្រាប់ធ្វើឱ្យ credential ថ្មីឡើងវិញ និង method `execute()` សម្រាប់រៀបចំលំហូរការងារ។
+
+| កម្មវិធីប្រតិបត្តិ        | អ្នកផ្តល់សេវា                                                                                                                                               | ការដោះស្រាយពិសេស                                                            |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `DefaultExecutor`         | OpenAI, Claude, Gemini, Qwen, OpenRouter, GLM, Kimi, MiniMax, DeepSeek, Groq, xAI, Mistral, Perplexity, Together, Fireworks, Cerebras, Cohere, NVIDIA ជាដើម | ការកំណត់រចនាសម្ព័ន្ធ URL/header បែបឌីណាមិកសម្រាប់អ្នកផ្តល់សេវានីមួយៗ        |
+| `AntigravityExecutor`     | Google Antigravity                                                                                                                                          | ID គម្រោង/សម័យផ្ទាល់ខ្លួន ការញែកតម្លៃ Retry-After និងការបិទបាំង 429         |
+| `AzureOpenAIExecutor`     | Azure OpenAI                                                                                                                                                | ការបញ្ជូនតាម deployment និងការបង្ខំឱ្យប្រើ query api-version                |
+| `BlackboxWebExecutor`     | Blackbox AI (មុខងារវេប)                                                                                                                                     | ការធ្វើ reverse សម័យវេបជាមួយការត្រាប់តាម TLS fingerprint                    |
+| `ClaudeIdentityExecutor`  | Claude.ai (ផ្លូវ CCH)                                                                                                                                       | ខ្សែដំណើរការ constraint + tool-remap និងការកែទម្រង់ fingerprint             |
+| `CliProxyApiExecutor`     | អ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ CLIProxyAPI                                                                                                                     | ការដោះស្រាយការផ្ទៀងផ្ទាត់ និង protocol ផ្ទាល់ខ្លួន                          |
+| `CloudflareAiExecutor`    | Cloudflare Workers AI                                                                                                                                       | ការបញ្ចូល Account ID និងការតាមដានការប្រើប្រាស់ផ្អែកលើ Neurons               |
+| `CodexExecutor`           | OpenAI Codex                                                                                                                                                | បញ្ចូលសេចក្តីណែនាំប្រព័ន្ធ និងបង្ខំកម្រិតការគិតពិចារណា                      |
+| `ChatGptWebCodexExecutor` | ChatGPT Web (Codex)                                                                                                                                         | ស្ពាន Responses API របស់សម័យ browser ជាមួយការចងភ្ជាប់ thread/turn           |
+| `CommandCodeExecutor`     | Command Code                                                                                                                                                | OAuth + ការបង្វិល header តាមសម័យនីមួយៗ                                      |
+| `CursorExecutor`          | Cursor IDE                                                                                                                                                  | protocol ConnectRPC ការអ៊ិនកូដ Protobuf និងការចុះហត្ថលេខាលើសំណើតាម checksum |
+| `DevinCliExecutor`        | Devin CLI                                                                                                                                                   | ការតភ្ជាប់វដ្តជីវិតភារកិច្ច Devin តាមម៉ូឌុល cloud agent                     |
+| `GithubExecutor`          | GitHub Copilot                                                                                                                                              | ការធ្វើឱ្យ token Copilot ស្រស់ឡើងវិញ និង header ដែលត្រាប់តាម VSCode         |
+| `GitlabExecutor`          | GitLab Duo                                                                                                                                                  | GitLab OAuth + ការបញ្ជូនតាមវិសាលភាពគម្រោង                                   |
+| `GlmExecutor`             | Z.AI GLM (រួមទាំង preset `glmt`)                                                                                                                            | យល់ដឹងអំពីថវិកាការគិត និងតម្លៃថេរ preset GLMT                               |
+| `GrokWebExecutor`         | xAI Grok web                                                                                                                                                | ការធ្វើ reverse សម័យវេប និងការជ្រើសរើសមុខងារ (គិត/ស្តង់ដារ)                 |
+| `KieExecutor`             | KIE                                                                                                                                                         | ការចេញ token ផ្ទាល់ខ្លួនជាមួយ anchor សម័យដែលបង្វិលផ្លាស់ប្តូរ               |
+| `KiroExecutor`            | AWS CodeWhisperer/Kiro                                                                                                                                      | ទម្រង់គោលពីរ AWS EventStream → ការបម្លែង SSE                                |
+| `MuseSparkWebExecutor`    | Muse Spark (វេប)                                                                                                                                            | ការធ្វើ reverse សម័យវេបជាមួយការតភ្ជាប់សាររូបភាព                             |
+| `NlpCloudExecutor`        | NLP Cloud                                                                                                                                                   | ទម្រង់ request body ជាក់លាក់សម្រាប់អ្នកផ្តល់សេវា                            |
+| `OpenCodeExecutor`        | OpenCode                                                                                                                                                    | ការរៀបចំអ្នកផ្តល់សេវាដែលឆបគ្នាជាមួយ AI SDK                                  |
+| `PerplexityWebExecutor`   | Perplexity web                                                                                                                                              | ការធ្វើ reverse សម័យវេបសម្រាប់ការបន្តការជជែក                                |
+| `PetalsExecutor`          | ការសន្និដ្ឋានចែកចាយ Petals                                                                                                                                  | ការបញ្ជូនតាម swarm វិមជ្ឈការ                                                |
+| `PollinationsExecutor`    | Pollinations AI                                                                                                                                             | មិនត្រូវការ API key និងសំណើដែលកំណត់អត្រា                                    |
+| `QoderExecutor`           | Qoder AI                                                                                                                                                    | គាំទ្រ PAT និង OAuth ព្រមទាំងកម្រិតឥតគិតថ្លៃពហុម៉ូដែល                       |
+| `VertexExecutor`          | Google Vertex AI                                                                                                                                            | ការផ្ទៀងផ្ទាត់ service account និង endpoint ផ្អែកលើតំបន់                    |
+| `DevinDesktopExecutor`    | Devin Desktop                                                                                                                                               | API key ដែលបាននាំចូល + ការផ្សាយ chat តាម Connect-protobuf                   |
+
+អ្នកផ្តល់សេវាផ្សេងទៀតទាំងអស់ (រួមទាំងថ្នាំងឆបគ្នាផ្ទាល់ខ្លួន) ប្រើ `DefaultExecutor`។
+
+## ម៉ាទ្រីសភាពឆបគ្នារបស់អ្នកផ្តល់សេវា
+
+> **ចំណាំ៖** ម៉ាទ្រីសខាងក្រោមនេះគឺជាគំរូតំណាងនៃអ្នកផ្តល់សេវាដែលបានចុះឈ្មោះចំនួន 351 នៅក្នុង
+> OmniRoute v3.8.0។ សម្រាប់បញ្ជីផ្លូវការដែលត្រូវបានធ្វើបច្ចុប្បន្នភាពជាបន្តបន្ទាប់ សូមមើល
+> [`docs/reference/PROVIDER_REFERENCE.md`](../reference/PROVIDER_REFERENCE.md) (បានបង្កើតដោយស្វ័យប្រវត្តិ) ឬប្រភព
+> ផ្លូវការនៅ `src/shared/constants/providers.ts` (បានផ្ទៀងផ្ទាត់ដោយ Zod នៅពេលផ្ទុក)។
+
+| អ្នកផ្តល់សេវា       | ទម្រង់           | ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ   | ស្ទ្រីម          | មិនស្ទ្រីម | ការធ្វើឱ្យថូខឹនថ្មីឡើងវិញ | API ការប្រើប្រាស់         |
+| ------------------- | ---------------- | -------------------------- | ---------------- | ---------- | ------------------------- | ------------------------- |
+| Claude              | claude           | កូនសោ API / OAuth          | ✅               | ✅         | ✅                        | ⚠️ សម្រាប់តែអ្នកគ្រប់គ្រង |
+| Gemini              | gemini           | កូនសោ API / OAuth          | ✅               | ✅         | ✅                        | ⚠️ Cloud Console          |
+| Antigravity         | antigravity      | OAuth                      | ✅               | ✅         | ✅                        | ✅ API កូតាពេញលេញ         |
+| OpenAI              | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Codex               | openai-responses | OAuth                      | ✅ បង្ខំ         | ❌         | ✅                        | ✅ ដែនកំណត់អត្រា          |
+| ChatGPT Web (Codex) | openai-responses | សម័យកម្មកម្មវិធីរុករក      | ✅ បង្ខំ         | ❌         | ❌                        | ❌                        |
+| GitHub Copilot      | openai           | OAuth + ថូខឹន Copilot      | ✅               | ✅         | ✅                        | ✅ ទិដ្ឋភាពកូតាតាមពេលវេលា |
+| Cursor              | cursor           | Checksum ផ្ទាល់ខ្លួន       | ✅               | ✅         | ❌                        | ❌                        |
+| Kiro                | kiro             | AWS SSO OIDC               | ✅ (EventStream) | ❌         | ✅                        | ✅ ដែនកំណត់ការប្រើប្រាស់  |
+| Qoder               | openai           | OAuth / PAT                | ✅               | ✅         | ✅                        | ⚠️ ក្នុងមួយសំណើ           |
+| Kilo Code           | openai           | OAuth                      | ✅               | ✅         | ✅                        | ❌                        |
+| Cline               | openai           | OAuth                      | ✅               | ✅         | ✅                        | ❌                        |
+| Kimi Coding         | openai           | OAuth                      | ✅               | ✅         | ✅                        | ❌                        |
+| OpenRouter          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| GLM/Kimi/MiniMax    | claude           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| DeepSeek            | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Groq                | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| xAI (Grok)          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Mistral             | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Perplexity          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Together AI         | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Fireworks AI        | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Cerebras            | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Cohere              | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| NVIDIA NIM          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Cloudflare AI       | openai           | ថូខឹន API + លេខសម្គាល់គណនី | ✅               | ✅         | ❌                        | ❌                        |
+| Pollinations        | openai           | គ្មាន (មិនត្រូវការកូនសោ)   | ✅               | ✅         | ❌                        | ❌                        |
+| Scaleway AI         | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| LongCat             | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Ollama Cloud        | openai           | កូនសោ API (ស្រេចចិត្ត)     | ✅               | ✅         | ❌                        | ❌                        |
+| HuggingFace         | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Nebius              | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| SiliconFlow         | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Hyperbolic          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Vertex AI           | gemini           | គណនីសេវាកម្ម               | ✅               | ✅         | ✅                        | ⚠️ Cloud Console          |
+| Command Code        | openai           | OAuth                      | ✅               | ✅         | ✅                        | ⚠️ ក្នុងមួយសំណើ           |
+| Z.AI / GLM          | openai           | កូនសោ API / OAuth          | ✅               | ✅         | ❌                        | ❌                        |
+| GLMT (កំណត់ជាមុន)   | claude           | កូនសោ API                  | ✅               | ✅         | ❌                        | ⚠️ ក្នុងមួយសំណើ           |
+| Kimi Coding         | openai           | OAuth / កូនសោ API          | ✅               | ✅         | ✅                        | ❌                        |
+| KIE                 | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Devin Desktop       | openai           | កូនសោ API ដែលបាននាំចូល     | ✅ (Connect→SSE) | ✅         | ❌                        | ⚠️ ក្នុងមួយសំណើ           |
+| GitLab Duo          | openai           | OAuth (GitLab)             | ✅               | ✅         | ✅                        | ❌                        |
+| Devin CLI           | openai           | ការចូល CLI មូលដ្ឋាន        | ✅               | ✅         | ❌                        | ✅ API កិច្ចការ           |
+| Codex Cloud         | openai-responses | OAuth                      | ✅               | ❌         | ✅                        | ✅ ដែនកំណត់អត្រា          |
+| Jules               | openai           | OAuth                      | ✅               | ✅         | ✅                        | ✅ API កិច្ចការ           |
+| AgentRouter         | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Grok-Web            | openai           | Cookie សម័យកម្ម            | ✅               | ✅         | ❌                        | ❌                        |
+| Perplexity-Web      | openai           | Cookie សម័យកម្ម            | ✅               | ✅         | ❌                        | ❌                        |
+| BlackBox-Web        | openai           | Cookie សម័យកម្ម + TLS      | ✅               | ✅         | ❌                        | ❌                        |
+| Muse-Spark-Web      | openai           | Cookie សម័យកម្ម            | ✅               | ✅         | ❌                        | ❌                        |
+| ModelScope          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ⚠️ គោលការណ៍កូតា           |
+| BazaarLink          | openai           | កូនសោ API                  | ✅               | ✅         | ❌                        | ❌                        |
+| Petals              | openai           | គ្មាន                      | ✅               | ✅         | ❌                        | ❌                        |
+| Qoder               | openai           | OAuth / PAT                | ✅               | ✅         | ✅                        | ⚠️ ក្នុងមួយសំណើ           |
+| OpenCode (Go/Zen)   | openai           | OAuth                      | ✅               | ✅         | ✅                        | ❌                        |
+| CLIProxyAPI         | openai           | ផ្ទាល់ខ្លួន                | ✅               | ✅         | ❌                        | ❌                        |
+
+## វិសាលភាពនៃការបម្លែងទ្រង់ទ្រាយ
+
+ទ្រង់ទ្រាយប្រភពដែលបានរកឃើញរួមមាន៖
+
+- `openai`
+- `openai-responses`
+- `claude`
+- `gemini`
+
+ទ្រង់ទ្រាយគោលដៅរួមមាន៖
+
+- ការជជែក/Responses របស់ OpenAI
+- Claude
+- ស្រោមសំបុត្រ Gemini/Antigravity
+- Kiro
+- Cursor
+
+ការបម្លែងប្រើ **OpenAI ជាទ្រង់ទ្រាយមជ្ឈមណ្ឌល** — ការបម្លែងទាំងអស់ត្រូវឆ្លងកាត់ OpenAI ជាទម្រង់កណ្ដាល៖
+
+```
+ទ្រង់ទ្រាយប្រភព → OpenAI (មជ្ឈមណ្ឌល) → ទ្រង់ទ្រាយគោលដៅ
+```
+
+ការបម្លែងត្រូវបានជ្រើសរើសដោយថាមវន្ត ដោយផ្អែកលើរចនាសម្ព័ន្ធ payload ប្រភព និងទ្រង់ទ្រាយគោលដៅរបស់អ្នកផ្ដល់សេវា។
+
+ស្រទាប់ដំណើរការបន្ថែមនៅក្នុងខ្សែដំណើរការបម្លែង៖
+
+- **ការសម្អាតការឆ្លើយតប** — ដកវាលដែលមិនមែនជាស្តង់ដារចេញពីការឆ្លើយតបក្នុងទ្រង់ទ្រាយ OpenAI (ទាំងបែបស្ទ្រីម និងមិនស្ទ្រីម) ដើម្បីធានាបាននូវការអនុលោមតាម SDK យ៉ាងតឹងរ៉ឹង
+- **ការធ្វើឱ្យតួនាទីមានលក្ខណៈស្តង់ដារ** — បម្លែង `developer` → `system` សម្រាប់គោលដៅដែលមិនមែនជា OpenAI; បញ្ចូល `system` → `user` សម្រាប់ម៉ូដែលដែលមិនទទួលយកតួនាទី system (GLM, ERNIE)
+- **ការស្រង់ស្លាក Think** — ញែកប្លុក `<think>...</think>` ចេញពីខ្លឹមសារ ទៅក្នុងវាល `reasoning_content`
+- **លទ្ធផលដែលមានរចនាសម្ព័ន្ធ** — បម្លែង `response_format.json_schema` របស់ OpenAI ទៅជា `responseMimeType` + `responseSchema` របស់ Gemini
+
+## Endpoint API ដែលគាំទ្រ
+
+| Endpoint                                           | ទ្រង់ទ្រាយ                 | Handler                                                                                              |
+| -------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `POST /v1/chat/completions`                        | ការជជែក OpenAI             | `src/sse/handlers/chat.ts`                                                                           |
+| `POST /v1/messages`                                | សារ Claude                 | Handler ដូចគ្នា (រកឃើញដោយស្វ័យប្រវត្តិ)                                                              |
+| `POST /v1/responses`                               | Responses របស់ OpenAI      | `open-sse/handlers/responsesHandler.ts`                                                              |
+| `POST /v1/embeddings`                              | Embeddings របស់ OpenAI     | `open-sse/handlers/embeddings.ts`                                                                    |
+| `GET /v1/embeddings`                               | បញ្ជីម៉ូដែល                | ផ្លូវ API                                                                                            |
+| `POST /v1/images/generations`                      | រូបភាព OpenAI              | `open-sse/handlers/imageGeneration.ts`                                                               |
+| `GET /v1/images/generations`                       | បញ្ជីម៉ូដែល                | ផ្លូវ API                                                                                            |
+| `POST /v1/providers/{provider}/chat/completions`   | ការជជែក OpenAI             | ផ្លូវដាច់ដោយឡែកសម្រាប់អ្នកផ្ដល់សេវានីមួយៗ ជាមួយការផ្ទៀងផ្ទាត់ម៉ូដែល                                  |
+| `POST /v1/providers/{provider}/embeddings`         | Embeddings របស់ OpenAI     | ផ្លូវដាច់ដោយឡែកសម្រាប់អ្នកផ្ដល់សេវានីមួយៗ ជាមួយការផ្ទៀងផ្ទាត់ម៉ូដែល                                  |
+| `POST /v1/providers/{provider}/images/generations` | រូបភាព OpenAI              | ផ្លូវដាច់ដោយឡែកសម្រាប់អ្នកផ្ដល់សេវានីមួយៗ ជាមួយការផ្ទៀងផ្ទាត់ម៉ូដែល                                  |
+| `POST /v1/messages/count_tokens`                   | ការរាប់ Token របស់ Claude  | ផ្លូវ API                                                                                            |
+| `GET /v1/models`                                   | បញ្ជីម៉ូដែល OpenAI         | ផ្លូវ API (ម៉ូដែលជជែក + embedding + រូបភាព + ផ្ទាល់ខ្លួន)                                            |
+| `GET /api/models/catalog`                          | កាតាឡុក                    | ម៉ូដែលទាំងអស់ដែលបានដាក់ជាក្រុមតាមអ្នកផ្ដល់សេវា + ប្រភេទ                                              |
+| `POST /v1beta/models/*:streamGenerateContent`      | Gemini ដើម                 | ផ្លូវ API                                                                                            |
+| `GET/PUT/DELETE /api/settings/proxy`               | ការកំណត់រចនាសម្ព័ន្ធ Proxy | ការកំណត់រចនាសម្ព័ន្ធ proxy បណ្ដាញ                                                                    |
+| `POST /api/settings/proxy/test`                    | ការតភ្ជាប់ Proxy           | Endpoint សម្រាប់សាកល្បងស្ថានភាព/ការតភ្ជាប់របស់ proxy                                                 |
+| `GET/POST/DELETE /api/provider-models`             | ម៉ូដែលរបស់អ្នកផ្ដល់សេវា    | ទិន្នន័យមេតារបស់ម៉ូដែលអ្នកផ្ដល់សេវា ដែលគាំទ្រម៉ូដែលផ្ទាល់ខ្លួន និងម៉ូដែលដែលបានគ្រប់គ្រងដែលអាចប្រើបាន |
+
+## កម្មវិធីដោះស្រាយការរំលង
+
+កម្មវិធីដោះស្រាយការរំលង (`open-sse/utils/bypassHandler.ts`) ស្ទាក់ចាប់សំណើ "ប្រើរួចបោះចោល" ដែលស្គាល់ពី Claude CLI — warmup pings, ការស្រង់ចំណងជើង និងការរាប់ token — ហើយត្រឡប់ **ការឆ្លើយតបក្លែងក្លាយ** ដោយមិនប្រើប្រាស់ token របស់អ្នកផ្តល់សេវាខាងលើ។ វាត្រូវបានកេះតែនៅពេល `User-Agent` មាន `claude-cli` ប៉ុណ្ណោះ។
+
+## ការកត់ត្រាសំណើ និងវត្ថុបង្កើត
+
+កម្មវិធីកត់ត្រាសំណើចាស់ដែលផ្អែកលើឯកសារ (`open-sse/utils/requestLogger.ts`) ត្រូវបានរក្សាទុកសម្រាប់តែ
+ភាពឆបគ្នាជាមួយប្រព័ន្ធចាស់ប៉ុណ្ណោះ។ កិច្ចសន្យា runtime បច្ចុប្បន្នប្រើ៖
+
+- `APP_LOG_TO_FILE=true` សម្រាប់កំណត់ហេតុកម្មវិធី និងកំណត់ហេតុសវនកម្ម ដែលត្រូវបានសរសេរនៅក្រោម `<repo>/logs/`
+- កំណត់ត្រាការហៅដែលគាំទ្រដោយ SQLite នៅក្នុង `call_logs`
+- វត្ថុបង្កើត `${DATA_DIR}/call_logs/YYYY-MM-DD/...` នៅពេល pipeline កំណត់ហេតុការហៅត្រូវបានបើក
+
+## របៀបបរាជ័យ និងភាពធន់
+
+## 1) ភាពអាចប្រើបាននៃគណនី/អ្នកផ្តល់សេវា
+
+- រយៈពេលរង់ចាំត្រជាក់នៃការតភ្ជាប់ ចំពោះការបរាជ័យនៅខាងលើដែលអាចសាកល្បងឡើងវិញបាន
+- ប្រើគណនីបម្រុង មុននឹងប្រកាសសំណើថាបរាជ័យ
+- ប្រើ combo model បម្រុង នៅពេលផ្លូវ model/អ្នកផ្តល់សេវាបច្ចុប្បន្នត្រូវបានប្រើអស់
+
+## 2) ការផុតកំណត់ Token
+
+- ពិនិត្យជាមុន និង refresh ជាមួយការសាកល្បងឡើងវិញ សម្រាប់អ្នកផ្តល់សេវាដែលអាច refresh បាន
+- សាកល្បងឡើងវិញចំពោះ 401/403 បន្ទាប់ពីការព្យាយាម refresh នៅក្នុងផ្លូវស្នូល
+
+## 3) សុវត្ថិភាព Stream
+
+- កម្មវិធីគ្រប់គ្រង stream ដែលដឹងពីការផ្តាច់ការតភ្ជាប់
+- stream បកប្រែដែលមានការ flush នៅចុងបញ្ចប់នៃ stream និងការដោះស្រាយ `[DONE]`
+- ការប៉ាន់ស្មានការប្រើប្រាស់ជាជម្រើសបម្រុង នៅពេល metadata ការប្រើប្រាស់របស់អ្នកផ្តល់សេវាបាត់
+
+## 4) ការថយចុះសមត្ថភាព Cloud Sync
+
+- កំហុស sync ត្រូវបានបង្ហាញ ប៉ុន្តែ runtime មូលដ្ឋាននៅតែបន្តដំណើរការ
+- scheduler មាន logic ដែលអាចសាកល្បងឡើងវិញបាន ប៉ុន្តែការប្រតិបត្តិតាមកាលកំណត់បច្ចុប្បន្ន ហៅ sync ដែលព្យាយាមតែម្តងតាមលំនាំដើម
+
+## 5) សុចរិតភាពទិន្នន័យ
+
+- migration របស់ schema SQLite និង hook ដំឡើងកំណែដោយស្វ័យប្រវត្តិនៅពេលចាប់ផ្តើម
+- ផ្លូវភាពឆបគ្នាសម្រាប់ migration ពី JSON ចាស់ → SQLite
+
+## 6) របាំង SSRF / URL ចេញក្រៅ
+
+- `src/shared/network/outboundUrlGuard.ts` រារាំង URL គោលដៅ private/loopback/link-local ទាំងអស់ មុនពេលពួកវាទៅដល់ executor របស់អ្នកផ្តល់សេវា
+- route សម្រាប់ការស្វែងរក និងផ្ទៀងផ្ទាត់ model របស់អ្នកផ្តល់សេវា ប្រើ `src/shared/network/safeOutboundFetch.ts` ដែលអនុវត្ត guard មុនរាល់សំណើចេញក្រៅ
+- កំហុស guard ត្រូវបានបង្ហាញជា `URL_GUARD_BLOCKED` ជាមួយ HTTP 422 ហើយត្រូវបានកត់ត្រាទៅក្នុងប្រវត្តិសវនកម្មអនុលោមភាពតាមរយៈ `providerAudit.ts`
+
+## ភាពអាចសង្កេតបាន និងសញ្ញាប្រតិបត្តិការ
+
+ប្រភពសម្រាប់មើលឃើញ runtime៖
+
+- កំណត់ហេតុ console ពី `src/sse/utils/logger.ts`
+- ទិន្នន័យសរុបនៃការប្រើប្រាស់តាមសំណើនីមួយៗនៅក្នុង SQLite (`usage_history`, `call_logs`, `proxy_logs`)
+- ការចាប់យក payload លម្អិតបួនដំណាក់កាលនៅក្នុង SQLite (`request_detail_logs`) នៅពេល `settings.detailed_logs_enabled=true`
+- កំណត់ហេតុស្ថានភាពសំណើជាអត្ថបទនៅក្នុង `log.txt` (ជាជម្រើស/សម្រាប់ភាពឆបគ្នា)
+- ឯកសារកំណត់ហេតុកម្មវិធីជាជម្រើស នៅក្រោម `logs/` នៅពេល `APP_LOG_TO_FILE=true`
+- វត្ថុបង្កើតសំណើជាជម្រើស នៅក្រោម `${DATA_DIR}/call_logs/` នៅពេល pipeline កំណត់ហេតុការហៅត្រូវបានបើក
+- endpoint ការប្រើប្រាស់ dashboard (`/api/usage/*`) សម្រាប់ការប្រើប្រាស់ដោយ UI
+
+ការចាប់យក payload សំណើលម្អិត រក្សាទុក payload JSON រហូតដល់បួនដំណាក់កាលក្នុងមួយការហៅដែលបាន route៖
+
+- សំណើដើមដែលបានទទួលពី client
+- សំណើដែលបានបកប្រែ និងផ្ញើទៅខាងលើពិតប្រាកដ
+- ការឆ្លើយតបរបស់អ្នកផ្តល់សេវាដែលបានបង្កើតឡើងវិញជា JSON; ការឆ្លើយតបជា stream ត្រូវបានបង្រួមជាសេចក្តីសង្ខេបចុងក្រោយ បូកនឹង metadata របស់ stream
+- ការឆ្លើយតបចុងក្រោយទៅ client ដែលត្រូវបានត្រឡប់ដោយ OmniRoute; ការឆ្លើយតបជា stream ត្រូវបានរក្សាទុកក្នុងទម្រង់សេចក្តីសង្ខេបបង្រួមដូចគ្នា
+
+## ព្រំដែនដែលពាក់ព័ន្ធខ្លាំងនឹងសុវត្ថិភាព
+
+- សម្ងាត់ JWT (`JWT_SECRET`) ការពារការផ្ទៀងផ្ទាត់/ចុះហត្ថលេខាលើ cookie សម័យរបស់ dashboard
+- ការរៀបចំពាក្យសម្ងាត់ដំបូង (`INITIAL_PASSWORD`) គួរត្រូវបានកំណត់រចនាសម្ព័ន្ធយ៉ាងច្បាស់លាស់ សម្រាប់ការផ្តល់ជូនដំបូងនៅពេលដំណើរការលើកទីមួយ
+- សម្ងាត់ HMAC របស់ API key (`API_KEY_SECRET`) ការពារទម្រង់ API key មូលដ្ឋានដែលបានបង្កើត
+- សម្ងាត់របស់អ្នកផ្តល់សេវា (API keys/tokens) ត្រូវបានរក្សាទុកក្នុង DB មូលដ្ឋាន ហើយគួរត្រូវបានការពារនៅកម្រិតប្រព័ន្ធឯកសារ
+- ចំណុចបញ្ចប់នៃការធ្វើសមកាលកម្ម cloud ពឹងផ្អែកលើការផ្ទៀងផ្ទាត់តាម API key + អត្ថន័យនៃ machine id
+
+## ម៉ាទ្រីសបរិស្ថាន និង Runtime
+
+អថេរបរិស្ថានដែលកូដប្រើប្រាស់យ៉ាងសកម្ម៖
+
+- កម្មវិធី/ការផ្ទៀងផ្ទាត់៖ `JWT_SECRET`, `INITIAL_PASSWORD`
+- ការផ្ទុក៖ `DATA_DIR`
+- ការកំណត់ជំនួសមូលដ្ឋានផ្ទុកតាមជម្រើស (Linux/macOS នៅពេលមិនបានកំណត់ `DATA_DIR`)៖ `XDG_CONFIG_HOME`
+- ការ hash ផ្នែកសុវត្ថិភាព៖ `API_KEY_SECRET`, `MACHINE_ID_SALT`
+- ការកត់ត្រា៖ `APP_LOG_TO_FILE`, `APP_LOG_RETENTION_DAYS`, `CALL_LOG_RETENTION_DAYS`
+- URL សម្រាប់សមកាលកម្ម/cloud៖ `NEXT_PUBLIC_BASE_URL`, `NEXT_PUBLIC_CLOUD_URL`
+- Proxy ចេញក្រៅ៖ `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` និងទម្រង់អក្សរតូច
+- Feature flags របស់ SOCKS5៖ `ENABLE_SOCKS5_PROXY`, `NEXT_PUBLIC_ENABLE_SOCKS5_PROXY`
+- ជំនួយការរបស់វេទិកា/runtime (មិនមែនការកំណត់រចនាសម្ព័ន្ធជាក់លាក់របស់កម្មវិធី)៖ `APPDATA`, `NODE_ENV`, `PORT`, `HOSTNAME`
+
+## កំណត់សម្គាល់ស្ថាបត្យកម្មដែលបានដឹង
+
+1. `usageDb` និង `localDb` ប្រើគោលការណ៍ថតមូលដ្ឋានដូចគ្នា (`DATA_DIR` -> `XDG_CONFIG_HOME/omniroute` -> `~/.omniroute`) ជាមួយការផ្ទេរឯកសារចាស់។
+2. `/api/v1/route.ts` ប្រគល់ភារកិច្ចទៅឱ្យកម្មវិធីបង្កើតកាតាឡុករួមដូចគ្នាដែលប្រើដោយ `/api/v1/models` (`src/app/api/v1/models/catalog.ts`) ដើម្បីជៀសវាងភាពខុសគ្នានៃអត្ថន័យ។
+3. កម្មវិធីកត់ត្រាសំណើ សរសេរ headers/body ពេញលេញនៅពេលបើកប្រើ។ ត្រូវចាត់ទុកថតកំណត់ហេតុជាទិន្នន័យរសើប។
+4. ឥរិយាបថរបស់ cloud ពឹងផ្អែកលើ `NEXT_PUBLIC_BASE_URL` ដែលត្រឹមត្រូវ និងលទ្ធភាពចូលដំណើរការចំណុចបញ្ចប់របស់ cloud។
+5. ថត `open-sse/` ត្រូវបានបោះផ្សាយជា **npm workspace package** `@omniroute/open-sse`។ កូដប្រភព import វាតាមរយៈ `@omniroute/open-sse/...` (ដោះស្រាយដោយ `transpilePackages` របស់ Next.js)។ ផ្លូវឯកសារក្នុងឯកសារនេះនៅតែប្រើឈ្មោះថត `open-sse/` ដើម្បីរក្សាភាពស៊ីសង្វាក់គ្នា។
+6. គំនូសតាងក្នុង dashboard ប្រើ **Recharts** (ផ្អែកលើ SVG) សម្រាប់ការមើលឃើញទិន្នន័យវិភាគដែលអាចចូលប្រើបាន និងអន្តរកម្ម (គំនូសតាងបារនៃការប្រើប្រាស់ model និងតារាងបែងចែកតាមអ្នកផ្តល់សេវា ជាមួយអត្រាជោគជ័យ)។
+7. ការធ្វើតេស្ត E2E ប្រើ **Playwright** (`tests/e2e/`) និងដំណើរការតាមរយៈ `npm run test:e2e`។ ការធ្វើតេស្ត unit ប្រើ **Node.js test runner** (`tests/unit/`) និងដំណើរការតាមរយៈ `npm run test:unit`។ កូដប្រភពនៅក្រោម `src/` គឺជា **TypeScript** (`.ts`/`.tsx`) ខណៈដែល workspace `open-sse/` នៅតែជា JavaScript (`.js`)។
+8. ទំព័រការកំណត់ត្រូវបានរៀបចំជា 7 ផ្ទាំង៖ ទូទៅ, រូបរាង, AI, សុវត្ថិភាព, ការកំណត់ផ្លូវ, ភាពធន់ និងកម្រិតខ្ពស់។ ទំព័រភាពធន់ កំណត់រចនាសម្ព័ន្ធតែជួរសំណើ រយៈពេលរង់ចាំនៃការតភ្ជាប់ ឧបករណ៍ផ្តាច់សៀគ្វីរបស់អ្នកផ្តល់សេវា និងឥរិយាបថរង់ចាំរហូតដល់ផុតរយៈពេលរង់ចាំប៉ុណ្ណោះ។ ស្ថានភាព runtime ផ្ទាល់របស់ឧបករណ៍ផ្តាច់សៀគ្វី ត្រូវបានបង្ហាញនៅលើទំព័រសុខភាព។
+9. យុទ្ធសាស្ត្រ **Context Relay** (`context-relay`) ត្រូវបានបែងចែកជាពីរស្រទាប់៖ `combo.ts` សម្រេចថាតើគួរបង្កើត handoff ឬអត់ ហើយ `chat.ts` បញ្ចូល handoff បន្ទាប់ពីដោះស្រាយគណនីរួច។ ទិន្នន័យ handoff ស្ថិតនៅក្នុងតារាង SQLite `context_handoffs`។ ការបែងចែកនេះគឺដោយចេតនា ព្រោះមានតែ `chat.ts` ប៉ុណ្ណោះដែលដឹងថាតើគណនីជាក់ស្តែងបានផ្លាស់ប្តូរឬអត់។
+10. **ការអនុវត្ត Proxy ជាកំហិត** ឥឡូវនេះមានភាពគ្រប់ជ្រុងជ្រោយ៖ `tokenHealthCheck.ts` ដោះស្រាយ proxy សម្រាប់ការតភ្ជាប់នីមួយៗ, `/api/providers/validate` ប្រើ `runWithProxyContext` ហើយ `proxyFetch.ts` ប្រើ `undici.fetch()` ដើម្បីរក្សាភាពឆបគ្នាជាមួយ dispatcher នៅលើ Node 22។
+11. **ការរកឃើញគោលការណ៍ runtime របស់ Node.js**៖ `/api/settings/require-login` ត្រឡប់ fields `nodeVersion` និង `nodeCompatible`។ ទំព័រចូលប្រើបង្ហាញផ្ទាំងព្រមាន នៅពេល runtime ស្ថិតនៅក្រៅជួរ Node.js ដែលមានសុវត្ថិភាព និងទទួលបានការគាំទ្រ។
+
+## បញ្ជីត្រួតពិនិត្យការផ្ទៀងផ្ទាត់ប្រតិបត្តិការ
+
+- បង្កើតពីកូដប្រភព៖ `npm run build`
+- បង្កើត Docker image៖ `docker build -t omniroute .`
+- ចាប់ផ្តើមសេវាកម្ម និងផ្ទៀងផ្ទាត់៖
+- `GET /api/settings`
+- `GET /api/v1/models`
+- URL មូលដ្ឋានគោលដៅរបស់ CLI គួរតែជា `http://<host>:20128/v1` នៅពេល `PORT=20128`

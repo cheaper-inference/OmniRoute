@@ -547,7 +547,7 @@ test.after(async () => {
   }
   await relay.stop();
   core.closeDbInstance();
-  await fsp.rm(TEST_DATA_DIR, { recursive: true, force: true });
+  await fsp.rm(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("resilience API only exposes configuration, not runtime breaker state", async () => {
@@ -556,16 +556,28 @@ test("resilience API only exposes configuration, not runtime breaker state", asy
 
   assert.equal(response.status, 200);
   // Exact key set — this is the whole point of the test: configuration only.
-  // `providerQuotaOverrides` joined the projection in #9871.
+  // `providerQuotaOverrides` joined the projection in #9871;
+  // `quotaPreflight` joined in #12014 (Settings → Routing Quota Preflight card);
+  // `credentialHealthCheck` joined in #12043 (the sweep's intervalMinutes setting);
+  // `streamStallCooldown` decides whether a stream content stall cools the account;
+  // `p2cLatency` is the opt-in latency weight for p2c account selection.
+  // `streamRecovery` joined the projection with this change: the route stores the
+  // block on every PATCH, so GET exposes it like every other stored block.
   assert.deepEqual(Object.keys(json).sort(), [
     "comboCooldownWait",
     "connectionCooldown",
+    "credentialHealthCheck",
     "legacy",
+    "p2cLatency",
     "providerBreaker",
     "providerCooldown",
     "providerQuotaOverrides",
+    "quotaPreflight",
     "quotaShareConcurrencyLimit",
     "requestQueue",
+    "streamRecovery",
+    "streamStallCooldown",
+    "tokenRefreshBreaker",
     "waitForCooldown",
   ]);
   assert.equal("providerBreakers" in json, false);

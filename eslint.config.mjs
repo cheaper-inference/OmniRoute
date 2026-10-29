@@ -1,4 +1,6 @@
+import { fixupConfigRules } from "@eslint/compat";
 import nextVitals from "eslint-config-next/core-web-vitals";
+import * as espree from "espree";
 import tseslint from "typescript-eslint";
 
 // #7879: bar NEW local `toNumber` definitions outside the canonical helper.
@@ -9,7 +11,8 @@ const TO_NUMBER_RESTRICTION = {
   selector: "FunctionDeclaration[id.name='toNumber'], VariableDeclarator[id.name='toNumber']",
   message:
     "New local `toNumber` definitions are barred — import `toNumber` from " +
-    "`@/shared/utils/numeric` instead (#7879). See that module's JSDoc for the " +
+    "`@/shared/utils/numeric` (src) or `open-sse/utils/numeric.ts` (engine) instead " +
+    "(#7879). See that module's JSDoc for the " +
     "canonical coercion shape and the `toNumberOrNull`/`toNumberArray` variants.",
 };
 
@@ -37,7 +40,22 @@ const IMPORT_BOUNDARY_RESTRICTIONS = {
 
 /** @type {import("eslint").Linter.Config[]} */
 const eslintConfig = [
-  ...nextVitals,
+  ...fixupConfigRules(nextVitals),
+  // eslint-config-next's Babel parser has not adopted ESLint 10's ScopeManager
+  // finalize contract yet. Plain JS/JSX does not need that parser, so use the
+  // ESLint-native parser while retaining Next's plugins and rules.
+  {
+    files: ["**/*.{js,jsx,mjs,cjs}"],
+    languageOptions: {
+      parser: espree,
+    },
+  },
+  {
+    files: ["**/*.{mts,cts}"],
+    languageOptions: {
+      parser: tseslint.parser,
+    },
+  },
   // Pacote 4 (plano mestre testes+CI, 2026-07-04) — zero-warning policy: TODA regra roda
   // como "error" e a dívida pré-existente vive congelada por arquivo+regra em
   // config/quality/eslint-suppressions.json (ESLint bulk suppressions nativo). Violação
@@ -126,23 +144,42 @@ const eslintConfig = [
       "no-restricted-syntax": ["error", TO_NUMBER_RESTRICTION],
     },
   },
-  // Canonical helper module itself is exempt from its own restriction.
+  // Canonical helper module itself is exempt from its own restriction. It lives in the engine so
+  // open-sse can import it without a new open-sse → src edge; src/shared/utils/numeric.ts re-exports it.
   {
-    files: ["src/shared/utils/numeric.ts"],
+    files: ["open-sse/utils/numeric.ts"],
     rules: {
       "no-restricted-syntax": "off",
     },
   },
-  // Relaxed rules for open-sse and tests (incremental adoption)
+  // Relaxed rules for TypeScript in open-sse and tests (incremental adoption).
+  // eslint-config-next already registers @typescript-eslint for every TS file;
+  // registering a second plugin object is rejected by ESLint 10.
   {
-    files: ["open-sse/**/*.ts", "tests/**/*.mjs", "tests/**/*.ts"],
-    plugins: {
-      "@typescript-eslint": tseslint.plugin,
-    },
+    files: ["open-sse/**/*.ts", "tests/**/*.ts"],
     rules: {
       "@typescript-eslint/no-explicit-any": "error",
       "@next/next/no-assign-module-variable": "off",
       "react-hooks/rules-of-hooks": "off",
+    },
+  },
+  {
+    files: ["tests/**/*.mjs"],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+    },
+    rules: {
+      "@next/next/no-assign-module-variable": "off",
+      "react-hooks/rules-of-hooks": "off",
+    },
+  },
+  // JS/JSX files do not match eslint-config-next's TypeScript block. Register
+  // the plugin only for that disjoint scope so the shared unused-vars ratchet
+  // works without redefining the plugin for TS/TSX under ESLint 10.
+  {
+    files: ["src/**/*.{js,jsx}"],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
     },
   },
   // Ratchet: bar NEW unused vars/args/catches outside the `_` escape hatch.
@@ -150,11 +187,10 @@ const eslintConfig = [
   // (same pattern as #7879 toNumber); only genuinely NEW unused bindings fail
   // lint. `args: "all"` (not `after-used`) so a leading unused param is never
   // silently skipped, e.g. `function handle(req, _opts, next)` must flag `req`.
+  // eslint-config-next already registers @typescript-eslint; registering it again
+  // in this block is rejected by ESLint 10.
   {
     files: ["src/**/*.{ts,tsx,js,jsx}", "open-sse/**/*.ts", "tests/**/*.{ts,tsx,mjs}"],
-    plugins: {
-      "@typescript-eslint": tseslint.plugin,
-    },
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "error",
@@ -195,6 +231,9 @@ const eslintConfig = [
       ".omnivscodeagent/**",
       // _tasks/ — planning/handoff/research artifacts (gitignored, external code)
       "_tasks/**",
+      // _artifacts/ — per-session review/recheck scratch inside worktrees
+      // (gitignored; workflow scripts with top-level return)
+      "_artifacts/**",
       // .agents/ — skill definitions + their helper scripts (gitignored; the
       // canonical copy lives here and is symlinked into .claude/).
       ".agents/**",
@@ -203,8 +242,11 @@ const eslintConfig = [
       ".source/**",
       // VS Code extension and its large test fixtures
       "vscode-extension/**",
+      // packages/ui-kit/ — snapshot vendorizado do CI UI Kit (lintado upstream; patches locais proibidos)
+      "packages/ui-kit/**",
       "_references/**",
       "_mono_repo/**",
+      "review/**",
       // Electron app
       "electron/**",
       // Docs

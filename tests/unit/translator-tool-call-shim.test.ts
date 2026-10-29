@@ -1,12 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { applyToolCallShimToBuffer, hasToolCallShim, __test } = await import(
-  "../../open-sse/translator/helpers/toolCallShim.ts"
-);
-const { openaiToClaudeResponse } = await import(
-  "../../open-sse/translator/response/openai-to-claude.ts"
-);
+const { applyToolCallShimToBuffer, hasToolCallShim, __test } =
+  await import("../../open-sse/translator/helpers/toolCallShim.ts");
+const { openaiToClaudeResponse } =
+  await import("../../open-sse/translator/response/openai-to-claude.ts");
 
 const { coerceToArray } = __test as { coerceToArray: (v: unknown) => unknown[] };
 
@@ -62,17 +60,26 @@ test("applyToolCallShimToBuffer: Read removes empty pages but preserves valid ra
       JSON.stringify({ file_path: "/etc/hosts", offset: 1, limit: 5, pages: "" })
     )
   );
-  assert.deepEqual(withEmptyPages, { file_path: "/etc/hosts", offset: 1, limit: 5 });
+  assert.deepEqual(withEmptyPages, {
+    file_path: "/etc/hosts",
+    filePath: "/etc/hosts",
+    offset: 1,
+    limit: 5,
+  });
 
   const withEmptyArrayPages = JSON.parse(
     applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/tmp/a.pdf", pages: [] }))
   );
-  assert.deepEqual(withEmptyArrayPages, { file_path: "/tmp/a.pdf" });
+  assert.deepEqual(withEmptyArrayPages, { file_path: "/tmp/a.pdf", filePath: "/tmp/a.pdf" });
 
   const withValidPages = JSON.parse(
     applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/tmp/a.pdf", pages: "1-5" }))
   );
-  assert.deepEqual(withValidPages, { file_path: "/tmp/a.pdf", pages: "1-5" });
+  assert.deepEqual(withValidPages, {
+    file_path: "/tmp/a.pdf",
+    filePath: "/tmp/a.pdf",
+    pages: "1-5",
+  });
 });
 
 // Port of decolua/9router#1144: non-Anthropic models (GPT-5.5, DeepSeek …) sometimes
@@ -118,32 +125,54 @@ test("applyToolCallShimToBuffer: Read coerces numeric-string limit/offset", () =
   assert.equal(out.offset, 5);
 });
 
-test("applyToolCallShimToBuffer: Read strips pages for non-PDF files", () => {
+// Issue #17294: Kilo/OpenCode declare `filePath` in their Read schema. The shim
+// must not delete the client's key while adding the Claude Code spelling.
+test("applyToolCallShimToBuffer: Read keeps filePath for clients that declare it", () => {
   const out = JSON.parse(
     applyToolCallShimToBuffer(
-      "Read",
-      JSON.stringify({ file_path: "/etc/hosts", pages: "1-3" })
+      "read",
+      JSON.stringify({ filePath: "/repo/a.ts", offset: 1, limit: 5 })
     )
+  );
+  assert.equal(out.filePath, "/repo/a.ts");
+  assert.equal(out.file_path, "/repo/a.ts");
+  assert.equal(out.offset, 1);
+  assert.equal(out.limit, 5);
+});
+
+test("applyToolCallShimToBuffer: Read keeps path alias for clients that declare it", () => {
+  const out = JSON.parse(
+    applyToolCallShimToBuffer("Read", JSON.stringify({ path: "/repo/a.ts" }))
+  );
+  assert.equal(out.filePath, "/repo/a.ts");
+  assert.equal(out.file_path, "/repo/a.ts");
+  assert.equal("path" in out, false);
+});
+
+test("applyToolCallShimToBuffer: Read mirrors filePath when only file_path is present", () => {
+  const out = JSON.parse(
+    applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/repo/a.ts" }))
+  );
+  assert.deepEqual(out, { file_path: "/repo/a.ts", filePath: "/repo/a.ts" });
+});
+
+test("applyToolCallShimToBuffer: Read strips pages for non-PDF files", () => {
+  const out = JSON.parse(
+    applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/etc/hosts", pages: "1-3" }))
   );
   assert.equal("pages" in out, false);
 });
 
 test("applyToolCallShimToBuffer: Read strips malformed pages even on PDFs", () => {
   const out = JSON.parse(
-    applyToolCallShimToBuffer(
-      "Read",
-      JSON.stringify({ file_path: "/tmp/doc.pdf", pages: "abc" })
-    )
+    applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/tmp/doc.pdf", pages: "abc" }))
   );
   assert.equal("pages" in out, false);
 });
 
 test("applyToolCallShimToBuffer: Read accepts a single page on PDFs", () => {
   const out = JSON.parse(
-    applyToolCallShimToBuffer(
-      "Read",
-      JSON.stringify({ file_path: "/tmp/doc.PDF", pages: "7" })
-    )
+    applyToolCallShimToBuffer("Read", JSON.stringify({ file_path: "/tmp/doc.PDF", pages: "7" }))
   );
   assert.equal(out.pages, "7");
 });
@@ -162,7 +191,12 @@ test("applyToolCallShimToBuffer: Read combined absurd args from non-Anthropic mo
       })
     )
   );
-  assert.deepEqual(out, { file_path: "F:/repo/file.js", offset: 0, limit: 2000 });
+  assert.deepEqual(out, {
+    file_path: "F:/repo/file.js",
+    filePath: "F:/repo/file.js",
+    offset: 0,
+    limit: 2000,
+  });
 });
 
 test("applyToolCallShimToBuffer: submit_pr_review with valid arrays preserved", () => {
@@ -255,6 +289,12 @@ function streamChunks(chunks: any[], state: any): any[] {
     const out = openaiToClaudeResponse(c, state);
     if (out) all.push(...out);
   }
+  // End-of-stream flush: production calls the translator once more with `null`
+  // when the upstream stream closes (open-sse/utils/stream.ts flush →
+  // translateResponse(..., null, state)). Since dd35750e5f a finish chunk that
+  // carries no usage is deferred until that flush, so the driver must mirror it.
+  const flushed = openaiToClaudeResponse(null, state);
+  if (flushed) all.push(...flushed);
   return all;
 }
 
@@ -306,9 +346,58 @@ test("streaming: Read suppresses raw pages delta and emits cleaned input at fini
   assert.equal(inputDeltas[0].delta.partial_json.includes('"pages"'), false);
   assert.deepEqual(JSON.parse(inputDeltas[0].delta.partial_json), {
     file_path: "/etc/hosts",
+    filePath: "/etc/hosts",
     offset: 1,
     limit: 5,
   });
+});
+
+test("streaming: Read mirrors filePath when the model emits file_path (#17294)", () => {
+  const state = freshState();
+  const chunks = [
+    {
+      id: "chatcmpl-kilo",
+      model: "cc-main",
+      choices: [
+        {
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                id: "call_read",
+                function: { name: "read", arguments: "" },
+              },
+            ],
+          },
+        },
+      ],
+    },
+    {
+      choices: [
+        {
+          delta: {
+            tool_calls: [
+              {
+                index: 0,
+                function: { arguments: '{"file_path":"/repo/a.ts"}' },
+              },
+            ],
+          },
+        },
+      ],
+    },
+    { choices: [{ delta: {}, finish_reason: "tool_calls" }] },
+  ];
+
+  const events = streamChunks(chunks, state);
+  const inputDeltas = events.filter(
+    (e) => e.type === "content_block_delta" && e.delta?.type === "input_json_delta"
+  );
+
+  assert.equal(inputDeltas.length, 1, "expected exactly one emitted Read delta");
+  const input = JSON.parse(inputDeltas[0].delta.partial_json);
+  assert.equal(input.filePath, "/repo/a.ts", "client-declared filePath must survive");
+  assert.equal(input.file_path, "/repo/a.ts", "Claude Code spelling must still be present");
 });
 
 test("streaming: submit_pr_review with missing arrays gets corrective delta at finish", () => {

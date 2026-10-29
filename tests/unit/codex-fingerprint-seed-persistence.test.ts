@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-codex-seed-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -14,13 +15,13 @@ const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
 beforeEach(resetStorage);
-after(() => {
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+after(async () => {
+  await cleanupTempDataDir(TEST_DATA_DIR);
 });
 
 async function createCodexOAuthConnection(providerSpecificData?: Record<string, unknown>) {

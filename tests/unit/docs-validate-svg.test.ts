@@ -27,7 +27,7 @@ test("SVG validator ignores Mermaid data-id attributes when checking duplicate I
     assert.match(result.stdout, /PASS/);
     assert.doesNotMatch(`${result.stdout}${result.stderr}`, /WARN/);
   } finally {
-    rmSync(fixtureDir, { recursive: true, force: true });
+    rmSync(fixtureDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -46,7 +46,7 @@ test("SVG validator rejects duplicate XML id attributes", () => {
     assert.equal(result.status, 1, `${result.stdout}${result.stderr}`);
     assert.match(result.stderr, /duplicate IDs: edge-a/);
   } finally {
-    rmSync(fixtureDir, { recursive: true, force: true });
+    rmSync(fixtureDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -101,6 +101,6 @@ test("SVG validator adds explicit accessible naming when requested for a generat
     assert.equal([...updated.matchAll(/id="auto-combo-title"/g)].length, 1);
     assert.equal([...updated.matchAll(/id="auto-combo-desc"/g)].length, 1);
   } finally {
-    rmSync(fixtureDir, { recursive: true, force: true });
+    rmSync(fixtureDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

@@ -124,7 +124,7 @@ test("backup auto enable — nenhuma opção é sombreada pelo parent backup", a
   } finally {
     if (origDataDir === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = origDataDir;
-    rmSync(dataDir, { recursive: true, force: true });
+    rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -189,7 +189,7 @@ test("backup — sem subcomando ainda cria um backup (uso legado documentado)", 
   } finally {
     if (origDataDir === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = origDataDir;
-    rmSync(dataDir, { recursive: true, force: true });
+    rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -345,11 +345,14 @@ test("test-provider --all-providers consumes the connections envelope", async ()
     assert.ok(requests.some((url) => url.includes("/api/providers?limit=200")));
     const parsed = JSON.parse(output.join(""));
     assert.deepEqual(
-      parsed.map(({ provider, model }: { provider: string; model: string }) => ({ provider, model })),
+      parsed.map(({ provider, model }: { provider: string; model: string }) => ({
+        provider,
+        model,
+      })),
       [
         { provider: "anthropic", model: "claude" },
         { provider: "gemini", model: "gemini" },
-      ],
+      ]
     );
     assert.ok(parsed.every(({ success }: { success: boolean }) => success));
   } finally {

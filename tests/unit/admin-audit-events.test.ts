@@ -24,7 +24,7 @@ const originalGetLogoutCookieStore = logoutRoute.logoutRouteInternals.getCookieS
 
 function resetDb() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -39,7 +39,7 @@ test.afterEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("auth login/logout routes emit structured audit events with ip and request id", async () => {
@@ -248,6 +248,7 @@ test("deleting the final provider connection removes imported models but preserv
       id: "manual-model",
       name: "Manual",
       source: "manual",
+      endpointCapabilitySource: "operator",
       apiFormat: "chat-completions",
       supportedEndpoints: ["chat"],
     },

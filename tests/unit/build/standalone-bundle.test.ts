@@ -127,9 +127,9 @@ test("pack → restore roundtrip restores the tree byte-for-byte", async () => {
       );
     }
   } finally {
-    fs.rmSync(src, { recursive: true, force: true });
-    fs.rmSync(path.dirname(out), { recursive: true, force: true });
-    fs.rmSync(dst, { recursive: true, force: true });
+    fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(path.dirname(out), { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dst, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -144,8 +144,8 @@ test("packing is byte-deterministic across runs", async () => {
     await runPack({ dir: src, out: b });
     assert.equal(sha256File(a), sha256File(b), "two packs of the same tree must be identical");
   } finally {
-    fs.rmSync(src, { recursive: true, force: true });
-    fs.rmSync(outDir, { recursive: true, force: true });
+    fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -161,8 +161,8 @@ test("restore rejects a corrupted archive before extraction", async () => {
     fs.writeFileSync(out, raw);
     await assert.rejects(() => runRestore({ archive: out, dir: path.join(outDir, "dst") }), /sha/);
   } finally {
-    fs.rmSync(src, { recursive: true, force: true });
-    fs.rmSync(outDir, { recursive: true, force: true });
+    fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -191,9 +191,9 @@ test("manifest verification flags modified and smuggled files in a restored tree
       `smuggled file detected: ${verdict.errors.join("; ")}`
     );
   } finally {
-    fs.rmSync(src, { recursive: true, force: true });
-    fs.rmSync(outDir, { recursive: true, force: true });
-    fs.rmSync(dst, { recursive: true, force: true });
+    fs.rmSync(src, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(dst, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -207,7 +207,7 @@ test("manifest verification rejects an unsupported manifest version", async () =
     assert.equal(verdict.ok, false);
     assert.match(verdict.errors[0] ?? "", /unsupported manifest version/);
   } finally {
-    fs.rmSync(dst, { recursive: true, force: true });
+    fs.rmSync(dst, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -222,6 +222,11 @@ test("hydratePlatformNatives swaps install-machine-forked packages for this leg"
       '{"name":"@img/sharp-linux-x64"}'
     );
     writeNative(standalone, "node_modules/@img/sharp-linux-x64/lib/index.js", "linux fork");
+    writeNative(
+      standalone,
+      "node_modules/@wreq-js/binding-linux-x64-gnu/wreq-js.linux-x64-gnu.node",
+      "linux wreq"
+    );
     writeNative(standalone, "node_modules/fsevents/fsevents.js", "mac only");
     // This leg (darwin-arm64) resolved its own forks: different sharp, no fsevents.
     writeNative(
@@ -230,6 +235,11 @@ test("hydratePlatformNatives swaps install-machine-forked packages for this leg"
       '{"name":"@img/sharp-darwin-arm64"}'
     );
     writeNative(source, "node_modules/@img/sharp-darwin-arm64/lib/index.js", "darwin fork");
+    writeNative(
+      source,
+      "node_modules/@wreq-js/binding-darwin-arm64/wreq-js.darwin-arm64.node",
+      "darwin wreq"
+    );
 
     const result = hydratePlatformNatives({
       standaloneNodeModules: path.join(standalone, "node_modules"),
@@ -239,9 +249,16 @@ test("hydratePlatformNatives swaps install-machine-forked packages for this leg"
     // Platform forks ship under different package names, so hydration is
     // remove(standalone fork) + copy(this leg's fork); `replaced` stays empty
     // unless the exact same name exists on both sides.
-    assert.deepEqual(result.copied.sort(), ["@img/sharp-darwin-arm64"]);
+    assert.deepEqual(result.copied.sort(), [
+      "@img/sharp-darwin-arm64",
+      "@wreq-js/binding-darwin-arm64",
+    ]);
     assert.deepEqual(result.replaced, []);
-    assert.deepEqual(result.removed.sort(), ["@img/sharp-linux-x64", "fsevents"]);
+    assert.deepEqual(result.removed.sort(), [
+      "@img/sharp-linux-x64",
+      "@wreq-js/binding-linux-x64-gnu",
+      "fsevents",
+    ]);
     assert.ok(
       fs.existsSync(
         path.join(standalone, "node_modules", "@img", "sharp-darwin-arm64", "lib", "index.js")
@@ -253,12 +270,24 @@ test("hydratePlatformNatives swaps install-machine-forked packages for this leg"
       "linux fork removed"
     );
     assert.ok(
+      fs.existsSync(
+        path.join(
+          standalone,
+          "node_modules",
+          "@wreq-js",
+          "binding-darwin-arm64",
+          "wreq-js.darwin-arm64.node"
+        )
+      ),
+      "darwin wreq binding copied in"
+    );
+    assert.ok(
       !fs.existsSync(path.join(standalone, "node_modules", "fsevents")),
       "fsevents dropped on non-matching leg"
     );
   } finally {
-    fs.rmSync(standalone, { recursive: true, force: true });
-    fs.rmSync(source, { recursive: true, force: true });
+    fs.rmSync(standalone, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(source, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -266,9 +295,8 @@ test("verifyBundledNatives asserts serviceability and honors the onnx darwin-x64
   const root = tmpDir("s8-natives-");
   try {
     const nm = path.join(root, "node_modules");
-    writeNative(nm, "koffi/build/koffi/linux_x64/koffi.node", "elf");
     writeNative(nm, "better-sqlite3/prebuilds/linux-x64.node", "napi");
-    writeNative(nm, "wreq-js/rust/wreq-js.linux-x64-gnu.node", "rust");
+    writeNative(nm, "@wreq-js/binding-linux-x64-gnu/wreq-js.linux-x64-gnu.node", "rust");
     writeNative(nm, "onnxruntime-node/bin/napi-v6/linux/x64/libonnxruntime.so", "ort");
 
     const good = verifyBundledNatives({ nodeModulesDir: nm, platform: "linux", arch: "x64" });
@@ -278,20 +306,21 @@ test("verifyBundledNatives asserts serviceability and honors the onnx darwin-x64
       `expected serviceable: ${(good as { errors?: string[] }).errors?.join("; ")}`
     );
 
-    const missingKoffi = verifyBundledNatives({
+    const missingPlatformNatives = verifyBundledNatives({
       nodeModulesDir: nm,
       platform: "darwin",
       arch: "arm64",
     });
-    assert.equal(missingKoffi.ok, false);
-    assert.ok((missingKoffi as { errors: string[] }).errors.some((e) => e.startsWith("koffi:")));
+    assert.equal(missingPlatformNatives.ok, false);
+    assert.ok(
+      (missingPlatformNatives as { errors: string[] }).errors.some((e) => e.startsWith("wreq-js:"))
+    );
 
     // darwin-x64 has no onnxruntime-node prebuild at all — the exemption must keep it green
     // as long as the other bundled natives service that triple.
     const nm2 = path.join(root, "node_modules2");
-    writeNative(nm2, "koffi/build/koffi/darwin_x64/koffi.node", "macho");
     writeNative(nm2, "better-sqlite3/prebuilds/darwin-x64.node", "napi");
-    writeNative(nm2, "wreq-js/rust/wreq-js.darwin-x64.node", "rust");
+    writeNative(nm2, "@wreq-js/binding-darwin-x64/wreq-js.darwin-x64.node", "rust");
     const exempted = verifyBundledNatives({ nodeModulesDir: nm2, platform: "darwin", arch: "x64" });
     assert.equal(
       exempted.ok,
@@ -299,6 +328,6 @@ test("verifyBundledNatives asserts serviceability and honors the onnx darwin-x64
       `darwin-x64 must pass via exemption: ${(exempted as { errors?: string[] }).errors?.join("; ")}`
     );
   } finally {
-    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

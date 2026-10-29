@@ -24,7 +24,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-api-key-secret-
 
 test.after(() => {
   try {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     // best effort
   }

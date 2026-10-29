@@ -15,7 +15,7 @@ lastUpdated: 2026-08-02
 
 ## What It Is
 
-OmniRoute registers 329 providers, including 155 catalog entries marked **free/no-auth**
+OmniRoute registers 377 providers, including 155 catalog entries marked **free/no-auth**
 (no-auth,
 free-tier OAuth, or free-tier API key — see the
 [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) and the full
@@ -128,7 +128,11 @@ Response shape:
 
 The Arena ELO sync engine (`src/lib/arenaEloSync.ts`) fetches two leaderboards — `text`
 and `code` — from the Arena AI leaderboard API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Each leaderboard entry
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). When that API returns no
+usable board, the engine falls back to the official `lmarena-ai/leaderboard-dataset` on the
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` reports `activeSource`, `lastError` and
+`lastFailedAt`. Each leaderboard entry
 carries a model name, vendor, ELO `score`, confidence interval, and vote count.
 
 Leaderboard categories map to OmniRoute task categories:
@@ -238,7 +242,7 @@ provider that ships at least one strong free model.
    `user_override → arena_elo → models_dev_tier → static table`). So after you connect
    the top free providers, routing with `model: "auto"` (e.g. `auto/coding`) will
    automatically prefer the higher-quality free models per request. See
-   [Auto-Combo](../routing/AUTO-COMBO.md) for the full 13-factor scoring.
+   [Auto-Combo](../routing/AUTO-COMBO.md) for the full 16-factor scoring.
 
 ---
 
@@ -248,7 +252,7 @@ provider that ships at least one strong free model.
   providers, no credit card required.
 - [Free Tiers directory](../reference/FREE_TIERS.md) — full catalog of free providers
   and their limits.
-- [Auto-Combo](../routing/AUTO-COMBO.md) — the 13-factor routing engine that consumes the
+- [Auto-Combo](../routing/AUTO-COMBO.md) — the 16-factor routing engine that consumes the
   same Arena ELO task-fitness data.
 - [Environment variables](../reference/ENVIRONMENT.md) — `ARENA_ELO_SYNC_ENABLED` /
   `ARENA_ELO_SYNC_INTERVAL` reference.

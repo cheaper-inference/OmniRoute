@@ -203,7 +203,7 @@ describe("aliasResolver.registerAliasResolver", () => {
       const ok = await registerAliasResolver(tmp);
       assert.equal(ok, false, "must return false when there is no src/ dir");
     } finally {
-      rmSync(tmp, { recursive: true, force: true });
+      rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 
@@ -214,7 +214,7 @@ describe("aliasResolver.registerAliasResolver", () => {
       const ok = await registerAliasResolver(tmp);
       assert.equal(ok, true, "must register when src/ exists");
     } finally {
-      rmSync(tmp, { recursive: true, force: true });
+      rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   });
 

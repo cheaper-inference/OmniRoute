@@ -22,6 +22,7 @@ import assert from "node:assert/strict";
 import {
   STANDARD_HEADERS,
   ANTHROPIC_HEADERS,
+  describeRetryAfter,
   parseResetTime,
   toPlainHeaders,
 } from "../../open-sse/services/rateLimitManager/headers.ts";
@@ -42,6 +43,41 @@ test("rateLimitManager/headers — parseResetTime: duration strings → ms", () 
 
 test("rateLimitManager/headers — parseResetTime: bare number → seconds*1000", () => {
   assert.equal(parseResetTime("5"), 5_000);
+});
+
+// The 429 log names the header the response carried; it used to claim a 60 s pause.
+test("rateLimitManager/headers — describeRetryAfter: parsed wait, raw value, or absence", () => {
+  assert.equal(describeRetryAfter("30"), "retry-after 30s");
+  assert.equal(describeRetryAfter("1500ms"), "retry-after 2s");
+  assert.equal(describeRetryAfter("0"), "retry-after 0");
+  assert.equal(describeRetryAfter("soon"), "retry-after soon");
+  assert.equal(describeRetryAfter(null), "no retry-after header");
+  assert.equal(describeRetryAfter(""), "no retry-after header");
+});
+
+// anthropic-ratelimit-*-reset carries an RFC 3339 timestamp. parseFloat read its
+// leading year, so a reset 30s away came back as 2026 * 1000 ms (~34 minutes).
+test("rateLimitManager/headers — parseResetTime: RFC 3339 timestamp → ms until then", () => {
+  const inThirtySeconds = new Date(Date.now() + 30_000);
+  for (const value of [
+    inThirtySeconds.toISOString(),
+    inThirtySeconds.toISOString().replace(/\.\d{3}Z$/, "Z"),
+  ]) {
+    const ms = parseResetTime(value);
+    assert.ok(ms > 28_000 && ms <= 30_000, `${value} → ${ms}`);
+  }
+  assert.equal(parseResetTime(new Date(Date.now() - 5_000).toISOString()), 0);
+});
+
+test("rateLimitManager/headers — parseResetTime: fractional seconds in a duration", () => {
+  assert.equal(parseResetTime("2m59.56s"), 179_560);
+  assert.equal(parseResetTime("1h2m3.5s"), 3_723_500);
+  assert.equal(parseResetTime("7.66s"), 7_660);
+});
+
+test("rateLimitManager/headers — parseResetTime: Unix timestamp → ms until then", () => {
+  const ms = parseResetTime(String(Math.floor(Date.now() / 1000) + 60));
+  assert.ok(ms > 58_000 && ms <= 60_000, String(ms));
 });
 
 test("rateLimitManager/headers — toPlainHeaders normalizes to a string record", () => {

@@ -15,14 +15,14 @@ const route = await import("../../src/app/api/model-capability-overrides/route.t
 
 beforeEach(() => {
   coreDb.resetDbInstance();
-  fs.rmSync(moduleDataDir, { recursive: true, force: true });
+  fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(moduleDataDir, { recursive: true });
   coreDb.getDbInstance();
 });
 
 after(() => {
   coreDb.resetDbInstance();
-  fs.rmSync(moduleDataDir, { recursive: true, force: true });
+  fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function patchOverride(key: string, value: unknown) {
@@ -195,10 +195,7 @@ describe("model capability overrides", () => {
 
   it("stores exact reasoning_efforts through the API and preserves native max/ultra", async () => {
     const before = caps.getResolvedModelCapabilities("codex/gpt-5.6");
-    const accepted = await patchOverride(
-      "reasoning_efforts",
-      "﻿​ low\r\n, medium, max‍, ultra⁠"
-    );
+    const accepted = await patchOverride("reasoning_efforts", "﻿​ low\r\n, medium, max‍, ultra⁠");
     assert.equal(accepted.status, 200);
 
     const payload = (await accepted.json()) as {

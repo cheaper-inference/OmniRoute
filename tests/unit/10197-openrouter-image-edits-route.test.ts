@@ -37,7 +37,7 @@ async function resetStorage() {
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 }
@@ -68,7 +68,7 @@ test.after(() => {
   globalThis.fetch = originalFetch;
   apiKeysDb.resetApiKeyState();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#10197 v1 image edit POST forwards built-in openrouter edits to the unified Image API", async () => {
@@ -95,10 +95,14 @@ test("#10197 v1 image edit POST forwards built-in openrouter edits to the unifie
     else if (raw instanceof Uint8Array) hitBody = Buffer.from(raw).toString("utf8");
     else if (raw instanceof ArrayBuffer) hitBody = Buffer.from(raw).toString("utf8");
     else if (raw && typeof (raw as { arrayBuffer?: unknown }).arrayBuffer === "function") {
-      hitBody = Buffer.from(await (raw as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer()).toString("utf8");
+      hitBody = Buffer.from(
+        await (raw as { arrayBuffer(): Promise<ArrayBuffer> }).arrayBuffer()
+      ).toString("utf8");
     }
     return new Response(
-      JSON.stringify({ data: [{ b64_json: Buffer.from([0x89, 0x50, 0x4e, 0x47]).toString("base64") }] }),
+      JSON.stringify({
+        data: [{ b64_json: Buffer.from([0x89, 0x50, 0x4e, 0x47]).toString("base64") }],
+      }),
       { status: 200, headers: { "content-type": "application/json" } }
     );
   };

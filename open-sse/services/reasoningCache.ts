@@ -23,6 +23,7 @@ import {
   getReasoningCacheStats,
   setReasoningCache,
 } from "../../src/lib/db/reasoningCache.ts";
+import { isFeatureFlagEnabled } from "../../src/shared/utils/featureFlags.ts";
 import { isInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 
 // ──────────────── Provider/Model Detection ────────────────
@@ -45,13 +46,16 @@ const REASONING_REPLAY_PROVIDERS = new Set([
   // 400s with "Param Incorrect: The reasoning_content in the thinking mode
   // must be passed back to the API."
   "xiaomi-mimo",
+  // Command Code routes upstream DeepSeek models and requires the same
+  // reasoning_content replay contract.
+  "command-code",
 ]);
 
 const REASONING_REPLAY_MODEL_PATTERNS = [
   /deepseek-r1/i,
   /deepseek-reasoner/i,
   /deepseek-chat/i,
-  /deepseek[-/]v4[-.](flash|pro)(-free)?/i,
+  /deepseek[-/]v4(?:[-.]\d+)?[-.](flash|pro)(-free)?/i,
   /zen\/deepseek-v4/i,
   // Match native kimi-kN and namespaced kimi/kN families without treating
   // generic aliases such as kimi-latest as strict thinking models.
@@ -64,7 +68,7 @@ const REASONING_REPLAY_MODEL_PATTERNS = [
   /^mimo[-.]?v\d/i,
 ];
 
-const DEEPSEEK_V4_MODEL_PATTERN = /deepseek[-/]v4[-.](flash|pro)/i;
+const DEEPSEEK_V4_MODEL_PATTERN = /deepseek[-/]v4(?:[-.]\d+)?[-.](flash|pro)/i;
 const K3_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)(?:kimi-)?k3(?:$|-)/i;
 const NATIVE_K27_REASONING_REPLAY_MODEL_PATTERN = /(?:^|\/)kimi-k2\.7-code(?:$|-)/i;
 
@@ -140,6 +144,7 @@ type AssistantMessageLike = {
 type AssistantMessageCacheContext = {
   scope?: string;
   historyMessages?: AssistantMessageLike[];
+  videoTranscriptSensitive?: boolean;
 };
 
 type ToolCallLike = {
@@ -199,13 +204,17 @@ export function cacheReasoning(
   cacheReasoningByKey(toolCallId, provider, model, reasoning);
 }
 
+function isReasoningReplayEnabled(): boolean {
+  return isFeatureFlagEnabled("REASONING_REPLAY_ENABLED");
+}
+
 export function cacheReasoningByKey(
   key: string,
   provider: string,
   model: string,
   reasoning: string
 ): void {
-  if (!key || !reasoning) return;
+  if (!isReasoningReplayEnabled() || !key || !reasoning) return;
   // ponytail: never store the internal replay placeholder — models echo it
   // and it poisons the cache (upstream echo loop, OmniRoute #9573).
   if (isInternalReasoningPlaceholder(reasoning)) return;
@@ -334,6 +343,7 @@ export function cacheReasoningFromAssistantMessage(
   model: string,
   context?: AssistantMessageCacheContext
 ): number {
+  if (context?.videoTranscriptSensitive) return 0;
   if (!message || message.role !== "assistant") {
     return 0;
   }
@@ -356,7 +366,11 @@ export function cacheReasoningFromAssistantMessage(
   if (toolCallIds.length === 0) {
     const scope = context?.scope?.trim();
     const historyMessages = context?.historyMessages;
-    if (!scope || !Array.isArray(historyMessages)) return 0;
+    // A real request always has at least one prior message (the user turn), so an
+    // empty history means the caller could not recover the transcript the read
+    // side keys on (e.g. a Responses-shaped body with `input` and no reported
+    // pivot). Writing a one-message digest then can never match — skip it.
+    if (!scope || !Array.isArray(historyMessages) || historyMessages.length === 0) return 0;
 
     const messages = [...historyMessages, message];
     const cacheKey = buildAssistantMessageCacheKey(scope, messages, messages.length - 1);
@@ -375,6 +389,11 @@ export function cacheReasoningFromAssistantMessage(
  * Memory first → DB fallback → null (miss).
  */
 export function lookupReasoning(toolCallId: string): string | null {
+  if (!isReasoningReplayEnabled()) return null;
+  return lookupStoredReasoning(toolCallId);
+}
+
+function lookupStoredReasoning(toolCallId: string): string | null {
   if (!toolCallId) {
     misses++;
     return null;

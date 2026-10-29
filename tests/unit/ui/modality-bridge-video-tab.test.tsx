@@ -2,6 +2,9 @@
 import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions, kitSelectTriggers } from "../../helpers/kitSelect";
 
 import ModalityBridgeVideoTab from "@/app/(dashboard)/dashboard/settings/components/modalityBridge/ModalityBridgeVideoTab";
 
@@ -11,6 +14,17 @@ vi.mock("next-intl", () => ({
       ? "MISSING:settings.degradationFull"
       : key,
 }));
+
+// KEA-7886: the advanced numeric fields live in the kit Accordion (Collapsible adapter), which
+// mounts its body only while open — expand "modalityBridgeAdvanced" before querying them.
+function openAdvanced(root: HTMLElement): void {
+  const trigger = Array.from(
+    root.querySelectorAll<HTMLButtonElement>("[data-slot=accordion-trigger]")
+  ).find((button) => button.textContent?.includes("modalityBridgeAdvanced"));
+  if (trigger && trigger.getAttribute("aria-expanded") !== "true") {
+    act(() => trigger.click());
+  }
+}
 
 const roots: Array<{ root: Root; element: HTMLDivElement }> = [];
 
@@ -26,14 +40,23 @@ describe("ModalityBridgeVideoTab", () => {
   let fetchMock: ReturnType<typeof vi.fn>;
   let failPatch = false;
   let failSettingsLoad = false;
+  let runtimeMode: "ready" | "unavailable" | "network-error" = "ready";
 
   beforeEach(() => {
     (globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
     failPatch = false;
     failSettingsLoad = false;
+    runtimeMode = "ready";
     fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url.includes("/api/modality-bridge/video/runtime")) {
+        if (runtimeMode === "network-error") throw new Error("network unreachable");
+        if (runtimeMode === "unavailable") {
+          return Response.json({
+            available: false,
+            reason: "ffmpeg binary not found on PATH",
+          });
+        }
         return Response.json({
           available: true,
           ffmpegVersion: "6.1.1",
@@ -96,6 +119,8 @@ describe("ModalityBridgeVideoTab", () => {
     const root = createRoot(element);
     await act(async () => root.render(<ModalityBridgeVideoTab {...props} />));
     roots.push({ root, element });
+    await waitFor(() => element.querySelector('[role="switch"]') !== null, "Video Bridge card");
+    openAdvanced(element);
     await waitFor(
       () => element.querySelector('[data-testid="modality-bridge-video-frame-count"]') !== null,
       "Video Bridge settings"
@@ -115,11 +140,12 @@ describe("ModalityBridgeVideoTab", () => {
   it("shows ready runtime versions, video stats, and only vision-capable models", async () => {
     const element = await render();
     await waitFor(() => element.textContent?.includes("6.1.1") ?? false, "runtime status");
-    await waitFor(
-      () => Array.from(element.querySelectorAll("option")).some((option) => option.value),
-      "model options"
-    );
-    const options = Array.from(element.querySelectorAll("option")).map((option) => option.value);
+    // the model picker is disabled until its catalog has loaded
+    await waitFor(() => {
+      const trigger = kitSelectTriggers(element)[0] as HTMLButtonElement | undefined;
+      return !!trigger && !trigger.disabled;
+    }, "model options");
+    const options = kitSelectOptions(kitSelectTriggers(element)[0]).map((option) => option.value);
     expect(options).toContain("openai/gpt-4o-mini");
     expect(options).not.toContain("example/text-only");
     expect(element.textContent).toContain("4 requestlogger.attempts");
@@ -142,6 +168,29 @@ describe("ModalityBridgeVideoTab", () => {
         String(input).includes("/api/modality-bridge/video/runtime")
       )
     ).toBe(false);
+  });
+
+  it("labels a confirmed-missing runtime as unavailable with its reason", async () => {
+    runtimeMode = "unavailable";
+    const element = await render();
+    await waitFor(
+      () => element.textContent?.includes("modalityBridgeVideoRuntimeUnavailable") ?? false,
+      "unavailable runtime status"
+    );
+    expect(element.textContent).toContain("ffmpeg binary not found on PATH");
+    expect(element.textContent).not.toContain("modalityBridgeVideoRuntimeChecking");
+    expect(element.textContent).not.toContain("modalityBridgeVideoRuntimeReady");
+  });
+
+  it("labels a probe that could not complete as unknown, never as unavailable (#11657)", async () => {
+    runtimeMode = "network-error";
+    const element = await render();
+    // The frame-count field is settings-only and renders regardless of the
+    // runtime probe outcome, so `render()`'s own wait is sufficient here —
+    // there is no separate "unknown" DOM marker to poll for.
+    expect(element.textContent).toContain("modalityBridgeVideoRuntimeChecking");
+    expect(element.textContent).not.toContain("modalityBridgeVideoRuntimeUnavailable");
+    expect(element.textContent).not.toContain("modalityBridgeVideoRuntimeInstall");
   });
 
   it("persists the enable toggle and clamps frame count to 16", async () => {
@@ -195,7 +244,10 @@ describe("ModalityBridgeVideoTab", () => {
       "health.degradationFull",
       "modalityBridgeTaskAware",
     ]);
-    const description = element.querySelector("#modality-bridge-video-analysis-mode-description");
+    // KEA-7886: the description is the Select adapter's hint, wired through aria-describedby.
+    const describedBy = analysisMode?.getAttribute("aria-describedby") ?? "";
+    expect(describedBy).toBe("modality-bridge-video-analysis-mode-hint");
+    const description = element.querySelector(`#${describedBy}`);
     expect(description?.textContent).toBe("modalityBridgeVideoDesc");
     await act(async () => {
       if (!analysisMode) return;

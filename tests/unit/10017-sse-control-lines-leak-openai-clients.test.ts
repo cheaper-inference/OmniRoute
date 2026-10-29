@@ -49,7 +49,7 @@ async function readTransformed(chunks: string[], options: object): Promise<strin
 test.after(() => {
   core.resetDbInstance();
   if (fs.existsSync(TEST_DATA_DIR)) {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -59,7 +59,8 @@ function leakedUpstreamControlLines(output: string): string[] {
     .trim()
     .split("\n")
     .filter(
-      (l) => /^(?:id:|event:|retry:)/i.test(l) || (l.startsWith(":") && !l.startsWith(": x-omniroute-"))
+      (l) =>
+        /^(?:id:|event:|retry:)/i.test(l) || (l.startsWith(":") && !l.startsWith(": x-omniroute-"))
     );
 }
 
@@ -166,7 +167,9 @@ test("#10017: OpenAI Responses passthrough KEEPS event framing (regression guard
     "Responses output_text.delta event framing must be preserved"
   );
   assert.ok(
-    !lines.some((l) => l.startsWith("id:") || (l.startsWith(":") && !l.startsWith(": x-omniroute-"))),
+    !lines.some(
+      (l) => l.startsWith("id:") || (l.startsWith(":") && !l.startsWith(": x-omniroute-"))
+    ),
     "Responses passthrough must still strip id:/comment control lines"
   );
 });
@@ -191,5 +194,8 @@ test("#10017: Claude Messages passthrough KEEPS event framing", async () => {
 
   const lines = text.trim().split("\n");
   assert.ok(lines.includes("event: message_start"), "Claude event framing must be preserved");
-  assert.ok(lines.includes("event: content_block_delta"), "Claude delta event framing must be preserved");
+  assert.ok(
+    lines.includes("event: content_block_delta"),
+    "Claude delta event framing must be preserved"
+  );
 });

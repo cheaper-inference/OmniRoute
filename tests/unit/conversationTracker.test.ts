@@ -144,6 +144,37 @@ test("computeFingerprintHash: identical apiKeyId/model/toolNames produce the sam
   assert.equal(a, b);
 });
 
+test("resolveConversationId: disabled tracking skips database access and message parsing", async () => {
+  const { getDbInstance } = await import("../../src/lib/db/core.ts");
+  const db = getDbInstance();
+  const previous = process.env.OMNIROUTE_DISABLE_CONVERSATION_TRACKING;
+  const prepare = test.mock.method(db, "prepare", () => {
+    throw new Error("disabled tracking must not access SQLite");
+  });
+  process.env.OMNIROUTE_DISABLE_CONVERSATION_TRACKING = "1";
+  try {
+    for (const clientSessionIdHeader of [null, "explicit-session"]) {
+      const result = await resolveConversationId({
+        body: {
+          get messages() {
+            throw new Error("disabled tracking must not parse messages");
+          },
+        },
+        model: "test-model",
+        apiKeyId: "test-key",
+        clientSessionIdHeader,
+        correlationId: "disabled-tracking",
+      });
+      assert.deepEqual(result, { conversationId: null, isNewConversation: false });
+    }
+    assert.equal(prepare.mock.callCount(), 0);
+  } finally {
+    prepare.mock.restore();
+    if (previous === undefined) delete process.env.OMNIROUTE_DISABLE_CONVERSATION_TRACKING;
+    else process.env.OMNIROUTE_DISABLE_CONVERSATION_TRACKING = previous;
+  }
+});
+
 test("resolveConversationId: exact-match continuation reuses the same id", async () => {
   const apiKeyId = "key-exact";
   const turn1 = await resolveConversationId({
@@ -539,6 +570,181 @@ test("resolveConversationId: continuation is detected even when the reconnect tu
     "the new turn should be appended, not a whole new duplicate history"
   );
   assert.ok(tree.some((n) => n.contentHash === hashOfPlainTextTurn("user", "brand new turn")));
+});
+
+test("resolveConversationId: a repeated tool result followed by new content appends to the same conversation instead of copying history", async () => {
+  // The recorded chain holds two byte-identical tool "ok" turns (distinct
+  // tool_call_id values, same role + text, so the same content hash). A new
+  // request resending the whole chain plus one more "ok" and a new answer
+  // must append the two new turns — the full-chain run (length 6) beats the
+  // single late duplicate (length 1) even though the duplicate ends further.
+  const apiKeyId = "key-longest-run";
+
+  const first = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "start" },
+        { role: "assistant", content: "a1" },
+        { role: "tool", tool_call_id: "c1", content: "ok" },
+        { role: "assistant", content: "poll" },
+        { role: "tool", tool_call_id: "c2", content: "ok" },
+        { role: "assistant", content: "poll" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+  assert.equal(first.isNewConversation, true);
+
+  const second = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "start" },
+        { role: "assistant", content: "a1" },
+        { role: "tool", tool_call_id: "c1", content: "ok" },
+        { role: "assistant", content: "poll" },
+        { role: "tool", tool_call_id: "c2", content: "ok" },
+        { role: "assistant", content: "poll" },
+        { role: "tool", tool_call_id: "c3", content: "ok" },
+        { role: "assistant", content: "brand new" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+
+  assert.equal(second.conversationId, first.conversationId);
+  assert.equal(second.isNewConversation, false);
+
+  const tree = getConversationTurnPage(first.conversationId, { limit: 500 }).nodes;
+  assert.equal(tree.length, 8);
+  assert.ok(tree.some((n) => n.contentHash === hashOfPlainTextTurn("assistant", "brand new")));
+});
+
+test("resolveConversationId: new content without any repeated turn continues the same conversation", async () => {
+  const apiKeyId = "key-fresh-tail";
+
+  const first = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "fresh tail start" },
+        { role: "assistant", content: "fresh tail reply" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+  assert.equal(first.isNewConversation, true);
+
+  const second = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "fresh tail start" },
+        { role: "assistant", content: "fresh tail reply" },
+        { role: "assistant", content: "fresh answer" },
+        { role: "user", content: "follow-up" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+
+  assert.equal(second.conversationId, first.conversationId);
+  assert.equal(second.isNewConversation, false);
+
+  const tree = getConversationTurnPage(first.conversationId, { limit: 500 }).nodes;
+  assert.equal(tree.length, 4);
+});
+
+test("resolveConversationId: continuation after a compacted prefix continues the same conversation", async () => {
+  const apiKeyId = "key-compacted-prefix";
+
+  const first = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "compacted A oldest" },
+        { role: "assistant", content: "compacted B" },
+        { role: "user", content: "compacted shared tail" },
+        { role: "assistant", content: "compacted D" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+  assert.equal(first.isNewConversation, true);
+
+  const second = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "[summary, unrelated to compacted A/B text]" },
+        { role: "user", content: "compacted shared tail" },
+        { role: "assistant", content: "compacted D" },
+        { role: "user", content: "compacted new turn" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+
+  assert.equal(second.conversationId, first.conversationId);
+  assert.equal(second.isNewConversation, false);
+});
+
+test("resolveConversationId: an edited middle turn still mints its own conversation", async () => {
+  const apiKeyId = "key-edited-middle";
+
+  const first = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "edited a" },
+        { role: "assistant", content: "edited b" },
+        { role: "user", content: "edited c" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+  assert.equal(first.isNewConversation, true);
+
+  const second = await resolveConversationId({
+    body: {
+      model: "big-pickle",
+      messages: [
+        { role: "user", content: "edited a" },
+        { role: "assistant", content: "edited b" },
+        { role: "user", content: "edited c changed" },
+        { role: "assistant", content: "edited d" },
+      ],
+    },
+    model: "big-pickle",
+    apiKeyId,
+    clientSessionIdHeader: null,
+    correlationId: nextCorrelationId(),
+  });
+
+  assert.notEqual(second.conversationId, first.conversationId);
+  assert.equal(second.isNewConversation, true);
 });
 
 test("resolveConversationId: different api keys never merge, even with byte-identical content", async () => {

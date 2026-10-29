@@ -18,11 +18,32 @@ If you discover a security vulnerability in OmniRoute, please report it responsi
 
 ## Supported Versions
 
-| Version | Support Status |
-| ------- | -------------- |
-| 3.8.x   | ✅ Active      |
-| 3.7.x   | ✅ Security    |
-| < 3.7.0 | ❌ Unsupported |
+| Version | Support Status                                 |
+| ------- | ---------------------------------------------- |
+| 3.9.x   | 🗓️ Planned — LTS line (`stable/v3`), see below |
+| 3.8.x   | ✅ Active                                      |
+| 3.7.x   | ✅ Security                                    |
+| < 3.7.0 | ❌ Unsupported                                 |
+
+## LTS support window (v3.9.x)
+
+After 3.8.59 the next version is **3.9.0**, which opens the long-term support line on the
+`stable/v3` branch (see [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
+
+- **What `stable/v3` receives:** bug fixes, security patches and provider updates. New
+  features go to the v4 channel; the LTS line is stability-first. `npm install omniroute`
+  (the `latest` dist-tag) stays on v3 during the whole v4 cycle.
+- **Window duration:** `stable/v3` receives **security fixes and critical regressions for
+  12 months after the 3.9.0 cut, or until 90 days after v4.0.0 is published as `latest` —
+  whichever is later**. The resulting end date is recorded in the 3.9.0 release notes and in
+  [`ROADMAP.md`](ROADMAP.md) when the cut happens.
+- **Reporting a vulnerability in the LTS line:** same channel as any other version —
+  a private [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
+  never a public issue. Say which version you tested (for example `3.9.2`); fixes land on
+  `stable/v3` and are forward-ported to v4.
+- **Security baseline at the LTS cut:** measured scanner state, route-guard and
+  public-credential proofs are recorded in
+  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 
@@ -42,7 +63,7 @@ Request → CORS → Authz pipeline (classify → policies → enforce)
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | **Dashboard Login**   | Password-based auth with JWT tokens (HttpOnly cookies)                                                                                    |
 | **API Key Auth**      | HMAC-signed keys with CRC validation                                                                                                      |
-| **OAuth 2.0 + PKCE**  | Provider-specific browser/device OAuth uses PKCE where supported; import-only Devin credentials are handled separately.                    |
+| **OAuth 2.0 + PKCE**  | Provider-specific browser/device OAuth uses PKCE where supported; import-only Devin credentials are handled separately.                   |
 | **Token Refresh**     | Automatic OAuth token refresh before expiry                                                                                               |
 | **Secure Cookies**    | `AUTH_COOKIE_SECURE=true` for HTTPS environments                                                                                          |
 | **Authz Pipeline**    | Route classification (PUBLIC / CLIENT_API / MANAGEMENT) — see `docs/architecture/AUTHZ_GUIDE.md`                                          |
@@ -218,11 +239,21 @@ These rules are enforced by tooling and reviewers:
 
 ## Supply-chain scanner findings (Socket.dev / Snyk / similar)
 
+> **Scope note:** `socket.yml` at the repository root only shapes `projectIgnorePaths` for Socket.dev's registry-side post-publish scan of the published npm artifact — it is not an enforced CI/PR merge gate. No workflow in `.github/workflows`, no `package.json` script, and no `Makefile` target invokes Socket.dev.
+
 The published `omniroute` npm artifact bundles the Next.js `output: "standalone"`
 build, which means every route handler — including documented privileged
 features (MITM, Zed import, Cloud Sync, embedded service supervisor) — ends
 up in `.next/server/*.js` minified chunks. Heuristic supply-chain scanners
 frequently pattern-match those chunks against malware signatures.
+
+The scanner configuration we use lives at [`socket.yml`](socket.yml) in the
+repo root (Socket.dev GitHub App format v2 — see
+<https://docs.socket.dev/docs/socket-yml>). It explicitly excludes
+non-shipped directories (`tests/`, `_tasks/`, `_references/`, `_ideia/`,
+`_mono_repo/`, `docs/`, etc.) so the scanner only reports on code paths that
+actually reach published users — the scan itself is driven by the Socket
+GitHub App reading that file, not by a workflow in this repository.
 
 For each finding category we maintain a per-finding maintainer attestation:
 

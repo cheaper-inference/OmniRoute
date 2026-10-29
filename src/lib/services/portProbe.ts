@@ -16,6 +16,7 @@
 import { createConnection } from "node:net";
 import { spawn } from "node:child_process";
 import os from "node:os";
+import { getOriginalFetch } from "@omniroute/open-sse/utils/proxyFetch.ts";
 
 /** Result of probing the service before spawning. */
 export interface PreSpawnProbe {
@@ -111,7 +112,10 @@ async function isHealthy(healthUrl: string, timeoutMs: number): Promise<boolean>
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    const res = await fetch(healthUrl, { signal: controller.signal });
+    // Embedded-service loopback probes are control-plane I/O. They must never
+    // enter the public provider proxy/TLS pipeline: an expected ECONNREFUSED
+    // on a free port is normal pre-spawn state, not a ProxyFetch warning.
+    const res = await getOriginalFetch()(healthUrl, { signal: controller.signal });
     return res.ok;
   } catch {
     return false;
@@ -231,12 +235,20 @@ export function parseWindowsNetstatPid(stdout: string, port: number): number | n
  * the Linux/macOS row shapes the Windows parser deliberately never matches
  * (LISTEN vs LISTENING), so it degrades to a no-op instead of a false pid.
  */
-const PID_PROBES: ReadonlyArray<{
+export const PID_PROBES: ReadonlyArray<{
   command: string;
   args: (port: number) => string[];
   parse: (stdout: string, port: number) => number | null;
 }> = [
-  { command: "lsof", args: (port) => ["-ti", `:${port}`], parse: (stdout) => parseLsofPid(stdout) },
+  // #14722: listeners only, matching the win32/ss/netstat LISTEN filters and omniroute stop (#14605).
+  // A bare `lsof -ti :PORT` also returns every client connected to the port (for example a browser
+  // tab on the dashboard, a Docker/VM port forward, or an SSH tunnel), which can cause the supervisor
+  // to kill the client or track the wrong pid when adopting.
+  {
+    command: "lsof",
+    args: (port) => ["-nP", "-t", `-iTCP:${port}`, "-sTCP:LISTEN"],
+    parse: (stdout) => parseLsofPid(stdout),
+  },
   {
     command: "ss",
     args: (port) => ["-tlnp", `sport = :${port}`],

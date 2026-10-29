@@ -96,7 +96,7 @@ test(
     } finally {
       if (readerFd !== null) fs.closeSync(readerFd);
       if (adapter?.open) adapter.close();
-      fs.rmSync(dataDir, { recursive: true, force: true });
+      fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   }
 );
@@ -111,6 +111,6 @@ test("sql.js persist() is a no-op for :memory: databases (no temp file, no throw
     assert.deepEqual(fs.readdirSync(dataDir), [], "an in-memory database wrote to disk");
   } finally {
     if (adapter?.open) adapter.close();
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

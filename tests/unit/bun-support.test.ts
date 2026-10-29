@@ -27,14 +27,22 @@ test("createSyncDriverFactory prefers bun:sqlite built-in driver when running un
     (process.versions as Record<string, string>).bun = "1.1.20";
 
     const dummyBunDb = {
-      query: () => ({ run: () => ({ changes: 1, lastInsertRowid: 1 }), get: () => null, all: () => [] }),
+      query: () => ({
+        run: () => ({ changes: 1, lastInsertRowid: 1 }),
+        get: () => null,
+        all: () => [],
+      }),
       exec: () => {},
       close: () => {},
     };
 
     const loader = (modName: string) => {
       if (modName === "bun:sqlite") {
-        return { Database: function DummyBunDatabase() { return dummyBunDb; } };
+        return {
+          Database: function DummyBunDatabase() {
+            return dummyBunDb;
+          },
+        };
       }
       throw new Error(`Unexpected module ${modName}`);
     };
@@ -88,13 +96,35 @@ test("createSyncDriverFactory prefers better-sqlite3 when running under Node", (
   }
 });
 
-test("resolveNextBuildBundlerFlag automatically disables Turbopack and uses Webpack under Bun", async () => {
+// `OMNIROUTE_USE_TURBOPACK` is the operator's only control over the bundler:
+// Turbopack is the default and `0` is the documented escape hatch (webpack), taken
+// for Windows / native-binding trouble / RAM-constrained machines — see
+// docs/reference/ENVIRONMENT.md and #6409. Nothing sniffs the runtime, so pin that:
+// a hidden override would silently ignore an explicit `=1` from an operator who set
+// it on purpose (CI does, in build.yml / ci.yml / quality.yml).
+test("resolveNextBuildBundlerFlag is decided by OMNIROUTE_USE_TURBOPACK alone, not by the runtime", async () => {
+  const buildIsolated = await import("../../scripts/build/build-next-isolated.mjs");
   const originalBun = process.versions.bun;
   try {
-    (process.versions as Record<string, string>).bun = "1.1.20";
-    const buildIsolated = await import("../../scripts/build/build-next-isolated.mjs");
-    assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}), "--webpack");
-    assert.equal(buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }), "--webpack");
+    for (const bun of [undefined, "1.1.20", "1.3.14"]) {
+      if (bun === undefined) {
+        delete (process.versions as Record<string, string | undefined>).bun;
+      } else {
+        (process.versions as Record<string, string>).bun = bun;
+      }
+      const where = `bun=${bun ?? "absent"}`;
+      assert.equal(buildIsolated.resolveNextBuildBundlerFlag({}), "--turbopack", where);
+      assert.equal(
+        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "1" }),
+        "--turbopack",
+        where
+      );
+      assert.equal(
+        buildIsolated.resolveNextBuildBundlerFlag({ OMNIROUTE_USE_TURBOPACK: "0" }),
+        "--webpack",
+        where
+      );
+    }
   } finally {
     if (originalBun === undefined) {
       delete (process.versions as Record<string, string | undefined>).bun;

@@ -17,7 +17,7 @@ const CONNECTION = "00000000-0000-4000-8000-000000000001";
 async function resetStorage(): Promise<void> {
   core.resetDbInstance();
   apiKeys.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -25,7 +25,7 @@ test.beforeEach(resetStorage);
 test.after(() => {
   core.resetDbInstance();
   apiKeys.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("managed API key create requires and atomically stores an explicit allowlist", async () => {

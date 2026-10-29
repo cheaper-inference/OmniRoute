@@ -26,7 +26,7 @@ async function resetStorage() {
   }
   antigravityVersion.clearAntigravityVersionCaches();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -58,7 +58,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("provider models route returns a static local catalog for non-LLM search/agent providers (#5569/#5571/#5573/#5575)", async () => {
@@ -535,7 +535,7 @@ test("provider models route returns the local catalog for built-in image provide
     {
       id: "topaz-enhance",
       name: "topaz-enhance",
-      apiFormat: "images",
+      apiFormat: "images-generations",
       supportedEndpoints: ["images"],
     },
   ]);
@@ -645,10 +645,33 @@ test("provider models route does NOT flag a degraded remote-fetch fallback as in
   const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
   globalThis.fetch = async () => new Response("upstream down", { status: 500 });
 
-  const body = (await (await callRoute(connection.id)).json()) as any;
+  // refresh=true is the live attempt; without it the discovery never leaves the
+  // operator's "auto-fetch off" setting (see the next test).
+  const body = (await (await callRoute(connection.id, "?refresh=true")).json()) as any;
 
   assert.equal(body.source, "local_catalog");
   assert.notEqual(body.intentional, true, "degraded fallback must not be flagged intentional");
+  assert.equal(body.degraded, true, "a failed live discovery is a degraded discovery");
+  assert.equal(body.error, "HTTP 500", "the degraded fallback reports the reason");
+});
+
+test("provider models route flags a discovery the operator turned off as intentional", async () => {
+  // Auto-fetch is opt-in: with it off, the built-in catalog is the expected
+  // source, so the response is NOT a degraded discovery.
+  const connection = await seedConnection("aimlapi", { apiKey: "aiml-key" });
+  globalThis.fetch = async () => new Response("upstream down", { status: 500 });
+
+  const body = (await (await callRoute(connection.id)).json()) as {
+    source?: string;
+    intentional?: unknown;
+    degraded?: unknown;
+    error?: unknown;
+  };
+
+  assert.equal(body.source, "local_catalog");
+  assert.equal(body.intentional, true, "a discovery the operator turned off is not a failure");
+  assert.notEqual(body.degraded, true);
+  assert.equal(body.error, undefined);
 });
 
 test("provider models route returns the local catalog for Runway video models", async () => {
@@ -683,9 +706,9 @@ test("provider models route returns the updated local catalog for GitHub Copilot
   assert.equal(response.status, 200);
   assert.equal(body.provider, "github");
   assert.equal(body.source, "local_catalog");
-  assert.ok(body.models.some((model) => model.id === "gpt-5.4"));
-  assert.ok(body.models.some((model) => model.id === "gpt-5.3-codex"));
-  assert.ok(body.models.some((model) => model.id === "claude-opus-4.7"));
+  assert.ok(body.models.some((model) => model.id === "gpt-6-astra"));
+  assert.ok(body.models.some((model) => model.id === "gpt-5.6-sol"));
+  assert.ok(body.models.some((model) => model.id === "claude-opus-5"));
   assert.equal(
     body.models.some((model) => model.id === "gpt-5.1"),
     false
@@ -943,8 +966,8 @@ test("provider models route retries Antigravity discovery endpoints before retur
       models: [
         { id: "gemini-3.1-pro-high", displayName: "Gemini 3.1 Pro (High)" },
         { id: "gemini-pro-agent", displayName: "Gemini 3.1 Pro (High)" },
-        { id: "gemini-3.7-flash-high", displayName: "Gemini 3.7 Flash High" },
-        { id: "gemini-3.7-flash-medium", displayName: "Gemini 3.7 Flash Medium" },
+        { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
+        { id: "gemini-3.8-flash-medium", displayName: "Gemini 3.8 Flash Medium" },
         { id: "gemini-3.8-flash-high", displayName: "Gemini 3.8 Flash High" },
         { id: "gemini-3.6-flash-high", displayName: "upstream-3.6-high" },
         { id: "gemini-3.6-flash-medium", displayName: "upstream-3.6-medium" },
@@ -976,12 +999,12 @@ test("provider models route retries Antigravity discovery endpoints before retur
     "https://cloudcode-pa.googleapis.com/v1internal:fetchAvailableModels",
   ]);
   assert.deepEqual(body.models, [
-    // #9106: both alias ids are user-callable now, so the upstream echo survives the filter.
+    // Callable aliases and repeated upstream IDs keep their shared catalog display names.
     { id: "gemini-3.1-pro-high", name: "Gemini 3.1 Pro (High)" },
     { id: "gemini-pro-agent", name: "Gemini 3.1 Pro (High)" },
-    { id: "gemini-3.7-flash-high", name: "Gemini 3.7 Flash (High)" },
-    { id: "gemini-3.7-flash-medium", name: "Gemini 3.7 Flash (Medium)" },
-    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash High" },
+    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
+    { id: "gemini-3.8-flash-medium", name: "Gemini 3.8 Flash (Medium)" },
+    { id: "gemini-3.8-flash-high", name: "Gemini 3.8 Flash (High)" },
   ]);
 });
 

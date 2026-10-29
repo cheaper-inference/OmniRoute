@@ -36,6 +36,6 @@ test("detectTool reports an existing opencode.jsonc as the real config path (#10
   } finally {
     if (previousXdg === undefined) delete process.env.XDG_CONFIG_HOME;
     else process.env.XDG_CONFIG_HOME = previousXdg;
-    fs.rmSync(xdgRoot, { recursive: true, force: true });
+    fs.rmSync(xdgRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

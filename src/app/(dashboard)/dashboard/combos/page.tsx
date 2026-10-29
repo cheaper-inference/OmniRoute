@@ -1,16 +1,40 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef, memo } from "react";
+import Icon from "@/shared/components/Icon";
+
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
+  useSyncExternalStore,
+  useId,
+  memo,
+  Suspense,
+} from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Field } from "@omniroute/ui-kit/field";
+import { Input as KitInput } from "@omniroute/ui-kit/input";
+import { ChoiceCard } from "@omniroute/ui-kit/onboarding-patterns";
+import { RadioGroup } from "@omniroute/ui-kit/radio-group";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import GlobalModelSearchPanel from "./GlobalModelSearchPanel";
 import Card from "@/shared/components/Card";
 import { CardSkeleton } from "@/shared/components/Loading";
 import EmptyState from "@/shared/components/EmptyState";
+import Checkbox from "@/shared/components/Checkbox";
+import FilterPills from "@/shared/components/FilterPills";
+import InfoTooltip from "@/shared/components/InfoTooltip";
 import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import Select from "@/shared/components/Select";
+import Textarea from "@/shared/components/Textarea";
 import Toggle from "@/shared/components/Toggle";
 import Tooltip from "@/shared/components/Tooltip";
 import { ComboCompressionModeSelect } from "@/shared/components/compression/ComboCompressionModeSelect";
@@ -18,9 +42,14 @@ import { useCopyToClipboard } from "@/shared/hooks/useCopyToClipboard";
 import { FieldLabelWithHelp, WeightTotalBar } from "./parts";
 import { ComboTargetOptions } from "./ComboQuotaOnlyFallbackToggle";
 import { applyQuotaOnlyFallbackConfig, setQuotaOnlyFallback } from "./comboQuotaOnlyFallback";
+import { buildAgentFeaturePatch } from "./comboAgentFeatures";
 import { useComboProxyAssignments } from "./useComboProxyAssignments";
 import { ResponseValidationEditor, type ResponseValidationValue } from "./ResponseValidationEditor";
 import ReasoningTokenBufferToggle from "./ReasoningTokenBufferToggle";
+import ComboTimeoutFields from "./ComboTimeoutFields";
+import ComboContextLengthField from "./ComboContextLengthField";
+import ComboRrLegibilityFields from "./ComboRrLegibilityFields";
+import { persistConnectionAwareExpansion, persistStickyRoundRobinLimit } from "./comboRrLegibility";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
@@ -50,10 +79,27 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
+import {
+  AutoComboTruncatedNote,
+  getComboStepKindLabel,
+  getI18nOrFallback,
+} from "./comboPageHelpers";
+import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
 import IntelligentComboPanel from "./IntelligentComboPanel";
+import { ComboSortSelect } from "./ComboSortSelect";
+import { StaleModelBadge, buildStaleModelSet, isStaleComboStep } from "./StaleModelBadge";
+import {
+  sortComboStepsSync,
+  sortComboStepsByScore,
+  fetchProviderRankings,
+  normalizeSortMethod,
+  isValidSortMethod,
+  type SortMethod,
+} from "@/lib/combos/comboSort";
+import type { ComboStep } from "@/lib/combos/steps";
 import {
   filterCombosByStrategyCategory,
   getStrategyCategory,
@@ -62,8 +108,13 @@ import {
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
 import { getComboStepTarget } from "@/lib/combos/steps";
+import { DEAD_COMBO_CONFIG_KEYS } from "@/lib/combos/deadConfigKeys";
+import { modelFamily } from "@/lib/combos/invariants";
+import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias.ts";
 import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
+import { cn } from "@/shared/utils/cn";
+import { strategyBadgeClass } from "./strategyPalette";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -165,6 +216,12 @@ const STRATEGY_GUIDANCE_FALLBACK = {
     avoid: "Avoid when models have similar context lengths or simple tasks.",
     example: "Example: Distribute long conversations across models with large context windows.",
   },
+  "quota-weighted": {
+    when: "Use when several accounts of the same model have quota snapshots and concurrent traffic should land on accounts that still have leftover.",
+    avoid: "Avoid when most accounts have no quota snapshots.",
+    example:
+      "Example: 10 Antigravity Gemini accounts with different 5h/weekly resets; skip empty ones and pick among the rest in proportion to leftover.",
+  },
 };
 
 const ADVANCED_FIELD_HELP_FALLBACK = {
@@ -180,8 +237,6 @@ const ADVANCED_FIELD_HELP_FALLBACK = {
     "Weighted sticky batch size: consecutive successful requests sent to the selected weighted target before drawing again. Empty or 1 keeps the current per-request weighted draw.",
   failoverBeforeRetry:
     "When enabled, a 429 from the upstream triggers immediate target failover instead of retrying the same URL first.",
-  targetTimeoutMs:
-    "Optional combo target timeout. Empty inherits the current request timeout; larger values are capped to that timeout.",
   maxSetRetries:
     "Number of times to retry the full target set when every target fails. 0 = no set-level retry.",
   setRetryDelayMs:
@@ -192,45 +247,21 @@ const ADVANCED_FIELD_HELP_FALLBACK = {
     "What to do when the next combo target cannot accept the original reasoning transport. Drop is the default: it removes reasoning state and tries the target. Skip leaves the request body untouched and falls through.",
 };
 
-const LEGACY_COMBO_RESILIENCE_KEYS = new Set([
+// UI-only keys the modal manages itself (never persisted by this path):
+// timeoutMs, healthCheckEnabled, healthCheckTimeoutMs.
+const NON_PERSISTED_COMBO_CONFIG_KEYS = new Set([
+  ...DEAD_COMBO_CONFIG_KEYS,
   "timeoutMs",
   "healthCheckEnabled",
   "healthCheckTimeoutMs",
-  "queueTimeoutMs",
-  "queueDepth",
-  "fallbackDelayMs",
-  "handoffProviders",
-  "maxComboDepth",
-  "manifestRouting",
-  "complexityAwareRouting",
-  "pipeline_enabled",
-  "pipelineConcurrency",
-  "shadowRouting",
-  "evalRouting",
-  "resetAwareEnabled",
-  "resetAwareWindow",
 ]);
-const MS_PER_SECOND = 1000;
-
-function msToOptionalSecondsInput(value) {
-  const ms = Number(value);
-  if (!Number.isFinite(ms) || ms <= 0) return "";
-  return String(Math.round(ms / MS_PER_SECOND));
-}
-
-function secondsInputToOptionalMs(value, maxSeconds = 86400) {
-  if (!value) return undefined;
-  const seconds = Number(value);
-  if (!Number.isFinite(seconds) || seconds <= 0) return undefined;
-  return Math.min(maxSeconds, Math.round(seconds)) * MS_PER_SECOND;
-}
 
 function sanitizeComboRuntimeConfig(config) {
   if (!config || typeof config !== "object") return {};
   return Object.fromEntries(
     Object.entries(config).filter(
       ([key, value]) =>
-        value !== undefined && value !== null && !LEGACY_COMBO_RESILIENCE_KEYS.has(key)
+        value !== undefined && value !== null && !NON_PERSISTED_COMBO_CONFIG_KEYS.has(key)
     )
   );
 }
@@ -373,9 +404,66 @@ const STRATEGY_RECOMMENDATIONS_FALLBACK = {
       "Use when context limits are a bottleneck for your workload.",
     ],
   },
+  "quota-weighted": {
+    title: "Quota-weighted account spread",
+    description:
+      "Drops exhausted accounts, keeps a 1% soft floor, then picks the first target in proportion to leftover divided by in-flight load. Existing conversations stay pinned.",
+    tips: [
+      "Keep session stickiness on (the default). New conversations spread by leftover and in-flight load; an existing conversation stays on its account until that account is empty, then rebinds.",
+      "Needs per-account quota snapshots. Missing snapshots stay eligible but only at the reset-aware missing-quota score (0.5).",
+      "The 1% floor is a last-resort pool. An empty A pool still serves B instead of returning 404.",
+    ],
+  },
 };
 
 const COMBO_USAGE_GUIDE_STORAGE_KEY = "omniroute:combos:hide-usage-guide";
+
+// The dismissal lives in localStorage, which SSR cannot read: a lazy useState
+// initializer would render "not dismissed" on the server and the real value on
+// the client, and correcting that in an effect is a synchronous setState inside
+// an effect (react-hooks/set-state-in-effect) that costs an extra commit of this
+// whole tree. useSyncExternalStore is the sanctioned shape for exactly this —
+// getServerSnapshot supplies the SSR-safe default, getSnapshot reads the store
+// after hydration, and the two handlers below notify subscribers instead of
+// setting state. The `storage` listener keeps other tabs in sync for free.
+const usageGuideListeners = new Set<() => void>();
+
+function subscribeUsageGuide(onStoreChange: () => void): () => void {
+  usageGuideListeners.add(onStoreChange);
+  globalThis.addEventListener?.("storage", onStoreChange);
+  return () => {
+    usageGuideListeners.delete(onStoreChange);
+    globalThis.removeEventListener?.("storage", onStoreChange);
+  };
+}
+
+function emitUsageGuideChange(): void {
+  for (const listener of usageGuideListeners) listener();
+}
+
+function getUsageGuideSnapshot(): boolean {
+  try {
+    return globalThis.localStorage?.getItem(COMBO_USAGE_GUIDE_STORAGE_KEY) !== "1";
+  } catch {
+    // Storage access errors (privacy mode / restricted environments) show the guide.
+    return true;
+  }
+}
+
+function getUsageGuideServerSnapshot(): boolean {
+  return true;
+}
+
+// Pure predicate hoisted out of the page component to keep its cyclomatic budget flat
+// (check:complexity new-code mode).
+function isStaleIntelligentSelection(
+  intelligentCombos: Array<{ id: string }>,
+  selectedId: string | null
+): boolean {
+  if (selectedId === null) return false;
+  if (intelligentCombos.length === 0) return true;
+  return !intelligentCombos.some((combo) => combo.id === selectedId);
+}
 const COMBO_FORM_STAGE_META = [
   {
     id: "basics",
@@ -519,25 +607,9 @@ function getStrategyDescription(t, strategy) {
   );
 }
 
+// Strategy badge colour: one shared palette on the kit chart tokens (strategyPalette.ts, P8).
 function getStrategyBadgeClass(strategy) {
-  if (strategy === "weighted") return "bg-amber-500/15 text-amber-600 dark:text-amber-400";
-  if (strategy === "round-robin") return "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400";
-  if (strategy === "context-relay")
-    return "bg-fuchsia-500/15 text-fuchsia-600 dark:text-fuchsia-400";
-  if (strategy === "random") return "bg-purple-500/15 text-purple-600 dark:text-purple-400";
-  if (strategy === "least-used") return "bg-cyan-500/15 text-cyan-600 dark:text-cyan-400";
-  if (strategy === "cost-optimized") return "bg-teal-500/15 text-teal-600 dark:text-teal-400";
-  if (strategy === "reset-aware") return "bg-lime-500/15 text-lime-700 dark:text-lime-300";
-  if (strategy === "fill-first") return "bg-orange-500/15 text-orange-600 dark:text-orange-400";
-  if (strategy === "p2c") return "bg-indigo-500/15 text-indigo-600 dark:text-indigo-400";
-  return "bg-blue-500/15 text-blue-600 dark:text-blue-400";
-}
-
-function getI18nOrFallback(t, key, fallback, values = undefined) {
-  try {
-    if (typeof t.has === "function" && t.has(key)) return t(key, values);
-  } catch {}
-  return fallback;
+  return strategyBadgeClass(strategy);
 }
 
 function moveArrayItem(items, fromIndex, toIndex) {
@@ -592,6 +664,54 @@ function normalizeModelEntry(entry) {
     model: entry.model,
     weight: entry.weight || 0,
   };
+}
+
+/**
+ * On an existing-combo edit, work out how the dashboard save should synchronize
+ * `allowedProviders` / `allowedModelFamilies` against the combo's new step list so
+ * adding a step across providers never triggers COMBO_008 (#13951). Both restrictions
+ * are only ever WIDENED or left untouched here — never synthesized from no restriction,
+ * and never wiped just because the combo happens to have one.
+ */
+function computeAllowedRestrictionSync(
+  isEdit: boolean,
+  combo: { allowedProviders?: unknown; allowedModelFamilies?: unknown } | null | undefined,
+  models: Array<{ providerId?: string; model?: string }>
+): { allowedProviders?: string[]; allowedModelFamilies?: null; overrideAllowedProviders?: true } {
+  if (!isEdit) return {};
+  const result: {
+    allowedProviders?: string[];
+    allowedModelFamilies?: null;
+    overrideAllowedProviders?: true;
+  } = { overrideAllowedProviders: true };
+
+  const existingProviders = Array.isArray(combo?.allowedProviders) ? combo.allowedProviders : [];
+  if (existingProviders.length > 0) {
+    const stepProviders = models
+      .map((m) => {
+        if (m.providerId) return m.providerId;
+        if (typeof m.model !== "string" || !m.model.includes("/")) return "";
+        const [aliasOrProvider] = m.model.split("/");
+        return resolveProviderAlias(aliasOrProvider) || "";
+      })
+      .filter((p): p is string => Boolean(p));
+    result.allowedProviders = Array.from(new Set([...existingProviders, ...stepProviders]));
+  }
+
+  // Only clear the family restriction when a new step actually violates it (#13951).
+  const existingFamilies = Array.isArray(combo?.allowedModelFamilies)
+    ? combo.allowedModelFamilies
+    : [];
+  if (existingFamilies.length > 0) {
+    const allowedFamilies = new Set(existingFamilies);
+    const stepViolatesFamilies = models.some((m) => {
+      const family = typeof m.model === "string" ? modelFamily(m.model) : null;
+      return !family || !allowedFamilies.has(family);
+    });
+    if (stepViolatesFamilies) result.allowedModelFamilies = null;
+  }
+
+  return result;
 }
 
 function getModelString(entry) {
@@ -719,10 +839,9 @@ function formatComboEntryDisplay(
   return `${providerLabel}/${modelLabel}`;
 }
 
-export default function CombosPage() {
+function CombosPageContent() {
   const t = useTranslations("combos");
   const tc = useTranslations("common");
-  const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const router = useRouter();
   const searchParams = useSearchParams();
   const [combos, setCombos] = useState([]);
@@ -739,13 +858,30 @@ export default function CombosPage() {
   const [proxyConfig, setProxyConfig] = useState(null);
   const { comboProxyAssignedIds, fetchComboProxyAssignments } = useComboProxyAssignments();
   const [providerNodes, setProviderNodes] = useState([]);
-  const [showUsageGuide, setShowUsageGuide] = useState(true);
+  // SSR has no localStorage, so a lazy initializer reading it here returns a
+  // different value server-side (always "not dismissed") than the client's
+  // real stored value -- exactly the kind of source React's hydration
+  // mismatch check is built to catch, and in dev mode a mismatch forces a
+  // full client-only re-render of this tree, discarding whatever the fetch
+  // effects below had already populated. useSyncExternalStore renders the
+  // SSR-safe default on both passes and switches to the stored value at
+  // hydration, without a second commit — see the store helpers above.
+  const usageGuideNotDismissed = useSyncExternalStore(
+    subscribeUsageGuide,
+    getUsageGuideSnapshot,
+    getUsageGuideServerSnapshot
+  );
+  // "Hide" (as opposed to "hide forever") is intentionally per-mount: it is not
+  // persisted, and remounting the page brings the guide back — same as before.
+  const [usageGuideHiddenForNow, setUsageGuideHiddenForNow] = useState(false);
+  const showUsageGuide = usageGuideNotDismissed && !usageGuideHiddenForNow;
   const [recentlyCreatedCombo, setRecentlyCreatedCombo] = useState("");
   const [creatingKimiPreset, setCreatingKimiPreset] = useState(false);
   const [comboDragIndex, setComboDragIndex] = useState(null);
   const [comboDragOverIndex, setComboDragOverIndex] = useState(null);
   const [savingComboOrder, setSavingComboOrder] = useState(false);
   const [comboConfigMode, setComboConfigMode] = useState("guided");
+  const [routingSettings, setRoutingSettings] = useState(null);
   const [promptCompressionEnabled, setPromptCompressionEnabled] = useState(false);
   const [selectedIntelligentComboId, setSelectedIntelligentComboId] = useState<string | null>(null);
   const comboDragIndexRef = useRef<number | null>(null);
@@ -771,45 +907,11 @@ export default function CombosPage() {
     return activeFilter === "intelligent" ? intelligentCombos[0] : null;
   }, [activeFilter, intelligentCombos, selectedIntelligentComboId]);
 
-  useEffect(() => {
-    if (intelligentCombos.length === 0) {
-      setSelectedIntelligentComboId(null);
-      return;
-    }
-
-    if (
-      selectedIntelligentComboId &&
-      !intelligentCombos.some((combo) => combo.id === selectedIntelligentComboId)
-    ) {
-      setSelectedIntelligentComboId(null);
-    }
-  }, [intelligentCombos, selectedIntelligentComboId]);
-
-  useEffect(() => {
-    fetchData();
-    fetch("/api/settings")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((settings) => setComboConfigMode(normalizeComboConfigMode(settings?.comboConfigMode)))
-      .catch(() => setComboConfigMode("guided"));
-    fetch("/api/settings/compression")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((settings) => setPromptCompressionEnabled(settings?.enabled === true))
-      .catch(() => setPromptCompressionEnabled(false));
-    fetch("/api/settings/proxy")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((c) => setProxyConfig(c))
-      .catch(() => {});
-  }, []);
-
-  useEffect(() => {
-    try {
-      if (globalThis.localStorage?.getItem(COMBO_USAGE_GUIDE_STORAGE_KEY) === "1") {
-        setShowUsageGuide(false);
-      }
-    } catch {
-      // Ignore storage access errors (privacy mode / restricted environments)
-    }
-  }, []);
+  // Drop a stale selection when the list no longer contains it — state adjustment
+  // during render (react-hooks/set-state-in-effect).
+  if (isStaleIntelligentSelection(intelligentCombos, selectedIntelligentComboId)) {
+    setSelectedIntelligentComboId(null);
+  }
 
   const fetchData = async () => {
     try {
@@ -838,6 +940,31 @@ export default function CombosPage() {
     }
   };
 
+  // Mount load — placed after fetchData so the effect does not read the binding in its
+  // TDZ (react-hooks/immutability); the call sits behind an async boundary
+  // (react-hooks/set-state-in-effect).
+  useEffect(() => {
+    void (async () => {
+      await fetchData();
+    })();
+    fetch("/api/settings")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((settings) => {
+        if (!settings) return;
+        setComboConfigMode(normalizeComboConfigMode(settings.comboConfigMode));
+        setRoutingSettings(settings);
+      })
+      .catch(() => setComboConfigMode("guided"));
+    fetch("/api/settings/compression")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((settings) => setPromptCompressionEnabled(settings?.enabled === true))
+      .catch(() => setPromptCompressionEnabled(false));
+    fetch("/api/settings/proxy")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((c) => setProxyConfig(c))
+      .catch(() => {});
+  }, []);
+
   const handleCreate = async (data) => {
     try {
       const res = await fetch("/api/combos", {
@@ -854,7 +981,7 @@ export default function CombosPage() {
         const err = await res.json();
         notify.error(err.error?.message || err.error || t("failedCreate"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorCreating"));
     }
   };
@@ -874,7 +1001,7 @@ export default function CombosPage() {
         const err = await res.json();
         notify.error(err.error?.message || err.error || t("failedUpdate"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorUpdating"));
     }
   };
@@ -895,8 +1022,11 @@ export default function CombosPage() {
       if (res.ok) {
         setCombos(combos.filter((c) => c.id !== id));
         notify.success(t("comboDeleted"));
+      } else {
+        const err = await res.json().catch(() => null);
+        notify.error(err?.error?.message || err?.error || t("errorDeleting"));
       }
-    } catch (error) {
+    } catch {
       notify.error(t("errorDeleting"));
     }
   };
@@ -944,7 +1074,7 @@ export default function CombosPage() {
       });
       const data = await res.json();
       setTestResults(data);
-    } catch (error) {
+    } catch {
       setTestResults({ error: t("testFailed") });
       notify.error(t("testFailed"));
     }
@@ -970,7 +1100,7 @@ export default function CombosPage() {
         );
         notify.error(resolveServerErrorMessage(errorBody, t("failedToggle")));
       }
-    } catch (error) {
+    } catch {
       // Revert on network error
       setCombos((prev) =>
         prev.map((c) => (c.id === combo.id ? { ...c, isActive: previousActive } : c))
@@ -980,17 +1110,18 @@ export default function CombosPage() {
   };
 
   const handleHideUsageGuideForever = () => {
-    setShowUsageGuide(false);
     try {
       globalThis.localStorage?.setItem(COMBO_USAGE_GUIDE_STORAGE_KEY, "1");
     } catch {}
+    emitUsageGuideChange();
   };
 
   const handleShowUsageGuide = () => {
-    setShowUsageGuide(true);
     try {
       globalThis.localStorage?.removeItem(COMBO_USAGE_GUIDE_STORAGE_KEY);
     } catch {}
+    setUsageGuideHiddenForNow(false);
+    emitUsageGuideChange();
   };
 
   const handleFilterChange = (nextFilter) => {
@@ -1095,25 +1226,29 @@ export default function CombosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("title")}</h1>
-          <p className="text-sm text-text-muted mt-1">{t("description")}</p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2">
-          {!showUsageGuide && (
-            <Button size="sm" variant="ghost" onClick={handleShowUsageGuide}>
-              {getI18nOrFallback(t, "usageGuideShow", "Show guide")}
+      <PageHeader
+        compact
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <>
+            {!showUsageGuide && (
+              <Button size="sm" variant="ghost" onClick={handleShowUsageGuide}>
+                {getI18nOrFallback(t, "usageGuideShow", "Show guide")}
+              </Button>
+            )}
+            <Button icon="add" onClick={() => setShowCreateModal(true)}>
+              {t("createCombo")}
             </Button>
-          )}
-          <Button icon="add" onClick={() => setShowCreateModal(true)}>
-            {t("createCombo")}
-          </Button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
-      <AutoComboCatalog onComboCreated={handleComboCreated} />
+      <AutoComboCatalog
+        onComboCreated={handleComboCreated}
+        onTestCombo={handleTestCombo}
+        testingName={testingCombo}
+      />
 
       <KimiComboPresetCard
         alreadyCreated={hasKimiCodingPreset(combos)}
@@ -1123,27 +1258,24 @@ export default function CombosPage() {
 
       {showUsageGuide && (
         <ComboUsageGuide
-          onHide={() => setShowUsageGuide(false)}
+          onHide={() => setUsageGuideHiddenForNow(true)}
           onHideForever={handleHideUsageGuideForever}
           onCreateCombo={() => setShowCreateModal(true)}
         />
       )}
 
       {recentlyCreatedCombo && (
-        <Card
-          padding="sm"
-          className="border border-emerald-500/20 bg-emerald-500/[0.04] dark:bg-emerald-500/[0.08]"
-        >
+        <Card padding="sm" className="border border-success/20 bg-success/[0.04]">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="min-w-0">
-              <p className="text-sm font-medium text-emerald-700 dark:text-emerald-300">
+              <p className="text-sm font-medium text-success">
                 {getI18nOrFallback(
                   t,
                   "quickTestTitle",
                   `Combo "${recentlyCreatedCombo}" ready to validate`
                 )}
               </p>
-              <code className="inline-block text-[11px] mt-0.5 px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+              <code className="inline-block text-[11px] mt-0.5 px-1.5 py-0.5 rounded bg-success/15 text-success">
                 {recentlyCreatedCombo}
               </code>
               <p className="text-xs text-text-muted mt-0.5">
@@ -1173,51 +1305,34 @@ export default function CombosPage() {
           </div>
         </Card>
       )}
-      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-1">
-        {[
+      <FilterPills
+        aria-label={t("routingStrategy")}
+        value={activeFilter}
+        onChange={handleFilterChange}
+        options={[
           {
-            id: "all",
+            value: "all",
             icon: "layers",
             label: getI18nOrFallback(t, "filterAll", "All"),
             count: combos.length,
           },
           {
-            id: "intelligent",
+            value: "intelligent",
             icon: "auto_awesome",
             label: getI18nOrFallback(t, "filterIntelligent", "Intelligent"),
             count: combos.filter((combo) => getStrategyCategory(combo?.strategy) === "intelligent")
               .length,
           },
           {
-            id: "deterministic",
+            value: "deterministic",
             icon: "sort",
             label: getI18nOrFallback(t, "filterDeterministic", "Deterministic"),
             count: combos.filter(
               (combo) => getStrategyCategory(combo?.strategy) === "deterministic"
             ).length,
           },
-        ].map((tab) => {
-          const isActive = activeFilter === tab.id;
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => handleFilterChange(tab.id)}
-              className={`inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm transition-all ${
-                isActive
-                  ? "border border-primary/20 bg-primary/10 text-primary"
-                  : "border border-transparent text-text-muted hover:bg-black/5 dark:hover:bg-white/5 hover:text-text-main"
-              }`}
-            >
-              <span className="material-symbols-outlined text-[16px]">{tab.icon}</span>
-              <span>{tab.label}</span>
-              <span className="rounded-full bg-black/5 dark:bg-white/5 px-1.5 py-0.5 text-[11px] text-text-muted">
-                {tab.count}
-              </span>
-            </button>
-          );
-        })}
-      </div>
+        ]}
+      />
 
       {activeFilter === "intelligent" && selectedIntelligentCombo && (
         <IntelligentComboPanel
@@ -1241,7 +1356,7 @@ export default function CombosPage() {
         <Card padding="sm">
           <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
-              <span className="material-symbols-outlined text-primary text-[18px]">filter_alt</span>
+              <Icon name="filter_alt" size={18} className="text-primary" />
               <p className="text-sm font-semibold text-text-main">
                 {getI18nOrFallback(t, "filterEmptyTitle", "No combos match this strategy filter.")}
               </p>
@@ -1328,6 +1443,7 @@ export default function CombosPage() {
         activeProviders={activeProviders}
         combo={null}
         comboConfigMode={comboConfigMode}
+        routingSettings={routingSettings}
       />
 
       <ComboFormModal
@@ -1338,6 +1454,7 @@ export default function CombosPage() {
         onSave={(data) => handleUpdate(editingCombo.id, data)}
         activeProviders={activeProviders}
         comboConfigMode={comboConfigMode}
+        routingSettings={routingSettings}
       />
 
       {proxyTargetCombo && (
@@ -1350,6 +1467,14 @@ export default function CombosPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function CombosPage() {
+  return (
+    <Suspense fallback={null}>
+      <CombosPageContent />
+    </Suspense>
   );
 }
 
@@ -1388,9 +1513,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           <div className="size-7 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-primary text-[16px]">
-              tips_and_updates
-            </span>
+            <Icon name="tips_and_updates" size={16} className="text-primary" />
           </div>
           <div className="min-w-0">
             <h2 className="text-sm font-semibold">
@@ -1425,15 +1548,13 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
           return (
             <div
               key={step.step}
-              className="relative rounded-lg border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-2.5"
+              className="relative rounded-lg border border-border bg-bg-subtle p-2.5"
             >
               <div className="flex items-center gap-1.5 mb-1.5">
                 <span className="inline-flex size-5 items-center justify-center rounded-full bg-primary/10 text-[10px] font-bold text-primary">
                   {step.step}
                 </span>
-                <span className="material-symbols-outlined text-[14px] text-primary">
-                  {step.icon}
-                </span>
+                <Icon name={step.icon} size={14} className="text-primary" />
               </div>
               <p className="text-xs font-medium">
                 {getI18nOrFallback(t, step.titleKey, step.titleKey)}
@@ -1443,7 +1564,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
               </p>
               {index < COMBO_WIZARD_STEPS.length - 1 && (
                 <span className="absolute -right-2.5 top-1/2 z-10 hidden -translate-y-1/2 text-text-muted md:block">
-                  <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+                  <Icon name="arrow_forward" size={14} />
                 </span>
               )}
             </div>
@@ -1493,7 +1614,7 @@ function ComboUsageGuide({ onHide, onHideForever, onCreateCombo }) {
 function StrategyGuidanceCard({ strategy }) {
   const t = useTranslations("combos");
   return (
-    <div className="rounded-lg border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] p-2.5">
+    <div className="rounded-lg border border-border bg-bg-subtle p-2.5">
       <div className="text-[11px] text-text-muted">
         {getI18nOrFallback(t, "strategyGuideTitle", "How to use this strategy")}
       </div>
@@ -1529,7 +1650,7 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
   const tips = getStrategyRecommendationText(t, strategy, "tips");
 
   return (
-    <div className="rounded-lg border border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/[0.02] p-2.5">
+    <div className="rounded-lg border border-border bg-surface p-2.5">
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
           <p className="text-[11px] text-text-muted">
@@ -1549,9 +1670,9 @@ function StrategyRecommendationsPanel({ strategy, onApply, showNudge }) {
         {tips.map((tip, index) => (
           <div
             key={`${strategy}-tip-${index + 1}`}
-            className="flex items-start gap-1 rounded-md bg-black/[0.02] dark:bg-white/[0.03] px-1.5 py-1"
+            className="flex items-start gap-1 rounded-md bg-bg-subtle px-1.5 py-1"
           >
-            <span className="material-symbols-outlined text-[12px] text-primary mt-0.5">check</span>
+            <Icon name="check" size={12} className="text-primary mt-0.5" />
             <p className="text-[10px] text-text-main">{tip}</p>
           </div>
         ))}
@@ -1582,21 +1703,15 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
     <div
       data-testid="combo-readiness-panel"
       className={`rounded-lg border px-2.5 py-2 ${
-        hasBlockers
-          ? "border-amber-500/30 bg-amber-500/5"
-          : "border-emerald-500/20 bg-emerald-500/[0.04]"
+        hasBlockers ? "border-warning/30 bg-warning/5" : "border-success/20 bg-success/[0.04]"
       }`}
     >
       <div className="flex items-center gap-1.5">
-        <span
-          className={`material-symbols-outlined text-[14px] ${
-            hasBlockers
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-emerald-600 dark:text-emerald-400"
-          }`}
-        >
-          {hasBlockers ? "rule" : "check_circle"}
-        </span>
+        <Icon
+          name={hasBlockers ? "rule" : "check_circle"}
+          size={14}
+          className={hasBlockers ? "text-warning" : "text-success"}
+        />
         <p className="text-[11px] font-medium text-text-main">
           {getI18nOrFallback(t, "readinessTitle", "Ready to save?")}
         </p>
@@ -1616,15 +1731,13 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
         {checks.map((check) => (
           <div
             key={check.id}
-            className="flex items-center gap-1 rounded-md px-1.5 py-1 bg-black/[0.02] dark:bg-white/[0.02]"
+            className="flex items-center gap-1 rounded-md px-1.5 py-1 bg-bg-subtle"
           >
-            <span
-              className={`material-symbols-outlined text-[12px] ${
-                check.ok ? "text-emerald-500" : "text-amber-500"
-              }`}
-            >
-              {check.ok ? "task_alt" : "pending"}
-            </span>
+            <Icon
+              name={check.ok ? "task_alt" : "pending"}
+              size={12}
+              className={check.ok ? "text-success" : "text-warning"}
+            />
             <span className="text-[10px] text-text-main">{check.label}</span>
           </div>
         ))}
@@ -1633,9 +1746,9 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
       {hasBlockers && (
         <div
           data-testid="combo-save-blockers"
-          className="mt-2 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-1.5"
+          className="mt-2 rounded-md border border-warning/30 bg-warning/10 px-2 py-1.5"
         >
-          <p className="text-[10px] font-medium text-amber-700 dark:text-amber-300">
+          <p className="text-[10px] font-medium text-warning">
             {getI18nOrFallback(
               t,
               "saveBlockedTitle",
@@ -1644,10 +1757,7 @@ function ComboReadinessPanel({ checks, blockers, showDescription = true }) {
           </p>
           <div className="mt-1 flex flex-col gap-0.5">
             {blockers.map((blocker, index) => (
-              <p
-                key={`${blocker}-${index}`}
-                className="text-[10px] text-amber-700 dark:text-amber-300"
-              >
+              <p key={`${blocker}-${index}`} className="text-[10px] text-warning">
                 • {blocker}
               </p>
             ))}
@@ -1699,25 +1809,27 @@ function ComboCardInner({
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 md:gap-0">
         <div className="flex items-center gap-2 md:gap-3 flex-1 min-w-0 w-full">
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             draggable={!dragDisabled}
             onDragStart={onDragStart}
             onDragEnd={onDragEnd}
             data-testid={`combo-drag-handle-${combo.id}`}
-            className={`p-1 rounded-md transition-colors shrink-0 ${
+            className={cn(
+              "shrink-0",
               dragDisabled
                 ? "cursor-not-allowed text-text-muted/40"
-                : "cursor-grab active:cursor-grabbing text-text-muted hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"
-            }`}
+                : "cursor-grab active:cursor-grabbing text-text-muted"
+            )}
             title={getI18nOrFallback(t, "reorderHandle", "Drag to reorder combo")}
             aria-label={getI18nOrFallback(t, "reorderHandle", "Drag to reorder combo")}
           >
-            <span className="material-symbols-outlined text-[18px]">drag_indicator</span>
-          </button>
+            <Icon name="drag_indicator" size={18} />
+          </Button>
 
           <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <span className="material-symbols-outlined text-primary text-[18px]">layers</span>
+            <Icon name="layers" size={18} className="text-primary" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -1732,26 +1844,30 @@ function ComboCardInner({
                 </span>
               </Tooltip>
               {hasProxy && (
-                <span
-                  className="text-[9px] uppercase font-semibold px-1.5 py-0.5 rounded-full bg-primary/15 text-primary flex items-center gap-0.5"
+                <Badge
+                  size="sm"
+                  variant="primary"
+                  icon={<Icon name="vpn_lock" size={11} />}
+                  className="uppercase font-semibold"
                   title={t("proxyConfigured")}
                 >
-                  <span className="material-symbols-outlined text-[11px]">vpn_lock</span>
                   proxy
-                </span>
+                </Badge>
               )}
-              <button
+              <Button
+                variant="ghost"
+                size="icon-sm"
                 onClick={(e) => {
                   e.stopPropagation();
                   onCopy(combo.name, `combo-${combo.id}`);
                 }}
-                className="p-0.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100"
+                className="text-text-muted opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
+                // Named by its title only (as before): an aria-label "Copy combo name" would also
+                // match label lookups for the "Combo name" field of the editor.
                 title={t("copyComboName")}
               >
-                <span className="material-symbols-outlined text-[14px]">
-                  {copied === `combo-${combo.id}` ? "check" : "content_copy"}
-                </span>
-              </button>
+                <Icon name={copied === `combo-${combo.id}` ? "check" : "content_copy"} size={14} />
+              </Button>
             </div>
 
             <div className="flex items-center gap-1 mt-0.5 flex-wrap">
@@ -1763,7 +1879,7 @@ function ComboCardInner({
                   return (
                     <code
                       key={index}
-                      className="text-[10px] font-mono bg-black/5 dark:bg-white/5 px-1.5 py-0.5 rounded text-text-muted"
+                      className="text-[10px] font-mono bg-bg-subtle px-1.5 py-0.5 rounded text-text-muted"
                     >
                       {formatComboEntryDisplay(entry, {
                         providerNodes,
@@ -1785,7 +1901,7 @@ function ComboCardInner({
             {metrics && (
               <div className="flex items-center gap-3 mt-1">
                 <span className="text-[10px] text-text-muted">
-                  <span className="text-emerald-500">{metrics.totalSuccesses}</span>/
+                  <span className="text-success">{metrics.totalSuccesses}</span>/
                   {metrics.totalRequests} {t("reqs")}
                 </span>
                 <span className="text-[10px] text-text-muted">
@@ -1793,16 +1909,14 @@ function ComboCardInner({
                 </span>
                 <span className="text-[10px] text-text-muted">~{metrics.avgLatencyMs}ms</span>
                 {metrics.fallbackRate > 0 && (
-                  <span className="text-[10px] text-amber-500">
-                    {metrics.fallbackRate}% fallback
-                  </span>
+                  <span className="text-[10px] text-warning">{metrics.fallbackRate}% fallback</span>
                 )}
               </div>
             )}
           </div>
         </div>
 
-        <div className="flex items-center justify-between md:justify-end gap-1.5 shrink-0 ml-0 md:ml-2 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t border-black/5 dark:border-white/5 md:border-t-0">
+        <div className="flex items-center justify-between md:justify-end gap-1.5 shrink-0 ml-0 md:ml-2 w-full md:w-auto mt-2 md:mt-0 pt-2 md:pt-0 border-t border-border md:border-t-0">
           <div className="flex items-center gap-2">
             <Toggle
               size="sm"
@@ -1819,57 +1933,77 @@ function ComboCardInner({
               <ComboCompressionModeSelect
                 combo={combo}
                 title={t("compressionOverride")}
-                className="text-xs py-1 px-2 rounded border border-black/10 dark:border-white/10 bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50 max-w-[130px] md:max-w-none"
+                className="text-xs py-1 px-2 rounded border border-border bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50 max-w-[130px] md:max-w-none"
               />
             )}
             <Link
               href={`/dashboard/combos/${combo.id}`}
               onClick={(e) => e.stopPropagation()}
-              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+              className={buttonVariants({
+                variant: "ghost",
+                size: "icon",
+                className: "text-text-muted",
+              })}
               title={getI18nOrFallback(t, "controlCenter", "Control Center")}
+              aria-label={getI18nOrFallback(t, "controlCenter", "Control Center")}
             >
-              <span className="material-symbols-outlined text-[16px]">monitoring</span>
+              <Icon name="monitoring" size={16} />
             </Link>
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onTest}
               disabled={testing}
-              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-emerald-500 transition-colors"
+              className="text-text-muted hover:text-success"
               title={t("testCombo")}
+              aria-label={t("testCombo")}
             >
-              <span
-                className={`material-symbols-outlined text-[16px] ${testing ? "animate-spin" : ""}`}
-              >
-                {testing ? "progress_activity" : "play_arrow"}
-              </span>
-            </button>
-            <button
+              <Icon
+                name={testing ? "progress_activity" : "play_arrow"}
+                size={16}
+                className={cn(testing && "animate-spin")}
+              />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onDuplicate}
-              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+              className="text-text-muted"
               title={t("duplicate")}
+              aria-label={t("duplicate")}
             >
-              <span className="material-symbols-outlined text-[16px]">content_copy</span>
-            </button>
-            <button
+              <Icon name="content_copy" size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onProxy}
-              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+              className="text-text-muted"
               title={t("proxyConfig")}
+              aria-label={t("proxyConfig")}
             >
-              <span className="material-symbols-outlined text-[16px]">vpn_lock</span>
-            </button>
-            <button
+              <Icon name="vpn_lock" size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onEdit}
-              className="p-1.5 hover:bg-black/5 dark:hover:bg-white/5 rounded text-text-muted hover:text-primary transition-colors"
+              className="text-text-muted"
               title={tc("edit")}
+              aria-label={tc("edit")}
             >
-              <span className="material-symbols-outlined text-[16px]">edit</span>
-            </button>
-            <button
+              <Icon name="edit" size={16} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onDelete}
-              className="p-1.5 hover:bg-red-500/10 rounded text-red-500 transition-colors"
+              className="text-error hover:bg-error/10"
               title={tc("delete")}
+              aria-label={tc("delete")}
             >
-              <span className="material-symbols-outlined text-[16px]">delete</span>
-            </button>
+              <Icon name="delete" size={16} />
+            </Button>
           </div>
         </div>
       </div>
@@ -1883,8 +2017,8 @@ function TestResultsView({ results }) {
 
   if (results.error) {
     return (
-      <div className="flex items-center gap-2 text-red-500 text-sm">
-        <span className="material-symbols-outlined text-[18px]">error</span>
+      <div className="flex items-center gap-2 text-error text-sm">
+        <Icon name="error" size={18} />
         {typeof results.error === "string" ? results.error : JSON.stringify(results.error)}
       </div>
     );
@@ -1892,15 +2026,18 @@ function TestResultsView({ results }) {
 
   return (
     <div className="flex flex-col gap-2">
+      <p className="text-xs text-text-muted">
+        Targets are tested independently. This checks model health, not the combo’s routing strategy
+        or fallback order.
+      </p>
+      <AutoComboTruncatedNote results={results} />
       {results.resolvedBy && (
         <div className="flex items-center gap-2 text-sm">
-          <span className="material-symbols-outlined text-emerald-500 text-[18px]">
-            check_circle
-          </span>
+          <Icon name="check_circle" size={18} className="text-success" />
           <div className="min-w-0">
             <div>
-              Resolved by:{" "}
-              <code className="text-xs bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+              First healthy target in combo order:{" "}
+              <code className="text-xs bg-success/10 text-success px-1.5 py-0.5 rounded">
                 {results.resolvedBy}
               </code>
             </div>
@@ -1921,19 +2058,22 @@ function TestResultsView({ results }) {
         <div
           key={i}
           title={r.error || undefined}
-          className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-black/[0.02] dark:bg-white/[0.02]"
+          className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-bg-subtle"
         >
-          <span
-            className={`material-symbols-outlined text-[14px] ${
+          <Icon
+            name={
+              r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"
+            }
+            size={14}
+            className={cn(
+              "shrink-0",
               r.status === "ok"
-                ? "text-emerald-500"
+                ? "text-success"
                 : r.status === "skipped"
                   ? "text-text-muted"
-                  : "text-red-500"
-            }`}
-          >
-            {r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"}
-          </span>
+                  : "text-error"
+            )}
+          />
           <div className="min-w-0 flex-1">
             <code className="font-mono block truncate">
               {pickDisplayValue([r.label], emailsVisible, r.model)}
@@ -1944,15 +2084,21 @@ function TestResultsView({ results }) {
                 {r.stepId ? ` · ${r.stepId}` : ""}
               </div>
             ) : null}
+            {r.error && (
+              <p className="mt-2 whitespace-pre-wrap break-words text-error">
+                {r.statusCode ? `HTTP ${r.statusCode}: ` : ""}
+                {r.error}
+              </p>
+            )}
           </div>
           {r.latencyMs !== undefined && <span className="text-text-muted">{r.latencyMs}ms</span>}
           <span
             className={`text-[10px] uppercase font-medium ${
               r.status === "ok"
-                ? "text-emerald-500"
+                ? "text-success"
                 : r.status === "skipped"
                   ? "text-text-muted"
-                  : "text-red-500"
+                  : "text-error"
             }`}
           >
             {r.status}
@@ -1963,7 +2109,15 @@ function TestResultsView({ results }) {
   );
 }
 
-function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, comboConfigMode }) {
+function ComboFormModal({
+  isOpen,
+  combo,
+  onClose,
+  onSave,
+  activeProviders,
+  comboConfigMode,
+  routingSettings,
+}) {
   type CreateDraftSnapshot = {
     name: string;
     models: unknown[];
@@ -2012,6 +2166,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
   const [modelAliases, setModelAliases] = useState({});
   const [providerNodes, setProviderNodes] = useState([]);
   const [builderOptions, setBuilderOptions] = useState({ providers: [], comboRefs: [] });
+  const [staleModels, setStaleModels] = useState<Set<string>>(() => new Set());
   const [builderLoading, setBuilderLoading] = useState(false);
   const [builderProviderId, setBuilderProviderId] = useState("");
   const [builderModelId, setBuilderModelId] = useState("");
@@ -2026,6 +2181,29 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
   const [builderStage, setBuilderStage] = useState<string>(COMBO_BUILDER_STAGES[0]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [config, setConfig] = useState(sanitizeComboRuntimeConfig(combo?.config));
+  // Validate persisted enum; ensure reset on combo change not just first mount.
+  const initialSortMethod = normalizeSortMethod(
+    (config.modelSort as { method?: unknown } | undefined)?.method
+  );
+  const [sortMethod, setSortMethod] = useState<SortMethod>(initialSortMethod);
+  // Sync point: when the combo identity changes, re-derive sort method — state
+  // adjustment during render (react-hooks/set-state-in-effect). Manual edits via
+  // handleSortChange already set sortMethod inside resetFormForCombo; this guards the
+  // modal-reuse case (edit-A→close→edit-B without unmount).
+  const [prevSortComboId, setPrevSortComboId] = useState(combo?.id);
+  if (combo?.id !== prevSortComboId) {
+    setPrevSortComboId(combo?.id);
+    setSortMethod(normalizeSortMethod(combo?.config?.modelSort?.method));
+  }
+  const modelsRef = useRef(models);
+  const sortMethodRef = useRef<SortMethod>(sortMethod);
+  const resetSortGenerationRef = useRef(0);
+  useEffect(() => {
+    modelsRef.current = models;
+  }, [models]);
+  useEffect(() => {
+    sortMethodRef.current = sortMethod;
+  }, [sortMethod]);
   const [showStrategyNudge, setShowStrategyNudge] = useState(false);
   const strategyChangeMountedRef = useRef(false);
   // Agent features (#399 / #401 / #454)
@@ -2060,9 +2238,34 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
             Object.fromEntries(Object.entries(nextDefaults).filter(([key]) => key !== "strategy"))
           );
 
+      // Validate persisted enum; tolerate hand-edited DB values.
+      const loadedMethod = normalizeSortMethod(nextCombo?.config?.modelSort?.method);
+      // Generation guard so a stale score fetch can't clobber the next combo.
+      const myGen = ++resetSortGenerationRef.current;
+      setSortMethod(loadedMethod);
+      sortMethodRef.current = loadedMethod;
       setName(nextCombo?.name || "");
       setDescription(nextCombo?.description || "");
-      setModels((nextCombo?.models || []).map((m) => normalizeModelEntry(m)));
+      // Branch so only one setModels runs (no raw-then-sorted double set).
+      // Score branch is async; guard with generation + cancelled from the caller's effect.
+      if (loadedMethod === "manual") {
+        setModels((nextCombo?.models || []).map((m) => normalizeModelEntry(m)));
+      } else if (loadedMethod === "score") {
+        const base = (nextCombo?.models || []).map((mm) => normalizeModelEntry(mm)) as ComboStep[];
+        fetchProviderRankings()
+          .then((rk) => sortComboStepsByScore(base, rk))
+          .then((sorted) => {
+            if (resetSortGenerationRef.current !== myGen) return;
+            setModels(sorted as typeof base);
+          })
+          .catch(() => {
+            if (resetSortGenerationRef.current !== myGen) return;
+            setModels(base);
+          });
+      } else {
+        const base = (nextCombo?.models || []).map((mm) => normalizeModelEntry(mm)) as ComboStep[];
+        setModels(sortComboStepsSync(base, loadedMethod));
+      }
       setStrategy(nextCombo?.strategy || comboDefaults?.strategy || "priority");
       setConfig(nextConfig);
       setShowAdvanced(isExpertMode);
@@ -2102,11 +2305,11 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     contextLength,
   ]);
 
-  useEffect(() => {
-    if (!comboBuilderStages.includes(builderStage)) {
-      setBuilderStage("strategy");
-    }
-  }, [builderStage, comboBuilderStages]);
+  // Keep the stage on a real option — self-extinguishing state adjustment during
+  // render (react-hooks/set-state-in-effect).
+  if (!comboBuilderStages.includes(builderStage)) {
+    setBuilderStage("strategy");
+  }
 
   const hasPricingForModel = useCallback(
     (modelValue) => {
@@ -2177,6 +2380,9 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
             builderConnectionId !== COMBO_BUILDER_AUTO_CONNECTION ? builderConnectionId : null,
           connectionLabel: selectedBuilderConnection?.label || null,
           allowedConnectionIds: builderEffectiveAllowedConnectionIds,
+          // #11433: use the already-corrected routing prefix (e.g. a no-auth
+          // provider's alias) instead of letting it default to the raw providerId.
+          modelPrefix: parseQualifiedModel(selectedBuilderModel.qualifiedModel)?.providerId,
         })
       : null;
   const builderHasDuplicate =
@@ -2327,45 +2533,50 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
         providers: builderData.providers || [],
         comboRefs: builderData.comboRefs || [],
       });
+      setStaleModels(buildStaleModelSet(builderData.staleComboRefs));
     } catch (error) {
       console.error("Error fetching modal data:", error);
       setBuilderOptions({ providers: [], comboRefs: [] });
+      setStaleModels(new Set());
     } finally {
       setBuilderLoading(false);
     }
   };
 
   useEffect(() => {
-    if (isOpen) fetchModalData();
+    // Async continuation — see react-hooks/set-state-in-effect.
+    if (isOpen) {
+      void (async () => {
+        await fetchModalData();
+      })();
+    }
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    setBuilderProviderId("");
-    setBuilderModelId("");
-    setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
-    setBuilderAllowedConnectionIds([]);
-    setManualModelInput("");
-    setManualModelError("");
-    setBuilderComboRefName("");
-    setBuilderError("");
-    setBuilderStage("basics");
-  }, [combo?.id, isOpen]);
+  // Reset the builder inputs whenever the modal (re)opens or switches combos —
+  // state adjustment during render (react-hooks/set-state-in-effect).
+  const [prevBuilderResetKey, setPrevBuilderResetKey] = useState<{
+    comboId: string | undefined;
+    isOpen: boolean;
+  }>({ comboId: combo?.id, isOpen });
+  if (prevBuilderResetKey.comboId !== combo?.id || prevBuilderResetKey.isOpen !== isOpen) {
+    setPrevBuilderResetKey({ comboId: combo?.id, isOpen });
+    if (isOpen) {
+      setBuilderProviderId("");
+      setBuilderModelId("");
+      setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
+      setBuilderAllowedConnectionIds([]);
+      setManualModelInput("");
+      setManualModelError("");
+      setBuilderComboRefName("");
+      setBuilderError("");
+      setBuilderStage("basics");
+    }
+  }
 
   useEffect(() => {
     if (!isOpen) return;
 
     let cancelled = false;
-
-    if (combo) {
-      resetFormForCombo(combo);
-      return () => {
-        cancelled = true;
-      };
-    }
-
-    createDraftStateRef.current = getEmptyCreateDraftSnapshot();
-    resetFormForCombo(null, null);
 
     const loadDefaults = async () => {
       try {
@@ -2392,20 +2603,30 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       }
     };
 
-    loadDefaults();
+    // Async continuation — the compiler rejects sync calls to setter-capturing
+    // callbacks from the effect body (react-hooks/set-state-in-effect).
+    void (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      if (combo) {
+        resetFormForCombo(combo);
+        return;
+      }
+      createDraftStateRef.current = getEmptyCreateDraftSnapshot();
+      resetFormForCombo(null, null);
+      await loadDefaults();
+    })();
 
     return () => {
       cancelled = true;
     };
   }, [combo, getEmptyCreateDraftSnapshot, isExpertMode, isOpen, resetFormForCombo]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-    if (builderProviderId) return;
-    if (builderProviders.length === 1) {
-      setBuilderProviderId(builderProviders[0].providerId);
-    }
-  }, [builderProviderId, builderProviders, isOpen]);
+  // Default to the only available provider — self-extinguishing state adjustment
+  // during render (react-hooks/set-state-in-effect).
+  if (isOpen && !builderProviderId && builderProviders.length === 1) {
+    setBuilderProviderId(builderProviders[0].providerId);
+  }
 
   useEffect(() => {
     if (!strategyChangeMountedRef.current) {
@@ -2501,6 +2722,9 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
         builderConnectionId !== COMBO_BUILDER_AUTO_CONNECTION ? builderConnectionId : null,
       connectionLabel: selectedBuilderConnection?.label || null,
       allowedConnectionIds: builderEffectiveAllowedConnectionIds,
+      // #11433: use the already-corrected routing prefix (e.g. a no-auth
+      // provider's alias) instead of letting it default to the raw providerId.
+      modelPrefix: parseQualifiedModel(selectedBuilderModel.qualifiedModel)?.providerId,
     });
 
     if (hasExactModelStepDuplicate(models, nextStep)) {
@@ -2591,7 +2815,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     setBuilderError("");
   };
 
-  const handleAddModel = (model) => {
+  const handleAddModel = async (model) => {
+    // Use refs to avoid stale closure when awaiting a score fetch.
+    const currentModels = (modelsRef.current ?? models) as typeof models;
+    const currentMethod = sortMethodRef.current;
     const qualifiedModel = typeof model?.value === "string" ? model.value : "";
     const parsedModel = parseQualifiedModel(qualifiedModel);
     const resolvedProviderId =
@@ -2605,7 +2832,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       ...(resolvedProviderId ? { providerId: resolvedProviderId } : {}),
       weight: 0,
     };
-    if (hasExactModelStepDuplicate(models, nextEntry)) {
+    if (hasExactModelStepDuplicate(currentModels, nextEntry)) {
       setBuilderError(
         getI18nOrFallback(
           t,
@@ -2615,7 +2842,21 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       );
       return;
     }
-    setModels([...models, nextEntry]);
+    const added = [...currentModels, nextEntry];
+    if (currentMethod === "manual") {
+      setModels(added);
+    } else if (currentMethod === "score") {
+      try {
+        const rankings = await fetchProviderRankings();
+        // Single-user modal; rapid double-add while fetch is in flight is low-probability.
+        const sorted = await sortComboStepsByScore(added, rankings);
+        setModels(sorted);
+      } catch {
+        setModels(added);
+      }
+    } else {
+      setModels(sortComboStepsSync(added, currentMethod as "provider" | "name"));
+    }
     setBuilderError("");
   };
 
@@ -2643,10 +2884,29 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
   // would each close over the same stale `models` snapshot and keep only the
   // last entry. Extracted so tests exercise this real implementation instead
   // of a hand-maintained mirror (#8526).
-  const handleAddModels = (selected) => {
-    const { next, addedAny } = computeBatchAddModelSteps(models, selected, builderProviders);
+  const handleAddModels = async (selected) => {
+    // Same ref discipline as handleAddModel — don't rely on closed-over render snapshot.
+    const currentModels = (modelsRef.current ?? models) as typeof models;
+    const currentMethod = sortMethodRef.current;
+    const { next, addedAny } = computeBatchAddModelSteps(currentModels, selected, builderProviders);
     if (!addedAny) return;
-    setModels(next);
+    if (currentMethod === "manual") {
+      setModels(next);
+    } else if (currentMethod === "score") {
+      try {
+        const rankings = await fetchProviderRankings();
+        // Functional note: `next` is the post-batch snapshot. Concurrent single-add
+        // racing this batch is low-probability single-user; last write wins.
+        const sorted = await sortComboStepsByScore(next as ComboStep[], rankings);
+        setModels(sorted as typeof next);
+      } catch {
+        setModels(next);
+      }
+    } else {
+      setModels(
+        sortComboStepsSync(next as ComboStep[], currentMethod as "provider" | "name") as typeof next
+      );
+    }
     setBuilderError("");
   };
 
@@ -2724,18 +2984,29 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     );
   };
 
+  // #14077: these ids are a literal, so they drift whenever a provider catalog
+  // changes and the combo is created with targets that resolve to nothing. The
+  // three Qoder entries below replace `kimi-k2-thinking`, `qwen3-coder-plus` and
+  // `deepseek-v3.2`, which the Qoder registry no longer carries.
+  // `tests/unit/combo-preset-models-resolve-14077.test.ts` pins every entry
+  // against the registry so the next catalog change fails there instead of in a
+  // user's combo.
   const FREE_STACK_PRESET_MODELS = [
     { model: "agy/gemini-3.7-flash-low", weight: 0 },
     { model: "kr/claude-sonnet-4.5", weight: 0 },
-    { model: "if/kimi-k2-thinking", weight: 0 },
-    { model: "if/qwen3-coder-plus", weight: 0 },
-    { model: "if/deepseek-v3.2", weight: 0 },
+    { model: "if/kimi-k2.7-code", weight: 0 },
+    { model: "if/qwen3.7-plus", weight: 0 },
+    { model: "if/deepseek-v4-pro", weight: 0 },
     { model: "nvidia/llama-3.3-70b-instruct", weight: 0 },
-    { model: "groq/llama-3.3-70b-versatile", weight: 0 },
+    { model: "groq/openai/gpt-oss-120b", weight: 0 },
   ];
 
+  // Found by the #14077 guard, not reported in the issue: Cursor carries no
+  // `claude-4.6-opus-*` at all — that generation is sonnet-only there, and opus
+  // lives under `claude-opus-5-*`. The sibling sonnet entry below resolves, which
+  // is why this one went unnoticed.
   const PAID_PREMIUM_PRESET_MODELS = [
-    { model: "cu/claude-4.6-opus-high", weight: 0 },
+    { model: "cu/claude-opus-5-high", weight: 0 },
     { model: "antigravity/claude-sonnet-4-6", weight: 0 },
     { model: "cu/claude-4.6-sonnet-high", weight: 0 },
     { model: "antigravity/gemini-pro-agent", weight: 0 },
@@ -2777,6 +3048,30 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     const newModels = [...models];
     [newModels[index], newModels[index + 1]] = [newModels[index + 1], newModels[index]];
     setModels(newModels);
+  };
+
+  const handleSortChange = async (next: SortMethod) => {
+    if (!isValidSortMethod(next)) return;
+    setSortMethod(next);
+    sortMethodRef.current = next;
+    setConfig((prev) => ({ ...prev, modelSort: { method: next } }));
+    if (next === "manual") return;
+    if (next === "score") {
+      try {
+        const rankings = await fetchProviderRankings();
+        // Capture snapshot; if a concurrent add lands while rankings fetch
+        // is in flight, modelsRef has the freshest value — prefer it at
+        // sort time. Single-user UI, low-probability race; fallback keeps
+        // previous models if the rankings fetch fails (mirrors load path).
+        const snapshot = (modelsRef.current ?? models) as ComboStep[];
+        const sorted = await sortComboStepsByScore(snapshot, rankings);
+        setModels(sorted as typeof models);
+      } catch {
+        // Keep previous models; same silent-fallback precedent as load path.
+      }
+      return;
+    }
+    setModels((prev) => sortComboStepsSync(prev as ComboStep[], next) as typeof prev);
   };
 
   // Drag and Drop handlers
@@ -2826,6 +3121,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       strategy,
     };
 
+    // When editing an existing combo from the dashboard form, synchronize allowedProviders
+    // and clear legacy family restrictions so adding steps across providers never triggers COMBO_008
+    Object.assign(saveData, computeAllowedRestrictionSync(isEdit, combo, models));
+
     // Per-combo description (#5005). Free-text, optional, persisted in combo data.
     if (description.trim()) {
       saveData.description = description.trim();
@@ -2843,12 +3142,12 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       if (config.concurrencyPerModel !== undefined)
         configToSave.concurrencyPerModel = config.concurrencyPerModel;
       if (config.queueTimeoutMs !== undefined) configToSave.queueTimeoutMs = config.queueTimeoutMs;
-      if (config.stickyRoundRobinLimit !== undefined)
-        configToSave.stickyRoundRobinLimit = config.stickyRoundRobinLimit;
     }
     if (strategy === "weighted" && config.stickyWeightedLimit !== undefined) {
       configToSave.stickyWeightedLimit = config.stickyWeightedLimit;
     }
+    persistStickyRoundRobinLimit(strategy, configToSave, config);
+    persistConnectionAwareExpansion(strategy, configToSave, config);
     if (
       usesIntelligentBuilderStage &&
       !isExpertMode &&
@@ -2865,13 +3164,20 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       saveData.config = configToSave;
     }
 
-    // Agent features (#399 / #401 / #454)
-    if (agentSystemMessage.trim()) saveData.system_message = agentSystemMessage.trim();
-    else delete saveData.system_message;
-    if (agentToolFilter.trim()) saveData.tool_filter_regex = agentToolFilter.trim();
-    else delete saveData.tool_filter_regex;
-    if (agentContextCache) saveData.context_cache_protection = true;
-    else delete saveData.context_cache_protection;
+    // Agent features (#399 / #401 / #454). A cleared field is sent as null on edit
+    // rather than omitted, because PUT merges over the stored record (#12158).
+    delete saveData.system_message;
+    delete saveData.tool_filter_regex;
+    delete saveData.context_cache_protection;
+    Object.assign(
+      saveData,
+      buildAgentFeaturePatch({
+        systemMessage: agentSystemMessage,
+        toolFilter: agentToolFilter,
+        contextCache: agentContextCache,
+        isEdit,
+      })
+    );
 
     // Validate and save context_length
     if (contextLength !== undefined && contextLength !== null) {
@@ -2907,6 +3213,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
     usesIntelligentBuilderStage && (isExpertMode || builderStage === "intelligent");
   const showReviewSection = !isExpertMode && builderStage === "review";
   const advancedConfigVisible = isExpertMode || showAdvanced;
+  const strategyLabelId = useId();
 
   return (
     <>
@@ -2918,7 +3225,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
       >
         <div className="flex flex-col gap-3">
           {!isExpertMode && (
-            <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+            <div className="rounded-lg border border-border bg-bg-subtle p-3">
               <div className="flex items-center justify-between gap-2 mb-2">
                 <div>
                   <p className="text-xs font-semibold text-text-main">
@@ -2955,35 +3262,38 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             : builderStageChecks.strategy;
 
                   return (
+                    // kit-exception: a stage tile of the builder stepper (icon, label,
+                    // description, status line); the kit Button is a single-line pill.
                     <button
                       key={stageMeta.id}
                       type="button"
+                      aria-current={isActive ? "step" : undefined}
                       data-testid={`combo-builder-stage-${stageMeta.id}`}
                       onClick={() => {
                         if (!canVisitStage) return;
                         setBuilderStage(stageMeta.id);
                       }}
                       disabled={!canVisitStage}
-                      className={`text-left rounded-lg border px-3 py-2 transition-all ${
+                      className={`text-start rounded-lg border px-3 py-2 transition-all ${
                         isActive
                           ? "border-primary bg-primary/8"
                           : canVisitStage
-                            ? "border-black/8 dark:border-white/8 bg-white/60 dark:bg-white/[0.02] hover:border-primary/40"
-                            : "border-black/6 dark:border-white/6 bg-black/[0.015] dark:bg-white/[0.015] opacity-60 cursor-not-allowed"
+                            ? "border-border bg-surface hover:border-primary/40"
+                            : "border-border bg-bg-subtle opacity-60 cursor-not-allowed"
                       }`}
                     >
                       <div className="flex items-center gap-1.5">
-                        <span
-                          className={`material-symbols-outlined text-[14px] ${
+                        <Icon
+                          name={isCompleted && !isActive ? "check_circle" : stageMeta.icon}
+                          size={14}
+                          className={
                             isCompleted && !isActive
-                              ? "text-emerald-500"
+                              ? "text-success"
                               : isActive
                                 ? "text-primary"
                                 : "text-text-muted"
-                          }`}
-                        >
-                          {isCompleted && !isActive ? "check_circle" : stageMeta.icon}
-                        </span>
+                          }
+                        />
                         <span className="text-[11px] font-semibold text-text-main">
                           {getI18nOrFallback(
                             t,
@@ -3026,18 +3336,17 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                   onChange={handleNameChange}
                   placeholder={t("comboNamePlaceholder")}
                   error={nameError}
+                  hint={!isExpertMode ? t("nameHint") : undefined}
                 />
-                {!isExpertMode && (
-                  <p className="text-[10px] text-text-muted mt-0.5">{t("nameHint")}</p>
-                )}
               </div>
 
               {/* Description (#5005) — optional free-text note for this combo */}
-              <div>
-                <label className="text-[11px] font-medium text-text-muted block mb-0.5">
-                  {getI18nOrFallback(t, "comboDescription", "Description")}
-                </label>
-                <textarea
+              <Field
+                htmlFor="combo-description-input"
+                label={getI18nOrFallback(t, "comboDescription", "Description")}
+              >
+                <Textarea
+                  id="combo-description-input"
                   rows={2}
                   data-testid="combo-description-input"
                   value={description}
@@ -3047,12 +3356,12 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     "comboDescriptionPlaceholder",
                     "Optional note describing this combo"
                   )}
-                  className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none resize-none"
+                  className="resize-none"
                 />
-              </div>
+              </Field>
 
               {!isEdit && !isExpertMode && (
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-border bg-bg-subtle p-3">
                   <div className="mb-2">
                     <p className="text-xs font-medium">
                       {getI18nOrFallback(t, "templatesTitle", COMBO_TEMPLATE_FALLBACK.title)}
@@ -3067,37 +3376,44 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-1">
                     {COMBO_TEMPLATES.map((template) => (
+                      // kit-exception: a multi-line template tile (icon, title, description,
+                      // CTA). The kit Button is a single-line pill control; the tile keeps the
+                      // kit tokens and the global :focus-visible ring.
                       <button
                         type="button"
                         key={template.id}
                         onClick={() => applyTemplate(template)}
                         data-testid={`combo-template-${template.id}`}
-                        className={`text-left rounded-md border px-3 py-2 transition-all ${
+                        className={`text-start rounded-md border px-3 py-2 transition-all ${
                           template.isFeatured
-                            ? "border-emerald-500/50 bg-emerald-500/5 hover:border-emerald-500/80 hover:bg-emerald-500/10 ring-1 ring-emerald-500/20"
-                            : "border-black/10 dark:border-white/10 bg-white/70 dark:bg-white/[0.03] hover:border-primary/40 hover:bg-primary/5"
+                            ? "border-success/50 bg-success/5 hover:border-success/80 hover:bg-success/10 ring-1 ring-success/20"
+                            : "border-border bg-surface hover:border-primary/40 hover:bg-primary/5"
                         }`}
                       >
                         <div className="flex items-center gap-2">
-                          <span
-                            className={`material-symbols-outlined text-[16px] ${template.isFeatured ? "text-emerald-500" : "text-primary"}`}
-                          >
-                            {template.icon}
-                          </span>
+                          <Icon
+                            name={template.icon}
+                            size={16}
+                            className={template.isFeatured ? "text-success" : "text-primary"}
+                          />
                           <span className="text-[12px] font-semibold text-text-main">
                             {getI18nOrFallback(t, template.titleKey, template.fallbackTitle)}
                           </span>
                           {template.isFeatured && (
-                            <span className="ml-auto text-[9px] font-bold uppercase tracking-wide bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded">
+                            <Badge
+                              size="sm"
+                              variant="success"
+                              className="ms-auto font-bold uppercase tracking-wide"
+                            >
                               FREE
-                            </span>
+                            </Badge>
                           )}
                         </div>
                         <p className="text-[10px] text-text-muted mt-1.5 leading-[1.5]">
                           {getI18nOrFallback(t, template.descKey, template.fallbackDesc)}
                         </p>
                         <p
-                          className={`text-[10px] mt-1.5 font-medium ${template.isFeatured ? "text-emerald-500" : "text-primary"}`}
+                          className={`text-[10px] mt-1.5 font-medium ${template.isFeatured ? "text-success" : "text-primary"}`}
                         >
                           {getI18nOrFallback(t, "templateApply", COMBO_TEMPLATE_FALLBACK.apply)} →
                         </p>
@@ -3113,40 +3429,41 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
           {showStrategySection && (
             <div>
               <div className="flex items-center gap-1 mb-1.5">
-                <label className="text-sm font-medium">{t("routingStrategy")}</label>
-                {!isExpertMode && (
-                  <Tooltip content={getStrategyDescription(t, strategy)}>
-                    <span className="material-symbols-outlined text-[13px] text-text-muted cursor-help">
-                      help
-                    </span>
-                  </Tooltip>
-                )}
+                <span id={strategyLabelId} className="text-sm font-medium">
+                  {t("routingStrategy")}
+                </span>
+                {!isExpertMode && <InfoTooltip text={getStrategyDescription(t, strategy)} />}
               </div>
-              <div className="grid grid-cols-3 gap-1 p-0.5 bg-black/5 dark:bg-white/5 rounded-lg">
+              {/* Strategies are a single choice → kit RadioGroup + ChoiceCard (spec §3). The
+                  wrapper keeps the testid on the clickable card (the kit input is 1px). */}
+              <RadioGroup
+                aria-labelledby={strategyLabelId}
+                value={strategy}
+                onValueChange={setStrategy}
+                className="[&>.ci-radio-group__items]:grid-cols-2 [&>.ci-radio-group__items]:gap-1.5 sm:[&>.ci-radio-group__items]:grid-cols-3"
+              >
                 {STRATEGY_OPTIONS.map((s) => (
-                  <button
+                  <div
                     key={s.value}
-                    onClick={() => setStrategy(s.value)}
                     data-testid={`strategy-option-${s.value}`}
                     title={!isExpertMode ? getStrategyDescription(t, s.value) : undefined}
-                    aria-label={
-                      isExpertMode
-                        ? getStrategyLabel(t, s.value)
-                        : `${getStrategyLabel(t, s.value)}. ${getStrategyDescription(t, s.value)}`
-                    }
-                    className={`py-1.5 px-2 rounded-md text-xs font-medium transition-all ${
-                      strategy === s.value
-                        ? "bg-white dark:bg-white/5 shadow-sm text-primary"
-                        : "text-text-muted hover:text-text-main"
-                    }`}
+                    className="min-w-0"
                   >
-                    <span className="material-symbols-outlined text-[14px] align-middle mr-0.5">
-                      {s.icon}
-                    </span>
-                    {getStrategyLabel(t, s.value)}
-                  </button>
+                    <ChoiceCard
+                      value={s.value}
+                      tone={strategy === s.value ? "accent" : "neutral"}
+                      icon={<Icon name={s.icon} size={14} />}
+                      title={getStrategyLabel(t, s.value)}
+                      aria-label={
+                        isExpertMode
+                          ? getStrategyLabel(t, s.value)
+                          : `${getStrategyLabel(t, s.value)}. ${getStrategyDescription(t, s.value)}`
+                      }
+                      className="h-full px-3 py-2 [&_.ci-choice-card__heading]:text-xs [&_.ci-choice-card__heading]:font-medium"
+                    />
+                  </div>
                 ))}
-              </div>
+              </RadioGroup>
               {!isExpertMode && (
                 <>
                   <p className="text-[10px] text-text-muted mt-0.5">
@@ -3189,18 +3506,15 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
           {showStepsSection && (
             <div>
               <div className="flex items-center justify-between mb-1.5">
-                <label className="text-sm font-medium">{t("models")}</label>
+                <h3 className="text-sm font-medium">{t("models")}</h3>
                 {strategy === "weighted" && models.length > 1 && (
-                  <button
-                    onClick={handleAutoBalance}
-                    className="text-[10px] text-primary hover:text-primary/80 transition-colors"
-                  >
+                  <Button size="sm" variant="ghost" icon="balance" onClick={handleAutoBalance}>
                     {t("autoBalance")}
-                  </button>
+                  </Button>
                 )}
               </div>
 
-              <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3 mb-2">
+              <div className="rounded-lg border border-border bg-bg-subtle p-3 mb-2">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-semibold text-text-main">
@@ -3217,23 +3531,24 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     )}
                   </div>
                   {!isExpertMode && (
-                    <button
-                      type="button"
+                    <Button
+                      size="sm"
+                      variant="outline"
                       onClick={() => setShowModelSelect(true)}
-                      className="text-[10px] shrink-0 text-primary hover:text-primary/80 transition-colors"
+                      className="shrink-0"
                     >
                       {getI18nOrFallback(t, "builderBrowseCatalog", "Legacy model browser")}
-                    </button>
+                    </Button>
                   )}
                 </div>
 
                 {isExpertMode && (
-                  <div className="mt-3 rounded-md border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] px-2.5 py-2">
-                    <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                      {getI18nOrFallback(t, "manualModel", "Manual model")}
-                    </label>
-                    <div className="flex flex-col sm:flex-row gap-2">
-                      <input
+                  <div className="mt-3 rounded-md border border-border bg-surface px-2.5 py-2">
+                    <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                      <Input
+                        className="flex-1"
+                        inputClassName="font-mono"
+                        label={getI18nOrFallback(t, "manualModel", "Manual model")}
                         type="text"
                         value={manualModelInput}
                         onChange={(e) => {
@@ -3248,7 +3563,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                         }}
                         placeholder="provider/model"
                         data-testid="combo-manual-model-input"
-                        className="flex-1 text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none font-mono"
                       />
                       <Button
                         onClick={handleAddManualModel}
@@ -3260,7 +3574,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       </Button>
                     </div>
                     {(manualModelError || manualModelHasDuplicate) && (
-                      <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300">
+                      <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
                         {manualModelError ||
                           getI18nOrFallback(
                             t,
@@ -3287,105 +3601,80 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                 {builderSelectionMode === "step" && (
                   <>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mt-3">
-                      <div>
-                        <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                          1. {getI18nOrFallback(t, "builderProvider", "Provider")}
-                        </label>
-                        <select
-                          value={builderProviderId}
-                          onChange={handleBuilderProviderChange}
-                          data-testid="combo-builder-provider"
-                          className="w-full text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none"
-                        >
-                          <option value="">
-                            {builderLoading
-                              ? getI18nOrFallback(
-                                  t,
-                                  "builderLoadingProviders",
-                                  "Loading providers…"
-                                )
-                              : getI18nOrFallback(t, "builderSelectProvider", "Select provider")}
+                      {/* Native-mode Select adapter (`ci-select-native`): long dynamic lists, and
+                          the builder e2e specs drive these three with selectOption(). */}
+                      <Select
+                        label={`1. ${getI18nOrFallback(t, "builderProvider", "Provider")}`}
+                        value={builderProviderId}
+                        onChange={handleBuilderProviderChange}
+                        data-testid="combo-builder-provider"
+                      >
+                        <option value="">
+                          {builderLoading
+                            ? getI18nOrFallback(t, "builderLoadingProviders", "Loading providers…")
+                            : getI18nOrFallback(t, "builderSelectProvider", "Select provider")}
+                        </option>
+                        {builderProviders.map((provider) => (
+                          <option key={provider.providerId} value={provider.providerId}>
+                            {provider.displayName} ({provider.connectionCount} acct
+                            {provider.connectionCount === 1 ? "" : "s"})
                           </option>
-                          {builderProviders.map((provider) => (
-                            <option key={provider.providerId} value={provider.providerId}>
-                              {provider.displayName} ({provider.connectionCount} acct
-                              {provider.connectionCount === 1 ? "" : "s"})
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        ))}
+                      </Select>
 
-                      <div>
-                        <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                          2. {getI18nOrFallback(t, "builderModel", "Model")}
-                        </label>
-                        <select
-                          value={builderModelId}
-                          onChange={handleBuilderModelChange}
-                          disabled={!selectedBuilderProvider}
-                          data-testid="combo-builder-model"
-                          className="w-full text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none disabled:opacity-50"
-                        >
-                          <option value="">
-                            {selectedBuilderProvider
-                              ? getI18nOrFallback(t, "builderSelectModel", "Select model")
-                              : getI18nOrFallback(
-                                  t,
-                                  "builderProviderFirst",
-                                  "Choose provider first"
-                                )}
+                      <Select
+                        label={`2. ${getI18nOrFallback(t, "builderModel", "Model")}`}
+                        value={builderModelId}
+                        onChange={handleBuilderModelChange}
+                        disabled={!selectedBuilderProvider}
+                        data-testid="combo-builder-model"
+                      >
+                        <option value="">
+                          {selectedBuilderProvider
+                            ? getI18nOrFallback(t, "builderSelectModel", "Select model")
+                            : getI18nOrFallback(t, "builderProviderFirst", "Choose provider first")}
+                        </option>
+                        {(selectedBuilderProvider?.models || []).map((model) => (
+                          <option key={model.id} value={model.id}>
+                            {model.name}
+                            {model.source ? ` · ${model.source}` : ""}
                           </option>
-                          {(selectedBuilderProvider?.models || []).map((model) => (
-                            <option key={model.id} value={model.id}>
-                              {model.name}
-                              {model.source ? ` · ${model.source}` : ""}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        ))}
+                      </Select>
 
-                      <div>
-                        <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                          3. {getI18nOrFallback(t, "builderAccount", "Account")}
-                        </label>
-                        <select
-                          value={builderConnectionId}
-                          onChange={handleBuilderConnectionChange}
-                          disabled={!selectedBuilderModel}
-                          data-testid="combo-builder-account"
-                          className="w-full text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none disabled:opacity-50"
-                        >
-                          <option value={COMBO_BUILDER_AUTO_CONNECTION}>
-                            {getI18nOrFallback(
-                              t,
-                              "autoSelectAccount",
-                              "Auto-select account at runtime"
-                            )}
+                      <Select
+                        label={`3. ${getI18nOrFallback(t, "builderAccount", "Account")}`}
+                        value={builderConnectionId}
+                        onChange={handleBuilderConnectionChange}
+                        disabled={!selectedBuilderModel}
+                        data-testid="combo-builder-account"
+                      >
+                        <option value={COMBO_BUILDER_AUTO_CONNECTION}>
+                          {getI18nOrFallback(
+                            t,
+                            "autoSelectAccount",
+                            "Auto-select account at runtime"
+                          )}
+                        </option>
+                        {selectedBuilderConnections.map((connection) => (
+                          <option key={connection.id} value={connection.id}>
+                            {pickDisplayValue([connection.label], emailsVisible, connection.label)}
+                            {connection.status !== "active" ? ` · ${connection.status}` : ""}
                           </option>
-                          {selectedBuilderConnections.map((connection) => (
-                            <option key={connection.id} value={connection.id}>
-                              {pickDisplayValue(
-                                [connection.label],
-                                emailsVisible,
-                                connection.label
-                              )}
-                              {connection.status !== "active" ? ` · ${connection.status}` : ""}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
+                        ))}
+                      </Select>
                     </div>
 
                     {builderConnectionId === COMBO_BUILDER_AUTO_CONNECTION &&
                     selectedBuilderConnections.length > 1 ? (
-                      <div className="mt-2 rounded-md border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] px-2.5 py-2">
-                        <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1.5">
+                      <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
+                        <p className="text-xs font-medium uppercase tracking-wide text-text-muted mb-1.5">
                           {getI18nOrFallback(
                             t,
                             "builderRestrictAccounts",
                             "Restrict to accounts (optional)"
                           )}
-                        </label>
+                        </p>
                         <div
                           className="flex flex-wrap gap-1.5"
                           data-testid="combo-builder-allowlist"
@@ -3393,23 +3682,20 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           {selectedBuilderConnections.map((connection) => {
                             const checked = builderAllowedConnectionIds.includes(connection.id);
                             return (
-                              <button
-                                type="button"
+                              <Button
                                 key={connection.id}
+                                size="sm"
+                                variant={checked ? "secondary" : "outline"}
                                 onClick={() => handleBuilderAllowedConnectionToggle(connection.id)}
                                 aria-pressed={checked}
-                                className={`text-[11px] px-2 py-1 rounded border transition-colors ${
-                                  checked
-                                    ? "border-primary bg-primary/10 text-primary"
-                                    : "border-black/10 dark:border-white/10 text-text-muted hover:border-primary/40"
-                                }`}
+                                icon={checked ? "check" : undefined}
                               >
                                 {pickDisplayValue(
                                   [connection.label],
                                   emailsVisible,
                                   connection.label
                                 )}
-                              </button>
+                              </Button>
                             );
                           })}
                         </div>
@@ -3434,7 +3720,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
                         </Button>
                         {builderHasDuplicate && (
-                          <span className="text-[10px] text-amber-600 dark:text-amber-300">
+                          <span className="text-[10px] text-warning">
                             {getI18nOrFallback(
                               t,
                               "builderDuplicateExact",
@@ -3444,7 +3730,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                         )}
                       </div>
                     ) : (
-                      <div className="mt-2 rounded-md border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] px-2.5 py-2">
+                      <div className="mt-2 rounded-md border border-border bg-surface px-2.5 py-2">
                         <p className="text-[10px] uppercase tracking-wide text-text-muted">
                           {getI18nOrFallback(t, "builderPreview", "Current step preview")}
                         </p>
@@ -3467,7 +3753,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             {getI18nOrFallback(t, "builderAddStep", "Add detailed step")}
                           </Button>
                           {builderHasDuplicate && (
-                            <span className="text-[10px] text-amber-600 dark:text-amber-300">
+                            <span className="text-[10px] text-warning">
                               {getI18nOrFallback(
                                 t,
                                 "builderDuplicateExact",
@@ -3479,30 +3765,25 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       </div>
                     )}
 
-                    <div className="mt-3 pt-3 border-t border-black/5 dark:border-white/5">
-                      <label className="text-[10px] font-medium uppercase tracking-wide text-text-muted block mb-1">
-                        {getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
-                      </label>
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <select
+                    <div className="mt-3 pt-3 border-t border-border">
+                      <div className="flex flex-col sm:flex-row sm:items-end gap-2">
+                        <Select
+                          className="flex-1"
+                          label={getI18nOrFallback(t, "builderComboRef", "Reference another combo")}
                           value={builderComboRefName}
                           onChange={(e) => setBuilderComboRefName(e.target.value)}
-                          className="flex-1 text-xs py-2 px-2 rounded border border-black/10 dark:border-white/10 bg-white dark:bg-white/5 text-text-main focus:border-primary focus:outline-none"
-                        >
-                          <option value="">
-                            {getI18nOrFallback(
-                              t,
-                              "selectComboToReference",
-                              "Select an existing combo to reference"
-                            )}
-                          </option>
-                          {builderComboRefs.map((comboRef) => (
-                            <option key={comboRef.id} value={comboRef.name}>
-                              {comboRef.name} · {comboRef.strategy} · {comboRef.stepCount} step
-                              {comboRef.stepCount === 1 ? "" : "s"}
-                            </option>
-                          ))}
-                        </select>
+                          placeholder={getI18nOrFallback(
+                            t,
+                            "selectComboToReference",
+                            "Select an existing combo to reference"
+                          )}
+                          options={builderComboRefs.map((comboRef) => ({
+                            value: comboRef.name,
+                            label: `${comboRef.name} · ${comboRef.strategy} · ${comboRef.stepCount} step${
+                              comboRef.stepCount === 1 ? "" : "s"
+                            }`,
+                          }))}
+                        />
                         <Button
                           onClick={handleAddComboReference}
                           variant="ghost"
@@ -3517,17 +3798,23 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                 )}
 
                 {builderError && (
-                  <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300">
+                  <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
                     {builderError}
                   </div>
                 )}
               </div>
 
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <ComboSortSelect
+                  value={sortMethod}
+                  onChange={handleSortChange}
+                  t={(k, f) => getI18nOrFallback(t, k, f)}
+                />
+              </div>
+
               {models.length === 0 ? (
-                <div className="text-center py-4 border border-dashed border-black/10 dark:border-white/10 rounded-lg bg-black/[0.01] dark:bg-white/[0.01]">
-                  <span className="material-symbols-outlined text-text-muted text-xl mb-1">
-                    layers
-                  </span>
+                <div className="text-center py-4 border border-dashed border-border rounded-lg bg-bg-subtle">
+                  <Icon name="layers" size={20} className="mx-auto mb-1 text-text-muted" />
                   <p className="text-xs text-text-muted">{t("noModelsYet")}</p>
                 </div>
               ) : (
@@ -3543,13 +3830,15 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       className={`group/item flex items-center gap-1.5 px-2 py-1.5 rounded-md transition-all cursor-grab active:cursor-grabbing ${
                         dragOverIndex === index && dragIndex !== index
                           ? "bg-primary/10 border border-primary/30"
-                          : "bg-black/[0.02] dark:bg-white/[0.02] hover:bg-black/[0.04] dark:hover:bg-white/[0.04] border border-transparent"
+                          : "bg-bg-subtle hover:bg-bg-subtle border border-transparent"
                       } ${dragIndex === index ? "opacity-50" : ""}`}
                     >
                       {/* Drag handle */}
-                      <span className="material-symbols-outlined text-[14px] text-text-muted/40 cursor-grab shrink-0">
-                        drag_indicator
-                      </span>
+                      <Icon
+                        name="drag_indicator"
+                        size={14}
+                        className="text-text-muted/40 cursor-grab"
+                      />
 
                       {/* Index badge */}
                       <span className="text-[10px] font-medium text-text-muted w-3 text-center shrink-0">
@@ -3558,31 +3847,22 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
 
                       {/* Model display */}
                       <div className="flex-1 min-w-0 px-1">
-                        <div className="text-xs text-text-main truncate">
-                          {formatModelDisplay(entry)}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="text-xs text-text-main truncate">
+                            {formatModelDisplay(entry)}
+                          </div>
+                          {isStaleComboStep(entry, staleModels) && (
+                            <StaleModelBadge
+                              label={getI18nOrFallback(
+                                t,
+                                "builderStaleModel",
+                                "Not in live catalog"
+                              )}
+                            />
+                          )}
                         </div>
                         <div className="text-[10px] text-text-muted truncate">
-                          {entry.kind === "combo-ref"
-                            ? getI18nOrFallback(t, "builderComboRefStep", "Nested combo reference")
-                            : entry.kind === "provider-wildcard"
-                              ? getI18nOrFallback(
-                                  t,
-                                  "builderProviderWildcard",
-                                  "All matching provider models"
-                                )
-                              : entry.connectionId
-                                ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                : entry.providerId
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderDynamicAccountShort",
-                                      "Dynamic account"
-                                    )
-                                  : getI18nOrFallback(
-                                      t,
-                                      "builderLegacyEntry",
-                                      "Legacy model entry"
-                                    )}
+                          {getComboStepKindLabel(t, entry)}
                         </div>
                       </div>
 
@@ -3600,13 +3880,16 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       {/* Weight input (weighted mode only) */}
                       {strategy === "weighted" && (
                         <div className="flex items-center gap-0.5 shrink-0">
-                          <input
+                          {/* Kit Input in its `sm` size: the adapter does not expose `size`. */}
+                          <KitInput
+                            size="sm"
                             type="number"
                             min="0"
                             max="100"
                             value={entry.weight}
                             onChange={(e) => handleWeightChange(index, e.target.value)}
-                            className="w-10 text-[11px] text-center py-0.5 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
+                            aria-label={getI18nOrFallback(t, "weightPercent", "Weight (%)")}
+                            className="w-14 text-center"
                           />
                           <span className="text-[10px] text-text-muted">%</span>
                         </div>
@@ -3614,36 +3897,43 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
 
                       {/* Reorder arrows (Mobile friendly) */}
                       <div className="flex items-center gap-0.5">
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleMoveUp(index)}
                           disabled={index === 0}
-                          className={`p-0.5 rounded ${index === 0 ? "text-text-muted/20 cursor-not-allowed" : "text-text-muted hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}
+                          className="text-text-muted"
                           title={t("moveUp")}
+                          aria-label={t("moveUp")}
                         >
-                          <span className="material-symbols-outlined text-[12px]">
-                            arrow_upward
-                          </span>
-                        </button>
-                        <button
+                          <Icon name="arrow_upward" size={12} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => handleMoveDown(index)}
                           disabled={index === models.length - 1}
-                          className={`p-0.5 rounded ${index === models.length - 1 ? "text-text-muted/20 cursor-not-allowed" : "text-text-muted hover:text-primary hover:bg-black/5 dark:hover:bg-white/5"}`}
+                          className="text-text-muted"
                           title={t("moveDown")}
+                          aria-label={t("moveDown")}
                         >
-                          <span className="material-symbols-outlined text-[12px]">
-                            arrow_downward
-                          </span>
-                        </button>
+                          <Icon name="arrow_downward" size={12} />
+                        </Button>
                       </div>
 
+                      <ComboStepTestButton entry={entry} />
+
                       {/* Remove */}
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => handleRemoveModel(index)}
-                        className="p-0.5 hover:bg-red-500/10 rounded text-text-muted hover:text-red-500 transition-all"
+                        className="text-text-muted hover:bg-error/10 hover:text-error"
                         title={t("removeModel")}
+                        aria-label={t("removeModel")}
                       >
-                        <span className="material-symbols-outlined text-[12px]">close</span>
-                      </button>
+                        <Icon name="close" size={12} />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -3653,7 +3943,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               {strategy === "weighted" && models.length > 0 && <WeightTotalBar models={models} />}
 
               {strategy === "cost-optimized" && models.length > 0 && (
-                <div className="mt-2 rounded-md border border-black/10 dark:border-white/10 bg-black/[0.02] dark:bg-white/[0.02] px-2 py-1.5">
+                <div className="mt-2 rounded-md border border-border bg-bg-subtle px-2 py-1.5">
                   <div className="flex items-center justify-between text-[10px]">
                     <span className="text-text-muted">
                       {getI18nOrFallback(t, "pricingCoverage", "Pricing coverage")}
@@ -3662,14 +3952,14 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                       {pricedModelCount}/{models.length} ({pricingCoveragePercent}%)
                     </span>
                   </div>
-                  <div className="h-1.5 mt-1 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
+                  <div className="h-1.5 mt-1 rounded-full bg-bg-subtle overflow-hidden">
                     <div
                       className={`h-full transition-all duration-300 ${
                         pricingCoveragePercent === 100
-                          ? "bg-emerald-500"
+                          ? "bg-success"
                           : pricingCoveragePercent > 0
-                            ? "bg-amber-500"
-                            : "bg-red-500"
+                            ? "bg-warning"
+                            : "bg-error"
                       }`}
                       style={{ width: `${pricingCoveragePercent}%` }}
                     />
@@ -3687,15 +3977,15 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               )}
 
               {hasNoModels && (
-                <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]">warning</span>
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                  <Icon name="warning" size={12} />
                   <span>{t("noModelsYet")}</span>
                 </div>
               )}
 
               {hasInvalidWeightedTotal && (
-                <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]">warning</span>
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                  <Icon name="warning" size={12} />
                   <span>
                     {t("weighted")} {weightTotal}% {"\u2260"} 100%. {t("autoBalance")}
                   </span>
@@ -3703,8 +3993,8 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               )}
 
               {!isExpertMode && hasRoundRobinSingleModel && (
-                <div className="mt-2 rounded-md border border-blue-500/20 bg-blue-500/10 px-2 py-1.5 text-[10px] text-blue-700 dark:text-blue-300 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]">info</span>
+                <div className="mt-2 rounded-md border border-info/20 bg-info/10 px-2 py-1.5 text-[10px] text-info flex items-center gap-1">
+                  <Icon name="info" size={12} />
                   <span>
                     {getI18nOrFallback(
                       t,
@@ -3716,8 +4006,8 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               )}
 
               {hasCostOptimizedPartialPricing && (
-                <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]">warning</span>
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                  <Icon name="warning" size={12} />
                   <span>
                     {typeof t.has === "function" && t.has("warningCostOptimizedPartialPricing")
                       ? t("warningCostOptimizedPartialPricing", {
@@ -3730,8 +4020,8 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               )}
 
               {hasCostOptimizedWithoutPricing && (
-                <div className="mt-2 rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300 flex items-center gap-1">
-                  <span className="material-symbols-outlined text-[12px]">warning</span>
+                <div className="mt-2 rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning flex items-center gap-1">
+                  <Icon name="warning" size={12} />
                   <span>
                     {getI18nOrFallback(
                       t,
@@ -3752,14 +4042,16 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                 </div>
               )}
 
-              <button
+              <Button
+                variant="outline"
+                icon="travel_explore"
+                fullWidth
                 onClick={() => setShowModelSelect(true)}
-                className="w-full mt-2 py-2 border border-dashed border-black/10 dark:border-white/10 rounded-lg text-xs text-text-muted hover:text-primary hover:border-primary/30 transition-colors flex items-center justify-center gap-1"
+                className="mt-2 border-dashed text-text-muted"
                 data-testid="combo-browse-catalog"
               >
-                <span className="material-symbols-outlined text-[16px]">travel_explore</span>
                 {getI18nOrFallback(t, "browseLegacyCatalog", "Browse legacy model catalog")}
-              </button>
+              </Button>
             </div>
           )}
 
@@ -3767,19 +4059,20 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
           {showStrategySection && (
             <>
               {!isExpertMode && (
-                <button
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon={showAdvanced ? "expand_less" : "expand_more"}
+                  aria-expanded={showAdvanced}
                   onClick={() => setShowAdvanced(!showAdvanced)}
-                  className="flex items-center gap-1 text-xs text-text-muted hover:text-text-main transition-colors self-start"
+                  className="self-start text-text-muted"
                 >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {showAdvanced ? "expand_less" : "expand_more"}
-                  </span>
                   {t("advancedSettings")}
-                </button>
+                </Button>
               )}
 
               {advancedConfigVisible && (
-                <div className="flex flex-col gap-2 p-3 bg-black/[0.02] dark:bg-white/[0.02] rounded-lg border border-black/5 dark:border-white/5">
+                <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
                   <div className="grid grid-cols-2 gap-2">
                     <div>
                       <FieldLabelWithHelp
@@ -3790,8 +4083,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           ADVANCED_FIELD_HELP_FALLBACK.maxRetries
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-max-retries"
                       />
-                      <input
+                      <Input
+                        id="combo-cfg-max-retries"
                         type="number"
                         min="0"
                         max="10"
@@ -3803,7 +4098,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             maxRetries: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                       />
                     </div>
                     <div>
@@ -3815,8 +4109,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           ADVANCED_FIELD_HELP_FALLBACK.retryDelay
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-retry-delay-ms"
                       />
-                      <input
+                      <Input
+                        id="combo-cfg-retry-delay-ms"
                         type="number"
                         min="0"
                         max="60000"
@@ -3829,43 +4125,19 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             retryDelayMs: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                       />
                     </div>
-                    <div>
-                      <FieldLabelWithHelp
-                        label={getI18nOrFallback(t, "targetTimeout", "Target timeout (seconds)")}
-                        help={getI18nOrFallback(
-                          t,
-                          "advancedHelp.targetTimeoutMs",
-                          ADVANCED_FIELD_HELP_FALLBACK.targetTimeoutMs
-                        )}
-                        showHelp={!isExpertMode}
-                        htmlFor="combo-target-timeout-ms"
-                      />
-                      <input
-                        id="combo-target-timeout-ms"
-                        type="number"
-                        min="1"
-                        max="86400"
-                        step="1"
-                        value={msToOptionalSecondsInput(config.targetTimeoutMs)}
-                        placeholder={getI18nOrFallback(t, "inheritRequestTimeout", "inherit")}
-                        onChange={(e) =>
-                          setConfig({
-                            ...config,
-                            targetTimeoutMs: secondsInputToOptionalMs(e.target.value),
-                          })
-                        }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
-                      />
-                    </div>
+                    <ComboTimeoutFields
+                      config={config}
+                      setConfig={setConfig}
+                      t={t}
+                      showHelp={!isExpertMode}
+                    />
                   </div>
-                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                     <div className="col-span-2">
                       <div className="flex items-center gap-2 py-1">
-                        <input
-                          type="checkbox"
+                        <Checkbox
                           id="failoverBeforeRetry"
                           checked={!!config.failoverBeforeRetry}
                           onChange={(e) =>
@@ -3874,26 +4146,16 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               failoverBeforeRetry: e.target.checked || undefined,
                             })
                           }
-                          className="w-3.5 h-3.5 rounded border border-black/20 dark:border-white/20 accent-primary cursor-pointer"
+                          className="text-xs text-text-muted"
+                          label={t("failoverBeforeRetry")}
                         />
-                        <label
-                          htmlFor="failoverBeforeRetry"
-                          className="text-xs text-text-muted cursor-pointer select-none"
-                        >
-                          {t("failoverBeforeRetry")}
-                        </label>
-                        <Tooltip
-                          position="bottom"
-                          content={getI18nOrFallback(
+                        <InfoTooltip
+                          text={getI18nOrFallback(
                             t,
                             "advancedHelp.failoverBeforeRetry",
                             ADVANCED_FIELD_HELP_FALLBACK.failoverBeforeRetry
                           )}
-                        >
-                          <span className="material-symbols-outlined text-[12px] text-text-muted cursor-help">
-                            help
-                          </span>
-                        </Tooltip>
+                        />
                       </div>
                     </div>
                     <div className="col-span-2">
@@ -3914,7 +4176,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                         showHelp={!isExpertMode}
                         htmlFor="combo-reasoning-transport-fallback"
                       />
-                      <select
+                      <Select
                         id="combo-reasoning-transport-fallback"
                         value={config.reasoningTransportFallback === "skip" ? "skip" : "drop"}
                         onChange={(e) =>
@@ -3924,7 +4186,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               e.target.value === "skip" ? "skip" : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-surface-1 focus:border-primary focus:outline-none"
                       >
                         <option value="skip">
                           {getI18nOrFallback(
@@ -3940,7 +4201,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Drop reasoning and try target"
                           )}
                         </option>
-                      </select>
+                      </Select>
                     </div>
                     <div>
                       <FieldLabelWithHelp
@@ -3951,8 +4212,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           ADVANCED_FIELD_HELP_FALLBACK.maxSetRetries
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-max-set-retries"
                       />
-                      <input
+                      <Input
+                        id="combo-cfg-max-set-retries"
                         type="number"
                         min="0"
                         max="10"
@@ -3964,7 +4227,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             maxSetRetries: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                       />
                     </div>
                     <div>
@@ -3976,8 +4238,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           ADVANCED_FIELD_HELP_FALLBACK.setRetryDelayMs
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-set-retry-delay-ms"
                       />
-                      <input
+                      <Input
+                        id="combo-cfg-set-retry-delay-ms"
                         type="number"
                         min="0"
                         max="60000"
@@ -3990,12 +4254,11 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             setRetryDelayMs: e.target.value ? Number(e.target.value) : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                       />
                     </div>
                   </div>
                   {strategy === "round-robin" && (
-                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div>
                         <FieldLabelWithHelp
                           label={t("concurrencyPerModel")}
@@ -4005,8 +4268,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             ADVANCED_FIELD_HELP_FALLBACK.concurrencyPerModel
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-concurrency-per-model"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-concurrency-per-model"
                           type="number"
                           min="1"
                           max="20"
@@ -4020,7 +4285,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                                 : undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div>
@@ -4032,8 +4296,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             ADVANCED_FIELD_HELP_FALLBACK.queueTimeout
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-queue-timeout-ms"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-queue-timeout-ms"
                           type="number"
                           min="1000"
                           max="120000"
@@ -4046,40 +4312,12 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               queueTimeoutMs: e.target.value ? Number(e.target.value) : undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
-                        />
-                      </div>
-                      <div className="col-span-2">
-                        <FieldLabelWithHelp
-                          label={getI18nOrFallback(t, "stickyLimit", "Sticky Limit")}
-                          help={getI18nOrFallback(
-                            t,
-                            "advancedHelp.stickyLimit",
-                            ADVANCED_FIELD_HELP_FALLBACK.stickyLimit
-                          )}
-                          showHelp={!isExpertMode}
-                        />
-                        <input
-                          type="number"
-                          min="0"
-                          max="1000"
-                          value={config.stickyRoundRobinLimit ?? ""}
-                          placeholder={getI18nOrFallback(t, "stickyLimitInherit", "inherit")}
-                          onChange={(e) =>
-                            setConfig({
-                              ...config,
-                              stickyRoundRobinLimit: e.target.value
-                                ? Number(e.target.value)
-                                : undefined,
-                            })
-                          }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                     </div>
                   )}
                   {strategy === "weighted" && (
-                    <div className="grid grid-cols-1 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                    <div className="grid grid-cols-1 gap-2 pt-2 border-t border-border">
                       <div>
                         <FieldLabelWithHelp
                           label={getI18nOrFallback(
@@ -4093,8 +4331,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             ADVANCED_FIELD_HELP_FALLBACK.stickyWeightedLimit
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-sticky-weighted-limit"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-sticky-weighted-limit"
                           type="number"
                           min="0"
                           max="1000"
@@ -4108,12 +4348,20 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                                 : undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                     </div>
                   )}
-                  <div className="grid grid-cols-1 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                  <ComboRrLegibilityFields
+                    strategy={strategy}
+                    config={config}
+                    setConfig={setConfig}
+                    models={models}
+                    routingSettings={routingSettings}
+                    t={t}
+                    showHelp={!isExpertMode}
+                  />
+                  <div className="grid grid-cols-1 gap-2 pt-2 border-t border-border">
                     <div>
                       <FieldLabelWithHelp
                         label={getI18nOrFallback(t, "nestedComboMode", "Nested Combo Behavior")}
@@ -4123,8 +4371,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           ADVANCED_FIELD_HELP_FALLBACK.nestedComboMode
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-nested-combo-mode"
                       />
-                      <select
+                      <Select
+                        id="combo-cfg-nested-combo-mode"
                         value={config.nestedComboMode ?? "flatten"}
                         onChange={(e) =>
                           setConfig({
@@ -4132,7 +4382,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             nestedComboMode: e.target.value === "execute" ? "execute" : "flatten",
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-surface-1 focus:border-primary focus:outline-none"
                       >
                         <option value="flatten">
                           {getI18nOrFallback(t, "nestedComboFlatten", "Flatten nested combos")}
@@ -4144,7 +4393,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Execute nested combos as targets"
                           )}
                         </option>
-                      </select>
+                      </Select>
                     </div>
                     {/* #6168: per-combo session-stickiness override (tri-state so it can
                         force ON or OFF regardless of the global default; blank = inherit). */}
@@ -4161,8 +4410,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           "Rotate to a different connection on every request instead of pinning a whole conversation to one connection by the first-message hash. Overrides the global default. Leave on Inherit to preserve prompt-cache hits for multi-turn chats."
                         )}
                         showHelp={!isExpertMode}
+                        htmlFor="combo-cfg-disable-session-stickiness"
                       />
-                      <select
+                      <Select
+                        id="combo-cfg-disable-session-stickiness"
                         value={
                           config.disableSessionStickiness === true
                             ? "disabled"
@@ -4181,7 +4432,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                                   : undefined,
                           })
                         }
-                        className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-surface-1 focus:border-primary focus:outline-none"
                       >
                         <option value="inherit">
                           {getI18nOrFallback(t, "stickyLimitInherit", "inherit")}
@@ -4192,11 +4442,11 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                         <option value="disabled">
                           {getI18nOrFallback(t, "sessionStickinessDisabled", "Stickiness off")}
                         </option>
-                      </select>
+                      </Select>
                     </div>
                   </div>
                   {strategy === "context-relay" && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-2 pt-2 border-t border-border">
                       <div>
                         <FieldLabelWithHelp
                           label={getI18nOrFallback(
@@ -4210,8 +4460,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "When quota usage reaches this threshold, OmniRoute generates a structured handoff summary before the account is exhausted."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-handoff-threshold"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-handoff-threshold"
                           type="number"
                           min="0.5"
                           max="0.94"
@@ -4224,7 +4476,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               handoffThreshold: e.target.value ? Number(e.target.value) : undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div>
@@ -4240,8 +4491,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Limits how much recent history is condensed into the relay summary."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-max-messages-for-summary"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-max-messages-for-summary"
                           type="number"
                           min="5"
                           max="100"
@@ -4255,7 +4508,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                                 : undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div>
@@ -4267,8 +4519,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Optional override model used only for generating the handoff summary. Leave empty to reuse the active combo model."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-handoff-model"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-handoff-model"
                           type="text"
                           value={config.handoffModel ?? ""}
                           placeholder="codex/gpt-5.6-sol"
@@ -4278,12 +4532,11 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               handoffModel: e.target.value || undefined,
                             })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       {!isExpertMode && (
-                        <div className="md:col-span-3 rounded-md border border-fuchsia-500/20 bg-fuchsia-500/5 px-2 py-1.5">
-                          <p className="text-[10px] text-fuchsia-700 dark:text-fuchsia-300">
+                        <div className="md:col-span-3 rounded-md border border-chart-3/20 bg-chart-3/5 px-2 py-1.5">
+                          <p className="text-[10px] text-chart-3">
                             {getI18nOrFallback(
                               t,
                               "contextRelayProviderNote",
@@ -4295,7 +4548,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     </div>
                   )}
                   {strategy === "fusion" && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-black/5 dark:border-white/5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-2 pt-2 border-t border-border">
                       <div className="md:col-span-2">
                         <FieldLabelWithHelp
                           label={getI18nOrFallback(t, "fusionJudgeModel", "Judge model")}
@@ -4305,15 +4558,16 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Model that synthesizes the panel answers into one final response. Leave empty to use the first panel model."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-judge-model"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-judge-model"
                           type="text"
                           value={config.judgeModel ?? ""}
                           placeholder={models[0]?.model || "openai/gpt-5.5"}
                           onChange={(e) =>
                             setConfig({ ...config, judgeModel: e.target.value || undefined })
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div>
@@ -4325,8 +4579,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Successful panel answers required before stragglers get a grace window (default 2)."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-fusion-min-panel"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-fusion-min-panel"
                           type="number"
                           min="1"
                           max="50"
@@ -4335,7 +4591,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                           onChange={(e) =>
                             setConfig(updateFusionTuning(config, "minPanel", e.target.value))
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div>
@@ -4351,8 +4606,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "How long to wait for slow panel models once quorum is reached (default 8000)."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-fusion-straggler-grace-ms"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-fusion-straggler-grace-ms"
                           type="number"
                           min="0"
                           max="120000"
@@ -4363,7 +4620,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               updateFusionTuning(config, "stragglerGraceMs", e.target.value)
                             )
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                       <div className="md:col-span-2">
@@ -4379,8 +4635,10 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                             "Absolute cap so one hung model can't stall the whole panel (default 90000)."
                           )}
                           showHelp={!isExpertMode}
+                          htmlFor="combo-cfg-fusion-panel-hard-timeout-ms"
                         />
-                        <input
+                        <Input
+                          id="combo-cfg-fusion-panel-hard-timeout-ms"
                           type="number"
                           min="1000"
                           max="600000"
@@ -4391,7 +4649,6 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               updateFusionTuning(config, "panelHardTimeoutMs", e.target.value)
                             )
                           }
-                          className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
                         />
                       </div>
                     </div>
@@ -4406,9 +4663,9 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
 
           {/* Response Validation (4985) */}
           {showStrategySection && (
-            <div className="flex flex-col gap-2 p-3 bg-black/[0.02] dark:bg-white/[0.02] rounded-lg border border-black/5 dark:border-white/5">
+            <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="material-symbols-outlined text-[14px] text-primary">rule</span>
+                <Icon name="rule" size={14} className="text-primary" />
                 <p className="text-xs font-medium">
                   {getI18nOrFallback(t, "responseValidationTitle", "Response validation")}
                 </p>
@@ -4423,11 +4680,9 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
 
           {/* Agent Features (#399 / #401 / #454) */}
           {showStrategySection && (
-            <div className="flex flex-col gap-2 p-3 bg-black/[0.02] dark:bg-white/[0.02] rounded-lg border border-black/5 dark:border-white/5">
+            <div className="flex flex-col gap-2 p-3 bg-bg-subtle rounded-lg border border-border">
               <div className="flex items-center gap-1.5 mb-1">
-                <span className="material-symbols-outlined text-[14px] text-primary">
-                  smart_toy
-                </span>
+                <Icon name="smart_toy" size={14} className="text-primary" />
                 <p className="text-xs font-medium">
                   {getI18nOrFallback(t, "agentFeaturesTitle", "Agent features")}
                 </p>
@@ -4443,15 +4698,25 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               </div>
 
               {/* System Message Override */}
-              <div>
-                <label className="text-[11px] font-medium text-text-muted block mb-0.5">
-                  {getI18nOrFallback(
-                    t,
-                    "agentFeaturesSystemMessageOverride",
-                    "System message override"
-                  )}
-                </label>
-                <textarea
+              <Field
+                htmlFor="combo-agent-system-message"
+                label={getI18nOrFallback(
+                  t,
+                  "agentFeaturesSystemMessageOverride",
+                  "System message override"
+                )}
+                hint={
+                  !isExpertMode
+                    ? getI18nOrFallback(
+                        t,
+                        "agentFeaturesSystemMessageHint",
+                        "Applied only when this combo is used as an agent."
+                      )
+                    : undefined
+                }
+              >
+                <Textarea
+                  id="combo-agent-system-message"
                   rows={2}
                   value={agentSystemMessage}
                   onChange={(e) => setAgentSystemMessage(e.target.value)}
@@ -4460,126 +4725,66 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     "agentFeaturesSystemMessagePlaceholder",
                     "Optional system instructions for this combo"
                   )}
-                  className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none resize-none"
+                  className="resize-none"
                 />
-                {!isExpertMode && (
-                  <p className="text-[10px] text-text-muted mt-0.5">
-                    {getI18nOrFallback(
-                      t,
-                      "agentFeaturesSystemMessageHint",
-                      "Applied only when this combo is used as an agent."
-                    )}
-                  </p>
-                )}
-              </div>
+              </Field>
 
               {/* Tool Filter Regex */}
-              <div>
-                <label className="text-[11px] font-medium text-text-muted block mb-0.5">
-                  {getI18nOrFallback(t, "agentFeaturesToolFilterRegex", "Tool filter regex")}
-                </label>
-                <input
-                  type="text"
-                  value={agentToolFilter}
-                  onChange={(e) => setAgentToolFilter(e.target.value)}
-                  placeholder="e.g. ^(bash|computer)$"
-                  className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none font-mono"
-                />
-                {!isExpertMode && (
-                  <p className="text-[10px] text-text-muted mt-0.5">
-                    {getI18nOrFallback(
-                      t,
-                      "agentFeaturesToolFilterHint",
-                      "Limit agent tools by name with a regular expression."
-                    )}
-                  </p>
-                )}
-              </div>
+              <Input
+                label={getI18nOrFallback(t, "agentFeaturesToolFilterRegex", "Tool filter regex")}
+                type="text"
+                value={agentToolFilter}
+                onChange={(e) => setAgentToolFilter(e.target.value)}
+                placeholder="e.g. ^(bash|computer)$"
+                inputClassName="font-mono"
+                hint={
+                  !isExpertMode
+                    ? getI18nOrFallback(
+                        t,
+                        "agentFeaturesToolFilterHint",
+                        "Limit agent tools by name with a regular expression."
+                      )
+                    : undefined
+                }
+              />
 
               {/* Context Cache Protection */}
-              <div className="flex items-center justify-between gap-2">
-                <div>
-                  <label className="text-[11px] font-medium text-text-muted block">
-                    {getI18nOrFallback(
-                      t,
-                      "agentFeaturesContextCacheProtection",
-                      "Context cache protection"
-                    )}
-                  </label>
-                  {!isExpertMode && (
-                    <p className="text-[10px] text-text-muted">
-                      {getI18nOrFallback(
+              <Toggle
+                size="sm"
+                checked={agentContextCache}
+                onChange={setAgentContextCache}
+                label={getI18nOrFallback(
+                  t,
+                  "agentFeaturesContextCacheProtection",
+                  "Context cache protection"
+                )}
+                description={
+                  !isExpertMode
+                    ? getI18nOrFallback(
                         t,
                         "agentFeaturesContextCacheHint",
                         "Keep cached context isolated when provider state changes."
-                      )}
-                    </p>
-                  )}
-                </div>
-                <input
-                  type="checkbox"
-                  checked={agentContextCache}
-                  onChange={(e) => setAgentContextCache(e.target.checked)}
-                  className="accent-primary shrink-0"
-                />
-              </div>
+                      )
+                    : undefined
+                }
+              />
 
               {/* Context Length */}
-              <div>
-                <label className="text-[11px] font-medium text-text-muted block mb-0.5">
-                  {getI18nOrFallback(t, "agentFeaturesContextLength", "Context length")}
-                </label>
-                <input
-                  type="number"
-                  min="1000"
-                  max="2000000"
-                  step="1000"
-                  value={contextLength || ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setContextLengthError("");
-                    if (value === "") {
-                      setContextLength(undefined);
-                      return;
-                    }
-                    const num = Number(value);
-                    if (isNaN(num) || !Number.isInteger(num)) {
-                      setContextLengthError(t("agentFeaturesContextLengthErrorInteger"));
-                      // Keep the raw input value so the user can correct it
-                    } else if (num < 1000 || num > 2000000) {
-                      setContextLengthError(t("agentFeaturesContextLengthErrorRange"));
-                      setContextLength(num);
-                    } else {
-                      setContextLength(num);
-                    }
-                  }}
-                  placeholder={getI18nOrFallback(
-                    t,
-                    "agentFeaturesContextLengthPlaceholder",
-                    "e.g. 128000"
-                  )}
-                  className="w-full text-xs py-1.5 px-2 rounded border border-black/10 dark:border-white/10 bg-transparent focus:border-primary focus:outline-none"
-                />
-                {contextLengthError && (
-                  <p className="text-[10px] text-red-500 mt-0.5">{contextLengthError}</p>
-                )}
-                {!contextLengthError && !isExpertMode && (
-                  <p className="text-[10px] text-text-muted mt-0.5">
-                    {getI18nOrFallback(
-                      t,
-                      "agentFeaturesContextLengthHint",
-                      "Defines the context window for this combo in /v1/models."
-                    )}
-                  </p>
-                )}
-              </div>
+              <ComboContextLengthField
+                contextLength={contextLength}
+                setContextLength={setContextLength}
+                contextLengthError={contextLengthError}
+                setContextLengthError={setContextLengthError}
+                t={t}
+                showHint={!isExpertMode}
+              />
             </div>
           )}
 
           {showReviewSection && (
             <div className="flex flex-col gap-3">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-border bg-bg-subtle p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewName", "Name")}
                   </p>
@@ -4587,7 +4792,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     {name || "—"}
                   </p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-border bg-bg-subtle p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewStrategy", "Strategy")}
                   </p>
@@ -4595,13 +4800,13 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     {getStrategyLabel(t, strategy)}
                   </p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-border bg-bg-subtle p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewSteps", "Steps")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{models.length}</p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+                <div className="rounded-lg border border-border bg-bg-subtle p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewAccounts", "Pinned accounts")}
                   </p>
@@ -4610,19 +4815,19 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] p-3">
+                <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewProviders", "Providers")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{uniqueProviderCount}</p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] p-3">
+                <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewComboRefs", "Combo refs")}
                   </p>
                   <p className="text-sm font-semibold text-text-main mt-1">{comboRefCount}</p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] p-3">
+                <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewAdvanced", "Advanced config")}
                   </p>
@@ -4630,7 +4835,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     {Object.keys(config || {}).length}
                   </p>
                 </div>
-                <div className="rounded-lg border border-black/8 dark:border-white/8 bg-white/70 dark:bg-white/[0.03] p-3">
+                <div className="rounded-lg border border-border bg-surface p-3">
                   <p className="text-[10px] uppercase tracking-wide text-text-muted">
                     {getI18nOrFallback(t, "reviewAgentFlags", "Agent flags")}
                   </p>
@@ -4649,9 +4854,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
               {usesIntelligentBuilderStage && (
                 <div className="rounded-lg border border-primary/15 bg-primary/[0.04] p-3">
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-primary text-[16px]">
-                      auto_awesome
-                    </span>
+                    <Icon name="auto_awesome" size={16} className="text-primary" />
                     <p className="text-sm font-semibold text-text-main">
                       {getI18nOrFallback(t, "reviewIntelligentTitle", "Intelligent Routing Config")}
                     </p>
@@ -4701,7 +4904,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                 </div>
               )}
 
-              <div className="rounded-lg border border-black/8 dark:border-white/8 bg-black/[0.02] dark:bg-white/[0.02] p-3">
+              <div className="rounded-lg border border-border bg-bg-subtle p-3">
                 <p className="text-xs font-semibold text-text-main">
                   {getI18nOrFallback(t, "reviewSequence", "Execution sequence")}
                 </p>
@@ -4714,7 +4917,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                     models.map((entry, index) => (
                       <div
                         key={`${getModelString(entry) || "entry"}-${index}`}
-                        className="rounded-md border border-black/6 dark:border-white/6 bg-white/70 dark:bg-white/[0.03] px-2.5 py-2"
+                        className="rounded-md border border-border bg-surface px-2.5 py-2"
                       >
                         <div className="flex items-start gap-2">
                           <span className="text-[10px] font-semibold text-text-muted mt-0.5">
@@ -4725,31 +4928,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
                               {formatModelDisplay(entry)}
                             </p>
                             <p className="text-[10px] text-text-muted mt-0.5">
-                              {entry.kind === "combo-ref"
-                                ? getI18nOrFallback(
-                                    t,
-                                    "builderComboRefStep",
-                                    "Nested combo reference"
-                                  )
-                                : entry.kind === "provider-wildcard"
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderProviderWildcard",
-                                      "All matching provider models"
-                                    )
-                                  : entry.connectionId
-                                    ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                    : entry.providerId
-                                      ? getI18nOrFallback(
-                                          t,
-                                          "builderDynamicAccountShort",
-                                          "Dynamic account"
-                                        )
-                                      : getI18nOrFallback(
-                                          t,
-                                          "builderLegacyEntry",
-                                          "Legacy model entry"
-                                        )}
+                              {getComboStepKindLabel(t, entry)}
                               {strategy === "weighted" && entry.weight > 0
                                 ? ` · ${entry.weight}%`
                                 : ""}
@@ -4805,7 +4984,7 @@ function ComboFormModal({ isOpen, combo, onClose, onSave, activeProviders, combo
           )}
 
           {(isExpertMode || builderStage !== "review") && !canAdvanceFromCurrentStage && (
-            <div className="rounded-md border border-amber-500/20 bg-amber-500/10 px-2 py-1.5 text-[10px] text-amber-700 dark:text-amber-300">
+            <div className="rounded-md border border-warning/20 bg-warning/10 px-2 py-1.5 text-[10px] text-warning">
               {builderStage === "basics"
                 ? getI18nOrFallback(
                     t,

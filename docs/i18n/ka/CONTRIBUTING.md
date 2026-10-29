@@ -1,0 +1,433 @@
+# Contributing to OmniRoute (ქართული)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+გმადლობთ კონტრიბუციით დაინტერესებისთვის! ეს სახელმძღვანელო მოიცავს ყველაფერს, რაც დასაწყებად გჭირდებათ.
+
+თითოეული ცვლილებისთვის განსაზღვრული ოფიციალური სამუშაო პროცესის გასაცნობად დაიწყეთ
+[კონტრიბუციის ძირითადი გზით](docs/ops/CONTRIBUTION_GOLDEN_PATH.md). ის პროვაიდერის, მარშრუტიზაციის,
+UI/UX-ის, i18n-ის, CLI-ის, მონაცემთა ბაზისა და აგების/განთავსების ცვლილებებს აკავშირებს მათ კონტრაქტებთან, მიზნობრივ ტესტებთან, CI-ის
+დაფარვასა და შეჯერების ეტაპებთან.
+
+---
+
+## დეველოპმენტის გარემოს გამართვა
+
+### წინაპირობები
+
+- **Node.js** `>=22.22.2 <23`, ან `>=24.0.0 <27` (რეკომენდებულია: 24 LTS)
+- **npm** 10+
+
+> **npm v11+-ის მომხმარებლები (Node 24+):** `npm install`-ის შემდეგ გადაამოწმეთ, რომ ნატიური მოდულები დაინსტალირდა:
+> `node -e "require('better-sqlite3')"`. თუ ის `MODULE_NOT_FOUND` შეცდომით დასრულდება,
+> გაუშვით `npm approve-scripts better-sqlite3 && npm install`. იხილეთ
+> [პრობლემების მოგვარება](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### კლონირება და ინსტალაცია
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### გარემოს ცვლადები
+
+```bash
+# შექმენით თქვენი .env შაბლონიდან
+cp .env.example .env
+
+# დააგენერირეთ საჭირო საიდუმლო მნიშვნელობები
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+დეველოპმენტისთვის ძირითადი ცვლადები:
+
+| ცვლადი                 | დეველოპმენტის ნაგულისხმევი მნიშვნელობა | აღწერა                     |
+| ---------------------- | -------------------------------------- | -------------------------- |
+| `PORT`                 | `20128`                                | სერვერის პორტი             |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | ფრონტენდის საბაზისო URL    |
+| `JWT_SECRET`           | (დააგენერირეთ ზემოთ)                   | JWT-ის ხელმოწერის საიდუმლო |
+| `INITIAL_PASSWORD`     | `CHANGEME`                             | პირველი შესვლის პაროლი     |
+| `APP_LOG_LEVEL`        | `info`                                 | ჟურნალის დეტალურობის დონე  |
+
+### დაფის პარამეტრები
+
+დაფა გთავაზობთ ფუნქციების UI-გადამრთველებს, რომელთა კონფიგურაციაც გარემოს ცვლადების მეშვეობითაც შეიძლება:
+
+| პარამეტრის მდებარეობა      | გადამრთველი              | აღწერა                                       |
+| -------------------------- | ------------------------ | -------------------------------------------- |
+| პარამეტრები → გაფართოებული | გამართვის რეჟიმი         | გამართვის მოთხოვნების ჟურნალების ჩართვა (UI) |
+| პარამეტრები → ზოგადი       | გვერდითი ზოლის ხილვადობა | გვერდითი ზოლის სექციების ჩვენება/დამალვა     |
+
+ეს პარამეტრები მონაცემთა ბაზაში ინახება და ხელახლა გაშვების შემდეგაც ნარჩუნდება; დაყენების შემთხვევაში ისინი გარემოს ცვლადების ნაგულისხმევ მნიშვნელობებს ანაცვლებს.
+
+### ლოკალურად გაშვება
+
+```bash
+# დეველოპმენტის რეჟიმი (ცხელი გადატვირთვა)
+npm run dev
+
+# საწარმოო აგება
+npm run build    # next build → .build/next/, შემდეგ assembleStandalone → dist/
+npm run start
+
+# სწრაფი, მხოლოდ ბექენდის/API-ის კომპილაცია კონტრიბუტორის ცვლილებებისთვის
+npm run build:contributor
+
+# რელიზის აგება (სუფთა ხელახალი აგება + HEAD საკონტროლო მარკერი — აუცილებელია განთავსებისთვის)
+npm run build:release   # rm -rf .build dist && build + წერს dist/BUILD_SHA-ს
+
+# პორტის გავრცელებული კონფიგურაცია
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+კონტრიბუტორის აგება მხოლოდ კომპილაციის ვალიდაციას ასრულებს: ის არ აწყობს დამოუკიდებელ
+დისტრიბუციას და არც არასავალდებულო ნატიური პაკეტირების რესურსებს აგებს. გამოიყენეთ ჩვეულებრივი საწარმოო აგება, როდესაც
+გასავრცელებელი პაკეტის ვალიდაცია გჭირდებათ.
+
+### აგების შედეგების სტრუქტურა
+
+| დირექტორია | შიგთავსი                                                                         | ვერსიების კონტროლშია |
+| ---------- | -------------------------------------------------------------------------------- | -------------------- |
+| `src/`     | აპლიკაციის საწყისი კოდი (TypeScript / TSX)                                       | დიახ                 |
+| `.build/`  | შუალედური ფაილები — `next build`-ის შედეგი (gitignored, `distDir = .build/next`) | არა                  |
+| `dist/`    | გასავრცელებელი პაკეტი — აწყობილია `assembleStandalone`-ის მიერ (gitignored)      | არა                  |
+
+აგების კონვეიერი ერთ გავლას იყენებს:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js-ის შედეგი)
+  └─ assembleStandalone()                 (აკოპირებს standalone + static + public + ნატიურ რესურსებს)
+       └─ შედეგი: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` დამატებით ჯერ ორივე დირექტორიას ასუფთავებს და
+განთავსების მთლიანობის საკონტროლო მარკერის სახით წერს `dist/BUILD_SHA`-ს (= `git rev-parse --short HEAD`).
+
+`npm run build:contributor` მხოლოდ ბექენდის აგების პროფილს იყენებს. აგებისას ის დროებით ანაცვლებს
+დაფის UI-ფაილებს დროებითი ვერსიებით, ინარჩუნებს API-მარშრუტების დამმუშავებლებს და აგების შემდეგ თავდაპირველ ფაილებს
+აღადგენს. დაფის UI-ზე მოქმედი ცვლილებებისთვის ან რელიზის სრული
+ვალიდაციისთვის გამოიყენეთ `npm run build`; კონტრიბუტორის პროფილი რელიზის აგებას ვერ ჩაანაცვლებს.
+
+> **VPS-ზე განთავსების შენიშვნა:** დისტანციური ასლის დირექტორია `/usr/lib/node_modules/omniroute/app/`
+> უცვლელია. განთავსების მექანიზმები `dist/`-ის შიგთავსს მასში `rsync`-ის მეშვეობით აკოპირებს.
+> შეიცვალა მხოლოდ რეპოზიტორიის შიგნით აგების შედეგის გზა (`app/` → `dist/`).
+
+ნაგულისხმევი URL-ები:
+
+- **დაფა**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Git-ის სამუშაო პროცესი
+
+> ⚠️ **არასოდეს შეიტანოთ commit პირდაპირ `main`-ში.** ყოველთვის გამოიყენეთ ფუნქციური განშტოებები.
+>
+> **PR-ის საბაზისო განშტოება:** სამიზნედ მიუთითეთ აქტიური `release/vX.Y.Z` განშტოება (და არა `main`). თითო გამოშვებაზე ცალკე განშტოებისა და გამოშვებისას ტეგის შექმნის მოდელის შესახებ იხილეთ
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md).
+
+```bash
+# შექმენით განშტოება აქტიური გამოშვების ბოლო წერტილიდან (მაგალითად: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... შეიტანეთ ცვლილებები ...
+git commit -m "feat: აღწერეთ თქვენი ცვლილება"
+git push -u origin feat/your-feature-name
+# გახსენით Pull Request, სადაც base = release/v3.8.49
+```
+
+### განშტოებების დასახელება
+
+| პრეფიქსი    | დანიშნულება                         |
+| ----------- | ----------------------------------- |
+| `feat/`     | ახალი ფუნქციები                     |
+| `fix/`      | შეცდომების გამოსწორება              |
+| `refactor/` | კოდის რესტრუქტურიზაცია              |
+| `docs/`     | დოკუმენტაციის ცვლილებები            |
+| `test/`     | ტესტების დამატება/შესწორება         |
+| `chore/`    | ინსტრუმენტები, CI, დამოკიდებულებები |
+
+### Commit-შეტყობინებები
+
+დაიცავით [Conventional Commits](https://www.conventionalcommits.org/)-ის წესები:
+
+```
+feat: პროვაიდერის გამოძახებებისთვის circuit breaker-ის დამატება
+fix: JWT საიდუმლოს ვალიდაციის განსაკუთრებული შემთხვევის მოგვარება
+docs: SECURITY.md-ის განახლება PII-ის დაცვით
+test: დაკვირვებადობის მოდულური ტესტების დამატება
+refactor(db): სიხშირის შეზღუდვის ცხრილების გაერთიანება
+```
+
+არეები (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## ტესტების გაშვება
+
+```bash
+# ყველა ტესტი (unit + vitest + ecosystem + e2e)
+npm run test:all
+
+# ერთი სატესტო ფაილი (Node.js-ის ჩაშენებული ტესტების გამშვები — ტესტების უმეტესობა ამას იყენებს)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# მხოლოდ თქვენი ცვლილებით ზემოქმედებული unit-ტესტები (იგივე TIA სელექტორი, რომელსაც CI-ის შემოწმება იყენებს, #8084)
+npm run test:scoped            # ცვლილებები ბოლო commit-ში (ან სამუშაო ხეში)
+npm run test:scoped:staged     # მხოლოდ staged ცვლილებები — კარგად ეწყობა pre-commit გაშვებას
+npm run test:scoped:full       # ჯერ import-graph რუკის თავიდან აგება (ფაილების დამატების/გადატანის შემდეგ)
+# Exit 1 + "run the full suite" ნიშნავს, რომ შეიცვალა hub-ფაილი (tsconfig, package.json, …) ან
+# რუკაზე დაუტანელი წყარო — სელექტორი უსაფრთხოდ წყვეტს მუშაობას და არასოდეს გამოტოვებს ჩუმად.
+
+# Vitest (MCP სერვერი, autoCombo, cache)
+npm run test:vitest
+
+# E2E ტესტები (საჭიროებს Playwright-ს)
+npm run test:e2e
+
+# პროტოკოლის კლიენტების E2E (MCP transports, A2A)
+npm run test:protocols:e2e
+
+# ეკოსისტემასთან თავსებადობის ტესტები
+npm run test:ecosystem
+
+# დაფარვის ზღვარი: 60% statements/lines/functions/branches
+npm run test:coverage
+npm run coverage:report
+
+# Lint + ფორმატის შემოწმება
+npm run lint
+npm run check
+
+# რეალურ upstream-თან კომბინაციის შეზღუდული smoke-ტესტი (საჭიროებს VPS-ზე წვდომას + რეალური პროვაიდერების კრედიტებს)
+# მიმართავს რეალურ პროვაიდერებს — მცირე ხარჯით. არასოდეს გაეშვება CI-ში. შეზღუდვის გარეშე სუფთად გამოტოვებს.
+# საჭიროა: ssh root@192.168.0.15 წვდომა (VPS-იდან იტვირთება მხოლოდ წაკითხვადი DB snapshot).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Phase-3 VPS-ის ცოცხალი smoke-ტესტი — უბრალო Node ESM სკრიპტები, რომლებიც პირდაპირ ცოცხალ .15 სერვერს მიმართავს.
+# საჭიროა: ssh root@192.168.0.15 წვდომა (კომბინაციები იქმნება/იშლება SSH sqlite-ის საშუალებით).
+# მიმართავს რეალურ პროვაიდერებს (მცირე ხარჯით). ქმნის/შლის მხოლოდ __live_test__* კომბინაციებს. არასოდეს გაეშვება CI-ში.
+# .15-ზე REQUIRE_API_KEY=false-ია, ამიტომ API გასაღები საჭირო არ არის, თუმცა თუ მითითებულია, ითვალისწინებს COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY-ს.
+npm run test:combo:live:vps              # 7 HTTP სცენარი (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # ამატებს რეალურ პროვაიდერებს შორის failover სცენარს (სულ 8)
+```
+
+დაფარვის შენიშვნები:
+
+- `npm run test:coverage` ზომავს წყაროს დაფარვას ძირითადი unit-ტესტების ნაკრებისთვის, გამორიცხავს `tests/**`-ს და მოიცავს `open-sse/**`-ს
+- Pull request-ებმა statements/lines/functions/branches-ის დაფარვის ზღვარი **60%+**-ზე უნდა შეინარჩუნონ
+- თუ PR ცვლის production კოდს `src/`, `open-sse/`, `electron/` ან `bin/`-ში, იმავე PR-ში უნდა დაამატოს ან განაახლოს ავტომატიზებული ტესტები
+- `npm run coverage:report` ბეჭდავს დაფარვის ბოლო გაშვების დეტალურ ანგარიშს თითოეული ფაილის მიხედვით
+- `npm run test:coverage:legacy` ისტორიული შედარებისთვის ინარჩუნებს ძველ მეტრიკას
+- დაფარვის ეტაპობრივი გაუმჯობესების გეგმისთვის იხილეთ `docs/ops/COVERAGE_PLAN.md`
+
+### Pull Request-ის მოთხოვნები
+
+PR-ის გახსნამდე გამოიყენეთ
+[კონტრიბუციის ოქროს გზა](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), რათა თქვენი
+ცვლილებისთვის მიზნობრივი ციკლი გაუშვათ. სრული unit-ტესტების ნაკრები (CI-ის 4 shard), Vitest, **60%+**
+დაფარვის ზღვარი და production build CI-ის პასუხისმგებლობაა — მათი ლოკალურად გაშვება არ იძლევა
+დამატებით სიგნალს, რომელსაც PR-ის შემოწმებები ისედაც არ მოგაწვდით, ხოლო ნაკლებად მძლავრ
+მანქანებზე შესაძლოა ჰოსტი სრულად დატვირთოს (#8084):
+
+- გაუშვით თქვენი ცვლილების დამფარავი სატესტო ფაილები: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- გაუშვით `npm run lint`
+- production კოდის ცვლილებისას იმავე PR-ში დაამატეთ ან განაახლეთ ავტომატიზებული ტესტები
+- `node:test` ფაილებში ყოველი ზედა დონის `await` (მაგალითად, `await import(...)`) მოათავსეთ პირველ `test()` / `describe()`-მდე: `--test-force-exit`-ის გამოყენებისას მის შემდეგ რეგისტრირებული ტესტები შეიძლება ჩუმად საერთოდ არ გაეშვას (#18045; კონტროლდება `npm run check:test-tla-order`-ით)
+- production კოდის ცვლილებისას PR-ის აღწერაში მიუთითეთ შეცვლილი ან დამატებული სატესტო ფაილები
+- როდესაც პროექტის secrets კონფიგურირებულია CI-ში, PR-ზე შეამოწმეთ SonarQube-ის შედეგი
+
+ტესტების მიმდინარე სტატუსი: **122 unit-ტესტის ფაილი**, რომლებიც ფარავს:
+
+- პროვაიდერების ტრანსლატორებსა და ფორმატის გარდაქმნას
+- სიხშირის შეზღუდვას, circuit breaker-სა და მდგრადობას
+- სემანტიკურ cache-ს, idempotency-სა და პროგრესის თვალყურის დევნებას
+- მონაცემთა ბაზის ოპერაციებსა და სქემას (21 DB მოდული)
+- OAuth პროცესებსა და ავთენტიფიკაციას
+- API endpoint-ების ვალიდაციას (Zod v4)
+- MCP სერვერის ხელსაწყოებსა და scope-ის აღსრულებას
+- მეხსიერებისა და უნარების სისტემებს
+
+---
+
+## კოდის სტილი
+
+- **ESLint** — კომიტამდე გაუშვით `npm run lint`
+- **Prettier** — კომიტისას ავტომატურად ფორმატირდება `lint-staged`-ის მეშვეობით (2 სივრცე, წერტილ-მძიმეები, ორმაგი ბრჭყალები, 100-სიმბოლოიანი სიგანე, es5-ის სტილის ბოლო მძიმეები)
+- **TypeScript** — `src/`-ში არსებული ყველა კოდი იყენებს `.ts`/`.tsx`-ს; `open-sse/` იყენებს `.ts`/`.js`-ს; დოკუმენტირება მოახდინეთ TSDoc-ით (`@param`, `@returns`, `@throws`)
+- **`eval()` აკრძალულია** — ESLint უზრუნველყოფს `no-eval`, `no-implied-eval`, `no-new-func` წესების დაცვას
+- **Zod-ით ვალიდაცია** — API-ის ყველა შეყვანის ვალიდაციისთვის გამოიყენეთ Zod v4-ის სქემები
+- **დასახელება**: ფაილები = camelCase/kebab-case, კომპონენტები = PascalCase, კონსტანტები = UPPER_SNAKE
+
+### შეცდომების დამუშავება / ცარიელი catch ბლოკები
+
+არასოდეს დატოვოთ `catch` განმარტების გარეშე. მიაკუთვნეთ ის ორი კატეგორიიდან ერთ-ერთს (ეს პრაქტიკაში ახორციელებს მკაცრ წესს — „არასოდეს ჩაყლაპოთ შეცდომები უხმოდ SSE ნაკადებში“):
+
+- **განზრახული (ჩვენივე მაქსიმალური ძალისხმევით შესრულებული გასუფთავება/ტელემეტრია)** — აქ შეცდომა მოსალოდნელი და უვნებელია; დაამატეთ მიზეზის განმარტების ერთსტრიქონიანი კომენტარი, ლოგირების გარეშე (ეს შეთანხმება თავიდან გვაცილებს ყოველ მოთხოვნაზე ლოგირებით წარმოქმნილ ხმაურს).
+
+  ```ts
+  } catch {} // კლიენტის გათიშვის შემდეგ უკვე დახურული კონტროლერის დახურვა მოსალოდნელია
+  ```
+
+- **უნდა დალოგირდეს (გარე/გამომძახებლის მიერ მოწოდებული კოდი, ან ჩაყლაპვა ცვლის მართვის ნაკადს)** — შეინარჩუნეთ catch (არასოდეს მისცეთ მას ნაკადის დარღვევის უფლება), მაგრამ გამოიტანეთ კონტექსტური `console.debug`/`warn`, რათა შეცდომის აღმოჩენა შესაძლებელი იყოს.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] onFailure უკუგამოძახების შეცდომა:", e);
+  }
+  ```
+
+პრაქტიკაში გამოყენებული მაგალითებისთვის იხილეთ `open-sse/utils/stream.ts` და `open-sse/utils/streamHandler.ts`.
+
+---
+
+## პროექტის სტრუქტურა
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # მართვის პანელის გვერდები (23 სექცია)
+│   ├── api/                # API მარშრუტები (51 დირექტორია)
+│   └── login/              # ავტორიზაციის გვერდები (.tsx)
+├── domain/                 # პოლიტიკების ძრავა (policyEngine, comboResolver, costRules და სხვ.)
+├── lib/                    # ძირითადი ბიზნესლოგიკა (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 პროტოკოლის სერვერი
+│   ├── acp/                # Agent Communication Protocol-ის რეესტრი
+│   ├── compliance/         # შესაბამისობის პოლიტიკების ძრავა
+│   ├── db/                 # SQLite-ის დომენური მოდულები + 130 მიგრაცია
+│   ├── memory/             # მუდმივი სასაუბრო მეხსიერება
+│   ├── oauth/              # OAuth-ის პროვაიდერები, სერვისები და დამხმარე საშუალებები
+│   ├── skills/             # გაფართოებადი უნარების ფრეიმვორკი
+│   ├── usage/              # გამოყენების აღრიცხვა და ღირებულების გამოთვლა
+│   └── localDb.ts          # მხოლოდ ხელახალი ექსპორტის შრე — აქ ლოგიკა არასოდეს დაამატოთ
+├── middleware/              # მოთხოვნების შუალედური პროგრამული უზრუნველყოფა (promptInjectionGuard)
+├── mitm/                   # MITM პროქსი (სერტიფიკატი, DNS, სამიზნე მარშრუტიზაცია)
+├── shared/
+│   ├── components/         # React კომპონენტები (.tsx)
+│   ├── constants/          # პროვაიდერების განსაზღვრებები (329), MCP-ის ფარგლები, მარშრუტიზაციის 20 სტრატეგია
+│   ├── utils/              # ავტომატური ამომრთველი, სანიტაიზერი, ავტორიზაციის დამხმარე საშუალებები
+│   └── validation/         # Zod v4 სქემები
+└── sse/                    # SSE პროქსის კონვეიერი
+
+open-sse/                   # @omniroute/open-sse სამუშაო სივრცე
+├── executors/              # 150 შემსრულებელი მოდული (შემსრულებელი კლასები + თითოეული პროვაიდერის დამხმარე საშუალებები)
+├── handlers/               # მოთხოვნების 11 დამმუშავებელი (ჩატი, პასუხები, ემბედინგები, სურათები და სხვ.)
+├── mcp-server/             # MCP სერვერი (110 უნიკალური ინსტრუმენტი, 3 ტრანსპორტი, 33 ფარგალი)
+├── services/               # ზედა დონის 178 სერვისი (combo, autoCombo, rateLimitManager და სხვ.)
+├── translator/             # ფორმატების გარდამქმნელები (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API-ის გარდამქმნელი
+└── utils/                  # 22 დამხმარე მოდული (ნაკადი, TLS, პროქსი, ჟურნალირება)
+
+electron/                   # Electron-ის დესკტოპაპლიკაცია (მრავალპლატფორმული)
+
+tests/
+├── unit/                   # Node.js-ის ტესტების გამშვები (1,574 სატესტო ფაილი)
+├── integration/            # ინტეგრაციული ტესტები
+├── e2e/                    # Playwright-ის ტესტები
+├── security/               # უსაფრთხოების ტესტები
+├── translator/             # გარდამქმნელისთვის სპეციფიკური ტესტები
+└── load/                   # დატვირთვის ტესტები
+
+docs/
+├── adr/                     # არქიტექტურული გადაწყვეტილებების ჩანაწერები
+├── architecture/            # სისტემის არქიტექტურა და მდგრადობა
+├── comparison/              # OmniRoute-ის შედარება ალტერნატივებთან
+├── compression/             # შეკუმშვის სახელმძღვანელოები და წესები
+├── dev/                     # შემუშავების სახელმძღვანელოები
+├── diagrams/                # არქიტექტურული დიაგრამები
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # მომხმარებლის სახელმძღვანელო, Docker, გამართვა, პრობლემების მოგვარება
+├── i18n/                    # README-ის ინტერნაციონალიზებული თარგმანები
+├── marketing/               # მარკეტინგული მასალები
+├── ops/                     # განთავსება, პროქსი, დაფარვა, გამოშვებები
+├── providers/               # პროვაიდერებისთვის სპეციფიკური დოკუმენტაცია
+├── reference/               # API ცნობარი, გარემოს ცვლადები, CLI ინსტრუმენტები, უფასო ტარიფები
+├── releases/                # გამოშვების შენიშვნები
+├── routing/                 # ავტომატური კომბინაციების ძრავა, მსჯელობის განმეორებითი გაშვება
+├── screenshots/             # მართვის პანელის ეკრანის ანაბეჭდები
+├── security/                # დამცავი მექანიზმები, შესაბამისობა, შეუმჩნევლობა, ტოკენები
+└── specs/                   # დიზაინის სპეციფიკაციები
+```
+
+---
+
+## ახალი პროვაიდერის დამატება
+
+### ნაბიჯი 1: პროვაიდერის კონსტანტების რეგისტრაცია
+
+დაამატეთ `src/shared/constants/providers.ts`-ში — მოდულის ჩატვირთვისას მოწმდება Zod-ის მეშვეობით.
+
+### ნაბიჯი 2: შემსრულებლის დამატება (თუ საჭიროა მორგებული ლოგიკა)
+
+შექმენით შემსრულებელი `open-sse/executors/your-provider.ts`-ში, რომელიც საბაზო შემსრულებელს გააფართოებს.
+
+### ნაბიჯი 3: ტრანსლატორის დამატება (თუ ფორმატი OpenAI-ის არ არის)
+
+შექმენით მოთხოვნის/პასუხის ტრანსლატორები `open-sse/translator/`-ში.
+
+### ნაბიჯი 4: OAuth-ის კონფიგურაციის დამატება (თუ OAuth-ზეა დაფუძნებული)
+
+დაამატეთ OAuth-ის ავტორიზაციის მონაცემები `src/lib/oauth/constants/oauth.ts`-ში, ხოლო სერვისი — `src/lib/oauth/services/`-ში.
+
+თუ ზედა დონის პროვაიდერი საჯარო OAuth `client_id`/საიდუმლოს ან Firebase Web API გასაღებს თავის საჯარო CLI-ში / ბრაუზერის პაკეტში ავრცელებს, **არ** ჩასვათ ის სტრიქონულ ლიტერალად. გამოიყენეთ `resolvePublicCred()` ფაილიდან `open-sse/utils/publicCreds.ts` და დაამატეთ შენიღბული ბაიტური ჩანაწერი `EMBEDDED_DEFAULTS`-ში. სრული სავალდებულო სამუშაო პროცესი აღწერილია [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)-ში.
+
+დამმუშავებლებსა/შემსრულებლებში კლიენტამდე მისული შეცდომის შეტყობინებები უნდა დამუშავდეს `buildErrorBody()` / `sanitizeErrorMessage()` ფუნქციებით ფაილიდან `open-sse/utils/error.ts` — არასოდეს ჩასვათ დაუმუშავებელი `err.stack` ან `err.message` Response-ის სხეულში. იხილეთ [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
+
+### ნაბიჯი 5: მოდელების რეგისტრაცია
+
+დაამატეთ მოდელების განსაზღვრებები `open-sse/config/providerRegistry.ts`-ში.
+
+### ნაბიჯი 6: ტესტების დამატება
+
+დაწერეთ ერთეულოვანი ტესტები `tests/unit/`-ში, რომლებიც მინიმუმ შემდეგს მოიცავს:
+
+- პროვაიდერის რეგისტრაცია
+- მოთხოვნის/პასუხის ტრანსლაცია
+- შეცდომების დამუშავება
+
+---
+
+## Pull Request-ის საკონტროლო სია
+
+- [ ] ტესტები წარმატებით სრულდება (`npm test`)
+- [ ] ლინტინგი წარმატებით სრულდება (`npm run lint`)
+- [ ] აგება წარმატებით სრულდება (`npm run build`)
+- [ ] ახალ საჯარო ფუნქციებსა და ინტერფეისებს დამატებული აქვს TypeScript-ის ტიპები
+- [ ] არ არის მყარად გაწერილი საიდუმლო მონაცემები ან სარეზერვო მნიშვნელობები
+- [ ] საჯარო upstream ავტორიზაციის მონაცემები ჩაშენებულია `resolvePublicCred()`-ის მეშვეობით (იხილეთ [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)) და არასდროს — პირდაპირი ლიტერალების სახით
+- [ ] შეცდომის პასუხები მუშავდება `buildErrorBody()` / `sanitizeErrorMessage()`-ის მეშვეობით — პასუხის სხეულებში არ არის დაუმუშავებელი stack trace-ები (იხილეთ [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] გარსის ბრძანებები (`exec` / `spawn`) შესრულების დროის მნიშვნელობებს გადასცემს `env`-ის მეშვეობით და არა სტრიქონული ინტერპოლაციით
+- [ ] ყველა შეყვანილი მონაცემი ვალიდირებულია Zod-ის სქემებით
+- [ ] მომხმარებლისთვის ხილული ცვლილებებისთვის `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md`-ში დამატებულია ცვლილებების ჟურნალის **ფრაგმენტი** (იხილეთ [`changelog.d/README.md`](./changelog.d/README.md)) — **არ** დაარედაქტიროთ `CHANGELOG.md` პირდაპირ; ფრაგმენტები ერთიანდება რელიზის დროს და Pull Request-ებს შორის კონფლიქტს არასდროს იწვევს
+- [ ] დოკუმენტაცია განახლებულია (თუ საჭიროა)
+- [ ] არ გახსნილა CodeQL-ის / Secret-Scanning-ის ახალი გაფრთხილებები, ან თითოეული მათგანი უარყოფილია ტექნიკური დასაბუთებით, შესაბამის `docs/security/` დოკუმენტზე მითითებით
+- [ ] მარშრუტები, რომლებიც შვილობილ პროცესებს უშვებს (`/api/mcp/`, `/api/cli-tools/runtime/`), კლასიფიცირებულია როგორც `isLocalOnlyPath()` ფაილში `src/server/authz/routeGuard.ts` — იხილეთ [მკაცრი წესი #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] commit-ის შეტყობინებებში არ არის AI/bot-ის `Co-authored-by` ტრეილერები (მკაცრი წესი #16) — ადამიან თანამშრომლებს, რომელთა ნამუშევარიც ხელახლა გამოიყენება, მიეთითებათ ავტორობა სტანდარტული `Co-authored-by: Name <email>` ტრეილერებით
+
+---
+
+## რელიზების გამოშვება
+
+რელიზები იმართება `/generate-release` სამუშაო პროცესის მეშვეობით. ახალი GitHub Release-ის შექმნისას პაკეტი GitHub Actions-ის მეშვეობით **ავტომატურად ქვეყნდება npm-ზე**.
+
+VPS-ზე განთავსებისთვის გამოიყენეთ `npm run build:release` (`npm run build`-ის ნაცვლად) — ის ასრულებს
+სუფთა ხელახალ აგებას, კრებს პაკეტს `dist/`-ში და ქმნის `dist/BUILD_SHA` საკონტროლო ფაილს.
+შემდეგ გამოიყენეთ `/deploy-vps-*-cc` უნარები, რომლებიც rsync-ის მეშვეობით `dist/`-ს დისტანციურ `app/` დირექტორიაში ასინქრონებენ.
+
+---
+
+## დახმარების მიღება
+
+- **არქიტექტურა**: იხილეთ [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **API-ის ცნობარი**: იხილეთ [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **უსაფრთხოების დოკუმენტაცია**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **ოპერაციების დოკუმენტაცია**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **პრობლემები**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

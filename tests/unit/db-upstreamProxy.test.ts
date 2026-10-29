@@ -53,12 +53,13 @@ afterEach(() => {
 });
 
 after(() => {
-  if (fs.existsSync(fileTmpDir)) fs.rmSync(fileTmpDir, { recursive: true, force: true });
+  if (fs.existsSync(fileTmpDir))
+    fs.rmSync(fileTmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 async function resetModuleStorage() {
   coreDb.resetDbInstance();
-  fs.rmSync(moduleDataDir, { recursive: true, force: true });
+  fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(moduleDataDir, { recursive: true });
 }
 
@@ -367,7 +368,7 @@ describe("db/upstreamProxy (module coverage)", () => {
 
   after(async () => {
     coreDb.resetDbInstance();
-    fs.rmSync(moduleDataDir, { recursive: true, force: true });
+    fs.rmSync(moduleDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("validates proxy URLs and blocks unsupported or private destinations", async () => {

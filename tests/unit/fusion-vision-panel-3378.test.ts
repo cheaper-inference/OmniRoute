@@ -23,14 +23,12 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "fusion-vision-3378-test-secret";
 
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
-const { saveModelsDevCapabilities, clearModelsDevCapabilities } = await import(
-  "../../src/lib/modelsDevSync.ts"
-);
+const { saveModelsDevCapabilities, clearModelsDevCapabilities } =
+  await import("../../src/lib/modelsDevSync.ts");
 const { resetAllComboMetrics } = await import("../../open-sse/services/comboMetrics.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
-const { resetAll: resetAllSemaphores } = await import(
-  "../../open-sse/services/rateLimitSemaphore.ts"
-);
+const { resetAll: resetAllSemaphores } =
+  await import("../../open-sse/services/rateLimitSemaphore.ts");
 const core = await import("../../src/lib/db/core.ts");
 
 function createLog() {
@@ -92,7 +90,7 @@ test.after(() => {
   resetAllSemaphores();
   clearModelsDevCapabilities();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
   } else {

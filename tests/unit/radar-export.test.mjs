@@ -35,7 +35,7 @@ function runExport(extraEnv = {}) {
     },
   });
   const parsed = JSON.parse(fs.readFileSync(outPath, "utf8"));
-  fs.rmSync(outDir, { recursive: true, force: true });
+  fs.rmSync(outDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   return parsed;
 }
 
@@ -64,7 +64,10 @@ test("radar export provenance never fabricates unknown fields", () => {
   assert.equal(p.sourceRef, null);
   assert.equal(p.runUrl, null);
   // sourceCommit: SHA de 40 hex (via git no checkout) ou null se indisponível.
-  assert.ok(p.sourceCommit === null || /^[0-9a-f]{40}$/.test(p.sourceCommit), "sourceCommit sha|null");
+  assert.ok(
+    p.sourceCommit === null || /^[0-9a-f]{40}$/.test(p.sourceCommit),
+    "sourceCommit sha|null"
+  );
 });
 
 test("radar export provenance reflects the GitHub Actions environment when present", () => {
@@ -74,12 +77,12 @@ test("radar export provenance reflects the GitHub Actions environment when prese
     GITHUB_SHA: sha,
     GITHUB_REF_NAME: "release/v9.9.9",
     GITHUB_SERVER_URL: "https://github.com",
-    GITHUB_REPOSITORY: "diegosouzapw/OmniRoute",
+    GITHUB_REPOSITORY: "cheaper-inference/OmniRoute",
     GITHUB_RUN_ID: "42",
   });
   const p = data.provenance;
   assert.equal(p.generatedBy, "github-actions");
   assert.equal(p.sourceCommit, sha);
   assert.equal(p.sourceRef, "release/v9.9.9");
-  assert.equal(p.runUrl, "https://github.com/diegosouzapw/OmniRoute/actions/runs/42");
+  assert.equal(p.runUrl, "https://github.com/cheaper-inference/OmniRoute/actions/runs/42");
 });

@@ -13,7 +13,7 @@ const { writeTerminalStatus } = await import("../../src/shared/utils/terminalSta
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(DIR, { recursive: true, force: true });
+  fs.rmSync(DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function row(id: string): { is_active: number; test_status: string } {

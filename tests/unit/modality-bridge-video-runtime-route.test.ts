@@ -25,7 +25,7 @@ async function withLocality(request: Request, locality: "loopback" | "lan"): Pro
 
 test.beforeEach(async () => {
   core.resetDbInstance();
-  fs.rmSync(dataDirectory, { force: true, recursive: true });
+  fs.rmSync(dataDirectory, { force: true, recursive: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(dataDirectory, { recursive: true });
   process.env.INITIAL_PASSWORD = "video-runtime-test-password";
   await settings.updateSettings({ requireLogin: true, password: "" });
@@ -33,7 +33,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(dataDirectory, { force: true, recursive: true });
+  fs.rmSync(dataDirectory, { force: true, recursive: true, maxRetries: 5, retryDelay: 100 });
   if (originalDataDirectory === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = originalDataDirectory;
   if (originalInitialPassword === undefined) delete process.env.INITIAL_PASSWORD;

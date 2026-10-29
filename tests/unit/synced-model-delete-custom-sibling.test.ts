@@ -32,7 +32,7 @@ test.after(() => {
   // Release the SQLite handle so the Node test runner can exit, then remove the
   // throwaway DATA_DIR (CLAUDE.md "Database Handles in Tests").
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 /** Invoke the real DELETE handler so the test tracks production behavior. */

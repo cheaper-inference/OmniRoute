@@ -17,6 +17,7 @@ Object.assign(process.env, {
 const providersModule = await import("../../src/lib/oauth/providers/index.ts");
 const oauthModule = await import("../../src/lib/oauth/constants/oauth.ts");
 const antigravityHeadersModule = await import("../../open-sse/services/antigravityHeaders.ts");
+const antigravityVersionModule = await import("../../open-sse/services/antigravityVersion.ts");
 const oauthHelpersModule = await import("../../src/lib/oauth/providers.ts");
 
 const PROVIDERS = providersModule.default;
@@ -28,6 +29,8 @@ const {
   CLINE_CONFIG,
   CODEX_CONFIG,
   CODEBUDDY_CN_CONFIG,
+  CODEBUDDY_INTL_CONFIG,
+  WORKBUDDY_CONFIG,
   DEVIN_DESKTOP_CONFIG,
   ZED_CONFIG,
   CURSOR_CONFIG,
@@ -41,13 +44,18 @@ const {
   OAUTH_TIMEOUT,
   PROVIDERS: OAUTH_PROVIDER_IDS,
   QODER_CONFIG,
-  RAYCAST_CONFIG,
   TRAE_CONFIG,
   XAI_OAUTH_CONFIG,
   OPENFERENCE_CONFIG,
   ZED_HOSTED_CONFIG,
+  MUSE_CODE_CONFIG,
 } = oauthModule;
 const { getAntigravityLoadCodeAssistMetadata } = antigravityHeadersModule;
+const {
+  ANTIGRAVITY_IDE_FALLBACK_VERSION,
+  clearAntigravityVersionCaches,
+  seedAntigravityIdeVersionCache,
+} = antigravityVersionModule;
 
 const originalFetch = globalThis.fetch;
 
@@ -65,7 +73,6 @@ const EXPECTED_PROVIDER_KEYS = [
   "amazon-q",
   "cursor",
   "trae",
-  "raycast",
   "kilocode",
   "cline",
   "clinepass",
@@ -75,8 +82,11 @@ const EXPECTED_PROVIDER_KEYS = [
   "xai-oauth",
   "openference",
   "codebuddy-cn",
+  "codebuddy-intl",
+  "workbuddy",
   "zed",
   "zed-hosted",
+  "muse-code",
 ];
 
 const browserUrl = "http://localhost:20128/callback";
@@ -104,14 +114,16 @@ const EXPECTED_CONFIG_BY_PROVIDER = {
   clinepass: CLINE_CONFIG, // reuses the Cline WorkOS flow (clinepass: cline in providers/index.ts)
   "devin-desktop": DEVIN_DESKTOP_CONFIG,
   "devin-cli": DEVIN_DESKTOP_CONFIG,
-  raycast: RAYCAST_CONFIG,
   trae: TRAE_CONFIG,
   "grok-cli": GROK_BUILD_OAUTH_CONFIG,
   "xai-oauth": XAI_OAUTH_CONFIG,
   openference: OPENFERENCE_CONFIG,
   "codebuddy-cn": CODEBUDDY_CN_CONFIG,
+  "codebuddy-intl": CODEBUDDY_INTL_CONFIG,
+  workbuddy: WORKBUDDY_CONFIG,
   zed: ZED_CONFIG,
   "zed-hosted": ZED_HOSTED_CONFIG,
+  "muse-code": MUSE_CODE_CONFIG,
 };
 
 const KIRO_REQUIRED_FIELDS = [
@@ -161,6 +173,7 @@ const REQUIRED_FIELDS_BY_PROVIDER = {
   "grok-cli": ["authorizeUrl", "tokenUrl", "scope", "codeChallengeMethod", "clientId", "loopbackPort", "callbackPath", "callbackHost"],
   // prettier-ignore
   "zed-hosted": ["webBaseUrl", "cloudBaseUrl", "llmBaseUrl", "userInfoUrl", "llmTokenUrl", "modelsUrl"],
+  "muse-code": ["deviceCodeUrl", "tokenUrl", "clientId", "mintUrl"],
 };
 
 function getByPath(object, path) {
@@ -450,7 +463,15 @@ test("Google OAuth callbacks stay on localhost when no custom credentials are co
 });
 
 test("device and import-token providers expose the flow-specific fields expected by their configs", () => {
-  const deviceProviders = ["kimi-coding", "github", "kiro", "amazon-q", "kilocode"];
+  const deviceProviders = [
+    "kimi-coding",
+    "github",
+    "kiro",
+    "amazon-q",
+    "kilocode",
+    "workbuddy",
+    "muse-code",
+  ];
 
   for (const providerId of deviceProviders) {
     const provider = PROVIDERS[providerId];
@@ -559,67 +580,76 @@ test("Cline decodes embedded callback payloads without using the network", async
 });
 
 test("Antigravity runs mocked browser OAuth exchanges and post-exchange enrichment", async () => {
-  useFetchSequence([
-    jsonResponse({ access_token: "anti-access", refresh_token: "anti-refresh", expires_in: 7200 }),
-    jsonResponse({ email: "anti@example.com" }),
-    (_url, init: any = {}) => {
-      assert.equal(init.method, "POST");
-      assert.equal(init.headers.Authorization, "Bearer anti-access");
-      assert.match(
-        init.headers["User-Agent"],
-        /^antigravity\/2\.1\.1 [^ ]+\/[^ ]+ google-api-nodejs-client\/10\.3\.0$/
-      );
-      assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
-      assert.deepEqual(
-        JSON.parse(String(init.body)).metadata,
-        getAntigravityLoadCodeAssistMetadata()
-      );
-      assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
-      return jsonResponse({
-        cloudaicompanionProject: { id: "anti-project" },
-        allowedTiers: [{ id: "tier-default", isDefault: true }],
-      });
-    },
-    (_url, init: any = {}) => {
-      assert.equal(init.method, "POST");
-      assert.equal(init.headers.Authorization, "Bearer anti-access");
-      assert.match(
-        init.headers["User-Agent"],
-        /^antigravity\/2\.1\.1 [^ ]+\/[^ ]+ google-api-nodejs-client\/10\.3\.0$/
-      );
-      assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
-      assert.deepEqual(
-        JSON.parse(String(init.body)).metadata,
-        getAntigravityLoadCodeAssistMetadata()
-      );
-      assert.equal(JSON.parse(String(init.body)).tier_id, "tier-default");
-      assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
-      return jsonResponse({
-        done: true,
-        response: { cloudaicompanionProject: { id: "anti-project-final" } },
-      });
-    },
-  ]);
-
-  const antigravityTokens = await PROVIDERS.antigravity.exchangeToken(
-    ANTIGRAVITY_CONFIG,
-    "code-2",
-    "http://localhost/callback"
+  // Pin the IDE version the User-Agent carries: it reads a module-level cache that other files
+  // seed or clear under --test-isolation=none, and the fallback moved to 2.5.5 in #16512.
+  seedAntigravityIdeVersionCache(ANTIGRAVITY_IDE_FALLBACK_VERSION);
+  const ideVersion = ANTIGRAVITY_IDE_FALLBACK_VERSION.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const ideNodeUa = new RegExp(
+    `^antigravity/${ideVersion} [^ ]+/[^ ]+ google-api-nodejs-client/10\\.3\\.0$`
   );
-  const antigravityExtra = await PROVIDERS.antigravity.postExchange(antigravityTokens);
-  const antigravityMapped = PROVIDERS.antigravity.mapTokens(antigravityTokens, antigravityExtra);
-  // postExchange runs onboarding fire-and-forget now (it must never block the OAuth
-  // login response); give the background onboard call a tick to consume its mocked
-  // fetch so the sequence drains deterministically.
-  await new Promise((r) => setTimeout(r, 50));
+  try {
+    useFetchSequence([
+      jsonResponse({
+        access_token: "anti-access",
+        refresh_token: "anti-refresh",
+        expires_in: 7200,
+      }),
+      jsonResponse({ email: "anti@example.com" }),
+      (_url, init: any = {}) => {
+        assert.equal(init.method, "POST");
+        assert.equal(init.headers.Authorization, "Bearer anti-access");
+        assert.match(init.headers["User-Agent"], ideNodeUa);
+        assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
+        assert.deepEqual(
+          JSON.parse(String(init.body)).metadata,
+          getAntigravityLoadCodeAssistMetadata()
+        );
+        assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
+        return jsonResponse({
+          cloudaicompanionProject: { id: "anti-project" },
+          allowedTiers: [{ id: "tier-default", isDefault: true }],
+        });
+      },
+      (_url, init: any = {}) => {
+        assert.equal(init.method, "POST");
+        assert.equal(init.headers.Authorization, "Bearer anti-access");
+        assert.match(init.headers["User-Agent"], ideNodeUa);
+        assert.equal(init.headers["X-Goog-Api-Client"], "gl-node/22.21.1");
+        assert.deepEqual(
+          JSON.parse(String(init.body)).metadata,
+          getAntigravityLoadCodeAssistMetadata()
+        );
+        assert.equal(JSON.parse(String(init.body)).tier_id, "tier-default");
+        assert.equal(JSON.parse(String(init.body)).cloudaicompanionProject, undefined);
+        return jsonResponse({
+          done: true,
+          response: { cloudaicompanionProject: { id: "anti-project-final" } },
+        });
+      },
+    ]);
 
-  assert.equal(antigravityMapped.email, "anti@example.com");
-  // projectId comes from loadCodeAssist ("anti-project"), NOT the backgrounded
-  // onboardUser response ("anti-project-final"). Onboarding is fire-and-forget, so it
-  // no longer updates the returned projectId synchronously — matching the 9router web
-  // flow, which also returns the loadCodeAssist project id.
-  assert.equal(antigravityMapped.projectId, "anti-project");
-  assert.equal(antigravityMapped.providerSpecificData.clientProfile, "ide");
+    const antigravityTokens = await PROVIDERS.antigravity.exchangeToken(
+      ANTIGRAVITY_CONFIG,
+      "code-2",
+      "http://localhost/callback"
+    );
+    const antigravityExtra = await PROVIDERS.antigravity.postExchange(antigravityTokens);
+    const antigravityMapped = PROVIDERS.antigravity.mapTokens(antigravityTokens, antigravityExtra);
+    // postExchange runs onboarding fire-and-forget now (it must never block the OAuth
+    // login response); give the background onboard call a tick to consume its mocked
+    // fetch so the sequence drains deterministically.
+    await new Promise((r) => setTimeout(r, 50));
+
+    assert.equal(antigravityMapped.email, "anti@example.com");
+    // projectId comes from loadCodeAssist ("anti-project"), NOT the backgrounded
+    // onboardUser response ("anti-project-final"). Onboarding is fire-and-forget, so it
+    // no longer updates the returned projectId synchronously — matching the 9router web
+    // flow, which also returns the loadCodeAssist project id.
+    assert.equal(antigravityMapped.projectId, "anti-project");
+    assert.equal(antigravityMapped.providerSpecificData.clientProfile, "ide");
+  } finally {
+    clearAntigravityVersionCaches();
+  }
 });
 
 test("Qoder enabled mode exchanges tokens and loads profile metadata through mocked endpoints", async () => {
@@ -730,6 +760,66 @@ test("Kimi Coding executes mocked device-code flow and token mapping", async () 
     kimiDevice.verification_uri_complete,
     "https://www.kimi.com/code/authorize_device?user_code=KIMI123"
   );
+});
+
+test("Muse Code executes mocked device-code, mint, and dca-preserving mapTokens", async () => {
+  useFetchSequence([
+    (url, init) => {
+      const params = init.body;
+      assert.equal(String(url), MUSE_CODE_CONFIG.deviceCodeUrl);
+      assert.equal(params.get("client_id"), MUSE_CODE_CONFIG.clientId);
+      assert.equal(init.headers["User-Agent"], "muse-code/1.0.2");
+      assert.equal(init.headers["Content-Type"], "application/x-www-form-urlencoded");
+      return jsonResponse({
+        device_code: "muse-device",
+        user_code: "ABCD-EFGH",
+        verification_uri: "https://auth.meta.com/oauth/device/",
+        verification_uri_complete: "https://auth.meta.com/oauth/device/?code=ABCD-EFGH",
+        expires_in: 1800,
+        interval: 5,
+      });
+    },
+    (url, init) => {
+      const params = init.body;
+      assert.equal(String(url), MUSE_CODE_CONFIG.tokenUrl);
+      assert.equal(params.get("client_id"), MUSE_CODE_CONFIG.clientId);
+      assert.equal(params.get("device_code"), "muse-device");
+      assert.equal(params.get("grant_type"), "urn:ietf:params:oauth:grant-type:device_code");
+      assert.equal(init.headers["User-Agent"], "muse-code/1.0.2");
+      return jsonResponse({
+        access_token: "dca:device-access",
+        token_type: "Bearer",
+        expires_in: 3600,
+      });
+    },
+    (url, init) => {
+      assert.equal(String(url), MUSE_CODE_CONFIG.mintUrl);
+      assert.equal(init.headers.Authorization, "Bearer dca:device-access");
+      assert.equal(init.headers["User-Agent"], "muse-code/1.0.2");
+      assert.deepEqual(JSON.parse(init.body), { dca_token: "dca:device-access" });
+      return jsonResponse({
+        api_key: "LLM|minted-key",
+        base_url: "https://api.meta.ai/v1",
+        user_email: "muse@example.com",
+        user_full_name: "Muse User",
+        subs_tier_name: "Power",
+        is_subs_active: true,
+      });
+    },
+  ]);
+
+  const device = await PROVIDERS["muse-code"].requestDeviceCode(MUSE_CODE_CONFIG);
+  const poll = await PROVIDERS["muse-code"].pollToken(MUSE_CODE_CONFIG, device.device_code);
+  const extra = await PROVIDERS["muse-code"].postExchange(poll.data);
+  const mapped = PROVIDERS["muse-code"].mapTokens(poll.data, extra);
+
+  assert.equal(device.user_code, "ABCD-EFGH");
+  assert.equal(mapped.accessToken, "LLM|minted-key");
+  assert.equal(mapped.refreshToken, "dca:device-access");
+  assert.equal(mapped.expiresIn, undefined);
+  assert.equal(mapped.email, "muse@example.com");
+  assert.equal(mapped.providerSpecificData.dcaToken, "dca:device-access");
+  assert.equal(mapped.providerSpecificData.subsTierName, "Power");
 });
 
 test("GitHub executes mocked device-code and profile enrichment flows", async () => {

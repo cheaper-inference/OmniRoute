@@ -3,22 +3,23 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 const routeSource = fs.readFileSync("src/app/api/v1/responses/route.ts", "utf8");
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-responses-route-test-"));
 process.env.DATA_DIR = dataDir;
 process.env.REQUIRE_API_KEY = "false";
-after(() => fs.rmSync(dataDir, { recursive: true, force: true }));
+after(async () => await cleanupTempDataDir(dataDir));
 
 test("Responses route wires dual-cadence neutral keepalives", () => {
   assert.match(
     routeSource,
-    /startupFrame:\s*OPENAI_RESPONSES_IN_PROGRESS_FRAME/,
+    /startupFrame:\s*keepaliveFrame/,
     "the immediate frame must not create a synthetic reasoning item"
   );
   assert.match(
     routeSource,
-    /applicationKeepalive:\s*\{[\s\S]*frame:\s*OPENAI_RESPONSES_IN_PROGRESS_FRAME,[\s\S]*intervalMs:\s*SSE_HEARTBEAT_INTERVAL_MS/,
+    /applicationKeepalive:\s*\{[\s\S]*frame:\s*keepaliveFrame,[\s\S]*intervalMs:\s*SSE_HEARTBEAT_INTERVAL_MS/,
     "parser-visible events must use the configured mid-stream heartbeat cadence"
   );
   assert.doesNotMatch(
@@ -27,6 +28,15 @@ test("Responses route wires dual-cadence neutral keepalives", () => {
     "frequent transport ticks must not all become application events"
   );
   assert.doesNotMatch(routeSource, /RESPONSES_STARTUP_THINKING_FRAME/);
+});
+
+test("Responses route builds one keepalive frame per request from the request model (#17825)", () => {
+  assert.match(routeSource, /const keepaliveFrame = buildRequestKeepaliveFrame\(resolvedBody\);/);
+  assert.match(
+    routeSource,
+    /function buildRequestKeepaliveFrame\([\s\S]*?id: buildKeepaliveResponseId\(\),[\s\S]*?typeof model === "string" \? model : undefined/,
+    "each request gets a fresh keepalive id and its own model, never a shared constant frame"
+  );
 });
 
 test("Responses route applies heavyweight admission through the SSE lifecycle", () => {

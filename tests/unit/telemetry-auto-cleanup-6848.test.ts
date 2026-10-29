@@ -44,7 +44,7 @@ const { getDbInstance, resetDbInstance } = await import("../../src/lib/db/core.t
 // or the native test runner can hang indefinitely on a dangling connection.
 test.after(() => {
   resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 const DAY_MS = 86_400_000;
@@ -179,6 +179,30 @@ test("#6848 cleanupCompressionRunTelemetry: deletes rows older than retention wi
     cnt: number;
   };
   assert.strictEqual(remaining.cnt, 1);
+});
+
+test("#6848 cleanupCompressionRunTelemetry: missing lazy table is an empty no-op", async () => {
+  getDbInstance()!.exec("DROP TABLE compression_run_telemetry");
+
+  const result = await cleanupCompressionRunTelemetry();
+
+  assert.deepStrictEqual(result, { deleted: 0, errors: 0 });
+});
+
+test("#6848 cleanupCompressionRunTelemetry: contains table lookup failures", async (t) => {
+  const db = getDbInstance()!;
+  const prepare = db.prepare.bind(db);
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (sql.includes("sqlite_master")) {
+      throw new Error("injected table lookup failure");
+    }
+    return prepare(sql);
+  });
+  t.mock.method(console, "error", () => {});
+
+  const result = await cleanupCompressionRunTelemetry();
+
+  assert.deepStrictEqual(result, { deleted: 0, errors: 1 });
 });
 
 test("#6848 no rows deleted when all data is within retention window (calls all 4 real functions)", async () => {

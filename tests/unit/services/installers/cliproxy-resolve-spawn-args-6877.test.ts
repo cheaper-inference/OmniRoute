@@ -39,14 +39,14 @@ after(() => {
   } else {
     process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }
-  fs.rmSync(FIXED_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(FIXED_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 describe("resolveSpawnArgs (#6877 — real filesystem)", () => {
   const dataDir = FIXED_DATA_DIR;
 
   beforeEach(() => {
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     fs.mkdirSync(dataDir, { recursive: true });
   });
 

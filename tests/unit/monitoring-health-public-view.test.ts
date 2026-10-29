@@ -20,7 +20,7 @@ const route = await import("../../src/app/api/monitoring/health/route.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("anonymous health GET is reduced to liveness only (GHSA-mvf8)", async () => {

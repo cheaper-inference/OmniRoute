@@ -25,8 +25,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
-import { execSync } from "node:child_process";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -60,7 +59,15 @@ const IGNORE_FROM_CODE = new Set([
   // OS / Node internals frequently surfaced by indirect dependencies.
   "APPDATA",
   "LOCALAPPDATA",
+  "PROGRAMFILES",
   "XDG_CONFIG_HOME",
+  // Codex-owned task/runtime locations and child-process markers. OmniRoute reads
+  // them as external execution context, not as product configuration.
+  "CODEX_HOME",
+  "CODEX_CHATGPT_WEB_BROWSER_HELPER_PROCESS",
+  // Claude Code's own config-root variable: the CLI only SETS it for the child `claude`
+  // process (bin/cli/commands/launch.mjs, setup-claude hint, #12161) — never product config.
+  "CLAUDE_CONFIG_DIR",
   // systemd-injected notify socket path (sd_notify protocol, see
   // scripts/dev/systemd-notify.mjs) — set by systemd only when running under
   // a unit, never user config.
@@ -83,6 +90,9 @@ const IGNORE_FROM_CODE = new Set([
   // bundler is active — framework-internal. The OmniRoute-facing knob is
   // OMNIROUTE_USE_TURBOPACK (scripts/dev/run-next.mjs), which IS documented.
   "TURBOPACK",
+  // Electron sets this on its embedded Node server; children must preserve Node mode.
+  // Runtime-owned context, never a user-facing OmniRoute setting (#16454).
+  "ELECTRON_RUN_AS_NODE",
   "NODE_TEST_CONTEXT",
   "VITEST",
   // Instruction snippet shown to users (Traffic Inspector HttpProxySnippetCard) — not OmniRoute config.
@@ -95,6 +105,21 @@ const IGNORE_FROM_CODE = new Set([
   // CI providers (set by the runner).
   "GITHUB_BASE_REF",
   "GITHUB_BASE_SHA",
+  // Actions-owned output file used by scripts/ci/release-green-result.mjs.
+  // A runner protocol path, not user-configurable OmniRoute environment.
+  "GITHUB_OUTPUT",
+  // check-ai-attribution.mjs reads the PR of the Actions event payload when run without args (#14436)
+  "GITHUB_EVENT_PATH",
+  // Actions-owned output file used by scripts/ci/release-green-result.mjs.
+  // A runner protocol path, not user-configurable OmniRoute environment.
+  "GITHUB_OUTPUT",
+  // Runner-owned identity/event context and same-run job results consumed by
+  // scripts/quality/admission-verdict.mjs; never application .env settings.
+  "GITHUB_EVENT_NAME",
+  "GITHUB_RUN_ATTEMPT",
+  "GITHUB_RUN_ID",
+  "GITHUB_SHA",
+  "NEEDS_JSON",
   // Set by the Actions runner; the ts7 ratchet appends its job summary there
   // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).
   "GITHUB_STEP_SUMMARY",
@@ -198,6 +223,10 @@ const IGNORE_FROM_CODE = new Set([
   // Listener-owned self-fetch transport signal. The HTTP/HTTPS launchers set
   // this before application imports; it is not user-configurable product env.
   "OMNIROUTE_INTERNAL_SCHEME",
+  // Runner-owned bind-host signal. scripts/dev/run-next.mjs publishes the
+  // interface it actually binds so the in-process startup guard can name it
+  // (#13695); operators configure HOST / HOSTNAME, never this.
+  "OMNIROUTE_BOUND_HOST",
   // Source typo / placeholder.
   "OMNIROUT",
   // Static config alias path (the canonical var is OMNIROUTE_PAYLOAD_RULES_PATH).
@@ -208,6 +237,16 @@ const IGNORE_FROM_CODE = new Set([
   // NVIDIA diagnostic/test helpers used only by ad-hoc scripts.
   "NVIDIA_BASE_URL",
   "NVIDIA_MODEL",
+  // Live smoke check for the claude-mem memory backend (scripts/ad-hoc/claude-mem-live-check.ts,
+  // #15425) — port of the operator's local claude-mem worker. The backend itself is configured
+  // through settings.backendConfigs["claude-mem"].port, never this env var.
+  "CLAUDE_MEM_PORT",
+  // Lemonade embedding-provider integration test (tests/integration/semantic-cache-lemonade.test.ts)
+  // — points the gated live test at an operator's local Lemonade server; the test skips itself
+  // when the endpoint is unreachable, never OmniRoute runtime config.
+  "LEMONADE_URL",
+  "LEMONADE_KEY",
+  "LEMONADE_MODEL",
   // Discord integration ad-hoc script (scripts/ad-hoc/mesh-send.mjs) —
   // operator-supplied bot credentials, not user-facing OmniRoute config.
   "BOT_TOKEN",
@@ -218,6 +257,12 @@ const IGNORE_FROM_CODE = new Set([
   // Test-only override: points setup-open-code.mjs at a fixture plugin dir without
   // requiring the real bundled plugin to be built.
   "OMNIROUTE_OPENCODE_PLUGIN_DIR",
+  // Test-only escape hatch: makes getMachineIdRaw() skip the macOS ioreg strategy so
+  // machineId tests reach the fallback strategies on darwin (#13539). Not user config.
+  "DISABLE_IOREG_STRATEGY",
+  // Next.js-internal switch, not OmniRoute config: scripts/dev/standalone-server-ws.mjs sets it
+  // so Next skips its own SIGINT/SIGTERM handlers and the wrapper owns shutdown.
+  "NEXT_MANUAL_SIG_HANDLE",
 ]);
 
 // Vars documented in ENVIRONMENT.md but intentionally absent from .env.example.
@@ -264,6 +309,10 @@ const DOC_ONLY_ALLOWLIST = new Set([
   // SQL keyword mentioned in the new VACUUM scheduler docs (#4437).
   // The check's regex picks up the bare word in description text.
   "VACUUM",
+  // Source-code constant (open-sse/services/combo/comboPredicates.ts:35 —
+  // `export const COMBO_LOOP_SAFETY_TIMEOUT_MS = 10 * 60 * 1000`), cited in the
+  // comboTimeoutMs narrative added by #13857. Not operator-configurable.
+  "COMBO_LOOP_SAFETY_TIMEOUT_MS",
 ]);
 
 // Vars present in .env.example but intentionally absent from ENVIRONMENT.md.
@@ -278,6 +327,9 @@ const ENV_ONLY_ALLOWLIST = new Set([
   "PII_WINDOW_SIZE",
   "TRAE_STREAM_TIMEOUT_MS",
   "TRAE_TOKEN",
+  // #12190: Trae host/Origin override. ENVIRONMENT.md documents no Trae variable at
+  // all; this joins its two siblings above under the same .env.example-only tier.
+  "TRAE_WEB_ORIGIN",
 ]);
 
 // ─── Parsing helpers ───────────────────────────────────────────────────────
@@ -306,21 +358,69 @@ export function parseEnvDocVars(text) {
   return vars;
 }
 
+/** Roots scanned for `process.env.X` references, relative to the repo root. */
+export const CODE_SCAN_ROOTS = [
+  "src",
+  "open-sse",
+  "bin",
+  "scripts",
+  "electron/main.js",
+  "electron/preload.js",
+];
+
+const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
+
 /**
- * Collect environment variable references in source code via grep against
- * the `process.env` member access pattern.
+ * Collect environment variable references in source code.
+ *
+ * Pure Node on purpose. This used to shell out to
+ * `grep -rhoE … 2>/dev/null || true`; on Windows that line runs through cmd.exe,
+ * where `2>/dev/null` is an invalid path, so the command printed an error,
+ * `|| true` swallowed it, and the scan returned ZERO variables — the
+ * "in code but missing from .env.example" check then passed vacuously.
+ *
+ * Mirrors the grep it replaces: recursive, symlinks not followed, files that
+ * contain a NUL byte (binary) skipped, missing roots ignored.
+ *
+ * @param {{ cwd?: string, roots?: readonly string[] }} [options]
+ * @returns {Set<string>}
  */
-function scanCodeVars({ cwd } = {}) {
+export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
   const repoRoot = cwd ?? REPO_ROOT;
-  const stdout = execSync(
-    "grep -rhoE 'process\\.env\\.[A-Z][A-Z0-9_]+' " +
-      "src/ open-sse/ bin/ scripts/ electron/main.js electron/preload.js 2>/dev/null || true",
-    { cwd: repoRoot, encoding: "utf8", maxBuffer: 20 * 1024 * 1024 }
-  );
   const vars = new Set();
-  for (const line of stdout.split("\n")) {
-    const m = line.match(/^process\.env\.([A-Z][A-Z0-9_]+)$/);
-    if (m) vars.add(m[1]);
+  const scanFile = (file) => {
+    let text;
+    try {
+      text = fs.readFileSync(file, "utf8");
+    } catch {
+      return;
+    }
+    if (text.includes("\0")) return;
+    for (const m of text.matchAll(CODE_ENV_REF)) vars.add(m[1]);
+  };
+  const walk = (dir) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(dir, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const entry of entries) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile()) scanFile(full);
+    }
+  };
+  for (const root of roots) {
+    const full = path.join(repoRoot, root);
+    let stat;
+    try {
+      stat = fs.lstatSync(full);
+    } catch {
+      continue;
+    }
+    if (stat.isDirectory()) walk(full);
+    else if (stat.isFile()) scanFile(full);
   }
   return vars;
 }
@@ -429,6 +529,24 @@ function main() {
   process.exit(1);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+/**
+ * True when this module was launched directly as the Node entry point.
+ *
+ * `process.argv[1]` is an absolute filesystem path while `import.meta.url` is a
+ * file URL, so the two only match when encoded through `pathToFileURL`. A raw
+ * `file://${argv[1]}` comparison silently never matches when the checkout path
+ * contains characters the URL form percent-encodes (e.g. a space), which made
+ * the CLI exit 0 without running anything.
+ */
+export function isMainEntry(argv1, moduleUrl) {
+  if (!argv1) return false;
+  try {
+    return pathToFileURL(argv1).href === moduleUrl;
+  } catch {
+    return false;
+  }
+}
+
+if (isMainEntry(process.argv[1], import.meta.url)) {
   main();
 }

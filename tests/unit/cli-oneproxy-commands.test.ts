@@ -44,14 +44,19 @@ test("oneproxy stats passa provider e period para MCP", async () => {
   const origFetch = globalThis.fetch;
   globalThis.fetch = makeMcpStreamFetch({ toolResult: { requests: 5000 } });
   const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
-  const result = await mcpCallTool("omniroute_oneproxy_stats", { provider: "openai", period: "24h" });
+  const result = await mcpCallTool("omniroute_oneproxy_stats", {
+    provider: "openai",
+    period: "24h",
+  });
   globalThis.fetch = origFetch;
   assert.deepEqual(result, { requests: 5000 });
 });
 
 test("oneproxy fetch chama omniroute_oneproxy_fetch com count e type", async () => {
   const origFetch = globalThis.fetch;
-  globalThis.fetch = makeMcpStreamFetch({ toolResult: { proxies: [{ host: "10.0.0.1", type: "http" }] } });
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { proxies: [{ host: "10.0.0.1", type: "http" }] },
+  });
   const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
   const result = await mcpCallTool("omniroute_oneproxy_fetch", { count: 5, type: "http" });
   globalThis.fetch = origFetch;
@@ -107,4 +112,19 @@ test("oneproxy pool chama /api/settings/oneproxy?include=pool", async () => {
 test("oneproxy.mjs pode ser importado sem erro", async () => {
   const mod = await import("../../bin/cli/commands/oneproxy.mjs");
   assert.equal(typeof mod.registerOneProxy, "function");
+});
+
+test("oneproxy stats works against a sessionless MCP stream", async () => {
+  const origFetch = globalThis.fetch;
+  globalThis.fetch = makeMcpStreamFetch({
+    toolResult: { poolSize: 3 },
+    sessionMode: "stateless",
+  });
+  try {
+    const { mcpCallTool } = await import("../../bin/cli/mcpClient.mjs");
+    const result = await mcpCallTool("omniroute_oneproxy_stats", {});
+    assert.deepEqual(result, { poolSize: 3 });
+  } finally {
+    globalThis.fetch = origFetch;
+  }
 });

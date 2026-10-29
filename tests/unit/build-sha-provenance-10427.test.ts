@@ -92,7 +92,7 @@ test("P6: readBuildSha returns the trimmed sentinel, or empty when absent", asyn
     fs.writeFileSync(path.join(repo, "dist", "BUILD_SHA"), "e05ac345da\n");
     assert.equal(readBuildSha(repo), "e05ac345da");
   } finally {
-    fs.rmSync(repo, { recursive: true, force: true });
+    fs.rmSync(repo, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 

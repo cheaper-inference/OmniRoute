@@ -67,9 +67,14 @@ test("getMode: empty string falls back to redact", () => {
 
 // ── IPv6 regex — compressed-form detection ────────────────────────────────────
 
-test("IPv6 :: (all-zeros) alone is redacted", () => {
+test("IPv6 :: (all-zeros) alone is NOT redacted (deliberate carve-out)", () => {
+  // `::` alone is the unspecified address — never a usable host address — while
+  // a double colon is load-bearing syntax in Python (s[::-1]), Rust (::std),
+  // C++ (std::), Haskell (x :: Int), Elixir, Scala and Markdown (:::note).
+  // Redacting it corrupted generated code, so the bare alternative was removed.
+  // Every `::`-bearing IPv6 form is still matched: ::1, fe80::1, ::ffff:0:0, [::1].
   const result = sanitizePII("::");
-  assert.ok(result.text.includes("[IP_REDACTED]"), "bare :: should be redacted as IPv6 all-zeros");
+  assert.strictEqual(result.text, "::", "bare :: must be left alone");
 });
 
 test("IPv6 ::1 (loopback) standalone is redacted", () => {
@@ -129,7 +134,11 @@ test("IPv6 followed by colon-hex suffix is NOT redacted (lookahead guard)", () =
   // being carved out of a longer colon-separated sequence.
   const text = "1:2:3:4:5:6:7:8:extra";
   const result = sanitizePII(text);
-  assert.strictEqual(result.text, text, "8-segment prefix of a longer colon sequence should not be redacted");
+  assert.strictEqual(
+    result.text,
+    text,
+    "8-segment prefix of a longer colon sequence should not be redacted"
+  );
 });
 
 test("IPv6 xyz::1 (non-hex prefix) is NOT redacted", () => {
@@ -141,7 +150,10 @@ test("IPv6 xyz::1 (non-hex prefix) is NOT redacted", () => {
 test("IPv6 abc::1 (valid hex prefix) IS redacted", () => {
   // a, b, c are valid hex digits, so abc::1 is a valid compressed IPv6 address.
   const result = sanitizePII("abc::1");
-  assert.ok(result.text.includes("[IP_REDACTED]"), "abc::1 should be redacted as valid compressed IPv6");
+  assert.ok(
+    result.text.includes("[IP_REDACTED]"),
+    "abc::1 should be redacted as valid compressed IPv6"
+  );
 });
 
 test("IPv6 full 8-segment with trailing alphanumeric is NOT redacted", () => {
@@ -149,7 +161,11 @@ test("IPv6 full 8-segment with trailing alphanumeric is NOT redacted", () => {
   // a letter/digit (8888abcd).
   const text = "2001:db8:3333:4444:5555:6666:7777:8888abcd";
   const result = sanitizePII(text);
-  assert.strictEqual(result.text, text, "8-segment address with trailing alnum should not be redacted");
+  assert.strictEqual(
+    result.text,
+    text,
+    "8-segment address with trailing alnum should not be redacted"
+  );
 });
 
 test("multiple IPv6 addresses in the same string are all redacted", () => {
@@ -174,9 +190,11 @@ test("IPv6 address inside SSE JSON content is redacted end-to-end", async () => 
 
   const encoder = new TextEncoder();
   const writePromise = (async () => {
-    await writer.write(encoder.encode(
-      `data: {"choices":[{"delta":{"content":"server is at 2001:db8:3333:4444:5555:6666:7777:8888"}}]}\n\n`
-    ));
+    await writer.write(
+      encoder.encode(
+        `data: {"choices":[{"delta":{"content":"server is at 2001:db8:3333:4444:5555:6666:7777:8888"}}]}\n\n`
+      )
+    );
     await writer.write(encoder.encode(`data: [DONE]\n\n`));
     await writer.close();
   })();
@@ -190,13 +208,17 @@ test("IPv6 address inside SSE JSON content is redacted end-to-end", async () => 
   await writePromise;
 
   const output = chunks.join("");
-  assert.ok(!output.includes("2001:db8:3333:4444:5555:6666:7777:8888"),
-    "full IPv6 address in SSE stream should be redacted");
-  assert.ok(output.includes("[IP_REDACTED]"),
-    "redaction marker should appear in SSE stream output");
+  assert.ok(
+    !output.includes("2001:db8:3333:4444:5555:6666:7777:8888"),
+    "full IPv6 address in SSE stream should be redacted"
+  );
+  assert.ok(
+    output.includes("[IP_REDACTED]"),
+    "redaction marker should appear in SSE stream output"
+  );
 });
 
 test.after(() => {
   resetDbInstance();
-  fs.rmSync(tmpDir, { recursive: true, force: true });
+  fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });

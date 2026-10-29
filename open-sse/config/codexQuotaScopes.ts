@@ -6,6 +6,16 @@ export const CODEX_SPARK_METERED_FEATURE = "gpt_5_3_codex_spark";
 export const CODEX_SPARK_QUOTA_SESSION = `${CODEX_SPARK_METERED_FEATURE}_session`;
 export const CODEX_SPARK_QUOTA_WEEKLY = `${CODEX_SPARK_METERED_FEATURE}_weekly`;
 
+/**
+ * Codex reserve pool (e.g. `limit_name: "gpt-reserve"`, "Luna Reserve") that keeps
+ * serving requests once the primary weekly limit is exhausted. Its rows are
+ * DISPLAY-ONLY: they are kept out of the routing quota cache so account selection
+ * is unchanged (see omitCodexDisplayOnlyQuotas).
+ */
+export const CODEX_RESERVE_DISPLAY_NAME = "Luna Reserve";
+export const CODEX_RESERVE_QUOTA_SESSION = "reserve_session";
+export const CODEX_RESERVE_QUOTA_WEEKLY = "reserve_weekly";
+
 const CODEX_SCOPE_PATTERNS: Array<{ pattern: string; scope: CodexQuotaScope }> = [
   { pattern: "codex-spark", scope: "spark" },
   { pattern: "spark", scope: "spark" },
@@ -84,4 +94,25 @@ export function toCodexBaseQuotaWindowName(windowName: string | null): string | 
     return "weekly";
   }
   return windowName;
+}
+
+export function isCodexReserveQuotaKey(key: string | null | undefined): boolean {
+  const normalized = String(key || "")
+    .trim()
+    .toLowerCase();
+  return normalized === CODEX_RESERVE_QUOTA_SESSION || normalized === CODEX_RESERVE_QUOTA_WEEKLY;
+}
+
+export function isCodexReserveLimitDescriptor(...values: unknown[]): boolean {
+  if (isCodexSparkLimitDescriptor(...values)) return false;
+  return values.some((value) => typeof value === "string" && /reserve/i.test(value));
+}
+
+/** Drops display-only Codex windows (reserve pool) so they never drive routing/exhaustion. */
+export function omitCodexDisplayOnlyQuotas<T>(quotas: Record<string, T>): Record<string, T> {
+  const keys = Object.keys(quotas);
+  if (!keys.some(isCodexReserveQuotaKey)) return quotas;
+  return Object.fromEntries(
+    keys.filter((k) => !isCodexReserveQuotaKey(k)).map((k) => [k, quotas[k]])
+  );
 }

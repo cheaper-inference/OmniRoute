@@ -61,7 +61,7 @@ test.after(() => {
   }
   if (prevDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = prevDataDir;
-  if (dataDir) fs.rmSync(dataDir, { recursive: true, force: true });
+  if (dataDir) fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("src/lib/db/core.ts has no top-level await (breaks esbuild's CJS require() bundling — #7288 hotfix)", () => {
@@ -183,9 +183,8 @@ test(
     const dir2 = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-7288-happy-"));
     const file2 = path.join(dir2, "storage.sqlite");
     try {
-      const { tryOpenSync, getSqlJsAdapter } = await import(
-        "../../src/lib/db/adapters/driverFactory"
-      );
+      const { tryOpenSync, getSqlJsAdapter } =
+        await import("../../src/lib/db/adapters/driverFactory");
       const { default: Database } = await import("better-sqlite3");
       const seed = new Database(file2);
       seed.exec("CREATE TABLE t (id INTEGER)");
@@ -204,7 +203,7 @@ test(
           "otherwise every boot would pay the WASM-load cost even on the happy path"
       );
     } finally {
-      fs.rmSync(dir2, { recursive: true, force: true });
+      fs.rmSync(dir2, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     }
   }
 );

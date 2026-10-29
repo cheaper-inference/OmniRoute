@@ -15,7 +15,7 @@ const { runAsProbe, shouldIsolateProbeFailures, isProbeContext } =
 test.after(() => {
   delete process.env.PROBE_CAN_DISABLE;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("outside a probe context the decision is always false (real path)", async () => {

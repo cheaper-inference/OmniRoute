@@ -1,5 +1,7 @@
 "use client";
 
+import { Button, Card, Checkbox, Input } from "@/shared/components";
+
 /**
  * ProviderParamFilterSection — Denylist/allowlist config for provider-level
  * request parameter filtering (#6625).
@@ -74,6 +76,18 @@ function errorMessage(err: unknown): string {
   return err instanceof Error ? err.message : String(err);
 }
 
+// Wraps the GET so a failure comes back as a value: the load callback then only
+// sets state after the await (no synchronous setState reachable from the effect).
+async function fetchParamFilterConfigSafe(
+  providerId: string
+): Promise<{ ok: boolean; config?: ParamFilterConfig; error?: string }> {
+  try {
+    return { ok: true, config: await fetchParamFilterConfig(providerId) };
+  } catch (err) {
+    return { ok: false, error: errorMessage(err) };
+  }
+}
+
 // ---------------------------------------------------------------------------
 // State hook — owns config load/save/reset so the component body stays JSX-only.
 // ---------------------------------------------------------------------------
@@ -95,7 +109,10 @@ function useDirtySetter<T>(setValue: (value: T) => void, setDirty: (value: boole
 function useProviderParamFilterConfig(providerId: string, t: Translate) {
   const notify = useNotificationStore();
   const [, setConfig] = useState<ParamFilterConfig>({ block: [], allow: [], autoLearn: false });
-  const [loading, setLoading] = useState(true);
+  // Loading is derived: true until a load attempt for the CURRENT provider
+  // settles — this also re-shows the skeleton when providerId changes.
+  const [loadedProviderId, setLoadedProviderId] = useState<string | null>(null);
+  const loading = loadedProviderId !== providerId;
   const [saving, setSaving] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [blockText, setBlockTextState] = useState("");
@@ -106,24 +123,24 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
   const setAllowText = useDirtySetter(setAllowTextState, setDirty);
   const setAutoLearn = useDirtySetter(setAutoLearnState, setDirty);
 
-  const loadConfig = useCallback(async () => {
-    setLoading(true);
-    try {
-      const cfg = await fetchParamFilterConfig(providerId);
-      setConfig(cfg);
-      setBlockTextState(formatCommaList(cfg.block));
-      setAllowTextState(formatCommaList(cfg.allow));
-      setAutoLearnState(cfg.autoLearn);
-    } catch (err) {
-      notify.notify(t("paramFiltersLoadError", { error: errorMessage(err) }), "error");
-    } finally {
-      setLoading(false);
-    }
-  }, [providerId, notify, t]);
-
+  // The async work is defined INSIDE the effect (a component-scope loader
+  // called synchronously from an effect is rejected by the compiler rules);
+  // every setState here runs after the await.
   useEffect(() => {
-    loadConfig();
-  }, [loadConfig]);
+    const run = async () => {
+      const outcome = await fetchParamFilterConfigSafe(providerId);
+      if (outcome.ok) {
+        setConfig(outcome.config);
+        setBlockTextState(formatCommaList(outcome.config.block));
+        setAllowTextState(formatCommaList(outcome.config.allow));
+        setAutoLearnState(outcome.config.autoLearn);
+      } else {
+        notify.notify(t("paramFiltersLoadError", { error: outcome.error }), "error");
+      }
+      setLoadedProviderId(providerId);
+    };
+    void run();
+  }, [providerId, notify, t]);
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -182,10 +199,10 @@ function useProviderParamFilterConfig(providerId: string, t: Translate) {
 
 function ParamFilterSectionSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
-      <div className="h-5 w-48 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-      <div className="mt-4 h-20 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />
-    </div>
+    <Card padding="sm" className="p-5">
+      <div className="h-5 w-48 animate-pulse rounded bg-bg-subtle" />
+      <div className="mt-4 h-20 animate-pulse rounded bg-bg-subtle" />
+    </Card>
   );
 }
 
@@ -197,9 +214,7 @@ function ParamFilterSectionHeader({ t }: { t: (key: string) => string }) {
       </h2>
       <p className="text-xs text-text-muted mb-4 leading-relaxed">
         {t.rich("paramFiltersSectionHint", {
-          code: (chunks) => (
-            <code className="text-xs bg-zinc-100 dark:bg-zinc-800 px-1 rounded">{chunks}</code>
-          ),
+          code: (chunks) => <code className="text-xs bg-bg-subtle px-1 rounded">{chunks}</code>,
         })}
       </p>
     </>
@@ -216,17 +231,15 @@ interface ParamListFieldProps {
 
 function ParamListField({ label, hint, value, placeholder, onChange }: ParamListFieldProps) {
   return (
-    <div className="mb-3">
-      <label className="block text-xs font-medium text-text-muted mb-1.5">{label}</label>
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        placeholder={placeholder}
-        className="w-full rounded-lg border border-border bg-white px-3 py-2 text-xs text-text-main placeholder:text-text-muted focus:outline-none focus:ring-1 focus:ring-primary dark:bg-zinc-900"
-      />
-      <p className="text-[11px] text-text-muted mt-1">{hint}</p>
-    </div>
+    <Input
+      label={label}
+      hint={hint}
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      placeholder={placeholder}
+      className="mb-3"
+      inputClassName="text-xs"
+    />
   );
 }
 
@@ -239,17 +252,15 @@ interface AutoLearnToggleProps {
 function AutoLearnToggle({ t, checked, onChange }: AutoLearnToggleProps) {
   return (
     <div className="mb-4">
-      <label className="flex items-center gap-2 cursor-pointer">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => onChange(e.target.checked)}
-          className="rounded border-border text-primary focus:ring-primary"
-        />
-        <span className="text-xs font-medium text-text-main">
-          {t("paramFiltersAutoLearnLabel")}
-        </span>
-      </label>
+      <Checkbox
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+        label={
+          <span className="text-xs font-medium text-text-main">
+            {t("paramFiltersAutoLearnLabel")}
+          </span>
+        }
+      />
       <p className="text-[11px] text-text-muted mt-1 ml-5">{t("paramFiltersAutoLearnHint")}</p>
     </div>
   );
@@ -266,28 +277,12 @@ interface ParamFilterActionsProps {
 function ParamFilterActions({ t, saving, dirty, onSave, onReset }: ParamFilterActionsProps) {
   return (
     <div className="flex items-center gap-2">
-      <button
-        type="button"
-        onClick={onSave}
-        disabled={saving || !dirty}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50 transition-colors"
-      >
-        {saving ? (
-          <span className="material-symbols-outlined text-sm animate-spin">progress_activity</span>
-        ) : (
-          <span className="material-symbols-outlined text-sm">save</span>
-        )}
+      <Button size="sm" icon="save" loading={saving} onClick={onSave} disabled={saving || !dirty}>
         {saving ? t("paramFiltersSaving") : t("paramFiltersSaveChanges")}
-      </button>
-      <button
-        type="button"
-        onClick={onReset}
-        disabled={saving}
-        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-text-muted hover:text-text-main hover:border-primary/40 disabled:opacity-50 transition-colors"
-      >
-        <span className="material-symbols-outlined text-sm">delete</span>
+      </Button>
+      <Button size="sm" variant="outline" icon="delete" onClick={onReset} disabled={saving}>
         {t("paramFiltersResetToDefault")}
-      </button>
+      </Button>
     </div>
   );
 }
@@ -319,7 +314,7 @@ export default function ProviderParamFilterSection({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
+    <Card padding="sm" className="p-5">
       <ParamFilterSectionHeader t={t} />
       <ParamListField
         label={t("paramFiltersBlockedLabel")}
@@ -343,6 +338,6 @@ export default function ProviderParamFilterSection({
         onSave={handleSave}
         onReset={handleReset}
       />
-    </div>
+    </Card>
   );
 }

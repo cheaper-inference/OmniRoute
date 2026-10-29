@@ -13,14 +13,31 @@ import {
   normalizeRequestQueueSettings,
   normalizeConnectionCooldownProfile,
   normalizeProviderBreakerProfile,
+  normalizeTokenRefreshBreakerSettings,
   normalizeWaitForCooldownSettings,
   normalizeComboCooldownWaitSettings,
   normalizeQuotaShareConcurrencyLimitSettings,
+  normalizeStreamStallCooldownSettings,
+  normalizeP2CLatencySettings,
   normalizeProviderCooldownSettings,
   normalizeQuotaPreflightSettings,
   normalizeStreamRecoverySettings,
   normalizeProviderQuotaOverrides,
+  normalizeCredentialHealthCheckSettings,
+  pruneResilienceSettingsToProvided,
 } from "./settings/normalize";
+
+export { pruneResilienceSettingsToProvided };
+
+// Memoization cache for resolveResilienceSettings: keyed by the settings object
+// reference returned by getCachedSettings(). The TTLCache in readCache.ts returns
+// the same object identity within its 5s window, so this cache is naturally
+// invalidated when settings are updated (the old object is evicted and a new one
+// is created). WeakMap avoids holding onto stale settings objects.
+// Env-derived defaults (RATE_LIMIT_*, PROVIDER_COOLDOWN_*, STREAM_RECOVERY_*) are read
+// once per settings object, so they stay frozen for that object's lifetime (bounded by the
+// 5s cache TTL). The returned object is shared across callers and must be treated as read-only.
+const resolvedSettingsCache = new WeakMap<Record<string, unknown>, ResilienceSettings>();
 
 // Re-export the settings shape (moved to ./settings/types) so this module's
 // public API is unchanged.
@@ -28,21 +45,35 @@ export type {
   RequestQueueSettings,
   ConnectionCooldownProfileSettings,
   ProviderBreakerProfileSettings,
+  TokenRefreshBreakerScope,
+  TokenRefreshBreakerSettings,
   WaitForCooldownSettings,
   ComboCooldownWaitSettings,
   QuotaShareConcurrencyLimitSettings,
+  P2CLatencySettings,
   ProviderCooldownSettings,
   QuotaPreflightSettings,
   StreamRecoverySettings,
   StreamThroughputWatchdogSettings,
   ProviderQuotaOverrideSettings,
+  CredentialHealthCheckSettings,
   ResilienceSettings,
   ResilienceSettingsPatch,
 } from "./settings/types";
 
 export const DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS = (() => {
-  const parsed = Number(process.env.RATE_LIMIT_MAX_WAIT_MS || "15000");
-  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 15000;
+  const parsed = Number(process.env.RATE_LIMIT_MAX_WAIT_MS || "30000");
+  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 30000;
+})();
+
+// Limiter-managed execution backstop (Bottleneck `expiration`). Deliberately
+// separate from the queue-wait budget: non-incremental gateways (Console Go /
+// Command Code) buffer whole generations before first bytes, so legitimate
+// executions run minutes. Default 10 min; the backstop only catches executors
+// without their own upstream timeout.
+export const DEFAULT_REQUEST_QUEUE_EXECUTION_MAX_WAIT_MS = (() => {
+  const parsed = Number(process.env.RATE_LIMIT_EXECUTION_MAX_WAIT_MS || "600000");
+  return Number.isFinite(parsed) && parsed > 0 ? Math.trunc(parsed) : 600000;
 })();
 
 // Issue #6593: opt-in admission cap on the local rate-limit queue depth.
@@ -58,7 +89,9 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
     requestsPerMinute: DEFAULT_API_LIMITS.requestsPerMinute,
     minTimeBetweenRequestsMs: DEFAULT_API_LIMITS.minTimeBetweenRequests,
     concurrentRequests: DEFAULT_API_LIMITS.concurrentRequests,
+    globalConcurrentRequests: 0,
     maxWaitMs: DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS,
+    executionMaxWaitMs: DEFAULT_REQUEST_QUEUE_EXECUTION_MAX_WAIT_MS,
     maxQueueDepth: DEFAULT_REQUEST_QUEUE_MAX_DEPTH,
   },
   connectionCooldown: {
@@ -84,6 +117,14 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
       degradationThreshold: PROVIDER_PROFILES.apikey.degradationThreshold,
       resetTimeoutMs: PROVIDER_PROFILES.apikey.circuitBreakerReset,
     },
+  },
+  // Token-refresh breaker: provider-wide by default (current behavior), so
+  // existing installs see no change. Operators can switch to per-connection
+  // scope to isolate one dead account from healthy ones on the same provider.
+  tokenRefreshBreaker: {
+    scope: "provider",
+    failureThreshold: 5,
+    cooldownMs: 30 * 60 * 1000,
   },
   // Wait at most 90s for a single connection cooldown (covers Gemini-class
   // TPM/RPM windows, which report ~60s retry-after live), at most 5 retry
@@ -115,6 +156,15 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   // comes from each connection's max_concurrent.
   quotaShareConcurrencyLimit: {
     enabled: true,
+  },
+  // A stream content stall fails one request; it does not cool the account unless
+  // the operator opts in (see StreamStallCooldownSettings).
+  streamStallCooldown: {
+    enabled: false,
+  },
+  // Opt-in latency term for p2c account selection (see P2CLatencySettings). 0 = off.
+  p2cLatency: {
+    weight: 0,
   },
   providerCooldown: {
     minRetryCooldownMs: Number(process.env.PROVIDER_COOLDOWN_MIN_MS || "5000"),
@@ -169,6 +219,13 @@ export const DEFAULT_RESILIENCE_SETTINGS: ResilienceSettings = {
   // provider registered in providerDefaultRateLimit.ts) uses its static
   // default until an operator adds an override here.
   providerQuotaOverrides: {},
+  // Global default cadence for the background credential health check sweep.
+  // 60 minutes: the sweep makes a real upstream probe against EVERY active
+  // connection, so the previous 5-minute default cost 12 requests/hour per
+  // connection. 0 disables the sweep entirely. Per-connection overrides win.
+  credentialHealthCheck: {
+    intervalMinutes: 60,
+  },
 };
 
 function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
@@ -208,7 +265,9 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
         DEFAULT_RESILIENCE_SETTINGS.requestQueue.concurrentRequests,
         { min: 1, max: 10_000 }
       ),
+      globalConcurrentRequests: DEFAULT_RESILIENCE_SETTINGS.requestQueue.globalConcurrentRequests,
       maxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxWaitMs,
+      executionMaxWaitMs: DEFAULT_RESILIENCE_SETTINGS.requestQueue.executionMaxWaitMs,
       maxQueueDepth: DEFAULT_RESILIENCE_SETTINGS.requestQueue.maxQueueDepth,
     },
     connectionCooldown: {
@@ -263,10 +322,14 @@ function buildLegacyFallback(settings: JsonRecord): ResilienceSettings {
     },
     comboCooldownWait: DEFAULT_RESILIENCE_SETTINGS.comboCooldownWait,
     quotaShareConcurrencyLimit: DEFAULT_RESILIENCE_SETTINGS.quotaShareConcurrencyLimit,
+    streamStallCooldown: DEFAULT_RESILIENCE_SETTINGS.streamStallCooldown,
+    p2cLatency: DEFAULT_RESILIENCE_SETTINGS.p2cLatency,
     providerCooldown: DEFAULT_RESILIENCE_SETTINGS.providerCooldown,
+    tokenRefreshBreaker: DEFAULT_RESILIENCE_SETTINGS.tokenRefreshBreaker,
     quotaPreflight: DEFAULT_RESILIENCE_SETTINGS.quotaPreflight,
     streamRecovery: streamRecoveryDefaults,
     providerQuotaOverrides: DEFAULT_RESILIENCE_SETTINGS.providerQuotaOverrides,
+    credentialHealthCheck: DEFAULT_RESILIENCE_SETTINGS.credentialHealthCheck,
   };
 }
 
@@ -297,10 +360,14 @@ export function resolveResilienceSettings(
   settings: Record<string, unknown> | null | undefined
 ): ResilienceSettings {
   const record = asRecord(settings);
+  const cacheKey = record; // the exact object reference from getCachedSettings()
+  const cached = resolvedSettingsCache.get(cacheKey);
+  if (cached) return cached;
+
   const current = asRecord(record.resilienceSettings);
   const fallback = buildLegacyFallback(record);
 
-  return {
+  const resolved: ResilienceSettings = {
     requestQueue: normalizeRequestQueueSettings(current.requestQueue, fallback.requestQueue),
     connectionCooldown: {
       oauth: normalizeConnectionCooldownProfile(
@@ -322,6 +389,10 @@ export function resolveResilienceSettings(
         fallback.providerBreaker.apikey
       ),
     },
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      current.tokenRefreshBreaker,
+      fallback.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       current.waitForCooldown,
       fallback.waitForCooldown
@@ -334,6 +405,11 @@ export function resolveResilienceSettings(
       current.quotaShareConcurrencyLimit,
       fallback.quotaShareConcurrencyLimit
     ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      current.streamStallCooldown,
+      fallback.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(current.p2cLatency, fallback.p2cLatency),
     providerCooldown: normalizeProviderCooldownSettings(
       current.providerCooldown,
       fallback.providerCooldown
@@ -350,7 +426,14 @@ export function resolveResilienceSettings(
       current.providerQuotaOverrides,
       fallback.providerQuotaOverrides
     ),
+    credentialHealthCheck: normalizeCredentialHealthCheckSettings(
+      current.credentialHealthCheck,
+      fallback.credentialHealthCheck
+    ),
   };
+
+  resolvedSettingsCache.set(cacheKey, resolved);
+  return resolved;
 }
 
 export function mergeResilienceSettings(
@@ -379,6 +462,10 @@ export function mergeResilienceSettings(
         current.providerBreaker.apikey
       ),
     },
+    tokenRefreshBreaker: normalizeTokenRefreshBreakerSettings(
+      updates.tokenRefreshBreaker,
+      current.tokenRefreshBreaker
+    ),
     waitForCooldown: normalizeWaitForCooldownSettings(
       updates.waitForCooldown,
       current.waitForCooldown
@@ -391,6 +478,11 @@ export function mergeResilienceSettings(
       updates.quotaShareConcurrencyLimit,
       current.quotaShareConcurrencyLimit
     ),
+    streamStallCooldown: normalizeStreamStallCooldownSettings(
+      updates.streamStallCooldown,
+      current.streamStallCooldown
+    ),
+    p2cLatency: normalizeP2CLatencySettings(updates.p2cLatency, current.p2cLatency),
     providerCooldown: normalizeProviderCooldownSettings(
       updates.providerCooldown,
       current.providerCooldown
@@ -400,6 +492,10 @@ export function mergeResilienceSettings(
     providerQuotaOverrides: normalizeProviderQuotaOverrides(
       updates.providerQuotaOverrides,
       current.providerQuotaOverrides
+    ),
+    credentialHealthCheck: normalizeCredentialHealthCheckSettings(
+      updates.credentialHealthCheck,
+      current.credentialHealthCheck
     ),
   };
 }

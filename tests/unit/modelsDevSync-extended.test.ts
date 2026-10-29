@@ -101,7 +101,7 @@ function restoreEnv() {
 
 function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -142,7 +142,7 @@ test.afterEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test.describe("modelsDevSync-extended", { concurrency: 1 }, async () => {
@@ -377,6 +377,7 @@ test.describe("modelsDevSync-extended", { concurrency: 1 }, async () => {
         limit_input: 4096,
         limit_output: null,
         interleaved_field: null,
+        reasoning_efforts: null,
       });
 
       const all = modelsDev.getSyncedCapabilities();

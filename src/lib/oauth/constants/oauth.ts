@@ -4,11 +4,16 @@ import {
   getAntigravityFetchAvailableModelsUrls,
 } from "@omniroute/open-sse/config/antigravityUpstream.ts";
 import {
+  CODEBUDDY_CN_USER_AGENT,
+  CODEBUDDY_INTL_USER_AGENT,
   GITHUB_COPILOT_API_VERSION,
   GITHUB_COPILOT_CHAT_PLUGIN_VERSION,
   GITHUB_COPILOT_CHAT_USER_AGENT,
   GITHUB_COPILOT_EDITOR_VERSION,
 } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
+// userAgent / editorVersion on GITHUB_CONFIG are captured-pin snapshots for
+// lockstep tests. Request construction must call getGitHubCopilotChatUserAgent()
+// (#12417) — see providers/github.ts and providers/ghe-copilot.ts.
 import {
   GROK_BUILD_DEVICE_CODE_URL,
   GROK_BUILD_OAUTH_ISSUER,
@@ -16,7 +21,7 @@ import {
   GROK_BUILD_TOKEN_URL,
 } from "@omniroute/open-sse/config/grokBuild.ts";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds.ts";
-import { CURSOR_AGENT_CLI_VERSION } from "@omniroute/open-sse/utils/cursorAgentCliVersion.ts";
+import { CURSOR_AGENT_CLI_VERSION } from "@omniroute/open-sse/utils/cursorAgentCliVersionPin.ts";
 import { buildGitLabOAuthEndpoints, GITLAB_DUO_DEFAULT_BASE_URL } from "../gitlab";
 
 /**
@@ -103,15 +108,34 @@ export const QODER_CONFIG = {
 // CodeBuddy CN (Tencent — copilot.tencent.com) OAuth Configuration
 // (Custom Device-Auth Flow: POST stateUrl → open authUrl → GET pollUrl?state=).
 // No client_id/secret — the upstream CLI ships none.
+export { CODEBUDDY_CN_USER_AGENT };
+
 export const CODEBUDDY_CN_CONFIG = {
   baseUrl: "https://copilot.tencent.com",
   stateUrl: "https://copilot.tencent.com/v2/plugin/auth/state",
   tokenUrl: "https://copilot.tencent.com/v2/plugin/auth/token",
   refreshUrl: "https://copilot.tencent.com/v2/plugin/auth/token/refresh",
-  userAgent: "CLI/2.63.2 CodeBuddy/2.63.2",
+  userAgent: CODEBUDDY_CN_USER_AGENT,
   platform: "CLI",
+  domain: "copilot.tencent.com",
   pollInterval: 5000,
 };
+
+// CodeBuddy International (codebuddy.ai) OAuth Configuration
+export const CODEBUDDY_INTL_CONFIG = {
+  baseUrl: "https://www.codebuddy.ai",
+  stateUrl: "https://www.codebuddy.ai/v2/plugin/auth/state",
+  tokenUrl: "https://www.codebuddy.ai/v2/plugin/auth/token",
+  refreshUrl: "https://www.codebuddy.ai/v2/plugin/auth/token/refresh",
+  userAgent: CODEBUDDY_INTL_USER_AGENT,
+  platform: "ide",
+  domain: "www.codebuddy.ai",
+  pollInterval: 5000,
+};
+
+// WorkBuddy config lives with its device-flow module so this god-file only
+// re-exports. Do not alias CODEBUDDY_CN_CONFIG — different host and account.
+export { WORKBUDDY_CONFIG } from "../providers/workbuddy";
 
 // Grok Build (xAI) OAuth Configuration (Device Code + import-token fallback)
 // Public client_id resolved through resolvePublicCred so it is never a literal.
@@ -164,6 +188,15 @@ export const OPENFERENCE_CONFIG = {
   loopbackPort: 56123,
   callbackPath: "/callback",
   callbackHost: "127.0.0.1",
+};
+
+// Muse Code (Meta) OAuth — RFC 8628 device grant + subscription key mint.
+// Public CLI client id (Muse Code CLI); PKCE is not used on this grant.
+export const MUSE_CODE_CONFIG = {
+  clientId: resolvePublicCred("muse_id", "MUSE_CODE_OAUTH_CLIENT_ID"),
+  deviceCodeUrl: "https://auth.meta.com/oidc/device/authorization/",
+  tokenUrl: "https://auth.meta.com/oidc/device/token/",
+  mintUrl: "https://api.meta.ai/muse-code/key",
 };
 
 // Kimi Coding OAuth Configuration (Device Code Flow)
@@ -369,7 +402,7 @@ export const KIRO_CONFIG = {
 // Cursor stores credentials in SQLite database: state.vscdb
 // Keys: cursorAuth/accessToken, cursorAuth/refreshToken, storage.serviceMachineId
 // Deep-control PKCE + refresh aligned with OpenCodex (lidge-jun/opencodex src/oauth/cursor.ts).
-// clientVersion pin lives in open-sse/utils/cursorAgentCliVersion.ts — single source of truth.
+// clientVersion pin lives in open-sse/utils/cursorAgentCliVersionPin.ts — single source of truth.
 export const CURSOR_CONFIG = {
   // API endpoints
   apiEndpoint: "https://api2.cursor.sh",
@@ -435,17 +468,6 @@ export const TRAE_CONFIG = {
     "Authorize via trae.ai in the popup, or sign in to solo.trae.ai and paste the Cloud-IDE-JWT from the Authorization header (~14-day lifetime).",
 };
 
-// Raycast Pro AI — reverse-engineered, unofficial API. LOCAL / PERSONAL USE ONLY.
-// See docs/security/PUBLIC_CREDS.md pattern: no secrets in repo; credentials from user's Mac.
-export const RAYCAST_CONFIG = {
-  apiEndpoint: "https://backend.raycast.com",
-  chatEndpoint: "/api/v1/ai/chat_completions",
-  modelsEndpoint: "/api/v1/ai/models",
-  clientType: "macos-app",
-  captureInstructions:
-    "macOS only: use Auto-Import (Keychain + Raycast DB) or capture Bearer, X-Raycast-DeviceId, and optional X-Raycast-Signature JWT from backend.raycast.com traffic.",
-};
-
 // Devin Desktop / Devin CLI import-token configuration.
 // Public product identity is Devin. The upstream transport still identifies
 // the IDE as `windsurf`; authentication itself is import-only.
@@ -509,10 +531,6 @@ export const PROVIDERS = {
   KIRO: "kiro",
   AMAZON_Q: "amazon-q",
   CURSOR: "cursor",
-  // #8895 — registered in src/lib/oauth/providers/index.ts but missing here, so
-  // every consumer reading PROVIDERS (onboarding wizard, test-connection routing)
-  // did not know Raycast Pro exists as an OAuth provider.
-  RAYCAST: "raycast",
   KILOCODE: "kilocode",
   CLINE: "cline",
   CLINEPASS: "clinepass",
@@ -520,9 +538,12 @@ export const PROVIDERS = {
   DEVIN_CLI: "devin-cli",
   TRAE: "trae",
   CODEBUDDY_CN: "codebuddy-cn",
+  CODEBUDDY_INTL: "codebuddy-intl",
+  WORKBUDDY: "workbuddy",
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
+  MUSE_CODE: "muse-code",
 };

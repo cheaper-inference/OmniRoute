@@ -1,287 +1,214 @@
-# Przewodnik po darmowych planach: darmowe AI bez karty kredytowej
+# Free Tiers Guide: Understand and Combine Free AI Access (Polski)
 
-> **TL;DR**: OmniRoute ma 155 wpisy katalogu oznaczone free/no-auth. Ściśle kwantyfikowany budżet obejmuje 43 pule / 522 wpisy modeli. Podłącz wielu providerów, aby rozszerzyć pokrycie fallbacku; dostępność, limity i warunki zależą od upstreamu.
-
----
-
-## Czym są darmowe plany?
-
-Wielu providerów AI oferuje **darmowe użycie** — bez karty kredytowej. To jak darmowe próbki w sklepie spożywczym. Możesz wypróbować produkt bez płacenia.
-
-OmniRoute **agreguje** te darmowe plany w jeden endpoint. Zamiast rejestrować się w 10 różnych serwisach, podłączasz je wszystkie do OmniRoute i używasz `model: "auto"`, aby automatycznie wybrać najlepszą darmową opcję dla każdego żądania.
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/FREE-TIERS-GUIDE.md) · 🇪🇹 [am](../../../am/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇦🇿 [az](../../../az/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇩🇰 [da](../../../da/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇩🇪 [de](../../../de/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇬🇷 [el](../../../el/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇪🇸 [es](../../../es/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇪🇪 [et](../../../et/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇱 [he](../../../he/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇩 [id](../../../id/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇹 [it](../../../it/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇰🇭 [km](../../../km/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇲🇲 [my](../../../my/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇴 [no](../../../no/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [or](../../../or/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇱🇰 [si](../../../si/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇮🇳 [te](../../../te/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇹🇭 [th](../../../th/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/FREE-TIERS-GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/FREE-TIERS-GUIDE.md)
 
 ---
 
-## Najlepsi darmowi providerzy (bez karty kredytowej)
-
-### Poziom 1: bieżący dostęp bez opublikowanego limitu tokenów
-
-Ci providerzy nie publikują stałego limitu tokenów w katalogu, lecz nadal mogą stosować limity szybkości, współbieżności, konta, regionu, modeli, KYC i ToS:
-
-| Provider          | Modele                                   | Limit                     | Jak podłączyć   |
-| ----------------- | ---------------------------------------- | ------------------------- | --------------- |
-| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | 50 kredytów/miesiąc       | Bez autoryzacji |
-| **OpenCode Free** | GPT-4o, Claude, Gemini                   | Brak opublikowanego capu; limity obowiązują | Bez autoryzacji |
-| **Pollinations**  | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Bez klucza                | Bez autoryzacji |
-| **LongCat**       | LongCat-2.0                              | 10M tokenów (jednorazowo) | Klucz API + KYC |
-| **Cloudflare AI** | 50+ modeli                               | 10K neuronów/dzień        | Bez autoryzacji |
-| **Qwen**          | Qwen3-coder-plus/flash/next              | Brak opublikowanego capu; limity obowiązują | Bez autoryzacji |
-| **Qoder**         | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Brak opublikowanego capu; limity obowiązują | Bez autoryzacji |
-
-### Poziom 2: darmowi po rejestracji (hojni)
-
-Ci providerzy dają **darmowe kredyty** przy rejestracji:
-
-| Provider       | Darmowe kredyty       | Modele                      | Jak uzyskać                          |
-| -------------- | --------------------- | --------------------------- | ------------------------------------ |
-| **NVIDIA NIM** | ~40 RPM               | 129 modeli                  | Rejestracja na build.nvidia.com      |
-| **Cerebras**   | 1M tokenów/dzień      | Qwen3 235B, GPT-OSS 120B    | Rejestracja na cerebras.ai           |
-| **DeepSeek**   | 5M darmowych tokenów  | DeepSeek V4                 | Rejestracja na platform.deepseek.com |
-| **Groq**       | 30 RPM za darmo       | Llama 4, Mixtral            | Rejestracja na console.groq.com      |
-| **OpenAI**     | $5 darmowych kredytów | GPT-5, GPT-4o               | Rejestracja na platform.openai.com   |
-| **Anthropic**  | $5 darmowych kredytów | Claude Opus 4.6, Sonnet 4.6 | Rejestracja na console.anthropic.com |
-| **Google**     | 1500 żądań/dzień      | Gemini 2.5 Pro, Flash       | Rejestracja na aistudio.google.com   |
-
-### Poziom 3: darmowi z limitami (konkretne zastosowania)
-
-Ci providerzy mają **darmowe plany** z określonymi limitami:
-
-| Provider          | Darmowy limit      | Modele           | Najlepsze do      |
-| ----------------- | ------------------ | ---------------- | ----------------- |
-| **Cerebras**      | 1M tokenów/dzień   | Qwen3 235B       | Szybka inferencja |
-| **NVIDIA NIM**    | ~40 RPM            | 129 modeli       | Różnorodność      |
-| **Groq**          | 30 RPM             | Llama 4, Mixtral | Szybkość          |
-| **Cloudflare AI** | 10K neuronów/dzień | 50+ modeli       | Różnorodność      |
+> **TL;DR**: Użyj własnych kont u kwalifikujących się dostawców. OmniRoute łączy skonfigurowane przez Ciebie połączenia; nie zapewnia reklamowanego, łącznego budżetu tokenów. Bezpłatny dostęp może wymagać rejestracji, klucza API, zatwierdzenia lub metody płatności. Nadal obowiązują limity, polityki prywatności i warunki dostawców.
 
 ---
 
-## Jak łączyć darmowe plany
+## Czym są darmowe poziomy dostępu?
 
-Siła OmniRoute to **stackowanie darmowych planów**. Zamiast polegać na jednym providerze, podłączasz wielu darmowych providerów i pozwalasz OmniRoute automatycznie wybrać najlepszego dla każdego żądania.
+Wielu dostawców AI oferuje pewną formę **bezpłatnego dostępu**. W zależności od dostawcy może to oznaczać punkt końcowy niewymagający uwierzytelniania, odnawialny limit, dostęp bez limitu łącznego, ale z ograniczeniem częstotliwości, bonus za rejestrację, ręczne zatwierdzenie lub tymczasową promocję. Niektóre opcje wymagają konta, klucza API, karty kredytowej, weryfikacji KYC lub zaakceptowania warunków określonych przez dostawcę.
 
-### Przykład: szersze pokrycie darmowego tieru
+OmniRoute **agreguje** skonfigurowane połączenia w jednym punkcie końcowym. Nadal musisz osobno zarejestrować się u każdego dostawcy, który wymaga konta. Połącz te konta i użyj `model: "auto"`, aby kierować żądania do kwalifikujących się usług docelowych. W nowej instalacji może nie być żadnej kwalifikującej się usługi docelowej niewymagającej klucza; samo zainstalowanie OmniRoute nie gwarantuje pomyślnej odpowiedzi na czacie.
 
-Podłącz tych 4 providerów, aby zmniejszyć zależność od pojedynczego limitu — nie oznacza to
-nieograniczonej przepustowości ani gwarantowanej dostępności:
+---
 
-1. **Kiro AI** — 50 kredytów/miesiąc (modele Claude)
-2. **OpenCode Free** — brak opublikowanego limitu tokenów; limity nadal obowiązują (modele GPT)
-3. **Pollinations** — bez klucza (wiele modeli)
-4. **LongCat** — 10M tokenów jednorazowo (wymaga KYC; nie odnawia się)
+## Reprezentatywni dostawcy bezpłatnego dostępu
+
+### Dostęp odnawialny, bez klucza lub bez limitu
+
+Ci dostawcy oferują w audytowanym katalogu odnawialną, niewymagającą klucza lub nielimitowaną ścieżkę bezpłatnego dostępu. „Bez limitu” oznacza brak opublikowanego limitu tokenów; nadal mogą obowiązywać ograniczenia szybkości, współbieżności, konta, regionu i zasad:
+
+| Dostawca          | Modele                                                                                               | Limit                                                                                                                                            | Jak się połączyć                                                                                                   |
+| ----------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Kiro AI**       | Claude Sonnet 4.5, Haiku 4.5, DeepSeek V3.2 i inne                                                   | Audytowany katalog szacuje współdzieloną miesięczną pulę na 25K tokenów                                                                          | Przepływ OAuth/konta; regulamin oznaczony w katalogu jako `avoid`                                                  |
+| **Pollinations**  | Aktualny zestaw modeli bez klucza; niektóre wcześniejsze modele zostały wycofane lub wymagają klucza | Bez klucza; brak opublikowanego limitu tokenów                                                                                                   | Brak danych uwierzytelniających dostawcy dla modeli bez klucza                                                     |
+| **Logfare**       | kimi-k3, deepseek-v4-pro, glm-5.2, gpt-5.6-luna, minimax-m3 i inne                                   | Bezpłatny klucz API (bez limitów szybkości, bez karty); **każde żądanie jest rejestrowane** na potrzeby badań (rezygnacja na logfare.ai/consent) | Natychmiastowy klucz na logfare.ai/register; regulamin/polityka prywatności na logfare.ai/tos i logfare.ai/privacy |
+| **Cloudflare AI** | Katalog Workers AI                                                                                   | Audytowana pula szacowana na ~30M tokenów/miesiąc na podstawie opublikowanych jednostek użycia                                                   | Konto Cloudflare i dane uwierzytelniające API                                                                      |
+| **Gemini**        | Rodzina Gemini Flash                                                                                 | Zmienne limity szybkości zależne od projektu/modelu; w głównej ofercie nie uwzględniono stałego miesięcznego przydziału tokenów                  | Klucz API Google AI Studio; sprawdź aktywne limity projektu                                                        |
+| **Groq**          | Modele Llama, GPT-OSS i Qwen                                                                         | Audytowana pula szacowana na ~15M tokenów/miesiąc                                                                                                | Klucz API Groq; obowiązują limity szybkości                                                                        |
+
+### Granty rejestracyjne i kredyty właściwe dla dostawców
+
+Ci dostawcy oferują granty rejestracyjne lub kredyty promocyjne, zgodnie z ich zasadami kwalifikacji. Jak zweryfikowano 2026-10-08, [cennik Cerebras](https://www.cerebras.ai/pricing) wymaga metody płatności w celu otrzymania jednorazowego kredytu w wysokości $5, który wygasa po 30 dniach; nie jest to odnawialny limit tokenów. [Limity szybkości Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) różnią się w zależności od projektu, modelu i poziomu, dlatego nie są przeliczane na gwarantowany miesięczny przydział tokenów.
+
+| Dostawca      | Bezpłatne kredyty                                                              | Modele                      | Jak uzyskać                                                     |
+| ------------- | ------------------------------------------------------------------------------ | --------------------------- | --------------------------------------------------------------- |
+| **Cerebras**  | Jednorazowy kredyt promocyjny $5; wygasa po 30 dniach                          | Aktualny katalog inferencji | Konto i ważna metoda płatności                                  |
+| **DeepSeek**  | 5M bezpłatnych tokenów                                                         | DeepSeek V4                 | Zarejestruj się na platform.deepseek.com                        |
+| **LongCat**   | Jednorazowy grant 10M tokenów                                                  | LongCat 2.0                 | Klucz API + KYC; po wykorzystaniu grantu płatność według użycia |
+| **Vertex AI** | Kredyt rejestracyjny $300 przedstawiony jako ~300M tokenów w modelu budżetowym | Gemini i modele partnerskie | Konto Google Cloud; obowiązują zasady rozliczeń i kwalifikacji  |
+
+### Inne formy ograniczonego dostępu
+
+Ci dostawcy mają **bezpłatne poziomy** z określonymi limitami:
+
+| Dostawca                   | Bezpłatny limit                                                                                      | Modele                             | Najlepsze zastosowanie |
+| -------------------------- | ---------------------------------------------------------------------------------------------------- | ---------------------------------- | ---------------------- |
+| **GitHub Models**          | Audytowana współdzielona pula szacowana na ~18M tokenów/miesiąc                                      | Szeroka ocena modeli               |
+| **Hugging Face**           | Mała, odnawialna pula miesięczna                                                                     | Eksperymenty i różnorodność modeli |
+| **OpenRouter free models** | Współdzielona pula z limitem żądań; opcjonalne jednorazowe doładowanie zwiększa odnawialny przydział | Szeroki katalog modeli zapasowych  |
+| **AI Horde**               | Społecznościowa moc obliczeniowa bez klucza; dostępność jest zmienna                                 | Okazjonalna inferencja rozproszona |
+
+---
+
+## Jak łączyć bezpłatne limity
+
+Siła OmniRoute tkwi w **łączeniu bezpłatnych limitów**. Zamiast polegać na jednym dostawcy, możesz połączyć wielu bezpłatnych dostawców i pozwolić OmniRoute automatycznie wybierać najlepszego z nich dla każdego żądania.
+
+### Przykład: szerszy zakres bezpłatnych limitów
+
+Połącz kilku dostawców, aby zmniejszyć zależność od pojedynczego limitu:
+
+1. **Gemini** — odnawialny limit klucza API
+2. **Groq** — odnawialny limit klucza API
+3. **Pollinations** — dostęp bez klucza, z ograniczeniem częstotliwości
+4. **LongCat** — jednorazowy pakiet powitalny (wymaga KYC)
 
 Następnie użyj `model: "auto"`, a OmniRoute:
 
-- Najpierw spróbuje Kiro (najlepsza jakość)
-- Jeśli Kiro jest zajęty → spróbuje OpenCode Free
-- Jeśli OpenCode Free jest wolny → spróbuje Pollinations
-- Jeśli wszystkie zawiodą → spróbuje LongCat jako kolejnego celu, o ile jego jednorazowa pula
-  i warunki dostępu nadal obowiązują
+- Najpierw wypróbuje najwyżej sklasyfikowane kwalifikujące się połączenie
+- Jeśli jego limit zostanie wyczerpany lub kontrola stanu zakończy się niepowodzeniem → wypróbuje następnego skonfigurowanego dostawcę
+- Jeśli dostawca niewymagający klucza będzie niedostępny → przejdzie do pozostałych usług docelowych
+- Jeśli żadne kwalifikujące się połączenie nie zadziała → zwróci błąd; środki przyznane przy rejestracji są dostępne tylko wtedy, gdy są ważne i niewykorzystane
 
-**Efekt**: szersze pokrycie darmowego tieru z automatycznym fallbackiem — bez gwarancji
-nieograniczonej przepustowości.
+**Rezultat**: szerszy zakres bezpłatnych limitów z automatycznym mechanizmem awaryjnym — bez gwarancji nieograniczonej przepustowości.
 
 ---
 
-## Jak podłączyć darmowych providerów
+## Jak połączyć bezpłatnych dostawców
 
-### Krok 1: Otwórz dashboard
+### Krok 1: Otwórz panel
 
-Wejdź na `http://localhost:20128` w przeglądarce.
+Przejdź w przeglądarce do `http://localhost:20128`.
 
-### Krok 2: Przejdź do Providers
+### Krok 2: Przejdź do dostawców
 
-Kliknij **Providers** na pasku bocznym.
+Kliknij **Dostawcy** na pasku bocznym.
 
-### Krok 3: Kliknij Add Provider
+### Krok 3: Kliknij Dodaj dostawcę
 
-Kliknij przycisk **+ Add Provider**.
+Kliknij przycisk **+ Dodaj dostawcę**.
 
-### Krok 4: Wybierz darmowego providera
+### Krok 4: Wybierz bezpłatnego dostawcę
 
-Przejrzyj listę i wybierz jednego z tych darmowych providerów:
+Przejrzyj katalog i sprawdź aktualne metadane każdego dostawcy dotyczące `hasFree`, uwierzytelniania, limitów, prywatności
+oraz warunków korzystania z usługi. Karta dostawcy i dokument
+[Informacje o bezpłatnych planach](../reference/FREE_TIERS.md) rozróżniają pule odnawialne,
+dostęp bez limitów lub klucza, środki przyznawane po rejestracji, wycofane pozycje oraz źródła o podwyższonym ryzyku.
 
-- **Kiro AI** — darmowe modele Claude
-- **OpenCode Free** — darmowe modele GPT
-- **Pollinations** — darmowe GPT-5, Claude, Gemini
-- **LongCat** — 10M tokenów za darmo (jednorazowo, wymaga KYC)
-- **Cloudflare AI** — 50+ modeli, 10K neuronów/dzień
+### Krok 5: Kliknij Połącz
 
-### Krok 5: Kliknij Connect
-
-Klucz API nie jest potrzebny — wystarczy kliknąć **Connect**.
+W przypadku dostawcy `NOAUTH` OmniRoute nie wymaga danych uwierzytelniających do usługi nadrzędnej. Nie gwarantuje to, że usługa nadrzędna akceptuje klientów zewnętrznych ani że dysponuje dostępnymi zasobami. Dostawców korzystających z OAuth i klucza API należy połączyć zgodnie z udokumentowaną procedurą konta. Gdy uwierzytelnianie routera jest włączone, klient nadal korzysta z klucza API OmniRoute widocznego w sekcji **Panel → Punkty końcowe**.
 
 ### Krok 6: Powtórz
 
-Podłącz 3–4 darmowych providerów, aby uzyskać najlepsze doświadczenie.
+Połącz kilku dostawców, których warunki i model prywatności odpowiadają Twojemu przypadkowi użycia.
 
 ---
 
-## Szczegóły darmowych providerów
+## Jak prawidłowo odczytywać katalog
 
-### Kiro AI
-
-- **Modele**: Claude Sonnet 4.5, Haiku 4.5, Opus 4.6
-- **Limit**: 50 kredytów/miesiąc
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: wysokiej jakości modele Claude
-
-### OpenCode Free
-
-- **Modele**: GPT-4o, Claude, Gemini
-- **Limit**: brak opublikowanego limitu tokenów; limity szybkości, współbieżności, konta,
-  regionu, modeli, KYC i ToS mogą nadal obowiązywać
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: uniwersalnego AI
-
-### Pollinations
-
-- **Modele**: GPT-5, Claude, Gemini, DeepSeek, Llama 4
-- **Limit**: bez klucza
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: różnorodności modeli
-
-### LongCat
-
-- **Modele**: LongCat-2.0
-- **Limit**: 10M tokenów, jednorazowa pula przy rejestracji (nie odnawia się dziennie/miesięcznie)
-- **Auth**: klucz API + weryfikacja KYC wymagana do odblokowania darmowej puli
-- **Najlepsze do**: jednorazowego darmowego limitu; pay-as-you-go po jego wyczerpaniu
-
-### Cloudflare AI
-
-- **Modele**: 50+ modeli
-- **Limit**: 10K neuronów/dzień
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: różnorodności i niezawodności
-
-### NVIDIA NIM
-
-- **Modele**: 129 modeli
-- **Limit**: ~40 RPM
-- **Auth**: rejestracja na build.nvidia.com
-- **Najlepsze do**: różnorodności i szybkości
-
-### Cerebras
-
-- **Modele**: Qwen3 235B, GPT-OSS 120B
-- **Limit**: 1M tokenów/dzień
-- **Auth**: rejestracja na cerebras.ai
-- **Najlepsze do**: szybkiej inferencji
-
-### Qwen
-
-- **Modele**: Qwen3-coder-plus/flash/next
-- **Limit**: brak opublikowanego limitu tokenów; limity szybkości, współbieżności, konta,
-  regionu, modeli, KYC i ToS mogą nadal obowiązywać
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: zadań kodowania
-
-### Qoder
-
-- **Modele**: Kimi-K2, DeepSeek-R1, Qwen3-coder
-- **Limit**: brak opublikowanego limitu tokenów; limity szybkości, współbieżności, konta,
-  regionu, modeli, KYC i ToS mogą nadal obowiązywać
-- **Auth**: bez autoryzacji
-- **Najlepsze do**: zadań kodowania
+- `NOAUTH` oznacza, że OmniRoute nie wymaga od Ciebie danych uwierzytelniających dostawcy; nie
+  gwarantuje to dostępności, prywatności ani nieograniczonej przepustowości.
+- `hasFree` to metadane ułatwiające wyszukiwanie. Mogą oznaczać odnawialny limit, dostęp bez klucza,
+  środki przyznawane przy rejestracji, program wymagający zatwierdzenia lub promocję.
+- `recurring-uncapped` oznacza, że nie znaleziono opublikowanego limitu tokenów; nadal obowiązują
+  limity częstotliwości żądań i współbieżności.
+- `one-time-initial` nie odnawia się po wykorzystaniu środków przyznanych przy rejestracji.
+- Dostawcy oznaczeni jako `tos: avoid` są domyślnie wykluczeni z automatycznego trasowania (`excludeTosAvoid`). Podłączenie konta nie omija tego filtra. Każde ręczne nadpisanie przez operatora powinno być poprzedzone przeglądem warunków dostawcy i ryzyka związanego z kontem.
+- Wpisy oznaczone jako `discontinued` pozostają świadectwem historycznym i nie mogą być przedstawiane jako
+  obecnie bezpłatne.
 
 ---
 
-## Jak OmniRoute usprawnia darmowe plany
+## Jak OmniRoute zwiększa korzyści z bezpłatnych pul
 
-### 1. Automatyczny fallback
+### 1. Automatyczne przełączanie awaryjne
 
-Jeśli jeden darmowy provider jest zajęty lub niedostępny, OmniRoute automatycznie próbuje następnego. Nie musisz nic robić.
+Jeśli jeden z bezpłatnych dostawców jest przeciążony lub niedostępny, OmniRoute automatycznie wypróbuje następnego. Nie musisz nic robić.
 
-### 2. Inteligentny routing
+### 2. Inteligentne trasowanie
 
-OmniRoute wybiera **najlepszego darmowego providera** dla każdego żądania na podstawie:
+OmniRoute wybiera **najlepszego bezpłatnego dostawcę** dla każdego żądania na podstawie:
 
-- Szybkość — który provider jest teraz najszybszy?
-- Jakość — który provider najlepiej pasuje do tego zadania?
-- Pojemność — który provider ma jeszcze dostępny limit?
+- Szybkości — który dostawca jest obecnie najszybszy?
+- Jakości — który dostawca najlepiej nadaje się do tego zadania?
+- Dostępnej przepustowości — który dostawca ma jeszcze niewykorzystany limit?
 
 ### 3. Oszczędność tokenów
 
-Funkcja **compression** w OmniRoute oszczędza 15–95% tokenów. Dzięki temu darmowy limit starcza **5–20× dłużej**.
+Mechanizm kompresji OmniRoute może zmniejszyć liczbę tokenów w kwalifikujących się promptach i danych wyjściowych narzędzi. Rzeczywiste
+oszczędności zależą od treści, wybranych mechanizmów, sposobu rozliczania przez dostawcę i ustawień
+wierności; kompresja nie zwiększa każdego limitu dostawcy o stały mnożnik.
 
 ### 4. Obsługa wielu kont
 
-Jeśli masz wiele kont u tego samego providera, OmniRoute traktuje każde jako osobnego kandydata. To podwaja lub potroja Twój darmowy limit.
+Jeśli warunki dostawcy zezwalają na używanie wielu kont lub danych uwierzytelniających, OmniRoute może traktować każde
+połączenie jako oddzielnego kandydata do trasowania. Nie twórz dodatkowych kont w celu obejścia limitu
+lub zasad dostępu dostawcy.
 
 ---
 
-## Matematyka darmowych planów
+## Wyliczenia bezpłatnego poziomu
 
-Policzmy, ile darmowego AI możesz uzyskać:
+Aktualny katalog działający na żywo, z deduplikacją pul, obecnie wskazuje:
 
-### Konserwatywne oszacowanie (3 providerów)
+| Metryka                                     | Aktualna zweryfikowana wartość | Interpretacja                                                                     |
+| ------------------------------------------- | -----------------------------: | --------------------------------------------------------------------------------- |
+| Cykliczny, określony ilościowo przydział    |     **~1.62B tokenów/miesiąc** | Współdzielone pule policzono jednokrotnie; suma nie obejmuje dostawców bez limitu |
+| Pierwszy miesiąc z grantami rejestracyjnymi |             **~2.22B tokenów** | Cykliczna suma wraz z jednorazowymi i cyklicznymi środkami                        |
 
-| Provider      | Limit dzienny | Limit miesięczny |
-| ------------- | ------------- | ---------------- |
-| Kiro AI       | ~1,7 kredytu  | 50 kredytów      |
-| OpenCode Free | Limity obowiązują | Brak opublikowanego capu |
-| Pollinations  | Limity obowiązują | Brak opublikowanego capu |
-
-**Suma**: brak wiarygodnego stałego tokenowego maksimum; dostęp podlega limitom providerów
-
-### Agresywne oszacowanie (7 providerów)
-
-| Provider      | Limit dzienny   | Limit miesięczny               |
-| ------------- | --------------- | ------------------------------ |
-| Kiro AI       | ~1,7 kredytu    | 50 kredytów                    |
-| OpenCode Free | Limity obowiązują | Brak opublikowanego capu       |
-| Pollinations  | Limity obowiązują | Brak opublikowanego capu       |
-| LongCat       | — (jednorazowo) | 10M tokenów (jednorazowo, KYC) |
-| Cloudflare AI | 10K neuronów    | 300K neuronów                  |
-| NVIDIA NIM    | ~40 RPM         | ~1,7M żądań                    |
-| Cerebras      | 1M tokenów      | 30M tokenów                    |
-
-**Suma**: ~1,53B udokumentowanych tokenów cyklicznych/miesiąc — do ~2,15B w pierwszym miesiącu z jednorazowymi kredytami za rejestrację. Dostawcy bez opublikowanego capu są raportowani osobno.
+Są to szacunki obejmujące cały katalog i odrębne kwalifikujące się konta, a nie limit zapewniany przez OmniRoute ani prognoza dla nowej instalacji. Dostępna pojemność zależy od podłączonych dostawców i ich aktualnych warunków. Wartości są obliczane na podstawie `open-sse/config/freeModelCatalog.ts`; informacje o deduplikacji pul, oznaczeniach regulaminu,
+wycofanych wpisach i metodologii naliczania środków za rejestrację zawiera
+[Dokumentacja bezpłatnych poziomów](../reference/FREE_TIERS.md).
 
 ---
 
-## Częste pytania
+## Często zadawane pytania
 
-### „Czy to naprawdę za darmo?”
+### „Czy to naprawdę jest darmowe?”
 
-Katalog opisuje darmowe warunki opublikowane przez providerów, ale oferty mogą się zmieniać.
-Przed użyciem sprawdź aktualne ceny, limity, prywatność i uprawnienia.
+Katalog rejestruje warunki publikowane przez dostawców oraz wyniki analiz projektu, jednak oferty mogą ulec zmianie.
+Przed użyciem sprawdź aktualne ceny, limity, politykę prywatności oraz kryteria kwalifikacyjne dostawcy.
 
-### „Czy darmowy plan się wyczerpie?”
+### „Czy limit darmowego planu może się wyczerpać?”
 
-Każdy provider może stosować rate limiting, zmienić modele, zawiesić dostęp lub być chwilowo
-niedostępny. Wiele połączeń zwiększa pokrycie fallbacku, ale nie gwarantuje działającej darmowej
-trasy.
+Każdy dostawca może ograniczyć częstotliwość żądań, zmienić modele, zawiesić dostęp lub zaprzestać działania. Wiele
+połączeń zwiększa dostępność tras zapasowych, ale nie gwarantuje dostępności darmowej trasy.
 
-### „Czy mogę używać darmowych providerów w produkcji?”
+### „Czy mogę korzystać z darmowych dostawców w środowisku produkcyjnym?”
 
-Tylko jeśli SLA, obsługa danych, limity i warunki danego providera spełniają wymagania
-produkcyjne. Dla krytycznych obciążeń użyj monitorowanego i odpowiedniego kontraktowo fallbacku.
+Tylko jeśli SLA, sposób przetwarzania danych, limity i warunki dostawcy spełniają wymagania
+środowiska produkcyjnego. Krytyczne obciążenia powinny mieć monitorowane, odpowiednie pod względem umownym rozwiązanie zapasowe.
 
 ### „Gdzie jest haczyk?”
 
-Możliwe kompromisy obejmują limity, kolejki, KYC, weryfikację karty, szkolenie na promptach,
-słabszą prywatność, brak SLA, zmienność modeli, ograniczenia geograficzne, płatne przekroczenia
-oraz ryzyko związane z zasadami konta. OmniRoute pokazuje dostępne metadane — decyzję podejmujesz
-Ty.
+Kompromisy mogą obejmować rygorystyczne limity, listy oczekujących, KYC, weryfikację kartą kredytową, trenowanie na
+promptach, słabszą ochronę prywatności, brak SLA, częste zmiany modeli, ograniczenia geograficzne, płatne przekroczenia limitów lub
+ryzyko związane z zasadami dotyczącymi konta. OmniRoute udostępnia dostępne metadane; to Ty decydujesz, co włączyć.
 
-### „Jak uzyskać większy darmowy limit?”
+### „Jak mogę uzyskać większy darmowy limit?”
 
-1. Podłącz więcej darmowych providerów, jeśli ich warunki na to pozwalają
-2. Używaj compression, aby oszczędzać tokeny (oszczędność 15–95%)
-3. Używaj `auto/cheap`, aby priorytetyzować darmowych/tanich providerów
-4. Dodaj inne dozwolone konta lub providery — nie twórz kont w celu obchodzenia limitów lub zasad
-   dostawcy
+1. Połącz więcej darmowych dostawców
+2. Włącz odpowiednie mechanizmy kompresji i zmierz oszczędności dla swojego obciążenia
+3. Użyj `auto/cheap`, aby priorytetyzować darmowych/tanich dostawców
+4. Dodaj kolejnych dozwolonych dostawców lub dane uwierzytelniające bez naruszania warunków dostawców
 
-### „Czy darmowi providerzy mają gorszą jakość?”
+### „Czy darmowi dostawcy oferują gorszą jakość?”
 
-**Niekoniecznie!** Wielu darmowych providerów oferuje te same modele co płatni. Na przykład Kiro daje dostęp do Claude Sonnet 4.5 — tego samego modelu, który dostajesz w płatnej subskrypcji Anthropic.
+Niekoniecznie. Niektórzy dostawcy udostępniają te same rodziny modeli, które są dostępne za pośrednictwem płatnych
+tras, ale limity, opóźnienia, prywatność, niezawodność i wersje modeli mogą się różnić. Użyj strony
+rankingu darmowych dostawców jako wskaźnika jakości i zweryfikuj faktycznie udostępniany model.
 
 ---
 
 ## Co dalej?
 
-- **[Przewodnik Auto-Combo](./AUTO-COMBO-GUIDE.md)** — pozwól OmniRoute wybrać najlepsze AI
-- **[Przewodnik po providerach](./PROVIDERS-GUIDE.md)** — podłącz więcej providerów
-- **[Rozwiązywanie problemów](./TROUBLESHOOTING.md)** — napraw typowe problemy
-- **[Referencja darmowych planów](../reference/FREE_TIERS.md)** — pełna lista darmowych planów
+- **[Przewodnik po Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Pozwól OmniRoute wybrać dla Ciebie najlepszą AI
+- **[Przewodnik po dostawcach](./PROVIDERS-GUIDE.md)** — Połącz więcej dostawców
+- **[Rozwiązywanie problemów](../guides/TROUBLESHOOTING.md)** — Rozwiąż typowe problemy
+- **[Informacje o darmowych planach](../reference/FREE_TIERS.md)** — Pełna lista darmowych planów

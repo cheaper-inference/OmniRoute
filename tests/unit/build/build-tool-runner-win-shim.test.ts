@@ -124,7 +124,7 @@ test("resolveLocalBinEntry reads the package's own bin map, never node_modules/.
       "the resolved entry must bypass the platform-specific .bin shim"
     );
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -145,7 +145,7 @@ test("resolveLocalBinEntry returns null for a missing package or a missing entry
       "an advertised entry that is not on disk must not be spawned"
     );
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -164,7 +164,7 @@ test("isNativeExecutable distinguishes an executable image from a JS shim", () =
     assert.equal(isNativeExecutable(pe), true);
     assert.equal(isNativeExecutable(join(root, "absent")), false, "a missing file is not native");
   } finally {
-    rmSync(root, { recursive: true, force: true });
+    rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -186,7 +186,7 @@ test("runBuildTool actually runs esbuild from this repo's dependency tree", () =
 
     assert.match(readFileSync(dest, "utf8"), /42/, "esbuild produced the bundle");
   } finally {
-    rmSync(out, { recursive: true, force: true });
+    rmSync(out, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -204,5 +204,30 @@ test("colocate-standalone.mjs never spawns the node_modules/.bin shim again", ()
     source,
     /runBuildTool\(/,
     "esbuild is spawned through the shared cross-platform runner"
+  );
+});
+
+test("prepublish.ts bundles the ChatGPT Web Codex MCP bridge through runBuildTool (#11704)", () => {
+  // Node >= 20 on Windows refuses to spawn npx.cmd without a shell (EINVAL,
+  // CVE-2024-27980). The ChatGPT Web MCP esbuild step was the last raw
+  // execFileSync(NPX_BIN, ...) in prepublish.ts and crashed npm run build:cli.
+  const source = readFileSync(
+    new URL("../../../scripts/build/prepublish.ts", import.meta.url),
+    "utf8"
+  );
+  const mcpPath = "open-sse/vendor/codex-chatgpt-web/adapters/chatgpt-web/mcp-server.ts";
+  const idx = source.indexOf(mcpPath);
+  assert.notEqual(idx, -1, "ChatGPT Web Codex MCP source path is still bundled");
+
+  const window = source.slice(Math.max(0, idx - 400), idx);
+  assert.match(
+    window,
+    /runBuildTool\s*\(\s*"esbuild"\s*,\s*"esbuild"/,
+    "must spawn esbuild via runBuildTool() — raw npx.cmd is EINVAL on Node >= 20/Windows"
+  );
+  assert.doesNotMatch(
+    window,
+    /execFileSync\s*\(\s*NPX_BIN/,
+    "must not spawn NPX_BIN (npx.cmd) to bundle the ChatGPT Web MCP bridge"
   );
 });

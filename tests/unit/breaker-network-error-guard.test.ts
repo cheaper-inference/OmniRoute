@@ -1,6 +1,9 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { shouldTripProviderBreakerForResult } from "../../src/sse/handlers/chatPredicates.ts";
+import {
+  classifyProviderBreakerResult,
+  shouldTripProviderBreakerForResult,
+} from "../../src/sse/handlers/chatPredicates.ts";
 import {
   recordProviderFailure,
   clearProviderFailure,
@@ -70,6 +73,50 @@ test("forceLiveComboTest=true prevents breaker trip (combo will try next target)
   assert.equal(result, false);
 });
 
+// #12254: the single-model call site accounts for a RESOLVED dispatch result exactly
+// once through this classifier — `breaker.execute()` no longer reads a resolved
+// `{ success: false, status: 5xx }` as a success.
+test("classifyProviderBreakerResult: a resolved 503 on the single-model path is a failure", () => {
+  const outcome = classifyProviderBreakerResult(
+    { success: false, status: 503, errorCode: null, errorType: null, error: "service unavailable" },
+    false,
+    false
+  );
+  assert.equal(outcome, "failure");
+});
+test("classifyProviderBreakerResult: a successful single-model dispatch is a success", () => {
+  const outcome = classifyProviderBreakerResult({ success: true, status: 200 }, false, false);
+  assert.equal(outcome, "success");
+});
+test("classifyProviderBreakerResult: excluded failures are ignored, not counted as successes", () => {
+  const outcome = classifyProviderBreakerResult(
+    { success: false, status: 502, errorCode: "proxy_unreachable", errorType: null },
+    false,
+    false
+  );
+  assert.equal(outcome, "ignore");
+});
+test("classifyProviderBreakerResult: combo dispatches leave accounting to combo.ts (success and failure)", () => {
+  assert.equal(
+    classifyProviderBreakerResult({ success: true, status: 200 }, true, false),
+    "ignore"
+  );
+  assert.equal(
+    classifyProviderBreakerResult({ success: false, status: 503, errorCode: null }, true, false),
+    "ignore"
+  );
+});
+test("classifyProviderBreakerResult: live combo tests never touch the breaker", () => {
+  assert.equal(
+    classifyProviderBreakerResult({ success: true, status: 200 }, false, true),
+    "ignore"
+  );
+  assert.equal(
+    classifyProviderBreakerResult({ success: false, status: 503, errorCode: null }, false, true),
+    "ignore"
+  );
+});
+
 test("queue-timeout recordProviderFailure never opens the provider breaker", () => {
   // Control first: that many real failures WOULD open the breaker — proving the
   // isQueueTimeout flag, not an inert provider, is what keeps it closed.
@@ -108,6 +155,41 @@ test("same-provider network errors in one window dedup to a single failure", () 
       isProviderInCooldown(provider),
       false,
       "one transient network event must not open the breaker"
+    );
+  } finally {
+    Date.now = originalNow;
+  }
+});
+
+test("clearProviderFailure resets same-provider network dedup", () => {
+  const originalNow = Date.now;
+  let now = 1_700_000_000_000;
+  Date.now = () => now;
+  try {
+    const provider = "test-net-reset-provider";
+    const profile = {
+      ...PROVIDER_PROFILES.apikey,
+      failureThreshold: 1,
+      circuitBreakerThreshold: 1,
+      resetTimeoutMs: 60_000,
+      circuitBreakerReset: 60_000,
+    };
+
+    clearProviderFailure(provider);
+    recordProviderFailure(provider, undefined, undefined, profile, { isNetworkError: true });
+    assert.equal(
+      isProviderInCooldown(provider),
+      true,
+      "single network blip should trip with threshold=1"
+    );
+
+    clearProviderFailure(provider);
+    recordProviderFailure(provider, undefined, undefined, profile, { isNetworkError: true });
+
+    assert.equal(
+      isProviderInCooldown(provider),
+      true,
+      "resetting the breaker must clear the network dedup so a fresh blip is counted again"
     );
   } finally {
     Date.now = originalNow;

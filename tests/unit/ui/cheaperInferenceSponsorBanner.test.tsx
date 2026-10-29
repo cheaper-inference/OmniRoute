@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 /**
  * CheaperInferenceSponsorBanner — render gate (localStorage dismissal), CTA
- * pointing at our link.omniroute.online branded short link, and discreet
+ * pointing at the real cheaperinference.com destination, and discreet
  * partner-link note. Mirrors kimiSponsorBanner.test.tsx, minus the version gate
  * (this banner is a durable partnership, not a time-boxed offer).
  */
@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const STORAGE_KEY = "omniroute-cheaperinference-sponsor-banner-dismissed-v1";
 const DISMISS_EVENT = "omniroute:cheaperinference-sponsor-banner-dismissed";
-const SHORT_URL = "https://link.omniroute.online/cheaper";
+const CTA_URL = "https://cheaperinference.com/?utm_source=omniroute";
 
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 vi.mock("@/shared/components/ProviderIcon", () => ({ default: () => null }));
@@ -50,7 +50,7 @@ describe("CheaperInferenceSponsorBanner", () => {
     expect(container.textContent).toContain("cta");
     const link = container.querySelector("a[href]");
     expect(link).not.toBeNull();
-    expect(link?.getAttribute("href")).toBe(SHORT_URL);
+    expect(link?.getAttribute("href")).toBe(CTA_URL);
     expect(link?.getAttribute("target")).toBe("_blank");
     expect(link?.getAttribute("rel")).toContain("noopener");
   });
@@ -60,6 +60,17 @@ describe("CheaperInferenceSponsorBanner", () => {
     expect(container.textContent).toContain("partnerLinkNote");
     const link = container.querySelector("a[href]");
     expect(link?.getAttribute("title")).toBe("partnerLinkNote");
+  });
+
+  it("keeps the partner-link note and the CTA ink at AA contrast (KEA-7886 P7)", async () => {
+    const container = await renderBanner();
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "partnerLinkNote"
+    );
+    expect(note).toBeDefined();
+    // Was text-[9px] text-text-muted/70 (axe color-contrast on /dashboard).
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
   });
 
   it("hides after dismissal and stays hidden on re-render", async () => {

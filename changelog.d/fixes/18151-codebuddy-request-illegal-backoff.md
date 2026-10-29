@@ -1,0 +1,1 @@
+- **fix(sse):** CodeBuddy Intl 400 "request illegal" WAF blocks now back the connection off exponentially instead of being retried at cooldown 0 (#18151 — thanks @azhnan-dev).

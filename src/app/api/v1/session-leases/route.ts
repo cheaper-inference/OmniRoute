@@ -1,11 +1,15 @@
 import { z } from "zod";
 
+import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
+import { isCommonChatGptWebRetirementError } from "@/shared/constants/chatgptWebRetirement";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
-import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
+import { CORS_HEADERS, credentialRejectionHeaders, handleCorsOptions } from "@/shared/utils/cors";
 import {
+  getExclusiveConnectionLeaseStatus,
   releaseExclusiveConnectionLease,
   renewExclusiveConnectionLease,
 } from "@/lib/db/exclusiveConnectionLeases";
+import { getProviderDisplayName } from "@/lib/display/names";
 import {
   extractApiKey,
   getProviderCredentialsWithQuotaPreflight,
@@ -27,6 +31,7 @@ const action = <T extends string>(name: T, shape: z.ZodRawShape) =>
 const generation = z.number().int().positive().safe();
 const actionSchema = z.discriminatedUnion("action", [
   action("acquire", { model: z.string().trim().min(1).max(512) }),
+  action("status", { generation }),
   action("renew", { generation }),
   z.object({
     action: z.literal("release"),
@@ -35,14 +40,23 @@ const actionSchema = z.discriminatedUnion("action", [
   }),
 ]);
 
-const json = (status: number, body: unknown) =>
+const json = (status: number, body: unknown, corsHeaders: Record<string, string> = CORS_HEADERS) =>
   new Response(JSON.stringify(body), {
     status,
-    headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 
-function error(status: number, code: string, message: string): Response {
-  return json(status, buildErrorBody(status, message, null, { type: "lease_error", code }));
+function error(
+  status: number,
+  code: string,
+  message: string,
+  corsHeaders?: Record<string, string>
+): Response {
+  return json(
+    status,
+    buildErrorBody(status, message, null, { type: "lease_error", code }),
+    corsHeaders
+  );
 }
 
 const lifecycle = (lease: Record<string, unknown>) => {
@@ -55,8 +69,14 @@ export const OPTIONS = async (): Promise<Response> => handleCorsOptions();
 export async function POST(request: Request): Promise<Response> {
   const apiKey = extractApiKey(request);
   if (!apiKey) return error(401, "LEASE_AUTHENTICATION_REQUIRED", "Authentication required");
-  if (!(await isValidApiKey(apiKey)))
-    return error(401, "LEASE_API_KEY_INVALID", "Invalid API key");
+  if (!(await isValidApiKey(apiKey))) {
+    return error(
+      401,
+      "LEASE_API_KEY_INVALID",
+      "Invalid API key",
+      credentialRejectionHeaders(request)
+    );
+  }
   const contentType = request.headers.get("content-type")?.toLowerCase().split(";", 1)[0].trim();
   if (contentType !== "application/json") {
     return error(415, "LEASE_CONTENT_TYPE_REQUIRED", "Content-Type must be application/json");
@@ -64,6 +84,18 @@ export async function POST(request: Request): Promise<Response> {
 
   const parsed = actionSchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return error(400, "LEASE_ACTION_INVALID", "Invalid lease lifecycle action");
+
+  let acquisitionModelInfo: Awaited<ReturnType<typeof getModelInfo>> | null = null;
+  if (parsed.data.action === "acquire") {
+    try {
+      acquisitionModelInfo = await getModelInfo(parsed.data.model);
+    } catch (cause) {
+      if (isCommonChatGptWebRetirementError(cause)) {
+        return error(cause.status, cause.code, cause.message);
+      }
+      return error(503, "LEASE_SERVICE_UNAVAILABLE", "Lease service unavailable");
+    }
+  }
 
   const policy = await enforceApiKeyPolicy(
     request,
@@ -82,6 +114,18 @@ export async function POST(request: Request): Promise<Response> {
         generation: parsed.data.generation,
         apiKeyId: policy.apiKeyInfo.id,
       };
+      if (parsed.data.action === "status") {
+        const status = getExclusiveConnectionLeaseStatus(input);
+        return status
+          ? json(200, {
+              ...lifecycle(status.lease),
+              connection: {
+                displayName: status.connectionName,
+                provider: getProviderDisplayName(status.provider),
+              },
+            })
+          : error(409, "LEASE_FENCE_STALE", "The lease generation is stale");
+      }
       const result =
         parsed.data.action === "renew"
           ? renewExclusiveConnectionLease(input)
@@ -91,7 +135,7 @@ export async function POST(request: Request): Promise<Response> {
         : error(409, "LEASE_FENCE_STALE", "The lease generation is stale");
     }
 
-    const modelInfo = await getModelInfo(parsed.data.model);
+    const modelInfo = acquisitionModelInfo!;
     if (!modelInfo.provider) return error(400, "LEASE_MODEL_INVALID", "The model is unavailable");
     const selection = await getProviderCredentialsWithQuotaPreflight(
       modelInfo.provider,
@@ -133,6 +177,9 @@ export async function POST(request: Request): Promise<Response> {
     const result = selection as ExclusiveLeaseSelectionResult;
     return json(200, lifecycle(result.exclusiveLease));
   } catch (cause) {
+    if (isRuntimeProviderRetirementError(cause) || isCommonChatGptWebRetirementError(cause)) {
+      return error(cause.status, cause.code, cause.message);
+    }
     if (cause instanceof LeaseContextError) return error(cause.status, cause.code, cause.message);
     return error(503, "LEASE_SERVICE_UNAVAILABLE", "Lease service unavailable");
   }

@@ -1,0 +1,1 @@
+- fix(client): inline OMNIROUTE_BASE_PATH into client bundles so fetch/EventSource and the login page work under a subpath deploy (#18062)

@@ -4,12 +4,21 @@ on:
   push:
     tags:
       - "v*"
+  # A dispatch builds the ref it is dispatched ON (`gh workflow run … --ref v3.8.50` rebuilds
+  # that tag; `--ref main` builds the repaired line). The ref is deliberately NOT an input:
+  # CodeQL flags an input-controlled checkout next to the npm cache on the default branch as
+  # cache poisoning (actions/cache-poisoning/poisonable-step), and `github.ref` is trusted.
   workflow_dispatch:
     inputs:
       version:
         description: "Release version (e.g., v1.6.8)"
         required: true
         type: string
+      publish_npm:
+        description: "Also run the npm publish leg (turn off when re-attaching desktop assets to a release whose npm package already shipped)"
+        required: false
+        default: true
+        type: boolean
 
 # Least-privilege default: read-only at the top level; each job grants the writes it
 # needs (build/release upload assets, publish-npm forwards npm provenance / packages
@@ -72,6 +81,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      actions: read # find + download the CI run's next-build artifact for this SHA (as npm-publish does)
     steps:
       - uses: actions/checkout@v7
         with:
@@ -84,9 +94,53 @@ jobs:
       - name: Install dependencies
         run: npm ci
         env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
           NPM_CONFIG_LEGACY_PEER_DEPS: true
 
-      - name: Build Next.js standalone
+      # The Next standalone is platform-independent, and `ci.yml` already built it for this
+      # exact commit on the omni-build runner (the `next-build` artifact every `main` push
+      # produces — the release squash included). Reusing it is what `npm-publish.yml` does
+      # (#8941): the hosted build below needs 18–20 GB and this runner has 16, which is why
+      # the legacy per-leg fallback cost 53 min on macOS-intel and 4h41 on macOS arm64 for
+      # v3.8.52. Only runs of THIS repository's CI are candidates (artifact-poisoning guard,
+      # as in npm-publish); a missing/expired artifact falls back to the full build.
+      - name: Reuse CI's next-build artifact for this commit
+        id: reuse
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.sha }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -uo pipefail
+          CANDIDATES=$(gh api "repos/$REPO/actions/runs?head_sha=$HEAD_SHA&per_page=100" \
+            --jq '[.workflow_runs[]
+                   | select(.name == "CI"
+                            and .head_repository.full_name == env.REPO)]
+                  | sort_by(.run_started_at) | reverse | .[0:5] | .[].id') || CANDIDATES=""
+          if [ -z "$CANDIDATES" ]; then
+            echo "::notice::no CI run from this repository for $HEAD_SHA — building the standalone here"
+            exit 0
+          fi
+          for candidate in $CANDIDATES; do
+            if gh run download "$candidate" --repo "$REPO" --name next-build --dir "$RUNNER_TEMP/next-build" 2>/dev/null; then
+              tar -xzf "$RUNNER_TEMP/next-build/e2e-build.tar.gz" -C .
+              rm -rf "$RUNNER_TEMP/next-build"
+              if [ -f .build/next/standalone/server.js ]; then
+                echo "reused=true" >> "$GITHUB_OUTPUT"
+                echo "✓ reused next-build from CI run $candidate"
+                exit 0
+              fi
+              echo "  run $candidate unpacked without .build/next/standalone/server.js — trying the next"
+              rm -rf .build/next
+            else
+              echo "  run $candidate carries no usable next-build — trying the next"
+            fi
+          done
+          echo "::notice::none of the candidate runs still carries next-build (1-day retention) — building the standalone here"
+
+      - name: Build Next.js standalone (fallback when no CI artifact)
+        if: steps.reuse.outputs.reused != 'true'
         # webpack, not Turbopack, for the same hosted-runner RAM reason as the
         # linux leg (see the long comment on the fallback step in `build`).
         env:
@@ -170,7 +224,24 @@ jobs:
       - name: Install dependencies
         run: npm ci
         env:
+          ONNXRUNTIME_NODE_INSTALL: "skip"
           NPM_CONFIG_LEGACY_PEER_DEPS: true
+
+      # The Linux leg produces x64 + arm64 installers from one x64 runner. npm
+      # deliberately installs only host-compatible optional dependencies, so
+      # hydrateNativeDeps cannot source the arm64 fork unless we fetch the exact
+      # package pinned in package-lock before either build path runs.
+      - name: Install Linux arm64 wreq binding for cross-package
+        if: matrix.platform == 'linux'
+        shell: bash
+        run: |
+          npm install --no-save --ignore-scripts --force --legacy-peer-deps \
+            @wreq-js/binding-linux-arm64-gnu@3.2.0
+          git diff --exit-code -- package.json package-lock.json
+          mkdir -p "$RUNNER_TEMP/omniroute-wreq-verify"
+          DATA_DIR="$RUNNER_TEMP/omniroute-wreq-verify" node --import tsx/esm --test \
+            --test-name-pattern='wreq-js 3.2 manifest pins all nine' \
+            tests/unit/wreq-native-manifest.test.ts
 
       - name: Sanitize Windows home directory
         if: runner.os == 'Windows'
@@ -220,9 +291,9 @@ jobs:
         #          targets, and no unlisted files) byte-for-byte.
         # hydrate: the bundle was built on ubuntu, so install-machine-forked native
         #          optionals (@img/sharp-*, @img/sharp-libvips-*, @ngrok/ngrok-*,
-        #          fsevents) carry linux forks. Replace them with the forks this
+        #          @wreq-js/binding-*, fsevents) carry linux forks. Replace them with the forks this
         #          leg's own `npm ci` resolved, then assert every bundled native
-        #          (koffi triplets, better-sqlite3 prebuilds, wreq-js, onnxruntime)
+        #          (better-sqlite3 prebuilds, wreq-js, onnxruntime)
         #          can service this leg's platform/arch before packaging starts.
         run: |
           node scripts/build/standaloneBundle.mjs restore --archive web-bundle.tar.gz
@@ -404,7 +475,14 @@ jobs:
           tag_name: ${{ needs.validate.outputs.version }}
           draft: false
           prerelease: false
-          generate_release_notes: true
+          # NEVER. Phase 3 of the release flow creates the GitHub Release with the curated
+          # notes seconds after pushing the tag, so by the time this step runs (1-2 h of
+          # builds later) the body already exists — and `true` APPENDS GitHub's
+          # auto-generated "What's Changed" block to it (v3.8.48 shipped that way; the
+          # v3.8.50 re-attach dispatch added +1,416 chars to a 121 KB body, run
+          # 33238093090). A curated body sits ~3 KB under the 125,000-char cap, so the
+          # append can also turn this step RED and leave the release with no assets.
+          generate_release_notes: false
           fail_on_unmatched_files: false
           files: |
             release-assets/*.dmg
@@ -462,11 +540,20 @@ jobs:
   publish-npm:
     name: Publish to npm
     needs: [validate, release]
+    # A re-dispatch that only re-attaches desktop assets must not publish the npm package again.
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.publish_npm }}
     permissions:
       # Must be `write`, not `read`: this job calls the reusable npm-publish.yml whose
       # `publish` job needs `contents: write` (gh release upload — attach the SBOM, #3874).
       # A reusable workflow's job cannot request more permission than the caller grants,
       # so a `read` here makes GitHub reject the run at startup (startup_failure).
+      #
+      # `actions: read` for the same reason: the called `publish` job downloads the next-build
+      # artefact and requests it. v3.8.50 (run 33005490476) died at startup with "The nested
+      # job 'publish' is requesting 'actions: read', but is only allowed 'actions: none'" — and
+      # because `release` lives in this same workflow, the tag shipped with ZERO assets. Keep
+      # this block a superset of every job's permissions in npm-publish.yml.
+      actions: read
       contents: write
       id-token: write # npm provenance (forwarded to the reusable workflow)
       packages: write # publish to npm.pkg.github.com

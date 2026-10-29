@@ -90,7 +90,7 @@ test.after(async () => {
     process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     /* best effort */
   }
@@ -215,7 +215,10 @@ test("G4: round-robin hung model → 504 via loop safety timer", async () => {
 test("G5: chaos all-panel failure is logged with per-model errors", async () => {
   const log = createLog();
   const res = await handleChaosChat({
-    body: {},
+    // Streaming client: the all-failed case keeps a well-formed SSE envelope.
+    // (A non-streaming client gets a JSON 502 instead — see
+    // tests/unit/chaos-non-stream-json.test.ts.)
+    body: { stream: true },
     models: ["openai/gpt-4o-mini", "claude/sonnet"],
     handleSingleModel: async () => errorResponse(503, "upstream down"),
     log,

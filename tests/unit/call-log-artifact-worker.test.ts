@@ -12,7 +12,7 @@ const { writeCallArtifactAsync, closeCallLogArtifactWriter, resolveCallLogArtifa
 
 test.after(async () => {
   await closeCallLogArtifactWriter();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function buildArtifact(id: string) {
@@ -120,7 +120,7 @@ test("worker resolution covers npm, standalone, source, and missing layouts", ()
       }
     );
   } finally {
-    fs.rmSync(layoutRoot, { recursive: true, force: true });
+    fs.rmSync(layoutRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 
   const resolved = resolveCallLogArtifactWorker();

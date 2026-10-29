@@ -60,23 +60,24 @@ test("QuotaEndpointsCard: references quotaModelName or qtSd/ prefix", () => {
 
 test("QuotaEndpointsCard: has a <select> for API key preview", () => {
   assert.ok(
-    cardSrc.includes("<select"),
+    // KEA-7886: the kit-styled Select adapter (native <select> children).
+    /<select|<Select/.test(cardSrc),
     "QuotaEndpointsCard must render a <select> for API key selection"
   );
 });
 
 test("QuotaEndpointsCard: has a previewKeyNone leading option", () => {
   assert.ok(
-    cardSrc.includes('previewKeyNone') || cardSrc.includes("previewKeyNone"),
+    cardSrc.includes("previewKeyNone") || cardSrc.includes("previewKeyNone"),
     "QuotaEndpointsCard must use the t('previewKeyNone') i18n key for the empty/all option"
   );
 });
 
-test("QuotaEndpointsCard: has a leading option with value=\"\" for no-key selection", () => {
+test('QuotaEndpointsCard: has a leading option with value="" for no-key selection', () => {
   // The leading option must have value="" so that on reset it reverts to all-endpoints view
   assert.ok(
     cardSrc.includes('value=""') || cardSrc.includes("value=''"),
-    "QuotaEndpointsCard must have a leading <option value=\"\"> for (all endpoints)"
+    'QuotaEndpointsCard must have a leading <option value=""> for (all endpoints)'
   );
 });
 
@@ -134,22 +135,14 @@ const ENDPOINTS_KEYS = [
 test("i18n: all 5 endpoint keys present in en.json quotaShare namespace", () => {
   const en = JSON.parse(readFileSync(EN_PATH, "utf8")) as Record<string, Record<string, string>>;
   for (const k of ENDPOINTS_KEYS) {
-    assert.equal(
-      typeof en["quotaShare"]?.[k],
-      "string",
-      `en.json missing quotaShare.${k}`
-    );
+    assert.equal(typeof en["quotaShare"]?.[k], "string", `en.json missing quotaShare.${k}`);
   }
 });
 
 test("i18n: all 5 endpoint keys present in pt-BR.json quotaShare namespace", () => {
   const pt = JSON.parse(readFileSync(PT_PATH, "utf8")) as Record<string, Record<string, string>>;
   for (const k of ENDPOINTS_KEYS) {
-    assert.equal(
-      typeof pt["quotaShare"]?.[k],
-      "string",
-      `pt-BR.json missing quotaShare.${k}`
-    );
+    assert.equal(typeof pt["quotaShare"]?.[k], "string", `pt-BR.json missing quotaShare.${k}`);
   }
 });
 

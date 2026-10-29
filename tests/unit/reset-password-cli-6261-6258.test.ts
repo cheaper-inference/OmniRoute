@@ -114,8 +114,8 @@ test("omniroute reset-password subcommand applies the reset over piped stdin (#6
       "the stored password must verify against the piped value"
     );
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true });
-    fs.rmSync(home, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -143,8 +143,8 @@ test("omniroute-reset-password applies the reset over piped two-line stdin (#625
       "the stored password must verify against the piped value"
     );
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true });
-    fs.rmSync(home, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -172,7 +172,7 @@ test("omniroute-reset-password --password-stdin reads the whole stdin as the pas
       "the stored password must verify against the --password-stdin value"
     );
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true });
-    fs.rmSync(home, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(home, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

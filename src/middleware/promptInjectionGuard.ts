@@ -10,7 +10,6 @@ import {
   evaluatePromptInjection,
   type PromptInjectionGuardrailOptions,
 } from "@/lib/guardrails/promptInjection";
-import { resolveDisabledGuardrails } from "@/lib/guardrails/registry";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 
 /**
@@ -32,8 +31,15 @@ export function createInjectionGuard(options: PromptInjectionGuardrailOptions = 
     }
 
     const decision = evaluatePromptInjection(body, options, {
-      disabledGuardrails: resolveDisabledGuardrails({ body }),
-      log: options.logger || console,
+      // Mandatory injection block mode intentionally ignores all caller-
+      // controlled disabledGuardrails. Registry-managed guardrails use those
+      // channels independently; never pass them into this middleware.
+      // Omitted logger → console fallback: for middleware-only routes (embeddings,
+      // images, audio, moderations, …) this guard is the ONLY injection evaluation,
+      // so a silent guard would leave blocked requests with zero server-side trace.
+      // Chat-family routes are re-evaluated by the guardrail registry with a pino
+      // logger and opt out of the duplicate line with `logger: null` (#11936).
+      log: options.logger === undefined ? console : options.logger,
     });
     return {
       blocked: decision.blocked,

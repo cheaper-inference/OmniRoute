@@ -1,5 +1,6 @@
 import { createHash, randomUUID } from "node:crypto";
-import { STATUS_CODES } from "node:http";
+import { relayForwardingHeaders } from "./peer-stamp.mjs";
+import { getHandshakeOriginHeaders, writeHttpError } from "./responses-ws-proxy.mjs";
 
 export const WS_PUBLIC_PATHS = new Set(["/v1/ws", "/api/v1/ws"]);
 export const WS_ALLOWED_ENDPOINTS = new Set([
@@ -14,6 +15,9 @@ export const WS_ALLOWED_ENDPOINTS = new Set([
 ]);
 
 const HANDSHAKE_PATH = "/api/v1/ws";
+// Carries the browser's upgrade headers to the handshake route for its Origin check.
+// Must match WS_HANDSHAKE_ORIGIN_HEADER in src/server/origin/wsOrigin.ts.
+const HANDSHAKE_ORIGIN_HEADER = "x-omniroute-ws-handshake";
 const WS_GUID = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
 const WS_QUERY_TOKEN_KEYS = ["api_key", "token", "access_token"];
 const textEncoder = new TextEncoder();
@@ -107,29 +111,6 @@ function decodeClientFrames(buffer) {
   };
 }
 
-function writeHttpError(socket, status, body, headers = {}) {
-  if (!socket.writable || socket.destroyed) return;
-
-  const bodyBuffer = Buffer.from(body || "", "utf8");
-  const statusText = STATUS_CODES[status] || "Error";
-  const responseHeaders = {
-    Connection: "close",
-    "Content-Length": String(bodyBuffer.length),
-    "Content-Type": "application/json; charset=utf-8",
-    ...headers,
-  };
-
-  const head = [
-    `HTTP/1.1 ${status} ${statusText}`,
-    ...Object.entries(responseHeaders).map(([name, value]) => `${name}: ${value}`),
-    "",
-    "",
-  ].join("\r\n");
-
-  socket.write(head);
-  socket.end(bodyBuffer);
-}
-
 function isWsPath(pathname) {
   return WS_PUBLIC_PATHS.has(pathname);
 }
@@ -155,11 +136,13 @@ function normalizeEndpoint(rawEndpoint) {
   return `${parsed.pathname}${parsed.search}`;
 }
 
-function getForwardHeaders(requestUrl, requestHeaders) {
+function getForwardHeaders(requestUrl, requestHeaders, forwarding) {
   const headers = {
     accept: "text/event-stream",
     "content-type": "application/json",
   };
+
+  Object.assign(headers, forwarding);
 
   const authorization = requestHeaders.authorization;
   if (isText(authorization)) {
@@ -200,7 +183,14 @@ function getForwardHeaders(requestUrl, requestHeaders) {
   return headers;
 }
 
-async function performHandshake(fetchImpl, baseUrl, requestUrl, requestHeaders) {
+async function performHandshake(
+  fetchImpl,
+  baseUrl,
+  requestUrl,
+  requestHeaders,
+  forwarding,
+  originHeaders = {}
+) {
   const incomingUrl = new URL(requestUrl, baseUrl);
   const handshakeUrl = new URL(HANDSHAKE_PATH, baseUrl);
 
@@ -215,7 +205,8 @@ async function performHandshake(fetchImpl, baseUrl, requestUrl, requestHeaders) 
       authorization: requestHeaders.authorization || "",
       cookie: requestHeaders.cookie || "",
       origin: requestHeaders.origin || "",
-      "x-forwarded-for": requestHeaders["x-forwarded-for"] || "",
+      ...forwarding,
+      [HANDSHAKE_ORIGIN_HEADER]: JSON.stringify(originHeaders),
     },
   });
 
@@ -610,9 +601,36 @@ export function createOmnirouteWsBridge({
       }
 
       try {
-        const handshake = await performHandshake(fetchImpl, baseUrl, req.url || "/", req.headers);
+        const forwarding = relayForwardingHeaders(
+          req.socket && req.socket.remoteAddress,
+          req.headers
+        );
+        const handshake = await performHandshake(
+          fetchImpl,
+          baseUrl,
+          req.url || "/",
+          req.headers,
+          forwarding,
+          getHandshakeOriginHeaders(req)
+        );
         if (!handshake.ok) {
           writeHttpError(socket, handshake.status, handshake.bodyText || "{}", handshake.headers);
+          return true;
+        }
+        // Browsers skip CORS for WebSocket, and this bridge returns inference output as
+        // frames. Upgrade only when the route ran its Origin check; a route that predates
+        // the check (or any other backend) fails closed.
+        if (handshake.bodyJson?.originChecked !== true) {
+          writeHttpError(
+            socket,
+            403,
+            JSON.stringify({
+              error: {
+                message: "WebSocket origin check unavailable",
+                code: "ws_origin_unchecked",
+              },
+            })
+          );
           return true;
         }
 
@@ -654,7 +672,7 @@ export function createOmnirouteWsBridge({
           pingIntervalMs,
           socket,
           requestUrl: req.url || pathname,
-          requestHeaders: getForwardHeaders(req.url || pathname, req.headers),
+          requestHeaders: getForwardHeaders(req.url || pathname, req.headers, forwarding),
         });
         session.sendJson({
           type: "session.ready",

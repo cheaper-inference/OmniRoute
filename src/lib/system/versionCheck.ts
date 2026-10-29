@@ -33,19 +33,93 @@ const NPM_REGISTRY_LATEST_URL = "https://registry.npmjs.org/omniroute/latest";
  * surviving cause of "#4100 still not fixed" after the registry fallback shipped in v3.8.28.
  */
 const GITHUB_RELEASES_LATEST_URL =
-  "https://api.github.com/repos/diegosouzapw/OmniRoute/releases/latest";
+  "https://api.github.com/repos/cheaper-inference/OmniRoute/releases/latest";
 
 const LOOKUP_TIMEOUT_MS = 10_000;
-const MAX_VERSION_RESPONSE_BYTES = 16 * 1024;
+// Bound on the version-metadata responses, so a misdirected or hostile URL
+// cannot make the banner pin memory. It has to sit ABOVE what the two HTTP
+// sources really send, or the fallbacks can never succeed at all: measured on
+// 2026-09-21 from the published package, the registry per-version document is
+// 29,609 bytes (it embeds the README) and GitHub's latest-release payload is
+// 154,002 bytes (its `assets` array). The old 16 KiB cap was below both, so
+// each body was cancelled mid-read, the throw was swallowed by the local
+// `catch`, and both paths returned null -- the #14339 "unavailable" banner.
+// 1 MiB keeps a real ceiling (~7x the largest observed payload) without
+// pretending to parse unbounded input.
+const MAX_VERSION_RESPONSE_BYTES = 1024 * 1024;
 const LATEST_VERSION_CACHE_TTL_MS = 10 * 60_000;
 const MAX_LATEST_VERSION_CACHE_TTL_MS = 10 * 60_000;
 
-type LatestVersionCacheEntry = { value: string; expiresAt: number };
+/** npm-binary-free dist-tags source: `{ latest, next, nightly, lts, … }`. */
+const NPM_REGISTRY_DIST_TAGS_URL = "https://registry.npmjs.org/-/package/omniroute/dist-tags";
 
-let latestVersionCache: LatestVersionCacheEntry | null = null;
-let latestVersionLookup: Promise<string | null> | null = null;
-let latestVersionRefresh: Promise<string | null> | null = null;
-let latestVersionCacheGeneration = 0;
+/** Dist-tags surfaced by `GET /api/system/version` (docs/ops/RELEASE_STRATEGY.md). */
+const RELEASE_DIST_TAGS = ["latest", "next", "nightly", "lts"] as const;
+type ReleaseDistTag = (typeof RELEASE_DIST_TAGS)[number];
+export type ReleaseDistTags = Partial<Record<ReleaseDistTag, string>>;
+const DIST_TAG_VERSION_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+
+type CachedLookupOptions<T> = {
+  lookup?: () => Promise<T | null>;
+  bypassCache?: boolean;
+  storeResult?: boolean;
+  now?: () => number;
+  ttlMs?: number;
+};
+
+/**
+ * A bounded-TTL cache with single-flight lookups: concurrent callers share one
+ * in-flight lookup, an explicit refresh (`bypassCache`) bypasses an ordinary
+ * in-flight lookup but coalesces with other refreshes, only non-null results
+ * are cached, and `clear()` bumps a generation so an older in-flight result can
+ * never repopulate the cache.
+ */
+function createCachedLookup<T>(defaultLookup: () => Promise<T | null>) {
+  let cache: { value: T; expiresAt: number } | null = null;
+  let ordinary: Promise<T | null> | null = null;
+  let refresh: Promise<T | null> | null = null;
+  let generation = 0;
+
+  const clear = () => {
+    cache = null;
+    generation += 1;
+  };
+
+  const resolve = async (opts?: CachedLookupOptions<T>): Promise<T | null> => {
+    const now = opts?.now ?? Date.now;
+    if (!opts?.bypassCache && cache?.expiresAt > now()) {
+      return cache.value;
+    }
+
+    const inFlight = opts?.bypassCache ? refresh : ordinary;
+    if (inFlight) return inFlight;
+    if (opts?.bypassCache) clear();
+
+    const startedGeneration = generation;
+    const lookup = opts?.lookup ?? defaultLookup;
+    const ttlMs = Math.min(
+      Math.max(opts?.ttlMs ?? LATEST_VERSION_CACHE_TTL_MS, 0),
+      MAX_LATEST_VERSION_CACHE_TTL_MS
+    );
+    const pending = lookup().then((value) => {
+      if (value && opts?.storeResult !== false && generation === startedGeneration) {
+        cache = { value, expiresAt: now() + ttlMs };
+      }
+      return value;
+    });
+    if (opts?.bypassCache) refresh = pending;
+    else ordinary = pending;
+
+    try {
+      return await pending;
+    } finally {
+      if (ordinary === pending) ordinary = null;
+      if (refresh === pending) refresh = null;
+    }
+  };
+
+  return { clear, resolve };
+}
 
 // The pure semver helpers live in `./versionCompare` (dependency-free) so
 // client-reachable modules can import them without pulling this file's
@@ -53,14 +127,35 @@ let latestVersionCacheGeneration = 0;
 // for back-compat with existing server-side importers.
 export { normalizeVersion, isNewer } from "./versionCompare";
 
-/** Latest published version via the `npm` CLI (fast when npm is on PATH, e.g. source installs). */
-export async function getLatestVersionFromNpmCli(): Promise<string | null> {
+/**
+ * Operator opt-out for every update check: the CLI exit notice (`bin/omniroute.mjs`) and the
+ * dashboard's `GET /api/system/version` lookup. Same semantics as the CLI — any non-empty
+ * value of `OMNIROUTE_NO_UPDATE_NOTIFIER` (including "0") disables the check.
+ */
+export function isUpdateCheckDisabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.OMNIROUTE_NO_UPDATE_NOTIFIER);
+}
+
+/**
+ * Latest published version via the `npm` CLI (fast when npm is on PATH, e.g. source installs).
+ *
+ * `execFn` is injectable for tests (same pattern as the CLI's own
+ * `bin/cli/commands/update.mjs::getLatestVersion()`).
+ */
+export async function getLatestVersionFromNpmCli(
+  execFn: typeof execFileAsync = execFileAsync
+): Promise<string | null> {
   try {
     // #5542 — win32 npm is npm.cmd; execFile without a shell throws "spawn npm ENOENT"
     // on Node ≥24 (nodejs/node#52554). buildNpmExecOptions enables the shell on win32.
-    const { stdout } = await execFileAsync(
+    // #11885 — `--prefer-online` forces npm to revalidate its HTTP cache against the
+    // registry. Without it `npm info` can return a stale cached version, the same known
+    // bug class already fixed in the CLI's own copy for #4376 (see that fix's comment in
+    // bin/cli/commands/update.mjs::getLatestVersion()) but never mirrored here — this is
+    // the function backing the dashboard's "Update Available" banner.
+    const { stdout } = await execFn(
       "npm",
-      ["info", "omniroute", "version", "--json"],
+      ["info", "omniroute", "version", "--json", "--prefer-online"],
       buildNpmExecOptions(process.platform, { timeoutMs: LOOKUP_TIMEOUT_MS })
     );
     const parsed = JSON.parse(String(stdout).trim());
@@ -74,19 +169,26 @@ export async function getLatestVersionFromNpmCli(): Promise<string | null> {
  * Latest published version via the npm registry HTTP API. Needs only network access — no
  * `npm` binary — so it works in Docker / desktop / locked-down installs.
  */
-async function readBoundedJson(response: Response): Promise<unknown> {
-  const declaredLength = Number(response.headers.get("Content-Length"));
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_VERSION_RESPONSE_BYTES) {
-    await response.body?.cancel();
-    throw new Error("Version metadata response is too large");
-  }
-
-  if (!response.body) return response.json();
-  const reader = response.body.getReader();
+async function readStreamChunks(
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  signal?: AbortSignal
+): Promise<{ chunks: Uint8Array[]; totalBytes: number }> {
   const chunks: Uint8Array[] = [];
   let totalBytes = 0;
+
+  const onAbort = () => {
+    reader.cancel().catch(() => {});
+  };
+
+  if (signal) {
+    signal.addEventListener("abort", onAbort, { once: true });
+  }
+
   try {
     while (true) {
+      if (signal?.aborted) {
+        throw new Error("Version metadata request aborted");
+      }
       const { done, value } = await reader.read();
       if (done) break;
       totalBytes += value.byteLength;
@@ -97,8 +199,16 @@ async function readBoundedJson(response: Response): Promise<unknown> {
       chunks.push(value);
     }
   } finally {
+    if (signal) {
+      signal.removeEventListener("abort", onAbort);
+    }
     reader.releaseLock();
   }
+
+  return { chunks, totalBytes };
+}
+
+function parseJsonFromChunks(chunks: Uint8Array[], totalBytes: number): unknown {
   const body = new Uint8Array(totalBytes);
   let offset = 0;
   for (const chunk of chunks) {
@@ -108,18 +218,40 @@ async function readBoundedJson(response: Response): Promise<unknown> {
   return JSON.parse(new TextDecoder().decode(body));
 }
 
+async function readBoundedJson(response: Response, signal?: AbortSignal): Promise<unknown> {
+  const declaredLength = Number(response.headers.get("Content-Length"));
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_VERSION_RESPONSE_BYTES) {
+    await response.body?.cancel();
+    throw new Error("Version metadata response is too large");
+  }
+
+  if (signal?.aborted) {
+    await response.body?.cancel();
+    throw new Error("Version metadata request aborted");
+  }
+
+  if (!response.body) return response.json();
+  const reader = response.body.getReader();
+  const { chunks, totalBytes } = await readStreamChunks(reader, signal);
+  return parseJsonFromChunks(chunks, totalBytes);
+}
+
 export async function getLatestVersionFromRegistry(
   fetchImpl: typeof fetch = fetch
 ): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOOKUP_TIMEOUT_MS);
   try {
     const res = await fetchImpl(NPM_REGISTRY_LATEST_URL, {
-      signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+      signal: controller.signal,
     });
     if (!res.ok) return null;
-    const data = (await readBoundedJson(res)) as { version?: unknown };
+    const data = (await readBoundedJson(res, controller.signal)) as { version?: unknown };
     return typeof data?.version === "string" && data.version ? data.version : null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -133,9 +265,11 @@ export async function getLatestVersionFromRegistry(
 export async function getLatestVersionFromGitHub(
   fetchImpl: typeof fetch = fetch
 ): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOOKUP_TIMEOUT_MS);
   try {
     const res = await fetchImpl(GITHUB_RELEASES_LATEST_URL, {
-      signal: AbortSignal.timeout(LOOKUP_TIMEOUT_MS),
+      signal: controller.signal,
       headers: {
         // GitHub's API rejects requests without a User-Agent.
         "User-Agent": "omniroute-version-check",
@@ -143,11 +277,100 @@ export async function getLatestVersionFromGitHub(
       },
     });
     if (!res.ok) return null;
-    const data = (await readBoundedJson(res)) as { tag_name?: unknown };
+    const data = (await readBoundedJson(res, controller.signal)) as { tag_name?: unknown };
     return typeof data?.tag_name === "string" && data.tag_name ? data.tag_name : null;
   } catch {
     return null;
+  } finally {
+    clearTimeout(timer);
   }
+}
+
+const latestVersionCache = createCachedLookup<string>(() => resolveLatestVersion());
+const distTagsCache = createCachedLookup<ReleaseDistTags>(() => resolveDistTags());
+
+/**
+ * Drop the cached latest version and dist-tags (after an update, or on an
+ * explicit refresh), so the next read goes back to npm.
+ */
+export function clearLatestVersionCache(): void {
+  latestVersionCache.clear();
+  distTagsCache.clear();
+}
+
+/** Coalesce and briefly cache successful latest-version lookups. */
+export async function resolveLatestVersionCached(
+  opts?: CachedLookupOptions<string>
+): Promise<string | null> {
+  return latestVersionCache.resolve(opts);
+}
+
+/**
+ * Coalesce and cache the npm dist-tags lookup with the same TTL and refresh
+ * semantics as {@link resolveLatestVersionCached}.
+ */
+export async function resolveDistTagsCached(
+  opts?: CachedLookupOptions<ReleaseDistTags>
+): Promise<ReleaseDistTags | null> {
+  return distTagsCache.resolve(opts);
+}
+
+/** Keep only the release dist-tags whose value looks like a published version. */
+function sanitizeDistTags(raw: unknown): ReleaseDistTags | null {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return null;
+  const record = raw as Record<string, unknown>;
+  const tags: ReleaseDistTags = {};
+  for (const key of RELEASE_DIST_TAGS) {
+    const value = record[key];
+    if (typeof value === "string" && DIST_TAG_VERSION_RE.test(value)) tags[key] = value;
+  }
+  return Object.keys(tags).length ? tags : null;
+}
+
+/** Dist-tags via the `npm` CLI (`npm view omniroute dist-tags --json`). */
+export async function getDistTagsFromNpmCli(
+  execFn: typeof execFileAsync = execFileAsync
+): Promise<ReleaseDistTags | null> {
+  try {
+    const { stdout } = await execFn(
+      "npm",
+      ["view", "omniroute", "dist-tags", "--json", "--prefer-online"],
+      buildNpmExecOptions(process.platform, { timeoutMs: LOOKUP_TIMEOUT_MS })
+    );
+    return sanitizeDistTags(JSON.parse(String(stdout).trim()));
+  } catch {
+    return null;
+  }
+}
+
+/** Dist-tags via the npm registry HTTP API — no `npm` binary needed. */
+export async function getDistTagsFromRegistry(
+  fetchImpl: typeof fetch = fetch
+): Promise<ReleaseDistTags | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), LOOKUP_TIMEOUT_MS);
+  try {
+    const res = await fetchImpl(NPM_REGISTRY_DIST_TAGS_URL, { signal: controller.signal });
+    if (!res.ok) return null;
+    return sanitizeDistTags(await readBoundedJson(res, controller.signal));
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/**
+ * Resolve the published dist-tags: `npm` CLI first, then the registry HTTP API.
+ * Returns null (the route then falls back to the latest version alone) when both fail.
+ */
+export async function resolveDistTags(opts?: {
+  npmCli?: () => Promise<ReleaseDistTags | null>;
+  registry?: () => Promise<ReleaseDistTags | null>;
+}): Promise<ReleaseDistTags | null> {
+  const npmCli = opts?.npmCli ?? getDistTagsFromNpmCli;
+  const registry = opts?.registry ?? (() => getDistTagsFromRegistry());
+  return (await npmCli()) ?? (await registry());
 }
 
 /**
@@ -156,51 +379,6 @@ export async function getLatestVersionFromGitHub(
  * warning — instead of silently degrading to "no update available" — when ALL sources fail.
  * Thunks are injectable for tests.
  */
-export function clearLatestVersionCache(): void {
-  latestVersionCache = null;
-  latestVersionCacheGeneration += 1;
-}
-
-/** Coalesce and briefly cache successful latest-version lookups. */
-export async function resolveLatestVersionCached(opts?: {
-  lookup?: () => Promise<string | null>;
-  bypassCache?: boolean;
-  storeResult?: boolean;
-  now?: () => number;
-  ttlMs?: number;
-}): Promise<string | null> {
-  const now = opts?.now ?? Date.now;
-  if (!opts?.bypassCache && latestVersionCache?.expiresAt > now()) {
-    return latestVersionCache.value;
-  }
-
-  const inFlight = opts?.bypassCache ? latestVersionRefresh : latestVersionLookup;
-  if (inFlight) return inFlight;
-  if (opts?.bypassCache) clearLatestVersionCache();
-
-  const generation = latestVersionCacheGeneration;
-  const lookup = opts?.lookup ?? resolveLatestVersion;
-  const ttlMs = Math.min(
-    Math.max(opts?.ttlMs ?? LATEST_VERSION_CACHE_TTL_MS, 0),
-    MAX_LATEST_VERSION_CACHE_TTL_MS
-  );
-  const pending = lookup().then((value) => {
-    if (value && opts?.storeResult !== false && latestVersionCacheGeneration === generation) {
-      latestVersionCache = { value, expiresAt: now() + ttlMs };
-    }
-    return value;
-  });
-  if (opts?.bypassCache) latestVersionRefresh = pending;
-  else latestVersionLookup = pending;
-
-  try {
-    return await pending;
-  } finally {
-    if (latestVersionLookup === pending) latestVersionLookup = null;
-    if (latestVersionRefresh === pending) latestVersionRefresh = null;
-  }
-}
-
 export async function resolveLatestVersion(opts?: {
   npmCli?: () => Promise<string | null>;
   registry?: () => Promise<string | null>;

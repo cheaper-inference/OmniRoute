@@ -1,0 +1,1 @@
+- **fix(providers):** WorkBuddy model discovery now sends the required client identity headers, preventing authenticated catalog requests from failing with gateway error `12403` (#18035).

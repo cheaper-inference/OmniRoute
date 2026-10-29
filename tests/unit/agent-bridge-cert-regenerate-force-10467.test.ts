@@ -23,7 +23,7 @@ async function withTempDataDir<T>(fn: (dir: string) => Promise<T>): Promise<T> {
   } finally {
     if (previous === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = previous;
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 }
 

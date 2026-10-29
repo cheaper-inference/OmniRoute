@@ -30,7 +30,7 @@ const proxySchemas = await import("../../src/shared/validation/schemas/proxy.ts"
 test.after(() => {
   core.resetDbInstance();
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     /* best effort */
   }
@@ -236,7 +236,7 @@ if (!isPrivateHostname("[fd00::1]")) throw new Error("bracketed IPv6 ULA must st
     );
   } finally {
     try {
-      fs.rmSync(tempDir, { recursive: true, force: true });
+      fs.rmSync(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     } catch {
       /* best effort */
     }

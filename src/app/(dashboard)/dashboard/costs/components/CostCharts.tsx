@@ -1,6 +1,7 @@
 "use client";
 
 import { Card } from "@/shared/components";
+import { CHART_SERIES, getSeriesColor } from "@/shared/components/analytics/chartColors";
 import {
   ResponsiveContainer,
   PieChart,
@@ -15,17 +16,6 @@ import {
   BarChart,
   Bar,
 } from "recharts";
-
-const CHART_COLORS = [
-  "#10b981",
-  "#06b6d4",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ef4444",
-  "#14b8a6",
-  "#6366f1",
-  "#ec4899",
-];
 
 function createCurrencyFormatter(locale: string) {
   return new Intl.NumberFormat(locale, {
@@ -61,7 +51,7 @@ export function ProviderSpendCard({
   const chartRows = rows.slice(0, 6).map((row, index) => ({
     name: row.provider,
     value: row.cost,
-    fill: CHART_COLORS[index % CHART_COLORS.length],
+    fill: getSeriesColor(index),
   }));
 
   return (
@@ -88,9 +78,11 @@ export function ProviderSpendCard({
               <Tooltip
                 formatter={(value: number) => currencyFormatter.format(value || 0)}
                 contentStyle={{
-                  background: "var(--surface)",
-                  border: "1px solid rgba(255,255,255,0.1)",
-                  borderRadius: "12px",
+                  backgroundColor: "var(--color-surface)",
+                  borderColor: "var(--color-border)",
+                  borderRadius: 12,
+                  color: "var(--color-text-main)",
+                  boxShadow: "var(--shadow-soft)",
                 }}
               />
             </PieChart>
@@ -140,16 +132,16 @@ export function CostTrendCard({
       <div className="h-55">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={chartRows} margin={{ top: 5, right: 12, left: 0, bottom: 0 }}>
-            <CartesianGrid stroke="rgba(255,255,255,0.06)" vertical={false} />
+            <CartesianGrid stroke="var(--ci-color-border-subtle)" vertical={false} />
             <XAxis
               dataKey="date"
-              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
               axisLine={false}
               tickLine={false}
               interval={Math.max(Math.floor(chartRows.length / 8), 0)}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(value) => currencyFormatter.format(value).replace(".00", "")}
@@ -158,15 +150,17 @@ export function CostTrendCard({
             <Tooltip
               formatter={(value: number) => currencyFormatter.format(value || 0)}
               contentStyle={{
-                background: "var(--surface)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+                borderRadius: 12,
+                color: "var(--color-text-main)",
+                boxShadow: "var(--shadow-soft)",
               }}
             />
             <Line
               type="monotone"
               dataKey="cost"
-              stroke="#10b981"
+              stroke={CHART_SERIES.cost}
               strokeWidth={2.5}
               dot={false}
               activeDot={{ r: 4 }}
@@ -204,12 +198,12 @@ export function WeeklyPatternCard({
           <BarChart data={chartData} margin={{ top: 5, right: 5, left: 0, bottom: 0 }}>
             <XAxis
               dataKey="day"
-              tick={{ fontSize: 11, fill: "var(--text-muted)" }}
+              tick={{ fontSize: 11, fill: "var(--color-text-muted)" }}
               axisLine={false}
               tickLine={false}
             />
             <YAxis
-              tick={{ fontSize: 10, fill: "var(--text-muted)" }}
+              tick={{ fontSize: 10, fill: "var(--color-text-muted)" }}
               axisLine={false}
               tickLine={false}
               tickFormatter={(value) =>
@@ -224,12 +218,14 @@ export function WeeklyPatternCard({
                 `${new Intl.NumberFormat(locale).format(value || 0)} ${tokensLabel}`
               }
               contentStyle={{
-                background: "var(--surface)",
-                border: "1px solid rgba(255,255,255,0.1)",
-                borderRadius: "12px",
+                backgroundColor: "var(--color-surface)",
+                borderColor: "var(--color-border)",
+                borderRadius: 12,
+                color: "var(--color-text-main)",
+                boxShadow: "var(--shadow-soft)",
               }}
             />
-            <Bar dataKey="tokens" fill="#8b5cf6" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="tokens" fill="var(--color-chart-3)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

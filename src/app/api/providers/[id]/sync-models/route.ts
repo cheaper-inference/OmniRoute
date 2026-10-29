@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { getCachedProviderConnectionById } from "@/lib/localDb";
+import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
+import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import {
   deleteImportedCustomModels,
   deleteSyncedAvailableModelsForProvider,
   getSyncedAvailableModelsForConnection,
 } from "@/lib/db/models";
 import { selectModelsForImport } from "@/shared/utils/freeModels";
+import { resolveEffectiveAvailableModels } from "@/shared/utils/modelListResolution";
 import {
   importManagedModels,
   type ManagedModelImportMode,
@@ -20,6 +22,7 @@ import {
 } from "@/shared/services/modelSyncScheduler";
 import { autoSyncCodexProfilesFromLiveCatalog } from "@/lib/cli-helper/codexProfileAutoSync";
 import { autoSyncClaudeProfilesFromLiveCatalog } from "@/lib/cli-helper/claudeProfileAutoSync";
+import { getSearchProvider } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { providerUsesCuratedModelsOnly } from "@/lib/providers/modelListingCapability";
 import {
   fetchVolcPlanModels,
@@ -29,6 +32,12 @@ import { replaceSyncedAvailableModelsForConnection } from "@/lib/db/models";
 import { GET as getProviderModels } from "../models/route";
 import { isDegradedDiscovery } from "./degradedLocalCatalog";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { findStaleComboModelRefs, type StaleComboModelRef } from "@/lib/combos/staleModelRefs";
+import {
+  isStaleComboAutoPruneEnabled,
+  pruneStaleComboModelRefs,
+} from "@/lib/combos/staleModelPrune";
+import { logAuditEvent } from "@/lib/compliance/index";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -506,7 +515,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
     }
 
-    if (providerUsesCuratedModelsOnly(logProvider)) {
+    const isSearchProvider = getSearchProvider(logProvider) !== null;
+    if (providerUsesCuratedModelsOnly(logProvider) || isSearchProvider) {
       const [removedSyncedLists, removedImportedModelIds] = await Promise.all([
         deleteSyncedAvailableModelsForProvider(logProvider),
         deleteImportedCustomModels(logProvider),
@@ -514,8 +524,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       return NextResponse.json({
         provider: logProvider,
         connectionId: id,
-        source: "curated",
-        skipped: "curated-models-only",
+        source: isSearchProvider ? "search" : "curated",
+        skipped: isSearchProvider ? "search-provider" : "curated-models-only",
         syncedModels: 0,
         availableModelsCount: 0,
         models: [],
@@ -573,9 +583,14 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
 
     const modelSource = toNonEmptyString(modelsData.source)?.toLowerCase() || "unknown";
     const modelWarning = toNonEmptyString(modelsData.warning);
+    // The reason of the failed discovery travels with the refusal: the operator
+    // sees WHY the catalog could not be synced, not only that it was not.
+    const modelCause = toNonEmptyString(modelsData.error);
+    const discoveryFailure = asRecord(modelsData.discoveryFailure);
+    const hasDiscoveryFailure = Object.keys(discoveryFailure).length > 0;
     if (isDegradedDiscovery(modelsData)) {
       const responseError =
-        modelWarning || "Remote model discovery failed; catalog fallback not synced";
+        modelCause || modelWarning || "Remote model discovery failed; catalog fallback not synced";
       await saveCallLog({
         method: "GET",
         path: `/api/providers/${id}/models`,
@@ -590,6 +605,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         responseBody: {
           source: modelSource,
           warning: modelWarning,
+          ...(hasDiscoveryFailure ? { discoveryFailure } : {}),
           provider: logProvider,
           channel: channelLabel,
         },
@@ -600,6 +616,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
           error: responseError,
           source: modelSource,
           ...(modelWarning ? { warning: modelWarning } : {}),
+          ...(hasDiscoveryFailure ? { discoveryFailure } : {}),
         },
         { status: 502 }
       );
@@ -631,15 +648,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       previousSyncedAvailableModels: previousSyncedAvailableModelsForConnection,
     });
 
-    const effectiveAvailableModels =
-      discoveredModels.length > 0 ? discoveredModels : syncedAvailableModels;
+    const effectiveAvailableModels = resolveEffectiveAvailableModels(
+      freeFilterEmpty,
+      discoveredModels,
+      syncedAvailableModels
+    );
+    if (freeFilterEmpty) {
+      log.warn(
+        "SYNC",
+        `freeFilterEmpty: ${Array.isArray(allFetchedModels) ? allFetchedModels.length : 0} fetched, 0 free — not falling back to stale syncedAvailableModels (${logProvider})`
+      );
+    }
     const modelChanges = summarizeModelChanges(
       previousSyncedAvailableModels,
       effectiveAvailableModels
     );
     const customModelChanges = summarizeModelChanges(previousModels, persistedModels);
-    const syncedModelsCount =
-      effectiveAvailableModels.length > 0
+    const syncedModelsCount = freeFilterEmpty
+      ? 0
+      : effectiveAvailableModels.length > 0
         ? effectiveAvailableModels.length
         : persistedModels.filter((model) => isManagedSyncedModel(model)).length;
     const availableModelsCount = new Set(
@@ -699,6 +726,55 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
+    // #13505: flag combo steps pinned to models this sync dropped. Failed and
+    // degraded syncs returned above; a free-only import is a deliberate subset,
+    // so it never prunes. Errors must not fail the sync, so they are swallowed.
+    let staleComboRefs: StaleComboModelRef[] = [];
+    let prunedComboRefs: StaleComboModelRef[] = [];
+    try {
+      staleComboRefs = await findStaleComboModelRefs(logProvider);
+      if (
+        staleComboRefs.length > 0 &&
+        !importFreeOnly &&
+        !freeFilterEmpty &&
+        isStaleComboAutoPruneEnabled()
+      ) {
+        prunedComboRefs = await pruneStaleComboModelRefs(staleComboRefs);
+        for (const ref of prunedComboRefs) {
+          logAuditEvent({
+            action: "combo.stale_model_ref.pruned",
+            actor: "system",
+            target: ref.comboName,
+            resourceType: "combo",
+            details: { connectionId: id, provider: logProvider, ...ref },
+          });
+        }
+        staleComboRefs = staleComboRefs.filter((ref) => !prunedComboRefs.includes(ref));
+      }
+      if (staleComboRefs.length > 0) {
+        if (!quiet) {
+          log.warn(
+            "SYNC",
+            `${staleComboRefs.length} combo step(s) pin models missing from the ${logProvider} catalog: ${staleComboRefs.map((ref) => `${ref.comboName} -> ${ref.model}`).join(", ")}`
+          );
+        }
+        // Audit only when the catalog changed, so periodic syncs don't repeat it.
+        if (shouldLog) {
+          logAuditEvent({
+            action: "combo.stale_model_refs.flagged",
+            actor: "system",
+            target: logProvider,
+            resourceType: "combo",
+            details: { connectionId: id, staleComboRefs },
+          });
+        }
+      }
+    } catch (error) {
+      if (!quiet) {
+        log.warn("SYNC", `stale combo ref check failed for ${logProvider}: ${String(error)}`);
+      }
+    }
+
     if (shouldLog) {
       await saveCallLog({
         method: "GET",
@@ -742,6 +818,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       logged: shouldLog,
       models: persistedModels,
       importedModels,
+      staleComboRefs,
+      prunedComboRefs,
     });
   } catch (error: any) {
     // Log error

@@ -1,0 +1,76 @@
+name: UI Kit upstream watch
+
+# The CI UI Kit is a vendored snapshot (packages/ui-kit, pinned in UPSTREAM.md), so nothing tells
+# the team when Keak ships a new release — 0.0.66 sat in the tree while 0.0.76 was out. Once a
+# week this compares the pinned version with the newest `v*` tag upstream and keeps ONE tracking
+# issue open while we are behind (closed automatically when the pin catches up).
+#
+# The upstream repo (keak-ai/cheaper-inference-ui-kit) is private: the job needs a read-only token
+# in the `UI_KIT_READ_TOKEN` secret. Without it the check reports "unknown" and does nothing.
+
+on:
+  schedule:
+    - cron: "17 9 * * 1" # Mondays 09:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: ui-kit-upstream-watch
+  cancel-in-progress: true
+
+jobs:
+  watch:
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
+    name: Compare the pinned kit with the latest upstream release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Check upstream
+        id: check
+        env:
+          UI_KIT_READ_TOKEN: ${{ secrets.UI_KIT_READ_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/check/check-ui-kit-upstream.mjs --json > ui-kit-upstream.json
+          cat ui-kit-upstream.json
+          echo "state=$(node -p "require('./ui-kit-upstream.json').state")" >> "$GITHUB_OUTPUT"
+      - name: Open or close the tracking issue
+        if: ${{ steps.check.outputs.state != 'unknown' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.check.outputs.state }}
+        run: |
+          set -euo pipefail
+          TITLE="UI kit: a newer upstream release is available"
+          EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"$TITLE\"" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          if [ "$STATE" = "behind" ]; then
+            PINNED=$(node -p "require('./ui-kit-upstream.json').pinned.version")
+            LATEST=$(node -p "require('./ui-kit-upstream.json').latest.version")
+            {
+              echo "The vendored kit is pinned at \`$PINNED\`; upstream released \`v$LATEST\`."
+              echo
+              echo "Sync from the main checkout:"
+              echo
+              echo '```'
+              echo 'git -C _references/cheaper-inference-ui-kit fetch --tags'
+              echo 'scripts/dev/sync-ui-kit.sh latest'
+              echo '```'
+              echo
+              echo "Then run the kit guards (\`tests/unit/*kit*\`, \`design-kit-bridge\`, \`ui-kit-snapshot-gate\`) and the dashboard typecheck."
+            } > body.md
+            if [ -n "$EXISTING" ]; then
+              gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file body.md
+            else
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file body.md
+            fi
+          elif [ -n "$EXISTING" ]; then
+            gh issue close "$EXISTING" --repo "$GITHUB_REPOSITORY" --reason completed \
+              --comment "The pinned kit matches the latest upstream release."
+          fi

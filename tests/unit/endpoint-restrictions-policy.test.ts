@@ -30,7 +30,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       }
       break;
     } catch (error: any) {
@@ -79,7 +79,7 @@ test.after(async () => {
   apiKeysDb.resetApiKeyState();
   costRules.resetCostData();
   coreDb.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // ─── Policy tests ─────────────────────────────────────────────────────────
@@ -117,6 +117,172 @@ test("search-only key blocks /v1/chat/completions", async () => {
   assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
 });
 
+test("search-only key blocks /api/v1/chat/completions too — the App Router path shape must not fail open", async () => {
+  // A client may call the App Router path directly (no `/v1/:path*` rewrite
+  // fires), and the handler then sees `/api/v1/…` in `request.url`. The
+  // category prefixes are `/v1/…`, so without normalization the allowlist
+  // silently failed open for that shape (omni-code-sec LEDGER-9/16).
+  const policy = await loadPolicy("search-blocks-api-chat");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/api/v1/chat/completions", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the /api/v1 shape as well");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks the /chat/completions alias", async () => {
+  // `next.config.mjs` rewrites `/chat/completions` onto the chat route without
+  // touching `request.url`, so the policy sees the bare alias. It has to map
+  // onto the canonical `/v1/…` path or the allowlist fails open (#13685).
+  const policy = await loadPolicy("search-blocks-chat-alias");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/chat/completions", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the alias spelling");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks the /responses alias", async () => {
+  const policy = await loadPolicy("search-blocks-responses-alias");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/responses", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the /responses alias");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks a /responses sub-path alias", async () => {
+  const policy = await loadPolicy("search-blocks-responses-subpath");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/responses/input_tokens", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the /responses/* alias");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks the /codex/… alias", async () => {
+  const policy = await loadPolicy("search-blocks-codex-alias");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/codex/tasks/abc", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the /codex alias");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks the doubled /v1/v1 alias", async () => {
+  const policy = await loadPolicy("search-blocks-v1v1-alias");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/v1/v1/chat/completions", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the doubled /v1/v1 alias");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("chat"), `Error message should mention 'chat', got: ${msg}`);
+});
+
+test("search-only key blocks the /models alias", async () => {
+  const policy = await loadPolicy("search-blocks-models-alias");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/models", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "gpt-4");
+
+  assert.ok(result.rejection, "Should reject the /models alias");
+  assert.equal(result.rejection.status, 403);
+  const msg = await readErrorMessage(result.rejection);
+  assert.ok(msg.includes("models"), `Error message should mention 'models', got: ${msg}`);
+});
+
+test("search-only key still reaches /v1/search through the canonical path", async () => {
+  // Control: the canonicalization must not turn an allowed endpoint into a
+  // rejection on the path that was already policed correctly.
+  const policy = await loadPolicy("search-allows-canonical");
+  const key = await createKeyWithEndpoints(["search"]);
+
+  const request = makeRequest("http://localhost/v1/search", key.key);
+  const result = await policy.enforceApiKeyPolicy(request, "search");
+
+  assert.equal(result.rejection, null);
+});
+
+test("policy checks endpoint authorization before Team budget state", async () => {
+  const policy = await loadPolicy("observed-validator-order");
+  const key = await createKeyWithEndpoints([]);
+  const calls: string[] = [];
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4",
+    { validationObserver: (stage) => calls.push(stage) }
+  );
+
+  assert.equal(result.rejection, null);
+  assert.deepEqual(calls, [
+    "validateEndpointAccess",
+    "validateTeamUsage",
+    "validateQuotaAccess",
+    "validateModelAccess",
+  ]);
+});
+
+test("endpoint rejection short-circuits before Team budget lookup", async () => {
+  const policy = await loadPolicy("endpoint-before-team-usage");
+  const key = await createKeyWithEndpoints(["search"]);
+  const calls: string[] = [];
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4",
+    { validationObserver: (stage) => calls.push(stage) }
+  );
+
+  assert.equal(result.rejection?.status, 403);
+  assert.deepEqual(calls, ["validateEndpointAccess"]);
+});
+
+test("Team budget backend failure is fail-closed with a sanitized 503", async (t) => {
+  const policy = await loadPolicy("team-budget-store-failure");
+  const key = await createKeyWithEndpoints([]);
+  const db = coreDb.getDbInstance();
+  const prepare = db.prepare.bind(db);
+  t.mock.method(db, "prepare", (sql: string) => {
+    if (sql.includes("FROM api_key_billing_team_history binding")) {
+      throw new Error("simulated team budget store failure");
+    }
+    return prepare(sql);
+  });
+
+  const result = await policy.enforceApiKeyPolicy(
+    makeRequest("http://localhost/v1/chat/completions", key.key),
+    "gpt-4"
+  );
+
+  assert.equal(result.rejection?.status, 503);
+  assert.equal(await readErrorMessage(result.rejection!), "Team usage limit unavailable");
+});
+
 test("chat+embeddings key allows /v1/embeddings", async () => {
   const policy = await loadPolicy("chat-emb-allowed");
   const key = await createKeyWithEndpoints(["chat", "embeddings"]);
@@ -137,10 +303,7 @@ test("chat-only key blocks /v1/embeddings", async () => {
   assert.ok(result.rejection, "Should reject the request");
   assert.equal(result.rejection.status, 403);
   const msg = await readErrorMessage(result.rejection);
-  assert.ok(
-    msg.includes("embeddings"),
-    `Error message should mention 'embeddings', got: ${msg}`
-  );
+  assert.ok(msg.includes("embeddings"), `Error message should mention 'embeddings', got: ${msg}`);
 });
 
 test("search-only key blocks /v1/images/generations", async () => {

@@ -237,13 +237,25 @@ export const DEFAULT_PRICING_INFERENCE = {
     },
   },
   orcarouter: {
+    // Orca's own USD/1M base rates, verified 2026-10-08 at
+    // https://www.orcarouter.ai/pricing and /models/<full model id>.
+    // These are token-price estimates, not exact billed cost. The current
+    // calculator does not apply context tiers or timed multipliers (#15151).
+    // GPT >272k uses 10/45/1 upstream; this row is the <=272k base tier.
+    "openai/gpt-5.5": { input: 5, output: 30, cached: 0.5 },
+    "anthropic/claude-opus-4.8": { input: 5, output: 25, cached: 0.5, cache_creation: 6.25 },
+    "grok/grok-4.3": { input: 1.25, output: 2.5, cached: 0.2 },
+    // DeepSeek applies 2x at 01:00–04:00 and 06:00–10:00 UTC upstream.
+    "deepseek/deepseek-v4-pro": { input: 0.66, output: 1.98, cached: 0.022 },
+    "minimax/minimax-m2.7": { input: 0.3, output: 1.2, cached: 0.06, cache_creation: 0.375 },
+    "qwen/qwen3.7-max": { input: 1.25, output: 3.75, cached: 0.25, cache_creation: 1.563 },
     "google/gemini-3.6-flash": {
-      input: 1.5,
-      output: 7.5,
-      cached: 0.15,
-      reasoning: 7.5,
-      cache_creation: 1.5,
+      input: 0.75,
+      output: 3.75,
+      cached: 0.075,
     },
+    // orcarouter/auto has no fixed published rate. Keep it unpriced so budget
+    // callers can fail closed; absent cache-write prices are not invented.
   },
   synthetic: {
     "hf:openai/gpt-oss-120b": {
@@ -340,26 +352,29 @@ export const DEFAULT_PRICING_INFERENCE = {
       cache_creation: 0,
     },
   },
+  // #11773: Developer-tier $/1M from cerebras.ai/pricing (2026-09-03).
+  // Signup is a one-time $5 credit, not a $0 token grant — keep paid rates
+  // so classifyTier cannot treat Cerebras as the free routing tier.
   cerebras: {
-    "gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "gemma-4-31b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "zai-glm-4.7": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
-    "llama-3.3-70b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "gpt-oss-120b": { input: 0.35, output: 0.75, cached: 0, reasoning: 0, cache_creation: 0 },
+    "gemma-4-31b": { input: 0.4, output: 0.8, cached: 0, reasoning: 0, cache_creation: 0 },
+    "zai-glm-4.7": { input: 2.25, output: 2.75, cached: 0, reasoning: 0, cache_creation: 0 },
+    "llama-3.3-70b": { input: 0.85, output: 1.2, cached: 0, reasoning: 0, cache_creation: 0 },
     "llama-4-scout-17b-16e-instruct": {
-      input: 0,
-      output: 0,
+      input: 0.2,
+      output: 0.2,
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
     },
     "qwen-3-235b-a22b-instruct-2507": {
-      input: 0,
-      output: 0,
+      input: 0.6,
+      output: 1.2,
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
     },
-    "qwen-3-32b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
+    "qwen-3-32b": { input: 0.4, output: 0.8, cached: 0, reasoning: 0, cache_creation: 0 },
   },
   nvidia: {
     "nvidia/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
@@ -442,6 +457,17 @@ export const DEFAULT_PRICING_INFERENCE = {
       cached: 0,
       reasoning: 0,
       cache_creation: 0,
+    },
+  },
+  // OpenCode Go per-1M rates from https://opencode.ai/docs/go/ (2026-10-23). The models.dev
+  // sync layer overrides these when it carries the same id.
+  "opencode-go": {
+    "kimi-k3.1-pro": {
+      input: 2.0,
+      output: 10.0,
+      cached: 0.2,
+      reasoning: 10.0,
+      cache_creation: 2.0,
     },
   },
   hyperbolic: {

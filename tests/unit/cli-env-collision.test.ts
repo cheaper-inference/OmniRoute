@@ -67,7 +67,7 @@ test("a key masked by an earlier .env is named, with both files and without its 
     assert.ok(!stderr.includes("cwd.example"), "the ignored value must never be printed");
     assert.ok(!stderr.includes("data.example"), "the winning value must never be printed");
   } finally {
-    fs.rmSync(dirs.tmp, { recursive: true, force: true });
+    fs.rmSync(dirs.tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -83,7 +83,7 @@ test("a key each file declares once says nothing", () => {
     const stderr = runCli(dirs).stderr ?? "";
     assert.ok(!/OMNIROUTE_BASE_URL|PORT/.test(stderr), `nothing to report: ${stderr}`);
   } finally {
-    fs.rmSync(dirs.tmp, { recursive: true, force: true });
+    fs.rmSync(dirs.tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -103,7 +103,7 @@ test("a key the environment already set is reported too — that is #6194", () =
     assert.ok(!stderr.includes("shell.example"), "the winning value must never be printed");
     assert.ok(!stderr.includes("data.example"), "the ignored value must never be printed");
   } finally {
-    fs.rmSync(dirs.tmp, { recursive: true, force: true });
+    fs.rmSync(dirs.tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -125,6 +125,6 @@ test("an unreadable .env is reported instead of being swallowed", () => {
       `the unreadable file should be named: ${result.stderr}`
     );
   } finally {
-    fs.rmSync(dirs.tmp, { recursive: true, force: true });
+    fs.rmSync(dirs.tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

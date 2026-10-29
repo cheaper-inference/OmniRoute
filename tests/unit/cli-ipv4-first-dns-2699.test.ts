@@ -88,6 +88,6 @@ test("ServerSupervisor starts Node with IPv4-first DNS", async () => {
     else process.env.DATA_DIR = previousDataDir;
     if (previousNodeOptions === undefined) delete process.env.NODE_OPTIONS;
     else process.env.NODE_OPTIONS = previousNodeOptions;
-    rmSync(dataDir, { recursive: true, force: true });
+    rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

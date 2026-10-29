@@ -30,7 +30,7 @@ const originalFetch = globalThis.fetch;
 async function resetStorage() {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -71,7 +71,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("per-connection models route includes user-added custom models on the local_catalog path (#6247)", async () => {
@@ -126,6 +126,31 @@ test("per-connection models route overlays same-id custom metadata", async () =>
   assert.equal(response.status, 200);
   assert.equal(model?.name, "Operator name");
   assert.equal(model?.supportsVision, false);
+});
+
+test("per-connection models route includes custom models on a curated-only provider", async () => {
+  // codebuddy-intl publishes no model-catalog endpoint, so the route takes the
+  // intentional local_catalog branch and never probes upstream. "Curated" must
+  // not also mean "the operator cannot add an id by hand" — the saved row used
+  // to be dropped here, in mergeProviderModelListing and in /v1/models alike.
+  const connection = await seedConnection("codebuddy-intl", {
+    authType: "oauth",
+    accessToken: "codebuddy-intl-access-token",
+  });
+  await modelsDb.addCustomModel("codebuddy-intl", "probe-curated-custom", "Probe Curated Custom");
+  globalThis.fetch = (async () => new Response("upstream down", { status: 500 })) as typeof fetch;
+
+  const response = await callRoute(connection.id);
+  const body = (await response.json()) as {
+    source?: string;
+    models?: Array<{ id: string; owned_by?: string }>;
+  };
+
+  assert.equal(response.status, 200);
+  assert.equal(body.source, "local_catalog");
+  const custom = (body.models || []).find((m) => m.id === "probe-curated-custom");
+  assert.ok(custom, "curated providers must still return operator-defined custom models");
+  assert.equal(custom.owned_by, "codebuddy-intl");
 });
 
 test("per-connection models route can exclude response-only custom models for sync", async () => {

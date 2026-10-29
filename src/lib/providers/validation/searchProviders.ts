@@ -5,12 +5,26 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { withCustomUserAgent } from "./headers";
 import { toValidationErrorResult, validationWrite } from "./transport";
+import {
+  NIMBLE_CLIENT_SOURCE,
+  NIMBLE_CLIENT_SOURCE_HEADER,
+} from "@omniroute/open-sse/config/nimble.ts";
+
+// Providers whose HTTP 400 means "bad credentials", not a request-shape quirk. Google Custom
+// Search answers 400 for an invalid API key (API_KEY_INVALID) and for an unknown Search Engine ID
+// ("Request contains an invalid argument"), so the lenient < 500 policy below would report a wrong
+// key/cx as valid. 429 stays valid on purpose: an exhausted quota still proves the key + cx work.
+// Fixed messages only — the upstream body is never echoed (error sanitization rule).
+const STRICT_BAD_REQUEST_ERRORS: Record<string, string> = {
+  "google-pse-search": "Google PSE validation failed. Check the API key and Search Engine ID (cx).",
+};
 
 export async function validateSearchProvider(
   url: string,
   init: RequestInit,
   providerSpecificData: any = {},
-  isLocal: boolean = false
+  isLocal: boolean = false,
+  providerId?: string
 ): Promise<{ valid: boolean; error: string | null; unsupported: false }> {
   try {
     const response = await safeOutboundFetch(url, {
@@ -21,6 +35,10 @@ export async function validateSearchProvider(
     if (response.ok) return { valid: true, error: null, unsupported: false };
     if (response.status === 401 || response.status === 403) {
       return { valid: false, error: "Invalid API key", unsupported: false };
+    }
+    const strictBadRequestError = providerId ? STRICT_BAD_REQUEST_ERRORS[providerId] : undefined;
+    if (response.status === 400 && strictBadRequestError) {
+      return { valid: false, error: strictBadRequestError, unsupported: false };
     }
     // For provider setup we only need to confirm authentication passed.
     // Search providers may return non-auth statuses for exhausted credits,
@@ -69,6 +87,14 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
       body: JSON.stringify({ query: "test", numResults: 1 }),
     },
   }),
+  "anysearch-search": (apiKey) => ({
+    url: "https://api.anysearch.com/v1/search",
+    init: {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({ query: "test", max_results: 1 }),
+    },
+  }),
   "tavily-search": (apiKey) => ({
     url: "https://api.tavily.com/search",
     init: {
@@ -99,6 +125,33 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
       },
     };
   },
+  "nimble-search": (apiKey) => ({
+    url: "https://sdk.nimbleway.com/v1/search",
+    init: {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${apiKey}`,
+        [NIMBLE_CLIENT_SOURCE_HEADER]: NIMBLE_CLIENT_SOURCE,
+      },
+      body: JSON.stringify({
+        query: "test",
+        max_results: 1,
+        search_depth: "lite",
+      }),
+    },
+  }),
+  // Deliberately incomplete body (no search_queries/objective) so the probe never runs a
+  // real search: an accepted key answers with a request-validation 4xx (< 500 → valid),
+  // a rejected key with 401/403. validateSearchProvider never follows redirects.
+  "parallel-search": (apiKey) => ({
+    url: "https://api.parallel.ai/v1/search",
+    init: {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-api-key": apiKey },
+      body: JSON.stringify({ mode: "fast" }),
+    },
+  }),
   "linkup-search": (apiKey) => ({
     url: "https://api.linkup.so/v1/search",
     init: {
@@ -165,6 +218,13 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
         input: "test",
         tools: [{ type: "x_search" }],
       }),
+    },
+  }),
+  "xquik-search": (apiKey) => ({
+    url: "https://xquik.com/api/v1/x/tweets/search?q=test&limit=1",
+    init: {
+      method: "GET",
+      headers: { Accept: "application/json", "x-api-key": apiKey },
     },
   }),
   "zai-search": (apiKey, providerSpecificData = {}) => {

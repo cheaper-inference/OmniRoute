@@ -23,13 +23,13 @@ function connectionId(connection: unknown): string {
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("round-robin same-model retry treats multi-exclude as fallback LRU and skips all excluded accounts", async () => {
@@ -120,6 +120,60 @@ test("round-robin same-model retry treats multi-exclude as fallback LRU and skip
   assert.equal(selected.connectionId, staleId);
 });
 
+test("API-key ordered preference wins among eligible Antigravity accounts and falls back when primary is excluded", async () => {
+  await resetStorage();
+
+  const fallback = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    email: "fallback@example.test",
+    accessToken: "tok-fallback",
+    isActive: true,
+    testStatus: "active",
+    priority: 1,
+  });
+  const primary = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    email: "primary@example.test",
+    accessToken: "tok-primary",
+    isActive: true,
+    testStatus: "active",
+    priority: 99,
+  });
+
+  const fallbackId = connectionId(fallback);
+  const primaryId = connectionId(primary);
+
+  // Global priority prefers fallbackId, so this proves the API-key-specific
+  // order overrides only account ranking, not eligibility/access gates.
+  const selectedPrimary = await auth.getProviderCredentials(
+    "antigravity",
+    null,
+    [fallbackId, primaryId],
+    "gemini-3-pro",
+    { preferredConnectionIds: [primaryId, fallbackId] }
+  );
+  assert.ok(selectedPrimary && !("allRateLimited" in selectedPrimary && selectedPrimary.allRateLimited));
+  assert.equal(selectedPrimary.connectionId, primaryId);
+
+  // The retry loop excludes a failed/cooling connection. Preference must not
+  // resurrect it; the next preferred eligible account becomes the fallback.
+  const selectedFallback = await auth.getProviderCredentials(
+    "antigravity",
+    null,
+    [fallbackId, primaryId],
+    "gemini-3-pro",
+    {
+      preferredConnectionIds: [primaryId, fallbackId],
+      excludeConnectionIds: [primaryId],
+    }
+  );
+  assert.ok(selectedFallback && !("allRateLimited" in selectedFallback && selectedFallback.allRateLimited));
+  assert.equal(selectedFallback.connectionId, fallbackId);
+});
+
+
 test("Antigravity 429 rate-limited locks only the exact model so siblings stay eligible", async () => {
   await resetStorage();
 
@@ -152,12 +206,7 @@ test("Antigravity 429 rate-limited locks only the exact model so siblings stay e
 
   // The exhausted model itself is locked: getProviderCredentials reports
   // model-scope cooldown for that exact model on the only connection.
-  const sameModel = await auth.getProviderCredentials(
-    "antigravity",
-    null,
-    null,
-    "gemini-3-pro"
-  );
+  const sameModel = await auth.getProviderCredentials("antigravity", null, null, "gemini-3-pro");
   assert.ok(sameModel);
   assert.ok("allRateLimited" in sameModel && sameModel.allRateLimited);
   assert.equal(sameModel.cooldownScope, "model");

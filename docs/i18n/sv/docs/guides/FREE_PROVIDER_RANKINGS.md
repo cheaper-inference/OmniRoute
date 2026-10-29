@@ -1,0 +1,248 @@
+# Free Provider Rankings (Arena ELO) (Svenska)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [or](../../../or/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+
+---
+
+> **Kort sagt**: OmniRoute rankar sina **kostnadsfria** leverantörer efter modellkvalitet med hjälp av **ELO-poäng från
+> Arena AI (i LMArena-stil)**. Öppna sidan **Rankning av kostnadsfria leverantörer** i
+> kontrollpanelen för att se vilka kostnadsfria leverantörer som erbjuder de starkaste modellerna för din uppgift —
+> totalt sett eller filtrerat efter kategori (kodning, granskning, dokumentation, felsökning).
+
+---
+
+## Vad det är
+
+OmniRoute registrerar 377 leverantörer, inklusive 155 markerade katalogposter**free/no-auth** (no-auth, free-tier OAuth eller free-tier API nyckel — se [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) och hela [Free Tiers-katalogen](../reference/FREE_TIERS.md) ). Haken: gratisleverantörer varierar mycket i modellkvalitet. En leverantör utan auktorisering som betjänar en gränsmodell är mycket mer användbar än en som betjänar en liten äldre modell.
+
+**Gratis leverantörsranking** svarar"** vilken gratis leverantör ger mig den bästa modellen?** " genom att gå med i varje gratisleverantörs katalog med** kvalitetsresultat från publiken** från** Arena AI leaderboard** (mänsklig preferens ELO, samma idé bakom LMArena chatbot-arenan). Leverantörer rankas sedan efter deras styrka** bästa gratismodellen** .
+
+Rangordningen beräknas från tre verkliga källor:
+
+1. Listorna med gratisleverantörer — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -poster flaggade `hasFree` (`src/shared/constants/providers.ts`).
+2. Varje leverantörs modellkatalog från leverantörsregistret (`open-sse/config/providerRegistry.ts`).
+3. ELO-härledda uppgiftsanpassningspoäng lagrade i `model_intelligence` DB tabellen av Arena ELO sync-motorn (`src/lib/arenaEloSync.ts`).
+
+Anslutningslogiken bor i `src/lib/freeProviderRankings.ts`.
+
+---
+
+## Så får du åtkomst
+
+### Kontrollpanelssida
+
+Öppna kontrollpanelen och gå till **Kostnader → Rankning av kostnadsfria leverantörer**, eller navigera direkt till:
+
+```
+/dashboard/free-provider-rankings
+```
+
+Sidan (`src/app/(dashboard)/dashboard/free-provider-rankings/page.tsx`) visar:
+
+- Ett **prispodium för de tre främsta** (🥇 🥈 🥉) bland de högst rankade kostnadsfria leverantörerna.
+- En fullständig **rankningstabell** med kolumnerna: **Placering**, **Leverantör**, **Toppmodell**,
+  **Poäng**, **Genomsnittlig poäng**, **Modeller**, **Typ**.
+- **Kategorifilterknappar**: _Alla kategorier_, _Standard_, _Kodning_, _Granskning_,
+  _Dokumentation_, _Felsökning_.
+
+Varje leverantörs **Typ**-märke visar på vilket sätt den är kostnadsfri:
+
+| Märke    | Betydelse                                                |
+| -------- | -------------------------------------------------------- |
+| `NOAUTH` | Alltid kostnadsfri, inga autentiseringsuppgifter krävs   |
+| `OAUTH`  | OAuth-leverantör med en kostnadsfri nivå (`hasFree`)     |
+| `APIKEY` | API-nyckelleverantör med en kostnadsfri nivå (`hasFree`) |
+
+Poängen visas som lättlästa etiketter (t.ex. _Elit_, _Utmärkt_, _Mycket bra_,
+_Bra_, _Genomsnittlig_) i stället för råa tal, eftersom det underliggande värdet är ett relativt
+mått på rankningskvalitet, inte en procentsats.
+
+### API-slutpunkt
+
+Sidan använder en offentlig slutpunkt för läsning
+(`src/app/api/free-provider-rankings/route.ts`):
+
+```
+GET /api/free-provider-rankings
+GET /api/free-provider-rankings?category=coding
+GET /api/free-provider-rankings?category=coding&limit=20
+```
+
+Frågeparametrar (validerade med Zod):
+
+| Parameter  | Typ    | Standardvärde | Anmärkningar                                                                                                |
+| ---------- | ------ | ------------- | ----------------------------------------------------------------------------------------------------------- |
+| `category` | sträng | (inget)       | En av `default`, `coding`, `review`, `documentation`, `debugging`. Utelämna för den kombinerade rankningen. |
+| `limit`    | tal    | `50`          | Begränsas till intervallet `1–100`.                                                                         |
+
+Svarsformat:
+
+```json
+{
+  "rankings": [
+    {
+      "id": "<provider-id>",
+      "name": "<provider name>",
+      "icon": "<icon>",
+      "color": "<hex color>",
+      "textIcon": "<short label>",
+      "category": "noauth | oauth | apikey",
+      "topModel": {
+        "modelId": "<registry model id>",
+        "modelName": "<model display name>",
+        "score": 0.0,
+        "eloRaw": 0,
+        "confidence": "high | medium | low",
+        "category": "<task category>"
+      },
+      "averageScore": 0.0,
+      "modelCount": 0
+    }
+  ]
+}
+```
+
+`eloRaw` är det ursprungliga Arena ELO-värdet; `score` är det normaliserade värdet för uppgiftslämplighet
+(se nedan). Leverantörer utan poängsatta modeller utelämnas från svaret.
+
+---
+
+## Så fungerar poängen
+
+### Källa: Arena AI-topplista
+
+Arena ELO-synkmotorn (`src/lib/arenaEloSync.ts`) hämtar två topplistor — `text`
+och `code` — från Arena AI:s toppliste-API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). När API:t inte
+returnerar någon användbar topplista faller motorn tillbaka på den officiella
+`lmarena-ai/leaderboard-dataset` på Hugging Faces datasets-server
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` rapporterar `activeSource`,
+`lastError` och `lastFailedAt`. Varje topplistepost
+innehåller ett modellnamn, en leverantör, en ELO-`score`, ett konfidensintervall
+och ett röstantal.
+
+Topplistekategorier mappas till OmniRoutes uppgiftskategorier:
+
+| Arena-topplista | OmniRoute-uppgiftskategorier                      |
+| --------------- | ------------------------------------------------- |
+| `text`          | `default`, `review`, `documentation`, `debugging` |
+| `code`          | `coding`                                          |
+
+### Normalisering (uppgiftslämplighetspoäng)
+
+Råa ELO-poäng normaliseras per topplista till ett **uppgiftslämplighetsvärde i `[0.4, 0.98]`**:
+
+```
+taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
+```
+
+Poängen når aldrig `0` eller `1`, vilket lämnar utrymme för användarens egna
+åsidosättanden. Detta är fältet `score` som du ser i API-svaret och etiketten som
+visas på instrumentpanelen.
+
+### Konfidens
+
+Varje post får en konfidensnivå baserad på Arena-röstantalet:
+
+| Konfidens | Röster  |
+| --------- | ------- |
+| `high`    | ≥ 5 000 |
+| `medium`  | ≥ 1 000 |
+| `low`     | < 1 000 |
+
+### Lagring och aktualitet
+
+Normaliserade poster skrivs till databastabellen `model_intelligence` med
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Poster **upphör efter
+7 dagar**, så en leverantör som slutar synkroniseras försvinner så småningom i
+stället för att servera inaktuella data.
+
+Synkroniseringen är **påslagen som standard**:
+
+- Den körs en gång vid serverstart och därefter enligt en periodisk timer
+  (`src/lib/arenaEloSync.ts`, kopplad från `src/instrumentation-node.ts`).
+- Den är **icke-blockerande och aldrig fatal** — om hämtningen uppströms
+  misslyckas fortsätter OmniRoute att köras och rankningarna visar helt enkelt
+  de senaste giltiga data (eller ett tomt tillstånd).
+
+Två miljövariabler styr detta (dokumenterade i
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+
+| Variabel                  | Standard      | Syfte                                                               |
+| ------------------------- | ------------- | ------------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Sätt till `false` för att välja bort den utgående synkroniseringen. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synkroniseringsintervall, i sekunder.                               |
+
+### Manuell synkronisering / status / rensning
+
+För driftansvariga exponerar en autentiserad hanteringsendpoint manuell styrning
+(`src/app/api/intelligence/sync/route.ts` — kräver hanteringsautentisering):
+
+```
+GET    /api/intelligence/sync          # aktuell synkroniseringsstatus (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # utlös en manuell synkronisering; body: { "dryRun": true } för förhandsgranskning utan skrivning
+DELETE /api/intelligence/sync          # rensa alla synkroniserade arena_elo-intelligensposter
+```
+
+Om rankningssidan är tom återfyller en manuell `POST /api/intelligence/sync`
+(eller helt enkelt en omstart av servern) den.
+
+### Matcha modeller mot topplistan
+
+Modell-ID:n i registret och Arena-modellnamn matchar inte alltid exakt. Rankningen
+använder flexibel matchning (`findMatchingIntelligence` i
+`src/lib/freeProviderRankings.ts`):
+
+1. Exakt matchning på det normaliserade modell-ID:t.
+2. Matchning efter borttagning av ett avslutande versionssuffix (t.ex. `kimi-k2.6` → `kimi-k2`).
+3. Prefixmatchning (ett modellnamn i topplistan är ett prefix till register-ID:t).
+
+På synksidan tas kända leverantörsprefix (`anthropic/`, `openai/`, `google/`, …)
+bort och en liten aliasmappning expanderar kanoniska namn till de varianter som
+OmniRoute använder internt, så att modeller förblir hittbara under vilket namn som helst.
+
+### Hur en leverantör rankas
+
+För varje gratisleverantör poängsätter motorn varje modell i dess katalog, därefter:
+
+- **Bästa modell** = leverantörens högst poängsatta modell.
+- **Medelpoäng** = medelpoängen för alla leverantörens poängsatta modeller.
+- **Modeller** = hur många av leverantörens modeller som hade en Arena-poäng.
+
+Leverantörer sorteras först efter **bästa modells poäng**, sedan efter
+medelpoäng. Detta belönar en leverantör som erbjuder minst en stark gratismodell.
+
+---
+
+## Använda den för att välja kostnadsfria leverantörer
+
+1. **Välj rätt kategori.** Använd filtret **Coding** för agentbaserade arbetsflöden/kodarbetsflöden, eller
+   behåll **All Categories** / **Default** för allmän chatt. Samma leverantör kan
+   rankas olika mellan kategorier eftersom dess bästa modell skiljer sig åt per topplista.
+2. **Föredra pallplatserna för engångskonfigurationer.** Om du bara vill ansluta en eller två kostnadsfria
+   leverantörer bör du börja med de högst rankade i din kategori.
+3. **Kontrollera typetiketten.** `NOAUTH`-leverantörer är snabbast att ansluta (inga
+   autentiseringsuppgifter). Kostnadsfria nivåer med `OAUTH` / `APIKEY` kräver en snabb registrering men ger ofta tillgång till
+   kraftfullare modeller. Se [Guide till kostnadsfria nivåer](../getting-started/FREE-TIERS-GUIDE.md) för
+   anslutningssteg.
+4. **Anslut flera och låt Auto-Combo avgöra.** Samma Arena ELO-data som driver
+   den här sidan används även för **uppgiftslämplighetsfaktorn** i Auto-Combos poängmotor
+   (`open-sse/services/autoCombo/taskFitness.ts`, prioritetsordning:
+   `user_override → arena_elo → models_dev_tier → static table`). När du har anslutit
+   de främsta kostnadsfria leverantörerna kommer dirigering med `model: "auto"` (t.ex. `auto/coding`)
+   därför automatiskt att föredra kostnadsfria modeller av högre kvalitet för varje begäran. Se
+   [Auto-Combo](../routing/AUTO-COMBO.md) för den fullständiga poängsättningen med 16 faktorer.
+
+---
+
+## Relaterad dokumentation
+
+- [Guide till kostnadsfria nivåer](../getting-started/FREE-TIERS-GUIDE.md) — så ansluter du kostnadsfria
+  leverantörer utan att något kreditkort krävs.
+- [Katalog över kostnadsfria nivåer](../reference/FREE_TIERS.md) — fullständig katalog över kostnadsfria leverantörer
+  och deras begränsningar.
+- [Auto-Combo](../routing/AUTO-COMBO.md) — dirigeringsmotorn med 16 faktorer som använder samma
+  Arena ELO-data om uppgiftslämplighet.
+- [Miljövariabler](../reference/ENVIRONMENT.md) — referens för `ARENA_ELO_SYNC_ENABLED` /
+  `ARENA_ELO_SYNC_INTERVAL`.

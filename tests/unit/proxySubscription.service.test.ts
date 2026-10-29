@@ -14,7 +14,7 @@ const sub = await import("../../src/lib/proxySubscription/index.ts");
 
 function reset() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -47,7 +47,7 @@ function insertSubscription(
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("global subscription binds its pool to the global scope and is resolvable", async () => {
@@ -171,7 +171,9 @@ test("deleteSubscription unbinds and removes its proxy rows", async () => {
   assert.equal(rows.length, 0, "subscription proxy rows should be removed");
 
   const assignments = db
-    .prepare("SELECT 1 FROM proxy_assignments a JOIN proxy_registry p ON p.id=a.proxy_id WHERE p.source='subscription' LIMIT 1")
+    .prepare(
+      "SELECT 1 FROM proxy_assignments a JOIN proxy_registry p ON p.id=a.proxy_id WHERE p.source='subscription' LIMIT 1"
+    )
     .get();
   assert.equal(assignments, undefined, "no subscription proxy should remain assigned");
 

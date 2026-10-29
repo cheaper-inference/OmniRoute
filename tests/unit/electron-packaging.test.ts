@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import afterPack from "../../scripts/build/afterpack-copy-node-modules.mjs";
 import { pruneElectronRuntimeDocs } from "../../scripts/build/electronRuntimeDocs.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "..");
@@ -73,6 +75,8 @@ test("electron docs manifest prunes authoring payloads without removing runtime 
     ["docs/guides/CODEX-CLI-CONFIGURATION.md", "# Codex CLI"],
     ["docs/i18n/ko/docs/guides/ELECTRON_GUIDE.md", "# Electron"],
     ["docs/i18n/ko/CHANGELOG.md", "translated release history"],
+    ["docs/i18n/ko/README.md", "translated readme"],
+    ["docs/i18n/ko/llm.txt", "translated llm summary"],
     ["docs/i18n/fr/CHANGELOG.md", "historique traduit"],
     ["docs/research/desktop-notes.md", "authoring notes"],
     ["docs/superpowers/plans/desktop-plan.md", "implementation plan"],
@@ -87,16 +91,23 @@ test("electron docs manifest prunes authoring payloads without removing runtime 
 
     const result = pruneElectronRuntimeDocs(bundleRoot);
 
+    // Only `docs/i18n/<locale>/docs/**` is read at runtime (the in-app docs
+    // route, see src/lib/docsI18nPath.ts); every root-level mirror of a locale
+    // is authoring material and leaves the bundle with the CHANGELOG.
     assert.deepEqual(result.removedPaths, [
       "docs/i18n/fr/CHANGELOG.md",
       "docs/i18n/ko/CHANGELOG.md",
+      "docs/i18n/ko/README.md",
+      "docs/i18n/ko/llm.txt",
       "docs/research",
       "docs/superpowers",
     ]);
-    assert.equal(result.removedFiles, 4);
+    assert.equal(result.removedFiles, 6);
     assert.equal(
       result.removedBytes,
       Buffer.byteLength("translated release history") +
+        Buffer.byteLength("translated readme") +
+        Buffer.byteLength("translated llm summary") +
         Buffer.byteLength("historique traduit") +
         Buffer.byteLength("authoring notes") +
         Buffer.byteLength("implementation plan")
@@ -106,6 +117,8 @@ test("electron docs manifest prunes authoring payloads without removing runtime 
     assert.equal(existsSync(join(bundleRoot, "docs/guides/CODEX-CLI-CONFIGURATION.md")), true);
     assert.equal(existsSync(join(bundleRoot, "docs/i18n/ko/docs/guides/ELECTRON_GUIDE.md")), true);
     assert.equal(existsSync(join(bundleRoot, "docs/i18n/ko/CHANGELOG.md")), false);
+    assert.equal(existsSync(join(bundleRoot, "docs/i18n/ko/README.md")), false);
+    assert.equal(existsSync(join(bundleRoot, "docs/i18n/ko/llm.txt")), false);
     assert.equal(existsSync(join(bundleRoot, "docs/research")), false);
     assert.equal(existsSync(join(bundleRoot, "docs/superpowers")), false);
 
@@ -115,7 +128,7 @@ test("electron docs manifest prunes authoring payloads without removing runtime 
       removedPaths: [],
     });
   } finally {
-    rmSync(bundleRoot, { recursive: true, force: true });
+    rmSync(bundleRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -130,4 +143,47 @@ test("electron bundle preparation applies the runtime docs manifest to its stagi
     /pruneElectronRuntimeDocs\(ELECTRON_STANDALONE_DIR\)/,
     "Electron staging must prune authoring docs before electron-builder copies the bundle"
   );
+});
+
+test("afterPack keeps playwright-core resolvable from the packaged Next server", async () => {
+  const tmp = mkdtempSync(join(tmpdir(), "omniroute-electron-playwright-"));
+  const projectDir = join(tmp, "project", "electron");
+  const stagingPackage = join(
+    projectDir,
+    "..",
+    ".build",
+    "electron-standalone",
+    "node_modules",
+    "playwright-core"
+  );
+  const appOutDir = join(tmp, "dist");
+  const packagedPackage = join(appOutDir, "resources", "app", "node_modules", "playwright-core");
+  const runtimeChunk = join(
+    appOutDir,
+    "resources",
+    "app",
+    ".build",
+    "next",
+    "server",
+    "chunks",
+    "runtime.cjs"
+  );
+
+  try {
+    mkdirSync(stagingPackage, { recursive: true });
+    writeFileSync(
+      join(stagingPackage, "package.json"),
+      JSON.stringify({ name: "playwright-core", main: "index.cjs" })
+    );
+    writeFileSync(join(stagingPackage, "index.cjs"), "module.exports = true;\n");
+
+    await afterPack({ packager: { projectDir }, appOutDir });
+
+    assert.equal(
+      createRequire(runtimeChunk).resolve("playwright-core"),
+      join(packagedPackage, "index.cjs")
+    );
+  } finally {
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
 });

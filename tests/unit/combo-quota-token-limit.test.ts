@@ -23,7 +23,7 @@ test.after(() => {
   else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   if (ORIGINAL_QUOTA_ROUTING === undefined) delete process.env.OMNIROUTE_QUOTA_AWARE_ROUTING;
   else process.env.OMNIROUTE_QUOTA_AWARE_ROUTING = ORIGINAL_QUOTA_ROUTING;
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("round-robin quota reservation keeps the connection token limit", async () => {

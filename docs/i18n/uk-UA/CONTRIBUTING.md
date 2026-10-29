@@ -1,6 +1,6 @@
 # Contributing to OmniRoute (Українська)
 
-🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md)
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇺🇿 [uz](../uz/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
 
 ---
 
@@ -8,15 +8,21 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Development Setup
+## Налаштування середовища розробки
 
-### Prerequisites
+### Передумови
 
-- **Node.js** >= 18 < 24 (recommended: 22 LTS)
+- **Node.js** `>=22.22.2 <23` або `>=24.0.0 <27` (рекомендовано: 24 LTS)
 - **npm** 10+
+
+> **Користувачам npm v11+ (Node 24+):** після `npm install` перевірте, чи встановлено нативні модулі:
+> `node -e "require('better-sqlite3')"`. Якщо команда завершується помилкою `MODULE_NOT_FOUND`,
+> виконайте `npm approve-scripts better-sqlite3 && npm install`. Див.
+> [Усунення несправностей](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
 - **Git**
 
-### Clone & Install
+### Клонування та встановлення
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -24,85 +30,131 @@ cd OmniRoute
 npm install
 ```
 
-### Environment Variables
+### Змінні середовища
 
 ```bash
-# Create your .env from the template
+# Створіть файл .env із шаблону
 cp .env.example .env
 
-# Generate required secrets
+# Згенеруйте необхідні секрети
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Key variables for development:
+Основні змінні для розробки:
 
-| Variable               | Development Default      | Description           |
-| ---------------------- | ------------------------ | --------------------- |
-| `PORT`                 | `20128`                  | Server port           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Base URL for frontend |
-| `JWT_SECRET`           | (generate above)         | JWT signing secret    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | First login password  |
-| `APP_LOG_LEVEL`        | `info`                   | Log verbosity level   |
+| Змінна                 | Значення за замовчуванням для розробки | Опис                            |
+| ---------------------- | -------------------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                                | Порт сервера                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | Базова URL-адреса фронтенду     |
+| `JWT_SECRET`           | (згенеруйте вище)                      | Секрет для підписування JWT     |
+| `INITIAL_PASSWORD`     | `CHANGEME`                             | Пароль для першого входу        |
+| `APP_LOG_LEVEL`        | `info`                                 | Рівень деталізації журналювання |
 
-### Dashboard Settings
+### Налаштування панелі керування
 
-The dashboard provides UI toggles for features that can also be configured via environment variables:
+Панель керування містить перемикачі функцій в інтерфейсі, які також можна налаштувати за допомогою змінних середовища:
 
-| Setting Location    | Toggle             | Description                    |
-| ------------------- | ------------------ | ------------------------------ |
-| Settings → Advanced | Debug Mode         | Enable debug request logs (UI) |
-| Settings → General  | Sidebar Visibility | Show/hide sidebar sections     |
+| Розташування налаштування | Перемикач               | Опис                                            |
+| ------------------------- | ----------------------- | ----------------------------------------------- |
+| Налаштування → Розширені  | Режим налагодження      | Увімкнути журнали запитів для налагодження (UI) |
+| Налаштування → Загальні   | Видимість бічної панелі | Показати/приховати розділи бічної панелі        |
 
-These settings are stored in the database and persist across restarts, overriding env var defaults when set.
+Ці налаштування зберігаються в базі даних і не втрачаються після перезапусків, перевизначаючи встановлені значення змінних середовища за замовчуванням.
 
-### Running Locally
+### Локальний запуск
 
 ```bash
-# Development mode (hot reload)
+# Режим розробки (гаряче перезавантаження)
 npm run dev
 
-# Production build
-npm run build
+# Продакшен-збірка
+npm run build    # next build → .build/next/, потім assembleStandalone → dist/
 npm run start
 
-# Common port configuration
+# Швидка компіляція лише бекенду/API для перевірки змін від контриб'юторів
+npm run build:contributor
+
+# Релізна збірка (чиста повторна збірка + контрольний маркер HEAD — обов'язково для розгортання)
+npm run build:release   # rm -rf .build dist && build + записує dist/BUILD_SHA
+
+# Типове налаштування порту
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Default URLs:
+Збірка для контриб'юторів виконує лише перевірку компіляції: вона не створює автономний
+дистрибутив і не збирає необов'язкові ресурси для нативного пакування. Використовуйте звичайну
+продакшен-збірку, коли потрібно перевірити готовий до постачання пакет.
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+### Структура результатів збірки
+
+| Каталог   | Вміст                                                                              | Відстежується |
+| --------- | ---------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Вихідний код застосунку (TypeScript / TSX)                                         | Так           |
+| `.build/` | Проміжні файли — результат `next build` (ігнорується Git, `distDir = .build/next`) | Ні            |
+| `dist/`   | Готовий до постачання пакет — створений `assembleStandalone` (ігнорується Git)     | Ні            |
+
+Конвеєр збірки виконується за один прохід:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (результат Next.js)
+  └─ assembleStandalone()                 (копіює автономну збірку + статичні + публічні + нативні ресурси)
+       └─ результат: dist/                (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` також спочатку очищує обидва каталоги та записує
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) як контрольний маркер цілісності розгортання.
+
+`npm run build:contributor` використовує профіль збірки лише для бекенду. Під час збірки він
+тимчасово замінює файли UI панелі керування заглушками, зберігає обробники маршрутів API та
+відновлює оригінальні файли після збірки. Використовуйте `npm run build` для змін, що впливають
+на UI панелі керування, або для повної перевірки релізу; профіль для контриб'юторів не замінює
+релізну збірку.
+
+> **Примітка щодо розгортання на VPS:** каталог віддаленого образу `/usr/lib/node_modules/omniroute/app/`
+> не змінився. Засоби розгортання синхронізують вміст `dist/` із ним за допомогою rsync.
+> Змінився лише шлях результатів збірки в репозиторії (`app/` → `dist/`).
+
+URL-адреси за замовчуванням:
+
+- **Панель керування**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
 
-## Git Workflow
+## Робочий процес Git
 
-> ⚠️ **NEVER commit directly to `main`.** Always use feature branches.
+> ⚠️ **НІКОЛИ не виконуйте коміти безпосередньо в `main`.** Завжди використовуйте гілки функціональності.
+>
+> **Базова гілка PR:** вибирайте активну гілку `release/vX.Y.Z` (а не `main`). Див.
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md), щоб дізнатися про
+> модель з окремою гілкою для кожного випуску та створенням тегу під час випуску.
 
 ```bash
-git checkout -b feat/your-feature-name
-# ... make changes ...
+# Створіть гілку від останнього коміту активної гілки випуску (приклад: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... внесіть зміни ...
 git commit -m "feat: describe your change"
 git push -u origin feat/your-feature-name
-# Open a Pull Request on GitHub
+# Відкрийте Pull Request із базовою гілкою release/v3.8.49
 ```
 
-### Branch Naming
+### Іменування гілок
 
-| Prefix      | Purpose                   |
-| ----------- | ------------------------- |
-| `feat/`     | New features              |
-| `fix/`      | Bug fixes                 |
-| `refactor/` | Code restructuring        |
-| `docs/`     | Documentation changes     |
-| `test/`     | Test additions/fixes      |
-| `chore/`    | Tooling, CI, dependencies |
+| Префікс     | Призначення                  |
+| ----------- | ---------------------------- |
+| `feat/`     | Нові функції                 |
+| `fix/`      | Виправлення помилок          |
+| `refactor/` | Реструктуризація коду        |
+| `docs/`     | Зміни в документації         |
+| `test/`     | Додавання/виправлення тестів |
+| `chore/`    | Інструменти, CI, залежності  |
 
-### Commit Messages
+### Повідомлення комітів
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
+Дотримуйтеся специфікації [Conventional Commits](https://www.conventionalcommits.org/):
 
 ```
 feat: add circuit breaker for provider calls
@@ -112,200 +164,266 @@ test: add observability unit tests
 refactor(db): consolidate rate limit tables
 ```
 
-Scopes: `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`.
+Області (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
 
 ---
 
-## Running Tests
+## Запуск тестів
 
 ```bash
-# All tests (unit + vitest + ecosystem + e2e)
+# Усі тести (модульні + vitest + екосистема + e2e)
 npm run test:all
 
-# Single test file (Node.js native test runner — most tests use this)
+# Окремий тестовий файл (вбудований засіб запуску тестів Node.js — використовується для більшості тестів)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Vitest (MCP server, autoCombo, cache)
+# Лише модульні тести, на які вплинула ваша зміна (той самий селектор TIA, що й у перевірці CI, #8084)
+npm run test:scoped            # зміни в останньому коміті (або в робочому дереві)
+npm run test:scoped:staged     # лише індексовані зміни — добре поєднується із запуском перед комітом
+npm run test:scoped:full       # спочатку перебудувати мапу графа імпортів (після додавання/переміщення файлів)
+# Код завершення 1 + «запустіть повний набір» означає, що змінився центральний файл (tsconfig, package.json, …) або
+# невідображене джерело — селектор безпечно завершується помилкою й ніколи мовчки нічого не пропускає.
+
+# Vitest (сервер MCP, autoCombo, кеш)
 npm run test:vitest
 
-# E2E tests (requires Playwright)
+# Тести E2E (потребують Playwright)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E для клієнтів протоколів (транспорти MCP, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem compatibility tests
+# Тести сумісності з екосистемою
 npm run test:ecosystem
 
-# Coverage (60% min statements/lines/functions/branches)
+# Поріг покриття: 60% операторів/рядків/функцій/гілок
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format check
+# Перевірка лінтингу та форматування
 npm run lint
 npm run check
+
+# Керована перевірка combo з реальними зовнішніми сервісами (потребує доступу до VPS і коштів у реальних провайдерів)
+# Звертається до РЕАЛЬНИХ провайдерів — спричиняє невеликі витрати. НІКОЛИ не запускається в CI. Коректно пропускається без прапорця.
+# Потрібно: доступ ssh root@192.168.0.15 (отримує з VPS знімок БД лише для читання).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Перевірка фази 3 на реальному VPS — звичайні скрипти Node ESM, які звертаються безпосередньо до робочого сервера .15.
+# Потребує: доступу ssh root@192.168.0.15 (combo створюються/видаляються через SSH sqlite).
+# Звертається до РЕАЛЬНИХ провайдерів (невеликі витрати). Створює/видаляє лише combo __live_test__*. НІКОЛИ не запускається в CI.
+# На .15 установлено REQUIRE_API_KEY=false, тому ключ API не потрібен, але враховуються COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, якщо їх задано.
+npm run test:combo:live:vps              # 7 сценаріїв HTTP (пріоритет/циклічний розподіл/зважування/вартість/об’єднання/авто + справність)
+npm run test:combo:live:vps:failover     # додає реальний сценарій аварійного перемикання між провайдерами (усього 8)
 ```
 
-Coverage notes:
+Примітки щодо покриття:
 
-- `npm run test:coverage` measures source coverage for the main unit test suite, excludes `tests/**`, and includes `open-sse/**`
-- Pull requests must keep the overall coverage gate at **60% or higher** for statements, lines, functions, and branches
-- If a PR changes production code in `src/`, `open-sse/`, `electron/`, or `bin/`, it must add or update automated tests in the same PR
-- `npm run coverage:report` prints the detailed file-by-file report from the latest coverage run
-- `npm run test:coverage:legacy` preserves the older metric for historical comparison
-- See `docs/ops/COVERAGE_PLAN.md` for the phased coverage improvement roadmap
+- `npm run test:coverage` вимірює покриття вихідного коду для основного набору модульних тестів, виключає `tests/**` і включає `open-sse/**`
+- Запити на злиття мають зберігати поріг покриття на рівні **60%+** операторів/рядків/функцій/гілок
+- Якщо PR змінює робочий код у `src/`, `open-sse/`, `electron/` або `bin/`, у тому самому PR потрібно додати або оновити автоматизовані тести
+- `npm run coverage:report` виводить докладний звіт по кожному файлу з останнього запуску перевірки покриття
+- `npm run test:coverage:legacy` зберігає старішу метрику для історичного порівняння
+- Поетапну дорожню карту покращення покриття дивіться в `docs/ops/COVERAGE_PLAN.md`
 
-### Pull Request Requirements
+### Вимоги до запитів на злиття
 
-Before opening or merging a PR:
+Перед відкриттям PR скористайтеся
+[рекомендованим процесом внесення змін](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), щоб виконати цільовий цикл перевірки
+ваших змін. Повний набір модульних тестів (4 сегменти CI), Vitest, поріг покриття **60%+** і
+робоче збирання належать до сфери відповідальності CI — їх локальний запуск не надає додаткової інформації,
+якої ще не нададуть перевірки PR, а на слабших машинах він може повністю завантажити систему (#8084):
 
-- Run `npm run test:unit`
-- Run `npm run test:coverage`
-- Ensure the coverage gate stays at **60%+** for all metrics
-- Include the changed or added test files in the PR description when production code changed
-- Check the SonarQube result on the PR when the project secrets are configured in CI
+- Запустіть тестові файли, що охоплюють вашу зміну: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Запустіть `npm run lint`
+- Щоразу, коли змінюється робочий код, додавайте або оновлюйте автоматизовані тести в тому самому PR
+- У файлах `node:test` розміщуйте кожен `await` верхнього рівня (наприклад, `await import(...)`) перед першим `test()` / `describe()`: із `--test-force-exit` зареєстровані після нього тести можуть непомітно не запуститися (#18045; дотримання перевіряється командою `npm run check:test-tla-order`)
+- Якщо змінювався робочий код, укажіть змінені або додані тестові файли в описі PR
+- Перевірте результат SonarQube для PR, якщо секрети проєкту налаштовано в CI
 
-Current test status: **122 unit test files** covering:
+Поточний стан тестів: **122 файли модульних тестів**, що охоплюють:
 
-- Provider translators and format conversion
-- Rate limiting, circuit breaker, and resilience
-- Semantic cache, idempotency, progress tracking
-- Database operations and schema (21 DB modules)
-- OAuth flows and authentication
-- API endpoint validation (Zod v4)
-- MCP server tools and scope enforcement
-- Memory and Skills systems
-
----
-
-## Code Style
-
-- **ESLint** — Run `npm run lint` before committing
-- **Prettier** — Auto-formatted via `lint-staged` on commit (2 spaces, semicolons, double quotes, 100 char width, es5 trailing commas)
-- **TypeScript** — All `src/` code uses `.ts`/`.tsx`; `open-sse/` uses `.ts`/`.js`; document with TSDoc (`@param`, `@returns`, `@throws`)
-- **No `eval()`** — ESLint enforces `no-eval`, `no-implied-eval`, `no-new-func`
-- **Zod validation** — Use Zod v4 schemas for all API input validation
-- **Naming**: Files = camelCase/kebab-case, components = PascalCase, constants = UPPER_SNAKE
+- Транслятори провайдерів і перетворення форматів
+- Обмеження частоти запитів, автоматичний вимикач і відмовостійкість
+- Семантичний кеш, ідемпотентність і відстеження прогресу
+- Операції з базою даних і схему (21 модуль БД)
+- Потоки OAuth і автентифікацію
+- Валідацію кінцевих точок API (Zod v4)
+- Інструменти сервера MCP і контроль областей доступу
+- Системи пам’яті та навичок
 
 ---
 
-## Project Structure
+## Стиль коду
+
+- **ESLint** — запускайте `npm run lint` перед комітом
+- **Prettier** — автоматичне форматування через `lint-staged` під час коміту (2 пробіли, крапки з комою, подвійні лапки, ширина 100 символів, кінцеві коми в стилі es5)
+- **TypeScript** — увесь код у `src/` використовує `.ts`/`.tsx`; `open-sse/` використовує `.ts`/`.js`; документуйте за допомогою TSDoc (`@param`, `@returns`, `@throws`)
+- **Без `eval()`** — ESLint застосовує правила `no-eval`, `no-implied-eval`, `no-new-func`
+- **Валідація Zod** — використовуйте схеми Zod v4 для валідації всіх вхідних даних API
+- **Іменування**: файли = camelCase/kebab-case, компоненти = PascalCase, константи = UPPER_SNAKE
+
+### Обробка помилок / порожні блоки catch
+
+Ніколи не залишайте `catch` без пояснення. Віднесіть його до однієї з двох категорій (це практичне втілення суворого правила «ніколи мовчки не ігнорувати помилки в потоках SSE»):
+
+- **Навмисно (наше власне очищення/телеметрія за принципом best-effort)** — помилка тут очікувана й нешкідлива; додайте однорядковий коментар із поясненням, без журналювання (ця домовленість дає змогу уникнути шуму від журналювання кожного запиту).
+
+  ```ts
+  } catch {} // закриття вже закритого контролера після від’єднання клієнта є очікуваним
+  ```
+
+- **Слід журналювати (зовнішній/наданий викликачем код або ігнорування змінює потік керування)** — залиште `catch` (ніколи не дозволяйте йому перервати потік), але виведіть контекстне повідомлення через `console.debug`/`warn`, щоб помилку можна було виявити.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] помилка зворотного виклику onFailure:", e);
+  }
+  ```
+
+Приклади застосування див. у `open-sse/utils/stream.ts` і `open-sse/utils/streamHandler.ts`.
+
+---
+
+## Структура проєкту
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Сторінки панелі керування (23 розділи)
+│   ├── api/                # Маршрути API (51 каталог)
+│   └── login/              # Сторінки автентифікації (.tsx)
+├── domain/                 # Рушій політик (policyEngine, comboResolver, costRules тощо)
+├── lib/                    # Основна бізнес-логіка (.ts)
+│   ├── a2a/                # Сервер протоколу Agent-to-Agent v0.3
+│   ├── acp/                # Реєстр Agent Communication Protocol
+│   ├── compliance/         # Рушій політик відповідності вимогам
+│   ├── db/                 # Доменні модулі SQLite + 130 міграцій
+│   ├── memory/             # Постійна пам’ять розмов
+│   ├── oauth/              # Провайдери, служби та утиліти OAuth
+│   ├── skills/             # Розширюваний фреймворк навичок
+│   ├── usage/              # Відстеження використання та розрахунок вартості
+│   └── localDb.ts          # Лише рівень повторного експорту — ніколи не додавайте сюди логіку
+├── middleware/              # Проміжне ПЗ для запитів (promptInjectionGuard)
+├── mitm/                   # Проксі MITM (сертифікат, DNS, маршрутизація до цілі)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Компоненти React (.tsx)
+│   ├── constants/          # Визначення провайдерів (329), області дії MCP, 20 стратегій маршрутизації
+│   ├── utils/              # Автоматичний вимикач, санітизатор, допоміжні засоби автентифікації
+│   └── validation/         # Схеми Zod v4
+└── sse/                    # Конвеєр проксі SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Робочий простір @omniroute/open-sse
+├── executors/              # 150 модулів виконавців (класи виконавців + допоміжні засоби для кожного провайдера)
+├── handlers/               # 11 обробників запитів (чат, відповіді, вбудовування, зображення тощо)
+├── mcp-server/             # Сервер MCP (110 унікальних інструментів, 3 транспорти, 33 області дії)
+├── services/               # 178 служб верхнього рівня (combo, autoCombo, rateLimitManager тощо)
+├── translator/             # Перетворювачі форматів (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Перетворювач Responses API
+└── utils/                  # 22 модулі утиліт (потоки, TLS, проксі, журналювання)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Настільний застосунок Electron (кросплатформний)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Засіб запуску тестів Node.js (1 574 тестові файли)
+├── integration/            # Інтеграційні тести
+├── e2e/                    # Тести Playwright
+├── security/               # Тести безпеки
+├── translator/             # Тести, специфічні для перетворювача
+└── load/                   # Навантажувальні тести
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Записи архітектурних рішень
+├── architecture/            # Архітектура та відмовостійкість системи
+├── comparison/              # Порівняння OmniRoute з альтернативами
+├── compression/             # Посібники та правила зі стиснення
+├── dev/                     # Посібники з розробки
+├── diagrams/                # Архітектурні діаграми
+├── frameworks/              # MCP, A2A, OpenCode, пам’ять, навички
+├── guides/                  # Посібник користувача, Docker, налаштування, усунення несправностей
+├── i18n/                    # Інтернаціоналізовані переклади README
+├── marketing/               # Маркетингові матеріали
+├── ops/                     # Розгортання, проксі, покриття, випуски
+├── providers/               # Документація для окремих провайдерів
+├── reference/               # Довідник API, змінні середовища, інструменти CLI, безкоштовні рівні
+├── releases/                # Примітки до випусків
+├── routing/                 # Рушій автоматичного комбінування, повторне відтворення міркувань
+├── screenshots/             # Знімки екрана панелі керування
+├── security/                # Захисні механізми, відповідність вимогам, прихованість, токени
+└── specs/                   # Проєктні специфікації
 ```
 
 ---
 
-## Adding a New Provider
+## Додавання нового провайдера
 
-### Step 1: Register Provider Constants
+### Крок 1: Зареєструйте константи провайдера
 
-Add to `src/shared/constants/providers.ts` — Zod-validated at module load.
+Додайте їх до `src/shared/constants/providers.ts` — валідація за допомогою Zod виконується під час завантаження модуля.
 
-### Step 2: Add Executor (if custom logic needed)
+### Крок 2: Додайте виконавець (якщо потрібна власна логіка)
 
-Create executor in `open-sse/executors/your-provider.ts` extending the base executor.
+Створіть виконавець у `open-sse/executors/your-provider.ts`, успадкувавши його від базового виконавця.
 
-### Step 3: Add Translator (if non-OpenAI format)
+### Крок 3: Додайте транслятор (якщо формат відрізняється від OpenAI)
 
-Create request/response translators in `open-sse/translator/`.
+Створіть транслятори запитів і відповідей у `open-sse/translator/`.
 
-### Step 4: Add OAuth Config (if OAuth-based)
+### Крок 4: Додайте конфігурацію OAuth (якщо використовується OAuth)
 
-Add OAuth credentials in `src/lib/oauth/constants/oauth.ts` and service in `src/lib/oauth/services/`.
+Додайте облікові дані OAuth до `src/lib/oauth/constants/oauth.ts`, а сервіс — до `src/lib/oauth/services/`.
 
-### Step 5: Register Models
+Якщо upstream-провайдер поширює публічний OAuth client_id/secret або ключ Firebase Web API у своєму публічному CLI / браузерному пакеті, **не** вбудовуйте його як рядковий літерал. Використовуйте `resolvePublicCred()` з `open-sse/utils/publicCreds.ts` і додайте запис із замаскованими байтами до `EMBEDDED_DEFAULTS`. Повний обов’язковий робочий процес задокументовано в [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md).
 
-Add model definitions in `open-sse/config/providerRegistry.ts`.
+Усередині обробників/виконавців повідомлення про помилки, що надходять клієнту, мають проходити через `buildErrorBody()` / `sanitizeErrorMessage()` з `open-sse/utils/error.ts` — ніколи не додавайте необроблені `err.stack` або `err.message` до тіла Response. Див. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md).
 
-### Step 6: Add Tests
+### Крок 5: Зареєструйте моделі
 
-Write unit tests in `tests/unit/` covering at minimum:
+Додайте визначення моделей до `open-sse/config/providerRegistry.ts`.
 
-- Provider registration
-- Request/response translation
-- Error handling
+### Крок 6: Додайте тести
 
----
+Напишіть модульні тести в `tests/unit/`, які щонайменше охоплюють:
 
-## Pull Request Checklist
-
-- [ ] Tests pass (`npm test`)
-- [ ] Linting passes (`npm run lint`)
-- [ ] Build succeeds (`npm run build`)
-- [ ] TypeScript types added for new public functions and interfaces
-- [ ] No hardcoded secrets or fallback values
-- [ ] All inputs validated with Zod schemas
-- [ ] CHANGELOG updated (if user-facing change)
-- [ ] Documentation updated (if applicable)
+- Реєстрацію провайдера
+- Трансляцію запитів і відповідей
+- Обробку помилок
 
 ---
 
-## Releasing
+## Контрольний список Pull Request
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+- [ ] Тести проходять (`npm test`)
+- [ ] Перевірка лінтером проходить (`npm run lint`)
+- [ ] Збірка успішна (`npm run build`)
+- [ ] Додано типи TypeScript для нових публічних функцій та інтерфейсів
+- [ ] Немає жорстко закодованих секретів або резервних значень
+- [ ] Публічні облікові дані upstream-сервісів вбудовано через `resolvePublicCred()` (див. [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), а не як літерали
+- [ ] Відповіді з помилками проходять через `buildErrorBody()` / `sanitizeErrorMessage()` — у тілах відповідей немає необроблених трасувань стека (див. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
+- [ ] Команди оболонки (`exec` / `spawn`) передають значення часу виконання через `env`, а не через інтерполяцію рядків
+- [ ] Усі вхідні дані перевіряються за допомогою схем Zod
+- [ ] Для змін, видимих користувачам, додано **фрагмент** журналу змін у `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` (див. [`changelog.d/README.md`](./changelog.d/README.md)) — **не** редагуйте `CHANGELOG.md` безпосередньо; фрагменти об’єднуються під час випуску й ніколи не спричиняють конфліктів між PR
+- [ ] Документацію оновлено (якщо застосовно)
+- [ ] Не створено нових сповіщень CodeQL / Secret-Scanning або кожне з них відхилено з технічним обґрунтуванням і посиланням на відповідний документ у `docs/security/`
+- [ ] Маршрути, що запускають дочірні процеси (`/api/mcp/`, `/api/cli-tools/runtime/`), класифіковано як `isLocalOnlyPath()` у `src/server/authz/routeGuard.ts` — див. [Жорстке правило №15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] У повідомленнях комітів немає трейлерів AI/ботів `Co-authored-by` (Жорстке правило №16) — людей-співавторів, чию роботу повторно використано, зазначено стандартними трейлерами `Co-authored-by: Name <email>`
 
 ---
 
-## Getting Help
+## Випуск релізів
 
-- **Architecture**: See [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
-- **API Reference**: See [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
-- **Issues**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)
-- **ADRs**: See `docs/adr/` for architectural decision records
+Керування релізами здійснюється через робочий процес `/generate-release`. Коли створюється новий реліз GitHub, пакет **автоматично публікується в npm** за допомогою GitHub Actions.
+
+Для розгортання на VPS використовуйте `npm run build:release` (не `npm run build`) — ця команда виконує чисту
+повторну збірку, формує пакет у `dist/` і записує сигнальний файл `dist/BUILD_SHA`.
+Потім використовуйте навички `/deploy-vps-*-cc`, які синхронізують `dist/` із віддаленим каталогом `app/` за допомогою rsync.
+
+---
+
+## Отримання допомоги
+
+- **Архітектура**: див. [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md)
+- **Довідник API**: див. [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md)
+- **Документація з безпеки**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Документація з експлуатації**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Проблеми**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

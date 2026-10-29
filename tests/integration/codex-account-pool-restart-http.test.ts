@@ -44,6 +44,6 @@ test("Codex Spark cooldown survives a fresh process without creating child conne
     assert.equal(after.connectionId, before.connectionId);
     assert.deepEqual(after.upstreamModels, ["gpt-5.5"]);
   } finally {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

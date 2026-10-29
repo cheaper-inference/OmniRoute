@@ -1,7 +1,7 @@
 /**
  * Fingerprint-based target expansion for combo routing.
  *
- * Some providers (MiMoCode, MiCode, OpenCode) store multiple device
+ * Some no-auth providers can store multiple device
  * fingerprints inside a single connection's `providerSpecificData.fingerprints`.
  * Without expansion the combo system treats the connection as one account,
  * so only one fingerprint is used per request.  This module splits such
@@ -14,8 +14,11 @@
 
 import type { ResolvedComboTarget } from "./types.ts";
 
-/** Providers whose `providerSpecificData.fingerprints` array should be expanded. */
-const FINGERPRINT_PROVIDERS: ReadonlySet<string> = new Set(["opencode"]);
+/**
+ * Providers whose `providerSpecificData.fingerprints` array should be expanded.
+ * Empty since the keyless OpenCode provider (its last member) was removed.
+ */
+const FINGERPRINT_PROVIDERS: ReadonlySet<string> = new Set<string>();
 
 /** Separator the combo builder UI uses to encode an account pin (#6087). */
 const FP_PIN_SEPARATOR = "|fp|";
@@ -79,6 +82,20 @@ export function buildFingerprintExecutionKey(
   return `${originalKey}@fp:${fingerprint}`;
 }
 
+function rewriteAllowlistIds(
+  allowlist: string[] | null | undefined,
+  fromId: string,
+  toId: string
+): string[] | null {
+  if (!Array.isArray(allowlist) || allowlist.length === 0) return null;
+  const rewritten = allowlist.map((id) => {
+    if (id === fromId) return toId;
+    const pin = splitFingerprintPin(id);
+    return pin ? pin.realConnectionId : id;
+  });
+  return [...new Set(rewritten)];
+}
+
 /**
  * Expand `expandedTargets` by splitting targets whose connection carries
  * multiple fingerprints into one target per fingerprint.
@@ -116,6 +133,11 @@ export function expandTargetsByFingerprints(
     // find the connection at all.
     const pin = splitFingerprintPin(connectionId);
     if (pin) {
+      const rewrittenAllowlist = rewriteAllowlistIds(
+        target.allowedConnectionIds,
+        connectionId,
+        pin.realConnectionId
+      );
       result.push({
         ...target,
         connectionId: pin.realConnectionId,
@@ -125,6 +147,7 @@ export function expandTargetsByFingerprints(
           pin.pinnedFingerprint,
           false
         ),
+        ...(rewrittenAllowlist ? { allowedConnectionIds: rewrittenAllowlist } : {}),
       });
       continue;
     }

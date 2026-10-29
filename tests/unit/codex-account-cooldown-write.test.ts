@@ -15,7 +15,7 @@ const codexFailover = await import("../../open-sse/handlers/chatCore/codexFailov
 
 async function resetStorage(): Promise<void> {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -65,7 +65,7 @@ test.beforeEach(resetStorage);
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("persisting Codex and Spark child cooldowns retains sibling and unrelated state", async () => {

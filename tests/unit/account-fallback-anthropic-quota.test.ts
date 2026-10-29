@@ -10,8 +10,7 @@ import assert from "node:assert/strict";
 
 const { classifyErrorText, parseRetryFromErrorText, checkFallbackError, getProviderProfile } =
   await import("../../open-sse/services/accountFallback.ts");
-const { isSubscriptionQuotaText } =
-  await import("../../open-sse/services/quotaTextCooldowns.ts");
+const { isSubscriptionQuotaText } = await import("../../open-sse/services/quotaTextCooldowns.ts");
 const { RateLimitReason } = await import("../../open-sse/config/constants.ts");
 
 test("#2321 classifyErrorText flags 'Usage Limit Reached' as QUOTA_EXHAUSTED", () => {
@@ -134,4 +133,33 @@ test("#2321 generic 429 without quota keyword still gets the short cooldown path
     out.cooldownMs < 5 * 60 * 1000,
     `expected short cooldown (<5min), got ${out.cooldownMs}ms`
   );
+});
+
+// Claude returns this 429 once the account's monthly extra-usage spend cap is reached. It is a
+// long-window quota (it clears when the billing month rolls over or the cap is raised), so the
+// connection must be parked for the subscription cooldown instead of being retried every few seconds.
+const MONTHLY_SPEND_LIMIT_TEXT =
+  "This request would exceed your account's monthly spend limit. Please try again later.";
+
+test("Claude monthly spend limit text is subscription quota only for Claude", () => {
+  assert.equal(isSubscriptionQuotaText(MONTHLY_SPEND_LIMIT_TEXT.toLowerCase(), "claude"), true);
+  assert.equal(isSubscriptionQuotaText(MONTHLY_SPEND_LIMIT_TEXT.toLowerCase(), "codex"), false);
+});
+
+test("Claude monthly spend limit 429 gets the subscription quota cooldown", () => {
+  const out = checkFallbackError(429, MONTHLY_SPEND_LIMIT_TEXT, 0, null, "claude");
+  assert.equal(out.shouldFallback, true);
+  assert.equal(out.reason, RateLimitReason.QUOTA_EXHAUSTED);
+  assert.ok(out.cooldownMs >= 5 * 60 * 1000, `expected long cooldown, got ${out.cooldownMs}ms`);
+});
+
+test("Claude per-minute rate limit text is not mistaken for the monthly spend limit", () => {
+  const out = checkFallbackError(
+    429,
+    "rate_limit_error: 50 requests per minute",
+    0,
+    null,
+    "claude"
+  );
+  assert.ok(out.cooldownMs < 5 * 60 * 1000, `expected short cooldown, got ${out.cooldownMs}ms`);
 });

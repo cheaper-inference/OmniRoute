@@ -2,13 +2,48 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Card } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { Card, EmptyState, SegmentedControl } from "@/shared/components";
 
 type LeaderboardScope = "global" | "weekly" | "monthly" | "tokens_shared";
 
 interface LeaderboardEntry {
   apiKeyId: string;
   score: number;
+  /** API key display name from the REST endpoint; absent on SSE payloads. */
+  name?: string | null;
+}
+
+/** Key name when known, otherwise a shortened id so the row is still identifiable. */
+function entryLabel(entry: LeaderboardEntry, idLength: number): string {
+  const name = entry.name?.trim();
+  return name ? name : `${entry.apiKeyId.slice(0, idLength)}...`;
+}
+
+/**
+ * Live SSE updates carry scores only. Carry the names already fetched over
+ * REST forward so rows do not flip back to raw ids on every refresh.
+ */
+function withKnownNames(
+  previous: LeaderboardEntry[],
+  incoming: LeaderboardEntry[]
+): LeaderboardEntry[] {
+  const known = new Map<string, string>();
+  for (const entry of previous) {
+    if (entry.name) known.set(entry.apiKeyId, entry.name);
+  }
+  return incoming.map((entry) =>
+    entry.name || !known.has(entry.apiKeyId) ? entry : { ...entry, name: known.get(entry.apiKeyId) }
+  );
 }
 
 const SCOPE_LABEL_KEYS: Record<LeaderboardScope, string> = {
@@ -18,11 +53,8 @@ const SCOPE_LABEL_KEYS: Record<LeaderboardScope, string> = {
   tokens_shared: "leaderboardScopes.tokensShared",
 };
 
-const MEDAL_COLORS = [
-  "from-amber-400 to-yellow-600", // gold
-  "from-gray-300 to-gray-500", // silver
-  "from-amber-600 to-orange-800", // bronze
-];
+// Podium accent strip: gold / silver / bronze through theme tokens (light + dark).
+const MEDAL_COLORS = ["bg-warning", "bg-border-strong", "bg-warning/50"];
 
 const MEDAL_EMOJI = ["🥇", "🥈", "🥉"];
 
@@ -67,7 +99,7 @@ export default function LeaderboardPage() {
       try {
         const data = JSON.parse(event.data);
         if (data.type === "leaderboard" && data.scope === scope) {
-          setEntries(data.entries || []);
+          setEntries((previous) => withKnownNames(previous, data.entries || []));
         }
       } catch {
         // ignore parse errors from heartbeats
@@ -96,26 +128,27 @@ export default function LeaderboardPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        compact
+        title={tg("leaderboardTitle")}
+        description={tg("leaderboardDescription")}
+      />
+
       {/* Scope selector */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {(Object.keys(SCOPE_LABEL_KEYS) as LeaderboardScope[]).map((s) => (
-          <button
-            key={s}
-            onClick={() => {
-              setLoading(true);
-              setError("");
-              setScope(s);
-            }}
-            className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${
-              scope === s
-                ? "bg-violet-500 border-violet-500 text-white"
-                : "border-border text-text-muted hover:text-text-main hover:border-violet-500/50"
-            }`}
-          >
-            {tg(SCOPE_LABEL_KEYS[s])}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        aria-label={tg("scope")}
+        value={scope}
+        onChange={(next) => {
+          if (next === scope) return;
+          setLoading(true);
+          setError("");
+          setScope(next as LeaderboardScope);
+        }}
+        options={(Object.keys(SCOPE_LABEL_KEYS) as LeaderboardScope[]).map((s) => ({
+          value: s,
+          label: tg(SCOPE_LABEL_KEYS[s]),
+        }))}
+      />
 
       {/* Your Rank */}
       {myRank !== null && (
@@ -133,11 +166,13 @@ export default function LeaderboardPage() {
         </Card>
       )}
 
-      {error && <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm">{error}</div>}
+      {error && <Alert variant="critical" description={error} dismissLabel={t("close")} />}
 
       {loading ? (
         <div className="flex items-center justify-center min-h-[200px]">
-          <div className="text-text-muted">{t("leaderboardLoading")}</div>
+          <div className="text-text-muted" role="status" aria-live="polite">
+            {t("leaderboardLoading")}
+          </div>
         </div>
       ) : (
         <>
@@ -147,13 +182,16 @@ export default function LeaderboardPage() {
               {top3.map((entry, idx) => (
                 <Card key={entry.apiKeyId} className="relative overflow-hidden">
                   <div
-                    className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${MEDAL_COLORS[idx]}`}
+                    aria-hidden="true"
+                    className={`absolute top-0 left-0 right-0 h-1 ${MEDAL_COLORS[idx]}`}
                   />
                   <div className="flex items-center gap-4">
-                    <div className="text-4xl">{MEDAL_EMOJI[idx]}</div>
+                    <div className="text-4xl" aria-hidden="true">
+                      {MEDAL_EMOJI[idx]}
+                    </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm text-text-muted truncate">
-                        {entry.apiKeyId.slice(0, 8)}...
+                      <p className="text-sm text-text-muted truncate" title={entry.apiKeyId}>
+                        {entryLabel(entry, 8)}
                       </p>
                       <p className="text-2xl font-bold mt-1">
                         {entry.score.toLocaleString(locale)}
@@ -162,7 +200,9 @@ export default function LeaderboardPage() {
                         {scope === "tokens_shared" ? tg("tokensShared") : tg("points")}
                       </p>
                     </div>
-                    <div className="text-5xl font-black text-text-muted/20">{idx + 1}</div>
+                    <div className="text-5xl font-black text-text-muted/20" aria-hidden="true">
+                      {idx + 1}
+                    </div>
                   </div>
                 </Card>
               ))}
@@ -172,38 +212,33 @@ export default function LeaderboardPage() {
           {/* Rest of leaderboard table */}
           {rest.length > 0 && (
             <Card>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="text-left text-sm text-text-muted border-b border-border">
-                      <th className="pb-3 font-medium w-16">{tg("rank")}</th>
-                      <th className="pb-3 font-medium">{tg("name")}</th>
-                      <th className="pb-3 font-medium text-right">{tg("score")}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rest.map((entry, idx) => (
-                      <tr
-                        key={entry.apiKeyId}
-                        className="border-b border-border/50 last:border-b-0"
-                      >
-                        <td className="py-3 text-text-muted font-mono">{idx + 4}</td>
-                        <td className="py-3 font-medium">{entry.apiKeyId.slice(0, 12)}...</td>
-                        <td className="py-3 text-right font-mono">
-                          {entry.score.toLocaleString(locale)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+              <Table className="min-w-0" scrollbarLabel={tg("rank")}>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-16">{tg("rank")}</TableHead>
+                    <TableHead>{tg("name")}</TableHead>
+                    <TableHead className="text-right">{tg("score")}</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {rest.map((entry, idx) => (
+                    <TableRow key={entry.apiKeyId}>
+                      <TableCell className="text-text-muted font-mono">{idx + 4}</TableCell>
+                      <TableCell className="font-medium" title={entry.apiKeyId}>
+                        {entryLabel(entry, 12)}
+                      </TableCell>
+                      <TableCell className="text-right font-mono">
+                        {entry.score.toLocaleString(locale)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </Card>
           )}
 
           {entries.length === 0 && !error && (
-            <Card>
-              <div className="text-center py-12 text-text-muted">{tg("leaderboardEmpty")}</div>
-            </Card>
+            <EmptyState icon="leaderboard" title={tg("leaderboardEmpty")} />
           )}
         </>
       )}

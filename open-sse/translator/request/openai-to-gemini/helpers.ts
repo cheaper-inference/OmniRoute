@@ -11,8 +11,15 @@ export type GeminiGenerationConfig = {
   topK?: unknown;
   maxOutputTokens?: unknown;
   thinkingConfig?: {
-    thinkingBudget: number;
-    includeThoughts: boolean;
+    thinkingBudget?: number;
+    includeThoughts?: boolean;
+    /**
+     * Gemini 3.x native thinking control (string enum low|medium|high).
+     * `thinkingBudget` is deprecated on 3.x models — when an operator payload
+     * override (or the request itself) supplies `thinkingLevel`, the numeric
+     * `thinkingBudget` is dropped so the upstream receives only the native field.
+     */
+    thinkingLevel?: string;
   };
   responseMimeType?: string;
   responseSchema?: unknown;
@@ -164,12 +171,43 @@ export type GeminiContent = { role: string; parts: GeminiPart[] };
 // that invalid alternation through. Merge adjacent same-role entries by concatenating
 // their parts, the same normalization the Kiro and Claude request paths already apply
 // (9router#2191).
-export function mergeConsecutiveSameRoleContents(contents: GeminiContent[]): GeminiContent[] {
+//
+// When the merge folds a tool-result turn (functionResponse parts) together with a
+// following plain user turn, the naive concatenation yields [functionResponse, text].
+// Gemini 4 (e.g. gemini-4-argon) rejects a user turn whose last part is not a
+// functionResponse with 400 "Requests ending with a model turn are not supported",
+// while [text, functionResponse] is accepted by Gemini 4, 3.x and 2.5 alike. So a
+// merged turn keeps its functionResponse parts at the end (stable within each group)
+// (9router#4802).
+function isFunctionResponsePart(part: GeminiPart): boolean {
+  return !!part && typeof part === "object" && "functionResponse" in part;
+}
+
+function moveFunctionResponsesLast(parts: GeminiPart[]): GeminiPart[] {
+  const others: GeminiPart[] = [];
+  const responses: GeminiPart[] = [];
+  for (const part of parts) {
+    (isFunctionResponsePart(part) ? responses : others).push(part);
+  }
+  return [...others, ...responses];
+}
+
+export function mergeConsecutiveSameRoleContents(
+  contents: GeminiContent[],
+  model = ""
+): GeminiContent[] {
   const merged: GeminiContent[] = [];
   for (const entry of contents) {
     const last = merged[merged.length - 1];
     if (last && last.role === entry.role) {
-      last.parts.push(...entry.parts);
+      // Claude requires tool results before user text; Gemini 4 requires them last.
+      const parts = [...last.parts, ...entry.parts];
+      last.parts = model.toLowerCase().includes("claude")
+        ? [
+            ...parts.filter(isFunctionResponsePart),
+            ...parts.filter((part) => !isFunctionResponsePart(part)),
+          ]
+        : moveFunctionResponsesLast(parts);
     } else {
       // Shallow-copy the entry and its `parts` array so a later same-role merge
       // (`last.parts.push(...)`) never mutates the caller's input objects.
@@ -177,4 +215,70 @@ export function mergeConsecutiveSameRoleContents(contents: GeminiContent[]): Gem
     }
   }
   return merged;
+}
+
+// Gemini also rejects a functionCall-bearing "model" turn with no preceding
+// turn at all:
+//   400 INVALID_ARGUMENT "Please ensure that function call turn comes
+//   immediately after a user turn or after a function response turn."
+// `contents[]` only ever uses role "user" or "model" here, and
+// mergeConsecutiveSameRoleContents above guarantees no two adjacent entries
+// share a role -- so for every index >= 1 the previous entry can only be
+// "user", satisfying this rule automatically. The one case that slips
+// through is history that OPENS with a functionCall-bearing "model" turn,
+// e.g. because the true leading user turn was dropped somewhere upstream
+// (continuation reconstruction, context compression, a truncated client
+// history) while a mid-conversation assistant tool-call turn survived.
+// Prepend a minimal synthetic user turn so Gemini accepts the request
+// instead of rejecting it outright -- cheaper and more robust than trying to
+// enumerate every possible upstream cause of a truncated leading turn.
+export function ensureHistoryDoesNotOpenWithFunctionCall(
+  contents: GeminiContent[]
+): GeminiContent[] {
+  const first = contents[0];
+  if (!first || first.role !== "model") return contents;
+  const opensWithFunctionCall = first.parts.some(
+    (part) => part && typeof part === "object" && "functionCall" in part
+  );
+  if (!opensWithFunctionCall) return contents;
+  return [{ role: "user", parts: [{ text: "(continuing the conversation)" }] }, ...contents];
+}
+
+/**
+ * Recursively sanitize function response objects before forwarding to Gemini.
+ * Google Cloud Code / Gemini API parses '$ref' keys inside function_response.response
+ * as OpenAPI/JSONSchema references. If unresolvable, it throws HTTP 400 INVALID_ARGUMENT:
+ * "The referenced name `...` in function_response.response does not match to a display_name in the function_response.parts."
+ * Prefixes all $-prefixed keys with '_' to prevent parser collision. A renamed key never
+ * overwrites a key the payload already carries (`$ref` next to an existing `_ref` becomes
+ * `__ref`).
+ */
+export function sanitizeFunctionResponseData(val: unknown, depth = 0): unknown {
+  if (depth > 20 || !val || typeof val !== "object") return val;
+  if (Array.isArray(val)) return val.map((item) => sanitizeFunctionResponseData(item, depth + 1));
+  const source = val as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(source)) {
+    if (k.startsWith("$")) continue;
+    out[k] = sanitizeFunctionResponseData(v, depth + 1);
+  }
+  for (const [k, v] of Object.entries(source)) {
+    if (!k.startsWith("$")) continue;
+    let key = `_${k.slice(1)}`;
+    while (Object.prototype.hasOwnProperty.call(out, key)) key = `_${key}`;
+    out[key] = sanitizeFunctionResponseData(v, depth + 1);
+  }
+  return out;
+}
+
+export function sanitizeGeminiPartFunctionResponse(part: GeminiPart): GeminiPart {
+  const fr = part.functionResponse as { response?: unknown } | undefined;
+  if (!fr?.response) return part;
+  return {
+    ...part,
+    functionResponse: {
+      ...fr,
+      response: sanitizeFunctionResponseData(fr.response),
+    },
+  };
 }

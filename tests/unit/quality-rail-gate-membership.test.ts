@@ -49,16 +49,46 @@ test("lint-guard carries the quality-ratchet engine (collect → ratchet → req
 test("fast-gates carries the deterministic ratchets and security scanners from the main rail", () => {
   const block = jobBlock("fast-gates");
   // #8542: all gates run inside a single aggregation step's bash loop.
-  // Check that the gate names appear in the arrays or the loop body.
+  const gateNames = new Set(
+    [...block.matchAll(/(?:^|\n)\s*(?:ratchet_)?gates=\(([\s\S]*?)\)/g)].flatMap((match) =>
+      match[1]
+        .replace(/#[^\n]*/g, "")
+        .trim()
+        .split(/\s+/)
+    )
+  );
+  for (const gate of [
+    "cycles",
+    "lockfile",
+    "duplication",
+    "dead-code",
+    "type-coverage",
+    "compression-budget",
+    "secrets",
+    "vuln-ratchet",
+    "workflows",
+    "openapi-breaking",
+  ]) {
+    assert.ok(gateNames.has(gate), `fast-gates must run "${gate}"`);
+  }
   for (const needle of [
-    "cycles lockfile duplication dead-code type-coverage compression-budget",
-    "secrets vuln-ratchet workflows openapi-breaking",
     "typecheck:core",
     "check:dashboard-typecheck",
     "check:ts7-diagnostics-ratchet",
   ]) {
     assert.ok(block.includes(needle), `fast-gates must contain "${needle}"`);
   }
+  // The ratchet_gates move must be exclusive: a plain `cycles` entry would run
+  // check-cycles.mjs without --ratchet, which exits 1 on ANY cycle and fails
+  // every PR at the frozen 14-SCC ceiling (#15306). Pin the whole gates=(...)
+  // array, not just its current line, so a re-entry on any line trips the guard.
+  const plainGates = /\n(\s+)gates=\(([\s\S]*?)\n\1\)/.exec(block);
+  assert.ok(plainGates, "fast-gates must still carry the deterministic plain gates array");
+  assert.doesNotMatch(
+    plainGates[2],
+    /(^|\s)cycles(\s|$)/,
+    "cycles must not re-enter the plain gates array — it would run without --ratchet"
+  );
   assert.ok(
     block.includes(
       "BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}"
@@ -111,11 +141,26 @@ test("the TS7 shadow and zero-new-diagnostics ratchet use one pinned compiler an
 });
 
 test("the new gates run on jobs that stay pinned to hosted runners", () => {
-  // Complements tests/unit/vps-runner-variable-scope.test.ts: neither gate job
-  // may pick up a USE_VPS_RUNNER switch (setup-node measured 20m06s on .113 vs 16s hosted).
-  for (const job of ["lint-guard", "fast-gates"]) {
+  // Complements tests/unit/vps-runner-variable-scope.test.ts: the fast-gates job
+  // may not pick up a USE_VPS_RUNNER switch (setup-node measured 20m06s on .113 vs 16s hosted).
+  for (const job of ["fast-gates"]) {
     const runsOn = /^ {4}runs-on:\s*(.+)$/m.exec(jobBlock(job));
     assert.ok(runsOn, `${job} must declare runs-on`);
     assert.equal(runsOn[1].trim(), "ubuntu-latest", `${job} must stay pinned to ubuntu-latest`);
   }
+  // Documented exception (2026-08-30): a cold full lint with the eslint-plugin-react-hooks 7
+  // compiler rules is OOM-killed on the 7 GB hosted runner with no output (status null →
+  // exit 1); lint-guard runs on the box's light pool with an explicit 8 GB heap instead.
+  const lintRunsOn = /^ {4}runs-on:\s*(.+)$/m.exec(jobBlock("lint-guard"));
+  assert.ok(lintRunsOn, "lint-guard must declare runs-on");
+  assert.match(
+    lintRunsOn[1],
+    /omni-light/,
+    "lint-guard runs on the box's light pool (OOM on hosted)"
+  );
+  assert.match(
+    jobBlock("lint-guard"),
+    /NODE_OPTIONS: --max-old-space-size=8192/,
+    "lint-guard needs the explicit heap"
+  );
 });

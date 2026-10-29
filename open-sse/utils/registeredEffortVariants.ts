@@ -1,6 +1,17 @@
 import { getProviderModels } from "../config/providerModels.ts";
 
-const REGISTERED_EFFORT_SUFFIXES = ["none", "low", "medium", "high", "max", "xhigh"] as const;
+// `ultra` is the Codex Astra/Sol/Terra alias tier (`gpt-6.1-sol-ultra`). A suffix only counts
+// when both the variant and its base are registry ids of the same provider, so a non-Codex id
+// such as `nemotron-ultra` is never collapsed (#16027).
+const REGISTERED_EFFORT_SUFFIXES = [
+  "none",
+  "low",
+  "medium",
+  "high",
+  "max",
+  "xhigh",
+  "ultra",
+] as const;
 
 /**
  * Return the registered base model for an explicit effort variant.
@@ -14,10 +25,9 @@ export function getRegisteredProviderEffortBaseModelId(
   modelId: string
 ): string | null {
   const providerModels = getProviderModels(providerId);
+  const registeredVariant = providerModels.find((candidate) => candidate.id === modelId);
 
-  if (!providerModels.some((candidate) => candidate.id === modelId)) {
-    return null;
-  }
+  if (!registeredVariant) return null;
 
   for (const effort of REGISTERED_EFFORT_SUFFIXES) {
     const suffix = `-${effort}`;
@@ -25,7 +35,15 @@ export function getRegisteredProviderEffortBaseModelId(
 
     const baseModelId = modelId.slice(0, -suffix.length);
 
-    return providerModels.some((candidate) => candidate.id === baseModelId) ? baseModelId : null;
+    if (providerModels.some((candidate) => candidate.id === baseModelId)) return baseModelId;
+
+    // Curated providers may intentionally expose only useful variants while the
+    // authoritative live catalog exposes their unsuffixed wire model. The registry
+    // declaration is the proof; never infer this relationship from spelling alone.
+    const declaredLiveBase = registeredVariant.liveCatalogIds?.find(
+      (candidate) => candidate === baseModelId || !candidate.endsWith(`-${effort}`)
+    );
+    return declaredLiveBase ?? null;
   }
 
   return null;

@@ -5,6 +5,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "api-manager",
   "endpoints",
   "providers",
+  "model-catalog",
   "embedded-services",
   "combos",
   "combos-live",
@@ -30,12 +31,14 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "acp-agents",
   "cloud-agents",
   "conductor",
+  "orchestration",
   "agent-bridge",
   "traffic-inspector",
   "discovery",
   // OmniProxy > Integrations
   "api-endpoints",
   "webhooks",
+  "log-export",
   // OmniProxy — proxy tools
   "mitm-proxy",
   "1proxy",
@@ -60,11 +63,13 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "health",
   "runtime",
   "resilience-connections",
+  "resilience-cooldowns",
   // Costs section
   "costs-pricing",
   "costs-budget",
   "costs-free-tiers",
   "costs-quota-share",
+  "costs-teams",
   "free-provider-rankings",
   "radar",
   "radar-admin",
@@ -88,6 +93,7 @@ export const HIDEABLE_SIDEBAR_ITEM_IDS = [
   "leaderboard",
   "profile",
   "tokens",
+  "gamification-admin",
   // Other Features — flat
   "media",
   // Other Features > Batch
@@ -121,6 +127,7 @@ export type SidebarItemId = HideableSidebarItemId | AlwaysVisibleSidebarItemId;
 
 export type SidebarSectionId =
   | "home"
+  | "pinned"
   | "omni-proxy"
   | "analytics"
   | "costs"

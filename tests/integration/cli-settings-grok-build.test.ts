@@ -29,7 +29,8 @@ process.env.OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE = "1";
 
 // Import DB reset helpers (must be before route import)
 const core = await import("../../src/lib/db/core.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const { updateSettings } = await import("@/lib/db/settings");
+const localDb = { updateSettings };
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 
 // Import route handlers
@@ -39,7 +40,7 @@ const { GET, POST, DELETE } =
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -163,7 +164,7 @@ test("grok-build-settings POST: writes [model.omniroute] section and preserves e
     }
   } finally {
     process.env.HOME = origHome;
-    fs.rmSync(tmpHome, { recursive: true, force: true });
+    fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -219,7 +220,7 @@ test("grok-build-settings DELETE: removes our section, preserves the rest, resto
     }
   } finally {
     process.env.HOME = origHome;
-    fs.rmSync(tmpHome, { recursive: true, force: true });
+    fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -237,7 +238,7 @@ test("grok-build-settings DELETE: no-op success when no config file exists", asy
     assert.equal(body.success, true);
   } finally {
     process.env.HOME = origHome;
-    fs.rmSync(tmpHome, { recursive: true, force: true });
+    fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -289,7 +290,7 @@ test("grok-build-settings: honors GROK_HOME and rejects a relative value", async
   } finally {
     if (original === undefined) delete process.env.GROK_HOME;
     else process.env.GROK_HOME = original;
-    fs.rmSync(grokHome, { recursive: true, force: true });
+    fs.rmSync(grokHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -313,7 +314,7 @@ test("grok-build-settings POST: returns 409 for an unowned omniroute slot", asyn
   } finally {
     if (original === undefined) delete process.env.GROK_HOME;
     else process.env.GROK_HOME = original;
-    fs.rmSync(grokHome, { recursive: true, force: true });
+    fs.rmSync(grokHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -342,7 +343,7 @@ test("grok-build-settings POST: resolves keyId to an unmasked key", async () => 
   } finally {
     if (original === undefined) delete process.env.GROK_HOME;
     else process.env.GROK_HOME = original;
-    fs.rmSync(grokHome, { recursive: true, force: true });
+    fs.rmSync(grokHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -376,7 +377,7 @@ test("grok-build-settings route.ts: does not call exec() or spawn() directly", (
 
 test.after(async () => {
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   delete process.env.DATA_DIR;
   delete process.env.API_KEY_SECRET;
   delete process.env.JWT_SECRET;

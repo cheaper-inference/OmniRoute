@@ -21,7 +21,7 @@ const route = await import("../../src/app/api/oauth/[provider]/[action]/route.ts
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 async function deviceCode(provider: string, region: string) {

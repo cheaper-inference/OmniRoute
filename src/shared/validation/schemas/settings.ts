@@ -32,6 +32,7 @@ export const legacyResilienceDefaultsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequests: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
+    globalConcurrentRequests: z.number().int().min(0).max(100_000).optional(),
   })
   .strict();
 
@@ -41,7 +42,10 @@ export const requestQueueSettingsSchema = z
     requestsPerMinute: z.number().int().min(1).optional(),
     minTimeBetweenRequestsMs: z.number().int().min(0).optional(),
     concurrentRequests: z.number().int().min(1).optional(),
-    maxWaitMs: z.number().int().min(1).optional(),
+    // 0 is an explicit "disable the queue-wait budget" sentinel (see
+    // src/lib/resilience/settings/normalize.ts maxWaitMs) — do not clamp it up to 1.
+    maxWaitMs: z.number().int().min(0).optional(),
+    executionMaxWaitMs: z.number().int().min(1).optional(),
     maxQueueDepth: z.number().int().min(0).max(100_000).optional(),
   })
   .strict();
@@ -109,6 +113,56 @@ export const quotaShareConcurrencyLimitSettingsSchema = z
   })
   .strict();
 
+// Whether a stream content stall cools down the account that served it (default off).
+export const streamStallCooldownSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+  })
+  .strict();
+
+// Opt-in latency term for p2c account selection. Bounds mirror normalizeP2CLatencySettings.
+export const p2cLatencySettingsSchema = z
+  .object({
+    weight: z.number().int().min(0).max(20).optional(),
+  })
+  .strict();
+
+// Mid-stream recovery block. Bounds mirror normalizeStreamRecoverySettings in
+// src/lib/resilience/settings/normalize.ts.
+export const throughputWatchdogSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    warmupMs: z.number().int().min(0).max(600_000).optional(),
+    windowMs: z.number().int().min(1_000).max(600_000).optional(),
+    minUsefulBytesPerSecond: z.number().int().min(1).max(1_000_000).optional(),
+    minUsefulBytes: z.number().int().min(1).max(1_000_000).optional(),
+  })
+  .strict();
+
+export const streamRecoverySettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    continueMidStream: z.boolean().optional(),
+    throughputWatchdog: throughputWatchdogSettingsSchema.optional(),
+  })
+  .strict();
+
+// Quota preflight cutoff (auth-level account skipping). Thresholds use
+// "minimum remaining %" semantics to match the dashboard's quota bars, and the
+// per-(provider, window) defaults override the global default per window.
+// Values clamp/coerce in normalizeQuotaPreflightSettings — this schema only
+// bounds the wire shape.
+export const quotaPreflightSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    defaultThresholdPercent: z.number().int().min(0).max(99).optional(),
+    warnThresholdPercent: z.number().int().min(0).max(100).optional(),
+    providerWindowDefaults: z
+      .record(z.string().min(1), z.record(z.string().min(1), z.number().int().min(0).max(100)))
+      .optional(),
+  })
+  .strict();
+
 export const providerCooldownSettingsSchema = z
   .object({
     enabled: z.boolean().optional(),
@@ -130,6 +184,25 @@ export const providerCooldownSettingsSchema = z
     }
   });
 
+// Global default cadence (minutes) for the background credential health check
+// sweep. 0 = disabled; 1440 = 24 hours. Per-connection overrides win.
+export const credentialHealthCheckSettingsSchema = z
+  .object({
+    intervalMinutes: z.number().int().min(0).max(1440).optional(),
+  })
+  .strict();
+
+// Token-refresh breaker scope + thresholds. Bounds mirror
+// normalizeTokenRefreshBreakerSettings: a refresh is a real upstream OAuth
+// call, so the cooldown floor stays at 60s (never hammer the provider).
+export const tokenRefreshBreakerSettingsSchema = z
+  .object({
+    scope: z.enum(["provider", "connection"]).optional(),
+    failureThreshold: z.number().int().min(1).max(100).optional(),
+    cooldownMs: z.number().int().min(60_000).max(86_400_000).optional(),
+  })
+  .strict();
+
 export const updateResilienceSchema = z
   .object({
     requestQueue: requestQueueSettingsSchema.optional(),
@@ -150,7 +223,14 @@ export const updateResilienceSchema = z
     waitForCooldown: waitForCooldownSettingsSchema.optional(),
     comboCooldownWait: comboCooldownWaitSettingsSchema.optional(),
     quotaShareConcurrencyLimit: quotaShareConcurrencyLimitSettingsSchema.optional(),
+    streamStallCooldown: streamStallCooldownSettingsSchema.optional(),
+    p2cLatency: p2cLatencySettingsSchema.optional(),
+    streamRecovery: streamRecoverySettingsSchema.optional(),
     providerCooldown: providerCooldownSettingsSchema.optional(),
+    // Quota preflight cutoff (auth-level account skipping) — surfaced in the
+    // Settings → Routing UI. Mirrors QuotaPreflightSettings in
+    // src/lib/resilience/settings/types.ts.
+    quotaPreflight: quotaPreflightSettingsSchema.optional(),
     profiles: z
       .object({
         oauth: legacyResilienceProfileSchema.optional(),
@@ -170,25 +250,35 @@ export const updateResilienceSchema = z
           .object({
             rpm: z.number().int().min(1).optional(),
             concurrency: z.number().int().min(1).optional(),
+            providerConcurrency: z.number().int().min(0).max(100_000).optional(),
           })
           .strict()
       )
       .optional(),
+    credentialHealthCheck: credentialHealthCheckSettingsSchema.optional(),
+    tokenRefreshBreaker: tokenRefreshBreakerSettingsSchema.optional(),
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (
-      !value.requestQueue &&
-      !value.connectionCooldown &&
-      !value.providerBreaker &&
-      !value.waitForCooldown &&
-      !value.comboCooldownWait &&
-      !value.quotaShareConcurrencyLimit &&
-      !value.providerCooldown &&
-      !value.profiles &&
-      !value.defaults &&
-      !value.providerQuotaOverrides
-    ) {
+    const provided = [
+      value.requestQueue,
+      value.connectionCooldown,
+      value.providerBreaker,
+      value.tokenRefreshBreaker,
+      value.waitForCooldown,
+      value.comboCooldownWait,
+      value.quotaShareConcurrencyLimit,
+      value.streamStallCooldown,
+      value.p2cLatency,
+      value.streamRecovery,
+      value.providerCooldown,
+      value.quotaPreflight,
+      value.profiles,
+      value.defaults,
+      value.providerQuotaOverrides,
+      value.credentialHealthCheck,
+    ].some(Boolean);
+    if (!provided) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Must provide resilience settings to update",
@@ -201,6 +291,10 @@ export const updateRequireLoginSchema = z
   .object({
     requireLogin: z.boolean().optional(),
     password: z.string().min(4, "Password must be at least 4 characters").optional(),
+    // Proof of the current password for a password change. Whether it is required depends on
+    // the caller's credential kind (a dashboard session must send it, the local CLI and the
+    // bootstrap window must not have to), so the route enforces it, not the schema.
+    currentPassword: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.requireLogin === undefined && !value.password) {
@@ -270,6 +364,10 @@ export const guideSettingsSaveSchema = z
     model: z.string().trim().min(1, "Model is required").optional(),
     models: z.array(z.string().trim().min(1, "Models must be non-empty")).min(1).optional(),
     modelLabels: z.record(z.string(), z.string().trim().min(1)).optional(),
+    // OpenCode dashboard save forwards the /v1/models catalog the page already
+    // loaded. Unknown keys stay so context_length / capabilities are not stripped.
+    // Absent catalog keeps the writer's 128K/8K fallback.
+    catalog: z.array(z.object({ id: z.string().trim().min(1) }).passthrough()).optional(),
   })
   .refine((data) => !!data.model || !!data.models?.length, {
     message: "Model is required",

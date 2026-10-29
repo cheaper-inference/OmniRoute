@@ -15,6 +15,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "auto-4235b-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const suffix = await import("../../open-sse/services/autoCombo/suffixComposition.ts");
 const modePacks = await import("../../open-sse/services/autoCombo/modePacks.ts");
 const builtinCatalog = await import("../../open-sse/services/autoCombo/builtinCatalog.ts");
@@ -22,14 +24,29 @@ const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 
 function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
+}
+
+// Auto combos with zero candidates are no longer advertised — seed providers
+// so the materialized pools are non-empty where a matching model exists.
+async function seedProviders() {
+  await settingsDb.updateSettings({ requireLogin: false });
+  for (const provider of ["openai", "anthropic", "gemini", "groq", "deepseek", "mistral"]) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      apiKey: `sk-test-4235-${provider}`,
+      name: `test-4235-${provider}`,
+      isActive: true,
+    });
+  }
 }
 
 test.beforeEach(() => resetStorage());
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#4235 parseAutoSuffix parses category and category:tier", () => {
@@ -88,23 +105,56 @@ test("#4235 reliability-first mode pack exists and is normalized", () => {
   assert.ok(pack.health >= 0.3, "reliability-first leans on circuit-breaker health");
 });
 
+test("every pack carries quality>0 and reliability>0", () => {
+  for (const [name, w] of Object.entries(modePacks.MODE_PACKS)) {
+    const weights = w as { quality?: unknown; reliability?: unknown } & Record<string, unknown>;
+    assert.ok(Number(weights.quality) > 0, `${name} quality>0`);
+    assert.ok(Number(weights.reliability) > 0, `${name} reliability>0`);
+    const sum = Object.values(weights).reduce((a: number, b: unknown) => a + Number(b), 0);
+    assert.ok(Math.abs(sum - 0.9999) < 0.002, `${name} sum ~0.9999 got ${sum}`);
+  }
+});
+
+// The tier weight overlay only applies to a non-empty pool (an empty pool returns
+// DEFAULT_WEIGHTS early). Since #15979 the keyless opencode pool is ToS-avoid and
+// excluded by default, so seed real connections instead of relying on it.
 test("#4235 createBuiltinAutoCombo composes tier weights for auto/coding:fast", async () => {
+  await seedProviders();
   const combo = await builtinCatalog.createBuiltinAutoCombo("auto/coding:fast", "coding:fast");
+  assert.ok(combo.models.length > 0, "auto/coding:fast must materialize candidates");
   assert.equal(combo.id, "auto/coding:fast");
   assert.equal(combo.strategy, "auto");
-  // :fast → ship-fast weights (latency-dominant)
   assert.deepEqual(combo.weights, modePacks.MODE_PACKS["ship-fast"]);
+  // The tier mapping resolves through the weight packs: the :fast tier must
+  // follow the same pack the factory uses for the ship-fast mapping, and
+  // :reliable the reliability-first mapping. Pinned by pack name via the
+  // factory's own selection (tierToWeightVariant), not a numeric snapshot —
+  // pack contents evolve as scoring factors are added.
+  const { tierToWeightVariant } =
+    await import("../../open-sse/services/autoCombo/suffixComposition.ts");
+  assert.equal(tierToWeightVariant("fast"), "fast");
+  assert.equal(tierToWeightVariant("reliable"), "reliability");
+  assert.ok(modePacks.MODE_PACKS["ship-fast"], "the ship-fast pack backs :fast");
+  assert.ok(
+    modePacks.MODE_PACKS["reliability-first"],
+    "the reliability-first pack backs :reliable"
+  );
 });
 
 test("#4235 createBuiltinAutoCombo composes reliability weights for auto/coding:reliable", async () => {
+  await seedProviders();
   const combo = await builtinCatalog.createBuiltinAutoCombo(
     "auto/coding:reliable",
     "coding:reliable"
   );
+  assert.ok(combo.models.length > 0, "auto/coding:reliable must materialize candidates");
+  assert.equal(combo.id, "auto/coding:reliable");
+  assert.equal(combo.strategy, "auto");
   assert.deepEqual(combo.weights, modePacks.MODE_PACKS["reliability-first"]);
 });
 
-test("#4235 /v1/models advertises the curated auto/<category>:<tier> combos", async () => {
+test("4235 /v1/models advertises the curated auto/<category>:<tier> combos with candidates", async () => {
+  await seedProviders();
   const response = await v1ModelsCatalog.getUnifiedModelsResponse(
     new Request("http://localhost/api/v1/models")
   );
@@ -112,8 +162,20 @@ test("#4235 /v1/models advertises the curated auto/<category>:<tier> combos", as
   const body = (await response.json()) as { data: Array<{ id: string; owned_by?: string }> };
   const ids = new Set(body.data.map((m) => m.id));
 
-  for (const autoId of builtinCatalog.AUTO_SUFFIX_VARIANTS) {
-    assert.ok(ids.has(autoId), `expected /v1/models to advertise ${autoId}`);
+  // An auto id is advertised iff its materialized pool is non-empty — ids
+  // with zero candidates must be absent. The oracle iterates the source
+  // suffix list plus the derived auto/lkgp id (kept independent of the
+  // catalog derivation so a regression dropping a suffix still fails here).
+  for (const autoId of [...builtinCatalog.AUTO_SUFFIX_VARIANTS, "auto/lkgp"]) {
+    const virtual = await builtinCatalog.createBuiltinAutoCombo(
+      autoId,
+      autoId.slice("auto/".length)
+    );
+    assert.equal(
+      ids.has(autoId),
+      virtual.models.length > 0,
+      `${autoId} must be advertised iff it has candidates (pool=${virtual.models.length})`
+    );
   }
   const codingFast = body.data.find((m) => m.id === "auto/coding:fast");
   assert.equal(codingFast?.owned_by, "combo");

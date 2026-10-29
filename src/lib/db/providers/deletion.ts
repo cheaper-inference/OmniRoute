@@ -12,6 +12,7 @@ import { getDbInstance } from "../core";
 import { backupDbFile } from "../backup";
 import { cleanupComboConnectionRefs } from "../combos";
 import { deleteLKGPByConnectionIds } from "../settings/lkgp";
+import { deleteProviderLimitsCache } from "../providerLimits";
 import {
   removeConnectionHealth,
   removeConnectionIndex,
@@ -19,6 +20,11 @@ import {
 import { invalidateDbCache } from "../readCache";
 import { invalidateReasoningRoutingRuleCache } from "../reasoningRoutingRules";
 import { bumpProxyConfigGeneration } from "../settings";
+import { deleteSyncedAvailableModelsForProvider } from "../models/syncedAvailableModelPersistence";
+import {
+  deleteDiscoveryStatesForConnections,
+  deleteDiscoveryStatesForProvider,
+} from "../discoveryState";
 import { toRecord } from "./columns";
 
 interface StatementLike<TRow = unknown> {
@@ -43,19 +49,24 @@ function _deleteAccountProxyAssignments(db: DbLike, ids: string[]) {
   ).run(...ids);
 }
 
-function _selectExistingConnectionIds(db: DbLike, ids: string[]): string[] {
+function _selectExistingConnections(
+  db: DbLike,
+  ids: string[]
+): Array<{ id: string; provider: string }> {
   if (ids.length === 0) return [];
 
   const placeholders = ids.map(() => "?").join(",");
 
   return db
-    .prepare(`SELECT id FROM provider_connections WHERE id IN (${placeholders})`)
+    .prepare(`SELECT id, provider FROM provider_connections WHERE id IN (${placeholders})`)
     .all(...ids)
     .map((row) => {
       const record = toRecord(row);
-      return typeof record.id === "string" ? record.id : null;
+      const id = typeof record.id === "string" ? record.id : null;
+      const provider = typeof record.provider === "string" ? record.provider : "";
+      return id ? { id, provider } : null;
     })
-    .filter((id): id is string => id !== null);
+    .filter((entry): entry is { id: string; provider: string } => entry !== null);
 }
 
 async function _cleanupDeletedComboConnectionRefs(connectionIds: string | string[]): Promise<void> {
@@ -77,6 +88,20 @@ async function _cleanupDeletedLKGPConnectionRefs(connectionIds: string | string[
   }
 }
 
+// Purge the provider limits cache of the deleted connections (#15531): orphan
+// cache entries otherwise keep serving quotas for provider_connections that no
+// longer exist. Do not turn a leftover purge into a failed delete.
+function _purgeProviderLimitsCacheForConnections(ids: string[]) {
+  if (ids.length === 0) return;
+  for (const id of ids) {
+    try {
+      deleteProviderLimitsCache(id);
+    } catch (error) {
+      console.error("Failed to purge provider limits cache for deleted connection:", error);
+    }
+  }
+}
+
 export async function deleteProviderConnection(id: string) {
   const db = getDbInstance() as unknown as DbLike;
   const existing = db.prepare("SELECT provider FROM provider_connections WHERE id = ?").get(id);
@@ -88,20 +113,33 @@ export async function deleteProviderConnection(id: string) {
     db.prepare("DELETE FROM provider_connections WHERE id = ?").run(id);
   })();
 
-  await _cleanupDeletedComboConnectionRefs(id);
-  await _cleanupDeletedLKGPConnectionRefs(id);
+  // These two helpers touch disjoint tables (combos vs lkgp) and are safe to run concurrently.
+  await Promise.all([
+    _cleanupDeletedComboConnectionRefs(id),
+    _cleanupDeletedLKGPConnectionRefs(id),
+  ]);
   void import("@omniroute/open-sse/services/combo/nativeCodexTurnPin.ts")
     .then((module) => module.revokeNativeCodexTurnPinsForConnection(id))
     .catch(() => {});
 
   removeConnectionHealth(id);
   removeConnectionIndex(id);
+  _purgeProviderLimitsCacheForConnections([id]);
   bumpProxyConfigGeneration();
   const existingRecord = toRecord(existing);
   const providerId =
     typeof existingRecord.provider === "string"
       ? existingRecord.provider
       : String(existingRecord.provider || "");
+  // The discovery outcome of the deleted connection goes with it: a stored
+  // failure of a connection that no longer exists is a leftover.
+  try {
+    deleteDiscoveryStatesForConnections([{ provider: providerId, id }]);
+  } catch (error) {
+    // Do not turn a leftover purge into a 500, but leave a trace: the stored
+    // outcome of a connection that no longer exists stays behind.
+    console.error("Failed to purge the stored discovery outcome of a deleted connection:", error);
+  }
   reorderConnections(db, providerId);
   backupDbFile("pre-write");
   invalidateDbCache("connections"); // Bust connections read cache
@@ -113,7 +151,7 @@ export async function deleteProviderConnections(ids: string[]): Promise<number> 
   if (ids.length === 0) return 0;
 
   const db = getDbInstance() as unknown as DbLike;
-  const existingIds = _selectExistingConnectionIds(db, ids);
+  const existingConnections = _selectExistingConnections(db, ids);
 
   const deletedCount = db.transaction(() => {
     const placeholders = ids.map(() => "?").join(",");
@@ -129,9 +167,21 @@ export async function deleteProviderConnections(ids: string[]): Promise<number> 
     return result.changes ?? 0;
   })();
 
-  await _cleanupDeletedComboConnectionRefs(existingIds);
-  await _cleanupDeletedLKGPConnectionRefs(existingIds);
+  await Promise.all([
+    _cleanupDeletedComboConnectionRefs(existingConnections.map((entry) => entry.id)),
+    _cleanupDeletedLKGPConnectionRefs(existingConnections.map((entry) => entry.id)),
+  ]);
 
+  // The discovery outcomes of the deleted connections go with them.
+  try {
+    deleteDiscoveryStatesForConnections(existingConnections);
+  } catch (error) {
+    // Do not turn a leftover purge into a 500, but leave a trace: the stored
+    // outcomes of connections that no longer exist stay behind.
+    console.error("Failed to purge the stored discovery outcomes of deleted connections:", error);
+  }
+
+  _purgeProviderLimitsCacheForConnections(ids);
   for (const id of ids) {
     removeConnectionHealth(id);
     removeConnectionIndex(id);
@@ -169,9 +219,12 @@ export async function deleteProviderConnectionsByProvider(providerId: string) {
     return db.prepare("DELETE FROM provider_connections WHERE provider = ?").run(providerId);
   })();
 
-  await _cleanupDeletedComboConnectionRefs(connectionIds);
-  await _cleanupDeletedLKGPConnectionRefs(connectionIds);
+  await Promise.all([
+    _cleanupDeletedComboConnectionRefs(connectionIds),
+    _cleanupDeletedLKGPConnectionRefs(connectionIds),
+  ]);
 
+  _purgeProviderLimitsCacheForConnections(connectionIds);
   for (const connectionId of connectionIds) {
     removeConnectionHealth(connectionId);
     removeConnectionIndex(connectionId);
@@ -182,6 +235,19 @@ export async function deleteProviderConnectionsByProvider(providerId: string) {
   backupDbFile("pre-write");
   invalidateDbCache("connections");
   invalidateReasoningRoutingRuleCache();
+  bumpProxyConfigGeneration();
+  try {
+    await deleteSyncedAvailableModelsForProvider(providerId);
+  } catch {
+    // Rows are already gone. Do not turn a leftover purge into a 500.
+  }
+  try {
+    deleteDiscoveryStatesForProvider(providerId);
+  } catch (error) {
+    // Do not turn a leftover purge into a 500, but leave a trace: the stored
+    // outcomes of a provider that no longer exists stay behind.
+    console.error("Failed to purge the stored discovery outcomes of a deleted provider:", error);
+  }
   return result.changes;
 }
 

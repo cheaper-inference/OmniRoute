@@ -81,6 +81,6 @@ test("prebuild verification fails fast when the selected binary is missing", () 
     fs.writeFileSync(expected, "napi");
     assert.equal(assertSqlitePrebuildExists?.(moduleDir, "darwin", "arm64"), expected);
   } finally {
-    fs.rmSync(moduleDir, { recursive: true, force: true });
+    fs.rmSync(moduleDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

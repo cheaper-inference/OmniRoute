@@ -181,7 +181,7 @@ for (const upstreamDone of [true, false]) {
 test.after(() => {
   usageHistory.clearPendingRequests();
   core.resetDbInstance();
-  fs.rmSync(testDataDir, { recursive: true, force: true });
+  fs.rmSync(testDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (previousDataDir === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = previousDataDir;
 });
