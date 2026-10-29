@@ -126,7 +126,8 @@ export async function handleRosebudImageGeneration(options: {
     return {
       success: false as const,
       status:
-        (job || (error instanceof RosebudError && error.jobId)) && !(error instanceof z.ZodError)
+        (job || (error instanceof RosebudError && error.uncertain && error.jobId)) &&
+        !(error instanceof z.ZodError)
           ? 422
           : error instanceof z.ZodError
             ? 400
@@ -141,7 +142,7 @@ export async function handleRosebudImageGeneration(options: {
             unit: "rosebud_credits",
             consumed: job.actualCredits,
           }
-        : error instanceof RosebudError && error.jobId
+        : error instanceof RosebudError && error.uncertain && error.jobId
           ? { job_id: error.jobId, unit: "rosebud_credits" }
           : undefined,
     };
