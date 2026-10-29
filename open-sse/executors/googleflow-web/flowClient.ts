@@ -151,10 +151,12 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     throw new Error("Missing Google Flow cookies (__Secure-1PSID)");
   }
 
-  // Pre-flight check: ensure credits > 0 before launching heavy browser
+  // Pre-flight check: ensure credits >= 20 before launching heavy browser for video
   const creditsInfo = await fetchFlowCredits(cookieHeader).catch(() => null);
-  if (creditsInfo && creditsInfo.credits <= 0) {
-    throw new Error("Google Flow quota exhausted (0 Veo credits remaining on this account)");
+  if (creditsInfo && creditsInfo.credits < 20) {
+    throw new Error(
+      `Google Flow quota exhausted (${creditsInfo.credits} Veo credits remaining, 20 required for video generation)`
+    );
   }
 
   let playwright: any;

@@ -196,7 +196,7 @@ export async function getGoogleFlowUsage(
       used: 0,
       total: credits,
       remaining: credits,
-      remainingPercentage: credits > 0 ? 100 : 0,
+      remainingPercentage: credits >= 20 ? 100 : 0,
       resetAt: null,
       unlimited: false,
       displayName: "Veo Credits",
