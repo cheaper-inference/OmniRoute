@@ -4,8 +4,8 @@
  *
  * Extracted from chatCore: reads an upstream response body to a string. When the upstream is an SSE /
  * NDJSON stream consumed in non-streaming mode, it drains the reader chunk-by-chunk under the body
- * timeout and cancels early once a terminal SSE signal is observed; otherwise it falls back to a
- * timeout-bounded response.text(). Behaviour is byte-identical to the previous module-level function.
+ * timeout and cancels early once a terminal SSE signal is observed; otherwise it reads the body as
+ * text under the same timeout. Both paths count decoded bytes against the non-streaming cap.
  */
 
 import { withBodyTimeout } from "../../utils/stream.ts";
@@ -40,33 +40,72 @@ const DEFAULT_MAX_NONSTREAMING_RESPONSE_BYTES = 64 * 1024 * 1024; // 64 MB
 /**
  * Hard cap for a non-streaming response buffered fully into memory. Generous by default so
  * legitimate large completions pass; bounds only pathological/runaway upstream bodies.
- * Override with `OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES`.
+ * Override with `OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES`. Read on every call, so the value
+ * does not depend on when this module was first loaded.
  */
-export const MAX_NONSTREAMING_RESPONSE_BYTES = (() => {
+export function getMaxNonStreamingResponseBytes(): number {
   const parsed = Number.parseInt(String(process.env.OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES), 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_NONSTREAMING_RESPONSE_BYTES;
-})();
+}
 
 export async function readNonStreamingResponseBody(
   response: Response,
   contentType: string,
   upstreamStream: boolean,
-  maxBytes: number = MAX_NONSTREAMING_RESPONSE_BYTES
+  maxBytes: number = getMaxNonStreamingResponseBytes()
 ): Promise<string> {
   if (
     !upstreamStream ||
     !response.body ||
     (!contentType.includes("text/event-stream") && !contentType.includes("application/x-ndjson"))
   ) {
-    // Reject before buffering when the upstream declares an over-cap Content-Length.
-    const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
-    if (Number.isFinite(declared) && declared > maxBytes) {
-      throw new NonStreamingResponseTooLargeError(declared, maxBytes);
-    }
-    return withBodyTimeout<string>(response.text());
+    return withBodyTimeout<string>(readResponseTextWithinCap(response, maxBytes));
   }
 
   return drainNonStreamingSseBody(response.body, maxBytes);
+}
+
+/**
+ * Read a whole response body as text under `maxBytes`. Content-Length alone is not enough:
+ * it is the compressed size for gzip/deflate/br and is absent for chunked bodies. fetch()
+ * hands us the decoded stream, so the cap is enforced on the decoded bytes. Past it, or when
+ * Content-Length already declares more, the body is cancelled (closing the upstream) and
+ * {@link NonStreamingResponseTooLargeError} is thrown.
+ */
+export async function readResponseTextWithinCap(
+  response: Response,
+  maxBytes: number = getMaxNonStreamingResponseBytes()
+): Promise<string> {
+  // Reject before buffering when the upstream declares an over-cap Content-Length.
+  const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    // Cancel so the upstream connection closes now, not when the Response is collected.
+    void response.body?.cancel().catch(() => {});
+    throw new NonStreamingResponseTooLargeError(declared, maxBytes);
+  }
+  if (!response.body) return response.text();
+
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  let bytesSeen = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      bytesSeen += value.byteLength;
+      if (bytesSeen > maxBytes) {
+        throw new NonStreamingResponseTooLargeError(bytesSeen, maxBytes);
+      }
+      text += decoder.decode(value, { stream: true });
+    }
+  } catch (error) {
+    cancelNonStreamingReader(reader, error);
+    throw error;
+  } finally {
+    reader.releaseLock();
+  }
+  return text + decoder.decode();
 }
 
 /**
