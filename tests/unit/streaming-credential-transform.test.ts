@@ -262,3 +262,175 @@ test("gate resolution honors the flag, the env fallback, and the opt-out", async
     else process.env.CREDENTIAL_REDACTION_ENABLED = original;
   }
 });
+
+// OpenAI Chat Completions streams: the end-of-stream flush must carry only the held-back
+// tails. Re-sending the last forwarded delta duplicated tool_calls headers and made the
+// client-side accumulated arguments invalid JSON.
+const chatEnvelope = {
+  id: "chatcmpl-flush",
+  object: "chat.completion.chunk",
+  created: 1,
+  model: "m",
+};
+function chatChunk(delta: object, finish: string | null = null, extra: object = {}): string {
+  const body = { ...chatEnvelope, ...extra, choices: [{ index: 0, delta, finish_reason: finish }] };
+  return `data: ${JSON.stringify(body)}\n\n`;
+}
+
+type ChatToolCall = { id?: string; index: number; function?: { arguments?: string } };
+type ChatEvent = {
+  id?: string;
+  usage?: unknown;
+  choices?: Array<{
+    finish_reason?: string | null;
+    delta?: {
+      content?: unknown;
+      reasoning?: unknown;
+      reasoning_content?: unknown;
+      tool_calls?: ChatToolCall[];
+    };
+  }>;
+};
+
+function parseChatEvents(output: string): ChatEvent[] {
+  return output
+    .split("\n")
+    .filter((line) => line.startsWith("data: ") && !line.includes("[DONE]"))
+    .map((line) => JSON.parse(line.slice(6)) as ChatEvent);
+}
+
+function accumulateChat(events: ChatEvent[]) {
+  const args = new Map<number, string>();
+  const ids: string[] = [];
+  let content = "";
+  let reasoning = "";
+  let usageEvents = 0;
+  for (const event of events) {
+    if (event.usage) usageEvents += 1;
+    for (const choice of event.choices ?? []) {
+      const delta = choice.delta ?? {};
+      if (typeof delta.content === "string") content += delta.content;
+      if (typeof delta.reasoning === "string") reasoning += delta.reasoning;
+      if (typeof delta.reasoning_content === "string") reasoning += delta.reasoning_content;
+      for (const call of delta.tool_calls ?? []) {
+        if (call.id) ids.push(call.id);
+        args.set(call.index, (args.get(call.index) ?? "") + (call.function?.arguments ?? ""));
+      }
+    }
+  }
+  return { args, ids, content, reasoning, usageEvents };
+}
+
+const memoryArgs = JSON.stringify({ action: "add", content: "cats sleep a lot" });
+const delegateArgs = JSON.stringify({
+  goal: "write a CLI",
+  context: "Detailed briefing. ".repeat(600),
+});
+
+test("flush does not re-send tool_calls headers and keeps arguments valid JSON", async () => {
+  const reasoningText = "Plan: call both tools in one turn. ".repeat(40);
+  const output = await runTransform(createCredentialSseTransform(), [
+    chatChunk({ role: "assistant", content: "", reasoning: "" }),
+    chatChunk({ content: "", reasoning: reasoningText }),
+    chatChunk({ content: "Calling both tools." }),
+    chatChunk({
+      content: "",
+      tool_calls: [
+        {
+          id: "call_a",
+          index: 0,
+          type: "function",
+          function: { name: "memory", arguments: memoryArgs },
+        },
+        {
+          id: "call_b",
+          index: 1,
+          type: "function",
+          function: { name: "delegate", arguments: delegateArgs },
+        },
+      ],
+    }),
+    chatChunk({}, "tool_calls"),
+    chatChunk({}, null, {
+      choices: [],
+      usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+    }),
+    "data: [DONE]\n\n",
+  ]);
+  const { args, ids, content, reasoning, usageEvents } = accumulateChat(parseChatEvents(output));
+  assert.deepEqual(ids.sort(), ["call_a", "call_b"], "each tool call header is sent exactly once");
+  assert.equal(args.get(0), memoryArgs);
+  assert.equal(args.get(1), delegateArgs);
+  assert.equal(content, "Calling both tools.");
+  assert.equal(reasoning, reasoningText);
+  assert.equal(usageEvents, 1);
+});
+
+test("flush event carries only held-back tails, without finish_reason", async () => {
+  const output = await runTransform(createCredentialSseTransform(), [
+    chatChunk({
+      tool_calls: [
+        {
+          id: "call_b",
+          index: 1,
+          type: "function",
+          function: { name: "delegate", arguments: delegateArgs },
+        },
+      ],
+    }),
+    chatChunk({}, "tool_calls"),
+    "data: [DONE]\n\n",
+  ]);
+  const events = parseChatEvents(output);
+  const flush = events.find((event) => {
+    const calls = event.choices?.[0]?.delta?.tool_calls;
+    return Array.isArray(calls) && !calls.some((call) => call.id);
+  });
+  assert.ok(flush, "expected a flush event with the argument tail");
+  assert.equal(flush.id, chatEnvelope.id);
+  assert.equal(flush.choices?.[0]?.finish_reason, undefined);
+  assert.deepEqual(Object.keys(flush.choices?.[0]?.delta ?? {}), ["tool_calls"]);
+  assert.equal(accumulateChat(events).args.get(1), delegateArgs);
+});
+
+test("text and argument tails in the finish_reason chunk keep their order", async () => {
+  const text = "Calling the worker now. ".repeat(40);
+  const output = await runTransform(createCredentialSseTransform(), [
+    chatChunk({ role: "assistant", content: text.slice(0, 600) }),
+    chatChunk({
+      tool_calls: [
+        {
+          id: "call_b",
+          index: 0,
+          type: "function",
+          function: { name: "delegate", arguments: delegateArgs.slice(0, 4000) },
+        },
+      ],
+    }),
+    chatChunk(
+      {
+        content: text.slice(600),
+        tool_calls: [{ index: 0, function: { arguments: delegateArgs.slice(4000) } }],
+      },
+      "tool_calls"
+    ),
+    "data: [DONE]\n\n",
+  ]);
+  const events = parseChatEvents(output);
+  const { args, ids, content } = accumulateChat(events);
+  assert.deepEqual(ids, ["call_b"]);
+  assert.equal(args.get(0), delegateArgs);
+  assert.equal(content, text);
+  assert.equal(events.at(-1)?.choices?.[0]?.finish_reason, "tool_calls", "finish chunk stays last");
+});
+
+test("unclosed private key header in the finish_reason chunk is still stamped", async () => {
+  const header = ["-----BEGIN", "PRIVATE", "KEY-----"].join(" ");
+  const output = await runTransform(createCredentialSseTransform(), [
+    chatChunk({ role: "assistant", content: "note " }),
+    chatChunk({ content: `${header}\n${"Q".repeat(32)}` }, "stop"),
+    "data: [DONE]\n\n",
+  ]);
+  assert.ok(!output.includes(header), "key header must not leak in clear");
+  assert.match(output, /\[REDACTED:private_key\]/);
+});

@@ -136,13 +136,16 @@ test.each([
       })
     );
     const onCreated = vi.fn();
-    const el = mount(
+    mount(
       <NewBatchWizard
         onClose={() => {}}
         onCreated={onCreated}
         availableProviders={[{ id: "openai", name: "OpenAI", models: ["gpt-4o"] }]}
       />
     );
+    // The wizard renders inside the kit Modal (KEA-7886), which portals to document.body,
+    // so its controls are queried there instead of in the mount container.
+    const el = document.body;
     async function next() {
       const button = el.querySelector("button[data-wizard-next]") as HTMLButtonElement;
       expect(button.disabled).toBe(false);

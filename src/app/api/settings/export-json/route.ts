@@ -4,11 +4,13 @@ import { getProviderConnections } from "@/lib/db/providers";
 import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getCombos } from "@/lib/db/combos";
 import { getApiKeys } from "@/lib/db/apiKeys";
+import { listAllApiKeyBillingHistory, listTeams } from "@/lib/db/teams";
 import {
   CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
   requireOperatorCredential,
 } from "@/lib/api/operatorCredential";
 import {
+  getAllDailyTeamUsageSummary,
   getAllUsageHistory,
   getAllDomainCostHistory,
   getAllDomainBudgets,
@@ -88,6 +90,8 @@ export async function GET(request: Request) {
       providerNodes,
       combos,
       apiKeys,
+      teams: listTeams({ includeArchived: true }),
+      apiKeyBillingTeamHistory: listAllApiKeyBillingHistory(),
       // Metadata to identify export version
       _meta: {
         exportedAt: new Date().toISOString(),
@@ -101,6 +105,7 @@ export async function GET(request: Request) {
     // thousands of rows and make the config backup grow to many MBs.
     if (includeHistory) {
       exportData.usageHistory = getAllUsageHistory();
+      exportData.dailyTeamUsageSummary = getAllDailyTeamUsageSummary();
       exportData.domainCostHistory = getAllDomainCostHistory();
       exportData.domainBudgets = getAllDomainBudgets();
     }

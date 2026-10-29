@@ -1,5 +1,9 @@
 "use client";
 
+import Textarea from "@/shared/components/Textarea";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
+
 // src/app/(dashboard)/dashboard/playground/components/tabs/BuildTab.tsx
 
 import { useRef, useState } from "react";
@@ -143,10 +147,7 @@ export default function BuildTab({ configState }: BuildTabProps) {
       const assistantMsg = choice?.message;
 
       if (assistantMsg == null) {
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: "(empty response)" },
-        ]);
+        setMessages((prev) => [...prev, { role: "assistant", content: "(empty response)" }]);
         return;
       }
 
@@ -166,14 +167,11 @@ export default function BuildTab({ configState }: BuildTabProps) {
             toolCallId: tc.id,
             functionName: tc.function.name,
             draft: "",
-          })),
+          }))
         );
       } else {
         const content = assistantMsg.content ?? "";
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content },
-        ]);
+        setMessages((prev) => [...prev, { role: "assistant", content }]);
 
         // Validate structured output response if enabled
         if (structuredOutput.enabled && structuredOutput.schema != null) {
@@ -232,9 +230,9 @@ export default function BuildTab({ configState }: BuildTabProps) {
           <div
             className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
               msg.role === "user"
-                ? "bg-primary text-white"
+                ? "bg-primary text-accent-foreground"
                 : msg.role === "tool"
-                  ? "bg-yellow-500/10 border border-yellow-500/30 text-text-main"
+                  ? "bg-warning/10 border border-warning/30 text-text-main"
                   : "bg-bg-alt border border-border text-text-main"
             }`}
           >
@@ -253,44 +251,42 @@ export default function BuildTab({ configState }: BuildTabProps) {
           {toolCalls.map((tc) => {
             const draft = toolResultDrafts.find((d) => d.toolCallId === tc.id);
             return (
-              <div
-                key={tc.id}
-                className="border border-amber-500/40 rounded-lg p-3 bg-amber-500/5"
-              >
+              <div key={tc.id} className="border border-warning/40 rounded-lg p-3 bg-warning/5">
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="material-symbols-outlined text-[14px] text-amber-500">
-                    function
-                  </span>
-                  <code className="text-xs font-mono text-text-main">
-                    {tc.function.name}
-                  </code>
+                  <Icon name="function" size={14} className="text-warning" />
+                  <code className="text-xs font-mono text-text-main">{tc.function.name}</code>
                 </div>
                 <pre className="text-[11px] font-mono text-text-muted bg-bg-alt rounded p-2 overflow-x-auto mb-2 whitespace-pre-wrap break-all">
                   {tc.function.arguments}
                 </pre>
                 <div className="flex flex-col gap-2">
-                  <label className="text-[10px] text-text-muted uppercase tracking-wider">
+                  <span
+                    className="text-[10px] text-text-muted uppercase tracking-wider"
+                    aria-hidden="true"
+                  >
                     Tool result
-                  </label>
-                  <textarea
+                  </span>
+                  <Textarea
                     value={draft?.draft ?? ""}
                     onChange={(e) =>
                       setToolResultDrafts((prev) =>
                         prev.map((d) =>
-                          d.toolCallId === tc.id ? { ...d, draft: e.target.value } : d,
-                        ),
+                          d.toolCallId === tc.id ? { ...d, draft: e.target.value } : d
+                        )
                       )
                     }
                     rows={3}
                     placeholder={t("enterToolResult")}
-                    className="text-xs font-mono bg-bg-alt border border-border rounded px-2 py-1.5 focus:outline-none focus:ring-1 focus:ring-primary text-text-main resize-y"
+                    aria-label={t("enterToolResult")}
+                    className="text-xs font-mono resize-y"
                   />
-                  <button
+                  <Button
+                    size="sm"
                     onClick={() => void sendToolResult(tc.id)}
-                    className="text-xs px-2.5 py-1 rounded bg-primary text-white hover:bg-primary/90 transition-colors self-start"
+                    className="self-start"
                   >
                     Send tool result
-                  </button>
+                  </Button>
                 </div>
               </div>
             );
@@ -303,11 +299,13 @@ export default function BuildTab({ configState }: BuildTabProps) {
         <div
           className={`text-xs rounded-lg px-3 py-2 border ${
             validationResult.valid
-              ? "border-green-500/40 bg-green-500/5 text-green-600 dark:text-green-400"
-              : "border-destructive/40 bg-destructive/5 text-destructive"
+              ? "border-success/40 bg-success/5 text-success"
+              : "border-error/40 bg-error/5 text-error"
           }`}
         >
-          {validationResult.valid ? "✅ Valid JSON schema response" : `❌ ${validationResult.error}`}
+          {validationResult.valid
+            ? "✅ Valid JSON schema response"
+            : `❌ ${validationResult.error}`}
         </div>
       )}
     </div>

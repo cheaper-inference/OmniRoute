@@ -72,10 +72,22 @@ export async function resolveCredentialGate(args: {
   }
   let disabled: string[] = [];
   try {
-    const resolver =
-      args.resolveDisabledGuardrails ?? (await import("./guardrails")).resolveDisabledGuardrails;
-    disabled =
-      resolver({ apiKeyInfo: args.apiKeyInfo, body: args.body, headers: args.headers }) ?? [];
+    if (args.resolveDisabledGuardrails) {
+      disabled =
+        args.resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo,
+          body: args.body,
+          headers: args.headers,
+        }) ?? [];
+    } else {
+      const { resolveDisabledGuardrails } = await import("./guardrails");
+      disabled =
+        resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo as Record<string, unknown> | null | undefined,
+          body: args.body,
+          headers: args.headers as Headers | Record<string, unknown> | null | undefined,
+        }) ?? [];
+    }
   } catch {
     disabled = [];
   }
@@ -277,11 +289,27 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   return false;
 }
 
+function pickClaudeFlushBuffer(
+  store: ChoiceBufferStore,
+  blockIndex: number
+): Record<FieldCategory, string> {
+  const own = store.get(`${blockIndex}_0`);
+  if (Object.values(own).some((v) => v.length > 0)) return own;
+  for (const [, candidate] of store.takeAll()) {
+    if (Object.values(candidate).some((v) => v.length > 0)) return candidate;
+  }
+  return own;
+}
+
 function flushClaudeFormat(
   store: ChoiceBufferStore,
   lastJson: Record<string, unknown>
 ): Record<string, unknown> | null {
-  const buffers = store.get("0_0");
+  const blockIndex = typeof lastJson.index === "number" ? lastJson.index : 0;
+  // Claude content blocks buffer under `<blockIndex>_0`; a thinking block at index 0 followed
+  // by a text block at index 1 must not strand the text in a buffer that is never flushed
+  // (#18006). Prefer the block the last frame belongs to, then any non-empty block buffer.
+  const buffers = pickClaudeFlushBuffer(store, blockIndex);
   const delta: Record<string, unknown> = { type: "text_delta" };
   let hasDelta = false;
   if (buffers.content) {
@@ -307,7 +335,7 @@ function flushClaudeFormat(
   if (!hasDelta) return null;
   return {
     type: "content_block_delta",
-    index: typeof lastJson.index === "number" ? lastJson.index : 0,
+    index: blockIndex,
     delta,
   };
 }
@@ -393,7 +421,18 @@ function flushOpenAiChoices(
   store: ChoiceBufferStore,
   lastJson: Record<string, unknown>
 ): Record<string, unknown> {
-  const finalJson = JSON.parse(JSON.stringify(lastJson)) as { choices: OpenAiChoice[] };
+  // `lastJson` was already forwarded to the client. Keep only its envelope
+  // (id/model/created) and per-choice index; the flush event carries the held-back
+  // tails alone. Re-sending its delta duplicated tool_calls headers (id/name/
+  // arguments) and corrupted the client-side accumulated arguments.
+  const finalJson = JSON.parse(JSON.stringify(lastJson)) as {
+    choices: OpenAiChoice[];
+    usage?: unknown;
+  };
+  delete finalJson.usage;
+  finalJson.choices = finalJson.choices.map((c) =>
+    typeof c.index === "number" ? { index: c.index, delta: {} } : { delta: {} }
+  );
   const presentIndexes = new Set(
     finalJson.choices.map((c) => c.index).filter((idx): idx is number => typeof idx === "number")
   );
@@ -622,18 +661,21 @@ function drainWindow(
   isStopSignal: boolean
 ): string {
   const sanitized = redactOutsideDataUrls(buffers[field]);
-  let emitLength = isStopSignal
-    ? sanitized.length
-    : Math.max(0, sanitized.length - state.windowSize);
-  if (!isStopSignal) {
-    const partial = findCredentialPartialTailIndex(sanitized);
-    if (partial !== undefined && emitLength > partial) emitLength = partial;
-    // A key header without a closing marker anywhere after it is never
-    // emitted in clear, however far past the tail probe it already sits.
-    const unclosedBegin = findUnclosedBeginIndex(sanitized);
-    if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
-    emitLength = backOffSurrogate(sanitized, emitLength);
+  if (isStopSignal) {
+    // The flush event is emitted before the chunk carrying finish_reason, so a
+    // tail held back from that chunk would reach the client out of order. Drain
+    // it whole here; key headers are stamped as in onFlush.
+    state.replace(buffers, field, "");
+    return markUnclosedBeginHead(sanitized);
   }
+  let emitLength = Math.max(0, sanitized.length - state.windowSize);
+  const partial = findCredentialPartialTailIndex(sanitized);
+  if (partial !== undefined && emitLength > partial) emitLength = partial;
+  // A key header without a closing marker anywhere after it is never
+  // emitted in clear, however far past the tail probe it already sits.
+  const unclosedBegin = findUnclosedBeginIndex(sanitized);
+  if (unclosedBegin !== undefined && emitLength > unclosedBegin) emitLength = unclosedBegin;
+  emitLength = backOffSurrogate(sanitized, emitLength);
   const toEmit = sanitized.slice(0, emitLength);
   state.replace(buffers, field, sanitized.slice(emitLength));
   return toEmit;
@@ -649,7 +691,8 @@ function appendAndDrain(
 ): string {
   const buffers = store.get(index);
   state.append(buffers, field, ownText);
-  if (state.bufferedBytes() > state.maxBufferedBytes) return drainOverflow(state, buffers, field);
+  if (!isStopSignal && state.bufferedBytes() > state.maxBufferedBytes)
+    return drainOverflow(state, buffers, field);
   return drainWindow(state, buffers, field, isStopSignal);
 }
 
@@ -734,12 +777,12 @@ export function createCredentialSseTransform(
   const processor = (
     text: string,
     field: FieldCategory,
-    _isStopSignal = false,
+    isStopSignal = false,
     index: string | number = "0_0",
     isSnapshot = false
   ): string => {
     if (isSnapshot) return redactOutsideDataUrls(text);
-    return appendAndDrain(state, store, field, index, redactOutsideDataUrls(text), false);
+    return appendAndDrain(state, store, field, index, redactOutsideDataUrls(text), isStopSignal);
   };
 
   return createSseTextTransform(processor, onFlush, undefined, { processToolArgs: true });

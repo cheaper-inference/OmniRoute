@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 import { validateJsonl } from "@/lib/batches/validateJsonl";
 import type { ValidationResult } from "@/lib/batches/types";
 import type { SupportedBatchEndpoint } from "@/lib/batches/types";
@@ -57,10 +58,8 @@ export default function JsonlValidationStep({
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-12 gap-3">
-        <span className="material-symbols-outlined text-3xl text-[var(--color-accent)] animate-spin">
-          progress_activity
-        </span>
-        <span className="text-sm text-[var(--color-text-muted)]">{t("wizardValidating")}</span>
+        <Icon name="progress_activity" size={30} className="text-accent animate-spin" />
+        <span className="text-sm text-text-muted">{t("wizardValidating")}</span>
       </div>
     );
   }
@@ -71,11 +70,11 @@ export default function JsonlValidationStep({
     <div className="flex flex-col gap-5">
       {/* OK / Error banner — spec §5 "campos OK" appended on success (A-7) */}
       {result.ok ? (
-        <div className="flex items-center gap-3 rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-3">
-          <span className="material-symbols-outlined text-emerald-400">check_circle</span>
+        <div className="flex items-center gap-3 rounded-xl border border-success/25 bg-success/10 px-4 py-3">
+          <Icon name="check_circle" className="text-success" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium text-emerald-400">{t("wizardValidationOk")}</span>
-            <span className="text-xs text-[var(--color-text-muted)]">
+            <span className="text-sm font-medium text-success">{t("wizardValidationOk")}</span>
+            <span className="text-xs text-text-muted">
               {t("wizardValidationSummary", {
                 lines: result.totalLines,
                 ids: result.uniqueCustomIds,
@@ -85,11 +84,11 @@ export default function JsonlValidationStep({
           </div>
         </div>
       ) : (
-        <div className="flex items-center gap-3 rounded-xl border border-red-500/25 bg-red-500/10 px-4 py-3">
-          <span className="material-symbols-outlined text-red-400">error</span>
+        <div className="flex items-center gap-3 rounded-xl border border-error/25 bg-error/10 px-4 py-3">
+          <Icon name="error" className="text-error" />
           <div className="flex flex-col gap-0.5">
-            <span className="text-sm font-medium text-red-400">{t("wizardValidationErrors")}</span>
-            <span className="text-xs text-[var(--color-text-muted)]">
+            <span className="text-sm font-medium text-error">{t("wizardValidationErrors")}</span>
+            <span className="text-xs text-text-muted">
               {t("wizardValidationErrorCount", { count: result.errors.length })}
             </span>
           </div>
@@ -98,19 +97,19 @@ export default function JsonlValidationStep({
 
       {/* Sampling note */}
       {result.sampledLines < result.totalLines && (
-        <div className="rounded-lg border border-yellow-500/25 bg-yellow-500/10 px-3 py-2 text-xs text-yellow-400">
+        <div className="rounded-lg border border-warning/25 bg-warning/10 px-3 py-2 text-xs text-warning">
           {t("wizardValidationSamplingNote")}
         </div>
       )}
 
       {/* Duplicate IDs */}
       {result.duplicateCustomIds.length > 0 && (
-        <div className="rounded-lg border border-red-500/25 bg-red-500/10 px-3 py-2 flex flex-col gap-1">
-          <span className="text-xs font-medium text-red-400">
+        <div className="rounded-lg border border-error/25 bg-error/10 px-3 py-2 flex flex-col gap-1">
+          <span className="text-xs font-medium text-error">
             {t("wizardValidationDuplicateIds")}
           </span>
           {result.duplicateCustomIds.slice(0, 10).map((id) => (
-            <span key={id} className="text-xs text-red-300 font-mono">
+            <span key={id} className="text-xs text-error font-mono">
               {id}
             </span>
           ))}
@@ -120,21 +119,19 @@ export default function JsonlValidationStep({
       {/* Error table */}
       {result.errors.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-[var(--color-text-muted)]">
+          <span className="text-xs font-medium text-text-muted">
             {t("wizardValidationFirstErrors", {
               count: Math.min(result.errors.length, 50),
             })}
           </span>
-          <div className="max-h-60 overflow-auto rounded-lg border border-[var(--color-border)] divide-y divide-[var(--color-border)]">
+          <div className="max-h-60 overflow-auto rounded-lg border border-border divide-y divide-border">
             {result.errors.slice(0, 50).map((err) => (
               <div key={`${err.lineNumber}-${err.reason}`} className="px-3 py-2 flex gap-3 text-xs">
-                <span className="text-[var(--color-text-muted)] min-w-[60px]">
+                <span className="text-text-muted min-w-[60px]">
                   {t("wizardValidationLine", { line: err.lineNumber })}
                 </span>
-                <span className="text-red-400 flex-1">{err.reason}</span>
-                {err.field && (
-                  <span className="text-[var(--color-text-muted)] font-mono">{err.field}</span>
-                )}
+                <span className="text-error flex-1">{err.reason}</span>
+                {err.field && <span className="text-text-muted font-mono">{err.field}</span>}
               </div>
             ))}
           </div>
@@ -144,10 +141,10 @@ export default function JsonlValidationStep({
       {/* Preview */}
       {result.preview.length > 0 && (
         <div className="flex flex-col gap-2">
-          <span className="text-xs font-medium text-[var(--color-text-muted)]">
+          <span className="text-xs font-medium text-text-muted">
             {t("wizardValidationPreview")}
           </span>
-          <pre className="max-h-40 overflow-auto rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-alt)] p-3 text-xs text-[var(--color-text)] whitespace-pre-wrap break-all">
+          <pre className="max-h-40 overflow-auto rounded-lg border border-border bg-bg-alt p-3 text-xs text-text-main whitespace-pre-wrap break-all">
             {JSON.stringify(result.preview, null, 2)}
           </pre>
         </div>

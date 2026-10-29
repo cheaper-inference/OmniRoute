@@ -170,18 +170,18 @@ Omfattningar (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, 
 ## Köra tester
 
 ```bash
-# Alla tester (enhet + vitest + ekosystem + e2e)
+# Alla tester (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Enskild testfil (Node.js inbyggda testkörare — de flesta tester använder denna)
+# En enskild testfil (Node.js inbyggda testkörare — de flesta tester använder denna)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Endast de enhetstester som påverkas av din ändring (samma TIA-väljare som CI-grinden, #8084)
-npm run test:scoped            # ändringar i den senaste committen (eller arbetskatalogen)
-npm run test:scoped:staged     # endast stageade ändringar — passar bra med en körning före commit
-npm run test:scoped:full       # bygg först om importgrafkartan (efter att filer lagts till/flyttats)
-# Avslutningskod 1 + "run the full suite" betyder att en navfil (tsconfig, package.json, …) eller en
-# omappad källfil har ändrats — väljaren avbryter säkert och hoppar aldrig över något i tysthet.
+npm run test:scoped            # ändringar i den senaste committen (eller arbetsträdet)
+npm run test:scoped:staged     # endast ändringar i stagingområdet — passar bra med en pre-commit-körning
+npm run test:scoped:full       # bygg först om kartan över importgrafen (efter att filer lagts till/flyttats)
+# Avslutningskod 1 + "kör hela testsviten" innebär att en central fil (tsconfig, package.json, …) eller en
+# omappad källfil har ändrats — väljaren stänger säkert och hoppar aldrig över något i tysthet.
 
 # Vitest (MCP-server, autoCombo, cache)
 npm run test:vitest
@@ -203,40 +203,41 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Grindad smoke-test av kombinationer mot verkliga uppströmstjänster (kräver VPS-åtkomst + krediter hos riktiga leverantörer)
-# Anropar VERKLIGA leverantörer — kostar lite. Körs ALDRIG i CI. Hoppas över utan fel om grinden saknas.
+# Grindstyrt kombinerat smoke-test mot verkliga uppströmstjänster (kräver VPS-åtkomst + riktiga leverantörskrediter)
+# Anropar VERKLIGA leverantörer — kostar lite. Körs ALDRIG i CI. Hoppas över på ett kontrollerat sätt utan grinden.
 # Kräver: åtkomst via ssh root@192.168.0.15 (hämtar en skrivskyddad DB-ögonblicksbild från VPS:en).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fas 3-live-smoke-test på VPS — vanliga Node ESM-skript som anropar live-servern på .15 direkt.
+# Live-smoke-test för fas 3 på VPS — vanliga Node ESM-skript som anropar live-servern på .15 direkt.
 # Kräver: åtkomst via ssh root@192.168.0.15 (kombinationer skapas/tas bort via SSH sqlite).
-# Anropar VERKLIGA leverantörer (liten kostnad). Skapar/raderar endast kombinationer av typen __live_test__*. Körs ALDRIG i CI.
-# REQUIRE_API_KEY=false på .15, så ingen API-nyckel behövs, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteras om de är angivna.
-npm run test:combo:live:vps              # 7 HTTP-scenarier (prioritet/round-robin/viktad/kostnad/fusion/auto + hälsa)
-npm run test:combo:live:vps:failover     # lägger till ett verkligt redundansscenario mellan leverantörer (totalt 8)
+# Anropar VERKLIGA leverantörer (liten kostnad). Skapar/tar endast bort kombinationer av typen __live_test__*. Körs ALDRIG i CI.
+# REQUIRE_API_KEY=false på .15, så ingen API-nyckel behövs, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteras om de har angetts.
+npm run test:combo:live:vps              # 7 HTTP-scenarier (priority/round-robin/weighted/cost/fusion/auto + hälsa)
+npm run test:combo:live:vps:failover     # lägger till ett verkligt redundansväxlingsscenario mellan leverantörer (totalt 8)
 ```
 
-Kommentarer om täckning:
+Anmärkningar om täckning:
 
-- `npm run test:coverage` mäter källtäckningen för huvudsviten med enhetstester, exkluderar `tests/**` och inkluderar `open-sse/**`
+- `npm run test:coverage` mäter källtäckning för den huvudsakliga enhetstestsviten, exkluderar `tests/**` och inkluderar `open-sse/**`
 - Pull requests måste hålla täckningsgrinden på **60 %+** för satser/rader/funktioner/grenar
 - Om en PR ändrar produktionskod i `src/`, `open-sse/`, `electron/` eller `bin/` måste automatiserade tester läggas till eller uppdateras i samma PR
 - `npm run coverage:report` skriver ut en detaljerad rapport fil för fil från den senaste täckningskörningen
 - `npm run test:coverage:legacy` bevarar det äldre mätvärdet för historisk jämförelse
-- Se `docs/ops/COVERAGE_PLAN.md` för den stegvisa planen för förbättrad täckning
+- Se `docs/ops/COVERAGE_PLAN.md` för den stegvisa färdplanen för förbättrad täckning
 
-### Krav för Pull Requests
+### Krav för pull requests
 
 Innan du öppnar en PR ska du använda
 [Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) för att köra den fokuserade loopen för
-det du har ändrat. Den fullständiga enhetstestsviten (4 CI-shards), Vitest, täckningsgrinden på **60 %+** och
-produktionsbygget är CI:s ansvar — att köra dem lokalt tillför ingen information som PR-
-kontrollerna inte redan ger dig, och på mindre maskiner kan det överbelasta värddatorn (#8084):
+det du ändrade. Den fullständiga enhetstestsviten (4 CI-shards), Vitest, täckningsgrinden på **60 %+** och
+produktionsbygget är CI:s ansvar — att köra dem lokalt ger ingen ytterligare information utöver vad PR-
+kontrollerna redan ger, och på mindre datorer kan det överbelasta värden (#8084):
 
 - Kör testfilerna som täcker din ändring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Kör `npm run lint`
 - Lägg till eller uppdatera automatiserade tester i samma PR när produktionskod ändras
-- Inkludera de ändrade eller tillagda testfilerna i PR-beskrivningen när produktionskod har ändrats
+- I `node:test`-filer ska varje `await` på toppnivå (exempelvis `await import(...)`) placeras före den första `test()` / `describe()`: med `--test-force-exit` kan tester som registreras efter det i tysthet aldrig köras (#18045; upprätthålls av `npm run check:test-tla-order`)
+- Inkludera de ändrade eller tillagda testfilerna i PR-beskrivningen när produktionskoden har ändrats
 - Kontrollera SonarQube-resultatet för PR:en när projektets hemligheter är konfigurerade i CI
 
 Aktuell teststatus: **122 enhetstestfiler** som täcker:
@@ -246,9 +247,9 @@ Aktuell teststatus: **122 enhetstestfiler** som täcker:
 - Semantisk cache, idempotens och förloppsspårning
 - Databasåtgärder och schema (21 DB-moduler)
 - OAuth-flöden och autentisering
-- Validering av API-endpoints (Zod v4)
-- MCP-serververktyg och tillämpning av behörighetsomfång
-- Minnes- och Skills-system
+- Validering av API-slutpunkter (Zod v4)
+- MCP-serververktyg och tillämpning av omfång
+- Systemen Memory och Skills
 
 ---
 

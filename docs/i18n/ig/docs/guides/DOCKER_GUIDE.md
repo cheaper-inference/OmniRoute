@@ -644,27 +644,29 @@ sudo systemctl enable --now omniroute-update.path
 Service ahụ na-ewepụ arịrịọ ahụ tupu ọ dọrọ image ka mmegharị dara ada ghara ịbanye na loop. Enweghị
 `DOCKER_UPDATE_TRIGGER_FILE`, dashboard ahụ ga-edobe usoro iwu aka.
 
-## Nnweta: SQLite ndabara bụ otu replica
+## Nnweta: SQLite ndabara bụ otu oyiri
 
-Docker / Kubernetes OmniRoute ndabara bụ **otu usoro Node + otu onye na-ede SQLite**. **Anaghị akwado** nnweta dị elu na topology ahụ.
+Stock Docker / Kubernetes OmniRoute bụ** otu Node usoro + otu SQLite odee** . Nnukwu nnweta bụ** akwadoghị** na topology.
 
-| Mmachi                                            | Nsonaazụ                                                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Otu onye na-ede                                   | **Agbala** ọtụtụ replica megide otu faịlụ SQLite ahụ. Nke ahụ ga-emebi DB.                                                                                                                                                                                                                                                                                  |
-| Mepụtaghachi / malitegharịa / ogbugbu HEALTHCHECK | **Nkwụsị ọrụ zuru ezu** nke SSE ndị na-aga n'ihu, session dashboard, na state dị na memory. Njikọ onye ahịa ọ bụla ga-akwụsị. Arịrịọ ọhụrụ n'oge windo endpoint tọgbọ chakoo ga-enweta **`502 Bad Gateway: Unknown error`** site na reverse proxy, ọ bụghị JSON OmniRoute — ndị ahịa enweghị ike ịmata ọdịiche dị n'etiti nke a na ọdịda provider (#11015). |
-| Otu event loop ahụ dịka `/healthz`                | Catalog ji ọrụ n'aka ma ọ bụ tick compression nwere ike igbu oge probe; timeout dị mkpụmkpụ ga-amalitegharị **naanị** replica ahụ.                                                                                                                                                                                                                          |
+| Mmachi                                     | Ihe si na ya pụta                                                                                                                                                                                                                                                                                          |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Otu onye edemede                           | Mee** ọ bụghị** mee ọtụtụ oyiri megide otu faịlụ SQLite. Nke ahụ na-emebi DB.                                                                                                                                                                                                                              |
+| Megharịa / malitegharịa / HEALTHCHECK igbu | **Ọpụpụ zuru oke** nke SSE ụgbọ elu, nnọkọ dashboard, na steeti ebe nchekwa. Onye ahịa ọ bụla ejikọrọ na-ada. Arịrịọ ọhụrụ n'oge mpio ihe efu na-enweta proxy reverse**`502 Bad Gateway: Unknown error`** , ọ bụghị OmniRoute JSON — ndị ahịa enweghị ike ịmata nke a na ọdịda onye na-eweta ọrụ (#11015). |
+| Otu ihe omume dị ka `/healthz`             | Katalọgụ na-arụsi ọrụ ike ma ọ bụ akara mkpakọ nwere ike igbu oge nyocha; obere oge wee malitegharịa** naanị** oyiri.                                                                                                                                                                                      |
 
-**Matriks probe** (leekwa [ndụmọdụ probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Nyocha matrix** (leekwa [ndụmọdụ Kubernetes nyocha](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe         | Ebe a na-elekwasị anya                                          | Ejila                                                                     |
-| ------------- | --------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Ịdị ndụ       | TCP na `PORT` (ndabara `20128`), ma ọ bụ HTTP dị nro `/healthz` | `/api/monitoring/health`                                                  |
-| Ịdị njikere   | HTTP `GET /healthz`                                             | Timeout siri ike nke na-ewere event loop ji ọrụ n'aka dịka nke nwụrụ anwụ |
-| Omimi / mmadụ | `/api/monitoring/health`                                        | Liveness kubelet akpaaka                                                  |
+| Nyocha       | Ebumnuche                                                        | Ejila ya                                                                 |
+| ------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| Ịdị ndụ      | TCP na `PORT` ( `20128` ndabara), ma ọ bụ HTTP `/healthz` dị nro | `/api/monitoring/health`                                                 |
+| Njikere      | HTTP `GET /healthz`                                              | Oge nkwụsịtụ siri ike na-ewere mmemme-loop na-arụ ọrụ ka onye nwụrụ anwụ |
+| Deep / mmadụ | `/api/monitoring/health`                                         | Kubelet ndụ akpaaka                                                      |
 
-**Nkwalite:** tụọ anya na session ọ bụla ga-akwụsị. Mee ka ndị ahịa kwụsị nke ọma ma ọ bụrụ na ị nwere ike; enweghị rolling update na SQLite ndabara. Compose `restart: unless-stopped` tinyere Docker `HEALTHCHECK` ga-edochikwa naanị usoro ahụ mgbe container ghọrọ Unhealthy — otu oke mmetụta ahụ.
+**Nkwalite:** na-atụ anya ka nnọkọ ọ bụla daa. Wepu ndị ahịa ma ọ bụrụ na ị nwere ike; enweghị mmelite mkpọgharị na ndabara SQLite. Mepụta `restart: unless-stopped` gbakwunyere Docker `HEALTHCHECK` ga-anọchikwa naanị usoro mgbe akpa adịghị mma - otu mgbawa radius.
 
-Iberibe Kubernetes maka **otu replica** (Recreate dị mkpa; amụbawanye `replicas` megide otu faịlụ SQLite):
+Ngosipụta emebere emebere yana eserese Helm na-ebi na `deploy/kubernetes/` na `deploy/helm/omniroute/` - lee [ntuziaka ntinye nke Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Kubernetes snippet maka a** otu oyiri** (Achọrọ imegharia; ebulila `replicas` megide otu faịlụ SQLite ):
 
 ```yaml
 spec:
@@ -691,9 +693,9 @@ spec:
             periodSeconds: 20
 ```
 
-Nkwụsịtụ `preStop` na-enye kube ohere iwepụ njedebe Service tupu SIGTERM ka okporo ụzọ **ọhụrụ** kwụsị iru usoro ahụ na-anwụ anwụ. A na-enye SSE `/v1/responses` ndị ka na-aga n'ihu ohere imecha ruo `SHUTDOWN_TIMEOUT_MS` (ndabara bụ 30s) site na ikike nnabata heavyweight (#11015). Arịrịọ ọhụrụ ndị ka rutere usoro ahụ ga-enweta `503` + `Retry-After: 5`. Oghere enweghị-endpoint nke Recreate ruo mgbe ihe nnọchi ahụ ghọrọ Ready ka bụ nkwụsị ọrụ zuru oke — nke ahụ bụ nhazi SQLite, ọ bụghị nhazi probe na-ezighi ezi.
+ụra `preStop` na-ahapụ kube dobe njedebe ọrụ tupu SIGTERM so** ọhụrụ** okporo ụzọ na-akwụsị ịkụ usoro ịnwụ anwụ. A na-ekpochapụ `/v1/responses` SSE n'ime ụgbọ elu ruo `SHUTDOWN_TIMEOUT_MS` (30s ndabara) site na mgbazinye nnabata arọ (#11015). Arịrịọ ọhụrụ ka ruru usoro a ga-enweta `503` + `Retry-After: 5`. Megharia oghere ngwụcha ngwụcha ruo mgbe nnọchi ya dị njikere na-anọgide na-apụ apụ - ya bụ SQLite topology, ọ bụghị nyocha misconfig.
 
-External Postgres / multi-writer HA **abụghị** ụzọ stock e depụtara n’akwụkwọ. Ọ bụrụ na ịchọrọ HA, jiri otu replica naanị ma ọ bụ mee nhazi nke project ahụ nwalere ma depụta iche n’akwụkwọ. Ọrụ Postgres/MySQL dị na [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Ruo mgbe ewepụtara nke ahụ, naanị ụzọ akwadoro iji mụbaa ikike `/v1/responses` **buru ibu** bụ usoro N ndị nọọrọ onwe ha (akụkụ na-esote), ọ bụghị `replicas > 1` n’otu volume.
+Mpụga Postgres / ọtụtụ odee HA bụ** ọ bụghị** ụzọ ngwaahịa edepụtara. Ọ bụrụ na ịchọrọ HA, debe otu oyiri ma ọ bụ mee topology ihe oru ngo nwalere wee detuo ya iche. Ọrụ Postgres/MySQL bi na [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Ruo mgbe ụgbọ mmiri ahụ, naanị ụzọ akwadoro iji mụbaa** nnukwu** ikike `/v1/responses` bụ N usoro nnwere onwe (ngalaba na-esote), ọ bụghị `replicas > 1` n'otu olu.
 
 ## Ịgbasa ikike: usoro N nọọrọ onwe ha
 
