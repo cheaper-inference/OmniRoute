@@ -79,8 +79,8 @@ const DEFAULT_TIMEOUT_MS = 180_000;
 const CATALOG_TTL_MS = 60_000;
 
 // Settings come from the dashboard (Providers → local → opencode server) and
-// win over the defaults; the cache lives in services/opencodeServerSettings.ts so
-// the settings route can invalidate it without importing an executor.
+// win over the defaults; applyRuntimeSettings() pushes them into
+// services/opencodeServerSettings.ts at boot and on every settings save.
 export { clearOpencodeServerSettingsCache };
 
 // Refreshed on every requireOpencodeServer() (i.e. before each request) so the

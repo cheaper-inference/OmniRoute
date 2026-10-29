@@ -598,3 +598,37 @@ test("opencode-server: closing the event bus stops its reconnect loop", async ()
   executorModule.closeOpencodeServerEventBus();
   executorModule.closeOpencodeServerEventBus(); // idempotent
 });
+
+test("opencode-server: the URL setting is pushed by the runtime-settings applier, never read from src/", async () => {
+  // open-sse must not gain an import edge into src/ (boundary ratchet): the dashboard
+  // URL setting reaches the executor through applyRuntimeSettings(), like every other
+  // runtime-tunable open-sse knob, and lives on globalThis so every bundle sees it.
+  const root = path.resolve(import.meta.dirname, "../..");
+  const settingsSource = fs.readFileSync(
+    path.join(root, "open-sse/services/opencodeServerSettings.ts"),
+    "utf8"
+  );
+  assert.doesNotMatch(settingsSource, /["']@\/|["'](?:\.\.\/)+src\//);
+
+  const settingsModule = await import("../../open-sse/services/opencodeServerSettings.ts");
+  const { applyRuntimeSettings, resetRuntimeSettingsStateForTests } =
+    await import("../../src/lib/config/runtimeSettings.ts");
+  try {
+    resetRuntimeSettingsStateForTests();
+    settingsModule.clearOpencodeServerSettingsCache();
+    await applyRuntimeSettings(
+      { opencode_server_url: "http://127.0.0.1:5123" },
+      { force: true, source: "test" }
+    );
+    assert.deepEqual(await settingsModule.readOpencodeServerSettings(), {
+      url: "http://127.0.0.1:5123",
+    });
+
+    // A later save that clears the URL falls back to the default (empty setting).
+    await applyRuntimeSettings({ opencode_server_url: "" }, { source: "test" });
+    assert.deepEqual(await settingsModule.readOpencodeServerSettings(), {});
+  } finally {
+    resetRuntimeSettingsStateForTests();
+    settingsModule.clearOpencodeServerSettingsCache();
+  }
+});

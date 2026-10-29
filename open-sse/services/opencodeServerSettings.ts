@@ -5,37 +5,30 @@
 // later passes to spawn() would turn any management JWT into a process-execution
 // primitive (Hard Rules 15/17). The binary comes from the operator's environment
 // (OPENCODE_SERVER_BIN / CLI_OPENCODE_BIN) or well-known install locations only.
-
-const SETTINGS_CACHE_TTL_MS = 60_000;
+//
+// The value is pushed in by the runtime-settings applier (src/lib/config/
+// runtimeSettings.ts → applyRuntimeSettings, at boot and on every settings save),
+// so this engine module never imports the settings DB from src/ (the open-sse → src
+// boundary is ratcheted). It lives on globalThis so every Next.js bundle that loads
+// this module (the settings route, the instrumentation hook, the /v1 routes) shares
+// one value, the same reason runtimeSettings keeps its authz-bypass store there.
 
 export type OpencodeServerSettings = { url?: string };
 
-// Cached because the executor sits on the request hot path; the PATCH
-// /api/settings handler calls clearOpencodeServerSettingsCache() so an operator
-// edit takes effect at once instead of after the TTL.
-let cachedSettings: { value: OpencodeServerSettings; ts: number } | null = null;
+const SETTINGS_GLOBAL_KEY = "__omniroute_opencodeServerSettings__";
+const settingsStore = globalThis as unknown as Record<string, OpencodeServerSettings | undefined>;
 
+/** Store the dashboard URL setting; an empty or missing URL means "use the default". */
+export function setOpencodeServerSettings(settings: OpencodeServerSettings | null | undefined) {
+  const url = typeof settings?.url === "string" ? settings.url.trim() : "";
+  settingsStore[SETTINGS_GLOBAL_KEY] = url ? { url } : {};
+}
+
+/** Forget the pushed value (tests); reads then return the empty default. */
 export function clearOpencodeServerSettingsCache(): void {
-  cachedSettings = null;
+  delete settingsStore[SETTINGS_GLOBAL_KEY];
 }
 
 export async function readOpencodeServerSettings(): Promise<OpencodeServerSettings> {
-  if (cachedSettings && Date.now() - cachedSettings.ts < SETTINGS_CACHE_TTL_MS) {
-    return cachedSettings.value;
-  }
-  let value: OpencodeServerSettings = {};
-  try {
-    // Imported lazily so the executor never hard-depends on the DB at import time
-    // (same pattern as executors/dario.ts).
-    const { getSettings } = await import("@/lib/db/settings");
-    const settings = (await getSettings()) as Record<string, unknown>;
-    value = {
-      url:
-        typeof settings.opencode_server_url === "string" ? settings.opencode_server_url : undefined,
-    };
-  } catch {
-    value = {};
-  }
-  cachedSettings = { value, ts: Date.now() };
-  return value;
+  return { ...(settingsStore[SETTINGS_GLOBAL_KEY] ?? {}) };
 }
