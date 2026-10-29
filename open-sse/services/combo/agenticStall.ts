@@ -189,28 +189,34 @@ function quotedTerminalLiterals(body: unknown): Set<string> {
   const found = new Set<string>();
   if (!isRecord(body)) return found;
   const messages = Array.isArray(body.messages) ? body.messages : [];
-  const push = (raw: string) => {
-    const lit = raw.trim().replace(/\s+/g, " ");
-    if (!lit || lit.length > INSTRUCTED_TERMINAL_MAX_CHARS) return;
-    found.add(lit.toLowerCase());
-  };
   for (const msg of messages) {
     if (!isRecord(msg)) continue;
     const contents = Array.isArray(msg.content) ? msg.content : [msg.content];
-    for (const part of contents) {
-      let text = "";
-      if (typeof part === "string") text = part;
-      else if (isRecord(part)) {
-        if (typeof part.text === "string") text = part.text;
-        else if (typeof part.content === "string") text = part.content;
-      }
-      if (!text) continue;
-      // Quoted literals: '...' | "..." | `...`. The 120 cap mirrors
-      // INSTRUCTED_TERMINAL_MAX_CHARS — longer quotes are never echoed whole.
-      for (const m of text.matchAll(/['"`]([^'"`\n]{1,120})['"`]/g)) push(m[1]);
-    }
+    for (const part of contents) addQuotedLiterals(found, messagePartText(part));
   }
   return found;
+}
+
+/** Text of one message content part: a bare string, or a block's `text` /
+ *  `content` string. Anything else yields "". */
+function messagePartText(part: unknown): string {
+  if (typeof part === "string") return part;
+  if (!isRecord(part)) return "";
+  if (typeof part.text === "string") return part.text;
+  if (typeof part.content === "string") return part.content;
+  return "";
+}
+
+/** Add every quoted literal ('...' | "..." | `...`) in `text` to `found`. The
+ *  120 cap mirrors INSTRUCTED_TERMINAL_MAX_CHARS — longer quotes are never
+ *  echoed whole. */
+function addQuotedLiterals(found: Set<string>, text: string): void {
+  if (!text) return;
+  for (const m of text.matchAll(/['"`]([^'"`\n]{1,120})['"`]/g)) {
+    const lit = m[1].trim().replace(/\s+/g, " ");
+    if (!lit || lit.length > INSTRUCTED_TERMINAL_MAX_CHARS) continue;
+    found.add(lit.toLowerCase());
+  }
 }
 
 /** True when the response is EXACTLY a literal the request itself told the model
@@ -294,68 +300,91 @@ function extractFromAnthropicJson(parsed: unknown): StallSignal | null {
   };
 }
 
+type SseAccumulator = StallSignal & { recognized: boolean };
+
+/** Parse one SSE line into its JSON `data:` record, or null when the line is
+ *  not a data line, is the [DONE] sentinel, or is not a JSON object. */
+function parseSseDataLine(rawLine: string): Record<string, unknown> | null {
+  const line = rawLine.trim();
+  if (!line.startsWith("data:")) return null;
+  const data = line.slice(5).trim();
+  if (!data || data === "[DONE]") return null;
+  try {
+    const parsed: unknown = JSON.parse(data);
+    return isRecord(parsed) ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Fold one OpenAI chat chunk (`choices[0].delta`) into the accumulator. */
+function applyOpenAiSseChunk(acc: SseAccumulator, choices: unknown[]): void {
+  const choice = choices[0];
+  if (!isRecord(choice)) return;
+  acc.recognized = true;
+  const delta = isRecord(choice.delta) ? choice.delta : null;
+  if (delta && typeof delta.content === "string") acc.text += delta.content;
+  if (delta && Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) {
+    acc.hasToolCalls = true;
+  }
+  if (typeof choice.finish_reason === "string" && choice.finish_reason) {
+    acc.finishReason = choice.finish_reason;
+  }
+}
+
+type AnthropicSseHandler = (acc: SseAccumulator, event: Record<string, unknown>) => void;
+
+const noopAnthropicSseHandler: AnthropicSseHandler = () => {};
+
+/** Per-event-type folding of Anthropic message events into the accumulator. */
+const ANTHROPIC_SSE_HANDLERS: Record<string, AnthropicSseHandler> = {
+  content_block_start(acc, event) {
+    const block = isRecord(event.content_block) ? event.content_block : null;
+    if (block && block.type === "tool_use") acc.hasToolCalls = true;
+  },
+  content_block_delta(acc, event) {
+    const delta = isRecord(event.delta) ? event.delta : null;
+    if (delta && delta.type === "text_delta" && typeof delta.text === "string") {
+      acc.text += delta.text;
+    }
+  },
+  message_delta(acc, event) {
+    const delta = isRecord(event.delta) ? event.delta : null;
+    if (delta && typeof delta.stop_reason === "string" && delta.stop_reason) {
+      acc.finishReason = delta.stop_reason;
+    }
+  },
+  message_start: noopAnthropicSseHandler,
+  message_stop: noopAnthropicSseHandler,
+};
+
+/** Fold one Anthropic message event into the accumulator. Unknown event types
+ *  are ignored and do not mark the payload as recognized. */
+function applyAnthropicSseEvent(acc: SseAccumulator, event: Record<string, unknown>): void {
+  const type = typeof event.type === "string" ? event.type : "";
+  if (!Object.hasOwn(ANTHROPIC_SSE_HANDLERS, type)) return;
+  acc.recognized = true;
+  ANTHROPIC_SSE_HANDLERS[type](acc, event);
+}
+
 /** Assemble the terminal assistant message from a buffered SSE payload,
  *  handling both OpenAI chat chunks and Anthropic message events. Returns
  *  null when nothing recognizable was seen (cannot classify). */
 function extractFromSse(payload: string): StallSignal | null {
-  let finishReason: string | null = null;
-  let hasToolCalls = false;
-  let text = "";
-  let recognized = false;
+  const acc: SseAccumulator = {
+    finishReason: null,
+    hasToolCalls: false,
+    text: "",
+    recognized: false,
+  };
   for (const rawLine of payload.split(/\r?\n/)) {
-    const line = rawLine.trim();
-    if (!line.startsWith("data:")) continue;
-    const data = line.slice(5).trim();
-    if (!data || data === "[DONE]") continue;
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(data);
-    } catch {
-      continue;
-    }
-    if (!isRecord(parsed)) continue;
-    // OpenAI chat chunks.
-    if (Array.isArray(parsed.choices)) {
-      const choice = parsed.choices[0];
-      if (isRecord(choice)) {
-        recognized = true;
-        const delta = isRecord(choice.delta) ? choice.delta : null;
-        if (delta) {
-          if (typeof delta.content === "string") text += delta.content;
-          if (Array.isArray(delta.tool_calls) && delta.tool_calls.length > 0) {
-            hasToolCalls = true;
-          }
-        }
-        if (typeof choice.finish_reason === "string" && choice.finish_reason) {
-          finishReason = choice.finish_reason;
-        }
-      }
-      continue;
-    }
-    // Anthropic message events.
-    const type = typeof parsed.type === "string" ? parsed.type : "";
-    if (type === "content_block_start") {
-      recognized = true;
-      const block = isRecord(parsed.content_block) ? parsed.content_block : null;
-      if (block && block.type === "tool_use") hasToolCalls = true;
-    } else if (type === "content_block_delta") {
-      recognized = true;
-      const delta = isRecord(parsed.delta) ? parsed.delta : null;
-      if (delta && delta.type === "text_delta" && typeof delta.text === "string") {
-        text += delta.text;
-      }
-    } else if (type === "message_delta") {
-      recognized = true;
-      const delta = isRecord(parsed.delta) ? parsed.delta : null;
-      if (delta && typeof delta.stop_reason === "string" && delta.stop_reason) {
-        finishReason = delta.stop_reason;
-      }
-    } else if (type === "message_start" || type === "message_stop") {
-      recognized = true;
-    }
+    const parsed = parseSseDataLine(rawLine);
+    if (!parsed) continue;
+    if (Array.isArray(parsed.choices)) applyOpenAiSseChunk(acc, parsed.choices);
+    else applyAnthropicSseEvent(acc, parsed);
   }
-  if (!recognized) return null;
-  return { finishReason, hasToolCalls, text };
+  if (!acc.recognized) return null;
+  return { finishReason: acc.finishReason, hasToolCalls: acc.hasToolCalls, text: acc.text };
 }
 
 async function readClonedBodyText(clone: Response): Promise<string | null> {
@@ -389,6 +418,41 @@ export type AgenticStallVerdict = {
   detail: string;
 };
 
+/** Clone the response and extract its terminal stall signal (SSE or JSON).
+ *  Returns null when the body cannot be read or classified. */
+async function readStallSignal(response: Response): Promise<StallSignal | null> {
+  if (!response || typeof response.clone !== "function") return null;
+  let clone: Response;
+  try {
+    clone = response.clone();
+  } catch {
+    return null;
+  }
+  const ct = clone.headers?.get?.("content-type") || "";
+  if (ct.includes("text/event-stream")) {
+    const text = await readClonedBodyText(clone);
+    return text == null ? null : extractFromSse(text);
+  }
+  if (!ct.includes("application/json")) return null;
+  let parsed: unknown;
+  try {
+    parsed = await clone.json();
+  } catch {
+    return null;
+  }
+  return extractFromOpenAiJson(parsed) ?? extractFromAnthropicJson(parsed);
+}
+
+/** Conditions 2 and 3 on an extracted signal: stop finish, no tool calls, not an
+ *  instructed terminal echo, and stall-shaped narration. */
+function signalIsStall(body: unknown, signal: StallSignal): boolean {
+  const finish = (signal.finishReason || "").toLowerCase();
+  if (finish !== "stop" && finish !== "end_turn") return false;
+  if (signal.hasToolCalls) return false;
+  if (isInstructedTerminalEcho(body, signal.text)) return false;
+  return contentLooksLikeStallNarration(signal.text);
+}
+
 /**
  * Classify a successful (HTTP 200, quality-valid) combo-member response as an
  * agentic stall. Returns the verdict (with a log/audit-safe detail string —
@@ -403,36 +467,8 @@ export async function classifyAgenticStallResponse(args: {
     if (!isAgenticStallFailoverEnabled()) return null;
     const { body, response } = args;
     if (!requestExpectsToolCall(body)) return null;
-    if (!response || typeof response.clone !== "function") return null;
-    let clone: Response;
-    try {
-      clone = response.clone();
-    } catch {
-      return null;
-    }
-    const ct = clone.headers?.get?.("content-type") || "";
-    let signal: StallSignal | null = null;
-    if (ct.includes("text/event-stream")) {
-      const text = await readClonedBodyText(clone);
-      if (text == null) return null;
-      signal = extractFromSse(text);
-    } else if (ct.includes("application/json")) {
-      let parsed: unknown;
-      try {
-        parsed = await clone.json();
-      } catch {
-        return null;
-      }
-      signal = extractFromOpenAiJson(parsed) ?? extractFromAnthropicJson(parsed);
-    } else {
-      return null;
-    }
-    if (!signal) return null;
-    const finish = (signal.finishReason || "").toLowerCase();
-    if (finish !== "stop" && finish !== "end_turn") return null;
-    if (signal.hasToolCalls) return null;
-    if (isInstructedTerminalEcho(body, signal.text)) return null;
-    if (!contentLooksLikeStallNarration(signal.text)) return null;
+    const signal = await readStallSignal(response);
+    if (!signal || !signalIsStall(body, signal)) return null;
     const head = signal.text.trim().slice(0, 120).replace(/\s+/g, " ");
     return {
       signature: AGENTIC_STALL_SIGNATURE,
