@@ -21,7 +21,7 @@ import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 const inputSchema = z.object({
   query: z.string().min(1),
-  connectionId: z.string().min(1).optional(),
+  connectionId: z.string().min(1),
   maxTotalMinutes: z.number().int().min(5).max(120).optional(),
 });
 
@@ -51,7 +51,7 @@ type ResearchResult = ReturnType<typeof envelope>;
 type ResearchConnection = Record<string, unknown> | null;
 
 const TOOL_DESCRIPTION =
-  "Runs one Perplexity Deep Research and returns the report. Off unless OMNIROUTE_PPLX_RESEARCH_ENABLED=1. A client that does not pass its own timeout will be cut off at 60 seconds while this call keeps running, so set timeout 120000, maxTotalTimeout 2760000 and resetTimeoutOnProgress with an onprogress handler. Errors: research_aborted (client cancel or time budget), research_failed (unexpected error).";
+  "Runs one Perplexity Deep Research and returns the report. Off unless OMNIROUTE_PPLX_RESEARCH_ENABLED=1. connectionId must name an active perplexity-web connection. A client that does not pass its own timeout will be cut off at 60 seconds while this call keeps running, so set timeout 120000, maxTotalTimeout 2760000 and resetTimeoutOnProgress with an onprogress handler. Errors: research_unavailable (connectionId is not an active perplexity-web connection), research_aborted (client cancel or time budget), research_failed (unexpected error).";
 
 function asString(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
@@ -64,16 +64,25 @@ function refuseEarly(extra: ResearchExtra | undefined): ResearchResult | null {
   return null;
 }
 
+const RESEARCH_PROVIDER = "perplexity-web";
+
 async function loadConnection(
   store: RegisteredConnectionStore,
-  connectionId: string | undefined
+  connectionId: string
 ): Promise<ResearchConnection> {
-  if (!connectionId) return null;
   // Called through a plain identifier on purpose: the hard-session-lease bypass
   // inventory counts bare getProviderConnectionById calls, so a store.method()
   // call here would drop this read from the inventory.
   const { getProviderConnectionById } = store;
   return ((await getProviderConnectionById(connectionId)) ?? null) as ResearchConnection;
+}
+
+// Only an existing, active perplexity-web connection may run a report: its
+// accessToken/apiKey goes to perplexity.ai, so a connection of any other
+// provider must never reach buildPplxHeaders.
+function isResearchConnection(connection: ResearchConnection): boolean {
+  if (!connection || connection.provider !== RESEARCH_PROVIDER) return false;
+  return connection.isActive !== false && connection.isActive !== 0;
 }
 
 function warn(message: string, err?: unknown): void {
@@ -216,9 +225,12 @@ async function startResearch(
   extra: ResearchExtra | undefined,
   store: RegisteredConnectionStore
 ) {
-  const parsed: ResearchInput = inputSchema.parse(args ?? {});
-  const connectionId = parsed.connectionId ?? "default";
-  const connection = await loadConnection(store, parsed.connectionId);
+  const input = inputSchema.safeParse(args ?? {});
+  if (!input.success) return failure("research_invalid_input");
+  const parsed: ResearchInput = input.data;
+  const connectionId = parsed.connectionId;
+  const connection = await loadConnection(store, connectionId);
+  if (!isResearchConnection(connection)) return failure("research_unavailable");
   const data = (connection?.providerSpecificData ?? {}) as Record<string, unknown>;
   if (cooldownRemainingMs(data, Date.now(), connectionId) > 0) return failure("research_cooldown");
   return runWithLock({

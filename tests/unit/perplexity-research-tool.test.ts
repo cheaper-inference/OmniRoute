@@ -32,6 +32,18 @@ stubSuccess();
 
 const { createMcpServer } = await import("../../open-sse/mcp-server/server.ts");
 
+// The tool only runs against an existing, active perplexity-web connection.
+// Unless a test installs its own store, every connection id below resolves to
+// one; the cooldown write is a no-op, like a write to a missing row.
+const STORE_KEY = Symbol.for("omniroute.providerConnectionStore");
+function pplxConnection(id) {
+  return { id, provider: "perplexity-web", isActive: true, accessToken: "pplx-session" };
+}
+globalThis[STORE_KEY] = {
+  getProviderConnectionById: async (id) => pplxConnection(id),
+  mergeConnectionProviderSpecificData: async () => {},
+};
+
 function handlerOf(server, name) {
   const registry = server._registeredTools;
   const tool = registry?.[name];
@@ -184,8 +196,6 @@ test("no research run starts when the account has no research runs left", async 
 
 const { sweepResearchLock } =
   await import("../../open-sse/mcp-server/tools/perplexityResearchLock.ts");
-const STORE_KEY = Symbol.for("omniroute.providerConnectionStore");
-
 function bodyOf(result) {
   assert.ok(result, "the handler must return an envelope");
   return result.structuredContent ?? JSON.parse(result.content[0].text);
@@ -221,7 +231,7 @@ test("a finished report survives a failed cooldown write and frees the lock", as
   stubSuccess();
   const handler = researchHandler();
   const store = {
-    getProviderConnectionById: async () => null,
+    getProviderConnectionById: async (id) => pplxConnection(id),
     mergeConnectionProviderSpecificData: async () => {
       throw new Error("forced write failure");
     },
@@ -409,4 +419,66 @@ test("with no connection store registered the call returns research_unavailable 
   assert.equal(body.error.code, "research_unavailable");
   assert.equal(fetches, 0);
   assert.ok(warnings.some((w) => w.includes("has no connection store")));
+});
+
+// ── Which connection the tool may use ───────────────────────────────────────
+
+function storeWith(connection) {
+  return {
+    getProviderConnectionById: async () => connection,
+    mergeConnectionProviderSpecificData: async () => {},
+  };
+}
+
+const refusedConnections = [
+  [
+    "a connection of another provider",
+    { id: "c-openai", provider: "openai", isActive: true, apiKey: "sk-other-provider" },
+  ],
+  [
+    "an inactive perplexity-web connection",
+    { id: "c-off", provider: "perplexity-web", isActive: false, accessToken: "pplx-session" },
+  ],
+  ["an unknown connection id", null],
+];
+
+for (const [label, connection] of refusedConnections) {
+  test(`${label} is refused before any fetch and leaves no lock`, async () => {
+    let sentHeaders = null;
+    __setTlsFetchOverrideForTesting(async (url, opts) => {
+      sentHeaders = opts?.headers ?? null;
+      return successFetch(url, opts);
+    });
+    const handler = researchHandler();
+    const connectionId = connection?.id ?? "c-missing-row";
+    fetches = 0;
+    const body = bodyOf(
+      await withStore(storeWith(connection), () =>
+        handler({ query: "q", connectionId }, successFrame)
+      )
+    );
+    assert.equal(body.ok, false);
+    assert.equal(body.error.code, "research_unavailable");
+    assert.equal(fetches, 0);
+    assert.equal(sentHeaders, null, "no credential of the connection may leave the process");
+    assert.equal(sweepResearchLock(connectionId, Date.now()), "absent");
+  });
+}
+
+test("a call without a connectionId is refused before any fetch", async () => {
+  stubSuccess();
+  const handler = researchHandler();
+  fetches = 0;
+  const body = bodyOf(await handler({ query: "q" }, successFrame));
+  assert.equal(body.ok, false);
+  assert.equal(body.error.code, "research_invalid_input");
+  assert.equal(fetches, 0);
+  assert.equal(sweepResearchLock("default", Date.now()), "absent");
+});
+
+test("the published input schema requires a connectionId", () => {
+  process.env.OMNIROUTE_PPLX_RESEARCH_ENABLED = "1";
+  const schema = createMcpServer()._registeredTools.omniroute_perplexity_research.inputSchema;
+  assert.equal(schema.safeParse({ query: "q" }).success, false);
+  assert.equal(schema.safeParse({ query: "q", connectionId: "c1" }).success, true);
 });
