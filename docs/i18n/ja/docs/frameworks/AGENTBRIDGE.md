@@ -14,36 +14,36 @@ AgentBridge は、IDE AI エージェントからの HTTPS トラフィックを
 
 ## §1 概要
 
-### AgentBridge とは?
+### AgentBridgeとは何ですか？
 
-IDE エージェント(GitHub Copilot、Cursor、Claude Code など)が API コールを行うと、アップストリームの AI プロバイダー(OpenAI、Anthropic など)に直接接続します。AgentBridge は、エージェント側の設定変更を一切必要とせず、TLS レベルでその接続を透過的にインターセプトし、OmniRoute を経由してリクエストを書き換えます。
+IDEエージェント ( GitHub Copilot、 Cursor、 Claudeコードなど) がAPI呼び出しを行うと、上流のAIプロバイダー (OpenAI、 Anthropicなど) に直接接続します。 AgentBridge 、エージェント構成の変更を必要とせずに、その接続をTLSレベルで透過的にインターセプトし、 OmniRouteを通じてリクエストを書き換えます。
 
-これにより、次のことが可能になります。
+つまり、次のことが可能になります。
 
-- **任意のエージェントを任意のプロバイダーへ振り替え**: Copilot が OpenAI と通信している? Anthropic Claude、Gemini、あるいは OmniRoute の 375 のプロバイダーのいずれかにリダイレクトできます。
-- **モデルマッピングの適用**: `gemini-3-flash` → `claude-sonnet-4.7` をハンドラーレベルで透過的に変換します。
-- **すべてのエージェントトラフィックを可視化**: インターセプトされたすべてのリクエストは [Traffic Inspector](./TRAFFIC_INSPECTOR.md) に公開されます。
-- **OmniRoute のレジリエンスを適用**: コンボルーティング、サーキットブレーカー、フォールバック、コスト追跡が IDE エージェントのトラフィックにもそのまま機能します。
+- **エージェントを任意のプロバイダーに再ルーティングする**: Copilot OpenAIと話していますか?それをAnthropic Claude、 Gemini、またはOmniRouteの 377 プロバイダーのいずれかにリダイレクトします。
+- **モデルマッピングを適用する**: `gemini-3-flash` → `claude-sonnet-4.7`ハンドラーレベルで透過的に。
+- **すべてのエージェントのトラフィックを監視する**: 傍受されたすべてのリクエストは[Traffic Inspector](./TRAFFIC_INSPECTOR.md)に公開されます。
+- **OmniRouteレジリエンスを適用する**: コンボ ルーティング、サーキット ブレーカー、フォールバック、コスト トラッキングは、 IDEエージェント トラフィックに対しても機能します。
 
-### 市場におけるポジショニング
+### ポジショニングと市場の比較
 
-| 機能                       | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                       |    —    |    —     |        —        |         🔍 調査中         |
-| ダッシュボード UI          |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector          |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute ルーティング     |    ✗    |    ✗     |        ✗        |             ✓             |
-| モデルマッピング UI        |    ✗    |    ✗     |        ✗        |             ✓             |
-| バイパスリスト             |    ✗    |    ✗     |        ✓        |             ✓             |
-| アップストリーム CA 証明書 |    ✗    |    ✗     |        ✓        |             ✓             |
+| 特徴                     | 9ルーター | アンチAPI | llm-インターセプター | **OmniRoute AgentBridge** |
+| ------------------------ | :-------: | :-------: | :------------------: | :-----------------------: |
+| Antigravity              |     ✓     |     ✓     |          —           |             ✓             |
+| GitHub Copilot           |     ✓     |     ✓     |          —           |             ✓             |
+| Kiro (AWS)               |     ✓     |     ✓     |          —           |             ✓             |
+| OpenAI Codex             |     —     |     ✓     |          —           |             ✓             |
+| Cursor IDE               |     ✓     |     ✓     |          —           |             ✓             |
+| Zedインダストリーズ      |     —     |     ✓     |          —           |             ✓             |
+| Claudeコード             |     —     |     —     |          ✓           |             ✓             |
+| オープンコード           |     —     |     —     |          ✓           |             ✓             |
+| トレイ                   |     —     |     —     |          —           |         🔍調査中          |
+| ダッシュボードUI         |     ✓     |     ✗     |          ✗           |             ✓             |
+| 交通監視官               |     ✗     |     ✗     |          ✓           |             ✓             |
+| OmniRouteルーティング    |     ✗     |     ✗     |          ✗           |             ✓             |
+| モデルマッピングUI       |     ✗     |     ✗     |          ✗           |             ✓             |
+| バイパスリスト           |     ✗     |     ✗     |          ✓           |             ✓             |
+| アップストリームCA証明書 |     ✗     |     ✗     |          ✓           |             ✓             |
 
 ---
 

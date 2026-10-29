@@ -122,6 +122,16 @@ const AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS = new Map<string, number>([
   ["opencode-go/deepseek-v4.1-flash", 1000000],
   ["opencode-go/deepseek-flash", 1000000],
   ["opencode-go/minimax-m2.5", 204800],
+  // The opposite direction: models.dev lists OpenCode's free DeepSeek V4.1
+  // Flash at 1M, but the free backend rejects prompts above ~330k tokens
+  // (measured 2026-10-26). Advertising 1M stops clients from compacting and
+  // long sessions hard-fail with 400 context_length_exceeded. The delisted
+  // deepseek-v4-flash-free id is forwarded to v4.1 (modelDeprecation.ts), so it
+  // shares the cap instead of inheriting deepseek-v4-flash's 1M spec.
+  ["opencode/deepseek-v4.1-flash-free", 330000],
+  ["opencode-zen/deepseek-v4.1-flash-free", 330000],
+  ["opencode/deepseek-v4-flash-free", 330000],
+  ["opencode-zen/deepseek-v4-flash-free", 330000],
 ]);
 
 const GPT_5_6_MODEL_SPEC = {
@@ -623,6 +633,17 @@ export const MODEL_SPECS: Record<string, ModelSpec> = {
     supportsTools: true,
     supportsVision: true,
     aliases: ["k3"],
+  },
+
+  // ── Kimi K3.1 Pro (OpenCode Go — 1M context, 131K output, native vision) ──
+  // Separate from kimi-k3: K3.1 Pro caps output at 131072, not 1M.
+  "kimi-k3.1-pro": {
+    maxOutputTokens: 131072,
+    contextWindow: 1048576,
+    thinkingBudgetCap: 32768,
+    supportsThinking: true,
+    supportsTools: true,
+    supportsVision: true,
   },
 
   // ── Kimi K2.6 (Moonshot API — 262K native) ──────────────────────

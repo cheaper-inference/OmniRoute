@@ -645,27 +645,29 @@ sudo systemctl enable --now omniroute-update.path
 Serviciul elimină solicitarea înainte de descărcare, astfel încât o execuție eșuată să nu intre într-o buclă. Fără
 `DOCKER_UPDATE_TRIGGER_FILE`, panoul de control păstrează fluxul cu comandă manuală.
 
-## Disponibilitate: configurația SQLite implicită acceptă o singură replică
+## Disponibilitate: SQLite implicit este o singură copie
 
-Configurația Docker / Kubernetes standard a OmniRoute este **un proces Node + un singur proces de scriere SQLite**. Disponibilitatea ridicată **nu este acceptată** în această topologie.
+Stock Docker / Kubernetes OmniRoute este** one Node process + one SQLite writer** . Disponibilitatea ridicată este** nesuportat** pe acea topologie.
 
-| Constrângere                                   | Consecință                                                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Un singur proces de scriere                    | **Nu** rulați mai multe replici folosind același fișier SQLite. Acest lucru corupe baza de date.                                                                                                                                                                                                                                                                                               |
-| Recreare / repornire / oprire prin HEALTHCHECK | **Întrerupere completă** a conexiunilor SSE în curs, a sesiunilor din panoul de control și a stării din memorie. Fiecare client conectat este deconectat. Solicitările noi din intervalul în care nu există niciun endpoint primesc de la proxy-ul invers un răspuns **`502 Bad Gateway: Unknown error`**, nu JSON OmniRoute — clienții nu îl pot deosebi de o eroare a furnizorului (#11015). |
-| Aceeași buclă de evenimente ca `/healthz`      | O operație intensă a catalogului sau a compresiei poate întârzia verificările; un timeout scurt repornește apoi **singura** replică.                                                                                                                                                                                                                                                           |
+| Constrângere                                 | Consecinţă                                                                                                                                                                                                                                                                                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Un singur scriitor                           | Do** nu** rulați mai multe replici împotriva aceluiași fișier SQLite. Asta corupe DB.                                                                                                                                                                                                                                                                               |
+| Recreează / repornește / HEALTHCHECK ucide   | **Întreruperea completă** a SSE în timpul zborului, a sesiunilor de tablou de bord și a stării în memorie. Fiecare client conectat scade. Noile solicitări în timpul ferestrei de punct final goale primesc un proxy invers**`502 Bad Gateway: Unknown error`** , nu OmniRoute JSON — clienții nu pot distinge acest lucru de o defecțiune a furnizorului (#11015). |
+| Aceeași buclă de evenimente ca și `/healthz` | Un catalog ocupat sau un bif de compresie poate întârzia probele; un scurt timeout apoi repornește** numai** replica.                                                                                                                                                                                                                                               |
 
-**Matricea verificărilor** (consultați și [recomandările pentru verificările Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matricea sondei** (vezi și [recomandările probei Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Verificare                | Țintă                                                         | Nu utilizați                                                                   |
-| ------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Activitate                | TCP pe `PORT` (implicit `20128`) sau HTTP permisiv `/healthz` | `/api/monitoring/health`                                                       |
-| Disponibilitate           | HTTP `GET /healthz`                                           | Timeouturi stricte care tratează o buclă de evenimente ocupată ca fiind oprită |
-| Detaliată / pentru oameni | `/api/monitoring/health`                                      | Verificare automată a activității prin kubelet                                 |
+| Sondă          | Ţintă                                                      | Nu utilizați                                                                  |
+| -------------- | ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Vioitate       | TCP pe `PORT` ( `20128` implicit) sau soft HTTP `/healthz` | `/api/monitoring/health`                                                      |
+| Pregătire      | HTTP `GET /healthz`                                        | Timeout-uri strânse care tratează bucla de evenimente ocupată ca fiind moartă |
+| Adânc / oameni | `/api/monitoring/health`                                   | Vioație automată a kubeletului                                                |
 
-**Upgrade-uri:** așteptați-vă ca fiecare sesiune să fie întreruptă. Redirecționați gradual clienții, dacă este posibil; nu există actualizare continuă cu configurația SQLite implicită. Opțiunea Compose `restart: unless-stopped`, împreună cu `HEALTHCHECK` din Docker, va înlocui, de asemenea, singurul proces atunci când containerul devine Unhealthy — cu aceeași rază de impact.
+**Upgrade-uri:** așteptați ca fiecare sesiune să scadă. Scurgeți clienții dacă puteți; nu există nicio actualizare continuă pentru SQLite implicit. Compune `restart: unless-stopped` plus Docker `HEALTHCHECK` va înlocui, de asemenea, singurul proces atunci când containerul este nesănătos - aceeași rază de explozie.
 
-Fragment Kubernetes pentru o **singură replică** (Recreate este obligatoriu; nu măriți `replicas` pentru un singur fișier SQLite):
+Manifeste gata făcute și o diagramă Helm live în `deploy/kubernetes/` și `deploy/helm/omniroute/` — consultați [ghidul de implementare Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Fragment Kubernetes pentru a** replică unică** (Recrearea este necesară; nu ridicați `replicas` față de un fișier SQLite ):
 
 ```yaml
 spec:
@@ -692,9 +694,9 @@ spec:
             periodSeconds: 20
 ```
 
-Pauza `preStop` permite Kubernetes să elimine endpointurile Service înainte de SIGTERM, astfel încât traficul **nou** să nu mai ajungă la procesul aflat în curs de oprire. Fluxurile SSE `/v1/responses` aflate în desfășurare sunt lăsate să se finalizeze timp de până la `SHUTDOWN_TIMEOUT_MS` (implicit 30 s) prin lease-uri de admitere heavyweight (#11015). Solicitările noi care încă ajung la proces primesc `503` + `Retry-After: 5`. Intervalul fără endpointuri al strategiei Recreate, până când instanța înlocuitoare devine Ready, rămâne o întrerupere completă — aceasta este topologia SQLite, nu o configurare greșită a probelor.
+`preStop` sleep permite lui Kube să renunțe la punctele finale ale serviciului înainte de SIGTERM așadar** nou** traficul încetează să lovească procesul de moarte. `/v1/responses` SSE în timpul zborului este scurs până la `SHUTDOWN_TIMEOUT_MS` (implicit 30s) prin contracte de închiriere de admitere grele (#11015). Solicitările noi care ajung încă în proces devin `503` + `Retry-After: 5`. Decalajul Recreează punctul final gol până când înlocuirea este gata rămâne o întrerupere gravă - adică topologia SQLite, nu o config greșită a sondei.
 
-Postgres extern / HA cu mai mulți writeri **nu** reprezintă o cale standard documentată. Dacă aveți nevoie de HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și a documentat-o separat. Lucrările pentru Postgres/MySQL se află în [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Până la lansarea acestora, singura modalitate acceptată de a multiplica capacitatea pentru solicitări `/v1/responses` **mari** este utilizarea a N procese independente (secțiunea următoare), nu `replicas > 1` pe un singur volum.
+Postgres extern / multi-writer HA este** nu** o cale de stoc documentată. Dacă aveți nevoie HA, păstrați o singură replică sau rulați o topologie pe care proiectul a testat-o și documentată separat. Lucrarea Postgres/MySQL locuiește în [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Până la livrare, singura modalitate acceptată de a se înmulți** mare** Capacitatea `/v1/responses` este N procese independente (secțiunea următoare), nu `replicas > 1` pe un volum.
 
 ## Scalare orizontală: N procese independente
 

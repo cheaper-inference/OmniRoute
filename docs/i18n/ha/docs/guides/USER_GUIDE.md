@@ -611,9 +611,9 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 <details>
 <summary><b>Duba duk samfuran da ake da su</b></summary>
 
-> An tsara jerin da ke ƙasa daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita kundin girgije (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken kundin kai-tsaye, buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
+> Jerin da ke ƙasa an tsara shi daga `open-sse/config/providerRegistry.ts` don v3.8.0. Ana daidaita katalogi na girgije (Gemini, OpenRouter, da sauransu) kai tsaye — don cikakken katalog na kai tsaye buɗe **Dashboard → Providers → [provider] → Available Models** ko kira `GET /api/models/catalog`.
 >
-> Idan ginannen jerin wani mai samarwa ya sauya daga na yanzu, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don jawo kundin kai-tsaye daga tushen sama. An tabbatar da wannan a v3.8.50 don LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); damar Pollinations ta ba-suna ta ci gaba da kasancewa ƙarƙashin iyakokin tushen sama yayin wannan zagayen gwajin.
+> Idan jerin da aka sanya na wani mai samarwa ya kaucewa, yi amfani da **Import from /models** a wannan shafin (ko kunna **Auto-Sync**) don ja katalog na upstream na kai tsaye. An tabbatar da wannan a v3.8.50 ga LLM7.io (`gemini-3.1-flash-lite`) da UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); samun damar baƙo na Pollinations ya kasance yana da ƙuntatawa daga upstream a lokacin wannan zagayen gwaji.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -621,7 +621,7 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth KYAUTA: yi amfani da kundin kai-tsaye da aka nuna ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwar ya dogara da asusun da tsarin biyan kuɗi.
+**Kiro (`kr/`)** — OAuth KYAUTA: yi amfani da katalog na kai tsaye da aka nuna a ƙarƙashin **Dashboard → Providers → Kiro → Available Models**. Samuwa ya dogara da asusun da shirin.
 
 **Qoder (`if/`)** — OAuth KYAUTA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -629,108 +629,113 @@ Don cikakken bayani game da maɓallan muhalli, duba [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata a dunƙule ko bisa amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/wata cikakke ko bisa kowane amfani: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Maɓallin API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Mai tsananin sauri: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Mai sauri sosai: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok na asali: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Ana masaukinsa a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Ana masaukar shi a EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — An ƙarfafa shi da bincike: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Buɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Budɗaɗɗen tushe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (kyauta), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Hasashe mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Inference mai sauri: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — A sikelin wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Girman wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Mai da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Mai mayar da hankali kan RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Na kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Don manyan kamfanoni: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai-tsaye bisa kowane maɓallin API daga Google — babu tsayayyen jeri. Haɗa maɓalli a **Dashboard → Providers**, sannan yi amfani da **Available Models** don shigo da kundin na yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Ana daidaita shi kai tsaye ga kowane maɓallin API daga Google — babu jeri na tsayayye. Haɗa maɓalli a **Dashboard → Providers** sannan yi amfani da **Available Models** don shigo da katalog na yanzu (misali `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta hanyar `aws-bedrock`), `azure-ai`, `openrouter` (kundin da ake wucewa kai tsaye), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da nasa jerin samfura a cikin `providerRegistry.ts`, kuma ana iya daidaita shi kai-tsaye idan mai samarwar ya bayar da maƙurar `/models`.
+**Sauran masu samarwa masu jituwa** (zaɓaɓɓu): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ta `aws-bedrock`), `azure-ai`, `openrouter` (katalog na passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kowanne yana kula da nasa jerin samfura a cikin `providerRegistry.ts` kuma ana iya daidaita shi ta atomatik idan mai samarwa ya bayyana ƙarshen `/models`.
 
-**Bayani kan ID ɗin samfura:** OmniRoute yana amfani da ID na asali na mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID sun haɗa da nau'ukan da ke da ɗigo saboda haka API na tushen sama yake buƙatar su. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko aika buƙata zuwa `GET /api/models/catalog` don tabbatar da samuwarsa.
+**Lura kan ID na samfura:** OmniRoute yana amfani da ID na asali na kowane mai samarwa (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Wasu ID suna haɗa da sigogi masu taki domin haka ne API na upstream yake tsammanin su. Idan ba a jera wani samfuri a sama ba, gudanar da `omniroute models --search <term>` ko kira `GET /api/models/catalog` don tabbatar da samuwa.
 
 </details>
 
 ---
 
-## 🧩 Manyan Fasali
+## 🧩 Advanced Features
 
 ### Samfuran Musamman
 
-Ƙara kowane ID na samfuri zuwa kowane mai bayarwa ba tare da jiran sabunta manhaja ba:
+Ƙara kowane samfurin ID zuwa kowane mai bayarwa ba tare da jiran sabuntawar app ba:
 
 ```bash
-# Ta hanyar API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Jeri: curl http://localhost:20128/api/provider-models?provider=openai
-# Cire: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# List: curl http://localhost:20128/api/provider-models?provider=openai
+# Remove: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Ko kuma yi amfani da Dashboard: **Providers → [Provider] → Custom Models**.
+Ko amfani da Dashboard:** Masu bayarwa → [Mai bayarwa] → Model Custom** .
 
 Bayanan kula:
 
-- Ana sarrafa OpenRouter da masu bayarwa masu jituwa da OpenAI/Anthropic daga **Available Models** kawai. Ƙarawa da hannu, shigo da bayanai, da daidaitawa ta atomatik duk suna shiga jerin samfuran da ake da su iri ɗaya, don haka babu wani sashe na Custom Models na daban ga waɗannan masu bayarwa.
-- An tsara sashen **Custom Models** ne ga masu bayarwa waɗanda ba sa samar da shigo da samfuran da ake da su mai sarrafawa.
+- OpenRouter da OpenAI/Anthropic-compatible ana sarrafa su daga** Samfuran Akwai** kawai. Ƙara, shigo da, da daidaitawa ta atomatik duk ƙasa a cikin jerin samfura iri ɗaya, don haka babu keɓantaccen ɓangaren Samfuran Al'adu na waɗannan masu samarwa.
+- The** Samfuran Musamman** An yi nufin sashe don masu samarwa waɗanda ba sa fallasa shigo da samfuran da ake sarrafawa.
 
-### Masu Bayarwa na Musamman Masu Jituwa da OpenAI
+### Custom OpenAI-Masu Bada Masu Haɗi
 
-Duk wata mashigar da ke amfani da OpenAI API (wakili mai zaman kansa, vLLM, ko mai tattarawa na wani ɓangare na uku)
-za a iya ƙara ta a matsayin kullin mai bayarwa na kanta:
+Duk wata ƙofa da ke magana da OpenAI API (wakili mai ɗaukar nauyi, vLLM, mai tarawa na ɓangare na uku) ana iya ƙara shi azaman kumburin mai bada kansa:
 
-1. **Providers → Add OpenAI Compatible**.
-2. **Name**: sunan da za a nuna wa kullin.
-3. **Prefix**: sunan da ake amfani da shi wajen turawa. Abokan hulɗa suna kiran samfura a matsayin `<prefix>/<model>`, don haka kulli mai
-   prefix `mygw` yana samar da `mygw/gpt-4o-mini`. Wajibi ne; babu ƙuntatawa kan haruffa.
-4. **API Type**: rukunin endpoint da mashigar ke samarwa (Chat Completions, Responses,
-   Embeddings, sauti, hotuna).
-5. **Base URL**: tushen API, har zuwa ciki har da `/v1` (misali
-   `https://gateway.example.com/v1`), ba cikakkiyar hanyar `/chat/completions` ba. Mashigai masu
-   hanyoyin da ba na yau da kullum ba suna saita su a ƙarƙashin **Advanced Settings** (hanyar chat, hanyar models).
-6. Filin **API Key (for Check)** yana gwada haɗin kawai. Bayan ƙirƙirar kullin,
-   buɗe shi sannan yi amfani da **Add Connection** don adana maɓallin da buƙatu za su yi amfani da shi.
+1. **Masu bayarwa → Ƙara OpenAI Mai jituwa** .
+2. **Suna** : alamar nuni don kumburi.
+3. **Prefix** : sunan hanya. Abokan ciniki suna kiran samfura azaman `<prefix>/<model>`, don haka kumburi tare da prefix `mygw` yana hidimar `mygw/gpt-4o-mini`. Da ake bukata; babu ƙuntata hali.
+4. **API Type** : dangi ƙarshen ƙofar yana hidima (Kammala Taɗi, Amsoshi, Haɗe-haɗe, sauti, hotuna).
+5. **Base URL** : tushen API, har zuwa kuma ya haɗa da `/v1` (misali `https://gateway.example.com/v1`), ba cikakken hanyar `/chat/completions` ba. Ƙofofin da ba daidaitattun hanyoyi ba sun saita su a ƙarƙashin** Babban Saituna** (Hanyar taɗi, hanyar samfuri).
+6. The**API Key (don Duba)** filin yana gwada haɗin gwiwa kawai. Bayan ƙirƙirar kumburi, buɗe shi kuma amfani** Ƙara Haɗi** don adana maɓallin da buƙatun zai yi amfani da shi.
 
-Kullin yana samun ID na ciki mai tsarin `openai-compatible-<apiType>-<uuid>`; ba za ka taɓa
-buƙatar rubuta shi ba, prefix shi ne sunan jama'a.
+Kullin yana samun id na ciki na nau'in `openai-compatible-<apiType>-<uuid>`; ba kwa buƙatar buga shi, prefix shine sunan jama'a.
 
-#### Prefix da aka keɓe
+#### Abubuwan da aka tanada
 
-Prefix ba zai iya zama ID ko alias na ginannen mai bayarwa ba (misali `openai`, `cf`), haka kuma
-ba zai iya zama ID na mai bayarwa da aka daina amfani da shi ba. Mai warware samfuri yana duba ginannun ID da alias kafin
-kullaye na musamman, don haka kullin da ke amfani da ɗaya daga cikin waɗannan prefix ba zai taɓa karɓar zirga-zirga ba:
-`<prefix>/model` zai je ga ginannen mai bayarwa maimakon haka, ko kuma ya gaza a rufe idan an
-daina amfani da wannan mai bayarwa. Ana ƙin ƙirƙira ko gyara kulli mai irin wannan prefix da saƙon:
+Prefix ba zai iya zama id ko laƙabi na ginannen mai bayarwa (misali `openai`, `cf`), ko kuma id na mai bayarwa mai ritaya. Mai warware ƙirar ƙirar yana bincika ids ɗin da aka gina a ciki da laƙabi kafin nodes na al'ada, don haka kumburin da ke amfani da ɗayan waɗannan prefixes ba zai taɓa karɓar zirga-zirga ba: `<prefix>/model` zai je wurin ginannen mai badawa a maimakon haka, ko ya kasa rufe idan mai bada ya yi ritaya. An ƙi ƙirƙira ko gyara kumburi tare da irin wannan prefix tare da:
 
 ```text
-prefix: "<prefix>" prefix ne na mai bayarwa da aka keɓe — zaɓi wani prefix daban (ba za a iya amfani da ID/alias da aka keɓe ga kullaye na musamman ba saboda buƙatu kamar <prefix>/model suna tafiya zuwa ginannen mai bayarwa ko kuma su gaza a rufe idan an daina amfani da shi)
+prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
 ```
 
-Zaɓi prefix na daban (`mygw`, `acme-proxy`). Idan buƙatu zuwa kullin musamman suka gaza da
-kuskuren da ya ambaci ginannen mai bayarwa ko bayanan shaidarsa, duba ko prefix na kullin
-an keɓe shi: kullayen da aka adana kafin wannan ƙa'ida su na nan a ajiye, amma prefix ɗinsu yana tura buƙatu zuwa
-ginannen mai bayarwa. Gyara kullin ka ba shi sabon prefix.
+Zaɓi takamaiman prefix (`mygw`, `acme-proxy`). Idan buƙatun kumbura na al'ada sun gaza tare da kuskuren da ke ba da sunan ginannen mai badawa ko takaddun shaidar sa, duba ko an adana prefix ɗin node: nodes ɗin da aka ajiye kafin wannan dokar ta wanzu har yanzu ana adana su, amma hanyoyin gabanin su zuwa ga ginannen mai samarwa. Shirya kumburi kuma ba shi sabon prefix.
 
-### Haɗa Abokan OmniRoute a Sarƙaƙƙiya
+#### Zaɓuɓɓukan ƙofa ta hanyar haɗin kai
 
-Za a iya ƙara wata mashigar OmniRoute a matsayin mai bayarwa na **Custom OpenAI-compatible**. Yi amfani da
-Base URL na `/v1` na abokin da kuma keɓaɓɓen API key mai mafi ƙarancin izini wanda wannan abokin ya bayar.
+Waɗannan maɓallan suna shiga cikin `providerSpecificData` na haɗin gwiwa (misali ta `PUT /api/providers/{id}`):
 
-Don sarƙoƙin juna ko masu matakai da yawa, kunna kariyar madauwari ta zaɓi a kowace mashiga:
+- `toolNameMaxLength` (Integer, 1-1024) - don tsarin haɗin kai-tsarin taɗi OpenAI waɗanda ƙofarsu ta ƙi dogon sunayen kayan aiki. Ana aika dogayen sunaye a matsayin gajeriyar laƙabi kuma a mayar da su a cikin martani.
+- `quotaEndpoint` — wurin ƙarshen quota/credits na ƙofa, karanta don dashboard keɓaɓɓun tsiri da kuma hanyar keɓancewa. Yana aiki akan duka hanyoyin haɗin gwiwar OpenAI- da Anthropic; An rubuta cikakken siffar a cikin `open-sse/services/usage/openaiCompatible.ts`.
+
+```json
+{
+  "toolNameMaxLength": 64,
+  "quotaEndpoint": {
+    "url": "https://gateway.example.com/key/info",
+    "auth": "bearer",
+    "quotas": {
+      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
+    }
+  }
+}
+```
+
+### Sarkar OmniRoute Takwarori
+
+Ana iya ƙara wata ƙofar OmniRoute azaman a** Custom OpenAI mai jituwa** mai bayarwa. Yi amfani da tushen `/v1` na ɗan'uwan URL da keɓewar, maɓallin API mafi ƙarancin gata da wancan ɗan'uwan ya bayar.
+
+Don sarƙaƙƙiya ko sarƙoƙi masu yawa, kunna gadin madauki a kowace ƙofa:
 
 ```bash
 # gateway-a
@@ -746,18 +751,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Buƙatun da aka aika zuwa URL na aboki da aka ba da izini a bayyane ne kawai suke karɓar
-header na `X-OmniRoute-Peer-Trace`. Mashiga tana ƙin ID na instance da aka maimaita ko iyakar tsallake-tsallake
-da ta ƙare da HTTP `508 Loop Detected`; masu bayarwa na upstream na yau da kullum ba sa karɓar metadata na aboki.
+Buƙatun da aka aika zuwa ga jerin sunayen tsarar URL kawai suna karɓar taken `X-OmniRoute-Peer-Trace`. Ƙofar ƙofa tana ƙin maimaita misali ID ko ƙarancin kasafin kuɗi tare da HTTP `508 Loop Detected`; na yau da kullun masu samar da sama ba su karɓi metadata takwarorinsu ba.
 
-Haɗa abokai a sarƙaƙƙiya ba maimaita bayanan database ba ne ko sauya host idan ya gaza. Kowace mashiga tana riƙe da nata
-yanayin SQLite, caches, ƙididdigar ƙimar amfani, da sessions daban. Yi amfani da reverse proxy mai duba lafiya ko sauyawar
-abokin hulɗa idan ya gaza don samuwar active/passive ko active/active, kuma kada a taɓa haɗa database ɗin SQLite guda ɗaya
-zuwa instances na OmniRoute da yawa da ke gudana.
+Sarkar takwarorinsu ba kwafin bayanai ba ne ko gazawar mai masaukin baki. Kowace ƙofa tana kiyaye jihar SQLite mai zaman kanta, caches, ƙididdiga masu ƙima, da zama. Yi amfani da wakili na baya da aka bincika lafiya ko gazawar abokin ciniki don samuwar active/passive ko active/active, kuma kar a taɓa sanya ma'ajin SQLite guda ɗaya cikin misalan OmniRoute masu gudana da yawa.
 
-### Hanyoyin Mai Bayarwa na Musamman
+### Hanyoyi masu sadaukar da kai
 
-Tura buƙatu kai tsaye zuwa takamaiman mai bayarwa tare da tabbatar da ingancin samfuri:
+Buƙatun hanyar kai tsaye zuwa takamaiman mai bayarwa tare da ingantaccen samfuri:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -765,137 +765,137 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Ana ƙara prefix na mai bayarwa ta atomatik idan babu shi. Samfuran da ba su dace ba suna mayar da `400`.
+Ana ƙara prefix ɗin mai bayarwa ta atomatik idan ya ɓace. Samfuran da basu dace ba sun dawo `400`.
 
-### Tsarin Wakilin Cibiyar Sadarwa
+### Kanfigareshan wakili na hanyar sadarwa
 
 ```bash
-# Saita wakili na gaba ɗaya
+# Set global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Wakili na kowane mai bayarwa
+# Per-provider proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Gwada wakili
+# Test proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Fifiko:** Na takamaiman maɓalli → Na takamaiman Combo → Na takamaiman mai bayarwa → Na gaba ɗaya → Muhalli.
+**Gaba:** Maɓalli na musamman → Haɗin-takamaiman → Mai ba da takamaiman → Muhallin → na Duniya.
 
-### API na Kundin Samfura
+### Model Catalog API
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Yana mayar da samfura da aka haɗa rukuni-rukuni bisa mai bayarwa tare da nau'ikansu (`chat`, `embedding`, `image`).
+Yana dawo da ƙira wanda aka haɗa ta mai bayarwa tare da nau'ikan (`chat`, `embedding`, `image`).
 
-### Daidaitawar Cloud
+### Cloud Sync
 
-- Daidaita masu bayarwa, combos, da saituna tsakanin na'urori
-- Daidaitawa ta atomatik a bango tare da ƙayyadadden lokacin jira + gazawa cikin sauri
-- Fi son `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` na bangaren sabar a production
+- Daidaita masu samarwa, combos, da saituna a cikin na'urori
+- Aiki tare ta baya ta atomatik tare da ƙarewar lokaci + gaza-sauri
+- Fi son `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` -gefen uwar garke a samarwa
 
-### Ramin Gaggawa na Cloudflare
+### Cloudflare Quick Tunnel
 
-- Ana samunsa a **Dashboard → Endpoints** don Docker da sauran tsarin da ake karɓar baƙuncinsu da kai
-- Yana ƙirƙirar URL na wucin gadi `https://*.trycloudflare.com` wanda ke tura buƙatu zuwa endpoint ɗinka na yanzu mai dacewa da OpenAI `/v1`
-- Kunna shi a karon farko yana girka `cloudflared` ne kawai idan ana buƙata; sake farawa daga baya yana amfani da binary ɗin da aka sarrafa iri ɗaya
-- Ba a maido da Quick Tunnels ta atomatik bayan sake farawa na OmniRoute ko container; sake kunna su daga dashboard idan ana buƙata
-- URLs na tunnel na wucin gadi ne kuma suna canzawa duk lokacin da ka dakatar/kunna tunnel
-- Managed Quick Tunnels suna amfani da jigilar HTTP/2 ta tsohuwa don kauce wa gargaɗin buffer na QUIC UDP masu hayaniya a cikin containers masu ƙarancin albarkatu
-- Saita `CLOUDFLARED_PROTOCOL=quic` ko `auto` idan kana son sauya zaɓin jigilar da aka sarrafa
-- Saita `CLOUDFLARED_BIN` idan ka fi son amfani da binary na `cloudflared` da aka riga aka girka maimakon wanda tsarin ke saukewa
-- Ana iya nuna ko ɓoye bangarorin Cloudflare Quick Tunnel, Tailscale Funnel, da ngrok Tunnel a **Settings → Appearance**. Ɓoye wani bangare ba ya dakatar da tunnel da ke gudana.
+- Akwai a ciki** Dashboard → Endpoints** don Docker da sauran turawa da kansu
+- Yana ƙirƙira `https://*.trycloudflare.com` URL na ɗan lokaci wanda ke turawa zuwa ƙarshen `/v1` ku na OpenAI mai jituwa na yanzu
+- Da farko kunna shigar `cloudflared` kawai lokacin da ake buƙata; daga baya zata sake farawa sake amfani da binary iri ɗaya da aka sarrafa
+- Ba a sake dawo da Ramukan gaggawa ta atomatik bayan an sake OmniRoute ko akwati; sake kunna su daga dashboard lokacin da ake buƙata
+- Tunnel URLs abu ne na al'ada kuma yana canzawa duk lokacin da kuka stop/start ramin
+- Matsakaicin Matsakaicin Saurin Gudanarwa zuwa jigilar HTTP/2 don gujewa faɗakarwa na QUIC UDP mai hayaniya a cikin kwantena.
+- Saita `CLOUDFLARED_PROTOCOL=quic` ko `auto` idan kuna son soke zaɓin jigilar da aka sarrafa
+- Saita `CLOUDFLARED_BIN` idan kun fi son amfani da riga-kafi `cloudflared` binary maimakon zazzagewar da aka sarrafa
+- Za a iya nunawa ko ɓoyayye a ciki Cloudflare Tunnel mai sauri, Tailscale Funnel da ngrok Ramin rami** Saituna → Bayyanar** . Boye panel baya hana ramin gudu.
 
-### Basirar LLM Gateway (Mataki na 9)
+### Sirrin Ƙofar LLM (Mataki na 9)
 
-- **Semantic Cache** — Yana adana martanin da ba na streaming ba kuma temperature=0 ta atomatik (tsallake shi da `X-OmniRoute-No-Cache: true`)
-- **Request Idempotency** — Yana haɗa buƙatun da suka maimaitu cikin daƙiƙa 5 ta hanyar header na `Idempotency-Key` ko `X-Request-Id`
-- **Progress Tracking** — Abubuwan da suka faru na SSE `event: progress` waɗanda ake kunna su da zaɓi ta hanyar header na `X-OmniRoute-Progress: true`
-
----
-
-### Filin Gwajin Mai Fassara
-
-Shiga ta **Dashboard → Translator**. Yi debugging kuma ka ga yadda OmniRoute ke fassara buƙatun API tsakanin providers.
-
-| Yanayi           | Manufa                                                                                             |
-| ---------------- | -------------------------------------------------------------------------------------------------- |
-| **Playground**   | Zaɓi tsarin tushe/manufa, liƙa buƙata, sannan ka ga sakamakon da aka fassara nan take              |
-| **Chat Tester**  | Aika saƙonnin tattaunawa kai tsaye ta proxy sannan ka binciki cikakken zagayen buƙata/martani      |
-| **Test Bench**   | Gudanar da gwaje-gwaje na rukuni a haɗe-haɗen tsare-tsare da yawa don tabbatar da ingancin fassara |
-| **Live Monitor** | Kalli fassarori a ainihin lokaci yayin da buƙatu ke gudana ta proxy                                |
-
-**Yanayin amfani:**
-
-- Gano dalilin da ya sa takamaiman haɗin client/provider yake gaza
-- Tabbatar cewa thinking tags, tool calls, da system prompts suna fassaruwa daidai
-- Kwatanta bambance-bambancen tsari tsakanin tsarin OpenAI, Claude, Gemini, da Responses API
+- **Cache na Semantic** - Caches ba yawo ta atomatik, martanin = 0 zazzabi (ketare da `X-OmniRoute-No-Cache: true`)
+- **Neman rashin ƙarfi** - Keɓance buƙatun tsakanin 5s ta hanyar `Idempotency-Key` ko taken `X-Request-Id`
+- **Bibiyar Ci gaba** - Ficewa abubuwan da suka faru SSE `event: progress` ta hanyar kai na `X-OmniRoute-Progress: true`
 
 ---
 
-### Dabarun Routing
+### Filin Wasan Fassara
 
-Saita ta **Dashboard → Settings → Routing**. Dashboard yana nuna dabaru shida da aka fi amfani da su; combos da auto-router suna goyon bayan ƙarin dabaru a ciki.
+Shiga ta hanyar** Dashboard → Translator** . Gyara kuma duba yadda OmniRoute ke fassara buƙatun API tsakanin masu samarwa.
 
-**Dabarun da ake gani a dashboard (routing na matakin asusu):**
+| Yanayin                | Manufar                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------- |
+| **filin wasa**         | Zaɓi tsarin source/target, liƙa buƙatu, kuma duba fitarwa da aka fassara nan take           |
+| **Gwajin Taɗi**        | Aika saƙonnin taɗi kai tsaye ta hanyar wakili kuma duba cikakken zagayowar request/response |
+| **Gwajin Bench**       | Gudanar da gwaje-gwajen tsari a cikin haɗe-haɗe da yawa don tabbatar da daidaiton fassarar  |
+| **Mai Kula da Rayuwa** | Duba fassarori na ainihi yayin da buƙatun ke gudana ta hanyar wakili                        |
 
-| Dabara                         | Bayani                                                                                                             |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
-| **Fill First**                 | Yana amfani da asusu bisa jerin fifiko — babban asusu yana kula da duk buƙatu har sai ba ya samuwa                 |
-| **Round Robin**                | Yana zagayawa cikin duk asusu tare da iyakar sticky da za a iya saitawa (tsoho: kira 3 ga kowane asusu)            |
-| **P2C (Power of Two Choices)** | Yana zaɓar asusu 2 bazuwar sannan ya tura zuwa wanda ya fi lafiya — yana daidaita nauyi tare da la’akari da lafiya |
-| **Random**                     | Yana zaɓar asusu bazuwar ga kowace buƙata ta amfani da Fisher-Yates shuffle                                        |
-| **Least Used**                 | Yana tura zuwa asusun da ke da timestamp na `lastUsedAt` mafi tsufa, yana rarraba zirga-zirga daidai               |
-| **Cost Optimized**             | Yana tura zuwa asusun da ke da ƙimar fifiko mafi ƙanƙanta, don zaɓar providers masu mafi ƙarancin farashi          |
+**Amfani da lokuta:**
 
-**Dabarun combo da auto na ci gaba** (ana iya saita su ga kowane combo ko ta prefixes na `auto/*` — duba [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+- Gyara dalilin da yasa takamaiman haɗin client/provider ya gaza
+- Tabbatar da cewa alamun tunani, kiran kayan aiki, da faɗakarwar tsarin suna fassara daidai
+- Kwatanta bambance-bambancen tsari tsakanin OpenAI, Claude, Gemini, da Amsoshi tsarin API
 
-- `priority` — tsayayyen tsari, ba ya yin round-robin
-- `weighted` — rabon zirga-zirga gwargwadon nauyin kowane model
-- `fill-first` — yana amfani da model na farko har sai an kai iyaka
+---
+
+### Dabarun Gudanarwa
+
+Sanya ta hanyar** Dashboard → Saitunan →** . Dashboard ɗin yana fallasa dabaru shida da aka fi amfani da su; combos da auto-router a ciki suna goyan bayan saiti mai faɗi.
+
+**Dabarun gani-dashboard (tushen matakin-asusu):**
+
+| Dabarun                  | Bayani                                                                                                            |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| **Cika Farko**           | Yana amfani da asusu a tsarin fifiko - asusun farko yana sarrafa duk buƙatun har sai babu shi                     |
+| **Zagaye Robin**         | Kewaya ta duk asusu tare da iyakoki mai daidaitawa (tsoho: kira 3 kowane asusu)                                   |
+| **P2C (Ikon Zabi Biyu)** | Zaɓi asusun bazuwar 2 da hanyoyi zuwa mafi koshin lafiya - daidaita nauyi tare da wayar da kan lafiya             |
+| **Bazuwar**              | Ba da gangan ya zaɓi asusu don kowace buƙata ta amfani da shuffle Fisher-Yates                                    |
+| **Mafi Karancin Amfani** | Hanyoyi zuwa asusun tare da mafi tsohuwar tambarin lokaci `lastUsedAt`, yana rarraba zirga-zirga daidai gwargwado |
+| **Ƙididdiga Ƙididdiga**  | Hanyoyi zuwa asusun tare da mafi ƙarancin fifikon fifiko, ingantawa ga masu samar da mafi ƙarancin farashi        |
+
+**Haɓaka haɓaka da dabarun atomatik** (wanda za'a iya daidaita shi ta kowace haduwa ko ta prefixes `auto/*` - duba [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+
+- `priority` - m tsari, ba zagaye-robins
+- `weighted` - daidaitaccen zirga-zirgar zirga-zirgar da aka raba ta kowane ma'aunin ƙira
+- `fill-first` - magudana samfurin farko har sai iyaka ya buga
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
-- `least-used` da `cost-optimized`
-- `auto` — zaɓi bisa maki daga cikin duk candidates
-- `lkgp` (Last Known Good Provider) — yana manne wa provider na ƙarshe da ya yi nasara, sannan ya koma ga ƙa’idoji idan ya gaza
-- `context-optimized` — yana zaɓar model mai taga context mafi girma da take a buɗe
-- `context-relay` — yana haɗa models masu dogon context don turns na gaba
+- `p2c` (Ikon Zabi Biyu)
+- `least-used` a `cost-optimized`
+- `auto` - ci gaba da ci gaba da duk 'yan takara
+- `lkgp` (Mai bayarwa na Ƙarshe da aka sani) - fil ga mai bayarwa na ƙarshe mai nasara, sannan ya koma ga ƙa'idodi
+- `context-optimized` - yana ɗaukar samfurin tare da mafi girman taga mahallin kyauta
+- `context-relay` - sarƙoƙi samfurin yanayi mai tsayi don bi da bi
 
-#### Header na External Sticky Session
+#### Shugaban Zama Mai Danko Na Waje
 
-Don session affinity na waje (misali, agents na Claude Code/Codex da ke bayan reverse proxies), aika:
+Don kusancin zama na waje (misali, wakilan Claude Code/Codex a bayan wakilai na baya), aika:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute kuma yana karɓar `x_session_id` kuma yana mayar da session key da ake amfani da ita a `X-OmniRoute-Session-Id`.
+OmniRoute kuma tana karɓar `x_session_id` kuma ta dawo da maɓallin zama mai tasiri a cikin `X-OmniRoute-Session-Id`.
 
-Idan kana amfani da Nginx kuma kana aika headers masu tsarin underscore, kunna:
+Idan kun yi amfani da Nginx kuma ku aika da manyan kantunan da ke ƙasa, kunna:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard Model Aliases
+#### Laƙabin Katin Model
 
-Ƙirƙiri wildcard patterns don sake taswirar sunayen model:
+Ƙirƙirar ƙirar kati don sake taswirar sunaye:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcards suna goyon bayan `*` (kowane irin haruffa) da `?` (harafi guda).
+Katunan daji suna goyan bayan `*` (kowane haruffa) da `?` (halaye ɗaya).
 
-#### Fallback Chains
+#### Sarkar koma baya
 
-Ƙayyade fallback chains na gama-gari waɗanda suka shafi duk buƙatu:
+Ƙayyade sarƙoƙin koma baya na duniya waɗanda ke aiki cikin duk buƙatun:
 
 ```
 Chain: production-fallback
@@ -906,22 +906,22 @@ Chain: production-fallback
 
 ---
 
-### Haɗe-haɗen Provider da Tsarin Routing da Aka Fi Amfani da Su
+### Haɗin Mai Ba da Gaggawa & Samfuran Tafiya
 
-Ga misalan tsarin haɗa providers da yawa da yin routing a tsakaninsu a OmniRoute:
+Ga misalan alamu don haɗa masu samarwa da yawa da kewayawa tsakanin su a cikin OmniRoute:
 
-#### 1. Combo na Coding Agent: Ƙwaƙƙwaran Tunani tare da Fallback na Farashi/Gudu
+#### 1. Agent Combo: Babban Mahimmancin Ƙarshe tare da faɗuwar Cost/Speed
 
-Ya dace da coding agents (OpenCode, Claude Code, Cursor, Cline). Da farko yana tura buƙatu zuwa frontier reasoning models, sannan ya koma ga fast coding models idan quota ta ƙare ko aka samu kurakurai.
+Mafi dacewa don masu yin coding (OpenCode, lambar Claude, Cursor, Cline). Hanyoyi da farko zuwa ƙirar tunani na kan iyaka, komawa zuwa ƙirar ƙididdigewa da sauri akan gajiyar ƙima ko kurakurai.
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
-- **Models**:
-  1. `claude/claude-sonnet-4-6` (Babban coding agent)
-  2. `openai/gpt-4o` (Fallback na biyu mai babban ƙarfin aiki)
-  3. `deepseek/deepseek-v4-flash` (Fallback mai inganci sosai da araha)
+- **Dashboard** : Combos → Sabon Haɗa → Suna: `agent-coding` → Dabarun: `Priority`
+- **Samfura** :
+  1. `claude/claude-sonnet-4-6` (Wakilin coding na farko)
+  2. `openai/gpt-4o` (Bayan baya mai ƙarfi na biyu)
+  3. `deepseek/deepseek-v4-flash` (Babban inganci, koma baya mai tsada)
 
 ```bash
-# Misali ta API
+# Example via API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -936,178 +936,174 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Haɗin Sauyawa ta Atomatik na Matakin Kyauta
+#### 2. Free-Tier Auto Failover Combo
 
-Yana jera masu samar da sabis da yawa na matakin kyauta da waɗanda ba sa buƙatar maɓalli domin ƙara tsawon lokacin aiki ba tare da kuɗin API ba.
+Sarrafa sarƙoƙi da yawa masu samar da kyauta da marasa maɓalli don haɓaka lokacin aiki ba tare da farashin API ba.
 
-- **Dabara**: `Least Used` ko `Round Robin` (yana rarraba nauyi a tsakanin iyakokin amfani)
-- **Samfura**:
+- **Dabarun** : `Least Used` ko `Round Robin` (yana rarraba kaya a kan adadin kuɗi)
+- **Samfura** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Misali ta CLI
+# Example via CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Bututun Aiki na Hanyoyi da Dama / Gani da Rubutu
+#### 3. Multimodal / Vision & Rubutun bututu
 
-Haɗa samfuran gani na musamman da samar da rubutu mai sauri don ayyukan da suka ƙunshi fahimtar hoto da samar da lamba.
+Haɗa samfuran hangen nesa na musamman tare da tsararrun rubutu mai sauri don gudanawar aiki wanda ya ƙunshi fahimtar hoto da tsara lamba.
 
-- **Tsari**: Haɗin `Priority` wanda ke jera samfuran da ke iya gani da farko, sannan samfurin rubutu/lamba mai yawan sarrafawa a ƙarshe.
-- **Samfura**:
-  1. `gemini/gemini-2.5-pro` (Ƙaƙƙarfan fahimtar hoto/hanyoyi da dama)
-  2. `openai/gpt-4o` (Daidaitaccen amfani da gani da kayan aiki)
-  3. `deepseek/deepseek-v4-flash` (Samar da rubutu/lamba)
-
----
-
-### Juriya da Masu Katse Da'ira
-
-Saita ta **Dashboard → Settings → Resilience**.
-
-OmniRoute yana aiwatar da juriya a matakin mai samar da sabis ta hanyar abubuwa biyar:
-
-1. **Jerin Jira da Daidaita Gudun Buƙatu** — Tsara buƙatu a matakin tsarin:
-   - **Buƙatu a Kowane Minti (RPM)** — Matsakaicin buƙatu a kowane minti ga kowane asusu
-   - **Mafi Ƙarancin Lokaci Tsakanin Buƙatu** — Mafi ƙarancin tazara a cikin milisekan tsakanin buƙatu
-   - **Matsakaicin Buƙatun Lokaci Ɗaya** — Matsakaicin buƙatun da za a iya gudanarwa lokaci guda ga kowane asusu
-
-2. **Lokacin Jiran Haɗi** — Saitin kowane nau'in tantancewa ga haɗi guda bayan gazawar da za a iya sake gwadawa:
-   - **Lokacin Jira na Asali** — Tsohuwar tazarar jira don gazawar sabis na sama da za a iya sake gwadawa
-   - **Yi Amfani da Alamomin Sake Gwadawa na Sabis na Sama** — Yana bin ingantattun alamomin `Retry-After` ko sake saiti idan an bayar da su
-   - **Matsakaicin Matakan Tsawaita Jira** — Matsakaicin matakin tsawaita jira ninki-ninki saboda gazawa mai maimaituwa
-
-3. **Mai Katse Da'irar Mai Samar da Sabis** — Yana bibiyar gazawar mai samar da sabis daga farko zuwa ƙarshe, yana yi wa mai samar da sabis alamar rauni idan ya kai iyakar gargaɗin da aka saita, sannan yana buɗe mai katsewar idan an kai iyakar gazawar da aka saita:
-   - **Iyakar Rauni** — Yawan gazawar mai samar da sabis a jere kafin shiga `DEGRADED`
-   - **Iyakar Gazawa** — Yawan gazawar mai samar da sabis a jere kafin shiga `OPEN`
-   - **Lokacin Sake Saiti** — Tazarar lokaci kafin a sake gwada mai samar da sabis
-   - **CLOSED** (Lafiyayye) — Buƙatu suna gudana yadda aka saba
-   - **DEGRADED** — Buƙatu suna ci gaba da gudana yayin da ake bibiyar ƙaruwar gazawa
-   - **OPEN** — An toshe mai samar da sabis na ɗan lokaci bayan gazawa mai maimaituwa
-   - **HALF_OPEN** — Ana gwada ko mai samar da sabis ya farfaɗo
-
-   Iyakokin ƙimar `429` da suka shafi haɗi suna ci gaba da kasancewa a cikin **Lokacin Jiran Haɗi** kuma ba a ƙirga su ga mai katse da'irar mai samar da sabis.
-
-   Ana nuna halin aiki na mai katse da'irar mai samar da sabis a **Dashboard → Health** kawai.
-
-4. **Jira Lokacin Jira** — Idan duk haɗinan da za a iya zaɓa sun riga sun shiga lokacin jira, OmniRoute zai iya jira wanda zai fara ƙarewa sannan ya sake gwada wannan buƙatar abokin ciniki ta atomatik.
-
-5. **Gano Iyakar Ƙima ta Atomatik** — Idan masu samar da sabis na sama suka dawo da takamaiman tazarar jira, waɗannan alamomin suna maye gurbin lokacin jiran haɗi na cikin gida idan an kunna saitin.
-
-**Shawarar Ƙwararru:** Yi amfani da shafin **Health** don dubawa da sake saita masu katse da'irar masu samar da sabis masu aiki bayan katsewar sabis. Shafin Resilience yana canza saituna kawai.
+- **Tsarin** : Haɗin `Priority` wanda ke jera samfuran hangen nesa da farko kuma samfurin text/code mai girma na ƙarshe.
+- **Samfura** :
+  1. `gemini/gemini-2.5-pro` (karfin fahimtar image/multimodal )
+  2. `openai/gpt-4o` (daidaitaccen hangen nesa da amfani da kayan aiki)
+  3. `deepseek/deepseek-v4-flash` (Text/code generation)
 
 ---
 
-### Fitarwa / Shigo da Bayanai
+### Resilience & Masu Satar Zama
 
-Sarrafa kwafin ajiyar bayanai a **Dashboard → Settings → System & Storage**.
+Sanya ta hanyar** Dashboard → Saitunan → Resilience** .
 
-| Aiki                        | Bayani                                                                                                                                                                                |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Fitar da Bayanai**        | Yana sauke ma'ajiyar bayanan SQLite ta yanzu a matsayin fayil ɗin `.sqlite`                                                                                                           |
-| **Fitar da Duka (.tar.gz)** | Yana sauke cikakken rumbun ajiyar da ya haɗa da: ma'ajiyar bayanai, saituna, combos, haɗinan masu samar da sabis (ba tare da bayanan sirri ba), bayanan metadata na maɓallan API      |
-| **Shigo da Bayanai**        | Yana loda fayil ɗin `.sqlite` don maye gurbin ma'ajiyar bayanai ta yanzu. Ana ƙirƙirar kwafin ajiya kafin shigo da bayanai ta atomatik sai dai idan `DISABLE_SQLITE_AUTO_BACKUP=true` |
+OmniRoute yana aiwatar da juriya na matakin mai bayarwa tare da abubuwa biyar:
+
+1. **Neman layi & Taki** - Siffar buƙatun matakin tsari:
+   - **Bukatun Minti (RPM)** - Matsakaicin buƙatun minti ɗaya a kowace asusu
+   - **Min Lokaci Tsakanin Buƙatun** - Matsakaicin tazara a cikin millise seconds tsakanin buƙatun
+   - **Matsakaicin Buƙatun Haɗin Kai** - Matsakaicin buƙatun lokaci guda kowane asusu
+
+2. **Haɗin Cooldown** - Tsarin-nau'in-auth don haɗin kai ɗaya bayan gazawar da za a iya sake gwadawa:
+   - **Tushen Cooldown** - Tsohuwar taga mai sanyi don sake gwada gazawar sama
+   - **Yi amfani da Nassosi Sake gwadawa** - Girmama `Retry-After` mai iko ko sake saita alamu lokacin da aka bayar
+   - **Max Backoff Matakan** - Matsakaicin matakin koma baya don maimaita gazawar
+
+3. **Mai Bayar da Wuta** - Yana bibiyar gazawar mai ba da sabis na ƙarshe zuwa ƙarshe, yana yiwa mai ba da alamar ƙasƙantar da shi a daidaitaccen madaidaicin faɗakarwa, kuma yana buɗe mai karyawa lokacin da aka saita iyakar gazawar:
+   - **Ƙarƙashin ƙazantawa** - gazawar mai bada a jere kafin shiga `DEGRADED`
+   - **Matsakaicin gazawa** - gazawar mai bada a jere kafin shiga `OPEN`
+   - **Sake saita Lokacin Karewa** - Tagar lokaci kafin a sake gwada mai badawa
+   - **CLOSED** (Lafiya) - Buƙatun suna gudana akai-akai
+   - **DEGRADED** - Har yanzu buƙatun suna gudana yayin da ake bin manyan gazawar
+   - **OPEN** - An toshe mai bayarwa na ɗan lokaci bayan an sami nasara akai-akai
+   - **HALF_OPEN** - Gwaji idan mai bada sabis ya murmure
+
+   Ƙimar `429` mai iyakacin haɗin haɗi yana tsayawa** Haɗin Cooldown** kuma kar a lissafta zuwa mai karyawar mai bayarwa.
+
+   Ana nuna yanayin lokacin gudu na mai bayarwa** Dashboard → Lafiya** kawai.
+
+4. **Jira sanyi** - Idan kowane haɗin ɗan takara ya riga ya yi sanyi, OmniRoute na iya jira farkon sanyi kuma ta sake gwada buƙatar abokin ciniki iri ɗaya ta atomatik.
+
+5. **Ƙayyadadden Ƙimar Gano Kai** - Lokacin da masu samarwa na sama suka dawo fayyace tagogin jira, waɗancan alamun sun ƙetare sanyin haɗin gida lokacin da aka kunna saitin.
+
+**Pro Tukwici:** Yi amfani da** Lafiya** shafi don dubawa da sake saita masu watsewar mai ba da rai bayan an fita. Shafin Resilience yana canza tsari kawai.
+
+---
+
+### Fitar da Database/Shigo
+
+Sarrafa madaidaitan bayanai a ciki** Dashboard → Saitunan → Tsarin & Ajiya** .
+
+| Aiki                    | Bayani                                                                                                                                                                               |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Aika Database**       | Zazzage bayanan SQLite na yanzu azaman fayil `.sqlite`                                                                                                                               |
+| **Fitar Duk (.tar.gz)** | Zazzage cikakken ma'ajiyar ajiya gami da: bayanan bayanai, saituna, haɗe-haɗe, haɗin mai bayarwa (babu takaddun shaida), metadata maɓalli na API                                     |
+| **Shigo Database**      | Loda fayil ɗin `.sqlite` don maye gurbin bayanan bayanai na yanzu. Ana ƙirƙira wariyar ajiya da aka riga aka shigo da ita ta atomatik sai dai idan `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: Fitar da ma'ajiyar bayanai
+# API: Export database
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Fitar da duka (cikakken rumbu)
+# API: Export all (full archive)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: Shigo da ma'ajiyar bayanai
+# API: Import database
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Tabbatar da Ingancin Shigo da Bayanai:** Ana tabbatar da amincin fayil ɗin da aka shigo da shi (binciken pragma na SQLite), teburan da ake buƙata (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), da girma (matsakaici 100MB).
+**Tabbatar da Shigowa:** Fayil ɗin da aka shigo da shi an inganta shi don daidaito ( duba SQLite pragma ), tebur da ake buƙata (`provider_connections`, `provider_nodes`, `combos`, `api_keys`), da girman (max 100MB).
 
-**Abubuwan Amfani:**
+**Amfani da Cases:**
 
-- Ƙaura da OmniRoute tsakanin kwamfutoci
-- Ƙirƙiri kwafin ajiya na waje don murmurewa daga bala'i
-- Raba saituna tsakanin mambobin ƙungiya (fitar da duka → raba rumbu)
-
----
-
-### Dashboard na Saituna
-
-An tsara shafin saituna zuwa **shafuka 7** domin sauƙaƙe kewayawa:
-
-| Shafi          | Abubuwan da ke ciki                                                                                                                                                                                |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Gabaɗaya**   | Kayan aikin ma’ajiyar tsarin, halayyar tsoho, ganin ramin Endpoint                                                                                                                                 |
-| **Bayyanar**   | Sarrafa jigo (haske/duhu/tsarin), ganin shafin gefe, maɓallan kunnawa da kashewa na katunan ramin Cloudflare/Tailscale/ngrok                                                                       |
-| **AI**         | Kasafin tunani (passthrough / cirewa ta atomatik / na musamman / daidaitacce — duba [THINKING_BUDGET.md](./THINKING_BUDGET.md)), umarnin tsarin gama-gari, ƙididdigar ma’ajiyar wucin-gadin umarni |
-| **Tsaro**      | Saitunan Shiga/Kalmar sirri, Sarrafa Samun Dama ta IP, tabbatar da API don `/models`, Toshe Mai Bayarwa, kariyar shigar da umarnin cutarwa                                                         |
-| **Juyarwa**    | Dabarar juyarwa ta gama-gari (Cika na Farko / Bi-da-bi / P2C / Bazuwar / Mafi Ƙarancin Amfani / Ingantaccen Kuɗi), sunayen laƙabi na samfurin wildcard, jerin komawa-baya, tsoffin combo           |
-| **Juriya**     | Layin jiran buƙata, lokacin hucewar haɗi, saitin mai katse mai bayarwa, da halayyar jira-har-hucewa                                                                                                |
-| **Na Ci-gaba** | Saitin proxy na gama-gari (HTTP/SOCKS5), keɓantattun saitunan proxy na kowane mai bayarwa                                                                                                          |
-
-Gabaɗaya ba ya sake maimaita bayanan rajista da ma’ajiyar wucin-gadi waɗanda ake karantawa kawai. Ana adana saitunan riƙe bayanan rumbun bayanai da
-ingantawa ta hanyar `/api/settings/database`; share ma’ajiyar wucin-gadi da hannu yana amfani da
-`DELETE /api/cache`. Ana sarrafa iyakar layukan rajistan buƙata da na proxy ta
-`CALL_LOGS_TABLE_MAX_ROWS` da `PROXY_LOGS_TABLE_MAX_ROWS`.
+- Ƙaura OmniRoute tsakanin inji
+- Ƙirƙiri madogara na waje don murmurewa bala'i
+- Raba daidaitawa tsakanin membobin ƙungiyar (fitar da duk tarihin raba → )
 
 ---
 
-### Sarrafa Kuɗaɗe & Kasafin Kuɗi
+### Dashboard Saituna
 
-Samun dama ta **Dashboard → Costs**.
+An tsara shafin saituna zuwa ciki** 7 tabs** don kewayawa cikin sauƙi:
 
-| Shafi       | Manufa                                                                                                       |
-| ----------- | ------------------------------------------------------------------------------------------------------------ |
-| **Kasafi**  | Saita iyakokin kashe kuɗi ga kowane maɓallin API tare da kasafin yau da kullum/mako/wata da sa ido kai-tsaye |
-| **Farashi** | Duba da gyara bayanan farashin samfura — kuɗin kowace token 1K na shigarwa/fitarwa ga kowane mai bayarwa     |
+| Tab              | Abubuwan da ke ciki                                                                                                                                                      |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Gabaɗaya**     | Kayan aikin ajiyar tsarin, dabi'un da aka saba, hangen nesa na ƙarshen ƙarshen                                                                                           |
+| **Bayyanar**     | Ikon jigo (light/dark/system), hangen nesa na gefen gefe, maɓallan panel don katunan rami Cloudflare/Tailscale/ngrok                                                     |
+| **AI**           | Kasafin kuɗi na tunani (wucewa / auto-strip / al'ada / daidaitawa - duba [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), saurin tsarin duniya, saurin cache ƙididdiga      |
+| **Tsaro**        | Saitunan Login/Password, Gudanarwar Samun damar IP, API auth don `/models`, Katange mai bayarwa, gadin allura da gaggawa                                                 |
+| **Hanyar hanya** | Dabarar kewayawa ta duniya (Cika Farko / Zagaye Robin / P2C / Random / Mafi ƙarancin Amfani / Ƙarfafa Kuɗi), laƙabi na ƙirar ƙira, sarƙoƙi na fadowa, rashin daidaituwa. |
+| **Juriya**       | Nemi jerin gwano, sanyin haɗin gwiwa, saitin mai ba da labari, da halin jira-sanyi                                                                                       |
+| **Na ci gaba**   | Tsarin wakili na duniya (HTTP/SOCKS5), wakili na kowane mai bayarwa ya soke                                                                                              |
+
+Gabaɗaya ba ya sake kwafin rajista-kawai da bayanin kula na cache. Ana ci gaba da riƙe bayanan bayanai da saitunan ingantawa ta hanyar `/api/settings/database`; share cache na hannu yana amfani da `DELETE /api/cache`. `CALL_LOGS_TABLE_MAX_ROWS` da `PROXY_LOGS_TABLE_MAX_ROWS` ne ke sarrafa buƙatun buƙatu da maƙallan log ɗin wakili.
+
+---
+
+### Farashin & Gudanar da Kasafin Kudi
+
+Shiga ta hanyar** Dashboard → Farashin** .
+
+| Tab              | Manufar                                                                                                          |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Kasafin kudi** | Saita iyakacin kashe kuɗi akan kowane maɓallin API tare da kasafin kuɗi daily/weekly/monthly da sa ido na ainihi |
+| **Farashi**      | Duba ku shirya shigarwar farashin ƙirar ƙira - farashi a kowace alamar input/output 1k ga kowane mai bayarwa     |
 
 ```bash
-# API: Saita kasafi
+# API: Set a budget
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Samo matsayin kasafi na yanzu
+# API: Get current budget status
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Bin Diddigin Kuɗi:** Kowace buƙata tana rajistar amfani da token kuma tana ƙididdige kuɗi ta amfani da jadawalin farashi. Duba rabuwar bayanai a **Dashboard → Usage** bisa mai bayarwa, samfuri, da maɓallin API.
+**Bibiyar farashi:** Kowane buƙatu yana yin rajistar amfani da alamar kuma yana ƙididdige farashi ta amfani da teburin farashi. Duba ɓarna a ciki** Dashboard → Amfani** ta mai bayarwa, samfuri, da maɓallin API.
 
 ---
 
-### Rubuta Sauti Zuwa Rubutu
+### Rubutun Sauti
 
-OmniRoute yana goyon bayan rubuta sauti zuwa rubutu ta endpoint mai dacewa da OpenAI:
+OmniRoute tana goyan bayan kwafin sauti ta hanyar ƙarshen ƙarshen OpenAI mai jituwa:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Misali da curl
+# Example with curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` ita ce hanyar Deepgram ta asali kuma tana buƙatar maɓallin API na Deepgram.
-Idan OpenRouter kaɗai aka saita, yi amfani da `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` ita ce hanyar Deepgram ta asali kuma tana buƙatar maɓallin Deepgram API. Idan an saita OpenRouter kawai, yi amfani da `openrouter/deepgram/nova-3`.
 
-Masu bayar da **Magana-zuwa-Rubutu (rubuta sauti)**:
+**Magana-zuwa-Rubutu (rubutu)** masu bayarwa:
 
-- `openai/` (mai dacewa da whisper)
+- `openai/` (wanda ya dace da raɗaɗi)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (iyalin Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (nau’ikan whisper)
+- `huggingface/` (bambance-bambancen raɗaɗi)
 - `qwen/`
 
-Masu bayar da **Rubutu-zuwa-Magana (`POST /v1/audio/speech`)**:
+**Rubutu-zuwa-Magana (`POST /v1/audio/speech`)** masu bayarwa:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1124,55 +1120,45 @@ Masu bayar da **Rubutu-zuwa-Magana (`POST /v1/audio/speech`)**:
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Tsarukan sauti da ake goyon baya don rubuta sauti: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Tsarukan fitarwar TTS sun dogara da mai bayarwa (mp3, wav, opus, pcm, mulaw).
+Tsarin sauti mai goyan baya don kwafi: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Tsarin fitarwa TTS ya dogara da mai bayarwa (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Dabarun Daidaita Combo
+### Dabarun Daidaita Haɗuwa
 
-Saita daidaitawar kowane combo a **Dashboard → Combos → Create/Edit → Strategy**.
+Sanya ma'auni na kowane-hadarin ciki** Dashboard → Combos → Create/Edit →** .
 
-| Dabara             | Bayani                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------ |
-| **Round-Robin**    | Yana zagayawa cikin samfura bi da bi                                                                   |
-| **Priority**       | Koyaushe yana fara gwada samfurin farko; yana komawa baya ne kawai idan an samu kuskure                |
-| **Random**         | Yana zaɓar samfurin bazuwar daga combo don kowace buƙata                                               |
-| **Weighted**       | Yana juyarwa gwargwadon nauyin da aka ware wa kowane samfuri                                           |
-| **Least-Used**     | Yana juyarwa zuwa samfurin da yake da mafi ƙarancin buƙatun kwanan nan (yana amfani da ma’aunin combo) |
-| **Cost-Optimized** | Yana juyarwa zuwa samfurin da ya fi arha daga waɗanda ake da su (yana amfani da jadawalin farashi)     |
+| Dabarun                  | Bayani                                                                                   |
+| ------------------------ | ---------------------------------------------------------------------------------------- |
+| **Zagaye-Robin**         | Yana jujjuya samfura a jere                                                              |
+| **fifiko**               | Koyaushe yana gwada samfurin farko; ya koma kan kuskure kawai                            |
+| **Bazuwar**              | Yana zaɓar samfurin bazuwar daga haɗakar don kowace buƙata                               |
+| **An yi nauyi**          | Hanyoyi daidai gwargwado dangane da ma'aunin da aka sanya kowane samfurin                |
+| **Mafi Karancin Amfani** | Hanyoyi zuwa samfurin tare da ƴan buƙatun kwanan nan (yana amfani da ma'aunin haɗaɗɗiya) |
+| **Ƙididdiga-Ƙari**       | Hanyoyi zuwa samfurin mafi arha (yana amfani da tebur farashin)                          |
 
-Ana iya saita tsoffin combo na gama-gari a **Dashboard → Settings → Routing → Combo Defaults**.
-A tsohuwa, iyakar lokacin jiran amsa na target na combo tana gaji iyakar lokacin jiran buƙata ta yanzu. Yi amfani da **Target timeout
-(seconds)** a tsoffin combo ko wani combo guda ɗaya ne kawai idan ana son gajeriyar iyakar kowane target ta
-jawo komawa-baya cikin sauri.
+Za'a iya saita abubuwan da suka dace na haɗin kai na duniya** Dashboard → Saitunan → Rarraba → Tsoffin Tsoffin** . Ƙaddamar da niyya ta haɗuwa ta gaji lokacin buƙatun na yanzu ta tsohuwa. Amfani** Lokaci ya ƙare (daƙiƙa)** akan abubuwan da suka dace na haɗin kai ko haɗin kai ɗaya kawai lokacin da gajeriyar iyakar kowane manufa ya kamata ya haifar da koma baya cikin sauri.
 
-Ingantawar combo mai rashin jinkiri sai an zaɓi kunna ta. Bar **Zero-latency optimizations** a kashe domin
-hana waɗannan fasalolin jinkiri yin tsere da target na komawa-baya, tsallake target bisa tarihin TTFT,
-ko matsar da buƙatun komawa-baya; kunna shi yana ba da damar hedging da aka saita, tsallakewar TTFT
-na hasashe, da matsawar komawa-baya ta gaba-gaba domin musanya daidaiton juyarwa/buƙata da rage
-jinkirin ƙarshen rarrabawa.
+Haɓaka haɗin haɗin sifili-latency an shiga. Bar** Haɓakawa-latency** nakasassu don hana waɗannan fasalulluka na latency daga tseren maƙasudin koma baya, tsallake maƙasudi dangane da tarihin TTFT, ko matsawa buƙatun koma baya; kunna shi yana ba da damar saita shinge, tsinkaya TTFT tsallakewa, da matsawar faɗuwa mai ƙarfi don kasuwanci amincin routing/request don ƙarancin lat ɗin wutsiya.
 
-Kashe **Ma'ajin token na Tunani** idan masu samarwa na sama suna buƙatar tsauraran iyakokin
-`max_tokens` / `maxOutputTokens`. Idan an kunna shi, hanyar haɗaka tana ƙara sararin
-samfurin tunani ne kawai ga samfuran da aka san iyakar fitarsu, kuma tana barin iyakar token ta abokin hulɗa ba tare da canji ba idan amintacciyar ƙimar da aka ƙara wa ma'aji za ta wuce wannan iyaka. Idan iyakar abokin hulɗa ta riga ta haura sananniyar iyaka,
-OmniRoute zai rage ta zuwa wannan iyakar kafin aika buƙatar zuwa sama.
+A kashe** Matsakaicin alamar alama** lokacin da masu samarwa na sama suna buƙatar tsauraran iyaka `max_tokens` / `maxOutputTokens`. Lokacin da aka kunna, hanyar haɗin haɗakarwa kawai tana ƙara ƙirar ƙira don ƙira tare da sanannen madaidaicin fitarwa kuma yana barin ƙayyadaddun alamar abokin ciniki baya canzawa lokacin da amintaccen ƙimar ƙimar za ta wuce wannan hular. Idan iyakar abokin ciniki ya riga ya sama da sanannen hula, OmniRoute ya matsa shi zuwa waccan hula kafin aika buƙatun sama.
 
 ---
 
-### Allon Kula da Lafiya
+### Dashboard Lafiya
 
-Shiga ta **Dashboard → Health**. Bayanin lafiyar tsarin kai-tsaye mai ɗauke da kati 6:
+Shiga ta hanyar** Dashboard → Lafiya** . Bayanin tsarin lafiya na ainihin lokaci tare da katunan 6:
 
-| Kati                        | Abin da Yake Nunawa                                                                 |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| **Matsayin Tsari**          | Tsawon lokacin aiki, siga, amfani da ƙwaƙwalwa, kundin bayanai                      |
-| **Lafiyar Mai Samarwa**     | Matsayin aiki na katsewar da'irar masu samarwa na duniya                            |
-| **Iyakokin Ƙima**           | Lokutan jira na haɗin da ke aiki ga kowane asusu tare da sauran lokaci              |
-| **Kulle-kullen da ke Aiki** | Kulle-kullen da suka shafi takamaiman samfuri da ke aiki da kuma keɓewar wucin gadi |
-| **Ma'ajin Sa Hannu**        | Ƙididdigar ma'ajin cire maimaituwa (maɓallan da ke aiki, ƙimar dacewa)              |
-| **Bayanan Jinkiri**         | Tarin jinkirin p50/p95/p99 ga kowane mai samarwa                                    |
+| Katin                       | Abin Da Ya Nuna                                                 |
+| --------------------------- | --------------------------------------------------------------- |
+| **Matsayin Tsarin**         | Lokacin aiki, sigar, amfani da ƙwaƙwalwar ajiya, kundin bayanai |
+| **Lafiya Mai Ba da Lafiya** | Yanayin runtime breaker mai ba da sabis na duniya               |
+| **Ƙimar Ƙimar**             | Haɗin kai mai aiki cooldowns kowane asusu tare da sauran lokaci |
+| **Makulli masu aiki**       | Makulli masu aiki da samfuri da keɓancewa na ɗan lokaci         |
+| **Cache Sa hannu**          | Ƙididdigar cache mai ɓarna (maɓallai masu aiki, ƙimar bugawa)   |
+| **Latency Telemetry**       | p50/p95/p99 latency kowane mai bayarwa                          |
 
-**Shawarar Ƙwararru:** Shafin Health yana sabunta kansa kowane daƙiƙa 10. Yi amfani da katin katsewar da'ira don gano masu samarwar da ke fuskantar matsaloli.
+**Pro Tukwici:** Shafin Lafiya yana sabunta kai tsaye kowane daƙiƙa 10. Yi amfani da katin da'ira don gano waɗanne masu samarwa ke fuskantar matsala.
 
 ---
 

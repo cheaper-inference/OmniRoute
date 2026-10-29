@@ -121,6 +121,7 @@ export interface ApiKeyAccessData {
   streamDefaultMode?: StreamDefaultMode | null;
   compressionEnabled?: boolean | null;
   allowAutoCombos?: boolean | null;
+  allowCcDiscoveryAliases?: boolean | null;
   catalogScope?: CatalogScope | null;
   forcedModel?: string | null;
   disableNonPublicModels?: boolean | null;
@@ -169,6 +170,7 @@ export interface ApiKeyAccessFormState {
   streamDefaultMode: StreamDefaultMode;
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
+  allowCcDiscoveryAliases: boolean;
   catalogScope: CatalogScope;
   /** Per-key enforced routing target; "" = not pinned. */
   forcedModel: string;
@@ -304,12 +306,15 @@ function initialScopeState(apiKey: StoredApiKey) {
   };
 }
 
-type BehaviourStateField =
+type CatalogBehaviourField =
   | "streamDefaultMode"
   | "compressionEnabled"
   | "allowAutoCombos"
+  | "allowCcDiscoveryAliases"
   | "catalogScope"
-  | "forcedModel"
+  | "forcedModel";
+
+type UsageBehaviourField =
   | "disableNonPublicModels"
   | "allowUsageCommand"
   | "usageLimitEnabled"
@@ -317,15 +322,25 @@ type BehaviourStateField =
   | "weeklyUsageLimitUsd"
   | "chaosModeEnabled";
 
-function initialBehaviourState(
+type BehaviourStateField = CatalogBehaviourField | UsageBehaviourField;
+
+function initialCatalogBehaviourState(
   apiKey: StoredApiKey
-): Pick<ApiKeyAccessFormState, BehaviourStateField> {
+): Pick<ApiKeyAccessFormState, CatalogBehaviourField> {
   return {
     streamDefaultMode: apiKey?.streamDefaultMode === "json" ? "json" : "legacy",
     compressionEnabled: apiKey?.compressionEnabled !== false,
     allowAutoCombos: apiKey?.allowAutoCombos !== false,
+    allowCcDiscoveryAliases: apiKey?.allowCcDiscoveryAliases !== false,
     catalogScope: apiKey?.catalogScope ?? "all",
     forcedModel: apiKey?.forcedModel ?? "",
+  };
+}
+
+function initialUsageBehaviourState(
+  apiKey: StoredApiKey
+): Pick<ApiKeyAccessFormState, UsageBehaviourField> {
+  return {
     disableNonPublicModels: apiKey?.disableNonPublicModels === true,
     allowUsageCommand: apiKey?.allowUsageCommand === true,
     usageLimitEnabled: apiKey?.usageLimitEnabled === true,
@@ -333,6 +348,12 @@ function initialBehaviourState(
     weeklyUsageLimitUsd: positiveUsdLimitText(apiKey?.weeklyUsageLimitUsd),
     chaosModeEnabled: apiKey?.chaosModeEnabled === true,
   };
+}
+
+function initialBehaviourState(
+  apiKey: StoredApiKey
+): Pick<ApiKeyAccessFormState, BehaviourStateField> {
+  return { ...initialCatalogBehaviourState(apiKey), ...initialUsageBehaviourState(apiKey) };
 }
 
 // The groups are spread in the original field order, so JSON.stringify (the dirty check) sees
@@ -496,6 +517,7 @@ export function buildApiKeyAccessPayload(
     streamDefaultMode: formState.streamDefaultMode,
     compressionEnabled: formState.compressionEnabled,
     allowAutoCombos: formState.allowAutoCombos,
+    allowCcDiscoveryAliases: formState.allowCcDiscoveryAliases,
     catalogScope: formState.catalogScope,
     disableNonPublicModels: formState.disableNonPublicModels,
     allowUsageCommand: formState.allowUsageCommand,
@@ -812,6 +834,13 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
     [setFormState]
   );
 
+  const setAllowCcDiscoveryAliases = useCallback(
+    (allowCcDiscoveryAliases: boolean) => {
+      setFormState((prev) => ({ ...prev, allowCcDiscoveryAliases }));
+    },
+    [setFormState]
+  );
+
   const setAllowAllConnections = useCallback(
     (allowAllConnections: boolean) => {
       setFormState((prev) => ({
@@ -897,6 +926,7 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
     setSelectedCombos,
     toggleCombo,
     setAllowAutoCombos,
+    setAllowCcDiscoveryAliases,
     setAllowAllConnections,
     setSelectedConnections,
     togglePreferredConnection,

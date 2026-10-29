@@ -10,77 +10,76 @@ _Cập nhật lần cuối: 2026-06-28_
 
 ## Tóm tắt điều hành
 
-OmniRoute là một cổng định tuyến AI cục bộ và bảng điều khiển được xây dựng trên Next.js.
-Nó cung cấp một endpoint duy nhất tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng qua nhiều nhà cung cấp thượng nguồn, với khả năng chuyển đổi, dự phòng, làm mới token và theo dõi mức sử dụng.
+OmniRoute là cổng định tuyến và bảng điều khiển AI cục bộ được xây dựng trên Next.js. Nó cung cấp một điểm cuối tương thích với OpenAI (`/v1/*`) và định tuyến lưu lượng truy cập trên nhiều nhà cung cấp ngược dòng với tính năng dịch thuật, dự phòng, làm mới mã thông báo và theo dõi việc sử dụng.
 
-Các khả năng cốt lõi:
+Khả năng cốt lõi:
 
-- Bề mặt API tương thích với OpenAI dành cho CLI/công cụ (375 nhà cung cấp, 156 mô-đun thực thi)
-- Chuyển đổi yêu cầu/phản hồi giữa các định dạng của nhà cung cấp
-- Dự phòng theo tổ hợp mô hình (chuỗi nhiều mô hình)
-- Các bước tổ hợp có cấu trúc (`provider + model + connection`) với thứ tự lúc chạy dựa trên `compositeTiers`
-- Dự phòng ở cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
-- Kiểm tra trước hạn mức và lựa chọn tài khoản P2C có nhận biết hạn mức trong luồng chat chính
-- Quản lý kết nối nhà cung cấp bằng OAuth + khóa API (27 mô-đun nhà cung cấp OAuth)
-- Tạo embedding qua `/v1/embeddings` (18 nhà cung cấp)
-- Tạo hình ảnh qua `/v1/images/generations` (hơn 10 nhà cung cấp, hơn 20 mô hình)
-- Chuyển âm thanh thành văn bản qua `/v1/audio/transcriptions` (18 nhà cung cấp)
-- Chuyển văn bản thành giọng nói qua `/v1/audio/speech` (24 nhà cung cấp tích hợp sẵn)
+- Bề mặt API tương thích OpenAI cho CLI/tools (377 nhà cung cấp, 156 mô-đun thực thi)
+- dịch Request/response trên các định dạng của nhà cung cấp
+- Dự phòng kết hợp mô hình (trình tự nhiều mô hình)
+- Các bước kết hợp có cấu trúc (`provider + model + connection`) với thứ tự thời gian chạy theo `compositeTiers`
+- Dự phòng cấp tài khoản (nhiều tài khoản cho mỗi nhà cung cấp)
+- Lựa chọn tài khoản P2C nhận biết hạn ngạch và nhận biết hạn ngạch trong đường dẫn trò chuyện chính
+- OAuth + Quản lý kết nối nhà cung cấp khóa API (27 mô-đun nhà cung cấp OAuth )
+- Nhúng thế hệ qua `/v1/embeddings` (18 nhà cung cấp)
+- Tạo hình ảnh qua `/v1/images/generations` (10 nhà cung cấp +, 20 mô hình + )
+- Phiên âm âm thanh qua `/v1/audio/transcriptions` (18 nhà cung cấp)
+- Chuyển văn bản thành giọng nói qua `/v1/audio/speech` (24 nhà cung cấp tích hợp)
 - Tạo video qua `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Tạo nhạc qua `/v1/music/generations` (ComfyUI)
-- Tìm kiếm web qua `/v1/search` (20 nhà cung cấp)
-- Kiểm duyệt qua `/v1/moderations`
+- Tìm kiếm trên web qua `/v1/search` (20 nhà cung cấp)
+- Kiểm duyệt thông qua `/v1/moderations`
 - Xếp hạng lại qua `/v1/rerank`
-- Phân tích thẻ suy luận (`<think>...</think>`) cho các mô hình suy luận
-- Làm sạch phản hồi để tương thích nghiêm ngặt với OpenAI SDK
-- Chuẩn hóa vai trò (developer→system, system→user) để tương thích giữa các nhà cung cấp
-- Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini responseSchema)
-- Lưu trữ cục bộ cho nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt và giá cả (122 mô-đun DB)
-- Theo dõi mức sử dụng/chi phí và ghi nhật ký yêu cầu
-- Tùy chọn đồng bộ đám mây để đồng bộ trạng thái trên nhiều thiết bị
-- Danh sách IP được phép/bị chặn để kiểm soát quyền truy cập API
-- Quản lý ngân sách suy luận (chuyển tiếp nguyên trạng/tự động/tùy chỉnh/thích ứng)
-- Chèn lời nhắc hệ thống toàn cục
-- Theo dõi phiên và tạo dấu vân tay
-- Giới hạn tốc độ nâng cao theo từng tài khoản với các cấu hình riêng cho từng nhà cung cấp
-- Mẫu circuit breaker để tăng khả năng phục hồi của nhà cung cấp
-- Bảo vệ chống hiệu ứng thundering herd bằng khóa mutex
-- Bộ nhớ đệm loại bỏ yêu cầu trùng lặp dựa trên chữ ký
+- Hãy suy nghĩ phân tích thẻ (`<think>...</think>`) cho các mô hình lý luận
+- Khử trùng phản hồi để tương thích OpenAI SDK nghiêm ngặt
+- Chuẩn hóa vai trò (hệ thống → của nhà phát triển, người dùng → hệ thống) để tương thích với nhiều nhà cung cấp
+- Chuyển đổi đầu ra có cấu trúc (json_schema → Gemini replySchema)
+- Tính bền vững cục bộ cho nhà cung cấp, khóa, bí danh, tổ hợp, cài đặt, giá cả (122 mô-đun DB )
+- theo dõi Usage/cost và yêu cầu ghi nhật ký
+- Đồng bộ hóa đám mây tùy chọn để đồng bộ hóa multi-device/state
+- IP allowlist/blocklist để kiểm soát truy cập API
+- Tư duy quản lý ngân sách (passthrough/auto/custom/adaptive)
+- Tiêm nhắc nhở hệ thống toàn cầu
+- Theo dõi phiên và lấy dấu vân tay
+- Giới hạn tỷ lệ nâng cao cho mỗi tài khoản với hồ sơ dành riêng cho nhà cung cấp
+- Mô hình ngắt mạch cho khả năng phục hồi của nhà cung cấp
+- Bảo vệ đàn chống sét bằng khóa mutex
+- Bộ đệm chống trùng lặp yêu cầu dựa trên chữ ký
 - Lớp miền: quy tắc chi phí, chính sách dự phòng, chính sách khóa
-- Context Relay: bản tóm tắt bàn giao phiên để duy trì tính liên tục khi luân chuyển tài khoản
-- Lưu trữ trạng thái miền (bộ nhớ đệm ghi xuyên SQLite cho dự phòng, ngân sách, khóa và circuit breaker)
-- Công cụ chính sách để đánh giá yêu cầu tập trung (khóa → ngân sách → dự phòng)
-- Dữ liệu đo từ xa của yêu cầu với tổng hợp độ trễ p50/p95/p99
-- Dữ liệu đo từ xa của đích tổ hợp và tình trạng lịch sử của đích tổ hợp thông qua `combo_execution_key` / `combo_step_id`
-- ID tương quan (X-Request-Id) để theo dõi xuyên suốt từ đầu đến cuối
-- Ghi nhật ký kiểm toán tuân thủ với khả năng từ chối tham gia theo từng khóa API
+- Chuyển tiếp bối cảnh: tóm tắt chuyển giao phiên để liên tục xoay vòng tài khoản
+- Tính bền vững của trạng thái miền (bộ đệm ghi SQLite dành cho dự phòng, ngân sách, khóa, bộ ngắt mạch)
+- Công cụ chính sách để đánh giá yêu cầu tập trung (khóa ngân sách → dự phòng → )
+- Yêu cầu đo từ xa với tổng hợp độ trễ p50/p95/p99
+- Kết hợp đo từ xa mục tiêu và sức khỏe mục tiêu kết hợp lịch sử thông qua `combo_execution_key` / `combo_step_id`
+- Tương quan ID (X-Request-Id) để theo dõi từ đầu đến cuối
+- Ghi nhật ký kiểm tra tuân thủ với tính năng chọn không tham gia trên mỗi khóa API
 - Khung đánh giá để đảm bảo chất lượng LLM
-- Bảng điều khiển tình trạng với trạng thái circuit breaker của nhà cung cấp theo thời gian thực
-- MCP Server (110 công cụ) với 3 phương thức truyền tải (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời tác vụ
+- Bảng thông tin tình trạng với trạng thái ngắt mạch của nhà cung cấp theo thời gian thực
+- Máy chủ MCP (110 công cụ) với 3 lần vận chuyển (stdio/SSE/Streamable HTTP)
+- Máy chủ A2A (JSON-RPC 2.0 + SSE) với các kỹ năng và vòng đời nhiệm vụ
 - Hệ thống bộ nhớ (trích xuất, chèn, truy xuất, tóm tắt)
-- Hệ thống kỹ năng (registry, executor, sandbox, các kỹ năng tích hợp sẵn)
-- Proxy MITM với khả năng quản lý chứng chỉ và xử lý DNS
-- Middleware bảo vệ chống chèn lời nhắc
-- Pipeline nén lời nhắc với Caveman, RTK, các pipeline xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
-- Registry ACP (Agent Communication Protocol)
-- Các nhà cung cấp OAuth dạng mô-đun (22 mô-đun riêng lẻ trong `src/lib/oauth/providers/`)
-- Các tập lệnh gỡ cài đặt/gỡ cài đặt hoàn toàn
-- Hành động sửa chữa môi trường OAuth
-- Cầu nối WebSocket cho các máy khách WS tương thích với OpenAI (`/v1/ws`)
-- Quản lý token đồng bộ (phát hành/thu hồi, tải xuống gói cấu hình được lập phiên bản bằng ETag)
-- GLM Thinking (`glmt`) dưới dạng cấu hình đặt trước của nhà cung cấp hạng nhất
-- Đếm token kết hợp (`/messages/count_tokens` phía nhà cung cấp với phương án dự phòng bằng ước tính)
-- Tự động khởi tạo bí danh mô hình (hơn 30 phép chuẩn hóa phương ngữ giữa các proxy khi khởi động)
-- Tìm nạp ra ngoài an toàn với lớp bảo vệ SSRF, chặn URL riêng tư và cơ chế thử lại có thể cấu hình
-- Thử lại chat có nhận biết thời gian chờ với `requestRetry` và `maxRetryIntervalSec` có thể cấu hình
-- Xác thực môi trường runtime bằng Zod khi khởi động
-- Kiểm toán tuân thủ v2 với phân trang, các sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị chặn bởi SSRF
+- Hệ thống kỹ năng (đăng ký, người thực thi, hộp cát, kỹ năng tích hợp)
+- proxy MITM với quản lý chứng chỉ và xử lý DNS
+- Phần mềm trung gian bảo vệ tiêm nhắc nhở
+- Quy trình nén nhanh chóng với Caveman, RTK, quy trình xếp chồng, tổ hợp nén, gói ngôn ngữ và phân tích
+- đăng ký ACP (Giao thức truyền thông đại lý)
+- Nhà cung cấp OAuth mô-đun (22 mô-đun riêng lẻ theo `src/lib/oauth/providers/`)
+- tập lệnh Uninstall/full-uninstall
+- hành động sửa chữa môi trường OAuth
+- cầu WebSocket dành cho máy khách WS tương thích với OpenAI (`/v1/ws`)
+- Đồng bộ hóa quản lý mã thông báo (issue/revoke, tải xuống gói cấu hình phiên bản ETag)
+- cài đặt sẵn của nhà cung cấp hạng nhất GLM Thought (`glmt`)
+- Đếm mã thông báo kết hợp ( `/messages/count_tokens` phía nhà cung cấp với dự phòng ước tính)
+- Tự động gieo hạt bí danh mô hình (30 chuẩn hóa phương ngữ proxy chéo + khi khởi động)
+- Tìm nạp ra ngoài an toàn với tính năng bảo vệ SSRF, chặn URL riêng tư và thử lại có thể định cấu hình
+- Thử lại trò chuyện có nhận biết thời gian hồi chiêu với `requestRetry` và `maxRetryIntervalSec` có thể định cấu hình
+- Xác thực môi trường thời gian chạy với Zod khi khởi động
+- Kiểm tra tuân thủ v2 với phân trang, sự kiện CRUD của nhà cung cấp và ghi nhật ký xác thực bị chặn SSRF
 
-Mô hình runtime chính:
+Mô hình thời gian chạy chính:
 
-- Các route ứng dụng Next.js trong `src/app/api/*` triển khai cả API bảng điều khiển lẫn API tương thích
-- Lõi SSE/định tuyến dùng chung trong `src/sse/*` + `open-sse/*` xử lý việc thực thi nhà cung cấp, chuyển đổi, truyền phát, dự phòng và mức sử dụng
+- các tuyến ứng dụng Next.js trong `src/app/api/*` triển khai cả bảng điều khiển APIs và khả năng tương thích APIs
+- Lõi SSE/routing được chia sẻ trong `src/sse/*` + `open-sse/*` xử lý việc thực thi, dịch thuật, phát trực tuyến, dự phòng và sử dụng của nhà cung cấp
 
 ## Sơ đồ tham chiếu
 
@@ -357,168 +356,123 @@ Các lớp kiến trúc:
 
 Tìm hiểu chuyên sâu: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## Các phân hệ chính (v3.8.0)
+## Các hệ thống con chính (v3.8.0)
 
-### A. Công cụ Auto Combo
+### A. Động cơ kết hợp tự động
 
-Auto Combo tự động chấm điểm và chọn các đích định tuyến tại thời điểm nhận yêu cầu, thay vì
-dựa vào một định nghĩa combo tĩnh. Đây là thành phần vận hành họ tiền tố mô hình `auto/*`.
+Tự động kết hợp tự động ghi điểm và chọn mục tiêu định tuyến tại thời điểm yêu cầu, thay vì dựa vào định nghĩa kết hợp tĩnh. Nó hỗ trợ họ tiền tố mô hình `auto/*`.
 
-- Điểm vào của công cụ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Bộ phân giải: `src/domain/comboResolver.ts` (tự động phát hiện tiền tố `auto/`)
+- Mục nhập động cơ: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Trình giải quyết: `src/domain/comboResolver.ts` (tự động phát hiện tiền tố `auto/` )
 - Bảng điều khiển: `/dashboard/auto-combo`
-- Dữ liệu đo từ xa: bảng SQLite `auto_combo_decisions`
+- Đo từ xa: bảng SQLite `auto_combo_decisions`
 
 Các khả năng chính:
 
-- **20 chiến lược định tuyến** (ưu tiên, có trọng số, lấp đầy trước, luân phiên, P2C, ngẫu nhiên,
-  ít được sử dụng nhất, tối ưu hóa chi phí, có xét đặt lại, cửa sổ đặt lại, dung lượng dự phòng, có trọng số theo hạn ngạch,
-  ngẫu nhiên nghiêm ngặt, **auto**, lkgp, tối ưu hóa ngữ cảnh, tối ưu hóa bộ nhớ đệm, chuyển tiếp ngữ cảnh, **fusion**,
-  pipeline) —
-  auto là bổ sung nổi bật trong v3.8.0; `fusion` (phân tán song song theo bảng + tổng hợp qua bộ phán xét,
-  `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
-- **Chấm điểm theo 16 yếu tố**: hạn ngạch, tình trạng hoạt động, nghịch đảo chi phí, nghịch đảo độ trễ, độ phù hợp với tác vụ và
-  mười yếu tố khác. Bảng yếu tố chuẩn cùng trọng số mặc định nằm trong
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — trình bày lại tại đây sẽ
-  tạo thêm một nơi có thể trở nên lỗi thời.
-- **Nhà máy ảo** tạo các combo tạm thời khi không tồn tại combo có tên phù hợp,
-  lấy các ứng viên từ những kết nối nhà cung cấp đang hoạt động và ở trạng thái tốt.
-- **Các tiền tố tự động**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — mỗi tiền tố được hỗ trợ bởi một hồ sơ trọng số đã tinh chỉnh.
-- **6 gói chế độ**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` và `chaos-mode` — các cấu hình trọng số đặt sẵn có thể gọi từ
-  bảng điều khiển. (Không nên nhầm lẫn với các tiền tố `auto/*` ở trên, vốn là
-  các biến thể tại thời điểm nhận yêu cầu.)
+- **20 chiến lược định tuyến** (ưu tiên, có trọng số, điền trước, quay vòng, P2C, ngẫu nhiên, ít được sử dụng nhất, tối ưu hóa chi phí, nhận biết lại, cửa sổ đặt lại, khoảng trống, trọng số hạn ngạch, ngẫu nhiên nghiêm ngặt,** tự động** , lkgp, tối ưu hóa theo ngữ cảnh, tối ưu hóa bộ đệm, chuyển tiếp ngữ cảnh,** sự hợp nhất** , đường dẫn) — auto là phần bổ sung tiêu đề trong v3.8.0; `fusion` (tổng hợp đánh giá + phân bổ bảng điều khiển, `open-sse/services/fusion.ts`) là tính năng mới trong v3.8.36.
+- **Chấm điểm 16 yếu tố** : hạn ngạch, tình trạng, chi phí nghịch đảo, độ trễ nghịch đảo, mức độ phù hợp với nhiệm vụ và hơn thế nữa. Bảng chính tắc gồm các thừa số và trọng số mặc định của chúng nằm trong [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) —, việc trình bày lại nó ở đây sẽ khiến nó trở thành cũ kỹ.
+- **Nhà máy ảo** hiện thực hóa các tổ hợp phù du khi không có tổ hợp có tên phù hợp nào tồn tại, tìm nguồn cung ứng ứng viên từ các kết nối nhà cung cấp hoạt động lành mạnh.
+- **Tiền tố tự động** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — mỗi cái được hỗ trợ bởi một cấu hình trọng số đã điều chỉnh.
+- **6 gói chế độ** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` và `chaos-mode` — cấu hình trọng lượng đặt trước có thể gọi được từ bảng điều khiển. (Đừng nhầm lẫn với các tiền tố `auto/*` ở trên, là các biến thể theo thời gian yêu cầu.)
 
-Để biết đầy đủ chi tiết về thuật toán (công thức của các yếu tố, tinh chỉnh trọng số), hãy xem
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Để biết chi tiết thuật toán đầy đủ (công thức nhân tố, điều chỉnh trọng số), hãy xem [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Cloud Agents
+### B. Đại lý đám mây
 
-Cloud Agents bao bọc các nền tảng tác nhân mã được lưu trữ bởi bên thứ ba (Codex Cloud, Devin,
-Jules) sau một vòng đời tác vụ thống nhất được hỗ trợ bởi cơ sở dữ liệu. Tất cả endpoint tạo/kiểm tra
-tác vụ đều yêu cầu xác thực quản trị.
+Tác nhân đám mây bao bọc các nền tảng tác nhân mã được lưu trữ của bên thứ ba (Codex Cloud, Devin, Jules) đằng sau vòng đời tác vụ thống nhất được DB hỗ trợ. Tất cả các điểm cuối nhiệm vụ creation/inspection đều yêu cầu xác thực quản lý.
 
-- Thư mục gốc của mô-đun: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, cùng các thư mục con cho từng tác nhân trong `agents/`)
-- Phần triển khai cho từng tác nhân: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Các endpoint công khai: `/api/v1/agents/tasks/*` (liệt kê/tạo/lấy/hủy)
-- Các endpoint quản trị: `/api/cloud/*` (cấp phát, trạng thái, xử lý hàng loạt)
+- Gốc mô-đun: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, cộng với các thư mục con cho mỗi tác nhân trong `agents/`)
+- Triển khai cho mỗi tác nhân: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Điểm cuối công cộng: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Điểm cuối quản lý: `/api/cloud/*` (cung cấp, trạng thái, lô)
 - Bảng điều khiển: `/dashboard/cloud-agents`
 - Lưu trữ: bảng `cloud_agent_tasks`
 
-Để biết chi tiết về cấp phát và OAuth cho từng tác nhân, hãy xem
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Để biết thông tin chi tiết về việc cung cấp cho mỗi tác nhân và OAuth, hãy xem [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Các rào chắn
+### C. Lan can
 
-Mô-đun rào chắn là một lớp middleware có thể tải lại nóng, dùng để kiểm tra yêu cầu
-và phản hồi nhằm phát hiện PII, tấn công chèn prompt và nội dung hình ảnh không an toàn. Các vi phạm
-sẽ lập tức ngắt yêu cầu với HTTP **503** cùng mã lỗi có cấu trúc, cho phép
-các thành phần gọi ở hạ nguồn thử lại hoặc rẽ nhánh.
+Mô-đun Guardrails là lớp phần mềm trung gian có thể tải lại nóng để kiểm tra các yêu cầu và phản hồi đối với PII, nội dung chèn nhanh và nội dung thị giác không an toàn. Vi phạm làm ngắn mạch yêu cầu bằng HTTP** 503** cộng với mã lỗi có cấu trúc, cho phép người gọi xuôi dòng thử lại hoặc phân nhánh.
 
-- Thư mục gốc của mô-đun: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Tải lại nóng: registry theo dõi các thay đổi cấu hình và dựng lại chuỗi ngay tại chỗ
-- Các điểm tích hợp: điểm vào của trình xử lý trò chuyện, trình xử lý tạo hình ảnh, bộ làm sạch phản hồi
-- Hợp đồng HTTP: các vi phạm được trả về dưới dạng `503` với `error.code = "GUARDRAIL_VIOLATION"`
+- Gốc mô-đun: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Tải lại nóng: sổ đăng ký theo dõi các thay đổi cấu hình và xây dựng lại chuỗi tại chỗ
+- Điểm kết nối: mục nhập trình xử lý trò chuyện, trình xử lý tạo hình ảnh, trình khử trùng phản hồi
+- hợp đồng HTTP : vi phạm bề mặt dưới dạng `503` với `error.code = "GUARDRAIL_VIOLATION"`
 
-Để biết cách xây dựng bộ quy tắc và tinh chỉnh ngưỡng, hãy xem
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Để biết cách soạn thảo quy tắc và điều chỉnh ngưỡng, hãy xem [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Lớp miền
 
-Không gian tên `src/domain/` tập trung hóa các quyết định chính sách để trình xử lý tuyến không
-phải tự lắp ghép logic khóa, ngân sách và dự phòng.
+Không gian tên `src/domain/` tập trung hóa các quyết định chính sách để người xử lý tuyến đường không phải tự lắp ráp logic lockout/budget/fallback.
 
-- Công cụ chính sách: `src/domain/policyEngine.ts` — điểm vào duy nhất để
-  đánh giá trước khi thực thi (thứ tự khóa → ngân sách → dự phòng)
+- Công cụ chính sách: điểm truy cập duy nhất `src/domain/policyEngine.ts` — để đánh giá trước khi thực hiện (khóa lệnh dự phòng → ngân sách → )
 - Quy tắc chi phí: `src/domain/costRules.ts`
 - Chính sách dự phòng: `src/domain/fallbackPolicy.ts`
 - Chính sách khóa: `src/domain/lockoutPolicy.ts`
 - Định tuyến dựa trên thẻ: `src/domain/tagRouter.ts`
-- Bộ phân giải combo: `src/domain/comboResolver.ts` — phân giải tên combo, các tiền tố auto/\*
-  và đích mô hình ký tự đại diện thành các kế hoạch thực thi cụ thể
-- Bộ nối quy tắc kết nối/mô hình: `src/domain/connectionModelRules.ts`
-- Ảnh chụp nhanh về tính khả dụng của mô hình: `src/domain/modelAvailability.ts`
-- Theo dõi thời hạn nhà cung cấp: `src/domain/providerExpiration.ts`
-- Bộ nhớ đệm hạn ngạch: `src/domain/quotaCache.ts`
-- Trạng thái suy giảm: `src/domain/degradation.ts`
+- Trình phân giải kết hợp: `src/domain/comboResolver.ts` — phân giải tên kết hợp, tiền tố auto/\* và mục tiêu mô hình ký tự đại diện thành các kế hoạch thực hiện cụ thể
+- Trình nối quy tắc Connection/model : `src/domain/connectionModelRules.ts`
+- Ảnh chụp nhanh về tình trạng sẵn có của mẫu: `src/domain/modelAvailability.ts`
+- Theo dõi hết hạn của nhà cung cấp: `src/domain/providerExpiration.ts`
+- Bộ đệm hạn ngạch: `src/domain/quotaCache.ts`
+- Trạng thái xuống cấp: `src/domain/degradation.ts`
 - Kiểm tra cấu hình: `src/domain/configAudit.ts`
-- Trình tạo siêu dữ liệu phản hồi OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Phân hệ đánh giá: `src/domain/assessment/` — các tác vụ đánh giá định kỳ
+- Trình tạo siêu dữ liệu phản hồi OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Hệ thống con đánh giá: công việc đánh giá định kỳ `src/domain/assessment/` —
 
-### E. Pipeline phân quyền
+### E. Đường dẫn ủy quyền
 
-Pipeline phân quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách
-phù hợp trước khi chuyển tiếp.
+Quy trình ủy quyền phân loại mọi yêu cầu đến và áp dụng chuỗi chính sách phù hợp trước khi gửi đi.
 
-- Điểm vào của pipeline: `src/server/authz/pipeline.ts`
-- Bộ phân loại yêu cầu: `src/server/authz/classify.ts` — phân biệt các tuyến tương thích
-  công khai với các tuyến quản trị
-- Danh mục tuyến công khai: `src/shared/constants/publicApiRoutes.ts`
-- Các chính sách: `src/server/authz/policies/` — các vị từ có thể kết hợp
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, v.v.)
-- Tiện ích header: `src/server/authz/headers.ts`
-- Trình trợ giúp xác nhận: `src/server/authz/assertAuth.ts`
+- Đầu vào đường ống: `src/server/authz/pipeline.ts`
+- Trình phân loại yêu cầu: `src/server/authz/classify.ts` — phân biệt các tuyến tương thích công khai với các tuyến quản lý
+- Kiểm kê tuyến đường công cộng: `src/shared/constants/publicApiRoutes.ts`
+- Chính sách: các vị từ có thể kết hợp `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth`, v.v.)
+- Tiện ích tiêu đề: `src/server/authz/headers.ts`
+- Người trợ giúp xác nhận: `src/server/authz/assertAuth.ts`
 - Ngữ cảnh yêu cầu: `src/server/authz/context.ts`
 
-Các tuyến công khai và quản trị có ranh giới nghiêm ngặt: API tác nhân/thời gian chờ và
-các thao tác thay đổi nhà cung cấp yêu cầu xác thực quản trị (HTTP 401 nếu thiếu).
+Các tuyến công khai và quản lý là một ranh giới cứng: agent/cooldown APIs và các đột biến của nhà cung cấp yêu cầu xác thực quản lý (HTTP 401 nếu thiếu).
 
-Để biết đầy đủ các quy tắc phân loại tuyến, hãy xem
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Để biết quy tắc phân loại tuyến đường đầy đủ, hãy xem [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM quy trình công việc và bộ định tuyến nhận biết tác vụ
+### F. Quy trình làm việc FSM và Bộ định tuyến nhận biết nhiệm vụ
 
-Một bộ định tuyến dựa trên máy trạng thái hữu hạn được xếp lớp phía trên bước chọn combo để điều hướng
-lưu lượng dựa trên giai đoạn quy trình công việc được phát hiện (lập kế hoạch, thực thi,
-đánh giá) và mức độ liên kết với tác vụ nền.
+Bộ định tuyến được điều khiển bằng máy trạng thái hữu hạn được xếp lớp phía trên lựa chọn kết hợp để điều hướng lưu lượng truy cập dựa trên giai đoạn quy trình làm việc được phát hiện (lập kế hoạch, thực hiện, đánh giá) và mối quan hệ giữa tác vụ nền.
 
-- FSM quy trình làm việc: `open-sse/services/workflowFSM.ts`
+- Quy trình làm việc FSM: `open-sse/services/workflowFSM.ts`
 - Bộ định tuyến nhận biết tác vụ: `open-sse/services/taskAwareRouter.ts`
-- Bộ phát hiện tác vụ nền: `open-sse/services/backgroundTaskDetector.ts`
-- Bộ phân loại ý định: `open-sse/services/intentClassifier.ts`
+- Trình phát hiện tác vụ nền: `open-sse/services/backgroundTaskDetector.ts`
+- Trình phân loại ý định: `open-sse/services/intentClassifier.ts`
 
-Các chuyển đổi trạng thái của FSM được đưa vào cơ chế chấm điểm của Auto Combo, ưu tiên các mô hình rẻ hơn
-cho tác vụ nền/tự động hóa và các mô hình mạnh hơn cho những lượt
-lập kế hoạch/đánh giá có tính tương tác.
+Quá trình chuyển đổi FSM đưa vào tính điểm của Auto Combo, thiên về các mô hình rẻ hơn cho các nhiệm vụ background/automation và hướng tới các mô hình mạnh hơn cho các lượt planning/review tương tác.
 
-### G. Khả năng phục hồi dành riêng cho nhà cung cấp
+### G. Khả năng phục hồi cụ thể của nhà cung cấp
 
-Một số nhà cung cấp đi kèm các mô-đun chuyên biệt về khả năng phục hồi và hoạt động ẩn, tận dụng
-các lớp ngắt mạch toàn cục / thời gian chờ kết nối / khóa mô hình:
+Một số nhà cung cấp cung cấp các mô-đun tàng hình và khả năng phục hồi chuyên dụng dựa trên bộ ngắt mạch toàn cầu/thời gian hồi chiêu kết nối/khóa mô hình:
 
-- Công cụ xử lý lỗi 429 của Antigravity: `open-sse/services/antigravity429Engine.ts` (luân chuyển
-  danh tính, loại bỏ các header phản hồi, quản lý việc theo dõi tín dụng/phiên bản thông qua
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Chính sách hạn ngạch ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH (Bắt tay kênh tương thích) của Claude Code: `open-sse/services/claudeCodeCCH.ts`,
-  cùng với `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Định hình dấu vân tay Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Làm rối Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- Công cụ Antigravity 429: `open-sse/services/antigravity429Engine.ts` (xoay danh tính, xóa tiêu đề phản hồi, điều khiển theo dõi credits/version qua `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (ngân sách theo yêu cầu của 429 ngược dòng trên tất cả các máy chủ, `ANTIGRAVITY_MAX_429_ATTEMPTS`; việc gửi lại nội dung bị từ chối giống hệt được trả lời cục bộ; `src/sse/handlers/chat.ts` không khởi động lại yêu cầu đó thông qua thử lại nhận biết thời gian hồi chiêu)
+- chính sách hạn ngạch ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Mã Claude CCH (Bắt tay kênh tương thích): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude định hình vân tay: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude làm xáo trộn: `open-sse/services/claudeCodeObfuscation.ts`
 
-Để xem cẩm nang đầy đủ về hoạt động ẩn và hướng dẫn vận hành, hãy tham khảo
-`docs/security/STEALTH_GUIDE.md` (git; không được biên dịch vào `/docs`).
+Để biết cẩm nang tàng hình đầy đủ và hướng dẫn vận hành, hãy xem `docs/security/STEALTH_GUIDE.md` (git; không được biên dịch thành `/docs`).
 
-### H. Webhook, bộ nhớ đệm suy luận, bộ nhớ đệm đọc
+### H. Webhooks, Reasoning Cache, Read Cache
 
-- **Webhook** — điều phối gửi đi cho các sự kiện của nhà cung cấp/tài khoản/tác vụ.
-  - Bộ điều phối: `src/lib/webhookDispatcher.ts`
-  - Lưu trữ: bảng SQLite `webhooks` (thông qua `src/lib/db/webhooks.ts`)
+- **Webhook** công văn đi — cho các sự kiện provider/account/task.
+  - Người điều phối: `src/lib/webhookDispatcher.ts`
+  - Lưu trữ: bảng `webhooks` SQLite (thông qua `src/lib/db/webhooks.ts`)
   - Bảng điều khiển: `/dashboard/webhooks` (đăng ký, bí mật, lịch sử thử lại)
-  - Để biết cách phân loại sự kiện và ngữ nghĩa thử lại, hãy xem [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Bộ nhớ đệm suy luận** — các khối suy luận có thể phát lại dành cho những nhà cung cấp phát
-  token tư duy (Claude, GLMT, v.v.) để các lượt liên tiếp có thể bỏ qua việc suy luận lại.
-  - Lớp DB: `src/lib/db/reasoningCache.ts`
+  - Để biết phân loại sự kiện và ngữ nghĩa thử lại, hãy xem [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Bộ đệm lý luận** — các khối lý luận có thể chơi lại dành cho các nhà cung cấp phát ra mã thông báo tư duy (Claude, GLMT, v.v.) để các lượt liên tiếp có thể bỏ qua việc suy nghĩ lại.
+  - lớp DB : `src/lib/db/reasoningCache.ts`
   - Lớp dịch vụ: `open-sse/services/reasoningCache.ts`
   - Để biết ngữ nghĩa phát lại, hãy xem [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Bộ nhớ đệm đọc** — bộ nhớ đệm phản hồi ngắn hạn được lập khóa theo chữ ký và dùng để
-  hợp nhất các lần thử lại giống hệt nhau từ các SDK thượng nguồn bị lỗi.
-  - Lớp DB: `src/lib/db/readCache.ts`
+- **Đọc bộ đệm** bộ đệm phản hồi tồn tại trong thời gian ngắn — được khóa bằng chữ ký và được sử dụng để thu gọn các lần thử lại giống hệt từ SDKs ngược dòng bị hỏng.
+  - lớp DB : `src/lib/db/readCache.ts`
   - Điểm cuối thống kê: `GET /api/cache/stats`, bảng điều khiển tại `/dashboard/cache`
 
 ## 3) Lớp lưu trữ
