@@ -3,6 +3,11 @@
 // state, following the handlers submodule pattern (chatCore/, responseSanitizer/).
 import { normalizeOpenAICompatibleFinishReasonString } from "../../utils/finishReason.ts";
 import { stripObfuscationZeroWidth } from "../../utils/zeroWidth.ts";
+import {
+  TRUNCATED_STREAM_FINISH_REASON,
+  hasSseDoneMarker,
+  markTruncatedStreamBody,
+} from "./truncation.ts";
 
 type AccumulatedToolCall = {
   id: string;
@@ -15,6 +20,7 @@ type AccumulatedToolCall = {
 type GeminiSSEAccumulator = {
   textContent: string;
   finishReason: string;
+  sawFinishReason: boolean;
   usage: Record<string, unknown> | null;
   sawContent: boolean;
   toolCalls: AccumulatedToolCall[];
@@ -120,6 +126,7 @@ function applyFinishReason(
   acc: GeminiSSEAccumulator
 ): void {
   if (!candidate?.finishReason) return;
+  acc.sawFinishReason = true;
   acc.finishReason = normalizeOpenAICompatibleFinishReasonString(
     String(candidate.finishReason).toLowerCase()
   );
@@ -186,7 +193,11 @@ function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccum
   const previousCachedTokens = (
     previousUsage.prompt_tokens_details as { cached_tokens?: number } | undefined
   )?.cached_tokens;
-  const cachedTokens = resolveCachedTokens(um, promptTokens, previousCachedTokens);
+  const cachedTokens = resolveCachedTokens(
+    um,
+    typeof promptTokens === "number" ? promptTokens : undefined,
+    previousCachedTokens
+  );
 
   const nextUsage = {
     ...previousUsage,
@@ -284,6 +295,7 @@ export function parseSSEToGeminiResponse(
   const acc: GeminiSSEAccumulator = {
     textContent: "",
     finishReason: "stop",
+    sawFinishReason: false,
     usage: null,
     sawContent: false,
     toolCalls: [],
@@ -300,5 +312,11 @@ export function parseSSEToGeminiResponse(
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;
 
-  return buildChatCompletionFromAccumulator(acc, fallbackModel);
+  // #18432 — content but no candidate finishReason (nor [DONE]): the stream was cut.
+  const streamCut = !acc.sawFinishReason && acc.sawContent && !hasSseDoneMarker(rawSSE);
+  if (streamCut) {
+    acc.finishReason = TRUNCATED_STREAM_FINISH_REASON;
+  }
+
+  return markTruncatedStreamBody(buildChatCompletionFromAccumulator(acc, fallbackModel), streamCut);
 }
