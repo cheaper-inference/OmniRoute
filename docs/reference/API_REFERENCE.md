@@ -916,12 +916,18 @@ returned result when `contents.summary` is set. Tavily is recorded at 1 credit (
 ## Web Fetch API
 
 Extract content from a URL via a configured web-fetch provider (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
 Parallel Extract (`parallel-search`, same API key as Parallel Search) returns Markdown
 only — any other `format` is a `400` — and caps content at 100,000 characters. When
 the target page itself cannot be extracted, the upstream reports it inside an HTTP 200;
 OmniRoute surfaces that as a `422` with a fixed message.
+
+Keenable Fetch (`keenable-search`) also returns Markdown only (any other `format` is a
+`400`) and caps content at 100,000 characters. It works without a key: an explicit
+`provider: "keenable-search"` request with no connection uses Keenable's keyless endpoint
+(per-IP rate limits). A configured key only lifts those limits; auto-select uses Keenable
+only when a key is configured.
 
 | Method | Path            | Description                                               |
 | ------ | --------------- | --------------------------------------------------------- |
@@ -931,7 +937,7 @@ OmniRoute surfaces that as a `422` with a fixed message.
 
 **Quota-aware fallback (#8297):** when no explicit `provider` is given, the pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) is
+`parallel-search` → `keenable-search`) is
 walked in fixed
 priority order (fill-first) — a rate-limited-but-configured provider is skipped
 instead of short-circuiting the request, and a retryable/quota upstream failure
