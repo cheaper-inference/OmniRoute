@@ -55,6 +55,7 @@ import {
 } from "@/lib/db/readCache";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
 import {
+  isDiscoveryImportedCustomSource,
   providerUsesCuratedModelsOnly,
   providerUsesExclusiveSyncedListing,
 } from "@/lib/providers/modelListingCapability";
@@ -1726,7 +1727,9 @@ async function buildUnifiedModelsResponseCore(
       for (const [providerId, rawProviderCustomModels] of Object.entries(customModelsMap)) {
         await maybeYieldCatalogBuild();
         // Curated providers publish no upstream catalog, but an operator-added id is a
-        // local decision: it must reach /v1/models or it is unusable for routing.
+        // local decision: it must reach /v1/models or it is unusable for routing (#18018).
+        // Rows a discovery sync imported are stale on those providers and stay out (#8451).
+        const curatedProvider = providerUsesCuratedModelsOnly(providerId);
         // Skip Gemini — handled by syncedAvailableModels above
         if (providerId === "gemini") continue;
         if (providerId === "reka") continue;
@@ -1758,6 +1761,7 @@ async function buildUnifiedModelsResponseCore(
           await maybeYieldCatalogBuild();
           const modelId = typeof model.id === "string" ? model.id : null;
           if (!modelId) continue;
+          if (curatedProvider && isDiscoveryImportedCustomSource(model.source)) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
             continue;
           if (model.isHidden === true && !revealHidden) continue;
