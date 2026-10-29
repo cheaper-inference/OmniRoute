@@ -148,3 +148,27 @@ test("Rosebud requires authenticated management access even in open mode and res
     else process.env.API_KEY_SECRET = previousSecret;
   }
 });
+
+test("cancellation while quoting does not start a paid request", async () =>
+  isolated(async () => {
+    const controller = new AbortController();
+    let submissions = 0;
+    const runtime = new RosebudRuntime(async (_profile, args) => {
+      if (args[1] === "models") return { models: [model] };
+      if (args[1] === "quote") {
+        controller.abort();
+        return { credits: 5 };
+      }
+      if (args[1] === "create") submissions++;
+      return {};
+    });
+    await assert.rejects(
+      runtime.generate(
+        "a",
+        { model: "test", input: { prompt: "hello" }, idempotencyKey: "cancel" },
+        controller.signal
+      ),
+      /request_cancelled/
+    );
+    assert.equal(submissions, 0);
+  }));

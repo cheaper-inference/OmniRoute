@@ -25,6 +25,20 @@ export async function rosebudConnection(id: string) {
   await rosebudProfile(profile);
   return { connection, profile };
 }
+/** Preserve retries of jobs created before the cross-account binding index existed. */
+export async function findRosebudImageConnection(key: string, allowed: string[] | null) {
+  const matches: string[] = [];
+  for (const connection of await getProviderConnections({ provider: "rosebud" })) {
+    if (allowed?.length && !allowed.includes(connection.id)) continue;
+    const profile = (connection.providerSpecificData as Record<string, unknown> | undefined)
+      ?.rosebudProfile;
+    if (typeof profile !== "string") continue;
+    if (await rosebudRuntime.jobForKey(profile, key)) matches.push(connection.id);
+  }
+  if (matches.length > 1)
+    throw new RosebudError("ambiguous_legacy_request_requires_reconciliation", 409);
+  return matches[0];
+}
 export async function connectRosebud(name: string) {
   const profile = randomUUID();
   const login = await runRosebud(profile, ["login", "--agent-client", "other", "--name", name]);
@@ -119,9 +133,14 @@ export function recordRosebudJob(connectionId: string, job: RosebudJob) {
     updatedAt: job.updatedAt,
   });
 }
-export async function generateRosebud(connectionId: string, profile: string, request: unknown) {
+export async function generateRosebud(
+  connectionId: string,
+  profile: string,
+  request: unknown,
+  signal?: AbortSignal | null
+) {
   try {
-    const job = await rosebudRuntime.generate(profile, request);
+    const job = await rosebudRuntime.generate(profile, request, signal);
     recordRosebudJob(connectionId, job);
     return job;
   } catch (error) {
