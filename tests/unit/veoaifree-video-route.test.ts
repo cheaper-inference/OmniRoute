@@ -9,6 +9,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "veo-route-test-secret";
 
 const core = await import("../../src/lib/db/core.ts");
+await core.ensureDbInitialized();
 const videoRoute = await import("../../src/app/api/v1/videos/generations/route.ts");
 
 const originalFetch = globalThis.fetch;
@@ -52,7 +53,7 @@ test.after(() => {
   globalThis.fetch = originalFetch;
   globalThis.setTimeout = originalSetTimeout;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("video route returns 200 with normalized b64_json for Veo AI Free", async () => {

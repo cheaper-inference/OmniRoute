@@ -1,13 +1,15 @@
 ---
 title: "Guardrails"
-version: 3.8.50
-lastUpdated: 2026-08-24
+version: 3.8.52
+lastUpdated: 2026-10-17
 ---
 
 # Guardrails
 
 > **Source of truth:** `src/lib/guardrails/`
-> **Last updated:** 2026-08-24 — v3.8.50 (Video Bridge visual dedup hardening + focused captions)
+> **Last updated:** 2026-10-17 — v3.8.52 (added [Coverage and limits](#coverage-and-limits):
+> which routes and response paths the hooks reach, the merged disable headers (#16412), injection
+> block mode as a mandatory boundary (#16413), and what sees a response before post-call)
 
 Guardrails enforce safety, policy, and content transformations at the boundary
 between OmniRoute and upstream providers. Each guardrail can inspect (and
@@ -17,6 +19,12 @@ upstream responses (`postCall`).
 The system is **fail-open**: if a guardrail throws while executing, the registry
 records the error and continues with the next guardrail rather than failing the
 request. Blocking is an explicit decision (`block: true`), never an accident.
+The one exception is an aborted request: when the caller's `signal` is aborted,
+a throwing guardrail rejects the hook run instead of being skipped.
+
+The hooks do **not** run on every route or every response. Read
+[Coverage and limits](#coverage-and-limits) before relying on a guardrail as a
+security control.
 
 ## Built-in Guardrails
 
@@ -36,6 +44,13 @@ Lower priority numbers run **first**.
 
 ### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
+The GLM 5.3 base model and `glm-5.3-{low,high,max}` have explicit
+`supportsVision:false` registry/spec metadata. The GLM 5.3 Flash variants
+remain native-vision models. Claude Code's `/v1/messages` route enters the
+shared `handleChat` pre-call guardrail chain **before** Claude-to-OpenAI
+translation; nested `Read` tool-result images must be described or handled
+before that translation lifts them into OpenAI `image_url` content (#17069).
+
 Intercepts image-bearing requests aimed at **non-vision models** and either
 reroutes the whole request to a vision-capable model or replaces the image
 parts with text descriptions produced by a configurable vision model before
@@ -50,11 +65,13 @@ Flow:
    (`visionBridgeHelpers.ts`), which delegates to the **unified media
    detector** `detectMediaParts()` in `open-sse/utils/mediaParts.ts` — the
    single source of truth shared with the combo compatibility filter.
-   Extraction is allowlisted to top-level parts of the shapes
-   `replaceImageParts` can splice back (the extract↔replace contract): OpenAI
-   `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"`, and Responses API `input_image`. Nested hits and
-   indicator-only shapes are combo-filter material and are never extracted.
+   Extraction is allowlisted to the shapes `replaceImageParts` can splice
+   back (the extract↔replace contract): OpenAI `image_url`, Anthropic base64
+   `source.type:"base64"`, Anthropic URL `source.type:"url"`, and Responses
+   API `input_image`. Matching images nested inside Claude Code
+   `tool_result.content` and Responses tool outputs are also extracted and
+   replaced at their original paths; indicator-only shapes are combo-filter
+   material and are not extracted.
    Skip if none found.
 3. Resolve runtime config via `resolveVisionBridgeRuntimeSettings()`
    (`src/shared/constants/modalityBridgeDefaults.ts`): new `modalityBridge*`
@@ -67,23 +84,46 @@ Flow:
 5. Describe path: cap images at `maxImages`, compose the task-aware prompt,
    consult the describe cache, call the vision model **in parallel**
    (`Promise.allSettled`), and inject `[Image N]: <description>` text parts in
-   their place. A failed describe yields `null` and the original image part is
-   **preserved** (#4012) — except on the combo describe path when every
-   describe failed, where a confirmed non-vision upstream gets an
-   `(unavailable — no vision-capable provider connected)` stub instead (#8430).
+   their place. A failed describe yields `null`: the raw image is preserved for
+   unknown/vision-capable targets (#4012), but a **confirmed text-only direct
+   target** or zero-vision combo gets an explicit
+   `(unavailable — no vision-capable provider connected)` text stub for
+   every undescribed image, including partial failures and images beyond the
+   describe-call cap (#17069). The existing all-failed combo describe fallback
+   remains in place (#8430).
 6. Return `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
 #### Mode selector (`modalityBridgeVisionMode`)
 
-| Mode       | Default | Behavior                                                                                                                                                                                                                                                |
-| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔       | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model unless the original model already has usable credentials (then describe); combo targets always describe.                                           |
-| `describe` |         | Always describe — the reroute block is skipped entirely; the user's chosen model always answers.                                                                                                                                                        |
-| `reroute`  |         | Force reroute: the keep-credentialed-model guard is bypassed. The reroute-**target** credential guard still applies — when no usable vision target exists, the request falls through to describe so raw images never reach a text-only backend (#8430). |
+| Mode       | Default | Behavior                                                                                                                                                                                                                                                            |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔       | Legacy heuristic, untouched (#6640/#7204): non-combo/`auto/` models reroute to the best vision model unless the original model already has usable credentials (then describe); combo targets always describe.                                                       |
+| `describe` |         | Always describe — the reroute block is skipped entirely; the user's chosen model always answers.                                                                                                                                                                    |
+| `reroute`  |         | Force reroute: the keep-credentialed-model guard is bypassed. The reroute-**target** credential guard still applies — when no usable vision target exists, the bridge blocks with a clear error rather than describing or sending raw images to a text-only target. |
 
 Forced modes short-circuit **before** the auto heuristic runs; `auto` behavior
 is byte-identical to the pre-PR-1 guardrail.
+
+#### API-key scope (`visionBridgeKeyScope.ts`)
+
+When the caller's API key restricts `allowedConnections`, quota pools
+(`allowedQuotas`) or models (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), the bridge only
+picks reroute and describe models the key may use, on connections the key may
+use. The describe call then always goes through the OmniRoute self-loop with
+the `x-omniroute-self-loop-key-id` header, so the receiving chat request
+enforces that key's connection and model policy again. `enforceApiKeyPolicy()`
+honors that header only together with the self-loop bearer, so it can only
+narrow access, and an id that does not resolve is rejected.
+
+If no vision model is permitted for the key, a **confirmed text-only
+target** rejects the image request locally with a clear HTTP 400 instead of
+forwarding image bytes to an incapable upstream (#17069). For targets with
+unknown or native vision capability, the describe path retains its previous
+fail-open behavior (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Requests without a key, and keys without these restrictions, behave exactly as
+before.
 
 #### Task-aware describe prompt (`modalityBridgeVisionTaskAware`)
 
@@ -206,8 +246,12 @@ limits, runtime
 counters, and a guarded sample request. The Audio tab is also live: it exposes
 enablement, an STT-only model picker with Auto, timeout/max-clip limits, audio
 counters, and an `input_audio` sample test. The Video tab is functional: it reports
-the FFmpeg/ffprobe runtime state, persists enable/model/frame/video/timeout limits,
-filters the model picker to vision-capable models, and exposes video counters.
+the FFmpeg/ffprobe runtime state — one of four explicit UI states (`unknown` while
+the probe is in flight or could not complete, `restricted` on a non-loopback
+dashboard host where the probe is skipped client-side, `unavailable` once probed
+and confirmed missing, or `available` with the FFmpeg/ffprobe versions) — persists
+enable/model/frame/video/timeout limits, filters the model picker to vision-capable
+models, and exposes video counters.
 
 The former Vision Bridge card under AI settings is a compatibility link to the
 new page; it no longer owns a second copy of the form. Media Providers also
@@ -287,13 +331,26 @@ Runtime settings are DB-backed and Zod-validated:
 The shared cache remains controlled by `modalityBridgeCacheEnabled`,
 `modalityBridgeCacheTtlMinutes`, and `modalityBridgeCacheMaxEntries`.
 
-### Video Bridge (`videoBridge.ts`)
+### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
 Intercepts top-level video parts in Chat Completions `messages` and Responses
 API `input` before a target without known native video support is called.
 Supported shapes are `input_video`, `video_url`, `video_source`, HTTPS URLs,
 and `data:video/*;base64,...` data URIs. Plain filenames in text are not treated
 as video.
+
+`VideoBridgeGuardrail.preCall` (`videoBridge.ts`) owns request traversal, the
+capability/policy check, per-request aggregation, and the response payload.
+Per-video work — acquisition, the whole-result cache, describing a frame
+sequence (which fuses any caller-declared audio transcript), and per-attempt
+metrics/abort/cleanup — is hidden behind `processVideoPart` in
+`videoBridgePipeline.ts`, called once per video part inside `preCall`'s loop.
+That module also defines the explicit port boundaries `VideoMediaBrokerPort`
+(acquiring bytes and extracting sampled frames), `VideoAudioTranscriptionPort`
+(fusing a caller-declared audio transcript with the sampled captions), and
+`VideoDrilldownPort` (the frame drill-down persistence boundary; not yet wired
+into `processVideoPart` — only the separate `/api/modality-bridge/video/drilldown`
+route writes drill-down entries today).
 
 The public `/v1` request path never imports or invokes a subprocess. Remote
 videos are downloaded under a 50 MiB bound; inline base64 videos have a
@@ -437,10 +494,16 @@ OmniRoute never starts transcription from this metadata: validated cues are
 copied into the described result with source, confidence, and interval, and
 are rendered as untrusted observations alongside the frame captions. Invalid,
 out-of-range, or provenance-free text is rejected rather than mixed into the
-caption stream.
+caption stream. Both request-body transcript channels normalize supplied
+provenance to `client`, including self-asserted `embedded` or `audio-bridge`
+labels. Only a server-owned adapter can assign those trusted labels through
+the code-only `trustedSource` argument; a request JSON field cannot reach
+that argument. Transcript text remains untrusted media-derived content,
+regardless of its provenance, and must never determine authorization.
 
-An advanced caller may provide an already-authorized `audioTranscript` track
-for the same video. The fusion seam runs visual and audio observations under
+An advanced caller may provide an `audioTranscript` track for the same video;
+it is treated as client-provided text, not proof of server transcription.
+The fusion seam runs visual and audio observations under
 one deadline and abort signal, orders them on a common timeline, collapses
 exact duplicates, and reports a partial result when only one side succeeds.
 An invalid `audioTranscript` degrades to that partial result — the visual
@@ -452,6 +515,67 @@ guardrail metadata (`audioFusionRuns`/`audioFusionPartials`/
 fusion counters. The default Video Bridge path does not invoke speech-to-text
 or download a second media copy; without that explicit track, it remains
 video-only.
+
+**Transcript retention (#12150 P1).** This applies automatically whenever the
+Video Bridge (itself opt-in) renders a transcript cue — there is no separate
+retention flag. When a request renders any transcript cue (a caller-declared
+`transcript` or a fused `audioTranscript`), the guardrail marks it
+`videoBridgeObserved` and produces a redacted shadow of the video description —
+an identical rendering in which every cue's free-text body is replaced by
+`[redacted-video-transcript]`, built by substituting the structured cue field
+before the string is assembled (never by parsing the flattened text, so no cue
+content — adversarial or ordinary, including bodies containing `]` such as
+`[inaudible]`/`[music]` — can survive). The persisted call-log request body swaps
+each video-derived text part for that redacted shadow, matched by content
+equality; the `fullText` anchor is re-read from the finished pre-call guardrail
+payload, so the match still succeeds after later chain guardrails (the PII and
+credential maskers, priorities 10/95) rewrite the description text in place and
+after system-prompt/handoff/memory injection reshapes the message array. The
+body sent upstream to the model is unchanged. An observed request also populates
+no durable Memory (both request- and response-derived extraction are skipped),
+so the model's own reply cannot echo transcript text into Memory.
+
+**Raw video fields (#12430).** When the bridge is enabled and native video support is unknown or absent, defined `transcript`/`audioTranscript` fields also activate `videoBridgeObserved`, even after description failure or a `maxVideos` limit. `null` and empty strings count; absent fields and non-video metadata do not. Retained copies redact these fields or omit the request, and caches/Memory are bypassed.
+
+On those fallback paths, valid caller cues become supported `text`/`input_text`
+parts rather than nonstandard provider fields. Both request-supplied tracks
+remain untrusted `client` observations, with an explicit warning that the video
+was not described and timestamps were not verified against the media. The existing
+256-cue/64-KiB total and per-cue budgets apply across the two tracks together;
+timestamps must fit the broker's 600-second ceiling and any supplied focus
+window. Invalid tracks are discarded, not forwarded as arbitrary text; a valid
+sibling may still be used unless their combined budget is exceeded. Null/empty
+fields add no text. No media fetch or transcription is added by this fallback.
+Transcript extension fields are removed from the fallback video carrier and its
+`video_url`/`source` objects. The OpenAI wire allowlist stays strict; unknown-native
+video carriers remain available and known text-only targets keep safe markers.
+Structured redaction shadows protect the appended transcript text, while the
+original caller-owned request remains unchanged. Native-supported targets and
+disabled bridges retain their existing bypass behavior.
+
+Additional retained copies use the same observed-request signal. The raw
+pre-guardrail client-request snapshot, in-memory pending request, and early
+rejected-request log structurally replace transcript fields in video parts;
+string prompts synthesized by pipeline stages and context handoff are redacted
+at the persisted-request-body sink. The persisted `video_content_removed` marker
+makes `previous_response_id` continuation fail closed rather than reconstruct
+text that was intentionally discarded. If an observed request loses its
+per-part redaction shadow before logging, or even one of several video shadows
+fails to match after later request mutations, the retained request body is
+omitted entirely instead of retaining a partially redacted transcript.
+
+For an observed request, a model response might quote any portion of the
+transcript without a structured cue boundary. Its persisted call-log
+`responseBody` is therefore replaced by an omission marker; the detailed
+pipeline artifact (which can include upstream/client bodies and stream chunks)
+is not retained. Semantic, idempotency, and reasoning-replay caches bypass
+reads and writes for that request. The provider request and client-visible
+response remain unchanged. Early keepalive bytes are drained from the temporary
+buffer when the detailed artifact is omitted. Kiro's malformed EventStream
+warning reports only the payload byte count, never its contents or the JSON
+parser's raw error.
+This does not claim that every unrelated provider/plugin diagnostic has been
+audited; the broader retained-sink sweep is tracked in #11658.
 
 The internal `/api/modality-bridge/video/drilldown` lifecycle is a separate,
 loopback/token-authenticated cache substrate. Every operation also requires a
@@ -515,7 +639,8 @@ The guardrail extracts every supported video part but describes no more than
 `modalityBridgeVideoMaxVideos`. For a target proven to have
 `supportsVideo === false`, failed and over-limit videos become explicit safe
 text markers so no raw video survives. When capability is unknown, those parts
-remain untouched. Targets with `supportsVideo === true` bypass the bridge.
+retain their video carrier; any fallback transcript follows the bounded text
+conversion above. Targets with `supportsVideo === true` bypass the bridge.
 The client request abort signal propagates through download, broker queue,
 subprocesses, and caption calls; aborts stop between videos and never fail open
 to raw media.
@@ -561,6 +686,42 @@ Runs on **both** stages.
 
 The guardrail never blocks; it only annotates (`meta.detections`,
 `meta.redacted`) or rewrites.
+
+#### Per-type selection, custom patterns and detection counters
+
+**Dashboard → Settings → Security → PII masking** chooses _what_ is masked. It
+does not switch masking on: that is still `PII_REDACTION_ENABLED` (request) and
+`PII_RESPONSE_SANITIZATION` (response + SSE), both off by default.
+
+- **Per-type selection** — the built-in ids are listed in
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Unset means every
+  type (the behaviour before this setting existed). The request engine's
+  `ssn_us` pattern maps to `ssn`. Templates (Minimal, Standard, Financial,
+  Brazilian, USA, Full) only fill the checkboxes in the UI.
+- **Custom patterns** — up to 20 regex or wildcard patterns (`*` = up to 64
+  non-whitespace characters, `?` = one). Matches become `[CUSTOM_REDACTED]`.
+  Every pattern goes through `compilePiiCustomPattern()`
+  (`src/shared/utils/piiCustomPatterns.ts`): at most 500 characters, flags limited
+  to `g i m s u`, must compile, must pass `safe-regex` (catastrophic
+  backtracking), and must not match an empty string or a redaction placeholder.
+  A pattern that fails is refused when saved and when tested, and a stored row
+  that fails is skipped at runtime instead of being compiled. Custom patterns only
+  run while masking is on.
+- **Detection counters** — per-type counts (never matched values), held in
+  memory and reset on restart (`src/lib/pii/piiDetectionStats.ts`). They only
+  increase while masking is on.
+
+The settings live in the `key_value` table (namespace `pii_settings`,
+`src/lib/db/piiSettings.ts`) and are read through a 1 s cache. API:
+
+| Method | Path                     | Purpose                                                                 |
+| ------ | ------------------------ | ----------------------------------------------------------------------- |
+| `GET`  | `/api/settings/pii`      | Flag state, `enabledTypes`, `customPatterns`, detection counters        |
+| `PUT`  | `/api/settings/pii`      | Replace `enabledTypes` (`null` = all) and/or `customPatterns`           |
+| `POST` | `/api/settings/pii/test` | Dry-run one pattern against a sample of at most 8 KB; nothing is stored |
+
+All three require management auth and validate the body with Zod
+(`src/shared/validation/schemas/piiSettings.ts`).
 
 ### Prompt Injection (`promptInjection.ts`)
 
@@ -701,23 +862,48 @@ useful for tracing.
 
 `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` aggregates a
 de-duplicated list of guardrail names that should be skipped for the current
-request. Sources (all optional, all merged):
+request. There are five channels, read in this order and merged into one list
+(first occurrence wins when de-duplicating):
 
-- `apiKeyInfo.disabledGuardrails`
-- Request body `disabledGuardrails` (top-level)
-- Request body `metadata.disabledGuardrails`
-- Header `x-omniroute-disabled-guardrails` (or legacy
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. Request body `disabledGuardrails` (top-level)
+3. Request body `metadata.disabledGuardrails` (only when `metadata` is an object)
+4. Header `x-omniroute-disabled-guardrails`
+5. Legacy header `x-disabled-guardrails`
 
-Values may be arrays of strings or a comma-separated string; names are
-normalized to lowercase kebab-case (`pii_masker` → `pii-masker`). The result
-is passed through `context.disabledGuardrails` to the registry, which skips
-matching guardrails (`skipped: true` in `results`).
+All five channels are merged, the two headers included: sending both
+`x-omniroute-disabled-guardrails` and `x-disabled-guardrails` skips the union of
+their lists, and an empty modern header no longer hides the legacy one
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), fixed in
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+Values may be arrays of strings or a comma-separated string; names are trimmed
+and normalized to lowercase kebab-case (`pii_masker` → `pii-masker`), and empty
+entries are dropped. The result is passed through `context.disabledGuardrails`
+to the registry, which skips matching guardrails (`skipped: true` in `results`).
+
+The disable list only affects the **registry**. Prompt-injection `block` mode is
+a mandatory boundary: the injection-guard middleware
+(`src/middleware/promptInjectionGuard.ts`) calls `evaluatePromptInjection()`
+without any caller-controlled disable list (the dead
+`resolveDisabledGuardrails({ body })` call it used to make was removed in
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), so a request
+that disables `prompt-injection` is still rejected in `block` mode. This is by
+design. The disable channels are caller-controlled (request body,
+metadata, headers), and a caller must not be able to switch off a security
+control the operator set
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). The header
+union from [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+changes only which registry guardrails are skipped; it does not let a client
+bypass the middleware. Mandatory per-key and per-group guardrail policies are
+tracked in the v4 RFC [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+See [Coverage and limits](#coverage-and-limits).
 
 ## Execution Order
 
 For each request flowing through `src/sse/handlers/chat.ts` and
-`open-sse/handlers/chatCore.ts`:
+`open-sse/handlers/chatCore.ts` (the chat-family routes listed under
+[Coverage and limits](#coverage-and-limits)):
 
 1. `resolveDisabledGuardrails(...)` builds the skip list from API key, body,
    and headers.
@@ -729,12 +915,62 @@ For each request flowing through `src/sse/handlers/chat.ts` and
      a guardrail rejection response.
 3. The (potentially rewritten) payload flows into combo routing and upstream
    dispatch.
-4. After the response is assembled, `guardrailRegistry.runPostCallHooks(...)`
-   runs the same chain on the response. `block: true` here drops the upstream
-   response.
+4. **Non-streaming only:** after the response is assembled,
+   `guardrailRegistry.runPostCallHooks(...)` runs the same chain on the
+   response. `block: true` here drops the upstream response and returns HTTP 400. Streamed responses skip this step entirely.
 
 Guardrails that throw are recorded with `error: <message>` and logged via
 `logger.warn`, but the chain continues — fail-open by design.
+
+## Coverage and limits
+
+The guardrail registry is wired into the chat pipeline only. These limits are
+pinned by `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` and
+`tests/unit/guardrail-pipeline-characterization.test.ts`; update those tests
+deliberately when the behavior changes.
+
+### Where the hooks run
+
+| Hook / control                      | Runs on                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `runPreCallHooks`                   | Requests handled by `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (and `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*`, and the Telegram chat proxy. Also the dashboard test endpoint `/api/guardrails/test`. A pre-call block returns HTTP 400. |
+| `runPostCallHooks`                  | **Non-streaming** chat responses only (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Streamed responses never reach it.                                                                                                                                                                                                                                                                                              |
+| Streaming PII                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), piped in `streamingPipeline.ts` when `PII_RESPONSE_SANITIZATION` is on. It is not a guardrail, so the disable channels don't affect it.                                                                                                                                                                                                                         |
+| Injection-guard middleware (legacy) | Every prompt-bearing `/v1` route, chat-family included (see [route coverage](#injection-guard-route-coverage--red-team-phase-8--block-d)). Prompt injection only.                                                                                                                                                                                                                                                             |
+
+### What is not covered
+
+- **Media, embeddings and data routes** (`/v1/images/*`, `/v1/embeddings`,
+  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
+  `/v1/rerank`, `/v1/search`, `/v1/moderations`) never reach the registry. No
+  PII masking, credential masking or modality bridge runs there. Their only
+  check is the legacy injection-guard middleware.
+- **Streamed responses** get no post-call guardrails: no `pii-masker` or
+  `credential-masker` post-call, and no post-call block. Only the streaming PII
+  transform applies (when `PII_RESPONSE_SANITIZATION` is on). A credential
+  echoed back in a streamed response is not redacted.
+- **Disable channels vs. the middleware (by design):** the middleware evaluates
+  prompt injection with its own call to `evaluatePromptInjection()`, without
+  passing any caller-controlled disable list. `block` mode is a mandatory
+  boundary that caller-controlled disables cannot bypass, including on chat-family routes
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Disabling
+  `prompt-injection` only skips the registry guardrail.
+
+### What sees a response before post-call
+
+On the non-streaming path the order is: memory extraction → built-in tool
+execution → post-call guardrails → post-call block exit → semantic-cache store.
+
+- **Memory extraction** and **tool execution** see the response before post-call
+  guardrails can rewrite or block it. Since
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), memory
+  extraction runs the extracted text through `sanitizePII` when
+  `PII_RESPONSE_SANITIZATION` is on (both streaming and non-streaming), but a
+  response that post-call later blocks has still been offered to memory and
+  tools.
+- **The semantic cache** stores the response after post-call, so it stores the
+  rewritten response, and a blocked response is never cached. Cache entries are
+  keyed per API key.
 
 ## Configuration
 
@@ -846,8 +1082,9 @@ Text extraction (`extractMessageContents`) covers `messages`/`input`/`prompt`/`q
 
 **Red-team (nightly, `nightly-llm-security.yml`):** promptfoo validates that each route blocks
 the OWASP-LLM corpus in `INJECTION_GUARD_MODE=block`; garak runs probes (skips without secret).
-`moderations` is included for consistency — operators in block-mode can exempt it via
-`resolveDisabledGuardrails`.
+`moderations` is included for consistency. Block mode is a mandatory boundary: `evaluatePromptInjection()`
+ignores the per-request disable list the middleware passes it, so `disabledGuardrails` does
+**not** exempt a route from it ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
 The nightly workflow (`.github/workflows/nightly-llm-security.yml`, cron + manual
 dispatch) has two jobs:

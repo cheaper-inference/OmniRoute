@@ -1,13 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
 
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { cn } from "@/shared/utils/cn";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
+
+// (#618) Match any custom:OmniRoute-<i> entry (multi-model).
+const isOmniRouteEntry = (m) => typeof m?.id === "string" && m.id.startsWith("custom:OmniRoute");
 
 export default function DroidToolCard({
   tool,
@@ -45,9 +53,6 @@ export default function DroidToolCard({
   const [restoringBackup, setRestoringBackup] = useState(null);
   const cliReady = !!(droidStatus?.installed && droidStatus?.runnable);
 
-  // (#618) Match any custom:OmniRoute-<i> entry (multi-model).
-  const isOmniRouteEntry = (m) => typeof m?.id === "string" && m.id.startsWith("custom:OmniRoute");
-
   const getConfigStatus = () => {
     if (!cliReady) return null;
     const currentConfig = droidStatus.settings?.customModels?.find(isOmniRouteEntry);
@@ -65,22 +70,12 @@ export default function DroidToolCard({
   const effectiveConfigStatus = configStatus || batchStatus?.configStatus || null;
 
   // (#523) Store the key *id* (not the masked string) so the backend can
-  // resolve the real secret from DB before writing to config files.
-  useEffect(() => {
-    if (apiKeys?.length > 0 && !selectedApiKeyId) {
-      setSelectedApiKeyId(apiKeys[0].id);
-    }
-  }, [apiKeys, selectedApiKeyId]);
+  // resolve the real secret from DB before writing to config files. Default to
+  // the first available key while the user hasn't picked one — derived during
+  // render instead of synced through an effect (react-hooks/set-state-in-effect).
+  const effectiveApiKeyId = selectedApiKeyId || (apiKeys?.length > 0 ? apiKeys[0].id : "");
 
-  useEffect(() => {
-    if (isExpanded && !droidStatus) {
-      checkDroidStatus();
-      fetchModelAliases();
-      fetchBackups();
-    }
-  }, [isExpanded, droidStatus]);
-
-  const fetchModelAliases = async () => {
+  const fetchModelAliases = useCallback(async () => {
     try {
       const res = await fetch("/api/models/alias");
       const data = await res.json();
@@ -88,34 +83,67 @@ export default function DroidToolCard({
     } catch (error) {
       console.log("Error fetching model aliases:", error);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (droidStatus?.installed && !hasInitializedModel.current) {
-      hasInitializedModel.current = true;
-      // (#618) Pre-fill the multi-model list from every custom:OmniRoute-<i>
-      // entry, preserving the original index order.
-      const existing = (droidStatus.settings?.customModels || [])
-        .filter(isOmniRouteEntry)
-        .slice()
-        .sort((a, b) => (a.index || 0) - (b.index || 0));
-      if (existing.length > 0) {
-        setModelList(existing.map((m) => m.model).filter(Boolean));
-        const first = existing[0];
-        // apiKey may be a structured secret reference (object) rather than a
-        // plaintext string. Only match on strings.
-        if (typeof first?.apiKey === "string" && first.apiKey) {
-          // (#523) Keys from /api/keys are masked. Match by prefix/suffix.
-          const fileKeyPrefix = first.apiKey.slice(0, 8);
-          const fileKeySuffix = first.apiKey.slice(-4);
-          const matchedKey = apiKeys?.find(
-            (k) => k.key && k.key.startsWith(fileKeyPrefix) && k.key.endsWith(fileKeySuffix)
-          );
-          if (matchedKey) setSelectedApiKeyId(matchedKey.id);
+  // ── Backups ──
+  const fetchBackups = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cli-tools/backups?tool=droid");
+      const data = await res.json();
+      if (res.ok) setBackups(data.backups || []);
+    } catch (error) {
+      console.log("Error fetching backups:", error);
+    }
+  }, []);
+
+  const checkDroidStatus = useCallback(async () => {
+    setCheckingDroid(true);
+    try {
+      const res = await fetch("/api/cli-tools/droid-settings");
+      const data = await res.json();
+      setDroidStatus(data);
+      // One-time form initialization from the settings file, right after the
+      // fetch resolves (was a separate droidStatus effect — moved here so no
+      // setState runs synchronously inside an effect body).
+      if (data?.installed && !hasInitializedModel.current) {
+        hasInitializedModel.current = true;
+        // (#618) Pre-fill the multi-model list from every custom:OmniRoute-<i>
+        // entry, preserving the original index order.
+        const existing = (data.settings?.customModels || [])
+          .filter(isOmniRouteEntry)
+          .slice()
+          .sort((a, b) => (a.index || 0) - (b.index || 0));
+        if (existing.length > 0) {
+          setModelList(existing.map((m) => m.model).filter(Boolean));
+          const first = existing[0];
+          // apiKey may be a structured secret reference (object) rather than a
+          // plaintext string. Only match on strings.
+          if (typeof first?.apiKey === "string" && first.apiKey) {
+            // (#523) Keys from /api/keys are masked. Match by prefix/suffix.
+            const fileKeyPrefix = first.apiKey.slice(0, 8);
+            const fileKeySuffix = first.apiKey.slice(-4);
+            const matchedKey = apiKeys?.find(
+              (k) => k.key && k.key.startsWith(fileKeyPrefix) && k.key.endsWith(fileKeySuffix)
+            );
+            if (matchedKey) setSelectedApiKeyId(matchedKey.id);
+          }
         }
       }
+    } catch (error) {
+      setDroidStatus({ installed: false, error: error.message });
+    } finally {
+      setCheckingDroid(false);
     }
-  }, [droidStatus, apiKeys]);
+  }, [apiKeys]);
+
+  useEffect(() => {
+    if (!(isExpanded && !droidStatus)) return;
+    // Load in an async continuation so every setState happens after an await
+    // (react-hooks/set-state-in-effect: no synchronous setState in effect bodies).
+    void (async () => {
+      await Promise.all([checkDroidStatus(), fetchModelAliases(), fetchBackups()]);
+    })();
+  }, [isExpanded, droidStatus, checkDroidStatus, fetchModelAliases, fetchBackups]);
 
   // (#618) Multi-model list manipulation helpers.
   const addModel = (value) => {
@@ -125,19 +153,6 @@ export default function DroidToolCard({
     setModelInput("");
   };
   const removeModel = (id) => setModelList((prev) => prev.filter((m) => m !== id));
-
-  const checkDroidStatus = async () => {
-    setCheckingDroid(true);
-    try {
-      const res = await fetch("/api/cli-tools/droid-settings");
-      const data = await res.json();
-      setDroidStatus(data);
-    } catch (error) {
-      setDroidStatus({ installed: false, error: error.message });
-    } finally {
-      setCheckingDroid(false);
-    }
-  };
 
   const getEffectiveBaseUrl = () => {
     const url = customBaseUrl || baseUrl;
@@ -155,7 +170,7 @@ export default function DroidToolCard({
     try {
       // (#523) Prefer keyId lookup so the backend writes the real key to disk.
       const selectedKeyId =
-        selectedApiKeyId?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
+        effectiveApiKeyId?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
 
       const res = await fetch("/api/cli-tools/droid-settings", {
         method: "POST",
@@ -227,17 +242,6 @@ export default function DroidToolCard({
     setModalOpen(false);
   };
 
-  // ── Backups ──
-  const fetchBackups = async () => {
-    try {
-      const res = await fetch("/api/cli-tools/backups?tool=droid");
-      const data = await res.json();
-      if (res.ok) setBackups(data.backups || []);
-    } catch (error) {
-      console.log("Error fetching backups:", error);
-    }
-  };
-
   const handleRestoreBackup = async (backupId) => {
     setRestoringBackup(backupId);
     setMessage(null);
@@ -269,7 +273,7 @@ export default function DroidToolCard({
 
   const getManualConfigs = () => {
     // (#523) Look up the key object by id to get the masked display value.
-    const selectedKeyObj = apiKeys?.find((k) => k.id === selectedApiKeyId);
+    const selectedKeyObj = apiKeys?.find((k) => k.id === effectiveApiKeyId);
     const keyToDisplay =
       selectedKeyObj?.key || (!cloudEnabled ? "sk_omniroute" : "<API_KEY_FROM_DASHBOARD>");
 
@@ -307,8 +311,11 @@ export default function DroidToolCard({
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 flex items-center justify-center shrink-0">
             <ProviderIcon providerId="droid" size={32} type="color" />
           </div>
@@ -324,27 +331,27 @@ export default function DroidToolCard({
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.droid")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingDroid && (
             <div className="flex items-center gap-2 text-text-muted">
-              <span className="material-symbols-outlined animate-spin">progress_activity</span>
+              <Icon name="progress_activity" className="animate-spin" />
               <span>{t("checkingCli", { tool: "Factory Droid" })}</span>
             </div>
           )}
 
           {!checkingDroid && droidStatus && !cliReady && (
-            <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-yellow-500">warning</span>
+            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+              <Icon name="warning" className="text-warning" />
               <div className="flex-1">
-                <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                <p className="font-medium text-warning">
                   {droidStatus.installed
                     ? t("cliNotRunnable", { tool: "Factory Droid" })
                     : t("cliNotInstalled", { tool: "Factory Droid" })}
@@ -370,9 +377,7 @@ export default function DroidToolCard({
                     <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                       {t("current")}
                     </span>
-                    <span className="material-symbols-outlined text-text-muted text-[14px]">
-                      arrow_forward
-                    </span>
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
                     <span className="flex-1 px-2 py-1.5 text-xs text-text-muted truncate">
                       {droidStatus.settings.customModels.find(isOmniRouteEntry).baseUrl}
                     </span>
@@ -384,24 +389,26 @@ export default function DroidToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("baseUrl")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <input
-                    type="text"
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Input
                     value={getDisplayUrl()}
                     onChange={(e) => setCustomBaseUrl(e.target.value)}
                     placeholder={t("baseUrlPlaceholder")}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("baseUrl")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setCustomBaseUrl("")}
-                      className="p-1 text-text-muted hover:text-primary rounded transition-colors"
                       title={t("resetToDefault")}
+                      aria-label={t("resetToDefault")}
+                      className="text-text-muted hover:text-primary"
                     >
-                      <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                    </button>
+                      <Icon name="restart_alt" size={14} />
+                    </Button>
                   )}
                 </div>
 
@@ -410,21 +417,21 @@ export default function DroidToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("apiKey")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   {apiKeys.length > 0 ? (
-                    <select
-                      value={selectedApiKeyId}
+                    <Select
+                      value={effectiveApiKeyId}
                       onChange={(e) => setSelectedApiKeyId(e.target.value)}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={t("apiKey")}
+                      className="min-w-0 w-auto flex-1"
+                      selectClassName="text-xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
                           {key.key}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   ) : (
                     <span className="flex-1 text-xs text-text-muted px-2 py-1.5">
                       {cloudEnabled ? t("noApiKeysCreateOne") : t("defaultOmnirouteKey")}
@@ -440,31 +447,32 @@ export default function DroidToolCard({
                       <span className="text-primary"> ({modelList.length})</span>
                     )}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px] pt-2">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted pt-2" />
                   <div className="flex-1 flex flex-col gap-1">
                     {modelList.length > 0 && (
                       <div className="flex flex-col gap-0.5 mb-1">
                         {modelList.map((id) => (
                           <div
                             key={id}
-                            className="flex items-center gap-1.5 px-2 py-1 bg-bg-secondary rounded border border-border"
+                            className="flex items-center gap-1.5 px-2 py-1 bg-bg-subtle rounded border border-border"
                           >
                             <span className="flex-1 text-xs font-mono truncate">{id}</span>
-                            <button
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
                               onClick={() => removeModel(id)}
-                              className="text-text-muted hover:text-red-500 transition-colors shrink-0"
                               title={t("clear")}
+                              aria-label={t("clear")}
+                              className="shrink-0 text-text-muted hover:text-error"
                             >
-                              <span className="material-symbols-outlined text-[12px]">close</span>
-                            </button>
+                              <Icon name="close" size={12} />
+                            </Button>
                           </div>
                         ))}
                       </div>
                     )}
                     <div className="flex items-center gap-1.5">
-                      <input
+                      <Input
                         type="text"
                         value={modelInput}
                         onChange={(e) => setModelInput(e.target.value)}
@@ -475,23 +483,30 @@ export default function DroidToolCard({
                           }
                         }}
                         placeholder={t("providerModelPlaceholder")}
-                        className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                        aria-label={t("model")}
+                        className="min-w-0 w-auto flex-1"
+                        inputClassName="text-xs"
                       />
-                      <button
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => setModalOpen(true)}
                         disabled={!hasActiveProviders}
-                        className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                        className="shrink-0 whitespace-nowrap text-xs"
                       >
                         {t("selectModel")}
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
                         onClick={() => addModel()}
                         disabled={!modelInput.trim() || modelList.includes(modelInput.trim())}
-                        className="px-2 py-1.5 rounded border bg-surface border-border hover:border-primary text-xs shrink-0 disabled:opacity-50"
                         title={t("addModel")}
+                        aria-label={t("addModel")}
+                        className="shrink-0 text-xs"
                       >
-                        <span className="material-symbols-outlined text-[14px]">add</span>
-                      </button>
+                        <Icon name="add" size={14} />
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -499,11 +514,9 @@ export default function DroidToolCard({
 
               {message && (
                 <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {message.type === "success" ? "check_circle" : "error"}
-                  </span>
+                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
                   <span>{message.text}</span>
                 </div>
               )}
@@ -516,7 +529,7 @@ export default function DroidToolCard({
                   disabled={modelList.length === 0}
                   loading={applying}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                  <Icon name="save" size={14} className="mr-1" />
                   {t("apply")}
                 </Button>
                 <Button
@@ -526,11 +539,11 @@ export default function DroidToolCard({
                   disabled={!droidStatus?.hasOmniRoute}
                   loading={restoring}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">restore</span>
+                  <Icon name="restore" size={14} className="mr-1" />
                   {t("reset")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>
+                  <Icon name="content_copy" size={14} className="mr-1" />
                   {t("manualConfig")}
                 </Button>
                 <div className="flex-1" />
@@ -542,7 +555,7 @@ export default function DroidToolCard({
                     if (!showBackups) fetchBackups();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">history</span>
+                  <Icon name="history" size={14} className="mr-1" />
                   {t("backups")}
                   {backups.length > 0 && ` (${backups.length})`}
                 </Button>
@@ -551,7 +564,7 @@ export default function DroidToolCard({
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
                   <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">history</span>
+                    <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
                   {backups.length === 0 ? (
@@ -561,24 +574,24 @@ export default function DroidToolCard({
                       {backups.map((b) => (
                         <div
                           key={b.id}
-                          className="flex items-center gap-2 px-2 py-1.5 bg-black/5 dark:bg-white/5 rounded text-xs"
+                          className="flex items-center gap-2 px-2 py-1.5 bg-bg-subtle rounded text-xs"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-text-muted">
-                            description
-                          </span>
+                          <Icon name="description" size={14} className="text-text-muted" />
                           <span className="flex-1 truncate font-mono" title={b.id}>
                             {b.id}
                           </span>
                           <span className="text-text-muted whitespace-nowrap">
                             {new Date(b.createdAt).toLocaleString()}
                           </span>
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>

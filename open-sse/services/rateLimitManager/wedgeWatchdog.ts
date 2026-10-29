@@ -14,10 +14,17 @@ interface LimiterWedgeWatchdogDependencies {
   limiters: Map<string, Bottleneck>;
   limiterLastUsed: Map<string, number>;
   limiterEffectiveSettings: WeakMap<Bottleneck, Bottleneck.ConstructorOptions>;
-  preservedReplacementSettings: Map<string, Bottleneck.ConstructorOptions>;
+  // boundedMap in production (LRU-capped), plain Map in some tests — the
+  // watchdog only reads and writes entries.
+  preservedReplacementSettings: {
+    get(key: string): Bottleneck.ConstructorOptions | undefined;
+    // The return value is ignored, so both Map#set (returns the map) and BoundedMap#set (void) fit.
+    set(key: string, value: Bottleneck.ConstructorOptions): unknown;
+  };
   trackBackground: (promise: Promise<unknown>) => void;
   log: (...args: unknown[]) => void;
   warn: (...args: unknown[]) => void;
+  debug?: (...args: unknown[]) => void;
 }
 
 /**
@@ -77,7 +84,11 @@ export class LimiterWedgeWatchdog {
 
   private async tick(now: number): Promise<void> {
     const { limiters, limiterLastUsed, log, trackBackground, warn } = this.dependencies;
+    const debug = this.dependencies.debug ?? ((...args: unknown[]) => console.debug(...args));
 
+    let evicted = 0;
+    let maxIdleMs = 0;
+    let hasValidIdle = false;
     for (const [key, limiter] of Array.from(limiters)) {
       const lastUsed = limiterLastUsed.get(key) ?? 0;
       if (now - lastUsed <= INACTIVE_LIMITER_MS) continue;
@@ -85,14 +96,26 @@ export class LimiterWedgeWatchdog {
       const counts = limiter.counts();
       if (counts.QUEUED > 0 || counts.RUNNING > 0 || counts.EXECUTING > 0) continue;
 
+      // Keep the eviction policy untouched: the row is removed even when its
+      // timestamp is missing. Only the headline figure skips corrupt rows so
+      // one missing timestamp cannot dominate the reported oldest idle age.
+      if (lastUsed > 0) {
+        maxIdleMs = Math.max(maxIdleMs, now - lastUsed);
+        hasValidIdle = true;
+      }
+      evicted += 1;
       limiters.delete(key);
       this.queueProgressAt.delete(limiter);
       limiterLastUsed.delete(key);
-      log(
+      debug(
         `[RATE-LIMIT] Evicting idle limiter: ${key} ` +
           `(inactive for ${Math.round((now - lastUsed) / 1000)}s)`
       );
       trackBackground(limiter.disconnect());
+    }
+    if (evicted > 0) {
+      const oldestIdleSec = hasValidIdle ? Math.round(maxIdleMs / 1000) : 0;
+      log(`[RATE-LIMIT] Evicted idle limiters: ${evicted} (oldest idle ${oldestIdleSec}s)`);
     }
 
     for (const [key, limiter] of Array.from(limiters)) {

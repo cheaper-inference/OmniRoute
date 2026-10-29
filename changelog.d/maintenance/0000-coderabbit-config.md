@@ -1,0 +1,1 @@
+- **ci:** add `.coderabbit.yaml` so CodeRabbit (free for public repositories) reviews non-draft PRs to release branches and main, skipping translated mirrors, lockfiles and generated files; pre-merge checks start as warnings during calibration.

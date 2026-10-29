@@ -37,14 +37,14 @@ function makeJsonRpcRequest(body: unknown): NextRequest {
 
 test.beforeEach(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   await settingsDb.updateSettings({ a2aEnabled: true });
 });
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#10839: v1.0 SendMessage is aliased to message/send and reshapes the response", async () => {

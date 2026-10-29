@@ -27,7 +27,7 @@ test.after(() => {
   } else {
     process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test.beforeEach(() => {
@@ -449,4 +449,215 @@ test("without an override the small-catalog target is ordered last for the large
     out.map((entry) => entry.modelStr),
     ["unit-override/big", "unit-override/capped"]
   );
+});
+
+// #12273: real Claude Code requests always carry `tools`, and the auto/coding
+// pool mixes coding-capable providers with providers whose catalog marks
+// toolCalling=false. Those non-coding targets are HARD-rejected (tools), so the
+// compat filter can collapse the whole pool to a single too-small-context
+// coding model (e.g. mimo-v2.5-free at 200k) for a much larger request — the
+// larger-context model was never assembled into the candidate pool. Routing to
+// that sole survivor is a guaranteed context_length_exceeded, so the filter
+// must fall back to the full pool instead of silently pinning the request.
+test("#12273 single known-too-small survivor falls back to the full pool", () => {
+  saveModelsDevCapabilities({
+    "unit-collapse": {
+      small: capabilityEntry(200_000),
+    },
+    "unit-noncoding": {
+      nocoder: { ...capabilityEntry(1_000_000), tool_call: false },
+    },
+  });
+  const body = {
+    ...bigContextBody(300_000),
+    tools: [{ type: "function" }], // Claude Code always sends tools
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-collapse/small"), target("unit-noncoding/nocoder")],
+    body,
+    noopLog
+  );
+
+  // nocoder is hard-rejected (toolCalling=false); small (200k) is the only
+  // compatible survivor but is known to be too small for a 300k request, so the
+  // filter returns the full pool rather than dispatch to a guaranteed failure.
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-collapse/small", "unit-noncoding/nocoder"]
+  );
+});
+
+// Guard against regression: when the single survivor's window DOES fit the
+// request, the filter still collapses (existing behavior preserved).
+test("#12273 single compatible target that fits is still collapsed", () => {
+  saveModelsDevCapabilities({
+    "unit-collapse": {
+      big: capabilityEntry(1_000_000),
+    },
+    "unit-noncoding": {
+      nocoder: { ...capabilityEntry(1_000_000), tool_call: false },
+    },
+  });
+  const body = {
+    ...bigContextBody(300_000),
+    tools: [{ type: "function" }],
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-collapse/big"), target("unit-noncoding/nocoder")],
+    body,
+    noopLog
+  );
+
+  // big (1M) fits the 300k request, so the collapse is legitimate.
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-collapse/big"]
+  );
+});
+
+// #12278: unknown context is advisory, not "known too small". Collapsing to a
+// single survivor whose context limit is unknown must NOT restore hard-rejected
+// targets (output_tokens here; vision is covered by combo-vision-aware-routing).
+test("#12273 unknown-context sole survivor does not restore hard-rejected targets", () => {
+  saveModelsDevCapabilities({
+    "unit-output": {
+      tiny: capabilityEntryWithLimits(128_000, 128_000, 4096),
+    },
+  });
+  const body = {
+    messages: [{ role: "user", content: "hello" }],
+    max_tokens: 32_000,
+  };
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-unknown/mystery"), target("unit-output/tiny")],
+    body,
+    noopLog
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-unknown/mystery"]
+  );
+});
+
+// Opt-in `outputLimitAdvisory`: a known output ceiling below `max_tokens` keeps a
+// target in its strategy position instead of removing it. Clients such as Claude Code send max_tokens as a
+// generous ceiling (128000), which otherwise strips every 64k-output model.
+test("outputLimitAdvisory keeps output-limited targets in strategy order instead of removing them", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      insufficient: capabilityEntryWithLimits(128_000, 128_000, 128),
+      sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/insufficient"), target("unit-output-limit/sufficient")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/insufficient", "unit-output-limit/sufficient"]
+  );
+});
+
+test("outputLimitAdvisory keeps strategy order when every target is output-limited", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      a: capabilityEntryWithLimits(128_000, 128_000, 128),
+      b: capabilityEntryWithLimits(128_000, 128_000, 256),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/a"), target("unit-output-limit/b")],
+    { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/a", "unit-output-limit/b"]
+  );
+});
+
+test("outputLimitAdvisory does not soften tool-calling mismatches", () => {
+  saveModelsDevCapabilities({
+    "unit-output-limit": {
+      notools: { ...capabilityEntryWithLimits(128_000, 128_000, 4_096), tool_call: false },
+      tools: capabilityEntryWithLimits(128_000, 128_000, 128),
+    },
+  });
+
+  const out = filterTargetsByRequestCompatibility(
+    [target("unit-output-limit/notools"), target("unit-output-limit/tools")],
+    {
+      messages: [{ role: "user", content: "hello" }],
+      max_tokens: 512,
+      tools: [{ type: "function", function: { name: "lookup", parameters: {} } }],
+    },
+    noopLog,
+    undefined,
+    { outputLimitAdvisory: true }
+  );
+
+  assert.deepEqual(
+    out.map((entry) => entry.modelStr),
+    ["unit-output-limit/tools"]
+  );
+});
+
+test("combo config outputLimitAdvisory keeps an output-limited target in its priority slot", async () => {
+  saveModelsDevCapabilities({
+    // Separate providers: a 503 from one provider must not skip the other.
+    "unit-output-a": { insufficient: capabilityEntryWithLimits(128_000, 128_000, 128) },
+    "unit-output-b": { sufficient: capabilityEntryWithLimits(128_000, 128_000, 4_096) },
+  });
+  const run = async (config?: Record<string, unknown>) => {
+    const calls: string[] = [];
+    const response = await handleComboChat({
+      body: { messages: [{ role: "user", content: "hello" }], max_tokens: 512 },
+      combo: {
+        name: "output-limit-advisory",
+        strategy: "priority",
+        models: ["unit-output-a/insufficient", "unit-output-b/sufficient"],
+        ...(config ? { config } : {}),
+      },
+      handleSingleModel: async (_body: Record<string, unknown>, modelStr: string) => {
+        calls.push(modelStr);
+        const ok = modelStr.endsWith("/insufficient");
+        return new Response(
+          JSON.stringify(ok ? { choices: [{ message: { content: "ok" } }] } : { error: "down" }),
+          { status: ok ? 200 : 503, headers: { "Content-Type": "application/json" } }
+        );
+      },
+      log: noopLog,
+    });
+    return { status: response.status, calls };
+  };
+
+  // The failing target may be retried, so assert on which targets are reached.
+  const strict = await run();
+  assert.notEqual(strict.status, 200);
+  assert.ok(!strict.calls.includes("unit-output-a/insufficient"));
+
+  const advisory = await run({ outputLimitAdvisory: true });
+  assert.equal(advisory.status, 200);
+  // Operator priority wins: the output-limited first step is tried first.
+  assert.deepEqual(advisory.calls, ["unit-output-a/insufficient"]);
+});
+
+test("combo config schema accepts boolean outputLimitAdvisory and rejects other types", async () => {
+  const { comboRuntimeConfigSchema } = await import("../../src/shared/validation/schemas/combo.ts");
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: true }).success, true);
+  assert.equal(comboRuntimeConfigSchema.safeParse({ outputLimitAdvisory: "yes" }).success, false);
 });

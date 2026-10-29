@@ -25,7 +25,7 @@
  */
 
 import { useCallback, useEffect, useState } from "react";
-import { Card, Button } from "@/shared/components";
+import { Button, Card, Input } from "@/shared/components";
 import Tooltip from "@/shared/components/Tooltip";
 
 interface DarioAccount {
@@ -65,9 +65,43 @@ function formatExpiry(acc: DarioAccount): string {
   return "";
 }
 
+// Network + parse concerns extracted so the refresh callbacks only set state
+// after the await — the mount effect can then call them without a synchronous
+// setState (errors come back as values instead of catch-block state writes).
+async function fetchDarioAccounts(): Promise<{ accounts: DarioAccount[] } | { error: string }> {
+  try {
+    const res = await fetch("/api/services/dario/admin/accounts");
+    const json = (await res.json().catch(() => null)) as {
+      accounts?: DarioAccount[];
+      error?: string;
+    } | null;
+    if (!res.ok) {
+      throw new Error(json?.error || `HTTP ${res.status}`);
+    }
+    return { accounts: Array.isArray(json?.accounts) ? json!.accounts : [] };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
+async function fetchOmniConnectionsList(): Promise<OmniConnection[] | null> {
+  try {
+    const res = await fetch("/api/services/dario/admin/import-from-omniroute");
+    const json = (await res.json().catch(() => null)) as {
+      connections?: OmniConnection[];
+      error?: string;
+    } | null;
+    if (!res.ok) return null;
+    return Array.isArray(json?.connections) ? json!.connections : [];
+  } catch {
+    /* non-fatal — import section just stays empty */
+    return null;
+  }
+}
+
 export function DarioAccountPanel() {
   const [accounts, setAccounts] = useState<DarioAccount[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const [pending, setPending] = useState<PendingLogin | null>(null);
@@ -77,51 +111,48 @@ export function DarioAccountPanel() {
   const [notice, setNotice] = useState<string | null>(null);
 
   const [omniConnections, setOmniConnections] = useState<OmniConnection[]>([]);
-  const [omniLoading, setOmniLoading] = useState(false);
+  const [omniLoading, setOmniLoading] = useState(true);
   const [importBusyId, setImportBusyId] = useState<string | null>(null);
 
   const refreshAccounts = useCallback(async () => {
+    const outcome = await fetchDarioAccounts();
+    if ("accounts" in outcome) {
+      setAccounts(outcome.accounts);
+      setError(null);
+    } else {
+      setError(outcome.error);
+    }
+    setLoading(false);
+  }, []);
+
+  // Inline-in-effect (calling the component-scope refresh callbacks
+  // synchronously from an effect is rejected by the compiler rules); every
+  // setState here runs after an await.
+  useEffect(() => {
+    const run = async () => {
+      const outcome = await fetchDarioAccounts();
+      if ("accounts" in outcome) {
+        setAccounts(outcome.accounts);
+        setError(null);
+      } else {
+        setError(outcome.error);
+      }
+      setLoading(false);
+    };
+    void run();
+    const runOmni = async () => {
+      const list = await fetchOmniConnectionsList();
+      if (list) setOmniConnections(list);
+      setOmniLoading(false);
+    };
+    void runOmni();
+  }, []);
+
+  const handleRefreshAccountsClick = () => {
     setLoading(true);
     setError(null);
-    try {
-      const res = await fetch("/api/services/dario/admin/accounts");
-      const json = (await res.json().catch(() => null)) as {
-        accounts?: DarioAccount[];
-        error?: string;
-      } | null;
-      if (!res.ok) {
-        throw new Error(json?.error || `HTTP ${res.status}`);
-      }
-      setAccounts(Array.isArray(json?.accounts) ? json!.accounts : []);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const refreshOmniConnections = useCallback(async () => {
-    setOmniLoading(true);
-    try {
-      const res = await fetch("/api/services/dario/admin/import-from-omniroute");
-      const json = (await res.json().catch(() => null)) as {
-        connections?: OmniConnection[];
-        error?: string;
-      } | null;
-      if (res.ok) {
-        setOmniConnections(Array.isArray(json?.connections) ? json!.connections : []);
-      }
-    } catch {
-      /* non-fatal — import section just stays empty */
-    } finally {
-      setOmniLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
     void refreshAccounts();
-    void refreshOmniConnections();
-  }, [refreshAccounts, refreshOmniConnections]);
+  };
 
   async function importFromOmniroute(connectionId: string) {
     setImportBusyId(connectionId);
@@ -330,12 +361,12 @@ export function DarioAccountPanel() {
         {/* Login flow */}
         {!pending ? (
           <div className="flex flex-wrap items-center gap-2 border-t border-border pt-3">
-            <input
-              type="text"
+            <Input
               placeholder="alias (optional)"
+              aria-label="alias (optional)"
               value={aliasInput}
               onChange={(e) => setAliasInput(e.target.value)}
-              className="flex-1 min-w-[140px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted"
+              className="min-w-[140px] flex-1"
             />
             <Button size="sm" disabled={busy !== null} onClick={startLogin}>
               {busy === "start" ? "Starting…" : "Start Login"}
@@ -344,7 +375,7 @@ export function DarioAccountPanel() {
               size="sm"
               variant="outline"
               disabled={loading}
-              onClick={() => void refreshAccounts()}
+              onClick={handleRefreshAccountsClick}
             >
               Refresh
             </Button>
@@ -370,12 +401,13 @@ export function DarioAccountPanel() {
             )}
             <p className="text-xs text-text-muted">2. Paste the code Anthropic displays:</p>
             <div className="flex flex-wrap items-center gap-2">
-              <input
-                type="text"
+              <Input
                 placeholder="code#state or bare code"
+                aria-label="code#state or bare code"
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
-                className="flex-1 min-w-[180px] bg-transparent text-xs border border-border rounded px-2 py-1.5 outline-none placeholder:text-text-muted font-mono"
+                className="min-w-[180px] flex-1"
+                inputClassName="font-mono"
               />
               <Button
                 size="sm"
@@ -399,8 +431,8 @@ export function DarioAccountPanel() {
           </div>
         )}
 
-        {notice && <p className="text-xs text-green-600 dark:text-green-400">{notice}</p>}
-        {error && <p className="text-xs text-red-600 dark:text-red-400 break-words">{error}</p>}
+        {notice && <p className="text-xs text-success">{notice}</p>}
+        {error && <p className="text-xs text-error break-words">{error}</p>}
       </div>
     </Card>
   );

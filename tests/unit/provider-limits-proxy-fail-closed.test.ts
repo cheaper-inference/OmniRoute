@@ -12,12 +12,13 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const providerLimits = await import("../../src/lib/usage/providerLimits.ts");
+const claudeUsage = await import("../../open-sse/services/usage/claude.ts");
 
 const originalFetch = globalThis.fetch;
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -79,12 +80,16 @@ function claudeBootstrapResponse() {
 test.beforeEach(async () => {
   globalThis.fetch = originalFetch;
   await resetStorage();
+  // The fail-closed cases leave their Claude usage poll pending forever on purpose (the
+  // mock ignores the abort). getClaudeUsage coalesces polls per credential, and every case
+  // reuses the same access token — start each case without the previous case's poll.
+  claudeUsage._resetClaudeUsagePollingState();
 });
 
 test.after(async () => {
   globalThis.fetch = originalFetch;
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("Claude provider limits fail closed when an account proxy is unreachable", async () => {

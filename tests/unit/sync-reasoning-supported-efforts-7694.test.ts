@@ -24,22 +24,20 @@ const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const v1ModelsCatalog = await import("../../src/app/api/v1/models/catalog.ts");
 const { getModelInfo } = await import("../../src/sse/services/model.ts");
-const { normalizeDiscoveredModels, detectSupportedThinkingEfforts } = await import(
-  "../../src/lib/providerModels/modelDiscovery.ts"
-);
+const { normalizeDiscoveredModels, detectSupportedThinkingEfforts } =
+  await import("../../src/lib/providerModels/modelDiscovery.ts");
 const { splitSyncedEffortSuffix } = await import("../../open-sse/services/model.ts");
 const {
   appendSyncedEffortVariants,
   shouldExposeSyncedEffortVariants,
   SYNCED_EFFORT_SKIP_PROVIDERS,
 } = await import("../../open-sse/utils/syncedEffortVariants.ts");
-const { applyDefaultReasoningEffort } = await import(
-  "../../open-sse/services/defaultReasoningEffort.ts"
-);
+const { applyDefaultReasoningEffort } =
+  await import("../../open-sse/services/defaultReasoningEffort.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -50,7 +48,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 async function seedProviderConnection(provider: string) {
@@ -69,14 +67,14 @@ async function seedProviderConnection(provider: string) {
 // normalized onto the canonical vocabulary. Hard Rule #7 — Zod-validated.
 // ---------------------------------------------------------------------------
 
-test("normalizeDiscoveredModels: captures nested reasoning.supported_efforts (no flat field) and normalizes 'max' -> 'xhigh'", () => {
+test("normalizeDiscoveredModels: captures nested reasoning.supported_efforts (no flat field) and preserves canonical 'max'", () => {
   const [model] = normalizeDiscoveredModels([
     {
       id: "some/model-7694",
       reasoning: { supported_efforts: ["low", "medium", "max"] },
     },
   ]);
-  assert.deepEqual(model.supportedThinkingEfforts, ["low", "medium", "xhigh"]);
+  assert.deepEqual(model.supportedThinkingEfforts, ["low", "medium", "max"]);
 });
 
 test("normalizeDiscoveredModels: pre-existing flat supportedThinkingEfforts field wins verbatim over nested (regression)", () => {
@@ -201,14 +199,14 @@ test("#7694 catalog: GET /api/v1/models advertises a <model>-<tier> alias id per
 // shouldExposeSyncedEffortVariants / appendSyncedEffortVariants — pure unit tests.
 // ---------------------------------------------------------------------------
 
-test("shouldExposeSyncedEffortVariants: skips codex/kimi-owned models (own suffix mechanism) — Kimi/codex regression guard", () => {
+test("shouldExposeSyncedEffortVariants: exposes declared Codex tiers and skips Kimi native suffixes", () => {
   assert.equal(
     shouldExposeSyncedEffortVariants({
       id: "codex/gpt-5.5",
       owned_by: "codex",
       capabilities: { effort_tiers: ["low", "high"] },
     }),
-    false
+    true
   );
   assert.equal(
     shouldExposeSyncedEffortVariants({
@@ -226,7 +224,7 @@ test("shouldExposeSyncedEffortVariants: skips codex/kimi-owned models (own suffi
     }),
     false
   );
-  assert.ok(SYNCED_EFFORT_SKIP_PROVIDERS.has("codex"));
+  assert.ok(!SYNCED_EFFORT_SKIP_PROVIDERS.has("codex"));
 });
 
 test("shouldExposeSyncedEffortVariants: skips a model id that already ends in a token matching a canonical effort value (collision guard)", () => {

@@ -16,7 +16,7 @@ test.after(() => {
   core.resetDbInstance();
   if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
   else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // ─── estimateTokens ─────────────────────────────────────────────────────────

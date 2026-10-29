@@ -80,7 +80,7 @@ test.after(() => {
   else process.env.OMNIROUTE_NO_SUDO = originalNoSudo;
   if (originalSkipSystemTrust === undefined) delete process.env.OMNIROUTE_SKIP_SYSTEM_TRUST;
   else process.env.OMNIROUTE_SKIP_SYSTEM_TRUST = originalSkipSystemTrust;
-  fs.rmSync(tmpRoot, { recursive: true, force: true });
+  fs.rmSync(tmpRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function resetCaptured(): void {

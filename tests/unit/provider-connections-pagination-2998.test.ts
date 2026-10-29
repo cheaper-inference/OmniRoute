@@ -17,7 +17,7 @@ const providersRoute = await import("../../src/app/api/providers/route.ts");
 
 function resetDb() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -34,7 +34,7 @@ test.beforeEach(resetDb);
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("GET /api/providers filters and counts before applying limit/offset", async () => {
@@ -76,4 +76,26 @@ test("GET /api/providers keeps the unfiltered contract when provider is absent",
     new Set(body.connections.map((connection) => connection.provider)),
     new Set(["synthetic", "poe"])
   );
+});
+
+test("#16940: successful sync timestamp is exposed by GET /api/providers and remains fresh", async () => {
+  await createConnection("synthetic", "Timestamped");
+  const rows = await providersDb.getProviderConnections({ provider: "synthetic" });
+  const id = String(rows[0].id);
+  const before = await providersRoute.GET(
+    await makeManagementSessionRequest("http://localhost/api/providers?provider=synthetic")
+  );
+  const initial = (await before.json()).connections;
+  assert.equal(initial[0].syncedModelsAt, null);
+
+  await providersDb.touchConnectionSyncedModelsAt(id);
+
+  // Timestamp writes must invalidate the cached raw connections: otherwise
+  // even a fresh GET would still expose the old null for up to five seconds.
+  const after = await providersRoute.GET(
+    await makeManagementSessionRequest("http://localhost/api/providers?provider=synthetic")
+  );
+  const updated = (await after.json()).connections;
+  assert.equal(typeof updated[0].syncedModelsAt, "string");
+  assert.ok(Number.isFinite(Date.parse(updated[0].syncedModelsAt)));
 });

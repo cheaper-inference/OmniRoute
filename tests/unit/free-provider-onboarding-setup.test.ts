@@ -7,10 +7,10 @@ import {
 } from "../../src/lib/providers/freeOnboarding.ts";
 
 test("batch setup creates missing providers, skips existing ones, and is retry-safe", async () => {
-  const existing = [{ provider: "opencode", name: "My customized OpenCode" }];
+  const existing = [{ provider: "uncloseai", name: "My customized UncloseAI" }];
   const created: Array<{ provider: string; name: string }> = [];
   const candidates = getEligibleFreeOnboardingProviders();
-  const requestedIds = ["opencode", "theoldllm"];
+  const requestedIds = ["uncloseai", "cloudflare-playground"];
 
   const first = await setupFreeProviderConnections({
     requestedIds,
@@ -32,15 +32,21 @@ test("batch setup creates missing providers, skips existing ones, and is retry-s
   });
 
   assert.deepEqual(first.results, [
-    { providerId: "opencode", status: "skipped", reason: "already-configured" },
-    { providerId: "theoldllm", status: "created", connectionId: "created-theoldllm" },
+    { providerId: "uncloseai", status: "skipped", reason: "already-configured" },
+    {
+      providerId: "cloudflare-playground",
+      status: "created",
+      connectionId: "created-cloudflare-playground",
+    },
   ]);
   assert.deepEqual(second.results, [
-    { providerId: "opencode", status: "skipped", reason: "already-configured" },
-    { providerId: "theoldllm", status: "skipped", reason: "already-configured" },
+    { providerId: "uncloseai", status: "skipped", reason: "already-configured" },
+    { providerId: "cloudflare-playground", status: "skipped", reason: "already-configured" },
   ]);
-  assert.deepEqual(existing, [{ provider: "opencode", name: "My customized OpenCode" }]);
-  assert.deepEqual(created, [{ provider: "theoldllm", name: "The Old LLM (Free)" }]);
+  assert.deepEqual(existing, [{ provider: "uncloseai", name: "My customized UncloseAI" }]);
+  assert.deepEqual(created, [
+    { provider: "cloudflare-playground", name: "Cloudflare AI Playground" },
+  ]);
 });
 
 test("batch setup rejects unknown or ineligible IDs before creating anything", async () => {
@@ -63,13 +69,14 @@ test("batch setup rejects unknown or ineligible IDs before creating anything", a
 
 test("partial failures are reported per provider and can be retried", async () => {
   const created = new Set<string>();
-  let oldllmAttempts = 0;
+  let cloudflarePlaygroundAttempts = 0;
   const input = {
-    requestedIds: ["opencode", "theoldllm"],
+    requestedIds: ["uncloseai", "cloudflare-playground"],
     candidates: getEligibleFreeOnboardingProviders(),
     listExisting: async () => [...created].map((provider) => ({ provider })),
     create: async ({ provider }: { provider: string }) => {
-      if (provider === "theoldllm" && oldllmAttempts++ === 0) throw new Error("upstream detail");
+      if (provider === "cloudflare-playground" && cloudflarePlaygroundAttempts++ === 0)
+        throw new Error("upstream detail");
       created.add(provider);
       return { id: `created-${provider}` };
     },
@@ -79,11 +86,15 @@ test("partial failures are reported per provider and can be retried", async () =
   const retry = await setupFreeProviderConnections(input);
 
   assert.deepEqual(first.results, [
-    { providerId: "opencode", status: "created", connectionId: "created-opencode" },
-    { providerId: "theoldllm", status: "failed", reason: "Failed to create provider" },
+    { providerId: "uncloseai", status: "created", connectionId: "created-uncloseai" },
+    { providerId: "cloudflare-playground", status: "failed", reason: "Failed to create provider" },
   ]);
   assert.deepEqual(retry.results, [
-    { providerId: "opencode", status: "skipped", reason: "already-configured" },
-    { providerId: "theoldllm", status: "created", connectionId: "created-theoldllm" },
+    { providerId: "uncloseai", status: "skipped", reason: "already-configured" },
+    {
+      providerId: "cloudflare-playground",
+      status: "created",
+      connectionId: "created-cloudflare-playground",
+    },
   ]);
 });

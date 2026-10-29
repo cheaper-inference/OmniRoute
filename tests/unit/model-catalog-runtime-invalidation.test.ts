@@ -25,7 +25,7 @@ const auth = await import("../../src/sse/services/auth.ts");
 async function resetStorage() {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 }
@@ -77,7 +77,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("session-affinity bookkeeping preserves the published model catalog", async () => {
@@ -272,6 +272,8 @@ test("#9199 a capability mutation during preparation detaches the obsolete gener
 
 test("#9199 a mutation during a cooperative catalog build detaches the obsolete generation", async () => {
   await settingsDb.updateSettings({ blockedProviders: [] });
+  // Keep auto/best-coding eligible before the test changes its provider visibility.
+  await seedOpenAiConnection();
 
   let firstSettled = false;
   const firstPromise = v1ModelsCatalog

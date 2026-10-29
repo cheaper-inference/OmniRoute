@@ -28,7 +28,7 @@ const route = await import("../../src/app/api/conversations/route.ts");
 test.after(() => {
   core.resetDbInstance();
   usageHistory.clearPendingRequests();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test.beforeEach(() => {

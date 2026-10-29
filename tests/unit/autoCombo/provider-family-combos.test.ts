@@ -16,13 +16,18 @@ import path from "node:path";
 
 import {
   detectModelFamily,
+  buildFamilyCandidateFilter,
   isValidModelFamily,
   AUTO_FAMILY_IDS,
+  MODEL_FAMILIES,
 } from "../../../open-sse/services/autoCombo/modelFamily";
 
 // First-touch DB migrations run once per worker and can exceed vitest's 5s
-// default in a cold thread; the DB-backed materialization tests below need it.
-vi.setConfig({ testTimeout: 20_000 });
+// default in a cold thread. auto/glm then materializes a ~50-candidate cartesian
+// pool across connected GLM backends plus always-on no-auth catalogs (auggie,
+// cloudflare-playground, devin-cli-agentic, zcode); that step measured ~35s on
+// a loaded runner and blew the previous 20s budget (base-red #15306).
+vi.setConfig({ testTimeout: 90_000 });
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-family-combo-"));
 const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
@@ -34,7 +39,7 @@ const builtinCatalog = await import("../../../open-sse/services/autoCombo/builti
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -44,7 +49,7 @@ beforeEach(async () => {
 
 afterAll(async () => {
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_DATA_DIR === undefined) {
     delete process.env.DATA_DIR;
   } else {
@@ -67,7 +72,7 @@ describe("detectModelFamily (pure)", () => {
   });
 
   it("returns null for unrelated model ids", () => {
-    assert.equal(detectModelFamily("gpt-4o"), null);
+    assert.equal(detectModelFamily("unrelated-model"), null);
     assert.equal(detectModelFamily(""), null);
     assert.equal(detectModelFamily(null), null);
   });
@@ -78,22 +83,44 @@ describe("detectModelFamily (pure)", () => {
     assert.equal(detectModelFamily("zai-glm-5.2"), null);
   });
 
-  it("isValidModelFamily accepts exactly the 7 advertised families", () => {
-    for (const family of ["glm", "minimax", "mimo", "zai", "gemma", "llama", "gemini"]) {
+  it("isValidModelFamily accepts exactly the advertised families", () => {
+    for (const family of [
+      "glm",
+      "minimax",
+      "mimo",
+      "zai",
+      "gemma",
+      "llama",
+      "gemini",
+      "kimi",
+      "qwen",
+      "deepseek",
+      "gpt",
+      "claude-opus",
+      "claude-sonnet",
+      "claude-haiku",
+    ]) {
       assert.equal(isValidModelFamily(family), true);
     }
-    assert.equal(isValidModelFamily("gpt"), false);
+    assert.equal(isValidModelFamily("unknown"), false);
     assert.equal(isValidModelFamily(undefined), false);
   });
 
   it("advertises exactly one auto/<family> catalog id per family", () => {
     assert.deepEqual([...AUTO_FAMILY_IDS].sort(), [
+      "auto/claude-haiku",
+      "auto/claude-opus",
+      "auto/claude-sonnet",
+      "auto/deepseek",
       "auto/gemini",
       "auto/gemma",
       "auto/glm",
+      "auto/gpt",
+      "auto/kimi",
       "auto/llama",
       "auto/mimo",
       "auto/minimax",
+      "auto/qwen",
       "auto/zai",
     ]);
   });
@@ -230,9 +257,169 @@ describe("auto/<family> materialization (#6453)", () => {
   });
 
   it("isRecognizedBuiltinAuto recognizes every auto/<family> id", () => {
-    for (const family of ["glm", "minimax", "mimo", "zai", "gemma", "llama", "gemini"]) {
+    for (const family of MODEL_FAMILIES) {
       assert.equal(builtinCatalog.isRecognizedBuiltinAuto(`auto/${family}`, family), true);
     }
     assert.equal(builtinCatalog.isRecognizedBuiltinAuto("auto/unknownfam", "unknownfam"), false);
+  });
+});
+
+describe("additional auto-routing families (#13214)", () => {
+  it("materializes Qwen, DeepSeek and GPT without crossing family boundaries", async () => {
+    for (const [provider, defaultModel] of [
+      ["qwen", "qwen3-14b"],
+      ["deepseek", "deepseek-chat"],
+      ["openai", "gpt-4o"],
+    ]) {
+      await providersDb.createProviderConnection({
+        provider,
+        defaultModel,
+        authType: "apikey",
+        name: provider,
+        apiKey: "test",
+      });
+    }
+    for (const [family, provider] of [
+      ["qwen", "qwen"],
+      ["deepseek", "deepseek"],
+      ["gpt", "openai"],
+    ]) {
+      const combo = await builtinCatalog.createBuiltinAutoCombo(`auto/${family}`, family);
+      assert.equal(combo.id, `auto/${family}`);
+      assert.equal(combo.strategy, "auto");
+      assert.ok(
+        combo.models.some((model) => model.providerId === provider),
+        family
+      );
+      assert.ok(
+        combo.models.every((model) => detectModelFamily(model.model) === family),
+        family
+      );
+    }
+  });
+
+  it("materializes Kimi across coding, web and Moonshot without unrelated models", async () => {
+    for (const [provider, defaultModel] of [
+      ["kimi-coding", "k3"],
+      ["kimi-coding-apikey", "k3"],
+      ["kimi-web", "k3"],
+      ["moonshot", "kimi-k2.5"],
+      ["openai", "gpt-4o"],
+    ]) {
+      await providersDb.createProviderConnection({
+        provider,
+        defaultModel,
+        authType: "apikey",
+        name: provider,
+        apiKey: "test",
+      });
+    }
+    const combo = await builtinCatalog.createBuiltinAutoCombo("auto/kimi", "kimi");
+    assert.equal(combo.id, "auto/kimi");
+    assert.equal(combo.strategy, "auto");
+    for (const provider of ["kimi-coding", "kimi-coding-apikey", "kimi-web", "moonshot"]) {
+      assert.ok(
+        combo.models.some((model) => model.providerId === provider),
+        provider
+      );
+    }
+    assert.ok(combo.models.every((model) => model.providerId !== "openai"));
+  });
+
+  it("detects new families across provider-prefixed and bare model ids", () => {
+    for (const [model, family] of [
+      ["moonshot/kimi-k3", "kimi"],
+      ["QWEN3-14B", "qwen"],
+      ["qwen2.5-coder-32b-instruct", "qwen"],
+      ["qwen3.5-plus", "qwen"],
+      ["deepseek/deepseek-chat", "deepseek"],
+      ["openai/gpt-4o", "gpt"],
+    ]) {
+      assert.equal(detectModelFamily(model), family);
+    }
+    assert.equal(detectModelFamily("k3"), null);
+    assert.equal(detectModelFamily("not-qwen3"), null);
+  });
+
+  it("includes Kimi k3 only on known Kimi backends, alongside prefix matches", () => {
+    const filter = buildFamilyCandidateFilter("kimi");
+    for (const provider of ["kimi-coding", "kimi-web", "kimi-coding-apikey"]) {
+      assert.equal(filter({ provider, model: "k3" }), true);
+      assert.equal(filter({ provider, model: `${provider}/k3` }), true);
+      assert.equal(filter({ provider, model: "gpt-4o" }), false);
+    }
+    assert.equal(filter({ provider: "moonshot", model: "kimi-k3" }), true);
+    assert.equal(filter({ provider: "custom", model: "kimi-k2.5" }), true);
+    assert.equal(filter({ provider: "custom", model: "k3" }), false);
+    assert.equal(buildFamilyCandidateFilter("gpt")({ provider: "kimi-web", model: "k3" }), false);
+    assert.equal(buildFamilyCandidateFilter("zai")({ provider: "glm", model: "glm-5.2" }), false);
+  });
+
+  it("resolves auto/claude-* as Claude model-family ids, not weight-pack variants (#15675)", () => {
+    for (const suffix of ["claude-haiku", "claude-opus", "claude-sonnet"]) {
+      assert.equal(builtinCatalog.AUTO_TEMPLATE_VARIANTS[`auto/${suffix}`], undefined);
+      assert.equal(builtinCatalog.isRecognizedBuiltinAuto(`auto/${suffix}`, suffix), true);
+      assert.deepEqual(builtinCatalog.resolveBuiltinAutoSpec(`auto/${suffix}`, suffix), {
+        family: suffix,
+      });
+    }
+  });
+
+  it("detects Claude tier names across real-world model id shapes", () => {
+    for (const [model, family] of [
+      ["claude-opus-4.8", "claude-opus"],
+      ["claude-opus-5", "claude-opus"],
+      ["anthropic/claude-3-opus-20240229", "claude-opus"],
+      ["us.anthropic.claude-opus-4-1", "claude-opus"],
+      ["claude-sonnet-4-5", "claude-sonnet"],
+      ["anthropic/claude-3-5-sonnet-20241022", "claude-sonnet"],
+      ["claude-haiku-4-5-20251001", "claude-haiku"],
+      ["anthropic.claude-haiku-4-5", "claude-haiku"],
+    ]) {
+      assert.equal(detectModelFamily(model), family, model);
+    }
+    // Non-tier Claude ids and unrelated models must not match any Claude family.
+    assert.equal(detectModelFamily("claude-fable-5"), null);
+    assert.equal(detectModelFamily("aion-3.0"), null);
+    // The \b boundary keeps substring lookalikes out.
+    assert.equal(detectModelFamily("octopus-v2"), null);
+  });
+
+  it("auto/claude-opus pool contains only *opus* models (#15675 repro)", async () => {
+    // Reproduces the issue: a connected cheaperinference serving aion-3.0 must
+    // NOT be routable through auto/claude-opus, while its real claude-opus-*
+    // catalog models legitimately are.
+    await providersDb.createProviderConnection({
+      provider: "cheaperinference",
+      authType: "apikey",
+      name: "CheaperInference",
+      apiKey: "sk-test-cinf",
+      defaultModel: "aion-3.0",
+    });
+    await providersDb.createProviderConnection({
+      provider: "claude",
+      authType: "apikey",
+      name: "Claude",
+      apiKey: "sk-test-claude",
+      defaultModel: "claude-opus-5",
+    });
+
+    const combo = await builtinCatalog.createBuiltinAutoCombo("auto/claude-opus", "claude-opus");
+
+    assert.equal(combo.id, "auto/claude-opus");
+    assert.equal(combo.strategy, "auto");
+    assert.ok(combo.models.length > 0, "auto/claude-opus must materialize candidates");
+    assert.ok(
+      combo.models.every((m) => detectModelFamily(m.model) === "claude-opus"),
+      "every auto/claude-opus candidate must be an *opus* model"
+    );
+    assert.ok(
+      combo.models.every((m) => !m.model.toLowerCase().includes("aion")),
+      "the issue's aion-3.0 target must never enter the opus pool"
+    );
+    assert.ok(
+      combo.models.some((m) => m.providerId === "claude"),
+      "the connected Claude provider must contribute opus candidates"
+    );
   });
 });

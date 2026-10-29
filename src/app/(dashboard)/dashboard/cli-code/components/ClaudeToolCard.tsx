@@ -1,7 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import CliStatusBadge from "./CliStatusBadge";
 import ClaudeClassifierCompatToggle from "./ClaudeClassifierCompatToggle";
@@ -12,8 +15,45 @@ import {
   getStoredClaudeAuthValue,
   normalizeClaudeBaseUrl,
 } from "@/shared/services/claudeCliConfig";
+import { cn } from "@/shared/utils/cn";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
+
+// (#523) Default to the first available key while the user hasn't picked one.
+const defaultKeyId = (selectedId, apiKeys) =>
+  selectedId || (apiKeys?.length > 0 ? apiKeys[0].id : "");
+
+/**
+ * One-time form initialization from ~/.claude/settings.json, applied right
+ * after a status fetch resolves: mirror the env model mappings into the form
+ * and re-select the API key whose masked value matches the stored token.
+ */
+function initClaudeFormFromSettings(
+  data,
+  apiKeys,
+  defaultModels,
+  onModelMappingChange,
+  onSelectKey
+) {
+  const env = data.settings?.env || {};
+
+  defaultModels.forEach((model) => {
+    if (!model.envKey) return;
+    const value = env[model.envKey] || model.defaultValue || "";
+    // Only sync initial values from file once
+    if (value) onModelMappingChange(model.alias, value);
+  });
+
+  // Restore selected key from file: match token stored in file against known keys
+  const tokenFromFile = getStoredClaudeAuthValue(env);
+  if (!tokenFromFile) return;
+  // (#523) Keys from /api/keys are masked (first 8 + "****" + last 4).
+  // Mask the token from file to compare against the masked list.
+  const maskedToken = tokenFromFile.slice(0, 8) + "****" + tokenFromFile.slice(-4);
+  const matchedKey = apiKeys?.find((k) => k.key === maskedToken);
+  if (matchedKey) onSelectKey(matchedKey.id);
+}
 
 export default function ClaudeToolCard({
   tool,
@@ -64,23 +104,13 @@ export default function ClaudeToolCard({
   // Use batch status as fallback when card hasn't been expanded yet
   const effectiveConfigStatus = configStatus || batchStatus?.configStatus || null;
 
-  useEffect(() => {
-    // (#523) Store the key *id* (not the masked string) so the backend can
-    // resolve the real secret from DB before writing to settings.json.
-    if (apiKeys?.length > 0 && !selectedApiKey) {
-      setSelectedApiKey(apiKeys[0].id);
-    }
-  }, [apiKeys, selectedApiKey]);
+  // (#523) Store the key *id* (not the masked string) so the backend can
+  // resolve the real secret from DB before writing to settings.json. Derived
+  // during render instead of synced through an effect
+  // (react-hooks/set-state-in-effect).
+  const effectiveApiKey = defaultKeyId(selectedApiKey, apiKeys);
 
-  useEffect(() => {
-    if (isExpanded && !claudeStatus) {
-      checkClaudeStatus();
-      fetchModelAliases();
-      fetchBackups();
-    }
-  }, [isExpanded, claudeStatus]);
-
-  const fetchModelAliases = async () => {
+  const fetchModelAliases = useCallback(async () => {
     try {
       const res = await fetch("/api/models/alias");
       const data = await res.json();
@@ -88,46 +118,53 @@ export default function ClaudeToolCard({
     } catch (error) {
       console.log("Error fetching model aliases:", error);
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (claudeStatus?.installed && !hasInitializedModels.current) {
-      hasInitializedModels.current = true;
-      const env = claudeStatus.settings?.env || {};
-
-      tool.defaultModels.forEach((model) => {
-        if (model.envKey) {
-          const value = env[model.envKey] || model.defaultValue || "";
-          // Only sync initial values from file once
-          if (value) {
-            onModelMappingChange(model.alias, value);
-          }
-        }
-      });
-      // Restore selected key from file: match token stored in file against known keys
-      const tokenFromFile = getStoredClaudeAuthValue(env);
-      if (tokenFromFile) {
-        // (#523) Keys from /api/keys are masked (first 8 + "****" + last 4).
-        // Mask the token from file to compare against the masked list.
-        const maskedToken = tokenFromFile.slice(0, 8) + "****" + tokenFromFile.slice(-4);
-        const matchedKey = apiKeys?.find((k) => k.key === maskedToken);
-        if (matchedKey) setSelectedApiKey(matchedKey.id);
-      }
+  // ── Backups ──
+  const fetchBackups = useCallback(async () => {
+    try {
+      const res = await fetch("/api/cli-tools/backups?tool=claude");
+      const data = await res.json();
+      if (res.ok) setBackups(data.backups || []);
+    } catch (error) {
+      console.log("Error fetching backups:", error);
     }
-  }, [claudeStatus, apiKeys, tool.defaultModels, onModelMappingChange]);
+  }, []);
 
-  const checkClaudeStatus = async () => {
+  const checkClaudeStatus = useCallback(async () => {
     setCheckingClaude(true);
     try {
       const res = await fetch("/api/cli-tools/claude-settings");
       const data = await res.json();
       setClaudeStatus(data);
+      // One-time form initialization from the settings file, right after the
+      // fetch resolves (was a separate claudeStatus effect — moved here so no
+      // setState runs synchronously inside an effect body).
+      if (data?.installed && !hasInitializedModels.current) {
+        hasInitializedModels.current = true;
+        initClaudeFormFromSettings(
+          data,
+          apiKeys,
+          tool.defaultModels,
+          onModelMappingChange,
+          setSelectedApiKey
+        );
+      }
     } catch (error) {
       setClaudeStatus({ installed: false, error: error.message });
     } finally {
       setCheckingClaude(false);
     }
-  };
+  }, [apiKeys, tool.defaultModels, onModelMappingChange]);
+
+  useEffect(() => {
+    if (!(isExpanded && !claudeStatus)) return;
+    // Load in an async continuation so every setState happens after an await
+    // (react-hooks/set-state-in-effect: no synchronous setState in effect bodies).
+    void (async () => {
+      await Promise.all([checkClaudeStatus(), fetchModelAliases(), fetchBackups()]);
+    })();
+  }, [isExpanded, claudeStatus, checkClaudeStatus, fetchModelAliases, fetchBackups]);
 
   const getEffectiveBaseUrl = () => {
     const url = customBaseUrl || baseUrl;
@@ -148,7 +185,7 @@ export default function ClaudeToolCard({
       // (#523) Prefer keyId lookup so the backend writes the real key to disk.
       // If no key is selected, leave auth unset so local installs can rely on
       // anonymous access instead of persisting a fake placeholder token.
-      const selectedKeyId = selectedApiKey?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
+      const selectedKeyId = effectiveApiKey?.trim() || (apiKeys?.length > 0 ? apiKeys[0].id : null);
 
       tool.defaultModels.forEach((model) => {
         const targetModel = modelMappings[model.alias] || model.defaultValue || "";
@@ -225,7 +262,7 @@ export default function ClaudeToolCard({
   // Generate settings.json content for manual copy
   const getManualConfigs = () => {
     const env = { ANTHROPIC_BASE_URL: getEffectiveBaseUrl() };
-    if (selectedApiKey && selectedApiKey.trim()) {
+    if (effectiveApiKey && effectiveApiKey.trim()) {
       env.ANTHROPIC_AUTH_TOKEN = "<API_KEY_FROM_DASHBOARD>";
     } else if (cloudEnabled) {
       env.ANTHROPIC_AUTH_TOKEN = "<API_KEY_FROM_DASHBOARD>";
@@ -242,17 +279,6 @@ export default function ClaudeToolCard({
         content: JSON.stringify({ env }, null, 2),
       },
     ];
-  };
-
-  // ── Backups ──
-  const fetchBackups = async () => {
-    try {
-      const res = await fetch("/api/cli-tools/backups?tool=claude");
-      const data = await res.json();
-      if (res.ok) setBackups(data.backups || []);
-    } catch (error) {
-      console.log("Error fetching backups:", error);
-    }
   };
 
   const handleRestoreBackup = async (backupId) => {
@@ -286,8 +312,11 @@ export default function ClaudeToolCard({
 
   return (
     <Card padding="sm" className="overflow-hidden">
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 flex items-center justify-center shrink-0">
             <ProviderIcon providerId="claude" size={32} type="color" />
           </div>
@@ -303,28 +332,28 @@ export default function ClaudeToolCard({
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.claude")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {isExpanded && (
         <div className="mt-4 pt-4 border-t border-border flex flex-col gap-4">
           {checkingClaude && (
             <div className="flex items-center gap-2 text-text-muted">
-              <span className="material-symbols-outlined animate-spin">progress_activity</span>
+              <Icon name="progress_activity" className="animate-spin" />
               <span>{t("checkingCli", { tool: "Claude" })}</span>
             </div>
           )}
 
           {!checkingClaude && claudeStatus && !cliReady && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                <span className="material-symbols-outlined text-yellow-500">warning</span>
+              <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
+                <Icon name="warning" className="text-warning" />
                 <div className="flex-1">
-                  <p className="font-medium text-yellow-600 dark:text-yellow-400">
+                  <p className="font-medium text-warning">
                     {claudeStatus.installed
                       ? t("cliNotRunnable", { tool: "Claude" })
                       : t("cliNotInstalled", { tool: "Claude" })}
@@ -346,7 +375,7 @@ export default function ClaudeToolCard({
                     not on the server. Upstream report: #589.
                   */}
                   <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                    <span className="material-symbols-outlined text-[18px] mr-1">content_copy</span>
+                    <Icon name="content_copy" size={18} className="mr-1" />
                     {t("manualConfig")}
                   </Button>
                   <Button
@@ -354,9 +383,11 @@ export default function ClaudeToolCard({
                     size="sm"
                     onClick={() => setShowInstallGuide(!showInstallGuide)}
                   >
-                    <span className="material-symbols-outlined text-[18px] mr-1">
-                      {showInstallGuide ? "expand_less" : "help"}
-                    </span>
+                    <Icon
+                      name={showInstallGuide ? "expand_less" : "help"}
+                      size={18}
+                      className="mr-1"
+                    />
                     {showInstallGuide ? t("hide") : t("howToInstall")}
                   </Button>
                 </div>
@@ -367,14 +398,13 @@ export default function ClaudeToolCard({
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-text-muted mb-1">{t("platforms")}</p>
-                      <code className="block px-3 py-2 bg-black/5 dark:bg-white/5 rounded font-mono text-xs">
+                      <code className="block px-3 py-2 bg-bg-subtle rounded font-mono text-xs">
                         npm install -g @anthropic-ai/claude-code
                       </code>
                     </div>
                     <p className="text-text-muted">
                       {t("afterInstallationRun")}{" "}
-                      <code className="px-1 bg-black/5 dark:bg-white/5 rounded">claude</code>{" "}
-                      {t("toVerify")}
+                      <code className="px-1 bg-bg-subtle rounded">claude</code> {t("toVerify")}
                     </p>
                   </div>
                 </div>
@@ -391,9 +421,7 @@ export default function ClaudeToolCard({
                     <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                       {t("current")}
                     </span>
-                    <span className="material-symbols-outlined text-text-muted text-[14px]">
-                      arrow_forward
-                    </span>
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
                     <span className="flex-1 px-2 py-1.5 text-xs text-text-muted truncate">
                       {claudeStatus.settings.env.ANTHROPIC_BASE_URL}
                     </span>
@@ -405,24 +433,26 @@ export default function ClaudeToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("baseUrl")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
-                  <input
-                    type="text"
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                  <Input
                     value={getDisplayUrl()}
                     onChange={(e) => setCustomBaseUrl(e.target.value)}
                     placeholder={t("baseUrlPlaceholder")}
-                    className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                    aria-label={t("baseUrl")}
+                    className="min-w-0 w-auto flex-1"
+                    inputClassName="text-xs"
                   />
                   {customBaseUrl && customBaseUrl !== baseUrl && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
                       onClick={() => setCustomBaseUrl("")}
-                      className="p-1 text-text-muted hover:text-primary rounded transition-colors"
                       title={t("resetToDefault")}
+                      aria-label={t("resetToDefault")}
+                      className="text-text-muted hover:text-primary"
                     >
-                      <span className="material-symbols-outlined text-[14px]">restart_alt</span>
-                    </button>
+                      <Icon name="restart_alt" size={14} />
+                    </Button>
                   )}
                 </div>
 
@@ -431,21 +461,21 @@ export default function ClaudeToolCard({
                   <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                     {t("apiKey")}
                   </span>
-                  <span className="material-symbols-outlined text-text-muted text-[14px]">
-                    arrow_forward
-                  </span>
+                  <Icon name="arrow_forward" size={14} className="text-text-muted" />
                   {apiKeys.length > 0 ? (
-                    <select
-                      value={selectedApiKey}
+                    <Select
+                      value={effectiveApiKey}
                       onChange={(e) => setSelectedApiKey(e.target.value)}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded text-xs border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={t("apiKey")}
+                      className="min-w-0 w-auto flex-1"
+                      selectClassName="text-xs"
                     >
                       {apiKeys.map((key) => (
                         <option key={key.id} value={key.id}>
                           {key.key}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                   ) : (
                     <span className="flex-1 text-xs text-text-muted px-2 py-1.5">
                       {cloudEnabled ? t("noApiKeysCreateOne") : t("noApiKeysAvailable")}
@@ -459,31 +489,35 @@ export default function ClaudeToolCard({
                     <span className="w-32 shrink-0 text-sm font-semibold text-text-main text-right">
                       {model.name}
                     </span>
-                    <span className="material-symbols-outlined text-text-muted text-[14px]">
-                      arrow_forward
-                    </span>
-                    <button
+                    <Icon name="arrow_forward" size={14} className="text-text-muted" />
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => openModelSelector(model.alias)}
                       disabled={!hasActiveProviders}
-                      className={`px-2 py-1.5 rounded border text-xs transition-colors shrink-0 whitespace-nowrap ${hasActiveProviders ? "bg-surface border-border text-text-main hover:border-primary cursor-pointer" : "opacity-50 cursor-not-allowed border-border"}`}
+                      className="shrink-0 whitespace-nowrap text-xs"
                     >
                       {t("selectModel")}
-                    </button>
-                    <input
-                      type="text"
+                    </Button>
+                    <Input
                       value={modelMappings[model.alias] || ""}
                       onChange={(e) => onModelMappingChange(model.alias, e.target.value)}
                       placeholder={t("providerModelPlaceholder")}
-                      className="flex-1 px-2 py-1.5 bg-surface rounded border border-border text-xs focus:outline-none focus:ring-1 focus:ring-primary/50"
+                      aria-label={model.name}
+                      className="min-w-0 w-auto flex-1"
+                      inputClassName="text-xs"
                     />
                     {modelMappings[model.alias] && (
-                      <button
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => onModelMappingChange(model.alias, "")}
-                        className="p-1 text-text-muted hover:text-red-500 rounded transition-colors"
                         title={t("clear")}
+                        aria-label={t("clear")}
+                        className="text-text-muted hover:text-error"
                       >
-                        <span className="material-symbols-outlined text-[14px]">close</span>
-                      </button>
+                        <Icon name="close" size={14} />
+                      </Button>
                     )}
                   </div>
                 ))}
@@ -500,11 +534,9 @@ export default function ClaudeToolCard({
 
               {message && (
                 <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
                 >
-                  <span className="material-symbols-outlined text-[14px]">
-                    {message.type === "success" ? "check_circle" : "error"}
-                  </span>
+                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
                   <span>{message.text}</span>
                 </div>
               )}
@@ -517,7 +549,7 @@ export default function ClaudeToolCard({
                   disabled={!hasActiveProviders}
                   loading={applying}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">save</span>
+                  <Icon name="save" size={14} className="mr-1" />
                   {t("apply")}
                 </Button>
                 <Button
@@ -527,11 +559,11 @@ export default function ClaudeToolCard({
                   disabled={!claudeStatus?.hasOmniRoute}
                   loading={restoring}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">restore</span>
+                  <Icon name="restore" size={14} className="mr-1" />
                   {t("reset")}
                 </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                  <span className="material-symbols-outlined text-[14px] mr-1">content_copy</span>
+                  <Icon name="content_copy" size={14} className="mr-1" />
                   {t("manualConfig")}
                 </Button>
                 <div className="flex-1" />
@@ -543,7 +575,7 @@ export default function ClaudeToolCard({
                     if (!showBackups) fetchBackups();
                   }}
                 >
-                  <span className="material-symbols-outlined text-[14px] mr-1">history</span>
+                  <Icon name="history" size={14} className="mr-1" />
                   {t("backups")}
                   {backups.length > 0 && ` (${backups.length})`}
                 </Button>
@@ -553,7 +585,7 @@ export default function ClaudeToolCard({
               {showBackups && (
                 <div className="mt-2 p-3 bg-surface border border-border rounded-lg">
                   <h4 className="text-xs font-semibold text-text-main mb-2 flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[14px]">history</span>
+                    <Icon name="history" size={14} />
                     {t("configBackups")}
                   </h4>
                   {backups.length === 0 ? (
@@ -563,24 +595,24 @@ export default function ClaudeToolCard({
                       {backups.map((b) => (
                         <div
                           key={b.id}
-                          className="flex items-center gap-2 px-2 py-1.5 bg-black/5 dark:bg-white/5 rounded text-xs"
+                          className="flex items-center gap-2 px-2 py-1.5 bg-bg-subtle rounded text-xs"
                         >
-                          <span className="material-symbols-outlined text-[14px] text-text-muted">
-                            description
-                          </span>
+                          <Icon name="description" size={14} className="text-text-muted" />
                           <span className="flex-1 truncate font-mono" title={b.id}>
                             {b.id}
                           </span>
                           <span className="text-text-muted whitespace-nowrap">
                             {new Date(b.createdAt).toLocaleString()}
                           </span>
-                          <button
+                          <Button
+                            variant="secondary"
+                            size="sm"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="px-2 py-0.5 bg-primary/10 text-primary rounded text-[10px] font-medium hover:bg-primary/20 transition-colors disabled:opacity-50"
+                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
-                          </button>
+                          </Button>
                         </div>
                       ))}
                     </div>

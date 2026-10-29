@@ -25,7 +25,7 @@ async function authHeaders(): Promise<Record<string, string>> {
 
 function resetStorage(): void {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -44,7 +44,7 @@ function request(
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   delete process.env.RADAR_ENABLED;
   delete process.env.STORAGE_ENCRYPTION_KEY;
 });
@@ -107,6 +107,32 @@ test("POST offers sync validates an empty body and gates a missing key without n
   const response = await POST(request("/api/radar/offers/sync", "POST", await authHeaders()));
   assert.equal(response.status, 200);
   assert.deepEqual(await response.json(), { status: "no_key" });
+});
+
+test("shared sync handler rejects invalid bodies before invoking a feed", async () => {
+  resetStorage();
+  process.env.RADAR_ENABLED = "true";
+  const { handleRadarFeedSync } = await import("../../src/app/api/radar/syncHandler.ts");
+  let calls = 0;
+  const sync = async () => {
+    calls += 1;
+    return { status: "test" };
+  };
+  const invalid = await handleRadarFeedSync(
+    request("/api/radar/offers/sync", "POST", await authHeaders(), { unexpected: true }),
+    sync,
+    "Sync failed"
+  );
+  assert.equal(invalid.status, 400);
+  assert.equal(calls, 0);
+  const valid = await handleRadarFeedSync(
+    request("/api/radar/offers/sync", "POST", await authHeaders(), {}),
+    sync,
+    "Sync failed"
+  );
+  assert.equal(valid.status, 200);
+  assert.deepEqual(await valid.json(), { status: "test" });
+  assert.equal(calls, 1);
 });
 
 test("local offer routes never call the private server directly", () => {

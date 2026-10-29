@@ -19,14 +19,14 @@ const { sanitizeReasoningEffortForProvider } = await import("../../open-sse/exec
 
 test.beforeEach(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 });
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("DeepSeek registries declare none/low/high/max on both V4 models", () => {

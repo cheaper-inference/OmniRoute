@@ -69,7 +69,7 @@ test.before(() => {
 test.after(() => {
   clearModelsDevCapabilities();
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#10281 isTinyBudgetReasoningProbe detects tiny explicit budgets on reasoning models", () => {

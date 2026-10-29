@@ -35,7 +35,7 @@ fs.writeFileSync(
 const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
 
 test.after(() => {
-  fs.rmSync(migrationsDir, { recursive: true, force: true });
+  fs.rmSync(migrationsDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (originalMigrationsDir === undefined) delete process.env.OMNIROUTE_MIGRATIONS_DIR;
   else process.env.OMNIROUTE_MIGRATIONS_DIR = originalMigrationsDir;
 });

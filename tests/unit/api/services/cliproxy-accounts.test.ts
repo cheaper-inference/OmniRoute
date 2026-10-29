@@ -22,13 +22,11 @@ before(async () => {
 after(() => {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 it("requires OmniRoute management authentication", async () => {
-  const response = await GET(
-    new Request("http://localhost/api/services/cliproxy/accounts")
-  );
+  const response = await GET(new Request("http://localhost/api/services/cliproxy/accounts"));
   assert.equal(response.status, 401);
 });
 

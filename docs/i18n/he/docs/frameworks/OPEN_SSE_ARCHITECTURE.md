@@ -1,0 +1,577 @@
+# open-sse Architecture (עברית)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OPEN_SSE_ARCHITECTURE.md)
+
+---
+
+> **בקצרה**: `open-sse/` הוא מנוע ההזרמה המרכזי שמפעיל כל בקשת LLM ב-OmniRoute. הוא מכיל כ-1,400 קבצים המממשים את צינור עיבוד הבקשות, רכיבי הביצוע, השירותים, שרת MCP ושכבת התרגום. מדריך זה מסביר כיצד החלקים משתלבים יחד.
+
+**מקור:** `open-sse/` (חבילת סביבת עבודה, כ-1,440 קובצי `.ts` שאינם קובצי בדיקות)
+
+---
+
+## מדוע חבילת סביבת עבודה נפרדת?
+
+`open-sse/` היא **סביבת עבודה עצמאית** בתוך ה-monorepo של OmniRoute, מכמה סיבות:
+
+1. **שימוש חוזר** — `open-sse` מפורסמת ב-npm בתור `@omniroute/open-sse`, כך שפרויקטים אחרים יכולים להשתמש בה באופן עצמאי
+2. **גבולות נקיים** — מנוע ההזרמה מופרד משכבת ממשק המשתמש/מסד הנתונים הייחודית ל-OmniRoute
+3. **ביצועים** — למנוע אין תלויות ב-Next.js, מה שמאפשר הפעלות קרות מהירות יותר בהקשרי CLI ו-serverless
+4. **ניהול גרסאות** — `open-sse` יכולה לפרסם גרסאות בקצב משלה
+
+```json
+// package.json
+"workspaces": ["open-sse"]
+```
+
+---
+
+## מבנה ברמה העליונה
+
+```
+open-sse/
+├── index.ts              # נקודת כניסה ציבורית
+├── types.d.ts            # ייצואי טיפוסים ציבוריים
+├── package.json          # @omniroute/open-sse
+├── config/               # תצורות ספקים, קבועים ורשומות
+├── executors/            # מבצעי HTTP לכל ספק (150 מודולים + base.ts/index.ts)
+├── handlers/             # מטפלי בקשות (chatCore, responses וכו')
+├── lib/                  # כלי עזר פנימיים
+├── mcp-server/           # שרת Model Context Protocol
+├── services/             # כ־298 מודולי שירות
+├── transformer/          # ממיר פורמט של Responses API
+├── translator/           # תרגום פורמטים (OpenAI ↔ Claude ↔ Gemini)
+└── utils/                # כלי עזר משותפים (רישום, שגיאות, הזרמה וכו')
+```
+
+### מספר המודולים
+
+| תיקייה | קבצים | מטרה |
+| `executors/` | 167 | מבצעי HTTP לכל ספק (מאוחדים באמצעות מפעל DefaultExecutor) |
+| `handlers/` | 157 | נקודות כניסה לבקשות (chatCore, responses, embeddings) |
+| `services/` | ~536 | ניתוב, אחסון במטמון, הגבלת קצב, רענון וכו' |
+| `translator/` | 56 | המרת פורמטים (OpenAI ↔ Claude ↔ Gemini) |
+| `mcp-server/` | 44 | כלי MCP ותעבורות |
+| `utils/` | ~108 | כלי עזר רוחביים (רישום, שגיאות, הזרמה) |
+| `config/` | ~339 | תצורות ספקים, קבועים ורשומות |
+
+---
+
+## צינור עיבוד הבקשה
+
+כל בקשת LLM עוברת דרך **צינור עיבוד בן 5 שלבים**:
+
+```
+                              ┌──────────────┐
+   בקשת HTTP                   │  1. ניתוב    │   פתרון combo, בחירת מודל
+   (נתיב Next.js)              └──────┬───────┘
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │  2. תרגום    │   המרת פורמטים (OpenAI ↔ Claude ↔ Gemini)
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │  3. ביצוע    │   רכיב ביצוע של ספק, HTTP, ניסיון חוזר, מפסק
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │  4. הזרמה    │   התמרת SSE, לחץ חוזר
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                              ┌──────────────┐
+                              │  5. תיעוד    │   מעקב שימוש, יומן קריאות, סיווג שגיאות
+                              └──────┬───────┘
+                                     │
+                                     ▼
+                              תגובת HTTP (SSE או JSON)
+```
+
+### שלב 1: ניתוב (services/combo.ts)
+
+**נקודת כניסה**: `handleComboChat()` בתוך `services/combo.ts`
+
+פותר את הבקשה לכדי רביעייה קונקרטית של `(provider, model, account, credentials)`:
+
+- חיפוש ה-combo לפי מזהה (או בניית combo וירטואלי עבור מודלים מסוג `auto/*`)
+- החלת אסטרטגיית הניתוב (עדיפות, משוקלל, round-robin וכו')
+- סינון ספקים שאינם תקינים (מפסק זרם)
+- בחירת היעד הזמין הבא
+
+עבור מודלים מסוג `auto/*`, שלב זה גם:
+
+- מפעיל את אלגוריתם **השקלול בעל 16 הגורמים** (`services/autoCombo/`)
+- בוחר צמד `provider+model` על סמך תקינות, עלות, זמן השהיה וכו'
+
+### שלב 2: תרגום (translator/)
+
+אם פורמט המקור (למשל OpenAI) שונה מפורמט היעד (למשל Claude), הבקשה **מתורגמת**:
+
+- הנחיית מערכת → הודעת מערכת
+- הגדרות כלים → פורמט כלים הייחודי לספק
+- פרמטרים של הנמקה/חשיבה → המקבילות הייחודיות לספק
+- נרמול תפקידי הודעות (`developer` → `system` עבור ספקים שאינם OpenAI)
+
+הקובץ `translator/index.ts` חושף:
+
+```ts
+translateRequest(body, sourceFormat, targetFormat): TranslatedRequest
+needsTranslation(source, target): boolean
+```
+
+### שלב 3: ביצוע (executors/)
+
+**נקודת כניסה**: `getExecutor(providerId).execute(request, options)`
+
+כל הספקים משתמשים ב-`DefaultExecutor` (`executors/default.ts`) באמצעות ברירת המחדל של המפעל `getExecutor()`. רכיב הביצוע:
+
+- בונה את כתובת ה-URL במעלה הזרם (`buildUrl()`)
+- מוסיף כותרות הייחודיות לספק (`buildHeaders()`)
+- מתמיר את גוף הבקשה (`transformRequest()`)
+- שולח את בקשת ה-HTTP עם ניסיונות חוזרים והשהיה מעריכית
+- מטפל ברענון אימות בעת הצורך (ספקי OAuth)
+
+כל רכיבי הביצוע יורשים את `BaseExecutor` (`executors/base.ts`, ‏1170 שורות קוד), המספק:
+
+- לוגיקת ניסיונות חוזרים משותפת
+- שילוב proxy
+- שילוב מפסק זרם
+- נקודות חיבור לתיעוד שימוש
+
+### שלב 4: הזרמה (utils/stream.ts)
+
+עבור תגובות זורמות, רכיב הביצוע מחזיר **ReadableStream**. המטפל:
+
+- מעביר דרך התמרת SSE (`createSSETransformStreamWithLogger`)
+- מחיל איתותי heartbeat כדי לזהות חיבורים שנותקו
+- מטפל בניתוק הלקוח באופן תקין (`pipeWithDisconnect`)
+- מתמיר SSE → JSON עבור לקוחות שאינם משתמשים בהזרמה
+
+עבור תגובות שאינן זורמות, רכיב הביצוע מחזיר אובייקט JSON מפוענח, שמועבר הלאה ללא שינוי.
+
+### שלב 5: תיעוד (services/usage.ts)
+
+לאחר התגובה (בין אם הצליחה ובין אם נכשלה), נתוני השימוש מתועדים:
+
+- `prompt_tokens`, `completion_tokens`, `cached_tokens` מתוך התגובה
+- `cost_usd` מחושב מנתוני התמחור
+- `latency_ms`, `status`, `error_class` במקרה של כשל
+- נשמרים בטבלה `usage_history`
+
+ארטיפקטים של יומן הקריאות (אם האפשרות מופעלת) נכתבים אל `${DATA_DIR}/call_logs/`.
+
+---
+
+## צלילה מעמיקה לקבצי מפתח
+
+### chatCore.ts (5977 שורות)
+
+ה**מטפל הראשי בבקשות**. למרות גודלו, המבנה שלו ברור:
+
+```ts
+// מבנה-על (pseudo) של chatCore.ts
+export async function handleChat(request: NextRequest) {
+  // 1. אימות + CORS
+  await authenticateRequest(request);
+  applyCorsHeaders(response);
+
+  // 2. אימות גוף הבקשה
+  const body = await parseRequestBody(request);
+
+  // 3. זיהוי פורמט + תרגום
+  const sourceFormat = detectFormat(request);
+  const targetFormat = getTargetFormat(providerId);
+  if (needsTranslation(sourceFormat, targetFormat)) {
+    body = translateRequest(body, sourceFormat, targetFormat);
+  }
+
+  // 4. ניתוב Combo
+  const targets = await resolveComboTargets(comboId, body);
+  for (const target of targets) {
+    try {
+      const result = await executeOnTarget(target, body);
+      await recordUsage(result);
+      return result;
+    } catch (err) {
+      // ממשיכים ליעד הבא
+    }
+  }
+
+  // 5. מנגנון גיבוי לחירום
+  return await emergencyFallback(body);
+}
+```
+
+למרות שמדובר בפונקציה ענקית אחת, היא מאורגנת ב**מקטעים עם הערות** הממופים ל-pipeline בן 5 השלבים.
+
+### combo.ts (4456 LOC)
+
+מנוע ה**ניתוב** שממיר combo לרשימת יעדים מסודרת.
+
+```ts
+// services/combo.ts
+export async function handleComboChat(body, comboId): Promise<ChatResult> {
+  const targets = await resolveComboTargets(comboId, body);
+  for (const target of targets) {
+    try {
+      return await handleSingleModel(target, body);
+    } catch (err) {
+      log.warn("target failed, trying next", { target, err });
+    }
+  }
+  throw new ComboExhaustedError("All targets failed");
+}
+```
+
+תומך ב**20 אסטרטגיות ניתוב** (ראו `src/shared/constants/routingStrategies.ts`):
+
+| אסטרטגיה            | התנהגות                                                                     |
+| ------------------- | --------------------------------------------------------------------------- |
+| `priority`          | רשימה מסודרת — היעד הראשון קודם                                             |
+| `weighted`          | הסתברותי, לפי משקל לכל יעד                                                  |
+| `round-robin`       | מעבר מחזורי על היעדים לפי הסדר                                              |
+| `context-relay`     | העברת ההקשר בין יעדים                                                       |
+| `fill-first`        | מילוי המכסה לפני המעבר ליעד הבא                                             |
+| `p2c`               | Power of two choices (בחירת הטוב מבין שתי אפשרויות)                         |
+| `random`            | אקראי אחיד                                                                  |
+| `least-used`        | בחירת היעד עם הכי מעט שימושים אחרונים                                       |
+| `cost-optimized`    | היעד התקין והזול ביותר קודם                                                 |
+| `reset-aware`       | מודע לחלונות האיפוס של הספק                                                 |
+| `reset-window`      | ניתוב מבוסס חלון איפוס                                                      |
+| `headroom`          | המרווח הגדול ביותר שנותר במכסה קודם                                         |
+| `quota-weighted`    | דילוג על חשבונות שמוצו, ואז הגרלה לפי מכסה שנותרה ÷ עומס פעיל (in-flight)   |
+| `strict-random`     | אחיד באמת (ללא שקלול איכות)                                                 |
+| `auto`              | שימוש בניקוד מבוסס 16 גורמים (`autoCombo/`)                                 |
+| `lkgp`              | הספק התקין הידוע האחרון קודם                                                |
+| `context-optimized` | המתאים ביותר לבקשות עם הקשר ארוך                                            |
+| `cache-optimized`   | הצמדת כל קידומת פרומפט הניתנת לשימוש חוזר לאותו חשבון (פגיעות prompt-cache) |
+| `fusion`            | פיזור מקבילי לפאנל, ואז סינתזה באמצעות שופט (`fusion.ts`)                   |
+| `pipeline`          | שרשור שלבים — הפלט של כל יעד מוזן לבא אחריו                                 |
+
+### base.ts (1170 LOC)
+
+ה**מבצע (executor) המופשט** שממנו יורשת כל מחלקת executor (ישירות או דרך `DefaultExecutor` ותת-מחלקות נוספות). הוא מכיל:
+
+- `buildUrl()` — בניית URL כברירת מחדל (תת-מחלקות דורסות זאת להתאמה אישית)
+- `buildHeaders()` — כותרות ברירת מחדל (אימות, content-type)
+- `transformRequest()` — העברה ישירה (pass-through) כברירת מחדל
+- `execute()` — לולאת ה-HTTP הראשית עם retry/backoff/breaker
+
+```ts
+// open-sse/executors/default.ts
+export class DefaultExecutor extends BaseExecutor {
+  // מטפל בכל הספקים התואמים ל-OpenAI/Anthropic
+  // ספקים רושמים תצורות (URL, אימות, כותרות) אך חולקים את לוגיקת ה-executor
+}
+```
+
+התנהגות ייחודית לספק (כותרות אימות, base URL, כותרות גרסה) מוגדרת דרך רישום הספקים (provider registry), ולא באמצעות מחלקות executor נפרדות.
+
+````
+
+---
+
+## Services (117 מודולים)
+
+Services הם **מודולים ממוקדים וחד-מטרתיים** שה-handlers מרכיבים יחד. הקטגוריות העיקריות:
+
+### ניתוב ו-Combo
+
+- `combo.ts` — נקודת כניסה לבקשות המנותבות דרך combo
+- `services/autoCombo/` — ניקוד מבוסס 16 גורמים, 8 אסטרטגיות ניתוב אוטומטי
+- `wildcardRouter.ts` — התאמת נתיבי wildcard (כגון `gpt-*`)
+- `modelFamilyFallback.ts` — fallback תוך-משפחתי מסוג T5
+
+### הגבלת קצב ומכסה
+
+- `rateLimitManager.ts` — token bucket לכל שילוב מפתח+ספק
+- `usage.ts` — רישום שימוש
+- `quotaCache.ts` — תמונות מצב של מכסות בזיכרון
+
+### חשבון ו-Token
+
+- `tokenRefresh.ts` — רענון OAuth בעת קבלת 401
+- `accountFallback.ts` — מעבר לחשבון חלופי
+- `sessionManager.ts` — מצב סשן רב-סיבובי (multi-turn)
+
+### אינטליגנציה
+
+- `intentClassifier.ts` — סיווג כוונת הבקשה
+- `taskAwareRouter.ts` — ניתוב לפי סוג המשימה
+- `thinkingBudget.ts` — הקצאת טוקני חשיבה
+- `contextManager.ts` — הזרקת הקשר ניתוב
+
+### חוסן (Resilience)
+
+- `resilience.ts` — תזמור של retry, backoff ו-breaker
+- `emergencyFallback.ts` — fallback כמוצא אחרון
+- `modelDeprecation.ts` — ניתוב אוטומטי למודלים יורשים
+
+### מצב (State)
+
+- `signatureCache.ts` — ביטול כפילויות לפי חתימת הבקשה
+- `volumeDetector.ts` — הפחתת עומס (load shedding)
+- `contextHandoff.ts` — סריאליזציה של סשן
+
+### דחיסה (Compression)
+
+- `compression/` (תת-תיקייה) — צינור דחיסה מלא (pipeline)
+- 39 קבצים המכסים מנועים, חבילות כללים ומתאמים (adapters)
+
+### כישורים (Skills)
+
+- (מכוסה ב-[SKILLS.md](./SKILLS.md))
+
+### זיכרון (Memory)
+
+- (מכוסה ב-[MEMORY.md](./MEMORY.md))
+
+---
+
+## Executors (150 מודולים)
+
+לרוב קובץ אחד לכל ספק. כל מחלקות ה-executor יורשות מ-`BaseExecutor` ודורסות את מה ששונה; שאר המודולים הם עוזרים ייעודיים לספק (סכימות של כלים, מתאמי fetch/TTS, מטפלי quirks).
+
+### דפוסים נפוצים
+
+ספקים נשלפים באמצעות `getExecutor(providerId)`, שמחזירה את ה-executor המוגדר. ספקים תואמי OpenAI/Anthropic משתמשים ב-`DefaultExecutor` (`executors/default.ts`). התנהגות ייחודית לספק (base URL, כותרות אימות, גרסת API) מוגדרת ב-`open-sse/config/providers/`, ואילו טרנספורמציות של גוף הבקשה מטופלות ב-`open-sse/translator/`.
+
+**URL מותאם אישית** מוגדר דרך קונפיגורציית הספק:
+
+```ts
+// קונפיגורציית ספק ב-open-sse/config/providers/
+export default {
+  id: "together",
+  baseURL: "https://api.together.xyz/v1/chat/completions",
+}
+````
+
+**אימות מותאם אישית** מטופל דרך קונפיגורציית האימות של רישום הספקים (מפתח API, OAuth, פרופילי כותרות).
+
+טרנספורמציות של **גוף בקשה מותאם אישית** (לדוגמה, Anthropic שמפרידה בין `system` ל-`messages`) נרשמות לכל ספק ב-`open-sse/translator/`.
+
+````
+
+### מפעל ה-Executors
+
+`executors/index.ts` מייצא את `getExecutor(providerId)`:
+
+```ts
+import { getExecutor } from "@omniroute/open-sse/executors";
+
+const executor = getExecutor("anthropic");
+const result = await executor.execute({
+  model: "claude-sonnet-4-5",
+  messages: [...],
+});
+````
+
+הפענוח מתבצע דרך ה-`ExecutorRegistry` (`executors/registry.ts`): כל executor מתמחה מוצהר בטבלה המובנית של `executors/index.ts` ונרשם באמצעות `registerExecutor(alias, instance)` בעת טעינת המודול; `getExecutor()` פונה לרישום ומבצעת fallback ל-`DefaultExecutor` עם memoization עבור כל ספק שאין לו רשומה מתמחה. המיפוי המלא של alias ← executor מאופיין על ידי ה-golden test `tests/unit/executor-map-golden.test.ts`.
+
+---
+
+## מתרגמים
+
+תרגום בין **3 פורמטים**: OpenAI, Anthropic, Gemini, וכן Responses API החדש.
+
+### מתי מתבצע תרגום
+
+```ts
+import { needsTranslation, translateRequest } from "@omniroute/open-sse/translator";
+
+if (needsTranslation(sourceFormat, targetFormat)) {
+  body = translateRequest(body, sourceFormat, targetFormat);
+}
+```
+
+תרגומים נפוצים:
+
+- `OpenAI → Anthropic`: שדה `system` נפרד, כותרת `x-api-key`
+- `OpenAI → Gemini`: `contents` במקום `messages`, וכן `systemInstruction`
+- `OpenAI → Responses API`: מערך `input`, מצב `previous_response_id`
+
+### מקרי קצה מטופלים
+
+- תפקיד `developer` →‏ `system` עבור ספקים שאינם OpenAI
+- תפקיד `system` → ממוזג לתוך הודעת המשתמש הראשונה עבור GLM/ERNIE
+- `json_schema` →‏ `responseMimeType` +‏ `responseSchema` של Gemini
+- `tools` → פורמט כלים ייעודי לספק
+- פרמטרים של חשיבה (o1, Claude) → מקבילות ייעודיות לספק
+
+---
+
+## שרת MCP
+
+`open-sse/mcp-server/` מממש את שרת **Model Context Protocol**:
+
+- **110 כלים** (ניהול ספקים, שילובים, זיכרון, מטמון, דחיסה, פרוקסי, מיומנויות, משחוק, תוספים, Notion, Obsidian, מאגר מקומי)
+- **3 תעבורות**: stdio, SSE, Streamable HTTP
+- **33 היקפי הרשאה** לצורך הרשאה פרטנית
+
+### רישום כלים
+
+הכלים רשומים כקבצים עצמאיים ב-`open-sse/mcp-server/tools/`, כאשר כל אחד מהם מייצא שם, סכימה, מטפל והיקף הרשאה:
+
+```ts
+// open-sse/mcp-server/tools/getHealth.ts
+import { z } from "zod";
+export default {
+  name: "omniroute_get_health",
+  description: "Get system health snapshot",
+  scope: "read:health",
+  inputSchema: z.object({}),
+  handler: async (_args, ctx) => {
+    return await getSystemHealth();
+  },
+};
+```
+
+### תעבורות
+
+```ts
+// stdio (שימוש ב-CLI)
+startMcpStdio(server);
+
+// SSE (הזרמה מבוססת HTTP)
+startMcpSse(server, port);
+
+// Streamable HTTP (MCP מודרני)
+startMcpStreamable(server, port);
+```
+
+### הרשאה
+
+כל קריאה לכלי עוברת בדיקות היקף הרשאה (`open-sse/mcp-server/auth/`):
+
+```ts
+if (!hasScope(apiKey, "providers:read")) {
+  throw new Error("Insufficient scope");
+}
+```
+
+---
+
+## ממירים
+
+`open-sse/transformer/` ממיר בין הפורמטים **Chat Completions** ו-**Responses API**.
+
+### מדוע נדרש ממיר נפרד?
+
+Responses API הוא הפורמט החדש של OpenAI, הכולל **שיחות בעלות מצב** (`previous_response_id`). כאשר לקוח שולח בקשת Responses, ‏OmniRoute:
+
+1. ממיר באופן פנימי Responses → Chat Completions
+2. שולח לספק (כל ספק שתומך ב-Chat Completions)
+3. ממיר את התגובה בחזרה לפורמט Responses
+4. מזרים את התגובה המומרת ללקוח
+
+הממיר (`transformer/responsesTransformer.ts`) מספק:
+
+```ts
+createResponsesApiTransformStream(): TransformStream
+```
+
+הוא מטפל ב:
+
+- אירועי `response.output_item.added`
+- אירועי `response.output_text.delta`
+- אירוע `response.completed`
+- מיפוי קריאות לכלים (`function_call` ↔ `tool_calls`)
+
+---
+
+## תְצוּרָה
+
+`open-sse/config/` מחזיקה את שכבת התצורה:
+
+| קוֹבֶץ                        | מַטָרָה                             |
+| ----------------------------- | ----------------------------------- |
+| `providerRegistry.ts`         | רישום מודל צ'אט מעל קטלוג 377 ספקים |
+| `providerModels.ts`           | כינויים של מודלים, מיפוי פורמטים    |
+| `constants.ts`                | פסק זמן, מגבלות, קודי סטטוס         |
+| `defaultThinkingSignature.ts` | חתימת חשיבה Claude ברירת מחדל       |
+| `modelStrip.ts` (בשירותים)    | הפשטת שדה לפי ספק                   |
+
+### סכימת רישום ספקים
+
+```ts
+interface ProviderConfig {
+  id: string;
+  name: string;
+  baseUrl: string;
+  authType: "bearer" | "api-key" | "oauth" | "cookie";
+  executorClass: string;
+  defaultModel: string;
+  capabilities: ProviderCapabilities;
+  models: ModelDefinition[];
+}
+```
+
+אימות Zod בעת טעינת המודול מבטיח שכל תצורות הספק חוקיות.
+
+---
+
+## מגבלות ביצועים
+
+למנוע הניתוב יש תקציבי ביצועים מחמירים:
+
+| פעולה                                    | יעד   | מדידה                      |
+| ---------------------------------------- | ----- | -------------------------- |
+| פתרון קומבינציה                          | <10ms | עבור 50 יעדים              |
+| בדיקת הגבלת קצב                          | <1ms  | דלי אסימונים בזיכרון       |
+| מעבר חלופי במשפחת מודלים                 | <5ms  | הגדרות משפחה שנשמרו במטמון |
+| שיגור ניתוב בקשה                         | <2ms  | נתיב קריטי                 |
+| **ללא קלט/פלט חוסם בנתיב הניתוב הקריטי** | —     | הכול אסינכרוני             |
+
+---
+
+## דפוסים שגויים
+
+❌ **קריאות סינכרוניות למסד הנתונים ב-`combo.ts`** — יש לחשב מראש ולשמור במטמון
+❌ **לוגיקת ניסיונות חוזרים במטפלים** — יש להשתמש ב-`retry()` משירות העמידות
+❌ **גישה ישירה לתצורת ספק** — יש להשתמש בפונקציות הגישה של `providerRegistry`
+❌ **שרשראות מעבר חלופי המקודדות באופן קשיח** — יש להגדיר ב-`modelFamilyFallback.ts`
+❌ **שינויי מצב בין בקשות מקביליות** — יש להשתמש רק בהקשר התחום לבקשה
+
+---
+
+## הוספת רכיב חדש
+
+### הוספת שירות חדש
+
+1. יש ליצור את `open-sse/services/[serviceName].ts` עם אחריות ממוקדת
+2. יש לייצא את פונקציית המטפל הראשית ואת כל הקבועים
+3. יש להוסיף בדיקות יחידה ב-`tests/unit/services/[serviceName].test.mjs`
+4. יש לשלב בצינור עיבוד הבקשות ב-`handlers/chatCore.ts` (אם קשור לניתוב)
+5. יש לעדכן את לוגיקת הניתוב ב-`combo.ts` אם השירות משפיע על בחירת היעד
+6. יש לתעד בקובץ זה
+
+### הוספת מבצע חדש
+
+1. יש ליצור את `open-sse/executors/[provider].ts` שיורש מ-`BaseExecutor`
+2. יש לרשום ב-`config/providerRegistry.ts`
+3. יש להוסיף למפעל ב-`executors/index.ts`
+4. יש להוסיף בדיקות יחידה עבור המבצע
+5. יש לתעד ב-`docs/architecture/ARCHITECTURE.md`
+
+### הוספת כלי MCP חדש
+
+1. יש ליצור או לעדכן את `open-sse/mcp-server/tools/[category]Tools.ts`
+2. יש להגדיר סכמת Zod עבור הקלטים
+3. יש לרשום את הכלי ב-`mcp-server/index.ts`
+4. יש להוסיף למטריצת ההרשאות ב-`mcp-server/auth/`
+5. יש להוסיף בדיקות יחידה
+
+---
+
+## ראו גם
+
+- [ARCHITECTURE.md](../architecture/ARCHITECTURE.md) — ארכיטקטורה ברמה גבוהה
+- [CODEBASE_DOCUMENTATION.md](../architecture/CODEBASE_DOCUMENTATION.md) — חומר עזר הנדסי
+- [REPOSITORY_MAP.md](../architecture/REPOSITORY_MAP.md) — פירוט לפי ספריות
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — ניקוד המבוסס על 16 גורמים
+- [MCP-SERVER.md](./MCP-SERVER.md) — שרת MCP
+- [A2A-SERVER.md](./A2A-SERVER.md) — שרת A2A
+- מקור: `open-sse/` (יותר מ-400 קבצים, כ-143K שורות קוד)

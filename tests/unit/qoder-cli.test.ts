@@ -38,7 +38,7 @@ function withStubQoderCli(fn: () => void | Promise<void>) {
   const restore = () => {
     if (prevBin === undefined) delete process.env.CLI_QODER_BIN;
     else process.env.CLI_QODER_BIN = prevBin;
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   };
   return Promise.resolve().then(fn).finally(restore);
 }
@@ -385,6 +385,35 @@ test("validateQoderCliPat returns valid when qodercli lists models for the PAT",
   });
 });
 
+test("validateQoderCliPat accepts a catalog that omits the MODEL header", async () => {
+  // Regression: validation required the literal "MODEL" header in stdout, so any
+  // CLI build that prints the catalog differently (renamed header, JSON output,
+  // localized table) failed with exit code 0 and a valid PAT was rejected.
+  const prevBin = process.env.CLI_QODER_BIN;
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "qodercli-stub-"));
+  const stub = path.join(dir, "qodercli");
+  fs.writeFileSync(
+    stub,
+    [
+      "#!/bin/sh",
+      'case "$*" in',
+      '  *--list-models*) printf "Auto\\nQwen3-Coder\\n"; exit 0;;',
+      "esac",
+      "exit 0",
+    ].join("\n"),
+    { mode: 0o755 }
+  );
+  process.env.CLI_QODER_BIN = stub;
+  try {
+    const result = await qoderCli.validateQoderCliPat({ apiKey: "pt-headerless" });
+    assert.deepEqual(result, { valid: true, error: null, unsupported: false });
+  } finally {
+    if (prevBin === undefined) delete process.env.CLI_QODER_BIN;
+    else process.env.CLI_QODER_BIN = prevBin;
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
+
 test("validateQoderCliPat rejects a PAT that qodercli reports as not logged in", async () => {
   await withStubQoderCli(async () => {
     const result = await qoderCli.validateQoderCliPat({ apiKey: "pt-bad-token" });
@@ -468,6 +497,34 @@ test("parseQoderCliFailure classifies qodercli auth output as 401", () => {
   }
 });
 
+test("parseQoderCliFailure classifies Qoder queued/busy envelopes as a retryable 503", () => {
+  // 10605 is Qoder's "upstream busy, try again" envelope. It arrives with a
+  // zero exit code, so before this classification it fell through to 502 —
+  // which parks the connection on the long failure cooldown and makes a brief
+  // upstream hiccup look like dead credentials.
+  for (const msg of [
+    "10605",
+    "Request queued, please retry later",
+    "The upstream model is busy right now",
+    "qodercli error: server busy",
+  ]) {
+    const failure = qoderCli.parseQoderCliFailure(msg);
+    assert.equal(failure.status, 503, msg);
+    assert.equal(failure.code, "upstream_busy", msg);
+    assert.equal(failure.message, msg, msg);
+  }
+
+  // A 503 response is what routing turns into the short serviceUnavailable
+  // cooldown, so keep the contract visible: createQoderErrorResponse must emit
+  // provider_error (not authentication_error) for it.
+  const response = qoderCli.createQoderErrorResponse({
+    status: 503,
+    message: "queued",
+    code: "upstream_busy",
+  });
+  assert.equal(response.status, 503);
+});
+
 test("runQoderCli survives qodercli exiting before it reads a large stdin (async EPIPE)", async () => {
   const prevBin = process.env.CLI_QODER_BIN;
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "qodercli-stub-"));
@@ -489,7 +546,7 @@ test("runQoderCli survives qodercli exiting before it reads a large stdin (async
   } finally {
     if (prevBin === undefined) delete process.env.CLI_QODER_BIN;
     else process.env.CLI_QODER_BIN = prevBin;
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -516,7 +573,7 @@ test("runQoderCli preserves multi-byte UTF-8 output (Chinese) via stream setEnco
   } finally {
     if (prevBin === undefined) delete process.env.CLI_QODER_BIN;
     else process.env.CLI_QODER_BIN = prevBin;
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -581,6 +638,6 @@ test("runQoderCli resolves the request against live --list-models and passes the
     qoderCli.__clearQoderModelNamesCache();
     if (prevBin === undefined) delete process.env.CLI_QODER_BIN;
     else process.env.CLI_QODER_BIN = prevBin;
-    fs.rmSync(dir, { recursive: true, force: true });
+    fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

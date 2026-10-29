@@ -38,7 +38,7 @@ test.after(() => {
   }
   for (const [key, value] of originalContextLengthEnv) process.env[key] = value;
   try {
-    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+    fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   } catch {
     // best-effort cleanup
   }
@@ -46,7 +46,7 @@ test.after(() => {
 
 function seedFixture() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   core.getDbInstance();
 
@@ -134,7 +134,11 @@ function seedFixture() {
   assert.equal(aliasCanonical.model, "claude-opus-4-5-20251101");
   assert.notEqual(aliasCanonical.model, "claude-4.5-opus");
   assert.equal(
-    capabilityOverrides.setModelCapabilityOverride("github/claude-4.5-opus", "max_output_tokens", 77777),
+    capabilityOverrides.setModelCapabilityOverride(
+      "github/claude-4.5-opus",
+      "max_output_tokens",
+      77777
+    ),
     true
   );
   assert.equal(
@@ -223,7 +227,7 @@ function assertOrdinarySnapshotParity(
 
 test("#9199 bulk capability rows treat prototype-shaped keys as data", () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   core.getDbInstance();
 

@@ -13,16 +13,25 @@
  *   3. Handles /start (returns the Mini App deep link) and everything else
  *      as a chat prompt proxied through the OmniRoute pipeline.
  */
+import { timingSafeEqual } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import type { TelegramUpdate } from "@/lib/telegram/botApi";
 import { extractChatMessage, sendTelegramMessage } from "@/lib/telegram/botApi";
-import { getTelegramBotToken, isTelegramEnabled } from "@/lib/telegram/config";
+import {
+  getTelegramBotToken,
+  getTelegramWebhookSecret,
+  getTelegramAllowlistConfigWarnings,
+  isTelegramEnabled,
+  isTelegramUserAllowed,
+  isTelegramWebhookSecretConfigured,
+} from "@/lib/telegram/config";
 import { verifyInitData, parseInitData } from "@/lib/telegram/initData";
 import { proxyChat } from "@/lib/telegram/chatProxy";
 import { formatTelegramGatewayError } from "@/lib/telegram/errorMessage";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
+import * as log from "@/sse/utils/logger";
 
 /**
  * Telegram update bodies are open-ended (many update types, evolving schema),
@@ -33,7 +42,12 @@ import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl"
 const telegramBodySchema = z
   .object({
     initData: z.string().optional(),
-    message: z.string().optional(),
+    // `message` is a STRING on the Mini App path ({ initData, message }) and an
+    // OBJECT on the webhook path (a Telegram update). Constraining it to a
+    // string rejected every real webhook delivery with 400 before any auth or
+    // routing ran, so accept either shape here and let each branch validate the
+    // shape it actually needs.
+    message: z.union([z.string(), z.record(z.string(), z.unknown())]).optional(),
     update_id: z.number().optional(),
     // allow unknown update fields
   })
@@ -66,10 +80,20 @@ const START_HELP =
   "• Send any message and I'll route it through your configured models.\n" +
   "• Open the Mini App for a full chat UI.";
 
+let allowlistConfigChecked = false;
+
+/** Report allowlist misconfiguration once per process instead of failing silently. */
+function warnOnceAboutAllowlistConfig(): void {
+  if (allowlistConfigChecked) return;
+  allowlistConfigChecked = true;
+  for (const warning of getTelegramAllowlistConfigWarnings()) log.warn("TELEGRAM", warning);
+}
+
 export async function POST(request: Request) {
   if (!isTelegramEnabled()) {
     return NextResponse.json({ ok: false, error: "Telegram not configured" }, { status: 503 });
   }
+  warnOnceAboutAllowlistConfig();
 
   let rawBody: unknown;
   try {
@@ -86,27 +110,64 @@ export async function POST(request: Request) {
 
   // ── Mini App direct path: { initData, message } ──────────────────────────
   const initData = typeof body.initData === "string" ? body.initData : "";
-  if (initData) {
-    const botToken = getTelegramBotToken();
-    if (!verifyInitData(initData, botToken)) {
-      return NextResponse.json({ ok: false, error: "Invalid initData signature" }, { status: 401 });
-    }
-    const message = typeof body.message === "string" ? body.message : "";
-    if (!message.trim()) {
-      return NextResponse.json({ ok: false, error: "message is required" }, { status: 400 });
-    }
-    // Resolve the Telegram user id from the verified initData for key mapping.
-    const telegramUserId = extractInitDataUserId(initData);
-    // Proxy synchronously and return the reply (Mini App awaits the fetch).
-    const reply = await proxyChat(telegramUserId, message);
-    return NextResponse.json({ ok: true, reply: reply || "⚠️ Empty gateway response." });
+  if (initData) return handleMiniAppRequest(initData, body);
+  return handleWebhookUpdate(request, body);
+}
+
+/** Mini App path: the initData HMAC proves origin; the allowlist decides who is served. */
+async function handleMiniAppRequest(initData: string, body: Record<string, unknown>) {
+  const botToken = getTelegramBotToken();
+  if (!verifyInitData(initData, botToken)) {
+    return NextResponse.json({ ok: false, error: "Invalid initData signature" }, { status: 401 });
+  }
+  const message = typeof body.message === "string" ? body.message : "";
+  if (!message.trim()) {
+    return NextResponse.json({ ok: false, error: "message is required" }, { status: 400 });
+  }
+  // Resolve the Telegram user id from the verified initData for key mapping.
+  const telegramUserId = extractInitDataUserId(initData);
+  if (!isTelegramUserAllowed(telegramUserId)) {
+    log.warn("TELEGRAM", "Mini App user not in TELEGRAM_ALLOWED_USER_IDS", {
+      userId: telegramUserId,
+    });
+    return NextResponse.json({ ok: false, error: "Telegram user not allowed" }, { status: 403 });
+  }
+  // Proxy synchronously and return the reply (Mini App awaits the fetch).
+  const reply = await proxyChat(telegramUserId, message);
+  return NextResponse.json({ ok: true, reply: reply || "⚠️ Empty gateway response." });
+}
+
+/** Bot webhook path: TelegramUpdate. */
+function handleWebhookUpdate(request: Request, body: Record<string, unknown>) {
+  // Unlike the Mini App branch (which verifies the initData HMAC), a
+  // webhook body carries no proof of origin: `chat.id` is attacker-chosen and
+  // reaches proxyChat(), which mints a real API key and spends upstream quota.
+  // Telegram's `secret_token` echo is the only authentication available here.
+  if (!isTelegramWebhookSecretConfigured()) {
+    return NextResponse.json(
+      { ok: false, error: "Telegram webhook secret not configured" },
+      { status: 503 }
+    );
+  }
+  const presentedSecret = request.headers.get("x-telegram-bot-api-secret-token") || "";
+  if (!webhookSecretMatches(presentedSecret, getTelegramWebhookSecret())) {
+    return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // ── Bot webhook path: TelegramUpdate ─────────────────────────────────────
   const update = body as unknown as TelegramUpdate;
   const chat = extractChatMessage(update);
   if (!chat) {
     // Non-message updates (callback_query etc.) — acknowledge silently.
+    return NextResponse.json({ ok: true });
+  }
+
+  // Authorize the *sender*, not the chat: in a group every member shares chatId.
+  // Telegram retries non-2xx deliveries, so acknowledge and drop silently.
+  if (!isTelegramUserAllowed(chat.fromId)) {
+    log.warn("TELEGRAM", "Dropped webhook message from a user not in TELEGRAM_ALLOWED_USER_IDS", {
+      userId: chat.fromId ?? null,
+      chatId: chat.chatId,
+    });
     return NextResponse.json({ ok: true });
   }
 
@@ -115,6 +176,22 @@ export async function POST(request: Request) {
   void handleAndReply(chat.chatId, chat.text, chat.messageId);
 
   return NextResponse.json({ ok: true });
+}
+
+/**
+ * Constant-time comparison of the presented webhook secret against the
+ * configured one. A plain `===` short-circuits on the first differing byte and
+ * leaks the shared-prefix length through response timing; `timingSafeEqual`
+ * does not. It requires equal-length buffers, so a length mismatch is rejected
+ * up front (the length itself is not secret).
+ *
+ * Exported as a test seam only — not part of the route contract.
+ */
+export function webhookSecretMatches(presented: string, expected: string): boolean {
+  const a = Buffer.from(presented);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 async function handleAndReply(chatId: number, text: string, messageId?: number): Promise<void> {

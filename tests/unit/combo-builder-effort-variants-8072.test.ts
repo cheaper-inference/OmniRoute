@@ -34,7 +34,7 @@ const { getComboBuilderOptions } = await import("../../src/lib/combos/builderOpt
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#8072 buildModelOptions: synced <model>-<tier> effort variants appear in the Combo Builder picker and inherit the base model's metadata", async () => {

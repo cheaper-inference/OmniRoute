@@ -9,14 +9,16 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
+const { getModelAliases, setModelAlias } = await import("@/lib/db/models");
+const localDb = { getModelAliases, setModelAlias };
 const { importManagedModels } = await import("../../src/lib/providerModels/managedModelImport.ts");
 const { mergeProviderModelListing } =
   await import("../../src/lib/providers/mergeProviderModelListing.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -26,7 +28,46 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
+
+test("sync preserves a disabled sibling catalog for later reactivation but prunes deleted accounts", async () => {
+  const active = await providersDb.createProviderConnection({
+    provider: "codex",
+    name: "active",
+    authType: "oauth",
+    isActive: true,
+  });
+  const disabled = await providersDb.createProviderConnection({
+    provider: "codex",
+    name: "disabled",
+    authType: "oauth",
+    isActive: false,
+  });
+  for (const id of [disabled.id, "deleted-account"]) {
+    await modelsDb.replaceSyncedAvailableModelsForConnection("codex", id, [
+      { id: "gpt-6-astra", name: "Astra" },
+    ]);
+  }
+  await importManagedModels({
+    providerId: "codex",
+    connectionId: active.id,
+    mode: "sync",
+    fetchedModels: [{ id: "gpt-6-astra", name: "Astra" }],
+  });
+  assert.equal(
+    (await modelsDb.getSyncedAvailableModelsForConnection("codex", disabled.id)).length,
+    1
+  );
+  assert.deepEqual(
+    await modelsDb.getSyncedAvailableModelsForConnection("codex", "deleted-account"),
+    []
+  );
+  await providersDb.updateProviderConnection(disabled.id, { isActive: true });
+  assert.equal(
+    (await modelsDb.getSyncedAvailableModelsForConnection("codex", disabled.id))[0].id,
+    "gpt-6-astra"
+  );
 });
 
 test("sync mode builds aliases from provider-level synced available models", async () => {
@@ -128,6 +169,7 @@ test("sync keeps a same-id manual model as the user-configurable metadata overri
       id: "shared-model",
       name: "Operator configuration",
       source: "manual",
+      endpointCapabilitySource: "operator",
       apiFormat: "responses",
       supportedEndpoints: ["responses"],
       targetFormat: "claude",
@@ -296,10 +338,70 @@ test("antigravity sync dynamically builds and saves mitmAlias mappings", async (
     models.some((model) => model.id === "gemini-3.5-flash"),
     false
   );
-  assert.equal(mitmMappings["gemini-3.7-flash-high"], "antigravity/gemini-3.7-flash-high");
+  // #11824: gemini-3.7-flash-high is a known cross-account-unsafe display id (the
+  // tier-suffixed upstream id is only callable on Google projects specifically
+  // provisioned for it); it must always resolve through the static alias to the
+  // safe shared "-tiered" endpoint id, never as an identity mapping to the literal
+  // tier id — even when it appears directly in this connection's own discovery.
+  assert.equal(mitmMappings["gemini-3.7-flash-high"], "antigravity/gemini-3.7-flash-tiered");
   assert.equal(mitmMappings["custom-antigravity-model"], "antigravity/custom-antigravity-model");
 
   // Removed Antigravity 2.0 preview/agent aliases must not be reintroduced.
   assert.equal(mitmMappings["gemini-3.5-flash-preview"], undefined);
   assert.equal(mitmMappings["gemini-3-flash-agent"], undefined);
+});
+
+test("#11824: syncing account A's model catalog must not route account B's gemini-3.7-flash-high to an id B's own discovery never advertised", async () => {
+  const db = core.getDbInstance();
+  const now = "2026-08-27";
+  db.prepare(
+    "INSERT INTO provider_connections (id, provider, auth_type, name, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run("acct-a", "antigravity", "oauth", "Antigravity A", 1, now, now);
+  db.prepare(
+    "INSERT INTO provider_connections (id, provider, auth_type, name, is_active, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)"
+  ).run("acct-b", "antigravity", "oauth", "Antigravity B", 1, now, now);
+
+  // Account A: Google has provisioned direct tier-suffixed callability for this
+  // project -- its own :fetchAvailableModels lists "gemini-3.7-flash-high" verbatim.
+  await importManagedModels({
+    providerId: "antigravity",
+    connectionId: "acct-a",
+    mode: "sync",
+    fetchedModels: [{ id: "gemini-3.7-flash-high", name: "Gemini 3.7 Flash High" }],
+  });
+
+  // Account B: Google has NOT provisioned the direct tier id for this project --
+  // its own :fetchAvailableModels only ever lists the tiered endpoint id.
+  await importManagedModels({
+    providerId: "antigravity",
+    connectionId: "acct-b",
+    mode: "sync",
+    fetchedModels: [{ id: "gemini-3.7-flash-tiered", name: "Gemini 3.7 Flash (Tiered)" }],
+  });
+
+  // Account B's OWN synced catalog never included the direct tier id.
+  const acctBOwnCatalog = await modelsDb.getSyncedAvailableModelsForConnection(
+    "antigravity",
+    "acct-b"
+  );
+  const acctBOwnIds = acctBOwnCatalog.map((m) => m.id);
+  assert.ok(
+    !acctBOwnIds.includes("gemini-3.7-flash-high"),
+    "precondition: account B's own discovery must not include the direct tier id"
+  );
+
+  // But the GLOBAL mitmAlias table used by cleanModelName() for EVERY connection
+  // (including B's requests) was rebuilt from the union of A + B, so it must not
+  // still route "gemini-3.7-flash-high" to the id only A supports.
+  const mitmMappings = await modelsDb.getMitmAlias("antigravity");
+
+  assert.notEqual(
+    mitmMappings["gemini-3.7-flash-high"],
+    "antigravity/gemini-3.7-flash-high",
+    "BUG: the shared mitmAlias table routes gemini-3.7-flash-high to the literal " +
+      "upstream id (only account A's project supports it) even for account B, " +
+      "whose own discovery never advertised that id -- this is what produces the " +
+      "per-account 404 reported in #11824/#11651."
+  );
+  assert.equal(mitmMappings["gemini-3.7-flash-high"], "antigravity/gemini-3.7-flash-tiered");
 });

@@ -236,7 +236,7 @@ describe("tryAgentAuth", () => {
     } else {
       delete process.env.USERPROFILE;
     }
-    fs.rmSync(tmpHome, { recursive: true, force: true });
+    fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("finds a token in the primary auth.json candidate", async () => {
@@ -336,7 +336,7 @@ describe("tryIdeAuth", () => {
       delete process.env.USERPROFILE;
     }
     if (tmpHome) {
-      fs.rmSync(tmpHome, { recursive: true, force: true });
+      fs.rmSync(tmpHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       tmpHome = undefined;
     }
   });

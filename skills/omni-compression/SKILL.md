@@ -19,7 +19,7 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 Preview compression for a message payload
 
 ```bash
-curl -X POST https://localhost:20128/api/compression/preview \
+curl -X POST http://localhost:20128/api/compression/preview \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -30,7 +30,7 @@ curl -X POST https://localhost:20128/api/compression/preview \
 List Caveman compression language packs
 
 ```bash
-curl https://localhost:20128/api/compression/language-packs \
+curl http://localhost:20128/api/compression/language-packs \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -39,8 +39,50 @@ curl https://localhost:20128/api/compression/language-packs \
 List Caveman compression rule metadata
 
 ```bash
-curl https://localhost:20128/api/compression/rules \
+curl http://localhost:20128/api/compression/rules \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/compression/compare
+
+POST compression › compare
+
+```bash
+curl -X POST http://localhost:20128/api/compression/compare \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/compression/compare/verify
+
+POST compression › compare › verify
+
+```bash
+curl -X POST http://localhost:20128/api/compression/compare/verify \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/compression/engines
+
+GET compression › engines
+
+```bash
+curl http://localhost:20128/api/compression/engines \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/compression/retrieve
+
+POST compression › retrieve
+
+```bash
+curl -X POST http://localhost:20128/api/compression/retrieve \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
 ```
 
 ## Payloads
@@ -52,7 +94,7 @@ See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.y
 
 # OmniRoute — Compression
 
-Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omniroute/SKILL.md) for setup.
+Requires `OMNIROUTE_URL` and `OMNIROUTE_KEY`. See [entry-point SKILL](https://raw.githubusercontent.com/diegosouzapw/OmniRoute/main/skills/omni-auth/SKILL.md) for setup.
 
 ## Overview
 

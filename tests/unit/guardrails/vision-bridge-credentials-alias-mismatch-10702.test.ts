@@ -10,13 +10,12 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const core = await import("../../../src/lib/db/core.ts");
 const providersDb = await import("../../../src/lib/db/providers.ts");
-const { hasUsableCredentialsForModel } = await import(
-  "../../../src/lib/guardrails/visionBridgeCredentials.ts"
-);
+const { hasUsableCredentialsForModel } =
+  await import("../../../src/lib/guardrails/visionBridgeCredentials.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("issue #10702: hasUsableCredentialsForModel resolves alias-prefixed model to the raw provider id (command-code / alias cmd)", async () => {
@@ -35,18 +34,18 @@ test("issue #10702: hasUsableCredentialsForModel resolves alias-prefixed model t
   );
 });
 
-test("issue #10702: hasUsableCredentialsForModel resolves alias-prefixed model to the raw provider id (opencode / alias oc)", async () => {
+test("issue #10702: hasUsableCredentialsForModel resolves alias-prefixed model to the raw provider id (uncloseai / alias unc)", async () => {
   await providersDb.createProviderConnection({
-    provider: "opencode",
+    provider: "uncloseai",
     authType: "apikey",
-    apiKey: "sk-test-opencode-key",
+    apiKey: "sk-test-uncloseai-key",
     isActive: true,
   });
 
-  const result = await hasUsableCredentialsForModel("oc/some-vision-model");
+  const result = await hasUsableCredentialsForModel("unc/some-vision-model");
   assert.equal(
     result,
     true,
-    "the credentialed opencode connection must be found via its public alias 'oc'"
+    "the credentialed uncloseai connection must be found via its public alias 'unc'"
   );
 });

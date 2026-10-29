@@ -21,7 +21,7 @@ test("T31: antigravity static catalog exposes client-visible Gemini preview IDs"
   // catalog) retired the `gemini-3-pro-preview` alias, so assert the current
   // client-visible top flash tier instead.
   const staticIds = (getStaticModelsForProvider("antigravity") || []).map((m) => m.id);
-  assert.ok(staticIds.includes("gemini-3.7-flash-high"));
+  assert.ok(staticIds.includes("gemini-3.8-flash-high"));
   assert.ok(!staticIds.includes("gemini-3-pro-preview"));
   // #3303 (agy parity, discussion #3184): the Gemini + Claude budget tiers ARE
   // client-visible on the Antigravity OAuth backend (Claude was never removed).
@@ -32,8 +32,12 @@ test("T31: antigravity static catalog exposes client-visible Gemini preview IDs"
   assert.ok(!staticIds.includes("gemini-claude-opus-4-5-thinking"));
 });
 
+// #11503 retargeted the -high alias from the dotted id to the hyphenated one, on the
+// grounds that the catalog spells it that way and the dotted form is not routable.
+// The two rungs therefore no longer share a spelling — pinned separately so a future
+// re-unification is a deliberate edit here rather than a silent drift.
 test("T31: legacy Gemini aliases resolve to Gemini 3.1 IDs", () => {
-  assert.equal(resolveDeprecatedAlias("gemini-3-pro-high"), "gemini-3.1-pro-high");
+  assert.equal(resolveDeprecatedAlias("gemini-3-pro-high"), "gemini-3-1-pro-high");
   assert.equal(resolveDeprecatedAlias("gemini-3-pro-low"), "gemini-3.1-pro-low");
 });
 
@@ -128,8 +132,8 @@ test("opencode-go family: context/output caps match upstream provider docs", () 
   // MiniMax M2.x: ~200K context, 131K output
   assert.equal(getModelSpec("minimax-m2.7").contextWindow, 204800);
   assert.equal(getModelSpec("minimax-m2.7").maxOutputTokens, 131072);
-  assert.equal(getModelSpec("minimax-m2.5").contextWindow, 200000);
-  assert.equal(getModelSpec("MiniMax-M2.5").contextWindow, 200000);
+  assert.equal(getModelSpec("minimax-m2.5").contextWindow, 204800);
+  assert.equal(getModelSpec("MiniMax-M2.5").contextWindow, 204800);
 
   // DeepSeek V4: 1M context, 384K output
   assert.equal(getModelSpec("deepseek-v4-pro").contextWindow, 1000000);

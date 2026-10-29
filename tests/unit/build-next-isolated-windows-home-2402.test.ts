@@ -5,11 +5,8 @@ import fsSync from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const {
-  ensureWindowsBuildProfileDirs,
-  getWindowsBuildProfileDir,
-  resolveNextBuildEnv,
-} = await import("../../scripts/build/build-next-isolated.mjs");
+const { ensureWindowsBuildProfileDirs, getWindowsBuildProfileDir, resolveNextBuildEnv } =
+  await import("../../scripts/build/build-next-isolated.mjs");
 
 // Port of decolua/9router#2402 ("fix(build): isolate Windows HOME/AppData during
 // next build"). Upstream wraps `npm run build` in a new `scripts/build-app.js`
@@ -27,6 +24,7 @@ test("resolveNextBuildEnv leaves HOME/USERPROFILE/APPDATA untouched on non-Windo
   assert.equal(env.USERPROFILE, undefined);
   assert.equal(env.APPDATA, undefined);
   assert.equal(env.LOCALAPPDATA, undefined);
+  assert.equal(env.SWC_NATIVE_BINDING_CACHE, undefined);
 });
 
 test("resolveNextBuildEnv isolates HOME/USERPROFILE/APPDATA/LOCALAPPDATA on win32", () => {
@@ -48,6 +46,40 @@ test("resolveNextBuildEnv isolates HOME/USERPROFILE/APPDATA/LOCALAPPDATA on win3
   assert.equal(path.dirname(path.dirname(env.LOCALAPPDATA)), env.HOME);
 });
 
+test("resolveNextBuildEnv pins SWC_NATIVE_BINDING_CACHE outside the temp sandbox on win32", () => {
+  const env = resolveNextBuildEnv(
+    {
+      NODE_ENV: "test",
+      USERPROFILE: "C:\\Users\\ci-runner",
+      LOCALAPPDATA: "C:\\Users\\ci-runner\\AppData\\Local",
+    },
+    "win32"
+  );
+
+  assert.equal(path.basename(env.SWC_NATIVE_BINDING_CACHE), "swc-native-cache-omniroute");
+  assert.ok(
+    !env.SWC_NATIVE_BINDING_CACHE.startsWith(env.HOME),
+    "the SWC binding cache must NOT live under the temp-home sandbox (its DACL is rejected)"
+  );
+  assert.ok(
+    env.SWC_NATIVE_BINDING_CACHE.startsWith("C:\\Users\\ci-runner"),
+    "the SWC binding cache must live under the real per-user LOCALAPPDATA"
+  );
+});
+
+test("resolveNextBuildEnv respects a caller-provided SWC_NATIVE_BINDING_CACHE on win32", () => {
+  const env = resolveNextBuildEnv(
+    {
+      NODE_ENV: "test",
+      USERPROFILE: "C:\\Users\\ci-runner",
+      SWC_NATIVE_BINDING_CACHE: "D:\\custom\\swc-cache",
+    },
+    "win32"
+  );
+
+  assert.equal(env.SWC_NATIVE_BINDING_CACHE, "D:\\custom\\swc-cache");
+});
+
 test("resolveNextBuildEnv skips Windows isolation when a caller already sandboxed the build (NEXT_DIST_DIR)", () => {
   const env = resolveNextBuildEnv(
     { NODE_ENV: "test", USERPROFILE: "C:\\Users\\ci-runner", NEXT_DIST_DIR: ".build/cli-next" },
@@ -61,6 +93,7 @@ test("resolveNextBuildEnv skips Windows isolation when a caller already sandboxe
   );
   assert.equal(env.APPDATA, undefined);
   assert.equal(env.LOCALAPPDATA, undefined);
+  assert.equal(env.SWC_NATIVE_BINDING_CACHE, undefined);
 });
 
 test("getWindowsBuildProfileDir is stable per-process (repeated calls return the same path)", () => {
@@ -88,6 +121,6 @@ test("ensureWindowsBuildProfileDirs creates the isolated AppData directories", a
     assert.equal(fsSync.existsSync(env.APPDATA), true);
     assert.equal(fsSync.existsSync(env.LOCALAPPDATA), true);
   } finally {
-    await fs.rm(tempDir, { recursive: true, force: true });
+    await fs.rm(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

@@ -20,7 +20,7 @@ function at(seconds: number): string {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("hashes canonical owners and never persists the raw owner", () => {
@@ -463,6 +463,6 @@ test("cross-process contenders never both acquire the same connection", async ()
     assert.equal(results.filter((result) => result.kind === "ACQUIRED").length, 1);
     assert.equal(results.filter((result) => result.kind === "CONNECTION_BUSY").length, 1);
   } finally {
-    fs.rmSync(raceDir, { recursive: true, force: true });
+    fs.rmSync(raceDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

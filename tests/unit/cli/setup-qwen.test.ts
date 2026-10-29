@@ -64,7 +64,7 @@ test("setup-qwen writes current V4 settings and only its dedicated env key", asy
     assert.match(env, /^OPENAI_API_KEY=keep-me$/m);
     assert.match(env, /^OMNIROUTE_API_KEY="sk-qwen-dedicated"$/m);
   } finally {
-    await fs.rm(tempDir, { recursive: true, force: true });
+    await fs.rm(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -85,6 +85,6 @@ test("setup-qwen does not overwrite an invalid settings file", async () => {
     assert.equal(code, 1);
     assert.equal(await fs.readFile(settingsPath, "utf8"), "{ invalid JSON");
   } finally {
-    await fs.rm(tempDir, { recursive: true, force: true });
+    await fs.rm(tempDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

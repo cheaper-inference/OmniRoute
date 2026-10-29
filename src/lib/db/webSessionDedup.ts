@@ -4,6 +4,24 @@
  * cookie-dedup wiring there stays thin (#3368 PR6). No DB access here.
  */
 
+import { WEB_COOKIE_PROVIDERS } from "@/shared/constants/providers";
+
+/**
+ * #15070 — web-cookie providers store a session credential under the apikey
+ * auth type when added from the dashboard. `name` is a user-editable label that
+ * two different accounts legitimately share, so the apikey name-based upsert
+ * must NOT apply to them: a second account under the same name would silently
+ * overwrite the first account's session. The credential-value dedup (#3023)
+ * still collapses re-adding the very same session. Mirrors #15159 / B-01 for
+ * the cookie auth type.
+ */
+export function isWebCookieProviderId(provider: unknown): boolean {
+  return (
+    typeof provider === "string" &&
+    Object.prototype.hasOwnProperty.call(WEB_COOKIE_PROVIDERS, provider.toLowerCase())
+  );
+}
+
 /**
  * Reduce a `provider_specific_data` record to a single comparable credential
  * value. Cookie/token credentials are mirrored across a provider's storage
@@ -19,6 +37,19 @@ const PREFERRED_CREDENTIAL_KEYS = [
   "sso",
   "access_token",
   "accessToken",
+  // Nonstandard provider console cookies used for web-session imports.
+  // They must precede the generic alphabetical fallback: baseUrl, username
+  // or workspaceId identifies a host/account display, NOT its session.
+  // Without these, two cookies from the same host can overwrite each other.
+  "authCookie",
+  "qwenCloudCookie",
+  "volcConsoleCookie",
+  "alibabaConsoleCookie",
+  "xiaomiMimoConsoleCookie",
+  "ollamaCloudCookie",
+  "ollamaCloudUsageCookie",
+  "ollamaUsageCookie",
+  "usageCookie",
 ];
 
 /** First trimmed non-empty string value among `keys` of `rec`, else null. */
@@ -73,25 +104,49 @@ function fieldMatch(incoming: string | null, existing: string | null): boolean |
 }
 
 /**
+ * Strictly two-sided disambiguator match: decides only when BOTH sides carry
+ * the field. Unlike `fieldMatch`, a value present on one side alone stays
+ * undecided, so rows stored before the field existed are never forked into a
+ * duplicate on the next login.
+ */
+function bothSidesFieldMatch(
+  incoming: string | null,
+  existing: string | null
+): boolean | undefined {
+  if (incoming && existing) return incoming === existing;
+  return undefined;
+}
+
+/**
  * Decide whether `row` (an existing `provider_connections` record) is the
  * same OAuth identity as an incoming connection carrying `incomingUsername`
- * and `incomingProfileArn` (#10815).
+ * and `incomingProfileArn` (#10815), plus `incomingOrganizationUuid` for
+ * Claude.
  *
- * Two independent disambiguators, either of which can prove "different
- * account": `providerSpecificData.username` (Raycast-style IdP dedup) and
+ * Three independent disambiguators, any of which can prove "different
+ * account": `providerSpecificData.username` (generic username/IdP fallback),
  * `providerSpecificData.profileArn` (Kiro/AWS profile dedup — Kiro never
- * sets `username`). A field only rules a match IN/OUT when both the
- * incoming and existing record carry it; when neither carries either field
- * the legacy bare-email match still applies unchanged.
+ * sets `username`) and `providerSpecificData.organizationUUID` (Claude, where
+ * one identity reaches its personal workspace and any Team organization under
+ * the same email and the same accountUUID). A field only rules a match IN/OUT
+ * when both the incoming and existing record carry it; when neither carries
+ * any of them the legacy bare-email match still applies unchanged.
  */
 export function isMatchingOauthIdentity(
   row: { provider_specific_data?: unknown },
   incomingUsername: string | null,
-  incomingProfileArn: string | null
+  incomingProfileArn: string | null,
+  incomingOrganizationUuid: string | null = null
 ): boolean {
   const existingPsd = parseProviderSpecificData(row.provider_specific_data);
   const usernameMatch = fieldMatch(incomingUsername, nonEmptyString(existingPsd?.username));
   const profileArnMatch = fieldMatch(incomingProfileArn, nonEmptyString(existingPsd?.profileArn));
-  if (usernameMatch === false || profileArnMatch === false) return false;
+  const organizationMatch = bothSidesFieldMatch(
+    incomingOrganizationUuid,
+    nonEmptyString(existingPsd?.organizationUUID)
+  );
+  if (usernameMatch === false || profileArnMatch === false || organizationMatch === false) {
+    return false;
+  }
   return true;
 }

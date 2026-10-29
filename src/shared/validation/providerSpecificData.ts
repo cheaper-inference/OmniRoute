@@ -16,11 +16,96 @@ function isHttpUrl(value: string): boolean {
 const CODEX_REASONING_EFFORT_VALUES = new Set(["none", "low", "medium", "high", "xhigh", "max"]);
 const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set(["default", "priority", "fast", "flex"]);
 const CODEX_FINGERPRINT_MODE_VALUES = new Set(["off", "device", "session", "full"]);
+const CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES = new Set(["client", "thread"]);
 const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
+const REASONING_CONTROL_VALUES = new Set(["chat-template", "openai"]);
+const PEAK_HOUR_PROTECTION_MODES = new Set(["block", "avoid"]);
+const PEAK_HOUR_PROTECTION_DAYS = new Set(["mon", "tue", "wed", "thu", "fri", "sat", "sun"]);
 export const MAX_PROVIDER_SPECIFIC_TIMEOUT_MS = 86_400_000; // 24h — operator cap, anti-DoS
+
+/** Shared guard for optional positive-number providerSpecificData knobs. */
+function validatePositiveNumberField(value: unknown, key: string, ctx: z.RefinementCtx): void {
+  if (value === undefined || value === null) return;
+  if (typeof value !== "number" || !Number.isFinite(value) || value <= 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `providerSpecificData.${key} must be a positive number`,
+      path: [key],
+    });
+  }
+}
 
 // #6880 — per-connection prompt-cache capability override, extracted so
 // validateProviderSpecificData() stays under the complexity gate.
+function validatePeakHourProtectionBlock(value: unknown, ctx: z.RefinementCtx): void {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.peakHourProtection must be an object",
+      path: ["peakHourProtection"],
+    });
+    return;
+  }
+  const record = value as Record<string, unknown>;
+  if (record.enabled !== undefined && typeof record.enabled !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.peakHourProtection.enabled must be a boolean",
+      path: ["peakHourProtection", "enabled"],
+    });
+  }
+  if (record.mode !== undefined && !PEAK_HOUR_PROTECTION_MODES.has(String(record.mode))) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.peakHourProtection.mode must be block or avoid",
+      path: ["peakHourProtection", "mode"],
+    });
+  }
+  if (!Array.isArray(record.windows)) return;
+  if (record.windows.length > 16) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.peakHourProtection.windows supports at most 16 windows",
+      path: ["peakHourProtection", "windows"],
+    });
+  }
+  record.windows.slice(0, 16).forEach((window, index) => {
+    if (!window || typeof window !== "object" || Array.isArray(window)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "peak-hour windows must be objects",
+        path: ["peakHourProtection", "windows", index],
+      });
+      return;
+    }
+    const entry = window as Record<string, unknown>;
+    for (const key of ["startUtc", "endUtc"] as const) {
+      if (typeof entry[key] !== "string" || !/^\d{1,2}:\d{2}$/.test(entry[key])) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `providerSpecificData.peakHourProtection.windows.${key} must be HH:MM UTC`,
+          path: ["peakHourProtection", "windows", index, key],
+        });
+      }
+    }
+    if (entry.days !== undefined) {
+      if (!Array.isArray(entry.days)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "providerSpecificData.peakHourProtection.windows.days must be an array",
+          path: ["peakHourProtection", "windows", index, "days"],
+        });
+      } else if (entry.days.some((day) => !PEAK_HOUR_PROTECTION_DAYS.has(String(day)))) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "providerSpecificData.peakHourProtection.windows.days contains an invalid day",
+          path: ["peakHourProtection", "windows", index, "days"],
+        });
+      }
+    }
+  });
+}
+
 function validateCacheBlock(data: Record<string, unknown>, ctx: z.RefinementCtx): void {
   const cache = data.cache;
   if (cache === undefined) return;
@@ -112,6 +197,21 @@ export function validateProviderSpecificData(
     });
   }
 
+  const toolNameMaxLength = data.toolNameMaxLength;
+  if (
+    toolNameMaxLength !== undefined &&
+    toolNameMaxLength !== null &&
+    (!Number.isInteger(toolNameMaxLength) ||
+      (toolNameMaxLength as number) < 1 ||
+      (toolNameMaxLength as number) > 1024)
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.toolNameMaxLength must be an integer from 1 to 1024",
+      path: ["toolNameMaxLength"],
+    });
+  }
+
   const customUserAgent = data.customUserAgent;
   if (
     customUserAgent !== undefined &&
@@ -170,6 +270,21 @@ export function validateProviderSpecificData(
     }
   }
 
+  const codexPromptCacheKeyScope = data.codexPromptCacheKeyScope;
+  if (codexPromptCacheKeyScope !== undefined && codexPromptCacheKeyScope !== null) {
+    const normalized =
+      typeof codexPromptCacheKeyScope === "string"
+        ? codexPromptCacheKeyScope.trim().toLowerCase()
+        : "";
+    if (!CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES.has(normalized)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "providerSpecificData.codexPromptCacheKeyScope must be one of client, thread",
+        path: ["codexPromptCacheKeyScope"],
+      });
+    }
+  }
+
   const preserveEncryptedReasoning = data.preserveEncryptedReasoning;
   if (preserveEncryptedReasoning !== undefined && typeof preserveEncryptedReasoning !== "boolean") {
     ctx.addIssue({
@@ -179,13 +294,38 @@ export function validateProviderSpecificData(
     });
   }
 
+  const reasoningControl = data.reasoningControl;
+  if (
+    reasoningControl !== undefined &&
+    reasoningControl !== null &&
+    (typeof reasoningControl !== "string" || !REASONING_CONTROL_VALUES.has(reasoningControl))
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.reasoningControl must be chat-template, openai, or null",
+      path: ["reasoningControl"],
+    });
+  }
+
   const blockExtraUsage = data.blockExtraUsage;
+  if (data.allowPaidCredits !== undefined && typeof data.allowPaidCredits !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.allowPaidCredits must be a boolean",
+      path: ["allowPaidCredits"],
+    });
+  }
   if (blockExtraUsage !== undefined && typeof blockExtraUsage !== "boolean") {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: "providerSpecificData.blockExtraUsage must be a boolean",
       path: ["blockExtraUsage"],
     });
+  }
+
+  const peakHourProtection = data.peakHourProtection;
+  if (peakHourProtection !== undefined && peakHourProtection !== null) {
+    validatePeakHourProtectionBlock(peakHourProtection, ctx);
   }
 
   const autoFetchModels = data.autoFetchModels;
@@ -331,6 +471,8 @@ export function validateProviderSpecificData(
     "alibabaConsoleSecToken",
     "qwenCloudCookie",
     "qwenCloudSecToken",
+    "volcConsoleCookie",
+    "xiaomiMimoConsoleCookie",
   ] as const) {
     const value = data[key];
     if (value !== undefined && value !== null && typeof value !== "string") {
@@ -497,6 +639,9 @@ export function validateProviderSpecificData(
       });
     }
   }
+
+  // #15753 — self-tracked Xiaomi MiMo monthly budget override (tokens per month).
+  validatePositiveNumberField(data.monthlyTokenLimit, "monthlyTokenLimit", ctx);
 
   // Per-connection operator timeout tier: a slow model must not monopolize an
   // executor slot indefinitely. Bounded to 24h (anti-DoS); below 1ms is

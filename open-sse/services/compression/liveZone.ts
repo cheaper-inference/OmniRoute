@@ -1,7 +1,6 @@
-import { createHash } from "node:crypto";
-
 import { estimateCompressionTokens } from "./stats.ts";
 import type { CompressionResult, CompressionStats } from "./types.ts";
+import { jsonSha256 } from "../../utils/jsonHash.ts";
 
 export interface LiveZoneOptions {
   principalId?: string;
@@ -57,8 +56,15 @@ function serialize(value: unknown): string | null {
 }
 
 function digest(value: unknown): string | null {
-  const serialized = serialize(value);
-  return serialized === null ? null : createHash("sha256").update(serialized).digest("hex");
+  // jsonSha256 computes sha256hex(JSON.stringify(value)) WITHOUT materializing the
+  // multi-MB string, avoiding the #7847 OOM-class transient on large tool-message
+  // items (e.g. base64 screenshots). Throws on non-serializable values, matching
+  // the previous JSON.stringify behavior which the caller treats as a miss.
+  try {
+    return jsonSha256(value);
+  } catch {
+    return null;
+  }
 }
 
 function cloneItems(items: unknown[]): unknown[] | null {
@@ -118,6 +124,27 @@ function isToolOutputItem(value: unknown): boolean {
   );
 }
 
+// Payload text may change, but role/type and all call linkage must retain their source slot.
+function itemIdentity(value: unknown): string | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  return digest(
+    Object.fromEntries(
+      Object.entries(value).filter(([key]) => key !== "content" && key !== "output")
+    )
+  );
+}
+
+function toolLinkage(value: unknown): string | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const item = value as Record<string, unknown>;
+  const link = item.tool_call_id ?? item.call_id ?? item.tool_use_id ?? item.id;
+  if (typeof link === "string" && link.length > 0) return `call:${link}`;
+  // Legacy function results use the function name rather than a call ID.
+  return item.role === "function" && typeof item.name === "string" && item.name.length > 0
+    ? `function:${item.name}`
+    : null;
+}
+
 function makeKey(options: LiveZoneOptions, field: string): string | null {
   const principal = options.principalId?.trim();
   const session = options.sessionId?.trim();
@@ -154,7 +181,8 @@ function store(
   ttlMs: number
 ): void {
   const transformedItems = result.body[field];
-  if (!Array.isArray(transformedItems)) return;
+  // Reuse maps raw positions to transformed positions; a shape-changing pass is not reusable.
+  if (!Array.isArray(transformedItems) || transformedItems.length !== rawItemDigests.length) return;
   const transformedPrefix = cloneItems(transformedItems);
   const transformedStableFields = pickStableFields(result.body);
   const stats = cloneValue(result.stats);
@@ -290,6 +318,7 @@ async function compressLiveToolOutputs(
   body: Record<string, unknown>,
   field: "messages" | "input",
   liveItems: unknown[],
+  contextItems: unknown[],
   previousStats: CompressionStats | null,
   compress: (body: Record<string, unknown>) => Promise<CompressionResult>
 ): Promise<{ liveResult: CompressionResult; transformedLive: unknown[] } | null> {
@@ -302,14 +331,39 @@ async function compressLiveToolOutputs(
     return { liveResult: { body, compressed: false, stats: previousStats }, transformedLive };
   }
 
-  const liveToolItems = liveToolIndexes.map((index) => liveItems[index]);
-  const liveResult = await compress({ ...body, [field]: liveToolItems });
+  // Engines need assistant/instruction boundaries to distinguish completed history from
+  // current observations. Context is read-only input: only live tool slots are copied back.
+  const compressionItems = cloneItems(contextItems);
+  if (!compressionItems) return null;
+  const liveOffset = contextItems.length - liveItems.length;
+  // Snapshot identities before invoking a callback that may mutate its cloned input in place.
+  const identities = Array.from(contextItems, itemIdentity);
+  const toolLinkCounts = new Map<string, number>();
+  for (const item of contextItems) {
+    const link = isToolOutputItem(item) ? toolLinkage(item) : null;
+    if (link !== null) toolLinkCounts.set(link, (toolLinkCounts.get(link) ?? 0) + 1);
+  }
+  const originalToolDigests = liveToolIndexes.map((index) => digest(transformedLive[index]));
+  const liveToolLinks = liveToolIndexes.map((index) => toolLinkage(transformedLive[index]));
+  const liveResult = await compress({ ...body, [field]: compressionItems });
   const transformed = liveResult.body[field];
-  if (!Array.isArray(transformed) || transformed.length !== liveToolItems.length) {
+  if (
+    !Array.isArray(transformed) ||
+    transformed.length !== contextItems.length ||
+    identities.some(
+      (identity, index) => identity === null || identity !== itemIdentity(transformed[index])
+    ) ||
+    liveToolIndexes.some((liveIndex, index) => {
+      if (digest(transformed[liveOffset + liveIndex]) === originalToolDigests[index]) return false;
+      const link = liveToolLinks[index];
+      return link === null || toolLinkCounts.get(link) !== 1;
+    })
+  ) {
     return { liveResult: { body, compressed: false, stats: null }, transformedLive };
   }
   for (let index = 0; index < liveToolIndexes.length; index++) {
-    transformedLive[liveToolIndexes[index]] = transformed[index];
+    const liveIndex = liveToolIndexes[index];
+    transformedLive[liveIndex] = transformed[liveOffset + liveIndex];
   }
   return { liveResult, transformedLive };
 }
@@ -328,10 +382,25 @@ async function reuseLiveZoneEntry(
   const liveItems = context.rawItems.slice(frozenItems);
   const frozenPrefix = cloneItems(previous.transformedPrefix);
   if (!frozenPrefix) return compress(body);
+  // The latest assistant may already be frozen (including on consecutive/parallel results).
+  // Carry its raw tail as engine context, but never replace its cached transformation.
+  let contextStart = frozenItems;
+  for (let index = frozenItems - 1; index >= 0; index--) {
+    const item = context.rawItems[index];
+    if (
+      item &&
+      typeof item === "object" &&
+      (item as Record<string, unknown>).role === "assistant"
+    ) {
+      contextStart = index;
+      break;
+    }
+  }
   const live = await compressLiveToolOutputs(
     body,
     context.field,
     liveItems,
+    context.rawItems.slice(contextStart),
     previous.stats,
     compress
   );
@@ -363,8 +432,9 @@ async function reuseLiveZoneEntry(
 }
 
 /**
- * Reuses the byte-identical transformed prefix from the previous request in a session and runs
- * compression only over newly appended messages/input items. Any changed prefix, missing identity,
+ * Reuses the byte-identical transformed prefix from the previous request in a session. Engines
+ * receive the ordered live suffix with frozen turn context; only appended tool outputs are rewritten.
+ * Any changed prefix, missing identity,
  * unsupported body shape, serialization failure, or oversized entry fails open to full compression.
  */
 export async function applyLiveZoneCompression(

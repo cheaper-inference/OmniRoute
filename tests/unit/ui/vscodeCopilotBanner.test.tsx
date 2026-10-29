@@ -11,14 +11,14 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const STORAGE_KEY = "omniroute-vscode-copilot-banner-dismissed-v1";
-const MARKETPLACE_URL = "https://link.omniroute.online/vsx";
+const MARKETPLACE_URL =
+  "https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot";
 
 vi.mock("next-intl", () => ({ useTranslations: () => (k: string) => k }));
 
 async function renderBanner(): Promise<HTMLDivElement> {
-  const { default: VscodeCopilotBanner } = await import(
-    "../../../src/app/(dashboard)/dashboard/VscodeCopilotBanner"
-  );
+  const { default: VscodeCopilotBanner } =
+    await import("../../../src/app/(dashboard)/dashboard/VscodeCopilotBanner");
 
   const container = document.createElement("div");
   document.body.appendChild(container);
@@ -57,6 +57,12 @@ describe("VscodeCopilotBanner", () => {
   it("shows the Open VSX secondary note near the CTA", async () => {
     const container = await renderBanner();
     expect(container.textContent).toContain("secondaryNote");
+    const note = Array.from(container.querySelectorAll("span")).find(
+      (el) => el.textContent === "secondaryNote"
+    );
+    // AA (KEA-7886 P7): was text-[9px] text-text-muted/70.
+    expect(note?.className).toContain("text-text-muted");
+    expect(note?.className).not.toMatch(/text-\[9px\]|text-text-muted\/\d+/);
   });
 
   it("dismiss button hides the banner and persists the dismissal to localStorage", async () => {

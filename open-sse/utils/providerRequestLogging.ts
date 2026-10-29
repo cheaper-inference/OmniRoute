@@ -26,8 +26,17 @@ type WarnLog = {
 type FetchInput = Parameters<typeof fetch>[0];
 type FetchInit = Parameters<typeof fetch>[1];
 
+/**
+ * What AsyncLocalStorage holds for a dispatch. Sockets and streams created during the
+ * dispatch keep the ALS store alive long after it settles, so the store must not
+ * reference the Capture (and its multi-megabyte `latest` request body) directly: the
+ * holder is emptied when the dispatch settles, while chatCore keeps the Capture itself
+ * through its own closure and can still read `latest()`/`body()` after the dispatch.
+ */
+type CaptureHolder = { capture: Capture | null };
+
 type CaptureState = {
-  context: AsyncLocalStorage<Capture>;
+  context: AsyncLocalStorage<CaptureHolder>;
   wrappedFetch: typeof fetch | null;
   wrappedInnerFetch: typeof fetch | null;
 };
@@ -41,7 +50,7 @@ function getCaptureState(): CaptureState {
 
   if (!scopedGlobal[CAPTURE_STATE_KEY]) {
     scopedGlobal[CAPTURE_STATE_KEY] = {
-      context: new AsyncLocalStorage<Capture>(),
+      context: new AsyncLocalStorage<CaptureHolder>(),
       wrappedFetch: null,
       wrappedInnerFetch: null,
     };
@@ -93,11 +102,10 @@ async function capturePreparedRequest(
 
   try {
     await requestCapture.capture({ url, headers, body, bodyString });
-  } catch (error) {
-    log?.warn?.(
-      "REQUEST_LOG",
-      `Provider request logging hook failed: ${error instanceof Error ? error.message : String(error)}`
-    );
+  } catch {
+    // Capture hooks can fail while processing a provider payload. The thrown
+    // value may echo request content, so never copy it into application logs.
+    log?.warn?.("REQUEST_LOG", "Provider request logging hook failed");
   }
 }
 
@@ -109,7 +117,7 @@ export function captureCurrentProviderRequest(
   log?: WarnLog | null
 ) {
   return capturePreparedRequest(
-    captureState.context.getStore(),
+    captureState.context.getStore()?.capture,
     url,
     headers,
     body,
@@ -127,9 +135,62 @@ export function captureCurrentProviderBody(
   return captureCurrentProviderRequest(url, headers, parseBody(bodyString), bodyString, log);
 }
 
+const DISPATCH_STATE_KEY = Symbol.for("omniroute.providerRequestCapture.dispatch");
+const dispatchContext = ((
+  globalThis as typeof globalThis & {
+    [DISPATCH_STATE_KEY]?: AsyncLocalStorage<{ settled: boolean }>;
+  }
+)[DISPATCH_STATE_KEY] ??= new AsyncLocalStorage<{ settled: boolean }>());
+
+type DispatchStartListener = () => void;
+
+const DISPATCH_LISTENERS_KEY = Symbol.for(
+  "omniroute.providerRequestCapture.dispatchStartListeners"
+);
+
+function getDispatchStartListeners(): Set<DispatchStartListener> {
+  const scopedGlobal = globalThis as typeof globalThis & {
+    [DISPATCH_LISTENERS_KEY]?: Set<DispatchStartListener>;
+  };
+  return (scopedGlobal[DISPATCH_LISTENERS_KEY] ??= new Set<DispatchStartListener>());
+}
+
+/**
+ * Run listeners at the entry of every provider dispatch, before fn starts. A
+ * listener resolves what it needs through its own closure (usually an ALS
+ * reader), so a dispatch for another request never touches this request's
+ * state. Listeners must stay synchronous and side-effect free beyond the
+ * request's own sink.
+ */
+export function onDispatchStart(listener: DispatchStartListener): void {
+  getDispatchStartListeners().add(listener);
+}
+
 export function runWithCapture<T>(requestCapture: Capture, fn: () => Promise<T>): Promise<T> {
   installFetchCapture();
-  return captureState.context.run(requestCapture, fn);
+  const dispatch = { settled: false };
+  return dispatchContext.run(dispatch, () => {
+    for (const listener of getDispatchStartListeners()) listener();
+    const holder: CaptureHolder = { capture: requestCapture };
+    return captureState.context.run(holder, fn).finally(() => {
+      dispatch.settled = true;
+      // Detach the Capture from the ALS store as soon as the dispatch is over: the
+      // async resources that outlive the call (sockets, streams) would otherwise pin
+      // it, and its captured request body, through the store (heap leak, ~80 MB/h in
+      // prod). Late work from those resources now finds no capture at all.
+      holder.capture = null;
+    });
+  });
+}
+
+/**
+ * True while a provider request is being dispatched: inside runWithCapture and before its
+ * fn settles. A fetch the executor leaves running after it returns (a background
+ * bookkeeping call) keeps the async context but no longer counts as the dispatch.
+ */
+export function isProviderRequestCaptureActive(): boolean {
+  const dispatch = dispatchContext.getStore();
+  return dispatch !== undefined && !dispatch.settled;
 }
 
 function installFetchCapture() {
@@ -137,7 +198,7 @@ function installFetchCapture() {
 
   captureState.wrappedInnerFetch = globalThis.fetch.bind(globalThis);
   captureState.wrappedFetch = (async (input: FetchInput, init?: FetchInit) => {
-    const activeCapture = captureState.context.getStore();
+    const activeCapture = captureState.context.getStore()?.capture;
     if (activeCapture) {
       await captureFetchRequest(activeCapture, input, init);
     }
@@ -225,6 +286,10 @@ export function createPreparedRequestLogger(
   let latest: ProviderRequestPrepared | null = null;
   return {
     capture(request) {
+      // Defense in depth: the ALS holder is already emptied when a dispatch settles, but
+      // a direct call from a settled dispatch's async resource must not overwrite the
+      // body of a fresh retry on this same Capture.
+      if (dispatchContext.getStore()?.settled) return;
       latest = request;
       reqLogger.logTargetRequest(request.url, request.headers, request.body);
       updatePendingScope(scope, {

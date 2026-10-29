@@ -6,8 +6,15 @@
 
 import { getDbInstance, rowToCamel } from "../core";
 import { backupDbFile } from "../backup";
-import { migrateLegacyEncryptedString } from "../encryption";
+import {
+  encrypt,
+  isEncryptionEnabled,
+  looksEncrypted,
+  migrateLegacyEncryptedString,
+} from "../encryption";
 import { invalidateDbCache } from "../readCache";
+import { parseProviderSpecificData } from "../webSessionDedup";
+import { mapProviderSpecificDataSecrets } from "./providerSpecificDataSecrets";
 
 interface StatementLike<TRow = unknown> {
   all: (...params: unknown[]) => TRow[];
@@ -18,6 +25,57 @@ interface StatementLike<TRow = unknown> {
 interface DbLike {
   prepare: <TRow = unknown>(sql: string) => StatementLike<TRow>;
   transaction: <T>(fn: () => T) => () => T;
+}
+
+// ──────────────── provider_specific_data secret sweep ────────────────
+
+const sweptDatabases = new WeakSet<object>();
+
+/**
+ * One pass per database instance, run by the providers module on its first read: rows
+ * whose declared secret fields (PROVIDER_SPECIFIC_SECRET_FIELDS) still hold plaintext —
+ * written before those fields were encrypted, or by an older importer — are rewritten
+ * with the fields enveloped. Idempotent: enveloped values are never re-wrapped, and a row
+ * with no plaintext secret is left byte-for-byte untouched (updated_at included, so the
+ * priority/updated_at ordering does not reshuffle). Skipped entirely when
+ * STORAGE_ENCRYPTION_KEY is unset, like encryptConnectionFields. Same lazy, in-module
+ * style as the api_keys backfill (../apiKeys/secretAtRest.ts) — no numbered migration.
+ */
+export function ensureProviderSpecificDataSecretsEncrypted(db: DbLike): number {
+  if (!isEncryptionEnabled() || sweptDatabases.has(db)) return 0;
+  sweptDatabases.add(db);
+  let rewritten = 0;
+  try {
+    const rows = db
+      .prepare(
+        "SELECT id, provider_specific_data FROM provider_connections WHERE provider_specific_data IS NOT NULL"
+      )
+      .all() as Array<{ id: string; provider_specific_data: string | null }>;
+    const update = db.prepare(
+      "UPDATE provider_connections SET provider_specific_data = ? WHERE id = ?"
+    );
+    db.transaction(() => {
+      for (const row of rows) {
+        const psd = parseProviderSpecificData(row.provider_specific_data);
+        const next = mapProviderSpecificDataSecrets(psd, (value) =>
+          looksEncrypted(value) ? value : encrypt(value)
+        );
+        if (next === psd) continue;
+        update.run(JSON.stringify(next), row.id);
+        rewritten++;
+      }
+    })();
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error(`[DB] provider_specific_data secret sweep failed: ${message}`);
+    return 0;
+  }
+  if (rewritten > 0) {
+    backupDbFile("pre-write");
+    invalidateDbCache("connections");
+    console.log(`[DB] Encrypted provider_specific_data secrets on ${rewritten} connection(s).`);
+  }
+  return rewritten;
 }
 
 // ──────────────── Auto Migration ────────────────

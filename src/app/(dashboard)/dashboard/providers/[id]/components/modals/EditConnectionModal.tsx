@@ -1,8 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import Icon from "@/shared/components/Icon";
+
+import { useState } from "react";
 import { useTranslations } from "next-intl";
+import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
+import { useConnectionTestModelDraft } from "@/shared/components/useConnectionTestModelDraft";
 import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
+import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
@@ -19,7 +24,12 @@ import { maskEmail } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
-import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
+import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
+import ModelConcurrencyField from "./ModelConcurrencyField";
+import {
+  buildRateLimitOverridesFromForm,
+  modelConcurrencyFormValue,
+} from "./rateLimitOverridesFromForm";
 import { resolveDashboardProviderInfo } from "../../../providerPageUtils";
 import {
   isBaseUrlConfigurableProvider,
@@ -39,10 +49,13 @@ import {
   getLocalProviderMetadata,
   normalizeAndValidateHttpBaseUrl,
   getCodexFingerprintMode,
+  getCodexPromptCacheKeyScope,
   getCodexRequestDefaults,
   type CodexFingerprintModeValue,
+  type CodexPromptCacheKeyScopeValue,
   getClaudeCodeCompatibleRequestDefaults,
   providerText,
+  validationErrorMessage,
   ERROR_TYPE_LABELS,
   formatTimeAgo,
 } from "../../providerPageHelpers";
@@ -51,21 +64,34 @@ import { useOpenRouterPresetControl } from "../OpenRouterPresetInput";
 import WebSessionCredentialGuide from "../WebSessionCredentialGuide";
 import HarImportButton from "../HarImportButton";
 import CcCompatibleRequestDefaultsFields from "./CcCompatibleRequestDefaultsFields";
+import type { ApiKeyHealthMap } from "./connectionApiKeyHealth";
+import ClaudeConnectionFields from "./ClaudeConnectionFields";
+import {
+  claudeConnectionFieldPatch,
+  claudeConnectionFieldValues,
+} from "./claudeConnectionFieldValues";
 import { CodexConnectionFields } from "./CodexFingerprintFields";
 import { assignEditApiKeyProviderSpecificData } from "./connectionProviderSpecificData";
 import { isM365TierCapableProvider, normalizeM365TierValue, type M365TierValue } from "./m365Tier";
 import ProviderTierField from "./ProviderTierField";
 import AgentrouterConsoleFields from "./AgentrouterConsoleFields";
+import { getVertexCredentialCopy } from "./vertexCredentialCopy";
 import QuotaScrapingFields, { EMPTY_QUOTA_SCRAPING_FIELDS } from "./QuotaScrapingFields";
 import GlmTeamQuotaFields, { EMPTY_GLM_TEAM_QUOTA_FIELDS } from "./GlmTeamQuotaFields";
 import ProviderRegionField, { getProviderRegionConfig } from "./AlibabaProviderRegionField";
+import PeakHourProtectionEditor, {
+  EMPTY_PEAK_HOUR_PROTECTION,
+  formatPeakHourSummary,
+  normalizePeakHourProtectionForSave,
+} from "../PeakHourProtectionEditor";
+import type { PeakHourProtectionConfig } from "@/lib/providers/peakHourProtection";
 export interface EditConnectionModalConnection {
   id?: string;
   name?: string;
   email?: string;
   priority?: number;
   maxConcurrent?: number | null;
-  rateLimitOverrides?: Record<string, number> | null;
+  rateLimitOverrides?: ConnectionRateLimitOverrides | null;
   authType?: string;
   provider?: string;
   apiKey?: string;
@@ -105,13 +131,15 @@ export default function EditConnectionModal({
     priority: 1,
     maxConcurrent: "",
     rpm: "",
+    rpd: "",
     tpm: "",
     tpd: "",
     minTime: "",
     maxWaitMs: "",
     rateLimitMaxConcurrent: "",
+    modelConcurrency: "",
     apiKey: "",
-    healthCheckInterval: 60,
+    healthCheckInterval: "" as number | "",
     baseUrl: "",
     targetFormat: "",
     cx: "",
@@ -125,10 +153,12 @@ export default function EditConnectionModal({
     routingTags: "",
     excludedModels: "",
     customUserAgent: "",
+    huggingfaceBillTo: "",
     accountId: "",
     codexReasoningEffort: "medium",
     codexServiceTier: "default" as CodexServiceTier,
     codexFingerprintMode: "session" as CodexFingerprintModeValue,
+    codexPromptCacheKeyScope: "client" as CodexPromptCacheKeyScopeValue,
     codexOpenaiStoreEnabled: false,
     openaiResponsesStoreEnabled: false,
     preserveEncryptedReasoning: false,
@@ -143,17 +173,18 @@ export default function EditConnectionModal({
     ccCompatibleSummarizeThinking: false,
     cloudCodeProjectId: "",
     antigravityClientProfile: "ide",
-    blockExtraUsage:
-      provider === "claude"
-        ? isClaudeExtraUsageBlockEnabled(provider, connectionProviderSpecificData)
-        : false,
+    ...claudeConnectionFieldValues(provider, connectionProviderSpecificData),
+    allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
-    connectorName: stringField(connectionProviderSpecificData?.connectorName) || "OmniRoute Codex",
+    connectorName:
+      stringField(connectionProviderSpecificData?.connectorName) ||
+      CHATGPT_WEB_CODEX_CONNECTOR_NAME,
     m365Tier: normalizeM365TierValue(connectionProviderSpecificData?.tier) as M365TierValue,
+    peakHourProtection: { ...EMPTY_PEAK_HOUR_PROTECTION, windows: [] } as PeakHourProtectionConfig,
   });
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
@@ -165,21 +196,11 @@ export default function EditConnectionModal({
   const [doctorStatus, setDoctorStatus] = useState<Record<string, any> | null>(null);
   const [doctorLoading, setDoctorLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const testModel = useConnectionTestModelDraft(isOpen ? connection : null, saving);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [extraApiKeys, setExtraApiKeys] = useState<string[]>([]);
   const [newExtraKey, setNewExtraKey] = useState("");
-  const [apiKeyHealth, setApiKeyHealth] = useState<
-    Record<
-      string,
-      {
-        status: "active" | "warning" | "invalid";
-        failures: number;
-        lastFailure: string | null;
-        totalRequests?: number;
-        totalFailures?: number;
-      }
-    >
-  >({});
+  const [apiKeyHealth, setApiKeyHealth] = useState<ApiKeyHealthMap>({});
   const [showAdvanced, setShowAdvanced] = useState(false);
   const showEmail = useEmailPrivacyStore((state) => state.emailsVisible);
   // #6147 — built-in providers can opt in to an advanced base-URL override.
@@ -234,29 +255,38 @@ export default function EditConnectionModal({
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
   const isCompatible =
     isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
+  const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
   const apiCredentialLabel = webSessionCredential
     ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
     : isAwsPolly
       ? providerText(t, "awsPollySecretAccessKeyLabel", "AWS Secret Access Key")
-      : apiKeyOptional
-        ? t("apiKeyOptionalLabel")
-        : t("apiKeyLabel");
+      : (vertexCopy?.label ?? (apiKeyOptional ? t("apiKeyOptionalLabel") : t("apiKeyLabel")));
   const apiCredentialPlaceholder = isWebSessionCredential
     ? webSessionCredential.placeholder
-    : isVertex
-      ? t("vertexServiceAccountPlaceholder")
-      : t("enterNewApiKey");
+    : (vertexCopy?.placeholder ?? t("enterNewApiKey"));
   const apiCredentialHint = isWebSessionCredential
     ? getWebSessionCredentialHint(t, webSessionCredential, providerDisplayName, true)
-    : isLocalSelfHostedProvider
-      ? t("localProviderApiKeyOptionalHint", {
-          provider: localProviderMetadata?.name || provider || "",
-        })
-      : apiKeyOptional
-        ? t("apiKeyOptionalHint")
-        : t("leaveBlankKeepCurrentApiKey");
-  useEffect(() => {
-    if (isOpen && connection) {
+    : (vertexCopy?.hint ??
+      (isLocalSelfHostedProvider
+        ? t("localProviderApiKeyOptionalHint", {
+            provider: localProviderMetadata?.name || provider || "",
+          })
+        : apiKeyOptional
+          ? t("apiKeyOptionalHint")
+          : t("leaveBlankKeepCurrentApiKey")));
+  // Modal-open form initialization from the loaded connection — applied as a
+  // render-phase adjustment guarded by the previously initialized connection
+  // (react.dev "adjusting state when a prop changes") instead of the former
+  // synchronous-setState effect. Remounting the 30+ field form per connection
+  // id stays out of scope (#11251 follow-up, #9985); closing clears the marker
+  // so the next open re-initializes again.
+  const [initializedFor, setInitializedFor] = useState<{
+    connection: EditConnectionModalConnection;
+    providerId: string;
+  } | null>(null);
+  if (isOpen && connection) {
+    if (initializedFor?.connection !== connection || initializedFor.providerId !== providerId) {
+      setInitializedFor({ connection, providerId });
       const effectiveProvider = connection.provider || providerId;
       const existingBaseUrl = stringField(connection.providerSpecificData?.baseUrl);
       const existingTargetFormat = stringField(connection.providerSpecificData?.targetFormat);
@@ -265,13 +295,10 @@ export default function EditConnectionModal({
         stringField(connection.providerSpecificData?.accessKeyId) ||
         stringField(connection.providerSpecificData?.awsAccessKeyId);
       const existingCustomUserAgent = stringField(connection.providerSpecificData?.customUserAgent);
+      const existingHuggingfaceBillTo = stringField(connection.providerSpecificData?.billTo);
       const existingOpenRouterPreset = stringField(connection.providerSpecificData?.preset);
       const existingCx = stringField(connection.providerSpecificData?.cx);
       const existingAccountId = stringField(connection.providerSpecificData?.accountId);
-      const existingOpenCodeGoWorkspaceId =
-        stringField(connection.providerSpecificData?.opencodeGoWorkspaceId) ||
-        stringField(connection.providerSpecificData?.openCodeGoWorkspaceId) ||
-        stringField(connection.providerSpecificData?.workspaceId);
       const existingGlmOrganizationId =
         stringField(connection.providerSpecificData?.glmOrganizationId) ||
         stringField(connection.providerSpecificData?.bigmodelOrganization) ||
@@ -290,13 +317,6 @@ export default function EditConnectionModal({
         connection.providerSpecificData?.quotaPerUnit != null
           ? String(connection.providerSpecificData.quotaPerUnit)
           : "";
-      // Modal-open form initialization from the loaded connection (sync with an
-      // external system on `isOpen`); remounting the 30+ field form per
-      // connection id is a behavior-risking restructure out of scope here
-      // (#11251 follow-up, #9985).
-      // NOTE: no react-hooks/set-state-in-effect suppression needed — the rule
-      // only fires on unconditional synchronous setState, and this one is
-      // guarded by the isOpen/connection condition above.
       setFormData({
         name: connection.name || "",
         priority: connection.priority || 1,
@@ -307,6 +327,10 @@ export default function EditConnectionModal({
         rpm:
           connection.rateLimitOverrides?.rpm != null
             ? String(connection.rateLimitOverrides.rpm)
+            : "",
+        rpd:
+          connection.rateLimitOverrides?.rpd != null
+            ? String(connection.rateLimitOverrides.rpd)
             : "",
         tpm:
           connection.rateLimitOverrides?.tpm != null
@@ -328,8 +352,11 @@ export default function EditConnectionModal({
           connection.rateLimitOverrides?.maxConcurrent != null
             ? String(connection.rateLimitOverrides.maxConcurrent)
             : "",
+        modelConcurrency: modelConcurrencyFormValue(connection.rateLimitOverrides),
         apiKey: "",
-        healthCheckInterval: connection.healthCheckInterval ?? 60,
+        // Unset per-connection override means "follow the global default" —
+        // surface that as an empty field (0 renders as an explicit opt-out).
+        healthCheckInterval: connection.healthCheckInterval ?? "",
         baseUrl: existingBaseUrl || defaultBaseUrl,
         targetFormat: existingTargetFormat || "",
         cx: existingCx,
@@ -348,10 +375,12 @@ export default function EditConnectionModal({
             connection.providerSpecificData?.excluded_models
         ),
         customUserAgent: existingCustomUserAgent,
+        huggingfaceBillTo: existingHuggingfaceBillTo,
         accountId: existingAccountId,
         codexReasoningEffort: codexRequestDefaults.reasoningEffort,
         codexServiceTier: codexRequestDefaults.serviceTier ?? "default",
         codexFingerprintMode: getCodexFingerprintMode(connection.providerSpecificData),
+        codexPromptCacheKeyScope: getCodexPromptCacheKeyScope(connection.providerSpecificData),
         codexOpenaiStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
         openaiResponsesStoreEnabled: connection.providerSpecificData?.openaiStoreEnabled === true,
         preserveEncryptedReasoning:
@@ -362,15 +391,8 @@ export default function EditConnectionModal({
         quotaPerUnit: existingQuotaPerUnit,
         glmOrganizationId: existingGlmOrganizationId,
         glmProjectId: existingGlmProjectId,
-        opencodeGoWorkspaceId: existingOpenCodeGoWorkspaceId,
-        opencodeGoAuthCookie: "",
-        ollamaCloudUsageCookie: "",
-        alibabaConsoleCookie: stringField(connection.providerSpecificData?.alibabaConsoleCookie),
-        qwenCloudCookie: stringField(connection.providerSpecificData?.qwenCloudCookie),
-        qwenCloudSecToken: stringField(connection.providerSpecificData?.qwenCloudSecToken),
-        alibabaConsoleSecToken: stringField(
-          connection.providerSpecificData?.alibabaConsoleSecToken
-        ),
+        // Console-session credentials stripped in responses; blank preserves stored values.
+        ...EMPTY_QUOTA_SCRAPING_FIELDS,
         ccCompatibleContext1m: ccRequestDefaults.context1m,
         ccCompatibleRedactThinking: ccRequestDefaults.redactThinking,
         ccCompatibleSummarizeThinking: ccRequestDefaults.summarizeThinking,
@@ -379,38 +401,43 @@ export default function EditConnectionModal({
         antigravityClientProfile: normalizeAntigravityClientProfileSetting(
           connection.providerSpecificData?.clientProfile
         ),
-        blockExtraUsage: isClaudeExtraUsageBlockEnabled(
-          effectiveProvider,
-          connection.providerSpecificData
-        ),
+        ...claudeConnectionFieldValues(effectiveProvider, connection.providerSpecificData),
+        allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
         connectorName:
-          stringField(connection.providerSpecificData?.connectorName) || "OmniRoute Codex",
+          stringField(connection.providerSpecificData?.connectorName) ||
+          CHATGPT_WEB_CODEX_CONNECTOR_NAME,
         m365Tier: normalizeM365TierValue(connection.providerSpecificData?.tier) as M365TierValue,
+        peakHourProtection: {
+          ...EMPTY_PEAK_HOUR_PROTECTION,
+          ...((connection.providerSpecificData?.peakHourProtection as PeakHourProtectionConfig) ||
+            {}),
+          windows: Array.isArray(
+            (
+              connection.providerSpecificData?.peakHourProtection as
+                PeakHourProtectionConfig | undefined
+            )?.windows
+          )
+            ? [
+                ...(connection.providerSpecificData?.peakHourProtection as PeakHourProtectionConfig)
+                  .windows,
+              ]
+            : [],
+        },
       });
       const existing = connection.providerSpecificData?.extraApiKeys;
       setExtraApiKeys(Array.isArray(existing) ? existing : []);
-      const health = connection.providerSpecificData?.apiKeyHealth as
-        | Record<
-            string,
-            {
-              status: "active" | "warning" | "invalid";
-              failures: number;
-              lastFailure: string | null;
-              totalRequests?: number;
-              totalFailures?: number;
-            }
-          >
-        | undefined;
+      const health = connection.providerSpecificData?.apiKeyHealth as ApiKeyHealthMap | undefined;
       setApiKeyHealth(health || {});
       setNewExtraKey("");
       setOpenRouterPreset(existingOpenRouterPreset);
       setShowAdvanced(
         !!existingCustomUserAgent ||
+          !!existingHuggingfaceBillTo ||
           normalizeM365TierValue(connection.providerSpecificData?.tier) !== ""
       );
       setTestResult(null);
@@ -418,15 +445,9 @@ export default function EditConnectionModal({
       setValidatedProviderSpecificData(undefined);
       setSaveError(null);
     }
-  }, [
-    isOpen,
-    connection,
-    providerId,
-    defaultBaseUrl,
-    showsRegion,
-    defaultRegion,
-    setOpenRouterPreset,
-  ]);
+  } else if (initializedFor !== null) {
+    setInitializedFor(null);
+  }
   const handleTest = async () => {
     if (!provider) return;
     setTesting(true);
@@ -443,7 +464,7 @@ export default function EditConnectionModal({
       setTestResult({
         valid: !!data.valid,
         diagnosis: data.diagnosis || null,
-        message: data.error || null,
+        message: validationErrorMessage(data.error),
       });
     } catch {
       setTestResult({
@@ -533,17 +554,15 @@ export default function EditConnectionModal({
         name: formData.name,
         priority: formData.priority,
         maxConcurrent: parsedMaxConcurrent,
-        healthCheckInterval: formData.healthCheckInterval,
+        // Empty field = "follow the global default" → send undefined so the
+        // stored per-connection override is cleared; 0 = explicit opt-out.
+        healthCheckInterval:
+          formData.healthCheckInterval === "" ? undefined : formData.healthCheckInterval,
       };
-      const overrides: Record<string, number> = {};
-      if (formData.rpm.trim()) overrides.rpm = Number(formData.rpm);
-      if (formData.tpm.trim()) overrides.tpm = Number(formData.tpm);
-      if (formData.tpd.trim()) overrides.tpd = Number(formData.tpd);
-      if (formData.minTime.trim()) overrides.minTime = Number(formData.minTime);
-      if (formData.maxWaitMs.trim()) overrides.maxWaitMs = Number(formData.maxWaitMs);
-      if (formData.rateLimitMaxConcurrent.trim())
-        overrides.maxConcurrent = Number(formData.rateLimitMaxConcurrent);
-      updates.rateLimitOverrides = Object.keys(overrides).length > 0 ? overrides : null;
+      const rateLimit = buildRateLimitOverridesFromForm(formData, connection?.rateLimitOverrides);
+      const invalid = rateLimit.invalidModelConcurrency;
+      if (invalid) return setSaveError(t("rateLimitOverridesModelConcurrencyInvalid", invalid));
+      updates.rateLimitOverrides = rateLimit.overrides;
       if (isAntigravityFamily) {
         updates.projectId = trimmedCloudCodeProjectId || null;
       }
@@ -638,7 +657,13 @@ export default function EditConnectionModal({
         updates.providerSpecificData = {
           ...(connection.providerSpecificData || {}),
           ...(validationPsd || {}),
-          ...(isCodex ? { codexFingerprintMode: null, codex_fingerprint_mode: null } : {}),
+          ...(isCodex
+            ? {
+                codexFingerprintMode: null,
+                codex_fingerprint_mode: null,
+                codexPromptCacheKeyScope: null,
+              }
+            : {}),
         };
         assignEditApiKeyProviderSpecificData({
           provider,
@@ -665,9 +690,10 @@ export default function EditConnectionModal({
           excludedModels: parseExcludedModelsInput(formData.excludedModels),
         };
         if (isClaude) {
-          updates.providerSpecificData.blockExtraUsage = formData.blockExtraUsage;
+          Object.assign(updates.providerSpecificData, claudeConnectionFieldPatch(formData));
         }
         if (isCodex) {
+          updates.providerSpecificData.allowPaidCredits = formData.allowPaidCredits;
           updates.providerSpecificData.requestDefaults = {
             reasoningEffort: formData.codexReasoningEffort,
             ...(formData.codexServiceTier !== "default"
@@ -677,6 +703,7 @@ export default function EditConnectionModal({
           updates.providerSpecificData.openaiStoreEnabled =
             formData.codexOpenaiStoreEnabled === true;
           updates.providerSpecificData.codexFingerprintMode = formData.codexFingerprintMode;
+          updates.providerSpecificData.codexPromptCacheKeyScope = formData.codexPromptCacheKeyScope;
         }
         if (isAntigravityFamily) {
           updates.providerSpecificData.projectId = trimmedCloudCodeProjectId || null;
@@ -699,6 +726,9 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
+          formData.peakHourProtection
+        );
         // Explicit `null`, not `undefined`: the PUT route merges
         // { ...existing, ...incoming }, so omitting the key would keep the previous
         // choice and switching back to the default would never take effect.
@@ -726,6 +756,7 @@ export default function EditConnectionModal({
         // previously-saved `true` and unchecking would never take effect.
         updates.providerSpecificData.importFreeModelsOnly = formData.importFreeModelsOnly === true;
       }
+      testModel.applyTo(updates.providerSpecificData);
       const error = (await onSave(updates)) as void | unknown;
       if (error) {
         setSaveError(typeof error === "string" ? error : t("failedSaveConnection"));
@@ -774,6 +805,9 @@ export default function EditConnectionModal({
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           placeholder={isOAuth ? t("accountName") : t("productionKey")}
         />
+        {isOpen && connection.id && (
+          <ConnectionTestModelField key={connection.id} {...testModel.fieldProps} />
+        )}
         <Input
           label={t("tagGroupLabel")}
           value={formData.tag}
@@ -801,23 +835,22 @@ export default function EditConnectionModal({
             reasoningEffort={formData.codexReasoningEffort}
             serviceTier={formData.codexServiceTier}
             fingerprintMode={formData.codexFingerprintMode}
+            promptCacheKeyScope={formData.codexPromptCacheKeyScope}
             openaiStoreEnabled={formData.codexOpenaiStoreEnabled}
+            allowPaidCredits={formData.allowPaidCredits}
             showFingerprintMode={isOAuth}
             onChange={(patch) => setFormData({ ...formData, ...patch })}
           />
         )}
         {isClaude && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
-            <Toggle
-              checked={formData.blockExtraUsage}
-              onChange={(checked) => setFormData({ ...formData, blockExtraUsage: checked })}
-              label={t("blockClaudeExtraUsageLabel")}
-              description={t("blockClaudeExtraUsageDescription")}
-            />
-          </div>
+          <ClaudeConnectionFields
+            values={formData}
+            showUsageWallOptions={isOAuth}
+            onChange={(patch) => setFormData({ ...formData, ...patch })}
+          />
         )}
         {(isCcCompatible || openRouterPreset.input) && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
             {isCcCompatible && (
               <CcCompatibleRequestDefaultsFields
                 values={formData}
@@ -827,7 +860,7 @@ export default function EditConnectionModal({
             {openRouterPreset.input}
           </div>
         )}
-        <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+        <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
           {showFreeModelsToggle && (
             <Toggle
               checked={formData.importFreeModelsOnly}
@@ -844,6 +877,16 @@ export default function EditConnectionModal({
             label={t("disableCoolingLabel")}
             description={t("disableCoolingDescription")}
           />
+          <PeakHourProtectionEditor
+            value={formData.peakHourProtection}
+            onChange={(peakHourProtection) => setFormData({ ...formData, peakHourProtection })}
+            t={t}
+          />
+          {formatPeakHourSummary(formData.peakHourProtection) && (
+            <p className="text-xs text-text-muted">
+              {formatPeakHourSummary(formData.peakHourProtection)}
+            </p>
+          )}
         </div>
         <QuotaScrapingFields
           provider={provider}
@@ -853,7 +896,7 @@ export default function EditConnectionModal({
           editMode
         />
         {isAntigravityFamily && (
-          <div className="flex flex-col gap-4 rounded-lg border border-border/50 bg-surface/20 p-4">
+          <div className="flex flex-col gap-4 rounded-lg border border-border bg-bg-subtle p-4">
             <Select
               label={t("antigravityClientProfileLabel")}
               value={formData.antigravityClientProfile}
@@ -877,27 +920,26 @@ export default function EditConnectionModal({
           </div>
         )}
         {isOAuth && connection.email && (
-          <div className="bg-sidebar/50 p-3 rounded-lg">
+          <div className="bg-bg-subtle p-3 rounded-lg">
             <p className="text-sm text-text-muted mb-1">{t("email")}</p>
             <p className="font-medium" title={showEmail ? connection.email : undefined}>
               {showEmail ? connection.email : maskEmail(connection.email)}
             </p>
           </div>
         )}
-        {isOAuth && (
-          <Input
-            label={t("healthCheckMinutes")}
-            type="number"
-            value={formData.healthCheckInterval}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                healthCheckInterval: Math.max(0, Number.parseInt(e.target.value) || 0),
-              })
-            }
-            hint={t("healthCheckHint")}
-          />
-        )}
+        <Input
+          label={t("healthCheckMinutes")}
+          type="number"
+          min={0}
+          max={1440}
+          value={formData.healthCheckInterval}
+          onChange={(e) => {
+            const parsed = Number.parseInt(e.target.value, 10);
+            const next = Number.isNaN(parsed) ? 0 : Math.min(1440, Math.max(0, parsed));
+            setFormData({ ...formData, healthCheckInterval: next });
+          }}
+          hint={t("healthCheckHint")}
+        />
         <Input
           label={t("priorityLabel")}
           type="number"
@@ -908,9 +950,7 @@ export default function EditConnectionModal({
         />
         <div className="flex flex-col gap-2 rounded-lg border border-primary/30 bg-primary/5 p-4">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-primary">
-            <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-              dynamic_feed
-            </span>
+            <Icon name="dynamic_feed" size={18} />
             {t("accountConcurrencyCapLabel")}
           </div>
           <Input
@@ -934,7 +974,7 @@ export default function EditConnectionModal({
           />
         </div>
         {saveError && (
-          <div className="text-sm text-red-500 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+          <div className="text-sm text-error bg-error/10 border border-error/20 rounded-lg px-3 py-2">
             {saveError}
           </div>
         )}
@@ -990,7 +1030,7 @@ export default function EditConnectionModal({
               </div>
             )}
             {isChatGptWebCodex && (
-              <div className="space-y-3 rounded-lg border border-border bg-surface/40 p-3">
+              <div className="space-y-3 rounded-lg border border-border bg-bg-subtle p-3">
                 <p className="text-sm font-medium text-text-main">Codex-Toolverbindung</p>
                 <Input
                   label="Tunnel-ID"
@@ -1012,6 +1052,7 @@ export default function EditConnectionModal({
                   onChange={(event) =>
                     setFormData({ ...formData, connectorName: event.target.value })
                   }
+                  placeholder={CHATGPT_WEB_CODEX_CONNECTOR_NAME}
                 />
                 <Button
                   variant="secondary"
@@ -1130,21 +1171,21 @@ export default function EditConnectionModal({
                 {validationResult === "success" ? t("valid") : t("invalid")}
               </Badge>
             )}
-            <button
-              type="button"
-              className="text-sm text-text-muted hover:text-text-primary flex items-center gap-1"
+            <Button
+              variant="ghost"
+              size="sm"
+              className="self-start"
               onClick={() => setShowAdvanced(!showAdvanced)}
               aria-expanded={showAdvanced}
               aria-controls="edit-connection-advanced-settings"
             >
-              <span
+              <Icon
+                name="chevron_right"
+                size={14}
                 className={`transition-transform ${showAdvanced ? "rotate-90" : ""}`}
-                aria-hidden="true"
-              >
-                ▶
-              </span>
+              />
               {t("advancedSettings")}
-            </button>
+            </Button>
             {showAdvanced && (
               <div
                 id="edit-connection-advanced-settings"
@@ -1157,6 +1198,17 @@ export default function EditConnectionModal({
                   placeholder="my-app/1.0"
                   hint={t("customUserAgentHint")}
                 />
+                {provider === "huggingface" && (
+                  <Input
+                    label={t("huggingfaceBillToLabel")}
+                    value={formData.huggingfaceBillTo}
+                    onChange={(e) =>
+                      setFormData({ ...formData, huggingfaceBillTo: e.target.value })
+                    }
+                    placeholder="account-123"
+                    hint={t("huggingfaceBillToHint")}
+                  />
+                )}
                 <ProviderTierField provider={provider} />
                 {isM365TierCapable && (
                   <Select
@@ -1211,6 +1263,15 @@ export default function EditConnectionModal({
                       hint={t("rateLimitOverridesRpmHint")}
                     />
                     <Input
+                      label={t("rateLimitOverridesRpdLabel")}
+                      type="number"
+                      min={0}
+                      value={formData.rpd}
+                      onChange={(e) => setFormData({ ...formData, rpd: e.target.value })}
+                      placeholder={t("inherit")}
+                      hint={t("rateLimitOverridesRpdHint")}
+                    />
+                    <Input
                       label={t("rateLimitOverridesTpmLabel")}
                       type="number"
                       min={0}
@@ -1257,6 +1318,12 @@ export default function EditConnectionModal({
                       placeholder={t("inherit")}
                       hint={t("rateLimitOverridesMaxConcurrentHint")}
                     />
+                    <ModelConcurrencyField
+                      value={formData.modelConcurrency}
+                      onChange={(modelConcurrency) =>
+                        setFormData({ ...formData, modelConcurrency })
+                      }
+                    />
                   </div>
                 </div>
               </div>
@@ -1286,13 +1353,14 @@ export default function EditConnectionModal({
         )}
         {/* #6147 — opt-in "Advanced → override base URL" for eligible built-ins */}
         {!usesBaseUrl && isBaseUrlOverrideEligible && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
             onClick={() => setShowBaseUrlOverride(true)}
-            className="self-start text-xs text-primary hover:underline"
+            className="self-start"
           >
             {providerText(t, "overrideBaseUrlAdvanced", "Advanced: override base URL")}
-          </button>
+          </Button>
         )}
         {usesBaseUrl && (
           <Input
@@ -1347,20 +1415,16 @@ export default function EditConnectionModal({
         )}
         {isGlm && (
           <div className="flex flex-col gap-3">
-            <div>
-              <label className="text-sm font-medium text-text-main mb-1 block">
-                {t("apiRegionLabel")}
-              </label>
-              <select
-                value={formData.apiRegion}
-                onChange={(e) => setFormData({ ...formData, apiRegion: e.target.value })}
-                className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
-              >
-                <option value="international">{t("apiRegionInternational")}</option>
-                <option value="china">{t("apiRegionChina")}</option>
-              </select>
-              <p className="text-xs text-text-muted mt-1">{t("apiRegionHint")}</p>
-            </div>
+            <Select
+              label={t("apiRegionLabel")}
+              hint={t("apiRegionHint")}
+              value={formData.apiRegion}
+              onChange={(e) => setFormData({ ...formData, apiRegion: e.target.value })}
+              options={[
+                { value: "international", label: t("apiRegionInternational") },
+                { value: "china", label: t("apiRegionChina") },
+              ]}
+            />
             <GlmTeamQuotaFields
               values={formData}
               onChange={(patch) => setFormData({ ...formData, ...patch })}
@@ -1370,16 +1434,16 @@ export default function EditConnectionModal({
         )}
         {!isOAuth && connection?.apiKey && (
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium text-text-main">{t("apiKeyHealthLabel")}</label>
+            <p className="text-sm font-medium text-text-main">{t("apiKeyHealthLabel")}</p>
             <div className="flex flex-col gap-1.5">
               {(() => {
                 const keyId = "primary";
                 const health = apiKeyHealth[keyId];
                 const statusColor =
                   health?.status === "invalid"
-                    ? "text-red-400"
+                    ? "text-error"
                     : health?.status === "warning"
-                      ? "text-yellow-400"
+                      ? "text-warning"
                       : "text-text-muted";
                 const statusIcon =
                   health?.status === "invalid" ? "🔴" : health?.status === "warning" ? "🟡" : "🟢";
@@ -1393,7 +1457,7 @@ export default function EditConnectionModal({
                 return (
                   <div className="flex items-center gap-2">
                     <span
-                      className={`flex-1 min-w-0 break-all font-mono text-xs bg-sidebar/50 px-3 py-2 rounded border border-border ${statusColor}`}
+                      className={`flex-1 min-w-0 break-all font-mono text-xs bg-bg-subtle px-3 py-2 rounded border border-border ${statusColor}`}
                     >
                       {statusIcon} {t("primaryKey")}: {connection.apiKey}
                     </span>
@@ -1419,20 +1483,21 @@ export default function EditConnectionModal({
         {!isOAuth && (
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
-              <label className="text-sm font-medium text-text-main">
+              <p className="text-sm font-medium text-text-main">
                 {t("extraApiKeysLabel")}
                 <span className="ml-2 text-[11px] font-normal text-text-muted">
                   ({t("extraApiKeysHint")})
                 </span>
-              </label>
+              </p>
               {extraApiKeys.length > 0 && (
-                <button
-                  type="button"
+                <Button
+                  variant="ghost"
+                  size="sm"
                   onClick={() => setExtraApiKeys([])}
-                  className="px-2.5 py-1.5 rounded-md bg-red-500/10 text-red-400 hover:bg-red-500/20 hover:text-red-300 text-xs font-medium transition-colors"
+                  className="text-error hover:text-error"
                 >
                   {t("deleteAllExtraApiKeys")}
-                </button>
+                </Button>
               )}
             </div>
             {extraApiKeys.length > 0 && (
@@ -1442,9 +1507,9 @@ export default function EditConnectionModal({
                   const health = apiKeyHealth[keyId];
                   const statusColor =
                     health?.status === "invalid"
-                      ? "text-red-400"
+                      ? "text-error"
                       : health?.status === "warning"
-                        ? "text-yellow-400"
+                        ? "text-warning"
                         : "text-text-muted";
                   const statusIcon =
                     health?.status === "invalid"
@@ -1462,7 +1527,7 @@ export default function EditConnectionModal({
                   return (
                     <div key={idx} className="flex items-center gap-2">
                       <span
-                        className={`flex-1 font-mono text-xs bg-sidebar/50 px-3 py-2 rounded border border-border truncate ${statusColor}`}
+                        className={`flex-1 font-mono text-xs bg-bg-subtle px-3 py-2 rounded border border-border truncate ${statusColor}`}
                       >
                         {statusIcon}{" "}
                         {t("extraApiKeyMasked", {
@@ -1484,13 +1549,15 @@ export default function EditConnectionModal({
                               : ""}
                           </span>
                         )}
-                        <button
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
+                          icon="close"
                           onClick={() => setExtraApiKeys(extraApiKeys.filter((_, i) => i !== idx))}
-                          className="p-1.5 rounded hover:bg-red-500/10 text-red-400 hover:text-red-500"
+                          className="text-error hover:text-error"
                           title={t("removeThisKey")}
-                        >
-                          <span className="material-symbols-outlined text-[16px]">close</span>
-                        </button>
+                          aria-label={t("removeThisKey")}
+                        />
                       </div>
                     </div>
                   );
@@ -1498,12 +1565,13 @@ export default function EditConnectionModal({
               </div>
             )}
             <div className="flex gap-2">
-              <input
+              <Input
                 type="password"
                 value={newExtraKey}
                 onChange={(e) => setNewExtraKey(e.target.value)}
                 placeholder={t("addAnotherApiKey")}
-                className="flex-1 text-sm bg-sidebar/50 border border-border rounded px-3 py-2 text-text-main placeholder:text-text-muted focus:ring-1 focus:ring-primary outline-none"
+                aria-label={t("addAnotherApiKey")}
+                className="min-w-0 flex-1"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && newExtraKey.trim()) {
                     setExtraApiKeys([...extraApiKeys, newExtraKey.trim()]);
@@ -1517,7 +1585,8 @@ export default function EditConnectionModal({
                   handleAddParsedExtraKeys(text);
                 }}
               />
-              <button
+              <Button
+                variant="secondary"
                 onClick={() => {
                   if (newExtraKey.trim()) {
                     setExtraApiKeys([...extraApiKeys, newExtraKey.trim()]);
@@ -1525,10 +1594,9 @@ export default function EditConnectionModal({
                   }
                 }}
                 disabled={!newExtraKey.trim()}
-                className="px-3 py-2 rounded bg-primary/10 text-primary hover:bg-primary/20 disabled:opacity-40 text-sm font-medium"
               >
                 {t("add")}
-              </button>
+              </Button>
             </div>
             <p className="text-[11px] text-text-muted">{t("bulkPasteHint")}</p>
             {extraApiKeys.length > 0 && (

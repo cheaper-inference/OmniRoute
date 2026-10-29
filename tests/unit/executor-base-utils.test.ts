@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { getEventListeners } from "node:events";
+import type { EventEmitter } from "node:events";
 
 const base = await import("../../open-sse/executors/base.ts");
 
@@ -18,11 +20,43 @@ test("mergeUpstreamExtraHeaders merges string key-value pairs", () => {
   assert.equal(h["X-Other"], "val2");
 });
 
+test("mergeUpstreamExtraHeaders replaces same-name entries under any case (no comma-join)", () => {
+  // A client-forwarded lowercase attribution key plus an operator-configured
+  // variant must end as ONE entry — undici comma-joins case-duplicates.
+  const h: Record<string, string> = {
+    "http-referer": "https://client.example",
+    "x-title": "Client",
+  };
+  base.mergeUpstreamExtraHeaders(h, {
+    "HTTP-Referer": "https://configured.example",
+    "X-Title": "Operator",
+  });
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "http-referer").length, 1);
+  assert.equal(h["HTTP-Referer"], "https://configured.example");
+  assert.equal(Object.keys(h).filter((k) => k.toLowerCase() === "x-title").length, 1);
+  assert.equal(h["X-Title"], "Operator");
+});
+
 test("mergeUpstreamExtraHeaders overrides user-agent via setUserAgentHeader", () => {
   const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
   base.mergeUpstreamExtraHeaders(h, { "user-agent": "new-agent" });
+  // Regression: the UA override must leave ONE entry; the old mirror kept both
+  // case variants and undici comma-joined them on the wire ("new, new").
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
   assert.equal(h["User-Agent"], "new-agent");
-  assert.equal(h["user-agent"], "new-agent");
+});
+
+test("setUserAgentHeader leaves exactly one entry regardless of prior case variants", () => {
+  const h: Record<string, string> = { "user-agent": "seeded-lower" };
+  base.setUserAgentHeader(h, "final/1.0");
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
+  assert.equal(h["User-Agent"], "final/1.0");
 });
 
 test("mergeUpstreamExtraHeaders skips empty keys", () => {
@@ -66,8 +100,12 @@ test("setUserAgentHeader sets User-Agent casing", () => {
 test("setUserAgentHeader overwrites existing", () => {
   const h: Record<string, string> = { "User-Agent": "old", "user-agent": "old" };
   base.setUserAgentHeader(h, "NewAgent/2.0");
+  // One canonical entry: the old lowercase mirror made undici comma-join both.
+  assert.deepEqual(
+    Object.keys(h).filter((k) => k.toLowerCase() === "user-agent"),
+    ["User-Agent"]
+  );
   assert.equal(h["User-Agent"], "NewAgent/2.0");
-  assert.equal(h["user-agent"], "NewAgent/2.0");
 });
 
 test("applyConfiguredUserAgent does nothing when no custom user agent", () => {
@@ -114,6 +152,42 @@ test("mergeAbortSignals aborts when secondary fires", () => {
   assert.ok(!merged.aborted);
   c2.abort(new Error("secondary"));
   assert.ok(merged.aborted);
+});
+
+// Regression: mergeAbortSignals used to attach its "abort" listeners to `primary`/
+// `secondary` and never remove them. Every executor fetch attempt calls this (once
+// per URL/retry — open-sse/executors/base.ts's fetchWithStartTimeout), so a busy
+// combo request accumulated one live listener per call on the long-lived combo/
+// client signal. Each leaked listener still fires when that signal is aborted later
+// (e.g. a hedge cancellation — COMBO_HEDGE_CANCELLED_REASON, "hedge-cancelled" —
+// arriving after this particular merge's own caller already finished), for a
+// `merged` output nothing is watching anymore. Proven here by counting real
+// listener growth (via node:events' getEventListeners) across repeated merges of
+// the SAME long-lived primary signal — exactly the fetchWithStartTimeout pattern.
+test("mergeAbortSignals removes its listeners once the merged signal settles (no leak across repeated merges)", () => {
+  const countAbortListeners = (target: AbortSignal) =>
+    getEventListeners(target as unknown as EventEmitter, "abort").length;
+
+  const longLived = new AbortController();
+  const before = countAbortListeners(longLived.signal);
+
+  for (let i = 0; i < 25; i++) {
+    const perAttempt = new AbortController();
+    const merged = base.mergeAbortSignals(longLived.signal, perAttempt.signal);
+    assert.ok(!merged.aborted);
+    // Simulate this attempt finishing on its own (its own timeout/abort fires),
+    // the way each fetchWithStartTimeout call's timeoutController does.
+    perAttempt.abort(new Error(`attempt-${i}-timeout`));
+    assert.ok(merged.aborted);
+  }
+
+  const after = countAbortListeners(longLived.signal);
+  assert.ok(
+    after <= before + 1,
+    `expected mergeAbortSignals to clean up its "abort" listener on the long-lived ` +
+      `signal after each merge settles; listener count grew from ~${before} to ${after} ` +
+      `across 25 merges (leak)`
+  );
 });
 
 test("sanitizeReasoningEffortForProvider passes through body without reasoning_effort", () => {

@@ -88,6 +88,49 @@ export function findAgenticConversationsByFingerprint(
   return rows.map(toRow);
 }
 
+/**
+ * SQL behind findAgenticConversationsByContent for `probeCount` content hashes. Params, in
+ * order: the hashes, the fingerprint hash, the scan limit, the result limit. Exported so
+ * the migration test can assert its plan uses idx_turn_nodes_content_hash (migration 211):
+ * without it each correlated probe filters a conversation's nodes row by row.
+ */
+export function contentCandidatesSql(probeCount: number): string {
+  const placeholders = Array.from({ length: probeCount }, () => "?").join(", ");
+  return `SELECT c.*, (
+         SELECT COUNT(DISTINCT n.content_hash) FROM conversation_turn_nodes n
+         WHERE n.conversation_id = c.id AND n.content_hash IN (${placeholders})
+       ) AS hits
+       FROM (
+         SELECT * FROM agentic_conversations WHERE fingerprint_hash = ?
+         ORDER BY last_seen_at DESC LIMIT ?
+       ) c
+       WHERE hits > 0
+       ORDER BY hits DESC, c.last_seen_at DESC
+       LIMIT ?`;
+}
+
+/**
+ * Conversations in a fingerprint bucket that already hold some of the given turns, best
+ * first: most matching turns, then most recently seen. Only the bucket's `scanLimit` most
+ * recently seen conversations are probed, through the (conversation_id, content_hash)
+ * index. Unlike the plain recency window above, a busy bucket (many parallel agents on
+ * one key or session) cannot push a conversation out of the candidates as long as it is
+ * among the bucket's recent `scanLimit`. The index was dropped by migration 201 and
+ * recreated by 211 for this query (see contentCandidatesSql).
+ */
+export function findAgenticConversationsByContent(
+  fingerprintHash: string,
+  contentHashes: string[],
+  { scanLimit = 500, limit = 20 }: { scanLimit?: number; limit?: number } = {}
+): AgenticConversationRow[] {
+  if (contentHashes.length === 0) return [];
+  const db = getDbInstance();
+  const rows = db
+    .prepare(contentCandidatesSql(contentHashes.length))
+    .all(...contentHashes, fingerprintHash, scanLimit, limit);
+  return rows.map(toRow);
+}
+
 export function updateAgenticConversation(id: string, patch: { turnCount: number }): void {
   const db = getDbInstance();
   db.prepare(`UPDATE agentic_conversations SET turn_count = ?, last_seen_at = ? WHERE id = ?`).run(
@@ -357,6 +400,12 @@ export interface MultiTurnConversationRow extends AgenticConversationRow {
   lastModel: string | null;
   lastProvider: string | null;
   lastStatus: number | null;
+  // Exposed so the API layer can check whether the latest turn genuinely
+  // used HTTP continuation (see isGenuineContinuationTurn in
+  // responsesContinuationStore.ts) without a second query — this row's own
+  // artifact/tenant already identify it, no separate lookup needed.
+  lastArtifactRelPath: string | null;
+  lastApiKeyId: string | null;
 }
 
 /**
@@ -400,16 +449,7 @@ export function listMultiTurnConversations(
 
   const rows = db
     .prepare(
-      `SELECT ac.*, latest.id as last_call_log_id, latest.model as last_model,
-              latest.provider as last_provider, latest.status as last_status
-       FROM agentic_conversations ac
-       LEFT JOIN (
-         SELECT cl1.id, cl1.session_tag, cl1.model, cl1.provider, cl1.status
-         FROM call_logs cl1
-         WHERE cl1.timestamp = (
-           SELECT MAX(cl2.timestamp) FROM call_logs cl2 WHERE cl2.session_tag = cl1.session_tag
-         )
-       ) latest ON latest.session_tag = ac.id
+      `${MULTI_TURN_CONVERSATION_SELECT}
        WHERE (SELECT COUNT(*) FROM conversation_turn_nodes n WHERE n.conversation_id = ac.id) >= 2
        ORDER BY ac.last_seen_at DESC
        LIMIT ? OFFSET ?`
@@ -418,15 +458,52 @@ export function listMultiTurnConversations(
 
   return {
     total: Number(total ?? 0),
-    rows: rows.map((r) => {
-      const rec = asRecord(r);
-      return {
-        ...toRow(rec),
-        lastCallLogId: typeof rec.last_call_log_id === "string" ? rec.last_call_log_id : null,
-        lastModel: typeof rec.last_model === "string" ? rec.last_model : null,
-        lastProvider: typeof rec.last_provider === "string" ? rec.last_provider : null,
-        lastStatus: typeof rec.last_status === "number" ? rec.last_status : null,
-      };
-    }),
+    rows: rows.map(toMultiTurnConversationRow),
   };
+}
+
+function toMultiTurnConversationRow(value: unknown): MultiTurnConversationRow {
+  const rec = asRecord(value);
+  return {
+    ...toRow(rec),
+    lastCallLogId: typeof rec.last_call_log_id === "string" ? rec.last_call_log_id : null,
+    lastModel: typeof rec.last_model === "string" ? rec.last_model : null,
+    lastProvider: typeof rec.last_provider === "string" ? rec.last_provider : null,
+    lastStatus: typeof rec.last_status === "number" ? rec.last_status : null,
+    lastArtifactRelPath:
+      typeof rec.last_artifact_relpath === "string" ? rec.last_artifact_relpath : null,
+    lastApiKeyId: typeof rec.last_api_key_id === "string" ? rec.last_api_key_id : null,
+  };
+}
+
+const MULTI_TURN_CONVERSATION_SELECT = `
+  SELECT ac.*, latest.id as last_call_log_id, latest.model as last_model,
+         latest.provider as last_provider, latest.status as last_status,
+         latest.artifact_relpath as last_artifact_relpath,
+         latest.api_key_id as last_api_key_id
+  FROM agentic_conversations ac
+  LEFT JOIN (
+    SELECT cl1.id, cl1.session_tag, cl1.model, cl1.provider, cl1.status,
+           cl1.artifact_relpath, cl1.api_key_id
+    FROM call_logs cl1
+    WHERE cl1.timestamp = (
+      SELECT MAX(cl2.timestamp) FROM call_logs cl2 WHERE cl2.session_tag = cl1.session_tag
+    )
+  ) latest ON latest.session_tag = ac.id
+`;
+
+/**
+ * Single-conversation equivalent of listMultiTurnConversations, for the
+ * dashboard's conversation modal: while it's open, polling this one row on
+ * the refresh interval (instead of the whole up-to-200-row list just to
+ * pluck one row back out of it) is what actually needs to stay live —
+ * lastCallLogId/lastStatus for "Goto latest request" and isActive detection.
+ * Unlike the list, this intentionally has no turn-count floor: a
+ * specifically-requested conversation should resolve even if it hasn't (yet)
+ * reached 2 turn nodes.
+ */
+export function getMultiTurnConversationById(id: string): MultiTurnConversationRow | null {
+  const db = getDbInstance();
+  const row = db.prepare(`${MULTI_TURN_CONVERSATION_SELECT} WHERE ac.id = ?`).get(id);
+  return row ? toMultiTurnConversationRow(row) : null;
 }

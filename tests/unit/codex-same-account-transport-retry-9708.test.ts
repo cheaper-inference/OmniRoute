@@ -24,7 +24,7 @@ const auth = await import("../../src/sse/services/auth.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -55,7 +55,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#9708: 503 connection-reset and 507 buffer errors are retryable pre-output transport", () => {
@@ -104,6 +104,36 @@ test("#9708: quota, auth, and deterministic 400s never enter the same-account re
       hasEmittedOutput: true,
     }),
     false
+  );
+});
+
+test("Antigravity 504 rotates rather than replaying after a full header timeout", () => {
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "antigravity",
+      status: 504,
+      errorText: "gateway timeout",
+      attempt: 0,
+    }),
+    false
+  );
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "antigravity",
+      status: 503,
+      errorText: "connection reset",
+      attempt: 0,
+    }),
+    true
+  );
+  assert.equal(
+    shouldRetrySameAccountTransport({
+      provider: "codex",
+      status: 504,
+      errorText: "temporary gateway timeout",
+      attempt: 0,
+    }),
+    true
   );
 });
 

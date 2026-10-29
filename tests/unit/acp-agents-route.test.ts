@@ -10,7 +10,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "acp-agents-route-api-key-secret";
 
 const core = await import("../../src/lib/db/core.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const { updateSettings } = await import("@/lib/db/settings");
+const localDb = { updateSettings };
 const routeModule = await import("../../src/app/api/acp/agents/route.ts");
 
 const ORIGINAL_INITIAL_PASSWORD = process.env.INITIAL_PASSWORD;
@@ -18,7 +19,7 @@ const ORIGINAL_JWT_SECRET = process.env.JWT_SECRET;
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   delete process.env.INITIAL_PASSWORD;
   delete process.env.JWT_SECRET;
@@ -50,7 +51,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_INITIAL_PASSWORD === undefined) {
     delete process.env.INITIAL_PASSWORD;

@@ -5,18 +5,6 @@ import os from "node:os";
 import path from "node:path";
 import { proxyConfigToUrl } from "../../open-sse/utils/proxyDispatcher.ts";
 
-describe("resolved proxy config → URL family encoding", () => {
-  it("encodes ipv6 family resolved from a connection's proxy", () => {
-    const resolved = { type: "socks5", host: "proxy.example.com", port: 1080, family: "ipv6" };
-    const url = proxyConfigToUrl(resolved);
-    assert.ok(url!.endsWith("?family=ipv6"), url!);
-  });
-  it("omits family marker when auto", () => {
-    const url = proxyConfigToUrl({ type: "http", host: "p.example.com", port: 8080, family: "auto" });
-    assert.ok(!url!.includes("family="), url!);
-  });
-});
-
 // ──────────────── Integration: family survives the resolveProxyForConnection cascade ──
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-resolve-family-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -28,17 +16,34 @@ const proxiesDb = await import("../../src/lib/db/proxies.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 
+describe("resolved proxy config → URL family encoding", () => {
+  it("encodes ipv6 family resolved from a connection's proxy", () => {
+    const resolved = { type: "socks5", host: "proxy.example.com", port: 1080, family: "ipv6" };
+    const url = proxyConfigToUrl(resolved);
+    assert.ok(url!.endsWith("?family=ipv6"), url!);
+  });
+  it("omits family marker when auto", () => {
+    const url = proxyConfigToUrl({
+      type: "http",
+      host: "p.example.com",
+      port: 8080,
+      family: "auto",
+    });
+    assert.ok(!url!.includes("family="), url!);
+  });
+});
+
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("account-level registry proxy carries family=ipv6 through resolveProxyForConnection", async () => {

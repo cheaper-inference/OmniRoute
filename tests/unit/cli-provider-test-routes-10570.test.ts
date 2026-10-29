@@ -35,7 +35,7 @@ async function withCliEnv(fn: (dataDir: string) => Promise<void>) {
     await fn(dataDir);
   } finally {
     globalThis.fetch = ORIGINAL_FETCH;
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
     if (ORIGINAL_API_KEY === undefined) delete process.env.OMNIROUTE_API_KEY;

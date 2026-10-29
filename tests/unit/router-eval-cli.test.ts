@@ -25,7 +25,7 @@ const scriptPath = "scripts/router-eval/index.ts";
 // DATA_DIR — the exact resolution the guard message prescribes — instead of loosening
 // the assertions.
 const cliDataDir = mkdtempSync(join(tmpdir(), "router-eval-cli-datadir-"));
-after(() => rmSync(cliDataDir, { recursive: true, force: true }));
+after(() => rmSync(cliDataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }));
 
 function runCli(args: string[]) {
   return spawnSync(process.execPath, ["--import", "tsx", scriptPath, ...args], {
@@ -68,7 +68,7 @@ test("router-eval CLI prints a markdown report for JSONL input", () => {
     assert.ok((result.stdout ?? "").includes("Frontier"));
     assert.ok((result.stdout ?? "").includes("AIQ"));
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -123,7 +123,7 @@ test("router-eval CLI exits non-zero when regression threshold is exceeded", () 
     assert.ok((result.stdout ?? "").includes("Router Eval Comparison"));
     assert.ok((result.stdout ?? "").includes("Regressions"));
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -156,7 +156,7 @@ test("router-eval CLI writes machine-readable JSON artifacts", () => {
       path: inputPath,
     });
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -242,7 +242,7 @@ test("router-eval CLI reads usage_history DB source", () => {
       "string"
     );
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -285,6 +285,6 @@ test("router-eval CLI defaults --db to call_logs when available", () => {
     assert.ok((result.stdout ?? "").includes("Router Eval Report"));
     assert.ok((result.stdout ?? "").includes("priority"));
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

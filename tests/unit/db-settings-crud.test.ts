@@ -21,7 +21,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       }
       break;
     } catch (error: any) {
@@ -43,7 +43,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
   if (ORIGINAL_INITIAL_PASSWORD === undefined) {
     delete process.env.INITIAL_PASSWORD;
@@ -63,7 +63,7 @@ test("getSettings exposes defaults and updateSettings persists typed values", as
     label: "task-303",
   });
 
-  assert.equal(defaults.cloudEnabled, true);
+  assert.equal(defaults.cloudEnabled, false);
   assert.equal(defaults.requireLogin, true);
   assert.deepEqual(defaults.hiddenSidebarItems, []);
   assert.deepEqual(defaults.hiddenSidebarGroupLabels, []);
@@ -82,6 +82,14 @@ test("getSettings exposes defaults and updateSettings persists typed values", as
   assert.equal(updated.antigravitySignatureCacheMode, "enabled");
   assert.equal(updated.label, "task-303");
   assert.equal(await settingsDb.isCloudEnabled(), true);
+
+  const reread = await settingsDb.getSettings();
+  assert.equal(reread.cloudEnabled, true);
+  const stored = core
+    .getDbInstance()
+    .prepare("SELECT value FROM key_value WHERE namespace = 'settings' AND key = 'cloudEnabled'")
+    .get() as { value: string };
+  assert.equal(stored.value, "true");
 });
 
 test("INITIAL_PASSWORD marks onboarding as complete on first read", async () => {

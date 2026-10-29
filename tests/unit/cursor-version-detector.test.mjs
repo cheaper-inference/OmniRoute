@@ -45,7 +45,7 @@ test("getCursorVersion reads version from state.vscdb", () => {
   } finally {
     if (origEnv === undefined) delete process.env.CURSOR_STATE_DB_PATH;
     else process.env.CURSOR_STATE_DB_PATH = origEnv;
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -74,7 +74,7 @@ test("getCursorVersion returns fallback when DB has no version key", () => {
   } finally {
     if (origEnv === undefined) delete process.env.CURSOR_STATE_DB_PATH;
     else process.env.CURSOR_STATE_DB_PATH = origEnv;
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -100,7 +100,7 @@ test("getCursorVersion caches the result across calls", () => {
   } finally {
     if (origEnv === undefined) delete process.env.CURSOR_STATE_DB_PATH;
     else process.env.CURSOR_STATE_DB_PATH = origEnv;
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -126,6 +126,6 @@ test("resetCursorVersionCache forces re-read from DB", () => {
   } finally {
     if (origEnv === undefined) delete process.env.CURSOR_STATE_DB_PATH;
     else process.env.CURSOR_STATE_DB_PATH = origEnv;
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });

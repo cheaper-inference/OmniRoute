@@ -77,7 +77,7 @@ function tickConfig(tool: string, port: number) {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("start spawns process and captures logs in ring buffer", async () => {

@@ -67,7 +67,7 @@ test("firstAncestorWith walks up from anchors to find a marker", () => {
     assert.equal(found, path.join(tmp, "dist"), "must find the dist root by walking up");
     assert.equal(firstAncestorWith([anchor], path.join("node_modules", "nope")), null);
   } finally {
-    fs.rmSync(tmp, { recursive: true, force: true });
+    fs.rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -76,6 +76,28 @@ test("resolveWorkerFile returns an existing onnxWorker file (no import.meta.url)
   const { workerFile } = resolveWorkerFile();
   assert.ok(fs.existsSync(workerFile), `resolved worker file must exist: ${workerFile}`);
   assert.ok(/onnxWorker\.(t|j)s$/.test(workerFile), `must point at onnxWorker: ${workerFile}`);
+});
+
+test("resolveWorkerFile chooses TS over a tracked JS placeholder in the source tree", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "slm-placeholder-"));
+  const originalCwd = process.cwd();
+  const originalArgv1 = process.argv[1];
+  try {
+    const dir = path.join(root, "open-sse", "services", "compression", "engines", "llmlingua");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "onnxWorker.js"), "export {};\n");
+    fs.writeFileSync(path.join(dir, "onnxWorker.ts"), "// source worker\n");
+    process.chdir(root);
+    process.argv[1] = path.join(root, "server.js");
+    assert.deepEqual(resolveWorkerFile(), {
+      workerFile: path.join(dir, "onnxWorker.ts"),
+      execArgv: ["--import", "tsx/esm"],
+    });
+  } finally {
+    process.argv[1] = originalArgv1;
+    process.chdir(originalCwd);
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 });
 
 test("depsAvailable is true when @atjsh/llmlingua-2 is installed (symlinked node_modules)", () => {

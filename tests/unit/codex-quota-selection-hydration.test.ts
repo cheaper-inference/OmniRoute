@@ -21,7 +21,7 @@ function futureIso(ms = 60_000) {
 async function resetStorage() {
   core.resetDbInstance();
   quotaCache.__clearForTests();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -31,7 +31,7 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("Codex selection ignores hydrated Spark-only exhaustion for normal Codex models", async () => {

@@ -27,14 +27,15 @@ process.env.CLOUD_URL = "http://cloud.example";
 
 const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const { updateSettings, getSettings } = await import("@/lib/db/settings");
+const localDb = { updateSettings, getSettings };
 const listRoute = await import("../../src/app/api/keys/route.ts");
 
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
   apiKeysDb.resetApiKeyState();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -49,16 +50,16 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   await resetStorage();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   core.resetDbInstance();
 });
 
 test("POST /api/keys responds promptly even when the Cloud-sync fetch hangs forever (#6570)", async () => {
   await enableManagementAuth();
-  // cloudEnabled defaults to true on a fresh install (no settings row yet) —
-  // simulate that "fresh install" condition explicitly for clarity/documentation.
+  // Exercise the opt-in path: a fresh install now leaves cloud sync disabled.
+  await localDb.updateSettings({ cloudEnabled: true });
   const settings = await localDb.getSettings();
-  assert.equal(settings.cloudEnabled, true, "cloudEnabled should default to true pre-fix");
+  assert.equal(settings.cloudEnabled, true, "this fixture explicitly enables cloud sync");
 
   const originalFetch = globalThis.fetch;
   // Simulate a slow/unreachable Cloud endpoint: a fetch() that never settles.

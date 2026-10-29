@@ -24,7 +24,8 @@ const backupDb = await import("../../src/lib/db/backup.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
-const localDb = await import("../../src/lib/localDb.ts");
+const { createProxy } = await import("@/lib/db/proxies");
+const localDb = { createProxy };
 const tokenRefresh = await import("../../open-sse/services/tokenRefresh.ts");
 const proxyFetch = await import("../../open-sse/utils/proxyFetch.ts");
 const proxyDispatcher = await import("../../open-sse/utils/proxyDispatcher.ts");
@@ -57,7 +58,7 @@ async function resetStorage() {
   for (let attempt = 0; attempt < 10; attempt++) {
     try {
       if (fs.existsSync(TEST_DATA_DIR)) {
-        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+        fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       }
       break;
     } catch (err: any) {
@@ -73,7 +74,7 @@ async function resetStorage() {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("token refresh dedupe key avoids collision for same-prefix tokens", async () => {

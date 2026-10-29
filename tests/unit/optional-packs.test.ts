@@ -33,7 +33,7 @@ test("packs dirs derive from DATA_DIR override without touching the real home", 
     packNodeModulesDir("browser-runtime", dataDir),
     path.join(dataDir, "packs", "browser-runtime", "node_modules")
   );
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("installedPackNodePaths lists only packs with an existing node_modules dir, in manifest order", () => {
@@ -51,7 +51,7 @@ test("installedPackNodePaths lists only packs with an existing node_modules dir,
     path.join(dataDir, "packs", "ml-runtime", "node_modules"),
     path.join(dataDir, "packs", "browser-runtime", "node_modules"),
   ]);
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("packMemberInstalled probes installed pack trees with optional node_modules prefix", () => {
@@ -83,7 +83,7 @@ test("packMemberInstalled probes installed pack trees with optional node_modules
     packMemberInstalled("@atjsh/llmlingua-2/package.json", path.join(dataDir, "absent")),
     false
   );
-  fs.rmSync(dataDir, { recursive: true, force: true });
+  fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("manifest and runtime pack lists stay in sync", async () => {

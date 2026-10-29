@@ -1,4 +1,6 @@
 "use client";
+
+import Icon from "@/shared/components/Icon";
 /**
  * CustomModelsSection — Issue #3501 Phase 1e
  *
@@ -10,7 +12,7 @@
  */
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
 import {
   normalizeModelSupportedEndpoints,
   type ModelSupportedEndpoint,
@@ -24,7 +26,9 @@ import {
   effectiveNormalizeForProtocol,
   effectivePreserveForProtocol,
   effectiveUpstreamHeadersForProtocol,
+  endpointsForApiFormatChange,
   formatProviderModelsErrorResponse,
+  parseContextWindowOverrideInput,
   providerText,
   targetFormatBadgeI18nKey,
   type CompatModelRow,
@@ -63,32 +67,47 @@ const MODEL_ENDPOINT_OPTIONS: ModelSupportedEndpoint[] = [
   "videos",
   "audio-speech",
   "audio-transcriptions",
+  "music",
 ];
+
+// Layout shared by the add form and the inline edit form: two columns on phones (fields
+// pair up, endpoint checkboxes form a tidy grid), one flowing row from lg up.
+const FORMAT_FIELDS_GRID = "grid grid-cols-2 items-end gap-3 lg:flex lg:flex-wrap lg:gap-x-4";
+const ENDPOINTS_GRID =
+  "grid grid-cols-2 gap-x-3 gap-y-1.5 sm:grid-cols-3 lg:flex lg:flex-wrap lg:items-center lg:gap-y-1";
+const CHECK_LABEL = "flex min-w-0 items-center gap-1.5 text-xs text-text-main cursor-pointer";
 
 function endpointLabel(endpoint: ModelSupportedEndpoint, t: (key: string) => string): string {
   const labels: Partial<Record<ModelSupportedEndpoint, string>> = {
-    chat: `💬 ${t("supportedEndpointChat")}`,
-    embeddings: `📐 ${t("supportedEndpointEmbeddings")}`,
+    chat: t("supportedEndpointChat"),
+    embeddings: t("supportedEndpointEmbeddings"),
     rerank: providerText(t, "rerankEndpoint", "Rerank"),
-    images: `🖼️ ${t("supportedEndpointImages")}`,
-    videos: "🎬 Video",
-    "audio-speech": `🔊 ${t("audioSpeech")}`,
-    "audio-transcriptions": `🎙️ ${t("audioTranscriptions")}`,
+    images: t("supportedEndpointImages"),
+    videos: "Video",
+    "audio-speech": t("audioSpeech"),
+    "audio-transcriptions": t("audioTranscriptions"),
+    music: "Music",
   };
   return labels[endpoint] || endpoint;
 }
 
-/**
- * #4125: parse the free-text "Context Window Override" field. Blank → no override
- * (`value: null`, not an error). A non-empty value must be a positive whole number of
- * tokens; anything else is rejected. Pulled out of saveEdit so its own branching stays
- * off that handler's cyclomatic complexity.
- */
-function parseContextWindowOverrideInput(raw: string): { value: number | null; invalid: boolean } {
-  const trimmed = raw.trim();
-  if (!trimmed) return { value: null, invalid: false };
-  if (!/^\d+$/.test(trimmed) || Number(trimmed) <= 0) return { value: null, invalid: true };
-  return { value: Number(trimmed), invalid: false };
+// Fetch + parse extracted from the component so errors surface as a return
+// value (logged here) instead of state writes inside catch/finally blocks —
+// the load callback then only sets state after the await, which lets the
+// mount effect call it without a synchronous setState.
+async function fetchProviderModelsPayload(providerId: string): Promise<{
+  models: CompatModelRow[];
+  overrides: Array<CompatModelRow & { id: string }>;
+} | null> {
+  try {
+    const res = await fetch(`/api/provider-models?provider=${encodeURIComponent(providerId)}`);
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { models: data.models || [], overrides: data.modelCompatOverrides || [] };
+  } catch (e) {
+    console.error("Failed to fetch custom models:", e);
+    return null;
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -128,34 +147,48 @@ export default function CustomModelsSection({
   // #4125: manual context-window override (Feature 5004 table) — free text so the
   // field can be left blank (no override) without fighting a number input's "0".
   const [editingContextWindowOverride, setEditingContextWindowOverride] = useState("");
+  // Mirrors the context-window override above: the backend already persists
+  // maxOutputTokenOverride via PUT /api/provider-models (see
+  // outputTokenOverrides.ts / ModelOutputTokenEditor.tsx used on the
+  // synced/passthrough model rows), but this custom-models list never read or
+  // sent it, so a custom model's output-token limit could not be set from the
+  // dashboard. Free text for the same "blank = no override" reason.
+  const [editingMaxOutputTokenOverride, setEditingMaxOutputTokenOverride] = useState("");
   // #1904: manual vision-capability override — some self-hosted/local OpenAI-compatible
   // backends don't self-report an image input modality, so the user needs a way to flag
   // the model as vision-capable by hand (read back by getCustomVisionCapabilityFields()).
   const [newSupportsVision, setNewSupportsVision] = useState(false);
   const [editingSupportsVision, setEditingSupportsVision] = useState(false);
+  const [newIsFree, setNewIsFree] = useState(false);
+  const [editingIsFree, setEditingIsFree] = useState(false);
 
   const customMap = useMemo(() => buildCompatMap(customModels), [customModels]);
   const overrideMap = useMemo(() => buildCompatMap(modelCompatOverrides), [modelCompatOverrides]);
   const syncedModelIdSet = useMemo(() => new Set(syncedModelIds), [syncedModelIds]);
 
   const fetchCustomModels = useCallback(async () => {
-    try {
-      const res = await fetch(`/api/provider-models?provider=${encodeURIComponent(providerId)}`);
-      if (res.ok) {
-        const data = await res.json();
-        setCustomModels(data.models || []);
-        setModelCompatOverrides(data.modelCompatOverrides || []);
-      }
-    } catch (e) {
-      console.error("Failed to fetch custom models:", e);
-    } finally {
-      setLoading(false);
+    const payload = await fetchProviderModelsPayload(providerId);
+    if (payload) {
+      setCustomModels(payload.models);
+      setModelCompatOverrides(payload.overrides);
     }
+    setLoading(false);
   }, [providerId]);
 
+  // Initial load: the async work is defined INSIDE the effect (calling the
+  // component-scope fetchCustomModels callback synchronously from an effect is
+  // rejected by the compiler rules); every setState here runs after the await.
   useEffect(() => {
-    fetchCustomModels();
-  }, [fetchCustomModels]);
+    const run = async () => {
+      const payload = await fetchProviderModelsPayload(providerId);
+      if (payload) {
+        setCustomModels(payload.models);
+        setModelCompatOverrides(payload.overrides);
+      }
+      setLoading(false);
+    };
+    void run();
+  }, [providerId]);
 
   const handleAdd = async () => {
     if (!newModelId.trim() || adding) return;
@@ -172,6 +205,7 @@ export default function CustomModelsSection({
           supportedEndpoints: newEndpoints,
           ...(newTargetFormat ? { targetFormat: newTargetFormat } : {}),
           ...(newSupportsVision ? { supportsVision: true } : {}),
+          ...(newIsFree ? { isFree: true } : {}),
         }),
       });
       if (res.ok) {
@@ -181,6 +215,7 @@ export default function CustomModelsSection({
         setNewEndpoints(["chat"]);
         setNewTargetFormat("");
         setNewSupportsVision(false);
+        setNewIsFree(false);
         await fetchCustomModels();
         onModelsChanged?.();
       }
@@ -266,7 +301,11 @@ export default function CustomModelsSection({
     setEditingContextWindowOverride(
       typeof model.contextWindowOverride === "number" ? String(model.contextWindowOverride) : ""
     );
+    setEditingMaxOutputTokenOverride(
+      typeof model.maxOutputTokenOverride === "number" ? String(model.maxOutputTokenOverride) : ""
+    );
     setEditingSupportsVision(model.supportsVision === true);
+    setEditingIsFree(model.isFree === true);
   };
 
   const cancelEdit = () => {
@@ -275,7 +314,9 @@ export default function CustomModelsSection({
     setEditingEndpoints(["chat"]);
     setEditingTargetFormat("");
     setEditingContextWindowOverride("");
+    setEditingMaxOutputTokenOverride("");
     setEditingSupportsVision(false);
+    setEditingIsFree(false);
     setSavingModelId(null);
   };
 
@@ -314,7 +355,11 @@ export default function CustomModelsSection({
   // Split out of saveEdit (which only validates + delegates) so the #4125 context-window
   // validation stays a single early-return in the caller instead of adding a branch to
   // this already-large PUT/fetch/error-handling body.
-  const performSaveEdit = async (modelId: string, contextWindowOverride: number | null) => {
+  const performSaveEdit = async (
+    modelId: string,
+    contextWindowOverride: number | null,
+    maxOutputTokenOverride: number | null
+  ) => {
     setSavingModelId(modelId);
     try {
       const model = customModels.find((m) => m.id === modelId);
@@ -334,9 +379,11 @@ export default function CustomModelsSection({
           ...(editingTargetFormat ? { targetFormat: editingTargetFormat } : {}),
           // #4125: manual context-window override — number to set, null to clear.
           contextWindowOverride,
-          // #1904: manual vision-capability override — true/false to set, null to
-          // clear back to the id-based heuristic.
+          // Same contract as contextWindowOverride above: number to set, null to
+          // clear. Persisted by persistOutputTokenOverride() on the API side.
+          maxOutputTokenOverride,
           supportsVision: editingSupportsVision ? true : null,
+          isFree: editingIsFree ? true : null,
         }),
       });
 
@@ -389,46 +436,46 @@ export default function CustomModelsSection({
       return;
     }
 
-    await performSaveEdit(modelId, contextOverride.value);
+    // Reuses the same parser as the context-window field: both are optional
+    // positive-integer overrides with identical blank/invalid semantics.
+    const maxOutputTokenOverride = parseContextWindowOverrideInput(editingMaxOutputTokenOverride);
+    if (maxOutputTokenOverride.invalid) {
+      notify.error(t("maxOutputTokenOverrideInvalid"));
+      return;
+    }
+
+    await performSaveEdit(modelId, contextOverride.value, maxOutputTokenOverride.value);
   };
 
   return (
     <div className="mt-6 pt-6 border-t border-border">
       <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-        <span className="material-symbols-outlined text-base text-primary">tune</span>
+        <Icon name="tune" size={16} className="text-primary" />
         {t("customModels")}
       </h3>
       <p className="text-xs text-text-muted mb-3">{t("customModelsHint")}</p>
 
       {/* Add form */}
       <div className="flex flex-col gap-3 mb-3">
-        <div className="flex items-end gap-2">
-          <div className="flex-1">
-            <label htmlFor="custom-model-id" className="text-xs text-text-muted mb-1 block">
-              {t("modelId")}
-            </label>
-            <input
+        <div className="grid grid-cols-[minmax(0,1fr)_auto] items-end gap-2 sm:flex sm:flex-wrap">
+          <div className="col-span-2 flex-1 basis-48 min-w-0">
+            <Input
               id="custom-model-id"
-              type="text"
+              label={t("modelId")}
               value={newModelId}
               onChange={(e) => setNewModelId(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
               placeholder={t("customModelPlaceholder")}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
             />
           </div>
-          <div className="w-40">
-            <label htmlFor="custom-model-name" className="text-xs text-text-muted mb-1 block">
-              {t("displayName")}
-            </label>
-            <input
+          <div className="min-w-0 sm:w-40">
+            <Input
               id="custom-model-name"
-              type="text"
+              label={t("displayName")}
               value={newModelName}
               onChange={(e) => setNewModelName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleAdd()}
               placeholder={t("optional")}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
             />
           </div>
           <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModelId.trim() || adding}>
@@ -437,16 +484,17 @@ export default function CustomModelsSection({
         </div>
 
         {/* API Format + Supported Endpoints */}
-        <div className="flex items-end gap-4 flex-wrap">
-          <div className="w-48">
-            <label htmlFor="custom-api-format" className="text-xs text-text-muted mb-1 block">
-              API Format
-            </label>
-            <select
+        <div className={FORMAT_FIELDS_GRID}>
+          <div className="min-w-0 lg:w-48">
+            <Select
               id="custom-api-format"
+              label="API Format"
               value={newApiFormat}
-              onChange={(e) => setNewApiFormat(e.target.value)}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
+              onChange={(e) => {
+                const endpoints = endpointsForApiFormatChange(newApiFormat, e.target.value);
+                setNewApiFormat(e.target.value);
+                if (endpoints) setNewEndpoints(endpoints);
+              }}
             >
               <option value="chat-completions">{t("chatCompletions")}</option>
               <option value="responses">{t("responsesApi")}</option>
@@ -456,18 +504,15 @@ export default function CustomModelsSection({
               <option value="audio-speech">{t("audioSpeech")}</option>
               <option value="images-generations">{t("imagesGenerations")}</option>
               <option value="video">Video</option>
-            </select>
+            </Select>
           </div>
-          <div className="w-48">
-            <label htmlFor="custom-target-format" className="text-xs text-text-muted mb-1 block">
-              {t("targetFormatLabel")}
-            </label>
-            <select
+          <div className="min-w-0 lg:w-48">
+            <Select
               id="custom-target-format"
+              label={t("targetFormatLabel")}
               value={newTargetFormat}
               onChange={(e) => setNewTargetFormat(e.target.value)}
               title={t("targetFormatHint")}
-              className="w-full px-3 py-2 text-sm border border-border rounded-lg bg-background focus:outline-none focus:border-primary"
             >
               <option value="">{t("targetFormatAuto")}</option>
               <option value="openai">{t("compatProtocolOpenAI")}</option>
@@ -475,51 +520,54 @@ export default function CustomModelsSection({
               <option value="claude">{t("compatProtocolClaude")}</option>
               <option value="gemini">{t("targetFormatGemini")}</option>
               <option value="antigravity">{t("targetFormatAntigravity")}</option>
-            </select>
+            </Select>
           </div>
-          <div className="flex-1">
+          <div className="col-span-2 min-w-0 lg:flex-1">
             <span className="text-xs text-text-muted mb-1 block">
               {t("supportedEndpointsLabel")}
             </span>
-            <div className="flex items-center gap-3">
+            <div className={ENDPOINTS_GRID}>
               {MODEL_ENDPOINT_OPTIONS.map((ep) => (
-                <label
+                <Checkbox
                   key={ep}
-                  className="flex items-center gap-1.5 text-xs text-text-main cursor-pointer"
-                >
-                  <input
-                    type="checkbox"
-                    checked={newEndpoints.includes(ep)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setNewEndpoints((prev) => [...prev, ep]);
-                      } else {
-                        setNewEndpoints((prev) => prev.filter((x) => x !== ep));
-                      }
-                    }}
-                    className="rounded border-border"
-                  />
-                  {endpointLabel(ep, t)}
-                </label>
+                  checked={newEndpoints.includes(ep)}
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      setNewEndpoints((prev) => [...prev, ep]);
+                    } else {
+                      setNewEndpoints((prev) => prev.filter((x) => x !== ep));
+                    }
+                  }}
+                  className={CHECK_LABEL}
+                  label={endpointLabel(ep, t)}
+                />
               ))}
             </div>
           </div>
-          <div>
-            <span className="text-xs text-text-muted mb-1 block">&nbsp;</span>
-            <label
-              htmlFor="custom-model-supports-vision"
-              className="flex items-center gap-1.5 text-xs text-text-main cursor-pointer whitespace-nowrap"
+          <div className="col-span-2 flex flex-wrap gap-x-4 gap-y-1 lg:block">
+            <span className="hidden text-xs text-text-muted mb-1 lg:block">&nbsp;</span>
+            <span
+              className="text-xs text-text-main whitespace-nowrap"
               title={t("visionCapableHint")}
             >
-              <input
+              <Checkbox
                 id="custom-model-supports-vision"
-                type="checkbox"
                 checked={newSupportsVision}
                 onChange={(e) => setNewSupportsVision(e.target.checked)}
-                className="rounded border-border"
+                label={t("visionCapableLabel")}
               />
-              {`👁️ ${t("visionCapableLabel")}`}
-            </label>
+            </span>
+            <span
+              className="text-xs text-text-main whitespace-nowrap"
+              title="Mark as free-tier (shown even when hide paid models is on)"
+            >
+              <Checkbox
+                id="custom-model-is-free"
+                checked={newIsFree}
+                onChange={(e) => setNewIsFree(e.target.checked)}
+                label="FREE"
+              />
+            </span>
           </div>
         </div>
       </div>
@@ -539,9 +587,7 @@ export default function CustomModelsSection({
                 className="flex items-center gap-3 rounded-lg border border-border p-3 hover:bg-sidebar/50"
               >
                 {editingModelId !== model.id && (
-                  <span className="material-symbols-outlined text-base text-primary shrink-0">
-                    tune
-                  </span>
+                  <Icon name="tune" size={16} className="text-primary" />
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium truncate">{model.name || model.id}</p>
@@ -549,17 +595,17 @@ export default function CustomModelsSection({
                     <code className="text-xs text-text-muted font-mono bg-sidebar px-1.5 py-0.5 rounded">
                       {fullModel}
                     </code>
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      icon={copied === copyKey ? "check" : "content_copy"}
                       onClick={() => onCopy(fullModel, copyKey)}
-                      className="p-0.5 hover:bg-sidebar rounded text-text-muted hover:text-primary"
+                      className="size-6 min-h-6 rounded text-text-muted"
                       title={t("copyModel")}
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        {copied === copyKey ? "check" : "content_copy"}
-                      </span>
-                    </button>
+                      aria-label={t("copyModel")}
+                    />
                     {model.apiFormat === "responses" && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-medium">
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-info/15 text-info font-medium">
                         {t("responses")}
                       </span>
                     )}
@@ -577,62 +623,78 @@ export default function CustomModelsSection({
                     )}
                     {model.targetFormat && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium"
                         title={t("targetFormatHint")}
                       >
                         {`→ ${targetFormatLabel(model.targetFormat, t)}`}
                       </span>
                     )}
                     {typeof model.contextWindowOverride === "number" && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-orange-500/15 text-orange-400 font-medium"
+                      <CapabilityBadge
+                        icon="width_normal"
+                        className="bg-warning/15 text-warning"
                         title={t("contextWindowOverrideHint")}
                       >
-                        {`🪟 ${model.contextWindowOverride.toLocaleString()}`}
-                      </span>
+                        {model.contextWindowOverride.toLocaleString()}
+                      </CapabilityBadge>
+                    )}
+                    {typeof model.maxOutputTokenOverride === "number" && (
+                      <CapabilityBadge
+                        icon="output"
+                        className="bg-info/15 text-info"
+                        title={t("maxOutputTokenOverrideHint")}
+                      >
+                        {model.maxOutputTokenOverride.toLocaleString()}
+                      </CapabilityBadge>
                     )}
                     {model.supportsVision === true && (
-                      <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-pink-500/15 text-pink-400 font-medium"
+                      <CapabilityBadge
+                        icon="visibility"
+                        className="bg-chart-5/15 text-chart-5"
                         title={t("visionCapableHint")}
                       >
-                        {`👁️ ${t("visionCapableLabel")}`}
+                        {t("visionCapableLabel")}
+                      </CapabilityBadge>
+                    )}
+                    {model.isFree === true && (
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-success/15 text-success font-medium">
+                        FREE
                       </span>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-purple-500/15 text-purple-400 font-medium">
-                        {`📐 ${t("supportedEndpointEmbeddings")}`}
-                      </span>
+                      <CapabilityBadge icon="scatter_plot" className="bg-chart-3/15 text-chart-3">
+                        {t("supportedEndpointEmbeddings")}
+                      </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("images") && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-amber-500/15 text-amber-400 font-medium">
-                        {`🖼️ ${t("imagesShortLabel")}`}
-                      </span>
+                      <CapabilityBadge icon="image" className="bg-warning/15 text-warning">
+                        {t("imagesShortLabel")}
+                      </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("audio") && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 font-medium">
-                        {`🔊 ${t("audioShortLabel")}`}
-                      </span>
+                      <CapabilityBadge icon="volume_up" className="bg-success/15 text-success">
+                        {t("audioShortLabel")}
+                      </CapabilityBadge>
                     )}
                     {(model.supportedEndpoints?.includes("videos") ||
                       model.supportedEndpoints?.includes("video")) && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-red-500/15 text-red-400 font-medium">
-                        🎬 Video
-                      </span>
+                      <CapabilityBadge icon="movie" className="bg-error/15 text-error">
+                        Video
+                      </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("audio-speech") && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-green-500/15 text-green-400 font-medium">
-                        {`🔊 ${t("audioSpeech")}`}
-                      </span>
+                      <CapabilityBadge icon="volume_up" className="bg-success/15 text-success">
+                        {t("audioSpeech")}
+                      </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("audio-transcriptions") && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 font-medium">
-                        {`🎙️ ${t("audioTranscriptions")}`}
-                      </span>
+                      <CapabilityBadge icon="mic" className="bg-chart-2/15 text-chart-2">
+                        {t("audioTranscriptions")}
+                      </CapabilityBadge>
                     )}
                     {anyNormalizeCompatBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-slate-500/15 text-slate-400 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-bg-subtle text-text-muted font-medium"
                         title={t("normalizeToolCallIdLabel")}
                       >
                         ID×9
@@ -640,7 +702,7 @@ export default function CustomModelsSection({
                     )}
                     {anyNoPreserveCompatBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2 font-medium"
                         title={t("compatDoNotPreserveDeveloper")}
                       >
                         {t("compatBadgeNoPreserve")}
@@ -648,7 +710,7 @@ export default function CustomModelsSection({
                     )}
                     {anyUpstreamHeadersBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-violet-500/15 text-violet-400 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3 font-medium"
                         title={t("compatUpstreamHeadersLabel")}
                       >
                         {t("compatBadgeUpstreamHeaders")}
@@ -657,16 +719,21 @@ export default function CustomModelsSection({
                   </div>
 
                   {editingModelId === model.id && (
-                    <div className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-muted p-3 dark:bg-zinc-900">
-                      <div className="flex min-w-0 flex-wrap items-end gap-x-3 gap-y-2">
-                        <div className="w-[11rem] shrink-0 min-w-0">
-                          <label className="text-xs text-text-muted mb-1 block">
-                            {t("apiFormatLabel")}
-                          </label>
-                          <select
+                    <div className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-bg-subtle p-3">
+                      <div className={FORMAT_FIELDS_GRID}>
+                        <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
+                          <Select
+                            label={t("apiFormatLabel")}
+                            selectClassName="text-xs"
                             value={editingApiFormat}
-                            onChange={(e) => setEditingApiFormat(e.target.value)}
-                            className="w-full px-2.5 py-2 text-xs border border-border rounded-lg bg-background text-text-main focus:outline-none focus:border-primary"
+                            onChange={(e) => {
+                              const endpoints = endpointsForApiFormatChange(
+                                editingApiFormat,
+                                e.target.value
+                              );
+                              setEditingApiFormat(e.target.value);
+                              if (endpoints) setEditingEndpoints(endpoints);
+                            }}
                           >
                             <option value="chat-completions">{t("chatCompletions")}</option>
                             <option value="responses">{t("responsesApi")}</option>
@@ -676,17 +743,15 @@ export default function CustomModelsSection({
                             <option value="audio-speech">{t("audioSpeech")}</option>
                             <option value="images-generations">{t("imagesGenerations")}</option>
                             <option value="video">Video</option>
-                          </select>
+                          </Select>
                         </div>
-                        <div className="w-[11rem] shrink-0 min-w-0">
-                          <label className="text-xs text-text-muted mb-1 block">
-                            {t("targetFormatLabel")}
-                          </label>
-                          <select
+                        <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
+                          <Select
+                            label={t("targetFormatLabel")}
+                            selectClassName="text-xs"
                             value={editingTargetFormat}
                             onChange={(e) => setEditingTargetFormat(e.target.value)}
                             title={t("targetFormatHint")}
-                            className="w-full px-2.5 py-2 text-xs border border-border rounded-lg bg-background text-text-main focus:outline-none focus:border-primary"
                           >
                             <option value="">{t("targetFormatAuto")}</option>
                             <option value="openai">{t("compatProtocolOpenAI")}</option>
@@ -696,69 +761,85 @@ export default function CustomModelsSection({
                             <option value="claude">{t("compatProtocolClaude")}</option>
                             <option value="gemini">{t("targetFormatGemini")}</option>
                             <option value="antigravity">{t("targetFormatAntigravity")}</option>
-                          </select>
+                          </Select>
                         </div>
-                        <div className="w-[10rem] shrink-0 min-w-0">
-                          <label className="text-xs text-text-muted mb-1 block">
-                            {t("contextWindowOverrideLabel")}
-                          </label>
-                          <input
-                            type="text"
+                        <div className="min-w-0 lg:w-[10rem] lg:shrink-0">
+                          <Input
+                            label={t("contextWindowOverrideLabel")}
+                            inputClassName="text-xs"
                             inputMode="numeric"
                             value={editingContextWindowOverride}
                             onChange={(e) => setEditingContextWindowOverride(e.target.value)}
                             placeholder={t("contextWindowOverridePlaceholder")}
                             title={t("contextWindowOverrideHint")}
-                            className="w-full px-2.5 py-2 text-xs border border-border rounded-lg bg-background text-text-main focus:outline-none focus:border-primary"
                           />
                         </div>
-                        <div className="w-[9rem] shrink-0 min-w-0">
-                          <label className="text-xs text-text-muted mb-1 block">&nbsp;</label>
-                          <label
-                            htmlFor={`custom-model-edit-vision-${model.id}`}
-                            className="flex items-center gap-1.5 text-xs text-text-main cursor-pointer whitespace-nowrap px-2.5 py-2"
+                        <div className="min-w-0 lg:w-[10rem] lg:shrink-0">
+                          <Input
+                            label={t("maxOutputTokenOverrideLabel")}
+                            inputClassName="text-xs"
+                            inputMode="numeric"
+                            value={editingMaxOutputTokenOverride}
+                            onChange={(e) => setEditingMaxOutputTokenOverride(e.target.value)}
+                            placeholder="4096"
+                            title={t("maxOutputTokenOverrideHint")}
+                          />
+                        </div>
+                        <div className="flex min-w-0 flex-col lg:w-[9rem] lg:shrink-0">
+                          <span
+                            className="hidden text-xs text-text-muted mb-1 lg:block"
+                            aria-hidden="true"
+                          >
+                            &nbsp;
+                          </span>
+                          <span
+                            className="text-xs text-text-main whitespace-nowrap py-1 lg:px-2.5 lg:py-2"
                             title={t("visionCapableHint")}
                           >
-                            <input
+                            <Checkbox
                               id={`custom-model-edit-vision-${model.id}`}
-                              type="checkbox"
                               checked={editingSupportsVision}
                               onChange={(e) => setEditingSupportsVision(e.target.checked)}
-                              className="rounded border-border"
+                              label={t("visionCapableLabel")}
                             />
-                            {`👁️ ${t("visionCapableLabel")}`}
-                          </label>
+                          </span>
+                          <span
+                            className="text-xs text-text-main whitespace-nowrap py-1 lg:px-2.5 lg:py-2"
+                            title="Mark as free-tier"
+                          >
+                            <Checkbox
+                              id={`custom-model-edit-free-${model.id}`}
+                              checked={editingIsFree}
+                              onChange={(e) => setEditingIsFree(e.target.checked)}
+                              label="FREE"
+                            />
+                          </span>
                         </div>
-                        <div className="flex min-w-0 flex-1 flex-wrap items-center gap-x-3 gap-y-1 overflow-x-auto overflow-y-visible [scrollbar-width:thin]">
+                        <div className="col-span-2 flex min-w-0 flex-col gap-1 lg:flex-1 lg:flex-row lg:flex-wrap lg:items-center lg:gap-x-3">
                           <span className="text-xs text-text-muted shrink-0">
                             {t("supportedEndpointsLabel")}
                           </span>
-                          <div className="flex flex-wrap items-center gap-x-2 sm:gap-x-3 gap-y-1 min-w-0">
+                          <div className={ENDPOINTS_GRID}>
                             {MODEL_ENDPOINT_OPTIONS.map((ep) => (
-                              <label
+                              <Checkbox
                                 key={ep}
-                                className="flex items-center gap-1.5 text-xs text-text-main cursor-pointer whitespace-nowrap"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={editingEndpoints.includes(ep)}
-                                  onChange={(e) => {
-                                    if (e.target.checked) {
-                                      setEditingEndpoints((prev) =>
-                                        prev.includes(ep) ? prev : [...prev, ep]
-                                      );
-                                    } else {
-                                      setEditingEndpoints((prev) => prev.filter((x) => x !== ep));
-                                    }
-                                  }}
-                                  className="rounded border-border"
-                                />
-                                {endpointLabel(ep, t)}
-                              </label>
+                                checked={editingEndpoints.includes(ep)}
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    setEditingEndpoints((prev) =>
+                                      prev.includes(ep) ? prev : [...prev, ep]
+                                    );
+                                  } else {
+                                    setEditingEndpoints((prev) => prev.filter((x) => x !== ep));
+                                  }
+                                }}
+                                className={CHECK_LABEL}
+                                label={endpointLabel(ep, t)}
+                              />
                             ))}
                           </div>
                         </div>
-                        <div className="flex shrink-0 flex-wrap items-center gap-2 pb-0.5">
+                        <div className="col-span-2 flex flex-wrap items-center gap-2 pb-0.5 lg:shrink-0">
                           <Button
                             size="sm"
                             onClick={() => saveEdit(model.id!)}
@@ -775,13 +856,15 @@ export default function CustomModelsSection({
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    icon="edit"
                     onClick={() => beginEdit(model)}
-                    className="rounded p-1 text-text-muted hover:bg-sidebar hover:text-primary"
+                    className="size-6 min-h-6 rounded text-text-muted"
                     title={t("edit")}
-                  >
-                    <span className="material-symbols-outlined text-sm">edit</span>
-                  </button>
+                    aria-label={t("edit")}
+                  />
                   <ModelCompatPopover
                     t={t}
                     providerId={providerId}
@@ -803,36 +886,44 @@ export default function CustomModelsSection({
                     showDeveloperToggle
                     disabled={savingModelId === model.id}
                   />
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    icon={model.isHidden ? "visibility_off" : "visibility"}
                     onClick={() => handleToggleHidden(model.id!, !model.isHidden)}
                     disabled={togglingModelId === model.id}
-                    className="rounded p-1 text-text-muted hover:bg-sidebar hover:text-primary disabled:opacity-50"
+                    className="size-6 min-h-6 rounded text-text-muted disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
-                  >
-                    <span className="material-symbols-outlined text-sm">
-                      {model.isHidden ? "visibility_off" : "visibility"}
-                    </span>
-                  </button>
+                    aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
+                  />
                   {hasSyncedBase && (
-                    <button
+                    <Button
+                      variant="ghost"
+                      size="icon-sm"
+                      icon="restart_alt"
                       onClick={() => handleResetToUpstreamDefaults(model.id!)}
-                      className="rounded p-1 text-amber-600 hover:bg-amber-50 dark:text-amber-400 dark:hover:bg-amber-900/20"
+                      className="size-6 min-h-6 rounded text-warning hover:bg-warning-bg"
                       title={providerText(
                         t,
                         "resetToUpstreamDefaults",
                         "Restore upstream defaults"
                       )}
-                    >
-                      <span className="material-symbols-outlined text-sm">restart_alt</span>
-                    </button>
+                      aria-label={providerText(
+                        t,
+                        "resetToUpstreamDefaults",
+                        "Restore upstream defaults"
+                      )}
+                    />
                   )}
-                  <button
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="rounded p-1 text-red-500 hover:bg-red-50"
+                    className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
                     title={t("removeCustomModel")}
-                  >
-                    <span className="material-symbols-outlined text-sm">delete</span>
-                  </button>
+                    aria-label={t("removeCustomModel")}
+                  />
                 </div>
               </div>
             );

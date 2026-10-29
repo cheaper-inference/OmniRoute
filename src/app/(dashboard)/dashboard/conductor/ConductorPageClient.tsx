@@ -9,7 +9,16 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 
-import { Badge, Card, ConfirmModal, DataTable, EmptyState, Modal } from "@/shared/components";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Badge,
+  Button,
+  Card,
+  ConfirmModal,
+  DataTable,
+  EmptyState,
+  Modal,
+} from "@/shared/components";
 
 import FaroChat from "./FaroChat";
 
@@ -74,7 +83,9 @@ export default function ConductorPageClient() {
   }, []);
 
   useEffect(() => {
-    void load();
+    void (async () => {
+      await load();
+    })();
     const timer = setInterval(() => void load(), REFRESH_MS);
     return () => clearInterval(timer);
   }, [load]);
@@ -95,7 +106,9 @@ export default function ConductorPageClient() {
     setCanceling(true);
     setErr("");
     try {
-      const res = await fetch(`/api/conductor/tasks/${encodeURIComponent(cancelTarget)}/cancel`, { method: "POST" });
+      const res = await fetch(`/api/conductor/tasks/${encodeURIComponent(cancelTarget)}/cancel`, {
+        method: "POST",
+      });
       if (!res.ok) setErr(`${t("cancelFailed")} (HTTP ${res.status})`);
       else {
         setDetail(null);
@@ -114,10 +127,7 @@ export default function ConductorPageClient() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-xl font-semibold">{t("title")}</h1>
-        <p className="text-sm text-text-muted">{t("subtitle")}</p>
-      </div>
+      <PageHeader compact title={t("title")} description={t("subtitle")} />
 
       {err && <Badge variant="error">{err}</Badge>}
 
@@ -141,11 +151,20 @@ export default function ConductorPageClient() {
                 const r = row as unknown as FleetRunner;
                 if (column.key === "name") return <span className="font-medium">{r.name}</span>;
                 if (column.key === "clis") return r.clis.join(" / ");
-                if (r.draining) return <Badge variant="warning" dot>{t("draining")}</Badge>;
+                if (r.draining)
+                  return (
+                    <Badge variant="warning" dot>
+                      {t("draining")}
+                    </Badge>
+                  );
                 return r.online ? (
-                  <Badge variant="success" dot>{t("online")}</Badge>
+                  <Badge variant="success" dot>
+                    {t("online")}
+                  </Badge>
                 ) : (
-                  <Badge variant="error" dot>{t("offline")}</Badge>
+                  <Badge variant="error" dot>
+                    {t("offline")}
+                  </Badge>
                 );
               }}
             />
@@ -166,7 +185,12 @@ export default function ConductorPageClient() {
               onRowClick={(row) => void openDetail(String(row.id))}
               renderCell={(row, column) => {
                 const task = row as unknown as FleetTask;
-                if (column.key === "status") return <Badge variant={statusVariant(task.status)} dot>{task.status}</Badge>;
+                if (column.key === "status")
+                  return (
+                    <Badge variant={statusVariant(task.status)} dot>
+                      {task.status}
+                    </Badge>
+                  );
                 if (column.key === "id") return <code className="text-xs">{task.id}</code>;
                 if (column.key === "summary") return task.summary ?? task.error ?? "—";
                 return (task as unknown as Record<string, unknown>)[column.key]?.toString() ?? "—";
@@ -178,19 +202,28 @@ export default function ConductorPageClient() {
 
       <FaroChat />
 
-      <Modal isOpen={detail !== null} onClose={() => setDetail(null)} title={t("detailTitle")} size="lg">
+      <Modal
+        isOpen={detail !== null}
+        onClose={() => setDetail(null)}
+        title={t("detailTitle")}
+        size="lg"
+      >
         {detail && (
           <div className="space-y-4 text-sm">
             <div className="flex items-center gap-2">
               <code className="text-xs">{detail.id}</code>
-              <Badge variant={statusVariant(detail.status)} dot>{detail.status}</Badge>
+              <Badge variant={statusVariant(detail.status)} dot>
+                {detail.status}
+              </Badge>
               <Badge>{detail.mode}</Badge>
               {detail.runner && <Badge variant="info">{detail.runner}</Badge>}
             </div>
             {detail.prompt && (
               <div>
                 <div className="font-medium">{t("prompt")}</div>
-                <pre className="whitespace-pre-wrap text-xs bg-black/5 dark:bg-white/5 rounded p-2">{detail.prompt}</pre>
+                <pre className="whitespace-pre-wrap text-xs bg-bg-subtle rounded p-2">
+                  {detail.prompt}
+                </pre>
               </div>
             )}
             {detail.summary && <p>{detail.summary}</p>}
@@ -199,7 +232,9 @@ export default function ConductorPageClient() {
               <div>
                 <div className="font-medium">{t("branch")}</div>
                 <code className="text-xs">{detail.branch}</code>
-                <p className="text-xs text-text-muted">{t("fetchHint", { branch: detail.branch })}</p>
+                <p className="text-xs text-text-muted">
+                  {t("fetchHint", { branch: detail.branch })}
+                </p>
               </div>
             )}
             {detail.mode.startsWith("council") && detail.council?.candidate_task_ids && (
@@ -211,13 +246,9 @@ export default function ConductorPageClient() {
               </div>
             )}
             {!TERMINAL.has(detail.status) && (
-              <button
-                type="button"
-                className="text-sm text-red-600 dark:text-red-400 underline"
-                onClick={() => setCancelTarget(detail.id)}
-              >
+              <Button variant="danger" size="sm" onClick={() => setCancelTarget(detail.id)}>
                 {t("cancel")}
-              </button>
+              </Button>
             )}
           </div>
         )}

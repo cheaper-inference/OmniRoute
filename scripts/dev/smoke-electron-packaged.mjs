@@ -123,6 +123,48 @@ function discoverPackagedExecutable() {
   throw new Error(`Packaged Electron smoke check does not support ${platform()}.`);
 }
 
+/**
+ * The packaged app opens SQLite lazily: `/login` (the readiness URL) never touches the
+ * database, so a smoke that only waits for readiness sees no `[DB]` line at all. After
+ * readiness the smoke requests a DB-backed endpoint and waits for evidence that the
+ * database opened. The primary open path does NOT print "[DB] Driver: ..." (only the
+ * recovery path and the sql.js fallback do), so the evidence is any `[DB]`/`[Migration]`
+ * startup line — and the #7592 guard below rejects the fallback's own line explicitly.
+ */
+export const DB_TOUCH_PATH = "/api/monitoring/health";
+export const DB_OPEN_EVIDENCE_PATTERN =
+  /\[DB\] (Driver: |SQLite database ready|Added [^\n]* column|Changing cache_size|cache_size changed)|\[Migration\] (Applied|Pre-migration backup)/;
+
+export async function waitForDatabaseOpen(getLogs, { timeoutMs = 15_000, pollMs = 250 } = {}) {
+  const startedAt = Date.now();
+  while (Date.now() - startedAt < timeoutMs) {
+    const logs = getLogs();
+    assertNoFatalLogs(logs);
+    if (DB_OPEN_EVIDENCE_PATTERN.test(logs)) return logs;
+    await sleep(pollMs);
+  }
+  throw new Error(
+    `Packaged Electron app logged no [DB]/[Migration] startup line within ${timeoutMs}ms of ` +
+      `touching ${DB_TOUCH_PATH} — the database never opened, so the SQLite driver cannot be verified.`
+  );
+}
+
+async function openDatabaseForSmoke({ logs, smokeUrl }) {
+  const touchUrl = new URL(DB_TOUCH_PATH, smokeUrl).toString();
+  try {
+    const response = await fetchWithTimeout(touchUrl, 5_000);
+    console.log(
+      `[electron-smoke] touched ${touchUrl} (HTTP ${response.status}) to open the database`
+    );
+  } catch (error) {
+    console.log(
+      `[electron-smoke] touching ${touchUrl} failed (${error instanceof Error ? error.message : String(error)}) — waiting for the database anyway`
+    );
+  }
+  await waitForDatabaseOpen(() => logs.value);
+  console.log("[electron-smoke] database opened");
+}
+
 async function fetchWithTimeout(url, timeoutMs) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -360,7 +402,12 @@ function isInsideDir(parentDir, candidateDir) {
   return candidate === parent || candidate.startsWith(parent + sep);
 }
 
-async function ensureSmokeEnvDirs(smokeEnv, dataDir) {
+export async function ensureSmokeEnvDirs(smokeEnv, dataDir, { currentPlatform = platform() } = {}) {
+  // The win32 branches below must key off the SMOKE TARGET's platform, not the
+  // host's: tests (and any future cross-platform dry-run) inject a win32-shaped
+  // smokeEnv while running on a Linux CI host, and branching on the host
+  // platform() there silently skipped the USERPROFILE/APPDATA userData tree —
+  // exactly what this function exists to pre-create (#7592).
   const dirNames = [
     "DATA_DIR",
     "HOME",
@@ -383,9 +430,19 @@ async function ensureSmokeEnvDirs(smokeEnv, dataDir) {
   // On Windows, Electron derives its userData from APPDATA/<productName>.
   // requestSingleInstanceLock() runs synchronously at module load and
   // fails silently if the directory doesn't exist yet — causing exit(0).
-  if (platform() === "win32" && smokeEnv.APPDATA) {
+  if (currentPlatform === "win32" && smokeEnv.APPDATA) {
     for (const subdir of ["omniroute-desktop", "OmniRoute", "omniroute"]) {
       dirs.push(join(smokeEnv.APPDATA, subdir));
+    }
+  }
+  // Electron resolves the Roaming profile from %USERPROFILE%\AppData\Roaming
+  // (USERPROFILE takes precedence over the APPDATA env var) and the path
+  // service throws — rather than creates — when that directory is missing,
+  // which makes requestSingleInstanceLock() return false and the app exit(0)
+  // before app.whenReady(). Pre-create the derived tree as well.
+  if (currentPlatform === "win32" && smokeEnv.USERPROFILE) {
+    for (const subdir of ["omniroute-desktop", "OmniRoute", "omniroute"]) {
+      dirs.push(join(smokeEnv.USERPROFILE, "AppData", "Roaming", subdir));
     }
   }
 
@@ -450,8 +507,13 @@ export function assertNativeDriverSelected(logs) {
     );
   }
 
+  // The primary open path prints no "[DB] Driver: ..." line at all (only the recovery path and
+  // the sql.js fallback do), so a database that demonstrably opened WITHOUT the fallback's own
+  // line is the native driver — that is exactly what #7592 guards.
+  if (DB_OPEN_EVIDENCE_PATTERN.test(logs)) return;
+
   throw new Error(
-    "Packaged Electron app logs contain no '[DB] Driver: ...' line — cannot confirm which SQLite " +
+    "Packaged Electron app logs show no database activity at all — cannot confirm which SQLite " +
       "driver loaded."
   );
 }
@@ -506,7 +568,14 @@ async function waitForReady({ logs, smokeUrl, timeoutMs, settleMs, exitState }) 
  * by the single-launch path and the cold-restart (two-launch) path so both
  * exercise identical spawn/readiness/shutdown behavior.
  */
-async function launchAndCollectLogs({ appExecutable, smokeUrl, dataDir, timeoutMs, settleMs, streamLogs }) {
+async function launchAndCollectLogs({
+  appExecutable,
+  smokeUrl,
+  dataDir,
+  timeoutMs,
+  settleMs,
+  streamLogs,
+}) {
   const smokeEnv = buildSmokeEnv({ dataDir });
   await assertPortIsFree(smokeUrl);
   await ensureSmokeEnvDirs(smokeEnv, dataDir);
@@ -538,6 +607,8 @@ async function launchAndCollectLogs({ appExecutable, smokeUrl, dataDir, timeoutM
 
   try {
     await waitForReady({ logs, smokeUrl, timeoutMs, settleMs, exitState });
+    // Outside waitForReady on purpose: a missing database is a verdict, not a readiness retry.
+    await openDatabaseForSmoke({ logs, smokeUrl });
     return logs.value;
   } catch (error) {
     if (!streamLogs) {
@@ -568,7 +639,14 @@ async function main() {
     !process.env.ELECTRON_SMOKE_DATA_DIR && process.env.ELECTRON_SMOKE_KEEP_DATA !== "1";
 
   try {
-    await launchAndCollectLogs({ appExecutable, smokeUrl, dataDir, timeoutMs, settleMs, streamLogs });
+    await launchAndCollectLogs({
+      appExecutable,
+      smokeUrl,
+      dataDir,
+      timeoutMs,
+      settleMs,
+      streamLogs,
+    });
 
     if (!coldRestart) return;
 

@@ -3,6 +3,9 @@ import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
+
 vi.mock("next/navigation", () => ({
   useParams: () => ({ id: "openrouter" }),
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
@@ -14,7 +17,7 @@ vi.mock("next-intl", () => ({
 const { default: EditConnectionModal } =
   await import("../../../src/app/(dashboard)/dashboard/providers/[id]/components/modals/EditConnectionModal");
 
-const FREE_TOGGLE = 'button[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
+const FREE_TOGGLE = '[role="switch"][aria-label="importFreeModelsOnlyLabel"]';
 
 const containers: Array<{ root: ReturnType<typeof createRoot>; el: HTMLDivElement }> = [];
 
@@ -34,15 +37,8 @@ function render(props: Record<string, unknown>) {
     );
   });
   containers.push({ root, el });
-  return el;
-}
-
-function setInputValue(input: HTMLInputElement, value: string) {
-  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")!.set!;
-  act(() => {
-    setter.call(input, value);
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  });
+  // Queries go through document.body: the dialog is portaled there (KEA-7886).
+  return document.body;
 }
 
 async function waitFor(fn: () => boolean, timeoutMs = 2000) {
@@ -170,7 +166,7 @@ describe("EditConnectionModal — import only free models", () => {
 });
 
 describe("EditConnectionModal — encrypted Responses reasoning", () => {
-  const PRESERVE_TOGGLE = 'button[role="switch"][aria-label="Preserve encrypted reasoning"]';
+  const PRESERVE_TOGGLE = '[role="switch"][aria-label="Preserve encrypted reasoning"]';
 
   it("loads and saves the opt-in for an OpenAI-compatible Responses connection", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
@@ -259,7 +255,7 @@ describe("EditConnectionModal — encrypted Responses reasoning", () => {
     expect(el.querySelector(PRESERVE_TOGGLE)).toBeNull();
     expect(el.textContent).toContain("defaultThinkingStrengthLabel");
     expect(
-      el.querySelector('button[role="switch"][aria-label="openaiResponsesStoreLabel"]')
+      el.querySelector('[role="switch"][aria-label="openaiResponsesStoreLabel"]')
     ).toBeTruthy();
     const saveBtn = Array.from(el.querySelectorAll("button")).find(
       (button) => button.textContent?.trim() === "save"
@@ -273,7 +269,7 @@ describe("EditConnectionModal — encrypted Responses reasoning", () => {
 });
 
 describe("EditConnectionModal — quota scraping fields", () => {
-  it("saves OpenCode Go workspace and replacement auth cookie", async () => {
+  it("renders only the API key for OpenCode Go and saves no scraping credentials", async () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const el = render({
       providerId: "opencode-go",
@@ -287,13 +283,9 @@ describe("EditConnectionModal — quota scraping fields", () => {
       onSave,
     });
 
-    const workspaceInput = el.querySelector<HTMLInputElement>(
-      'input[name="opencodeGoWorkspaceId"]'
-    )!;
-    const cookieInput = el.querySelector<HTMLInputElement>('input[name="opencodeGoAuthCookie"]')!;
-    expect(workspaceInput.value).toBe("workspace-existing");
-    setInputValue(workspaceInput, "workspace-updated");
-    setInputValue(cookieInput, "auth=opencode-cookie");
+    expect(el.querySelector('input[name="opencodeGoWorkspaceId"]')).toBeNull();
+    expect(el.querySelector('input[name="opencodeGoAuthCookie"]')).toBeNull();
+    expect(el.querySelector('input[placeholder="enterNewApiKey"]')).toBeTruthy();
 
     const saveBtn = Array.from(el.querySelectorAll("button")).find(
       (b) => b.textContent?.trim() === "save"
@@ -304,8 +296,8 @@ describe("EditConnectionModal — quota scraping fields", () => {
 
     await waitFor(() => onSave.mock.calls.length > 0);
     const payload = onSave.mock.calls[0][0];
-    expect(payload.providerSpecificData?.opencodeGoWorkspaceId).toBe("workspace-updated");
-    expect(payload.providerSpecificData?.opencodeGoAuthCookie).toBe("auth=opencode-cookie");
+    expect(payload.providerSpecificData).not.toHaveProperty("opencodeGoWorkspaceId");
+    expect(payload.providerSpecificData).not.toHaveProperty("opencodeGoAuthCookie");
   });
 
   it("omits Ollama Cloud usage cookie when the edit field is left blank", async () => {

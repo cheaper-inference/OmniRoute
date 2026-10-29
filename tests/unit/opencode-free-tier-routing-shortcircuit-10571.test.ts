@@ -39,7 +39,7 @@ const { getModelInfoCore } = await import("../../open-sse/services/model.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("bare big-pickle routes to an opencode-family provider when an opencode connection is active", async () => {

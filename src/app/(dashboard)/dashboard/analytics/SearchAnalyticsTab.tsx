@@ -9,6 +9,7 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import Icon from "@/shared/components/Icon";
 
 interface SearchStats {
   total: number;
@@ -20,6 +21,52 @@ interface SearchStats {
   last24h: Array<{ hour: string; count: number }>;
   cacheHitRate: number;
   avgDurationMs: number;
+}
+
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function isSearchStats(value: unknown): value is SearchStats {
+  if (!value || typeof value !== "object") return false;
+
+  const candidate = value as Partial<SearchStats>;
+  return (
+    isFiniteNumber(candidate.total) &&
+    isFiniteNumber(candidate.today) &&
+    isFiniteNumber(candidate.cached) &&
+    isFiniteNumber(candidate.errors) &&
+    isFiniteNumber(candidate.totalCostUsd) &&
+    isFiniteNumber(candidate.cacheHitRate) &&
+    isFiniteNumber(candidate.avgDurationMs) &&
+    !!candidate.byProvider &&
+    typeof candidate.byProvider === "object" &&
+    !Array.isArray(candidate.byProvider) &&
+    Object.values(candidate.byProvider).every(
+      (provider) =>
+        !!provider &&
+        typeof provider === "object" &&
+        isFiniteNumber(provider.count) &&
+        isFiniteNumber(provider.costUsd)
+    ) &&
+    Array.isArray(candidate.last24h) &&
+    candidate.last24h.every(
+      (point) => typeof point.hour === "string" && isFiniteNumber(point.count)
+    )
+  );
+}
+
+async function readSearchStats(response: Response): Promise<SearchStats> {
+  const body: unknown = await response.json().catch(() => null);
+  if (!response.ok) {
+    const message =
+      body && typeof body === "object" && "error" in body && typeof body.error === "string"
+        ? body.error
+        : null;
+    throw new Error(message ?? "searchAnalyticsNoData");
+  }
+  if (!isSearchStats(body)) throw new Error("searchAnalyticsNoData");
+  return body;
 }
 
 function StatCard({
@@ -36,7 +83,7 @@ function StatCard({
   return (
     <div className="card p-4 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-text-muted text-sm">
-        <span className="material-symbols-outlined text-[18px]">{icon}</span>
+        <Icon name={icon} size={18} />
         {label}
       </div>
       <div className="text-2xl font-bold text-text">{value}</div>
@@ -85,22 +132,31 @@ export default function SearchAnalyticsTab() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/v1/search/analytics")
-      .then((r) => r.json())
-      .then((d) => {
-        setStats(d);
-        setLoading(false);
-      })
-      .catch((e) => {
-        setError(e.message);
-        setLoading(false);
-      });
+    let cancelled = false;
+    const controller = new AbortController();
+    async function loadStats() {
+      try {
+        const response = await fetch("/api/v1/search/analytics", { signal: controller.signal });
+        const nextStats = await readSearchStats(response);
+        if (!cancelled) setStats(nextStats);
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : "searchAnalyticsNoData";
+        if (!cancelled) setError(message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+    void loadStats();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
   }, []);
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-16 text-text-muted">
-        <span className="material-symbols-outlined animate-spin mr-2">progress_activity</span>
+        <Icon name="progress_activity" className="animate-spin mr-2" />
         {t("searchAnalyticsLoading")}
       </div>
     );
@@ -109,7 +165,7 @@ export default function SearchAnalyticsTab() {
   if (error || !stats) {
     return (
       <div className="card p-6 text-center text-text-muted">
-        <span className="material-symbols-outlined text-[32px] mb-2 block">search_off</span>
+        <Icon name="search_off" size={32} className="mb-2 block" />
         {error || t("searchAnalyticsNoData")}
         <p className="text-xs mt-2">
           {t.rich("searchAnalyticsNoDataDescription", {
@@ -160,7 +216,7 @@ export default function SearchAnalyticsTab() {
       {providers.length > 0 && (
         <div className="card p-5">
           <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-[20px]">hub</span>
+            <Icon name="hub" size={20} className="text-primary" />
             {t("searchAnalyticsProviderBreakdown")}
           </h3>
           <div className="flex flex-col gap-4">
@@ -181,9 +237,7 @@ export default function SearchAnalyticsTab() {
       {/* Empty state */}
       {stats.total === 0 && (
         <div className="card p-8 text-center text-text-muted">
-          <span className="material-symbols-outlined text-[48px] mb-3 block text-primary opacity-50">
-            travel_explore
-          </span>
+          <Icon name="travel_explore" size={48} className="mb-3 block text-primary opacity-50" />
           <p className="font-medium text-text">{t("searchAnalyticsNoSearchesYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("searchAnalyticsEmptyDescription", {
@@ -195,9 +249,7 @@ export default function SearchAnalyticsTab() {
 
       {/* Free tier note */}
       <div className="text-xs text-text-muted border border-border rounded-lg p-3 flex items-start gap-2">
-        <span className="material-symbols-outlined text-[16px] text-green-500 mt-0.5">
-          check_circle
-        </span>
+        <Icon name="check_circle" size={16} className="text-success mt-0.5" />
         <span>
           <strong>{t("freeTierAvailable")}:</strong> Serper (2,500/mo), Brave (2,000/mo), Exa
           (1,000/mo), Tavily (1,000/mo) — total 6,500+ free searches/month with automatic failover.

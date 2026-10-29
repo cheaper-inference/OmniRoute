@@ -16,6 +16,8 @@ const {
   handleComboChat,
 } = await import("../../open-sse/services/combo.ts");
 const { resolveComboTargets } = await import("../../open-sse/services/combo/comboStructure.ts");
+const { getComboFailureCount, __resetComboFailureTrackerForTests } =
+  await import("../../open-sse/services/combo/failureTracker.ts");
 const { applyPromptCacheAffinity } =
   await import("../../open-sse/services/combo/promptCacheAffinity.ts");
 const { resolveReasoningBufferedMaxTokens } =
@@ -126,7 +128,7 @@ async function cleanupTestDataDir() {
   for (let attempt = 0; attempt < 5; attempt += 1) {
     try {
       core.resetDbInstance();
-      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+      fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
       return;
     } catch (error: any) {
       lastError = error;
@@ -587,6 +589,62 @@ test("handleComboChat preserves the weighted primary before prompt-cache affinit
   } finally {
     _setSecureRandomFloatSource(null);
   }
+});
+
+test("prompt-cache affinity falls through when its preferred account becomes runtime-ineligible", async () => {
+  const combo = {
+    name: "affinity-runtime-ineligible",
+    strategy: "round-robin",
+    models: [
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "affinity-account-a",
+      },
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "eligible-account-b",
+      },
+    ],
+    config: { maxRetries: 0 },
+  };
+  const resolvedTargets = resolveComboTargets(combo, null);
+  const cacheKey = Array.from({ length: 100 }, (_, index) => `affinity-cache-${index}`).find(
+    (key) =>
+      applyPromptCacheAffinity(resolvedTargets, { prompt_cache_key: key }).targets[0]
+        ?.connectionId === "affinity-account-a"
+  );
+  assert.ok(cacheKey, "fixture must prefer affinity account A");
+
+  const availabilityChecks: string[] = [];
+  const dispatches: string[] = [];
+  const result = await handleComboChat({
+    body: { prompt_cache_key: cacheKey },
+    combo,
+    handleSingleModel: async (
+      _body: unknown,
+      _modelStr: string,
+      target: { connectionId?: string }
+    ) => {
+      dispatches.push(target.connectionId || "none");
+      return okResponse();
+    },
+    isModelAvailable: async (_modelStr: string, target: { connectionId?: string }) => {
+      availabilityChecks.push(target.connectionId || "none");
+      return target.connectionId !== "affinity-account-a";
+    },
+    log: createLog(),
+    settings: { promptCacheAffinityEnabled: true },
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(availabilityChecks[0], "affinity-account-a");
+  assert.deepEqual(dispatches, ["eligible-account-b"]);
 });
 
 test("handleComboChat weighted strategy falls back to uniform random when all weights are zero", async () => {
@@ -1327,6 +1385,42 @@ test("handleComboChat returns 404 model_not_found when a combo has no executable
   assert.match(payload.error.message, /Combo has no executable targets/);
 });
 
+test("#11408 guard: no-executable-targets early exit still records the combo failure (silent-stop counter, #5923)", async () => {
+  __resetComboFailureTrackerForTests();
+  const result = await handleComboChat({
+    body: {},
+    combo: {
+      name: "guard-empty-11408",
+      strategy: "priority",
+      models: [],
+      context_cache_protection: true,
+    },
+    handleSingleModel: async () => {
+      throw new Error("handleSingleModel should not run for empty combos");
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: {
+      comboDefaults: {
+        maxRetries: 0,
+        retryDelayMs: 1,
+      },
+    },
+    relayOptions: { sessionId: "sess-guard-11408" },
+    allCombos: null,
+  });
+
+  assert.equal(result.status, 404);
+  // The quota-share slot release must not replace the #5923 silent-stop
+  // bookkeeping: the consecutive-failure counter must still advance so the
+  // session pin auto-clears after COMBO_FAILURE_THRESHOLD no-target failures.
+  assert.equal(
+    getComboFailureCount("sess-guard-11408", "guard-empty-11408"),
+    1,
+    "recordComboFailure must run on the no-executable-targets early exit"
+  );
+});
+
 test("handleComboChat round-robin returns 404 when no models are configured", async () => {
   const result = await handleComboChat({
     body: {},
@@ -1648,6 +1742,44 @@ test("handleComboChat starts hedged fallback only after explicit zero-latency op
   assert.equal(result.status, 200);
   assert.equal(payload.choices[0].message.content, "fast");
   assert.deepEqual(calls, ["model-a", "model-b"]);
+});
+
+test("handleComboChat does not hedge a body that would double the native send buffer", async () => {
+  const calls: string[] = [];
+  const oversized = "x".repeat(256 * 1024 + 1);
+
+  const result = await handleComboChat({
+    body: { messages: [{ role: "user", content: oversized }] },
+    combo: {
+      name: "hedging-skipped-for-large-body",
+      strategy: "priority",
+      models: ["model-a", "model-b"],
+      config: {
+        maxRetries: 0,
+        retryDelayMs: 1,
+        zeroLatencyOptimizationsEnabled: true,
+        hedging: true,
+        hedgeDelayMs: 1,
+      },
+    },
+    handleSingleModel: async (_body: unknown, modelStr: string) => {
+      calls.push(modelStr);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return okResponse({ choices: [{ message: { content: modelStr } }] });
+    },
+    isModelAvailable: async () => true,
+    log: createLog(),
+    settings: null,
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  const payload = (await result.json()) as {
+    choices: { message: { content: string } }[];
+  };
+  assert.equal(result.status, 200);
+  assert.equal(payload.choices[0].message.content, "model-a");
+  assert.deepEqual(calls, ["model-a"]);
 });
 
 test("handleComboChat round-robin falls through generic 400s when a later model succeeds", async () => {

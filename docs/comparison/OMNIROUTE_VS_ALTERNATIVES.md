@@ -11,37 +11,37 @@ Objective feature comparison vs popular open-source AI routers.
 > **Methodology**: Public repos audited 2026-Q2. Versions as listed.
 > Submit corrections via PR — we want this to be accurate.
 
-| Feature                                            |                  OmniRoute 3.8                   |  LiteLLM 1.x   | OpenRouter (SaaS) |   Portkey   |
-| -------------------------------------------------- | :----------------------------------------------: | :------------: | :---------------: | :---------: |
-| **Providers**                                      |                     **329**                      |      ~100      |        ~50        |     ~30     |
-| **Free/no-auth catalog entries**                   |                     **155**                      |      n/a       |    passthrough    |     n/a     |
-| **Self-hostable**                                  |                        ✅                        |       ✅       |        ❌         |   ⚠ paid    |
-| **OAuth catalog entries**                          |                     **23**                       |    partial     |        ❌         |     ❌      |
-| **Auto-fallback combos**                           |                **19 strategies**                 | priority-based |    tier-based     |  weighted   |
-| **Fusion (parallel panel + judge synthesis)**      |                        ✅                        |       ❌       |        ❌         |     ❌      |
-| **Tier 1/2/3 fallback (subscription→cheap→free)**  |                     ✅ + UI                      |     manual     |        n/a        |   manual    |
-| **Token compression**                              | 12-engine stack (RTK + Caveman + LLMLingua)      |      none      |       none        |    none     |
-| **Multimodal generation (speech/music/video)**     |                        ✅                        |       ❌       |    passthrough    |     ❌      |
-| **Built-in MCP server**                            |             ✅ 107 tools, 32 scopes              |       ❌       |        ❌         |     ❌      |
-| **A2A protocol**                                   |                   ✅ 6 skills                    |       ❌       |        ❌         |     ❌      |
-| **Memory (FTS5 + vector)**                         |                        ✅                        |       ❌       |        ❌         |     ❌      |
-| **Guardrails (PII, injection, vision)**            |                        ✅                        |    partial     |        ❌         |   ✅ paid   |
-| **Cloud agent integrations**                       |           Codex, Cursor, Devin, Jules            |       ❌       |        ❌         |     ❌      |
-| **Circuit breaker per provider**                   |            ✅ 3-state, lazy recovery             |     basic      |        ❌         |     ✅      |
-| **TLS fingerprint stealth (JA3/JA4)**              |                    ✅ wreq-js                    |       ❌       |        ❌         |     ❌      |
-| **Eval framework**                                 |                   ✅ built-in                    |       ❌       |        ❌         |   ⚠ paid    |
-| **MITM proxy (intercepts Cursor/Antigravity)**     |                ✅ cross-platform                 |       ❌       |        ❌         |     ❌      |
-| **CLI with system tray (no Electron)**             |                        ✅                        |       ❌       |        n/a        |     n/a     |
-| **CLI machine-ID auto-auth**                       |                        ✅                        |       ❌       |        n/a        |     n/a     |
-| **Dashboard**                                      |                    Next.js 16                    |     basic      |    proprietary    | proprietary |
-| **i18n**                                           |                  **43 locales**                  |       ❌       |        ❌         |      ⚠      |
-| **Public agent skills (SKILL.md)**                 |                      ✅ 45                       |       ❌       |        ❌         |     ❌      |
-| **Tunnel support (Cloudflared, Tailscale, Ngrok)** |                        ✅                        |       ❌       |        n/a        |     n/a     |
-| **License**                                        |                       MIT                        |      MIT       |    proprietary    | proprietary |
+| Feature                                            |                OmniRoute 3.8                |  LiteLLM 1.x   | OpenRouter (SaaS) |   Portkey   |
+| -------------------------------------------------- | :-----------------------------------------: | :------------: | :---------------: | :---------: |
+| **Providers**                                      |                   **329**                   |      ~100      |        ~50        |     ~30     |
+| **Free/no-auth catalog entries**                   |                   **155**                   |      n/a       |    passthrough    |     n/a     |
+| **Self-hostable**                                  |                     ✅                      |       ✅       |        ❌         |   ⚠ paid    |
+| **OAuth catalog entries**                          |                   **23**                    |    partial     |        ❌         |     ❌      |
+| **Auto-fallback combos**                           |              **20 strategies**              | priority-based |    tier-based     |  weighted   |
+| **Fusion (parallel panel + judge synthesis)**      |                     ✅                      |       ❌       |        ❌         |     ❌      |
+| **Tier 1/2/3 fallback (subscription→cheap→free)**  |                   ✅ + UI                   |     manual     |        n/a        |   manual    |
+| **Token compression**                              | 12-engine stack (RTK + Caveman + LLMLingua) |      none      |       none        |    none     |
+| **Multimodal generation (speech/music/video)**     |                     ✅                      |       ❌       |    passthrough    |     ❌      |
+| **Built-in MCP server**                            |           ✅ 110 tools, 33 scopes           |       ❌       |        ❌         |     ❌      |
+| **A2A protocol**                                   |                 ✅ 6 skills                 |       ❌       |        ❌         |     ❌      |
+| **Memory (FTS5 + vector)**                         |                     ✅                      |       ❌       |        ❌         |     ❌      |
+| **Guardrails (PII, injection, vision)**            |                     ✅                      |    partial     |        ❌         |   ✅ paid   |
+| **Cloud agent integrations**                       |         Codex, Cursor, Devin, Jules         |       ❌       |        ❌         |     ❌      |
+| **Circuit breaker per provider**                   |          ✅ 3-state, lazy recovery          |     basic      |        ❌         |     ✅      |
+| **TLS fingerprint stealth (JA3/JA4)**              |                 ✅ wreq-js                  |       ❌       |        ❌         |     ❌      |
+| **Eval framework**                                 |                 ✅ built-in                 |       ❌       |        ❌         |   ⚠ paid    |
+| **MITM proxy (intercepts Cursor/Antigravity)**     |              ✅ cross-platform              |       ❌       |        ❌         |     ❌      |
+| **CLI with system tray (no Electron)**             |                     ✅                      |       ❌       |        n/a        |     n/a     |
+| **CLI machine-ID auto-auth**                       |                     ✅                      |       ❌       |        n/a        |     n/a     |
+| **Dashboard**                                      |                 Next.js 16                  |     basic      |    proprietary    | proprietary |
+| **i18n**                                           |               **67 locales**                |       ❌       |        ❌         |      ⚠      |
+| **Public agent skills (SKILL.md)**                 |                    ✅ 45                    |       ❌       |        ❌         |     ❌      |
+| **Tunnel support (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |       ❌       |        n/a        |     n/a     |
+| **License**                                        |                     MIT                     |      MIT       |    proprietary    | proprietary |
 
 ## When to choose OmniRoute
 
-- You self-host and want **maximum provider coverage** (329 providers, 155 free/no-auth catalog entries)
+- You self-host and want **maximum provider coverage** (377 providers, 155 free/no-auth catalog entries)
 - You need a **built-in MCP server** (LLM tools, memory, skills exposed as tools)
 - You need **A2A protocol** for agent-to-agent workflows
 - You want **fingerprint stealth** (JA3/JA4) to avoid detection by upstream CAPTCHAs

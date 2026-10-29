@@ -18,6 +18,7 @@ const { clearGeminiThoughtSignatures } =
   await import("../../open-sse/services/geminiThoughtSignatureStore.ts");
 
 type UnknownRecord = Record<string, unknown>;
+type GeminiTools = NonNullable<ReturnType<typeof openaiToGeminiRequest>["tools"]>;
 type GeminiRequestWithConfig = { generationConfig: UnknownRecord };
 type GeminiRequestWithSystem = { systemInstruction: { role?: unknown; parts?: unknown } };
 
@@ -289,7 +290,7 @@ test("OpenAI -> Gemini request maps messages, merged system instructions, tools 
   assert.deepEqual(getFunctionResponse(toolResponseTurn.parts[0]), {
     id: "call_1",
     name: "weather",
-    response: { result: { temp: 20 } },
+    response: { result: '{"temp":20}' },
   });
 
   const generationConfig = (result as GeminiRequestWithConfig).generationConfig;
@@ -550,7 +551,7 @@ test("OpenAI -> Cloud Code Gemini emits native functionResponse result", () => {
   assert.deepEqual(getFunctionResponse(toolTurn.parts[0]), {
     id: "read_file_123_0",
     name: "read_file",
-    response: { result: { result: "The answer is capybara-4729." } },
+    response: { result: "The answer is capybara-4729." },
   });
 });
 
@@ -866,7 +867,11 @@ test("OpenAI -> Antigravity maps Claude-family models to Gemini-compatible schem
   assert.match(result.requestId, /^agent\/\d+\/[0-9a-f]{8}$/);
   assert.equal(result.enabledCreditTypes, undefined);
   assert.equal(result.request.systemInstruction.parts[0].text, ANTIGRAVITY_DEFAULT_SYSTEM);
-  assert.equal(result.request.systemInstruction.parts.length, 1, "systemInstruction must contain only ANTIGRAVITY_DEFAULT_SYSTEM (#9030)");
+  assert.equal(
+    result.request.systemInstruction.parts.length,
+    1,
+    "systemInstruction must contain only ANTIGRAVITY_DEFAULT_SYSTEM (#9030)"
+  );
   // #9030 — Client system content moved to first user message to avoid upstream 429s
   assert.equal(result.request.contents[0].parts[0].text, "Project rules");
   assert.equal(result.request.contents[0].parts[1].text, "Read a file");
@@ -956,7 +961,7 @@ test("OpenAI -> Antigravity Claude path sanitizes tool names for Gemini schema",
   const toolResultBlock = getFunctionResponse(toolTurn.parts[0]);
   assert.equal(toolResultBlock.id, "call_long_2");
   assert.equal(toolResultBlock.name, sanitizedToolName);
-  assert.deepEqual(toolResultBlock.response, { result: { ok: true } });
+  assert.deepEqual(toolResultBlock.response, { result: '{"ok":true}' });
 });
 
 test("OpenAI -> Antigravity Claude path applies output cap and strips thinkingConfig", () => {
@@ -992,13 +997,17 @@ test("OpenAI -> Antigravity Claude path preserves lower requested output and str
       reasoning_effort: "high",
     },
     false,
-    { projectId: "proj-claude-short" } as any
-  );
+    { projectId: "proj-claude-short" } as unknown as Parameters<
+      typeof openaiToAntigravityRequest
+    >[3]
+  ) as Record<string, unknown>;
 
-  assert.equal((result as any).request?.generationConfig.maxOutputTokens, 32769);
-  assert.equal((result as any).request?.generationConfig.thinkingConfig, undefined);
-  assert.equal((result as any).request?.max_tokens, undefined);
-  assert.equal((result as any).request?.thinking, undefined);
+  const claudeRequest = result.request as Record<string, unknown> | undefined;
+  const claudeGenConfig = claudeRequest?.generationConfig as Record<string, unknown> | undefined;
+  assert.equal(claudeGenConfig?.maxOutputTokens, 32769);
+  assert.equal(claudeGenConfig?.thinkingConfig, undefined);
+  assert.equal(claudeRequest?.max_tokens, undefined);
+  assert.equal(claudeRequest?.thinking, undefined);
 });
 
 test("OpenAI -> Antigravity Gemini path preserves thinkingConfig (only Claude is stripped)", () => {
@@ -1013,17 +1022,41 @@ test("OpenAI -> Antigravity Gemini path preserves thinkingConfig (only Claude is
       reasoning_effort: "high",
     },
     false,
-    { projectId: "proj-gemini-thinking" } as any
-  );
+    { projectId: "proj-gemini-thinking" } as unknown as Parameters<
+      typeof openaiToAntigravityRequest
+    >[3]
+  ) as Record<string, unknown>;
 
   // For Gemini, thinkingConfig must remain in place because the Cloud Code
   // Gemini endpoint understands and uses it.
-  assert.ok(
-    (result as any).request?.generationConfig.thinkingConfig,
-    "thinkingConfig must be preserved for Gemini models on Antigravity"
+  const geminiRequest = result.request as Record<string, unknown> | undefined;
+  const geminiGenConfig = geminiRequest?.generationConfig as Record<string, unknown> | undefined;
+  const thinkingConfig = geminiGenConfig?.thinkingConfig as Record<string, unknown> | undefined;
+  assert.ok(thinkingConfig, "thinkingConfig must be preserved for Gemini models on Antigravity");
+  assert.equal((thinkingConfig.thinkingBudget as number) > 0, true);
+  assert.equal(thinkingConfig.includeThoughts, true);
+});
+
+test("OpenAI -> Antigravity Gemini thinking models omit maxOutputTokens when max_tokens is undefined", () => {
+  const result = openaiToAntigravityRequest(
+    "gemini-3.8-flash-tiered",
+    {
+      messages: [{ role: "user", content: "Hello" }],
+    },
+    false,
+    { projectId: "proj-gemini-thinking" } as unknown as Parameters<
+      typeof openaiToAntigravityRequest
+    >[3]
+  ) as Record<string, unknown>;
+
+  const envelopeRequest = result.request as Record<string, unknown> | undefined;
+  const genConfig = envelopeRequest?.generationConfig as Record<string, unknown> | undefined;
+  assert.ok(genConfig?.thinkingConfig, "expected thinkingConfig to be set");
+  assert.equal(
+    genConfig.maxOutputTokens,
+    undefined,
+    "maxOutputTokens must be undefined when not requested"
   );
-  assert.equal((result as any).request?.generationConfig.thinkingConfig.thinkingBudget > 0, true);
-  assert.equal((result as any).request?.generationConfig.thinkingConfig.includeThoughts, true);
 });
 
 // Regression for #2480: when projectId is stored in providerSpecificData rather than at
@@ -1200,6 +1233,152 @@ test("OpenAI -> Gemini request maps google_search tool", () => {
   assert.ok(
     (result as any).tools.some((t: any) => t.googleSearch),
     "expected googleSearch tool"
+  );
+});
+
+// Scope guard (#16567): the mixed-tools rule is an Antigravity/Cloud Code fix. Plain
+// Gemini (AI Studio / Gemini CLI) must keep its historical behavior — a
+// function-declared google_search is still promoted to native grounding even when
+// other callable functions are declared.
+test("OpenAI -> Gemini (plain) still promotes google_search to native grounding when mixed with other tools", () => {
+  const result = openaiToGeminiRequest(
+    "gemini-2.0-flash",
+    {
+      messages: [{ role: "user", content: "Search the web" }],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "google_search",
+            description: "Search the web",
+            parameters: {
+              type: "object",
+              properties: { query: { type: "string" } },
+              required: ["query"],
+            },
+          },
+        },
+        {
+          type: "function",
+          function: {
+            name: "weather",
+            description: "Fetch weather",
+            parameters: { type: "object", properties: {} },
+          },
+        },
+      ],
+    },
+    false
+  );
+
+  assert.ok(Array.isArray(result.tools), "expected tools array");
+  assert.ok(
+    result.tools.some((t) => t.googleSearch),
+    "plain Gemini keeps the native googleSearch promotion (behavior unchanged)"
+  );
+  const decls = result.tools.find((t) => Array.isArray(t.functionDeclarations))
+    ?.functionDeclarations as { name: string }[];
+  assert.ok(decls, "expected functionDeclarations");
+  assert.deepEqual(decls.map((fn) => fn.name).sort(), ["google_search", "weather"]);
+});
+
+// Same regression through the base Cloud Code translator (no envelope): the mixed
+// request must carry both declarations and no native grounding entry.
+test("OpenAI -> Cloud Code Gemini keeps mixed google_search declaration without native grounding", () => {
+  const result = openaiToCloudCodeGeminiRequest(
+    "gemini-2.0-flash",
+    {
+      messages: [{ role: "user", content: "Search the web" }],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "google_search",
+            parameters: { type: "object", properties: { query: { type: "string" } } },
+          },
+        },
+        {
+          type: "function",
+          function: { name: "weather", parameters: { type: "object", properties: {} } },
+        },
+      ],
+    },
+    false
+  );
+
+  assert.ok(Array.isArray(result.tools), "expected tools array");
+  assert.ok(
+    !result.tools.some((t) => t.googleSearch),
+    "native googleSearch must not be present in the mixed-tools request"
+  );
+  const decls = result.tools.find((t) => Array.isArray(t.functionDeclarations))
+    ?.functionDeclarations as { name: string }[];
+  assert.ok(decls, "expected functionDeclarations");
+  assert.deepEqual(
+    decls.map((fn) => fn.name).sort(),
+    ["google_search", "weather"],
+    "mixed google_search must stay a callable declaration"
+  );
+});
+
+// Sole-tool case must keep the native grounding promotion, and the Antigravity
+// envelope strip must drop the now-redundant builtin-named declaration (the
+// envelope cleanup lives in wrapInCloudCodeEnvelope, reached only via
+// openaiToAntigravityRequest).
+test("OpenAI -> Antigravity promotes sole google_search tool to native grounding", () => {
+  const result = openaiToAntigravityRequest(
+    "gemini-2.0-flash",
+    {
+      messages: [{ role: "user", content: "What happened today?" }],
+      tools: [
+        {
+          type: "function",
+          function: { name: "google_search", parameters: { type: "object", properties: {} } },
+        },
+      ],
+    },
+    false,
+    { projectId: "proj-search" }
+  );
+
+  assert.deepEqual(result.request?.tools, [{ googleSearch: {} }]);
+});
+
+// Envelope-level regression: with native grounding present (sole-tool promotion),
+// the builtin-named declaration is stripped; in the mixed case (no native entry)
+// nothing is stripped.
+test("OpenAI -> Antigravity envelope keeps mixed declarations and strips none", () => {
+  const result = openaiToAntigravityRequest(
+    "gemini-2.0-flash",
+    {
+      messages: [{ role: "user", content: "Search the web" }],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "google_search",
+            parameters: { type: "object", properties: { query: { type: "string" } } },
+          },
+        },
+        {
+          type: "function",
+          function: { name: "weather", parameters: { type: "object", properties: {} } },
+        },
+      ],
+    },
+    false,
+    { projectId: "proj-search" }
+  );
+
+  const tools = (result.request?.tools ?? []) as GeminiTools;
+  assert.ok(!tools.some((t) => t.googleSearch), "no native grounding in mixed case");
+  const decls = tools.find((t) => Array.isArray(t.functionDeclarations))?.functionDeclarations as {
+    name: string;
+  }[];
+  assert.deepEqual(
+    (decls ?? []).map((fn) => fn.name).sort(),
+    ["google_search", "weather"],
+    "envelope cleanup must not strip google_search when no native grounding exists"
   );
 });
 

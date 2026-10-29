@@ -31,7 +31,7 @@ function tempCodexHome(): string {
 after(() => {
   for (const dir of tmpDirs) {
     try {
-      fs.rmSync(dir, { recursive: true, force: true });
+      fs.rmSync(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     } catch {
       // best-effort cleanup
     }

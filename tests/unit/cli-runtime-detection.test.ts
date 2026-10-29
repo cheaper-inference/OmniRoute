@@ -101,7 +101,7 @@ describe("Size threshold — checkKnownPath", () => {
   });
 
   after(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("should detect files >= 30 bytes via env var", async () => {
@@ -164,7 +164,7 @@ describe("Healthcheck — checkRunnable", () => {
   });
 
   after(() => {
-    fs.rmSync(tmpDir, { recursive: true, force: true });
+    fs.rmSync(tmpDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   });
 
   it("should report runnable=true for a script that outputs version", async () => {
@@ -268,6 +268,15 @@ describe("Continue CLI detection", () => {
     assert.ok(
       knownPaths.some((knownPath) => /^cn(?:\.cmd)?$/i.test(path.basename(knownPath))),
       "Continue detection should search for the cn executable"
+    );
+  });
+});
+describe("Oh My Pi (omp) CLI detection", () => {
+  it("should enumerate omp in known installation paths", () => {
+    const knownPaths = getKnownToolPaths("omp");
+    assert.ok(
+      knownPaths.some((knownPath) => /^omp(?:\.exe|\.cmd)?$/i.test(path.basename(knownPath))),
+      "omp detection should search for the omp executable"
     );
   });
 });

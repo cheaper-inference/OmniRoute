@@ -13,7 +13,7 @@ const searchRoute = await import("../../src/app/api/v1/search/route.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -42,7 +42,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("v1 search GET lists all search providers", async () => {
@@ -52,13 +52,15 @@ test("v1 search GET lists all search providers", async () => {
 
   assert.equal(response.status, 200);
   assert.equal(body.object, "list");
-  assert.equal(body.data.length, 17);
+  assert.equal(body.data.length, 22);
   assert.deepEqual(ids, [
     "serper-search",
     "brave-search",
     "perplexity-search",
     "exa-search",
     "tavily-search",
+    "nimble-search",
+    "kimi-search",
     "firecrawl",
     "google-pse-search",
     "linkup-search",
@@ -71,6 +73,9 @@ test("v1 search GET lists all search providers", async () => {
     "context7",
     "duckduckgo-free",
     "x-search",
+    "xquik-search",
+    "anysearch-search",
+    "parallel-search",
   ]);
 });
 

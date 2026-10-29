@@ -43,24 +43,40 @@ import {
 import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
+import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { getClaudeUsage, getClaudePlanLabel } from "./usage/claude.ts";
 import { getKiroUsage, buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 // Re-exported para os testes kiro-* (importam de services/usage).
 export { buildKiroUsageResult, discoverKiroProfileArn } from "./usage/kiro.ts";
 import { getAdobeFireflyUsage } from "./usage/adobeFirefly.ts";
 import { getOpenrouterUsage } from "./usage/openrouter.ts";
-import { getOllamaCloudUsage, getOpenCodeGoUsage } from "./opencodeOllamaUsage.ts";
+import { getOpenAiCompatibleUsage } from "./usage/openaiCompatible.ts";
+import { getLlmgatewayUsage } from "./usage/llmgateway.ts";
+import { getLyceumUsage } from "./usage/lyceum.ts";
+import { getOllamaCloudUsage } from "./opencodeOllamaUsage.ts";
 import { getCodeBuddyCnUsage } from "./usage/codebuddy-cn.ts";
+import { getCodeBuddyIntlUsage } from "./usage/codebuddy-intl.ts";
 import { getPromptQlUsage } from "./usage/promptql.ts";
 import { getHyperAgentUsage } from "./usage/hyperagent.ts";
 import { getGitHubUsage, formatGitHubQuotaSnapshot, inferGitHubPlanName } from "./usage/github.ts";
 import { getCrofUsage } from "./usage/crof.ts";
+import { getClinepassUsage } from "./usage/clinepass.ts";
 import { getNanoGptUsage } from "./usage/nanogpt.ts";
+import { getNanUsage } from "./usage/nan.ts";
+import { getApmixUsage } from "./usage/apmix.ts";
 import { getQoderUsage, parseQoderUserStatusUsage } from "./usage/qoder.ts";
 // Re-exported para o teste qoder-usage-quota (importa parseQoderUserStatusUsage de services/usage).
 export { parseQoderUserStatusUsage } from "./usage/qoder.ts";
 import { getOpencodeUsage } from "./usage/opencode.ts";
 import { getDeepseekUsage } from "./usage/deepseek.ts";
+import { getStepfunUsage } from "./usage/stepfun.ts";
+import { getMoonshotOpenPlatformUsage } from "./moonshotQuotaFetcher.ts";
+import {
+  isKimiCodingConnection,
+  isMoonshotOpenPlatformConnection,
+} from "./usage/moonshotOpenPlatform.ts";
+import { getDevinCliUsage } from "./usage/devinCli.ts";
+import { getAnthropicApiKeyUsage } from "./usage/anthropicApiKey.ts";
 import { getBailianCodingPlanUsage } from "./usage/bailian.ts";
 import { getVertexUsage } from "./usage/vertex.ts";
 import { getXiaomiMimoUsage } from "./usage/xiaomi-mimo.ts";
@@ -68,11 +84,18 @@ import { getXaiUsage } from "./usage/xai.ts";
 import { getXaiOauthUsage } from "./usage/xaiOauth.ts";
 import { getGrokCliUsage } from "./usage/grokCli.ts";
 import { getFirecrawlUsage } from "./usage/firecrawl.ts";
+import { getContext7Usage } from "./usage/context7.ts";
+import { getTavilyUsage } from "./usage/tavily.ts";
+import { getJinaUsage } from "./usage/jina.ts";
 import { getVolcenginePlanUsage } from "./usage/volcenginePlan.ts";
 import { getCommandCodeUsage } from "./usage/command-code.ts";
 import { getQwenTokenPlanUsage } from "./usage/qwen-token-plan.ts";
 import { getConolUsage } from "./conolUsage.ts";
+import { getSyntxUsage } from "./usage/syntx.ts";
 import { getAgentrouterUsage } from "./usage/agentrouter.ts";
+import { getKilocodeUsage } from "./usage/kilocode.ts";
+import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
+import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
 
 type JsonRecord = Record<string, unknown>;
 type UsageProviderConnection = JsonRecord & {
@@ -87,67 +110,16 @@ type UsageProviderConnection = JsonRecord & {
 
 /**
  * Single source of truth for which providers have a `getUsageForProvider`
- * implementation. Consumers like `genericQuotaFetcher.ts` reference this so
- * the registration list can't drift from the switch statement below.
+ * implementation — consumers like `genericQuotaFetcher.ts` reference it so the
+ * registration list can't drift from the switch statement below.
  *
- * If you add a new provider to the switch, add it here too.
+ * If you add a new provider to the switch, add it to the list too. The list now lives in
+ * `./usage/fetcherProviders.ts` (a zero-dependency leaf) so that consumers which only need
+ * to know *whether* a fetcher exists — the provider-plugin manifest — can read it without
+ * importing this dispatcher. Re-exported here so this stays the public import path.
  */
-export const USAGE_FETCHER_PROVIDERS = [
-  "github",
-  "antigravity",
-  "agy",
-  "claude",
-  "codex",
-  "cursor",
-  "kiro",
-  "amazon-q",
-  "kimi-coding",
-  "kimi-coding-apikey",
-  "qoder",
-  "glm",
-  "glm-cn",
-  "zai",
-  "glmt",
-  "opencode-go",
-  "ollama-cloud",
-  "minimax",
-  "minimax-cn",
-  "crof",
-  "bailian-coding-plan",
-  "qwen-cloud-token-plan",
-  "nanogpt",
-  "deepseek",
-  "opencode",
-  "opencode-zen",
-  "xiaomi-mimo",
-  "xai",
-  "xai-oauth",
-  "xao",
-  "grok-cli",
-  "vertex",
-  "vertex-partner",
-  "codebuddy-cn",
-  "openrouter",
-  // PromptQL playground credits (data.pro.ql.app getCreditSummary)
-  "promptql",
-  "pql",
-  // HyperAgent billing usage (creditBlocks USD)
-  "hyperagent",
-  "ha",
-  // Firecrawl team credits (GET /v2/team/credit-usage)
-  "firecrawl",
-  // Volcano Ark Plan subscriptions (agent-plan / coding-plan)
-  "volcengine-agent-plan",
-  "volcengine-coding-plan",
-  // Command Code credits + 5h/weekly windows (GET /alpha/billing/credits)
-  "command-code",
-  "conol-web",
-  "cnl",
-  // AgentRouter (New-API) console balance (GET /api/user/self)
-  "agentrouter",
-] as const;
-
-export type UsageFetcherProvider = (typeof USAGE_FETCHER_PROVIDERS)[number];
+export { USAGE_FETCHER_PROVIDERS } from "./usage/fetcherProviders.ts";
+export type { UsageFetcherProvider } from "./usage/fetcherProviders.ts";
 
 /**
  * Get usage data for a provider connection
@@ -160,9 +132,29 @@ export async function getUsageForProvider(
 ) {
   const { id, provider, accessToken, apiKey, providerSpecificData, projectId, email } = connection;
 
+  if (isKimiCodingConnection(connection)) {
+    return await getKimiUsage(accessToken, apiKey, providerSpecificData);
+  }
+
+  if (isMoonshotOpenPlatformConnection(connection)) {
+    return await getMoonshotOpenPlatformUsage(connection);
+  }
+
+  // openai-/anthropic-compatible-* ids are generated per connection, so they can never
+  // appear in the switch below or in USAGE_FETCHER_PROVIDERS. The connection
+  // itself declares where its quota lives (#13616); without that declaration
+  // this returns a message and the sync treats it as "nothing to show", exactly
+  // as it did before.
+  if (
+    typeof provider === "string" &&
+    (provider.startsWith("openai-compatible-") || provider.startsWith("anthropic-compatible-"))
+  ) {
+    return await getOpenAiCompatibleUsage(apiKey, providerSpecificData);
+  }
+
   switch (provider) {
     case "github":
-      return await getGitHubUsage(accessToken, providerSpecificData);
+      return await getGitHubUsage(accessToken, providerSpecificData, id || "");
     case "antigravity":
     case "agy":
       return await getAntigravityUsage(
@@ -174,11 +166,18 @@ export async function getUsageForProvider(
         options
       );
     case "claude":
-      return await getClaudeUsage(accessToken);
+      return await getClaudeUsage(accessToken, id || "", {
+        forceRefresh: options.forceRefresh === true,
+      });
     case "codex":
-      return await getCodexUsage(accessToken, providerSpecificData);
+      // /me/status and the quota-cache refresh reach this fetch with no
+      // caller-side pacing. Gate the start here so those paths, and any later
+      // one, cannot burst the usage endpoint. Callers that already acquired the
+      // shared gate wait at most one more interval.
+      await throttleQuotaFetch();
+      return await getCodexUsage(accessToken, providerSpecificData, id || "");
     case "cursor":
-      return await getCursorUsage(accessToken || "", providerSpecificData);
+      return await getCursorUsage(accessToken || "", providerSpecificData, id || "");
     case "kiro":
     case "amazon-q":
       return await getKiroUsage(accessToken, providerSpecificData);
@@ -201,29 +200,49 @@ export async function getUsageForProvider(
         ...(provider === "glm-cn" ? { apiRegion: "china" } : {}),
       });
     case "opencode-go":
-      return await getOpenCodeGoUsage(apiKey || "", providerSpecificData);
+      return await getOpencodeUsage(id || "", apiKey || "");
     case "ollama-cloud":
-      return await getOllamaCloudUsage(providerSpecificData);
+      return await getOllamaCloudUsage(providerSpecificData, apiKey);
     case "minimax":
     case "minimax-cn":
       return await getMiniMaxUsage(apiKey || "", provider);
     case "crof":
       return await getCrofUsage(apiKey || "");
+    case "clinepass":
+      // Dual-auth: OAuth WorkOS token in `accessToken`, or a BYOK key in `apiKey`.
+      return await getClinepassUsage(accessToken, apiKey);
     case "bailian-coding-plan":
       return await getBailianCodingPlanUsage(id || "", apiKey || "", providerSpecificData);
     case "qwen-cloud-token-plan":
       return await getQwenTokenPlanUsage(id || "", apiKey || "", providerSpecificData);
     case "nanogpt":
       return await getNanoGptUsage(apiKey || "");
+    case "nan":
+      return await getNanUsage(apiKey || "");
+    case "apmix":
+      return await getApmixUsage(apiKey || "");
     case "deepseek":
       return await getDeepseekUsage(id || "", apiKey || "");
+    case "stepfun":
+      // Account balance (GET /v1/accounts). The base-URL override in
+      // providerSpecificData selects the platform (api.stepfun.com China vs
+      // api.stepfun.ai international) — the same override the chat path uses.
+      return await getStepfunUsage(apiKey || "", providerSpecificData);
+    case "moonshot":
+    case "kimi":
+      return await getMoonshotOpenPlatformUsage(connection);
     case "openrouter":
       return await getOpenrouterUsage(id || "", apiKey || "", providerSpecificData);
-    case "opencode":
+    case "llmgateway":
+      return await getLlmgatewayUsage(id || "", apiKey || "");
+    case "lyceum":
+      return await getLyceumUsage(id || "", apiKey || "");
     case "opencode-zen":
       return await getOpencodeUsage(id || "", apiKey || "");
     case "xiaomi-mimo":
-      return await getXiaomiMimoUsage(id || "");
+      return await getXiaomiMimoUsage(id || "", "xiaomi-mimo", providerSpecificData);
+    case "xiaomi-mimo-token-plan":
+      return await getXiaomiMimoUsage(id || "", "xiaomi-mimo-token-plan", providerSpecificData);
     case "xai":
       return await getXaiUsage(id || "");
     case "xai-oauth":
@@ -233,6 +252,9 @@ export async function getUsageForProvider(
       return await getGrokCliUsage(accessToken);
     case "codebuddy-cn":
       return await getCodeBuddyCnUsage(accessToken, apiKey, providerSpecificData);
+    case "codebuddy-intl":
+    case "cbai":
+      return await getCodeBuddyIntlUsage(accessToken, apiKey, providerSpecificData);
     case "promptql":
     case "pql":
       // DDN lux JWTs carry projectId only in JWT aud; connection.projectId may be set by sync.
@@ -246,16 +268,42 @@ export async function getUsageForProvider(
       return await getHyperAgentUsage(apiKey || accessToken, providerSpecificData);
     case "firecrawl":
       return await getFirecrawlUsage(id || "", apiKey, connection);
+    case "context7":
+      return await getContext7Usage(id || "", apiKey, connection);
+    case "tavily-search":
+    case "tavily":
+      return await getTavilyUsage(id || "", apiKey, connection);
+    case "jina-search":
+    case "jina":
+    case "jina-ai":
+    case "jina-reader":
+      return await getJinaUsage(id || "", apiKey, connection);
     case "volcengine-agent-plan":
     case "volcengine-coding-plan":
       return await getVolcenginePlanUsage(apiKey || "", provider, providerSpecificData);
     case "command-code":
-      return await getCommandCodeUsage(apiKey || accessToken || "");
+      return await getCommandCodeUsage(apiKey || accessToken || "", id || "");
     case "conol-web":
     case "cnl":
-      return await getConolUsage(apiKey || accessToken, providerSpecificData);
+      return await getConolUsage(apiKey || accessToken, providerSpecificData, id || "");
+    case "syntx":
+    case "stx":
+      return await getSyntxUsage(apiKey, accessToken, providerSpecificData, id || "");
     case "agentrouter":
       return await getAgentrouterUsage(id, connection);
+    case "kilocode":
+      return await getKilocodeUsage(id, connection);
+    case "devin-cli":
+      // Devin CLI tokens live in `accessToken` (oauth import) or `apiKey`.
+      return await getDevinCliUsage(apiKey || accessToken, id || "");
+    case "anthropic":
+      return await getAnthropicApiKeyUsage(apiKey);
+    case "chatplayground":
+    case "cpl":
+      return await getChatPlaygroundUsage(apiKey || accessToken, providerSpecificData, id || "");
+    case "cloudflare-ai":
+      // Daily neurons from GraphQL Analytics (needs Account Analytics: Read on the token).
+      return await getCloudflareAiUsage(apiKey || "", providerSpecificData);
     default:
       return { message: `Usage API not implemented for ${provider}` };
   }
@@ -286,6 +334,9 @@ export const __testing = {
   getXaiUsage,
   getXaiOauthUsage,
   getFirecrawlUsage,
+  getContext7Usage,
+  getTavilyUsage,
+  getJinaUsage,
   getCommandCodeUsage,
   getVertexUsage,
   getMiniMaxAuthErrorMessage,
@@ -295,4 +346,5 @@ export const __testing = {
   mapSubscriptionTierStringToPlanLabel,
   toDisplayLabel,
   getKiroUsage,
+  getKilocodeUsage,
 };

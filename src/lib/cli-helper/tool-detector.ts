@@ -77,9 +77,11 @@ function expandHome(p: string): string {
 
 function isConfigured(content: string, baseUrl: string): boolean {
   const normalized = baseUrl.replace(/\/+$/, "");
+  const port = process.env.PORT || process.env.DASHBOARD_PORT;
   return (
     content.includes(normalized) ||
     content.includes("localhost:20128") ||
+    (!!port && content.includes(`localhost:${port}`)) ||
     content.includes("OMNIROUTE_BASE_URL")
   );
 }
@@ -100,12 +102,22 @@ async function detectBinaryWindows(
   if (!located.installed || !located.commandPath) return { installed: false };
 
   try {
+    // A .cmd/.bat shim needs cmd.exe, but `shell: true` with an argument array is what
+    // Node 24 deprecates (DEP0190): it concatenates the argv onto the command line
+    // instead of escaping it. Run cmd.exe ourselves with an argv array instead, so each
+    // element (the path included) is quoted by Node and nothing is interpolated into a
+    // shell string (Hard Rule #13).
     const useShell = shouldUseShellForCommand(located.commandPath);
-    const { stdout } = await execFileImpl(located.commandPath, ["--version"], {
+    const [file, args] = useShell
+      ? [
+          env.ComSpec || process.env.ComSpec || "cmd.exe",
+          ["/d", "/c", located.commandPath, "--version"],
+        ]
+      : [located.commandPath, ["--version"]];
+    const { stdout } = await execFileImpl(file, args, {
       timeout: 5000,
       env,
       windowsHide: true,
-      ...(useShell ? { shell: true, windowsVerbatimArguments: true } : {}),
     });
     return { installed: true, version: stdout.trim().replace(/^v/, "") };
   } catch {
@@ -170,7 +182,9 @@ export async function detectTool(id: string): Promise<DetectedTool | null> {
       : getCliPrimaryConfigPath(tool.id) ||
         (tool.id === "opencode" ? resolveOpencodeConfigPath() : "");
   const configContents = await readConfigFile(configPath);
-  const configured = !!configContents && isConfigured(configContents, "http://localhost:20128");
+  const defaultPort = process.env.PORT || process.env.DASHBOARD_PORT || 20128;
+  const configured =
+    !!configContents && isConfigured(configContents, `http://localhost:${defaultPort}`);
 
   const result: DetectedTool = {
     id: canonicalId,
@@ -187,12 +201,14 @@ export async function detectTool(id: string): Promise<DetectedTool | null> {
     try {
       const roles = await getCurrentHermesAgentRoles();
       const richRoles: Record<string, any> = {};
+      const currentPort = String(process.env.PORT || process.env.DASHBOARD_PORT || 20128);
 
       Object.entries(roles).forEach(([role, info]) => {
         const usingOmni =
           info?.provider === "omniroute" ||
           (info?.base_url || "").includes("20128") ||
-          (info?.base_url || "").includes("localhost:20128");
+          (info?.base_url || "").includes(currentPort) ||
+          (info?.base_url || "").includes("localhost");
 
         richRoles[role] = {
           model: info.model,

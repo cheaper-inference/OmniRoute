@@ -40,7 +40,7 @@ async function withComboEnv(fn: (dataDir: string) => Promise<void>) {
   } finally {
     console.log = originalLog;
     globalThis.fetch = ORIGINAL_FETCH;
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
@@ -225,7 +225,7 @@ test("combo create (HTTP) — POST /api/combos body carries the parsed models", 
   } finally {
     console.log = originalLog;
     globalThis.fetch = ORIGINAL_FETCH;
-    fs.rmSync(dataDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }

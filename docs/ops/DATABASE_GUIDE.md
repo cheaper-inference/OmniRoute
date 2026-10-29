@@ -12,7 +12,7 @@ lastUpdated: 2026-08-23
 
 - `src/lib/db/core.ts` — singleton + SCHEMA_SQL (17 base tables)
 - `src/lib/db/migrationRunner.ts` — versioned migrations
-- `src/lib/db/migrations/` — 106 versioned SQL files
+- `src/lib/db/migrations/` — 167 versioned SQL files
 - `src/lib/db/encryption.ts` — encryption helpers
 - `src/lib/db/backup.ts` — backup export/import
 - `src/lib/db/healthCheck.ts` — health diagnostics
@@ -535,8 +535,11 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Restore from backup:
 
 ```bash
-omniroute sync pull --merge   # or: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` only downloads a full `.tar.gz` archive from a running server
+(`GET /api/db-backups/exportAll`, operator credential required); it does not restore anything.
 
 ### Scenario 3: Encryption Key Lost
 

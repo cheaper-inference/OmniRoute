@@ -80,7 +80,7 @@ test.after(() => {
   globalThis.fetch = originalFetch;
   featureFlagsDb.removeFeatureFlagOverride("DISABLE_CONTEXT_WINDOW_CHECKS");
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("handleChatCore clamps an over-cap max_tokens to the model's output cap before dispatch", async () => {

@@ -15,34 +15,34 @@ const { safeResolveProxy } = await import("../../src/sse/handlers/chatHelpers.ts
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   if (ORIGINAL_INITIAL_PASSWORD === undefined) delete process.env.INITIAL_PASSWORD;
   else process.env.INITIAL_PASSWORD = ORIGINAL_INITIAL_PASSWORD;
 });
 
-test("#6272: resolveProxyForConnection('noauth', ...) honors a provider-level proxy assigned to 'opencode'", async () => {
+test("#6272: resolveProxyForConnection('noauth', ...) honors a provider-level proxy assigned to 'uncloseai'", async () => {
   core.getDbInstance();
   const proxy = { type: "http", host: "127.0.0.1", port: 8888 };
 
   // Reporter's second symptom: "same thing happen when i set the proxy directly
-  // in the provider menu" -> assign a provider-scoped proxy to the opencode
-  // provider id, the way Settings -> Providers -> opencode would persist it.
-  await settingsDb.setProxyForLevel("provider", "opencode", proxy);
+  // in the provider menu" -> assign a provider-scoped proxy to a no-auth
+  // provider id, the way Settings -> Providers -> <provider> would persist it.
+  await settingsDb.setProxyForLevel("provider", "uncloseai", proxy);
 
   const resolved = await settingsDb.resolveProxyForConnection("noauth", undefined);
 
   assert.equal(
     resolved?.proxy?.host,
     "127.0.0.1",
-    `expected the opencode provider-level proxy to be honored, got level=${resolved?.level} proxy=${JSON.stringify(resolved?.proxy)}`
+    `expected the no-auth provider-level proxy to be honored, got level=${resolved?.level} proxy=${JSON.stringify(resolved?.proxy)}`
   );
   assert.equal(resolved?.level, "provider");
-  assert.equal(resolved?.levelId, "opencode");
+  assert.equal(resolved?.levelId, "uncloseai");
 });
 
 test("control: resolveProxyForConnection('noauth', ...) still honors the GLOBAL proxy when no no-auth provider proxy is set", async () => {
   core.getDbInstance();
-  await settingsDb.deleteProxyForLevel("provider", "opencode");
+  await settingsDb.deleteProxyForLevel("provider", "uncloseai");
   const proxy = { type: "http", host: "10.0.0.1", port: 9999 };
   await settingsDb.setProxyForLevel("global", null, proxy);
 
@@ -54,40 +54,40 @@ test("control: resolveProxyForConnection('noauth', ...) still honors the GLOBAL 
 test("resolveProxyForConnection keeps provider-level no-auth proxies isolated", async () => {
   core.getDbInstance();
   await settingsDb.deleteProxyForLevel("global", null);
-  await settingsDb.setProxyForLevel("provider", "opencode", {
+  await settingsDb.setProxyForLevel("provider", "uncloseai", {
     type: "http",
     host: "127.0.0.2",
     port: 8889,
   });
-  await settingsDb.setProxyForLevel("provider", "theoldllm", {
+  await settingsDb.setProxyForLevel("provider", "duckduckgo-web", {
     type: "http",
     host: "127.0.0.3",
     port: 8890,
   });
 
-  const opencode = await settingsDb.resolveProxyForConnection("noauth", undefined, "opencode");
-  const theOldLlm = await settingsDb.resolveProxyForConnection("noauth", undefined, "theoldllm");
+  const noAuth = await settingsDb.resolveProxyForConnection("noauth", undefined, "uncloseai");
+  const ddgw = await settingsDb.resolveProxyForConnection("noauth", undefined, "duckduckgo-web");
 
-  assert.equal(opencode?.proxy?.host, "127.0.0.2");
-  assert.equal(theOldLlm?.proxy?.host, "127.0.0.3");
+  assert.equal(noAuth?.proxy?.host, "127.0.0.2");
+  assert.equal(ddgw?.proxy?.host, "127.0.0.3");
 });
 
 test("safeResolveProxy keeps the synthetic no-auth connection provider-specific", async () => {
   core.getDbInstance();
-  await settingsDb.setProxyForLevel("provider", "opencode", {
+  await settingsDb.setProxyForLevel("provider", "uncloseai", {
     type: "http",
     host: "127.0.0.4",
     port: 8891,
   });
-  await settingsDb.setProxyForLevel("provider", "theoldllm", {
+  await settingsDb.setProxyForLevel("provider", "duckduckgo-web", {
     type: "http",
     host: "127.0.0.5",
     port: 8892,
   });
 
-  const opencode = await safeResolveProxy("noauth", undefined, "opencode");
-  const theOldLlm = await safeResolveProxy("noauth", undefined, "theoldllm");
+  const noAuth = await safeResolveProxy("noauth", undefined, "uncloseai");
+  const ddgw = await safeResolveProxy("noauth", undefined, "duckduckgo-web");
 
-  assert.equal(opencode?.proxy?.host, "127.0.0.4");
-  assert.equal(theOldLlm?.proxy?.host, "127.0.0.5");
+  assert.equal(noAuth?.proxy?.host, "127.0.0.4");
+  assert.equal(ddgw?.proxy?.host, "127.0.0.5");
 });

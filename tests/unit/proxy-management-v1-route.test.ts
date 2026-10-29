@@ -16,6 +16,31 @@ const proxyHealthV1Route = await import("../../src/app/api/v1/management/proxies
 const proxyBulkAssignV1Route =
   await import("../../src/app/api/v1/management/proxies/bulk-assign/route.ts");
 const proxyLogger = await import("../../src/lib/proxyLogger.ts");
+const settingsBulkAssignRoute =
+  await import("../../src/app/api/settings/proxies/bulk-assign/route.ts");
+
+const settingsAssignmentsRoute =
+  await import("../../src/app/api/settings/proxies/assignments/route.ts");
+
+test("settings and v1 bulk assignment retain matching validation and auth responses", async () => {
+  await resetStorage();
+  for (const [handler, url] of [
+    [settingsBulkAssignRoute.PUT, "http://localhost/api/settings/proxies/bulk-assign"],
+    [proxyBulkAssignV1Route.PUT, "http://localhost/api/v1/management/proxies/bulk-assign"],
+  ] as const) {
+    await resetStorage();
+    const malformed = await handler(new Request(url, { method: "PUT", body: "{bad" }));
+    assert.equal(malformed.status, 400);
+    const invalid = await handler(
+      new Request(url, { method: "PUT", body: JSON.stringify({ scope: "invalid" }) })
+    );
+    assert.equal(invalid.status, 400);
+    await withEnv("INITIAL_PASSWORD", "test-password", async () => {
+      const unauthorized = await handler(new Request(url, { method: "PUT", body: "{bad" }));
+      assert.equal(unauthorized.status, 401, "auth must run before JSON validation");
+    });
+  }
+});
 
 async function withEnv(name, value, fn) {
   const previous = process.env[name];
@@ -39,7 +64,7 @@ async function withEnv(name, value, fn) {
 async function resetStorage() {
   delete process.env.INITIAL_PASSWORD;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -65,7 +90,7 @@ async function withPrepareFailure(match, message, fn) {
 
 test.after(async () => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("v1 management proxies supports create/list/pagination", async () => {
@@ -151,6 +176,13 @@ test("v1 management proxies main route covers auth, lookup variants, update and 
     );
     assert.equal(deleteAuthRes.status, 401);
   });
+
+  // The INITIAL_PASSWORD block above persisted setupComplete=true (headless-deploy
+  // bootstrap in getSettings()). Since #15044, requireManagementAuth no longer inherits
+  // the public-route shortcut, so a setup-complete install without a password requires
+  // management auth even from loopback. Start the unauthenticated CRUD branches below
+  // from a fresh, pre-onboarding install, as this test originally intended.
+  await resetStorage();
 
   const providerConn = await providersDb.createProviderConnection({
     provider: "openai",
@@ -266,7 +298,7 @@ test("v1 management proxies main route covers auth, lookup variants, update and 
   );
   assert.equal(inUseDeleteRes.status, 409);
   const inUseDeleteBody = (await inUseDeleteRes.json()) as any;
-  assert.match(inUseDeleteBody.error.message, /remove assignments first/i);
+  assert.match(inUseDeleteBody.error.message, /remove assignments or account references first/i);
 
   const forceDeleteRes = await proxyV1Route.DELETE(
     new Request(`http://localhost/api/v1/management/proxies?id=${created.id}&force=1`, {
@@ -796,4 +828,62 @@ test("v1 assignments route resolves connection proxies and bulk assignment cover
   assert.equal(globalPayload.scope, "global");
   assert.equal(globalPayload.requested, 1);
   assert.equal(globalPayload.updated, 1);
+});
+
+test("both assignment write endpoints validate bodies before changing state", async () => {
+  for (const handler of [settingsAssignmentsRoute.PUT, proxyAssignmentsV1Route.PUT]) {
+    await resetStorage();
+    const invalid = await handler(
+      new Request("http://localhost/api/settings/proxies/assignments", {
+        method: "PUT",
+        body: JSON.stringify({ scope: "invalid" }),
+      })
+    );
+    assert.equal(invalid.status, 400);
+    const malformed = await handler(
+      new Request("http://localhost/api/settings/proxies/assignments", {
+        method: "PUT",
+        body: "{bad",
+      })
+    );
+    assert.equal(malformed.status, 400);
+  }
+});
+
+test("each assignment write endpoint reports its own failure message", async () => {
+  const cases = [
+    [
+      settingsAssignmentsRoute.PUT,
+      "http://localhost/api/settings/proxies/assignments",
+      "Failed to update assignment",
+    ],
+    [
+      proxyAssignmentsV1Route.PUT,
+      "http://localhost/api/v1/management/proxies/assignments",
+      "Failed to update proxy assignment",
+    ],
+  ] as const;
+  for (const [handler, url, expectedMessage] of cases) {
+    await resetStorage();
+    const db = core.getDbInstance();
+    const originalPrepare = db.prepare.bind(db);
+    // A thrown value without a message falls back to the per-route failure message.
+    db.prepare = (sql, ...args) => {
+      if (String(sql).includes("DELETE FROM proxy_assignments")) throw {};
+      return originalPrepare(sql, ...args);
+    };
+    try {
+      const response = await handler(
+        new Request(url, {
+          method: "PUT",
+          body: JSON.stringify({ scope: "global", proxyId: null }),
+        })
+      );
+      assert.equal(response.status, 500);
+      const payload = (await response.json()) as { error: { message: string } };
+      assert.equal(payload.error.message, expectedMessage);
+    } finally {
+      db.prepare = originalPrepare;
+    }
+  }
 });

@@ -431,7 +431,7 @@ test("checks individual and aggregate frame byte caps before returning broker ou
       6
     );
   } finally {
-    await rm(directory, { recursive: true, force: true });
+    await rm(directory, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 

@@ -188,7 +188,7 @@ test("installPack accepts tarball payloads (the desktop release asset layout)", 
     stdio: "pipe",
   });
   assert.equal(tarred.status, 0, "fixture tarball creation must succeed");
-  fs.rmSync(packDir, { recursive: true, force: true }); // only the tarball remains
+  fs.rmSync(packDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 }); // only the tarball remains
 
   const source = resolvePackSource(pack.name, sourceDir, dataDir);
   assert.equal(source.kind, "tarball");

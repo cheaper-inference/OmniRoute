@@ -18,6 +18,7 @@ import path from "node:path";
 
 import { makeManagementSessionRequest } from "../../helpers/managementSession.ts";
 import { deriveDefaultPlan } from "@omniroute/open-sse/services/compression/deriveDefaultPlan.ts";
+import { ENGINE_IDS } from "@omniroute/open-sse/services/compression/engineCatalog.ts";
 
 // ─── isolated temp DB ─────────────────────────────────────────────────────────
 
@@ -36,13 +37,21 @@ const defaultRoute = await import("../../../src/app/api/context/combos/default/r
 
 async function setupAuth(): Promise<void> {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
   await settingsDb.updateSettings({
     requireLogin: true,
     setupComplete: true,
     password: "test-password-hash",
   });
+}
+
+// An engines write merges over the engines the install already has, so a test that needs only
+// some engines on writes every engine id, with the rest off.
+function onlyEngines(
+  enabled: Record<string, { enabled: boolean; level?: string }>
+): Record<string, { enabled: boolean; level?: string }> {
+  return Object.fromEntries(ENGINE_IDS.map((id) => [id, enabled[id] ?? { enabled: false }]));
 }
 
 // ─── lifecycle ────────────────────────────────────────────────────────────────
@@ -58,7 +67,7 @@ test.after(() => {
   if (originalJwtSecret === undefined) delete process.env.JWT_SECRET;
   else process.env.JWT_SECRET = originalJwtSecret;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // ─── tests ────────────────────────────────────────────────────────────────────
@@ -66,7 +75,7 @@ test.after(() => {
 test("GET /api/context/combos/default returns the derived default plan (single-mode caveman)", async () => {
   await compressionDb.updateCompressionSettings({
     enabled: true,
-    engines: { caveman: { enabled: true, level: "full" } },
+    engines: onlyEngines({ caveman: { enabled: true, level: "full" } }),
   });
 
   const req = await makeManagementSessionRequest("http://localhost/api/context/combos/default");
@@ -88,10 +97,10 @@ test("GET /api/context/combos/default returns the derived default plan (single-m
 test("GET /api/context/combos/default returns the derived stacked pipeline (reflects enabled engines)", async () => {
   await compressionDb.updateCompressionSettings({
     enabled: true,
-    engines: {
+    engines: onlyEngines({
       caveman: { enabled: true, level: "full" },
       headroom: { enabled: true },
-    },
+    }),
   });
 
   const req = await makeManagementSessionRequest("http://localhost/api/context/combos/default");
@@ -110,7 +119,10 @@ test("GET /api/context/combos/default returns the derived stacked pipeline (refl
   assert.equal(body.mode, "stacked");
   assert.deepEqual(body.pipeline, expected.stackedPipeline);
   const engineIds = body.pipeline.map((s) => s.engine);
-  assert.ok(engineIds.includes("caveman"), `expected caveman in derived pipeline, got: ${engineIds}`);
+  assert.ok(
+    engineIds.includes("caveman"),
+    `expected caveman in derived pipeline, got: ${engineIds}`
+  );
 });
 
 test("GET /api/context/combos/default returns off when master switch is disabled", async () => {

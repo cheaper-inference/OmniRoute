@@ -21,6 +21,8 @@ const accountSelector = await import("../../open-sse/services/accountSelector.ts
 const { RateLimitReason, COOLDOWN_MS, PROVIDER_PROFILES } =
   await import("../../open-sse/config/constants.ts");
 const { getCircuitBreaker } = await import("../../src/shared/utils/circuitBreaker.ts");
+const { connectionCircuitBreakerName } =
+  await import("../../open-sse/services/connectionCircuitBreaker.ts");
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
@@ -36,6 +38,7 @@ const {
   lockModelIfPerModelQuota,
   isModelLocked,
   getModelLockoutInfo,
+  clearAllModelLockouts,
   hasPerModelQuota,
   getProviderProfile,
   recordModelLockoutFailure,
@@ -45,7 +48,6 @@ const {
   isProviderInCooldown,
   getProviderCooldownRemainingMs,
   clearProviderFailure,
-  isProviderFailureCode,
   getProvidersInCooldown,
   getProviderBreakerState,
   isCreditsExhausted,
@@ -600,19 +602,13 @@ test("recordModelLockoutFailure uses provider profile cooldowns, backoff, and re
 });
 
 // Provider-level failure circuit breaker tests
-test("isProviderFailureCode correctly identifies provider-wide transient error codes", () => {
-  assert.equal(isProviderFailureCode(429), true);
-  assert.equal(isProviderFailureCode(408), true);
-  assert.equal(isProviderFailureCode(500), true);
-  assert.equal(isProviderFailureCode(502), true);
-  assert.equal(isProviderFailureCode(503), true);
-  assert.equal(isProviderFailureCode(504), true);
-  assert.equal(isProviderFailureCode(401), false);
-  assert.equal(isProviderFailureCode(403), false);
-  assert.equal(isProviderFailureCode(400), false);
-  assert.equal(isProviderFailureCode(404), false);
-  assert.equal(isProviderFailureCode(200), false);
-});
+// B-04 (#15159): the `isProviderFailureCode` case that used to live here was deleted
+// along with the dead export it pinned. It asserted `isProviderFailureCode(429) === true`,
+// which is the OPPOSITE of the breaker policy — 429 is per-connection cooldown / model
+// lockout scope and must never open the whole-provider breaker. The single source of
+// truth is `PROVIDER_BREAKER_FAILURE_STATUSES` in src/sse/handlers/chatPredicates.ts,
+// and `tests/unit/breaker-status-set-single-source-15159.test.ts` now guards both that
+// set and this file's local copy against drift. Do NOT restore a 429-inclusive set here.
 
 test("recordProviderFailure tracks failures and triggers cooldown after threshold", () => {
   const originalNow = Date.now;
@@ -676,12 +672,14 @@ test("recordProviderFailure honors runtime provider breaker profile", () => {
 
     recordProviderFailure(provider, undefined, "conn-runtime-profile", runtimeProfile);
 
-    const breaker = getCircuitBreaker(provider);
+    // #14530: a per-connection failure configures that connection's breaker.
+    const breakerName = connectionCircuitBreakerName(provider, "conn-runtime-profile");
+    const breaker = getCircuitBreaker(breakerName);
     assert.equal(breaker.failureThreshold, runtimeProfile.failureThreshold);
     assert.equal(breaker.resetTimeout, runtimeProfile.resetTimeoutMs);
-    assert.equal(isProviderInCooldown(provider), false);
+    assert.equal(isProviderInCooldown(provider, "conn-runtime-profile"), false);
 
-    const breakerAfterStatusCheck = getCircuitBreaker(provider);
+    const breakerAfterStatusCheck = getCircuitBreaker(breakerName);
     assert.equal(breakerAfterStatusCheck.failureThreshold, runtimeProfile.failureThreshold);
     assert.equal(breakerAfterStatusCheck.resetTimeout, runtimeProfile.resetTimeoutMs);
   } finally {
@@ -699,7 +697,10 @@ test("recordProviderFailure preserves provider breaker cooldown while open", () 
     const profile = { failureThreshold: 1, resetTimeoutMs: 60_000 };
     clearProviderFailure(provider);
 
-    recordProviderFailure(provider, undefined, "conn-open-cooldown", profile);
+    // #14530: only network/proxy failures reach the provider-wide breaker now.
+    recordProviderFailure(provider, undefined, "conn-open-cooldown", profile, {
+      isNetworkError: true,
+    });
     assert.equal(isProviderInCooldown(provider), true);
 
     const openedAt = getProviderBreakerState(provider)?.lastFailureTime;
@@ -708,7 +709,9 @@ test("recordProviderFailure preserves provider breaker cooldown while open", () 
     assert.equal(initialRemaining, 60_000);
 
     now += 10_000;
-    recordProviderFailure(provider, undefined, "conn-open-cooldown-later", profile);
+    recordProviderFailure(provider, undefined, "conn-open-cooldown-later", profile, {
+      isNetworkError: true,
+    });
 
     assert.equal(getProviderBreakerState(provider)?.lastFailureTime, openedAt);
     assert.equal(getProviderCooldownRemainingMs(provider), 50_000);
@@ -1196,6 +1199,16 @@ test("isCreditsExhausted returns true for actual credits-exhausted signals", () 
   );
 });
 
+test("isCreditsExhausted matches FriendliAI credit-exhaustion 403 body (#13040)", () => {
+  // FriendliAI returns HTTP 403 with body {"detail":"You've exhausted all your
+  // credits..."} when free tier credits are depleted via Adaptive Rate Limits.
+  // Before #13040 this fell through every quota/credits check to the generic
+  // 403 -> AUTH_ERROR fallback; the signal below routes it to QUOTA_EXHAUSTED.
+  assert.equal(isCreditsExhausted("You've exhausted all your credits"), true);
+  assert.equal(isCreditsExhausted('{"detail":"You\'ve exhausted all your credits"}'), true);
+  assert.equal(isCreditsExhausted("exhausted all your credits"), true);
+});
+
 test("CREDITS_EXHAUSTED_SIGNALS no longer contains generic gRPC resource-exhausted patterns", () => {
   // These patterns were removed because they falsely matched Gemini RPM 429 errors
   assert.equal(CREDITS_EXHAUSTED_SIGNALS.includes("resource has been exhausted"), false);
@@ -1617,8 +1630,12 @@ test("isAccountDeactivated matches a custom signal after setCustomBannedSignals"
 
 async function resetStorage10460() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR_10460, { recursive: true });
+  // The in-memory model-lock map outlives the DB reset, and an unpinned combo
+  // target now resolves locks across connections (#16551) — without this, a lock
+  // seeded by an earlier test in this block pre-empts the next test's dispatch.
+  clearAllModelLockouts();
 }
 
 async function seedConn10460(provider: string): Promise<string> {
@@ -1634,7 +1651,7 @@ async function seedConn10460(provider: string): Promise<string> {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR_10460, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("#10460: model-unsupported 400 returns shouldFallback:false (no account cooldown)", async () => {
@@ -2004,4 +2021,63 @@ test("#10460 acceptance: unambiguous model-unsupported 400 makes exactly ONE ups
       `untried account ${connId} must stay active`
     );
   }
+});
+
+const MOONSHOT_COMPAT = "openai-compatible-chat-e2971611-bc02-4c37-8fc5-39b8e3906fdf";
+const MOONSHOT_TPD =
+  "[429]: Your account org-x / proj-y <ak-z> request reached organization TPD rate limit, current: 1537190, limit: 1500000";
+const MOONSHOT_BROKE =
+  "[429]: Your account org-x <ak-z> is suspended due to insufficient balance, please recharge your account or check your plan and billing details";
+
+test("checkFallbackError: compatible Moonshot insufficient balance is creditsExhausted", () => {
+  const result = checkFallbackError(429, MOONSHOT_BROKE, 0, null, MOONSHOT_COMPAT);
+  assert.equal(result.creditsExhausted, true);
+  assert.equal(result.reason, RateLimitReason.QUOTA_EXHAUSTED);
+});
+
+test("checkFallbackError: compatible node empty wallet without billing-suspend phrasing is creditsExhausted", () => {
+  const result = checkFallbackError(
+    429,
+    "You have insufficient balance, please recharge your account",
+    0,
+    null,
+    MOONSHOT_COMPAT
+  );
+  assert.equal(result.creditsExhausted, true);
+  assert.equal(result.reason, RateLimitReason.QUOTA_EXHAUSTED);
+});
+
+test("isDailyQuotaExhausted detects organization TPD rate limit", () => {
+  const { isDailyQuotaExhausted } = accountFallback;
+  assert.equal(isDailyQuotaExhausted(MOONSHOT_TPD), true);
+  assert.equal(isDailyQuotaExhausted("The engine is currently overloaded"), false);
+});
+
+test("checkFallbackError: TPD with node clock uses that instant, not host midnight", () => {
+  const now = Date.parse("2026-09-02T07:30:00Z");
+  const result = checkFallbackError(
+    429,
+    MOONSHOT_TPD,
+    0,
+    null,
+    MOONSHOT_COMPAT,
+    null,
+    null,
+    null,
+    null,
+    {
+      timezone: "Asia/Shanghai",
+      hour: 0,
+      nowMs: now,
+    }
+  );
+  assert.equal(result.dailyQuotaExhausted, true);
+  assert.equal(result.cooldownMs, Date.parse("2026-09-02T16:00:00Z") - now);
+  assert.equal(result.reason, RateLimitReason.QUOTA_EXHAUSTED);
+});
+
+test("checkFallbackError: TPD without clock or header is NOT host-midnight lock", () => {
+  const result = checkFallbackError(429, MOONSHOT_TPD, 0, null, MOONSHOT_COMPAT);
+  assert.notEqual(result.dailyQuotaExhausted, true);
+  assert.ok(result.cooldownMs < 2 * 60 * 60 * 1000);
 });

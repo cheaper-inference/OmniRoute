@@ -23,7 +23,7 @@ after(() => {
   globalThis.fetch = originalFetch;
   if (originalHome === undefined) delete process.env.HOME;
   else process.env.HOME = originalHome;
-  fs.rmSync(testHome, { recursive: true, force: true });
+  fs.rmSync(testHome, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function runOpencode(binary: string, args: string[]) {

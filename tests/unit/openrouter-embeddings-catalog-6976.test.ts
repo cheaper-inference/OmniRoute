@@ -22,7 +22,7 @@ type ModelsResponseBody = { source: string; models: DiscoveredModel[] };
 async function resetStorage() {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -53,7 +53,7 @@ test.beforeEach(async () => {
 test.after(async () => {
   globalThis.fetch = originalFetch;
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("embeddingRegistry curated openrouter catalog carries the refreshed lineup with dimensions (#6976)", () => {
@@ -75,10 +75,7 @@ test("embeddingRegistry curated openrouter catalog carries the refreshed lineup 
     const dim = config!.models.find((m) => m.id === expected)?.dimensions;
     assert.equal(typeof dim, "number", `${expected} must carry a dimensions value`);
   }
-  assert.equal(
-    config!.models.find((m) => m.id === "google/gemini-embedding-2")?.dimensions,
-    3072
-  );
+  assert.equal(config!.models.find((m) => m.id === "google/gemini-embedding-2")?.dimensions, 3072);
   assert.equal(
     config!.models.find((m) => m.id === "google/gemini-embedding-2-preview")?.dimensions,
     3072

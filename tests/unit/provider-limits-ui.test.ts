@@ -7,6 +7,10 @@ const providerLimitUtils =
   await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/utils.tsx");
 const providerConstants = await import("../../src/shared/constants/providers.ts");
 const settingsSchemas = await import("../../src/shared/validation/settingsSchemas.ts");
+const resetCreditModal =
+  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/CodexResetCreditsModal.tsx");
+const resetCreditRedemption =
+  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/useCodexResetCreditRedemption.ts");
 
 type ParsedQuota = {
   name?: string;
@@ -37,6 +41,37 @@ test("paid individual tiers use non-gray badge variants", () => {
   assert.equal(providerLimitUtils.normalizePlanTier("Lite").label, "Lite");
   assert.notEqual(providerLimitUtils.normalizePlanTier("Lite").variant, "default");
   assert.equal(providerLimitUtils.normalizePlanTier("Free").variant, "default");
+});
+
+test("Codex Pro plan variants (prolite, pro, promax) normalize to Pro tier (#15161)", () => {
+  const prolite = providerLimitUtils.normalizePlanTier("prolite", "codex");
+  assert.equal(prolite.key, "pro");
+  assert.equal(prolite.label, "Pro Standard");
+  assert.equal(prolite.variant, "success");
+
+  const pro = providerLimitUtils.normalizePlanTier("pro", "codex");
+  assert.equal(pro.key, "pro");
+  assert.equal(pro.label, "Pro Extra");
+  assert.equal(pro.variant, "success");
+
+  const promax = providerLimitUtils.normalizePlanTier("promax", "codex");
+  assert.equal(promax.key, "pro");
+  assert.equal(promax.label, "Pro Max");
+  assert.equal(promax.variant, "success");
+});
+
+test("Codex Pro variants are scoped to Codex: other providers keep the generic Pro label (#15161)", () => {
+  for (const provider of ["github", "gemini", "minimax", undefined]) {
+    for (const plan of ["Pro", "pro", "PRO"]) {
+      const tier = providerLimitUtils.normalizePlanTier(plan, provider);
+      assert.equal(tier.key, "pro", `${provider}/${plan} key`);
+      assert.equal(tier.label, "Pro", `${provider}/${plan} label`);
+    }
+  }
+  assert.equal(providerLimitUtils.normalizePlanTier("Claude Pro", "claude").label, "Pro");
+  // Codex-only vocabulary does not leak into other providers either.
+  assert.notEqual(providerLimitUtils.normalizePlanTier("prolite", "github").label, "Pro Standard");
+  assert.notEqual(providerLimitUtils.normalizePlanTier("promax", "github").label, "Pro Max");
 });
 
 test("Codex workspacePlanType is used when live plan is missing or unknown", () => {
@@ -212,6 +247,69 @@ test("Codex banked reset credits parse as an integer reset-credit counter", () =
   assert.equal(resetCredits.creditCount, 2);
 });
 
+test("reset-credit modal uses provider-specific titles and confirmations", () => {
+  const tr = (_key: string, fallback: string) => fallback;
+  const upstreamTitle = { selectionToken: "card-1", title: "Bonus card" };
+
+  assert.equal(
+    resetCreditModal.getResetCreditWindowTitle("codex", upstreamTitle, tr),
+    "Bonus card"
+  );
+  assert.equal(
+    resetCreditModal.getResetCreditWindowTitle("glm", upstreamTitle, tr),
+    "5-hour window reset · Bonus card"
+  );
+  assert.equal(
+    resetCreditModal.getResetCreditWindowTitle("zai", { ...upstreamTitle, resetType: "WEEK" }, tr),
+    "Weekly window reset · Bonus card"
+  );
+  assert.match(
+    resetCreditModal.getResetCreditConfirmation("codex", undefined, tr),
+    /Codex usage windows/
+  );
+  assert.match(resetCreditModal.getResetCreditConfirmation("glm", "FIVE_HOUR", tr), /5-hour/);
+  assert.match(resetCreditModal.getResetCreditConfirmation("glm-cn", "WEEK", tr), /weekly/);
+});
+
+test("committed refresh fallback preserves usage windows and decrements only reset cards", () => {
+  const session = { name: "session", used: 50, total: 100 };
+  const entry = {
+    quotas: [
+      session,
+      {
+        name: "banked_reset_credits",
+        isResetCredits: true,
+        remaining: 2,
+        creditCount: 2,
+      },
+    ],
+    raw: { bankedResetCredits: 2, quotas: { session } },
+    plan: "pro",
+  };
+
+  const decremented = resetCreditRedemption.applyCommittedResetCreditFallback(entry);
+  assert.deepEqual(decremented.quotas, [
+    session,
+    {
+      name: "banked_reset_credits",
+      isResetCredits: true,
+      remaining: 1,
+      creditCount: 1,
+    },
+  ]);
+  assert.equal(decremented.raw.bankedResetCredits, 1);
+  assert.deepEqual(decremented.raw.quotas, entry.raw.quotas);
+  assert.equal(decremented.plan, "pro");
+
+  const exhausted = resetCreditRedemption.applyCommittedResetCreditFallback({
+    ...entry,
+    quotas: [{ isResetCredits: true, remaining: 1, creditCount: 1 }],
+    raw: { ...entry.raw, bankedResetCredits: 1 },
+  });
+  assert.deepEqual(exhausted.quotas, []);
+  assert.equal(exhausted.raw.bankedResetCredits, 0);
+});
+
 test("quota labels normalize session and weekly windows while preserving readable titles", () => {
   assert.equal(providerLimitUtils.formatQuotaLabel("session"), "Session");
   assert.equal(providerLimitUtils.formatQuotaLabel("session (5h)"), "Session");
@@ -227,6 +325,11 @@ test("MiniMax providers are exposed to the limits dashboard support list", () =>
   assert.ok(providerConstants.USAGE_SUPPORTED_PROVIDERS.includes("zai"));
   assert.ok(providerConstants.USAGE_SUPPORTED_PROVIDERS.includes("minimax"));
   assert.ok(providerConstants.USAGE_SUPPORTED_PROVIDERS.includes("minimax-cn"));
+});
+
+test("OpenRouter and Devin CLI are exposed to the limits dashboard support list", () => {
+  assert.ok(providerConstants.USAGE_SUPPORTED_PROVIDERS.includes("openrouter"));
+  assert.ok(providerConstants.USAGE_SUPPORTED_PROVIDERS.includes("devin-cli"));
 });
 
 test("MiniMax quota payloads use generic provider parsing and stale resets still refill", () => {
@@ -263,18 +366,75 @@ test("MiniMax quota payloads use generic provider parsing and stale resets still
   assert.equal(providerLimitUtils.formatQuotaLabel(parsed[1].name), "Weekly");
 });
 
-test("GLM quota rows are ordered by session, weekly, then monthly", () => {
-  const parsed = providerLimitUtils.parseQuotaData("glm", {
+test("GLM quota rows are ordered by session, weekly, monthly, then reset cards", () => {
+  for (const provider of ["glm", "glm-cn", "glmt", "zai"]) {
+    const parsed = providerLimitUtils.parseQuotaData(provider, {
+      bankedResetCredits: 2,
+      quotas: {
+        mcp_monthly: { used: 10, total: 100, remainingPercentage: 90 },
+        weekly: { used: 20, total: 100, remainingPercentage: 80 },
+        session: { used: 30, total: 100, remainingPercentage: 70 },
+      },
+    });
+
+    assert.deepEqual(
+      parsed.map((quota) => quota.name),
+      ["session", "weekly", "mcp_monthly", "banked_reset_credits"],
+      `${provider} should use GLM family parsing`
+    );
+    assert.equal(parsed[3].creditCount, 2);
+    assert.equal(parsed[3].isResetCredits, true);
+  }
+});
+
+test("OpenRouter credits render as a USD credit count, not a percentage row", () => {
+  const parsed = providerLimitUtils.parseQuotaData("openrouter", {
     quotas: {
-      mcp_monthly: { used: 10, total: 100, remainingPercentage: 90 },
-      weekly: { used: 20, total: 100, remainingPercentage: 80 },
-      session: { used: 30, total: 100, remainingPercentage: 70 },
+      free_daily: { used: 0, total: 50, remaining: 50, remainingPercentage: 100 },
+      free_rpm: { used: 0, total: 20, remaining: 20, remainingPercentage: 100 },
+      credits: {
+        used: 0,
+        total: 0,
+        remaining: 231.0973698130001,
+        remainingPercentage: 100,
+        unlimited: true,
+        currency: "USD",
+      },
+    },
+  });
+
+  const credits = parsed.find((quota) => quota.name === "credits");
+  assert.ok(credits, "credits row must survive parsing");
+  assert.equal(credits.isCredits, true, "dollar renderer requires isCredits");
+  assert.equal(credits.creditCount, 231.0973698130001);
+  assert.equal(credits.remaining, 231.0973698130001);
+  assert.equal(credits.currency, "USD");
+  assert.equal(providerLimitUtils.formatQuotaLabel(credits.name), "AI Credits");
+  // Free-tier windows keep the generic percentage treatment.
+  const freeDaily = parsed.find((quota) => quota.name === "free_daily");
+  assert.ok(freeDaily);
+  assert.notEqual(freeDaily.isCredits, true);
+  assert.equal(freeDaily.total, 50);
+});
+
+test("Antigravity live quota models retain upstream order instead of static catalog rank", () => {
+  const quotas = providerLimitUtils.parseQuotaData("antigravity", {
+    quotas: {
+      "gemini-3.9-flash-high": { used: 2, total: 100, remainingPercentage: 98 },
+      "gemini-3.8-flash-high": { used: 2, total: 100, remainingPercentage: 98 },
+      gemini_session: {
+        used: 2,
+        total: 100,
+        remainingPercentage: 98,
+        quotaAggregate: true,
+        quotaWindow: "session",
+      },
     },
   });
 
   assert.deepEqual(
-    parsed.map((quota) => quota.name),
-    ["session", "weekly", "mcp_monthly"]
+    quotas.map((quota) => quota.modelKey || quota.name),
+    ["gemini-3.9-flash-high", "gemini-3.8-flash-high", "gemini_session"]
   );
 });
 
@@ -344,9 +504,9 @@ test("usage namespace includes Provider Limits UI translation keys", () => {
 
   for (const key of [
     "statTotal",
-    "statCritical",
-    "statAlert",
-    "statHealthy",
+    "healthUnavailable",
+    "healthRestricted",
+    "healthAvailable",
     "filterPurchaseTypeLabel",
     "filterTierLabel",
     "purchaseAll",
@@ -376,6 +536,13 @@ test("usage namespace includes Provider Limits UI translation keys", () => {
     "confirmRedeemResetCreditButton",
     "resetCreditRedeemed",
     "resetCreditRedeemFailed",
+    "glmResetCreditsModalTitle",
+    "glmResetCreditsModalExplainer",
+    "glmResetCreditFiveHourTitle",
+    "glmResetCreditWeekTitle",
+    "glmConfirmRedeemResetCredit",
+    "glmConfirmRedeemFiveHourResetCredit",
+    "glmConfirmRedeemWeekResetCredit",
   ]) {
     assert.equal(typeof usage[key], "string", `usage.${key} should be defined in en.json`);
     assert.ok(!usage[key].startsWith("__MISSING__:"), `usage.${key} should not be a placeholder`);
@@ -389,4 +556,42 @@ test("provider quota auto-refresh settings are accepted by the settings schema",
   });
 
   assert.equal(result.success, true);
+});
+
+test("grok-cli banked reset credits parse as an integer reset-credit counter including zero", () => {
+  const parsed = providerLimitUtils.parseQuotaData("grok-cli", {
+    quotas: {
+      weekly: { used: 37.25, total: 100, remainingPercentage: 62.75, isPercentageOnly: true },
+    },
+    bankedResetCredits: 0,
+  }) as ParsedQuota[];
+  const resetCredits = parsed.find((quota) => quota.name === "banked_reset_credits");
+  assert.ok(resetCredits);
+  assert.equal(resetCredits.isResetCredits, true);
+  assert.equal(resetCredits.creditCount, 0);
+});
+
+test("grok-cli omits the reset-credit row when bankedResetCredits is absent", () => {
+  const parsed = providerLimitUtils.parseQuotaData("grok-cli", {
+    quotas: {
+      weekly: { used: 37.25, total: 100, remainingPercentage: 62.75 },
+    },
+  }) as ParsedQuota[];
+  assert.equal(
+    parsed.some((quota) => quota.name === "banked_reset_credits"),
+    false
+  );
+});
+
+test("grok-cli exposes the redeem button when banked reset credits are present", () => {
+  const parsed = providerLimitUtils.parseQuotaData("grok-cli", {
+    quotas: { weekly: { used: 0, total: 100, remainingPercentage: 100 } },
+    bankedResetCredits: 2,
+  });
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("grok-cli", parsed), true);
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("codex", parsed), true);
+  // Claude reset credits (banked usage grants + weekly session reset) redeem through the
+  // same picker as of #14728 — a genuinely unsupported provider stays the negative control.
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("claude", parsed), true);
+  assert.equal(providerLimitUtils.computeCanRedeemResetCredit("openai", parsed), false);
 });

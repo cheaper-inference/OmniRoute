@@ -12,7 +12,7 @@ const searchRoute = await import("../../src/app/api/v1/search/route.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 function makeRequest(body: unknown) {
@@ -49,10 +49,7 @@ test("#10849: short alias 'brave' resolves like existing 'jina' aliases (not an 
 });
 
 test("#10849: a genuinely bad field surfaces a non-generic, field-named 400 message", async () => {
-  const response = await searchRoute.POST(
-    makeRequest({ query: "test", search_type: "bogus" }),
-    {}
-  );
+  const response = await searchRoute.POST(makeRequest({ query: "test", search_type: "bogus" }), {});
   const body = (await response.json()) as ErrorBody;
 
   assert.equal(response.status, 400);

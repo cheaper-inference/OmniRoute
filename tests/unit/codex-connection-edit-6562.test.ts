@@ -46,7 +46,7 @@ const providerByIdRoute = await import("../../src/app/api/providers/[id]/route.t
 
 function resetDb() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -56,7 +56,7 @@ test.beforeEach(() => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 async function createCodexConnection(
@@ -148,13 +148,10 @@ test("PUT /api/providers/[id] persists a Codex OAuth edit when priority already 
     string,
     unknown
   >;
-  // `updateProviderConnection` renormalizes every same-provider connection's
-  // priority to a dense 1..N sequence whenever `priority` is part of the
-  // update (`_reorderConnections`, src/lib/db/providers.ts) — this is the
-  // connection's first successful edit, so it lands at rank 1 (only Codex
-  // connection in this test). The point of this assertion is that the save
-  // *persisted* at all instead of 400ing before ever reaching that step.
-  assert.equal(persisted.priority, 1);
+  // Saving an unrelated edit must preserve the priority already accepted by
+  // the edit schema, rather than silently collapsing this account to rank 1.
+  assert.equal(body.connection.priority, 142);
+  assert.equal(persisted.priority, 142);
   const persistedPsd = persisted.providerSpecificData as Record<string, unknown>;
   assert.deepEqual(persistedPsd.requestDefaults, { reasoningEffort: "high" });
 });

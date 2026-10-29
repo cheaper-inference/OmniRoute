@@ -1,4 +1,5 @@
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
+import type { VertexModelMetadataProvenance } from "@/lib/providerModels/vertexModelMetadata";
 
 import { asRecord, toNonEmptyString } from "./shared";
 
@@ -6,22 +7,41 @@ export interface SyncedAvailableModel {
   id: string;
   name: string;
   source: "imported";
+  /**
+   * Set on rows derived from the static registry (unionRegistryDispatchModels)
+   * rather than from provider discovery; absent on discovery-synced rows. Any
+   * future persist-back of catalog rows must never launder registry rows into
+   * the syncedAvailableModels snapshot.
+   */
+  catalogOrigin?: "registry";
+  /** Upstream picker visibility; does not restrict explicit inference requests. */
+  visibility?: "hide" | "list";
+  supportedInApi?: boolean;
+  minimalClientVersion?: string;
   apiFormat?: string;
   targetFormat?: string;
   upstreamProtocol?: string;
   supportedEndpoints?: string[];
+  endpointCapabilitySource?: "declared" | "inferred" | "defaulted" | "operator";
   supportedThinkingEfforts?: string[];
   defaultThinkingEffort?: string;
   inputTokenLimit?: number;
+  contextWindow?: number;
   outputTokenLimit?: number;
+  metadataProvenance?: VertexModelMetadataProvenance;
   description?: string;
   supportsThinking?: boolean;
   alwaysThinking?: boolean;
   supportsTools?: boolean;
   supportsVideo?: boolean;
+  /** Discovery economics verdict; false preserves explicit paid evidence. */
+  isFree?: boolean;
   // #4264: image-input capability captured at sync time (e.g. OpenRouter
   // `architecture.input_modalities`/`modality`) so the catalog can surface vision.
   supportsVision?: boolean;
+  dimensions?: number;
+  supportedInputTypes?: string[];
+  modelType?: "chat" | "embedding" | "image" | "rerank";
 }
 
 export type SyncedAvailableModelInput = Omit<SyncedAvailableModel, "source"> & {
@@ -53,16 +73,36 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
     id,
     name,
     source: "imported",
+    ...(record.visibility === "hide" || record.visibility === "list"
+      ? { visibility: record.visibility }
+      : {}),
+    ...(typeof record.supportedInApi === "boolean"
+      ? { supportedInApi: record.supportedInApi }
+      : {}),
+    ...(toNonEmptyString(record.minimalClientVersion)
+      ? { minimalClientVersion: toNonEmptyString(record.minimalClientVersion)! }
+      : {}),
     ...(toNonEmptyString(record.apiFormat)
       ? { apiFormat: toNonEmptyString(record.apiFormat)! }
       : {}),
     ...(toNonEmptyString(record.targetFormat)
       ? { targetFormat: toNonEmptyString(record.targetFormat)! }
       : {}),
+    // catalogOrigin is deliberately NOT copied from input records: the only
+    // source is unionRegistryDispatchRows, so the registry-vs-discovery
+    // marker cannot be forged through operator-supplied metadata.
     ...(toNonEmptyString(record.upstreamProtocol)
       ? { upstreamProtocol: toNonEmptyString(record.upstreamProtocol)! }
       : {}),
     ...(supportedEndpoints && supportedEndpoints.length > 0 ? { supportedEndpoints } : {}),
+    ...(["declared", "inferred", "defaulted", "operator"].includes(
+      String(record.endpointCapabilitySource)
+    )
+      ? {
+          endpointCapabilitySource:
+            record.endpointCapabilitySource as SyncedAvailableModel["endpointCapabilitySource"],
+        }
+      : {}),
     ...(Array.isArray(record.supportedThinkingEfforts)
       ? {
           supportedThinkingEfforts: record.supportedThinkingEfforts.filter(
@@ -76,8 +116,14 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
     ...(typeof record.inputTokenLimit === "number"
       ? { inputTokenLimit: record.inputTokenLimit }
       : {}),
+    ...(typeof record.contextWindow === "number" ? { contextWindow: record.contextWindow } : {}),
     ...(typeof record.outputTokenLimit === "number"
       ? { outputTokenLimit: record.outputTokenLimit }
+      : {}),
+    ...(record.metadataProvenance && typeof record.metadataProvenance === "object"
+      ? {
+          metadataProvenance: record.metadataProvenance as VertexModelMetadataProvenance,
+        }
       : {}),
     ...(typeof record.description === "string" ? { description: record.description } : {}),
     ...(typeof record.supportsThinking === "boolean"
@@ -86,7 +132,21 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
     ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
     ...(typeof record.supportsTools === "boolean" ? { supportsTools: record.supportsTools } : {}),
     ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
+    ...(typeof record.isFree === "boolean" ? { isFree: record.isFree } : {}),
     ...(record.supportsVision === true ? { supportsVision: true } : {}),
+    ...(typeof record.dimensions === "number" && record.dimensions > 0
+      ? { dimensions: record.dimensions }
+      : {}),
+    ...(Array.isArray(record.supportedInputTypes)
+      ? {
+          supportedInputTypes: record.supportedInputTypes.filter(
+            (t): t is string => typeof t === "string" && t.length > 0
+          ),
+        }
+      : {}),
+    ...(typeof record.modelType === "string"
+      ? { modelType: record.modelType as "chat" | "embedding" | "image" | "rerank" }
+      : {}),
   };
 }
 

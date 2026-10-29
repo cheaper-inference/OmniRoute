@@ -432,7 +432,7 @@ test("real FFmpeg evidence distinguishes a frozen dark segment from dense motion
     assert.equal(decision.timestamps.filter((timestamp) => timestamp < 6).length, 1);
     assert.equal(decision.timestamps.filter((timestamp) => timestamp > 6).length, 3);
   } finally {
-    await rm(directory, { force: true, recursive: true });
+    await rm(directory, { force: true, recursive: true, maxRetries: 5, retryDelay: 100 });
   }
 });
 
@@ -481,6 +481,6 @@ test("real FFmpeg abort stops preanalysis, skips frame extraction, and cleans th
     assert.notEqual(privateInputPath, "");
     await assert.rejects(() => access(privateInputPath));
   } finally {
-    await rm(directory, { force: true, recursive: true });
+    await rm(directory, { force: true, recursive: true, maxRetries: 5, retryDelay: 100 });
   }
 });

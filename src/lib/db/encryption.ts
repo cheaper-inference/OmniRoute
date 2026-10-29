@@ -48,6 +48,8 @@ export interface ConnectionFields {
   accessToken?: string | null;
   refreshToken?: string | null;
   idToken?: string | null;
+  providerSpecificData?: unknown;
+  credentialDecryptFailed?: boolean;
   [key: string]: unknown;
 }
 
@@ -76,6 +78,47 @@ function decryptFailureSignature(
 const RECOVERY_HINT =
   "Re-authenticate this account, or verify STORAGE_ENCRYPTION_KEY matches the key used to store it.";
 
+import fs from "fs";
+import path from "path";
+import os from "os";
+import { isTestContext, resolveDataDir } from "../dataPaths.ts";
+import { mapProviderSpecificDataSecrets } from "./providers/providerSpecificDataSecrets";
+
+function ensureSecretLoaded(): string | undefined {
+  if (isTestContext()) {
+    return process.env.STORAGE_ENCRYPTION_KEY;
+  }
+  if (process.env.STORAGE_ENCRYPTION_KEY) {
+    return process.env.STORAGE_ENCRYPTION_KEY;
+  }
+  const candidates = [
+    path.join(resolveDataDir(), ".env"),
+    path.join(process.cwd(), ".env"),
+    path.join(os.homedir(), ".hermes", ".env"),
+  ];
+  for (const envPath of candidates) {
+    try {
+      if (fs.existsSync(envPath)) {
+        const content = fs.readFileSync(envPath, "utf8");
+        for (const line of content.split("\n")) {
+          const trimmed = line.trim();
+          if (trimmed.startsWith("STORAGE_ENCRYPTION_KEY=")) {
+            const val = trimmed
+              .split("=", 2)[1]
+              ?.trim()
+              .replace(/^["'](.*)["']$/, "$1");
+            if (val) {
+              process.env.STORAGE_ENCRYPTION_KEY = val;
+              return val;
+            }
+          }
+        }
+      }
+    } catch {}
+  }
+  return undefined;
+}
+
 /**
  * Derive the PRIMARY encryption key using the static salt.
  * This is the canonical key derivation that all new encryptions use.
@@ -84,7 +127,7 @@ const RECOVERY_HINT =
 function getStaticKey(): Buffer | null {
   if (_staticKey !== null) return _staticKey;
 
-  const secret = process.env.STORAGE_ENCRYPTION_KEY;
+  const secret = ensureSecretLoaded();
   if (!secret || typeof secret !== "string" || secret.trim().length === 0) return null;
 
   try {
@@ -110,7 +153,7 @@ function getStaticKey(): Buffer | null {
 function getLegacyDynamicKey(): Buffer | null {
   if (_legacyDynamicKey !== null) return _legacyDynamicKey;
 
-  const secret = process.env.STORAGE_ENCRYPTION_KEY;
+  const secret = ensureSecretLoaded();
   if (!secret || typeof secret !== "string" || secret.trim().length === 0) return null;
 
   const dynamicSalt = createHash("sha256").update(secret).digest().slice(0, 16);
@@ -124,7 +167,42 @@ function getLegacyDynamicKey(): Buffer | null {
 
 /** Check if encryption is enabled. */
 export function isEncryptionEnabled(): boolean {
-  return !!process.env.STORAGE_ENCRYPTION_KEY;
+  return !!ensureSecretLoaded();
+}
+
+/**
+ * Loud production warning when STORAGE_ENCRYPTION_KEY is unset.
+ *
+ * Dev/test keep the plaintext passthrough. In production the same empty-key
+ * contract applies (`.env.example`: "Leave empty to disable DB encryption";
+ * `docs/reference/ENVIRONMENT.md`: "empty = disabled"). Exiting here would
+ * crash-loop Docker, which sets NODE_ENV=production and starts from that
+ * example env. The box is logged once at boot and the process keeps serving.
+ *
+ * Call once from `src/instrumentation-node.ts`, not from encrypt()/decrypt().
+ * `encryptionEnabled` is injectable so a test can reach this branch without
+ * reading the operator's `.env`.
+ */
+export function assertEncryptionKeyConfiguredForProduction(
+  env: NodeJS.ProcessEnv = process.env,
+  logger: Pick<Console, "error"> = console,
+  encryptionEnabled: () => boolean = isEncryptionEnabled
+): void {
+  if (isTestContext()) return;
+  if (env.NODE_ENV !== "production") return;
+  if (encryptionEnabled()) return;
+
+  logger.error("");
+  logger.error("═══════════════════════════════════════════════════");
+  logger.error("  ⚠  STARTUP: STORAGE_ENCRYPTION_KEY is not set");
+  logger.error("═══════════════════════════════════════════════════");
+  logger.error("  • Credential encryption is disabled. Provider credentials (API keys,");
+  logger.error("    OAuth tokens) will be stored in plaintext. An empty key is the");
+  logger.error("    documented default, so startup continues.");
+  logger.error("    → Generate a key with: openssl rand -base64 32");
+  logger.error("    → Set STORAGE_ENCRYPTION_KEY and restart to encrypt credentials at rest.");
+  logger.error("═══════════════════════════════════════════════════");
+  logger.error("");
 }
 
 /**
@@ -252,6 +330,36 @@ export function decrypt(
 }
 
 /**
+ * #11500 — decrypt() wrapper for callers outside decryptConnectionFields()
+ * (the lazy-decrypt views in providers/lazyConnectionView.ts, which call
+ * decrypt() directly on every fresh getProviderConnections() cycle). A
+ * fresh Proxy wraps a fresh row object each cycle, so per-proxy memoization
+ * never survives across cycles — without this wrapper the raw
+ * "[Encryption] Decryption failed..." line re-fires every single cycle for
+ * the same corrupt/stale-key credential. Shares the loggedDecryptFailures
+ * Set with decryptConnectionFields() so a credential already flagged via one
+ * path does not re-log via the other, and logs the SAME raw message
+ * decrypt() would emit (unlike decryptConnectionFields()'s enriched
+ * message) — just deduped to once per (provider + connection + field +
+ * ciphertext) instead of once per cycle.
+ */
+export function decryptQuiet(
+  ciphertext: string | null | undefined,
+  meta: { connectionId: string; provider: string; field: string }
+): string | null | undefined {
+  if (!looksEncrypted(ciphertext)) {
+    return decrypt(ciphertext);
+  }
+  const signature = `${meta.provider}::${meta.connectionId}::${meta.field}:${ciphertext}`;
+  const alreadyLogged = loggedDecryptFailures.has(signature);
+  const result = decrypt(ciphertext, { quiet: alreadyLogged });
+  if (result === null && !alreadyLogged) {
+    loggedDecryptFailures.add(signature);
+  }
+  return result;
+}
+
+/**
  * Encrypt sensitive fields in a connection object (mutates in-place).
  * After decryption that required legacy key, re-encrypt with static key
  * to migrate tokens automatically.
@@ -264,6 +372,12 @@ export function encryptConnectionFields<T extends ConnectionFields | null | unde
   if (conn.accessToken) conn.accessToken = encrypt(conn.accessToken);
   if (conn.refreshToken) conn.refreshToken = encrypt(conn.refreshToken);
   if (conn.idToken) conn.idToken = encrypt(conn.idToken);
+  if (conn.providerSpecificData) {
+    conn.providerSpecificData = mapProviderSpecificDataSecrets(
+      conn.providerSpecificData,
+      (value) => encrypt(value)
+    );
+  }
   return conn;
 }
 
@@ -284,6 +398,17 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
   const accessToken = decrypt(row.accessToken, { quiet: true });
   const refreshToken = decrypt(row.refreshToken, { quiet: true });
   const idToken = decrypt(row.idToken, { quiet: true });
+  const failedNested: Array<{ field: string; value: unknown }> = [];
+  const providerSpecificData = mapProviderSpecificDataSecrets(
+    row.providerSpecificData,
+    (value, field) => {
+      const plaintext = decrypt(value, { quiet: true });
+      if (looksEncrypted(value) && plaintext === null) {
+        failedNested.push({ field: `providerSpecificData.${field}`, value });
+      }
+      return plaintext;
+    }
+  );
 
   // #6148 — a stored credential that is still encrypted (`enc:v1:…`) but
   // decrypts to null means the STORAGE_ENCRYPTION_KEY changed or was unset.
@@ -293,16 +418,20 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
     (looksEncrypted(row.apiKey) && apiKey === null) ||
     (looksEncrypted(row.accessToken) && accessToken === null) ||
     (looksEncrypted(row.refreshToken) && refreshToken === null) ||
-    (looksEncrypted(row.idToken) && idToken === null);
+    (looksEncrypted(row.idToken) && idToken === null) ||
+    failedNested.length > 0;
 
   if (credentialDecryptFailed) {
     const failed: Array<{ field: string; value: unknown }> = [];
-    if (looksEncrypted(row.apiKey) && apiKey === null) failed.push({ field: "apiKey", value: row.apiKey });
+    if (looksEncrypted(row.apiKey) && apiKey === null)
+      failed.push({ field: "apiKey", value: row.apiKey });
     if (looksEncrypted(row.accessToken) && accessToken === null)
       failed.push({ field: "accessToken", value: row.accessToken });
     if (looksEncrypted(row.refreshToken) && refreshToken === null)
       failed.push({ field: "refreshToken", value: row.refreshToken });
-    if (looksEncrypted(row.idToken) && idToken === null) failed.push({ field: "idToken", value: row.idToken });
+    if (looksEncrypted(row.idToken) && idToken === null)
+      failed.push({ field: "idToken", value: row.idToken });
+    failed.push(...failedNested);
 
     const connectionId = typeof row.id === "string" ? row.id : "";
     const provider = typeof row.provider === "string" ? row.provider : "unknown";
@@ -326,6 +455,7 @@ export function decryptConnectionFields<T extends ConnectionFields | null | unde
     accessToken,
     refreshToken,
     idToken,
+    ...(row.providerSpecificData !== undefined ? { providerSpecificData } : {}),
     ...(credentialDecryptFailed ? { credentialDecryptFailed: true } : {}),
   };
 }

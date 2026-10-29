@@ -51,6 +51,11 @@ export async function validateScoreChange(
   _action: string,
   amount: number
 ): Promise<ScoreValidation> {
+  // A non-finite or negative amount would slip past (or offset) the window total.
+  if (!Number.isFinite(amount) || amount < 0) {
+    return { allowed: false, reason: "Invalid XP amount" };
+  }
+
   // Rate limiting: max XP per window
   const recentXp = await getRecentXp(apiKeyId, RATE_LIMIT_WINDOW_MS);
   if (recentXp + amount > MAX_XP_PER_WINDOW) {
@@ -140,13 +145,17 @@ async function computeZScore(apiKeyId: string): Promise<number | null> {
  */
 async function getRecentXp(apiKeyId: string, windowMs: number): Promise<number> {
   const d = db();
-  const since = new Date(Date.now() - windowMs).toISOString();
+  // xp_audit_log.created_at is written by the table default datetime('now') as
+  // "YYYY-MM-DD HH:MM:SS", and TEXT compares are lexical. Computing the window start in
+  // SQLite keeps both sides in the same format (an ISO "T…Z" string from JS never matched
+  // same-day rows, so the window read as empty).
+  const windowStart = `-${Math.ceil(windowMs / 1000)} seconds`;
 
   const row = d
     .prepare(
-      "SELECT COALESCE(SUM(xp_earned), 0) AS total FROM xp_audit_log WHERE api_key_id = ? AND created_at > ?"
+      "SELECT COALESCE(SUM(xp_earned), 0) AS total FROM xp_audit_log WHERE api_key_id = ? AND created_at > datetime('now', ?)"
     )
-    .get(apiKeyId, since) as { total: number };
+    .get(apiKeyId, windowStart) as { total: number };
 
   return row.total;
 }

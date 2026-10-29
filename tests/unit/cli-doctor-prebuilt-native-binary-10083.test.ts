@@ -31,8 +31,8 @@ async function withTempRoot(fn: (rootDir: string) => Promise<void>) {
   try {
     await fn(rootDir);
   } finally {
-    fs.rmSync(dataDir, { recursive: true, force: true });
-    fs.rmSync(rootDir, { recursive: true, force: true });
+    fs.rmSync(dataDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    fs.rmSync(rootDir, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
     if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
     else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
   }

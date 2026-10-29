@@ -1,4 +1,13 @@
+import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
+import {
+  getDiscoveryStatesForConnections,
+  type DiscoveryStateEntry,
+  type DiscoveryStateRecord,
+} from "@/lib/db/discoveryState";
 import { NextResponse } from "next/server";
+import { getSettings } from "@/lib/db/settings";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import { isConnectionAutoProtected } from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 export const dynamic = "force-dynamic";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import {
@@ -7,6 +16,7 @@ import {
 } from "@/lib/compliance/providerAudit";
 import {
   getProviderConnections,
+  getProviderConnectionById,
   getProviderConnectionsCount,
   createProviderConnection,
   deleteProviderConnections,
@@ -18,6 +28,8 @@ import {
   isClaudeCodeCompatibleProvider,
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
+  providerAllowsOptionalApiKey,
+  NOAUTH_PROVIDERS,
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
@@ -30,9 +42,14 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { normalizeQoderPatProviderData } from "@omniroute/open-sse/services/qoderCli";
 import { projectCodexAccountPool } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import {
+  CODEX_SPARK_QUOTA_SESSION,
+  CODEX_SPARK_QUOTA_WEEKLY,
+} from "@omniroute/open-sse/config/codexQuotaScopes.ts";
+import {
   normalizeProviderSpecificData,
   sanitizeProviderSpecificDataForResponse,
 } from "@/lib/providers/requestDefaults";
+import { getQuotaWindowObservation } from "@/domain/quotaCache";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isManagedProviderConnectionId } from "@/lib/providers/catalog";
 import { isApiKeyRevealEnabled, maskStoredApiKey } from "@/lib/apiKeyExposure";
@@ -42,7 +59,69 @@ import {
   fetchModelSyncInternal,
   getModelSyncInternalBaseUrl,
 } from "@/shared/services/modelSyncScheduler";
-import { finalizeValidatedChatGptWebCodexSecrets } from "@omniroute/open-sse/services/chatgptWebCodexAdmin.ts";
+// Dynamically imported below, inside the one `provider === "chatgpt-web-codex"`
+// branch that needs it: this module's transitive chain pulls in tiktoken's
+// WASM tokenizer, which Turbopack dev mode fails to resolve for this graph
+// even with `tiktoken` listed in serverExternalPackages (the standalone
+// Node require works fine; only Turbopack's bundling of this import path
+// doesn't). A static top-level import evaluates that whole chain on EVERY
+// /api/providers request regardless of provider, turning an unrelated-
+// provider bug into a route-wide 500. Loading it lazily, only when actually
+// needed, avoids paying that cost (and that risk) on the common path.
+import { isAutoFetchModelsEnabled } from "@/lib/providerModels/modelDiscovery";
+import { testSingleConnection } from "./[id]/test/route";
+import { rejectRetiredCommonChatGptWebProvider } from "@/lib/providers/chatgptWebRetirementResponse";
+import {
+  chatGptWebStorageStateFromCookieHeader,
+  normalizeChatGptWebStorageState,
+} from "@omniroute/open-sse/utils/chatgptWebExecutorAdapter.ts";
+import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
+import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
+import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+
+function projectCodexAccountPoolWithRoutingQuota(
+  connection: Parameters<typeof projectCodexAccountPool>[0],
+  now: number,
+  cachedUsage?: Parameters<typeof projectCodexAccountPool>[2]
+) {
+  const projection = projectCodexAccountPool(connection, now, cachedUsage);
+  const children = projection.children.map((child) => {
+    const fiveHourWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_SESSION : "session";
+    const weeklyWindow = child.key.scope === "spark" ? CODEX_SPARK_QUOTA_WEEKLY : "weekly";
+    const fiveHour = getQuotaWindowObservation(connection.id, fiveHourWindow);
+    const weekly = getQuotaWindowObservation(connection.id, weeklyWindow);
+    if (!fiveHour && !weekly) return child;
+
+    return {
+      ...child,
+      quota: {
+        ...child.quota,
+        observedAt: fiveHour?.observedAt ?? weekly?.observedAt ?? null,
+        windows: {
+          "5h": fiveHour
+            ? {
+                usage: null,
+                limit: null,
+                resetAt: fiveHour.resetAt,
+                usedPercentage: fiveHour.usedPercentage,
+              }
+            : child.quota.windows["5h"],
+          "7d": weekly
+            ? {
+                usage: null,
+                limit: null,
+                resetAt: weekly.resetAt,
+                usedPercentage: weekly.usedPercentage,
+              }
+            : child.quota.windows["7d"],
+        },
+      },
+    };
+  }) as typeof projection.children;
+
+  return { ...projection, children };
+}
 
 // GET /api/providers - List all connections
 export async function GET(request: Request) {
@@ -66,10 +145,28 @@ export async function GET(request: Request) {
     const total = getProviderConnectionsCount(filter);
     const revealKeys = isApiKeyRevealEnabled();
 
+    const quotaCache = connections.some((c) => c.provider === "codex")
+      ? getAllProviderLimitsCache()
+      : {};
+
     // Hide or mask sensitive fields
+    const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
+    // The outcome of the last model discovery of each connection. A read
+    // failure must not break the connection list: an unknown outcome simply
+    // reads as "unknown".
+    let discoveryStates = new Map<string, DiscoveryStateRecord>();
+    try {
+      const discoveryEntries: DiscoveryStateEntry[] = connections.map((c) => ({
+        provider: String(c.provider ?? ""),
+        id: String(c.id ?? ""),
+      }));
+      discoveryStates = getDiscoveryStatesForConnections(discoveryEntries);
+    } catch (error) {
+      console.error("Failed to read the stored discovery outcomes:", error);
+    }
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
-        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData)
+        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
       return {
         ...c,
@@ -78,15 +175,34 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        // #16940: the row mapper drops null columns; keep "never synced" an
+        // explicit null so the dashboard contract does not depend on absence.
+        syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        // Same contract for the discovery outcome: absent means "unknown",
+        // never "healthy".
+        discoveryState:
+          discoveryStates.get(`${String(c.provider ?? "")}:${String(c.id ?? "")}`) ?? null,
+        rateLimitAutoProtected: isConnectionAutoProtected(
+          {
+            provider: String(c.provider),
+            isActive: c.isActive === true,
+            rateLimitProtection: c.rateLimitProtection === true,
+          },
+          requestQueueSettings
+        ),
         ...(c.provider === "codex"
           ? {
-              codexAccountPool: projectCodexAccountPool(
+              codexAccountPool: projectCodexAccountPoolWithRoutingQuota(
                 {
-                  id: c.id,
+                  id: String(c.id),
                   provider: c.provider,
-                  providerSpecificData: c.providerSpecificData ?? {},
+                  providerSpecificData:
+                    c.providerSpecificData && typeof c.providerSpecificData === "object"
+                      ? (c.providerSpecificData as Readonly<Record<string, unknown>>)
+                      : {},
                 },
-                Date.now()
+                Date.now(),
+                quotaCache[String(c.id)]
               ),
             }
           : {}),
@@ -124,14 +240,39 @@ export async function POST(request: Request) {
       defaultModel,
       testStatus,
       providerSpecificData: incomingPsd,
+      allowNoCredential,
     } = validation.data;
     const provider = resolveProviderId(requestedProvider);
+    if (provider === "cloudflare-ai" && Object.hasOwn(body, "accountId")) {
+      return NextResponse.json(
+        {
+          error: sanitizeErrorMessage(
+            "Use providerSpecificData.accountId instead of top-level accountId"
+          ),
+        },
+        { status: 400 }
+      );
+    }
+    const retirementResponse =
+      rejectRetiredCommonChatGptWebProvider(requestedProvider) ??
+      rejectRetiredCommonChatGptWebProvider(provider);
+    if (retirementResponse) return retirementResponse;
+    if (allowNoCredential === true && !providerAllowsOptionalApiKey(provider)) {
+      return NextResponse.json(
+        { error: "This provider does not allow a connection without a credential" },
+        { status: 400 }
+      );
+    }
 
-    // Business validation
+    // Business validation. Own-property only: `in` is also true for Object.prototype
+    // keys ("toString", "constructor"), which are not catalogued providers.
+    const isNoAuthProvider =
+      typeof provider === "string" && Object.hasOwn(NOAUTH_PROVIDERS, provider);
     const isValidProvider =
       isManagedProviderConnectionId(provider) ||
       isOpenAICompatibleProvider(provider) ||
-      isAnthropicCompatibleProvider(provider);
+      isAnthropicCompatibleProvider(provider) ||
+      isNoAuthProvider;
 
     if (!isValidProvider) {
       return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
@@ -144,12 +285,35 @@ export async function POST(request: Request) {
       providerSpecificData = normalizeQoderPatProviderData(providerSpecificData || {});
     }
 
+    if (provider === "chatgpt-web" && typeof apiKey === "string") {
+      try {
+        persistedApiKey = JSON.stringify(normalizeChatGptWebStorageState(JSON.parse(apiKey)));
+      } catch (error) {
+        if (!(error instanceof SyntaxError)) {
+          return NextResponse.json(
+            { error: "ChatGPT Web storage state JSON is invalid or contains foreign origins" },
+            { status: 400 }
+          );
+        }
+        try {
+          persistedApiKey = JSON.stringify(chatGptWebStorageStateFromCookieHeader(apiKey));
+        } catch {
+          return NextResponse.json(
+            { error: "ChatGPT Web storage state JSON or Cookie header is invalid" },
+            { status: 400 }
+          );
+        }
+      }
+    }
+
     if (provider === "chatgpt-web-codex") {
       const validationId =
         providerSpecificData && typeof providerSpecificData.validationId === "string"
           ? providerSpecificData.validationId
           : "";
       try {
+        const { finalizeValidatedChatGptWebCodexSecrets } =
+          await import("@omniroute/open-sse/services/chatgptWebCodexAdmin.ts");
         const finalized = finalizeValidatedChatGptWebCodexSecrets(apiKey || "", validationId);
         persistedApiKey = finalized.encodedCredential;
         providerSpecificData = { ...(providerSpecificData || {}) };
@@ -175,16 +339,11 @@ export async function POST(request: Request) {
 
       // Allow multiple connections for compatible nodes exactly like first-party providers
 
-      providerSpecificData = {
-        ...(providerSpecificData || {}),
-        prefix: node.prefix,
-        apiType: node.apiType,
-        baseUrl: node.baseUrl,
-        nodeName: node.name,
-        ...(node.chatPath ? { chatPath: node.chatPath } : {}),
-        ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
-        ...(node.customHeaders ? { customHeaders: node.customHeaders } : {}),
-      };
+      const hydrated = hydrateCompatibleNodeCreation(provider, node, providerSpecificData, true);
+      if (hydrated.error) {
+        return NextResponse.json({ error: sanitizeErrorMessage(hydrated.error) }, { status: 400 });
+      }
+      providerSpecificData = hydrated.data;
     } else if (isAnthropicCompatibleProvider(provider)) {
       const node: any = await resolveProviderNodeForConnection(provider);
       if (!node) {
@@ -200,15 +359,11 @@ export async function POST(request: Request) {
 
       // Allow multiple connections for compatible nodes exactly like first-party providers
 
-      providerSpecificData = {
-        ...(providerSpecificData || {}),
-        prefix: node.prefix,
-        baseUrl: node.baseUrl,
-        nodeName: node.name,
-        ...(node.chatPath ? { chatPath: node.chatPath } : {}),
-        ...(node.modelsPath ? { modelsPath: node.modelsPath } : {}),
-        ...(node.customHeaders ? { customHeaders: node.customHeaders } : {}),
-      };
+      const hydrated = hydrateCompatibleNodeCreation(provider, node, providerSpecificData, false);
+      if (hydrated.error) {
+        return NextResponse.json({ error: sanitizeErrorMessage(hydrated.error) }, { status: 400 });
+      }
+      providerSpecificData = hydrated.data;
     }
 
     providerSpecificData = normalizeProviderSpecificData(provider, providerSpecificData) || null;
@@ -222,55 +377,94 @@ export async function POST(request: Request) {
       globalPriority: globalPriority || null,
       defaultModel: defaultModel || null,
       providerSpecificData,
-      isActive: true,
+      // Start inactive: a connection is only advertised via /v1/models (which
+      // filters on isActive) once a connection test has actually confirmed it
+      // works. The auto-test fired below flips this to true on success (or on
+      // an "unsupported" test, which cannot be verified either way and keeps
+      // the historical trust-it default) — see testSingleConnection in
+      // ./[id]/test/route.ts. A connection that fails its test, or is never
+      // tested because auto-test itself errors, simply stays hidden until the
+      // operator fixes the credential and re-tests it manually.
+      isActive: false,
       testStatus: testStatus || "unknown",
     });
 
-    // Auto-trigger model discovery for the newly created connection.
+    // Auto-trigger model discovery only for an explicit autoFetchModels opt-in.
     // Fire-and-forget: model sync can take seconds and should NOT block the
     // POST response. If it fails, we log and move on — the connection itself
     // is already persisted and the user can manually trigger a sync later.
     // We use a self-fetch against our own /sync-models route, forwarding the
     // incoming cookies (preserves management auth) plus the internal sync
     // auth header (defense in depth) and an X-Internal-Auto-Sync marker for
-    // log correlation.
-    try {
-      // SECURITY: use the trusted loopback/env-pinned origin, NOT
-      // `new URL(request.url).origin` — the latter comes from the client-
-      // controlled Host header, which would let a caller redirect this
-      // credential-bearing internal self-fetch to an arbitrary host
-      // (SSRF + internal-auth-header exfiltration; CodeQL js/request-forgery).
-      const internalOrigin = getModelSyncInternalBaseUrl();
-      const cookieHeader = request.headers.get("cookie") || "";
-      const syncHeaders: Record<string, string> = {
-        "Content-Type": "application/json",
-        "X-Internal-Auto-Sync": "true",
-        ...(cookieHeader ? { cookie: cookieHeader } : {}),
-        ...buildModelSyncInternalHeaders(),
-      };
-      const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnection.id)}/sync-models?mode=import`;
-      // Intentionally not awaited: this is async/non-blocking work.
-      void fetchModelSyncInternal(syncUrl, {
-        method: "POST",
-        headers: syncHeaders,
-        redirect: "error",
-      })
-        .then((syncRes) => {
-          if (!syncRes.ok) {
-            console.log(`[providers] Auto-sync failed for ${newConnection.id}: ${syncRes.status}`);
-          }
+    // log correlation. The dashboard skips this server-owned copy when it
+    // performs the same sync itself so it can render progress.
+    if (
+      isAutoFetchModelsEnabled(providerSpecificData) &&
+      request.headers.get("x-skip-model-sync") !== "true"
+    ) {
+      try {
+        // SECURITY: use the trusted loopback/env-pinned origin, NOT
+        // `new URL(request.url).origin` — the latter comes from the client-
+        // controlled Host header, which would let a caller redirect this
+        // credential-bearing internal self-fetch to an arbitrary host
+        // (SSRF + internal-auth-header exfiltration; CodeQL js/request-forgery).
+        const internalOrigin = getModelSyncInternalBaseUrl();
+        const cookieHeader = request.headers.get("cookie") || "";
+        const syncHeaders: Record<string, string> = {
+          "Content-Type": "application/json",
+          "X-Internal-Auto-Sync": "true",
+          ...(cookieHeader ? { cookie: cookieHeader } : {}),
+          ...buildModelSyncInternalHeaders(),
+        };
+        const syncUrl = `${internalOrigin}/api/providers/${encodeURIComponent(newConnection.id)}/sync-models?mode=import`;
+        // Intentionally not awaited: this is async/non-blocking work.
+        void fetchModelSyncInternal(syncUrl, {
+          method: "POST",
+          headers: syncHeaders,
+          redirect: "error",
         })
-        .catch((err) => {
-          console.log(`[providers] Auto-sync error for ${newConnection.id}:`, err?.message || err);
-        });
-    } catch (syncSetupError) {
-      // Defensive: if URL parsing or header construction itself throws, do
-      // not let it break the (already successful) POST response.
-      console.log(
-        `[providers] Auto-sync setup failed for ${newConnection.id}:`,
-        syncSetupError?.message || syncSetupError
-      );
+          .then((syncRes) => {
+            if (!syncRes.ok) {
+              console.log(
+                `[providers] Auto-sync failed for ${newConnection.id}: ${syncRes.status}`
+              );
+            }
+          })
+          .catch((err) => {
+            console.log(
+              `[providers] Auto-sync error for ${newConnection.id}:`,
+              err?.message || err
+            );
+          });
+      } catch (syncSetupError) {
+        // Defensive: if URL parsing or header construction itself throws, do
+        // not let it break the (already successful) POST response.
+        console.log(
+          `[providers] Auto-sync setup failed for ${newConnection.id}:`,
+          syncSetupError?.message || syncSetupError
+        );
+      }
     }
+
+    // Auto-test the newly created connection so `testStatus` reflects reality
+    // shortly after creation instead of sitting at "unknown" until the
+    // operator manually clicks "Test" in the dashboard. Fire-and-forget for
+    // the same reason as the auto-sync above: the probe can take a few
+    // seconds (OAuth refresh, upstream round-trip) and must not block the
+    // 201 response. testSingleConnection() persists testStatus/lastError/etc.
+    // itself, so nothing further is needed here beyond logging failures.
+    // GHSA-jmq6-8j86-8xqj: the local CLI probe spawns on the host — only for local callers.
+    // S-01 (#15159): allowLocalSpawn covers the devin cloud-agent validator's CLI
+    // fallback, which also spawns. Same gate, same reason.
+    void testSingleConnection(newConnection.id, undefined, {
+      allowLocalRuntimeProbe: getRequestPeerLocality(request) !== "remote",
+      allowLocalSpawn: getRequestPeerLocality(request) !== "remote",
+    }).catch((testError: unknown) => {
+      console.log(
+        `[providers] Auto-test failed for ${newConnection.id}:`,
+        (testError as { message?: string })?.message || testError
+      );
+    });
 
     // Note: Gemini model sync is now triggered client-side with progress dialog
 
@@ -343,11 +537,33 @@ export async function PATCH(request: Request) {
   const { ids, isActive } = validation.data;
 
   try {
+    if (isActive) {
+      const requestedIds = new Set(ids);
+      const requestedConnections = (
+        await getProviderConnections({}, undefined, undefined, ["id", "provider"])
+      ).filter((connection) => requestedIds.has(connection.id));
+      for (const connection of requestedConnections) {
+        const retirementResponse = rejectRetiredCommonChatGptWebProvider(connection.provider);
+        if (retirementResponse) return retirementResponse;
+      }
+    }
+
     // Partial-failure semantics: report unknown IDs instead of failing the whole batch
     const updatedIds: string[] = [];
     const notFoundIds: string[] = [];
     for (const id of ids) {
-      const updated = await updateProviderConnection(id, { isActive });
+      // Record the operator's on/off intent next to isActive, so the connection
+      // test does not re-enable a connection that was switched off on purpose.
+      const existing = (await getProviderConnectionById(id)) as Record<string, unknown> | null;
+      const updated = existing
+        ? await updateProviderConnection(id, {
+            isActive,
+            providerSpecificData: applyOperatorActivationIntent(
+              existing.providerSpecificData,
+              isActive
+            ),
+          })
+        : null;
       if (updated) updatedIds.push(id);
       else notFoundIds.push(id);
     }
@@ -393,7 +609,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.ids) || body.ids.length === 0) {
     return NextResponse.json(
       { error: "ids must be a non-empty array of connection IDs" },
       { status: 400 }
@@ -410,7 +626,10 @@ export async function DELETE(request: Request) {
   try {
     const requestedIds = new Set(body.ids);
     const deletedConnections = (
-      await getProviderConnections({}, undefined, undefined, ["id", "provider"])
+      (await getProviderConnections({}, undefined, undefined, ["id", "provider"])) as Array<{
+        id: string;
+        provider: string;
+      }>
     ).filter((connection) => requestedIds.has(connection.id));
     const deleted = await deleteProviderConnections(body.ids);
 

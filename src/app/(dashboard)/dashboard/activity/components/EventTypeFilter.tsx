@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import FilterPills from "@/shared/components/FilterPills";
 
 export type EventCategory =
   "all" | "providers" | "combos" | "apikeys" | "settings" | "quota" | "auth" | "system";
@@ -53,23 +54,11 @@ export default function EventTypeFilter({ value, onChange }: EventTypeFilterProp
   };
 
   return (
-    <div className="flex flex-wrap gap-2" role="group" aria-label={t("filterAria")}>
-      {CATEGORIES.map((cat) => (
-        <button
-          key={cat}
-          type="button"
-          onClick={() => onChange(cat)}
-          aria-pressed={value === cat}
-          className={[
-            "px-3 py-1 rounded-full text-xs font-medium border transition-colors",
-            value === cat
-              ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)]"
-              : "bg-[var(--color-surface)] text-[var(--color-text-muted)] border-[var(--color-border)] hover:bg-[var(--color-bg-alt)]",
-          ].join(" ")}
-        >
-          {t(labelKey[cat])}
-        </button>
-      ))}
-    </div>
+    <FilterPills
+      aria-label={t("filterAria")}
+      options={CATEGORIES.map((cat) => ({ value: cat, label: t(labelKey[cat]) }))}
+      value={value}
+      onChange={(next) => onChange(next as EventCategory)}
+    />
   );
 }

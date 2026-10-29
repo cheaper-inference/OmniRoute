@@ -32,7 +32,7 @@ const mappingsDb = await import("../../../src/lib/db/modelComboMappings.ts");
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
@@ -42,7 +42,7 @@ test.beforeEach(async () => {
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 async function createCombo(name, models, overrides = {}) {
@@ -142,6 +142,11 @@ test("decision: combo with all vision-capable targets returns 'skip'", async () 
     { provider: "anthropic", model: "anthropic/claude-sonnet-4-20250514" },
   ]);
   assert.equal(await getComboVisionBridgeDecision("vision-combo"), "skip");
+});
+
+test("decision: explicit combo/ prefix resolves the stored bare combo name", async () => {
+  await createCombo("prefixed-vision-combo", [{ provider: "openai", model: VISION_MODEL }]);
+  assert.equal(await getComboVisionBridgeDecision("combo/prefixed-vision-combo"), "skip");
 });
 
 test("decision: mixed combo (some vision, some not) returns 'process'", async () => {
@@ -273,7 +278,7 @@ test("preCall: all-vision combo still skips the bridge entirely", async () => {
   assert.equal(visionCallCount, 0);
 });
 
-test("preCall: mixed combo keeps the describe path (no reroute, model unchanged)", async () => {
+test("preCall: mixed combo keeps raw images for dispatch to filter (no reroute, model unchanged) (#18008)", async () => {
   resetGuardrailsForTests({ registerDefaults: false });
   await createCombo("mixed-combo", [
     { provider: "openai", model: VISION_MODEL },
@@ -284,9 +289,9 @@ test("preCall: mixed combo keeps the describe path (no reroute, model unchanged)
   const result = await guardrail.preCall({ ...IMAGE_PAYLOAD, model: "mixed-combo" }, {});
 
   assert.equal(result.block, false);
-  // Mixed combo is NOT reroute-eligible: model stays, images described.
-  assert.equal(result.meta.rerouted, undefined);
-  assert.equal(asModifiedBody(result).model, "mixed-combo");
-  assert.equal(hasImagePart(asModifiedBody(result).messages), false);
-  assert.equal(visionCallCount, 1);
+  // Mixed combo is NOT reroute-eligible and is no longer blanket-described: the
+  // image stays so vision-capable targets receive it; combo dispatch drops
+  // text-only targets for an image request (fail-closed, #8332/#8488).
+  assert.equal(result.modifiedPayload, undefined);
+  assert.equal(visionCallCount, 0);
 });

@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/shared/components";
+
 /**
  * CoolingConnectionsPanel — Dashboard readout of connections currently in a
  * persisted 429 cooldown. Sourced from `useProviderConnections().connections`
@@ -12,6 +14,14 @@
  * indicator the user has no way to see "OmniRoute learned that this key is
  * exhausted — and for how long". This panel makes the lesson visible.
  *
+ * Each row also carries a manual "Clear cooldown" action. The cooldown is
+ * OmniRoute's local lesson, not upstream truth: when the quota has already
+ * refreshed upstream (daily/weekly resets, provider-side fix), the automatic
+ * clear paths (Test-button success, Edit-modal key re-validation) still
+ * require an upstream round-trip before the bench lifts. The button PUTs
+ * `rateLimitedUntil: null` directly so the connection rejoins routing
+ * immediately — the next request is the real test of whether the key works.
+ *
  * Acceptance criteria (Issue #1, fix scope D):
  *   1. Filters `connections` to those with a future `rateLimitedUntil`.
  *   2. Shows connection name + reset countdown.
@@ -19,6 +29,8 @@
  *   4. Renders nothing when no connection is cooling.
  *   5. Uses the same connection-shape type as ConnectionRow so the data flow
  *      stays consistent with the rest of the dashboard.
+ *   6. Offers a per-row manual clear (disabled while that row's request is
+ *      in flight) for the stale-bench case described above.
  */
 
 import { useEffect, useState } from "react";
@@ -34,6 +46,10 @@ import { providerText } from "../providerCredentialText";
 
 export interface CoolingConnectionsPanelProps {
   readonly connections: readonly ConnectionRowConnection[];
+  /** Clears a connection's persisted cooldown (PUT `rateLimitedUntil: null`). */
+  readonly onClearCooldown?: (connectionId: string) => void;
+  /** Connection id whose clear request is in flight — disables its button. */
+  readonly clearingCooldownId?: string | null;
 }
 
 function isCoolingNow(connection: ConnectionRowConnection, now: number): boolean {
@@ -42,8 +58,59 @@ function isCoolingNow(connection: ConnectionRowConnection, now: number): boolean
   return Number.isFinite(until) && until > now;
 }
 
+/** Visible last-error text (truncated) plus the full string for the tooltip. */
+function coolingRecordedError(connection: ConnectionRowConnection): {
+  display: string;
+  title: string;
+} | null {
+  const raw = typeof connection.lastError === "string" ? connection.lastError.trim() : "";
+  if (!raw) return null;
+  return {
+    display: raw.length > 160 ? `${raw.slice(0, 157)}...` : raw,
+    title: raw,
+  };
+}
+
+interface ClearCooldownButtonProps {
+  /** Row's connection id — without one there is nothing to PUT, so no button. */
+  readonly connectionId: string | undefined;
+  /** True while this row's clear request is in flight (disables the button). */
+  readonly clearing: boolean;
+  readonly onClearCooldown?: (connectionId: string) => void;
+}
+
+/**
+ * Per-row manual "Clear cooldown" action, split out of the panel body so the
+ * row map stays readable (and the panel inside the max-lines-per-function
+ * ratchet). Renders nothing when there is no handler or no connection id.
+ */
+function ClearCooldownButton(props: ClearCooldownButtonProps) {
+  const { connectionId, clearing, onClearCooldown } = props;
+  const t = useTranslations("providers");
+  if (!onClearCooldown || !connectionId) return null;
+  return (
+    <Button
+      variant="outline"
+      size="sm"
+      data-testid={`clear-cooldown-${connectionId}`}
+      disabled={clearing}
+      onClick={() => onClearCooldown(connectionId)}
+      title={providerText(
+        t,
+        "clearConnectionCooldownTitle",
+        "Clear the cooldown now — use when the quota has already refreshed upstream"
+      )}
+      className="h-6 min-h-0 rounded px-2 text-xs"
+    >
+      {clearing
+        ? providerText(t, "clearConnectionCooldownInProgress", "Clearing…")
+        : providerText(t, "clearConnectionCooldown", "Clear cooldown")}
+    </Button>
+  );
+}
+
 export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelProps) {
-  const { connections } = props;
+  const { connections, onClearCooldown, clearingCooldownId } = props;
   const t = useTranslations("providers");
   // Tick once per second so the human-readable countdown updates.
   const [now, setNow] = useState<number>(() => Date.now());
@@ -58,14 +125,11 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
   return (
     <div
       data-testid="cooling-connections-panel"
-      className="mb-4 rounded-card border border-amber-500/40 bg-amber-500/5 p-4 shadow-sm"
+      className="mb-4 rounded-card border border-warning/40 bg-warning/5 p-4 shadow-sm"
     >
       <div className="mb-2 flex items-center gap-2">
-        <span
-          aria-hidden
-          className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500"
-        />
-        <h3 className="text-sm font-medium text-amber-700 dark:text-amber-300">
+        <span aria-hidden className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
+        <h3 className="text-sm font-medium text-warning">
           {providerText(t, "coolingConnectionsTitle", "Currently cooling ({count})", {
             count: cooling.length,
           })}
@@ -75,7 +139,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
         {providerText(
           t,
           "coolingConnectionsDescription",
-          "These connections returned a 429 (rate-limit) on their last request. OmniRoute will skip them until the timer expires — no manual disable required."
+          "These connections are cooling after their last request. OmniRoute will skip them until the timer expires — no manual disable required."
         )}
       </p>
       <ul className="space-y-1">
@@ -88,17 +152,34 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
             (c.id
               ? `${providerText(t, "connectionFallback", "connection")} ${c.id.slice(0, 8)}`
               : providerText(t, "connectionFallback", "connection"));
+          const recorded = coolingRecordedError(c);
+          const clearing = clearingCooldownId != null && clearingCooldownId === c.id;
           return (
             <li
               key={c.id ?? label}
-              className="flex items-center justify-between rounded border border-amber-500/30 bg-background/40 px-3 py-2 text-sm"
+              className="flex items-center justify-between gap-2 rounded border border-warning/30 bg-bg/40 px-3 py-2 text-sm"
             >
-              <span className="font-medium">{label}</span>
-              <span
-                className="font-mono text-xs text-amber-700 dark:text-amber-300"
-                data-testid="cooling-countdown"
-              >
-                {formatResetCountdown(until)}
+              <span className="min-w-0">
+                <span className="font-medium">{label}</span>
+                {recorded ? (
+                  <span
+                    className="mt-0.5 block truncate text-xs text-muted-foreground"
+                    data-testid="cooling-last-error"
+                    title={recorded.title}
+                  >
+                    {recorded.display}
+                  </span>
+                ) : null}
+              </span>
+              <span className="flex items-center gap-2">
+                <span className="font-mono text-xs text-warning" data-testid="cooling-countdown">
+                  {formatResetCountdown(until)}
+                </span>
+                <ClearCooldownButton
+                  connectionId={c.id}
+                  clearing={clearing}
+                  onClearCooldown={onClearCooldown}
+                />
               </span>
             </li>
           );

@@ -31,13 +31,13 @@ const modelsRoute = await import("../../src/app/api/providers/[id]/models/route.
 
 async function resetStorage() {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 interface ModelsBody {
@@ -113,7 +113,11 @@ for (const { provider, liveUrl, source = "api" } of LIVE_CASES) {
       const body = (await response.json()) as ModelsBody;
       assert.equal(body.provider, provider);
       assert.ok(fetched, `should have probed ${liveUrl}`);
-      assert.equal(body.source, source, "should serve the live upstream catalog, not local_catalog");
+      assert.equal(
+        body.source,
+        source,
+        "should serve the live upstream catalog, not local_catalog"
+      );
       const ids = body.models.map((m) => m.id);
       assert.ok(
         ids.includes(`${provider}-live-a`) && ids.includes(`${provider}-live-b`),

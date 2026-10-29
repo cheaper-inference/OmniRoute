@@ -13,7 +13,7 @@ const callLogs = await import("../../src/lib/usage/callLogs.ts");
 
 test.after(() => {
   core.resetDbInstance();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 // Captured stream chunks are prefixed with a per-chunk arrival timestamp
@@ -186,8 +186,11 @@ test("updatePendingRequestStreamChunks stores empty streamChunks object (not nul
   assert.ok(detail.streamChunks, "streamChunks should be set even when empty");
   assert.deepEqual(detail.streamChunks, { provider: [], openai: [], client: [] });
 
-  // Verify the reference is live: mutations to the original object are visible
+  // Stream chunk updates retain an owned snapshot so external array mutations
+  // cannot bypass byte accounting.
   empty.provider.push("data: hello");
+  assert.equal(detail.streamChunks.provider.length, 0);
+  usageHistory.updatePendingRequestStreamChunks("gpt-4", "openai", "conn-1", empty);
   assert.equal(detail.streamChunks.provider.length, 1);
   assert.equal(detail.streamChunks.provider[0], "data: hello");
 });
@@ -527,6 +530,8 @@ test("createRequestLogger with connectionId/model/provider populates streamChunk
   // append a provider chunk — this should call pushStreamChunks() → updatePendingRequestStreamChunks()
   logger.appendProviderChunk('data: {"content":"hello"}');
   logger.appendProviderChunk('data: {"content":" world"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const pending = usageHistory.getPendingRequests();
   const detail = pending.details["test-conn-1"]?.["gpt-4 (openai)"]?.[0];
@@ -555,6 +560,8 @@ test("createRequestLogger requestId binds streamChunks to the exact pending requ
   });
 
   logger.appendProviderChunk('data: {"content":"second"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const first = usageHistory.getPendingById().get(firstId);
   const second = usageHistory.getPendingById().get(secondId);
@@ -579,6 +586,8 @@ test("createRequestLogger fallback match does not cross connectionId boundaries"
   });
 
   logger.appendProviderChunk('data: {"content":"conn-b"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const second = usageHistory.getPendingById().get(secondId);
   assert.equal(stripChunkTs(second?.streamChunks?.provider[0]), 'data: {"content":"conn-b"}');
@@ -628,6 +637,8 @@ test("createRequestLogger appendOpenAIChunk and appendConvertedChunk also popula
 
   logger.appendOpenAIChunk('data: {"role":"assistant","content":"hi"}');
   logger.appendConvertedChunk('data: {"content":"there"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const pending = usageHistory.getPendingRequests();
   const detail = pending.details["test-conn-3"]?.["claude-3 (anthropic)"]?.[0];
@@ -660,6 +671,8 @@ test("createRequestLogger captures stream chunks even when enabled: false", asyn
   });
 
   logger.appendProviderChunk('data: {"content":"hello"}');
+  // Stream chunks reach the pending map in batches (64 KiB deltas); getPipelinePayloads() flushes.
+  logger.getPipelinePayloads();
 
   const pending = usageHistory.getPendingRequests();
   const detail = pending.details["test-conn-4"]?.["gpt-4 (openai)"]?.[0];
@@ -737,4 +750,53 @@ test("generic client snapshots exclude hard-lease control headers", async () => 
   assert.equal(out.headers["x-omniroute-lease-owner"], undefined);
   assert.equal(out.headers["x-omniroute-lease-generation"], undefined);
   assert.equal(out.headers["x-session-id"], "independent-routing-session");
+});
+
+function syntheticReceipt(index: number) {
+  return {
+    index,
+    connectionId: "conn-1",
+    provider: "openai",
+    model: "gpt-4o",
+    startedAt: "2026-01-01T00:00:00.000Z",
+    endedAt: "2026-01-01T00:00:01.000Z",
+    latencyMs: 10 + index,
+    httpStatus: 200,
+    errorType: null,
+    usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 },
+    serviceTier: null,
+    computedCostUsd: 0.001,
+    toolCalls: [{ id: `call-${index}`, name: "memory_search" }],
+    termination: "completed",
+    clientVisible: true,
+  };
+}
+
+test("logToolLoopReceipt keeps first 4 receipts and clones them", async () => {
+  const { createRequestLogger } = await import("../../open-sse/utils/requestLogger.ts");
+  const logger = await createRequestLogger("openai", "openai", "gpt-4o", {
+    enabled: true,
+    captureStreamChunks: false,
+  });
+  for (let i = 0; i < 5; i++) {
+    logger.logToolLoopReceipt(syntheticReceipt(i));
+  }
+  const payloads = logger.getPipelinePayloads();
+  assert.ok(payloads?.toolLoop);
+  assert.equal(payloads.toolLoop.legs.length, 4);
+  assert.deepEqual(
+    payloads.toolLoop.legs.map((leg) => (leg as { index: number }).index),
+    [0, 1, 2, 3]
+  );
+  assert.equal("arguments" in (payloads.toolLoop.legs[0] as object), false);
+});
+
+test("logToolLoopReceipt is a no-op when logger is disabled", async () => {
+  const { createRequestLogger } = await import("../../open-sse/utils/requestLogger.ts");
+  const logger = await createRequestLogger("openai", "openai", "gpt-4o", {
+    enabled: false,
+    captureStreamChunks: false,
+  });
+  logger.logToolLoopReceipt(syntheticReceipt(0));
+  assert.equal(logger.getPipelinePayloads(), null);
 });
