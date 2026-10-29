@@ -12,6 +12,7 @@ import {
   isAdaptiveEffort,
   type ChatMessageLike,
 } from "../../services/adaptiveEffort.ts";
+import { isKimiK31Model } from "../../executors/base/reasoningEffort.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
 
@@ -55,9 +56,7 @@ export function wireAdaptiveEffort<T extends Record<string, unknown>>(
   // not a wire value, so it must NOT count as an explicit client field (it
   // would otherwise short-circuit the guard below and ship "auto" upstream).
   const modelDefaultAuto = isAdaptiveEffort(body.reasoning_effort);
-  if (modelDefaultAuto && /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(ctx.model || "")) {
-    return body;
-  }
+  if (modelDefaultAuto && isKimiK31Model(ctx.model)) return body;
   if (!modelDefaultAuto && hasExplicitReasoningField(body)) return body;
   const headerEffort =
     ctx.headerEffort !== undefined

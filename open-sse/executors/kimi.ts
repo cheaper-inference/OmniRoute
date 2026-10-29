@@ -73,19 +73,26 @@ function normalizeK31Effort(value: unknown): unknown {
   return effort === "none" ? "off" : effort;
 }
 
+/** K3.1 keeps the first explicit effort literally; only disabled flags imply "off". */
+function resolveK31RequestedEffort(
+  body: JsonRecord,
+  reasoning: JsonRecord | null,
+  thinking: JsonRecord | null
+): unknown {
+  const requested = firstDefinedEffortValue(
+    body.reasoning_effort,
+    reasoning?.effort,
+    thinking?.effort
+  );
+  if (requested !== undefined) return normalizeK31Effort(requested);
+  if (body.enable_thinking === false || thinking?.type === "disabled") return "off";
+  return undefined;
+}
+
 function resolveRequestedEffort(body: JsonRecord, modelId: string): unknown {
   const reasoning = asRecord(body.reasoning);
   const thinking = asRecord(body.thinking);
-  if (isK31Model(modelId)) {
-    const requested = firstDefinedEffortValue(
-      body.reasoning_effort,
-      reasoning?.effort,
-      thinking?.effort
-    );
-    if (requested !== undefined) return normalizeK31Effort(requested);
-    if (body.enable_thinking === false || thinking?.type === "disabled") return "off";
-    return undefined;
-  }
+  if (isK31Model(modelId)) return resolveK31RequestedEffort(body, reasoning, thinking);
 
   const direct = normalizeEffort(body.reasoning_effort);
   if (direct) return direct;
@@ -319,6 +326,26 @@ function firstNormalizedEffort(...values: unknown[]): string | null {
   return null;
 }
 
+/** K3.1 Anthropic-shape effort: explicit value first, then disabled flags, then budget. */
+function resolveK31AnthropicEffort(
+  body: JsonRecord,
+  reasoning: JsonRecord | null,
+  existingThinking: JsonRecord | null,
+  outputConfig: JsonRecord | null
+): unknown {
+  const effort = normalizeK31Effort(
+    firstDefinedEffortValue(
+      body.reasoning_effort,
+      reasoning?.effort,
+      outputConfig?.effort,
+      existingThinking?.effort
+    )
+  );
+  if (effort !== undefined) return effort;
+  if (body.enable_thinking === false || existingThinking?.type === "disabled") return "off";
+  return budgetToEffort(existingThinking?.budget_tokens) ?? undefined;
+}
+
 function resolveAnthropicEffort(
   body: JsonRecord,
   existingThinking: JsonRecord | null,
@@ -328,20 +355,11 @@ function resolveAnthropicEffort(
 ): unknown {
   const reasoning = asRecord(body.reasoning);
   if (isK31Model(modelId)) {
-    let effort = normalizeK31Effort(
-      firstDefinedEffortValue(
-        body.reasoning_effort,
-        reasoning?.effort,
-        outputConfig?.effort,
-        existingThinking?.effort
-      )
+    return applyThinkingPolicyDefaults(
+      resolveK31AnthropicEffort(body, reasoning, existingThinking, outputConfig),
+      policy,
+      modelId
     );
-    if (effort === undefined && body.enable_thinking === false) effort = "off";
-    if (effort === undefined && existingThinking?.type === "disabled") effort = "off";
-    if (effort === undefined) {
-      effort = budgetToEffort(existingThinking?.budget_tokens) ?? undefined;
-    }
-    return applyThinkingPolicyDefaults(effort, policy, modelId);
   }
 
   let effort = firstNormalizedEffort(

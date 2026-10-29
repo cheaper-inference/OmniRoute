@@ -229,6 +229,18 @@ test("namespaced K3.1 also preserves none instead of clamping it", () => {
   assert.equal(output.reasoning_effort, "none");
 });
 
+test("K3.1 preserved efforts still fold the camel-case alias onto the canonical field", () => {
+  for (const effort of ["none", "bogus"]) {
+    const output = sanitizeReasoningEffortForProvider(
+      { reasoningEffort: effort, messages: [] },
+      "moonshot",
+      K31
+    ) as Record<string, unknown>;
+    assert.equal(output.reasoning_effort, effort, effort);
+    assert.equal(Object.prototype.hasOwnProperty.call(output, "reasoningEffort"), false, effort);
+  }
+});
+
 test("Kimi Code static thinking policy and wire aliases cover K3.1", () => {
   for (const model of [CODING_K31, CODING_K31_HS]) {
     assert.deepEqual(getKimiCodeStaticThinkingPolicy(model), {
