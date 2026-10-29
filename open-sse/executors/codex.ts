@@ -1,4 +1,5 @@
 import { isResponsesTerminalLine, RESPONSES_TERMINAL_EVENT_TYPES } from "./opencodeMuseSpark.ts";
+import { newestChromeProfile } from "../utils/browserProfiles.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { buildErrorBody } from "../utils/error.ts";
 import { getCodexRequestDefaults } from "@/lib/providers/requestDefaults";
@@ -329,7 +330,9 @@ function normalizeEffortValue(value: unknown): string | undefined {
   return normalized || undefined;
 }
 
-function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
+function ensureCodexReasoningSummary(body: Record<string, unknown>, skipDefaults = false): void {
+  // #18124: a Chat-translated request for a safety-block model stays effort-only.
+  if (skipDefaults) return;
   const reasoning =
     body.reasoning && typeof body.reasoning === "object" && !Array.isArray(body.reasoning)
       ? (body.reasoning as Record<string, unknown>)
@@ -348,6 +351,13 @@ function ensureCodexReasoningSummary(body: Record<string, unknown>): void {
   if (!body.include.includes(CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE)) {
     body.include = [...body.include, CODEX_REASONING_ENCRYPTED_CONTENT_INCLUDE];
   }
+}
+
+// Set by the Chat -> Responses translator (#18124); see REASONING_SUMMARY_OPT_OUT_MARKER.
+function consumeReasoningSummaryOptOutMarker(body: Record<string, unknown>): boolean {
+  const marker = body._omnirouteSkipReasoningSummaryDefault;
+  delete body._omnirouteSkipReasoningSummaryDefault;
+  return marker === true;
 }
 
 function consumeResponsesStoreMarker(body: Record<string, unknown>): unknown {
@@ -1069,7 +1079,7 @@ export class CodexExecutor extends BaseExecutor {
 
         try {
           ws = await websocketFn(toWebSocketUrl(url), {
-            browser: "chrome_142",
+            browser: newestChromeProfile(),
             os: "windows",
             headers,
           });
@@ -1331,6 +1341,7 @@ export class CodexExecutor extends BaseExecutor {
     const thinkingBudgetConfig = getThinkingBudgetConfig();
     const allowConnectionReasoningDefaults = thinkingBudgetConfig.mode === ThinkingMode.PASSTHROUGH;
     consumeResponsesStoreMarker(body);
+    const skipReasoningSummaryDefaults = consumeReasoningSummaryOptOutMarker(body);
 
     // Codex /responses rejects stream=false, but /responses/compact rejects the stream field entirely.
     if (isCompactRequest) {
@@ -1486,7 +1497,7 @@ export class CodexExecutor extends BaseExecutor {
       allowConnectionReasoningDefaults,
       getForcedReasoningEffort(credentials)
     );
-    ensureCodexReasoningSummary(body);
+    ensureCodexReasoningSummary(body, skipReasoningSummaryDefaults);
     if (isCompactRequest) {
       delete body.include;
     }

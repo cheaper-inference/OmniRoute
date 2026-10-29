@@ -138,7 +138,7 @@ export default function CliCodePageClient({
     <div className="flex flex-col gap-6">
       <PageHeader
         compact
-        title={t("pageTitle")}
+        title={t("title")}
         description={t("pageSubtitle")}
         actions={
           <Button

@@ -116,10 +116,11 @@
 3. Àwọn ìyanáà fún àwọn àlàfo kit gbọdọ̀ wà nínú adapter náà (tàbí nínú `globals.css` `@layer components` tí àtúnṣe náà bá jẹ́ style), kì í ṣe nínú `packages/ui-kit/src` rárá.
 4. Ṣàfikún tàbí ṣe àtúnṣe `tests/unit/ui/adapters/<name>.test.tsx`. Fún adapter tí ó ní ọ̀pọ̀ olùpè, ṣe àfiwè markup tí a ṣe jáde ṣáájú àti lẹ́yìn àyípadà náà — àyípadà padding tàbí wrapper máa ń tàn ká sí gbogbo ojú-ìbòjú.
 
-## 5. Ṣíṣe àtúnṣe kit náà
+## 5. Nmu awọn kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` máa ń da `src/` upstream ní commit yẹn sínú
-`packages/ui-kit/src` kí ó sì lo ìyípadà kan ṣoṣo tí a gba àṣẹ fún (ó máa ń yọ àmì-ìparí `.js` kúrò lẹ́nu àwọn relative import). Lẹ́yìn náà: ṣe àtúnyẹ̀wò `git diff packages/ui-kit`, ṣe àyẹ̀wò fífòjúrí lórí àwọn olùpèsè, ètò, àpọ̀pọ̀, lílò àti endpoint nínú àwọn theme méjèèjì, ṣe àṣẹ `npm run check:ui-kit-snapshot` àti `npm run test:vitest:ui`, kí o sì ṣí PR náà pẹ̀lú changelog upstream.
+`npm run check:ui-kit-upstream` ṣe afiwe ẹya ti a pinni ni `packages/ui-kit/UPSTREAM.md` pẹlu aami `v*` tuntun ti repo oke ati ṣe atẹjade aṣẹ amuṣiṣẹpọ nigbati itusilẹ ba jade. Ṣiṣan iṣiṣẹ `UI Kit upstream watch` osẹ-ọsẹ (`.github/workflows/ui-kit-upstream-watch.yml`) nṣiṣẹ ayẹwo kanna ati pe o jẹ ki ọrọ ipasẹ kan ṣii lakoko ti pin wa lẹhin; repo ti o wa ni oke jẹ ikọkọ, nitorinaa ṣiṣiṣẹsẹhin nilo ami kika-nikan ni aṣiri `UI_KIT_READ_TOKEN` ati duro inert laisi rẹ.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` daakọ `src/` ti o wa ni oke ni adehun yẹn (`latest` = tuntun `v*` tag) sinu `packages/ui-kit/src`, nlo iyipada ti a gba laaye nikan (o ju suffix `.js` silẹ lati agbewọle ojulumọ), o si ṣeto ẹya aaye iṣẹ ni `packages/ui-kit/package.json` ati `package-lock.json` si oke oke. Lẹhinna: atunwo `git diff packages/ui-kit`, ṣe iwe-iwoye wiwo lori awọn olupese, awọn eto, awọn akojọpọ, lilo ati aaye ipari ni awọn akori mejeeji, ṣiṣe `npm run check:ui-kit-snapshot` ati `npm run test:vitest:ui`, ati ṣii PR pẹlu iyipada iyipada oke.
 
 ## 6. README awọn aworan atọka
 
