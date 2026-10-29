@@ -4200,6 +4200,90 @@ paths:
         "200":
           description: Connection usage data
 
+  /api/v0/management/auth-files:
+    get:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible OAuth account list
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/auth-files`).
+        Lists the Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider,
+        email, disabled, id_token }] }`. Never includes tokens. Requires a dashboard session or
+        a `manage`-scoped API key, even when login is disabled.
+      x-always-protected: true
+      responses:
+        "200":
+          description: "`{ files }`"
+        "401":
+          description: Authentication required
+        "403":
+          description: API key lacks the `manage` scope
+
+  /api/v0/management/api-call:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible upstream usage call
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/api-call`). Sends
+        one allowlisted request (Claude `GET /api/oauth/usage`; Codex `GET /backend-api/wham/usage`,
+        `GET /backend-api/wham/rate-limit-reset-credits`, `POST .../consume`) with the
+        connection's OAuth token injected server-side, and returns the raw upstream
+        `{ status_code, body }`. Any other method, URL or provider is refused with 403.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index, method, url]
+              properties:
+                auth_index:
+                  type: string
+                method:
+                  type: string
+                  enum: [GET, POST]
+                url:
+                  type: string
+                header:
+                  type: object
+                  additionalProperties:
+                    type: string
+                data:
+                  type: string
+                  description: JSON-encoded request body (POST only)
+      responses:
+        "200":
+          description: "`{ status_code, body }`"
+        "403":
+          description: Request not allowlisted, or API key lacks the `manage` scope
+        "404":
+          description: Unknown auth_index
+
+  /api/v0/management/reset-quota:
+    post:
+      tags: [Usage]
+      summary: CLIProxyAPI-compatible cooldown reset
+      description: >-
+        CLIProxyAPI management compatibility (also served at `/v0/management/reset-quota`).
+        Lifts the connection cooldown and model lockouts of one Claude or Codex OAuth account
+        (and the Codex per-scope cooldowns). Terminal states are left alone.
+      x-always-protected: true
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [auth_index]
+              properties:
+                auth_index:
+                  type: string
+      responses:
+        "200":
+          description: "`{ ok, auth_index, cleared, lockouts_cleared, skipped_terminal }`"
+        "404":
+          description: Unknown auth_index
+
   /api/usage/history:
     get:
       tags: [Usage]
@@ -4481,6 +4565,24 @@ paths:
       responses:
         "200":
           description: Per-model pricing data
+
+  /api/pricing/unpriced-usage:
+    get:
+      tags: [Pricing]
+      summary: List recent usage with no configured price
+      description: >-
+        Successful usage in the last 8 days whose provider/model has no pricing row,
+        with request counts, affected API keys (and how many of those have a per-key
+        USD limit enabled), and the active UNPRICED_USAGE_BUDGET_POLICY. Under the
+        default `fail_closed` policy those limited keys are blocked until the model
+        is priced or the window rolls over.
+      responses:
+        "200":
+          description: Unpriced usage report
+        "401":
+          $ref: "#/components/responses/ManagementAuthenticationRequired"
+        "403":
+          $ref: "#/components/responses/ManagementInvalidToken"
 
   # ─── Translator ────────────────────────────────────────────────
 
@@ -11640,6 +11742,123 @@ paths:
       responses:
         "200":
           description: OK
+  /api/oauth/{provider}/import-export:
+    post:
+      tags:
+        - Oauth
+      summary: Import OAuth accounts from a third-party account-manager export
+      description: >
+        Bulk-imports OAuth accounts from a plaintext account-manager export (for example
+        Antigravity Manager's cloud-accounts export). The body is the export document itself:
+        `{ "accounts": [...] }`, a bare array, or a single record, with at most 100 accounts and
+        at most 5 MiB. Tokens may live under a nested `token` object or flat on the record, in
+        snake_case or camelCase. Each record is refreshed and finalized through the same path as
+        `paste-credentials`, only an upstream-verified account email takes part in de-duplication,
+        and re-importing refreshes an existing connection in place. Supported providers are those
+        accepted by `paste-credentials` (`antigravity`, `agy`). Requires management authentication.
+      security:
+        - BearerAuth: []
+        - ManagementSessionAuth: []
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - antigravity
+              - agy
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  properties:
+                    accounts:
+                      type: array
+                      maxItems: 100
+                      items:
+                        type: object
+                        additionalProperties: true
+                - type: array
+                  maxItems: 100
+                  items:
+                    type: object
+                    additionalProperties: true
+                - type: object
+                  additionalProperties: true
+      responses:
+        "200":
+          description: Per-record import summary (also returned when some or all records failed)
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - imported
+                  - failed
+                  - total
+                  - results
+                properties:
+                  success:
+                    type: boolean
+                    description: True only when no record failed.
+                  imported:
+                    type: integer
+                  failed:
+                    type: integer
+                  total:
+                    type: integer
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - index
+                        - ok
+                      properties:
+                        index:
+                          type: integer
+                        email:
+                          type: string
+                        ok:
+                          type: boolean
+                        connectionId:
+                          type: string
+                        connectionEmail:
+                          type: string
+                        error:
+                          type: string
+        "400":
+          description: Unsupported provider, invalid or empty JSON body, or no accounts in the payload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "401":
+          description: Missing or invalid management credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        "413":
+          description: Account export exceeds the 5 MiB request body limit
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
   /api/oauth/cliproxy-import:
     get:
       tags:
