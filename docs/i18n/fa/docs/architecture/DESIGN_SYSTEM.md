@@ -57,13 +57,11 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx` را اضافه یا بهروزرسانی کنید. برای آداپتوری با فراخوانهای زیاد،
    مارکآپ رندرشده را قبل و بعد از تغییر مقایسه کنید — تغییر در padding یا wrapper به همهٔ صفحهها سرایت میکند.
 
-## 5. بهروزرسانی kit
+## 5. به روز رسانی کیت
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` دایرکتوری `src/` بالادستی را در آن commit به
-`packages/ui-kit/src` کپی میکند و تنها تبدیل مجاز را اعمال میکند (پسوند `.js` را از importهای نسبی
-حذف میکند). سپس: `git diff packages/ui-kit` را بررسی کنید، یک بازبینی بصری روی providers، settings، combos،
-usage و endpoint در هر دو تم انجام دهید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا
-کنید و PR را همراه با changelog بالادستی باز کنید.
+`npm run check:ui-kit-upstream` نسخه پینشده در `packages/ui-kit/UPSTREAM.md` را با جدیدترین تگ `v*` مخزن بالادستی مقایسه میکند و دستور همگامسازی را هنگامی که نسخه منتشر میشود چاپ میکند. گردش کار هفتگی `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) همان بررسی را انجام میدهد و یک موضوع ردیابی را در حالی که پین پشت است باز نگه میدارد. مخزن بالادستی خصوصی است، بنابراین گردش کار به یک توکن فقط خواندنی در رمز `UI_KIT_READ_TOKEN` نیاز دارد و بدون آن بی اثر می ماند.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` بالادست `src/` در آن commit (`latest` = جدیدترین تگ `v*` ) را در `packages/ui-kit/src` کپی میکند، تبدیل واحد مجاز را اعمال میکند (پسوند `.js` را از واردات نسبی حذف میکند)، و نسخه فضای کاری را در `packages/ui-kit/package.json` و `package-lock.json` به بالادستی تنظیم میکند. سپس: `git diff packages/ui-kit` را مرور کنید، ارائهدهندهها، تنظیمات، ترکیبهای ترکیبی، استفاده و نقطه پایانی را در هر دو موضوع بررسی کنید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا کنید و PR را با تغییرات بالادستی باز کنید.
 
 ## 6. نمودارهای README
 

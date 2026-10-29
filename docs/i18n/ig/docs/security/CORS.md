@@ -56,11 +56,11 @@ n’ihi otu eziokwu doro anya gbasara mmejuputa ya:
 
 Ihe nke ahụ pụtara n’elu interface ọ bụla, ọbụna mgbe `CORS_ALLOW_ALL=true`:
 
-| Interface                           | Usoro nyocha njirimara      | Mmetụta wildcard CORS                                                                                                                                                                                                                                                 |
-| ----------------------------------- | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard / MANAGEMENT `/api/*`     | Oge njikọ cookie            | A na-ezighachi isi mmalite ahụ, mana **n’enweghị `Allow-Credentials`** ihe nchọgharị na-**egbochi** ịgụ nwere nzere. Saịtị ọjọọ sitere n’isi mmalite ọzọ **enweghị ike ịgụ** nzaghachi dashboard gị a nyochara njirimara ya, a naghịkwa ekpughe cookie oge njikọ ahụ. |
-| Client API `/v1/*`, `/v1beta/*`     | Header Bearer / `x-api-key` | Ọ dịlarị mfe ịnweta **site na nhazi** (`relaxForTokenAuth`): ihe nchọgharị anaghị etinye `Authorization`/`x-api-key` na-akpaghị aka, ya mere ibe onye na-awakpo enweghị ike iweta key gị. `CORS_ALLOW_ALL` anaghị eme ka nke a gbasaa.                                |
-| Ọha na-agụ naanị (`/api/health`, …) | Ọ dịghị                     | Ọ bụghị ozi nwere mmetụta; wildcard adịghị emerụ ahụ.                                                                                                                                                                                                                 |
+| Interface                           | Usoro nyocha njirimara      | Mmetụta wildcard CORS                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------- | --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard / MANAGEMENT `/api/*`     | Oge njikọ cookie            | A na-ezighachi isi mmalite ahụ, mana **n’enweghị `Allow-Credentials`** ihe nchọgharị na-**egbochi** ịgụ nwere nzere. Saịtị ọjọọ sitere n’isi mmalite ọzọ **enweghị ike ịgụ** nzaghachi dashboard gị a nyochara njirimara ya, a naghịkwa ekpughe cookie oge njikọ ahụ.                                                                                                              |
+| Client API `/v1/*`, `/v1beta/*`     | Header Bearer / `x-api-key` | Ọ dịlarị mfe ịnweta **site na nhazi** (`relaxForTokenAuth`): ihe nchọgharị anaghị etinye `Authorization`/`x-api-key` na-akpaghị aka, ya mere ibe onye na-awakpo enweghị ike iweta key gị. A na-eweghachi origin naanị mgbe e kwadoro key e gosiri; nzaghachi ndị na-enweghị aha (`REQUIRE_API_KEY=false`) na-edebe ndepụta ikike ahụ. `CORS_ALLOW_ALL` anaghị eme ka nke a gbasaa. |
+| Ọha na-agụ naanị (`/api/health`, …) | Ọ dịghị                     | Ọ bụghị ozi nwere mmetụta; wildcard adịghị emerụ ahụ.                                                                                                                                                                                                                                                                                                                              |
 
 Ya mere, mkpughe **fọdụrụ** nke `CORS_ALLOW_ALL=true` nwere oke naanị na: (a)
 ịgụ sitere n’isi mmalite ọzọ **na-enweghị nzere** nke data na-achọghị nyocha njirimara, na (b)
@@ -121,11 +121,50 @@ restart.
 - **Bearer / `x-api-key` (elu inference `/v1/*`):** browser anaghị etinye
   ihe ndị a n’onwe ya. CORS abụghị ihe mgbochi bara uru ebe a — API key bụ
   ihe mgbochi ahụ — ọ bụkwa ya mere e ji kpachapụ anya mee ka elu ahụ nabata ọtụtụ origin ka browser na
-  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta.
+  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta. Nweghachi origin a mere
+  ka ọ dị nro na-agbaso key e kwadoro, ọ bụghị naanị ịdị adị nke header ahụ: mgbe
+  `REQUIRE_API_KEY=false` na-ejere arịrịọ ozi n’enweghị aha, nzaghachi ya gara nke ọma
+  na-edebe ndepụta ikike fail-closed ahụ. Ọjụjụ auth (401) na-anọgide na-agụ agụ ka client
+  nwee ike igosi key a kagburu ma ọ bụ nke e dehiere ihe (#5242): 401 nke pipeline n’onwe
+  ya na-edebe nweghachi ahụ, na route nke n’onwe ya na-ajụ key ahụ mgbe pipeline jesịrị
+  arịrịọ ahụ ozi dị ka nke na-enweghị aha (`/v1/models` na `/v1beta/models` mgbe a haziri
+  management auth, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ndị e
+  kenyere onye nwe ha, na route ndị a na-atụle maka auto-combo) na-agbakwunye nweghachi
+  ahụ na 401 ahụ site na `credentialRejectionHeaders()`. Ihe na-ekpebi nweghachi ahụ bụ ma
+  arịrịọ ahụ ọ na-ebu header nke nzere (`Authorization`, `x-api-key`, `x-goog-api-key` ma
+  ọ bụ cookie `auth_token`), ọ bụghị nke n’ime ha route ahụ lelere, a naghịkwa ejikọ ya
+  ọnụ na `Access-Control-Allow-Credentials`; body ya bụ envelope njehie a kapịrị ọnụ.
+  Route management ndị dị n’okpuru `/api/v1/` nke `requireManagementAuth()` na-echekwa
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) anaghị agbakwunye nweghachi ahụ:
+  mgbe `REQUIRE_API_KEY=false`, a pụghị ịgụ 401/403 ha site n’isi mmalite ọzọ.
 - **Cookie session (dashboard):** ndabara **fail-closed** na
   enweghị `Access-Control-Allow-Credentials` n’ụzọ a na-ekekọrịta na-echebe ya. Etinyela
   origin management/dashboard na config ọ bụla na-enye ohere sara mbara; ha ga-anọrịrị kpọmkwem
   n’ọnọdụ fail-closed.
+
+## Njikọ mbido WebSocket (`/v1/responses`, `/v1/ws`)
+
+Ihe nchọgharị anaghị etinye CORS n’ọrụ maka WebSocket, ya mere ụzọ WebSocket ndị
+na-eweghachi mmepụta inference na-enyocha `Origin` nke njikọ mbido ahụ n’onwe ha
+(`src/server/origin/wsOrigin.ts`): Responses WebSocket (`/v1/responses`) na, mgbe
+OmniRoute na-arụ ọrụ site na `npm start` / `npm run dev`, akwa mmiri `/v1/ws` na
+`/api/v1/ws`, nke na-ezipụ `/v1/chat/completions`, `/v1/messages` na `/v1/responses` dị
+ka frame. Akwa mmiri ahụ na-ajụ `/api/v1/ws?handshake=1` maka mkpebi ma na-ajụ ịme
+upgrade ma ọ bụrụ na route ahụ emeghị nlele ahụ. A na-anabata njikọ mbido mgbe:
+
+- o nweghị header `Origin` (Codex CLI, SDK na client ndị ọzọ na-abụghị ihe nchọgharị);
+- ndepụta ikike dị n’elu kwere `Origin` ahụ (`CORS_ALLOWED_ORIGINS`, ntọala
+  `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` ahụ bụ otu n’ime origin ọha nke OmniRoute n’onwe ya (base URL ọha a haziri,
+  origin nke proxy a tụkwasịrị obi zigaara, ma ọ bụ host loopback/LAN kpọmkwem e nyere dị
+  ka IP literal ma ọ bụ `localhost` — otu ndị a na-atụle nke nlele mgbanwe dashboard
+  na-eji); ma ọ bụ
+- o bu API key ziri ezi, dị ka ọ dị n’elu HTTP `/v1/*`.
+
+Ihe ọ bụla ọzọ na-enweta `403 ws_origin_forbidden`. Cookie session nke dashboard anaghị
+ewepụ `Origin` si mba ọzọ, n’ihi na ihe nchọgharị na-etinye ya na socket nke ibe ọ bụla.
+A naghị ewere `localhost` na port ọzọ dị ka otu origin; tinye origin mmepe ndị dị otú
+ahụ na `CORS_ALLOWED_ORIGINS`.
 
 ## Ọmụmaatụ: reverse proxy n'ihu OmniRoute
 
@@ -161,6 +200,7 @@ taabụ Security), ọ bụghị n'ime proxy.
 | Ọkọlọtọ ịdọ aka ná ntị nke dashboard         | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Mpaghara CORS Allowed Origins                | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS kwa route nke Cloud-Agent (ihe dị iche) | `src/lib/cloudAgent/api.ts`                                          |
+| Nlele `Origin` n’oge njikọ WebSocket         | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Hụkwa
 

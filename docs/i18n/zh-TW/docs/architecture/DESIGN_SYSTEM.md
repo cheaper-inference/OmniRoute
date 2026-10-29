@@ -106,9 +106,11 @@
 3. 針對 kit 缺口的變通做法應放在轉接器中（若修正屬於樣式，則放在 `globals.css` 的 `@layer components`），絕不放在 `packages/ui-kit/src`。
 4. 新增或更新 `tests/unit/ui/adapters/<name>.test.tsx`。對於有許多呼叫方的轉接器，請比較變更前後渲染出的標記——內距或包裝層的變動會擴散到每個畫面。
 
-## 5. 更新 kit
+## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 會將該 commit 的上游 `src/` 複製到 `packages/ui-kit/src`，並套用唯一允許的轉換（移除相對匯入的 `.js` 後綴）。接著：檢視 `git diff packages/ui-kit`，在兩種主題下對 providers、settings、combos、usage 與 endpoint 各頁面進行目視檢查，執行 `npm run check:ui-kit-snapshot` 與 `npm run test:vitest:ui`，然後附上上游更新日誌提交 PR。
+`npm run check:ui-kit-upstream`將`packages/ui-kit/UPSTREAM.md`中固定的版本與上游儲存庫的最新`v*`標籤進行比較，並在發佈時列印同步命令。每週`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 執行相同的檢查，並在 pin 落後時保持一個追蹤問題處於開啟狀態；上游儲存庫是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的唯讀令牌，並且在沒有它的情況下保持惰性。
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`將該提交處的上游`src/` （`latest` =最新的`v*`標記）複製到`packages/ui-kit/src`中，應用單一允許的轉換（它從相對導入中刪除`.js`後綴），並將`packages/ui-kit/package.json`和`package-lock.json`中的工作區版本設定為上游版本。然後：檢視`git diff packages/ui-kit`，對兩個主題中的提供者、設定、組合、用法和端點進行視覺化傳遞，運行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，並使用上游變更日誌開啟PR 。
 
 ## README圖
 

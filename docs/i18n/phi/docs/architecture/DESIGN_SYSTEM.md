@@ -105,11 +105,9 @@
 
 ## 5. Pag-update ng kit
 
-Ang `scripts/dev/sync-ui-kit.sh <commit> [clone]` ay kinokopya ang upstream `src/` sa commit na iyon papunta sa
-`packages/ui-kit/src` at ina-apply ang iisang pinapayagang transformation (itinatanggal nito ang `.js` suffix mula sa
-mga relative import). Pagkatapos: i-review ang `git diff packages/ui-kit`, gumawa ng visual na pagsusuri sa providers, settings, combos,
-usage at endpoint sa parehong tema, patakbuhin ang `npm run check:ui-kit-snapshot` at `npm run test:vitest:ui`, at
-buksan ang PR kasama ang upstream changelog.
+Inihahambing `npm run check:ui-kit-upstream` ang bersyon na naka-pin sa `packages/ui-kit/UPSTREAM.md` sa pinakabagong `v*` tag ng upstream na repo at nagpi-print ng utos sa pag-sync kapag lumabas ang isang release. Ang lingguhang `UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) ay nagpapatakbo ng parehong pagsusuri at pinananatiling bukas ang isang isyu sa pagsubaybay habang nasa likod ang pin; pribado ang upstream repo, kaya kailangan ng workflow ng read-only na token sa `UI_KIT_READ_TOKEN` secret at mananatiling inert kung wala ito.
+
+Kinokopya `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ang upstream `src/` sa commit na iyon (`latest` = ang pinakabagong `v*` tag) sa `packages/ui-kit/src`, inilalapat ang nag-iisang pinapayagang pagbabago (binabagsak nito ang `.js` suffix mula sa mga kaugnay na pag-import), at itinatakda ang bersyon ng workspace sa `packages/ui-kit/package.json` at `package-lock.json` sa upstream. Pagkatapos: suriin ang `git diff packages/ui-kit`, gumawa ng visual pass sa mga provider, setting, combo, paggamit at endpoint sa parehong tema, patakbuhin `npm run check:ui-kit-snapshot` at `npm run test:vitest:ui`, at buksan ang PR gamit ang upstream changelog.
 
 ## 6. README diagram
 

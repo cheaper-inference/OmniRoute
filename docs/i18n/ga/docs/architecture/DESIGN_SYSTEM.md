@@ -58,13 +58,11 @@
 4. Cuir `tests/unit/ui/adapters/<name>.test.tsx` leis nó nuashonraigh é. I gcás cuibheora a bhfuil go leor glaoiteoirí aige, déan
    comparáid idir an mharcáil rindreáilte roimh an athrú agus ina dhiaidh — scaipfidh athruithe ar an stuáil nó ar an bhfillteán chuig gach scáileán.
 
-## 5. An kit a nuashonrú
+## 5. An trealamh a nuashonrú
 
-Cóipeálann `scripts/dev/sync-ui-kit.sh <commit> [clone]` an `src/` uasabhraí ag an dtiomantas sin isteach i
-`packages/ui-kit/src` agus cuireann sé an t-aon chlaochlú ceadaithe amháin i bhfeidhm (baineann sé an iarmhír `.js` de na
-hiompórtálacha coibhneasta). Ansin: déan athbhreithniú ar `git diff packages/ui-kit`, tabhair pas amhairc do na soláthraithe,
-socruithe, teaglaim, úsáid agus críochphointe sa dá théama, rith `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus
-oscail an PR leis an loga athruithe uasabhraí.
+Déanann `npm run check:ui-kit-upstream` comparáid idir an leagan atá pinned in `packages/ui-kit/UPSTREAM.md` leis an gclib `v*` is nuaí den repo in aghaidh an tsrutha agus priontaí an t-ordú sioncronaithe nuair a bhíonn scaoileadh amach. Ritheann an sreabhadh oibre seachtainiúil `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) an tseiceáil céanna agus coinníonn sé saincheist rianaithe amháin ar oscailt agus an bioráin taobh thiar; tá an repo in aghaidh an tsrutha príobháideach, mar sin tá comhartha inléite amháin ag teastáil ón sreabhadh oibre sa rún `UI_KIT_READ_TOKEN` agus fanann sé támh gan é.
+
+Déanann `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` an `src/` in aghaidh an tsrutha a chóipeáil ag an ngealltanas sin (`latest` = an chlib `v*` is nua) go `packages/ui-kit/src`, cuireann sé an claochlú aonair ceadaithe i bhfeidhm (titeann sé an iarmhír `.js` ó allmhairí coibhneasta), agus socraíonn sé an leagan spáis oibre i `packages/ui-kit/package.json` agus `package-lock.json` chuig an gceann in aghaidh an tsrutha. Ansin: athbhreithniú `git diff packages/ui-kit`, déan pas amhairc ar sholáthraithe, socruithe, teaglama, úsáid agus críochphointe sa dá théama, reáchtáil `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus oscail an PR leis an changelog in aghaidh an tsrutha.
 
 ## 6. léaráidí README
 
