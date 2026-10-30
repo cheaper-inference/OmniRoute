@@ -910,7 +910,12 @@ function convertOpenAINonStreamingToClaude(
     }
   }
 
-  const stopReason = openAIFinishReasonToClaudeStopReason(choiceObj.finish_reason);
+  const mappedStopReason = openAIFinishReasonToClaudeStopReason(choiceObj.finish_reason);
+  // #18270: some OpenAI-compatible upstreams report finish_reason "stop" together
+  // with tool_calls. Claude requires stop_reason "tool_use" whenever tool_use
+  // blocks are present, otherwise the agent loop stops after a single turn.
+  const stopReason =
+    hasToolCalls && mappedStopReason === "end_turn" ? "tool_use" : mappedStopReason;
 
   const usageSrc = toRecord(openaiResponse.usage);
   const promptTokens = toFiniteNumber(usageSrc.prompt_tokens, 0);
