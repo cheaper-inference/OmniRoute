@@ -848,6 +848,15 @@ export function getQuotaCache(connectionId: string): QuotaCacheEntry | null {
   return getState().cache.get(connectionId) || null;
 }
 
+/**
+ * Cached quota entry, hydrated from `quota_snapshots` on a miss (#5015). Account
+ * ranking reads through this so an evicted entry is not mistaken for "no
+ * telemetry" (#18541).
+ */
+export function getQuotaCacheOrSnapshot(connectionId: string): QuotaCacheEntry | null {
+  return hydrateQuotaCacheFromSnapshots(connectionId);
+}
+
 function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry | null {
   const { cache } = getState();
   if (cache.has(connectionId)) return cache.get(connectionId) || null;

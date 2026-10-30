@@ -431,9 +431,10 @@ export function resolveExpiryFirstConfig(config: Record<string, unknown> | null 
  * has already passed has refilled and caps nothing. The session reset is still
  * the deadline when it is the only window, or when no longer window reports one.
  *
- * With burn telemetry, each window's expiring tranche is projected to its own
- * reset so a short session window is not scored using weekly burn, while the
- * tightest-window bound on `usable` is preserved.
+ * With burn telemetry, each deadline window's expiring tranche is projected to
+ * its own reset, while the tightest-window bound on `usable` is preserved. The
+ * session follows the deadline rule above: it is scored on its own reset only
+ * when no longer window reports one (#18541).
  *
  * Deliberately different from `scoreResetAwareQuota`, which ranks mostly on
  * leftover and adds `resetUrgency * (1 - remaining)` — a RECOVERY signal that
@@ -485,6 +486,8 @@ export function scoreExpiryFirstQuota(
     if (capOnly) msUntilSessionReset = Math.min(msUntilSessionReset, msLeft);
     else msUntilReset = Math.min(msUntilReset, msLeft);
   }
+  // Only when no longer window reports a reset may the session set the deadline.
+  const sessionIsCapOnly = hasLongerWindow && Number.isFinite(msUntilReset);
   if (!Number.isFinite(msUntilReset)) msUntilReset = msUntilSessionReset;
 
   if (usable <= config.exhaustedFloor) return { score: 0 };
@@ -505,7 +508,10 @@ export function scoreExpiryFirstQuota(
 
   let score = 0;
   let hasReset = false;
-  for (const { key, window } of windows) {
+  for (const { key, window, session } of windows) {
+    // A session refills many times before a longer window resets, so its reset
+    // is not where quota is lost (#18541); it already caps `usable` above.
+    if (session && sessionIsCapOnly) continue;
     const resetMs = parseResetTimeMs(window.resetAt);
     if (!Number.isFinite(resetMs)) continue;
     hasReset = true;
