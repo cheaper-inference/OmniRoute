@@ -1,0 +1,1 @@
+- **feat(api):** `/v1/models` gives built-in and synced models a human-readable `name` (registry name first, then the synced name, else one derived from the id), and the Crush and OpenClaw config writers use the same label ([#18354](https://github.com/cheaper-inference/OmniRoute/pull/18354)) — thanks @asterxsk
