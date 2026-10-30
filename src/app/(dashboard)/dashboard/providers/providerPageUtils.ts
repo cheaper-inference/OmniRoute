@@ -305,7 +305,7 @@ export function connectionMatchesProviderCard(
 
 type GetProviderStats = (
   providerId: string,
-  authType: "oauth" | "free" | "apikey"
+  authType: ProviderEntry["toggleAuthType"]
 ) => ProviderStatsSnapshot;
 
 function getProviderSortLabel<TProvider>(entry: ProviderEntry<TProvider>): string {

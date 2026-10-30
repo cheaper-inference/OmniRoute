@@ -196,7 +196,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
 
 // ── ActivityHeatmap ────────────────────────────────────────────────────────
 
-export function ActivityHeatmap({ activityMap }) {
+export function ActivityHeatmap({ activityMap }: { activityMap?: Record<string, number> }) {
   const t = useTranslations("analytics");
   const locale = useLocale();
   const scrollRef = useRef<HTMLDivElement>(null);

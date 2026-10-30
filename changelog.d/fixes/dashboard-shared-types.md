@@ -1,0 +1,1 @@
+- Restore shared dashboard type contracts for no-auth provider statistics, React JSX, activity totals, and optional donut legend callbacks; reject malformed OAuth authorization URLs before opening a browser window.

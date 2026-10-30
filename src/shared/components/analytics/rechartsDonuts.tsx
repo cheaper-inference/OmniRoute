@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type Key } from "react";
 import { useTranslations } from "next-intl";
 import Card from "../Card";
 import { getSeriesColor } from "./chartColors";
@@ -12,6 +12,17 @@ import {
 import { PROVIDER_COLORS } from "./chartColors";
 import { ChartLoadingCard, DarkTooltip, useRecharts } from "./rechartsCore";
 
+type DonutSegment = { name: string; value: number; fill: string; fullName?: string };
+type CompactDonutCardProps = {
+  pieData: DonutSegment[];
+  title: string;
+  formatter: (value: number) => string;
+  valueClassName?: string;
+  labelClassName?: string;
+  getLegendKey?: (segment: DonutSegment, index: number) => Key;
+  getLegendTitle?: (segment: DonutSegment) => string;
+};
+
 function CompactDonutCard({
   pieData,
   title,
@@ -20,7 +31,7 @@ function CompactDonutCard({
   labelClassName = "",
   getLegendKey,
   getLegendTitle,
-}) {
+}: CompactDonutCardProps) {
   const recharts = useRecharts();
 
   if (!recharts) {
