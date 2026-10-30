@@ -66,6 +66,9 @@ function getRow(id: string): TicketRow | undefined {
     TicketRow | undefined;
 }
 
+/** States that still hold a request payload and can compete for a dispatch slot. */
+const ACTIVE_STATES_SQL = "('pending', 'running', 'needs_confirmation')";
+
 export function enqueueQuotaRecoveryTicket(input: {
   apiKeyId: string;
   turnKey: string;
@@ -73,6 +76,8 @@ export function enqueueQuotaRecoveryTicket(input: {
   requestPayload: string;
   nextAttemptAt: string;
   expiresAt: string;
+  /** New turns are refused once the key holds this many active tickets. */
+  maxActivePerKey?: number;
 }): QuotaRecoveryTicket {
   const ciphertext = encryptRequired(input.requestPayload);
   const db = getDbInstance();
@@ -83,27 +88,57 @@ export function enqueueQuotaRecoveryTicket(input: {
     .update("\0")
     .update(input.requestPayload)
     .digest("hex");
-  db.prepare(
-    `INSERT OR IGNORE INTO quota_recovery_tickets
-      (id, api_key_id, turn_key, request_hash, endpoint, request_ciphertext, next_attempt_at,
-       expires_at, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
-  ).run(
-    id,
-    input.apiKeyId,
-    input.turnKey,
-    requestHash,
-    input.endpoint,
-    ciphertext,
-    input.nextAttemptAt,
-    input.expiresAt,
-    now,
-    now
+  const selectTurn = db.prepare(
+    "SELECT * FROM quota_recovery_tickets WHERE api_key_id = ? AND turn_key = ?"
   );
-  const row = db
-    .prepare("SELECT * FROM quota_recovery_tickets WHERE api_key_id = ? AND turn_key = ?")
-    .get(input.apiKeyId, input.turnKey) as TicketRow;
-  if (row.request_hash !== requestHash) {
+  // IMMEDIATE takes the write lock before the count, so a second connection waits on
+  // busy_timeout instead of failing the read-to-write upgrade with SQLITE_BUSY.
+  let row: TicketRow | undefined;
+  db.immediate(() => {
+    const existing = selectTurn.get(input.apiKeyId, input.turnKey) as TicketRow | undefined;
+    if (existing) {
+      row = existing;
+      return;
+    }
+    if (input.maxActivePerKey !== undefined) {
+      // Pinned to idx_quota_recovery_due, which has `state`, so only active rows
+      // are looked up (api_key_id sits before the payload). The (api_key_id,
+      // turn_key) index has no `state`: through it, or through a table scan,
+      // the count reads `state`, past both ciphertext columns, from every row
+      // the key holds, completed ones included. A unary + is not enough: with
+      // the planner statistics from sqlitePlannerStats.ts, SQLite can pick a
+      // table scan instead of the due index, depending on the data.
+      const { active } = db
+        .prepare(
+          `SELECT COUNT(*) AS active FROM quota_recovery_tickets
+           INDEXED BY idx_quota_recovery_due
+           WHERE api_key_id = ? AND state IN ${ACTIVE_STATES_SQL}`
+        )
+        .get(input.apiKeyId) as { active: number };
+      if (active >= input.maxActivePerKey) {
+        throw new Error("Quota recovery ticket limit reached for this API key");
+      }
+    }
+    db.prepare(
+      `INSERT OR IGNORE INTO quota_recovery_tickets
+        (id, api_key_id, turn_key, request_hash, endpoint, request_ciphertext, next_attempt_at,
+         expires_at, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(
+      id,
+      input.apiKeyId,
+      input.turnKey,
+      requestHash,
+      input.endpoint,
+      ciphertext,
+      input.nextAttemptAt,
+      input.expiresAt,
+      now,
+      now
+    );
+    row = selectTurn.get(input.apiKeyId, input.turnKey) as TicketRow;
+  });
+  if (!row || row.request_hash !== requestHash) {
     throw new Error("Recovery turn identity was reused with a different request");
   }
   return toTicket(row);
@@ -128,15 +163,31 @@ export function claimQuotaRecoveryTicket(id: string, now = new Date()): QuotaRec
   return updated.changes === 1 ? toTicket(getRow(id)!) : null;
 }
 
+/**
+ * Round-robin across keys so one key's backlog cannot fill every slot of a tick.
+ * The ranking reads only the due index, rowid and api_key_id. Those sit in front of
+ * the encrypted payload (up to about 1 MiB), so no due row's overflow pages are read.
+ * Reading expires_at or created_at there would walk every one of them. Ties fall back
+ * to rowid (insert order). Expiry is checked on the joined rows; the tick expires stale
+ * tickets before it calls this, so that check does not shrink a batch in practice.
+ */
 export function listDueQuotaRecoveryTickets(now = new Date(), limit = 25): QuotaRecoveryTicket[] {
   const iso = now.toISOString();
   const rows = getDbInstance()
     .prepare(
-      `SELECT * FROM quota_recovery_tickets
-       WHERE state = 'pending' AND next_attempt_at <= ? AND expires_at > ?
-       ORDER BY next_attempt_at, created_at LIMIT ?`
+      `SELECT t.* FROM (
+         SELECT rowid AS rid, next_attempt_at, ROW_NUMBER() OVER (
+           PARTITION BY api_key_id ORDER BY next_attempt_at, rowid
+         ) AS key_rank
+         FROM quota_recovery_tickets
+         WHERE state = 'pending' AND next_attempt_at <= ?
+         ORDER BY key_rank, next_attempt_at, rid LIMIT ?
+       ) AS due
+       JOIN quota_recovery_tickets AS t ON t.rowid = due.rid
+       WHERE t.expires_at > ?
+       ORDER BY due.key_rank, due.next_attempt_at, due.rid`
     )
-    .all(iso, iso, Math.max(1, Math.min(limit, 100))) as TicketRow[];
+    .all(iso, Math.max(1, Math.min(limit, 100)), iso) as TicketRow[];
   return rows.map(toTicket);
 }
 
@@ -244,5 +295,19 @@ export function expireQuotaRecoveryTickets(now = new Date()): number {
        WHERE expires_at <= ? AND state IN ('pending', 'completed', 'failed', 'needs_confirmation')`
     )
     .run(iso, iso);
+  return changed.changes;
+}
+
+/** Delete expired or cancelled rows (no payload left) `retentionMs` after their expiry. */
+export function purgeFinishedQuotaRecoveryTickets(
+  now = new Date(),
+  retentionMs = 24 * 60 * 60_000
+): number {
+  const changed = getDbInstance()
+    .prepare(
+      `DELETE FROM quota_recovery_tickets
+       WHERE state IN ('expired', 'cancelled') AND expires_at <= ?`
+    )
+    .run(new Date(now.getTime() - retentionMs).toISOString());
   return changed.changes;
 }
