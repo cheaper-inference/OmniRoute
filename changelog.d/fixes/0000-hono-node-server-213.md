@@ -1,0 +1,1 @@
+- **fix(deps):** raise the `@hono/node-server` override to `^2.1.3` (resolves 2.1.5), which fixes the double path decoding in `serveStatic`; OmniRoute uses the package only through the MCP SDK's Streamable HTTP transport (#0000)
