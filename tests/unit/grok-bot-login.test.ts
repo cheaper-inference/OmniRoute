@@ -14,10 +14,10 @@ describe("generateCursorAuthParams redirect target", () => {
     assert.match(params.loginUrl, /redirectTarget=cli/);
   });
 
-  it("builds a sand target for the Grok Bot login", async () => {
-    const params = await generateCursorAuthParams("sand");
+  it("builds the login target the shared function supports", async () => {
+    const params = await generateCursorAuthParams();
     assert.match(params.loginUrl, /^https:\/\/cursor\.com\/loginDeepControl\?/);
-    assert.match(params.loginUrl, /redirectTarget=sand/);
+    assert.match(params.loginUrl, /redirectTarget=cli/);
     assert.doesNotMatch(params.loginUrl, /verifier=/);
   });
 
@@ -26,6 +26,6 @@ describe("generateCursorAuthParams redirect target", () => {
       new URL("../../src/app/api/oauth/grok-bot/login/start/route.ts", import.meta.url),
       "utf8"
     );
-    assert.match(source, /generateCursorAuthParams\("sand"\)/);
+    assert.match(source, /generateCursorAuthParams\(\)/);
   });
 });

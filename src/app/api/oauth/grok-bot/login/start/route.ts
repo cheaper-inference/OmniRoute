@@ -21,7 +21,7 @@ export async function POST(request: Request) {
   if (authResponse) return authResponse;
 
   try {
-    const params = await generateCursorAuthParams("sand");
+    const params = await generateCursorAuthParams();
     const { sessionId, loginUrl } = createCursorLoginSession(params);
     return NextResponse.json({
       success: true,
