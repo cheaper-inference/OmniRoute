@@ -1,4 +1,10 @@
 import { updateProviderConnection } from "@/lib/db/providers";
+import {
+  captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import type { BaseExecutor } from "@omniroute/open-sse/executors/base";
 import {
@@ -109,6 +115,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
   if (!shouldAttemptRotatingRefresh(connection.provider, opts.allowRotatingRefresh)) {
     return { connection, refreshed: false };
   }
+  const fence =
+    connection.provider === "codex"
+      ? (passive.isPassiveCodex(connection.provider)
+          ? captureCodexConnectionOwnerFence
+          : captureCodexConnectionFence)(connection as unknown as JsonRecord, connection.id)
+      : null;
   const executor = await resolveExecutor(connection.provider);
   const credentials = {
     connectionId: connection.id,
@@ -126,6 +138,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   if (passive.isPassiveCodex(connection.provider)) {
     const adopted = await passive.adoptPassiveCodex(connection);
+    adoptCodexConnectionFence(
+      fence,
+      connection as unknown as JsonRecord,
+      adopted as unknown as JsonRecord,
+      connection.id
+    );
     return {
       connection: adopted,
       refreshed: false,
@@ -153,7 +171,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   const updateData = buildCredentialUpdateData(connection, refreshResult);
 
-  await updateProviderConnection(connection.id, updateData);
+  const persisted = await updateProviderConnection(
+    connection.id,
+    updateData,
+    fence ? { expectedCodexFence: fence } : undefined
+  );
+  if (fence && !persisted) throw new StaleCodexOperationError();
 
   return {
     connection: {

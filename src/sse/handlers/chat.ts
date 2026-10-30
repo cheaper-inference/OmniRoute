@@ -66,6 +66,7 @@ import {
 import { getPassthroughProviders } from "@omniroute/open-sse/config/providerRegistry.ts";
 import * as log from "../utils/logger";
 import { checkAndRefreshToken } from "../services/tokenRefresh";
+import { isCodexResponseCurrent, runWithCodexResponseFence } from "@/lib/db/codexConnectionFences";
 import { createHookContext, runHooks, initPreRequestRegistry } from "@/lib/middleware/registry";
 import { rejectPeerRequest } from "@/shared/resilience/peerRouting";
 import { isRuntimeProviderRetirementError } from "@/shared/constants/providerRetirement";
@@ -2230,8 +2231,10 @@ async function handleSingleModelChat(
       });
 
       if (result.success) {
-        clearModelLock(provider, credentials.connectionId, model);
-        markQuotaHealthy(credentials.connectionId);
+        if (isCodexResponseCurrent(result.response, true)) {
+          clearModelLock(provider, credentials.connectionId, model);
+          markQuotaHealthy(credentials.connectionId);
+        }
         // Acquired probes were settled inside execute(); other successes settle here or in combo.
         if (
           !wasProviderProbe &&
@@ -2729,23 +2732,25 @@ async function handleSingleModelChat(
 
       const { shouldFallback, cooldownMs } = skipConnectionDisable
         ? { shouldFallback: false, cooldownMs: 0 }
-        : await markAccountUnavailable(
-            credentials.connectionId,
-            result.status,
-            errorStr,
-            provider,
-            model,
-            providerProfile,
-            buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
-              persistUnavailableState: !(
-                isCombo &&
-                result.status === 429 &&
-                (failureKind === "rate_limit" || failureKind === "transient")
-              ),
-              isCombo,
-              headers: result.response.headers,
-              structuredError: { code: result.errorCode, type: result.errorType },
-            })
+        : await runWithCodexResponseFence(result.response, () =>
+            markAccountUnavailable(
+              credentials.connectionId,
+              result.status,
+              errorStr,
+              provider,
+              model,
+              providerProfile,
+              buildExhaustionOptions(runtimeOptions.correlationId ?? null, {
+                persistUnavailableState: !(
+                  isCombo &&
+                  result.status === 429 &&
+                  (failureKind === "rate_limit" || failureKind === "transient")
+                ),
+                isCombo,
+                headers: result.response.headers,
+                structuredError: { code: result.errorCode, type: result.errorType },
+              })
+            )
           );
 
       // An explicit pin (combo step `connectionId` / `x-omniroute-connection`) is an

@@ -1,4 +1,5 @@
 import { inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { inheritCodexResponseFence } from "@/lib/db/codexConnectionFences";
 import {
   attachOmniRouteMetaHeaders,
   buildOmniRouteResponseMetaHeaders,
@@ -371,13 +372,16 @@ export function materializeDeduplicatedExecutionResult<T extends Record<string, 
 
   return {
     ...result,
-    response: inheritEmptyTurnPolicy(
+    response: inheritCodexResponseFence(
       result.response as Response,
-      new Response(snapshot.payload, {
-        status: snapshot.status,
-        statusText: snapshot.statusText,
-        headers: snapshot.headers,
-      })
+      inheritEmptyTurnPolicy(
+        result.response as Response,
+        new Response(snapshot.payload, {
+          status: snapshot.status,
+          statusText: snapshot.statusText,
+          headers: snapshot.headers,
+        })
+      )
     ),
   } as T;
 }

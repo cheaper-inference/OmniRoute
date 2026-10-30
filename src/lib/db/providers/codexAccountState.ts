@@ -2,6 +2,7 @@ import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
+import { mayWriteCodexConnection } from "../codexConnectionFences";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -66,6 +67,7 @@ export function stripCodexChildCooldownsFromConnection(
 ): void {
   if (typeof id !== "string" || id.length === 0) return;
   const db = getDbInstance() as unknown as DbLike;
+  if (!mayWriteCodexConnection(id)) return;
   const alsoClearTopLevel = options?.alsoClearTopLevel === true;
   const candidate = db.prepare("SELECT provider FROM provider_connections WHERE id = ?").get(id);
   const isCodex = toRecord(candidate).provider === "codex";
@@ -73,6 +75,7 @@ export function stripCodexChildCooldownsFromConnection(
 
   backupDbFile("pre-write");
   const wrote = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return false;
     const existing = db
       .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
       .get(id);
@@ -129,6 +132,7 @@ export async function updateCodexScopedQuotaState(
 
   backupDbFile("pre-write");
   const persisted = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return null;
     const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
     if (!existing) return null;
 
@@ -240,6 +244,7 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
 
   backupDbFile("pre-write");
   const wrote = db.transaction(() => {
+    if (!mayWriteCodexConnection(id)) return false;
     const existing = db
       .prepare("SELECT provider, provider_specific_data FROM provider_connections WHERE id = ?")
       .get(id);

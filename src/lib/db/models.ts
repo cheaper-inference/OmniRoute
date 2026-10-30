@@ -7,6 +7,7 @@
 import { isRetiredGitHubCopilotModelId } from "@omniroute/open-sse/config/providers/registry/github/retiredModels.ts";
 
 import { getDbInstance } from "./core";
+import { withCodexConnectionWrite, StaleCodexOperationError } from "./codexConnectionFences";
 import { isSyncedAtFresh } from "./models/syncedCatalogFreshness";
 import { getProviderConnectionsCount, touchConnectionSyncedModelsAt } from "./providers";
 import { type JsonRecord, getKeyValue } from "./models/shared";
@@ -612,12 +613,14 @@ export async function replaceSyncedAvailableModelsForConnection(
 ): Promise<SyncedAvailableModel[]> {
   const key = `${providerId}:${connectionId}`;
   const normalizedModels = normalizeSyncedAvailableModels(models, providerId);
-  persistCanonicalSyncedAvailableModels(key, normalizedModels, normalizeSyncedAvailableModels);
+  const applied = withCodexConnectionWrite(connectionId, () => {
+    persistCanonicalSyncedAvailableModels(key, normalizedModels, normalizeSyncedAvailableModels);
+    // Catalog and sync timestamp belong to one operation/owner and commit together.
+    if (connectionId) touchConnectionSyncedModelsAt(connectionId);
+    return true;
+  });
+  if (!applied) throw new StaleCodexOperationError();
   notifyQuotaCombosForProvider(providerId);
-  // #12849: stamp the sync time on every successful sync — even a re-sync that
-  // returns an unchanged list proves the catalog is still current, so staleness
-  // gating in getActiveSyncedCatalog must not treat it as aging regardless.
-  if (connectionId) await touchConnectionSyncedModelsAt(connectionId);
   // Return the full unioned list for the provider
   return getSyncedAvailableModels(providerId);
 }

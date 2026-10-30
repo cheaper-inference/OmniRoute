@@ -1,4 +1,5 @@
 import type { CredentialSelectionOptions } from "./credentialSelectionOptions";
+import { mayWriteCodexConnection } from "@/lib/db/codexConnectionFences";
 export type { CredentialSelectionOptions } from "./credentialSelectionOptions";
 import { qoderSupportsCallerTools } from "@omniroute/open-sse/services/qoderCapabilities";
 import { randomUUID } from "crypto";
@@ -2360,6 +2361,8 @@ export async function markAccountUnavailable(
 
   try {
     await currentMutex;
+    if (provider === "codex" && !mayWriteCodexConnection(connectionId))
+      return { shouldFallback: true, cooldownMs: 0 };
 
     // STRICT_ZERO_COST: this connection just failed (whatever the reason) —
     // drop any cached "SAFE" free-allowance reading for it immediately rather
@@ -2394,6 +2397,8 @@ export async function markAccountUnavailable(
       .map(toProviderConnection)
       .filter((connection) => connection.id.length > 0);
     const conn = connections.find((connection) => connection.id === connectionId);
+    if (provider === "codex" && !mayWriteCodexConnection(connectionId))
+      return { shouldFallback: true, cooldownMs: 0 };
     const backoffLevel = conn?.backoffLevel || 0;
 
     // T06/T10/T36: terminal statuses should not be overwritten by transient cooldown state.
@@ -2489,6 +2494,8 @@ export async function markAccountUnavailable(
     // lockout sites (per-model quota, grok-web 403, local 404) never did, so the cap
     // fell back to BACKOFF_CONFIG.max here. Resolve it once and pass it at every site.
     const mlSettings = resolveModelLockoutSettings(await getCachedSettings());
+    if (provider === "codex" && !mayWriteCodexConnection(connectionId))
+      return { shouldFallback: true, cooldownMs: 0 };
     const fallbackResult = checkFallbackError(
       status,
       errorText,
@@ -3213,6 +3220,7 @@ export async function clearAccountError(
   connectionId: string,
   currentConnection: Partial<RecoverableConnectionState>
 ) {
+  if (!mayWriteCodexConnection(connectionId)) return;
   oauthAuthBackoff.resetStreak(connectionId);
   // Only update if currently has error status
   const hasError =
