@@ -254,17 +254,8 @@ export async function dispatchWithCooldownRetry(opts: {
           "COMBO",
           `All targets failed — retrying set (${setTry}/${extra.maxSetRetries})`
         );
-        await new Promise((resolve) => {
-          const timer = setTimeout(resolve, extra.setRetryDelayMs);
-          deps.signal?.addEventListener(
-            "abort",
-            () => {
-              clearTimeout(timer);
-              resolve(undefined);
-            },
-            { once: true }
-          );
-        });
+        // Keep zero-delay retries on a timer turn so queued cancellation can run.
+        await waitForCooldownAwareRetry(Math.max(1, extra.setRetryDelayMs), deps.signal);
         if (deps.signal?.aborted) {
           deps.log.info("COMBO", "Client disconnected during set retry delay — aborting");
           return errorResponse(499, "Client disconnected");
