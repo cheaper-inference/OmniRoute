@@ -5,6 +5,7 @@ import {
   SEARCH_PROVIDERS,
 } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { foldUsageRowsByFamily } from "@/lib/providerFamilyAgg";
+import { NOAUTH_PROVIDERS } from "@/shared/constants/providers/noauth";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 
 /**
@@ -73,12 +74,30 @@ export interface SearchProviderCountRow {
 // /api/provider-metrics — aggregate per-provider stats
 // ---------------------------------------------------------------------------
 
+// Ids and aliases of the no-auth providers. They are catalogue constants, but filtered to
+// a safe charset anyway since they are inlined into the SQL text below.
+const NOAUTH_PROVIDER_KEYS = Object.values(NOAUTH_PROVIDERS)
+  .flatMap((provider: { id: string; alias?: string }) => [provider.id, provider.alias])
+  .filter((key): key is string => typeof key === "string" && /^[a-z0-9._-]+$/i.test(key));
+
+/**
+ * `call_logs c` rows whose provider still exists: it has a `provider_connections` row
+ * (#10714 — a deleted provider must not resurface from retained logs), or it is a
+ * no-auth provider, which works without one and logs with connection_id "noauth".
+ */
+const LIVE_PROVIDER_FILTER_SQL = `(
+        EXISTS (SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider)
+        OR c.provider IN (${NOAUTH_PROVIDER_KEYS.map((key) => `'${key}'`).join(", ") || "NULL"})
+      )`;
+
 /**
  * Returns one row per provider with call-level aggregates plus last-status
  * subselects. Excludes rows where provider is NULL or '-', and excludes
  * providers with no live row in `provider_connections` — a deleted provider
  * connection must not keep surfacing as a ghost topology node forever from
- * its retained historical call_logs rows. See #10714.
+ * its retained historical call_logs rows. See #10714. No-auth providers never
+ * get a connection row (they are on unless blocked), so they are admitted by id
+ * instead — see `LIVE_PROVIDER_FILTER_SQL`.
  *
  * Rows stay per raw provider (one per topology node, index-backed subqueries);
  * family totals are folded in JS by `foldMetricRowsByFamily` (#15005).
@@ -118,9 +137,7 @@ export const PROVIDER_METRICS_SQL = `SELECT
       ) as lastErrorStatus
     FROM call_logs c
     WHERE c.provider IS NOT NULL AND c.provider != '-'
-      AND EXISTS (
-        SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
-      )
+      AND ${LIVE_PROVIDER_FILTER_SQL}
     GROUP BY c.provider`;
 
 export function getProviderMetrics(): ProviderMetricRow[] {
@@ -156,9 +173,7 @@ export function getProviderUsageSince(since: string): ProviderUsageRow[] {
         FROM call_logs c
         WHERE c.provider IS NOT NULL AND c.provider != '-'
           AND c.timestamp >= @since
-          AND EXISTS (
-            SELECT 1 FROM provider_connections pc WHERE pc.provider = c.provider
-          )
+          AND ${LIVE_PROVIDER_FILTER_SQL}
         GROUP BY c.provider`
     )
     .all({ since }) as ProviderUsageRow[];
