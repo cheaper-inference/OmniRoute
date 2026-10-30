@@ -283,6 +283,9 @@ export function shouldRecordProviderBreakerFailure(args: {
 const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   context_length_exceeded: true,
   context_window_exceeded: true,
+  // The provider completed the request, but its returned tool-call arguments
+  // were unusable. This must not poison connection, model, or provider health.
+  malformed_tool_call_arguments: true,
   upstream_empty_response: true,
   upstream_response_failed: true,
   // The upstream cancelled THIS attempt (the request itself was fine, the

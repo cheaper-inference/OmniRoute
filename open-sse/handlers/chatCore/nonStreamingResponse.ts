@@ -55,6 +55,12 @@ import {
   modelAfterFamilyFallback,
 } from "../../services/modelFamilyFallbackPolicy.ts";
 import { runNonStreamingProviderLeg } from "../chatCore/nonStreamingProviderLeg.ts";
+import {
+  MALFORMED_TOOL_CALL_ARGUMENTS_CODE,
+  MALFORMED_TOOL_CALL_ARGUMENTS_MESSAGE,
+  MalformedToolCallArgumentsError,
+} from "../chatCore/malformedToolCallArguments.ts";
+import { UPSTREAM_RESPONDED_ERROR_TYPE } from "../../utils/diagnostics.ts";
 import type { NonStreamingProviderLegResult } from "@/lib/skills/toolLoopTypes.ts";
 import { finalizeToolLoopError } from "../chatCore/nonStreamingFinalization.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
@@ -1168,6 +1174,76 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           pipelineRecovered,
         },
       };
+    // The provider answered, but its tool-call arguments cannot be translated
+    // into an object. Surface a safe terminal error without treating the
+    // connection or provider as unavailable.
+    if (error instanceof MalformedToolCallArgumentsError) {
+      log?.warn?.(
+        "TOOL_ARGS",
+        `${provider}/${model} returned malformed tool-call arguments (${MALFORMED_TOOL_CALL_ARGUMENTS_CODE})`
+      );
+      appendRequestLog({
+        model,
+        provider,
+        connectionId,
+        status: `FAILED ${MALFORMED_TOOL_CALL_ARGUMENTS_CODE}`,
+      }).catch(() => {});
+      const result = createErrorResult(
+        HTTP_STATUS.BAD_GATEWAY,
+        MALFORMED_TOOL_CALL_ARGUMENTS_MESSAGE,
+        null,
+        MALFORMED_TOOL_CALL_ARGUMENTS_CODE,
+        UPSTREAM_RESPONDED_ERROR_TYPE
+      );
+      persistAttemptLogs({
+        status: HTTP_STATUS.BAD_GATEWAY,
+        error: result.error,
+        providerRequest: finalBody || translatedBody,
+        clientResponse: buildErrorBody(
+          HTTP_STATUS.BAD_GATEWAY,
+          MALFORMED_TOOL_CALL_ARGUMENTS_MESSAGE,
+          undefined,
+          { code: MALFORMED_TOOL_CALL_ARGUMENTS_CODE, type: UPSTREAM_RESPONDED_ERROR_TYPE }
+        ),
+        claudeCacheMeta: claudePromptCacheLogMeta,
+        cacheSource: "upstream",
+      });
+      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, MALFORMED_TOOL_CALL_ARGUMENTS_CODE);
+      void emitRoutingEvent(
+        createRoutingEvent({
+          requestId: traceId || pendingRequestId || "unknown",
+          provider: provider || "unknown",
+          model: model || "unknown",
+          strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
+          latencyMs: Date.now() - startTime,
+          ttftMs: null,
+          inputTokens: null,
+          outputTokens: null,
+          cost: null,
+          retries: 0,
+          fallbackUsed: false,
+          outcome: "malformed",
+          status: HTTP_STATUS.BAD_GATEWAY,
+          finishReason: null,
+          connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
+        })
+      );
+      return {
+        response: result,
+        carry: {
+          translatedBody,
+          currentModel,
+          finalBody,
+          providerResponse,
+          providerHeaders,
+          effectiveServiceTier,
+          claudePromptCacheLogMeta,
+          reasoningReplayHistory,
+          pipelineRecovered,
+        },
+      };
+    }
     // isSemaphoreCapacityError already reads the code through getSafeErrorMetadata,
     // so a hostile rejection cannot escape this classification.
     if (isSemaphoreCapacityError(error)) {
