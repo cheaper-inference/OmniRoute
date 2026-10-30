@@ -175,9 +175,17 @@ export function buildCallLogListRows({
   }
 
   const pendingIds = new Set(activeEntries.map((entry) => entry.id));
+  // Since #14324 a chat attempt's row gets a fresh UUID while the in-memory entry stays
+  // keyed by pendingRequestId, so ids alone never match: the shared correlationId is
+  // what pairs a finished request with its persisted row(s). Active entries are kept
+  // either way — a request still in flight is not done just because one attempt saved.
+  const persistedCorrelationIds = new Set(
+    logs.map((log: any) => log.correlationId).filter(Boolean)
+  );
   const completedEntries: any[] = [];
   for (const detail of completedDetails) {
     if (persistedIds.has(detail.id) || pendingIds.has(detail.id)) continue;
+    if (detail.correlationId && persistedCorrelationIds.has(detail.correlationId)) continue;
     const completedAt = typeof detail.completedAt === "number" ? detail.completedAt : null;
     const duration =
       typeof detail.durationMs === "number" && Number.isFinite(detail.durationMs)
