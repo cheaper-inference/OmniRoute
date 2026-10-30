@@ -43,9 +43,15 @@ export function isRequestedModelAdvertised(
 
 /**
  * Self-hosted hosts and Codex subscription accounts can advertise different
- * inventories. For Codex, once an account inventory is known, unsynchronized
- * accounts are not eligible guesses for models advertised by another account.
- * With no inventories at all, retain the existing bootstrap/offline behavior.
+ * inventories. For Codex, once an account inventory advertises the requested
+ * model, unsynchronized accounts are not eligible guesses for it. With no
+ * inventories at all, retain the existing bootstrap/offline behavior.
+ *
+ * #18311: a Codex model that no synced inventory lists (a user-added custom
+ * model, or one released after the last sync) carries no evidence about which
+ * account can serve it, so Codex accounts are not filtered for it and the
+ * upstream decides. Filtering every account answered a misleading
+ * provider_not_configured despite active accounts.
  */
 export async function loadAdvertisedModelsForConnections(
   connections: ProviderConnectionView[],
@@ -75,10 +81,16 @@ export async function loadAdvertisedModelsForConnections(
       }
       // Malformed persisted rows: fail open for the whole provider.
       if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) return;
-      if (
-        providerId === "codex" &&
-        Object.values(byConnection).some((models) => Array.isArray(models) && models.length > 0)
-      ) {
+      if (providerId === "codex") {
+        const advertisedByAnyAccount = Object.values(byConnection).some(
+          (models) =>
+            Array.isArray(models) &&
+            // An empty set means "advertises everything" to the matcher, so an
+            // empty row must not count as evidence for the requested model.
+            models.length > 0 &&
+            isRequestedModelAdvertised(providerId, requestedModel, new Set(models.map((m) => m.id)))
+        );
+        if (!advertisedByAnyAccount) return;
         for (const connection of connections) {
           if (connection.provider === providerId) advertised.set(connection.id, new Set());
         }

@@ -276,7 +276,9 @@ test("Codex reasoning-suffix aliases select the account that advertises the base
   }
 });
 
-test("Codex suffixed request for a model no account advertises stays filtered", async () => {
+test("Codex suffixed request for a model no account advertises is not filtered (#18311)", async () => {
+  // No inventory lists the base model either, so the inventories carry no evidence
+  // about which account can serve it and every account stays eligible.
   await resetStorage();
   const { proId, plusId } = await seedTwoAccounts();
 
@@ -287,7 +289,7 @@ test("Codex suffixed request for a model no account advertises stays filtered", 
       [accountId],
       "gpt-unadvertised-test-high"
     );
-    assert.equal(selectedConnectionId(selected), null);
+    assert.equal(selectedConnectionId(selected), accountId);
   }
 });
 
@@ -307,4 +309,65 @@ test("Codex keeps matching an inventory id that already carries a reasoning suff
 
   const selected = await auth.getProviderCredentials(PROVIDER, null, null, "gpt-6-sol-high");
   assert.equal(selectedConnectionId(selected), proId);
+});
+
+test("Codex custom model listed by no synced inventory keeps every account eligible (#18311)", async () => {
+  // A user-added custom model (or one released after the last sync) is in no
+  // account inventory. Filtering on it left no account and answered
+  // provider_not_configured despite active accounts.
+  await resetStorage();
+  const { proId, plusId } = await seedTwoAccounts();
+
+  for (const model of ["gpt-6.1-terra", "cx/gpt-6.1-terra"]) {
+    const first = await auth.getProviderCredentials(PROVIDER, null, null, model);
+    assert.equal(selectedConnectionId(first), proId, `${model} must select an active account`);
+    const failover = await auth.getProviderCredentials(PROVIDER, proId, null, model);
+    assert.equal(
+      selectedConnectionId(failover),
+      plusId,
+      `${model} must still fail over to the other active account`
+    );
+  }
+});
+
+test("Codex custom model keeps an account with an empty synced inventory eligible (#18311)", async () => {
+  await resetStorage();
+  const { proId, plusId } = await seedTwoAccounts();
+  // A persisted but empty inventory row must not count as advertising every model.
+  // Written raw because replacing with [] deletes the row instead of storing it.
+  core
+    .getDbInstance()
+    .prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('syncedAvailableModels', ?, '[]')"
+    )
+    .run(`${PROVIDER}:${plusId}`);
+
+  const selected = await auth.getProviderCredentials(PROVIDER, proId, null, "gpt-6.1-terra");
+  assert.equal(selectedConnectionId(selected), plusId);
+});
+
+test("Codex model listed by one account still routes only to that account (#18311 keeps #15133)", async () => {
+  await resetStorage();
+  const { proId, plusId } = await seedTwoAccounts();
+
+  // Mixed request sequence on the same pool: a custom model is unfiltered while a
+  // model one account lists stays pinned to that account.
+  const custom = await auth.getProviderCredentials(PROVIDER, proId, null, "gpt-6.1-terra");
+  assert.equal(selectedConnectionId(custom), plusId);
+
+  const listed = await auth.getProviderCredentials(PROVIDER, null, null, "gpt-pro-only-test");
+  assert.equal(selectedConnectionId(listed), proId);
+  const noFallback = await auth.getProviderCredentials(PROVIDER, proId, null, "gpt-pro-only-test");
+  assert.equal(
+    selectedConnectionId(noFallback),
+    null,
+    "plus does not list gpt-pro-only-test and must not be selected for it"
+  );
+  const restricted = await auth.getProviderCredentials(
+    PROVIDER,
+    null,
+    [plusId],
+    "gpt-pro-only-test"
+  );
+  assert.equal(selectedConnectionId(restricted), null);
 });
