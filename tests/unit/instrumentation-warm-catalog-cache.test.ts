@@ -39,7 +39,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
-const { warmModelCatalogCache, isBackgroundServicesDisabled } =
+const { warmModelCatalogCache, isBackgroundServicesDisabled, shouldStartE2EBatchProcessor } =
   await import("../../src/instrumentation-node.ts");
 const { getUnifiedModelsResponse } = await import("../../src/app/api/v1/models/catalog.ts");
 
@@ -198,6 +198,57 @@ test("isBackgroundServicesDisabled correctly parses environment flag values", ()
       delete process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
     }
   }
+});
+
+test("the isolated E2E batch processor requires both explicit test flags", () => {
+  const base = {
+    NODE_ENV: "development",
+    OMNIROUTE_DISABLE_BACKGROUND_SERVICES: "true",
+  } as NodeJS.ProcessEnv;
+
+  assert.equal(
+    isBackgroundServicesDisabled(base),
+    true,
+    "the normal background kill switch remains on"
+  );
+  assert.equal(
+    shouldStartE2EBatchProcessor({ ...base, OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR: "1" }),
+    false,
+    "the batch flag alone must not enable the E2E exception"
+  );
+  assert.equal(
+    shouldStartE2EBatchProcessor({ ...base, OMNIROUTE_E2E_BOOTSTRAP_MODE: "open" }),
+    false,
+    "open E2E bootstrap alone must not enable the batch worker"
+  );
+  assert.equal(
+    shouldStartE2EBatchProcessor({
+      ...base,
+      OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
+      OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR: "1",
+    }),
+    true,
+    "both explicit E2E flags enable only the isolated batch-worker exception"
+  );
+  assert.equal(
+    shouldStartE2EBatchProcessor({
+      ...base,
+      NODE_ENV: "production",
+      OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
+      OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR: "1",
+    }),
+    false,
+    "production startup must not enable the E2E exception"
+  );
+  assert.equal(
+    shouldStartE2EBatchProcessor({
+      NODE_ENV: "development",
+      OMNIROUTE_E2E_BOOTSTRAP_MODE: "open",
+      OMNIROUTE_E2E_ENABLE_BATCH_PROCESSOR: "1",
+    } as NodeJS.ProcessEnv),
+    false,
+    "the exception requires the background-services kill switch"
+  );
 });
 
 // #14076 — registerNodejs() is too heavy to boot in a unit test, so this pins
