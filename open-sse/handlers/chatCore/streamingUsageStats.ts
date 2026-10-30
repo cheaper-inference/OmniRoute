@@ -19,6 +19,8 @@ import { type EffectiveServiceTier } from "./serviceTier.ts";
 export type RecordStreamingUsageStatsContext = {
   provider: string | null | undefined;
   model: string | null | undefined;
+  requestedModel?: string | null | undefined;
+  actualModel?: string | null | undefined;
   streamStatus: number;
   startTime: number;
   ttft: number;
@@ -33,10 +35,21 @@ export type RecordStreamingUsageStatsContext = {
 };
 
 function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsContext): void {
-  const { provider, model, streamStatus, startTime, ttft, streamErrorCode } = ctx;
+  const {
+    provider,
+    model,
+    requestedModel,
+    actualModel,
+    streamStatus,
+    startTime,
+    ttft,
+    streamErrorCode,
+  } = ctx;
   saveRequestUsage({
     provider: provider || "unknown",
     model: model || "unknown",
+    requestedModel: requestedModel || model || "unknown",
+    actualModel: actualModel || model || "unknown",
     tokens: usage,
     status: String(streamStatus),
     success: streamStatus === 200,

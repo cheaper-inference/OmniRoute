@@ -922,6 +922,8 @@ export async function getUsageDb(sinceIso?: string | null, limit?: number, curso
 export interface UsageEntry {
   provider?: string | null;
   model?: string | null;
+  requestedModel?: string | null;
+  actualModel?: string | null;
   /** Raw or normalized token usage — see the interface doc above. */
   tokens?: unknown;
   status?: string | null;

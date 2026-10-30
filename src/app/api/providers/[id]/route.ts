@@ -166,6 +166,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
       projectId,
       providerSpecificData: incomingPsd,
       rateLimitOverrides,
+      notes,
+      modelMap,
+      model_map: snakeModelMap,
     } = body;
 
     const existing = (await getCachedProviderConnectionById(id)) as Record<string, any> | null;
@@ -279,6 +282,9 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     if (proxyEnabled !== undefined) updateData.proxyEnabled = proxyEnabled;
     if (perKeyProxyEnabled !== undefined) updateData.perKeyProxyEnabled = perKeyProxyEnabled;
     if (quotaVisible !== undefined) updateData.quotaVisible = quotaVisible;
+    if (notes !== undefined) updateData.notes = notes;
+    const effectiveModelMap = modelMap !== undefined ? modelMap : snakeModelMap;
+    if (effectiveModelMap !== undefined) updateData.modelMap = effectiveModelMap;
 
     // Merge providerSpecificData (partial update — preserve existing keys not sent by caller)
     if (incomingPsd !== undefined && incomingPsd !== null && typeof incomingPsd === "object") {

@@ -23,6 +23,8 @@ export type RecordNonStreamingUsageStatsContext = {
   provider: string | null | undefined;
   connectionId: string | null | undefined;
   model: string | null | undefined;
+  requestedModel?: string | null | undefined;
+  actualModel?: string | null | undefined;
   startTime: number;
   apiKeyInfo: { id?: string | null; name?: string | null } | null | undefined;
   effectiveServiceTier: EffectiveServiceTier;
@@ -42,10 +44,21 @@ function logUsageTrace(
 }
 
 function persistUsageRow(usage: object, ctx: RecordNonStreamingUsageStatsContext): void {
-  const { provider, connectionId, model, startTime, apiKeyInfo, effectiveServiceTier } = ctx;
+  const {
+    provider,
+    connectionId,
+    model,
+    requestedModel,
+    actualModel,
+    startTime,
+    apiKeyInfo,
+    effectiveServiceTier,
+  } = ctx;
   saveRequestUsage({
     provider: provider || "unknown",
     model: model || "unknown",
+    requestedModel: requestedModel || model || "unknown",
+    actualModel: actualModel || model || "unknown",
     tokens: usage,
     status: "200",
     success: true,

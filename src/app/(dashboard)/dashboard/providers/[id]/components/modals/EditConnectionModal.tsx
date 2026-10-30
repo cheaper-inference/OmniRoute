@@ -6,7 +6,8 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import ConnectionTestModelField from "@/shared/components/ConnectionTestModelField";
 import { useConnectionTestModelDraft } from "@/shared/components/useConnectionTestModelDraft";
-import { Button, Badge, Input, Modal, Toggle, Select } from "@/shared/components";
+import { Button, Badge, Input, Modal, Toggle, Select, Textarea } from "@/shared/components";
+import { formatModelMapInput, parseModelMapInput } from "@/lib/providers/connectionModelMapInput";
 import { CHATGPT_WEB_CODEX_CONNECTOR_NAME } from "@/shared/constants/chatgptWebCodex";
 import {
   isOpenAICompatibleProvider,
@@ -99,6 +100,8 @@ export interface EditConnectionModalConnection {
   defaultModel?: string | null;
   healthCheckInterval?: number;
   projectId?: string | null;
+  notes?: string | null;
+  modelMap?: Record<string, string> | null;
 }
 export interface EditConnectionModalProps {
   isOpen: boolean;
@@ -185,6 +188,8 @@ export default function EditConnectionModal({
       CHATGPT_WEB_CODEX_CONNECTOR_NAME,
     m365Tier: normalizeM365TierValue(connectionProviderSpecificData?.tier) as M365TierValue,
     peakHourProtection: { ...EMPTY_PEAK_HOUR_PROTECTION, windows: [] } as PeakHourProtectionConfig,
+    notes: "",
+    modelMap: "",
   });
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState(null);
@@ -428,6 +433,8 @@ export default function EditConnectionModal({
               ]
             : [],
         },
+        notes: connection.notes || "",
+        modelMap: formatModelMapInput(connection.modelMap),
       });
       const existing = connection.providerSpecificData?.extraApiKeys;
       setExtraApiKeys(Array.isArray(existing) ? existing : []);
@@ -558,7 +565,14 @@ export default function EditConnectionModal({
         // stored per-connection override is cleared; 0 = explicit opt-out.
         healthCheckInterval:
           formData.healthCheckInterval === "" ? undefined : formData.healthCheckInterval,
+        notes: formData.notes.trim() || null,
       };
+      const parsedMapResult = parseModelMapInput(formData.modelMap);
+      if (parsedMapResult.error) {
+        setSaveError(parsedMapResult.error);
+        return;
+      }
+      updates.modelMap = parsedMapResult.map;
       const rateLimit = buildRateLimitOverridesFromForm(formData, connection?.rateLimitOverrides);
       const invalid = rateLimit.invalidModelConcurrency;
       if (invalid) return setSaveError(t("rateLimitOverridesModelConcurrencyInvalid", invalid));
@@ -829,6 +843,38 @@ export default function EditConnectionModal({
           placeholder={t("excludedModelsPlaceholder")}
           hint={t("excludedModelsHint")}
         />
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-text-muted">
+            {providerText(t, "notesLabel", "Notes")}
+          </label>
+          <Textarea
+            value={formData.notes}
+            onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+            placeholder={providerText(t, "notesPlaceholder", "Notes, owner or account details...")}
+            rows={2}
+            data-testid="connection-notes-input"
+          />
+        </div>
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-medium text-text-muted">
+            {providerText(t, "modelMapLabel", "Model Mapping")}
+          </label>
+          <Textarea
+            value={formData.modelMap}
+            onChange={(e) => setFormData({ ...formData, modelMap: e.target.value })}
+            placeholder={"gpt-4o: gpt-4o-mini\nclaude-3-7-sonnet: claude-3-5-sonnet"}
+            rows={3}
+            className="font-mono text-xs"
+            data-testid="connection-model-map-input"
+          />
+          <p className="text-[11px] text-text-muted">
+            {providerText(
+              t,
+              "modelMapHint",
+              "Map requested models to target models for this connection (one per line, e.g. requested: target)."
+            )}
+          </p>
+        </div>
         {isCodex && (
           <CodexConnectionFields
             t={t}

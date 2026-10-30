@@ -661,6 +661,19 @@ export const updateProviderConnectionSchema = z
     proxyEnabled: z.boolean().optional(),
     perKeyProxyEnabled: z.boolean().optional(),
     quotaVisible: z.boolean().optional(),
+    notes: z.union([z.string().max(10_000), z.null()]).optional(),
+    modelMap: z
+      .union([
+        z.null(),
+        z.record(z.string().min(1).max(200), z.union([z.null(), z.string().min(1).max(200)])),
+      ])
+      .optional(),
+    model_map: z
+      .union([
+        z.null(),
+        z.record(z.string().min(1).max(200), z.union([z.null(), z.string().min(1).max(200)])),
+      ])
+      .optional(),
     // Partial patch of per-connection provider-specific settings (e.g. quota toggles)
     providerSpecificData: z
       .record(z.string(), z.unknown())

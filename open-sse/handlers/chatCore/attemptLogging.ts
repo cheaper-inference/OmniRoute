@@ -280,6 +280,7 @@ export type PersistAttemptLogsContext = {
   provider: string | null | undefined;
   connectionId: string | null | undefined;
   model: string | null | undefined;
+  actualModel?: string | null | undefined;
   skillRequestId: string;
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
@@ -576,6 +577,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     status,
     model,
     requestedModel,
+    actualModel: ctx.actualModel || model || "-",
     provider,
     connectionId: finalConnectionId || undefined,
     duration: Date.now() - startTime,

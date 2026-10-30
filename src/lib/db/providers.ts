@@ -41,8 +41,10 @@ import {
   withNullableMaxConcurrent,
   withNullableQuotaWindowThresholds,
   withNullableRateLimitOverrides,
+  withNullableNotesAndModelMap,
   normalizeBooleanColumn,
   sanitizeRateLimitOverrides,
+  sanitizeConnectionModelMap,
   serializeJsonField,
   toRecord,
   sanitizeQuotaWindowThresholds,
@@ -176,6 +178,9 @@ export const PROVIDER_CONNECTIONS_COLUMNS = new Set([
   "per_key_proxy_enabled",
   "quota_window_thresholds_json",
   "rate_limit_overrides_json",
+  "notes",
+  "model_map",
+  "modelMap",
   "created_at",
   "updated_at",
   "synced_models_at",
@@ -270,9 +275,12 @@ export async function getRawProviderConnections(
   const rows = db.prepare(sql).all(params);
   return rows.map((r) => {
     const camelRow = rowToCamel(r);
-    return withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
+    return withNullableNotesAndModelMap(
+      withNullableRateLimitOverrides(
+        withNullableQuotaWindowThresholds(
+          withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
+          camelRow
+        ),
         camelRow
       ),
       camelRow
@@ -315,9 +323,12 @@ export async function getProviderConnectionById(id: string) {
 
   const camelRow = rowToCamel(row);
   return decryptConnectionFields(
-    withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
+    withNullableNotesAndModelMap(
+      withNullableRateLimitOverrides(
+        withNullableQuotaWindowThresholds(
+          withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
+          camelRow
+        ),
         camelRow
       ),
       camelRow
@@ -734,6 +745,8 @@ export async function createProviderConnection(data: JsonRecord) {
     "quotaWindowThresholds",
     "rateLimitOverrides",
     "healthCheckInterval",
+    "notes",
+    "modelMap",
   ];
   for (const field of optionalFields) {
     if (data[field] !== undefined && data[field] !== null) {
@@ -771,6 +784,16 @@ export async function createProviderConnection(data: JsonRecord) {
     connection.rateLimitOverrides = result.sanitized;
   }
 
+  if ("modelMap" in connection) {
+    const result = sanitizeConnectionModelMap(connection.modelMap);
+    if (result.rejected.length > 0) {
+      throw new Error(
+        `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
+      );
+    }
+    connection.modelMap = result.sanitized;
+  }
+
   _insertConnectionRow(db, encryptConnectionFields({ ...connection }));
   const providerId = toStringOrNull(data.provider);
   if (providerId) {
@@ -779,9 +802,12 @@ export async function createProviderConnection(data: JsonRecord) {
   backupDbFile("pre-write");
   invalidateDbCache("connections"); // Bust connections read cache
 
-  const returnedConnection = withNullableRateLimitOverrides(
-    withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(connection), connection),
+  const returnedConnection = withNullableNotesAndModelMap(
+    withNullableRateLimitOverrides(
+      withNullableQuotaWindowThresholds(
+        withNullableMaxConcurrent(cleanNulls(connection), connection),
+        connection
+      ),
       connection
     ),
     connection
@@ -811,6 +837,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       expires_in, display_name, global_priority, default_model,
       token_type, consecutive_use_count, rate_limit_protection, last_used_at, "group", max_concurrent,
       proxy_enabled, per_key_proxy_enabled, quota_visible, quota_window_thresholds_json, rate_limit_overrides_json,
+      notes, model_map,
       created_at, updated_at
     ) VALUES (
       @id, @provider, @authType, @name, @email, @priority, @isActive,
@@ -822,6 +849,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       @expiresIn, @displayName, @globalPriority, @defaultModel,
       @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt, @group, @maxConcurrent,
       @proxyEnabled, @perKeyProxyEnabled, @quotaVisible, @quotaWindowThresholdsJson, @rateLimitOverridesJson,
+      @notes, @modelMap,
       @createdAt, @updatedAt
     )
   `
@@ -871,6 +899,8 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
     quotaVisible: normalizeBooleanColumn(conn.quotaVisible, true) ? 1 : 0,
     quotaWindowThresholdsJson: serializeJsonField(conn.quotaWindowThresholds),
     rateLimitOverridesJson: serializeJsonField(conn.rateLimitOverrides),
+    notes: typeof conn.notes === "string" ? conn.notes : null,
+    modelMap: serializeJsonField(conn.modelMap),
     createdAt: conn.createdAt,
     updatedAt: conn.updatedAt,
   });
@@ -926,6 +956,9 @@ function _buildUpdateConnectionRowParams(id: string, data: JsonRecord, now: unkn
     perKeyProxyEnabled: normalizeBooleanColumn(data.perKeyProxyEnabled, false) ? 1 : 0,
     quotaVisible: normalizeBooleanColumn(data.quotaVisible, true) ? 1 : 0,
     rateLimitOverridesJson: serializeJsonField(data.rateLimitOverrides),
+    notes:
+      typeof data.notes === "string" ? data.notes : data.notes === null ? null : data.notes || null,
+    modelMap: serializeJsonField(data.modelMap),
     lastPingAt: data.lastPingAt || null,
     lastPingedResetKey: data.lastPingedResetKey || null,
     updatedAt: now,
@@ -958,6 +991,8 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
       per_key_proxy_enabled = @perKeyProxyEnabled,
       quota_visible = @quotaVisible,
       rate_limit_overrides_json = @rateLimitOverridesJson,
+      notes = @notes,
+      model_map = @modelMap,
       last_ping_at = @lastPingAt,
       last_pinged_reset_key = @lastPingedResetKey,
       updated_at = @updatedAt
@@ -1038,6 +1073,15 @@ export async function updateProviderConnection(
     }
     merged.rateLimitOverrides = result.sanitized;
   }
+  if ("modelMap" in merged) {
+    const result = sanitizeConnectionModelMap(merged.modelMap);
+    if (result.rejected.length > 0) {
+      throw new Error(
+        `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
+      );
+    }
+    merged.modelMap = result.sanitized;
+  }
   const existingRecord = toRecord(existing);
 
   db.transaction(() => {
@@ -1069,9 +1113,12 @@ export async function updateProviderConnection(
   // callers of updateProviderConnection must never see enc:v1 metadata as the
   // usable console credentials (#16836).
   const returned = decryptConnectionFields({ ...merged });
-  const returnedConnection = withNullableRateLimitOverrides(
-    withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(returned), returned),
+  const returnedConnection = withNullableNotesAndModelMap(
+    withNullableRateLimitOverrides(
+      withNullableQuotaWindowThresholds(
+        withNullableMaxConcurrent(cleanNulls(returned), returned),
+        returned
+      ),
       returned
     ),
     returned

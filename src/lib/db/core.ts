@@ -263,6 +263,8 @@ const SCHEMA_SQL = `
     quota_visible INTEGER NOT NULL DEFAULT 1,
     quota_window_thresholds_json TEXT,
     rate_limit_overrides_json TEXT,
+    notes TEXT,
+    model_map TEXT,
     created_at TEXT NOT NULL,
     updated_at TEXT NOT NULL
   );
@@ -320,6 +322,8 @@ const SCHEMA_SQL = `
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     provider TEXT,
     model TEXT,
+    requested_model TEXT,
+    actual_model TEXT,
     connection_id TEXT,
     account_key TEXT,
     account_label TEXT,
@@ -354,6 +358,7 @@ const SCHEMA_SQL = `
     status INTEGER,
     model TEXT,
     requested_model TEXT,
+    actual_model TEXT,
     provider TEXT,
     account TEXT,
     connection_id TEXT,

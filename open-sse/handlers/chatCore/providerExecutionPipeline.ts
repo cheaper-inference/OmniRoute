@@ -460,6 +460,17 @@ export async function runProviderExecutionPipeline(
           retryAfterMs,
         });
         connection.replaceCredentials(nextCreds as Record<string, unknown>);
+        if (nextCreds.modelMap) {
+          const { resolveConnectionMappedModel } =
+            await import("../../services/connectionModelMap.ts");
+          const remapped = resolveConnectionMappedModel(
+            target.requestedModel || wire.currentModel,
+            nextCreds.modelMap as Record<string, string>
+          );
+          if (remapped !== wire.currentModel) {
+            wire.setBodyAndModel({ ...wire.body, model: remapped }, remapped);
+          }
+        }
         attempts += 1;
         continue;
       }
@@ -488,6 +499,17 @@ export async function runProviderExecutionPipeline(
           .catch(() => null);
         if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
           connection.replaceCredentials(nextCreds as Record<string, unknown>);
+          if (nextCreds.modelMap) {
+            const { resolveConnectionMappedModel } =
+              await import("../../services/connectionModelMap.ts");
+            const remapped = resolveConnectionMappedModel(
+              target.requestedModel || wire.currentModel,
+              nextCreds.modelMap as Record<string, string>
+            );
+            if (remapped !== wire.currentModel) {
+              wire.setBodyAndModel({ ...wire.body, model: remapped }, remapped);
+            }
+          }
           antigravityByopRotationPending = true;
           continue;
         }

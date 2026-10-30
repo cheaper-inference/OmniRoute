@@ -69,6 +69,14 @@ export function ensureProviderConnectionsColumns(db: SqliteDatabase) {
       db.exec("ALTER TABLE provider_connections ADD COLUMN rate_limit_overrides_json TEXT");
       console.log("[DB] Added provider_connections.rate_limit_overrides_json column");
     }
+    if (!columnNames.has("notes")) {
+      db.exec("ALTER TABLE provider_connections ADD COLUMN notes TEXT DEFAULT NULL");
+      console.log("[DB] Added provider_connections.notes column");
+    }
+    if (!columnNames.has("model_map")) {
+      db.exec("ALTER TABLE provider_connections ADD COLUMN model_map TEXT DEFAULT NULL");
+      console.log("[DB] Added provider_connections.model_map column");
+    }
     // `refresh_token` is part of 001_initial_schema.sql, but `CREATE TABLE IF NOT EXISTS`
     // is a no-op on a pre-existing legacy table that predates it — heal it defensively
     // before the index below relies on it, or a very old DB fails startup entirely.
@@ -152,6 +160,14 @@ export function ensureUsageHistoryColumns(db: SqliteDatabase) {
     if (!columnNames.has("team_rollup_processed_at")) {
       db.exec("ALTER TABLE usage_history ADD COLUMN team_rollup_processed_at TEXT");
       console.log("[DB] Added usage_history.team_rollup_processed_at column");
+    }
+    if (!columnNames.has("requested_model")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN requested_model TEXT DEFAULT NULL");
+      console.log("[DB] Added usage_history.requested_model column");
+    }
+    if (!columnNames.has("actual_model")) {
+      db.exec("ALTER TABLE usage_history ADD COLUMN actual_model TEXT DEFAULT NULL");
+      console.log("[DB] Added usage_history.actual_model column");
     }
     db.exec(
       "CREATE INDEX IF NOT EXISTS idx_uh_provider_model_timestamp ON usage_history(provider, model, timestamp)"
@@ -326,6 +342,10 @@ export function ensureCallLogsColumns(db: SqliteDatabase) {
     if (!columnNames.has("resilience_actions")) {
       db.exec("ALTER TABLE call_logs ADD COLUMN resilience_actions TEXT DEFAULT NULL");
       console.log("[DB] Added call_logs.resilience_actions column");
+    }
+    if (!columnNames.has("actual_model")) {
+      db.exec("ALTER TABLE call_logs ADD COLUMN actual_model TEXT DEFAULT NULL");
+      console.log("[DB] Added call_logs.actual_model column");
     }
 
     db.exec(

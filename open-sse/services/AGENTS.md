@@ -34,6 +34,7 @@ Live count: `ls open-sse/services/*.ts | wc -l` (currently 134). More including 
 - **`intentClassifier.ts`** — Request intent classification for intelligent routing.
 - **`taskAwareRouter.ts`** — Task-type-based routing (reasoning → o1, code-gen → Cursor).
 - **`targetRequestSanitizer.ts`** — Final provider/model-aware parameter sanitation after routing resolution and before executor dispatch.
+- **`connectionModelMap.ts`** — Connection-level model mapping (`modelMap`) resolving requested models to target models per connection.
 - **`thinkingBudget.ts`** — Thinking token allocation for o1/o3 models.
 - **`contextManager.ts`** — Routing context injection (system prompts, memory).
 
