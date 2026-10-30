@@ -160,6 +160,7 @@ import {
   WEB_COOKIE_PROVIDERS,
 } from "@/shared/constants/providers";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
+import { isCodexPlanEligibleForModel } from "@omniroute/open-sse/services/codexPlanEligibility.ts";
 import {
   isRequestedModelAdvertised,
   loadAdvertisedModelsForConnections,
@@ -1247,6 +1248,13 @@ export async function getProviderCredentials(
       }
       if (requestedModel && isModelExcludedByConnection(requestedModel, c.providerSpecificData)) {
         connectionFilterStatus.set(c.id, "modelExcluded");
+        return false;
+      }
+      // Paid-only Codex models must never be sent to Free/Go/unknown accounts.
+      // Filter before routing modes so even an explicit probe cannot select one.
+      if (provider === "codex" && requestedModel &&
+          !isCodexPlanEligibleForModel(c.providerSpecificData, requestedModel)) {
+        connectionFilterStatus.set(c.id, "codexPlanIneligible");
         return false;
       }
       if (
