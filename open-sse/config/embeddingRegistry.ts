@@ -225,6 +225,14 @@ export const EMBEDDING_PROVIDERS: Record<string, EmbeddingProvider> = {
     models: [{ id: "mistral-embed", name: "Mistral Embed", dimensions: 1024 }],
   },
 
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/embeddings",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "Bge_M3_FP16", name: "BGE-M3 (deAPI)", dimensions: 1024 }],
+  },
+
   together: {
     id: "together",
     baseUrl: "https://api.together.xyz/v1/embeddings",
