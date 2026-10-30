@@ -71,6 +71,30 @@ function saveGateLog(id, out) {
 
 // ─── Pure helpers (exported for tests) ──────────────────────────────────────
 
+/** Complete JSON delivery before the CLI exits; pipe writes can finish asynchronously. */
+export async function writeObserverJson(report, output = process.stdout) {
+  const json = JSON.stringify(report, null, 2) + "\n";
+  await new Promise((resolve, reject) => {
+    const onError = (error) => reject(error);
+    output.once("error", onError);
+    try {
+      output.write(json, (error) => {
+        if (error) {
+          // Writable emits the error after invoking its callback. Keep the once-listener
+          // until that event so a rejected write cannot become an unhandled error.
+          reject(error);
+          return;
+        }
+        output.removeListener("error", onError);
+        resolve();
+      });
+    } catch (error) {
+      output.removeListener("error", onError);
+      reject(error);
+    }
+  });
+}
+
 /** Read the committed ratchet baseline value for a metric (null if unknown). */
 export function baselineValue(metric, root = ROOT) {
   try {
@@ -790,8 +814,14 @@ async function runUnitShards(total, pool, timeout) {
 }
 
 async function main() {
+  let flushingJson = false;
   for (const signal of ["SIGINT", "SIGTERM"]) {
-    process.once(signal, () => cancellation.abort(signal));
+    process.once(signal, () => {
+      cancellation.abort(signal);
+      // Gates have finished before the final flush. A blocked consumer must not
+      // prevent the existing supervisor deadline from terminating this process.
+      if (flushingJson) process.exit(1);
+    });
   }
   const args = new Set(process.argv.slice(2));
   const JSON_OUT = args.has("--json");
@@ -1332,33 +1362,33 @@ async function main() {
   );
 
   if (JSON_OUT) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          schemaVersion: 1,
-          candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
-            cwd: ROOT,
-            encoding: "utf8",
-          }).trim(),
-          profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
-          completedAt: new Date().toISOString(),
-          i18nComparison,
-          releaseGreen,
-          hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({
-            id: r.id,
-            kind: r.kind,
-            ok: r.ok,
-            detail: r.detail,
-            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
-          })),
-          commandReceipts,
-        },
-        null,
-        2
-      ) + "\n"
-    );
+    flushingJson = true;
+    try {
+      await writeObserverJson({
+        schemaVersion: 1,
+        candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
+          cwd: ROOT,
+          encoding: "utf8",
+        }).trim(),
+        profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
+        completedAt: new Date().toISOString(),
+        i18nComparison,
+        releaseGreen,
+        hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        checks: results.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          ok: r.ok,
+          detail: r.detail,
+          ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+        })),
+        commandReceipts,
+      });
+    } catch {
+      process.stderr.write("Observer JSON output failed; evidence is incomplete.\n");
+      process.exit(1);
+    }
   }
 
   process.exit(releaseGreen ? 0 : 1);
