@@ -15,8 +15,12 @@ name: i18n mirror refresh
 #   4. `npm run check:docs-all` + the drift check must both pass; then the mirrors are committed
 #      to the fixed branch `chore/i18n-mirror-refresh` (force-reset from the target every run)
 #      and one PR is opened, or the open one is updated by the force-push;
-#   5. any translation or check failure opens NO PR and fails the job with a step summary that
-#      lists the failing files / locales.
+#   5. a partial translation (run-translation exit 3: some (source, locale) units failed, the
+#      rest translated) still opens the PR with the translated mirrors. The failed units keep
+#      their mirror and state record, the drift check excuses exactly those units, and the PR
+#      body lists them for the next run (#18538);
+#   6. a run where nothing translated, any other translation error, or any other check failure
+#      opens NO PR and fails the job with a step summary that lists the failing files / locales.
 #
 # PRs opened with the default GITHUB_TOKEN do not trigger other workflows (no CI on the refresh
 # PR). Set the `I18N_REFRESH_TOKEN` secret (fine-grained PAT or App token with contents +
@@ -179,9 +183,24 @@ jobs:
           export OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK=1
           echo "engine=$ENGINE" >> "$GITHUB_OUTPUT"
           echo "Engine: \`$ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
-          node scripts/i18n/run-translation.mjs --files="$FILES" 2>&1 | tee "$RUNNER_TEMP/translate.log"
-          RC=${PIPESTATUS[0]}
-          if [ "$RC" -ne 0 ]; then
+          # The default `bash -e` would end the step on a non-zero pipeline before RC is read, so
+          # catch the status here (pipefail makes it the translator's exit code).
+          RC=0
+          node scripts/i18n/run-translation.mjs --files="$FILES" \
+            --failures-json="$RUNNER_TEMP/translate-failures.json" 2>&1 \
+            | tee "$RUNNER_TEMP/translate.log" || RC=$?
+          if [ "$RC" -eq 3 ]; then
+            # Partial: the translated units are written and recorded, the failed ones are untouched.
+            echo "partial=true" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Partial translation (exit 3): failed locales left as they were"
+              echo
+              echo '```'
+              grep -E '^  - .+ \[[^]]+\]: ' "$RUNNER_TEMP/translate.log" | head -100 || true
+              grep -E 'summary: translated=' "$RUNNER_TEMP/translate.log" | tail -1 || true
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$RC" -ne 0 ]; then
             {
               echo "### Translation failed (exit $RC) — no PR opened"
               echo
@@ -201,10 +220,19 @@ jobs:
           npm run check:docs-all 2>&1 | tee "$RUNNER_TEMP/docs-all.log"
           DOCS_RC=${PIPESTATUS[0]}
           node scripts/i18n/check-translation-drift.mjs --json --warn > "$RUNNER_TEMP/drift-after.json"
-          DRIFT_OK=$(DRIFT_JSON="$RUNNER_TEMP/drift-after.json" node -e '
-            const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
-            process.stdout.write(String(r.ok === true));
-          ')
+          # Drift left by the failed units of a partial run is excused; any other drift blocks.
+          if ! BLOCKING=$(DRIFT_JSON="$RUNNER_TEMP/drift-after.json" \
+            FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node --input-type=module -e '
+            import { existsSync, readFileSync } from "node:fs";
+            import { blockingDrift } from "./scripts/i18n/run-translation.mjs";
+            const read = (p) => JSON.parse(readFileSync(p, "utf8"));
+            const run = existsSync(process.env.FAILURES_JSON) ? read(process.env.FAILURES_JSON) : {};
+            const left = blockingDrift(read(process.env.DRIFT_JSON), run.failures ?? [], run.translatedUnits ?? []);
+            for (const x of left) console.log(x.kind + ": " + x.rel + (x.locale ? " [" + x.locale + "]" : ""));
+          '); then
+            echo "::error::could not evaluate the drift report"
+            exit 1
+          fi
           if [ "$DOCS_RC" -ne 0 ]; then
             FAILED=1
             {
@@ -215,17 +243,13 @@ jobs:
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
-          if [ "$DRIFT_OK" != "true" ]; then
+          if [ -n "$BLOCKING" ]; then
             FAILED=1
             {
               echo "### Drift check still reports drift — no PR opened"
               echo
               echo '```'
-              DRIFT_JSON="$RUNNER_TEMP/drift-after.json" node -e '
-                const r = JSON.parse(require("fs").readFileSync(process.env.DRIFT_JSON, "utf8"));
-                for (const k of ["driftedSources", "missingTargets", "driftedTargets"])
-                  for (const x of r[k] ?? []) console.log(k + ": " + x.rel + (x.locale ? " [" + x.locale + "]" : ""));
-              ' | head -100
+              printf '%s\n' "$BLOCKING" | head -100
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
@@ -238,6 +262,7 @@ jobs:
           REPO: ${{ github.repository }}
           BASE: ${{ steps.target.outputs.base }}
           ENGINE: ${{ steps.translate.outputs.engine }}
+          PARTIAL: ${{ steps.translate.outputs.partial }}
           FILES: ${{ steps.drift.outputs.files }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
@@ -248,11 +273,21 @@ jobs:
             exit 0
           fi
           COUNT=$(git diff --cached --name-only -- docs/i18n | wc -l | tr -d ' ')
+          FAILED_UNITS=""
+          if [ "${PARTIAL:-}" = "true" ]; then
+            FAILED_UNITS=$(FAILURES_JSON="$RUNNER_TEMP/translate-failures.json" node -e '
+              const r = JSON.parse(require("fs").readFileSync(process.env.FAILURES_JSON, "utf8"));
+              const one = (e) => String(e ?? "").replace(/\s+/g, " ").replace(/`/g, "\x27").slice(0, 200);
+              for (const f of r.failures) console.log("- `" + f.rel + "` [" + f.locale + "]: " + one(f.error));
+            ')
+          fi
+          NOTE=""
+          [ -z "$FAILED_UNITS" ] || NOTE=" $(printf '%s\n' "$FAILED_UNITS" | wc -l | tr -d ' ') unit(s) failed and were left as they were."
           # CI bot commit: the bot identity is the author, no Co-Authored-By trailer.
           git -c user.name="github-actions[bot]" \
             -c user.email="41898282+github-actions[bot]@users.noreply.github.com" \
             commit --quiet -m "$PR_TITLE" \
-            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s)." \
+            -m "Engine: ${ENGINE}. Sources: ${FILES//,/, }. ${COUNT} mirror file(s).${NOTE}" \
             -m "Run: ${RUN_URL}"
           gh auth setup-git
           # Fixed branch, reset from the target on every run: the open PR always shows exactly
@@ -268,6 +303,12 @@ jobs:
             echo "- Mirror files changed: ${COUNT}"
             echo
             echo "\`npm run check:docs-all\` and \`check-translation-drift.mjs\` passed on the refreshed tree before this PR was opened."
+            if [ -n "$FAILED_UNITS" ]; then
+              echo
+              echo "Partial run: these (source, locale) units failed to translate. Their mirrors and \`.i18n-state.json\` records are unchanged, so they still show as stale or drifted and the next run retries them. The drift check excused only these units:"
+              echo
+              printf '%s\n' "$FAILED_UNITS"
+            fi
             echo
             echo "The branch \`${REFRESH_BRANCH}\` is force-reset from the target on every run, so a later run replaces this commit."
             echo "PRs opened with the default \`GITHUB_TOKEN\` do not trigger other workflows; set the \`I18N_REFRESH_TOKEN\` secret so CI runs here."
