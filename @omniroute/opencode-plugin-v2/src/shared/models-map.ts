@@ -41,7 +41,8 @@ export interface OmniRouteRawModelEntry {
 export type OmniRouteModelsFetcher = (
   baseURL: string,
   apiKey: string,
-  timeoutMs?: number
+  timeoutMs?: number,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteRawModelEntry[]>;
 
 /**
@@ -50,11 +51,15 @@ export type OmniRouteModelsFetcher = (
  * emits today and a bare-array envelope (defensive — keeps the plugin
  * working if a future OmniRoute build trims the wrapper). Anything that
  * isn't an object with a string `id` is filtered out silently.
+ *
+ * `headers` are merged into the request (e.g. Cloudflare Access client
+ * id/secret). User-supplied values never override the bearer token.
  */
 export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
   baseURL,
   apiKey,
-  timeoutMs = 10_000
+  timeoutMs = 10_000,
+  headers
 ) => {
   if (!apiKey) throw new Error("[omniroute-v2] apiKey required to fetch /v1/models");
   if (!baseURL) throw new Error("[omniroute-v2] baseURL required to fetch /v1/models");
@@ -70,8 +75,9 @@ export const defaultOmniRouteModelsFetcher: OmniRouteModelsFetcher = async (
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: controller.signal,
     });

@@ -19,7 +19,8 @@ export type OmniRouteProvidersFetcher = (
   baseURL: string,
   apiKey: string,
   timeoutMs?: number,
-  onSourceError?: (endpoint: string, reason: string) => void
+  onSourceError?: (endpoint: string, reason: string) => void,
+  headers?: Record<string, string>
 ) => Promise<OmniRouteProviderConnection[]>;
 
 export interface UsableProviderSet {
@@ -40,7 +41,8 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
   baseURL,
   apiKey,
   timeoutMs = 10_000,
-  onSourceError
+  onSourceError,
+  headers
 ) => {
   const empty: OmniRouteProviderConnection[] = [];
   if (!baseURL || !apiKey) return empty;
@@ -52,8 +54,9 @@ export const defaultOmniRouteProvidersFetcher: OmniRouteProvidersFetcher = async
     const res = await fetch(url, {
       method: "GET",
       headers: {
-        Authorization: `Bearer ${apiKey}`,
         Accept: "application/json",
+        ...(headers ?? {}),
+        Authorization: `Bearer ${apiKey}`,
       },
       signal: ac.signal,
     });
