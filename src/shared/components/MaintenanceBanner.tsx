@@ -23,6 +23,7 @@ export default function MaintenanceBanner() {
 
   useEffect(() => {
     const checkHealth = async () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort("Health check timeout"), 8000);
       try {

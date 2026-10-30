@@ -45,6 +45,7 @@ export default function TokenHealthBadge() {
 
   useEffect(() => {
     const fetchHealth = async () => {
+      if (typeof document !== "undefined" && document.visibilityState !== "visible") return;
       try {
         const res = await fetch("/api/token-health");
         if (res.ok) {

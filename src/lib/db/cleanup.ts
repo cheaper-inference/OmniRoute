@@ -1111,6 +1111,14 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
 export function startCleanupScheduler(): void {
   if (_cleanupSchedulerTimer) return;
 
+  const bgDisabled = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  if (bgDisabled && new Set(["1", "true", "yes", "on"]).has(bgDisabled.trim().toLowerCase())) {
+    console.log(
+      "[Cleanup] Background cleanup scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)."
+    );
+    return;
+  }
+
   // Run cleanup 30s after startup (let the server initialize first).
   setTimeout(async () => {
     try {

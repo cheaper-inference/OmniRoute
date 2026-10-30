@@ -432,6 +432,12 @@ export function requestFullVacuum(reason: string): VacuumSchedulerState {
 export function init(): VacuumSchedulerState {
   if (timer) return getState();
 
+  const bgDisabled = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  if (bgDisabled && new Set(["1", "true", "yes", "on"]).has(bgDisabled.trim().toLowerCase())) {
+    console.log("[STARTUP] Vacuum scheduler disabled (OMNIROUTE_DISABLE_BACKGROUND_SERVICES)");
+    return getState();
+  }
+
   hydrated = false; // an explicit init() always re-reads the persisted blob
   hydrateFromPersistedState();
   return refresh();
