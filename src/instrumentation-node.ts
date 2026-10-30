@@ -677,6 +677,13 @@ export async function registerNodejs(): Promise<void> {
     const { startCodexWakeups } = await import("@/lib/services/codexWakeups");
     startCodexWakeups();
     console.log("[STARTUP] Codex wakeup scheduler started (no-op until a task is created)");
+    const { startCodexResetCreditAutospend } = await import(
+      "@/lib/services/codexResetCreditAutospend"
+    );
+    startCodexResetCreditAutospend();
+    console.log(
+      "[STARTUP] Codex reset-credit auto-spend scheduler started (opt-in, no-op until enabled)"
+    );
     // Optional: cloud/model sync is skipped in headless mode (src/lib/system/headless.ts).
     if (!skipInHeadless("cloud-sync")) {
       const cloudSyncInitialized = await ensureCloudSyncInitialized();

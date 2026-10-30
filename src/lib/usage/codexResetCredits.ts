@@ -1,5 +1,10 @@
 import { getProviderConnectionById } from "@/lib/db/providers";
-import { resolveProxyForConnection } from "@/lib/db/settings";
+import {
+  getCodexAutospendCount,
+  setCodexAutospendCount,
+  utcDayKey,
+} from "@/lib/db/codexResetCreditAutospend";
+import { getSettings, resolveProxyForConnection } from "@/lib/db/settings";
 import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import {
   fetchAndPersistProviderLimits,
@@ -59,6 +64,46 @@ export class CodexResetCreditError extends Error {
     this.status = status;
     this.code = code;
   }
+}
+
+/** Default look-ahead for the opt-in auto-spend sweep (see settings.ts). */
+export const CODEX_AUTOSPEND_DEFAULT_HORIZON_HOURS = 24;
+export const CODEX_AUTOSPEND_DEFAULT_MAX_PER_DAY = 1;
+
+export interface CodexAutospendConfig {
+  enabled: boolean;
+  horizonHours: number;
+  maxPerDay: number;
+  /** True when `connections` was absent (opt-in covers every eligible connection). */
+  providerWide: boolean;
+  connections: Record<string, boolean>;
+}
+
+export interface CodexAutospendSpent {
+  creditId: string;
+  outcome: CodexResetCreditOutcome;
+}
+
+export interface CodexAutospendFailure {
+  creditId: string;
+  code: string;
+}
+
+export type CodexAutospendSkipReason =
+  | "opt_in_off"
+  | "no_expiring_credit"
+  | "daily_cap_reached";
+
+export interface CodexAutospendResult {
+  /** Credits that were actually redeemed (or confirmed as already redeemed). */
+  spent: CodexAutospendSpent[];
+  /** Credits that upstream refused; the sweep keeps going and never throws for these. */
+  failed: CodexAutospendFailure[];
+  /** How many available credits the sweep looked at. */
+  considered: number;
+  skipped?: CodexAutospendSkipReason;
+  /** Fatal, non-per-credit error (listing failure, connection gone, …). */
+  error?: string;
 }
 
 function toRecord(value: unknown): JsonRecord {
@@ -485,26 +530,8 @@ export async function consumeCodexResetCredit(
   }
 
   try {
-    const connection = await loadCodexConnection(connectionId);
-    const normalizedCreditId =
-      typeof creditId === "string" && creditId.trim().length > 0 ? creditId.trim() : undefined;
-    const { response } = await consumeWithAuthRetry(
-      connection,
-      idempotencyKey.trim(),
-      normalizedCreditId
-    );
-    const payload = await readResponsePayload(response);
+    const outcome = await redeemCodexResetCredit(connectionId, idempotencyKey.trim(), creditId);
 
-    if (!response.ok) {
-      throwKnownConsumeError(payload);
-      throw new CodexResetCreditError(
-        response.status,
-        "codex_reset_credit_upstream_error",
-        `Codex reset-credit API returned HTTP ${response.status}.`
-      );
-    }
-
-    const outcome = parseConsumeOutcome(payload);
     invalidateCodexQuotaCache(connectionId);
 
     const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
@@ -525,5 +552,214 @@ export async function consumeCodexResetCredit(
       "codex_reset_credit_failed",
       sanitizeErrorMessage(error) || "Failed to redeem Codex reset credit."
     );
+  }
+}
+
+/**
+ * Redeem one credit upstream WITHOUT the post-consume quota refresh.
+ *
+ * `consumeCodexResetCredit` owns the operator-facing path (one redemption, then a
+ * full limits refresh + cooldown release). The auto-spend sweep redeems several
+ * credits in a single tick, so it calls this lower-level primitive and lets the
+ * already-running quota refresh observe the result instead of paying for one
+ * upstream usage read per credit. The wire request is identical either way:
+ * same URL, same `{ redeem_request_id, credit_id }` body, same auth retry.
+ */
+async function redeemCodexResetCredit(
+  connectionId: string,
+  idempotencyKey: string,
+  creditId?: string
+): Promise<CodexResetCreditOutcome> {
+  const connection = await loadCodexConnection(connectionId);
+  const normalizedCreditId =
+    typeof creditId === "string" && creditId.trim().length > 0 ? creditId.trim() : undefined;
+  const { response } = await consumeWithAuthRetry(
+    connection,
+    idempotencyKey,
+    normalizedCreditId
+  );
+  const payload = await readResponsePayload(response);
+
+  if (!response.ok) {
+    throwKnownConsumeError(payload);
+    throw new CodexResetCreditError(
+      response.status,
+      "codex_reset_credit_upstream_error",
+      `Codex reset-credit API returned HTTP ${response.status}.`
+    );
+  }
+
+  return parseConsumeOutcome(payload);
+}
+
+// ---------------------------------------------------------------------------
+// Opt-in auto-spend of credits that are about to expire
+// ---------------------------------------------------------------------------
+
+function normalizeAutospendConfig(raw: unknown): CodexAutospendConfig {
+  const record = toRecord(raw);
+  const horizonHours = Number(record.horizonHours);
+  const maxPerDay = Number(record.maxPerDay);
+  // `connections` absent => provider-wide (every eligible connection);
+  // `connections: {}` => explicitly nobody (fail-closed, matches codexAutoPing).
+  const hasAllowlist = record.connections !== undefined && record.connections !== null;
+  const connections = toRecord(record.connections);
+
+  return {
+    enabled: record.enabled === true,
+    horizonHours:
+      Number.isFinite(horizonHours) && horizonHours > 0
+        ? Math.trunc(horizonHours)
+        : CODEX_AUTOSPEND_DEFAULT_HORIZON_HOURS,
+    maxPerDay:
+      Number.isFinite(maxPerDay) && maxPerDay > 0
+        ? Math.trunc(maxPerDay)
+        : CODEX_AUTOSPEND_DEFAULT_MAX_PER_DAY,
+    providerWide: !hasAllowlist,
+    connections: Object.fromEntries(
+      Object.entries(connections).filter(([, value]) => value === true)
+    ) as Record<string, boolean>,
+  };
+}
+
+/**
+ * The opt-in is provider-wide when `connections` is absent, and allowlist-only
+ * when it is present (an empty map means nobody). The master `enabled` gates both.
+ */
+function isAutospendEnabledFor(config: CodexAutospendConfig, connectionId: string): boolean {
+  if (!config.enabled) return false;
+  if (config.providerWide) return true;
+  return config.connections[connectionId] === true;
+}
+
+function autospendIdempotencyKey(connectionId: string, creditId: string): string {
+  // Deterministic on purpose: a retry (same tick, next tick, or after a crash)
+  // replays the identical `redeem_request_id`, so upstream dedupes the consume
+  // instead of burning a second credit.
+  return `auto-spend:${connectionId}:${creditId}`;
+}
+
+function hoursUntilExpiry(credit: CodexResetCredit, nowMs: number): number | null {
+  if (!credit.expiresAt) return null;
+  const expiresAtMs = Date.parse(credit.expiresAt);
+  if (!Number.isFinite(expiresAtMs)) return null;
+  return (expiresAtMs - nowMs) / 3_600_000;
+}
+
+async function readAutospendSpendCount(connectionId: string, nowMs: number): Promise<number> {
+  return getCodexAutospendCount(connectionId, utcDayKey(nowMs));
+}
+
+/**
+ * Opt-in sweep that redeems Codex reset credits about to expire so the account
+ * does not silently lose them.
+ *
+ * Contract (see the PR body):
+ * - OFF by default (`settings.codexSpendExpiringResetCredits.enabled`), master
+ *   switch gated per connection.
+ * - Only credits whose `expiresAt` lands inside `horizonHours` (default 24 h)
+ *   are candidates; the soonest-expiring one is redeemed first (the same FEFO
+ *   order the dashboard modal shows).
+ * - Never throws: a rejected redemption (`nothing_to_reset`, `no_credit`, …) is
+ *   reported per credit so the surrounding quota refresh is unaffected.
+ * - Bounded by `maxPerDay` per connection, tracked in `key_value` (no migration).
+ * - Reuses the exact manual wire request; only the `redeem_request_id` is
+ *   derived (`auto-spend:<connectionId>:<creditId>`) instead of a UI UUID.
+ */
+export async function spendExpiringResetCredits(
+  connectionId: string,
+  options: { now?: () => number } = {}
+): Promise<CodexAutospendResult> {
+  const empty: CodexAutospendResult = { spent: [], failed: [], considered: 0 };
+
+  if (!connectionId || typeof connectionId !== "string") {
+    return { ...empty, error: "connectionId is required." };
+  }
+
+  const now = options.now ?? Date.now;
+
+  try {
+    const settings = await getSettings();
+    const config = normalizeAutospendConfig(settings.codexSpendExpiringResetCredits);
+    if (!isAutospendEnabledFor(config, connectionId)) {
+      return { ...empty, skipped: "opt_in_off" };
+    }
+
+    const nowMs = now();
+    const spentToday = await readAutospendSpendCount(connectionId, nowMs);
+    if (spentToday >= config.maxPerDay) {
+      return { ...empty, skipped: "daily_cap_reached" };
+    }
+
+    const connection = await loadCodexConnection(connectionId);
+    const refreshedConnection = await refreshCodexConnectionIfNeeded(connection);
+    let response = await fetchResetCredits(refreshedConnection);
+    if (response.status === 401 || response.status === 403) {
+      const retried = await refreshCodexConnectionIfNeeded(refreshedConnection, true);
+      response = await fetchResetCredits(retried);
+    }
+
+    const payload = await readResponsePayload(response);
+    if (!response.ok) {
+      throwKnownConsumeError(payload);
+      throw new CodexResetCreditError(
+        response.status,
+        "codex_reset_credit_upstream_error",
+        `Codex reset-credit API returned HTTP ${response.status}.`
+      );
+    }
+
+    const { credits } = parseAvailableResetCredits(payload);
+    const considered = credits.length;
+    const candidates = credits.filter((credit) => {
+      const hours = hoursUntilExpiry(credit, nowMs);
+      return hours !== null && hours > 0 && hours <= config.horizonHours;
+    });
+
+    if (candidates.length === 0) {
+      return { ...empty, considered, skipped: "no_expiring_credit" };
+    }
+
+    const spent: CodexAutospendSpent[] = [];
+    const failed: CodexAutospendFailure[] = [];
+    let remainingBudget = config.maxPerDay - spentToday;
+
+    for (const credit of candidates) {
+      if (remainingBudget <= 0) break;
+      try {
+        const outcome = await redeemCodexResetCredit(
+          connectionId,
+          autospendIdempotencyKey(connectionId, credit.id),
+          credit.id
+        );
+        spent.push({ creditId: credit.id, outcome });
+        remainingBudget -= 1;
+      } catch (error) {
+        const code =
+          error instanceof CodexResetCreditError ? error.code : "codex_reset_credit_failed";
+        failed.push({ creditId: credit.id, code });
+      }
+    }
+
+    if (spent.length > 0) {
+      invalidateCodexQuotaCache(connectionId);
+      // Counter persistence is bookkeeping, not part of the redemption: a DB
+      // hiccup must never reclassify an already-spent credit as a failure.
+      try {
+        setCodexAutospendCount(connectionId, utcDayKey(nowMs), spentToday + spent.length, nowMs);
+      } catch (error) {
+        console.warn(
+          `[CodexResetCredits] Auto-spend counter update failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+        );
+      }
+    }
+
+    return { spent, failed, considered };
+  } catch (error) {
+    const message =
+      error instanceof CodexResetCreditError
+        ? error.code
+        : sanitizeErrorMessage(error) || "Codex reset-credit auto-spend failed.";
+    return { ...empty, error: message };
   }
 }

@@ -315,6 +315,17 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in auto-spend of Codex reset credits that are about to expire. Spending a
+    // credit mutates upstream account state, so this is off by default (Hard Rule #20
+    // spirit: never consume on the operator's behalf until they opt in).
+    // `enabled` is the master switch; `connections` narrows it to specific ids
+    // (absent = every eligible Codex connection; `{}` = nobody). `maxPerDay` is a
+    // per-connection ceiling and `horizonHours` how close to expiry a credit must be.
+    codexSpendExpiringResetCredits: {
+      enabled: false,
+      horizonHours: 24,
+      maxPerDay: 1,
+    },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex
