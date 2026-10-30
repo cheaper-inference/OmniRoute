@@ -579,6 +579,11 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "test:fumadocs-prewatch",
+      "command": "node --test tests/unit/fumadocs-prewatch-patch.test.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
       "name": "test:heap",
       "command": "node --expose-gc --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/integration/heap-growth.test.ts",
       "disposition": "separately-invoked"

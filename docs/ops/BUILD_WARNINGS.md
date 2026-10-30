@@ -1,7 +1,7 @@
 ---
 title: "Build Warnings Reference"
 version: 3.8.52
-lastUpdated: 2026-10-18
+lastUpdated: 2026-10-27
 ---
 
 # Build Warnings Reference
@@ -46,6 +46,29 @@ the **emitted output is unaffected**. OmniRoute suppresses the known benign form
 `next.config.mjs` via `scripts/build/knownBuildWarnings.mjs`, which allow-lists the whole
 `node_modules/fumadocs-mdx/dist/` directory (both the `load-from-file-*.js` and
 `eval-*.js` bundles).
+
+## Fumadocs development watcher bridge
+
+OmniRoute temporarily applies a version-specific `fumadocs-mdx@15.4.6` patch during
+installation. It supplies a development-only watcher ignore before Fumadocs registers its
+directories, keeping `docs/i18n` out of the default MDX watch tree. This is a bridge until
+Fumadocs provides an official watcher-ignore API; do not upgrade `fumadocs-mdx` without
+regenerating and validating the version-specific patch.
+
+Arabic translation edits therefore require a manual browser refresh by default. Set
+`OMNIROUTE_MDX_WATCH_I18N=1` to restore translation watching when actively authoring those
+files. That opt-in may substantially increase file-descriptor pressure on large translation
+trees.
+
+### Installation and recovery
+
+- Do not run concurrent `npm install` or `npm ci` processes against the same
+  `node_modules` directory.
+- If an installation is forcibly interrupted while applying the patch, stop every installer
+  using that dependency tree and perform a clean reinstall. Do not manually repair or
+  partially overwrite Fumadocs distribution files.
+- Treat a patch-version mismatch or patch-applier failure as an installation failure. Keep
+  the dependency tree unchanged until a clean reinstall has completed successfully.
 
 ## Runtime configuration messages during static generation
 
