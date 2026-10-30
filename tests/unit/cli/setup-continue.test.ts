@@ -22,8 +22,14 @@ test("buildContinueModels gives the fast tier an autocomplete role", () => {
   assert.ok(fast.roles.includes("autocomplete"));
 });
 
-test("buildContinueModels skips uncategorised models", () => {
-  assert.equal(buildContinueModels(["some/unknown-model"], "http://x/v1").length, 0);
+test("buildContinueModels derives a profile for uncategorised models", () => {
+  // categoriseModel() only knows a curated table of legacy prefixes. Skipping whatever
+  // it did not match emptied the whole list once the catalog filled with newer prefixes,
+  // so this command now falls back to a derived profile like setup-claude/setup-codex.
+  const models = buildContinueModels(["some/unknown-model"], "http://x/v1");
+  assert.equal(models.length, 1);
+  assert.equal(models[0].model, "some/unknown-model");
+  assert.ok(models[0].roles.includes("chat"));
 });
 
 test("mergeContinueConfig replaces prior OmniRoute models, keeps others", () => {

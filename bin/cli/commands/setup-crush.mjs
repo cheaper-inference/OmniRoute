@@ -12,7 +12,7 @@ import { join } from "node:path";
 import os from "node:os";
 import { printHeading, printInfo, printSuccess, printError } from "../io.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
-import { categoriseModel } from "./setup-codex.mjs";
+import { categoriseModel, fallbackCodexProfile } from "./setup-codex.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 
 const API_KEY_REF = "$OMNIROUTE_API_KEY";
@@ -51,7 +51,11 @@ export function resolveCrushTarget(opts = {}) {
 export function buildCrushProvider(modelIds, baseUrl) {
   const models = [];
   for (const id of modelIds) {
-    const cfg = categoriseModel(id);
+    // categoriseModel() only knows a hardcoded table of legacy prefixes, so a catalog
+    // of newer ids (aug/, dva/, tllm/, oc/ ...) emptied this list entirely. Fall back to
+    // the same derived profile setup-codex uses; passing { id } keeps the non-text
+    // modality filter (image/audio/embedding ids stay out) and yields a usable ctx.
+    const cfg = categoriseModel(id) ?? fallbackCodexProfile(id, { id });
     if (!cfg) continue;
     models.push({ id, name: `OmniRoute: ${id}`, context_window: cfg.ctx });
   }

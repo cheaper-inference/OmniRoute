@@ -13,9 +13,11 @@ test("buildCrushProvider emits openai-compat + env-ref key + curated models w/ c
   assert.equal(p.type, "openai-compat");
   assert.equal(p.base_url, "http://vps:20128/v1");
   assert.equal(p.api_key, "$OMNIROUTE_API_KEY");
-  assert.equal(p.models.length, 1); // unknown skipped
+  // the uncategorised id is no longer dropped — it gets a derived profile instead
+  assert.equal(p.models.length, 2);
   assert.equal(p.models[0].id, "glm/glm-5.2");
-  assert.ok(p.models[0].context_window > 0);
+  assert.equal(p.models[1].id, "some/unknown");
+  assert.ok(p.models.every((m) => m.context_window > 0));
 });
 test("mergeCrushConfig adds providers.omniroute, preserves the rest", () => {
   const m = mergeCrushConfig({ options: { tui: true }, providers: { local: {} } }, buildCrushProvider(["glm/glm-5.2"], "http://x/v1"));
