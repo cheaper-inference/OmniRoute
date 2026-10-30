@@ -203,16 +203,16 @@ The JSON-RPC endpoint `/a2a` is the canonical A2A entry point. The REST endpoint
 
 1. **Create skill file:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Export an async function `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Follow the shape of existing skills such as `smartRouting.ts`.
+   Export an async function `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>`. Follow the shape of existing skills such as `smartRouting.ts`. If the skill calls back into OmniRoute over HTTP, build the headers with `buildSelfLoopHeaders(caller)` from `src/lib/a2a/selfLoopAuth.ts` so the call runs with the A2A caller's key, not `OMNIROUTE_API_KEY`, and pass `redirect: "error"` to `fetch` so a redirect never gets the key. The helper only builds headers; each skill sets the redirect policy itself.
 
 2. **Register handler:** in `src/lib/a2a/taskExecution.ts`, add an entry to `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...existing skills
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
