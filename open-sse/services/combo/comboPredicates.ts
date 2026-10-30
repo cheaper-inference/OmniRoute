@@ -299,6 +299,9 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   rate_limit_queue_timeout: true,
   rate_limit_queue_full: true,
   rate_limit_queue_wedged: true,
+  // Local account-semaphore capacity — same verdict, different gate.
+  semaphore_timeout: true,
+  semaphore_queue_full: true,
   token_limit_exceeded: true,
   // #10360: our own executor-result contract violation. An internal defect, not
   // a provider/account fault — it must never cool a connection or trip a breaker.
@@ -344,6 +347,7 @@ export function isRequestScopedUpstreamFailure(error?: {
     type === "invalid_request_error" ||
     type === "context_length_exceeded" ||
     type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity" ||
     // #14313: OpenCode free-tier refusal (FreeTierError) — same verdict on every
     // account for the same request; never a connection/model health signal.
     type === "freetiererror" ||
@@ -628,7 +632,13 @@ export function isLocalQueueCapacityErrorBody(errorBody: unknown): boolean {
     code === "RATE_LIMIT_QUEUE_TIMEOUT" ||
     code === "RATE_LIMIT_QUEUE_FULL" ||
     code === "RATE_LIMIT_QUEUE_WEDGED" ||
-    type === "local_queue_capacity"
+    // Account-semaphore capacity: the connection is healthy — the per-account
+    // concurrency gate is simply full for this moment. Same verdict as the
+    // limiter queue codes above: no cooldown, no rotation blame.
+    code === "SEMAPHORE_TIMEOUT" ||
+    code === "SEMAPHORE_QUEUE_FULL" ||
+    type === "local_queue_capacity" ||
+    type === "account_semaphore_capacity"
   );
 }
 

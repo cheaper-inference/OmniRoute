@@ -77,3 +77,50 @@ test("combo returns a local queue capacity response without retrying or rotating
   assert.equal(body.error.code, "RATE_LIMIT_QUEUE_TIMEOUT");
   assert.equal(body.error.type, "local_queue_capacity");
 });
+
+test("account-semaphore capacity is local too: no cooldown, no rotation blame, no conn disable", () => {
+  // The per-account concurrency gate being momentarily full is local capacity,
+  // not a provider or connection health signal — the same account is serving
+  // other requests right now. All three classifiers must agree, mirroring the
+  // rate-limit queue codes above.
+  assert.equal(
+    isLocalQueueCapacityErrorBody({
+      error: { code: "SEMAPHORE_TIMEOUT", type: "account_semaphore_capacity" },
+    }),
+    true
+  );
+  assert.equal(
+    isLocalQueueCapacityErrorBody({
+      error: { code: "SEMAPHORE_QUEUE_FULL" },
+    }),
+    true
+  );
+  assert.equal(
+    isLocalQueueCapacityErrorBody({
+      error: { type: "account_semaphore_capacity" },
+    }),
+    true
+  );
+  assert.equal(
+    isRequestScopedUpstreamFailure({ code: "SEMAPHORE_TIMEOUT", type: "account_semaphore_capacity" }),
+    true
+  );
+  assert.equal(
+    shouldSkipConnDisable(
+      {
+        status: 429,
+        errorCode: "SEMAPHORE_TIMEOUT",
+        errorType: "account_semaphore_capacity",
+      },
+      false,
+      false,
+      "nvidia"
+    ),
+    true
+  );
+  // And it is not over-broad: an unrelated code/type stays a health signal.
+  assert.equal(
+    isLocalQueueCapacityErrorBody({ error: { code: "RATE_LIMITED", type: "rate_limit" } }),
+    false
+  );
+});
