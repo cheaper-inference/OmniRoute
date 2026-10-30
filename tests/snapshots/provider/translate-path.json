@@ -2266,6 +2266,29 @@
       "stream": "https://api.eurouter.ai/v1/chat/completions"
     }
   },
+  "evren": {
+    "format": "openai",
+    "headers": {
+      "apiKey": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "nonStream": {
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      },
+      "oauth": {
+        "Accept": "text/event-stream",
+        "Authorization": "Bearer <TOK>",
+        "Content-Type": "application/json"
+      }
+    },
+    "url": {
+      "nonStream": "https://evren-llmapi.ssyz.org.tr/v1/chat/completions",
+      "stream": "https://evren-llmapi.ssyz.org.tr/v1/chat/completions"
+    }
+  },
   "factory": {
     "format": "openai",
     "headers": {
