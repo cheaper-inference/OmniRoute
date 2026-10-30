@@ -101,7 +101,7 @@ import {
   hasPerModelFailureScope,
   getRuntimeProviderProfile,
   recordModelLockoutFailure,
-  retryHintBypassesMaxCooldownMs,
+  upstreamResetDateIsAuthoritative,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
@@ -2824,10 +2824,11 @@ export async function markAccountUnavailable(
               : (fallbackResult.quotaResetHintMs ?? null),
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
-          // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
-          // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped.
+          // Only a transport header, google.rpc.RetryInfo, a cached Claude reset, or a
+          // provider that opted in with trustUpstreamResetDate can bypass maxCooldownMs.
+          // Prose and generic JSON hints remain exact but operator-capped.
           exactCooldownIsUpstreamReset:
-            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
+            upstreamResetDateIsAuthoritative(fallbackResult.retryHintSource, provider) ||
             isModelScopedClaudeQuota,
         }
       );

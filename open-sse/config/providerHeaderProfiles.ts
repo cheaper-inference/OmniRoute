@@ -192,7 +192,11 @@ export const QODER_DEFAULT_USER_AGENT = "Qoder-Cli";
 export const CODEBUDDY_CN_USER_AGENT = "CLI/2.108.1 CodeBuddy/2.108.1";
 
 // CodeBuddy International (codebuddy.ai) - single source of truth for intl profile.
-export const CODEBUDDY_INTL_USER_AGENT = "IDE/2.108.1 CodeBuddy/2.108.1";
+// Captured from the official CLI (CLI/2.175.0), NOT the IDE: the intl gateway's
+// channel verification keys on the CLI agent/IDE headers, and the IDE profile was
+// the reason the wire shape drifted. Keep this in lockstep with
+// open-sse/executors/codebuddy-intl/cliProfile.ts (CODEBUDDY_INTL_CLI).
+export const CODEBUDDY_INTL_USER_AGENT = "CLI/2.175.0 CodeBuddy/2.175.0";
 
 // WorkBuddy gateway identity shared by chat and authenticated model discovery.
 // Discovery intentionally omits the chat-only X-Agent-* intent headers.
