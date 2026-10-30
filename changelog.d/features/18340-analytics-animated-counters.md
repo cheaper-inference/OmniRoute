@@ -1,0 +1,1 @@
+- **feat(dashboard):** the analytics Overview counters (tokens and estimated cost) animate toward their new value when the range or filters change; cost keeps its cents and `prefers-reduced-motion` is respected ([#18340](https://github.com/cheaper-inference/OmniRoute/pull/18340)) — thanks @F0Rextasy

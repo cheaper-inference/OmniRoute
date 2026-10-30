@@ -6,6 +6,7 @@ import Button from "./Button";
 import Card from "./Card";
 import Icon from "./Icon";
 import { CardSkeleton } from "./Loading";
+import AnimatedNumber from "./AnimatedNumber";
 import { fmtCompact as fmt, fmtFull, fmtCost } from "@/shared/utils/formatting";
 import { readFetchErrorMessage } from "@/shared/utils/fetchError";
 import {
@@ -342,14 +343,24 @@ export default function UsageAnalytics() {
         <StatCard
           icon="generating_tokens"
           label={t("totalTokens")}
-          value={tokenDisplayMode === "exact" ? fmtFull(s.totalTokens) : fmt(s.totalTokens)}
+          value={
+            <AnimatedNumber
+              value={s.totalTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
+          }
           tooltip={tokenDisplayMode === "exact" ? `~${fmt(s.totalTokens)}` : fmtFull(s.totalTokens)}
           subValue={`${fmtFull(s.totalRequests)} ${t("chartRequests")}`}
         />
         <StatCard
           icon="input"
           label={t("inputTokens")}
-          value={tokenDisplayMode === "exact" ? fmtFull(s.promptTokens) : fmt(s.promptTokens)}
+          value={
+            <AnimatedNumber
+              value={s.promptTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
+          }
           tooltip={
             tokenDisplayMode === "exact" ? `~${fmt(s.promptTokens)}` : fmtFull(s.promptTokens)
           }
@@ -359,7 +370,10 @@ export default function UsageAnalytics() {
           icon="output"
           label={t("outputTokens")}
           value={
-            tokenDisplayMode === "exact" ? fmtFull(s.completionTokens) : fmt(s.completionTokens)
+            <AnimatedNumber
+              value={s.completionTokens}
+              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
+            />
           }
           tooltip={
             tokenDisplayMode === "exact"
@@ -371,7 +385,7 @@ export default function UsageAnalytics() {
         <StatCard
           icon="payments"
           label={t("estCost")}
-          value={fmtCost(s.totalCost)}
+          value={<AnimatedNumber value={s.totalCost} format={fmtCost} integer={false} />}
           tooltip={
             s.totalCost !== undefined && s.totalCost !== null
               ? `$${Number(s.totalCost).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 6 })}`
