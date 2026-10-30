@@ -61,8 +61,8 @@ test("#15534 diagnostics compare signatures in-memory and emit only aggregate st
     toolResultTurns: 1,
   });
   assert.deepEqual(compareThinkingSignatures(ingress, outbound), {
-    unchanged: 1,
-    removed: 1,
+    unchanged: 2,
+    removed: 0,
     added: 0,
   });
   const event = buildThinkingSignatureDiagnosticsEvent({
@@ -110,6 +110,8 @@ test("#15534 diagnostics do not emit on unrelated status, provider, or validatio
   for (const input of [
     { provider: "claude", status: 200, message: "Invalid `signature` in `thinking` block" },
     { provider: "codex", status: 400, message: "Invalid `signature` in `thinking` block" },
+    // Truncated paraphrase, not Anthropic's canonical wording — the gate must not
+    // over-match generic "cannot be modified" 400s (see #17324 positive case below).
     { provider: "claude", status: 400, message: "latest assistant message cannot be modified" },
   ]) {
     assert.equal(
@@ -126,6 +128,85 @@ test("#15534 diagnostics do not emit on unrelated status, provider, or validatio
       null
     );
   }
+});
+
+test('#17324 diagnostics emit on the canonical "cannot be modified" thinking-block 400', () => {
+  // Anthropic's exact wording for a replayed latest-turn thinking block that is not a
+  // faithful copy (cross-org signature restore, fabricated placeholder, truncated capture).
+  const canonicalMessage =
+    "messages.2.content.0: `thinking` or `redacted_thinking` blocks in the latest assistant message cannot be modified. These blocks must remain as they were in the original response.";
+  const event = buildThinkingSignatureDiagnosticsEvent({
+    correlationId: "27d5aa1e-9f40-4b9e-8e4b-1c2d3e4f5a6b",
+    provider: "claude",
+    model: "claude-opus-5-5",
+    status: 400,
+    message: canonicalMessage,
+    ingressBody: ingress,
+    outboundBody: outbound,
+    recoveryAttempted: true,
+    recoverySucceeded: false,
+    outboundBodyCaptured: true,
+  });
+  assert.ok(event);
+  assert.equal(event.status, 400);
+  assert.equal(event.correlationId, "27d5aa1e-9f40-4b9e-8e4b-1c2d3e4f5a6b");
+  assert.equal(event.recoveryAttempted, true);
+  // Same allowlisted shape: structural scalars only, no signature/thinking/header values.
+  const serialized = JSON.stringify(event);
+  for (const secret of [
+    FOREIGN_SIGNATURE,
+    ACTIVE_SIGNATURE,
+    SENSITIVE_THINKING,
+    ENCRYPTED_CONTENT,
+    API_KEY,
+    "private-tool-id",
+  ]) {
+    assert.equal(serialized.includes(secret), false, `diagnostics must not leak ${secret}`);
+  }
+  assert.deepEqual(Object.keys(event).sort(), [
+    "correlationId",
+    "ingress",
+    "ingressToOutbound",
+    "model",
+    "outbound",
+    "outboundBodyCaptured",
+    "provider",
+    "recoveryAttempted",
+    "recoverySucceeded",
+    "status",
+  ]);
+
+  // anthropic-compatible-* providers share the same boundary; a non-400 status does not.
+  assert.equal(
+    buildThinkingSignatureDiagnosticsEvent({
+      correlationId: null,
+      model: null,
+      ingressBody: ingress,
+      outboundBody: outbound,
+      recoveryAttempted: false,
+      recoverySucceeded: false,
+      outboundBodyCaptured: true,
+      provider: "anthropic-compatible-proxy",
+      status: 400,
+      message: canonicalMessage,
+    }) === null,
+    false
+  );
+  assert.equal(
+    buildThinkingSignatureDiagnosticsEvent({
+      correlationId: null,
+      model: null,
+      ingressBody: ingress,
+      outboundBody: outbound,
+      recoveryAttempted: false,
+      recoverySucceeded: false,
+      outboundBodyCaptured: true,
+      provider: "claude",
+      status: 500,
+      message: canonicalMessage,
+    }),
+    null
+  );
 });
 
 test("#15534 diagnostics never echo a caller-supplied non-UUID correlation id", () => {

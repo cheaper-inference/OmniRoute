@@ -1,0 +1,3 @@
+- Stop fabricating the #5312 `redacted_thinking` placeholder for adaptive-thinking replays and drop rejected/store-restored thinking blocks without re-injecting it — a mismatched blob re-triggers the "latest assistant message cannot be modified" 400 (#17324).
+- Bind signed-thinking continuity store entries to the serving connection id: thinking signatures are scoped to the producing OAuth org, so a block captured on one Claude org must never be replayed on another connection of the same provider+model (#17324).
+- Emit the #15534 privacy-safe THINKING_SIGNATURE structural diagnostics for the "cannot be modified" thinking-block 400 variant as well, not just the invalid-signature variant.

@@ -1,6 +1,7 @@
 import {
   executeWithAnthropicThinkingSignatureRecovery,
   isAnthropicThinkingSignatureError,
+  isAnthropicThinkingModifiedError,
 } from "./passthroughHelpers.ts";
 
 type ProviderExecution = {
@@ -30,9 +31,11 @@ export type ThinkingSignatureRecoveryResult = {
 };
 
 /**
- * Retry exactly once after Anthropic's explicit thinking-signature validation
- * error. The caller keeps all connection/provider resilience state untouched
- * until this request-scoped recovery has finished.
+ * Retry exactly once after one of the two Anthropic thinking-block
+ * validation errors this module understands: the explicit signature
+ * rejection, or the separate "latest assistant message cannot be modified"
+ * error (#17324). The caller keeps all connection/provider resilience state
+ * untouched until this request-scoped recovery has finished.
  */
 export async function recoverAnthropicThinkingSignature(args: {
   provider?: string | null;
@@ -42,12 +45,10 @@ export async function recoverAnthropicThinkingSignature(args: {
   execute: (body: unknown) => Promise<ProviderExecution>;
   parseError: (response: Response) => Promise<ParsedError>;
 }): Promise<ThinkingSignatureRecoveryResult> {
+  const errorArgs = { provider: args.provider, status: args.statusCode, message: args.message };
   if (
-    !isAnthropicThinkingSignatureError({
-      provider: args.provider,
-      status: args.statusCode,
-      message: args.message,
-    })
+    !isAnthropicThinkingSignatureError(errorArgs) &&
+    !isAnthropicThinkingModifiedError(errorArgs)
   ) {
     return {
       attempted: false,
