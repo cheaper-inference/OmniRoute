@@ -1,0 +1,1 @@
+- **fix(ui):** Prevent intermittent Vitest teardown errors by unmounting Studio React roots, stabilizing the Provider Stats translation mock, and cancelling OmniGlyph saved-status timers when saving again or unmounting. Late OmniGlyph save completions no longer update an unmounted page.
