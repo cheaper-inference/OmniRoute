@@ -15,6 +15,7 @@ import { EventEmitter } from "events";
 import {
   TOKEN_EXTRACTION_CONFIGS,
   TokenExtractionConfig,
+  isAcceptableStorageToken,
   type TokenSource,
 } from "./tokenExtractionConfig";
 import { matchesCookieDomain } from "../utils/cookieDomain";
@@ -219,7 +220,7 @@ export class InAppLoginService extends EventEmitter {
                 (key: string) => localStorage.getItem(key),
                 source.key
               );
-              if (value && typeof value === "string") {
+              if (isAcceptableStorageToken(config.providerId, source.key, value)) {
                 credentials[source.key] = value;
               }
             } catch {
@@ -232,7 +233,7 @@ export class InAppLoginService extends EventEmitter {
                 (key: string) => sessionStorage.getItem(key),
                 source.key
               );
-              if (value && typeof value === "string") {
+              if (isAcceptableStorageToken(config.providerId, source.key, value)) {
                 credentials[source.key] = value;
               }
             } catch {
