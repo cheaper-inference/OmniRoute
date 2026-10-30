@@ -12,6 +12,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 // ---------------------------------------------------------------------------
 // Inline mock for systemCommands — must happen before importing dnsConfig.
@@ -221,7 +222,13 @@ test("removeDNSEntries: skips hosts NOT in /etc/hosts (idempotency)", async () =
 test("addDNSEntries: calls exec with array-form args (Hard Rule #13 pattern)", async () => {
   // We cannot fully mock execFile in ESM without experimental flags, so we
   // verify structural compliance by inspecting the source file directly.
-  const srcPath = new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url).pathname;
+  //
+  // `URL.pathname` is a URL path, not an OS path: on Windows it yields
+  // "/D:/..." — a leading slash before the drive letter — which readFileSync
+  // cannot open. `fileURLToPath` decodes to a real OS path on every platform
+  // (it also un-escapes %20 in paths containing spaces). Same fix, same reason
+  // as tests/unit/webdav-server-3485.test.ts. Applies to every read below.
+  const srcPath = fileURLToPath(new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url));
   const src = fs.readFileSync(srcPath, "utf8");
 
   // The tee invocation must use array form: args array contains HOSTS_FILE as
@@ -240,8 +247,11 @@ test("addDNSEntries: calls exec with array-form args (Hard Rule #13 pattern)", a
 });
 
 test("addDNSEntries: entry passed as stdin data, not shell-interpolated", () => {
-  const srcPath = new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url).pathname;
-  const src = fs.readFileSync(srcPath, "utf8");
+  const srcPath = fileURLToPath(new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url));
+  // Normalize line endings: the multi-line needle below is written with "\n",
+  // but a checkout with core.autocrlf=true (the Windows default) hands back the
+  // same source with CRLF, so the un-normalized read can never match.
+  const src = fs.readFileSync(srcPath, "utf8").replace(/\r\n/g, "\n");
 
   // The stdin `data` is built from the batched entries and sent to tee via pipe —
   // not part of the command array. Verify the pattern appears in the source and
@@ -261,7 +271,7 @@ test("addDNSEntries: entry passed as stdin data, not shell-interpolated", () => 
 
 test("addDNSEntries: generates both IPv4 and IPv6 lines per host", () => {
   // Validate by reading source — the dnsLines helper must produce both.
-  const srcPath = new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url).pathname;
+  const srcPath = fileURLToPath(new URL("../../src/mitm/dns/dnsConfig.ts", import.meta.url));
   const src = fs.readFileSync(srcPath, "utf8");
   assert.ok(src.includes("127.0.0.1 ${hostname}"), "must produce 127.0.0.1 entry");
   assert.ok(src.includes("::1 ${hostname}"), "must produce ::1 entry");

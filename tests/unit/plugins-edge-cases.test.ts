@@ -79,12 +79,11 @@ function writeTestPlugin(opts: {
 // ── Lifecycle ──
 
 test.beforeEach(() => {
-  core.resetDbInstance();
   // Clean all existing plugins to prevent UNIQUE constraint failures.
   // Wrapped in try-catch: when running alongside other test files that load core
   // before DATA_DIR is set, the SQLITE_FILE may point to the production DB which
   // may not have the plugins table yet (migration 076 renumbered). The cleanup
-  // is redundant anyway — resetDbInstance() already invalidates the instance,
+  // is redundant anyway — resetDbInstance() below invalidates the instance,
   // and rmSync/mkdirSync below gives us a fresh DATA_DIR for next getDbInstance().
   try {
     for (const p of dbPlugins.listPlugins()) {
@@ -93,6 +92,13 @@ test.beforeEach(() => {
   } catch {
     // Production DB may not have the plugins table — ignore; fresh DB created below.
   }
+  // Must run AFTER the cleanup loop above, never before it: listPlugins() calls
+  // getDbInstance(), which reopens the SQLite file inside TEST_DATA_DIR. Windows
+  // refuses to remove a directory while a handle on it is open, so closing first
+  // and reopening second makes the rmSync below fail with EPERM — and because this
+  // is a beforeEach, that one lock fails every test in the file. The close must be
+  // the last thing before the removal (see tests/_setup/tempDataDir.ts, #13290).
+  core.resetDbInstance();
   resetHooks();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
