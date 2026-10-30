@@ -160,7 +160,14 @@ async function refreshDashboardSessionIfNeeded(
     const refreshWindowSeconds = 7 * 24 * 60 * 60;
     if (exp - now >= refreshWindowSeconds) return;
 
-    const freshToken = await mintDashboardSessionToken(secret);
+    // Refresh the same session, not a new independently revocable login. Keep iat
+    // so a concurrent password-change cutoff still rejects every refreshed copy.
+    // Legacy cookies acquire an identity through a fresh sign-in, not silent renewal.
+    if (typeof payload.jti !== "string" || !payload.jti || typeof payload.iat !== "number") return;
+    const freshToken = await mintDashboardSessionToken(secret, {
+      jti: payload.jti,
+      iat: payload.iat,
+    });
 
     response.cookies.set(DASHBOARD_SESSION_COOKIE, freshToken, {
       httpOnly: true,
@@ -168,8 +175,8 @@ async function refreshDashboardSessionIfNeeded(
       sameSite: "lax",
       path: "/",
     });
-  } catch (error) {
-    console.error("[Authz] JWT auto-refresh failed:", error);
+  } catch {
+    console.warn("[Authz] Dashboard session renewal unavailable; retry or sign in again");
   }
 }
 
