@@ -1,0 +1,1 @@
+- **fix(plugin):** refresh the served catalog on the configured TTL instead of publishing once at install ([#18235](https://github.com/cheaper-inference/OmniRoute/pull/18235)) — thanks @maxmad64bis
