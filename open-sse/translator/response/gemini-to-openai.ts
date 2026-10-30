@@ -5,6 +5,7 @@ import {
   storeGeminiThoughtSignature,
 } from "../../services/geminiThoughtSignatureStore.ts";
 import { caseInsensitiveToolNameLookup } from "../helpers/toolCallHelper.ts";
+import { stripGeminiPlaceholderArgs } from "../helpers/geminiPlaceholderArgs.ts";
 import {
   parseTextualToolCallCandidate,
   containsTextualToolCallMarker,
@@ -27,6 +28,8 @@ type GeminiToOpenAIState = {
   signatureNamespace?: string | null;
   toolCalls: Map<number, unknown>;
   toolNameMap?: Map<string, string>;
+  /** The CLIENT request's tools[], used to drop the synthetic `reason` argument. */
+  clientTools?: unknown;
   textualToolCallBuffer?: string;
   textualReasoningTagBuffer?: string;
   activeTextualReasoningTag?: string;
@@ -260,7 +263,11 @@ function emitFunctionCallPart(
 ) {
   const rawToolName = part.functionCall.name;
   const fcName = caseInsensitiveToolNameLookup(rawToolName, state.toolNameMap) ?? rawToolName;
-  const fcArgs = normalizeToolCallArgs(part.functionCall.args || {});
+  const fcArgs = stripGeminiPlaceholderArgs(
+    fcName,
+    normalizeToolCallArgs(part.functionCall.args || {}),
+    state.clientTools
+  );
   const toolCallIndex = state.functionIndex++;
   const toolCall = {
     id: buildToolCallId(part.functionCall, fcName, toolCallIndex),

@@ -974,6 +974,13 @@ function preserveNullable(obj: unknown): void {
   }
 }
 
+/** Property Phase 6 adds to an empty object schema (stripped again by geminiPlaceholderArgs.ts). */
+export const GEMINI_PLACEHOLDER_KEY = "reason";
+export const GEMINI_PLACEHOLDER_SCHEMA = Object.freeze({
+  type: "string",
+  description: "Brief explanation of why you are calling this tool",
+});
+
 export function cleanJSONSchemaForAntigravity(
   schema: unknown,
   options: {
@@ -1063,7 +1070,10 @@ export function cleanJSONSchemaForAntigravity(
 
   cleanupRequired(cleaned);
 
-  // Phase 6: Add placeholder for empty object schemas (Antigravity requirement).
+  // Phase 6: Add placeholder for empty object schemas. It stays on the request:
+  // Gemini rejects an OBJECT with empty `properties` ("should be non-empty for OBJECT
+  // type") and Claude on Antigravity (VALIDATED mode) needs one required property.
+  // The model fills it, so geminiPlaceholderArgs.ts drops it from the tool-call args.
   function addPlaceholders(obj: unknown): void {
     if (!obj || typeof obj !== "object") return;
 
@@ -1077,13 +1087,8 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (record.type === "object") {
       if (!record.properties || Object.keys(toRecord(record.properties)).length === 0) {
-        record.properties = {
-          reason: {
-            type: "string",
-            description: "Brief explanation of why you are calling this tool",
-          },
-        };
-        record.required = ["reason"];
+        record.properties = { [GEMINI_PLACEHOLDER_KEY]: { ...GEMINI_PLACEHOLDER_SCHEMA } };
+        record.required = [GEMINI_PLACEHOLDER_KEY];
       }
     }
 

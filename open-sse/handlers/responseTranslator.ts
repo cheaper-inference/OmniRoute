@@ -26,6 +26,7 @@ import {
 import { restoreDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { extractReplayableResponsesReasoningText } from "../services/reasoningInputPolicy.ts";
 import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
+import { stripGeminiPlaceholderArgs } from "../translator/helpers/geminiPlaceholderArgs.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
 import { toNumber as toFiniteNumber } from "../utils/numeric.ts";
 import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
@@ -511,7 +512,13 @@ export function translateNonStreamingResponse(
                       type: "function",
                       function: {
                         name: restoredName,
-                        arguments: JSON.stringify(normalizeToolCallArgs(fn.args || {})),
+                        arguments: JSON.stringify(
+                          stripGeminiPlaceholderArgs(
+                            restoredName,
+                            normalizeToolCallArgs(fn.args || {}),
+                            clientTools
+                          )
+                        ),
                       },
                     });
                   }
