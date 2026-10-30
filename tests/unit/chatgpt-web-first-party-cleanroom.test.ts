@@ -4,6 +4,8 @@ import { describe, test } from "node:test";
 import {
   buildChatGptWebIntegrityResolutionSource,
   collectChatGptWebFirstPartyAssetCandidates,
+  collectPageAssetCandidates,
+  assertChatGptWebSignedIn,
   executeChatGptWebFirstPartyTurn,
   extractChatGptWebFirstPartyAssetReferences,
   parseChatGptWebFirstPartyModuleContract,
@@ -500,5 +502,72 @@ describe("ChatGPT Web integrity module resolution", () => {
     );
     assert.doesNotMatch(source, /evil\.example/);
     assert.doesNotMatch(source, /not-a-chunk\.css/);
+  });
+});
+
+describe("ChatGPT Web browser asset inventory during navigation", () => {
+  test("retries read-only asset inventory when a redirect destroys the frame", async () => {
+    let attempts = 0;
+    let loadWaits = 0;
+    const page = {
+      evaluate: async () => {
+        attempts += 1;
+        if (attempts === 1) {
+          throw new Error("page.evaluate: Execution context was destroyed, most likely because of a navigation");
+        }
+        return {
+          modulePreloadUrls: ["https://chatgpt.com/cdn/assets/demo.abc.js"],
+          resourceUrls: ["https://other.example/script.js"],
+        };
+      },
+      waitForLoadState: async () => { loadWaits += 1; },
+    } as unknown as import("playwright").Page;
+    const result = await collectPageAssetCandidates(page);
+    assert.deepEqual(result, ["https://chatgpt.com/cdn/assets/demo.abc.js"]);
+    assert.equal(attempts, 2);
+    assert.equal(loadWaits, 1);
+  });
+
+  test("does not retry unrelated failures or silently ignore permanent redirects", async () => {
+    const fail = (message: string) => ({
+      evaluate: async () => { throw new Error(message); },
+      waitForLoadState: async () => {},
+    } as unknown as import("playwright").Page);
+    await assert.rejects(collectPageAssetCandidates(fail("Page crashed")), /Page crashed/);
+    await assert.rejects(
+      collectPageAssetCandidates(fail("Execution context was destroyed, most likely because of a navigation")),
+      /Execution context was destroyed/
+    );
+  });
+});
+
+
+describe("ChatGPT Web cleanroom stored session preflight", () => {
+  test("accepts an authenticated session without exposing user identity", async () => {
+    const page = {
+      evaluate: async () => ({ ready: true, httpStatus: 200 }),
+    } as unknown as import("playwright").Page;
+    await assert.doesNotReject(assertChatGptWebSignedIn(page));
+  });
+
+  test("rejects an unauthenticated browser state with actionable guidance", async () => {
+    const page = {
+      evaluate: async () => ({ ready: false, httpStatus: 200 }),
+    } as unknown as import("playwright").Page;
+    await assert.rejects(assertChatGptWebSignedIn(page), /authenticated browser session/);
+  });
+
+  test("recovers one navigation and checks the final document instead", async () => {
+    let count = 0;
+    const page = {
+      evaluate: async () => {
+        count++;
+        if (count === 1) throw new Error("Execution context was destroyed, most likely because of a navigation");
+        return { ready: true, httpStatus: 200 };
+      },
+      waitForLoadState: async () => {},
+    } as unknown as import("playwright").Page;
+    await assert.doesNotReject(assertChatGptWebSignedIn(page));
+    assert.equal(count, 2);
   });
 });
