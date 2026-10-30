@@ -1337,11 +1337,35 @@ verdicts; the second stage can still produce its requested visible reasoning as 
 
 | Endpoint              | Method   | Description                   |
 | --------------------- | -------- | ----------------------------- |
+| `/api/models`         | GET/PUT  | Model list / alias update     |
 | `/api/models/alias`   | GET/POST | Model aliases                 |
 | `/api/models/catalog` | GET      | All models by provider + type |
 | `/api/combos*`        | Various  | Combo management              |
 | `/api/keys*`          | Various  | API key management            |
 | `/api/pricing`        | GET      | Model pricing                 |
+
+#### Model limit provenance
+
+`GET /api/models?withLimits=1` (also `true`; `0`/`false` or omitting it keeps the default
+payload unchanged) adds `contextWindow`, `maxInputTokens`, `maxOutputTokens` and a `capsSource`
+object to every model row. `capsSource` names the rule that supplied each limit, so a
+surprising limit (for example 128k on a 1M model) can be traced to its origin. The resolved
+values are the same ones routing uses; the flag only adds fields and never changes a value.
+Any other `withLimits` value is rejected with `400`.
+
+| `capsSource` value                           | Origin                                                                 |
+| -------------------------------------------- | ---------------------------------------------------------------------- |
+| `override:context`                           | Persisted context-window override (`model_context_overrides`)          |
+| `override:max_input` / `override:max_output` | Persisted `max_input_tokens` / `max_output_tokens` capability override |
+| `static-authoritative:<provider>/<model>`    | Static authoritative context-window table                              |
+| `synced:<provider>/<model>`                  | models.dev synced capability row                                       |
+| `registry:<provider>/<model>`                | Provider registry entry                                                |
+| `spec:<model>`                               | Static model spec                                                      |
+| `effort-base:` prefix                        | Row borrowed from the base model of an effort-suffixed variant         |
+| `none`                                       | No source declares the limit (value is `null`)                         |
+
+Implementation: `getResolvedModelCapabilitiesWithLimitSources()` in `src/lib/modelCapabilities.ts`
+and the precedence chains in `src/lib/modelCapabilityLimits.ts`.
 
 ### Usage & Analytics
 
