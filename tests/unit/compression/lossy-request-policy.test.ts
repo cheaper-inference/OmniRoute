@@ -17,7 +17,7 @@ test("default path replaces a lossy profile with dedup and whitespace folding", 
   assert.equal(plan.mode, "stacked");
   assert.deepEqual(plan.stackedPipeline, [
     { engine: "session-dedup" },
-    { engine: "lite", config: { compressToolResults: false } },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
   ]);
 });
 
@@ -46,7 +46,9 @@ test("a safe stacked plan scopes Lite to preserve tool results", () => {
   };
   assert.deepEqual(applyLossyRequestPolicy(safe, null), {
     ...safe,
-    stackedPipeline: [{ engine: "lite", config: { compressToolResults: false } }],
+    stackedPipeline: [
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+    ],
   });
   assert.deepEqual(safe.stackedPipeline, [{ engine: "lite" }]);
 });

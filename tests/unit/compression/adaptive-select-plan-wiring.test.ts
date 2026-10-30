@@ -24,7 +24,7 @@ test("no contextBudget → auto-trigger path retains legacy selection with safe 
   const small = selectCompressionPlan(cfg, null, 1000);
   assert.equal(small.mode, "stacked");
   assert.deepEqual(small.stackedPipeline, [
-    { engine: "lite", config: { compressToolResults: false } },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
   ]);
   assert.equal(
     selectCompressionPlan(cfg, null, 1000, undefined, undefined, {}, "allow-lossy").mode,

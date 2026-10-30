@@ -193,7 +193,7 @@ describe("engines map drives dispatch ONLY when explicit", () => {
       enginesExplicit: false,
     };
     assert.deepEqual(selectCompressionPlan(legacy, null, 0).stackedPipeline, [
-      { engine: "lite", config: { compressToolResults: false } },
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
     ]);
     assert.equal(
       selectCompressionStrategy(legacy, null, 0, undefined, undefined, {}, "allow-lossy"),

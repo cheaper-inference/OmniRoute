@@ -2,9 +2,9 @@ import { isSafeDefault } from "./engineCatalog.ts";
 import type { DerivedPlan } from "./deriveDefaultPlan.ts";
 
 /**
- * HouMinXi's plan for the default path: dedup and whitespace folding stay on.
- * Summaries, relevance filters, and style rewrites run only when the request
- * opts in.
+ * HouMinXi's plan for the default path: dedup and non-tool whitespace folding stay on.
+ * Unique tool text stays verbatim. Summaries, relevance filters, and style rewrites
+ * run only when the request opts in.
  */
 const LOSSY_SINGLE_MODES = new Set([
   "standard",
@@ -18,7 +18,7 @@ const LOSSY_SINGLE_MODES = new Set([
 
 export const SAFE_DEFAULT_PIPELINE = [
   { engine: "session-dedup" },
-  { engine: "lite", config: { compressToolResults: false } },
+  { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
 ] as const;
 
 function isSafeEngine(id: string): boolean {
@@ -43,7 +43,7 @@ export function headerOptsIntoLossy(header: string | null, plan: DerivedPlan): b
   return plan.source === "request-header";
 }
 
-/** Replace lossy steps with dedup + whitespace folding unless the request opted in. */
+/** Replace lossy steps with dedup + tool-preserving Lite unless the request opted in. */
 export function applyLossyRequestPolicy(plan: DerivedPlan, header: string | null): DerivedPlan {
   if (headerOptsIntoLossy(header, plan)) return plan;
   return downgradeUnrequestedLossy(plan);
@@ -70,7 +70,10 @@ export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
     mode: "stacked",
     stackedPipeline: pipeline.map((step) =>
       step.engine === "lite"
-        ? { ...step, config: { ...step.config, compressToolResults: false } }
+        ? {
+            ...step,
+            config: { ...step.config, compressToolResults: false, preserveToolWhitespace: true },
+          }
         : step
     ),
   };

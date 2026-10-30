@@ -29,7 +29,7 @@ describe("active named combo resolution (Phase 2)", () => {
     assert.equal(plan.source, "active-profile");
     assert.deepEqual(plan.stackedPipeline, [
       { engine: "session-dedup" },
-      { engine: "lite", config: { compressToolResults: false } },
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
     ]);
     const optedIn = selectCompressionPlan(
       config,
@@ -61,7 +61,7 @@ describe("active named combo resolution (Phase 2)", () => {
     const config = cfg({ activeComboId: "ghost", defaultMode: "lite", enginesExplicit: false });
     assert.deepEqual(
       selectCompressionPlan(config, null, 0, undefined, undefined, combos).stackedPipeline,
-      [{ engine: "lite", config: { compressToolResults: false } }]
+      [{ engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } }]
     );
   });
   it("routing-combo override wins over the active profile", () => {

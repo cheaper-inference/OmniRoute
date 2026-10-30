@@ -61,7 +61,10 @@ test("defaultComboForRequest keeps only the safe steps when the request does not
     });
     assert.deepEqual(
       combo?.pipeline,
-      [{ engine: "session-dedup" }, { engine: "lite", config: { compressToolResults: false } }],
+      [
+        { engine: "session-dedup" },
+        { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+      ],
       String(header)
     );
   }
@@ -118,7 +121,7 @@ test("defaultComboForRequest swaps a single lossy engine for the safe default pa
   });
   assert.deepEqual(combo?.pipeline, [
     { engine: "session-dedup" },
-    { engine: "lite", config: { compressToolResults: false } },
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
   ]);
 });
 
@@ -129,7 +132,9 @@ test("defaultComboForRequest scopes a single safe Lite engine", () => {
     header: null,
     combos: {},
   });
-  assert.deepEqual(combo?.pipeline, [{ engine: "lite", config: { compressToolResults: false } }]);
+  assert.deepEqual(combo?.pipeline, [
+    { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+  ]);
 });
 
 test("defaultComboForRequest yields when an engine:<id> header resolves a plan", () => {

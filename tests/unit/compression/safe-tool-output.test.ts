@@ -36,12 +36,15 @@ const configs: Record<string, CompressionConfig> = {
   },
 };
 
+const TOOL_WHITESPACE = "\t  first  \n\n\n\nsecond\t \r\n  third\t  \n";
+const NORMALIZED_WHITESPACE = "\t  first\n\nsecond\r\n  third\n";
+
 function toolText(bytes: number): string {
   const tail = `\nTOOL_TAIL_${bytes}`;
   const rows = Array.from({ length: Math.ceil(bytes / 65) }, (_, i) =>
     createHash("sha256").update(`tool-output-${i}`).digest("hex")
   ).join("\n");
-  return rows.slice(0, bytes - tail.length) + tail;
+  return TOOL_WHITESPACE + rows.slice(0, bytes - TOOL_WHITESPACE.length - tail.length) + tail;
 }
 
 function bodyWithTool(text: string, layout: string): Record<string, unknown> {
@@ -102,10 +105,10 @@ for (const [name, config] of Object.entries(configs)) {
       "Responses output-only",
       "Responses historical",
     ]) {
-      test(`${name} preserves all ${bytes} tool bytes: ${layout}`, async () => {
-        const text = toolText(bytes);
-        assert.equal(Buffer.byteLength(text), bytes);
-        for (const asyncMode of [false, true]) {
+      for (const asyncMode of [false, true]) {
+        test(`${name} preserves all ${bytes} tool bytes: ${layout} (${asyncMode ? "async" : "sync"})`, async () => {
+          const text = toolText(bytes);
+          assert.equal(Buffer.byteLength(text), bytes);
           const body = bodyWithTool(text, layout);
           const before = structuredClone(body);
           const result = await compress(config, body, null, asyncMode);
@@ -113,8 +116,8 @@ for (const [name, config] of Object.entries(configs)) {
           assert.equal(Buffer.byteLength(output), bytes, "tool byte length must be preserved");
           assert.equal(output, text, "the complete tool text, including its tail, must survive");
           assert.deepEqual(body, before, "compression must not mutate the request");
-        }
-      });
+        });
+      }
     }
   }
 }
@@ -155,8 +158,21 @@ test("explicit lossy requests retain global and step clipping precedence", async
   for (const compressToolResults of [true, false]) {
     const config = { ...baseConfig, lite: { compressToolResults, maxToolLength: 512 } };
     for (const header of ["allow-lossy", "engine:lite"]) {
-      const result = await compress(config, bodyWithTool(text, "historical tool"), header);
-      assert.equal(outputText(result.body) === text, !compressToolResults);
+      for (const asyncMode of [false, true]) {
+        for (const layout of ["historical tool", "Responses historical"]) {
+          const body = bodyWithTool(text, layout);
+          const before = structuredClone(body);
+          const result = await compress(config, body, header, asyncMode);
+          const output = outputText(result.body);
+          if (compressToolResults) {
+            assert.ok(output.length <= 512);
+            assert.match(output, /\.\.\.\[truncated\]/);
+          } else {
+            assert.equal(output, text.replace(TOOL_WHITESPACE, NORMALIZED_WHITESPACE));
+          }
+          assert.deepEqual(body, before);
+        }
+      }
     }
   }
   const config: CompressionConfig = {
@@ -172,8 +188,75 @@ test("explicit lossy requests retain global and step clipping precedence", async
   assert.match(outputText(result.body), /\.\.\.\[truncated\]/);
 });
 
+test("opted-in Lite with step clipping disabled still normalizes tool whitespace", async () => {
+  const config: CompressionConfig = {
+    ...baseConfig,
+    defaultMode: "stacked",
+    lite: { compressToolResults: true, maxToolLength: 512 },
+    stackedPipeline: [{ engine: "lite", config: { compressToolResults: false } }],
+  };
+  const stored = structuredClone(config);
+  const text = toolText(16_000);
+  for (const asyncMode of [false, true]) {
+    for (const layout of ["historical tool", "Responses historical"]) {
+      const body = bodyWithTool(text, layout);
+      const before = structuredClone(body);
+      const result = await compress(config, body, "allow-lossy", asyncMode);
+      assert.equal(outputText(result.body), text.replace(TOOL_WHITESPACE, NORMALIZED_WHITESPACE));
+      assert.deepEqual(body, before);
+    }
+  }
+  assert.deepEqual(config, stored);
+});
+
+test("a raw opted-in Lite step honors its explicit tool-whitespace option", async () => {
+  // An internal step option, not a public/global setting or an implication of clipping=false.
+  const config: CompressionConfig = {
+    ...baseConfig,
+    defaultMode: "stacked",
+    stackedPipeline: [
+      { engine: "lite", config: { compressToolResults: false, preserveToolWhitespace: true } },
+    ],
+  };
+  const stored = structuredClone(config);
+  const text = toolText(16_000);
+  for (const asyncMode of [false, true]) {
+    const body = bodyWithTool(text, "Responses historical");
+    const before = structuredClone(body);
+    const result = await compress(config, body, "allow-lossy", asyncMode);
+    assert.equal(outputText(result.body), text);
+    assert.deepEqual(body, before);
+  }
+  assert.deepEqual(config, stored);
+});
+
+test("safe Lite still normalizes non-tool whitespace", async () => {
+  const body = {
+    messages: [
+      { role: "user", content: TOOL_WHITESPACE + "USER_251" },
+      { role: "assistant", content: TOOL_WHITESPACE + "ASSISTANT_251" },
+    ],
+  };
+  const before = structuredClone(body);
+  const expected = {
+    messages: [
+      { role: "user", content: NORMALIZED_WHITESPACE + "USER_251" },
+      { role: "assistant", content: NORMALIZED_WHITESPACE + "ASSISTANT_251" },
+    ],
+  };
+  for (const config of Object.values(configs)) {
+    for (const asyncMode of [false, true]) {
+      const result = await compress(config, body, null, asyncMode);
+      assert.deepEqual(result.body, expected);
+      assert.deepEqual(body, before);
+    }
+  }
+});
+
 test("safe Lite leaves unique non-tool text intact", async () => {
-  const body = { messages: [{ role: "user", content: toolText(16_000) }] };
+  const body = {
+    messages: [{ role: "user", content: toolText(16_000).slice(TOOL_WHITESPACE.length) }],
+  };
   for (const config of Object.values(configs)) {
     const result = await compress(config, body);
     assert.deepEqual(result.body, body);

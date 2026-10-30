@@ -42,10 +42,12 @@ test("Responses WS uses the scoped safe Lite plan instead of the stored clipping
     ],
   });
   const text =
+    "\t  first  \n\n\n\nsecond\t \r\n  third\t  \n" +
     Array.from(
       { length: 400 },
       (_, i) => `unique-tool-line-${i}: ${i.toString(16).padStart(32, "0")}`
-    ).join("\n") + "\nWS_TOOL_TAIL_251";
+    ).join("\n") +
+    "\nWS_TOOL_TAIL_251";
   const body = {
     input: [
       { type: "function_call_output", call_id: "call_251", output: text },
