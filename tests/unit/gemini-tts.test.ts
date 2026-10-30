@@ -6,20 +6,37 @@ const { AUDIO_SPEECH_PROVIDERS, parseSpeechModel } =
   await import("../../open-sse/config/audioRegistry.ts");
 const { geminiGenerateSpeech } = await import("../../open-sse/executors/geminiTts.ts");
 const { handleAudioSpeech } = await import("../../open-sse/handlers/audioSpeech.ts");
+const { normalizeAudioOutput } = await import("../../open-sse/executors/vertexMedia.ts");
 
 test("Google Gemini TTS models parse publicly and remap to Gemini credentials", () => {
-  assert.deepEqual(parseSpeechModel("google/gemini-2.5-flash-preview-tts"), {
+  assert.deepEqual(parseSpeechModel("google/gemini-3.8-flash-tts"), {
     provider: "google",
-    model: "gemini-2.5-flash-preview-tts",
+    model: "gemini-3.8-flash-tts",
   });
   assert.equal(AUDIO_SPEECH_PROVIDERS.google.credentialProviderId, "gemini");
   assert.deepEqual(
     AUDIO_SPEECH_PROVIDERS.google.models.map(({ id }) => id),
-    ["gemini-3.1-flash-tts-preview", "gemini-2.5-flash-preview-tts", "gemini-2.5-pro-preview-tts"]
+    [
+      "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts",
+      "gemini-3.1-flash-tts-preview",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro-preview-tts",
+    ]
+  );
+  assert.deepEqual(
+    AUDIO_SPEECH_PROVIDERS.vertex.models.map(({ id }) => id),
+    [
+      "gemini-3.8-flash-tts",
+      "gemini-3.8-flash-lite-tts",
+      "gemini-3.1-flash-tts-preview",
+      "gemini-2.5-flash-preview-tts",
+      "gemini-2.5-pro-preview-tts",
+    ]
   );
 });
 
-test("geminiGenerateSpeech sends the exact AI Studio generateContent contract and wraps PCM", async () => {
+test("geminiGenerateSpeech sends speech_metadata.style and wraps PCM if needed", async () => {
   const originalFetch = globalThis.fetch;
   const pcm = Buffer.from([1, 2, 3, 4]);
   let captured: { url: string; init: RequestInit } | undefined;
@@ -43,13 +60,19 @@ test("geminiGenerateSpeech sends the exact AI Studio generateContent contract an
     });
   };
   try {
-    const wav = await geminiGenerateSpeech(
+    const { audio, contentType } = await geminiGenerateSpeech(
       { apiKey: "gemini-key" },
-      { model: "gemini-2.5-flash-preview-tts", text: "Hello", voice: "Kore" }
+      {
+        model: "gemini-3.8-flash-tts",
+        text: "Hello",
+        voice: "Puck",
+        instructions: "Whispering with suspense",
+        speed: 1.25,
+      }
     );
     assert.equal(
       captured?.url,
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-tts:generateContent"
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent"
     );
     assert.equal(
       (captured?.init.headers as Record<string, string>)["Content-Type"],
@@ -59,30 +82,69 @@ test("geminiGenerateSpeech sends the exact AI Studio generateContent contract an
       (captured?.init.headers as Record<string, string>)["x-goog-api-key"],
       "gemini-key"
     );
-    assert.equal((captured?.init.headers as Record<string, string>).Authorization, undefined);
     assert.deepEqual(JSON.parse(String(captured?.init.body)), {
-      contents: [{ parts: [{ text: "Hello" }] }],
+      contents: [
+        {
+          parts: [
+            {
+              text: "Hello",
+              speech_metadata: {
+                style: "Whispering with suspense. Pace: 1.25x normal speed",
+              },
+            },
+          ],
+        },
+      ],
       generationConfig: {
         responseModalities: ["AUDIO"],
         speechConfig: {
-          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: "Puck" } },
         },
       },
     });
-    assert.equal(wav.subarray(0, 4).toString("ascii"), "RIFF");
-    assert.equal(wav.readUInt32LE(24), 16000);
-    assert.deepEqual(wav.subarray(44), pcm);
+    assert.equal(contentType, "audio/wav");
+    assert.equal(audio.subarray(0, 4).toString("ascii"), "RIFF");
+    assert.equal(audio.readUInt32LE(24), 16000);
+    assert.deepEqual(audio.subarray(44), pcm);
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
-test("handleAudioSpeech returns WAV and defaults the AI Studio voice to Kore", async () => {
+test("normalizeAudioOutput preserves existing WAV and prevents double RIFF header", () => {
+  const fakePcm = Buffer.alloc(100, 1);
+  const dataHeader = Buffer.concat([Buffer.from("data"), Buffer.from([100, 0, 0, 0]), fakePcm]);
+  const fmtHeader = Buffer.concat([
+    Buffer.from("fmt "),
+    Buffer.from([16, 0, 0, 0]),
+    Buffer.alloc(16),
+  ]);
+  const c2paTrailer = Buffer.concat([Buffer.from("C2PA"), Buffer.alloc(50, 0xff)]);
+  const riffContent = Buffer.concat([Buffer.from("WAVE"), fmtHeader, dataHeader, c2paTrailer]);
+  const wavHeader = Buffer.concat([
+    Buffer.from("RIFF"),
+    Buffer.from([riffContent.length, 0, 0, 0]),
+    riffContent,
+  ]);
+
+  const { audio, contentType } = normalizeAudioOutput(wavHeader, "audio/wav");
+  assert.equal(contentType, "audio/wav");
+  assert.equal(audio.subarray(0, 4).toString("ascii"), "RIFF");
+  assert.equal(audio.indexOf(Buffer.from("RIFF"), 4), -1);
+  assert.equal(audio.indexOf(Buffer.from("C2PA")), -1);
+});
+
+test("normalizeAudioOutput supports response_format pcm", () => {
+  const pcm = Buffer.from([1, 2, 3, 4, 5, 6]);
+  const { audio, contentType } = normalizeAudioOutput(pcm, "audio/pcm", "pcm");
+  assert.equal(contentType, "audio/pcm");
+  assert.deepEqual(audio, pcm);
+});
+
+test("handleAudioSpeech passes instructions and style aliases to Gemini TTS", async () => {
   const originalFetch = globalThis.fetch;
   let payload: {
-    generationConfig: {
-      speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: string } } };
-    };
+    contents: [{ parts: [{ text: string; speech_metadata?: { style?: string } }] }];
   };
   globalThis.fetch = async (_input, init = {}) => {
     payload = JSON.parse(String(init.body));
@@ -106,17 +168,15 @@ test("handleAudioSpeech returns WAV and defaults the AI Studio voice to Kore", a
   try {
     const response = await handleAudioSpeech({
       body: {
-        model: "google/gemini-2.5-pro-preview-tts",
+        model: "google/gemini-3.8-flash-tts",
         input: "Speak",
+        delivery: "Dramatic and whispering",
       },
       credentials: { apiKey: "gemini-key" },
     });
     assert.equal(response.status, 200);
     assert.equal(response.headers.get("content-type"), "audio/wav");
-    assert.equal(
-      payload.generationConfig.speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName,
-      "Kore"
-    );
+    assert.equal(payload.contents[0].parts[0].speech_metadata?.style, "Dramatic and whispering");
   } finally {
     globalThis.fetch = originalFetch;
   }

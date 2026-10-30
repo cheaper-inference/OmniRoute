@@ -162,11 +162,9 @@ export function parsePcmSampleRate(mimeType: string | undefined): number {
   return match ? parseInt(match[1], 10) : 24000;
 }
 
-export function extractInlineAudio(
-  data: unknown
-): { base64: string; mimeType: string } | null {
-  const parts = (data as { candidates?: Array<{ content?: { parts?: unknown[] } }> })?.candidates?.[0]
-    ?.content?.parts;
+export function extractInlineAudio(data: unknown): { base64: string; mimeType: string } | null {
+  const parts = (data as { candidates?: Array<{ content?: { parts?: unknown[] } }> })
+    ?.candidates?.[0]?.content?.parts;
   if (!Array.isArray(parts)) return null;
   for (const part of parts) {
     const inline = (part as { inlineData?: { data?: unknown; mimeType?: unknown } })?.inlineData;
@@ -181,8 +179,8 @@ export function extractInlineAudio(
 }
 
 function extractText(data: unknown): string {
-  const parts = (data as { candidates?: Array<{ content?: { parts?: unknown[] } }> })?.candidates?.[0]
-    ?.content?.parts;
+  const parts = (data as { candidates?: Array<{ content?: { parts?: unknown[] } }> })
+    ?.candidates?.[0]?.content?.parts;
   if (!Array.isArray(parts)) return "";
   return parts
     .map((part) => (part as { text?: unknown })?.text)
@@ -191,20 +189,156 @@ function extractText(data: unknown): string {
     .trim();
 }
 
+/**
+ * Extract stylistic speech instructions from OpenAI / custom alias keys.
+ */
+export function extractSpeechInstruction(body: Record<string, unknown>): string | undefined {
+  for (const key of ["instructions", "style", "delivery", "prompt"]) {
+    const val = body[key];
+    if (typeof val === "string" && val.trim().length > 0) {
+      return val.trim();
+    }
+  }
+  return undefined;
+}
+
+/**
+ * Format Gemini / Vertex speech_metadata.style combining stylistic instructions and tempo/pace.
+ */
+export function buildGeminiSpeechStyle(instructions?: string, speed?: number): string | undefined {
+  const parts: string[] = [];
+  if (instructions && instructions.trim().length > 0) {
+    parts.push(instructions.trim());
+  }
+  if (typeof speed === "number" && speed > 0 && Math.abs(speed - 1.0) > 0.05) {
+    parts.push(`Pace: ${speed}x normal speed`);
+  }
+  return parts.length > 0 ? parts.join(". ") : undefined;
+}
+
+/**
+ * Strip metadata trailers (C2PA / SynthID / etc.) following the audio `data` chunk in RIFF/WAVE.
+ * Inspects chunk headers rather than searching raw PCM bytes.
+ */
+export function stripC2paMetadata(buffer: Buffer): Buffer {
+  if (
+    buffer.length >= 12 &&
+    buffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    buffer.subarray(8, 12).toString("ascii") === "WAVE"
+  ) {
+    let pos = 12;
+    let dataEnd = -1;
+    while (pos + 8 <= buffer.length) {
+      const tag = buffer.subarray(pos, pos + 4).toString("ascii");
+      const chunkSize = buffer.readUInt32LE(pos + 4);
+      if (tag === "data") {
+        dataEnd = pos + 8 + chunkSize;
+        pos = dataEnd + (chunkSize & 1);
+        continue;
+      }
+      if (dataEnd !== -1 && (tag === "C2PA" || tag === "jumb" || tag === "c2pa")) {
+        return buffer.subarray(0, pos);
+      }
+      pos += 8 + chunkSize + (chunkSize & 1);
+    }
+    if (dataEnd !== -1 && dataEnd < buffer.length) {
+      return buffer.subarray(0, dataEnd);
+    }
+    return buffer;
+  }
+
+  // Non-RIFF fallback: verify trailer chunk header structure (tag + 4-byte LE length)
+  if (buffer.length > 8) {
+    const c2paMarker = Buffer.from("C2PA");
+    const markerIndex = buffer.lastIndexOf(c2paMarker);
+    if (
+      markerIndex !== -1 &&
+      markerIndex >= buffer.length - 65536 &&
+      markerIndex + 8 <= buffer.length
+    ) {
+      const trailerLen = buffer.readUInt32LE(markerIndex + 4);
+      const expectedEnd = markerIndex + 8 + trailerLen;
+      if (expectedEnd === buffer.length || expectedEnd + 1 === buffer.length) {
+        return buffer.subarray(0, markerIndex);
+      }
+    }
+  }
+
+  return buffer;
+}
+
+/**
+ * Normalize Google audio output into a clean WAV container or extract raw PCM.
+ */
+export function normalizeAudioOutput(
+  rawBuffer: Buffer,
+  mimeType: string | undefined,
+  responseFormat?: string
+): { audio: Buffer; contentType: string } {
+  const cleanBuffer = stripC2paMetadata(rawBuffer);
+  const isWav =
+    cleanBuffer.length >= 12 &&
+    cleanBuffer.subarray(0, 4).toString("ascii") === "RIFF" &&
+    cleanBuffer.subarray(8, 12).toString("ascii") === "WAVE";
+
+  const requestedFormat = (responseFormat || "wav").toLowerCase();
+
+  if (requestedFormat === "pcm") {
+    if (isWav) {
+      const dataIdx = cleanBuffer.indexOf(Buffer.from("data"));
+      if (dataIdx !== -1 && dataIdx + 8 <= cleanBuffer.length) {
+        return { audio: cleanBuffer.subarray(dataIdx + 8), contentType: "audio/pcm" };
+      }
+    }
+    return { audio: cleanBuffer, contentType: "audio/pcm" };
+  }
+
+  // Default: WAV
+  if (isWav) {
+    const wav = Buffer.from(cleanBuffer);
+    wav.writeUInt32LE(wav.length - 8, 4);
+    return { audio: wav, contentType: "audio/wav" };
+  }
+
+  return { audio: pcmToWav(cleanBuffer, parsePcmSampleRate(mimeType)), contentType: "audio/wav" };
+}
+
 /** Gemini TTS → WAV audio buffer. */
 export async function vertexGenerateSpeech(
   credentials: VertexMediaCredentials,
-  options: { model: string; input: string; voice?: string }
+  options: {
+    model: string;
+    input: string;
+    voice?: string;
+    instructions?: string;
+    speed?: number;
+    response_format?: string;
+  }
 ): Promise<{ audio: Buffer<ArrayBuffer>; contentType: string }> {
   const auth = await resolveVertexAuth(credentials);
   const { url, headers } = buildModelRequest(auth, options.model, "generateContent");
+
+  const style = buildGeminiSpeechStyle(options.instructions, options.speed);
+
   const payload = {
-    contents: [{ role: "user", parts: [{ text: options.input }] }],
+    contents: [
+      {
+        role: "user",
+        parts: [
+          {
+            text: options.input,
+            ...(style ? { speech_metadata: { style } } : {}),
+          },
+        ],
+      },
+    ],
     generationConfig: {
       responseModalities: ["AUDIO"],
       speechConfig: {
         voiceConfig: {
-          prebuiltVoiceConfig: { voiceName: options.voice && options.voice.trim() ? options.voice.trim() : "Kore" },
+          prebuiltVoiceConfig: {
+            voiceName: options.voice && options.voice.trim() ? options.voice.trim() : "Kore",
+          },
         },
       },
     },
@@ -214,14 +348,21 @@ export async function vertexGenerateSpeech(
   const data = await res.json();
   const inline = extractInlineAudio(data);
   if (!inline) throw new Error("Vertex TTS returned no audio content");
-  const pcm = Buffer.from(inline.base64, "base64");
-  return { audio: pcmToWav(pcm, parsePcmSampleRate(inline.mimeType)), contentType: "audio/wav" };
+  const rawBuffer = Buffer.from(inline.base64, "base64");
+  const normalized = normalizeAudioOutput(rawBuffer, inline.mimeType, options.response_format);
+  return { audio: normalized.audio as Buffer<ArrayBuffer>, contentType: normalized.contentType };
 }
 
 /** Gemini transcription (audio → text). `audioBase64` is the raw file bytes, base64-encoded. */
 export async function vertexTranscribe(
   credentials: VertexMediaCredentials,
-  options: { model: string; audioBase64: string; mimeType?: string; prompt?: string; language?: string }
+  options: {
+    model: string;
+    audioBase64: string;
+    mimeType?: string;
+    prompt?: string;
+    language?: string;
+  }
 ): Promise<string> {
   const auth = await resolveVertexAuth(credentials);
   const { url, headers } = buildModelRequest(auth, options.model, "generateContent");
@@ -250,7 +391,13 @@ export async function vertexTranscribe(
 /** Lyria music generation → { base64 WAV, format }. */
 export async function vertexGenerateMusic(
   credentials: VertexMediaCredentials,
-  options: { model?: string; prompt: string; negativePrompt?: string; sampleCount?: number; seed?: number }
+  options: {
+    model?: string;
+    prompt: string;
+    negativePrompt?: string;
+    sampleCount?: number;
+    seed?: number;
+  }
 ): Promise<{ base64: string; format: string }> {
   const auth = await resolveVertexAuth(credentials);
   const model = options.model && options.model.trim() ? options.model.trim() : "lyria-002";
@@ -267,8 +414,8 @@ export async function vertexGenerateMusic(
   });
   if (!res.ok) throw await vertexError(res);
   const data = await res.json();
-  const base64 = (data as { predictions?: Array<{ bytesBase64Encoded?: unknown }> })?.predictions?.[0]
-    ?.bytesBase64Encoded;
+  const base64 = (data as { predictions?: Array<{ bytesBase64Encoded?: unknown }> })
+    ?.predictions?.[0]?.bytesBase64Encoded;
   if (typeof base64 !== "string" || base64.length === 0) {
     throw new Error("Vertex Lyria returned no audio");
   }
@@ -299,7 +446,8 @@ export async function vertexGenerateVideo(
     sampleCount: typeof options.sampleCount === "number" ? options.sampleCount : 1,
   };
   if (options.aspectRatio) parameters.aspectRatio = options.aspectRatio;
-  if (typeof options.durationSeconds === "number") parameters.durationSeconds = options.durationSeconds;
+  if (typeof options.durationSeconds === "number")
+    parameters.durationSeconds = options.durationSeconds;
   if (options.negativePrompt) parameters.negativePrompt = options.negativePrompt;
 
   const submitRes = await fetch(submit.url, {
@@ -315,7 +463,8 @@ export async function vertexGenerateVideo(
   }
 
   const poll = buildModelRequest(auth, options.model, "fetchPredictOperation");
-  const intervalMs = options.pollIntervalMs && options.pollIntervalMs > 0 ? options.pollIntervalMs : 10000;
+  const intervalMs =
+    options.pollIntervalMs && options.pollIntervalMs > 0 ? options.pollIntervalMs : 10000;
   const maxWaitMs = options.maxWaitMs && options.maxWaitMs > 0 ? options.maxWaitMs : 5 * 60 * 1000;
   const deadline = Date.now() + maxWaitMs;
 
