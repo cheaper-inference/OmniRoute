@@ -41,6 +41,8 @@ import { errorResponseWithComboDiagnostics } from "../../utils/error.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import type { ResilienceSettings } from "../../../src/lib/resilience/settings";
 import { applyStrategyOrdering } from "./applyStrategyOrdering.ts";
+import { parseAutoConfig } from "./autoConfig.ts";
+import { orderSimilarTargets } from "../autoCombo/omniJev.ts";
 import { expandTargetsForAllStrategies } from "./connectionAwareExpansion.ts";
 import { clampComboDepth } from "./comboPredicates.ts";
 import {
@@ -835,6 +837,19 @@ function transferInflightReservation(
   return quotaShareRelease;
 }
 
+/** OmniJev `similar-first`: same-family candidates follow the top pick (order only). */
+function applyOmniJevSimilarFirst(
+  strategy: string,
+  combo: ComboLike,
+  orderedTargets: ResolvedComboTarget[]
+): ResolvedComboTarget[] {
+  if (strategy !== "auto") return orderedTargets;
+  const auto = parseAutoConfig(combo, orderedTargets);
+  return auto.routingStrategy === "omni-jev" && auto.omniJev.fallbackMode === "similar-first"
+    ? orderSimilarTargets(orderedTargets)
+    : orderedTargets;
+}
+
 export async function resolveComboTargetPipeline(
   deps: ResolveComboTargetPipelineDeps
 ): Promise<ResolveComboTargetPipelineResult> {
@@ -932,6 +947,8 @@ export async function resolveComboTargetPipeline(
   );
 
   // Parallel pre-screen: check provider profiles and model availability for all targets
+  orderedTargets = applyOmniJevSimilarFirst(strategy, combo, orderedTargets);
+
   // Only runs for priority strategy where sequential checking causes latency
   const preScreenMap = traits.preScreensTargets
     ? await preScreenTargets(orderedTargets, isModelAvailable).catch(

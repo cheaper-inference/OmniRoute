@@ -127,16 +127,25 @@ const ProxyConfigModal = dynamic(() => import("@/shared/components/ProxyConfigMo
 
 const VALID_NAME_REGEX = /^[a-zA-Z0-9_/.\-\[\] ]+$/;
 
-const STRATEGY_OPTIONS = ROUTING_STRATEGIES.map((strategy) => ({
-  value: strategy.value,
-  labelKey: strategy.labelKey,
-  descKey: strategy.combosDescKey,
-  icon: strategy.icon,
-}));
+const STRATEGY_OPTIONS = [
+  ...ROUTING_STRATEGIES.map((strategy) => ({
+    value: strategy.value,
+    labelKey: strategy.labelKey,
+    descKey: strategy.combosDescKey,
+    icon: strategy.icon,
+  })),
+  {
+    value: "omni-jev" as const,
+    labelKey: "omniJev",
+    descKey: "omniJevDescription",
+    icon: "psychology",
+  },
+];
 
 const STRATEGY_LABEL_FALLBACK = {
   "context-relay": "Context Relay",
   "reset-aware": "Reset-Aware RR",
+  "omni-jev": "OmniJev",
 };
 
 const STRATEGY_DESC_FALLBACK = {
@@ -144,6 +153,8 @@ const STRATEGY_DESC_FALLBACK = {
     "Priority-style routing with automatic context handoffs when account rotation happens.",
   "reset-aware":
     "Quota remaining and reset windows decide the order; similar scores rotate round-robin.",
+  "omni-jev":
+    "Enriches requests with the TypeSafe/Jev methodology and fails over to a similar model.",
 };
 
 const STRATEGY_GUIDANCE_FALLBACK = {
@@ -3294,6 +3305,19 @@ function ComboFormModal({
     usesIntelligentBuilderStage && (isExpertMode || builderStage === "intelligent");
   const showReviewSection = !isExpertMode && builderStage === "review";
   const advancedConfigVisible = isExpertMode || showAdvanced;
+  const selectedStrategy =
+    strategy === "auto" && intelligentConfig.routerStrategy === "omni-jev" ? "omni-jev" : strategy;
+  const selectStrategyOption = (value: string) => {
+    if (value === "omni-jev") {
+      setStrategy("auto");
+      setConfig((previousConfig) => ({
+        ...previousConfig,
+        routerStrategy: "omni-jev",
+      }));
+    } else {
+      setStrategy(value);
+    }
+  };
   const strategyLabelId = useId();
 
   return (
@@ -3519,8 +3543,8 @@ function ComboFormModal({
                   wrapper keeps the testid on the clickable card (the kit input is 1px). */}
               <RadioGroup
                 aria-labelledby={strategyLabelId}
-                value={strategy}
-                onValueChange={setStrategy}
+                value={selectedStrategy}
+                onValueChange={selectStrategyOption}
                 className="[&>.ci-radio-group__items]:grid-cols-2 [&>.ci-radio-group__items]:gap-1.5 sm:[&>.ci-radio-group__items]:grid-cols-3"
               >
                 {STRATEGY_OPTIONS.map((s) => (
@@ -3532,7 +3556,7 @@ function ComboFormModal({
                   >
                     <ChoiceCard
                       value={s.value}
-                      tone={strategy === s.value ? "accent" : "neutral"}
+                      tone={selectedStrategy === s.value ? "accent" : "neutral"}
                       icon={<Icon name={s.icon} size={14} />}
                       title={getStrategyLabel(t, s.value)}
                       aria-label={

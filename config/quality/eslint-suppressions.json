@@ -268,11 +268,6 @@
       "count": 3
     }
   },
-  "open-sse/mcp-server/tools/advancedTools.ts": {
-    "no-restricted-syntax": {
-      "count": 1
-    }
-  },
   "open-sse/mcp-server/tools/compressionTools.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2
