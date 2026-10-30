@@ -226,6 +226,20 @@ export const HTTP_STATUS = {
  */
 export const EXECUTOR_CONTRACT_VIOLATION_CODE = "executor_contract_violation";
 
+/**
+ * #18019: a local executor refusing to start because its operator configuration is
+ * missing or unsafe (the Devin agentic bridge with DEVIN_AGENTIC_HOME unset or outside
+ * the sandbox). Decided before any spawn and identical on every retry until the operator
+ * fixes the env and restarts, so it must not cool the shared no-auth connection, trip the
+ * provider breaker, or be replayed on the same account; a combo just moves on.
+ */
+export const DEVIN_BRIDGE_NOT_CONFIGURED_CODE = "devin_bridge_not_configured";
+export const UNSAFE_DEVIN_HOME_CODE = "unsafe_devin_home";
+export const LOCAL_CONFIGURATION_ERROR_CODES: ReadonlySet<string> = new Set([
+  DEVIN_BRIDGE_NOT_CONFIGURED_CODE,
+  UNSAFE_DEVIN_HOME_CODE,
+]);
+
 export {
   BACKOFF_CONFIG,
   COOLDOWN_MS,

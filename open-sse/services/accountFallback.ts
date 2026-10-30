@@ -1,6 +1,7 @@
 import {
   BACKOFF_STEPS_MS,
   EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
   PROVIDER_PROFILES,
   RateLimitReason,
   HTTP_STATUS,
@@ -1733,6 +1734,17 @@ export function checkFallbackError(
       shouldFallback: false,
       cooldownMs: 0,
       reason: EXECUTOR_CONTRACT_VIOLATION_CODE,
+      skipProviderBreaker: true,
+    };
+  }
+  // #18019: a missing/unsafe local executor config repeats until the operator fixes it;
+  // a cooldown would only delay the combo's next target (fallback wait on a 503).
+  const localConfigCode = structuredError?.code;
+  if (localConfigCode && LOCAL_CONFIGURATION_ERROR_CODES.has(localConfigCode)) {
+    return {
+      shouldFallback: false,
+      cooldownMs: 0,
+      reason: localConfigCode,
       skipProviderBreaker: true,
     };
   }

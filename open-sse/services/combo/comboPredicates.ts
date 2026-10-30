@@ -6,7 +6,10 @@
  * predicates are re-exported from combo.ts for backward compatibility.
  */
 
-import { EXECUTOR_CONTRACT_VIOLATION_CODE } from "../../config/constants.ts";
+import {
+  EXECUTOR_CONTRACT_VIOLATION_CODE,
+  LOCAL_CONFIGURATION_ERROR_CODES,
+} from "../../config/constants.ts";
 import { finitePercentUsed, remainingPercentFromQuotaWindows } from "../antigravityQuotaFamily.ts";
 import { errorResponse } from "../../utils/error.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
@@ -315,6 +318,8 @@ const REQUEST_SCOPED_UPSTREAM_ERROR_CODES: Record<string, true> = {
   // markAccountUnavailable, the provider breaker, or the #1731/#1731v2 combo
   // skip-marking — in a combo it only skips this one target.
   quota_share_blocked: true,
+  // #18019: missing/unsafe local executor config (see LOCAL_CONFIGURATION_ERROR_CODES).
+  ...Object.fromEntries([...LOCAL_CONFIGURATION_ERROR_CODES].map((code) => [code, true])),
 };
 
 /** Request/model-specific failures must not poison provider-wide resilience state. */

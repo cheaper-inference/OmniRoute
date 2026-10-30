@@ -75,6 +75,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "context_length_exceeded",
   "context_window",
   "devin_agentic_error",
+  "devin_bridge_not_configured",
   "devin_cli_error",
   "devin_desktop_error",
   "devin_internal_tool_execution",

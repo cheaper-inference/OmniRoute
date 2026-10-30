@@ -15,6 +15,7 @@
  */
 
 import { UPSTREAM_RESPONDED_ERROR_TYPE } from "@omniroute/open-sse/utils/diagnostics.ts";
+import { LOCAL_CONFIGURATION_ERROR_CODES } from "@omniroute/open-sse/config/constants.ts";
 
 export const SAME_ACCOUNT_TRANSPORT_RETRY_MAX = 1;
 export const SAME_ACCOUNT_TRANSPORT_RETRY_MIN_DELAY_MS = 2000;
@@ -56,6 +57,8 @@ export function isRetryablePreOutputTransportError(
 ): boolean {
   if (errorType && NON_RETRYABLE_ERROR_TYPES.has(errorType)) return false;
   if (errorCode && String(errorCode).startsWith("LEASE_")) return false;
+  // #18019: a missing/unsafe local executor config fails the same way on a replay.
+  if (errorCode && LOCAL_CONFIGURATION_ERROR_CODES.has(String(errorCode))) return false;
 
   const text = String(errorText || "");
   const numericStatus = Number(status);
