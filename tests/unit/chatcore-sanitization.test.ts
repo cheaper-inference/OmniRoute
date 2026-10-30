@@ -728,6 +728,59 @@ test("chatCore skips memory injection when memory is disabled or apiKeyInfo is m
   assert.equal(noApiKey.call.body.messages[0].content, "Hello");
 });
 
+test("chatCore keeps a Claude Code classifier turn out of memory, in both directions", async () => {
+  await settingsDb.updateSettings({
+    memoryEnabled: true,
+    memoryMaxTokens: 1024,
+    memoryRetentionDays: 30,
+    memoryStrategy: "recent",
+  });
+  invalidateMemorySettingsCache();
+  ensureLegacyMemoryTable();
+
+  const apiKeyId = `key-classifier-${Date.now()}`;
+  await createMemory({
+    apiKeyId,
+    sessionId: "session-1",
+    type: "factual",
+    key: "preference",
+    content: "User prefers concise Rust examples.",
+    metadata: {},
+    expiresAt: null,
+  });
+  const claudeTurn = (system, content) => ({
+    apiKeyInfo: { id: apiKeyId, name: "Memory Key" },
+    endpoint: "/v1/messages",
+    body: {
+      model: "gpt-4o-mini",
+      max_tokens: 16,
+      stream: false,
+      system,
+      messages: [{ role: "user", content }],
+    },
+  });
+  const storedContents = async () => {
+    await flushAsyncSideEffects();
+    const listed = await listMemories({ apiKeyId });
+    return (Array.isArray(listed) ? listed : (listed.data ?? [])).map((row) => row.content);
+  };
+
+  // Control: an ordinary Claude-format turn still reads and writes memory.
+  const ordinary = await invokeChatCore(claudeTurn("You are helpful.", "I prefer blue themes."));
+  assert.match(JSON.stringify(ordinary.call.body), /Memory context: User prefers concise Rust/);
+  const afterOrdinary = await storedContents();
+  assert.ok(afterOrdinary.some((content) => /blue themes/.test(content)));
+
+  const classifier = await invokeChatCore(
+    claudeTurn(
+      "You are a security monitor for autonomous AI coding agents. Reply with <block>no</block>.",
+      "I prefer green themes."
+    )
+  );
+  assert.doesNotMatch(JSON.stringify(classifier.call.body), /Memory context/);
+  assert.deepEqual(await storedContents(), afterOrdinary);
+});
+
 test("chatCore does not share or persist memories when apiKeyInfo is missing", async () => {
   await settingsDb.updateSettings({
     memoryEnabled: true,

@@ -1,0 +1,1 @@
+- **fix(sse):** Claude Code's internal security-classifier turns no longer read from or write to Memory, so a classifier's output format cannot become a stored fact that is replayed into later requests (#0000)
