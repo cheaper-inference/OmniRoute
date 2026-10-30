@@ -12,6 +12,19 @@ OmniRoute has three distinct but related resilience mechanisms. Each has a diffe
 
 > Source: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
+> **Env-vs-dashboard precedence for resilience toggles.** The opt-in
+> resilience toggles seeded from the environment — `QUOTA_PREFLIGHT_CUTOFF_ENABLED`,
+> `PROVIDER_COOLDOWN_ENABLED`, `STREAM_RECOVERY_ENABLED`,
+> `STREAM_RECOVERY_MIDSTREAM_ENABLED`, `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —
+> only supply the _default_ (`DEFAULT_RESILIENCE_SETTINGS`,
+> `src/lib/resilience/settings.ts`). A boolean persisted in `resilienceSettings`
+> (Dashboard → **Settings → Resilience** / `PATCH /api/resilience`, stored in
+> `key_value`) wins over the env value: normalization (`toBoolean`,
+> `src/lib/resilience/settings/normalize.ts`) keeps the stored boolean whenever
+> one exists. Setting such an env var to `true` on a deployment where the
+> dashboard already saved `false` therefore changes nothing — flip the toggle
+> in **Settings → Resilience** (or clear the stored field) instead.
+
 ## 1. Provider Circuit Breaker
 
 **Scope:** entire provider (e.g., `glm`, `openai`, `anthropic`).
@@ -610,7 +623,10 @@ The watchdog requires a warm-up period followed by a complete rolling window bef
 it can abort. It counts text deltas from Chat Completions and Responses API output
 events (a conservative UTF-8 byte proxy), ignores usage-only and empty events, and
 suspends judgement while tool-call or reasoning events are in flight. It is disabled
-by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`; the
+by default and can be enabled with `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`
+(that env value only seeds the default — a saved
+`resilienceSettings.streamRecovery.throughputWatchdog.enabled` boolean wins;
+see the env-vs-dashboard precedence note at the top of this guide); the
 window, warm-up, minimum rate, and minimum measurable output are bounded by the
 normal resilience-settings normalization layer.
 
