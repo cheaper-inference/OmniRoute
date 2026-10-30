@@ -79,6 +79,7 @@ import { applyOperatorActivationIntent } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 import { hydrateCompatibleNodeCreation } from "@/lib/providers/compatibleNodeCreation";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+import { parseM365RefreshToken } from "@/lib/providers/m365RefreshToken";
 
 function projectCodexAccountPoolWithRoutingQuota(
   connection: Parameters<typeof projectCodexAccountPool>[0],
@@ -281,6 +282,28 @@ export async function POST(request: Request) {
     let providerSpecificData = incomingPsd || null;
     let persistedApiKey = apiKey;
 
+    const m365Token = parseM365RefreshToken(provider, incomingPsd);
+    if (!m365Token.success) {
+      return NextResponse.json(
+        {
+          error: {
+            message: sanitizeErrorMessage("Invalid request"),
+            details: [
+              {
+                field: "providerSpecificData.refreshToken",
+                message: sanitizeErrorMessage("Refresh token must be a bounded plaintext string"),
+              },
+            ],
+          },
+        },
+        { status: 400 }
+      );
+    }
+    if (provider === "copilot-m365-web" && providerSpecificData) {
+      providerSpecificData = { ...providerSpecificData };
+      delete providerSpecificData.refreshToken;
+    }
+
     if (provider === "qoder") {
       providerSpecificData = normalizeQoderPatProviderData(providerSpecificData || {});
     }
@@ -373,6 +396,7 @@ export async function POST(request: Request) {
       authType: "apikey",
       name,
       apiKey: persistedApiKey,
+      ...(m365Token.data.refreshToken ? { refreshToken: m365Token.data.refreshToken } : {}),
       priority: priority || 1,
       globalPriority: globalPriority || null,
       defaultModel: defaultModel || null,
@@ -471,6 +495,9 @@ export async function POST(request: Request) {
     // Hide sensitive fields
     const result: Record<string, any> = { ...newConnection };
     delete result.apiKey;
+    delete result.accessToken;
+    delete result.refreshToken;
+    delete result.idToken;
     if (result.providerSpecificData) {
       result.providerSpecificData = sanitizeProviderSpecificDataForResponse(
         result.providerSpecificData

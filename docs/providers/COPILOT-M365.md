@@ -1,7 +1,7 @@
 ---
 title: "Providers — Microsoft 365 Copilot (BizChat)"
 version: 3.8.51
-lastUpdated: 2026-09-11
+lastUpdated: 2026-10-28
 ---
 
 # Providers — Microsoft 365 Copilot (BizChat)
@@ -69,36 +69,35 @@ HAR import decodes the JWT expiry and shows the remaining token lifetime.
 
 ## Token lifetime and refresh
 
-The `access_token` is short-lived (typically **~75 minutes**). After expiry, the provider
-reports a connection error and you must re-capture the credential.
+The `access_token` is short-lived (typically **~75 minutes**). Without a usable refresh
+token, you must re-capture the credential after expiry.
 
 ### Automatic refresh with `refreshToken`
 
-To avoid manual re-capture, you can store a Microsoft refresh token in the connection's
-**Advanced Settings → providerSpecificData**:
-
-| Field          | Description                                                                |
-| -------------- | -------------------------------------------------------------------------- |
-| `refreshToken` | Microsoft OAuth refresh token for `substrate.office.com/sydney` scope      |
-| `tier`         | `individual` (default), `edu`, or `enterprise`                             |
+In the Microsoft 365 provider's **Add connection** or **Edit connection** dialog, open
+**Advanced Settings → Refresh token (optional)**. Paste a Microsoft OAuth refresh token
+for the `substrate.office.com/sydney` scope and save. The input is masked and never
+prefilled with the stored token. When editing, leave it blank to keep the existing token;
+paste a new token to replace it.
 
 Obtain the refresh token from a Microsoft device-code or authorization-code flow
-scoped to `substrate.office.com/sydney`. With `refreshToken` set, OmniRoute
-pre-flight-refreshes the `access_token` before each request, so you do not need to
-re-capture after every ~75-minute expiry.
+scoped to `substrate.office.com/sydney`; the dashboard does not acquire it for you.
+With a refresh token configured, OmniRoute checks the `access_token` before requests
+and refreshes it only when it needs refreshing. A successful refresh also persists
+the rotated refresh token, avoiding manual re-capture while the refresh token remains valid.
 
 If `refreshToken` is not set, you must re-capture the WebSocket credential manually
 after each expiry.
 
 ### Tier selection
 
-| Tier          | Alias        | Surface                         |
-| ------------- | ------------ | ------------------------------- |
-| `individual`  | _(default)_  | Consumer M365 Copilot           |
-| `edu`         | `included`   | Education M365 Copilot          |
-| `enterprise`  | `work`       | M365 Copilot for Work           |
+| Tier         | Alias       | Surface                |
+| ------------ | ----------- | ---------------------- |
+| `individual` | _(default)_ | Consumer M365 Copilot  |
+| `edu`        | `included`  | Education M365 Copilot |
+| `enterprise` | `work`      | M365 Copilot for Work  |
 
-Set the tier in **Advanced Settings → providerSpecificData → tier**. The tier affects
+Set the tier in **Advanced Settings → Copilot tier**. The tier affects
 the BizChat routing and model access.
 
 ## Security model
@@ -127,7 +126,8 @@ the BizChat routing and model access.
 This is expected. Without a `refreshToken`, the access token is short-lived. Either:
 
 - Re-capture the credential from DevTools, or
-- Configure a `refreshToken` in Advanced Settings for automatic refresh.
+- Configure **Advanced Settings → Refresh token (optional)** in the Add or Edit
+  connection dialog for automatic refresh.
 
 ### Test Connection passes but chat returns 401
 
