@@ -742,6 +742,21 @@ export function isQuotaExhaustedForRequest(
 }
 
 /**
+ * Subscription-window exhaustion of a Codex account, ignoring its paid-credit opt-in and
+ * recent successes (those may have been paid with credits). Routing uses it to keep
+ * credit-only accounts behind accounts that still have subscription quota.
+ */
+export function isCodexSubscriptionExhaustedForRequest(
+  connectionId: string,
+  requestedModel: string | null = null
+): boolean {
+  const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
+  if (!entry) return false;
+  if (advancedWindowResetAt(entry, Date.now())) return false;
+  return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+}
+
+/**
  * Store quota data for a connection (called by usage endpoint and background refresh).
  */
 export function setQuotaCache(
