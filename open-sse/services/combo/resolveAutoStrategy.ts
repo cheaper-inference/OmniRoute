@@ -48,6 +48,7 @@ import type {
   ResolvedComboTarget,
 } from "./types.ts";
 import { normalizeAutoConnectionScope } from "./autoConnectionScope.ts";
+import { firstAccountPreferenceTier, orderAccountPreferences } from "./accountPreferences.ts";
 
 /**
  * Dependency-injected `buildAutoCandidates` — it lives in `combo.ts` (the host of
@@ -307,6 +308,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    accountPreferences,
   } = parseAutoConfig(combo, eligibleTargets);
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
@@ -376,24 +378,66 @@ export async function resolveAutoStrategyOrder(
     log
   );
 
-  const { sourceCandidates, candidates, routableCandidates, scoredTargets } =
-    await evaluateAutoCandidates({
-      targets: eligibleTargets,
-      comboName: combo.name,
-      body,
-      taskType,
-      weights,
-      sessionId: relayOptions?.sessionId,
-      resetWindowConfig,
-      resilienceSettings: autoCandidateResilienceSettings,
-      manifestHint: autoManifestHint,
-      buildAutoCandidates,
-      apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
-    });
+  const {
+    sourceCandidates,
+    candidates,
+    routableCandidates: unfilteredCandidates,
+    scoredTargets,
+  } = await evaluateAutoCandidates({
+    targets: eligibleTargets,
+    comboName: combo.name,
+    body,
+    taskType,
+    weights,
+    sessionId: relayOptions?.sessionId,
+    resetWindowConfig,
+    resilienceSettings: autoCandidateResilienceSettings,
+    manifestHint: autoManifestHint,
+    buildAutoCandidates,
+    apiKeyAllowedConnections: deps.apiKeyAllowedConnections ?? null,
+  });
   for (let index = 0; index < sourceCandidates.length; index += 1) {
     sourceCandidates[index].cacheAffinity = candidates[index]?.cacheAffinity;
   }
-  const quotaBlockedCount = candidates.length - routableCandidates.length;
+  const hasAccountPreferences = Object.keys(accountPreferences).length > 0;
+  let routableCandidates = orderAccountPreferences(unfilteredCandidates, accountPreferences);
+  if (hasAccountPreferences) {
+    routableCandidates = routableCandidates.filter(
+      (candidate) =>
+        candidate.circuitBreakerState !== "OPEN" &&
+        !candidate.statusPenalty &&
+        (!candidatePool.length || candidatePool.includes(candidate.provider))
+    );
+    if (budgetCap && routableCandidates.length) {
+      const tokens = estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
+      const cost = (candidate: AutoProviderCandidate) =>
+        (candidate.costPer1MTokens * tokens) / 1_000_000;
+      const affordable = routableCandidates.filter((candidate) => cost(candidate) <= budgetCap);
+      if (affordable.length) {
+        routableCandidates = affordable;
+      } else if (budgetFallback === "strict") {
+        return {
+          earlyResponse: errorResponse(
+            402,
+            new BudgetExceededError(budgetCap, Math.min(...routableCandidates.map(cost))).message
+          ),
+        };
+      } else {
+        const cheapest = Math.min(...routableCandidates.map(cost));
+        routableCandidates = routableCandidates.filter((candidate) => cost(candidate) === cheapest);
+      }
+    }
+  }
+  if (hasAccountPreferences && routableCandidates.length === 0) {
+    return {
+      earlyResponse: unavailableResponse(
+        503,
+        "No eligible accounts remain for this combo's account preferences"
+      ),
+    };
+  }
+  const selectionCandidates = firstAccountPreferenceTier(routableCandidates, accountPreferences);
+  const quotaBlockedCount = candidates.length - unfilteredCandidates.length;
   if (quotaBlockedCount > 0) {
     log.info(
       "COMBO",
@@ -419,7 +463,7 @@ export async function resolveAutoStrategyOrder(
     if (routingStrategy !== "rules") {
       try {
         const decision = await selectWithStrategyAsync(
-          routableCandidates,
+          selectionCandidates,
           {
             taskType,
             requestHasTools,
@@ -470,7 +514,7 @@ export async function resolveAutoStrategyOrder(
             explorationRate,
             manifestHint: autoManifestHint,
           },
-          routableCandidates,
+          selectionCandidates,
           taskType
         );
       } catch (err) {
@@ -488,17 +532,23 @@ export async function resolveAutoStrategyOrder(
       selectionReason = `score=${selection.score.toFixed(3)}${selection.isExploration ? " (exploration)" : ""}`;
     }
 
-    const rankedTargets = scoredTargets.map((entry) => entry.target);
+    const routableKeys = new Set(routableCandidates.map((candidate) => candidate.executionKey));
+    const rankedTargets = orderAccountPreferences(
+      scoredTargets
+        .filter((entry) => !hasAccountPreferences || routableKeys.has(entry.target.executionKey))
+        .map((entry) => entry.target),
+      accountPreferences
+    );
     const selectedTarget =
-      scoredTargets.find((entry) => {
-        const parsed = parseModel(entry.target.modelStr);
-        const modelId = parsed.model || entry.target.modelStr;
+      rankedTargets.find((target) => {
+        const parsed = parseModel(target.modelStr);
+        const modelId = parsed.model || target.modelStr;
         return (
-          entry.target.provider === selectedProvider &&
+          target.provider === selectedProvider &&
           modelId === selectedModel &&
-          (!selectedConnectionId || entry.target.connectionId === selectedConnectionId)
+          (!selectedConnectionId || target.connectionId === selectedConnectionId)
         );
-      })?.target ||
+      }) ||
       rankedTargets[0] ||
       eligibleTargets[0];
     if (!selectedTarget) {
@@ -521,10 +571,17 @@ export async function resolveAutoStrategyOrder(
       ? restoreIncomingOrder(rankedTargets, eligibleTargets)
       : [selectedTarget, ...rankedTargets];
     orderedTargets = dedupeTargetsByExecutionKey(
-      [...headTargets, ...eligibleTargets].filter(
+      [...headTargets, ...(hasAccountPreferences ? [] : eligibleTargets)].filter(
         (entry): entry is ResolvedComboTarget => entry !== undefined && entry !== null
       )
     );
+    orderedTargets = orderAccountPreferences(orderedTargets, accountPreferences);
+    if (hasAccountPreferences) {
+      log.info(
+        "COMBO",
+        `Account preferences: ${orderedTargets.length} concrete targets ordered preferred → normal → reserve; excluded accounts removed`
+      );
+    }
 
     log.info(
       "COMBO",

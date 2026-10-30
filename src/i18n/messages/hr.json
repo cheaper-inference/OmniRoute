@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Postavke računa",
+    "description": "Odaberite više računa kao prve izbore ili ih ostavite kao pričuvu za ovu kombinaciju. Automatsko usmjeravanje rangira račune unutar svake razine. Računi koji nisu navedeni smatraju se uobičajenima. Dozvole, ograničenja kvote i postojeća vezivanja uz poteze i dalje vrijede.",
+    "preferred": "Prvi izbor",
+    "normal": "Uobičajeno",
+    "reserve": "Pričuva",
+    "excluded": "Ne koristi se",
+    "loading": "Učitavanje računa…",
+    "error": "Račune nije moguće učitati. Ponovno otvorite uređivač da biste pokušali ponovno.",
+    "missing": "Nedostupan račun ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Način usluge Codex za ovaj API ključ",
     "description": "Primjenjuje se na Codex zahtjeve, uključujući Codex modele unutar kombinacija. Prisilni načini nadjačavaju postavke klijenta, globalne postavke i zadane postavke veze. Ostali pružatelji ostaju nepromijenjeni.",

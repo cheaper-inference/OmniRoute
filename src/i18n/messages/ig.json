@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Mmasị akaụntụ",
+    "description": "Mee ka ọtụtụ akaụntụ bụrụ ndị a ga-eji mbụ ma ọ bụ debe ha dị ka ndị ndabere maka combo a. Nhazi ụzọ akpaaka na-ahazi akaụntụ n'ime ọkwa nke ọ bụla. Akaụntụ ndị na-adịghị na ndepụta ahụ bụ ndị nkịtị. Ikike, oke oke ojiji, na njikọ ntụgharị dị adị ka na-arụ ọrụ.",
+    "preferred": "A ga-eji mbụ",
+    "normal": "Nkịtị",
+    "reserve": "Ndabere",
+    "excluded": "Ewepụrụ",
+    "loading": "Na-ebunye akaụntụ…",
+    "error": "Enweghị ike ibunye akaụntụ. Mepee ndezi ahụ ọzọ ka ị nwaa ọzọ.",
+    "missing": "Akaụntụ adịghị ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ọnọdụ ọrụ Codex maka igodo API a",
     "description": "Ọ metụtara arịrịọ Codex, gụnyere ụdị Codex dị n'ime ngwakọta. Ọnọdụ amanyere iwu na-akagbu ntọala nke klayenti, ntọala zuru ụwa ọnụ na ndabara njikọ. Ndị na-eweta ọrụ ndị ọzọ agaghị agbanwe.",

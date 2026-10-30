@@ -31,6 +31,8 @@ import type { resolveComboSetupConfig } from "../comboConfig.ts";
 import { orderTargetsByEvalScores } from "../evalRouting.ts";
 import { parseModel } from "../model.ts";
 import { getRemainingCooldownMs, isProviderInCooldown } from "../providerCooldownTracker.ts";
+import { orderAccountPreferences } from "./accountPreferences.ts";
+import { parseAutoConfig } from "./autoConfig.ts";
 import {
   classifyTask,
   getConversationCacheKey,
@@ -404,6 +406,8 @@ async function dispatchSmartPipeline(
 ): Promise<Response | null> {
   const { body, combo, strategy, config, settings, signal, log } = deps;
   if (!getStrategyTraits(strategy).smartPipeline) return null;
+  // The smart pipeline dispatches model strings, not concrete accounts.
+  if (Object.keys(parseAutoConfig(combo, []).accountPreferences).length > 0) return null;
   const autoParsed = parseAutoPrefix(combo.name);
   const autoVariant = autoParsed.valid ? autoParsed.variant : undefined;
   if (autoVariant !== "smart" && !config.pipeline_enabled) return null;
@@ -923,6 +927,14 @@ export async function resolveComboTargetPipeline(
     continuity.sticky.stuck,
     autoUsedExplicitRouter
   );
+
+  if (strategy === "auto") {
+    orderedTargets = orderAccountPreferences(
+      orderedTargets,
+      parseAutoConfig(combo, orderedTargets).accountPreferences,
+      continuity.sticky.stuck
+    );
+  }
 
   quotaShareRelease = transferInflightReservation(
     traits.inflightReservation,

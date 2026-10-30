@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "帳戶偏好設定",
+    "description": "為此路由設定優先使用多個帳戶，或將其保留為備用。自動路由會在每個層級內排列帳戶順序。未列出的帳戶會照常使用。權限、配額限制以及現有的回合綁定仍然適用。",
+    "preferred": "優先",
+    "normal": "一般",
+    "reserve": "備用",
+    "excluded": "排除",
+    "loading": "正在載入帳戶…",
+    "error": "無法載入帳戶。重新開啟編輯器以重試。",
+    "missing": "帳戶無法使用（{id}）"
+  },
   "codexKeyServiceMode": {
     "title": "此 API 金鑰的 Codex 服務模式",
     "description": "套用於 Codex 請求，包括組合中的 Codex 模型。強制模式會覆寫用戶端、全域設定和連線預設值。其他提供者不受影響。",

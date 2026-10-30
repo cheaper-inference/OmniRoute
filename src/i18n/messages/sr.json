@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Podešavanja naloga",
+    "description": "Dajte prednost većem broju naloga ili ih sačuvajte kao rezervu za ovu kombinaciju. Automatsko usmeravanje rangira naloge unutar svakog nivoa. Nalozi koji nisu navedeni su uobičajeni. Dozvole, ograničenja kvote i postojeća vezivanja za poteze i dalje važe.",
+    "preferred": "Prioritetni",
+    "normal": "Uobičajeni",
+    "reserve": "Rezervni",
+    "excluded": "Isključeni",
+    "loading": "Učitavanje naloga…",
+    "error": "Nije moguće učitati naloge. Ponovo otvorite uređivač da biste pokušali ponovo.",
+    "missing": "Nedostupan nalog ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Режим услуге Codex за овај API кључ",
     "description": "Примењује се на Codex захтеве, укључујући Codex моделе у комбинацијама. Принудно подешени режими имају предност над клијентом, глобалним подешавањима и подразумеваним вредностима везе. Остали добављачи остају непромењени.",

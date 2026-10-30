@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Tùy chọn tài khoản",
+    "description": "Ưu tiên nhiều tài khoản hoặc giữ chúng làm dự phòng cho cấu hình định tuyến này. Định tuyến tự động xếp hạng các tài khoản trong từng nhóm. Các tài khoản không được liệt kê sẽ hoạt động bình thường. Quyền, giới hạn hạn mức và các liên kết tài khoản hiện có với lượt vẫn được áp dụng.",
+    "preferred": "Ưu tiên",
+    "normal": "Thông thường",
+    "reserve": "Dự phòng",
+    "excluded": "Loại trừ",
+    "loading": "Đang tải tài khoản…",
+    "error": "Không thể tải tài khoản. Mở lại trình chỉnh sửa để thử lại.",
+    "missing": "Tài khoản không khả dụng ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Chế độ dịch vụ Codex cho khóa API này",
     "description": "Áp dụng cho các yêu cầu Codex, bao gồm các mô hình Codex bên trong các tổ hợp. Chế độ bắt buộc sẽ ghi đè thiết lập của ứng dụng khách, thiết lập chung và thiết lập mặc định của kết nối. Các nhà cung cấp khác không bị ảnh hưởng.",

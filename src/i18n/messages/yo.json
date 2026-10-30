@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Àwọn ààyò àkọọ́lẹ̀",
+    "description": "Yan ọ̀pọ̀ àkọọ́lẹ̀ gẹ́gẹ́ bí èyí tí a ó lò kọ́kọ́, tàbí pa wọ́n mọ́ sí ìpamọ́ fún ìṣètò ìtọ́sọ́nà yìí. Ìtọ́sọ́nà aládàáṣiṣẹ́ máa ń ṣe ìṣètò àwọn àkọọ́lẹ̀ nínú ẹ̀ka kọ̀ọ̀kan. Àwọn àkọọ́lẹ̀ tí kò sí nínú àkójọ yóò ṣiṣẹ́ déédéé. Àwọn àṣẹ, ààlà ìpín àti àwọn ìdè àkọọ́lẹ̀ tó ti wà fún ìyípo ṣì kan náà.",
+    "preferred": "Èyí tí a ó lò kọ́kọ́",
+    "normal": "Déédéé",
+    "reserve": "Ìpamọ́",
+    "excluded": "A kò ní lò",
+    "loading": "Ń ṣí àwọn àkọọ́lẹ̀…",
+    "error": "A kò lè ṣí àwọn àkọọ́lẹ̀. Ṣí olóòtú náà lẹ́ẹ̀kan sí i láti tún gbìyànjú.",
+    "missing": "Àkọọ́lẹ̀ kò sí ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Ìpo iṣẹ́ Codex fún kọ́kọ́rọ́ API yìí",
     "description": "Ó kan àwọn ìbéèrè Codex, pẹ̀lú àwọn àwòṣe Codex inú àwọn àkójọpọ̀. Àwọn ìpo tí a fi tipátipá yan máa borí ètò oníbàárà, àwọn ètò àgbáyé àti àwọn àiyípadà ìbẹ̀rẹ̀ ìsopọ̀. Àwọn olùpèsè mìíràn kò ní yí padà.",

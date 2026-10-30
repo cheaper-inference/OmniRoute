@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Account-Präferenzen",
+    "description": "Mehrere Accounts für diese Combo bevorzugen oder als Reserve vorhalten. Auto-Routing bewertet Accounts innerhalb jeder Stufe. Nicht aufgeführte Accounts sind normal. Berechtigungen, Quota-Grenzen und bestehende Gesprächsbindungen gelten weiterhin.",
+    "preferred": "Bevorzugt",
+    "normal": "Normal",
+    "reserve": "Reserve",
+    "excluded": "Ausgeschlossen",
+    "loading": "Accounts werden geladen…",
+    "error": "Accounts konnten nicht geladen werden. Zum erneuten Laden den Editor wieder öffnen.",
+    "missing": "Nicht verfügbarer Account ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-Service-Modus für diesen API-Key",
     "description": "Gilt für Codex-Aufrufe, auch innerhalb von Combos. Erzwungene Modi überschreiben Client-, globale und Verbindungs-Vorgaben. Andere Provider bleiben unverändert.",

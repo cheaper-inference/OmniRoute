@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Postavke računa",
+    "description": "Postavite više računa kao preferirane ili ih ostavite u rezervi za ovu kombinaciju. Automatsko usmjeravanje rangira račune unutar svakog nivoa. Računi koji nisu navedeni smatraju se normalnim. Dozvole, ograničenja kvote i postojeće veze s potezima i dalje vrijede.",
+    "preferred": "Preferirani",
+    "normal": "Normalni",
+    "reserve": "Rezervni",
+    "excluded": "Isključeni",
+    "loading": "Učitavanje računa…",
+    "error": "Nije moguće učitati račune. Ponovo otvorite uređivač da pokušate ponovo.",
+    "missing": "Nedostupan račun ({id})"
+  },
   "teamCosts": {
     "title": "Troškovi tima",
     "subtitle": "Upravljajte zajedničkim mekim budžetima i procjenama troškova iz kataloga.",

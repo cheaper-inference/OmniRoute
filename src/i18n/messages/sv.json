@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Kontoinställningar",
+    "description": "Ge flera konton företräde eller behåll dem som reserver för den här konfigurationen. Automatisk routning rangordnar konton inom varje nivå. Konton som inte anges är normala. Behörigheter, kvotgränser och befintliga bindningar till turer gäller fortfarande.",
+    "preferred": "Föredragen",
+    "normal": "Normal",
+    "reserve": "Reserv",
+    "excluded": "Utesluten",
+    "loading": "Läser in konton…",
+    "error": "Det gick inte att läsa in konton. Öppna redigeraren igen för att försöka på nytt.",
+    "missing": "Otillgängligt konto ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-tjänsteläge för denna API-nyckel",
     "description": "Gäller för Codex-förfrågningar, inklusive Codex-modeller i kombinationer. Tvingade lägen åsidosätter klientens inställningar, globala inställningar och anslutningens standardvärden. Andra leverantörer påverkas inte.",

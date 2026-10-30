@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Préférences des comptes",
+    "description": "Définissez plusieurs comptes comme prioritaires ou gardez-les en réserve pour cette configuration. Le routage automatique classe les comptes au sein de chaque niveau. Les comptes non répertoriés restent normaux. Les autorisations, les limites de quota et les associations de tour existantes continuent de s’appliquer.",
+    "preferred": "Prioritaire",
+    "normal": "Normal",
+    "reserve": "En réserve",
+    "excluded": "Exclu",
+    "loading": "Chargement des comptes…",
+    "error": "Impossible de charger les comptes. Rouvrez l’éditeur pour réessayer.",
+    "missing": "Compte indisponible ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Mode de service Codex pour cette clé API",
     "description": "S’applique aux requêtes Codex, y compris aux modèles Codex au sein des combinaisons. Les modes forcés remplacent les paramètres du client, les paramètres globaux et les valeurs par défaut de la connexion. Les autres fournisseurs restent inchangés.",

@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Tiliasetukset",
+    "description": "Aseta useita tilejä etusijalle tai pidä niitä varalla tätä yhdistelmää varten. Automaattinen reititys järjestää tilit kussakin ryhmässä. Luettelemattomat tilit ovat tavallisia. Käyttöoikeudet, kiintiörajoitukset ja olemassa olevat vuorosidonnat ovat edelleen voimassa.",
+    "preferred": "Ensisijainen",
+    "normal": "Tavallinen",
+    "reserve": "Varalla",
+    "excluded": "Poissuljettu",
+    "loading": "Ladataan tilejä…",
+    "error": "Tilejä ei voitu ladata. Yritä uudelleen avaamalla editori uudelleen.",
+    "missing": "Tili ei ole käytettävissä ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Codex-palvelutila tälle API-avaimelle",
     "description": "Koskee Codex-pyyntöjä, mukaan lukien yhdistelmissä olevat Codex-mallit. Pakotetut tilat ohittavat asiakasohjelman, yleiset asetukset ja yhteyden oletusasetukset. Muut palveluntarjoajat säilyvät ennallaan.",

@@ -1,4 +1,15 @@
 {
+  "accountPreferences": {
+    "title": "Preferencias de cuentas",
+    "description": "Marca varias cuentas como preferidas o déjalas como reserva para esta combinación. El enrutamiento automático ordena las cuentas dentro de cada nivel. Las cuentas no incluidas son normales. Los permisos, los límites de cuota y las vinculaciones existentes a turnos siguen aplicándose.",
+    "preferred": "Preferidas",
+    "normal": "Normales",
+    "reserve": "Reserva",
+    "excluded": "Excluidas",
+    "loading": "Cargando cuentas…",
+    "error": "No se pudieron cargar las cuentas. Vuelve a abrir el editor para intentarlo de nuevo.",
+    "missing": "Cuenta no disponible ({id})"
+  },
   "codexKeyServiceMode": {
     "title": "Modo de servicio de Codex para esta clave de API",
     "description": "Se aplica a las solicitudes de Codex, incluidos los modelos de Codex dentro de las combinaciones. Los modos forzados prevalecen sobre el cliente, la configuración global y los valores predeterminados de conexión. Los demás proveedores no se ven afectados.",
