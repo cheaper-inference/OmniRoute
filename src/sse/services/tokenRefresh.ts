@@ -1,6 +1,7 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
@@ -145,7 +146,7 @@ export function resolveCopilotTokenBaseUrl(
   if (provider !== "ghe-copilot") return undefined;
   const gheUrl = credentials?.providerSpecificData?.gheUrl;
   if (typeof gheUrl === "string" && gheUrl.trim().length > 0) {
-    return `${gheUrl.trim().replace(/\/+$/, "")}/api/v3`;
+    return `${stripTrailingSlashes(gheUrl.trim())}/api/v3`;
   }
   return undefined;
 }
