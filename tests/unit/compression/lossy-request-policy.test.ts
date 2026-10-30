@@ -15,7 +15,10 @@ const lossyProfile: DerivedPlan = {
 test("default path replaces a lossy profile with dedup and whitespace folding", () => {
   const plan = applyLossyRequestPolicy(lossyProfile, null);
   assert.equal(plan.mode, "stacked");
-  assert.deepEqual(plan.stackedPipeline, [{ engine: "session-dedup" }, { engine: "lite" }]);
+  assert.deepEqual(plan.stackedPipeline, [
+    { engine: "session-dedup" },
+    { engine: "lite", config: { compressToolResults: false } },
+  ]);
 });
 
 test("allow-lossy keeps the operator profile for this request", () => {
@@ -35,11 +38,15 @@ test("engine header is the opt-in for that engine", () => {
   assert.equal(plan.mode, "rtk");
 });
 
-test("a safe stacked plan is left as-is", () => {
+test("a safe stacked plan scopes Lite to preserve tool results", () => {
   const safe: DerivedPlan = {
     mode: "stacked",
     source: "default",
     stackedPipeline: [{ engine: "lite" }],
   };
-  assert.equal(applyLossyRequestPolicy(safe, null), safe);
+  assert.deepEqual(applyLossyRequestPolicy(safe, null), {
+    ...safe,
+    stackedPipeline: [{ engine: "lite", config: { compressToolResults: false } }],
+  });
+  assert.deepEqual(safe.stackedPipeline, [{ engine: "lite" }]);
 });

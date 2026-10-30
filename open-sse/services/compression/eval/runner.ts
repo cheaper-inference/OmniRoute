@@ -53,7 +53,11 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
   // D-D3 self-test gate — a broken judge aborts before any score is emitted.
   const selfTest = await runSelfTest(opts.client, opts.judgeModel);
   if (!selfTest.passed) {
-    return { aborted: true, abortReason: `judge self-test failed: ${selfTest.detail}`, report: null };
+    return {
+      aborted: true,
+      abortReason: `judge self-test failed: ${selfTest.detail}`,
+      report: null,
+    };
   }
 
   const limit = typeof opts.sample === "number" ? Math.max(0, opts.sample) : corpus.length;
@@ -65,25 +69,47 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
 
   for (const c of cases) {
     // Stop BEFORE a case if we cannot afford its (~3) model calls; flag partial.
-    if (meter.exceeded) { partial = true; break; }
+    if (meter.exceeded) {
+      partial = true;
+      break;
+    }
 
     const fullBody = buildBody(c.context, c.question);
     try {
-      const full = await opts.client.complete(opts.answerModel, [{ role: "user", content: answerText(fullBody) }]);
+      const full = await opts.client.complete(opts.answerModel, [
+        { role: "user", content: answerText(fullBody) },
+      ]);
       meter.add(full.usdCost ?? 0);
 
       const estimatedTokens = estimateCompressionTokens(fullBody);
-      const plan = selectCompressionPlan(opts.config, opts.comboId, estimatedTokens, fullBody, undefined, opts.combos);
+      const plan = selectCompressionPlan(
+        opts.config,
+        opts.comboId,
+        estimatedTokens,
+        fullBody,
+        undefined,
+        opts.combos
+      );
       const compressedResult = await applyCompressionAsync(fullBody, plan.mode as CompressionMode, {
-        config: opts.config,
+        config: {
+          ...opts.config,
+          stackedPipeline: plan.stackedPipeline as CompressionConfig["stackedPipeline"],
+        },
         model: opts.answerModel,
       });
-      const compressedBody = compressedResult.compressed ? (compressedResult.body as Record<string, unknown>) : fullBody;
+      const compressedBody = compressedResult.compressed
+        ? (compressedResult.body as Record<string, unknown>)
+        : fullBody;
 
-      const compressed = await opts.client.complete(opts.answerModel, [{ role: "user", content: answerText(compressedBody) }]);
+      const compressed = await opts.client.complete(opts.answerModel, [
+        { role: "user", content: answerText(compressedBody) },
+      ]);
       meter.add(compressed.usdCost ?? 0);
 
-      const judge = await opts.client.complete(opts.judgeModel, buildJudgePrompt(full.text, compressed.text));
+      const judge = await opts.client.complete(
+        opts.judgeModel,
+        buildJudgePrompt(full.text, compressed.text)
+      );
       meter.add(judge.usdCost ?? 0);
       const fidelity = parseJudgeVerdict(judge.text);
 
@@ -92,7 +118,10 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
       if (typeof c.gold === "string") {
         const gf = await opts.client.complete(opts.judgeModel, buildGradePrompt(full.text, c.gold));
         meter.add(gf.usdCost ?? 0);
-        const gc = await opts.client.complete(opts.judgeModel, buildGradePrompt(compressed.text, c.gold));
+        const gc = await opts.client.complete(
+          opts.judgeModel,
+          buildGradePrompt(compressed.text, c.gold)
+        );
         meter.add(gc.usdCost ?? 0);
         goldFull = parseGradeVerdict(gf.text).correct;
         goldCompressed = parseGradeVerdict(gc.text).correct;
@@ -121,7 +150,10 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
     }
 
     // After the case, if the cap is now crossed, stop the loop and flag partial.
-    if (meter.exceeded) { partial = true; break; }
+    if (meter.exceeded) {
+      partial = true;
+      break;
+    }
   }
 
   const stamps: RunStamps = {

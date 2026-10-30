@@ -16,7 +16,10 @@ const LOSSY_SINGLE_MODES = new Set([
   "codex-responses",
 ]);
 
-export const SAFE_DEFAULT_PIPELINE = [{ engine: "session-dedup" }, { engine: "lite" }] as const;
+export const SAFE_DEFAULT_PIPELINE = [
+  { engine: "session-dedup" },
+  { engine: "lite", config: { compressToolResults: false } },
+] as const;
 
 function isSafeEngine(id: string): boolean {
   try {
@@ -49,23 +52,26 @@ export function applyLossyRequestPolicy(plan: DerivedPlan, header: string | null
 export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
   if (plan.mode === "off") return plan;
 
+  let pipeline: DerivedPlan["stackedPipeline"];
   if (plan.mode === "stacked") {
-    const kept = plan.stackedPipeline.filter((step) => isSafeEngine(step.engine));
-    if (kept.length === plan.stackedPipeline.length) return plan;
-    return {
-      ...plan,
-      mode: "stacked",
-      stackedPipeline: kept.length > 0 ? kept : [...SAFE_DEFAULT_PIPELINE],
-    };
+    pipeline = plan.stackedPipeline.filter((step) => isSafeEngine(step.engine));
+  } else if (plan.mode === "lite") {
+    // A scoped step overrides global Lite settings without changing the stored config.
+    pipeline = [{ engine: "lite" }];
+  } else if (LOSSY_SINGLE_MODES.has(plan.mode)) {
+    pipeline = [];
+  } else {
+    return plan;
   }
 
-  if (LOSSY_SINGLE_MODES.has(plan.mode)) {
-    return {
-      ...plan,
-      mode: "stacked",
-      stackedPipeline: [...SAFE_DEFAULT_PIPELINE],
-    };
-  }
-
-  return plan;
+  if (pipeline.length === 0) pipeline = [...SAFE_DEFAULT_PIPELINE];
+  return {
+    ...plan,
+    mode: "stacked",
+    stackedPipeline: pipeline.map((step) =>
+      step.engine === "lite"
+        ? { ...step, config: { ...step.config, compressToolResults: false } }
+        : step
+    ),
+  };
 }
