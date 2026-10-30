@@ -326,3 +326,114 @@ test("ENABLE_REQUEST_LOGS=true does not turn capture on for a noLog API key", ()
     `noLog key must not capture under ENABLE_REQUEST_LOGS=true: ${JSON.stringify(result)}`
   );
 });
+
+// The security review asked for the noLog guarantee across the upgrade matrix, not just the
+// one combination where the environment override and the stored value are both on. Each row
+// runs the real chatCore in a child process and records the `enabled` flag it hands the
+// request logger, so the assertion is about the gate rather than the persisted row.
+const NO_LOG_MATRIX_CHILD = `
+import { mock } from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+const root = process.env.REPO_ROOT_17998;
+const url = (rel) => new URL(rel, "file://" + root + "/").href;
+process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-17998-matrix-"));
+const loggerUrl = url("open-sse/utils/requestLogger.ts");
+const real = await import(loggerUrl);
+const seen = [];
+mock.module(loggerUrl, {
+  namedExports: {
+    ...real,
+    createRequestLogger: (...args) => {
+      seen.push(args[3]?.enabled);
+      return real.createRequestLogger(...args);
+    },
+  },
+});
+const core = await import(url("src/lib/db/core.ts"));
+const settingsDb = await import(url("src/lib/db/settings.ts"));
+const { invalidateDbCache } = await import(url("src/lib/db/readCache.ts"));
+const { waitForCallLogSaves } = await import(url("src/lib/usage/callLogs.ts"));
+const { handleChatCore } = await import(url("open-sse/handlers/chatCore.ts"));
+core.getDbInstance();
+globalThis.fetch = async () => { throw new Error("Connection refused"); };
+const out = {};
+for (const combo of JSON.parse(process.env.COMBOS_17998)) {
+  if (combo.env === null) delete process.env.ENABLE_REQUEST_LOGS;
+  else process.env.ENABLE_REQUEST_LOGS = combo.env;
+  await settingsDb.updateSettings({ call_log_pipeline_enabled: combo.stored });
+  invalidateDbCache("settings");
+  out[combo.label] = {};
+  for (const [label, apiKeyInfo] of [
+    ["noLog", { id: "key-17998-matrix-nolog", noLog: true }],
+    ["control", { id: "key-17998-matrix-control", noLog: false }],
+  ]) {
+    seen.length = 0;
+    const body = { model: "gpt-4o-mini", stream: false, messages: [{ role: "user", content: "hi" }] };
+    await handleChatCore({
+      body: structuredClone(body),
+      modelInfo: { provider: "openai", model: "gpt-4o-mini", extendedContext: false },
+      credentials: { apiKey: "sk-17998-matrix", providerSpecificData: {} },
+      log: { debug() {}, info() {}, warn() {}, error() {} },
+      clientRawRequest: { endpoint: "/v1/chat/completions", body: structuredClone(body), headers: new Headers() },
+      userAgent: "unit-test",
+      apiKeyInfo,
+    });
+    out[combo.label][label] = [...seen];
+  }
+}
+await waitForCallLogSaves(60000);
+core.resetDbInstance();
+fs.rmSync(process.env.DATA_DIR, { recursive: true, force: true });
+process.stdout.write("MATRIX17998:" + JSON.stringify(out) + "\\n");
+process.exit(0);
+`;
+
+test("noLog wins over every upgrade combination, and the control follows one reader", () => {
+  const combos = [
+    { label: "stored-on", env: null, stored: true, control: true },
+    { label: "env-off", env: "false", stored: true, control: false },
+    { label: "env-one-stored-off", env: "1", stored: false, control: true },
+    { label: "all-off", env: null, stored: false, control: false },
+  ];
+  const repoRoot = fileURLToPath(new URL("../../", import.meta.url)).replace(/\/$/, "");
+  const env = {
+    ...process.env,
+    REPO_ROOT_17998: repoRoot,
+    DISABLE_SQLITE_AUTO_BACKUP: "true",
+    COMBOS_17998: JSON.stringify(combos),
+  };
+  delete env.NODE_TEST_CONTEXT;
+  delete env.ENABLE_REQUEST_LOGS;
+  const child = spawnSync(
+    process.execPath,
+    [
+      "--experimental-test-module-mocks",
+      "--import",
+      "tsx/esm",
+      "--import",
+      pathToFileURL(path.join(repoRoot, "open-sse/utils/setupPolyfill.ts")).href,
+      "--input-type=module",
+      "-e",
+      NO_LOG_MATRIX_CHILD,
+    ],
+    { cwd: repoRoot, env, encoding: "utf8", timeout: 180_000, maxBuffer: 16 * 1024 * 1024 }
+  );
+  const line = (child.stdout || "").split("\n").find((l) => l.startsWith("MATRIX17998:"));
+  assert.ok(line, `child produced no result: ${child.error || ""}\n${child.stderr}`);
+  const result = JSON.parse(line.slice("MATRIX17998:".length));
+  for (const combo of combos) {
+    const row = result[combo.label];
+    assert.ok(row, `missing row ${combo.label}`);
+    assert.ok(row.noLog.length > 0, `${combo.label}: noLog call did not reach the logger`);
+    assert.ok(
+      row.noLog.every((enabled) => enabled === false),
+      `${combo.label}: a noLog key captured with env=${combo.env} stored=${combo.stored}`
+    );
+    assert.ok(
+      row.control.length > 0 && row.control.every((enabled) => enabled === combo.control),
+      `${combo.label}: control should be ${combo.control}, got ${JSON.stringify(row.control)}`
+    );
+  }
+});
