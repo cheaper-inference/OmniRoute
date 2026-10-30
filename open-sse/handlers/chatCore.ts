@@ -97,6 +97,7 @@ import { normalizeHeaders } from "../utils/headers.ts";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
 import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
+import type { CachingDetectionContext } from "../services/compression/cachingAware.ts";
 import { usesClaudeBridge } from "./chatCore/agentRouterProtocol.ts";
 import { normalizeUpstreamRequestParams } from "./chatCore/upstreamRequestParams.ts";
 import { injectSystemPromptPreTranslation } from "../services/systemPrompt.ts";

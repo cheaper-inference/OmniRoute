@@ -257,4 +257,36 @@ describe("cache-aligned live-zone compression", () => {
     assert.equal((calls[1].messages as unknown[]).length, 2);
     assert.equal(getLiveZoneCacheStats().entries, 0);
   });
+
+  for (const field of ["messages", "input"] as const) {
+    it(`preserves an unchanged ${field} history and current request controls`, async () => {
+      const calls: Array<Record<string, unknown>> = [];
+      const compress = toolCompressor(calls);
+      const first = {
+        model: "synthetic-model",
+        stream: false,
+        max_output_tokens: 1024,
+        reasoning: { effort: "medium" },
+        instructions: "stable instructions",
+        [field]: [
+          { role: "user", content: "user turn" },
+          { role: "tool", content: "tool output" },
+        ],
+      };
+      const firstResult = await applyLiveZoneCompression(first, options, compress);
+      const repeated = { ...first, stream: true, max_output_tokens: 2048 };
+      const unchangedResult = await applyLiveZoneCompression(repeated, options, compress);
+
+      assert.equal(calls.length, 1, "unchanged history must not rerun the compressor");
+      assert.deepEqual(unchangedResult.body, {
+        ...repeated,
+        [field]: firstResult.body[field],
+      });
+      assert.deepEqual(unchangedResult.stats?.liveZone, {
+        cacheHit: true,
+        frozenItems: first[field].length,
+        liveItems: 0,
+      });
+    });
+  }
 });
