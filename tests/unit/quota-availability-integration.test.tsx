@@ -1,7 +1,7 @@
 import React from "react";
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
-import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../src/i18n/messages/en.json";
 import zh from "../../src/i18n/messages/zh-CN.json";
@@ -23,15 +23,17 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function fixture(failCooldowns = false, malformed = false) {
+function fixture(failCooldowns = false, malformed = false, providerIds: string[] = []) {
   const fetchedAt = new Date().toISOString();
-  const connections = ["available", "blocked", "restricted", "paused", "unknown"].map((id) => ({
-    id,
-    provider: "claude",
-    email: `${id}@example.test`,
-    authType: "oauth",
-    isActive: id !== "paused",
-  }));
+  const connections = ["available", "blocked", "restricted", "paused", "unknown"].map(
+    (id, index) => ({
+      id,
+      provider: providerIds[index] ?? "claude",
+      email: `${id}@example.test`,
+      authType: providerIds[index] ? "apikey" : "oauth",
+      isActive: id !== "paused",
+    })
+  );
   const caches = Object.fromEntries(
     connections.map((c) => [
       c.id,
@@ -238,3 +240,18 @@ it.each([false, true])(
     expect(document.querySelector('[data-stat="ok"] .text-2xl')).toHaveTextContent("2");
   }
 );
+
+it("shows Kimi in the provider filter while preserving the moonshot filter value", async () => {
+  fixture(false, false, ["moonshot", "kimi-coding"]);
+  mount("en");
+  const select = await screen.findByRole("combobox", { name: "Filter quota providers" });
+  expect(within(select).getByRole("option", { name: "Kimi", exact: true })).toHaveValue("moonshot");
+  expect(within(select).getByRole("option", { name: "Kimi Coding", exact: true })).toHaveValue(
+    "kimi-coding"
+  );
+
+  fireEvent.change(select, { target: { value: "moonshot" } });
+  await waitFor(() => expect(document.querySelectorAll("[data-account]")).toHaveLength(1));
+  expect(select).toHaveValue("moonshot");
+  expect(document.querySelector("[data-account]")).toHaveAttribute("data-account", "available");
+});
