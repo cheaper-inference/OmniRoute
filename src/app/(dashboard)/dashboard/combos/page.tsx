@@ -109,6 +109,7 @@ import {
   normalizeIntelligentRoutingFilter,
   normalizeIntelligentRoutingConfig,
 } from "@/lib/combos/intelligentRouting";
+import { toDecisionPreviewModels } from "@/lib/combos/decisionModelDraft";
 import { getComboStepTarget } from "@/lib/combos/steps";
 import { DEAD_COMBO_CONFIG_KEYS } from "@/lib/combos/deadConfigKeys";
 import { modelFamily } from "@/lib/combos/invariants";
@@ -2304,6 +2305,7 @@ function ComboFormModal({
   );
   const usesIntelligentBuilderStage = isIntelligentBuilderStrategy(strategy);
   const intelligentConfig = useMemo(() => normalizeIntelligentRoutingConfig(config), [config]);
+  const decisionPreviewModels = useMemo(() => toDecisionPreviewModels(models), [models]);
 
   const resetFormForCombo = useCallback(
     (nextCombo, comboDefaults = null) => {
@@ -3570,6 +3572,7 @@ function ComboFormModal({
               t={t}
               config={config}
               activeProviders={builderProviders}
+              stepModels={decisionPreviewModels}
               onChange={(nextIntelligentConfig: any) =>
                 setConfig((previousConfig) => ({
                   ...previousConfig,

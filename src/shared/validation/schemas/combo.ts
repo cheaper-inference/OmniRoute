@@ -167,6 +167,23 @@ export const responseValidationSchema = z
   })
   .strict();
 
+// Decision API config (open-sse/services/autoCombo/decisionModelStrategy.ts).
+export const decisionModelConfigSchema = z
+  .object({
+    apiKey: z.string().trim().max(500).optional(),
+    baseUrl: z.string().trim().max(500).optional(),
+    model: z.string().trim().min(1).max(200).optional(),
+    timeoutMs: z.coerce.number().int().min(100).max(30_000).optional(),
+    // Keyed by model ID or provider/model; capped like the 50-entry decision menu.
+    descriptions: z
+      .record(z.string().trim().min(1).max(300), z.string().trim().min(1).max(1_000))
+      .refine((value) => Object.keys(value).length <= 50, {
+        message: "At most 50 model descriptions",
+      })
+      .optional(),
+  })
+  .strict();
+
 export const comboRuntimeConfigSchema = z
   .object({
     responseValidation: responseValidationSchema.optional(),
@@ -243,6 +260,7 @@ export const comboRuntimeConfigSchema = z
       })
       .strict()
       .optional(),
+    decisionModel: decisionModelConfigSchema.optional(),
     compositeTiers: compositeTiersSchema.optional(),
     resetAwareSessionWeight: z.coerce.number().min(0).max(100).optional(),
     resetAwareWeeklyWeight: z.coerce.number().min(0).max(100).optional(),
@@ -543,6 +561,16 @@ export const reorderCombosSchema = z
 
 export const testComboSchema = z.object({
   comboName: z.string().trim().min(1, "comboName is required"),
+});
+
+// POST /api/combos/decision-preview - Menu descriptions and an optional test decision
+// for an unsaved decision-router combo (dashboard combo builder).
+export const decisionPreviewSchema = z.object({
+  strategy: z.enum(["decision-openai", "decision-systemone"]),
+  decisionModel: decisionModelConfigSchema.optional(),
+  // Combo step model strings (`provider/model`); combo refs and wildcards are not sent.
+  models: z.array(z.string().trim().min(1).max(300)).max(200),
+  prompt: z.string().trim().min(1).max(16_000).optional(),
 });
 
 // POST /api/combos/duplicate - Resolve an auto-combo template (e.g. "auto/best-coding")

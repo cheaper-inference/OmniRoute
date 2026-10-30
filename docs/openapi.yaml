@@ -3105,6 +3105,45 @@ paths:
         "404":
           description: Combo not found
 
+  /api/combos/decision-preview:
+    post:
+      tags: [Combos]
+      summary: Preview a decision-router menu and optionally test one decision
+      description: >-
+        Returns the menu and generated choice descriptions a `decision-openai` or
+        `decision-systemone` router would send for the given combo models. With `prompt`,
+        also calls the configured decision service once and returns its answer under `test`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [strategy, models]
+              properties:
+                strategy:
+                  type: string
+                  enum: [decision-openai, decision-systemone]
+                models:
+                  type: array
+                  maxItems: 200
+                  items:
+                    type: string
+                  description: Combo step model strings (`provider/model`).
+                decisionModel:
+                  type: object
+                  description: Same shape as a combo's `config.decisionModel`.
+                prompt:
+                  type: string
+                  maxLength: 16000
+      responses:
+        "200":
+          description: Menu, generated descriptions, and the optional test result
+        "400":
+          description: Invalid request body
+        "401":
+          description: Management authentication required
+
   /api/settings:
     get:
       tags: [Settings]

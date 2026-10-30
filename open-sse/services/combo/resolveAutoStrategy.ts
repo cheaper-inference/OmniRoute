@@ -307,6 +307,7 @@ export async function resolveAutoStrategyOrder(
     resetWindowConfig,
     slaPolicy,
     nadirConfig,
+    decisionModelConfig,
   } = parseAutoConfig(combo, eligibleTargets);
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
@@ -437,6 +438,7 @@ export async function resolveAutoStrategyOrder(
             manifestHint: autoManifestHint,
             messages: body.messages,
             nadir: nadirConfig,
+            decisionModel: decisionModelConfig,
           },
           routingStrategy
         );
