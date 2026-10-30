@@ -4,6 +4,7 @@
  * through deps.
  */
 import { markEmptyTurnExecution, inheritEmptyTurnPolicy } from "../../utils/emptyTurnPolicy.ts";
+import { noteUpstreamDispatch } from "../../utils/proxyFetch.ts";
 
 import type { BaseExecutor } from "../../executors/base.ts";
 import type { AgentGoalPolicy } from "../../utils/agentGoalPolicy.ts";
@@ -340,8 +341,9 @@ export async function executeProviderRequest(
                   signal: streamController.signal,
                   log,
                   execute: (signal) =>
-                    runWithCapture(providerRequestCapture, () =>
-                      executor.execute({
+                    runWithCapture(providerRequestCapture, () => {
+                      noteUpstreamDispatch();
+                      return executor.execute({
                         model: modelToCall,
                         body: bodyToSend,
                         stream: upstreamStream,
@@ -356,8 +358,8 @@ export async function executeProviderRequest(
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
-                      })
-                    ),
+                      });
+                    }),
                 });
               },
               streamController.signal,
@@ -546,8 +548,9 @@ export async function executeProviderRequest(
                       signal: streamController.signal,
                       log,
                       execute: (signal) =>
-                        runWithCapture(providerRequestCapture, () =>
-                          executor.execute({
+                        runWithCapture(providerRequestCapture, () => {
+                          noteUpstreamDispatch();
+                          return executor.execute({
                             model: modelToCall,
                             body,
                             stream: upstreamStream,
@@ -562,8 +565,8 @@ export async function executeProviderRequest(
                             skipUpstreamRetry,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
-                          })
-                        ),
+                          });
+                        }),
                     });
                     const retryRes = normalizeExecutorResult(retryRaw);
                     const retryOk =

@@ -182,6 +182,14 @@ export type AppliedProxySink = {
    * pool has nothing else to offer — the executor keeps its behavior then.
    */
   reselectPoolMember?: () => Promise<unknown>;
+  /**
+   * Wall-clock Date.now() of the first upstream dispatch inside this capture
+   * (sticky: the first writer wins, retries keep the original stamp). Null /
+   * absent when nothing dispatched. Lets the call log derive how long the
+   * request waited in OmniRoute (scheduling, translation, parking) before the
+   * first byte left for the provider.
+   */
+  upstreamDispatchedAt?: number | null;
 };
 const APPLIED_PROXY_CONTEXT_KEY = Symbol.for("omniroute.proxyFetch.applied-context");
 type AppliedProxyStore = typeof globalThis & {
@@ -266,6 +274,49 @@ export function readAddedWait(): { ms: number | null; cause: string | null } | n
   } catch {
     return null;
   }
+}
+
+/**
+ * Stamp the first upstream dispatch of this capture on the sink (sticky: only
+ * the first writer wins, so retry dispatches keep the original moment). Best-
+ * effort like noteAddedWait: no-op outside a capture.
+ */
+export function noteUpstreamDispatch(): void {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    if (sink && sink.upstreamDispatchedAt == null) sink.upstreamDispatchedAt = Date.now();
+  } catch {
+    /* queue-wait is best-effort; never break the request path */
+  }
+}
+
+/**
+ * Late read of the first upstream dispatch timestamp. Fail-soft: null
+ * outside a capture or when nothing dispatched — callers persist NULL.
+ */
+export function readUpstreamDispatchedAt(): number | null {
+  try {
+    const sink = getAppliedProxyContext().getStore();
+    return sink && typeof sink.upstreamDispatchedAt === "number"
+      ? sink.upstreamDispatchedAt
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Queue wait = how long the serving execution waited from `startTime` until
+ * the first byte left for the provider. Null when no dispatch happened
+ * (rejected before egress); clamped at 0 against clock skew.
+ */
+export function queueWaitMsFromDispatch(
+  upstreamDispatchedAt: number | null,
+  startTime: number
+): number | null {
+  if (upstreamDispatchedAt === null || !Number.isFinite(upstreamDispatchedAt)) return null;
+  if (!Number.isFinite(startTime)) return null;
+  return Math.max(0, Math.round(upstreamDispatchedAt - startTime));
 }
 
 type FetchWithDispatcherOptions = RequestInit & { dispatcher?: unknown };
