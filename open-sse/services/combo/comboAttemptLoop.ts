@@ -27,6 +27,7 @@ import {
   buildAllTargetsCoolingDownResponse,
   buildNoUpstreamResponseDiagnostics,
   formatPreDispatchExclusions,
+  resolveAllFailedTerminalReason,
 } from "./pinRecovery.ts";
 import { collectQuotaWindowExclusions, formatQuotaSkipMessage } from "./quotaSkipDiagnostics.ts";
 import { recordComboRequest } from "../comboMetrics.ts";
@@ -905,11 +906,9 @@ export async function dispatchWithCooldownRetry(opts: {
       // terminalReason instead of forwarding the raw upstream error string. The raw
       // string falls through buildRecoveryHint's default branch ("retry" / "failed
       // transiently"), which is actively misleading for a durable wallet/quota
-      // exhaustion — retrying the same combo will never refill it.
-      const terminalReason =
-        state.observedFailure && state.allObservedFailuresQuota
-          ? "quota_exhausted"
-          : (state.lastError ?? "all_models_failed");
+      // exhaustion. Retrying the same combo will never refill it. #18360 adds the
+      // same treatment for an all-authentication failure.
+      const terminalReason = resolveAllFailedTerminalReason(state);
       return withQuotaExhaustionClassification(
         errorResponseWithComboDiagnostics(
           status,
