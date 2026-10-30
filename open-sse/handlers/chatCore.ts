@@ -3054,9 +3054,11 @@ async function handleChatCoreInner({
             suffix: "trying other accounts",
           });
         } else if (errorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED) {
-          // Per-request refusal (#12859): growing cooldown, streak → banned.
+          // Per-request refusal (#12859): growing MODEL-scoped cooldown. Never a ban.
           await handleRequestRejectedFailure({
             connectionId: errorConnectionId,
+            provider,
+            targetModel,
             statusCode,
             message: persistentMessage,
           });
