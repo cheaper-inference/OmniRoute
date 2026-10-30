@@ -1,0 +1,1 @@
+- **fix(dashboard):** Paginate the combo inventory so large installations remain responsive, while keeping filter state, ordering, and drag controls consistent across pages ([#17985](https://github.com/diegosouzapw/OmniRoute/pull/17985)) — thanks @seanford
