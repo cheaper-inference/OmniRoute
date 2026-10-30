@@ -1,3 +1,7 @@
+---
+title: "Grok Build OAuth media"
+---
+
 # Grok Build OAuth media
 
 Connect **Grok Build** (`grok-cli`) using its existing OAuth flow. Media requests
