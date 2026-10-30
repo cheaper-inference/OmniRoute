@@ -1,4 +1,4 @@
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../registeredFeatureFlag.ts";
 
 /**
  * #17386: Cursor's docs list exactly four Grok 4.7 effort levels (low/medium/high/xhigh), but
@@ -9,10 +9,5 @@ import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 export const CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG = "CURSOR_GROK_47_DROP_MAX_EFFORT";
 
 export function isCursorGrok47MaxEffortDropped(): boolean {
-  try {
-    return isFeatureFlagEnabled(CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG);
-  } catch {
-    // Unreadable flag store fails closed: keep the old behavior (max stays).
-    return false;
-  }
+  return isRegisteredFeatureFlagEnabled(CURSOR_GROK_47_DROP_MAX_EFFORT_FLAG);
 }

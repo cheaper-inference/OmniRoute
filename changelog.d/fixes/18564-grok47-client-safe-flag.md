@@ -1,0 +1,1 @@
+- **fix(cursor):** Grok 4.7's effort flag is now read through open-sse's registered-flag helper, so the provider detail page no longer pulls the SQLite layer into the browser bundle and the production build completes ([#18564](https://github.com/cheaper-inference/OmniRoute/pull/18564))
