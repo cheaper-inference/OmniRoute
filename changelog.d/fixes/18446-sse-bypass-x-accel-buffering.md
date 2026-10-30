@@ -1,0 +1,1 @@
+- **fix(sse):** self-built SSE responses that bypass the central header path (early-keepalive slow path, synthetic bypass stream, MCP SSE transport) now send `X-Accel-Buffering: no` so buffering reverse proxies stop sitting on the stream ([#18446](https://github.com/cheaper-inference/OmniRoute/pull/18446)) — thanks @jjxyxsjr
