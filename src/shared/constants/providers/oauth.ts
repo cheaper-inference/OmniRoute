@@ -74,6 +74,19 @@ export const OAUTH_PROVIDERS = {
     riskNoticeVariant: "oauth",
     hasFree: true,
   },
+  "qoder-cn": {
+    id: "qoder-cn",
+    serviceKinds: ["llm"],
+    alias: "qoder-cn",
+    name: "Qoder CN",
+    authHint:
+      "Qoder's China deployment (qoder.cn). Paste a Personal Access Token, or configure QODER_CN_OAUTH_* for browser OAuth; no upstream client credentials are embedded.",
+    icon: "water_drop",
+    color: "#E11D48",
+    website: "https://qoder.cn",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+  },
   agy: {
     id: "agy",
     serviceKinds: ["llm"],

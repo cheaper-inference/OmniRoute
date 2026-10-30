@@ -105,6 +105,41 @@ export const QODER_CONFIG = {
   },
 };
 
+// Qoder CN (qoder.cn) OAuth Configuration (Authorization Code)
+//
+// The CN site is a separate Qoder deployment. Its browser OAuth stays env-only
+// on purpose: an earlier revision of the global config carried a literal
+// client_id/client_secret for qoder.cn, and #7866 removed exactly that
+// (Hard Rule #11). Never reintroduce a literal here — supply
+// QODER_CN_OAUTH_* from the environment, or use a Personal Access Token.
+const QODER_CN_OAUTH_AUTHORIZE_URL =
+  process.env.QODER_CN_OAUTH_AUTHORIZE_URL || "https://qoder.cn/oauth";
+const QODER_CN_OAUTH_TOKEN_URL =
+  process.env.QODER_CN_OAUTH_TOKEN_URL || "https://qoder.cn/oauth/token";
+const QODER_CN_OAUTH_USERINFO_URL =
+  process.env.QODER_CN_OAUTH_USERINFO_URL || "https://qoder.cn/api/oauth/getUserInfo";
+const QODER_CN_OAUTH_CLIENT_ID = process.env.QODER_CN_OAUTH_CLIENT_ID || "";
+const QODER_CN_OAUTH_CLIENT_SECRET = process.env.QODER_CN_OAUTH_CLIENT_SECRET || "";
+const QODER_CN_OAUTH_ENABLED =
+  !!QODER_CN_OAUTH_CLIENT_ID &&
+  !!QODER_CN_OAUTH_CLIENT_SECRET &&
+  !!QODER_CN_OAUTH_AUTHORIZE_URL &&
+  !!QODER_CN_OAUTH_TOKEN_URL &&
+  !!QODER_CN_OAUTH_USERINFO_URL;
+
+export const QODER_CN_CONFIG = {
+  enabled: QODER_CN_OAUTH_ENABLED,
+  clientId: QODER_CN_OAUTH_CLIENT_ID,
+  clientSecret: QODER_CN_OAUTH_CLIENT_SECRET,
+  authorizeUrl: QODER_CN_OAUTH_AUTHORIZE_URL,
+  tokenUrl: QODER_CN_OAUTH_TOKEN_URL,
+  userInfoUrl: QODER_CN_OAUTH_USERINFO_URL,
+  extraParams: {
+    loginMethod: "phone",
+    type: "phone",
+  },
+};
+
 // CodeBuddy CN (Tencent — copilot.tencent.com) OAuth Configuration
 // (Custom Device-Auth Flow: POST stateUrl → open authUrl → GET pollUrl?state=).
 // No client_id/secret — the upstream CLI ships none.
