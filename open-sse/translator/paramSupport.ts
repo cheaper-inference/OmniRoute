@@ -15,6 +15,8 @@
 //   - `maxOutputCap` clamps the same keys down to a fixed endpoint-imposed ceiling
 //     (independent of the model's own advertised ceiling). When both are present on
 //     the same rule, the lower of the two wins.
+//   - `dropOutputConfigFields` removes keys nested under `output_config`, keeping the
+//     rest of the object and dropping `output_config` only when it ends up empty.
 //
 // A param is removed only when it is present (!== undefined). The helper never
 // introduces new keys and never throws on null/undefined bodies — call sites
@@ -35,6 +37,7 @@ type StripRule = {
   // budget_tokens). Only applies when `thinking` is an object whose current
   // `type` matches the key.
   mapThinkingType?: Record<string, string>;
+  dropOutputConfigFields?: string[];
 };
 
 const MAX_OUTPUT_TOKEN_KEYS = ["max_tokens", "max_completion_tokens", "max_output_tokens"] as const;
@@ -199,6 +202,11 @@ const STRIP_RULES: StripRule[] = [
   // single model id, since AgentRouter's static catalog carries no glm-*
   // entries (passthroughModels: true lets arbitrary GLM ids through). #13696.
   { provider: "agentrouter", match: /glm-/i, mapThinkingType: { adaptive: "enabled" } },
+  // OpenCode Go's Claude lane (/v1/messages) is a strict Anthropic proxy that rejects
+  // `output_config.task_budget` with 400 "Extra inputs are not permitted" even when the
+  // task-budgets beta travels with it. `output_config.effort` stays: the adaptive-thinking
+  // Claude models there need it. Non-Claude opencode-go ids accept the field.
+  { provider: "opencode-go", match: /claude/i, dropOutputConfigFields: ["task_budget"] },
 ];
 
 function matches(rule: StripRule, model: string): boolean {
@@ -259,6 +267,23 @@ function applyThinkingTypeMap(rule: StripRule, body: Record<string, unknown>): v
 }
 
 /**
+ * When a rule requests it, drop keys nested under `body.output_config`. The object is
+ * replaced rather than mutated (the caller's original stays intact), and removed
+ * altogether only when nothing is left in it.
+ */
+function applyOutputConfigFieldDrops(rule: StripRule, body: Record<string, unknown>): void {
+  if (!rule.dropOutputConfigFields?.length) return;
+  const outputConfig = body.output_config;
+  if (!outputConfig || typeof outputConfig !== "object" || Array.isArray(outputConfig)) return;
+  const fields = rule.dropOutputConfigFields;
+  const record = outputConfig as Record<string, unknown>;
+  if (!fields.some((key) => record[key] !== undefined)) return;
+  const kept = Object.fromEntries(Object.entries(record).filter(([key]) => !fields.includes(key)));
+  if (Object.keys(kept).length > 0) body.output_config = kept;
+  else delete body.output_config;
+}
+
+/**
  * Remove unsupported params from `body` in place. Returns the same reference
  * (or `body` unchanged when it is not a plain object / model is empty).
  */
@@ -285,6 +310,7 @@ export function stripUnsupportedParams<T>(
     }
     applyMaxOutputClamp(rule, provider, model, rec);
     applyThinkingTypeMap(rule, rec);
+    applyOutputConfigFieldDrops(rule, rec);
   }
 
   // Phase 2: Config-driven rules from DB

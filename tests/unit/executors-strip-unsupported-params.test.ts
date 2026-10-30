@@ -248,9 +248,12 @@ test("STRIP_RULES is non-empty and every rule has a drop list, a clamp mechanism
       typeof rule.mapThinkingType === "object" &&
       rule.mapThinkingType !== null &&
       Object.keys(rule.mapThinkingType).length > 0;
+    // Nested output_config drops (e.g. opencode-go Claude output_config.task_budget).
+    const hasOutputConfigDrop =
+      Array.isArray(rule.dropOutputConfigFields) && rule.dropOutputConfigFields.length > 0;
     assert.ok(
-      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap,
-      "rule must either drop params (always or only when null), clamp max output, or map a thinking type"
+      hasDrop || hasDropIfNull || hasClamp || hasThinkingMap || hasOutputConfigDrop,
+      "rule must either drop params (always or only when null), clamp max output, map a thinking type, or drop nested output_config fields"
     );
     assert.ok(typeof rule.match === "function" || rule.match instanceof RegExp);
   }

@@ -34,6 +34,7 @@ import {
   resolveOpencodeCliDefaults,
 } from "../utils/opencodeHeaders.ts";
 import { projectOpencodeSessionBody } from "../utils/opencodeSessionIdentity.ts";
+import { applyOpencodeClaudeBeta } from "./opencodeClaudeBeta.ts";
 import { listForRequest, releaseRequestList } from "./opencodeAccountScope.ts";
 import { applyOpencodeToolNameLengthAliases } from "./toolNameLengthAlias.ts";
 import type { ScopedAccount, ScopedAccountHealth } from "./opencodeAccountScope.ts";
@@ -1612,6 +1613,7 @@ export class OpencodeExecutor extends BaseExecutor {
 
     if (this._requestFormat === "claude") {
       headers["anthropic-version"] = "2023-06-01";
+      applyOpencodeClaudeBeta(headers, clientHeaders, model, body);
     }
     // The free tier only answers streamed requests (measured 2026-09-17: a non-streamed
     // body answers 403 FreeTierError), so a JSON client is served by streaming upstream and

@@ -1,0 +1,1 @@
+- **fix(opencode):** the opencode-go / Zen Claude lane forwards the client's allowlisted `anthropic-beta` and pairs `context-management-2025-06-27` with `context_management`, and opencode-go Claude models drop the rejected `output_config.task_budget` while keeping `effort` ([#18275](https://github.com/diegosouzapw/OmniRoute/pull/18275)) — thanks @datalover37
