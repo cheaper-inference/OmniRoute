@@ -300,6 +300,22 @@ jobs:
         env:
           DOCKER_BUILDKIT_INLINE_CACHE: 1
 
+      # Check the binaries in both final Node images on each native architecture,
+      # before their digests can reach the multi-arch manifest/promotion job.
+      - name: Verify published Node runtimes
+        env:
+          DIGEST_BASE: ${{ steps.build.outputs.digest }}
+          DIGEST_WEB: ${{ steps.build-web.outputs.digest }}
+          PLATFORM: ${{ matrix.platform }}
+        run: |
+          set -euo pipefail
+          for digest in "$DIGEST_BASE" "$DIGEST_WEB"; do
+            image="${GHCR_IMAGE_NAME}@${digest}"
+            echo "Verifying Node runtime in ${image} (${PLATFORM})"
+            docker run --rm --pull always --platform "$PLATFORM" --entrypoint node -i \
+              "$image" --input-type=module < scripts/ci/check-docker-node-runtime.mjs
+          done
+
       - name: Build and push BUN base platform image by digest
         id: build-bun-base
         # Bun is a best-effort compatibility target, not a supported runtime

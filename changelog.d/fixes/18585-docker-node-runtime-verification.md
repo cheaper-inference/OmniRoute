@@ -1,0 +1,1 @@
+- **fix(ci):** Verify the actual Node runtime in pushed base and web Docker images on both architectures before publishing multi-arch manifests, rejecting versions below the Node 26.12.1 security floor for CVE-2026-111497 ([#18585](https://github.com/cheaper-inference/OmniRoute/pull/18585)) — thanks @alirezariahi.
