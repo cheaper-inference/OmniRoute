@@ -112,7 +112,7 @@ for (const completed of [false, true]) {
       toolUseIds: ["toolu_scope"],
       provider: "claude",
       model,
-    })!;
+    })!.flatMap((segment) => segment.blocks);
     assert.equal(isRestoredClaudeThinkingBlock(restored[0]), true);
     assert.equal(
       isRestoredClaudeThinkingBlock({ ...restored[0] }),
