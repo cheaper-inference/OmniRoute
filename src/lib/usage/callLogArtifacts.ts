@@ -1,14 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
-import { resolveWritableDataDir } from "../dataPaths";
-import { getCallLogPipelineMaxSizeBytes, isChatDebugFileEnabled } from "../logEnv";
+import { resolveWritableDataDir } from "../dataPaths.ts";
+import { getCallLogPipelineMaxSizeBytes, isChatDebugFileEnabled } from "../logEnv.ts";
 import {
   CALL_LOG_SIZE_LIMIT_REASON as SIZE_LIMIT_EXCEEDED_REASON,
   CALL_LOG_BODY_OMITTED_FOR_SIZE_LIMIT as OMITTED_FOR_SIZE_LIMIT,
   CALL_LOG_STREAM_CHUNKS_OMITTED_FOR_SIZE_LIMIT as STREAM_CHUNKS_OMITTED_FOR_SIZE_LIMIT,
   isSizeLimitOmissionMarker,
-} from "@/shared/constants/callLogSizeLimitMarkers";
+} from "../../shared/constants/callLogSizeLimitMarkers.ts";
 
 const isCloud = typeof globalThis.caches === "object" && globalThis.caches !== null;
 const isBuildPhase =

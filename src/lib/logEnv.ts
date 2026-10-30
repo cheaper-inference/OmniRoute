@@ -1,5 +1,5 @@
 import path from "path";
-import { resolveDataDir } from "@/lib/dataPaths";
+import { resolveDataDir } from "./dataPaths.ts";
 
 const DEFAULT_APP_LOG_RETENTION_DAYS = 7;
 const DEFAULT_CALL_LOG_RETENTION_DAYS = 7;
