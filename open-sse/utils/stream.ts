@@ -1,6 +1,7 @@
 import { translateResponse, initState } from "../translator/index.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { appendRequestLog } from "@/lib/usageDb";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import type { PendingRequestIdentity } from "./pendingRequestCleanup.ts";
 import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
@@ -854,6 +855,11 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   let buffer = "";
   let usage: UsageLike | null = null;
+  const mergePassthroughCacheCreationUsage = (value: unknown) => {
+    if (!value) return;
+    const fields = mergeCacheCreationFields(usage, value);
+    if (Object.keys(fields).length > 0) Object.assign((usage ??= {}), fields);
+  };
   let lastPropagatedCacheEvidence: TranslateState["cacheEvidence"];
 
   function mergeUsageSnapshot(current: UsageLike | null, incoming: UsageLike): UsageLike {
@@ -1700,7 +1706,10 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // Responses SSE: only extract usage, forward payload as-is
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = mergeUsageSnapshot(usage, extracted);
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
                   // Keep generic Responses deltas for fallback usage estimates,
                   // but only visible text deltas may become assistant content in
@@ -1972,6 +1981,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (!usage) usage = {};
                     const u = usage;
                     const eu = extracted as UsageTokenRecord;
+                    Object.assign(u, mergeCacheCreationFields(u, extracted));
                     if (eu.prompt_tokens > 0) u.prompt_tokens = eu.prompt_tokens;
                     if (eu.completion_tokens > 0) u.completion_tokens = eu.completion_tokens;
                     if (eu.total_tokens > 0) u.total_tokens = eu.total_tokens;
@@ -2096,6 +2106,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                   const hadArrayContent = Array.isArray(rawDelta?.content);
                   const nativeFailure = nativeFinishFailure(parsed); // before sanitize drops it
 
+                  // Client sanitization may remove diagnostic status fields.
+                  // Capture provider evidence first without changing token totals.
+                  mergePassthroughCacheCreationUsage(extractUsage(parsed));
                   if (!projectedFailure) {
                     parsed = sanitizeStreamingChunk(parsed);
                     if (
@@ -2270,7 +2283,10 @@ export function createSSEStream(options: StreamOptions = {}) {
 
                   const extracted = extractUsage(parsed);
                   if (extracted) {
-                    usage = mergeUsageSnapshot(usage, extracted);
+                    usage = {
+                      ...mergeUsageSnapshot(usage, extracted),
+                      ...mergeCacheCreationFields(usage, extracted),
+                    };
                   }
 
                   const isFinishChunk = parsed.choices?.[0]?.finish_reason;
@@ -2583,6 +2599,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             } else {
               const su = state.usage as UsageLike;
               const eu = extracted as UsageLike;
+              Object.assign(su, mergeCacheCreationFields(su, extracted));
               if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
               if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
               if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;
@@ -2676,8 +2693,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                 passthroughResponsesId = value;
               },
               setUsage: (value: unknown) => {
-                usage = value as UsageTokenRecord;
+                usage = {
+                  ...(value as UsageTokenRecord),
+                  ...mergeCacheCreationFields(usage, value),
+                };
               },
+              mergeCacheCreationUsage: mergePassthroughCacheCreationUsage,
               addTotalContentLength: (value: number) => {
                 totalContentLength += value;
               },
@@ -2749,6 +2770,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 }
                 if (sanitizeUsagePayloadForRequest(bufferedPayload, body, clientResponseFormat))
                   output = `data: ${JSON.stringify(bufferedPayload)}\n\n`;
+                mergePassthroughCacheCreationUsage(extractUsage(bufferedPayload));
                 if (
                   shouldInjectClaudeEmptyResponseBeforeCurrentEvent(
                     claudeEmptyResponseLifecycle,
@@ -3123,6 +3145,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 } else {
                   const su = state.usage as UsageLike;
                   const eu = extracted as UsageLike;
+                  Object.assign(su, mergeCacheCreationFields(su, extracted));
                   if (eu.prompt_tokens > 0) su.prompt_tokens = eu.prompt_tokens;
                   if (eu.completion_tokens > 0) su.completion_tokens = eu.completion_tokens;
                   if (eu.total_tokens > 0) su.total_tokens = eu.total_tokens;

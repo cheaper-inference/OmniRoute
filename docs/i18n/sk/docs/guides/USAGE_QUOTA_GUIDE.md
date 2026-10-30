@@ -42,27 +42,27 @@ Požiadavka ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Služba `usage.ts` zachytáva **udalosť využitia** pre každú požiadavku:
 
-| Pole               | Typ     | Zdroj                                                                                          |
-| ------------------ | ------- | ---------------------------------------------------------------------------------------------- |
-| `id`               | string  | UUID vygenerované pri zaznamenaní                                                              |
-| `apiKeyId`         | string  | API kľúč, ktorý inicioval požiadavku                                                           |
-| `provider`         | string  | ID poskytovateľa (openai, anthropic atď.)                                                      |
-| `model`            | string  | ID modelu (gpt-5, claude-opus-4-6 atď.)                                                        |
-| `comboId`          | string? | ID kombinácie, ak bola požiadavka smerovaná cez kombináciu                                     |
-| `promptTokens`     | number  | Z odpovede nadradenej služby                                                                   |
-| `completionTokens` | number  | Z odpovede nadradenej služby                                                                   |
-| `cachedTokens`     | number  | Tokeny nájdené vo vyrovnávacej pamäti (ukladanie výziev do vyrovnávacej pamäte Anthropic atď.) |
-| `totalTokens`      | number  | výzva + dokončenie                                                                             |
-| `costUsd`          | number  | Vypočítané z cenových údajov                                                                   |
-| `latencyMs`        | number  | Celkové trvanie požiadavky                                                                     |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                                     |
-| `errorClass`       | string? | Trieda chyby, ak status != success                                                             |
-| `timestamp`        | string  | ISO 8601 UTC                                                                                   |
-| `metadata`         | object  | Vlastné údaje vložené doplnkom                                                                 |
+| Pole               | Typ     | Zdroj                                                                                            |
+| ------------------ | ------- | ------------------------------------------------------------------------------------------------ |
+| `id`               | string  | UUID vygenerované pri zaznamenaní                                                                |
+| `apiKeyId`         | string  | Kľúč API, ktorý inicioval požiadavku                                                             |
+| `provider`         | string  | ID poskytovateľa (openai, anthropic atď.)                                                        |
+| `model`            | string  | ID modelu (gpt-5, claude-opus-4-6 atď.)                                                          |
+| `comboId`          | string? | ID kombinácie, ak sa požiadavka smerovala cez kombináciu                                         |
+| `promptTokens`     | number  | Z odpovede nadradeného poskytovateľa                                                             |
+| `completionTokens` | number  | Z odpovede nadradeného poskytovateľa                                                             |
+| `cachedTokens`     | number  | Tokeny načítané z vyrovnávacej pamäte (ukladanie promptov do vyrovnávacej pamäte Anthropic atď.) |
+| `totalTokens`      | number  | prompt + dokončenie                                                                              |
+| `costUsd`          | number  | Vypočítané z cenových údajov                                                                     |
+| `latencyMs`        | number  | Celkové trvanie požiadavky                                                                       |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                                       |
+| `errorClass`       | string? | Trieda chyby, ak stav != success                                                                 |
+| `timestamp`        | string  | ISO 8601 UTC                                                                                     |
+| `metadata`         | object  | Vlastné údaje vložené doplnkom                                                                   |
 
 ### Odkiaľ pochádzajú tokeny
 
-Tokeny sa získavajú z odpovede nadradeného poskytovateľa v **obslužnom mechanizme odpovede**:
+Tokeny sa extrahujú z odpovede nadradeného poskytovateľa v **obslužnej rutine odpovede**:
 
 ```ts
 // Z open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Pri poskytovateľoch, ktorí údaje o využití nevracajú (niektorí poskytovatelia využívajúci webové súbory cookie), OmniRoute tokeny **odhaduje** pomocou heuristiky `~4 znaky na token` (pozrite si `open-sse/services/autoCombo/pipelineRouter.ts`).
+Pri poskytovateľoch, ktorí nevracajú údaje o využití (niektorí poskytovatelia využívajúci webové súbory cookie), OmniRoute **odhaduje** počet tokenov pomocou heuristiky `~4 chars per token` (pozri `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Tokeny vo vyrovnávacej pamäti
 
 OmniRoute sleduje `cached_tokens` oddelene od `prompt_tokens`, pretože:
 
-- Ukladanie výziev Anthropic do vyrovnávacej pamäte účtuje za tokeny vo vyrovnávacej pamäti zníženú sadzbu (10 % bežnej sadzby)
-- Niektorí poskytovatelia vracajú `cache_read_input_tokens`, ktoré by mali mať odlišnú cenu
-- Analytika môže zobrazovať **mieru zásahov vyrovnávacej pamäte** = `cached_tokens / prompt_tokens`
+- Anthropic účtuje za tokeny uložené vo vyrovnávacej pamäti promptov zníženú sadzbu (10 % bežnej sadzby)
+- Niektorí poskytovatelia vracajú `cache_read_input_tokens`, na ktoré by sa mala vzťahovať iná cena
+- Analytika môže zobrazovať **mieru zásahov do vyrovnávacej pamäte** = `cached_tokens / prompt_tokens`
+
+### Diagnostika úrovní zápisu do vyrovnávacej pamäte
+
+Panel stavu vyrovnávacej pamäte promptov na analytickom paneli rozlišuje poskytovateľom hlásené
+zápisy do vyrovnávacej pamäte s platnosťou 5 minút a 1 hodiny. Údaje Anthropic
+`usage.cache_creation.ephemeral_5m_input_tokens` a
+`usage.cache_creation.ephemeral_1h_input_tokens` sa zachovávajú pri prevode údajov o využití pri streamovaní aj
+bez streamovania a ukladajú sa so súhrnmi protokolov volaní. Súhrnný
+počet zápisov do vyrovnávacej pamäte sa do týchto kategórií nepripočítava druhýkrát.
+
+Volania iba so súhrnným počítadlom zápisov vrátane starších záznamov majú neznámu
+úroveň. Pri čiastočnom rozdelení zostáva nepriradený zvyšok neznámy; neplatné alebo
+konfliktné počítadlá sa označia namiesto toho, aby sa im bez upozornenia priradila hodnota TTL. Značky TTL
+na strane požiadavky nie sú dôkazom účtovanej úrovne.
+
+Odhad zápisov ekvivalentný API na tomto paneli zahŕňa iba hlásené úrovne so známou cenou, nie
+celú požiadavku. Pri natívnych cenách modelov Claude/Anthropic používa 1,25-násobok
+vstupnej sadzby pre zápisy s platnosťou 5 minút a dvojnásobok vstupnej sadzby pre zápisy s platnosťou 1 hodiny. Chýbajúca
+cena sa považuje za nedostupnú, nie nulovú. Ceny sa zachytávajú pri zaznamenaní každého nového volania;
+historické záznamy sa nepreceňujú. Účty s predplatným preto môžu mať
+odhad ekvivalentný API bez toho, aby sa táto suma skutočne účtovala alebo odpočítala z kvóty
+predplatného. Existujúce výpočty kvót, rozpočtov a nákladov presne podľa poskytovateľa zostávajú nezmenené.
+
+Táto diagnostika využíva existujúci súhrn stavu vyrovnávacej pamäte s obmedzeným rozsahom a pravidlá uchovávania
+protokolov volaní. Nemení predvolené hodnoty TTL požiadaviek, smerovanie ani výber účtu.
+Zachytávanie TTL požadovaného klientom oproti skutočnému odchádzajúcemu TTL v bode odoslania
+poskytovateľovi je odložené; tento panel uvádza úrovne podľa údajov o účtovaní, nie skutočné odchádzajúce TTL.
+
+Implementácia: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` a `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,7 +153,7 @@ Pri modeloch bez cenových údajov používa OmniRoute ako náhradné riešenie 
 
 ## Agregácia podľa rozsahu dátumov
 
-Modul `usageAnalytics.ts` vypočítava widgety ovládacieho panela zo surových údajov o používaní. Podporuje 7 časových rozsahov:
+Modul `usageAnalytics.ts` vypočítava widgety ovládacieho panela z nespracovaných údajov o využití. Podporuje 7 časových rozsahov:
 
 | Rozsah   | Obdobie                             | Prípad použitia                       |
 | -------- | ----------------------------------- | ------------------------------------- |
@@ -132,22 +162,22 @@ Modul `usageAnalytics.ts` vypočítava widgety ovládacieho panela zo surových 
 | `30d`    | Posledných 30 dní                   | Mesačná fakturácia                    |
 | `90d`    | Posledných 90 dní                   | Štvrťročná analýza                    |
 | `ytd`    | Od 1. januára aktuálneho roka       | Sledovanie ročného rozpočtu           |
-| `all`    | Celé obdobie                        | Štatistiky za celé obdobie používania |
+| `all`    | Celé obdobie                        | Štatistiky za celé obdobie            |
 | `custom` | Používateľom určený začiatok/koniec | Audity, ad hoc dotazy                 |
 
-### Vypočítané widgety ovládacieho panela
+### Vypočítavané widgety ovládacieho panela
 
 Pre ľubovoľný rozsah dátumov analytická vrstva vypočítava:
 
-| Widget                              | Popis                                                                               |
-| ----------------------------------- | ----------------------------------------------------------------------------------- |
-| **Súhrnné karty**                   | Celkový počet požiadaviek, celkové náklady, celkový počet tokenov, miera úspešnosti |
-| **Graf denného trendu**             | Náklady + tokeny za deň, vrstvené podľa modelu                                      |
-| **Tepelná mapa aktivity**           | Mriežka hodina dňa × deň týždňa, farba = počet požiadaviek                          |
-| **Rozdelenie podľa modelov**        | Koláčový graf nákladov podľa modelu                                                 |
-| **Rozdelenie podľa poskytovateľov** | Stĺpcový graf požiadaviek podľa poskytovateľa                                       |
-| **Najpoužívanejšie kľúče API**      | Tabuľka 10 najpoužívanejších kľúčov podľa nákladov                                  |
-| **Analýza chýb**                    | Miera chybovosti v čase, najčastejšie triedy chýb                                   |
+| Widget                             | Popis                                                                               |
+| ---------------------------------- | ----------------------------------------------------------------------------------- |
+| **Súhrnné karty**                  | Celkový počet požiadaviek, celkové náklady, celkový počet tokenov, miera úspešnosti |
+| **Graf denného trendu**            | Náklady + tokeny za deň, skladané podľa modelu                                      |
+| **Teplotná mapa aktivity**         | Mriežka hodina dňa × deň v týždni, farba = počet požiadaviek                        |
+| **Rozdelenie podľa modelu**        | Koláčový graf nákladov podľa modelu                                                 |
+| **Rozdelenie podľa poskytovateľa** | Stĺpcový graf požiadaviek podľa poskytovateľa                                       |
+| **Najvyužívanejšie kľúče API**     | Tabuľka 10 kľúčov s najvyššími nákladmi                                             |
+| **Analýza chýb**                   | Miera chybovosti v čase, najčastejšie triedy chýb                                   |
 
 ### Programový prístup
 
@@ -155,7 +185,7 @@ Pre ľubovoľný rozsah dátumov analytická vrstva vypočítava:
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // záznamy histórie používania
+  history,              // záznamy histórie využitia
   "7d",                 // časový rozsah: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // mapa pripojení poskytovateľov (connectionId → názov účtu)
   {
@@ -164,38 +194,38 @@ const analytics = await computeAnalytics(
   }
 );
 
-console.log(analytics.summary.totalCost);   // 12.34 (centov)
+console.log(analytics.summary.totalCost);   // 12.34 (centy)
 console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
 
 ## Vynucovanie kvót
 
-Kvóta pre jednotlivé API kľúče sa vynucuje na dvoch miestach:
+Kvóta pre jednotlivé kľúče API sa vynucuje na dvoch miestach:
 
-1. **Mäkký limit** (`quotaWarnAt`): upozornenie na ovládacom paneli, keď používanie prekročí prahovú hodnotu
-2. **Pevný limit** (`quotaLimit`): požiadavka sa po prekročení limitu odmietne so stavom HTTP 429
+1. **Mäkký limit** (`quotaWarnAt`): upozornenie na ovládacom paneli, keď využitie prekročí prahovú hodnotu
+2. **Tvrdý limit** (`quotaLimit`): po prekročení sa požiadavka odmietne so stavom HTTP 429
 
 ### Konfigurácia
 
 ```ts
-// Pre jednotlivý API kľúč
+// Pre jednotlivý kľúč API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — zobraziť upozornenie
-  quotaLimit: 10_00,    // $10.00 — pevné zastavenie
+  quotaLimit: 10_00,    // $10.00 — úplné zastavenie
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
 
-### Priebeh vynucovania
+### Postup vynucovania
 
 ```
-Požiadavka ──▶ quotaCheck()
-                 │
-                 ├── V rámci limitu?  ──▶ povoliť
-                 │
-                 └── Nad limitom?  ──▶ 429 Too Many Requests
-                                      s hlavičkou Retry-After
+Request ──▶ quotaCheck()
+              │
+              ├── Within limit?  ──▶ allow
+              │
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
 ### Snímky kvót
@@ -206,22 +236,22 @@ Tabuľka `quotaSnapshots` uchováva **historický stav kvót** na analýzu trend
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Sledovaný kľúč |
 | `window` | "day" | "week" | "month" |
-| `used` | Náklady použité v tomto období (centy) |
+| `used` | Náklady spotrebované v tomto období (centy) |
 | `limit` | Limit (centy) |
-| `resetAt` | Čas obnovenia obdobia |
-| `createdAt` | Čas vytvorenia snímky |
+| `resetAt` | Kedy sa obdobie obnoví |
+| `createdAt` | Kedy bola snímka vytvorená |
 
-Snímky sa vytvárajú **pri každej požiadavke** s nákladmi > 0 a používajú sa na:
+Snímky sa vytvárajú **pri každej požiadavke**, ktorej náklady sú > 0, a používajú sa na:
 
-- Vykreslenie indikátora priebehu kvóty na ovládacom paneli
+- Vykreslenie ukazovateľa čerpania kvóty na ovládacom paneli
 - Zobrazenie grafov trendu kvóty za 30 dní
-- Spustenie upozornení, keď sa používanie priblíži k limitu
+- Spustenie upozornení, keď sa využitie blíži k limitu
 
 ---
 
 ## REST API
 
-### Zoznam záznamov používania
+### Zoznam záznamov o využití
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -253,7 +283,7 @@ Odpoveď:
 }
 ```
 
-### Získanie súhrnu analytiky
+### Získanie analytického súhrnu
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ Odpoveď:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,24 +311,24 @@ Odpoveď:
 }
 ```
 
-### Dotazovanie analytiky používania
+### Dotazovanie na analytické údaje o využití
 
-Údaje o používaní sú dostupné prostredníctvom ovládacieho panela alebo nástrojov MCP, nie cez priame koncové body REST na export. Dostupná analytika:
+Údaje o využití sú dostupné prostredníctvom prehľadového panela alebo nástrojov MCP, nie priamo cez koncové body REST na export. Dostupné analytické údaje:
 
-- **`/api/usage/analytics`** — agregované metriky používania (zoskupenie podľa modelu, poskytovateľa alebo kľúča)
-- **`/api/usage/quota`** — aktuálny stav kvóty pre každý API kľúč
-- **`/api/usage/history`** — protokoly histórie požiadaviek
+- **`/api/usage/analytics`** — agregované metriky využitia (zoskupenie podľa modelu, poskytovateľa, kľúča)
+- **`/api/usage/quota`** — aktuálny stav kvóty pre každý kľúč API
+- **`/api/usage/history`** — záznamy histórie požiadaviek
 
 ---
 
 ## Nástroje MCP
 
-Dva nástroje MCP sprístupňujú údaje o používaní agentom (pozrite si `open-sse/mcp-server/tools/`):
+Dva nástroje MCP sprístupňujú údaje o využití agentom (pozrite si `open-sse/mcp-server/tools/`):
 
-| Nástroj                 | Popis                                                     |
-| ----------------------- | --------------------------------------------------------- |
-| `omniroute_cost_report` | Vygeneruje pre dané obdobie prehľad nákladov podľa kľúčov |
-| `omniroute_check_quota` | Vráti aktuálny stav kvóty pre API kľúč                    |
+| Nástroj                 | Popis                                                  |
+| ----------------------- | ------------------------------------------------------ |
+| `omniroute_cost_report` | Generuje prehľad nákladov podľa kľúčov za dané obdobie |
+| `omniroute_check_quota` | Vracia aktuálny stav kvóty pre kľúč API                |
 
 Príklad volania agentom:
 
@@ -316,26 +341,26 @@ Príklad volania agentom:
 
 ---
 
-## Uchovávanie a čistenie
+## Uchovávanie a čistenie údajov
 
-Údaje o používaní narastajú približne o ~1-10KB na požiadavku. Vo veľkom rozsahu môže ísť o významný objem.
+Objem údajov o využití rastie približne o 1–10 KB na požiadavku. Pri veľkom rozsahu to môže byť významné.
 
 ### Nastavenia uchovávania
 
-Doba uchovávania histórie používania sa konfiguruje prostredníctvom nastavení databázy v používateľskom rozhraní alebo cez `/api/settings/database`.
+Uchovávanie histórie využitia sa konfiguruje v nastaveniach databázy v používateľskom rozhraní alebo prostredníctvom `/api/settings/database`.
 
-V predvolenom nastavení sa história používania uchováva **90 dní**.
+Predvolene sa história využitia uchováva **90 dní**.
 
 ### Čistenie
 
-Staré záznamy čistí súbor `src/lib/db/cleanup.ts`:
+Staré záznamy sa odstraňujú pomocou `src/lib/db/cleanup.ts`:
 
 - Spúšťa sa procesom cron na pozadí
-- Odstraňuje záznamy z `usage_history`, ktoré sú staršie než nakonfigurovaná doba uchovávania `usageHistory`
+- Odstraňuje záznamy z `usage_history`, ktoré sú staršie než doba uchovávania nakonfigurovaná v nastavení `usageHistory`
 
-### Odhad úložiska
+### Odhad úložného priestoru
 
-| Frekvencia požiadaviek  | Úložisko za 30 dní | Úložisko za 90 dní |
+| Frekvencia požiadaviek  | Úložisko na 30 dní | Úložisko na 90 dní |
 | ----------------------- | ------------------ | ------------------ |
 | 100 požiadaviek/deň     | ~3MB               | ~9MB               |
 | 1,000 požiadaviek/deň   | ~30MB              | ~90MB              |
@@ -344,8 +369,8 @@ Staré záznamy čistí súbor `src/lib/db/cleanup.ts`:
 
 Pri veľmi vysokej prevádzke zvážte:
 
-- Skrátenie doby uchovávania prostredníctvom nastavení databázy
-- Použitie `aggregated_metrics` namiesto nespracovaných záznamov (iba na analytické účely)
+- Skrátenie doby uchovávania v nastaveniach databázy
+- Používanie `aggregated_metrics` namiesto nespracovaných záznamov (iba na analytické účely)
 
 ---
 
@@ -357,16 +382,16 @@ Pri veľmi vysokej prevádzke zvážte:
 # Rýchla odpoveď — použite lacný a rýchly model
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Komplexná úloha — použite kvalitný model
+# Zložitá úloha — uprednostnite kvalitu
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Zapnite ukladanie do vyrovnávacej pamäte
 
-Ukladanie promptov Anthropic do vyrovnávacej pamäte šetrí **90 % nákladov pri opakovanom kontexte**:
+Ukladanie promptov do vyrovnávacej pamäte od Anthropic šetrí **90% nákladov pri opakovanom kontexte**:
 
 ```ts
-// Ukladanie do vyrovnávacej pamäte je automatické — stačí zahrnúť rovnaký veľký systémový prompt
+// Ukladanie do vyrovnávacej pamäte je automatické — stačí zahrnúť rovnaký rozsiahly systémový prompt
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Automaticky sa uloží do vyrovnávacej pamäte
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Používajte kompresiu
 
-Kompresia RTK + Caveman šetrí **15-95 % nákladov pri reláciách s intenzívnym používaním nástrojov**:
+Kompresia RTK + Caveman šetrí **15-95% nákladov pri reláciách s intenzívnym využívaním nástrojov**:
 
 ```ts
 const config = {
@@ -395,9 +420,9 @@ Vždy nastavte `quotaLimit`, aby ste zabránili nekontrolovanému rastu náklado
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Limit 10 USD/mesiac
 ```
 
-### 5. Skontrolujte najväčších spotrebiteľov
+### 5. Kontrolujte najväčších spotrebiteľov
 
-Pomocou ovládacieho panela alebo **`/api/usage/analytics`** zoskupte údaje podľa API kľúča a zoraďte ich podľa nákladov:
+Pomocou ovládacieho panela alebo **`/api/usage/analytics`** zoskupte údaje podľa kľúča API a zoraďte ich podľa nákladov:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Riešenie problémov
 
-### „Náklady sú vyššie, než sa očakávalo“
+### "Náklady sú vyššie, než sa očakávalo"
 
 1. Skontrolujte **`/api/usage/analytics?groupBy=model`** — nájdite drahý model
-2. Skontrolujte **`/api/usage/analytics?groupBy=apiKey`** — nájdite veľkého spotrebiteľa
-3. Overte, či sú údaje o cenách aktuálne: `POST /api/pricing/sync`
+2. Skontrolujte **`/api/usage/analytics?groupBy=apiKey`** — nájdite najväčšieho spotrebiteľa
+3. Overte, či sú cenové údaje aktuálne: `POST /api/pricing/sync`
 
-### „Chýbajú záznamy“
+### "Chýbajúce záznamy"
 
-- Skontrolujte nastavenia uchovávania databázy v časti Ovládací panel → Databáza → Čistenie — staré záznamy odstraňuje pravidelná úloha čistenia (`src/lib/db/cleanup.ts`)
+- Skontrolujte nastavenia uchovávania údajov v databáze v časti Ovládací panel → Databáza → Čistenie — staré záznamy odstraňuje pravidelná úloha čistenia (`src/lib/db/cleanup.ts`)
 - Skontrolujte chyby v `src/lib/db/usage*.ts` — zlyhania zápisu do databázy sa zaznamenávajú do protokolu, ale nezobrazujú sa
-- Overte, či sa požiadavka skutočne dostala do `chatCore` — skontrolujte kombinované smerovanie
+- Overte, či požiadavka skutočne dorazila do `chatCore` — skontrolujte smerovanie kombinácií
 
-### „Kvóta sa neuplatňuje“
+### "Kvóta sa neuplatňuje"
 
 - Skontrolujte nastavenie `quotaLimit` daného kľúča
 - Overte, či je `quotaWindow` nastavené správne
-- Vyhľadajte záznamy `quotaSnapshots` — mali by sa vytvoriť pri každej požiadavke
+- Vyhľadajte záznamy `quotaSnapshots` — mali by sa vytvárať pri každej požiadavke
 
 ---
 
-## Pozrite tiež
+## Pozrite si tiež
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schéma tabuliek používania
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schéma tabuliek využitia
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Premenné prostredia na synchronizáciu cien
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Ako `auto/fast` a `auto/cheap` znižujú náklady
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Kompletná dokumentácia `/api/usage/*`
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Ako `auto/fast`, `auto/cheap` znižujú náklady
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Kompletná referencia pre `/api/usage/*`
 - Zdroj: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

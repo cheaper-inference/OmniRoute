@@ -38,31 +38,31 @@ A máa ń kó àwọn àkọsílẹ̀ wọ̀nyí jọ sí **àtúpalẹ̀**, a m
 
 ---
 
-## Ohun Tí A Ń Ṣàkọsílẹ̀
+## Ohun Tí A Ń Ṣe Àkọsílẹ̀ Rẹ̀
 
-Iṣẹ́ `usage.ts` ń ṣàkọsílẹ̀ **ìṣẹ̀lẹ̀ lílo** kan fún gbogbo ìbéèrè:
+Iṣẹ́ `usage.ts` ń gba **ìṣẹ̀lẹ̀ lílò** sílẹ̀ fún ìbéèrè kọ̀ọ̀kan:
 
-| Ààyè               | Irú     | Orísun                                                                         |
-| ------------------ | ------- | ------------------------------------------------------------------------------ |
-| `id`               | string  | UUID tí a ṣẹ̀dá nígbà ṣíṣe àkọsílẹ̀                                              |
-| `apiKeyId`         | string  | Kọ́kọ́rọ́ API tó bẹ̀rẹ̀ ìbéèrè náà                                                  |
-| `provider`         | string  | ID olùpèsè (openai, anthropic, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                 |
-| `model`            | string  | ID àwòṣe (gpt-5, claude-opus-4-6, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                              |
-| `comboId`          | string? | ID àkójọpọ̀ bí a bá darí ìbéèrè náà gba inú àkójọpọ̀                             |
-| `promptTokens`     | number  | Láti inú èsì olùpèsè ìṣàkóso                                                   |
-| `completionTokens` | number  | Láti inú èsì olùpèsè ìṣàkóso                                                   |
-| `cachedTokens`     | number  | Àwọn tókìnì tí cache rí (fífi ìtọ́ni Anthropic pamọ́ sínú cache, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) |
-| `totalTokens`      | number  | ìtọ́ni + ìparí                                                                  |
-| `costUsd`          | number  | Tí a ṣírò láti inú dátà iye owó                                                |
-| `latencyMs`        | number  | Gígùn àkókò ìbéèrè láti ìbẹ̀rẹ̀ dé òpin                                          |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                     |
-| `errorClass`       | string? | Ẹ̀ka àṣìṣe bí status != success                                                 |
-| `timestamp`        | string  | ISO 8601 UTC                                                                   |
-| `metadata`         | object  | Dátà àdáni tí plugin fi kún un                                                 |
+| Ààyè               | Irú       | Orísun                                                                                  |
+| ------------------ | --------- | --------------------------------------------------------------------------------------- |
+| `id`               | ọ̀rọ̀       | UUID tí a dá nígbà ṣíṣe àkọsílẹ̀                                                         |
+| `apiKeyId`         | ọ̀rọ̀       | Kọ́kọ́rọ́ API tí ó bẹ̀rẹ̀ ìbéèrè náà                                                         |
+| `provider`         | ọ̀rọ̀       | ID olùpèsè (openai, anthropic, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                          |
+| `model`            | ọ̀rọ̀       | ID àwòṣe (gpt-5, claude-opus-4-6, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)                                       |
+| `comboId`          | ọ̀rọ̀?      | ID àkópọ̀ bí a bá darí rẹ̀ gba àkópọ̀ kan                                                  |
+| `promptTokens`     | nọ́ńbà     | Láti inú ìdáhùn olùpèsè òkè                                                             |
+| `completionTokens` | nọ́ńbà     | Láti inú ìdáhùn olùpèsè òkè                                                             |
+| `cachedTokens`     | nọ́ńbà     | Àwọn tókìn tí a rí nínú káàṣì (fífipamọ́ àṣẹ ìwọlé Anthropic sínú káàṣì, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) |
+| `totalTokens`      | nọ́ńbà     | àṣẹ ìwọlé + ìparí                                                                       |
+| `costUsd`          | nọ́ńbà     | Tí a ṣírò láti inú dátà ìdíyelé                                                         |
+| `latencyMs`        | nọ́ńbà     | Àkókò ìbéèrè láti ìbẹ̀rẹ̀ dé òpin                                                         |
+| `status`           | àkójọ iye | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                              |
+| `errorClass`       | ọ̀rọ̀?      | Ẹ̀ka àṣìṣe bí ipò kò bá jẹ́ àṣeyọrí                                                       |
+| `timestamp`        | ọ̀rọ̀       | ISO 8601 UTC                                                                            |
+| `metadata`         | ohun      | Dátà àkànṣe tí àfikún fi sínú rẹ̀                                                        |
 
-### Ibi Tí Àwọn Tókìnì Ti Wá
+### Ibi Tí Àwọn Tókìn Ti Ń Wá
 
-A máa ń yọ àwọn tókìnì jáde láti inú èsì olùpèsè ìṣàkóso nínú **olùmójútó èsì**:
+A ń yọ àwọn tókìn jáde láti inú ìdáhùn olùpèsè òkè nínú **olùṣàkóso ìdáhùn**:
 
 ```ts
 // Láti open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Fún àwọn olùpèsè tí kò dá dátà lílo padà (àwọn olùpèsè web-cookie kan), OmniRoute máa ń **ṣírò ìfojúsùn** iye tókìnì nípa lílo òfin àròsọ `~4 chars per token` (wo `open-sse/services/autoCombo/pipelineRouter.ts`).
+Fún àwọn olùpèsè tí kì í dá ìlò padà (àwọn olùpèsè kúkì wẹ́ẹ̀bù kan), OmniRoute ń **ṣe ìṣírò àfojúsùn** àwọn tókìn nípa lílo ìlànà àfojúsùn `~4 chars per token` (wo `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Àwọn Tókìnì Inú Cache
+### Àwọn Tókìn Tí A Fi Pamọ́ Sínú Káàṣì
 
-OmniRoute ń tọpa `cached_tokens` lọ́tọ̀ sí `prompt_tokens` nítorí:
+OmniRoute ń tọpinpin `cached_tokens` lọ́tọ̀ sí `prompt_tokens` nítorí pé:
 
-- Fífi ìtọ́ni Anthropic pamọ́ sínú cache ń gba owó tó dín kù fún àwọn tókìnì inú cache (10% ti iye owó déédéé)
-- Àwọn olùpèsè kan máa ń dá `cache_read_input_tokens` padà, èyí tó yẹ kí a fi iye owó tó yàtọ̀ kàn
-- Àtúpalẹ̀ lè ṣàfihàn **ìwọ̀n àṣeyọrí cache** = `cached_tokens / prompt_tokens`
+- Fífipamọ́ àṣẹ ìwọlé Anthropic sínú káàṣì ń gba owó ní òṣùwọ̀n tí ó dín kù fún àwọn tókìn inú káàṣì (10% ti déédéé)
+- Àwọn olùpèsè kan ń dá `cache_read_input_tokens` padà tí ó yẹ kí ìdíyelé wọn yàtọ̀
+- Ìtúpalẹ̀ lè fi **òṣùwọ̀n rírí nínú káàṣì** hàn = `cached_tokens / prompt_tokens`
+
+### Àyẹ̀wò àwọn ìpele kíkọ sínú káàṣì
+
+Pánẹ́ẹ̀lì ìlera káàṣì àṣẹ ìwọlé lórí pátákó Ìtúpalẹ̀ ń ṣe ìyàtọ̀ láàárín kíkọ sínú káàṣì
+ìṣẹ́jú 5 àti wákàtí 1 tí olùpèsè ròyìn. A ń pa
+`usage.cache_creation.ephemeral_5m_input_tokens` àti
+`usage.cache_creation.ephemeral_1h_input_tokens` ti Anthropic mọ́ nípasẹ̀ ìyípadà ìlò tí ń ṣàn àti
+èyí tí kì í ṣàn, a sì ń fi wọ́n pamọ́ pẹ̀lú àwọn àkótán àkọsílẹ̀ ìpè. A kì í fi àpapọ̀
+kíkọ sínú káàṣì kún àwọn ẹ̀ka wọ̀nyẹn lẹ́ẹ̀kejì.
+
+Àwọn ìpè tí ó ní kìkì òǹkà àpapọ̀ kíkọ, títí kan àwọn àkọsílẹ̀ àtijọ́, ní ìpele
+tí a kò mọ̀. Ìpín tí kò pé ń fi ìyókù tí a kò pín sílẹ̀ gẹ́gẹ́ bí ohun tí a kò mọ̀; a ń sàmì sí àwọn òǹkà tí kò bófin mu tàbí
+tí ó tako ara wọn dípò fífi TTL yàn wọ́n láìsọ. Àwọn àmì TTL ní ẹ̀gbẹ́ ìbéèrè
+kì í ṣe ẹ̀rí ìpele tí a gba owó fún.
+
+Ìṣírò àfojúsùn kíkọ tí ó dọ́gba pẹ̀lú API lórí pánẹ́ẹ̀lì náà kan àwọn ìpele tí a ròyìn tí wọ́n sì ní ìdíyelé nìkan, kì í ṣe
+gbogbo ìbéèrè náà. Fún ìdíyelé àwòṣe Claude/Anthropic ìbílẹ̀, ó ń lo ìlọ́po 1.25 ti
+òṣùwọ̀n ìwọlé fún kíkọ ìṣẹ́jú 5 àti ìlọ́po méjì òṣùwọ̀n ìwọlé fún kíkọ wákàtí 1. Ìdíyelé
+tí kò sí kò wà lárọ̀ọ́wọ́tó, kì í ṣe òdo. A ń gba iye owó sílẹ̀ nígbà tí a bá ń ṣe àkọsílẹ̀ ìpè tuntun kọ̀ọ̀kan;
+a kì í tún ṣètò iye owó fún àwọn àkọsílẹ̀ àtijọ́. Nítorí náà, àwọn àkáǹtì ìforúkọsílẹ̀ lè ní
+ìṣírò àfojúsùn tí ó dọ́gba pẹ̀lú API láìná iye náà gẹ́gẹ́ bí owó tàbí
+ìpín ìforúkọsílẹ̀. Àwọn ìṣírò ìpín, ìnáwó tí a yàn àti iye owó pàtó ti olùpèsè tí ó ti wà kò yí padà.
+
+Àwọn àyẹ̀wò wọ̀nyí ń lo àkótán ìlera káàṣì tí ó ní ààlà àti ìpamọ́ àkọsílẹ̀ ìpè
+tí ó ti wà. Wọn kì í yí àwọn iye àiyípadà TTL ìbéèrè, ìdarí tàbí yíyan àkáǹtì padà.
+A ti sún gbígba TTL tí oníbàárà béèrè ní ìfiwéra pẹ̀lú TTL tó ń jáde ní tòótọ́ ní ààlà
+fífiranṣẹ́ sí olùpèsè síwájú; pánẹ́ẹ̀lì yìí ń ròyìn àwọn ìpele ìwé ẹ̀rí, kì í ṣe TTL tó ń jáde ní tòótọ́.
+
+Ìmúṣẹ: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, àti `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,35 +151,35 @@ Fún àwọn módẹ́lì tí kò ní dátà ìdíyelé, OmniRoute máa ń padà
 
 ---
 
-## Àkójọpọ̀ Àárín Ọjọ́
+## Àkójọpọ̀ Àárín Àwọn Ọjọ́
 
-Module `usageAnalytics.ts` máa ń ṣírò àwọn ẹrọ kéékèèké dashboard láti inú dátà lílò tí kò tíì ṣe àtúnṣe. Ó ṣe àtìlẹ́yìn fún àárín àkókò méje:
+Módù `usageAnalytics.ts` ń ṣírò àwọn ohun èlò pátákó ìṣàkóso láti inú dátà lílò àìṣe àtúnṣe. Ó ṣe àtìlẹ́yìn fún àárín àkókò 7:
 
-| Àárín    | Àkókò                         | Ohun tí a fi ń lò ó               |
-| -------- | ----------------------------- | --------------------------------- |
-| `1d`     | Wákàtí 24 tó kọjá             | Ìṣàwárí ìfojúrí iye owó ní wákàtí |
-| `7d`     | Ọjọ́ méje tó kọjá              | Àyẹ̀wò ọ̀sọ̀ọ̀sẹ̀                      |
-| `30d`    | Ọjọ́ 30 tó kọjá                | Ìdíyelé oṣooṣù                    |
-| `90d`    | Ọjọ́ 90 tó kọjá                | Ìtúpalẹ̀ oṣù mẹ́ta-mẹ́ta             |
-| `ytd`    | Láti Jan 1 ti ọdún tó wà lọ́wọ́ | Ìtọ́pinpin ìnáwó ọdọọdún           |
-| `all`    | Gbogbo àkókò                  | Àwọn ìṣirò gbogbo ìgbà            |
-| `custom` | Ìbẹ̀rẹ̀/òpin tí olumulo pinnu   | Àyẹ̀wò, àwọn ìbéèrè àkànṣe         |
+| Àárín    | Àkókò                        | Ohun tí a fi ń lò ó                        |
+| -------- | ---------------------------- | ------------------------------------------ |
+| `1d`     | Wákàtí 24 tó kọjá            | Ṣíṣàwárí ìgòkè owó lójijì ní wákàtí kọ̀ọ̀kan |
+| `7d`     | Ọjọ́ 7 tó kọjá                | Àtúnyẹ̀wò ọ̀sẹ̀                               |
+| `30d`    | Ọjọ́ 30 tó kọjá               | Ìṣírò owó oṣù                              |
+| `90d`    | Ọjọ́ 90 tó kọjá               | Ìtúpalẹ̀ ìdámẹ́rin ọdún                      |
+| `ytd`    | Láti Ọjọ́ 1 Oṣù Ṣẹ́rẹ́ ọdún yìí | Títọpinpin ètò ìnáwó ọdún                  |
+| `all`    | Gbogbo àkókò                 | Àwọn ìṣirò gbogbo àkókò                    |
+| `custom` | Ìbẹ̀rẹ̀/ìparí tí aṣàmúlò yàn   | Àyẹ̀wò, àwọn ìbéèrè pàtó                    |
 
-### Àwọn Ẹrọ Kéékèèké Dashboard Tí A Ṣírò
+### Àwọn Ohun Èlò Pátákó Ìṣàkóso Tí A Ṣírò
 
-Fún àárín ọjọ́ èyíkéyìí, ìpele ìtúpalẹ̀ máa ń ṣírò:
+Fún àárín ọjọ́ èyíkéyìí, ìpele ìtúpalẹ̀ ń ṣírò:
 
-| Ẹrọ kéékèèké                 | Àpèjúwe                                                     |
-| ---------------------------- | ----------------------------------------------------------- |
-| **Àwọn káàdì àkótán**        | Àpapọ̀ àwọn ìbéèrè, àpapọ̀ iye owó, àpapọ̀ token, ìwọ̀n àṣeyọrí |
-| **Àtẹ ìṣàn ojoojúmọ́**        | Iye owó + àwọn token fún ọjọ́ kọ̀ọ̀kan, tí a tò nípa módẹ́lì    |
-| **Máàpù ooru ìṣe**           | Àkójọpọ̀ wákàtí-ọjọ́ × ọjọ́-ọ̀sẹ̀, àwọ̀ = iye àwọn ìbéèrè         |
-| **Pípín módẹ́lì**             | Àtẹ pái ti iye owó nípa módẹ́lì                              |
-| **Pípín olùpèsè**            | Àtẹ ọ̀pá ti àwọn ìbéèrè nípa olùpèsè                         |
-| **Àwọn kọ́kọ́rọ́ API tó ga jù** | Tábìlì àwọn kọ́kọ́rọ́ mẹ́wàá tó ga jù nípa iye owó              |
-| **Ìtúpalẹ̀ àṣìṣe**            | Ìwọ̀n àṣìṣe bí àkókò ṣe ń lọ, àwọn ẹ̀ka àṣìṣe tó ga jù        |
+| Ohun èlò                     | Àpèjúwe                                                |
+| ---------------------------- | ------------------------------------------------------ |
+| **Àwọn káàdì àkótán**        | Àpapọ̀ ìbéèrè, àpapọ̀ owó, àpapọ̀ tóókìn, ìwọ̀n àṣeyọrí    |
+| **Àwòrán ìtẹ̀sí ojoojúmọ́**    | Owó + tóókìn fún ọjọ́ kan, tí a tò pọ̀ gẹ́gẹ́ bí àwòṣe     |
+| **Máàpù ooru ìgbòkègbodò**   | Àkój ìlà wákàtí ọjọ́ × ọjọ́ ọ̀sẹ̀, àwọ̀ = iye ìbéèrè        |
+| **Ìpínsọ́rí àwòṣe**           | Àwòrán àyíká owó gẹ́gẹ́ bí àwòṣe                         |
+| **Ìpínsọ́rí olùpèsè**         | Àwòrán ọ̀pá ìbéèrè gẹ́gẹ́ bí olùpèsè                      |
+| **Àwọn kọ́kọ́rọ́ API tó ga jù** | Tábìlì àwọn kọ́kọ́rọ́ 10 tó ga jù gẹ́gẹ́ bí owó             |
+| **Ìtúpalẹ̀ àṣìṣe**            | Ìwọ̀n àṣìṣe bí àkókò ṣe ń lọ, àwọn ẹ̀ka àṣìṣe tó wọ́pọ̀ jù |
 
-### Ìráyè Sí Nípasẹ̀ Ètò
+### Ìráyè Nípasẹ̀ Ètò
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
@@ -157,7 +187,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // àwọn àkọsílẹ̀ ìtàn lílò
   "7d",                 // àárín àkókò: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // máàpù àsopọ̀ olùpèsè (connectionId → orúkọ àkọọ́lẹ̀)
+  connectionMap,        // máàpù ìsopọ̀ olùpèsè (connectionId → orúkọ àkọọ́lẹ̀)
   {
     startDate: "2025-01-01",  // àṣàyàn: fún àárín "custom"
     endDate: "2025-06-01",   // àṣàyàn: fún àárín "custom"
@@ -169,12 +199,12 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Ìmúṣẹ Ìpín
+## Mímú Ààlà Ìpín Lílò Ṣiṣẹ́
 
-A ń mú ìpín fún kọ́kọ́rọ́ API kọ̀ọ̀kan ṣiṣẹ́ ní ibi méjì:
+A ń mú ààlà ìpín lílò fún kọ́kọ́rọ́ API kọ̀ọ̀kan ṣiṣẹ́ ní ibi méjì:
 
-1. **Ààlà rírọ̀** (`quotaWarnAt`): ìkìlọ̀ lórí pátákó ìṣàkóso nígbà tí lílò bá kọjá ààlà
-2. **Ààlà líle** (`quotaLimit`): a ó kọ ìbéèrè pẹ̀lú HTTP 429 nígbà tí ó bá kọjá ààlà
+1. **Ààlà ìkìlọ̀** (`quotaWarnAt`): ìkìlọ̀ lórí pátákó ìṣàkóso nígbà tí lílò bá kọjá ààlà
+2. **Ààlà dídúró** (`quotaLimit`): a kọ ìbéèrè pẹ̀lú HTTP 429 nígbà tí ó bá kọjá ààlà
 
 ### Ìṣètò
 
@@ -187,41 +217,41 @@ await updateApiKey(keyId, {
 });
 ````
 
-### Ìṣàn Ìmúṣẹ
+### Ìṣàn Mímú Ààlà Ṣiṣẹ́
 
 ```
-Ìbéèrè ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Ó wà láàárín ààlà?  ──▶ gbà á láàyè
+              ├── Within limit?  ──▶ allow
               │
-              └── Ó kọjá ààlà?  ──▶ 429 Àwọn Ìbéèrè Pọ̀ Jù
-                                   pẹ̀lú àkọlé Retry-After
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Àwọn Àwòrán Ìpín Ní Àkókò Kan
+### Àwọn Àwòrán Ipò Ìpín Lílò
 
-Tábìlì `quotaSnapshots` ń tọ́jú **ipò ìpín ìtàn** fún ìtúpalẹ̀ àṣà ìyípadà:
+Tábìlì `quotaSnapshots` ń tọ́jú **ìtàn ipò ìpín lílò** fún ìtúpalẹ̀ ìtẹ̀sí:
 
 | Ààyè | Àpèjúwe |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Kọ́kọ́rọ́ tí a ń tọpinpin |
-| `window` | "day" | "week" | "month" |
-| `used` | Iye owó tí a lò nínú fèrèsé yìí (senti) |
-| `limit` | Ààlà náà (senti) |
-| `resetAt` | Ìgbà tí fèrèsé náà yóò padà sí ìbẹ̀rẹ̀ |
+| `window` | "ọjọ́" | "ọ̀sẹ̀" | "oṣù" |
+| `used` | Owó tí a lò nínú àkókò yìí (sẹ́ǹtì) |
+| `limit` | Ààlà (sẹ́ǹtì) |
+| `resetAt` | Ìgbà tí àkókò náà yóò tún bẹ̀rẹ̀ |
 | `createdAt` | Ìgbà tí a ya àwòrán ipò náà |
 
-A máa ń ya àwọn àwòrán ipò **ní gbogbo ìbéèrè** tí ó bá lo iye owó > 0, a sì ń lò wọ́n láti:
+A ń ya àwọn àwòrán ipò **lórí gbogbo ìbéèrè** tí ó ná owó > 0, a sì ń lò wọ́n láti:
 
-- Ṣàfihàn ọ̀pá ìlọsíwájú ìpín lórí pátákó ìṣàkóso
-- Ṣàfihàn àwọn àtẹ ìyípadà ìpín ọjọ́ 30
-- Fa àwọn ìkìlọ̀ nígbà tí lílò bá ń sún mọ́ ààlà
+- Ṣàfihàn ọ̀pá ìlọsíwájú ìpín lílò lórí pátákó ìṣàkóso
+- Fi àwọn àwòrán ìtẹ̀sí ìpín lílò ọjọ́ 30 hàn
+- Mú àwọn ìkìlọ̀ ṣiṣẹ́ nígbà tí lílò bá ń sún mọ́ ààlà
 
 ---
 
 ## REST API
 
-### Ṣàkójọ Àwọn Àkọsílẹ̀ Lílò
+### Ṣe Àtòjọ Àwọn Àkọsílẹ̀ Ìlò
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -253,7 +283,7 @@ GET /api/usage?provider=openai&range=1d
 }
 ```
 
-### Gba Àkópọ̀ Ìtúpalẹ̀
+### Gba Àkótán Ìtúpalẹ̀
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
@@ -272,12 +302,7 @@ GET /api/usage/analytics?range=7d&groupBy=model
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,26 +311,26 @@ GET /api/usage/analytics?range=7d&groupBy=model
 }
 ```
 
-### Ṣèwádìí Ìtúpalẹ̀ Lílò
+### Ṣe Ìbéèrè Ìtúpalẹ̀ Ìlò
 
-A ń ráyè sí dátà lílò nípasẹ̀ pátákó ìṣàkóso tàbí àwọn irinṣẹ́ MCP, kì í ṣe àwọn òpin-ọ̀nà ìkójáde REST tààrà. Àwọn ìtúpalẹ̀ tó wà:
+A ń wọlé sí dátà ìlò nípasẹ̀ pátákó ìṣàkóso tàbí àwọn irinṣẹ́ MCP, kì í ṣe nípasẹ̀ àwọn ojú òpin REST fún fífi dátà jáde tààrà. Àwọn ìtúpalẹ̀ tó wà:
 
-- **`/api/usage/analytics`** — àwọn ìwọ̀n lílò tí a ṣàkópọ̀ (pín gẹ́gẹ́ bí model, provider, key)
-- **`/api/usage/quota`** — ipò ìpín lọ́wọ́lọ́wọ́ fún kọ́kọ́rọ́ API kọ̀ọ̀kan
+- **`/api/usage/analytics`** — àwọn ìwọ̀n ìlò tí a kójọpọ̀ (pín sí ẹgbẹ́ gẹ́gẹ́ bí àwòṣe, olùpèsè, kọ́kọ́rọ́)
+- **`/api/usage/quota`** — ipò ààlà ìlò lọ́wọ́lọ́wọ́ fún kọ́kọ́rọ́ API kọ̀ọ̀kan
 - **`/api/usage/history`** — àwọn àkọsílẹ̀ ìtàn ìbéèrè
 
 ---
 
 ## Àwọn Irinṣẹ́ MCP
 
-Àwọn irinṣẹ́ MCP méjì ń ṣí dátà lílò sílẹ̀ fún àwọn aṣojú (wo `open-sse/mcp-server/tools/`):
+Àwọn irinṣẹ́ MCP méjì ń jẹ́ kí àwọn aṣojú ráyè sí dátà ìlò (wo `open-sse/mcp-server/tools/`):
 
-| Irinṣẹ́                  | Àpèjúwe                                                              |
-| ----------------------- | -------------------------------------------------------------------- |
-| `omniroute_cost_report` | Ń ṣe àgbéjáde ìròyìn iye owó fún kọ́kọ́rọ́ kọ̀ọ̀kan ní àkókò kan tí a yàn |
-| `omniroute_check_quota` | Ń dá ipò ìpín lọ́wọ́lọ́wọ́ padà fún kọ́kọ́rọ́ API kan                       |
+| Irinṣẹ́                  | Àpèjúwe                                                 |
+| ----------------------- | ------------------------------------------------------- |
+| `omniroute_cost_report` | Ṣẹ̀dá ìròyìn iye owó fún kọ́kọ́rọ́ kọ̀ọ̀kan láàárín àkókò kan |
+| `omniroute_check_quota` | Dá ipò ààlà ìlò lọ́wọ́lọ́wọ́ fún kọ́kọ́rọ́ API kan padà        |
 
-Àpẹẹrẹ ìpè aṣojú:
+Àpẹẹrẹ bí aṣojú ṣe ń pe irinṣẹ́:
 
 ```json
 {
@@ -316,67 +341,67 @@ A ń ráyè sí dátà lílò nípasẹ̀ pátákó ìṣàkóso tàbí àwọn 
 
 ---
 
-## Ìmúdúródé àti Ìfọ̀mọ́
+## Ìpamọ́ àti Ìmọ́tótó
 
-Dátà ìlò máa ń pọ̀ sí i ní ~1-10KB fún ìbéèrè kọ̀ọ̀kan. Ní ìwọ̀n ńlá, èyí lè pọ̀ gan-an.
+Dátà ìlò ń pọ̀ sí i ní ~1-10KB fún ìbéèrè kọ̀ọ̀kan. Ní ìwọ̀n ńlá, èyí lè pọ̀ gan-an.
 
-### Àwọn Ààtò Ìmúdúródé
+### Àwọn Ètò Ìpamọ́
 
-A máa ń ṣètò bí a ṣe máa pa ìtàn ìlò mọ́ nípasẹ̀ Àwọn Ààtò Database nínú UI tàbí nípasẹ̀ `/api/settings/database`.
+A ń ṣètò bí a ṣe ń pa ìtàn ìlò mọ́ nípasẹ̀ Àwọn Ètò Ibi Ìpamọ́ Dátà nínú UI tàbí nípasẹ̀ `/api/settings/database`.
 
-Ní àìyípadà, a máa ń pa ìtàn ìlò mọ́ fún **ọjọ́ 90**.
+Ní àiyípadà, a ń pa ìtàn ìlò mọ́ fún **ọjọ́ 90**.
 
-### Ìfọ̀mọ́
+### Ìmọ́tótó
 
-`src/lib/db/cleanup.ts` máa ń yọ àwọn àkọsílẹ̀ àtijọ́ kúrò:
+`src/lib/db/cleanup.ts` ló ń yọ àwọn àkọsílẹ̀ àtijọ́ kúrò:
 
-- Ìlànà cron abẹ́lẹ̀ ló máa ń mú un ṣiṣẹ́
-- Ó máa ń pa àwọn àkọsílẹ̀ inú `usage_history` tí ó ti ju àkókò ìmúdúródé `usageHistory` tí a ṣètò lọ
+- Ìlànà cron tó ń ṣiṣẹ́ lẹ́yìn ló ń mú un bẹ̀rẹ̀
+- Ó ń pa àwọn àkọsílẹ̀ inú `usage_history` tí ọjọ́-orí wọn ti kọjá àkókò ìpamọ́ tí a ṣètò fún `usageHistory` rẹ́
 
 ### Ìṣírò Ibi Ìpamọ́
 
-| Ìwọ̀n ìbéèrè        | Ibi ìpamọ́ ọjọ́ 30 | Ibi ìpamọ́ ọjọ́ 90 |
+| Oṣùwọ̀n ìbéèrè      | Ibi ìpamọ́ ọjọ́ 30 | Ibi ìpamọ́ ọjọ́ 90 |
 | ------------------ | ---------------- | ---------------- |
-| 100 ìbéèrè/ọjọ́     | ~3MB             | ~9MB             |
-| 1,000 ìbéèrè/ọjọ́   | ~30MB            | ~90MB            |
-| 10,000 ìbéèrè/ọjọ́  | ~300MB           | ~900MB           |
-| 100,000 ìbéèrè/ọjọ́ | ~3GB             | ~9GB             |
+| Ìbéèrè 100/ọjọ́     | ~3MB             | ~9MB             |
+| Ìbéèrè 1,000/ọjọ́   | ~30MB            | ~90MB            |
+| Ìbéèrè 10,000/ọjọ́  | ~300MB           | ~900MB           |
+| Ìbéèrè 100,000/ọjọ́ | ~3GB             | ~9GB             |
 
-Fún ìṣàn olùlò tó ga gan-an, ronú nípa:
+Fún iye ìbéèrè tó ga gan-an, gbé àwọn wọ̀nyí yẹ̀ wò:
 
-- Dídín àkókò ìmúdúródé kù nípasẹ̀ Àwọn Ààtò Database
-- Lílo `aggregated_metrics` dípò àwọn àkọsílẹ̀ aláìṣàkójọ (fún ìtúpalẹ̀ nìkan)
+- Dídín àkókò ìpamọ́ kù nípasẹ̀ Àwọn Ètò Ibi Ìpamọ́ Dátà
+- Lílo `aggregated_metrics` dípò àwọn àkọsílẹ̀ tí a kò tíì ṣe àkójọpọ̀ wọn (fún ìtúpalẹ̀ nìkan)
 
 ---
 
-## Àwọn Ìmọ̀ràn Fún Ìdínkù Iye Owó
+## Àwọn Ìmọ̀ràn fún Dídín Ìnáwó Kù
 
-### 1. Lo Àwòṣe Tó Yẹ
+### 1. Lo Módẹ́lì Tó Yẹ
 
 ```bash
-# Ìdáhùn kíákíá — lo èyí tí kò gbówó lórí + tí ó yára
+# Ìdáhùn kíákíá — lo èyí tí ó rọrùn ní owó + tí ó yára
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Iṣẹ́ tó díjú — lo èyí tó ní dídára
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Mú Ìfipamọ́ Sílẹ̀
+### 2. Mú Ìpamọ́ Ìgbà Díẹ̀ Ṣiṣẹ́
 
-Ìfipamọ́ prompt Anthropic máa ń dín iye owó kù ní **90% lórí àyíká-ọ̀rọ̀ tí a tún lò**:
+Ìpamọ́ ìtọ́ni ìgbà díẹ̀ ti Anthropic ń dín ìnáwó kù ní **90% lórí àyíká ọ̀rọ̀ tí a tún lò**:
 
 ```ts
-// Ìfipamọ́ máa ń ṣẹlẹ̀ fúnra rẹ̀ — kàn fi system prompt ńlá kan náà sí i
+// Ìpamọ́ ìgbà díẹ̀ ń ṣiṣẹ́ fúnra rẹ̀ — kàn fi ìtọ́ni ètò gígùn kan náà sínú rẹ̀
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // A ó fi pamọ́ fúnra rẹ̀
+  system: longSystemPrompt, // A ó fi pamọ́ fún ìgbà díẹ̀ fúnra rẹ̀
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Lo Ìfúnpọ̀
 
-Ìfúnpọ̀ RTK + Caveman máa ń dín ìlò kù ní **15-95% nínú àwọn àkókò iṣẹ́ tí irinṣẹ́ pọ̀ nínú wọn**:
+Ìfúnpọ̀ RTK + Caveman ń dín ìnáwó kù ní **15-95% lórí àwọn sáà tí ó lo irinṣẹ́ púpọ̀**:
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. Ṣètò Ìpín Fún Kọ́kọ́rọ́ Kọ̀ọ̀kan
+### 4. Ṣètò Ààlà Fún Kọ́kọ́rọ́ Kọ̀ọ̀kan
 
-Ṣètò `quotaLimit` ní gbogbo ìgbà láti dènà iye owó tó lè pòjù:
+Máa ṣètò `quotaLimit` ní gbogbo ìgbà láti dènà ìnáwó tí ó kọjá ààlà:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Òpin $10/oṣù
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Ààlà $10 lóṣooṣù
 ```
 
-### 5. Ṣàyẹ̀wò Àwọn Olùlò Tó Ga Jù
+### 5. Ṣàyẹ̀wò Àwọn Tó Ń Lò Ó Jù Lọ
 
-Lo dashboard tàbí **`/api/usage/analytics`** láti ṣe àkójọpọ̀ gẹ́gẹ́ bí kọ́kọ́rọ́ API, kí o sì tò ó gẹ́gẹ́ bí iye owó:
+Lo pátákó ìṣàkóso tàbí **`/api/usage/analytics`** láti pín sí ẹgbẹ́ gẹ́gẹ́ bí kọ́kọ́rọ́ API àti láti tò wọ́n gẹ́gẹ́ bí ìnáwó:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -407,30 +432,30 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Yíyanjú Ìṣòro
 
-### "Iye owó ga ju bí a ṣe retí lọ"
+### "Ìnáwó ga ju bí a ti retí lọ"
 
-1. Ṣàyẹ̀wò **`/api/usage/analytics?groupBy=model`** — wá àwòṣe tó gbówó lórí
-2. Ṣàyẹ̀wò **`/api/usage/analytics?groupBy=apiKey`** — wá olùlò tó ń lò ó jù
-3. Jẹ́rìí pé dátà iye owó jẹ́ tuntun: `POST /api/pricing/sync`
+1. Ṣàyẹ̀wò **`/api/usage/analytics?groupBy=model`** — wá módẹ́lì tó gbówó lórí
+2. Ṣàyẹ̀wò **`/api/usage/analytics?groupBy=apiKey`** — wá ẹni tó ń lò ó púpọ̀
+3. Jẹ́rìí pé dátà iye owó jẹ́ ti ìsinsìnyí: `POST /api/pricing/sync`
 
-### "Àwọn àkọsílẹ̀ kan kò sí"
+### "Àwọn àkọsílẹ̀ kò sí"
 
-- Ṣàyẹ̀wò àwọn ààtò ìmúdúródé DB lábẹ́ Dashboard → Database → Cleanup — iṣẹ́ ìfọ̀mọ́ tí ń ṣiṣẹ́ lẹ́ẹ̀kọ̀ọ̀kan máa ń pa àwọn àkọsílẹ̀ àtijọ́ rẹ́ (`src/lib/db/cleanup.ts`)
-- Ṣàyẹ̀wò àwọn àṣìṣe nínú `src/lib/db/usage*.ts` — a máa ń kọ àwọn ìkùnà kíkọ sínú DB sí àkọsílẹ̀, ṣùgbọ́n a kì í fi wọ́n hàn
-- Jẹ́rìí pé ìbéèrè náà dé `chatCore` ní tòótọ́ — ṣàyẹ̀wò ìdarí combo
+- Ṣàyẹ̀wò àwọn ètò ìdádúró dátà DB lábẹ́ Pátákó Ìṣàkóso → Ibi Ìpamọ́ Dátà → Ìfọ̀mọ́ — iṣẹ́ ìfọ̀mọ́ tí ń ṣiṣẹ́ lẹ́ẹ̀kọ̀ọ̀kan máa ń pa àwọn àkọsílẹ̀ àtijọ́ rẹ́ (`src/lib/db/cleanup.ts`)
+- Ṣàyẹ̀wò àwọn àṣìṣe nínú `src/lib/db/usage*.ts` — àwọn ìkùnà kíkọ sínú DB ni a ń ṣe àkọsílẹ̀ wọn ṣùgbọ́n a kì í fi wọ́n hàn
+- Jẹ́rìí pé ìbéèrè náà dé `chatCore` ní tòótọ́ — ṣàyẹ̀wò bí a ṣe ń darí combo
 
-### "Ìpín kò ṣiṣẹ́"
+### "Ààlà lílò kò ṣiṣẹ́"
 
-- Ṣàyẹ̀wò ààtò `quotaLimit` ti kọ́kọ́rọ́ náà
+- Ṣàyẹ̀wò ètò `quotaLimit` ti kọ́kọ́rọ́ náà
 - Jẹ́rìí pé a ṣètò `quotaWindow` lọ́nà tó tọ́
-- Wá àwọn àkọsílẹ̀ `quotaSnapshots` — ó yẹ kí a ṣẹ̀dá wọn ní gbogbo ìbéèrè
+- Wá àwọn àkọsílẹ̀ `quotaSnapshots` — ó yẹ kí a ṣẹ̀dá wọn fún gbogbo ìbéèrè
 
 ---
 
 ## Tún Wo
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Ètò àwọn tábìlì ìlò
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — àwọn env vars fún ìṣiṣẹ́pọ̀ iye owó
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Bí `auto/fast`, `auto/cheap` ṣe ń dín iye owó kù
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Àlàyé `/api/usage/*` kíkún
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Ìgbékalẹ̀ fún àwọn tábìlì lílò
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Àwọn oníyípadà àyíká fún mímú iye owó bá ara mu
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Bí `auto/fast`, `auto/cheap` ṣe ń dín ìnáwó kù
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Ìtọ́kasí kíkún fún `/api/usage/*`
 - Orísun: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

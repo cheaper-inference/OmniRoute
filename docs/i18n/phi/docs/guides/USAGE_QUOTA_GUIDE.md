@@ -40,29 +40,29 @@ Request ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Ano ang Itinatala
 
-Kumukuha ang service na `usage.ts` ng **usage event** para sa bawat request:
+Nagtatala ang serbisyong `usage.ts` ng isang **kaganapan ng paggamit** para sa bawat kahilingan:
 
-| Field              | Uri     | Source                                                        |
-| ------------------ | ------- | ------------------------------------------------------------- |
-| `id`               | string  | UUID na binubuo sa pagtatala                                  |
-| `apiKeyId`         | string  | Ang API key na nagpasimula sa request                         |
-| `provider`         | string  | Provider ID (openai, anthropic, atbp.)                        |
-| `model`            | string  | Model ID (gpt-5, claude-opus-4-6, atbp.)                      |
-| `comboId`          | string? | Combo ID kung idinaan sa isang combo                          |
-| `promptTokens`     | number  | Mula sa upstream response                                     |
-| `completionTokens` | number  | Mula sa upstream response                                     |
-| `cachedTokens`     | number  | Mga token mula sa cache hit (Anthropic prompt caching, atbp.) |
-| `totalTokens`      | number  | prompt + completion                                           |
-| `costUsd`          | number  | Kinakalkula mula sa data ng presyo                            |
-| `latencyMs`        | number  | Kabuuang tagal ng request mula simula hanggang pagtatapos     |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`    |
-| `errorClass`       | string? | Error class kung status != success                            |
-| `timestamp`        | string  | ISO 8601 UTC                                                  |
-| `metadata`         | object  | Custom na data na inilagay ng plugin                          |
+| Field              | Uri     | Pinagmulan                                                     |
+| ------------------ | ------- | -------------------------------------------------------------- |
+| `id`               | string  | UUID na binubuo sa pagtatala                                   |
+| `apiKeyId`         | string  | Ang API key na nagpasimula ng kahilingan                       |
+| `provider`         | string  | ID ng provider (openai, anthropic, atbp.)                      |
+| `model`            | string  | ID ng modelo (gpt-5, claude-opus-4-6, atbp.)                   |
+| `comboId`          | string? | ID ng combo kung idinaan sa isang combo                        |
+| `promptTokens`     | number  | Mula sa tugon ng upstream                                      |
+| `completionTokens` | number  | Mula sa tugon ng upstream                                      |
+| `cachedTokens`     | number  | Mga token na tumama sa cache (Anthropic prompt caching, atbp.) |
+| `totalTokens`      | number  | prompt + completion                                            |
+| `costUsd`          | number  | Kinakalkula mula sa datos ng pagpepresyo                       |
+| `latencyMs`        | number  | Kabuuang tagal ng kahilingan mula simula hanggang wakas        |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`     |
+| `errorClass`       | string? | Klase ng error kung ang status != success                      |
+| `timestamp`        | string  | ISO 8601 UTC                                                   |
+| `metadata`         | object  | Pasadyang datos na ipinapasok ng plugin                        |
 
 ### Saan Nagmumula ang mga Token
 
-Kinukuha ang mga token mula sa response ng upstream provider sa **response handler**:
+Kinukuha ang mga token mula sa tugon ng upstream provider sa **tagapangasiwa ng tugon**:
 
 ```ts
 // Mula sa open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Para sa mga provider na hindi nagbabalik ng usage (ilang web-cookie provider), **tinatantya** ng OmniRoute ang mga token gamit ang heuristic na `~4 chars per token` (tingnan ang `open-sse/services/autoCombo/pipelineRouter.ts`).
+Para sa mga provider na hindi nagbabalik ng datos ng paggamit (ilang web-cookie provider), **tinatantya** ng OmniRoute ang mga token gamit ang heuristic na `~4 chars per token` (tingnan ang `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Mga Naka-cache na Token
 
 Hiwalay na sinusubaybayan ng OmniRoute ang `cached_tokens` mula sa `prompt_tokens` dahil:
 
-- Naniningil ang Anthropic prompt caching ng mas mababang rate para sa mga naka-cache na token (10% ng karaniwang halaga)
-- Nagbabalik ang ilang provider ng `cache_read_input_tokens` na dapat magkaroon ng ibang presyo
-- Maaaring ipakita ng analytics ang **cache hit rate** = `cached_tokens / prompt_tokens`
+- Mas mababa ang singil ng Anthropic prompt caching para sa mga naka-cache na token (10% ng karaniwang singil)
+- Nagbabalik ang ilang provider ng `cache_read_input_tokens` na dapat presyuhan nang iba
+- Maaaring ipakita ng analytics ang **proporsyon ng pagtama sa cache** = `cached_tokens / prompt_tokens`
+
+### Mga diagnostic ng antas ng pagsulat sa cache
+
+Tinutukoy nang magkahiwalay ng panel ng kalagayan ng prompt-cache sa Analytics dashboard ang mga pagsulat sa cache na may tagal na
+5 minuto at 1 oras na iniulat ng provider. Ang
+`usage.cache_creation.ephemeral_5m_input_tokens` at
+`usage.cache_creation.ephemeral_1h_input_tokens` ng Anthropic ay pinananatili sa pagsasalin ng datos ng paggamit para sa streaming at
+non-streaming at iniimbak kasama ng mga buod ng talaan ng tawag. Hindi idinaragdag sa mga pangkat na iyon
+sa ikalawang pagkakataon ang pinagsamang kabuuan ng mga pagsulat sa cache.
+
+Hindi alam ang antas ng mga tawag na may pinagsamang bilang lamang ng pagsulat, kabilang ang mga mas lumang tala.
+Sa bahagyang pagkakahati-hati, nananatiling hindi alam ang hindi naitalagang natitira; minamarkahan ang mga hindi wasto o
+magkasalungat na bilang sa halip na tahimik na italaga sa isang TTL. Ang mga marker ng
+TTL sa panig ng kahilingan ay hindi katibayan ng isang antas na siningil.
+
+Saklaw lamang ng katumbas-sa-API na pagtatantya ng pagsulat sa panel ang mga antas na iniulat at may presyo, hindi
+ang buong kahilingan. Para sa katutubong pagpepresyo ng modelo ng Claude/Anthropic, gumagamit ito ng 1.25 beses ng
+singil sa input para sa mga pagsulat na may tagal na 5 minuto at dalawang beses ng singil sa input para sa mga pagsulat na may tagal na 1 oras. Ang nawawalang
+presyo ay hindi available, hindi sero. Itinatala ang mga presyo kapag inilolog ang bawat bagong tawag;
+hindi muling pinepresyuhan ang mga makasaysayang tala. Samakatuwid, maaaring magkaroon ang mga subscription account ng
+katumbas-sa-API na pagtatantya nang hindi nagagastos ang halagang iyon bilang aktuwal na salapi o nababawas sa quota ng
+subscription. Hindi nagbabago ang mga kasalukuyang kalkulasyon ng quota, badyet, at eksaktong gastos ayon sa provider.
+
+Ginagamit ng mga diagnostic na ito ang kasalukuyang buod ng kalagayan ng cache na may takdang saklaw at ang pagpapanatili
+ng talaan ng tawag. Hindi nila binabago ang mga default na TTL ng kahilingan, pagruruta, o pagpili ng account.
+Ipinagpaliban ang pagtatala ng TTL na hiniling ng kliyente kumpara sa aktuwal na papalabas na TTL sa hangganan
+ng pagpapadala sa provider; iniuulat ng panel na ito ang mga antas sa resibo, hindi ang aktuwal na papalabas na TTL.
+
+Implementasyon: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, at `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,40 +153,40 @@ Para sa mga modelong walang datos ng pagpepresyo, gumagamit ang OmniRoute ng **p
 
 ## Pagsasama-sama ayon sa Saklaw ng Petsa
 
-Kinakalkula ng `usageAnalytics.ts` module ang mga widget ng dashboard mula sa raw na datos ng paggamit. Sinusuportahan nito ang 7 saklaw ng oras:
+Kinakalkula ng module na `usageAnalytics.ts` ang mga widget ng dashboard mula sa hilaw na datos ng paggamit. Sinusuportahan nito ang 7 saklaw ng panahon:
 
-| Saklaw   | Panahon                           | Gamit                                               |
-| -------- | --------------------------------- | --------------------------------------------------- |
-| `1d`     | Nakaraang 24 na oras              | Pagtukoy ng biglaang oras-oras na pagtaas ng gastos |
-| `7d`     | Nakaraang 7 araw                  | Lingguhang pagsusuri                                |
-| `30d`    | Nakaraang 30 araw                 | Buwanang pagsingil                                  |
-| `90d`    | Nakaraang 90 araw                 | Kuwarterlyong pagsusuri                             |
-| `ytd`    | Mula Enero 1 ng kasalukuyang taon | Taunang pagsubaybay sa badyet                       |
-| `all`    | Lahat ng panahon                  | Panghabambuhay na mga estadistika                   |
-| `custom` | Simula/wakas na tinukoy ng user   | Mga audit, ad-hoc na query                          |
+| Saklaw   | Panahon                            | Gamit                                           |
+| -------- | ---------------------------------- | ----------------------------------------------- |
+| `1d`     | Nakaraang 24 na oras               | Pagtukoy ng biglang pagtaas ng gastos kada oras |
+| `7d`     | Nakaraang 7 araw                   | Lingguhang pagsusuri                            |
+| `30d`    | Nakaraang 30 araw                  | Buwanang pagsingil                              |
+| `90d`    | Nakaraang 90 araw                  | Pagsusuri kada quarter                          |
+| `ytd`    | Mula Enero 1 ng kasalukuyang taon  | Pagsubaybay sa taunang badyet                   |
+| `all`    | Buong panahon                      | Mga istatistika sa buong panahon                |
+| `custom` | Simula/katapusang itinakda ng user | Mga audit, ad-hoc na query                      |
 
-### Mga Kinakalkulang Widget ng Dashboard
+### Mga Widget ng Dashboard na Kinakalkula
 
-Para sa anumang saklaw ng petsa, kinakalkula ng analytics layer ang:
+Para sa anumang saklaw ng petsa, kinakalkula ng layer ng analytics ang:
 
-| Widget                               | Paglalarawan                                                       |
-| ------------------------------------ | ------------------------------------------------------------------ |
-| **Mga summary card**                 | Kabuuang request, kabuuang gastos, kabuuang token, success rate    |
-| **Chart ng pang-araw-araw na trend** | Gastos + mga token bawat araw, naka-stack ayon sa modelo           |
-| **Heatmap ng aktibidad**             | Grid ng oras ng araw × araw ng linggo, kulay = bilang ng request   |
-| **Breakdown ayon sa modelo**         | Pie chart ng gastos ayon sa modelo                                 |
-| **Breakdown ayon sa provider**       | Bar chart ng mga request ayon sa provider                          |
-| **Mga nangungunang API key**         | Talahanayan ng nangungunang 10 key ayon sa gastos                  |
-| **Pagsusuri ng error**               | Error rate sa paglipas ng panahon, mga nangungunang klase ng error |
+| Widget                               | Paglalarawan                                                           |
+| ------------------------------------ | ---------------------------------------------------------------------- |
+| **Mga card ng buod**                 | Kabuuang request, kabuuang gastos, kabuuang token, antas ng tagumpay   |
+| **Tsart ng pang-araw-araw na trend** | Gastos + mga token bawat araw, pinagpatong ayon sa modelo              |
+| **Heatmap ng aktibidad**             | Grid ng oras ng araw × araw ng linggo, kulay = bilang ng request       |
+| **Paghahati ayon sa modelo**         | Pie chart ng gastos ayon sa modelo                                     |
+| **Paghahati ayon sa provider**       | Bar chart ng mga request ayon sa provider                              |
+| **Mga nangungunang API key**         | Talahanayan ng nangungunang 10 key ayon sa gastos                      |
+| **Pagsusuri ng error**               | Antas ng error sa paglipas ng panahon, mga nangungunang klase ng error |
 
-### Programmatic na Pag-access
+### Pag-access sa Pamamagitan ng Programa
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
   history,              // mga tala ng kasaysayan ng paggamit
-  "7d",                 // saklaw ng oras: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
+  "7d",                 // saklaw ng panahon: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
   connectionMap,        // mapa ng koneksyon ng provider (connectionId → pangalan ng account)
   {
     startDate: "2025-01-01",  // opsyonal: para sa saklaw na "custom"
@@ -171,10 +201,10 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Pagpapatupad ng Quota
 
-Ipinapatupad ang quota para sa bawat API key sa dalawang lugar:
+Ipinapatupad ang quota ng bawat API key sa dalawang lugar:
 
-1. **Soft limit** (`quotaWarnAt`): babala sa dashboard kapag lumampas ang paggamit sa threshold
-2. **Hard limit** (`quotaLimit`): tinatanggihan ang request gamit ang HTTP 429 kapag lumampas sa limitasyon
+1. **Malambot na limitasyon** (`quotaWarnAt`): babala sa dashboard kapag lumampas ang paggamit sa itinakdang antas
+2. **Mahigpit na limitasyon** (`quotaLimit`): tinatanggihan ang request gamit ang HTTP 429 kapag lumampas dito
 
 ### Configuration
 
@@ -192,36 +222,36 @@ await updateApiKey(keyId, {
 ```
 Request ──▶ quotaCheck()
               │
-              ├── Nasa loob ng limitasyon?  ──▶ payagan
+              ├── Pasok sa limitasyon?  ──▶ payagan
               │
-              └── Lumampas sa limitasyon?  ──▶ 429 Too Many Requests
-                                               na may Retry-After header
+              └── Lampas sa limitasyon?  ──▶ 429 Too Many Requests
+                                   na may Retry-After header
 ```
 
 ### Mga Snapshot ng Quota
 
-Iniimbak ng table na `quotaSnapshots` ang **dating estado ng quota** para sa pagsusuri ng trend:
+Iniimbak ng talahanayang `quotaSnapshots` ang **makasaysayang estado ng quota** para sa pagsusuri ng trend:
 
 | Field | Paglalarawan |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Ang key na sinusubaybayan |
 | `window` | "day" | "week" | "month" |
-| `used` | Gastos na nagamit sa window na ito (sentimo) |
+| `used` | Gastos na nagamit sa panahong ito (sentimo) |
 | `limit` | Ang limitasyon (sentimo) |
-| `resetAt` | Kung kailan mare-reset ang window |
-| `createdAt` | Kung kailan ginawa ang snapshot |
+| `resetAt` | Kung kailan nagre-reset ang panahon |
+| `createdAt` | Kung kailan kinuha ang snapshot |
 
-Kinukuha ang mga snapshot **sa bawat request** na gumagamit ng > 0 na halaga, at ginagamit ang mga ito upang:
+Kinukuha ang mga snapshot **sa bawat request** na may gastos na > 0, at ginagamit upang:
 
-- I-render ang progress bar ng quota sa dashboard
-- Magpakita ng mga chart ng trend ng quota sa loob ng 30 araw
-- Mag-trigger ng mga alert kapag papalapit na sa limitasyon ang paggamit
+- Ipakita ang progress bar ng quota sa dashboard
+- Ipakita ang mga tsart ng trend ng quota sa loob ng 30 araw
+- Mag-trigger ng mga alerto kapag papalapit na sa limitasyon ang paggamit
 
 ---
 
 ## REST API
 
-### Ilista ang mga Record ng Paggamit
+### Ilista ang mga Rekord ng Paggamit
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -272,12 +302,7 @@ Tugon:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,24 +313,24 @@ Tugon:
 
 ### I-query ang Analytics ng Paggamit
 
-Ina-access ang data ng paggamit sa pamamagitan ng dashboard o mga MCP tool, hindi sa pamamagitan ng mga direktang REST export endpoint. Mga available na analytics:
+Ina-access ang datos ng paggamit sa pamamagitan ng dashboard o mga MCP tool, hindi sa mga direktang REST export endpoint. Mga available na analytics:
 
-- **`/api/usage/analytics`** — pinagsama-samang mga metric ng paggamit (ipangkat ayon sa model, provider, key)
-- **`/api/usage/quota`** — kasalukuyang estado ng quota para sa bawat API key
-- **`/api/usage/history`** — mga log ng history ng request
+- **`/api/usage/analytics`** — pinagsama-samang sukatan ng paggamit (nakagrupo ayon sa modelo, provider, key)
+- **`/api/usage/quota`** — kasalukuyang katayuan ng quota bawat API key
+- **`/api/usage/history`** — mga log ng kasaysayan ng kahilingan
 
 ---
 
 ## Mga MCP Tool
 
-Inilalantad ng dalawang MCP tool ang data ng paggamit sa mga agent (tingnan ang `open-sse/mcp-server/tools/`):
+Dalawang MCP tool ang nagbibigay sa mga agent ng access sa datos ng paggamit (tingnan ang `open-sse/mcp-server/tools/`):
 
-| Tool                    | Paglalarawan                                                               |
-| ----------------------- | -------------------------------------------------------------------------- |
-| `omniroute_cost_report` | Bumubuo ng ulat ng gastos para sa bawat key sa isang partikular na panahon |
-| `omniroute_check_quota` | Ibinabalik ang kasalukuyang estado ng quota para sa isang API key          |
+| Tool                    | Paglalarawan                                                        |
+| ----------------------- | ------------------------------------------------------------------- |
+| `omniroute_cost_report` | Bumubuo ng ulat ng gastos bawat key para sa isang takdang panahon   |
+| `omniroute_check_quota` | Ibinabalik ang kasalukuyang katayuan ng quota para sa isang API key |
 
-Halimbawa ng invocation ng agent:
+Halimbawa ng pagtawag ng agent:
 
 ```json
 {
@@ -318,34 +343,34 @@ Halimbawa ng invocation ng agent:
 
 ## Pagpapanatili at Paglilinis
 
-Lumalaki ang data ng paggamit nang ~1-10KB bawat kahilingan. Sa malaking saklaw, maaari itong maging makabuluhan.
+Lumalaki ang datos ng paggamit nang ~1-10KB bawat kahilingan. Sa malawakang paggamit, maaari itong maging malaki.
 
 ### Mga Setting ng Pagpapanatili
 
-Kino-configure ang pagpapanatili ng kasaysayan ng paggamit sa pamamagitan ng Database Settings sa UI o sa pamamagitan ng `/api/settings/database`.
+Ang pagpapanatili ng kasaysayan ng paggamit ay kino-configure sa pamamagitan ng Mga Setting ng Database sa UI o sa pamamagitan ng `/api/settings/database`.
 
 Bilang default, pinapanatili ang kasaysayan ng paggamit sa loob ng **90 araw**.
 
 ### Paglilinis
 
-Nililinis ng `src/lib/db/cleanup.ts` ang mga lumang tala:
+Nililinis ang mga lumang rekord ng `src/lib/db/cleanup.ts`:
 
-- Pinasisimulan ng proseso ng cron sa background
-- Binubura ang mga tala mula sa `usage_history` na mas luma kaysa sa naka-configure na setting ng pagpapanatiling `usageHistory`
+- Pinasisimulan ng proseso ng cron na tumatakbo sa background
+- Binubura ang mga rekord mula sa `usage_history` na mas luma kaysa sa naka-configure na setting ng pagpapanatili na `usageHistory`
 
-### Pagtatantya ng Storage
+### Pagtatantya ng Imbakan
 
-| Bilis ng kahilingan     | Storage sa 30 araw | Storage sa 90 araw |
-| ----------------------- | ------------------ | ------------------ |
-| 100 kahilingan/araw     | ~3MB               | ~9MB               |
-| 1,000 kahilingan/araw   | ~30MB              | ~90MB              |
-| 10,000 kahilingan/araw  | ~300MB             | ~900MB             |
-| 100,000 kahilingan/araw | ~3GB               | ~9GB               |
+| Dami ng kahilingan      | Imbakan para sa 30 araw | Imbakan para sa 90 araw |
+| ----------------------- | ----------------------- | ----------------------- |
+| 100 kahilingan/araw     | ~3MB                    | ~9MB                    |
+| 1,000 kahilingan/araw   | ~30MB                   | ~90MB                   |
+| 10,000 kahilingan/araw  | ~300MB                  | ~900MB                  |
+| 100,000 kahilingan/araw | ~3GB                    | ~9GB                    |
 
 Para sa napakataas na trapiko, isaalang-alang ang:
 
-- Pagbabawas ng panahon ng pagpapanatili sa pamamagitan ng Database Settings
-- Paggamit ng `aggregated_metrics` sa halip na mga raw na tala (para lamang sa analytics)
+- Pagpapaikli sa panahon ng pagpapanatili sa pamamagitan ng Mga Setting ng Database
+- Paggamit ng `aggregated_metrics` sa halip na mga hilaw na rekord (para lamang sa analytics)
 
 ---
 
@@ -354,19 +379,19 @@ Para sa napakataas na trapiko, isaalang-alang ang:
 ### 1. Gamitin ang Tamang Modelo
 
 ```bash
-# Mabilisang sagot — gumamit ng mura + mabilis
+# Mabilis na sagot — gumamit ng mura + mabilis
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Komplikadong gawain — gumamit ng kalidad
+# Komplikadong gawain — unahin ang kalidad
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. I-enable ang Caching
+### 2. Paganahin ang Caching
 
-Nakakatipid ang Anthropic prompt caching ng **90% sa paulit-ulit na konteksto**:
+Nakakatipid ang prompt caching ng Anthropic ng **90% sa paulit-ulit na konteksto**:
 
 ```ts
-// Awtomatiko ang caching — isama lamang ang parehong malaking system prompt
+// Awtomatiko ang caching — isama lang ang parehong malaking system prompt
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Awtomatikong ika-cache
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Gumamit ng Compression
 
-Nakakatipid ang RTK + Caveman compression ng **15-95% sa mga session na maraming tool**:
+Nakakatipid ang RTK + Caveman compression ng **15-95% sa mga session na madalas gumamit ng mga tool**:
 
 ```ts
 const config = {
@@ -387,17 +412,17 @@ const config = {
 };
 ```
 
-### 4. Magtakda ng Quota Bawat Key
+### 4. Magtakda ng Quota para sa Bawat Key
 
 Palaging itakda ang `quotaLimit` upang maiwasan ang hindi makontrol na gastos:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // $10/buwan na limitasyon
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Limitasyong $10/buwan
 ```
 
-### 5. I-audit ang mga Nangungunang Gumagamit
+### 5. Suriin ang mga May Pinakamalaking Paggamit
 
-Gamitin ang dashboard o ang **`/api/usage/analytics`** upang pagpangkatin ayon sa API key at pagsunud-sunurin ayon sa gastos:
+Gamitin ang dashboard o **`/api/usage/analytics`** upang igrupo ayon sa API key at pagbukud-bukurin ayon sa gastos:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -409,28 +434,28 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ### "Mas mataas ang gastos kaysa sa inaasahan"
 
-1. Tingnan ang **`/api/usage/analytics?groupBy=model`** — hanapin ang mahal na modelo
-2. Tingnan ang **`/api/usage/analytics?groupBy=apiKey`** — hanapin ang malakas gumamit
-3. Tiyaking napapanahon ang data ng pagpepresyo: `POST /api/pricing/sync`
+1. Suriin ang **`/api/usage/analytics?groupBy=model`** — hanapin ang mahal na modelo
+2. Suriin ang **`/api/usage/analytics?groupBy=apiKey`** — hanapin ang may malaking paggamit
+3. Tiyaking napapanahon ang datos ng pagpepresyo: `POST /api/pricing/sync`
 
-### "May mga nawawalang tala"
+### "May mga nawawalang rekord"
 
-- Tingnan ang mga setting ng pagpapanatili ng DB sa Dashboard → Database → Cleanup — binubura ng pana-panahong gawain sa paglilinis ang mga lumang tala (`src/lib/db/cleanup.ts`)
-- Suriin kung may mga error sa `src/lib/db/usage*.ts` — nila-log ang mga pagkabigo sa pagsusulat sa DB ngunit hindi ipinapakita
-- Tiyaking talagang nakarating ang kahilingan sa `chatCore` — suriin ang combo routing
+- Suriin ang mga setting ng pagpapanatili ng DB sa Dashboard → Database → Cleanup — binubura ang mga lumang rekord ng pana-panahong gawain sa paglilinis (`src/lib/db/cleanup.ts`)
+- Suriin kung may mga error sa `src/lib/db/usage*.ts` — itinatala sa log ang mga pagkabigo sa pagsulat sa DB ngunit hindi ipinapakita
+- Tiyaking talagang nakarating ang request sa `chatCore` — suriin ang combo routing
 
 ### "Hindi naipapatupad ang quota"
 
-- Tingnan ang setting na `quotaLimit` ng key
-- Tiyaking tama ang pagkakatakda sa `quotaWindow`
-- Hanapin ang mga tala ng `quotaSnapshots` — dapat malikha ang mga ito sa bawat kahilingan
+- Suriin ang setting na `quotaLimit` ng key
+- Tiyaking tama ang pagkakatakda ng `quotaWindow`
+- Hanapin ang mga rekord ng `quotaSnapshots` — dapat nalilikha ang mga ito sa bawat request
 
 ---
 
 ## Tingnan Din
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schema para sa mga talahanayan ng paggamit
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — mga env var para sa pag-sync ng pagpepresyo
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — mga environment variable para sa pag-sync ng pagpepresyo
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Paano binabawasan ng `auto/fast`, `auto/cheap` ang gastos
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Kumpletong sanggunian para sa `/api/usage/*`
-- Source: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`
+- Pinagmulan: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

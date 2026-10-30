@@ -8,6 +8,12 @@
 import type { RequestPipelinePayloads } from "@omniroute/open-sse/utils/requestLogger.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/errorSanitization.ts";
 import { getDbInstance } from "../db/core";
+import { getPricingForModel } from "../db/settings/pricing";
+import {
+  readCacheWriteUsage,
+  storedCacheWriteUsage,
+} from "@omniroute/open-sse/utils/cacheWriteUsage.ts";
+import { estimateApiEquivalentCacheWrite } from "./cacheWriteEstimate";
 import { failPendingCallLogDetail, publishPendingCallLogDetail } from "../db/callLogDetails";
 import { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
 export { applyNodePrefix, resolveProviderDisplay } from "./callLogDisplay";
@@ -100,6 +106,11 @@ type CallLogSummaryRow = {
   tokens_out: number | null;
   tokens_cache_read: number | null;
   tokens_cache_creation: number | null;
+  tokens_cache_creation_5m?: number | null;
+  tokens_cache_creation_1h?: number | null;
+  cache_creation_tier_status?: string | null;
+  cache_write_cost_usd?: number | null;
+  cache_write_priced_tokens?: number | null;
   tokens_reasoning: number | null;
   tokens_compressed: number | null;
   reasoning_source?: string | null;
@@ -403,6 +414,17 @@ function mapSummaryRow(row: CallLogSummaryRow) {
       compressed: row.tokens_compressed != null ? toNumber(row.tokens_compressed) : null,
     },
     cacheSource: row.cache_source || "upstream",
+    cacheWriteUsage: storedCacheWriteUsage(
+      row.tokens_cache_creation,
+      row.tokens_cache_creation_5m,
+      row.tokens_cache_creation_1h,
+      row.cache_creation_tier_status
+    ),
+    cacheWriteEstimate: {
+      knownTierCostUsd: row.cache_write_cost_usd ?? null,
+      pricedTokens: row.cache_write_priced_tokens ?? 0,
+      source: "api-equivalent-estimate" as const,
+    },
     // #6187/#13965: observed reasoning (source + CHARACTER count, never tokens) so the
     // detail view can tell "reasoned but not metered" apart from "did not reason".
     reasoningSource: row.reasoning_source ?? null,
@@ -623,6 +645,26 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     tokens: entry.tokens,
     isSuccess,
   });
+  const cacheWriteUsage = readCacheWriteUsage(entry.tokens);
+  let cacheWriteEstimate = estimateApiEquivalentCacheWrite(null, cacheWriteUsage, {
+    provider: rawProvider,
+    model: entry.model || "",
+  });
+  if (cacheWriteUsage.fiveMinute !== null || cacheWriteUsage.oneHour !== null) {
+    try {
+      cacheWriteEstimate = estimateApiEquivalentCacheWrite(
+        await getPricingForModel(rawProvider, entry.model || ""),
+        cacheWriteUsage,
+        {
+          provider: rawProvider,
+          model: entry.model || "",
+          inputTokens: getLoggedInputTokens(entry.tokens),
+        }
+      );
+    } catch {
+      // Diagnostic pricing is optional; a lookup failure must not discard usage.
+    }
+  }
   const logEntry = {
     id: typeof entry.id === "string" && entry.id.length > 0 ? entry.id : generateLogId(),
     timestamp: typeof entry.timestamp === "string" ? entry.timestamp : new Date().toISOString(),
@@ -644,7 +686,12 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     tokensIn: toNumber(getLoggedInputTokens(entry.tokens)),
     tokensOut: toNumber(getLoggedOutputTokens(entry.tokens)),
     tokensCacheRead: getPromptCacheReadTokensOrNull(entry.tokens),
-    tokensCacheCreation: getPromptCacheCreationTokensOrNull(entry.tokens),
+    tokensCacheCreation: cacheWriteUsage.total,
+    tokensCacheCreation5m: cacheWriteUsage.fiveMinute,
+    tokensCacheCreation1h: cacheWriteUsage.oneHour,
+    cacheCreationTierStatus: cacheWriteUsage.status,
+    cacheWriteCostUsd: cacheWriteEstimate.knownTierCostUsd,
+    cacheWritePricedTokens: cacheWriteEstimate.pricedTokens,
     tokensReasoning,
     reasoningSource: reasoningObservation.source,
     reasoningChars: reasoningObservation.chars,
@@ -752,6 +799,8 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         id, timestamp, method, path, status, model, requested_model, provider,
         account, connection_id, duration, ttft_ms, tokens_in, tokens_out,
         tokens_cache_read, tokens_cache_creation, tokens_reasoning, tokens_compressed,
+        tokens_cache_creation_5m, tokens_cache_creation_1h, cache_creation_tier_status,
+        cache_write_cost_usd, cache_write_priced_tokens,
         reasoning_source, reasoning_chars,
         reasoning_duration_ms, reasoning_effort_requested, reasoning_effort_upstream,
         reasoning_encrypted,
@@ -767,6 +816,8 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @id, @timestamp, @method, @path, @status, @model, @requestedModel, @provider,
         @account, @connectionId, @duration, @ttftMs, @tokensIn, @tokensOut,
         @tokensCacheRead, @tokensCacheCreation, @tokensReasoning, @tokensCompressed,
+        @tokensCacheCreation5m, @tokensCacheCreation1h, @cacheCreationTierStatus,
+        @cacheWriteCostUsd, @cacheWritePricedTokens,
         @reasoningSource, @reasoningChars,
         @reasoningDurationMs, @reasoningEffortRequested, @reasoningEffortUpstream,
         @reasoningEncrypted,

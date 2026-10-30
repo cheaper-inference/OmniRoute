@@ -40,29 +40,29 @@ Solicitare ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Ce se înregistrează
 
-Serviciul `usage.ts` captează un **eveniment de utilizare** pentru fiecare solicitare:
+Serviciul `usage.ts` captează un **eveniment de utilizare** pentru fiecare cerere:
 
-| Câmp               | Tip     | Sursă                                                            |
-| ------------------ | ------- | ---------------------------------------------------------------- |
-| `id`               | string  | UUID generat la înregistrare                                     |
-| `apiKeyId`         | string  | Cheia API care a inițiat solicitarea                             |
-| `provider`         | string  | ID-ul furnizorului (openai, anthropic etc.)                      |
-| `model`            | string  | ID-ul modelului (gpt-5, claude-opus-4-6 etc.)                    |
-| `comboId`          | string? | ID-ul combinației, dacă rutarea s-a făcut printr-o combinație    |
-| `promptTokens`     | number  | Din răspunsul serviciului din amonte                             |
-| `completionTokens` | number  | Din răspunsul serviciului din amonte                             |
-| `cachedTokens`     | number  | Tokenuri găsite în cache (cache pentru prompturi Anthropic etc.) |
-| `totalTokens`      | number  | prompt + completare                                              |
-| `costUsd`          | number  | Calculat pe baza datelor de tarifare                             |
-| `latencyMs`        | number  | Durata integrală a solicitării                                   |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`       |
-| `errorClass`       | string? | Clasa erorii dacă status != success                              |
-| `timestamp`        | string  | ISO 8601 UTC                                                     |
-| `metadata`         | object  | Date personalizate injectate de pluginuri                        |
+| Câmp               | Tip     | Sursă                                                                       |
+| ------------------ | ------- | --------------------------------------------------------------------------- |
+| `id`               | string  | UUID generat la înregistrare                                                |
+| `apiKeyId`         | string  | Cheia API care a inițiat cererea                                            |
+| `provider`         | string  | ID-ul furnizorului (openai, anthropic etc.)                                 |
+| `model`            | string  | ID-ul modelului (gpt-5, claude-opus-4-6 etc.)                               |
+| `comboId`          | string? | ID-ul combinației, dacă rutarea se face printr-o combinație                 |
+| `promptTokens`     | number  | Din răspunsul furnizorului din amonte                                       |
+| `completionTokens` | number  | Din răspunsul furnizorului din amonte                                       |
+| `cachedTokens`     | number  | Tokenuri găsite în cache (memorarea în cache a prompturilor Anthropic etc.) |
+| `totalTokens`      | number  | prompt + completare                                                         |
+| `costUsd`          | number  | Calculat pe baza datelor de tarifare                                        |
+| `latencyMs`        | number  | Durata cererii de la un capăt la altul                                      |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                  |
+| `errorClass`       | string? | Clasa erorii dacă starea != succes                                          |
+| `timestamp`        | string  | ISO 8601 UTC                                                                |
+| `metadata`         | object  | Date personalizate injectate de plugin                                      |
 
 ### De unde provin tokenurile
 
-Tokenurile sunt extrase din răspunsul furnizorului din amonte în **handlerul de răspuns**:
+Tokenurile sunt extrase din răspunsul furnizorului din amonte în **gestionarul de răspunsuri**:
 
 ```ts
 // Din open-sse/handlers/chatCore.ts
@@ -76,13 +76,43 @@ const usage = response.usage || {
 
 Pentru furnizorii care nu returnează date de utilizare (unii furnizori bazați pe cookie-uri web), OmniRoute **estimează** tokenurile folosind euristica `~4 chars per token` (consultați `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Tokenuri din cache
+### Tokenuri memorate în cache
 
 OmniRoute urmărește `cached_tokens` separat de `prompt_tokens` deoarece:
 
-- Cache-ul pentru prompturi Anthropic taxează un tarif redus pentru tokenurile din cache (10% din tariful normal)
-- Unii furnizori returnează `cache_read_input_tokens`, care trebuie tarifate diferit
-- Analizele pot afișa **rata de accesare a cache-ului** = `cached_tokens / prompt_tokens`
+- Memorarea în cache a prompturilor Anthropic aplică un tarif redus pentru tokenurile memorate în cache (10% din tariful normal)
+- Unii furnizori returnează `cache_read_input_tokens`, pentru care trebuie aplicat un tarif diferit
+- Analizele pot afișa **rata de succes a accesărilor cache-ului** = `cached_tokens / prompt_tokens`
+
+### Diagnosticarea nivelurilor de scriere în cache
+
+Panoul privind starea cache-ului de prompturi din tabloul de bord de analiză diferențiază scrierile în cache
+cu durată de 5 minute și de 1 oră raportate de furnizor. Câmpurile Anthropic
+`usage.cache_creation.ephemeral_5m_input_tokens` și
+`usage.cache_creation.ephemeral_1h_input_tokens` sunt păstrate la conversia datelor de utilizare atât în flux, cât și
+fără flux și sunt stocate împreună cu rezumatele jurnalelor de apeluri. Totalul cumulat
+al scrierilor în cache nu este adăugat a doua oară la aceste categorii.
+
+Apelurile care au doar un contor cumulat al scrierilor, inclusiv înregistrările mai vechi, au un nivel
+necunoscut. În cazul unei defalcări parțiale, restul neatribuit rămâne necunoscut; contoarele nevalide sau
+contradictorii sunt semnalate în loc să li se atribuie tacit un TTL. Marcajele
+TTL din cerere nu constituie o dovadă a unui nivel facturat.
+
+Estimarea scrierilor din panou, exprimată ca echivalent API, acoperă numai nivelurile raportate pentru care există tarife, nu
+întreaga cerere. Pentru tarifarea nativă a modelelor Claude/Anthropic, aceasta folosește de 1,25 ori
+tariful de intrare pentru scrierile cu durată de 5 minute și de două ori tariful de intrare pentru scrierile cu durată de 1 oră. Tarifele
+lipsă sunt considerate indisponibile, nu zero. Tarifele sunt capturate la înregistrarea fiecărui apel nou;
+înregistrările istorice nu sunt recalculate la noile tarife. Prin urmare, conturile cu abonament pot avea o
+estimare echivalentă API fără ca suma respectivă să reprezinte o cheltuială efectivă sau un consum din
+cota abonamentului. Calculele existente pentru cote, bugete și costurile exacte ale furnizorilor rămân neschimbate.
+
+Aceste diagnostice folosesc rezumatul existent, cu limite prestabilite, privind starea cache-ului și politica de păstrare
+a jurnalelor de apeluri. Nu modifică valorile TTL implicite ale cererilor, rutarea sau selectarea conturilor.
+Capturarea TTL-ului solicitat de client în raport cu TTL-ul efectiv trimis, la punctul de
+trimitere către furnizor, este amânată; acest panou raportează nivelurile din datele de facturare primite, nu TTL-ul efectiv trimis.
+
+Implementare: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` și `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,33 +151,33 @@ Pentru modelele fără date de tarifare, OmniRoute recurge la **estimarea costul
 
 ---
 
-## Agregarea după intervalul de date
+## Agregare pe intervale de date
 
-Modulul `usageAnalytics.ts` calculează widgeturile tabloului de bord pe baza datelor brute de utilizare. Acesta acceptă 7 intervale de timp:
+Modulul `usageAnalytics.ts` calculează widgeturile tabloului de bord pe baza datelor brute de utilizare. Acceptă 7 intervale de timp:
 
-| Interval | Fereastră                             | Caz de utilizare                               |
-| -------- | ------------------------------------- | ---------------------------------------------- |
-| `1d`     | Ultimele 24 de ore                    | Detectarea creșterilor orare ale costurilor    |
-| `7d`     | Ultimele 7 zile                       | Analiză săptămânală                            |
-| `30d`    | Ultimele 30 de zile                   | Facturare lunară                               |
-| `90d`    | Ultimele 90 de zile                   | Analiză trimestrială                           |
-| `ytd`    | De la 1 ianuarie din anul curent      | Monitorizarea bugetului anual                  |
-| `all`    | Întreaga perioadă                     | Statistici pentru întreaga durată de utilizare |
-| `custom` | Început/sfârșit definit de utilizator | Audituri, interogări ad-hoc                    |
+| Interval | Perioadă                               | Caz de utilizare                    |
+| -------- | -------------------------------------- | ----------------------------------- |
+| `1d`     | Ultimele 24 de ore                     | Detectarea vârfurilor orare de cost |
+| `7d`     | Ultimele 7 zile                        | Evaluare săptămânală                |
+| `30d`    | Ultimele 30 de zile                    | Facturare lunară                    |
+| `90d`    | Ultimele 90 de zile                    | Analiză trimestrială                |
+| `ytd`    | De la 1 ianuarie al anului curent      | Monitorizarea bugetului anual       |
+| `all`    | Întreaga perioadă                      | Statistici pe întreaga durată       |
+| `custom` | Început/sfârșit definite de utilizator | Audituri, interogări ad-hoc         |
 
 ### Widgeturi calculate pentru tabloul de bord
 
 Pentru orice interval de date, stratul de analiză calculează:
 
-| Widget                          | Descriere                                                          |
-| ------------------------------- | ------------------------------------------------------------------ |
-| **Carduri de sinteză**          | Total solicitări, cost total, total tokenuri, rată de succes       |
-| **Grafic al tendinței zilnice** | Cost + tokenuri pe zi, stivuite după model                         |
-| **Hartă termică a activității** | Grilă oră din zi × zi din săptămână, culoare = număr de solicitări |
-| **Defalcare după model**        | Diagramă circulară a costului după model                           |
-| **Defalcare după furnizor**     | Diagramă cu bare a solicitărilor după furnizor                     |
-| **Chei API principale**         | Tabel cu primele 10 chei după cost                                 |
-| **Analiza erorilor**            | Rata erorilor în timp, principalele clase de erori                 |
+| Widget                          | Descriere                                                     |
+| ------------------------------- | ------------------------------------------------------------- |
+| **Carduri de sinteză**          | Total cereri, cost total, total tokenuri, rata de succes      |
+| **Grafic de evoluție zilnică**  | Cost + tokenuri pe zi, suprapuse pe modele                    |
+| **Hartă termică a activității** | Grilă oră din zi × zi a săptămânii, culoare = număr de cereri |
+| **Defalcare pe modele**         | Diagramă circulară a costului pe modele                       |
+| **Defalcare pe furnizori**      | Diagramă cu bare a cererilor pe furnizori                     |
+| **Top chei API**                | Tabel cu primele 10 chei după cost                            |
+| **Analiza erorilor**            | Rata erorilor în timp, principalele clase de erori            |
 
 ### Acces programatic
 
@@ -155,9 +185,9 @@ Pentru orice interval de date, stratul de analiză calculează:
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // înregistrări din istoricul utilizării
+  history,              // înregistrări ale istoricului de utilizare
   "7d",                 // interval de timp: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // harta conexiunilor furnizorilor (connectionId → numele contului)
+  connectionMap,        // maparea conexiunilor furnizorilor (connectionId → numele contului)
   {
     startDate: "2025-01-01",  // opțional: pentru intervalul "custom"
     endDate: "2025-06-01",   // opțional: pentru intervalul "custom"
@@ -171,18 +201,18 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Aplicarea cotelor
 
-Cota per cheie API este aplicată în două locuri:
+Cota pentru fiecare cheie API este aplicată în două locuri:
 
-1. **Limită flexibilă** (`quotaWarnAt`): avertisment în panoul de control atunci când utilizarea depășește pragul
-2. **Limită strictă** (`quotaLimit`): solicitarea este respinsă cu HTTP 429 atunci când limita este depășită
+1. **Limită de avertizare** (`quotaWarnAt`): avertizare în tabloul de bord când utilizarea depășește pragul
+2. **Limită strictă** (`quotaLimit`): cerere respinsă cu HTTP 429 la depășirea limitei
 
 ### Configurare
 
 ```ts
-// Per cheie API
+// Pentru fiecare cheie API
 await updateApiKey(keyId, {
-  quotaWarnAt: 5_00,    // 5,00 USD — afișează avertismentul
-  quotaLimit: 10_00,    // 10,00 USD — oprire strictă
+  quotaWarnAt: 5_00,    // $5.00 — afișează avertizarea
+  quotaLimit: 10_00,    // $10.00 — oprire strictă
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -190,12 +220,12 @@ await updateApiKey(keyId, {
 ### Fluxul de aplicare
 
 ```
-Solicitare ──▶ quotaCheck()
-                 │
-                 ├── În limită?  ──▶ permite
-                 │
-                 └── Peste limită?  ──▶ 429 Prea multe solicitări
-                                         cu antetul Retry-After
+Cerere ──▶ quotaCheck()
+              │
+              ├── În limita cotei?  ──▶ permite
+              │
+              └── Peste limită?  ──▶ 429 Too Many Requests
+                                   cu antetul Retry-After
 ```
 
 ### Instantanee ale cotelor
@@ -206,16 +236,16 @@ Tabelul `quotaSnapshots` stochează **starea istorică a cotelor** pentru analiz
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Cheia monitorizată |
 | `window` | "day" | "week" | "month" |
-| `used` | Costul utilizat în această fereastră (cenți) |
+| `used` | Costul consumat în această perioadă (cenți) |
 | `limit` | Limita (cenți) |
-| `resetAt` | Momentul resetării ferestrei |
-| `createdAt` | Momentul realizării instantaneului |
+| `resetAt` | Momentul resetării perioadei |
+| `createdAt` | Momentul creării instantaneului |
 
-Instantaneele sunt realizate **la fiecare solicitare** care are un cost > 0 și sunt utilizate pentru:
+Instantaneele sunt create **la fiecare cerere** cu un cost > 0 și sunt folosite pentru a:
 
-- Afișarea barei de progres a cotei în panoul de control
-- Afișarea graficelor cu tendința cotei pe 30 de zile
-- Declanșarea alertelor atunci când utilizarea se apropie de limită
+- Afișa bara de progres a cotei în tabloul de bord
+- Afișa grafice de evoluție a cotei pe 30 de zile
+- Declanșa alerte când utilizarea se apropie de limită
 
 ---
 
@@ -272,12 +302,7 @@ Răspuns:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,26 +311,26 @@ Răspuns:
 }
 ```
 
-### Interogarea analizelor de utilizare
+### Interogarea datelor analitice de utilizare
 
-Datele de utilizare sunt accesate prin panoul de control sau prin instrumentele MCP, nu prin endpointuri REST directe de export. Analize disponibile:
+Datele de utilizare sunt accesate prin panoul de control sau prin instrumentele MCP, nu prin endpointuri REST de export direct. Date analitice disponibile:
 
-- **`/api/usage/analytics`** — metrici agregate de utilizare (grupate după model, furnizor, cheie)
+- **`/api/usage/analytics`** — metrici de utilizare agregate (grupare după model, furnizor, cheie)
 - **`/api/usage/quota`** — starea curentă a cotei pentru fiecare cheie API
-- **`/api/usage/history`** — jurnalele istoricului solicitărilor
+- **`/api/usage/history`** — jurnalele istoricului cererilor
 
 ---
 
 ## Instrumente MCP
 
-Două instrumente MCP expun agenților datele de utilizare (consultați `open-sse/mcp-server/tools/`):
+Două instrumente MCP pun datele de utilizare la dispoziția agenților (consultați `open-sse/mcp-server/tools/`):
 
-| Instrument              | Descriere                                                          |
-| ----------------------- | ------------------------------------------------------------------ |
-| `omniroute_cost_report` | Generează un raport al costurilor per cheie pentru o perioadă dată |
-| `omniroute_check_quota` | Returnează starea curentă a cotei pentru o cheie API               |
+| Instrument              | Descriere                                                                   |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `omniroute_cost_report` | Generează un raport de costuri pentru fiecare cheie, pentru o perioadă dată |
+| `omniroute_check_quota` | Returnează starea curentă a cotei pentru o cheie API                        |
 
-Exemplu de invocare de către agent:
+Exemplu de invocare de către un agent:
 
 ```json
 {
@@ -316,57 +341,57 @@ Exemplu de invocare de către agent:
 
 ---
 
-## Păstrarea și curățarea
+## Păstrare și curățare
 
-Datele de utilizare cresc cu aproximativ 1-10KB per solicitare. La scară largă, acest volum poate fi semnificativ.
+Volumul datelor de utilizare crește cu ~1-10KB per cerere. La scară largă, acest volum poate fi semnificativ.
 
 ### Setări de păstrare
 
-Păstrarea istoricului de utilizare este configurată prin setările bazei de date din interfața cu utilizatorul sau prin `/api/settings/database`.
+Perioada de păstrare a istoricului de utilizare se configurează din Setările bazei de date din interfața cu utilizatorul sau prin `/api/settings/database`.
 
 În mod implicit, istoricul de utilizare este păstrat timp de **90 de zile**.
 
-### Curățarea
+### Curățare
 
-Înregistrările vechi sunt curățate de `src/lib/db/cleanup.ts`:
+Înregistrările vechi sunt eliminate de `src/lib/db/cleanup.ts`:
 
-- Procesul este declanșat de procesul cron din fundal
-- Șterge din `usage_history` înregistrările mai vechi decât perioada configurată prin setarea de păstrare `usageHistory`
+- Curățarea este declanșată de procesul cron din fundal
+- Șterge din `usage_history` înregistrările mai vechi decât perioada de păstrare configurată prin setarea `usageHistory`
 
 ### Estimarea spațiului de stocare
 
-| Rata solicitărilor    | Stocare pentru 30 de zile | Stocare pentru 90 de zile |
-| --------------------- | ------------------------- | ------------------------- |
-| 100 solicitări/zi     | ~3MB                      | ~9MB                      |
-| 1.000 solicitări/zi   | ~30MB                     | ~90MB                     |
-| 10.000 solicitări/zi  | ~300MB                    | ~900MB                    |
-| 100.000 solicitări/zi | ~3GB                      | ~9GB                      |
+| Rata cererilor    | Stocare pentru 30 de zile | Stocare pentru 90 de zile |
+| ----------------- | ------------------------- | ------------------------- |
+| 100 cereri/zi     | ~3MB                      | ~9MB                      |
+| 1,000 cereri/zi   | ~30MB                     | ~90MB                     |
+| 10,000 cereri/zi  | ~300MB                    | ~900MB                    |
+| 100,000 cereri/zi | ~3GB                      | ~9GB                      |
 
 Pentru un trafic foarte ridicat, luați în considerare:
 
-- Reducerea perioadei de păstrare prin setările bazei de date
-- Utilizarea `aggregated_metrics` în locul înregistrărilor brute (numai pentru analiză)
+- Reducerea perioadei de păstrare din Setările bazei de date
+- Utilizarea `aggregated_metrics` în locul înregistrărilor brute (doar pentru analiză)
 
 ---
 
 ## Sfaturi pentru optimizarea costurilor
 
-### 1. Utilizați modelul potrivit
+### 1. Folosiți modelul potrivit
 
 ```bash
-# Răspuns rapid — utilizați un model ieftin și rapid
+# Răspuns rapid — folosiți un model ieftin și rapid
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Sarcină complexă — utilizați un model de calitate
+# Sarcină complexă — optați pentru calitate
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Activați memorarea în cache
 
-Memorarea în cache a prompturilor Anthropic economisește **90% pentru contextele repetate**:
+Memorarea în cache a prompturilor Anthropic reduce costurile cu **90% pentru contextul repetat**:
 
 ```ts
-// Memorarea în cache este automată — includeți pur și simplu același prompt de sistem de mari dimensiuni
+// Memorarea în cache este automată — includeți doar același prompt de sistem de mari dimensiuni
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Va fi memorat automat în cache
@@ -374,9 +399,9 @@ const response = await openai.chat({
 });
 ```
 
-### 3. Utilizați compresia
+### 3. Folosiți compresia
 
-Compresia RTK + Caveman economisește **15-95% în sesiunile care utilizează intensiv instrumente**:
+Compresia RTK + Caveman reduce costurile cu **15-95% în sesiunile cu utilizare intensivă a instrumentelor**:
 
 ```ts
 const config = {
@@ -392,12 +417,12 @@ const config = {
 Setați întotdeauna `quotaLimit` pentru a preveni costurile necontrolate:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Limită de 10 USD/lună
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Plafon de 10 USD/lună
 ```
 
-### 5. Auditați principalii consumatori
+### 5. Auditați cei mai mari consumatori
 
-Utilizați panoul de control sau **`/api/usage/analytics`** pentru a grupa după cheia API și a sorta după cost:
+Folosiți panoul de control sau **`/api/usage/analytics`** pentru a grupa după cheia API și a sorta după cost:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -405,32 +430,32 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ---
 
-## Depanarea
+## Depanare
 
-### „Costul este mai mare decât cel estimat”
+### "Costul este mai mare decât era de așteptat"
 
 1. Verificați **`/api/usage/analytics?groupBy=model`** — identificați modelul costisitor
-2. Verificați **`/api/usage/analytics?groupBy=apiKey`** — identificați consumatorul cu utilizare intensă
+2. Verificați **`/api/usage/analytics?groupBy=apiKey`** — identificați consumatorul cu utilizare intensivă
 3. Verificați dacă datele despre prețuri sunt actualizate: `POST /api/pricing/sync`
 
-### „Lipsesc înregistrări”
+### "Lipsesc înregistrări"
 
-- Verificați setările de păstrare ale bazei de date în Panou de control → Bază de date → Curățare — înregistrările vechi sunt șterse de sarcina periodică de curățare (`src/lib/db/cleanup.ts`)
+- Verificați setările de păstrare a datelor din baza de date în Panou de control → Bază de date → Curățare — înregistrările vechi sunt șterse de sarcina periodică de curățare (`src/lib/db/cleanup.ts`)
 - Verificați dacă există erori în `src/lib/db/usage*.ts` — erorile de scriere în baza de date sunt înregistrate în jurnal, dar nu sunt afișate
-- Verificați dacă solicitarea a ajuns efectiv la `chatCore` — verificați rutarea combinată
+- Verificați dacă solicitarea a ajuns efectiv la `chatCore` — verificați rutarea combo
 
-### „Cota nu este aplicată”
+### "Cota nu este aplicată"
 
 - Verificați setarea `quotaLimit` a cheii
 - Verificați dacă `quotaWindow` este setată corect
-- Căutați înregistrările `quotaSnapshots` — acestea ar trebui create la fiecare solicitare
+- Căutați înregistrări `quotaSnapshots` — acestea ar trebui create la fiecare solicitare
 
 ---
 
 ## Consultați și
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Schema tabelelor de utilizare
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — variabilele de mediu pentru sincronizarea prețurilor
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Cum reduc costurile `auto/fast` și `auto/cheap`
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Referința completă pentru `/api/usage/*`
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Variabile de mediu pentru sincronizarea prețurilor
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Cum reduc costurile `auto/fast`, `auto/cheap`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Documentația de referință completă pentru `/api/usage/*`
 - Sursă: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

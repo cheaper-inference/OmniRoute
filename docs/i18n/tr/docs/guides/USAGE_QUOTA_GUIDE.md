@@ -40,27 +40,27 @@ Bu kayıtlar **analizler** hâlinde toplanır, **kota anlık görüntüleri** ol
 
 ## Neler Kaydedilir
 
-`usage.ts` servisi, her istek için bir **kullanım olayı** kaydeder:
+`usage.ts` servisi her istek için bir **kullanım olayı** kaydeder:
 
-| Alan               | Tür     | Kaynak                                                         |
-| ------------------ | ------- | -------------------------------------------------------------- |
-| `id`               | string  | Kayıt sırasında oluşturulan UUID                               |
-| `apiKeyId`         | string  | İsteği başlatan API anahtarı                                   |
-| `provider`         | string  | Sağlayıcı kimliği (openai, anthropic vb.)                      |
-| `model`            | string  | Model kimliği (gpt-5, claude-opus-4-6 vb.)                     |
-| `comboId`          | string? | Bir kombinasyon üzerinden yönlendirildiyse kombinasyon kimliği |
-| `promptTokens`     | number  | Üst sağlayıcı yanıtından                                       |
-| `completionTokens` | number  | Üst sağlayıcı yanıtından                                       |
-| `cachedTokens`     | number  | Önbellek isabeti token'ları (Anthropic istem önbellekleme vb.) |
-| `totalTokens`      | number  | istem + tamamlama                                              |
-| `costUsd`          | number  | Fiyatlandırma verilerinden hesaplanır                          |
-| `latencyMs`        | number  | Uçtan uca istek süresi                                         |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`     |
-| `errorClass`       | string? | status != success ise hata sınıfı                              |
-| `timestamp`        | string  | ISO 8601 UTC                                                   |
-| `metadata`         | object  | Eklentiler tarafından eklenen özel veriler                     |
+| Alan               | Tür     | Kaynak                                                           |
+| ------------------ | ------- | ---------------------------------------------------------------- |
+| `id`               | string  | Kayıt sırasında oluşturulan UUID                                 |
+| `apiKeyId`         | string  | İsteği başlatan API anahtarı                                     |
+| `provider`         | string  | Sağlayıcı kimliği (openai, anthropic vb.)                        |
+| `model`            | string  | Model kimliği (gpt-5, claude-opus-4-6 vb.)                       |
+| `comboId`          | string? | Bir kombinasyon üzerinden yönlendirildiyse kombinasyon kimliği   |
+| `promptTokens`     | number  | Üst sağlayıcının yanıtından                                      |
+| `completionTokens` | number  | Üst sağlayıcının yanıtından                                      |
+| `cachedTokens`     | number  | Önbellek isabeti token'ları (Anthropic istem önbelleklemesi vb.) |
+| `totalTokens`      | number  | İstem + tamamlama                                                |
+| `costUsd`          | number  | Fiyatlandırma verilerinden hesaplanır                            |
+| `latencyMs`        | number  | Uçtan uca istek süresi                                           |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`       |
+| `errorClass`       | string? | Durum success değilse hata sınıfı                                |
+| `timestamp`        | string  | ISO 8601 UTC                                                     |
+| `metadata`         | object  | Eklenti tarafından eklenen özel veriler                          |
 
-### Token'lar Nereden Gelir?
+### Token'lar Nereden Gelir
 
 Token'lar, **yanıt işleyicisinde** üst sağlayıcının yanıtından çıkarılır:
 
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Kullanım bilgisi döndürmeyen sağlayıcılarda (bazı web çerezi sağlayıcıları) OmniRoute, `token başına ~4 karakter` sezgisel yöntemini kullanarak token sayısını **tahmin eder** (bkz. `open-sse/services/autoCombo/pipelineRouter.ts`).
+Kullanım bilgisi döndürmeyen sağlayıcılar (bazı web çerezi sağlayıcıları) için OmniRoute, `~4 chars per token` sezgisel kuralını kullanarak token sayısını **tahmin eder** (bkz. `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Önbelleğe Alınmış Token'lar
 
-OmniRoute, `cached_tokens` değerini `prompt_tokens` değerinden ayrı olarak izler; çünkü:
+OmniRoute, `cached_tokens` değerini `prompt_tokens` değerinden ayrı izler, çünkü:
 
-- Anthropic istem önbellekleme, önbelleğe alınmış token'lar için daha düşük bir ücret uygular (normal ücretin %10'u)
-- Bazı sağlayıcılar, farklı şekilde fiyatlandırılması gereken `cache_read_input_tokens` değerini döndürür
-- Analizler, **önbellek isabet oranını** gösterebilir = `cached_tokens / prompt_tokens`
+- Anthropic istem önbelleklemesi, önbelleğe alınmış token'lar için indirimli ücret uygular (normal ücretin %10'u)
+- Bazı sağlayıcılar, farklı fiyatlandırılması gereken `cache_read_input_tokens` değerini döndürür
+- Analizler **önbellek isabet oranını** gösterebilir = `cached_tokens / prompt_tokens`
+
+### Önbelleğe yazma katmanı tanılaması
+
+Analiz panosunun istem önbelleği sağlık paneli, sağlayıcının bildirdiği
+5 dakikalık ve 1 saatlik önbelleğe yazma işlemlerini birbirinden ayırır. Anthropic'in
+`usage.cache_creation.ephemeral_5m_input_tokens` ve
+`usage.cache_creation.ephemeral_1h_input_tokens` değerleri, akışlı ve
+akışsız kullanım verisi dönüştürme işlemleri boyunca korunur ve çağrı günlüğü özetleriyle birlikte saklanır. Birleşik
+önbelleğe yazma toplamı bu gruplara ikinci kez eklenmez.
+
+Eski kayıtlar da dahil olmak üzere, yalnızca birleşik bir yazma sayacı içeren çağrıların
+katmanı bilinmiyor olarak kabul edilir. Kısmi bir dökümde, atanmamış kalan miktar bilinmiyor olarak tutulur; geçersiz veya
+çelişkili sayaçlar sessizce bir TTL'ye atanmak yerine işaretlenir. İstek tarafındaki
+TTL işaretleri, faturalandırılan bir katmanın kanıtı değildir.
+
+Panelin API eşdeğeri yazma tahmini, isteğin tamamını değil, yalnızca
+bildirilen ve fiyatı belirli katmanları kapsar. Yerel Claude/Anthropic model fiyatlandırmasında, 5 dakikalık yazma işlemleri için
+girdi ücretinin 1,25 katını, 1 saatlik yazma işlemleri için ise girdi ücretinin iki katını kullanır. Eksik
+fiyatlandırma sıfır değil, mevcut değil olarak değerlendirilir. Fiyatlar her yeni çağrı günlüğe kaydedildiğinde alınır;
+geçmiş kayıtlar yeniden fiyatlandırılmaz. Bu nedenle abonelik hesapları,
+bu tutar nakit harcama olarak gerçekleşmeden veya abonelik
+kotasından düşülmeden bir API eşdeğeri tahminine sahip olabilir. Mevcut kota, bütçe ve sağlayıcının kesin maliyet hesaplamaları değişmez.
+
+Bu tanılamalar, mevcut sınırlı önbellek sağlığı özetini ve çağrı günlüğü
+saklama politikasını kullanır. İstek TTL varsayılanlarını, yönlendirmeyi veya hesap seçimini değiştirmez.
+Sağlayıcıya gönderim sınırında, istemcinin talep ettiği TTL ile fiilen gönderilen TTL'nin
+kaydedilmesi ertelenmiştir; bu panel fiilen gönderilen TTL'yi değil, alındılarda belirtilen katmanları raporlar.
+
+Uygulama: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` ve `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,33 +151,33 @@ Fiyatlandırma verisi bulunmayan modeller için OmniRoute, dahili ortalama oranl
 
 ---
 
-## Tarih Aralığı Toplama
+## Tarih Aralığına Göre Toplulaştırma
 
-`usageAnalytics.ts` modülü, ham kullanım verilerinden pano bileşenlerini hesaplar. 7 zaman aralığını destekler:
+`usageAnalytics.ts` modülü, ham kullanım verilerinden gösterge paneli bileşenlerini hesaplar. 7 zaman aralığını destekler:
 
-| Aralık   | Zaman dilimi                           | Kullanım amacı                          |
-| -------- | -------------------------------------- | --------------------------------------- |
-| `1d`     | Son 24 saat                            | Saatlik maliyet artışlarını algılama    |
-| `7d`     | Son 7 gün                              | Haftalık inceleme                       |
-| `30d`    | Son 30 gün                             | Aylık faturalandırma                    |
-| `90d`    | Son 90 gün                             | Üç aylık analiz                         |
-| `ytd`    | Geçerli yılın 1 Ocak tarihi itibarıyla | Yıllık bütçe takibi                     |
-| `all`    | Tüm zamanlar                           | Tüm kullanım süresine ait istatistikler |
-| `custom` | Kullanıcı tanımlı başlangıç/bitiş      | Denetimler, geçici sorgular             |
+| Aralık   | Zaman dilimi                                      | Kullanım amacı                            |
+| -------- | ------------------------------------------------- | ----------------------------------------- |
+| `1d`     | Son 24 saat                                       | Saatlik maliyet sıçramalarını tespit etme |
+| `7d`     | Son 7 gün                                         | Haftalık inceleme                         |
+| `30d`    | Son 30 gün                                        | Aylık faturalandırma                      |
+| `90d`    | Son 90 gün                                        | Üç aylık analiz                           |
+| `ytd`    | İçinde bulunulan yılın 1 Ocak tarihinden itibaren | Yıllık bütçe takibi                       |
+| `all`    | Tüm zamanlar                                      | Tüm dönem istatistikleri                  |
+| `custom` | Kullanıcı tanımlı başlangıç/bitiş                 | Denetimler, anlık sorgular                |
 
-### Hesaplanan Pano Bileşenleri
+### Hesaplanan Gösterge Paneli Bileşenleri
 
-Analiz katmanı, herhangi bir tarih aralığı için şunları hesaplar:
+Analitik katmanı, herhangi bir tarih aralığı için şunları hesaplar:
 
-| Bileşen                               | Açıklama                                                  |
-| ------------------------------------- | --------------------------------------------------------- |
-| **Özet kartları**                     | Toplam istek, toplam maliyet, toplam token, başarı oranı  |
-| **Günlük eğilim grafiği**             | Model bazında yığılmış günlük maliyet + token sayısı      |
-| **Etkinlik ısı haritası**             | Günün saati × haftanın günü ızgarası, renk = istek sayısı |
-| **Model dağılımı**                    | Modele göre maliyetin pasta grafiği                       |
-| **Sağlayıcı dağılımı**                | Sağlayıcıya göre isteklerin çubuk grafiği                 |
-| **En çok kullanılan API anahtarları** | Maliyete göre ilk 10 anahtarın tablosu                    |
-| **Hata analizi**                      | Zaman içindeki hata oranı, en yaygın hata sınıfları       |
+| Bileşen                                  | Açıklama                                                  |
+| ---------------------------------------- | --------------------------------------------------------- |
+| **Özet kartları**                        | Toplam istek, toplam maliyet, toplam token, başarı oranı  |
+| **Günlük eğilim grafiği**                | Modele göre yığılmış günlük maliyet + token sayısı        |
+| **Etkinlik ısı haritası**                | Günün saati × haftanın günü ızgarası, renk = istek sayısı |
+| **Model dağılımı**                       | Modele göre maliyetin pasta grafiği                       |
+| **Sağlayıcı dağılımı**                   | Sağlayıcıya göre isteklerin çubuk grafiği                 |
+| **En çok harcama yapan API anahtarları** | Maliyete göre ilk 10 anahtarın tablosu                    |
+| **Hata analizi**                         | Zaman içindeki hata oranı, en yaygın hata sınıfları       |
 
 ### Programatik Erişim
 
@@ -171,9 +201,9 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Kota Uygulaması
 
-API anahtarı başına kota iki noktada uygulanır:
+API anahtarı başına kota iki yerde uygulanır:
 
-1. **Yumuşak sınır** (`quotaWarnAt`): kullanım eşiği aştığında kontrol panelinde uyarı gösterilir
+1. **Esnek sınır** (`quotaWarnAt`): kullanım eşiği aştığında gösterge panelinde uyarı
 2. **Kesin sınır** (`quotaLimit`): aşıldığında istek HTTP 429 ile reddedilir
 
 ### Yapılandırma
@@ -190,12 +220,12 @@ await updateApiKey(keyId, {
 ### Uygulama Akışı
 
 ```
-İstek ──▶ quotaCheck()
-             │
-             ├── Sınır içinde mi?  ──▶ izin ver
-             │
-             └── Sınır aşıldı mı?  ──▶ 429 Too Many Requests
-                                        Retry-After üstbilgisiyle
+Request ──▶ quotaCheck()
+              │
+              ├── Within limit?  ──▶ allow
+              │
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
 ### Kota Anlık Görüntüleri
@@ -203,17 +233,17 @@ await updateApiKey(keyId, {
 `quotaSnapshots` tablosu, eğilim analizi için **geçmiş kota durumunu** saklar:
 
 | Alan | Açıklama |
-| ----------- | ------------------------------------- | ------ | ------- |
-| `apiKeyId` | İzlenen anahtar |
-| `window` | "day" | "week" | "month" |
-| `used` | Bu zaman aralığında kullanılan maliyet (sent) |
+| ----------- | -------------------------------- | ------ | ------- |
+| `apiKeyId` | Takip edilen anahtar |
+| `window` | "gün" | "hafta" | "ay" |
+| `used` | Bu zaman diliminde kullanılan maliyet (sent) |
 | `limit` | Sınır (sent) |
-| `resetAt` | Zaman aralığının sıfırlandığı zaman |
-| `createdAt` | Anlık görüntünün alındığı zaman |
+| `resetAt` | Zaman diliminin sıfırlandığı an |
+| `createdAt` | Anlık görüntünün alındığı an |
 
-Anlık görüntüler, maliyeti > 0 olan **her istekte** alınır ve şunlar için kullanılır:
+Anlık görüntüler, maliyeti > 0 olan **her istekte** alınır ve şu amaçlarla kullanılır:
 
-- Kontrol panelinde kota ilerleme çubuğunu oluşturmak
+- Gösterge panelinde kota ilerleme çubuğunu görüntülemek
 - 30 günlük kota eğilim grafiklerini göstermek
 - Kullanım sınıra yaklaştığında uyarıları tetiklemek
 
@@ -272,12 +302,7 @@ Yanıt:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -290,7 +315,7 @@ Yanıt:
 
 Kullanım verilerine doğrudan REST dışa aktarma uç noktaları üzerinden değil, kontrol paneli veya MCP araçları üzerinden erişilir. Kullanılabilir analizler:
 
-- **`/api/usage/analytics`** — toplu kullanım metrikleri (modele, sağlayıcıya veya anahtara göre gruplandırma)
+- **`/api/usage/analytics`** — toplulaştırılmış kullanım metrikleri (modele, sağlayıcıya, anahtara göre gruplama)
 - **`/api/usage/quota`** — API anahtarı başına geçerli kota durumu
 - **`/api/usage/history`** — istek geçmişi günlükleri
 
@@ -298,14 +323,14 @@ Kullanım verilerine doğrudan REST dışa aktarma uç noktaları üzerinden de�
 
 ## MCP Araçları
 
-İki MCP aracı, kullanım verilerini aracılara sunar (bkz. `open-sse/mcp-server/tools/`):
+İki MCP aracı, kullanım verilerini ajanlara sunar (bkz. `open-sse/mcp-server/tools/`):
 
-| Araç                    | Açıklama                                                    |
-| ----------------------- | ----------------------------------------------------------- |
-| `omniroute_cost_report` | Belirli bir dönem için anahtar başına maliyet raporu üretir |
-| `omniroute_check_quota` | Bir API anahtarının geçerli kota durumunu döndürür          |
+| Araç                    | Açıklama                                                        |
+| ----------------------- | --------------------------------------------------------------- |
+| `omniroute_cost_report` | Belirli bir dönem için anahtar bazında maliyet raporu oluşturur |
+| `omniroute_check_quota` | Bir API anahtarının geçerli kota durumunu döndürür              |
 
-Örnek aracı çağrısı:
+Örnek ajan çağrısı:
 
 ```json
 {
@@ -318,34 +343,34 @@ Kullanım verilerine doğrudan REST dışa aktarma uç noktaları üzerinden de�
 
 ## Saklama ve Temizleme
 
-Kullanım verileri istek başına yaklaşık 1-10KB büyür. Büyük ölçekte bu miktar önemli olabilir.
+Kullanım verileri, istek başına ~1-10KB büyür. Büyük ölçekte bu miktar önemli boyutlara ulaşabilir.
 
 ### Saklama Ayarları
 
 Kullanım geçmişinin saklama süresi, kullanıcı arayüzündeki Veritabanı Ayarları veya `/api/settings/database` üzerinden yapılandırılır.
 
-Varsayılan olarak kullanım geçmişi **90 gün** boyunca saklanır.
+Varsayılan olarak kullanım geçmişi **90 gün** saklanır.
 
 ### Temizleme
 
 Eski kayıtlar `src/lib/db/cleanup.ts` tarafından temizlenir:
 
 - Arka plandaki cron işlemi tarafından tetiklenir
-- Yapılandırılmış `usageHistory` saklama ayarından daha eski `usage_history` kayıtlarını siler
+- `usage_history` içindeki, yapılandırılmış `usageHistory` saklama süresinden daha eski kayıtları siler
 
 ### Depolama Tahmini
 
-| İstek oranı       | 30 günlük depolama | 90 günlük depolama |
+| İstek sıklığı     | 30 günlük depolama | 90 günlük depolama |
 | ----------------- | ------------------ | ------------------ |
 | 100 istek/gün     | ~3MB               | ~9MB               |
 | 1.000 istek/gün   | ~30MB              | ~90MB              |
 | 10.000 istek/gün  | ~300MB             | ~900MB             |
 | 100.000 istek/gün | ~3GB               | ~9GB               |
 
-Çok yüksek trafik için şunları değerlendirin:
+Çok yüksek trafik durumunda şunları değerlendirin:
 
-- Veritabanı Ayarları üzerinden saklama süresini azaltmak
-- Ham kayıtlar yerine `aggregated_metrics` kullanmak (yalnızca analiz için)
+- Veritabanı Ayarları üzerinden saklama süresini kısaltmak
+- Ham kayıtlar yerine `aggregated_metrics` kullanmak (yalnızca analizler için)
 
 ---
 
@@ -354,19 +379,19 @@ Eski kayıtlar `src/lib/db/cleanup.ts` tarafından temizlenir:
 ### 1. Doğru Modeli Kullanın
 
 ```bash
-# Hızlı yanıt — ucuz + hızlı seçeneği kullanın
+# Hızlı yanıt — ucuz + hızlı modeli kullanın
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Karmaşık görev — kaliteli seçeneği kullanın
+# Karmaşık görev — kaliteli modeli kullanın
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
 ### 2. Önbelleğe Almayı Etkinleştirin
 
-Anthropic istem önbelleğe alma özelliği, **tekrarlanan bağlamlarda %90 tasarruf sağlar**:
+Anthropic istem önbelleklemesi, **tekrarlanan bağlamda %90 tasarruf** sağlar:
 
 ```ts
-// Önbelleğe alma otomatiktir — yalnızca aynı büyük sistem istemini ekleyin
+// Önbelleğe alma otomatiktir — aynı büyük sistem istemini eklemeniz yeterlidir
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Otomatik olarak önbelleğe alınır
@@ -374,9 +399,9 @@ const response = await openai.chat({
 });
 ```
 
-### 3. Sıkıştırma Kullanın
+### 3. Sıkıştırmayı Kullanın
 
-RTK + Caveman sıkıştırması, **yoğun araç kullanılan oturumlarda %15-95 tasarruf sağlar**:
+RTK + Caveman sıkıştırması, **araçların yoğun kullanıldığı oturumlarda %15-95 tasarruf** sağlar:
 
 ```ts
 const config = {
@@ -389,13 +414,13 @@ const config = {
 
 ### 4. Anahtar Başına Kota Belirleyin
 
-Kontrolsüz maliyetleri önlemek için her zaman `quotaLimit` ayarlayın:
+Kontrolsüz maliyet artışlarını önlemek için her zaman `quotaLimit` değerini ayarlayın:
 
 ```ts
-await updateApiKey(keyId, { quotaLimit: 10_00 }); // Aylık $10 sınırı
+await updateApiKey(keyId, { quotaLimit: 10_00 }); // Aylık 10 ABD doları sınırı
 ```
 
-### 5. En Fazla Tüketim Yapanları Denetleyin
+### 5. En Çok Tüketenleri Denetleyin
 
 API anahtarına göre gruplamak ve maliyete göre sıralamak için kontrol panelini veya **`/api/usage/analytics`** uç noktasını kullanın:
 
@@ -410,27 +435,27 @@ GET /api/usage/analytics?groupBy=apiKey
 ### "Maliyet beklenenden yüksek"
 
 1. **`/api/usage/analytics?groupBy=model`** uç noktasını kontrol edin — pahalı modeli bulun
-2. **`/api/usage/analytics?groupBy=apiKey`** uç noktasını kontrol edin — en fazla tüketim yapanı bulun
+2. **`/api/usage/analytics?groupBy=apiKey`** uç noktasını kontrol edin — yoğun tüketim yapanı bulun
 3. Fiyatlandırma verilerinin güncel olduğunu doğrulayın: `POST /api/pricing/sync`
 
 ### "Kayıtlar eksik"
 
-- Kontrol Paneli → Veritabanı → Temizleme altındaki veritabanı saklama ayarlarını kontrol edin — eski kayıtlar düzenli temizleme görevi (`src/lib/db/cleanup.ts`) tarafından silinir
-- `src/lib/db/usage*.ts` içindeki hataları kontrol edin — veritabanına yazma hataları günlüğe kaydedilir ancak kullanıcıya gösterilmez
+- Kontrol Paneli → Veritabanı → Temizleme altındaki veritabanı saklama ayarlarını kontrol edin — eski kayıtlar periyodik temizleme görevi (`src/lib/db/cleanup.ts`) tarafından silinir
+- `src/lib/db/usage*.ts` dosyalarında hata olup olmadığını kontrol edin — veritabanına yazma hataları günlüğe kaydedilir ancak kullanıcıya gösterilmez
 - İsteğin gerçekten `chatCore` bileşenine ulaştığını doğrulayın — combo yönlendirmesini kontrol edin
 
 ### "Kota uygulanmıyor"
 
 - Anahtarın `quotaLimit` ayarını kontrol edin
-- `quotaWindow` ayarının doğru yapıldığını doğrulayın
-- `quotaSnapshots` kayıtlarını arayın — bunlar her istekte oluşturulmalıdır
+- `quotaWindow` değerinin doğru ayarlandığını doğrulayın
+- `quotaSnapshots` kayıtlarını arayın — her istekte oluşturulmaları gerekir
 
 ---
 
-## Ayrıca Bkz.
+## Ayrıca Bakınız
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Kullanım tablolarının şeması
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — fiyatlandırma eşitleme ortam değişkenleri
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Fiyatlandırma eşitlemesi için ortam değişkenleri
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — `auto/fast` ve `auto/cheap` maliyeti nasıl azaltır
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Tam `/api/usage/*` referansı
 - Kaynak: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

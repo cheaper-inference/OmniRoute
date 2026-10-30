@@ -1,4 +1,5 @@
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
@@ -145,10 +146,13 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
     usageNumber(source.total_tokens) ??
     usageNumber(source.totalTokens) ??
     inputTokens + outputTokens;
+  const cacheFields = mergeCacheCreationFields(previous, raw);
 
   return {
+    ...cacheFields,
     input_tokens: inputTokens,
     input_tokens_details: {
+      ...cacheFields,
       cached_tokens: cachedTokens,
       ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
       ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined

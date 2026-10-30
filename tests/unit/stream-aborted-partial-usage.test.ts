@@ -218,7 +218,9 @@ test("resolvePartialStreamUsage: preserves positive detail counters and omits em
       contentLength: 0,
       body: REQUEST_BODY,
     }),
-    { ...base, total_tokens: 120 }
+    // Empty/negative counters are still omitted; the negative cache-write total is kept only
+    // as its diagnostic tier status (#17307), never as a counter.
+    { ...base, total_tokens: 120, cache_creation_tier_status: "invalid" }
   );
 });
 

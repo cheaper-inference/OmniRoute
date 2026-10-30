@@ -38,31 +38,31 @@ Yêu cầu ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Những dữ liệu được ghi lại
+## Những gì được ghi lại
 
-Dịch vụ `usage.ts` ghi lại một **sự kiện sử dụng** cho mỗi yêu cầu:
+Dịch vụ `usage.ts` ghi nhận một **sự kiện sử dụng** cho mỗi yêu cầu:
 
-| Trường             | Kiểu    | Nguồn                                                                          |
-| ------------------ | ------- | ------------------------------------------------------------------------------ |
-| `id`               | string  | UUID được tạo khi ghi bản ghi                                                  |
-| `apiKeyId`         | string  | Khóa API đã khởi tạo yêu cầu                                                   |
-| `provider`         | string  | ID nhà cung cấp (openai, anthropic, v.v.)                                      |
-| `model`            | string  | ID mô hình (gpt-5, claude-opus-4-6, v.v.)                                      |
-| `comboId`          | string? | ID tổ hợp nếu được định tuyến qua một tổ hợp                                   |
-| `promptTokens`     | number  | Từ phản hồi thượng nguồn                                                       |
-| `completionTokens` | number  | Từ phản hồi thượng nguồn                                                       |
-| `cachedTokens`     | number  | Token truy cập bộ nhớ đệm thành công (bộ nhớ đệm lời nhắc của Anthropic, v.v.) |
-| `totalTokens`      | number  | lời nhắc + hoàn thành                                                          |
-| `costUsd`          | number  | Được tính từ dữ liệu định giá                                                  |
-| `latencyMs`        | number  | Thời lượng yêu cầu từ đầu đến cuối                                             |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                     |
-| `errorClass`       | string? | Lớp lỗi nếu status != success                                                  |
-| `timestamp`        | string  | ISO 8601 UTC                                                                   |
-| `metadata`         | object  | Dữ liệu tùy chỉnh do plugin chèn vào                                           |
+| Trường             | Kiểu    | Nguồn                                                           |
+| ------------------ | ------- | --------------------------------------------------------------- |
+| `id`               | string  | UUID được tạo khi ghi bản ghi                                   |
+| `apiKeyId`         | string  | Khóa API khởi tạo yêu cầu                                       |
+| `provider`         | string  | ID nhà cung cấp (openai, anthropic, v.v.)                       |
+| `model`            | string  | ID mô hình (gpt-5, claude-opus-4-6, v.v.)                       |
+| `comboId`          | string? | ID tổ hợp nếu được định tuyến qua một tổ hợp                    |
+| `promptTokens`     | number  | Từ phản hồi của nhà cung cấp thượng nguồn                       |
+| `completionTokens` | number  | Từ phản hồi của nhà cung cấp thượng nguồn                       |
+| `cachedTokens`     | number  | Các token trúng bộ nhớ đệm (lưu đệm prompt của Anthropic, v.v.) |
+| `totalTokens`      | number  | prompt + phần hoàn thành                                        |
+| `costUsd`          | number  | Được tính từ dữ liệu giá                                        |
+| `latencyMs`        | number  | Thời gian xử lý yêu cầu từ đầu đến cuối                         |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`      |
+| `errorClass`       | string? | Lớp lỗi nếu trạng thái != thành công                            |
+| `timestamp`        | string  | ISO 8601 UTC                                                    |
+| `metadata`         | object  | Dữ liệu tùy chỉnh do plugin chèn vào                            |
 
-### Nguồn của token
+### Token được lấy từ đâu
 
-Token được trích xuất từ phản hồi của nhà cung cấp thượng nguồn trong **trình xử lý phản hồi**:
+Token được trích xuất từ phản hồi của nhà cung cấp thượng nguồn trong **bộ xử lý phản hồi**:
 
 ```ts
 // Từ open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Đối với các nhà cung cấp không trả về dữ liệu sử dụng (một số nhà cung cấp web-cookie), OmniRoute **ước tính** số token bằng phương pháp kinh nghiệm `~4 ký tự trên mỗi token` (xem `open-sse/services/autoCombo/pipelineRouter.ts`).
+Đối với các nhà cung cấp không trả về thông tin sử dụng (một số nhà cung cấp dùng cookie web), OmniRoute **ước tính** số token bằng quy tắc gần đúng `~4 chars per token` (xem `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Token được lưu vào bộ nhớ đệm
+### Token được lưu đệm
 
 OmniRoute theo dõi `cached_tokens` riêng biệt với `prompt_tokens` vì:
 
-- Cơ chế lưu lời nhắc vào bộ nhớ đệm của Anthropic tính mức phí thấp hơn cho token được lưu vào bộ nhớ đệm (10% mức phí thông thường)
-- Một số nhà cung cấp trả về `cache_read_input_tokens`, cần được tính giá khác
-- Dữ liệu phân tích có thể hiển thị **tỷ lệ truy cập bộ nhớ đệm thành công** = `cached_tokens / prompt_tokens`
+- Tính năng lưu đệm prompt của Anthropic áp dụng mức phí thấp hơn cho token được lưu đệm (10% mức thông thường)
+- Một số nhà cung cấp trả về `cache_read_input_tokens` cần được tính giá khác
+- Phân tích có thể hiển thị **tỷ lệ trúng bộ nhớ đệm** = `cached_tokens / prompt_tokens`
+
+### Chẩn đoán cấp ghi bộ nhớ đệm
+
+Bảng tình trạng bộ nhớ đệm prompt trên bảng điều khiển Phân tích phân biệt
+các lượt ghi bộ nhớ đệm 5 phút và 1 giờ do nhà cung cấp báo cáo. Các trường
+`usage.cache_creation.ephemeral_5m_input_tokens` và
+`usage.cache_creation.ephemeral_1h_input_tokens` của Anthropic được giữ lại khi chuyển đổi thông tin sử dụng ở chế độ truyền luồng và
+không truyền luồng, đồng thời được lưu cùng các bản tóm tắt nhật ký lệnh gọi. Tổng số
+ghi bộ nhớ đệm gộp không được cộng lại lần thứ hai vào các nhóm đó.
+
+Các lệnh gọi chỉ có bộ đếm ghi gộp, bao gồm cả các bản ghi cũ, có cấp
+không xác định. Với số liệu phân tách chưa đầy đủ, phần còn lại chưa được phân bổ vẫn được coi là không xác định; các bộ đếm không hợp lệ hoặc
+mâu thuẫn sẽ được đánh dấu thay vì âm thầm gán TTL. Các dấu chỉ
+TTL ở phía yêu cầu không phải là bằng chứng về cấp được tính phí.
+
+Ước tính chi phí ghi tương đương API của bảng chỉ bao gồm các cấp đã được báo cáo và có giá, không phải
+toàn bộ yêu cầu. Đối với giá mô hình Claude/Anthropic gốc, ước tính này sử dụng mức giá bằng 1,25 lần
+giá đầu vào cho lượt ghi 5 phút và gấp đôi giá đầu vào cho lượt ghi 1 giờ. Khi thiếu
+giá, giá trị được coi là không có, chứ không phải bằng không. Giá được ghi nhận khi mỗi lệnh gọi mới được ghi vào nhật ký;
+các bản ghi lịch sử không được tính lại giá. Do đó, tài khoản đăng ký có thể có
+ước tính tương đương API mà không phát sinh khoản chi tiền thực tế hoặc mức sử dụng hạn ngạch
+đăng ký tương ứng. Các phép tính hạn ngạch, ngân sách và chi phí chính xác theo nhà cung cấp hiện có không thay đổi.
+
+Các chẩn đoán này sử dụng bản tóm tắt tình trạng bộ nhớ đệm có giới hạn và chính sách lưu giữ nhật ký lệnh gọi
+hiện có. Chúng không thay đổi TTL mặc định của yêu cầu, cách định tuyến hoặc lựa chọn tài khoản.
+Việc ghi nhận TTL do máy khách yêu cầu so với TTL gửi đi thực tế tại ranh giới gửi đến
+nhà cung cấp được hoãn lại; bảng này báo cáo các cấp trên biên nhận, không phải TTL gửi đi thực tế.
+
+Triển khai: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` và `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,33 +153,33 @@ curl -X POST http://localhost:20128/api/pricing/sync
 
 ## Tổng hợp theo khoảng ngày
 
-Mô-đun `usageAnalytics.ts` tính toán các tiện ích trên bảng điều khiển từ dữ liệu sử dụng thô. Mô-đun này hỗ trợ 7 khoảng thời gian:
+Mô-đun `usageAnalytics.ts` tính toán các tiện ích trên bảng điều khiển từ dữ liệu sử dụng thô. Mô-đun hỗ trợ 7 khoảng thời gian:
 
-| Khoảng   | Khung thời gian                              | Trường hợp sử dụng                           |
-| -------- | -------------------------------------------- | -------------------------------------------- |
-| `1d`     | 24 giờ qua                                   | Phát hiện mức tăng đột biến chi phí theo giờ |
-| `7d`     | 7 ngày qua                                   | Đánh giá hằng tuần                           |
-| `30d`    | 30 ngày qua                                  | Thanh toán hằng tháng                        |
-| `90d`    | 90 ngày qua                                  | Phân tích hằng quý                           |
-| `ytd`    | Từ ngày 1 tháng 1 của năm hiện tại           | Theo dõi ngân sách hằng năm                  |
-| `all`    | Toàn bộ thời gian                            | Thống kê trọn vòng đời                       |
-| `custom` | Ngày bắt đầu/kết thúc do người dùng xác định | Kiểm toán, truy vấn tùy phát                 |
+| Khoảng   | Khung thời gian                              | Trường hợp sử dụng                       |
+| -------- | -------------------------------------------- | ---------------------------------------- |
+| `1d`     | 24 giờ qua                                   | Phát hiện chi phí tăng đột biến theo giờ |
+| `7d`     | 7 ngày qua                                   | Đánh giá hằng tuần                       |
+| `30d`    | 30 ngày qua                                  | Thanh toán hằng tháng                    |
+| `90d`    | 90 ngày qua                                  | Phân tích hằng quý                       |
+| `ytd`    | Từ ngày 1 tháng 1 năm hiện tại               | Theo dõi ngân sách hằng năm              |
+| `all`    | Toàn bộ thời gian                            | Thống kê toàn thời gian                  |
+| `custom` | Ngày bắt đầu/kết thúc do người dùng xác định | Kiểm toán, truy vấn đột xuất             |
 
-### Các tiện ích bảng điều khiển được tính toán
+### Các tiện ích được tính toán trên bảng điều khiển
 
-Đối với bất kỳ khoảng ngày nào, lớp phân tích đều tính toán:
+Với bất kỳ khoảng ngày nào, lớp phân tích tính toán:
 
 | Tiện ích                        | Mô tả                                                             |
 | ------------------------------- | ----------------------------------------------------------------- |
-| **Thẻ tóm tắt**                 | Tổng số yêu cầu, tổng chi phí, tổng số token, tỷ lệ thành công    |
+| **Thẻ tổng quan**               | Tổng số yêu cầu, tổng chi phí, tổng số token, tỷ lệ thành công    |
 | **Biểu đồ xu hướng hằng ngày**  | Chi phí + token mỗi ngày, xếp chồng theo mô hình                  |
 | **Bản đồ nhiệt hoạt động**      | Lưới giờ trong ngày × ngày trong tuần, màu sắc = số lượng yêu cầu |
 | **Phân tích theo mô hình**      | Biểu đồ tròn về chi phí theo mô hình                              |
-| **Phân tích theo nhà cung cấp** | Biểu đồ cột về số yêu cầu theo nhà cung cấp                       |
-| **Các khóa API hàng đầu**       | Bảng 10 khóa có chi phí cao nhất                                  |
-| **Phân tích lỗi**               | Tỷ lệ lỗi theo thời gian, các lớp lỗi phổ biến nhất               |
+| **Phân tích theo nhà cung cấp** | Biểu đồ cột về số lượng yêu cầu theo nhà cung cấp                 |
+| **Khóa API hàng đầu**           | Bảng 10 khóa có chi phí cao nhất                                  |
+| **Phân tích lỗi**               | Tỷ lệ lỗi theo thời gian, các loại lỗi phổ biến nhất              |
 
-### Truy cập bằng lập trình
+### Truy cập bằng mã lập trình
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
@@ -171,15 +201,15 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Thực thi hạn ngạch
 
-Hạn ngạch cho mỗi khóa API được thực thi ở hai nơi:
+Hạn ngạch cho từng khóa API được thực thi ở hai nơi:
 
-1. **Giới hạn mềm** (`quotaWarnAt`): cảnh báo trên bảng điều khiển khi mức sử dụng vượt quá ngưỡng
-2. **Giới hạn cứng** (`quotaLimit`): yêu cầu bị từ chối với HTTP 429 khi vượt quá giới hạn
+1. **Giới hạn mềm** (`quotaWarnAt`): cảnh báo trên bảng điều khiển khi mức sử dụng vượt ngưỡng
+2. **Giới hạn cứng** (`quotaLimit`): yêu cầu bị từ chối với HTTP 429 khi vượt giới hạn
 
 ### Cấu hình
 
 ```ts
-// Cho mỗi khóa API
+// Cho từng khóa API
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — hiển thị cảnh báo
   quotaLimit: 10_00,    // $10.00 — dừng hoàn toàn
@@ -195,27 +225,27 @@ Yêu cầu ──▶ quotaCheck()
               ├── Trong giới hạn?  ──▶ cho phép
               │
               └── Vượt giới hạn?  ──▶ 429 Quá nhiều yêu cầu
-                                      kèm header Retry-After
+                                   kèm tiêu đề Retry-After
 ```
 
-### Ảnh chụp nhanh hạn ngạch
+### Bản chụp hạn ngạch
 
-Bảng `quotaSnapshots` lưu trữ **trạng thái hạn ngạch trong lịch sử** để phân tích xu hướng:
+Bảng `quotaSnapshots` lưu trữ **trạng thái hạn ngạch trong quá khứ** để phân tích xu hướng:
 
 | Trường | Mô tả |
-| ----------- | --------------------------------- | ------ | ------- |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Khóa đang được theo dõi |
 | `window` | "day" | "week" | "month" |
-| `used` | Chi phí đã sử dụng trong kỳ này (cent) |
-| `limit` | Giới hạn (cent) |
-| `resetAt` | Thời điểm kỳ được đặt lại |
-| `createdAt` | Thời điểm ảnh chụp nhanh được tạo |
+| `used` | Chi phí đã sử dụng trong khung thời gian này (xu) |
+| `limit` | Giới hạn (xu) |
+| `resetAt` | Thời điểm khung thời gian được đặt lại |
+| `createdAt` | Thời điểm tạo bản chụp |
 
-Ảnh chụp nhanh được tạo **trên mọi yêu cầu** có chi phí > 0 và được dùng để:
+Bản chụp được tạo **với mỗi yêu cầu** có chi phí > 0 và được dùng để:
 
 - Hiển thị thanh tiến trình hạn ngạch trên bảng điều khiển
 - Hiển thị biểu đồ xu hướng hạn ngạch trong 30 ngày
-- Kích hoạt cảnh báo khi mức sử dụng gần đạt giới hạn
+- Kích hoạt cảnh báo khi mức sử dụng tiến gần giới hạn
 
 ---
 
@@ -272,12 +302,7 @@ Phản hồi:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,9 +311,9 @@ Phản hồi:
 }
 ```
 
-### Truy vấn dữ liệu phân tích sử dụng
+### Truy vấn phân tích mức sử dụng
 
-Dữ liệu sử dụng được truy cập qua bảng điều khiển hoặc các công cụ MCP, không phải qua các endpoint xuất REST trực tiếp. Các dữ liệu phân tích hiện có:
+Dữ liệu sử dụng được truy cập qua bảng điều khiển hoặc các công cụ MCP, không phải qua các điểm cuối xuất dữ liệu REST trực tiếp. Các chức năng phân tích hiện có:
 
 - **`/api/usage/analytics`** — các chỉ số sử dụng tổng hợp (nhóm theo mô hình, nhà cung cấp, khóa)
 - **`/api/usage/quota`** — trạng thái hạn ngạch hiện tại của từng khóa API
@@ -298,14 +323,14 @@ Dữ liệu sử dụng được truy cập qua bảng điều khiển hoặc c�
 
 ## Công cụ MCP
 
-Hai công cụ MCP cung cấp dữ liệu sử dụng cho các tác nhân (xem `open-sse/mcp-server/tools/`):
+Hai công cụ MCP cung cấp dữ liệu sử dụng cho các tác tử (xem `open-sse/mcp-server/tools/`):
 
 | Công cụ                 | Mô tả                                                                 |
 | ----------------------- | --------------------------------------------------------------------- |
 | `omniroute_cost_report` | Tạo báo cáo chi phí theo từng khóa cho một khoảng thời gian nhất định |
 | `omniroute_check_quota` | Trả về trạng thái hạn ngạch hiện tại của một khóa API                 |
 
-Ví dụ về lệnh gọi của tác nhân:
+Ví dụ về lời gọi từ tác tử:
 
 ```json
 {
@@ -318,11 +343,11 @@ Ví dụ về lệnh gọi của tác nhân:
 
 ## Lưu giữ và dọn dẹp
 
-Dữ liệu sử dụng tăng khoảng ~1-10KB cho mỗi yêu cầu. Ở quy mô lớn, con số này có thể đáng kể.
+Dữ liệu sử dụng tăng khoảng ~1-10KB cho mỗi yêu cầu. Ở quy mô lớn, dung lượng này có thể đáng kể.
 
 ### Cài đặt lưu giữ
 
-Thời gian lưu giữ lịch sử sử dụng được cấu hình thông qua phần Cài đặt cơ sở dữ liệu trong giao diện người dùng hoặc qua `/api/settings/database`.
+Thời gian lưu giữ lịch sử sử dụng được cấu hình qua phần Cài đặt cơ sở dữ liệu trong giao diện người dùng hoặc qua `/api/settings/database`.
 
 Theo mặc định, lịch sử sử dụng được lưu giữ trong **90 ngày**.
 
@@ -331,30 +356,30 @@ Theo mặc định, lịch sử sử dụng được lưu giữ trong **90 ngày
 Các bản ghi cũ được dọn dẹp bởi `src/lib/db/cleanup.ts`:
 
 - Được kích hoạt bởi tiến trình cron chạy nền
-- Xóa các bản ghi trong `usage_history` cũ hơn khoảng thời gian lưu giữ được cấu hình trong cài đặt `usageHistory`
+- Xóa các bản ghi trong `usage_history` cũ hơn thời gian lưu giữ được cấu hình trong cài đặt `usageHistory`
 
 ### Ước tính dung lượng lưu trữ
 
-| Tần suất yêu cầu     | Dung lượng 30 ngày | Dung lượng 90 ngày |
-| -------------------- | ------------------ | ------------------ |
-| 100 yêu cầu/ngày     | ~3MB               | ~9MB               |
-| 1.000 yêu cầu/ngày   | ~30MB              | ~90MB              |
-| 10.000 yêu cầu/ngày  | ~300MB             | ~900MB             |
-| 100.000 yêu cầu/ngày | ~3GB               | ~9GB               |
+| Tần suất yêu cầu     | Lưu trữ 30 ngày | Lưu trữ 90 ngày |
+| -------------------- | --------------- | --------------- |
+| 100 yêu cầu/ngày     | ~3MB            | ~9MB            |
+| 1,000 yêu cầu/ngày   | ~30MB           | ~90MB           |
+| 10,000 yêu cầu/ngày  | ~300MB          | ~900MB          |
+| 100,000 yêu cầu/ngày | ~3GB            | ~9GB            |
 
-Đối với lưu lượng rất cao, hãy cân nhắc:
+Đối với lưu lượng truy cập rất cao, hãy cân nhắc:
 
-- Giảm thời gian lưu giữ thông qua phần Cài đặt cơ sở dữ liệu
+- Giảm thời gian lưu giữ qua phần Cài đặt cơ sở dữ liệu
 - Sử dụng `aggregated_metrics` thay cho các bản ghi thô (chỉ dành cho phân tích)
 
 ---
 
 ## Mẹo tối ưu hóa chi phí
 
-### 1. Sử dụng đúng mô hình
+### 1. Sử dụng mô hình phù hợp
 
 ```bash
-# Câu trả lời nhanh — dùng mô hình rẻ + nhanh
+# Trả lời nhanh — dùng mô hình rẻ + nhanh
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Tác vụ phức tạp — ưu tiên chất lượng
@@ -363,10 +388,10 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. Bật bộ nhớ đệm
 
-Tính năng lưu bộ nhớ đệm prompt của Anthropic giúp tiết kiệm **90% chi phí đối với ngữ cảnh lặp lại**:
+Tính năng lưu bộ nhớ đệm prompt của Anthropic giúp tiết kiệm **90% chi phí cho ngữ cảnh lặp lại**:
 
 ```ts
-// Việc lưu bộ nhớ đệm diễn ra tự động — chỉ cần sử dụng cùng một system prompt lớn
+// Việc lưu bộ nhớ đệm diễn ra tự động — chỉ cần dùng lại cùng một prompt hệ thống dài
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Sẽ được tự động lưu vào bộ nhớ đệm
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Sử dụng tính năng nén
 
-Tính năng nén RTK + Caveman giúp tiết kiệm **15-95% đối với các phiên sử dụng nhiều công cụ**:
+Tính năng nén RTK + Caveman giúp tiết kiệm **15-95% chi phí trong các phiên sử dụng nhiều công cụ**:
 
 ```ts
 const config = {
@@ -387,7 +412,7 @@ const config = {
 };
 ```
 
-### 4. Đặt hạn ngạch cho từng khóa
+### 4. Đặt hạn mức cho từng khóa
 
 Luôn đặt `quotaLimit` để ngăn chi phí tăng ngoài tầm kiểm soát:
 
@@ -395,7 +420,7 @@ Luôn đặt `quotaLimit` để ngăn chi phí tăng ngoài tầm kiểm soát:
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Giới hạn $10/tháng
 ```
 
-### 5. Kiểm tra các đối tượng tiêu thụ nhiều nhất
+### 5. Rà soát các đối tượng tiêu thụ nhiều nhất
 
 Sử dụng bảng điều khiển hoặc **`/api/usage/analytics`** để nhóm theo khóa API và sắp xếp theo chi phí:
 
@@ -409,28 +434,28 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ### "Chi phí cao hơn dự kiến"
 
-1. Kiểm tra **`/api/usage/analytics?groupBy=model`** — tìm mô hình tốn kém
+1. Kiểm tra **`/api/usage/analytics?groupBy=model`** — tìm mô hình có chi phí cao
 2. Kiểm tra **`/api/usage/analytics?groupBy=apiKey`** — tìm đối tượng tiêu thụ nhiều
 3. Xác minh dữ liệu giá đã được cập nhật: `POST /api/pricing/sync`
 
 ### "Thiếu bản ghi"
 
-- Kiểm tra cài đặt lưu giữ của DB tại Bảng điều khiển → Cơ sở dữ liệu → Dọn dẹp — các bản ghi cũ bị xóa bởi tác vụ dọn dẹp định kỳ (`src/lib/db/cleanup.ts`)
-- Kiểm tra lỗi trong `src/lib/db/usage*.ts` — các lỗi ghi DB được ghi vào nhật ký nhưng không hiển thị ra ngoài
-- Xác minh yêu cầu thực sự đã đến `chatCore` — kiểm tra định tuyến kết hợp
+- Kiểm tra cài đặt lưu giữ dữ liệu DB trong Bảng điều khiển → Cơ sở dữ liệu → Dọn dẹp — các bản ghi cũ bị xóa bởi tác vụ dọn dẹp định kỳ (`src/lib/db/cleanup.ts`)
+- Kiểm tra lỗi trong `src/lib/db/usage*.ts` — lỗi ghi DB được ghi vào nhật ký nhưng không được hiển thị
+- Xác minh yêu cầu thực sự đã đến `chatCore` — kiểm tra định tuyến combo
 
-### "Hạn ngạch không được thực thi"
+### "Hạn mức không được áp dụng"
 
 - Kiểm tra cài đặt `quotaLimit` của khóa
-- Xác minh `quotaWindow` được đặt chính xác
+- Xác minh `quotaWindow` được đặt đúng
 - Tìm các bản ghi `quotaSnapshots` — chúng phải được tạo cho mỗi yêu cầu
 
 ---
 
 ## Xem thêm
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Lược đồ cho các bảng sử dụng
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Lược đồ cho các bảng dữ liệu sử dụng
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Các biến môi trường đồng bộ giá
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Cách `auto/fast`, `auto/cheap` giảm chi phí
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Tài liệu tham khảo đầy đủ về `/api/usage/*`
-- Nguồn: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`
+- Mã nguồn: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

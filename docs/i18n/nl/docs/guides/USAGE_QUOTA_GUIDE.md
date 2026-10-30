@@ -38,31 +38,31 @@ Verzoek ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Wat er wordt vastgelegd
+## Wat wordt vastgelegd
 
-De `usage.ts`-service legt voor elk verzoek een **gebruiksgebeurtenis** vast:
+De service `usage.ts` legt voor elk verzoek een **gebruiksgebeurtenis** vast:
 
 | Veld               | Type    | Bron                                                       |
 | ------------------ | ------- | ---------------------------------------------------------- |
 | `id`               | string  | UUID gegenereerd bij het vastleggen                        |
-| `apiKeyId`         | string  | De API-sleutel waarmee het verzoek is geïnitieerd          |
+| `apiKeyId`         | string  | De API-sleutel waarmee het verzoek is gestart              |
 | `provider`         | string  | Provider-ID (openai, anthropic, enz.)                      |
 | `model`            | string  | Model-ID (gpt-5, claude-opus-4-6, enz.)                    |
-| `comboId`          | string? | Combinatie-ID indien gerouteerd via een combinatie         |
-| `promptTokens`     | number  | Uit de upstream-respons                                    |
-| `completionTokens` | number  | Uit de upstream-respons                                    |
-| `cachedTokens`     | number  | Tokens uit cachehits (Anthropic-promptcaching, enz.)       |
-| `totalTokens`      | number  | prompt + voltooiing                                        |
+| `comboId`          | string? | Combo-ID indien via een combo gerouteerd                   |
+| `promptTokens`     | number  | Uit het antwoord van de upstream-provider                  |
+| `completionTokens` | number  | Uit het antwoord van de upstream-provider                  |
+| `cachedTokens`     | number  | Tokens uit de cache (Anthropic-promptcaching, enz.)        |
+| `totalTokens`      | number  | prompt + aanvulling                                        |
 | `costUsd`          | number  | Berekend op basis van prijsgegevens                        |
 | `latencyMs`        | number  | Totale duur van het verzoek                                |
 | `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
-| `errorClass`       | string? | Foutklasse indien status != success                        |
+| `errorClass`       | string? | Foutklasse als status != success                           |
 | `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | Aangepaste gegevens die door plug-ins zijn geïnjecteerd    |
+| `metadata`         | object  | Aangepaste gegevens ingevoegd door een plug-in             |
 
 ### Waar tokens vandaan komen
 
-Tokens worden in de **responshandler** uit de respons van de upstream-provider gehaald:
+Tokens worden in de **antwoordhandler** uit het antwoord van de upstream-provider gehaald:
 
 ```ts
 // Uit open-sse/handlers/chatCore.ts
@@ -74,7 +74,7 @@ const usage = response.usage || {
 };
 ```
 
-Voor providers die geen gebruiksgegevens retourneren (sommige webcookieproviders), **schat** OmniRoute het aantal tokens met behulp van een heuristiek van `~4 tekens per token` (zie `open-sse/services/autoCombo/pipelineRouter.ts`).
+Voor providers die geen gebruiksgegevens retourneren (sommige webcookieproviders), **schat** OmniRoute het aantal tokens met de vuistregel `~4 chars per token` (zie `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Gecachete tokens
 
@@ -82,7 +82,37 @@ OmniRoute houdt `cached_tokens` apart van `prompt_tokens` bij, omdat:
 
 - Anthropic-promptcaching een lager tarief rekent voor gecachete tokens (10% van het normale tarief)
 - Sommige providers `cache_read_input_tokens` retourneren, waarvoor een ander tarief moet worden berekend
-- Analyses het **cachehitpercentage** kunnen tonen = `cached_tokens / prompt_tokens`
+- Analyses het **cachetrefferpercentage** kunnen tonen = `cached_tokens / prompt_tokens`
+
+### Diagnostiek voor cacheschrijfcategorieën
+
+Het paneel voor promptcachestatus in het Analytics-dashboard maakt onderscheid tussen door providers gerapporteerde
+cacheschrijfacties met een bewaartijd van 5 minuten en 1 uur. De Anthropic-velden
+`usage.cache_creation.ephemeral_5m_input_tokens` en
+`usage.cache_creation.ephemeral_1h_input_tokens` blijven behouden bij de omzetting van
+streaming- en niet-streaminggebruiksgegevens en worden opgeslagen bij de samenvattingen van aanroeplogboeken. Het gecombineerde
+totaal voor cacheschrijfacties wordt niet nogmaals aan die categorieën toegevoegd.
+
+Aanroepen met alleen een gecombineerde schrijfteller, inclusief oudere records, hebben een onbekende
+categorie. Bij een gedeeltelijke uitsplitsing blijft het niet-toegewezen restant onbekend; ongeldige of
+tegenstrijdige tellers worden gemarkeerd in plaats van stilzwijgend aan een TTL te worden toegewezen. TTL-markeringen
+aan de verzoekzijde vormen geen bewijs voor een gefactureerde categorie.
+
+De API-equivalente kostenraming voor schrijfacties in het paneel omvat alleen gerapporteerde categorieën waarvoor prijzen beschikbaar zijn, niet
+het volledige verzoek. Voor de eigen modelprijzen van Claude/Anthropic wordt 1,25 maal het
+invoertarief gebruikt voor schrijfacties met een bewaartijd van 5 minuten en tweemaal het invoertarief voor schrijfacties met een bewaartijd van 1 uur. Ontbrekende
+prijzen worden als niet beschikbaar beschouwd, niet als nul. Prijzen worden vastgelegd wanneer elke nieuwe aanroep wordt gelogd;
+historische records worden niet opnieuw geprijsd. Abonnementsaccounts kunnen daarom een
+API-equivalente raming hebben zonder dat dit bedrag daadwerkelijk wordt uitgegeven of op het abonnementsquotum
+in mindering wordt gebracht. Bestaande berekeningen voor quota, budgetten en exacte providerkosten blijven ongewijzigd.
+
+Deze diagnostiek gebruikt de bestaande begrensde samenvatting van de cachestatus en de bestaande bewaartermijn voor
+aanroeplogboeken. De standaard-TTL voor verzoeken, routering en accountselectie worden hierdoor niet gewijzigd.
+Het vastleggen van de door de client aangevraagde TTL versus de effectieve uitgaande TTL op het moment van verzending
+naar de provider is uitgesteld; dit paneel rapporteert gefactureerde categorieën, niet de effectieve uitgaande TTL.
+
+Implementatie: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` en `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,19 +151,19 @@ Voor modellen zonder prijsgegevens valt OmniRoute terug op het **schatten van de
 
 ---
 
-## Aggregatie op datumbereik
+## Aggregatie per datumbereik
 
-De module `usageAnalytics.ts` berekent dashboardwidgets op basis van onbewerkte gebruiksgegevens. De module ondersteunt 7 tijdsbereiken:
+De module `usageAnalytics.ts` berekent dashboardwidgets op basis van ruwe gebruiksgegevens. De module ondersteunt 7 tijdsbereiken:
 
-| Bereik   | Periode                                        | Gebruikssituatie                          |
-| -------- | ---------------------------------------------- | ----------------------------------------- |
-| `1d`     | Afgelopen 24 uur                               | Detectie van kostenpieken per uur         |
-| `7d`     | Afgelopen 7 dagen                              | Wekelijkse evaluatie                      |
-| `30d`    | Afgelopen 30 dagen                             | Maandelijkse facturering                  |
-| `90d`    | Afgelopen 90 dagen                             | Kwartaalsanalyse                          |
-| `ytd`    | Sinds 1 januari van het huidige jaar           | Bewaking van het jaarbudget               |
-| `all`    | Gehele periode                                 | Statistieken over de volledige levensduur |
-| `custom` | Door de gebruiker bepaalde begin- en einddatum | Audits, ad-hocquery's                     |
+| Bereik   | Periode                                 | Toepassing                           |
+| -------- | --------------------------------------- | ------------------------------------ |
+| `1d`     | Afgelopen 24 uur                        | Detectie van kostenpieken per uur    |
+| `7d`     | Afgelopen 7 dagen                       | Wekelijkse evaluatie                 |
+| `30d`    | Afgelopen 30 dagen                      | Maandelijkse facturering             |
+| `90d`    | Afgelopen 90 dagen                      | Kwartaalanalyse                      |
+| `ytd`    | Sinds 1 januari van het huidige jaar    | Jaarlijkse budgetbewaking            |
+| `all`    | Gehele periode                          | Statistieken over de gehele looptijd |
+| `custom` | Door de gebruiker ingesteld begin/einde | Audits, ad-hocquery's                |
 
 ### Berekende dashboardwidgets
 
@@ -141,13 +171,13 @@ Voor elk datumbereik berekent de analyselaag:
 
 | Widget                         | Beschrijving                                                                   |
 | ------------------------------ | ------------------------------------------------------------------------------ |
-| **Overzichtskaarten**          | Totaal aantal aanvragen, totale kosten, totaal aantal tokens, succespercentage |
+| **Samenvattingskaarten**       | Totaal aantal aanvragen, totale kosten, totaal aantal tokens, succespercentage |
 | **Dagelijkse trendgrafiek**    | Kosten + tokens per dag, gestapeld per model                                   |
-| **Activiteitenheatmap**        | Raster met uur van de dag × dag van de week, kleur = aantal aanvragen          |
-| **Uitsplitsing per model**     | Cirkeldiagram van de kosten per model                                          |
+| **Activiteitenheatmap**        | Raster van uur van de dag × dag van de week, kleur = aantal aanvragen          |
+| **Uitsplitsing per model**     | Cirkeldiagram van kosten per model                                             |
 | **Uitsplitsing per provider**  | Staafdiagram van aanvragen per provider                                        |
-| **Belangrijkste API-sleutels** | Tabel met de 10 belangrijkste sleutels op basis van kosten                     |
-| **Foutanalyse**                | Foutpercentage in de loop van de tijd, belangrijkste foutklassen               |
+| **Belangrijkste API-sleutels** | Tabel met de 10 sleutels met de hoogste kosten                                 |
+| **Foutenanalyse**              | Foutpercentage in de loop van de tijd, meest voorkomende foutklassen           |
 
 ### Programmatische toegang
 
@@ -155,26 +185,26 @@ Voor elk datumbereik berekent de analyselaag:
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // gebruiksgeschiedenisrecords
+  history,              // records uit de gebruiksgeschiedenis
   "7d",                 // tijdsbereik: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // verbindingstoewijzing van providers (connectionId → accountnaam)
+  connectionMap,        // overzicht van providerverbindingen (connectionId → accountnaam)
   {
     startDate: "2025-01-01",  // optioneel: voor het bereik "custom"
     endDate: "2025-06-01",   // optioneel: voor het bereik "custom"
   }
 );
 
-console.log(analytics.summary.totalCost);   // 12.34 (cent)
-console.log(analytics.byModel[0]);           // { model, kosten, aanvragen, promptTokens, completionTokens }
+console.log(analytics.summary.totalCost);   // 12.34 (centen)
+console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
 
 ## Quotahandhaving
 
-Quota's per API-sleutel worden op twee plaatsen gehandhaafd:
+Het quotum per API-sleutel wordt op twee plaatsen gehandhaafd:
 
-1. **Zachte limiet** (`quotaWarnAt`): waarschuwing in het dashboard wanneer het gebruik de drempel overschrijdt
-2. **Harde limiet** (`quotaLimit`): verzoek wordt geweigerd met HTTP 429 wanneer de limiet wordt overschreden
+1. **Zachte limiet** (`quotaWarnAt`): waarschuwing op het dashboard wanneer het gebruik de drempel overschrijdt
+2. **Harde limiet** (`quotaLimit`): aanvraag geweigerd met HTTP 429 bij overschrijding
 
 ### Configuratie
 
@@ -190,15 +220,15 @@ await updateApiKey(keyId, {
 ### Handhavingsproces
 
 ```
-Verzoek ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Binnen limiet?  ──▶ toestaan
+              ├── Within limit?  ──▶ allow
               │
-              └── Boven limiet?  ──▶ 429 Too Many Requests
-                                     met Retry-After-header
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Quota-snapshots
+### Quotamomentopnamen
 
 De tabel `quotaSnapshots` slaat de **historische quotastatus** op voor trendanalyse:
 
@@ -206,22 +236,22 @@ De tabel `quotaSnapshots` slaat de **historische quotastatus** op voor trendanal
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | De sleutel die wordt bijgehouden |
 | `window` | "day" | "week" | "month" |
-| `used` | Kosten gebruikt binnen dit venster (centen) |
+| `used` | Verbruikte kosten in deze periode (centen) |
 | `limit` | De limiet (centen) |
-| `resetAt` | Wanneer het venster wordt gereset |
-| `createdAt` | Wanneer de snapshot is gemaakt |
+| `resetAt` | Wanneer de periode opnieuw begint |
+| `createdAt` | Wanneer de momentopname is gemaakt |
 
-Snapshots worden gemaakt **bij elk verzoek** met kosten > 0 en worden gebruikt om:
+Momentopnamen worden gemaakt **bij elke aanvraag** met kosten > 0 en worden gebruikt om:
 
-- De voortgangsbalk voor quota in het dashboard weer te geven
+- De voortgangsbalk voor het quotum op het dashboard weer te geven
 - Grafieken met quotatrends over 30 dagen te tonen
 - Waarschuwingen te activeren wanneer het gebruik de limiet nadert
 
 ---
 
-## REST-API
+## REST API
 
-### Gebruiksrecords weergeven
+### Gebruiksrecords opvragen
 
 ```bash
 GET /api/usage?range=7d&limit=100
@@ -229,7 +259,7 @@ GET /api/usage?apiKeyId=key-123&range=30d
 GET /api/usage?provider=openai&range=1d
 ```
 
-Respons:
+Antwoord:
 
 ```json
 {
@@ -253,13 +283,13 @@ Respons:
 }
 ```
 
-### Analysesamenvatting ophalen
+### Analysesamenvatting opvragen
 
 ```bash
 GET /api/usage/analytics?range=7d&groupBy=model
 ```
 
-Respons:
+Antwoord:
 
 ```json
 {
@@ -272,12 +302,7 @@ Respons:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,11 +313,11 @@ Respons:
 
 ### Gebruiksanalyses opvragen
 
-Gebruiksgegevens zijn toegankelijk via het dashboard of MCP-tools, niet via directe REST-exportendpoints. Beschikbare analyses:
+Gebruiksgegevens zijn toegankelijk via het dashboard of MCP-tools, niet via rechtstreekse REST-exportendpoints. Beschikbare analyses:
 
-- **`/api/usage/analytics`** — geaggregeerde gebruiksstatistieken (groeperen op model, provider of sleutel)
+- **`/api/usage/analytics`** — geaggregeerde gebruiksstatistieken (gegroepeerd op model, provider, sleutel)
 - **`/api/usage/quota`** — huidige quotastatus per API-sleutel
-- **`/api/usage/history`** — logboeken met verzoekgeschiedenis
+- **`/api/usage/history`** — logboeken met de aanvraaggeschiedenis
 
 ---
 
@@ -303,7 +328,7 @@ Twee MCP-tools stellen gebruiksgegevens beschikbaar aan agents (zie `open-sse/mc
 | Tool                    | Beschrijving                                                      |
 | ----------------------- | ----------------------------------------------------------------- |
 | `omniroute_cost_report` | Genereert een kostenrapport per sleutel voor een bepaalde periode |
-| `omniroute_check_quota` | Retourneert de huidige quotastatus voor een API-sleutel           |
+| `omniroute_check_quota` | Geeft de huidige quotastatus voor een API-sleutel terug           |
 
 Voorbeeld van een aanroep door een agent:
 
@@ -316,13 +341,13 @@ Voorbeeld van een aanroep door een agent:
 
 ---
 
-## Bewaring en opschoning
+## Bewaartermijn en opschoning
 
-Gebruiksgegevens groeien met ~1-10KB per aanvraag. Op grote schaal kan dit aanzienlijk zijn.
+Gebruiksgegevens nemen met ~1-10KB per aanvraag toe. Op grote schaal kan dit aanzienlijk zijn.
 
 ### Bewaarinstellingen
 
-De bewaartermijn van de gebruiksgeschiedenis wordt geconfigureerd via de Database Settings in de UI of via `/api/settings/database`.
+De bewaartermijn van de gebruiksgeschiedenis wordt ingesteld via de database-instellingen in de gebruikersinterface of via `/api/settings/database`.
 
 Standaard wordt de gebruiksgeschiedenis **90 dagen** bewaard.
 
@@ -330,10 +355,10 @@ Standaard wordt de gebruiksgeschiedenis **90 dagen** bewaard.
 
 Oude records worden opgeschoond door `src/lib/db/cleanup.ts`:
 
-- Geactiveerd door het cronproces op de achtergrond
-- Verwijdert records uit `usage_history` die ouder zijn dan de geconfigureerde bewaarinstelling `usageHistory`
+- Wordt geactiveerd door het cron-proces op de achtergrond
+- Verwijdert records uit `usage_history` die ouder zijn dan de ingestelde bewaartermijn voor `usageHistory`
 
-### Schatting van opslaggebruik
+### Opslagschatting
 
 | Aanvraagfrequentie    | Opslag voor 30 dagen | Opslag voor 90 dagen |
 | --------------------- | -------------------- | -------------------- |
@@ -344,8 +369,8 @@ Oude records worden opgeschoond door `src/lib/db/cleanup.ts`:
 
 Overweeg bij zeer veel verkeer:
 
-- De bewaartermijn te verkorten via Database Settings
-- `aggregated_metrics` te gebruiken in plaats van onbewerkte records (alleen voor analyses)
+- De bewaartermijn te verkorten via de database-instellingen
+- `aggregated_metrics` te gebruiken in plaats van ruwe records (alleen voor analyses)
 
 ---
 
@@ -363,7 +388,7 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. Schakel caching in
 
-Promptcaching van Anthropic bespaart **90% bij herhaalde context**:
+Promptcaching van Anthropic bespaart **90% op herhaalde context**:
 
 ```ts
 // Caching gebeurt automatisch — neem gewoon dezelfde grote systeemprompt op
@@ -389,7 +414,7 @@ const config = {
 
 ### 4. Stel quota per sleutel in
 
-Stel altijd `quotaLimit` in om uit de hand lopende kosten te voorkomen:
+Stel altijd `quotaLimit` in om ongecontroleerde kosten te voorkomen:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Limiet van $10/maand
@@ -397,7 +422,7 @@ await updateApiKey(keyId, { quotaLimit: 10_00 }); // Limiet van $10/maand
 
 ### 5. Controleer de grootste verbruikers
 
-Gebruik het dashboard of **`/api/usage/analytics`** om op API-sleutel te groeperen en op kosten te sorteren:
+Gebruik het dashboard of **`/api/usage/analytics`** om te groeperen op API-sleutel en te sorteren op kosten:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -405,25 +430,25 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ---
 
-## Probleemoplossing
+## Problemen oplossen
 
 ### "Kosten zijn hoger dan verwacht"
 
 1. Controleer **`/api/usage/analytics?groupBy=model`** — zoek het dure model
-2. Controleer **`/api/usage/analytics?groupBy=apiKey`** — zoek de grootverbruiker
+2. Controleer **`/api/usage/analytics?groupBy=apiKey`** — zoek de grote verbruiker
 3. Controleer of de prijsgegevens actueel zijn: `POST /api/pricing/sync`
 
 ### "Records ontbreken"
 
-- Controleer de bewaarinstellingen van de database onder Dashboard → Database → Cleanup — oude records worden verwijderd door de periodieke opschoningstaak (`src/lib/db/cleanup.ts`)
-- Controleer op fouten in `src/lib/db/usage*.ts` — schrijffouten in de database worden gelogd, maar niet weergegeven
-- Controleer of de aanvraag daadwerkelijk `chatCore` heeft bereikt — controleer de combinatieroutering
+- Controleer de instellingen voor databasebewaring onder Dashboard → Database → Opschonen — oude records worden verwijderd door de periodieke opschoontaak (`src/lib/db/cleanup.ts`)
+- Controleer op fouten in `src/lib/db/usage*.ts` — schrijffouten in de database worden gelogd, maar niet getoond
+- Controleer of het verzoek daadwerkelijk `chatCore` heeft bereikt — controleer de comboroutering
 
-### "Quota worden niet afgedwongen"
+### "Quotum wordt niet afgedwongen"
 
 - Controleer de instelling `quotaLimit` van de sleutel
 - Controleer of `quotaWindow` correct is ingesteld
-- Zoek naar `quotaSnapshots`-records — deze moeten bij elke aanvraag worden aangemaakt
+- Zoek naar `quotaSnapshots`-records — deze moeten bij elk verzoek worden aangemaakt
 
 ---
 

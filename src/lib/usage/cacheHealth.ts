@@ -19,9 +19,14 @@
 
 import { getDbInstance } from "@/lib/db/core";
 import type { UtilizationTimeRange } from "@/shared/types/utilization";
+import {
+  summarizeCacheWrites,
+  type CacheWriteSummary,
+  type CacheWriteSummaryRow,
+} from "./cacheWriteSummary";
 
 /** One `call_logs` row, already narrowed to the cache columns. Both counters are nullable in the schema. */
-export interface CacheHealthRow {
+export interface CacheHealthRow extends CacheWriteSummaryRow {
   model: string;
   cacheRead: number | null;
   cacheCreation: number | null;
@@ -39,7 +44,7 @@ export interface CacheHealthModelSummary {
 
 export type CacheHealthVerdict = "healthy" | "degraded" | "thrash" | "no-data";
 
-export interface CacheHealthSummary {
+export interface CacheHealthSummary extends CacheWriteSummary {
   totalCalls: number;
   cacheReadTotal: number;
   cacheWriteTotal: number;
@@ -102,6 +107,7 @@ function ratio(write: number, read: number): number {
 
 export function summarizeCacheHealth(rows: CacheHealthRow[]): CacheHealthSummary {
   const empty: CacheHealthSummary = {
+    ...summarizeCacheWrites([]),
     totalCalls: 0,
     cacheReadTotal: 0,
     cacheWriteTotal: 0,
@@ -186,6 +192,7 @@ export function summarizeCacheHealth(rows: CacheHealthRow[]): CacheHealthSummary
     .sort((a, b) => b.writeReadRatio - a.writeReadRatio || b.cacheWriteTotal - a.cacheWriteTotal);
 
   return {
+    ...summarizeCacheWrites(rows),
     totalCalls: rows.length,
     cacheReadTotal: readTotal,
     cacheWriteTotal: writeTotal,
@@ -226,6 +233,11 @@ type CacheHealthDbRow = {
   requested_model: string | null;
   tokens_cache_read: number | null;
   tokens_cache_creation: number | null;
+  tokens_cache_creation_5m: number | null;
+  tokens_cache_creation_1h: number | null;
+  cache_creation_tier_status: string | null;
+  cache_write_cost_usd: number | null;
+  cache_write_priced_tokens: number | null;
   timestamp: string | null;
 };
 
@@ -262,7 +274,9 @@ export function buildCacheHealthResponse(opts: {
 
   const rows = db
     .prepare(
-      `SELECT model, requested_model, tokens_cache_read, tokens_cache_creation, timestamp
+      `SELECT model, requested_model, tokens_cache_read, tokens_cache_creation, timestamp,
+              tokens_cache_creation_5m, tokens_cache_creation_1h, cache_creation_tier_status,
+              cache_write_cost_usd, cache_write_priced_tokens
          FROM call_logs
         WHERE timestamp >= ?
           AND status = 200
@@ -282,6 +296,11 @@ export function buildCacheHealthResponse(opts: {
       model: r.requested_model || r.model || "unknown",
       cacheRead: r.tokens_cache_read,
       cacheCreation: r.tokens_cache_creation,
+      cacheCreation5m: r.tokens_cache_creation_5m,
+      cacheCreation1h: r.tokens_cache_creation_1h,
+      cacheCreationTierStatus: r.cache_creation_tier_status,
+      cacheWriteCostUsd: r.cache_write_cost_usd,
+      cacheWritePricedTokens: r.cache_write_priced_tokens,
       timestamp: r.timestamp || "",
     }))
   );

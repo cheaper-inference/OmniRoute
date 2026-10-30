@@ -86,6 +86,36 @@ OmniRoute tracks `cached_tokens` separately from `prompt_tokens` because:
 - Some providers return `cache_read_input_tokens` that should be priced differently
 - Analytics can show the **cache hit rate** = `cached_tokens / prompt_tokens`
 
+### Cache-write tier diagnostics
+
+The Analytics dashboard's prompt-cache health panel distinguishes provider-reported
+5-minute and 1-hour cache writes. Anthropic's
+`usage.cache_creation.ephemeral_5m_input_tokens` and
+`usage.cache_creation.ephemeral_1h_input_tokens` are retained through streaming and
+non-streaming usage translation and stored with call-log summaries. The combined
+cache-write total is not added to those buckets a second time.
+
+Calls with only a combined write counter, including older records, have an unknown
+tier. A partial breakdown keeps its unassigned remainder unknown; invalid or
+conflicting counters are flagged rather than silently assigned a TTL. Request-side
+TTL markers are not evidence of a billed tier.
+
+The panel's API-equivalent write estimate covers only reported, priced tiers, not
+the whole request. For native Claude/Anthropic model pricing it uses 1.25 times the
+input rate for 5-minute writes and twice the input rate for 1-hour writes. Missing
+pricing is unavailable, not zero. Prices are captured when each new call is logged;
+historical records are not repriced. Subscription accounts can therefore have an
+API-equivalent estimate without incurring that amount as cash spend or subscription
+quota. Existing quota, budget and provider-exact cost calculations are unchanged.
+
+These diagnostics use the existing bounded cache-health summary and call-log
+retention. They do not change request TTL defaults, routing or account selection.
+Capturing client-requested versus effective outgoing TTL at the provider send
+boundary is deferred; this panel reports receipt tiers, not effective outgoing TTL.
+
+Implementation: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, and `open-sse/utils/cacheWriteUsage.ts`.
+
 ---
 
 ## Cost Calculation
@@ -204,14 +234,14 @@ Request ──▶ quotaCheck()
 
 `quotaSnapshots` table stores **historical quota state** for trend analysis:
 
-| Field       | Description                      |
+| Field | Description |
 | ----------- | -------------------------------- | ------ | ------- |
-| `apiKeyId`  | The key being tracked            |
-| `window`    | "day"                            | "week" | "month" |
-| `used`      | Cost used in this window (cents) |
-| `limit`     | The limit (cents)                |
-| `resetAt`   | When the window resets           |
-| `createdAt` | When the snapshot was taken      |
+| `apiKeyId` | The key being tracked |
+| `window` | "day" | "week" | "month" |
+| `used` | Cost used in this window (cents) |
+| `limit` | The limit (cents) |
+| `resetAt` | When the window resets |
+| `createdAt` | When the snapshot was taken |
 
 Snapshots are taken **on every request** that uses > 0 cost, and used to:
 

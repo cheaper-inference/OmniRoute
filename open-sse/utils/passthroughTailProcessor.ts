@@ -35,6 +35,7 @@ export type PassthroughTailProcessorContext = {
   sanitizeUsagePayload: (payload: unknown) => boolean;
   setPassthroughResponsesId: (value: string) => void;
   setUsage: (value: unknown) => void;
+  mergeCacheCreationUsage: (value: unknown) => void;
   addTotalContentLength: (value: number) => void;
   appendPassthroughContent: (value: string) => void;
   appendPassthroughReasoning: (value: string) => void;
@@ -296,6 +297,7 @@ export function processBufferedPassthroughLine(
     if (context.sanitizeUsagePayload(parsed)) {
       output = `data: ${JSON.stringify(parsed)}\n\n`;
     }
+    context.mergeCacheCreationUsage(extractUsage(parsed));
     const parsedType = typeof parsed.type === "string" ? parsed.type : "";
     const isResponses = parsedType.startsWith("response.");
     const isClaude = context.isClaudeEventPayload(parsed);

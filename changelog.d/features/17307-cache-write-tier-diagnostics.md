@@ -1,0 +1,1 @@
+- **feat(usage):** Preserve provider-reported 5-minute and 1-hour cache-write tiers through response translation, call logs, and Cache Health diagnostics; keep legacy unknown tiers explicit and existing quota deductions unchanged ([#17307](https://github.com/diegosouzapw/OmniRoute/pull/17307)) — thanks @xiaoyaner0201

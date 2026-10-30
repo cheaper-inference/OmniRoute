@@ -3,6 +3,7 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
+import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
@@ -192,13 +193,15 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     const u = chunk.usage;
     const input_tokens = u.input_tokens ?? u.prompt_tokens ?? 0;
     const output_tokens = u.output_tokens ?? u.completion_tokens ?? 0;
-    const cacheDetails = resolveResponsesCacheUsageDetails(u);
+    const cacheFields = mergeCacheCreationFields(state.usage, u);
+    const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
     const rawReasoning =
       u.output_tokens_details?.reasoning_tokens ?? u.completion_tokens_details?.reasoning_tokens;
     const reasoningTokens =
       typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
 
     state.usage = {
+      ...cacheFields,
       // Exact provider-reported cost and its credit provenance; billing reads them.
       ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
       ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
@@ -1460,6 +1463,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
           : 0);
 
       state.usage = {
+        ...mergeCacheCreationFields(state.usage, responseUsage),
         ...(responseUsage.provider_credits !== undefined && {
           provider_credits: responseUsage.provider_credits,
         }),
@@ -1473,7 +1477,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
 
       // Add prompt_tokens_details if cache tokens exist
       if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
-        state.usage.prompt_tokens_details = {};
+        state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
         if (cacheReadTokens > 0) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }

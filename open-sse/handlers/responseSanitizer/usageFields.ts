@@ -17,6 +17,7 @@ export const ALLOWED_USAGE_FIELDS = new Set([
   "completion_tokens_details",
   "cache_read_input_tokens",
   "cache_creation_input_tokens",
+  "cache_creation",
   // Keep through sanitize → applyClientUsageBuffer so heuristic web usage is
   // not inflated by the default USAGE_TOKEN_BUFFER (2000).
   "estimated",
@@ -24,6 +25,7 @@ export const ALLOWED_USAGE_FIELDS = new Set([
 
 /** Responses API `usage` fields. */
 export const ALLOWED_RESPONSES_USAGE_FIELDS = new Set([
+  "cache_creation",
   "input_tokens",
   "output_tokens",
   "total_tokens",

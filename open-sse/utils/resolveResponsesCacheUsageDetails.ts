@@ -2,6 +2,7 @@ import {
   pickCacheCreationTokens,
   resolveCacheCreationInPrompt,
 } from "./pickCacheCreationTokens.ts";
+import { cacheCreationFields } from "./cacheWriteUsage.ts";
 
 type CacheUsageSource = {
   cache_creation_input_tokens?: number;
@@ -34,6 +35,7 @@ export function resolveResponsesCacheUsageDetails(usage: CacheUsageSource) {
     ? resolveCacheCreationInPrompt(usage)
     : undefined;
   return {
+    ...cacheCreationFields(usage),
     ...(cachedTokens ? { cached_tokens: cachedTokens } : {}),
     ...(cacheCreationTokens ? { cache_creation_tokens: cacheCreationTokens } : {}),
     ...(cacheCreationInPrompt !== undefined
