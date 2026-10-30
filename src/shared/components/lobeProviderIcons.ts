@@ -376,6 +376,7 @@ const LOBE_PROVIDER_ALIASES = {
   grok: "Grok",
   "grok-web": "Grok",
   "grok-cli": "Grok",
+  "grok-bot": "Grok",
   groq: "Groq",
   huggingchat: "HuggingFace",
   "hugging-face": "HuggingFace",
