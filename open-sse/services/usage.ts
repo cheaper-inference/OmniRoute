@@ -129,12 +129,12 @@ export type { UsageFetcherProvider } from "./usage/fetcherProviders.ts";
  */
 export async function getUsageForProvider(
   connection: UsageProviderConnection,
-  options: { forceRefresh?: boolean } = {}
+  options: { forceRefresh?: boolean; includePlan?: boolean } = {}
 ) {
   const { id, provider, accessToken, apiKey, providerSpecificData, projectId, email } = connection;
 
   if (isKimiCodingConnection(connection)) {
-    return await getKimiUsage(accessToken, apiKey, providerSpecificData);
+    return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
   }
 
   if (isMoonshotOpenPlatformConnection(connection)) {
@@ -187,7 +187,7 @@ export async function getUsageForProvider(
       return await getVertexUsage(id || "", provider);
     case "kimi-coding":
     case "kimi-coding-apikey":
-      return await getKimiUsage(accessToken, apiKey, providerSpecificData);
+      return await getKimiUsage(accessToken, apiKey, providerSpecificData, options);
     case "qoder":
       // Qoder PATs live in `apiKey` (decrypted) or `providerSpecificData.qoderPat`,
       // never in `accessToken`.

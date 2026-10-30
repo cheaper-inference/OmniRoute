@@ -1019,7 +1019,7 @@ async function fetchLiveProviderLimitsWithOptions(
     const usage = sanitizeUsageQuotasForProvider(
       connection.provider,
       (await runWithProxyContext(apiKeyProxy?.proxy ?? null, () =>
-        getUsageForProvider(connection as unknown as JsonRecord, options)
+        getUsageForProvider(connection as unknown as JsonRecord, { ...options, includePlan: true })
       )) as JsonRecord,
       await refreshLiveModelIds(connection.provider)
     );
@@ -1058,7 +1058,10 @@ async function fetchLiveProviderLimitsWithOptions(
 
       let usageData = sanitizeUsageQuotasForProvider(
         conn.provider,
-        (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+        (await getUsageForProvider(conn as unknown as JsonRecord, {
+          ...options,
+          includePlan: true,
+        })) as JsonRecord,
         await refreshLiveModelIds(conn.provider)
       );
 
@@ -1077,7 +1080,10 @@ async function fetchLiveProviderLimitsWithOptions(
           if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
-            (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
+            (await getUsageForProvider(conn as unknown as JsonRecord, {
+              ...options,
+              includePlan: true,
+            })) as JsonRecord,
             await refreshLiveModelIds(conn.provider)
           );
         }
