@@ -11,6 +11,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import * as yaml from "js-yaml";
+import { lookupMessagePath } from "../i18n/message-lookup.mjs";
 
 const cwd = process.cwd();
 const out = {};
@@ -212,20 +213,6 @@ async function i18nUiCoverage() {
     return paths;
   }
 
-  const FORBIDDEN_KEY_SEGMENTS = new Set(["__proto__", "prototype", "constructor"]);
-
-  function lookupPath(obj, parts) {
-    let cur = obj;
-    for (const part of parts) {
-      if (!isPlainObject(cur)) return undefined;
-      if (FORBIDDEN_KEY_SEGMENTS.has(part)) return undefined;
-      if (!Object.prototype.hasOwnProperty.call(cur, part)) return undefined;
-      const entry = Object.entries(cur).find(([k]) => k === part);
-      cur = entry ? entry[1] : undefined;
-    }
-    return cur;
-  }
-
   const source = JSON.parse(fs.readFileSync(sourcePath, "utf8"));
   const enPaths = collectLeafPaths(source);
   const totalEn = enPaths.length;
@@ -259,7 +246,7 @@ async function i18nUiCoverage() {
     let present = 0;
     let placeholder = 0;
     for (const pathParts of enPaths) {
-      const value = lookupPath(target, pathParts);
+      const value = lookupMessagePath(target, pathParts);
       if (value === undefined || isPlainObject(value)) continue;
       present++;
       if (typeof value === "string" && value.startsWith(PLACEHOLDER_PREFIX)) placeholder++;
