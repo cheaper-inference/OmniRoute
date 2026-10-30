@@ -231,6 +231,7 @@ jobs:
           # already over frozen cap) must not red an innocent PR. Unset on
           # workflow_dispatch (no PR base) → absolute comparison.
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: |
           set -uo pipefail
