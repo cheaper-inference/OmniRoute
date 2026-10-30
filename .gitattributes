@@ -9,3 +9,11 @@
 # This file must stay LF too: git parses it as-is, and a trailing CR would
 # corrupt every pattern (e.g. "*.sh\r" matches nothing).
 .gitattributes text eol=lf
+
+# `npm run build` regenerates these catalogs through
+# scripts/i18n/generate-global-error-messages.mjs, which writes plain LF. Without an
+# attribute, core.autocrlf=true expects CRLF in the working tree and marks all 67 files
+# modified after every build on Windows — zero lines changed, pure noise that buries real
+# changes in `git status` (and made an unrelated repair look far larger than it was,
+# 2026-10-30). eol=lf matches what the generator actually writes.
+src/i18n/global-error-messages/*.json text eol=lf

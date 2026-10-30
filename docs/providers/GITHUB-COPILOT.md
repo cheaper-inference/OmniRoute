@@ -1,3 +1,8 @@
+---
+title: "GitHub Copilot Provider"
+description: "Routing through a user's own GitHub Copilot subscription, and what OmniRoute can and cannot measure about the allowance"
+---
+
 # GitHub Copilot Provider
 
 **Status: Experimental / Policy-ambiguous**

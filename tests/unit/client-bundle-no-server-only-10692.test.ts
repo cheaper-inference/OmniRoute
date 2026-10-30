@@ -111,6 +111,16 @@ const EXTRA_ENTRIES = [
 const EXTENSIONS = [".ts", ".tsx", ".mts", ".js"];
 const SKIP_DIRS = new Set(["node_modules", ".git", ".build", "dist", ".next", ".claude"]);
 
+/**
+ * Repo-relative path with forward slashes on every platform. `path.relative` yields
+ * backslashes on Windows, and every literal in this file (`SERVER_ONLY`, `EXTRA_ENTRIES`,
+ * the resolver assertions) is written with `/` — so without this the `SERVER_ONLY` lookup
+ * silently never matched there and the pinned #10692 chain was unguarded on Windows.
+ */
+function toRepoPath(absolute: string): string {
+  return path.relative(REPO_ROOT, absolute).split(path.sep).join("/");
+}
+
 /** Resolve an import specifier to a repo-relative file, or null when it leaves the repo. */
 function resolveSpecifier(fromFile: string, specifier: string): string | null {
   let base: string;
@@ -138,7 +148,7 @@ function resolveSpecifier(fromFile: string, specifier: string): string | null {
 
   for (const candidate of candidates) {
     if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
-      return path.relative(REPO_ROOT, candidate);
+      return toRepoPath(candidate);
     }
   }
   return null;
@@ -260,7 +270,7 @@ function walk(dir: string, acc: string[] = []): string[] {
       if (SKIP_DIRS.has(entry.name)) continue;
       walk(full, acc);
     } else if (/\.tsx?$/.test(entry.name)) {
-      acc.push(path.relative(REPO_ROOT, full));
+      acc.push(toRepoPath(full));
     }
   }
   return acc;

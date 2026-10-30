@@ -1,3 +1,8 @@
+---
+title: "Grok Build OAuth media"
+description: "Image and video generation reusing the existing grok-cli OAuth connection pool"
+---
+
 # Grok Build OAuth media
 
 Connect **Grok Build** (`grok-cli`) using its existing OAuth flow. Media requests
