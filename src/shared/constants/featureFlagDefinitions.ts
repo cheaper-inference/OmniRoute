@@ -83,6 +83,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "info",
   },
   {
+    key: "PII_REVERSIBLE_VAULT_ENABLED",
+    label: "Reversible PII Token Vault",
+    description:
+      "Opt-in reversible PII pseudonymization vault: replaces detected PII with surrogate tokens upstream and restores original values on outbound responses",
+    descriptionI18nKey: "featureFlagPiiReversibleVaultEnabledDescription",
+    category: "security",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "info",
+  },
+  {
     key: "OUTBOUND_SSRF_GUARD_ENABLED",
     label: "SSRF Guard",
     description:

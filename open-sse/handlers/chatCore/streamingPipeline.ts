@@ -20,7 +20,10 @@ import {
   wantsProgress as defaultWantsProgress,
 } from "../../utils/progressTracker.ts";
 import { createPiiSseTransform as defaultPiiSse } from "@/lib/streamingPiiTransform";
-import { isPiiTransformEnabled, resolvePiiGate } from "@/lib/streamingPiiTransform";
+import {
+  isPiiTransformEnabled,
+  resolvePiiGate,
+} from "@/lib/streamingPiiTransform";
 
 // Single seam to the PII stream module: streamingTail resolves the per-request gate through this
 // file instead of importing src/ itself (boundary ratchet, quality-baseline.json).
@@ -32,6 +35,10 @@ import {
 import { isFeatureFlagEnabled as defaultFeatureFlag } from "@/shared/utils/featureFlags";
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { SSE_HEARTBEAT_INTERVAL_MS } from "../../config/constants.ts";
+import {
+  createDetokenizingStream,
+  isReversibleVaultEnabled,
+} from "../../utils/tokenVault.ts";
 /**
  * Pipeline assembly instrumentation — performance.mark() along the SSE hot path.
  * Marks are visible to Node.js perf_hooks consumers and DevTools' Performance
@@ -56,6 +63,8 @@ export interface StreamingPipelineDeps {
   createSseHeartbeatTransform: typeof defaultHeartbeat;
   shapeForClientFormat: typeof defaultShape;
   createModelEchoTransform: typeof defaultModelEcho;
+  createDetokenizingStream?: typeof createDetokenizingStream;
+  isReversibleVaultEnabled?: typeof isReversibleVaultEnabled;
 }
 
 const DEFAULT_DEPS: StreamingPipelineDeps = {
@@ -68,6 +77,8 @@ const DEFAULT_DEPS: StreamingPipelineDeps = {
   createSseHeartbeatTransform: defaultHeartbeat,
   shapeForClientFormat: defaultShape,
   createModelEchoTransform: defaultModelEcho,
+  createDetokenizingStream: createDetokenizingStream,
+  isReversibleVaultEnabled: isReversibleVaultEnabled,
 };
 
 export function assembleStreamingPipeline(
@@ -96,7 +107,7 @@ export function assembleStreamingPipeline(
      * Omitted falls back to STREAM_ACTIVE_TIMEOUT_MS; 0 leaves the watchdog off. */
     activeTimeoutMs?: number;
   },
-  deps: StreamingPipelineDeps = DEFAULT_DEPS
+  deps: StreamingPipelineDeps = DEFAULT_DEPS,
 ) {
   performance.clearMarks(PIPELINE_START);
   performance.clearMarks(PIPELINE_END);
@@ -113,11 +124,17 @@ export function assembleStreamingPipeline(
     {
       contentStallTimeoutMs: args.contentStallTimeoutMs,
       activeTimeoutMs: args.activeTimeoutMs,
-    }
+    },
   );
-  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
+  if (
+    isPiiTransformEnabled({
+      piiDisabledGuardrails: args.piiDisabledGuardrails ?? [],
+    })
+  ) {
     if (typeof args.createPiiTransform === "function") {
-      piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
+      piiStream = piiStream.pipeThrough(
+        (args.createPiiTransform as () => TransformStream)(),
+      );
     } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
       piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
     }
@@ -150,11 +167,19 @@ export function assembleStreamingPipeline(
       signal: args.streamController.signal,
       intervalMs: SSE_HEARTBEAT_INTERVAL_MS,
       shape: deps.shapeForClientFormat(args.clientResponseFormat),
-    })
+    }),
   );
   // #1311: echo the requested alias/combo name in each streamed SSE chunk's model field.
   if (args.echoModel) {
-    finalStream = finalStream.pipeThrough(deps.createModelEchoTransform(args.echoModel));
+    finalStream = finalStream.pipeThrough(
+      deps.createModelEchoTransform(args.echoModel),
+    );
+  }
+  const checkVault = deps.isReversibleVaultEnabled ?? isReversibleVaultEnabled;
+  if (checkVault()) {
+    const makeDetokenizer =
+      deps.createDetokenizingStream ?? createDetokenizingStream;
+    finalStream = finalStream.pipeThrough(makeDetokenizer());
   }
   performance.mark(PIPELINE_END);
   performance.measure(PIPELINE_MEASURE, PIPELINE_START, PIPELINE_END);

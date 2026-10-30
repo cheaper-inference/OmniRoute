@@ -11,6 +11,7 @@ import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
 import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { isReversibleVaultEnabled, resolveVault } from "@/lib/pii/tokenVault";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -343,7 +344,7 @@ function processPII(text, redact = false, options = undefined) {
 
   for (const rule of resolvePiiRules(options)) {
     if (rule.validate) {
-      const validated = redactValidatedMatches(processed, rule, redact);
+      const validated = redactValidatedMatches(processed, rule, redact, options);
       if (validated.count > 0) {
         detections.push({ type: rule.name, count: validated.count });
         processed = validated.text;
@@ -354,7 +355,12 @@ function processPII(text, redact = false, options = undefined) {
     if (matches && matches.length > 0) {
       detections.push({ type: rule.name, count: matches.length });
       if (redact) {
-        processed = processed.replace(rule.pattern, rule.replacement);
+        if (isReversibleVaultEnabled()) {
+          const vault = resolveVault(options?.vault);
+          processed = processed.replace(rule.pattern, (match: string) => vault.getOrCreateToken(rule.name, match));
+        } else {
+          processed = processed.replace(rule.pattern, rule.replacement);
+        }
       }
     }
   }
@@ -369,7 +375,7 @@ function processPII(text, redact = false, options = undefined) {
  * @param {boolean} redact
  * @returns {{ text: string, count: number }}
  */
-function redactValidatedMatches(text, rule, redact) {
+function redactValidatedMatches(text, rule, redact, options = undefined) {
   let count = 0;
   let output = "";
   let cursor = 0;
@@ -377,7 +383,12 @@ function redactValidatedMatches(text, rule, redact) {
     const index = match.index ?? 0;
     if (!rule.validate(match[0], precedingContext(text, index))) continue;
     count++;
-    output += text.slice(cursor, index) + rule.replacement;
+    let replacement = rule.replacement;
+    if (redact && isReversibleVaultEnabled()) {
+      const vault = resolveVault(options?.vault);
+      replacement = vault.getOrCreateToken(rule.name, match[0]);
+    }
+    output += text.slice(cursor, index) + replacement;
     cursor = index + match[0].length;
   }
   return { text: redact ? output + text.slice(cursor) : text, count };
