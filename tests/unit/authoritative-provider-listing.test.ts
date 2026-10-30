@@ -117,12 +117,36 @@ test("curated-only catalogs cannot be emptied or extended by a live-catalog flag
       ...input,
       providerId,
       syncedCatalogAuthoritative: true,
+      customModels: [],
     });
     assert.deepEqual(
       models.map((m) => m.id),
       ["retired", "live"]
     );
     assert.ok(models.every((m) => m.source === "system"));
+  }
+});
+
+test("curated-only providers still accept operator-defined custom models", () => {
+  // "Curated" describes the upstream discovery surface (there is none), not a ban on
+  // hand-added ids: without this a curated provider can never route a model the
+  // registry does not ship, and the row saved in the dashboard is silently dropped.
+  for (const providerId of ["kimi-web", "zai-web", "chatgpt-web", "codebuddy-intl"]) {
+    const models = mergeProviderModelListing({
+      ...input,
+      providerId,
+      syncedCatalogAuthoritative: true,
+      syncedModels: [],
+      customModels: [{ id: "manual", name: "My model", source: "custom" }],
+    });
+    assert.deepEqual(
+      models.map((m) => m.id),
+      ["retired", "live", "manual"],
+      providerId
+    );
+    const manual = models.find((m) => m.id === "manual");
+    assert.equal(manual?.source, "custom");
+    assert.equal(manual?.name, "My model");
   }
 });
 

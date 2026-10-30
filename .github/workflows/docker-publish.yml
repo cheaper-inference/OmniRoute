@@ -158,7 +158,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - name: Check an online runner carries the omni-build label
+      - name: Check an online runner carries both build labels
         env:
           # Listing self-hosted runners needs the repository "Administration: read"
           # permission, which GITHUB_TOKEN can never be granted through `permissions:`.
@@ -170,13 +170,13 @@ jobs:
         run: |
           set -euo pipefail
           if ! ONLINE=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runners" \
-            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build"))] | length'); then
+            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build")) | select(any(.labels[]; .name == "omni-build-60gb"))] | length'); then
             echo "::warning::Could not list self-hosted runners (token lacks Administration read — set the RUNNER_STATUS_TOKEN secret). Skipping the omni-build availability check."
             exit 0
           fi
-          echo "online omni-build runners: ${ONLINE}"
+          echo "online omni-build + omni-build-60gb runners: ${ONLINE}"
           if [ "${ONLINE}" -eq 0 ]; then
-            echo "::error::No ONLINE runner carries the omni-build label. The amd64 build would queue forever (silent publish stall, #14560)."
+            echo "::error::No ONLINE runner carries both omni-build and omni-build-60gb labels. The amd64 build would queue forever (silent publish stall, #14560)."
             echo "Check the self-hosted runner pool, or set USE_VPS_RUNNER=false to fall back to hosted (note: hosted ~7GB dies ResourceExhausted on this build, #11976)."
             exit 1
           fi
@@ -200,7 +200,7 @@ jobs:
     # (run 33253576569). The same tree's arm64 webpack build on hosted ARM
     # succeeded (run 33264823398). Dockerfile already documents webpack as the
     # Docker escape hatch (OMNIROUTE_USE_TURBOPACK=0).
-    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
+    runs-on: ${{ matrix.arch == 'amd64' && (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && fromJSON('["self-hosted","omni-build","omni-build-60gb"]') || 'ubuntu-24.04') || 'ubuntu-24.04-arm' }}
     # Share the 1-slot omni-build ceiling (#12048) with ci.yml `Build` /
     # npm-publish. Same group as main's Build so a :next publish waits beside
     # the artefact instead of sitting next to it. arm64 is hosted — its own
@@ -731,18 +731,18 @@ jobs:
           set -euo pipefail
           TITLE="Docker publish runner offline: no online omni-build runner"
           if ! ONLINE=$(GH_TOKEN="$RUNNERS_TOKEN" gh api "repos/${GITHUB_REPOSITORY}/actions/runners" \
-            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build"))] | length'); then
+            --paginate --jq '[.runners[] | select(.status == "online") | select(any(.labels[]; .name == "omni-build")) | select(any(.labels[]; .name == "omni-build-60gb"))] | length'); then
             echo "::warning::Could not list self-hosted runners (token lacks Administration read — set the RUNNER_STATUS_TOKEN secret). Alert skipped."
             exit 0
           fi
-          echo "online omni-build runners: ${ONLINE}"
+          echo "online omni-build + omni-build-60gb runners: ${ONLINE}"
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title ${TITLE}" --json number --jq '.[0].number' 2>/dev/null || echo "")
 
           if [ "${ONLINE}" -eq 0 ]; then
             {
-              echo "No **online** runner carries the \`omni-build\` label (\`GET /repos/{owner}/{repo}/actions/runners\`)."
+              echo "No **online** runner carries both \`omni-build\` and \`omni-build-60gb\` labels (\`GET /repos/{owner}/{repo}/actions/runners\`)."
               echo ""
               echo "While this persists, every Docker publish with \`USE_VPS_RUNNER=true\` queues the amd64 build forever - the silent stall from #14560 (the runner-preflight job turns it into a red run at publish time; this issue is the standing signal between publishes)."
               echo ""
@@ -759,7 +759,7 @@ jobs:
             fi
           elif [ -n "$EXISTING" ]; then
             gh issue close "$EXISTING" --repo "$GITHUB_REPOSITORY" --reason completed \
-              --comment "OK: ${ONLINE} online \`omni-build\` runner(s) - pool recovered. Auto-closed."
+              --comment "OK: ${ONLINE} online \`omni-build\` + \`omni-build-60gb\` runner(s) - pool recovered. Auto-closed."
             echo "Closed issue #$EXISTING"
           else
             echo "Pool healthy (${ONLINE} online), nothing to do"

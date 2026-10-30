@@ -474,6 +474,7 @@ FSM 状态转换会纳入 Auto Combo 的评分机制，对后台/自动化任务
 多个提供者配备了专用的弹性和隐匿模块，这些模块构建于全局熔断器、连接冷却和模型锁定层之上：
 
 - Antigravity 429 引擎：`open-sse/services/antigravity429Engine.ts`（轮换身份、清理响应标头，并通过 `antigravityCredits.ts`、`antigravityHeaderScrub.ts`、`antigravityHeaders.ts`、`antigravityIdentity.ts`、`antigravityVersion.ts` 驱动额度/版本跟踪）
+- Antigravity 429 防护： `open-sse/services/antigravity429Guard.ts` （所有主机上的上游 429 的每个请求预算， `ANTIGRAVITY_MAX_429_ATTEMPTS`；本地应答拒绝正文的相同重新发送； `src/sse/handlers/chat.ts`不会通过冷却感知重试重新启动此类请求）
 - ModelScope 配额策略：`open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH（兼容性通道握手）：`open-sse/services/claudeCodeCCH.ts`，以及 `claudeCodeCompatible.ts`、`claudeCodeConstraints.ts`、`claudeCodeExtraRemap.ts`、`claudeCodeToolRemapper.ts`
 - Claude Code 指纹塑形：`open-sse/services/claudeCodeFingerprint.ts`

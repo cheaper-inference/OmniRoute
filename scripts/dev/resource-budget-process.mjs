@@ -55,7 +55,7 @@ function readProcessIdentity(pid) {
   try {
     statLine = readFileSync(`/proc/${pid}/stat`, "utf8");
   } catch (error) {
-    if (error.code === "ENOENT") return { kind: "MISSING" };
+    if (error.code === "ENOENT" || error.code === "ESRCH") return { kind: "MISSING" };
     return { kind: "UNKNOWN", reason: error.message };
   }
   try {
@@ -69,7 +69,7 @@ function readProcessRecord(pid) {
   try {
     return { kind: "PRESENT", ...parseProcStat(readFileSync(`/proc/${pid}/stat`, "utf8")) };
   } catch (error) {
-    if (error.code === "ENOENT") return { kind: "MISSING" };
+    if (error.code === "ENOENT" || error.code === "ESRCH") return { kind: "MISSING" };
     return { kind: "UNKNOWN", reason: error.message };
   }
 }
@@ -95,7 +95,9 @@ export function listProcessGroupMembers(processGroup) {
         members.push({ pid, startTicks: stat.startTicks });
       }
     } catch (error) {
-      if (error.code !== "ENOENT") unknown = true;
+      // procfs can return ESRCH when a process exits after its stat file is opened.
+      // Both disappearance errors prove this PID is gone; other failures stay unknown.
+      if (error.code !== "ENOENT" && error.code !== "ESRCH") unknown = true;
     }
   }
   return { members, unknown };

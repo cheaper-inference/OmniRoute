@@ -872,14 +872,16 @@ o netinkamo tipo raktas atmetamas. Visi kiti raktai ignoruojami, įskaitant aute
 `stream` ir `outputSchema`. Kitų teikėjų naudojami plokštieji raktai (`cx`, `depth`, ...) veikia
 kaip anksčiau.
 
-| Teikėjas | Aukščiausiojo lygio laukai                                                                                                                                                                                                                                                                                                                                                | Įdėtiniai                                                                                                                                                                  |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokščiosios primityviosios reikšmės), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                         | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` sujungiami su numatytąja reikšme `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                          |
+| Teikėjas | Aukščiausiojo lygio laukai                                                                                                                                                                                                                                                                                                                                                | Įdėtiniai                                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokščiosios primityviosios reikšmės), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                         | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sujungiami su numatytąja reikšme `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
 
 Bendrieji laukai visada turi pirmenybę: `query`, `max_results`, `filters` (domenai), `country` ir iš
 `search_type` išvedama tema. Exa atveju `search_type: "news"` išlaiko `category: "news"`.
 Tavily taip pat priima `search_type: "finance"` (`topic: "finance"`).
+
+„Firecrawl“ paieškos kaina įrašoma už pradėtą 10 grąžintų rezultatų bloką, 0,002 USD (2 kreditai) už bloką ir bent vieną bloką už skambutį ( [„Firecrawl billing](https://docs.firecrawl.dev/billing) “): 11 rezultatų kainuoja 0,004 USD.
 
 Bendrasis `time_range` dabar perduodamas abiem teikėjams: Exa gauna `startPublishedDate` (ISO
 laiko žymą), o Tavily gauna `start_date` (`YYYY-MM-DD`). Aiškiai nurodyta data lauke `provider_options`
@@ -888,9 +890,11 @@ turi pirmenybę prieš susietąją.
 Exa rezultatuose `id`, `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` išlaikomi
 lauke `provider_raw`. Tavily rezultatuose išlaikomi `images` ir `favicon`.
 
-Sąnaudų apskaitai vis dar naudojamas plokščiasis registras `costPerQuery`. Tavily už
-`search_depth: "advanced"` taiko daugiau kreditų vienam iškvietimui, o šis skirtumas
-`usage.search_cost_usd` neatsispindi.
+Linkup: Susiejimo paieškos kaina įrašoma 0,005 USD už `depth` `fast` ir `standard` ir 0,05 USD už `deep` ( [susiejimo kainodara](https://docs.linkup.so/pages/documentation/development/pricing) ), nesvarbu, ar `depth` gaunama iš `provider_options` ar ryšio nustatymų.
+
+Exa `type: "lite"` (Exa 3.0) priima mažesnį laukų rinkinį ir atmeta visą užklausą, kai nustatomas bet kuris kitas laukas. Lite, `additionalQueries`, `systemPrompt` ir kiekvienas `contents` klavišas, išskyrus `text` ir `highlights` atmetamas prieš skambinant. Nebenaudojami `subpages`, `subpageTarget`, `highlights.numSentences` ir `highlights.highlightsPerUrl` nebepersiunčiami.
+
+Exa: 0,007 USD už `auto` (ir senojo `fast`) skambutį arba 0,004 USD už `lite` (ir senąjį `instant`), apimanti 10 rezultatų; 0,001 USD už kiekvieną tolesnį rezultatą; ir 0,001 USD už grąžintą rezultatą, kai nustatytas `contents.summary`. Tavily įrašytas 1 kreditu (0,008 USD) už `search_depth` `basic`, `fast` ir `ultra-fast` ir 2 kreditus (0,016 USD) už `advanced` ( [Tavily API kreditai](https://docs.tavily.com/documentation/api-credits) ). Skambutis su `auto_parameters: true`, kurį Tavily atnaujina į išplėstinį, vis tiek įrašomas į 1 kreditą.
 
 ---
 

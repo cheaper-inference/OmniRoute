@@ -84,6 +84,7 @@ import {
   getComboStepKindLabel,
   getI18nOrFallback,
 } from "./comboPageHelpers";
+import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
@@ -3919,6 +3920,8 @@ function ComboFormModal({
                           <Icon name="arrow_downward" size={12} />
                         </Button>
                       </div>
+
+                      <ComboStepTestButton entry={entry} />
 
                       {/* Remove */}
                       <Button

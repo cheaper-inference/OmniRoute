@@ -7,7 +7,21 @@
 > **ሁኔታ:** ዳሽቦርዱ በ**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ላይ የተገነባ ነው፣
 > እንደ workspace `packages/ui-kit` (`@omniroute/ui-kit`፤ የupstream snapshot በ`packages/ui-kit/UPSTREAM.md`
 > ውስጥ ተሰክቶ ተቆልፏል እና በ`npm run check:ui-kit-snapshot` ይጠበቃል) vendored ተደርጓል። Light
-> የመደበኛው (canonical) ገለጻ ነው፤ ነባሪ ምርጫው `system` ነው። አጽናኝ ቀለሙ Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI፣ የማሳያ እና ኮድ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ነጠላ ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
+> የመደበኛው (canonical) ገለጻ ነው፤ ነባሪ ምርጫው `system` ነው። አጽናኝ ቀለሙ Keak lime (`--ci-color-accent`) ነው። ስዊዘርዘር ለ UI እና ለማሳያ ጽሑፍ (`--ci-font-ui`፣ `--ci-font-display` እና `--ci-font-mono` መፍታት ያለበት) ዋና ቤተሰብ ነው፣ በራሱ በራሱ የሚስተናገደው (`packages/ui-kit/src/ci-fonts.css`፣ በ `ci-tokens.css` የመጣ)። እያንዳንዱ አዶ የሉሲድ ግሊፍ ነው።
+>
+> Inter በSwitzer ውስጥ ለሌሉ የፊደል ቅርጾች አማራጭ ነው፤ `--font-mono` ወደ ስርዓቱ እኩል-ስፋት ቅርጸ-ፊደል ዝርዝር `--ci-font-code` ይጠቁማል።
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. ነገሮች የሚገኙበት ቦታ
 

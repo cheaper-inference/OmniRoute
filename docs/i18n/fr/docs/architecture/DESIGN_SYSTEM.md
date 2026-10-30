@@ -7,7 +7,21 @@
 > **Statut :** le tableau de bord est construit sur le **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendorisé
 > en tant que workspace `packages/ui-kit` (`@omniroute/ui-kit` ; l'instantané amont est épinglé dans
 > `packages/ui-kit/UPSTREAM.md` et protégé par `npm run check:ui-kit-snapshot`). Le thème clair est le thème
-> canonique ; la préférence par défaut est `system`. L'accent est le vert lime Keak (`--ci-color-accent`). Switzer est la famille unique pour UI, affichage et texte de code (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Chaque icône est un glyphe Lucide.
+> canonique ; la préférence par défaut est `system`. L'accent est le vert lime Keak (`--ci-color-accent`). Switzer est la famille principale pour UI et le texte d’affichage (`--ci-font-ui`; `--ci-font-display` et `--ci-font-mono` s'y résolvent), auto-hébergé par le kit lui-même (`packages/ui-kit/src/ci-fonts.css`, importé par `ci-tokens.css`). Chaque icône est un glyphe Lucide.
+>
+> Inter sert de police de repli pour les glyphes absents de Switzer ; `--font-mono` pointe vers la pile de polices système à chasse fixe `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Où les choses se trouvent
 

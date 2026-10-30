@@ -8,7 +8,21 @@
 > do repozitáře začleněn (vendored) jako workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream
 > snapshot je připnut v `packages/ui-kit/UPSTREAM.md` a střežen příkazem
 > `npm run check:ui-kit-snapshot`). Kanonickým motivem je světlý; výchozí preference je `system`.
-> Akcentem je Keak lime (`--ci-color-accent`). Switzer je jediná rodina pro UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Každá ikona je lucidní glyf.
+> Akcentem je Keak lime (`--ci-color-accent`). Switzer je primární rodina písem pro UI a zobrazovaný text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` se na něj rozlišují), kterou vlastní sada (`packages/ui-kit/src/ci-fonts.css`, importováno `ci-tokens.css`). Každá ikona je lucidní glyf.
+>
+> Inter je náhradní písmo pro glyfy chybějící ve Switzeru; `--font-mono` odkazuje na systémový seznam neproporcionálních písem `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Kde co je
 

@@ -494,6 +494,7 @@ Jules) מאחורי מחזור חיים אחיד של משימות המגובה 
   של זהות, מנקה כותרות תגובה ומנהל מעקב אחר קרדיטים/גרסאות באמצעות
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (תקציב לפי בקשה של 429s במעלה הזרם בכל המארחים, `ANTIGRAVITY_MAX_429_ATTEMPTS`; שליחה חוזרת זהה של גוף שסורב נענתה באופן מקומי; `src/sse/handlers/chat.ts` לא מפעילה מחדש בקשה כזו דרך הניסוי החוזר עם התקררות)
 - מדיניות המכסות של ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH של Claude Code (לחיצת יד לערוץ תאימות): `open-sse/services/claudeCodeCCH.ts`,
   וכן `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

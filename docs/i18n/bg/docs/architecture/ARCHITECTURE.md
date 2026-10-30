@@ -494,6 +494,7 @@ Jules) зад унифициран, поддържан от база данни 
   идентичността, премахва заглавките на отговора, управлява проследяването на кредити/версии чрез
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (бюджет на заявка от upstream 429s във всички хостове, `ANTIGRAVITY_MAX_429_ATTEMPTS`; на идентично повторно изпращане на отказано тяло се отговаря локално; `src/sse/handlers/chat.ts` не рестартира такава заявка чрез повторен опит с разхлаждане)
 - Политика за квоти на ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH на Claude Code (ръкостискане на канал за съвместимост): `open-sse/services/claudeCodeCCH.ts`,
   както и `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

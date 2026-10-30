@@ -9,9 +9,23 @@ lastUpdated: 2026-10-27
 > as the workspace `packages/ui-kit` (`@omniroute/ui-kit`; the upstream snapshot is pinned in
 > `packages/ui-kit/UPSTREAM.md` and guarded by `npm run check:ui-kit-snapshot`). Light is the canonical
 > theme; the default preference is `system`. The accent is Keak lime (`--ci-color-accent`). Switzer is
-> the single family for UI, display and code text (`--ci-font-ui`; `--ci-font-display` and
+> the primary family for UI and display text (`--ci-font-ui`; `--ci-font-display` and
 > `--ci-font-mono` resolve to it), self-hosted by the kit itself (`packages/ui-kit/src/ci-fonts.css`,
 > imported by `ci-tokens.css`). Every icon is a Lucide glyph.
+>
+> Inter is a fallback for glyphs missing from Switzer; `--font-mono` maps to the system monospace stack `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Where things live
 

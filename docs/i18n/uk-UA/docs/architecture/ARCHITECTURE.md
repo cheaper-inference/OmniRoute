@@ -484,6 +484,7 @@ Jules) зі збереженням життєвого циклу завдань 
   ідентичність, очищає заголовки відповіді, керує відстеженням кредитів і версій через
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (бюджет висхідного потоку 429 на всі хости на запит, `ANTIGRAVITY_MAX_429_ATTEMPTS`; відповідь на ідентичне повторне надсилання відхиленого тіла надається локально; `src/sse/handlers/chat.ts` не перезапускає такий запит через повторну спробу з урахуванням часу відновлення)
 - Політика квот ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (рукостискання каналу сумісності): `open-sse/services/claudeCodeCCH.ts`,
   а також `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

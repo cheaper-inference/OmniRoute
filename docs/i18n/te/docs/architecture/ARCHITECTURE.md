@@ -486,6 +486,7 @@ FSM ట్రాన్సిషన్లు Auto Combo స్కోరింగ�
 అనేక ప్రొవైడర్లు గ్లోబల్ సర్క్యూట్ బ్రేకర్ / కనెక్షన్ కూల్డౌన్ / మోడల్ లాకౌట్ లేయర్లపై ఆధారపడి పనిచేసే ప్రత్యేక స్థితిస్థాపకత మరియు స్టెల్త్ మాడ్యూల్లను అందిస్తారు:
 
 - Antigravity 429 ఇంజిన్: `open-sse/services/antigravity429Engine.ts` (ఐడెంటిటీని రొటేట్ చేస్తుంది, రెస్పాన్స్ హెడర్లను స్క్రబ్ చేస్తుంది, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` ద్వారా క్రెడిట్లు/వెర్షన్ ట్రాకింగ్ను నిర్వహిస్తుంది)
+- Antigravity 429 గార్డ్: `open-sse/services/antigravity429Guard.ts` (అన్ని హోస్ట్లలో అప్స్ట్రీమ్ 429s యొక్క ప్రతి అభ్యర్థన బడ్జెట్, `ANTIGRAVITY_MAX_429_ATTEMPTS`; తిరస్కరించబడిన బాడీ యొక్క ఒకే విధమైన రీ-పంపిణీకి స్థానికంగా సమాధానం ఇవ్వబడుతుంది; కూల్డౌన్-అవేర్ రీట్రీ ద్వారా `src/sse/handlers/chat.ts` అటువంటి అభ్యర్థనను పునఃప్రారంభించదు)
 - ModelScope కోటా పాలసీ: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (కంపాటిబిలిటీ ఛానల్ హ్యాండ్షేక్): `open-sse/services/claudeCodeCCH.ts`, అలాగే `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code ఫింగర్ప్రింట్ షేపింగ్: `open-sse/services/claudeCodeFingerprint.ts`

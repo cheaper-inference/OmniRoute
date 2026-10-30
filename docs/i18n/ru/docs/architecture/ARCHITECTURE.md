@@ -484,6 +484,7 @@ Jules). Все конечные точки создания и просмотр�
   идентификаторов, очищает заголовки ответов и управляет отслеживанием кредитов и версий через
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (бюджет восходящих 429 на каждый запрос на всех хостах, `ANTIGRAVITY_MAX_429_ATTEMPTS`; на идентичную повторную отправку отклоненного тела отвечает локально; `src/sse/handlers/chat.ts` не перезапускает такой запрос посредством повторной попытки с учетом времени восстановления)
 - Политика квот ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH (рукопожатие канала совместимости) Claude Code: `open-sse/services/claudeCodeCCH.ts`,
   а также `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

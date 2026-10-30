@@ -494,6 +494,7 @@ lapisan pemutus litar / tempoh bertenang sambungan / sekatan model global:
   identiti, membersihkan pengepala respons, mengendalikan penjejakan kredit/versi melalui
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (belanjawan setiap permintaan huluan 429s merentasi semua hos, `ANTIGRAVITY_MAX_429_ATTEMPTS`; hantaran semula yang sama bagi badan yang ditolak akan dijawab secara setempat; `src/sse/handlers/chat.ts` tidak memulakan semula permintaan sedemikian melalui percubaan semula yang menyedari cooldown)
 - Dasar kuota ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH Claude Code (Jabat Tangan Saluran Keserasian): `open-sse/services/claudeCodeCCH.ts`,
   serta `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

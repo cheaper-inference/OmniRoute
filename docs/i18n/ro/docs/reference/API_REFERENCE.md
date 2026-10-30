@@ -871,14 +871,16 @@ iar o cheie cu un tip incorect este eliminată. Orice altă cheie este ignorată
 `stream` și `outputSchema`. Cheile fără imbricare utilizate de alți furnizori (`cx`, `depth`, ...) funcționează
 ca înainte.
 
-| Furnizor | Câmpuri de nivel superior                                                                                                                                                                                                                                                                                                                                                 | Imbricate                                                                                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive fără imbricare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` îmbinate peste valoarea implicită `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| Furnizor | Câmpuri de nivel superior                                                                                                                                                                                                                                                                                                                                                 | Imbricate                                                                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive fără imbricare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` îmbinate peste valoarea implicită `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
 Câmpurile generice au întotdeauna prioritate: `query`, `max_results`, `filters` (domenii), `country` și
 subiectul derivat din `search_type`. Pentru Exa, `search_type: "news"` păstrează `category: "news"`.
 Tavily acceptă și `search_type: "finance"` (`topic: "finance"`).
+
+Costul de căutare Firecrawl este înregistrat pentru fiecare bloc început de 10 rezultate returnate, la 0,002 USD (2 credite) un bloc și cel puțin un bloc pe apel ( [facturare Firecrawl](https://docs.firecrawl.dev/billing) ): 11 rezultate costă 0,004 USD.
 
 Câmpul generic `time_range` ajunge acum la ambii furnizori: Exa primește `startPublishedDate` (marcaj temporal ISO),
 iar Tavily primește `start_date` (`YYYY-MM-DD`). O dată explicită din `provider_options`
@@ -887,9 +889,11 @@ o suprascrie pe cea mapată.
 Rezultatele Exa păstrează `id`, `highlight_scores`, `summary`, `subpages`, `entities` și `extras` în
 `provider_raw`. Rezultatele Tavily păstrează `images` și `favicon`.
 
-Contabilizarea costurilor utilizează în continuare registrul fără imbricare `costPerQuery`. Tavily facturează
-`search_depth: "advanced"` cu mai multe credite per apel, iar această diferență nu este reflectată în
-`usage.search_cost_usd`.
+Linkup: Costul de căutare a conexiunii este înregistrat la 0,005 USD pentru `depth` `fast` și `standard` și la 0,05 USD pentru `deep` ( [prețuri de conectare](https://docs.linkup.so/pages/documentation/development/pricing) ), indiferent dacă `depth` provine din `provider_options` sau din setările conexiunii.
+
+Exa `type: "lite"` (Exa 3.0) acceptă un set mai mic de câmpuri și respinge întreaga cerere atunci când este setat orice alt câmp. Pentru lite, `additionalQueries`, `systemPrompt` și fiecare tastă `contents` cu excepția `text` și `highlights` sunt abandonate înainte de apel. `subpages`, `subpageTarget`, `highlights.numSentences` și `highlights.highlightsPerUrl` depreciate nu mai sunt redirecționate.
+
+Exa: 0,007 USD per apel pentru `auto` (și `fast` moștenit) sau 0,004 USD pentru `lite` (și `instant` moștenit), acoperind 10 rezultate; 0,001 USD pentru fiecare rezultat suplimentar; și 0,001 USD per rezultat returnat când `contents.summary` este setat. Tavily este înregistrat la 1 credit (0,008 USD) pentru `search_depth` `basic`, `fast` și `ultra-fast` și 2 credite (0,016 USD) pentru `advanced` ( [credite Tavily API](https://docs.tavily.com/documentation/api-credits) ). Un apel cu `auto_parameters: true` pe care Tavily face upgrade la avansat este încă înregistrat la 1 credit.
 
 ---
 

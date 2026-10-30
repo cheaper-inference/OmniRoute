@@ -799,14 +799,16 @@ Exa နှင့် Tavily တို့သည် provider သီးသန့် 
 `stream` နှင့် `outputSchema` အပါအဝင် အခြားမည်သည့် key ကိုမဆို လျစ်လျူရှုသည်။ အခြား provider များအသုံးပြုသော
 အဆင့်တစ်ခုတည်းရှိ key များ (`cx`, `depth`, ...) သည် ယခင်အတိုင်း အလုပ်လုပ်သည်။
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                                                 |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (အဆင့်တစ်ခုတည်းရှိ primitive များ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ကို ပုံသေ `{ text: true, highlights: true }` အပေါ် ပေါင်းစပ်သည် |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                      |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                        |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (အဆင့်တစ်ခုတည်းရှိ primitive များ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ကို ပုံသေ `{ text: true, highlights: true }` အပေါ် ပေါင်းစပ်သည် |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                             |
 
 ယေဘုယျ field များဖြစ်သည့် `query`, `max_results`, `filters` (domain များ)၊ `country` နှင့်
 `search_type` မှ ဆင်းသက်လာသော topic တို့ကို အမြဲဦးစားပေးသည်။ Exa တွင် `search_type: "news"` သည် `category: "news"` ကို ဆက်လက်ထိန်းသိမ်းသည်။
 Tavily သည် `search_type: "finance"` (`topic: "finance"`) ကိုလည်း လက်ခံသည်။
+
+Firecrawl ရှာဖွေမှုကုန်ကျစရိတ်သည် ဘလော့ဂ်တစ်ခုလျှင် $0.002 (ခရက်ဒစ် 2 ခု) နှင့် ခေါ်ဆိုမှုတစ်ခုလျှင် အနည်းဆုံး ဘလောက်တစ်ခု ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 ရလဒ်များသည် $0.004 ကုန်ကျသည်။
 
 ယေဘုယျ `time_range` သည် ယခုအခါ provider နှစ်ခုလုံးသို့ ရောက်ရှိသည်- Exa သည် `startPublishedDate` (ISO
 timestamp) ကိုရရှိပြီး Tavily သည် `start_date` (`YYYY-MM-DD`) ကိုရရှိသည်။ `provider_options` ရှိ တိတိကျကျသတ်မှတ်ထားသော ရက်စွဲသည်
@@ -815,9 +817,11 @@ timestamp) ကိုရရှိပြီး Tavily သည် `start_date` (`YYY
 Exa ရလဒ်များသည် `id`, `highlight_scores`, `summary`, `subpages`, `entities` နှင့် `extras` ကို
 `provider_raw` ထဲတွင် ဆက်လက်ထိန်းသိမ်းသည်။ Tavily ရလဒ်များသည် `images` နှင့် `favicon` ကို ဆက်လက်ထိန်းသိမ်းသည်။
 
-ကုန်ကျစရိတ်တွက်ချက်မှုသည် အဆင့်တစ်ခုတည်းရှိ registry `costPerQuery` အတိုင်း ဆက်လက်ရှိသည်။ Tavily သည်
-`search_depth: "advanced"` အတွက် call တစ်ကြိမ်လျှင် credit ပိုမိုကောက်ခံသော်လည်း ထိုကွာခြားချက်ကို
-`usage.search_cost_usd` တွင် ထည့်သွင်းဖော်ပြထားခြင်းမရှိပါ။
+Linkup ရှာဖွေမှုကုန်ကျစရိတ်သည် `depth` `fast` နှင့် `standard` အတွက် $0.005 နှင့် `deep` အတွက် $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ၊ `depth` မှ `provider_options` သို့မဟုတ် ချိတ်ဆက်မှု၏ဆက်တင်များတွင်ဖြစ်စေ မှတ်တမ်းတင်ထားသည်။
+
+Exa `type: "lite"` (Exa 3.0) သည် သေးငယ်သော နယ်ပယ်အစုံကို လက်ခံပြီး အခြားနယ်ပယ်တစ်ခုခုကို သတ်မှတ်သည့်အခါ တောင်းဆိုချက်တစ်ခုလုံးကို ငြင်းပယ်သည်။ lite အတွက် `additionalQueries`၊ `systemPrompt` နှင့် `text`၊ `highlights` မှလွဲ၍ `contents` အတွင်းရှိ ကီးအားလုံးကို ခေါ်ဆိုမှုမပြုမီ ဖယ်ရှားသည်။ ကန့်ကွက်ထားသော `subpages`၊ `subpageTarget`၊ `highlights.numSentences` နှင့် `highlights.highlightsPerUrl` တို့ကို ထပ်ဆင့်မပို့တော့ပါ။
+
+Exa: `auto` (နှင့် ယခင် `fast`) အတွက် ခေါ်ဆိုမှုတစ်ကြိမ်လျှင် $0.007 သို့မဟုတ် `lite` (နှင့် ယခင် `instant`) အတွက် $0.004 ဖြစ်ပြီး ရလဒ် 10 ခု ပါဝင်သည်။ နောက်ထပ်ရလဒ်တစ်ခုစီအတွက် $0.001; `contents.summary` သတ်မှတ်လိုက်သောအခါ ရလဒ်တစ်ခုလျှင် $0.001။ Tavily ကို `search_depth` `basic`၊ `fast` နှင့် `ultra-fast` အတွက် 1 ခရက်ဒစ် ($0.008) နှင့် `advanced` ( [Tavily API ခရက်ဒစ်](https://docs.tavily.com/documentation/api-credits) ) အတွက် ခရက်ဒစ် 2 ခု ($0.016) ဖြင့် မှတ်တမ်းတင်ထားသည်။ Tavily အဆင့်မြှင့်တင်ထားသော `auto_parameters: true` ဖြင့်ခေါ်ဆိုမှုကို 1 ခရက်ဒစ်တွင် မှတ်တမ်းတင်ထားဆဲဖြစ်သည်။
 
 ---
 

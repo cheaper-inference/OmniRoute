@@ -841,14 +841,16 @@ Exa మరియు Tavily, నేమ్స్పేస్ చేసిన బ�
 `stream` మరియు `outputSchema`తో సహా ఇతర కీలు విస్మరించబడతాయి. ఇతర ప్రొవైడర్లు ఉపయోగించే ఫ్లాట్ కీలు (`cx`, `depth`, ...) మునుపటిలాగే
 పని చేస్తాయి.
 
-| ప్రొవైడర్ | అగ్ర-స్థాయి ఫీల్డ్లు                                                                                                                                                                                                                                                                                                                                                      | నెస్టెడ్                                                                                                                                                                |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ఫ్లాట్ ప్రిమిటివ్లు), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` డిఫాల్ట్ `{ text: true, highlights: true }`పై విలీనం చేయబడుతుంది |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                       |
+| ప్రొవైడర్ | అగ్ర-స్థాయి ఫీల్డ్లు                                                                                                                                                                                                                                                                                                                                                      | నెస్టెడ్                                                                                                                                       |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ఫ్లాట్ ప్రిమిటివ్లు), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` డిఫాల్ట్ `{ text: true, highlights: true }`పై విలీనం చేయబడుతుంది |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                              |
 
 సాధారణ ఫీల్డ్లకే ఎల్లప్పుడూ ప్రాధాన్యం ఉంటుంది: `query`, `max_results`, `filters` (డొమైన్లు), `country` మరియు
 `search_type` నుండి ఉత్పన్నమైన టాపిక్. Exaలో, `search_type: "news"` అనేది `category: "news"`ని అలాగే ఉంచుతుంది.
 Tavily, `search_type: "finance"`ను కూడా అంగీకరిస్తుంది (`topic: "finance"`).
+
+ఫైర్క్రాల్ శోధన ధర 10 రిటర్న్ చేసిన ఫలితాల యొక్క ప్రారంభ బ్లాక్కు నమోదు చేయబడుతుంది, ఒక బ్లాక్కి $0.002 (2 క్రెడిట్లు) మరియు ప్రతి కాల్కి కనీసం ఒక బ్లాక్ ( [ఫైర్క్రాల్ బిల్లింగ్](https://docs.firecrawl.dev/billing) ): 11 ఫలితాల ధర $0.004.
 
 సాధారణ `time_range` ఇప్పుడు రెండు ప్రొవైడర్లకూ చేరుతుంది: Exaకు `startPublishedDate` (ISO
 టైమ్స్టాంప్), Tavilyకు `start_date` (`YYYY-MM-DD`) లభిస్తాయి. `provider_options`లో స్పష్టంగా పేర్కొన్న తేదీ
@@ -857,9 +859,11 @@ Tavily, `search_type: "finance"`ను కూడా అంగీకరిస్�
 Exa ఫలితాలు `id`, `highlight_scores`, `summary`, `subpages`, `entities` మరియు `extras`ను
 `provider_raw`లో ఉంచుతాయి. Tavily ఫలితాలు `images` మరియు `favicon`ను ఉంచుతాయి.
 
-వ్యయ గణన ఇప్పటికీ ఫ్లాట్ రిజిస్ట్రీ `costPerQuery`గానే ఉంటుంది. ప్రతి కాల్కు Tavilyలో
-`search_depth: "advanced"`కు ఎక్కువ క్రెడిట్లు బిల్ చేయబడతాయి, అయితే ఆ వ్యత్యాసం
-`usage.search_cost_usd`లో ప్రతిబింబించదు.
+లింక్అప్ శోధన ధర `depth` `fast` మరియు `standard` కోసం $0.005 మరియు `deep` కోసం $0.05 ( [Linkup ప్రైసింగ్](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` లేదా కనెక్షన్ సెట్టింగ్ల నుండి వచ్చినా నమోదు చేయబడుతుంది.
+
+Exa `type: "lite"` (Exa 3.0) చిన్న ఫీల్డ్లను అంగీకరిస్తుంది మరియు ఏదైనా ఇతర ఫీల్డ్ సెట్ చేయబడినప్పుడు మొత్తం అభ్యర్థనను తిరస్కరిస్తుంది. లైట్ కోసం, `additionalQueries`, `systemPrompt` మరియు `text` మరియు `highlights` మినహా ప్రతి `contents` కీ కాల్కు ముందు డ్రాప్ చేయబడతాయి. నిలిపివేయబడిన `subpages`, `subpageTarget`, `highlights.numSentences` మరియు `highlights.highlightsPerUrl` ఇకపై ఫార్వార్డ్ చేయబడవు.
+
+Exa: `auto` (మరియు లెగసీ `fast`) కోసం ప్రతి కాల్కు $0.007 లేదా `lite` (మరియు లెగసీ `instant`) కోసం $0.004 10 ఫలితాలను కవర్ చేస్తుంది; ప్రతి తదుపరి ఫలితం కోసం $0.001; మరియు `contents.summary` సెట్ చేసినప్పుడు ప్రతి ఫలితానికి $0.001. Tavily `search_depth` `basic`, `fast` మరియు `ultra-fast` కోసం 1 క్రెడిట్ ($0.008), మరియు `advanced` ( [Tavily API క్రెడిట్లు](https://docs.tavily.com/documentation/api-credits) ) కోసం 2 క్రెడిట్లు ($0.016) వద్ద రికార్డ్ చేయబడింది. Tavily అధునాతనంగా అప్గ్రేడ్ చేసిన `auto_parameters: true` తో కాల్ ఇప్పటికీ 1 క్రెడిట్లో రికార్డ్ చేయబడింది.
 
 ---
 

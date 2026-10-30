@@ -827,14 +827,16 @@ Exa 和 Tavily 會從具命名空間的資料包讀取提供者特定欄位：
 `stream` 和 `outputSchema`。其他提供者使用的扁平鍵（`cx`、`depth` 等）仍會
 如先前一樣運作。
 
-| 提供者 | 頂層欄位                                                                                                                                                                                                                                                                                                                                                                  | 巢狀欄位                                                                                                                                                     |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平基本型別）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` 會合併並覆寫預設值 `{ text: true, highlights: true }` |
-| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                            |
+| 提供者 | 頂層欄位                                                                                                                                                                                                                                                                                                                                                                  | 巢狀欄位                                                                                                                            |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平基本型別）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 會合併並覆寫預設值 `{ text: true, highlights: true }` |
+| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                   |
 
 一般欄位一律優先：`query`、`max_results`、`filters`（網域）、`country`，以及從
 `search_type` 衍生的主題。在 Exa 上，`search_type: "news"` 會保留 `category: "news"`。
 Tavily 也接受 `search_type: "finance"`（`topic: "finance"`）。
+
+Firecrawl 搜尋成本記錄為每個啟動區塊（包含 10 個返回結果），每個區塊為 0.002 美元（2 個積分），每次呼叫至少一個區塊（ [Firecrawl 計費](https://docs.firecrawl.dev/billing)）：11 個結果的成本為 0.004 美元。
 
 一般的 `time_range` 現在會傳遞給這兩個提供者：Exa 會收到 `startPublishedDate`（ISO
 時間戳記），而 Tavily 會收到 `start_date`（`YYYY-MM-DD`）。`provider_options`
@@ -843,9 +845,11 @@ Tavily 也接受 `search_type: "finance"`（`topic: "finance"`）。
 Exa 結果會將 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras` 保留在
 `provider_raw` 中。Tavily 結果會保留 `images` 和 `favicon`。
 
-成本核算仍使用扁平登錄表 `costPerQuery`。Tavily 對每次
-`search_depth: "advanced"` 呼叫收取較多點數，而此差異不會反映在
-`usage.search_cost_usd` 中。
+Linkup 的搜尋費用依 `depth` 記錄：`fast` 和 `standard` 為 $0.005，`deep` 為 $0.05（[Linkup 定價](https://docs.linkup.so/pages/documentation/development/pricing)），不論 `depth` 來自 `provider_options` 還是連線設定。
+
+Exa `type: "lite"` (Exa 3.0) 接受較小的欄位集，並在設定任何其他欄位時拒絕整個請求。對於 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每個`contents`鍵在呼叫之前都會被刪除。已棄用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再轉發。
+
+Exa：`auto`（以及舊版 `fast`）每次呼叫 $0.007，`lite`（以及舊版 `instant`）每次呼叫 $0.004，均包含 10 筆結果；每筆額外結果收取 $0.001；設定 `contents.summary` 時，每筆傳回結果再收取 $0.001。Tavily 的 `search_depth` 為 `basic`、`fast` 和 `ultra-fast` 時，記為 1 個點數（$0.008）；為 `advanced` 時，記為 2 個點數（$0.016）（[Tavily API 點數](https://docs.tavily.com/documentation/api-credits)）。對於設定了 `auto_parameters: true` 且被 Tavily 升級為 advanced 的呼叫，仍記為 1 個點數。
 
 ---
 

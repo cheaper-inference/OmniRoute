@@ -7,7 +7,21 @@
 > **स्थिति:** डैशबोर्ड **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) पर बनाया गया है, जिसे
 > workspace `packages/ui-kit` (`@omniroute/ui-kit`; अपस्ट्रीम स्नैपशॉट
 > `packages/ui-kit/UPSTREAM.md` में पिन किया गया है और `npm run check:ui-kit-snapshot` द्वारा सुरक्षित रखा गया है) के रूप में वेंडर किया गया है। Light ही आधिकारिक
-> थीम है; डिफ़ॉल्ट प्राथमिकता `system` है। एक्सेंट Keak lime (`--ci-color-accent`) है। स्विट्ज़र UI, डिस्प्ले और कोड टेक्स्ट (`--ci-font-ui`; `--ci-font-display` और `--ci-font-mono` इसे हल करता है) के लिए एकल परिवार है, किट द्वारा स्वयं-होस्टेड (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयातित)। प्रत्येक आइकन एक ल्यूसिड ग्लिफ़ है।
+> थीम है; डिफ़ॉल्ट प्राथमिकता `system` है। एक्सेंट Keak lime (`--ci-color-accent`) है। स्विट्ज़र UI और डिस्प्ले टेक्स्ट (`--ci-font-ui`; `--ci-font-display` और `--ci-font-mono` इसे हल करता है) के लिए मुख्य फ़ॉन्ट परिवार है, किट द्वारा स्वयं-होस्टेड (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` द्वारा आयातित)। प्रत्येक आइकन एक ल्यूसिड ग्लिफ़ है।
+>
+> Switzer में अनुपस्थित ग्लिफ़ के लिए Inter एक वैकल्पिक फ़ॉन्ट है; `--font-mono` सिस्टम के मोनोस्पेस फ़ॉन्ट स्टैक `--ci-font-code` को संदर्भित करता है।
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. चीज़ें कहाँ रहती हैं
 

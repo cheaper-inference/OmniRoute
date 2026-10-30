@@ -494,6 +494,7 @@ les couches globales de disjoncteur, de délai de récupération des connexions 
   de l'identité, nettoie les en-têtes de réponse et gère le suivi des crédits/versions via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard : `open-sse/services/antigravity429Guard.ts` (budget par requête des 429 en amont sur tous les hôtes, `ANTIGRAVITY_MAX_429_ATTEMPTS`; un réenvoi identique d'un corps refusé reçoit une réponse locale ; `src/sse/handlers/chat.ts` ne redémarre pas une telle requête via la nouvelle tentative prenant en compte le temps de recharge)
 - Politique de quota ModelScope : `open-sse/services/modelscopePolicy.ts`
 - CCH (Compatibility Channel Handshake) de Claude Code : `open-sse/services/claudeCodeCCH.ts`,
   ainsi que `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

@@ -871,14 +871,16 @@ dan kunci dengan tipe yang salah akan dihapus. Kunci lainnya diabaikan, termasuk
 `stream`, dan `outputSchema`. Kunci datar yang digunakan oleh penyedia lain (`cx`, `depth`, ...) tetap berfungsi
 seperti sebelumnya.
 
-| Penyedia | Kolom tingkat atas                                                                                                                                                                                                                                                                                                                                                        | Bersarang                                                                                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif datar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` digabungkan di atas nilai default `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| Penyedia | Kolom tingkat atas                                                                                                                                                                                                                                                                                                                                                        | Bersarang                                                                                                                                          |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitif datar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` digabungkan di atas nilai default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
 Kolom generik selalu diprioritaskan: `query`, `max_results`, `filters` (domain), `country`, dan
 topik yang diturunkan dari `search_type`. Pada Exa, `search_type: "news"` mempertahankan `category: "news"`.
 Tavily juga menerima `search_type: "finance"` (`topic: "finance"`).
+
+Biaya pencarian Firecrawl dicatat per blok yang dimulai dari 10 hasil yang dikembalikan, sebesar $0,002 (2 sks) per blok dan setidaknya satu blok per panggilan ( [Penagihan Firecrawl](https://docs.firecrawl.dev/billing) ): 11 hasil berharga $0,004.
 
 `time_range` generik kini diteruskan ke kedua penyedia: Exa mendapatkan `startPublishedDate` (stempel waktu
 ISO) dan Tavily mendapatkan `start_date` (`YYYY-MM-DD`). Tanggal eksplisit dalam `provider_options`
@@ -887,9 +889,11 @@ menggantikan tanggal hasil pemetaan.
 Hasil Exa mempertahankan `id`, `highlight_scores`, `summary`, `subpages`, `entities`, dan `extras` dalam
 `provider_raw`. Hasil Tavily mempertahankan `images` dan `favicon`.
 
-Penghitungan biaya tetap menggunakan registri datar `costPerQuery`. Tavily mengenakan biaya
-lebih banyak kredit per panggilan untuk `search_depth: "advanced"`, dan perbedaan tersebut tidak tercermin dalam
-`usage.search_cost_usd`.
+Biaya pencarian linkup dicatat sebesar $0,005 untuk `depth` `fast` dan `standard` dan $0,05 untuk `deep` ( [Harga linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), baik `depth` berasal dari `provider_options` atau pengaturan koneksi.
+
+Exa `type: "lite"` (Exa 3.0) menerima kumpulan bidang yang lebih kecil dan menolak seluruh permintaan ketika bidang lainnya disetel. Untuk ringan, `additionalQueries`, `systemPrompt` dan setiap kunci `contents` kecuali `text` dan `highlights` dihilangkan sebelum panggilan. `subpages`, `subpageTarget`, `highlights.numSentences` dan `highlights.highlightsPerUrl` yang tidak digunakan lagi tidak lagi diteruskan.
+
+Exa: $0,007 per panggilan untuk `auto` (dan warisan `fast`) atau $0,004 untuk `lite` (dan warisan `instant`), mencakup 10 hasil; $0,001 untuk setiap hasil selanjutnya; dan $0,001 per hasil yang dikembalikan ketika `contents.summary` disetel. Tavily dicatat pada 1 kredit ($0,008) untuk `search_depth` `basic`, `fast` dan `ultra-fast`, dan 2 kredit ($0,016) untuk `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Panggilan dengan `auto_parameters: true` yang ditingkatkan Tavily ke tingkat lanjut masih dicatat sebesar 1 kredit.
 
 ---
 

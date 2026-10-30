@@ -490,6 +490,7 @@ FSM کی منتقلیاں Auto Combo کی اسکورنگ میں شامل ہوت�
 - Antigravity 429 انجن: `open-sse/services/antigravity429Engine.ts` (شناخت تبدیل کرتا ہے، ریسپانس ہیڈرز صاف کرتا ہے، اور کریڈٹس/ورژن کی ٹریکنگ کو
   `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`،
   `antigravityIdentity.ts`، `antigravityVersion.ts` کے ذریعے چلاتا ہے)
+- Antigravity 429 گارڈ: `open-sse/services/antigravity429Guard.ts` (تمام میزبانوں میں اپ اسٹریم 429s کا فی درخواست بجٹ، `ANTIGRAVITY_MAX_429_ATTEMPTS`؛ انکار شدہ باڈی کی ایک جیسی دوبارہ بھیجنے کا مقامی طور پر جواب دیا جاتا ہے؛ `src/sse/handlers/chat.ts` ایسی درخواست کو کولڈاؤن سے آگاہ دوبارہ کوشش کے ذریعے دوبارہ شروع نہیں کرتا ہے)
 - ModelScope کوٹہ پالیسی: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (مطابقتی چینل ہینڈ شیک): `open-sse/services/claudeCodeCCH.ts`،
   نیز `claudeCodeCompatible.ts`، `claudeCodeConstraints.ts`، `claudeCodeExtraRemap.ts`،

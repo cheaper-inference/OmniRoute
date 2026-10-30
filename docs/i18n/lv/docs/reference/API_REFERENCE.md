@@ -871,14 +871,16 @@ un atslēga ar nepareizu tipu tiek atmesta. Visas pārējās atslēgas tiek igno
 `stream` un `outputSchema`. Plakanās atslēgas, kuras izmanto citi pakalpojumu sniedzēji (`cx`, `depth`, ...), darbojas
 tāpat kā iepriekš.
 
-| Pakalpojumu sniedzējs | Augstākā līmeņa lauki                                                                                                                                                                                                                                                                                                                                                     | Ligzdotie lauki                                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa                   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plakanas primitīvas vērtības), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` tiek sapludināts ar noklusējuma vērtību `{ text: true, highlights: true }` |
-| Tavily                | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                 |
+| Pakalpojumu sniedzējs | Augstākā līmeņa lauki                                                                                                                                                                                                                                                                                                                                                     | Ligzdotie lauki                                                                                                                                          |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa                   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plakanas primitīvas vērtības), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` tiek sapludināts ar noklusējuma vērtību `{ text: true, highlights: true }` |
+| Tavily                | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                        |
 
 Vispārīgajiem laukiem vienmēr ir prioritāte: `query`, `max_results`, `filters` (domēni), `country` un no
 `search_type` atvasinātā tēma. Exa gadījumā `search_type: "news"` saglabā `category: "news"`.
 Tavily pieņem arī `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl meklēšanas izmaksas tiek reģistrētas par katru sākto 10 atgriezto rezultātu bloku — 0,002 ASV dolāri (2 kredīti) par bloku un vismaz viens bloks par zvanu ( [Firecrawl norēķini](https://docs.firecrawl.dev/billing) ): 11 rezultāti maksā 0,004 ASV dolārus.
 
 Vispārīgais `time_range` tagad tiek nodots abiem pakalpojumu sniedzējiem: Exa saņem `startPublishedDate` (ISO
 laikspiedolu), bet Tavily saņem `start_date` (`YYYY-MM-DD`). Laukā `provider_options`
@@ -887,9 +889,11 @@ tieši norādītam datumam ir prioritāte pār kartēto datumu.
 Exa rezultāti saglabā `id`, `highlight_scores`, `summary`, `subpages`, `entities` un `extras` laukā
 `provider_raw`. Tavily rezultāti saglabā `images` un `favicon`.
 
-Izmaksu uzskaitei joprojām tiek izmantots plakanais reģistrs `costPerQuery`. Tavily piemēro
-lielāku kredītu skaitu par izsaukumu, ja izmantots `search_depth: "advanced"`, un šī atšķirība netiek atspoguļota laukā
-`usage.search_cost_usd`.
+Linkup: Saites meklēšanas izmaksas tiek reģistrētas USD 0,005 par `depth` `fast` un `standard` un USD 0,05 par `deep` ( [Saistīšanas cenas](https://docs.linkup.so/pages/documentation/development/pricing) ) neatkarīgi no tā, vai `depth` nāk no `provider_options` vai savienojuma iestatījumiem.
+
+Exa `type: "lite"` (Exa 3.0) pieņem mazāku lauku kopu un noraida visu pieprasījumu, ja ir iestatīts kāds cits lauks. Lite versijai `additionalQueries`, `systemPrompt` un visi `contents` taustiņi, izņemot `text` un `highlights` tiek atmesti pirms izsaukuma. Novecojušie `subpages`, `subpageTarget`, `highlights.numSentences` un `highlights.highlightsPerUrl` vairs netiek pārsūtīti.
+
+Exa: USD 0,007 par zvanu `auto` (un mantotā `fast`) vai USD 0,004 par `lite` (un mantoto `instant`), aptverot 10 rezultātus; 0,001 USD par katru nākamo rezultātu; un USD 0,001 par katru atgriezto rezultātu, ja ir iestatīts `contents.summary`. Tavily ir reģistrēts ar 1 kredītu ($ 0,008) par `search_depth` `basic`, `fast` un `ultra-fast` un par 2 kredītiem ($ 0,016) par `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Zvans ar `auto_parameters: true`, ko Tavily jaunina uz uzlaboto, joprojām tiek ierakstīts 1 kredīta apmērā.
 
 ---
 

@@ -494,6 +494,7 @@ globální vrstvy jističe, prodlevy připojení a blokování modelů:
   identity, odstraňuje hlavičky odpovědí, řídí sledování kreditů/verzí prostřednictvím
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (rozpočet na požadavek upstream 429 napříč všemi hostiteli, `ANTIGRAVITY_MAX_429_ATTEMPTS`; identické opětovné odeslání odmítnutého těla je zodpovězeno lokálně; `src/sse/handlers/chat.ts` nerestartuje takový požadavek prostřednictvím opakování s vědomím cooldown)
 - Zásady kvót ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (navázání kompatibilního kanálu): `open-sse/services/claudeCodeCCH.ts`,
   dále `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

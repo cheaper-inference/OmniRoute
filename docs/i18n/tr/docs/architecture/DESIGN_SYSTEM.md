@@ -8,7 +8,21 @@
 > workspace içinde `packages/ui-kit` (`@omniroute/ui-kit`) olarak vendorlanmıştır (upstream anlık görüntüsü
 > `packages/ui-kit/UPSTREAM.md` dosyasında sabitlenmiştir ve `npm run check:ui-kit-snapshot` ile korunmaktadır).
 > Açık (Light) tema kanonik temadır; varsayılan tercih `system`'dir. Vurgu rengi Keak lime'dır
-> (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI, görüntüleme ve kod metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için tek bir ailedir. Her simge bir Lucide glifidir.
+> (`--ci-color-accent`). Switzer, kitin kendisi tarafından barındırılan (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tarafından içe aktarılan) UI ve görüntüleme metni (`--ci-font-ui`; `--ci-font-display` ve `--ci-font-mono` buna çözümlenir) için birincil yazı tipi ailesidir. Her simge bir Lucide glifidir.
+>
+> Inter, Switzer'de bulunmayan glifler için yedek yazı tipidir; `--font-mono`, sistemin eş aralıklı yazı tipi yığını `--ci-font-code`'a başvurur.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Nerede ne bulunur
 

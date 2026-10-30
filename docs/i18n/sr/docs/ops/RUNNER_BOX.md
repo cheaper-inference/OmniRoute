@@ -12,13 +12,13 @@ OmniRoute извршилац има **једну улогу**, једну озн
 lint послом; swap простор хоста (16 GB) то апсорбује, а пошто се Build послови за захтеве за
 спајање извршавају на хостованим извршиоцима, Turbopack слот је неактиван већину времена:
 
-| извршилац            | ознака             | улога                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`       | Turbopack изградње: `ci.yml` `Build` (само push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ноћна a11y изградња | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release`     | Release-Green (`release-green` + `main-green`), webpack изградња                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`       | ноћни послови (Schemathesis, promptfoo, garak, k6) и `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`       | исти скуп као изнад                                                                                                                                 | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (њихова складишта) | само Dependabot (вршна вредност по 155 MB, 2026-10-18)                                                                                              | 4 GB / 6 GB                | по 200 %   |
+| извршилац            | ознака                          | улога                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack изградње: `ci.yml` `Build` (само push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ноћна a11y изградња | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack изградња                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | ноћни послови (Schemathesis, promptfoo, garak, k6) и `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | исти скуп као изнад                                                                                                                                 | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (њихова складишта)              | само Dependabot (вршна вредност по 155 MB, 2026-10-18)                                                                                              | 4 GB / 6 GB                | по 200 %   |
 
 Измерено 2026-10-18:
 
@@ -28,7 +28,7 @@ lint послом; swap простор хоста (16 GB) то апсорбуј�
 | swap      | 16 GB                                 | `omniroute-113-5` ради са искљученим swap простором (`MemorySwapMax=0`), тако да се неконтролисана изградња прекида када достигне ограничење уместо да примора сервер да користи swap                                                                                                                                                                                                                |
 | `/tmp`    | **12 GB tmpfs = RAM**                 | све што се тамо смести заузима меморију; преостале датотеке се уклањају након 3 h                                                                                                                                                                                                                                                                                                                    |
 | CPU       | забележено оптерећење 60 на 32 језгра | пре увођења квота, једна Turbopack изградња (~1166 % CPU) уз пакет тестова покривености на истом серверу ускратила је ресурсе сигналима одржавања везе осталих слушалаца (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                       |
-| извршиоци | **6 слушалаца**                       | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` су онемогућени (`systemctl enable --now` поново активира један)                                                                                                                                                                                                                                                                      |
+| извршиоци | **7 слушалаца** (2026-10-28)          | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` носи и `omni-build-60gb`; `omniroute-113-3/-4/-8` обрисани су из репозиторијума (2026-10-28)                                                                                                                                                                                                                                                  |
 
 Ограничења се налазе у `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` сваке
 јединице (претходне вредности су сачуване као `override.conf.bak-20261018`) и примењена су уживо
@@ -43,7 +43,7 @@ lint послом; swap простор хоста (16 GB) то апсорбуј�
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): сваких 30 минута, уписује дневник у /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` је обавезан: чистач потврђује да је путања неактивна помоћу једног снимка отворених
@@ -85,7 +85,7 @@ CPU без придруженог посла. Свака OmniRoute једини�
 ## Правила рада
 
 - **Само један Turbopack build истовремено — обезбеђено ознаком.** Сваки посао који покреће потпуни Turbopack
-  `next build` циља `[self-hosted, omni-build]`, а само **`omniroute-113-5`** носи ту
+  `next build` циља `[self-hosted, omni-build, omni-build-60gb]`, а само **`omniroute-113-5`** носи ту
   ознаку: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   ноћни a11y build (#16853) и `docker-publish.yml` **amd64** (webpack унутар BuildKit-а —
   Turbopack се ту срушио, покретање 33253576569). Docker деоница за arm64 остаје на `ubuntu-24.04-arm`.
@@ -120,8 +120,9 @@ CPU без придруженог посла. Свака OmniRoute једини�
   је имао `MemoryHigh=4G` до 2026-10-18 — promptfoo build је тамо провео 54 минута стално ослобађајући
   меморију; 8 GB уклања ограничавање.
 - **Намерно мање listener-а.** Четири OmniRoute јединице онемогућене су 2026-08-29 — сваки додатни
-  listener још је један корисник горенаведеног меморијског буџета. Горња граница чистача је 6 (`MAX_ACTIVE_RUNNERS=6` у cron-у): он броји
-  сваки `Runner.Listener` на машини, а OmniHeuris + OmniMind додају још два на наша четири.
+  listener још је један корисник горенаведеног меморијског буџета. Горња граница чистача је 8 (`MAX_ACTIVE_RUNNERS=8` у cron-у): он броји
+  сваки `Runner.Listener` на машини, а OmniHeuris + OmniMind додају још два на наших пет.
+- **Unit и Vitest послови остају хостовани.** `ci.yml` шаље своје unit шардове и Vitest посао на `[self-hosted, omni-ci]` само када је променљива репозиторијума `vars.USE_VPS_TEST_RUNNER` постављена на `true`, и тада само за `pull_request` извршавања из истог репозиторијума; форкови, `merge_group` и прослеђивања измена остају на `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Променљива је `false`. Дана 2026-10-28 три `omni-ci` listener-а са по 4 језгра трошила су 250–270 s на `npm ci`, а сваки unit шард достигао је ограничење посла од 30 минута, наспрам ~634 s за хостовани шард, уз оптерећење машине од 17–24. Ти listener-и су обрисани. Не укључујте поново променљиву без listener-а димензионисаних за unit шард.
 - **Никада ручно не чистите `/tmp` или `_work` док је било који runner заузет.**
   Провера па брисање, са паузом између та два корака, довели су до тога да активни Build посао изгуби свој
   `_work` 2026-08-27. Чистач обавља проверу и уклањање у једном кораку;
@@ -135,8 +136,7 @@ CPU без придруженог посла. Свака OmniRoute једини�
 
 ## Хостована трака (извршиоци које хостује GitHub)
 
-Налог је на **Pro** плану: **40 истовремених хостованих послова**, које деле све провере PR-ова,
-сви токови рада покренути прослеђивањем измена и подразумевано подешавање CodeQL-а. Измерено 2026-10-18 током
+Репозиторијум припада организацији `cheaper-inference`, на **Team** плану: **60 истовремених хостованих послова**, које деле сви репозиторијуми у организацији, све провере PR-ова, сви токови рада покренути прослеђивањем измена и подразумевано подешавање CodeQL-а. Бројке у наставку измерене су на **Pro** плану (40 истовремених хостованих послова). Измерено 2026-10-18 током
 кампање спајања (~10 спајања на сат на `release/v3.8.52`): **2.500 извршавања токова рада направљено је за
 24 h**, 44 прослеђивања измена на грану за 6 h, **106 хостованих послова било је у реду** док су провере PR-ова чекале
 сатима, а PR-ови су спајани без њих. Девет токова рада покретало се при сваком прослеђивању измена на грану:

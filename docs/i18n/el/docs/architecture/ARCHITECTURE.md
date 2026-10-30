@@ -494,6 +494,7 @@ Jules) πίσω από έναν ενιαίο κύκλο ζωής εργασιώ�
   την ταυτότητα, αφαιρεί κεφαλίδες απόκρισης, διαχειρίζεται την παρακολούθηση πιστώσεων/εκδόσεων μέσω των
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (προϋπολογισμός ανά αίτημα των upstream 429 σε όλους τους κεντρικούς υπολογιστές, `ANTIGRAVITY_MAX_429_ATTEMPTS`, μια πανομοιότυπη εκ νέου αποστολή ενός απορριφθέντος σώματος απαντάται τοπικά. `src/sse/handlers/chat.ts` δεν επανεκκινεί ένα τέτοιο αίτημα μέσω της επανάληψης προσπάθειας cooldown-aware)
 - Πολιτική ορίων χρήσης του ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH του Claude Code (Χειραψία Καναλιού Συμβατότητας): `open-sse/services/claudeCodeCCH.ts`,
   μαζί με τα `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

@@ -15,6 +15,7 @@ import {
   type ModelTestTarget,
 } from "./catalogBulkUtils";
 import CatalogTabs, { catalogPanelId, catalogTabId } from "./CatalogTabs";
+import { countCatalogVisibility } from "./catalogVisibility";
 import ComboCatalogFiltersComponent from "./ComboCatalogFilters";
 import ComboCatalogTable from "./ComboCatalogTable";
 import {
@@ -54,6 +55,7 @@ import {
   type CatalogTab,
 } from "./catalogUrlState";
 import { useCatalogTestRunner } from "./useCatalogTestRunner";
+import { useCatalogVisibility } from "./useCatalogVisibility";
 
 const PAGE_SIZE = 50;
 
@@ -209,7 +211,9 @@ function useCatalogPageLoading(state: ReturnType<typeof useCatalogPageState>) {
     // Load models
     const fetchModels = async () => {
       try {
-        const response = await fetch("/api/models/catalog", { signal: controller.signal });
+        const response = await fetch("/api/models/catalog?includeHidden=1", {
+          signal: controller.signal,
+        });
         if (!response.ok) throw new Error("catalog request failed");
         const payload: unknown = await response.json();
         const catalog =
@@ -591,6 +595,33 @@ function useCatalogPageBulkActions(
 
   return { confirmPendingBulkRun, handleTestSelected, handleTestAllFiltered };
 }
+/** Hide/show controls, offered once the catalog carries visibility data (`includeHidden`). */
+function useCatalogPageVisibility(
+  state: ReturnType<typeof useCatalogPageState>,
+  loading: ReturnType<typeof useCatalogPageLoading>,
+  actions: ReturnType<typeof useCatalogPageActions>
+) {
+  const { models, t } = state;
+  const { visibilityBusy, applyVisibility } = useCatalogVisibility(
+    loading.loadData,
+    t("visibilityUpdateFailed")
+  );
+  if (!models.some((model) => model.visibility)) return { visibilityBusy };
+  const filtered = countCatalogVisibility(actions.visibleModels.filter((m) => m.visibility));
+  return {
+    visibilityBusy,
+    visibilityCounts: countCatalogVisibility(models),
+    visibilityActions: {
+      hideCount: filtered.visible,
+      showCount: filtered.hidden,
+      busy: visibilityBusy,
+      onHideFiltered: () => void applyVisibility(actions.visibleModels, true),
+      onShowFiltered: () => void applyVisibility(actions.visibleModels, false),
+    },
+    toggleModelVisibility: (row: CatalogModelRow) =>
+      void applyVisibility([row], row.hidden !== true),
+  };
+}
 function useCatalogPageContext() {
   const state = useCatalogPageState();
   useCatalogUrlRead(state);
@@ -598,12 +629,14 @@ function useCatalogPageContext() {
   const options = useCatalogPageOptions(state);
   const actions = useCatalogPageActions(state, options);
   const bulk = useCatalogPageBulkActions(state, actions);
+  const visibility = useCatalogPageVisibility(state, loading, actions);
   return {
     ...state,
     ...loading,
     ...options,
     ...actions,
     ...bulk,
+    ...visibility,
     hasModelFiltersActive: hasActiveModelFilters(options.modelFilters),
     hasComboFiltersActive: hasActiveComboFilters(options.comboFilters),
     hasTestResults: Object.keys(state.testResults).length > 0,
@@ -613,6 +646,7 @@ type CatalogPageContext = ReturnType<typeof useCatalogPageContext>;
 function CatalogHeader({ context }: { context: CatalogPageContext }) {
   const { t, refreshAll, switchTab, activeTab, models, modelsLoading, combos, combosLoading } =
     context;
+  const { visibilityCounts } = context;
   return (
     <>
       <div className="flex flex-col gap-2">
@@ -631,6 +665,11 @@ function CatalogHeader({ context }: { context: CatalogPageContext }) {
             </Button>
           }
         />
+        {visibilityCounts && (
+          <p className="text-xs text-text-muted" data-testid="catalog-visibility-counts">
+            {t("visibilityCounts", visibilityCounts)}
+          </p>
+        )}
 
         <CatalogTabs
           activeTab={activeTab}
@@ -711,6 +750,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
     progress,
     cancelTest,
     clearResults,
+    visibilityActions,
   } = context;
   return (
     <>
@@ -724,6 +764,7 @@ function CatalogModelsBulkActions({ context }: { context: CatalogPageContext }) 
         onTestFiltered={handleTestAllFiltered}
         onCancel={cancelTest}
         onClearResults={clearResults}
+        visibilityActions={visibilityActions}
       />
     </>
   );
@@ -788,6 +829,8 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
     running,
     activeItemKeys,
     testSingleModel,
+    toggleModelVisibility,
+    visibilityBusy,
   } = context;
   return (
     <ModelCatalogTable
@@ -830,6 +873,8 @@ function CatalogModelsResults({ context }: { context: CatalogPageContext }) {
       onTestModel={testSingleModel}
       providerHealthMap={providerHealthMap}
       bulkRunning={running}
+      onToggleVisibility={toggleModelVisibility}
+      visibilityBusy={visibilityBusy}
     />
   );
 }

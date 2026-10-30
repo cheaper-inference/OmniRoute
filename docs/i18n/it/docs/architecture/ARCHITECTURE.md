@@ -494,6 +494,7 @@ ai livelli globali di circuit breaker, cooldown della connessione e blocco dei m
   l'identità, ripulisce gli header di risposta, gestisce il monitoraggio dei crediti/delle versioni tramite
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (budget per richiesta di 429 upstream su tutti gli host, `ANTIGRAVITY_MAX_429_ATTEMPTS`; un identico reinvio di un corpo rifiutato riceve risposta localmente; `src/sse/handlers/chat.ts` non riavvia tale richiesta attraverso il nuovo tentativo in base al cooldown)
 - Criterio per le quote di ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH (Compatibility Channel Handshake) di Claude Code: `open-sse/services/claudeCodeCCH.ts`,
   oltre a `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

@@ -7,7 +7,21 @@
 > **ಸ್ಥಿತಿ:** ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಅನ್ನು **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ಮೇಲೆ ನಿರ್ಮಿಸಲಾಗಿದೆ, ಇದನ್ನು
 > `packages/ui-kit` ವರ್ಕ್ಸ್ಪೇಸ್ ಆಗಿ ವೆಂಡರ್ ಮಾಡಲಾಗಿದೆ (`@omniroute/ui-kit`; ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ಅನ್ನು
 > `packages/ui-kit/UPSTREAM.md` ನಲ್ಲಿ ಪಿನ್ ಮಾಡಲಾಗಿದೆ ಮತ್ತು `npm run check:ui-kit-snapshot` ಮೂಲಕ ಕಾಪಾಡಲಾಗಿದೆ). ಲೈಟ್ ಕ್ಯಾನೋನಿಕಲ್
-> ಥೀಮ್ ಆಗಿದೆ; ಡೀಫಾಲ್ಟ್ ಆದ್ಯತೆ `system`. ಆಕ್ಸೆಂಟ್ ಬಣ್ಣ Keak ಲೈಮ್ (`--ci-color-accent`) ಆಗಿದೆ. ಸ್ವಿಟ್ಜರ್ ಎಂಬುದು UI, ಪ್ರದರ್ಶನ ಮತ್ತು ಕೋಡ್ ಪಠ್ಯಕ್ಕಾಗಿ (`--ci-font-ui`; `--ci-font-display` ಮತ್ತು `--ci-font-mono` ಪರಿಹರಿಸಲು) ಒಂದೇ ಕುಟುಂಬವಾಗಿದೆ, ಕಿಟ್ನಿಂದ ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಲಾಗಿದೆ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ನಿಂದ ಆಮದು ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ). ಪ್ರತಿಯೊಂದು ಐಕಾನ್ ಲೂಸಿಡ್ ಗ್ಲಿಫ್ ಆಗಿದೆ.
+> ಥೀಮ್ ಆಗಿದೆ; ಡೀಫಾಲ್ಟ್ ಆದ್ಯತೆ `system`. ಆಕ್ಸೆಂಟ್ ಬಣ್ಣ Keak ಲೈಮ್ (`--ci-color-accent`) ಆಗಿದೆ. ಸ್ವಿಟ್ಜರ್ ಎಂಬುದು UI ಮತ್ತು ಪ್ರದರ್ಶನ ಪಠ್ಯಕ್ಕಾಗಿ (`--ci-font-ui`; `--ci-font-display` ಮತ್ತು `--ci-font-mono` ಪರಿಹರಿಸಲು) ಪ್ರಮುಖ ಫಾಂಟ್ ಕುಟುಂಬವಾಗಿದೆ, ಕಿಟ್ನಿಂದ ಸ್ವಯಂ-ಹೋಸ್ಟ್ ಮಾಡಲಾಗಿದೆ (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ನಿಂದ ಆಮದು ಮಾಡಿಕೊಳ್ಳಲಾಗಿದೆ). ಪ್ರತಿಯೊಂದು ಐಕಾನ್ ಲೂಸಿಡ್ ಗ್ಲಿಫ್ ಆಗಿದೆ.
+>
+> Switzer ನಲ್ಲಿ ಇಲ್ಲದ ಗ್ಲಿಫ್‌ಗಳಿಗೆ Inter ಪರ್ಯಾಯ ಫಾಂಟ್ ಆಗಿದೆ; `--font-mono` ಸಿಸ್ಟಮ್‌ನ ಮೋನೋಸ್ಪೇಸ್ ಫಾಂಟ್ ಪಟ್ಟಿಯಾದ `--ci-font-code` ಅನ್ನು ಸೂಚಿಸುತ್ತದೆ.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. ವಸ್ತುಗಳು ಎಲ್ಲಿವೆ
 

@@ -7,7 +7,21 @@
 > **الحالة:** لوحة التحكم مبنية على **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)، وهي مدمجة ضمن المستودع
 > كمساحة عمل `packages/ui-kit` (`@omniroute/ui-kit`؛ واللقطة المرجعية للمصدر الأصلي مثبّتة في
 > `packages/ui-kit/UPSTREAM.md` ومحمية عبر `npm run check:ui-kit-snapshot`). السمة الفاتحة هي السمة
-> القياسية؛ والتفضيل الافتراضي هو `system`. لون التمييز هو Keak lime (`--ci-color-accent`). Switzer هي عائلة واحدة لـ UI ونص العرض والرمز (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
+> القياسية؛ والتفضيل الافتراضي هو `system`. لون التمييز هو Keak lime (`--ci-color-accent`). Switzer هي عائلة الخطوط الأساسية لـ UI ونص العرض (`--ci-font-ui`; `--ci-font-display` و `--ci-font-mono` مصممان عليه)، تتم استضافتها ذاتيًا بواسطة المجموعة نفسها (`packages/ui-kit/src/ci-fonts.css`، المستوردة بواسطة `ci-tokens.css`). كل أيقونة عبارة عن حرف رسومي من Lucide.
+>
+> Inter خط احتياطي للمحارف الرسومية المفقودة من Switzer؛ ويشير `--font-mono` إلى مجموعة خطوط النظام أحادية المسافة `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. أين توجد الأشياء
 

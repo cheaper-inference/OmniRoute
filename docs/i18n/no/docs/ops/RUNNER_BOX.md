@@ -11,13 +11,13 @@ de målte toppene. Boksen overallokerer bare når et Turbopack-bygg sammenfaller
 webpack-bygg og en lint-jobb. Vertens swap (16 GB) absorberer dette, og fordi bygg for pull-forespørsler kjører
 hostet, er Turbopack-plassen inaktiv mesteparten av tiden:
 
-| runner               | etikett        | rolle                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-bygg: `ci.yml` `Build` (kun push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattlige a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-bygg                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | nattlige jobber (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`   | samme pool som ovenfor                                                                                                                              | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (deres repoer) | kun Dependabot (topp på 155 MB hver, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % hver |
+| runner               | etikett                         | rolle                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-bygg: `ci.yml` `Build` (kun push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, det nattlige a11y-bygget | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-bygg                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nattlige jobber (Schemathesis, promptfoo, garak, k6) og `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | samme pool som ovenfor                                                                                                                              | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (deres repoer)                  | kun Dependabot (topp på 155 MB hver, 2026-10-18)                                                                                                    | 4 GB / 6 GB                | 200 % hver |
 
 Målt 2026-10-18:
 
@@ -27,7 +27,7 @@ Målt 2026-10-18:
 | swap      | 16 GB                                    | `omniroute-113-5` kjører med swap slått av (`MemorySwapMax=0`), slik at et løpsk bygg stoppes ved grensen i stedet for å få boksen til å bruke swap                                                                                                                                                                                                                                 |
 | `/tmp`    | **12 GB tmpfs = RAM**                    | alt som plasseres der, bruker minne; gjenværende filer ryddes etter 3 t                                                                                                                                                                                                                                                                                                             |
 | CPU       | belastning på 60 observert på 32 kjerner | før kvotene førte ett Turbopack-bygg (~1166 % CPU) pluss en dekningssuite på samme boks til at de andre lytternes livstegn ble sultet ut (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                      |
-| runnere   | **6 lyttere**                            | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` er deaktivert (`systemctl enable --now` aktiverer én igjen)                                                                                                                                                                                                                                                         |
+| runnere   | **7 lyttere** (2026-10-28)               | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` bærer også `omni-build-60gb`; `omniroute-113-3/-4/-8` ble slettet fra repoet (2026-10-28)                                                                                                                                                                                                                                    |
 
 Grensene ligger i hver enhets `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (tidligere verdier er beholdt som `override.conf.bak-20261018`) og ble tatt i bruk direkte med
@@ -42,7 +42,7 @@ kjørende jobb ble berørt. Etiketter endres gjennom runner-API-et
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): hvert 30. minutt, logg til /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` er påkrevd: Oppryddingsskriptet bekrefter at en bane er inaktiv med ett øyeblikksbilde av åpne
@@ -81,7 +81,7 @@ gangen, kun når den er inaktiv**, med inaktivitetskontrollen og omstarten i sam
 ## Driftsregler
 
 - **Én Turbopack-bygging om gangen — håndhevet med etikett.** Hver jobb som kjører en fullstendig Turbopack-
-  `next build`, bruker `[self-hosted, omni-build]`, og bare **`omniroute-113-5`** har denne
+  `next build`, bruker `[self-hosted, omni-build, omni-build-60gb]`, og bare **`omniroute-113-5`** har denne
   etiketten: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   den nattlige a11y-byggingen (#16853) og **amd64** i `docker-publish.yml` (webpack i BuildKit —
   Turbopack fikk panikk der, kjøring 33253576569). Docker-etappen for arm64 forblir på `ubuntu-24.04-arm`.
@@ -117,8 +117,9 @@ gangen, kun når den er inaktiv**, med inaktivitetskontrollen og omstarten i sam
   `omniroute-113` hadde `MemoryHigh=4G` frem til 2026-10-18 — promptfoo-byggingen brukte
   54 minutter på å kjempe seg gjennom minnegjenvinningen der; 8 GB fjerner strupingen.
 - **Færre lyttere med hensikt.** Fire OmniRoute-enheter ble deaktivert 2026-08-29 — hver ekstra
-  lytter er enda en leietaker i minnebudsjettet ovenfor. Vaktmesterens øvre grense er 6 (`MAX_ACTIVE_RUNNERS=6` i cron): den teller
-  hver `Runner.Listener` på maskinen, og OmniHeuris + OmniMind legger til to utover våre fire.
+  lytter er enda en leietaker i minnebudsjettet ovenfor. Vaktmesterens øvre grense er 8 (`MAX_ACTIVE_RUNNERS=8` i cron): den teller
+  hver `Runner.Listener` på maskinen, og OmniHeuris + OmniMind legger til to utover våre fem.
+- **Unit- og Vitest-jobber forblir vertsbaserte.** `ci.yml` sender unit-shardene og Vitest-jobben til `[self-hosted, omni-ci]` bare når repository-variabelen `vars.USE_VPS_TEST_RUNNER` er `true`, og da bare for `pull_request`-kjøringer fra samme repository; forks, `merge_group` og pusher blir værende på `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Variabelen er `false`. 2026-10-28 brukte tre `omni-ci`-lyttere med 4 kjerner 250–270 s på `npm ci`, og hver unit-shard traff jobbgrensen på 30 minutter, mot ~634 s for en vertsbasert shard, med maskinen på last 17–24. Lytterne ble slettet. Ikke slå variabelen på igjen uten lyttere dimensjonert for en unit-shard.
 - **Rydd aldri `/tmp` eller `_work` manuelt mens en kjører er opptatt.** En
   kontroller-og-slett-operasjon med et opphold mellom de to førte til at en aktiv Build-jobb mistet
   `_work` 2026-08-27. Vaktmesteren utfører kontrollen og slettingen i ett trinn;
@@ -132,8 +133,7 @@ gangen, kun når den er inaktiv**, med inaktivitetskontrollen og omstarten i sam
 
 ## Vertsbane (GitHub-driftede kjørere)
 
-Kontoen er på **Pro**-abonnementet: **40 samtidige vertsbaserte jobber**, delt av hver PR-kontroll,
-hver push-utløste arbeidsflyt og CodeQLs standardoppsett. Målt 2026-10-18 under en
+Repositoryet tilhører organisasjonen `cheaper-inference`, på **Team**-abonnementet: **60 samtidige vertsbaserte jobber**, delt av hvert repository i organisasjonen, hver PR-kontroll, hver push-utløste arbeidsflyt og CodeQLs standardoppsett. Tallene nedenfor ble målt på **Pro**-abonnementet (40 samtidige vertsbaserte jobber). Målt 2026-10-18 under en
 sammenslåingskampanje (~10 sammenslåinger/time på `release/v3.8.52`): **2 500 arbeidsflytkjøringer opprettet i
 løpet av 24 t**, 44 push-operasjoner til grenen i løpet av 6 t, **106 vertsbaserte jobber i kø** mens PR-kontroller ventet i
 timevis og PR-er ble slått sammen uten dem. Ni arbeidsflyter ble utløst ved hver push til grenen:

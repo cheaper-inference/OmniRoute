@@ -848,14 +848,16 @@ Exa ଏବଂ Tavily ଏକ ନେମସ୍ପେସ୍ଯୁକ୍ତ ବ୍ୟ
 `stream` ଏବଂ `outputSchema` ସମେତ ଅନ୍ୟ ଯେକୌଣସି କୀକୁ ଅଣଦେଖା କରାଯାଏ। ଅନ୍ୟ ପ୍ରଦାନକାରୀମାନେ ବ୍ୟବହାର କରୁଥିବା ଫ୍ଲାଟ୍ କୀଗୁଡ଼ିକ (`cx`, `depth`, ...) ପୂର୍ବପରି
 କାମ କରେ।
 
-| ପ୍ରଦାନକାରୀ | ଶୀର୍ଷ-ସ୍ତରୀୟ ଫିଲ୍ଡଗୁଡ଼ିକ                                                                                                                                                                                                                                                                                                                                                  | ନେଷ୍ଟେଡ୍                                                                                                                                                           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ଫ୍ଲାଟ୍ ପ୍ରିମିଟିଭ୍ଗୁଡ଼ିକ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ଡିଫଲ୍ଟ `{ text: true, highlights: true }` ଉପରେ ମର୍ଜ୍ କରାଯାଏ |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                  |
+| ପ୍ରଦାନକାରୀ | ଶୀର୍ଷ-ସ୍ତରୀୟ ଫିଲ୍ଡଗୁଡ଼ିକ                                                                                                                                                                                                                                                                                                                                                  | ନେଷ୍ଟେଡ୍                                                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ଫ୍ଲାଟ୍ ପ୍ରିମିଟିଭ୍ଗୁଡ଼ିକ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ଡିଫଲ୍ଟ `{ text: true, highlights: true }` ଉପରେ ମର୍ଜ୍ କରାଯାଏ |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
 
 ଜେନେରିକ୍ ଫିଲ୍ଡଗୁଡ଼ିକ ସର୍ବଦା ପ୍ରାଧାନ୍ୟ ପାଆନ୍ତି: `query`, `max_results`, `filters` (ଡୋମେନ୍ଗୁଡ଼ିକ), `country` ଏବଂ
 `search_type` ରୁ ନିର୍ଦ୍ଧାରିତ ବିଷୟ। Exa ରେ, `search_type: "news"` ବ୍ୟବହାର କଲେ `category: "news"` ଅପରିବର୍ତ୍ତିତ ରହେ।
 Tavily ମଧ୍ୟ `search_type: "finance"` (`topic: "finance"`) ଗ୍ରହଣ କରେ।
+
+Fire 0.002 (2 କ୍ରେଡିଟ୍) ରେ ଗୋଟିଏ ବ୍ଲକ୍ ଏବଂ କଲ୍ ପାଇଁ ଅତି କମରେ ଗୋଟିଏ ବ୍ଲକ୍ ( [ଫାୟାର୍କ୍ରାଲ୍ ବିଲିଂ](https://docs.firecrawl.dev/billing) ) ରେ ଫାୟାର୍କ୍ରାଲ୍ ସର୍ଚ୍ଚ ମୂଲ୍ୟ 10 ଟି ପ୍ରତ୍ୟାବର୍ତ୍ତିତ ଫଳାଫଳର ପ୍ରାରମ୍ଭ ବ୍ଲକ୍ ରେକର୍ଡ କରାଯାଇଛି: 11 ଫଳାଫଳର ମୂଲ୍ୟ $ 0.004 \|
 
 ଜେନେରିକ୍ `time_range` ବର୍ତ୍ତମାନ ଉଭୟ ପ୍ରଦାନକାରୀଙ୍କ ପାଖରେ ପହଞ୍ଚେ: Exa `startPublishedDate` (ISO
 ଟାଇମ୍ଷ୍ଟାମ୍ପ) ପାଏ ଏବଂ Tavily `start_date` (`YYYY-MM-DD`) ପାଏ। `provider_options` ରେ ଥିବା ଏକ ସ୍ପଷ୍ଟ ତାରିଖ
@@ -864,9 +866,11 @@ Tavily ମଧ୍ୟ `search_type: "finance"` (`topic: "finance"`) ଗ୍ରହ�
 Exa ଫଳାଫଳଗୁଡ଼ିକ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` କୁ
 `provider_raw` ରେ ରଖେ। Tavily ଫଳାଫଳଗୁଡ଼ିକ `images` ଏବଂ `favicon` କୁ ରଖେ।
 
-ଖର୍ଚ୍ଚ ହିସାବ ଏବେ ମଧ୍ୟ ଫ୍ଲାଟ୍ ରେଜିଷ୍ଟ୍ରି `costPerQuery` ଅଟେ। Tavily ପ୍ରତ୍ୟେକ କଲ୍ ପାଇଁ
-`search_depth: "advanced"` ଉପରେ ଅଧିକ କ୍ରେଡିଟ୍ ବିଲ୍ କରେ, ଏବଂ ସେହି ପାର୍ଥକ୍ୟ
-`usage.search_cost_usd` ରେ ପ୍ରତିଫଳିତ ହୁଏ ନାହିଁ।
+ଲିଙ୍କଅପ୍ ସନ୍ଧାନ ମୂଲ୍ୟ `depth` `fast` ଏବଂ `standard` ପାଇଁ $ 0.005 ଏବଂ `deep` ( [ଲିଙ୍କଅପ୍ ମୂଲ୍ୟ](https://docs.linkup.so/pages/documentation/development/pricing) ) ପାଇଁ $ 0.05 ରେକର୍ଡ କରାଯାଇଛି, `depth` `provider_options` ରୁ ହେଉ କିମ୍ବା ସଂଯୋଗର ସେଟିଂସମୂହ \|
+
+Exa `type: "lite"` (Exa 3.0) ଏକ ଛୋଟ କ୍ଷେତ୍ରର ସେଟ୍ ଗ୍ରହଣ କରେ ଏବଂ ଅନ୍ୟ କ field ଣସି କ୍ଷେତ୍ର ସେଟ୍ ହେବାପରେ ସମଗ୍ର ଅନୁରୋଧକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ \| ଲାଇଟ୍ ପାଇଁ, `additionalQueries`, `systemPrompt` ଏବଂ `text` ଏବଂ `highlights` ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ `contents` କି କଲ୍ ପୂର୍ବରୁ ଡ୍ରପ୍ ହୋଇଯାଏ \| ପୁରୁଣା `subpages`, `subpageTarget`, `highlights.numSentences` ଏବଂ `highlights.highlightsPerUrl` ଆଉ ଅଗ୍ରଗାମୀ ନୁହେଁ \|
+
+Exa: `auto` ପାଇଁ କଲ୍ ପାଇଁ $ 0.007 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `fast`) କିମ୍ବା `lite` ପାଇଁ $ 0.004 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `instant`), 10 ଫଳାଫଳକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ; ପ୍ରତ୍ୟେକ ପରବର୍ତ୍ତୀ ଫଳାଫଳ ପାଇଁ $ 0.001; ଏବଂ `contents.summary` ସେଟ୍ ହେବାବେଳେ ଫେରସ୍ତ ଫଳାଫଳ ପାଇଁ $ 0.001 \| `search_depth` `basic`, `fast` ଏବଂ `ultra-fast` ପାଇଁ ଟାଭିଲି 1 କ୍ରେଡିଟ୍ ($ 0.008) ଏବଂ `advanced` ( [Tavily API କ୍ରେଡିଟ୍](https://docs.tavily.com/documentation/api-credits) ) ପାଇଁ 2 କ୍ରେଡିଟ୍ ($ 0.016) ରେକର୍ଡ କରାଯାଇଛି \| `auto_parameters: true` ସହିତ ଏକ କଲ ଯାହା ଟାଭିଲି ଉନ୍ନତକୁ ଅପଗ୍ରେଡ୍ କରେ ତଥାପି 1 କ୍ରେଡିଟ୍ ରେ ରେକର୍ଡ ହୋଇଛି \|
 
 ---
 

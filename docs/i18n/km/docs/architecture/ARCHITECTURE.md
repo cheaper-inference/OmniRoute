@@ -494,6 +494,7 @@ namespace `src/domain/` ប្រមូលផ្តុំការសម្រ�
   អត្តសញ្ញាណជាបន្តបន្ទាប់ សម្អាតក្បាលតបឆ្លើយ និងគ្រប់គ្រងការតាមដានក្រេឌីត/កំណែតាមរយៈ
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (ថវិកាតាមសំណើរនៃ 429s ខាងលើនៅទូទាំង hosts ទាំងអស់ `ANTIGRAVITY_MAX_429_ATTEMPTS`; ការបញ្ជូនសារឡើងវិញដូចគ្នាបេះបិទនៃតួដែលត្រូវបានបដិសេធត្រូវបានឆ្លើយតបក្នុងមូលដ្ឋាន; `src/sse/handlers/chat.ts` មិនចាប់ផ្តើមសំណើបែបនេះឡើងវិញតាមរយៈការព្យាយាម cooldown-aware ម្តងទៀត)
 - គោលការណ៍កូតារបស់ ModelScope៖ `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (ការចាប់ដៃឆានែលភាពត្រូវគ្នា)៖ `open-sse/services/claudeCodeCCH.ts`,
   រួមជាមួយ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

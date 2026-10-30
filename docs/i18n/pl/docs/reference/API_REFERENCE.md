@@ -871,14 +871,16 @@ a klucz o nieprawidłowym typie jest odrzucany. Wszystkie pozostałe klucze są 
 `stream` i `outputSchema`. Płaskie klucze używane przez innych dostawców (`cx`, `depth`, ...) działają
 tak jak wcześniej.
 
-| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                                                  |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie wartości proste), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` scalone z domyślnym `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                             |
+| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                         |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie wartości proste), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` scalone z domyślnym `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                    |
 
 Pola ogólne mają zawsze pierwszeństwo: `query`, `max_results`, `filters` (domeny), `country` oraz
 temat wyprowadzony z `search_type`. W przypadku Exa ustawienie `search_type: "news"` zachowuje `category: "news"`.
 Tavily akceptuje również `search_type: "finance"` (`topic: "finance"`).
+
+Koszt wyszukiwania Firecrawl jest rejestrowany za rozpoczęty blok 10 zwróconych wyników i wynosi 0,002 USD (2 kredyty) za blok i co najmniej jeden blok na połączenie ( [rozliczenie Firecrawl](https://docs.firecrawl.dev/billing) ): 11 wyników kosztuje 0,004 USD.
 
 Ogólne pole `time_range` jest teraz przekazywane do obu dostawców: Exa otrzymuje `startPublishedDate` (znacznik czasu
 ISO), a Tavily otrzymuje `start_date` (`YYYY-MM-DD`). Data jawnie określona w `provider_options`
@@ -887,9 +889,11 @@ zastępuje wartość wynikającą z mapowania.
 Wyniki Exa zachowują `id`, `highlight_scores`, `summary`, `subpages`, `entities` oraz `extras` w
 `provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
 
-Rozliczanie kosztów nadal korzysta z płaskiego rejestru `costPerQuery`. Tavily nalicza
-więcej kredytów za wywołanie przy ustawieniu `search_depth: "advanced"`, a różnica ta nie jest uwzględniana w
-`usage.search_cost_usd`.
+Linkup: Koszt wyszukiwania łącza jest rejestrowany na poziomie 0,005 USD dla `depth` `fast` i `standard` oraz 0,05 USD dla `deep` ( [cena łącza](https://docs.linkup.so/pages/documentation/development/pricing) ), niezależnie od tego, czy `depth` pochodzi z `provider_options`, czy z ustawień połączenia.
+
+Exa `type: "lite"` (Exa 3.0) akceptuje mniejszy zestaw pól i odrzuca całe żądanie, gdy ustawione jest inne pole. W przypadku Lite, `additionalQueries`, `systemPrompt` i każdy klawisz `contents` z wyjątkiem `text` i `highlights` są odrzucane przed wywołaniem. Przestarzałe `subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` nie są już przekazywane.
+
+Exa: 0,007 USD za połączenie dla `auto` (i starszego `fast`) lub 0,004 USD dla `lite` (i starszego `instant`), obejmujące 10 wyników; 0,001 $ za każdy kolejny wynik; i 0,001 USD za zwrócony wynik, gdy ustawiono `contents.summary`. Tavily ma 1 kredyt (0,008 USD) dla `search_depth` `basic`, `fast` i `ultra-fast` oraz 2 kredyty (0,016 USD) dla `advanced` ( [kredyty Tavily API](https://docs.tavily.com/documentation/api-credits) ). Połączenie z `auto_parameters: true`, które Tavily aktualizuje do wersji zaawansowanej, jest nadal rejestrowane z 1 kredytem.
 
 ---
 

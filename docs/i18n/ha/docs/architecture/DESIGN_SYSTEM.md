@@ -7,7 +7,21 @@
 > **Matsayi:** an gina dashboard a kan **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), an saka shi
 > a matsayin workspace `packages/ui-kit` (`@omniroute/ui-kit`; an tsare kwafin upstream a cikin
 > `packages/ui-kit/UPSTREAM.md` kuma `npm run check:ui-kit-snapshot` yana kare shi). Light shi ne
-> jigon hukuma; zaɓin tsoho shi ne `system`. Launin jaddadawa shi ne Keak lime (`--ci-color-accent`). Switzer shine iyali guda don UI, nuni da rubutu na lamba (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun yanke shawara zuwa gare shi), kayan aikin da kanta suka shirya (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Kowane gunki shine Lucide glyph.
+> jigon hukuma; zaɓin tsoho shi ne `system`. Launin jaddadawa shi ne Keak lime (`--ci-color-accent`). Switzer shine babban iyalin rubutu don UI da rubutun nuni (`--ci-font-ui`; `--ci-font-display` da `--ci-font-mono` sun yanke shawara zuwa gare shi), kayan aikin da kanta suka shirya (`packages/ui-kit/src/ci-fonts.css`, shigo da `ci-tokens.css`). Kowane gunki shine Lucide glyph.
+>
+> Inter madadin font ne ga glyph da ba su cikin Switzer; `--font-mono` yana nuni zuwa jerin font masu faɗi ɗaya na tsarin, `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Inda abubuwa ke zaune
 

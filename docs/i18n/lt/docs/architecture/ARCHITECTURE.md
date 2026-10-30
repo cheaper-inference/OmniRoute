@@ -494,6 +494,7 @@ bendruosius grandinės pertraukiklio / ryšio atvėsimo / modelio blokavimo sluo
   tapatybę, išvalo atsakymo antraštes, valdo kreditų / versijų stebėjimą per
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 apsauga: `open-sse/services/antigravity429Guard.ts` (pagal užklausą 429s biudžetas prieš srovę visuose pagrindiniuose kompiuteriuose, `ANTIGRAVITY_MAX_429_ATTEMPTS`; identiškas pakartotinis atmesto kūno siuntimas atsakomas vietoje; `src/sse/handlers/chat.ts` nepaleidžia tokios užklausos iš naujo, kai bandoma atvėsti)
 - „ModelScope“ kvotų politika: `open-sse/services/modelscopePolicy.ts`
 - „Claude Code“ CCH (suderinamumo kanalo rankos paspaudimas): `open-sse/services/claudeCodeCCH.ts`,
   taip pat `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

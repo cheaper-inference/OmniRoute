@@ -39,3 +39,11 @@ test("engine files touched by the seams do not import src/ directly", () => {
     );
   }
 });
+
+test("combo services reach the dashboard event bus through rrDashboardEvents", async () => {
+  const seam = await import("../../open-sse/services/combo/rrDashboardEvents.ts");
+  const bus = await import("../../src/lib/events/eventBus.ts");
+  assert.equal(seam.emit, bus.emit);
+  const s = readFileSync("open-sse/services/combo/truncatedStreamFailover.ts", "utf8");
+  assert.doesNotMatch(s, /from ["'](?:@\/|(?:\.\.\/)+src\/)lib\/events\/eventBus/);
+});

@@ -7,7 +7,21 @@
 > **Կարգավիճակ.** վահանակը կառուցված է **Keak CI UI Kit**-ի վրա (`@keak/cheaper-inference-ui-kit`), որը վենդորացված է
 > որպես `packages/ui-kit` workspace (`@omniroute/ui-kit`; upstream սնեփշոթը ամրացված է
 > `packages/ui-kit/UPSTREAM.md`-ում և վերահսկվում է `npm run check:ui-kit-snapshot`-ով)։ Light-ը կանոնական
-> թեման է. լռելյայն նախապատվությունը `system` է։ Շեշտադրման գույնը Keak lime-ն է (`--ci-color-accent`): Switzer-ը UI, ցուցադրման և կոդերի տեքստի (`--ci-font-ui`; `--ci-font-display` և `--ci-font-mono` լուծում են դրան) մեկ ընտանիքն է, որը ինքնակառավարվում է հենց փաթեթի կողմից (`packages/ui-kit/src/ci-fonts.css`, ներմուծված `ci-tokens.css` կողմից): Յուրաքանչյուր պատկերակ Lucide հոլովակ է:
+> թեման է. լռելյայն նախապատվությունը `system` է։ Շեշտադրման գույնը Keak lime-ն է (`--ci-color-accent`): Switzer-ը UI-ի և ցուցադրվող տեքստի (`--ci-font-ui`; `--ci-font-display` և `--ci-font-mono` լուծում են դրան) հիմնական տառատեսակների ընտանիքն է, որը ինքնակառավարվում է հենց փաթեթի կողմից (`packages/ui-kit/src/ci-fonts.css`, ներմուծված `ci-tokens.css` կողմից): Յուրաքանչյուր պատկերակ Lucide հոլովակ է:
+>
+> Inter-ը պահուստային տառատեսակ է Switzer-ում բացակայող գլիֆների համար․ `--font-mono`-ն հղվում է համակարգի հավասարալայն տառատեսակների `--ci-font-code` ցանկին։
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Ինչ որտեղ է գտնվում
 

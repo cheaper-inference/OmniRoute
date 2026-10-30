@@ -4,7 +4,21 @@
 
 ---
 
-> **وضعیت:** داشبورد بر پایهٔ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ساخته شده و بهصورت vendored در ورکاسپیس `packages/ui-kit` (`@omniroute/ui-kit`) قرار دارد؛ اسنپشات upstream در `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود. تم روشن، تم مرجع است؛ ترجیح پیشفرض `system` است. رنگ تأکیدی، لیمویی Keak (`--ci-color-accent`) است. Switzer یک خانواده واحد برای UI، نمایش و متن کد (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن است)، که توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). هر نماد یک گلیف Lucide است.
+> **وضعیت:** داشبورد بر پایهٔ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ساخته شده و بهصورت vendored در ورکاسپیس `packages/ui-kit` (`@omniroute/ui-kit`) قرار دارد؛ اسنپشات upstream در `packages/ui-kit/UPSTREAM.md` پین شده و توسط `npm run check:ui-kit-snapshot` محافظت میشود. تم روشن، تم مرجع است؛ ترجیح پیشفرض `system` است. رنگ تأکیدی، لیمویی Keak (`--ci-color-accent`) است. Switzer خانوادهٔ اصلی قلم برای UI و متن نمایشی (`--ci-font-ui`؛ `--ci-font-display` و `--ci-font-mono` به آن است)، که توسط خود کیت میزبانی میشود (`packages/ui-kit/src/ci-fonts.css`، وارد شده توسط `ci-tokens.css`). هر نماد یک گلیف Lucide است.
+>
+> Inter قلم جایگزین برای گلیف‌های غایب در Switzer است؛ `--font-mono` به فهرست قلم‌های تک‌عرض سیستم در `--ci-font-code` اشاره می‌کند.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. محل قرارگیری اجزا
 

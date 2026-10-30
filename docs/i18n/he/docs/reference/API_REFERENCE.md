@@ -871,14 +871,16 @@ Exa ו-Tavily קוראים שדות ייעודיים לספק מתוך מאגר 
 `stream` ו-`outputSchema`. המפתחות השטוחים שבהם משתמשים ספקים אחרים (`cx`, `depth`, ...) פועלים
 כמו קודם.
 
-| ספק    | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקוננים                                                                                                                                                         |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ערכים פרימיטיביים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ממוזג מעל ברירת המחדל `{ text: true, highlights: true }` |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                               |
+| ספק    | שדות ברמה העליונה                                                                                                                                                                                                                                                                                                                                                         | מקוננים                                                                                                                                |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ערכים פרימיטיביים שטוחים), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ממוזג מעל ברירת המחדל `{ text: true, highlights: true }` |
+| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                      |
 
 השדות הכלליים תמיד מקבלים עדיפות: `query`, `max_results`, `filters` (דומיינים), `country` והנושא
 הנגזר מ-`search_type`. ב-Exa, ‏`search_type: "news"` משמר את `category: "news"`.
 Tavily מקבל גם `search_type: "finance"` ‏(`topic: "finance"`).
+
+עלות החיפוש של Firecrawl נרשמת לכל בלוק התחיל של 10 תוצאות שהוחזרו, ב-$0.002 (2 זיכויים) לחסימה ולפחות חסימה אחת לשיחה ( [חיוב Firecrawl](https://docs.firecrawl.dev/billing) ): 11 תוצאות עולות $0.004.
 
 השדה הכללי `time_range` מגיע כעת לשני הספקים: Exa מקבל `startPublishedDate` (חותמת זמן בפורמט ISO)
 ו-Tavily מקבל `start_date` ‏(`YYYY-MM-DD`). תאריך מפורש ב-`provider_options`
@@ -887,9 +889,11 @@ Tavily מקבל גם `search_type: "finance"` ‏(`topic: "finance"`).
 תוצאות Exa שומרות את `id`, `highlight_scores`, `summary`, `subpages`, `entities` ו-`extras` בתוך
 `provider_raw`. תוצאות Tavily שומרות את `images` ואת `favicon`.
 
-חישוב העלויות עדיין משתמש במאגר השטוח `costPerQuery`. ‏Tavily מחייב
-יותר נקודות זכות לכל קריאה עבור `search_depth: "advanced"`, והפרש זה אינו משתקף
-ב-`usage.search_cost_usd`.
+Linkup: עלות חיפוש קישור נרשמת ב-$0.005 עבור `depth` `fast` ו- `standard` ו-$0.05 עבור `deep` ( [מחיר Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), בין אם `depth` מגיע מ- `provider_options` או מהגדרות החיבור.
+
+Exa `type: "lite"` (Exa 3.0) מקבל קבוצה קטנה יותר של שדות ודוחה את כל הבקשה כאשר כל שדה אחר מוגדר. עבור lite, `additionalQueries`, `systemPrompt` וכל מקש `contents` מלבד `text` ו- `highlights` נשמטים לפני השיחה. `subpages`, `subpageTarget`, `highlights.numSentences` ו- `highlights.highlightsPerUrl` לא מועברים עוד.
+
+Exa: $0.007 לקריאה עבור `auto` (וה- `fast` מדור קודם) או $0.004 עבור `lite` (וה- `instant` מדור קודם), המכסה 10 תוצאות; $0.001 עבור כל תוצאה נוספת; ו-$0.001 לתוצאה שהוחזרה כאשר `contents.summary` מוגדר. Tavily נרשם ב-1 זיכוי ($0.008) עבור `search_depth` `basic`, `fast` ו- `ultra-fast`, ו-2 קרדיטים ($0.016) עבור `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). שיחה עם `auto_parameters: true` שתווילי משדרגת למתקדמים עדיין מוקלטת ב-1 זיכוי.
 
 ---
 

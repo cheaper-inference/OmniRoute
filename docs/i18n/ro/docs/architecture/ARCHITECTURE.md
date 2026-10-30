@@ -494,6 +494,7 @@ straturile globale de întrerupere a circuitului / perioadă de așteptare a con
   identitatea, elimină antetele răspunsului, gestionează urmărirea creditelor/versiunii prin
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (bugetul pe solicitare al 429-urilor din amonte pe toate gazdele, `ANTIGRAVITY_MAX_429_ATTEMPTS`; o retrimitere identică a unui corp refuzat primește răspuns local; `src/sse/handlers/chat.ts` nu repornește o astfel de solicitare prin reîncercarea conștientă de cooldown)
 - Politica de cotă ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH Claude Code (negocierea canalului de compatibilitate): `open-sse/services/claudeCodeCCH.ts`,
   împreună cu `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

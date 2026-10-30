@@ -488,6 +488,7 @@ FSM ਟ੍ਰਾਂਜ਼ਿਸ਼ਨ Auto Combo ਦੀ ਸਕੋਰਿੰਗ �
 - Antigravity 429 ਇੰਜਣ: `open-sse/services/antigravity429Engine.ts` (ਪਛਾਣ ਨੂੰ ਰੋਟੇਟ ਕਰਦਾ ਹੈ, ਰਿਸਪਾਂਸ ਹੈਡਰਾਂ ਨੂੰ ਸਾਫ਼ ਕਰਦਾ ਹੈ, ਅਤੇ
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` ਰਾਹੀਂ ਕ੍ਰੈਡਿਟ/ਵਰਜ਼ਨ ਟ੍ਰੈਕਿੰਗ ਚਲਾਉਂਦਾ ਹੈ)
+- Antigravity 429 ਗਾਰਡ: `open-sse/services/antigravity429Guard.ts` (ਸਾਰੇ ਮੇਜ਼ਬਾਨਾਂ ਵਿੱਚ ਅੱਪਸਟ੍ਰੀਮ 429s ਦਾ ਪ੍ਰਤੀ-ਬੇਨਤੀ ਬਜਟ, `ANTIGRAVITY_MAX_429_ATTEMPTS`; ਅਸਵੀਕਾਰ ਕੀਤੇ ਸਰੀਰ ਦੀ ਇੱਕ ਸਮਾਨ ਮੁੜ-ਭੇਜਣ ਦਾ ਜਵਾਬ ਸਥਾਨਕ ਤੌਰ 'ਤੇ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ; `src/sse/handlers/chat.ts` ਕੋਲਡਾਊਨ-ਜਾਗਰੂਕ ਮੁੜ ਕੋਸ਼ਿਸ਼ ਦੁਆਰਾ ਅਜਿਹੀ ਬੇਨਤੀ ਨੂੰ ਮੁੜ ਚਾਲੂ ਨਹੀਂ ਕਰਦਾ)
 - ModelScope ਕੋਟਾ ਨੀਤੀ: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (ਅਨੁਕੂਲਤਾ ਚੈਨਲ ਹੈਂਡਸ਼ੇਕ): `open-sse/services/claudeCodeCCH.ts`,
   ਨਾਲ ਹੀ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

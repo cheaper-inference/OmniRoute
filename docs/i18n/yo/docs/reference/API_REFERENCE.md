@@ -848,14 +848,16 @@ Exa àti Tavily máa ń ka àwọn pápá tó jẹ́ ti olùpèsè pàtó láti 
 `stream` àti `outputSchema`. Àwọn kọ́kọ́rọ́ pẹlẹbẹ tí àwọn olùpèsè mìíràn ń lò (`cx`, `depth`, ...) ṣì ń ṣiṣẹ́
 gẹ́gẹ́ bí tẹ́lẹ̀.
 
-| Olùpèsè | Àwọn pápá ìpele-ókè                                                                                                                                                                                                                                                                                                                                                       | Àwọn tó wà nínú                                                                                                                                                 |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (àwọn iye primitive pẹlẹbẹ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` tí a dapọ̀ lé àìyípadà `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                               |
+| Olùpèsè | Àwọn pápá ìpele-ókè                                                                                                                                                                                                                                                                                                                                                       | Àwọn tó wà nínú                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (àwọn iye primitive pẹlẹbẹ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` tí a dapọ̀ lé àìyípadà `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                      |
 
 Àwọn pápá gbogbogbò máa ń gba ipò àkọ́kọ́ ní gbogbo ìgbà: `query`, `max_results`, `filters` (àwọn domain), `country` àti
 topic tí a mú jáde láti inú `search_type`. Lórí Exa, `search_type: "news"` máa ń pa `category: "news"` mọ́.
 Tavily tún gba `search_type: "finance"` (`topic: "finance"`).
+
+Iye owo wiwa Firecrawl jẹ igbasilẹ fun bulọọki ti o bẹrẹ ti awọn abajade 10 ti o pada, ni $0.002 (awọn kirẹditi 2) bulọki kan ati pe o kere ju bulọọki kan fun ipe ( [Isanwo Firecrawl](https://docs.firecrawl.dev/billing) ): awọn abajade 11 jẹ $0.004.
 
 `time_range` gbogbogbò ti ń dé ọ̀dọ̀ àwọn olùpèsè méjèèjì báyìí: Exa ń gba `startPublishedDate` (timestamp ISO)
 àti Tavily ń gba `start_date` (`YYYY-MM-DD`). Déètì tí a sọ ní pàtó nínú `provider_options`
@@ -864,9 +866,11 @@ máa ń rọ́pò èyí tí a ti ṣe mapping rẹ̀.
 Àwọn àbájáde Exa máa ń pa `id`, `highlight_scores`, `summary`, `subpages`, `entities` àti `extras` mọ́ sínú
 `provider_raw`. Àwọn àbájáde Tavily máa ń pa `images` àti `favicon` mọ́.
 
-Ìṣírò iye owó ṣì jẹ́ registry pẹlẹbẹ `costPerQuery`. Tavily ń gba
-credit púpọ̀ sí i fún ipe kọ̀ọ̀kan nígbà tí `search_depth: "advanced"`, àti pé ìyàtọ̀ yẹn kò hàn nínú
-`usage.search_cost_usd`.
+Linkup: Iye owo wiwa ọna asopọ jẹ igbasilẹ ni $0.005 fun `depth` `fast` ati `standard` ati $0.05 fun `deep` ( [Ifowoleri Ọna asopọ](https://docs.linkup.so/pages/documentation/development/pricing) ), boya `depth` wa lati `provider_options` tabi awọn eto asopọ.
+
+Exa `type: "lite"` (Exa 3.0) gba eto ti o kere ju ti awọn aaye ati kọ gbogbo ibeere nigbati eyikeyi aaye miiran ti ṣeto. Fun Lite, `additionalQueries`, `systemPrompt` ati gbogbo bọtini `contents` ayafi `text` ati `highlights` ti wa silẹ ṣaaju ipe naa. `subpages`, `subpageTarget`, `highlights.numSentences` ati `highlights.highlightsPerUrl` ti a ti sọ silẹ ko ni siwaju mọ.
+
+Exa: $ 0.007 fun ipe fun `auto` (ati julọ `fast`) tabi $ 0.004 fun `lite` (ati aṣẹ `instant`), ti o bo awọn abajade 10; $ 0.001 fun abajade siwaju kọọkan; ati $0.001 fun esi pada nigbati `contents.summary` ti ṣeto. Tavily ti wa ni igbasilẹ ni 1 kirẹditi ($0.008) fun `search_depth` `basic`, `fast` ati `ultra-fast`, ati 2 kirediti ($0.016) fun `advanced` ( [Tavily API kirediti](https://docs.tavily.com/documentation/api-credits) ). Ipe pẹlu `auto_parameters: true` ti awọn iṣagbega Tavily si ilọsiwaju jẹ ṣi gbasilẹ ni kirẹditi 1.
 
 ---
 

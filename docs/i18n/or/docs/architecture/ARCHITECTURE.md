@@ -479,6 +479,7 @@ FSM ଟ୍ରାନ୍ଜିସନ୍ଗୁଡ଼ିକ Auto Comboର ସ୍କ�
 - Antigravity 429 ଇଞ୍ଜିନ୍: `open-sse/services/antigravity429Engine.ts` (ପରିଚୟକୁ ପର୍ଯ୍ୟାୟକ୍ରମେ ବଦଳାଏ, ପ୍ରତିକ୍ରିୟା ହେଡର୍ଗୁଡ଼ିକୁ ସଫା କରେ, ଏବଂ
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` ମାଧ୍ୟମରେ କ୍ରେଡିଟ୍/ଭର୍ସନ୍ ଟ୍ରାକିଂ ପରିଚାଳନା କରେ)
+- Antigravity `open-sse/services/antigravity429Guard.ts` `ANTIGRAVITY_MAX_429_ATTEMPTS` `src/sse/handlers/chat.ts`
 - ModelScope କୋଟା ନୀତି: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (ସୁସଙ୍ଗତତା ଚ୍ୟାନେଲ୍ ହ୍ୟାଣ୍ଡସେକ୍): `open-sse/services/claudeCodeCCH.ts`,
   ସହିତ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

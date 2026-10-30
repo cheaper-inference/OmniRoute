@@ -65,7 +65,7 @@ jobs:
     # mid-"Creating an optimized production build" while v3.8.48 had still fit in 16min.
     # This job never runs on `pull_request`, so the fork-safety clause is always true here;
     # it is kept verbatim so the expression stays greppable against ci.yml.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)) && fromJSON('["self-hosted","omni-build","omni-build-60gb"]') || 'ubuntu-latest' }}
     outputs:
       version: ${{ steps.resolve.outputs.version }}
       tag: ${{ steps.resolve.outputs.tag }}

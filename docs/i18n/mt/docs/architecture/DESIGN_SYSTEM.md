@@ -7,7 +7,21 @@
 > **Status:** id-dashboard hi mibnija fuq il-**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > bħala l-workspace `packages/ui-kit` (`@omniroute/ui-kit`; is-snapshot tal-upstream huwa ffissat f'
 > `packages/ui-kit/UPSTREAM.md` u mħares minn `npm run check:ui-kit-snapshot`). Light hi t-tema kanonika;
-> il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja waħda għal UI, wiri u test tal-kodiċi (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
+> il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja primarja ta’ fonts għal UI u test tal-wiri (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
+>
+> Inter huwa font ta’ riżerva għall-glifi nieqsa minn Switzer; `--font-mono` jirreferi għal-lista ta’ fonts monospace tas-sistema `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Fejn jinsabu l-affarijiet
 

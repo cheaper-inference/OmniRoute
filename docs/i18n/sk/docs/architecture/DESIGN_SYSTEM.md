@@ -7,7 +7,21 @@
 > **Stav:** dashboard je postavený na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendorovaný
 > ako workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot je pripnutý v
 > `packages/ui-kit/UPSTREAM.md` a kontrolovaný príkazom `npm run check:ui-kit-snapshot`). Svetlá je kanonická
-> téma; predvolená preferencia je `system`. Akcentom je Keak lime (`--ci-color-accent`). Switzer je jediná rodina pre UI, displej a kódový text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Každá ikona je symbolom Lucide.
+> téma; predvolená preferencia je `system`. Akcentom je Keak lime (`--ci-color-accent`). Switzer je primárna rodina písiem pre UI a zobrazovaný text (`--ci-font-ui`; `--ci-font-display` a `--ci-font-mono` sa naň rozlíšia), ktorý je hostený samotnou súpravou (`packages/ui-kit/src/ci-fonts.css`, importované `ci-tokens.css`). Každá ikona je symbolom Lucide.
+>
+> Inter je náhradné písmo pre glyfy, ktoré chýbajú v Switzeri; `--font-mono` odkazuje na systémový zoznam písiem s pevnou šírkou `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Kde sa čo nachádza
 

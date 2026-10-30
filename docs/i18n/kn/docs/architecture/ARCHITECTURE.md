@@ -485,6 +485,7 @@ FSM ಸ್ಥಿತಿಬದಲಾವಣೆಗಳು Auto Combo ನ ಸ್ಕೋ
 ಹಲವಾರು ಪೂರೈಕೆದಾರರು ಜಾಗತಿಕ ಸರ್ಕ್ಯೂಟ್ ಬ್ರೇಕರ್ / ಸಂಪರ್ಕ ಕೂಲ್ಡೌನ್ / ಮಾದರಿ ಲಾಕ್ಔಟ್ ಪದರಗಳ ಮೇಲೆ ಕಾರ್ಯನಿರ್ವಹಿಸುವ ಮೀಸಲಾದ ಸ್ಥಿತಿಸ್ಥಾಪಕತೆ ಮತ್ತು ಗುಪ್ತ ಕಾರ್ಯಾಚರಣೆ ಮಾಡ್ಯೂಲ್ಗಳನ್ನು ಒದಗಿಸುತ್ತಾರೆ:
 
 - Antigravity 429 ಎಂಜಿನ್: `open-sse/services/antigravity429Engine.ts` (ಗುರುತನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ, ಪ್ರತಿಕ್ರಿಯೆ ಹೆಡರ್ಗಳನ್ನು ಸ್ವಚ್ಛಗೊಳಿಸುತ್ತದೆ, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` ಮೂಲಕ ಕ್ರೆಡಿಟ್ಗಳು/ಆವೃತ್ತಿ ಟ್ರ್ಯಾಕಿಂಗ್ ಅನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ)
+- Antigravity 429 ಸಿಬ್ಬಂದಿ: `open-sse/services/antigravity429Guard.ts` (ಎಲ್ಲಾ ಹೋಸ್ಟ್ಗಳಾದ್ಯಂತ ಅಪ್ಸ್ಟ್ರೀಮ್ 429s ನ ಪ್ರತಿ-ಕೋರಿಕೆ ಬಜೆಟ್, `ANTIGRAVITY_MAX_429_ATTEMPTS`; ನಿರಾಕರಿಸಿದ ದೇಹದ ಒಂದೇ ರೀತಿಯ ಮರು-ಕಳುಹಿಕೆಗೆ ಸ್ಥಳೀಯವಾಗಿ ಉತ್ತರಿಸಲಾಗುತ್ತದೆ; ಕೂಲ್ಡೌನ್-ಅರಿವಿನ ಮರುಪ್ರಯತ್ನದ ಮೂಲಕ `src/sse/handlers/chat.ts` ಅಂತಹ ವಿನಂತಿಯನ್ನು ಮರುಪ್ರಾರಂಭಿಸುವುದಿಲ್ಲ)
 - ModelScope ಕೋಟಾ ನೀತಿ: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (ಹೊಂದಾಣಿಕೆ ಚಾನೆಲ್ ಹ್ಯಾಂಡ್ಶೇಕ್): `open-sse/services/claudeCodeCCH.ts`, ಜೊತೆಗೆ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code ಫಿಂಗರ್ಪ್ರಿಂಟ್ ರೂಪಿಸುವಿಕೆ: `open-sse/services/claudeCodeFingerprint.ts`

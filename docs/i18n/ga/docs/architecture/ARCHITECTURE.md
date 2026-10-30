@@ -493,6 +493,7 @@ na sraitheanna domhanda scoradáin chiorcaid / fuaraithe naisc / frithdhúnadh s
   aitheantas, glanann sé ceanntásca freagartha, agus bainistíonn sé rianú creidmheasanna/leaganacha trí
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- garda Antigravity 429: `open-sse/services/antigravity429Guard.ts` (buiséad in aghaidh an iarratais de 429s in aghaidh an tsrutha ar fud na n-óstach go léir, `ANTIGRAVITY_MAX_429_ATTEMPTS`; freagraítear athsheoladh comhionann comhlachta diúltaithe go háitiúil; ní atosaíonn `src/sse/handlers/chat.ts` iarratas den sórt sin tríd an atriail atá feasach ar an bhfiosrúchán)
 - Beartas cuóta ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH Claude Code (Croitheadh Láimhe Cainéil Comhoiriúnachta): `open-sse/services/claudeCodeCCH.ts`,
   chomh maith le `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

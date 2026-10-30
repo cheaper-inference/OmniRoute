@@ -486,6 +486,7 @@ Az FSM állapotátmenetei bekerülnek az Auto Combo pontozásába, így a hátt�
 Számos szolgáltató különálló hibatűrési és rejtőzködési modulokat biztosít, amelyek a globális megszakító-, kapcsolat-várakoztatási és modellkizárási rétegekre épülnek:
 
 - Antigravity 429-motor: `open-sse/services/antigravity429Engine.ts` (rotálja az identitást, megtisztítja a válaszfejléceket, valamint az `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` segítségével kezeli a kreditek és a verziók nyomon követését)
+- Antigravity 429 őr: `open-sse/services/antigravity429Guard.ts` (az upstream 429-ek kérésenkénti költségvetése az összes gazdagépen, `ANTIGRAVITY_MAX_429_ATTEMPTS`; a visszautasított test azonos újraküldésére helyileg válaszol; `src/sse/handlers/chat.ts` nem indítja újra az ilyen kérést a lehűlés-tudatos újrapróbálkozáson keresztül)
 - ModelScope kvótaszabályzat: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (kompatibilitási csatorna kézfogása): `open-sse/services/claudeCodeCCH.ts`, továbbá `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code-ujjlenyomat alakítása: `open-sse/services/claudeCodeFingerprint.ts`

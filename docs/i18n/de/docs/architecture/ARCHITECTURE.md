@@ -484,6 +484,7 @@ globalen Circuit-Breaker-, Verbindungs-Cooldown- und Modellsperrschichten aufbau
   die Identität, bereinigt Antwort-Header und steuert die Guthaben-/Versionsverfolgung über
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (Budget pro Anfrage von Upstream-429s auf allen Hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; ein identisches erneutes Senden eines abgelehnten Körpers wird lokal beantwortet; `src/sse/handlers/chat.ts` startet eine solche Anfrage nicht durch den abklingzeitbewussten Wiederholungsversuch neu)
 - ModelScope-Kontingentrichtlinie: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Kompatibilitätskanal-Handshake): `open-sse/services/claudeCodeCCH.ts`,
   zusätzlich `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

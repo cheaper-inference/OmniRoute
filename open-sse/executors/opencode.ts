@@ -1497,10 +1497,10 @@ export class OpencodeExecutor extends BaseExecutor {
       if (typeof systemMessage.content === "string") {
         systemMessage.content = `${systemMessage.content}\\n\\n${prompt}`;
       } else if (Array.isArray(systemMessage.content)) {
-        systemMessage.content.push({
-          type: "text",
-          text: `\\n\\n${prompt}`,
-        });
+        systemMessage.content = [
+          ...systemMessage.content,
+          { type: "text", text: `\\n\\n${prompt}` },
+        ];
       }
     } else {
       messages.unshift({

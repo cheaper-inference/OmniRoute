@@ -8,7 +8,21 @@
 > gẹ́gẹ́ bí workspace `packages/ui-kit` (`@omniroute/ui-kit`; a fi snapshot upstream dúró nínú
 > `packages/ui-kit/UPSTREAM.md`, àti pé `npm run check:ui-kit-snapshot` ló ń dáàbò bo rẹ̀). Ìmọ́lẹ̀ ni
 > àkójọ àkọ́kọ́ (canonical theme); ìfẹ́ràn àtòpìnwáà ni `system`. Àwọ̀ accent ni Keak lime
-> (`--ci-color-accent`). Switzer jẹ ẹbi ẹyọkan fun UI, ifihan ati ọrọ koodu (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Gbogbo aami jẹ glyph Lucide kan.
+> (`--ci-color-accent`). Switzer jẹ ẹbí fóǹtì àkọ́kọ́ fún UI àti ọ̀rọ̀ ìfihàn (`--ci-font-ui`; `--ci-font-display` ati `--ci-font-mono` pinnu si rẹ), ti gbalejo nipasẹ ohun elo funrararẹ (`packages/ui-kit/src/ci-fonts.css`, gbe wọle nipasẹ `ci-tokens.css`). Gbogbo aami jẹ glyph Lucide kan.
+>
+> Inter jẹ́ fóǹtì àfidípò fún àwọn glyph tí kò sí nínú Switzer; `--font-mono` ń tọ́ka sí àkójọ fóǹtì ìwọ̀n-dọ́gba ti ètò, `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Ibi tí àwọn ohun wà
 

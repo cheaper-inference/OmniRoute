@@ -490,6 +490,7 @@ FSM-ի անցումները ներառվում են Auto Combo-ի գնահատմ
   ինքնությունը, մաքրում է պատասխանի վերնագրերը, կառավարում է կրեդիտների/տարբերակի հետագծումը՝
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` մոդուլների միջոցով)
+- Antigravity 429 պահակ. `open-sse/services/antigravity429Guard.ts` (յուրաքանչյուր հյուրընկալող 429-ների յուրաքանչյուր հարցման բյուջեն, `ANTIGRAVITY_MAX_429_ATTEMPTS`, մերժված մարմնի նույնական վերուղարկին պատասխանվում է տեղում, `src/sse/handlers/chat.ts` չի վերագործարկում նման հարցումը սառեցման տեղյակ կրկնակի փորձի միջոցով)
 - ModelScope քվոտայի քաղաքականություն՝ `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (համատեղելիության կապուղու ձեռքսեղմում)՝ `open-sse/services/claudeCodeCCH.ts`,
   ինչպես նաև `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

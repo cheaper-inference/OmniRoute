@@ -7,7 +7,21 @@
 > **Κατάσταση:** ο πίνακας ελέγχου είναι χτισμένος πάνω στο **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), το οποίο διατίθεται ως vendored
 > στο workspace `packages/ui-kit` (`@omniroute/ui-kit`· το στιγμιότυπο upstream είναι καρφιτσωμένο στο
 > `packages/ui-kit/UPSTREAM.md` και προστατεύεται από το `npm run check:ui-kit-snapshot`). Το φωτεινό είναι το κανονικό
-> θέμα· η προεπιλεγμένη προτίμηση είναι `system`. Το χρώμα έμφασης είναι το Keak lime (`--ci-color-accent`). Το Switzer είναι η ενιαία οικογένεια για UI, οθόνη και κείμενο κώδικα (`--ci-font-ui`; `--ci-font-display` και `--ci-font-mono` επιλύουν σε αυτό), που φιλοξενείται από το ίδιο το κιτ (`packages/ui-kit/src/ci-fonts.css`, εισαγωγή από `ci-tokens.css`). Κάθε εικονίδιο είναι ένα γλυφό Lucide.
+> θέμα· η προεπιλεγμένη προτίμηση είναι `system`. Το χρώμα έμφασης είναι το Keak lime (`--ci-color-accent`). Το Switzer είναι η κύρια οικογένεια γραμματοσειρών για UI και κείμενο οθόνης (`--ci-font-ui`; `--ci-font-display` και `--ci-font-mono` επιλύουν σε αυτό), που φιλοξενείται από το ίδιο το κιτ (`packages/ui-kit/src/ci-fonts.css`, εισαγωγή από `ci-tokens.css`). Κάθε εικονίδιο είναι ένα γλυφό Lucide.
+>
+> Το Inter είναι εφεδρική γραμματοσειρά για γλυφές που λείπουν από το Switzer· το `--font-mono` παραπέμπει στη στοίβα γραμματοσειρών σταθερού πλάτους του συστήματος `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Πού βρίσκονται τα πράγματα
 

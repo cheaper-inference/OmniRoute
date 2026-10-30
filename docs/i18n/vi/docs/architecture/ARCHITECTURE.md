@@ -494,6 +494,7 @@ các lớp ngắt mạch toàn cục / thời gian chờ kết nối / khóa mô
   danh tính, loại bỏ các header phản hồi, quản lý việc theo dõi tín dụng/phiên bản thông qua
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (ngân sách theo yêu cầu của 429 ngược dòng trên tất cả các máy chủ, `ANTIGRAVITY_MAX_429_ATTEMPTS`; việc gửi lại nội dung bị từ chối giống hệt được trả lời cục bộ; `src/sse/handlers/chat.ts` không khởi động lại yêu cầu đó thông qua thử lại nhận biết thời gian hồi chiêu)
 - Chính sách hạn ngạch ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH (Bắt tay kênh tương thích) của Claude Code: `open-sse/services/claudeCodeCCH.ts`,
   cùng với `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

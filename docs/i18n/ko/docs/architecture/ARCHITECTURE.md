@@ -475,6 +475,7 @@ FSM 전이는 Auto Combo의 점수 계산에 반영되어, 백그라운드/자�
 여러 제공자는 전역 회로 차단기 / 연결 쿨다운 / 모델 잠금 계층을 기반으로 동작하는 전용 복원력 및 스텔스 모듈을 제공합니다.
 
 - Antigravity 429 엔진: `open-sse/services/antigravity429Engine.ts`(신원을 순환하고, 응답 헤더를 정리하며, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`를 통해 크레딧/버전 추적을 구동)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (모든 호스트에 걸쳐 업스트림 429의 요청당 예산, `ANTIGRAVITY_MAX_429_ATTEMPTS`; 거부된 본문의 동일한 재전송은 로컬로 응답됩니다. `src/sse/handlers/chat.ts` 휴지 인식 재시도를 통해 그러한 요청을 다시 시작하지 않습니다)
 - ModelScope 할당량 정책: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH(호환성 채널 핸드셰이크): `open-sse/services/claudeCodeCCH.ts`, 그리고 `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code 지문 형성: `open-sse/services/claudeCodeFingerprint.ts`

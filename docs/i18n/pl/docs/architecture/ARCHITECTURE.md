@@ -494,6 +494,7 @@ globalnych warstwach wyłącznika automatycznego / okresu karencji połączenia 
   tożsamość, oczyszcza nagłówki odpowiedzi, obsługuje śledzenie kredytów/wersji za pośrednictwem
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429guard: `open-sse/services/antigravity429Guard.ts` (budżet na żądanie 429 wysyłania na wszystkich hostach, `ANTIGRAVITY_MAX_429_ATTEMPTS`; na identyczne ponowne wysłanie odrzuconej treści odpowiada lokalnie; `src/sse/handlers/chat.ts` nie wznawia takiego żądania poprzez ponowną próbę uwzględniającą czas odnowienia)
 - Zasady limitów ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH Claude Code (uzgadnianie kanału zgodności): `open-sse/services/claudeCodeCCH.ts`,
   a także `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

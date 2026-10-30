@@ -488,6 +488,7 @@ Jules) را پشت یک چرخه حیات وظیفه یکنواخت و مبتن�
 چندین ارائهدهنده، ماژولهای اختصاصی تابآوری و مخفیکاری را عرضه میکنند که بر لایههای سراسری قطعکننده مدار / دوره انتظار اتصال / قفل مدل سوار میشوند:
 
 - موتور 429 مربوط به Antigravity: `open-sse/services/antigravity429Engine.ts` (هویت را بهصورت چرخشی تغییر میدهد، سرآیندهای پاسخ را پاکسازی میکند و ردیابی اعتبار/نسخه را از طریق `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`، `antigravityIdentity.ts` و `antigravityVersion.ts` انجام میدهد)
+- نگهبان Antigravity 429: `open-sse/services/antigravity429Guard.ts` (بودجه به ازای درخواست 429s بالادست در همه میزبانها، `ANTIGRAVITY_MAX_429_ATTEMPTS`؛ ارسال مجدد یکسانی از بدن رد شده به صورت محلی پاسخ داده میشود؛ `src/sse/handlers/chat.ts` چنین درخواستی را از طریق تلاش مجدد با آگاهی از سرد کردن مجدد راهاندازی نمیکند)
 - سیاست سهمیه ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH در Claude Code (دستدهی کانال سازگاری): `open-sse/services/claudeCodeCCH.ts`، بههمراه `claudeCodeCompatible.ts`، `claudeCodeConstraints.ts`، `claudeCodeExtraRemap.ts` و `claudeCodeToolRemapper.ts`
 - شکلدهی اثرانگشت Claude Code: `open-sse/services/claudeCodeFingerprint.ts`

@@ -494,6 +494,7 @@ de globala lagren för kretsbrytare, anslutningsvänteperioder och modellblocker
   identitet, rensar svarshuvuden, hanterar spårning av krediter/versioner via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-begäran budget för uppströms 429s över alla värdar, `ANTIGRAVITY_MAX_429_ATTEMPTS`; en identisk återsändning av en nekad instans besvaras lokalt; `src/sse/handlers/chat.ts` startar inte om en sådan begäran genom det nedkylningsmedvetna försöket)
 - ModelScopes kvotpolicy: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (kompatibilitetskanalens handskakning): `open-sse/services/claudeCodeCCH.ts`,
   samt `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

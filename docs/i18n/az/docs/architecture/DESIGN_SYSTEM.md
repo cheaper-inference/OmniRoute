@@ -7,7 +7,21 @@
 > **Vəziyyət:** panel **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) üzərində qurulub və
 > `packages/ui-kit` iş sahəsi kimi daxil edilib (`@omniroute/ui-kit`; yuxarı axın snapshot-ı
 > `packages/ui-kit/UPSTREAM.md` faylında sabitlənib və `npm run check:ui-kit-snapshot` ilə qorunur). İşıqlı (Light) mövzu kanonik
-> mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Switzer UI, displey və kod mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün vahid ailədir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
+> mövzudur; standart seçim `system`-dir. Vurğu rəngi Keak lime-dır (`--ci-color-accent`). Switzer UI və displey mətni (`--ci-font-ui`; `--ci-font-display` və `--ci-font-mono` həll etmək üçün ) üçün əsas şrift ailəsidir , dəstin özü tərəfindən (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tərəfindən idxal olunur ). Hər ikona Lucide qlifidir.
+>
+> Inter, Switzer-də olmayan qliflər üçün ehtiyat şriftdir; `--font-mono` sistemin bərabər enli şrift yığını olan `--ci-font-code`-a yönəlir.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Hər şey harada yerləşir
 

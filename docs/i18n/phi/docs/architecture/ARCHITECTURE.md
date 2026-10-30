@@ -494,6 +494,7 @@ mga pandaigdigang layer ng circuit breaker / cooldown ng koneksyon / lockout ng 
   ng identity, naglilinis ng mga response header, namamahala sa pagsubaybay ng credits/bersyon sa pamamagitan ng
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (bawat-request na budget ng upstream 429s sa lahat ng host, `ANTIGRAVITY_MAX_429_ATTEMPTS`; isang kaparehong re-send ng isang tinanggihang katawan ay sinasagot nang lokal; hindi nire-restart `src/sse/handlers/chat.ts` ang naturang kahilingan sa pamamagitan ng cooldown-aware retry)
 - Patakaran sa quota ng ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   kasama ang `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

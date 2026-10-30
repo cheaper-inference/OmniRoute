@@ -124,6 +124,50 @@ function asRecord(v: unknown): Record<string, unknown> | null {
   return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
 }
 
+/** Replay tool history natively: turn/start's UserInput cannot carry tool results. */
+function extractReplayItems(body: unknown): unknown[] | null {
+  const input = asRecord(body)?.input;
+  const toolTypes = [
+    "function_call",
+    "function_call_output",
+    "custom_tool_call",
+    "custom_tool_call_output",
+    "tool_search_call",
+    "tool_search_output",
+  ];
+  if (
+    !Array.isArray(input) ||
+    !input.some((item) => toolTypes.includes(String(asRecord(item)?.type)))
+  ) {
+    return null;
+  }
+  return input.map((item) => {
+    const message = asRecord(item);
+    if (
+      !message ||
+      typeof message.role !== "string" ||
+      (message.type && message.type !== "message")
+    ) {
+      return item;
+    }
+    return {
+      ...message,
+      type: "message",
+      // Codex drops system-role history; developer preserves these instructions.
+      role: message.role === "system" ? "developer" : message.role,
+      content:
+        typeof message.content === "string"
+          ? [
+              {
+                type: message.role === "assistant" ? "output_text" : "input_text",
+                text: message.content,
+              },
+            ]
+          : message.content,
+    };
+  });
+}
+
 function appServerThreadId(result: { thread?: { id?: unknown }; threadId?: unknown }): string {
   // Codex returns thread.id; retain the legacy top-level threadId fallback.
   if (result && typeof result.thread?.id === "string") return result.thread.id;
@@ -247,6 +291,7 @@ export class CodexAppServerExecutor extends BaseExecutor {
     const policy = resolveThreadStartPolicy(config, psd);
 
     const promptText = extractPromptText(input.body);
+    const replayItems = extractReplayItems(input.body);
     const { baseModel, effort: suffixEffort } = splitCodexReasoningSuffix(input.model);
     const bodyEffort = extractEffort(input.body);
     // Explicit model suffix selection (e.g. gpt-5.5-high) represents an explicit
@@ -381,9 +426,13 @@ export class CodexAppServerExecutor extends BaseExecutor {
         };
         input.signal?.addEventListener("abort", onAbort, { once: true });
 
-        const turnInput: CodexTextUserInput[] = [
-          { type: "text", text: promptText, text_elements: [] },
-        ];
+        if (replayItems) {
+          await client.request("thread/inject_items", { threadId, items: replayItems });
+        }
+        if (terminated) return;
+        const turnInput: CodexTextUserInput[] = replayItems
+          ? []
+          : [{ type: "text", text: promptText, text_elements: [] }];
         await client.request("turn/start", {
           threadId,
           input: turnInput,

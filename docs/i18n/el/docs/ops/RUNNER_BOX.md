@@ -11,13 +11,13 @@ runner του OmniRoute έχει **έναν ρόλο**, μία ετικέτα κ
 του Release-Green και μια εργασία lint· το swap του host (16 GB) απορροφά αυτή την επιβάρυνση και, επειδή τα Builds των pull request εκτελούνται
 σε φιλοξενούμενους runners, η υποδοχή Turbopack παραμένει αδρανής τις περισσότερες φορές:
 
-| runner               | ετικέτα              | ρόλος                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
-| -------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`         | Builds Turbopack: `ci.yml` `Build` (μόνο push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, το νυχτερινό build a11y | 56 GB / 60 GB (swap 0)     | 1600 %       |
-| `omniroute-113-6`    | `omni-release`       | Release-Green (`release-green` + `main-green`), build webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
-| `omniroute-113-2`    | `omni-light`         | νυχτερινές εργασίες (Schemathesis, promptfoo, garak, k6) και `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
-| `omniroute-113`      | `omni-light`         | ίδιο pool με το παραπάνω                                                                                                                              | 8 GB / 12 GB               | 400 %        |
-| OmniHeuris, OmniMind | (τα αποθετήριά τους) | μόνο Dependabot (μέγιστη τιμή 155 MB έκαστο, 2026-10-18)                                                                                              | 4 GB / 6 GB                | 200 % έκαστο |
+| runner               | ετικέτα                         | ρόλος                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`   |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds Turbopack: `ci.yml` `Build` (μόνο push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, το νυχτερινό build a11y | 56 GB / 60 GB (swap 0)     | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | νυχτερινές εργασίες (Schemathesis, promptfoo, garak, k6) και `quality.yml` `lint-guard`                                                               | 12 GB / 16 GB (swap 4 GB)  | 600 %        |
+| `omniroute-113`      | `omni-light`                    | ίδιο pool με το παραπάνω                                                                                                                              | 8 GB / 12 GB               | 400 %        |
+| OmniHeuris, OmniMind | (τα αποθετήριά τους)            | μόνο Dependabot (μέγιστη τιμή 155 MB έκαστο, 2026-10-18)                                                                                              | 4 GB / 6 GB                | 200 % έκαστο |
 
 Μετρήσεις στις 2026-10-18:
 
@@ -27,7 +27,7 @@ runner του OmniRoute έχει **έναν ρόλο**, μία ετικέτα κ
 | swap      | 16 GB                                | το `omniroute-113-5` εκτελείται με απενεργοποιημένο swap (`MemorySwapMax=0`), ώστε ένα ανεξέλεγκτο build να τερματίζεται στο όριό του αντί να αναγκάζει το μηχάνημα να χρησιμοποιεί swap                                                                                                                                                                                                                |
 | `/tmp`    | **12 GB tmpfs = RAM**                | οτιδήποτε αποθηκεύεται εκεί καταναλώνει μνήμη· τα υπολείμματα καθαρίζονται μετά από 3 ώρες                                                                                                                                                                                                                                                                                                              |
 | CPU       | παρατηρήθηκε φορτίο 60 σε 32 πυρήνες | πριν από τα quotas, ένα build Turbopack (~1166 % CPU) μαζί με μια σουίτα κάλυψης στο ίδιο μηχάνημα στερούσαν από τα heartbeat των άλλων listeners τους απαιτούμενους πόρους (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                       |
-| runners   | **6 listeners**                      | 4 OmniRoute + OmniHeuris + OmniMind· τα `omniroute-113-3/-4/-7/-8` είναι απενεργοποιημένα (το `systemctl enable --now` επαναφέρει ένα από αυτά)                                                                                                                                                                                                                                                         |
+| runners   | **7 listeners** (2026-10-28)         | 5 OmniRoute + OmniHeuris + OmniMind· το `omniroute-113-5` φέρει επίσης το `omni-build-60gb`· τα `omniroute-113-3/-4/-8` διαγράφηκαν από το αποθετήριο (2026-10-28)                                                                                                                                                                                                                                      |
 
 Τα όρια βρίσκονται στο `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` κάθε μονάδας
 (οι προηγούμενες τιμές διατηρούνται ως `override.conf.bak-20261018`) και εφαρμόστηκαν ενώ το σύστημα βρισκόταν σε λειτουργία με
@@ -42,7 +42,7 @@ runner του OmniRoute έχει **έναν ρόλο**, μία ετικέτα κ
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): κάθε 30 λεπτά, καταγραφή στο /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 Το `lsof` είναι απαραίτητο: το πρόγραμμα καθαρισμού επιβεβαιώνει ότι μια διαδρομή είναι ανενεργή μέσω ενός στιγμιότυπου των ανοιχτών
@@ -81,7 +81,7 @@ CPU χωρίς συνδεδεμένη εργασία. Κάθε μονάδα Omni
 ## Κανόνες λειτουργίας
 
 - **Μία μεταγλώττιση Turbopack κάθε φορά — επιβάλλεται μέσω ετικέτας.** Κάθε εργασία που εκτελεί ένα πλήρες
-  `next build` με Turbopack στοχεύει το `[self-hosted, omni-build]`, και μόνο το **`omniroute-113-5`** φέρει αυτήν
+  `next build` με Turbopack στοχεύει το `[self-hosted, omni-build, omni-build-60gb]`, και μόνο το **`omniroute-113-5`** φέρει αυτήν
   την ετικέτα: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   η νυχτερινή μεταγλώττιση a11y (#16853) και το **amd64** του `docker-publish.yml` (webpack μέσα στο BuildKit —
   το Turbopack κατέρρευσε εκεί, εκτέλεση 33253576569). Το σκέλος arm64 του Docker παραμένει στο `ubuntu-24.04-arm`.
@@ -116,8 +116,16 @@ CPU χωρίς συνδεδεμένη εργασία. Κάθε μονάδα Omni
   είχε `MemoryHigh=4G` έως τις 2026-10-18 — η μεταγλώττιση promptfoo προχωρούσε με ανακτήσεις μνήμης επί 54 λεπτά
   εκεί· τα 8 GB εξαλείφουν τον περιορισμό απόδοσης.
 - **Λιγότεροι listeners, σκόπιμα.** Τέσσερις μονάδες OmniRoute απενεργοποιήθηκαν στις 2026-08-29 — κάθε επιπλέον
-  listener είναι ένας ακόμη ένοικος για τον παραπάνω προϋπολογισμό μνήμης. Το ανώτατο όριο του janitor είναι 6 (`MAX_ACTIVE_RUNNERS=6` στο cron): μετρά
-  κάθε `Runner.Listener` στο μηχάνημα, ενώ τα OmniHeuris + OmniMind προσθέτουν δύο στα δικά μας τέσσερα.
+  listener είναι ένας ακόμη ένοικος για τον παραπάνω προϋπολογισμό μνήμης. Το ανώτατο όριο του janitor είναι 8 (`MAX_ACTIVE_RUNNERS=8` στο cron): μετρά
+  κάθε `Runner.Listener` στο μηχάνημα, ενώ τα OmniHeuris + OmniMind προσθέτουν δύο στα δικά μας πέντε.
+- **Οι εργασίες Unit και Vitest παραμένουν σε φιλοξενούμενους runners.** Το `ci.yml` στέλνει τα unit shards και την εργασία Vitest στο
+  `[self-hosted, omni-ci]` μόνο όταν η μεταβλητή αποθετηρίου `vars.USE_VPS_TEST_RUNNER` είναι
+  `true`, και τότε μόνο για εκτελέσεις `pull_request` από το ίδιο αποθετήριο· τα forks, το `merge_group` και τα push
+  παραμένουν στο `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Η μεταβλητή είναι
+  `false`. Στις 2026-10-28 τρεις listeners `omni-ci` με 4 πυρήνες χρειάστηκαν 250–270 s για το `npm ci` και κάθε
+  unit shard έφτασε το όριο εργασίας των 30 λεπτών, έναντι ~634 s για ένα φιλοξενούμενο shard, με το φορτίο του μηχανήματος
+  στο 17–24. Οι listeners διαγράφηκαν. Μην ενεργοποιήσετε ξανά τη μεταβλητή χωρίς listeners διαστασιολογημένους για
+  ένα unit shard.
 - **Μην καθαρίζετε ποτέ τα `/tmp` ή `_work` χειροκίνητα όσο οποιοσδήποτε runner είναι απασχολημένος.** Ένας
   έλεγχος και κατόπιν διαγραφή με χρονικό κενό μεταξύ των δύο είχε ως αποτέλεσμα μια ενεργή εργασία Build να χάσει τον κατάλογο
   `_work` της στις 2026-08-27. Ο janitor πραγματοποιεί τον έλεγχο και την αφαίρεση σε ένα βήμα·
@@ -131,8 +139,10 @@ CPU χωρίς συνδεδεμένη εργασία. Κάθε μονάδα Omni
 
 ## Φιλοξενούμενος δίαυλος (runners που φιλοξενούνται στο GitHub)
 
-Ο λογαριασμός είναι στο πρόγραμμα **Pro**: **40 ταυτόχρονες φιλοξενούμενες εργασίες**, κοινόχρηστες από κάθε έλεγχο PR,
-κάθε workflow που ενεργοποιείται από push και την προεπιλεγμένη ρύθμιση του CodeQL. Μετρήθηκε στις 2026-10-18 κατά τη διάρκεια μιας
+Το αποθετήριο ανήκει στον οργανισμό `cheaper-inference`, στο πρόγραμμα **Team**: **60
+ταυτόχρονες φιλοξενούμενες εργασίες**, κοινόχρηστες από κάθε αποθετήριο του οργανισμού, κάθε έλεγχο PR,
+κάθε workflow που ενεργοποιείται από push και την προεπιλεγμένη ρύθμιση του CodeQL. Τα παρακάτω στοιχεία μετρήθηκαν στο
+πρόγραμμα **Pro** (40 ταυτόχρονες φιλοξενούμενες εργασίες). Μετρήθηκε στις 2026-10-18 κατά τη διάρκεια μιας
 εκστρατείας συγχωνεύσεων (~10 συγχωνεύσεις/ώρα στο `release/v3.8.52`): δημιουργήθηκαν **2.500 εκτελέσεις workflow μέσα σε
 24 ώρες**, 44 push στον κλάδο μέσα σε 6 ώρες, **106 φιλοξενούμενες εργασίες σε αναμονή**, ενώ οι έλεγχοι PR περίμεναν για
 ώρες και τα PR συγχωνεύονταν χωρίς αυτούς. Εννέα workflow ενεργοποιούνταν σε κάθε push προς τον κλάδο:

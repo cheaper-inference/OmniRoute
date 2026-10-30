@@ -11,13 +11,13 @@ izmērītajām maksimālajām slodzēm. Servera resursi tiek pārdalīti virs to
 webpack būvējumu un lint darbu; servera mijmaiņas apgabals (16 GB) to absorbē, un, tā kā izvilkšanas pieprasījumu būvējumi darbojas
 mitinātā vidē, Turbopack slots lielāko daļu laika ir dīkstāvē:
 
-| izpildītājs          | etiķete           | loma                                                                                                                                                 | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
-| -------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
-| `omniroute-113-5`    | `omni-build`      | Turbopack būvējumi: `ci.yml` `Build` (tikai push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nakts a11y būvējums | 56 GB / 60 GB (mijmaiņa 0)    | 1600 %       |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), webpack būvējums                                                                                     | 20 GB / 24 GB (mijmaiņa 4 GB) | 800 %        |
-| `omniroute-113-2`    | `omni-light`      | nakts darbi (Schemathesis, promptfoo, garak, k6) un `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (mijmaiņa 4 GB) | 600 %        |
-| `omniroute-113`      | `omni-light`      | tas pats pūls, kas norādīts iepriekš                                                                                                                 | 8 GB / 12 GB                  | 400 %        |
-| OmniHeuris, OmniMind | (to repozitoriji) | tikai Dependabot (maksimums 155 MB katram, 2026-10-18)                                                                                               | 4 GB / 6 GB                   | 200 % katram |
+| izpildītājs          | etiķete                         | loma                                                                                                                                                 | `MemoryHigh` / `MemoryMax`    | `CPUQuota`   |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ------------ |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack būvējumi: `ci.yml` `Build` (tikai push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nakts a11y būvējums | 56 GB / 60 GB (mijmaiņa 0)    | 1600 %       |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack būvējums                                                                                     | 20 GB / 24 GB (mijmaiņa 4 GB) | 800 %        |
+| `omniroute-113-2`    | `omni-light`                    | nakts darbi (Schemathesis, promptfoo, garak, k6) un `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (mijmaiņa 4 GB) | 600 %        |
+| `omniroute-113`      | `omni-light`                    | tas pats pūls, kas norādīts iepriekš                                                                                                                 | 8 GB / 12 GB                  | 400 %        |
+| OmniHeuris, OmniMind | (to repozitoriji)               | tikai Dependabot (maksimums 155 MB katram, 2026-10-18)                                                                                               | 4 GB / 6 GB                   | 200 % katram |
 
 Mērīts 2026-10-18:
 
@@ -27,7 +27,7 @@ Mērīts 2026-10-18:
 | mijmaiņa    | 16 GB                             | `omniroute-113-5` darbojas ar izslēgtu mijmaiņu (`MemorySwapMax=0`), tāpēc nekontrolēts būvējums tiek apturēts pie noteiktā ierobežojuma, nevis liek serverim izmantot mijmaiņu                                                                                                                                                                                                                                            |
 | `/tmp`      | **12 GB tmpfs = RAM**             | viss, kas tur tiek novietots, aizņem atmiņu; atlikumi tiek iztīrīti pēc 3 h                                                                                                                                                                                                                                                                                                                                                |
 | CPU         | novērota slodze 60 uz 32 kodoliem | pirms kvotu ieviešanas viens Turbopack būvējums (~1166 % CPU) kopā ar pārklājuma testu komplektu tajā pašā serverī atņēma resursus pārējo klausītāju sirdspukstiem (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                   |
-| izpildītāji | **6 klausītāji**                  | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` ir atspējoti (`systemctl enable --now` atkal iespējo vienu no tiem)                                                                                                                                                                                                                                                                                        |
+| izpildītāji | **7 klausītāji** (2026-10-28)     | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` nes arī `omni-build-60gb`; `omniroute-113-3/-4/-8` tika dzēsti no repozitorija (2026-10-28)                                                                                                                                                                                                                                                                         |
 
 Ierobežojumi atrodas katras vienības failā `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (iepriekšējās vērtības saglabātas kā `override.conf.bak-20261018`) un tika lietoti darbības laikā ar
@@ -42,7 +42,7 @@ aktīvais darbs netika ietekmēts. Etiķetes tiek mainītas, izmantojot izpildī
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ik pēc 30 minūtēm, žurnāls failā /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` ir obligāts: pirms ceļa dzēšanas tīrītājs ar vienu atvērto failu momentuzņēmumu
@@ -86,7 +86,7 @@ restartēšanu izpildot vienā komandā.
 ## Darbības noteikumi
 
 - **Vienlaikus tikai viens Turbopack būvējums — to nodrošina etiķete.** Katrs darbs, kas izpilda pilnu Turbopack
-  `next build`, izmanto `[self-hosted, omni-build]`, un tikai **`omniroute-113-5`** ir piešķirta šī
+  `next build`, izmanto `[self-hosted, omni-build, omni-build-60gb]`, un tikai **`omniroute-113-5`** ir piešķirta šī
   etiķete: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   nakts a11y būvējums (#16853) un `docker-publish.yml` **amd64** (webpack BuildKit iekšienē —
   Turbopack tur avarēja, izpilde 33253576569). arm64 Docker posms joprojām darbojas uz `ubuntu-24.04-arm`.
@@ -121,8 +121,9 @@ restartēšanu izpildot vienā komandā.
   līdz 2026-10-18 bija `MemoryHigh=4G` — promptfoo būvējums tur 54 minūtes centās atbrīvot sev atmiņu;
   8 GB novērš ierobežošanu.
 - **Apzināti mazāk klausītāju.** Četras OmniRoute vienības tika atspējotas 2026-08-29 — katrs papildu
-  klausītājs ir vēl viens iepriekš minētā atmiņas budžeta patērētājs. Uzkopšanas procesa maksimālā robeža ir 6 (`MAX_ACTIVE_RUNNERS=6` cron konfigurācijā): tas saskaita
-  katru `Runner.Listener` šajā serverī, un OmniHeuris + OmniMind mūsu četriem pievieno vēl divus.
+  klausītājs ir vēl viens iepriekš minētā atmiņas budžeta patērētājs. Uzkopšanas procesa maksimālā robeža ir 8 (`MAX_ACTIVE_RUNNERS=8` cron konfigurācijā): tas saskaita
+  katru `Runner.Listener` šajā serverī, un OmniHeuris + OmniMind mūsu pieciem pievieno vēl divus.
+- **Unit un Vitest darbi paliek mitināti.** `ci.yml` sūta savas unit daļas un Vitest darbu uz `[self-hosted, omni-ci]` tikai tad, ja repozitorija mainīgais `vars.USE_VPS_TEST_RUNNER` ir `true`, un arī tad tikai tā paša repozitorija `pull_request` palaidieniem; atzarojumi (forks), `merge_group` un nosūtījumi (push) paliek uz `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). Mainīgais ir `false`. 2026-10-28 trīs 4 kodolu `omni-ci` klausītājiem `npm ci` aizņēma 250–270 s, un katra unit daļa sasniedza 30 minūšu darba limitu, salīdzinot ar ~634 s mitinātai daļai, kamēr servera slodze bija 17–24. Klausītāji tika dzēsti. Neieslēdziet mainīgo atkārtoti bez klausītājiem, kuru izmērs atbilst unit daļai.
 - **Nekad netīriet `/tmp` vai `_work` manuāli, kamēr kaut viens izpildītājs ir aizņemts.**
   Pārbaude, kam seko dzēšana ar pauzi starp abām darbībām, izraisīja to, ka aktīvs Build darbs 2026-08-27 zaudēja savu
   `_work`. Uzkopšanas process pārbaudi un dzēšanu veic vienā darbībā;
@@ -136,8 +137,7 @@ restartēšanu izpildot vienā komandā.
 
 ## Mitinātā josla (GitHub mitinātie izpildītāji)
 
-Kontam ir **Pro** plāns: **40 vienlaicīgi mitināti darbi**, ko kopīgi izmanto visas PR pārbaudes,
-visas pēc `push` aktivizētās darbplūsmas un CodeQL noklusējuma konfigurācija. Mērīts 2026-10-18
+Repozitorijs pieder organizācijai `cheaper-inference`, kurai ir **Team** plāns: **60 vienlaicīgi mitināti darbi**, ko kopīgi izmanto visi organizācijas repozitoriji, visas PR pārbaudes, visas pēc nosūtīšanas (push) aktivizētās darbplūsmas un CodeQL noklusējuma konfigurācija. Tālāk norādītie skaitļi tika izmērīti ar **Pro** plānu (40 vienlaicīgi mitināti darbi). Mērīts 2026-10-18
 sapludināšanas kampaņas laikā (~10 sapludināšanas stundā zarā `release/v3.8.52`): 24 stundu
 laikā izveidotas **2,500 darbplūsmu izpildes**, 6 stundu laikā zarā veikti 44 `push`, rindā bija
 **106 mitināti darbi**, kamēr PR pārbaudes gaidīja vairākas stundas un PR tika sapludināti bez tām.

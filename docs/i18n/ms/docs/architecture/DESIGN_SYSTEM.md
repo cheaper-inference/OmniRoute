@@ -7,7 +7,21 @@
 > **Status:** papan pemuka ini dibina di atas **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), divendorkan
 > sebagai workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream dipinkan dalam
 > `packages/ui-kit/UPSTREAM.md` dan dijaga oleh `npm run check:ui-kit-snapshot`). Light ialah tema
-> kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Switzer ialah keluarga tunggal untuk UI, paparan dan teks kod (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
+> kanonik; keutamaan lalai ialah `system`. Aksennya ialah Keak lime (`--ci-color-accent`). Switzer ialah keluarga fon utama untuk UI dan teks paparan (`--ci-font-ui`; `--ci-font-display` dan `--ci-font-mono` menyelesaikannya), dihoskan sendiri oleh kit itu sendiri (`packages/ui-kit/src/ci-fonts.css`, diimport oleh `ci-tokens.css`). Setiap ikon ialah glif Lucide.
+>
+> Inter ialah fon sandaran untuk glif yang tiada dalam Switzer; `--font-mono` merujuk kepada susunan fon monospace sistem `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Di mana semuanya berada
 

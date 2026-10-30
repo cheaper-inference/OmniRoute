@@ -7,7 +7,21 @@
 > **סטטוס:** לוח הבקרה בנוי על **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), המוטמע (vendored)
 > כ-workspace בשם `packages/ui-kit` (`@omniroute/ui-kit`; ה-snapshot של ה-upstream מוצמד ב-
 > `packages/ui-kit/UPSTREAM.md` ומוגן באמצעות `npm run check:ui-kit-snapshot`). ערכת הנושא הקנונית
-> היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`). Switzer היא המשפחה היחידה עבור UI, תצוגה וטקסט קוד (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
+> היא בהירה (Light); ברירת המחדל של ההעדפה היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`). Switzer היא משפחת הגופנים הראשית עבור UI וטקסט תצוגה (`--ci-font-ui`; `--ci-font-display` ו- `--ci-font-mono` פותרים את זה), מתארחת בעצמה על ידי הערכה עצמה (`packages/ui-kit/src/ci-fonts.css`, מיובא על ידי `ci-tokens.css`). כל אייקון הוא גליף Lucide.
+>
+> Inter הוא גופן חלופי לגליפים שחסרים ב-Switzer; `--font-mono` מפנה לרשימת גופני המערכת ברוחב אחיד `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. איפה דברים נמצאים
 

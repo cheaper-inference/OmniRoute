@@ -5,7 +5,21 @@
 ---
 
 > **Statuss:** panelis ir veidots uz **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) bāzes, kas iekļauts krātuvē (vendored) kā darbvietas `packages/ui-kit` (`@omniroute/ui-kit`; upstream momentuzņēmums ir nofiksēts
-> `packages/ui-kit/UPSTREAM.md` un to uzrauga `npm run check:ui-kit-snapshot`). Kanoniskā tēma ir gaišā (Light); noklusējuma iestatījums ir `system`. Akcenta krāsa ir Keak laima zaļā (`--ci-color-accent`). Switzer ir viena saime UI, displeja un koda tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
+> `packages/ui-kit/UPSTREAM.md` un to uzrauga `npm run check:ui-kit-snapshot`). Kanoniskā tēma ir gaišā (Light); noklusējuma iestatījums ir `system`. Akcenta krāsa ir Keak laima zaļā (`--ci-color-accent`). Switzer ir galvenā fontu saime UI un attēlojamajam tekstam (`--ci-font-ui`; `--ci-font-display` un `--ci-font-mono` to atrisina), ko pats mitina pats komplekts (`packages/ui-kit/src/ci-fonts.css`, importēts `ci-tokens.css`). Katra ikona ir Lucide glifs.
+>
+> Inter ir rezerves fonts glifiem, kuru nav Switzer; `--font-mono` norāda uz sistēmas vienāda platuma fontu sarakstu `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Kur kas atrodas
 

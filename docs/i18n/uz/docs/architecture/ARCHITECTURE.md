@@ -485,6 +485,7 @@ FSM o‘tishlari Auto Combo’ning baholash tizimiga uzatiladi va fon/avtomatlas
 Bir nechta provayderlar global avtomatik uzgich / ulanishni kutish davri / modelni bloklash qatlamlari asosida ishlaydigan maxsus barqarorlik va yashirinlik modullarini taqdim etadi:
 
 - Antigravity 429 mexanizmi: `open-sse/services/antigravity429Engine.ts` (identifikatsiyani almashtiradi, javob sarlavhalarini tozalaydi, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` orqali kreditlar/versiyalar kuzatuvini boshqaradi)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (barcha xostlar bo‘yicha yuqori oqim 429-larning har bir so‘rov byudjeti, `ANTIGRAVITY_MAX_429_ATTEMPTS`; rad etilgan korpusning bir xil qayta jo‘natishiga mahalliy darajada javob beriladi; `src/sse/handlers/chat.ts` sovutish vaqtini hisobga olgan holda qayta urinish orqali bunday so‘rovni qayta ishga tushirmaydi)
 - ModelScope kvota siyosati: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Moslik kanali qo‘l siqishuvi): `open-sse/services/claudeCodeCCH.ts`, shuningdek `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code raqamli izini shakllantirish: `open-sse/services/claudeCodeFingerprint.ts`

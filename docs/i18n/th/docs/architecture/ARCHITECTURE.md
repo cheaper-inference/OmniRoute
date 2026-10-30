@@ -488,6 +488,7 @@ Jules) ไว้เบื้องหลังวงจรชีวิตงา�
 - กลไกจัดการ 429 ของ Antigravity: `open-sse/services/antigravity429Engine.ts` (หมุนเวียนข้อมูลระบุตัวตน ล้างส่วนหัวการตอบกลับ และจัดการการติดตามเครดิต/เวอร์ชันผ่าน
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (งบประมาณต่อคำขอของอัปสตรีม 429s ทั่วทั้งโฮสต์ `ANTIGRAVITY_MAX_429_ATTEMPTS` การส่งซ้ำที่เหมือนกันของเนื้อหาที่ถูกปฏิเสธจะได้รับคำตอบในเครื่อง `src/sse/handlers/chat.ts` จะไม่รีสตาร์ทคำขอดังกล่าวผ่านการลองอีกครั้งโดยคำนึงถึงคูลดาวน์)
 - นโยบายโควตาของ ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   รวมถึง `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

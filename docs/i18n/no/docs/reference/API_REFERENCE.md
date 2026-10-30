@@ -873,14 +873,16 @@ og en nøkkel med feil type fjernes. Alle andre nøkler ignoreres, inkludert aut
 `stream` og `outputSchema`. De flate nøklene som brukes av andre leverandører (`cx`, `depth`, ...), fungerer
 som før.
 
-| Leverandør | Felt på øverste nivå                                                                                                                                                                                                                                                                                                                                                      | Nestet                                                                                                                                                                     |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flate primitive verdier), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` slås sammen over standardverdien `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                          |
+| Leverandør | Felt på øverste nivå                                                                                                                                                                                                                                                                                                                                                      | Nestet                                                                                                                                            |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flate primitive verdier), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` slås sammen over standardverdien `{ text: true, highlights: true }` |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
 
 De generiske feltene har alltid prioritet: `query`, `max_results`, `filters` (domener), `country` og
 emnet som avledes fra `search_type`. For Exa beholder `search_type: "news"` verdien `category: "news"`.
 Tavily godtar også `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl-søkekostnaden registreres per startet blokk med 10 returnerte resultater, til $0,002 (2 studiepoeng) per blokk og minst én blokkering per samtale ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultater koster $0,004.
 
 Det generiske feltet `time_range` når nå begge leverandørene: Exa får `startPublishedDate` (ISO-
 tidsstempel), og Tavily får `start_date` (`YYYY-MM-DD`). En eksplisitt dato i `provider_options`
@@ -889,9 +891,11 @@ overstyrer den tilordnede datoen.
 Exa-resultater beholder `id`, `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
 `provider_raw`. Tavily-resultater beholder `images` og `favicon`.
 
-Kostnadsberegningen bruker fortsatt det flate registeret `costPerQuery`. Tavily fakturerer
-`search_depth: "advanced"` med flere kreditter per kall, og denne forskjellen gjenspeiles ikke i
-`usage.search_cost_usd`.
+Linkup: Koblingssøkekostnad er registrert til $0,005 for `depth` `fast` og `standard` og $0,05 for `deep` ( [Linkup-priser](https://docs.linkup.so/pages/documentation/development/pricing) ), enten `depth` kommer fra `provider_options` eller tilkoblingens innstillinger.
+
+Exa `type: "lite"` (Exa 3.0) godtar et mindre sett med felt og avviser hele forespørselen når et hvilket som helst annet felt er satt. For lite blir `additionalQueries`, `systemPrompt` og hver `contents` -tast unntatt `text` og `highlights` droppet før samtalen. De utdaterte `subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes ikke lenger.
+
+Exa: $0,007 per samtale for `auto` (og den eldre `fast`) eller $0,004 for `lite` (og den eldre `instant`), som dekker 10 resultater; $0,001 for hvert ytterligere resultat; og $0,001 per returnert resultat når `contents.summary` er satt. Tavily er registrert med 1 kreditt ($0,008) for `search_depth` `basic`, `fast` og `ultra-fast`, og 2 kreditter ($0,016) for `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). En samtale med `auto_parameters: true` som Tavily oppgraderer til avansert blir fortsatt registrert med 1 kreditt.
 
 ---
 

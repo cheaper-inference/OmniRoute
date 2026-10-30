@@ -872,14 +872,16 @@ kuma ana watsar da maɓalli mai nau'in da bai dace ba. Ana yin watsi da duk wani
 `stream` da `outputSchema`. Maɓallan flat da sauran masu samarwa ke amfani da su (`cx`, `depth`, ...) suna aiki
 kamar yadda suke a baya.
 
-| Mai samarwa | Filayen matakin sama                                                                                                                                                                                                                                                                                                                                                      | Na ciki                                                                                                                                                               |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Ana haɗa `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` a kan tsohon ƙimar `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                     |
+| Mai samarwa | Filayen matakin sama                                                                                                                                                                                                                                                                                                                                                      | Na ciki                                                                                                                                      |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | Ana haɗa `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` a kan tsohon ƙimar `{ text: true, highlights: true }` |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
 Filayen gama-gari kullum su ne ke da fifiko: `query`, `max_results`, `filters` (domains), `country` da
 topic da aka samo daga `search_type`. A Exa, `search_type: "news"` yana riƙe `category: "news"`.
 Tavily kuma yana karɓar `search_type: "finance"` (`topic: "finance"`).
+
+Ana yin rikodin farashin binciken Firecrawl ga kowane farkon toshe na sakamakon 10 da aka dawo, a $0.002 (ƙididdigar ƙididdigewa 2) toshe kuma aƙalla toshe ɗaya a kowane kira ( [Billing na Firecrawl](https://docs.firecrawl.dev/billing) ): Sakamakon 11 ya kai $0.004.
 
 Yanzu `time_range` na gama-gari yana isa ga dukkan masu samarwar biyu: Exa yana samun `startPublishedDate` (ISO
 timestamp), Tavily kuma yana samun `start_date` (`YYYY-MM-DD`). Kwanan wata da aka fayyace kai tsaye a `provider_options`
@@ -888,9 +890,11 @@ yana maye gurbin wanda aka tsara.
 Sakamakon Exa yana riƙe `id`, `highlight_scores`, `summary`, `subpages`, `entities` da `extras` a cikin
 `provider_raw`. Sakamakon Tavily yana riƙe `images` da `favicon`.
 
-Lissafin kuɗi har yanzu yana amfani da flat registry `costPerQuery`. Tavily yana cajin
-`search_depth: "advanced"` da ƙarin credits a kowane kira, kuma ba a nuna wannan bambanci a cikin
-`usage.search_cost_usd`.
+Linkup: Ana yin rikodin farashin neman haɗin kai a $0.005 don `depth` `fast` da `standard` da $0.05 don `deep` ( [Farashin haɗin gwiwa](https://docs.linkup.so/pages/documentation/development/pricing) ), ko `depth` ya fito daga `provider_options` ko saitunan haɗin.
+
+Exa `type: "lite"` (Exa 3.0) yana karɓar ƙaramin saitin filayen kuma ya ƙi duk buƙatar lokacin da aka saita kowane filin. Don lite, `additionalQueries`, `systemPrompt` da kowane maɓallin `contents` banda `text` da `highlights` ana sauke kafin kiran. Ba a ƙara turawa da aka soke `subpages`, `subpageTarget`, `highlights.numSentences` da `highlights.highlightsPerUrl`.
+
+Exa: $0.007 a kowane kira don `auto` (da `fast` na gado ) ko $0.004 don `lite` (da `instant` na gado), yana rufe sakamako 10; $0.001 ga kowane ƙarin sakamako; da $0.001 a kowane sakamakon da aka dawo lokacin da aka saita `contents.summary`. Ana yin rikodin Tavily a 1 kiredit ($0.008) don `search_depth` `basic`, `fast` da `ultra-fast`, da ƙididdiga 2 ($0.016) don `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Kira tare da `auto_parameters: true` wanda Tavily ya inganta zuwa ci gaba har yanzu ana yin rikodin shi a 1 kiredit.
 
 ---
 

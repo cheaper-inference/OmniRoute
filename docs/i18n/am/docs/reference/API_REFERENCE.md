@@ -850,14 +850,16 @@ Exa እና Tavily ለአቅራቢው የተወሰኑ መስኮችን ከስም �
 `stream`ን እና `outputSchema`ን ጨምሮ ማንኛውም ሌላ ቁልፍ ችላ ይባላል። ሌሎች አቅራቢዎች የሚጠቀሙባቸው ጠፍጣፋ ቁልፎች (`cx`፣ `depth`፣ ...) እንደቀድሞው
 ይሰራሉ።
 
-| አቅራቢ   | ከፍተኛ ደረጃ መስኮች                                                                                                                                                                                                                                                                                                                                                             | የተዋረዱ                                                                                                                                                    |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`፣ `category`፣ `userLocation`፣ `moderation`፣ `additionalQueries`፣ `objective`፣ `systemPrompt`፣ `compliance` (ጠፍጣፋ መሠረታዊ ዓይነቶች)፣ `startPublishedDate`፣ `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` በነባሪው `{ text: true, highlights: true }` ላይ ይዋሃዳል |
-| Tavily | `search_depth`፣ `chunks_per_source`፣ `time_range`፣ `start_date`፣ `end_date`፣ `include_published_date`፣ `filter_by_published_date`፣ `include_answer`፣ `include_raw_content`፣ `include_images`፣ `include_image_descriptions`፣ `include_favicon`፣ `include_domains_mode`፣ `language`፣ `filter_by_language`፣ `auto_parameters`፣ `exact_match`፣ `include_usage`፣ `safe_search` | —                                                                                                                                                        |
+| አቅራቢ   | ከፍተኛ ደረጃ መስኮች                                                                                                                                                                                                                                                                                                                                                             | የተዋረዱ                                                                                                                           |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`፣ `category`፣ `userLocation`፣ `moderation`፣ `additionalQueries`፣ `objective`፣ `systemPrompt`፣ `compliance` (ጠፍጣፋ መሠረታዊ ዓይነቶች)፣ `startPublishedDate`፣ `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` በነባሪው `{ text: true, highlights: true }` ላይ ይዋሃዳል |
+| Tavily | `search_depth`፣ `chunks_per_source`፣ `time_range`፣ `start_date`፣ `end_date`፣ `include_published_date`፣ `filter_by_published_date`፣ `include_answer`፣ `include_raw_content`፣ `include_images`፣ `include_image_descriptions`፣ `include_favicon`፣ `include_domains_mode`፣ `language`፣ `filter_by_language`፣ `auto_parameters`፣ `exact_match`፣ `include_usage`፣ `safe_search` | —                                                                                                                               |
 
 አጠቃላይ መስኮቹ ሁልጊዜ ቅድሚያ ያገኛሉ፦ `query`፣ `max_results`፣ `filters` (ጎራዎች)፣ `country` እና ከ
 `search_type` የሚመነጨው ርዕስ። በExa ላይ፣ `search_type: "news"` `category: "news"`ን እንዳለ ያቆያል።
 Tavily `search_type: "finance"`ንም (`topic: "finance"`) ይቀበላል።
+
+የFirecrawl ፍለጋ ዋጋ በተጀመረ 10 የተመለሱ ውጤቶች፣ በ$0.002 (2 ክሬዲት) ብሎክ እና ቢያንስ አንድ ብሎክ በጥሪ ( [Firecrawl ክፍያ](https://docs.firecrawl.dev/billing) ) ይመዘገባል፡ 11 ውጤቶች ዋጋ $0.004 ነው።
 
 አጠቃላዩ `time_range` አሁን ወደ ሁለቱም አቅራቢዎች ይደርሳል፦ Exa `startPublishedDate`ን (የISO
 የጊዜ ማህተም) እና Tavily `start_date`ን (`YYYY-MM-DD`) ያገኛሉ። በ`provider_options`
@@ -866,9 +868,11 @@ Tavily `search_type: "finance"`ንም (`topic: "finance"`) ይቀበላል።
 የExa ውጤቶች `id`፣ `highlight_scores`፣ `summary`፣ `subpages`፣ `entities` እና `extras`ን በ
 `provider_raw` ውስጥ እንዳሉ ያቆያሉ። የTavily ውጤቶች `images`ን እና `favicon`ን እንዳሉ ያቆያሉ።
 
-የወጪ ስሌት አሁንም ጠፍጣፋው መዝገብ `costPerQuery` ነው። Tavily ለ
-`search_depth: "advanced"` በእያንዳንዱ ጥሪ ተጨማሪ ክሬዲቶችን ያስከፍላል፣ እና ያ ልዩነት በ
-`usage.search_cost_usd` ውስጥ አይንጸባረቅም።
+Linkup: የማገናኘት ፍለጋ ዋጋ በ$0.005 ለ `depth` `fast` እና `standard` እና $0.05 ለ `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) )፣ `depth` ከ `provider_options` ወይም የግንኙነት መቼቶች ይመዘገባል።
+
+Exa `type: "lite"` (Exa 3.0) አነስተኛ የመስኮች ስብስብ ይቀበላል እና ሌላ ማንኛውም መስክ ሲዘጋጅ ሙሉውን ጥያቄ ውድቅ ያደርጋል። ለሊት፣ `additionalQueries`፣ `systemPrompt` እና `text` እና `highlights` በስተቀር ሁሉም `contents` ቁልፍ ከጥሪው በፊት ይጣላሉ። የተቋረጠው `subpages`፣ `subpageTarget`፣ `highlights.numSentences` እና `highlights.highlightsPerUrl` ከአሁን በኋላ አይተላለፉም።
+
+Exa: $0.007 በአንድ ጥሪ `auto` (እና ቅርስ `fast`) ወይም $0.004 `lite` (እና ቅርስ `instant`), 10 ውጤቶች የሚሸፍን; ለእያንዳንዱ ተጨማሪ ውጤት $ 0.001; እና `contents.summary` ሲዘጋጅ በአንድ የተመለሰ ውጤት $0.001። ታቪሊ በ1 ክሬዲት ($0.008) ለ `search_depth` `basic`፣ `fast` እና `ultra-fast`፣ እና 2 ክሬዲት ($0.016) ለ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) ተመዝግቧል። Tavily ወደ የላቀ የሚያሻሽለው `auto_parameters: true` ያለው ጥሪ አሁንም በ1 ክሬዲት ተመዝግቧል።
 
 ---
 

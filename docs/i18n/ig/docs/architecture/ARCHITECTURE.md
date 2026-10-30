@@ -493,6 +493,7 @@ usoro mgbochi sekit zuru ụwa ọnụ / oge nchere njikọ / mkpọchi ụdịd
   njirimara, na-ehicha nkụnyeisi nzaghachi, ma na-achịkwa nsuso kredit/ụdị site na
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 nche: `open-sse/services/antigravity429Guard.ts` (mmefu ego ọ bụla nke elu 429s n'ofe ndị agha niile, `ANTIGRAVITY_MAX_429_ATTEMPTS`; a na-azaghachi nzigharị nke anụ ahụ jụrụ na mpaghara; `src/sse/handlers/chat.ts` anaghị ebido ụdị arịrịọ ahụ site na nyochaghachi nke ọma)
 - Iwu oke ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Nkwekọrịta Njikọ Ọwa Ndakọrịta): `open-sse/services/claudeCodeCCH.ts`,
   tinyere `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

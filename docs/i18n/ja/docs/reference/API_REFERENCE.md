@@ -827,15 +827,17 @@ Exa と Tavily は、名前空間付きバッグからプロバイダー固有�
 を含め、それ以外のキーはすべて無視されます。他のプロバイダーで使用されるフラットなキー
 （`cx`、`depth`、...）は従来どおり機能します。
 
-| プロバイダー | トップレベルフィールド                                                                                                                                                                                                                                                                                                                                                    | ネスト                                                                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（フラットなプリミティブ）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` はデフォルトの `{ text: true, highlights: true }` にマージされます |
-| Tavily       | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                                         |
+| プロバイダー | トップレベルフィールド                                                                                                                                                                                                                                                                                                                                                    | ネスト                                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa          | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（フラットなプリミティブ）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` はデフォルトの `{ text: true, highlights: true }` にマージされます |
+| Tavily       | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                |
 
 汎用フィールドが常に優先されます: `query`、`max_results`、`filters`（ドメイン）、`country`、
 および `search_type` から導出されるトピックです。Exa では、`search_type: "news"` により
 `category: "news"` が維持されます。Tavily は `search_type: "finance"`（`topic: "finance"`）も
 受け付けます。
+
+Firecrawl の検索コストは、返された 10 件の結果の開始ブロックごとに記録され、1 ブロックあたり 0.002 ドル (2 クレジット)、呼び出しごとに少なくとも 1 ブロック ( [Firecrawl の請求](https://docs.firecrawl.dev/billing)): 11 件の結果の費用は 0.004 ドルです。
 
 汎用の `time_range` が両方のプロバイダーに渡されるようになりました。Exa には
 `startPublishedDate`（ISO タイムスタンプ）が渡され、Tavily には `start_date`
@@ -845,9 +847,11 @@ Exa と Tavily は、名前空間付きバッグからプロバイダー固有�
 Exa の結果では、`id`、`highlight_scores`、`summary`、`subpages`、`entities`、`extras` が
 `provider_raw` に保持されます。Tavily の結果では、`images` と `favicon` が保持されます。
 
-コスト計算には、引き続きフラットなレジストリ `costPerQuery` が使用されます。Tavily では、
-`search_depth: "advanced"` の場合、呼び出しごとにより多くのクレジットが請求されますが、
-その差は `usage.search_cost_usd` には反映されません。
+リンクアップ検索コストは、 `depth` `provider_options`からのものか接続の設定からのものかに関係なく、 `depth` `fast`および`standard`については 0.005 ドル、 `deep`については 0.05 ドル ([リンクアップ価格設定](https://docs.linkup.so/pages/documentation/development/pricing)) で記録されます。
+
+Exa `type: "lite"` (Exa 3.0) は、より小さいフィールドのセットを受け入れ、他のフィールドが設定されている場合はリクエスト全体を拒否します。 lite の場合、 `additionalQueries`、 `systemPrompt` 、および`text`と`highlights`を除くすべての`contents`キーは呼び出し前に削除されます。非推奨の`subpages`、 `subpageTarget`、 `highlights.numSentences`および`highlights.highlightsPerUrl`は転送されなくなりました。
+
+Exa: `auto` (および従来の`fast`) の場合は呼び出しごとに 0.007 ドル、 `lite` (および従来の`instant`) の場合は 0.004 ドルで、10 件の結果がカバーされます。その後の結果ごとに 0.001 ドル。 `contents.summary`が設定されている場合は、返された結果ごとに $0.001 がかかります。 Tavily は、 `search_depth` `basic`、 `fast`および`ultra-fast`の場合は 1 クレジット ($0.008)、 `advanced` ( [Tavily APIクレジット](https://docs.tavily.com/documentation/api-credits)) の場合は 2 クレジット ($0.016) で記録されます。 Tavily がアドバンストにアップグレードした`auto_parameters: true`との通話は、引き続き 1 クレジットで記録されます。
 
 ---
 

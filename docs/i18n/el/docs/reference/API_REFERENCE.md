@@ -871,14 +871,16 @@ POST /v1/providers/{provider}/images/generations
 των `stream` και `outputSchema`. Τα μη εμφωλευμένα κλειδιά που χρησιμοποιούνται από άλλους παρόχους (`cx`, `depth`, ...) λειτουργούν
 όπως πριν.
 
-| Πάροχος | Πεδία ανώτατου επιπέδου                                                                                                                                                                                                                                                                                                                                                   | Εμφωλευμένα                                                                                                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (μη εμφωλευμένοι πρωτογενείς τύποι), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                            | Το `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` συγχωνεύεται πάνω από την προεπιλογή `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                 |
+| Πάροχος | Πεδία ανώτατου επιπέδου                                                                                                                                                                                                                                                                                                                                                   | Εμφωλευμένα                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (μη εμφωλευμένοι πρωτογενείς τύποι), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                            | Το `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` συγχωνεύεται πάνω από την προεπιλογή `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                        |
 
 Τα γενικά πεδία έχουν πάντα προτεραιότητα: `query`, `max_results`, `filters` (τομείς), `country` και το
 θέμα που προκύπτει από το `search_type`. Στο Exa, το `search_type: "news"` διατηρεί το `category: "news"`.
 Το Tavily αποδέχεται επίσης `search_type: "finance"` (`topic: "finance"`).
+
+Το κόστος αναζήτησης Firecrawl καταγράφεται ανά αρχικό μπλοκ 10 επιστρεφόμενων αποτελεσμάτων, σε 0,002 $ (2 μονάδες) το μπλοκ και τουλάχιστον ένα μπλοκ ανά κλήση ( [χρέωση Firecrawl](https://docs.firecrawl.dev/billing) ): 11 αποτελέσματα κοστίζουν 0,004 $.
 
 Το γενικό `time_range` μεταβιβάζεται πλέον και στους δύο παρόχους: το Exa λαμβάνει `startPublishedDate` (χρονοσήμανση ISO)
 και το Tavily λαμβάνει `start_date` (`YYYY-MM-DD`). Μια ρητά καθορισμένη ημερομηνία στο `provider_options`
@@ -887,9 +889,11 @@ POST /v1/providers/{provider}/images/generations
 Τα αποτελέσματα του Exa διατηρούν τα `id`, `highlight_scores`, `summary`, `subpages`, `entities` και `extras` στο
 `provider_raw`. Τα αποτελέσματα του Tavily διατηρούν τα `images` και `favicon`.
 
-Η λογιστική κόστους εξακολουθεί να χρησιμοποιεί το μη εμφωλευμένο μητρώο `costPerQuery`. Το Tavily χρεώνει
-το `search_depth: "advanced"` με περισσότερες πιστώσεις ανά κλήση και αυτή η διαφορά δεν αποτυπώνεται στο
-`usage.search_cost_usd`.
+Linkup: Το κόστος αναζήτησης σύνδεσης καταγράφεται σε 0,005 $ για `depth` `fast` και `standard` και 0,05 $ για `deep` ( [τιμολόγηση σύνδεσης](https://docs.linkup.so/pages/documentation/development/pricing) ), είτε `depth` προέρχεται από `provider_options` είτε από τις ρυθμίσεις της σύνδεσης.
+
+Το Exa `type: "lite"` (Exa 3.0) δέχεται ένα μικρότερο σύνολο πεδίων και απορρίπτει ολόκληρο το αίτημα όταν έχει οριστεί οποιοδήποτε άλλο πεδίο. Για το lite, `additionalQueries`, `systemPrompt` και κάθε πλήκτρο `contents` εκτός από `text` και `highlights` απορρίπτονται πριν από την κλήση. Τα καταργημένα `subpages`, `subpageTarget`, `highlights.numSentences` και `highlights.highlightsPerUrl` δεν προωθούνται πλέον.
+
+Exa: 0,007 $ ανά κλήση για `auto` (και το κληρονομούμενο `fast`) ή 0,004 $ για `lite` (και το κληροδοτημένο `instant`), καλύπτοντας 10 αποτελέσματα. 0,001 $ για κάθε περαιτέρω αποτέλεσμα. και 0,001 $ ανά επιστρεφόμενο αποτέλεσμα όταν έχει οριστεί `contents.summary`. Το Tavily καταγράφεται σε 1 πίστωση (0,008 $) για `search_depth` `basic`, `fast` και `ultra-fast`, και 2 μονάδες (0,016 $) για `advanced` ( [πιστώσεις Tavily API](https://docs.tavily.com/documentation/api-credits) ). Μια κλήση με `auto_parameters: true` που ο Tavily αναβαθμίζει σε προχωρημένους εξακολουθεί να καταγράφεται με 1 πίστωση.
 
 ---
 

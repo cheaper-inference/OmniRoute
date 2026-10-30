@@ -45,7 +45,7 @@ test("no pull request or merge group Build reaches the self-hosted build slot", 
     "github.event_name != 'pull_request'",
   ]);
   assert.doesNotMatch(runnerCondition, /\|\|/, "no exception may re-admit a PR event");
-  assert.match(runsOn, /\["self-hosted","omni-build"\]/);
+  assert.match(runsOn, /\["self-hosted","omni-build","omni-build-60gb"\]/);
   assert.match(runsOn, /\|\| 'ubuntu-latest' \}\}$/);
 });
 

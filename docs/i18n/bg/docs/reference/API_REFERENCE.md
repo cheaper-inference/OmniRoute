@@ -871,14 +871,16 @@ Exa и Tavily четат специфични за доставчика поле
 `stream` и `outputSchema`. Плоските ключове, използвани от други доставчици (`cx`, `depth`, ...), работят
 както преди.
 
-| Доставчик | Полета от най-горно ниво                                                                                                                                                                                                                                                                                                                                                  | Вложени                                                                                                                                                                               |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоски примитивни стойности), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`, обединени върху стойността по подразбиране `{ text: true, highlights: true }` |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                     |
+| Доставчик | Полета от най-горно ниво                                                                                                                                                                                                                                                                                                                                                  | Вложени                                                                                                                                                      |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (плоски примитивни стойности), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`, обединени върху стойността по подразбиране `{ text: true, highlights: true }` |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                            |
 
 Общите полета винаги са с предимство: `query`, `max_results`, `filters` (домейни), `country` и
 темата, извлечена от `search_type`. При Exa `search_type: "news"` запазва `category: "news"`.
 Tavily приема също `search_type: "finance"` (`topic: "finance"`).
+
+Разходите за търсене с Firecrawl се записват за стартиран блок от 10 върнати резултата, при $0,002 (2 кредита) на блок и поне един блок на повикване ( [Firecrawl таксуване](https://docs.firecrawl.dev/billing) ): 11 резултата струват $0,004.
 
 Общото поле `time_range` вече достига и до двата доставчика: Exa получава `startPublishedDate` (ISO
 времеви маркер), а Tavily получава `start_date` (`YYYY-MM-DD`). Изрично зададена дата в `provider_options`
@@ -887,9 +889,11 @@ Tavily приема също `search_type: "finance"` (`topic: "finance"`).
 Резултатите от Exa запазват `id`, `highlight_scores`, `summary`, `subpages`, `entities` и `extras` в
 `provider_raw`. Резултатите от Tavily запазват `images` и `favicon`.
 
-Отчитането на разходите продължава да използва плоския регистър `costPerQuery`. Tavily таксува
-`search_depth: "advanced"` с повече кредити на извикване и тази разлика не е отразена в
-`usage.search_cost_usd`.
+Linkup: Разходите за търсене на връзка се записват на $0,005 за `depth` `fast` и `standard` и $0,05 за `deep` ( [ценообразуване на връзка](https://docs.linkup.so/pages/documentation/development/pricing) ), независимо дали `depth` идва от `provider_options` или от настройките на връзката.
+
+Exa `type: "lite"` (Exa 3.0) приема по-малък набор от полета и отхвърля цялата заявка, когато е зададено друго поле. За lite `additionalQueries`, `systemPrompt` и всеки ключ `contents` с изключение `text` и `highlights` се премахват преди повикването. Отхвърлените `subpages`, `subpageTarget`, `highlights.numSentences` и `highlights.highlightsPerUrl` вече не се препращат.
+
+Exa: $0,007 на повикване за `auto` (и наследеното `fast`) или $0,004 за `lite` (и наследеното `instant`), покриващи 10 резултата; $0,001 за всеки следващ резултат; и $0,001 за върнат резултат, когато е зададен `contents.summary`. Tavily се записва на 1 кредит ($0,008) за `search_depth` `basic`, `fast` и `ultra-fast` и 2 кредита ($0,016) за `advanced` ( [Tavily API кредити](https://docs.tavily.com/documentation/api-credits) ). Обаждане с `auto_parameters: true`, което Tavily надгражда до напреднал, все още се записва на 1 кредит.
 
 ---
 

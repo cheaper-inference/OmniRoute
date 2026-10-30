@@ -4,7 +4,21 @@
 
 ---
 
-> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත්තේ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) මත වන අතර, එය workspace එකක් ලෙස `packages/ui-kit` ලෙස vendor කර ඇත (`@omniroute/ui-kit`; upstream snapshot එක `packages/ui-kit/UPSTREAM.md` හි pin කර ඇති අතර `npm run check:ui-kit-snapshot` මඟින් ආරක්ෂා කර ඇත). Light යනු නිල (canonical) theme එකයි; පෙරනිමි preference එක `system` වේ. Accent වර්ණය Keak lime (`--ci-color-accent`) වේ. Switzer යනු UI, සංදර්ශකය සහ කේත පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා තනි පවුලකි. සෑම නිරූපකයක්ම Lucide glyph වේ.
+> **තත්ත්වය:** උපකරණ පුවරුව ගොඩනගා ඇත්තේ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) මත වන අතර, එය workspace එකක් ලෙස `packages/ui-kit` ලෙස vendor කර ඇත (`@omniroute/ui-kit`; upstream snapshot එක `packages/ui-kit/UPSTREAM.md` හි pin කර ඇති අතර `npm run check:ui-kit-snapshot` මඟින් ආරක්ෂා කර ඇත). Light යනු නිල (canonical) theme එකයි; පෙරනිමි preference එක `system` වේ. Accent වර්ණය Keak lime (`--ci-color-accent`) වේ. Switzer යනු UI සහ සංදර්ශක පෙළ (`--ci-font-ui`; `--ci-font-display` සහ `--ci-font-mono` එයට නිරාකරණය කිරීම), කට්ටලය විසින්ම ස්වයං-සත්කාරක (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` විසින් ආනයනය කරන ලද) සඳහා ප්‍රධාන අකුරු පවුලකි. සෑම නිරූපකයක්ම Lucide glyph වේ.
+>
+> Inter යනු Switzer හි නොමැති ග්ලිෆ් සඳහා විකල්ප අකුරු වර්ගයකි; `--font-mono` පද්ධතියේ සමාන පළල අකුරු ලැයිස්තුව වන `--ci-font-code` වෙත යොමු වේ.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. දේවල් තිබෙන තැන
 

@@ -7,7 +7,21 @@
 > **Статус:** таблото е изградено върху **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), копиран в хранилището
 > като workspace `packages/ui-kit` (`@omniroute/ui-kit`; моментната снимка на оригиналния източник е фиксирана в
 > `packages/ui-kit/UPSTREAM.md` и се контролира от `npm run check:ui-kit-snapshot`). Светлата тема е каноничната;
-> предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е единствената фамилия за UI, дисплей и кодов текст (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Всяка икона е Lucide глиф.
+> предпочитанието по подразбиране е `system`. Акцентът е Keak lime (`--ci-color-accent`). Switzer е основната фамилия за UI и текст на дисплея (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешават това), самостоятелно хостван от самия комплект (`packages/ui-kit/src/ci-fonts.css`, импортиран от `ci-tokens.css`). Всяка икона е Lucide глиф.
+>
+> Inter е резервен шрифт за глифове, липсващи в Switzer; `--font-mono` сочи към системния набор от моноширинни шрифтове `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Къде се намират нещата
 

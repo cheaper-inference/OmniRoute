@@ -489,6 +489,7 @@ FSM நிலைமாற்றங்கள் Auto Combo-வின் மதி
 - Antigravity 429 இயந்திரம்: `open-sse/services/antigravity429Engine.ts` (அடையாளத்தைச் சுழற்சி முறையில் மாற்றுகிறது, பதில் தலைப்புகளைத் தூய்மைப்படுத்துகிறது, மேலும்
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` ஆகியவற்றின் மூலம் கிரெடிட்கள்/பதிப்பு கண்காணிப்பை இயக்குகிறது)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (அனைத்து ஹோஸ்ட்களிலும் அப்ஸ்ட்ரீம் 429களின் ஒவ்வொரு கோரிக்கை பட்ஜெட்டுக்கு, `ANTIGRAVITY_MAX_429_ATTEMPTS`; மறுக்கப்பட்ட உடலின் ஒரே மாதிரியான மறுஅனுப்பலுக்கு உள்ளூரில் பதில் அளிக்கப்படும்; கூல்டவுன்-அவேர் ரீட்ரை மூலம் `src/sse/handlers/chat.ts` அத்தகைய கோரிக்கையை மறுதொடக்கம் செய்யாது)
 - ModelScope ஒதுக்கீட்டுக் கொள்கை: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (இணக்கத்தன்மை சேனல் கைகுலுக்கல்): `open-sse/services/claudeCodeCCH.ts`,
   மேலும் `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

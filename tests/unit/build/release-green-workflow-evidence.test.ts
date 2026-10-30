@@ -84,6 +84,7 @@ function observe({
     );
     for (const path of [
       "scripts/quality",
+      "scripts/dev",
       "scripts/i18n",
       "scripts/check",
       "config/quality",
@@ -100,10 +101,11 @@ function observe({
     ]) {
       cpSync(new URL(`scripts/quality/${name}`, root), join(dir, "scripts/quality", name));
     }
-    // The real static-profile module imports this two-file comparison closure.
+    // Include the static-profile comparison and gate-process inspection dependencies.
     for (const path of [
       "scripts/i18n/resolve-ui-diff-base.mjs",
       "scripts/check/openapiBaseline.mjs",
+      "scripts/dev/resource-budget-process.mjs",
     ]) {
       cpSync(new URL(path, root), join(dir, path));
     }

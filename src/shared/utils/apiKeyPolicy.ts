@@ -11,9 +11,8 @@
 import { extractApiKey } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
-import { getComboByName } from "@/lib/db/combos";
+import { getCachedComboByName, getCachedComboForModel } from "@/lib/db/readCache";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
-import { resolveComboForModel } from "@/lib/db/modelComboMappings";
 import { checkBudget } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
@@ -265,16 +264,16 @@ function policyErrorResponse(
 }
 
 async function resolveRequestedComboName(modelStr: string): Promise<string | null> {
-  const exact = await getComboByName(modelStr);
+  const exact = await getCachedComboByName(modelStr);
   if (exact && typeof exact.name === "string") return exact.name;
 
   if (modelStr.startsWith("combo/")) {
     const withoutPrefix = modelStr.slice(6);
-    const prefixed = await getComboByName(withoutPrefix);
+    const prefixed = await getCachedComboByName(withoutPrefix);
     if (prefixed && typeof prefixed.name === "string") return prefixed.name;
   }
 
-  const mapped = await resolveComboForModel(modelStr);
+  const mapped = await getCachedComboForModel(modelStr);
   const mappedName = normalizeComboAccessName(mapped?.name);
   return mappedName;
 }

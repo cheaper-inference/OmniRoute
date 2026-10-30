@@ -493,6 +493,7 @@ Jules) በወጥ የውሂብ ጎታ የተደገፈ የተግባር የሕይ�
   ያፈራርቃል፣ የምላሽ ራስጌዎችን ያጸዳል፣ የክሬዲት/ስሪት ክትትልን በ
   `antigravityCredits.ts`፣ `antigravityHeaderScrub.ts`፣ `antigravityHeaders.ts`፣
   `antigravityIdentity.ts`፣ `antigravityVersion.ts` በኩል ያከናውናል)
+- Antigravity 429 ጠባቂ `open-sse/services/antigravity429Guard.ts` (በሁሉም አስተናጋጆች ላይ የላይ 429 ዎች በጥያቄ ባጀት፣ `ANTIGRAVITY_MAX_429_ATTEMPTS`፣ ውድቅ የተደረገ አካል እንደገና መላክ ተመሳሳይ ምላሽ በአገር ውስጥ ምላሽ ተሰጥቶታል፣ `src/sse/handlers/chat.ts` ይህን ጥያቄ በማቀዝቀዝ አውቆ እንደገና ሞክር)
 - ModelScope የኮታ ፖሊሲ፦ `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (የተኳኋኝነት ቻናል መጨባበጥ)፦ `open-sse/services/claudeCodeCCH.ts`፣
   እንዲሁም `claudeCodeCompatible.ts`፣ `claudeCodeConstraints.ts`፣ `claudeCodeExtraRemap.ts`፣

@@ -7,7 +7,21 @@
 > **Status:** dashboardet er bygget på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendored
 > som workspace-pakken `packages/ui-kit` (`@omniroute/ui-kit`; upstream-snapshotet er fastlåst i
 > `packages/ui-kit/UPSTREAM.md` og beskyttet af `npm run check:ui-kit-snapshot`). Lys er det kanoniske
-> tema; standardindstillingen er `system`. Accentfarven er Keak-lime (`--ci-color-accent`). Switzer er den enkelte familie for UI, display og kodetekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løses til det), selv-hostet af selve sættet (`packages/ui-kit/src/ci-fonts.css`, importeret af `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
+> tema; standardindstillingen er `system`. Accentfarven er Keak-lime (`--ci-color-accent`). Switzer er den primære skrifttypefamilie til UI og displaytekst (`--ci-font-ui`; `--ci-font-display` og `--ci-font-mono` løses til det), selv-hostet af selve sættet (`packages/ui-kit/src/ci-fonts.css`, importeret af `ci-tokens.css`). Hvert ikon er en Lucide-glyph.
+>
+> Inter er en reserveskrifttype til glyffer, der mangler i Switzer; `--font-mono` henviser til systemets monospace-stak `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Hvor tingene ligger
 

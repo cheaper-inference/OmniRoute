@@ -8,7 +8,21 @@
 > curtha san áireamh go díreach (vendored) mar spás oibre `packages/ui-kit` (`@omniroute/ui-kit`; tá
 > snapsháil an tsrutha uachtaraigh greamaithe i `packages/ui-kit/UPSTREAM.md` agus é á chosaint ag
 > `npm run check:ui-kit-snapshot`). Is é an téama Éadrom an téama canónta; is í `system` an rogha
-> réamhshocraithe. Is é lime Keak an t-aicsean (`--ci-color-accent`). Is é Switzer an teaghlach aonair le haghaidh UI, taispeáint agus cód téacs (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Is glyph Lucide gach íocón.
+> réamhshocraithe. Is é lime Keak an t-aicsean (`--ci-color-accent`). Is é Switzer an príomhtheaghlach clónna le haghaidh UI agus téacs taispeána (`--ci-font-ui`; `--ci-font-display` agus `--ci-font-mono` réiteach dó ), féin-óstáil ag an trealamh féin (`packages/ui-kit/src/ci-fonts.css`, allmhairithe ag `ci-tokens.css`). Is glyph Lucide gach íocón.
+>
+> Is cló cúltaca é Inter do ghlifeanna atá in easnamh ar Switzer; tagraíonn `--font-mono` do chruach clónna aonleithid an chórais `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Cá bhfuil rudaí suite
 

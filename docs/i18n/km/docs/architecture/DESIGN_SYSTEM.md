@@ -7,7 +7,21 @@
 > **ស្ថានភាព:** ផ្ទាំងគ្រប់គ្រងត្រូវបានបង្កើតឡើងលើ **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)
 > ដែលត្រូវបាន vendored ជា workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot នៃ upstream ត្រូវបាន pin
 > នៅក្នុង `packages/ui-kit/UPSTREAM.md` ហើយត្រូវបានការពារដោយ `npm run check:ui-kit-snapshot`)។ Light គឺជា
-> theme ផ្លូវការ; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ពណ៌ accent គឺ Keak lime (`--ci-color-accent`) ។ Switzer គឺជាគ្រួសារតែមួយសម្រាប់ UI ការបង្ហាញ និងអត្ថបទកូដ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
+> theme ផ្លូវការ; ចំណូលចិត្តលំនាំដើមគឺ `system`។ ពណ៌ accent គឺ Keak lime (`--ci-color-accent`) ។ Switzer គឺជាគ្រួសារពុម្ពអក្សរចម្បងសម្រាប់ UI និងអត្ថបទបង្ហាញ (`--ci-font-ui`; `--ci-font-display` និង `--ci-font-mono` ដោះស្រាយវា) រៀបចំដោយខ្លួនឯងដោយឧបករណ៍ខ្លួនវា (`packages/ui-kit/src/ci-fonts.css` នាំចូលដោយ `ci-tokens.css`) ។ រូបតំណាងនីមួយៗគឺ Lucide glyph ។
+>
+> Inter ជាពុម្ពអក្សរបម្រុងសម្រាប់ glyph ដែលខ្វះក្នុង Switzer; `--font-mono` ចង្អុលទៅបញ្ជីពុម្ពអក្សរទទឹងស្មើរបស់ប្រព័ន្ធ `--ci-font-code`។
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. កន្លែងដែលអ្វីៗស្ថិតនៅ
 

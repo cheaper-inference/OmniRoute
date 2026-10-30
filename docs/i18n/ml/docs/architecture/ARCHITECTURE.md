@@ -485,6 +485,7 @@ FSM ട്രാൻസിഷനുകൾ Auto Combo-യുടെ സ്കോറ
 നിരവധി പ്രൊവൈഡറുകൾ ഗ്ലോബൽ സർക്യൂട്ട് ബ്രേക്കർ / കണക്ഷൻ കൂൾഡൗൺ / മോഡൽ ലോക്കൗട്ട് ലെയറുകളോടൊപ്പം പ്രവർത്തിക്കുന്ന സമർപ്പിത പ്രതിരോധശേഷി, സ്റ്റെൽത്ത് മൊഡ്യൂളുകൾ നൽകുന്നു:
 
 - Antigravity 429 എഞ്ചിൻ: `open-sse/services/antigravity429Engine.ts` (ഐഡന്റിറ്റി റൊട്ടേറ്റ് ചെയ്യുന്നു, റെസ്പോൺസ് ഹെഡറുകൾ നീക്കം ചെയ്യുന്നു, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` എന്നിവയിലൂടെ ക്രെഡിറ്റ്/പതിപ്പ് ട്രാക്കിംഗ് നിയന്ത്രിക്കുന്നു)
+- Antigravity 429 ഗാർഡ്: `open-sse/services/antigravity429Guard.ts` (എല്ലാ ഹോസ്റ്റുകളിലുടനീളമുള്ള അപ്സ്ട്രീം 429-ൻ്റെ ഓരോ അഭ്യർത്ഥന ബജറ്റ്, `ANTIGRAVITY_MAX_429_ATTEMPTS`; നിരസിച്ച ബോഡിയുടെ സമാനമായ റീ-അയയ്ക്കിന് പ്രാദേശികമായി ഉത്തരം നൽകും; കൂൾഡൗൺ-അവേർ റീട്രിയിലൂടെ `src/sse/handlers/chat.ts` അത്തരമൊരു അഭ്യർത്ഥന പുനരാരംഭിക്കുന്നില്ല)
 - ModelScope ക്വോട്ട നയം: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`, കൂടാതെ `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code ഫിംഗർപ്രിന്റ് രൂപപ്പെടുത്തൽ: `open-sse/services/claudeCodeFingerprint.ts`

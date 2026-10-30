@@ -7,7 +7,21 @@
 > **Hali:** dashibodi imejengwa juu ya **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), iliyojazwa ndani
 > kama workspace ya `packages/ui-kit` (`@omniroute/ui-kit`; picha ya upstream imewekwa imara katika
 > `packages/ui-kit/UPSTREAM.md` na kulindwa na `npm run check:ui-kit-snapshot`). Mandhari ya mwanga ndiyo
-> halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
+> halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Switzer ni familia kuu ya fonti kwa UI na maandishi ya onyesho (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
+>
+> Inter ni fonti mbadala kwa glifu zinazokosekana katika Switzer; `--font-mono` inaelekeza kwenye orodha ya fonti za mfumo zenye upana sawa `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Mahali vitu vilipo
 

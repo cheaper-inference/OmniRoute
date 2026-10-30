@@ -865,14 +865,16 @@ Exa اور Tavily، نام کی مخصوص حدود والے بیگ سے فرا�
 `stream` اور `outputSchema` سمیت کسی بھی دوسری کلید کو نظر انداز کیا جاتا ہے۔ دیگر فراہم کنندگان
 کے زیر استعمال فلیٹ کلیدیں (`cx`، `depth`، ...) پہلے کی طرح کام کرتی ہیں۔
 
-| فراہم کنندہ | بالائی سطح کی فیلڈز                                                                                                                                                                                                                                                                                                                                                       | ذیلی                                                                                                                                                                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (فلیٹ ابتدائی اقدار)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` کو ڈیفالٹ `{ text: true, highlights: true }` پر ضم کیا جاتا ہے |
-| Tavily      | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                                                     |
+| فراہم کنندہ | بالائی سطح کی فیلڈز                                                                                                                                                                                                                                                                                                                                                       | ذیلی                                                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (فلیٹ ابتدائی اقدار)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` کو ڈیفالٹ `{ text: true, highlights: true }` پر ضم کیا جاتا ہے |
+| Tavily      | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                            |
 
 عمومی فیلڈز کو ہمیشہ ترجیح حاصل ہوتی ہے: `query`، `max_results`، `filters` (ڈومینز)، `country` اور
 `search_type` سے اخذ کردہ موضوع۔ Exa پر، `search_type: "news"`، `category: "news"` کو برقرار رکھتا ہے۔
 Tavily، `search_type: "finance"` (`topic: "finance"`) کو بھی قبول کرتا ہے۔
+
+فائر کرال تلاش کی لاگت 10 لوٹے گئے نتائج کے فی شروع شدہ بلاک میں، $0.002 (2 کریڈٹ) ایک بلاک اور کم از کم ایک بلاک فی کال ( [فائرکرول بلنگ](https://docs.firecrawl.dev/billing) ): 11 نتائج کی لاگت $0.004 ہے۔
 
 عمومی `time_range` اب دونوں فراہم کنندگان تک پہنچتا ہے: Exa کو `startPublishedDate` (ISO
 ٹائم اسٹیمپ) اور Tavily کو `start_date` (`YYYY-MM-DD`) ملتا ہے۔ `provider_options`
@@ -881,9 +883,11 @@ Tavily، `search_type: "finance"` (`topic: "finance"`) کو بھی قبول کر
 Exa کے نتائج، `id`، `highlight_scores`، `summary`، `subpages`، `entities` اور `extras` کو
 `provider_raw` میں برقرار رکھتے ہیں۔ Tavily کے نتائج `images` اور `favicon` کو برقرار رکھتے ہیں۔
 
-لاگت کا حساب اب بھی فلیٹ رجسٹری `costPerQuery` کے مطابق کیا جاتا ہے۔ Tavily،
-`search_depth: "advanced"` کے لیے ہر کال پر زیادہ کریڈٹس وصول کرتا ہے، اور یہ فرق
-`usage.search_cost_usd` میں ظاہر نہیں ہوتا۔
+لنک اپ کی تلاش کی قیمت `depth` `fast` اور `standard` کے لیے $0.005 اور `deep` کے لیے $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ریکارڈ کی گئی ہے، چاہے `depth` `provider_options` سے آیا ہو یا کنکشن کی ترتیبات سے۔
+
+Exa `type: "lite"` (Exa 3.0) فیلڈز کے ایک چھوٹے سیٹ کو قبول کرتا ہے اور جب کوئی دوسرا فیلڈ سیٹ کیا جاتا ہے تو پوری درخواست کو مسترد کر دیتا ہے۔ لائٹ کے لیے، `additionalQueries`، `systemPrompt` اور `text` اور `highlights` کے علاوہ ہر `contents` کلید کال سے پہلے چھوڑ دی جاتی ہے۔ فرسودہ `subpages`، `subpageTarget`، `highlights.numSentences` اور `highlights.highlightsPerUrl` مزید آگے نہیں بھیجے جاتے ہیں۔
+
+Exa: $0.007 فی کال `auto` (اور لیگیسی `fast`) کے لیے یا $0.004 `lite` (اور لیگیسی `instant`) کے لیے، جس میں 10 نتائج شامل ہیں۔ ہر مزید نتیجے کے لیے $0.001؛ اور $0.001 فی لوٹا ہوا نتیجہ جب `contents.summary` سیٹ ہو۔ Tavily کو `search_depth` `basic`، `fast` اور `ultra-fast` کے لیے 1 کریڈٹ ($0.008) اور `advanced` ( [Tavily API کریڈٹس](https://docs.tavily.com/documentation/api-credits) ) کے لیے 2 کریڈٹ ($0.016) پر ریکارڈ کیا گیا ہے۔ `auto_parameters: true` کے ساتھ ایک کال جسے Tavily ایڈوانس میں اپ گریڈ کرتا ہے اب بھی 1 کریڈٹ پر ریکارڈ کیا جاتا ہے۔
 
 ---
 

@@ -483,6 +483,7 @@ katmanlarını kullanan özel dayanıklılık ve gizlilik modülleri sunar:
   dönüşümlü kullanır, yanıt başlıklarını temizler, kredi/sürüm takibini
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` aracılığıyla yürütür)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (tüm ana bilgisayarlarda yukarı akış 429'ların istek başına bütçesi, `ANTIGRAVITY_MAX_429_ATTEMPTS`; reddedilen bir gövdenin aynı şekilde yeniden gönderilmesi yerel olarak yanıtlanır; `src/sse/handlers/chat.ts` böyle bir isteği soğuma süresine duyarlı yeniden deneme yoluyla yeniden başlatmaz)
 - ModelScope kota politikası: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Uyumluluk Kanalı El Sıkışması): `open-sse/services/claudeCodeCCH.ts`,
   ayrıca `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

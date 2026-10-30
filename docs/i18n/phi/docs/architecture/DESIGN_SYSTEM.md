@@ -7,7 +7,21 @@
 > **Katayuan:** ang dashboard ay binuo sa **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), na-vendored
 > bilang workspace na `packages/ui-kit` (`@omniroute/ui-kit`; ang upstream snapshot ay naka-pin sa
 > `packages/ui-kit/UPSTREAM.md` at binabantayan ng `npm run check:ui-kit-snapshot`). Ang Light ang canonical
-> na tema; ang default na kagustuhan ay `system`. Ang accent ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang nag-iisang pamilya para sa UI, display at code text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Ang bawat icon ay isang Lucide glyph.
+> na tema; ang default na kagustuhan ay `system`. Ang accent ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang pangunahing pamilya ng font para sa UI at display text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Ang bawat icon ay isang Lucide glyph.
+>
+> Ang Inter ay reserbang font para sa mga glyph na wala sa Switzer; tumutukoy ang `--font-mono` sa monospace font stack ng system na `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Saan matatagpuan ang mga bagay
 

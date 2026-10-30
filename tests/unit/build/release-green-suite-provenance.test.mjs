@@ -46,6 +46,7 @@ function observe(
   try {
     for (const path of [
       "scripts/quality",
+      "scripts/dev",
       "scripts/i18n",
       "scripts/check",
       "scripts/ci",
@@ -64,10 +65,11 @@ function observe(
       "release-green-static-profile.mjs",
     ])
       copyFileSync(join(root, "scripts/quality", file), join(dir, "scripts/quality", file));
-    // The real static-profile module imports this two-file comparison closure.
+    // Include the static-profile comparison and gate-process inspection dependencies.
     for (const path of [
       "scripts/i18n/resolve-ui-diff-base.mjs",
       "scripts/check/openapiBaseline.mjs",
+      "scripts/dev/resource-budget-process.mjs",
     ]) {
       copyFileSync(join(root, path), join(dir, path));
     }
@@ -461,6 +463,8 @@ for (const [name, mcpExit, expected] of [
   test(`hosted ${name} executes the complete assigned runner set (MCP exit ${mcpExit})`, () => {
     const dir = mkdtempSync(join(tmpdir(), "hosted-vitest-shard-"));
     try {
+      // These executable stubs use require(), even when TMPDIR inherits an ESM package.
+      writeFileSync(join(dir, "package.json"), '{"type":"commonjs"}');
       const calls = join(dir, "calls.jsonl");
       writeFileSync(
         join(dir, "npm"),

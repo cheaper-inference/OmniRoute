@@ -7,7 +7,21 @@
 > **状态：** 仪表盘基于 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）构建，以 vendor 方式
 > 作为工作区 `packages/ui-kit` 引入（包名 `@omniroute/ui-kit`；上游快照固定在
 > `packages/ui-kit/UPSTREAM.md` 中，并由 `npm run check:ui-kit-snapshot` 守护）。浅色（Light）是规范
-> 主题；默认偏好为 `system`。强调色为 Keak 青柠色（`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
+> 主题；默认偏好为 `system`。强调色为 Keak 青柠色（`--ci-color-accent`)。 Switzer 是UI 和显示文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的主要字体家族，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
+>
+> Inter 为 Switzer 缺少的字形提供回退；`--font-mono` 指向系统等宽字体栈 `--ci-font-code`。
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. 内容所在位置
 

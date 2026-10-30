@@ -7,7 +7,21 @@
 > **Статус:** дашборд построен на **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), завендоренном
 > как workspace-пакет `packages/ui-kit` (`@omniroute/ui-kit`; снимок апстрима зафиксирован в
 > `packages/ui-kit/UPSTREAM.md` и защищён проверкой `npm run check:ui-kit-snapshot`). Светлая тема — каноническая;
-> предпочтение по умолчанию — `system`. Акцентный цвет — Keak lime (`--ci-color-accent`). Switzer — это единое семейство для UI, отображения и текста кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешают его), размещаемое самим комплектом (`packages/ui-kit/src/ci-fonts.css`, импортированное `ci-tokens.css`). Каждая иконка представляет собой глиф Люцида.
+> предпочтение по умолчанию — `system`. Акцентный цвет — Keak lime (`--ci-color-accent`). Switzer — это основное семейство шрифтов для UI и отображаемого текста (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешают его), размещаемое самим комплектом (`packages/ui-kit/src/ci-fonts.css`, импортированное `ci-tokens.css`). Каждая иконка представляет собой глиф Люцида.
+>
+> Inter служит резервным шрифтом для глифов, отсутствующих в Switzer; `--font-mono` ссылается на системный стек моноширинных шрифтов `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Где что находится
 

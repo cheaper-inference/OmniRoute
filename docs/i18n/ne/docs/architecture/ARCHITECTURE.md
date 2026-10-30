@@ -481,6 +481,7 @@ FSM ट्रान्जिसनहरू Auto Combo को स्कोरि
 धेरै प्रदायकहरूले विश्वव्यापी सर्किट ब्रेकर / जडान कूलडाउन / मोडेल लकआउट तहहरूको सहारा लिने समर्पित प्रत्यास्थता र स्टेल्थ मोड्युलहरू उपलब्ध गराउँछन्:
 
 - Antigravity 429 इन्जिन: `open-sse/services/antigravity429Engine.ts` (पहिचान बदल्छ, प्रतिक्रिया हेडरहरू सफा गर्छ, र `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` मार्फत क्रेडिट/संस्करण ट्र्याकिङ सञ्चालन गर्छ)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (सबै होस्टहरूमा अपस्ट्रीम 429s को प्रति-अनुरोध बजेट, `ANTIGRAVITY_MAX_429_ATTEMPTS`; अस्वीकार गरिएको शरीरको समान पुन: पठाउने स्थानीय रूपमा जवाफ दिइन्छ; `src/sse/handlers/chat.ts` कूलडाउन-सचेत पुन: प्रयास मार्फत यस्तो अनुरोध पुन: सुरु गर्दैन)
 - ModelScope कोटा नीति: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (अनुकूलता च्यानल ह्यान्डशेक): `open-sse/services/claudeCodeCCH.ts`, साथै `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
 - Claude Code फिङ्गरप्रिन्ट आकार निर्धारण: `open-sse/services/claudeCodeFingerprint.ts`

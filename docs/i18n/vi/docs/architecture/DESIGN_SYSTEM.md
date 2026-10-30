@@ -7,7 +7,21 @@
 > **Trạng thái:** dashboard được xây dựng trên **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được đưa vào (vendor)
 > dưới dạng workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream được ghim trong
 > `packages/ui-kit/UPSTREAM.md` và được bảo vệ bởi `npm run check:ui-kit-snapshot`). Light là theme chuẩn;
-> tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Switzer là họ duy nhất cho UI, văn bản hiển thị và mã (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
+> tùy chọn mặc định là `system`. Màu nhấn là Keak lime (`--ci-color-accent`). Switzer là họ phông chữ chính cho UI và văn bản hiển thị (`--ci-font-ui`; `--ci-font-display` và `--ci-font-mono` giải quyết nó), được chính bộ công cụ tự lưu trữ (`packages/ui-kit/src/ci-fonts.css`, được nhập bởi `ci-tokens.css`). Mỗi biểu tượng là một hình tượng Lucide.
+>
+> Inter là phông chữ dự phòng cho các glyph không có trong Switzer; `--font-mono` trỏ đến ngăn xếp phông chữ đơn cách của hệ thống `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Mọi thứ nằm ở đâu
 

@@ -834,14 +834,16 @@ Exa र Tavily ले नेमस्पेस गरिएको ब्या�
 `stream` र `outputSchema` सहित अन्य कुनै पनि कुञ्जीलाई बेवास्ता गरिन्छ। अन्य प्रदायकहरूले प्रयोग गर्ने समतल कुञ्जीहरू (`cx`, `depth`, ...) पहिलेझैँ
 काम गर्छन्।
 
-| प्रदायक | शीर्ष-स्तरीय फिल्डहरू                                                                                                                                                                                                                                                                                                                                                     | नेस्टेड                                                                                                                                                                       |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (समतल प्रिमिटिभहरू), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` लाई पूर्वनिर्धारित `{ text: true, highlights: true }` माथि मर्ज गरिन्छ |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+| प्रदायक | शीर्ष-स्तरीय फिल्डहरू                                                                                                                                                                                                                                                                                                                                                     | नेस्टेड                                                                                                                                              |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (समतल प्रिमिटिभहरू), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` लाई पूर्वनिर्धारित `{ text: true, highlights: true }` माथि मर्ज गरिन्छ |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                    |
 
 जेनेरिक फिल्डहरूले सधैँ प्राथमिकता पाउँछन्: `query`, `max_results`, `filters` (डोमेनहरू), `country` र
 `search_type` बाट प्राप्त विषय। Exa मा, `search_type: "news"` ले `category: "news"` कायम राख्छ।
 Tavily ले `search_type: "finance"` (`topic: "finance"`) पनि स्वीकार गर्छ।
+
+फायरक्रल खोज लागत प्रति 10 फिर्ता परिणामहरूको सुरु ब्लक रेकर्ड गरिएको छ, $0.002 (2 क्रेडिट) एक ब्लक र कम्तिमा एक ब्लक प्रति कल ( [फायरक्रल बिलिङ](https://docs.firecrawl.dev/billing) ): 11 परिणामहरूको लागत $0.004।
 
 जेनेरिक `time_range` अब दुवै प्रदायकसम्म पुग्छ: Exa ले `startPublishedDate` (ISO
 टाइमस्ट्याम्प) र Tavily ले `start_date` (`YYYY-MM-DD`) प्राप्त गर्छ। `provider_options`
@@ -850,9 +852,11 @@ Tavily ले `search_type: "finance"` (`topic: "finance"`) पनि स्व�
 Exa का नतिजाहरूले `id`, `highlight_scores`, `summary`, `subpages`, `entities` र `extras` लाई
 `provider_raw` मा कायम राख्छन्। Tavily का नतिजाहरूले `images` र `favicon` कायम राख्छन्।
 
-लागत लेखाङ्कन अझै पनि समतल रजिस्ट्री `costPerQuery` नै हो। Tavily ले
-`search_depth: "advanced"` का लागि प्रति कल बढी क्रेडिट बिल गर्छ, र त्यो भिन्नता
-`usage.search_cost_usd` मा प्रतिबिम्बित हुँदैन।
+लिङ्कअप खोज लागत `depth` `fast` र `standard` को लागि $ 0.005 र `deep` ( [Linkup मूल्य निर्धारण](https://docs.linkup.so/pages/documentation/development/pricing) ) को लागि $ 0.05 मा रेकर्ड गरिएको छ, चाहे `depth` `provider_options` बाट आउँछ वा जडानको सेटिङहरू।
+
+Exa `type: "lite"` (Exa 3.0) ले फिल्डहरूको सानो सेट स्वीकार गर्छ र कुनै अन्य फिल्ड सेट गर्दा सम्पूर्ण अनुरोध अस्वीकार गर्दछ। लाइटको लागि, `additionalQueries`, `systemPrompt` र `text` र `highlights` बाहेक प्रत्येक `contents` कुञ्जी कल अघि छोडिन्छ। बहिष्कृत `subpages`, `subpageTarget`, `highlights.numSentences` र `highlights.highlightsPerUrl` अब फर्वार्ड गरिने छैन।
+
+Exa: $0.007 प्रति कल `auto` (र लेगेसी `fast`) को लागि वा $0.004 `lite` (र लिगेसी `instant`) को लागि, 10 परिणामहरू समावेश गर्दछ; प्रत्येक अर्को परिणामको लागि $0.001; र $0.001 प्रति फिर्ता परिणाम जब `contents.summary` सेट हुन्छ। Tavily `search_depth` `basic`, `fast` र `ultra-fast` को लागि 1 क्रेडिट ($ 0.008), र `advanced` ( [Tavily API क्रेडिटहरू](https://docs.tavily.com/documentation/api-credits) ) को लागि 2 क्रेडिट ($ 0.016) मा रेकर्ड गरिएको छ। Tavily ले उन्नतमा अपग्रेड गर्ने `auto_parameters: true` सँगको कल अझै पनि १ क्रेडिटमा रेकर्ड गरिएको छ।
 
 ---
 

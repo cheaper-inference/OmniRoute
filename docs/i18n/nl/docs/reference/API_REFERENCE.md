@@ -871,14 +871,16 @@ en een sleutel van het verkeerde type wordt weggelaten. Alle andere sleutels wor
 `stream` en `outputSchema`. De platte sleutels die door andere providers worden gebruikt (`cx`, `depth`, ...) werken
 zoals voorheen.
 
-| Provider | Velden op het hoogste niveau                                                                                                                                                                                                                                                                                                                                              | Genest                                                                                                                                                                         |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platte primitieve waarden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` samengevoegd over de standaardwaarde `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                              |
+| Provider | Velden op het hoogste niveau                                                                                                                                                                                                                                                                                                                                              | Genest                                                                                                                                                |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platte primitieve waarden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` samengevoegd over de standaardwaarde `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                     |
 
 De algemene velden hebben altijd voorrang: `query`, `max_results`, `filters` (domeinen), `country` en het
 onderwerp dat is afgeleid van `search_type`. Bij Exa behoudt `search_type: "news"` de waarde `category: "news"`.
 Tavily accepteert ook `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl-zoekkosten worden geregistreerd per gestart blok van 10 geretourneerde resultaten, tegen $ 0,002 (2 credits) per blok en ten minste één blok per oproep ( [Firecrawl-facturering](https://docs.firecrawl.dev/billing) ): 11 resultaten kosten $ 0,004.
 
 De algemene `time_range` bereikt nu beide providers: Exa ontvangt `startPublishedDate` (ISO-
 tijdstempel) en Tavily ontvangt `start_date` (`YYYY-MM-DD`). Een expliciete datum in `provider_options`
@@ -887,9 +889,11 @@ overschrijft de toegewezen datum.
 Exa-resultaten behouden `id`, `highlight_scores`, `summary`, `subpages`, `entities` en `extras` in
 `provider_raw`. Tavily-resultaten behouden `images` en `favicon`.
 
-De kostenberekening gebruikt nog steeds het platte register `costPerQuery`. Tavily brengt voor
-`search_depth: "advanced"` meer credits per aanroep in rekening, en dat verschil wordt niet weergegeven in
-`usage.search_cost_usd`.
+Linkup: De zoekkosten voor koppelingen worden vastgelegd op $0,005 voor `depth` `fast` en `standard` en $0,05 voor `deep` ( [Linkup-prijzen](https://docs.linkup.so/pages/documentation/development/pricing) ), ongeacht of `depth` afkomstig is van `provider_options` of van de instellingen van de verbinding.
+
+Exa `type: "lite"` (Exa 3.0) accepteert een kleinere set velden en wijst het hele verzoek af wanneer een ander veld wordt ingesteld. Voor lite worden `additionalQueries`, `systemPrompt` en elke `contents` -sleutel behalve `text` en `highlights` verwijderd vóór de aanroep. De verouderde `subpages`, `subpageTarget`, `highlights.numSentences` en `highlights.highlightsPerUrl` worden niet langer doorgestuurd.
+
+Exa: $0,007 per oproep voor `auto` (en de oude `fast`) of $0,004 voor `lite` (en de oude `instant`), wat 10 resultaten omvat; $ 0,001 voor elk verder resultaat; en $ 0,001 per geretourneerd resultaat wanneer `contents.summary` is ingesteld. Tavily wordt geregistreerd op 1 credit ($0,008) voor `search_depth` `basic`, `fast` en `ultra-fast`, en 2 credits ($0,016) voor `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Een gesprek met `auto_parameters: true` dat Tavily upgradet naar geavanceerd wordt nog steeds geregistreerd tegen 1 credit.
 
 ---
 

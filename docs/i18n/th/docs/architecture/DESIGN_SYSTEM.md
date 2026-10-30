@@ -7,7 +7,21 @@
 > **สถานะ:** แดชบอร์ดสร้างขึ้นบน **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ซึ่งถูกนำมา vendor
 > ไว้เป็น workspace `packages/ui-kit` (`@omniroute/ui-kit`; สแนปชอตจาก upstream ถูกปักหมุดไว้ใน
 > `packages/ui-kit/UPSTREAM.md` และมีการตรวจสอบโดย `npm run check:ui-kit-snapshot`) ธีม Light คือธีม
-> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
+> มาตรฐาน ค่า preference เริ่มต้นคือ `system` สี accent คือ Keak lime (`--ci-color-accent`) Switzer เป็นตระกูลแบบอักษรหลักสำหรับ UI และข้อความแสดงผล (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
+>
+> Inter เป็นแบบอักษรสำรองสำหรับรูปอักษรที่ไม่มีใน Switzer; `--font-mono` อ้างอิงชุดแบบอักษรความกว้างคงที่ของระบบ `--ci-font-code`
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 

@@ -795,14 +795,16 @@ yoxlanılır və yanlış tipə malik açar silinir. Autentifikasiya, baza URL-i
 `stream` və `outputSchema` daxil olmaqla, istənilən digər açar nəzərə alınmır. Digər provayderlərin
 istifadə etdiyi yastı açarlar (`cx`, `depth`, ...) əvvəlki kimi işləyir.
 
-| Provayder | Üst səviyyəli sahələr                                                                                                                                                                                                                                                                                                                                                     | İç-içə                                                                                                                                                                   |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (yastı primitivlər), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` üzərinə birləşdirilir |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                        |
+| Provayder | Üst səviyyəli sahələr                                                                                                                                                                                                                                                                                                                                                     | İç-içə                                                                                                                                          |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (yastı primitivlər), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` üzərinə birləşdirilir |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
 Ümumi sahələr həmişə üstünlük təşkil edir: `query`, `max_results`, `filters` (domenlər), `country` və
 `search_type` əsasında müəyyən edilən mövzu. Exa-da `search_type: "news"` parametrinin istifadəsi `category: "news"` dəyərini saxlayır.
 Tavily həmçinin `search_type: "finance"` (`topic: "finance"`) dəyərini qəbul edir.
+
+Firecrawl axtarış dəyəri 10 qaytarılmış nəticənin hər bloku üçün 0,002 ABŞ dolları (2 kredit) və hər zəng üçün ən azı bir blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ) ilə qeydə alınır: 11 nəticə 0,004 dollara başa gəlir.
 
 Ümumi `time_range` artıq hər iki provayderə ötürülür: Exa `startPublishedDate` (ISO
 zaman möhürü), Tavily isə `start_date` (`YYYY-MM-DD`) alır. `provider_options` daxilində açıq şəkildə göstərilmiş tarix
@@ -811,9 +813,11 @@ xəritələnmiş tarixi əvəz edir.
 Exa nəticələri `id`, `highlight_scores`, `summary`, `subpages`, `entities` və `extras` sahələrini
 `provider_raw` daxilində saxlayır. Tavily nəticələri `images` və `favicon` sahələrini saxlayır.
 
-Xərclərin uçotu hələ də yastı `costPerQuery` reyestri vasitəsilə aparılır. Tavily
-`search_depth: "advanced"` üçün hər çağırışa görə daha çox kredit hesablayır və bu fərq
-`usage.search_cost_usd` daxilində əks olunmur.
+Linkup axtarış dəyəri `depth` `fast` və `standard` üçün 0,005 ABŞ dolları və `deep` üçün 0,05 ABŞ dolları ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` və ya əlaqə parametrlərindən gəlir olsun, qeydə alınır.
+
+Exa `type: "lite"` (Exa 3.0) daha kiçik sahələr dəstini qəbul edir və hər hansı digər sahə təyin edildikdə bütün sorğunu rədd edir. Lite üçün `additionalQueries`, `systemPrompt` və `text` və `highlights` istisna olmaqla hər `contents` düyməsi zəngdən əvvəl atılır. Köhnəlmiş `subpages`, `subpageTarget`, `highlights.numSentences` və `highlights.highlightsPerUrl` artıq yönləndirilmir.
+
+Exa: `auto` (və köhnə `fast`) üçün hər zəng üçün $0,007 və ya `lite` (və köhnə `instant`) üçün $0,004, 10 nəticəni əhatə edir; Hər sonrakı nəticə üçün $0,001; və `contents.summary` təyin edildikdə hər qaytarılmış nəticə üçün $0,001. Tavily `search_depth` `basic`, `fast` və `ultra-fast` üçün 1 kreditlə ($0,008), `advanced` ( [Tavily API kreditləri](https://docs.tavily.com/documentation/api-credits) ) üçün isə 2 kreditlə ($0,016) qeydə alınır. Tavilinin qabaqcıl səviyyəyə yüksəltdiyi `auto_parameters: true` ilə zəng hələ də 1 kreditlə qeydə alınır.
 
 ---
 

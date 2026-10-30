@@ -7,7 +7,21 @@
 > **სტატუსი:** დეშბორდი აგებულია **Keak CI UI Kit**-ზე (`@keak/cheaper-inference-ui-kit`) და ჩასმულია
 > სამუშაო სივრცეში როგორც `packages/ui-kit` (`@omniroute/ui-kit`; upstream სნაფშოტი დაფიქსირებულია
 > `packages/ui-kit/UPSTREAM.md`-ში და მას იცავს `npm run check:ui-kit-snapshot`). ღია თემა არის კანონიკური;
-> ნაგულისხმევი პარამეტრია `system`. აქცენტი არის Keak lime (`--ci-color-accent`). Switzer არის UI, ჩვენების და კოდის ტექსტის ერთი ოჯახი (`--ci-font-ui`; `--ci-font-display` და `--ci-font-mono` გადაწყვეტს მას), დამოუკიდებლად მასპინძლობს თავად ნაკრების მიერ (`packages/ui-kit/src/ci-fonts.css`, იმპორტირებული `ci-tokens.css` მიერ). ყველა ხატი არის ლუციდის გლიფი.
+> ნაგულისხმევი პარამეტრია `system`. აქცენტი არის Keak lime (`--ci-color-accent`). Switzer არის UI-ისა და საჩვენებელი ტექსტის ძირითადი შრიფტის ოჯახი (`--ci-font-ui`; `--ci-font-display` და `--ci-font-mono` გადაწყვეტს მას), დამოუკიდებლად მასპინძლობს თავად ნაკრების მიერ (`packages/ui-kit/src/ci-fonts.css`, იმპორტირებული `ci-tokens.css` მიერ). ყველა ხატი არის ლუციდის გლიფი.
+>
+> Inter არის სარეზერვო შრიფტი Switzer-ში არმყოფი გლიფებისთვის; `--font-mono` მიუთითებს სისტემის თანაბარსიგანიანი შრიფტების სიაზე `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. სად რა მდებარეობს
 

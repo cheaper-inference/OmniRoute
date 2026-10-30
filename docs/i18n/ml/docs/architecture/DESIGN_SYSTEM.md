@@ -7,7 +7,21 @@
 > **സ്റ്റാറ്റസ്:** ഡാഷ്ബോർഡ് നിർമ്മിച്ചിരിക്കുന്നത് **Keak CI UI Kit**-ൽ (`@keak/cheaper-inference-ui-kit`) ആണ്, അത്
 > `packages/ui-kit` എന്ന വർക്ക്സ്പേസ് പാക്കേജായി വെൻഡർ ചെയ്തിരിക്കുന്നു (`@omniroute/ui-kit`; അപ്പ്സ്ട്രീം സ്നാപ്ഷോട്ട്
 > `packages/ui-kit/UPSTREAM.md`-ൽ പിൻ ചെയ്തിരിക്കുകയും `npm run check:ui-kit-snapshot` കൊണ്ട് സംരക്ഷിക്കപ്പെടുകയും
-> ചെയ്യുന്നു). ലൈറ്റ് ആണ് കാനോനിക്കൽ തീം; സ്ഥിരസ്ഥിതി മുൻഗണന `system` ആണ്. ആക്സന്റ് Keak lime (`--ci-color-accent`) ആണ്. UI, ഡിസ്പ്ലേ, കോഡ് ടെക്സ്റ്റ് (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono` എന്നിവ പരിഹരിക്കുക), കിറ്റ് തന്നെ സ്വയം ഹോസ്റ്റ് ചെയ്ത (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ഇറക്കുമതി ചെയ്തത്) ഏക കുടുംബമാണ് സ്വിറ്റ്സർ. ഓരോ ഐക്കണും ഒരു ലൂസിഡ് ഗ്ലിഫാണ്.
+> ചെയ്യുന്നു). ലൈറ്റ് ആണ് കാനോനിക്കൽ തീം; സ്ഥിരസ്ഥിതി മുൻഗണന `system` ആണ്. ആക്സന്റ് Keak lime (`--ci-color-accent`) ആണ്. UI, ഡിസ്പ്ലേ ടെക്സ്റ്റ് (`--ci-font-ui`; `--ci-font-display`, `--ci-font-mono` എന്നിവ പരിഹരിക്കുക), കിറ്റ് തന്നെ സ്വയം ഹോസ്റ്റ് ചെയ്ത (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ഇറക്കുമതി ചെയ്തത്) പ്രധാന ഫോണ്ട് കുടുംബമാണ് സ്വിറ്റ്സർ. ഓരോ ഐക്കണും ഒരു ലൂസിഡ് ഗ്ലിഫാണ്.
+>
+> Switzer-ൽ ഇല്ലാത്ത ഗ്ലിഫുകൾക്കുള്ള പകരം ഫോണ്ടാണ് Inter; `--font-mono` സിസ്റ്റത്തിന്റെ മോണോസ്പേസ് ഫോണ്ട് പട്ടികയായ `--ci-font-code`-നെ സൂചിപ്പിക്കുന്നു.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. കാര്യങ്ങൾ എവിടെയാണ്
 

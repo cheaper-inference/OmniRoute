@@ -7,7 +7,21 @@
 > **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며,
 > 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)로 벤더링되어 있습니다 (업스트림 스냅샷은
 > `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 검증됩니다). Light가 표준
-> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Switzer는 UI, 디스플레이 및 코드 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 단일 제품군이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
+> 테마이며, 기본 설정은 `system`입니다. 강조색은 Keak lime (`--ci-color-accent`)입니다. Switzer는 UI 및 디스플레이 텍스트(`--ci-font-ui`, `--ci-font-display` 및 `--ci-font-mono` 이를 해결함)에 대한 기본 글꼴 계열이며 키트 자체(`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` 에서 가져옴)에 의해 자체 호스팅됩니다. 모든 아이콘은 Lucide 문자 모양입니다.
+>
+> Inter는 Switzer에 없는 글리프를 위한 대체 글꼴입니다. `--font-mono`는 시스템 고정폭 글꼴 스택인 `--ci-font-code`를 참조합니다.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. 각 요소의 위치
 

@@ -11,13 +11,13 @@ measured peaks. The box only overcommits when a Turbopack build coincides with a
 webpack build and a lint job; host swap (16 GB) absorbs that, and because pull-request Builds run
 hosted, the Turbopack slot is idle most of the time:
 
-| runner               | label          | role                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack builds: `ci.yml` `Build` (push/dispatch only), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, the nightly a11y build | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack build                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | nightlies (Schemathesis, promptfoo, garak, k6) and `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`   | same pool as above                                                                                                                                   | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (their repos)  | Dependabot only (peak 155 MB each, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | 200 % each |
+| runner               | label                           | role                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (push/dispatch only), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, the nightly a11y build | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nightlies (Schemathesis, promptfoo, garak, k6) and `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | same pool as above                                                                                                                                   | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (their repos)                   | Dependabot only (peak 155 MB each, 2026-10-18)                                                                                                       | 4 GB / 6 GB                | 200 % each |
 
 Measured 2026-10-18:
 
@@ -27,7 +27,7 @@ Measured 2026-10-18:
 | swap      | 16 GB                        | `omniroute-113-5` runs with swap off (`MemorySwapMax=0`) so a runaway build is cut at its cap instead of swapping the box                                                                                                                                                                                                                             |
 | `/tmp`    | **12 GB tmpfs = RAM**        | anything parked there is memory; leftovers are swept after 3 h                                                                                                                                                                                                                                                                                        |
 | CPU       | load 60 on 32 cores observed | before the quotas, one Turbopack build (~1166 % CPU) plus a coverage suite on the same box starved the other listeners' heartbeats (`The self-hosted runner lost communication`, #16853)                                                                                                                                                              |
-| runners   | **6 listeners**              | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` are disabled (`systemctl enable --now` brings one back)                                                                                                                                                                                                                               |
+| runners   | **7 listeners** (2026-10-28) | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` also carries `omni-build-60gb`; `omniroute-113-3/-4/-8` were deleted from the repo (2026-10-28)                                                                                                                                                                                                |
 
 The limits live in each unit's `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`
 (previous values kept as `override.conf.bak-20261018`) and were applied live with
@@ -42,7 +42,7 @@ running job was touched. Labels are changed through the runners API
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): every 30 min, log to /var/log/runner-janitor.log
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` is required: the janitor proves a path is idle with one snapshot of open
@@ -81,7 +81,7 @@ a time, only when idle**, with the idle check and the restart in the same comman
 ## Operating rules
 
 - **One Turbopack build at a time — enforced by label.** Every job that runs a full Turbopack
-  `next build` targets `[self-hosted, omni-build]`, and only **`omniroute-113-5`** carries that
+  `next build` targets `[self-hosted, omni-build, omni-build-60gb]`, and only **`omniroute-113-5`** carries that
   label: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   the nightly a11y build (#16853) and `docker-publish.yml` **amd64** (webpack inside BuildKit —
   Turbopack panicked there, run 33253576569). The arm64 Docker leg stays on `ubuntu-24.04-arm`.
@@ -116,8 +116,16 @@ a time, only when idle**, with the idle check and the restart in the same comman
   had `MemoryHigh=4G` until 2026-10-18 — the promptfoo build reclaimed its way through 54 minutes
   there; 8 GB removes the throttling.
 - **Fewer listeners on purpose.** Four OmniRoute units were disabled on 2026-08-29 — each extra
-  listener is another tenant for the memory budget above. The janitor ceiling is 6 (`MAX_ACTIVE_RUNNERS=6` in cron): it counts
-  every `Runner.Listener` on the box, and OmniHeuris + OmniMind add two to our four.
+  listener is another tenant for the memory budget above. The janitor ceiling is 8 (`MAX_ACTIVE_RUNNERS=8` in cron): it counts
+  every `Runner.Listener` on the box, and OmniHeuris + OmniMind add two to our five.
+- **Unit and Vitest jobs stay hosted.** `ci.yml` sends its unit shards and the Vitest job to
+  `[self-hosted, omni-ci]` only when the repository variable `vars.USE_VPS_TEST_RUNNER` is
+  `true`, and then only for same-repository `pull_request` runs; forks, `merge_group` and pushes
+  stay on `ubuntu-latest` (`tests/unit/vps-runner-variable-scope.test.ts`). The variable is
+  `false`. On 2026-10-28 three 4-core `omni-ci` listeners took 250–270 s for `npm ci` and every
+  unit shard hit the 30-minute job limit, against ~634 s for a hosted shard, with the box at load
+  17–24. The listeners were deleted. Do not turn the variable back on without listeners sized for
+  a unit shard.
 - **Never clean `/tmp` or `_work` by hand while any runner is busy.** A
   check-then-delete with a gap between the two is how a live Build job lost its
   `_work` on 2026-08-27. The janitor does the check and the removal in one step;
@@ -131,8 +139,10 @@ a time, only when idle**, with the idle check and the restart in the same comman
 
 ## Hosted lane (GitHub-hosted runners)
 
-The account is on the **Pro** plan: **40 concurrent hosted jobs**, shared by every PR check,
-every push-triggered workflow and CodeQL's default setup. Measured on 2026-10-18 during a
+The repository belongs to the `cheaper-inference` organization, on the **Team** plan: **60
+concurrent hosted jobs**, shared by every repository in the organization, every PR check, every
+push-triggered workflow and CodeQL's default setup. The figures below were measured on the
+**Pro** plan (40 concurrent hosted jobs). Measured on 2026-10-18 during a
 merge campaign (~10 merges/hour on `release/v3.8.52`): **2,500 workflow runs created in
 24 h**, 44 pushes to the branch in 6 h, **106 hosted jobs queued** while PR checks waited for
 hours and PRs were merged without them. Nine workflows fired on every push to the branch:

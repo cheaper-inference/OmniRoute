@@ -868,14 +868,16 @@ na ufunguo wenye aina isiyo sahihi huondolewa. Ufunguo mwingine wowote hupuuzwa,
 `stream` na `outputSchema`. Funguo tambarare zinazotumiwa na watoa huduma wengine (`cx`, `depth`, ...) hufanya kazi
 kama hapo awali.
 
-| Mtoa huduma | Sehemu za kiwango cha juu                                                                                                                                                                                                                                                                                                                                                 | Zilizopachikwa                                                                                                                                                                |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (thamani msingi tambarare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` zinaunganishwa juu ya chaguo-msingi `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                             |
+| Mtoa huduma | Sehemu za kiwango cha juu                                                                                                                                                                                                                                                                                                                                                 | Zilizopachikwa                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (thamani msingi tambarare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                     | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` zinaunganishwa juu ya chaguo-msingi `{ text: true, highlights: true }` |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                    |
 
 Sehemu za jumla hupewa kipaumbele kila wakati: `query`, `max_results`, `filters` (vikoa), `country` na
 mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` hudumisha `category: "news"`.
 Tavily pia inakubali `search_type: "finance"` (`topic: "finance"`).
+
+Gharama ya utafutaji ya Firecrawl inarekodiwa kwa kila block iliyoanza ya matokeo 10 yaliyorejeshwa, kwa $0.002 (salio 2) block na angalau block moja kwa kila simu ( [Billing Firecrawl](https://docs.firecrawl.dev/billing) ): Matokeo 11 yanagharimu $0.004.
 
 `time_range` ya jumla sasa huwafikia watoa huduma wote wawili: Exa hupokea `startPublishedDate` (muhuri wa muda wa ISO)
 na Tavily hupokea `start_date` (`YYYY-MM-DD`). Tarehe iliyobainishwa moja kwa moja katika `provider_options`
@@ -884,9 +886,11 @@ hubatilisha ile iliyolinganishwa.
 Matokeo ya Exa hudumisha `id`, `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika
 `provider_raw`. Matokeo ya Tavily hudumisha `images` na `favicon`.
 
-Uhasibu wa gharama bado ni rejista tambarare ya `costPerQuery`. Tavily hutoza
-`search_depth: "advanced"` kwa salio zaidi kwa kila ombi, na tofauti hiyo haionyeshwi katika
-`usage.search_cost_usd`.
+Linkup: Gharama ya utafutaji ya kiunganishi imerekodiwa kuwa $0.005 kwa `depth` `fast` na `standard` na $0.05 kwa `deep` ( [Bei ya kiunganishi](https://docs.linkup.so/pages/documentation/development/pricing) ), iwe `depth` inatoka `provider_options` au mipangilio ya muunganisho.
+
+Exa `type: "lite"` (Exa 3.0) inakubali seti ndogo ya sehemu na kukataa ombi zima wakati uga mwingine wowote umewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila kitufe cha `contents` isipokuwa `text` na `highlights` hudondoshwa kabla ya simu. `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` zilizoacha kutumika hazisambazwi tena.
+
+Exa: $0.007 kwa simu kwa `auto` (na legacy `fast`) au $0.004 kwa `lite` (na urithi `instant`), inayojumuisha matokeo 10; $0.001 kwa kila matokeo zaidi; na $0.001 kwa kila tokeo lililorejeshwa wakati `contents.summary` imewekwa. Tavily imerekodiwa kwa salio 1 ($0.008) kwa `search_depth` `basic`, `fast` na `ultra-fast`, na salio 2 ($0.016) kwa `advanced` ( [mikopo ya Tavily API](https://docs.tavily.com/documentation/api-credits) ). Simu iliyo na `auto_parameters: true` ambayo Tavily inaboresha hadi ya hali ya juu bado inarekodiwa kwa mkopo 1.
 
 ---
 

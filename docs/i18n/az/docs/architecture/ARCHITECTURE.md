@@ -477,6 +477,7 @@ Bir neçə provayder qlobal avtomatik qoruyucu / bağlantının gözləmə müdd
 - Antigravity 429 mühərriki: `open-sse/services/antigravity429Engine.ts` (identikliyi rotasiya edir, cavab başlıqlarını təmizləyir, kreditlərin/versiyanın izlənməsini
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` vasitəsilə idarə edir)
+- Antigravity 429 mühafizəsi: `open-sse/services/antigravity429Guard.ts` (bütün hostlar üzrə yuxarı axın 429-ların hər bir sorğu büdcəsi, `ANTIGRAVITY_MAX_429_ATTEMPTS`; imtina edilmiş orqanın eyni şəkildə təkrar göndərilməsi yerli olaraq cavablandırılır; `src/sse/handlers/chat.ts` soyuducudan xəbərdar olan təkrar cəhd vasitəsilə belə sorğunu yenidən başlatmır)
 - ModelScope kvota siyasəti: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Uyğunluq Kanalı Əl Sıxışması): `open-sse/services/claudeCodeCCH.ts`,
   həmçinin `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

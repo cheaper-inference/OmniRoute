@@ -871,14 +871,16 @@ ja vääräntyyppinen avain poistetaan. Kaikki muut avaimet ohitetaan, mukaan lu
 `stream` ja `outputSchema`. Muiden palveluntarjoajien käyttämät litteät avaimet (`cx`, `depth`, ...) toimivat
 kuten ennenkin.
 
-| Palveluntarjoaja | Ylimmän tason kentät                                                                                                                                                                                                                                                                                                                                                      | Sisäkkäiset                                                                                                                                                                 |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa              | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiiviarvot), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` yhdistettynä oletusarvojen `{ text: true, highlights: true }` päälle |
-| Tavily           | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| Palveluntarjoaja | Ylimmän tason kentät                                                                                                                                                                                                                                                                                                                                                      | Sisäkkäiset                                                                                                                                        |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa              | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (litteät primitiiviarvot), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` yhdistettynä oletusarvojen `{ text: true, highlights: true }` päälle |
+| Tavily           | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
 Yleiset kentät ovat aina etusijalla: `query`, `max_results`, `filters` (verkkotunnukset), `country` sekä
 kentästä `search_type` johdettu aihe. Exassa `search_type: "news"` säilyttää arvon `category: "news"`.
 Tavily hyväksyy myös arvon `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl-haun hinta kirjataan 10 palautetun tuloksen aloitettua lohkoa kohti, 0,002 dollaria (2 krediittiä) lohko ja vähintään yksi lohko per puhelu ( [Firecrawl -laskutus](https://docs.firecrawl.dev/billing) ): 11 tuloksen hinta on 0,004 dollaria.
 
 Yleinen `time_range` välitetään nyt molemmille palveluntarjoajille: Exa saa kentän `startPublishedDate` (ISO-
 aikaleima) ja Tavily kentän `start_date` (`YYYY-MM-DD`). Kohdassa `provider_options`
@@ -887,9 +889,11 @@ eksplisiittisesti määritetty päivämäärä ohittaa muunnetun arvon.
 Exan tulokset säilyttävät kentät `id`, `highlight_scores`, `summary`, `subpages`, `entities` ja `extras`
 kohdassa `provider_raw`. Tavilyn tulokset säilyttävät kentät `images` ja `favicon`.
 
-Kustannuslaskenta käyttää edelleen litteää `costPerQuery`-rekisteriä. Tavily laskuttaa
-arvosta `search_depth: "advanced"` enemmän krediittejä kutsua kohden, eikä tämä ero näy
-kentässä `usage.search_cost_usd`.
+Linkup: Linkityshaun hinta kirjataan 0,005 $ `depth` `fast` ja `standard` ja 0,05 $ `deep` lle ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) riippumatta siitä, tuleeko `depth` `provider_options` tai yhteyden asetuksista.
+
+Exa `type: "lite"` (Exa 3.0) hyväksyy pienemmän joukon kenttiä ja hylkää koko pyynnön, kun jokin muu kenttä on asetettu. Lite:ssä `additionalQueries`, `systemPrompt` ja kaikki `contents` -näppäimet paitsi `text` ja `highlights` pudotetaan ennen kutsua. Käytöstä poistettuja `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei enää lähetetä edelleen.
+
+Exa: 0,007 $ per puhelu `auto` (ja vanhalle `fast`) tai 0,004 $ `lite` :lle (ja vanhalle `instant`), joka kattaa 10 tulosta; 0,001 dollaria jokaisesta lisätuloksesta; ja 0,001 $ per palautettu tulos, kun `contents.summary` on asetettu. Tavily on kirjattu 1 krediittiin (0,008 dollaria) `search_depth` `basic`, `fast` ja `ultra-fast` ja 2 krediittiä (0,016 dollaria) `advanced` ( [Tavily API krediittejä](https://docs.tavily.com/documentation/api-credits) ). Puhelu `auto_parameters: true` llä, jonka Tavily päivittää edistyneemmäksi, tallennetaan edelleen 1 pisteellä.
 
 ---
 

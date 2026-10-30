@@ -828,14 +828,16 @@ Exa 和 Tavily 从带命名空间的配置集合中读取提供者特定字段�
 `stream` 和 `outputSchema`。其他提供者使用的扁平键（`cx`、`depth` 等）仍按
 原方式工作。
 
-| 提供者 | 顶层字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套字段                                                                                                                                                      |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平原始值）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` 会合并到默认值 `{ text: true, highlights: true }` 之上 |
-| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                             |
+| 提供者 | 顶层字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套字段                                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平原始值）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 会合并到默认值 `{ text: true, highlights: true }` 之上 |
+| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                    |
 
 通用字段始终具有优先权：`query`、`max_results`、`filters`（域名）、`country`，以及从
 `search_type` 派生的主题。在 Exa 上，`search_type: "news"` 会保留 `category: "news"`。
 Tavily 还接受 `search_type: "finance"`（`topic: "finance"`）。
+
+Firecrawl 搜索成本记录为每个启动块（包含 10 个返回结果），每个块为 0.002 美元（2 个积分），并且每次调用至少一个块（ [Firecrawl 计费](https://docs.firecrawl.dev/billing)）：11 个结果的成本为 0.004 美元。
 
 通用的 `time_range` 现在会传递到两个提供者：Exa 获取 `startPublishedDate`（ISO
 时间戳），Tavily 获取 `start_date`（`YYYY-MM-DD`）。`provider_options` 中显式指定的日期
@@ -844,9 +846,11 @@ Tavily 还接受 `search_type: "finance"`（`topic: "finance"`）。
 Exa 结果会在 `provider_raw` 中保留 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras`。
 Tavily 结果会保留 `images` 和 `favicon`。
 
-成本核算仍使用扁平注册表 `costPerQuery`。Tavily 对
-`search_depth: "advanced"` 的每次调用收取更多额度，但这种差异不会反映在
-`usage.search_cost_usd` 中。
+Linkup 的搜索费用按 `depth` 记录：`fast` 和 `standard` 为 $0.005，`deep` 为 $0.05（[Linkup 定价](https://docs.linkup.so/pages/documentation/development/pricing)），无论 `depth` 来自 `provider_options` 还是连接设置。
+
+Exa `type: "lite"` (Exa 3.0) 接受较小的字段集，并在设置任何其他字段时拒绝整个请求。对于 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每个`contents`键在调用之前都会被删除。已弃用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再转发。
+
+Exa：`auto`（以及旧版 `fast`）每次调用 $0.007，`lite`（以及旧版 `instant`）每次调用 $0.004，均包含 10 条结果；每条额外结果收取 $0.001；设置 `contents.summary` 时，每条返回结果再收取 $0.001。Tavily 的 `search_depth` 为 `basic`、`fast` 和 `ultra-fast` 时，记为 1 个积分（$0.008）；为 `advanced` 时，记为 2 个积分（$0.016）（[Tavily API 积分](https://docs.tavily.com/documentation/api-credits)）。对于设置了 `auto_parameters: true` 且被 Tavily 升级为 advanced 的调用，仍记为 1 个积分。
 
 ---
 

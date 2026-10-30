@@ -494,6 +494,7 @@ las capas globales de disyuntor, tiempo de espera de reconexión y bloqueo de mo
   la identidad, depura las cabeceras de respuesta y gestiona el seguimiento de créditos/versiones mediante
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (presupuesto por solicitud de 429 ascendentes en todos los hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; un reenvío idéntico de un cuerpo rechazado se responde localmente; `src/sse/handlers/chat.ts` no reinicia dicha solicitud a través del reintento de tiempo de reutilización)
 - Política de cuotas de ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH (protocolo de enlace del canal de compatibilidad) de Claude Code: `open-sse/services/claudeCodeCCH.ts`,
   además de `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

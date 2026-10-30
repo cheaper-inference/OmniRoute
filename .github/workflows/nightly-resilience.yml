@@ -124,7 +124,7 @@ jobs:
     # build pool — same runner class and Turbopack policy as ci.yml's `build` job — and hand
     # the artefact to the a11y job, which only boots it. Falls back to hosted (webpack) when
     # the VPS build runner is off, like ci.yml.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true') && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true') && fromJSON('["self-hosted","omni-build","omni-build-60gb"]') || 'ubuntu-latest' }}
     timeout-minutes: 60
     env:
       JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation

@@ -871,14 +871,16 @@ Exa และ Tavily อ่านฟิลด์เฉพาะของผู�
 `stream` และ `outputSchema` คีย์แบบแบนที่ผู้ให้บริการรายอื่นใช้ (`cx`, `depth`, ...) ยังคงทำงาน
 เหมือนเดิม
 
-| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ฟิลด์ซ้อน                                                                                                                                                    |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ค่าพื้นฐานแบบแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ผสานทับค่าเริ่มต้น `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                            |
+| ผู้ให้บริการ | ฟิลด์ระดับบนสุด                                                                                                                                                                                                                                                                                                                                                           | ฟิลด์ซ้อน                                                                                                                           |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ค่าพื้นฐานแบบแบน), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ผสานทับค่าเริ่มต้น `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                   |
 
 ฟิลด์ทั่วไปจะมีลำดับความสำคัญเหนือกว่าเสมอ ได้แก่ `query`, `max_results`, `filters` (โดเมน), `country` และ
 หัวข้อที่ได้มาจาก `search_type` สำหรับ Exa ค่า `search_type: "news"` จะคง `category: "news"` ไว้
 นอกจากนี้ Tavily ยังยอมรับ `search_type: "finance"` (`topic: "finance"`) ด้วย
+
+ค่าใช้จ่ายในการค้นหา Firecrawl จะถูกบันทึกต่อบล็อกเริ่มต้นของผลลัพธ์ที่ส่งคืน 10 รายการ ที่ 0.002 ดอลลาร์ (2 เครดิต) ต่อบล็อกและอย่างน้อยหนึ่งบล็อกต่อการโทร ( [การเรียกเก็บเงินของ Firecrawl](https://docs.firecrawl.dev/billing) ): ผลลัพธ์ 11 รายการมีราคา 0.004 ดอลลาร์
 
 ขณะนี้ `time_range` แบบทั่วไปจะถูกส่งไปยังผู้ให้บริการทั้งสอง: Exa จะได้รับ `startPublishedDate` (การประทับเวลา
 แบบ ISO) และ Tavily จะได้รับ `start_date` (`YYYY-MM-DD`) วันที่ที่ระบุไว้อย่างชัดเจนใน `provider_options`
@@ -887,9 +889,11 @@ Exa และ Tavily อ่านฟิลด์เฉพาะของผู�
 ผลลัพธ์ของ Exa จะเก็บ `id`, `highlight_scores`, `summary`, `subpages`, `entities` และ `extras` ไว้ใน
 `provider_raw` ส่วนผลลัพธ์ของ Tavily จะเก็บ `images` และ `favicon`
 
-การคำนวณค่าใช้จ่ายยังคงใช้รีจิสทรีแบบแบน `costPerQuery` Tavily เรียกเก็บเครดิตต่อการเรียกใช้สำหรับ
-`search_depth: "advanced"` มากกว่า และความแตกต่างดังกล่าวจะไม่แสดงอยู่ใน
-`usage.search_cost_usd`
+ค่าใช้จ่ายในการค้นหาลิงก์อัปจะถูกบันทึกไว้ที่ 0.005 ดอลลาร์สำหรับ `depth` `fast` และ `standard` และ 0.05 ดอลลาร์สำหรับ `deep` ( [การกำหนดราคาลิงก์อัป](https://docs.linkup.so/pages/documentation/development/pricing) ) ไม่ว่า `depth` จะมาจาก `provider_options` หรือการตั้งค่าของการเชื่อมต่อก็ตาม
+
+Exa `type: "lite"` (Exa 3.0) ยอมรับชุดฟิลด์ที่เล็กกว่าและปฏิเสธคำขอทั้งหมดเมื่อมีการตั้งค่าฟิลด์อื่น สำหรับ lite, `additionalQueries`, `systemPrompt` และทุกคีย์ `contents` ยกเว้น `text` และ `highlights` จะถูกละทิ้งก่อนการโทร `subpages`, `subpageTarget`, `highlights.numSentences` และ `highlights.highlightsPerUrl` ที่เลิกใช้แล้วจะไม่ถูกส่งต่ออีกต่อไป
+
+Exa: 0.007 ดอลลาร์ต่อการเรียก `auto` (และ `fast` แบบเดิม) หรือ 0.004 ดอลลาร์สำหรับ `lite` (และ `instant` แบบเดิม) ครอบคลุม 10 ผลลัพธ์ $0.001 สำหรับผลลัพธ์เพิ่มเติมแต่ละรายการ และ 0.001 ดอลลาร์ต่อผลลัพธ์ที่ส่งคืนเมื่อตั้งค่า `contents.summary` Tavily ได้รับการบันทึกที่ 1 เครดิต ($0.008) สำหรับ `search_depth` `basic`, `fast` และ `ultra-fast` และ 2 เครดิต ($0.016) สำหรับ `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ) การโทรด้วย `auto_parameters: true` ที่ Tavily อัปเกรดเป็นขั้นสูงจะยังคงบันทึกไว้ที่ 1 เครดิต
 
 ---
 

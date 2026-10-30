@@ -494,6 +494,7 @@ yleisiä katkaisija-, yhteyden jäähdytys- ja mallien estokerroksia:
   identiteettiä, puhdistaa vastausotsakkeet sekä hallinnoi krediittien ja versioiden seurantaa moduulien
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts` avulla)
+- Antigravity 429-suojaus: `open-sse/services/antigravity429Guard.ts` (pyyntökohtainen budjetti ylävirran 429:stä kaikissa isännissä, `ANTIGRAVITY_MAX_429_ATTEMPTS`; identtiseen hylätyn kappaleen uudelleenlähetykseen vastataan paikallisesti; `src/sse/handlers/chat.ts` ei käynnistä tällaista pyyntöä uudelleen jäähtymistietoisen uudelleenyrityksen kautta)
 - ModelScopen kiintiökäytäntö: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (yhteensopivuuskanavan kättely): `open-sse/services/claudeCodeCCH.ts`,
   sekä `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

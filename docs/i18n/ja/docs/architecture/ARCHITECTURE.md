@@ -477,6 +477,7 @@ FSM の遷移は Auto Combo のスコアリングに反映され、バックグ�
 複数のプロバイダーには、グローバルなサーキットブレーカー、接続クールダウン、モデルロックアウトの各レイヤーを利用する専用のレジリエンスおよびステルスモジュールが用意されています。
 
 - Antigravity 429 エンジン: `open-sse/services/antigravity429Engine.ts`（ID のローテーション、レスポンスヘッダーの除去、`antigravityCredits.ts`、`antigravityHeaderScrub.ts`、`antigravityHeaders.ts`、`antigravityIdentity.ts`、`antigravityVersion.ts` を介したクレジット/バージョン追跡）
+- Antigravity 429 ガード: `open-sse/services/antigravity429Guard.ts`（全ホストを通じたリクエスト単位の上流 429 応答の上限は `ANTIGRAVITY_MAX_429_ATTEMPTS`。拒否されたボディを同一内容で再送するとローカルで応答します。`src/sse/handlers/chat.ts` は、クールダウンを考慮した再試行でこのリクエストを再開しません）
 - ModelScope クォータポリシー: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH（互換性チャネルハンドシェイク）: `open-sse/services/claudeCodeCCH.ts`、および `claudeCodeCompatible.ts`、`claudeCodeConstraints.ts`、`claudeCodeExtraRemap.ts`、`claudeCodeToolRemapper.ts`
 - Claude Code フィンガープリント調整: `open-sse/services/claudeCodeFingerprint.ts`

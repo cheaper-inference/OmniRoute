@@ -484,6 +484,7 @@ de globale lagen voor circuit breaking, verbindingscooldowns en modelblokkeringe
   identiteit, zuivert responsheaders en stuurt het bijhouden van tegoeden/versies aan via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (budget per verzoek van upstream 429s voor alle hosts, `ANTIGRAVITY_MAX_429_ATTEMPTS`; een identieke herverzending van een geweigerde instantie wordt lokaal beantwoord; `src/sse/handlers/chat.ts` start een dergelijk verzoek niet opnieuw via de cooldown-bewuste nieuwe poging)
 - ModelScope-quotabeleid: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

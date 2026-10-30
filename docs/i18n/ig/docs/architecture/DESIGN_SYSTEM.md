@@ -7,7 +7,21 @@
 > **Ọnọdụ:** e wuru dashboard ahụ n'elu **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), nke e debere
 > dị ka workspace `packages/ui-kit` (`@omniroute/ui-kit`; e gbochiri snapshot upstream na
 > `packages/ui-kit/UPSTREAM.md`, ma `npm run check:ui-kit-snapshot` na-echekwa ya). Light bụ isiokwu
-> nkịtị a na-anabata; nhọrọ ndabara bụ `system`. Accent ahụ bụ Keak lime (`--ci-color-accent`). Switzer bụ otu ezinụlọ maka UI, ngosi na ederede koodu (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Akara ngosi ọ bụla bụ Lucide glyph.
+> nkịtị a na-anabata; nhọrọ ndabara bụ `system`. Accent ahụ bụ Keak lime (`--ci-color-accent`). Switzer bụ ezinụlọ mkpụrụedemede bụ isi maka UI na ederede ngosi (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` kpebisiri ike na ya), nke ngwa ahụ n'onwe ya kwadoro (`packages/ui-kit/src/ci-fonts.css`, nke `ci-tokens.css` bubata). Akara ngosi ọ bụla bụ Lucide glyph.
+>
+> Inter bụ font nnọchi maka glyph ndị na-adịghị na Switzer; `--font-mono` na-ezo aka na ndepụta font monospace nke sistemụ, `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Ebe ihe ndị a dị
 

@@ -494,6 +494,7 @@ globālos slēdžaizsardzības / savienojuma nogaidīšanas / modeļa bloķēša
   identitāti, attīra atbildes galvenes, pārvalda kredītu/versiju izsekošanu, izmantojot
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 aizsargs: `open-sse/services/antigravity429Guard.ts` (pēc pieprasījuma budžets augšpus 429s visos saimniekdatoros, `ANTIGRAVITY_MAX_429_ATTEMPTS`; uz identisku atkārtotu atteiktā teksta sūtīšanu tiek atbildēts lokāli; `src/sse/handlers/chat.ts` nerestartē šādu pieprasījumu, izmantojot atdzišanas mēģinājumu)
 - ModelScope kvotu politika: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (saderības kanāla rokasspiediens): `open-sse/services/claudeCodeCCH.ts`,
   kā arī `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

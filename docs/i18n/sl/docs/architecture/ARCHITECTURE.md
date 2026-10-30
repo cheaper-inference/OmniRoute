@@ -494,6 +494,7 @@ globalne plasti odklopnika, zakasnitve povezave in blokade modela:
   identiteto, odstranjuje glave odziva ter upravlja sledenje dobroimetju/različici prek
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (proračun na zahtevo 429 navzgor v vseh gostiteljih, `ANTIGRAVITY_MAX_429_ATTEMPTS`; na identično ponovno pošiljanje zavrnjenega telesa se odgovori lokalno; `src/sse/handlers/chat.ts` ne zažene znova takšne zahteve prek ponovnega poskusa, ki se zaveda ohlajanja)
 - Pravilnik kvot ModelScope: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (usklajevanje združljivostnega kanala): `open-sse/services/claudeCodeCCH.ts`,
   skupaj z `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

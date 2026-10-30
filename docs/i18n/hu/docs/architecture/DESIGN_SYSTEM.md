@@ -4,7 +4,21 @@
 
 ---
 
-> **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). A Switzer az egyetlen család UI hoz, a kijelzőhöz és a kódszöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
+> **Állapot:** az irányítópult a **Keak CI UI Kit**-re (`@keak/cheaper-inference-ui-kit`) épül, amely a `packages/ui-kit` workspace-csomagként van beágyazva (`@omniroute/ui-kit`; az upstream pillanatkép a `packages/ui-kit/UPSTREAM.md` fájlban van rögzítve, és az `npm run check:ui-kit-snapshot` védi). A világos téma a kanonikus téma; az alapértelmezett beállítás a `system`. A kiemelőszín a Keak lime (`--ci-color-accent`). A Switzer az elsődleges betűcsalád a UI-hoz és a megjelenített szöveghez (`--ci-font-ui`; `--ci-font-display` és `--ci-font-mono` ezt oldja meg), amelyet maga a készlet tárol (`packages/ui-kit/src/ci-fonts.css`, importálta `ci-tokens.css`). Minden ikon egy Lucide jelkép.
+>
+> Az Inter a Switzerből hiányzó karakterjelek tartalék betűtípusa; a `--font-mono` a rendszer rögzített szélességű betűtípusainak `--ci-font-code` listájára mutat.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Hol mi található
 

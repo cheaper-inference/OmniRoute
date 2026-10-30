@@ -7,7 +7,21 @@
 > **Tila:** hallintapaneeli on rakennettu **Keak CI UI Kit** -kirjaston (`@keak/cheaper-inference-ui-kit`) päälle, vendoituna
 > workspace-pakettina `packages/ui-kit` (`@omniroute/ui-kit`; upstream-otos on kiinnitetty tiedostossa
 > `packages/ui-kit/UPSTREAM.md` ja sitä valvoo `npm run check:ui-kit-snapshot`). Vaalea on kanoninen
-> teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Switzer on yksi UI, näyttö- ja kooditekstiperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
+> teema; oletusvalinta on `system`. Korostusvärinä on Keak-lime (`--ci-color-accent`). Switzer on UI- ja näyttötekstin ensisijainen kirjasinperhe (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` ratkaisevat sen), itse isännöi itse sarja (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css`:n tuoma). Jokainen kuvake on Luciden merkki.
+>
+> Inter on varakirjasin Switzeristä puuttuville merkeille; `--font-mono` viittaa järjestelmän tasalevyiseen kirjasinpinoon `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Missä asiat sijaitsevat
 

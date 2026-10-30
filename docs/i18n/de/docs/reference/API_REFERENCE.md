@@ -864,14 +864,16 @@ geprüft; ein Schlüssel mit dem falschen Typ wird verworfen. Alle anderen Schl�
 `stream` und `outputSchema`. Die von anderen Anbietern verwendeten flachen Schlüssel (`cx`, `depth`, ...) funktionieren
 weiterhin wie zuvor.
 
-| Anbieter | Felder auf oberster Ebene                                                                                                                                                                                                                                                                                                                                                 | Verschachtelt                                                                                                                                                                        |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flache primitive Werte), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` wird über dem Standardwert `{ text: true, highlights: true }` zusammengeführt |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                    |
+| Anbieter | Felder auf oberster Ebene                                                                                                                                                                                                                                                                                                                                                 | Verschachtelt                                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flache primitive Werte), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` wird über dem Standardwert `{ text: true, highlights: true }` zusammengeführt |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                           |
 
 Die generischen Felder haben immer Vorrang: `query`, `max_results`, `filters` (Domains), `country` und das
 aus `search_type` abgeleitete Thema. Bei Exa behält `search_type: "news"` den Wert `category: "news"` bei.
 Tavily akzeptiert außerdem `search_type: "finance"` (`topic: "finance"`).
+
+Die Kosten für die Firecrawl-Suche werden pro gestartetem Block von 10 zurückgegebenen Ergebnissen erfasst, mit 0,002 $ (2 Credits) pro Block und mindestens einem Block pro Aufruf ( [Firecrawl-Abrechnung](https://docs.firecrawl.dev/billing) ): 11 Ergebnisse kosten 0,004 $.
 
 Das generische `time_range` erreicht nun beide Anbieter: Exa erhält `startPublishedDate` (ISO-
 Zeitstempel) und Tavily erhält `start_date` (`YYYY-MM-DD`). Ein explizites Datum in `provider_options`
@@ -880,9 +882,11 @@ Zeitstempel) und Tavily erhält `start_date` (`YYYY-MM-DD`). Ein explizites Datu
 Exa-Ergebnisse behalten `id`, `highlight_scores`, `summary`, `subpages`, `entities` und `extras` in
 `provider_raw`. Tavily-Ergebnisse behalten `images` und `favicon`.
 
-Die Kostenabrechnung verwendet weiterhin die flache Registry `costPerQuery`. Tavily berechnet für
-`search_depth: "advanced"` mehr Credits pro Aufruf; dieser Unterschied wird in
-`usage.search_cost_usd` nicht berücksichtigt.
+Die Linkup-Suchkosten betragen 0,005 $ für `depth` `fast` und `standard` und 0,05 $ für `deep` ( [Linkup-Preise](https://docs.linkup.so/pages/documentation/development/pricing) ), unabhängig davon, ob `depth` von `provider_options` oder den Verbindungseinstellungen stammt.
+
+Exa `type: "lite"` (Exa 3.0) akzeptiert einen kleineren Satz von Feldern und lehnt die gesamte Anfrage ab, wenn ein anderes Feld festgelegt ist. Bei Lite werden `additionalQueries`, `systemPrompt` und alle `contents`-Schlüssel außer `text` und `highlights` vor dem Aufruf gelöscht. Die veralteten `subpages`, `subpageTarget`, `highlights.numSentences` und `highlights.highlightsPerUrl` werden nicht mehr weitergeleitet.
+
+Exa: 0,007 $ pro Aufruf für `auto` (und das alte `fast`) oder 0,004 $ für `lite` (und das alte `instant`), was 10 Ergebnisse abdeckt; 0,001 $ für jedes weitere Ergebnis; und 0,001 $ pro zurückgegebenem Ergebnis, wenn `contents.summary` festgelegt ist. Tavily wird mit 1 Credit (0,008 $) für `search_depth` `basic`, `fast` und `ultra-fast` und 2 Credits (0,016 $) für `advanced` ( [Tavily API Credits](https://docs.tavily.com/documentation/api-credits) ) erfasst. Ein Anruf mit `auto_parameters: true`, den Tavily auf „Erweitert“ hochstuft, wird immer noch mit 1 Credit aufgezeichnet.
 
 ---
 

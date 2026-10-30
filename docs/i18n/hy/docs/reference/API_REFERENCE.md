@@ -844,14 +844,16 @@ Exa-ն և Tavily-ն կարդում են մատակարարին հատուկ դա
 `stream`-ը և `outputSchema`-ն։ Այլ մատակարարների կողմից օգտագործվող հարթ բանալիները (`cx`, `depth`, ...) շարունակում են
 աշխատել նախկինի պես։
 
-| Մատակարար | Վերին մակարդակի դաշտեր                                                                                                                                                                                                                                                                                                                                                    | Ներդրված                                                                                                                                                             |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (հարթ պարզունակ արժեքներ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`՝ միաձուլված լռելյայն `{ text: true, highlights: true }`-ի վրա |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                    |
+| Մատակարար | Վերին մակարդակի դաշտեր                                                                                                                                                                                                                                                                                                                                                    | Ներդրված                                                                                                                                    |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (հարթ պարզունակ արժեքներ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`՝ միաձուլված լռելյայն `{ text: true, highlights: true }`-ի վրա |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
 
 Ընդհանուր դաշտերը միշտ գերակայում են՝ `query`, `max_results`, `filters` (տիրույթներ), `country` և
 `search_type`-ից ստացված թեման։ Exa-ում `search_type: "news"`-ը պահպանում է `category: "news"`-ը։
 Tavily-ն նաև ընդունում է `search_type: "finance"` (`topic: "finance"`)։
+
+Firecrawl որոնման արժեքը գրանցվում է 10 վերադարձված արդյունքների մեկնարկած բլոկի համար՝ $0,002 (2 վարկ) մեկ բլոկ և առնվազն մեկ բլոկ մեկ զանգի համար ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ). 11 արդյունքն արժե $0,004:
 
 Ընդհանուր `time_range`-ն այժմ հասնում է երկու մատակարարներին էլ․ Exa-ն ստանում է `startPublishedDate` (ISO
 ժամանակային դրոշմ), իսկ Tavily-ն՝ `start_date` (`YYYY-MM-DD`)։ `provider_options`-ում բացահայտ նշված ամսաթիվը
@@ -860,9 +862,11 @@ Tavily-ն նաև ընդունում է `search_type: "finance"` (`topic: "financ
 Exa-ի արդյունքները `provider_raw`-ում պահպանում են `id`, `highlight_scores`, `summary`, `subpages`, `entities` և `extras`
 դաշտերը։ Tavily-ի արդյունքները պահպանում են `images` և `favicon` դաշտերը։
 
-Ծախսերի հաշվառումը շարունակում է օգտագործել հարթ `costPerQuery` ռեեստրը։ Tavily-ն
-`search_depth: "advanced"`-ի դեպքում յուրաքանչյուր կանչի համար ավելի շատ կրեդիտ է գանձում, և այդ տարբերությունը չի արտացոլվում
-`usage.search_cost_usd`-ում։
+Linkup որոնման արժեքը գրանցվում է $0,005 `depth` `fast` և `standard` համար և $0,05-ի համար `deep` համար ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), անկախ նրանից `depth` գալիս է `provider_options` ից կամ կապի կարգավորումներից:
+
+Exa `type: "lite"` (Exa 3.0) ընդունում է դաշտերի ավելի փոքր շարք և մերժում է ամբողջ հարցումը, երբ որևէ այլ դաշտ է սահմանված: Lite-ի համար `additionalQueries`, `systemPrompt` և բոլոր `contents` ստեղները, բացի `text` և `highlights` հանվում են զանգից առաջ: Հնացած `subpages`, `subpageTarget`, `highlights.numSentences` և `highlights.highlightsPerUrl` այլևս չեն փոխանցվում:
+
+Exa: յուրաքանչյուր կանչի համար $0,007՝ `auto` (և հին `fast`) ռեժիմում, կամ $0,004՝ `lite` (և հին `instant`) ռեժիմում՝ ներառյալ 10 արդյունք; $0,001 յուրաքանչյուր հետագա արդյունքի համար; և $0,001 մեկ վերադարձված արդյունքի համար, երբ `contents.summary` սահմանվում է: Tavily-ն գրանցվում է 1 կրեդիտով ($0,008) `search_depth` `basic`, `fast` և `ultra-fast` համար, իսկ 2 վարկ (0,016$) `advanced` համար ( [Tavily API վարկեր](https://docs.tavily.com/documentation/api-credits) ): `auto_parameters: true` ով զանգը, որը Tavily-ն թարմացնում է առաջադեմի, դեռ գրանցվում է 1 կրեդիտով:
 
 ---
 

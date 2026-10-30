@@ -494,6 +494,7 @@ flowchart LR
   الهوية، وينقّي ترويسات الاستجابة، ويدير تتبّع الأرصدة/الإصدارات عبر
   `antigravityCredits.ts` و`antigravityHeaderScrub.ts` و`antigravityHeaders.ts`
   و`antigravityIdentity.ts` و`antigravityVersion.ts`)
+- Antigravity 429 Guard: `open-sse/services/antigravity429Guard.ts` (ميزانية لكل طلب من 429s المنبع عبر جميع المضيفين، `ANTIGRAVITY_MAX_429_ATTEMPTS`؛ يتم الرد على إعادة إرسال مماثلة لجسم مرفوض محليًا؛ لا يقوم `src/sse/handlers/chat.ts` بإعادة تشغيل مثل هذا الطلب من خلال إعادة المحاولة مع مراعاة فترة التهدئة)
 - سياسة الحصص في ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH في Claude Code (مصافحة قناة التوافق): `open-sse/services/claudeCodeCCH.ts`،
   بالإضافة إلى `claudeCodeCompatible.ts` و`claudeCodeConstraints.ts` و`claudeCodeExtraRemap.ts`

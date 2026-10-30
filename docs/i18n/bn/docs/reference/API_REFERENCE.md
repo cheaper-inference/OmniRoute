@@ -867,14 +867,16 @@ Exa এবং Tavily নেমস্পেসযুক্ত ব্যাগ থ
 `stream` এবং `outputSchema`-সহ অন্য যেকোনো কী উপেক্ষা করা হয়। অন্যান্য প্রদানকারীর ব্যবহৃত ফ্ল্যাট কীগুলো (`cx`, `depth`, ...)
 আগের মতোই কাজ করে।
 
-| প্রদানকারী | শীর্ষ-স্তরের ফিল্ড                                                                                                                                                                                                                                                                                                                                                        | নেস্টেড                                                                                                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ফ্ল্যাট প্রিমিটিভ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ডিফল্ট `{ text: true, highlights: true }`-এর ওপর মার্জ করা হয় |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                     |
+| প্রদানকারী | শীর্ষ-স্তরের ফিল্ড                                                                                                                                                                                                                                                                                                                                                        | নেস্টেড                                                                                                                                      |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ফ্ল্যাট প্রিমিটিভ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ডিফল্ট `{ text: true, highlights: true }`-এর ওপর মার্জ করা হয় |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
 জেনেরিক ফিল্ডগুলো সবসময় অগ্রাধিকার পায়: `query`, `max_results`, `filters` (ডোমেইন), `country` এবং
 `search_type` থেকে নির্ধারিত টপিক। Exa-তে, `search_type: "news"` ব্যবহার করলে `category: "news"` অপরিবর্তিত থাকে।
 Tavily `search_type: "finance"`-ও গ্রহণ করে (`topic: "finance"`)।
+
+ফায়ারক্রল অনুসন্ধান খরচ 10টি ফলাফলের সূচনা ব্লক প্রতি রেকর্ড করা হয়, $0.002 (2 ক্রেডিট) একটি ব্লক এবং প্রতি কলে কমপক্ষে একটি ব্লক ( [ফায়ারক্রল বিলিং](https://docs.firecrawl.dev/billing) ): 11টি ফলাফলের মূল্য $0.004।
 
 জেনেরিক `time_range` এখন উভয় প্রদানকারীর কাছেই পৌঁছায়: Exa পায় `startPublishedDate` (ISO
 টাইমস্ট্যাম্প) এবং Tavily পায় `start_date` (`YYYY-MM-DD`)। `provider_options`-এ দেওয়া সুস্পষ্ট তারিখ
@@ -883,9 +885,11 @@ Tavily `search_type: "finance"`-ও গ্রহণ করে (`topic: "finance"
 Exa-এর ফলাফলগুলো `id`, `highlight_scores`, `summary`, `subpages`, `entities` এবং `extras`
 `provider_raw`-এ সংরক্ষণ করে। Tavily-এর ফলাফলগুলো `images` এবং `favicon` সংরক্ষণ করে।
 
-খরচের হিসাব এখনো ফ্ল্যাট রেজিস্ট্রি `costPerQuery`। Tavily-তে
-`search_depth: "advanced"`-এর জন্য প্রতি কলে বেশি ক্রেডিট বিল করা হয়, এবং সেই পার্থক্য
-`usage.search_cost_usd`-এ প্রতিফলিত হয় না।
+লিংকআপ সার্চ খরচ `depth` `fast` এবং `standard` জন্য $0.005 এবং `deep` এর জন্য $0.05 রেকর্ড করা হয়েছে ( [লিঙ্কআপ মূল্য](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` থেকে আসে বা সংযোগের সেটিংস থেকে।
+
+Exa `type: "lite"` (Exa 3.0) ক্ষেত্রগুলির একটি ছোট সেট গ্রহণ করে এবং অন্য কোনও ক্ষেত্র সেট করা হলে পুরো অনুরোধটি প্রত্যাখ্যান করে। লাইটের জন্য, `additionalQueries`, `systemPrompt` এবং `text` এবং `highlights` ছাড়া প্রতিটি `contents` কী কলের আগে ড্রপ করা হয়। অপ্রচলিত `subpages`, `subpageTarget`, `highlights.numSentences` এবং `highlights.highlightsPerUrl` আর ফরওয়ার্ড করা হয় না।
+
+Exa: $0.007 প্রতি কলে `auto` (এবং লিগ্যাসি `fast`) অথবা $0.004 `lite` (এবং লিগ্যাসি `instant`), 10টি ফলাফল কভার করে; প্রতিটি পরবর্তী ফলাফলের জন্য $0.001; এবং $0.001 প্রতি ফেরত ফলাফল যখন `contents.summary` সেট করা হয়। Tavily `search_depth` `basic`, `fast` এবং `ultra-fast` এর জন্য 1 ক্রেডিট ($0.008) এবং `advanced` ( [Tavily API ক্রেডিট](https://docs.tavily.com/documentation/api-credits) ) এর জন্য 2 ক্রেডিট ($0.016) রেকর্ড করা হয়েছে। `auto_parameters: true` এর সাথে একটি কল যা Tavily অ্যাডভান্সড-এ আপগ্রেড করে তা এখনও 1 ক্রেডিটে রেকর্ড করা হয়।
 
 ---
 

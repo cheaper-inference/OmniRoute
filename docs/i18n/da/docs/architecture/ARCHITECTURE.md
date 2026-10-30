@@ -494,6 +494,7 @@ de globale lag for circuit breaker, forbindelsesnedkøling og modellåsning:
   identitet, renser responsheadere og håndterer kredit-/versionssporing via
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (per-request-budget på upstream 429s på tværs af alle værter, `ANTIGRAVITY_MAX_429_ATTEMPTS`; en identisk genafsendelse af et afvist organ besvares lokalt; `src/sse/handlers/chat.ts` genstarter ikke en sådan anmodning gennem det nedkølingsbevidste genforsøg)
 - ModelScope-kvotepolitik: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (Compatibility Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
   samt `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

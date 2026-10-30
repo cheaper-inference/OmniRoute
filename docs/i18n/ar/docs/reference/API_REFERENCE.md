@@ -871,14 +871,16 @@ POST /v1/providers/{provider}/images/generations
 و`stream` و`outputSchema`. تواصل المفاتيح المسطحة التي تستخدمها المزوّدات الأخرى (`cx` و`depth` و...) العمل
 كما كانت من قبل.
 
-| المزوّد | الحقول ذات المستوى الأعلى                                                                                                                                                                                                                                                                                                                                                 | المتداخلة                                                                                                                                                             |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (قيم أولية مسطحة)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                              | تُدمج `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` فوق القيمة الافتراضية `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                                                     |
+| المزوّد | الحقول ذات المستوى الأعلى                                                                                                                                                                                                                                                                                                                                                 | المتداخلة                                                                                                                                    |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (قيم أولية مسطحة)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                              | تُدمج `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` فوق القيمة الافتراضية `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                            |
 
 تكون الأولوية دائمًا للحقول العامة: `query` و`max_results` و`filters` (النطاقات) و`country` والموضوع
 المشتق من `search_type`. في Exa، يحافظ `search_type: "news"` على `category: "news"`.
 ويقبل Tavily أيضًا `search_type: "finance"` ‏(`topic: "finance"`).
+
+Firecrawl: يتم تسجيل تكلفة بحث الزحف الناري لكل كتلة بدأت مكونة من 10 نتائج تم إرجاعها، بسعر 0.002 USD (اعتمادان) للكتل وكتلة واحدة على الأقل لكل مكالمة ( [فواتير الزحف الناري](https://docs.firecrawl.dev/billing) ): تكلفة 11 نتيجة 0.004 دولار أمريكي.
 
 يصل الحقل العام `time_range` الآن إلى كلا المزوّدين: يحصل Exa على `startPublishedDate` (طابع زمني
 بتنسيق ISO)، ويحصل Tavily على `start_date` ‏(`YYYY-MM-DD`). ويتجاوز التاريخ المحدد صراحةً في `provider_options`
@@ -887,9 +889,11 @@ POST /v1/providers/{provider}/images/generations
 تحتفظ نتائج Exa بـ`id` و`highlight_scores` و`summary` و`subpages` و`entities` و`extras` في
 `provider_raw`. وتحتفظ نتائج Tavily بـ`images` و`favicon`.
 
-لا تزال محاسبة التكلفة تستخدم السجل المسطح `costPerQuery`. يحتسب Tavily تكلفة
-`search_depth: "advanced"` بعدد أكبر من الأرصدة لكل استدعاء، ولا يظهر هذا الفرق في
-`usage.search_cost_usd`.
+Linkup: يتم تسجيل تكلفة البحث عن الارتباط بمبلغ 0.005 USD لـ `depth` `fast` و `standard` و0.05 USD لـ `deep` ( [تسعير الارتباط](https://docs.linkup.so/pages/documentation/development/pricing) )، سواء أتى `depth` من `provider_options` أو من إعدادات الاتصال.
+
+يقبل Exa `type: "lite"` (Exa 3.0) مجموعة أصغر من الحقول ويرفض الطلب بالكامل عند تعيين أي حقل آخر. بالنسبة إلى lite، يتم إسقاط `additionalQueries` و `systemPrompt` وكل مفتاح `contents` باستثناء `text` و `highlights` قبل المكالمة. لم يعد يتم إعادة توجيه `subpages` و `subpageTarget` و `highlights.numSentences` و `highlights.highlightsPerUrl` المهملة.
+
+Exa: 0.007 USD لكل استدعاء لـ `auto` (و `fast` القديم) أو 0.004 USD لـ `lite` (و `instant` القديم)، ويغطي 10 نتائج؛ 0.001 دولار لكل نتيجة إضافية؛ و0.001 دولار لكل نتيجة يتم إرجاعها عند تعيين `contents.summary`. تم تسجيل Tavily برصيد واحد (0.008 دولار) لـ `search_depth` `basic` و `fast` و `ultra-fast` و 2 رصيد (0.016 دولار) لـ `advanced` ( [أرصدة Tavily API](https://docs.tavily.com/documentation/api-credits) ). المكالمة مع `auto_parameters: true` التي يقوم Tavily بترقيتها إلى المستوى المتقدم لا تزال مسجلة برصيد واحد.
 
 ---
 

@@ -866,14 +866,16 @@ Exa සහ Tavily, namespace කළ bag එකකින් සැපයුම්
 පරීක්ෂා කෙරෙන අතර, වැරදි වර්ගයක් සහිත යතුරක් ඉවත් කෙරේ. auth, base URL,
 `stream` සහ `outputSchema` ඇතුළුව වෙනත් ඕනෑම යතුරක් නොසලකා හරිනු ලැබේ. අනෙකුත් සැපයුම්කරුවන් භාවිත කරන පැතලි යතුරු (`cx`, `depth`, ...) පෙර පරිදිම ක්රියා කරයි.
 
-| සැපයුම්කරු | ඉහළ මට්ටමේ ක්ෂේත්ර                                                                                                                                                                                                                                                                                                                                                        | අභ්යන්තරව කැදලිගත                                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (පැතලි ප්රාථමික අගයන්), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                         | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` පෙරනිමි `{ text: true, highlights: true }` මත ඒකාබද්ධ කෙරේ |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                 |
+| සැපයුම්කරු | ඉහළ මට්ටමේ ක්ෂේත්ර                                                                                                                                                                                                                                                                                                                                                        | අභ්යන්තරව කැදලිගත                                                                                                                        |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (පැතලි ප්රාථමික අගයන්), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                         | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` පෙරනිමි `{ text: true, highlights: true }` මත ඒකාබද්ධ කෙරේ |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
 සාමාන්ය ක්ෂේත්ර සැමවිටම ප්රමුඛත්වය ගනී: `query`, `max_results`, `filters` (domains), `country` සහ
 `search_type` වෙතින් ව්යුත්පන්න කළ topic එක. Exa හි, `search_type: "news"` මඟින් `category: "news"` එලෙසම තබා ගනී.
 Tavily විසින් `search_type: "finance"` (`topic: "finance"`) ද පිළිගනී.
+
+ෆයර්ක්‍රෝල් සෙවුම් පිරිවැය වාර්තා කරන ලද ප්‍රතිඵල 10කින් ආරම්භ කරන ලද කොටසකට, වාරිකයකට ඩොලර් 0.002 (බැර 2) සහ ඇමතුමකට අවම වශයෙන් එක් වාරණ ( [ෆයර්ක්‍රෝල් බිල්පත්](https://docs.firecrawl.dev/billing) ): 11 ප්‍රතිඵල සඳහා ඩොලර් 0.004ක් වැය වේ.
 
 සාමාන්ය `time_range` දැන් සැපයුම්කරුවන් දෙදෙනාටම ළඟා වේ: Exa වෙත `startPublishedDate` (ISO
 timestamp) ලැබෙන අතර Tavily වෙත `start_date` (`YYYY-MM-DD`) ලැබේ. `provider_options` තුළ ඇති පැහැදිලි දිනයක්
@@ -882,9 +884,11 @@ timestamp) ලැබෙන අතර Tavily වෙත `start_date` (`YYYY-MM-DD`
 Exa ප්රතිඵල `id`, `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras`
 `provider_raw` තුළ රඳවා ගනී. Tavily ප්රතිඵල `images` සහ `favicon` රඳවා ගනී.
 
-පිරිවැය ගිණුම්කරණය තවමත් පැතලි registry එක වන `costPerQuery` භාවිත කරයි. Tavily විසින්
-`search_depth: "advanced"` සඳහා එක් ඇමතුමකට වැඩි credits ගණනක් අය කරන අතර, එම වෙනස
-`usage.search_cost_usd` තුළ පිළිබිඹු නොවේ.
+Linkup සෙවුම් පිරිවැය `depth` `fast` සහ `standard` සඳහා $0.005 සහ `deep` සඳහා $0.05 ( [Linkup මිලකරණය](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` පැමිණෙන්නේ `provider_options` හෝ සම්බන්ධතා සැකසුම් වලින් වුවද.
+
+Exa `type: "lite"` (Exa 3.0) කුඩා ක්ෂේත්‍ර කට්ටලයක් පිළිගන්නා අතර වෙනත් ඕනෑම ක්ෂේත්‍රයක් සකසා ඇති විට සම්පූර්ණ ඉල්ලීම ප්‍රතික්ෂේප කරයි. lite සඳහා, `additionalQueries`, `systemPrompt` සහ `text` සහ `highlights` හැර සෑම `contents` යතුරක්ම ඇමතුමට පෙර අත්හරිනු ලැබේ. අත්හරින ලද `subpages`, `subpageTarget`, `highlights.numSentences` සහ `highlights.highlightsPerUrl` තවදුරටත් යොමු නොකෙරේ.
+
+Exa: `auto` සඳහා ඇමතුමකට $0.007 (සහ උරුමය `fast`) හෝ `lite` සඳහා $0.004 (සහ උරුමය `instant`), ප්‍රතිඵල 10ක් ආවරණය කරයි; එක් එක් ප්‍රතිඵලයක් සඳහා $0.001; සහ `contents.summary` සකසා ඇති විට ලැබෙන ප්‍රතිඵලයකට $0.001. Tavily `search_depth` `basic`, `fast` සහ `ultra-fast` සඳහා ණය 1 ($0.008) ලෙසත්, `advanced` සඳහා ණය 2 ($0.016) ( [Tavily API ණය](https://docs.tavily.com/documentation/api-credits) ) ලෙසත් සටහන් වේ. Tavily උසස් වෙත උත්ශ්‍රේණි කරන `auto_parameters: true` සහිත ඇමතුමක් තවමත් ණය 1කින් වාර්තා වේ.
 
 ---
 

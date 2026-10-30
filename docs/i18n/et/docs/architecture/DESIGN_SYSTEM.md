@@ -7,7 +7,21 @@
 > **Staatus:** armatuurlaud on ehitatud **Keak CI UI Kit**-i (`@keak/cheaper-inference-ui-kit`) peale ning
 > vendoreitud tööruumis `packages/ui-kit` (`@omniroute/ui-kit`; ülemvoo hetktõmmis on fikseeritud failis
 > `packages/ui-kit/UPSTREAM.md` ja seda valvab `npm run check:ui-kit-snapshot`). Hele on kanooniline
-> teema; vaikeeelistus on `system`. Aktsentvärv on Keaki laim (`--ci-color-accent`). Switzer on UI, kuva- ja kooditeksti (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` lahendavad selle) üksikperekond, mida ise hostib komplekt ise (`packages/ui-kit/src/ci-fonts.css`, impordib `ci-tokens.css`). Iga ikoon on Lucide'i glüüf.
+> teema; vaikeeelistus on `system`. Aktsentvärv on Keaki laim (`--ci-color-accent`). Switzer on UI ja kuvateksti (`--ci-font-ui`; `--ci-font-display` ja `--ci-font-mono` lahendavad selle) peamine fondiperekond, mida ise hostib komplekt ise (`packages/ui-kit/src/ci-fonts.css`, impordib `ci-tokens.css`). Iga ikoon on Lucide'i glüüf.
+>
+> Inter on varufont Switzeris puuduvate glüüfide jaoks; `--font-mono` viitab süsteemi fikseeritud laiusega fontide loendile `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Kus asjad asuvad
 

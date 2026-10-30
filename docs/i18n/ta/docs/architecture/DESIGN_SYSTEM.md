@@ -8,7 +8,21 @@
 > வொர்க்ஸ்பேஸ் `packages/ui-kit` ஆக வெண்டர் செய்யப்பட்டுள்ளது (`@omniroute/ui-kit`; upstream ஸ்னாப்ஷாட்
 > `packages/ui-kit/UPSTREAM.md`-இல் pin செய்யப்பட்டு, `npm run check:ui-kit-snapshot` மூலம்
 > பாதுகாக்கப்படுகிறது). Light என்பது முதன்மையான தீம்; இயல்புநிலை விருப்பம் `system`. Accent நிறம்
-> Keak lime (`--ci-color-accent`) ஆகும். Switzer என்பது UI, காட்சி மற்றும் குறியீடு உரை (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` தீர்க்கும்) ஆகியவற்றிற்கான ஒற்றைக் குடும்பமாகும் (zqk ; zql மற்றும் zqm அதைத் தீர்க்கும்), கிட் மூலம் சுயமாக ஹோஸ்ட் செய்யப்பட்டது (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ஆல் இறக்குமதி செய்யப்பட்டது). ஒவ்வொரு ஐகானும் ஒரு லூசிட் கிளிஃப் ஆகும்.
+> Keak lime (`--ci-color-accent`) ஆகும். Switzer என்பது UI மற்றும் காட்சி உரை (`--ci-font-ui`; `--ci-font-display` மற்றும் `--ci-font-mono` தீர்க்கும்) ஆகியவற்றிற்கான முதன்மை எழுத்துருக் குடும்பமாகும், கிட் மூலம் சுயமாக ஹோஸ்ட் செய்யப்பட்டது (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` ஆல் இறக்குமதி செய்யப்பட்டது). ஒவ்வொரு ஐகானும் ஒரு லூசிட் கிளிஃப் ஆகும்.
+>
+> Switzer இல் இல்லாத கிளிஃப்களுக்கான மாற்று எழுத்துரு Inter ஆகும்; `--font-mono` அமைப்பின் சமஅகல எழுத்துரு அடுக்கான `--ci-font-code` ஐக் குறிக்கிறது.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. விஷயங்கள் எங்கே உள்ளன
 

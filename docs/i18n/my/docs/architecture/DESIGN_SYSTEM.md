@@ -4,7 +4,21 @@
 
 ---
 
-> **အခြေအနေ:** dashboard ကို **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) အပေါ်တွင် တည်ဆောက်ထားပြီး၊ workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot ကို `packages/ui-kit/UPSTREAM.md` တွင် pin ထားကာ `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ကြပ်ထားသည်) အဖြစ် vendored လုပ်ထားသည်။ Light သည် canonical theme ဖြစ်ပြီး မူလ preference မှာ `system` ဖြစ်သည်။ Accent မှာ Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Switzer သည် UI၊ display နှင့် code စာသား (`--ci-font-ui`; `--ci-font-display` နှင့် `--ci-font-mono` တို့ကိုဖြေရှင်းရန်) အတွက် တစ်ခုတည်းသော မိသားစုဖြစ်ပြီး kit ကိုယ်တိုင် (`packages/ui-kit/src/ci-fonts.css`၊ `ci-tokens.css` မှ တင်သွင်းသည် ) ။ အိုင်ကွန်တိုင်းသည် Lucide ဂရပ်ဖစ်ဖြစ်သည်။
+> **အခြေအနေ:** dashboard ကို **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) အပေါ်တွင် တည်ဆောက်ထားပြီး၊ workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot ကို `packages/ui-kit/UPSTREAM.md` တွင် pin ထားကာ `npm run check:ui-kit-snapshot` ဖြင့် စောင့်ကြပ်ထားသည်) အဖြစ် vendored လုပ်ထားသည်။ Light သည် canonical theme ဖြစ်ပြီး မူလ preference မှာ `system` ဖြစ်သည်။ Accent မှာ Keak lime (`--ci-color-accent`) ဖြစ်သည်။ Switzer သည် UI နှင့် display စာသား (`--ci-font-ui`; `--ci-font-display` နှင့် `--ci-font-mono` တို့ကိုဖြေရှင်းရန်) အတွက် အဓိက ဖောင့်မိသားစုဖြစ်ပြီး kit ကိုယ်တိုင် (`packages/ui-kit/src/ci-fonts.css`၊ `ci-tokens.css` မှ တင်သွင်းသည် ) ။ အိုင်ကွန်တိုင်းသည် Lucide ဂရပ်ဖစ်ဖြစ်သည်။
+>
+> Inter သည် Switzer တွင် မပါသော glyph များအတွက် အရန်ဖောင့်ဖြစ်သည်။ `--font-mono` သည် စနစ်၏ စာလုံးအကျယ်တူ ဖောင့်စာရင်း `--ci-font-code` ကို ညွှန်းသည်။
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## ၁. အရာများ တည်ရှိရာနေရာ
 

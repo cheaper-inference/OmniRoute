@@ -13,13 +13,13 @@ OmniRoute-ის თითოეულ runner-ს აქვს **ერთი �
 ხოლო რადგან pull-request-ის Builds ჰოსტირებულ runner-ებზე სრულდება, Turbopack-ის სლოტი დროის უმეტეს
 ნაწილში უმოქმედოა:
 
-| runner               | label          | როლი                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-ის აგებები: `ci.yml` `Build` (მხოლოდ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ღამის a11y აგება | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-ის აგება                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | ღამის დავალებები (Schemathesis, promptfoo, garak, k6) და `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | იგივე პული, რაც ზემოთ                                                                                                                                | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (მათი repos)   | მხოლოდ Dependabot (თითოეულის პიკი 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | თითოეულს 200 % |
+| runner               | label                           | როლი                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-ის აგებები: `ci.yml` `Build` (მხოლოდ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ღამის a11y აგება | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-ის აგება                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | ღამის დავალებები (Schemathesis, promptfoo, garak, k6) და `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | იგივე პული, რაც ზემოთ                                                                                                                                | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (მათი repos)                    | მხოლოდ Dependabot (თითოეულის პიკი 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | თითოეულს 200 % |
 
 გაზომილია 2026-10-18:
 
@@ -29,7 +29,7 @@ OmniRoute-ის თითოეულ runner-ს აქვს **ერთი �
 | swap      | 16 GB                         | `omniroute-113-5` მუშაობს გამორთული swap-ით (`MemorySwapMax=0`), რათა უკონტროლო აგება ლიმიტის მიღწევისას შეწყდეს და მთლიანმა ჰოსტმა swap-ის გამოყენება არ დაიწყოს                                                                                                                                                                                                                                 |
 | `/tmp`    | **12 GB tmpfs = RAM**         | ყველაფერი, რაც იქ ინახება, მეხსიერებას იკავებს; ნარჩენები 3 სთ-ის შემდეგ იწმინდება                                                                                                                                                                                                                                                                                                                |
 | CPU       | 32 ბირთვზე დაფიქსირდა load 60 | კვოტების შემოღებამდე, Turbopack-ის ერთმა აგებამ (~1166 % CPU) იმავე ჰოსტზე გაშვებულ coverage suite-თან ერთად სხვა listener-ების heartbeat-ებს რესურსი წაართვა (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                               |
-| runners   | **6 listener**                | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` გათიშულია (`systemctl enable --now` ერთ-ერთ მათგანს კვლავ ააქტიურებს)                                                                                                                                                                                                                                                             |
+| runners   | **7 listener** (2026-10-28)   | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-5` ასევე ატარებს `omni-build-60gb`-ს; `omniroute-113-3/-4/-8` წაიშალა რეპოზიტორიიდან (2026-10-28)                                                                                                                                                                                                                                             |
 
 ლიმიტები ინახება თითოეული unit-ის `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`-ში
 (წინა მნიშვნელობები შენახულია როგორც `override.conf.bak-20261018`) და გაშვებულ სისტემაზე გამოყენებულ
@@ -44,7 +44,7 @@ OmniRoute-ის თითოეულ runner-ს აქვს **ერთი �
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ყოველ 30 წუთში, ჟურნალი ჩაიწეროს /var/log/runner-janitor.log-ში
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` აუცილებელია: წაშლამდე დამსუფთავებელი გახსნილი ფაილების ერთი სურათით
@@ -88,7 +88,7 @@ Runner-ის ნაგულისხმევი `KillMode=process` unit-ი�
 ## მუშაობის წესები
 
 - **ერთდროულად მხოლოდ ერთი Turbopack build — შეზღუდვა label-ით ხორციელდება.** ყველა job, რომელიც სრულ Turbopack
-  `next build`-ს უშვებს, მიზნად `[self-hosted, omni-build]`-ს იყენებს, ხოლო ამ
+  `next build`-ს უშვებს, მიზნად `[self-hosted, omni-build, omni-build-60gb]`-ს იყენებს, ხოლო ამ
   label-ს მხოლოდ **`omniroute-113-5`** ატარებს: `ci.yml`-ის `Build`, `npm-publish.yml`-ის `publish`, `nightly-v4-build`, `preview-artifact`,
   ღამის a11y build (#16853) და `docker-publish.yml`-ის **amd64** (webpack BuildKit-ის შიგნით —
   Turbopack იქ ავარიულად გაითიშა, run 33253576569). Docker-ის arm64 ნაწილი კვლავ `ubuntu-24.04-arm`-ზე რჩება.
@@ -124,8 +124,16 @@ Runner-ის ნაგულისხმევი `KillMode=process` unit-ი�
   2026-10-18-მდე `MemoryHigh=4G` ჰქონდა — promptfoo build იქ 54 წუთის განმავლობაში მეხსიერების განთავისუფლებით
   ძლივს მიიწევდა წინ; 8 GB throttling-ს აღმოფხვრის.
 - **განზრახ ნაკლები listener.** ოთხი OmniRoute unit 2026-08-29-ს გაითიშა — ყოველი დამატებითი
-  listener ზემოთ აღწერილი მეხსიერების ბიუჯეტის კიდევ ერთი მომხმარებელია. janitor-ის ზედა ზღვარია 6 (`MAX_ACTIVE_RUNNERS=6` cron-ში): ის ითვლის
-  box-ზე არსებულ ყველა `Runner.Listener`-ს, ხოლო OmniHeuris და OmniMind ჩვენს ოთხს კიდევ ორს ამატებს.
+  listener ზემოთ აღწერილი მეხსიერების ბიუჯეტის კიდევ ერთი მომხმარებელია. janitor-ის ზედა ზღვარია 8 (`MAX_ACTIVE_RUNNERS=8` cron-ში): ის ითვლის
+  box-ზე არსებულ ყველა `Runner.Listener`-ს, ხოლო OmniHeuris და OmniMind ჩვენს ხუთს კიდევ ორს ამატებს.
+- **Unit და Vitest დავალებები ჰოსტირებულზე რჩება.** `ci.yml` თავის unit shard-ებს და Vitest დავალებას
+  `[self-hosted, omni-ci]`-ზე მხოლოდ მაშინ აგზავნის, როცა რეპოზიტორიის ცვლადი `vars.USE_VPS_TEST_RUNNER` არის
+  `true`, და ისიც მხოლოდ იმავე რეპოზიტორიის `pull_request` გაშვებებისთვის; fork-ები, `merge_group` და push-ები
+  `ubuntu-latest`-ზე რჩება (`tests/unit/vps-runner-variable-scope.test.ts`). ცვლადის მნიშვნელობაა
+  `false`. 2026-10-28-ს სამმა 4-ბირთვიანმა `omni-ci` listener-მა `npm ci`-ს 250–270 წმ მოანდომა და ყოველმა
+  unit shard-მა 30-წუთიან დავალების ლიმიტს მიაღწია, მაშინ როცა ჰოსტირებულ shard-ს ~634 წმ სჭირდება, box-ის დატვირთვა კი
+  17–24 იყო. listener-ები წაიშალა. ცვლადი ხელახლა არ ჩართოთ unit shard-ისთვის შესაფერისი ზომის
+  listener-ების გარეშე.
 - **არასოდეს გაასუფთაოთ `/tmp` ან `_work` ხელით, სანამ რომელიმე runner დაკავებულია.**
   შემოწმებასა და წაშლას შორის შუალედის მქონე check-then-delete მიდგომის გამო მოქმედმა Build job-მა
   2026-08-27-ს საკუთარი `_work` დაკარგა. janitor შემოწმებასა და წაშლას ერთ მოქმედებად ასრულებს;
@@ -139,8 +147,10 @@ Runner-ის ნაგულისხმევი `KillMode=process` unit-ი�
 
 ## ჰოსტირებული არხი (GitHub-ის მიერ ჰოსტირებული რანერები)
 
-ანგარიში **Pro** გეგმაზეა: **40 პარალელური ჰოსტირებული დავალება**, რომლებსაც ყველა PR-ის შემოწმება,
-ყოველი push-ით გაშვებული workflow და CodeQL-ის ნაგულისხმევი კონფიგურაცია იზიარებს. 2026-10-18-ს,
+რეპოზიტორია ეკუთვნის ორგანიზაციას `cheaper-inference`, რომელიც **Team** გეგმაზეა: **60
+პარალელური ჰოსტირებული დავალება**, რომლებსაც ორგანიზაციის ყველა რეპოზიტორია, ყველა PR-ის შემოწმება,
+ყოველი push-ით გაშვებული workflow და CodeQL-ის ნაგულისხმევი კონფიგურაცია იზიარებს. ქვემოთ მოცემული მონაცემები გაიზომა
+**Pro** გეგმაზე (40 პარალელური ჰოსტირებული დავალება). 2026-10-18-ს,
 გაერთიანებების კამპანიის დროს (~10 გაერთიანება/საათში `release/v3.8.52`-ზე), გაზომვისას დაფიქსირდა:
 **24 საათში შექმნილი 2,500 workflow-ის გაშვება**, 6 საათში ამ branch-ზე 44 push და
 **რიგში ჩაყენებული 106 ჰოსტირებული დავალება**, მაშინ როცა PR-ის შემოწმებები საათობით იცდიდნენ

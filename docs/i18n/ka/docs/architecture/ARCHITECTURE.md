@@ -493,6 +493,7 @@ FSM-ის გადასვლები გავლენას ახდე�
   იდენტობას, ასუფთავებს პასუხის სათაურებს, მართავს კრედიტების/ვერსიის აღრიცხვას
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`-ის მეშვეობით)
+- Antigravity 429 მცველი: `open-sse/services/antigravity429Guard.ts` (თითო მოთხოვნაზე ზემოთ 429-ების ბიუჯეტი ყველა ჰოსტში, `ANTIGRAVITY_MAX_429_ATTEMPTS`; უარის თქმის იდენტური ხელახალი გაგზავნა პასუხობს ადგილობრივად; `src/sse/handlers/chat.ts` არ განაახლებს ასეთ მოთხოვნას გაგრილების ცოდნის განმეორებით)
 - ModelScope-ის კვოტის პოლიტიკა: `open-sse/services/modelscopePolicy.ts`
 - Claude Code CCH (თავსებადობის არხის ხელის ჩამორთმევა): `open-sse/services/claudeCodeCCH.ts`,
   დამატებით `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

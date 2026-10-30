@@ -7,7 +7,21 @@
 > **Status:** tabloul de bord este construit pe baza **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), preluat local (vendored)
 > ca workspace-ul `packages/ui-kit` (`@omniroute/ui-kit`; snapshot-ul upstream este fixat în
 > `packages/ui-kit/UPSTREAM.md` și verificat prin `npm run check:ui-kit-snapshot`). Light este tema
-> canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Switzer este familia unică pentru UI, afișare și text de cod (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Fiecare pictogramă este un glif Lucide.
+> canonică; preferința implicită este `system`. Culoarea de accent este Keak lime (`--ci-color-accent`). Switzer este familia principală pentru UI și textul afișat (`--ci-font-ui`; `--ci-font-display` și `--ci-font-mono` se rezolvă la acesta), auto-găzduit de kit în sine (`packages/ui-kit/src/ci-fonts.css`, importat de `ci-tokens.css`). Fiecare pictogramă este un glif Lucide.
+>
+> Inter este un font de rezervă pentru glifele care lipsesc din Switzer; `--font-mono` indică stiva de fonturi monospațiate a sistemului `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Unde se află lucrurile
 

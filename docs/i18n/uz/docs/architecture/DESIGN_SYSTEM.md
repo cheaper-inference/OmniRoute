@@ -7,7 +7,21 @@
 > **Holat:** boshqaruv paneli **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) asosida qurilgan bo‘lib,
 > u `packages/ui-kit` workspace’i sifatida kiritilgan (`@omniroute/ui-kit`; yuqori oqim (upstream) snapshot’i
 > `packages/ui-kit/UPSTREAM.md` faylida mahkamlangan va `npm run check:ui-kit-snapshot` bilan himoyalangan). Yorug‘ (Light) mavzu kanonik
-> mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Switzer UI, displey va kod matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun yagona oila bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Har bir belgi Lucid glifidir.
+> mavzu hisoblanadi; standart tanlov — `system`. Aktsent rangi — Keak lime (`--ci-color-accent`). Switzer UI va displey matni (`--ci-font-ui`; `--ci-font-display` va `--ci-font-mono` to'g'ridan-to'g'ri) uchun asosiy shrift oilasi bo'lib, to'plamning o'zi (`packages/ui-kit/src/ci-fonts.css`, `ci-tokens.css` tomonidan import qilingan) tomonidan o'z-o'zidan joylashtirilgan. Har bir belgi Lucid glifidir.
+>
+> Inter — Switzer'da yo‘q gliflar uchun zaxira shrift; `--font-mono` tizimning bir xil kenglikdagi shriftlar to‘plami `--ci-font-code`ga murojaat qiladi.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Narsalar qayerda joylashgani
 

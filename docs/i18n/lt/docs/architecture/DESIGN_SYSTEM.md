@@ -4,7 +4,21 @@
 
 ---
 
-> **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Switzer yra viena šeima, skirta UI, ekranui ir kodo tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
+> **Būsena:** informacinė suvestinė sukurta naudojant **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), perkeltą į projektą kaip darbo srities paketą `packages/ui-kit` (`@omniroute/ui-kit`; pirminis (upstream) momentinis vaizdas prisegtas `packages/ui-kit/UPSTREAM.md` ir saugomas `npm run check:ui-kit-snapshot`). Šviesi tema yra kanoninė; numatytoji nuostata yra `system`. Akcentinė spalva yra Keak laimo (`--ci-color-accent`). Switzer yra pagrindinė šriftų šeima, skirta UI ir rodomam tekstui (`--ci-font-ui`; `--ci-font-display` ir `--ci-font-mono` jį atitinka), savarankiškai priglobta paties rinkinio (`packages/ui-kit/src/ci-fonts.css`, importuota `ci-tokens.css`). Kiekviena piktograma yra Lucide glifas.
+>
+> Inter yra atsarginis šriftas glifams, kurių nėra Switzer; `--font-mono` nurodo sistemos vienodo pločio šriftų sąrašą `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Kur kas saugoma
 

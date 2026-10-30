@@ -818,14 +818,16 @@ Exa와 Tavily는 네임스페이스가 지정된 객체에서 제공자별 필�
 포함한 그 외 모든 키는 무시됩니다. 다른 제공자가 사용하는 평면 키(`cx`, `depth`, ...)는
 이전과 동일하게 작동합니다.
 
-| 제공자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩 필드                                                                                                                                                      |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance`(평면 기본 타입), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
-| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                              |
+| 제공자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩 필드                                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance`(평면 기본 타입), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
+| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
 일반 필드가 항상 우선합니다. 해당 필드는 `query`, `max_results`, `filters`(도메인), `country` 및
 `search_type`에서 파생된 주제입니다. Exa에서 `search_type: "news"`는 `category: "news"`를 유지합니다.
 Tavily는 `search_type: "finance"`(`topic: "finance"`)도 허용합니다.
+
+Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2크레딧), 호출당 최소 하나의 블록( [Firecrawl 청구](https://docs.firecrawl.dev/billing) )으로 기록됩니다. 11개 결과 비용은 $0.004입니다.
 
 이제 일반 `time_range`가 두 제공자 모두에 전달됩니다. Exa에는 `startPublishedDate`(ISO
 타임스탬프)가, Tavily에는 `start_date`(`YYYY-MM-DD`)가 전달됩니다. `provider_options`에 명시된 날짜는
@@ -834,9 +836,11 @@ Tavily는 `search_type: "finance"`(`topic: "finance"`)도 허용합니다.
 Exa 결과는 `id`, `highlight_scores`, `summary`, `subpages`, `entities`, `extras`를
 `provider_raw`에 유지합니다. Tavily 결과는 `images`와 `favicon`을 유지합니다.
 
-비용 계산에는 계속해서 평면 레지스트리인 `costPerQuery`가 사용됩니다. Tavily는
-`search_depth: "advanced"`에 대해 호출당 더 많은 크레딧을 청구하며, 이 차이는
-`usage.search_cost_usd`에 반영되지 않습니다.
+링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 가져온 것인지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격](https://docs.linkup.so/pages/documentation/development/pricing) ).
+
+Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
+
+Exa: `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
 
 ---
 

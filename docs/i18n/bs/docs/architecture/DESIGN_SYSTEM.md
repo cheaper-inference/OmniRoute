@@ -7,7 +7,21 @@
 > **Status:** kontrolna ploča je izgrađena na **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), uključenom (vendored)
 > kao workspace `packages/ui-kit` (`@omniroute/ui-kit`; upstream snapshot je fiksiran u
 > `packages/ui-kit/UPSTREAM.md` i zaštićen sa `npm run check:ui-kit-snapshot`). Svijetla je kanonska
-> tema; zadana postavka je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Switzer je jedinstvena porodica za UI, prikaz i tekst koda (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
+> tema; zadana postavka je `system`. Akcentna boja je Keak lime (`--ci-color-accent`). Switzer je primarna porodica fontova za UI i prikaz teksta (`--ci-font-ui`; `--ci-font-display` i `--ci-font-mono` rješavaju ga), koji sam hostuje sam komplet (`packages/ui-kit/src/ci-fonts.css`, uvezen od `ci-tokens.css`). Svaka ikona je Lucide glif.
+>
+> Inter je rezervni font za glifove koji nedostaju u Switzeru; `--font-mono` upućuje na sistemski niz monospace fontova `--ci-font-code`.
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. Gdje se stvari nalaze
 

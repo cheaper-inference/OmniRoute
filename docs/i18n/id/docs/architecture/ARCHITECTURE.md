@@ -494,6 +494,7 @@ lapisan pemutus sirkuit global / jeda koneksi / penguncian model:
   identitas, membersihkan header respons, menjalankan pelacakan kredit/versi melalui
   `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
   `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 penjaga: `open-sse/services/antigravity429Guard.ts` (anggaran per permintaan upstream 429 di semua host, `ANTIGRAVITY_MAX_429_ATTEMPTS`; pengiriman ulang yang sama dari isi yang ditolak akan dijawab secara lokal; `src/sse/handlers/chat.ts` tidak memulai ulang permintaan tersebut melalui percobaan ulang sadar cooldown)
 - Kebijakan kuota ModelScope: `open-sse/services/modelscopePolicy.ts`
 - CCH (Compatibility Channel Handshake) Claude Code: `open-sse/services/claudeCodeCCH.ts`,
   serta `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,

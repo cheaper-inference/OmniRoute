@@ -8,7 +8,21 @@
 > ワークスペースの `packages/ui-kit`（`@omniroute/ui-kit`、上流スナップショットは
 > `packages/ui-kit/UPSTREAM.md` に固定され、`npm run check:ui-kit-snapshot` で保護されている）として
 > ベンダー化されている。Light が標準テーマであり、デフォルトの設定は `system`。アクセントカラーは Keak ライム
-> （`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+> （`--ci-color-accent`）です。 Switzer は、 UI および表示テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の主要なフォントファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+>
+> Inter は Switzer にないグリフのフォールバックです。`--font-mono` はシステムの等幅フォントスタック `--ci-font-code` を参照します。
+
+`src/app/globals.css`:
+
+```css
+:root,
+.ci-theme {
+  --ci-font-ui:
+    "Switzer", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  --ci-font-code: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  --font-mono: var(--ci-font-code);
+}
+```
 
 ## 1. どこに何があるか
 
