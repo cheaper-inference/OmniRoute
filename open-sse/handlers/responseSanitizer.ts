@@ -2,6 +2,11 @@ import {
   copyOpenAICompatibleReasoningFields,
   getReadableReasoningValue,
 } from "../utils/reasoningFields.ts";
+import {
+  hasDotsToolCalls,
+  parseDotsToolCalls,
+  stripDotsToolCallBlocks,
+} from "../utils/dotsToolCalls.ts";
 import { stripInternalReasoningPlaceholder } from "../utils/reasoningPlaceholder.ts";
 import { normalizeOpenAICompatibleFinishReason } from "../utils/finishReason.ts";
 import {
@@ -408,6 +413,29 @@ function applyTextualToolCallSanitization(sanitized: JsonRecord, msgRecord: Json
   }
 }
 
+/** Dots Studio `<dots_function_call>` markup in content (OpenAI leg) becomes structured tool_calls. */
+function applyDotsToolCallSanitization(sanitized: JsonRecord, msgRecord: JsonRecord): void {
+  if (typeof sanitized.content !== "string" || !hasDotsToolCalls(sanitized.content)) return;
+  // Non-streaming body only: a whole message, so nothing is held back for a later chunk.
+  // finish_reason belongs to the choice; sanitizeOpenAIResponse promotes it to
+  // "tool_calls" once the message carries tool_calls.
+  const dotsResult = parseDotsToolCalls(sanitized.content, { final: true });
+  if (dotsResult.toolCalls.length > 0 && !msgRecord.tool_calls && !sanitized.tool_calls) {
+    sanitized.content = dotsResult.content || null;
+    sanitized.tool_calls = dotsResult.toolCalls;
+  } else if (dotsResult.content !== sanitized.content) {
+    sanitized.content = dotsResult.content || null;
+  }
+}
+
+/** Scrub dots blocks from reasoning fields if present. */
+function scrubDotsFromReasoning(sanitized: JsonRecord): void {
+  for (const key of ["reasoning_content", "reasoning"]) {
+    const value = sanitized[key];
+    if (typeof value === "string") sanitized[key] = stripDotsToolCallBlocks(value);
+  }
+}
+
 function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
   const msgRecord = toRecord(msg);
   if (!msgRecord) return msg;
@@ -419,7 +447,9 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
 
   Object.assign(sanitized, sanitizeMessageContent(msgRecord, options));
 
+  applyDotsToolCallSanitization(sanitized, msgRecord);
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
+  scrubDotsFromReasoning(sanitized);
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {
