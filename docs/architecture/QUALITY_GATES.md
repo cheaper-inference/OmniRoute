@@ -59,8 +59,14 @@ These profiles cover the static scan only. They do not certify product tests,
 coverage, packaging, external checks or a candidate's full release acceptance.
 Workflow admission uses the linked `config/quality/admission-policy.json` and
 `scripts/quality/admission-verdict.mjs`. Release-observer profiles remain separate;
-inspect their applicable checks and receipts independently. The prose
-inventory below is a reference, not proof that a gate actually ran.
+inspect their applicable checks and receipts independently. The full observer's static
+commands are declared in `config/quality/release-green-static-profile.json`, including
+`audit:deps`, mutation-test selection and translation checks. The loader validates npm
+commands against package.json and modeled CI/Quality declarations; it rejects drift
+instead of executing shell tokens as arguments. Required scanner SKIP/INCOMPLETE output
+cannot establish PASS. The profile records its external exclusions and does not replace
+hosted coverage, test matrices, package or deployment evidence. The prose inventory below
+is a reference, not proof that a gate actually ran.
 
 Scripts live under `scripts/check/` (policy gates) and `scripts/quality/` (ratchet engine).
 The CI source of truth is `.github/workflows/ci.yml`.

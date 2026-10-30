@@ -300,12 +300,13 @@ jobs:
           path: coverage/
       # Prefer lint job's ESLint JSON (one inventory, two consumers).
       - name: Download ESLint results
-        continue-on-error: true
         uses: actions/download-artifact@v8
         with:
           name: eslint-results
           path: .artifacts/
       - run: npm run quality:collect
+        env:
+          ESLINT_RESULTS_JSON: .artifacts/eslint-results.json
       # Catraca: falha se qualquer métrica regredir vs quality-baseline.json (commitado).
       # Hoje: contagem de warnings do ESLint. Fase 4 estende com cobertura (lida do
       # coverage mergeado). Tamanho de arquivo e duplicação têm gates dedicados.

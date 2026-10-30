@@ -11,6 +11,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 import * as yaml from "js-yaml";
+import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
 
 const cwd = process.cwd();
 const out = {};
@@ -26,13 +27,11 @@ function eslintCounts() {
   // Prefer a precomputed JSON report (same existence reason as lint job: inventory
   // of net-new warnings vs suppressions). Avoids a second cold full-tree ESLint
   // when CI/local already produced the report.
-  const cached = path.resolve(
-    cwd,
-    process.env.ESLINT_RESULTS_JSON || path.join(".artifacts", "eslint-results.json")
-  );
+  const selectedReport = process.env.ESLINT_RESULTS_JSON;
   let results;
-  if (fs.existsSync(cached)) {
-    results = JSON.parse(fs.readFileSync(cached, "utf8"));
+  if (selectedReport) {
+    // An explicitly selected receipt is a dependency, never a request for a fallback scan.
+    results = JSON.parse(fs.readFileSync(path.resolve(cwd, selectedReport), "utf8"));
   } else {
     let stdout;
     const eslintBin = path.join(
@@ -44,6 +43,7 @@ function eslintCounts() {
     const args = [".", "--format", "json", "--cache", "--cache-location", ".eslintcache"];
     if (fs.existsSync(path.join(cwd, "config/quality/eslint-suppressions.json"))) {
       args.push("--suppressions-location", "config/quality/eslint-suppressions.json");
+      args.push("--pass-on-unpruned-suppressions");
     }
     try {
       // Prefer local bin (Windows-safe .cmd); shell only when needed for the shim.
@@ -53,13 +53,15 @@ function eslintCounts() {
         shell: process.platform === "win32",
       });
     } catch (e) {
-      // eslint sai com código != 0 quando há errors; o JSON ainda vem no stdout
-      stdout = e.stdout?.toString() || "[]";
+      // Exit 1 is a completed policy failure. Tool/setup failures are not zero findings.
+      if (e.status !== 1 || e.signal || !e.stdout?.length) throw e;
+      stdout = e.stdout.toString();
     }
     results = JSON.parse(stdout);
   }
-  out.eslintWarnings = results.reduce((n, r) => n + (r.warningCount || 0), 0);
-  out.eslintErrors = results.reduce((n, r) => n + (r.errorCount || 0), 0);
+  const counts = eslintMeasurementCounts(results);
+  out.eslintWarnings = counts.warnings;
+  out.eslintErrors = counts.errors;
 }
 
 // 2) Cobertura: lê coverage/coverage-summary.json se existir (gerado por c8)
