@@ -495,6 +495,7 @@
       "tests/unit/responses-passthrough-openai-compatible.test.ts",
       "tests/unit/retry-after-provenance.test.ts",
       "tests/unit/rotation-config-omniroute.test.ts",
+      "tests/unit/rotation-config-provider-cooldown.test.ts",
       "tests/unit/route-explainability.test.ts",
       "tests/unit/route-guard-acp-agents-local-only.test.ts",
       "tests/unit/route-guard-cli-tools-settings-local-only.test.ts",
