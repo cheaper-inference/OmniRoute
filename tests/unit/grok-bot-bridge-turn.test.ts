@@ -1,12 +1,9 @@
 import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 
-const { startBridgeTurn, BRIDGE_TOOL_NAME } = await import(
-  "../../open-sse/executors/grok-bot-bridge.ts"
-);
-const { GrokBotBridgeRegistry } = await import(
-  "../../open-sse/services/grokBotBridgeRegistry.ts"
-);
+const { startBridgeTurn, BRIDGE_TOOL_NAME } =
+  await import("../../open-sse/executors/grok-bot-bridge.ts");
+const { GrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
 
 describe("grok bot bridge turn (registry-backed)", () => {
   let registry: InstanceType<typeof GrokBotBridgeRegistry>;
@@ -87,11 +84,12 @@ describe("grok bot bridge turn (registry-backed)", () => {
       method: "tools/call",
       params: { name: BRIDGE_TOOL_NAME, arguments: { a: 2, b: 2 } },
     });
-    const post = () => fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
-      method: "POST",
-      headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
-      body,
-    });
+    const post = () =>
+      fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
+        method: "POST",
+        headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
+        body,
+      });
     assert.equal((await post()).status, 200);
     assert.equal((await post()).status, 200);
     assert.deepEqual(turn.invocations, [{ name: BRIDGE_TOOL_NAME, arguments: { a: 2, b: 2 } }]);
@@ -99,10 +97,22 @@ describe("grok bot bridge turn (registry-backed)", () => {
 
   it("advertises the tools it was given and accepts a call to one of them", async () => {
     const tools = [
-      { name: "canary_value", description: "canary", inputSchema: { type: "object", properties: {} } },
-      { name: "canary_echo", description: "echo", inputSchema: { type: "object", properties: { text: { type: "string" } } } },
+      {
+        name: "canary_value",
+        description: "canary",
+        inputSchema: { type: "object", properties: {} },
+      },
+      {
+        name: "canary_echo",
+        description: "echo",
+        inputSchema: { type: "object", properties: { text: { type: "string" } } },
+      },
     ];
-    const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry, tools });
+    const turn = await startBridgeTurn({
+      publicBaseUrl: "https://bridge.example.com",
+      registry,
+      tools,
+    });
     const found = registry.lookup(turn.nonce);
     if (found.kind !== "active") {
       assert.fail(`nonce must be active, got: ${found.kind}`);
@@ -113,13 +123,18 @@ describe("grok bot bridge turn (registry-backed)", () => {
       body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "tools/list" }),
     });
     const listBody = (await list.json()) as { result: { tools: Array<{ name: string }> } };
-    assert.deepEqual(listBody.result.tools.map((tool) => tool.name), ["canary_value", "canary_echo"]);
+    assert.deepEqual(
+      listBody.result.tools.map((tool) => tool.name),
+      ["canary_value", "canary_echo"]
+    );
 
     const call = await fetch(`http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`, {
       method: "POST",
       headers: { authorization: "Bearer " + turn.challenge, "content-type": "application/json" },
       body: JSON.stringify({
-        jsonrpc: "2.0", id: 2, method: "tools/call",
+        jsonrpc: "2.0",
+        id: 2,
+        method: "tools/call",
         params: { name: "canary_echo", arguments: { text: "ping" } },
       }),
     });
@@ -162,7 +177,11 @@ describe("grok bot bridge turn (registry-backed)", () => {
         closedReason = reason;
       },
     });
-    assert.match(turn.url, /^https:\/\/bridge\.example\.com\/grok-bridge\//, "base trailing slash stripped");
+    assert.match(
+      turn.url,
+      /^https:\/\/bridge\.example\.com\/grok-bridge\//,
+      "base trailing slash stripped"
+    );
     assert.equal(turn.close("normal"), true);
     // New admissions stop immediately even though drain is still running.
     const replay = registry.lookup(turn.nonce);
@@ -221,7 +240,10 @@ describe("grok bot bridge turn (registry-backed)", () => {
     const turns = [];
     for (let i = 0; i < 100; i += 1) {
       turns.push(
-        await startBridgeTurn({ publicBaseUrl: "https://bridge.example.com", registry: fullRegistry })
+        await startBridgeTurn({
+          publicBaseUrl: "https://bridge.example.com",
+          registry: fullRegistry,
+        })
       );
     }
     const err = await startBridgeTurn({

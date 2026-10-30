@@ -85,13 +85,21 @@ type FixtureServer = {
 
 function makeFixtureServer(): Promise<FixtureServer> {
   const requests: RecordedRequest[] = [];
-  let currentHandler: (req: http.IncomingMessage, res: http.ServerResponse) => void = (req, res) => {
+  let currentHandler: (req: http.IncomingMessage, res: http.ServerResponse) => void = (
+    req,
+    res
+  ) => {
     let size = 0;
     req.on("data", (c) => {
       size += c.length;
     });
     req.on("end", () => {
-      requests.push({ method: req.method ?? "", url: req.url ?? "", headers: req.headers, bodyLength: size });
+      requests.push({
+        method: req.method ?? "",
+        url: req.url ?? "",
+        headers: req.headers,
+        bodyLength: size,
+      });
       res.writeHead(200, { "content-type": "application/json" });
       res.end(JSON.stringify({ ok: true }));
     });
@@ -112,7 +120,10 @@ function makeFixtureServer(): Promise<FixtureServer> {
   });
 }
 
-function postRequest(nonce: string, options: { challenge?: string | null; body?: BodyInit; headers?: HeadersInit } = {}): Request {
+function postRequest(
+  nonce: string,
+  options: { challenge?: string | null; body?: BodyInit; headers?: HeadersInit } = {}
+): Request {
   const headers = new Headers(options.headers);
   if (options.challenge !== null) {
     headers.set("authorization", `Bearer ${options.challenge ?? "test-challenge"}`);
@@ -161,7 +172,10 @@ describe("grok bot bridge proxy pipeline", () => {
   it("proxies a valid request end to end and forwards only authorization and content-type", async () => {
     const { nonce, challenge } = registerTurn();
     const res = await handleGrokBridgeRequest({
-      request: postRequest(nonce, { challenge, headers: { "content-type": "application/json", "x-extra": "drop-me" } }),
+      request: postRequest(nonce, {
+        challenge,
+        headers: { "content-type": "application/json", "x-extra": "drop-me" },
+      }),
       upstreamPath: `/grok-bridge/${nonce}/mcp`,
       nonce,
       registry,
@@ -174,7 +188,11 @@ describe("grok bot bridge proxy pipeline", () => {
     assert.equal(upstream.url, `/grok-bridge/${nonce}/mcp`);
     assert.equal(upstream.headers.authorization, `Bearer ${challenge}`);
     assert.equal(upstream.headers["content-type"], "application/json");
-    assert.equal(upstream.headers["x-extra"], undefined, "hop-by-hop and unknown headers are dropped by construction");
+    assert.equal(
+      upstream.headers["x-extra"],
+      undefined,
+      "hop-by-hop and unknown headers are dropped by construction"
+    );
   });
 
   it("preserves the upstream status and content-type on error responses", async () => {
@@ -191,7 +209,11 @@ describe("grok bot bridge proxy pipeline", () => {
     });
     assert.equal(res.status, 500);
     assert.equal(res.headers.get("content-type"), "application/json");
-    assert.equal(res.headers.get("x-upstream-secret"), null, "upstream response headers are not blindly copied");
+    assert.equal(
+      res.headers.get("x-upstream-secret"),
+      null,
+      "upstream response headers are not blindly copied"
+    );
   });
 
   it("returns 404 for an unknown nonce and consumes nothing", async () => {
@@ -514,7 +536,10 @@ describe("grok bot bridge proxy pipeline", () => {
     const options = handleGrokBridgeOptions();
     assert.equal(options.status, 204);
     assert.equal(options.headers.get("access-control-allow-methods"), "GET, POST, OPTIONS");
-    assert.equal(options.headers.get("access-control-allow-headers"), "authorization, content-type, accept, mcp-protocol-version");
+    assert.equal(
+      options.headers.get("access-control-allow-headers"),
+      "authorization, content-type, accept, mcp-protocol-version"
+    );
     const other = handleGrokBridgeMethodNotAllowed();
     assert.equal(other.status, 405);
     assert.equal(other.headers.get("allow"), "GET, POST, OPTIONS");

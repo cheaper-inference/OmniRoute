@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "doon",
     "errNoReply": "⚠️ Walang sagot mula sa gateway.",
     "btnSend": "Ipadala"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Mga nakapaggawa ng singin na account, mga bot, skills, at lokal na kompyuter.",

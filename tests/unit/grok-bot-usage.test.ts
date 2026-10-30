@@ -6,9 +6,8 @@ const { USAGE_FETCHER_PROVIDERS, getUsageForProvider } =
 const { USAGE_SUPPORTED_PROVIDERS } = await import("../../src/shared/constants/providers.ts");
 const { OAUTH_PROVIDERS } = await import("../../src/shared/constants/providers/oauth.ts");
 const { getLobeProviderIcon } = await import("../../src/shared/components/lobeProviderIcons.ts");
-const { parseQuotaData } = await import(
-  "../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts"
-);
+const { parseQuotaData } =
+  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts");
 
 const originalFetch = globalThis.fetch;
 
@@ -48,9 +47,6 @@ describe("Grok Bot usage", () => {
     assert.equal(result.plan, "SuperGrok Heavy");
     assert.equal(result.quotas?.weekly?.remainingPercentage, 98.34282);
     assert.equal(result.quotas?.weekly?.resetAt, resetAt);
-    assert.equal(
-      parseQuotaData("grok-bot", result)[0]?.remainingPercentage,
-      98.34282
-    );
+    assert.equal(parseQuotaData("grok-bot", result)[0]?.remainingPercentage, 98.34282);
   });
 });

@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "тамо",
     "errNoReply": "⚠️ Нема одговора од гатеваја.",
     "btnSend": "Пошаљи"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Prijavljeni nalozi, njihovi botovi, veštine i lokalna računara.",

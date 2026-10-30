@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "هناك",
     "errNoReply": "⚠️ لا توجد ردود من بوابة.",
     "btnSend": "إرسال"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "الحسابات المسجّل دخولها، وبوتاتها، ومهاراتها، وأجهزة الكمبيوتر المحلية.",

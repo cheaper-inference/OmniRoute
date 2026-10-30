@@ -30,7 +30,11 @@ test("a different connection refreshes on its own", async () => {
 test("a finished refresh is not replayed", async () => {
   const gate = singleFlight();
   let calls = 0;
-  const run = () => gate.run("conn-1", async () => { calls += 1; return calls; });
+  const run = () =>
+    gate.run("conn-1", async () => {
+      calls += 1;
+      return calls;
+    });
   await run();
   await run();
   assert.equal(calls, 2);

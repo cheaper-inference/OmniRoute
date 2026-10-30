@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "sina",
     "errNoReply": "⚠️ Väravalt ei ole vastust.",
     "btnSend": "Saada"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Sisse loginud kontod, nende botid, oskused ja kohalikud arvutud.",

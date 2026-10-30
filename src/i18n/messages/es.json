@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "Ahí",
     "errNoReply": "⚠️ Sin respuesta de la pasarela.",
     "btnSend": "Enviar"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Cuentas con sesión iniciada, sus bots, habilidades y equipos locales.",

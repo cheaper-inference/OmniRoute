@@ -19,10 +19,7 @@ describe("fetchGrokBotAccountEmail", () => {
       return jsonResponse(200, { email: "User@Example.com" });
     });
     assert.equal(email, "user@example.com");
-    assert.equal(
-      seen.url,
-      "https://api2.cursor.sh/aiserver.v1.DashboardService/GetMe"
-    );
+    assert.equal(seen.url, "https://api2.cursor.sh/aiserver.v1.DashboardService/GetMe");
     assert.equal(seen.headers?.get("authorization"), "Bearer token-1");
     assert.equal(seen.headers?.get("x-cursor-client-type"), "sand");
   });

@@ -26,16 +26,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   } catch {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
-  const payload = incoming.dismiss === true
-    ? widgetDismissal({
-        agentId: typeof incoming.agentId === "string" ? incoming.agentId : "",
-        entryId: typeof incoming.entryId === "string" ? incoming.entryId : "",
-      })
-    : widgetReply({
-        agentId: typeof incoming.agentId === "string" ? incoming.agentId : "",
-        entryId: typeof incoming.entryId === "string" ? incoming.entryId : "",
-        value: typeof incoming.value === "string" ? incoming.value : "",
-      });
+  const payload =
+    incoming.dismiss === true
+      ? widgetDismissal({
+          agentId: typeof incoming.agentId === "string" ? incoming.agentId : "",
+          entryId: typeof incoming.entryId === "string" ? incoming.entryId : "",
+        })
+      : widgetReply({
+          agentId: typeof incoming.agentId === "string" ? incoming.agentId : "",
+          entryId: typeof incoming.entryId === "string" ? incoming.entryId : "",
+          value: typeof incoming.value === "string" ? incoming.value : "",
+        });
   if (!payload) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
@@ -47,14 +48,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       payload,
     });
     return NextResponse.json(
-      { status: answer && typeof answer === "object" && Object.keys(answer).length > 0 ? "dispatched" : "unknown" },
+      {
+        status:
+          answer && typeof answer === "object" && Object.keys(answer).length > 0
+            ? "dispatched"
+            : "unknown",
+      },
       { status: answer && typeof answer === "object" && Object.keys(answer).length > 0 ? 200 : 502 }
     );
   } catch (error) {
     const failure = permissionFailure((error as { status?: number }).status);
-    return NextResponse.json(
-      failure.code === "gone" ? { error: "gone" } : { status: "unknown" },
-      { status: failure.status }
-    );
+    return NextResponse.json(failure.code === "gone" ? { error: "gone" } : { status: "unknown" }, {
+      status: failure.status,
+    });
   }
 }

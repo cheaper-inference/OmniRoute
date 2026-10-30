@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "tu",
     "errNoReply": "⚠️ Od brány nebol žiaden odozva.",
     "btnSend": "Odoslať"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Prihlásené účty, ich boty, zručnosti a lokálne počítače.",

@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ansin",
     "errNoReply": "⚠️ Níl aon freagra ón ngeata.",
     "btnSend": "Seol"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Cuntais le logáil isteach, a n-rudaí, scileanna agus ríomhaire áitiúla.",

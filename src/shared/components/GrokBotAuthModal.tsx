@@ -134,7 +134,12 @@ export default function GrokBotAuthModal({
         </p>
         {error && <p className="text-sm text-red-500">{error}</p>}
         {loginUrl ? (
-          <a className="text-sm underline break-all" href={loginUrl} target="_blank" rel="noreferrer">
+          <a
+            className="text-sm underline break-all"
+            href={loginUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             {loginUrl}
           </a>
         ) : null}

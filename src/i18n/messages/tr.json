@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Geçiş noktasından yanıt gelmedi.",
     "btnSend": "Gönder"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Giriş yapılmış hesaplar, botları, yetenekleri ve yerel bilgisayarları.",

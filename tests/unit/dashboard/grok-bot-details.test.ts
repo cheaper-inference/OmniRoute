@@ -5,10 +5,9 @@ const { grokBotSkills, grokBotRoutines } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/details.ts");
 
 test("skills keep a record that has no body", () => {
-  assert.deepEqual(
-    grokBotSkills({ skills: [{ id: "s", name: "search", description: "find" }] }),
-    [{ id: "s", name: "search", description: "find" }]
-  );
+  assert.deepEqual(grokBotSkills({ skills: [{ id: "s", name: "search", description: "find" }] }), [
+    { id: "s", name: "search", description: "find" },
+  ]);
 });
 
 test("skills keep only complete records and drop the body", () => {

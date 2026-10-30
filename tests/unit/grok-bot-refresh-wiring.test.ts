@@ -3,8 +3,14 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { supportsTokenRefresh, formatProviderCredentials } from "../../open-sse/services/tokenRefresh.ts";
-import { ROTATION_LOCK_GROUP, serializeRefresh } from "../../open-sse/services/refreshSerializer.ts";
+import {
+  supportsTokenRefresh,
+  formatProviderCredentials,
+} from "../../open-sse/services/tokenRefresh.ts";
+import {
+  ROTATION_LOCK_GROUP,
+  serializeRefresh,
+} from "../../open-sse/services/refreshSerializer.ts";
 import { providerAllowsOptionalApiKey } from "../../src/shared/constants/providers.ts";
 import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
@@ -39,13 +45,15 @@ describe("grok-bot refresh wiring", () => {
       order.push(`${name}:end`);
       return name;
     };
-    await Promise.all([serializeRefresh("grok-bot", task("a")), serializeRefresh("grok-bot", task("b"))]);
+    await Promise.all([
+      serializeRefresh("grok-bot", task("a")),
+      serializeRefresh("grok-bot", task("b")),
+    ]);
     const aStart = order.indexOf("a:start");
     const bStart = order.indexOf("b:start");
     const aEnd = order.indexOf("a:end");
     const bEnd = order.indexOf("b:end");
-    const overlapped =
-      (aStart < bEnd && bStart < aEnd) || (bStart < aEnd && aStart < bEnd);
+    const overlapped = (aStart < bEnd && bStart < aEnd) || (bStart < aEnd && aStart < bEnd);
     assert.equal(overlapped, false, `refreshes overlapped: ${order.join(" ")}`);
   });
 
@@ -61,13 +69,15 @@ describe("grok-bot refresh wiring", () => {
         order.push(`${name}:end`);
         return name;
       };
-      await Promise.all([serializeRefresh("grok-bot", task("a")), serializeRefresh("grok-bot", task("b"))]);
+      await Promise.all([
+        serializeRefresh("grok-bot", task("a")),
+        serializeRefresh("grok-bot", task("b")),
+      ]);
       const aStart = order.indexOf("a:start");
       const bStart = order.indexOf("b:start");
       const aEnd = order.indexOf("a:end");
       const bEnd = order.indexOf("b:end");
-      const overlapped =
-        (aStart < bStart && bStart < aEnd) || (bStart < aStart && aStart < bEnd);
+      const overlapped = (aStart < bStart && bStart < aEnd) || (bStart < aStart && aStart < bEnd);
       assert.equal(overlapped, true, `refreshes did not overlap: ${order.join(" ")}`);
     } finally {
       ROTATION_LOCK_GROUP["grok-bot"] = saved;

@@ -116,5 +116,12 @@ export function reduce(state: SessionState, event: SessionEvent): SessionState {
   if (fails >= LIVE_FAILS) return { phase: "lost", reason: "failures" };
   if (flaps >= LIVE_FLAPS) return { phase: "lost", reason: "flaps" };
   if (rapid >= LIVE_RAPID) return { phase: "lost", reason: "rapid" };
-  return { phase: "streaming", fails, flaps, rapid, holds: state.holds, lastCloseAtMs: event.nowMs };
+  return {
+    phase: "streaming",
+    fails,
+    flaps,
+    rapid,
+    holds: state.holds,
+    lastCloseAtMs: event.nowMs,
+  };
 }

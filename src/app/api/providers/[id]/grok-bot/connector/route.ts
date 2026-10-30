@@ -43,14 +43,18 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       payload,
     });
     return NextResponse.json(
-      { status: answer && typeof answer === "object" && Object.keys(answer).length > 0 ? "dispatched" : "unknown" },
+      {
+        status:
+          answer && typeof answer === "object" && Object.keys(answer).length > 0
+            ? "dispatched"
+            : "unknown",
+      },
       { status: answer && typeof answer === "object" && Object.keys(answer).length > 0 ? 200 : 502 }
     );
   } catch (error) {
     const failure = permissionFailure((error as { status?: number }).status);
-    return NextResponse.json(
-      failure.code === "gone" ? { error: "gone" } : { status: "unknown" },
-      { status: failure.status }
-    );
+    return NextResponse.json(failure.code === "gone" ? { error: "gone" } : { status: "unknown" }, {
+      status: failure.status,
+    });
   }
 }

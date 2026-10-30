@@ -28,7 +28,10 @@ function fold(events: SessionEvent[], from: SessionState = idle()): SessionState
 const streaming = () => fold([{ type: "select" }, { type: "cutover" }]);
 
 test("a selection opens, seals and then streams", () => {
-  assert.equal(fold([{ type: "select" }, { type: "frame" }, { type: "cutover" }]).phase, "streaming");
+  assert.equal(
+    fold([{ type: "select" }, { type: "frame" }, { type: "cutover" }]).phase,
+    "streaming"
+  );
 });
 
 test("a conversation restored from memory starts live instead of waiting for a seal", () => {
@@ -163,7 +166,14 @@ test("every state answers every event, so no later state can fall through", () =
     { phase: "opening", drops: 0, holds: 0 },
     { phase: "opening", drops: SNAPSHOT_DROPS - 1, holds: 0 },
     { phase: "streaming", fails: 0, flaps: 0, rapid: 0, holds: 0, lastCloseAtMs: 0 },
-    { phase: "streaming", fails: LIVE_FAILS - 1, flaps: LIVE_FLAPS - 1, rapid: LIVE_RAPID - 1, holds: 0, lastCloseAtMs: 500 },
+    {
+      phase: "streaming",
+      fails: LIVE_FAILS - 1,
+      flaps: LIVE_FLAPS - 1,
+      rapid: LIVE_RAPID - 1,
+      holds: 0,
+      lastCloseAtMs: 500,
+    },
     { phase: "stalled" },
     { phase: "lost", reason: "fault" },
   ];

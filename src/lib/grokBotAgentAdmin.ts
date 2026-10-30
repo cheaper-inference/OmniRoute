@@ -10,7 +10,14 @@ type AgentBinding = {
   routines?: Array<{ id: string; recordJson: string }>;
   version?: number | null;
 };
-type Action = "get" | "create" | "recreate" | "unbind" | "delete" | "put-memory" | "add-skill"
+type Action =
+  | "get"
+  | "create"
+  | "recreate"
+  | "unbind"
+  | "delete"
+  | "put-memory"
+  | "add-skill"
   | "update-skill"
   | "remove-skill"
   | "set-routine"
@@ -55,8 +62,7 @@ function profileFields(value: { name?: unknown; description?: unknown } | string
 
 function savedAgent(data: Record<string, unknown> | null | undefined): AgentBinding | null {
   const value = data?.grokBotAgent as
-    | { agentId?: unknown; rowId?: unknown; name?: unknown; description?: unknown }
-    | undefined;
+    { agentId?: unknown; rowId?: unknown; name?: unknown; description?: unknown } | undefined;
   if (!value || typeof value.agentId !== "string" || !value.agentId) return null;
   return {
     agentId: value.agentId,
@@ -142,7 +148,9 @@ async function readAgent(input: ManagerInput, current: AgentBinding): Promise<Ag
   const skills = Array.isArray(listedSkills?.skills)
     ? listedSkills.skills.flatMap((skill) =>
         skill &&
-        ["id", "name", "description", "body", "source"].every((key) => typeof skill[key] === "string")
+        ["id", "name", "description", "body", "source"].every(
+          (key) => typeof skill[key] === "string"
+        )
           ? [
               {
                 id: skill.id as string,
@@ -158,7 +166,9 @@ async function readAgent(input: ManagerInput, current: AgentBinding): Promise<Ag
   const listedRoutines = (await input.rpc("ListGrokBotAgentAutomations", {
     agentId: current.agentId,
     timeZone: "UTC",
-  })) as { automations?: Array<{ automationId?: unknown; recordJson?: unknown } | null> | null } | null;
+  })) as {
+    automations?: Array<{ automationId?: unknown; recordJson?: unknown } | null> | null;
+  } | null;
   const routines = Array.isArray(listedRoutines?.automations)
     ? listedRoutines.automations.flatMap((item) =>
         typeof item?.automationId === "string" && typeof item.recordJson === "string"
@@ -180,7 +190,10 @@ async function putMemory(input: ManagerInput, current: AgentBinding): Promise<Ag
   return {
     ...current,
     version:
-      typeof version === "number" && Number.isInteger(version) && version >= 0 && version <= 4294967295
+      typeof version === "number" &&
+      Number.isInteger(version) &&
+      version >= 0 &&
+      version <= 4294967295
         ? version + 0
         : null,
   };

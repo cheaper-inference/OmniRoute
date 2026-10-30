@@ -11,9 +11,6 @@ test("frames become one json line each, replay included", () => {
   ]);
   assert.deepEqual(
     lines.map((line) => JSON.parse(line)),
-    [
-      { replay: true, rows: { entries: [{ updatedSeq: "1" }] } },
-      { heartbeat: true },
-    ]
+    [{ replay: true, rows: { entries: [{ updatedSeq: "1" }] } }, { heartbeat: true }]
   );
 });

@@ -3,8 +3,7 @@ import assert from "node:assert/strict";
 
 const { grokBotAccounts } =
   await import("../../../src/app/(dashboard)/dashboard/grok-bot/regions.ts");
-const { namedItems } =
-  await import("../../../src/app/(dashboard)/dashboard/grok-bot/details.ts");
+const { namedItems } = await import("../../../src/app/(dashboard)/dashboard/grok-bot/details.ts");
 
 test("grok bot accounts keep only signed-in grok bot connections", () => {
   const accounts = grokBotAccounts([

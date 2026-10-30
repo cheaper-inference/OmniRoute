@@ -25,7 +25,14 @@ export type PermissionRequest = {
 export type TranscriptCard =
   | { seq: string; entryId: string; kind: "attachment"; fileName: string }
   | { seq: string; entryId: string; kind: "notice"; text: string }
-  | { seq: string; entryId: string; kind: "connector"; name: string; requestId: string; action: string }
+  | {
+      seq: string;
+      entryId: string;
+      kind: "connector";
+      name: string;
+      requestId: string;
+      action: string;
+    }
   | {
       seq: string;
       entryId: string;
@@ -37,7 +44,15 @@ export type TranscriptCard =
       dismissOnMoveOn: boolean;
     }
   | { seq: string; entryId: string; kind: "secret"; label: string }
-  | { seq: string; entryId: string; kind: "email"; from: string; to: string; subject: string; body: string }
+  | {
+      seq: string;
+      entryId: string;
+      kind: "email";
+      from: string;
+      to: string;
+      subject: string;
+      body: string;
+    }
   | { seq: string; entryId: string; kind: "slack"; target: string; body: string }
   | { seq: string; entryId: string; kind: "unknown"; type: string };
 
@@ -146,9 +161,12 @@ function cardOf(entry: Entry, body: Body): TranscriptCard | null {
     return text === "" ? null : { seq, entryId, kind: "notice", text };
   }
   if (type === "connector" || type === "onepassword-connect") {
-    const name = type === "onepassword-connect"
-      ? "1Password"
-      : typeof source?.connector === "string" ? source.connector : "";
+    const name =
+      type === "onepassword-connect"
+        ? "1Password"
+        : typeof source?.connector === "string"
+          ? source.connector
+          : "";
     const requestId = typeof source?.requestId === "string" ? source.requestId : "";
     const action = typeof source?.variant === "string" ? source.variant : "connect";
     return name === "" ? null : { seq, entryId, kind: "connector", name, requestId, action };
@@ -169,21 +187,26 @@ function cardOf(entry: Entry, body: Body): TranscriptCard | null {
     };
   }
   if (type === "secret-request") {
-    const label = typeof source?.secretRequest?.label === "string" ? source.secretRequest.label : "";
+    const label =
+      typeof source?.secretRequest?.label === "string" ? source.secretRequest.label : "";
     return label === "" ? null : { seq, entryId, kind: "secret", label };
   }
   if (type === "email-draft") {
-    const to = Array.isArray(source?.draft?.to) ? source.draft.to.filter((item) => typeof item === "string").join(", ") : "";
+    const to = Array.isArray(source?.draft?.to)
+      ? source.draft.to.filter((item) => typeof item === "string").join(", ")
+      : "";
     const text = typeof source?.draft?.body === "string" ? source.draft.body : "";
-    return text === "" ? null : {
-      seq,
-      entryId,
-      kind: "email",
-      from: typeof source?.draft?.from === "string" ? source.draft.from : "",
-      to,
-      subject: typeof source?.draft?.subject === "string" ? source.draft.subject : "",
-      body: text,
-    };
+    return text === ""
+      ? null
+      : {
+          seq,
+          entryId,
+          kind: "email",
+          from: typeof source?.draft?.from === "string" ? source.draft.from : "",
+          to,
+          subject: typeof source?.draft?.subject === "string" ? source.draft.subject : "",
+          body: text,
+        };
   }
   if (type === "slack-draft") {
     const target = typeof source?.draft?.target === "string" ? source.draft.target : "";
@@ -249,7 +272,10 @@ function putRow(rows: TranscriptItem[], row: TranscriptItem): void {
   rows.push(row);
 }
 
-export function mergeTranscriptRows(existing: TranscriptItem[], incoming: TranscriptItem[]): TranscriptItem[] {
+export function mergeTranscriptRows(
+  existing: TranscriptItem[],
+  incoming: TranscriptItem[]
+): TranscriptItem[] {
   const rows = [...existing];
   for (const row of incoming) putRow(rows, row);
   return rows.slice(-200);
@@ -267,10 +293,18 @@ export function localRowId(
   const same = (row: TranscriptItem) =>
     row.entryId.startsWith("anon-") && row.seq === item.seq && row.role === item.role;
   const earlier = shown.filter((row) => same(row) && row.text === item.text);
-  const longer = shown.filter((row) => same(row) && item.text.startsWith(row.text) && item.text !== row.text);
+  const longer = shown.filter(
+    (row) => same(row) && item.text.startsWith(row.text) && item.text !== row.text
+  );
   const fresh = frame
     .slice(0, index)
-    .filter((row) => row.entryId === "" && row.seq === item.seq && row.text === item.text && row.role === item.role).length;
+    .filter(
+      (row) =>
+        row.entryId === "" &&
+        row.seq === item.seq &&
+        row.text === item.text &&
+        row.role === item.role
+    ).length;
   const held = earlier[fresh] ?? (fresh === 0 && longer.length === 1 ? longer[0] : undefined);
   if (held) return { item: { ...item, entryId: held.entryId }, next };
   return { item: { ...item, entryId: `anon-${scope}:${next}` }, next: next + 1 };
@@ -280,7 +314,7 @@ function bigger(left: string, right: string): string {
   const a = left.replace(/^0+(?=\d)/, "");
   const b = right.replace(/^0+(?=\d)/, "");
   if (a.length !== b.length) return a.length > b.length ? left : right;
-  return (a >= b ? left : right);
+  return a >= b ? left : right;
 }
 
 export function transcriptLines(frames: unknown[]): string[] {
@@ -327,20 +361,35 @@ export async function sendOnce(
   return result === "ok" ? "recorded" : "unknown";
 }
 
-export function liveRetry(after: string, fails: number): { phase: "live"; after: string; wait: number } {
+export function liveRetry(
+  after: string,
+  fails: number
+): { phase: "live"; after: string; wait: number } {
   const capped = Math.min(fails, LIVE_FAILS);
   const wait = Math.min(30000, 500 * 2 ** capped);
   return { phase: "live", after, wait };
 }
 
 export function resumeTranscript(
-  saved: Record<string, { after: string; messages?: TranscriptItem[]; cards?: TranscriptCard[]; seenAt?: string }>,
+  saved: Record<
+    string,
+    { after: string; messages?: TranscriptItem[]; cards?: TranscriptCard[]; seenAt?: string }
+  >,
   account: string,
   bot: string,
   connectionUpdatedAt = ""
-): { phase: "snapshot" | "live"; after: string; messages: TranscriptItem[]; cards: TranscriptCard[] } {
+): {
+  phase: "snapshot" | "live";
+  after: string;
+  messages: TranscriptItem[];
+  cards: TranscriptCard[];
+} {
   const found = saved[`${account}:${bot}`];
-  if (!found || found.after === "" || (connectionUpdatedAt !== "" && found.seenAt !== connectionUpdatedAt)) {
+  if (
+    !found ||
+    found.after === "" ||
+    (connectionUpdatedAt !== "" && found.seenAt !== connectionUpdatedAt)
+  ) {
     return { phase: "snapshot", after: "0", messages: [], cards: [] };
   }
   return { phase: "live", after: found.after, messages: [], cards: [] };
@@ -422,7 +471,9 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     }
     const card = cardOf(item, body);
     if (card) {
-      const held = cards.findIndex((current) => current.entryId !== "" && current.entryId === card.entryId);
+      const held = cards.findIndex(
+        (current) => current.entryId !== "" && current.entryId === card.entryId
+      );
       if (held >= 0) cards[held] = card;
       else if (card.kind === "unknown") {
         const index = cards.findIndex((current) => current.kind === "unknown");

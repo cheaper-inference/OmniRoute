@@ -28,7 +28,9 @@ test("a response that is not a list is empty", () => {
 test("the machine label the client shows is kept", () => {
   assert.deepEqual(
     grokBotComputers({
-      computers: [{ machineId: "0d533c1e-4c2c-45e4-a7b3-42bb0d2b640b", hello: { label: "houminxi" } }],
+      computers: [
+        { machineId: "0d533c1e-4c2c-45e4-a7b3-42bb0d2b640b", hello: { label: "houminxi" } },
+      ],
     }),
     [{ machineId: "0d533c1e-4c2c-45e4-a7b3-42bb0d2b640b", label: "houminxi" }]
   );

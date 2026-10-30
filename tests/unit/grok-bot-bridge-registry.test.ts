@@ -288,7 +288,9 @@ describe("bridge registry lifecycle", () => {
   it("atomic slot reservation: fills the budget, consumed once, extends sliding TTL", () => {
     const input = regInput(clock);
     registry.register(input);
-    const entry = (registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number } }).entry;
+    const entry = (
+      registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number } }
+    ).entry;
     const expiry0 = entry.expiryAt;
     clock.advance(1000);
     for (let i = 0; i < bridgeMaxRequestsPerNonce(); i++) {
@@ -303,7 +305,11 @@ describe("bridge registry lifecycle", () => {
   it("holds the idle window to the absolute cap without consuming a slot", () => {
     const input = regInput(clock);
     registry.register(input);
-    const entry = (registry.lookup(input.nonce) as { entry: { slotsUsed: number; expiryAt: number; createdAt: number } }).entry;
+    const entry = (
+      registry.lookup(input.nonce) as {
+        entry: { slotsUsed: number; expiryAt: number; createdAt: number };
+      }
+    ).entry;
     const slots = entry.slotsUsed;
     assert.equal(registry.holdUntilCap(entry as never), true);
     assert.equal(entry.slotsUsed, slots, "holding consumes no request slot");
@@ -316,7 +322,8 @@ describe("bridge registry lifecycle", () => {
   });
 
   it("reads the absolute cap from the environment", async () => {
-    const { bridgeAbsoluteCapMs } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+    const { bridgeAbsoluteCapMs } =
+      await import("../../open-sse/services/grokBotBridgeRegistry.ts");
     const previous = process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
     try {
       delete process.env.GROK_BOT_BRIDGE_ABSOLUTE_CAP_MS;
@@ -450,7 +457,11 @@ describe("bridge registry lifecycle", () => {
     }
     assert.equal(registry.tombstoneCount, BRIDGE_MAX_TOMBSTONES);
     registry.sweep();
-    assert.equal(registry.lookup(old.nonce).kind, "unknown", "capped tombstone swept after removal pass");
+    assert.equal(
+      registry.lookup(old.nonce).kind,
+      "unknown",
+      "capped tombstone swept after removal pass"
+    );
   });
 
   it("stop switch clears all timers and state", () => {

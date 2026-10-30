@@ -56,12 +56,7 @@ export const BRIDGE_RESERVED_PORTS: ReadonlySet<number> = new Set([20128, 20130]
 export const BRIDGE_NONCE_PATTERN = /^[A-Za-z0-9_-]{22}$/;
 export const BRIDGE_ROUTE_PATTERN = /^\/grok-bridge\/([A-Za-z0-9_-]{22})\/mcp$/;
 
-export type BridgeCloseReason =
-  | "normal"
-  | "cancel"
-  | "cap"
-  | "reaper-expiry"
-  | "forced";
+export type BridgeCloseReason = "normal" | "cancel" | "cap" | "reaper-expiry" | "forced";
 
 export type BridgeNonceState = "active" | "closing" | "tombstone";
 
@@ -223,7 +218,10 @@ export function challengeTokenConstantTimeEqual(
 }
 
 /** Constant-time bearer challenge comparison; length mismatch is a plain miss. */
-export function challengeMatches(entry: BridgeTurnEntry, presented: string | null | undefined): boolean {
+export function challengeMatches(
+  entry: BridgeTurnEntry,
+  presented: string | null | undefined
+): boolean {
   return challengeTokenConstantTimeEqual(presented, entry.challenge);
 }
 

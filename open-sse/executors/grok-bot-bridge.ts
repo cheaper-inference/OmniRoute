@@ -1,5 +1,8 @@
 import { createServer, type Server } from "node:http";
-import { LATEST_PROTOCOL_VERSION, SUPPORTED_PROTOCOL_VERSIONS } from "@modelcontextprotocol/sdk/types.js";
+import {
+  LATEST_PROTOCOL_VERSION,
+  SUPPORTED_PROTOCOL_VERSIONS,
+} from "@modelcontextprotocol/sdk/types.js";
 import {
   challengeTokenConstantTimeEqual,
   generateBridgeChallenge,
@@ -33,11 +36,13 @@ type AdvertisedTool = {
 
 function advertisedTools(tools: AdvertisedTool[] | undefined): AdvertisedTool[] {
   if (tools && tools.length) return tools;
-  return [{
-    name: BRIDGE_TOOL_NAME,
-    description: "Request-level bridge tool; call exactly once.",
-    inputSchema: { type: "object", properties: {}, additionalProperties: true },
-  }];
+  return [
+    {
+      name: BRIDGE_TOOL_NAME,
+      description: "Request-level bridge tool; call exactly once.",
+      inputSchema: { type: "object", properties: {}, additionalProperties: true },
+    },
+  ];
 }
 
 type BridgeToolState = {
@@ -120,15 +125,18 @@ function handleBridgeMcpRequest(
     }
     if (body.method === "initialize") {
       const requestedVersion = body.params?.protocolVersion;
-      const protocolVersion = requestedVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
-        ? requestedVersion
-        : LATEST_PROTOCOL_VERSION;
+      const protocolVersion =
+        requestedVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
+          ? requestedVersion
+          : LATEST_PROTOCOL_VERSION;
       res.writeHead(200, { "content-type": "application/json" });
-      res.end(jsonRpcResult(body.id, {
-        protocolVersion,
-        capabilities: { tools: {} },
-        serverInfo: { name: "grok-bot-bridge", version: "1.0.0" },
-      }));
+      res.end(
+        jsonRpcResult(body.id, {
+          protocolVersion,
+          capabilities: { tools: {} },
+          serverInfo: { name: "grok-bot-bridge", version: "1.0.0" },
+        })
+      );
       return;
     }
     if (body.method === "ping") {
@@ -228,7 +236,11 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
   // unsettled. A destroy that lands before the bind resolves is re-applied
   // idempotently once the listen callback fires.
   const state: BridgeToolState = {
-    challenge, nonce, used: false, calls: 0, invocations: [],
+    challenge,
+    nonce,
+    used: false,
+    calls: 0,
+    invocations: [],
     tools: advertisedTools(options.tools),
     registry: options.registry ?? null,
   };

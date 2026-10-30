@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "there",
     "errNoReply": "⚠️ No reply from gateway.",
     "btnSend": "Send"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Signed-in accounts, their bots, skills, and local computers.",

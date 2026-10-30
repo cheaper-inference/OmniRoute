@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { watchCounter, watchOverlap, watchSlot } from "../../../src/app/(dashboard)/dashboard/grok-bot/overlap";
+import {
+  watchCounter,
+  watchOverlap,
+  watchSlot,
+} from "../../../src/app/(dashboard)/dashboard/grok-bot/overlap";
 
 test("a second watch is kept until the new one seals", () => {
   assert.equal(watchOverlap(1), "keep");

@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ա՛հա",
     "errNoReply": "⚠️ Գրեյթվեյից պատասխան չկա։",
     "btnSend": "Ուղարկել"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Գրանցված հաշվեր, նրանց bot-ները, հմարները և տեղական համակարգիչները։",

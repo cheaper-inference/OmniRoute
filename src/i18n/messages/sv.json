@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "där",
     "errNoReply": "⚠️ Inget svar från gateway.",
     "btnSend": "Skicka"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Inloggade konton, deras botar, färdigheter och lokala datorer.",

@@ -37,12 +37,14 @@ export async function grokBotToken(
     accessToken: typeof connection.accessToken === "string" ? connection.accessToken : "",
     refreshToken: typeof connection.refreshToken === "string" ? connection.refreshToken : "",
     expiresAt: typeof connection.expiresAt === "string" ? connection.expiresAt : null,
-    tokenExpiresAt: typeof connection.tokenExpiresAt === "string" ? connection.tokenExpiresAt : null,
+    tokenExpiresAt:
+      typeof connection.tokenExpiresAt === "string" ? connection.tokenExpiresAt : null,
   };
   const { accessToken } = stored;
   const { refreshToken } = stored;
   if (!needsRefresh(stored, nowMs)) return { accessToken };
-  if (refreshToken === "") return accessToken === "" ? { error: "reauth_required" } : { accessToken };
+  if (refreshToken === "")
+    return accessToken === "" ? { error: "reauth_required" } : { accessToken };
 
   return gate.run(id, async (): Promise<GrokBotToken> => {
     let response: Response;

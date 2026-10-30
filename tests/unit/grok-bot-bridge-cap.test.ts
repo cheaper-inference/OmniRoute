@@ -1,11 +1,8 @@
 import { describe, it, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
-const {
-  BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT,
-  GrokBotBridgeRegistry,
-  bridgeMaxRequestsPerNonce,
-} = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
+const { BRIDGE_MAX_REQUESTS_PER_NONCE_DEFAULT, GrokBotBridgeRegistry, bridgeMaxRequestsPerNonce } =
+  await import("../../open-sse/services/grokBotBridgeRegistry.ts");
 
 const ORIGINAL = process.env.GROK_BOT_BRIDGE_MAX_REQUESTS;
 

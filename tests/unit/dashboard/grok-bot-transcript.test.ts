@@ -2,9 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
-const { applyTranscriptFrame, nextTranscriptRequest, recordedSend, localRowId, mergeTranscriptRows } =
-  await import("../../../src/app/(dashboard)/dashboard/grok-bot/transcript.ts");
-
+const {
+  applyTranscriptFrame,
+  nextTranscriptRequest,
+  recordedSend,
+  localRowId,
+  mergeTranscriptRows,
+} = await import("../../../src/app/(dashboard)/dashboard/grok-bot/transcript.ts");
 
 // Entries as the service actually sends them: `entryKind` says who spoke, and the
 // message itself is base64 JSON in `body`. Fixtures that put `role`/`text` on the
@@ -55,7 +59,9 @@ test("rows after the seal are shown", () => {
     rows: { entries: [wire("send-message", reply("new"), "11")] },
   });
   assert.equal(next.cursor, "11");
-  assert.deepEqual(next.visible, [{ seq: "11", entryId: "e1", role: "assistant", text: "new", clientNonce: "", streaming: false }]);
+  assert.deepEqual(next.visible, [
+    { seq: "11", entryId: "e1", role: "assistant", text: "new", clientNonce: "", streaming: false },
+  ]);
 });
 
 test("an absent client nonce never confirms a send", () => {
@@ -115,7 +121,14 @@ test("a connector card is kept when it has a name but no request id", () => {
         entries: [
           wire(
             "send-message",
-            { message: { type: "connector", connector: "Finance", serverId: "grok:user-Finance-xai", variant: "connect" } },
+            {
+              message: {
+                type: "connector",
+                connector: "Finance",
+                serverId: "grok:user-Finance-xai",
+                variant: "connect",
+              },
+            },
             "20",
             "entry-20"
           ),
@@ -124,7 +137,14 @@ test("a connector card is kept when it has a name but no request id", () => {
     }
   );
   assert.deepEqual(state.cards, [
-    { seq: "20", entryId: "entry-20", kind: "connector", name: "Finance", requestId: "", action: "connect" },
+    {
+      seq: "20",
+      entryId: "entry-20",
+      kind: "connector",
+      name: "Finance",
+      requestId: "",
+      action: "connect",
+    },
   ]);
 });
 
@@ -136,7 +156,17 @@ test("an email draft keeps its body", () => {
         entries: [
           wire(
             "send-message",
-            { message: { type: "email-draft", draft: { from: "a@x.ai", to: ["b@x.ai"], subject: "Hello", body: "The actual message" } } },
+            {
+              message: {
+                type: "email-draft",
+                draft: {
+                  from: "a@x.ai",
+                  to: ["b@x.ai"],
+                  subject: "Hello",
+                  body: "The actual message",
+                },
+              },
+            },
             "21",
             "entry-21"
           ),
@@ -153,7 +183,12 @@ test("a live secret card reads the label at the message root", () => {
     {
       rows: {
         entries: [
-          wire("send-message", { type: "secret-request", secretRequest: { label: "PROBE_TOKEN" } }, "22", "entry-22"),
+          wire(
+            "send-message",
+            { type: "secret-request", secretRequest: { label: "PROBE_TOKEN" } },
+            "22",
+            "entry-22"
+          ),
         ],
       },
     }
@@ -165,7 +200,11 @@ test("repeated unsupported messages stay as one card", () => {
   let state = { cursor: "0", visible: [], cards: [], permissions: [], sealed: false };
   for (let index = 1; index <= 94; index += 1) {
     state = applyTranscriptFrame(state, {
-      rows: { entries: [wire("send-message", { type: `unused-${index}` }, String(index), `entry-${index}`)] },
+      rows: {
+        entries: [
+          wire("send-message", { type: `unused-${index}` }, String(index), `entry-${index}`),
+        ],
+      },
     });
   }
   assert.equal(state.cards.length, 1);
@@ -177,13 +216,27 @@ test("a later answer replaces the request instead of stacking another card", () 
       entries: [
         wire(
           "send-message",
-          { message: { type: "local-tool-permission", ask: { requestId: "req-1", action: "run-command", target: "/tmp", machineId: "m", status } } },
+          {
+            message: {
+              type: "local-tool-permission",
+              ask: {
+                requestId: "req-1",
+                action: "run-command",
+                target: "/tmp",
+                machineId: "m",
+                status,
+              },
+            },
+          },
           status === "pending" ? "12" : "13"
         ),
       ],
     },
   });
-  const first = applyTranscriptFrame({ cursor: "0", visible: [], permissions: [], sealed: false }, ask("pending"));
+  const first = applyTranscriptFrame(
+    { cursor: "0", visible: [], permissions: [], sealed: false },
+    ask("pending")
+  );
   const second = applyTranscriptFrame(first, ask("always"));
   assert.equal(second.permissions.length, 1);
   assert.equal(second.permissions[0].status, "always");
@@ -195,7 +248,14 @@ test("a notice carries its text at the top level, not under message", () => {
     { rows: { entries: [wire("send-message", { text: "the box restarted" }, "14")] } }
   );
   assert.deepEqual(state.visible, [
-    { seq: "14", entryId: "e1", role: "assistant", text: "the box restarted", clientNonce: "", streaming: false },
+    {
+      seq: "14",
+      entryId: "e1",
+      role: "assistant",
+      text: "the box restarted",
+      clientNonce: "",
+      streaming: false,
+    },
   ]);
 });
 
@@ -204,9 +264,17 @@ test("a captured frame decodes to the two rows it actually contains", async () =
   // from the reader. It is the guard the earlier fixtures could not be: they
   // encoded the reader's assumption, so they agreed with it forever.
   const frames = JSON.parse(
-    await readFile(new URL("../../fixtures/grok-bot-transcript-frames.json", import.meta.url), "utf-8")
+    await readFile(
+      new URL("../../fixtures/grok-bot-transcript-frames.json", import.meta.url),
+      "utf-8"
+    )
   ) as unknown[];
-  let state = { cursor: "0", visible: [] as unknown[], permissions: [] as unknown[], sealed: false };
+  let state = {
+    cursor: "0",
+    visible: [] as unknown[],
+    permissions: [] as unknown[],
+    sealed: false,
+  };
   for (const frame of frames) state = applyTranscriptFrame(state, frame);
   const rows = state.visible as Array<{ role: string; text: string; clientNonce: string }>;
   assert.equal(rows.length, 2);
@@ -250,11 +318,53 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
     {
       rows: {
         entries: [
-          wire("send-message", { message: { type: "attachment", file_name: "notes.txt", url: "https://secret.example/file" } }, "30", "file"),
+          wire(
+            "send-message",
+            {
+              message: {
+                type: "attachment",
+                file_name: "notes.txt",
+                url: "https://secret.example/file",
+              },
+            },
+            "30",
+            "file"
+          ),
           wire("send-message", { kind: "notice", text: "paused" }, "31", "note"),
-          wire("send-message", { message: { type: "connector", connector: "GitHub", requestId: "grant", serverId: "server-secret" } }, "32", "link"),
-          wire("send-message", { message: { type: "widget", prompt: "Pick one", options: ["A", "B"], allowCustom: true, multiSelect: false, dismissOnMoveOn: false } }, "33", "choice"),
-          wire("send-message", { message: { type: "canvas", payload: { secret: "hidden" } } }, "34", "other"),
+          wire(
+            "send-message",
+            {
+              message: {
+                type: "connector",
+                connector: "GitHub",
+                requestId: "grant",
+                serverId: "server-secret",
+              },
+            },
+            "32",
+            "link"
+          ),
+          wire(
+            "send-message",
+            {
+              message: {
+                type: "widget",
+                prompt: "Pick one",
+                options: ["A", "B"],
+                allowCustom: true,
+                multiSelect: false,
+                dismissOnMoveOn: false,
+              },
+            },
+            "33",
+            "choice"
+          ),
+          wire(
+            "send-message",
+            { message: { type: "canvas", payload: { secret: "hidden" } } },
+            "34",
+            "other"
+          ),
         ],
       },
     }
@@ -262,8 +372,24 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
   assert.deepEqual(state.cards, [
     { seq: "30", entryId: "file", kind: "attachment", fileName: "notes.txt" },
     { seq: "31", entryId: "note", kind: "notice", text: "paused" },
-    { seq: "32", entryId: "link", kind: "connector", name: "GitHub", requestId: "grant", action: "connect" },
-    { seq: "33", entryId: "choice", kind: "widget", prompt: "Pick one", options: ["A", "B"], allowCustom: true, multiSelect: false, dismissOnMoveOn: false },
+    {
+      seq: "32",
+      entryId: "link",
+      kind: "connector",
+      name: "GitHub",
+      requestId: "grant",
+      action: "connect",
+    },
+    {
+      seq: "33",
+      entryId: "choice",
+      kind: "widget",
+      prompt: "Pick one",
+      options: ["A", "B"],
+      allowCustom: true,
+      multiSelect: false,
+      dismissOnMoveOn: false,
+    },
     { seq: "34", entryId: "other", kind: "unknown", type: "canvas" },
   ]);
   assert.equal(JSON.stringify(state.cards).includes("secret"), false);
@@ -272,7 +398,18 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
 test("an oversized or deeply nested body becomes unsupported", () => {
   const huge = applyTranscriptFrame(
     { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },
-    { rows: { entries: [wire("send-message", { message: { type: "text", content: "x".repeat(4001) } }, "40", "big")] } }
+    {
+      rows: {
+        entries: [
+          wire(
+            "send-message",
+            { message: { type: "text", content: "x".repeat(4001) } },
+            "40",
+            "big"
+          ),
+        ],
+      },
+    }
   );
   const nested = { message: { type: "text", content: "ok" } } as Record<string, unknown>;
   let cursor: Record<string, unknown> = nested;
@@ -293,13 +430,16 @@ test("the next request hands the cards to the page", () => {
     { phase: "live", after: "0" },
     { rows: { entries: [wire("send-message", { kind: "notice", text: "paused" }, "31", "note")] } }
   );
-  assert.deepEqual(next.cards, [
-    { seq: "31", entryId: "note", kind: "notice", text: "paused" },
-  ]);
+  assert.deepEqual(next.cards, [{ seq: "31", entryId: "note", kind: "notice", text: "paused" }]);
 });
 
 const spoken = (seq: string, text: string, entryId = "") => ({
-  seq, entryId, role: "assistant", text, clientNonce: "", streaming: false,
+  seq,
+  entryId,
+  role: "assistant",
+  text,
+  clientNonce: "",
+  streaming: false,
 });
 
 test("a row with no server id keeps one local id as its text grows", () => {
@@ -329,10 +469,19 @@ test("the same words from the user and the bot stay two rows", () => {
   assert.notEqual(first.item.entryId, second.item.entryId, "a different role is a different row");
   const shown = mergeTranscriptRows(
     [first.item, second.item],
-    [{ ...user, entryId: "s-user" }, { ...bot, entryId: "s-bot" }]
+    [
+      { ...user, entryId: "s-user" },
+      { ...bot, entryId: "s-bot" },
+    ]
   );
-  assert.deepEqual(shown.map((row) => row.entryId), ["s-user", "s-bot"]);
-  assert.deepEqual(shown.map((row) => row.role), ["user", "assistant"]);
+  assert.deepEqual(
+    shown.map((row) => row.entryId),
+    ["s-user", "s-bot"]
+  );
+  assert.deepEqual(
+    shown.map((row) => row.role),
+    ["user", "assistant"]
+  );
 });
 
 test("a mixed-role frame reuses each row's own id on the next frame", () => {
@@ -343,7 +492,12 @@ test("a mixed-role frame reuses each row's own id on the next frame", () => {
     next = result.next;
     return result.item;
   });
-  const replayed = frame.map((unused, index) => localRowId(named, frame, index, next, "acc:bot").item);
-  assert.deepEqual(replayed.map((row) => row.entryId), named.map((row) => row.entryId));
+  const replayed = frame.map(
+    (unused, index) => localRowId(named, frame, index, next, "acc:bot").item
+  );
+  assert.deepEqual(
+    replayed.map((row) => row.entryId),
+    named.map((row) => row.entryId)
+  );
   assert.equal(new Set(replayed.map((row) => row.entryId)).size, 2);
 });

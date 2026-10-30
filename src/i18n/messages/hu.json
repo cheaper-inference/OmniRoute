@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ott",
     "errNoReply": "⚠️ Nincs válasz a kaputól.",
     "btnSend": "Küldés"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Bejelentkezett fiókok, botjaik, készségeik és helyi számítógépeik.",

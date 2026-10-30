@@ -15,7 +15,10 @@ import { getGrokBotBridgeRegistry } from "@omniroute/open-sse/services/grokBotBr
  * Public Route).
  */
 
-export async function POST(request: Request, { params }: { params: Promise<{ nonce: string }> }): Promise<Response> {
+export async function POST(
+  request: Request,
+  { params }: { params: Promise<{ nonce: string }> }
+): Promise<Response> {
   const { nonce } = await params;
   const url = new URL(request.url);
   return handleGrokBridgeRequest({

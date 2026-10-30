@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "朋友",
     "errNoReply": "⚠️ 网关没有回复。",
     "btnSend": "发送"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "已登录的账户、其机器人、技能以及本地计算机。",

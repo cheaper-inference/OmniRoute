@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "εκεί",
     "errNoReply": "⚠️ Δεν υπήρξε απάντηση από το gateway.",
     "btnSend": "Αποστολή"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Συνδεδεμένοι λογαριασμοί, τα bot, οι δεξιότητες και οι τοπικοί υπολογιστές τους.",

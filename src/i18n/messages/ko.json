@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "사용자",
     "errNoReply": "⚠️ 게이트웨이에서 응답이 없습니다.",
     "btnSend": "전송"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "로그인된 계정, 해당 봇, 스킬 및 로컬 컴퓨터.",

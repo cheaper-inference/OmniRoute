@@ -198,9 +198,12 @@ function remoteMcpServers(): Record<string, { url: string; headers?: Record<stri
     if (!entry || typeof entry.url !== "string" || !entry.url) continue;
     const headers =
       entry.headers && typeof entry.headers === "object" && !Array.isArray(entry.headers)
-        ? Object.fromEntries(Object.entries(entry.headers).filter((item) => typeof item[1] === "string"))
+        ? Object.fromEntries(
+            Object.entries(entry.headers).filter((item) => typeof item[1] === "string")
+          )
         : undefined;
-    servers[name] = headers && Object.keys(headers).length ? { url: entry.url, headers } : { url: entry.url };
+    servers[name] =
+      headers && Object.keys(headers).length ? { url: entry.url, headers } : { url: entry.url };
   }
   return servers;
 }
@@ -239,7 +242,10 @@ function messageText(content: unknown): string {
     .join("\n");
 }
 
-function describeCall(call: { id?: string; function?: { name?: string; arguments?: unknown } }): string {
+function describeCall(call: {
+  id?: string;
+  function?: { name?: string; arguments?: unknown };
+}): string {
   const name = call.function?.name ?? "";
   const rawArgs = call.function?.arguments;
   const args =
@@ -320,7 +326,13 @@ function composePrompt(
 ): string {
   const { lines, count } = renderConversation(messages);
   lines.push("Answer only from this conversation. Do not read or write Grok account memory.");
-  const directive = toolDirective({ challenge, advertisedName, hasClientTools, toolChoice, parallel });
+  const directive = toolDirective({
+    challenge,
+    advertisedName,
+    hasClientTools,
+    toolChoice,
+    parallel,
+  });
   if (directive) lines.push(directive);
   return fitPrompt(lines, count);
 }
@@ -607,13 +619,13 @@ export class GrokBotExecutor extends BaseExecutor {
 
     const t = getTransport(accessToken);
     const stored = creds.providerSpecificData?.grokBotAgent as
-      | { agentId?: unknown; rowId?: unknown }
-      | undefined;
+      { agentId?: unknown; rowId?: unknown } | undefined;
     const storedAgent =
       typeof stored?.agentId === "string" && stored.agentId
         ? { agentId: stored.agentId, rowId: typeof stored.rowId === "string" ? stored.rowId : null }
         : undefined;
-    const savedAgent = storedAgent ?? (connectionId ? this.durableAgents.get(connectionId) : undefined);
+    const savedAgent =
+      storedAgent ?? (connectionId ? this.durableAgents.get(connectionId) : undefined);
     const agentId = savedAgent?.agentId ?? randomUUID();
     let rowId: string | null = savedAgent?.rowId ?? null;
     let createdOk = savedAgent !== undefined;
@@ -632,48 +644,48 @@ export class GrokBotExecutor extends BaseExecutor {
       if (!savedAgent) {
         try {
           created = await t.rpc(
-          "CreateGrokBotTemporalAgent",
-          {
-            agentId,
-            name: "omni-grok-bot",
-            description:
-              "OmniRoute single-conversation bridge agent. Do not use tools, files, network, integrations, memory storage, or computer access.",
-            title: "",
-            avatarShape: "",
-            avatarColor: "",
-            harness: HARNESS_TEMPORAL,
-            kickstartRequested: false,
-            introductionSuppressed: true,
-            language: "en",
-          },
-          { signal: AbortSignal.timeout(CREATE_TIMEOUT_MS) }
-        );
-      } catch (err) {
-        if (isTimeoutError(err)) {
-          // Server may or may not have created the agent -- reconcile via the
-          // roster before the next conversation on this connection.
-          enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
+            "CreateGrokBotTemporalAgent",
+            {
+              agentId,
+              name: "omni-grok-bot",
+              description:
+                "OmniRoute single-conversation bridge agent. Do not use tools, files, network, integrations, memory storage, or computer access.",
+              title: "",
+              avatarShape: "",
+              avatarColor: "",
+              harness: HARNESS_TEMPORAL,
+              kickstartRequested: false,
+              introductionSuppressed: true,
+              language: "en",
+            },
+            { signal: AbortSignal.timeout(CREATE_TIMEOUT_MS) }
+          );
+        } catch (err) {
+          if (isTimeoutError(err)) {
+            // Server may or may not have created the agent -- reconcile via the
+            // roster before the next conversation on this connection.
+            enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
+          }
+          throw err;
         }
-        throw err;
-      }
 
-      // Live response shape (measured 2026-09-23): our client nonce comes back
-      // as `legacyAgentId`, the roster primary key lives in `agent.id`, and the
-      // harness echoes as the lowercase string name.
-      const agent = (
-        created as {
-          agent?: { id?: string; agentId?: string; legacyAgentId?: string; harness?: string };
+        // Live response shape (measured 2026-09-23): our client nonce comes back
+        // as `legacyAgentId`, the roster primary key lives in `agent.id`, and the
+        // harness echoes as the lowercase string name.
+        const agent = (
+          created as {
+            agent?: { id?: string; agentId?: string; legacyAgentId?: string; harness?: string };
+          }
+        )?.agent;
+        if (!agent || agent.legacyAgentId !== agentId || agent.harness !== "temporal") {
+          return errResponse(
+            HTTP_STATUS.BAD_GATEWAY ?? 502,
+            "CreateGrokBotTemporalAgent returned an invalid agent"
+          );
         }
-      )?.agent;
-      if (!agent || agent.legacyAgentId !== agentId || agent.harness !== "temporal") {
-        return errResponse(
-          HTTP_STATUS.BAD_GATEWAY ?? 502,
-          "CreateGrokBotTemporalAgent returned an invalid agent"
-        );
-      }
-      rowId = agent.id ?? null;
-      createdOk = true;
-      if (connectionId) this.durableAgents.set(connectionId, { agentId, rowId });
+        rowId = agent.id ?? null;
+        createdOk = true;
+        if (connectionId) this.durableAgents.set(connectionId, { agentId, rowId });
         await input.onCredentialsRefreshed?.({
           ...creds,
           accessToken,

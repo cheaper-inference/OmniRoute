@@ -2,7 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 const D = "../../../src/app/(dashboard)/dashboard/grok-bot";
-const { permissionAnswer, permissionFailure, permissionSummary } = await import(`${D}/permission.ts`);
+const { permissionAnswer, permissionFailure, permissionSummary } = await import(
+  `${D}/permission.ts`
+);
 const { watchRefusal, watchCounter, watchSlot } = await import(`${D}/overlap.ts`);
 const { transcriptErrorFrame } = await import(`${D}/transcript.ts`);
 const { nextExpiry } = await import(`${D}/token.ts`);
@@ -64,7 +66,16 @@ test("the card names the machine, not its uuid", () => {
 });
 
 test("a payload without an agent or request id is refused before it reaches the service", () => {
-  assert.equal(permissionAnswer({ agentId: "", entryId: "e", requestId: "r", resolution: "deny" }), null);
-  assert.equal(permissionAnswer({ agentId: "a", entryId: "e", requestId: "", resolution: "deny" }), null);
-  assert.equal(permissionAnswer({ agentId: "a", entryId: "e", requestId: "r", resolution: "" }), null);
+  assert.equal(
+    permissionAnswer({ agentId: "", entryId: "e", requestId: "r", resolution: "deny" }),
+    null
+  );
+  assert.equal(
+    permissionAnswer({ agentId: "a", entryId: "e", requestId: "", resolution: "deny" }),
+    null
+  );
+  assert.equal(
+    permissionAnswer({ agentId: "a", entryId: "e", requestId: "r", resolution: "" }),
+    null
+  );
 });

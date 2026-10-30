@@ -82,7 +82,9 @@ describe("Grok Bot durable agent panel", () => {
       } as Response);
     });
     const name = container.querySelector('input[name="agentName"]') as HTMLInputElement;
-    const description = container.querySelector('input[name="agentDescription"]') as HTMLInputElement;
+    const description = container.querySelector(
+      'input[name="agentDescription"]'
+    ) as HTMLInputElement;
     expect(name.value).toBe("Research");
     expect(description.value).toBe("Collect sources only.");
     await act(async () => {
@@ -147,7 +149,7 @@ describe("Grok Bot durable agent panel", () => {
         json: async () => ({
           agentId: "agent-1",
           rowId: "row-1",
-          routines: [{ id: "routine-1", recordJson: "{\"name\":\"Morning\"}" }],
+          routines: [{ id: "routine-1", recordJson: '{"name":"Morning"}' }],
         }),
       };
     });

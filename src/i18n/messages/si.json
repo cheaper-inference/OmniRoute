@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "මිතුරා",
     "errNoReply": "⚠️ ගේට්වේව් එකෙන් පිළිතුරක් නැත.",
     "btnSend": "යවන්න"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "පුරෝකථනය කළ ගිණුම්, ඒවායේ bots, skills සහ දුරස්ථප්‍රදේශීය පරිගණක.",

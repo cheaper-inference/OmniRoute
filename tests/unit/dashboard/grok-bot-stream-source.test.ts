@@ -104,7 +104,7 @@ test("the route's error frame ends the read instead of yielding an empty object"
 
 test("an event outside the whitelist is dropped", async () => {
   const frames = await drain(
-    bodyOf(["event: secret\ndata: {\"token\":\"hidden\"}\n\n", "event: frame\ndata: {\"seq\":\"16\"}\n\n"])
+    bodyOf(['event: secret\ndata: {"token":"hidden"}\n\n', 'event: frame\ndata: {"seq":"16"}\n\n'])
   );
   assert.deepEqual(frames, [{ seq: "16" }]);
 });

@@ -32,7 +32,11 @@ test("snapshot cutover closes the request before opening live at the frozen curs
         assert.equal(snapshotClosed, true);
         assert.equal(signals[0].aborted, true);
         assert.equal(signal.aborted, false);
-        yield { rows: { entries: [{ updatedSeq: "9007199254740994", role: "assistant", text: "live reply" }] } };
+        yield {
+          rows: {
+            entries: [{ updatedSeq: "9007199254740994", role: "assistant", text: "live reply" }],
+          },
+        };
         await new Promise<void>((resolve) =>
           signal.addEventListener("abort", () => resolve(), { once: true })
         );
@@ -43,14 +47,20 @@ test("snapshot cutover closes the request before opening live at the frozen curs
       visible.push(...(next.visible ?? []).map((item) => item.text));
       return next;
     },
-    retryWait: () => { retries += 1; return -1; },
+    retryWait: () => {
+      retries += 1;
+      return -1;
+    },
   });
   t.after(opened.abort);
   await tick();
-  assert.deepEqual(requests.map(({ phase, after }) => ({ phase, after })), [
-    { phase: "snapshot", after: "0" },
-    { phase: "live", after: "9007199254740993" },
-  ]);
+  assert.deepEqual(
+    requests.map(({ phase, after }) => ({ phase, after })),
+    [
+      { phase: "snapshot", after: "0" },
+      { phase: "live", after: "9007199254740993" },
+    ]
+  );
   assert.deepEqual(visible, ["live reply"]);
   assert.equal(retries, 0);
 });
@@ -72,7 +82,10 @@ test("a failed live read retries from the last processed cursor", async (t) => {
       );
     },
     onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
-    retryWait: (fails) => { counts.push(fails); return 10; },
+    retryWait: (fails) => {
+      counts.push(fails);
+      return 10;
+    },
   });
   t.after(opened.abort);
   await tick();
@@ -88,7 +101,10 @@ test("abort during a retry wait keeps the reader closed", async (t) => {
   let reads = 0;
   const opened = openTranscript({
     request: { phase: "live", after: "5" },
-    read: () => { reads += 1; throw new Error("dropped"); },
+    read: () => {
+      reads += 1;
+      throw new Error("dropped");
+    },
     onFrame: (_frame, cursor) => cursor,
     retryWait: () => 10,
   });
@@ -104,7 +120,10 @@ test("a negative retry delay terminates after a synchronous read failure", async
   let reads = 0;
   const opened = openTranscript({
     request: { phase: "snapshot", after: "0" },
-    read: () => { reads += 1; throw new Error("dropped"); },
+    read: () => {
+      reads += 1;
+      throw new Error("dropped");
+    },
     onFrame: (_frame, cursor) => cursor,
     retryWait: () => -1,
   });
@@ -118,7 +137,10 @@ test("abort right after opening discards the first frame", async (t) => {
   const opened = openTranscript({
     request: { phase: "snapshot", after: "0" },
     read: () => frames([{ heartbeat: true }]),
-    onFrame: (frame, cursor) => { seen.push(frame); return cursor; },
+    onFrame: (frame, cursor) => {
+      seen.push(frame);
+      return cursor;
+    },
     retryWait: () => 0,
   });
   t.after(opened.abort);
@@ -129,7 +151,9 @@ test("abort right after opening discards the first frame", async (t) => {
 
 test("a frame arriving after abort is discarded", async (t) => {
   let deliver!: () => void;
-  const late = new Promise<void>((resolve) => { deliver = resolve; });
+  const late = new Promise<void>((resolve) => {
+    deliver = resolve;
+  });
   const seen: unknown[] = [];
   let signal: AbortSignal | undefined;
   const opened = openTranscript({
@@ -139,8 +163,13 @@ test("a frame arriving after abort is discarded", async (t) => {
       await late;
       yield "late";
     },
-    onFrame: (frame, cursor) => { seen.push(frame); return cursor; },
-    retryWait: () => { assert.fail("abort must not retry"); },
+    onFrame: (frame, cursor) => {
+      seen.push(frame);
+      return cursor;
+    },
+    retryWait: () => {
+      assert.fail("abort must not retry");
+    },
   });
   t.after(opened.abort);
   opened.abort();
@@ -155,12 +184,17 @@ test("abort at the cutover boundary cannot start a live request", async (t) => {
   let opened!: { abort: () => void };
   opened = openTranscript({
     request: { phase: "snapshot", after: "0" },
-    read: () => { reads += 1; return frames([{ heartbeat: true }]); },
+    read: () => {
+      reads += 1;
+      return frames([{ heartbeat: true }]);
+    },
     onFrame: (frame, cursor) => {
       opened.abort();
       return nextTranscriptRequest(cursor, frame);
     },
-    retryWait: () => { assert.fail("abort must not retry"); },
+    retryWait: () => {
+      assert.fail("abort must not retry");
+    },
   });
   t.after(opened.abort);
   await tick();
@@ -229,7 +263,9 @@ test("abort aborts the in-flight read signal synchronously", async (t) => {
       yield undefined;
     },
     onFrame: (_frame, cursor) => cursor,
-    retryWait: () => { assert.fail("abort must not retry"); },
+    retryWait: () => {
+      assert.fail("abort must not retry");
+    },
   });
   t.after(opened.abort);
   await tick();
@@ -255,7 +291,10 @@ test("a delivered frame resets the retry backoff", async (t) => {
       );
     },
     onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
-    retryWait: (fails) => { attempts.push(fails); return 5; },
+    retryWait: (fails) => {
+      attempts.push(fails);
+      return 5;
+    },
   });
   t.after(opened.abort);
   await tick();
@@ -279,14 +318,23 @@ test("a handler fault stops the reader instead of retrying it", async (t) => {
         signal.addEventListener("abort", () => resolve(), { once: true })
       );
     },
-    onFrame: () => { throw new Error("handler bug"); },
-    retryWait: () => { assert.fail("a handler fault must not be retried"); },
-    onFault: (error) => { faults.push(error); },
+    onFrame: () => {
+      throw new Error("handler bug");
+    },
+    retryWait: () => {
+      assert.fail("a handler fault must not be retried");
+    },
+    onFault: (error) => {
+      faults.push(error);
+    },
   });
   t.after(opened.abort);
   await tick();
   assert.equal(reads, 1);
-  assert.deepEqual(faults.map((error) => (error as Error).message), ["handler bug"]);
+  assert.deepEqual(
+    faults.map((error) => (error as Error).message),
+    ["handler bug"]
+  );
 });
 
 test("a socket that goes silent is treated as closed instead of hanging", async (t) => {
@@ -299,7 +347,10 @@ test("a socket that goes silent is treated as closed instead of hanging", async 
       );
     },
     onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
-    retryWait: (_fails, _livedMs, kind) => { kinds.push(kind); return -1; },
+    retryWait: (_fails, _livedMs, kind) => {
+      kinds.push(kind);
+      return -1;
+    },
     silenceMs: 20,
   });
   t.after(opened.abort);
@@ -315,7 +366,10 @@ test("a refusal to admit the watch is not counted as a dead stream", async (t) =
       throw Object.assign(new Error("transcript 429"), { admission: true });
     },
     onFrame: (frame, cursor) => nextTranscriptRequest(cursor, frame),
-    retryWait: (_fails, _livedMs, kind) => { kinds.push(kind); return -1; },
+    retryWait: (_fails, _livedMs, kind) => {
+      kinds.push(kind);
+      return -1;
+    },
   });
   t.after(opened.abort);
   await new Promise((resolve) => setTimeout(resolve, 20));

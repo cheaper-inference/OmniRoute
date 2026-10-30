@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "siellä",
     "errNoReply": "⚠️ Ei vastausta lähetysverkkoon.",
     "btnSend": "Lähetä"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Kirjautuneet tilit, niiden botit, taidot ja paikalliset tietokoneet.",

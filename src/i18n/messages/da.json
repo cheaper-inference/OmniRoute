@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "der",
     "errNoReply": "⚠️ Intet svar fra gatewayen.",
     "btnSend": "Send"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Indloggede konti, deres bots, færdigheder og lokale computere.",

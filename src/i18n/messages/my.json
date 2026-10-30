@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "မိတ်ဆွေ",
     "errNoReply": "⚠️ Gateway မှ အဖြေမရပါ။",
     "btnSend": "ပို့ရန်"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "ထင်ရှိနေသော အကောင့်များ၊ ၎င်းတို့၏ Bot များ၊ ချွေချာများနှင့် တစ်နေရာတည်းတွင်ရှိသော ကွန်ပ်ပျူတာများ။",

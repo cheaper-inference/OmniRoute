@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "तहाँ",
     "errNoReply": "⚠️ गेटविरुबाट जवाफ प्राप्त भएन।",
     "btnSend": "पठाउनुहोस्"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "साइन-इन खाताहरू, तिनका बटहरू, कौशलहरू र स्थानीय कम्प्युटरहरू।",

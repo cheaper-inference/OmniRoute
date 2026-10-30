@@ -96,17 +96,20 @@ export type DraftDiscard = {
   sessionId: string;
 };
 
-export function draftDiscard(input: {
-  agentId: string;
-  entryId: string;
-}): DraftDiscard | null {
+export function draftDiscard(input: { agentId: string; entryId: string }): DraftDiscard | null {
   if (input.agentId === "" || input.entryId === "") return null;
   return { agentId: input.agentId, entryId: input.entryId, sessionId: "" };
 }
 
 export function cardAccepted(answer: unknown): boolean {
-  return answer === null || (
-    !!answer && typeof answer === "object" && !("error" in answer) && !("code" in answer)
-    && !("refusal" in answer) && !("status" in answer) && !("message" in answer)
+  return (
+    answer === null ||
+    (!!answer &&
+      typeof answer === "object" &&
+      !("error" in answer) &&
+      !("code" in answer) &&
+      !("refusal" in answer) &&
+      !("status" in answer) &&
+      !("message" in answer))
   );
 }

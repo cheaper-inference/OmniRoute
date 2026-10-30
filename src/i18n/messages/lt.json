@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ten",
     "errNoReply": "⚠️ Atsakymo iš įėjimo punkto nėra.",
     "btnSend": "Siųsti"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Prisijungtos paskyros, jų botai, įgūdžiai ir vietiniai kompiuteriai.",

@@ -13,8 +13,5 @@ test("a failed send is not tried again", async () => {
 });
 
 test("a send that lands stays recorded", async () => {
-  assert.equal(
-    await sendOnce("hello", async () => "ok"),
-    "recorded"
-  );
+  assert.equal(await sendOnce("hello", async () => "ok"), "recorded");
 });

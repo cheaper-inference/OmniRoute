@@ -85,9 +85,7 @@ describe("refreshGrokBotToken", () => {
   });
 
   it("uses the desktop production client identity for refresh", async () => {
-    const { impl, calls } = fakeFetch([
-      { status: 200, body: { access_token: "new-access" } },
-    ]);
+    const { impl, calls } = fakeFetch([{ status: 200, body: { access_token: "new-access" } }]);
     const result = await refreshGrokBotToken("old-refresh", undefined, null, {
       fetchImpl: impl as unknown as typeof fetch,
       attempts: 1,

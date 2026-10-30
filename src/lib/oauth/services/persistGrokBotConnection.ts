@@ -70,7 +70,9 @@ export async function persistGrokBotConnection(input: PersistGrokBotConnectionIn
   };
 
   if (email || input.accountId) {
-    const existing = (await getProviderConnections({ provider: "grok-bot" })) as GrokBotConnectionRow[];
+    const existing = (await getProviderConnections({
+      provider: "grok-bot",
+    })) as GrokBotConnectionRow[];
     const match = matchGrokBotConnection(existing, email, input.accountId || null);
     if (match) {
       return updateProviderConnection(match.id, {

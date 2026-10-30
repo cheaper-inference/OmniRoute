@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { grokBotRegions } =
-  await import("../../../src/app/(dashboard)/dashboard/grok-bot/page.tsx");
+const { grokBotRegions } = await import("../../../src/app/(dashboard)/dashboard/grok-bot/page.tsx");
 
 test("grok bot page lists the five read-only regions in order", () => {
   assert.deepEqual(

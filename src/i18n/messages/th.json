@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ที่นั่น",
     "errNoReply": "⚠️ ไม่มีการตอบกลับจาก gateway.",
     "btnSend": "ส่ง"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "บัญชีที่เข้าสู่ระบบ, บอท, ทักษะ และคอมพิวเตอร์ท้องถิ่น.",

@@ -1,5 +1,4 @@
-const GROK_BOT_USAGE_URL =
-  "https://api2.cursor.sh/aiserver.v1.DashboardService/GetSandUsageStatus";
+const GROK_BOT_USAGE_URL = "https://api2.cursor.sh/aiserver.v1.DashboardService/GetSandUsageStatus";
 
 type GrokBotUsageResponse = {
   usagePercent?: unknown;

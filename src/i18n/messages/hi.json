@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "वहाँ",
     "errNoReply": "⚠️ गेटवे से कोई उत्तर नहीं मिला।",
     "btnSend": "भेजें"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "साइन-इन खातों, उनके बॉट्स, स्किल्स और लोकल कंप्यूटर।",

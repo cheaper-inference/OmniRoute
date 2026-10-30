@@ -82,11 +82,7 @@ export function readPresence(frame: unknown, nowMs: number): Partial<Presence> {
   return out;
 }
 
-export function statusOf(
-  presence: Presence,
-  nowMs: number,
-  agentId?: string
-): PresenceStatus {
+export function statusOf(presence: Presence, nowMs: number, agentId?: string): PresenceStatus {
   if (presence.lastFrameAtMs === 0) return "stale";
   const window = presence.staleAfterMs > 0 ? presence.staleAfterMs : STALE_AFTER_MS;
   if (nowMs - presence.lastFrameAtMs >= window) return "stale";

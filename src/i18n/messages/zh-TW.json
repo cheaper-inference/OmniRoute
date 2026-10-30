@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "朋友",
     "errNoReply": "⚠️ 閘道沒有回應。",
     "btnSend": "傳送"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "已登入的帳戶、其機器人生成器、技能與本機電腦。",

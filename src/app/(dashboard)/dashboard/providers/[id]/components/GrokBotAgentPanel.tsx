@@ -118,7 +118,11 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
       >
         Save memory
       </Button>
-      <input name="skillName" value={skillName} onChange={(event) => setSkillName(event.target.value)} />
+      <input
+        name="skillName"
+        value={skillName}
+        onChange={(event) => setSkillName(event.target.value)}
+      />
       <input
         name="skillDescription"
         value={skillDescription}
@@ -168,7 +172,11 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
       >
         Remove skill
       </Button>
-      <input name="routineId" value={routineId} onChange={(event) => setRoutineId(event.target.value)} />
+      <input
+        name="routineId"
+        value={routineId}
+        onChange={(event) => setRoutineId(event.target.value)}
+      />
       <Button
         size="sm"
         variant="ghost"

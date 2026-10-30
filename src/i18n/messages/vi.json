@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ở đó",
     "errNoReply": "⚠️ Không có phản hồi từ cổng.",
     "btnSend": "Gửi"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Tài khoản đã đăng nhập, các bot, kỹ năng và máy tính cục bộ của chúng.",

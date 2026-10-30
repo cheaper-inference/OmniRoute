@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "là",
     "errNoReply": "⚠️ Pas de réponse de la passerelle.",
     "btnSend": "Envoyer"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Comptes connectés, leurs bots, compétences et ordinateurs locaux.",

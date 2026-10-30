@@ -44,7 +44,9 @@ export function ConsoleBar({
       >
         <option value="">{t("accountsTitle")}</option>
         {accounts.map((account) => (
-          <option key={account.id} value={account.id}>{account.name}</option>
+          <option key={account.id} value={account.id}>
+            {account.name}
+          </option>
         ))}
       </select>
       <select
@@ -173,7 +175,10 @@ function MessageCards({
   return (
     <ul className="mx-auto flex w-full max-w-[640px] flex-col gap-2 px-4">
       {cards.map((card) => (
-        <li className="rounded-card border border-border bg-surface p-3 text-sm" key={`${card.kind}:${card.entryId}:${card.seq}`}>
+        <li
+          className="rounded-card border border-border bg-surface p-3 text-sm"
+          key={`${card.kind}:${card.entryId}:${card.seq}`}
+        >
           {card.kind === "attachment" ? <p>{card.fileName}</p> : null}
           {card.kind === "notice" ? <p>{card.text}</p> : null}
           {card.kind === "connector" ? (
@@ -181,19 +186,27 @@ function MessageCards({
               <span>{card.name}</span>
               <span className="text-xs text-text-muted">{card.action}</span>
               {card.requestId !== "" ? (
-              <>
-              {(
-                [
-                  ["allowed", "connectorAllow"],
-                  ["skipped", "connectorSkip"],
-                  ["always_this_bot", "connectorAlwaysBot"],
-                  ["always_all_team_bots", "connectorAlwaysTeam"],
-                  ["allow_in_channel", "connectorAllowChannel"],
-                ] as const
-              ).map(([resolution, key]) => (
-                <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} key={resolution} onClick={() => onConnector(card, resolution)} type="button">{t(key)}</button>
-              ))}
-              </>
+                <>
+                  {(
+                    [
+                      ["allowed", "connectorAllow"],
+                      ["skipped", "connectorSkip"],
+                      ["always_this_bot", "connectorAlwaysBot"],
+                      ["always_all_team_bots", "connectorAlwaysTeam"],
+                      ["allow_in_channel", "connectorAllowChannel"],
+                    ] as const
+                  ).map(([resolution, key]) => (
+                    <button
+                      className="rounded-control border px-2 py-1 text-xs"
+                      disabled={busy}
+                      key={resolution}
+                      onClick={() => onConnector(card, resolution)}
+                      type="button"
+                    >
+                      {t(key)}
+                    </button>
+                  ))}
+                </>
               ) : null}
             </div>
           ) : null}
@@ -201,53 +214,118 @@ function MessageCards({
             <div className="flex flex-col gap-2">
               <span>{card.prompt}</span>
               {card.multiSelect ? (
-                <form className="flex flex-wrap items-center gap-2" onSubmit={(event) => {
-                  event.preventDefault();
-                  const chosen = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>("input:checked")).map((item) => item.value);
-                  if (chosen.length > 0) onWidget(card, chosen.join("\n"));
-                }}>
+                <form
+                  className="flex flex-wrap items-center gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const chosen = Array.from(
+                      event.currentTarget.querySelectorAll<HTMLInputElement>("input:checked")
+                    ).map((item) => item.value);
+                    if (chosen.length > 0) onWidget(card, chosen.join("\n"));
+                  }}
+                >
                   {card.options.map((option) => (
-                    <label className="text-xs" key={option}><input className="mr-1" type="checkbox" value={option} />{option}</label>
+                    <label className="text-xs" key={option}>
+                      <input className="mr-1" type="checkbox" value={option} />
+                      {option}
+                    </label>
                   ))}
-                  <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} type="submit">{t("widgetSubmit")}</button>
+                  <button
+                    className="rounded-control border px-2 py-1 text-xs"
+                    disabled={busy}
+                    type="submit"
+                  >
+                    {t("widgetSubmit")}
+                  </button>
                 </form>
               ) : (
                 <div className="flex flex-wrap items-center gap-2">
                   {card.options.map((option) => (
-                    <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} key={option} onClick={() => onWidget(card, option)} type="button">{option}</button>
+                    <button
+                      className="rounded-control border px-2 py-1 text-xs"
+                      disabled={busy}
+                      key={option}
+                      onClick={() => onWidget(card, option)}
+                      type="button"
+                    >
+                      {option}
+                    </button>
                   ))}
                 </div>
               )}
               {card.allowCustom ? (
-                <form className="flex gap-2" onSubmit={(event) => {
-                  event.preventDefault();
-                  const value = new FormData(event.currentTarget).get("custom");
-                  if (typeof value === "string" && value.trim() !== "") onWidget(card, value);
-                }}>
-                  <input className="min-w-0 flex-1 rounded-control border px-2 py-1 text-xs" name="custom" />
-                  <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} type="submit">{t("widgetCustom")}</button>
+                <form
+                  className="flex gap-2"
+                  onSubmit={(event) => {
+                    event.preventDefault();
+                    const value = new FormData(event.currentTarget).get("custom");
+                    if (typeof value === "string" && value.trim() !== "") onWidget(card, value);
+                  }}
+                >
+                  <input
+                    className="min-w-0 flex-1 rounded-control border px-2 py-1 text-xs"
+                    name="custom"
+                  />
+                  <button
+                    className="rounded-control border px-2 py-1 text-xs"
+                    disabled={busy}
+                    type="submit"
+                  >
+                    {t("widgetCustom")}
+                  </button>
                 </form>
               ) : null}
               {card.dismissOnMoveOn ? (
-                <button className="self-start rounded-control border px-2 py-1 text-xs" disabled={busy} onClick={() => onDismissWidget(card)} type="button">{t("widgetDismiss")}</button>
+                <button
+                  className="self-start rounded-control border px-2 py-1 text-xs"
+                  disabled={busy}
+                  onClick={() => onDismissWidget(card)}
+                  type="button"
+                >
+                  {t("widgetDismiss")}
+                </button>
               ) : null}
             </div>
           ) : null}
           {card.kind === "secret" ? (
-            <form className="flex gap-2" onSubmit={(event) => {
-              event.preventDefault();
-              const value = new FormData(event.currentTarget).get("secret");
-              if (typeof value === "string" && value.trim() !== "") onSecret(card, value);
-            }}>
+            <form
+              className="flex gap-2"
+              onSubmit={(event) => {
+                event.preventDefault();
+                const value = new FormData(event.currentTarget).get("secret");
+                if (typeof value === "string" && value.trim() !== "") onSecret(card, value);
+              }}
+            >
               <span>{card.label}</span>
-              <input className="min-w-0 flex-1 rounded-control border px-2 py-1 text-xs" name="secret" type="password" />
-              <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} type="submit">{t("widgetSubmit")}</button>
+              <input
+                className="min-w-0 flex-1 rounded-control border px-2 py-1 text-xs"
+                name="secret"
+                type="password"
+              />
+              <button
+                className="rounded-control border px-2 py-1 text-xs"
+                disabled={busy}
+                type="submit"
+              >
+                {t("widgetSubmit")}
+              </button>
             </form>
           ) : null}
           {card.kind === "email" || card.kind === "slack" ? (
             <div className="flex items-center gap-2">
-              <span>{card.kind === "email" ? `${card.from} → ${card.to}: ${card.subject}: ${card.body}` : `${card.target}: ${card.body}`}</span>
-              <button className="rounded-control border px-2 py-1 text-xs" disabled={busy} onClick={() => onDiscardDraft(card)} type="button">{t("widgetDismiss")}</button>
+              <span>
+                {card.kind === "email"
+                  ? `${card.from} → ${card.to}: ${card.subject}: ${card.body}`
+                  : `${card.target}: ${card.body}`}
+              </span>
+              <button
+                className="rounded-control border px-2 py-1 text-xs"
+                disabled={busy}
+                onClick={() => onDiscardDraft(card)}
+                type="button"
+              >
+                {t("widgetDismiss")}
+              </button>
             </div>
           ) : null}
           {card.kind === "unknown" ? <p>{t("unsupportedMessage")}</p> : null}
@@ -411,9 +489,7 @@ function SendBar({
           {t("sendButton")}
         </button>
       </form>
-      {uploadNote !== "" ? (
-        <p className="text-sm text-muted-foreground">{uploadNote}</p>
-      ) : null}
+      {uploadNote !== "" ? <p className="text-sm text-muted-foreground">{uploadNote}</p> : null}
       {sendState === "unknown" ? (
         <p className="text-sm text-muted-foreground">{t("sendUnknown")}</p>
       ) : null}
@@ -499,7 +575,12 @@ export function ConversationPanel({
         </span>
       </div>
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto py-3" ref={scroller}>
-        <MessageList hidden={Math.max(0, state.messages.length - state.window)} messages={state.messages.slice(-state.window)} onOlder={handlers.onOlder} t={t} />
+        <MessageList
+          hidden={Math.max(0, state.messages.length - state.window)}
+          messages={state.messages.slice(-state.window)}
+          onOlder={handlers.onOlder}
+          t={t}
+        />
         {state.linkLost ? (
           <p className="px-4 text-sm text-text-muted">
             {state.needsSignIn ? t("conversationSignIn") : t("conversationLost")}
@@ -525,11 +606,51 @@ export function ConversationPanel({
         />
       </div>
       <div className="border-t border-border p-3">
-        <MessageCards busy={state.cardBusy} cards={state.cards.filter((card) => card.kind === "widget" || card.kind === "secret" || card.kind === "email" || card.kind === "slack" || (card.kind === "connector" && card.requestId !== "")).slice(-1)} onConnector={handlers.onConnector} onDiscardDraft={handlers.onDiscardDraft} onDismissWidget={handlers.onDismissWidget} onSecret={handlers.onSecret} onWidget={handlers.onWidget} t={t} />
-        {state.cards.filter((card) => card.kind === "widget" || card.kind === "secret" || card.kind === "email" || card.kind === "slack" || (card.kind === "connector" && card.requestId !== "")).length > 1 ? (
-          <p className="px-4 pb-2 text-xs text-text-muted">{t("cardQueued", { count: String(state.cards.filter((card) => card.kind === "widget" || card.kind === "secret" || card.kind === "email" || card.kind === "slack" || (card.kind === "connector" && card.requestId !== "")).length - 1) })}</p>
+        <MessageCards
+          busy={state.cardBusy}
+          cards={state.cards
+            .filter(
+              (card) =>
+                card.kind === "widget" ||
+                card.kind === "secret" ||
+                card.kind === "email" ||
+                card.kind === "slack" ||
+                (card.kind === "connector" && card.requestId !== "")
+            )
+            .slice(-1)}
+          onConnector={handlers.onConnector}
+          onDiscardDraft={handlers.onDiscardDraft}
+          onDismissWidget={handlers.onDismissWidget}
+          onSecret={handlers.onSecret}
+          onWidget={handlers.onWidget}
+          t={t}
+        />
+        {state.cards.filter(
+          (card) =>
+            card.kind === "widget" ||
+            card.kind === "secret" ||
+            card.kind === "email" ||
+            card.kind === "slack" ||
+            (card.kind === "connector" && card.requestId !== "")
+        ).length > 1 ? (
+          <p className="px-4 pb-2 text-xs text-text-muted">
+            {t("cardQueued", {
+              count: String(
+                state.cards.filter(
+                  (card) =>
+                    card.kind === "widget" ||
+                    card.kind === "secret" ||
+                    card.kind === "email" ||
+                    card.kind === "slack" ||
+                    (card.kind === "connector" && card.requestId !== "")
+                ).length - 1
+              ),
+            })}
+          </p>
         ) : null}
-        {state.cardFailed ? <p className="px-4 pb-2 text-sm text-text-muted">{t("cardFailed")}</p> : null}
+        {state.cardFailed ? (
+          <p className="px-4 pb-2 text-sm text-text-muted">{t("cardFailed")}</p>
+        ) : null}
         <SendBar
           draft={state.draft}
           fanState={state.fanState}

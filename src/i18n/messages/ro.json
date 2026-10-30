@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "acolo",
     "errNoReply": "⚠️ Niciun răspuns din partea poartei.",
     "btnSend": "Trimite"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Conturile conectate, bot-urile, abilitățile și calculatoarele locale aferente acestora.",

@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "tur",
     "errNoReply": "⚠️ Nav atbildes no vārta.",
     "btnSend": "Nosūtīt"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Pieslēgti konti, to boti, iemači un lokālās datorsistēmas.",

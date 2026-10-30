@@ -47,9 +47,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   } catch (error) {
     const failure = permissionFailure((error as { status?: number }).status);
-    return NextResponse.json(
-      failure.code === "gone" ? { error: "gone" } : { status: "unknown" },
-      { status: failure.status }
-    );
+    return NextResponse.json(failure.code === "gone" ? { error: "gone" } : { status: "unknown" }, {
+      status: failure.status,
+    });
   }
 }

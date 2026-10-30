@@ -30,7 +30,10 @@ test("a fresh access token is read with its expiry", () => {
 });
 
 test("a rotated refresh token is kept", () => {
-  const tokens = readRefreshResponse({ access_token: jwt(1_800_000_000), refresh_token: "new" }, "old");
+  const tokens = readRefreshResponse(
+    { access_token: jwt(1_800_000_000), refresh_token: "new" },
+    "old"
+  );
   assert.equal(tokens?.refreshToken, "new");
 });
 
@@ -40,7 +43,10 @@ test("an empty access token is not a refresh", () => {
 });
 
 test("shouldLogout means the grant is gone", () => {
-  assert.equal(readRefreshResponse({ access_token: jwt(1_800_000_000), shouldLogout: true }, "old"), null);
+  assert.equal(
+    readRefreshResponse({ access_token: jwt(1_800_000_000), shouldLogout: true }, "old"),
+    null
+  );
 });
 
 test("a malformed answer is not a refresh", () => {
@@ -59,7 +65,10 @@ test("a missing access token always needs a refresh", () => {
 });
 
 test("without a refresh token there is nothing to do", () => {
-  assert.equal(needsRefresh({ accessToken: "a", expiresAt: "2020-01-01T00:00:00.000Z" }, 1_000), false);
+  assert.equal(
+    needsRefresh({ accessToken: "a", expiresAt: "2020-01-01T00:00:00.000Z" }, 1_000),
+    false
+  );
 });
 
 test("a spent access token needs a refresh a minute early", () => {

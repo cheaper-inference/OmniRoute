@@ -171,7 +171,9 @@ export default function GrokBotPage() {
       .then((data) => {
         setRoster(rosterEntries(data?.roster));
         setComputers(grokBotComputers(data));
-        setConnectionUpdatedAt(typeof data?.connectionUpdatedAt === "string" ? data.connectionUpdatedAt : "");
+        setConnectionUpdatedAt(
+          typeof data?.connectionUpdatedAt === "string" ? data.connectionUpdatedAt : ""
+        );
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
@@ -252,7 +254,13 @@ export default function GrokBotPage() {
         if (next.visible.length > 0) {
           const scoped: TranscriptItem[] = [];
           for (const [index] of next.visible.entries()) {
-            const named = localRowId(shown, next.visible, index, nextStable.current, `${selectedAccount}:${selectedBot}`);
+            const named = localRowId(
+              shown,
+              next.visible,
+              index,
+              nextStable.current,
+              `${selectedAccount}:${selectedBot}`
+            );
             nextStable.current = named.next;
             scoped.push(named.item);
           }
@@ -327,7 +335,9 @@ export default function GrokBotPage() {
       closedNow.current = [...closedNow.current, identity];
       setClosedCards(closedNow.current);
     }
-    setCards((held) => held.filter((item) => (item.entryId !== "" ? item.entryId : item.seq) !== identity));
+    setCards((held) =>
+      held.filter((item) => (item.entryId !== "" ? item.entryId : item.seq) !== identity)
+    );
   };
 
   const answerConnector = async (
@@ -343,10 +353,7 @@ export default function GrokBotPage() {
     finishCard(card, ok, true);
   };
 
-  const answerWidget = async (
-    card: Extract<TranscriptCard, { kind: "widget" }>,
-    value: string
-  ) => {
+  const answerWidget = async (card: Extract<TranscriptCard, { kind: "widget" }>, value: string) => {
     setCardBusy(true);
     const ok = await postCard("widget", { entryId: card.entryId, value }).catch(() => false);
     finishCard(card, ok, false);
@@ -354,14 +361,13 @@ export default function GrokBotPage() {
 
   const dismissWidget = async (card: Extract<TranscriptCard, { kind: "widget" }>) => {
     setCardBusy(true);
-    const ok = await postCard("widget", { entryId: card.entryId, dismiss: true }).catch(() => false);
+    const ok = await postCard("widget", { entryId: card.entryId, dismiss: true }).catch(
+      () => false
+    );
     finishCard(card, ok, true);
   };
 
-  const answerSecret = async (
-    card: Extract<TranscriptCard, { kind: "secret" }>,
-    value: string
-  ) => {
+  const answerSecret = async (card: Extract<TranscriptCard, { kind: "secret" }>, value: string) => {
     setCardBusy(true);
     const ok = await postCard("secret", { entryId: card.entryId, value }).catch(() => false);
     finishCard(card, ok, true);
@@ -369,7 +375,9 @@ export default function GrokBotPage() {
 
   const discardDraft = async (card: Extract<TranscriptCard, { kind: "email" | "slack" }>) => {
     setCardBusy(true);
-    const ok = await postCard("draft", { entryId: card.entryId, kind: card.kind }).catch(() => false);
+    const ok = await postCard("draft", { entryId: card.entryId, kind: card.kind }).catch(
+      () => false
+    );
     finishCard(card, ok, true);
   };
 
@@ -488,7 +496,12 @@ export default function GrokBotPage() {
                       checked={fanout.includes(account.id)}
                       onChange={(event) =>
                         setFanout((current) =>
-                          toggleFanout(current, account.id, event.target.checked, account.email ?? "")
+                          toggleFanout(
+                            current,
+                            account.id,
+                            event.target.checked,
+                            account.email ?? ""
+                          )
                         )
                       }
                       type="checkbox"
@@ -516,7 +529,12 @@ export default function GrokBotPage() {
             )}
           </Card>
           <Card icon="storefront" padding="sm" title="Marketplace">
-            <a className="text-sm text-primary underline" href="https://x.ai/bot/marketplace" rel="noreferrer" target="_blank">
+            <a
+              className="text-sm text-primary underline"
+              href="https://x.ai/bot/marketplace"
+              rel="noreferrer"
+              target="_blank"
+            >
               x.ai/bot/marketplace
             </a>
             <p className="mt-2 text-xs text-text-muted">{t("marketplaceNote")}</p>

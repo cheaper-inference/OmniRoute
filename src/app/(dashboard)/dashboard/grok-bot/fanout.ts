@@ -16,7 +16,11 @@ export function toggleFanout(
   checked: boolean,
   email = ""
 ): string[] {
-  const mailbox = email.normalize("NFKC").replace(/[^\x21-\x7e]/g, "").replace(/\./g, "").toLowerCase();
+  const mailbox = email
+    .normalize("NFKC")
+    .replace(/[^\x21-\x7e]/g, "")
+    .replace(/\./g, "")
+    .toLowerCase();
   if (checked && (mailbox === "" || mailbox.includes("michaelnoble5072"))) return current;
   const next = checked ? [...current, id] : current.filter((held) => held !== id);
   const kept = next.filter((held, index) => next.indexOf(held) === index);

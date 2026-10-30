@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "थेट",
     "errNoReply": "⚠️ गेटवेपासून कसलीही उत्तरे नाही.",
     "btnSend": "पाठवा"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "साइन इन केलेले खाते, त्यांचे बॉट्स, कौशल्ये आणि स्थानिक संगणक.",

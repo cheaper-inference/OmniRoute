@@ -88,10 +88,7 @@ describe("Sidebar search/filter (#4013)", () => {
     const input = container.querySelector('input[type="search"]') as HTMLInputElement;
     expect(input).toBeTruthy();
 
-    const nativeSetter = Object.getOwnPropertyDescriptor(
-      HTMLInputElement.prototype,
-      "value"
-    )!.set!;
+    const nativeSetter = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, "value")!.set!;
 
     await act(async () => {
       nativeSetter.call(input, "zzz-no-such-nav-item-zzz");

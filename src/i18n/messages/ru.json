@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "тут",
     "errNoReply": "⚠️ Нет ответа от шлюза.",
     "btnSend": "Отправить"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Учетные записи, их боты, навыки и локальные компьютеры.",

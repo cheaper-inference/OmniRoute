@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Brak odpowiedzi z bramki.",
     "btnSend": "Wyślij"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Zarejestrowane konta, ich boty, umiejętności i lokalne komputery.",

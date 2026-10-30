@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "آنجا",
     "errNoReply": "⚠️ پاسخی از دروازه دریافت نشد.",
     "btnSend": "ارسال"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "حساب‌های ورودی، بات‌ها، مهارت‌ها و کامپیوترهای محلی آن‌ها.",

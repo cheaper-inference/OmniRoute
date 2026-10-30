@@ -55,7 +55,10 @@ function bearerToken(headers: Headers): string | null {
 function corsHeaders(): Headers {
   const headers = new Headers();
   headers.set("access-control-allow-methods", "GET, POST, OPTIONS");
-  headers.set("access-control-allow-headers", "authorization, content-type, accept, mcp-protocol-version");
+  headers.set(
+    "access-control-allow-headers",
+    "authorization, content-type, accept, mcp-protocol-version"
+  );
   return headers;
 }
 
@@ -95,10 +98,16 @@ function withDeadline<T>(promise: Promise<T>, remainingMs: number): Promise<T> {
   });
 }
 
-async function readBodyCapped(request: Request, deadline: number, signal: AbortSignal): Promise<Buffer> {
+async function readBodyCapped(
+  request: Request,
+  deadline: number,
+  signal: AbortSignal
+): Promise<Buffer> {
   if (!request.body) return Buffer.alloc(0);
   const reader = request.body.getReader();
-  const onAbort = () => { void reader.cancel().catch(() => {}); };
+  const onAbort = () => {
+    void reader.cancel().catch(() => {});
+  };
   signal.addEventListener("abort", onAbort, { once: true });
   if (signal.aborted) onAbort();
   const chunks: Buffer[] = [];
@@ -194,7 +203,10 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
   // Step 5: atomic slot reservation, before any body byte is read. An
   // exhausted count is 410 before the cap and 404 at or after it.
   if (!registry.reserveSlot(entry)) {
-    return jsonError(registry.isOverCap(entry) ? 404 : 410, registry.isOverCap(entry) ? "not_found" : "gone");
+    return jsonError(
+      registry.isOverCap(entry) ? 404 : 410,
+      registry.isOverCap(entry) ? "not_found" : "gone"
+    );
   }
 
   // GET is only the server-to-client channel. Answering it here returns the
@@ -215,33 +227,53 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     const release = (sink: ReadableStreamDefaultController<Uint8Array> | null) => {
       clearTimeout(deadline);
       entry.inflight.delete(controller);
-      if (sink) { try { sink.close(); } catch { /* already closed */ } }
+      if (sink) {
+        try {
+          sink.close();
+        } catch {
+          /* already closed */
+        }
+      }
     };
     let stream: ReadableStream<Uint8Array>;
     try {
       stream = new ReadableStream<Uint8Array>({
-      start(sink) {
-        // Cursor sends mcp-protocol-version 2025-11-25 but still speaks the
-        // 2024-11-05 HTTP+SSE transport: it reads the first frame and, unless
-        // that frame is an `endpoint` event naming the POST path, closes the
-        // stream and never POSTs. A packet capture on the live bridge showed
-        // the 200 and the comment frame delivered, then a FIN one round trip
-        // later. The data is a path so the client resolves it against the
-        // connection origin, and it is built from the turn nonce so it does
-        // not depend on the request URL.
-        sink.enqueue(encoder.encode(`event: endpoint\ndata: /grok-bridge/${entry.nonce}/mcp\n\n`));
-        sink.enqueue(encoder.encode(": connected\n\n"));
-        const timer = setInterval(() => {
-          if (controller.signal.aborted) return;
-          try { sink.enqueue(encoder.encode(": keepalive\n\n")); }
-          catch { clearInterval(timer); }
-        }, 5000);
-        timer.unref?.();
-        controller.signal.addEventListener("abort", () => { clearInterval(timer); release(sink); }, { once: true });
-        request.signal.addEventListener("abort", () => controller.abort(), { once: true });
-      },
-      cancel() { controller.abort(); },
-    });
+        start(sink) {
+          // Cursor sends mcp-protocol-version 2025-11-25 but still speaks the
+          // 2024-11-05 HTTP+SSE transport: it reads the first frame and, unless
+          // that frame is an `endpoint` event naming the POST path, closes the
+          // stream and never POSTs. A packet capture on the live bridge showed
+          // the 200 and the comment frame delivered, then a FIN one round trip
+          // later. The data is a path so the client resolves it against the
+          // connection origin, and it is built from the turn nonce so it does
+          // not depend on the request URL.
+          sink.enqueue(
+            encoder.encode(`event: endpoint\ndata: /grok-bridge/${entry.nonce}/mcp\n\n`)
+          );
+          sink.enqueue(encoder.encode(": connected\n\n"));
+          const timer = setInterval(() => {
+            if (controller.signal.aborted) return;
+            try {
+              sink.enqueue(encoder.encode(": keepalive\n\n"));
+            } catch {
+              clearInterval(timer);
+            }
+          }, 5000);
+          timer.unref?.();
+          controller.signal.addEventListener(
+            "abort",
+            () => {
+              clearInterval(timer);
+              release(sink);
+            },
+            { once: true }
+          );
+          request.signal.addEventListener("abort", () => controller.abort(), { once: true });
+        },
+        cancel() {
+          controller.abort();
+        },
+      });
     } catch (err) {
       clearTimeout(deadline);
       entry.inflight.delete(controller);
@@ -314,7 +346,9 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     }
     try {
       const buffered = await readResponseCapped(upstream, deadline);
-      const responseBody = [204, 205, 304].includes(upstream.status) ? null : new Uint8Array(buffered);
+      const responseBody = [204, 205, 304].includes(upstream.status)
+        ? null
+        : new Uint8Array(buffered);
       return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
     } catch (error) {
       return error instanceof BridgeBodyTooLargeError
@@ -346,7 +380,10 @@ function relayEventStream(
     cleanup();
     if (error) {
       downstream.error(error);
-      void reader.cancel().catch(() => {}).finally(() => reader.releaseLock());
+      void reader
+        .cancel()
+        .catch(() => {})
+        .finally(() => reader.releaseLock());
       abort.abort();
     } else {
       downstream.close();
@@ -386,7 +423,10 @@ function relayEventStream(
       abort.signal.removeEventListener("abort", onAbort);
       abort.abort();
       cleanup();
-      return reader.cancel().catch(() => {}).finally(() => reader.releaseLock());
+      return reader
+        .cancel()
+        .catch(() => {})
+        .finally(() => reader.releaseLock());
     },
   });
 }

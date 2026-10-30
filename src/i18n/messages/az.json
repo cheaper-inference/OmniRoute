@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Qəpazədən cavab gəlmir.",
     "btnSend": "Göndər"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Daxil olmuş hesablar, onların botları, bacarıqları və lokal kompüterləri.",

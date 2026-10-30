@@ -47,8 +47,5 @@ test("a watch stream yields one parsed frame at a time", async () => {
   })) {
     frames.push(item);
   }
-  assert.deepEqual(frames, [
-    { replay: true, rows: { entries: [] } },
-    { heartbeat: true },
-  ]);
+  assert.deepEqual(frames, [{ replay: true, rows: { entries: [] } }, { heartbeat: true }]);
 });

@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "እዚህ",
     "errNoReply": "⚠️ ከ gateway መልስ የለም።",
     "btnSend": "ላክ"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "የገቡ መለያዎች፣ ቦቶቻቸው፣ ክህሎቶቻቸው እና የአካባቢ ኮምፒውተሮቻቸው።",

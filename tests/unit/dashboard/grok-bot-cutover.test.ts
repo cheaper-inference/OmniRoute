@@ -58,7 +58,14 @@ test("replay on the live stream is shown", () => {
   });
   assert.equal(next.stop, false);
   assert.deepEqual(next.visible, [
-    { seq: "11", entryId: "e1", role: "assistant", text: "missed", clientNonce: "", streaming: false },
+    {
+      seq: "11",
+      entryId: "e1",
+      role: "assistant",
+      text: "missed",
+      clientNonce: "",
+      streaming: false,
+    },
   ]);
 });
 
@@ -69,17 +76,21 @@ test("the seal hands over the rows the snapshot collected", () => {
     { phase: "snapshot", after: "0" },
     {
       rows: {
-        entries: [
-          wire("send-message", reply("hello"), "7"),
-          wire("message", echo("hi"), "8"),
-        ],
+        entries: [wire("send-message", reply("hello"), "7"), wire("message", echo("hi"), "8")],
       },
       heartbeat: true,
     }
   );
   assert.equal(state.stop, true);
   assert.deepEqual(state.visible, [
-    { seq: "7", entryId: "e1", role: "assistant", text: "hello", clientNonce: "", streaming: false },
+    {
+      seq: "7",
+      entryId: "e1",
+      role: "assistant",
+      text: "hello",
+      clientNonce: "",
+      streaming: false,
+    },
     { seq: "8", entryId: "e1", role: "user", text: "hi", clientNonce: "", streaming: false },
   ]);
 });

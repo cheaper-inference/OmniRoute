@@ -2,7 +2,11 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import { grokBotToken } from "../tokenSource";
 import { watchStream } from "../../../../../(dashboard)/dashboard/grok-bot/watchStream";
-import { watchCounter, watchRefusal, watchSlot } from "../../../../../(dashboard)/dashboard/grok-bot/overlap";
+import {
+  watchCounter,
+  watchRefusal,
+  watchSlot,
+} from "../../../../../(dashboard)/dashboard/grok-bot/overlap";
 import { NextResponse } from "next/server";
 
 // Advisory: this counter lives in one process, so the cap holds for the

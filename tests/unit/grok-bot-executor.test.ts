@@ -620,9 +620,18 @@ describe("GrokBotExecutor", () => {
       process.env.GROK_BOT_REMOTE_MCP_SERVERS = JSON.stringify({
         context7: { url: "https://mcp.context7.com/mcp" },
         exa: { url: "https://mcp.exa.ai/mcp", headers: { Authorization: "Bearer exa-test" } },
-        firecrawl: { url: "https://mcp.firecrawl.dev/v2/mcp", headers: { Authorization: "Bearer fire-test" } },
-        tavily: { url: "https://mcp.tavily.com/mcp", headers: { Authorization: "Bearer tav-test" } },
-        jina: { url: "https://mcp.jina.ai/v1", headers: { Authorization: "Bearer jina-test", bad: 1 } },
+        firecrawl: {
+          url: "https://mcp.firecrawl.dev/v2/mcp",
+          headers: { Authorization: "Bearer fire-test" },
+        },
+        tavily: {
+          url: "https://mcp.tavily.com/mcp",
+          headers: { Authorization: "Bearer tav-test" },
+        },
+        jina: {
+          url: "https://mcp.jina.ai/v1",
+          headers: { Authorization: "Bearer jina-test", bad: 1 },
+        },
         skipped: { headers: { Authorization: "Bearer unused" } },
       });
       const servers = _grokBotInternals.remoteMcpServers();
@@ -666,26 +675,40 @@ describe("GrokBotExecutor", () => {
   });
 
   it("restores a durable agent saved on the connection", async () => {
-    const saved = makeInput([{ role: "user", content: "again" }]) as ReturnType<typeof makeInput> & {
+    const saved = makeInput([{ role: "user", content: "again" }]) as ReturnType<
+      typeof makeInput
+    > & {
       credentials: { providerSpecificData?: Record<string, unknown> };
       onCredentialsRefreshed?: (credentials: Record<string, unknown>) => Promise<void>;
     };
-    saved.credentials.providerSpecificData = { grokBotAgent: { agentId: "agent-saved", rowId: "row-saved" } };
+    saved.credentials.providerSpecificData = {
+      grokBotAgent: { agentId: "agent-saved", rowId: "row-saved" },
+    };
     const res = (await executor.execute(saved)) as Response;
     assert.equal(res.status, 200);
-    assert.equal(t.calls.some((call) => call.method === "CreateGrokBotTemporalAgent"), false);
+    assert.equal(
+      t.calls.some((call) => call.method === "CreateGrokBotTemporalAgent"),
+      false
+    );
     const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
     assert.equal(send?.payload.agentId, "agent-saved");
   });
 
   it("reuses one durable agent for the same connection", async () => {
     executor.setBridgeControllerForTests(null);
-    const first = (await executor.execute(makeInput([{ role: "user", content: "one" }]))) as Response;
-    const second = (await executor.execute(makeInput([{ role: "user", content: "two" }]))) as Response;
+    const first = (await executor.execute(
+      makeInput([{ role: "user", content: "one" }])
+    )) as Response;
+    const second = (await executor.execute(
+      makeInput([{ role: "user", content: "two" }])
+    )) as Response;
     assert.equal(first.status, 200);
     assert.equal(second.status, 200);
     assert.equal(t.calls.filter((call) => call.method === "CreateGrokBotTemporalAgent").length, 1);
-    assert.equal(t.calls.some((call) => call.method === "DeleteGrokBotAgent"), false);
+    assert.equal(
+      t.calls.some((call) => call.method === "DeleteGrokBotAgent"),
+      false
+    );
     const sent = t.calls.filter((call) => call.method === "SendGrokBotUserMessage");
     assert.equal(sent.length, 2);
     assert.equal(sent[0]?.payload.agentId, sent[1]?.payload.agentId);
@@ -1211,7 +1234,9 @@ describe("GrokBotExecutor", () => {
     });
     t.watchEvents = settledWatchEvents("plain answer");
     try {
-      const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }])
+      )) as Response;
       assert.equal(res.status, 200);
       const send = t.calls.find((c) => c.method === "SendGrokBotUserMessage");
       const servers = JSON.parse(String(send?.payload.mcpConfigJson)).mcpServers;
@@ -1632,8 +1657,14 @@ describe("GrokBotExecutor", () => {
     assert.equal(res2.status, 200);
     const rosterLookups = t.calls.slice(before).filter((c) => c.method === "ListGrokBotAgents");
     assert.equal(rosterLookups.length, 0, "a saved agent does not need a roster lookup");
-    assert.equal(t.calls.slice(before).some((c) => c.method === "CreateGrokBotTemporalAgent"), false);
-    assert.equal(t.calls.slice(before).some((c) => c.method === "DeleteGrokBotAgent"), false);
+    assert.equal(
+      t.calls.slice(before).some((c) => c.method === "CreateGrokBotTemporalAgent"),
+      false
+    );
+    assert.equal(
+      t.calls.slice(before).some((c) => c.method === "DeleteGrokBotAgent"),
+      false
+    );
     assert.equal(_grokBotInternals.pendingCleanupCount(), 0);
   });
 

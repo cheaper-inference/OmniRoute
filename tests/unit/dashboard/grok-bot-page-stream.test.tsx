@@ -31,7 +31,6 @@ function streamed(): Stream {
   };
 }
 
-
 // Frames as the service sends them: `entryKind` plus a base64 `body`, with the
 // reply text inside `message`. Fixtures that put role/text on the entry agree
 // with the reader instead of with the wire.
@@ -46,7 +45,13 @@ const reply = (text: string) => ({ message: { type: "text", content: text } });
 const ask = (status: string, requestId = "req-1") => ({
   message: {
     type: "local-tool-permission",
-    ask: { requestId, action: "read-file", target: "/Users/houminxi/code", machineId: "m-1", status },
+    ask: {
+      requestId,
+      action: "read-file",
+      target: "/Users/houminxi/code",
+      machineId: "m-1",
+      status,
+    },
   },
 });
 
@@ -107,8 +112,14 @@ describe("Grok Bot page transcript wiring", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     page();
-    fireEvent.change(await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]), { target: { value: "conn-1" } });
-    fireEvent.change(await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]), { target: { value: "bot-a" } });
+    fireEvent.change(
+      await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]),
+      { target: { value: "conn-1" } }
+    );
+    fireEvent.change(
+      await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]),
+      { target: { value: "bot-a" } }
+    );
 
     await waitFor(() => expect(calls.length).toBe(1));
     expect(calls[0]).toMatchObject({ phase: "snapshot", after: "0" });
@@ -175,8 +186,14 @@ describe("Grok Bot page transcript wiring", () => {
     vi.stubGlobal("fetch", fetchMock);
 
     page();
-    fireEvent.change(await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]), { target: { value: "conn-1" } });
-    fireEvent.change(await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]), { target: { value: "bot-a" } });
+    fireEvent.change(
+      await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]),
+      { target: { value: "conn-1" } }
+    );
+    fireEvent.change(
+      await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]),
+      { target: { value: "bot-a" } }
+    );
     await waitFor(() => expect(calls.length).toBe(1));
 
     streams[0].push({ rows: { entries: [{ updatedSeq: "9007199254740993" }] } });
@@ -199,14 +216,15 @@ describe("Grok Bot page transcript wiring", () => {
     expect(await screen.findByText("reply from Alice")).toBeTruthy();
   });
 
-
   it("answers a permission request and drops the card once the service takes it", async () => {
     const streams: Stream[] = [];
     const posts: Array<{ url: string; body: unknown }> = [];
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const url = String(input);
       if (url === "/api/providers") {
-        return Response.json({ connections: [{ id: "conn-1", name: "Main", provider: "grok-bot" }] });
+        return Response.json({
+          connections: [{ id: "conn-1", name: "Main", provider: "grok-bot" }],
+        });
       }
       if (url.startsWith("/api/providers/conn-1/grok-bot/transcript")) {
         const stream = streamed();
@@ -218,15 +236,26 @@ describe("Grok Bot page transcript wiring", () => {
         return Response.json({ status: "dispatched" });
       }
       if (url.startsWith("/api/providers/conn-1/grok-bot")) {
-        return Response.json({ roster: [{ agentId: "bot-a", name: "Alice" }], skills: [], routines: [], computers: [] });
+        return Response.json({
+          roster: [{ agentId: "bot-a", name: "Alice" }],
+          skills: [],
+          routines: [],
+          computers: [],
+        });
       }
       throw new Error(`unexpected fetch: ${url}`);
     });
     vi.stubGlobal("fetch", fetchMock);
 
     page();
-    fireEvent.change(await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]), { target: { value: "conn-1" } });
-    fireEvent.change(await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]), { target: { value: "bot-a" } });
+    fireEvent.change(
+      await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]),
+      { target: { value: "conn-1" } }
+    );
+    fireEvent.change(
+      await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]),
+      { target: { value: "bot-a" } }
+    );
     await waitFor(() => expect(streams.length).toBe(1));
 
     streams[0].push({ rows: { entries: [wire("send-message", ask("pending"), "10")] } });
@@ -249,7 +278,9 @@ describe("Grok Bot page transcript wiring", () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
       if (url === "/api/providers") {
-        return Response.json({ connections: [{ id: "conn-1", name: "Main", provider: "grok-bot" }] });
+        return Response.json({
+          connections: [{ id: "conn-1", name: "Main", provider: "grok-bot" }],
+        });
       }
       if (url.startsWith("/api/providers/conn-1/grok-bot/transcript")) {
         const stream = streamed();
@@ -260,15 +291,26 @@ describe("Grok Bot page transcript wiring", () => {
         return Response.json({ error: "gone" }, { status: 409 });
       }
       if (url.startsWith("/api/providers/conn-1/grok-bot")) {
-        return Response.json({ roster: [{ agentId: "bot-a", name: "Alice" }], skills: [], routines: [], computers: [] });
+        return Response.json({
+          roster: [{ agentId: "bot-a", name: "Alice" }],
+          skills: [],
+          routines: [],
+          computers: [],
+        });
       }
       throw new Error(`unexpected fetch: ${url}`);
     });
     vi.stubGlobal("fetch", fetchMock);
 
     page();
-    fireEvent.change(await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]), { target: { value: "conn-1" } });
-    fireEvent.change(await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]), { target: { value: "bot-a" } });
+    fireEvent.change(
+      await screen.findByText("Main").then(() => screen.getAllByRole("combobox")[0]),
+      { target: { value: "conn-1" } }
+    );
+    fireEvent.change(
+      await screen.findByText("Alice").then(() => screen.getAllByRole("combobox")[1]),
+      { target: { value: "bot-a" } }
+    );
     await waitFor(() => expect(streams.length).toBe(1));
 
     streams[0].push({ rows: { entries: [wire("send-message", ask("pending"), "11")] } });

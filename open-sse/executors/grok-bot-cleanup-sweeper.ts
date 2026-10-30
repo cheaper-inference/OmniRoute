@@ -23,11 +23,7 @@
  */
 
 import { getAccessToken } from "../services/tokenRefresh.ts";
-import {
-  readQueue,
-  removeFromQueue,
-  type PendingCleanup,
-} from "./grok-bot-cleanup-queue.ts";
+import { readQueue, removeFromQueue, type PendingCleanup } from "./grok-bot-cleanup-queue.ts";
 
 /** 24h dead-letter horizon from item creation. */
 export const CLEANUP_ITEM_TTL_MS = 24 * 60 * 60 * 1000;
@@ -37,10 +33,17 @@ export const CLEANUP_ABSENT_SPAN_MS = 10 * 60 * 1000;
 /** Default sweep cadence. */
 export const CLEANUP_SWEEP_INTERVAL_MS = 60 * 1000;
 
-export type SweeperLog = { warn?: (...args: unknown[]) => void; info?: (...args: unknown[]) => void } | null;
+export type SweeperLog = {
+  warn?: (...args: unknown[]) => void;
+  info?: (...args: unknown[]) => void;
+} | null;
 
 export interface SweeperTransport {
-  rpc(method: string, payload: Record<string, unknown>, opts?: { signal?: AbortSignal }): Promise<unknown>;
+  rpc(
+    method: string,
+    payload: Record<string, unknown>,
+    opts?: { signal?: AbortSignal }
+  ): Promise<unknown>;
 }
 
 export interface CleanupSweeperOptions {
@@ -91,7 +94,10 @@ export async function sweepGrokBotCleanupsOnce(options: CleanupSweeperOptions): 
     try {
       await processItem(item, now, options, log);
     } catch (err) {
-      log?.warn?.("GROK_BOT_CLEANUP", `sweep item failed (kept for retry): ${String((err as Error)?.message ?? err)}`);
+      log?.warn?.(
+        "GROK_BOT_CLEANUP",
+        `sweep item failed (kept for retry): ${String((err as Error)?.message ?? err)}`
+      );
     } finally {
       inFlight.delete(key);
     }
@@ -122,10 +128,14 @@ async function processItem(
     dropItem(item, log, "no refresh token on persisted connection (unrecoverable)");
     return;
   }
-  const refresh = options.refresh ?? ((credentials: { refreshToken?: string }, l?: { warn?: (...args: unknown[]) => void }) =>
-    getAccessToken("grok-bot", credentials, l)
+  const refresh =
+    options.refresh ??
+    ((credentials: { refreshToken?: string }, l?: { warn?: (...args: unknown[]) => void }) =>
+      getAccessToken("grok-bot", credentials, l));
+  const refreshed = await refresh(
+    { refreshToken: connection.refreshToken ?? undefined },
+    log ?? undefined
   );
-  const refreshed = await refresh({ refreshToken: connection.refreshToken ?? undefined }, log ?? undefined);
   if (!refreshed || refreshed.error) {
     // Transient refresh failure (network, upstream blip): keep the item.
     return;
@@ -140,7 +150,9 @@ async function processItem(
     }
     let roster: { agents?: { id?: string; agentId?: string }[] };
     try {
-      roster = (await transport.rpc("ListGrokBotAgents", {})) as { agents?: { id?: string; agentId?: string }[] };
+      roster = (await transport.rpc("ListGrokBotAgents", {})) as {
+        agents?: { id?: string; agentId?: string }[];
+      };
     } catch {
       return; // roster RPC failure is transient -- retry next sweep
     }
@@ -151,7 +163,11 @@ async function processItem(
       absenceTracking.set(item.agentId, record);
       const span = now - record.firstMissAt;
       if (record.misses >= CLEANUP_ABSENT_MISS_THRESHOLD && span >= CLEANUP_ABSENT_SPAN_MS) {
-        dropItem(item, log, `unresolved: agent absent from ${record.misses} consecutive roster lists over ${Math.round(span / 60000)}m (terminal)`);
+        dropItem(
+          item,
+          log,
+          `unresolved: agent absent from ${record.misses} consecutive roster lists over ${Math.round(span / 60000)}m (terminal)`
+        );
       }
       return;
     }

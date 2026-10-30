@@ -41,7 +41,10 @@ export function jwtExpiry(token: string): string {
  * stored grant is gone and only a fresh sign-in can help, so both report null
  * rather than an empty token that would be sent upstream.
  */
-export function readRefreshResponse(payload: unknown, previousRefreshToken: string): RefreshTokens | null {
+export function readRefreshResponse(
+  payload: unknown,
+  previousRefreshToken: string
+): RefreshTokens | null {
   if (!payload || typeof payload !== "object") return null;
   const record = payload as {
     access_token?: unknown;

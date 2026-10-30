@@ -53,7 +53,11 @@ describe("grok bot agent admin", () => {
       skills: [],
       routines: [],
     });
-    assert.deepEqual(calls, ["ListGrokBotMemoryShards", "ListGrokBotAgentSkills", "ListGrokBotAgentAutomations"]);
+    assert.deepEqual(calls, [
+      "ListGrokBotMemoryShards",
+      "ListGrokBotAgentSkills",
+      "ListGrokBotAgentAutomations",
+    ]);
   });
 
   it("create returns the saved agent without calling Cursor", async () => {
@@ -305,7 +309,9 @@ describe("grok bot agent admin", () => {
           name: "Research",
           description: "Collect sources only.",
         }),
-        rpc: async () => ({ agent: { id: "row-new", legacyAgentId: "wrong", harness: "temporal" } }),
+        rpc: async () => ({
+          agent: { id: "row-new", legacyAgentId: "wrong", harness: "temporal" },
+        }),
         save: async () => {
           saved = true;
         },
@@ -378,7 +384,11 @@ describe("grok bot agent admin", () => {
         throw new Error("get must not write");
       },
     });
-    assert.deepEqual(methods, ["ListGrokBotMemoryShards", "ListGrokBotAgentSkills", "ListGrokBotAgentAutomations"]);
+    assert.deepEqual(methods, [
+      "ListGrokBotMemoryShards",
+      "ListGrokBotAgentSkills",
+      "ListGrokBotAgentAutomations",
+    ]);
     assert.deepEqual(result.memory, [{ agentId: "agent-1", profile: "Use short answers." }]);
   });
 
@@ -451,7 +461,10 @@ describe("grok bot agent admin", () => {
         throw new Error("get must not write");
       },
     });
-    assert.equal(methods.includes('ListGrokBotAgentAutomations:{"agentId":"agent-1","timeZone":"UTC"}'), true);
+    assert.equal(
+      methods.includes('ListGrokBotAgentAutomations:{"agentId":"agent-1","timeZone":"UTC"}'),
+      true
+    );
     assert.deepEqual(result.routines, [{ id: "auto-1", recordJson: '{"name":"Daily"}' }]);
   });
 
@@ -462,7 +475,9 @@ describe("grok bot agent admin", () => {
       rpc: async (method) =>
         method === "ListGrokBotMemoryShards"
           ? { shards: [] }
-          : { skills: [{ id: "skill-1", name: "Research", description: "Look up", body: "steps" }] },
+          : {
+              skills: [{ id: "skill-1", name: "Research", description: "Look up", body: "steps" }],
+            },
       save: async () => {
         throw new Error("get must not write");
       },
@@ -480,7 +495,13 @@ describe("grok bot agent admin", () => {
         if (method === "ListGrokBotMemoryShards") return { shards: [] };
         return {
           skills: [
-            { id: "skill-1", name: "Research", description: "Look up", body: "steps", source: "user" },
+            {
+              id: "skill-1",
+              name: "Research",
+              description: "Look up",
+              body: "steps",
+              source: "user",
+            },
             null,
             { id: 1, name: "Bad" },
           ],
@@ -761,9 +782,7 @@ describe("grok bot agent admin", () => {
         throw new Error("save");
       },
     });
-    assert.deepEqual(calls, [
-      'RemoveGrokBotAgentSkill:{"agentId":"agent-1","name":"Research"}',
-    ]);
+    assert.deepEqual(calls, ['RemoveGrokBotAgentSkill:{"agentId":"agent-1","name":"Research"}']);
     assert.deepEqual(result, {
       agentId: "agent-1",
       rowId: "row-1",

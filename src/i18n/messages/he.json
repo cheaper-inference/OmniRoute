@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "שם",
     "errNoReply": "⚠️ אין תגובה מהשער.",
     "btnSend": "שלח"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "חשבונות מחוברים, הרובוטים, הכישורים והמחשבים המקומיים שלהם.",

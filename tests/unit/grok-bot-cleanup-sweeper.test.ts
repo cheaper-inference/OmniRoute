@@ -14,15 +14,16 @@ const {
   CLEANUP_ABSENT_SPAN_MS,
   CLEANUP_ITEM_TTL_MS,
 } = await import("../../open-sse/executors/grok-bot-cleanup-sweeper.ts");
-const {
-  queueFile,
-  readQueue,
-  enqueueCleanup,
-} = await import("../../open-sse/executors/grok-bot-cleanup-queue.ts");
+const { queueFile, readQueue, enqueueCleanup } =
+  await import("../../open-sse/executors/grok-bot-cleanup-queue.ts");
 import type { PendingCleanup } from "../../open-sse/executors/grok-bot-cleanup-queue.ts";
 
 type SweeperTransport = {
-  rpc(method: string, payload: Record<string, unknown>, opts?: { signal?: AbortSignal }): Promise<unknown>;
+  rpc(
+    method: string,
+    payload: Record<string, unknown>,
+    opts?: { signal?: AbortSignal }
+  ): Promise<unknown>;
 };
 
 function makeTransport(behavior: {
@@ -77,7 +78,10 @@ describe("grok bot cleanup sweeper", () => {
     }
   });
 
-  function optionsFor(behavior: Parameters<typeof makeTransport>[0], connection: { refreshToken?: string | null } | null = { refreshToken: "rt" }) {
+  function optionsFor(
+    behavior: Parameters<typeof makeTransport>[0],
+    connection: { refreshToken?: string | null } | null = { refreshToken: "rt" }
+  ) {
     const made = makeTransport(behavior);
     return {
       made,
@@ -126,17 +130,26 @@ describe("grok bot cleanup sweeper", () => {
     for (let i = 0; i < CLEANUP_ABSENT_MISS_THRESHOLD - 1; i += 1) {
       await sweepGrokBotCleanupsOnce(options);
       assert.equal(readQueue().length, 1);
-      assert.equal(warnings.some((w) => w.includes("unresolved")), false);
+      assert.equal(
+        warnings.some((w) => w.includes("unresolved")),
+        false
+      );
     }
     // One more miss still inside the 10-minute window: count alone is not enough.
     await sweepGrokBotCleanupsOnce(options);
     assert.equal(readQueue().length, 1);
-    assert.equal(warnings.some((w) => w.includes("unresolved")), false);
+    assert.equal(
+      warnings.some((w) => w.includes("unresolved")),
+      false
+    );
     // Advance past the observation window: the next miss terminates.
     now += CLEANUP_ABSENT_SPAN_MS + 1;
     await sweepGrokBotCleanupsOnce(options);
     assert.equal(readQueue().length, 0);
-    assert.equal(warnings.some((w) => w.includes("unresolved")), true);
+    assert.equal(
+      warnings.some((w) => w.includes("unresolved")),
+      true
+    );
   });
 
   it("drops an item older than the 24h TTL without any RPC", async () => {
@@ -145,7 +158,10 @@ describe("grok bot cleanup sweeper", () => {
     await sweepGrokBotCleanupsOnce(options);
     assert.equal(readQueue().length, 0);
     assert.equal(made.calls.length, 0);
-    assert.equal(warnings.some((w) => w.includes("dead-letter")), true);
+    assert.equal(
+      warnings.some((w) => w.includes("dead-letter")),
+      true
+    );
   });
 
   it("drops the item when the persisted connection is gone", async () => {
@@ -169,7 +185,10 @@ describe("grok bot cleanup sweeper", () => {
     const { options } = optionsFor({});
     await sweepGrokBotCleanupsOnce(options);
     assert.equal(readQueue().length, 0);
-    assert.equal(warnings.some((w) => w.includes("neither roster row id")), true);
+    assert.equal(
+      warnings.some((w) => w.includes("neither roster row id")),
+      true
+    );
   });
 
   it("keeps the item when the delete RPC fails", async () => {
@@ -218,10 +237,7 @@ describe("grok bot cleanup sweeper", () => {
     releaseDelete();
     await sweep1;
     assert.equal(deleteCount, 1, "overlapping sweeps must not double-delete");
-    assert.equal(
-      made.calls.filter((c) => c.method === "DeleteGrokBotAgent").length,
-      1
-    );
+    assert.equal(made.calls.filter((c) => c.method === "DeleteGrokBotAgent").length, 1);
     assert.equal(readQueue().length, 0);
   });
 

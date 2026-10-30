@@ -71,7 +71,10 @@ export async function* readTranscriptStream(
     const { done, value } = await reader.read();
     if (done) break;
     bytes += value.byteLength;
-    if (cursor.phase === "snapshot" && budget({ bytes, elapsed: now() - started }, SNAPSHOT_LIMIT) !== "ok") {
+    if (
+      cursor.phase === "snapshot" &&
+      budget({ bytes, elapsed: now() - started }, SNAPSHOT_LIMIT) !== "ok"
+    ) {
       throw new Error("snapshot budget");
     }
     pending += decoder.decode(value, { stream: true });
@@ -91,7 +94,8 @@ export async function* readTranscriptStream(
         // end.
         throw new Error("transcript reported an error");
       }
-      if (kind !== "message" && kind !== "connected" && kind !== "frame" && kind !== "terminal") continue;
+      if (kind !== "message" && kind !== "connected" && kind !== "frame" && kind !== "terminal")
+        continue;
       try {
         yield JSON.parse(line.slice(6));
       } catch {

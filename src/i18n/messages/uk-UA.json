@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "там",
     "errNoReply": "⚠️ Від шлюза немає відповіді.",
     "btnSend": "Надіслати"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Підключені акаунти, їхні боти, навички та локальні комп'ютери.",

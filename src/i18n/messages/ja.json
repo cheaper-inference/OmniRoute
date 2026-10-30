@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ユーザー",
     "errNoReply": "⚠️ ゲートウェイからの応答がありません。",
     "btnSend": "送信"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "サインイン済みアカウント、そのボット、スキル、およびローカルコンピュータ。",

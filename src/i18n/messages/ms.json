@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "di sana",
     "errNoReply": "⚠️ Tiada respons daripada gerbang.",
     "btnSend": "Hantar"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Akaun berdaftar, bot, kemahiran, dan komputer tempatan mereka.",

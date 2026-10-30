@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ទីនោះ",
     "errNoReply": "⚠️ គ្មានឆ្លើយតបពី gateway ទេ។",
     "btnSend": "ផ្ញើ"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "គណនីដែលបានចូល, ប៉ុត, ជំនាញ និងកុំព្យូទ័រផ្ទៃក្នុងរបស់ពួកគេ។",

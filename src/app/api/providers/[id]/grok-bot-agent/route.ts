@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { updateProviderConnection } from "@/lib/db/providers";
-import { manageGrokBotAgent, runGrokBotAgentAction, withGrokBotAgentLock } from "@/lib/grokBotAgentAdmin";
+import {
+  manageGrokBotAgent,
+  runGrokBotAgentAction,
+  withGrokBotAgentLock,
+} from "@/lib/grokBotAgentAdmin";
 import { grokBotAgentRpc } from "@/sse/services/grokBotAgentRpc";
 
 export function postAction(body: { action?: string }) {
@@ -21,11 +25,7 @@ export function postAction(body: { action?: string }) {
   return "create";
 }
 
-export function postPayload(body: {
-  profile?: unknown;
-  skill?: unknown;
-  routine?: unknown;
-}) {
+export function postPayload(body: { profile?: unknown; skill?: unknown; routine?: unknown }) {
   return { profile: body.profile, skill: body.skill, routine: body.routine };
 }
 

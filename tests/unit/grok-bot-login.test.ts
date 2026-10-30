@@ -2,7 +2,10 @@ import { describe, it, beforeEach } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 
-import { generateCursorAuthParams, clearCursorLoginSessions } from "../../src/lib/oauth/services/cursorLogin.ts";
+import {
+  generateCursorAuthParams,
+  clearCursorLoginSessions,
+} from "../../src/lib/oauth/services/cursorLogin.ts";
 
 describe("generateCursorAuthParams redirect target", () => {
   beforeEach(() => {

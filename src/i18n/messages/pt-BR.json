@@ -15981,8 +15981,7 @@
     "greetingFallbackName": "ali",
     "errNoReply": "⚠️ Sem resposta do gateway.",
     "btnSend": "Enviar"
-  }
-,
+  },
   "grokBotPage": {
     "title": "Grok Bot",
     "subtitle": "Contas conectadas, seus bots, habilidades e computadores locais.",

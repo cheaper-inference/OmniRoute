@@ -1,8 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { grokBotRead } =
-  await import("../../../src/app/(dashboard)/dashboard/grok-bot/read.ts");
+const { grokBotRead } = await import("../../../src/app/(dashboard)/dashboard/grok-bot/read.ts");
 
 test("read posts the method and bearer without returning the token", async () => {
   const calls: Array<{ url: string; auth: string; body: string }> = [];
