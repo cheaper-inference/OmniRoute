@@ -32,7 +32,7 @@ const INV = KIT.dark;
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
 // "<n> providers" from the title); the health line and the "… N more providers" footer of the
 // providers screen derive from it so the three numbers can never disagree.
-const PROVIDER_TOTAL = 377;
+const PROVIDER_TOTAL = 380;
 
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
