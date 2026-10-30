@@ -11,8 +11,6 @@
 // importers (open-sse/index.ts, executors, src/sse/services/tokenRefresh.ts,
 // tests) keep a stable surface.
 import { AsyncLocalStorage } from "node:async_hooks";
-export { isPassiveCodex } from "./tokenRefresh/passiveCodex.ts";
-import { isPassiveCodex, resolvePassiveCodex } from "./tokenRefresh/passiveCodex.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
@@ -60,6 +58,7 @@ import {
 import { persistDiscoveredAntigravityProjectId } from "./antigravityProjectPersist.ts";
 import { refreshCodexToken } from "./tokenRefresh/providers/codex.ts";
 import { refreshCursorToken } from "./tokenRefresh/providers/cursor.ts";
+import { refreshGrokBotToken } from "./tokenRefresh/providers/grok-bot.ts";
 import { refreshOpenferenceToken } from "./tokenRefresh/providers/openference.ts";
 import { refreshKiroToken } from "./tokenRefresh/providers/kiro.ts";
 import { refreshQoderToken } from "./tokenRefresh/providers/qoder.ts";
@@ -247,15 +246,10 @@ export function getActiveOnPersist(): RefreshPersistFn | undefined {
 // ./tokenRefresh/shared.ts (imported above, re-exported below) — used both by
 // the generic orchestrator below and by every per-provider refresh module.
 
-export function refreshAccessToken(provider, token, creds, log, proxy: unknown = null) {
-  if (isPassiveCodex(provider)) return resolvePassiveCodex(creds);
-  return refreshActiveAccessToken(provider, token, creds, log, proxy);
-}
-
 /**
  * Refresh OAuth access token using refresh token
  */
-async function refreshActiveAccessToken(
+export async function refreshAccessToken(
   provider,
   refreshToken,
   credentials,
@@ -434,6 +428,14 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
       }
       return await refreshCursorToken(credentials.refreshToken, log, proxyConfig);
 
+    case "grok-bot":
+      if (!credentials.refreshToken) {
+        return { error: "unrecoverable_refresh_error", code: "no_refresh_token" };
+      }
+      return await refreshGrokBotToken(credentials.refreshToken, log, proxyConfig, {
+        previousAccessToken: credentials.accessToken ?? null,
+      });
+
     case "openference":
       return await refreshOpenferenceToken(credentials.refreshToken, log, proxyConfig);
 
@@ -523,6 +525,7 @@ export function supportsTokenRefresh(provider) {
     "codebuddy-intl",
     "workbuddy",
     "cursor",
+    "grok-bot",
   ]);
   if (explicitlySupported.has(provider)) return true;
   const config = PROVIDERS[provider];
@@ -560,7 +563,6 @@ export async function getAccessToken(
   proxyConfig: unknown = null,
   onPersist?: RefreshPersistFn
 ) {
-  if (isPassiveCodex(provider)) return resolvePassiveCodex(credentials);
   if (!credentials || !credentials.refreshToken || typeof credentials.refreshToken !== "string") {
     log?.warn?.("TOKEN_REFRESH", `No valid refresh token available for provider: ${provider}`);
     return null;
@@ -816,6 +818,7 @@ export function formatProviderCredentials(provider, credentials, log) {
 
     case "antigravity":
     case "agy":
+    case "grok-bot":
       return {
         accessToken: credentials.accessToken,
         refreshToken: credentials.refreshToken,

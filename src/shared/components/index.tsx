@@ -1,6 +1,5 @@
 // Shared Components - Export all
 export { default as Button } from "./Button";
-export { default as Icon } from "./Icon";
 export { default as Input } from "./Input";
 export { default as Select } from "./Select";
 export { default as Checkbox } from "./Checkbox";
@@ -16,6 +15,7 @@ export { default as ThemeToggle } from "./ThemeToggle";
 export { ThemeProvider } from "./ThemeProvider";
 export { default as Sidebar } from "./Sidebar";
 export { default as Header } from "./Header";
+export { default as Footer } from "./Footer";
 export { default as OAuthModal } from "./OAuthModal";
 export { default as ModelSelectModal } from "./ModelSelectModal";
 export { default as ModelSelectField } from "./ModelSelectField";
@@ -31,6 +31,7 @@ export { default as KiroAuthModal } from "./KiroAuthModal";
 export { default as KiroOAuthWrapper } from "./KiroOAuthWrapper";
 export { default as KiroSocialOAuthModal } from "./KiroSocialOAuthModal";
 export { default as CursorAuthModal } from "./CursorAuthModal";
+export { default as GrokBotAuthModal } from "./GrokBotAuthModal";
 export { default as TraeAuthModal } from "./TraeAuthModal";
 export { default as SegmentedControl } from "./SegmentedControl";
 export { default as FilterPills } from "./FilterPills";

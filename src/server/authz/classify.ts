@@ -3,19 +3,12 @@ import {
   isPublicReadonlyCorsRoute,
 } from "../../shared/constants/publicApiRoutes";
 import type { ClassificationReason, RouteClassification } from "./types";
+import { BRIDGE_ROUTE_PATTERN } from "@omniroute/open-sse/services/grokBotBridgeRegistry.ts";
 
-const ALIAS_PREFIXES: ReadonlyArray<{
-  alias: string;
-  canonical: string;
-  reason: ClassificationReason;
-}> = [
-  { alias: "/chat/completions", canonical: "/api/v1/chat/completions", reason: "client_api_alias" },
-  { alias: "/responses", canonical: "/api/v1/responses", reason: "client_api_alias" },
-  { alias: "/models", canonical: "/api/v1/models", reason: "client_api_alias" },
-  // CLIProxyAPI management compatibility: next.config.mjs rewrites /v0/management/* to
-  // /api/v0/management/*. Normalize here so the policy (and the ALWAYS_PROTECTED entry in
-  // routeGuard.ts) sees the same path for both spellings. Still MANAGEMENT, never client API.
-  { alias: "/v0/management", canonical: "/api/v0/management", reason: "cliproxy_management_alias" },
+const CLIENT_API_ALIAS_PREFIXES: ReadonlyArray<{ alias: string; canonical: string }> = [
+  { alias: "/chat/completions", canonical: "/api/v1/chat/completions" },
+  { alias: "/responses", canonical: "/api/v1/responses" },
+  { alias: "/models", canonical: "/api/v1/models" },
 ];
 
 function normalizePathname(rawPath: string): { path: string; reason?: ClassificationReason } {
@@ -51,12 +44,12 @@ function normalizePathname(rawPath: string): { path: string; reason?: Classifica
     return { path: "/api/v1" + tail, reason: "client_api_alias" };
   }
 
-  for (const { alias, canonical, reason } of ALIAS_PREFIXES) {
+  for (const { alias, canonical } of CLIENT_API_ALIAS_PREFIXES) {
     if (lower === alias) {
-      return { path: canonical, reason };
+      return { path: canonical, reason: "client_api_alias" };
     }
     if (lower.startsWith(alias + "/")) {
-      return { path: canonical + path.slice(alias.length), reason };
+      return { path: canonical + path.slice(alias.length), reason: "client_api_alias" };
     }
   }
 
@@ -129,7 +122,19 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
 
     return {
       routeClass: "MANAGEMENT",
-      reason: managementApiReason(aliasReason),
+      reason: "management_api",
+      normalizedPath,
+    };
+  }
+
+  // Public Grok Bot tool-bridge endpoint (frozen spec 2026-09-28). The nonce
+  // segment pattern matches the src/proxy.ts matcher byte for byte; every
+  // other /grok-bridge shape stays management-classified. All methods classify
+  // as PUBLIC so the route handler owns the 405/404 decisions.
+  if (isPublicGrokBridgeRoute(normalizedPath, method)) {
+    return {
+      routeClass: "PUBLIC",
+      reason: "grok_bridge_public_route",
       normalizedPath,
     };
   }
@@ -141,15 +146,26 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
   };
 }
 
-// The CLIProxyAPI alias keeps its own reason so audit logs show which spelling was used.
-function managementApiReason(aliasReason?: ClassificationReason): ClassificationReason {
-  return aliasReason === "cliproxy_management_alias" ? aliasReason : "management_api";
-}
-
 function matchesReadonlyPublic(path: string, method: string): boolean {
   // Exact match, not startsWith: a prefix here would hand the CORS origin
   // relaxation to every adjacent path too (GHSA-74g9-q8f6-793h).
   return isPublicReadonlyCorsRoute(path, method);
+}
+
+/**
+ * True only for the exact public bridge path with a well-formed nonce. The
+ * character class matches the src/proxy.ts segment matcher
+ * `:nonce([A-Za-z0-9_-]{22})` byte for byte, so a request that passes the
+ * proxy matcher always classifies PUBLIC here; a shape the matcher would
+ * never forward (wrong length, wrong suffix) stays management-classified.
+ * The method parameter is accepted for call-site symmetry with the other
+ * public-route classifiers; the bridge classifies every method as public so
+ * the route handler owns method enforcement (405/404 per frozen spec).
+ */
+export function isPublicGrokBridgeRoute(pathname: string, _method: string = "GET"): boolean {
+  // Single source of truth: the registry owns the route shape (its own
+  // extractor and the proxy matcher consume this exact pattern).
+  return BRIDGE_ROUTE_PATTERN.test(pathname);
 }
 
 function isClassifiedAsPublic(path: string, method: string): boolean {

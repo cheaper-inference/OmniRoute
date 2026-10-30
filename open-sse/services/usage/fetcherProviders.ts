@@ -60,15 +60,13 @@ export const USAGE_FETCHER_PROVIDERS = [
   "xai-oauth",
   "xao",
   "grok-cli",
+  "grok-bot",
   "vertex",
   "vertex-partner",
   "codebuddy-cn",
   "codebuddy-intl",
   "cbai",
   "openrouter",
-  // Muse Code subscription has no usage API; registered so the generic fetcher
-  // returns persisted subscription metadata instead of "not implemented".
-  "muse-code",
   // LLM Gateway DevPass allowance (GET /v1/key → monthly + weekly premium)
   "llmgateway",
   // Lyceum credit balance (GET /api/v2/external/billing/credits)
@@ -109,9 +107,6 @@ export const USAGE_FETCHER_PROVIDERS = [
   // AgentRouter (New-API) console balance (GET /api/user/self)
   "agentrouter",
   "kilocode",
-  // StepFun account balance (GET /v1/accounts; base URL override selects
-  // China vs international platform, mirroring the chat path)
-  "stepfun",
   // Devin CLI agentic quota (Codeium seat-management GetUserStatus, protobuf)
   "devin-cli",
   // ChatPlayground subscription and daily credits (GET /api/user)

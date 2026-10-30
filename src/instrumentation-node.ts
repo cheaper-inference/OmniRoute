@@ -564,6 +564,29 @@ export async function registerNodejs(): Promise<void> {
   const { registerNoAuthAutoRoutingReadiness } =
     await import("@/lib/providers/noAuthAutoRoutingReadiness");
   registerNoAuthAutoRoutingReadiness();
+  // Grok Bot remote-cleanup sweeper (spec step 14): drain the persistent
+  // retry queue once at boot, then every 60s -- independent of new requests
+  // arriving on the affected connection. Non-fatal: a sweeper failure must
+  // never block server readiness.
+  try {
+    const [{ startGrokBotCleanupSweeper }, { getTransport }, { getProviderConnectionById }] =
+      await Promise.all([
+        import("@omniroute/open-sse/executors/grok-bot-cleanup-sweeper.ts"),
+        import("@omniroute/open-sse/executors/grok-bot.ts"),
+        import("@/lib/db/providers"),
+      ]);
+    startGrokBotCleanupSweeper({
+      resolveConnection: async (connectionId: string) => {
+        const connection = await getProviderConnectionById(connectionId);
+        const token = connection?.refreshToken;
+        return typeof token === "string" ? { refreshToken: token } : null;
+      },
+      transportFor: (accessToken: string) => getTransport(accessToken),
+    });
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn("[STARTUP] Grok Bot cleanup sweeper unavailable (non-fatal):", msg);
+  }
 
   // Guarantee the SQLite singleton — including a sql.js WASM pre-init when
   // both synchronous drivers (better-sqlite3, node:sqlite) are unavailable —
@@ -668,9 +691,6 @@ export async function registerNodejs(): Promise<void> {
     console.log("[STARTUP] Quota cache background refresh started");
     startProviderLimitsSyncScheduler();
     console.log("[STARTUP] Provider limits sync scheduler started");
-    const { startQuotaSessionRecovery } = await import("@/lib/quota/quotaSessionRecovery");
-    startQuotaSessionRecovery();
-    console.log("[STARTUP] Quota session recovery scheduler started (opt-in)");
     const { startQuotaAutoPing } = await import("@/lib/services/quotaAutoPing");
     startQuotaAutoPing();
     console.log("[STARTUP] Quota auto-ping scheduler started (opt-in, no-op until enabled)");
@@ -732,18 +752,6 @@ export async function registerNodejs(): Promise<void> {
       await import("@omniroute/open-sse/services/thinkingBudget.ts");
     if (hydrateThinkingBudgetConfig(settings)) {
       console.log("[STARTUP] Thinking-Budget config restored from settings");
-    }
-
-    // Restore the operator's CLI client-version overrides. `settings.cliVersionOverrides`
-    // feeds the Claude Code / Codex identity presets through a module-level map on the
-    // per-request hot path, and those presets are also consumed by compatibility bridges
-    // that never see a settings write — so cold-boot hydration is explicit here rather
-    // than relying on applyRuntimeSettings alone (same shape as the two restores above,
-    // and for the same #5312 RC-A reason: an in-memory map with no boot read reverts to
-    // "no override" on every restart).
-    const { hydrateCliVersionOverrides } = await import("@/shared/constants/cliVersions");
-    if (hydrateCliVersionOverrides(settings)) {
-      console.log("[STARTUP] CLI client-version overrides restored from settings");
     }
 
     // Restore the Task-Aware Smart Routing config (#8601). It lives in

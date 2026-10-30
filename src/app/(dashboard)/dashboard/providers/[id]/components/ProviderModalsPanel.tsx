@@ -7,6 +7,7 @@ import {
   OAuthModal,
   KiroOAuthWrapper,
   CursorAuthModal,
+  GrokBotAuthModal,
   TraeAuthModal,
   ProxyConfigModal,
 } from "@/shared/components";
@@ -268,6 +269,13 @@ export default function ProviderModalsPanel({
           />
         ) : providerId === "cursor" ? (
           <CursorAuthModal
+            isOpen={showOAuthModal}
+            reauthConnection={reauthConnection}
+            onSuccess={handleOAuthSuccess}
+            onClose={() => setShowOAuthModal(false)}
+          />
+        ) : providerId === "grok-bot" ? (
+          <GrokBotAuthModal
             isOpen={showOAuthModal}
             reauthConnection={reauthConnection}
             onSuccess={handleOAuthSuccess}
