@@ -285,9 +285,9 @@ export function getSyncedPricing(): PricingByProvider {
       console.warn(`[PRICING_SYNC] Corrupted data for provider "${key}", skipping`);
     }
   }
-  pricingMemo = synced;
+  pricingMemo = normalizeLiteLLMPricingProviders(synced);
   pricingMemoVersion = currentVersion;
-  return synced;
+  return pricingMemo;
 }
 
 /**

@@ -7,6 +7,7 @@ import { backupDbFile } from "../backup";
 import { getCachedPricing, invalidateDbCache } from "../readCache";
 import { PROVIDER_ID_TO_ALIAS } from "@omniroute/open-sse/config/providerModels.ts";
 import { invalidateUserPricingMemo } from "@/lib/catalogUserPricing";
+import { normalizeLiteLLMPricingProviders } from "@/lib/litellmPricingProviderAliases";
 import { type JsonRecord, toRecord } from "./shared";
 
 type PricingModels = Record<string, JsonRecord>;
@@ -109,7 +110,7 @@ async function getPricingLayers() {
   const { getDefaultPricing } = await import("@/shared/constants/pricing");
   return {
     defaults: getDefaultPricing(),
-    litellm: readPricingNamespace(db, "pricing_synced"),
+    litellm: normalizeLiteLLMPricingProviders(readPricingNamespace(db, "pricing_synced")),
     modelsDev: readPricingNamespace(db, "models_dev_pricing"),
     user: readPricingNamespace(db, "pricing"),
   };
