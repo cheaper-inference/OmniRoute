@@ -362,7 +362,7 @@ function resolveCatalogPricing(
   provider: string | null,
   model: string | null,
   snapshot?: CatalogEnrichmentSnapshot
-): Record<string, number> | null {
+): ReturnType<typeof getDefaultPricingForModel> {
   if (!provider || !model) return null;
   const base = resolveBaseCatalogPricing(provider, model, snapshot);
   // #15528: user overrides win per-field over models.dev / LiteLLM / defaults.
@@ -376,7 +376,7 @@ function resolveCatalogPricing(
 }
 
 function lookupCatalogPricing(
-  source: Record<string, Record<string, Record<string, number>>>,
+  source: Record<string, Record<string, Record<string, unknown>>>,
   provider: string,
   model: string
 ): Record<string, number> | null {
@@ -412,42 +412,33 @@ function resolveBaseCatalogPricing(
   provider: string,
   model: string,
   snapshot?: CatalogEnrichmentSnapshot
-): Record<string, number> | null {
-  // Prefer models.dev synced pricing when present; fall back to hardcoded defaults.
+): ReturnType<typeof getDefaultPricingForModel> {
+  let merged: ReturnType<typeof getDefaultPricingForModel> = null;
+  // Match runtime per-field precedence: defaults → LiteLLM → models.dev.
   try {
-    const modelsDev = (
-      snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing()
-    ) as Record<string, Record<string, Record<string, number>>>;
-    const pricing = lookupCatalogPricing(modelsDev, provider, model);
-    if (pricing) return pricing;
-  } catch {
-    // pricing lookup must never break catalog assembly
-  }
-
-  // LiteLLM-synced pricing (`pricing_synced` namespace) — Layer 3 in the
-  // documented resolution order (user > models.dev > LiteLLM > defaults).
-  // Consulted only when models.dev returned nothing, matching the order
-  // already implemented in db/settings/pricing.ts::getPricing().
-  try {
-    const litellm = getSyncedPricing() as unknown as Record<
-      string,
-      Record<string, Record<string, number>>
-    >;
-    const pricing = lookupCatalogPricing(litellm, provider, model);
-    if (pricing) return pricing;
-  } catch {
-    // pricing lookup must never break catalog assembly
-  }
-
-  try {
-    const defaults = getDefaultPricingForModel(provider, model) as Record<string, number> | null;
+    const defaults = getDefaultPricingForModel(provider, model);
     if (defaults && (typeof defaults.input === "number" || typeof defaults.output === "number")) {
-      return defaults;
+      merged = defaults;
     }
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  try {
+    const pricing = lookupCatalogPricing(getSyncedPricing(), provider, model);
+    if (pricing) merged = { ...(merged || {}), ...pricing };
+  } catch {
+    // pricing lookup must never break catalog assembly
+  }
+
+  try {
+    const modelsDev = snapshot ? snapshot.modelsDevPricing || {} : getModelsDevPricing();
+    const pricing = lookupCatalogPricing(modelsDev, provider, model);
+    if (pricing) merged = { ...(merged || {}), ...pricing };
   } catch {
     // ignore
   }
-  return null;
+  return merged;
 }
 
 export function enrichCatalogModelEntry<T extends JsonRecord>(
