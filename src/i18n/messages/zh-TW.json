@@ -3006,7 +3006,7 @@
       "grok-build": "xAI Grok Build TUI 程式代理，支援自訂提供者",
       "droid": "Factory Droid AI 助手",
       "openclaw": "OpenClaw AI 助手",
-      "openclaude": "支援 OpenAI 相容供應商的 OpenClaude 程式代理 CLI",
+      "openclaude": "支援 OpenAI 相容提供者的 OpenClaude 程式代理 CLI",
       "cline": "Cline AI 編碼助手 CLI",
       "kilo": "Kilo Code AI 助手 CLI",
       "qwen": "阿里巴巴 Qwen Code CLI",
