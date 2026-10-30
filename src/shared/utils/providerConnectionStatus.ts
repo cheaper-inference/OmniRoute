@@ -1,16 +1,25 @@
+export interface PrefixShadowedDiagnostic {
+  code: "prefix_shadowed";
+  message: string;
+  prefix?: string;
+  builtinProvider?: string;
+}
+
 export interface ProviderConnectionStatusLike {
+  prefixShadowed?: PrefixShadowedDiagnostic | null;
   isActive?: boolean | null;
   testStatus?: string | null;
   rateLimitedUntil?: string | number | Date | null;
 }
 
 const CONNECTED_STATUSES = new Set(["active", "success", "unknown"]);
-const ERROR_STATUSES = new Set(["error", "expired", "unavailable"]);
+const ERROR_STATUSES = new Set(["error", "expired", "unavailable", "prefix_shadowed"]);
 
 export function getEffectiveProviderConnectionStatus(
   connection: ProviderConnectionStatusLike,
   now = Date.now()
 ): string {
+  if (connection.prefixShadowed?.code === "prefix_shadowed") return "prefix_shadowed";
   const status = connection.testStatus || "unknown";
   if (status !== "unavailable") return status;
 

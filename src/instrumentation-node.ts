@@ -612,6 +612,13 @@ export async function registerNodejs(): Promise<void> {
   }
 
   await scanComboModelNameCollisionsAtBoot();
+  try {
+    const { warnProviderPrefixCollisionsAtBoot } =
+      await import("@/lib/providers/providerPrefixCollision");
+    await warnProviderPrefixCollisionsAtBoot();
+  } catch {
+    console.warn("[STARTUP] Could not scan provider-prefix collisions (non-fatal).");
+  }
   await warmAdaptiveVirtualLanesIntoRuntime();
 
   const [
