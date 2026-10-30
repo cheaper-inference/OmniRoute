@@ -17,6 +17,7 @@ import {
   ANTHROPIC_COMPATIBLE_PREFIX,
 } from "@/shared/constants/providers";
 import { testSingleConnection } from "../[id]/test/route";
+import { getSharedConnectionTestDebounce } from "@/lib/connectionTestDebounce";
 import { providersBatchTestSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -172,15 +173,29 @@ export async function POST(request) {
     const allowLocalSpawn = getRequestPeerLocality(request) !== "remote";
     const testOne = async (conn: Record<string, unknown>) => {
       try {
-        const result = await Promise.race([
-          testSingleConnection(conn.id, undefined, { allowLocalRuntimeProbe, allowLocalSpawn }),
-          new Promise((_, reject) =>
-            setTimeout(
-              () => reject(new Error("Connection test timed out after 30s")),
-              PER_CONNECTION_TIMEOUT
-            )
-          ),
-        ]);
+        // The dashboard's always-open tab re-fires this batch loop every ~300s:
+        // serve fresh-enough results from the shared debounce cache instead of
+        // re-probing every upstream each round. The operator's single-connection
+        // "Test" button and the credential-health revalidator call
+        // testSingleConnection directly and are unaffected. A timed-out race
+        // below records nothing, so the next sweep retries for real.
+        const debounce = getSharedConnectionTestDebounce();
+        const cached = debounce.lookup(String(conn.id));
+        const result = cached
+          ? cached.result
+          : await Promise.race([
+              testSingleConnection(conn.id, undefined, { allowLocalRuntimeProbe, allowLocalSpawn }),
+              new Promise((_, reject) =>
+                setTimeout(
+                  () => reject(new Error("Connection test timed out after 30s")),
+                  PER_CONNECTION_TIMEOUT
+                )
+              ),
+            ]);
+        if (!cached) {
+          const fresh = result as { valid?: boolean };
+          debounce.record(String(conn.id), result, fresh?.valid !== true);
+        }
         const data = result as {
           valid: boolean;
           latencyMs?: number;
