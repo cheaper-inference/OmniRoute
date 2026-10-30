@@ -315,6 +315,10 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
+    // Opt-in dashboard alerts for quota windows and reset credits about to
+    // expire. Purely client-side toasts: no upstream call, no consumption. Off
+    // by default so nobody gets paged until they ask for it.
+    codexQuotaAlerts: { enabled: false },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
     // Operator-set CLI client-version overrides for the Claude Code / Codex

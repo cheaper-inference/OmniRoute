@@ -50,6 +50,8 @@ import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
+import { useQuotaWindowAlerts } from "./useQuotaWindowAlerts";
+import type { QuotaAlertLatch } from "./quotaWindowAlerts";
 import { PROVIDER_LABEL, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
 import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
@@ -275,6 +277,47 @@ export default function ProviderLimits({
   const { layoutMode, selectLayout } = useQuotaLayout();
   const { canRequestLive, scheduleLiveRetry } = useAutomaticQuotaRequests(layoutMode);
 
+  // Opt-in low-quota / expiring-credit alerts. Off until `/api/settings`
+  // confirms the operator turned them on, so a slow or failed read stays silent.
+  const [quotaAlertsEnabled, setQuotaAlertsEnabled] = useState(false);
+  const [quotaAlertLatch, setQuotaAlertLatch] = useState<QuotaAlertLatch | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const res = await fetchWithTimeout("/api/settings", { timeoutMs: 8000 });
+        const data = res.ok ? await res.json() : null;
+        if (!alive) return;
+        setQuotaAlertsEnabled(data?.codexQuotaAlerts?.enabled === true);
+      } catch {
+        /* keep the default: alerts stay off */
+      }
+      try {
+        const res = await fetchWithTimeout("/api/settings/quota-alert-latch", { timeoutMs: 8000 });
+        const data = res.ok ? await res.json() : null;
+        if (alive && data && typeof data.latch === "object") setQuotaAlertLatch(data.latch);
+      } catch {
+        /* a missing latch only means a one-off repeat toast */
+      }
+    };
+    void load();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const persistQuotaAlertLatch = useCallback((latch: QuotaAlertLatch) => {
+    setQuotaAlertLatch(latch);
+    void fetch("/api/settings/quota-alert-latch", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ latch }),
+    }).catch(() => {
+      /* persistence is best-effort; the in-memory latch still dedupes this session */
+    });
+  }, []);
+
   const lastFetchTimeRef = useRef<Record<string, number>>({});
   const staleProbeRef = useRef<Record<string, number>>({});
   const lastRefreshAllAtRef = useRef<number>(Date.now());
@@ -333,6 +376,20 @@ export default function ProviderLimits({
     setLastRefreshedAt,
     confirmAvailabilityChange
   );
+  // Opt-in client-side alerts: low quota windows + reset credits about to
+  // expire. No upstream call — it only reads the snapshot already on screen.
+  useQuotaWindowAlerts({
+    enabled: quotaAlertsEnabled && quotaAlertLatch !== null,
+    quotaSnapshot: quotaData,
+    expiringCredits: resetCreditRedemption.resetCreditPicker
+      ? {
+          [resetCreditRedemption.resetCreditPicker.connectionId]:
+            resetCreditRedemption.resetCreditPicker.credits,
+        }
+      : {},
+    initialLatch: quotaAlertLatch ?? undefined,
+    persistLatch: persistQuotaAlertLatch,
+  });
 
   // Only the active field is confirmed by this write; all other runtime evidence is retained.
   const handleToggleActive = useCallback(
