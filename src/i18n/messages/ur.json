@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "میں سمجھتا ہوں، جڑتا ہوں۔",
     "tabPasteSetupToken": "سیٹ اپ ٹوکن",
     "claudeSetupTokenDescription": "ٹرمینل میں `claude setup-token` چلائیں اور اس کا پرنٹ کردہ ٹوکن پیسٹ کریں۔ یہ ایک سال کے لیے درست ہے اور اس کا کوئی ریفریش ٹوکن نہیں ہے۔ محفوظ کرنے سے پہلے OmniRoute، Anthropic کو ایک ٹیسٹ درخواست بھیجتا ہے۔",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "ٹوکن ریفریش کریں۔",
+    "antigravityRefreshTokenDescription": "Antigravity کے لیے اپنا Google OAuth ریفریش ٹوکن چسپاں کریں۔ OmniRoute محفوظ کرنے سے پہلے اس کی تصدیق اور تبادلہ کرتا ہے۔",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

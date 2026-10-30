@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "이해합니다. 연결하세요.",
     "tabPasteSetupToken": "설정 토큰",
     "claudeSetupTokenDescription": "터미널에서 `claude setup-token`을 실행하고 출력된 토큰을 붙여넣으세요. 이 토큰은 1년간 유효하며 새로 고침 토큰이 없습니다. OmniRoute는 저장하기 전에 Anthropic에 테스트 요청을 한 번 보냅니다.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "새로고침 토큰",
+    "antigravityRefreshTokenDescription": "Antigravity 에 대한 Google OAuth 새로 고침 토큰을 붙여넣습니다. OmniRoute 저장하기 전에 이를 검증하고 교환합니다.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor IDE 연결",

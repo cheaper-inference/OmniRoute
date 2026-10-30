@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Je comprends, connecte-toi",
     "tabPasteSetupToken": "Jeton de configuration",
     "claudeSetupTokenDescription": "Exécutez `claude setup-token` dans un terminal et collez le jeton affiché. Il est valable un an et n'a pas de jeton d'actualisation. OmniRoute envoie une requête de test à Anthropic avant de l'enregistrer.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Actualiser le jeton",
+    "antigravityRefreshTokenDescription": "Collez votre jeton d'actualisation Google OAuth pour Antigravity. OmniRoute le valide et l'échange avant de l'enregistrer.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connecter l'IDE du curseur",

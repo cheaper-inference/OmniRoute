@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Aghọtara m, jikọọ",
     "tabPasteSetupToken": "Tokin nhazi",
     "claudeSetupTokenDescription": "Gbaa `claude setup-token` na timinal ma mado tokin ọ bipụtara. Ọ dị irè otu afọ, ọ nweghịkwa tokin mmeghari. OmniRoute na-ezipụ otu arịrịọ nnwale na Anthropic tupu ọ chekwaa ya.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Token nweta ume",
+    "antigravityRefreshTokenDescription": "Tapawa akara ngosi OAuth Google maka Antigravity. OmniRoute kwadoro ma gbanwee ya tupu ịchekwa ya.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Jikọọ Cursor",

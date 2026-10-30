@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "எனக்கு புரிகிறது, இணைக்கவும்",
     "tabPasteSetupToken": "அமைவு டோக்கன்",
     "claudeSetupTokenDescription": "டெர்மினலில் `claude setup-token` ஐ இயக்கி, அது அச்சிடும் டோக்கனை ஒட்டவும். இது ஒரு வருடத்திற்குச் செல்லுபடியாகும், புதுப்பிப்பு டோக்கன் இல்லை. சேமிப்பதற்கு முன் OmniRoute Anthropic-க்கு ஒரு சோதனைக் கோரிக்கையை அனுப்புகிறது.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "டோக்கனைப் புதுப்பிக்கவும்",
+    "antigravityRefreshTokenDescription": "Antigravity க்காக உங்கள் Google OAuth புதுப்பிப்பு டோக்கனை ஒட்டவும். OmniRoute சேமிப்பதற்கு முன் அதைச் சரிபார்த்து பரிமாறிக்கொள்கிறது.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

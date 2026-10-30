@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "Разбирам, свържете се",
     "tabPasteSetupToken": "Токен за настройка",
     "claudeSetupTokenDescription": "Изпълнете `claude setup-token` в терминал и поставете токена, който отпечатва. Той е валиден една година и няма токен за опресняване. OmniRoute изпраща една тестова заявка към Anthropic, преди да го запази.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Опресняване на токена",
+    "antigravityRefreshTokenDescription": "Поставете вашия Google OAuth токен за опресняване за Antigravity. OmniRoute го валидира и обменя, преди да го запази.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Свържете Cursor IDE",

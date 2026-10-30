@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "我明白了，连接",
     "tabPasteSetupToken": "设置令牌",
     "claudeSetupTokenDescription": "在终端中运行 `claude setup-token`，然后粘贴它输出的令牌。该令牌有效期为一年，没有刷新令牌。OmniRoute 会在保存前向 Anthropic 发送一次测试请求。",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "刷新令牌",
+    "antigravityRefreshTokenDescription": "粘贴Antigravity的Google OAuth刷新令牌。 OmniRoute在保存之前验证并交换它。",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "连接 Cursor IDE",

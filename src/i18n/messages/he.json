@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "אני מבין, תתחבר",
     "tabPasteSetupToken": "אסימון הגדרה",
     "claudeSetupTokenDescription": "הריצו `claude setup-token` במסוף והדביקו את האסימון שהוא מדפיס. הוא תקף לשנה אחת ואין לו אסימון רענון. OmniRoute שולח בקשת בדיקה אחת ל-Anthropic לפני שמירתו.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "רענן אסימון",
+    "antigravityRefreshTokenDescription": "הדבק את אסימון הרענון של Google OAuth עבור Antigravity. OmniRoute מאמת ומחליף אותו לפני השמירה.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "חבר את הסמן IDE",

@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "أنا أفهم، الاتصال",
     "tabPasteSetupToken": "رمز الإعداد",
     "claudeSetupTokenDescription": "شغّل `claude setup-token` في الطرفية والصق الرمز الذي يطبعه. الرمز صالح لمدة عام واحد ولا يملك رمز تحديث. يرسل OmniRoute طلب اختبار واحدًا إلى Anthropic قبل حفظه.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "تحديث الرمز المميز",
+    "antigravityRefreshTokenDescription": "قم بلصق رمز التحديث Google OAuth الخاص بـ Antigravity. يقوم OmniRoute بالتحقق من صحته واستبداله قبل الحفظ.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "ربط IDE Cursor",

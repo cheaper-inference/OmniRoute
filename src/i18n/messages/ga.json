@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Tuigim, ceangail",
     "tabPasteSetupToken": "Comhartha socraithe",
     "claudeSetupTokenDescription": "Rith `claude setup-token` i dteirminéal agus greamaigh an comhartha a phriontálann sé. Tá sé bailí ar feadh bliana agus níl comhartha athnuachana aige. Seolann OmniRoute iarratas tástála amháin chuig Anthropic sula sábhálann sé é.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Comhartha Athnuaigh",
+    "antigravityRefreshTokenDescription": "Greamaigh do chomhartha athnuachana Google OAuth le haghaidh Antigravity. Déanann OmniRoute é a bhailíochtú agus a mhalartú roimh shábháil.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Ceangail Cursor",

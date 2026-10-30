@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Ma saan aru, ühendage",
     "tabPasteSetupToken": "Seadistusluba",
     "claudeSetupTokenDescription": "Käivitage terminalis `claude setup-token` ja kleepige selle väljastatud luba. See kehtib ühe aasta ja sellel puudub värskendusluba. OmniRoute saadab enne salvestamist Anthropicule ühe testpäringu.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Värskenda märki",
+    "antigravityRefreshTokenDescription": "Kleepige oma Google OAuth värskendusmärk Antigravity jaoks. OmniRoute kinnitab ja vahetab selle enne salvestamist.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Ühenda Cursor",

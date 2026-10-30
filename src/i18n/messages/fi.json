@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Ymmärrän, yhdistä",
     "tabPasteSetupToken": "Asetustunnus",
     "claudeSetupTokenDescription": "Suorita `claude setup-token` päätteessä ja liitä sen tulostama tunnus. Se on voimassa vuoden, eikä sillä ole päivitystunnusta. OmniRoute lähettää Anthropicille yhden testipyynnön ennen tallentamista.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Päivitä Token",
+    "antigravityRefreshTokenDescription": "Liitä Google OAuth -päivitystunnus Antigravity:lle. OmniRoute vahvistaa ja vaihtaa sen ennen tallentamista.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Yhdistä kohdistin IDE",

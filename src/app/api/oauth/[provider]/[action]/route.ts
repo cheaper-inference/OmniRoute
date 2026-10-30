@@ -85,7 +85,14 @@ const NO_PKCE_DEVICE_CODE_PROVIDERS = new Set([
 const RETIRED_PKCE_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
 
 /** Providers that allow direct import of a raw API token (no OAuth exchange). */
-const IMPORT_TOKEN_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
+const IMPORT_TOKEN_PROVIDERS = new Set([
+  "devin-desktop",
+  "devin-cli",
+  "grok-cli",
+  "claude",
+  "antigravity",
+  "agy",
+]);
 
 /**
  * #10143: re-importing a token onto an existing connection must keep its persisted
@@ -869,6 +876,9 @@ export async function POST(
           ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
           : null;
 
+        const getAntigravityDegradedState = antigravityDegradedProjectState;
+        const degradedProject = getAntigravityDegradedState(provider, tokenData);
+
         // Tokens without an identity (e.g. a Claude setup-token) match on the token itself,
         // so re-pasting the same token updates its connection instead of duplicating it.
         let connection: any;
@@ -884,13 +894,13 @@ export async function POST(
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
             ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
-            testStatus: "active",
+            ...antigravityPersistStatus(degradedProject),
             isActive: true,
           });
         }
         if (!connection) {
           connection = await createProviderConnection(
-            buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt)
+            buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt, degradedProject)
           );
         }
 
@@ -898,6 +908,7 @@ export async function POST(
 
         return NextResponse.json({
           success: true,
+          ...(degradedProject ? { warning: degradedProject.warning } : {}),
           connection: {
             id: connection.id,
             provider: connection.provider,

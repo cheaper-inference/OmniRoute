@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Na fahimta, haɗa",
     "tabPasteSetupToken": "Alamar saitin",
     "claudeSetupTokenDescription": "Gudanar da `claude setup-token` a cikin tasha kuma liƙa alamar da ya buga. Tana aiki na shekara ɗaya kuma ba ta da alamar sabuntawa. OmniRoute yana aika buƙatar gwaji ɗaya zuwa Anthropic kafin ya adana ta.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Refresh Token",
+    "antigravityRefreshTokenDescription": "Manna alamar refresh na Google OAuth don Antigravity. OmniRoute ya inganta kuma ya musanya shi kafin ajiyewa.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Haɗa Cursor",

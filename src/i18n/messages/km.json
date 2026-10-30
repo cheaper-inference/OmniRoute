@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "ខ្ញុំយល់, ភ្ជាប់",
     "tabPasteSetupToken": "ថូខឹនរៀបចំ",
     "claudeSetupTokenDescription": "ដំណើរការ `claude setup-token` ក្នុងទែមីណាល់ ហើយបិទភ្ជាប់ថូខឹនដែលវាបង្ហាញ។ វាមានសុពលភាពមួយឆ្នាំ ហើយគ្មានថូខឹនធ្វើឱ្យស្រស់ទេ។ OmniRoute ផ្ញើសំណើសាកល្បងមួយទៅ Anthropic មុនពេលរក្សាទុកវា។",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "ផ្ទុកថូខឹនឡើងវិញ",
+    "antigravityRefreshTokenDescription": "បិទភ្ជាប់ Google OAuth refresh token របស់អ្នកសម្រាប់ Antigravity។ OmniRoute ធ្វើឱ្យមានសុពលភាព និងផ្លាស់ប្តូរវាមុនពេលរក្សាទុក។",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "ភ្ជាប់ Cursor",

@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "मैं समझता हूं, कनेक्ट करें",
     "tabPasteSetupToken": "सेटअप टोकन",
     "claudeSetupTokenDescription": "टर्मिनल में `claude setup-token` चलाएँ और वह जो टोकन प्रिंट करता है उसे पेस्ट करें। यह एक वर्ष के लिए मान्य है और इसमें कोई रिफ़्रेश टोकन नहीं है। सहेजने से पहले OmniRoute Anthropic को एक परीक्षण अनुरोध भेजता है।",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "टोकन ताज़ा करें",
+    "antigravityRefreshTokenDescription": "Antigravity के लिए अपना Google OAuth ताज़ा टोकन चिपकाएँ। OmniRoute सहेजने से पहले इसे मान्य करता है और इसका आदान-प्रदान करता है।",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "कर्सर आईडीई कनेक्ट करें",

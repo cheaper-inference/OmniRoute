@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "わかりました、接続します",
     "tabPasteSetupToken": "セットアップトークン",
     "claudeSetupTokenDescription": "ターミナルで `claude setup-token` を実行し、表示されたトークンを貼り付けてください。有効期間は1年で、リフレッシュトークンはありません。OmniRoute は保存前に Anthropic へテストリクエストを1件送信します。",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "リフレッシュトークン",
+    "antigravityRefreshTokenDescription": "AntigravityのGoogle OAuthリフレッシュ トークンを貼り付けます。 OmniRoute 、保存する前にそれを検証して交換します。",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "カーソルIDEの接続",

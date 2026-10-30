@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Supratau, prisijunk",
     "tabPasteSetupToken": "Sąrankos žetonas",
     "claudeSetupTokenDescription": "Terminale paleiskite `claude setup-token` ir įklijuokite jo išspausdintą žetoną. Jis galioja vienerius metus ir neturi atnaujinimo žetono. Prieš išsaugodamas OmniRoute išsiunčia vieną bandomąją užklausą į Anthropic.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Atnaujinti žetoną",
+    "antigravityRefreshTokenDescription": "Įklijuokite Google OAuth atnaujinimo prieigos raktą, skirtą Antigravity. OmniRoute patvirtina ir pakeičia jį prieš išsaugant.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Prijungti Cursor",

@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Καταλαβαίνω, συνδεθείτε",
     "tabPasteSetupToken": "Διακριτικό ρύθμισης",
     "claudeSetupTokenDescription": "Εκτελέστε το `claude setup-token` σε ένα τερματικό και επικολλήστε το διακριτικό που εμφανίζει. Ισχύει για ένα έτος και δεν έχει διακριτικό ανανέωσης. Το OmniRoute στέλνει ένα δοκιμαστικό αίτημα στην Anthropic πριν το αποθηκεύσει.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Ανανέωση διακριτικού",
+    "antigravityRefreshTokenDescription": "Επικολλήστε το διακριτικό ανανέωσης Google OAuth Antigravity. OmniRoute το επικυρώνει και το ανταλλάσσει πριν από την αποθήκευση.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Σύνδεση στο Cursor",

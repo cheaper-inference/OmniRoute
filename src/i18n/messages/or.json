@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "ମୁଁ ବୁ understand ିଛି, ସଂଯୋଗ କର \\|",
     "tabPasteSetupToken": "ସେଟଅପ୍ ଟୋକେନ୍",
     "claudeSetupTokenDescription": "ଟର୍ମିନାଲରେ `claude setup-token` ଚଲାନ୍ତୁ ଏବଂ ଏହା ପ୍ରିଣ୍ଟ କରୁଥିବା ଟୋକେନ୍ ପେଷ୍ଟ କରନ୍ତୁ। ଏହା ଏକ ବର୍ଷ ପାଇଁ ବୈଧ ଏବଂ ଏହାର କୌଣସି ରିଫ୍ରେସ୍ ଟୋକେନ୍ ନାହିଁ। ସେଭ୍ କରିବା ପୂର୍ବରୁ OmniRoute Anthropic କୁ ଗୋଟିଏ ପରୀକ୍ଷଣ ଅନୁରୋଧ ପଠାଏ।",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "ଟୋକେନ୍ ସତେଜ କରନ୍ତୁ \\|",
+    "antigravityRefreshTokenDescription": "Antigravity ପାଇଁ ଆପଣଙ୍କର Google OAuth ସତେଜ ଟୋକେନ୍ ଲେପନ କରନ୍ତୁ \\| OmniRoute ସଞ୍ଚୟ କରିବା ପୂର୍ବରୁ ଏହାକୁ ବ valid ଧ କରେ ଏବଂ ବିନିମୟ କରେ \\|",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor ସଂଯୋଗ କରନ୍ତୁ",

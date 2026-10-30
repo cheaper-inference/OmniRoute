@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "เข้าใจแล้ว เชื่อมต่อเลย",
     "tabPasteSetupToken": "โทเค็นการตั้งค่า",
     "claudeSetupTokenDescription": "เรียกใช้ `claude setup-token` ในเทอร์มินัลแล้ววางโทเค็นที่แสดงออกมา โทเค็นนี้ใช้ได้หนึ่งปีและไม่มีโทเค็นรีเฟรช OmniRoute จะส่งคำขอทดสอบหนึ่งรายการไปยัง Anthropic ก่อนบันทึก",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "รีเฟรชโทเค็น",
+    "antigravityRefreshTokenDescription": "วางโทเค็นการรีเฟรช OAuth Google ของคุณสำหรับ AntigravityOmniRoute ตรวจสอบและแลกเปลี่ยนก่อนบันทึก",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "เชื่อมต่อเคอร์เซอร์ IDE",

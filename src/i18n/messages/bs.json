@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "Razumijem, poveži se",
     "tabPasteSetupToken": "Token za postavljanje",
     "claudeSetupTokenDescription": "Pokrenite `claude setup-token` u terminalu i zalijepite token koji ispiše. Važi godinu dana i nema token za osvježavanje. OmniRoute šalje jedan testni zahtjev Anthropicu prije nego što ga sačuva.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Osvježi token",
+    "antigravityRefreshTokenDescription": "Zalijepite svoj Google OAuth token za osvježavanje za Antigravity. OmniRoute ga potvrđuje i razmjenjuje prije spremanja.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Poveži Cursor",

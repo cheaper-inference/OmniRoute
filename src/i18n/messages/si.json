@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "මට තේරෙනවා, සම්බන්ධ කරන්න",
     "tabPasteSetupToken": "සැකසුම් ටෝකනය",
     "claudeSetupTokenDescription": "ටර්මිනලයක `claude setup-token` ධාවනය කර එය මුද්‍රණය කරන ටෝකනය අලවන්න. එය වසරක් සඳහා වලංගු වන අතර නැවුම් කිරීමේ ටෝකනයක් නැත. සුරැකීමට පෙර OmniRoute Anthropic වෙත එක් පරීක්ෂණ ඉල්ලීමක් යවයි.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "ටෝකනය නැවුම් කරන්න",
+    "antigravityRefreshTokenDescription": "Antigravity සඳහා ඔබේ Google OAuth නැවුම් ටෝකනය අලවන්න. OmniRoute සුරැකීමට පෙර එය වලංගු කර හුවමාරු කරයි.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor සම්බන්ධ කරන්න",

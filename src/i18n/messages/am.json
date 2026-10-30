@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "ተረድቻለሁ፣ ተገናኝ",
     "tabPasteSetupToken": "የማዋቀሪያ ቶከን",
     "claudeSetupTokenDescription": "በተርሚናል ውስጥ `claude setup-token` ያሂዱ እና የሚያሳየውን ቶከን ይለጥፉ። ለአንድ ዓመት ያገለግላል እና የማደሻ ቶከን የለውም። OmniRoute ከማስቀመጡ በፊት አንድ የሙከራ ጥያቄ ወደ Anthropic ይልካል።",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "አድስ ማስመሰያ",
+    "antigravityRefreshTokenDescription": "ለ Antigravity የእርስዎን Google OAuth አድስ ማስመሰያ ይለጥፉ። OmniRoute ከማስቀመጡ በፊት አረጋግጦ ይለውጠዋል።",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursorን አገናኝ",

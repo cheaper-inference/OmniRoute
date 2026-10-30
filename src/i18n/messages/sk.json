@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Rozumiem, spojte sa",
     "tabPasteSetupToken": "Token z nastavenia",
     "claudeSetupTokenDescription": "Spustite v termináli `claude setup-token` a vložte token, ktorý vypíše. Platí jeden rok a nemá obnovovací token. OmniRoute pred uložením odošle do Anthropic jednu testovaciu požiadavku.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Obnoviť token",
+    "antigravityRefreshTokenDescription": "Prilepte svoj obnovovací token Google OAuth pre Antigravity. OmniRoute ho pred uložením overí a vymení.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Pripojte kurzorové IDE",

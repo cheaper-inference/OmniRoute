@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "فهمیدم، وصل کن",
     "tabPasteSetupToken": "توکن راه‌اندازی",
     "claudeSetupTokenDescription": "دستور `claude setup-token` را در ترمینال اجرا کنید و توکنی را که چاپ می‌کند جای‌گذاری کنید. این توکن یک سال اعتبار دارد و توکن تازه‌سازی ندارد. OmniRoute پیش از ذخیره، یک درخواست آزمایشی به Anthropic می‌فرستد.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Refresh Token",
+    "antigravityRefreshTokenDescription": "رمز نوسازی OAuth Google خود را برای Antigravity بچسبانید. OmniRoute قبل از ذخیره آن را اعتبارسنجی و مبادله می کند.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

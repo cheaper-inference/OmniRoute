@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "နားလည်တယ်၊ ချိတ်ဆက်တယ်။",
     "tabPasteSetupToken": "စနစ်ထည့်သွင်းမှု တိုကင်",
     "claudeSetupTokenDescription": "တာမီနယ်တွင် `claude setup-token` ကို လုပ်ဆောင်ပြီး ၎င်းထုတ်ပြသော တိုကင်ကို ကူးထည့်ပါ။ ၎င်းသည် တစ်နှစ်အထိ အကျုံးဝင်ပြီး ပြန်လည်စတင်ရန် တိုကင် မရှိပါ။ မသိမ်းဆည်းမီ OmniRoute သည် Anthropic သို့ စမ်းသပ်တောင်းဆိုမှု တစ်ခု ပို့ပါသည်။",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "တိုကင်ကို ပြန်လည်စတင်ပါ။",
+    "antigravityRefreshTokenDescription": "Antigravity အတွက် သင်၏ Google OAuth refresh တိုကင်ကို ကူးထည့်ပါ။ OmniRoute သိမ်းဆည်းခြင်းမပြုမီ အတည်ပြုပြီး လဲလှယ်ပေးသည်။",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor ကို ချိတ်ဆက်ရန်",

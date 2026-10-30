@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Am înțeles, conectează-te",
     "tabPasteSetupToken": "Token de configurare",
     "claudeSetupTokenDescription": "Rulați `claude setup-token` într-un terminal și lipiți tokenul afișat. Este valabil un an și nu are token de reîmprospătare. OmniRoute trimite o cerere de test către Anthropic înainte de a-l salva.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Jeton de reîmprospătare",
+    "antigravityRefreshTokenDescription": "Lipiți indicativul de reîmprospătare OAuth Google pentru Antigravity. OmniRoute îl validează și îl schimbă înainte de a salva.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Conectați Cursor IDE",

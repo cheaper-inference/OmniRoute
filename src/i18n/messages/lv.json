@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Saprotu, pieslēdzies",
     "tabPasteSetupToken": "Iestatīšanas marķieris",
     "claudeSetupTokenDescription": "Terminālī palaidiet `claude setup-token` un ielīmējiet izdrukāto marķieri. Tas ir derīgs vienu gadu, un tam nav atsvaidzināšanas marķiera. Pirms saglabāšanas OmniRoute nosūta vienu testa pieprasījumu uz Anthropic.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Atsvaidzināt marķieri",
+    "antigravityRefreshTokenDescription": "Ielīmējiet savu Google OAuth atsvaidzināšanas pilnvaru Antigravity. OmniRoute pirms saglabāšanas to apstiprina un apmaina.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Savienot Cursor",

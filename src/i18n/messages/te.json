@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "నేను అర్థం చేసుకున్నాను, కనెక్ట్ చేయండి",
     "tabPasteSetupToken": "సెటప్ టోకెన్",
     "claudeSetupTokenDescription": "టెర్మినల్‌లో `claude setup-token` ను అమలు చేసి, అది ముద్రించే టోకెన్‌ను అతికించండి. ఇది ఒక సంవత్సరం చెల్లుబాటు అవుతుంది మరియు దీనికి రిఫ్రెష్ టోకెన్ లేదు. సేవ్ చేయడానికి ముందు OmniRoute Anthropic కు ఒక పరీక్ష అభ్యర్థనను పంపుతుంది.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "టోకెన్ని రిఫ్రెష్ చేయండి",
+    "antigravityRefreshTokenDescription": "Antigravity కోసం మీ Google OAuth రిఫ్రెష్ టోకెన్ను అతికించండి. OmniRoute ఆదా చేయడానికి ముందు దానిని ధృవీకరిస్తుంది మరియు మార్పిడి చేస్తుంది.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

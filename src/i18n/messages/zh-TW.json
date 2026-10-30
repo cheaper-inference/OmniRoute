@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "我明白了，連接",
     "tabPasteSetupToken": "設定權杖",
     "claudeSetupTokenDescription": "在終端機中執行 `claude setup-token`，然後貼上它輸出的權杖。此權杖有效期為一年，沒有重新整理權杖。OmniRoute 會在儲存前向 Anthropic 發送一次測試請求。",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "刷新令牌",
+    "antigravityRefreshTokenDescription": "貼上Antigravity的Google OAuth刷新令牌。 OmniRoute在保存之前驗證並交換它。",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "連線 Cursor IDE",

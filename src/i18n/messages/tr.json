@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "anladım bağlan",
     "tabPasteSetupToken": "Kurulum belirteci",
     "claudeSetupTokenDescription": "Bir terminalde `claude setup-token` komutunu çalıştırın ve yazdırdığı belirteci yapıştırın. Belirteç bir yıl geçerlidir ve yenileme belirteci yoktur. OmniRoute, kaydetmeden önce Anthropic'e bir test isteği gönderir.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Jetonu Yenile",
+    "antigravityRefreshTokenDescription": "Antigravity için Google OAuth yenileme belirtecinizi yapıştırın. OmniRoute kaydetmeden önce doğrular ve değiştirir.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "İmleç IDE'sini bağlayın",

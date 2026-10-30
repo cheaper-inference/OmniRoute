@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "Nifhem, qabbad",
     "tabPasteSetupToken": "Token tas-setup",
     "claudeSetupTokenDescription": "Ħaddem `claude setup-token` f'terminal u waħħal it-token li jistampa. Huwa validu għal sena u m'għandux token ta' aġġornament. OmniRoute jibgħat talba waħda ta' test lil Anthropic qabel ma jsalvah.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Aġġorna Token",
+    "antigravityRefreshTokenDescription": "Paste Google OAuth token ta' aġġornament tiegħek għal Antigravity. OmniRoute jivvalidaha u tiskambjaha qabel issalva.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Qabbad Cursor",

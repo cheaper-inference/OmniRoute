@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Saya faham, sambung",
     "tabPasteSetupToken": "Token persediaan",
     "claudeSetupTokenDescription": "Jalankan `claude setup-token` dalam terminal dan tampal token yang dicetaknya. Token sah selama satu tahun dan tiada token muat semula. OmniRoute menghantar satu permintaan ujian kepada Anthropic sebelum menyimpannya.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Token Muat Semula",
+    "antigravityRefreshTokenDescription": "Tampalkan token muat semula Google OAuth anda untuk Antigravity. OmniRoute mengesahkan dan menukarnya sebelum menyimpan.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Sambungkan IDE Kursor",

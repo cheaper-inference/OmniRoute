@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "მესმის, დაკავშირება",
     "tabPasteSetupToken": "დაყენების ტოკენი",
     "claudeSetupTokenDescription": "გაუშვით `claude setup-token` ტერმინალში და ჩასვით ტოკენი, რომელსაც ის ბეჭდავს. ის მოქმედებს ერთი წლის განმავლობაში და არ აქვს განახლების ტოკენი. შენახვამდე OmniRoute Anthropic-ს ერთ სატესტო მოთხოვნას უგზავნის.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "განაახლეთ ჟეტონი",
+    "antigravityRefreshTokenDescription": "ჩასვით თქვენი Google OAuth განახლების ჟეტონი Antigravity სთვის. OmniRoute ამოწმებს და ცვლის მას შენახვამდე.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor-ის დაკავშირება",

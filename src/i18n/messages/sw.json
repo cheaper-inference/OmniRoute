@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Ninaelewa, unganisha",
     "tabPasteSetupToken": "Tokeni ya usanidi",
     "claudeSetupTokenDescription": "Endesha `claude setup-token` kwenye terminal na ubandike tokeni inayochapisha. Ni halali kwa mwaka mmoja na haina tokeni ya kuonyesha upya. OmniRoute hutuma ombi moja la majaribio kwa Anthropic kabla ya kuihifadhi.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Onyesha upya Tokeni",
+    "antigravityRefreshTokenDescription": "Bandika tokeni yako ya kuonyesha upya Google OAuth kwa Antigravity. OmniRoute inaithibitisha na kuibadilisha kabla ya kuhifadhi.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

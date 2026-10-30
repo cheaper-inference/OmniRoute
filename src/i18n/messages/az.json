@@ -11693,7 +11693,10 @@
     "copilotPolicyAcknowledge": "başa düşürəm, qoşul",
     "tabPasteSetupToken": "Quraşdırma tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` əmrini işə salın və çap etdiyi tokeni yapışdırın. Token bir il etibarlıdır və yeniləmə tokeni yoxdur. OmniRoute onu saxlamazdan əvvəl Anthropic-ə bir test sorğusu göndərir.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Tokeni yeniləyin",
+    "antigravityRefreshTokenDescription": "Antigravity üçün Google OAuth yeniləmə nişanını yapışdırın. OmniRoute saxlamadan əvvəl onu təsdiqləyir və dəyişdirir.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Connect Cursor IDE",

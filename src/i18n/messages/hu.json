@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Értem, kapcsolódj",
     "tabPasteSetupToken": "Beállítási token",
     "claudeSetupTokenDescription": "Futtassa a `claude setup-token` parancsot egy terminálban, és illessze be a kiírt tokent. Egy évig érvényes, és nincs frissítési tokenje. Mentés előtt az OmniRoute egy tesztkérést küld az Anthropicnak.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Token frissítése",
+    "antigravityRefreshTokenDescription": "Illessze be Google OAuth frissítési tokent a Antigravity. OmniRoute a mentés előtt érvényesíti és kicseréli.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Csatlakoztassa a kurzor IDE-t",

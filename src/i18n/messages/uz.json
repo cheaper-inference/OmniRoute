@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Tushundim, ulaning",
     "tabPasteSetupToken": "Sozlash tokeni",
     "claudeSetupTokenDescription": "Terminalda `claude setup-token` buyrug'ini ishga tushiring va u chiqargan tokenni joylashtiring. U bir yil amal qiladi va yangilash tokeniga ega emas. OmniRoute saqlashdan oldin Anthropic'ga bitta sinov so'rovini yuboradi.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Tokenni yangilash",
+    "antigravityRefreshTokenDescription": "Antigravity uchun Google OAuth yangilash tokenini joylashtiring. OmniRoute saqlashdan oldin uni tasdiqlaydi va almashtiradi.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor’ni ulash",

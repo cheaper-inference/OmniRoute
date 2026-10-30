@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Mo ye, so",
     "tabPasteSetupToken": "Àmì ìṣètò",
     "claudeSetupTokenDescription": "Ṣiṣẹ́ `claude setup-token` nínú tẹ́mínà kí o sì lẹ àmì tí ó tẹ̀ jáde. Ó wúlò fún ọdún kan kò sì ní àmì ìsọdọ̀tun. OmniRoute ń fi ìbéèrè ìdánwò kan ránṣẹ́ sí Anthropic kí ó tó fi pamọ́.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Sọ àmi",
+    "antigravityRefreshTokenDescription": "Lẹẹmọ ami isọdọtun OAuth Google rẹ fun Antigravity. OmniRoute fọwọsi ati paarọ rẹ ṣaaju fifipamọ.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "So Cursor pọ̀",

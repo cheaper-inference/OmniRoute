@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "Jag förstår, anslut",
     "tabPasteSetupToken": "Installationstoken",
     "claudeSetupTokenDescription": "Kör `claude setup-token` i en terminal och klistra in token som skrivs ut. Den är giltig i ett år och har ingen uppdateringstoken. OmniRoute skickar en testbegäran till Anthropic innan den sparas.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "Uppdatera token",
+    "antigravityRefreshTokenDescription": "Klistra in din Google OAuth refresh token för Antigravity. OmniRoute validerar och byter ut den innan den sparas.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Anslut Cursor IDE",

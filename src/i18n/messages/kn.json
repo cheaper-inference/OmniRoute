@@ -11616,7 +11616,10 @@
     "copilotPolicyAcknowledge": "ನಾನು ಅರ್ಥಮಾಡಿಕೊಂಡಿದ್ದೇನೆ, ಸಂಪರ್ಕಿಸಿ",
     "tabPasteSetupToken": "ಸೆಟಪ್ ಟೋಕನ್",
     "claudeSetupTokenDescription": "ಟರ್ಮಿನಲ್‌ನಲ್ಲಿ `claude setup-token` ಅನ್ನು ಚಲಾಯಿಸಿ ಮತ್ತು ಅದು ಮುದ್ರಿಸುವ ಟೋಕನ್ ಅನ್ನು ಅಂಟಿಸಿ. ಇದು ಒಂದು ವರ್ಷ ಮಾನ್ಯವಾಗಿರುತ್ತದೆ ಮತ್ತು ರಿಫ್ರೆಶ್ ಟೋಕನ್ ಹೊಂದಿಲ್ಲ. ಉಳಿಸುವ ಮೊದಲು OmniRoute Anthropic ಗೆ ಒಂದು ಪರೀಕ್ಷಾ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುತ್ತದೆ.",
-    "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
+    "claudeSetupTokenPlaceholder": "sk-ant-oat01-...",
+    "tabPasteRefreshToken": "ಟೋಕನ್ ಅನ್ನು ರಿಫ್ರೆಶ್ ಮಾಡಿ",
+    "antigravityRefreshTokenDescription": "Antigravity ಗಾಗಿ ನಿಮ್ಮ Google OAuth ರಿಫ್ರೆಶ್ ಟೋಕನ್ ಅನ್ನು ಅಂಟಿಸಿ. OmniRoute ಉಳಿಸುವ ಮೊದಲು ಅದನ್ನು ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ ಮತ್ತು ವಿನಿಮಯ ಮಾಡಿಕೊಳ್ಳುತ್ತದೆ.",
+    "antigravityRefreshTokenPlaceholder": "1//..."
   },
   "cursorAuthModal": {
     "title": "Cursor ಅನ್ನು ಸಂಪರ್ಕಿಸಿ",
