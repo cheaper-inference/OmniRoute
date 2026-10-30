@@ -54,11 +54,7 @@ test("priority combo walks a 3-target chain: 500 → 503 → success", async () 
     name: "router-3way",
     strategy: "priority",
     config: { maxRetries: 0, retryDelayMs: 0, fallbackDelayMs: 0 },
-    models: [
-      "openai/gpt-4o-mini",
-      "claude/claude-sonnet-4-6",
-      "gemini/gemini-2.5-flash",
-    ],
+    models: ["openai/gpt-4o-mini", "claude/claude-sonnet-4-6", "gemini/gemini-2.5-flash"],
   });
 
   const attempts: string[] = [];
@@ -88,7 +84,11 @@ test("priority combo walks a 3-target chain: 500 → 503 → success", async () 
   };
 
   assert.equal(res.status, 200, "request must succeed on the 3rd target");
-  assert.deepEqual(attempts, ["openai", "claude", "gemini"], "all three targets attempted in order");
+  assert.deepEqual(
+    attempts,
+    ["openai", "claude", "gemini"],
+    "all three targets attempted in order"
+  );
   assert.equal(json.choices[0].message.content, "Third target answered");
 });
 
@@ -161,4 +161,50 @@ test("auto combo selects and dispatches a scored candidate end-to-end", async ()
   assert.equal(res.status, 200, "auto combo must dispatch successfully");
   assert.equal(seen.length, 1, "auto selects exactly one target (no needless fan-out)");
   assert.match(json.choices[0].message.content, /Auto chose (openai|claude)/);
+});
+
+test("protected priority falls back on structured context overflow without changing messages", async () => {
+  await seedConnection("openai", { apiKey: "sk-openai-context" });
+  await combosDb.createCombo({
+    name: "router-context-fit",
+    strategy: "priority",
+    config: { maxRetries: 0, retryDelayMs: 0, fallbackDelayMs: 0 },
+    models: ["openai/gpt-4o-mini", "openai/gpt-4.1"],
+  });
+  const messages = [
+    { role: "system", content: "Preserve this system instruction exactly." },
+    { role: "user", content: "lossless-context-marker" },
+  ];
+  const attempts: Array<Record<string, unknown>> = [];
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async (_input, init) => {
+    const requestBody = JSON.parse(String(init?.body ?? "{}")) as Record<string, unknown>;
+    attempts.push(requestBody);
+    if (attempts.length === 1) {
+      return new Response(
+        JSON.stringify({
+          error: { message: "Bad Request", code: "context_window_exceeded" },
+        }),
+        { status: 400, headers: { "content-type": "application/json" } }
+      );
+    }
+    return buildOpenAIResponse("larger-context-ok", "gpt-4.1");
+  };
+  try {
+    const response = await handleChat(
+      buildRequest({
+        body: { model: "combo/router-context-fit", stream: false, messages },
+      })
+    );
+    assert.equal(response.status, 200);
+    assert.equal(attempts.length, 2, "structured overflow must exclude only the first candidate");
+    assert.deepEqual(attempts[0].messages, messages);
+    assert.deepEqual(attempts[1].messages, messages);
+    const { model: firstModel, ...firstPayload } = attempts[0];
+    const { model: secondModel, ...secondPayload } = attempts[1];
+    assert.notEqual(firstModel, secondModel, "fallback must dispatch the larger target");
+    assert.deepEqual(secondPayload, firstPayload, "fallback must preserve every non-model field");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });

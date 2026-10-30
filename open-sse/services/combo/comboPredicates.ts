@@ -18,7 +18,8 @@ import {
   isModelCapacityOverloadError,
 } from "@/shared/utils/circuitBreaker";
 import {
-  CONTEXT_OVERFLOW_PATTERNS,
+  isContextOverflowText,
+  isTokenRateLimitWording,
   PARAM_VALIDATION_PATTERNS,
   RATE_LIMIT_TEXT_PATTERNS,
   AUTH_CREDENTIAL_ERROR_PATTERNS,
@@ -424,7 +425,7 @@ export function isInputBoundRequestFailure(error?: {
 }): boolean {
   const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
   const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
-  return INPUT_BOUND_ERROR_CODES.has(code) || type === "context_length_exceeded";
+  return INPUT_BOUND_ERROR_CODES.has(code) || INPUT_BOUND_ERROR_CODES.has(type);
 }
 
 /**
@@ -820,12 +821,21 @@ export async function resolvePersistedConnectionCooldownSkipReason(
 export function isContextOverflow400(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
+  if (isTokenRateLimitWording(text)) return false;
   return (
     /\bcontext.*(?:length_exceeded|too long|overflow|exceeded|window|limit)\b/i.test(text) ||
     /exceeds.*context/i.test(text) ||
+    /input exceeds maximum input tokens(?:\s*[,.]|$)/i.test(text) ||
     /your input exceeds/i.test(text) ||
-    CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(text))
+    isContextOverflowText(text)
   );
+}
+
+export function isContextOverflowFailure(
+  errorText: string | null | undefined,
+  error?: { code?: string | null; type?: string | null }
+): boolean {
+  return isInputBoundRequestFailure(error) || isContextOverflow400(errorText);
 }
 
 /** @param {string} errorText */

@@ -64,6 +64,7 @@ import {
   resolveDelayMs,
   resolvePersistedConnectionCooldownSkipReason,
   isModelScoped400,
+  isContextOverflowFailure,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
 import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
@@ -1180,6 +1181,7 @@ export async function executeTargetAttempt(
     const protectedTargetTrust = state.targetFailureTrust.get(target.executionKey);
     if (
       protectedPriorityTarget &&
+      !isContextOverflowFailure(errorText, structuredError) &&
       (!protectedTargetTrust?.observedFailure || !protectedTargetTrust.allObservedFailuresQuota)
     ) {
       recordComboRequest(deps.combo.name, modelStr, {

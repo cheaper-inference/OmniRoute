@@ -1,7 +1,7 @@
 import { HTTP_STATUS } from "../../config/constants.ts";
 import {
   AUTH_CREDENTIAL_ERROR_PATTERNS,
-  CONTEXT_OVERFLOW_PATTERNS,
+  isContextOverflowText,
   MALFORMED_REQUEST_PATTERNS,
   PARAM_VALIDATION_PATTERNS,
   RATE_LIMIT_TEXT_PATTERNS,
@@ -20,7 +20,7 @@ export function isRequestScoped400(status: number, errorText: string): boolean {
   if (RATE_LIMIT_TEXT_PATTERNS.some((p) => p.test(errorText))) return false;
   return (
     PARAM_VALIDATION_PATTERNS.some((p) => p.test(errorText)) ||
-    CONTEXT_OVERFLOW_PATTERNS.some((p) => p.test(errorText)) ||
+    isContextOverflowText(errorText) ||
     MALFORMED_REQUEST_PATTERNS.some((p) => p.test(errorText))
   );
 }
