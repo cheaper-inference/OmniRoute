@@ -12345,6 +12345,42 @@ paths:
       responses:
         "200":
           description: OK
+  /api/provider-intelligence:
+    get:
+      tags:
+        - Intelligence
+      summary: "GET provider intelligence"
+      description: Per-model intelligence scores for a provider's catalog (static registry plus custom models), sorted by score descending. Models without a matching intelligence row are returned with `score` 0. Management-authenticated.
+      parameters:
+        - in: query
+          name: provider
+          required: true
+          schema: { type: string }
+          description: Provider id (e.g. `openai`)
+      responses:
+        "200":
+          description: Array of per-model entries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [modelId, modelName, score, eloRaw, confidence, category, isFree]
+                  properties:
+                    modelId: { type: string }
+                    modelName: { type: string }
+                    score: { type: number, minimum: 0, maximum: 1 }
+                    eloRaw: { type: number, nullable: true }
+                    confidence: { type: string, nullable: true }
+                    category: { type: string }
+                    isFree: { type: boolean }
+        "400":
+          description: Missing `provider` query parameter
+        "401":
+          description: Management authentication required
+        "500":
+          description: Intelligence read failed (sanitized error message)
   /api/provider-metrics:
     get:
       tags:
