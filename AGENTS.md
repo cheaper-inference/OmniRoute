@@ -330,6 +330,10 @@ a service running again — it is **not** a reason for the work to live outside 
   — the highest `release/v*` on origin (`git ls-remote --heads origin 'refs/heads/release/*'`;
   local refs may not have it) — and diff against that. A stale checkout reports already-merged
   code as pending work.
+- **A verification command read from a stale checkout may already have been corrected upstream**,
+  and such a command usually fails _silently_ — returning nothing instead of erroring — so a red
+  base reads as green. Re-check a verification command against the active release branch before
+  trusting what it reports.
 
 Incident 2026-08-15 → 2026-10-29: a build-breaking repair was applied straight to the shared
 checkout, classified "local repair, not feature", and used to regenerate the build serving port
@@ -338,6 +342,12 @@ pending changes, but the repair had already landed upstream as `37d70785c7` (PR 
 2026-08-12 15:58, _after_ the local `HEAD`): of the 88 files triaged, 15 were in that commit, 13
 of them byte-identical, and only 13 were still needed at all. The local `HEAD` was 5,266 commits
 behind `release/v3.8.53`.
+
+The same stale checkout misled the follow-up work on 2026-10-29: its `AGENTS.md` still carried a
+base-green query naming the pre-rename repository, and `gh issue list --search` resolves that to
+nothing rather than following the redirect — so the open `base-red` issue #17219 for
+`release/v3.8.53` read as "no issue" across several sessions, and the failures inherited from the
+base looked like each contributor's own defect.
 
 ### Base-green check (PRs must not be born red)
 
