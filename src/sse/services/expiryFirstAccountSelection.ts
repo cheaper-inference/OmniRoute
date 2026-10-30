@@ -27,7 +27,10 @@ import {
 } from "@omniroute/open-sse/services/combo/quotaScoring.ts";
 
 interface QuotaCacheView {
-  quotas?: Record<string, { remainingPercentage?: number; resetAt?: string | null }>;
+  quotas?: Record<
+    string,
+    { remainingPercentage?: number; resetAt?: string | null; fractionReported?: boolean }
+  >;
 }
 
 interface ExpiryFirstCandidate {
@@ -59,22 +62,37 @@ export function buildConnectionQuotaWindowsView(
   const quotas = (getQuotaCache(connectionId) as QuotaCacheView | null)?.quotas;
   if (!quotas) return null;
 
-  const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
+  const windows: Record<
+    string,
+    { percentUsed: number | null; resetAt: string | null; fractionReported?: false }
+  > = {};
+  let hasReportedWindow = false;
   const windowNames = scope
     ? selectExpiryFirstQuotaWindowNames(Object.keys(quotas), scope)
     : Object.keys(quotas);
   for (const windowName of windowNames) {
     const quota = quotas[windowName];
     if (!quota) continue;
+    if (quota.fractionReported === false) {
+      // Keep reset telemetry without turning the cache's sentinel zero into an
+      // exhausted fraction (or promoting a short session to the deadline).
+      windows[windowName.toLowerCase()] = {
+        percentUsed: null,
+        resetAt: toStringOrNull(quota.resetAt),
+        fractionReported: false,
+      };
+      continue;
+    }
     const remainingPercent = toNumber(quota?.remainingPercentage, Number.NaN);
     if (!Number.isFinite(remainingPercent)) continue;
+    hasReportedWindow = true;
     windows[windowName.toLowerCase()] = {
       percentUsed: Math.min(1, Math.max(0, 1 - remainingPercent / 100)),
       resetAt: toStringOrNull(quota?.resetAt),
     };
   }
 
-  return Object.keys(windows).length > 0 ? { windows } : null;
+  return hasReportedWindow ? { windows } : null;
 }
 
 /**

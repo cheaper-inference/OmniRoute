@@ -186,7 +186,11 @@ function normalizeWindowPercentUsed(value: unknown): number | null {
   return clamp01(numericValue);
 }
 
-type QuotaWindowSnapshot = { percentUsed: number | null; resetAt: string | null };
+type QuotaWindowSnapshot = {
+  percentUsed: number | null;
+  resetAt: string | null;
+  fractionReported?: false;
+};
 
 /**
  * Pick the first candidate that actually carries a reset instant, falling back
@@ -222,8 +226,10 @@ function getNamedQuotaWindow(
 function toWindowSnapshot(window: unknown): QuotaWindowSnapshot | null {
   if (!isRecord(window)) return null;
   return {
-    percentUsed: normalizeWindowPercentUsed(window.percentUsed),
+    percentUsed:
+      window.fractionReported === false ? null : normalizeWindowPercentUsed(window.percentUsed),
     resetAt: normalizeResetAt(window.resetAt),
+    ...(window.fractionReported === false ? { fractionReported: false as const } : {}),
   };
 }
 
@@ -465,23 +471,42 @@ export function scoreExpiryFirstQuota(
     const window = resolveQuotaWindowByName(quota, windowName);
     if (window) windows.push({ key: windowName, window, session: windowName === "session" });
   }
-  if (windows.length === 0) {
+  if (windows.length === 0 || windows.some(({ window }) => window.fractionReported === false)) {
+    // A canonical placeholder must not hide a reported scoped window such as
+    // "weekly sonnet (7d)" or a provider-specific limit (#18552).
+    windows.length = 0;
     for (const { key, window } of getQuotaWindowEntries(quota)) {
-      windows.push({ key, window, session: false });
+      windows.push({ key, window, session: key === "session" || key.startsWith("session ") });
     }
   }
   if (windows.length === 0) return { score: 0 };
+  if (windows.every(({ window }) => window.fractionReported === false)) return { score: 0 };
   const hasLongerWindow = windows.some((entry) => !entry.session);
+  const hasReportedLongerReset = windows.some(
+    ({ window, session }) =>
+      !session &&
+      window.fractionReported !== false &&
+      Number.isFinite(parseResetTimeMs(window.resetAt))
+  );
+  const hasUnreportedLongerReset = windows.some(
+    ({ window, session }) =>
+      !session &&
+      window.fractionReported === false &&
+      Number.isFinite(parseResetTimeMs(window.resetAt))
+  );
 
   let usable = 1;
   let msUntilReset = Number.POSITIVE_INFINITY;
   let msUntilSessionReset = Number.POSITIVE_INFINITY;
   for (const { window, session } of windows) {
+    if (window.fractionReported === false && hasReportedLongerReset) continue;
     const resetMs = parseResetTimeMs(window.resetAt);
     const msLeft = Number.isFinite(resetMs) ? resetMs - nowMs : Number.POSITIVE_INFINITY;
     const capOnly = session && hasLongerWindow;
     if (capOnly && msLeft <= 0) continue;
-    usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
+    if (window.fractionReported !== false) {
+      usable = Math.min(usable, clamp01(1 - (window.percentUsed ?? 0.5)));
+    }
     if (capOnly) msUntilSessionReset = Math.min(msUntilSessionReset, msLeft);
     else msUntilReset = Math.min(msUntilReset, msLeft);
   }
@@ -505,12 +530,17 @@ export function scoreExpiryFirstQuota(
 
   let score = 0;
   let hasReset = false;
-  for (const { key, window } of windows) {
+  for (const { key, window, session } of windows) {
+    if (window.fractionReported === false && hasReportedLongerReset) continue;
+    // An unreported longer reset is a conservative deadline fallback, not
+    // evidence that the session's entire balance must be spent in a few hours.
+    if (session && hasUnreportedLongerReset) continue;
     const resetMs = parseResetTimeMs(window.resetAt);
     if (!Number.isFinite(resetMs)) continue;
     hasReset = true;
     const hours = Math.max(config.minHours, (resetMs - nowMs) / (60 * 60 * 1000));
-    const remaining = clamp01(1 - (window.percentUsed ?? 0.5));
+    const remaining =
+      window.fractionReported === false ? usable : clamp01(1 - (window.percentUsed ?? 0.5));
     const burnRate = Math.max(0, burnRates[key] ?? 0);
     const projectedRemaining = Math.max(0, remaining - burnRate * hours);
     const predictedWaste = Math.min(usable, projectedRemaining);

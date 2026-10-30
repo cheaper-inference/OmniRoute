@@ -467,6 +467,30 @@
       "verifiedBy": "OmniRoute maintainers",
       "summary": "The unauthenticated onomeo /api/info endpoint lists this exact model id in its freeModels field (not in modelsPaused), served with no per-token charge.",
       "limitations": "Metered by calls, not tokens: 30 calls per 5 hours per account (perAccountWindowMax 30, windowMinutes 300) and 12 requests/min per key, inside a site-wide pool shared by all accounts; the pool can be exhausted for everyone. The site is in public beta and the free set and pauses change without notice. Upstream training is per model (modelTraining) and the terms-of-service rating stays at caution. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "nvidia",
+      "modelId": "google/gemma-4-31b-it",
+      "catalogHash": "73f0faff52317136c7f3e7ef3bb07dbbd538437ad86e321b77c61a9f945187c6",
+      "sourceType": "public-page",
+      "sourceUrl": "https://build.nvidia.com/google/gemma-4-31b-it",
+      "checkedAt": "2026-10-30",
+      "claim": "recurring-free-access",
+      "verifiedBy": "alirezariahi",
+      "summary": "The model page advertises a free endpoint. NVIDIA NIM FAQ (https://docs.api.nvidia.com/nim/docs/product) grants Developer Program members free API access for prototyping. The catalog rate-limit notice (https://build.nvidia.com/search) publishes request limits rather than a numeric token allowance.",
+      "limitations": "Requires a registered NVIDIA account and API key. Prototyping/trial use only; no production entitlement, permanent availability, token allowance, guaranteed throughput or billing hard stop is established. Limits vary by model and traffic; trial terms may permit credits. Paid dedicated deployments are separate."
+    },
+    {
+      "provider": "nvidia",
+      "modelId": "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "catalogHash": "73f0faff52317136c7f3e7ef3bb07dbbd538437ad86e321b77c61a9f945187c6",
+      "sourceType": "public-page",
+      "sourceUrl": "https://build.nvidia.com/nvidia/nemotron-3.5-super-vl-120b-a12b",
+      "checkedAt": "2026-10-30",
+      "claim": "recurring-free-access",
+      "verifiedBy": "alirezariahi",
+      "summary": "The model page advertises a free endpoint. NVIDIA NIM FAQ (https://docs.api.nvidia.com/nim/docs/product) grants Developer Program members free API access for prototyping. The catalog rate-limit notice (https://build.nvidia.com/search) publishes request limits rather than a numeric token allowance.",
+      "limitations": "Requires a registered NVIDIA account and API key. Prototyping/trial use only; no production entitlement, permanent availability, token allowance, guaranteed throughput or billing hard stop is established. Limits vary by model and traffic; trial terms may permit credits. Paid dedicated deployments are separate."
     }
   ]
 }

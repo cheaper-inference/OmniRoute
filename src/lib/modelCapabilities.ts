@@ -948,8 +948,8 @@ export function getResolvedModelCapabilities(
   );
   // A persisted context-window override (operator-set or auto-discovered)
   // reflects the real *total* window and wins over every static/synced source.
-  // `maxInputTokens` still follows its own precedence chain; only when that
-  // chain has no narrower source does it naturally fall back to this window.
+  // It also replaces stale catalog/synced input hints. A separately configured
+  // max_input_tokens override remains the operator's input-only ceiling.
   const persistedContextWindow = usePersistedOverrides
     ? getContextOverride(resolved, snapshot)
     : null;
@@ -1064,6 +1064,7 @@ export function getResolvedModelCapabilities(
       // output against this input cap.
       const candidate =
         maxInputOverride ??
+        persistedContextWindow ??
         (typeof registryModel?.maxInputTokens === "number" ? registryModel.maxInputTokens : null) ??
         authoritativeContextWindow ??
         synced?.limit_input ??
@@ -1111,8 +1112,9 @@ export function getResolvedModelCapabilities(
  *   must never be bypassed by a context-window override.
  * - Otherwise, for a COMBO request with an exact persisted context override, that
  *   context override is the input cap (it reflects the real window; the smaller
- *   catalog hint does not apply). Direct requests ignore this branch.
- * - Otherwise the canonical `maxInputTokens` chain applies (registry input hint →
+ *   catalog hint does not apply). Direct requests use the same override through
+ *   the canonical maxInputTokens resolver below.
+ * - Otherwise the canonical `maxInputTokens` chain applies (context override → registry input hint →
  *   authoritative window → synced limit_input → total window), clamped to the
  *   total window.
  *
