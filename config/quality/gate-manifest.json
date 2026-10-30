@@ -610,7 +610,7 @@
     },
     {
       "name": "test:property",
-      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+      "command": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/correctness/*.property.test.ts",
       "disposition": "separately-invoked"
     },
     {

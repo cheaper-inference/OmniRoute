@@ -153,7 +153,7 @@
     "test:plan3": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/plan3-p0.test.ts",
     "test:fixes": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/fixes-p1.test.ts",
     "test:security": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test tests/unit/security-fase01.test.ts",
-    "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --test --test-force-exit tests/unit/correctness/*.property.test.ts",
+    "test:property": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --import tsx/esm --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit tests/unit/correctness/*.property.test.ts",
     "check:boundary": "node scripts/quality/measure-boundary.mjs",
     "check:boundary:ratchet": "node scripts/quality/measure-boundary.mjs --ratchet",
     "check:cycles": "node scripts/check/check-cycles.mjs",
