@@ -1,0 +1,1 @@
+- Honor enabled stream recovery for structured transport read failures before usable combo output, with bounded retries and client cancellation cleanup. First-output inspection limits conservatively prevent a new transport retry.

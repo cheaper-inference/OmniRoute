@@ -5,6 +5,7 @@
  *
  * @internal — not part of the public combo.ts barrel.
  */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
   classifyLockoutReason,
@@ -114,6 +115,7 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
@@ -146,6 +148,9 @@ export async function executeTargetAttempt(
   // this loop's existing retry on a sibling connection with no lockout. Off = release path.
   const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
   let emptyTurnConnectionId: string | null = null;
+  const preContentTransportRecovery =
+    deps.clientRequestedStream && deps.resilienceSettings.streamRecovery.enabled === true;
+  let encounteredTransportReadFailure = false;
   // Retry loop for transient errors
   for (let retry = 0; retry <= deps.maxRetries; retry++) {
     // Fix #1681: Bail out immediately if the client has disconnected
@@ -200,17 +205,20 @@ export async function executeTargetAttempt(
         "COMBO",
         `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
       );
-      await new Promise((resolve) => {
-        const timer = setTimeout(resolve, retryDelayMs);
-        deps.signal?.addEventListener(
-          "abort",
-          () => {
-            clearTimeout(timer);
-            resolve(undefined);
-          },
-          { once: true }
-        );
-      });
+      if (encounteredTransportReadFailure) {
+        await waitForCooldownAwareRetry(retryDelayMs, deps.signal);
+      } else
+        await new Promise((resolve) => {
+          const timer = setTimeout(resolve, retryDelayMs);
+          deps.signal?.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(timer);
+              resolve(undefined);
+            },
+            { once: true }
+          );
+        });
       if (deps.signal?.aborted) {
         deps.log.info("COMBO", `Client disconnected during retry delay — aborting`);
         return { ok: false, response: errorResponse(499, "Client disconnected") };
@@ -341,6 +349,9 @@ export async function executeTargetAttempt(
           : "",
       fingerprint: resolveTargetFingerprint(target) ?? "",
     });
+    if (preContentTransportRecovery && deps.signal?.aborted) {
+      return { ok: false, response: errorResponse(499, "Client disconnected") };
+    }
     // #10681: record dispatch once per target (retries keep the first decision).
     if (!state.dispatchedTargets.has(target.executionKey)) {
       state.dispatchedTargets.add(target.executionKey);
@@ -356,6 +367,11 @@ export async function executeTargetAttempt(
       effectiveComboStrategy: deps.strategy,
       failoverBeforeRetry: deps.config.failoverBeforeRetry,
     });
+
+    if (preContentTransportRecovery && deps.signal?.aborted) {
+      releaseRejectedQualityResponse(result, result);
+      return { ok: false, response: errorResponse(499, "Client disconnected") };
+    }
 
     // Success — validate response quality before returning
     if (result.ok) {
@@ -381,21 +397,23 @@ export async function executeTargetAttempt(
       // Clone BEFORE quality check — validateResponseQuality reads the body
       // via getReader() which locks the stream. The clone's body is consumed
       // by the quality check; the original stays unlocked for piping.
-      let qualityClone: Response;
-      try {
-        qualityClone = result.clone();
-      } catch {
-        qualityClone = result;
-      }
+      const qualityClone = cloneForQuality(result);
       const quality = await validateResponseQuality(
         qualityClone,
         deps.clientRequestedStream,
         deps.log,
         deps.config.responseValidation as ResponseValidationConfig | null | undefined,
-        null,
-        await isTrustedEmptyTurn(provider, result, target.connectionId)
+        preContentTransportRecovery ? deps.signal : null,
+        await isTrustedEmptyTurn(provider, result, target.connectionId),
+        preContentTransportRecovery
       );
       releaseQualityClone(qualityClone, result, quality);
+      if (preContentTransportRecovery && deps.signal?.aborted) {
+        void quality.clonedResponse?.body?.cancel().catch(() => {});
+        releaseRejectedQualityResponse(qualityClone, result);
+        return { ok: false, response: errorResponse(499, "Client disconnected") };
+      }
+      encounteredTransportReadFailure ||= quality.upstreamFailure?.transportReadFailure === true;
       if (!quality.valid) {
         releaseRejectedQualityResponse(qualityClone, result);
         deps.log.warn(

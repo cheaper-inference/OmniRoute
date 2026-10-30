@@ -1,4 +1,5 @@
 /** Round-robin combo dispatcher. Lift-as-is from combo.ts. @internal */
+import { cloneForQuality } from "./preContentTransportFailure.ts";
 import {
   checkFallbackError,
   decayModelFailureCount,
@@ -116,6 +117,7 @@ import {
   isEarlyEofResponse,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { waitForCooldownAwareRetry } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { getCachedProviderConnectionById } from "../../../src/lib/db/readCache.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
@@ -490,7 +492,11 @@ export async function handleRoundRobinCombo({
   // #16438 opt-in (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): empty_content sibling retry,
   // abort-aware retry delay and the early-EOF provider-cooldown skip. Off = release path.
   const emptyStreamSiblingRecovery = isEmptyStreamSiblingRecoveryEnabled();
-  const clientGone = () => emptyStreamSiblingRecovery && signal?.aborted === true;
+  const preContentTransportRecovery =
+    clientRequestedStream && resilienceSettings.streamRecovery.enabled === true;
+  let encounteredTransportReadFailure = false;
+  const clientGone = () =>
+    (emptyStreamSiblingRecovery || preContentTransportRecovery) && signal?.aborted === true;
 
   const retryEmptyContent = ({
     response,
@@ -752,7 +758,9 @@ export async function handleRoundRobinCombo({
               "COMBO-RR",
               `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${maxRetries + 1})`
             );
-            if (emptyStreamSiblingRecovery) {
+            if (encounteredTransportReadFailure) {
+              await waitForCooldownAwareRetry(retryDelayMs, signal);
+            } else if (emptyStreamSiblingRecovery) {
               await new Promise<void>((resolve) => {
                 const finish = () => {
                   clearTimeout(timer);
@@ -814,6 +822,8 @@ export async function handleRoundRobinCombo({
             fingerprint: resolveTargetFingerprint(target) ?? "",
           });
 
+          if (preContentTransportRecovery && signal?.aborted)
+            return errorResponse(499, "Client disconnected");
           rrEvents.attempt();
           const result = await Promise.race([
             handleSingleModel(attemptBody, modelStr, {
@@ -824,6 +834,10 @@ export async function handleRoundRobinCombo({
             }),
             rrSafetyPromise,
           ]);
+          if (preContentTransportRecovery && signal?.aborted) {
+            releaseRejectedQualityResponse(result, result);
+            return errorResponse(499, "Client disconnected");
+          }
           if (rrExpired) return result; // G4: safety timer won — stop everything
 
           // Quota-aware scheduling: reserve the estimated budget for this
@@ -847,21 +861,24 @@ export async function handleRoundRobinCombo({
 
           // Success — validate response quality before returning
           if (result.ok) {
-            let rrClone: Response;
-            try {
-              rrClone = result.clone();
-            } catch {
-              rrClone = result;
-            }
+            const rrClone = cloneForQuality(result);
             const quality = await validateResponseQuality(
               rrClone,
               clientRequestedStream,
               log,
               config.responseValidation,
-              null,
-              await isTrustedEmptyTurn(provider, result, targetForAttempt.connectionId)
+              preContentTransportRecovery ? signal : null,
+              await isTrustedEmptyTurn(provider, result, targetForAttempt.connectionId),
+              preContentTransportRecovery
             );
             releaseQualityClone(rrClone, result, quality);
+            if (preContentTransportRecovery && signal?.aborted) {
+              void quality.clonedResponse?.body?.cancel().catch(() => {});
+              releaseRejectedQualityResponse(rrClone, result);
+              return errorResponse(499, "Client disconnected");
+            }
+            encounteredTransportReadFailure ||=
+              quality.upstreamFailure?.transportReadFailure === true;
             if (!quality.valid) {
               releaseRejectedQualityResponse(rrClone, result);
               log.warn(
