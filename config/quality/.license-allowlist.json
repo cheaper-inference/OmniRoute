@@ -110,6 +110,12 @@
       "justification": "SIL Open Font License 1.1 covers only the font files shipped by @fontsource/inter (self-hosted dashboard typography added by the Keak CI UI Kit migration, KEA-7886). OFL-1.1 permits bundling, embedding and redistribution of the fonts with software of any license as long as the fonts themselves are not sold on their own and keep their notices; it places no copyleft or attribution requirement on OmniRoute's code. The fonts are served as static assets, never modified.",
       "risk": "low",
       "reviewAt": "v4.0.0"
+    },
+    "gsap": {
+      "license": "Custom: https://gsap.com/standard-license.",
+      "justification": "GSAP's non-SPDX Standard 'no charge' license (https://gsap.com/standard-license) grants free use, including commercial use, of the core and every bonus plugin. It carries no copyleft and places no obligation on OmniRoute's own MIT code. The one restriction is that GSAP may not be used in a product that competes with Webflow's visual animation tools; a dashboard UI does not. GSAP is installed from the npm registry and is not vendored or modified.",
+      "risk": "low",
+      "reviewAt": "v4.0.0"
     }
   }
 }
