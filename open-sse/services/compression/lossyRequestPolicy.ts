@@ -1,5 +1,6 @@
 import { isSafeDefault } from "./engineCatalog.ts";
 import type { DerivedPlan } from "./deriveDefaultPlan.ts";
+import type { CompressionPipelineStep } from "./types.ts";
 
 /**
  * HouMinXi's plan for the default path: dedup and whitespace folding stay on.
@@ -40,13 +41,20 @@ export function headerOptsIntoLossy(header: string | null, plan: DerivedPlan): b
   return plan.source === "request-header";
 }
 
-/** Replace lossy steps with dedup + whitespace folding unless the request opted in. */
-export function applyLossyRequestPolicy(plan: DerivedPlan, header: string | null): DerivedPlan {
+/** Replace lossy steps with a safe configured pipeline unless the request opted in. */
+export function applyLossyRequestPolicy(
+  plan: DerivedPlan,
+  header: string | null,
+  configuredPipeline?: readonly CompressionPipelineStep[]
+): DerivedPlan {
   if (headerOptsIntoLossy(header, plan)) return plan;
-  return downgradeUnrequestedLossy(plan);
+  return downgradeUnrequestedLossy(plan, configuredPipeline);
 }
 
-export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
+export function downgradeUnrequestedLossy(
+  plan: DerivedPlan,
+  configuredPipeline?: readonly CompressionPipelineStep[]
+): DerivedPlan {
   if (plan.mode === "off") return plan;
 
   if (plan.mode === "stacked") {
@@ -60,10 +68,11 @@ export function downgradeUnrequestedLossy(plan: DerivedPlan): DerivedPlan {
   }
 
   if (LOSSY_SINGLE_MODES.has(plan.mode)) {
+    const kept = (configuredPipeline ?? []).filter((step) => isSafeEngine(step.engine));
     return {
       ...plan,
       mode: "stacked",
-      stackedPipeline: [...SAFE_DEFAULT_PIPELINE],
+      stackedPipeline: kept.length > 0 ? kept : [...SAFE_DEFAULT_PIPELINE],
     };
   }
 

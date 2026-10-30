@@ -235,13 +235,19 @@ turn it on. Values:
 | ------------- | ------------------------------------------------------------------------------------------------ |
 | `off`         | No compression for this request.                                                                 |
 | `default`     | The panel-derived Default profile (ignores the active profile). Lossy engines are left off.      |
-| `safe`        | Same as omitting the header: dedup and whitespace folding only.                                  |
+| `safe`        | Force the historical safe fallback: dedup and whitespace folding only.                           |
 | `allow-lossy` | Keep this request's operator plan, including summaries, relevance filters, and style rewrites.   |
 | `engine:<id>` | A single engine when enabled, e.g. `engine:rtk`. This is the per-request opt-in for that engine. |
 | `<combo>`     | A named combo, matched by name (case-insensitive) first, then by id.                             |
 
-Without `allow-lossy`, `engine:<id>`, or a named combo, lossy engines are not applied. The
-request still gets session dedup and whitespace folding when compression is on.
+Without `allow-lossy`, `engine:<id>`, or a named combo, lossy engines are not applied. When a
+lossy Default, auto-trigger, or routing override is downgraded, OmniRoute keeps the recognized
+lossless steps from the configured stacked pipeline in configured order. It falls back to
+`session-dedup → lite` only when no configured lossless step survives.
+
+The Settings panel's **Effective pipeline** preview shows the ordinary at-rest plan. When an
+auto-trigger can run, the same preview also shows its conditional effective pipeline so the panel
+and header-less runtime resolution stay aligned.
 
 The applied plan is echoed back in the `X-OmniRoute-Compression: <mode>; source=<source>` response
 header, where `<source>` is one of `request-header`, `routing-override`, `active-profile`,
