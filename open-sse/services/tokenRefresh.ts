@@ -46,6 +46,7 @@ import {
 import { refreshCodebuddyCnToken } from "./tokenRefresh/providers/codebuddyCn.ts";
 import { refreshCodebuddyIntlToken } from "./tokenRefresh/providers/codebuddyIntl.ts";
 import { refreshWorkbuddyToken } from "./tokenRefresh/providers/workbuddy.ts";
+import { refreshDevinDesktopToken } from "./tokenRefresh/providers/devinDesktop.ts";
 import { refreshClineToken } from "./tokenRefresh/providers/cline.ts";
 import { refreshKimiCodingToken } from "./tokenRefresh/providers/kimiCoding.ts";
 import { refreshMuseCodeToken } from "./tokenRefresh/providers/museCode.ts";
@@ -489,6 +490,20 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "workbuddy":
       return await refreshWorkbuddyToken(credentials.refreshToken, log, proxyConfig);
 
+    case "devin-desktop": {
+      // Only password-login connections carry an auth1 token. An import-token
+      // connection returns null here, which the caller already treats as
+      // "not refreshable" — the behaviour these connections had before.
+      const refreshed = await refreshDevinDesktopToken(credentials.providerSpecificData, log);
+      if (!refreshed) return null;
+      return {
+        accessToken: refreshed.accessToken,
+        refreshToken: credentials.refreshToken,
+        expiresIn: null,
+        providerSpecificData: refreshed.providerSpecificData,
+      };
+    }
+
     default:
       // Fallback to generic OAuth refresh for unknown providers
       return refreshAccessToken(provider, credentials.refreshToken, credentials, log, proxyConfig);
@@ -513,11 +528,14 @@ export function supportsTokenRefresh(provider) {
     "cline",
     "kimi-coding",
     "muse-code",
-    // Devin auth is not refreshable here: devin-desktop accepts an imported API
-    // key (#8228), while devin-cli is local-CLI owned via `devin auth login`
-    // (#8407). Neither connection carries a refresh token, so listing either
-    // provider would make tokenHealthCheck force a healthy connection to
-    // testStatus="expired" / errorCode="no_refresh_token".
+    // Devin: devin-cli is local-CLI owned via `devin auth login` (#8407) and has
+    // no refresh token. devin-desktop accepts an imported API key (#8228) with
+    // no refresh token either — but a connection created by the Devin Auth
+    // password login DOES carry a long-lived auth1 token, and
+    // refreshDevinDesktopToken exchanges it for a fresh ide_token. Listing it is
+    // safe: connections without auth1 return null instead of forcing a healthy
+    // row to testStatus="expired" / errorCode="no_refresh_token".
+    "devin-desktop",
     "gitlab-duo",
     "codebuddy-cn",
     "codebuddy-intl",
