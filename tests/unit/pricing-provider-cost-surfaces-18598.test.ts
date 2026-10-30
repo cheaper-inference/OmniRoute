@@ -13,6 +13,9 @@ import { buildOmniRouteResponseMetaHeaders } from "../../src/domain/omnirouteRes
 import { createSSEStream } from "../../open-sse/utils/stream.ts";
 import { normalizeUsage } from "../../open-sse/utils/usageTracking.ts";
 import * as pricingRoute from "../../src/app/api/pricing/route.ts";
+import { saveRequestUsage, getUsageHistory } from "../../src/lib/usage/usageHistory.ts";
+import { getUsageStats } from "../../src/lib/usage/usageStats.ts";
+import { getApiKeyUsageLimitStatus } from "../../src/lib/usage/apiKeyUsageLimits.ts";
 
 const GLM = { input: 1.4, output: 4.4, cached: 0.26 };
 const TOKENS = { input: 1_000, output: 100 };
@@ -55,6 +58,7 @@ test.beforeEach(() => {
     )
     .run();
   invalidateDbCache("pricing");
+  getDbInstance().prepare("DELETE FROM usage_history").run();
 });
 test.after(() => resetDbInstance());
 
@@ -238,7 +242,11 @@ test("supported partial Go PATCH invalidates warm lookups, survives sync, and re
 
 test("partial models.dev and user overrides preserve legacy fields equally in catalog and cost", async () => {
   seedLegacy();
-  saveModelsDevPricing({ "opencode-go": { "glm-5.2": { input: 2 } } });
+  // The persisted layer supports partial rows; the sync writer's typed input is complete.
+  getDbInstance()
+    .prepare("INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run("models_dev_pricing", "opencode-go", JSON.stringify({ "glm-5.2": { input: 2 } }));
+  invalidateDbCache("pricing");
   await patchPricing({ "opencode-go": { "glm-5.2": { cached: 0 } } });
   const expected = { input: 2, output: 4.4, cached: 0 };
   assert.deepEqual(await getPricingForModel("opencode-go", "glm-5.2"), expected);
@@ -267,4 +275,104 @@ test("a genuinely free row is priced while missing cloud pricing is not", async 
     costUsd: 0,
     priced: false,
   });
+});
+
+test("local Ollama free entries and Go tariffs never price an unpriced Ollama Cloud model", async () => {
+  getDbInstance()
+    .prepare("INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "pricing_synced",
+      "ollama",
+      JSON.stringify({ "deepseek-v4.1-flash": { input: 0, output: 0 } })
+    );
+  getDbInstance()
+    .prepare("INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "pricing_synced",
+      "opencode_go",
+      JSON.stringify({ "deepseek-v4.1-flash": { input: 0.3, output: 1.2, cached: 0.006 } })
+    );
+  invalidateDbCache("pricing");
+  for (const provider of ["ollama-cloud", "ollamacloud"]) {
+    assert.equal(await getPricingForModel(provider, "deepseek-v4.1-flash"), null);
+    assert.deepEqual(await calculateCostDetailed(provider, "deepseek-v4.1-flash", TOKENS), {
+      costUsd: 0,
+      priced: false,
+    });
+  }
+});
+
+test("synthetic cloud override prices and attributes metered usage, then resets to unpriced", async () => {
+  // SYNTHETIC test-only tariff: not an authoritative Ollama rate or a shipped default.
+  await patchPricing({ "ollama-cloud": { "deepseek-v4.1-flash": { input: 1, output: 2 } } });
+  for (const provider of ["ollama-cloud", "ollamacloud"]) {
+    assert.deepEqual(await getPricingForModel(provider, "deepseek-v4.1-flash"), {
+      input: 1,
+      output: 2,
+    });
+    const cost = await calculateCostDetailed(provider, "deepseek-v4.1-flash", TOKENS);
+    assert.equal(cost.priced, true);
+    assertCost(cost.costUsd, 0.0012);
+    assertCost(meteredBudgetCost(provider, cost.costUsd), 0.0012);
+  }
+  assert.deepEqual(catalogPricing("deepseek-v4.1-flash", "ollama-cloud"), { input: 1, output: 2 });
+  const timestamp = "2026-10-30T20:00:00.000Z";
+  await saveRequestUsage({
+    provider: "ollama-cloud",
+    model: "deepseek-v4.1-flash",
+    apiKeyId: "synthetic-cloud-key-18598",
+    apiKeyName: "Synthetic cloud key",
+    tokens: TOKENS,
+    success: true,
+    timestamp,
+  });
+  const history = await getUsageHistory({ provider: "ollama-cloud", model: "deepseek-v4.1-flash" });
+  assert.equal(history.length, 1);
+  assert.equal(history[0].apiKeyId, "synthetic-cloud-key-18598");
+  assert.equal(history[0].provider, "ollama-cloud");
+  assert.equal(history[0].model, "deepseek-v4.1-flash");
+  assert.equal(history[0].tokens.input, 1_000);
+  assert.equal(history[0].tokens.output, 100);
+  const stats = await getUsageStats();
+  for (const bucket of [
+    stats.byProvider["ollama-cloud"],
+    stats.byModel["deepseek-v4.1-flash (ollama-cloud)"],
+    Object.values(stats.byApiKey).find((b) => b.apiKeyId === "synthetic-cloud-key-18598"),
+  ]) {
+    assert.ok(bucket);
+    assert.equal(bucket.requests, 1);
+    assert.equal(bucket.promptTokens, 1_000);
+    assert.equal(bucket.completionTokens, 100);
+    assertCost(bucket.cost, 0.0012);
+  }
+  const metadata = {
+    id: "synthetic-cloud-key-18598",
+    usageLimitEnabled: true,
+    dailyUsageLimitUsd: 1,
+  };
+  const deps = {
+    now: () => Date.parse(timestamp),
+    getProviderConnections: async () => [],
+    getAllProviderLimitsCache: () => ({}),
+    getUnpricedUsagePolicy: () => "fail_closed" as const,
+  };
+  const priced = await getApiKeyUsageLimitStatus(metadata, deps);
+  assertCost(priced.dailySpentUsd, 0.0012);
+  assert.equal(priced.dailyHasUnpricedUsage, false);
+  assert.equal(
+    (
+      await pricingRoute.DELETE(
+        new Request(
+          "http://localhost/api/pricing?provider=ollama-cloud&model=deepseek-v4.1-flash",
+          { method: "DELETE" }
+        )
+      )
+    ).status,
+    200
+  );
+  assert.equal(await getPricingForModel("ollama-cloud", "deepseek-v4.1-flash"), null);
+  assert.equal(await getPricingForModel("ollamacloud", "deepseek-v4.1-flash"), null);
+  const unpriced = await getApiKeyUsageLimitStatus(metadata, deps);
+  assert.equal(unpriced.dailyHasUnpricedUsage, true);
+  assert.equal(unpriced.dailyExceeded, true);
 });
