@@ -31,6 +31,11 @@ import { buildOpencodeBackgroundHeaders } from "@omniroute/open-sse/utils/openco
 import { CODEBUDDY_CN_USER_AGENT } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { applyConnectionCustomHeaders } from "./connectionCustomHeaders";
+import {
+  CLOUDFLARE_MODELS_SEARCH_URL,
+  nextCloudflareModelsPageUrl,
+  parseCloudflareModelsSearch,
+} from "./cloudflareModels";
 import { buildChatPlaygroundModelsDiscoveryEntry } from "@omniroute/open-sse/services/chatplaygroundModels.ts";
 import {
   normalizeCodeBuddyCnModelsResponse,
@@ -148,6 +153,11 @@ export type ProviderModelsConfigEntry = {
     connection?: ProviderModelsHeaderContext
   ) => Record<string, string>;
   parseResponse: (data: any) => any;
+  /**
+   * Page-numbered pagination: returns the next page URL derived from the current
+   * one, or null on the last page. Without it only `nextPageToken` is followed.
+   */
+  nextPageUrl?: (data: any, currentUrl: string) => string | null;
 };
 
 export function assembleProviderModelsHeaders(
@@ -952,7 +962,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     },
   },
   "cloudflare-ai": {
-    url: "https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/models/search",
+    url: CLOUDFLARE_MODELS_SEARCH_URL,
     method: "GET",
     headers: { "Content-Type": "application/json" },
     authHeader: "Authorization",
@@ -960,20 +970,9 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     // #4259: Cloudflare's `/ai/models/search` returns `{ id: "<uuid>", name: "@cf/..." }`.
     // `name` is the usable model slug; `id` is an internal UUID. Map `name`→id so the
     // dashboard/import surfaces callable model ids (`@cf/...`) instead of UUIDs.
-    parseResponse: (data) =>
-      (data.result || [])
-        .map((model: any) => {
-          const slug = typeof model?.name === "string" ? model.name : "";
-          if (!slug) return null;
-          return {
-            id: slug,
-            name: slug,
-            ...(typeof model?.description === "string" && model.description
-              ? { description: model.description }
-              : {}),
-          };
-        })
-        .filter(Boolean),
+    // The search is page-numbered and also lists embeddings/speech/classifiers.
+    parseResponse: parseCloudflareModelsSearch,
+    nextPageUrl: nextCloudflareModelsPageUrl,
   },
   synthetic: {
     url: "https://api.synthetic.new/openai/v1/models",

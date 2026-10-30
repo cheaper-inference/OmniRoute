@@ -1,0 +1,1 @@
+- **feat(providers):** Cloudflare Workers AI model discovery reads every page of the catalog and leaves embeddings, speech, classifier and guard models out of the chat list ([#18321](https://github.com/cheaper-inference/OmniRoute/pull/18321)) — thanks @askidmobile

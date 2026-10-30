@@ -2485,6 +2485,7 @@ export async function GET(
     let pageCount = 0;
     const MAX_PAGES = 20; // Safety limit
     const seenTokens = new Set<string>();
+    const seenPageUrls = new Set<string>([url]);
 
     while (pageUrl && pageCount < MAX_PAGES) {
       pageCount++;
@@ -2529,6 +2530,14 @@ export async function GET(
       }
       allModels = allModels.concat(pageModels);
 
+      if (config.nextPageUrl) {
+        const nextUrl = config.nextPageUrl(data, pageUrl);
+        if (!nextUrl || seenPageUrls.has(nextUrl)) break;
+        seenPageUrls.add(nextUrl);
+        pageUrl = nextUrl;
+        continue;
+      }
+
       const nextPageToken = data.nextPageToken;
       if (!nextPageToken) break;
       if (seenTokens.has(nextPageToken)) {
@@ -2540,6 +2549,16 @@ export async function GET(
       if (config.authQuery) {
         pageUrl += `&${config.authQuery}=${token}`;
       }
+    }
+
+    if (config.nextPageUrl && pageCount > 1) {
+      // Page-numbered listings can shift while being walked; keep the first row per id.
+      const seenIds = new Set<unknown>();
+      allModels = allModels.filter((model) => {
+        if (seenIds.has(model?.id)) return false;
+        seenIds.add(model?.id);
+        return true;
+      });
     }
 
     if (pageCount > 1) {
