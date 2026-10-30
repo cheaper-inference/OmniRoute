@@ -208,8 +208,14 @@ export function registerSetupKilo(program) {
       "--allow-container-write",
       "Write even when the target is inside a container and not mounted from the host"
     )
-    .action(async (opts) => {
-      const code = await runSetupKiloCommand(opts);
+    .action(async (opts, cmd) => {
+      // The program-level --api-key (bin/cli/program.mjs, bound to
+      // OMNIROUTE_API_KEY) wins the flag wherever it appears in argv, so this
+      // local option's own opts.apiKey never sees it. Same fix as setup-opencode.
+      const code = await runSetupKiloCommand({
+        ...opts,
+        apiKey: cmd.optsWithGlobals().apiKey ?? opts.apiKey,
+      });
       if (code !== 0) process.exit(code);
     });
 }
