@@ -130,6 +130,7 @@ interface KeyUsageStats {
 
 export default function ApiManagerPageClient() {
   const t = useTranslations("apiManager");
+  const tt = useTranslations("tokenLimits");
   const tc = useTranslations("common");
   const locale = useLocale();
   const newKeyNameInputId = useId();
@@ -982,6 +983,12 @@ export default function ApiManagerPageClient() {
                         {stats?.totalRequests ?? 0}{" "}
                         <span className="text-text-muted font-normal text-xs">{t("reqs")}</span>
                       </span>
+                      <Link
+                        href={`/dashboard/api-manager/${encodeURIComponent(key.id)}/access?tab=limits`}
+                        className="text-xs text-primary underline underline-offset-4"
+                      >
+                        {tt("title")}
+                      </Link>
                       {(stats?.totalRequests ?? 0) > 0 && (
                         <span className="text-[10px] text-success tabular-nums">
                           {formatUsdCost(stats?.totalCost ?? 0, locale)}

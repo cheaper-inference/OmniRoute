@@ -13,13 +13,13 @@ import { NextResponse } from "next/server";
 import { setTokenLimitSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import { getCurrentWindowUsage } from "@omniroute/open-sse/services/tokenLimitCounter";
 
 import {
   TokenLimit,
   listTokenLimits,
   upsertTokenLimit,
   deleteTokenLimit,
-  getWindowUsage,
   resetWindowIfElapsed,
   TokenLimitConflictError,
   TokenLimitNotFoundError,
@@ -34,9 +34,10 @@ export async function GET(request: Request) {
         status: 400,
       });
     }
+    const now = Date.now();
     const limits = listTokenLimits(apiKeyId).map((limit: TokenLimit) => {
-      const usage = getWindowUsage(limit);
-      const window = resetWindowIfElapsed(limit);
+      const usage = getCurrentWindowUsage(limit, now, true);
+      const window = resetWindowIfElapsed(limit, now);
       return {
         ...limit,
         tokensUsed: usage,

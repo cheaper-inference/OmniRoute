@@ -7,10 +7,12 @@ import { useId } from "react";
 import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
 import { UsageLimitSettings } from "@/app/(dashboard)/dashboard/api-manager/components/UsageLimitSettings";
+import TokenLimitSettings from "@/app/(dashboard)/dashboard/api-manager/components/TokenLimitSettings";
 import type { ApiKeyAccessFormState } from "../useApiKeyAccessForm";
 import TabErrorList from "./TabErrorList";
 
 interface LimitsTabProps {
+  apiKeyId: string;
   formState: ApiKeyAccessFormState;
   setMaxSessions: (sessions: number) => void;
   setThrottleDelayMs: (delay: number) => void;
@@ -289,6 +291,7 @@ function AccessScheduleSection({
 }
 
 export default function LimitsTab({
+  apiKeyId,
   formState,
   setMaxSessions,
   setThrottleDelayMs,
@@ -310,6 +313,7 @@ export default function LimitsTab({
   return (
     <div className="flex flex-col gap-5">
       <TabErrorList errors={errors} />
+      <TokenLimitSettings key={apiKeyId} apiKeyId={apiKeyId} />
 
       {/* Max Sessions Limit (T08) */}
       <MaxSessionsField formState={formState} setMaxSessions={setMaxSessions} />

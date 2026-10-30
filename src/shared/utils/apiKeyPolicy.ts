@@ -800,7 +800,10 @@ function validateTokenLimit(context: PolicyContext): Response | null {
     if (!breach) return null;
     const scopeLabel =
       breach.scopeType === "global" ? "account" : `${breach.scopeType} "${breach.scopeValue}"`;
-    const resetSuffix = formatResetDurationSuffix(breach.nextResetAt) || "Please try again later.";
+    const resetSuffix =
+      breach.nextResetAt === null
+        ? "This credit does not renew automatically. Contact the administrator to increase the allowance."
+        : formatResetDurationSuffix(breach.nextResetAt) || "Please try again later.";
     return errorResponse(
       HTTP_STATUS.RATE_LIMITED,
       `Token limit exceeded for ${scopeLabel}: ${breach.tokensUsed}/${breach.limitValue} tokens used in the current window. ${resetSuffix}`,
