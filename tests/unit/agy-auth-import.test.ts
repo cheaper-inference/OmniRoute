@@ -109,13 +109,21 @@ async function withIsolatedHome(fn: (home: string) => Promise<void>) {
   const os = await import("os");
   const path = await import("path");
   const home = await fs.mkdtemp(path.join(os.tmpdir(), "agy-home-"));
-  const keys = ["HOME", "USERPROFILE", "XDG_CONFIG_HOME", "APPDATA", "AGY_TOKEN_FILE"] as const;
+  const keys = [
+    "HOME",
+    "USERPROFILE",
+    "XDG_CONFIG_HOME",
+    "APPDATA",
+    "AGY_TOKEN_FILE",
+    "DBUS_SESSION_BUS_ADDRESS",
+  ] as const;
   const saved = Object.fromEntries(keys.map((k) => [k, process.env[k]]));
   process.env.HOME = home;
   process.env.USERPROFILE = home;
   process.env.XDG_CONFIG_HOME = path.join(home, ".config");
   process.env.APPDATA = path.join(home, "AppData", "Roaming");
   delete process.env.AGY_TOKEN_FILE;
+  process.env.DBUS_SESSION_BUS_ADDRESS = "disabled-in-test";
   try {
     await fn(home);
   } finally {

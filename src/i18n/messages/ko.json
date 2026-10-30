@@ -5942,7 +5942,7 @@
     "agyImportLocalHeading": "활성 세션 자동 감지",
     "agyImportLocalIntro": "다음에서 활성 Google Cloud Code / Antigravity CLI 로그인을 감지합니다.",
     "agyImportLocalSourceEnv": "AGY_TOKEN_FILE 환경 변수로 명명된 토큰 파일",
-    "agyImportLocalSourceKeyring": "Linux Secret Service / 열쇠 고리 (service=gemini, user=antigravity)",
+    "agyImportLocalSourceKeyring": "Linux Secret Service / 키링 (service=gemini, user=antigravity)",
     "agyImportLocalSourceCli": "로컬 CLI 토큰 프로필(~/.gemini/antigravity-cli/)",
     "agyImportLocalNote": "브라우저 로그인, 팝업 또는 수동 OAuth 코드 복사가 필요하지 않습니다. CLI 에서 로그아웃하더라도 토큰은 OmniRoute 에 유지됩니다.",
     "agyImportLocalOverwrite": "이미 가져온 경우 기존 연결 바꾸기/새로 고침",
