@@ -4,7 +4,9 @@
 // Órfão novo → fail; entrada de baseline que deixou de ser órfã → fail (stale).
 import { test } from "node:test";
 import assert from "node:assert";
+import fs from "node:fs";
 import {
+  COLLECTORS,
   globToRegExp,
   findOrphans,
   evaluateAgainstBaseline,
@@ -84,6 +86,32 @@ test("findCollectorDrift: glob declarado deve aparecer textualmente em TODAS as 
   assert.equal(drift.length, 1);
   assert.match(drift[0], /ci\.yml/);
   assert.match(drift[0], /tests\/unit\/\*\.test\.ts/);
+});
+
+test("managed HTTP discovery requires its real runner and CI wiring", { timeout: 1000 }, () => {
+  const file = "tests/integration/managed-proxy/deletion-dispatch.test.ts";
+  const runner = "scripts/test/run-managed-proxy-runtime.mjs";
+  const workflow = ".github/workflows/managed-proxy-cores.yml";
+  const collector = COLLECTORS.find((entry) => entry.glob === file);
+  assert.ok(collector, "The dedicated managed HTTP test must have a collector");
+  assert.deepEqual(collector.sources, [runner, workflow]);
+  const contents = Object.fromEntries(
+    collector.sources.map((source) => [
+      source,
+      fs.readFileSync(new URL(`../../${source}`, import.meta.url), "utf8"),
+    ])
+  );
+  assert.deepEqual(findOrphans([file], [collector]), []);
+  assert.deepEqual(findCollectorDrift([collector], contents), []);
+  for (const source of collector.sources) {
+    const anchor = collector.anchors?.[source] ?? file;
+    const drift = findCollectorDrift([collector], {
+      ...contents,
+      [source]: contents[source].replaceAll(anchor, "disconnected"),
+    });
+    assert.equal(drift.length, 1, `Removing ${source} wiring must fail closed`);
+    assert.ok(drift[0].includes(source));
+  }
 });
 
 test("findCollectorDrift: sem drift quando o glob aparece em todas as fontes", () => {

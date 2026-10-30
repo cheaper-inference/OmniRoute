@@ -167,6 +167,18 @@ export const COLLECTORS = [
       "playwright.config.ts": 'testDir: "./tests/e2e"',
     },
   },
+  // Dedicated hosted runner owns the HTTP fixture; keep both execution links checked.
+  {
+    glob: "tests/integration/managed-proxy/deletion-dispatch.test.ts",
+    sources: [
+      "scripts/test/run-managed-proxy-runtime.mjs",
+      ".github/workflows/managed-proxy-cores.yml",
+    ],
+    anchors: {
+      ".github/workflows/managed-proxy-cores.yml":
+        "run: node scripts/test/run-managed-proxy-runtime.mjs",
+    },
+  },
   // Runners custom — test:ecosystem / test:protocols:e2e (spawnam vitest com o arquivo)
   { glob: "tests/e2e/ecosystem.test.ts", sources: ["scripts/dev/run-ecosystem-tests.mjs"] },
   {

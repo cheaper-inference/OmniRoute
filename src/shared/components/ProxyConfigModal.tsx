@@ -6,15 +6,18 @@ import { Field } from "@omniroute/ui-kit/field";
 import Icon from "./Icon";
 import Modal from "./Modal";
 import Button from "./Button";
-import Input from "./Input";
 import SegmentedControl from "./SegmentedControl";
 import Select from "./Select";
 import {
-  type ProxyAssignmentItem,
-  normalizeScopeId,
-  isSameScopeAssignment,
-  selectScopeAssignment,
-} from "./proxyAssignment";
+  readJson,
+  fetchAssignmentForScope,
+  fetchRegistryProxy,
+  fetchProxyUsage,
+  isRedactedSecret,
+} from "./proxyConfigPersistence";
+import ProxyCustomFields, { isManagedProxySource } from "./ProxyCustomFields";
+import { saveManagedSource } from "./managedProxySave";
+import { isSameScopeAssignment, selectScopeAssignment } from "./proxyAssignment";
 
 const ALL_PROXY_TYPES = [
   { value: "http", label: "HTTP" },
@@ -44,6 +47,7 @@ type ProxyRegistryItem = {
   username?: string | null;
   password?: string | null;
   source?: string | null;
+  notes?: string | null;
 };
 
 type ProxyConfigModalProps = {
@@ -75,52 +79,6 @@ function getCustomProxyName(level: ProxyConfigLevel, levelId?: string, levelLabe
   return `Custom Provider Proxy${suffix}`;
 }
 
-async function readJson(response: Response) {
-  return response.json().catch(() => ({}));
-}
-
-async function fetchAssignmentForScope(scope: string, scopeId: string | null) {
-  const params = new URLSearchParams({ scope });
-  if (scopeId) params.set("scopeId", scopeId);
-
-  const res = await fetch(`/api/settings/proxies/assignments?${params}`);
-  if (!res.ok) return null;
-
-  const payload = await readJson(res);
-  const items: ProxyAssignmentItem[] = Array.isArray(payload?.items) ? payload.items : [];
-  return selectScopeAssignment(items, scope, scopeId);
-}
-
-async function fetchRegistryProxy(proxyId: string, cachedProxies: ProxyRegistryItem[]) {
-  const cached = cachedProxies.find((proxy) => proxy.id === proxyId);
-  if (cached) return cached;
-
-  const res = await fetch(`/api/settings/proxies?id=${encodeURIComponent(proxyId)}`);
-  if (!res.ok) return null;
-  return (await readJson(res)) as ProxyRegistryItem;
-}
-
-async function fetchProxyUsage(proxyId: string) {
-  const res = await fetch(`/api/settings/proxies?id=${encodeURIComponent(proxyId)}&whereUsed=1`);
-  if (!res.ok) return [];
-
-  const payload = await readJson(res);
-  const assignments: ProxyAssignmentItem[] = Array.isArray(payload?.assignments)
-    ? payload.assignments
-    : [];
-  const seen = new Set<string>();
-  return assignments.filter((assignment) => {
-    const key = `${assignment.scope || ""}:${normalizeScopeId(assignment.scopeId) || ""}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
-function isRedactedSecret(value?: string | null) {
-  return value === "***";
-}
-
 export default function ProxyConfigModal({
   isOpen,
   onClose,
@@ -141,6 +99,7 @@ export default function ProxyConfigModal({
   );
   const [proxyType, setProxyType] = useState("http");
   const [host, setHost] = useState("");
+  const [managedCore, setManagedCore] = useState("");
   const [port, setPort] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -229,7 +188,10 @@ export default function ProxyConfigModal({
             setHasOwnProxy(true);
             hasSavedAssignment = true;
             const assignedProxy = registryItems.find((item) => item.id === target.proxyId);
-            if (assignedProxy?.source === DASHBOARD_CUSTOM_PROXY_SOURCE) {
+            if (
+              assignedProxy?.source === DASHBOARD_CUSTOM_PROXY_SOURCE &&
+              !assignedProxy.notes?.includes('"managedProxyId"')
+            ) {
               const normalizedType = String(assignedProxy.type || "http").toLowerCase();
               const hasTypeOption = runtimeProxyTypes.some(
                 (entry) => entry.value === normalizedType
@@ -350,6 +312,18 @@ export default function ProxyConfigModal({
           if (levelId) clearParams.set("id", levelId);
           await fetch(`/api/settings/proxy?${clearParams.toString()}`, { method: "DELETE" });
         }
+      } else if (isManagedProxySource(host)) {
+        if (!managedCore) {
+          setFormError("Select sing-box or Xray before saving this tunnel");
+          return;
+        }
+        res = await saveManagedSource(
+          managedCore,
+          host.trim(),
+          getCustomProxyName(level, levelId, levelLabel),
+          scope,
+          scopeId
+        );
       } else {
         const trimmedHost = String(host || "").trim();
         const normalizedPort = Number(String(port || "").trim() || getDefaultPort(proxyType));
@@ -378,7 +352,10 @@ export default function ProxyConfigModal({
         let safeExistingProxyId: string | null = null;
         if (existingAssignment?.proxyId) {
           const existingProxy = await fetchRegistryProxy(existingAssignment.proxyId, savedProxies);
-          if (existingProxy?.source === DASHBOARD_CUSTOM_PROXY_SOURCE) {
+          if (
+            existingProxy?.source === DASHBOARD_CUSTOM_PROXY_SOURCE &&
+            !existingProxy.notes?.includes('"managedProxyId"')
+          ) {
             const usage = await fetchProxyUsage(existingAssignment.proxyId);
             if (
               usage.length === 1 &&
@@ -613,68 +590,24 @@ export default function ProxyConfigModal({
           )}
 
           {mode === "custom" && (
-            <>
-              <Field label={t("proxyType")}>
-                <SegmentedControl
-                  aria-label={t("proxyType")}
-                  className="w-full"
-                  value={proxyType}
-                  onChange={setProxyType}
-                  options={proxyTypes.map((pt) => ({ value: pt.value, label: pt.label }))}
-                />
-              </Field>
-
-              {/* Host + Port */}
-              <div className="grid grid-cols-3 gap-3">
-                <Input
-                  className="col-span-2"
-                  label={t("host")}
-                  type="text"
-                  value={host}
-                  onChange={(e) => setHost(e.target.value)}
-                  placeholder={t("hostPlaceholder")}
-                />
-                <Input
-                  label={t("port")}
-                  type="text"
-                  value={port}
-                  onChange={(e) => setPort(e.target.value)}
-                  placeholder={getDefaultPort(proxyType)}
-                />
-              </div>
-
-              {/* Auth Toggle */}
-              <div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  aria-expanded={showAuth}
-                  onClick={() => setShowAuth(!showAuth)}
-                  className="gap-2 px-0 text-text-muted hover:text-text-main"
-                >
-                  <Icon name={showAuth ? "expand_less" : "expand_more"} size={16} />
-                  {t("authOptional")}
-                </Button>
-                {showAuth && (
-                  <div className="grid grid-cols-2 gap-3 mt-3">
-                    <Input
-                      label={t("username")}
-                      type="text"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder={t("usernamePlaceholder")}
-                    />
-                    <Input
-                      label={t("password")}
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      placeholder={t("passwordPlaceholder")}
-                    />
-                  </div>
-                )}
-              </div>
-            </>
+            <ProxyCustomFields
+              proxyTypes={proxyTypes}
+              proxyType={proxyType}
+              setProxyType={setProxyType}
+              host={host}
+              setHost={setHost}
+              port={port}
+              setPort={setPort}
+              username={username}
+              setUsername={setUsername}
+              password={password}
+              setPassword={setPassword}
+              showAuth={showAuth}
+              setShowAuth={setShowAuth}
+              core={managedCore}
+              setCore={setManagedCore}
+              getDefaultPort={getDefaultPort}
+            />
           )}
 
           {/* Test Result */}
@@ -730,7 +663,11 @@ export default function ProxyConfigModal({
                 icon="speed"
                 onClick={handleTest}
                 loading={testing}
-                disabled={mode === "saved" ? !selectedProxyId : !String(host || "").trim()}
+                disabled={
+                  mode === "saved"
+                    ? !selectedProxyId
+                    : isManagedProxySource(host) || !String(host || "").trim()
+                }
               >
                 {t("testConnection")}
               </Button>
