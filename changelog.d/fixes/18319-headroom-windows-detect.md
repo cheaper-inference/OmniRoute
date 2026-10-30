@@ -1,0 +1,1 @@
+- **fix(headroom):** detect the headroom CLI and Python 3.10–3.14 on Windows (`where` probe, `;` search PATH, Windows Python install dirs, `py` launcher) ([#18319](https://github.com/cheaper-inference/OmniRoute/pull/18319)) — thanks @sancaksert

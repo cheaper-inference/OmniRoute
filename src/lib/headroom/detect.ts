@@ -16,10 +16,21 @@
  */
 
 import { execFileSync } from "node:child_process";
+import path from "node:path";
 
 const EXTRA_BINS = ["/usr/local/bin", "/opt/homebrew/bin", "/usr/bin", "/bin"];
 
+/** Python minor versions whose Windows install dirs are probed, newest first. */
+const WINDOWS_PYTHON_VERSIONS = ["314", "313", "312", "311", "310"];
+
+/**
+ * Windows Python launcher (`py.exe`, installed into C:\Windows by python.org).
+ * Fixed allowlist entry — never request input (GHSA notes on HeadroomStatusOptions).
+ */
+const WINDOWS_PY_LAUNCHER = "py";
+
 export const PYTHON_CANDIDATES = [
+  "python3.14",
   "python3.13",
   "python3.12",
   "python3.11",
@@ -29,6 +40,46 @@ export const PYTHON_CANDIDATES = [
 ];
 
 type EnvLike = Record<string, string | undefined>;
+
+type ExecFileFn = (
+  file: string,
+  args: readonly string[],
+  options: { stdio: ["ignore", "pipe", "ignore"]; windowsHide: boolean; env: NodeJS.ProcessEnv }
+) => Buffer | string;
+
+/** Injectable seams so the probes are unit-testable without spawning anything. */
+export interface HeadroomProbeDeps {
+  platform?: NodeJS.Platform;
+  env?: EnvLike;
+  execFile?: ExecFileFn;
+}
+
+/**
+ * Python dirs a Windows install puts on disk but a packaged (Electron/service)
+ * process usually lacks on PATH (upstream 9router#5063): python.org per-user
+ * installs, `pip install --user` Scripts dirs and legacy top-level `C:\Python3xx`.
+ * Dirs derived from an unset env var are skipped instead of becoming drive-less.
+ */
+function windowsPythonDirs(env: EnvLike): string[] {
+  const dirs: string[] = [];
+  const drive = env.SystemDrive || "C:";
+  for (const version of WINDOWS_PYTHON_VERSIONS) {
+    if (env.LOCALAPPDATA) {
+      const install = path.win32.join(env.LOCALAPPDATA, "Programs", "Python", `Python${version}`);
+      dirs.push(path.win32.join(install, "Scripts"), install);
+    }
+  }
+  for (const version of WINDOWS_PYTHON_VERSIONS) {
+    if (env.APPDATA) {
+      dirs.push(path.win32.join(env.APPDATA, "Python", `Python${version}`, "Scripts"));
+    }
+  }
+  for (const version of WINDOWS_PYTHON_VERSIONS) {
+    const install = `${drive}\\Python${version}`;
+    dirs.push(install, `${install}\\Scripts`);
+  }
+  return dirs;
+}
 
 /**
  * Build the PATH used to locate a python interpreter (upstream 9router#2353).
@@ -42,7 +93,15 @@ type EnvLike = Record<string, string | undefined>;
  *
  * Pure + env-injectable so it is unit-testable without spawning.
  */
-export function buildPythonSearchPath(env: EnvLike = process.env): string {
+export function buildPythonSearchPath(
+  env: EnvLike = process.env,
+  platform: NodeJS.Platform = process.platform
+): string {
+  if (platform === "win32") {
+    // path.delimiter of the target platform (";"), resolved explicitly so the
+    // Windows branch stays testable from a POSIX host.
+    return [...windowsPythonDirs(env), env.PATH || ""].filter(Boolean).join(path.win32.delimiter);
+  }
   const home = env.HOME || "";
   const managerDirs: string[] = [];
   if (home || env.MISE_DATA_DIR) {
@@ -60,7 +119,7 @@ export function buildPythonSearchPath(env: EnvLike = process.env): string {
   if (home) {
     managerDirs.push(`${home}/.local/bin`); // pipx / uv installs
   }
-  return [...managerDirs, ...EXTRA_BINS, env.PATH || ""].filter(Boolean).join(":");
+  return [...managerDirs, ...EXTRA_BINS, env.PATH || ""].filter(Boolean).join(path.posix.delimiter);
 }
 
 /**
@@ -69,9 +128,14 @@ export function buildPythonSearchPath(env: EnvLike = process.env): string {
  * `HEADROOM_URL` escape hatch, so operators on exotic setups can point directly
  * at their interpreter (upstream 9router#2353).
  */
-export function resolvePythonCandidates(env: EnvLike = process.env): string[] {
+export function resolvePythonCandidates(
+  env: EnvLike = process.env,
+  platform: NodeJS.Platform = process.platform
+): string[] {
   const override = env.HEADROOM_PYTHON?.trim();
-  return override ? [override, ...PYTHON_CANDIDATES] : [...PYTHON_CANDIDATES];
+  const defaults =
+    platform === "win32" ? [...PYTHON_CANDIDATES, WINDOWS_PY_LAUNCHER] : [...PYTHON_CANDIDATES];
+  return override ? [override, ...defaults] : defaults;
 }
 const MIN_VERSION: readonly [number, number] = [3, 10];
 const HEADROOM_HEALTH_TIMEOUT_MS = 1500;
@@ -160,35 +224,43 @@ export function buildHeadroomStatus(input: BuildHeadroomStatusInput): HeadroomSt
 
 // ──────────────── Side-effecting probes ────────────────
 
-export function findHeadroomBinary(): string | null {
+export function findHeadroomBinary(deps: HeadroomProbeDeps = {}): string | null {
+  const platform = deps.platform ?? process.platform;
+  const env = deps.env ?? process.env;
+  const execFile = deps.execFile ?? execFileSync;
   try {
-    // execFileSync (no shell): "which" is invoked directly with "headroom" as an
-    // arg, so even if some upstream caller passes attacker-controlled input the
-    // shell metacharacters cannot reach a shell parser.
-    const out = execFileSync("which", ["headroom"], {
+    // execFileSync (no shell): "which"/"where" is invoked directly with "headroom"
+    // as an arg and the search PATH goes through `env`, so even if some upstream
+    // caller passes attacker-controlled input the shell metacharacters cannot
+    // reach a shell parser. Windows has no `which`; `where` is its equivalent.
+    const out = execFile(platform === "win32" ? "where" : "which", ["headroom"], {
       stdio: ["ignore", "pipe", "ignore"],
       windowsHide: true,
-      env: { ...process.env, PATH: buildPythonSearchPath() },
+      env: { ...env, PATH: buildPythonSearchPath(env, platform) },
     })
       .toString()
       .trim();
-    return out || null;
+    // `where` lists every match, one per line (CRLF) — take the first.
+    return out.split(/\r?\n/)[0].trim() || null;
   } catch {
     return null;
   }
 }
 
-export function findPython310(): string | null {
-  const searchPath = buildPythonSearchPath();
-  for (const candidate of resolvePythonCandidates()) {
+export function findPython310(deps: HeadroomProbeDeps = {}): string | null {
+  const platform = deps.platform ?? process.platform;
+  const env = deps.env ?? process.env;
+  const execFile = deps.execFile ?? execFileSync;
+  const searchPath = buildPythonSearchPath(env, platform);
+  for (const candidate of resolvePythonCandidates(env, platform)) {
     try {
-      // candidate is from a fixed allowlist (PYTHON_CANDIDATES) plus an optional
-      // operator-set HEADROOM_PYTHON override — never remote/request input — but
-      // use execFileSync anyway to remove the shell entirely.
-      const ver = execFileSync(candidate, ["--version"], {
+      // candidate is from a fixed allowlist (PYTHON_CANDIDATES + the Windows `py`
+      // launcher) plus an optional operator-set HEADROOM_PYTHON override — never
+      // remote/request input — but use execFileSync anyway to remove the shell entirely.
+      const ver = execFile(candidate, ["--version"], {
         stdio: ["ignore", "pipe", "ignore"],
         windowsHide: true,
-        env: { ...process.env, PATH: searchPath },
+        env: { ...env, PATH: searchPath },
       })
         .toString()
         .trim();
