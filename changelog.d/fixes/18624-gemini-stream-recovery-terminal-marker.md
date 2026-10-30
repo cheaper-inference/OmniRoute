@@ -1,0 +1,1 @@
+- **fix(sse):** recognize Gemini `finishReason` terminal markers in `streamRecovery` holdback and `throughputWatchdog` so completed Gemini SSE streams under 750ms are not misclassified as `TruncatedStreamError` and replayed 4x ([#18624](https://github.com/diegosouzapw/OmniRoute/pull/18624) — thanks @fidelix)
