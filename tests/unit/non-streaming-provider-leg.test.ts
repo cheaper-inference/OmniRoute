@@ -977,7 +977,7 @@ test("setRequestWireState is called before initial, retry, and fallback executor
 });
 
 test("invalid SSE payload returns errorCode invalid_sse_payload, not upstream_error", async () => {
-  const sseBody = 'data: {"error":{"message":"Devin CLI not found"}}\n\n';
+  const sseBody = "data: not-json-at-all\n\n";
   const input = baseInput({
     executeProviderRequest: async () => ({
       response: {
@@ -1028,7 +1028,7 @@ test("invalid JSON payload returns errorCode invalid_json_payload, not upstream_
 });
 
 test("empty-content fallback with invalid SSE body is 502, not 200 empty", async () => {
-  const sseBody = 'data: {"error":{"message":"Devin CLI not found"}}\n\n';
+  const sseBody = "data: not-json-at-all\n\n";
   let executorCallCount = 0;
   const input = baseInput({
     clientHeaders: { "x-omniroute-allow-cross-version-fallback": "true" },
