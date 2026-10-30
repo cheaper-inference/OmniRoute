@@ -6,7 +6,6 @@ import {
   MAX_BODY_BYTES_FILE,
   MAX_BODY_BYTES_IMAGE_EDIT,
   MAX_BODY_BYTES_MEDIA,
-  MAX_BODY_BYTES_LLM_API,
   MAX_BODY_BYTES_VIDEO_BRIDGE_BROKER,
   RequestBodyTooLargeError,
   readRequestBodyWithLimit,
@@ -28,14 +27,14 @@ test("body size guard uses maxBodySizeMb from settings for regular API routes", 
   );
 });
 
-test("body size guard keeps dedicated upload limits as lower bounds", () => {
+test("body size guard keeps dedicated upload limits, but no LLM route floor", () => {
   assert.equal(
     getBodySizeLimit("/api/v1/responses", { maxBodySizeMb: 10 }),
-    MAX_BODY_BYTES_LLM_API
+    requestBodyLimitMbToBytes(10)
   );
   assert.equal(
     getBodySizeLimit("/api/v1/chat/completions", { maxBodySizeMb: 10 }),
-    MAX_BODY_BYTES_LLM_API
+    requestBodyLimitMbToBytes(10)
   );
   assert.equal(
     getBodySizeLimit("/api/v1/audio/transcriptions", { maxBodySizeMb: 1 }),
@@ -147,30 +146,36 @@ test("checkBodySize reports the configured request limit in 413 responses", asyn
   assert.match(body.error.message, /100 MB/);
 });
 
-test("/api/v1/responses route guard allows 15 MB agent payloads by default", () => {
+test("/api/v1/responses route guard allows 15 MB agent payloads when configured", () => {
   const fifteenMb = 15 * 1024 * 1024;
   const request = new Request("http://localhost/api/v1/responses", {
     method: "POST",
     headers: { "content-length": String(fifteenMb) },
   });
 
-  assert.equal(checkBodySize(request, getBodySizeLimit("/api/v1/responses")), null);
+  assert.equal(
+    checkBodySize(request, getBodySizeLimit("/api/v1/responses", { maxBodySizeMb: 20 })),
+    null
+  );
 });
 
-test("/api/v1/responses route guard rejects payloads above the LLM API floor", async () => {
-  const tooBig = MAX_BODY_BYTES_LLM_API + 1;
+test("/api/v1/responses route guard rejects payloads above the saved limit", async () => {
+  const tooBig = requestBodyLimitMbToBytes(10) + 1;
   const request = new Request("http://localhost/api/v1/responses", {
     method: "POST",
     headers: { "content-length": String(tooBig) },
   });
 
-  const response = checkBodySize(request, getBodySizeLimit("/api/v1/responses"));
+  const response = checkBodySize(
+    request,
+    getBodySizeLimit("/api/v1/responses", { maxBodySizeMb: 10 })
+  );
 
   assert.ok(response);
   assert.equal(response.status, 413);
   const body = await response.json();
   assert.equal(body.error.code, "PAYLOAD_TOO_LARGE");
-  assert.match(body.error.message, /50 MB/);
+  assert.match(body.error.message, /10 MB/);
 });
 
 test("/api/v1/files route has 512 MB dedicated limit floor", () => {

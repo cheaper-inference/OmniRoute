@@ -243,8 +243,8 @@ export function ingressAnnotationsFor(className: string | undefined): Record<str
       "nginx.ingress.kubernetes.io/proxy-request-buffering": "off",
       "nginx.ingress.kubernetes.io/proxy-read-timeout": "3600",
       "nginx.ingress.kubernetes.io/proxy-send-timeout": "3600",
-      // Matches OMNIROUTE_CHAT_HARD_MAX_BODY_BYTES (50 MB). Below that, nginx
-      // rejects bodies the app would accept and its compact-required 413 never runs.
+      // Exceeds the default request limit. Operators raising maxBodySizeMb
+      // above 50 MiB must also raise this independent nginx ingress limit.
       "nginx.ingress.kubernetes.io/proxy-body-size": "50m",
     };
   }
