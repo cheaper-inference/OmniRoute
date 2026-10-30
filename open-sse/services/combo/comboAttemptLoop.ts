@@ -383,7 +383,16 @@ export async function dispatchWithCooldownRetry(opts: {
         return extra.executeAttempt({
           index: i,
           state,
-          deps,
+          deps: {
+            ...deps,
+            retryCooldownWait: {
+              attempt: extra.comboCooldownAttempt,
+              budgetLeftMs: extra.comboCooldownBudgetLeftMs,
+              deadline:
+                extra.comboStartTime +
+                (extra.comboTimeoutMs > 0 ? extra.comboTimeoutMs : COMBO_LOOP_SAFETY_TIMEOUT_MS),
+            },
+          },
           targetForAttempt: gate.targetForAttempt,
           profile: gate.profile,
           protectedPriorityTarget: gate.protectedPriorityTarget,

@@ -101,6 +101,12 @@ export type AttemptLoopDeps = {
   signal?: AbortSignal | null;
   body: Record<string, unknown>;
   startTime: number;
+  /** Shares the existing request wait limits with an inline, already-authorized retry. */
+  retryCooldownWait?: {
+    attempt: { current: number };
+    budgetLeftMs: { current: number };
+    deadline: number;
+  };
   releaseStickyPinOnFailure: (
     messageHash: string | null | undefined,
     failedConnectionId: string | null | undefined
