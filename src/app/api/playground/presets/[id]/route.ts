@@ -13,11 +13,7 @@ import { z } from "zod";
 import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
-import {
-  getPlaygroundPreset,
-  updatePlaygroundPreset,
-  deletePlaygroundPreset,
-} from "@/lib/db/playgroundPresets";
+import { getPlaygroundPresetRepository } from "@/lib/db/playgroundPresets";
 import { PlaygroundPresetUpdateSchema } from "@/shared/schemas/playground";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 
@@ -76,7 +72,7 @@ export async function GET(
   const { id } = validation;
 
   try {
-    const preset = getPlaygroundPreset(id);
+    const preset = await getPlaygroundPresetRepository().findById(id);
     if (!preset) {
       return errorResp(HTTP_STATUS.NOT_FOUND, `Preset not found: ${id}`);
     }
@@ -129,7 +125,7 @@ export async function PUT(
   const patch = parsed.data;
 
   try {
-    const updated = updatePlaygroundPreset(id, {
+    const updated = await getPlaygroundPresetRepository().update(id, {
       ...(patch.name !== undefined ? { name: patch.name } : {}),
       ...(patch.endpoint !== undefined ? { endpoint: patch.endpoint } : {}),
       ...(patch.model !== undefined ? { model: patch.model } : {}),
@@ -170,7 +166,7 @@ export async function DELETE(
   const { id } = validation;
 
   try {
-    const deleted = deletePlaygroundPreset(id);
+    const deleted = await getPlaygroundPresetRepository().deleteById(id);
     if (!deleted) {
       return errorResp(HTTP_STATUS.NOT_FOUND, `Preset not found: ${id}`);
     }

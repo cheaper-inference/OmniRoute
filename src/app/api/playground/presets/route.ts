@@ -11,7 +11,7 @@ import { buildErrorBody, sanitizeErrorMessage } from "@omniroute/open-sse/utils/
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
-import { listPlaygroundPresets, createPlaygroundPreset } from "@/lib/db/playgroundPresets";
+import { getPlaygroundPresetRepository } from "@/lib/db/playgroundPresets";
 import { PlaygroundPresetCreateSchema } from "@/shared/schemas/playground";
 import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { paginationSchema } from "@/shared/validation/schemas";
@@ -78,7 +78,9 @@ export async function GET(request: Request): Promise<Response> {
       });
     }
     const { limit, offset } = validation.data;
-    const result = listPlaygroundPresets(limit !== undefined ? { limit, offset } : undefined);
+    const result = await getPlaygroundPresetRepository().list(
+      limit !== undefined ? { limit, offset } : undefined
+    );
     return new Response(JSON.stringify({ presets: result.items, total: result.total }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...CORS_HEADERS },
@@ -121,7 +123,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // 3. Create preset (Hard Rule #5 — via DB module)
   try {
-    const created = createPlaygroundPreset({
+    const created = await getPlaygroundPresetRepository().create({
       name: body.name,
       endpoint: body.endpoint,
       model: body.model,
