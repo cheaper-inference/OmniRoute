@@ -1,0 +1,1 @@
+- **fix(sse):** the Codex rejected-token fingerprint, the Muse session-ownership digest, the Z Code per-key state map and the Entra token cache key now go through `opaqueTokenFingerprint()` instead of an inline `createHash`; outputs are byte-identical, so stored values keep matching (#0000)

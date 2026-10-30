@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import {
   museScopeHasRecordedItems,
   pruneIdleMuseOwnershipScopes,
@@ -11,8 +10,9 @@ import {
   isAccountUnavailable,
   isModelLocked,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 
-const digest = (value: string) => createHash("sha256").update(value).digest("hex");
+const digest = (value: string) => opaqueTokenFingerprint(value);
 type Owner = { connectionId: string; generation?: string; account?: string };
 type Connection = { id: string; unavailable?: boolean };
 
