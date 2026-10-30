@@ -403,7 +403,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         }
 
         // Direct CDN video request
-        if (url.includes("flow-content.google/video") && url.includes("Signature=")) {
+        if (
+          (url.includes("flow-content.google/video") && url.includes("Signature=")) ||
+          (url.includes("googlevideo.com/videoplayback") && url.includes("sig="))
+        ) {
           const aid = extractAssetId(url);
           if (!existingVideoUrls.has(url) && (!aid || !existingAssetIds.has(aid))) {
             console.log("[FLOW_DEBUG] RESOLVED video response with direct CDN URL:", url);
@@ -417,6 +420,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         // Catch any batchexecute, labs-flow, or direct video/stream response from Google Flow
         if (
           url.includes("flow-content.google/video") ||
+          url.includes("googlevideo.com/videoplayback") ||
           url.includes("batchexecute") ||
           url.includes("labs-flow") ||
           url.includes("flow.google.com")
@@ -452,26 +456,29 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     // Ensure video mode is selected in project settings if project defaulted to image
     try {
+      console.log("[FLOW_DEBUG] Checking if project settings need video mode switch...");
       const settingsTrigger = page.locator(".settings-trigger-button").first();
-      if (await settingsTrigger.isVisible({ timeout: 3_000 }).catch(() => false)) {
-        const triggerText = await settingsTrigger.innerText().catch(() => "");
-        if (triggerText.includes("Banana") || !triggerText.toLowerCase().includes("veo")) {
-          console.log("[FLOW_DEBUG] Switching mode to Video in project settings...");
-          await settingsTrigger.click();
+      await settingsTrigger.waitFor({ state: "visible", timeout: 8_000 }).catch(() => {});
+      const triggerText = await settingsTrigger.innerText().catch(() => "");
+      console.log("[FLOW_DEBUG] Settings trigger text:", JSON.stringify(triggerText));
+      if (triggerText.includes("Banana") || !triggerText.toLowerCase().includes("veo")) {
+        console.log("[FLOW_DEBUG] Switching mode to Video in project settings...");
+        await settingsTrigger.click();
+        await page.waitForTimeout(1_000);
+        const videoModeBtn = page
+          .locator(
+            "button:has-text('Видео'), button:has-text('Video'), [role='menuitem']:has-text('Видео'), [role='menuitem']:has-text('Video')"
+          )
+          .first();
+        if (await videoModeBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
+          await videoModeBtn.click();
+          console.log("[FLOW_DEBUG] Clicked Video mode button in popover");
           await page.waitForTimeout(1_000);
-          const videoModeBtn = page
-            .locator(
-              "button:has-text('Видео'), button:has-text('Video'), [role='menuitem']:has-text('Видео'), [role='menuitem']:has-text('Video')"
-            )
-            .first();
-          if (await videoModeBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-            await videoModeBtn.click();
-            await page.waitForTimeout(1_000);
-          }
-          // Close settings popover by clicking outside or pressing Escape
-          await page.keyboard.press("Escape").catch(() => {});
-          await page.waitForTimeout(500);
+        } else {
+          console.log("[FLOW_DEBUG] Video mode button not found in popover");
         }
+        await page.keyboard.press("Escape").catch(() => {});
+        await page.waitForTimeout(500);
       }
     } catch (e) {
       console.warn("[FLOW_DEBUG] Failed to ensure video mode:", e);
@@ -539,7 +546,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         try {
           const progressEl = page
             .locator(
-              ".video-container, .media-option, .generation-card, [class*='generation-progress'], [class*='rendering'], [class*='media-card']"
+              "flow-video-tile, .video-container, .media-option, .generation-card, [class*='generation-progress'], [class*='rendering'], [class*='media-card']"
             )
             .first();
           if (await progressEl.isVisible({ timeout: 500 }).catch(() => false)) {
