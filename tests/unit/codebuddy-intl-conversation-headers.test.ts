@@ -26,8 +26,10 @@ test("CodeBuddyIntlExecutor sends the X-Conversation-* family", async (t) => {
     assert.equal(h["X-Request-ID"], h["X-Conversation-Message-ID"]);
   });
 
-  await t.test("keeps the conversation id stable across retries of the same turn", () => {
-    const body = { messages: [{ role: "user", content: "same opening message" }] };
+  await t.test("keeps the conversation id stable across retries of the same session", () => {
+    // Only an explicit session key joins requests; the opening message text no longer
+    // does (unrelated chats starting with the same text must not share an id).
+    const body = { session_id: "sess-retry", messages: [{ role: "user", content: "same" }] };
     const a = exec.buildHeaders(creds, true, null, "m", null, body);
     const b = exec.buildHeaders(creds, true, null, "m", null, body);
     assert.equal(a["X-Conversation-ID"], b["X-Conversation-ID"]);
@@ -47,7 +49,7 @@ test("CodeBuddyIntlExecutor sends the X-Conversation-* family", async (t) => {
     assert.notEqual(a["X-Conversation-ID"], b["X-Conversation-ID"]);
   });
 
-  await t.test("supports typed-block user content for the derived key", () => {
+  await t.test("supports typed-block user content", () => {
     const h = exec.buildHeaders(creds, true, null, "m", null, {
       messages: [{ role: "user", content: [{ type: "text", text: "typed block" }] }],
     });
