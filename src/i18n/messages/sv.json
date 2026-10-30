@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Detta kommer att ta en ögonblicksbild av de för närvarande anslutna leverantörerna/modellerna som matchar denna mall i en redigerbar kombination.",
     "duplicateAutoComboFailedPrefix": "Kopiering av automatisk kombination misslyckades:",
     "duplicateAutoComboUnknownError": "Okänt fel",
-    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}"
+    "duplicateAutoComboTitle": "Skapa en statisk kombination från {name}",
+    "fallbackSummary": "{rate}% av begärandedan använde en reserv, ~{skips} mål hopplat över per begärande"
   },
   "costs": {
     "title": "Kostnader",

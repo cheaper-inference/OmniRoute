@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "ఈ టెంప్లేట్‌తో సరిపోయే ప్రస్తుత కనెక్ట్ చేసిన ప్రొవైడర్లు/మోడల్‌లను ఎడిటబుల్ కంబోలో స్నాప్‌షాట్ తీసుకుంటుంది.",
     "duplicateAutoComboFailedPrefix": "ఆటోకంబో డూప్లికేట్ చేయడంలో విఫలమైంది:",
     "duplicateAutoComboUnknownError": "తెలియని దోషం",
-    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి"
+    "duplicateAutoComboTitle": "{name} నుండి స్థిర కంబో సృష్టించండి",
+    "fallbackSummary": "{rate}% గమనికలు బ్యాక్‌అప్ అయ్యాయి, ప్రతిసారీ ~{skips} లక్ష్యాలు వదిలివేయబడ్డాయి"
   },
   "costs": {
     "title": "ఖర్చులు",

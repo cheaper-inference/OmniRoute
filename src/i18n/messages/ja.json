@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "このテンプレートに一致する現在接続されているプロバイダー/モデルを編集可能なコンボとしてスナップショットします。",
     "duplicateAutoComboFailedPrefix": "オートコンボの複製に失敗しました：",
     "duplicateAutoComboUnknownError": "不明なエラー",
-    "duplicateAutoComboTitle": "{name}から静的コンボを作成"
+    "duplicateAutoComboTitle": "{name}から静的コンボを作成",
+    "fallbackSummary": "リクエストの{rate}%がフォールバックに切り替えられ、平均して約{skips}件のターゲットがスキップされました"
   },
   "costs": {
     "title": "コスト",

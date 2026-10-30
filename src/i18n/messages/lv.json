@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Tādējādi pašlaik pievienotie nodrošinātāji/modeļi, kas atbilst šai veidnei, tiks saglabāti rediģējamā kombinācijā.",
     "duplicateAutoComboFailedPrefix": "Neizdevās dublēt automātisko kombināciju:",
     "duplicateAutoComboUnknownError": "Nezināma kļūda",
-    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}"
+    "duplicateAutoComboTitle": "Izveidot statisku kombināciju no {name}",
+    "fallbackSummary": "{rate}% pieprasījumu tika pārcelti, vidēji tiek izlaisti ~{skips} mērķi"
   },
   "costs": {
     "title": "Izmaksas",

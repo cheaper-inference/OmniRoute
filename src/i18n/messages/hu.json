@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Ez rögzíti az éppen csatlakoztatott szolgáltatókat/modelleket, amelyek megfelelnek ennek a sablonnak, egy szerkeszthető kombinációba.",
     "duplicateAutoComboFailedPrefix": "Az automatikus kombináció duplikálása sikertelen:",
     "duplicateAutoComboUnknownError": "Ismeretlen hiba",
-    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból"
+    "duplicateAutoComboTitle": "Hozzon létre statikus kombinációt a(z) {name}-ból",
+    "fallbackSummary": "{rate}% kérés vésztárhelyre váltott, átlagosan ~{skips} célpontot ugrottunk feje kérésenként"
   },
   "costs": {
     "title": "Költségek",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Tämä tallentaa tämän mallin mukaiset tällä hetkellä yhdistetyt tarjoajat/mallit muokattavaan yhdistelmään.",
     "duplicateAutoComboFailedPrefix": "Automaattisen yhdistelmän kaksoiskappaleen luonti epäonnistui:",
     "duplicateAutoComboUnknownError": "Tuntematon virhe",
-    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}"
+    "duplicateAutoComboTitle": "Luo staattinen yhdistelmä kohteesta {name}",
+    "fallbackSummary": "{rate}% pyynnöistä siirtyi varatahoojeen, noin {skips} kohdet ohitettiin kussakin pyynnössä"
   },
   "costs": {
     "title": "Kustannukset",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Time će se izraditi snimka trenutačno povezanih davatelja/modela koji odgovaraju ovom predlošku i pretvoriti u uređivu kombinaciju.",
     "duplicateAutoComboFailedPrefix": "Dupliciranje automatske kombinacije nije uspjelo:",
     "duplicateAutoComboUnknownError": "Nepoznata pogreška",
-    "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Stvori statičnu kombinaciju iz {name}",
+    "fallbackSummary": "{rate}% zahtjeva je prebačeno na rezervni sustav, prosječno je zapremljeno ~{skips} ciljeva po zahtjevu"
   },
   "costs": {
     "title": "Troškovi",

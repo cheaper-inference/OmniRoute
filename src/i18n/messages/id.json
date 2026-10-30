@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang terhubung saat ini yang cocok dengan templat ini ke dalam kombo yang dapat diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo otomatis:",
     "duplicateAutoComboUnknownError": "Kesalahan tidak diketahui",
-    "duplicateAutoComboTitle": "Buat kombo statis dari {name}"
+    "duplicateAutoComboTitle": "Buat kombo statis dari {name}",
+    "fallbackSummary": "{rate}% permintaan menggunakan cadangan, rata-rata ~{skips} target dilewati per permintaan"
   },
   "costs": {
     "title": "Biaya",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "આ ટેમપ્લેટ સાથે મેચ થતા વર્તમાન જોડાયેલા પ્રદાતાઓ/મોડેલને સંપાદનીય કોમ્બોમાં સ્નેપશોટ લેશે.",
     "duplicateAutoComboFailedPrefix": "ઓટોકોમ્બો ડુપ્લિકેટ કરવામાં નિષ્ફળ:",
     "duplicateAutoComboUnknownError": "અજ્ઞાત ભૂલ",
-    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો"
+    "duplicateAutoComboTitle": "{name} માંથી સ્ટેટિક કોમ્બો બનાવો",
+    "fallbackSummary": "{rate}% વિનંતીઓ ફેલબેક પર ગઈ, દરેકમાં લગભગ {skips} લક્ષ્યો ચૂકાયા"
   },
   "costs": {
     "title": "ખર્ચ",

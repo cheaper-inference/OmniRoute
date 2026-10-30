@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Tým sa zachytí aktuálne pripojení poskytovatelia/modely, ktoré zodpovedajú tejto šablóne, do upraviteľnej kombinácie.",
     "duplicateAutoComboFailedPrefix": "Duplikácia automatickej kombinácie zlyhala:",
     "duplicateAutoComboUnknownError": "Neznáma chyba",
-    "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}"
+    "duplicateAutoComboTitle": "Vytvorte staticú kombináciu z {name}",
+    "fallbackSummary": "{rate}% požiadaviek použilo záložný proces, ~{skips} cieľov preskočených každou"
   },
   "costs": {
     "title": "náklady",

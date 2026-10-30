@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Dit maakt een momentopname van de momenteel verbonden providers/modellen die overeenkomen met dit sjabloon in een bewerkbare combinatie.",
     "duplicateAutoComboFailedPrefix": "Automatische combinatie dupliceren mislukt:",
     "duplicateAutoComboUnknownError": "Onbekende fout",
-    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}"
+    "duplicateAutoComboTitle": "Maak een statische combinatie van {name}",
+    "fallbackSummary": "{rate}% van de verzoeken viel terug, gemiddeld ~{skips} doelen per verzoek overslagen"
   },
   "costs": {
     "title": "Kosten",

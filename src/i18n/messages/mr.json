@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "या टेम्पलेटशी जुळणारे सध्या कनेक्ट केलेले प्रदाता/मॉडेल्स संपादनयोग्य कॉम्बोमध्ये स्नॅपशॉट घेईल.",
     "duplicateAutoComboFailedPrefix": "ऑटोकॉम्बो डुप्लिकेट करण्यात अपयश:",
     "duplicateAutoComboUnknownError": "अज्ञात त्रुटी",
-    "duplicateAutoComboTitle": "{name} मधून स्थिर कॉम्बो तयार करा"
+    "duplicateAutoComboTitle": "{name} मधून स्थिर कॉम्बो तयार करा",
+    "fallbackSummary": "{rate}% आवेदनांचा फॉलबॅक झाला, प्रत्येक आवेदनातून सरासरी ~{skips} टार्गेट्स वगळले गेले"
   },
   "costs": {
     "title": "खर्च",

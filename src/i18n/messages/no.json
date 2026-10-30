@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Dette vil ta et øyeblikksbilde av de nåvørende tilkoblede leverandørene/modellene som matcher denne malen i en redigerbar kombinasjon.",
     "duplicateAutoComboFailedPrefix": "Duplisering av auto-kombinasjon mislyktes:",
     "duplicateAutoComboUnknownError": "Ukjent feil",
-    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}"
+    "duplicateAutoComboTitle": "Opprett en statisk kombinasjon fra {name}",
+    "fallbackSummary": "{rate}% av forespurningene gikk til fallback, i snitt ~{skips} mål hoppet over hver"
   },
   "costs": {
     "title": "Kostnader",

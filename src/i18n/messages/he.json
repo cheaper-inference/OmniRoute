@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "פעולה זו תצלם את הספקים/מודלים המחוברים כעת התואמים לתבנית הזו לקומבו ניתן לעריכה.",
     "duplicateAutoComboFailedPrefix": "כשל בהעתיק קומבו אוטומטי:",
     "duplicateAutoComboUnknownError": "שגיאה לא ידועה",
-    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}"
+    "duplicateAutoComboTitle": "צור קומבו סטטי מ־{name}",
+    "fallbackSummary": "{rate}% מהבקשות הופעל בהן נפיל, כ-{skips} יעדים נדלגו בממוצע לכל בקשה"
   },
   "costs": {
     "title": "עלויות",

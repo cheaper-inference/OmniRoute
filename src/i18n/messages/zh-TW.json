@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "這將把與此模板匹配的目前連線提供者/模型快照到可編輯的組合中。",
     "duplicateAutoComboFailedPrefix": "複製自動組合失敗：",
     "duplicateAutoComboUnknownError": "未知錯誤",
-    "duplicateAutoComboTitle": "從{name}建立靜態組合"
+    "duplicateAutoComboTitle": "從{name}建立靜態組合",
+    "fallbackSummary": "{rate}% 的請求已回退，每次約跳過 {skips} 個目標"
   },
   "costs": {
     "title": "成本",

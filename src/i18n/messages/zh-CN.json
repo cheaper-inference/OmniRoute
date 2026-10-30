@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "这将把与此模板匹配的当前连接提供者/模型快照到可编辑的组合中。",
     "duplicateAutoComboFailedPrefix": "复制自动组合失败：",
     "duplicateAutoComboUnknownError": "未知错误",
-    "duplicateAutoComboTitle": "从{name}创建静态组合"
+    "duplicateAutoComboTitle": "从{name}创建静态组合",
+    "fallbackSummary": "{rate}% 的请求已回退，每次约跳过 {skips} 个目标"
   },
   "costs": {
     "title": "成本",

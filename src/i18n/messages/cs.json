@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
+    "fallbackSummary": "{rate} % požadavků využilo záložní cestu, každý přeskočil průměrně ~{skips} cílů"
   },
   "costs": {
     "title": "Náklady",

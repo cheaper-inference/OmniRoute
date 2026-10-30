@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "Ovo će napraviti snapshot povezanih providera/modela koji odgovaraju ovom šablonu u uredivi combo.",
     "duplicateAutoComboFailedPrefix": "Neuspjelo dupliranje auto-comba:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statični combo iz {name}",
+    "fallbackSummary": "{rate}% zahtjeva je koristilo alternativni put, svaki je prosječno preskočio ~{skips} meta"
   },
   "costs": {
     "title": "Troškovi",

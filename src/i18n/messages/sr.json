@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Овим ће тренутно повезани провајдери/модели који одговарају овом шаблону бити снимљени у комбинацију која се може уређивати.",
     "duplicateAutoComboFailedPrefix": "Neuspešno dupliranje auto-kombinacije:",
     "duplicateAutoComboUnknownError": "Nepoznata greška",
-    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}"
+    "duplicateAutoComboTitle": "Kreiraj statičku kombinaciju iz {name}",
+    "fallbackSummary": "{rate}% zahteva je koristilo zamenski metod, ~{skips} meta preskočeno za svaki"
   },
   "costs": {
     "title": "Troškovi",

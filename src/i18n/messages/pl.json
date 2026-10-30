@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Spowoduje to przechwycenie aktualnie połączonych dostawców/modeli pasujących do tego szablonu w edytowalnej kombinacji.",
     "duplicateAutoComboFailedPrefix": "Nie udało się skopiować automatycznej kombinacji:",
     "duplicateAutoComboUnknownError": "Nieznany błąd",
-    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}"
+    "duplicateAutoComboTitle": "Utwórz statyczną kombinację z {name}",
+    "fallbackSummary": "{rate}% żądań użyło awaryjnego przełącznika, ~{skips} celów pominiętych przy każdym"
   },
   "costs": {
     "title": "Koszty",

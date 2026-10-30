@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "இந்த டெம்ப்ளேட்டுடன் பொருந்தும் தற்போதைய இணைக்கப்பட்ட வழங்குநர்கள்/மாதிரிகளை திருத்தக்கூடிய கம்போவில் எடுக்கும்.",
     "duplicateAutoComboFailedPrefix": "ஆட்டோகம்போ நகலெடுத்தல் தோல்வியடைந்தது:",
     "duplicateAutoComboUnknownError": "அறியப்படாத பிழை",
-    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்"
+    "duplicateAutoComboTitle": "{name} இலிருந்து நிலையான கம்போ உருவாக்கவும்",
+    "fallbackSummary": "{rate}% கோரிக்கைகள் பின்னடைவு அடைந்தன, ஒவ்வொருமுறையும் ~{skips} இலக்குகள் தவிர்க்கப்பட்டன"
   },
   "costs": {
     "title": "செலவுகள்",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Èyí yóò ṣe ẹ̀dà àwọn olùpèsè/àwọn awoṣe tó sopọ̀ lọ́wọ́lọ́wọ́ tí ó bá àdàkọ yìí mu, yóò sì fi wọ́n sínú àkójọpọ̀ tí a lè ṣàtúnṣe.",
     "duplicateAutoComboFailedPrefix": "Kò ṣeé ṣe láti ṣe ẹ̀dà àkójọpọ̀ aládàáṣiṣẹ́:",
     "duplicateAutoComboUnknownError": "Àṣìṣe àìmọ̀",
-    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}"
+    "duplicateAutoComboTitle": "Ṣẹ̀dá àkójọpọ̀ àìyípadà láti inú {name}",
+    "fallbackSummary": "{rate}% awọn ibeere ti wọle si ibeere ti a le ni, ~{skips} awọn atupale wọn di igbasilẹ si ọwọ si ọwọ"
   },
   "costs": {
     "title": "Àwọn ìnáwó",

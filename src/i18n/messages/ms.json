@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Ini akan mengambil snapshot penyedia/model yang disambungkan semasa yang sepadan dengan templat ini ke dalam kombo yang boleh diedit.",
     "duplicateAutoComboFailedPrefix": "Gagal menduplikasi kombo automatik:",
     "duplicateAutoComboUnknownError": "Ralat tidak diketahui",
-    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}"
+    "duplicateAutoComboTitle": "Cipta kombo statik dari {name}",
+    "fallbackSummary": "{rate}% permintaan kembali ke cadangan, purata ~{skips} sasaran dilepaskan setiap satu"
   },
   "costs": {
     "title": "Kos",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Cela capturera les fournisseurs/modèles actuellement connectés qui correspondent à ce modèle dans une combinaison modifiable.",
     "duplicateAutoComboFailedPrefix": "Échec de la duplication de la combinaison automatique :",
     "duplicateAutoComboUnknownError": "Erreur inconnue",
-    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}"
+    "duplicateAutoComboTitle": "Créer une combinaison statique à partir de {name}",
+    "fallbackSummary": "{rate}% des requêtes ont été basculées, environ {skips} cibles ont été ignorées par requête"
   },
   "costs": {
     "title": "Coûts",

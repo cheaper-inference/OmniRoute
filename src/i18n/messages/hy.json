@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Այս ձևանմուշին համապատասխանող՝ ներկայումս միացված մատակարարների/մոդելների պատճենը կպահվի որպես խմբագրվող կոմբինացիա։",
     "duplicateAutoComboFailedPrefix": "Չհաջողվեց կրկնօրինակել ավտոմատ կոմբինացիան՝",
     "duplicateAutoComboUnknownError": "Անհայտ սխալ",
-    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից"
+    "duplicateAutoComboTitle": "Ստեղծել ստատիկ կոմբինացիա {name}-ից",
+    "fallbackSummary": "{rate}%-ը հարցումները փոխարինվել են, յուրաքանչյուրը միջինում ~{skips} նպատակ թողած"
   },
   "costs": {
     "title": "Ծախսեր",

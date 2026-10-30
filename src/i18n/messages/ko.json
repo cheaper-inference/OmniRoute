@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "이 템플릿과 일치하는 현재 연결된 제공자/모델을 편집 가능한 콤보로 스냅샷합니다.",
     "duplicateAutoComboFailedPrefix": "자동 콤보 복제 실패:",
     "duplicateAutoComboUnknownError": "알 수 없는 오류",
-    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기"
+    "duplicateAutoComboTitle": "{name}에서 정적 콤보 만들기",
+    "fallbackSummary": "요청의 {rate}%가 폴백으로 전환되어 요청당 평균 약 {skips}개 타겟이 건너뛰었습니다"
   },
   "costs": {
     "title": "비용",

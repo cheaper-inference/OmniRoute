@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "سيؤدي هذا إلى التقاط المزودين/النماذج المتصلة حاليًا التي تطابق هذا القالب في مجموعة قابلة للتحرير.",
     "duplicateAutoComboFailedPrefix": "فشل تكرار المجموعة التلقائية:",
     "duplicateAutoComboUnknownError": "خطأ غير معروف",
-    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}"
+    "duplicateAutoComboTitle": "إنشاء مجموعة ثابتة من {name}",
+    "fallbackSummary": "نسبة {rate}% من الطلبات استخدمت المسار البديل، مع تخطي ~{skips} أهداف لكل طلب تقريباً"
   },
   "costs": {
     "title": "التكاليف",

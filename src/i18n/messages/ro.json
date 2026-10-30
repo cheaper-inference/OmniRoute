@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Acesta va captura furnizorii/modelurile conectate în prezent care se potrivesc cu acest șablon într-o combinație editabilă.",
     "duplicateAutoComboFailedPrefix": "Duplicarea combinației automate a eșuat:",
     "duplicateAutoComboUnknownError": "Eroare necunoscută",
-    "duplicateAutoComboTitle": "Creați o combinație statică din {name}"
+    "duplicateAutoComboTitle": "Creați o combinație statică din {name}",
+    "fallbackSummary": "{rate}% din cereri au folosit alternativ, ~{skips} ținte omise fiecare"
   },
   "costs": {
     "title": "Costuri",

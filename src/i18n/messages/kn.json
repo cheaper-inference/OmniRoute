@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "ಈ ಟೆಂಪ್ಲೇಟ್ಗೆ ಹೊಂದಿಕೆಯಾಗುವ ಪ್ರಸ್ತುತ ಸಂಪರ್ಕಿತ ಪೂರೈಕೆದಾರರು/ಮಾಡೆಲ್ಗಳ ಸ್ನ್ಯಾಪ್ಶಾಟ್ ತೆಗೆದು, ಅದನ್ನು ಸಂಪಾದಿಸಬಹುದಾದ ಕಾಂಬೊ ಆಗಿ ರಚಿಸಲಾಗುತ್ತದೆ.",
     "duplicateAutoComboFailedPrefix": "ಸ್ವಯಂ-ಕಾಂಬೊವನ್ನು ನಕಲಿಸಲು ವಿಫಲವಾಗಿದೆ:",
     "duplicateAutoComboUnknownError": "ಅಜ್ಞಾತ ದೋಷ",
-    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ"
+    "duplicateAutoComboTitle": "{name} ನಿಂದ ಸ್ಥಿರ ಕಾಂಬೊವನ್ನು ರಚಿಸಿ",
+    "fallbackSummary": "{rate}% ಮನವಿಗಳು ಪೂರ್ವಾಹ್ನಕ್ಕೆ ಬಂದವು, ಪ್ರತಿಯೊಂದೂ ಸರಾಸರಿ ~{skips} ಗುರಿಗಳನ್ನು ಬಿಟ್ಟುவிಟ್ಟವು"
   },
   "costs": {
     "title": "ವೆಚ್ಚಗಳು",

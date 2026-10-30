@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Wannan zai adana kwafin masu samarwa/samfura da aka haɗa a yanzu waɗanda suka dace da wannan samfuri na tsari a matsayin haɗin da za a iya gyarawa.",
     "duplicateAutoComboFailedPrefix": "An kasa yin kwafin haɗin atomatik:",
     "duplicateAutoComboUnknownError": "Kuskuren da ba a sani ba",
-    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}"
+    "duplicateAutoComboTitle": "Ƙirƙiri tsayayyen haɗi daga {name}",
+    "fallbackSummary": "kasofofen {rate}% na tambaya suke ta wucin gari, kawai matsi {skips} a kowace"
   },
   "costs": {
     "title": "Kuɗaɗen kashewa",

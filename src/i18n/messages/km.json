@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "វានឹងថតស្ថានភាពបច្ចុប្បន្ននៃអ្នកផ្តល់សេវា/ម៉ូដែលដែលបានតភ្ជាប់ និងត្រូវគ្នានឹងគំរូនេះ ទៅជាបន្សំដែលអាចកែសម្រួលបាន។",
     "duplicateAutoComboFailedPrefix": "មិនអាចចម្លងបន្សំស្វ័យប្រវត្តិបានទេ៖",
     "duplicateAutoComboUnknownError": "កំហុសដែលមិនស្គាល់",
-    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}"
+    "duplicateAutoComboTitle": "បង្កើតបន្សំថេរពី {name}",
+    "fallbackSummary": "សំណើរ {rate}% បានប្រើជម្រើស រហូតដល់ ~{skips} គោលដៅ ដែលបានរំលង"
   },
   "costs": {
     "title": "ការចំណាយ",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Это создаст снимок текущих подключенных провайдеров/моделей, соответствующих этому шаблону, в редактируемом комбо.",
     "duplicateAutoComboFailedPrefix": "Не удалось дублировать автоматическое комбо:",
     "duplicateAutoComboUnknownError": "Неизвестная ошибка",
-    "duplicateAutoComboTitle": "Создать статическое комбо из {name}"
+    "duplicateAutoComboTitle": "Создать статическое комбо из {name}",
+    "fallbackSummary": "{rate}% запросов использовали аварийный режим, в каждом пропущено ~{skips} целей"
   },
   "costs": {
     "title": "Затраты",

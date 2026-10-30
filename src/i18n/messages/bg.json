@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "Това ще направи моментна снимка на текущо свързаните доставчици/модели, които съвпадат с този шаблон, в редактируемо комбо.",
     "duplicateAutoComboFailedPrefix": "Неуспешно копиране на автоматично комбо:",
     "duplicateAutoComboUnknownError": "Неизвестна грешка",
-    "duplicateAutoComboTitle": "Създайте статично комбо от {name}"
+    "duplicateAutoComboTitle": "Създайте статично комбо от {name}",
+    "fallbackSummary": "{rate}% от заявките използваха резервна линия, всяка изпусна средно ~{skips} цели"
   },
   "costs": {
     "title": "Разходи",

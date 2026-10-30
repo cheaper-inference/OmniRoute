@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "මෙමඟින් මෙම අච්චුවට ගැළපෙන, දැනට සම්බන්ධිත සැපයුම්කරුවන්/ආකෘතිවල වත්මන් තත්ත්වය සංස්කරණය කළ හැකි සංයෝජනයක් ලෙස සුරකිනු ඇත.",
     "duplicateAutoComboFailedPrefix": "ස්වයංක්රීය සංයෝජනය අනුපිටපත් කිරීමට අසමත් විය:",
     "duplicateAutoComboUnknownError": "නොදන්නා දෝෂයකි",
-    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න"
+    "duplicateAutoComboTitle": "{name} වෙතින් ස්ථිතික සංයෝජනයක් සාදන්න",
+    "fallbackSummary": "{rate}% අනුරෝපණ ආලෝපයන්ට ආශ්‍රිත විය, සෑම එකක්ම ~{skips} ඉලක්ක හැර යාමකි"
   },
   "costs": {
     "title": "පිරිවැය",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Déanfaidh sé seo cóip de na soláthraithe/samhlacha atá nasctha faoi láthair agus a mheaitseálann an teimpléad seo, agus cuirfidh sé i gcomhcheangal ineagarthóireachta iad.",
     "duplicateAutoComboFailedPrefix": "Theip ar chóip den chomhcheangal uathoibríoch a chruthú:",
     "duplicateAutoComboUnknownError": "Earráid anaithnid",
-    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}"
+    "duplicateAutoComboTitle": "Cruthaigh comhcheangal statach ó {name}",
+    "fallbackSummary": "d'fhéad fa ghabh {rate}% d'iarruithe siuile, thit thart {skips} sprioc sa chineál gach ceann"
   },
   "costs": {
     "title": "Costais",

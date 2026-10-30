@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "ਇਹ ਇਸ ਟੈਂਪਲੇਟ ਨਾਲ ਮੇਲ ਖਾਂਦੇ ਮੌਜੂਦਾ ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ/ਮਾਡਲਾਂ ਦਾ ਸਨੈਪਸ਼ਾਟ ਲੈ ਕੇ ਇੱਕ ਸੰਪਾਦਨਯੋਗ ਕੌਂਬੋ ਬਣਾਏਗਾ।",
     "duplicateAutoComboFailedPrefix": "ਆਟੋ-ਕੌਂਬੋ ਦੀ ਨਕਲ ਬਣਾਉਣ ਵਿੱਚ ਅਸਫਲ:",
     "duplicateAutoComboUnknownError": "ਅਣਜਾਣ ਗਲਤੀ",
-    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ"
+    "duplicateAutoComboTitle": "{name} ਤੋਂ ਇੱਕ ਸਥਿਰ ਕੌਂਬੋ ਬਣਾਓ",
+    "fallbackSummary": "{rate}% ਐਪਲੀਕੇਸ਼ਨਾਂ ਬੈਕਅੱਪ ਵਿੱਚ ਗਈਆਂ, ਔਸਤਨ ~{skips} ਟਾਰਗੇਟ ਹਰ ਐਪਲੀਕੇਸ਼ਨ ਵਿੱਚ ਛੂੜੇ ਗਏ"
   },
   "costs": {
     "title": "ਲਾਗਤਾਂ",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "این ارائه‌دهندگان/مدل‌های متصل فعلی که با این قالب مطابقت دارند را در یک ترکیب قابل ویرایش ذخیره می‌کند.",
     "duplicateAutoComboFailedPrefix": "تکرار ترکیب خودکار ناموفق بود:",
     "duplicateAutoComboUnknownError": "خطای ناشناخته",
-    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}"
+    "duplicateAutoComboTitle": "ایجاد یک ترکیب ثابت از {name}",
+    "fallbackSummary": "{rate}% درخواست‌ها فallback شدند، در هر درخواست به طور متوسط ~{skips} هدف رد شد"
   },
   "costs": {
     "title": "هزینهها",

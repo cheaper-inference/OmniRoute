@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "এটি এই টেমপ্লেটের সাথে মিলে যায় এমন বর্তমান সংযুক্ত প্রদানকারী/মডেলগুলিকে একটি সম্পাদনযোগ্য কম্বোতে স্ন্যাপশট নেবে।",
     "duplicateAutoComboFailedPrefix": "অটোকম্বো ডুপ্লিকেশন ব্যর্থ:",
     "duplicateAutoComboUnknownError": "অজানা ত্রুটি",
-    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন"
+    "duplicateAutoComboTitle": "{name} থেকে একটি স্ট্যাটিক কম্বো তৈরি করুন",
+    "fallbackSummary": "আপেক্ষার {rate}% ফলব্যাক ব্যবহার করেছিল, প্রতিটিতে গড় করে ~{skips}টি লক্ষ্য বিমুখ"
   },
   "costs": {
     "title": "খরচ",

@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uyğun olan hazırkı qoşulmuş provayderləri/modeləri redaktə oluna bilən kombo kimi saxlayacaq.",
     "duplicateAutoComboFailedPrefix": "Avtokombo kopyalanması uğursuz oldu:",
     "duplicateAutoComboUnknownError": "Naməlum xəta",
-    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat"
+    "duplicateAutoComboTitle": "{name}-dan statik kombo yarat",
+    "fallbackSummary": "Sorğuların {rate}-i ehtiyat rejimindən istifadə etdi, hər sorğuda təqribən {skips} obyekti atlandı"
   },
   "costs": {
     "title": "Xərclər",

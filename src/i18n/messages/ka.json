@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "ამჟამად დაკავშირებული პროვაიდერებისა და მოდელების, რომლებიც ამ შაბლონს შეესაბამება, მიმდინარე მდგომარეობა დაფიქსირდება რედაქტირებად კომბოდ.",
     "duplicateAutoComboFailedPrefix": "ავტოკომბოს დუბლირება ვერ მოხერხდა:",
     "duplicateAutoComboUnknownError": "უცნობი შეცდომა",
-    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან"
+    "duplicateAutoComboTitle": "სტატიკური კომბოს შექმნა {name}-დან",
+    "fallbackSummary": "{rate}% მოთხოვნის გადამორჩილება, თითოეულში საშუალოდ ~{skips} მიზანი გამოტოვებულია"
   },
   "costs": {
     "title": "ხარჯები",

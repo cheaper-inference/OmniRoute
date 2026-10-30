@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Taip šiuo metu prijungtų, šį šabloną atitinkančių teikėjų ir modelių momentinė kopija bus įrašyta į redaguojamą kombo.",
     "duplicateAutoComboFailedPrefix": "Nepavyko dubliuoti automatinio kombo:",
     "duplicateAutoComboUnknownError": "Nežinoma klaida",
-    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}"
+    "duplicateAutoComboTitle": "Sukurti statinį kombo iš {name}",
+    "fallbackSummary": "{rate}% užklausų naudojo atsarginį variantą, vidutiniškai praleido apie {skips} tikslų per užklausą"
   },
   "costs": {
     "title": "Išlaidos",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Ito ay kukuha ng snapshot ng kasalukuyang nakakonektang mga provider/model na tugma sa template na ito sa isang editable na combo.",
     "duplicateAutoComboFailedPrefix": "Nabigo ang pag-duplicate ng auto-combo:",
     "duplicateAutoComboUnknownError": "Hindi alam na error",
-    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}"
+    "duplicateAutoComboTitle": "Gumawa ng static combo mula sa {name}",
+    "fallbackSummary": "{rate}% ng mga request ang nagbailback, tinatayang ~{skips} na target ang sinakrip sa bawat isa"
   },
   "costs": {
     "title": "Mga gastos",

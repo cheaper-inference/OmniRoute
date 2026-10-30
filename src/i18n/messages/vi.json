@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Điều này sẽ chụp lại các nhà cung cấp/mô hình đang kết nối hiện tại phù hợp với mẫu này vào một tổ hợp có thể chỉnh sửa.",
     "duplicateAutoComboFailedPrefix": "Không thể sao chép tổ hợp tự động:",
     "duplicateAutoComboUnknownError": "Lỗi không xác định",
-    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}"
+    "duplicateAutoComboTitle": "Tạo tổ hợp tĩnh từ {name}",
+    "fallbackSummary": "{rate}% yêu cầu đã dùng phương án dự phòng, mỗi lần bỏ qua ~{skips} mục tiêu"
   },
   "costs": {
     "title": "Chi phí",

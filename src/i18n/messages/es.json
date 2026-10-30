@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Esto capturará los proveedores/modelos conectados actualmente que coincidan con esta plantilla en una combinación editable.",
     "duplicateAutoComboFailedPrefix": "Error al duplicar la combinación automática:",
     "duplicateAutoComboUnknownError": "Error desconocido",
-    "duplicateAutoComboTitle": "Crear una combinación estática de {name}"
+    "duplicateAutoComboTitle": "Crear una combinación estática de {name}",
+    "fallbackSummary": "{rate}% de las solicitudes usaron el respaldo; cada una omitió en promedio ~{skips} objetivos"
   },
   "costs": {
     "title": "Costos",

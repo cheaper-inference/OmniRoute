@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "Bu, bu şablona uygun olarak şu anda bağlı olan sağlayıcıları/modelleri düzenlenebilir bir kombinasyonda yakalayacaktır.",
     "duplicateAutoComboFailedPrefix": "Otomatik kombinasyon kopyalanamadı:",
     "duplicateAutoComboUnknownError": "Bilinmeyen hata",
-    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur"
+    "duplicateAutoComboTitle": "{name}-den statik bir kombinasyon oluştur",
+    "fallbackSummary": "İsteklerin %{rate}'i yedek hedeflere geçti, her seferinde ~{skips} hedef atlandı"
   },
   "costs": {
     "title": "Maliyetler",

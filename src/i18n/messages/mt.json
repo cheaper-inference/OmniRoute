@@ -4185,7 +4185,8 @@
     "duplicateAutoComboSnapshotMsg": "Dan se joħloq snapshot tal-fornituri/mudelli konnessi bħalissa li jaqblu ma’ din is-sagoma, f’kombinazzjoni li tista’ tiġi editjata.",
     "duplicateAutoComboFailedPrefix": "Ma rnexxilniex nidduplikaw il-kombinazzjoni awtomatika:",
     "duplicateAutoComboUnknownError": "Żball mhux magħruf",
-    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}"
+    "duplicateAutoComboTitle": "Oħloq kombinazzjoni statika minn {name}",
+    "fallbackSummary": "{rate}% tal-bitiet wasslu għal fallback, ċaże mhux medja ~{skips} objettivi salta"
   },
   "costs": {
     "title": "Spejjeż",

@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "สิ่งนี้จะจับภาพผู้ให้บริการ/โมเดลที่เชื่อมต่ออยู่ในปัจจุบันซึ่งตรงกับเทมเพลตนี้ลงในคอมโบที่แก้ไขได้",
     "duplicateAutoComboFailedPrefix": "ล้มเหลวในการทำสำเนาคอมโบอัตโนมัติ:",
     "duplicateAutoComboUnknownError": "ข้อผิดพลาดที่ไม่ทราบสาเหตุ",
-    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}"
+    "duplicateAutoComboTitle": "สร้างคอมโบคงที่จาก {name}",
+    "fallbackSummary": "คำขอ {rate}% ย้ายไปใช้สำรอง แต่ละครั้งข้ามเป้าหมายประมาณ {skips} รายการ"
   },
   "costs": {
     "title": "ค่าใช้จ่าย",

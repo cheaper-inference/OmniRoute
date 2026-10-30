@@ -3618,6 +3618,7 @@
     "more": "+{count} more",
     "reqs": "reqs",
     "success": "success",
+    "fallbackSummary": "{rate}% of requests fell back, ~{skips} targets skipped each",
     "proxyConfigured": "Proxy configured",
     "copyComboName": "Copy combo name",
     "enableCombo": "Enable combo",

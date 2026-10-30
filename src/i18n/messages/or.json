@@ -4108,7 +4108,8 @@
     "duplicateAutoComboSnapshotMsg": "ଏହା ଏହି ଟେମ୍ପ୍ଲେଟ୍ ସହ ମେଳ ଖାଉଥିବା ବର୍ତ୍ତମାନ ସଂଯୁକ୍ତ ପ୍ରଦାନକାରୀ/ମଡେଲ୍ଗୁଡ଼ିକର ଏକ ସ୍ନାପ୍ସଟ୍ ନେଇ ତାହାକୁ ଏକ ସମ୍ପାଦନଯୋଗ୍ୟ କମ୍ବୋରେ ପରିଣତ କରିବ।",
     "duplicateAutoComboFailedPrefix": "ସ୍ୱୟଂଚାଳିତ କମ୍ବୋର ନକଲ କରିବାରେ ବିଫଳ:",
     "duplicateAutoComboUnknownError": "ଅଜଣା ତ୍ରୁଟି",
-    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ"
+    "duplicateAutoComboTitle": "{name} ରୁ ଏକ ସ୍ଥିର କମ୍ବୋ ସୃଷ୍ଟି କରନ୍ତୁ",
+    "fallbackSummary": "{rate}% ଆବେଦନ ଫଲବେକ୍ ହୋଇଛି, ପ୍ରତି ଆବେଦନରେ ପ୍ରାୟ ~{skips} ଟାର୍ଗେଟ୍ ଚାଲି ଯାଇଛି"
   },
   "costs": {
     "title": "ଖର୍ଚ୍ଚ",

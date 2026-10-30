@@ -1929,7 +1929,9 @@ function ComboCardInner({
                 </span>
                 <span className="text-[10px] text-text-muted">~{metrics.avgLatencyMs}ms</span>
                 {metrics.fallbackRate > 0 && (
-                  <span className="text-[10px] text-warning">{metrics.fallbackRate}% fallback</span>
+                  <span className="text-[10px] text-warning">
+                    {t("fallbackSummary", { rate: metrics.fallbackRate, skips: metrics.skipsPerRequest })}
+                  </span>
                 )}
               </div>
             )}
