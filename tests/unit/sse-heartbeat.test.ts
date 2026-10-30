@@ -125,9 +125,14 @@ test("shape: anthropic-ping emits event: ping with empty JSON data", async () =>
   });
 });
 
-test("shape: openai-chunk emits valid chat.completion.chunk with empty delta", async () => {
+test("shape: openai-chunk emits valid chat.completion.chunk without application choices", async () => {
   await withFakeIntervals(async (intervals) => {
-    const transform = createSseHeartbeatTransform({ intervalMs: 100, shape: "openai-chunk" });
+    const transform = createSseHeartbeatTransform({
+      intervalMs: 100,
+      shape: "openai-chunk",
+      chunkId: "custom-heartbeat",
+      chunkModel: "custom-model",
+    });
     const writer = transform.writable.getWriter();
     const reader = transform.readable.getReader();
     const emitted = [];
@@ -148,10 +153,10 @@ test("shape: openai-chunk emits valid chat.completion.chunk with empty delta", a
     const jsonStr = emitted[0].slice("data: ".length, -"\n\n".length);
     const json = JSON.parse(jsonStr);
     assert.equal(json.object, "chat.completion.chunk");
-    assert.ok(Array.isArray(json.choices) && json.choices.length === 1);
-    assert.equal(typeof json.choices[0].delta, "object");
-    assert.equal(Object.keys(json.choices[0].delta).length, 0);
-    assert.equal(json.choices[0].finish_reason, null);
+    assert.deepEqual(json.choices, []);
+    assert.equal(json.id, "custom-heartbeat");
+    assert.equal(json.model, "custom-model");
+    assert.ok(Number.isInteger(json.created), "heartbeat timestamp remains a JSON integer");
   });
 });
 
