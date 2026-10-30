@@ -133,7 +133,12 @@ import {
 import { markAntigravityMissingCloudCodeProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { wrapResponseWithOAuthSessionRelease } from "@omniroute/open-sse/services/oauthSessionOccupancy.ts";
-import { inheritProviderProbeResponse, inheritResponsePolicies } from "./chat/responsePolicies.ts";
+import {
+  inheritProviderProbeResponse,
+  inheritResponsePolicies,
+  isNoReplayResponse,
+  markCustomJsonNoReplay,
+} from "./chat/responsePolicies.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -2193,6 +2198,7 @@ async function handleSingleModelChat(
         return execution.localResourcePressureResult.response;
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
+      markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2290,6 +2296,12 @@ async function handleSingleModelChat(
           }
         }
         return muse.museFailureResponse(museOwner, result);
+      }
+
+      // Custom JSON API node: the business call may already have taken effect. Surface
+      // its failure as-is — no account cooldown, no replay on another connection.
+      if (isNoReplayResponse(result.response)) {
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
       }
 
       // A hard-lease rejection must not mutate account state or retry.
