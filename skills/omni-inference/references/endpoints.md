@@ -98,6 +98,8 @@
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
 - [`GET /api/v1/providers/{provider}/limits`](#get-apiv1providersproviderlimits)
 - [`PUT /api/v1/providers/{provider}/limits`](#put-apiv1providersproviderlimits)
+- [`GET /api/v1/quota-recoveries/{id}`](#get-apiv1quota-recoveriesid)
+- [`DELETE /api/v1/quota-recoveries/{id}`](#delete-apiv1quota-recoveriesid)
 - [`GET /api/v1/quotas/check`](#get-apiv1quotascheck)
 - [`GET /api/v1/registered-keys`](#get-apiv1registered-keys)
 - [`POST /api/v1/registered-keys`](#post-apiv1registered-keys)
@@ -1168,6 +1170,26 @@ curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/v1/quota-recoveries/{id}
+
+Poll a quota recovery ticket
+
+Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or `POST /api/v1/responses` turn that failed with a terminal quota error. A request opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for up to 24 h). Instead of the quota error the caller then receives `202` with `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+
+```bash
+curl http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### DELETE /api/v1/quota-recoveries/{id}
+
+Cancel a quota recovery ticket
+
+```bash
+curl -X DELETE http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### GET /api/v1/quotas/check

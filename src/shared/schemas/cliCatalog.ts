@@ -45,7 +45,9 @@ export const CliCatalogEntrySchema = z.object({
       })
     )
     .optional(),
-  codeBlock: z.object({ language: z.string(), code: z.string() }).optional(),
+  codeBlock: z
+    .object({ title: z.string().optional(), language: z.string(), code: z.string() })
+    .optional(),
   notes: z
     .array(z.object({ type: z.enum(["info", "warning", "error", "cloudCheck"]), text: z.string() }))
     .optional(),
