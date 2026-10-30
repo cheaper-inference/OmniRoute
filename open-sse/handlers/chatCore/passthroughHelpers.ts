@@ -2,6 +2,7 @@ import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
 import { downgradeRestoredClaudeThinking } from "../../services/claudeThinkingStore.ts";
+import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
 import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
 import { getHeaderValueCaseInsensitive } from "./headers.ts";
@@ -266,6 +267,106 @@ export function isAnthropicThinkingSignatureError({
 }
 
 /**
+ * Match the other Anthropic thinking-block validation failure, which names
+ * the LATEST assistant message specifically rather than a stale signature:
+ *
+ *   400 messages.N.content.M: `thinking` or `redacted_thinking` blocks in
+ *   the latest assistant message cannot be modified. These blocks must
+ *   remain as they were in the original response.
+ *
+ * This fires when the thinking/redacted_thinking block OmniRoute replayed
+ * for the latest turn is not a faithful copy of what Anthropic actually
+ * produced for it — most commonly because the upstream stream for that turn
+ * was cut short (e.g. a `content_filter` stop mid-stream, #17324) before a
+ * complete, replayable signed block could be captured, so the block OmniRoute
+ * has on file (or the client resent) no longer matches. Unlike
+ * {@link isAnthropicThinkingSignatureError}, stripping HISTORICAL thinking
+ * cannot help here — the rejected block is in the message the error names,
+ * not an earlier one — so this uses its own targeted recovery
+ * ({@link stripLatestAssistantThinkingForModifiedRecovery}).
+ */
+export function isAnthropicThinkingModifiedError({
+  provider,
+  status,
+  message,
+}: ThinkingSignatureError): boolean {
+  const isAnthropicTarget =
+    provider === "claude" ||
+    (typeof provider === "string" && provider.startsWith("anthropic-compatible-"));
+  if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
+
+  return /[`'\"]?thinking[`'\"]?\s+or\s+[`'\"]?redacted_thinking[`'\"]?\s+blocks\s+in\s+the\s+latest\s+assistant\s+message\s+cannot\s+be\s+modified/i.test(
+    message
+  );
+}
+
+function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
+  if (content.every(isThinkingBlock)) return true;
+  if (!hasBlock({ content }, "tool_use")) return false;
+  const first = content[0] as Record<string, unknown> | null;
+  if (!first || typeof first !== "object" || Object.keys(first).length !== 2) return false;
+  return (
+    first.type === "redacted_thinking" &&
+    first.data === DEFAULT_THINKING_CLAUDE_SIGNATURE &&
+    content.slice(1).every((block) => !isThinkingBlock(block))
+  );
+}
+
+/**
+ * Build a one-shot recovery body after Anthropic rejected the thinking block
+ * of the LATEST assistant message as modified (see
+ * {@link isAnthropicThinkingModifiedError}). Only that one message is
+ * touched: a block this store restored is swapped back to the #5312
+ * `redacted_thinking` placeholder and forgotten (the same recovery
+ * {@link stripHistoricalThinkingForSignatureRecovery} uses); any other
+ * thinking block left in that message — never restored by this store, so
+ * either sent by the client or produced by a filtered/truncated upstream
+ * turn OmniRoute could not capture faithfully — is dropped outright, since
+ * it cannot be resent regardless of how it became unreplayable. A `tool_use`
+ * left in the same message keeps a `redacted_thinking` placeholder ahead of
+ * it so the turn's structural shape stays valid. Earlier turns and any
+ * trailing tool-result messages are untouched. Returns the original body
+ * reference when there is nothing safe to recover.
+ */
+export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return body;
+
+  const record = body as Record<string, unknown>;
+  if (!Array.isArray(record.messages)) return body;
+
+  const messages = record.messages as MessageLike[];
+  let index = messages.length - 1;
+  while (index >= 0 && messages[index]?.role !== "assistant") index -= 1;
+  if (index < 0) return body;
+
+  const message = messages[index];
+  if (!message || !Array.isArray(message.content) || !message.content.some(isThinkingBlock)) {
+    return body;
+  }
+  // Dropping every block would create an invalid empty assistant message.
+  // Keep the original failure when there is no safe content to retry.
+  if (hasNoSafeThinkingRecovery(message.content)) return body;
+
+  // The guards above exclude empty and already-normalized recovery bodies
+  // before downgrading stored blocks, which also forgets their cached entries.
+  const downgraded = downgradeRestoredClaudeThinking(message.content);
+  const base = (downgraded ?? message.content) as unknown[];
+  let content = base.filter((block) => !isThinkingBlock(block));
+
+  const hasToolUse = content.some(
+    (block) =>
+      !!block && typeof block === "object" && (block as { type?: unknown }).type === "tool_use"
+  );
+  if (hasToolUse) {
+    content = [{ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE }, ...content];
+  }
+
+  const recoveredMessages = messages.slice();
+  recoveredMessages[index] = { ...message, content: content as typeof message.content };
+  return { ...record, messages: recoveredMessages } as T;
+}
+
+/**
  * Build a one-shot recovery body after Anthropic has explicitly rejected a
  * thinking signature. Historical thinking blocks are omitted, but the complete
  * active tool-use cycle is preserved verbatim: when the request ends in one or
@@ -357,18 +458,19 @@ export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
 }): Promise<SignatureRecoveryExecution<T>> {
   const first = await args.execute(args.body);
   const failure = await args.getError(first);
-  if (
-    !failure ||
-    !isAnthropicThinkingSignatureError({
-      provider: args.provider,
-      status: failure.status,
-      message: failure.message,
-    })
-  ) {
+  if (!failure) {
     return { result: first, retried: false, recoveryBody: null };
   }
 
-  const recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
+  const errorArgs = { provider: args.provider, status: failure.status, message: failure.message };
+  let recoveryBody: unknown;
+  if (isAnthropicThinkingSignatureError(errorArgs)) {
+    recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
+  } else if (isAnthropicThinkingModifiedError(errorArgs)) {
+    recoveryBody = stripLatestAssistantThinkingForModifiedRecovery(args.body);
+  } else {
+    return { result: first, retried: false, recoveryBody: null };
+  }
   if (recoveryBody === args.body) {
     return { result: first, retried: false, recoveryBody: null };
   }
