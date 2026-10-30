@@ -267,6 +267,20 @@ function isGrokBuildReasoningItem(item: unknown): boolean {
   );
 }
 
+const CODEX_WEB_SEARCH_ACTIONS = new Set(["search", "open_page", "find_in_page"]);
+
+function sanitizeCodexWebSearchAction(item: unknown): unknown {
+  const record = toRecord(item);
+  if (record?.type !== "web_search_call" || record.action === undefined) return item;
+  const action = toRecord(record.action);
+  if (typeof action?.type === "string" && CODEX_WEB_SEARCH_ACTIONS.has(action.type)) return item;
+  // WebSearchCall.action is optional. Omit an unrecognized replay action rather
+  // than inventing a search or discarding the item's encrypted history.
+  const next = { ...record };
+  delete next.action;
+  return next;
+}
+
 // Codex-specific call site (#13698): the native Codex/ChatGPT passthrough path is the only
 // caller that needs both flags derived from one boolean, kept here (not in the frozen
 // open-sse/executors/codex.ts) so a per-property change never grows that file's line count.
@@ -277,7 +291,9 @@ export function sanitizeCodexResponsesInput(
   nativeCodexPassthrough: boolean
 ): void {
   if (!Array.isArray(body.input)) return;
-  const input = body.input.filter((item) => !isGrokBuildReasoningItem(item));
+  const input = body.input
+    .filter((item) => !isGrokBuildReasoningItem(item))
+    .map(sanitizeCodexWebSearchAction);
   body.input = sanitizeResponsesInputItems(input, false, {
     dropInternalAssistantMessages: !nativeCodexPassthrough,
     preserveAgentMessages: nativeCodexPassthrough,

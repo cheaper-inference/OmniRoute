@@ -1,0 +1,1 @@
+- **fix(codex):** Omit unsupported optional `web_search_call.action` history without replacing the search or dropping its item/encrypted content; retain valid search/open/find actions and compaction replay behavior. ([#18333](https://github.com/cheaper-inference/OmniRoute/pull/18333)) — thanks @shevar0
