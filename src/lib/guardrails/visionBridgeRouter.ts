@@ -457,7 +457,13 @@ export async function getBestVisionModel(
     // Only skip credential validation when the check is indeterminate (null).
     // A confirmed `false` means fall through to auto-selection.
     if (usable !== false) {
-      return fullConfig.fixedModel;
+      const separator = fullConfig.fixedModel.indexOf("/");
+      if (separator < 1) return fullConfig.fixedModel;
+      const providerAlias = fullConfig.fixedModel.slice(0, separator);
+      const modelId = fullConfig.fixedModel.slice(separator + 1);
+      if (await isModelUsableGivenLockouts(providerAlias, modelId, deps)) {
+        return fullConfig.fixedModel;
+      }
     }
   }
 
