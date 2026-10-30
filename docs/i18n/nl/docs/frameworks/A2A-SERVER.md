@@ -215,21 +215,21 @@ Het JSON-RPC-eindpunt `/a2a` is het canonieke A2A-toegangspunt. De onderstaande 
    };
    ```
 
-3. **Maak de skill beschikbaar in de Agent Card:** voeg in `src/app/.well-known/agent.json/route.ts` het volgende toe aan de `skills`-array:
+3. **Maak deze beschikbaar in de Agent Card:** voeg in `src/lib/a2a/agentCardMetadata.ts` (gedeeld door `/.well-known/agent.json` en `/.well-known/agent-card.json`) het volgende toe aan de array `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Uw skill",
      "description": "Korte, intentiegerichte beschrijving",
-     "tags": ["routering", "quotum"],
-     "examples": ["Voorbeeld van een aanroep in natuurlijke taal"]
+     "tags": ["routing", "quotum"],
+     "examples": ["Voorbeeldaanroep in natuurlijke taal"]
    }
    ```
 
 4. **Schrijf tests:** `tests/unit/a2a-<your-skill>.test.ts`. Test zowel het succesvolle pad als het foutpad.
 
-5. **Documenteer** de nieuwe skill in de tabel `Beschikbare skills` van dit bestand.
+5. **Documenteer** de nieuwe skill in de tabel `Available Skills` van dit bestand.
 
 ---
 

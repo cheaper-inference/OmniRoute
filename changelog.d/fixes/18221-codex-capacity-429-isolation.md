@@ -1,0 +1,1 @@
+- **fix(codex):** classify explicit transient Codex capacity HTTP 429s separately from exhausted quota. Avoid virtual-scope cooldowns and shared limiter pauses, honor `disableCooling`, retain bounded exact-model backoff and account rotation, and preserve genuine quota/reset evidence (#18221 - thanks @fabioKoruja00).

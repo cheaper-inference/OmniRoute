@@ -201,13 +201,13 @@ JSON-RPC एंडपॉइंट `/a2a` प्रामाणिक A2A प्�
 
 1. **स्किल फ़ाइल बनाएँ:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   एक async फ़ंक्शन `(task: A2ATask) => Promise<{ artifacts, metadata }>` एक्सपोर्ट करें। `smartRouting.ts` जैसे मौजूदा स्किल के स्वरूप का अनुसरण करें।
+   एक async फ़ंक्शन `(task: A2ATask) => Promise<{ artifacts, metadata }>` एक्सपोर्ट करें। `smartRouting.ts` जैसे मौजूदा स्किल्स की संरचना का पालन करें।
 
-2. **हैंडलर पंजीकृत करें:** `src/lib/a2a/taskExecution.ts` में, `A2A_SKILL_HANDLERS` में एक प्रविष्टि जोड़ें:
+2. **हैंडलर रजिस्टर करें:** `src/lib/a2a/taskExecution.ts` में, `A2A_SKILL_HANDLERS` में एक एंट्री जोड़ें:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...मौजूदा स्किल
+     // ...मौजूदा स्किल्स
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC एंडपॉइंट `/a2a` प्रामाणिक A2A प्�
    };
    ```
 
-3. **Agent Card में प्रदर्शित करें:** `src/app/.well-known/agent.json/route.ts` में, `skills` ऐरे में जोड़ें:
+3. **Agent Card में प्रदर्शित करें:** `src/lib/a2a/agentCardMetadata.ts` में (`/.well-known/agent.json` और `/.well-known/agent-card.json` द्वारा साझा की जाने वाली फ़ाइल), `skills` ऐरे में निम्न जोड़ें:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC एंडपॉइंट `/a2a` प्रामाणिक A2A प्�
    }
    ```
 
-4. **टेस्ट लिखें:** `tests/unit/a2a-<your-skill>.test.ts`। सफल पथ + त्रुटि पथ को कवर करें।
+4. **टेस्ट लिखें:** `tests/unit/a2a-<your-skill>.test.ts`। सफल स्थिति + त्रुटि स्थिति को कवर करें।
 
-5. इस फ़ाइल की `Available Skills` तालिका में नए स्किल का **दस्तावेज़ीकरण करें**।
+5. **इस फ़ाइल की `Available Skills` तालिका में नए स्किल का दस्तावेज़ीकरण करें।**
 
 ---
 

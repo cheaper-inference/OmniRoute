@@ -200,9 +200,9 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
 
 1. **સ્કિલ ફાઇલ બનાવો:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` અસિંક ફંક્શન એક્સપોર્ટ કરો. `smartRouting.ts` જેવી હાલની સ્કિલ્સનું માળખું અનુસરો.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` સ્વરૂપનું async function export કરો. `smartRouting.ts` જેવી હાલની સ્કિલ્સના માળખાને અનુસરો.
 
-2. **હૅન્ડલર નોંધાવો:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એક એન્ટ્રી ઉમેરો:
+2. **હેન્ડલર રજિસ્ટર કરો:** `src/lib/a2a/taskExecution.ts` માં, `A2A_SKILL_HANDLERS` માં એક એન્ટ્રી ઉમેરો:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -214,7 +214,7 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
    };
    ```
 
-3. **Agent Card માં પ્રદર્શિત કરો:** `src/app/.well-known/agent.json/route.ts` માં, `skills` ઍરેમાં ઉમેરો:
+3. **Agent Card માં ઉપલબ્ધ કરાવો:** `src/lib/a2a/agentCardMetadata.ts` માં (`/.well-known/agent.json` અને `/.well-known/agent-card.json` બંને દ્વારા શેર કરાયેલ), `skills` array માં ઉમેરો:
 
    ```json
    {
@@ -226,9 +226,9 @@ JSON-RPC એન્ડપોઇન્ટ `/a2a` પ્રમાણભૂત A2A �
    }
    ```
 
-4. **ટેસ્ટ્સ લખો:** `tests/unit/a2a-<your-skill>.test.ts`. સફળ માર્ગ + ભૂલ માર્ગ આવરી લો.
+4. **ટેસ્ટ્સ લખો:** `tests/unit/a2a-<your-skill>.test.ts`. સફળતા પાથ + ભૂલ પાથને આવરી લો.
 
-5. આ ફાઇલના `Available Skills` કોષ્ટકમાં નવી સ્કિલનું **દસ્તાવેજીકરણ કરો**.
+5. **આ ફાઇલના `Available Skills` ટેબલમાં નવી સ્કિલનું દસ્તાવેજીકરણ કરો.**
 
 ---
 

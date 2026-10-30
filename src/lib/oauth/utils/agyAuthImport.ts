@@ -154,7 +154,7 @@ export async function enrichWithAntigravityBackend(
   const loadTimer = setTimeout(() => loadController.abort(), 8000);
   try {
     const headers = getAntigravityContentHeaders("cli", parsed.accessToken);
-    const metadata = getAntigravityLoadCodeAssistMetadata();
+    const metadata = getAntigravityLoadCodeAssistMetadata("cli");
     for (const endpoint of AGY_CONFIG.loadCodeAssistEndpoints) {
       try {
         const res = await fetch(endpoint, {
