@@ -1,0 +1,1 @@
+- **chore(pricing):** Remove six retired or unlisted NVIDIA model IDs from the shipped zero-price defaults instead of continuing to advertise those passthrough IDs as free. This does not change registered NVIDIA models or explicit operator pricing; current GPT-OSS alias handling remains in the separate NVIDIA follow-ups (#18500).

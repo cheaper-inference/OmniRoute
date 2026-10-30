@@ -50,3 +50,29 @@ test("formatCost remains re-exported from the pricing barrel", () => {
   const fn = (P as Record<string, (value: number) => string>).formatCost;
   assert.equal(fn(0.0123), "$0.0123");
 });
+
+test("#18500: obsolete NVIDIA passthrough IDs are not priced as free defaults", () => {
+  const obsoleteModels = [
+    "moonshotai/kimi-k2.5",
+    "z-ai/glm4.7",
+    "deepseek-ai/deepseek-v3.2",
+    "nvidia/llama-3.3-70b-instruct",
+    "meta/llama-4-maverick-17b-128e-instruct",
+    "deepseek/deepseek-r1",
+  ];
+  // The pricing barrel is the public surface used to resolve default rates;
+  // the same six obsolete IDs must be absent from both exported access paths.
+  for (const [source, nvidia] of [
+    ["DEFAULT_PRICING", P.DEFAULT_PRICING.nvidia],
+    ["getDefaultPricing", P.getDefaultPricing().nvidia],
+  ] as const) {
+    assert.ok(nvidia && typeof nvidia === "object", `${source}: missing NVIDIA defaults`);
+    for (const modelId of obsoleteModels) {
+      assert.equal(
+        Object.hasOwn(nvidia, modelId),
+        false,
+        `${source}: stale NVIDIA model ${modelId} must not have a default zero price`
+      );
+    }
+  }
+});
