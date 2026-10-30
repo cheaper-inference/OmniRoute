@@ -390,6 +390,7 @@ export function resumeTranscript(
 ): {
   phase: "snapshot" | "live";
   after: string;
+  generation?: number;
   messages: TranscriptItem[];
   cards: TranscriptCard[];
 } {
