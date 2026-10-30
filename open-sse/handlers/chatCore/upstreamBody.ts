@@ -400,6 +400,7 @@ function normalizeAttemptBody(opts: PrepareUpstreamBodyOptions): Body {
       rawBody: opts.rawBody as Parameters<typeof wireAdaptiveEffort>[1]["rawBody"],
       clientRawRequest: opts.clientRawRequest,
       targetFormat,
+      model: modelToCall,
     });
   }
   if (provider === "xiaomi-mimo") bodyToSend = normalizeMimoThinking(bodyToSend);

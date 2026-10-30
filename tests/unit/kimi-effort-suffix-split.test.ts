@@ -13,6 +13,8 @@ const core = await import("../../src/lib/db/core.ts");
 const { extractReasoningIntent } = await import("../../src/lib/reasoningRouting/policy.ts");
 const { splitKimiCodingEffortVariant } =
   await import("../../open-sse/utils/kimiCodingEffortVariant.ts");
+const { applyKimiCodingEffortVariant } =
+  await import("../../open-sse/handlers/chatCore/kimiCodingEffortVariant.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 
 type Json = Record<string, unknown>;
@@ -28,23 +30,37 @@ test.after(async () => {
 async function dispatchKimi(
   model: string,
   extraBody: Json = {},
-  provider = "kimi-coding"
+  provider = "kimi-coding",
+  protocol = "claude"
 ): Promise<{ url: string; body: Json }> {
   const captured: Array<{ url: string; body: Json }> = [];
   globalThis.fetch = (async (url: unknown, init: RequestInit = {}) => {
     captured.push({ url: String(url), body: JSON.parse(String(init.body || "{}")) });
-    return new Response(
-      JSON.stringify({
-        id: "msg_kimi",
-        type: "message",
-        role: "assistant",
-        model: "k3",
-        content: [{ type: "text", text: "OK" }],
-        stop_reason: "end_turn",
-        usage: { input_tokens: 3, output_tokens: 1 },
-      }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
+    const payload =
+      protocol === "openai"
+        ? {
+            id: "chat_kimi",
+            object: "chat.completion",
+            created: 0,
+            model: "k3.1-pro",
+            choices: [
+              { index: 0, message: { role: "assistant", content: "OK" }, finish_reason: "stop" },
+            ],
+            usage: { prompt_tokens: 3, completion_tokens: 1, total_tokens: 4 },
+          }
+        : {
+            id: "msg_kimi",
+            type: "message",
+            role: "assistant",
+            model: "k3",
+            content: [{ type: "text", text: "OK" }],
+            stop_reason: "end_turn",
+            usage: { input_tokens: 3, output_tokens: 1 },
+          };
+    return new Response(JSON.stringify(payload), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
   }) as typeof fetch;
 
   const body = {
@@ -57,8 +73,11 @@ async function dispatchKimi(
   try {
     const result = await handleChatCore({
       body: structuredClone(body),
-      modelInfo: { provider, model, extendedContext: false },
-      credentials: { apiKey: "test-kimi-key", providerSpecificData: {} },
+      modelInfo: { provider, model, extendedContext: false, targetFormat: protocol },
+      credentials: {
+        apiKey: "test-kimi-key",
+        providerSpecificData: { _omnirouteKimiTargetFormat: protocol },
+      },
       log: { debug() {}, info() {}, warn() {}, error() {} },
       clientRawRequest: {
         endpoint: "/v1/chat/completions",
@@ -71,6 +90,10 @@ async function dispatchKimi(
     globalThis.fetch = originalFetch;
   }
   assert.equal(captured.length, 1, "exactly one upstream call");
+  assert.match(
+    captured[0].url,
+    protocol === "openai" ? /chat\/completions$/ : /messages\?beta=true$/
+  );
   return captured[0];
 }
 
@@ -165,4 +188,132 @@ test("explicit request effort still wins over the suffix", () => {
   });
   assert.equal(intent.model, "kimi-coding/kimi-k3");
   assert.equal(intent.effort, "low");
+});
+
+test("K3.1 alias normalization does not synthesize effort before dispatch", () => {
+  for (const provider of ["kimi-coding", "kimi-coding-apikey"]) {
+    for (const [requested, wireModel] of [
+      ["kimi-k3.1-pro", "k3.1-pro"],
+      ["kimi-k3.1-pro-highspeed", "k3.1-pro-highspeed"],
+    ]) {
+      const body = { model: requested };
+      const normalized = applyKimiCodingEffortVariant({
+        provider,
+        effectiveModel: requested,
+        body,
+      });
+      assert.equal(normalized.effectiveModel, wireModel);
+      assert.equal(body.model, wireModel);
+      assert.equal(Object.hasOwn(body, "reasoning_effort"), false);
+
+      const disabled = { model: `${requested}-high`, enable_thinking: false };
+      applyKimiCodingEffortVariant({
+        provider,
+        effectiveModel: disabled.model,
+        body: disabled,
+      });
+      assert.equal(disabled.model, wireModel);
+      assert.equal(disabled.reasoning_effort, undefined);
+    }
+  }
+});
+
+test("K3.1 canonical aliases dispatch to wire ids with the executor default", async () => {
+  for (const provider of ["kimi-coding", "kimi-coding-apikey"]) {
+    for (const protocol of ["openai", "claude"]) {
+      for (const [requested, wireModel] of [
+        ["kimi-k3.1-pro", "k3.1-pro"],
+        ["kimi-k3.1-pro-highspeed", "k3.1-pro-highspeed"],
+      ]) {
+        const { url, body } = await dispatchKimi(requested, {}, provider, protocol);
+        const label = `${provider}/${requested} (${protocol}): ${url} ${JSON.stringify(body)}`;
+        assert.equal(body.model, wireModel, label);
+        assert.equal(body.reasoning_effort, undefined, label);
+        assert.equal(body.reasoning, undefined, label);
+        assert.equal(body.enable_thinking, undefined, label);
+        if (protocol === "openai") {
+          assert.deepEqual(body.thinking, { type: "enabled", effort: "max", keep: "all" }, label);
+          assert.equal(body.output_config, undefined, label);
+        } else {
+          assert.deepEqual(body.thinking, { type: "enabled" }, label);
+          assert.deepEqual(body.output_config, { effort: "max" }, label);
+        }
+      }
+    }
+  }
+});
+
+test("K3.1 canonical aliases preserve disabled-only and explicit-effort requests", async () => {
+  for (const provider of ["kimi-coding", "kimi-coding-apikey"]) {
+    for (const protocol of ["openai", "claude"]) {
+      for (const [extra, expected] of [
+        [{ enable_thinking: false }, null],
+        [{ enable_thinking: false, reasoning_effort: "low" }, "low"],
+      ]) {
+        const { body } = await dispatchKimi("kimi-k3.1-pro", extra, provider, protocol);
+        const label = `${provider} (${protocol}): ${JSON.stringify(extra)}`;
+        assert.equal(body.model, "k3.1-pro", label);
+        assert.equal(body.reasoning_effort, undefined, label);
+        assert.equal(body.reasoning, undefined, label);
+        assert.equal(body.enable_thinking, undefined, label);
+        if (expected === null) {
+          assert.deepEqual(body.thinking, { type: "disabled" }, label);
+          assert.equal(body.output_config, undefined, label);
+        } else if (protocol === "openai") {
+          assert.deepEqual(
+            body.thinking,
+            { type: "enabled", effort: expected, keep: "all" },
+            label
+          );
+        } else {
+          assert.deepEqual(body.thinking, { type: "enabled" }, label);
+          assert.deepEqual(body.output_config, { effort: expected }, label);
+        }
+      }
+    }
+  }
+});
+
+test("bare K3.1 Coding ids preserve enable_thinking false through both translators", async () => {
+  for (const provider of ["kimi-coding", "kimi-coding-apikey"]) {
+    for (const protocol of ["openai", "claude"]) {
+      const { body } = await dispatchKimi(
+        "k3.1-pro",
+        { enable_thinking: false },
+        provider,
+        protocol
+      );
+      const label = `${provider}/k3.1-pro (${protocol})`;
+      assert.equal(body.model, "k3.1-pro", label);
+      assert.deepEqual(body.thinking, { type: "disabled" }, label);
+      assert.equal(body.output_config, undefined, label);
+      assert.equal(body.enable_thinking, undefined, label);
+    }
+  }
+});
+
+test("K3.1 canonical aliases stay intact in reasoning intent without fabricated effort", () => {
+  for (const prefix of ["kimi-coding", "kmc", "kimi-coding-apikey", "kmca"]) {
+    for (const model of ["kimi-k3.1-pro", "kimi-k3.1-pro-highspeed"]) {
+      const id = `${prefix}/${model}`;
+      const intent = extractReasoningIntent(id, {});
+      assert.equal(intent.model, id);
+      assert.equal(intent.effort, null);
+      assert.equal(intent.sourceEffort, "missing");
+      assert.equal(intent.hasReasoningSignal, false);
+    }
+  }
+  const explicit = extractReasoningIntent("kmc/kimi-k3.1-pro", { reasoning_effort: "low" });
+  assert.equal(explicit.model, "kmc/kimi-k3.1-pro");
+  assert.equal(explicit.effort, "low");
+});
+
+test("K3.1 effort suffixes still split into the canonical model and request effort", () => {
+  const high = extractReasoningIntent("kmc/kimi-k3.1-pro-high", {});
+  assert.equal(high.model, "kmc/kimi-k3.1-pro");
+  assert.equal(high.effort, "high");
+
+  const low = extractReasoningIntent("kmca/kimi-k3.1-pro-highspeed-low", {});
+  assert.equal(low.model, "kmca/kimi-k3.1-pro-highspeed");
+  assert.equal(low.effort, "low");
 });

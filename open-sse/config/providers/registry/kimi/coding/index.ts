@@ -5,6 +5,22 @@ import { KIMI_CODING_ANTHROPIC_URL } from "./runtime.ts";
 
 export const KIMI_CODING_MODELS: RegistryModel[] = [
   {
+    id: "k3.1-pro",
+    name: "Kimi K3.1 Pro",
+    contextLength: 1048576,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsVideo: true,
+  },
+  {
+    id: "k3.1-pro-highspeed",
+    name: "Kimi K3.1 Pro Highspeed",
+    contextLength: 1048576,
+    supportsReasoning: true,
+    supportedThinkingEfforts: ["low", "high", "max"],
+    supportsVideo: true,
+  },
+  {
     id: "k3",
     name: "Kimi K3",
     contextLength: 1048576,

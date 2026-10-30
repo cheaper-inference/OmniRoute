@@ -205,7 +205,7 @@ export function supportsMaxEffortForProvider(provider: string, model: string): b
     supportsClaudeMaxEffort(resolvedModelId);
   const isOpencodeGo = isOpencodeGoProvider(provider);
   const isOllamaCloud = isOllamaCloudProvider(provider);
-  const isMoonshotK3 = /^kimi-k3(?:$|-)/i.test(resolvedModelId);
+  const isMoonshotK3 = /^kimi-k3(?:$|[.-])/i.test(resolvedModelId);
   const isCommandCode = isCommandCodeProvider(provider);
   const isMaxTierModel =
     MAX_TIER_REASONING_MODEL_PATTERN.test(resolvedModelId) ||
@@ -268,6 +268,74 @@ function readEffortCarriers(b: Record<string, unknown>): EffortCarriers {
     hasOutputConfigEffort,
     effort,
   };
+}
+
+const K31_WIRE_EFFORTS = new Set(["low", "high", "max"]);
+const KIMI_K31_MODEL_PATTERN = /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i;
+
+/** Kimi K3.1 ids, bare (`k3.1-pro`), `kimi-`-prefixed or provider-namespaced. */
+export function isKimiK31Model(model: string | null | undefined): boolean {
+  return KIMI_K31_MODEL_PATTERN.test(model || "");
+}
+
+/** K3.1 recovery must not turn an explicit invalid value into an accepted tier. */
+export function hasUnsupportedK31Effort(body: unknown): boolean {
+  if (!body || typeof body !== "object" || Array.isArray(body)) return false;
+  const record = body as Record<string, unknown>;
+  const asRecord = (value: unknown): Record<string, unknown> | null =>
+    value && typeof value === "object" && !Array.isArray(value)
+      ? (value as Record<string, unknown>)
+      : null;
+  return [
+    record.reasoning_effort,
+    asRecord(record.reasoning)?.effort,
+    asRecord(record.output_config)?.effort,
+    asRecord(record.thinking)?.effort,
+  ].some(
+    (value) =>
+      value !== undefined &&
+      (typeof value !== "string" || !K31_WIRE_EFFORTS.has(value.toLowerCase()))
+  );
+}
+
+const K31_NATIVE_PROVIDERS = new Set(["moonshot", "kimi", "kimi-coding", "kimi-coding-apikey"]);
+const K31_MAPPABLE_EFFORTS = new Set([
+  "low",
+  "high",
+  "max",
+  "medium",
+  "minimum",
+  "light",
+  "xhigh",
+  "ultra",
+]);
+
+/**
+ * K3.1 rejects off-thinking and unknown effort values, so preserve them for
+ * the upstream 400 instead of silently clamping to an accepted tier. Only the
+ * mappable tiers fall through to the regular clamp.
+ */
+function shouldPreserveK31Effort(provider: string, model: string, effort: string): boolean {
+  if (!K31_NATIVE_PROVIDERS.has(provider) || !isKimiK31Model(model)) return false;
+  return !K31_MAPPABLE_EFFORTS.has(effort);
+}
+
+/**
+ * True when a K3.1 body's 400 must reach the client as sent: thinking was
+ * explicitly disabled, or an effort K3.1 does not accept was set. Recovery
+ * paths must not rewrite either into an accepted request.
+ */
+export function isK31RejectionFinal(model: string | null | undefined, body: unknown): boolean {
+  if (!isKimiK31Model(model) || !body || typeof body !== "object" || Array.isArray(body)) {
+    return false;
+  }
+  const record = body as Record<string, unknown>;
+  const thinking =
+    record.thinking && typeof record.thinking === "object" && !Array.isArray(record.thinking)
+      ? (record.thinking as Record<string, unknown>)
+      : null;
+  if (record.enable_thinking === false || thinking?.type === "disabled") return true;
+  return hasUnsupportedK31Effort(record);
 }
 
 /** Write a normalized effort value back to every carrier that was present.
@@ -374,6 +442,8 @@ export function sanitizeReasoningEffortForProvider(
   if (c.effort === undefined) return working;
   const effortStr = typeof c.effort === "string" ? c.effort.toLowerCase() : "";
   const modelStr = model || "";
+
+  if (shouldPreserveK31Effort(provider, modelStr, effortStr)) return working;
 
   // ── o1-preview: does not accept reasoning_effort parameter at all ─────────
   if (O1_PREVIEW_PATTERN.test(modelStr)) {

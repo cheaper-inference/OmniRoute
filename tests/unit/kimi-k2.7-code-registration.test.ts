@@ -23,12 +23,24 @@ function modelIds(provider: string): string[] {
 
 test("kimi-coding (OAuth) keeps the current stable offline aliases", () => {
   const ids = modelIds("kimi-coding");
-  assert.deepEqual(ids, ["k3", "kimi-for-coding", "kimi-for-coding-highspeed"]);
+  assert.deepEqual(ids, [
+    "k3.1-pro",
+    "k3.1-pro-highspeed",
+    "k3",
+    "kimi-for-coding",
+    "kimi-for-coding-highspeed",
+  ]);
 });
 
 test("legacy kimi-coding-apikey shares the current stable offline aliases", () => {
   const ids = modelIds("kimi-coding-apikey");
-  assert.deepEqual(ids, ["k3", "kimi-for-coding", "kimi-for-coding-highspeed"]);
+  assert.deepEqual(ids, [
+    "k3.1-pro",
+    "k3.1-pro-highspeed",
+    "k3",
+    "kimi-for-coding",
+    "kimi-for-coding-highspeed",
+  ]);
 });
 
 test("Kimi Code k3 fallback advertises the documented 1M context and thinking", () => {

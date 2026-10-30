@@ -17,6 +17,8 @@ import {
   recordLearnedReasoningEffort,
 } from "../../services/learnedReasoningEffortCaps.ts";
 import {
+  hasUnsupportedK31Effort,
+  isKimiK31Model,
   readBodyReasoningEffort,
   sanitizeReasoningEffortForProvider,
   writeBodyReasoningEffort,
@@ -61,6 +63,15 @@ export interface ReasoningEffortRecoveryResult {
 }
 
 /**
+ * No object body to clamp, or a K3.1 body whose explicit effort is not one K3.1
+ * accepts: that value must reach the client as the upstream's 400, not a clamp.
+ */
+function isUnrecoverableEffortBody(body: unknown, model: string | undefined): boolean {
+  if (!body || typeof body !== "object") return true;
+  return isKimiK31Model(model) && hasUnsupportedK31Effort(body);
+}
+
+/**
  * Detect an upstream 400/422 naming a rejected reasoning_effort enum, clamp
  * the body to the nearest accepted value, and retry the same URL once.
  * Returns the original response/body unchanged (retried: false) when the
@@ -80,7 +91,7 @@ export async function applyReasoningEffortRecovery(
   ) {
     return notRecoverable;
   }
-  if (!body || typeof body !== "object") {
+  if (isUnrecoverableEffortBody(body, model)) {
     return notRecoverable;
   }
 

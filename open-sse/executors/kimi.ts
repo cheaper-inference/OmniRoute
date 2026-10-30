@@ -59,13 +59,45 @@ function normalizeEffort(value: unknown): string | null {
   return effort;
 }
 
-function resolveRequestedEffort(body: JsonRecord): string | null {
+function firstDefinedEffortValue(...values: unknown[]): unknown {
+  for (const value of values) {
+    if (value !== undefined) return value;
+  }
+  return undefined;
+}
+
+function normalizeK31Effort(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const effort = value.trim().toLowerCase();
+  if (!effort) return value;
+  return effort === "none" ? "off" : effort;
+}
+
+/** K3.1 keeps the first explicit effort literally; only disabled flags imply "off". */
+function resolveK31RequestedEffort(
+  body: JsonRecord,
+  reasoning: JsonRecord | null,
+  thinking: JsonRecord | null
+): unknown {
+  const requested = firstDefinedEffortValue(
+    body.reasoning_effort,
+    reasoning?.effort,
+    thinking?.effort
+  );
+  if (requested !== undefined) return normalizeK31Effort(requested);
+  if (body.enable_thinking === false || thinking?.type === "disabled") return "off";
+  return undefined;
+}
+
+function resolveRequestedEffort(body: JsonRecord, modelId: string): unknown {
+  const reasoning = asRecord(body.reasoning);
+  const thinking = asRecord(body.thinking);
+  if (isK31Model(modelId)) return resolveK31RequestedEffort(body, reasoning, thinking);
+
   const direct = normalizeEffort(body.reasoning_effort);
   if (direct) return direct;
-  const reasoning = asRecord(body.reasoning);
   const nested = normalizeEffort(reasoning?.effort);
   if (nested) return nested;
-  const thinking = asRecord(body.thinking);
   if (thinking?.type === "disabled") return "off";
   if (thinking?.type === "enabled" || thinking?.type === "adaptive") {
     return normalizeEffort(thinking.effort) || "on";
@@ -73,7 +105,27 @@ function resolveRequestedEffort(body: JsonRecord): string | null {
   return null;
 }
 
-function constrainEffort(effort: string, policy: KimiThinkingPolicy): string {
+const K31_EFFORT_ALIASES: Record<string, string> = {
+  ultra: "max",
+  xhigh: "max",
+  high: "high",
+  medium: "high",
+  low: "low",
+  minimum: "low",
+  light: "low",
+  max: "max",
+};
+
+function isK31Model(modelId: string): boolean {
+  return /(?:^|\/)(?:kimi-)?k3\.1(?:$|-)/i.test(modelId);
+}
+
+function constrainEffort(effort: unknown, policy: KimiThinkingPolicy, modelId: string): unknown {
+  if (typeof effort !== "string") return effort;
+  if (isK31Model(modelId)) {
+    if (effort === "off") return effort;
+    return K31_EFFORT_ALIASES[effort] ?? effort;
+  }
   if (effort === "off" || effort === "on") return effort;
   const supported = policy.supportedThinkingEfforts;
   if (!Array.isArray(supported)) return effort;
@@ -84,31 +136,37 @@ function constrainEffort(effort: string, policy: KimiThinkingPolicy): string {
 }
 
 function applyThinkingPolicyDefaults(
-  requestedEffort: string | null,
-  policy: KimiThinkingPolicy
-): string | null {
+  requestedEffort: unknown,
+  policy: KimiThinkingPolicy,
+  modelId: string
+): unknown {
+  if (isK31Model(modelId)) {
+    if (requestedEffort === "off") return "off";
+    return requestedEffort === undefined ? policy.defaultThinkingEffort || "max" : requestedEffort;
+  }
   let effort = requestedEffort;
   if (!effort && policy.defaultThinkingEffort) effort = policy.defaultThinkingEffort;
   if (policy.alwaysThinking && effort === "off") {
     effort = policy.defaultThinkingEffort || "on";
   }
   if (policy.alwaysThinking && !effort) effort = policy.defaultThinkingEffort || "on";
-  return effort;
+  return effort ?? undefined;
 }
 
 function buildOpenAIThinking(
-  effort: string,
+  effort: unknown,
   currentThinking: unknown,
-  policy: KimiThinkingPolicy
+  policy: KimiThinkingPolicy,
+  modelId: string
 ): JsonRecord {
-  const constrained = constrainEffort(effort, policy);
+  const constrained = constrainEffort(effort, policy, modelId);
   const previousKeep = asRecord(currentThinking)?.keep;
   if (constrained === "off") {
     return { type: "disabled", ...(previousKeep !== undefined ? { keep: previousKeep } : {}) };
   }
   return {
     type: "enabled",
-    ...(constrained !== "on" ? { effort: constrained } : {}),
+    ...(constrained !== "on" || isK31Model(modelId) ? { effort: constrained } : {}),
     keep: previousKeep ?? "all",
   };
 }
@@ -124,8 +182,8 @@ function normalizeExistingOpenAIThinking(value: unknown): JsonRecord | null {
   };
 }
 
-function applyOpenAIThinking(body: JsonRecord, policy: KimiThinkingPolicy): void {
-  const requestedEffort = resolveRequestedEffort(body);
+function applyOpenAIThinking(body: JsonRecord, policy: KimiThinkingPolicy, modelId: string): void {
+  const requestedEffort = resolveRequestedEffort(body, modelId);
   delete body.reasoning_effort;
   delete body.reasoning;
 
@@ -134,9 +192,9 @@ function applyOpenAIThinking(body: JsonRecord, policy: KimiThinkingPolicy): void
     return;
   }
 
-  const effort = applyThinkingPolicyDefaults(requestedEffort, policy);
-  if (effort) {
-    body.thinking = buildOpenAIThinking(effort, body.thinking, policy);
+  const effort = applyThinkingPolicyDefaults(requestedEffort, policy, modelId);
+  if (effort !== undefined) {
+    body.thinking = buildOpenAIThinking(effort, body.thinking, policy, modelId);
     return;
   }
 
@@ -174,7 +232,8 @@ function backfillKimiReasoningContent(body: JsonRecord): JsonRecord {
 function normalizeOpenAIRequest(
   body: JsonRecord,
   stream: boolean,
-  policy: KimiThinkingPolicy
+  policy: KimiThinkingPolicy,
+  modelId: string
 ): JsonRecord {
   let next: JsonRecord = { ...body };
   if (next.max_completion_tokens === undefined && next.max_tokens !== undefined) {
@@ -182,7 +241,7 @@ function normalizeOpenAIRequest(
   }
   delete next.max_tokens;
 
-  applyOpenAIThinking(next, policy);
+  applyOpenAIThinking(next, policy, modelId);
   if (Array.isArray(next.tools)) next.tools = flattenOpenAIToolRootAnyOf(next.tools);
 
   if (stream) {
@@ -267,13 +326,42 @@ function firstNormalizedEffort(...values: unknown[]): string | null {
   return null;
 }
 
+/** K3.1 Anthropic-shape effort: explicit value first, then disabled flags, then budget. */
+function resolveK31AnthropicEffort(
+  body: JsonRecord,
+  reasoning: JsonRecord | null,
+  existingThinking: JsonRecord | null,
+  outputConfig: JsonRecord | null
+): unknown {
+  const effort = normalizeK31Effort(
+    firstDefinedEffortValue(
+      body.reasoning_effort,
+      reasoning?.effort,
+      outputConfig?.effort,
+      existingThinking?.effort
+    )
+  );
+  if (effort !== undefined) return effort;
+  if (body.enable_thinking === false || existingThinking?.type === "disabled") return "off";
+  return budgetToEffort(existingThinking?.budget_tokens) ?? undefined;
+}
+
 function resolveAnthropicEffort(
   body: JsonRecord,
   existingThinking: JsonRecord | null,
   outputConfig: JsonRecord | null,
-  policy: KimiThinkingPolicy
-): string | null {
+  policy: KimiThinkingPolicy,
+  modelId: string
+): unknown {
   const reasoning = asRecord(body.reasoning);
+  if (isK31Model(modelId)) {
+    return applyThinkingPolicyDefaults(
+      resolveK31AnthropicEffort(body, reasoning, existingThinking, outputConfig),
+      policy,
+      modelId
+    );
+  }
+
   let effort = firstNormalizedEffort(
     body.reasoning_effort,
     reasoning?.effort,
@@ -285,18 +373,19 @@ function resolveAnthropicEffort(
   if (!effort && (existingThinking?.type === "enabled" || existingThinking?.type === "adaptive")) {
     effort = "on";
   }
-  return applyThinkingPolicyDefaults(effort, policy);
+  return applyThinkingPolicyDefaults(effort, policy, modelId);
 }
 
 function applyAnthropicEffort(
   body: JsonRecord,
-  effort: string | null,
+  effort: unknown,
   outputConfig: JsonRecord | null,
-  policy: KimiThinkingPolicy
+  policy: KimiThinkingPolicy,
+  modelId: string
 ): boolean {
-  if (!effort) return false;
+  if (effort === undefined) return false;
 
-  const constrained = constrainEffort(effort, policy);
+  const constrained = constrainEffort(effort, policy, modelId);
   if (constrained === "off") {
     body.thinking = { type: "disabled" };
     delete body.output_config;
@@ -305,7 +394,7 @@ function applyAnthropicEffort(
   }
 
   body.thinking = { type: "enabled" };
-  if (constrained === "on") {
+  if (constrained === "on" && !isK31Model(modelId)) {
     delete body.output_config;
   } else {
     body.output_config = { ...(outputConfig || {}), effort: constrained };
@@ -332,11 +421,15 @@ function normalizeExistingAnthropicThinking(
   }
 }
 
-function normalizeAnthropicRequest(body: JsonRecord, policy: KimiThinkingPolicy): JsonRecord {
+function normalizeAnthropicRequest(
+  body: JsonRecord,
+  policy: KimiThinkingPolicy,
+  modelId: string
+): JsonRecord {
   const next: JsonRecord = { ...body };
   const existingThinking = asRecord(next.thinking);
   const outputConfig = asRecord(next.output_config);
-  const effort = resolveAnthropicEffort(next, existingThinking, outputConfig, policy);
+  const effort = resolveAnthropicEffort(next, existingThinking, outputConfig, policy, modelId);
   delete next.reasoning_effort;
   delete next.reasoning;
 
@@ -347,7 +440,7 @@ function normalizeAnthropicRequest(body: JsonRecord, policy: KimiThinkingPolicy)
     return next;
   }
 
-  if (applyAnthropicEffort(next, effort, outputConfig, policy)) return next;
+  if (applyAnthropicEffort(next, effort, outputConfig, policy, modelId)) return next;
   normalizeExistingAnthropicThinking(next, existingThinking);
   return next;
 }
@@ -422,8 +515,9 @@ export class KimiExecutor extends DefaultExecutor {
     const policy = getThinkingPolicy(credentials);
     const normalized =
       resolveKimiProtocol(credentials, withNames) === "claude"
-        ? normalizeAnthropicRequest(withNames, policy)
-        : normalizeOpenAIRequest(withNames, stream, policy);
+        ? normalizeAnthropicRequest(withNames, policy, model)
+        : normalizeOpenAIRequest(withNames, stream, policy, model);
+    if (isK31Model(model)) delete normalized.enable_thinking;
     return stream ? { ...normalized, stream: true } : normalized;
   }
 }

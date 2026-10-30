@@ -11,6 +11,7 @@ import {
   isAutoLearnGloballyEnabled,
 } from "@/lib/db/paramFilters";
 import { HTTP_STATUS } from "../../config/constants.ts";
+import { isK31RejectionFinal } from "./reasoningEffort.ts";
 import {
   findOffendingField,
   detectRejectedMessageFields,
@@ -158,6 +159,8 @@ export async function applyFieldDowngradeRecovery(params: FieldDowngradeParams):
     return response;
   }
   const record = body as Record<string, unknown>;
+  if (isK31RejectionFinal(params.model, record)) return response;
+
   const errText = await response
     .clone()
     .text()
