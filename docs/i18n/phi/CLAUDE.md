@@ -7,7 +7,7 @@
 @AGENTS.md
 
 **Nasa [`AGENTS.md`](AGENTS.md) ang lahat ng tuntunin ng proyekto** — ang nag-iisang mapagkukunan ng katotohanan para sa bawat AI
-assistant (arkitektura, mga kumbensiyon, pagsubok, mga quality gate, git workflow, ang 23 Hard Rules,
+assistant (arkitektura, mga kumbensiyon, pagsubok, mga quality gate, git workflow, ang 24 Hard Rules,
 mga natutunan tungkol sa PII). Basahin ito nang buo; huwag muling idagdag dito ang mga tuntunin ng proyekto. Ang lahat ng nasa ibaba ay nalalapat LAMANG
 sa Claude Code — mga operasyonal na pagpipino ng mga tuntuning tinukoy na sa `AGENTS.md`.
 

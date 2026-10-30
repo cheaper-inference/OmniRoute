@@ -3,7 +3,7 @@
 @AGENTS.md
 
 **All project rules live in [`AGENTS.md`](AGENTS.md)** — the single source of truth for every AI
-assistant (architecture, conventions, testing, quality gates, git workflow, the 23 Hard Rules,
+assistant (architecture, conventions, testing, quality gates, git workflow, the 24 Hard Rules,
 PII learnings). Read it in full; do not re-add project rules here. Everything below applies ONLY
 to Claude Code — operational refinements of rules already defined in `AGENTS.md`.
 

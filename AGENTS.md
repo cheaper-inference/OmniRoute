@@ -313,6 +313,32 @@ operator first (usually the active `release/vX.Y.Z`). Non-negotiables:
 Full protocol with commands and incident history:
 [`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md).
 
+### Shared-checkout changes must not go orphan
+
+Rule #19 keeps development out of the shared checkout; this is about what is already sitting in
+it. "Local repair, not feature development" is a legitimate reason to touch the shared tree to get
+a service running again — it is **not** a reason for the work to live outside git.
+
+- **Every change in the shared checkout ends the session in one of two states**: (a) committed on a
+  branch of its own (the PR may come later), or (b) recorded as a known divergence — an open issue
+  naming the files, why it was not committed, and a review date (label `local-divergence`, created
+  on first use). There is no third state, and "it was only a local repair" is not one.
+- **A production build regenerated from an uncommitted tree is declared in that same issue.** The
+  served build then depends on code that exists in no commit, so discarding the working tree and
+  rebuilding takes production down with no warning and no trace of what was lost.
+- **Never measure pending work against the local `HEAD`.** Resolve the active release branch first
+  — the highest `release/v*` on origin (`git ls-remote --heads origin 'refs/heads/release/*'`;
+  local refs may not have it) — and diff against that. A stale checkout reports already-merged
+  code as pending work.
+
+Incident 2026-08-15 → 2026-10-29: a build-breaking repair was applied straight to the shared
+checkout, classified "local repair, not feature", and used to regenerate the build serving port
+20128 — then never committed. Two and a half months later the shared tree still read as ~90
+pending changes, but the repair had already landed upstream as `37d70785c7` (PR #10198, merged
+2026-08-12 15:58, _after_ the local `HEAD`): of the 88 files triaged, 15 were in that commit, 13
+of them byte-identical, and only 13 were still needed at all. The local `HEAD` was 5,266 commits
+behind `release/v3.8.53`.
+
 ### Base-green check (PRs must not be born red)
 
 Before cutting a branch, merging the base into a PR branch, mass-retargeting PRs, or opening a
@@ -414,6 +440,18 @@ is a short form, its complete binding text, rationale and incident history are i
     (e) se `_tasks` aparecer como symlink quebrado, NÃO commitar nada — restaurar do remote e
     avisar o operador. O gate `check:tracked-artifacts` (pre-commit + CI) bloqueia `_tasks`
     rastreado em qualquer forma. Texto completo: `docs/ops/HARD_RULES_DETAIL.md` → Rule 23.
+
+24. **Never leave a shared-checkout change outside git.** "Local repair, not feature development"
+    justifies touching the shared checkout to restore service; it never justifies leaving the work
+    uncommitted. Before the session ends, every change there is either committed on its own branch
+    (the PR can come later) or recorded as a known-divergence issue naming the files, the reason
+    and a review date — and a production build regenerated from that uncommitted tree is declared
+    in the same issue, because the served build then depends on code that exists in no commit.
+    Measure pending work against the active release branch (the highest `release/v*` on origin),
+    never the local `HEAD` — a stale checkout reports already-merged code as pending. Incident
+    2026-08-15 → 2026-10-29: a repair orphaned for two and a half months that had already landed
+    upstream (`37d70785c7` / PR #10198), with the local `HEAD` 5,266 commits behind. See Git
+    Workflow → "Shared-checkout changes must not go orphan".
 
 ---
 
