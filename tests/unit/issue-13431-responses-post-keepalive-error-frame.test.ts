@@ -35,7 +35,9 @@ async function readAll(response: Response): Promise<string> {
 }
 
 function lastDataPayload(body: string): Record<string, unknown> {
-  const dataLines = [...body.matchAll(/^data: (.+)$/gm)].map((m) => m[1]);
+  const dataLines = [...body.matchAll(/^data: (.+)$/gm)]
+    .map((m) => m[1])
+    .filter((payload) => payload !== "[DONE]");
   return JSON.parse(dataLines[dataLines.length - 1]);
 }
 
@@ -117,7 +119,7 @@ test("Responses route: non-JSON/empty post-keepalive error body falls back to a 
   );
 });
 
-test("Chat Completions route: post-keepalive JSON error body stays verbatim pass-through (regression guard) (#13431)", async () => {
+test("Chat Completions route: post-keepalive JSON error preserves its identifier and terminal framing (#13431, #18557)", async () => {
   const upstreamErrorBody = JSON.stringify({
     error: { message: "boom", type: "invalid_request_error", code: "bad_request" },
   });
@@ -141,11 +143,16 @@ test("Chat Completions route: post-keepalive JSON error body stays verbatim pass
     errorFrame: OPENAI_CHAT_ERROR_FRAME,
   });
 
-  const lastPayload = lastDataPayload(await readAll(result));
+  const body = await readAll(result);
+  const lastPayload = lastDataPayload(body);
 
-  // Unchanged: verbatim pass-through, top-level `error` key, no reshaping.
+  // Chat remains a top-level error object, retaining its public identifier while
+  // adding the status lost once the keepalive committed HTTP 200.
   assert.equal(lastPayload.type, undefined);
   assert.equal((lastPayload as { error: { message: string } }).error.message, "boom");
+  assert.equal((lastPayload as { error: { code: string } }).error.code, "bad_request");
+  assert.equal((lastPayload as { error: { status: number } }).error.status, 400);
+  assert.equal((body.match(/^data: \[DONE\]$/gm) ?? []).length, 1);
 });
 
 test("Anthropic /v1/messages route: post-keepalive named event: error framing stays unaffected (regression guard) (#13431)", async () => {

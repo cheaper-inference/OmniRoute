@@ -192,6 +192,50 @@ function buildResponsesErrorDataLine(
   });
 }
 
+/**
+ * Reshapes an already-sanitized Chat Completions error for the slow path.
+ *
+ * Once a keepalive byte commits HTTP 200, the original HTTP status and
+ * Retry-After header cannot reach the client. Keep the public string `code`
+ * intact (clients use it as a stable identifier) and add numeric `status`
+ * instead of changing that field's type.
+ */
+function buildChatErrorDataLine(
+  text: string,
+  meta: { status: number; retryAfterSeconds: number | null }
+): string {
+  const fallback = () =>
+    JSON.stringify({
+      error: {
+        message: "stream_error",
+        type: "stream_error",
+        status: meta.status,
+        ...(meta.retryAfterSeconds !== null ? { retry_after: meta.retryAfterSeconds } : {}),
+      },
+    });
+  const trimmed = text.trim();
+  if (!trimmed) return fallback();
+
+  try {
+    const parsed: unknown = JSON.parse(trimmed);
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) return fallback();
+    const body = parsed as Record<string, unknown>;
+    const error = body.error;
+    if (!error || typeof error !== "object" || Array.isArray(error)) return fallback();
+
+    return JSON.stringify({
+      ...body,
+      error: {
+        ...(error as Record<string, unknown>),
+        status: meta.status,
+        ...(meta.retryAfterSeconds !== null ? { retry_after: meta.retryAfterSeconds } : {}),
+      },
+    });
+  } catch {
+    return fallback();
+  }
+}
+
 export type EarlyStreamKeepaliveOptions = {
   /** Wait this long for the handler before committing to a keepalive stream. */
   thresholdMs?: number;
@@ -718,8 +762,13 @@ export async function withEarlyStreamKeepalive(
                     status: response.status,
                     retryAfterSeconds: readRetryAfterSeconds(response.headers),
                   })
-                : text.trim() ||
-                  JSON.stringify({ error: { message: "stream_error", type: "stream_error" } });
+                : errorFrameFormat === "chat"
+                  ? buildChatErrorDataLine(text, {
+                      status: response.status,
+                      retryAfterSeconds: readRetryAfterSeconds(response.headers),
+                    })
+                  : text.trim() ||
+                    JSON.stringify({ error: { message: "stream_error", type: "stream_error" } });
             const framed =
               errorFrameFormat === "anthropic"
                 ? `event: error\ndata: ${dataLine}\n\n`
@@ -727,6 +776,11 @@ export async function withEarlyStreamKeepalive(
             const framedBytes = ENCODER.encode(framed);
             controller.enqueue(framedBytes);
             recordClientBytes(framedBytes);
+            if (errorFrameFormat === "chat") {
+              const done = ENCODER.encode("data: [DONE]\n\n");
+              controller.enqueue(done);
+              recordClientBytes(done);
+            }
           }
         }
       } catch {

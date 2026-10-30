@@ -436,10 +436,241 @@ test("errorFrame option overrides the default Anthropic-style event: error frame
     /^event: error/m,
     "must not fall back to the Anthropic-style event: error frame when a custom errorFrame is given"
   );
-  // The real upstream error body ("rate limited") is forwarded verbatim, framed as a
-  // plain data: line (matching errorFrame's format) instead of the generic fallback
-  // message — this is the dynamic real-body branch, distinct from the static default.
-  assert.match(body, /"error":\{"message":"rate limited","type":"rate_limit"\}/);
+  const errorData = body
+    .split("\n")
+    .find((line) => line.startsWith("data: {") && line.includes("rate limited"));
+  assert.ok(errorData, "must frame the real terminal error as Chat Completions data");
+  const payload = JSON.parse(errorData.slice("data: ".length));
+  assert.equal(payload.error.message, "rate limited");
+  assert.equal(payload.error.type, "rate_limit");
+  assert.equal(payload.error.status, 429, "must preserve the lost HTTP status in-band");
+  assert.equal(
+    body.match(/^data: \[DONE\]$/gm)?.length,
+    1,
+    "a late Chat error must terminate with exactly one [DONE] frame"
+  );
+});
+
+test("late Chat error preserves its string identifier, status, retry hint, and framing", async () => {
+  const slowFail = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response(
+            JSON.stringify({
+              error: {
+                message: "all targets failed",
+                type: "server_error",
+                code: "bad_gateway",
+              },
+              diagnostics: { attempted: 2 },
+            }),
+            {
+              status: 502,
+              headers: { "Content-Type": "application/json", "Retry-After": "17" },
+            }
+          )
+        ),
+      50
+    );
+  });
+  const choicesOnlyKeepalive = new TextEncoder().encode(
+    'data: {"id":"chatcmpl-keepalive","object":"chat.completion.chunk","choices":[]}\n\n'
+  );
+
+  const result = await withEarlyStreamKeepalive(slowFail, {
+    thresholdMs: 5,
+    intervalMs: 250,
+    keepaliveFrame: choicesOnlyKeepalive,
+    startupFrame: choicesOnlyKeepalive,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+  assert.equal(result.status, 200);
+
+  const body = await readAll(result);
+  const frames = body.trim().split("\n\n");
+  const keepalive = JSON.parse(frames[0]!.slice("data: ".length));
+  assert.deepEqual(
+    keepalive.choices,
+    [],
+    "supports the choices: [] heartbeat contract from #18468"
+  );
+  const errorFrame = frames.find((frame) => frame.includes("all targets failed"));
+  assert.ok(errorFrame, "must emit a terminal Chat error frame");
+  const payload = JSON.parse(errorFrame.slice("data: ".length));
+  assert.equal(payload.error.code, "bad_gateway", "must preserve the semantic identifier");
+  assert.equal(payload.error.status, 502);
+  assert.equal(payload.error.retry_after, 17);
+  assert.deepEqual(payload.diagnostics, { attempted: 2 });
+  assert.equal(frames.at(-1), "data: [DONE]", "must end after the terminal error");
+  assert.equal(
+    frames.filter((frame) => frame === "data: [DONE]").length,
+    1,
+    "must not duplicate the terminal marker"
+  );
+  assert.ok(
+    frames.indexOf(errorFrame) < frames.indexOf("data: [DONE]"),
+    "the error must arrive before its terminal marker"
+  );
+});
+
+test("late Chat 429 and 503 errors retain status and safe Retry-After metadata", async () => {
+  for (const [status, retryAfter] of [
+    [429, "9"],
+    [503, "11"],
+  ] as const) {
+    const slowFail = new Promise<Response>((resolve) => {
+      setTimeout(
+        () =>
+          resolve(
+            new Response(
+              JSON.stringify({
+                error: { message: `failure ${status}`, code: "service_unavailable" },
+              }),
+              {
+                status,
+                headers: { "Content-Type": "application/json", "Retry-After": retryAfter },
+              }
+            )
+          ),
+        35
+      );
+    });
+    const result = await withEarlyStreamKeepalive(slowFail, {
+      thresholdMs: 5,
+      intervalMs: 250,
+      errorFrame: OPENAI_CHAT_ERROR_FRAME,
+    });
+    const body = await readAll(result);
+    const errorData = body
+      .split("\n")
+      .find((line) => line.startsWith("data: {") && line.includes(`failure ${status}`));
+    assert.ok(errorData, `must frame ${status} as a Chat error`);
+    const payload = JSON.parse(errorData.slice("data: ".length));
+    assert.equal(payload.error.status, status);
+    assert.equal(payload.error.retry_after, Number(retryAfter));
+    assert.equal(body.match(/^data: \[DONE\]$/gm)?.length, 1);
+  }
+});
+
+test("late Chat errors with a non-JSON body remain JSON-framed and do not echo it", async () => {
+  const slowFail = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          new Response("internal upstream detail: token=secret", {
+            status: 502,
+            headers: { "Content-Type": "text/plain" },
+          })
+        ),
+      35
+    );
+  });
+  const result = await withEarlyStreamKeepalive(slowFail, {
+    thresholdMs: 5,
+    intervalMs: 250,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+  const body = await readAll(result);
+  const errorData = body.split("\n").find((line) => line.startsWith("data: {"));
+  assert.ok(errorData, "must emit a JSON error frame");
+  const payload = JSON.parse(errorData.slice("data: ".length));
+  assert.deepEqual(payload.error, { message: "stream_error", type: "stream_error", status: 502 });
+  assert.doesNotMatch(body, /token=secret/);
+  assert.equal(body.match(/^data: \[DONE\]$/gm)?.length, 1);
+});
+
+test("fast Chat JSON errors remain verbatim HTTP errors", async () => {
+  const original = new Response(
+    JSON.stringify({
+      error: { message: "fast failure", type: "server_error", code: "bad_gateway" },
+    }),
+    {
+      status: 502,
+      headers: { "Content-Type": "application/json", "Retry-After": "7" },
+    }
+  );
+  const result = await withEarlyStreamKeepalive(Promise.resolve(original), {
+    thresholdMs: 100,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+  assert.equal(result, original);
+  assert.equal(result.status, 502);
+  assert.equal(result.headers.get("retry-after"), "7");
+  assert.deepEqual(await result.json(), {
+    error: { message: "fast failure", type: "server_error", code: "bad_gateway" },
+  });
+});
+
+test("late Anthropic and Responses errors retain their existing terminal framing", async () => {
+  const makeLateFailure = () =>
+    new Promise<Response>((resolve) => {
+      setTimeout(
+        () =>
+          resolve(
+            new Response(
+              JSON.stringify({ error: { message: "late failure", code: "bad_gateway" } }),
+              {
+                status: 503,
+                headers: { "Content-Type": "application/json", "Retry-After": "5" },
+              }
+            )
+          ),
+        35
+      );
+    });
+
+  const anthropic = await withEarlyStreamKeepalive(makeLateFailure(), {
+    thresholdMs: 5,
+    intervalMs: 250,
+  });
+  const anthropicBody = await readAll(anthropic);
+  assert.match(anthropicBody, /^event: error$/m);
+  assert.doesNotMatch(anthropicBody, /data: \[DONE\]/);
+
+  const responses = await withEarlyStreamKeepalive(makeLateFailure(), {
+    thresholdMs: 5,
+    intervalMs: 250,
+    errorFrame: OPENAI_RESPONSES_ERROR_FRAME,
+  });
+  const responsesBody = await readAll(responses);
+  const responsesData = responsesBody
+    .split("\n")
+    .find((line) => line.startsWith("data: {") && line.includes("late failure"));
+  assert.ok(responsesData);
+  const payload = JSON.parse(responsesData.slice("data: ".length));
+  assert.equal(payload.status_code, 503);
+  assert.equal(payload.retry_after_seconds, 5);
+  assert.doesNotMatch(responsesBody, /data: \[DONE\]/);
+});
+
+test("a late SSE response is forwarded unchanged after its provider stream begins", async () => {
+  const slowSse = new Promise<Response>((resolve) => {
+    setTimeout(
+      () =>
+        resolve(
+          sseResponse(
+            'data: {"choices":[{"delta":{"content":"partial"},"finish_reason":null}]}\n\n' +
+              'data: {"error":{"message":"provider stream failed"}}\n\n' +
+              "data: [DONE]\n\n"
+          )
+        ),
+      35
+    );
+  });
+  const result = await withEarlyStreamKeepalive(slowSse, {
+    thresholdMs: 5,
+    intervalMs: 250,
+    errorFrame: OPENAI_CHAT_ERROR_FRAME,
+  });
+  const body = await readAll(result);
+  assert.match(body, /provider stream failed/);
+  assert.equal(
+    body.match(/^data: \[DONE\]$/gm)?.length,
+    1,
+    "must forward the upstream terminator once"
+  );
+  assert.doesNotMatch(body, /"status":503/, "must not rewrite an already-started provider stream");
 });
 
 // #2544: a fast rejection must propagate so the route's normal error handling runs —
