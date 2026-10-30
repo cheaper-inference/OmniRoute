@@ -41,6 +41,7 @@ import {
   getLearnedReasoningEffort,
 } from "../services/learnedReasoningEffortCaps.ts";
 import { STREAM_READINESS_TIMEOUT_MS } from "../config/constants.ts";
+import { EFFORT_BUDGETS, THINKING_LEVEL_MAP } from "../services/thinkingBudget.ts";
 import { resolveSuppressThinkClose, THINKING_MARKER_HEADER } from "../utils/thinkCloseMarker.ts";
 
 type JsonRecord = Record<string, unknown>;
@@ -128,6 +129,38 @@ function isGlmThinkingModel(model: string): boolean {
  * https://z.ai/blog/glm-5.2
  */
 const GLM_THINKING_DEFAULT_MAX_TOKENS = 131072;
+
+// Anthropic thinking contract, which Z.ai's /api/anthropic endpoint enforces:
+// budget_tokens >= 1024 and max_tokens > budget_tokens.
+const GLM_ANTHROPIC_MIN_THINKING_BUDGET = 1024;
+const GLM_ANTHROPIC_MIN_RESPONSE_ROOM = 1024;
+
+/**
+ * Z.ai's Anthropic endpoint rejects `thinking: { type: "enabled" }` without
+ * `budget_tokens` (HTTP 400 "missing field budget_tokens"). A client budget is
+ * kept as-is; a missing one comes from the effort tier's level budget
+ * (THINKING_LEVEL_MAP: high 24576, max 131072) or the medium effort budget for
+ * non-tier models, clamped so max_tokens keeps room for the answer. When
+ * max_tokens cannot fit the minimum budget, thinking is dropped instead of being
+ * sent invalid (same rule as fitThinkingToMaxTokens in the Claude translator).
+ */
+function ensureGlmAnthropicThinkingBudget(record: JsonRecord, effort: GlmEffortLevel | null) {
+  const thinking = asRecord(record.thinking);
+  if (thinking?.type !== "enabled") return;
+  const clientBudget = Number(thinking.budget_tokens);
+  if (Number.isFinite(clientBudget) && clientBudget > 0) return;
+
+  let budget = effort ? THINKING_LEVEL_MAP[effort] : EFFORT_BUDGETS.medium;
+  const maxTokens = Number(record.max_tokens);
+  if (Number.isFinite(maxTokens) && maxTokens > 0) {
+    budget = Math.min(budget, Math.floor(maxTokens) - GLM_ANTHROPIC_MIN_RESPONSE_ROOM);
+  }
+  if (budget < GLM_ANTHROPIC_MIN_THINKING_BUDGET) {
+    delete record.thinking;
+    return;
+  }
+  record.thinking = { ...thinking, budget_tokens: budget };
+}
 
 function applyGlmRequestDefaults(
   body: unknown,
@@ -428,6 +461,11 @@ export class GlmExecutor extends DefaultExecutor {
           };
         }
       }
+    }
+
+    const anthropicBody = asRecord(translated);
+    if (anthropicBody) {
+      ensureGlmAnthropicThinkingBudget(anthropicBody, effortTier?.effort ?? null);
     }
 
     return translated;
