@@ -43,6 +43,8 @@ import type { BridgeCloseReason } from "../services/grokBotBridgeRegistry";
 
 const GROK_BOT_SERVICE = "aiserver.v1.GrokBotService";
 const CREATE_TIMEOUT_MS = 45_000;
+/** Remote delete is best-effort inside the request; the queue owns retries. */
+const DELETE_TIMEOUT_MS = 15_000;
 const WATCH_IDLE_TIMEOUT_MS = 240_000;
 // The server silently drops watch streams that go quiet; reconnect well before
 // the upstream/proxy idle cut. Measured live: a settled turn idles the stream
@@ -515,7 +517,6 @@ export class GrokBotExecutor extends BaseExecutor {
   private bridgeController: BridgeController | null = createDefaultBridgeController();
   private readonly bridgeLifecycle: string[] = [];
   private readonly usedBridgeNonces = new Set<string>();
-  private readonly durableAgents = new Map<string, { agentId: string; rowId: string | null }>();
 
   bridgeLifecycleForTests(): string[] {
     return [...this.bridgeLifecycle];
@@ -618,17 +619,13 @@ export class GrokBotExecutor extends BaseExecutor {
     await this.drainPendingCleanups(connectionId, accessToken, log);
 
     const t = getTransport(accessToken);
-    const stored = creds.providerSpecificData?.grokBotAgent as
-      { agentId?: unknown; rowId?: unknown } | undefined;
-    const storedAgent =
-      typeof stored?.agentId === "string" && stored.agentId
-        ? { agentId: stored.agentId, rowId: typeof stored.rowId === "string" ? stored.rowId : null }
-        : undefined;
-    const savedAgent =
-      storedAgent ?? (connectionId ? this.durableAgents.get(connectionId) : undefined);
-    const agentId = savedAgent?.agentId ?? randomUUID();
-    let rowId: string | null = savedAgent?.rowId ?? null;
-    let createdOk = savedAgent !== undefined;
+    // One agent per request. The dashboard keeps a durable agent bound to the
+    // connection, and inference must not borrow it: two callers on one
+    // connection would share a transcript, and skills or routines attached to
+    // the console agent would end up applying to API traffic.
+    const agentId = randomUUID();
+    let rowId: string | null = null;
+    let createdOk = false;
     // Deletion is owned by whoever finishes last: the non-stream branch awaits
     // the turn inline; the stream branch hands ownership to the ReadableStream's
     // finally so the agent outlives the SSE body. Without the handoff, execute's
@@ -641,66 +638,72 @@ export class GrokBotExecutor extends BaseExecutor {
     let turnController: AbortController | null = null;
     try {
       let created: unknown;
-      if (!savedAgent) {
-        try {
-          created = await t.rpc(
-            "CreateGrokBotTemporalAgent",
-            {
-              agentId,
-              name: "omni-grok-bot",
-              description:
-                "OmniRoute single-conversation bridge agent. Do not use tools, files, network, integrations, memory storage, or computer access.",
-              title: "",
-              avatarShape: "",
-              avatarColor: "",
-              harness: HARNESS_TEMPORAL,
-              kickstartRequested: false,
-              introductionSuppressed: true,
-              language: "en",
-            },
-            { signal: AbortSignal.timeout(CREATE_TIMEOUT_MS) }
-          );
-        } catch (err) {
-          if (isTimeoutError(err)) {
-            // Server may or may not have created the agent -- reconcile via the
-            // roster before the next conversation on this connection.
-            enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
-          }
-          throw err;
-        }
-
-        // Live response shape (measured 2026-09-23): our client nonce comes back
-        // as `legacyAgentId`, the roster primary key lives in `agent.id`, and the
-        // harness echoes as the lowercase string name.
-        const agent = (
-          created as {
-            agent?: { id?: string; agentId?: string; legacyAgentId?: string; harness?: string };
-          }
-        )?.agent;
-        if (!agent || agent.legacyAgentId !== agentId || agent.harness !== "temporal") {
-          return errResponse(
-            HTTP_STATUS.BAD_GATEWAY ?? 502,
-            "CreateGrokBotTemporalAgent returned an invalid agent"
-          );
-        }
-        rowId = agent.id ?? null;
-        createdOk = true;
-        if (connectionId) this.durableAgents.set(connectionId, { agentId, rowId });
-        await input.onCredentialsRefreshed?.({
-          ...creds,
-          accessToken,
-          providerSpecificData: {
-            ...(creds.providerSpecificData ?? {}),
-            grokBotAgent: { agentId, rowId },
+      try {
+        created = await t.rpc(
+          "CreateGrokBotTemporalAgent",
+          {
+            agentId,
+            name: "omni-grok-bot",
+            description:
+              "OmniRoute single-conversation bridge agent. Do not use tools, files, network, integrations, memory storage, or computer access.",
+            title: "",
+            avatarShape: "",
+            avatarColor: "",
+            harness: HARNESS_TEMPORAL,
+            kickstartRequested: false,
+            introductionSuppressed: true,
+            language: "en",
           },
-        });
+          { signal: AbortSignal.timeout(CREATE_TIMEOUT_MS) }
+        );
+      } catch (err) {
+        if (isTimeoutError(err)) {
+          // Server may or may not have created the agent -- reconcile via the
+          // roster before the next conversation on this connection.
+          enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
+        }
+        throw err;
       }
+
+      // Live response shape (measured 2026-09-23): our client nonce comes back
+      // as `legacyAgentId`, the roster primary key lives in `agent.id`, and the
+      // harness echoes as the lowercase string name.
+      const agent = (
+        created as {
+          agent?: { id?: string; agentId?: string; legacyAgentId?: string; harness?: string };
+        }
+      )?.agent;
+      if (!agent || agent.legacyAgentId !== agentId || agent.harness !== "temporal") {
+        return errResponse(
+          HTTP_STATUS.BAD_GATEWAY ?? 502,
+          "CreateGrokBotTemporalAgent returned an invalid agent"
+        );
+      }
+      rowId = agent.id ?? null;
+      createdOk = true;
 
       // Bind remote cleanup the moment the agent exists: any later failure
       // (send, discovery, prompt build) must still delete it. Binding after
       // the send left a window where a failed discovery leaked the agent
       // (review finding, slice 4d R1).
-      deleteAgentRef = async (): Promise<void> => {};
+      deleteAgentRef = async (): Promise<void> => {
+        if (!rowId) {
+          // The create response did not carry a roster id. The sweeper resolves
+          // agentId -> id through the roster and deletes it there.
+          enqueueCleanup({ connectionId, agentId, createdAt: new Date().toISOString() });
+          return;
+        }
+        try {
+          await t.rpc(
+            "DeleteGrokBotAgent",
+            { id: rowId },
+            { signal: AbortSignal.timeout(DELETE_TIMEOUT_MS) }
+          );
+        } catch (err) {
+          enqueueCleanup({ connectionId, agentId, rowId, createdAt: new Date().toISOString() });
+          log?.warn?.("GROK_BOT", `agent cleanup failed: ${sanitizeErrorMessage(err)}`);
+        }
+      };
 
       const clientToolList = Array.isArray(requestBody.tools) ? requestBody.tools : [];
       const bridge =
@@ -1170,9 +1173,11 @@ export class GrokBotExecutor extends BaseExecutor {
       staleTimer = null;
     };
     const deadline = Date.now() + WATCH_IDLE_TIMEOUT_MS;
-    // A freshly created temporal agent has no transcript history, so the
-    // generation-0 / seq-"0" baseline is exact. Reused agents would need a
-    // ListGrokBotTranscriptEntries pass first (out of scope: one-shot agents).
+    // Each request owns a freshly created temporal agent, so it carries no
+    // transcript history and the generation-0 / seq-"0" baseline is exact.
+    // Reusing an agent here would replay its earlier assistant rows into this
+    // answer: those rows carry no clientNonce, so the filter below cannot tell
+    // them apart from the current turn.
     let lastTrace = "";
     while (Date.now() < deadline) {
       const remaining = deadline - Date.now();

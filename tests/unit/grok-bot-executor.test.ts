@@ -674,27 +674,34 @@ describe("GrokBotExecutor", () => {
     assert.match(String(send?.payload.text), /User: hi/);
   });
 
-  it("restores a durable agent saved on the connection", async () => {
+  it("creates its own agent even when the connection carries a saved one", async () => {
     const saved = makeInput([{ role: "user", content: "again" }]) as ReturnType<
       typeof makeInput
     > & {
       credentials: { providerSpecificData?: Record<string, unknown> };
-      onCredentialsRefreshed?: (credentials: Record<string, unknown>) => Promise<void>;
     };
     saved.credentials.providerSpecificData = {
       grokBotAgent: { agentId: "agent-saved", rowId: "row-saved" },
     };
     const res = (await executor.execute(saved)) as Response;
     assert.equal(res.status, 200);
-    assert.equal(
-      t.calls.some((call) => call.method === "CreateGrokBotTemporalAgent"),
-      false
-    );
+    const create = t.calls.find((call) => call.method === "CreateGrokBotTemporalAgent");
+    assert.ok(create, "inference must not adopt the console's durable agent");
     const send = t.calls.find((call) => call.method === "SendGrokBotUserMessage");
-    assert.equal(send?.payload.agentId, "agent-saved");
+    assert.notEqual(send?.payload.agentId, "agent-saved");
+    assert.equal(
+      t.calls.find((call) => call.method === "DeleteGrokBotAgent")?.payload.id,
+      "row-1",
+      "the request deletes the agent it created"
+    );
+    assert.equal(
+      t.calls.some((call) => call.method === "DeleteGrokBotAgent" && call.payload.id === "row-saved"),
+      false,
+      "the console agent is never deleted by inference"
+    );
   });
 
-  it("reuses one durable agent for the same connection", async () => {
+  it("gives each request on one connection its own agent", async () => {
     executor.setBridgeControllerForTests(null);
     const first = (await executor.execute(
       makeInput([{ role: "user", content: "one" }])
@@ -704,14 +711,15 @@ describe("GrokBotExecutor", () => {
     )) as Response;
     assert.equal(first.status, 200);
     assert.equal(second.status, 200);
-    assert.equal(t.calls.filter((call) => call.method === "CreateGrokBotTemporalAgent").length, 1);
-    assert.equal(
-      t.calls.some((call) => call.method === "DeleteGrokBotAgent"),
-      false
-    );
+    assert.equal(t.calls.filter((call) => call.method === "CreateGrokBotTemporalAgent").length, 2);
     const sent = t.calls.filter((call) => call.method === "SendGrokBotUserMessage");
     assert.equal(sent.length, 2);
-    assert.equal(sent[0]?.payload.agentId, sent[1]?.payload.agentId);
+    assert.notEqual(sent[0]?.payload.agentId, sent[1]?.payload.agentId);
+    assert.equal(
+      t.calls.filter((call) => call.method === "DeleteGrokBotAgent").length,
+      2,
+      "each request deletes the agent it created"
+    );
   });
 
   it("answers a plain question and deletes the agent by row id", async () => {
@@ -750,6 +758,13 @@ describe("GrokBotExecutor", () => {
     const discoveryConfig = JSON.parse(String(t.calls[discoveryIndex]?.payload.mcpConfigJson));
     assert.equal(discoveryConfig.mcpServers.bridge.url, "http://127.0.0.1:9/mcp");
     assert.deepEqual(t.calls[discoveryIndex]?.payload.serverIdentifiers, ["bridge"]);
+    const deletes = t.calls.filter((call) => call.method === "DeleteGrokBotAgent");
+    assert.equal(deletes.length, 1, "the turn deletes exactly one agent");
+    assert.equal(
+      deletes[0]?.payload.id,
+      "row-1",
+      "and targets the row id the create call returned"
+    );
   });
 
   it("returns the bridge tool result instead of the model text", async () => {
@@ -1605,6 +1620,84 @@ describe("GrokBotExecutor", () => {
     );
   });
 
+  it("queues the agent for retry when the delete call fails", async () => {
+    t.failDelete = true;
+    t.watchEvents = settledWatchEvents("ok");
+    try {
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }])
+      )) as Response;
+      assert.equal(res.status, 200);
+      assert.equal(
+        _grokBotInternals.pendingCleanupCount(),
+        1,
+        "a failed delete is queued so the sweeper can retry it"
+      );
+
+      // Drain the queue so the shared queue file does not leak into later tests.
+      t.failDelete = false;
+      const drainStart = t.calls.length;
+      const drained = (await executor.execute(
+        makeInput([{ role: "user", content: "next" }])
+      )) as Response;
+      assert.equal(drained.status, 200, "the drain request must succeed on its own");
+      const drainedDeletes = t.calls
+        .slice(drainStart)
+        .filter((c) => c.method === "DeleteGrokBotAgent");
+      assert.equal(
+        drainedDeletes.length,
+        2,
+        "the drain request deletes the queued agent and its own"
+      );
+      assert.equal(_grokBotInternals.pendingCleanupCount(), 0);
+    } finally {
+      t.failDelete = false;
+    }
+  });
+
+  it("queues the agent when the create response carries no roster id", async () => {
+    t.watchEvents = settledWatchEvents("ok");
+    setGrokBotTransportForTests({
+      async rpc(method: string, payload: Record<string, unknown>) {
+        t.calls.push({ method, payload });
+        if (method === "CreateGrokBotTemporalAgent") {
+          // No `id`: the agent exists upstream but nothing names its roster row.
+          return { agent: { legacyAgentId: String(payload.agentId), harness: "temporal" } };
+        }
+        if (method === "SendGrokBotUserMessage") return { dispatched: true };
+        if (method === "ListGrokBotAgents") return { agents: [] };
+        if (method === "DeleteGrokBotAgent") return {};
+        return {};
+      },
+      async *watch() {
+        for (const ev of settledWatchEvents("ok")) {
+          yield ev as unknown as Record<string, unknown>;
+        }
+      },
+    } as never);
+    try {
+      const res = (await executor.execute(
+        makeInput([{ role: "user", content: "hi" }])
+      )) as Response;
+      assert.equal(res.status, 200);
+      assert.equal(
+        t.calls.some((c) => c.method === "DeleteGrokBotAgent"),
+        false,
+        "nothing can be deleted without a roster row id"
+      );
+      assert.equal(
+        _grokBotInternals.pendingCleanupCount(),
+        1,
+        "the agentId-only item is queued for the sweeper to resolve"
+      );
+    } finally {
+      setGrokBotTransportForTests(null);
+      installTransport(t);
+      const queuePath = path.join(TEST_DATA_DIR, "grok-bot-pending-cleanups.json");
+      fs.rmSync(queuePath, { force: true });
+    }
+  });
+
   it("deletes the agent when discovery fails after a successful send (review finding 4d-R1)", async () => {
     t.watchEvents = settledWatchEvents("unused");
     const callsBefore = t.calls.length;
@@ -1636,34 +1729,34 @@ describe("GrokBotExecutor", () => {
     assert.ok(res.status >= 400);
     const after = t.calls.slice(callsBefore);
     assert.equal(
-      after.some((c) => c.method === "DeleteGrokBotAgent"),
-      false,
-      "a durable agent stays after discovery fails"
+      after.filter((c) => c.method === "DeleteGrokBotAgent").length,
+      1,
+      "a failed discovery still deletes the request's agent"
     );
   });
 
-  it("keeps the durable agent when a later request uses the same connection", async () => {
+  it("deletes each request's agent and leaves no cleanup debt", async () => {
     t.watchEvents = settledWatchEvents("answer");
     const res = (await executor.execute(makeInput([{ role: "user", content: "hi" }]))) as Response;
     assert.equal(res.status, 200);
     assert.equal(_grokBotInternals.pendingCleanupCount(), 0);
 
-    t.failDelete = false;
     t.watchEvents = settledWatchEvents("again");
     const before = t.calls.length;
     const res2 = (await executor.execute(
       makeInput([{ role: "user", content: "again" }])
     )) as Response;
     assert.equal(res2.status, 200);
-    const rosterLookups = t.calls.slice(before).filter((c) => c.method === "ListGrokBotAgents");
-    assert.equal(rosterLookups.length, 0, "a saved agent does not need a roster lookup");
+    const after = t.calls.slice(before);
     assert.equal(
-      t.calls.slice(before).some((c) => c.method === "CreateGrokBotTemporalAgent"),
-      false
+      after.filter((c) => c.method === "CreateGrokBotTemporalAgent").length,
+      1,
+      "a second request creates its own agent"
     );
     assert.equal(
-      t.calls.slice(before).some((c) => c.method === "DeleteGrokBotAgent"),
-      false
+      after.filter((c) => c.method === "DeleteGrokBotAgent").length,
+      1,
+      "and deletes it when the turn ends"
     );
     assert.equal(_grokBotInternals.pendingCleanupCount(), 0);
   });
@@ -1738,10 +1831,12 @@ describe("GrokBotExecutor", () => {
     assert.deepEqual(seenByToken["token-A"], [
       "CreateGrokBotTemporalAgent",
       "SendGrokBotUserMessage",
+      "DeleteGrokBotAgent",
     ]);
     assert.deepEqual(seenByToken["token-B"], [
       "CreateGrokBotTemporalAgent",
       "SendGrokBotUserMessage",
+      "DeleteGrokBotAgent",
     ]);
     setGrokBotTransportForTests(null);
     installTransport(t);
@@ -1832,8 +1927,13 @@ describe("GrokBotExecutor", () => {
     clearTimeout(releaseTimer);
     assert.match(text, /chat\.completion\.chunk/);
     assert.match(text, /data: \[DONE\]/);
-    assert.equal(events.includes("rpc:DeleteGrokBotAgent"), false);
-    assert.ok(events.includes("watch:settled"), "watch must settle");
+    const settledAt = events.indexOf("watch:settled");
+    const deleteAt = events.indexOf("rpc:DeleteGrokBotAgent");
+    assert.ok(settledAt >= 0, "watch must settle");
+    assert.ok(
+      deleteAt > settledAt,
+      "the agent outlives the SSE body and is deleted after the turn settles"
+    );
     setGrokBotTransportForTests(null);
     installTransport(t);
   });
@@ -1941,9 +2041,9 @@ describe("GrokBotExecutor", () => {
     )) as Response;
     assert.ok(res.status >= 400);
     assert.equal(
-      t.calls.some((c) => c.method === "DeleteGrokBotAgent"),
-      false,
-      "a cancelled turn keeps the durable agent"
+      t.calls.filter((c) => c.method === "DeleteGrokBotAgent").length,
+      1,
+      "a cancelled turn still deletes its agent"
     );
   });
 
