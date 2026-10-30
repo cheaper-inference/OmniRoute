@@ -1,0 +1,1 @@
+- **fix(images):** admit the explicit Codex GPT-6.1 Sol image model and preserve original reference bytes on its edit path instead of applying legacy reference downscaling; reject unsupported masks before dispatch while retaining existing validation and legacy model behavior ([#17184](https://github.com/diegosouzapw/OmniRoute/pull/17184)) — thanks @KiaroSama

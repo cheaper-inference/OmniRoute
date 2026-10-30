@@ -60,26 +60,33 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-test("image catalog GET uses the unified active-credential model list", async () => {
-  await seedConnection("codex");
+test(
+  "image catalog GET uses the unified active-credential model list",
+  { timeout: 10000 },
+  async () => {
+    await seedConnection("codex");
 
-  const ids = await listedIds(imageRoute, "/v1/images/generations");
+    const ids = await listedIds(imageRoute, "/v1/images/generations");
 
-  // #14976 added the Codex GPT Image models (dedicated Codex Images API route)
-  // after the GPT-5.6 hosted-tool ids; see tests/unit/image-registry-gpt56.test.ts.
-  assert.deepEqual(
-    ids.filter((id) => id.startsWith("codex/")),
-    [
-      "codex/gpt-5.6-sol-image",
-      "codex/gpt-5.6-terra-image",
-      "codex/gpt-5.6-luna-image",
-      "codex/gpt-image-2.5-flare",
-      "codex/gpt-image-2.5-sunburst",
-      "codex/gpt-image-2",
-    ]
-  );
-  assert.ok(!ids.includes("openai/gpt-image-2"));
-});
+    // #14976 added the Codex GPT Image models (dedicated Codex Images API route)
+    // after the GPT-5.6 hosted-tool ids; see tests/unit/image-registry-gpt56.test.ts.
+    assert.deepEqual(
+      ids.filter((id) => id.startsWith("codex/")),
+      [
+        "codex/gpt-5.6-sol-image",
+        "codex/gpt-5.6-terra-image",
+        "codex/gpt-5.6-luna-image",
+        "codex/gpt-6.1-sol-image",
+        "codex/gpt-image-2.5-flare",
+        "codex/gpt-image-2.5-sunburst",
+        "codex/gpt-image-2",
+      ]
+    );
+    assert.ok(!ids.includes("codex/gpt-5.5"));
+    assert.ok(!ids.includes("openai/gpt-image-2"));
+    assert.ok(!ids.some((id) => id.startsWith("xai/")));
+  }
+);
 
 test("specialty catalog GET preserves unified catalog headers", async () => {
   await seedConnection("codex");
