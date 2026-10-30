@@ -1,0 +1,1 @@
+- **fix(codeassist):** Code Assist onboarding no longer sends a current tier the account is ineligible for — such accounts fall back to the legacy tier when no allowed default tier exists ([#18060](https://github.com/cheaper-inference/OmniRoute/pull/18060)) — thanks @maxmad64bis
