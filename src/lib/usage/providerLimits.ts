@@ -1,4 +1,5 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
+import { syncCodexWorkspaceInfoIfNeeded } from "@/lib/usage/codexWorkspaceSync";
 import {
   getProviderConnectionById,
   getProviderConnections,
@@ -1081,6 +1082,15 @@ async function fetchLiveProviderLimitsWithOptions(
             await refreshLiveModelIds(conn.provider)
           );
         }
+      }
+
+      // Display-only workspace label (personal plan vs. Business seat), fetched once
+      // the token has just proven itself on the usage request.
+      if (conn.provider === "codex" && !usageData?.message) {
+        conn = await syncCodexWorkspaceInfoIfNeeded(conn, {
+          persist: (id, providerSpecificData) =>
+            updateProviderConnection(id, { providerSpecificData }),
+        });
       }
 
       // Only the dashboard's on-demand refresh lists credits; background polls keep
