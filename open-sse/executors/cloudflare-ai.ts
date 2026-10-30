@@ -1,21 +1,56 @@
 import { BaseExecutor } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 
-type CloudflareCredentials = {
+export type CloudflareProviderSpecificData = {
+  accountId?: string;
+  authType?: string;
+  email?: string;
+};
+
+export type CloudflareCredentials = {
   apiKey?: string;
   accessToken?: string;
   accountId?: string;
-  providerSpecificData?: {
-    accountId?: string;
-  } | null;
+  providerSpecificData?: CloudflareProviderSpecificData | null;
 } | null;
+
+export const CLOUDFLARE_ACCOUNT_ID_REQUIRED =
+  "Cloudflare Workers AI requires an Account ID. " +
+  "Add it in provider settings under 'Account ID'. " +
+  "Find it at: https://dash.cloudflare.com (right sidebar).";
+
+/** Share the executor's account selection with the read-only credential probe. */
+export function resolveCloudflareAccountBase(credentials: CloudflareCredentials) {
+  const accountId =
+    credentials?.providerSpecificData?.accountId ||
+    credentials?.accountId ||
+    process.env.CLOUDFLARE_ACCOUNT_ID;
+  return {
+    accountUrl: accountId
+      ? `https://api.cloudflare.com/client/v4/accounts/${encodeURIComponent(accountId)}`
+      : null,
+  };
+}
+
+/** API tokens use Bearer; explicitly selected legacy Global API Keys need both headers. */
+export function buildCloudflareAuthHeaders(
+  credentials: CloudflareCredentials
+): Record<string, string> {
+  const key = credentials?.apiKey || credentials?.accessToken;
+  if (credentials?.providerSpecificData?.authType === "global") {
+    const email = credentials.providerSpecificData.email;
+    if (!email) throw new Error("Cloudflare Global API Key authentication requires an email.");
+    return { "X-Auth-Email": email, "X-Auth-Key": key || "" };
+  }
+  return { Authorization: `Bearer ${key}` };
+}
 
 /**
  * CloudflareAIExecutor — handles dynamic URL construction with accountId.
  * Cloudflare Workers AI uses the authenticated user's account ID in the URL.
  *
  * URL pattern: https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/v1/chat/completions
- * Auth: Bearer <API Token>
+ * Auth: Bearer <API Token>, or X-Auth-Email + X-Auth-Key for a Global API Key
  * Docs: https://developers.cloudflare.com/workers-ai/
  *
  * Free tier: 10,000 Neurons/day = ~150 LLM responses or 500s Whisper audio
@@ -33,27 +68,15 @@ export class CloudflareAIExecutor extends BaseExecutor {
     _urlIndex = 0,
     credentials: CloudflareCredentials = null
   ): string {
-    // Account ID can be stored in providerSpecificData or at top level credentials
-    const accountId =
-      credentials?.providerSpecificData?.accountId ||
-      credentials?.accountId ||
-      process.env.CLOUDFLARE_ACCOUNT_ID;
-
-    if (!accountId) {
-      throw new Error(
-        "Cloudflare Workers AI requires an Account ID. " +
-          "Add it in provider settings under 'Account ID'. " +
-          "Find it at: https://dash.cloudflare.com (right sidebar)."
-      );
-    }
-
-    return `https://api.cloudflare.com/client/v4/accounts/${accountId}/ai/v1/chat/completions`;
+    const { accountUrl } = resolveCloudflareAccountBase(credentials);
+    if (!accountUrl) throw new Error(CLOUDFLARE_ACCOUNT_ID_REQUIRED);
+    return `${accountUrl}/ai/v1/chat/completions`;
   }
 
   buildHeaders(credentials: CloudflareCredentials, stream = true): Record<string, string> {
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${credentials.apiKey || credentials.accessToken}`,
+      ...buildCloudflareAuthHeaders(credentials),
     };
 
     if (stream) {
