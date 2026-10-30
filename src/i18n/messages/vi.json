@@ -6262,6 +6262,8 @@
     "newApiUserIdLabel": "ID người dùng New-API",
     "newApiUserIdPlaceholder": "vd. 12345",
     "newApiUserIdHint": "Giá trị tiêu đề New-Api-User của AgentRouter, dùng cùng với khóa API console để lấy số dư hạn mức.",
+    "tokenrouterManagementKeyLabel": "Khóa quản lý (tùy chọn)",
+    "tokenrouterManagementKeyHint": "Khóa tài khoản từ bảng điều khiển TokenRouter (Settings → Management Key). Chỉ dùng để đọc hạn mức và số dư, không bao giờ dùng cho yêu cầu. Khóa đã lưu không được hiển thị; để trống để giữ nguyên.",
     "newApiAggregatorToggleLabel": "Cổng tổng hợp",
     "newApiAggregatorToggleHint": "Bật tính năng phát hiện số dư cho các node tổng hợp New-API / One-API / Sub2API. Bảng điều khiển sẽ hiển thị huy hiệu số dư và định tuyến kiểm tra hạn mức trước sẽ bỏ qua các tài khoản đã hết hạn mức.",
     "newApiAggregatorConsoleApiKeyHint": "Token truy cập hệ thống cho endpoint /api/user/self của bộ tổng hợp. Không phải là khóa API định tuyến.",

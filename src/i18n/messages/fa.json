@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "شناسه کاربر New-API",
     "newApiUserIdPlaceholder": "مثلاً 12345",
     "newApiUserIdHint": "مقدار هدر New-Api-User در AgentRouter که همراه با کلید API کنسول برای دریافت موجودی سهمیه استفاده میشود.",
+    "tokenrouterManagementKeyLabel": "کلید مدیریت (اختیاری)",
+    "tokenrouterManagementKeyHint": "کلید حساب از داشبورد TokenRouter (Settings → Management Key). فقط برای خواندن سهمیه و موجودی استفاده می‌شود و هرگز برای درخواست‌ها به کار نمی‌رود. کلید ذخیره‌شده نمایش داده نمی‌شود؛ برای حفظ آن خالی بگذارید.",
     "newApiAggregatorToggleLabel": "دروازه تجمیع کننده",
     "newApiAggregatorToggleHint": "تشخیص موجودی را برای گره‌های تجمیع New-API / One-API / Sub2API فعال کنید. داشبورد نشانگر موجودی را نمایش خواهد داد و مسیریابی پیش‌پرواز سهمیه، حساب‌های خالی را نادیده خواهد گرفت.",
     "newApiAggregatorConsoleApiKeyHint": "توکن دسترسی سیستم برای نقطه پایانی /api/user/self از تجمیع‌کننده. نه کلید API مسیریابی.",

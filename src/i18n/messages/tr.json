@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API Kullanıcı Kimliği",
     "newApiUserIdPlaceholder": "örn. 12345",
     "newApiUserIdHint": "AgentRouter'ın New-Api-User başlık değeri, kota bakiyesini almak için konsol API anahtarıyla birlikte kullanılır.",
+    "tokenrouterManagementKeyLabel": "Yönetim anahtarı (isteğe bağlı)",
+    "tokenrouterManagementKeyHint": "TokenRouter panosundaki hesap anahtarı (Settings → Management Key). Yalnızca kota ve bakiyeyi okumak için kullanılır, asla istekler için kullanılmaz. Kayıtlı anahtar gösterilmez; korumak için boş bırakın.",
     "newApiAggregatorToggleLabel": "Toplayıcı Geçidi",
     "newApiAggregatorToggleHint": "Yeni-API / Tek-API / Sub2API toplayıcı düğümleri için bakiye tespiti etkinleştir. Gösterge paneli bakiye rozeti gösterecek ve kota ön kontrol yönlendirmesi tükenmiş hesapları atlayacak.",
     "newApiAggregatorConsoleApiKeyHint": "Toplayıcının /api/user/self uç noktası için Sistem Erişim Token'ı. Yönlendirme API anahtarı değil.",

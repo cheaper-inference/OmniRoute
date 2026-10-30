@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API felhasználói azonosító",
     "newApiUserIdPlaceholder": "pl. 12345",
     "newApiUserIdHint": "Az AgentRouter New-Api-User fejlécértéke, amelyet a konzol API-kulcsával együtt használunk a kvótaegyenleg lekéréséhez.",
+    "tokenrouterManagementKeyLabel": "Kezelési kulcs (opcionális)",
+    "tokenrouterManagementKeyHint": "Fiókkulcs a TokenRouter irányítópultjáról (Settings → Management Key). Csak a kvóta és az egyenleg lekérdezésére szolgál, kérésekhez soha. A mentett kulcs nem jelenik meg; hagyja üresen a megtartásához.",
     "newApiAggregatorToggleLabel": "Aggregátor Kapu",
     "newApiAggregatorToggleHint": "Engedélyezze a egyenleg-érzékelést az Új-API / Egy-API / Sub2API aggregátor csomópontokhoz. A műszerfal megjeleníti az egyenleg jelvényt, és a kvóta-előzetes irányítás kihagyja a kimerült fiókokat.",
     "newApiAggregatorConsoleApiKeyHint": "Rendszerhozzáférési Token az aggregátor /api/user/self végpontjához. Nem a routing API kulcs.",

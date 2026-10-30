@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API ବ୍ୟବହାରକାରୀ ID",
     "newApiUserIdPlaceholder": "ଯଥା 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User ହେଡର୍ ମୂଲ୍ୟ, ଯାହା କୋଟା ବାଲାନ୍ସ ଆଣିବା ପାଇଁ କନସୋଲ୍ API କୀ ସହିତ ବ୍ୟବହୃତ ହୁଏ।",
+    "tokenrouterManagementKeyLabel": "ପରିଚାଳନା କି (ବୈକଳ୍ପିକ)",
+    "tokenrouterManagementKeyHint": "TokenRouter ଡ୍ୟାସବୋର୍ଡରୁ ଆକାଉଣ୍ଟ କି (Settings → Management Key)। କେବଳ କୋଟା ଏବଂ ବାଲାନ୍ସ ପଢ଼ିବା ପାଇଁ ବ୍ୟବହୃତ ହୁଏ, ଅନୁରୋଧ ପାଇଁ କେବେ ନୁହେଁ। ସଞ୍ଚିତ କି ଦେଖାଯାଏ ନାହିଁ; ଏହାକୁ ରଖିବା ପାଇଁ ଖାଲି ଛାଡ଼ନ୍ତୁ।",
     "newApiAggregatorToggleLabel": "ଏଗ୍ରିଗେଟର୍ ଗେଟୱେ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ଏଗ୍ରିଗେଟର୍ ନୋଡ୍ଗୁଡ଼ିକ ପାଇଁ ବାଲାନ୍ସ ଚିହ୍ନଟ ସକ୍ଷମ କରନ୍ତୁ। ଡ୍ୟାସ୍ବୋର୍ଡ ବାଲାନ୍ସ ବ୍ୟାଜ୍ ଦେଖାଇବ ଏବଂ କୋଟା-ପ୍ରିଫ୍ଲାଇଟ୍ ରାଉଟିଂ କୋଟା ଶେଷ ହୋଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଏଡ଼ାଇଯିବ।",
     "newApiAggregatorConsoleApiKeyHint": "ଏଗ୍ରିଗେଟର୍ର /api/user/self ଏଣ୍ଡପଏଣ୍ଟ ପାଇଁ ସିଷ୍ଟମ୍ ଆକ୍ସେସ୍ ଟୋକେନ୍। ଏହା ରାଉଟିଂ API କୀ ନୁହେଁ।",

@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API صارف ID",
     "newApiUserIdPlaceholder": "مثلاً 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User ہیڈر کی قدر، جو کوٹہ بیلنس حاصل کرنے کے لیے کنسول API کلید کے ساتھ استعمال ہوتی ہے۔",
+    "tokenrouterManagementKeyLabel": "مینجمنٹ کلید (اختیاری)",
+    "tokenrouterManagementKeyHint": "TokenRouter ڈیش بورڈ سے اکاؤنٹ کلید (Settings → Management Key)۔ صرف کوٹا اور بیلنس پڑھنے کے لیے استعمال ہوتی ہے، درخواستوں کے لیے کبھی نہیں۔ محفوظ شدہ کلید نہیں دکھائی جاتی؛ اسے برقرار رکھنے کے لیے خالی چھوڑ دیں۔",
     "newApiAggregatorToggleLabel": "ایگریگیٹر گیٹ وے",
     "newApiAggregatorToggleHint": "نئے-API / ایک-API / سب2API ایگریگیٹر نوڈز کے لیے بیلنس کی شناخت کو فعال کریں۔ ڈیش بورڈ بیلنس بیج دکھائے گا اور کوٹہ-پری فلائٹ روٹنگ ختم شدہ اکاؤنٹس کو چھوڑ دے گی۔",
     "newApiAggregatorConsoleApiKeyHint": "ایگریگیٹر کے /api/user/self اینڈپوائنٹ کے لیے سسٹم ایکسیس ٹوکن۔ روٹنگ API کلید نہیں۔",

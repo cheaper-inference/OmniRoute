@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API वापरकर्ता आयडी",
     "newApiUserIdPlaceholder": "उदा. 12345",
     "newApiUserIdHint": "AgentRouter चे New-Api-User हेडर मूल्य, कोटा शिल्लक मिळवण्यासाठी कन्सोल API कीसोबत वापरले जाते.",
+    "tokenrouterManagementKeyLabel": "व्यवस्थापन की (ऐच्छिक)",
+    "tokenrouterManagementKeyHint": "TokenRouter डॅशबोर्डमधील खाते की (Settings → Management Key). फक्त कोटा आणि शिल्लक वाचण्यासाठी वापरली जाते, विनंत्यांसाठी कधीही नाही. जतन केलेली की दाखवली जात नाही; ती ठेवण्यासाठी रिकामे ठेवा.",
     "newApiAggregatorToggleLabel": "एग्रीगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API समाकलन नोडसाठी संतुलन शोध सक्षम करा. डॅशबोर्ड संतुलन बॅज दर्शवेल आणि कोटा-पूर्व उड्डाण मार्गक्रमण थकलेले खाते वगळेल.",
     "newApiAggregatorConsoleApiKeyHint": "संविधानकर्ता /api/user/self अंतिम बिंदूसाठी प्रणाली प्रवेश टोकन. राउटिंग API की नाही.",

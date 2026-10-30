@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API-bruker-ID",
     "newApiUserIdPlaceholder": "f.eks. 12345",
     "newApiUserIdHint": "Verdien for AgentRouter New-Api-User-headeren, som brukes sammen med konsollens API-nøkkel for å hente kvotebalansen.",
+    "tokenrouterManagementKeyLabel": "Administrasjonsnøkkel (valgfri)",
+    "tokenrouterManagementKeyHint": "Kontonøkkel fra TokenRouter-dashbordet (Settings → Management Key). Brukes kun til å lese kvote og saldo, aldri til forespørsler. Den lagrede nøkkelen vises ikke; la feltet stå tomt for å beholde den.",
     "newApiAggregatorToggleLabel": "Aggregator-gateway",
     "newApiAggregatorToggleHint": "Aktiver balanseoppdagelse for New-API / One-API / Sub2API aggregator-noder. Dashbordet vil vise balanse-merket, og kvote-preflight-ruting vil hoppe over utmattede kontoer.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token for aggregatorens /api/user/self-endepunkt. Ikke routing API-nøkkelen.",

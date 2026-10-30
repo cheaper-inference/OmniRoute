@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API વપરાશકર્તા ID",
     "newApiUserIdPlaceholder": "દા.ત. 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User હેડર મૂલ્ય, જેનો ઉપયોગ ક્વોટા બેલેન્સ મેળવવા માટે કન્સોલ API કી સાથે થાય છે.",
+    "tokenrouterManagementKeyLabel": "મેનેજમેન્ટ કી (વૈકલ્પિક)",
+    "tokenrouterManagementKeyHint": "TokenRouter ડેશબોર્ડમાંથી એકાઉન્ટ કી (Settings → Management Key). ફક્ત ક્વોટા અને બેલેન્સ વાંચવા માટે વપરાય છે, વિનંતીઓ માટે ક્યારેય નહીં. સાચવેલી કી બતાવવામાં આવતી નથી; તેને રાખવા માટે ખાલી છોડો.",
     "newApiAggregatorToggleLabel": "એગ્રેગેટર ગેટવે",
     "newApiAggregatorToggleHint": "નવી-એપીઆઈ / વન-એપીઆઈ / સબ2એપીઆઈ એગ્રેગેટર નોડ્સ માટે બેલેન્સ ડિટેક્શન સક્રિય કરો. ડેશબોર્ડ બેલેન્સ બેજ દર્શાવશે અને ક્વોટા-પ્રિફ્લાઇટ રૂટિંગ થાકેલા ખાતાઓને અવગણશે.",
     "newApiAggregatorConsoleApiKeyHint": "એગ્રેગેટરનાં /api/user/self એન્ડપોઈન્ટ માટે સિસ્ટમ ઍક્સેસ ટોકન. રૂટિંગ API કી નથી.",

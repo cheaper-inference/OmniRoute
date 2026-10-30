@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API kasutaja ID",
     "newApiUserIdPlaceholder": "nt 12345",
     "newApiUserIdHint": "AgentRouteri New-Api-User päise väärtus, mida kasutatakse koos konsooli API-võtmega kvoodijäägi hankimiseks.",
+    "tokenrouterManagementKeyLabel": "Haldusvõti (valikuline)",
+    "tokenrouterManagementKeyHint": "Kontovõti TokenRouteri juhtpaneelilt (Settings → Management Key). Kasutatakse ainult kvoodi ja saldo lugemiseks, mitte kunagi päringuteks. Salvestatud võtit ei kuvata; selle säilitamiseks jätke väli tühjaks.",
     "newApiAggregatorToggleLabel": "Agregaatori lüüs",
     "newApiAggregatorToggleHint": "Luba New-API / One-API / Sub2API agregaatorisõlmede saldo tuvastamine. Juhtpaneel kuvab saldomärgi ja kvoodi eelkontrolliga marsruutimine jätab ammendunud kontod vahele.",
     "newApiAggregatorConsoleApiKeyHint": "Süsteemi juurdepääsutõend agregaatori /api/user/self lõpp-punkti jaoks. See ei ole marsruutimise API-võti.",

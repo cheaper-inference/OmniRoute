@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID Pengguna New-API",
     "newApiUserIdPlaceholder": "mis. 12345",
     "newApiUserIdHint": "Nilai header New-Api-User AgentRouter, digunakan bersama kunci API konsol untuk mengambil saldo kuota.",
+    "tokenrouterManagementKeyLabel": "Kunci manajemen (opsional)",
+    "tokenrouterManagementKeyHint": "Kunci akun dari dasbor TokenRouter (Settings → Management Key). Hanya digunakan untuk membaca kuota dan saldo, tidak pernah untuk permintaan. Kunci yang tersimpan tidak ditampilkan; biarkan kosong untuk mempertahankannya.",
     "newApiAggregatorToggleLabel": "Gerbang Agregator",
     "newApiAggregatorToggleHint": "Aktifkan deteksi saldo untuk node agregator New-API / One-API / Sub2API. Dasbor akan menampilkan lencana saldo dan pengalihan kuota-preflight akan melewati akun yang habis.",
     "newApiAggregatorConsoleApiKeyHint": "Token Akses Sistem untuk endpoint /api/user/self agregator. Bukan kunci API routing.",

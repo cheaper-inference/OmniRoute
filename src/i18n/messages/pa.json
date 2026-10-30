@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API ਯੂਜ਼ਰ ID",
     "newApiUserIdPlaceholder": "ਉਦਾਹਰਨ ਲਈ 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User ਹੈਡਰ ਮੁੱਲ, ਜੋ ਕੋਟਾ ਬਕਾਇਆ ਪ੍ਰਾਪਤ ਕਰਨ ਲਈ ਕੰਸੋਲ API ਕੁੰਜੀ ਦੇ ਨਾਲ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ।",
+    "tokenrouterManagementKeyLabel": "ਪ੍ਰਬੰਧਨ ਕੁੰਜੀ (ਵਿਕਲਪਿਕ)",
+    "tokenrouterManagementKeyHint": "TokenRouter ਡੈਸ਼ਬੋਰਡ ਤੋਂ ਖਾਤਾ ਕੁੰਜੀ (Settings → Management Key)। ਸਿਰਫ਼ ਕੋਟਾ ਅਤੇ ਬਕਾਇਆ ਪੜ੍ਹਨ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ, ਬੇਨਤੀਆਂ ਲਈ ਕਦੇ ਨਹੀਂ। ਸੰਭਾਲੀ ਕੁੰਜੀ ਨਹੀਂ ਦਿਖਾਈ ਜਾਂਦੀ; ਇਸਨੂੰ ਰੱਖਣ ਲਈ ਖਾਲੀ ਛੱਡੋ।",
     "newApiAggregatorToggleLabel": "ਐਗਰੀਗੇਟਰ ਗੇਟਵੇ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ਐਗਰੀਗੇਟਰ ਨੋਡਾਂ ਲਈ ਬਕਾਇਆ ਪਤਾ ਲਗਾਉਣਾ ਸਮਰੱਥ ਕਰੋ। ਡੈਸ਼ਬੋਰਡ ਬਕਾਇਆ ਬੈਜ ਦਿਖਾਏਗਾ ਅਤੇ ਕੋਟਾ-ਪ੍ਰੀਫਲਾਈਟ ਰੂਟਿੰਗ ਕੋਟਾ ਖ਼ਤਮ ਹੋ ਚੁੱਕੇ ਖਾਤਿਆਂ ਨੂੰ ਛੱਡ ਦੇਵੇਗੀ।",
     "newApiAggregatorConsoleApiKeyHint": "ਐਗਰੀਗੇਟਰ ਦੇ /api/user/self ਐਂਡਪੌਇੰਟ ਲਈ ਸਿਸਟਮ ਐਕਸੈੱਸ ਟੋਕਨ। ਇਹ ਰੂਟਿੰਗ API ਕੁੰਜੀ ਨਹੀਂ ਹੈ।",

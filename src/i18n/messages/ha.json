@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID na Mai Amfani na New-API",
     "newApiUserIdPlaceholder": "misali 12345",
     "newApiUserIdHint": "Ƙimar taken New-Api-User ta AgentRouter, wadda ake amfani da ita tare da maɓallin API na console don samo ragowar ƙayyadadden kaso.",
+    "tokenrouterManagementKeyLabel": "Maɓallin gudanarwa (na zaɓi)",
+    "tokenrouterManagementKeyHint": "Maɓallin asusu daga dashboard na TokenRouter (Settings → Management Key). Ana amfani da shi ne kawai don karanta kaso da ragowar kuɗi, ba don buƙatu ba. Ba a nuna maɓallin da aka adana ba; bar shi babu komai don a riƙe shi.",
     "newApiAggregatorToggleLabel": "Ƙofar Mai Tarawa",
     "newApiAggregatorToggleHint": "Kunna gano ragowar kuɗi don nodes na masu tarawa na New-API / One-API / Sub2API. Allon sarrafawa zai nuna alamar ragowar kuɗi, sannan zaɓin hanya na binciken ƙayyadadden kaso kafin aikawa zai tsallake asusun da suka ƙare.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token don maƙurar /api/user/self ta mai tarawa. Ba maɓallin API na zaɓin hanya ba ne.",

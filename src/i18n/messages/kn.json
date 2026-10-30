@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API ಬಳಕೆದಾರ ID",
     "newApiUserIdPlaceholder": "ಉದಾ. 12345",
     "newApiUserIdHint": "ಕೋಟಾ ಬಾಕಿಯನ್ನು ಪಡೆಯಲು ಕನ್ಸೋಲ್ API ಕೀಯೊಂದಿಗೆ ಬಳಸಲಾಗುವ AgentRouter New-Api-User ಹೆಡರ್ ಮೌಲ್ಯ.",
+    "tokenrouterManagementKeyLabel": "ನಿರ್ವಹಣಾ ಕೀ (ಐಚ್ಛಿಕ)",
+    "tokenrouterManagementKeyHint": "TokenRouter ಡ್ಯಾಶ್‌ಬೋರ್ಡ್‌ನಿಂದ ಖಾತೆ ಕೀ (Settings → Management Key). ಕೋಟಾ ಮತ್ತು ಬಾಕಿಯನ್ನು ಓದಲು ಮಾತ್ರ ಬಳಸಲಾಗುತ್ತದೆ, ವಿನಂತಿಗಳಿಗೆ ಎಂದಿಗೂ ಅಲ್ಲ. ಉಳಿಸಿದ ಕೀಯನ್ನು ತೋರಿಸಲಾಗುವುದಿಲ್ಲ; ಅದನ್ನು ಉಳಿಸಿಕೊಳ್ಳಲು ಖಾಲಿ ಬಿಡಿ.",
     "newApiAggregatorToggleLabel": "ಅಗ್ರಿಗೇಟರ್ ಗೇಟ್ವೇ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API ಅಗ್ರಿಗೇಟರ್ ನೋಡ್ಗಳಿಗಾಗಿ ಬ್ಯಾಲೆನ್ಸ್ ಪತ್ತೆಹಚ್ಚುವಿಕೆಯನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಿ. ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಬ್ಯಾಲೆನ್ಸ್ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ತೋರಿಸುತ್ತದೆ ಮತ್ತು ಕೋಟಾ-ಪೂರ್ವಪರಿಶೀಲನಾ ರೂಟಿಂಗ್ ಕೋಟಾ ಮುಗಿದ ಖಾತೆಗಳನ್ನು ಬಿಟ್ಟುಬಿಡುತ್ತದೆ.",
     "newApiAggregatorConsoleApiKeyHint": "ಅಗ್ರಿಗೇಟರ್ನ /api/user/self ಎಂಡ್ಪಾಯಿಂಟ್ಗಾಗಿ ಸಿಸ್ಟಮ್ ಆಕ್ಸೆಸ್ ಟೋಕನ್. ಇದು ರೂಟಿಂಗ್ API ಕೀ ಅಲ್ಲ.",

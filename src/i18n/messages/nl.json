@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API-gebruikers-ID",
     "newApiUserIdPlaceholder": "bijv. 12345",
     "newApiUserIdHint": "Waarde van de New-Api-User-header van AgentRouter, gebruikt samen met de console-API-sleutel om het quotasaldo op te halen.",
+    "tokenrouterManagementKeyLabel": "Beheersleutel (optioneel)",
+    "tokenrouterManagementKeyHint": "Accountsleutel uit het TokenRouter-dashboard (Settings → Management Key). Wordt alleen gebruikt om quotum en saldo te lezen, nooit voor verzoeken. De opgeslagen sleutel wordt niet getoond; laat leeg om hem te behouden.",
     "newApiAggregatorToggleLabel": "Aggregatorgateway",
     "newApiAggregatorToggleHint": "Schakel balansdetectie in voor New-API / One-API / Sub2API aggregator nodes. Het dashboard toont de balansbadge en quota-preflight routering zal uitgeputte accounts overslaan.",
     "newApiAggregatorConsoleApiKeyHint": "Systeemtoegangstoken voor de aggregator's /api/user/self eindpunt. Niet de routerings-API-sleutel.",

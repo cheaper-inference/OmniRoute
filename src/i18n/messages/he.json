@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "מזהה משתמש New-API",
     "newApiUserIdPlaceholder": "לדוגמה 12345",
     "newApiUserIdHint": "ערך כותרת New-Api-User של AgentRouter, המשמש יחד עם מפתח ה-API של הקונסולה לקבלת יתרת המכסה.",
+    "tokenrouterManagementKeyLabel": "מפתח ניהול (אופציונלי)",
+    "tokenrouterManagementKeyHint": "מפתח חשבון מלוח הבקרה של TokenRouter (Settings → Management Key). משמש רק לקריאת המכסה והיתרה, אף פעם לא לבקשות. המפתח השמור אינו מוצג; השאירו ריק כדי לשמור עליו.",
     "newApiAggregatorToggleLabel": "שער מאגר",
     "newApiAggregatorToggleHint": "אפשר גילוי יתר עבור צמתים של New-API / One-API / Sub2API. לוח המחוונים יראה את תג היתר והנתיב לפני הטיסה של הקוטע ידלג על חשבונות שנוצלו.",
     "newApiAggregatorConsoleApiKeyHint": "אסימון גישה למערכת עבור נקודת הקצה /api/user/self של המאגד. לא מפתח ה-API של הניווט.",

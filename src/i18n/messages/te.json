@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API వినియోగదారు ID",
     "newApiUserIdPlaceholder": "ఉదా. 12345",
     "newApiUserIdHint": "కోటా బ్యాలెన్స్ను పొందడానికి కన్సోల్ API కీతో కలిపి ఉపయోగించే AgentRouter New-Api-User హెడర్ విలువ.",
+    "tokenrouterManagementKeyLabel": "నిర్వహణ కీ (ఐచ్ఛికం)",
+    "tokenrouterManagementKeyHint": "TokenRouter డ్యాష్‌బోర్డ్ నుండి ఖాతా కీ (Settings → Management Key). కోటా మరియు బ్యాలెన్స్ చదవడానికి మాత్రమే ఉపయోగించబడుతుంది, అభ్యర్థనలకు ఎప్పుడూ కాదు. సేవ్ చేసిన కీ చూపబడదు; దానిని ఉంచడానికి ఖాళీగా వదిలేయండి.",
     "newApiAggregatorToggleLabel": "అగ్రిగేటర్ గేట్వే",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API సమీకర్త నోడ్స్ కోసం బ్యాలెన్స్ గుర్తింపు ప్రారంభించండి. డాష్‌బోర్డ్ బ్యాలెన్స్ బ్యాడ్జ్‌ను చూపిస్తుంది మరియు క్వోటా-ప్రీఫ్లైట్ రూటింగ్ ఖర్చైన ఖాతాలను దాటిస్తుంది.",
     "newApiAggregatorConsoleApiKeyHint": "అగ్రిగేటర్ యొక్క /api/user/self ఎండ్‌పాయింట్ కోసం సిస్టమ్ యాక్సెస్ టోకెన్. రౌటింగ్ API కీ కాదు.",

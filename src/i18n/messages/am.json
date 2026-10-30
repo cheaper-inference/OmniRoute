@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "የNew-API ተጠቃሚ መለያ",
     "newApiUserIdPlaceholder": "ለምሳሌ 12345",
     "newApiUserIdHint": "የAgentRouter New-Api-User ራስጌ እሴት፤ የኮታ ቀሪ ሂሳብን ለማምጣት ከኮንሶል API ቁልፍ ጋር አብሮ ጥቅም ላይ ይውላል።",
+    "tokenrouterManagementKeyLabel": "የአስተዳደር ቁልፍ (አማራጭ)",
+    "tokenrouterManagementKeyHint": "ከTokenRouter ዳሽቦርድ የሚገኝ የመለያ ቁልፍ (Settings → Management Key)። ኮታን እና ቀሪ ሂሳብን ለማንበብ ብቻ ያገለግላል፣ ለጥያቄዎች በፍጹም አይውልም። የተቀመጠው ቁልፍ አይታይም፤ ለማቆየት ባዶ ይተዉት።",
     "newApiAggregatorToggleLabel": "የአግሪጌተር ጌትዌይ",
     "newApiAggregatorToggleHint": "ለNew-API / One-API / Sub2API አግሪጌተር ኖዶች የቀሪ ሂሳብ ማወቂያን አንቃ። ዳሽቦርዱ የቀሪ ሂሳብ ባጅን ያሳያል፣ እንዲሁም ከኮታ ቅድመ-ማረጋገጫ ጋር የሚደረግ ማዘዋወር ኮታቸው ያለቀባቸውን መለያዎች ይዘላል።",
     "newApiAggregatorConsoleApiKeyHint": "ለአግሪጌተሩ /api/user/self የመዳረሻ ነጥብ የስርዓት መዳረሻ ቶከን። ይህ የማዘዋወሪያ API ቁልፍ አይደለም።",

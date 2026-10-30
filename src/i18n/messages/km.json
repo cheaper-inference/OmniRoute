@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "ID អ្នកប្រើប្រាស់ New-API",
     "newApiUserIdPlaceholder": "ឧ. 12345",
     "newApiUserIdHint": "តម្លៃ AgentRouter New-Api-User header ដែលប្រើរួមជាមួយ console API key ដើម្បីទាញយកសមតុល្យកូតា។",
+    "tokenrouterManagementKeyLabel": "សោគ្រប់គ្រង (ស្រេចចិត្ត)",
+    "tokenrouterManagementKeyHint": "សោគណនីពីផ្ទាំងគ្រប់គ្រង TokenRouter (Settings → Management Key)។ ប្រើសម្រាប់តែអានកូតា និងសមតុល្យប៉ុណ្ណោះ មិនដែលប្រើសម្រាប់សំណើទេ។ សោដែលបានរក្សាទុកមិនត្រូវបានបង្ហាញទេ; ទុកឱ្យទទេដើម្បីរក្សាវាទុក។",
     "newApiAggregatorToggleLabel": "ច្រកទ្វារប្រមូលផ្ដុំ",
     "newApiAggregatorToggleHint": "បើកការរកឃើញសមតុល្យសម្រាប់ថ្នាំងប្រមូលផ្តុំ New-API / One-API / Sub2API។ ផ្ទាំងគ្រប់គ្រងនឹងបង្ហាញស្លាកសមតុល្យ ហើយការកំណត់ផ្លូវដោយពិនិត្យកូតាជាមុននឹងរំលងគណនីដែលអស់សមតុល្យ។",
     "newApiAggregatorConsoleApiKeyHint": "ថូខឹនចូលប្រើប្រព័ន្ធសម្រាប់ចំណុចបញ្ចប់ /api/user/self របស់កម្មវិធីប្រមូលផ្តុំ។ មិនមែនជាសោ API សម្រាប់កំណត់ផ្លូវទេ។",

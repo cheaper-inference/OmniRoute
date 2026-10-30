@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID de utilizator New-API",
     "newApiUserIdPlaceholder": "de ex., 12345",
     "newApiUserIdHint": "Valoarea antetului AgentRouter New-Api-User, utilizată împreună cu cheia API a consolei pentru a prelua soldul cotei.",
+    "tokenrouterManagementKeyLabel": "Cheie de administrare (opțional)",
+    "tokenrouterManagementKeyHint": "Cheia contului din tabloul de bord TokenRouter (Settings → Management Key). Folosită doar pentru citirea cotei și a soldului, niciodată pentru cereri. Cheia salvată nu este afișată; lăsați gol pentru a o păstra.",
     "newApiAggregatorToggleLabel": "Gateway-ul Agregator",
     "newApiAggregatorToggleHint": "Activați detectarea soldului pentru nodurile agregator New-API / One-API / Sub2API. Panoul de control va afișa insigna soldului, iar rutarea quota-preflight va sări peste conturile epuizate.",
     "newApiAggregatorConsoleApiKeyHint": "Token de acces al sistem pentru endpoint-ul /api/user/self al agregatorului. Nu cheia API de rutare.",

@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API 使用者 ID",
     "newApiUserIdPlaceholder": "例如 12345",
     "newApiUserIdHint": "AgentRouter 的 New-Api-User 標頭值，與控制台 API key 一起用於取得配額餘額。",
+    "tokenrouterManagementKeyLabel": "管理金鑰（選填）",
+    "tokenrouterManagementKeyHint": "TokenRouter 控制台中的帳戶金鑰（Settings → Management Key）。僅用於讀取配額與餘額，絕不用於請求。已儲存的金鑰不會顯示；留空即可保留。",
     "newApiAggregatorToggleLabel": "聚合閘道",
     "newApiAggregatorToggleHint": "為 New-API / One-API / Sub2API 聚合器節點啟用餘額檢測。儀表板將顯示餘額徽章，配額預檢路由將跳過已耗盡的帳戶。",
     "newApiAggregatorConsoleApiKeyHint": "聚合器的 /api/user/self 端點的系統訪問令牌。不是路由 API 金鑰。",

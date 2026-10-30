@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API ID корисника",
     "newApiUserIdPlaceholder": "нпр. 12345",
     "newApiUserIdHint": "Вредност AgentRouter New-Api-User заглавља која се користи заједно са API кључем конзоле за преузимање стања квоте.",
+    "tokenrouterManagementKeyLabel": "Кључ за управљање (опционо)",
+    "tokenrouterManagementKeyHint": "Кључ налога са TokenRouter контролне табле (Settings → Management Key). Користи се само за читање квоте и стања, никада за захтеве. Сачувани кључ се не приказује; оставите празно да бисте га задржали.",
     "newApiAggregatorToggleLabel": "Агрегаторски мрежни пролаз",
     "newApiAggregatorToggleHint": "Омогућава детекцију стања за New-API / One-API / Sub2API агрегаторске чворове. Контролна табла ће приказати ознаку стања, а рутирање са провером квоте ће заобилазити исцрпљене налоге.",
     "newApiAggregatorConsoleApiKeyHint": "Системски приступни токен за /api/user/self крајњу тачку агрегатора. Није API кључ за рутирање.",

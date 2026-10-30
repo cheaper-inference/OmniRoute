@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "Aitheantas Úsáideora New-API",
     "newApiUserIdPlaceholder": "m.sh. 12345",
     "newApiUserIdHint": "Luach ceanntáisc AgentRouter New-Api-User, a úsáidtear in éineacht le heochair API an chonsóil chun iarmhéid cuóta a fháil.",
+    "tokenrouterManagementKeyLabel": "Eochair bhainistíochta (roghnach)",
+    "tokenrouterManagementKeyHint": "Eochair chuntais ó dheais TokenRouter (Settings → Management Key). Úsáidtear í chun cuóta agus iarmhéid a léamh amháin, riamh le haghaidh iarratas. Ní thaispeántar an eochair shábháilte; fág folamh í chun í a choinneáil.",
     "newApiAggregatorToggleLabel": "Geata Comhiomlánóra",
     "newApiAggregatorToggleHint": "Cuir ar chumas braite iarmhéid do nóid chomhiomlánaithe New-API / One-API / Sub2API. Taispeánfaidh an deais an suaitheantas iarmhéid agus scipeoidh ródú réamhsheiceála cuóta cuntais ídithe.",
     "newApiAggregatorConsoleApiKeyHint": "Comhartha Rochtana Córais do chríochphointe /api/user/self an chomhiomlánóra. Ní hé eochair API an ródaithe é.",

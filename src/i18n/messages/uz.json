@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API foydalanuvchi IDsi",
     "newApiUserIdPlaceholder": "masalan, 12345",
     "newApiUserIdHint": "Kvota qoldigʻini olish uchun konsol API kaliti bilan birga ishlatiladigan AgentRouter New-Api-User sarlavha qiymati.",
+    "tokenrouterManagementKeyLabel": "Boshqaruv kaliti (ixtiyoriy)",
+    "tokenrouterManagementKeyHint": "TokenRouter boshqaruv panelidagi hisob kaliti (Settings → Management Key). Faqat kvota va balansni oʻqish uchun ishlatiladi, hech qachon soʻrovlar uchun emas. Saqlangan kalit koʻrsatilmaydi; uni saqlab qolish uchun boʻsh qoldiring.",
     "newApiAggregatorToggleLabel": "Agregator shlyuzi",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API agregator tugunlari uchun balansni aniqlashni yoqing. Boshqaruv paneli balans nishonini koʻrsatadi va kvotani oldindan tekshiruvchi marshrutlash limiti tugagan hisoblarni chetlab oʻtadi.",
     "newApiAggregatorConsoleApiKeyHint": "Agregatorning /api/user/self endpointi uchun tizim kirish tokeni. Bu marshrutlash API kaliti emas.",

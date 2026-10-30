@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API පරිශීලක ID",
     "newApiUserIdPlaceholder": "උදා. 12345",
     "newApiUserIdHint": "කෝටා ශේෂය ලබා ගැනීම සඳහා කොන්සෝල API යතුර සමඟ භාවිත කරන AgentRouter New-Api-User ශීර්ෂක අගය.",
+    "tokenrouterManagementKeyLabel": "කළමනාකරණ යතුර (විකල්ප)",
+    "tokenrouterManagementKeyHint": "TokenRouter උපකරණ පුවරුවෙන් ගිණුම් යතුර (Settings → Management Key). කෝටාව සහ ශේෂය කියවීමට පමණක් භාවිත වේ, ඉල්ලීම් සඳහා කිසිදා නොවේ. සුරකින ලද යතුර පෙන්වන්නේ නැත; එය තබා ගැනීමට හිස්ව තබන්න.",
     "newApiAggregatorToggleLabel": "එකතුකාරක ද්වාරය",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API එකතුකාරක නෝඩ් සඳහා ශේෂ හඳුනාගැනීම සක්රීය කරන්න. උපකරණ පුවරුව ශේෂ ලාංඡනය පෙන්වන අතර, කෝටා පූර්ව-පරීක්ෂණ මාර්ගගත කිරීම කෝටාව අවසන් වූ ගිණුම් මඟහරිනු ඇත.",
     "newApiAggregatorConsoleApiKeyHint": "එකතුකාරකයේ /api/user/self අන්ත ලක්ෂ්යය සඳහා පද්ධති ප්රවේශ ටෝකනය. මෙය මාර්ගගත කිරීමේ API යතුර නොවේ.",

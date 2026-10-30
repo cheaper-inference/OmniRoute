@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API-käyttäjätunnus",
     "newApiUserIdPlaceholder": "esim. 12345",
     "newApiUserIdHint": "AgentRouterin New-Api-User-otsakkeen arvo, jota käytetään yhdessä konsolin API-avaimen kanssa kiintiösaldon hakemiseen.",
+    "tokenrouterManagementKeyLabel": "Hallintaavain (valinnainen)",
+    "tokenrouterManagementKeyHint": "Tiliavain TokenRouterin hallintapaneelista (Settings → Management Key). Käytetään vain kiintiön ja saldon lukemiseen, ei koskaan pyyntöihin. Tallennettua avainta ei näytetä; jätä tyhjäksi säilyttääksesi sen.",
     "newApiAggregatorToggleLabel": "Kokoaja Portti",
     "newApiAggregatorToggleHint": "Ota tasapainon havaitseminen käyttöön New-API / One-API / Sub2API -aggregointisolmuille. Hallintapaneeli näyttää tasapainotunnuksen ja kiintiön ennakkoreititys ohittaa loppuun käytetyt tilit.",
     "newApiAggregatorConsoleApiKeyHint": "Järjestelmän pääsytunnus aggregaattorin /api/user/self päätepisteelle. Ei reitityksen API-avainta.",

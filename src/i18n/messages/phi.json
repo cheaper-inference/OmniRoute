@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "User ID ng New-API",
     "newApiUserIdPlaceholder": "hal. 12345",
     "newApiUserIdHint": "Value ng AgentRouter New-Api-User header, na ginagamit kasama ng console API key upang kunin ang balanse ng quota.",
+    "tokenrouterManagementKeyLabel": "Management key (opsyonal)",
+    "tokenrouterManagementKeyHint": "Account key mula sa dashboard ng TokenRouter (Settings → Management Key). Ginagamit lamang para basahin ang quota at balanse, hindi kailanman para sa mga request. Hindi ipinapakita ang naka-save na key; iwanang blangko para panatilihin ito.",
     "newApiAggregatorToggleLabel": "Gateway ng Aggregator",
     "newApiAggregatorToggleHint": "I-enable ang pagtukoy ng balanse para sa New-API / One-API / Sub2API aggregator nodes. Ipapakita ng dashboard ang badge ng balanse at ang quota-preflight routing ay laktawan ang mga ubos na account.",
     "newApiAggregatorConsoleApiKeyHint": "Token ng Access ng Sistema para sa endpoint na /api/user/self ng aggregator. Hindi ang routing API key.",

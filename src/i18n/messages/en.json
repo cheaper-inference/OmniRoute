@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API User ID",
     "newApiUserIdPlaceholder": "e.g. 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User header value, used together with the console API key to fetch quota balance.",
+    "tokenrouterManagementKeyLabel": "Management Key (optional)",
+    "tokenrouterManagementKeyHint": "Account key from the TokenRouter dashboard (Settings → Management Key). Used only to read quota and balance, never for requests. The saved key is not shown; leave empty to keep it.",
     "newApiAggregatorToggleLabel": "Aggregator Gateway",
     "newApiAggregatorToggleHint": "Enable balance detection for New-API / One-API / Sub2API aggregator nodes. The dashboard will show the balance badge and quota-preflight routing will skip exhausted accounts.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token for the aggregator's /api/user/self endpoint. Not the routing API key.",

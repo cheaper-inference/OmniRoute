@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API प्रयोगकर्ता ID",
     "newApiUserIdPlaceholder": "उदाहरण: 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User हेडर मान, जुन कोटा मौज्दात प्राप्त गर्न कन्सोल API कुञ्जीसँग प्रयोग गरिन्छ।",
+    "tokenrouterManagementKeyLabel": "व्यवस्थापन कुञ्जी (वैकल्पिक)",
+    "tokenrouterManagementKeyHint": "TokenRouter ड्यासबोर्डबाट खाता कुञ्जी (Settings → Management Key)। कोटा र ब्यालेन्स पढ्न मात्र प्रयोग हुन्छ, अनुरोधहरूका लागि कहिल्यै होइन। सुरक्षित गरिएको कुञ्जी देखाइँदैन; यसलाई राख्न खाली छोड्नुहोस्।",
     "newApiAggregatorToggleLabel": "एग्रिगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API एग्रिगेटर नोडहरूका लागि ब्यालेन्स पहिचान सक्षम गर्नुहोस्। ड्यासबोर्डले ब्यालेन्स ब्याज देखाउनेछ र कोटा-प्रीफ्लाइट राउटिङले सकिएका खाताहरू छोड्नेछ।",
     "newApiAggregatorConsoleApiKeyHint": "एग्रिगेटरको /api/user/self एन्डपोइन्टका लागि सिस्टम एक्सेस टोकन। यो राउटिङ API कुञ्जी होइन।",

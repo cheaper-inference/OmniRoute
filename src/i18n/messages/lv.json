@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API lietotāja ID",
     "newApiUserIdPlaceholder": "piem., 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User galvenes vērtība, ko izmanto kopā ar konsoles API atslēgu, lai iegūtu kvotas atlikumu.",
+    "tokenrouterManagementKeyLabel": "Pārvaldības atslēga (neobligāti)",
+    "tokenrouterManagementKeyHint": "Konta atslēga no TokenRouter informācijas paneļa (Settings → Management Key). Tiek izmantota tikai kvotas un atlikuma nolasīšanai, nekad pieprasījumiem. Saglabātā atslēga netiek rādīta; atstājiet tukšu, lai to paturētu.",
     "newApiAggregatorToggleLabel": "Apkopotāja vārteja",
     "newApiAggregatorToggleHint": "Iespējot atlikuma noteikšanu New-API / One-API / Sub2API apkopotāju mezgliem. Informācijas panelī tiks parādīta atlikuma emblēma, un kvotas priekšpārbaudes maršrutēšana izlaidīs kontus, kuru kvota ir izsmelta.",
     "newApiAggregatorConsoleApiKeyHint": "Sistēmas piekļuves marķieris apkopotāja /api/user/self galapunktam. Tā nav maršrutēšanas API atslēga.",

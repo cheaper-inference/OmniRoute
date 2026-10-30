@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API ഉപയോക്തൃ ID",
     "newApiUserIdPlaceholder": "ഉദാ. 12345",
     "newApiUserIdHint": "ക്വോട്ട ബാലൻസ് ലഭ്യമാക്കാൻ കൺസോൾ API കീയോടൊപ്പം ഉപയോഗിക്കുന്ന AgentRouter New-Api-User ഹെഡർ മൂല്യം.",
+    "tokenrouterManagementKeyLabel": "മാനേജ്മെന്റ് കീ (ഐച്ഛികം)",
+    "tokenrouterManagementKeyHint": "TokenRouter ഡാഷ്ബോർഡിൽ നിന്നുള്ള അക്കൗണ്ട് കീ (Settings → Management Key). ക്വോട്ടയും ബാലൻസും വായിക്കാൻ മാത്രം ഉപയോഗിക്കുന്നു, അഭ്യർത്ഥനകൾക്ക് ഒരിക്കലും ഉപയോഗിക്കില്ല. സംരക്ഷിച്ച കീ കാണിക്കില്ല; അത് നിലനിർത്താൻ ശൂന്യമായി വിടുക.",
     "newApiAggregatorToggleLabel": "അഗ്രിഗേറ്റർ ഗേറ്റ്വേ",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API അഗ്രിഗേറ്റർ നോഡുകൾക്കായി ബാലൻസ് കണ്ടെത്തൽ പ്രവർത്തനക്ഷമമാക്കുക. ഡാഷ്ബോർഡ് ബാലൻസ് ബാഡ്ജ് കാണിക്കുകയും ക്വോട്ട പ്രീഫ്ലൈറ്റ് റൂട്ടിംഗ് ക്വോട്ട തീർന്ന അക്കൗണ്ടുകൾ ഒഴിവാക്കുകയും ചെയ്യും.",
     "newApiAggregatorConsoleApiKeyHint": "അഗ്രിഗേറ്ററിന്റെ /api/user/self എൻഡ്പോയിന്റിനായുള്ള System Access Token. ഇത് റൂട്ടിംഗ് API കീ അല്ല.",

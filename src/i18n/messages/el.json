@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "Αναγνωριστικό χρήστη New-API",
     "newApiUserIdPlaceholder": "π.χ. 12345",
     "newApiUserIdHint": "Τιμή κεφαλίδας New-Api-User του AgentRouter, που χρησιμοποιείται μαζί με το κλειδί API κονσόλας για την ανάκτηση υπολοίπου ποσόστωσης.",
+    "tokenrouterManagementKeyLabel": "Κλειδί διαχείρισης (προαιρετικό)",
+    "tokenrouterManagementKeyHint": "Κλειδί λογαριασμού από τον πίνακα ελέγχου του TokenRouter (Settings → Management Key). Χρησιμοποιείται μόνο για ανάγνωση ορίου χρήσης και υπολοίπου, ποτέ για αιτήματα. Το αποθηκευμένο κλειδί δεν εμφανίζεται· αφήστε κενό για να το διατηρήσετε.",
     "newApiAggregatorToggleLabel": "Πύλη συγκέντρωσης",
     "newApiAggregatorToggleHint": "Ενεργοποίηση ανίχνευσης υπολοίπου για κόμβους συγκέντρωσης New-API / One-API / Sub2API. Ο πίνακας ελέγχου θα εμφανίζει το σήμα υπολοίπου και η δρομολόγηση προελέγχου ποσόστωσης θα παραλείπει τους εξαντλημένους λογαριασμούς.",
     "newApiAggregatorConsoleApiKeyHint": "Διακριτικό πρόσβασης συστήματος για το endpoint /api/user/self της υπηρεσίας συγκέντρωσης. Δεν είναι το κλειδί API δρομολόγησης.",

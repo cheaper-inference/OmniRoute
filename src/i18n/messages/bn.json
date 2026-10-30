@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API ব্যবহারকারী ID",
     "newApiUserIdPlaceholder": "যেমন 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User হেডারের মান, যা কোটার ব্যালেন্স আনতে কনসোল API কী-এর সঙ্গে ব্যবহৃত হয়।",
+    "tokenrouterManagementKeyLabel": "ম্যানেজমেন্ট কী (ঐচ্ছিক)",
+    "tokenrouterManagementKeyHint": "TokenRouter ড্যাশবোর্ড থেকে অ্যাকাউন্ট কী (Settings → Management Key)। শুধুমাত্র কোটা ও ব্যালান্স পড়তে ব্যবহৃত হয়, কখনোই অনুরোধের জন্য নয়। সংরক্ষিত কী দেখানো হয় না; রাখতে চাইলে খালি রাখুন।",
     "newApiAggregatorToggleLabel": "এগ্রিগেটর গেটওয়ে",
     "newApiAggregatorToggleHint": "নতুন-এপিআই / ওয়ান-এপিআই / সাব2এপিআই অ্যাগ্রিগেটর নোডগুলির জন্য ব্যালেন্স সনাক্তকরণ সক্ষম করুন। ড্যাশবোর্ড ব্যালেন্স ব্যাজ দেখাবে এবং কোটা-পূর্ব ফ্লাইট রাউটিং ক্লান্ত অ্যাকাউন্টগুলি বাদ দেবে।",
     "newApiAggregatorConsoleApiKeyHint": "এগ্রিগেটরের /api/user/self এন্ডপয়েন্টের জন্য সিস্টেম অ্যাক্সেস টোকেন। রাউটিং API কী নয়।",

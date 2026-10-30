@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID de usuario New-API",
     "newApiUserIdPlaceholder": "p. ej. 12345",
     "newApiUserIdHint": "Valor del encabezado New-Api-User de AgentRouter, usado junto con la clave de API de la consola para consultar el saldo de cuota.",
+    "tokenrouterManagementKeyLabel": "Clave de administración (opcional)",
+    "tokenrouterManagementKeyHint": "Clave de cuenta del panel de TokenRouter (Settings → Management Key). Solo se usa para leer la cuota y el saldo, nunca para solicitudes. La clave guardada no se muestra; déjalo vacío para conservarla.",
     "newApiAggregatorToggleLabel": "Puerta de Enlace del Agregador",
     "newApiAggregatorToggleHint": "Habilitar la detección de saldo para nodos agregadores New-API / One-API / Sub2API. El panel mostrará la insignia de saldo y el enrutamiento de pre-vuelo de cuota omitirá las cuentas agotadas.",
     "newApiAggregatorConsoleApiKeyHint": "Token de acceso del sistema para el endpoint /api/user/self del agregador. No es la clave API de enrutamiento.",

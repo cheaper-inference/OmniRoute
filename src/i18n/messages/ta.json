@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API பயனர் ID",
     "newApiUserIdPlaceholder": "எ.கா. 12345",
     "newApiUserIdHint": "ஒதுக்கீட்டு இருப்பைப் பெறுவதற்காக கன்சோல் API விசையுடன் சேர்த்துப் பயன்படுத்தப்படும் AgentRouter New-Api-User தலைப்பு மதிப்பு.",
+    "tokenrouterManagementKeyLabel": "நிர்வாக விசை (விருப்பத்தேர்வு)",
+    "tokenrouterManagementKeyHint": "TokenRouter டாஷ்போர்டில் உள்ள கணக்கு விசை (Settings → Management Key). ஒதுக்கீடு மற்றும் இருப்பைப் படிக்க மட்டுமே பயன்படுத்தப்படுகிறது, கோரிக்கைகளுக்கு ஒருபோதும் இல்லை. சேமித்த விசை காட்டப்படாது; அதைத் தக்கவைக்க காலியாக விடவும்.",
     "newApiAggregatorToggleLabel": "அக்ரிகேட்டர் கேட்‌வே",
     "newApiAggregatorToggleHint": "புதிய-API / ஒன்-API / Sub2API தொகுப்பாளர் நொடிகளுக்கான சமநிலை கண்டறிதலை செயல்படுத்தவும். டாஷ்போர்டில் சமநிலை அடையாளம் மற்றும் குவோட்டா-முன் வழிமுறை சிக்கிய கணக்குகளை தவிர்க்கும்.",
     "newApiAggregatorConsoleApiKeyHint": "அக்ரிகேட்டரின் /api/user/self எண்ட்பாயிண்டிற்கான சிஸ்டம் அணுகல் டோக்கன். ரவுடிங் API விசை அல்ல.",

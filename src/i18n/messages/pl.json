@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID użytkownika New-API",
     "newApiUserIdPlaceholder": "np. 12345",
     "newApiUserIdHint": "Wartość nagłówka AgentRouter New-Api-User, używana wraz z konsolowym kluczem API do pobierania salda quota.",
+    "tokenrouterManagementKeyLabel": "Klucz zarządzania (opcjonalnie)",
+    "tokenrouterManagementKeyHint": "Klucz konta z panelu TokenRouter (Settings → Management Key). Używany wyłącznie do odczytu limitu i salda, nigdy do żądań. Zapisany klucz nie jest wyświetlany; pozostaw puste, aby go zachować.",
     "newApiAggregatorToggleLabel": "Brama Agregatora",
     "newApiAggregatorToggleHint": "Włącz wykrywanie salda dla węzłów agregatora New-API / One-API / Sub2API. Panel sterowania wyświetli odznakę salda, a routowanie quota-preflight pominie wyczerpane konta.",
     "newApiAggregatorConsoleApiKeyHint": "Token dostępu systemu dla punktu końcowego agregatora /api/user/self. Nie klucz API routingu.",

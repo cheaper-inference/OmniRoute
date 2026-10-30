@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID Pengguna New-API",
     "newApiUserIdPlaceholder": "cth. 12345",
     "newApiUserIdHint": "Nilai pengepala AgentRouter New-Api-User, digunakan bersama-sama dengan kunci API konsol untuk mendapatkan baki kuota.",
+    "tokenrouterManagementKeyLabel": "Kunci pengurusan (pilihan)",
+    "tokenrouterManagementKeyHint": "Kunci akaun daripada papan pemuka TokenRouter (Settings → Management Key). Digunakan hanya untuk membaca kuota dan baki, tidak sekali-kali untuk permintaan. Kunci yang disimpan tidak dipaparkan; biarkan kosong untuk mengekalkannya.",
     "newApiAggregatorToggleLabel": "Gerbang Pengumpul",
     "newApiAggregatorToggleHint": "Aktifkan pengesanan baki untuk nod pengumpul New-API / One-API / Sub2API. Papan pemuka akan menunjukkan lencana baki dan penghalaan pra-penggunaan kuota akan mengabaikan akaun yang telah habis.",
     "newApiAggregatorConsoleApiKeyHint": "Token Akses Sistem untuk titik akhir /api/user/self pengumpul. Bukan kunci API penghalaan.",

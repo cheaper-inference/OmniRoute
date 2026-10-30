@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID de Usuário New-API",
     "newApiUserIdPlaceholder": "ex.: 12345",
     "newApiUserIdHint": "Valor do cabeçalho New-Api-User do AgentRouter, usado junto com a chave de API do console para consultar o saldo de cota.",
+    "tokenrouterManagementKeyLabel": "Chave de gerenciamento (opcional)",
+    "tokenrouterManagementKeyHint": "Chave da conta no painel do TokenRouter (Settings → Management Key). Usada só para ler cota e saldo, nunca para requisições. A chave salva não é exibida; deixe em branco para mantê-la.",
     "newApiAggregatorToggleLabel": "Gateway agregador",
     "newApiAggregatorToggleHint": "Ativa a detecção de saldo para nós agregadores New-API / One-API / Sub2API. O painel passa a mostrar o selo de saldo e o roteamento com quota-preflight pula contas esgotadas.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token para o endpoint /api/user/self do agregador. Não é a chave de API de roteamento.",

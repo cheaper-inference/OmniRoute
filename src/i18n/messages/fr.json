@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID utilisateur New-API",
     "newApiUserIdPlaceholder": "ex. 12345",
     "newApiUserIdHint": "Valeur de l'en-tête New-Api-User d'AgentRouter, utilisée avec la clé API de la console pour récupérer le solde du quota.",
+    "tokenrouterManagementKeyLabel": "Clé de gestion (facultative)",
+    "tokenrouterManagementKeyHint": "Clé de compte issue du tableau de bord TokenRouter (Settings → Management Key). Utilisée uniquement pour lire le quota et le solde, jamais pour les requêtes. La clé enregistrée n’est pas affichée ; laissez vide pour la conserver.",
     "newApiAggregatorToggleLabel": "Passerelle Agrégateur",
     "newApiAggregatorToggleHint": "Activez la détection de solde pour les nœuds agrégateurs New-API / One-API / Sub2API. Le tableau de bord affichera le badge de solde et le routage préliminaire de quota ignorera les comptes épuisés.",
     "newApiAggregatorConsoleApiKeyHint": "Jeton d'accès système pour le point de terminaison /api/user/self de l'agrégateur. Pas la clé API de routage.",

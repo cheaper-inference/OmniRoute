@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "ID uživatele New-API",
     "newApiUserIdPlaceholder": "např. 12345",
     "newApiUserIdHint": "Hodnota hlavičky AgentRouter New-Api-User, která se používá společně s API klíčem konzole k načtení zůstatku kvóty.",
+    "tokenrouterManagementKeyLabel": "Klíč pro správu (volitelné)",
+    "tokenrouterManagementKeyHint": "Klíč účtu z řídicího panelu TokenRouter (Settings → Management Key). Používá se pouze ke čtení kvóty a zůstatku, nikdy pro požadavky. Uložený klíč se nezobrazuje; pro jeho zachování nechte pole prázdné.",
     "newApiAggregatorToggleLabel": "Agregátorová Brána",
     "newApiAggregatorToggleHint": "Povolit detekci zůstatku pro uzly agregátoru New-API / One-API / Sub2API. Dashboard zobrazí odznak zůstatku a směrování předletu kvót bude přeskočeno pro vyčerpané účty.",
     "newApiAggregatorConsoleApiKeyHint": "Token pro přístup k systému pro koncový bod agregátoru /api/user/self. Ne klíč API pro směrování.",

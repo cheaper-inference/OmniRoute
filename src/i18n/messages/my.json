@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API အသုံးပြုသူ ID",
     "newApiUserIdPlaceholder": "ဥပမာ 12345",
     "newApiUserIdHint": "quota လက်ကျန်ကို ရယူရန် console API ကီးနှင့်အတူ အသုံးပြုသော AgentRouter New-Api-User header တန်ဖိုး။",
+    "tokenrouterManagementKeyLabel": "စီမံခန့်ခွဲမှုကီး (ရွေးချယ်နိုင်)",
+    "tokenrouterManagementKeyHint": "TokenRouter ဒက်ရှ်ဘုတ်မှ အကောင့်ကီး (Settings → Management Key)။ ခွဲတမ်းနှင့် လက်ကျန်ငွေကို ဖတ်ရန်အတွက်သာ အသုံးပြုပြီး တောင်းဆိုမှုများအတွက် ဘယ်တော့မှ မသုံးပါ။ သိမ်းထားသောကီးကို မပြပါ။ ထိန်းသိမ်းထားရန် ဗလာထားပါ။",
     "newApiAggregatorToggleLabel": "စုစည်းဝန်ဆောင်မှု ဂိတ်ဝေး",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API စုစည်းပေးသည့် node များအတွက် လက်ကျန်ငွေ စစ်ဆေးမှုကို ဖွင့်ပါ။ dashboard တွင် လက်ကျန်ငွေ badge ကို ပြသမည်ဖြစ်ပြီး quota-preflight routing က လက်ကျန်ကုန်ဆုံးနေသော account များကို ကျော်သွားပါမည်။",
     "newApiAggregatorConsoleApiKeyHint": "စုစည်းပေးသည့်စနစ်၏ /api/user/self endpoint အတွက် System Access Token ဖြစ်သည်။ routing API key မဟုတ်ပါ။",

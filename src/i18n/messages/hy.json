@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API օգտատիրոջ ID",
     "newApiUserIdPlaceholder": "օր.՝ 12345",
     "newApiUserIdHint": "AgentRouter New-Api-User վերնագրի արժեքը, որն օգտագործվում է վահանակի API բանալիի հետ միասին՝ քվոտայի մնացորդը ստանալու համար։",
+    "tokenrouterManagementKeyLabel": "Կառավարման բանալի (ըստ ցանկության)",
+    "tokenrouterManagementKeyHint": "Հաշվի բանալի TokenRouter-ի վահանակից (Settings → Management Key)։ Օգտագործվում է միայն քվոտան և մնացորդը կարդալու համար, երբեք՝ հարցումների համար։ Պահպանված բանալին չի ցուցադրվում․ այն պահելու համար թողեք դատարկ։",
     "newApiAggregatorToggleLabel": "Ագրեգատորային դարպաս",
     "newApiAggregatorToggleHint": "Միացնել մնացորդի հայտնաբերումը New-API / One-API / Sub2API ագրեգատորային հանգույցների համար։ Կառավարման վահանակը կցուցադրի մնացորդի նշիչը, իսկ քվոտայի նախնական ստուգմամբ երթուղավորումը կշրջանցի սպառված հաշիվները։",
     "newApiAggregatorConsoleApiKeyHint": "Ագրեգատորի /api/user/self վերջնակետի համակարգային մուտքի նշանը։ Սա երթուղավորման API բանալին չէ։",

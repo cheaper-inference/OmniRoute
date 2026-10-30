@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID uporabnika New-API",
     "newApiUserIdPlaceholder": "npr. 12345",
     "newApiUserIdHint": "Vrednost glave AgentRouter New-Api-User, ki se skupaj z API-ključem konzole uporablja za pridobivanje stanja kvote.",
+    "tokenrouterManagementKeyLabel": "Ključ za upravljanje (neobvezno)",
+    "tokenrouterManagementKeyHint": "Ključ računa z nadzorne plošče TokenRouter (Settings → Management Key). Uporablja se samo za branje kvote in stanja, nikoli za zahteve. Shranjeni ključ ni prikazan; pustite prazno, da ga ohranite.",
     "newApiAggregatorToggleLabel": "Prehod agregatorja",
     "newApiAggregatorToggleHint": "Omogočite zaznavanje stanja za agregatorska vozlišča New-API / One-API / Sub2API. Nadzorna plošča bo prikazala značko stanja, usmerjanje s predhodnim preverjanjem kvote pa bo preskočilo izčrpane račune.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemski žeton za dostop do agregatorjeve končne točke /api/user/self. To ni API-ključ za usmerjanje.",

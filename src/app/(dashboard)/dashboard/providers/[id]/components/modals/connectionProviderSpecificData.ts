@@ -46,7 +46,8 @@ type ProviderSpecificData = Record<string, unknown>;
 // bailian-coding-plan reuses consoleApiKey as its console token; agentrouter (#6850)
 // reuses the same generic field for its New-API System Access Token, paired with
 // newApiUserId (the New-Api-User header value). See agentrouterQuotaFetcher.ts.
-const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter"]);
+// tokenrouter stores its optional Management Key here (open-sse/services/usage/tokenrouter.ts).
+const CONSOLE_API_KEY_PROVIDERS = new Set(["bailian-coding-plan", "agentrouter", "tokenrouter"]);
 
 export function buildAddProviderSpecificData(options: {
   provider?: string;

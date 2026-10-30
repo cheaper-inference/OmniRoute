@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API 사용자 ID",
     "newApiUserIdPlaceholder": "예: 12345",
     "newApiUserIdHint": "AgentRouter의 New-Api-User 헤더 값으로, 할당량 잔액을 조회할 때 콘솔 API 키와 함께 사용됩니다.",
+    "tokenrouterManagementKeyLabel": "관리 키(선택 사항)",
+    "tokenrouterManagementKeyHint": "TokenRouter 대시보드의 계정 키(Settings → Management Key)입니다. 할당량과 잔액을 읽는 데만 사용되며 요청에는 절대 사용되지 않습니다. 저장된 키는 표시되지 않으며, 유지하려면 비워 두세요.",
     "newApiAggregatorToggleLabel": "집계 게이트웨이",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API 집계 노드에 대한 잔액 감지를 활성화합니다. 대시보드는 잔액 배지를 표시하고 쿼터 사전 비행 라우팅은 소진된 계정을 건너뜁니다.",
     "newApiAggregatorConsoleApiKeyHint": "집계자의 /api/user/self 엔드포인트에 대한 시스템 액세스 토큰입니다. 라우팅 API 키가 아닙니다.",

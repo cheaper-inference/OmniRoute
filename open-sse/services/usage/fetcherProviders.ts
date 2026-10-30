@@ -108,6 +108,8 @@ export const USAGE_FETCHER_PROVIDERS = [
   "stx",
   // AgentRouter (New-API) console balance (GET /api/user/self)
   "agentrouter",
+  // TokenRouter Management API (optional Management Key in consoleApiKey)
+  "tokenrouter",
   "kilocode",
   // StepFun account balance (GET /v1/accounts; base URL override selects
   // China vs international platform, mirroring the chat path)

@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "ID tal-utent ta’ New-API",
     "newApiUserIdPlaceholder": "eż. 12345",
     "newApiUserIdHint": "Il-valur tal-intestazzjoni AgentRouter New-Api-User, użat flimkien maċ-ċavetta API tal-console biex jinkiseb il-bilanċ tal-kwota.",
+    "tokenrouterManagementKeyLabel": "Ċavetta tal-ġestjoni (mhux obbligatorja)",
+    "tokenrouterManagementKeyHint": "Ċavetta tal-kont mid-dashboard ta’ TokenRouter (Settings → Management Key). Tintuża biss biex jinqraw il-kwota u l-bilanċ, qatt għal talbiet. Iċ-ċavetta salvata ma tintweriex; ħalliha vojta biex iżżommha.",
     "newApiAggregatorToggleLabel": "Gateway tal-aggregatur",
     "newApiAggregatorToggleHint": "Ippermetti l-identifikazzjoni tal-bilanċ għan-nodi aggregaturi New-API / One-API / Sub2API. Id-dashboard se juri l-badge tal-bilanċ u r-routing tal-verifika preliminari tal-kwota se jaqbeż il-kontijiet eżawriti.",
     "newApiAggregatorConsoleApiKeyHint": "Token ta’ Aċċess tas-Sistema għall-endpoint /api/user/self tal-aggregatur. Mhuwiex iċ-ċavetta API tar-routing.",

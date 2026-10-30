@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API istifadəçi ID-si",
     "newApiUserIdPlaceholder": "məs., 12345",
     "newApiUserIdHint": "Kvota balansını əldə etmək üçün konsol API açarı ilə birlikdə istifadə olunan AgentRouter New-Api-User başlıq dəyəri.",
+    "tokenrouterManagementKeyLabel": "İdarəetmə açarı (istəyə bağlı)",
+    "tokenrouterManagementKeyHint": "TokenRouter panelindən hesab açarı (Settings → Management Key). Yalnız kvota və balansı oxumaq üçün istifadə olunur, sorğular üçün heç vaxt istifadə edilmir. Saxlanmış açar göstərilmir; onu saxlamaq üçün boş buraxın.",
     "newApiAggregatorToggleLabel": "Toplanma Qapısı",
     "newApiAggregatorToggleHint": "Yeni-API / Bir-API / Sub2API toplayıcı düyünləri üçün balans aşkar etməni aktivləşdirin. İdarəetmə paneli balans nişanını göstərəcək və kvota-preflight yönləndirməsi tükənmiş hesabları atlayacaq.",
     "newApiAggregatorConsoleApiKeyHint": "Toplayıcının /api/user/self son nöqtəsi üçün Sistem Giriş Tokeni. Yönləndirmə API açarı deyil.",

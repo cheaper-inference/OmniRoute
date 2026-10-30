@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API naudotojo ID",
     "newApiUserIdPlaceholder": "pvz., 12345",
     "newApiUserIdHint": "AgentRouter New-API-User antraštės reikšmė, naudojama kartu su konsolės API raktu kvotos likučiui gauti.",
+    "tokenrouterManagementKeyLabel": "Valdymo raktas (neprivaloma)",
+    "tokenrouterManagementKeyHint": "Paskyros raktas iš TokenRouter valdymo skydelio (Settings → Management Key). Naudojamas tik kvotai ir likučiui nuskaityti, niekada užklausoms. Išsaugotas raktas nerodomas; palikite tuščią, kad jį išlaikytumėte.",
     "newApiAggregatorToggleLabel": "Agregatoriaus tinklų sietuvas",
     "newApiAggregatorToggleHint": "Įjungti New-API / One-API / Sub2API agregatoriaus mazgų likučio aptikimą. Prietaisų skydelyje bus rodoma likučio žyma, o išankstinis maršruto parinkimas pagal kvotą praleis išnaudotas paskyras.",
     "newApiAggregatorConsoleApiKeyHint": "Sistemos prieigos raktas, skirtas agregatoriaus /api/user/self galiniam taškui. Tai nėra maršruto parinkimo API raktas.",

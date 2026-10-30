@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "รหัสผู้ใช้ New-API",
     "newApiUserIdPlaceholder": "เช่น 12345",
     "newApiUserIdHint": "ค่าส่วนหัว New-Api-User ของ AgentRouter ใช้ร่วมกับคีย์ API ของคอนโซลเพื่อดึงยอดคงเหลือโควตา",
+    "tokenrouterManagementKeyLabel": "คีย์การจัดการ (ไม่บังคับ)",
+    "tokenrouterManagementKeyHint": "คีย์บัญชีจากแดชบอร์ด TokenRouter (Settings → Management Key) ใช้สำหรับอ่านโควตาและยอดคงเหลือเท่านั้น ไม่ใช้สำหรับคำขอใดๆ คีย์ที่บันทึกไว้จะไม่แสดง เว้นว่างไว้เพื่อคงคีย์เดิม",
     "newApiAggregatorToggleLabel": "เกตเวย์ตัวรวม",
     "newApiAggregatorToggleHint": "เปิดใช้งานการตรวจจับยอดคงเหลือสำหรับโหนดตัวรวม New-API / One-API / Sub2API แดชบอร์ดจะแสดงป้ายยอดคงเหลือและการกำหนดเส้นทาง quota-preflight จะข้ามบัญชีที่ใช้หมดแล้ว",
     "newApiAggregatorConsoleApiKeyHint": "โทเค็นการเข้าถึงระบบสำหรับจุดสิ้นสุด /api/user/self ของตัวรวม ไม่ใช่คีย์ API การจัดเส้นทาง",

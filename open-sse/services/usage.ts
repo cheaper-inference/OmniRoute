@@ -95,6 +95,7 @@ import { getSyntxUsage } from "./usage/syntx.ts";
 import { getAgentrouterUsage } from "./usage/agentrouter.ts";
 import { getKilocodeUsage } from "./usage/kilocode.ts";
 import { getChatPlaygroundUsage } from "./usage/chatplayground.ts";
+import { getTokenRouterUsage } from "./usage/tokenrouter.ts";
 import { getCloudflareAiUsage } from "./usage/cloudflareAi.ts";
 import { getMuseUsage } from "./usage/museCode.ts";
 
@@ -292,6 +293,8 @@ export async function getUsageForProvider(
       return await getSyntxUsage(apiKey, accessToken, providerSpecificData, id || "");
     case "agentrouter":
       return await getAgentrouterUsage(id, connection);
+    case "tokenrouter":
+      return await getTokenRouterUsage(apiKey || "", providerSpecificData);
     case "kilocode":
       return await getKilocodeUsage(id, connection);
     case "devin-cli":

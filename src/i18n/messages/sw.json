@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "Kitambulisho cha mtumiaji cha New-API",
     "newApiUserIdPlaceholder": "k.m. 12345",
     "newApiUserIdHint": "Thamani ya kichwa cha AgentRouter New-Api-User, inayotumiwa pamoja na ufunguo wa API wa dashibodi kupata salio la kikomo.",
+    "tokenrouterManagementKeyLabel": "Ufunguo wa usimamizi (si lazima)",
+    "tokenrouterManagementKeyHint": "Ufunguo wa akaunti kutoka dashibodi ya TokenRouter (Settings → Management Key). Hutumika tu kusoma kiwango na salio, kamwe si kwa maombi. Ufunguo uliohifadhiwa hauonyeshwi; acha tupu ili kuubakiza.",
     "newApiAggregatorToggleLabel": "Mlango wa Mkusanyiko",
     "newApiAggregatorToggleHint": "wezesha kugundua salio kwa nodi za mkusanyiko wa New-API / One-API / Sub2API. Dashibodi itaonyesha alama ya salio na upitaji wa quota-preflight utaepuka akaunti zilizokamilika.",
     "newApiAggregatorConsoleApiKeyHint": "Token ya Ufikiaji wa Mfumo kwa kiungo cha /api/user/self cha mkusanyiko. Si funguo ya API ya usafirishaji.",

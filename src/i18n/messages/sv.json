@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API-användar-ID",
     "newApiUserIdPlaceholder": "t.ex. 12345",
     "newApiUserIdHint": "Värde för AgentRouters New-Api-User-header, används tillsammans med konsolens API-nyckel för att hämta kvotsaldo.",
+    "tokenrouterManagementKeyLabel": "Hanteringsnyckel (valfri)",
+    "tokenrouterManagementKeyHint": "Kontonyckel från TokenRouter-instrumentpanelen (Settings → Management Key). Används endast för att läsa kvot och saldo, aldrig för förfrågningar. Den sparade nyckeln visas inte; lämna tomt för att behålla den.",
     "newApiAggregatorToggleLabel": "Aggregeringsgateway",
     "newApiAggregatorToggleHint": "Aktivera balansdetektering för New-API / One-API / Sub2API aggregatornoder. Instrumentpanelen kommer att visa balansmärket och kvotförhandsrouting kommer att hoppa över uttömda konton.",
     "newApiAggregatorConsoleApiKeyHint": "Systemåtkomsttoken för aggregatorns /api/user/self slutpunkt. Inte routing API-nyckeln.",

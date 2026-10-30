@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID користувача New-API",
     "newApiUserIdPlaceholder": "напр. 12345",
     "newApiUserIdHint": "Значення заголовка New-Api-User AgentRouter, використовується разом із ключем API консолі для отримання балансу квоти.",
+    "tokenrouterManagementKeyLabel": "Ключ керування (необов’язково)",
+    "tokenrouterManagementKeyHint": "Ключ облікового запису з панелі TokenRouter (Settings → Management Key). Використовується лише для читання квоти та балансу, ніколи для запитів. Збережений ключ не відображається; залиште порожнім, щоб зберегти його.",
     "newApiAggregatorToggleLabel": "Агрегаторний Шлюз",
     "newApiAggregatorToggleHint": "Увімкніть виявлення балансу для вузлів агрегатора New-API / One-API / Sub2API. Панель приладів відобразить значок балансу, а маршрутизація quota-preflight пропустить вичерпані рахунки.",
     "newApiAggregatorConsoleApiKeyHint": "Токен доступу системи для кінцевої точки агрегатора /api/user/self. Не ключ API маршрутизації.",

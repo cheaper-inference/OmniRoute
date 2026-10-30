@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API उपयोगकर्ता आईडी",
     "newApiUserIdPlaceholder": "जैसे 12345",
     "newApiUserIdHint": "AgentRouter का New-Api-User हेडर मान, कोटा शेष प्राप्त करने के लिए कंसोल API कुंजी के साथ उपयोग किया जाता है।",
+    "tokenrouterManagementKeyLabel": "मैनेजमेंट कुंजी (वैकल्पिक)",
+    "tokenrouterManagementKeyHint": "TokenRouter डैशबोर्ड से खाता कुंजी (Settings → Management Key)। केवल कोटा और बैलेंस पढ़ने के लिए उपयोग होती है, अनुरोधों के लिए कभी नहीं। सहेजी गई कुंजी दिखाई नहीं जाती; इसे बनाए रखने के लिए खाली छोड़ें।",
     "newApiAggregatorToggleLabel": "एग्रीगेटर गेटवे",
     "newApiAggregatorToggleHint": "New-API / One-API / Sub2API एग्रीगेटर नोड्स के लिए बैलेंस डिटेक्शन सक्षम करें। डैशबोर्ड बैलेंस बैज दिखाएगा और कोटा-प्रेफ्लाइट रूटिंग समाप्त खातों को छोड़ देगी।",
     "newApiAggregatorConsoleApiKeyHint": "एग्रीगेटर के /api/user/self एंडपॉइंट के लिए सिस्टम एक्सेस टोकन। राउटिंग एपीआई कुंजी नहीं।",

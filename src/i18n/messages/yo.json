@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID Olùmúlò New-API",
     "newApiUserIdPlaceholder": "àpẹẹrẹ 12345",
     "newApiUserIdHint": "Iye àkọlé AgentRouter New-Api-User, tí a ń lò pọ̀ mọ́ kọ́kọ́rọ́ API console láti gba ìwọ̀ntúnwọ̀nsì kóòtà.",
+    "tokenrouterManagementKeyLabel": "Kọ́kọ́rọ́ ìṣàkóso (àṣàyàn)",
+    "tokenrouterManagementKeyHint": "Kọ́kọ́rọ́ àkọọ́lẹ̀ láti dashboard TokenRouter (Settings → Management Key). A ń lò ó láti ka kóòtà àti ìwọ̀ntúnwọ̀nsì nìkan, kì í ṣe fún àwọn ìbéèrè rárá. A kì í fi kọ́kọ́rọ́ tí a ti fipamọ́ hàn; fi sílẹ̀ ní òfo láti pa á mọ́.",
     "newApiAggregatorToggleLabel": "Ẹnu-ọ̀nà Olùkójọpọ̀",
     "newApiAggregatorToggleHint": "Mú ìṣàwárí ìwọ̀ntúnwọ̀nsì ṣiṣẹ́ fún àwọn node olùkójọpọ̀ New-API / One-API / Sub2API. Dashboard yóò ṣàfihàn báàjì ìwọ̀ntúnwọ̀nsì, àti pé ìdarí ọ̀nà àyẹ̀wò-kóòtà-kí-á-tó-bẹ̀rẹ̀ yóò fo àwọn àkọọ́lẹ̀ tí kóòtà wọn ti tán.",
     "newApiAggregatorConsoleApiKeyHint": "Token Ìwọlé Sístẹ́mù fún endpoint /api/user/self ti olùkójọpọ̀. Kì í ṣe kọ́kọ́rọ́ API ìdarí ọ̀nà.",

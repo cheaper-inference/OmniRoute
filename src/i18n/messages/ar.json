@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "معرّف مستخدم New-API",
     "newApiUserIdPlaceholder": "مثال: 12345",
     "newApiUserIdHint": "قيمة New-Api-User الخاص بـ AgentRouter، وبالتالي مع مفتاح API لوحة التحكم لجلب رصيد الحصة.",
+    "tokenrouterManagementKeyLabel": "مفتاح الإدارة (اختياري)",
+    "tokenrouterManagementKeyHint": "مفتاح الحساب من لوحة تحكم TokenRouter (Settings → Management Key). يُستخدم فقط لقراءة الحصة والرصيد، ولا يُستخدم أبدًا للطلبات. لا يُعرض المفتاح المحفوظ؛ اتركه فارغًا للاحتفاظ به.",
     "newApiAggregatorToggleLabel": "بوابة المجمع",
     "newApiAggregatorToggleHint": "قم بتمكين كشف الرصيد لعقد مجمع New-API / One-API / Sub2API. ستظهر لوحة المعلومات شارة الرصيد وسيتجاوز توجيه ما قبل الرحلة للحصة الحسابات المستنفدة.",
     "newApiAggregatorConsoleApiKeyHint": "رمز وصول النظام لنقطة نهاية /api/user/self الخاصة بالموحد. ليس مفتاح واجهة برمجة التطبيقات للتوجيه.",

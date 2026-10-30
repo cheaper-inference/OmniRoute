@@ -6346,6 +6346,8 @@
     "newApiUserIdLabel": "New-API მომხმარებლის ID",
     "newApiUserIdPlaceholder": "მაგ. 12345",
     "newApiUserIdHint": "AgentRouter-ის New-Api-User სათაურის მნიშვნელობა, რომელიც კონსოლის API გასაღებთან ერთად კვოტის ბალანსის მისაღებად გამოიყენება.",
+    "tokenrouterManagementKeyLabel": "მართვის გასაღები (არასავალდებულო)",
+    "tokenrouterManagementKeyHint": "ანგარიშის გასაღები TokenRouter-ის პანელიდან (Settings → Management Key). გამოიყენება მხოლოდ კვოტისა და ბალანსის წასაკითხად, არასდროს მოთხოვნებისთვის. შენახული გასაღები არ ჩანს; მის შესანარჩუნებლად დატოვეთ ცარიელი.",
     "newApiAggregatorToggleLabel": "აგრეგატორის კარიბჭე",
     "newApiAggregatorToggleHint": "ჩართეთ ბალანსის გამოვლენა New-API / One-API / Sub2API აგრეგატორის კვანძებისთვის. მართვის პანელზე გამოჩნდება ბალანსის ნიშანი, ხოლო კვოტის წინასწარი შემოწმების მქონე მარშრუტიზაცია ამოწურულ ანგარიშებს გამოტოვებს.",
     "newApiAggregatorConsoleApiKeyHint": "სისტემური წვდომის ტოკენი აგრეგატორის /api/user/self ენდპოინტისთვის. ეს არ არის მარშრუტიზაციის API გასაღები.",

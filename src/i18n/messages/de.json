@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "New-API-Benutzer-ID",
     "newApiUserIdPlaceholder": "z. B. 12345",
     "newApiUserIdHint": "Wert des New-Api-User-Headers von AgentRouter, zusammen mit dem Konsolen-API-Schlüssel verwendet, um das Kontingentguthaben abzurufen.",
+    "tokenrouterManagementKeyLabel": "Verwaltungsschlüssel (optional)",
+    "tokenrouterManagementKeyHint": "Kontoschlüssel aus dem TokenRouter-Dashboard (Settings → Management Key). Wird nur zum Lesen von Kontingent und Guthaben verwendet, nie für Anfragen. Der gespeicherte Schlüssel wird nicht angezeigt; leer lassen, um ihn beizubehalten.",
     "newApiAggregatorToggleLabel": "Aggregator-Gateway",
     "newApiAggregatorToggleHint": "Aktivieren Sie die Saldenüberwachung für New-API / One-API / Sub2API-Aggregator-Knoten. Das Dashboard zeigt das Saldenabzeichen an und die Quoten-Vorabprüfung wird erschöpfte Konten überspringen.",
     "newApiAggregatorConsoleApiKeyHint": "Systemzugangstoken für den Endpunkt /api/user/self des Aggregators. Nicht den Routing-API-Schlüssel.",

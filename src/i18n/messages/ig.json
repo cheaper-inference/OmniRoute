@@ -6269,6 +6269,8 @@
     "newApiUserIdLabel": "ID Onye Ọrụ New-API",
     "newApiUserIdPlaceholder": "dịka ọmụmaatụ 12345",
     "newApiUserIdHint": "Uru nkụnyeisi AgentRouter New-Api-User, nke a na-eji ya na igodo API nke console iji nweta nguzo oke.",
+    "tokenrouterManagementKeyLabel": "Igodo njikwa (nhọrọ)",
+    "tokenrouterManagementKeyHint": "Igodo akaụntụ sitere na dashboard TokenRouter (Settings → Management Key). A na-eji ya naanị ịgụ oke na ego fọdụrụ, ọ dịghị mgbe a na-eji ya maka arịrịọ. A naghị egosi igodo echekwara; hapụ ya efu ka i debe ya.",
     "newApiAggregatorToggleLabel": "Ọnụ Ụzọ Aggregator",
     "newApiAggregatorToggleHint": "Kwado nchọpụta nguzo maka node aggregator New-API / One-API / Sub2API. Dashboard ga-egosi baajị nguzo, ma nhazi ụzọ quota-preflight ga-amafe akaụntụ ndị oke ha gwụchara.",
     "newApiAggregatorConsoleApiKeyHint": "System Access Token maka endpoint /api/user/self nke aggregator. Ọ bụghị igodo API maka nhazi ụzọ.",
