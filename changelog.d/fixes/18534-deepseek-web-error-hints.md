@@ -1,0 +1,1 @@
+- **fix(providers):** Preserve DeepSeek Web error hints, return HTTP 429 for explicit upstream rate-limit rejections, and fail rejected streams without reporting a successful completion. ([#18534](https://github.com/cheaper-inference/OmniRoute/pull/18534)), thanks @Hector-Ha.
