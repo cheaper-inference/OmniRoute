@@ -94,6 +94,7 @@ export interface ProviderCascadeNodeData {
   cooldownCount?: number;
   cooldownTotal?: number;
   cooldownRetryAfterMs?: number;
+  connectionId?: string | null;
   [key: string]: unknown;
 }
 
@@ -123,6 +124,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
     cooldownCount,
     cooldownTotal,
     cooldownRetryAfterMs,
+    connectionId,
   } = data as ProviderCascadeNodeData;
 
   const borderColor = getStateBorderColor(state as TargetState);
@@ -170,7 +172,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         )}
       </div>
 
-      {/* Body: model + latency */}
+      {/* Body: model + latency + account */}
       <div className="px-2.5 py-1.5 flex flex-col gap-0.5">
         <span
           className="text-[10px] text-text-muted font-mono truncate"
@@ -179,6 +181,15 @@ export function ProviderCascadeNode({ data }: NodeProps) {
         >
           {model as string}
         </span>
+        {connectionId && (
+          <span
+            className="text-[9px] text-muted font-mono truncate"
+            title={`Account: ${connectionId}`}
+            data-testid="connection-id"
+          >
+            acct: {connectionId.length > 12 ? `${connectionId.slice(0, 8)}...` : connectionId}
+          </span>
+        )}
         {latencyMs != null && (
           <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}

@@ -243,6 +243,7 @@ export async function executeTargetAttempt(
       model: modelStr,
       timestamp: Date.now(),
       strategy: deps.strategy,
+      ...(target.connectionId ? { connectionId: target.connectionId } : {}),
     });
     // QA P0 diagnostics: capture the attempt order (provider/model ids only).
     state.comboAttemptOrder.push({ provider: provider ?? "unknown", model: modelStr });
@@ -473,6 +474,7 @@ export async function executeTargetAttempt(
           model: modelStr,
           error: `Quality: ${quality.reason}`,
           latencyMs: Date.now() - deps.startTime,
+          ...(effectiveConnectionId || target.connectionId ? { connectionId: effectiveConnectionId || target.connectionId } : {}),
         });
         state.observeFailure(false, target.executionKey);
         if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
@@ -551,6 +553,7 @@ export async function executeTargetAttempt(
         provider,
         model: modelStr,
         latencyMs,
+        ...(effectiveConnectionId || target.connectionId ? { connectionId: effectiveConnectionId || target.connectionId } : {}),
       });
       deps.log.info(
         "COMBO",
