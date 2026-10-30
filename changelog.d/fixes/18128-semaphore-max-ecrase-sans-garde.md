@@ -1,0 +1,1 @@
+- **fix(semaphore):** Keep the concurrency limit set at creation when later requests pass a different limit ([#18128](https://github.com/cheaper-inference/OmniRoute/pull/18128)) — thanks @maxmad64bis
