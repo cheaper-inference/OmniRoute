@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-28";
+export const FREE_CATALOG_CURATED_AT = "2026-10-30";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -318,6 +318,14 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "nscale", modelId: "meta-llama/Llama-3.3-70B-Instruct", displayName: "meta-llama/Llama-3.3-70B-Instruct", monthlyTokens: 0, creditTokens: 5000000, freeType: "one-time-initial", poolKey: "nscale", tos: "caution" },
   { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
   { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
+  // evidence: public-page https://github.com/mnfst/awesome-free-llm-apis (2026-10-30)
+  // lists GPT OSS 20B on NVIDIA NIM's free Developer Program tier (40 RPM / 10,000 RPD).
+  // NVIDIA's model page https://build.nvidia.com/openai/gpt-oss-20b identifies this as an
+  // API Trial governed by NVIDIA API Trial Terms. The allowance is request-based, not a
+  // published token budget; keep it uncapped here rather than inventing a token estimate.
+  // NVIDIA's trial notice says prompts are logged to improve products; do not send secrets
+  // or confidential code through this free endpoint.
+  { provider: "nvidia", modelId: "openai/gpt-oss-20b", displayName: "GPT OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution", trainsOnPrompts: true },
   { provider: "nvidia", modelId: "openai/gpt-oss-120b", displayName: "GPT OSS 120B", monthlyTokens: 0, creditTokens: 0, freeType: "one-time-initial", poolKey: "nvidia", tos: "caution" },
   // evidence: public-page https://ollama.com/pricing (2026-09-02) — Free plan: "Starter usage credits
   // included · Includes access to starter models · Add credits to unlock all models"; docs.ollama.com/cloud:

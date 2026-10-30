@@ -15,6 +15,7 @@ const EXPECTED_MODEL_IDS = [
   "nvidia/nemotron-3.5-super-vl-120b-a12b",
   "nvidia/nemotron-3.5-lightning-30b-a3b",
   "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
+  "openai/gpt-oss-20b",
   "openai/gpt-oss-120b",
 ] as const;
 
@@ -38,6 +39,10 @@ test("NVIDIA NIM registry preserves known model capabilities", () => {
 
   const omni = byId.get("nvidia/nemotron-3-nano-omni-30b-a3b-reasoning");
   assert.equal(omni?.supportsVision, true, "Nemotron 3 Nano Omni must support vision");
+
+  const gptOss20b = byId.get("openai/gpt-oss-20b");
+  assert.equal(gptOss20b?.supportsReasoning, true, "GPT OSS 20B must advertise reasoning");
+  assert.equal(gptOss20b?.toolCalling, true, "GPT OSS 20B must advertise tool calling");
 
   assert.equal(
     byId.get("openai/gpt-oss-120b")?.toolCalling,
