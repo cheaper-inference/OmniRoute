@@ -16,7 +16,13 @@
  *
  * Operators can still point any task type at a specific model via
  * PUT /api/settings/task-routing — the defaults just stop shipping stale ones.
+ *
+ * Two opt-in refinements for agent traffic: `detectionAnchor: "first-user"` keeps one
+ * decision per conversation (see DetectionAnchor), and `complexityRouting` escalates hard
+ * prompts to a stronger model (see ComplexityRoutingConfig).
  */
+
+import { analyzeSpecificity } from "./specificityDetector";
 
 // ── Types ───────────────────────────────────────────────────────────────────
 
@@ -36,6 +42,32 @@ interface TaskPattern {
  */
 export type TaskPatternOverrides = Partial<Record<TaskType, Partial<TaskPattern>>>;
 
+/**
+ * Which user message drives detection.
+ *
+ *  - "latest-user" (default): the most recent user message — the original behavior.
+ *  - "first-user": the first user message that carries human-written text. Agent CLIs
+ *    (Claude Code, Codex, …) resend the whole conversation on every turn, so this anchor
+ *    gives every turn of a conversation the same decision: the model never flips
+ *    mid-conversation, and the upstream prompt cache — which is per model — stays warm.
+ *    Each subagent conversation starts with its own first message, so it is classified
+ *    on its own.
+ */
+export type DetectionAnchor = "latest-user" | "first-user";
+
+/**
+ * Opt-in escalation by prompt complexity. The anchor prompt is scored with the existing
+ * specificity detector (`specificityDetector.ts`, 0..100); when the score is at least
+ * `minScore`, the request goes to `model` instead of the task-type mapping. Background
+ * and vision requests never escalate.
+ */
+export interface ComplexityRoutingConfig {
+  enabled: boolean;
+  minScore: number;
+  /** provider/model, combo name or `auto/` id. Required when enabled. */
+  model: string;
+}
+
 export interface TaskRoutingConfig {
   enabled: boolean;
   /**
@@ -46,6 +78,10 @@ export interface TaskRoutingConfig {
   /** Operator-configurable detection patterns — see TaskPatternOverrides. */
   patternOverrides?: TaskPatternOverrides;
   detectionEnabled: boolean;
+  /** See DetectionAnchor. Missing = "latest-user". */
+  detectionAnchor?: DetectionAnchor;
+  /** See ComplexityRoutingConfig. Missing or disabled = no escalation. */
+  complexityRouting?: ComplexityRoutingConfig;
   stats: { detected: number; routed: number };
 }
 
@@ -202,11 +238,22 @@ const DEFAULT_TASK_MODEL_MAP: Record<TaskType, string> = {
 const GLOBAL_KEY = "__omniroute_taskRouting_config__";
 const _store = globalThis as unknown as Record<string, TaskRoutingConfig | undefined>;
 
+/**
+ * Default `complexityRouting.minScore`. Measured on coding-agent prompts: one-line asks
+ * ("rename X", "add a delete button that calls …", "write unit tests for …") score 1–3,
+ * while multi-step design/debugging prompts (race conditions, cross-service refactors,
+ * migrations) score 9+. The detector's named levels put both groups in trivial/simple, so
+ * the threshold is a raw score rather than a level name.
+ */
+export const DEFAULT_COMPLEXITY_MIN_SCORE = 6;
+
 function freshConfig(): TaskRoutingConfig {
   return {
     enabled: false, // User must explicitly enable
     taskModelMap: { ...DEFAULT_TASK_MODEL_MAP },
     detectionEnabled: true,
+    detectionAnchor: "latest-user",
+    complexityRouting: { enabled: false, minScore: DEFAULT_COMPLEXITY_MIN_SCORE, model: "" },
     stats: { detected: 0, routed: 0 },
   };
 }
@@ -234,6 +281,7 @@ export function getTaskRoutingConfig(): TaskRoutingConfig {
   return {
     ...current,
     taskModelMap: { ...current.taskModelMap },
+    ...(current.complexityRouting ? { complexityRouting: { ...current.complexityRouting } } : {}),
     stats: { ...current.stats },
   };
 }
@@ -301,16 +349,85 @@ interface RequestMessage {
   content?: unknown;
 }
 
-function extractText(content: unknown): string {
-  if (typeof content === "string") return content.toLowerCase();
+/**
+ * Blocks that agent harnesses inject into user turns — Claude Code wraps project
+ * instructions, skill/tool listings and reminders in `<system-reminder>`. They are not the
+ * user's request, and their boilerplate ("implement", code fences, …) would otherwise drive
+ * detection.
+ */
+const HARNESS_INJECTED_TAGS = ["system-reminder"];
+
+/**
+ * Remove every complete `<tag>…</tag>` block for the injected tags. Plain indexOf scanning,
+ * linear in the input — no regex, so no ReDoS surface. An unterminated opening tag is kept
+ * as-is: only text that is provably injected is dropped.
+ */
+export function stripHarnessInjectedBlocks(text: string): string {
+  let out = text;
+  for (const tag of HARNESS_INJECTED_TAGS) {
+    const open = `<${tag}>`;
+    const close = `</${tag}>`;
+    let kept = "";
+    let cursor = 0;
+    for (;;) {
+      const start = out.indexOf(open, cursor);
+      const end = start === -1 ? -1 : out.indexOf(close, start + open.length);
+      if (end === -1) {
+        kept += out.slice(cursor);
+        break;
+      }
+      kept += out.slice(cursor, start);
+      cursor = end + close.length;
+    }
+    out = kept;
+  }
+  return out;
+}
+
+function extractRawText(content: unknown): string {
+  if (typeof content === "string") return stripHarnessInjectedBlocks(content);
   if (Array.isArray(content)) {
     return content
       .map((part: any) =>
-        typeof part === "string" ? part.toLowerCase() : part?.text?.toLowerCase() || ""
+        stripHarnessInjectedBlocks(
+          typeof part === "string" ? part : typeof part?.text === "string" ? part.text : ""
+        )
       )
       .join(" ");
   }
   return "";
+}
+
+function extractText(content: unknown): string {
+  return extractRawText(content).toLowerCase();
+}
+
+function getRequestMessages(body: unknown): RequestMessage[] {
+  if (!body || typeof body !== "object") return [];
+  const { messages, input } = body as { messages?: unknown; input?: unknown };
+  if (Array.isArray(messages)) return messages as RequestMessage[];
+  if (Array.isArray(input)) return input as RequestMessage[];
+  return [];
+}
+
+function getDetectionAnchor(): DetectionAnchor {
+  return getConfig().detectionAnchor === "first-user" ? "first-user" : "latest-user";
+}
+
+/**
+ * The user message detection reads. "first-user" skips leading user turns that carry no
+ * human-written text (only injected blocks or tool results), falling back to the first
+ * user message when none has any.
+ */
+function selectAnchorMessage(
+  messages: RequestMessage[],
+  anchor: DetectionAnchor
+): RequestMessage | undefined {
+  const userMessages = messages.filter((m) => m.role === "user");
+  if (anchor === "first-user") {
+    return userMessages.find((m) => extractRawText(m.content).trim().length > 0) ?? userMessages[0];
+  }
+  return userMessages[userMessages.length - 1];
 }
 
 function hasImages(messages: RequestMessage[]): boolean {
@@ -329,24 +446,21 @@ function hasImages(messages: RequestMessage[]): boolean {
  * Returns 'chat' (no-op) if nothing specific is detected.
  */
 export function detectTaskType(body: any): TaskType {
-  if (!body || typeof body !== "object") return "chat";
-
-  const messages: RequestMessage[] = Array.isArray(body.messages)
-    ? body.messages
-    : Array.isArray(body.input)
-      ? body.input
-      : [];
-
+  const messages = getRequestMessages(body);
   if (messages.length === 0) return "chat";
 
-  // 1. Vision — check for image_url in any message
-  if (hasImages(messages)) return "vision";
+  const anchor = getDetectionAnchor();
+  const anchorMsg = selectAnchorMessage(messages, anchor);
+
+  // 1. Vision — check for image_url in any message ("first-user": only in the anchor
+  // message, so a screenshot pasted mid-conversation does not flip the decision)
+  const imageScope = anchor === "first-user" ? (anchorMsg ? [anchorMsg] : []) : messages;
+  if (hasImages(imageScope)) return "vision";
 
   // 2. System prompt patterns (background first — most specific)
   const systemMsg = messages.find((m) => m.role === "system" || m.role === "developer");
   const systemText = systemMsg ? extractText(systemMsg.content) : "";
-  const lastUserMsg = [...messages].reverse().find((m) => m.role === "user");
-  const userText = lastUserMsg ? extractText(lastUserMsg.content) : "";
+  const userText = anchorMsg ? extractText(anchorMsg.content) : "";
 
   // Check ALL task patterns in priority order
   const priorityOrder: TaskType[] = [
@@ -385,18 +499,69 @@ export function detectTaskType(body: any): TaskType {
   return "chat";
 }
 
+// ── Complexity escalation ────────────────────────────────────────────────────
+
+/** Utility traffic stays cheap, and the escalation model may not accept images. */
+const NEVER_ESCALATE: ReadonlySet<TaskType> = new Set<TaskType>(["background", "vision"]);
+
+export interface ComplexityEscalation {
+  /** Specificity score (0..100) of the anchor prompt. */
+  score: number;
+  /** The model to escalate to, or null when the request stays on the task-type mapping. */
+  model: string | null;
+}
+
+/** The persisted complexityRouting block when it is enabled and well-formed, else null. */
+function getActiveComplexityRouting(): ComplexityRoutingConfig | null {
+  const routing = getConfig().complexityRouting;
+  if (!routing || routing.enabled !== true) return null;
+  const model = typeof routing.model === "string" ? routing.model.trim() : "";
+  const minScore = Number(routing.minScore);
+  if (!model || !Number.isFinite(minScore)) return null;
+  return { enabled: true, minScore, model };
+}
+
+/**
+ * Score the anchor prompt and decide whether it escalates. Only the anchor user text is
+ * scored — never tool schemas, the system prompt or the rest of the history — so an agent
+ * request carrying dozens of tools and a long transcript is judged by what was asked.
+ * Returns null when complexityRouting is off.
+ */
+export function resolveComplexityEscalation(
+  taskType: TaskType,
+  body: unknown
+): ComplexityEscalation | null {
+  const routing = getActiveComplexityRouting();
+  if (!routing) return null;
+
+  const anchorMsg = selectAnchorMessage(getRequestMessages(body), getDetectionAnchor());
+  const text = anchorMsg ? extractRawText(anchorMsg.content) : "";
+  const { score } = analyzeSpecificity({ messages: [{ role: "user", content: text }] });
+  const escalates = !NEVER_ESCALATE.has(taskType) && score >= routing.minScore;
+  return { score, model: escalates ? routing.model : null };
+}
+
+// ── Routing ──────────────────────────────────────────────────────────────────
+
+export interface TaskRouteResult {
+  model: string;
+  taskType: TaskType;
+  wasRouted: boolean;
+  /** Present when complexityRouting is enabled: the anchor prompt's specificity score. */
+  complexityScore?: number;
+  /** True when the model came from complexityRouting rather than the task-type map. */
+  escalated?: boolean;
+}
+
 /**
  * Apply task-aware model override.
  * Returns the original model if routing is disabled or no override found.
  *
  * @param originalModel - The model from the request (e.g. "openai/gpt-4o")
  * @param body - The raw request body to detect task type from
- * @returns { model, taskType, wasRouted }
+ * @returns { model, taskType, wasRouted, complexityScore?, escalated? }
  */
-export function applyTaskAwareRouting(
-  originalModel: string,
-  body: any
-): { model: string; taskType: TaskType; wasRouted: boolean } {
+export function applyTaskAwareRouting(originalModel: string, body: any): TaskRouteResult {
   const config = getConfig();
   if (!config.enabled || !config.detectionEnabled) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
@@ -405,11 +570,15 @@ export function applyTaskAwareRouting(
   const taskType = detectTaskType(body);
   config.stats.detected++;
 
-  const preferred = config.taskModelMap[taskType];
+  const escalation = resolveComplexityEscalation(taskType, body);
+  const complexity = escalation
+    ? { complexityScore: escalation.score, escalated: escalation.model !== null }
+    : {};
+  const preferred = escalation?.model ?? config.taskModelMap[taskType];
 
   // No override configured for this task type
   if (!preferred || preferred === "") {
-    return { model: originalModel, taskType, wasRouted: false };
+    return { model: originalModel, taskType, wasRouted: false, ...complexity };
   }
 
   // Don't override if the model is already "better" (e.g. user sent opus, preferred is flash)
@@ -421,5 +590,5 @@ export function applyTaskAwareRouting(
   }
 
   config.stats.routed++;
-  return { model: preferred, taskType, wasRouted: true };
+  return { model: preferred, taskType, wasRouted: true, ...complexity };
 }
