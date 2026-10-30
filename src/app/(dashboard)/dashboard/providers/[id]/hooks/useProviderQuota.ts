@@ -1,24 +1,11 @@
 "use client";
 
 /**
- * useProviderQuota — data source for the per-account quota panel on the
- * provider detail page.
- *
- * The server already owns the whole quota pipeline: per-provider usage
- * fetchers persist their latest snapshot into `providerLimitsCache`
- * (namespace of the key_value store), a background scheduler refreshes it
- * every ~70 min, and two routes expose it:
- *   - GET /api/usage/provider-limits  → all cached entries, no upstream calls
- *   - GET /api/usage/[connectionId]   → live upstream fetch + persist
- *
- * This hook only loads the cached map once per page and refreshes a single
- * connection on demand — it never talks to an upstream provider itself.
- *
- * Kept cycle-safe like the sibling hooks: imports only React + leaf types,
- * never from ProviderDetailPageClient.
+ * Per-account display reads the server's canonical cached snapshots. Polling is
+ * local-only and visible-tab-only; only the explicit refresh button probes upstream.
  */
-
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
 export interface ProviderQuotaCacheEntry {
   quotas?: Record<string, unknown> | null;
@@ -36,59 +23,72 @@ export function useProviderQuota() {
   >({});
   const [quotaLoading, setQuotaLoading] = useState(true);
   const [refreshingIds, setRefreshingIds] = useState<ReadonlySet<string>>(new Set());
+  const polling = useRef<ReturnType<typeof startVisiblePolling> | null>(null);
+  const manualReads = useRef(new Map<string, AbortController>());
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
+    let alive = true;
+    const reader = startVisiblePolling(async (signal) => {
+      if (manualReads.current.size > 0) return;
       try {
-        const res = await fetch("/api/usage/provider-limits", { cache: "no-store" });
+        const res = await fetch("/api/usage/provider-limits", { cache: "no-store", signal });
         if (!res.ok) return;
         const data = await res.json();
-        if (cancelled || !data?.caches || typeof data.caches !== "object") return;
+        if (
+          signal.aborted ||
+          !alive ||
+          !data?.caches ||
+          typeof data.caches !== "object" ||
+          Array.isArray(data.caches)
+        )
+          return;
+        // Preserve observation times supplied by the server. A cache read is not new evidence.
         setQuotaByConnectionId(data.caches as Record<string, ProviderQuotaCacheEntry>);
-      } catch {
-        // Cached quotas are best-effort — rows simply stay without data and
-        // the per-row refresh button remains available.
       } finally {
-        if (!cancelled) setQuotaLoading(false);
+        if (alive && !signal.aborted) setQuotaLoading(false);
       }
-    })();
+    });
+    polling.current = reader;
+    const controllers = manualReads.current;
     return () => {
-      cancelled = true;
+      alive = false;
+      polling.current = null;
+      reader.dispose();
+      for (const controller of controllers.values()) controller.abort();
+      controllers.clear();
     };
   }, []);
 
   const refreshConnection = useCallback(async (connectionId: string) => {
-    if (!connectionId) return;
-    setRefreshingIds((prev) => {
-      const next = new Set(prev);
-      next.add(connectionId);
-      return next;
-    });
+    if (!connectionId || !polling.current || manualReads.current.has(connectionId)) return;
+    // A pre-refresh cached GET must not arrive later and roll back the refreshed panel.
+    polling.current.cancel();
+    const controller = new AbortController();
+    manualReads.current.set(connectionId, controller);
+    setRefreshingIds((prev) => new Set(prev).add(connectionId));
+    const timeout = setTimeout(() => controller.abort(), 15000);
     try {
-      const res = await fetch(`/api/usage/${encodeURIComponent(connectionId)}`, {
+      const response = await fetch(`/api/usage/${encodeURIComponent(connectionId)}`, {
         cache: "no-store",
+        signal: controller.signal,
       });
-      if (res.ok) {
-        const usage = await res.json();
-        setQuotaByConnectionId((prev) => ({
-          ...prev,
-          [connectionId]: {
-            ...usage,
-            // The live route returns the usage payload, not the cache entry —
-            // stamp the merge time so "updated X ago" stays meaningful.
-            fetchedAt: usage?.fetchedAt || new Date().toISOString(),
-          },
-        }));
-      }
+      await response.body?.cancel();
+      // Ignore the live route's payload: newer inference evidence may have arrived meanwhile.
+      // Both manual and background reads must display the canonical server projection.
     } catch {
-      // Keep the previous cached entry on failure.
+      // An explicit refresh can fail; keep the last observation and its original age.
     } finally {
-      setRefreshingIds((prev) => {
-        const next = new Set(prev);
-        next.delete(connectionId);
-        return next;
-      });
+      clearTimeout(timeout);
+      manualReads.current.delete(connectionId);
+      if (polling.current) {
+        // A timed-out request must not leave the refresh button disabled either.
+        setRefreshingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(connectionId);
+          return next;
+        });
+        if (!controller.signal.aborted) await polling.current.refresh(true);
+      }
     }
   }, []);
 

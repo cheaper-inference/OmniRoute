@@ -1,3 +1,4 @@
+import { mergeCodexQuotaObservation } from "@/lib/providers/codexQuotaDisplay";
 import { backupDbFile } from "../backup";
 import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
@@ -139,12 +140,14 @@ export async function updateCodexScopedQuotaState(
 
     if (patch.quotaState) {
       const quotaByScope = toRecord(providerSpecificData.codexQuotaStateByScope);
+      const merged = mergeCodexQuotaObservation(toRecord(quotaByScope[scope]), patch.quotaState);
+      if (!merged) return null;
       nextProviderSpecificData.codexQuotaStateByScope = {
         ...quotaByScope,
-        [scope]: patch.quotaState,
+        [scope]: merged,
       };
       nextProviderSpecificData.codexQuotaState = {
-        ...patch.quotaState,
+        ...merged,
         scope,
         updatedAt: patch.quotaState.observedAt,
       };
