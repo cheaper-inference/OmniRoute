@@ -12,6 +12,7 @@ import { finalizeResponsesTerminalStatus } from "../helpers/responsesTerminalSta
 import { shouldParseTextualReasoningTags } from "../../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../../utils/reasoningFields.ts";
 import { resolveResponsesCacheUsageDetails } from "../../utils/resolveResponsesCacheUsageDetails.ts";
+import { normalizeResponsesContextUsage } from "../../utils/normalizeResponsesContextUsage.ts";
 import { pickCacheCreationInPrompt } from "../../utils/pickCacheCreationTokens.ts";
 import {
   isInternalReasoningPlaceholder,
@@ -870,7 +871,8 @@ function sendCompleted(state, emit) {
     }
 
     if (state.usage) {
-      response.usage = state.usage;
+      // Preserve upstream accounting in state; expose the full context only to Responses clients.
+      response.usage = normalizeResponsesContextUsage(state.usage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
