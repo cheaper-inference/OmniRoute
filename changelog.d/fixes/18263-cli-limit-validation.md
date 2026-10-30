@@ -1,0 +1,1 @@
+- **fix(cli):** Parse positive safe integer `--limit` values correctly for provider metrics, batch lists, and file lists instead of passing Commander's previous value to `parseInt` as a radix ([#18263](https://github.com/cheaper-inference/OmniRoute/pull/18263)) — thanks @mcspanky802.

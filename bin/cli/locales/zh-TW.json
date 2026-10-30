@@ -12,7 +12,8 @@
     "dryRun": "【模擬】將執行：{action}",
     "cancelled": "已取消。",
     "jsonOpt": "以 JSON 格式輸出",
-    "yesOpt": "跳過確認"
+    "yesOpt": "跳過確認",
+    "positiveIntegerRequired": "限制必須是正整數。"
   },
   "setup": {
     "title": "OmniRoute 設定",

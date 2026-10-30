@@ -4,6 +4,7 @@ import { setTimeout as sleep } from "node:timers/promises";
 import { apiFetch, getBaseUrl } from "../api.mjs";
 import { emit } from "../output.mjs";
 import { t } from "../i18n.mjs";
+import { parsePositiveInt } from "../utils/positiveInteger.mjs";
 
 function fmtTs(v) {
   if (!v) return "-";
@@ -97,7 +98,7 @@ export function registerBatches(program) {
   batches
     .command("list")
     .option("--status <s>", t("batches.list.status"))
-    .option("--limit <n>", t("batches.list.limit"), parseInt, 50)
+    .option("--limit <n>", t("batches.list.limit"), parsePositiveInt, 50)
     .action(async (opts, cmd) => {
       const params = new URLSearchParams({ limit: String(opts.limit) });
       if (opts.status) params.set("status", opts.status);
