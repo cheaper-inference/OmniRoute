@@ -36,12 +36,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { openaiToClaudeRequest } = await import(
-  "../../open-sse/translator/request/openai-to-claude.ts"
-);
-const { DEFAULT_THINKING_CLAUDE_SIGNATURE } = await import(
-  "../../open-sse/config/defaultThinkingSignature.ts"
-);
+const { openaiToClaudeRequest } =
+  await import("../../open-sse/translator/request/openai-to-claude.ts");
+const { DEFAULT_THINKING_CLAUDE_SIGNATURE } =
+  await import("../../open-sse/config/defaultThinkingSignature.ts");
 
 test("#5945: reasoning_content on a plain-text assistant turn (no tool_use, thinking not requested) yields NO redacted_thinking/thinking block", () => {
   const result = openaiToClaudeRequest(
@@ -109,7 +107,7 @@ test("#5945: reasoning_content + tool_use, but thinking NOT enabled on the outbo
   );
 });
 
-test("#5312: reasoning_content + tool_use + thinking ENABLED still gets a signature-less redacted_thinking precursor (the legitimate #5312 400-fix case)", () => {
+test("#5312: reasoning_content + tool_use + thinking ENABLED no longer gets a fabricated redacted_thinking precursor", () => {
   const result = openaiToClaudeRequest(
     "claude-opus-4-8",
     {
@@ -141,15 +139,14 @@ test("#5312: reasoning_content + tool_use + thinking ENABLED still gets a signat
   );
   assert.equal(fake, undefined, "must NOT emit a `thinking` block with the fabricated signature");
 
-  // It becomes a redacted_thinking placeholder (Anthropic accepts without sig check),
-  // and it must precede the tool_use block.
-  assert.equal(assistant.content[0].type, "redacted_thinking", "must be the precursor block");
-  assert.equal(assistant.content[0].data, DEFAULT_THINKING_CLAUDE_SIGNATURE);
+  // The DEFAULT blob is a real encrypted thought from an unrelated session: never inject it.
   assert.equal(
-    assistant.content[0].signature,
+    assistant.content.find((b) => b && b.type === "redacted_thinking"),
     undefined,
-    "redacted_thinking must not carry a signature"
+    "must NOT inject a redacted_thinking placeholder"
   );
+  assert.equal(assistant.content[0].type, "tool_use");
+  assert.equal(JSON.stringify(result).includes(DEFAULT_THINKING_CLAUDE_SIGNATURE), false);
   assert.ok(
     assistant.content.some((b) => b.type === "tool_use"),
     "tool_use block must still be present"

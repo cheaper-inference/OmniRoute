@@ -22,8 +22,6 @@
  *   replayable (non-empty signature / data); a partial set would reorder the turn.
  */
 
-import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../config/defaultThinkingSignature.ts";
-
 export type ClaudeSignedThinkingBlock =
   | { type: "thinking"; thinking: string; signature: string }
   | { type: "redacted_thinking"; data: string };
@@ -253,16 +251,8 @@ export function downgradeRestoredClaudeThinking(content: unknown): unknown[] | n
 
   forgetEntriesHolding(restored);
   const kept = content.filter((block) => !restored.includes(block));
-  const hasThinking = kept.some((block) => {
-    const type = (block as Record<string, unknown> | null)?.type;
-    return type === "thinking" || type === "redacted_thinking";
-  });
-  const hasToolUse = kept.some(
-    (block) => (block as Record<string, unknown> | null)?.type === "tool_use"
-  );
-  if (!hasThinking && hasToolUse) {
-    kept.unshift({ type: "redacted_thinking", data: DEFAULT_THINKING_CLAUDE_SIGNATURE });
-  }
+  // Inject nothing (the DEFAULT blob is a foreign encrypted thought);
+  // the recovery caller disables manual thinking when the final tool turn is left bare.
   return kept;
 }
 

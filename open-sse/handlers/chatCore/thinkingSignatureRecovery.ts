@@ -36,6 +36,7 @@ export type ThinkingSignatureRecoveryResult = {
  */
 export async function recoverAnthropicThinkingSignature(args: {
   provider?: string | null;
+  model?: string | null;
   statusCode: number;
   message: string;
   body: unknown;
@@ -45,6 +46,7 @@ export async function recoverAnthropicThinkingSignature(args: {
   if (
     !isAnthropicThinkingSignatureError({
       provider: args.provider,
+      model: args.model,
       status: args.statusCode,
       message: args.message,
     })
@@ -65,6 +67,7 @@ export async function recoverAnthropicThinkingSignature(args: {
   };
   const recovery = await executeWithAnthropicThinkingSignatureRecovery({
     provider: args.provider,
+    model: args.model,
     body: args.body,
     execute: async (requestBody) => {
       if (requestBody === args.body) return firstFailure;
