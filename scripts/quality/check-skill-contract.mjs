@@ -12,6 +12,7 @@ const CONTRACTS = [
   "sweep-reds/SKILL.md",
   "merge-prs/SKILL.md",
   "merge-batch/SKILL.md",
+  "i18n-waves/SKILL.md",
   "_shared/merge-gates.md",
   "_shared/validation-gate.md",
   "_shared/protected-surfaces.md",
