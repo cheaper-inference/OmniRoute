@@ -38,6 +38,7 @@ import { startMcpHeartbeat } from "./runtimeHeartbeat.ts";
 import { countUniqueMcpTools } from "./toolCount.ts";
 import { z } from "zod";
 import { closeAuditDb, logToolCall } from "./audit.ts";
+import { isDirectRun } from "./directRun.ts";
 import {
   buildScopeDenialMessage,
   evaluateToolScopes,
@@ -1064,7 +1065,7 @@ export async function startMcpStdio(): Promise<void> {
 }
 
 // If this file is run directly, start stdio server
-if (process.argv[1] && import.meta.url.endsWith(process.argv[1].replace(/\\/g, "/"))) {
+if (isDirectRun(import.meta.url, process.argv[1])) {
   startMcpStdio().catch((err) => {
     console.error("[MCP] Fatal error:", err);
     process.exit(1);
