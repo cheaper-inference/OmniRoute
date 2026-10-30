@@ -1,6 +1,6 @@
 import path from "path";
 import { resolveDataDir } from "./dataPaths.ts";
-import { toBooleanSetting } from "@/lib/db/booleanSetting";
+import { toStrictBooleanSetting } from "@/lib/db/booleanSetting";
 
 const DEFAULT_APP_LOG_RETENTION_DAYS = 7;
 const DEFAULT_CALL_LOG_RETENTION_DAYS = 7;
@@ -126,14 +126,17 @@ export function getCallLogPipelineCaptureStreamChunks(): boolean {
  *
  * `ENABLE_REQUEST_LOGS` wins when set (documented as overriding the dashboard
  * setting). Otherwise the stored `call_log_pipeline_enabled` value is read with
- * the same parser the dashboard uses, so the panel and the request path agree.
+ * the same strict parser the panel uses, so the panel and the request path
+ * agree and a non-canonical stored value does not start capture on its own.
  */
 export function resolveCallLogPipelineEnabled(settings: Record<string, unknown>): boolean {
   const envOverride = process.env.ENABLE_REQUEST_LOGS;
   if (envOverride !== undefined) {
-    return envOverride.trim().toLowerCase() === "true";
+    // Same parser as the stored value, so "1"/"true" mean the same thing
+    // whichever side of the switch the operator used.
+    return toStrictBooleanSetting(envOverride) === true;
   }
-  return toBooleanSetting(settings.call_log_pipeline_enabled) === true;
+  return toStrictBooleanSetting(settings.call_log_pipeline_enabled) === true;
 }
 
 export function getCallLogPipelineMaxSizeBytes(): number {

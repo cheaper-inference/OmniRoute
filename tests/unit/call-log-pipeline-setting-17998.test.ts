@@ -144,6 +144,17 @@ test("ENABLE_REQUEST_LOGS=false overrides a stored true on the request path", as
   });
 });
 
+test("ENABLE_REQUEST_LOGS=1 reads the same as a stored '1'", async () => {
+  await freshDb();
+  await settingsDb.updateSettings({ call_log_pipeline_enabled: false });
+  await withEnv("1", async () => {
+    const v = await views();
+    assert.equal(v.logger, true);
+    assert.equal(v.requestPath, true);
+    assert.equal(await chatCoreCaptures(), true);
+  });
+});
+
 test("legacy detailed_logs_enabled='1' carried over by migration 014 reads as on everywhere", async () => {
   await freshDb();
   const db = core.getDbInstance();
@@ -199,7 +210,7 @@ for (const value of [0, "no", "off", "FALSE", "garbage"]) {
   });
 }
 
-test("a stored 'yes' that bypassed the importer reaches chatCore", async () => {
+test("a stored 'yes' that bypassed the importer does not switch capture on", async () => {
   await freshDb();
   core
     .getDbInstance()
@@ -208,9 +219,12 @@ test("a stored 'yes' that bypassed the importer reaches chatCore", async () => {
     )
     .run(JSON.stringify("yes"));
   const v = await views();
-  assert.equal(v.panel, true);
-  assert.equal(v.requestPath, true);
-  assert.equal(await chatCoreCaptures(), true);
+  // The panel and the request path share one strict reader, so a value the
+  // importer would have normalised does not start capture on its own.
+  assert.equal(v.panel, false);
+  assert.equal(v.logger, false);
+  assert.equal(v.requestPath, false);
+  assert.equal(await chatCoreCaptures(), false);
 });
 
 test("panel save and request path stay in sync", async () => {
