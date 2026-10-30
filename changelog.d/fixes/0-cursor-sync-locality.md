@@ -1,0 +1,1 @@
+- **fix(providers):** Preserve the original caller's local CLI restriction during Cursor model sync and carry trusted locality into the in-process fallback.
