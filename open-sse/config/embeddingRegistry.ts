@@ -739,15 +739,27 @@ export function getEmbeddingDimension(modelStr: string): number | undefined {
  * vector store built on top of the proxy. Models with an *unknown* dimension
  * are ignored (conservative: we never flag a conflict we can't prove).
  */
-export function detectEmbeddingDimensionConflict(modelStrs: string[]): {
+export function detectEmbeddingDimensionConflict(
+  modelStrs: string[],
+  pinnedDimensions?: number
+): {
   conflict: boolean;
   dimensions: Record<string, number>;
   distinct: number[];
 } {
+  const pinned =
+    typeof pinnedDimensions === "number" &&
+    Number.isInteger(pinnedDimensions) &&
+    pinnedDimensions > 0
+      ? pinnedDimensions
+      : undefined;
   const dimensions: Record<string, number> = {};
   for (const modelStr of modelStrs) {
     const dim = getEmbeddingDimension(modelStr);
-    if (typeof dim === "number") dimensions[modelStr] = dim;
+    if (typeof dim !== "number") continue;
+    // Every target receives the pinned `dimensions`, so a model whose native size can be
+    // truncated to it returns vectors of that size. A smaller native size cannot grow.
+    dimensions[modelStr] = pinned !== undefined && dim >= pinned ? pinned : dim;
   }
   const distinct = [...new Set(Object.values(dimensions))].sort((a, b) => a - b);
   return { conflict: distinct.length > 1, dimensions, distinct };
