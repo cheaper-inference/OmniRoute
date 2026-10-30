@@ -1,0 +1,1 @@
+- **fix(key-value):** provider removals no longer leave their synced catalogs in the key/value store — a cleanup migration drops every catalog whose connection is gone ([#17332](https://github.com/diegosouzapw/OmniRoute/pull/17332)) — thanks @maxmad64bis
