@@ -12,7 +12,7 @@ import Select from "./Select";
  * Console Log Viewer — Real-time application log viewer.
  *
  * Displays structured application logs from the server with a terminal-like UI.
- * Polls the backend API every 5 seconds. Shows logs from the last 1 hour.
+ * Polls the newest retained page every 5 seconds. Older pages and pause freeze updates.
  * Supports level filtering, text search, auto-scroll, and copy-to-clipboard.
  */
 
@@ -58,10 +58,20 @@ export default function ConsoleLogViewer() {
   const t = useTranslations("loggers");
   const tv = useTranslations("logs.consoleViewer");
   const tc = useTranslations("common");
+  const tl = useTranslations("logs");
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState("all");
+  const [range, setRange] = useState("all");
+  const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [viewingHistory, setViewingHistory] = useState(false);
+  const [scanLimited, setScanLimited] = useState(false);
+  const [paused, setPaused] = useState(false);
+  const historyRef = useRef(false);
+  const pausedRef = useRef(false);
+  const requestVersionRef = useRef(0);
+  const fetchAbortRef = useRef<AbortController | null>(null);
   const [searchText, setSearchText] = useState("");
   const [autoScroll, setAutoScroll] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -73,35 +83,89 @@ export default function ConsoleLogViewer() {
   const followTailRef = useRef(true);
   const copyFeedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchLogs = useCallback(async () => {
-    try {
-      const params = new URLSearchParams();
-      if (levelFilter !== "all") params.set("level", levelFilter);
-      params.set("limit", "500");
+  const invalidateFetch = useCallback(() => {
+    requestVersionRef.current++;
+    fetchAbortRef.current?.abort();
+    fetchAbortRef.current = null;
+  }, []);
 
-      const res = await fetch(`/api/logs/console?${params.toString()}`);
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const data: LogEntry[] = await res.json();
+  const fetchLogs = useCallback(
+    async (cursor?: string, refresh = false) => {
+      if (pausedRef.current || (!cursor && historyRef.current && !refresh)) return;
+      if (cursor || refresh) {
+        historyRef.current = Boolean(cursor);
+        setViewingHistory(Boolean(cursor));
+      }
+      setLoading(true);
+      const version = ++requestVersionRef.current;
+      fetchAbortRef.current?.abort();
+      const controller = new AbortController();
+      fetchAbortRef.current = controller;
+      const isCurrent = () => !pausedRef.current && version === requestVersionRef.current;
+      try {
+        const params = new URLSearchParams();
+        if (levelFilter !== "all") params.set("level", levelFilter);
+        params.set("limit", "500");
+        params.set("range", range);
+        if (cursor) params.set("cursor", cursor);
+        const res = await fetch(`/api/logs/console?${params.toString()}`, {
+          signal: controller.signal,
+          cache: "no-store",
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data: LogEntry[] = await res.json();
+        if (!isCurrent()) return;
+        if (!Array.isArray(data)) throw new Error(tv("fetchFailed"));
+        // Bound browser memory independently of the retained files. Keep the older
+        // end while paging so every retained page stays reachable.
+        setLogs((previous) => (cursor ? [...data, ...previous].slice(0, 2000) : data));
+        setNextCursor(res.headers?.get("x-console-next-cursor") || null);
+        setScanLimited(res.headers?.get("x-console-truncated") === "true");
+        setLastUpdated(new Date());
+        setError(null);
+      } catch (err: unknown) {
+        if (isCurrent() && !controller.signal.aborted)
+          setError(err instanceof Error ? err.message : tv("fetchFailed"));
+      } finally {
+        if (isCurrent()) {
+          fetchAbortRef.current = null;
+          setLoading(false);
+        }
+      }
+    },
+    [levelFilter, range, tv]
+  );
 
-      setLogs(data);
-      setLastUpdated(new Date());
-      setError(null);
-    } catch (err: any) {
-      setError(err.message || tv("fetchFailed"));
-    } finally {
-      setLoading(false);
+  const togglePause = () => {
+    // Invalidate synchronously: even a response already decoding must not
+    // replace selected text, including after a quick pause/resume.
+    pausedRef.current = !pausedRef.current;
+    invalidateFetch();
+    setLoading(false);
+    setPaused(pausedRef.current);
+    if (!pausedRef.current) {
+      historyRef.current = false;
+      setViewingHistory(false);
     }
-  }, [levelFilter, tv]);
+  };
+  const resetHistory = () => {
+    invalidateFetch();
+    historyRef.current = false;
+    setViewingHistory(false);
+    setNextCursor(null);
+  };
 
-  // Initial fetch + polling
+  // Pause freezes the displayed snapshot, not the server's log writer.
   useEffect(() => {
+    if (paused) return;
     const initialFetch = setTimeout(() => void fetchLogs(), 0);
-    const interval = setInterval(fetchLogs, POLL_INTERVAL);
+    const interval = setInterval(() => void fetchLogs(), POLL_INTERVAL);
     return () => {
       clearTimeout(initialFetch);
       clearInterval(interval);
+      invalidateFetch();
     };
-  }, [fetchLogs]);
+  }, [fetchLogs, paused, invalidateFetch]);
 
   useEffect(
     () => () => {
@@ -112,10 +176,10 @@ export default function ConsoleLogViewer() {
 
   // Auto-scroll to bottom on new logs, but only while the reader is already at the bottom
   useEffect(() => {
-    if (autoScroll && followTailRef.current && scrollRef.current) {
+    if (autoScroll && !paused && !viewingHistory && followTailRef.current && scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
-  }, [logs, autoScroll]);
+  }, [logs, autoScroll, paused, viewingHistory]);
 
   const handleCopy = async (entry: LogEntry, idx: number) => {
     const text = JSON.stringify(entry, null, 2);
@@ -137,7 +201,8 @@ export default function ConsoleLogViewer() {
   const formatTime = (ts: string) => {
     try {
       const d = new Date(ts);
-      return d.toLocaleTimeString(locale, {
+      return d.toLocaleString(locale, {
+        ...(range !== "1h" ? ({ year: "numeric", month: "2-digit", day: "2-digit" } as const) : {}),
         hour12: false,
         hour: "2-digit",
         minute: "2-digit",
@@ -182,7 +247,11 @@ export default function ConsoleLogViewer() {
         {/* Level filter */}
         <Select
           value={levelFilter}
-          onChange={(e) => setLevelFilter(e.target.value)}
+          onChange={(e) => {
+            resetHistory();
+            setLevelFilter(e.target.value);
+          }}
+          disabled={paused}
           aria-label={tv("filterByLevel")}
         >
           <option value="all">{t("allLevels")}</option>
@@ -191,6 +260,32 @@ export default function ConsoleLogViewer() {
           <option value="warn">Warn+</option>
           <option value="error">Error+</option>
         </Select>
+
+        <Select
+          data-console-history="range"
+          aria-label={tl("timeRange")}
+          value={range}
+          disabled={paused}
+          onChange={(e) => {
+            resetHistory();
+            setRange(e.target.value);
+          }}
+        >
+          <option value="all">{tc("all")}</option>
+          <option value="1h">{tv("lastHour")}</option>
+          <option value="24h">{tl("lastNHours", { hours: "24h" })}</option>
+          <option value="7d">{tl("lastNHours", { hours: "168h" })}</option>
+        </Select>
+        <Button
+          variant="outline"
+          data-console-history="older"
+          onClick={() => {
+            if (nextCursor) void fetchLogs(nextCursor);
+          }}
+          disabled={!nextCursor || loading || paused}
+        >
+          {tc("loadMore")}
+        </Button>
 
         {/* Search */}
         <Input
@@ -202,6 +297,16 @@ export default function ConsoleLogViewer() {
           aria-label={tv("searchAria")}
           className="min-w-[200px] flex-1"
         />
+
+        <Button
+          variant="outline"
+          onClick={togglePause}
+          aria-label={tv(paused ? "resumeLogs" : "pauseLogs")}
+          aria-pressed={paused}
+        >
+          <Icon name={paused ? "play_arrow" : "pause"} size={16} />
+          {tv(paused ? "resumeLogs" : "pauseLogs")}
+        </Button>
 
         {/* Auto-scroll toggle */}
         <Button
@@ -223,8 +328,8 @@ export default function ConsoleLogViewer() {
         <Button
           variant="outline"
           size="icon"
-          onClick={fetchLogs}
-          disabled={loading}
+          onClick={() => void fetchLogs(undefined, true)}
+          disabled={loading || paused}
           aria-label={tc("refresh")}
           title={tc("refresh")}
         >
@@ -235,11 +340,22 @@ export default function ConsoleLogViewer() {
         <div className="ml-auto flex items-center gap-2 self-center text-xs text-text-muted">
           <span
             aria-hidden="true"
-            className="inline-block size-2 animate-pulse rounded-full bg-success"
+            className={cn(
+              "inline-block size-2 rounded-full",
+              paused || viewingHistory ? "bg-warning" : "animate-pulse bg-success"
+            )}
           />
+          {(paused || viewingHistory) && <span>{tv("paused")}</span>}
+          {scanLimited && <span>{tv("scanLimited")}</span>}
           <span>{tv("entryCount", { count: filteredLogs.length })}</span>
           <span className="text-text-muted/50">•</span>
-          <span>{tv("lastHour")}</span>
+          <span>
+            {range === "all"
+              ? tc("all")
+              : range === "1h"
+                ? tv("lastHour")
+                : tl("lastNHours", { hours: range === "24h" ? "24h" : "168h" })}
+          </span>
           {lastUpdated && (
             <>
               <span className="text-text-muted/50">•</span>
@@ -275,7 +391,7 @@ export default function ConsoleLogViewer() {
         style={{ maxHeight: "calc(100vh - 340px)", minHeight: "400px" }}
         role="log"
         aria-label={tv("consoleAria")}
-        aria-live="polite"
+        aria-live={paused || viewingHistory ? "off" : "polite"}
       >
         {/* Header bar */}
         <div className="sticky top-0 z-10 px-4 py-2 bg-[#161b22] border-b border-[#30363d] flex items-center gap-2">
@@ -307,7 +423,7 @@ export default function ConsoleLogViewer() {
               return (
                 <div
                   key={idx}
-                  className={`group flex items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
+                  className={`group flex flex-wrap sm:flex-nowrap items-start gap-2 px-2 py-1 rounded hover:bg-white/5 transition-colors ${
                     level === "error" || level === "fatal" ? "bg-[#ff7b72]/5" : ""
                   }`}
                 >
@@ -324,10 +440,14 @@ export default function ConsoleLogViewer() {
                   </span>
 
                   {/* Component */}
-                  {comp && <span className="text-[#d2a8ff]/80 shrink-0">[{comp}]</span>}
+                  {comp && (
+                    <span className="text-[#d2a8ff]/80 max-w-full break-all sm:shrink-0">
+                      [{comp}]
+                    </span>
+                  )}
 
                   {/* Message */}
-                  <span className="text-[#c9d1d9] flex-1 break-all">
+                  <span className="text-[#c9d1d9] flex-1 min-w-0 basis-full order-last sm:basis-auto sm:order-none break-all">
                     {msg}
                     {/* Extra meta */}
                     {correlationId && (

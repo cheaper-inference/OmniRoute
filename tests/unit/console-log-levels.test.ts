@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { NextRequest } from "next/server";
 
 import { updateSettings } from "../../src/lib/db/settings";
 
@@ -19,7 +20,16 @@ process.once("exit", () => {
 const originalLogFilePath = process.env.APP_LOG_FILE_PATH;
 process.env.APP_LOG_FILE_PATH = TEST_LOG_PATH;
 
-const route = await import("../../src/app/api/logs/console/route.ts");
+const consoleRoute = await import("../../src/app/api/logs/console/route.ts");
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+// These compatibility cases exercise the explicitly selected one-hour view.
+const route = {
+  GET(request: Request) {
+    const url = new URL(request.url);
+    url.searchParams.set("range", "1h");
+    return consoleRoute.GET(new NextRequest(url, { headers: request.headers }));
+  },
+};
 
 interface ConsoleLogApiEntry {
   level?: string;
@@ -35,6 +45,7 @@ test.before(async () => {
 
 test.after(async () => {
   await updateSettings({ requireLogin: true });
+  resetDbInstance();
   if (originalLogFilePath === undefined) {
     delete process.env.APP_LOG_FILE_PATH;
   } else {
@@ -191,32 +202,31 @@ function restoreLogFile(previous: string): void {
   }
 }
 
-function installReadSpy(counter: { calls: number; bytes: number }): () => void {
-  const pristine = fs.readSync;
-  let calls = 0;
-  let bytes = 0;
-  Object.defineProperty(fs, "readSync", {
+async function installReadSpy(counter: { calls: number; bytes: number }): Promise<() => void> {
+  const handle = await fs.promises.open(TEST_LOG_PATH, "a");
+  const prototype = Object.getPrototypeOf(handle) as { read: typeof handle.read };
+  const pristine = prototype.read;
+  await handle.close();
+  counter.calls = 0;
+  counter.bytes = 0;
+  Object.defineProperty(prototype, "read", {
     configurable: true,
     writable: true,
-    value: function (
-      fd: number,
+    value: async function (
+      this: typeof handle,
       buffer: Buffer,
       offset: number,
       length: number,
       position: number | null
-    ): number {
-      calls += 1;
-      const read = pristine.call(this, fd, buffer, offset, length, position);
-      bytes += read;
-      return read;
+    ) {
+      const result = await pristine.call(this, buffer, offset, length, position);
+      counter.calls += 1;
+      counter.bytes += result.bytesRead;
+      return result;
     },
   });
-  counter.calls = 0;
-  counter.bytes = 0;
   return () => {
-    counter.calls = calls;
-    counter.bytes = bytes;
-    Object.defineProperty(fs, "readSync", {
+    Object.defineProperty(prototype, "read", {
       configurable: true,
       writable: true,
       value: pristine,
@@ -280,14 +290,19 @@ function oracleEntries(
       // Skip unparseable lines, like the route.
     }
   }
-  return entries.slice(-limit);
+  return entries.slice(-limit).map((entry) => ({
+    ...entry,
+    timestamp: entry.timestamp
+      ? new Date(entry.timestamp as string | number).toISOString()
+      : new Date(fs.statSync(filePath).mtimeMs).toISOString(),
+  }));
 }
 
 test("console log API serves the recent tail from a large file without reading the head", async (t) => {
   const casePath = path.join(TAIL_CASE_DIR, `large-${t.name.replace(/\W+/g, "-")}.log`);
   const previous = isolateLogFile(casePath);
   const counter = { calls: 0, bytes: 0 };
-  const restoreSpy = installReadSpy(counter);
+  const restoreSpy = await installReadSpy(counter);
   const generatedAt = Date.now();
   let size = 0;
   try {
@@ -317,7 +332,9 @@ test("console log API serves the recent tail from a large file without reading t
       "not-json",
     ];
     const head: string[] = [];
-    for (let i = 0; i < 12000; i += 1) {
+    // Exceed the reader's 8 MiB per-request scan budget. Smaller files may be
+    // scanned fully when fewer than limit records match the requested range.
+    for (let i = 0; i < 120000; i += 1) {
       head.push(headLine(i));
     }
     const probe = JSON.stringify({
@@ -399,7 +416,7 @@ test("console log API matches the full read for a file smaller than the first wi
   const casePath = path.join(TAIL_CASE_DIR, `small-${t.name.replace(/\W+/g, "-")}.log`);
   const previous = isolateLogFile(casePath);
   const counter = { calls: 0, bytes: 0 };
-  const restoreSpy = installReadSpy(counter);
+  const restoreSpy = await installReadSpy(counter);
   try {
     const now = Date.now();
     const lines = [
@@ -441,7 +458,7 @@ test("console log API climbs past filtered tail entries to older matching lines"
   const casePath = path.join(TAIL_CASE_DIR, `filtered-${t.name.replace(/\W+/g, "-")}.log`);
   const previous = isolateLogFile(casePath);
   const counter = { calls: 0, bytes: 0 };
-  const restoreSpy = installReadSpy(counter);
+  const restoreSpy = await installReadSpy(counter);
   try {
     const now = Date.now();
     const lines: string[] = [];
@@ -492,7 +509,7 @@ test("console log API keeps undated lines when an older dated line ends the wind
   const casePath = path.join(TAIL_CASE_DIR, `undated-${t.name.replace(/\W+/g, "-")}.log`);
   const previous = isolateLogFile(casePath);
   const counter = { calls: 0, bytes: 0 };
-  const restoreSpy = installReadSpy(counter);
+  const restoreSpy = await installReadSpy(counter);
   try {
     const now = Date.now();
     fs.writeFileSync(
@@ -589,7 +606,7 @@ test("console log API keeps the first line when the window starts on a line boun
   const casePath = path.join(TAIL_CASE_DIR, `aligned-${t.name.replace(/\W+/g, "-")}.log`);
   const previous = isolateLogFile(casePath);
   const counter = { calls: 0, bytes: 0 };
-  const restoreSpy = installReadSpy(counter);
+  const restoreSpy = await installReadSpy(counter);
   try {
     const now = Date.now();
     const oldStamp = new Date(now - 2 * 60 * 60 * 1000).toISOString();
