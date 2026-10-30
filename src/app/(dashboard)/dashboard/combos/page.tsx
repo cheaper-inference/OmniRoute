@@ -81,6 +81,7 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
+import ComboHeaderActions from "./ComboHeaderActions";
 import {
   AutoComboTruncatedNote,
   getComboStepKindLabel,
@@ -1253,9 +1254,7 @@ function CombosPageContent() {
                 {getI18nOrFallback(t, "usageGuideShow", "Show guide")}
               </Button>
             )}
-            <Button icon="add" onClick={() => setShowCreateModal(true)}>
-              {t("createCombo")}
-            </Button>
+            <ComboHeaderActions onImported={fetchData} onCreate={() => setShowCreateModal(true)} />
           </>
         }
       />
