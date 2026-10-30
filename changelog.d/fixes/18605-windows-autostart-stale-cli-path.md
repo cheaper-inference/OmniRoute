@@ -1,0 +1,1 @@
+- **fix(cli):** on Windows, `serve` now repoints a Startup `OmniRoute.vbs` that still launches an older or removed installed copy (pnpm keeps each version in its own directory, so autostart kept booting the pre-upgrade version); only the CLI path changes, the node binary and flags are kept (#18605)

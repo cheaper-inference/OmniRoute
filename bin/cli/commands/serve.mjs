@@ -33,6 +33,7 @@ import {
 import { resolveTlsOptions } from "../../../scripts/dev/tls-options.mjs";
 import { startDetachedTray, validateTrayOptions } from "../tray/detachedTray.mjs";
 import { resolveTrayPreference } from "../tray/preferences.mjs";
+import { refreshWinAutostartCliPath } from "../tray/autostart.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const _pkg = JSON.parse(readFileSync(join(__dirname, "..", "..", "..", "package.json"), "utf8"));
@@ -157,12 +158,25 @@ export function resolveServeTrayOptions(opts = {}, env = process.env) {
   return { ...opts, tray };
 }
 
+/** #18601: keep a Windows Startup entry pointed at this install after an upgrade. */
+function refreshAutostartEntry() {
+  if (process.platform !== "win32") return;
+  try {
+    if (refreshWinAutostartCliPath()) {
+      console.log("  \x1b[2m↻ Autostart entry updated to launch this install\x1b[0m");
+    }
+  } catch {
+    // Autostart is a convenience: never block serve on it.
+  }
+}
+
 export async function runServe(opts = {}) {
   opts = resolveServeTrayOptions(opts);
   const startedAt = performance.now();
 
   const trayOptionError = validateTrayOptions(opts);
   if (trayOptionError) throw new Error(trayOptionError);
+  if (opts.trayWorker !== true) refreshAutostartEntry();
 
   if (opts.tray === true && opts.trayWorker !== true) {
     const port = parsePort(opts.port ?? process.env.PORT ?? "20128", 20128);

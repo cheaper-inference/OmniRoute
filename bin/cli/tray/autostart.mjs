@@ -1,7 +1,14 @@
-import { existsSync, writeFileSync, unlinkSync, mkdirSync, realpathSync } from "node:fs";
+import {
+  existsSync,
+  readFileSync,
+  writeFileSync,
+  unlinkSync,
+  mkdirSync,
+  realpathSync,
+} from "node:fs";
 import { execFileSync, execSync } from "node:child_process";
 import { homedir } from "node:os";
-import { join, dirname } from "node:path";
+import { join, dirname, win32 } from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveTrayPreference, saveTrayPreference } from "./preferences.mjs";
 
@@ -10,6 +17,8 @@ const WIN_REG_VALUE = "OmniRoute";
 const WIN_STARTUP_FILE = "OmniRoute.vbs";
 const LINUX_SERVICE_NAME = "omniroute.service";
 const LINUX_DESKTOP_NAME = "omniroute.desktop";
+const INSTALLED_CLI_SUFFIX =
+  win32.sep + win32.join("node_modules", "omniroute", "bin", "omniroute.mjs");
 
 function resolveCliPath() {
   const candidates = [];
@@ -458,6 +467,62 @@ function enableWin({ tray }) {
   // a visible console window. The VBS approach is the replacement.
   cleanLegacyWinReg();
   return existsSync(vbsPath);
+}
+
+/**
+ * Swaps the CLI script in an OmniRoute.vbs written by buildWinVbsContent (any
+ * release; older ones escaped every backslash) for `cliPath`, keeping the node
+ * binary, every flag and the line endings as they are. Returns null for a VBS
+ * this module did not write.
+ */
+export function rewriteWinVbsCliPath(vbs, cliPath) {
+  const run = vbs.match(/^WshShell\.Run "(.*)", 0, False(\r?)$/m);
+  const exec = run && run[1].replace(/""/g, '"').match(/^("[^"]*"|\S+)(\s+)("[^"]*"|\S+)(.*)$/);
+  if (!exec) return null;
+  const [, node, sep, previous, rest] = exec;
+  const execLine = `${node}${sep}${quoteWindowsArg(cliPath)}${rest}`;
+  const runLine = `WshShell.Run "${execLine.replace(/"/g, '""')}", 0, False${run[2]}`;
+  return {
+    previousCliPath: win32.normalize(previous.replace(/^"|"$/g, "")),
+    content: vbs.replace(run[0], () => runLine),
+  };
+}
+
+function installedVersion(cliPath) {
+  try {
+    return JSON.parse(readFileSync(join(dirname(cliPath), "..", "package.json"), "utf8")).version;
+  } catch {
+    return null;
+  }
+}
+
+function isInstalledCli(cliPath) {
+  return win32.normalize(cliPath).toLowerCase().endsWith(INSTALLED_CLI_SUFFIX);
+}
+
+// A removed install reads as version null, so it counts as stale too.
+function isStaleInstalledCli(previous, current) {
+  if (!isInstalledCli(previous) || !isInstalledCli(current)) return false;
+  return installedVersion(previous) !== installedVersion(current);
+}
+
+/**
+ * #18601: the VBS pins the real path of the CLI that enabled autostart, and pnpm
+ * installs every version under its own directory, so after an upgrade each login
+ * kept booting the old version. `serve` calls this to point the VBS at the
+ * running install when it launches another version of an installed copy, or one
+ * that is gone. Source checkouts and VBS files we did not write are left alone.
+ * Returns true when the file was rewritten.
+ */
+export function refreshWinAutostartCliPath({
+  cliPath = resolveCliPath(),
+  vbsPath = winStartupPath(),
+} = {}) {
+  if (process.platform !== "win32" || !cliPath || !vbsPath || !existsSync(vbsPath)) return false;
+  const rewritten = rewriteWinVbsCliPath(readFileSync(vbsPath, "utf8"), cliPath);
+  if (!rewritten || !isStaleInstalledCli(rewritten.previousCliPath, cliPath)) return false;
+  writeFileSync(vbsPath, rewritten.content, { mode: 0o644 });
+  return true;
 }
 
 function disableWin() {
