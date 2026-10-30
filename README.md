@@ -57,6 +57,9 @@
 
 **Questions, provider tips, roadmap & support → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
+📢 **Stay connected! Follow our official WhatsApp Channel for the latest news, updates, releases & announcements:**
+
+[![Official WhatsApp Channel](https://img.shields.io/badge/Official_WhatsApp_Channel-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R)
 <br/>
 
 ## 📈 The Gateway Keeps Growing
