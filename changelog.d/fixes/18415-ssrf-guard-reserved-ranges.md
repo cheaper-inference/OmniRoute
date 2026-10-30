@@ -1,0 +1,1 @@
+- **fix(network):** refuse the reserved 240.0.0.0/4 range and the 255.255.255.255 broadcast in the SSRF guard, in IPv4 and IPv6-embedded forms and as DNS answers; 198.18.0.0/15 stays allowed for fake-IP proxy setups ([#18415](https://github.com/cheaper-inference/OmniRoute/pull/18415))
