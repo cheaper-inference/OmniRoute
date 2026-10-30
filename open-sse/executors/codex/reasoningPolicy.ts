@@ -6,11 +6,33 @@ import {
 } from "./reasoningSuffix.ts";
 
 type RecordValue = Record<string, unknown>;
+type WireEffort = string | number;
+const NORMALIZED_EFFORTS = new Set<string>([...EFFORT_ORDER, "minimal", "persistent", "disabled"]);
+
 function asRecord(value: unknown): RecordValue {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as RecordValue) : {};
 }
-function effort(value: unknown): string | undefined {
-  return typeof value === "string" ? value.trim().toLowerCase() || undefined : undefined;
+
+/** Preserve the Responses control without forwarding Chat-only stream options. */
+export function normalizeCodexSummaryStreamOptions(body: RecordValue): void {
+  const delivery = asRecord(body.stream_options).reasoning_summary_delivery;
+  if (typeof delivery === "string" && delivery.length > 0) {
+    body.stream_options = { reasoning_summary_delivery: delivery };
+  } else {
+    delete body.stream_options;
+  }
+}
+
+function effort(value: unknown): WireEffort | undefined {
+  // Codex's request serializer emits custom u64 budgets as JSON numbers. Keep
+  // the exactly representable JS subset, including zero, without coercion.
+  if (typeof value === "number") {
+    return Number.isSafeInteger(value) && value >= 0 ? value : undefined;
+  }
+  if (typeof value !== "string" || !value.trim()) return undefined;
+  const normalized = value.trim().toLowerCase();
+  // Retain known-tier normalization, but do not change model-defined spellings.
+  return NORMALIZED_EFFORTS.has(normalized) ? normalized : value;
 }
 
 /**
@@ -34,7 +56,8 @@ function legacyEffortCap(model: string): EffortLevel | null {
   return MAX_EFFORT_BY_MODEL[model] ?? getCodexAliasEffortCap(model);
 }
 
-function clampEffort(model: string, requested: string): string {
+function clampEffort(model: string, requested: WireEffort): WireEffort {
+  if (typeof requested === "number") return requested;
   const max = legacyEffortCap(model);
   if (!max) return requested;
   const reqIdx = EFFORT_ORDER.indexOf(requested as EffortLevel);
@@ -82,7 +105,7 @@ export function applyCodexReasoningSelection(
   whitelistWireReasoning(body);
 }
 
-type CatalogSplit = { baseModel: string; effort: string | null | undefined };
+type CatalogSplit = { baseModel: string; effort: WireEffort | null | undefined };
 
 /** The model id and suffix effort: a discovered catalog id is used verbatim (no re-parse). */
 function splitRequestedModel(
@@ -105,10 +128,10 @@ function fallbackEffort(
   metadata: RecordValue,
   connectionDefault: string | undefined,
   allowDefaults: boolean
-): string | undefined {
+): WireEffort | undefined {
   if (reasoning.enabled === false) return "none";
   if (!allowDefaults) return undefined;
-  return connectionDefault || effort(metadata.defaultThinkingEffort) || "medium";
+  return effort(connectionDefault) ?? effort(metadata.defaultThinkingEffort) ?? "medium";
 }
 
 /**
@@ -121,11 +144,11 @@ function requestedEffort(
   reasoning: RecordValue,
   body: RecordValue,
   restoreOriginal: boolean
-): string | undefined {
+): WireEffort | undefined {
   if (restoreOriginal && Object.hasOwn(metadata, "requestedThinkingEffort")) {
     return effort(metadata.requestedThinkingEffort);
   }
-  return effort(reasoning.effort) || effort(body.reasoning_effort);
+  return effort(reasoning.effort) ?? effort(body.reasoning_effort);
 }
 
 function selectCodexReasoning(
@@ -145,11 +168,11 @@ function selectCodexReasoning(
   const reasoning = asRecord(body.reasoning);
   const requested = requestedEffort(metadata, reasoning, body, hasCatalog && allowDefaults);
   const selected =
-    effort(forcedEffort) ||
-    split.effort ||
-    requested ||
+    effort(forcedEffort) ??
+    split.effort ??
+    requested ??
     fallbackEffort(reasoning, metadata, connectionDefault, allowDefaults);
-  if (!selected) return;
+  if (selected === undefined || selected === null) return;
   // New catalog values pass through verbatim, including upstream validation errors.
   // Only the old built-in Ultra aliases retain their historical Max wire mapping.
   const resolved = hasCatalog ? selected : clampEffort(split.baseModel, selected);
