@@ -11554,6 +11554,52 @@ paths:
       responses:
         "200":
           description: OK
+  /api/intelligence/overrides:
+    delete:
+      tags:
+        - Intelligence
+      summary: "DELETE intelligence › overrides"
+      description: Removes a `user_override` fitness entry for a model and task category. `model` and `category` come from the query string or a JSON body. Idempotent.
+      parameters:
+        - in: query
+          name: model
+          schema: { type: string }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Override removed (`deleted` is false when none existed)
+        "400":
+          description: model or category missing
+        "401":
+          description: Management authentication required
+    post:
+      tags:
+        - Intelligence
+      summary: "POST intelligence › overrides"
+      description: Sets a `user_override` fitness score (0..1) for a model and task category and invalidates the in-memory fitness cache.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, category, score]
+              additionalProperties: false
+              properties:
+                model: { type: string, minLength: 1 }
+                category:
+                  type: string
+                  enum: [coding, review, planning, analysis, debugging, documentation, default]
+                score: { type: number, minimum: 0, maximum: 1 }
+      responses:
+        "200":
+          description: Override stored
+        "400":
+          description: Invalid request body
+        "401":
+          description: Management authentication required
   /api/intelligence/sync:
     delete:
       tags:
@@ -11573,9 +11619,25 @@ paths:
       tags:
         - Intelligence
       summary: "POST intelligence › sync"
+      description: Triggers an intelligence sync. A body without a source flag runs the Arena ELO sync (`dryRun` previews it without writing); `rebuildTier` rebuilds only the persisted `models_dev_tier` source; `syncArenaElo` forces the Arena sync alongside it.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                dryRun: { type: boolean }
+                rebuildTier: { type: boolean, default: false }
+                syncArenaElo: { type: boolean, default: false }
       responses:
         "200":
-          description: OK
+          description: Sync completed; `tier` carries `{ upserted, pruned }` when `rebuildTier` was set
+        "400":
+          description: Invalid request body
+        "502":
+          description: The Arena ELO sync failed
   /api/internal/codex-responses-ws:
     post:
       tags:
