@@ -33,7 +33,10 @@ test("fetchCodexQuota returns null when no registered credentials exist", async 
 test("fetchCodexQuota exposes available paid credits without changing exhausted subscription windows", async () => {
   globalThis.fetch = async () =>
     Response.json({
-      rate_limit: { limit_reached: true, primary_window: { used_percent: 100 } },
+      rate_limit: {
+        limit_reached: true,
+        primary_window: { limit_window_seconds: 18000, used_percent: 100 },
+      },
       credits: { has_credits: true, unlimited: false, overage_limit_reached: false, balance: null },
     });
   const connectionId = "codex-paid-credits-fetch";
@@ -61,10 +64,12 @@ test("fetchCodexQuota can read credentials directly from the provided connection
       JSON.stringify({
         rate_limit: {
           primary_window: {
+            limit_window_seconds: 18000,
             used_percent: 70,
             reset_after_seconds: 45,
           },
           secondary_window: {
+            limit_window_seconds: 604800,
             used_percent: 20,
             reset_after_seconds: 300,
           },
@@ -108,10 +113,12 @@ test("fetchCodexQuota parses dual-window usage, forwards workspace headers, and 
       JSON.stringify({
         rate_limit: {
           primary_window: {
+            limit_window_seconds: 18000,
             used_percent: 80,
             reset_after_seconds: 60,
           },
           secondary_window: {
+            limit_window_seconds: 604800,
             used_percent: 40,
             reset_at: Math.floor((Date.now() + 3600_000) / 1000),
           },
@@ -152,8 +159,16 @@ test("fetchCodexQuota evaluates normal and Spark windows independently by reques
     return new Response(
       JSON.stringify({
         rate_limit: {
-          primary_window: { used_percent: 20, reset_after_seconds: 60 },
-          secondary_window: { used_percent: 30, reset_after_seconds: 120 },
+          primary_window: {
+            limit_window_seconds: 18000,
+            used_percent: 20,
+            reset_after_seconds: 60,
+          },
+          secondary_window: {
+            limit_window_seconds: 604800,
+            used_percent: 30,
+            reset_after_seconds: 120,
+          },
         },
         additional_rate_limits: [
           {
@@ -161,8 +176,16 @@ test("fetchCodexQuota evaluates normal and Spark windows independently by reques
             limit_name: "GPT-5.3-Codex-Spark",
             metered_feature: "gpt_5_3_codex_spark",
             rate_limit: {
-              primary_window: { used_percent: 100, reset_after_seconds: 300 },
-              secondary_window: { used_percent: 40, reset_after_seconds: 600 },
+              primary_window: {
+                limit_window_seconds: 18000,
+                used_percent: 100,
+                reset_after_seconds: 300,
+              },
+              secondary_window: {
+                limit_window_seconds: 604800,
+                used_percent: 40,
+                reset_after_seconds: 600,
+              },
             },
           },
         ],
@@ -255,7 +278,11 @@ test("registerCodexQuotaFetcher exposes Codex quota to preflight and monitor flo
     new Response(
       JSON.stringify({
         rate_limit: {
-          primary_window: { used_percent: 100, reset_after_seconds: 90 },
+          primary_window: {
+            limit_window_seconds: 18000,
+            used_percent: 100,
+            reset_after_seconds: 90,
+          },
         },
       }),
       {

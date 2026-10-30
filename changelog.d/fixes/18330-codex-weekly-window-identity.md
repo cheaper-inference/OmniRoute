@@ -1,0 +1,1 @@
+- fix(providers): classify Codex quota windows by their reported duration so weekly-only Pro quota enforces weekly cutoffs and agrees across usage badges and account pools; preserve unknown durations without inventing 5h availability (#18326, #18330).

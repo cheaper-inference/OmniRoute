@@ -9,6 +9,7 @@
  */
 
 import { buildCodexUsageQuotas, findCodexSparkRateLimit } from "../codexUsageQuotas.ts";
+import { isCodexLimitReached } from "../codexQuotaSignals.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
@@ -96,7 +97,7 @@ export async function getCodexUsage(
     return {
       ...(typeof sparkLimitReached === "boolean" ? { sparkLimitReached } : {}),
       plan: String(getFieldValue(data, "plan_type", "planType") || "unknown"),
-      limitReached: Boolean(getFieldValue(rateLimit, "limit_reached", "limitReached")),
+      limitReached: isCodexLimitReached(rateLimit),
       quotas,
       // Banked reset credits (display-only, eligibility-gated — issue #5199).
       // Absent for most accounts; never throws when the upstream omits it.

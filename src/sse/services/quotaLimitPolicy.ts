@@ -1,10 +1,8 @@
 import { DEFAULT_QUOTA_THRESHOLD_PERCENT, getQuotaWindowStatus } from "@/domain/quotaCache";
 import { defersQuotaCutoff } from "@/lib/providers/quotaCutoffOptIns";
+import { applyCodexWindowPolicy } from "@/lib/providers/codexQuotaWindowPolicy";
 import { toNumber } from "@/shared/utils/numeric";
-import {
-  toCodexBaseQuotaWindowName,
-  toCodexScopedQuotaWindowName,
-} from "@omniroute/open-sse/config/codexQuotaScopes.ts";
+import { toCodexScopedQuotaWindowName } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { formatQuotaUsageReason } from "@omniroute/open-sse/services/quotaWindowLabel.ts";
 
@@ -22,16 +20,6 @@ function asRecord(value: unknown): JsonRecord {
 function toBooleanOrDefault(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
-function getCodexLimitPolicy(providerSpecificData: JsonRecord): {
-  use5h: boolean;
-  useWeekly: boolean;
-} {
-  const policy = asRecord(providerSpecificData.codexLimitPolicy);
-  return {
-    use5h: toBooleanOrDefault(policy.use5h, true),
-    useWeekly: toBooleanOrDefault(policy.useWeekly, true),
-  };
-}
 function normalizeQuotaThreshold(
   value: unknown,
   fallback = DEFAULT_QUOTA_THRESHOLD_PERCENT
@@ -43,32 +31,6 @@ export function normalizeWindowName(windowName: unknown): string | null {
   if (typeof windowName !== "string") return null;
   const normalized = windowName.trim().toLowerCase();
   return normalized.length > 0 ? normalized : null;
-}
-function uniqueWindows(windows: string[]): string[] {
-  return [...new Set(windows)];
-}
-function normalizeCodexWindowName(windowName: unknown): string | null {
-  if (typeof windowName !== "string") return null;
-  const normalized = windowName.trim().toLowerCase();
-  if (normalized === "session (5h)" || normalized === "5h" || normalized === "five_hour")
-    return "session";
-  if (normalized === "weekly (7d)" || normalized === "7d" || normalized === "seven_day")
-    return "weekly";
-  return toCodexBaseQuotaWindowName(normalized);
-}
-function applyCodexWindowPolicy(rawWindows: string[], providerSpecificData: JsonRecord): string[] {
-  const codexPolicy = getCodexLimitPolicy(providerSpecificData);
-  const normalizedRaw = rawWindows.map(normalizeCodexWindowName).filter(Boolean) as string[];
-  // Preserve custom windows, while canonical toggles always contribute their windows.
-  let windows = [...normalizedRaw];
-  windows = windows.filter((windowName) => {
-    if (windowName === "session") return codexPolicy.use5h;
-    if (windowName === "weekly") return codexPolicy.useWeekly;
-    return true;
-  });
-  if (codexPolicy.use5h) windows.push("session");
-  if (codexPolicy.useWeekly) windows.push("weekly");
-  return uniqueWindows(windows);
 }
 export function resolveQuotaLimitPolicy(
   provider: string,

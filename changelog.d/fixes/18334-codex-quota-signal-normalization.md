@@ -1,0 +1,1 @@
+- **fix(codex):** Parse official primary/secondary quota headers, keep malformed usage unknown instead of inventing healthy zero-percent windows, validate reset units, and preserve independent Codex/Spark evidence and explicit quota denial. ([#18334](https://github.com/cheaper-inference/OmniRoute/pull/18334)) — thanks @shevar0

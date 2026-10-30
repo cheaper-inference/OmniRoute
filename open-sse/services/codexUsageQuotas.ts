@@ -1,3 +1,4 @@
+import { parseCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 import {
   CODEX_RESERVE_DISPLAY_NAME,
   CODEX_RESERVE_QUOTA_SESSION,
@@ -9,7 +10,7 @@ import {
   isCodexSparkLimitDescriptor,
 } from "../config/codexQuotaScopes.ts";
 import { inferWindowFamilyLabel } from "./quotaWindowLabel.ts";
-import { parseCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import { codexQuotaWindowKey, parseCodexQuotaWindow } from "./codexQuotaSignals.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -45,69 +46,48 @@ function toNumber(value: unknown, fallback = 0): number {
   return fallback;
 }
 
-function toNullableNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string" && value.trim().length > 0) {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : null;
-  }
-  return null;
-}
-
-function parseResetTime(resetValue: unknown): string | null {
-  if (!resetValue) return null;
-  try {
-    let date: Date | null = null;
-    if (resetValue instanceof Date) {
-      date = resetValue;
-    } else if (typeof resetValue === "number") {
-      date = new Date(resetValue < 1e12 ? resetValue * 1000 : resetValue);
-    } else if (typeof resetValue === "string") {
-      // Numeric strings are Unix timestamps too (seconds or milliseconds).
-      if (/^\d+$/.test(resetValue)) {
-        const ts = Number(resetValue);
-        date = new Date(ts < 1e12 ? ts * 1000 : ts);
-      } else {
-        date = new Date(resetValue);
-      }
-    }
-    if (!date || date.getTime() <= 0) return null;
-    return date.toISOString();
-  } catch {
-    return null;
-  }
-}
-
-function parseWindowReset(window: unknown): string | null {
-  const resetAt = toNumber(getFieldValue(window, "reset_at", "resetAt"), 0);
-  const resetAfterSeconds = toNumber(
-    getFieldValue(window, "reset_after_seconds", "resetAfterSeconds"),
-    0
-  );
-  if (resetAt > 0) return parseResetTime(resetAt * 1000);
-  if (resetAfterSeconds > 0) return parseResetTime(Date.now() + resetAfterSeconds * 1000);
-  return null;
-}
-
-function buildPercentageQuota(window: JsonRecord, displayName?: string): CodexUsageQuota {
-  const usedPercent = toNumber(getFieldValue(window, "used_percent", "usedPercent"), 0);
-  return {
-    used: usedPercent,
+function assignPercentageQuota(
+  quotas: Record<string, CodexUsageQuota>,
+  key: string,
+  rawWindow: JsonRecord,
+  displayName?: string
+): void {
+  const window = parseCodexQuotaWindow(rawWindow);
+  if (!window) return;
+  quotas[key] = {
+    used: window.usedPercent,
     total: 100,
-    remaining: 100 - usedPercent,
-    resetAt: parseWindowReset(window),
+    remaining: 100 - window.usedPercent,
+    resetAt: window.resetAt,
     unlimited: false,
-    windowSeconds: toNullableNumber(
-      getFieldValue(
-        window,
-        "limit_window_seconds",
-        "limitWindowSeconds",
-        "window_seconds",
-        "windowSeconds"
-      )
-    ),
+    windowSeconds: window.windowSeconds,
     ...(displayName ? { displayName } : {}),
   };
+}
+
+function assignDurationQuotas(
+  quotas: Record<string, CodexUsageQuota>,
+  rateLimit: JsonRecord,
+  names: { primary: string; secondary: string },
+  displayName?: string,
+  skipLatent = false
+): void {
+  for (const id of ["primary", "secondary"] as const) {
+    const raw = toRecord(getFieldValue(rateLimit, `${id}_window`, `${id}Window`));
+    if (skipLatent && isLatentWindow(raw)) continue;
+    const window = parseCodexQuotaWindow(raw, id);
+    if (!window) continue;
+    const key = codexQuotaWindowKey(window, names);
+    const family = windowDurationLabel(raw);
+    const label = displayName
+      ? family === "Weekly"
+        ? `${displayName} Weekly`
+        : displayName
+      : family === "Monthly"
+        ? family
+        : undefined;
+    assignPercentageQuota(quotas, key, raw, label || undefined);
+  }
 }
 
 // A window whose duration is >= this is a weekly (or longer) window; <= the
@@ -274,7 +254,7 @@ function appendCodexReserveQuotas(data: JsonRecord, quotas: Record<string, Codex
     const window = toRecord(windowValue);
     if (Object.keys(window).length === 0 || isLatentWindow(window)) continue;
     const label = windowDurationLabel(window) || fallbackLabel;
-    quotas[key] = buildPercentageQuota(window, label ? `${displayName} ${label}` : displayName);
+    assignPercentageQuota(quotas, key, window, label ? `${displayName} ${label}` : displayName);
   }
 }
 
@@ -367,27 +347,7 @@ export function buildCodexUsageQuotas(dataValue: unknown): {
   const bankedResetCredits = parseBankedResetCredits(data);
   const rateLimitReachedType = parseRateLimitReachedType(data);
 
-  // The `session`/`weekly` keys carry routing semantics (combo quota scoring,
-  // preflight, cooldowns) and stay position-based. Only the display label is
-  // corrected from the real window duration, so a `primary_window` that is
-  // actually a 7-day window shows "Weekly" instead of "Session".
-  const primaryWindow = toRecord(getFieldValue(rateLimit, "primary_window", "primaryWindow"));
-  if (Object.keys(primaryWindow).length > 0) {
-    const primaryLabel = windowDurationLabel(primaryWindow);
-    quotas.session = buildPercentageQuota(
-      primaryWindow,
-      primaryLabel === "Weekly" || primaryLabel === "Monthly" ? primaryLabel : undefined
-    );
-  }
-
-  const secondaryWindow = toRecord(getFieldValue(rateLimit, "secondary_window", "secondaryWindow"));
-  if (Object.keys(secondaryWindow).length > 0) {
-    const secondaryLabel = windowDurationLabel(secondaryWindow);
-    quotas.weekly = buildPercentageQuota(
-      secondaryWindow,
-      secondaryLabel === "Session" ? secondaryLabel : undefined
-    );
-  }
+  assignDurationQuotas(quotas, rateLimit, { primary: "session", secondary: "weekly" });
 
   // Resolve the code-review rate limit block. ChatGPT Codex exposes the same
   // information under two different shapes depending on the plan tier
@@ -411,7 +371,7 @@ export function buildCodexUsageQuotas(dataValue: unknown): {
     getFieldValue(codeReviewWindow, "used_percent", "usedPercent") !== null ||
     getFieldValue(codeReviewWindow, "remaining_count", "remainingCount") !== null
   ) {
-    quotas.code_review = buildPercentageQuota(codeReviewWindow);
+    assignPercentageQuota(quotas, "code_review", codeReviewWindow);
   }
 
   const codeReviewSecondaryWindow = toRecord(
@@ -421,7 +381,7 @@ export function buildCodexUsageQuotas(dataValue: unknown): {
     getFieldValue(codeReviewSecondaryWindow, "used_percent", "usedPercent") !== null ||
     getFieldValue(codeReviewSecondaryWindow, "remaining_count", "remainingCount") !== null
   ) {
-    quotas.code_review_weekly = buildPercentageQuota(codeReviewSecondaryWindow);
+    assignPercentageQuota(quotas, "code_review_weekly", codeReviewSecondaryWindow);
   }
 
   const spark = findCodexSparkRateLimit(data);
@@ -430,25 +390,16 @@ export function buildCodexUsageQuotas(dataValue: unknown): {
   // reports (e.g. as the spark model version bumps) rather than a hardcoded
   // constant; fall back to the constant when the field is absent.
   const sparkDisplayName = spark.limitName || CODEX_SPARK_DISPLAY_NAME;
-  const sparkPrimaryWindow = toRecord(
-    getFieldValue(sparkRateLimit, "primary_window", "primaryWindow")
+  assignDurationQuotas(
+    quotas,
+    sparkRateLimit,
+    {
+      primary: CODEX_SPARK_QUOTA_SESSION,
+      secondary: CODEX_SPARK_QUOTA_WEEKLY,
+    },
+    sparkDisplayName,
+    true
   );
-  // Skip latent (never-used, full-window) spark ceilings so they don't render as
-  // a permanent 100% row with a meaningless always-full reset. Once the account
-  // actually uses the spark model the window is no longer latent and appears.
-  if (Object.keys(sparkPrimaryWindow).length > 0 && !isLatentWindow(sparkPrimaryWindow)) {
-    quotas[CODEX_SPARK_QUOTA_SESSION] = buildPercentageQuota(sparkPrimaryWindow, sparkDisplayName);
-  }
-
-  const sparkSecondaryWindow = toRecord(
-    getFieldValue(sparkRateLimit, "secondary_window", "secondaryWindow")
-  );
-  if (Object.keys(sparkSecondaryWindow).length > 0 && !isLatentWindow(sparkSecondaryWindow)) {
-    quotas[CODEX_SPARK_QUOTA_WEEKLY] = buildPercentageQuota(
-      sparkSecondaryWindow,
-      `${sparkDisplayName} Weekly`
-    );
-  }
 
   appendCodexReserveQuotas(data, quotas);
 
