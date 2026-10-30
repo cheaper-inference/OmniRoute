@@ -337,6 +337,15 @@ export function validateProviderSpecificData(
     });
   }
 
+  const requireUserLastMessage = data.requireUserLastMessage;
+  if (requireUserLastMessage !== undefined && typeof requireUserLastMessage !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.requireUserLastMessage must be a boolean",
+      path: ["requireUserLastMessage"],
+    });
+  }
+
   const disableStreamOptions = data.disableStreamOptions;
   if (disableStreamOptions !== undefined && typeof disableStreamOptions !== "boolean") {
     ctx.addIssue({

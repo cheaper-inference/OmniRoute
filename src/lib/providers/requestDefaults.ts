@@ -255,6 +255,14 @@ export function normalizeProviderSpecificData(
     delete normalized.disableCooling;
   }
 
+  // Assistant-prefill ban opt-in (open-sse/services/assistantPrefill.ts) — real booleans only.
+  if (
+    "requireUserLastMessage" in normalized &&
+    typeof normalized.requireUserLastMessage !== "boolean"
+  ) {
+    delete normalized.requireUserLastMessage;
+  }
+
   // Claude OAuth usage-wall opt-ins (open-sse/services/claudeLowPriority.ts) — only
   // persist real booleans; both default to off when absent.
   if ("lowPriorityMode" in normalized && typeof normalized.lowPriorityMode !== "boolean") {

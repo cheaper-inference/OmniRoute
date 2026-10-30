@@ -37,6 +37,7 @@ import {
   getCircuitBreaker,
 } from "../../src/shared/utils/circuitBreaker";
 import { MODEL_ACCESS_DENIED_PATTERNS, isModelScoped400 } from "./modelAccessDenied.ts";
+import { isAssistantPrefillUnsupportedError } from "./assistantPrefillError.ts";
 import {
   connectionCircuitBreakerName,
   failureCircuitBreakerName,
@@ -405,6 +406,8 @@ const PROVIDER_MODEL_UNSUPPORTED_PATTERNS = [
 export function isProviderModelUnsupported400(status: number, errorText: string): boolean {
   if (status !== HTTP_STATUS.BAD_REQUEST) return false;
   if (AUTH_CREDENTIAL_ERROR_PATTERNS.some((p) => p.test(errorText))) return false;
+  // Prefill rejection ("model does not support assistant message prefill") is request-shape.
+  if (isAssistantPrefillUnsupportedError(errorText)) return false;
   return PROVIDER_MODEL_UNSUPPORTED_PATTERNS.some((p) => p.test(errorText));
 }
 
@@ -413,6 +416,9 @@ export const MALFORMED_REQUEST_PATTERNS = [
   /\binvalid.*message.*format/i,
   /\bmessages must alternate\b/i,
   /\bempty (message|content)\b/i,
+  // Assistant prefill rejected: the body must end with a user turn (request shape).
+  /\bdoes\s+not\s+support\s+assistant\s+message\s+prefill\b/i,
+  /\bconversation\s+must\s+end\s+with\s+a\s+user\s+message\b/i,
   // Tool call function name errors
   /\bfunction'?s? name (?:can't|can not|is|has) (?:blank|empty|missing)/i,
   /function.*name.*(?:blank|empty|missing)/i,
@@ -2309,7 +2315,9 @@ export function checkFallbackError(
       p.test(errorStr)
     );
     const matchesModelAccessPattern =
-      !looksLikeAuthCredentialError && MODEL_ACCESS_DENIED_PATTERNS.some((p) => p.test(errorStr));
+      !looksLikeAuthCredentialError &&
+      !isAssistantPrefillUnsupportedError(errorStr) &&
+      MODEL_ACCESS_DENIED_PATTERNS.some((p) => p.test(errorStr));
 
     const isModelAccessDeniedStructured =
       !!structuredError &&

@@ -27,6 +27,7 @@ import {
 } from "../accountFallback.ts";
 import { isModelNotFound404 } from "../accountFallback/perModelFailureScope.ts";
 import { isRequestScoped400 } from "../accountFallback/requestScoped400.ts";
+import { isAssistantPrefillUnsupported400 } from "../assistantPrefillError.ts";
 import { isResourceNotFoundResponse } from "../errorClassifier.ts";
 import { isOpencodeFreeTierRefusal } from "../../executors/opencodeGeoBlock.ts";
 import { isChatGptWebBridgeFailure } from "../../utils/chatgptWebBridgeFailure.ts";
@@ -393,7 +394,9 @@ export function isComboRequestScopedFailure(
     isRequestScopedUpstreamFailure(error) ||
     (response.status === 404 && isResourceNotFoundResponse(errorText)) ||
     // #14313: body-only free-tier refusals (relayed sentence, no error.type kept).
-    isOpencodeFreeTierRefusal(response.status, errorText)
+    isOpencodeFreeTierRefusal(response.status, errorText) ||
+    // Prefill ban: the body's shape, not the model/connection — even without error.type.
+    isAssistantPrefillUnsupported400(response.status, errorText)
   );
 }
 

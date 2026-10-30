@@ -83,6 +83,10 @@ import {
   stripTrailingAssistantOrphanToolUse,
   stripTrailingAssistantForProvider,
 } from "../services/contextManager.ts";
+import {
+  requiresUserLastMessage,
+  stripTrailingAssistantTurns,
+} from "../services/assistantPrefill.ts";
 import { randomUUID } from "node:crypto";
 import {
   getClaudeCodeVersion,
@@ -1382,6 +1386,19 @@ export class BaseExecutor {
             // trailing text-only assistant turn with 400. Strip here so combo
             // failover does not burn the next account on the same body.
             tb.messages = stripTrailingAssistantForProvider(stripped, this.provider);
+            // Per-connection opt-in for relays that ban assistant prefill.
+            if (requiresUserLastMessage(requestCredentials?.providerSpecificData)) {
+              const userLast = stripTrailingAssistantTurns(tb.messages as JsonRecord[]);
+              tb.messages = userLast.messages;
+              if (userLast.removedTurns > 0 || userLast.noUserTurn) {
+                log?.info?.(
+                  "PREFILL",
+                  userLast.noUserTurn
+                    ? "requireUserLastMessage: no user turn to end on — forwarded unchanged"
+                    : `requireUserLastMessage: dropped ${userLast.removedTurns} trailing assistant turn(s)`
+                );
+              }
+            }
           }
         }
 

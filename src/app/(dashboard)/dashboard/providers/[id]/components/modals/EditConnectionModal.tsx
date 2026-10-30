@@ -177,6 +177,7 @@ export default function EditConnectionModal({
     allowPaidCredits: connectionProviderSpecificData?.allowPaidCredits === true,
     passthroughModels: connectionProviderSpecificData?.passthroughModels === true,
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
+    requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
     runtimeKey: "",
@@ -253,6 +254,7 @@ export default function EditConnectionModal({
   const apiKeyOptional =
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
+  const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
   const isCompatible =
     isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
@@ -405,6 +407,7 @@ export default function EditConnectionModal({
         allowPaidCredits: connection.providerSpecificData?.allowPaidCredits === true,
         passthroughModels: connection?.providerSpecificData?.passthroughModels === true,
         disableCooling: connection?.providerSpecificData?.disableCooling === true,
+        requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
         runtimeKey: "",
@@ -726,6 +729,11 @@ export default function EditConnectionModal({
       }
       if (updates.providerSpecificData) {
         updates.providerSpecificData.disableCooling = formData.disableCooling ? true : undefined;
+        if (isPlainAnthropicCompatible) {
+          updates.providerSpecificData.requireUserLastMessage = formData.requireUserLastMessage
+            ? true
+            : undefined;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -785,6 +793,22 @@ export default function EditConnectionModal({
         t,
         "preserveEncryptedReasoningDescription",
         "Forward encrypted Responses reasoning items supplied by the client."
+      )}
+    />
+  ) : null;
+  const requireUserLastMessageToggle = isPlainAnthropicCompatible ? (
+    <Toggle
+      checked={formData.requireUserLastMessage}
+      onChange={(checked) => setFormData({ ...formData, requireUserLastMessage: checked })}
+      label={providerText(
+        t,
+        "requireUserLastMessageLabel",
+        "Require conversation to end with a user message"
+      )}
+      description={providerText(
+        t,
+        "requireUserLastMessageDescription",
+        "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer."
       )}
     />
   ) : null;
@@ -871,6 +895,7 @@ export default function EditConnectionModal({
           )}
           {preserveEncryptedReasoningToggle}
           {openaiResponsesStoreToggle}
+          {requireUserLastMessageToggle}
           <Toggle
             checked={formData.disableCooling}
             onChange={(checked) => setFormData({ ...formData, disableCooling: checked })}
