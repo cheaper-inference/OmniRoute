@@ -787,9 +787,10 @@ async function patchedFetchUnrecorded(
     // Direct undici path: bound response-start, fresh-socket retry, and body guard.
     const directOptions = { ...options, signal: getEffectiveSignal(input, options) };
     const hasNonReplayableBody = requestHasNonReplayableBody(input, options);
-    // Method gating covers response-start ambiguity; connection-error retries remain below.
-    const canReplayResponseStartTimeout = isAmbiguousFailureReplaySafe(input, options);
-    const maxAttempts = hasNonReplayableBody ? 1 : 2;
+    // A transport error can arrive after the origin accepted the whole body.
+    // Replayable bytes alone do not make a generation request safe to resend.
+    const canReplayAmbiguousFailure = isAmbiguousFailureReplaySafe(input, options);
+    const maxAttempts = canReplayAmbiguousFailure ? 2 : 1;
     const _undiciDirect =
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
     const _nativeFallback =
@@ -832,12 +833,12 @@ async function patchedFetchUnrecorded(
                 : getRetryDispatcher(hostnameForDispatcher),
           },
           _undiciDirect,
-          timeoutFor(attempt === 0 && canReplayResponseStartTimeout ? 0 : 1)
+          timeoutFor(attempt === 0 && canReplayAmbiguousFailure ? 0 : 1)
         );
       } catch (dispatcherError) {
         if (isCallerAbort(dispatcherError, directOptions.signal)) throw dispatcherError;
         if (isDirectResponseStartTimeout(dispatcherError)) {
-          if (attempt === 0 && maxAttempts > 1 && canReplayResponseStartTimeout) {
+          if (attempt === 0 && maxAttempts > 1 && canReplayAmbiguousFailure) {
             console.warn(
               `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
             );
@@ -876,14 +877,14 @@ async function patchedFetchUnrecorded(
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (hasNonReplayableBody) {
+          if (!canReplayAmbiguousFailure) {
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              "skipped: non-replayable request body"
+              hasNonReplayableBody
+                ? "skipped: non-replayable request body"
+                : "skipped: request method is not safe to replay"
             );
-            console.warn(
-              `[ProxyFetch] skipping native fetch fallback for non-replayable body: ${detail}`
-            );
+            console.warn(`[ProxyFetch] skipping unsafe native fetch fallback: ${detail}`);
             if (dispatcherError instanceof Error) {
               (dispatcherError as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
             }
@@ -990,8 +991,7 @@ async function patchedFetchUnrecorded(
     // connections again.
     const _undiciRelay =
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
-    const hasNonReplayableRelayBody = requestHasNonReplayableBody(input, options);
-    const maxRelayAttempts = hasNonReplayableRelayBody ? 1 : 2;
+    const maxRelayAttempts = isAmbiguousFailureReplaySafe(input, options) ? 2 : 1;
     const relayUrl = `https://${vc.host}`;
     let lastRelayError: unknown = null;
     for (let attempt = 0; attempt < maxRelayAttempts; attempt++) {
@@ -1109,8 +1109,7 @@ async function patchedFetchUnrecorded(
   // of killing all idle sockets after 1ms or surfacing a bare 502.
   const _undiciProxy =
     deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
-  const hasNonReplayableProxyBody = requestHasNonReplayableBody(input, options);
-  const maxProxyAttempts = hasNonReplayableProxyBody ? 1 : 2;
+  const maxProxyAttempts = isAmbiguousFailureReplaySafe(input, options) ? 2 : 1;
   let lastProxyError: unknown = null;
   for (let attempt = 0; attempt < maxProxyAttempts; attempt++) {
     try {

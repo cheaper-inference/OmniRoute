@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { handleChat } from "@/sse/handlers/chat";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { CORS_HEADERS } from "@/shared/utils/cors";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -25,11 +26,7 @@ import {
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
-import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
-import {
-  buildKeepaliveResponseId,
-  buildResponsesInProgressFrame,
-} from "@omniroute/open-sse/utils/responsesKeepaliveFrame";
+import { RESPONSES_KEEPALIVE_FRAME } from "@omniroute/open-sse/utils/sseHeartbeat";
 
 // NOTE: We do NOT call initTranslators() here — the translator registry is
 // bootstrapped at module level inside open-sse/translator/index.ts when it
@@ -105,15 +102,6 @@ export async function withCodexPreferredModel(
  * POST /v1/responses - OpenAI Responses API format
  * Handled by the unified chat handler (openai-responses format auto-detected).
  */
-// #17825: per-request complete frame (stable id, request-time created_at, request model).
-function buildRequestKeepaliveFrame(body: { model?: unknown } | null | undefined) {
-  const model = body?.model;
-  return buildResponsesInProgressFrame({
-    id: buildKeepaliveResponseId(),
-    model: typeof model === "string" ? model : undefined,
-  });
-}
-
 async function postHandler(request: any) {
   // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
   // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
@@ -217,8 +205,8 @@ async function postHandler(request: any) {
 
     // Codex CLI (wire_api="responses") consumes this endpoint over SSE and its reqwest
     // client drops the connection if no bytes arrive within ~5s. Keep the connection
-    // warm with transport comments plus sparse parser-visible events while the upstream
-    // produces its first token (#2544).
+    // warm with transport bytes while the upstream produces its first token (#2544).
+    // Only the upstream may establish a Responses identity and lifecycle.
     const { request: resolved, body: resolvedBody } = await withCodexPreferredModel(
       request,
       parsedBody
@@ -239,7 +227,7 @@ async function postHandler(request: any) {
         admission.lease,
         { signal: streamSignal }
       );
-      const keepaliveFrame = buildRequestKeepaliveFrame(resolvedBody);
+      const keepaliveFrame = RESPONSES_KEEPALIVE_FRAME;
       return await withEarlyStreamKeepalive(handlerResponse, {
         signal: streamSignal,
         thresholdMs,
