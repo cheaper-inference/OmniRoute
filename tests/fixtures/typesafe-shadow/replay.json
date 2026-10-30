@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "profiles": [
+    {
+      "id": "review",
+      "harness": "codex",
+      "model": "fixture/reviewer",
+      "description": "Review a code change",
+      "approved": true,
+      "available": true,
+      "compatible": true,
+      "capabilities": ["tools"],
+      "permissions": ["read"],
+      "allowedDataClasses": ["public"],
+      "estimatedTaskCostUsd": 0.2
+    },
+    {
+      "id": "build",
+      "harness": "claude",
+      "model": "fixture/builder",
+      "description": "Implement a code change",
+      "approved": true,
+      "available": true,
+      "compatible": true,
+      "capabilities": ["tools"],
+      "permissions": ["read"],
+      "allowedDataClasses": ["public"],
+      "estimatedTaskCostUsd": 0.4
+    }
+  ],
+  "policy": {
+    "version": "synthetic-policy-v1",
+    "approvedWorkspaceRefs": ["workspace-1"],
+    "approvedProfileIds": ["review", "build"],
+    "allowedPermissions": ["read"],
+    "remainingBudgetUsd": 1,
+    "maxEvaluationCostUsd": 0,
+    "minConfidence": 0.8
+  },
+  "events": [
+    {
+      "task": {
+        "id": "synthetic-task",
+        "boundaryId": "review-phase",
+        "boundary": "phase",
+        "summary": "Review a parser change",
+        "dataClass": "public",
+        "requiredCapabilities": ["tools"],
+        "requiredPermissions": ["read"],
+        "explicitModel": null,
+        "explicitHarness": null,
+        "handoff": {
+          "objectiveRef": "objective-1",
+          "planRef": "plan-1",
+          "workspaceRef": "workspace-1",
+          "branchRef": "branch-1",
+          "changeRefs": ["change-1"],
+          "testRefs": ["test-1"],
+          "outstandingRefs": []
+        }
+      },
+      "outcome": {
+        "taskId": "synthetic-task",
+        "boundaryId": "review-phase",
+        "source": "synthetic",
+        "actualProfileId": "build",
+        "success": true,
+        "testsPassed": true,
+        "durationMs": 100,
+        "costUsd": 0.3
+      },
+      "recording": {
+        "source": "synthetic",
+        "requestSha256": "067d60bdcbc56649608eb57fd1ea9e1f8f4e4b01f71bc90662a79ee9433a4ea0",
+        "latencyMs": 12,
+        "costUsd": 0,
+        "response": {
+          "model": "jev-1.14.0",
+          "answers": {
+            "route": {
+              "type": "choice",
+              "choice": "review",
+              "confidence": 0.9,
+              "probabilities": {
+                "review": 0.95,
+                "build": 0.05
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
