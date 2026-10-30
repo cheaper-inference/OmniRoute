@@ -18,6 +18,7 @@ import {
 import { applyReasoningEffortRecovery } from "./base/reasoningEffortRecovery.ts";
 import { applyFieldDowngradeRecovery } from "./base/fieldDowngradeRecovery.ts";
 import { peekCommandCodeCliStream } from "./commandCode/cliEmbeddedError.ts";
+import { commandCodeSessionId } from "./commandCode/sessionId.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -1010,11 +1011,26 @@ export class CommandCodeExecutor extends BaseExecutor {
     sanitizedBody: unknown;
     stream: boolean;
     apiKey: string;
+    connectionId?: string;
+    clientHeaders?: Record<string, string> | null;
     signal?: AbortSignal;
     upstreamExtraHeaders?: Record<string, string>;
   }) {
     const { model, sanitizedBody, stream, apiKey, signal, upstreamExtraHeaders } = input;
     const cliUrl = this.buildCliUrl();
+    const { body: builtCliBody, toolNameMap } = buildCommandCodeCliBody(
+      model,
+      sanitizedBody,
+      stream
+    );
+    // Upstream keys its prompt cache on this id: one per conversation (and tenant), never
+    // per request, carried identically in the header and the envelope `threadId`.
+    const sessionId = commandCodeSessionId({
+      body: sanitizedBody,
+      params: builtCliBody.params as JsonRecord,
+      clientHeaders: input.clientHeaders,
+      tenantKey: input.connectionId || apiKey,
+    });
     const cliHeaders: Record<string, string> = {
       "Content-Type": "application/json",
       Authorization: `Bearer ${apiKey}`,
@@ -1023,17 +1039,12 @@ export class CommandCodeExecutor extends BaseExecutor {
       "x-project-slug": "pi-cc",
       "x-taste-learning": "false",
       "x-co-flag": "false",
-      "x-session-id": randomUUID(),
+      "x-session-id": sessionId,
     };
     mergeUpstreamExtraHeaders(cliHeaders, upstreamExtraHeaders);
 
     const abortSignal = signal || undefined;
-    const { body: initialCliTransformedBody, toolNameMap } = buildCommandCodeCliBody(
-      model,
-      sanitizedBody,
-      stream
-    );
-    let cliTransformedBody = initialCliTransformedBody;
+    let cliTransformedBody: JsonRecord = { threadId: sessionId, ...builtCliBody };
 
     let cliUpstream = await fetch(cliUrl, {
       method: "POST",
@@ -1084,7 +1095,15 @@ export class CommandCodeExecutor extends BaseExecutor {
     return { response, url: cliUrl, headers: cliHeaders, transformedBody: cliTransformedBody };
   }
 
-  async execute({ model, body, stream, credentials, signal, upstreamExtraHeaders }: ExecuteInput) {
+  async execute({
+    model,
+    body,
+    stream,
+    credentials,
+    signal,
+    upstreamExtraHeaders,
+    clientHeaders,
+  }: ExecuteInput) {
     const apiKey = credentials?.apiKey || credentials?.accessToken;
     if (!apiKey) throw new Error("Command Code API key required");
 
@@ -1162,6 +1181,8 @@ export class CommandCodeExecutor extends BaseExecutor {
           sanitizedBody: cliShaped,
           stream,
           apiKey,
+          connectionId: credentials?.connectionId,
+          clientHeaders,
           signal,
           upstreamExtraHeaders,
         });
