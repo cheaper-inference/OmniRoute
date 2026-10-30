@@ -13,6 +13,7 @@
 import { getDbInstance } from "./db/core";
 import { invalidateDbCache, getModelCatalogCacheVersion } from "./db/readCache";
 import { backupDbFile } from "./db/backup";
+import { normalizeLiteLLMPricingProviders } from "./litellmPricingProviderAliases";
 
 // ─── Types ───────────────────────────────────────────────
 
@@ -238,7 +239,7 @@ export function transformToOmniRoute(raw: Record<string, LiteLLMModelInfo>): Pri
     }
   }
 
-  return result;
+  return normalizeLiteLLMPricingProviders(result);
 }
 
 // ─── DB: Synced pricing namespace ────────────────────────
