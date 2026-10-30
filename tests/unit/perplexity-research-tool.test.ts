@@ -31,6 +31,8 @@ function stubSuccess() {
 stubSuccess();
 
 const { createMcpServer } = await import("../../open-sse/mcp-server/server.ts");
+const { sweepResearchLock } =
+  await import("../../open-sse/mcp-server/tools/perplexityResearchLock.ts");
 
 // The tool only runs against an existing, active perplexity-web connection.
 // Unless a test installs its own store, every connection id below resolves to
@@ -194,8 +196,6 @@ test("no research run starts when the account has no research runs left", async 
 
 // ── How each outcome leaves the per-connection lock ──────────────────────────
 
-const { sweepResearchLock } =
-  await import("../../open-sse/mcp-server/tools/perplexityResearchLock.ts");
 function bodyOf(result) {
   assert.ok(result, "the handler must return an envelope");
   return result.structuredContent ?? JSON.parse(result.content[0].text);
