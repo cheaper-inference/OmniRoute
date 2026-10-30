@@ -166,6 +166,15 @@ export default function OAuthModal({
   const [showPasteToken, setShowPasteToken] = useState(PASTE_FIRST_PROVIDERS.has(provider));
   const [pasteToken, setPasteToken] = useState("");
   const [savingToken, setSavingToken] = useState(false);
+  // devin-desktop only: Devin Auth replaced Windsurf's Firebase login in 2026-04,
+  // so new accounts are reachable only through email+password. `passwordMode`
+  // flips the panel from the paste-token form to the sign-in form; the password
+  // is held in component state just long enough to POST it once and is cleared
+  // as soon as the request settles.
+  const [passwordMode, setPasswordMode] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [submittingLogin, setSubmittingLogin] = useState(false);
   // grok-cli only (#7013 rework): device_code is the default method (matches
   // DEVICE_CODE_PROVIDERS); flipping this to true routes startOAuthFlow through
   // the browser PKCE / PKCE_CALLBACK_SERVER_PROVIDERS branch instead.
@@ -331,6 +340,40 @@ export default function OAuthModal({
       setSavingToken(false);
     }
   }, [pasteToken, provider, onSuccess, reauthConnection, t]);
+
+  // Devin Auth email+password sign-in (devin-desktop). The password is posted once
+  // and dropped from component state immediately afterwards — it is never stored
+  // in the connection, and the server never echoes it back.
+  const handlePasswordLogin = useCallback(async () => {
+    const email = loginEmail.trim();
+    if (!email || !loginPassword || !provider) return;
+    setSubmittingLogin(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/oauth/${provider}/password-login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          password: loginPassword,
+          connectionId: reauthConnection?.id,
+        }),
+      });
+      const data = (await parseResponseBody(res)) as Record<string, unknown>;
+      if (!res.ok) {
+        const errMsg = getErrorMessage(data, res.status, t("errorSaveFailed"));
+        throw new Error(errMsg);
+      }
+      setStep("success");
+      onSuccess?.();
+    } catch (err) {
+      // Keep the form open so the user can correct the email/password.
+      setError(err.message);
+    } finally {
+      setLoginPassword("");
+      setSubmittingLogin(false);
+    }
+  }, [loginEmail, loginPassword, provider, onSuccess, reauthConnection, t]);
 
   // Poll for device code token
   const startPolling = useCallback(
@@ -1006,6 +1049,14 @@ export default function OAuthModal({
   const handlePasteMode = useCallback(() => {
     invalidateDeviceFlow();
     setShowPasteToken(true);
+    setPasswordMode(false);
+  }, [invalidateDeviceFlow]);
+
+  // devin-desktop: switch to the Devin Auth email+password form.
+  const handlePasswordMode = useCallback(() => {
+    invalidateDeviceFlow();
+    setShowPasteToken(false);
+    setPasswordMode(true);
   }, [invalidateDeviceFlow]);
 
   const handleBrowserMode = useCallback(() => {
@@ -1042,9 +1093,11 @@ export default function OAuthModal({
             value={
               showPasteToken
                 ? "paste"
-                : provider === "grok-cli" && !grokBrowserMode
-                  ? "device"
-                  : "browser"
+                : passwordMode
+                  ? "password"
+                  : provider === "grok-cli" && !grokBrowserMode
+                    ? "device"
+                    : "browser"
             }
           >
             <TabsList aria-label={t("title", { providerName: providerInfo.name })}>
@@ -1063,6 +1116,15 @@ export default function OAuthModal({
               <TabsTrigger value="paste" aria-controls={undefined} onClick={handlePasteMode}>
                 {t(pasteCopyKeys.tab)}
               </TabsTrigger>
+              {provider === "devin-desktop" && (
+                <TabsTrigger
+                  value="password"
+                  aria-controls={undefined}
+                  onClick={handlePasswordMode}
+                >
+                  {t("tabDevinPassword")}
+                </TabsTrigger>
+              )}
             </TabsList>
           </Tabs>
         )}
@@ -1096,6 +1158,44 @@ export default function OAuthModal({
                 disabled={!pasteToken.trim() || savingToken}
               >
                 {savingToken ? t("saving") : t("saveConnection")}
+              </Button>
+              <Button onClick={handleClose} variant="ghost" fullWidth>
+                {t("cancel")}
+              </Button>
+            </div>
+          </div>
+        )}
+
+        {/* Devin Auth email+password sign-in (devin-desktop only). The password is
+            held in memory for the single request and cleared in `finally`. */}
+        {provider === "devin-desktop" && passwordMode && step !== "success" && (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm text-text-muted">{t("devinPasswordDescription")}</p>
+            <Input
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+              placeholder={t("devinPasswordEmailPlaceholder")}
+              type="email"
+              autoComplete="username"
+              label={t("devinPasswordEmailLabel")}
+            />
+            <Input
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+              placeholder={t("devinPasswordPasswordPlaceholder")}
+              type="password"
+              autoComplete="current-password"
+              label={t("devinPasswordPasswordLabel")}
+            />
+            <p className="text-xs text-text-muted">{t("devinPasswordRiskNotice")}</p>
+            {error && <p className="text-sm text-error">{error}</p>}
+            <div className="flex gap-2">
+              <Button
+                onClick={handlePasswordLogin}
+                fullWidth
+                disabled={!loginEmail.trim() || !loginPassword || submittingLogin}
+              >
+                {submittingLogin ? t("devinPasswordSigningIn") : t("devinPasswordSignIn")}
               </Button>
               <Button onClick={handleClose} variant="ghost" fullWidth>
                 {t("cancel")}

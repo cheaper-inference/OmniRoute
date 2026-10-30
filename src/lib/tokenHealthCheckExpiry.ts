@@ -27,6 +27,24 @@ export function getEffectiveTokenExpiryMs(conn: any): number {
  * connections is normal rather than broken — unlike `antigravity`/`gemini`, whose
  * flows always mint one.
  */
+/**
+ * Connections whose refresh path is CONDITIONAL on stored metadata rather than on
+ * a refresh token.
+ *
+ * Devin Desktop is refresh-capable only for connections created by the Devin Auth
+ * password login: those persist a long-lived `auth1_…` credential in
+ * providerSpecificData and renew without the password. A connection created by
+ * plain `import_token` carries no auth1 and genuinely cannot be renewed (#8228) —
+ * so the sweep must not force it to `no_refresh_token`.
+ */
+function hasConditionalRefreshCredential(conn: Record<string, any>): boolean {
+  if (conn.provider !== "devin-desktop") return false;
+  const data = conn.providerSpecificData;
+  if (!data || typeof data !== "object") return false;
+  const auth1 = (data as Record<string, unknown>).devinAuth1Token;
+  return typeof auth1 === "string" && auth1.startsWith("auth1_");
+}
+
 function issuesRefreshLessLongLivedTokens(provider: unknown): boolean {
   return typeof provider === "string" && provider.toLowerCase() === "claude";
 }
@@ -70,6 +88,9 @@ export function shouldMarkRefreshCapableExpired(
   if (!supportsRefresh) return false;
   // Cursor access-token-only imports: refresh is optional (deep-control stores one).
   if (conn.provider === "cursor") return false;
+  // Devin Desktop: only password-login connections carry the auth1 refresh credential.
+  // (Evaluated after expiryMs is computed — see below.)
+  if (conn.provider === "devin-desktop" && !hasConditionalRefreshCredential(conn)) return false;
   // Never clobber a terminal/specific state, nor the request path's `unavailable` cooldown.
   if (conn.testStatus && conn.testStatus !== "active") return false;
   // API-key-only connections do not need refresh tokens at all.
@@ -82,6 +103,10 @@ export function shouldMarkRefreshCapableExpired(
   // when the token really dies.
   const expiryMs = getEffectiveTokenExpiryMs(conn);
   if (expiryMs > nowMs) return false;
+  // Devin Desktop password-login connections renew from a stored `auth1_…`
+  // credential, NOT from an OAuth refreshToken — so they follow the refresh-LESS
+  // rule: condemn only when a known expiry has actually passed.
+  if (conn.provider === "devin-desktop") return expiryMs > 0 && expiryMs <= nowMs;
   if (!issuesRefreshLessLongLivedTokens(conn.provider)) return true;
   return expiryMs > 0 && expiryMs <= nowMs;
 }

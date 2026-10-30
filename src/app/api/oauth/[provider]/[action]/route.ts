@@ -88,6 +88,14 @@ const RETIRED_PKCE_PROVIDERS = new Set(["devin-desktop", "devin-cli"]);
 const IMPORT_TOKEN_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);
 
 /**
+ * Providers whose users may complete a first-party email+password sign-in.
+ * Devin Auth replaced Windsurf's Firebase login in 2026-04, and the resulting
+ * ide_token is machine-bound, so it cannot be obtained any other way for a new
+ * account. The password is used once and never persisted.
+ */
+const PASSWORD_LOGIN_PROVIDERS = new Set(["devin-desktop"]);
+
+/**
  * #10143: re-importing a token onto an existing connection must keep its persisted
  * device identity, or the account presents to the upstream as a new device.
  */
@@ -836,6 +844,87 @@ export async function POST(
         return NextResponse.json(
           { success: false, error: detail || "Internal server error" },
           { status: 500 }
+        );
+      }
+    }
+
+    if (action === "password-login") {
+      if (!PASSWORD_LOGIN_PROVIDERS.has(provider)) {
+        return NextResponse.json(
+          { error: `password-login not supported for provider: ${provider}` },
+          { status: 400 }
+        );
+      }
+
+      const email = typeof body?.email === "string" ? body.email.trim() : "";
+      const password = typeof body?.password === "string" ? body.password : "";
+      // Optional re-auth signal: signing in again updates the existing connection
+      // instead of creating a duplicate row for the same account.
+      const connectionId =
+        typeof body?.connectionId === "string" && body.connectionId ? body.connectionId : undefined;
+      if (!email || !password) {
+        return NextResponse.json(
+          { success: false, error: "Email and password are required." },
+          { status: 400 }
+        );
+      }
+
+      try {
+        const providerData = getProvider(provider);
+        if (typeof providerData.passwordLogin !== "function") {
+          return NextResponse.json(
+            { error: `password-login is not implemented for provider: ${provider}` },
+            { status: 400 }
+          );
+        }
+
+        // The password lives only in this frame. It is never logged, returned,
+        // or written to the connection row — only the resulting tokens are.
+        const tokenData = await providerData.passwordLogin(email, password);
+
+        if (!tokenData.name && (tokenData.email || tokenData.displayName)) {
+          tokenData.name = tokenData.email || tokenData.displayName;
+        }
+
+        const expiresAt = tokenData.expiresIn
+          ? new Date(Date.now() + tokenData.expiresIn * 1000).toISOString()
+          : null;
+
+        let connection: any;
+        const existing = await getProviderConnections({ provider });
+        const match = findExistingOAuthConnectionMatch(existing, provider, tokenData, connectionId);
+        const matchId = typeof match?.id === "string" ? match.id : null;
+        if (matchId) {
+          connection = await updateProviderConnection(matchId, {
+            ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
+            testStatus: "active",
+            isActive: true,
+          });
+        }
+        if (!connection) {
+          connection = await createProviderConnection(
+            buildOAuthConnectionCreatePayload(provider, tokenData, expiresAt)
+          );
+        }
+
+        await syncToCloudIfEnabled();
+
+        return NextResponse.json({
+          success: true,
+          connection: {
+            id: connection.id,
+            provider: connection.provider,
+            email: connection.email,
+            displayName: connection.displayName,
+          },
+        });
+      } catch (loginErr: any) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: sanitizeErrorMessage(loginErr?.message) || "Sign-in failed",
+          },
+          { status: Number.isInteger(loginErr?.status) ? loginErr.status : 500 }
         );
       }
     }

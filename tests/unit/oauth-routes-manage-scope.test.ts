@@ -79,6 +79,19 @@ const oauthCalls: Array<[string, (apiKey: string) => Promise<Response>]> = [
         actionParams("devin-cli", "import-token")
       ),
   ],
+  // Devin Auth password login creates a connection and forwards account credentials
+  // upstream, so it must require the same management auth as import-token.
+  [
+    "POST /api/oauth/devin-desktop/password-login",
+    (key) =>
+      actionRoute.POST(
+        jsonRequest("/api/oauth/devin-desktop/password-login", key, {
+          email: "user@example.com",
+          password: "hunter2",
+        }),
+        actionParams("devin-desktop", "password-login")
+      ),
+  ],
   [
     "POST /api/oauth/github/poll",
     (key) =>
