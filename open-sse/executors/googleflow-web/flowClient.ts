@@ -573,7 +573,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
               return v ? v.src || v.currentSrc : null;
             })
             .catch(() => null);
-          if (videoSrc && videoSrc.includes("flow-content.google/video")) {
+          if (
+            videoSrc &&
+            (videoSrc.includes("flow-content.google") || videoSrc.includes("googlevideo.com"))
+          ) {
             const aid = extractAssetId(videoSrc);
             if (!existingVideoUrls.has(videoSrc) && (!aid || !existingAssetIds.has(aid))) {
               console.log("[FLOW_DEBUG] RESOLVED video directly from <video> element:", videoSrc);
@@ -592,7 +595,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             .first();
           if (await downloadBtn.isVisible({ timeout: 300 }).catch(() => false)) {
             const href = await downloadBtn.getAttribute("href").catch(() => null);
-            if (href && href.includes("flow-content.google/video")) {
+            if (
+              href &&
+              (href.includes("flow-content.google") || href.includes("googlevideo.com"))
+            ) {
               const aid = extractAssetId(href);
               if (!existingVideoUrls.has(href) && (!aid || !existingAssetIds.has(aid))) {
                 console.log("[FLOW_DEBUG] RESOLVED video via download button href:", href);
@@ -613,7 +619,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             return (
               !existingVideoUrls.has(v) &&
               (!aid || !existingAssetIds.has(aid)) &&
-              v.includes("flow-content.google")
+              (v.includes("flow-content.google") || v.includes("googlevideo.com"))
             );
           });
           if (newVideos.length > 0) {
@@ -622,7 +628,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           }
         } catch {}
       }
-      return "";
+      throw new Error("Polling loop finished without finding video asset in DOM or network");
     })();
 
     try {
@@ -630,6 +636,11 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     } finally {
       isFinished = true;
     }
+
+    if (!videoUrl) {
+      throw new Error("Veo video generation finished without producing a valid CDN URL");
+    }
+
     invalidateFlowCreditsCache();
 
     return {
