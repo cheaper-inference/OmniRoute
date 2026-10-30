@@ -38,8 +38,8 @@ function createChunk(state, delta, finishReason = null) {
 
 // Signed-thinking continuity: the OpenAI client only sees reasoning text, so keep the
 // exact signed thinking / redacted_thinking blocks (per content-block index) and hand
-// them to claudeThinkingStore, keyed by this turn's tool_use ids, when the message ends.
-// openai-to-claude restores them before the owning tool_use on the next tool turn.
+// them to claudeThinkingStore in their original layout relative to this turn's tool_use
+// blocks when the message ends. openai-to-claude puts them back on the next tool turn.
 function thinkingBlocksOf(state): Map<number, Record<string, string>> {
   if (!(state.claudeThinkingBlocks instanceof Map)) state.claudeThinkingBlocks = new Map();
   return state.claudeThinkingBlocks;
@@ -50,9 +50,17 @@ function flushThinkingContinuity(state) {
   state.claudeThinkingFlushed = true;
   const blocks = thinkingBlocksOf(state);
   if (blocks.size === 0 || !(state.toolCalls instanceof Map) || state.toolCalls.size === 0) return;
+  const indexed: Array<[number, Record<string, unknown>]> = [
+    ...blocks.entries(),
+    ...[...state.toolCalls.entries()].map(
+      ([index, toolCall]): [number, Record<string, unknown>] => [
+        index,
+        { type: "tool_use", id: toolCall?.id },
+      ]
+    ),
+  ];
   storeClaudeThinkingBlocks({
-    toolUseIds: [...state.toolCalls.values()].map((toolCall) => toolCall?.id),
-    blocks: [...blocks.entries()].sort(([left], [right]) => left - right).map(([, b]) => b),
+    content: indexed.sort(([left], [right]) => left - right).map(([, block]) => block),
     provider: state.provider,
     model: state.model,
   });

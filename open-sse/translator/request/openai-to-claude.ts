@@ -647,7 +647,8 @@ function getContentBlocksFromMessage(
     // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
     // onto the tool_result block. Also accept a marker already hoisted onto the
     // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
-    const { content: hoistedContent, cacheControl } = hoistNestedToolResultCacheControl(toolContent);
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
     const toolResultCacheControl =
       msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
@@ -825,9 +826,12 @@ function getContentBlocksFromMessage(
     const hasToolUseBlock = blocks.some((b) => b.type === "tool_use");
     // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
     // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
-    // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
+    // keyed by the tool_use ids. Put each run back where Claude emitted it: after the
+    // turn's previous tool_use (or at the front), before the tool_use it preceded —
     // only for the same provider + model, only when this request has thinking on and
     // the client sent no thinking block of its own, never for a video-derived request.
+    // A fragment that does not carry a run's tool_use skips that run, so a turn the
+    // client split into several messages replays every block once (#18607).
     // A miss keeps the #5312 placeholder.
     if (
       !isKimiCoding &&
@@ -841,8 +845,14 @@ function getContentBlocksFromMessage(
         provider: thinkingBinding.provider,
         model: thinkingBinding.model,
       });
-      if (restored) {
-        blocks.unshift(...restored);
+      let cursor = 0;
+      for (const { toolUseId, blocks: signed } of restored ?? []) {
+        const owner = blocks.findIndex(
+          (b, i) => i >= cursor && b.type === "tool_use" && b.id === toolUseId
+        );
+        if (owner < 0) continue;
+        blocks.splice(cursor, 0, ...signed);
+        cursor = owner + signed.length + 1;
         hasThinkingBlock = true;
       }
     }
