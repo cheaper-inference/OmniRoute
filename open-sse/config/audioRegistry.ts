@@ -148,9 +148,10 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     authType: "apikey",
     authHeader: "bearer",
     format: "openai",
+    // Ct2 adds native word-level timestamps and diarized_json.
     models: [
-      { id: "WhisperLargeV3", name: "Whisper Large v3 (deAPI)" },
       { id: "WhisperLargeV3Ct2", name: "Whisper Large v3 CT2 (deAPI)" },
+      { id: "WhisperLargeV3", name: "Whisper Large v3 (deAPI)" },
     ],
   },
 
@@ -612,8 +613,9 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     models: [{ id: "speech-2.8-hd", name: "Speech 2.8 HD" }],
   },
 
-  // deAPI accepts native voice ids only (Kokoro: af_alloy, am_adam, bf_emma, ...;
-  // Qwen3 TTS: Vivian, Serena, Ryan, ...) and returns mp3 only.
+  // deAPI maps the OpenAI stock voices (alloy, nova, ...) onto each model's own
+  // voices, so the default "alloy" works on every model; native ids (af_bella,
+  // Vivian, ...) are accepted too. mp3 only. VoiceDesign needs `instructions`.
   deapi: {
     id: "deapi",
     baseUrl: "https://oai.deapi.ai/v1/audio/speech",
@@ -621,10 +623,11 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "bearer",
     format: "openai",
     supportedFormats: ["mp3"],
-    defaultVoice: "af_alloy",
     models: [
       { id: "Kokoro", name: "Kokoro (deAPI)" },
+      { id: "Chatterbox", name: "Chatterbox (deAPI)" },
       { id: "Qwen3_TTS_12Hz_1_7B_CustomVoice", name: "Qwen3 TTS 1.7B (deAPI)" },
+      { id: "Qwen3_TTS_12Hz_1_7B_VoiceDesign", name: "Qwen3 TTS Voice Design (deAPI)" },
     ],
   },
 

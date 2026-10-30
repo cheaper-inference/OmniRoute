@@ -12,6 +12,7 @@ import {
   AUDIO_TRANSCRIPTION_PROVIDERS,
 } from "../../open-sse/config/audioRegistry.ts";
 import { EMBEDDING_PROVIDERS } from "../../open-sse/config/embeddingRegistry.ts";
+import { handleAudioSpeech } from "../../open-sse/handlers/audioSpeech.ts";
 import { getRegistryMediaKinds } from "../../open-sse/config/mediaServiceKinds.ts";
 import { APIKEY_PROVIDERS_SPECIALTY } from "../../src/shared/constants/providers/apikey/specialty-media.ts";
 import {
@@ -74,8 +75,9 @@ test("deapi registries use native model ids and gateway-specific defaults", () =
       assert.doesNotMatch(model.id, /^(dall-e|tts-1|whisper-1|gpt-)/);
     }
   }
-  // OpenAI stock voices are not deAPI voices; the speech path must not fall back to "alloy".
-  assert.equal(AUDIO_SPEECH_PROVIDERS.deapi.defaultVoice, "af_alloy");
+  // deAPI maps the OpenAI stock voices onto every model, so the handler's "alloy"
+  // default must not be overridden by a model-specific voice id.
+  assert.equal(AUDIO_SPEECH_PROVIDERS.deapi.defaultVoice, undefined);
   assert.deepEqual(AUDIO_SPEECH_PROVIDERS.deapi.supportedFormats, ["mp3"]);
   assert.equal(EMBEDDING_PROVIDERS.deapi.models[0].dimensions, 1024);
   assert.equal(getVideoProvider("deapi")?.format, "deapi-video-job");
@@ -190,4 +192,42 @@ test("deapi video preset reports a failed job instead of downloading", async () 
   } finally {
     globalThis.fetch = originalFetch;
   }
+});
+
+async function captureSpeechBody(body: Record<string, unknown>) {
+  const originalFetch = globalThis.fetch;
+  const seen: Array<{ url: string; body: Record<string, unknown> }> = [];
+  globalThis.fetch = async (input, init) => {
+    seen.push({ url: String(input), body: JSON.parse(String(init?.body ?? "{}")) });
+    return new Response(new Uint8Array([0xff, 0xfb, 0x90, 0x00]), {
+      status: 200,
+      headers: { "content-type": "audio/mpeg" },
+    });
+  };
+  try {
+    const res = await handleAudioSpeech({ body, credentials: { apiKey: "sk-dp-1-test" } });
+    assert.equal(res.status, 200);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+  assert.equal(seen.length, 1);
+  return seen[0];
+}
+
+test("deapi speech forwards instructions for the voice-design model and defaults to alloy", async () => {
+  const call = await captureSpeechBody({
+    model: "deapi/Qwen3_TTS_12Hz_1_7B_VoiceDesign",
+    input: "Hello from OmniRoute.",
+    instructions: "a warm female voice with a British accent",
+  });
+  assert.equal(call.url, `${GATEWAY}/audio/speech`);
+  assert.equal(call.body.model, "Qwen3_TTS_12Hz_1_7B_VoiceDesign");
+  assert.equal(call.body.voice, "alloy");
+  assert.equal(call.body.instructions, "a warm female voice with a British accent");
+});
+
+test("the OpenAI-compatible speech path omits instructions when the client sends none", async () => {
+  const call = await captureSpeechBody({ model: "deapi/Kokoro", input: "Hello from OmniRoute." });
+  assert.equal(call.body.model, "Kokoro");
+  assert.equal("instructions" in call.body, false);
 });

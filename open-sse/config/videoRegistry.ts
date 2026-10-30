@@ -400,10 +400,10 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     authHeader: "bearer",
     format: "deapi-video-job",
     models: [
-      { id: "Ltxv_13B_0_9_8_Distilled_FP8", name: "LTX-Video 13B Distilled (deAPI)" },
-      { id: "Ltx2_3_22B_Dist_INT8", name: "LTX-2.3 22B (deAPI)" },
       { id: "Ltx2_5_22B_Dist_INT8", name: "LTX-2.5 22B (deAPI)" },
       { id: "MiniMaxH3_33B_Turbo_INT8", name: "MiniMax H3 Turbo (deAPI)" },
+      { id: "Ltx2_3_22B_Dist_INT8", name: "LTX-2.3 22B (deAPI)" },
+      { id: "Ltxv_13B_0_9_8_Distilled_FP8", name: "LTX-Video 13B Distilled (deAPI)" },
     ],
   },
 
