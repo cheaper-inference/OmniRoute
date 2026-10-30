@@ -193,3 +193,13 @@ test("resolveCanonicalEndpointPath: canonical and uncategorised paths come back 
   assert.equal(resolveCanonicalEndpointPath("/api/keys"), "/api/keys");
   assert.equal(resolveCanonicalEndpointPath("/dashboard"), "/dashboard");
 });
+
+// ─── decisions (System One, #13987) ────────────────────────────────────────
+
+test("resolveEndpointCategory: maps /v1/systemone to 'decisions'", () => {
+  assert.equal(resolveEndpointCategory("/v1/systemone"), "decisions");
+});
+
+test("resolveEndpointCategory: maps the OpenRouter-alpha alias /v1/decisions to 'decisions'", () => {
+  assert.equal(resolveEndpointCategory("/v1/decisions"), "decisions");
+});

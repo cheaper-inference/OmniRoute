@@ -73,6 +73,12 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     prefixes: ["/v1/rerank"],
   },
   {
+    id: "decisions",
+    label: "Decisions",
+    description: "System One typed decisions (Jev)",
+    prefixes: ["/v1/systemone", "/v1/decisions"],
+  },
+  {
     id: "models",
     label: "Models",
     description: "List available models (read-only)",

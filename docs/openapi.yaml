@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: Decisions
+    description: System One typed decisions (Jev)
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -1772,6 +1774,54 @@ paths:
         "401":
           $ref: "#/components/responses/Unauthorized"
 
+  /api/v1/decisions:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions (OpenRouter-alpha alias)
+      description: >-
+        Alias of `POST /api/v1/systemone` with the identical body, backend
+        resolution, credentials, and usage accounting — for clients that
+        already speak OpenRouter's alpha decisions shape.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                  description: >-
+                    `typesafe/jev-*`, a bare `jev-*` alias (native TypeSafe), or
+                    `openrouter/<vendor>/<model>` for OpenRouter-hosted decisions
+                    models.
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
+                  description: >-
+                    Question id → typed question (`noul`, `choice`, or `score`).
+      responses:
+        "200":
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+    get:
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Model list (same shape as GET /api/v1/models).
   /api/v1/embeddings:
     post:
       tags: [Embeddings]
@@ -15327,6 +15377,50 @@ paths:
       responses:
         "200":
           description: OK
+  /api/v1/systemone:
+    post:
+      tags: [Decisions]
+      summary: System One typed decisions
+      description: >-
+        One `state` plus typed `questions` (`noul` / `choice` / `score`); the
+        backend is selected by the model id — `typesafe/jev-*` or a bare
+        `jev-*` alias routes natively to api.typesafe.ai, `openrouter/<vendor>/
+        <model>` routes to OpenRouter's alpha decisions endpoint. Answers,
+        probabilities and usage (tokens, cost) pass through untouched.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [state, questions]
+              properties:
+                model:
+                  type: string
+                state:
+                  description: Decision context — a string or an object map.
+                questions:
+                  type: object
+      responses:
+        "200":
+          description: >-
+            Upstream passthrough: `{ model, answers, usage }` with calibrated
+            probabilities. Carries the `X-OmniRoute-*` cost-telemetry headers.
+        "400":
+          description: Unknown decisions model or invalid body.
+        "401":
+          description: Missing or invalid gateway API key / provider credentials.
+    get:
+      tags: [Decisions]
+      summary: List decisions-capable models
+      description: Decisions entries from the unified model catalog.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: Model list (same shape as GET /api/v1/models).
   /api/v1/video-bridge/drilldown:
     delete:
       tags:
