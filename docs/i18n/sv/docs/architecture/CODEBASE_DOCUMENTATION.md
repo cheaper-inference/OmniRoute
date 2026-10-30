@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Leverantörsregister, rubrikprofiler, identitet, …
 ├── handlers/               Förfrågningshanterare (chatt, inbäddningar, ljud, bild, …)
-├── executors/              150 exekverarmoduler för leverantörer (exekverarklasser + hjälpfunktioner per leverantör)
+├── executors/              156 exekverarmoduler för leverantörer (exekverarklasser + hjälpfunktioner per leverantör)
 ├── translator/             Formatkonvertering (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Strömtransformator för Responses API ↔ Chat Completions
 ├── services/               Över 80 tjänstemoduler (kombinationer, reservlösningar, kvoter, identitet, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
+156 exekverarmoduler på toppnivå (`*.ts` minus `base.ts`, `index.ts` och tester — antalet
 mäts av `npm run check:docs-counts`). Varje exekverarklass utökar `BaseExecutor` (`base.ts`),
 direkt eller genom `DefaultExecutor` eller en annan exekverare; de återstående modulerna är
 hjälpfunktioner per leverantör (verktygsscheman, fetch/TTS-adaptrar, hanterare för särdrag). Exekverarna omfattar:
@@ -772,7 +772,7 @@ Se [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) och det särskilda avsnittet i
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Tilldela lämpligt/lämpliga scope i `src/shared/constants/mcpScopes.ts`.
 3. Registrera verktyget i `open-sse/mcp-server/server.ts`.
-4. Lägg till tester under `open-sse/mcp-server/__tests__/`.
+4. Lägg till tester under `tests/unit/`.
 5. Uppdatera [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Lägg till en ny A2A-färdighet
@@ -790,7 +790,7 @@ Se [A2A-SERVER.md § Lägga till en ny färdighet](../frameworks/A2A-SERVER.md).
 - **Namngivning**: filer använder `camelCase` eller `kebab-case`, komponenter `PascalCase`,
   konstanter `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` överallt;
-  `no-explicit-any` = `warn` i `open-sse/` och `tests/`, annars `error`.
+  `no-explicit-any` = `error` i `open-sse/**/*.ts` och `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (äldre förhållningssätt). Föredra explicita typer framför
   inferens vid gränser mellan moduler.
 - **Databas**: skriv aldrig rå SQL i rutter eller hanterare — gå alltid via
@@ -820,8 +820,7 @@ Se [A2A-SERVER.md § Lägga till en ny färdighet](../frameworks/A2A-SERVER.md).
   `a2a`, `memory`, `skills`.
 - **Grenar**: prefixen `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Gör aldrig commits direkt till `main`.
-- **Husky**: pre-commit kör `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push kör `check:any-budget:t11` + `check:tracked-artifacts` (snabba kontroller; exkluderar `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

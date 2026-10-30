@@ -1,0 +1,1 @@
+- **fix(sse):** Type image-registry lookups and alias metadata for the strict core gate while preserving provider routing, optional image input, and the fallback for unknown modality payloads.

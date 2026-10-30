@@ -18,49 +18,46 @@ OmniRoute publiserer npm + Docker-artefakter. Disse portene gir proveniens, inve
 
 Bilde-CVE-justeringen bruker **to trinn** i `docker-publish.yml`: SARIF-trinnet (`HIGH,CRITICAL`, `exit-code: 0`) holder HIGH+CRITICAL synlig i Sikkerhetsfanen uten å blokkere; _KRITISK-port_ trinnet (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) feiler utgivelsen ved en KRITISK CVE **med en tilgjengelig fiks**. `ignore-unfixed` forhindrer blokkering av utgivelsen for en base-bilde-CVE uten en oppstrøms patch.
 
-## ⚠️ CVE-varians (blokkerende osv/Trivy-porter)
+## ⚠️ CVE-variasjon (blokkerer osv-/Trivy-porter)
 
-osv og Trivy sammenligner avhengigheter mot CVE-databaser som **kontinuerlig vokser**. En PR som **ikke berører avhengigheter** kan plutselig bli rød fordi en ny CVE ble avslørt i en eksisterende avhengighet (osv: målt `vulnCount` > grunnlinje; Trivy: en ny fiksbar KRITISK i bildet). **Dette er FORVENTET operasjonell oppførsel for en blokkerende CVE-port, ikke en produktregresjon.**
+osv og Trivy sammenligner avhengigheter med CVE-databaser som **vokser kontinuerlig**. En PR
+som **ikke endrer noen avhengigheter**, kan plutselig bli rød fordi en ny CVE er
+offentliggjort i en eksisterende avhengighet (osv: målt `vulnCount` > referanseverdi; Trivy: en ny
+CRITICAL-sårbarhet i avbildningen som kan utbedres). **Dette er FORVENTET operasjonell atferd for en blokkerende
+CVE-port, ikke en regresjon i produktet.**
 
-Når osv eller Trivy blir røde på grunn av en nylig avslørt CVE, er løsningen:
+Når osv eller Trivy blir røde på grunn av en nylig offentliggjort CVE, er løsningen:
 
-1.  **Oppgrader den berørte avhengigheten** (foretrukket) — oppgrader til den patchede versjonen via `package.json` `overrides` (transitive avhengigheter) eller bygg bildet på nytt på en patchet base.
-2.  **Hvis det ikke finnes en oppstrøms fiks:**
-    - **osv:** re-baselinje `metrics.vulnCount` i `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` dekker ikke dedikerte porter — rediger verdien manuelt, `direction:down`) med en begrunnelsesnotat + sporingssak.
-    - **Trivy:** legg til en oppføring i `.trivyignore` (CVE-ID per linje) med en begrunnelseskommentar + sporingssak. `ignore-unfixed: true` dekker allerede CVE-er uten patcher automatisk.
+1. **Oppgrader den berørte avhengigheten** (foretrukket) – oppgrader til den korrigerte versjonen via `package.json`
+   `overrides` (transitive avhengigheter), eller bygg avbildningen på nytt med en korrigert basisavbildning.
+2. **Hvis det ikke finnes noen oppstrømsrettelse:**
+   - **osv:** oppdater referanseverdien for `metrics.vulnCount` i `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` dekker ikke dedikerte porter – rediger verdien
+     manuelt, `direction:down`) med en begrunnelse og en sporingssak.
+   - **Trivy:** legg til en oppføring i `.trivyignore` (én CVE-ID per linje) med en
+     begrunnende kommentar og en sporingssak. `ignore-unfixed: true` dekker allerede automatisk
+     CVE-er uten tilgjengelige rettelser.
 
-Begge portene **hopper elegant over** (exit 0) når verktøyet mangler eller målingen feiler (osv-scanner ikke i PATH, osv.dev/nettverk utilgjengelig, ugyldig JSON) — en **målingsfeil** blokkerer aldri, kun en **målt** regresjon blokkerer.
+Påkrevde OSV-kjøringer (`check:vuln-ratchet -- --ratchet`) feiler lukket med
+`INCOMPLETE` og avslutningskode 2 når skanneren, rapporten eller referanseverdien ikke kan valideres.
+En målt regresjon gir avslutningskode 1. En rådgivende kjøring kan fortsatt rapportere `SKIP` med
+avslutningskode 0, noe som ikke fastslår at avhengighetene besto skanningen. Det blokkerende
+Trivy-trinnet krever også en vellykket måling: utilgjengelige verktøy, mislykkede jobber
+og manglende dokumentasjon for avbildningen kan ikke bekrefte at en avbildning er fri for sårbarheter.
 
-## Kjente aksepterte risikoer
+## Risiko ved utfaset avhengighet
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Rotlåsfilen inkluderer ikke lenger `extract-zip` eller en avhengighetskant til den etter
+oppgraderingen av det fastlåste utviklingsverktøyet promptfoo. Dette utfaser den tidligere godtatte
+`promptfoo` → `@openai/codex-security` → `extract-zip`-kjeden som spores i #14482.
+Regresjonskontrollene i `tests/unit/extract-zip-14482-exposure.test.ts` avviser at den
+gjeninnføres, og opprettholder forbudet mot importer fra produksjonskode.
 
-`extract-zip@2.0.1` inneholder to ufiksete symlink-traversal-rådgivninger med høy alvorlighetsgrad.
-I henhold til "ingen oppstrømsfiks"-grenen av CVE Variance-løsningen ovenfor, er dette en
-**akseptert risiko**, ikke en bump:
-
-- **Kjede:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Bekreftet via `package-lock.json` — nøyaktig én pakke i hele avhengighetstreet
-  (`@openai/codex-security`) deklarerer `extract-zip`, og nøyaktig én pakke
-  (`promptfoo`) deklarerer `@openai/codex-security`.
-- **Ingen fikset utgivelse eksisterer noe sted i kjeden.** `extract-zip@2.0.1` (publisert 2020) er pakkens siste utgivelse – den vedlikeholdes ikke. `@openai/codex-security`s
-  nåværende npm-latest (`0.1.29`) trekker fortsatt `extract-zip@2.0.1`.
-- **Uoppnåelig fra produksjon.** `promptfoo` er kun devDependency (aldri oppført
-  under `dependencies`), og ingen fil under `src/`, `open-sse/`, eller `bin/` importerer
-  `extract-zip` npm-pakken — OmniRoutes egen `extractZip()`-hjelper
-  (`src/lib/versionManager/binaryManager.ts:93`) kaller ut til native `unzip`/`tar`
-  og er urelatert. `@openai/codex-security` leverer også sin egen symlink-traversal-
-  beskyttelse på toppen av extract-zips onEntry-callback.
-- **Ikke** alias `extract-zip` via `package.json` `overrides` — den eneste levedyktige
-  drop-in-erstatningen er Electron-org-intern og API-inkompatibel med
-  `@openai/codex-security`s egne onEntry/defaultDirMode/defaultFileMode-kontroller;
-  å overstyre den ville i stillhet bryte pakkens sikkerhetskontroller.
-- **Grunnlinje:** målt osv `vulnCount` (3) er allerede godt under den frosne
-  `config/quality/quality-baseline.json`-grunnlinjen (27) — ingen ratchet-endring nødvendig.
-- **Regresjonsbeskyttelse:** `tests/unit/extract-zip-14482-exposure.test.ts` bekrefter
-  kjeden og den ingen-produksjonsimport-invarianten ovenfor; den feiler CI hvis en av dem
-  noen gang brytes (f.eks. en fremtidig PR gjør `extract-zip` tilgjengelig fra produksjon).
-- **Sporing:** sak #14482.
+Den gjeldende reparasjonen av avhengigheter avgrenser også kompatibilitetsoverstyringer til Azure identity sin
+MSAL-klient, get-uri sin FTP-klient og Zod-avhengigheten til OpenCode v1 SDK. Innhenting av Azure-token
+og FTP-henting testes med kontrollerte transporter. Begge OpenCode-
+pakkene kjører sine egne bygg- og testsuiter. Antallet registervarsler er øyeblikksmålinger
+og kan endres etter at låsfilen er innsendt.
 
 ## Restanse: Scorecard-rådgivning → blokkering
 

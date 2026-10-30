@@ -18,49 +18,46 @@ OmniRoute publiceert npm + Docker-artefacten. Deze poorten bieden herkomst, inve
 
 De CVE-ratchet voor afbeeldingen gebruikt **twee stappen** in `docker-publish.yml`: de SARIF-stap (`HIGH,CRITICAL`, `exit-code: 0`) houdt HIGH+CRITICAL zichtbaar in het Beveiligingstabblad zonder te blokkeren; de _CRITICAL-poort_ stap (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) laat de release mislukken bij een CRITICAL CVE **met een beschikbare oplossing**. `ignore-unfixed` voorkomt het blokkeren van de release voor een basis-image CVE zonder een upstream-patch.
 
-## ⚠️ CVE-variantie (blokkerende osv/Trivy-poorten)
+## ⚠️ CVE-variatie (blokkeert osv/Trivy-gates)
 
-osv en Trivy vergelijken afhankelijkheden met CVE-databases die **continu groeien**. Een PR die **geen afhankelijkheden aanraakt**, kan plotseling rood worden omdat een nieuwe CVE werd onthuld in een bestaande afhankelijkheid (osv: gemeten `vulnCount` > baseline; Trivy: een nieuwe oplosbare CRITICAL in de image). **Dit is VERWACHT operationeel gedrag van een blokkerende CVE-poort, geen productregressie.**
+osv en Trivy vergelijken afhankelijkheden met CVE-databases die **continu blijven groeien**. Een PR
+waarin **geen afhankelijkheden worden gewijzigd**, kan plotseling rood worden omdat een nieuwe CVE is
+bekendgemaakt in een bestaande afhankelijkheid (osv: gemeten `vulnCount` > baseline; Trivy: een nieuwe
+herstelbare CRITICAL in de image). **Dit is VERWACHT operationeel gedrag van een blokkerende
+CVE-gate, geen productregressie.**
 
-Wanneer osv of Trivy rood worden door een nieuw onthulde CVE, is de oplossing:
+Wanneer osv of Trivy rood wordt vanwege een nieuw bekendgemaakte CVE, is de oplossing:
 
-1.  **Werk de getroffen afhankelijkheid bij** (voorkeur) — upgrade naar de gepatchte versie via `package.json` `overrides` (transitieme afhankelijkheden) of herbouw de image op een gepatchte basis.
-2.  **Als er geen upstream-oplossing is:**
-    - **osv:** her-baseline `metrics.vulnCount` in `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` dekt geen dedicated poorten — bewerk de waarde handmatig, `direction:down`) met een rechtvaardigingsnotitie + tracking-issue.
-    - **Trivy:** voeg een vermelding toe in `.trivyignore` (CVE-ID per regel) met een rechtvaardigingscommentaar + tracking-issue. `ignore-unfixed: true` dekt CVE's zonder patches al automatisch.
+1. **Werk de getroffen afhankelijkheid bij** (voorkeur) — upgrade naar de gepatchte versie via `package.json`
+   `overrides` (transitieve afhankelijkheden) of bouw de image opnieuw op basis van een gepatchte basisimage.
+2. **Als er geen upstream-fix beschikbaar is:**
+   - **osv:** stel de baseline voor `metrics.vulnCount` opnieuw in `config/quality/quality-baseline.json` vast
+     (`npm run quality:ratchet -- --update` dekt afzonderlijke gates niet — bewerk de waarde
+     handmatig, `direction:down`) met een onderbouwing en een tracking-issue.
+   - **Trivy:** voeg een vermelding toe aan `.trivyignore` (één CVE-ID per regel) met een onderbouwende
+     opmerking en een tracking-issue. `ignore-unfixed: true` dekt CVE's zonder
+     patches al automatisch af.
 
-Beide poorten **slaan netjes over** (exit 0) wanneer de tool afwezig is of de meting mislukt (osv-scanner niet in PATH, osv.dev/netwerk onbereikbaar, ongeldige JSON) — een **meetfout** blokkeert nooit, alleen een **gemeten** regressie blokkeert.
+Verplichte OSV-uitvoeringen (`check:vuln-ratchet -- --ratchet`) sluiten bij fouten en mislukken met
+`INCOMPLETE` en exitcode 2 wanneer de scanner, het rapport of de baseline niet kan worden gevalideerd.
+Een gemeten regressie resulteert in exitcode 1. Een adviserende uitvoering kan nog steeds `SKIP` rapporteren met
+exitcode 0, maar dat toont niet aan dat de afhankelijkheden de scan hebben doorstaan. De blokkerende
+Trivy-stap vereist eveneens een geslaagde meting: niet-beschikbare tools, mislukte jobs
+en ontbrekend bewijs voor de image kunnen niet certificeren dat een image schoon is.
 
-## Bekende Geaccepteerde Risico's
+## Risico van uitgefaseerde afhankelijkheid
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Het hoofdlockbestand bevat niet langer `extract-zip` of een afhankelijkheidsrelatie ernaartoe na
+het upgraden van de vastgezette promptfoo-ontwikkelingstool. Hiermee wordt de eerder geaccepteerde
+keten `promptfoo` → `@openai/codex-security` → `extract-zip`, die in #14482 wordt bijgehouden, uitgefaseerd.
+De regressiecontroles in `tests/unit/extract-zip-14482-exposure.test.ts` verhinderen de
+herintroductie ervan en handhaven het verbod op imports vanuit productiecode.
 
-`extract-zip@2.0.1` bevat twee ongepatchte adviezen voor symlink-traversal met hoge ernst.
-Volgens de "geen upstream fix" tak van de CVE Variance oplossing hierboven, is dit een
-**geaccepteerd risico**, geen verhoging:
-
-- **Keten:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Bevestigd via `package-lock.json` — precies één pakket in de hele afhankelijkheidsboom
-  (`@openai/codex-security`) declareert `extract-zip`, en precies één pakket
-  (`promptfoo`) declareert `@openai/codex-security`.
-- **Geen vaste release bestaat ergens in de keten.** `extract-zip@2.0.1` (gepubliceerd in 2020) is de laatste release van het pakket — het wordt niet onderhouden. `@openai/codex-security`'s
-  huidige npm-latest (`0.1.29`) trekt nog steeds `extract-zip@2.0.1`.
-- **Niet bereikbaar vanuit productie.** `promptfoo` is alleen een devDependency (nooit vermeld
-  onder `dependencies`), en geen enkel bestand onder `src/`, `open-sse/`, of `bin/` importeert het
-  `extract-zip` npm-pakket — OmniRoute's eigen `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) roept native `unzip`/`tar` aan
-  en is niet gerelateerd. `@openai/codex-security` levert ook zijn eigen symlink-traversal
-  beveiliging bovenop de onEntry callback van extract-zip.
-- **Niet** alias `extract-zip` via `package.json` `overrides` — de enige levensvatbare
-  drop-in vervanging is Electron-org-internal en API-incompatibel met
-  `@openai/codex-security`'s eigen onEntry/defaultDirMode/defaultFileMode controles;
-  het overschrijven ervan zou de beveiligingscontroles van dat pakket stilzwijgend doorbreken.
-- **Baseline:** gemeten osv `vulnCount` (3) ligt al ruim onder de bevroren
-  `config/quality/quality-baseline.json` baseline (27) — geen ratelwijziging nodig.
-- **Regressiebeveiliging:** `tests/unit/extract-zip-14482-exposure.test.ts` bevestigt de
-  keten en de bovengenoemde no-production-import invariant; het faalt CI als een van beide ooit
-  breekt (bijv. een toekomstige PR maakt `extract-zip` bereikbaar vanuit productie).
-- **Tracking:** issue #14482.
+De huidige reparatie van afhankelijkheden beperkt compatibiliteitsoverschrijvingen ook tot Azure Identity's
+MSAL-client, de FTP-client van get-uri en de Zod-afhankelijkheid van de OpenCode v1-SDK. Het verkrijgen
+van Azure-tokens en ophalen via FTP worden getest met gecontroleerde transports; beide OpenCode-pakketten
+voeren hun eigen build- en testsuites uit. De aantallen registry-beveiligingsadviezen zijn momentopnamen
+en kunnen veranderen nadat het lockbestand is vastgelegd.
 
 ## Backlog: Scorecard-advies → blokkerend
 

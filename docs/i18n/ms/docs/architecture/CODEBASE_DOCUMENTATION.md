@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Daftar penyedia, profil pengepala, identiti, …
 ├── handlers/               Pengendali permintaan (sembang, pembenaman, audio, imej, …)
-├── executors/              150 modul pelaksana penyedia (kelas pelaksana + pembantu setiap penyedia)
+├── executors/              156 modul pelaksana penyedia (kelas pelaksana + pembantu setiap penyedia)
 ├── translator/             Penukaran format (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Pengubah strim Responses API ↔ Chat Completions
 ├── services/               80+ modul perkhidmatan (gabungan, sandaran, kuota, identiti, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modul pelaksana peringkat atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan ini
+156 modul pelaksana peringkat atas (`*.ts` tidak termasuk `base.ts`, `index.ts` dan ujian — bilangan ini
 diukur oleh `npm run check:docs-counts`). Setiap kelas pelaksana melanjutkan `BaseExecutor` (`base.ts`),
 secara langsung atau melalui `DefaultExecutor` atau pelaksana lain; modul selebihnya ialah pembantu
 setiap penyedia (skema alat, penyesuai pengambilan/TTS, pengendali kekhususan). Pelaksana termasuk:
@@ -772,7 +772,7 @@ Lihat [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) dan bahagian khusus dalam
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Tetapkan skop yang sesuai dalam `src/shared/constants/mcpScopes.ts`.
 3. Daftarkan alat tersebut dalam `open-sse/mcp-server/server.ts`.
-4. Tambah ujian di bawah `open-sse/mcp-server/__tests__/`.
+4. Tambah ujian di bawah `tests/unit/`.
 5. Kemas kini [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Tambah kemahiran A2A baharu
@@ -790,7 +790,7 @@ Lihat [A2A-SERVER.md § Menambah Kemahiran Baharu](../frameworks/A2A-SERVER.md).
 - **Penamaan**: fail `camelCase` atau `kebab-case`, komponen `PascalCase`,
   pemalar `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` di semua tempat;
-  `no-explicit-any` = `warn` dalam `open-sse/` dan `tests/`, ralat di tempat lain.
+  `no-explicit-any` = `error` dalam `open-sse/**/*.ts` dan `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (pendekatan legasi). Utamakan jenis eksplisit berbanding
   inferens untuk sempadan rentas modul.
 - **Pangkalan data**: jangan sesekali tulis SQL mentah dalam laluan atau pengendali — sentiasa gunakan
@@ -820,8 +820,7 @@ Lihat [A2A-SERVER.md § Menambah Kemahiran Baharu](../frameworks/A2A-SERVER.md).
   `a2a`, `memory`, `skills`.
 - **Cabang**: awalan `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Jangan sesekali membuat komit secara langsung kepada `main`.
-- **Husky**: prakomit menjalankan `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pratujah menjalankan `check:any-budget:t11` + `check:tracked-artifacts` (semakan pantas; tidak termasuk `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

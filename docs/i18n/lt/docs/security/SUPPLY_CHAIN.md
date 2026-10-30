@@ -25,60 +25,38 @@ neblokuodamas; _CRITICAL vartų_ žingsnis (`severity: CRITICAL`, `ignore-unfixe
 `exit-code: 1`) nutraukia išleidimą, jei aptinkamas CRITICAL CVE **su galimu pataisymu**. `ignore-unfixed`
 neleidžia blokuoti išleidimo dėl bazinio atvaizdo CVE be aukštesniojo lygio pataisymo.
 
-## ⚠️ CVE Variacija (blokuojantys osv/Trivy vartai)
+## ⚠️ CVE kintamumas (blokuojančios osv/Trivy patikros)
 
 osv ir Trivy lygina priklausomybes su CVE duomenų bazėmis, kurios **nuolat auga**. PR,
-kuris **neliečia jokių priklausomybių**, gali staiga tapti raudonas, nes naujas CVE buvo
-atskleistas esamoje priklausomybėje (osv: išmatuotas `vulnCount` > bazinė vertė; Trivy: naujas
-pataisomas CRITICAL atvaizde). **Tai yra TIKĖTINAS blokuojančių CVE vartų veikimo elgesys,
-o ne produkto regresija.**
+kuris **nekeičia jokių priklausomybių**, gali staiga tapti raudonas, nes buvo
+paskelbta nauja esamos priklausomybės CVE (osv: išmatuotas `vulnCount` > bazinė reikšmė; Trivy: atvaizde aptikta nauja
+ištaisoma CRITICAL spraga). **Tai yra TIKĖTINA blokuojančios
+CVE patikros veikimo elgsena, o ne produkto regresija.**
 
-Kai osv arba Trivy tampa raudoni dėl naujai atskleisto CVE, sprendimas yra:
+Kai osv arba Trivy patikra tampa raudona dėl naujai paskelbtos CVE, reikia:
 
-1.  **Atnaujinti paveiktą priklausomybę** (pageidautina) – atnaujinti į pataisytą versiją per `package.json`
-    `overrides` (tranzityvinės priklausomybės) arba perkurti atvaizdą ant pataisytos bazės.
-2.  **Jei nėra aukštesniojo lygio pataisymo:**
-    - **osv:** iš naujo nustatyti `metrics.vulnCount` bazinę vertę `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` neapima specialių vartų – redaguokite reikšmę
-      rankiniu būdu, `direction:down`) su pagrindimu ir sekimo problema.
-    - **Trivy:** pridėti įrašą į `.trivyignore` (CVE-ID eilutėje) su pagrindimo
-      komentaru ir sekimo problema. `ignore-unfixed: true` jau automatiškai apima CVE be
-      pataisymų.
+1. **Atnaujinti paveiktą priklausomybę** (pageidautina) — atnaujinti iki pataisytos versijos naudojant `package.json`
+   `overrides` (tranzityviosioms priklausomybėms) arba iš naujo sukurti atvaizdą naudojant pataisytą bazinį atvaizdą.
+2. **Jei pataisos iš pirminio šaltinio nėra:**
+   - **osv:** iš naujo nustatyti bazinę `metrics.vulnCount` reikšmę faile `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` neapima specializuotų patikrų — reikšmę redaguokite
+     rankiniu būdu, `direction:down`), pridėdami pagrindimo pastabą ir sekimo užduotį.
+   - **Trivy:** pridėti įrašą į `.trivyignore` (po vieną CVE-ID eilutėje) su pagrindimo
+     komentaru ir sekimo užduotimi. `ignore-unfixed: true` jau automatiškai apima CVE, kurioms
+     pataisų nėra.
 
-Abu vartai **gracingai PRALEIDŽIA** (išeina 0), kai įrankio nėra arba matavimas
-nepavyksta (osv-scanner nėra PATH, osv.dev/tinklas nepasiekiamas, neteisingas JSON) –
-**matavimo** gedimas niekada neblokuoja, blokuoja tik **išmatuota** regresija.
+Privalomi OSV vykdymai (`check:vuln-ratchet -- --ratchet`) baigiami nesėkmingai su
+`INCOMPLETE` ir išėjimo kodu 2, kai nepavyksta patikrinti skaitytuvo, ataskaitos arba bazinės reikšmės.
+Išmatuotos regresijos atveju grąžinamas išėjimo kodas 1. Patariamasis vykdymas vis tiek gali pateikti `SKIP` su
+išėjimo kodu 0, tačiau tai nepatvirtina, kad priklausomybės sėkmingai praėjo nuskaitymą. Blokuojančiam
+Trivy veiksmui taip pat būtinas sėkmingas matavimas: nepasiekiami įrankiai, nepavykusios užduotys
+ir trūkstami atvaizdo patikros duomenys negali patvirtinti, kad atvaizdas yra švarus.
 
-## Žinomos priimtinos rizikos
+## Nebenaudojamos priklausomybės rizika
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Atnaujinus fiksuotos versijos „promptfoo“ kūrimo įrankį, šakniniame užrakto faile nebėra `extract-zip` ar į ją nukreipiančio priklausomybės ryšio. Taip pašalinama anksčiau priimta `promptfoo` → `@openai/codex-security` → `extract-zip` grandinė, stebėta #14482. Regresijos patikros faile `tests/unit/extract-zip-14482-exposure.test.ts` neleidžia jos vėl įtraukti ir toliau draudžia importuoti ją iš produkcinio kodo.
 
-`extract-zip@2.0.1` turi du nepašalintus didelio rimtumo simbolinių nuorodų perėjimo patarimus.
-Pagal aukščiau minėtą CVE Varianto pataisos „nėra pataisymo iš tiekėjo“ šaką, tai yra
-**priimtina rizika**, o ne atnaujinimas:
-
-- **Grandinė:** `promptfoo` (kūrimo priklausomybė) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Patvirtinta per `package-lock.json` – lygiai vienas paketas visame priklausomybių
-  medyje (`@openai/codex-security`) deklaruoja `extract-zip`, ir lygiai vienas paketas
-  (`promptfoo`) deklaruoja `@openai/codex-security`.
-- **Visoje grandinėje nėra išleistos pataisytos versijos.** `extract-zip@2.0.1` (išleistas 2020 m.) yra paskutinė paketo versija – jis nebepalaikomas. `@openai/codex-security`
-  dabartinė naujausia npm versija (`0.1.29`) vis dar naudoja `extract-zip@2.0.1`.
-- **Nepasiekiamas iš gamybos aplinkos.** `promptfoo` yra tik kūrimo priklausomybė (niekada nenurodyta
-  `dependencies` sąraše), ir joks failas `src/`, `open-sse/` ar `bin/` kataloguose neimportuoja
-  `extract-zip` npm paketo – OmniRoute nuosavas `extractZip()` pagalbinis metodas
-  (`src/lib/versionManager/binaryManager.ts:93`) naudoja vietines `unzip`/`tar`
-  komandas ir yra nesusijęs. `@openai/codex-security` taip pat turi savo simbolinių nuorodų perėjimo
-  apsaugą, papildančią `extract-zip` `onEntry` atgalinio iškvietimo funkciją.
-- **Nekurkite** `extract-zip` pseudonimo per `package.json` `overrides` – vienintelis tinkamas
-  pakeitimas yra „Electron-org-internal“ ir jis yra API nesuderinamas su
-  `@openai/codex-security` `onEntry`/`defaultDirMode`/`defaultFileMode` patikromis;
-  jį perrašius, tyliai sugadintų to paketo saugumo patikras.
-- **Pradinė reikšmė:** išmatuotas osv `vulnCount` (3) jau yra gerokai mažesnis už užfiksuotą
-  `config/quality/quality-baseline.json` pradinę reikšmę (27) – nereikia keisti ribos.
-- **Regresijos apsauga:** `tests/unit/extract-zip-14482-exposure.test.ts` patvirtina
-  grandinę ir aukščiau minėtą neimportavimo į gamybos aplinką invariantą; CI nepavyks, jei bet kuris iš jų kada nors
-  bus pažeistas (pvz., būsimas PR padarys `extract-zip` pasiekiamą iš gamybos aplinkos).
-- **Sekimas:** problema #14482.
+Dabartinis priklausomybių pataisymas taip pat apriboja suderinamumo perrašymus iki „Azure Identity“ MSAL kliento, „get-uri“ FTP kliento ir „OpenCode v1 SDK“ Zod priklausomybės. „Azure“ prieigos raktų gavimas ir FTP duomenų gavimas tikrinami naudojant kontroliuojamus transportus; abu „OpenCode“ paketai vykdo savo komponavimo ir testavimo rinkinius. Registro saugos įspėjimų skaičius yra konkrečiu laiko momentu atliktas matavimas ir gali pasikeisti po užrakto failo patvirtinimo.
 
 ## Atsilikimas: „Scorecard“ patarimas → blokavimas
 

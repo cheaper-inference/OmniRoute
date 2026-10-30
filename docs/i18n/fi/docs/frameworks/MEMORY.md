@@ -351,11 +351,11 @@ Poiminta on **säännöllisiin lausekkeisiin perustuvaa**, ei LLM-pohjaista — 
 `setImmediate()`-funktion avulla, joten se ei koskaan estä vastausvirtaa:
 
 - **Mieltymysmallit** → `MemoryType.FACTUAL`
-  (esim. `Pidän enemmän …`, `Pidän todella paljon …`, `suosikkini on …`, `Vihaan …`)
+  (esim. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Päätösmallit** → `MemoryType.EPISODIC`
-  (esim. `Käytän …`, `Valitsin …`, `Päädyin …`, `Aion ottaa käyttöön …`)
+  (esim. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Toimintamallit** → `MemoryType.FACTUAL`
-  (esim. `Yleensä …`, `Aina …`, `Minulla on tapana …`)
+  (esim. `I usually …`, `I always …`, `I tend to …`)
 
 Jokainen osuma siistitään (`trim`, välilyöntien yhdistäminen, enimmäispituus 500 merkkiä),
 kaksoiskappaleet poistetaan erän sisällä vakaan `factKey(category, content)`-avaimen avulla, ja
@@ -726,11 +726,11 @@ Vertailutesti tyypillisellä 4-ytimisellä x86-palvelimella (tekstit noin 100 to
 
 ### Oletusarvoiset malliluokat
 
-| Luokka              | Esimerkkimalli                                                  | Poimii                           |
-| ------------------- | --------------------------------------------------------------- | -------------------------------- |
-| PREFERENCE_PATTERNS | `"Pidän enemmän <X>:stä"`, `"Pidän <X>:stä"`, `"Vihaan <X>:ää"` | Käyttäjän mieltymykset           |
-| DECISION_PATTERNS   | `"Käytän <X>:ää"`, `"Päätin <X>"`, `"Valitsin <X>:n"`           | Käyttäjän päätökset (episodiset) |
-| PATTERN_PATTERNS    | `"Yleensä <X>"`, `"Aina <X>"`, `"En koskaan <X>"`               | Pysyvät käyttäytymismallit       |
+| Luokka              | Esimerkkimalli                                              | Poimii                           |
+| ------------------- | ----------------------------------------------------------- | -------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Käyttäjän mieltymykset           |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Käyttäjän päätökset (episodiset) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Pysyvät käyttäytymismallit       |
 
 ### Esimerkkimallit (yksinkertaistettu)
 
@@ -766,8 +766,9 @@ Kun käyttäjä sanoo:
 
 Hallitsemattoman poiminnan estämiseksi käytössä ovat seuraavat rajat:
 
-| Sisällön vähimmäispituus | 3 merkkiä |
-| Sisällön enimmäispituus | 500 merkkiä |
+| Sisällön vähimmäispituus | 3 merkkiä   |
+| ------------------------ | ----------- |
+| Sisällön enimmäispituus  | 500 merkkiä |
 
 ### Milloin poiminta kannattaa poistaa käytöstä
 

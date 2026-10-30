@@ -15,7 +15,7 @@ Tas nodrošina vienotu ar OpenAI saderīgu galapunktu (`/v1/*`) un maršrutē da
 
 Galvenās iespējas:
 
-- Ar OpenAI saderīga API saskarne komandrindas saskarnēm/rīkiem (375 pakalpojumu sniedzēji, 154 izpildītāju moduļi)
+- Ar OpenAI saderīga API saskarne komandrindas saskarnēm/rīkiem (375 pakalpojumu sniedzēji, 156 izpildītāju moduļi)
 - Pieprasījumu/atbilžu formātu pārveidošana starp pakalpojumu sniedzējiem
 - Modeļu kombināciju rezerves pārslēgšanās (vairāku modeļu secība)
 - Strukturēti kombināciju soļi (`provider + model + connection`) ar izpildlaika secību, ko nosaka `compositeTiers`
@@ -31,7 +31,7 @@ Galvenās iespējas:
 - Meklēšana tīmeklī, izmantojot `/v1/search` (20 pakalpojumu sniedzēji)
 - Satura moderēšana, izmantojot `/v1/moderations`
 - Atkārtota ranžēšana, izmantojot `/v1/rerank`
-- Domāšanas tagu parsēšana (``) spriešanas modeļiem
+- Domāšanas tagu parsēšana (`<think>...</think>`) spriešanas modeļiem
 - Atbilžu attīrīšana, lai nodrošinātu stingru saderību ar OpenAI SDK
 - Lomu normalizēšana (developer→system, system→user), lai nodrošinātu saderību starp pakalpojumu sniedzējiem
 - Strukturētās izvades pārveidošana (json_schema → Gemini responseSchema)
@@ -1093,11 +1093,11 @@ Vecākais failu balstītais pieprasījumu reģistrētājs (`open-sse/utils/reque
 - SQLite shēmas migrācijas un automātiskās jaunināšanas saitnes (hooks) programmas palaišanas laikā
 - Savietojamības risinājums vecajai JSON → SQLite migrācijai
 
-## 6) SSRF / Ārējo URL aizsardzība
+## 6) SSRF / Izejošo URL aizsardzība
 
-- `src/shared/network/outboundUrlGuard.ts` bloķē visus privātos, cirkulācijas (loopback) vai saites-lokaļa (link-local) adresātāju URL pirms to sasniegšanas nodrošinātāju izpildītājos
-- Nodrošinātāju modeļu atklāšanas un validācijas maršrutus izmanto `src/shared/network/safeOutboundFetch.ts`, kas pielieto aizsardzību pirms katra ārējā pieprasījuma
-- Aizsardzības kļūdas tiek parādītas kā `URL_GUARD_BLOCKED` ar HTTP 422 un tiek reģistrētas atbilstības revīzijas žurnālā, izmantojot `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) tērzēšanas pieprasījumiem, kas nosūtīti, izmantojot `BaseExecutor.execute()`, piemēro `src/shared/network/outboundUrlGuard.ts`. Tikai publiskajā režīmā (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, kad privātais karodziņš ir izslēgts) tas bloķē privātos un atgriezeniskās cilpas resursdatorus, kā arī 169.254.0.0/16; visos pārējos režīmos tas bloķē mākoņa metadatu resursdatorus. Pirms jebkādas DNS uzmeklēšanas tas pārbauda resursdatora nosaukumu vai IP literāli tieši tā, kā tas ir norādīts. Iebūvētie lokālie pakalpojumu sniedzēji šo pārbaudi izlaiž.
+- Pakalpojumu sniedzēju modeļu atrašanas un validācijas maršruti izmanto `src/shared/network/safeOutboundFetch.ts`, kas piemēro aizsardzību pirms katra izejošā pieprasījuma
+- Aizsardzības kļūdas tiek parādītas kā `URL_GUARD_BLOCKED` ar HTTP 503 (`getSafeOutboundFetchErrorStatus`; modeļu atrašanas maršruts atgriež 400), un validācijas laikā konstatētie faktiskie SSRF bloķēšanas gadījumi tiek reģistrēti audita žurnālā kā `provider.validation.ssrf_blocked` notikumi
 
 ## Novērojamība un darbības signāli
 
@@ -1148,7 +1148,7 @@ Vides mainīgie, ko kods aktīvi izmanto:
 4. Mākoņa uzvedība ir atkarīga no pareiza `NEXT_PUBLIC_BASE_URL` un mākoņa galapunkta pieejamības.
 5. `open-sse/` direktorija ir publicēta kā `@omniroute/open-sse` **npm darbvietas pakete**. Avota kods to importē, izmantojot `@omniroute/open-sse/...` (atrisināts ar Next.js `transpilePackages`). Šajā dokumentā failu ceļi joprojām izmanto direktorijas nosaukumu `open-sse/` konsekvences labad.
 6. Dēļdatu diagrammas izmanto **Recharts** (SVG-bazētu) pieejamām, interaktīvām analītikas vizualizācijām (modeļa izmantošanas stabiņu diagrammas, pakalpojumu sadalījuma tabulas ar veiksmīgas darbības rādītājiem).
-7. E2E testi izmanto **Playwright** (`tests/e2e/`), palaiduši ar `npm run test:e2e`. Vienību testi izmanto **Node.js testu palaižu** (`tests/unit/`), palaiduši ar `npm run test:unit`. Avota kods `src/` apakšā ir **TypeScript** (`.ts`/`.tsx`); `open-sse/` darbvieta paliek JavaScript (`.js`).
+7. E2E testi izmanto **Playwright** (`tests/e2e/`), palaiduši ar `npm run test:e2e`. Vienību testi izmanto **Node.js testu palaižu** (`tests/unit/`), palaiduši ar `npm run test:unit`. Avota kods `src/` apakšā ir **TypeScript** (`.ts`/`.tsx`); `open-sse/` darbvieta paliek TypeScript (`.ts`).
 8. Iestatījumu lapa ir sadalīta 7 cilnēs: Vispārīgi, Izskats, AI, Drošība, Maršrutēšana, Atspējas, Izeja. Atspēju lapa konfigurē tikai pieprasījumu rindu, savienojuma atdzēšanos, pakalpojumu pārtraukci un gaidīšanas-pārtraukcijas uzvedību; dzīvo pārtraukci izpildes stāvokli rāda Veselības lapā.
 9. **Konteksta nododšanas** stratēģija (`context-relay`) ir sadalīta divās slāņos: `combo.ts` nosaka, vai jāģenerē pāreja, `chat.ts` ievieto pāreju pēc konta atrisināšanas. Pārejas dati atrodas `context_handoffs` SQLite tabulā. Šī sadalīšana ir nostiprināta, jo tikai `chat.ts` zina, vai faktiskais konts mainījies.
 10. **Proxy noteikšana** tagad ir iekļaujoša: `tokenHealthCheck.ts` atrisina proxy katram savienojumam, `/api/providers/validate` izmanto `runWithProxyContext`, un `proxyFetch.ts` izmanto `undici.fetch()`, lai uzturētu dispatcher savietojamību Node 22.

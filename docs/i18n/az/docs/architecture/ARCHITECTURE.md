@@ -15,7 +15,7 @@ O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və tərcümə, ehtiya
 
 Əsas imkanlar:
 
-- CLI/alətlər üçün OpenAI-uyğun API interfeysi (375 provayder, 154 icraçı modul)
+- CLI/alətlər üçün OpenAI-uyğun API interfeysi (375 provayder, 156 icraçı modul)
 - Provayder formatları arasında sorğu/cavab çevrilməsi
 - Model kombinasiyası üzrə ehtiyat keçid (çoxmodelli ardıcıllıq)
 - `compositeTiers` əsasında icra zamanı sıralanan strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`)
@@ -31,7 +31,7 @@ O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və tərcümə, ehtiya
 - `/v1/search` vasitəsilə veb axtarışı (20 provayder)
 - `/v1/moderations` vasitəsilə moderasiya
 - `/v1/rerank` vasitəsilə yenidən sıralama
-- Mühakimə modelləri üçün düşüncə teqlərinin (``) təhlili
+- Mühakimə modelləri üçün düşüncə teqlərinin (`<think>...</think>`) təhlili
 - Ciddi OpenAI SDK uyğunluğu üçün cavabların təmizlənməsi
 - Provayderlərarası uyğunluq üçün rol normallaşdırılması (developer→system, system→user)
 - Strukturlaşdırılmış çıxışın çevrilməsi (json_schema → Gemini responseSchema)
@@ -1075,11 +1075,11 @@ köhnə sistemlərlə uyğunluq üçün saxlanılır. Cari icra mühiti müqavil
 - işəsalma zamanı SQLite sxem miqrasiyaları və avtomatik təkmilləşdirmə qarmaqları
 - köhnə JSON → SQLite miqrasiyası üçün uyğunluq yolu
 
-## 6) SSRF / Xarici URL Qoruyucusu
+## 6) SSRF / Xarici URL Mühafizəsi
 
-- `src/shared/network/outboundUrlGuard.ts` bütün özəl/dövrəvi keçid/lokal keçid hədəf URL-lərini provayder icraçılarına çatmazdan əvvəl bloklayır
-- Provayder modellərinin aşkarlanması və doğrulama marşrutları hər xarici sorğudan əvvəl qoruyucunu tətbiq edən `src/shared/network/safeOutboundFetch.ts` faylından istifadə edir
-- Qoruyucu xətaları HTTP 422 ilə `URL_GUARD_BLOCKED` kimi göstərilir və `providerAudit.ts` vasitəsilə uyğunluq audit jurnalına yazılır
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) `BaseExecutor.execute()` vasitəsilə göndərilən çat sorğularına `src/shared/network/outboundUrlGuard.ts` tətbiq edir. Yalnız ictimai rejimdə (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, özəl bayraq söndürülmüş halda) özəl və geri dövrə hostlarını, eləcə də 169.254.0.0/16 diapazonunu bloklayır; bütün digər rejimlərdə isə bulud metadata hostlarını bloklayır. O, hər hansı DNS axtarışından əvvəl host adını və ya IP literalını yazıldığı şəkildə yoxlayır. Daxili lokal provayderlər bu yoxlamadan keçirilmirlər.
+- Provayder modellərinin aşkarlanması və doğrulanması marşrutları hər xarici sorğudan əvvəl mühafizəni tətbiq edən `src/shared/network/safeOutboundFetch.ts` faylından istifadə edir
+- Mühafizə xətaları HTTP 503 ilə `URL_GUARD_BLOCKED` kimi göstərilir (`getSafeOutboundFetchErrorStatus`; model aşkarlama marşrutu 400 qaytarır), doğrulama zamanı həqiqi SSRF bloklamaları isə audit jurnalında `provider.validation.ssrf_blocked` hadisələri kimi qeydə alınır
 
 ## Müşahidə İmkanı və Əməliyyat Siqnalları
 
@@ -1130,7 +1130,7 @@ Kod tərəfindən aktiv şəkildə istifadə edilən mühit dəyişənləri:
 4. Bulud davranışı `NEXT_PUBLIC_BASE_URL` dəyişəninin düzgün təyin edilməsindən və bulud son nöqtəsinin əlçatanlığından asılıdır.
 5. `open-sse/` kataloqu `@omniroute/open-sse` **npm iş sahəsi paketi** kimi yayımlanır. Mənbə kodu onu `@omniroute/open-sse/...` vasitəsilə import edir (Next.js `transpilePackages` tərəfindən həll olunur). Ardıcıllığı qorumaq üçün bu sənəddəki fayl yollarında hələ də `open-sse/` kataloq adı istifadə olunur.
 6. İdarəetmə panelindəki diaqramlar əlçatan, interaktiv analitik vizuallaşdırmalar (model istifadəsi üzrə sütun diaqramları, uğur göstəriciləri olan provayder bölgüsü cədvəlləri) üçün **Recharts** (SVG əsaslı) istifadə edir.
-7. E2E testləri **Playwright** (`tests/e2e/`) istifadə edir və `npm run test:e2e` vasitəsilə işə salınır. Vahid testlər **Node.js test icraçısından** (`tests/unit/`) istifadə edir və `npm run test:unit` vasitəsilə işə salınır. `src/` altındakı mənbə kodu **TypeScript** (`.ts`/`.tsx`) dilindədir; `open-sse/` iş sahəsi JavaScript (`.js`) olaraq qalır.
+7. E2E testləri **Playwright** (`tests/e2e/`) istifadə edir və `npm run test:e2e` vasitəsilə işə salınır. Vahid testlər **Node.js test icraçısından** (`tests/unit/`) istifadə edir və `npm run test:unit` vasitəsilə işə salınır. `src/` altındakı mənbə kodu **TypeScript** (`.ts`/`.tsx`) dilindədir; `open-sse/` iş sahəsi TypeScript (`.ts`) olaraq qalır.
 8. Parametrlər səhifəsi 7 nişana bölünüb: Ümumi, Görünüş, AI, Təhlükəsizlik, Marşrutlaşdırma, Dayanıqlılıq, Qabaqcıl. Dayanıqlılıq səhifəsi yalnız sorğu növbəsini, bağlantının soyuma müddətini, provayder dövrəqırıcısını və soyuma müddətini gözləmə davranışını konfiqurasiya edir; dövrəqırıcının canlı icra vəziyyəti Sağlamlıq səhifəsində göstərilir.
 9. **Context Relay** strategiyası (`context-relay`) iki təbəqəyə bölünüb: `combo.ts` ötürmənin yaradılıb-yaradılmamalı olduğuna qərar verir, `chat.ts` isə hesab müəyyənləşdirildikdən sonra ötürməni əlavə edir. Ötürmə məlumatları `context_handoffs` SQLite cədvəlində saxlanılır. Bu bölgü məqsədlidir, çünki faktiki hesabın dəyişib-dəyişmədiyini yalnız `chat.ts` bilir.
 10. **Proksi tətbiqi** artıq hərtərəflidir: `tokenHealthCheck.ts` hər bağlantı üçün proksini müəyyənləşdirir, `/api/providers/validate` `runWithProxyContext` istifadə edir və `proxyFetch.ts` Node 22-də dispatcher uyğunluğunu qorumaq üçün `undici.fetch()` istifadə edir.

@@ -153,7 +153,7 @@ Tunnel, Tailscale, Ngrok) ಹಿಂದೆ ಚಲಾಯಿಸಿದರೆ, ಮೇ
 
 `/api/settings/obsidian` ಅದರ `/webdav` ಉಪಮಾರ್ಗವನ್ನೂ ಒಳಗೊಳ್ಳುತ್ತದೆ: Next.js ಗಿಂತ ಮೊದಲು, ಈ ಪೈಪ್ಲೈನ್ನ ಹೊರಗೆ ಕಸ್ಟಮ್ Node ಪದರದಿಂದ ಸೇವೆ ಒದಗಿಸಲ್ಪಡುವ WebDAV ಫೈಲ್ ಸೇವೆಯನ್ನು `POST`, ಕರೆಗಾರನು ಆಯ್ಕೆಮಾಡಿದ ರೂಟ್ಗೆ ಸೂಚಿಸಿ ಹೊಸದಾಗಿ ಸೃಷ್ಟಿಸಿದ Basic ರುಜುವಾತುಗಳನ್ನು ಪ್ರತಿಧ್ವನಿಸುತ್ತದೆ; `DELETE` ಅವುಗಳನ್ನು ಪರಿವರ್ತಿಸುತ್ತದೆ; ಮತ್ತು ಮೂಲ `POST` Obsidian REST API ಟೋಕನ್ ಅನ್ನು ಸಂಗ್ರಹಿಸುತ್ತದೆ. GHSA-62vw ಕೇವಲ `GET` ಪಾಸ್ವರ್ಡ್ ಬಹಿರಂಗಪಡಿಸುವಿಕೆಯನ್ನು ಮರೆಮಾಡಿತು; ರುಜುವಾತುಗಳ ವಿತರಣೆಯು ಇನ್ನೂ ವಿಫಲವಾದಾಗ ಅನುಮತಿಸುವ ಹಂತದಲ್ಲೇ ಇತ್ತು (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` ಹೆಚ್ಚುವರಿಯಾಗಿ ಡೇಟಾ ಡೈರೆಕ್ಟರಿಯೇ ಆಗಿರುವ, ಅದರೊಳಗೆ ಇರುವ ಅಥವಾ ಅದನ್ನು ಒಳಗೊಂಡಿರುವ ವಾಲ್ಟ್ ಅನ್ನು ನಿರಾಕರಿಸುತ್ತದೆ.
 
-#### ರುಜುವಾತುಗಳ ರಫ್ತುಗಳು ಆಪರೇಟರ್ಗಳಿಗೆ ಮಾತ್ರ
+#### ರುಜುವಾತುಗಳ ರಫ್ತು ಮತ್ತು ಮರುಸ್ಥಾಪನೆ ಆಪರೇಟರ್‌ಗಳಿಗೆ ಮಾತ್ರ
 
 ಮೇಲಿನ ಹಂತವು _ಯಾವುದಾದರೂ_ ರುಜುವಾತು ಅಗತ್ಯವಿದೆಯೇ ಎಂಬುದನ್ನು ಮಾತ್ರ ನಿರ್ಧರಿಸುತ್ತದೆ. ಸಂಗ್ರಹಿಸಿದ
 ರುಜುವಾತುಗಳನ್ನು ಡೌನ್ಲೋಡ್ ಮಾಡುವ ಮಾರ್ಗಗಳು ಹ್ಯಾಂಡ್ಲರ್ನಲ್ಲಿ ಎರಡನೇ ಪರಿಶೀಲನೆಯನ್ನು ಸೇರಿಸುತ್ತವೆ: `GET /api/settings/export-json` (ಡೀಕ್ರಿಪ್ಟ್ ಮಾಡಿದ
@@ -164,22 +164,9 @@ Tunnel, Tailscale, Ngrok) ಹಿಂದೆ ಚಲಾಯಿಸಿದರೆ, ಮೇ
 ಮತ್ತು `admin` ಸೇರಿದಂತೆ) ಹಾಗೂ `oma_` ಪ್ರವೇಶ ಟೋಕನ್ಗಳಿಗೆ `403` ಎಂದು ಪ್ರತಿಕ್ರಿಯಿಸುತ್ತದೆ. ಸಿಂಕ್ ಟೋಕನ್ ನೀಡುವಿಕೆ (`POST /api/sync/tokens`) ಇದೇ
 ಸಹಾಯಕವನ್ನು, ಜೊತೆಗೆ ವಿಶ್ವಾಸಾರ್ಹ ಲೂಪ್ಬ್ಯಾಕ್ ಆಂತರಿಕ-ಸೇವಾ ಟೋಕನ್ ಅನ್ನು ಬಳಸುತ್ತದೆ.
 
-#### Credential exports and restores are operator-only
+ಸಂಬಂಧಿತ ವಿನಾಶಕಾರಿ ಕಾರ್ಯಗಳಿಗೂ ಇದೇ ಮಿತಿ ಅನ್ವಯಿಸುತ್ತದೆ: `POST /api/db-backups/import` (ಅಪ್‌ಲೋಡ್ ಮಾಡಿದ `.sqlite` ಫೈಲ್, `dryRun=true` ಸಹ ಸೇರಿ), `POST /api/db-backups` (ಉಳಿಸಿದ ಬ್ಯಾಕಪ್ ಅನ್ನು ಅದರ id ಮೂಲಕ ಮರುಸ್ಥಾಪಿಸುವುದು) ಮತ್ತು `POST /api/settings/import-json` (ಹಳೆಯ JSON ಸ್ವರೂಪದಿಂದ ಮರುಸ್ಥಾಪನೆ) ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿರುವ ಡೇಟಾಬೇಸ್ ಅಥವಾ ಸೆಟ್ಟಿಂಗ್‌ಗಳು, ಸಂಪರ್ಕಗಳು ಮತ್ತು API ಕೀಗಳ ಸಂಪೂರ್ಣ ಸಮೂಹವನ್ನು ಬದಲಿಸುತ್ತವೆ. ಆದ್ದರಿಂದ ಯಂತ್ರದ ರುಜುವಾತುಗಳಿಂದ ಈ ಕಾರ್ಯಗಳನ್ನೂ ಆರಂಭಿಸಲಾಗುವುದಿಲ್ಲ.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ಮರುಸ್ಥಾಪನೆ ಬಿಂದುಗಳನ್ನು ಅಳಿಸುವುದಕ್ಕೂ ಇದೇ ಮಿತಿ ಇದೆ: `DELETE /api/db-backups` (ಸ್ವಚ್ಛಗೊಳಿಸುವಿಕೆ — ಇತ್ತೀಚಿನ N ಅನ್ನು ಉಳಿಸುವುದು ಅಥವಾ D ದಿನಗಳಿಗಿಂತ ಹಳೆಯದನ್ನು ಅಳಿಸುವುದು) ಮತ್ತು `PATCH /api/db-backups` (ಉಳಿಸಿಕೊಳ್ಳುವ ಸೆಟ್ಟಿಂಗ್‌ಗಳು). ಉಳಿಸಿದ ನಿಯಮಗಳನ್ನೇ `cleanupDbBackups()` ಪ್ರತಿ ಸ್ವಯಂಚಾಲಿತ ಬ್ಯಾಕಪ್ ನಂತರ ಅನ್ವಯಿಸುತ್ತದೆ (`src/lib/db/backup.ts`); ಹೀಗಾಗಿ `keepLatest: 1` ಉಳಿಸಬಹುದಾದ ಯಂತ್ರದ ರುಜುವಾತು ಮುಂದಿನ ಸ್ನ್ಯಾಪ್‌ಶಾಟ್‌ನಲ್ಲಿ ಹಿಂದಿನ ಮರುಸ್ಥಾಪನೆ ಬಿಂದುಗಳನ್ನು ಅಳಿಸಬಹುದಿತ್ತು. ಬ್ಯಾಕಪ್‌ಗಳನ್ನು ಪಟ್ಟಿ ಮಾಡುವುದು ಮತ್ತು ರಚಿಸುವುದು (`GET`/`PUT /api/db-backups`) ಸಾಮಾನ್ಯ ನಿರ್ವಹಣಾ ದೃಢೀಕರಣವನ್ನೇ ಉಳಿಸಿಕೊಳ್ಳುತ್ತದೆ.
 
 ### ಹೊಸ-ಸ್ಥಾಪನೆಯ ಬೂಟ್ಸ್ಟ್ರ್ಯಾಪ್ ಲೂಪ್ಬ್ಯಾಕ್ಗೆ ಮಾತ್ರ ಸೀಮಿತ — `Host` ನಿಂದಲ್ಲ, ನಿಜವಾದ ಪೀರ್ನಿಂದ
 

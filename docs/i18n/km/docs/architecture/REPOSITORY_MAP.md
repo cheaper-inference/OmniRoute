@@ -106,7 +106,7 @@ OmniRoute/
 
 > **បានផ្លាស់ចេញពីថត root ក្នុង v3.8.26 (ដើម្បីកាត់បន្ថយភាពរញ៉េរញ៉ៃ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` និង `quality-metrics.json` ដែលបានបង្កើត (ត្រូវបាន gitignore)។ សូមមើល [`## config/`](#config--static-configs--quality-gate-state)។
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` និង `quality-metrics.json` ដែលបានបង្កើត (ត្រូវបាន gitignore)។ សូមមើល [`## config/`](#config--ការកំណត់រចនាសម្ព័ន្ធឋិតិវន្ត--ស្ថានភាពច្រកត្រួតពិនិត្យគុណភាព)។
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ថតរង                  | គោលបំណង                                                                                                                                                                                                                                       |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ការបកប្រែឯកសារតាមមូលដ្ឋាននីយកម្ម (41 ភាសា)                                                                                                                                                                                                    |
+| `docs/i18n/`          | ការបកប្រែឯកសារតាមមូលដ្ឋាននីយកម្ម (66 ភាសា)                                                                                                                                                                                                    |
 | `docs/screenshots/`   | ធនធានរូបភាពសម្រាប់មគ្គុទ្ទេសក៍                                                                                                                                                                                                                |
 | `_tasks/superpowers/` | ផែនការ/លក្ខណៈបច្ចេកទេសពី superpowers (`writing-plans`/`brainstorming`) + ការស្រាវជ្រាវ — ត្រូវបានបំបែកដាច់ដោយឡែក ជា repo ដែលមានកំណែដោយឡែក និងត្រូវបាន gitignore ដោយមែកធាងមេ។ សូមមើល CLAUDE.md → "វត្ថុបុរាណនៃការធ្វើផែនការ និងការស្រាវជ្រាវ"។ |
 

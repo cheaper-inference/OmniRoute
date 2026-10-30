@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 வழங்குநர் பதிவகங்கள், தலைப்பு சுயவிவரங்கள், அடையாளம், …
 ├── handlers/               கோரிக்கைக் கையாளிகள் (அரட்டை, உட்பொதிவுகள், ஒலி, படம், …)
-├── executors/              150 வழங்குநர் இயக்கி தொகுதிகள் (இயக்கி வகுப்புகள் + வழங்குநருக்கான உதவிகள்)
+├── executors/              156 வழங்குநர் இயக்கி தொகுதிகள் (இயக்கி வகுப்புகள் + வழங்குநருக்கான உதவிகள்)
 ├── translator/             வடிவமைப்பு மாற்றம் (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ஸ்ட்ரீம் மாற்றி
 ├── services/               80+ சேவைத் தொகுதிகள் (சேர்க்கைகள், மாற்றுவழி, ஒதுக்கீடுகள், அடையாளம், …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 உயர்நிலை இயக்கி தொகுதிகள் (`base.ts`, `index.ts` மற்றும் சோதனைகள் நீங்கலான `*.ts` — இந்த எண்ணிக்கையை
+156 உயர்நிலை இயக்கி தொகுதிகள் (`base.ts`, `index.ts` மற்றும் சோதனைகள் நீங்கலான `*.ts` — இந்த எண்ணிக்கையை
 `npm run check:docs-counts` அளவிடுகிறது). ஒவ்வொரு இயக்கி வகுப்பும் `BaseExecutor` (`base.ts`) ஐ,
 நேரடியாகவோ `DefaultExecutor` அல்லது மற்றொரு இயக்கி வழியாகவோ நீட்டிக்கிறது; மீதமுள்ள தொகுதிகள் வழங்குநருக்கான
 உதவிகள் (கருவித் திட்டவடிவங்கள், fetch/TTS அடாப்டர்கள், தனித்தன்மைக் கையாளிகள்). இயக்கிகளில் இவை அடங்கும்:
@@ -771,7 +771,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`-ஐ நீட்டிக்கவும்).
 2. `src/shared/constants/mcpScopes.ts`-இல் பொருத்தமான scope(களை) ஒதுக்கவும்.
 3. `open-sse/mcp-server/server.ts`-இல் tool-ஐப் பதிவுசெய்யவும்.
-4. `open-sse/mcp-server/__tests__/`-இன் கீழ் சோதனைகளைச் சேர்க்கவும்.
+4. `tests/unit/`-இன் கீழ் சோதனைகளைச் சேர்க்கவும்.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ஐப் புதுப்பிக்கவும்.
 
 ### புதிய A2A skill-ஐச் சேர்த்தல்
@@ -789,7 +789,7 @@ bin/
 - **பெயரிடல்**: கோப்புகள் `camelCase` அல்லது `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = எல்லா இடங்களிலும் `error`;
-  `no-explicit-any` = `open-sse/` மற்றும் `tests/`-இல் `warn`, மற்ற இடங்களில் error.
+  `no-explicit-any` = `open-sse/**/*.ts` மற்றும் `tests/**/*.ts`-இல் `error`.
 - **TypeScript**: `strict: false` (மரபுவழி நிலைப்பாடு). Modules இடையிலான எல்லைகளில்
   inference-ஐவிட வெளிப்படையான types-ஐ முன்னுரிமைப்படுத்தவும்.
 - **Database**: routes அல்லது handlers-இல் ஒருபோதும் raw SQL எழுத வேண்டாம் — எப்போதும்
@@ -818,8 +818,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main`-க்கு ஒருபோதும் நேரடியாக commit செய்ய வேண்டாம்.
-- **Husky**: pre-commit, `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ஆகியவற்றை இயக்கும்; pre-push, `check:any-budget:t11` + `check:tracked-artifacts` ஆகியவற்றை இயக்கும் (வேகமான gates; `test:unit` விலக்கப்பட்டுள்ளது).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

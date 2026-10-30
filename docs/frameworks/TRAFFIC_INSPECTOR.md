@@ -90,17 +90,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanism:** Uses OS APIs to redirect all HTTP/HTTPS traffic through the HTTP_PROXY listener:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` and the HTTP/HTTPS host/port settings
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Reach:** Every application on the machine that respects system proxy settings
   **Note:** `source` = `"system-proxy"`
 
 **Safety mechanisms:**
 
-- Auto-disable timer (default 30 min, configurable via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Previous system proxy state is saved in DB and restored on revert
-- Dashboard shows "Reverting system proxy" prompt if user navigates away while active
-- UI shows `⚠ Advanced` badge + explicit confirmation checkbox
+- Applying the proxy schedules a process-local, best-effort revert timer (default 30 min, configurable via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). The timer does not survive a server process exit.
+- The previous proxy state is kept in process memory, not persisted to a database by this capture-state store. Revert restores the saved macOS/GNOME settings; on Windows it resets the WinHTTP proxy instead of restoring the previous configuration.
+- While the proxy is reported as applied, browser unload sends a best-effort keepalive revert request and requests a native confirmation prompt whose wording is controlled by the browser. Unmounting the inspector during SPA navigation also attempts the revert, without that browser prompt.
+- The capture toolbar shows the localized `System-wide` control with a warning icon. Clicking it currently changes local UI state only; it does not show a confirmation checkbox or apply or revert the system proxy.
 
 ### Mode 5 — TPROXY transparent decrypt (Linux, root, opt-in)
 
@@ -115,13 +115,13 @@ This is a substantial subsystem with its own dedicated operator guide — see `d
 
 ### Capture mode comparison
 
-| Mode              | Setup                         |          Sudo?          | Reach                       | Notes                                                                                                                  |
-| ----------------- | ----------------------------- | :---------------------: | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Automatic                     |    Once (cert+hosts)    | 9 IDE agents                | Default on                                                                                                             |
-| 2. Custom Hosts   | Per-host input                |    Yes (hosts file)     | Any app using that host     | Persisted in DB                                                                                                        |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`      |           No            | Apps respecting env         | Port 8080; HTTPS is CONNECT-tunneled (metadata only, never decrypted)                                                  |
-| 4. System-wide    | Toggle + confirm              |           Yes           | All apps on machine         | Auto-disable in 30 min                                                                                                 |
-| 5. TPROXY decrypt | Toggle (Linux + native addon) | Yes (root + CA install) | Any host on the target port | Decrypts arbitrary hosts; off by default — see `docs/security/MITM-TPROXY-DECRYPT.md` (git; not compiled into `/docs`) |
+| Mode              | Setup                                                          |          Sudo?          | Reach                       | Notes                                                                                                                  |
+| ----------------- | -------------------------------------------------------------- | :---------------------: | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Automatic                                                      |    Once (cert+hosts)    | 9 IDE agents                | Default on                                                                                                             |
+| 2. Custom Hosts   | Per-host input                                                 |    Yes (hosts file)     | Any app using that host     | Persisted in DB                                                                                                        |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |           No            | Apps respecting env         | Port 8080; HTTPS is CONNECT-tunneled (metadata only, never decrypted)                                                  |
+| 4. System-wide    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |           Yes           | All apps on machine         | Best-effort revert timer (30 min by default)                                                                           |
+| 5. TPROXY decrypt | Toggle (Linux + native addon)                                  | Yes (root + CA install) | Any host on the target port | Decrypts arbitrary hosts; off by default — see `docs/security/MITM-TPROXY-DECRYPT.md` (git; not compiled into `/docs`) |
 
 ---
 
@@ -317,7 +317,7 @@ support is a follow-up).
 ### 5.1 Recording a session
 
 1. Click **"● Record session"** in the toolbar → enter a name (optional)
-2. Live tail continues normally; a red pulsing indicator shows `◉ REC · <name> · 00:42 · 23 reqs`
+2. Live tail continues normally; the recording bar shows a pulsing red dot, elapsed time, the session name when available, and a localized Stop control.
 3. Click **"⏹ Stop"** → the session snapshot is saved to `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Viewing a recorded session
@@ -325,7 +325,7 @@ support is a follow-up).
 The **Sessions** dropdown in the toolbar lists saved sessions. Selecting one:
 
 - Loads the session's snapshot (frozen state)
-- A banner shows: `Viewing recorded session "<name>" — [Back to live]`
+- A banner shows a localized recorded-session label and the session name (or a localized untitled fallback), alongside a localized Back to live button.
 - The Stats tab becomes available with Recharts aggregates
 
 ### 5.3 Export formats
@@ -417,7 +417,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-The dashboard will also offer "Revert system proxy" on next load if it detects the DB state indicates proxy was active.
+The saved proxy state is held only in the server process. After a crash or restart, the current capture-state store cannot restore that snapshot from a database; use the platform recovery commands above when manual recovery is needed.
 
 ### Buffer full
 

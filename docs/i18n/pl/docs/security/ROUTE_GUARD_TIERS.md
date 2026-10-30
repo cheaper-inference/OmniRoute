@@ -218,7 +218,7 @@ nadal znajdowało się na poziomie przepuszczającym żądania w razie awarii za
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` dodatkowo odrzuca sejf, który jest
 katalogiem danych, znajduje się w nim lub go zawiera.
 
-#### Eksporty poświadczeń są dostępne wyłącznie dla operatora
+#### Eksporty poświadczeń i przywracanie są dostępne wyłącznie dla operatora
 
 Powyższy poziom określa jedynie, czy wymagane są _jakiekolwiek_ dane uwierzytelniające. Trasy pobierające
 przechowywane dane uwierzytelniające wykonują w procedurze obsługi drugą kontrolę: `GET /api/settings/export-json` (odszyfrowane
@@ -229,22 +229,9 @@ instancję z wyłączonym logowaniem, a także zwraca `403` dla kluczy API o dow
 i `admin`) oraz dla tokenów dostępu `oma_`. Wydawanie tokenów synchronizacji (`POST /api/sync/tokens`) korzysta z tego
 samego mechanizmu pomocniczego, a dodatkowo obsługuje zaufany token usługi wewnętrznej pochodzący z interfejsu pętli zwrotnej.
 
-#### Credential exports and restores are operator-only
+Ta sama granica dotyczy odpowiadających im działań destrukcyjnych: `POST /api/db-backups/import` (przesłany plik `.sqlite`, także z `dryRun=true`), `POST /api/db-backups` (przywrócenie zapisanej kopii według jej id) oraz `POST /api/settings/import-json` (przywrócenie starszego formatu JSON) zastępują działającą bazę lub cały zestaw ustawień, połączeń i kluczy API. Poświadczenie maszynowe również nie może ich uruchomić.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Ta sama granica obejmuje niszczenie punktów przywracania: `DELETE /api/db-backups` (czyszczenie — pozostawienie ostatnich N lub usunięcie starszych niż D dni) oraz `PATCH /api/db-backups` (ustawienia przechowywania). Zapisane reguły są dokładnie tymi, które `cleanupDbBackups()` stosuje po każdej automatycznej kopii (`src/lib/db/backup.ts`); poświadczenie maszynowe mogące zapisać `keepLatest: 1` mogłoby więc usunąć wcześniejsze punkty przy następnym obrazie. Wyświetlanie i tworzenie kopii (`GET`/`PUT /api/db-backups`) zachowuje zwykłe uwierzytelnianie zarządzania.
 
 ### Rozruch świeżej instalacji jest dostępny tylko z interfejsu pętli zwrotnej — na podstawie rzeczywistego peera, a nie `Host`
 

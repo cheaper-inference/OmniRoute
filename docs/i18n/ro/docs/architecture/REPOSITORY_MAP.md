@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Mutate din rădăcină în v3.8.26 (pentru simplificare):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` și fișierul generat `quality-metrics.json` (ignorat de git). Consultați [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` și fișierul generat `quality-metrics.json` (ignorat de git). Consultați [`## config/`](#config--configurații-statice--starea-pragurilor-de-calitate).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Subdirector           | Scop                                                                                                                                                                                                                            |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traduceri localizate ale documentației (41 de limbi)                                                                                                                                                                            |
+| `docs/i18n/`          | Traduceri localizate ale documentației (66 de limbi)                                                                                                                                                                            |
 | `docs/screenshots/`   | Resurse de imagine pentru ghiduri                                                                                                                                                                                               |
 | `_tasks/superpowers/` | Planuri/specificații din superpowers (`writing-plans`/`brainstorming`) + cercetare — depozit izolat, versionat separat și ignorat de Git în arborele principal. Consultați CLAUDE.md → „Artefacte de planificare și cercetare”. |
 

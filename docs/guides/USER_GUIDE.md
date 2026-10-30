@@ -594,7 +594,7 @@ post_install() {
 | `NODE_ENV`                              | runtime default          | Set `production` for deploy                                                                                                            |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | Public base URL surfaced to the dashboard and exposed to the server (replaces legacy `BASE_URL`)                                       |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Cloud sync endpoint base URL (replaces legacy `CLOUD_URL`)                                                                             |
-| `API_KEY_SECRET`                        | _(auto-generated)_       | HMAC secret for generated API keys — auto-generated on first run and persisted to `server.env`                                         |
+| `API_KEY_SECRET`                        | _(auto-generated)_       | Checksum secret for machine-bound API keys — the startup bootstrap auto-generates it when unset and saves it to writable `server.env`  |
 | `REQUIRE_API_KEY`                       | `false`                  | Enforce Bearer API key on `/v1/*`                                                                                                      |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | Allow authenticated dashboard users to reveal full stored API key values on demand                                                     |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side refresh cadence for cached Provider Limits data; UI refresh buttons still trigger manual sync                              |

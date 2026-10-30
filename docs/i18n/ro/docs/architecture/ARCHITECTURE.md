@@ -15,7 +15,7 @@ Acesta oferă un singur endpoint compatibil cu OpenAI (`/v1/*`) și direcționea
 
 Capabilități principale:
 
-- Interfață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 154 de module de execuție)
+- Interfață API compatibilă cu OpenAI pentru CLI/instrumente (375 de furnizori, 156 de module de execuție)
 - Traducerea cererilor/răspunsurilor între formatele furnizorilor
 - Mecanism de rezervă pentru combinații de modele (secvență cu mai multe modele)
 - Pași structurați pentru combinații (`provider + model + connection`), cu ordonare la execuție prin `compositeTiers`
@@ -31,7 +31,7 @@ Capabilități principale:
 - Căutare pe web prin `/v1/search` (20 de furnizori)
 - Moderare prin `/v1/moderations`
 - Reordonarea rezultatelor prin `/v1/rerank`
-- Parsarea etichetelor de raționament (``) pentru modelele de raționament
+- Parsarea etichetelor de raționament (`<think>...</think>`) pentru modelele de raționament
 - Igienizarea răspunsurilor pentru compatibilitate strictă cu SDK-ul OpenAI
 - Normalizarea rolurilor (developer→system, system→user) pentru compatibilitate între furnizori
 - Conversia ieșirilor structurate (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ compatibilitate cu sistemele vechi. Contractul curent al mediului de execuție u
 - migrări ale schemei SQLite și mecanisme de actualizare automată la pornire
 - cale de compatibilitate pentru migrarea din JSON moștenit → SQLite
 
-## 6) Protecție SSRF / pentru URL-uri de ieșire
+## 6) Protecție SSRF / URL de ieșire
 
-- `src/shared/network/outboundUrlGuard.ts` blochează toate URL-urile țintă private/loopback/link-local înainte ca acestea să ajungă la executorii furnizorilor
-- Rutele de descoperire și validare a modelelor furnizorilor utilizează `src/shared/network/safeOutboundFetch.ts`, care aplică protecția înainte de fiecare solicitare de ieșire
-- Erorile protecției sunt semnalate ca `URL_GUARD_BLOCKED` cu HTTP 422 și sunt înregistrate în jurnalul de audit pentru conformitate prin `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplică `src/shared/network/outboundUrlGuard.ts` solicitărilor de chat trimise prin `BaseExecutor.execute()`. În modul exclusiv public (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` cu indicatorul pentru rețele private dezactivat), blochează gazdele private și de loopback, precum și intervalul 169.254.0.0/16; în orice alt mod, blochează gazdele de metadate cloud. Verifică numele gazdei sau adresa IP literală așa cum este scrisă, înainte de orice interogare DNS. Furnizorii locali integrați omit această verificare.
+- Rutele de descoperire și validare a modelelor furnizorilor utilizează `src/shared/network/safeOutboundFetch.ts`, care aplică protecția înaintea fiecărei solicitări de ieșire
+- Erorile protecției sunt expuse ca `URL_GUARD_BLOCKED` cu HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruta de descoperire a modelelor returnează 400), iar blocările SSRF autentice din timpul validării sunt înregistrate în jurnalul de audit ca evenimente `provider.validation.ssrf_blocked`
 
 ## Observabilitate și semnale operaționale
 
@@ -1149,7 +1149,7 @@ Variabile de mediu utilizate în mod activ de cod:
 4. Comportamentul în cloud depinde de valoarea corectă a `NEXT_PUBLIC_BASE_URL` și de accesibilitatea endpointului cloud.
 5. Directorul `open-sse/` este publicat drept **pachetul de spațiu de lucru npm `@omniroute/open-sse`**. Codul sursă îl importă prin `@omniroute/open-sse/...` (rezolvat de `transpilePackages` din Next.js). Căile fișierelor din acest document continuă să utilizeze numele directorului `open-sse/` pentru consecvență.
 6. Graficele din panoul de control utilizează **Recharts** (bazat pe SVG) pentru vizualizări analitice accesibile și interactive (grafice cu bare pentru utilizarea modelelor, tabele cu defalcarea pe furnizori și ratele de succes).
-7. Testele E2E utilizează **Playwright** (`tests/e2e/`) și sunt rulate prin `npm run test:e2e`. Testele unitare utilizează **instrumentul de rulare a testelor Node.js** (`tests/unit/`) și sunt rulate prin `npm run test:unit`. Codul sursă din `src/` este **TypeScript** (`.ts`/`.tsx`); spațiul de lucru `open-sse/` rămâne JavaScript (`.js`).
+7. Testele E2E utilizează **Playwright** (`tests/e2e/`) și sunt rulate prin `npm run test:e2e`. Testele unitare utilizează **instrumentul de rulare a testelor Node.js** (`tests/unit/`) și sunt rulate prin `npm run test:unit`. Codul sursă din `src/` este **TypeScript** (`.ts`/`.tsx`); spațiul de lucru `open-sse/` rămâne TypeScript (`.ts`).
 8. Pagina de setări este organizată în 7 file: General, Aspect, IA, Securitate, Rutare, Reziliență, Avansat. Pagina Reziliență configurează numai coada de cereri, perioada de așteptare a conexiunii, disjunctorul furnizorului și comportamentul de așteptare a încheierii perioadei de răcire; starea de execuție în timp real a disjunctorului este afișată în pagina Stare de funcționare.
 9. Strategia **Context Relay** (`context-relay`) este împărțită în două niveluri: `combo.ts` decide dacă trebuie generat un transfer, iar `chat.ts` injectează transferul după rezolvarea contului. Datele transferului se află în tabelul SQLite `context_handoffs`. Această separare este intenționată, deoarece numai `chat.ts` știe dacă s-a schimbat contul efectiv.
 10. **Aplicarea proxy-ului** este acum completă: `tokenHealthCheck.ts` rezolvă proxy-ul pentru fiecare conexiune, `/api/providers/validate` utilizează `runWithProxyContext`, iar `proxyFetch.ts` utilizează `undici.fetch()` pentru a menține compatibilitatea cu dispecerul în Node 22.

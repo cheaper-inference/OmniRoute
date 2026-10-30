@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 でルート外へ移動（整理）：**
 >
-> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`、および生成される `quality-metrics.json`（gitignore 対象）。[`## config/`](#config--static-configs--quality-gate-state)を参照してください。
+> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`、および生成される `quality-metrics.json`（gitignore 対象）。[`## config/`](#config--静的設定--品質ゲートの状態)を参照してください。
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | サブディレクトリ      | 目的                                                                                                                                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ローカライズされたドキュメントの翻訳（41 ロケール）                                                                                                                                                                        |
+| `docs/i18n/`          | ローカライズされたドキュメントの翻訳（66 ロケール）                                                                                                                                                                        |
 | `docs/screenshots/`   | ガイド用の画像アセット                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | superpowers（`writing-plans`/`brainstorming`）による計画・仕様書 + 調査資料 — 分離された個別にバージョン管理されるリポジトリで、メインツリーでは gitignore の対象です。CLAUDE.md →「計画・調査成果物」を参照してください。 |
 

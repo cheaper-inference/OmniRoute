@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mecanismo:** Usa APIs do sistema operacional para redirecionar todo o tráfego HTTP/HTTPS pelo listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` e as configurações de host/porta HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Alcance:** Todos os aplicativos da máquina que respeitam as configurações de proxy do sistema
   **Observação:** `source` = `"system-proxy"`
 
 **Mecanismos de segurança:**
 
-- Temporizador de desativação automática (padrão de 30 min, configurável por meio de `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- O estado anterior do proxy do sistema é salvo no banco de dados e restaurado ao reverter
-- O painel exibe a mensagem "Revertendo o proxy do sistema" se o usuário sair da página enquanto ele estiver ativo
-- A interface exibe o selo `⚠ Avançado` + uma caixa de seleção de confirmação explícita
+- Aplicar o proxy agenda um temporizador de reversão de melhor esforço, local ao processo (30 min por padrão, configurável por `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Ele não sobrevive ao encerramento do processo do servidor.
+- O estado anterior do proxy fica na memória do processo; este armazenamento de estado de captura não o persiste em banco de dados. A reversão restaura as configurações salvas do macOS/GNOME; no Windows, redefine o proxy WinHTTP em vez de restaurar a configuração anterior.
+- Enquanto o proxy é informado como aplicado, a saída da página envia uma solicitação de reversão com keepalive, de melhor esforço, e solicita uma confirmação nativa cujo texto é controlado pelo navegador. Desmontar o inspetor durante a navegação SPA também tenta a reversão, sem esse aviso do navegador.
+- A barra de captura exibe o controle `System-wide` traduzido, com um ícone de aviso. Clicar nele atualmente só altera o estado local da interface; não exibe uma caixa de confirmação nem aplica ou reverte o proxy do sistema.
 
 ### Modo 5 — Descriptografia transparente TPROXY (Linux, root, opcional)
 
@@ -113,13 +113,13 @@ Este é um subsistema substancial, com seu próprio guia dedicado para operadore
 
 ### Comparação dos modos de captura
 
-| Modo                      | Configuração                    |             Sudo?             | Alcance                           | Observações                                                                                                                               |
-| ------------------------- | ------------------------------- | :---------------------------: | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge            | Automática                      |     Uma vez (cert+hosts)      | 9 agentes de IDE                  | Ativado por padrão                                                                                                                        |
-| 2. Hosts personalizados   | Entrada por host                |      Sim (arquivo hosts)      | Qualquer app que use esse host    | Persistido no banco de dados                                                                                                              |
-| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`        |              Não              | Apps que respeitam o ambiente     | Porta 8080; HTTPS usa túnel CONNECT (somente metadados, nunca descriptografado)                                                           |
-| 4. Todo o sistema         | Alternar + confirmar            |              Sim              | Todos os apps na máquina          | Desativação automática em 30 min                                                                                                          |
-| 5. Descriptografia TPROXY | Alternar (Linux + addon nativo) | Sim (root + instalação da CA) | Qualquer host na porta de destino | Descriptografa hosts arbitrários; desativado por padrão — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
+| Modo                      | Configuração                                                   |             Sudo?             | Alcance                           | Observações                                                                                                                               |
+| ------------------------- | -------------------------------------------------------------- | :---------------------------: | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge            | Automática                                                     |     Uma vez (cert+hosts)      | 9 agentes de IDE                  | Ativado por padrão                                                                                                                        |
+| 2. Hosts personalizados   | Entrada por host                                               |      Sim (arquivo hosts)      | Qualquer app que use esse host    | Persistido no banco de dados                                                                                                              |
+| 3. HTTP_PROXY             | `export HTTPS_PROXY=...`                                       |              Não              | Apps que respeitam o ambiente     | Porta 8080; HTTPS usa túnel CONNECT (somente metadados, nunca descriptografado)                                                           |
+| 4. Todo o sistema         | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Sim              | Todos os apps na máquina          | Temporizador de reversão de melhor esforço (30 min por padrão)                                                                            |
+| 5. Descriptografia TPROXY | Alternar (Linux + addon nativo)                                | Sim (root + instalação da CA) | Qualquer host na porta de destino | Descriptografa hosts arbitrários; desativado por padrão — consulte `docs/security/MITM-TPROXY-DECRYPT.md` (git; não compilado em `/docs`) |
 
 ---
 
@@ -316,7 +316,7 @@ será adicionado posteriormente).
 ### 5.1 Gravando uma sessão
 
 1. Clique em **"● Gravar sessão"** na barra de ferramentas → insira um nome (opcional)
-2. O acompanhamento em tempo real continua normalmente; um indicador vermelho pulsante exibe `◉ GRAVANDO · <nome> · 00:42 · 23 reqs`
+2. O acompanhamento em tempo real continua normalmente; a barra de gravação mostra um ponto vermelho pulsante, o tempo decorrido, o nome da sessão quando disponível e um controle Parar traduzido.
 3. Clique em **"⏹ Parar"** → o snapshot da sessão é salvo em `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Visualizando uma sessão gravada
@@ -324,7 +324,7 @@ será adicionado posteriormente).
 O menu suspenso **Sessões** na barra de ferramentas lista as sessões salvas. Ao selecionar uma:
 
 - Carrega o snapshot da sessão (estado congelado)
-- Um banner exibe: `Visualizando a sessão gravada "<nome>" — [Voltar ao tempo real]`
+- Um banner mostra um rótulo traduzido de sessão gravada e o nome da sessão (ou a alternativa traduzida para uma sessão sem título), ao lado de um botão Voltar ao tempo real traduzido.
 - A aba Estatísticas fica disponível com agregações do Recharts
 
 ### 5.3 Formatos de exportação
@@ -348,7 +348,7 @@ O Traffic Inspector mostra **todo o tráfego HTTPS interceptado**, incluindo cab
 | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **LOCAL_ONLY**                  | Todas as rotas e o endpoint WebSocket são restritos ao loopback (imposto em `routeGuard.ts` antes da autenticação)                                                                                                       |
 | **Mascaramento de segredos**    | O scanner linear `maskSecret()` oculta credenciais Bearer da RFC 6750, chaves com prefixo de provedor e tokens opacos longos antes de `TrafficBuffer.push()`                                                             |
-| **Limite de tamanho do corpo**  | Corpos > `INSPECTOR_MAX_BODY_KB` (padrão: 1024 KB) são truncados com o aviso `"(truncado para preservar o desempenho)"`                                                                                                  |
+| **Limite de tamanho do corpo**  | Corpos > `INSPECTOR_MAX_BODY_KB` (padrão: 1024 KB) são truncados com o aviso `"(truncated for performance)"`                                                                                                             |
 | **Sanitização de cabeçalhos**   | Os nomes são convertidos em minúsculas; cabeçalhos de enquadramento/salto a salto e de autenticação de proxy são descartados; cookies são totalmente ocultados; os valores de credenciais são delegados a `maskSecret()` |
 | **CSP**                         | Política de Segurança de Conteúdo rigorosa nas páginas do Traffic Inspector para impedir XSS por meio de corpos de resposta injetados                                                                                    |
 | **Sem persistência por padrão** | O `TrafficBuffer` fica na memória e é perdido quando o servidor é reiniciado. As sessões são persistidas somente quando gravadas explicitamente                                                                          |
@@ -416,7 +416,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-O painel também oferecerá a opção "Reverter proxy do sistema" no próximo carregamento se detectar que o estado no banco de dados indica que o proxy estava ativo.
+O estado salvo do proxy existe apenas no processo do servidor. Após uma falha ou reinicialização, o armazenamento atual do estado de captura não consegue restaurar esse instantâneo de um banco de dados; use os comandos de recuperação da plataforma acima quando precisar de recuperação manual.
 
 ### Buffer cheio
 

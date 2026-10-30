@@ -106,7 +106,7 @@ OmniRoute/
 
 > **ย้ายออกจากไดเรกทอรีรากใน v3.8.26 (เพื่อลดความรก):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` และ `quality-metrics.json` ที่สร้างขึ้นโดยอัตโนมัติ (ถูก gitignore) ดู [`## config/`](#config--static-configs--quality-gate-state)
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` และ `quality-metrics.json` ที่สร้างขึ้นโดยอัตโนมัติ (ถูก gitignore) ดู [`## config/`](#config--การกำหนดค่าแบบคงที่--สถานะเกณฑ์ตรวจสอบคุณภาพ)
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ไดเรกทอรีย่อย         | วัตถุประสงค์                                                                                                                                                                                                   |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | คำแปลเอกสารเป็นภาษาท้องถิ่น (41 ภาษา)                                                                                                                                                                          |
+| `docs/i18n/`          | คำแปลเอกสารเป็นภาษาท้องถิ่น (66 ภาษา)                                                                                                                                                                          |
 | `docs/screenshots/`   | ไฟล์รูปภาพสำหรับคู่มือ                                                                                                                                                                                         |
 | `_tasks/superpowers/` | แผน/ข้อกำหนดจาก superpowers (`writing-plans`/`brainstorming`) + งานวิจัย — แยกออกเป็นรีโพซิทอรีที่มีการกำหนดเวอร์ชันต่างหาก และถูก gitignore โดยโครงสร้างหลัก ดู CLAUDE.md → "อาร์ติแฟกต์การวางแผนและการวิจัย" |
 

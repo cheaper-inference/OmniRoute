@@ -13,13 +13,13 @@ OmniRoute-ის თითოეულ runner-ს აქვს **ერთი �
 ხოლო რადგან pull-request-ის Builds ჰოსტირებულ runner-ებზე სრულდება, Turbopack-ის სლოტი დროის უმეტეს
 ნაწილში უმოქმედოა:
 
-| runner               | label          | როლი                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack-ის აგებები: `ci.yml` `Build` (მხოლოდ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ღამის a11y აგება | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack-ის აგება                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | ღამის დავალებები (Schemathesis, promptfoo, garak, k6) და `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | იგივე პული, რაც ზემოთ                                                                                                                                | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (მათი repos)   | მხოლოდ Dependabot (თითოეულის პიკი 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | თითოეულს 200 % |
+| runner               | label                           | როლი                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack-ის აგებები: `ci.yml` `Build` (მხოლოდ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ღამის a11y აგება | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack-ის აგება                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | ღამის დავალებები (Schemathesis, promptfoo, garak, k6) და `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | იგივე პული, რაც ზემოთ                                                                                                                                | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (მათი repos)                    | მხოლოდ Dependabot (თითოეულის პიკი 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | თითოეულს 200 % |
 
 გაზომილია 2026-10-18:
 
@@ -88,7 +88,7 @@ Runner-ის ნაგულისხმევი `KillMode=process` unit-ი�
 ## მუშაობის წესები
 
 - **ერთდროულად მხოლოდ ერთი Turbopack build — შეზღუდვა label-ით ხორციელდება.** ყველა job, რომელიც სრულ Turbopack
-  `next build`-ს უშვებს, მიზნად `[self-hosted, omni-build]`-ს იყენებს, ხოლო ამ
+  `next build`-ს უშვებს, მიზნად `[self-hosted, omni-build, omni-build-60gb]`-ს იყენებს, ხოლო ამ
   label-ს მხოლოდ **`omniroute-113-5`** ატარებს: `ci.yml`-ის `Build`, `npm-publish.yml`-ის `publish`, `nightly-v4-build`, `preview-artifact`,
   ღამის a11y build (#16853) და `docker-publish.yml`-ის **amd64** (webpack BuildKit-ის შიგნით —
   Turbopack იქ ავარიულად გაითიშა, run 33253576569). Docker-ის arm64 ნაწილი კვლავ `ubuntu-24.04-arm`-ზე რჩება.

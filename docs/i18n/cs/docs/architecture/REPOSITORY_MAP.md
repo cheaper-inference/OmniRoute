@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Přesunuto z kořenového adresáře ve verzi v3.8.26 (úklid):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a generovaný soubor `quality-metrics.json` (ignorovaný Gitem). Viz [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a generovaný soubor `quality-metrics.json` (ignorovaný Gitem). Viz [`## config/`](#config--statické-konfigurace-a-stav-kontrol-kvality).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Podadresář            | Účel                                                                                                                                                                                                                  |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizované překlady dokumentace (41 jazykových verzí)                                                                                                                                                               |
+| `docs/i18n/`          | Lokalizované překlady dokumentace (66 jazykových verzí)                                                                                                                                                               |
 | `docs/screenshots/`   | Obrazové podklady pro průvodce                                                                                                                                                                                        |
 | `_tasks/superpowers/` | Plány/specifikace ze superpowers (`writing-plans`/`brainstorming`) + výzkum — izolovaný repozitář se samostatným verzováním, ignorovaný pomocí git v hlavním stromu. Viz CLAUDE.md → „Artefakty plánování a výzkumu“. |
 

@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 میں روٹ سے باہر منتقل کیا گیا (بے ترتیبی کم کرنے کے لیے):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json`، اور تیار کردہ `quality-metrics.json` (gitignored)۔ دیکھیے [`## config/`](#config--static-configs--quality-gate-state)۔
+> - **→ `config/quality/`:** `quality-baseline.json`، `complexity-baseline.json`، `duplication-baseline.json`، `file-size-baseline.json`، `test-discovery-baseline.json`، `dependency-allowlist.json`، `.license-allowlist.json`، اور تیار کردہ `quality-metrics.json` (gitignored)۔ دیکھیے [`## config/`](#config--جامد-کنفیگریشنز--کوالٹی-گیٹ-کی-حالت)۔
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ذیلی ڈائریکٹری        | مقصد                                                                                                                                                                                           |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | مقامی زبانوں میں دستاویزی تراجم (41 زبانیں)                                                                                                                                                    |
+| `docs/i18n/`          | مقامی زبانوں میں دستاویزی تراجم (66 زبانیں)                                                                                                                                                    |
 | `docs/screenshots/`   | گائیڈز کے لیے تصویری اثاثے                                                                                                                                                                     |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) کے منصوبے/تفصیلات + تحقیق — الگ تھلگ، علیحدہ ورژن شدہ ریپوزٹری، مرکزی ٹری میں gitignore شدہ۔ CLAUDE.md → "Planning & Research Artifacts" دیکھیں۔ |
 

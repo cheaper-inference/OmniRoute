@@ -71,6 +71,24 @@ function fakeChild(): ChildProcess {
   return proc as unknown as ChildProcess;
 }
 
+test.beforeEach((t) => {
+  const hostsPath =
+    os.platform() === "win32"
+      ? path.join(process.env.SystemRoot || "C:\\Windows", "System32", "drivers", "etc", "hosts")
+      : "/etc/hosts";
+  // The injected removers describe a clean fixture, not the runner's real DNS configuration.
+  t.mock.method(
+    fs,
+    "readFileSync",
+    new Proxy(fs.readFileSync, {
+      apply(read, receiver, args) {
+        if (args[0] === hostsPath) return "127.0.0.1 localhost\n";
+        return Reflect.apply(read, receiver, args);
+      },
+    })
+  );
+});
+
 test.after(() => {
   manager.__setServerProcessForTest(null, null);
   core.resetDbInstance();

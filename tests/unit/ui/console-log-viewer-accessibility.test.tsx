@@ -3,7 +3,9 @@ import React, { act } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-const copyToClipboard = vi.fn();
+import ConsoleLogViewer from "../../../src/shared/components/ConsoleLogViewer";
+
+const { copyToClipboard } = vi.hoisted(() => ({ copyToClipboard: vi.fn() }));
 
 vi.mock("next-intl", () => ({
   useLocale: () => "en",
@@ -19,9 +21,6 @@ async function renderViewer() {
   document.body.appendChild(container);
   const root = createRoot(container);
   roots.push(root);
-
-  const { default: ConsoleLogViewer } =
-    await import("../../../src/shared/components/ConsoleLogViewer");
 
   await act(async () => {
     root.render(<ConsoleLogViewer />);

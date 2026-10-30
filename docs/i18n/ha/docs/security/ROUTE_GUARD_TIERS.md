@@ -207,7 +207,7 @@ Obsidian REST API token. GHSA-62vw ya ɓoye bayyanar password ta `GET` kawai; ƙ
 har yanzu tana kan matakin fail-open (GHSA-7pq4-8pvv-rx7r). Haka kuma `enableObsidianVaultSync()`
 yana ƙin vault wanda yake data directory ne, yake cikinsa, ko yake ɗauke da shi.
 
-#### Fitar da credentials na operators ne kaɗai
+#### Fitar da bayanan shaidar shiga da dawo da ajiyar bayanai na mai gudanarwa ne kaɗai
 
 Matakin da ke sama yana yanke shawara ne kawai ko ana buƙatar _wani_ bayanin shaidar shiga. Hanyoyin da ke sauke
 bayanan shaidar shiga da aka adana suna ƙara bincike na biyu a cikin handler: `GET /api/settings/export-json` (haɗin
@@ -218,22 +218,9 @@ instance da aka kashe login a cikinsa, kuma yana mayar da `403` ga API keys na k
 da `admin`) da kuma `oma_` access tokens. Bayar da sync token (`POST /api/sync/tokens`) yana amfani da
 helper ɗin iri ɗaya, tare da amintaccen internal-service token na loopback.
 
-#### Credential exports and restores are operator-only
+Ayyukan lalata bayanai masu alaƙa suna da wannan iyaka: `POST /api/db-backups/import` (fayil ɗin `.sqlite` da aka ɗora, har da `dryRun=true`), `POST /api/db-backups` (dawo da ajiyar da aka adana ta id ɗinta) da `POST /api/settings/import-json` (dawo da tsohon tsarin JSON) suna maye gurbin rumbun bayanai mai aiki ko dukkan saituna, haɗi da maɓallan API. Saboda haka shaidar shiga ta na'ura ba za ta iya fara waɗannan ayyuka ba.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Goge wuraren dawo da bayanai yana da wannan iyaka: `DELETE /api/db-backups` (tsabtacewa — riƙe N na baya-bayan nan ko goge waɗanda suka wuce kwanaki D) da `PATCH /api/db-backups` (saitunan riƙewa). Dokokin da aka adana su ne waɗanda `cleanupDbBackups()` ke amfani da su bayan kowace ajiyar atomatik (`src/lib/db/backup.ts`); shaidar na'ura da za ta iya adana `keepLatest: 1` za ta iya goge tsoffin wuraren dawo da bayanai a hoto na gaba. Jera da ƙirƙirar ajiyar bayanai (`GET`/`PUT /api/db-backups`) suna ci gaba da amfani da tantancewar gudanarwa ta yau da kullum.
 
 ### Bootstrap na sabon shigarwa na loopback ne kawai — bisa ainihin peer, ba `Host` ba
 

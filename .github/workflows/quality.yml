@@ -14,8 +14,12 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # A metadata edit must not evict a pending candidate from GitHub's single slot.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'edited' && github.event.changes.base == null && github.run_id || 'candidate' }}
+  # The fail-closed admission Gate uses always() to reject failed or cancelled dependencies.
+  # Cancelling the running workflow can strand that Gate while it retains this group. Let the
+  # running candidate finish; GitHub's single pending slot keeps only the latest waiter.
+  cancel-in-progress: false
 
 permissions:
   contents: read
@@ -31,9 +35,21 @@ jobs:
   # Same classifier as ci.yml (scripts/quality/classify-pr-changes.mjs) so PR→release
   # path filters share existence reasons: code / docs / i18n / workflow.
   changes:
+    # Base retargets arrive as edited too; only body/title edits are observation-only.
+    if: ${{ github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null }}
     name: Change Classification
     runs-on: ubuntu-latest
     outputs:
+      # Only the same-repository Mergify App may validate a draft queue candidate.
+      queueCandidate: >-
+        ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+            github.event.pull_request.user.id == 37929162 &&
+            github.event.pull_request.user.login == 'mergify[bot]' &&
+            github.event.pull_request.user.type == 'Bot' &&
+            startsWith(github.head_ref, 'mergify/merge-queue/') &&
+            github.event.repository.id > 0 &&
+            github.event.pull_request.head.repo.id == github.event.repository.id &&
+            github.event.pull_request.base.repo.id == github.event.repository.id }}
       code: ${{ steps.classify.outputs.code }}
       docs: ${{ steps.classify.outputs.docs }}
       i18n: ${{ steps.classify.outputs.i18n }}
@@ -42,11 +58,11 @@ jobs:
       # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
       domains: ${{ steps.classify.outputs.domains }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -83,13 +99,13 @@ jobs:
   docs-gates:
     name: Docs Gates (fast-path)
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -106,7 +122,7 @@ jobs:
     name: Fast Quality Gates
     needs: changes
     # Code surface only — pure docs/i18n PRs skip this bag (docs-gates covers docs).
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
     # Dynamic runner (same rule as ci.yml): use the self-hosted VPS pool only when the
     # release captain has USE_VPS_RUNNER=true AND this is not a fork PR (own-origin
     # branches only — a fork PR must never execute on the LAN runner). Var unset/false
@@ -132,11 +148,11 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -211,7 +227,7 @@ jobs:
           cat forgotten-sibling-tests.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload forgotten sibling report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: forgotten-sibling-tests
           path: |
@@ -231,6 +247,7 @@ jobs:
           # already over frozen cap) must not red an innocent PR. Unset on
           # workflow_dispatch (no PR base) → absolute comparison.
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: |
           set -uo pipefail
@@ -388,7 +405,7 @@ jobs:
       # audited against fast-unit failures on the same run (gate moves need this data).
       - name: Upload TIA selection (shadow evidence)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tia-selection
           path: tia-selection.txt
@@ -398,7 +415,7 @@ jobs:
   fast-vitest:
     name: Vitest (fast-path)
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
     # Dynamic runner — see fast-gates (own-origin + flag; fork/unset → ubuntu-latest).
     # PINNED to hosted, deliberately not on the USE_VPS_RUNNER switch (gap 19). One variable
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
@@ -412,10 +429,10 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -439,7 +456,7 @@ jobs:
   fast-unit:
     name: Unit Tests fast-path (${{ matrix.shard }}/4)
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
     # Dynamic runner — see fast-gates (own-origin + flag; fork/unset → ubuntu-latest).
     # This is the heaviest fast-path job; 4-way sharding (was 2, #6781) halves the
     # critical path again (~8.5min → ~4.5min on ubuntu-latest; ~2min on the 8-slot
@@ -467,10 +484,10 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -484,6 +501,16 @@ jobs:
       - run: npm run test:unit:ci:shard
         env:
           TEST_SHARD: ${{ matrix.shard }}/4
+      - name: Upload unit progress receipt
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: unit-progress-quality-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: .artifacts/unit-progress/*.jsonl
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
 
   # ── Pacote 4 (plano mestre testes+CI, aprovado 2026-07-04) ─────────────────────────
   # No-new-warnings por PR via ESLint bulk suppressions nativo (>=9.24). O baseline
@@ -498,7 +525,7 @@ jobs:
   lint-guard:
     name: No new ESLint warnings
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
+    if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && needs.changes.outputs.code == 'true') }}
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     # 2026-08-30: a cold full lint with the eslint-plugin-react-hooks 7 compiler rules is
     # killed on the 7 GB hosted runner without a message (status null → exit 1, the
@@ -510,10 +537,10 @@ jobs:
       contents: read
       security-events: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -573,9 +600,10 @@ jobs:
   #
   # Merge integrity is required regardless of who owns the PR branch.
   merge-integrity:
+    needs: changes
     name: Merge integrity (changelog + generated skills)
     # Always on non-draft PRs — CHANGELOG/skills can break on docs-only merges too.
-    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) }}
+    if: ${{ github.event_name != 'pull_request' || (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') }}
     runs-on: ubuntu-latest
     env:
       JWT_SECRET: ci-lint-secret-with-sufficient-length-for-validation
@@ -600,8 +628,11 @@ jobs:
         run: npm run check:agent-skills-sync
 
   admission-verdict:
-    name: Gate / Quality
-    if: ${{ always() }}
+    # A skipped job reports success on GitHub. Reserve the admission check name for
+    # real candidates, so a body/title edit or ordinary draft cannot supersede it.
+    name: ${{ (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / Quality' || 'Admission not requested / Quality' }}
+    # A failed/cancelled/missing classifier must still reach the fail-closed evaluator.
+    if: ${{ always() && (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

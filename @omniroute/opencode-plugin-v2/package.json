@@ -27,7 +27,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@opencode/plugin": "2.0.12",
+    "@opencode/plugin": "2.1.4",
     "@types/node": "^22.19.19",
     "tsup": "^8.5.1",
     "tsx": "^4.22.3",

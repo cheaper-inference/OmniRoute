@@ -15,7 +15,7 @@ Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagruruta
 
 Mga pangunahing kakayahan:
 
-- API surface na compatible sa OpenAI para sa CLI/mga tool (375 provider, 154 executor module)
+- API surface na compatible sa OpenAI para sa CLI/mga tool (375 provider, 156 executor module)
 - Translation ng request/response sa iba't ibang format ng provider
 - Model combo fallback (sunod-sunod na paggamit ng maraming modelo)
 - Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
@@ -31,7 +31,7 @@ Mga pangunahing kakayahan:
 - Paghahanap sa web sa pamamagitan ng `/v1/search` (20 provider)
 - Moderation sa pamamagitan ng `/v1/moderations`
 - Muling pagraranggo sa pamamagitan ng `/v1/rerank`
-- Pag-parse ng think tag (``) para sa mga reasoning model
+- Pag-parse ng think tag (`<think>...</think>`) para sa mga reasoning model
 - Sanitization ng response para sa mahigpit na compatibility sa OpenAI SDK
 - Normalization ng role (developer→system, system→user) para sa compatibility sa iba't ibang provider
 - Conversion ng structured output (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ compatibility sa mga legacy na sistema. Ginagamit ng kasalukuyang runtime contra
 - Mga migration ng SQLite schema at mga hook para sa awtomatikong pag-upgrade sa startup
 - Compatibility path para sa migration mula sa legacy JSON → SQLite
 
-## 6) SSRF / Guard ng Outbound URL
+## 6) SSRF / Proteksiyon sa Outbound URL
 
-- Hinaharang ng `src/shared/network/outboundUrlGuard.ts` ang lahat ng pribado/loopback/link-local na target URL bago makarating ang mga ito sa mga provider executor
-- Gumagamit ang mga route para sa pagtuklas at validation ng provider model ng `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang guard bago ang bawat outbound na kahilingan
-- Lumalabas ang mga error ng guard bilang `URL_GUARD_BLOCKED` na may HTTP 422 at nilo-log sa compliance audit trail sa pamamagitan ng `providerAudit.ts`
+- Inilalapat ng `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ang `src/shared/network/outboundUrlGuard.ts` sa mga kahilingan sa chat na ipinadadala sa pamamagitan ng `BaseExecutor.execute()`. Sa public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` habang naka-off ang private flag), bina-block nito ang mga private at loopback host at ang 169.254.0.0/16; sa lahat ng iba pang mode, bina-block nito ang mga cloud-metadata host. Sinusuri nito ang hostname o literal na IP ayon sa pagkakasulat, bago ang anumang DNS lookup. Nilalaktawan ito ng mga built-in na local provider.
+- Ginagamit ng mga ruta para sa pagtuklas at pagpapatunay ng provider model ang `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang proteksiyon bago ang bawat outbound request
+- Lumalabas ang mga error ng proteksiyon bilang `URL_GUARD_BLOCKED` na may HTTP 503 (`getSafeOutboundFetchErrorStatus`; nagbabalik ng 400 ang ruta para sa pagtuklas ng model), at ang mga tunay na pag-block sa SSRF habang nagpapatunay ay itinatala sa audit trail bilang mga event na `provider.validation.ssrf_blocked`
 
 ## Observability at Mga Signal sa Operasyon
 
@@ -1149,7 +1149,7 @@ Mga environment variable na aktibong ginagamit ng code:
 4. Nakasalalay ang gawi ng cloud sa tamang `NEXT_PUBLIC_BASE_URL` at pagiging naaabot ng cloud endpoint.
 5. Pino-publish ang direktoryong `open-sse/` bilang **npm workspace package** na `@omniroute/open-sse`. Ini-import ito ng source code sa pamamagitan ng `@omniroute/open-sse/...` (nire-resolve ng Next.js `transpilePackages`). Ginagamit pa rin ng mga file path sa dokumentong ito ang pangalan ng direktoryong `open-sse/` para sa pagkakapare-pareho.
 6. Gumagamit ang mga chart sa dashboard ng **Recharts** (batay sa SVG) para sa naa-access at interaktibong mga visualization ng analytics (mga bar chart ng paggamit ng modelo, mga talahanayan ng breakdown ng provider na may mga success rate).
-7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling JavaScript (`.js`) ang workspace na `open-sse/`.
+7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling TypeScript (`.ts`) ang workspace na `open-sse/`.
 8. Nakaayos ang pahina ng mga setting sa 7 tab: General, Appearance, AI, Security, Routing, Resilience, Advanced. Kino-configure lamang ng pahinang Resilience ang request queue, connection cooldown, provider breaker, at gawi ng wait-for-cooldown; ipinapakita sa pahinang Health ang live na runtime state ng breaker.
 9. Nahahati sa dalawang layer ang estratehiyang **Context Relay** (`context-relay`): nagpapasya ang `combo.ts` kung dapat bumuo ng handoff, at ini-inject ng `chat.ts` ang handoff pagkatapos ng paglutas ng account. Nasa SQLite table na `context_handoffs` ang data ng handoff. Sinadya ang paghahating ito dahil ang `chat.ts` lamang ang nakaaalam kung nagbago ang aktuwal na account.
 10. Komprehensibo na ngayon ang **pagpapatupad ng proxy**: nire-resolve ng `tokenHealthCheck.ts` ang proxy para sa bawat koneksyon, ginagamit ng `/api/providers/validate` ang `runWithProxyContext`, at ginagamit ng `proxyFetch.ts` ang `undici.fetch()` upang mapanatili ang compatibility ng dispatcher sa Node 22.

@@ -713,7 +713,8 @@ Foydalanuvchi quyidagicha aytsa:
 
 Haddan tashqari ko‘p maʼlumot ajratib olinishining oldini olish uchun quyidagi cheklovlar qo‘llanadi:
 
-| Minimal tarkib uzunligi | 3 ta belgi |
+| Minimal tarkib uzunligi  | 3 ta belgi   |
+| ------------------------ | ------------ |
 | Maksimal tarkib uzunligi | 500 ta belgi |
 
 ### Ajratib olishni qachon o‘chirish kerak

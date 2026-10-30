@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Μεταφέρθηκαν εκτός του ριζικού καταλόγου στην έκδοση v3.8.26 (αποσυμφόρηση):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` και το παραγόμενο `quality-metrics.json` (αγνοείται από το git). Δείτε την ενότητα [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` και το παραγόμενο `quality-metrics.json` (αγνοείται από το git). Δείτε την ενότητα [`## config/`](#config--στατικές-ρυθμίσεις--κατάσταση-πυλών-ποιότητας).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Υποκατάλογος          | Σκοπός                                                                                                                                                                                                                                                |
 | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Μεταφράσεις της τεκμηρίωσης σε άλλες γλώσσες (41 τοπικές ρυθμίσεις)                                                                                                                                                                                   |
+| `docs/i18n/`          | Μεταφράσεις της τεκμηρίωσης σε άλλες γλώσσες (66 τοπικές ρυθμίσεις)                                                                                                                                                                                   |
 | `docs/screenshots/`   | Στοιχεία εικόνων για τους οδηγούς                                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | Σχέδια/προδιαγραφές από το superpowers (`writing-plans`/`brainstorming`) + έρευνα — απομονωμένο αποθετήριο με ξεχωριστή διαχείριση εκδόσεων, το οποίο αγνοείται από το κύριο δέντρο μέσω git. Βλ. CLAUDE.md → «Τεχνουργήματα σχεδιασμού και έρευνας». |
 

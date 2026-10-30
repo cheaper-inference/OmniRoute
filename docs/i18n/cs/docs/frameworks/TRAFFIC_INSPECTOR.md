@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mechanismus:** K přesměrování veškerého provozu HTTP/HTTPS přes naslouchací službu HTTP_PROXY používá rozhraní API operačního systému:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` a nastavení hostitele/portu HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Dosah:** Každá aplikace v počítači, která respektuje systémové nastavení proxy serveru
   **Poznámka:** `source` = `"system-proxy"`
 
 **Bezpečnostní mechanismy:**
 
-- Časovač automatického vypnutí (ve výchozím nastavení 30 min, lze nakonfigurovat pomocí `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Předchozí stav systémového proxy serveru se uloží do databáze a při návratu se obnoví
-- Pokud uživatel přejde jinam, když je systémový proxy server aktivní, řídicí panel zobrazí výzvu „Obnovuje se systémový proxy server“
-- Uživatelské rozhraní zobrazuje odznak `⚠ Pokročilé` a zaškrtávací políčko pro výslovné potvrzení
+- Použití proxy naplánuje časovač návratu bez záruky, lokální pro proces (výchozí hodnota 30 min, nastavitelná přes `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Časovač nepřežije ukončení serverového procesu.
+- Předchozí stav proxy zůstává v paměti procesu; toto úložiště stavu zachytávání jej neukládá trvale do databáze. Návrat obnoví uložená nastavení macOS/GNOME; ve Windows resetuje proxy WinHTTP namísto obnovení předchozí konfigurace.
+- Dokud je proxy hlášena jako použitá, uvolnění stránky odešle požadavek keepalive na návrat bez záruky a vyžádá nativní potvrzení, jehož text určuje prohlížeč. Odpojení inspektoru během navigace SPA také zkusí návrat, bez tohoto dialogu prohlížeče.
+- Panel zachytávání zobrazuje lokalizovaný ovládací prvek `System-wide` s varovnou ikonou. Kliknutí nyní mění pouze místní stav rozhraní; nezobrazuje potvrzovací políčko ani nepoužívá či nevrací systémovou proxy.
 
 ### Režim 5 — Transparentní dešifrování TPROXY (Linux, root, volitelné)
 
@@ -113,13 +113,13 @@ Jedná se o rozsáhlý subsystém s vlastní specializovanou příručkou pro pr
 
 ### Porovnání režimů zachytávání
 
-| Režim                 | Nastavení                          |            Sudo?            | Dosah                                           | Poznámky                                                                                                                               |
-| --------------------- | ---------------------------------- | :-------------------------: | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge        | Automatické                        | Jednou (certifikát + hosts) | 9 IDE agentů                                    | Ve výchozím nastavení zapnuto                                                                                                          |
-| 2. Vlastní hostitelé  | Zadání pro jednotlivé hostitele    |     Ano (soubor hosts)      | Libovolná aplikace používající daného hostitele | Uloženo v DB                                                                                                                           |
-| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`           |             Ne              | Aplikace respektující proměnné prostředí        | Port 8080; HTTPS je tunelováno pomocí CONNECT (pouze metadata, nikdy se nedešifruje)                                                   |
-| 4. V celém systému    | Přepnutí + potvrzení               |             Ano             | Všechny aplikace na počítači                    | Automatické vypnutí za 30 minut                                                                                                        |
-| 5. Dešifrování TPROXY | Přepnutí (Linux + nativní doplněk) |  Ano (root + instalace CA)  | Libovolný hostitel na cílovém portu             | Dešifruje libovolné hostitele; ve výchozím nastavení vypnuto — viz `docs/security/MITM-TPROXY-DECRYPT.md` (git; nezahrnuto do `/docs`) |
+| Režim                 | Nastavení                                                      |            Sudo?            | Dosah                                           | Poznámky                                                                                                                               |
+| --------------------- | -------------------------------------------------------------- | :-------------------------: | ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge        | Automatické                                                    | Jednou (certifikát + hosts) | 9 IDE agentů                                    | Ve výchozím nastavení zapnuto                                                                                                          |
+| 2. Vlastní hostitelé  | Zadání pro jednotlivé hostitele                                |     Ano (soubor hosts)      | Libovolná aplikace používající daného hostitele | Uloženo v DB                                                                                                                           |
+| 3. HTTP_PROXY         | `export HTTPS_PROXY=...`                                       |             Ne              | Aplikace respektující proměnné prostředí        | Port 8080; HTTPS je tunelováno pomocí CONNECT (pouze metadata, nikdy se nedešifruje)                                                   |
+| 4. V celém systému    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |             Ano             | Všechny aplikace na počítači                    | Časovač návratu bez záruky (výchozí hodnota 30 min)                                                                                    |
+| 5. Dešifrování TPROXY | Přepnutí (Linux + nativní doplněk)                             |  Ano (root + instalace CA)  | Libovolný hostitel na cílovém portu             | Dešifruje libovolné hostitele; ve výchozím nastavení vypnuto — viz `docs/security/MITM-TPROXY-DECRYPT.md` (git; nezahrnuto do `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ implementace; podpora `lsof`/`GetExtendedTcpTable` bude doplněna později).
 ### 5.1 Záznam relace
 
 1. Klikněte na **„● Zaznamenat relaci“** na panelu nástrojů → zadejte název (volitelné)
-2. Živý výpis pokračuje jako obvykle; červený pulzující indikátor zobrazuje `◉ REC · <název> · 00:42 · 23 požadavků`
+2. Živý výpis pokračuje jako obvykle; panel nahrávání zobrazuje pulzující červenou tečku, uplynulý čas, název relace, je-li dostupný, a lokalizovaný ovládací prvek pro zastavení.
 3. Klikněte na **„⏹ Zastavit“** → snímek relace se uloží do `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Zobrazení zaznamenané relace
@@ -322,7 +322,7 @@ implementace; podpora `lsof`/`GetExtendedTcpTable` bude doplněna později).
 Rozbalovací nabídka **Relace** na panelu nástrojů obsahuje seznam uložených relací. Výběrem některé z nich:
 
 - Načte se snímek relace (zmrazený stav)
-- Zobrazí se banner: `Zobrazení zaznamenané relace „<název>“ — [Zpět k živému provozu]`
+- Banner zobrazuje lokalizovaný popisek nahrané relace a její název (nebo lokalizovaný náhradní text pro relaci bez názvu) vedle lokalizovaného tlačítka pro návrat k živému zobrazení.
 - Zpřístupní se karta Statistiky s agregacemi Recharts
 
 ### 5.3 Formáty exportu
@@ -346,7 +346,7 @@ Inspektor provozu zobrazuje **veškerý zachycený provoz HTTPS**, včetně auto
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                            | Všechny trasy a koncový bod WebSocket jsou přístupné pouze přes loopback (vynuceno v `routeGuard.ts` před ověřením)                                                                                           |
 | **Maskování tajných údajů**               | Lineární skener `maskSecret()` rediguje přihlašovací údaje Bearer dle RFC 6750, klíče s prefixem poskytovatele a dlouhé neprůhledné tokeny před `TrafficBuffer.push()`                                        |
-| **Limit velikosti těla**                  | Těla větší než `INSPECTOR_MAX_BODY_KB` (výchozí hodnota 1024 KB) jsou zkrácena s upozorněním `"(zkráceno z důvodu výkonu)"`                                                                                   |
+| **Limit velikosti těla**                  | Těla větší než `INSPECTOR_MAX_BODY_KB` (výchozí hodnota 1024 KB) jsou zkrácena s upozorněním `"(truncated for performance)"`                                                                                  |
 | **Sanitizace hlaviček**                   | Názvy jsou převedeny na malá písmena; hlavičky rámcování, hop-by-hop a ověřování proxy jsou odstraněny; soubory cookie jsou zcela redigovány; hodnoty přihlašovacích údajů jsou předány funkci `maskSecret()` |
 | **CSP**                                   | Přísné zásady Content Security Policy na stránkách Inspektoru provozu zabraňují útokům XSS prostřednictvím vložených těl odpovědí                                                                             |
 | **Ve výchozím nastavení bez persistence** | `TrafficBuffer` je uložen v paměti a při restartování serveru se ztratí. Relace jsou uchovány pouze tehdy, když jsou výslovně zaznamenány                                                                     |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Pokud řídicí panel zjistí, že stav v DB označuje proxy jako aktivní, při příštím načtení také nabídne možnost „Vrátit systémový proxy server do původního stavu“.
+Uložený stav proxy existuje pouze v serverovém procesu. Po pádu nebo restartu nemůže současné úložiště stavu zachytávání obnovit tento snímek z databáze; je-li nutná ruční obnova, použijte výše uvedené příkazy pro obnovu dané platformy.
 
 ### Plná vyrovnávací paměť
 

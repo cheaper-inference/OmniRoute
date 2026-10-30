@@ -54,7 +54,7 @@ Nová karta na extrakciu obsahu z URL prostredníctvom `POST /v1/web/fetch` (vyt
 - Vstup: URL + prepínač celej stránky + výber formátu (markdown / text / HTML).
 - Odoslanie → načítanie → vykreslenie `ScrapeResult.tsx`.
 - `ScrapeResult` vykresľuje náhľad markdownu + prepínač surového obsahu.
-- Limit: ak telo odpovede presiahne **256 KB**, používateľské rozhranie zobrazí `(skrátené, zobraziť surový obsah)` a otvorí surový obsah v modálnom okne Monaco (D21).
+- Limit: ak telo odpovede presiahne **256 KB**, používateľské rozhranie zobrazí `View full raw content` a otvorí surový obsah v modálnom okne (D21).
 - Panel metadát: poskytovateľ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencia, náklady, veľkosť odpovede, počet odkazov.
 - Používa hook `useScrapeFetch.ts`.
 

@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   stryker:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Stryker mutation (batch ${{ matrix.batch.name }} — advisory)
     runs-on: ubuntu-latest
     # Mutation testing is expensive. History of the budget:
@@ -105,10 +105,10 @@ jobs:
     # scripts/quality/mutation-radiography.mjs both merge per file).
     timeout-minutes: ${{ matrix.batch.timeout || 180 }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -129,7 +129,7 @@ jobs:
         run: npx stryker run --mutate "$BATCH_MUTATE"
       - name: Upload mutation report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: mutation-report-${{ matrix.batch.name }}
           path: reports/mutation/
@@ -147,18 +147,18 @@ jobs:
   mutation-ratchet:
     name: Mutation score ratchet (blocking)
     needs: stryker
-    if: ${{ always() && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ always() && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
       - name: Download all mutation reports
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           pattern: mutation-report-*
           path: reports/all

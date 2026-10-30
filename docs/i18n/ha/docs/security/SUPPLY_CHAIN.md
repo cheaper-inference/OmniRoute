@@ -25,52 +25,46 @@ ba tare da toshewa ba; matakin _CRITICAL gate_ (`severity: CRITICAL`, `ignore-un
 `exit-code: 1`) yana kasa sakin akan CRITICAL CVE **tare da gyara da ake samu**. `ignore-unfixed`
 yana hana toshe sakin don CVE na asali ba tare da facin sama ba.
 
-## ⚠️ Bambancin CVE (toshewar ƙofofin osv/Trivy)
+## ⚠️ Bambancin CVE (ƙofofin osv/Trivy masu toshewa)
 
-osv da Trivy suna kwatanta deps da bayanan CVE waɗanda **ke ci gaba da girma**. PR
-wanda **bai taɓa dogaro ba** na iya zama ja ba zato ba tsammani saboda an bayyana sabon CVE
-a cikin dep da ke akwai (osv: an auna `vulnCount` > tushe; Trivy: sabon
-CRITICAL mai gyarawa a cikin hoton). **Wannan shine halin aiki da ake tsammani na toshewar
-ƙofar CVE, ba koma baya na samfur ba.**
+osv da Trivy suna kwatanta dependencies da ma'ajin bayanan CVE waɗanda suke **ci gaba da ƙaruwa**. Wani PR
+wanda **bai taɓa kowace dependency ba** zai iya sauyawa zuwa ja ba zato ba tsammani saboda an
+bayyana sabon CVE a cikin dependency da ake da ita (osv: `vulnCount` da aka auna > baseline; Trivy: sabon
+CRITICAL mai gyaruwa a cikin image). **Wannan halayyar aiki ce da AKE SA RAN TA daga
+ƙofar CVE mai toshewa, ba koma-bayan samfur ba.**
 
-Lokacin da osv ko Trivy suka zama ja saboda sabon CVE da aka bayyana, maganin shine:
+Lokacin da osv ko Trivy suka koma ja saboda sabon CVE da aka bayyana, mafita ita ce:
 
-1. **Haɓaka dep da abin ya shafa** (an fi so) — haɓaka zuwa sigar da aka gyara ta hanyar `package.json`
-   `overrides` (transitive deps) ko sake gina hoton akan tushe da aka gyara.
-2. **Idan babu gyara na sama:**
-   - **osv:** sake daidaita `metrics.vulnCount` a cikin `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` baya rufe ƙofofin da aka keɓe — gyara darajar da
-     hannu, `direction:down`) tare da bayanin hujja + batun bin diddigi.
-   - **Trivy:** ƙara shigarwa a cikin `.trivyignore` (CVE-ID a kowane layi) tare da bayanin
-     hujja + batun bin diddigi. `ignore-unfixed: true` ya riga ya rufe CVEs ba tare da
-     facin kai tsaye ba.
+1. **Ɗaga sigar dependency da abin ya shafa** (an fi so) — haɓaka zuwa sigar da aka gyara ta hanyar `package.json`
+   `overrides` (dependencies na kaikaice) ko sake gina image ɗin bisa patched base.
+2. **Idan babu gyara daga upstream:**
+   - **osv:** sake saita baseline na `metrics.vulnCount` a cikin `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` ba ya rufe keɓaɓɓun ƙofofi — gyara ƙimar da
+     hannu, `direction:down`) tare da bayanin dalili + tracking issue.
+   - **Trivy:** ƙara entry a cikin `.trivyignore` (CVE-ID ɗaya a kowane layi) tare da comment na
+     dalili + tracking issue. `ignore-unfixed: true` tuni yana rufe CVEs marasa
+     patches kai tsaye.
 
-Duk ƙofofin **suna tsallakewa da kyau** (fita 0) lokacin da kayan aikin ba su nan ko kuma ma'aunin
-ya gaza (osv-scanner ba a cikin PATH, osv.dev/network ba za a iya isa ba, JSON mara inganci) —
-gazawar **ma'auni** ba ta taɓa toshewa ba, kawai koma baya **da aka auna** ke toshewa.
+Aiwatarwar OSV da ake buƙata (`check:vuln-ratchet -- --ratchet`) tana gazawa a rufe tare da
+`INCOMPLETE` da exit 2 lokacin da ba za a iya tabbatar da ingancin scanner, report ko baseline ba.
+Koma-bayan da aka auna yana bayar da exit 1. Aiwatarwar shawara har yanzu tana iya bayar da rahoton `SKIP` tare da
+exit 0, wanda ba ya tabbatar da cewa dependencies sun wuce scan ɗin. Matakin Trivy
+mai toshewa kuma yana buƙatar auna sakamako cikin nasara: tools da ba su samuwa, jobs da suka gaza
+da rashin shaidar image ba za su iya tabbatar da cewa image ɗin ba shi da matsala ba.
 
-## Sanannun Hadarurruka Masu Karɓa
+## Haɗarin dogaron da aka daina amfani da shi
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Babban lockfile ɗin ba ya ƙara haɗawa da `extract-zip` ko wata alaƙar dogaro zuwa gare shi bayan
+haɓaka kayan aikin haɓakawa na promptfoo mai kayyadadden siga. Wannan ya kawo ƙarshen jerin
+`promptfoo` → `@openai/codex-security` → `extract-zip` da aka amince da shi a baya, wanda ake bibiyarsa a #14482.
+Gwaje-gwajen kariya daga komawar matsala a cikin `tests/unit/extract-zip-14482-exposure.test.ts` suna hana
+sake shigar da shi kuma suna ci gaba da hana shigo da shi daga lambar samarwa.
 
-`extract-zip@2.0.1` yana ɗauke da shawarwari biyu na symlink-traversal masu tsanani waɗanda ba a gyara ba.
-Bisa ga reshen "babu gyara daga tushe" na maganin CVE Variance da ke sama, wannan **hadari ne da aka karɓa**, ba haɓakawa ba ne:
-
-- **Sarka:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  An tabbatar ta hanyar `package-lock.json` — fakiti ɗaya tak a cikin dukkan bishiyar dogaro (`@openai/codex-security`) ya bayyana `extract-zip`, kuma fakiti ɗaya tak (`promptfoo`) ya bayyana `@openai/codex-security`.
-- **Babu wani fitowar da aka gyara a ko'ina a cikin sarka.** `extract-zip@2.0.1` (wanda aka buga a 2020) shine fitowar ƙarshe na fakitin — ba a kula da shi. `@openai/codex-security`'s
-  current npm-latest (`0.1.29`) har yanzu yana jawo `extract-zip@2.0.1`.
-- **Ba za a iya isa gare shi daga samarwa ba.** `promptfoo` devDependency-only ne (ba a taɓa lissafa shi a ƙarƙashin `dependencies` ba), kuma babu wani fayil a ƙarƙashin `src/`, `open-sse/`, ko `bin/` da ke shigo da fakitin npm na
-  `extract-zip` — OmniRoute's own `extractZip()` helper
-  (`src/lib/versionManager/binaryManager.ts:93`) yana amfani da `unzip`/`tar` na asali kuma ba shi da alaƙa. `@openai/codex-security` kuma yana jigilar nasa mai gadi na symlink-traversal a saman kiran baya na onEntry na extract-zip.
-- **Kada** a yi amfani da sunan `extract-zip` ta hanyar `package.json` `overrides` — kawai madadin da za a iya amfani da shi shine Electron-org-internal kuma API-incompatible ne da binciken onEntry/defaultDirMode/defaultFileMode na
-  `@openai/codex-security`; maye gurbinsa zai karya binciken tsaro na wannan fakitin a hankali.
-- **Matsayin Farko:** osv `vulnCount` (3) da aka auna ya riga ya kasance ƙasa da matsayin farko na
-  `config/quality/quality-baseline.json` (27) — babu buƙatar canjin ratchet.
-- **Mai gadi na koma baya:** `tests/unit/extract-zip-14482-exposure.test.ts` yana tabbatar da
-  sarka da kuma invariant na rashin shigo da samarwa da ke sama; yana kasa CI idan ɗayan ya taɓa
-  karyewa (misali, PR na gaba ya sa `extract-zip` ya zama mai isa daga samarwa).
-- **Bibiya:** issue #14482.
+Gyaran dogaro na yanzu kuma yana iyakance sauye-sauyen dacewa ga abokin cinikin MSAL na Azure identity,
+abokin cinikin FTP na get-uri, da dogaron Zod na OpenCode v1 SDK. Ana gwada samo
+token na Azure da karɓo bayanai ta FTP ta amfani da hanyoyin sufuri masu sarrafawa; duk fakitin OpenCode
+biyu suna gudanar da nasu tsarin ginawa da jerin gwaje-gwaje. Ƙididdigar gargaɗin registry ma'aunai ne
+na wani takamaiman lokaci kuma za su iya canzawa bayan an commit ɗin lockfile.
 
 ## Baya: Shawarwarin Scorecard → toshewa
 

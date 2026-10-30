@@ -11,13 +11,13 @@ gosiri na ọ na-eji. Oghere Turbopack na-enweta ihe build chọrọ; a haziri o
 webpack Release-Green na ọrụ lint; swap host (16 GB) na-anabata nke ahụ, ebe ọ bụkwa na Builds nke pull-request
 na-agba na hosted runners, oghere Turbopack anaghị arụ ọrụ ọtụtụ oge:
 
-| runner               | label          | ọrụ                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
-| `omniroute-113-5`    | `omni-build`   | Build Turbopack: `ci.yml` `Build` (naanị push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y nke abalị | 56 GB / 60 GB (swap 0)     | 1600 %           |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), build webpack                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
-| `omniroute-113-2`    | `omni-light`   | ọrụ abalị (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
-| `omniroute-113`      | `omni-light`   | otu ọdọ ahụ dị n'elu                                                                                                                               | 8 GB / 12 GB               | 400 %            |
-| OmniHeuris, OmniMind | (repos ha)     | Naanị Dependabot (ọnụ ọgụgụ kachasị elu bụ 155 MB nke ọ bụla, 2026-10-18)                                                                          | 4 GB / 6 GB                | 200 % nke ọ bụla |
+| runner               | label                           | ọrụ                                                                                                                                                | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Build Turbopack: `ci.yml` `Build` (naanị push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build a11y nke abalị | 56 GB / 60 GB (swap 0)     | 1600 %           |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build webpack                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
+| `omniroute-113-2`    | `omni-light`                    | ọrụ abalị (Schemathesis, promptfoo, garak, k6) na `quality.yml` `lint-guard`                                                                       | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
+| `omniroute-113`      | `omni-light`                    | otu ọdọ ahụ dị n'elu                                                                                                                               | 8 GB / 12 GB               | 400 %            |
+| OmniHeuris, OmniMind | (repos ha)                      | Naanị Dependabot (ọnụ ọgụgụ kachasị elu bụ 155 MB nke ọ bụla, 2026-10-18)                                                                          | 4 GB / 6 GB                | 200 % nke ọ bụla |
 
 Ihe a tụrụ na 2026-10-18:
 
@@ -85,7 +85,7 @@ nlele na ọ naghị arụ ọrụ na restart n'otu command ahụ.
 ## Iwu ọrụ
 
 - **Naanị otu build Turbopack n'otu oge — label na-amanye nke a.** Job ọ bụla na-eme build Turbopack zuru ezu
-  `next build` na-ezubere `[self-hosted, omni-build]`, ma ọ bụ naanị **`omniroute-113-5`** nwere
+  `next build` na-ezubere `[self-hosted, omni-build, omni-build-60gb]`, ma ọ bụ naanị **`omniroute-113-5`** nwere
   label ahụ: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   build a11y nke abalị (#16853) na `docker-publish.yml` **amd64** (webpack n'ime BuildKit —
   Turbopack dara n'ebe ahụ, run 33253576569). Akụkụ Docker arm64 ka na-eji `ubuntu-24.04-arm`.

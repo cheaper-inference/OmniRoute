@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanisme:** Menggunakan API OS untuk mengubah hala semua trafik HTTP/HTTPS melalui pendengar HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` dan tetapan hos/port HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Liputan:** Setiap aplikasi dalam mesin yang mematuhi tetapan proksi sistem
   **Nota:** `source` = `"system-proxy"`
 
 **Mekanisme keselamatan:**
 
-- Pemasa nyahaktif automatik (lalai 30 minit, boleh dikonfigurasikan melalui `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Keadaan proksi sistem sebelumnya disimpan dalam DB dan dipulihkan apabila dikembalikan
-- Papan pemuka memaparkan gesaan "Mengembalikan proksi sistem" jika pengguna beralih keluar semasa ia aktif
-- UI memaparkan lencana `⚠ Lanjutan` + kotak semak pengesahan eksplisit
+- Penggunaan proksi menjadualkan pemasa pengembalian yang setempat pada proses, dengan usaha terbaik tanpa jaminan (lalai 30 minit, boleh dikonfigurasi melalui `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Pemasa tidak kekal selepas proses pelayan tamat.
+- Keadaan proksi sebelumnya disimpan dalam memori proses; stor keadaan tangkapan ini tidak menyimpannya secara kekal dalam pangkalan data. Pengembalian memulihkan tetapan macOS/GNOME yang disimpan; pada Windows, ia menetapkan semula proksi WinHTTP dan bukannya memulihkan konfigurasi sebelumnya.
+- Selagi proksi dilaporkan sebagai digunakan, nyahmuat halaman (unload) menghantar permintaan pengembalian keepalive dengan usaha terbaik dan meminta pengesahan asli yang teksnya dikawal pelayar. Menanggalkan komponen inspector semasa navigasi SPA juga cuba membuat pengembalian, tanpa dialog pelayar tersebut.
+- Bar alat tangkapan memaparkan kawalan `System-wide` yang disetempatkan dengan ikon amaran. Mengkliknya pada masa ini hanya mengubah keadaan UI setempat; ia tidak memaparkan kotak semak pengesahan atau menggunakan mahupun mengembalikan proksi sistem.
 
 ### Mod 5 — Nyahsulit telus TPROXY (Linux, root, pilihan)
 
@@ -113,13 +113,13 @@ Ini ialah subsistem besar dengan panduan pengendali khususnya sendiri — lihat 
 
 ### Perbandingan mod tangkapan
 
-| Mod                 | Persediaan                    |           Sudo?           | Liputan                                          | Catatan                                                                                                                                          |
-| ------------------- | ----------------------------- | :-----------------------: | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge      | Automatik                     |   Sekali (sijil+hosts)    | 9 ejen IDE                                       | Dihidupkan secara lalai                                                                                                                          |
-| 2. Hos Tersuai      | Input bagi setiap hos         |      Ya (fail hosts)      | Mana-mana aplikasi yang menggunakan hos tersebut | Disimpan dalam DB                                                                                                                                |
-| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`      |           Tidak           | Aplikasi yang mematuhi env                       | Port 8080; HTTPS melalui terowong CONNECT (metadata sahaja, tidak pernah dinyahsulit)                                                            |
-| 4. Seluruh sistem   | Togol + sahkan                |            Ya             | Semua aplikasi pada mesin                        | Dilumpuhkan secara automatik dalam 30 minit                                                                                                      |
-| 5. Nyahsulit TPROXY | Togol (Linux + tambahan asli) | Ya (root + pemasangan CA) | Mana-mana hos pada port sasaran                  | Menyahsulit hos sewenang-wenangnya; dimatikan secara lalai — lihat `docs/security/MITM-TPROXY-DECRYPT.md` (git; tidak dikompil ke dalam `/docs`) |
+| Mod                 | Persediaan                                                     |           Sudo?           | Liputan                                          | Catatan                                                                                                                                          |
+| ------------------- | -------------------------------------------------------------- | :-----------------------: | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge      | Automatik                                                      |   Sekali (sijil+hosts)    | 9 ejen IDE                                       | Dihidupkan secara lalai                                                                                                                          |
+| 2. Hos Tersuai      | Input bagi setiap hos                                          |      Ya (fail hosts)      | Mana-mana aplikasi yang menggunakan hos tersebut | Disimpan dalam DB                                                                                                                                |
+| 3. HTTP_PROXY       | `export HTTPS_PROXY=...`                                       |           Tidak           | Aplikasi yang mematuhi env                       | Port 8080; HTTPS melalui terowong CONNECT (metadata sahaja, tidak pernah dinyahsulit)                                                            |
+| 4. Seluruh sistem   | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Ya             | Semua aplikasi pada mesin                        | Pemasa pengembalian dengan usaha terbaik tanpa jaminan (lalai 30 minit)                                                                          |
+| 5. Nyahsulit TPROXY | Togol (Linux + tambahan asli)                                  | Ya (root + pemasangan CA) | Mana-mana hos pada port sasaran                  | Menyahsulit hos sewenang-wenangnya; dimatikan secara lalai — lihat `docs/security/MITM-TPROXY-DECRYPT.md` (git; tidak dikompil ke dalam `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ akan ditambahkan kemudian).
 ### 5.1 Merakam sesi
 
 1. Klik **"● Rakam sesi"** dalam bar alat → masukkan nama (pilihan)
-2. Paparan langsung diteruskan seperti biasa; penunjuk merah berdenyut memaparkan `◉ RAKAM · <nama> · 00:42 · 23 permintaan`
+2. Pemantauan langsung diteruskan seperti biasa; bar rakaman menunjukkan titik merah berdenyut, masa berlalu, nama sesi apabila tersedia, dan kawalan Berhenti yang disetempatkan.
 3. Klik **"⏹ Henti"** → petikan sesi disimpan ke `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Melihat sesi yang dirakam
@@ -322,7 +322,7 @@ akan ditambahkan kemudian).
 Menu juntai bawah **Sesi** dalam bar alat menyenaraikan sesi yang disimpan. Apabila satu sesi dipilih:
 
 - Memuatkan petikan sesi (keadaan dibekukan)
-- Sepanduk memaparkan: `Melihat sesi yang dirakam "<nama>" — [Kembali ke paparan langsung]`
+- Sepanduk menunjukkan label sesi rakaman yang disetempatkan dan nama sesi (atau teks gantian yang disetempatkan untuk sesi tanpa tajuk), bersebelahan butang kembali ke paparan langsung yang disetempatkan.
 - Tab Statistik tersedia dengan agregat Recharts
 
 ### 5.3 Format eksport
@@ -346,7 +346,7 @@ Traffic Inspector memaparkan **semua trafik HTTPS yang dipintas**, termasuk peng
 | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                    | Semua laluan dan titik akhir WebSocket hanya boleh dicapai melalui gelung balik (dikuatkuasakan dalam `routeGuard.ts` sebelum pengesahan)                                                    |
 | **Penyamaran rahsia**             | Pengimbas linear `maskSecret()` menyunting kelayakan Bearer RFC 6750, kunci berawalan penyedia dan token legap yang panjang sebelum `TrafficBuffer.push()`                                   |
-| **Had saiz badan**                | Badan > `INSPECTOR_MAX_BODY_KB` (lalai 1024 KB) dipangkas dengan notis `"(dipangkas untuk prestasi)"`                                                                                        |
+| **Had saiz badan**                | Badan > `INSPECTOR_MAX_BODY_KB` (lalai 1024 KB) dipangkas dengan notis `"(truncated for performance)"`                                                                                       |
 | **Pembersihan pengepala**         | Nama ditukar kepada huruf kecil; pengepala pembingkaian/lompatan demi lompatan dan pengesahan proksi digugurkan; kuki disunting sepenuhnya; nilai kelayakan diserahkan kepada `maskSecret()` |
 | **CSP**                           | Dasar Keselamatan Kandungan yang ketat pada halaman Traffic Inspector untuk mencegah XSS melalui badan respons yang disuntik                                                                 |
 | **Tiada pengekalan secara lalai** | `TrafficBuffer` disimpan dalam memori dan hilang apabila pelayan dimulakan semula. Sesi hanya dikekalkan apabila dirakam secara eksplisit                                                    |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Papan pemuka juga akan menawarkan "Kembalikan proksi sistem" pada pemuatan seterusnya jika keadaan DB yang dikesan menunjukkan bahawa proksi telah aktif.
+Keadaan proksi yang disimpan hanya berada dalam proses pelayan. Selepas ranap atau mula semula, stor keadaan tangkapan semasa tidak dapat memulihkan petikan keadaan itu daripada pangkalan data; gunakan arahan pemulihan platform di atas apabila pemulihan manual diperlukan.
 
 ### Penimbal penuh
 

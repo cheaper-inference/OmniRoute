@@ -19,263 +19,348 @@ tí kò sinmi lé irinṣẹ́ kan pàtó fún ètò kan náà, wo
 
 ### Ìgbàwọlé olùdíje
 
-Àwọn ìṣàn iṣẹ́ CI àti Quality Gates kọ̀ọ̀kan ń ṣe ìdájọ́ tó dúró ṣinṣin: `Gate / CI` àti
-`Gate / Quality`. Ìlànà ìgbàwọlé wọn tí a pín sí ẹ̀yà ń ṣe àtòjọ gbogbo iṣẹ́ upstream
-gẹ́gẹ́ bí èyí tí a béèrè tàbí èyí tí ó jẹ́ ìmọ̀ràn. Iṣẹ́ tí a béèrè tí ó bá wúlò gbọ́dọ̀ ṣàṣeyọrí: àbájáde
-tí ó sọnù, tí a fagilé, tí a fo, tí ó ṣì ń dúró àti tí a kò mọ̀ kò lè fi ìkọjá PASS múlẹ̀. Ìsọ̀rí
-docs-only tàbí catalog-only tó péye lè mú kí lane kóòdù má wúlò;
-PR àwòkọ́ṣe kì í ṣe olùdíje tí a gbà. Àmì `hotfix` kì í yọ ẹ̀rí kúrò.
+Àwọn ìṣàn-iṣẹ́ CI àti Quality Gates kọ̀ọ̀kan ń ṣe ìdájọ́ tó dúró ṣinṣin: `Gate / CI` àti
+`Gate / Quality`. Ìlànà ìgbàwọlé wọn tí a fi ẹ̀yà sọtọ̀ ṣe àkójọ gbogbo iṣẹ́ tó wà ní ìpele òkè
+gẹ́gẹ́ bí ohun tí a nílò tàbí ohun ìmọ̀ràn. Iṣẹ́ tí a nílò, tí ó sì bá ọ̀ràn mu, gbọdọ̀ ṣàṣeyọrí:
+àbájáde tí kò sí, tí a fagilé, tí a fò kọjá, tí ó ṣì ń dúró, tàbí tí a kò mọ̀ kò lè fi ìmúdájú PASS hàn.
+Ìpínsísọ̀rí docs-only tàbí catalog-only tó péye lè mú kí ọ̀nà kóòdù kan má ṣe bá ọ̀ràn mu;
+PR àkọ́kọ́ tí kò tíì parí kì í ṣe olùdíje tí a gbà. Àmì `hotfix` kì í fagilé ẹ̀rí tí a nílò.
 
-Àwọn ìṣàn iṣẹ́ méjèèjì bo àwọn PR àti àwọn push sí àwọn ẹ̀ka main/release, ìfiránṣẹ́ afọwọ́ṣe àti
-àwọn ìṣẹ̀lẹ̀ merge-group. Push, dispatch àti merge-group máa ń ṣiṣẹ́ gbogbo àṣàyàn. Àwọn fork
+Àwọn ìṣàn-iṣẹ́ méjèèjì bo àwọn PR sí ẹ̀ka main/release, àwọn push sí `main`, ìpilẹ̀ṣẹ̀ afọwọ́ṣe
+àti àwọn ìṣẹ̀lẹ̀ merge-group. Push, dispatch àti merge-group máa ń ṣiṣẹ́ àṣàyàn kíkún. Àwọn push sí
+`release/**` kì í bẹ̀rẹ̀ wọn (2026-10-18): gbogbo àyípadà ti ṣe matrix náà tẹ́lẹ̀ lórí PR rẹ̀,
+àti pé àkójọpọ̀ tí a merge jẹ́ iṣẹ́ Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted lane). Àwọn fork
 àti merge group máa ń lo àwọn runner tí a gbàlejò fún àwọn iṣẹ́ tí yóò yan àwọn runner
-self-hosted ní ọ̀nà mìíràn; a gbọ́dọ̀ ṣàyẹ̀wò pé agbára hosted tó pọ̀ tó wà ṣáájú rollout.
+tí a gbàlejò fúnra wa ní ipò míì; a gbọdọ̀ ṣàyẹ̀wò pé agbára gbígbàlejò tó pọ̀ tó wà kí rollout tó bẹ̀rẹ̀.
 
-Ìwé-ẹ̀rí JSON kọ̀ọ̀kan ń dá SHA tí a checkout, ìṣiṣẹ́ ìṣàn iṣẹ́ àti ìgbìyànjú mọ̀.
-CLI kọ checkout/event SHA tí kò bá ara wọn mu. Àwọn àdánwò ìṣàn iṣẹ́ so jíjẹ́ ọmọ ẹgbẹ́ policy
-mọ́ àtòjọ `needs` ti iṣẹ́ ìdájọ́, kí lane tuntun tàbí èyí tí a yọ má bàa pòórá ní ìdákẹ́jẹ.
-Àwọn ìwé-ẹ̀rí náà bo ìṣàn iṣẹ́ tiwọn, kì í ṣe ìtẹ̀jáde, ìmúṣẹ, tàbí àwọn iṣẹ́ inú
-scanner ìmọ̀ràn tó ti wà. Ṣíṣiṣẹ́ àwọn orúkọ àyẹ̀wò méjèèjì nínú àwọn òfin ẹ̀ka jẹ́
-àtúnṣe ìṣàkóso ọ̀tọ̀; fífi àwọn iṣẹ́ wọ̀nyí kún un kò dáàbò bo ẹ̀ka fúnra rẹ̀.
+Ìwé-ẹ̀rí JSON kọ̀ọ̀kan ń ṣe ìdánimọ̀ SHA tí a checkout, ìṣiṣẹ́ ìṣàn-iṣẹ́ àti àdánwò náà.
+CLI máa ń kọ ìbámu-àìbámu checkout/event SHA. Àwọn ìdánwò ìṣàn-iṣẹ́ so ọmọ-ẹgbẹ́ ìlànà
+mọ́ àkójọ `needs` ti iṣẹ́ ìdájọ́ náà, kí ọ̀nà tuntun tàbí ọ̀nà tí a yọ kúrò má bàa pòórá ní ìkọ̀kọ̀.
+Àwọn ìwé ẹ̀rí náà bo ìṣàn iṣẹ́ tiwọn fúnra wọn, kì í ṣe ìtẹ̀jáde, ìgbékalẹ̀ síbi lílò, tàbí àwọn iṣẹ́ inú
+ẹ̀rọ àyẹ̀wò tó ń fúnni ní ìmọ̀ràn tó ti wà tẹ́lẹ̀. Ṣíṣe àwọn àyẹ̀wò tó bá kan ọ̀ràn náà ní ohun tí a nílò nínú àwọn òfin ẹ̀ka
+jẹ́ àyípadà ìṣàkóso ọ̀tọ̀; ṣíṣe àlàyé àwọn iṣẹ́ wọn nìkan kò dáàbò bo ẹ̀ka kan.
 
-### Àkójọ àyẹ̀wò aimi
+`API Route Typecheck` jẹ́ àyẹ̀wò ìṣàn iṣẹ́ olómìnira, tí kò sí nínú àwọn ìdájọ́ àpapọ̀ méjèèjì
+àti prófáìlì àìyípadà ti olùṣàkíyèsí kíkún agbègbè. Ṣàyẹ̀wò àbájáde rẹ̀ lọ́tọ̀ fún olùdíje gangan náà.
+`.github/workflows/api-route-typecheck.yml` máa ń ṣiṣẹ́ lórí àwọn PR sínú `main` tàbí
+`release/**`, àwọn ìfìránṣẹ́ sí èyíkéyìí nínú ìdílé ẹ̀ka náà, àti ìpilẹ̀ṣẹ̀ afọwọ́ṣe. Kò ní àsẹ̀ àlẹ́ ọ̀nà.
+Àtúndojú ìpìlẹ̀ PR máa ń béèrè àyẹ̀wò tuntun; àwọn àtúnṣe sí àkóónú/àkọlé máa ń lo orúkọ àkíyèsí-nìkan
+`Admission not requested / API Route Typecheck`, wọn kò sì lè rọ́pò àyẹ̀wò ìgbàwọlé náà. Ìṣàn iṣẹ́ náà
+kò kéde ohun ìpilẹ̀ṣẹ̀ ẹgbẹ́ ìdàpọ̀. Ìmúṣiṣẹ́ ètò ìlà ìdàpọ̀ èyíkéyìí tó nílò àyẹ̀wò yìí gbọ́dọ̀ kọ́kọ́
+fi ìṣiṣẹ́ rẹ̀ múlẹ̀ fún ìṣẹ̀lẹ̀ náà.
 
-Àkójọ npm-alias tí a pín sí ẹ̀yà àti jíjẹ́ ọmọ ẹgbẹ́ static-scan wà nínú
-`config/quality/gate-manifest.json`. Ṣiṣe `npm run check:gate-manifest` láti fìdí
-àwọn orúkọ script àti àwọn àṣẹ gangan múlẹ̀ pẹ̀lú `package.json`; àwọn àfikún, ìyọkúrò àti
-yíyà àṣẹ kúrò ní ọ̀nà tó yẹ yóò mú kí hook agbègbè àti àwọn iṣẹ́ ìsọ̀rí-àyípadà nínú CI kùnà.
-Alias kì í ṣe iṣẹ́ ìṣàn iṣẹ́, àpẹẹrẹ matrix tàbí test case: a kò gbọ́dọ̀ fi àwọn iye wọ̀nyí
-hàn bí ohun tí a lè fi pààrọ̀ ara wọn.
+### Agbára ìṣiṣẹ́ UI
+
+CI máa ń ṣiṣẹ́ gbogbo àkójọ UI gẹ́gẹ́ bí shard matrix `test-vitest` mẹ́rin, tí ọ̀kọ̀ọ̀kan ní
+òṣìṣẹ́ tí kò ju méjì lọ àti àkókò ìparí iṣẹ́ ìṣẹ́jú 15 tó ti wà tẹ́lẹ̀. Shard àkọ́kọ́ tún máa ń ṣiṣẹ́
+àkójọpọ̀ ìdánwò MCP/autoCombo Vitest. Àbájáde iṣẹ́ tí a nílò bo gbogbo apá matrix; ìkùnà
+tàbí fífagilé shard kan kò lè fi ìgbàwọlé olùdíje múlẹ̀.
+
+Olùṣàkíyèsí alẹ́ máa ń tọ́jú ìwé-ẹ̀rí exact-candidate ọ̀tọ̀ fún shard UI kọ̀ọ̀kan,
+pẹ̀lú ìṣiṣẹ́ MCP nínú ìwé-ẹ̀rí àkọ́kọ́. Gbogbo ìwé-ẹ̀rí mẹ́rin, àwọn log àti àwọn
+ìdánimọ̀ ìṣiṣẹ́ tó bára mu ni a nílò. `npm run test:vitest:ui` ti agbègbè ṣì máa ń yan
+gbogbo àkójọpọ̀ ìdánwò; ìṣiṣẹ́ `--shard` kan jẹ́ ẹ̀rí apá kan ṣoṣo.
+
+### Ìkójọpọ̀ coverage unit
+
+Àwọn shard unit méjìlá máa ń gba coverage V8 nígbà ìṣiṣẹ́ ìdánwò wọn tó ti wà tẹ́lẹ̀. Shard
+tó ṣàṣeyọrí máa ń ṣiṣẹ́ `scripts/ci/compact-v8-coverage.mjs` láti fún àwọn fáìlì ìpilẹ̀ pọ̀
+láìṣẹ̀dá report Istanbul aláàrín. Iṣẹ́ Coverage ìkẹyìn máa ń ṣàyẹ̀wò gbogbo manifest méjìlá
+pẹ̀lú candidate SHA, runtime, source root àti data hash, lẹ́yìn náà ó máa ń ṣiṣẹ́ àwọn reporter c8
+àti àwọn ààlà coverage tó ti wà. Àwọn input máa ń pa ìtòlẹ́sẹẹsẹ filename àgbáyé c8 mọ́;
+pre-merging lọ́tọ̀ọ̀tọ̀ fún shard kò ní ààbò fún coverage function/block àdàpọ̀. Àwọn shard
+tí kò sí, tí kò bófin mu tàbí tí kò bá ara mu máa ń mú kí ìgbàwọlé kùnà.
+Àwọn shard ìdánwò tó kùnà máa ń tọ́jú raw diagnostic coverage lọ́tọ̀; kò lè wọ final merge.
+
+### Àwọn àkọsílẹ̀ ìtẹ̀síwájú ìṣiṣẹ́ unit
+
+Àṣẹ `test:unit:ci:shard` tí a pín ń ṣàkọsílẹ̀ àwọn ìpele `primary`, `dashboard` àti `serial`
+nípasẹ̀ `scripts/ci/unit-progress-reporter.mjs`. Ìjábọ̀ ìdánwò déédéé ṣì wà
+fún lílò. Àkọsílẹ̀ ọ̀tọ̀ kan tí ó ní metadata nìkan ń ṣàkọsílẹ̀ ìbẹ̀rẹ̀ àti ìparí fáìlì kọ̀ọ̀kan,
+heartbeat ọlọ́gbọ̀n-àáyá sì ń ṣe àkójọ àwọn fáìlì tí ó ṣì ń ṣiṣẹ́ àti iye àkókò tí wọ́n ti lò. Ó ń ṣàkọsílẹ̀
+metadata ìṣiṣẹ́ tí a fọwọ́ sí nìkan; a kì í serialize àwọn àpèjúwe ìdánwò, àbájáde, àkóónú àṣìṣe àti gbogbo
+environment náà.
+
+CI àti Quality ń tọ́jú àwọn fáìlì JSONL gẹ́gẹ́ bí `unit-progress-ci-<run>-<attempt>-<shard>` àti
+`unit-progress-quality-<run>-<attempt>-<shard>`. Timeout job kan lè dí upload tí ó yẹ kí ó wáyé lẹ́yìn;
+àwọn heartbeat tí a ti fi jáde ṣì jẹ́ ẹ̀rí fún ìwádìí ìṣòro. Àìsí heartbeat tún lè túmọ̀ sí
+pé process runner kan ti di tàbí pé a ti dá a dúró. Àwọn àkọsílẹ̀ wọ̀nyí ń pa yíyan ìdánwò,
+concurrency, àwọn deadline àti exit status tó wà tẹ́lẹ̀ mọ́; wọn kì í ṣe àwọn ìdájọ́ candidate-admission.
+
+### Ẹ̀rí tí a pa mọ́ nínú àkójọpọ̀ àbájáde ìtẹ́wọ́gbà
+
+`scripts/quality/validate-release-acceptance.mjs` ń kó ètò tí a fún un àti àwọn manifest rẹ̀ jọ; kò fi hàn pé ètò náà bo gbogbo ìlànà ìtújáde. Àwọn ìròyìn rẹ̀ ń ṣètò `releaseAcceptance: false` ní kedere, bí ó tilẹ̀ jẹ́ pé ètò náà jẹ́ `VERIFIED`. Workflow `release-acceptance.yml` ṣì ń lo dátà ìdánwò shadow, kì í ṣe àwọn ìwé ẹ̀rí gidi fún build, package, boot tàbí promotion.
+
+CLI nílò `--evidence-root` láti ṣàyẹ̀wò ẹ̀rí tí a pa mọ́. A ń wá àwọn fáìlì ní `<evidence-root>/<artifact_id>/<member>` a sì ń ṣe ìṣirò hash wọn pẹ̀lú SHA-256. Àkọsílẹ̀ PASS tí kò ní ẹ̀rí, fáìlì tí ó sọnù tàbí tí ó yí padà, ọ̀nà tí kò ní ààbò tàbí symlink ń dí ìmúdájú dúró. Àwọn fáìlì tí ó sọnù kì í ṣe ohun kan náà pẹ̀lú log òfo láti inú iṣẹ́ tí ó ṣàṣeyọrí. Àwọn àyẹ̀wò SHA/run/attempt tí ó wà ṣì dúró lọ́tọ̀: bytes tí ó bá ara wọn mu kò lè sọ ìwé ẹ̀rí tí ó ti kọjá àkókò di èyí tí ó wúlò. Ìdúróṣinṣin fáìlì kì í ṣe ẹ̀rí pé ìṣiṣẹ́ náà jẹ́ ojúlówó tàbí pé a ṣe promotion artifact náà.
+
+### Àkójọ static scan
+
+Àkójọ npm-alias tí a fi ẹ̀yà sọtọ̀ àti ọmọ-ẹgbẹ́ static-scan wà nínú
+`config/quality/gate-manifest.json`. Ṣiṣe `npm run check:gate-manifest` láti ṣàyẹ̀wò
+àwọn orúkọ script àti àwọn command gangan pẹ̀lú `package.json`; àfikún, yíyọ kúrò àti
+yíyí command padà máa ń mú kí local hook àti àwọn iṣẹ́ change-classification nínú CI kùnà.
+Alias kì í ṣe iṣẹ́ ìṣàn-iṣẹ́, instance matrix tàbí test case: a kò gbọdọ̀ fi àwọn iye wọ̀nyí
+hàn bí ẹni pé a lè fi ọ̀kan rọ́pò èkejì.
 
 Lo `npm run quality:scan -- --list` tàbí `npm run quality:scan:fast -- --list`
-láti ṣàyẹ̀wò àwọn alias tí a yàn láìṣiṣẹ́ wọn. Runner náà ń pe
-entrypoint npm, nítorí náà runtime rẹ̀ (pẹ̀lú Bun níbi tí a ti ṣètò rẹ̀) wà bí ó ti rí.
-Manifest náà ṣe àkọsílẹ̀ àwọn alias tí kò sí nínú àwọn prófáìlì wọ̀nyí gẹ́gẹ́ bí èyí tí a pè lọ́tọ̀, àti pé
-a kò gba àwọn àṣẹ ìtọju láyè nínú àwọn prófáìlì àyẹ̀wò read-only.
+láti wo àwọn alias tí a yàn láìṣiṣẹ́ wọn. Runner máa ń pe npm entrypoint,
+nítorí náà runtime rẹ̀ (pẹ̀lú Bun níbi tí a ti ṣètò rẹ̀) máa ń dúró bí ó ṣe rí.
+Manifest náà ń ṣe àkọsílẹ̀ àwọn alias tí kò sí nínú àwọn prófáìlì wọ̀nyẹn gẹ́gẹ́ bí èyí
+tí a pè lọ́tọ̀, a sì kọ àwọn command ìtọ́jú láàyè nínú àwọn prófáìlì scan read-only.
 
-Àwọn prófáìlì wọ̀nyí bo àyẹ̀wò aimi nìkan. Wọn kì í fọwọ́sí àwọn àdánwò ọjà,
-coverage, packaging, àwọn àyẹ̀wò òde tàbí gbogbo ìgbàwọlé ìtújáde olùdíje.
-Ìgbàwọlé ìṣàn iṣẹ́ ń lo `config/quality/admission-policy.json` tí a sopọ̀ àti
-`scripts/quality/admission-verdict.mjs`. Àwọn prófáìlì release-observer ṣì wà lọ́tọ̀;
-ṣàyẹ̀wò àwọn àyẹ̀wò tó wúlò fún wọn àti àwọn ìwé-ẹ̀rí wọn lọ́tọ̀. Àkójọ
-àlàyé ní ìsàlẹ̀ jẹ́ ìtọ́kasí, kì í ṣe ẹ̀rí pé ẹnubodè kan ṣiṣẹ́ ní ti gidi.
+Àwọn prófáìlì wọ̀nyí bo static scan nìkan. Wọn kì í fọwọ́sí àwọn ìdánwò ọjà,
+coverage, packaging, àwọn ìṣàyẹ̀wò òde tàbí ìtẹ́wọ́gbà ìtújáde kíkún ti olùdíje.
+Ìgbàwọlé ìṣàn-iṣẹ́ máa ń lo `config/quality/admission-policy.json` tí a sopọ̀ mọ́ ọn àti
+`scripts/quality/admission-verdict.mjs`. Àwọn prófáìlì release-observer ṣì jẹ́ ọ̀tọ̀;
+ṣàyẹ̀wò àwọn ìṣàyẹ̀wò àti ìwé-ẹ̀rí wọn tó bá ọ̀ràn mu lọ́tọ̀. Àwọn command static ti full observer
+ni a kéde nínú `config/quality/release-green-static-profile.json`, pẹ̀lú
+`audit:deps`, àṣàyàn mutation-test àti àwọn ìṣàyẹ̀wò ìtumọ̀. Loader máa ń ṣàyẹ̀wò àwọn command npm
+pẹ̀lú package.json àti àwọn ìkéde CI/Quality tí a ṣàpẹẹrẹ; ó máa ń kọ ìyípadà
+dípò kí ó ṣiṣẹ́ àwọn token shell gẹ́gẹ́ bí argument. Àbájáde SKIP/INCOMPLETE ti scanner
+tí a nílò kò lè fi PASS múlẹ̀. Prófáìlì náà ń ṣe àkọsílẹ̀ àwọn ohun òde tí kò kó sí, kò sì rọ́pò
+coverage tí a gbàlejò, àwọn matrix ìdánwò, package tàbí ẹ̀rí ìmúṣiṣẹ́ sí àyíká. Àkójọ àlàyé ní ìsàlẹ̀
+jẹ́ ìtọ́kasí, kì í ṣe ẹ̀rí pé ẹnubodè kan ṣiṣẹ́ ní tòótọ́.
 
-Àwọn script wà lábẹ́ `scripts/check/` (àwọn ẹnubodè policy) àti `scripts/quality/` (ẹ́ńjìnnì ratchet).
+Àwọn script wà lábẹ́ `scripts/check/` (àwọn ẹnubodè ìlànà) àti `scripts/quality/` (ẹ̀rọ ratchet).
 Orísun òtítọ́ CI ni `.github/workflows/ci.yml`.
 
-### Ọ̀nà yíyára fún PR ìtújáde (`quality.yml`)
+### Ìlera àkọsílẹ̀ ìpìlẹ̀ tí a tẹ̀jáde
 
-`.github/workflows/quality.yml` ń ṣe àfikún sí CI lórí àwọn PR main/release, àwọn
-push ẹ̀ka tí a dáàbò bo, dispatch àti merge group. Àwọn PR ń lo àwọn àyẹ̀wò yíyára tí a sẹ́ nípasẹ̀ path. A yọ
-duplicate build tí a pa títí láé kúrò; àwọn àyẹ̀wò build/package/boot gidi ṣì wà nínú CI.
+`.github/workflows/i18n-base-health.yml` ń ṣàkíyèsí ìlera àkọsílẹ̀ lẹ́yìn àwọn ìfìránṣẹ́ tí a yàn sí `main` àti `release/v*`, àti nígbà ìpilẹ̀ṣẹ̀ afọwọ́ṣe. Àwọn asẹ rẹ̀ bo àkọsílẹ̀, Markdown gbòǹgbò, `llm.txt`, ipò/ìṣètò ìtumọ̀ àti àwọn irinṣẹ́ i18n tó yẹ. Iṣẹ́ kan ṣoṣo náà, `Published base documentation health`, ń lo Ubuntu tí a gbàlejò, pẹ̀lú àkókò ìparí ìṣẹ́jú márùn-ún. Ó ń ṣe ìfọwọ́sí kíkà-nìkan, ó sì ń kọ ìwé-ẹ̀rí àyẹ̀wò láìsí fífi àwọn ohun-ìgbẹ́kẹ̀lé sori ẹrọ, ṣíṣe ìtumọ̀ tàbí gbígba ipò.
 
-| Iṣẹ́                                              | Ìwọ̀n                                                                                                                                                                                                                          | Dídènà                 |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `Docs Gates (fast-path)`                         | Àwọn PR docs/kóòdù; àwọn ìtọ́kasí docs API àti docs-all                                                                                                                                                                        | Bẹ́ẹ̀ ni                 |
-| `Fast Quality Gates`                             | Àwọn PR kóòdù; àwọn àyẹ̀wò aimi, typecheck, typecheck dashboard, àwọn unit test tí àyípadà kàn                                                                                                                                 | Bẹ́ẹ̀ ni                 |
-| `Forgotten sibling tests`                        | Àwọn PR kóòdù; àwọn module tí a yí padà tí a tọpa dé àwọn olùlò aimi àti àwọn sibling test olùdíje; àwọn path barrel àti dynamic-import ni a máa ń jabo gẹ́gẹ́ bí àyẹ̀wò ìwádìí ìmọ̀ràn, pẹ̀lú àwọn àyọkúrò allowlist tí a tọ́ka sí | **Ìmọ̀ràn**             |
-| `Vitest (fast-path)`                             | Àwọn PR kóòdù; àkójọpọ̀ vitest yíyára                                                                                                                                                                                          | Bẹ́ẹ̀ ni                 |
-| `Unit Tests fast-path`                           | Àwọn PR kóòdù; àkójọpọ̀ unit oní-shard mẹ́rin                                                                                                                                                                                   | Bẹ́ẹ̀ ni                 |
-| `No new ESLint warnings`                         | Àwọn PR kóòdù; olùṣọ́ lint tó mọ̀ nípa àwọn suppression                                                                                                                                                                         | Bẹ́ẹ̀ ni, pẹ̀lú àwọn fork |
-| `Merge integrity (changelog + generated skills)` | Àwọn PR tí kì í ṣe àwòkọ́ṣe; changelog àti ìṣiṣẹ́pọ̀ skill tí a ṣẹ̀dá                                                                                                                                                             | Bẹ́ẹ̀ ni, pẹ̀lú àwọn fork |
+`scripts/i18n/check-base-health.mjs` ń béèrè pé kò gbọdọ̀ sí àìbáramu kankan nínú háṣì orísun, àfojúsùn tí ó sọnù, háṣì àfojúsùn, ìtumọ̀ tí ó ti di àtijọ́ àti cache abala. Ó tún ń fọwọ́sí ààlà ìwé pàtàkì/èdè-agbègbè lọ́wọ́lọ́wọ́ àti orísun rẹ̀ tí a ti ṣàkọsílẹ̀. Àyíká tí kò fẹsẹ̀ múlẹ̀, àìpé ìbórí tàbí olùṣàyẹ̀wò tí a dá dúró ń mú `INCOMPLETE` jáde; ìyapa tí a ti fìdí rẹ̀ múlẹ̀ ń mú `FAIL` jáde. Àwọn méjèèjì ń dá ipò ìjáde tó ń fi ìkùnà hàn padà. A so ìwé-ẹ̀rí náà mọ́ SHA checkout, workflow, run àti attempt, a sì ń tọ́jú rẹ̀ gẹ́gẹ́ bí `i18n-base-health-<sha>-<run>-<attempt>`.
+
+Èyí jẹ́ àkíyèsí olómìnira lórí ìpìlẹ̀ tí a tẹ̀jáde. Kò ṣàfikún ìṣẹ̀lẹ̀ PR tàbí merge-group, àyẹ̀wò PR tí a béèrè dandan, alias npm tàbí ọmọ ẹgbẹ́ profaili static-scan. Ìlànà PR ìyàtọ̀ tó wà tẹ́lẹ̀ àti àwọn ìsọ̀rí ìmọ̀ràn ti olùṣàyẹ̀wò abẹ́lẹ̀ ṣì wà lọ́tọ̀. Ìkó-sókè tó ṣàṣeyọrí kò lè yí àbájáde ìlera tó kùnà padà sí PASS.
+
+### Ọ̀nà yíyára fún Release PR (`quality.yml`)
+
+`.github/workflows/quality.yml` ń ṣe àfikún sí CI lórí àwọn PR main/release, àwọn push sí `main`,
+dispatch àti merge group. Àwọn PR máa ń lo àwọn ìṣàyẹ̀wò yíyára tí a fi path filter sí.
+A yọ duplicate build tí a ti pa títí láé kúrò; àwọn ìṣàyẹ̀wò build/package/boot gidi ṣì wà nínú CI.
+
+| Iṣẹ́                                              | Ààlà                                                                                                                                                                                                                 | Ìdènà              |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
+| `Docs Gates (fast-path)`                         | Àwọn PR ìwé àkọsílẹ̀/kóòdù; àwọn ìtọ́kasí ìwé àkọsílẹ̀ API àti docs-all                                                                                                                                                 | Bẹ́ẹ̀ ni             |
+| `Fast Quality Gates`                             | Àwọn PR kóòdù; àwọn àyẹ̀wò static, typecheck, typecheck dashboard, àti àwọn unit test tí ìyípadà kan                                                                                                                  | Bẹ́ẹ̀ ni             |
+| `Forgotten sibling tests`                        | Àwọn PR kóòdù; a tọpa àwọn module tí a yí padà sí àwọn onílò static àti àwọn sibling test tó ṣeé ṣe; àwọn ọ̀nà barrel àti dynamic-import ni a máa ń jabo gẹ́gẹ́ bí àyẹ̀wò ìmọ̀ràn, pẹ̀lú àwọn àfiwé allowlist tí a tọ́ka sí | **Ìmọ̀ràn**         |
+| `Vitest (fast-path)`                             | Àwọn PR kóòdù; suite vitest yíyára                                                                                                                                                                                   | Bẹ́ẹ̀ ni             |
+| `Unit Tests fast-path`                           | Àwọn PR kóòdù; suite unit oní-shard mẹ́rin                                                                                                                                                                            | Bẹ́ẹ̀ ni             |
+| `No new ESLint warnings`                         | Àwọn PR kóòdù; olùṣọ́ lint tó mọ nípa àwọn suppression                                                                                                                                                                | Bẹ́ẹ̀ ni, pẹ̀lú forks |
+| `Merge integrity (changelog + generated skills)` | Àwọn PR tí kì í ṣe draft; changelog àti ìbámuṣiṣẹ́pọ̀ àwọn skill tí a ṣe jáde                                                                                                                                          | Bẹ́ẹ̀ ni, pẹ̀lú forks |
 
 #### Ìjábọ̀ àwọn sibling test tí a gbàgbé
 
 `npm run check:forgotten-sibling-tests` tún ń lo import resolver tó wà lẹ́yìn maapu test-impact.
-Fún gbogbo module production tí a yí padà, ó máa ń jabo àwọn ẹ̀wọ̀n tó ṣeé tún ṣe ní ọ̀nà kan náà
-`changed module/symbol -> static consumer -> candidate sibling test` nígbà tí test olùdíje
-kò bá sí nínú diff pull-request. A pa àkótán Markdown àti àbájáde JSON mọ́ gẹ́gẹ́ bí
-artifact ìṣàn iṣẹ́ `forgotten-sibling-tests` fún calibration ṣáájú rollout dídènà èyíkéyìí.
+Fún gbogbo production module tí a yí padà, ó ń jabo àwọn ìsopọ̀ tó ṣeé tún ṣe ní ọ̀nà kan náà
+`changed module/symbol -> static consumer -> candidate sibling test` nígbà tí candidate
+test náà kò bá sí nínú diff pull-request. A máa pa àkótán Markdown àti àbájáde JSON mọ́ gẹ́gẹ́ bí
+artifact workflow `forgotten-sibling-tests` fún calibration kí rollout ìdènà èyíkéyìí tó bẹ̀rẹ̀.
 
-Àwọn àtún-gbéjáde barrel àti àwọn ìgbéwọlé alárìnàkò jẹ́ fún ìṣàwárí ìṣòro resolution nìkan; wọn kì í dá
-àbájáde ìdènà sílẹ̀ láé. Àwọn ìyọkúrò tí a ti ṣàgbéyẹ̀wò wà nínú
-`config/quality/forgotten-sibling-allowlist.json`. Gbogbo àkọsílẹ̀ gbọ́dọ̀ sọ orúkọ consumer àti candidate
-test, pèsè ìdí pàtó, kí ó sì ní ìjápọ̀ sí GitHub issue tàbí pull request. Àwọn àkọsílẹ̀ tí kò bófin mu yóò kuna
-ní ọ̀nà títì. Àwọn ìyọkúrò kò lè fi candidate test tí a ti parẹ́ pamọ́ tàbí diff tí ó fi `.skip`/`.todo` kún un;
-ìrẹ̀wẹ̀sì assertion àti àwọn ìbòjú mìíràn ṣì wà lábẹ́ ojúṣe ẹnu-ọ̀nà
-`check:test-masking` tí ó ń dí lọ́tọ̀.
+Àwọn re-export barrel àti dynamic import jẹ́ àwọn àyẹ̀wò resolution nìkan; wọn kì í dá
+àbájáde ìdènà sílẹ̀ láé. Àwọn àfiwé tí a ti ṣàyẹ̀wò wà nínú
+`config/quality/forgotten-sibling-allowlist.json`. Gbogbo entry gbọ́dọ̀ dárúkọ consumer àti candidate
+test, fúnni ní ìdí pàtó, kí ó sì sopọ̀ mọ́ issue GitHub tàbí pull request kan. Àwọn entry tí kò tọ́ ń fa
+ìkùnà ní ipò pípa. Àwọn àfiwé kò lè pa candidate test tí a ti parẹ́ tàbí diff tó ṣàfikún `.skip`/`.todo` mọ́;
+dídín agbára assertion kù àti àwọn ìbojú míì ṣì jẹ́ ojúṣe gate
+`check:test-masking` tó ń dí lọ́nà òmìnira.
 
 ### Iṣẹ́: `lint`
 
-Ó máa ń ṣiṣẹ́ lórí gbogbo PR sí `main`. Ó máa ń dí merge tí ó bá kuna.
+Ó ń ṣiṣẹ́ lórí gbogbo PR sí `main`. Ó ń dí merge tí ìkùnà bá ṣẹlẹ̀.
 
-| Script (`npm run ...`)            | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ìdènà                                  |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
-| `check:node-runtime`              | Ẹ̀yà Node.js wà láàárín àlà tí a ṣe àtìlẹ́yìn fún                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Bẹ́ẹ̀ni                                  |
-| `check:cycles`                    | Àwọn ìgbéwọlé aláyípo jákèjádò gbogbo `src/` + `open-sse/` (ó dá lórí AST, a sì yanjú `paths` tsconfig). Ní ipò àìfikún, ó máa jáde pẹ̀lú 1 nígbàkigbà tí ayípo èyíkéyìí bá wà (kíkùn ní ọ̀nà títì láti #15281), ó sì máa ṣe àtòjọ àwọn SCC. `check:cycles:ratchet` (èyí tí CI ń ṣiṣẹ́) máa ń dí nígbà tí iye náà bá kọjá òkè `metrics.cycles` nínú `quality-baseline.json` — lọ́wọ́lọ́wọ́ 14, `direction: down`, nítorí náà ó lè dín kù nìkan (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Bẹ́ẹ̀ni (ratchet)                        |
-| `check:boundary`                  | Ìsopọ̀ `open-sse → src`: àwọn ìgbéwọlé fáìlì-sí-fáìlì aláìlẹ́gbẹ́ láti inú engine sínú ìṣàfilọ́lẹ̀ (`scripts/quality/measure-boundary.mjs`; àtòjọ edge náà ni backlog àtúnṣe core/module-split v4). Ní ipò àìfikún = ìròyìn ìmọ̀ràn (kannáà bí `quality:boundary`). `check:boundary:ratchet` (èyí tí CI ń ṣiṣẹ́, tí ó tún wà nínú loop ratchet fast-gates `quality.yml`) máa ń dí nígbà tí iye náà bá kọjá òkè `metrics.boundaryOpenSseToSrc` nínú `quality-baseline.json` — a bẹ̀rẹ̀ rẹ̀ pẹ̀lú iye 771 tí a wọn, `direction: down`; `--update` máa ń dín in kù nìkan; ó dá lórí base ní ìbámu pẹ̀lú PR (pẹ̀lú `--base-ref`, wo ìsàlẹ̀)                                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ni (ratchet)                        |
-| `check:route-validation:t06`      | Àwọn schema Zod wà lórí gbogbo route (ìlànà Tier 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Bẹ́ẹ̀ni                                  |
-| `check:any-budget:t11`            | Iye `@ts-expect-error // any` kò kọjá ààlà tí a yàn (Ìpele 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ ni                                 |
-| `check:provider-consistency`      | Gbogbo olùpèsè inú `providers.ts` ní àkọsílẹ̀ tó bá a mu nínú `providerRegistry.ts` (bẹ́ẹ̀ náà sì ni ní ọ̀nà ìdàkejì, láàárín àtòjọ àwọn ohun tí a gbà láàyè)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ ni                                 |
-| `check:model-lifecycle`           | Àwọn tábìlì ìdarí mẹ́ta tí a ń tọ́jú lọ́wọ́ gbọ́dọ̀ wà ní ìbámu pẹ̀lú àwòrán ìṣáájú-ìgbésí-ayé tí a fi sínú ibi ìpamọ́ (#11503): `FITNESS_TABLE` (`taskFitness.ts`) kì í fún id tí a ti fẹ̀yìntì, tí `REGISTRY` sì lè darí sí, ní àmì; gbogbo ibi-afẹ́ `BUILT_IN_ALIASES` wà nínú `REGISTRY`, wọn kò sì sí nínú àwòrán àwọn id tí a ti fẹ̀yìntì; gbogbo id tí a ti fẹ̀yìntì tí ó ṣì wà nínú `REGISTRY` ni a darí sí ibòmíràn tàbí tí a ṣe àkójọ rẹ̀ nínú `allowedRetiredInCatalog`; kò sì sí orísun tàbí ibi-afẹ́ `DEFAULT_DEGRADATION_MAP` kankan tí ó hàn gẹ́gẹ́ bí èyí tí a ti fẹ̀yìntì nínú àwòrán náà. Èyí kò fi ẹ̀rí múlẹ̀ pé upstream aláàyè kan ń pèsè model kan lọ́wọ́lọ́wọ́. Aisinipo — ó ń fi wé `config/quality/model-lifecycle.json`, tí a ń sọ di tuntun lọ́wọ́ pẹ̀lú `npm run quality:refresh-model-lifecycle` (nẹ́tíwọ́ọ̀kì; a kò so ó mọ́ CI). `allowedRetiredInCatalog` jẹ́ ratchet ìdínkù díẹ̀díẹ̀: fi àkọsílẹ̀ kan kún un kìkì pẹ̀lú ọ̀ràn ìtọ́pa kan. | Bẹ́ẹ̀ ni                                 |
-| `check:fetch-targets`             | Gbogbo `fetch("/api/...")` nínú `src/` ẹ̀gbẹ́ client ń tọ́ka sí `route.ts` gidi kan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹ́ẹ̀ ni                                 |
-| `check:deps`                      | Gbogbo deps tí a lè fi `npm install` sí, káàkiri gbogbo `package.json` inú repo, wà nínú `dependency-allowlist.json`; àwọn package tuntun tí a kò pin sí ẹ̀yà pàtó tàbí tí a fi slopsquat ni a máa samisi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Bẹ́ẹ̀ ni                                 |
-| `audit:deps`                      | `npm audit` (root + electron) — kò sí ìkìlọ̀ ewu gíga/pàjáwìrì (ó ní àgbélébú pẹ̀lú osv `check:vuln-ratchet`; wo Àtòjọ Iṣẹ́ Ìmúlòye)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Bẹ́ẹ̀ ni                                 |
-| `check:lockfile`                  | Ìdúróṣinṣin `package-lock.json` — ibi ìforúkọsílẹ̀ https, àwọn háṣì ìdúróṣinṣin, kò sí ìyípadà àgbàlejò                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ ni                                 |
-| `check:licenses`                  | Àtòjọ ìyọ̀nda ìwé-àṣẹ SPDX fún àwọn ìgbẹ́kẹ̀lé iṣẹ́jáde                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Bẹ́ẹ̀ ni                                 |
-| `check:tracked-artifacts`         | Kò sí àwọn àfọwọ́ṣe ìkọ́lé / àwọn àmì-ọ̀nà `node_modules` tí a fi sínú ìtọ́pasẹ̀ (ó tún ń ṣiṣẹ́ nínú husky pre-commit; a mọ̀ọ́mọ̀ jẹ́ kí pre-push fúyẹ́ — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹ́ẹ̀ ni                                 |
-| `check:ai-attribution`            | Kò sí àfikún `Co-Authored-By` ti AI/bot tàbí àlàyé ìsàlẹ̀ nípa ìṣẹ̀dá AI nínú àwọn commit PR, àkọlé tàbí àkóónú — Òfin Líle #16 (nínú yípo fast-gates `quality.yml` fún PR→`release/**` — ó ń ka event payload, kì í ṣe ohunkóhun lẹ́yìn àwọn PR — àti ìgbésẹ̀ PR-nìkan nínú lint `ci.yml` fún PR→`main`; pẹ̀lú hook husky `commit-msg`; a gba àwọn alábàáṣèkọ̀wé ènìyàn láàyè; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `check:vitest-exclusions`         | Gbogbo ìyọkúrò Vitest gbọdọ̀ dárúkọ ọ̀ràn ìtọ́pasẹ̀ kan, kí ó sì wà nínú `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹ́ẹ̀ ni                                 |
-| `check:file-size`                 | Àwọn fáìlì kóòdù-orísun (`.ts`/`.tsx` nínú `src/`, `open-sse/`, `electron/`, `bin/`) gbọdọ̀ dúró láàárín `cap`, àwọn fáìlì ìdánwò (`*.test.ts(x)`) sì gbọdọ̀ dúró láàárín `testCap`; àwọn fáìlì tí a ti dì nínú `file-size-baseline.json` (`frozen` / `testFrozen`) kò gbọdọ̀ tóbi ju ìwọ̀n tí a kọ sílẹ̀ fún wọn lọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Bẹ́ẹ̀ ni                                 |
-| `check:error-helper`              | Àwọn ìdáhùn àṣìṣe nínú àwọn olùṣe/olùṣàkóso ń lo `buildErrorBody()` / `sanitizeErrorMessage()` (Òfin Líle #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ni                                  |
-| `check:migration-numbering`       | Àwọn fáìlì SQL ìṣíkiri ní nọ́ńbà tẹ̀lé-tẹ̀lé, kò sí àlàfo tàbí nọ́ńbà àdáwòkọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ni                                  |
-| `check:public-creds`              | Kò sí OAuth `client_id`/`client_secret` tàbí àwọn kọ́kọ́rọ́ Firebase Web tí a kọ ní tààrà níta `publicCreds.ts` (Òfin Líle #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Bẹ́ẹ̀ni                                  |
-| `check:db-rules`                  | Kò sí SQL àìṣẹ̀dá níta àwọn módù `src/lib/db/`; kò sí àwọn àgbéwọlé-àkójọpọ̀ láti `localDb.ts` (Àwọn Òfin Líle #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Bẹ́ẹ̀ni                                  |
-| `check:known-symbols`             | Àwọn olùṣe olùpèsè, àwọn ọgbọ́n ìdarí-ọ̀nà, àti àwọn olùtumọ̀ tí a forúkọsílẹ̀ sínú àwọn tábìlì ìpínṣẹ́ wọn bá àwọn fáìlì tó wà lórí disiki mu — kò sí àmì tí kò ní olùtọ́jú tàbí tí a kò kéde                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Bẹ́ẹ̀ni                                  |
-| `check:route-guard-membership`    | Gbogbo ipa-ọ̀nà tó dá ìlànà ọmọ sílẹ̀ ni a pín sí ẹ̀ka nípasẹ̀ `isLocalOnlyPath()` (Àwọn Òfin Líle #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Bẹ́ẹ̀ni                                  |
-| `check:test-discovery`            | Gbogbo fáìlì `*.test.ts` / `*.spec.ts` inú repo ni ó kéré tán olùṣiṣẹ́ ìdánwò kan ń kójọ (ratchet: àtòjọ àwọn fáìlì aláìní olùtọ́jú nínú `test-discovery-baseline.json` lè dín kù nìkan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ni                                  |
-| `check:agent-skills-sync`         | Àwọn artifact agent-skills tí a ṣe jáde bá catalog orísun wọn mu (kò sí ìyapa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `check:provider-asset-provenance` | Àwọn logo/asset olùpèsè ní àkọsílẹ̀ provenance tí a ti ṣàkọsílẹ̀                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `lint:json`                       | Àwọn fáìlì àtúnṣe JSON lè ṣe parse, wọ́n sì tẹ̀lé àwọn òfin lint ti repo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `typecheck:core`                  | Ìkójọpọ̀ TypeScript láìsí àṣìṣe (àwọn ìkìlọ̀ ìmọ̀ràn nìkan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Bẹ́ẹ̀ni                                  |
-| `typecheck:noimplicit:core`       | `noImplicitAny` tó muna — fún ọjọ́ iwájú; ọ̀pọ̀ call site tó ti wà tẹ́lẹ̀ ṣì nílò àwọn annotation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | **Ìmọ̀ràn** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` tí a fi ààlà sí `src/app/(dashboard)/**` (#7033) — àtòjọ ààyè fáìlì 27 tí a ti yan fún `typecheck:core` kò ní TSX dashboard kankan, `next build` kò sì ṣe type-check rẹ̀ rárá pẹ̀lú (`next.config.mjs` ṣètò `ignoreBuildErrors: true`), nítorí náà àwọn regression identifier aláìní olùtọ́jú níbẹ̀ (#6625/#6909) kò hàn sí CI. Ó ń ṣe diff sí baseline iye per-file/per-TS-code tí a ti dì mú (`config/quality/dashboard-typecheck-baseline.json`, àpẹẹrẹ ìmúlò stale kan náà bí `check:known-symbols`) — àwọn àṣìṣe TUNTUN tí ó kọjá iye baseline nìkan ni yóò mú kí gate kùnà; dín ratchet kù pẹ̀lú `--update` nígbà tí a bá ṣàtúnṣe àṣìṣe tó ti wà tẹ́lẹ̀.                                                                                                                                                                                                                                                                         | Bẹ́ẹ̀ni                                  |
+| Skripti (`npm run ...`)           | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ìdènà                                  |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `check:node-runtime`              | Ẹ̀yà Node.js wà láàárín ìwọ̀n tí a ṣe àtìlẹ́yìn fún                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ ni                                 |
+| `check:test-tla-order`            | Kò sí fáìlì `node:test` kankan lábẹ́ `tests/unit` tí ó forúkọ ìdánwò sílẹ̀, tí ó dé `await` ìpele-òkè, tí ó sì tún forúkọ àwọn míì sílẹ̀ lẹ́yìn náà (#18045; ratchet: `test-tla-order-allowlist.json` lè dín kù nìkan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹ́ẹ̀ ni                                 |
+| `check:cycles`                    | Àwọn ìkó wọlé aláyíká ká gbogbo `src/` + `open-sse/` (tí ó dá lórí AST, tí a sì yanjú `paths` tsconfig). Bare máa jáde pẹ̀lú 1 nígbàkigbà tí yííká kankan bá wà (fail-closed láti #15281), yóò sì ṣe àkójọ àwọn SCC. `check:cycles:ratchet` (èyí tí CI ń ṣiṣẹ́) máa dí iṣẹ́ dúró nígbà tí iye náà bá kọjá òrùlé `metrics.cycles` nínú `quality-baseline.json` — lọ́wọ́lọ́wọ́ 14, `direction: down`, nítorí náà ó lè dín kù nìkan (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Bẹ́ẹ̀ ni (ratchet)                       |
+| `check:boundary`                  | Ìsopọ̀ `open-sse → src`: àwọn ìkó wọlé fáìlì-sí-fáìlì aláìlẹ́ẹ̀mejì láti inú ẹ́ńjìnnì sínú ohun èlò (`scripts/quality/measure-boundary.mjs`; àkójọ edge náà ni àkójọ iṣẹ́ àtúnṣe core/module-split v4). Bare = ìròyìn ìmọ̀ràn (kanna pẹ̀lú `quality:boundary`). `check:boundary:ratchet` (èyí tí CI ń ṣiṣẹ́, tí ó tún wà nínú loop ratchet fast-gates `quality.yml`) máa dí iṣẹ́ dúró nígbà tí iye náà bá kọjá òrùlé `metrics.boundaryOpenSseToSrc` nínú `quality-baseline.json` — a bẹ̀rẹ̀ rẹ̀ ní 771 tí a wọn, `direction: down`; `--update` máa ń dín in kù nìkan; ó dá lórí ìbáṣepọ̀ pẹ̀lú base lórí àwọn PR (`--base-ref`, wo ìsàlẹ̀)                                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ ni (ratchet)                       |
+| `check:route-validation:t06`      | Àwọn schema Zod wà lórí gbogbo route (ìlànà Tier 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Bẹ́ẹ̀ni                                  |
+| `check:any-budget:t11`            | Iye `@ts-expect-error // any` kò kọjá ààlà tí a yàn (ẹnu-ọ̀nà Tier 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Bẹ́ẹ̀ni                                  |
+| `check:provider-consistency`      | Gbogbo provider inú `providers.ts` ní àkọsílẹ̀ tó bá a mu nínú `providerRegistry.ts` (àti ní òdìkejì, láàárín àkójọ àwọn tí a fàyè gbà)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Bẹ́ẹ̀ni                                  |
+| `check:model-lifecycle`           | Àwọn tábìlì routing mẹ́ta tí a ń tọ́jú lọ́wọ́ gbọ́dọ̀ wà ní ìbámu pẹ̀lú snapshot lifecycle tí a ti fi sínú ibi ìpamọ́ (#11503): `FITNESS_TABLE` (`taskFitness.ts`) kò fún id tí a ti dáwọ́ dúró, tí `REGISTRY` lè ṣe routing rẹ̀, ní score kankan; gbogbo target `BUILT_IN_ALIASES` wà nínú `REGISTRY`, wọn kò sì sí nínú snapshot àwọn id tí a ti dáwọ́ dúró; gbogbo id tí a ti dáwọ́ dúró tí ó ṣì wà nínú `REGISTRY` ni a forward tàbí tí a ṣe àkójọ rẹ̀ nínú `allowedRetiredInCatalog`; kò sì sí source tàbí target `DEFAULT_DEGRADATION_MAP` kankan tó hàn gẹ́gẹ́ bí èyí tí a ti dáwọ́ dúró nínú snapshot yẹn. Èyí kò fi hàn dájú pé upstream tó ń ṣiṣẹ́ ń pèsè model kan lọ́wọ́lọ́wọ́. Offline — ó ń fi wé `config/quality/model-lifecycle.json`, tí a ń sọ di tuntun lọ́wọ́ pẹ̀lú `npm run quality:refresh-model-lifecycle` (network; a kò so mọ́ CI). `allowedRetiredInCatalog` jẹ́ ratchet ìdínkù díẹ̀díẹ̀: fi àkọsílẹ̀ kún un kìkì bí tracking issue bá wà. | Bẹ́ẹ̀ni                                  |
+| `check:fetch-targets`             | Gbogbo `fetch("/api/...")` nínú `src/` ti ẹgbẹ́ client ń tọ́ka sí `route.ts` gidi kan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Bẹ́ẹ̀ni                                  |
+| `check:deps`                      | Gbogbo dependency tí `npm install` lè fi sori ẹrọ láti gbogbo `package.json` inú repo wà nínú `dependency-allowlist.json`; a máa sàmì sí package tuntun tí a kò pin mọ́ version pàtó tàbí tí a fi ọgbọ́n slopsquatting ṣe                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹ́ẹ̀ni                                  |
+| `audit:deps`                      | Àyẹ̀wò npm fún gbogbo lockfile olómìnira márùn-ún (gbòǹgbò, Electron, àwọn plugin OpenCode v1/v2 àti provider). Àwọn ìkìlọ̀ tó léwu gan-an máa ń dá iṣẹ́ dúró; àwọn ìkìlọ̀ tó ga ṣì máa ń hàn gẹ́gẹ́ bí ìkìlọ̀. Àwọn àyẹ̀wò tí kò sí/tó kùnà jẹ́ INCOMPLETE, wọ́n sì máa ń dá iṣẹ́ dúró; àwọn hash lock àti ìjábọ̀ fún scope kọ̀ọ̀kan ni a máa ń tọ́jú.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ ni                                 |
+| `check:lockfile`                  | Ìdúróṣinṣin `package-lock.json` — registry https, àwọn hash ìdúróṣinṣin, kò sí ìyípadà host                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ ni                                 |
+| `check:licenses`                  | Àtòjọ àwọn ìwé-àṣẹ SPDX tí a fàyè gbà fún àwọn dependency production                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Bẹ́ẹ̀ ni                                 |
+| `check:tracked-artifacts`         | Kò sí àwọn artifact build / symlink `node_modules` tí a commit (ó tún máa ń ṣiṣẹ́ nínú husky pre-commit; a mọ̀ọ́mọ̀ jẹ́ kí pre-push fúyẹ́ — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Bẹ́ẹ̀ ni                                 |
+| `check:ai-attribution`            | Kò gbọdọ̀ sí trailer AI/bot `Co-Authored-By` tàbí footer ìṣẹ̀dá AI nínú àwọn commit PR, àkọlé tàbí ara — Òfin Líle #16 (nínú loop fast-gates `quality.yml` fún PR→`release/**` — ó máa ń ka payload event, kò sì ṣe ohunkóhun níta àwọn PR — àti ìgbésẹ̀ PR-nìkan nínú lint `ci.yml` fún PR→`main`; bẹ́ẹ̀ náà ni hook husky `commit-msg`; àwọn olùkọ̀wé-ẹlẹ́gbẹ́ ènìyàn ni a fàyè gbà; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `check:vitest-exclusions`         | Gbogbo exclusion Vitest gbọdọ̀ dárúkọ issue ìtọ́pinpin kan, kí ó sì fara hàn nínú `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ ni                                 |
+| `check:file-size`                 | Àwọn fáìlì orísun (`.ts`/`.tsx` nínú `src/`, `open-sse/`, `electron/`, `bin/`) gbọdọ̀ dúró láàárín `cap`, àwọn fáìlì ìdánwò (`*.test.ts(x)`) sì gbọdọ̀ dúró láàárín `testCap`; àwọn fáìlì tí a ti dì mú nínú `file-size-baseline.json` (`frozen` / `testFrozen`) kò gbọdọ̀ tóbi ju ìwọ̀n tí a ti ṣàkọsílẹ̀ fún wọn lọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ni                                  |
+| `check:error-helper`              | Àwọn ìdáhùn àṣìṣe nínú àwọn olùṣiṣẹ́/olùtọ́jú máa ń lo `buildErrorBody()` / `sanitizeErrorMessage()` (Òfin Líle #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹ́ẹ̀ni                                  |
+| `check:migration-numbering`       | Àwọn fáìlì SQL ìṣíkiri ní nọ́ńbà léraléra, láìsí àlàfo tàbí àdáàkọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Bẹ́ẹ̀ni                                  |
+| `check:public-creds`              | Kò sí OAuth `client_id`/`client_secret` tàbí àwọn kọ́kọ́rọ́ Firebase Web gangan níta `publicCreds.ts` (Òfin Líle #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹ́ẹ̀ni                                  |
+| `check:db-rules`                  | Kò sí SQL tààrà níta àwọn módù `src/lib/db/`; kò sí àwọn ìgbéwọlé barrel láti `localDb.ts` (Àwọn Òfin Líle #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Bẹ́ẹ̀ni                                  |
+| `check:known-symbols`             | Àwọn olùṣiṣẹ́ olùpèsè, àwọn ọgbọ́n ìdarí ipa ọ̀nà, àti àwọn atúmọ̀ tí a forúkọsílẹ̀ sínú àwọn tábìlì ìpínṣẹ́ wọn bá àwọn fáìlì tó wà lórí disiki mu — kò sí àmì tí kò ní olùtọ́jú tàbí tí a kò kéde                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Bẹ́ẹ̀ni                                  |
+| `check:route-guard-membership`    | Gbogbo route tó ń ṣẹ̀dá child process ni a pín sí ẹ̀ka nípasẹ̀ `isLocalOnlyPath()` (Àwọn Òfin Gíga #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ ni                                 |
+| `check:test-discovery`            | Gbogbo fáìlì `*.test.ts` / `*.spec.ts` inú repo ni ó kéré tán test runner kan ń kó jọ (ratchet: àkójọ orphan inú `test-discovery-baseline.json` lè dín kù nìkan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ ni                                 |
+| `check:agent-skills-sync`         | Àwọn artifact agent-skills tí a ṣe jáde bá source catalog wọn mu (kò sí drift)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `check:provider-asset-provenance` | Àwọn logo/asset provider ní àkọsílẹ̀ provenance tí a ti forúkọ sílẹ̀                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `lint:json`                       | Àwọn fáìlì config JSON lè ṣe parse, wọ́n sì tẹ̀lé àwọn òfin lint ti repo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `typecheck:core`                  | Compilation TypeScript láìsí àṣìṣe (àwọn ìkìlọ̀ ìmọ̀ràn nìkan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Bẹ́ẹ̀ ni                                 |
+| `typecheck:noimplicit:core`       | `noImplicitAny` tó muna — fún ọjọ́ iwájú; ọ̀pọ̀ call site tó ti wà tẹ́lẹ̀ ṣì nílò àwọn annotation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | **Ìmọ̀ràn** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` tí a fi ààlà sí `src/app/(dashboard)/**` (#7033) — àkójọ-fáìlì 27 tí a ti yan fún ààyè láàyè ti `typecheck:core` kò ní TSX dasibodu kankan, àti pé `next build` kì í ṣe àyẹ̀wò-irú rẹ̀ pẹ̀lú (`next.config.mjs` ṣètò `ignoreBuildErrors: true`), nítorí náà àwọn ìfàsẹ́yìn ìdánimọ̀-aláìní-olùní níbẹ̀ (#6625/#6909) kò hàn sí CI. Ó ń fi àwọn ìyàtọ̀ wé ìpìlẹ̀ ìṣírò tí a ti dì fún fáìlì kọ̀ọ̀kan/kóòdù TS kọ̀ọ̀kan (`config/quality/dashboard-typecheck-baseline.json`, àpẹẹrẹ ìfipá-mú-ìgbàgbọ́ tó ti pẹ́ kan náà bí `check:known-symbols`) — àwọn àṣìṣe TUNTUN nìkan tí ó kọjá ìṣírò inú ìpìlẹ̀ ni yóò mú kí ẹnubodè kùnà; dín ìpìlẹ̀ náà kù pẹ̀lú `--update` nígbà tí a bá ṣàtúnṣe àṣìṣe tó ti wà tẹ́lẹ̀.                                                                                                                                                                                                                                      | Bẹ́ẹ̀ni                                  |
 
 ### Iṣẹ́: `quality-gate`
 
-Máa ń ṣiṣẹ́ lẹ́yìn `test-coverage`. Ó máa ń dí ìdapọ̀ mọ́ bí ó bá kùnà.
+Ó máa ń ṣiṣẹ́ lẹ́yìn `test-coverage`. Ó máa ń dí ìdàpọ̀ mọ́ tí ó bá kùnà.
 
-| Skripti                      | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                           | Ìdènà                  |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------- |
-| `quality:collect`            | Ó ń ṣe àgbéjáde `quality-metrics.json` (iye ìkìlọ̀ ESLint, ìborí láti inú ìjábọ̀ shard tí a ti dapọ̀)                                                                                 | Bẹ́ẹ̀ ni (ṣáájú ratchet) |
-| `quality:ratchet`            | Mẹ́tríkì kọ̀ọ̀kan nínú `quality-baseline.json` kò ti fà sẹ́yìn (àwọn ìkìlọ̀ ESLint ≤ baseline; ìborí ≥ baseline)                                                                        | Bẹ́ẹ̀ ni                 |
-| `check:duplication`          | Àtúndá kóòdù (jscpd@4) kò kọjá baseline nínú `quality-baseline.json`                                                                                                               | Bẹ́ẹ̀ ni                 |
-| `check:complexity`           | Ìdíjú cyclomatic ní ìpele fáìlì kò kọjá ààlà (ESLint àkọ́kọ́ `complexity` + `max-lines-per-function`)                                                                                | Bẹ́ẹ̀ ni                 |
-| `check:cognitive-complexity` | Ratchet ìdíjú ìrònú (`eslint-plugin-sonarjs`) — ìṣiṣẹ́ ESLint ọ̀tọ̀; CI ń ṣiṣẹ́ méjèèjì ní àpapọ̀ gẹ́gẹ́ bí ìgbésẹ̀ `check:complexity-ratchets` kan ṣoṣo                                   | Bẹ́ẹ̀ ni                 |
-| `check:dead-code`            | Ratchet àwọn exports / fáìlì tí a kò lò (knip) kò fà sẹ́yìn ní ìfiwéra pẹ̀lú baseline                                                                                                | Bẹ́ẹ̀ ni                 |
-| `check:compression-budget`   | Ìnáwó àdánwò ìfúnpọ̀ — àwọn ìpele tó kéré jù fún ìfipamọ́ token fún engine kọ̀ọ̀kan kò gbọ́dọ̀ fà sẹ́yìn                                                                                  | Bẹ́ẹ̀ ni                 |
-| `check:type-coverage`        | Ratchet ìdá ọgọ́rùn-ún tí a fi type sí (`type-coverage`) kò fà sẹ́yìn; ó fẹ́rẹ̀ẹ́ bo gbogbo `typecheck:noimplicit:core`                                                                 | Bẹ́ẹ̀ ni                 |
-| `check:codeql-ratchet`       | Iye ìkìlọ̀ CodeQL tó ṣí sílẹ̀ kò fà sẹ́yìn (ó ń kà nípasẹ̀ `gh api`; ó máa fo kọjá láìfa ìṣòro bí token kò bá sí) — ìgbà ìmúdójúìwọ̀n àti ìpilẹ̀ṣẹ̀ afọwọ́ṣe: wo "CodeQL ratchet" ní ìsàlẹ̀ | Bẹ́ẹ̀ ni                 |
+| Skripti                      | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                          | Dídènà                  |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `quality:collect`            | Ó ń ṣe `quality-metrics.json` jáde (iye ìkìlọ̀ ESLint, ìbora láti inú ìròyìn shard tí a ti dapọ̀)                                                                                   | Bẹ́ẹ̀ni (ó ṣáájú ratchet) |
+| `quality:ratchet`            | Mẹ́tríìkì kọ̀ọ̀kan inú `quality-baseline.json` kò fà sẹ́yìn (àwọn ìkìlọ̀ ESLint ≤ ìpìlẹ̀; ìbora ≥ ìpìlẹ̀)                                                                                | Bẹ́ẹ̀ni                   |
+| `check:duplication`          | Àtúnlò kóòdù (jscpd@4) kò kọjá ìpìlẹ̀ inú `quality-baseline.json`                                                                                                                  | Bẹ́ẹ̀ni                   |
+| `check:complexity`           | Ìṣòro cyclomatic ní ìpele fáìlì kò kọjá òpin (ESLint `complexity` àkọ́kọ́ + `max-lines-per-function`)                                                                               | Bẹ́ẹ̀ni                   |
+| `check:cognitive-complexity` | Ratchet ìṣòro ìrònú (`eslint-plugin-sonarjs`) — ìṣiṣẹ́ ESLint ọ̀tọ̀; CI ń ṣiṣẹ́ àwọn méjèèjì tí a dapọ̀ gẹ́gẹ́ bí ìgbésẹ̀ `check:complexity-ratchets` kan ṣoṣo                            | Bẹ́ẹ̀ni                   |
+| `check:dead-code`            | Ratchet àwọn export / fáìlì tí a kò lò (knip) kò fà sẹ́yìn ní ìfiwéra pẹ̀lú ìpìlẹ̀                                                                                                   | Bẹ́ẹ̀ni                   |
+| `check:compression-budget`   | Ìnáwó àṣeìwọ̀n ìfúnpọ̀ — àwọn ìpele-kéré jù fún ìfipamọ́ token fún engine kọ̀ọ̀kan kò gbọ́dọ̀ fà sẹ́yìn                                                                                   | Bẹ́ẹ̀ni                   |
+| `check:type-coverage`        | Ratchet ìdá-ọgọ́rùn-ún tí a ti fún ní irú (`type-coverage`) kò fà sẹ́yìn; ó kúnjú òṣùwọ̀n ó sì gba iṣẹ́ `typecheck:noimplicit:core` ní pàtàkì                                         | Bẹ́ẹ̀ni                   |
+| `check:codeql-ratchet`       | Iye ìkìlọ̀ CodeQL tí ó ṣí kò fà sẹ́yìn (ó ń kà nípasẹ̀ `gh api`; ó máa ń fo kọjá láìfa ìṣòro tí token kò bá sí) — fún àkókò ìsọ̀tun àti ìmúṣiṣẹ́ afọwọ́ṣe: wo "Ratchet CodeQL" ní ìsàlẹ̀ | Bẹ́ẹ̀ni                   |
 
 ### Iṣẹ́: `quality-extended`
 
-Gbogbo iṣẹ́ náà jẹ́ ìmọ̀ràn (`continue-on-error: true`). Àwọn ratchet tó dá lórí npm ń ṣiṣẹ́
-gan-an; àwọn scanner òde máa ń fi ara wọn sílẹ̀ nípasẹ̀ `gh release download`, wọ́n sì máa ń fo ara wọn kọjá (exit 0)
-nígbà tí binary kò bá tíì sí.
+Iṣẹ́ náà máa ń dí àwọn olùdíje tí ó bá yẹ. Iwọn bundle, àwọn àwárí àṣírí, àwọn àwárí àìlera,
+àwọn àwárí workflow àti àwọn ìyípadà OpenAPI ni a ń ṣàyẹ̀wò pẹ̀lú àwọn ratchet tí a béèrè.
+Àwọn àyẹ̀wò àyíká-ìgbẹ́kẹ̀lé ṣì jẹ́ ìmọ̀ràn. Fífi scanner sí ẹrọ jẹ́ dandan:
+`scripts/ci/install-quality-scanners.sh` ń pèsè àwọn ẹ̀dà tí a ti ṣókùn, ó sì ń tan
+àwọn ìkùnà fífi-sí-ẹrọ ká. Àwọn irinṣẹ́ tí kò sí, àwọn ìròyìn tí kò bófin mu tàbí àwọn ìpìlẹ̀ tí kò sí máa ń jẹ́ kí
+ẹnubodè scanner tí a béèrè wà ní ÀÌPARÍ.
 
-| Skripti                  | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                                                   | Ìdènà                                                 |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
-| `check:circular-deps`    | Kò sí àwọn dependency tó yí ká (dpdm)                                                                                                                                                                                      | **Ìmọ̀ràn**                                            |
-| `check:bundle-size`      | Ìwọ̀n bundle kò kọjá ààlà                                                                                                                                                                                                   | **Ìmọ̀ràn**                                            |
-| `check:secrets`          | Ṣíṣàyẹ̀wò àwọn àṣírí (gitleaks) — ó máa fo kọjá bí binary kò bá sí                                                                                                                                                          | **Ìmọ̀ràn**                                            |
-| `check:vuln-ratchet`     | Àwọn àìlera dependency (osv-scanner) kò fà sẹ́yìn — ó máa fo kọjá bí binary kò bá sí                                                                                                                                        | **Ìmọ̀ràn**                                            |
-| `check:workflows`        | Lint workflow (actionlint + zizmor); àwọn scanner tí kò sí/tó bàjẹ́, àwọn ìjábọ̀ tí kò péye tàbí baseline ratchet tí kò sí máa ń kùnà gẹ́gẹ́ bí INCOMPLETE. Àwọn àbájáde tó péye ń tẹ̀lé ìlànà strict/advisory/ratchet tí a yàn | Ìṣiṣẹ́ jẹ́ dandan; ratchet zizmor ń dí ìdapọ̀ mọ́ nínú CI |
-| `check:openapi-breaking` | Àwọn àyípadà tó ń ba àdéhùn API gbogbogbò (`openapi.yaml`) jẹ́ ní ìfiwéra pẹ̀lú ẹ̀ka ìpìlẹ̀ (oasdiff) — ó ń ṣe àgbéjáde `openapiBreaking=N`; ó máa fo kọjá bí oasdiff kò bá sí tàbí bí kò ṣeé yanjú spec ìpìlẹ̀                 | **Ìmọ̀ràn**                                            |
+| Skripti                  | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                                                          | Ìdènà                                           |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| `check:circular-deps`    | Kò sí àwọn ìgbẹ́kẹ̀lé alábùdá (dpdm)                                                                                                                                                                                                | **Ìmọ̀ràn**                                      |
+| `check:bundle-size`      | Ìwọ̀n bundle kò kọjá òpin; ìwọ̀n tí kò sí yóò kuna                                                                                                                                                                                  | **Ìdènà pẹ̀lú --ratchet**                        |
+| `check:secrets`          | Àwọn àbájáde Gitleaks kò gbọdọ̀ burú sí i; àwọn àyẹ̀wò tí a béèrè fún yóò kọ àwọn irinṣẹ́/orísun/baseline tí kò sí, àwọn àyẹ̀wò tí ó kuna àti àwọn ìròyìn tí kò péye                                                                  | **Ìdènà pẹ̀lú --ratchet**                        |
+| `check:vuln-ratchet`     | Àwọn àìlera inú àwọn ìgbẹ́kẹ̀lé kò gbọdọ̀ burú sí i; àwọn àyẹ̀wò tí a béèrè fún yóò kọ àwọn irinṣẹ́ tí kò sí, àwọn ìròyìn tí kò péye tàbí àwọn baseline tí kò sí                                                                       | **Ìdènà pẹ̀lú --ratchet**                        |
+| `check:workflows`        | Àyẹ̀wò lint workflow (actionlint + zizmor); àwọn scanner tí kò sí/tí ó bàjẹ́, àwọn ìròyìn tí kò péye tàbí baseline ratchet tí kò sí yóò kuna gẹ́gẹ́ bí INCOMPLETE. Àwọn àbájáde tó péye ń tẹ̀lé ìlànà strict/advisory/ratchet tí a yàn | A gbọ́dọ̀ ṣiṣẹ́ ẹ; ratchet zizmor jẹ́ ìdènà nínú CI |
+| `check:openapi-breaking` | Àdéhùn API gbogbogbò ní ìfiwéra pẹ̀lú àwọn commit event tí a pin mọ́lẹ̀ (merge-base PR, before push, base merge-group; checkout scheduled/manual ti parent àkọ́kọ́); ìwọ̀n tí a béèrè fún yóò kuna nípasẹ̀ pípa ara rẹ̀ mọ́                | **Ìdènà pẹ̀lú --ratchet**                        |
 
 ### Iṣẹ́: `docs-sync-strict`
 
-Ó máa ń ṣiṣẹ́ lórí gbogbo PR sí `main`. Ó máa ń dí ìdapọ̀ mọ́ bí ó bá kùnà.
+Fún pull request sí `main` tàbí `release/**`, iṣẹ́ yìí máa ń ṣiṣẹ́ kìkì fún àwọn àyípadà tí a dábàá tí kò sí ní ipò ìkọ̀wé àkọ́kọ́ (tàbí tí ó wà nínú ìlà ìdúró tí a gbẹ́kẹ̀ lé), tí a sì ti pín sí àyípadà àkọsílẹ̀ tàbí kóòdù. Ó tún máa ń ṣiṣẹ́ lórí àwọn ìṣẹ̀lẹ̀ CI tí kì í ṣe PR; ohun tí ń fa iṣẹ́ yìí nígbà push bo `main` nìkan, kì í bo `release/**`. Ìgbésẹ̀ tí ó parí pẹ̀lú kóòdù ìjáde tí kì í ṣe òdo máa ń dí iṣẹ́ náà; àwọn àbájáde tí a kàn ń ròyìn àti àwọn ìyọkúrò tí a ṣàkọsílẹ̀ nísàlẹ̀ kò dí i.
 
-| Skripti                        | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                   | Ìdènà                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
-| `check:docs-all`               | Ẹnu-ọ̀nà àpapọ̀ tó ń ṣiṣẹ́ àwọn ẹnu-ọ̀nà kékeré mẹ́fà tó wà nísàlẹ̀ ní ọ̀kọ̀ọ̀kan                                                                                   | Bẹ́ẹ̀ni                             |
-| ↳ `check:docs-sync`            | Ìbámu ẹ̀yà láàárín CHANGELOG / OpenAPI / llm.txt                                                                                                            | Bẹ́ẹ̀ni                             |
-| ↳ `check:docs-counts`          | Àwọn iye nínú àlàyé (iye olùpèsè, iye ìṣíkiri, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ) wà láàárín ààyè ratchet ti àwọn iye gidi                                                    | Bẹ́ẹ̀ni                             |
-| ↳ `check:env-doc-sync`         | Gbogbo env var inú `.env.example` ni a ṣàkọsílẹ̀ sínú tábìlì ìwé, bẹ́ẹ̀ sì ni ní ìdákẹ́jì                                                                      | Bẹ́ẹ̀ni                             |
-| ↳ `check:deprecated-versions`  | Kò sí àwọn okun ẹ̀yà tí a ti fòpin sí nínú ìwé                                                                                                              | Bẹ́ẹ̀ni                             |
-| ↳ `check:doc-links`            | Àwọn ìjápọ̀ markdown inú ìwé ń tọ́ka sí àwọn fáìlì gidi (ọ̀nà kika `[text]`/`(path)`)                                                                         | Bẹ́ẹ̀ni                             |
-| ↳ `check:fabricated-docs`      | Àwọn route, env var, àṣẹ CLI, orúkọ hook, àti ipa-ọ̀nà fáìlì tí a tọ́ka sí nínú ìwé wà nínú codebase. Ẹnu-ọ̀nà líle nípasẹ̀ `--strict`; ìkùnà-fẹ́lẹ́ láìsí flag. | Bẹ́ẹ̀ni (nípasẹ̀ `--strict` nínú CI) |
-| `check:cli-i18n`               | Àwọn okun àṣẹ CLI wà nínú gbogbo fáìlì locale i18n                                                                                                         | Bẹ́ẹ̀ni                             |
-| `check:openapi-coverage`       | Ìlànà OpenAPI bo ó kéré tán ìpele ìsàlẹ̀ tí a fi ratchet mú fún àwọn route gidi                                                                             | Bẹ́ẹ̀ni                             |
-| `check:openapi-security-tiers` | Àwọn àlàyé ìpele ààbò nínú `openapi.yaml` bá àwọn ìsọ̀rí `routeGuard.ts` mu                                                                                 | **Ìmọ̀ràn**                        |
-| `check:openapi-routes`         | Gbogbo path nínú `openapi.yaml` ń tọ́ka sí `route.ts` gidi (ìdènà ìrọ̀ àpilẹ̀kọ)                                                                              | Bẹ́ẹ̀ni                             |
-| `check:docs-symbols`           | Gbogbo ìtọ́kasí `/api/...` nínú `docs/**/*.md` ń tọ́ka sí `route.ts` gidi (ìdènà ìrọ̀ àpilẹ̀kọ)                                                                | Bẹ́ẹ̀ni                             |
-| `i18n translation drift`       | Àwọn key tí a kò túmọ̀ nínú àwọn fáìlì locale i18n — ìkìlọ̀ nìkan                                                                                            | **Ìmọ̀ràn**                        |
+| Skripti                        | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ìdènà                                                                                                                                                            |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:docs-all`               | Meta-gate tí ń ṣiṣẹ́ àwọn sub-gate 7 tó wà nísàlẹ̀ ní ọ̀kọ̀ọ̀kan                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| ↳ `check:docs-sync`            | Ìbámu ẹ̀yà àkójọpọ̀/OpenAPI/CHANGELOG, àwọn ẹ̀dà dígí `llm.txt` tí ó bá a mu pátápátá, àwọn òfin tí kò gbọ́dọ̀ yípadà nípa apá àti ìwọ̀n CHANGELOG tí a túmọ̀, àti àìsí àwọn àkọsílẹ̀ àdàkọ tí àwọn tuntun ti rọ́pò                                                                                                                                                                                                                                                                                                                                         | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| ↳ `check:docs-frontmatter`     | Àwọn ojú-ewé àkọsílẹ̀ tí a compile ní àwọn àkọlé frontmatter tó péye                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| ↳ `check:docs-counts`          | Àwọn òfin iye tí kò gbọ́dọ̀ yípadà tí a ní ìgbẹ́kẹ̀lé gíga nínú wọn jẹ́ dandan; àwọn àyẹ̀wò iye fáìlì tí ó dá lórí ìfojúsùn máa ń kìlọ̀ nìkan àyàfi tí skripti bá gba `--strict` (meta-gate CI kò fi í ránṣẹ́)                                                                                                                                                                                                                                                                                                                                             | Ìpele líle máa ń dí; ìpele rọrùn jẹ́ ìmọ̀ràn nìkan                                                                                                                 |
+| ↳ `check:env-doc-sync`         | Kíkà àwọn oníyípadà àyíká nínú kóòdù orísun, `.env.example` àti `docs/reference/ENVIRONMENT.md` bá ara wọn mu lẹ́yìn lílo àwọn àkójọ ìyọkúrò tí a sọ ní kedere fún ohun tí a kọ̀ sílẹ̀, ohun tí ó wà nínú àkọsílẹ̀ nìkan àti ohun tí ó wà nínú àyíká nìkan                                                                                                                                                                                                                                                                                             | Bẹ́ẹ̀ ni, fún ohun tí kò sí nínú àwọn àkójọ ìyọkúrò tí a ṣàkọsílẹ̀                                                                                                  |
+| ↳ `check:deprecated-versions`  | Ó ń ròyìn àwọn ẹ̀yà tí ó lè ti gbó níta àwọn àyíká ìtàn tí kò ní ìṣòro àti àwọn ọjọ́ ìmúdójúìwọ̀n tí ó ti gbó, láìka àwọn àkọsílẹ̀ tí a kọ̀ sílẹ̀ sí                                                                                                                                                                                                                                                                                                                                                                                                     | Ìmọ̀ràn nínú ètò CI lọ́wọ́lọ́wọ́ (a kò fi `--strict` ránṣẹ́)                                                                                                           |
+| ↳ `check:doc-links`            | Àwọn link markdown abẹ́nú nínú docs ń tọ́ka sí àwọn fáìlì gidi (`[text]`/`(path)` form)                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| ↳ `check:fabricated-docs`      | Àwọn route, env var, àṣẹ CLI, orúkọ hook, àti ipa-ọ̀nà fáìlì tí a mẹ́nu kàn nínú docs wà nínú codebase. Hard gate nípasẹ̀ `--strict`; soft-fail láìsí flag.                                                                                                                                                                                                                                                                                                                                                                                           | Bẹ́ẹ̀ ni (nípasẹ̀ `--strict` nínú CI)                                                                                                                               |
+| `check:cli-i18n`               | Àwọn kọ́kọ́rọ́ `t()` tí CLI ń lò wà nínú `en`; `pt-BR` pa gbogbo apá ìpele òkè mọ́; `zh-CN` àti `zh-TW` ní gbogbo kọ́kọ́rọ́ láti inú `en`                                                                                                                                                                                                                                                                                                                                                                                                                 | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| `check:openapi-coverage`       | Spec OpenAPI bo ó kéré tán ilẹ̀ ratchet kan ti àwọn route gidi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| `check:openapi-security-tiers` | Àwọn àlàyé `x-loopback-only`/`x-always-protected` tí a kéde gbọdọ̀ ní àtìlẹ́yìn nínú `routeGuard.ts`; àṣìṣe parser àti àìbámu nínú àyẹ̀wò síwájú máa ń dí. Àyẹ̀wò ìdákẹ́jì fún `x-loopback-only` tí ó sọnù lábẹ́ àwọn prefix fún àyè-wọlé agbègbè nìkan máa ń kìlọ̀, a sì yọ àwọn route tí a ṣàlàyé pẹ̀lú pattern nìkan kúrò nínú àyẹ̀wò ìdákẹ́jì yẹn.                                                                                                                                                                                                       | Àwọn àyẹ̀wò parser àti síwájú máa ń dí; àyẹ̀wò ìdákẹ́jì jẹ́ ìmọ̀ràn                                                                                                   |
+| `check:openapi-routes`         | Gbogbo ipa-ọ̀nà `/api...` nínú `openapi.yaml` bá route gidi mu láìka ìyàtọ̀ àwọn paramita sí lẹ́yìn lílo àkójọ ìyọkúrò `KNOWN_STALE_SPEC` tí a fi ìdí rẹ̀ múlẹ̀; àwọn ohun tí ó ti gbó nínú àkójọ náà tún ń fa ìkùnà                                                                                                                                                                                                                                                                                                                                    | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| `check:docs-symbols`           | Àwọn ìtọ́kasí URL abẹ́nú `/api/...` nínú àwọn àkọsílẹ̀ àkọ́kọ́ tí kì í ṣe ẹ̀dà dígí bá route gidi tàbí ẹbí route mu; a yọ àwọn ìtọ́kasí proxy/upstream/ohun tó di ipò mú/fáìlì àti àwọn ohun `KNOWN_STALE_DOC_REFS` tí a fi ìdí wọn múlẹ̀ kúrò, àwọn ohun tí ó ti gbó nínú àkójọ ìyọkúrò sì ń fa ìkùnà                                                                                                                                                                                                                                                     | Bẹ́ẹ̀ ni                                                                                                                                                           |
+| `i18n translation drift`       | Ó ń ṣàyẹ̀wò hash orísun/ibi àfojúsùn àwọn ìwé pàtàkì àti ìpilẹ̀ṣẹ̀ ìtumọ̀. Ìfiwéra PR gba àwọn ìkùnà tí a jogún tí ó jẹ́ bákan náà pátápátá nìkan láàyè; àìbámu tuntun tàbí tí a kò tíì jẹ́rìí sí nínú orísun, ibi àfojúsùn tí ó sọnù, hash ibi àfojúsùn, ìtumọ̀ tí ó ti di àtijọ́ tàbí cache àwọn apá ń dí ìtẹ̀síwájú dúró. Ní òde ìfiwéra PR, ìkùnà orísun/ibi àfojúsùn tí ó sọnù/hash ibi àfojúsùn ń dí ìtẹ̀síwájú dúró, ṣùgbọ́n ìtumọ̀ tí ó ti di àtijọ́ àti cache àwọn apá tí kò bára mu jẹ́ ìkìlọ̀ nìkan. Àìsí cache àwọn apá ní ìṣètò àtijọ́ kì í ṣe ìkùnà. | Ìyapa tuntun/tí a kò tíì jẹ́rìí sí nínú PR ń dí ìtẹ̀síwájú dúró; ìyapa tí a jogún tí ó jẹ́ bákan náà pátápátá jẹ́ ìkìlọ̀ nìkan; àwọn òfin ní òde PR dá lórí irú ìkùnà |
 
 ### Iṣẹ́: `i18n-ui-coverage`
 
-| Skripti                           | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                   | Ìdènà      |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check-ui-keys-coverage` (inline) | Ìbòrí key i18n UI jẹ́ ≥ 65%                                                                                                                                                 | Bẹ́ẹ̀ni      |
-| `check-ui-value-drift` (inline)   | **Value** Gẹ̀ẹ́sì tí a tún kọ kò fi ìtumọ̀ àtijọ́ kankan sílẹ̀                                                                                                                  | Bẹ́ẹ̀ni      |
-| `check-new-key-coverage` (inline) | A túmọ̀ key Gẹ̀ẹ́sì **tuntun** nínú gbogbo locale — a kọ àmì `__MISSING__:`                                                                                                   | Bẹ́ẹ̀ni      |
-| `check-translation-ratio`         | Ìpín ìtumọ̀ gidi fún locale kọ̀ọ̀kan (èyí tó jọ Gẹ̀ẹ́sì / placeholder / àwọn ewé tó sọnù lẹ́yìn allowlist) kò gbọ́dọ̀ kọjá `config/quality/i18n-translation-baseline.json` + slack | **Ìmọ̀ràn** |
+| Skripti                               | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                                                   | Ìdènà     |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check-ui-keys-coverage` (nínú laini) | Ìbora kọ́kọ́rọ́ UI i18n jẹ́ ≥ 65%                                                                                                                                                              | Bẹ́ẹ̀ni     |
+| `check-ui-value-drift` (nínú laini)   | Àtúnkọ iye Gẹ̀ẹ́sì kan kò fi ìtumọ̀ tí ó ti di àtijọ́ sílẹ̀                                                                                                                                     | Bẹ́ẹ̀ni     |
+| `check-new-key-coverage` (nínú laini) | Kọ́kọ́rọ́ Gẹ̀ẹ́sì **tuntun** kan ni a túmọ̀ ní gbogbo locale — a kọ àmì `__MISSING__:`                                                                                                           | Bẹ́ẹ̀ni     |
+| `check-translation-ratio`             | Ìpín ìtumọ̀ gidi fún locale kọ̀ọ̀kan (èyí tó jọ Gẹ̀ẹ́sì pátápátá / àyè ìdádúró / àwọn ohun tó ṣáìsí lẹ́yìn allowlist) kò gbọ́dọ̀ kọjá `config/quality/i18n-translation-baseline.json` + àyè àfikún | **Ìdènà** |
 
-Ó nílò `fetch-depth: 0` — ẹnu-ọ̀nà value-drift ń fi `en.json` wé merge base.
+Ó nílò `fetch-depth: 0` — ibodè value-drift ń ṣe diff `en.json` sí merge base.
 
-#### `check-ui-value-drift` — ẹnu-ọ̀nà ìtumọ̀ àtijọ́
+#### `check-ui-value-drift` — ibodè ìtumọ̀ tí ó ti di àtijọ́
 
-Ó ń mú ìfàsẹ́yìn i18n kan ṣoṣo tí àwọn ẹnu-ọ̀nà yòókù kò lè rí nípasẹ̀ ìṣètò: a tún value Gẹ̀ẹ́sì
-kọ, ṣùgbọ́n àwọn ìtumọ̀ tí a dá lórí Gẹ̀ẹ́sì _tẹ́lẹ̀_ ṣì wà, nítorí náà
-àwọn aṣàmúlò tí kì í ṣe Gẹ̀ẹ́sì ṣì ń ka ẹ̀dà tí a kọ pẹ̀lú ìdánilójú, ṣùgbọ́n tí ó ti di àṣìṣe.
+Ó ń rí ìfàsẹ́yìn i18n kan ṣoṣo tí àwọn ibodè yòókù kò lè rí nípasẹ̀ ìṣètò wọn: a tún iye Gẹ̀ẹ́sì kan
+kọ, ṣùgbọ́n àwọn ìtumọ̀ tí a dá láti ara Gẹ̀ẹ́sì _tẹ́lẹ̀_ ṣì wà, nítorí náà
+àwọn aṣàmúlò tí kì í ṣe Gẹ̀ẹ́sì ṣì ń ka ẹ̀dà tí a kọ pẹ̀lú ìdánilójú, ṣùgbọ́n tí kò tọ́ mọ́.
 
-Èyí ṣẹlẹ̀ ní tòótọ́ nínú ẹ̀yà tí a tú jáde. A tún `oauthModal.googleOAuthWarning` kọ nígbà tí olùrànlọ́wọ́
-ìwọlé Antigravity dé (#5203); **39 nínú 43 locale** pa ọ̀rọ̀ tó ń sọ fún àwọn olùṣàkóso pé kí wọ́n "da
-URL kíkún kọ, kí wọ́n sì lẹ̀ ẹ́ sí ìsàlẹ̀" mọ́ — ìṣàn iṣẹ́ tí kò lè parí fún olùpèsè yẹn. A kò
+Èyí ti ṣẹlẹ̀ ní tòótọ́ nínú ẹ̀yà tí a gbé jáde. A tún `oauthModal.googleOAuthWarning` kọ nígbà tí olùrànlọ́wọ́
+ìwọlé Antigravity dé (#5203); **39 nínú 43 locales** ṣì ní ọ̀rọ̀ tó ń sọ fún àwọn olùdarí pé kí wọ́n “ṣe àdàkọ
+URL kíkún kí wọ́n sì lẹ̀ mọ́ ìsàlẹ̀” — ìṣàn iṣẹ́ tí kò lè parí fún olùpèsè yẹn. A kò
 ṣàkíyèsí rẹ̀ títí di #8463 nítorí pé:
 
-- `sync-ui-keys` kàn ń fi àwọn key tí **kò sí** kún un, kì í ṣe àwọn tí ó ti **di àtijọ́**;
-- `check-ui-keys-coverage` ń ka bí key ṣe _wà_, nítorí náà ìtumọ̀ àtijọ́ máa gba àmì bí ohun tí a ti bo;
-- `check-translation-drift` ń tọpa àwọn ẹ̀dà àwòkọ ìwé `docs/i18n/<locale>/**.md` —
-  kò ka `src/i18n/messages/*.json` rárá. Ó ti jẹ́ dandan nínú iṣẹ́ `docs-sync-strict` láti ìmúdọ́gba
-  2026-09: ṣàtúnṣe ìwé pàtàkì kan → `npm run i18n:run -- --files=<doc>` (ní ìpele abala, kò ná púpọ̀).
+- `sync-ui-keys` ń kún àwọn kọ́kọ́rọ́ tí wọ́n **kò sí** nìkan, kì í ṣe àwọn tí ó **ti di àtijọ́**;
+- `check-ui-keys-coverage` ń ka _wíwà_ kọ́kọ́rọ́, nítorí náà ìtumọ̀ tí ó ti di àtijọ́ máa ń jẹ́ èyí tí a kà sí pé a ti bò;
+- `check-translation-drift` ń tọpa àwọn àwòkọjá ìwé àkọsílẹ̀ `docs/i18n/<locale>/**.md` —
+  kì í ka `src/i18n/messages/*.json` láé. Ó ti ń dí iṣẹ́ dúró nínú job `docs-sync-strict` láti ìgbà
+  ìmúdójúìwọ̀n 2026-09: ṣàtúnṣe ìwé àkọsílẹ̀ pàtàkì kan → `npm run i18n:run -- --files=<doc>` (ní ìpele abala, kò náni).
 
-**Ó mọ ìyàtọ̀, kò gbára lé ìpìlẹ̀.** Ó ń fi `en.json` ní ibi ìpìlẹ̀ ìdapọ̀ wé
-igi iṣẹ́; fún gbogbo kọ́kọ́rọ́ tí iye Gẹ̀ẹ́sì rẹ̀ yí padà, èdè agbègbè èyíkéyìí tí ó ṣì ní
-ìtumọ̀ tí a kò fọwọ́ kàn ti di àtijọ́. Èyí mọ̀ọ́mọ̀ **di gbèsè tó ti wà tẹ́lẹ̀ mú** — ìyàtọ̀
-kò lè fi Gẹ̀ẹ́sì àtijọ́ tí ìtumọ̀ kan tó ti wà fún ìgbà pípẹ́ ti wá hàn, nítorí náà ẹnubodè náà ń ṣàyẹ̀wò
-ohun tí àyípadà lọ́wọ́lọ́wọ́ kàn nìkan. Yíyan ọ̀nà mìíràn (ìpìlẹ̀ hash fún kọ́kọ́rọ́ kọ̀ọ̀kan) yóò ná
-fáìlì tí a ṣẹ̀dá tó ~600 KB, ìlọ́po mẹ́ta ìpìlẹ̀ tó tóbi jù lọ tó wà, tí yóò sì máa yí padà lórí gbogbo PR i18n.
+**Ó mọ diff, kò gbára lé baseline.** Ó ń fi `en.json` tó wà ní merge base wé
+working tree; fún gbogbo kọ́kọ́rọ́ tí iye Gẹ̀ẹ́sì rẹ̀ yí padà, locale èyíkéyìí tí ó ṣì ní
+ìtumọ̀ tí a kò fọwọ́ kàn ti di àtijọ́. Èyí mọ̀ọ́mọ̀ **di gbèsè tó ti wà tẹ́lẹ̀ dúró** — diff
+kò lè fi Gẹ̀ẹ́sì àtijọ́ wo tí ìtumọ̀ tó ti wà fún ìgbà pípẹ́ ti wá hàn, nítorí náà ibodè náà ń ṣèdájọ́
+ohun tí ìyípadà lọ́wọ́lọ́wọ́ fọwọ́ kàn nìkan. Àṣàyàn mìíràn (baseline hash fún kọ́kọ́rọ́ kọ̀ọ̀kan) yóò nílò
+fáìlì tí a ṣẹ̀dá tó tó ~600 KB, ìgbà mẹ́ta tó baseline tó tóbi jù lọ tó wà, tí yóò máa yí padà lórí gbogbo PR i18n.
 
 Ọ̀nà méjì láti mú un ṣẹ:
 
-1. ṣàfikún àwọn ìtumọ̀ tí ó kan, tàbí
-2. ṣètò wọn sí `__MISSING__:<new english>` — nígbà náà runtime yóò pèsè Gẹ̀ẹ́sì tí a ti ṣàtúnṣe
-   (`src/i18n/request.ts::deepMergeFallback`, #7258), kọ́kọ́rọ́ náà yóò sì wọ ìlà fún ìtumọ̀.
+1. ṣe àfikún sí àwọn ìtumọ̀ tí ó kan, tàbí
+2. ṣètò wọn sí `__MISSING__:<new english>` — runtime yóò fi Gẹ̀ẹ́sì tí a ti ṣàtúnṣe hàn
+   (`src/i18n/request.ts::deepMergeFallback`, #7258), a ó sì fi kọ́kọ́rọ́ náà sí ìlà fún ìtumọ̀.
 
-Tí **ìtumọ̀ ọ̀rọ̀** náà bá yí padà, ó dára láti **tún kọ́kọ́rọ́ náà lorúkọ**: kọ́kọ́rọ́ tuntun kò lè jogún
-ìtumọ̀ àtijọ́. Àpẹẹrẹ yìí ni #8463 lò.
+Tí **ìtumọ̀** okun náà bá yí padà, ó dára láti **tún kọ́kọ́rọ́ náà lorúkọ**: kọ́kọ́rọ́ tuntun kò lè jogún
+ìtumọ̀ tí ó ti di àtijọ́. Èyí ni àpẹẹrẹ tí #8463 lò.
 
 ```bash
-npm run i18n:check-value-drift          # líle (èyí tí CI ń ṣiṣẹ́)
+npm run i18n:check-value-drift          # tó muna (èyí tí CI ń ṣiṣẹ́)
 npm run i18n:check-value-drift:warn     # ìròyìn nìkan
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Ó jáde pẹ̀lú 0 àti `SKIP reason=base-unresolved` nígbà tí kò bá ṣeé ka katalọ́ọ̀gù ìpìlẹ̀ (clone tí kò jin
-láìsí base ref), gẹ́gẹ́ bí `check-openapi-breaking`.
+Àwọn ẹnubodè value-drift àti new-key ń lo ìfiwéra aláìṣeéyípadà kan náà láti inú
+`scripts/i18n/resolve-ui-diff-base.mjs`. Workflow náà ń fi base, base-tip àti
+candidate SHAs kan náà ránṣẹ́ sí àwọn àyẹ̀wò méjèèjì. Àwọn ìṣiṣẹ́ PR/base-retarget, push àti merge-group ń lo event
+context wọn. Fífi candidate branch kan ránṣẹ́ nílò PR tí ó ṣí sílẹ̀ gan-an fún un tàbí input
+`i18n_base_sha` tí a sọ ní pàtó. Dispatch tàbí scheduled observation ti `main` tàbí `release/vX.Y.Z`
+láìsí input yẹn máa ń fi commit tó kẹ́yìn wé first parent rẹ̀; kì í ṣe audit fún
+gbogbo gbèsè ìtumọ̀ tí a jogún. Local invocation nílò comparison base tí a sọ ní pàtó,
+fún àpẹẹrẹ àṣẹ `BASE_REF` tó wà lókè.
 
-### Iṣẹ́: `i18n`
+Comparison context tí kò sí tàbí tí kò ṣe kedere, required catalog tí kò ṣeé kà tàbí tí kò bófin mu, àti
+candidate tí ó yí padà máa ń ṣe àbájáde `INCOMPLETE` pẹ̀lú exit code **2**, títí kan ní warn mode.
+Àwọn catalog read ń lo `scripts/i18n/read-ui-catalog.mjs`; a kì í fi empty objects
+rọ́pò read failures. Bẹ́ẹ̀ ni unavailable base tàbí incomplete input kò lè fi ìdí PASS múlẹ̀.
 
-Mátíríìsì ìfọwọ́sí i18n kíkún (iṣẹ́ kan fún èdè agbègbè kọ̀ọ̀kan). Gbogbo iṣẹ́ náà jẹ́ àbá.
+### Job: `i18n`
 
-| Skripti                         | Ohun tí ó ń fọwọ́sí               | Dídènà                                              |
-| ------------------------------- | -------------------------------- | --------------------------------------------------- |
-| `validate_translation.py quick` | Ìpé ìtumọ̀ fún èdè agbègbè kọ̀ọ̀kan | **Àbá** (`continue-on-error: true` lórí gbogbo iṣẹ́) |
+Matrix ìfìdímúlẹ̀ i18n kíkún (job kan fún locale kọ̀ọ̀kan). Gbogbo job náà jẹ́ ti ìmọ̀ràn.
 
-### Iṣẹ́: `pr-test-policy`
+| Skripti                         | Ohun tí ó ń fìdí rẹ̀ múlẹ̀     | Ìdènà                                                      |
+| ------------------------------- | ---------------------------- | ---------------------------------------------------------- |
+| `validate_translation.py quick` | Pípé ìtumọ̀ fún locale kọ̀ọ̀kan | **Ìmọ̀ràn** (`continue-on-error: true` lórí gbogbo job náà) |
 
-Ó ń ṣiṣẹ́ lórí àwọn pull request nìkan.
+### Job: `pr-test-policy`
 
-| Skripti                | Ohun tí ó ń fọwọ́sí                                                                                                                                    | Dídènà |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `check:pr-test-policy` | Àwọn PR tó yí kóòdù iṣelọpọ padà nínú `src/`, `open-sse/`, `electron/`, tàbí `bin/` gbọ́dọ̀ ní àwọn ìdánwò tuntun tàbí tí a ṣe àfikún sí (Òfin Líle #8) | Bẹ́ẹ̀ ni |
-| `check:test-masking`   | Àwọn fáìlì ìdánwò tí a yí padà kò dín àpapọ̀ iye assert kù tàbí ṣàfikún tautology `assert.ok(true)`                                                    | Bẹ́ẹ̀ ni |
-| `check:pr-evidence`    | Ara PR tọ́ka sí ẹ̀rí ìdánwò/VPS fún àyípadà náà (ó sọ Òfin Líle #18 di aládàáṣiṣẹ́ nípa wíwá inú ọ̀rọ̀ PR — ó rọrùn láti bàjẹ́, wo Backlog)                 | Bẹ́ẹ̀ ni |
+Ó ń ṣiṣẹ́ lórí pull requests nìkan.
 
-### Iṣẹ́: `test-vitest`
+| Skripti                | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                          | Ìdènà |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
+| `check:pr-test-policy` | Àwọn PR tí ó yí production code padà nínú `src/`, `open-sse/`, `electron/`, tàbí `bin/` gbọ́dọ̀ ní àwọn test tàbí ṣe ìmúdójúìwọ̀n wọn (Òfin Líle #8) | Bẹ́ẹ̀ni |
+| `check:test-masking`   | Àwọn fáìlì test tí a yí padà kò dín àpapọ̀ iye assert kù tàbí ṣàfikún tautology `assert.ok(true)`                                                  | Bẹ́ẹ̀ni |
+| `check:pr-evidence`    | Ara PR tọ́ka sí ẹ̀rí test/VPS fún ìyípadà náà (ó sọ Òfin Líle #18 di aládàáṣiṣẹ́ nípa ṣíṣe grep lórí ọ̀rọ̀ PR — ó rọrùn láti bàjẹ́, wo Backlog)         | Bẹ́ẹ̀ni |
 
-Ó ń ṣiṣẹ́ lẹ́yìn `build`. Ó ń dènà ìdapọ̀ tí ó bá kùnà.
+### Job: `test-vitest`
 
-| Àkójọpọ̀          | Ohun tí ó ń fọwọ́sí                                         | Dídènà                                                                                                                      |
-| ---------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (irinṣẹ́ 110), autoCombo, cache — olùṣiṣẹ́ vitest | Bẹ́ẹ̀ ni                                                                                                                      |
-| `test:vitest:ui` | Àwọn ìdánwò kọ́ńpónẹ́ǹtì UI — olùṣiṣẹ́ vitest                 | **Ó ń dènà** — àwọn ìkùnà tó ti wà tẹ́lẹ̀ ni a yọ kúrò ní pàtó nínú `vitest.config.ts`; àwọn ìkùnà tuntun máa mú iṣẹ́ náà kùnà |
+Ó nílò iṣẹ́ ìpínsísọ̀rí `changes`. Àwọn abala matrix tó bá wúlò máa ń dí ìdapọ̀ lọ́wọ́ bí ìkùnà bá ṣẹlẹ̀.
 
-### Àwọn workflow alẹ́ (tí a ṣètò, àbá)
+| Àkójọpọ̀ ìdánwò   | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                    | Ìdíwọ́                                                                                                                    |
+| ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `test:vitest`    | Olùpèsè MCP (irinṣẹ́ 110), autoCombo, cache — olùṣiṣẹ́ vitest | Bẹ́ẹ̀ ni                                                                                                                   |
+| `test:vitest:ui` | Àwọn ìdánwò ẹ̀yà UI — olùṣiṣẹ́ vitest                         | **Ìdíwọ́** — àwọn ìkùnà tó ti wà tẹ́lẹ̀ ni a yọ kúrò ní pàtó nínú `vitest.config.ts`; àwọn ìkùnà tuntun yóò mú iṣẹ́ náà kùnà |
 
-Àwọn wọ̀nyí ń ṣiṣẹ́ lórí ìṣètò cron (àti `workflow_dispatch`), wọn kì í ṣiṣẹ́ lórí àwọn PR. Gbogbo wọn jẹ́ àbá.
+### Àwọn ìṣàn-iṣẹ́ alẹ́ (tí a ṣètò, fún ìmọ̀ràn)
 
-| Workflow               | Ohun tí ó ń fọwọ́sí                                                                                                                                              | Dídènà  |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
-| `nightly-property`     | Àwọn ìdánwò property fast-check pẹ̀lú random seed + iye ìṣiṣẹ́ gíga                                                                                               | **Àbá** |
-| `nightly-resilience`   | ẹnubodè ìdàgbàsókè heap, fífi àṣìṣe chaos sínú ètò, ẹrù/ìdánwò ọlọ́jọ́-pípẹ́ k6                                                                                    | **Àbá** |
-| `nightly-llm-security` | olùṣọ́ injection promptfoo (ipò ìdènà) + àwọn probe garak (a máa fo wọn tí kò bá sí provider secret)                                                             | **Àbá** |
-| `nightly-schemathesis` | Ìdánwò fuzzing àdéhùn OpenAPI (schemathesis) sí OmniRoute tó ń ṣiṣẹ́ ní lílo `docs/openapi.yaml` — ó ṣí àwọn ìrúfin spec / 500 tí a kò bójú tó payá (Fase 8 B.4) | **Àbá** |
-| `nightly-mutation`     | àmì ìdánwò mutation Stryker lórí ipa unit tó yára — àwọn mutant tó yè ń fi àwọn assert aláìlágbára hàn                                                          | **Àbá** |
-| `nightly-compat`       | mátíríìsì ìbámu engine Node káàkiri àwọn ààlà `engines.node` tí a ṣe àtìlẹ́yìn fún                                                                               | **Àbá** |
+Àwọn wọ̀nyí máa ń ṣiṣẹ́ ní ìbámu pẹ̀lú ètò cron (àti `workflow_dispatch`), wọn kì í ṣiṣẹ́ lórí àwọn PR. Gbogbo wọn jẹ́ ti ìmọ̀ràn.
 
-A ń ṣàkọsílẹ̀ àwọn ìpìlẹ̀ iṣẹ́-ṣiṣe (heap, TTFB, àkókò build), a kò fi wọ́n ṣe ẹnubodè: wo [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+| Ìṣàn-iṣẹ́               | Ohun tí ó ń fìdí rẹ̀ múlẹ̀                                                                                                                                | Ìdíwọ́      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `nightly-property`     | Àwọn ìdánwò property fast-check pẹ̀lú seed àìròtẹ́lẹ̀ + iye ìṣiṣẹ́ gíga                                                                                     | **Ìmọ̀ràn** |
+| `nightly-resilience`   | Ẹnu-ọ̀nà ìdàgbàsókè heap, fífi àṣìṣe chaos sínú ètò, ẹrù/ìṣiṣẹ́ pípẹ́ k6                                                                                   | **Ìmọ̀ràn** |
+| `nightly-llm-security` | Aṣọ́-ọ̀nà ìdènà injection promptfoo (ipò ìdènà) + àwọn ìwádìí garak (a máa fò ó kọjá láìsí àṣírí olùpèsè)                                                 | **Ìmọ̀ràn** |
+| `nightly-schemathesis` | Fuzzing àdéhùn OpenAPI (schemathesis) sí OmniRoute tó ń ṣiṣẹ́ ní lílo `docs/openapi.yaml` — ń ṣàfihàn rírú spec / àwọn 500 tí a kò bójú tó (Ìpele 8 B.4) | **Ìmọ̀ràn** |
+| `nightly-mutation`     | Ìwọ̀n ìdánwò mutation Stryker lórí ọ̀nà ìdánwò unit yíyára — àwọn mutant tó yè ń ṣàfihàn àwọn assert aláìlágbára                                          | **Ìmọ̀ràn** |
+| `nightly-compat`       | Matrix ìbámu engine Node jákèjádò àwọn ìpele `engines.node` tí a ṣètìlẹ́yìn fún                                                                          | **Ìmọ̀ràn** |
+
+Àwọn òṣùwọ̀n ìpilẹ̀ iṣẹ́ (heap, TTFB, àkókò build) ni a ń ṣàkọsílẹ̀, a kì í lò wọ́n gẹ́gẹ́ bí ẹnu-ọ̀nà: wo [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
@@ -328,8 +413,9 @@ nìkan** (`scripts/check/newCodeMode.mjs`: a dá merge-base náà sílẹ̀ nín
 
 - **tí ń dí ìlọsíwájú** — PR náà fi àwọn ìrúfin cyclomatic/cognitive tàbí àwọn export tí kò lò kún àwọn fáìlì tí ó yí padà
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` nínú àkọsílẹ̀);
-- **ìmọ̀ràn** — àpapọ̀ gbogbo rẹ̀ ní ìfiwéra pẹ̀lú ìpìlẹ̀ tí a ti dì mú. Ìyapa tí a jogún kì í sọ
-  PR aláìlẹ́bi di pupa; a tún di ìyapa náà mú nígbà ìlaja ìtúsílẹ̀, iṣẹ́ headroom sì ń ṣọ́ ọ.
+- **ìkìlọ̀** — àpapọ̀ káríayé ní ìfiwéra pẹ̀lú ìpìlẹ̀ tí a ti dí mú. Ìyapa tí a jogún kì í fi
+  àmì pupa sí PR tí kò mọwọ́-mẹsẹ̀; a máa ń tọpa ìyapa náà fún àtúnṣe nígbà ìbámu ìtújáde, iṣẹ́
+  headroom sì máa ń ṣọ́ ọ.
 
 `check:file-size` ń lo base ref gẹ́gẹ́ bí òfin tirẹ̀ (`scripts/check/check-file-size.mjs`, #8522):
 ó ń ṣàyẹ̀wò gbogbo fáìlì source àti test inú tree, ó ń ka iye ìlà fáìlì kọ̀ọ̀kan ní base PR
@@ -531,7 +617,11 @@ Nígbà tí o bá ń ṣàfikún àkọsílẹ̀ sí àtòjọ ìyọ̀ǹda:
 
 1. Ṣẹ̀dá `scripts/check/check-<name>.mjs` (tàbí `.ts`). Àwọn ẹnu-ọ̀nà àyẹ̀wò ìlànà máa jáde pẹ̀lú 0/1.
    Àwọn ẹnu-ọ̀nà àyẹ̀wò irú ratchet máa ń fi òṣùwọ̀n kan ránṣẹ́ sí `quality-metrics.json` nípasẹ̀ `collect-metrics.mjs`.
-2. Ṣàfikún `"check:<name>": "node scripts/check/check-<name>.mjs"` sí `package.json`.
+2. Ṣàfikún `"check:<name>": "node scripts/check/check-<name>.mjs"` sí `package.json`, kí o sì
+   mú alias náà àti àṣẹ rẹ̀ gan-an bá ara wọn mu nínú `config/quality/gate-manifest.json`.
+   Lo ìmúṣiṣẹ́pọ̀ kan náà nígbà tí o bá ń yí alias ìfàṣẹsí tó ti wà padà tàbí tí o bá ń yọ ọ́ kúrò.
+   Ṣiṣe `npm run check:gate-manifest`; hook pre-commit àti ìsọ̀rí ìyípadà CI
+   ń mú kí àdéhùn yìí di dandan.
 3. So ó pọ̀ sínú `.github/workflows/ci.yml` lábẹ́ iṣẹ́ tó yẹ
    (ìlànà → `lint` tàbí `docs-sync-strict`; ratchet → `quality-gate`).
 4. Tí ó bá ní àtòjọ ìyọ̀ǹda, lo `reportStaleEntries()` láti
@@ -553,118 +643,111 @@ kò gbé e wọlé láìfọwọ́ṣe (ìwọ ni yóò yan afárá MCP↔LSP t�
 
 ---
 
-## Àtòjọ Àwọn Iṣẹ́ Ìṣàlàyé (àtúnyẹ̀wò ROI — Ìpele 9 Ìgbì 3)
+## Àtòjọ Iṣẹ́ Ìṣètò-dáradára (àtúnyẹ̀wò ROI — Ìpele 9 Ìgbì 3)
 
-A ṣe ìbámu àkójọ yìí pẹ̀lú `ci.yml` ní 2026-06-17 (ẹ̀yà àtẹ̀yìnwá kò ní
+A ṣe àtúnṣe àtòjọ yìí pẹ̀lú `ci.yml` ní 2026-06-17 (ẹ̀dà ìṣáájú kò fi
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Àtúnyẹ̀wò ROI lórí àkójọ tí a mú bá ara wọn mu
-ṣàwárí àwọn olùdíje ìṣàlàyé wọ̀nyí. **Àwọn ìṣọ̀kan náà jẹ́ àwọn àyípadà CI
-aláìlọ́gbọ́n-ọ̀nà; àwọn ìyípadà/iparẹ́ jẹ́ àwọn ìpinnu ìlànà tí a fi sílẹ̀ fún olùṣàkóso.** Kò sí ohunkóhun nísàlẹ̀
+`check:codeql-ratchet`, `check:pr-evidence` kún un). Àtúnyẹ̀wò ROI lórí àkójọpọ̀ tí a ti mú bá ara wọn mu
+ṣe ìdámọ̀ àwọn olùdíje ìṣètò-dáradára wọ̀nyí. **Àwọn ìdapọ̀ jẹ́ àwọn àyípadà CI
+aládàáṣe; àwọn ìyípadà/iparẹ́ jẹ́ ìpinnu ìlànà tí a fi pamọ́ fún olùṣiṣẹ́.** Kò sí ohun kankan nísàlẹ̀
 tí a ti lò síbẹ̀.
 
-**Ohun mìíràn tí a kò ṣàkọsílẹ̀ lókè** (ìmọ̀ràn, àmì aláìlágbára): iṣẹ́ `docs-lint`
-(markdownlint + Vale, gbogbo iṣẹ́ náà jẹ́ `continue-on-error`) àti àwọn ìṣàn-iṣẹ́ aṣàyẹ̀wò olóminira
+**Ohun mìíràn tí a kò ṣàkọsílẹ̀ lókè** (ìmọ̀ràn, àmì tí kò lágbára): iṣẹ́ `docs-lint`
+(markdownlint + Vale, gbogbo iṣẹ́ náà jẹ́ `continue-on-error`) àti àwọn workflow aṣàyẹ̀wò adádúró
 `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` wà nínú
-`quality-baseline.json` ṣùgbọ́n a kò so mọ́ ratchet ìdènà nínú `ci.yml` — òṣùwọ̀n náà
-kò ní ohun tí ó ń lò ó lọ́wọ́lọ́wọ́.
+`quality-baseline.json` ṣùgbọ́n a kò so ó mọ́ ratchet ìdènà nínú `ci.yml` — òṣùwọ̀n náà
+kò ní ìsopọ̀ mọ́ ohunkóhun lọ́wọ́lọ́wọ́.
 
-### Ṣọ̀kan / yọ àtúnsí kúrò (aláìlọ́gbọ́n-ọ̀nà, ewu kéré)
+### Ìdapọ̀ / yíyọ àtúnṣe (aládàáṣe, ewu kékeré)
 
-A fìdí olùdíje kọ̀ọ̀kan múlẹ̀ pẹ̀lú ipò ẹnu-ọ̀nà tó ń ṣiṣẹ́ ní 2026-06-17 (gbọ́kànlé-ṣùgbọ́n-ṣàyẹ̀wò);
-ọ̀pọ̀ àwọn ìṣọ̀kan tí ó dàbí ẹni pé ó “hàn gbangba” fi hàn pé wọ́n ń fi gbèsè pamọ́, wọn kò sì jẹ́
-àwọn àfidípò tààrà **rárá**.
+A fìdí olùdíje kọ̀ọ̀kan múlẹ̀ ní ìbámu pẹ̀lú ipò gate tó ń ṣiṣẹ́ ní 2026-06-17 (gbẹ́kẹ̀lé-ṣùgbọ́n-ṣàyẹ̀wò);
+ọ̀pọ̀ àwọn ìdapọ̀ tó dà bí “ohun tó hàn gbangba” ni ó fi hàn pé wọ́n ń fi gbèsè pamọ́, wọn kì í sì í ṣe
+àwọn àrọ́pò tó mọ́.
 
-- **`check:docs-sync` ń ṣiṣẹ́ lẹ́ẹ̀mejì** — gẹ́gẹ́ bí ohun olóminira nínú iṣẹ́ `lint` àti lẹ́ẹ̀kan sí i nínú `check:docs-all` (`docs-sync-strict`) àti ìkọ̀ husky pre-commit. ✅ **TI PARÍ** — a yọ ìpè `lint` olóminira náà kúrò.
-- **Àyẹ̀wò CVE** — ❌ **KÌ Í ṢE ìṣọ̀kan tó mọ́ tónítóní.** `audit:deps` máa ń kùnà pátápátá lórí CVE èyíkéyìí tó ga/pàtàkì; `check:vuln-ratchet` (osv) máa ń kùnà nìkan lórí _ìfàsẹ́yìn_ ní ìfiwéra pẹ̀lú baseline (lọ́wọ́lọ́wọ́ 1 MODERATE). Ìtumọ̀ wọn yàtọ̀ — píparẹ́ `audit:deps` yóò mú kí ẹnu-ọ̀nà pípé fún ga/pàtàkì pàdánù. Ẹ jẹ́ kí àwọn méjèèjì wà.
-- **Ìṣàwárí cycle** — ✅ **TI PARÍ** (#15159 G-01/G-02). Ọ̀rọ̀ àtijọ́ níbí pe `check:cycles` ní ẹnu-ọ̀nà “aláwọ̀ ewé, tí a ṣàyàn pẹ̀lú ìṣọ́ra” ó sì ṣàlàyé pé kí ó máa dí iṣẹ́ lọ́nà nítorí `check:circular-deps` (dpdm) ròyìn cycle 91. Àwọ̀ ewé yẹn jẹ́ **àwọ̀ ewé èké**: `check:cycles` ṣàyẹ̀wò àwọn subdirectory 5 (fáìlì 450), ó bá `import|export … from` aimi nìkan mu, ó sì sọ gbogbo specifier `@/` àti `@omniroute/open-sse/` nù, nítorí náà kò lè rí àwọn cycle dynamic-import + alias tí ó pọ̀ jù nínú repo. A ti tún un ṣe: ẹnu-ọ̀nà náà ń rìn ká `src` + `open-sse` báyìí (fáìlì 5023), ó ń kó àwọn specifier láti TypeScript AST (nítorí náà `import("…")` wúlò ṣùgbọ́n `typeof import("…")` ní ipò type kò wúlò), ó sì ń yanjú `paths` tsconfig. Ó rí cycle **14**, kì í ṣe 0. Nítorí pé a kò lè tún àwọn cycle 14 tó ti wà tẹ́lẹ̀ ṣe nínú PR ẹnu-ọ̀nà kan, `check:cycles` ti di **ratchet** báyìí (`--ratchet`, òrùlé `metrics.cycles.value = 14` nínú `quality-baseline.json`, `direction: down`) — ó ń dí _ìfàsẹ́yìn_ èyíkéyìí, iye náà sì lè dín kù nìkan. CI ń ṣiṣẹ́ `npm run check:cycles:ratchet`. Ìdínkù díẹ̀díẹ̀ máa lọ pẹ̀lú **A-01**. `check:circular-deps` (dpdm) ṣì jẹ́ ìmọ̀ràn gẹ́gẹ́ bí èrò kejì tó gbòòrò.
-- **Ìdíjú** — ✅ **TI PARÍ** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ìrìn ESLint kan ṣoṣo, ó ń ka nípasẹ̀ ruleId kí baseline cyclomatic+max-lines àti cognitive lè dúró lọ́tọ̀ọ̀tọ̀; `check:complexity` / `check:cognitive-complexity` kọ̀ọ̀kan ṣì wà fún `--update` agbègbè.
-- **Ìdènà ìròsọ `/api`** — ✅ **TI PARÍ** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): àkójọ FS kan ṣoṣo ti `src/app/api`, openapi-routes + docs-symbols ṣì ń ròyìn lọ́tọ̀ọ̀tọ̀; àwọn ti ẹnìkọ̀ọ̀kan ṣì wà fún ṣíṣiṣẹ́ agbègbè.
-- **`check:node-runtime` ń ṣiṣẹ́ nínú iṣẹ́ 11** — ⚠️ **ROI kéré.** Ọ̀kọ̀ọ̀kan jẹ́ runner lọ́tọ̀, àyẹ̀wò náà sì jẹ́ <1s; àpapọ̀ àkókò tí a lè fipamọ́ ~10s, ní ìfiwéra pẹ̀lú pípàdánù olùṣọ́ olówó-pọ́ọ́kú fún iṣẹ́ kọ̀ọ̀kan. Kò tọ́ ìrúkèrúdò náà.
-- **`typecheck:noimplicit:core` lórí lint CI** — ✅ **a ti yọ ọ́ kúrò nínú iṣẹ́ lint** (ó jẹ́ `continue-on-error` ìmọ̀ràn); àyè type tó ń dí iṣẹ́ ni `typecheck:core` + `check:type-coverage`. A dá script agbègbè sílẹ̀.
+- **`check:docs-sync` ń ṣiṣẹ́ lẹ́ẹ̀mejì** — lọ́tọ̀ nínú iṣẹ́ `lint` àti lẹ́ẹ̀kan sí i nínú `check:docs-all` (`docs-sync-strict`) àti hook husky pre-commit. ✅ **A TI ṢE É** — a yọ ìpè `lint` adádúró kúrò.
+- **Àyẹ̀wò CVE** — ❌ **Kì í ṣe ìdapọ̀ tó mọ́.** `audit:deps` ń dí àwọn ìkìlọ̀ ewu tó ṣe pàtàkì àti àwọn audit tí kò pé kọjá gbogbo lockfile márùn-ún, nígbà tó ń ṣàfihàn àwọn ìkìlọ̀ ewu gíga gẹ́gẹ́ bí ìkìlọ̀ lábẹ́ ìlànà lọ́wọ́lọ́wọ́; `check:vuln-ratchet` (osv) máa ń kùnà nìkan nígbà tí _ìfàsẹ́yìn_ bá wà ní ìfiwéra pẹ̀lú baseline tí a commit sínú rẹ̀, ó sì ń kọ àwọn ìwọ̀n tí kò sí nígbà tí a bá béèrè wọn. Ìtumọ̀ wọn yàtọ̀ — yíyọ `audit:deps` kúrò yóò mú kí a pàdánù gate ewu-pàtàkì alákòóso àti àwọn ẹ̀rí audit package olómìnira. Jẹ́ kí àwọn méjèèjì wà.
+- **Ìṣàwárí cycle** — ✅ **A TI ṢE É** (#15159 G-01/G-02). Ọ̀rọ̀ àtijọ́ níbí pe `check:cycles` ní gate “tó ń kọjá, tí a sì ti ṣàṣàyàn rẹ̀” ó sì ṣàlàyé pé kí ó máa dí nítorí `check:circular-deps` (dpdm) ṣàlàyé cycle 91. Ìkọjá yẹn jẹ́ **ìkọjá èké**: `check:cycles` ṣàyẹ̀wò subdirectory 5 (file 450), ó bá `import|export … from` aimi nìkan mu, ó sì sọ gbogbo specifier `@/` àti `@omniroute/open-sse/` nù, nítorí náà kò lè rí àwọn cycle dynamic-import + alias tí ó pọ̀ jù nínú repo. A ti tún un ṣe: gate náà ń rìn káàkiri `src` + `open-sse` (file 5023), ó ń kó àwọn specifier láti inú TypeScript AST (nítorí náà `import("…")` wúlò ṣùgbọ́n `typeof import("…")` tó wà ní ipò type kò wúlò), ó sì ń yanjú `paths` tsconfig. Ó rí cycle **14**, kì í ṣe 0. Nítorí a kò lè ṣàtúnṣe cycle 14 tó ti wà tẹ́lẹ̀ nínú PR gate kan, `check:cycles` ti di **ratchet** báyìí (`--ratchet`, òpin `metrics.cycles.value = 14` nínú `quality-baseline.json`, `direction: down`) — ó ń dí gbogbo _ìfàsẹ́yìn_, iye náà sì lè dínkù nìkan. CI ń ṣiṣẹ́ `npm run check:cycles:ratchet`. Ìdínkù rẹ̀ máa bá **A-01** lọ. `check:circular-deps` (dpdm) ṣì wà gẹ́gẹ́ bí èrò kejì tó gbòòrò tí kì í ṣe ìdènà.
+- **Complexity** — ✅ **A TI ṢE É** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ìrìn ESLint kan ṣoṣo, ó ń ka nípasẹ̀ ruleId kí baseline cyclomatic+max-lines àti cognitive lè dúró lọ́tọ̀; `check:complexity` / `check:cognitive-complexity` kọ̀ọ̀kan ṣì wà fún `--update` agbègbè.
+- **Ìdènà àròsọ-àìlótọ́ ` /api`** — ✅ **A TI ṢE É** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): àkójọ FS kan ṣoṣo ti `src/app/api`, openapi-routes + docs-symbols ṣì ń jabo lọ́tọ̀ọ̀tọ̀; èyí kọ̀ọ̀kan ṣì wà fún ìṣiṣẹ́ agbègbè.
+- **`check:node-runtime` ń ṣiṣẹ́ nínú iṣẹ́ 11** — ⚠️ **ROI rẹ̀ kéré.** Ọ̀kọ̀ọ̀kan jẹ́ runner ọ̀tọ̀, àyẹ̀wò náà sì kéré ju ìṣẹ́jú-ààyá 1; àpapọ̀ ohun tí a lè fipamọ́ jẹ́ ~10s, ní ìfiwéra pẹ̀lú pípàdánù ìṣọ́ iṣẹ́-kọ̀ọ̀kan tó rọrùn tí kò sì náni púpọ̀. Kò yẹ fún ìyípadà àti ìdàrúdàpọ̀ náà.
+- **`typecheck:noimplicit:core` lórí lint CI** — ✅ **a ti yọ ọ́ kúrò nínú iṣẹ́ lint** (ó jẹ́ ìmọ̀ràn `continue-on-error` tẹ́lẹ̀); àyè type tó ń dí ni `typecheck:core` + `check:type-coverage`. A pa script agbègbè mọ́.
 
-### Yípadà / pinnu (ìlànà olùṣàkóso)
+### Yí padà / pinnu (ìlànà olùṣiṣẹ́)
 
-- `check:openapi-security-tiers` (ìmọ̀ràn) — ❌ **KÒ ṢEÉ yípadà ní mímọ́.** Ó jáde pẹ̀lú 0 ṣùgbọ́n ó kìlọ̀ pé ọ̀pọ̀ àwọn route `traffic-inspector` lábẹ́ `LOCAL_ONLY_API_PREFIXES` kò ní àkọsílẹ̀ `x-loopback-only: true`. Fífi agbára mú un nílò fífi àwọn àkọsílẹ̀ yẹn kún `openapi.yaml` lákọ̀ọ́kọ́.
-- `typecheck:noimplicit:core` (ìmọ̀ràn) — ratchet `check:type-coverage` tó ń dí iṣẹ́ ti bo ọ́ púpọ̀. Yí i padà sí ratchet tàbí pa ìrìn `tsc` kejì tó tún ara rẹ̀ ṣe rẹ́.
-- `test:vitest:ui` (tó jẹ́ **olùdènà** báyìí) — àwọn ìkùnà tó ti wà tẹ́lẹ̀ ni a yọ kúrò ní pàtó nínú `vitest.config.ts` pẹ̀lú àwọn àlàyé ìtọ́pasẹ̀ `// #8618`; àwọn ìkùnà tuntun máa ń mú kí iṣẹ́ náà kùnà.
-- `check:secrets` (gitleaks, ratchet olùdènà tí a dì mọ́ àwọn false-positive 3 tí a ṣàkọsílẹ̀) — fi àwọn 3 náà sí allowlist láti dé 0, tàbí sọ ọ́ kalẹ̀ sí ìmọ̀ràn. Ó ní àgbélébùú pẹ̀lú secret-scanning abinibi GitHub + `check:public-creds`.
-- `check:pr-evidence` (olùdènà, ń lo grep lórí ọ̀rọ̀ inú PR-body) — ewu false-positive ga; píparẹ́ rẹ̀ máa sọ ìmúlò Hard Rule #18 di aláìlágbára, nítorí náà èyí jẹ́ ìpinnu ìlànà gidi.
-- `semgrep` (olóminira ìmọ̀ràn) — ó ní àgbélébùú pẹ̀lú CodeQL fún àwọn ẹbí OWASP; so baseline rẹ̀ mọ́ ratchet kan tàbí pa á rẹ́.
+- `check:openapi-security-tiers` (ìmọ̀ràn) — ❌ **A kò lè yí i padà ní mímọ́.** Ó máa ń jáde pẹ̀lú 0 ṣùgbọ́n ó ń kìlọ̀ pé ọ̀pọ̀ route `traffic-inspector` lábẹ́ `LOCAL_ONLY_API_PREFIXES` kò ní annotation `x-loopback-only: true`. Fífi agbára mú un nílò fífi àwọn annotation wọ̀nyẹn kún `openapi.yaml` lákọ̀ọ́kọ́.
+- `typecheck:noimplicit:core` (ìmọ̀ràn) — ratchet ìdènà `check:type-coverage` ti gba ọ̀pọ̀ iṣẹ́ rẹ̀. Yí i padà sí ratchet tàbí yọ ìṣiṣẹ́ `tsc` kejì tó tún ara rẹ̀ ṣe kúrò.
+- `test:vitest:ui` (tó jẹ́ **ìdènà** báyìí) — a yọ àwọn ìkùnà tó ti wà tẹ́lẹ̀ kúrò ní kedere nínú `vitest.config.ts` pẹ̀lú àwọn àlàyé ìtọ́pasẹ̀ `// #8618`; àwọn ìkùnà tuntun máa mú kí iṣẹ́ náà kùnà.
+- `check:secrets` (gitleaks, ratchet ìdènà) — òpin lọ́wọ́lọ́wọ́ ni `metrics.secretFindings` nínú `quality-baseline.json`. Gbogbo àyọkúrò nílò àkọsílẹ̀ `.gitleaks.toml` tó ní ìdáláre; ìwọ̀n tí kò sí jẹ́ INCOMPLETE. Àyẹ̀wò náà ń ṣe àfikún sí àyẹ̀wò secret abinibi GitHub àti `check:public-creds`.
+- `check:pr-evidence` (ìdènà, ó ń lo grep lórí ọ̀rọ̀ inú ara PR) — ewu false-positive rẹ̀ ga; yíyọ ọ́ kúrò ń sọ ìfipámúlẹ̀ Hard Rule #18 di aláìlágbára, nítorí náà èyí jẹ́ ìpinnu ìlànà gidi.
+- `semgrep` (adádúró ìmọ̀ràn) — ó ní ìbójútó tó fara pọ̀ mọ́ CodeQL fún àwọn ẹbí OWASP; so baseline rẹ̀ mọ́ ratchet tàbí yọ ọ́ kúrò.
 
 ---
 
-## Ìwé Àkọsílẹ̀ Tó Jẹmọ́
+## Àwọn Ìwé Ìtọ́kasí Tó Jẹmọ́ Ọ̀rọ̀ Yìí
 
-- Ẹ̀wọ̀n-ìpèsè (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Ẹ̀wọ̀n-ìpèsè (ìtàn-orísun, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — ìdènà ìbámu àkójọpọ̀ kọ́kọ́rọ́
+#### `check-key-completeness` — ibodè ìbáradọ́gba àkójọpọ̀ kọ́kọ́rọ́
 
 `scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, iṣẹ́ `i18n-ui-coverage`).
-Ó ń fi àkójọpọ̀ àwọn kọ́kọ́rọ́ ewé inú gbogbo `src/i18n/messages/<locale>.json` wé `en.json`, ó sì
-máa ń kùnà lórí èyíkéyìí tí kò sí tàbí tí ó jẹ́ àfikún, láìka ìgbà tí a fi kọ́kọ́rọ́ náà kún un sí.
-Àwọn ààyè ìdádúró `__MISSING__:` ni a kà sí èyí tó wà (àkóónú wọn jẹ́ ọ̀ràn ìdènà ìpín).
-Ó jẹ́ alábàáṣe pípé fún àwọn ìdènà méjì tó dá lórí ìyàtọ̀/ìdá-ọgọ́rùn-ún: `check-ui-keys-coverage`
-ń fipá mú ààlà ìsàlẹ̀ 80 % fún locale kọ̀ọ̀kan (àwọn kọ́kọ́rọ́ 43 tí kò sí nínú ~13,000 ṣì máa ń
-fi 99.7 % hàn), `check-new-key-coverage` sì ń ṣàyẹ̀wò kìkì àwọn kọ́kọ́rọ́ tí PR kan fi kún
-`en.json`. Àkójọpọ̀ locale kan ni a ń ṣẹ̀dá láti inú `en.json` ti ọjọ́ tí a gé ẹ̀ka rẹ̀, ó sì ń
-túmọ̀ fún ọ̀pọ̀ ọjọ́ nígbà tí ìpìlẹ̀ ṣì ń fi àwọn kọ́kọ́rọ́ kún un; PR àkójọpọ̀ náà kò fi kọ́kọ́rọ́
-kankan kún un fúnra rẹ̀, nítorí náà àwọn méjèèjì tó jọ ọ́ kò fi ìkìlọ̀ hàn nígbà tí àkójọpọ̀ 1
-(#13044) wọlé pẹ̀lú àìní kọ́kọ́rọ́ 43 nínú locale mẹ́sàn-án àti àkójọpọ̀ 2 (#13660) pẹ̀lú àìní
-kọ́kọ́rọ́ 10 nínú mẹ́jọ (2026-09-15). Ṣàtúnṣe ìkùnà pẹ̀lú
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; ewé `extra` túmọ̀ sí
-pé orísun ti yọ ọ́ kúrò — pa á rẹ́ kúrò nínú locale náà. `--warn` máa ń ṣe ìròyìn láìkùnà.
+Ó máa ń fi àkójọpọ̀ àwọn kọ́kọ́rọ́ ewé inú gbogbo `src/i18n/messages/<locale>.json` wé `en.json`, yóò sì kùnà
+lórí ewé èyíkéyìí tó sọnù tàbí tó jẹ́ àfikún, láìka ìgbà tí a fi kọ́kọ́rọ́ náà kún un sí. Àwọn àmì ìfipamọ́ `__MISSING__:`
+ni a kà sí èyí tó wà (àkóónú wọn jẹ́ ojúṣe ibodè ìwọ̀n). Ó jẹ́ àfikún pípé
+sí àwọn ibodè méjèèjì tó dá lórí ìyàtọ̀/ìdá-ọgọ́rùn-ún: `check-ui-keys-coverage` ń fi ìwọ̀n kékeré 80 % múlẹ̀ fún
+locale kọ̀ọ̀kan (àwọn kọ́kọ́rọ́ 43 tó sọnù nínú ~13,000 ṣì máa hàn bí 99.7 %), `check-new-key-coverage` sì ń ṣàyẹ̀wò
+kìkì àwọn kọ́kọ́rọ́ tí PR kan fi kún `en.json`. A máa ń dá ìdìpọ̀ locale kan láti inú `en.json` ọjọ́
+tí a gé ẹ̀ka rẹ̀, ó sì máa ń túmọ̀ fún ọ̀pọ̀ ọjọ́ nígbà tí base ń fi àwọn kọ́kọ́rọ́ míì kún un; PR ìdìpọ̀ náà kò fi
+kọ́kọ́rọ́ kankan kún un fúnra rẹ̀, nítorí náà àwọn ibodè arákùnrin méjèèjì dákẹ́ nígbà tí ìdìpọ̀ 1 (#13044) wọlé pẹ̀lú àìní kọ́kọ́rọ́ 43 nínú
+locale mẹ́sàn-án àti ìdìpọ̀ 2 (#13660) pẹ̀lú àìní kọ́kọ́rọ́ 10 nínú mẹ́jọ (2026-09-15). Ṣàtúnṣe ìkùnà pẹ̀lú
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; ewé `extra` kan
+túmọ̀ sí pé orísun ti yọ ọ́ kúrò — yọ ọ́ kúrò nínú locale náà. `--warn` máa ń ṣe ìròyìn láìkùnà.
 `--catalog=cli` ń ṣe ìfiwéra kan náà lórí `bin/cli/locales` (`npm run i18n:check-keys:cli`);
 àwọn ìgbésẹ̀ méjèèjì wà nínú iṣẹ́ `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — ìdènà i18n fún kọ́kọ́rọ́ tuntun
+#### `check-new-key-coverage` — ibodè i18n fún kọ́kọ́rọ́ tuntun
 
-Ẹgbẹ́ `check-ui-value-drift`. Èyí ń mú iye Gẹ̀ẹ́sì kan tí a **kọ ní ọ̀nà míràn**
-nígbà tí a fi àwọn ìtumọ̀ rẹ̀ sílẹ̀ sẹ́yìn; èyí sì ń mú kọ́kọ́rọ́ Gẹ̀ẹ́sì kan tí a **fi kún un**
+Arákùnrin `check-ui-value-drift`. Èyí yẹn máa ń ṣàwárí iye Gẹ̀ẹ́sì tí a **tún kọ**
+nígbà tí àwọn ìtumọ̀ rẹ̀ kù sẹ́yìn; èyí máa ń ṣàwárí kọ́kọ́rọ́ Gẹ̀ẹ́sì tí a **fikún**
 nígbà tí àwọn locale kan kò rí i gbà rárá.
 
-`check-ui-keys-coverage` kò lè rí irú èyí: ó ń fipá mú ààlà ìdá-ọgọ́rùn-ún fún locale kọ̀ọ̀kan,
-àti pé àìní kọ́kọ́rọ́ mọ́kànlá nínú ~13,000 fi àgbájọ ìborí sí 99.9%. Ìdá-ọgọ́rùn-ún fún èdè
-kọ̀ọ̀kan kò lè ṣàlàyé pé “a ṣe ìtújáde ẹ̀yà yìí láìtumọ̀ rẹ̀” — gbogbo ẹ̀yà kan lè wọ inú locale
-tuntun láìsí ọ̀rọ̀ kankan, láìsí ìyípadà kankan sí nọ́ńbà náà.
+`check-ui-keys-coverage` kò lè rí irú èyí: ó ń fi ìwọ̀n ìdá-ọgọ́rùn-ún kékeré múlẹ̀ fún locale kọ̀ọ̀kan, àti pé
+àwọn kọ́kọ́rọ́ mọ́kànlá tó sọnù nínú ~13,000 fi ìbòòrò sí 99.9%. Ìdá-ọgọ́rùn-ún fún èdè kọ̀ọ̀kan kò lè
+ṣàlàyé pé “ẹ̀yà iṣẹ́ yìí jáde láìsí ìtumọ̀” — gbogbo ẹ̀yà iṣẹ́ kan lè wọ locale tuntun láìsí
+ọ̀rọ̀ kankan, kí iye náà má sì yí padà láé.
 
-Ìṣẹ̀lẹ̀ tí ó dúró fún: Ìpele 3 ti Orchestration Canvas túmọ̀ àwọn kọ́kọ́rọ́ mọ́kànlá rẹ̀ káàkiri
-àwọn locale 42 tó wà nígbà náà. Wákàtí díẹ̀ lẹ́yìn náà, àkójọpọ̀ èdè EU (#13044) mú ibi ìpamọ́ náà
+Ìṣẹ̀lẹ̀ tí ó ṣàkọsílẹ̀: Ìpele 3 ti Orchestration Canvas túmọ̀ àwọn kọ́kọ́rọ́ mọ́kànlá rẹ̀ káàkiri
+àwọn locale 42 tó wà nígbà náà. Wákàtí díẹ̀ lẹ́yìn náà, ìdìpọ̀ èdè EU (#13044) mú repo náà
 dé locale 51, àwọn tuntun mẹ́sàn-án (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) kò sì
-rí wọn gbà rárá. `deepMergeFallback` ń fi Gẹ̀ẹ́sì rọ́pò kọ́kọ́rọ́ tí kò sí, nítorí náà ọ̀nà ìkùnà
-náà jẹ́ UI tí a kò túmọ̀ dípò UI òfìfo — ó jẹ́ gidi, ó sì dákẹ́ nípasẹ̀ àpẹrẹ rẹ̀.
+rí wọn gbà rárá. `deepMergeFallback` máa ń fi Gẹ̀ẹ́sì rọ́pò kọ́kọ́rọ́ tó sọnù, nítorí náà ìkùnà náà
+jẹ́ UI tí a kò túmọ̀ dípò UI tó ṣófo — ó jẹ́ ìṣòro gidi, ó sì dákẹ́ gẹ́gẹ́ bí a ṣe kọ́ ọ.
 
-Gẹ́gẹ́ bí ẹgbẹ́ rẹ̀, ó **mọ ìyàtọ̀**, ó ń fi Gẹ̀ẹ́sì ní ìpìlẹ̀ ìdàpọ̀ wé igi iṣẹ́, nítorí náà
-àwọn àlàfo tó ti wà tẹ́lẹ̀ dúró gẹ́gẹ́ bí wọ́n ṣe rí, ìdènà náà kò sì nílò ìṣíkiri kankan láti
-ṣiṣẹ́.
+Gẹ́gẹ́ bí arákùnrin rẹ̀, ó **mọ ìyàtọ̀**, ó ń fi Gẹ̀ẹ́sì ní merge base wé
+working tree, nítorí náà àwọn àlàfo tó ti wà tẹ́lẹ̀ dúró gẹ́gẹ́ bí wọ́n ṣe wà, ibodè náà kò sì nílò ìṣíkiri láti mú un ṣiṣẹ́.
 
-**Àmì `__MISSING__:<english>` kò mú un ṣẹ mọ́ (láti 2026-09-17).** Ó ti jẹ́ ìdádúró tí ìwé
-àkọsílẹ̀ sọ tẹ́lẹ̀ — àsìkò ìṣiṣẹ́ máa ń padà sí Gẹ̀ẹ́sì tó tọ́ — títí tí àwọn PR ẹ̀yà mẹ́jọ ní
-2026-09-16 fi kún kọ́kọ́rọ́ 61, tí wọ́n sì tẹ àmì náà sínú gbogbo locale 65 dípò títúmọ̀ wọn:
-ìdènà yìí gba gbogbo wọn, kò sí ohun tó dá àwọn PR náà dúró, lẹ́yìn náà ìdènà ìpín ìtumọ̀ gidi
-tó ń dí iṣẹ́ kọ́ lórí òkè ìtújáde fún gbogbo ènìyàn (pt-BR 3.2 % > 2.5 % + 0.5). Ní báyìí,
-a ń ṣe ìdájọ́ àmì kan gẹ́gẹ́ bí ìtumọ̀ tí kò sí. Ṣàtúnṣe ìkùnà pẹ̀lú
+**Àmì `__MISSING__:<english>` kan kò tẹ́ ẹ lọ́rùn (láti 2026-09-17).** Ó ti jẹ́
+ọ̀nà ìsunwọ̀n tí a kọ sínú ìwé tẹ́lẹ̀ — runtime máa ń padà sí Gẹ̀ẹ́sì tó tọ́ — títí di ìgbà tí àwọn PR ẹ̀yà iṣẹ́ mẹ́jọ ní
+2026-09-16 fi àwọn kọ́kọ́rọ́ 61 kún un, tí wọ́n sì fi àmì náà sínú gbogbo locale 65 dípò kí wọ́n túmọ̀ wọn: ibodè yìí
+gba gbogbo wọn, kò sí ohun tó dí àwọn PR náà, ibodè ìwọ̀n ìtumọ̀ gidi tó ń dí ìtẹ̀síwájú sì
+kùnà lórí release tip fún gbogbo ènìyàn (pt-BR 3.2 % > 2.5 % + 0.5). Ní báyìí, a máa ń ṣèdájọ́
+àmì kan gẹ́gẹ́ bí ìtumọ̀ tó sọnù. Ṣàtúnṣe ìkùnà pẹ̀lú
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, tàbí
-gbogbo locale lẹ́ẹ̀kan náà pẹ̀lú `npm run i18n:translate-new-keys`
-(`scripts/i18n/translate-new-keys.sh`, ó láìléwu nígbà tí a yà á kúrò, kò ní bẹ̀rẹ̀ láìsí env
-`OMNIROUTE_TRANSLATION_*`). Kọ́kọ́rọ́ kan tí ó gbọ́dọ̀ dúró ní Gẹ̀ẹ́sì (orúkọ
-ọjà/engine/flag tí a dì mọ́lẹ̀) yẹ kí ó wà nínú `scripts/i18n/untranslatable-keys.json`,
-kì í ṣe lẹ́yìn àmì kan. `vi` fòfin de àwọn àmì pátápátá
-(`tests/unit/i18n-vi-completeness.test.ts`).
+gbogbo locale lẹ́ẹ̀kan náà pẹ̀lú `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
+ó lè ṣiṣẹ́ láìso mọ́ terminal, kò sì ní bẹ̀rẹ̀ láìsí env `OMNIROUTE_TRANSLATION_*`). Kọ́kọ́rọ́ kan tí ó gbọ́dọ̀ dúró
+ní Gẹ̀ẹ́sì (orúkọ ọjà/ẹ̀rọ/flag tí a ti dì mọ́lẹ̀) gbọ́dọ̀ wà nínú `scripts/i18n/untranslatable-keys.json`,
+kì í ṣe lẹ́yìn àmì kan. `vi` fòfin de àwọn àmì pátápátá (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — ìdènà ìdánwò tí a dá dúró
+#### `check-vitest-exclusions` — ibodè àwọn ìdánwò tí a dá dúró
 
-Fáìlì kan nínú àkójọ `exclude` ti `vitest.config.ts` jẹ́ ìdánwò tí kò ṣiṣẹ́, ó sì dà bí
-ìborí lójú ẹni tó bá ka igi náà. Fáìlì méjìlélọ́gọ́ta kójọ sẹ́yìn àlàyé
-`// #8618 — ìkùnà tó ti wà tẹ́lẹ̀; yọ ìyọkúrò yìí nígbà tí a bá ṣàtúnṣe rẹ̀`. A ti pa Issue #8618
-ní 2026-08-11 nígbà tí àkójọ tí ó ń tọ́pinpin dàgbà láti àwọn àkọsílẹ̀ 45 sí 62, tí ọ̀kọ̀ọ̀kan
-tuntun sì jogún àlàyé tó tọ́ka sí issue tí kò ṣiṣẹ́ mọ́. Nígbà tí a wọn àkójọ náà ní fáìlì
-kọ̀ọ̀kan níkẹyìn (#13204), **51 nínú 62 náà kọjá lórí igi lọ́wọ́lọ́wọ́ láìsí ìyípadà kankan
-sí orísun**.
+Fáìlì kan nínú àtòjọ `exclude` ti `vitest.config.ts` jẹ́ ìdánwò tí kò ṣiṣẹ́, ó sì dà bí
+ìbòòrò sí ẹni tó ń ka igi náà. Fáìlì méjìlélọ́gọ́ta kójọ lẹ́yìn àlàyé
+`// #8618 — pre-existing failure; remove this exclusion when fixed`. A ti pa Issue #8618 ní
+2026-08-11 nígbà tí àtòjọ tí ó ń tọpinpin dàgbà láti àkọsílẹ̀ 45 sí 62, ọ̀kọ̀ọ̀kan àwọn tuntun sì jogún àlàyé kan
+tó tọ́ka sí issue tí a ti pa. Nígbà tí a ṣe ìwọ̀n àtòjọ náà níkẹyìn fáìlì-kọ̀ọ̀kan (#13204), **51 nínú 62
+kọjá lórí igi lọ́wọ́lọ́wọ́ láìsí ìyípadà sí orísun**.
 
-Ìdènà náà ń béèrè pé gbogbo ìyọkúrò tí ó tọ́ka sí fáìlì gidi gbọ́dọ̀ (a) dárúkọ issue
-ìtọ́pinpin kan àti (b) hàn nínú `config/quality/vitest-exclusions.json` pẹ̀lú ipò rẹ̀ tí a ti
-wọn, kí fífi ọ̀kan kún un lè jẹ́ ìyàtọ̀ tí a lè ṣàgbéyẹ̀wò nínú fáìlì àkànṣe, dípò kàn jẹ́ ìlà
-míràn nínú àkójọpọ̀ oní-àkọsílẹ̀ 60. Ó mọ̀ọ́mọ̀ kò tún àwọn ìdánwò tí a yọ kúrò ṣiṣẹ́ — ìyẹn
-ń gba ~10 ìṣẹ́jú, ó sì yẹ iṣẹ́ alákòókò; àkójọ ohun-ìní náà ń ṣàkọsílẹ̀ ìgbà tí a wọn ọ̀kọ̀ọ̀kan
-wọn kẹ́yìn.
+Ibodè náà béèrè pé gbogbo ìyọkúrò tó ń tọ́ka sí fáìlì gidi gbọ́dọ̀ (a) darúkọ issue ìtọpinpin kan àti
+(b) fara hàn nínú `config/quality/vitest-exclusions.json` pẹ̀lú ipò tí a wọn, kí fífi ọ̀kan kún un lè jẹ́
+ìyàtọ̀ tí a lè ṣàyẹ̀wò nínú fáìlì pàtó dípò ìlà míì nínú array oníàkọsílẹ̀ 60. Ó mọ̀ọ́mọ̀
+kò tún àwọn ìdánwò tí a yọ sílẹ̀ ṣiṣẹ́ — ìyẹn máa gba ~ìṣẹ́jú 10, ó sì yẹ fún iṣẹ́ tó ń wáyé lẹ́ẹ̀kọ̀ọ̀kan;
+àkójọ náà ń ṣàkọsílẹ̀ ìgbà tí a ṣe ìwọ̀n ọ̀kọ̀ọ̀kan wọn kẹ́yìn.

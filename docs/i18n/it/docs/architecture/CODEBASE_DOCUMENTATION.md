@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Registri dei provider, profili degli header, identità, …
 ├── handlers/               Gestori delle richieste (chat, embedding, audio, immagini, …)
-├── executors/              150 moduli executor dei provider (classi executor + helper specifici per provider)
+├── executors/              156 moduli executor dei provider (classi executor + helper specifici per provider)
 ├── translator/             Conversione dei formati (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer di stream Responses API ↔ Chat Completions
 ├── services/               Oltre 80 moduli di servizio (combinazioni, fallback, quote, identità, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 moduli executor di primo livello (`*.ts` esclusi `base.ts`, `index.ts` e i test — conteggio
+156 moduli executor di primo livello (`*.ts` esclusi `base.ts`, `index.ts` e i test — conteggio
 effettuato da `npm run check:docs-counts`). Ogni classe executor estende `BaseExecutor` (`base.ts`),
 direttamente oppure tramite `DefaultExecutor` o un altro executor; i moduli rimanenti sono helper
 specifici per provider (schemi degli strumenti, adattatori fetch/TTS, gestori delle particolarità). Gli executor includono:
@@ -774,7 +774,7 @@ Consulta [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) e la sezione dedicata in
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Assegnare gli scope appropriati in `src/shared/constants/mcpScopes.ts`.
 3. Registrare lo strumento in `open-sse/mcp-server/server.ts`.
-4. Aggiungere i test in `open-sse/mcp-server/__tests__/`.
+4. Aggiungere i test in `tests/unit/`.
 5. Aggiornare [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Aggiungere una nuova skill A2A
@@ -792,7 +792,7 @@ Consultare [A2A-SERVER.md § Aggiunta di una nuova skill](../frameworks/A2A-SERV
 - **Denominazione**: file in `camelCase` o `kebab-case`, componenti in `PascalCase`,
   costanti in `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ovunque;
-  `no-explicit-any` = `warn` in `open-sse/` e `tests/`, errore altrove.
+  `no-explicit-any` = `error` in `open-sse/**/*.ts` e `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (impostazione legacy). Preferire tipi espliciti
   all'inferenza per i confini tra moduli.
 - **Database**: non scrivere mai SQL grezzo nelle route o negli handler; passare sempre
@@ -823,8 +823,7 @@ Consultare [A2A-SERVER.md § Aggiunta di una nuova skill](../frameworks/A2A-SERV
   `a2a`, `memory`, `skills`.
 - **Branch**: prefissi `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Non eseguire mai commit direttamente su `main`.
-- **Husky**: il pre-commit esegue `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; il pre-push esegue `check:any-budget:t11` + `check:tracked-artifacts` (controlli rapidi; esclude `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

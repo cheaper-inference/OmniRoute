@@ -11,13 +11,13 @@ OmniRoute റണ്ണറിനും **ഒരു റോൾ**, ഒരു ലേ�
 വരുമ്പോൾ മാത്രമാണ് ബോക്സ് ഓവർകമ്മിറ്റ് ചെയ്യുന്നത്; ഹോസ്റ്റ് swap (16 GB) അത് ഉൾക്കൊള്ളുന്നു. കൂടാതെ, pull-request ബിൽഡുകൾ
 ഹോസ്റ്റ് ചെയ്ത പരിതസ്ഥിതിയിൽ പ്രവർത്തിക്കുന്നതിനാൽ Turbopack സ്ലോട്ട് മിക്ക സമയത്തും നിഷ്ക്രിയമാണ്:
 
-| റണ്ണർ                | ലേബൽ           | റോൾ                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
-| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack ബിൽഡുകൾ: `ci.yml` `Build` (push/dispatch മാത്രം), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, രാത്രികാല a11y ബിൽഡ് | 56 GB / 60 GB (swap 0)     | 1600 %           |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack ബിൽഡ്                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
-| `omniroute-113-2`    | `omni-light`   | രാത്രികാല ജോബുകളും (Schemathesis, promptfoo, garak, k6) `quality.yml`-ലെ `lint-guard`-ഉം                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
-| `omniroute-113`      | `omni-light`   | മുകളിലുള്ള അതേ പൂൾ                                                                                                                                    | 8 GB / 12 GB               | 400 %            |
-| OmniHeuris, OmniMind | (അവയുടെ repos) | Dependabot മാത്രം (ഓരോന്നിന്റെയും പീക്ക് 155 MB, 2026-10-18)                                                                                          | 4 GB / 6 GB                | ഓരോന്നിനും 200 % |
+| റണ്ണർ                | ലേബൽ                            | റോൾ                                                                                                                                                   | `MemoryHigh` / `MemoryMax` | `CPUQuota`       |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack ബിൽഡുകൾ: `ci.yml` `Build` (push/dispatch മാത്രം), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, രാത്രികാല a11y ബിൽഡ് | 56 GB / 60 GB (swap 0)     | 1600 %           |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack ബിൽഡ്                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %            |
+| `omniroute-113-2`    | `omni-light`                    | രാത്രികാല ജോബുകളും (Schemathesis, promptfoo, garak, k6) `quality.yml`-ലെ `lint-guard`-ഉം                                                              | 12 GB / 16 GB (swap 4 GB)  | 600 %            |
+| `omniroute-113`      | `omni-light`                    | മുകളിലുള്ള അതേ പൂൾ                                                                                                                                    | 8 GB / 12 GB               | 400 %            |
+| OmniHeuris, OmniMind | (അവയുടെ repos)                  | Dependabot മാത്രം (ഓരോന്നിന്റെയും പീക്ക് 155 MB, 2026-10-18)                                                                                          | 4 GB / 6 GB                | ഓരോന്നിനും 200 % |
 
 2026-10-18-ൽ അളന്നത്:
 
@@ -58,7 +58,7 @@ GitHub ഇതിനകം ഉപേക്ഷിച്ച ഒരു ജോബി�
 ## പ്രവർത്തന നിയമങ്ങൾ
 
 - **ഒരു സമയം ഒരു Turbopack build മാത്രം — label വഴി ഇത് നിർബന്ധമാക്കുന്നു.** പൂർണ്ണ Turbopack
-  `next build` പ്രവർത്തിപ്പിക്കുന്ന എല്ലാ job-കളും `[self-hosted, omni-build]` ലക്ഷ്യമിടുന്നു; കൂടാതെ
+  `next build` പ്രവർത്തിപ്പിക്കുന്ന എല്ലാ job-കളും `[self-hosted, omni-build, omni-build-60gb]` ലക്ഷ്യമിടുന്നു; കൂടാതെ
   **`omniroute-113-5`** മാത്രമാണ് ആ label വഹിക്കുന്നത്: `ci.yml` `Build`, `npm-publish.yml`
   `publish`, `nightly-v4-build`, `preview-artifact`, nightly a11y build (#16853), കൂടാതെ
   `docker-publish.yml` **amd64** (BuildKit-നുള്ളിൽ webpack — അവിടെ Turbopack panic സംഭവിച്ചു,

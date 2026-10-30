@@ -55,7 +55,7 @@ Cluaisín nua chun ábhar a bhaint as URL trí `POST /v1/web/fetch` (cruthaithe 
 - Ionchur: URL + scorán lánleathanaigh + roghnóir formáide (markdown / téacs / HTML).
 - Seol → faigh → rindreáil `ScrapeResult.tsx`.
 - Rindreálann `ScrapeResult` réamhamharc markdown + scorán amhábhair.
-- Teorainn: más mó corp an fhreagra ná **256 KB**, taispeánann an Chomhéadain `(teasctha, féach ar an amhábhar)` agus osclaíonn sí an t-amhábhar i módaldialóg Monaco (D21).
+- Teorainn: más mó corp an fhreagra ná **256 KB**, taispeánann an Chomhéadain `View full raw content` agus osclaíonn sí an t-amhábhar i módaldialóg (D21).
 - Painéal meiteashonraí: soláthraí (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), aga folaigh, costas, méid an fhreagra, líon na nasc.
 - Úsáideann sé an crúca `useScrapeFetch.ts`.
 

@@ -343,11 +343,11 @@ Ana yin cire bayanai ne bisa **regex**, ba bisa LLM ba — yana gudana a cikin t
 `setImmediate()` don haka ba ya taɓa tare rafin amsa:
 
 - **Tsarin zaɓi** → `MemoryType.FACTUAL`
-  (misali `Na fi son …`, `Ina matuƙar son …`, `wanda na fi so shi ne …`, `Na ƙi …`)
+  (misali `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Tsarin shawara** → `MemoryType.EPISODIC`
-  (misali `Zan yi amfani da …`, `Na zaɓi …`, `Na ɗauki …`, `Zan fara amfani da …`)
+  (misali `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Tsarin ɗabi’a** → `MemoryType.FACTUAL`
-  (misali `Yawanci ina …`, `Kullum ina …`, `Na saba …`)
+  (misali `I usually …`, `I always …`, `I tend to …`)
 
 Ana tsabtace kowace daidaituwa (`trim`, haɗa sararin-fari, iyakancewa zuwa haruffa 500),
 ana cire maimaituwa a cikin rukuni ta amfani da tabbataccen `factKey(category, content)`, sannan
@@ -720,11 +720,11 @@ Modulin `extraction.ts` (`src/lib/memory/extraction.ts`) yana amfani da **daidai
 
 ### Rukunonin Tsari na Asali
 
-| Rukuni              | Misalin tsari                                                        | Abin da ake kamawa                 |
-| ------------------- | -------------------------------------------------------------------- | ---------------------------------- |
-| PREFERENCE_PATTERNS | `"Na fi son <X>"`, `"Ina son <X>"`, `"Na ƙi <X>"`                    | Abubuwan da mai amfani ya fi so    |
-| DECISION_PATTERNS   | `"Zan yi amfani da <X>"`, `"Na yanke shawarar <X>"`, `"Na zaɓi <X>"` | Shawarwarin mai amfani (na aukuwa) |
-| PATTERN_PATTERNS    | `"Yawanci ina <X>"`, `"Kullum ina <X>"`, `"Ban taɓa <X> ba"`         | Tsarukan ɗabi'a masu ɗorewa        |
+| Rukuni              | Misalin tsari                                               | Abin da ake kamawa                 |
+| ------------------- | ----------------------------------------------------------- | ---------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Abubuwan da mai amfani ya fi so    |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Shawarwarin mai amfani (na aukuwa) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Tsarukan ɗabi'a masu ɗorewa        |
 
 ### Misalan Tsaruka (An Sauƙaƙa)
 
@@ -760,8 +760,9 @@ Lokacin da mai amfani ya ce:
 
 Don hana ciro bayanai fiye da kima, ana amfani da waɗannan iyakoki:
 
-| Mafi ƙarancin tsawon abun ciki | haruffa 3 |
-| Mafi girman tsawon abun ciki | haruffa 500 |
+| Mafi ƙarancin tsawon abun ciki | haruffa 3   |
+| ------------------------------ | ----------- |
+| Mafi girman tsawon abun ciki   | haruffa 500 |
 
 ### Lokacin da Ya Kamata a Kashe Ciro Bayanai
 

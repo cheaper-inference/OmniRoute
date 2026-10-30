@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanism:** Använder operativsystemets API:er för att omdirigera all HTTP/HTTPS-trafik genom HTTP_PROXY-lyssnaren:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` och HTTP/HTTPS-inställningarna för värd/port
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Räckvidd:** Alla program på datorn som respekterar systemets proxyinställningar
   **Obs:** `source` = `"system-proxy"`
 
 **Säkerhetsmekanismer:**
 
-- Timer för automatisk inaktivering (standard 30 min, kan konfigureras via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Systemets tidigare proxytillstånd sparas i databasen och återställs vid återställning
-- Instrumentpanelen visar uppmaningen "Återställer systemproxyn" om användaren lämnar sidan medan funktionen är aktiv
-- Användargränssnittet visar märket `⚠ Avancerat` + en kryssruta för uttrycklig bekräftelse
+- När proxyn tillämpas schemaläggs en processlokal timer som försöker återställa utan garanti (30 min som standard, konfigurerbart via `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Timern överlever inte att serverprocessen avslutas.
+- Proxyns tidigare tillstånd finns i processminnet; detta lager för inspelningstillstånd sparar det inte beständigt i en databas. Återställning återför sparade macOS/GNOME-inställningar; i Windows nollställs WinHTTP-proxyn i stället för att återställa den tidigare konfigurationen.
+- Medan proxyn rapporteras som tillämpad skickar sidans unload-händelse en keepalive-begäran om återställning utan garanti och begär en inbyggd bekräftelse vars text styrs av webbläsaren. Avmontering av inspektören under SPA-navigering försöker också återställa, utan den webbläsardialogen.
+- Inspelningsverktygsfältet visar den lokaliserade kontrollen `System-wide` med en varningsikon. Ett klick ändrar för närvarande bara lokalt UI-tillstånd; det visar ingen kryssruta för bekräftelse och tillämpar eller återställer inte systemproxyn.
 
 ### Läge 5 — Transparent TPROXY-dekryptering (Linux, root, valfritt)
 
@@ -113,13 +113,13 @@ Detta är ett omfattande delsystem med en egen särskild driftguide — se `docs
 
 ### Jämförelse av insamlingslägen
 
-| Läge                   | Konfiguration                           |            Sudo?            | Räckvidd                             | Anmärkningar                                                                                                                        |
-| ---------------------- | --------------------------------------- | :-------------------------: | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatisk                              | En gång (certifikat+hosts)  | 9 IDE-agenter                        | Aktiverat som standard                                                                                                              |
-| 2. Anpassade hosts     | Inmatning per host                      |      Ja (hosts-filen)       | Alla appar som använder den hosten   | Sparas i databasen                                                                                                                  |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                |             Nej             | Appar som respekterar miljövariabler | Port 8080; HTTPS tunnlas via CONNECT (endast metadata, dekrypteras aldrig)                                                          |
-| 4. Systemomfattande    | Växla + bekräfta                        |             Ja              | Alla appar på datorn                 | Inaktiveras automatiskt efter 30 min                                                                                                |
-| 5. TPROXY-dekryptering | Växla (Linux + systemspecifikt tillägg) | Ja (root + CA-installation) | Alla hosts på målporten              | Dekrypterar valfria hosts; inaktiverat som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte in i `/docs`) |
+| Läge                   | Konfiguration                                                  |            Sudo?            | Räckvidd                             | Anmärkningar                                                                                                                        |
+| ---------------------- | -------------------------------------------------------------- | :-------------------------: | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automatisk                                                     | En gång (certifikat+hosts)  | 9 IDE-agenter                        | Aktiverat som standard                                                                                                              |
+| 2. Anpassade hosts     | Inmatning per host                                             |      Ja (hosts-filen)       | Alla appar som använder den hosten   | Sparas i databasen                                                                                                                  |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |             Nej             | Appar som respekterar miljövariabler | Port 8080; HTTPS tunnlas via CONNECT (endast metadata, dekrypteras aldrig)                                                          |
+| 4. Systemomfattande    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |             Ja              | Alla appar på datorn                 | Timer för återställning utan garanti (30 min som standard)                                                                          |
+| 5. TPROXY-dekryptering | Växla (Linux + systemspecifikt tillägg)                        | Ja (root + CA-installation) | Alla hosts på målporten              | Dekrypterar valfria hosts; inaktiverat som standard — se `docs/security/MITM-TPROXY-DECRYPT.md` (git; kompileras inte in i `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ macOS/Windows returnerar funktionen `null` (stub; stöd för `lsof`/`GetExtended
 ### 5.1 Spela in en session
 
 1. Klicka på **"● Spela in session"** i verktygsfältet → ange ett namn (valfritt)
-2. Liveflödet fortsätter som vanligt; en röd pulserande indikator visar `◉ INSPELNING · <namn> · 00:42 · 23 förfrågningar`
+2. Liveflödet fortsätter som vanligt; inspelningsfältet visar en pulserande röd punkt, förfluten tid, sessionsnamnet när det finns och en lokaliserad Stopp-kontroll.
 3. Klicka på **"⏹ Stoppa"** → sessionsögonblicksbilden sparas i `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Visa en inspelad session
@@ -322,7 +322,7 @@ macOS/Windows returnerar funktionen `null` (stub; stöd för `lsof`/`GetExtended
 Rullgardinsmenyn **Sessioner** i verktygsfältet visar sparade sessioner. När du väljer en:
 
 - Läses sessionens ögonblicksbild in (fryst tillstånd)
-- En banderoll visar: `Visar den inspelade sessionen "<namn>" — [Tillbaka till liveflödet]`
+- En banderoll visar en lokaliserad etikett för en inspelad session och sessionsnamnet (eller en lokaliserad reservtext för en session utan titel), bredvid en lokaliserad Tillbaka till live-knapp.
 - Fliken Statistik blir tillgänglig med aggregeringar från Recharts
 
 ### 5.3 Exportformat
@@ -346,7 +346,7 @@ Traffic Inspector visar **all avlyssnad HTTPS-trafik**, inklusive auktoriserings
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                           | Alla rutter och WebSocket-slutpunkten är endast tillgängliga via loopback (framtvingas i `routeGuard.ts` före autentisering)                                                      |
 | **Maskering av hemligheter**             | Den linjära `maskSecret()`-skannern maskerar RFC 6750 Bearer-autentiseringsuppgifter, leverantörsprefixerade nycklar och långa ogenomskinliga token innan `TrafficBuffer.push()`  |
-| **Gräns för brödtextstorlek**            | Brödtexter > `INSPECTOR_MAX_BODY_KB` (standardvärde 1024 KB) trunkeras med meddelandet `"(trunkerad av prestandaskäl)"`                                                           |
+| **Gräns för brödtextstorlek**            | Brödtexter > `INSPECTOR_MAX_BODY_KB` (standardvärde 1024 KB) trunkeras med meddelandet `"(truncated for performance)"`                                                            |
 | **Sanering av huvuden**                  | Namn konverteras till gemener; ram-, hop-by-hop- och proxyautentiseringshuvuden tas bort; cookies maskeras helt; värden för autentiseringsuppgifter delegeras till `maskSecret()` |
 | **CSP**                                  | Strikt Content Security Policy på Traffic Inspector-sidor för att förhindra XSS via injicerade svarstexter                                                                        |
 | **Ingen beständig lagring som standard** | `TrafficBuffer` lagras i minnet och går förlorad när servern startas om. Sessioner sparas endast när de uttryckligen spelas in                                                    |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Instrumentpanelen erbjuder även "Återställ systemproxy" nästa gång den läses in om den upptäcker att databasens tillstånd indikerar att proxyn var aktiv.
+Proxyns sparade tillstånd finns endast i serverprocessen. Efter en krasch eller omstart kan det nuvarande lagret för inspelningstillstånd inte återställa denna ögonblicksbild från en databas; använd plattformens återställningskommandon ovan när manuell återställning behövs.
 
 ### Full buffert
 

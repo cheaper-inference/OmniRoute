@@ -750,9 +750,11 @@ export async function executeTargetAttempt(
               : null);
         }
       } catch {
+        // no-effect: status/text still classify the error; prose/header hints remain available.
         logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "unparseable body");
       }
     } catch {
+      // no-effect: the original failure remains; only optional body-derived hints are missing.
       logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "clone failed");
     }
     retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose retry hints

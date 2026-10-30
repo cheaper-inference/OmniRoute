@@ -11,13 +11,13 @@ OmniRoute रनर की **एक भूमिका**, एक लेबल �
 webpack बिल्ड और lint जॉब एक साथ चलते हैं; होस्ट swap (16 GB) इसे संभाल लेता है, और क्योंकि pull-request बिल्ड
 होस्टेड रनर पर चलते हैं, इसलिए Turbopack स्लॉट अधिकांश समय निष्क्रिय रहता है:
 
-| रनर                  | लेबल           | भूमिका                                                                                                                                              | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack बिल्ड: `ci.yml` `Build` (केवल push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रात्रिकालीन a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                       | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | रात्रिकालीन जॉब (Schemathesis, promptfoo, garak, k6) और `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | ऊपर वाला ही पूल                                                                                                                                     | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (उनके repos)   | केवल Dependabot (प्रत्येक का अधिकतम उपयोग 155 MB, 2026-10-18)                                                                                       | 4 GB / 6 GB                | प्रत्येक 200 % |
+| रनर                  | लेबल                            | भूमिका                                                                                                                                              | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack बिल्ड: `ci.yml` `Build` (केवल push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रात्रिकालीन a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                       | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | रात्रिकालीन जॉब (Schemathesis, promptfoo, garak, k6) और `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | ऊपर वाला ही पूल                                                                                                                                     | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (उनके repos)                    | केवल Dependabot (प्रत्येक का अधिकतम उपयोग 155 MB, 2026-10-18)                                                                                       | 4 GB / 6 GB                | प्रत्येक 200 % |
 
 2026-10-18 को मापा गया:
 
@@ -58,7 +58,7 @@ ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get i
 ## संचालन नियम
 
 - **एक समय में केवल एक Turbopack बिल्ड — लेबल द्वारा लागू।** पूर्ण Turbopack
-  `next build` चलाने वाला प्रत्येक जॉब `[self-hosted, omni-build]` को लक्षित करता है, और केवल **`omniroute-113-5`** पर वह
+  `next build` चलाने वाला प्रत्येक जॉब `[self-hosted, omni-build, omni-build-60gb]` को लक्षित करता है, और केवल **`omniroute-113-5`** पर वह
   लेबल है: `ci.yml` का `Build`, `npm-publish.yml` का `publish`, `nightly-v4-build`, `preview-artifact`,
   रात्रिकालीन a11y बिल्ड (#16853) और `docker-publish.yml` का **amd64** (BuildKit के भीतर webpack —
   वहाँ Turbopack पैनिक हुआ था, रन 33253576569)। arm64 Docker चरण `ubuntu-24.04-arm` पर ही रहता है।

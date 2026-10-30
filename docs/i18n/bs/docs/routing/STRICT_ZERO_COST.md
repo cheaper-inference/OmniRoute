@@ -4,8 +4,6 @@
 
 ---
 
-# STRICT_ZERO_COST
-
 > Opciono, isključeno po podrazumevanoj vrednosti (`settings.freeAccessPolicy !== "strict"` ostavlja svaki `auto/*` kandidatski skup identičnim na nivou bajtova). Stroži srodnik `hidePaidModels` (`open-sse/services/autoCombo/paidModelFilter.ts`, #6512) za operatere kojima je potrebna čvrsta garancija protiv BILO KAKVE dodatne novčane potrošnje, a ne samo "dokumentovano kao besplatno".
 
 ## Zašto ovo postoji i zašto `hidePaidModels` sam po sebi nije dovoljan

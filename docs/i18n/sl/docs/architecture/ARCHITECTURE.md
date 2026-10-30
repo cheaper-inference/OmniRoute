@@ -15,7 +15,7 @@ Zagotavlja enotno končno točko, združljivo z OpenAI (`/v1/*`), ter usmerja pr
 
 Ključne zmožnosti:
 
-- Površina API-ja, združljiva z OpenAI, za CLI/orodja (375 ponudnikov, 154 izvajalnih modulov)
+- Površina API-ja, združljiva z OpenAI, za CLI/orodja (375 ponudnikov, 156 izvajalnih modulov)
 - Prevajanje zahtev in odgovorov med oblikami zapisa ponudnikov
 - Nadomestne kombinacije modelov (zaporedje več modelov)
 - Strukturirani koraki kombinacij (`provider + model + connection`) z določanjem vrstnega reda med izvajanjem prek `compositeTiers`
@@ -31,7 +31,7 @@ Ključne zmožnosti:
 - Spletno iskanje prek `/v1/search` (20 ponudnikov)
 - Moderiranje prek `/v1/moderations`
 - Ponovno razvrščanje prek `/v1/rerank`
-- Razčlenjevanje oznak razmišljanja (``) za modele sklepanja
+- Razčlenjevanje oznak razmišljanja (`<think>...</think>`) za modele sklepanja
 - Čiščenje odgovorov za strogo združljivost z OpenAI SDK
 - Normalizacija vlog (developer→system, system→user) za združljivost med ponudniki
 - Pretvarjanje strukturiranega izhoda (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ združljivosti s starejšimi različicami. Trenutna izvajalna pogodba uporablja:
 - migracije sheme SQLite in kavlji za samodejno nadgradnjo ob zagonu
 - združljivostna pot za migracijo iz starejšega formata JSON → SQLite
 
-## 6) Zaščita pred SSRF/odhodnimi URL-ji
+## 6) SSRF / Zaščita odhodnih URL-jev
 
-- `src/shared/network/outboundUrlGuard.ts` blokira vse zasebne, povratne in lokalne ciljne URL-je, preden dosežejo izvajalnike ponudnikov
-- poti za odkrivanje in preverjanje modelov ponudnikov uporabljajo `src/shared/network/safeOutboundFetch.ts`, ki pred vsako odhodno zahtevo uporabi zaščito
-- napake zaščite se prikažejo kot `URL_GUARD_BLOCKED` s HTTP 422 in se prek `providerAudit.ts` zabeležijo v revizijsko sled skladnosti
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) za zahteve klepeta, poslane prek `BaseExecutor.execute()`, uporabi `src/shared/network/outboundUrlGuard.ts`. V načinu samo za javne naslove (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, pri čemer je zastavica za zasebne naslove izklopljena) blokira zasebne gostitelje, gostitelje povratne zanke in obseg 169.254.0.0/16; v vseh drugih načinih blokira gostitelje metapodatkov v oblaku. Ime gostitelja ali dobesedni naslov IP preveri tako, kot je zapisan, še pred kakršnim koli iskanjem DNS. Vgrajeni lokalni ponudniki to preverjanje preskočijo.
+- Poti za odkrivanje in preverjanje modelov ponudnikov uporabljajo `src/shared/network/safeOutboundFetch.ts`, ki zaščito uporabi pred vsako odhodno zahtevo.
+- Napake zaščite so prikazane kot `URL_GUARD_BLOCKED` s stanjem HTTP 503 (`getSafeOutboundFetchErrorStatus`; pot za odkrivanje modelov vrne 400), dejanske blokade SSRF med preverjanjem pa se v revizijsko sled zabeležijo kot dogodki `provider.validation.ssrf_blocked`.
 
 ## Opazljivost in operativni signali
 
@@ -1149,7 +1149,7 @@ Okoljske spremenljivke, ki jih koda dejansko uporablja:
 4. Delovanje oblaka je odvisno od pravilne vrednosti `NEXT_PUBLIC_BASE_URL` in dosegljivosti končne točke v oblaku.
 5. Imenik `open-sse/` je objavljen kot **paket delovnega prostora npm `@omniroute/open-sse`**. Izvorna koda ga uvaža prek `@omniroute/open-sse/...` (razrešeno z možnostjo Next.js `transpilePackages`). Zaradi doslednosti poti datotek v tem dokumentu še vedno uporabljajo ime imenika `open-sse/`.
 6. Grafikoni na nadzorni plošči uporabljajo **Recharts** (temelji na SVG) za dostopne, interaktivne analitične vizualizacije (stolpčni grafikoni uporabe modelov, tabele razčlenitve po ponudnikih s stopnjami uspešnosti).
-7. Testi E2E uporabljajo **Playwright** (`tests/e2e/`) in se izvajajo z `npm run test:e2e`. Testi enot uporabljajo **izvajalnik testov Node.js** (`tests/unit/`) in se izvajajo z `npm run test:unit`. Izvorna koda v `src/` je napisana v jeziku **TypeScript** (`.ts`/`.tsx`); delovni prostor `open-sse/` ostaja v jeziku JavaScript (`.js`).
+7. Testi E2E uporabljajo **Playwright** (`tests/e2e/`) in se izvajajo z `npm run test:e2e`. Testi enot uporabljajo **izvajalnik testov Node.js** (`tests/unit/`) in se izvajajo z `npm run test:unit`. Izvorna koda v `src/` je napisana v jeziku **TypeScript** (`.ts`/`.tsx`); delovni prostor `open-sse/` ostaja v jeziku TypeScript (`.ts`).
 8. Stran z nastavitvami je razdeljena na 7 zavihkov: Splošno, Videz, UI, Varnost, Usmerjanje, Odpornost, Napredno. Stran Odpornost konfigurira samo čakalno vrsto zahtev, obdobje mirovanja povezave, odklopnik ponudnika in vedenje čakanja na iztek obdobja mirovanja; trenutno stanje izvajanja odklopnika je prikazano na strani Stanje.
 9. Strategija **Context Relay** (`context-relay`) je razdeljena na dve plasti: `combo.ts` odloči, ali je treba ustvariti predajo, `chat.ts` pa predajo vstavi po razrešitvi računa. Podatki o predajah so shranjeni v tabeli SQLite `context_handoffs`. Ta razdelitev je namerna, saj samo `chat.ts` ve, ali se je dejanski račun spremenil.
 10. **Uveljavljanje posredniškega strežnika** je zdaj celovito: `tokenHealthCheck.ts` razreši posredniški strežnik za vsako povezavo, `/api/providers/validate` uporablja `runWithProxyContext`, `proxyFetch.ts` pa uporablja `undici.fetch()`, da ohrani združljivost z razpošiljevalnikom v Node 22.

@@ -152,7 +152,7 @@ host ကို probe လုပ်သည့် read route အသစ်သည် �
 
 `/api/settings/obsidian` သည် ၎င်း၏ `/webdav` child ကို အကျုံးဝင်စေသည်။ `POST` သည် ဤ pipeline ပြင်ပရှိ Next.js မတိုင်မီ custom Node layer မှ ဝန်ဆောင်မှုပေးသော WebDAV file service ကို caller ရွေးချယ်ထားသည့် root သို့ ညွှန်ပြပြီး အသစ်ထုတ်ပေးထားသော Basic credential များကို ပြန်ပို့သည်၊ `DELETE` က ၎င်းတို့ကို ပြောင်းလဲထုတ်ပေးပြီး parent `POST` က Obsidian REST API token ကို သိမ်းဆည်းသည်။ GHSA-62vw သည် `GET` password ဖော်ပြမှုကိုသာ ဖုံးကွယ်ခဲ့သည်။ credential ထုတ်ပေးမှုမှာ fail-open အဆင့်တွင် ရှိနေဆဲဖြစ်ခဲ့သည် (GHSA-7pq4-8pvv-rx7r)။ ထို့အပြင် `enableObsidianVaultSync()` သည် data directory ကိုယ်တိုင်ဖြစ်သော၊ ၎င်းအတွင်းတွင်ရှိသော သို့မဟုတ် ၎င်းကို အတွင်းတွင် ထည့်သွင်းထားသော vault ကို ငြင်းပယ်သည်။
 
-#### Credential export များသည် operator အတွက်သာဖြစ်သည်
+#### အထောက်အထားများ ထုတ်ယူခြင်းနှင့် ပြန်လည်ရယူခြင်းကို အော်ပရေတာသာ လုပ်နိုင်သည်
 
 အထက်ပါ tier သည် _တစ်ခုခုသော_ အထောက်အထား လိုအပ်ခြင်းရှိမရှိကိုသာ ဆုံးဖြတ်ပါသည်။ သိမ်းဆည်းထားသော
 အထောက်အထားများကို ဒေါင်းလုဒ်လုပ်သည့် route များသည် handler တွင် ဒုတိယစစ်ဆေးမှုတစ်ခု ထပ်ထည့်ပါသည်- `GET /api/settings/export-json` (စာဝှက်ဖြည်ထားသော
@@ -163,22 +163,9 @@ login ပိတ်ထားသော instance တစ်ခုကို လက်
 နှင့် `admin` အပါအဝင်) နှင့် `oma_` access token များကို `403` ဖြင့် တုံ့ပြန်ပါသည်။ Sync token ထုတ်ပေးခြင်း (`POST /api/sync/tokens`) သည်
 တူညီသော helper အပြင် ယုံကြည်ရသော loopback internal-service token ကိုပါ အသုံးပြုပါသည်။
 
-#### Credential exports and restores are operator-only
+သက်ဆိုင်ရာ ဒေတာဖျက်စီးနိုင်သော လုပ်ဆောင်ချက်များတွင်လည်း တူညီသော ကန့်သတ်ချက်ရှိသည်။ `POST /api/db-backups/import` (တင်ထားသော `.sqlite` ဖိုင်၊ `dryRun=true` လည်း ပါဝင်သည်)၊ `POST /api/db-backups` (သိမ်းထားသော အရန်မိတ္တူကို ၎င်း၏ id ဖြင့် ပြန်ယူခြင်း) နှင့် `POST /api/settings/import-json` (JSON ပုံစံအဟောင်းမှ ပြန်ယူခြင်း) တို့သည် လက်ရှိဒေတာဘေ့စ် သို့မဟုတ် ဆက်တင်များ၊ ချိတ်ဆက်မှုများနှင့် API ကီးများအားလုံးကို အစားထိုးသည်။ ထို့ကြောင့် စက်သုံးအထောက်အထားဖြင့် ဤလုပ်ဆောင်ချက်များကိုလည်း စတင်၍မရပါ။
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ပြန်လည်ရယူရန်အမှတ်များ ဖျက်ခြင်းတွင်လည်း တူညီသော ကန့်သတ်ချက်ရှိသည်။ `DELETE /api/db-backups` (ရှင်းလင်းခြင်း — နောက်ဆုံး N ခုကိုထားခြင်း သို့မဟုတ် D ရက်ထက်ဟောင်းသောအရာများကို ဖျက်ခြင်း) နှင့် `PATCH /api/db-backups` (ထိန်းသိမ်းမှုဆက်တင်များ) ဖြစ်သည်။ သိမ်းထားသော စည်းမျဉ်းများကို အလိုအလျောက် အရန်ကူးပြီးတိုင်း `cleanupDbBackups()` က အသုံးချသည် (`src/lib/db/backup.ts`)။ ထို့ကြောင့် `keepLatest: 1` ကို သိမ်းနိုင်သော စက်သုံးအထောက်အထားက နောက်တစ်ကြိမ် အခြေအနေမိတ္တူယူချိန်တွင် ယခင်ပြန်လည်ရယူရန်အမှတ်များကို ဖျက်နိုင်မည်ဖြစ်သည်။ အရန်မိတ္တူများ စာရင်းကြည့်ခြင်းနှင့် ဖန်တီးခြင်း (`GET`/`PUT /api/db-backups`) တွင် ပုံမှန်စီမံခန့်ခွဲမှုအထောက်အထားစစ်ဆေးခြင်းကို ဆက်လက်သုံးသည်။
 
 ### အသစ်တပ်ဆင်မှု bootstrap သည် loopback အတွက်သာဖြစ်သည် — `Host` ဖြင့်မဟုတ်ဘဲ peer အစစ်ဖြင့်
 

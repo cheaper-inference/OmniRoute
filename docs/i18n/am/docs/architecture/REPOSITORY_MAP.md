@@ -106,7 +106,7 @@ OmniRoute/
 
 > **በv3.8.26 ከroot ውጭ ተዛውሯል (ማስተካከያ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`፣ `complexity-baseline.json`፣ `duplication-baseline.json`፣ `file-size-baseline.json`፣ `test-discovery-baseline.json`፣ `dependency-allowlist.json`፣ `.license-allowlist.json`፣ እና የሚመነጨው `quality-metrics.json` (በgitignored የተደረገ)። [`## config/`](#config--static-configs--quality-gate-state)ን ይመልከቱ።
+> - **→ `config/quality/`:** `quality-baseline.json`፣ `complexity-baseline.json`፣ `duplication-baseline.json`፣ `file-size-baseline.json`፣ `test-discovery-baseline.json`፣ `dependency-allowlist.json`፣ `.license-allowlist.json`፣ እና የሚመነጨው `quality-metrics.json` (በgitignored የተደረገ)። [`## config/`](#config--የማይለወጡ-ውቅሮች--የጥራት-መግቢያ-በር-ሁኔታ)ን ይመልከቱ።
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ንዑስ ማውጫ               | ዓላማ                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ወደ አካባቢያዊ ቋንቋዎች የተተረጎሙ ሰነዶች (41 ቋንቋዎች)                                                                                                                                               |
+| `docs/i18n/`          | ወደ አካባቢያዊ ቋንቋዎች የተተረጎሙ ሰነዶች (66 ቋንቋዎች)                                                                                                                                               |
 | `docs/screenshots/`   | ለመመሪያዎች የሚያገለግሉ የምስል ግብዓቶች                                                                                                                                                           |
 | `_tasks/superpowers/` | ከsuperpowers (`writing-plans`/`brainstorming`) የመጡ ዕቅዶች/ዝርዝር መግለጫዎች + ጥናት — ከዋናው የተለየ፣ ራሱን ችሎ ስሪት የሚቆጣጠር repo፣ በዋናው tree ውስጥ gitignored የሆነ። CLAUDE.md → "የዕቅድ እና የጥናት ቅርሶች"ን ይመልከቱ። |
 

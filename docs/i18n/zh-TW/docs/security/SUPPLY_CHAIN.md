@@ -18,48 +18,37 @@ OmniRoute 發布 npm + Docker 構件。這些關卡提供溯源、庫存（SBOM�
 
 映像檔 CVE 棘輪式調整在 `docker-publish.yml` 中使用**兩個步驟**：SARIF 步驟（`HIGH,CRITICAL`，`exit-code: 0`）讓高風險和嚴重風險在安全性分頁中可見，但不阻擋發布；而 _嚴重關卡_ 步驟（`severity: CRITICAL`，`ignore-unfixed: true`，`exit-code: 1`）會在存在**可用修復程式**的嚴重 CVE 時使發布失敗。`ignore-unfixed` 可防止因基礎映像檔 CVE 缺乏上游修補程式而阻擋發布。
 
-## ⚠️ CVE 變異（阻擋 osv/Trivy 關卡）
+## ⚠️ CVE 差異（阻擋 osv/Trivy 閘門）
 
-osv 和 Trivy 會將依賴項與**持續增長**的 CVE 資料庫進行比較。一個**未觸及任何依賴項**的 PR 可能會突然變紅，因為現有依賴項中披露了新的 CVE（osv：測量的 `vulnCount` > 基準線；Trivy：映像檔中出現新的可修復嚴重問題）。**這是阻擋性 CVE 關卡的預期操作行為，而非產品退化。**
+osv 和 Trivy 會將相依套件與**持續增加**的 CVE 資料庫進行比對。即使 PR
+**完全未變更相依套件**，也可能因現有相依套件新揭露了 CVE 而突然變成紅燈（osv：測得的 `vulnCount` > 基準值；Trivy：映像中出現新的
+可修復 CRITICAL 弱點）。**這是阻擋式 CVE 閘門的預期操作行為，
+並非產品退化。**
 
-當 osv 或 Trivy 因新披露的 CVE 而變紅時，解決方案是：
+當 osv 或 Trivy 因新揭露的 CVE 而變成紅燈時，處理方式如下：
 
-1.  **提升受影響的依賴項**（首選）— 透過 `package.json` 的 `overrides`（傳遞性依賴項）升級到已修補版本，或在已修補的基礎上重建映像檔。
-2.  **如果沒有上游修復：**
-    - **osv：** 在 `config/quality/quality-baseline.json` 中重新設定 `metrics.vulnCount` 的基準線（`npm run quality:ratchet -- --update` 不涵蓋專用關卡 — 手動編輯數值，`direction:down`），並附上理由說明和追蹤問題。
-    - **Trivy：** 在 `.trivyignore` 中新增一個條目（每行一個 CVE-ID），並附上理由註釋和追蹤問題。`ignore-unfixed: true` 已自動涵蓋沒有修補程式的 CVE。
+1. **升級受影響的相依套件**（建議）— 透過 `package.json`
+   `overrides`（間接相依套件）升級至已修補版本，或使用已修補的基礎映像重新建置映像。
+2. **若上游尚無修正：**
+   - **osv：** 重新設定 `config/quality/quality-baseline.json` 中的 `metrics.vulnCount` 基準值
+     （`npm run quality:ratchet -- --update` 不涵蓋專用閘門——請手動編輯該值，
+     `direction:down`），並附上理由說明與追蹤議題。
+   - **Trivy：** 在 `.trivyignore` 中新增一筆項目（每行一個 CVE-ID），並附上理由
+     註解與追蹤議題。`ignore-unfixed: true` 已會自動涵蓋沒有
+     修補程式的 CVE。
 
-當工具不存在或測量失敗時（例如 osv-scanner 不在 PATH 中、osv.dev/網路無法連線、JSON 無效），這兩個關卡都會**優雅地跳過**（exit 0）— **測量**失敗絕不會阻擋，只有**測量到的**退化才會阻擋。
+必要的 OSV 執行（`check:vuln-ratchet -- --ratchet`）會在
+掃描器、報告或基準值無法驗證時採取失敗關閉策略，回報
+`INCOMPLETE` 並以狀態碼 2 結束。測得退化時則以狀態碼 1 結束。諮詢性執行仍可能回報 `SKIP` 並
+以狀態碼 0 結束，但這不代表相依套件已通過掃描。阻擋式
+Trivy 步驟同樣要求成功完成測量：工具無法使用、工作失敗
+以及缺少映像證據，都無法證明映像未含弱點。
 
-## 已知接受的風險
+## 已淘汰的相依性風險
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+升級固定版本的 promptfoo 開發工具後，根目錄鎖定檔已不再包含 `extract-zip`，也不再包含指向它的相依性邊。這會淘汰先前於 #14482 中追蹤並接受的 `promptfoo` → `@openai/codex-security` → `extract-zip` 鏈結。`tests/unit/extract-zip-14482-exposure.test.ts` 中的迴歸檢查會阻止其重新引入，並保留禁止正式環境程式碼匯入它的規定。
 
-`extract-zip@2.0.1` 帶有兩個未修補的高嚴重性符號連結遍歷諮詢。
-根據上述 CVE 差異補救措施的「無上游修復」分支，這是一個
-**已接受的風險**，而不是版本升級：
-
-- **鏈條：** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`。
-  透過 `package-lock.json` 確認 — 整個依賴樹中只有一個套件
-  (`@openai/codex-security`) 宣告了 `extract-zip`，並且只有一個套件
-  (`promptfoo`) 宣告了 `@openai/codex-security`。
-- **鏈條中不存在任何已修復的版本。** `extract-zip@2.0.1` (2020 年發布) 是該套件的最終版本 — 它已不再維護。`@openai/codex-security` 的
-  當前 npm-latest (`0.1.29`) 仍然拉取 `extract-zip@2.0.1`。
-- **無法從生產環境中觸及。** `promptfoo` 僅為 devDependency (從未列在
-  `dependencies` 下)，並且 `src/`、`open-sse/` 或 `bin/` 下沒有任何檔案匯入
-  `extract-zip` npm 套件 — OmniRoute 自己的 `extractZip()` 輔助函數
-  (`src/lib/versionManager/binaryManager.ts:93`) 呼叫原生 `unzip`/`tar`
-  且與之無關。`@openai/codex-security` 還在其 `extract-zip` 的 onEntry 回調之上
-  提供了自己的符號連結遍歷防護。
-- **請勿** 透過 `package.json` `overrides` 別名 `extract-zip` — 唯一可行的
-  替代品是 Electron-org-internal 且與
-  `@openai/codex-security` 自己的 onEntry/defaultDirMode/defaultFileMode 檢查
-  API 不相容；覆蓋它將會默默地破壞該套件的安全檢查。
-- **基準線：** 測量的 osv `vulnCount` (3) 已經遠低於凍結的
-  `config/quality/quality-baseline.json` 基準線 (27) — 無需棘輪變更。
-- **回歸防護：** `tests/unit/extract-zip-14482-exposure.test.ts` 斷言了
-  上述鏈條和非生產匯入不變式；如果其中任何一個被破壞 (例如，未來的 PR 使 `extract-zip` 可從生產環境中觸及)，它將導致 CI 失敗。
-- **追蹤：** 問題 #14482。
+目前的相依性修復也將相容性覆寫範圍限定於 Azure Identity 的 MSAL 用戶端、get-uri 的 FTP 用戶端，以及 OpenCode v1 SDK 的 Zod 相依性。Azure 權杖取得與 FTP 擷取均使用受控傳輸進行測試；兩個 OpenCode 套件也都執行各自的建置與測試套件。登錄檔中的安全公告數量是特定時間點的測量值，在提交鎖定檔後可能會有所變動。
 
 ## 待辦事項：記分卡諮詢 → 阻擋
 

@@ -15,7 +15,7 @@ Pruža jednu krajnju tačku kompatibilnu s OpenAI-em (`/v1/*`) i usmjerava saobr
 
 Osnovne mogućnosti:
 
-- API površina kompatibilna s OpenAI-em za CLI/alate (375 pružalaca, 154 izvršna modula)
+- API površina kompatibilna s OpenAI-em za CLI/alate (375 pružalaca, 156 izvršna modula)
 - Prevođenje zahtjeva/odgovora između formata pružalaca
 - Rezervno prebacivanje kombinacije modela (sekvenca više modela)
 - Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tokom izvođenja prema `compositeTiers`
@@ -31,7 +31,7 @@ Osnovne mogućnosti:
 - Pretraživanje weba putem `/v1/search` (20 pružalaca)
 - Moderiranje putem `/v1/moderations`
 - Ponovno rangiranje putem `/v1/rerank`
-- Raščlanjivanje oznaka za razmišljanje (``) za modele rezonovanja
+- Raščlanjivanje oznaka za razmišljanje (`<think>...</think>`) za modele rezonovanja
 - Sanitizacija odgovora radi stroge kompatibilnosti s OpenAI SDK-om
 - Normalizacija uloga (developer→system, system→user) radi kompatibilnosti između pružalaca
 - Pretvaranje strukturiranog izlaza (json_schema → Gemini responseSchema)
@@ -1027,7 +1027,7 @@ Dodatni slojevi obrade u procesu prevođenja:
 
 - **Sanitizacija odgovora** — Uklanja nestandardna polja iz odgovora u OpenAI formatu (i kod streaminga i bez streaminga) kako bi se osigurala stroga usklađenost sa SDK-om
 - **Normalizacija uloga** — Pretvara `developer` → `system` za ciljeve koji nisu OpenAI; spaja `system` → `user` za modele koji odbijaju sistemsku ulogu (GLM, ERNIE)
-- **Izdvajanje oznaka za razmišljanje** — Parsira blokove `` iz sadržaja u polje `reasoning_content`
+- **Izdvajanje oznaka za razmišljanje** — Parsira blokove `<think>...</think>` iz sadržaja u polje `reasoning_content`
 - **Strukturirani izlaz** — Pretvara OpenAI `response_format.json_schema` u Gemini `responseMimeType` + `responseSchema`
 
 ## Podržane API krajnje tačke
@@ -1096,9 +1096,9 @@ kompatibilnosti sa starijim verzijama. Trenutni ugovor izvršnog okruženja kori
 
 ## 6) SSRF / zaštita odlaznih URL-ova
 
-- `src/shared/network/outboundUrlGuard.ts` blokira sve privatne, povratne i lokalne ciljne URL-ove prije nego što stignu do izvršilaca pružaoca usluge
-- Rute za otkrivanje i provjeru modela pružaoca usluge koriste `src/shared/network/safeOutboundFetch.ts`, koji primjenjuje zaštitu prije svakog odlaznog zahtjeva
-- Greške zaštite prikazuju se kao `URL_GUARD_BLOCKED` sa statusom HTTP 422 i evidentiraju se u revizijskom tragu usklađenosti putem `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) primjenjuje `src/shared/network/outboundUrlGuard.ts` na zahtjeve za razgovor poslane putem `BaseExecutor.execute()`. U načinu rada samo za javne adrese (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` uz isključenu privatnu zastavicu) blokira privatne i povratne hostove te 169.254.0.0/16; u svakom drugom načinu rada blokira hostove za metapodatke u oblaku. Provjerava naziv hosta ili doslovnu IP adresu u navedenom obliku prije bilo kakvog DNS upita. Ugrađeni lokalni pružaoci usluga ga zaobilaze.
+- Rute za otkrivanje i validaciju modela pružaoca usluga koriste `src/shared/network/safeOutboundFetch.ts`, koji primjenjuje zaštitu prije svakog odlaznog zahtjeva
+- Greške zaštite prikazuju se kao `URL_GUARD_BLOCKED` uz HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruta za otkrivanje modela vraća 400), a stvarne SSRF blokade tokom validacije bilježe se u revizijski trag kao događaji `provider.validation.ssrf_blocked`
 
 ## Uočljivost i operativni signali
 
@@ -1149,7 +1149,7 @@ Varijable okruženja koje kôd aktivno koristi:
 4. Ponašanje u oblaku zavisi od ispravnog `NEXT_PUBLIC_BASE_URL` i dostupnosti krajnje tačke u oblaku.
 5. Direktorij `open-sse/` objavljuje se kao **npm paket radnog prostora** `@omniroute/open-sse`. Izvorni kôd ga uvozi putem `@omniroute/open-sse/...` (razrješava ga Next.js `transpilePackages`). Putanje datoteka u ovom dokumentu i dalje koriste naziv direktorija `open-sse/` radi dosljednosti.
 6. Grafikoni na kontrolnoj ploči koriste **Recharts** (zasnovan na SVG-u) za pristupačne, interaktivne analitičke vizualizacije (stubičasti grafikoni korištenja modela, tabele raspodjele po pružaocima usluga sa stopama uspješnosti).
-7. E2E testovi koriste **Playwright** (`tests/e2e/`), a pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), a pokreću se putem `npm run test:unit`. Izvorni kôd unutar `src/` je **TypeScript** (`.ts`/`.tsx`); radni prostor `open-sse/` ostaje JavaScript (`.js`).
+7. E2E testovi koriste **Playwright** (`tests/e2e/`), a pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), a pokreću se putem `npm run test:unit`. Izvorni kôd unutar `src/` je **TypeScript** (`.ts`/`.tsx`); radni prostor `open-sse/` ostaje TypeScript (`.ts`).
 8. Stranica postavki organizirana je u 7 kartica: Općenito, Izgled, AI, Sigurnost, Usmjeravanje, Otpornost, Napredno. Stranica Otpornost konfigurira samo red čekanja zahtjeva, period mirovanja veze, prekidač pružaoca usluga i ponašanje čekanja na završetak perioda mirovanja; trenutno izvršno stanje prekidača prikazuje se na stranici Stanje sistema.
 9. Strategija **Context Relay** (`context-relay`) podijeljena je na dva sloja: `combo.ts` odlučuje treba li generirati primopredaju, dok `chat.ts` umeće primopredaju nakon razrješavanja računa. Podaci o primopredaji nalaze se u SQLite tabeli `context_handoffs`. Ova podjela je namjerna jer samo `chat.ts` zna da li se stvarni račun promijenio.
 10. **Primjena proxyja** sada je sveobuhvatna: `tokenHealthCheck.ts` razrješava proxy za svaku vezu, `/api/providers/validate` koristi `runWithProxyContext`, a `proxyFetch.ts` koristi `undici.fetch()` kako bi održao kompatibilnost dispečera na Node 22.

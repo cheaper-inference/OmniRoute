@@ -11,13 +11,13 @@ nameraných špičiek. Server prekračuje dostupnú kapacitu iba vtedy, keď sa 
 so zostavením webpack pre Release-Green a úlohou lint; túto situáciu absorbuje swap hostiteľa (16 GB),
 a keďže zostavenia pre pull requesty bežia na hostovanej infraštruktúre, slot Turbopack je väčšinu času nečinný:
 
-| runner               | štítok           | úloha                                                                                                                                                  | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`     | zostavenia Turbopack: `ci.yml` `Build` (iba push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočné zostavenie a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release`   | Release-Green (`release-green` + `main-green`), zostavenie webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`     | nočné úlohy (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`     | rovnaký fond ako vyššie                                                                                                                                | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (ich repozitáre) | iba Dependabot (špička 155 MB pre každý, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % pre každý |
+| runner               | štítok                          | úloha                                                                                                                                                  | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | zostavenia Turbopack: `ci.yml` `Build` (iba push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, nočné zostavenie a11y | 56 GB / 60 GB (swap 0)     | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), zostavenie webpack                                                                                     | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | nočné úlohy (Schemathesis, promptfoo, garak, k6) a `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
+| `omniroute-113`      | `omni-light`                    | rovnaký fond ako vyššie                                                                                                                                | 8 GB / 12 GB               | 400 %           |
+| OmniHeuris, OmniMind | (ich repozitáre)                | iba Dependabot (špička 155 MB pre každý, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | 200 % pre každý |
 
 Merané 2026-10-18:
 
@@ -81,7 +81,7 @@ a len keď je nečinný**, pričom kontrola nečinnosti a reštart musia byť v 
 ## Prevádzkové pravidlá
 
 - **Naraz iba jedno zostavenie Turbopack — vynútené štítkom.** Každá úloha, ktorá spúšťa úplné
-  `next build` s Turbopackom, cieli na `[self-hosted, omni-build]`, pričom tento štítok má iba
+  `next build` s Turbopackom, cieli na `[self-hosted, omni-build, omni-build-60gb]`, pričom tento štítok má iba
   **`omniroute-113-5`**: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`,
   `preview-artifact`, nočné zostavenie a11y (#16853) a **amd64** v `docker-publish.yml` (webpack
   v rámci BuildKit — Turbopack tam zlyhal s panic, beh 33253576569). Vetva Docker pre arm64 zostáva

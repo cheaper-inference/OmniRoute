@@ -25,60 +25,38 @@ tanpa menghalang; langkah _gerbang CRITICAL_ (`severity: CRITICAL`, `ignore-unfi
 `exit-code: 1`) menggagalkan keluaran apabila terdapat CVE CRITICAL **dengan pembaikan yang tersedia**. `ignore-unfixed`
 mengelakkan keluaran daripada dihalang kerana CVE imej asas yang tiada tampalan huluan.
 
-## ⚠️ Varians CVE (gerbang osv/Trivy yang menghalang)
+## ⚠️ Varians CVE (menyekat get osv/Trivy)
 
-osv dan Trivy membandingkan kebergantungan dengan pangkalan data CVE yang **terus berkembang**. PR
-yang **tidak mengubah sebarang kebergantungan** boleh tiba-tiba menjadi merah kerana CVE baharu
-telah didedahkan dalam kebergantungan sedia ada (osv: `vulnCount` yang diukur > garis dasar; Trivy: CRITICAL baharu
-yang boleh dibaiki dalam imej). **Ini ialah tingkah laku operasi YANG DIJANGKA bagi gerbang
-CVE yang menghalang, bukannya regresi produk.**
+osv dan Trivy membandingkan kebergantungan dengan pangkalan data CVE yang **berkembang secara berterusan**. Sesuatu PR
+yang **tidak mengubah sebarang kebergantungan** boleh tiba-tiba menjadi merah kerana CVE baharu telah
+didedahkan dalam kebergantungan sedia ada (osv: `vulnCount` yang diukur > garis dasar; Trivy: CRITICAL
+baharu yang boleh dibaiki dalam imej). **Ini ialah tingkah laku operasi yang DIJANGKA bagi get
+CVE yang menyekat, bukan regresi produk.**
 
 Apabila osv atau Trivy menjadi merah disebabkan CVE yang baru didedahkan, penyelesaiannya ialah:
 
 1. **Naik taraf kebergantungan yang terjejas** (diutamakan) — naik taraf kepada versi yang telah ditampal melalui `package.json`
-   `overrides` (kebergantungan transitif) atau bina semula imej menggunakan imej asas yang telah ditampal.
+   `overrides` (kebergantungan transitif) atau bina semula imej berasaskan imej asas yang telah ditampal.
 2. **Jika tiada pembaikan huluan:**
    - **osv:** tetapkan semula garis dasar `metrics.vulnCount` dalam `config/quality/quality-baseline.json`
-     (`npm run quality:ratchet -- --update` tidak merangkumi gerbang khusus — edit nilainya secara
-     manual, `direction:down`) berserta nota justifikasi + isu penjejakan.
-   - **Trivy:** tambahkan entri dalam `.trivyignore` (satu CVE-ID setiap baris) berserta komen
+     (`npm run quality:ratchet -- --update` tidak merangkumi get khusus — edit nilai tersebut secara
+     manual, `direction:down`) dengan nota justifikasi + isu penjejakan.
+   - **Trivy:** tambahkan entri dalam `.trivyignore` (CVE-ID setiap baris) dengan komen
      justifikasi + isu penjejakan. `ignore-unfixed: true` sudah merangkumi CVE tanpa
      tampalan secara automatik.
 
-Kedua-dua gerbang **MELANGKAU dengan lancar** (keluar 0) apabila alat tiada atau pengukuran
-gagal (osv-scanner tiada dalam PATH, osv.dev/rangkaian tidak dapat dicapai, JSON tidak sah) — kegagalan
-**pengukuran** tidak pernah menghalang; hanya regresi yang **diukur** akan menghalang.
+Pelaksanaan OSV yang diwajibkan (`check:vuln-ratchet -- --ratchet`) akan gagal secara tertutup dengan
+`INCOMPLETE` dan kod keluar 2 apabila pengimbas, laporan atau garis dasar tidak dapat disahkan.
+Regresi yang diukur menghasilkan kod keluar 1. Pelaksanaan berbentuk nasihat masih boleh melaporkan `SKIP` dengan
+kod keluar 0, yang tidak membuktikan bahawa kebergantungan telah lulus imbasan. Langkah
+Trivy yang menyekat juga memerlukan pengukuran yang berjaya: alat yang tidak tersedia, tugas yang gagal
+dan bukti imej yang tiada tidak boleh memperakui imej sebagai bersih.
 
-## Risiko Diketahui yang Diterima
+## Risiko kebergantungan yang ditamatkan
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Fail kunci akar tidak lagi menyertakan `extract-zip` atau hubungan kebergantungan kepadanya selepas menaik taraf alat pembangunan promptfoo yang versinya ditetapkan. Ini menamatkan rantaian `promptfoo` → `@openai/codex-security` → `extract-zip` yang diterima sebelum ini dan dijejaki dalam #14482. Semakan regresi dalam `tests/unit/extract-zip-14482-exposure.test.ts` menghalang pengenalannya semula dan mengekalkan larangan terhadap import daripada kod pengeluaran.
 
-`extract-zip@2.0.1` mempunyai dua nasihat kerentanan perentasan pautan simbolik berkeparahan tinggi yang belum ditampal.
-Menurut cabang "tiada pembaikan huluan" bagi remedi Varians CVE di atas, ini ialah
-**risiko yang diterima**, bukannya peningkatan versi:
-
-- **Rantaian:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Disahkan melalui `package-lock.json` — tepat satu pakej dalam keseluruhan pepohon
-  kebergantungan (`@openai/codex-security`) mengisytiharkan `extract-zip`, dan tepat satu pakej
-  (`promptfoo`) mengisytiharkan `@openai/codex-security`.
-- **Tiada keluaran yang telah dibaiki wujud di mana-mana dalam rantaian.** `extract-zip@2.0.1` (diterbitkan pada 2020) ialah keluaran terakhir pakej tersebut — ia tidak lagi diselenggara. npm-latest
-  semasa bagi `@openai/codex-security` (`0.1.29`) masih menarik `extract-zip@2.0.1`.
-- **Tidak boleh dicapai daripada pengeluaran.** `promptfoo` hanya merupakan devDependency (tidak pernah disenaraikan
-  di bawah `dependencies`), dan tiada fail di bawah `src/`, `open-sse/`, atau `bin/` mengimport
-  pakej npm `extract-zip` — pembantu `extractZip()` milik OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) menggunakan shell untuk menjalankan `unzip`/`tar` asli
-  dan tidak berkaitan. `@openai/codex-security` turut menyediakan pelindung perentasan pautan simboliknya sendiri
-  di atas panggil balik onEntry milik extract-zip.
-- **Jangan** jadikan `extract-zip` sebagai alias melalui `package.json` `overrides` — satu-satunya
-  pengganti terus yang berdaya maju adalah dalaman Electron-org dan tidak serasi API dengan
-  semakan onEntry/defaultDirMode/defaultFileMode milik `@openai/codex-security`;
-  tindakan menimpanya akan merosakkan semakan keselamatan pakej tersebut secara senyap.
-- **Garis dasar:** `vulnCount` osv yang diukur (3) sememangnya jauh di bawah garis dasar
-  `config/quality/quality-baseline.json` yang dibekukan (27) — tiada perubahan ratchet diperlukan.
-- **Pelindung regresi:** `tests/unit/extract-zip-14482-exposure.test.ts` menegaskan
-  rantaian dan invarian tiada-import-pengeluaran di atas; ia menggagalkan CI jika salah satu daripadanya
-  dilanggar (cth. PR pada masa hadapan menjadikan `extract-zip` boleh dicapai daripada pengeluaran).
-- **Penjejakan:** isu #14482.
+Pembaikan kebergantungan semasa juga mengehadkan penggantian keserasian kepada klien MSAL Azure Identity, klien FTP get-uri dan kebergantungan Zod bagi OpenCode v1 SDK. Pemerolehan token Azure dan pengambilan melalui FTP diuji menggunakan pengangkutan terkawal; kedua-dua pakej OpenCode menjalankan suit binaan dan ujian masing-masing. Bilangan nasihat keselamatan registri ialah ukuran pada sesuatu masa dan boleh berubah selepas fail kunci dikomit.
 
 ## Tunggakan: nasihat Scorecard → penyekatan
 

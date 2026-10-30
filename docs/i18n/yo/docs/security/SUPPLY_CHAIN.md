@@ -19,34 +19,46 @@ OmniRoute n tẹjade àwọn ohun èlò npm + Docker. Àwọn ẹnu-ọ̀nà w�
 
 Ìmú-lọ-sí-ìsàlẹ̀ CVE àwòrán n lo **ìgbésẹ̀ méjì** nínú `docker-publish.yml`: ìgbésẹ̀ SARIF (`HIGH,CRITICAL`, `exit-code: 0`) n jẹ́ kí HIGH+CRITICAL hàn kedere nínú abala Aabo láìsí ìdènà; ìgbésẹ̀ _ẹnu-ọ̀nà CRITICAL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) n mú ìtúsílẹ̀ kùnà lórí CRITICAL CVE **pẹ̀lú àtúnṣe tí ó wà**. `ignore-unfixed` n dènà ìdènà ìtúsílẹ̀ fún CVE àwòrán ìpilẹ̀ṣẹ̀ láìsí àtúnṣe láti orísun.
 
-## ⚠️ Ìyàtọ̀ CVE (n dènà àwọn ẹnu-ọ̀nà osv/Trivy)
+## ⚠️ Ìyàtọ̀ CVE (tí ń dá àwọn ẹnu-ọ̀nà osv/Trivy dúró)
 
-osv àti Trivy n fi àwọn ìgbẹ́kẹ̀lé wé àwọn ibi ìpamọ́ data CVE tí **n gbòòrò sí i nígbà gbogbo**. PR kan tí **kò fọwọ́ kan àwọn ìgbẹ́kẹ̀lé kankan** lè yí padà sí pupa lójijì nítorí pé a ṣí CVE tuntun kan sílẹ̀ nínú ìgbẹ́kẹ̀lé tí ó wà tẹ́lẹ̀ (osv: `vulnCount` tí a wọ̀n > ìpilẹ̀ṣẹ̀; Trivy: CRITICAL tuntun tí ó ṣeé túnṣe nínú àwòrán). **Èyí jẹ́ ìhùwàsí ìṣiṣẹ́ tí a retí fún ẹnu-ọ̀nà CVE tí n dènà, kì í ṣe ìpadàsẹ́yìn ọjà.**
+osv àti Trivy máa ń fi àwọn ìgbẹ́kẹ̀lé wé àwọn ibi ìpamọ́ dátà CVE tí **ń pọ̀ sí i nígbà gbogbo**. PR kan
+tí **kò yí ìgbẹ́kẹ̀lé kankan padà** lè ṣàdédé di pupa nítorí pé a ṣàfihàn CVE tuntun kan
+nínú ìgbẹ́kẹ̀lé tó ti wà tẹ́lẹ̀ (osv: `vulnCount` tí a wọ̀n > ìwọ̀n ìpilẹ̀; Trivy: CRITICAL tuntun
+tí ó ṣeé túnṣe nínú image náà). **Èyí ni ìhùwàsí ìṣiṣẹ́ tí a RETÍ láti ọ̀dọ̀ ẹnu-ọ̀nà CVE
+tí ń dá iṣẹ́ dúró, kì í ṣe ìfàsẹ́yìn ọjà.**
 
-Nígbà tí osv tàbí Trivy bá di pupa nítorí CVE tuntun tí a ṣí sílẹ̀, ojútùú ni:
+Nígbà tí osv tàbí Trivy bá di pupa nítorí CVE tí a ṣẹ̀ṣẹ̀ ṣàfihàn, ojútùú ni:
 
-1.  **Ṣe ìgbéga ìgbẹ́kẹ̀lé tí ó kan** (èyí tí a fẹ́ràn jù) — ṣe ìgbéga sí àtúnṣe tí a ti túnṣe nípasẹ̀ `package.json`
-    `overrides` (àwọn ìgbẹ́kẹ̀lé àtìgbà-dégbà) tàbí tún ṣe àwòrán náà lórí ìpilẹ̀ṣẹ̀ tí a ti túnṣe.
-2.  **Bí kò bá sí àtúnṣe láti orísun:**
-    - **osv:** tún ṣe ìpilẹ̀ṣẹ̀ `metrics.vulnCount` nínú `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` kò bo àwọn ẹnu-ọ̀nà ìyàsọ́tọ̀ — ṣatunṣe ìwọ̀n náà pẹ̀lú ọwọ́, `direction:down`) pẹ̀lú àlàyé ìdáláre + ọ̀rọ̀ ìtọ́pinpin.
-    - **Trivy:** fi ìwọlé kan kún `.trivyignore` (CVE-ID fún ìlà kọ̀ọ̀kan) pẹ̀lú àlàyé ìdáláre + ọ̀rọ̀ ìtọ́pinpin. `ignore-unfixed: true` ti bo àwọn CVE tí kò ní àtúnṣe tẹ́lẹ̀ láìfọwọ́sí.
+1. **Ṣe bump ìgbẹ́kẹ̀lé tí ọ̀ràn náà kàn** (èyí ló dára jù) — ṣe ìgbésókè sí ẹ̀yà tí a ti patch nípasẹ̀ `package.json`
+   `overrides` (àwọn ìgbẹ́kẹ̀lé transitive) tàbí tún image náà kọ́ lórí base tí a ti patch.
+2. **Tí kò bá sí àtúnṣe láti upstream:**
+   - **osv:** tún ìwọ̀n ìpilẹ̀ `metrics.vulnCount` ṣe nínú `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` kò bo àwọn ẹnu-ọ̀nà àkànṣe — ṣàtúnṣe iye náà
+     pẹ̀lú ọwọ́, `direction:down`) pẹ̀lú àkọsílẹ̀ ìdáláre + issue ìtọ́pasẹ̀.
+   - **Trivy:** ṣàfikún àkọsílẹ̀ kan sínú `.trivyignore` (CVE-ID kan ní ìlà kọ̀ọ̀kan) pẹ̀lú comment
+     ìdáláre + issue ìtọ́pasẹ̀. `ignore-unfixed: true` ti ń bo àwọn CVE tí kò ní
+     patch láìfọwọ́ṣe.
 
-Àwọn ẹnu-ọ̀nà méjèèjì **n fàyè gbà láti fò** (jáde 0) nígbà tí ohun èlò kò bá sí tàbí tí ìwọ̀n bá kùnà (osv-scanner kò sí nínú PATH, osv.dev/network kò ṣeé dé, JSON tí kò tọ́) — ìkùnà **ìwọ̀n** kì í dènà láé, kìkì ìpadàsẹ́yìn **tí a wọ̀n** ni ó n dènà.
+Àwọn ìṣiṣẹ́ OSV tí a béèrè fún (`check:vuln-ratchet -- --ratchet`) máa ń kùnà ní ọ̀nà tí ó pa ẹnu-ọ̀nà mọ́ pẹ̀lú
+`INCOMPLETE` àti exit 2 nígbà tí a kò bá lè fìdí scanner, ìjábọ̀ tàbí ìwọ̀n ìpilẹ̀ múlẹ̀.
+Ìfàsẹ́yìn tí a wọ̀n máa ń jáde pẹ̀lú exit 1. Ìṣiṣẹ́ ìmọ̀ràn ṣì lè jabo `SKIP` pẹ̀lú
+exit 0, èyí tí kò fi hàn pé àwọn ìgbẹ́kẹ̀lé kọjá àyẹ̀wò náà. Ìgbésẹ̀ Trivy
+tí ń dá iṣẹ́ dúró náà tún nílò ìwọ̀n tó ṣàṣeyọrí: àwọn irinṣẹ́ tí kò sí lárọwọ́tó, àwọn iṣẹ́ tó kùnà,
+àti àìsí ẹ̀rí image kò lè jẹ́rìí pé image kan mọ́.
 
-## Àwọn Ewu Tí A Gbà Wọlé Tí A Mọ̀
+## Ewu ìgbẹ́kẹ̀lé tí a ti fẹ̀yìntì
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Fáìlì ìdènà gbòǹgbò kò ní `extract-zip` mọ́ tàbí ìsopọ̀ ìgbẹ́kẹ̀lé sí i lẹ́yìn
+ìgbésókè irinṣẹ́ ìdàgbàsókè promptfoo tí a ti so mọ́ ẹ̀yà pàtó. Èyí fẹ̀yìntì ọ̀wọ̀
+`promptfoo` → `@openai/codex-security` → `extract-zip` tí a ti tẹ́wọ́ gbà tẹ́lẹ̀, tí a sì tọ́pa rẹ̀ nínú #14482.
+Àwọn àyẹ̀wò ìpadàsẹ́yìn nínú `tests/unit/extract-zip-14482-exposure.test.ts` kọ
+àtúnmú rẹ̀ wọlé, wọ́n sì pa ìfòfindè lórí àwọn ìgbéwọlé láti inú kóòdù ìṣelọpọ mọ́.
 
-`extract-zip@2.0.1` ní àwọn ìkìlọ̀ méjì tí kò tíì túnṣe, tí ó léwu púpọ̀ nípa symlink-traversal. Gẹ́gẹ́ bí ẹ̀ka "kò sí àtúnṣe láti orísun" ti ìtọ́jú CVE Variance lókè, èyí jẹ́ **ewu tí a gbà wọlé**, kì í ṣe ìgbéga:
-
-- **Ẹ̀wọ̀n:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. Ìmúdájú nípasẹ̀ `package-lock.json` — gẹ́lẹ́gẹ́ àpò kan ṣoṣo nínú gbogbo igi ìgbẹ́kẹ̀lé (`@openai/codex-security`) ló kéde `extract-zip`, àti gẹ́lẹ́gẹ́ àpò kan ṣoṣo (`promptfoo`) ló kéde `@openai/codex-security`.
-- **Kò sí ìtúsílẹ̀ tí a ti túnṣe níbikíbi nínú ẹ̀wọ̀n náà.** `extract-zip@2.0.1` (tí a tẹ̀ jáde ní 2020) ni ìtúsílẹ̀ ìkẹyìn ti àpò náà — kò sí ẹni tó ń tọ́jú rẹ̀ mọ́. npm-latest lọ́wọ́lọ́wọ́ ti `@openai/codex-security` (`0.1.29`) ṣì ń fa `extract-zip@2.0.1` wọlé.
-- **Kò ṣeé dé ọ̀dọ̀ láti ìṣelọ́pọ̀.** `promptfoo` jẹ́ devDependency-nìkan (kò sí ní àtòjọ lábẹ́ `dependencies` rárá), kò sì sí faili kankan lábẹ́ `src/`, `open-sse/`, tàbí `bin/` tí ó kó àpò npm `extract-zip` wọlé — olùrànlọ́wọ́ `extractZip()` ti OmniRoute fúnra rẹ̀ (`src/lib/versionManager/binaryManager.ts:93`) ń lo `unzip`/`tar` abínibí, kò sì ní í ṣe pẹ̀lú rẹ̀. `@openai/codex-security` tún ní olùṣọ́ symlink-traversal tirẹ̀ lórí ìpèpadà onEntry ti extract-zip.
-- **Má ṣe** fi orúkọ mìíràn fún `extract-zip` nípasẹ̀ `overrides` ti `package.json` — àdánidúró kan ṣoṣo tí ó ṣeé lò ni Electron-org-internal, kò sì bá API mu pẹ̀lú àwọn àyẹ̀wò onEntry/defaultDirMode/defaultFileMode ti `@openai/codex-security` fúnra rẹ̀; fífi orúkọ mìíràn fún un yóò fọ́ àwọn àyẹ̀wò ààbò àpò náà láìsọ fún ẹnikẹ́ni.
-- **Ìpìlẹ̀:** `vulnCount` osv tí a wọ̀n (3) ti wà ní ìsàlẹ̀ ìpìlẹ̀ `config/quality/quality-baseline.json` tí a ti dì (27) — kò sí àtúnṣe ratchet tí ó pọn dandan.
-- **Olùṣọ́ ìpadàsẹ́yìn:** `tests/unit/extract-zip-14482-exposure.test.ts` ń fìdí ẹ̀wọ̀n àti àìyípadà kò-sí-ìkó-wọlé-ìṣelọ́pọ̀ lókè múlẹ̀; yóò kùnà CI bí ó bá yẹ́ nígbàkúùgbà (fún àpẹẹrẹ, PR ọjọ́ iwájú mú `extract-zip` ṣeé dé ọ̀dọ̀ láti ìṣelọ́pọ̀).
-- **Ìtọ́pinpin:** ọ̀rọ̀ #14482.
+Àtúnṣe ìgbẹ́kẹ̀lé lọ́wọ́lọ́wọ́ tún fi àwọn àtúnkọ ìbámu mọ́ oníbàárà MSAL ti Azure identity,
+oníbàárà FTP ti get-uri, àti ìgbẹ́kẹ̀lé Zod ti OpenCode v1 SDK. Ìgba token Azure
+àti gbígba ohun èlò nípasẹ̀ FTP ni a dánwò pẹ̀lú àwọn ọ̀nà ìgbéjàde tí a ṣàkóso; àwọn package OpenCode
+méjèèjì ń ṣiṣẹ́ àwọn àkójọpọ̀ àti àkójọpọ̀ ìdánwò tiwọn. Àwọn iye ìkìlọ̀ registry jẹ́ àwọn ìwọ̀n
+ní àkókò kan pàtó, wọ́n sì lè yí padà lẹ́yìn tí a bá commit fáìlì ìdènà náà.
 
 ## Àtòjọ Iṣẹ́ Tó Kù: Ìkìlọ̀ Scorecard → dídènà
 

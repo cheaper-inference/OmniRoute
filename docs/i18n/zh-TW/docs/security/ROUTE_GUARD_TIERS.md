@@ -181,7 +181,7 @@ Obsidian REST API token。GHSA-62vw 僅遮蔽了 `GET` 密碼洩露；認證簽�
 失效時開放的層級（GHSA-7pq4-8pvv-rx7r）。`enableObsidianVaultSync()` 還會拒絕
 本身即為資料目錄、位於資料目錄內，或包含資料目錄的 Vault。
 
-#### 認證匯出僅限操作員使用
+#### 憑證匯出與還原僅限操作員使用
 
 上一層級僅決定是否需要_某種_憑證。下載已儲存憑證的路由會在處理常式中加入第二項檢查：`GET /api/settings/export-json`（已解密的提供者連線與原始 API 金鑰）、`GET /api/db-backups/export`（SQLite 檔案）以及
 `GET /api/db-backups/exportAll`（完整封存檔）會呼叫 `requireOperatorCredential()`
@@ -190,22 +190,9 @@ Obsidian REST API token。GHSA-62vw 僅遮蔽了 `GET` 密碼洩露；認證簽�
 與 `admin`）以及 `oma_` 存取權杖皆回應 `403`。同步權杖核發（`POST /api/sync/tokens`）使用
 相同的輔助函式，並額外接受受信任的回送內部服務權杖。
 
-#### Credential exports and restores are operator-only
+對應的破壞性操作也遵守相同界線：`POST /api/db-backups/import`（上傳的 `.sqlite` 檔案，包含 `dryRun=true`）、`POST /api/db-backups`（依 id 還原已儲存的備份）與 `POST /api/settings/import-json`（還原舊版 JSON 格式）會取代正在使用的資料庫，或整組設定、連線與 API 金鑰。因此，機器憑證同樣無法觸發這些操作。
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+刪除還原點也遵守相同界線：`DELETE /api/db-backups`（清理——保留最新 N 個，或刪除超過 D 天的備份）與 `PATCH /api/db-backups`（保留設定）。已儲存的保留規則，就是 `cleanupDbBackups()` 在每次自動備份後套用的規則（`src/lib/db/backup.ts`）；若機器憑證能儲存 `keepLatest: 1`，便可能在下一次快照時刪除先前的還原點。列出與建立備份（`GET`/`PUT /api/db-backups`）仍使用一般管理驗證。
 
 ### 全新安裝的啟動程序僅限回送連線——依據真實對等端，而非 `Host`
 

@@ -11,13 +11,13 @@ var. Turbopack slotuna yığma üçün lazım olan resurslar verilir; digər slo
 webpack yığması və lint işi ilə eyni vaxta düşdükdə baş verir; host swap-ı (16 GB) bunu qarşılayır və pull request Build-ləri
 host edilən runner-lərdə işlədiyi üçün Turbopack slotu vaxtın böyük hissəsində boş qalır:
 
-| runner               | etiket         | rol                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
-| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack yığmaları: `ci.yml` `Build` (yalnız push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, gecəlik a11y yığması | 56 GB / 60 GB (swap 0)     | 1600 %              |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack yığması                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %               |
-| `omniroute-113-2`    | `omni-light`   | gecəlik işlər (Schemathesis, promptfoo, garak, k6) və `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %               |
-| `omniroute-113`      | `omni-light`   | yuxarıdakı ilə eyni hovuz                                                                                                                               | 8 GB / 12 GB               | 400 %               |
-| OmniHeuris, OmniMind | (öz repoları)  | yalnız Dependabot (hər biri üçün pik 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | hər biri üçün 200 % |
+| runner               | etiket                          | rol                                                                                                                                                     | `MemoryHigh` / `MemoryMax` | `CPUQuota`          |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack yığmaları: `ci.yml` `Build` (yalnız push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, gecəlik a11y yığması | 56 GB / 60 GB (swap 0)     | 1600 %              |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack yığması                                                                                         | 20 GB / 24 GB (swap 4 GB)  | 800 %               |
+| `omniroute-113-2`    | `omni-light`                    | gecəlik işlər (Schemathesis, promptfoo, garak, k6) və `quality.yml` `lint-guard`                                                                        | 12 GB / 16 GB (swap 4 GB)  | 600 %               |
+| `omniroute-113`      | `omni-light`                    | yuxarıdakı ilə eyni hovuz                                                                                                                               | 8 GB / 12 GB               | 400 %               |
+| OmniHeuris, OmniMind | (öz repoları)                   | yalnız Dependabot (hər biri üçün pik 155 MB, 2026-10-18)                                                                                                | 4 GB / 6 GB                | hər biri üçün 200 % |
 
 2026-10-18 tarixində ölçülüb:
 
@@ -86,7 +86,7 @@ runner-ı və yalnız boş olduqda** yenidən başladın.
 ## İstismar qaydaları
 
 - **Eyni anda yalnız bir Turbopack yığması — etiket vasitəsilə məcburi tətbiq edilir.** Tam Turbopack
-  `next build` əməliyyatını icra edən hər bir tapşırıq `[self-hosted, omni-build]` hədəfləyir və həmin
+  `next build` əməliyyatını icra edən hər bir tapşırıq `[self-hosted, omni-build, omni-build-60gb]` hədəfləyir və həmin
   etiketi yalnız **`omniroute-113-5`** daşıyır: `ci.yml` faylındakı `Build`, `npm-publish.yml` faylındakı `publish`, `nightly-v4-build`, `preview-artifact`,
   gecəlik a11y yığması (#16853) və `docker-publish.yml` faylındakı **amd64** (BuildKit daxilində webpack —
   Turbopack orada panikaya düşmüşdü, icra 33253576569). arm64 Docker qolu `ubuntu-24.04-arm` üzərində qalır.

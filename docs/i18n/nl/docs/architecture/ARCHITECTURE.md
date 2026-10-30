@@ -15,7 +15,7 @@ Het biedt één OpenAI-compatibel endpoint (`/v1/*`) en routeert verkeer naar me
 
 Kernfunctionaliteiten:
 
-- OpenAI-compatibel API-oppervlak voor CLI/tools (375 providers, 154 uitvoeringsmodules)
+- OpenAI-compatibel API-oppervlak voor CLI/tools (375 providers, 156 uitvoeringsmodules)
 - Vertaling van requests/responses tussen providerindelingen
 - Fallback voor modelcombinaties (reeks van meerdere modellen)
 - Gestructureerde combinatiestappen (`provider + model + connection`) met runtimevolgorde op basis van `compositeTiers`
@@ -31,7 +31,7 @@ Kernfunctionaliteiten:
 - Zoeken op het web via `/v1/search` (20 providers)
 - Moderatie via `/v1/moderations`
 - Herrangschikking via `/v1/rerank`
-- Verwerking van denktags (``) voor redeneermodellen
+- Verwerking van denktags (`<think>...</think>`) voor redeneermodellen
 - Opschoning van responses voor strikte compatibiliteit met de OpenAI SDK
 - Normalisatie van rollen (developer→system, system→user) voor compatibiliteit tussen providers
 - Conversie van gestructureerde uitvoer (json_schema → Gemini responseSchema)
@@ -1085,9 +1085,9 @@ De oudere bestandsgebaseerde verzoeklogger (`open-sse/utils/requestLogger.ts`) w
 
 ## 6) SSRF-/uitgaande-URL-beveiliging
 
-- `src/shared/network/outboundUrlGuard.ts` blokkeert alle privé-, loopback- en link-local-doel-URL's voordat ze providerexecutors bereiken
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) past `src/shared/network/outboundUrlGuard.ts` toe op chatverzoeken die via `BaseExecutor.execute()` worden verzonden. In de modus alleen-openbaar (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` met de privévlag uitgeschakeld) blokkeert deze privé- en loopbackhosts en 169.254.0.0/16; in elke andere modus blokkeert deze cloudmetadatahosts. De hostnaam of het letterlijke IP-adres wordt gecontroleerd zoals opgegeven, vóór elke DNS-lookup. Ingebouwde lokale providers slaan deze controle over.
 - Routes voor detectie en validatie van providermodellen gebruiken `src/shared/network/safeOutboundFetch.ts`, dat de beveiliging vóór elk uitgaand verzoek toepast
-- Beveiligingsfouten worden weergegeven als `URL_GUARD_BLOCKED` met HTTP 422 en via `providerAudit.ts` vastgelegd in het compliance-auditspoor
+- Beveiligingsfouten worden weergegeven als `URL_GUARD_BLOCKED` met HTTP 503 (`getSafeOutboundFetchErrorStatus`; de route voor modeldetectie retourneert 400), en daadwerkelijke SSRF-blokkeringen tijdens validatie worden in het auditlogboek vastgelegd als `provider.validation.ssrf_blocked`-gebeurtenissen
 
 ## Observeerbaarheid en operationele signalen
 
@@ -1138,7 +1138,7 @@ Omgevingsvariabelen die actief door de code worden gebruikt:
 4. Cloudgedrag is afhankelijk van een correcte `NEXT_PUBLIC_BASE_URL` en de bereikbaarheid van het cloudeindpunt.
 5. De map `open-sse/` wordt gepubliceerd als het **npm-werkruimtepakket** `@omniroute/open-sse`. De broncode importeert dit via `@omniroute/open-sse/...` (opgelost door `transpilePackages` van Next.js). Bestandspaden in dit document gebruiken voor consistentie nog steeds de mapnaam `open-sse/`.
 6. Grafieken in het dashboard gebruiken **Recharts** (gebaseerd op SVG) voor toegankelijke, interactieve analytische visualisaties (staafdiagrammen voor modelgebruik en uitsplitsingstabellen per provider met slagingspercentages).
-7. E2E-tests gebruiken **Playwright** (`tests/e2e/`) en worden uitgevoerd via `npm run test:e2e`. Unittests gebruiken de **Node.js-test-runner** (`tests/unit/`) en worden uitgevoerd via `npm run test:unit`. Broncode onder `src/` is **TypeScript** (`.ts`/`.tsx`); de werkruimte `open-sse/` blijft JavaScript (`.js`).
+7. E2E-tests gebruiken **Playwright** (`tests/e2e/`) en worden uitgevoerd via `npm run test:e2e`. Unittests gebruiken de **Node.js-test-runner** (`tests/unit/`) en worden uitgevoerd via `npm run test:unit`. Broncode onder `src/` is **TypeScript** (`.ts`/`.tsx`); de werkruimte `open-sse/` blijft TypeScript (`.ts`).
 8. De instellingenpagina is ingedeeld in 7 tabbladen: Algemeen, Uiterlijk, AI, Beveiliging, Routering, Veerkracht en Geavanceerd. De pagina Veerkracht configureert alleen de verzoekwachtrij, de afkoelperiode voor verbindingen, de provideronderbreker en het gedrag voor wachten op de afkoelperiode; de actuele runtimestatus van de onderbreker wordt op de pagina Status weergegeven.
 9. De strategie **Context Relay** (`context-relay`) is verdeeld over twee lagen: `combo.ts` bepaalt of een overdracht moet worden gegenereerd, waarna `chat.ts` de overdracht invoegt nadat het account is bepaald. Overdrachtsgegevens bevinden zich in de SQLite-tabel `context_handoffs`. Deze opsplitsing is opzettelijk, omdat alleen `chat.ts` weet of het daadwerkelijke account is gewijzigd.
 10. **Proxyhandhaving** is nu allesomvattend: `tokenHealthCheck.ts` bepaalt de proxy per verbinding, `/api/providers/validate` gebruikt `runWithProxyContext` en `proxyFetch.ts` gebruikt `undici.fetch()` om de dispatchercompatibiliteit in Node 22 te behouden.

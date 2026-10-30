@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Bogtha amach as an fhréamh in v3.8.26 (glanadh tranglaim):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (neamhaird tugtha air ag git). Féach [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (neamhaird tugtha air ag git). Féach [`## config/`](#config--cumraíochtaí-statacha--staid-an-gheata-cáilíochta).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Fochomhadlann         | Cuspóir                                                                                                                                                                                                                                                    |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Aistriúcháin logánaithe ar cháipéisíocht (41 logchaighdeán)                                                                                                                                                                                                |
+| `docs/i18n/`          | Aistriúcháin logánaithe ar cháipéisíocht (66 logchaighdeán)                                                                                                                                                                                                |
 | `docs/screenshots/`   | Sócmhainní íomhá do threoracha                                                                                                                                                                                                                             |
 | `_tasks/superpowers/` | Pleananna/sonraíochtaí ó superpowers (`writing-plans`/`brainstorming`) + taighde — stór leithlisithe a bhfuil leaganacha á mbainistiú air ar leithligh agus a ndéanann an príomhchrann neamhaird git de. Féach CLAUDE.md → "Déantáin Phleanála & Taighde". |
 

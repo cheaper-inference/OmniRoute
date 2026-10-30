@@ -18,34 +18,24 @@ OmniRoute npm + Docker artefaktlarını dərc edir. Bu qapılar mənşə, invent
 
 Şəkil CVE ratçeti `docker-publish.yml` faylında **iki addımdan** istifadə edir: SARIF addımı (`HIGH,CRITICAL`, `exit-code: 0`) HIGH+CRITICAL səviyyələrini Təhlükəsizlik tabında bloklamadan görünən saxlayır; _KRİTİK qapı_ addımı (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) **mövcud düzəlişi olan** KRİTİK CVE-də buraxılışı uğursuz edir. `ignore-unfixed` yuxarı axın yaması olmayan əsas şəkil CVE-si üçün buraxılışın bloklanmasının qarşısını alır.
 
-## ⚠️ CVE Fərqliliyi (osv/Trivy qapılarını bloklayır)
+## ⚠️ CVE dəyişkənliyi (bloklayıcı osv/Trivy keçidləri)
 
-osv və Trivy asılılıqları **davamlı olaraq böyüyən** CVE verilənlər bazaları ilə müqayisə edir. **Heç bir asılılığa toxunmayan** bir PR, mövcud bir asılılıqda yeni bir CVE aşkar edildiyi üçün qəfildən qırmızıya çevrilə bilər (osv: ölçülmüş `vulnCount` > baza; Trivy: şəkildə yeni düzəldilə bilən KRİTİK). **Bu, bloklayıcı CVE qapısının GÖZLƏNİLƏN əməliyyat davranışıdır, məhsul reqressiyası deyil.**
+osv və Trivy asılılıqları **davamlı olaraq genişlənən** CVE verilənlər bazaları ilə müqayisə edir. **Heç bir asılılığa toxunmayan** PR mövcud asılılıqda yeni CVE açıqlandığı üçün qəfildən uğursuz ola bilər (osv: ölçülən `vulnCount` > ilkin göstərici; Trivy: obrazda aradan qaldırıla bilən yeni CRITICAL boşluq). **Bu, məhsul reqressiyası deyil, bloklayıcı CVE keçidinin GÖZLƏNİLƏN əməliyyat davranışıdır.**
 
-osv və ya Trivy yeni aşkar edilmiş CVE səbəbindən qırmızıya çevrildikdə, çarəsi budur:
+Yeni açıqlanmış CVE səbəbindən osv və ya Trivy uğursuz olduqda həll yolu belədir:
 
-1.  **Təsirlənmiş asılılığı yeniləyin** (üstünlük verilən) — `package.json` `overrides` (tranzitiv asılılıqlar) vasitəsilə yamalanmış versiyaya yüksəldin və ya yamalanmış baza üzərində şəkli yenidən qurun.
-2.  **Əgər yuxarı axın düzəlişi yoxdursa:**
-    - **osv:** `metrics.vulnCount` göstəricisini `config/quality/quality-baseline.json` faylında yenidən baza səviyyəsinə gətirin (`npm run quality:ratchet -- --update` xüsusi qapıları əhatə etmir — dəyəri əl ilə dəyişdirin, `direction:down`) əsaslandırma qeydi + izləmə problemi ilə.
-    - **Trivy:** `.trivyignore` faylına (hər sətirdə CVE-ID) əsaslandırma şərhi + izləmə problemi ilə bir giriş əlavə edin. `ignore-unfixed: true` artıq yaması olmayan CVE-ləri avtomatik olaraq əhatə edir.
+1. **Təsirə məruz qalan asılılığın versiyasını artırın** (üstünlük verilən variant) — `package.json` faylındakı `overrides` vasitəsilə düzəliş edilmiş versiyaya yüksəldin (tranzitiv asılılıqlar üçün) və ya obrazı düzəliş edilmiş baza əsasında yenidən yaradın.
+2. **Əgər yuxarı axında düzəliş yoxdursa:**
+   - **osv:** `config/quality/quality-baseline.json` faylındakı `metrics.vulnCount` üçün ilkin göstəricini yenidən təyin edin (`npm run quality:ratchet -- --update` xüsusi keçidləri əhatə etmir — əsaslandırma qeydi və izləmə məsələsi əlavə edərək dəyəri əl ilə redaktə edin, `direction:down`).
+   - **Trivy:** `.trivyignore` faylına əsaslandırma şərhi və izləmə məsələsi ilə birlikdə qeyd əlavə edin (hər sətirdə bir CVE-ID). `ignore-unfixed: true` artıq yamağı olmayan CVE-ləri avtomatik olaraq əhatə edir.
 
-Hər iki qapı, alət olmadıqda və ya ölçmə uğursuz olduqda (osv-scanner PATH-da yoxdur, osv.dev/şəbəkə əlçatmazdır, etibarsız JSON) **zərif şəkildə ÖTÜRÜLÜR** (exit 0) — **ölçmə** uğursuzluğu heç vaxt bloklamır, yalnız **ölçülmüş** reqressiya bloklayır.
+Tələb olunan OSV icraları (`check:vuln-ratchet -- --ratchet`) skaner, hesabat və ya ilkin göstərici doğrulana bilmədikdə `INCOMPLETE` statusu və 2 çıxış kodu ilə qapalı şəkildə uğursuz olur. Ölçülmüş reqressiya 1 çıxış kodu ilə nəticələnir. Məsləhət xarakterli icra yenə də 0 çıxış kodu ilə `SKIP` bildirə bilər, lakin bu, asılılıqların skandan uğurla keçdiyini təsdiqləmir. Bloklayıcı Trivy addımı da uğurlu ölçmə tələb edir: əlçatan olmayan alətlər, uğursuz tapşırıqlar və çatışmayan obraz sübutları obrazın təmiz olduğunu təsdiqləyə bilməz.
 
-## Məlum Qəbul Edilmiş Risklər
+## İstifadədən çıxarılmış asılılıq riski
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Sabitlənmiş promptfoo inkişaf aləti yeniləndikdən sonra kök lockfile artıq `extract-zip` paketini və ya ona aparan asılılıq əlaqəsini ehtiva etmir. Bununla da #14482-də izlənilən və əvvəllər qəbul edilmiş `promptfoo` → `@openai/codex-security` → `extract-zip` zənciri istifadədən çıxarılır. `tests/unit/extract-zip-14482-exposure.test.ts` daxilindəki reqressiya yoxlamaları onun yenidən əlavə edilməsini rədd edir və istehsal kodundan import edilməsinə qoyulan qadağanı saxlayır.
 
-`extract-zip@2.0.1` iki yamalanmamış yüksək təhlükəli simlink-traversal məsləhəti daşıyır.
-Yuxarıdakı CVE Variance həllinin "upstream fix yoxdur" qoluna əsasən, bu, bir **qəbul edilmiş riskdir**, yeniləmə deyil:
-
-- **Zəncir:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json` vasitəsilə təsdiqləndi — bütün asılılıq ağacında yalnız bir paket (`@openai/codex-security`) `extract-zip` elan edir və yalnız bir paket (`promptfoo`) `@openai/codex-security` elan edir.
-- **Zəncirdə heç bir sabit buraxılış mövcud deyil.** `extract-zip@2.0.1` (2020-ci ildə nəşr olunub) paketin son buraxılışıdır — o, dəstəklənmir. `@openai/codex-security`'nin cari npm-latest (`0.1.29`) hələ də `extract-zip@2.0.1` çəkir.
-- **İstehsaldan əlçatmazdır.** `promptfoo` yalnız devDependency-dir (`dependencies` altında heç vaxt siyahıya alınmayıb) və `src/`, `open-sse/` və ya `bin/` altında heç bir fayl `extract-zip` npm paketini idxal etmir — OmniRoute-un öz `extractZip()` köməkçisi (`src/lib/versionManager/binaryManager.ts:93`) yerli `unzip`/`tar` proqramlarına müraciət edir və əlaqəli deyil. `@openai/codex-security` həmçinin extract-zip-in onEntry callback-inin üzərində öz simlink-traversal mühafizəsini təmin edir.
-- `package.json` `overrides` vasitəsilə `extract-zip` **təxəllüs etməyin** — yeganə əlverişli əvəzedici Electron-org-internal-dır və `@openai/codex-security`'nin öz onEntry/defaultDirMode/defaultFileMode yoxlamaları ilə API-uyğunsuzluq təşkil edir; onu ləğv etmək həmin paketin təhlükəsizlik yoxlamalarını səssizcə pozacaq.
-- **Baza xətti:** ölçülmüş osv `vulnCount` (3) dondurulmuş `config/quality/quality-baseline.json` baza xəttindən (27) xeyli aşağıdır — heç bir tənzimləmə dəyişikliyinə ehtiyac yoxdur.
-- **Reqressiya mühafizəsi:** `tests/unit/extract-zip-14482-exposure.test.ts` yuxarıdakı zənciri və istehsalda idxal olunmama invariantını təsdiqləyir; əgər bunlardan hər hansı biri pozularsa (məsələn, gələcək bir PR `extract-zip`-i istehsaldan əlçatan edərsə), CI uğursuz olur.
-- **İzləmə:** #14482 nömrəli məsələ.
+Cari asılılıq düzəlişi həmçinin uyğunluq əvəzləmələrini Azure identity-nin MSAL klienti, get-uri-nin FTP klienti və OpenCode v1 SDK-nın Zod asılılığı ilə məhdudlaşdırır. Azure tokenlərinin əldə edilməsi və FTP vasitəsilə məlumatların alınması idarə olunan nəqliyyat mexanizmləri ilə sınaqdan keçirilir; hər iki OpenCode paketi öz build və test dəstlərini işlədir. Registry təhlükəsizlik bildirişlərinin sayı müəyyən bir zaman nöqtəsində aparılan ölçmələrdir və lockfile commit edildikdən sonra dəyişə bilər.
 
 ## Backlog: Scorecard məsləhəti → bloklama
 

@@ -75,6 +75,10 @@ test("malformed, incomplete, duplicate, result, and streaming shapes keep minimu
     chatToolTurn([chatCall({ id: " " })]),
     chatToolTurn([chatCall({ function: { name: "bad/name", arguments: "{}" } })]),
     chatToolTurn([chatCall({ function: { name: "read_file", arguments: "[]" } })]),
+    chatToolTurn([chatCall({ function: { name: "read_file", arguments: "{" } })]),
+    responsesTool({
+      output: [{ type: "function_call", call_id: "call", name: "read_file", arguments: "{" }],
+    }),
     chatToolTurn([chatCall(), chatCall()]),
     chatToolTurn([chatCall({ type: "tool_result" })]),
     chatToolTurn([chatCall()], "stop"),

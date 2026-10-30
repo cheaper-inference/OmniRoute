@@ -192,26 +192,13 @@ GHSA-62vw نے صرف `GET` password reveal کو mask کیا تھا؛ issuance �
 (GHSA-7pq4-8pvv-rx7r)۔ `enableObsidianVaultSync()` مزید یہ بھی مسترد کرتا ہے کہ vault خود data
 directory ہو، اس کے اندر واقع ہو، یا اسے اپنے اندر رکھتا ہو۔
 
-#### Credential exports صرف operators کے لیے ہیں
+#### اسناد کا ایکسپورٹ اور بحالی صرف آپریٹر کے لیے ہیں
 
 اوپر والا درجہ صرف یہ طے کرتا ہے کہ آیا _کوئی_ اسناد درکار ہیں۔ ذخیرہ شدہ اسناد ڈاؤن لوڈ کرنے والے روٹس ہینڈلر میں ایک دوسری جانچ شامل کرتے ہیں: `GET /api/settings/export-json` (ڈی کرپٹ شدہ پرووائیڈر کنکشنز اور خام API کلیدیں)، `GET /api/db-backups/export` (SQLite فائل) اور `GET /api/db-backups/exportAll` (مکمل آرکائیو) `requireOperatorCredential()` کو کال کرتے ہیں (`src/lib/api/operatorCredential.ts`)۔ یہ ڈیش بورڈ سیشن، مقامی CLI سبجیکٹ، یا لاگ اِن غیر فعال رکھنے والی انسٹینس کو قبول کرتا ہے، اور کسی بھی اسکوپ کی API کلیدوں (بشمول `manage` اور `admin`) اور `oma_` رسائی ٹوکنز کو `403` جواب دیتا ہے۔ سنک ٹوکن کا اجرا (`POST /api/sync/tokens`) اسی ہیلپر کے ساتھ قابلِ اعتماد لوپ بیک اندرونی سروس ٹوکن بھی استعمال کرتا ہے۔
 
-#### Credential exports and restores are operator-only
+متعلقہ تباہ کن کارروائیوں پر بھی یہی حد لاگو ہوتی ہے: `POST /api/db-backups/import` (اپ لوڈ کی گئی `.sqlite` فائل، بشمول `dryRun=true`)، `POST /api/db-backups` (محفوظ بیک اپ کو اس کے id سے بحال کرنا) اور `POST /api/settings/import-json` (پرانے JSON فارمیٹ کی بحالی) فعال ڈیٹابیس یا ترتیبات، کنکشنز اور API کلیدوں کے پورے مجموعے کو بدل دیتی ہیں۔ اس لیے مشین کی اسناد ان کارروائیوں کو بھی شروع نہیں کر سکتیں۔
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+بحالی کے پوائنٹس حذف کرنے پر بھی یہی حد ہے: `DELETE /api/db-backups` (صفائی — تازہ ترین N رکھنا یا D دن سے پرانے حذف کرنا) اور `PATCH /api/db-backups` (محفوظ رکھنے کی ترتیبات)۔ محفوظ قواعد وہی ہیں جو `cleanupDbBackups()` ہر خودکار بیک اپ کے بعد نافذ کرتا ہے (`src/lib/db/backup.ts`)؛ اگر مشین کی اسناد `keepLatest: 1` محفوظ کر سکیں تو اگلے اسنیپ شاٹ پر پچھلے بحالی پوائنٹس حذف ہو سکتے ہیں۔ بیک اپ کی فہرست دیکھنے اور بنانے (`GET`/`PUT /api/db-backups`) کے لیے عام انتظامی تصدیق برقرار رہتی ہے۔
 
 ### تازہ انسٹالیشن کا بوٹسٹریپ صرف لوپ بیک تک محدود ہے — حقیقی پیئر کے ذریعے، نہ کہ `Host`
 

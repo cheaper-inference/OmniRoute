@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 मा रुटबाट बाहिर सारिएको (अव्यवस्था घटाउन):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, र सिर्जना गरिएको `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) हेर्नुहोस्।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, र सिर्जना गरिएको `quality-metrics.json` (gitignored)। [`## config/`](#config--स्थिर-कन्फिगहरू--गुणस्तर-गेट-स्थिति) हेर्नुहोस्।
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | उपनिर्देशिका          | उद्देश्य                                                                                                                                                                                                                     |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | स्थानीयकृत कागजात अनुवादहरू (४१ लोकेलहरू)                                                                                                                                                                                    |
+| `docs/i18n/`          | स्थानीयकृत कागजात अनुवादहरू (६६ लोकेलहरू)                                                                                                                                                                                    |
 | `docs/screenshots/`   | गाइडहरूका लागि छवि एसेटहरू                                                                                                                                                                                                   |
 | `_tasks/superpowers/` | superpowers बाट प्राप्त योजना/विशिष्टीकरणहरू (`writing-plans`/`brainstorming`) + अनुसन्धान — पृथक्, छुट्टै संस्करणीकृत रिपोजिटरी, मुख्य ट्रीद्वारा gitignore गरिएको। CLAUDE.md → "Planning & Research Artifacts" हेर्नुहोस्। |
 

@@ -54,7 +54,7 @@ Taabụ ọhụrụ maka iwepụta ọdịnaya site na URL site na `POST /v1/web
 - Ntinye: URL + mgba ọkụ ibe zuru ezu + ihe nhọpụta usoro (markdown / ederede / HTML).
 - Nyefee → weta → gosipụta `ScrapeResult.tsx`.
 - `ScrapeResult` na-egosipụta nlele markdown + mgba ọkụ maka ọdịnaya raw.
-- Oke: ọ bụrụ na ahụ nzaghachi > **256 KB**, UI na-egosi `(ebelatara, lee raw)` ma mepee ọdịnaya raw na modal Monaco (D21).
+- Oke: ọ bụrụ na ahụ nzaghachi > **256 KB**, UI na-egosi `View full raw content` ma mepee ọdịnaya raw na modal (D21).
 - Paanụ metadata: onye na-eweta ọrụ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, ọnụahịa, nha nzaghachi, ọnụọgụ njikọ.
 - Na-eji hook `useScrapeFetch.ts`.
 

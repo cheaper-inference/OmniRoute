@@ -53,7 +53,7 @@ Search Tools Studio `/dashboard/search-tools` ਨੂੰ ਇੱਕ ਬੁਨਿ�
 - ਇਨਪੁੱਟ: URL + ਪੂਰੇ-ਪੰਨੇ ਦਾ ਟੌਗਲ + ਫਾਰਮੈਟ ਚੋਣਕਾਰ (markdown / text / HTML)।
 - ਸਬਮਿਟ → ਪ੍ਰਾਪਤ ਕਰੋ → `ScrapeResult.tsx` ਰੈਂਡਰ ਕਰੋ।
 - `ScrapeResult` ਮਾਰਕਡਾਊਨ ਪੂਰਵਦਰਸ਼ਨ + ਰਾਅ ਟੌਗਲ ਰੈਂਡਰ ਕਰਦਾ ਹੈ।
-- ਸੀਮਾ: ਜੇ ਜਵਾਬ ਦੀ ਬਾਡੀ **256 KB** ਤੋਂ ਵੱਧ ਹੋਵੇ, ਤਾਂ UI `(ਕੱਟਿਆ ਗਿਆ, ਰਾਅ ਵੇਖੋ)` ਦਿਖਾਉਂਦਾ ਹੈ ਅਤੇ ਰਾਅ ਸਮੱਗਰੀ ਨੂੰ Monaco ਮੋਡਲ (D21) ਵਿੱਚ ਖੋਲ੍ਹਦਾ ਹੈ।
+- ਸੀਮਾ: ਜੇ ਜਵਾਬ ਦੀ ਬਾਡੀ **256 KB** ਤੋਂ ਵੱਧ ਹੋਵੇ, ਤਾਂ UI `View full raw content` ਦਿਖਾਉਂਦਾ ਹੈ ਅਤੇ ਰਾਅ ਸਮੱਗਰੀ ਨੂੰ ਮੋਡਲ (D21) ਵਿੱਚ ਖੋਲ੍ਹਦਾ ਹੈ।
 - ਮੈਟਾਡੇਟਾ ਪੈਨਲ: ਪ੍ਰਦਾਤਾ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ਲੇਟੈਂਸੀ, ਲਾਗਤ, ਜਵਾਬ ਦਾ ਆਕਾਰ, ਲਿੰਕਾਂ ਦੀ ਗਿਣਤੀ।
 - `useScrapeFetch.ts` ਹੁੱਕ ਵਰਤਦਾ ਹੈ।
 

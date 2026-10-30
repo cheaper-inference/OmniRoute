@@ -212,7 +212,7 @@ utstedelsen lå fortsatt på nivået som er åpent ved feil (GHSA-7pq4-8pvv-rx7r
 `enableObsidianVaultSync()` avviser i tillegg et hvelv som er datakatalogen, ligger
 inni den eller inneholder den.
 
-#### Eksport av legitimasjonsopplysninger er bare for operatører
+#### Eksport av legitimasjonsopplysninger og gjenoppretting er bare for operatører
 
 Nivået ovenfor avgjør bare om _en eller annen_ legitimasjon kreves. Rutene som laster ned
 lagret legitimasjon, utfører en ekstra kontroll i behandleren: `GET /api/settings/export-json` (dekrypterte
@@ -223,22 +223,9 @@ en instans der innlogging er deaktivert, og svarer med `403` på API-nøkler med
 og `admin`) og på `oma_`-tilgangstokener. Utstedelse av synkroniseringstokener (`POST /api/sync/tokens`) bruker den
 samme hjelpefunksjonen, i tillegg til det klarerte interne tjenestetokenet for loopback.
 
-#### Credential exports and restores are operator-only
+De tilsvarende destruktive handlingene har samme tilgangsgrense: `POST /api/db-backups/import` (en opplastet `.sqlite`-fil, også med `dryRun=true`), `POST /api/db-backups` (gjenoppretting av en lagret sikkerhetskopi etter id) og `POST /api/settings/import-json` (gjenoppretting fra det eldre JSON-formatet) erstatter den aktive databasen eller hele settet med innstillinger, tilkoblinger og API-nøkler. Maskinlegitimasjon kan derfor heller ikke utløse dem.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Sletting av gjenopprettingspunkter har samme grense: `DELETE /api/db-backups` (opprydding — behold de nyeste N eller slett dem som er eldre enn D dager) og `PATCH /api/db-backups` (oppbevaringsinnstillinger). Det er nettopp de lagrede reglene som `cleanupDbBackups()` bruker etter hver automatiske sikkerhetskopi (`src/lib/db/backup.ts`); maskinlegitimasjon som kunne lagre `keepLatest: 1`, kunne dermed fjerne de tidligere gjenopprettingspunktene ved neste øyeblikksbilde. Listing og oppretting av sikkerhetskopier (`GET`/`PUT /api/db-backups`) beholder vanlig administrasjonsautentisering.
 
 ### Bootstrap for ny installasjon er begrenset til loopback — basert på reell motpart, ikke `Host`
 

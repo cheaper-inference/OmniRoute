@@ -31,11 +31,32 @@ set -euo pipefail
 
 BRANCH="${1:-}"
 BASE="${2:-}"
+SCRIPT_DIR=$(CDPATH='' cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
+RESOURCE_BUDGET="$SCRIPT_DIR/resource-budget.mjs"
+RESOURCE_FLOOR_BYTES=8589934592       # 8 GiB left available after every reservation.
+RESOURCE_TREE_MARGIN_BYTES=536870912  # 512 MiB above the checked-out tree's logical size.
+RESOURCE_FALLBACK_BYTES=3221225472     # 3 GiB until a missing remote-tracking ref is fetched.
 
 if [ -z "$BRANCH" ]; then
   echo "uso: scripts/dev/new-worktree.sh <branch> [base-branch]" >&2
   echo "  ex: scripts/dev/new-worktree.sh fix/12345-algo release/v3.8.51" >&2
   exit 1
+fi
+
+# The capacity guard deliberately depends on Linux process identity and util-linux flock.
+# Keep the mkdir lock below for its forced fallback contract test, but do not let a real
+# developer machine silently create an unbudgeted worktree when the guard is unsupported.
+if [ "$(uname -s)" != "Linux" ]; then
+  echo "resource budget guard is supported only on Linux; refusing to create an unguarded worktree" >&2
+  exit 2
+fi
+if ! command -v flock >/dev/null 2>&1; then
+  echo "resource budget guard requires util-linux flock; refusing to create an unguarded worktree" >&2
+  exit 2
+fi
+if ! command -v node >/dev/null 2>&1 || [ ! -f "$RESOURCE_BUDGET" ]; then
+  echo "resource budget guard is unavailable: $RESOURCE_BUDGET" >&2
+  exit 2
 fi
 
 # O checkout PRINCIPAL, mesmo quando este script roda de dentro de outra worktree:
@@ -48,15 +69,36 @@ cd "$MAIN"
 LOCK="$COMMON_DIR/omniroute-new-worktree.lock"
 LOCK_WAIT="${NEW_WORKTREE_LOCK_WAIT:-600}"
 MKDIR_LOCK=""
+RESOURCE_LEASE=""
 
 release_lock() {
   if [ -n "$MKDIR_LOCK" ]; then
     rmdir "$MKDIR_LOCK" 2>/dev/null || true
   fi
 }
-trap release_lock EXIT
+
+release_resource_lease() {
+  [ -n "$RESOURCE_LEASE" ] || return 0
+  if ! node "$RESOURCE_BUDGET" release \
+      --common-dir "$COMMON_DIR" --lease "$RESOURCE_LEASE" --json >/dev/null; then
+    echo "AVISO: não consegui liberar a resource-budget lease; use 'resource-budget.mjs status' para recuperar com prova de identidade" >&2
+  fi
+  RESOURCE_LEASE=""
+}
+
+cleanup() {
+  local rc=$?
+  release_resource_lease
+  release_lock
+  return "$rc"
+}
+trap cleanup EXIT
 
 acquire_lock() {
+  if [ -L "$LOCK" ]; then
+    echo "new-worktree compatibility lock must not be a symlink: $LOCK" >&2
+    exit 78
+  fi
   if [ -z "${NEW_WORKTREE_NO_FLOCK:-}" ] && command -v flock >/dev/null 2>&1; then
     exec 9>"$LOCK"
     if ! flock -n 9; then
@@ -97,7 +139,50 @@ fi
 DIR=".claude/worktrees/${BRANCH##*/}"
 [ -e "$DIR" ] && { echo "já existe: $DIR" >&2; exit 1; }
 
+# The first reservation happens before fetch, branch creation, or checkout. Usually the
+# existing remote-tracking ref gives the exact logical tree size. On a first-ever base the
+# 3 GiB fallback is resized under the same authenticated lease immediately after fetch.
+estimate_tree_bytes() {
+  git ls-tree -lr --long "$1" \
+    | awk '$2 == "blob" && $4 ~ /^[0-9]+$/ { total += $4 } END { printf "%.0f\n", total + 0 }'
+}
+
+INITIAL_RESERVE_BYTES="$RESOURCE_FALLBACK_BYTES"
+if git rev-parse --verify --quiet "refs/remotes/origin/$BASE^{commit}" >/dev/null; then
+  INITIAL_TREE_BYTES=$(estimate_tree_bytes "refs/remotes/origin/$BASE")
+  INITIAL_RESERVE_BYTES=$((INITIAL_TREE_BYTES + RESOURCE_TREE_MARGIN_BYTES))
+fi
+
+set +e
+RESOURCE_RESULT=$(node "$RESOURCE_BUDGET" reserve \
+  --common-dir "$COMMON_DIR" \
+  --reserve-bytes "$INITIAL_RESERVE_BYTES" \
+  --floor-bytes "$RESOURCE_FLOOR_BYTES" \
+  --purpose "new-worktree:${BRANCH//\//-}" \
+  --owner-pid "$$" \
+  --json)
+RESOURCE_RC=$?
+set -e
+if [ "$RESOURCE_RC" -ne 0 ]; then
+  echo "resource budget denied before fetch; no branch or worktree was created" >&2
+  exit "$RESOURCE_RC"
+fi
+RESOURCE_LEASE=$(printf '%s\n' "$RESOURCE_RESULT" \
+  | sed -n 's/.*"handle":"\([^"]*\)".*/\1/p')
+if [ -z "$RESOURCE_LEASE" ]; then
+  echo "resource budget returned no lease handle; refusing to continue" >&2
+  exit 78
+fi
+
 git fetch origin "$BASE" --quiet
+
+TREE_BYTES=$(estimate_tree_bytes "refs/remotes/origin/$BASE")
+CHECKOUT_RESERVE_BYTES=$((TREE_BYTES + RESOURCE_TREE_MARGIN_BYTES))
+node "$RESOURCE_BUDGET" resize \
+  --common-dir "$COMMON_DIR" --lease "$RESOURCE_LEASE" \
+  --reserve-bytes "$CHECKOUT_RESERVE_BYTES" --json >/dev/null
+node "$RESOURCE_BUDGET" check \
+  --common-dir "$COMMON_DIR" --lease "$RESOURCE_LEASE" --json >/dev/null
 
 # ---- criação com rollback da branch ----------------------------------------
 # `git worktree add -b` cria a branch ANTES da worktree; se a worktree falhar, a
@@ -148,10 +233,19 @@ if [ -d "$MAIN/node_modules/node_modules" ]; then
   echo "       Ele infla a cópia e esgota o limite de hard links; convém removê-lo." >&2
 fi
 if [ -d "$MAIN/node_modules" ]; then
+  set +e
+  node "$RESOURCE_BUDGET" check \
+    --common-dir "$COMMON_DIR" --lease "$RESOURCE_LEASE" --json >/dev/null
+  RESOURCE_CHECK_RC=$?
+  set -e
+  if [ "$RESOURCE_CHECK_RC" -ne 0 ]; then
+    echo "resource budget denied before cp -al; worktree and hooks were preserved, node_modules was not copied" >&2
+    exit "$RESOURCE_CHECK_RC"
+  fi
   # Falha parcial (limite de hard links, disco) não pode derrubar a worktree inteira:
   # os hooks já estão no lugar e o npm install continua sendo uma saída válida.
   if cp -al "$MAIN/node_modules" "$DIR/node_modules" 2>"$DIR/.cp-node-modules.log"; then
-    echo "node_modules: $(ls "$DIR/node_modules" | wc -l) entradas (hard links)"
+    echo "node_modules: $(find "$DIR/node_modules" -mindepth 1 -maxdepth 1 -printf . | wc -c) entradas (hard links)"
     rm -f "$DIR/.cp-node-modules.log"
   else
     echo "AVISO: a cópia de node_modules falhou parcialmente (veja $DIR/.cp-node-modules.log)." >&2

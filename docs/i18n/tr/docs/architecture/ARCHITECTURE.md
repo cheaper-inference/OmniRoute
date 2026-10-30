@@ -15,7 +15,7 @@ Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, yedek dev
 
 Temel yetenekler:
 
-- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 154 yürütücü modül)
+- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 156 yürütücü modül)
 - Sağlayıcı biçimleri arasında istek/yanıt çevirisi
 - Model kombinasyonu yedekleme mekanizması (çok modelli sıra)
 - `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)
@@ -31,7 +31,7 @@ Temel yetenekler:
 - `/v1/search` üzerinden web araması (20 sağlayıcı)
 - `/v1/moderations` üzerinden moderasyon
 - `/v1/rerank` üzerinden yeniden sıralama
-- Akıl yürütme modelleri için düşünme etiketi ayrıştırma (``)
+- Akıl yürütme modelleri için düşünme etiketi ayrıştırma (`<think>...</think>`)
 - Katı OpenAI SDK uyumluluğu için yanıt temizleme
 - Sağlayıcılar arası uyumluluk için rol normalleştirme (developer→system, system→user)
 - Yapılandırılmış çıktı dönüştürme (json_schema → Gemini responseSchema)
@@ -1083,9 +1083,9 @@ Eski dosya tabanlı istek günlükleyicisi (`open-sse/utils/requestLogger.ts`) y
 
 ## 6) SSRF / Giden URL Koruması
 
-- `src/shared/network/outboundUrlGuard.ts`, sağlayıcı yürütücülerine ulaşmadan önce tüm özel/geri döngü/yerel bağlantı hedef URL'lerini engeller
-- Sağlayıcı modeli keşif ve doğrulama rotaları, her giden istekten önce korumayı uygulayan `src/shared/network/safeOutboundFetch.ts` dosyasını kullanır
-- Koruma hataları, HTTP 422 ile `URL_GUARD_BLOCKED` olarak görünür hâle gelir ve `providerAudit.ts` aracılığıyla uyumluluk denetim izine kaydedilir
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`), `BaseExecutor.execute()` üzerinden gönderilen sohbet isteklerine `src/shared/network/outboundUrlGuard.ts` uygular. Yalnızca genel erişim modunda (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ve özel bayrak kapalıyken) özel ve geri döngü ana bilgisayarlarını ve 169.254.0.0/16 aralığını engeller; diğer tüm modlarda bulut meta veri ana bilgisayarlarını engeller. Herhangi bir DNS sorgusundan önce, ana bilgisayar adını veya IP sabitini yazıldığı şekliyle denetler. Yerleşik yerel sağlayıcılar bu denetimi atlar.
+- Sağlayıcı modeli keşif ve doğrulama rotaları, her giden istekten önce korumayı uygulayan `src/shared/network/safeOutboundFetch.ts` dosyasını kullanır.
+- Koruma hataları, HTTP 503 ile `URL_GUARD_BLOCKED` olarak gösterilir (`getSafeOutboundFetchErrorStatus`; model keşif rotası 400 döndürür) ve doğrulama sırasında gerçekleşen gerçek SSRF engellemeleri, denetim kaydına `provider.validation.ssrf_blocked` olayları olarak kaydedilir.
 
 ## Gözlemlenebilirlik ve Operasyonel Sinyaller
 
@@ -1136,7 +1136,7 @@ Kod tarafından etkin olarak kullanılan ortam değişkenleri:
 4. Bulut davranışı, `NEXT_PUBLIC_BASE_URL` değerinin doğruluğuna ve bulut uç noktasının erişilebilirliğine bağlıdır.
 5. `open-sse/` dizini, `@omniroute/open-sse` **npm çalışma alanı paketi** olarak yayımlanır. Kaynak kod, bunu `@omniroute/open-sse/...` aracılığıyla içe aktarır (Next.js `transpilePackages` tarafından çözümlenir). Bu belgedeki dosya yolları, tutarlılık için hâlâ `open-sse/` dizin adını kullanır.
 6. Panodaki grafikler, erişilebilir ve etkileşimli analitik görselleştirmeler (model kullanım çubuk grafikleri, başarı oranlarını içeren sağlayıcı döküm tabloları) için **Recharts** (SVG tabanlı) kullanır.
-7. E2E testleri **Playwright** (`tests/e2e/`) kullanır ve `npm run test:e2e` aracılığıyla çalıştırılır. Birim testleri **Node.js test çalıştırıcısını** (`tests/unit/`) kullanır ve `npm run test:unit` aracılığıyla çalıştırılır. `src/` altındaki kaynak kod **TypeScript** (`.ts`/`.tsx`) kullanır; `open-sse/` çalışma alanı ise JavaScript (`.js`) olarak kalır.
+7. E2E testleri **Playwright** (`tests/e2e/`) kullanır ve `npm run test:e2e` aracılığıyla çalıştırılır. Birim testleri **Node.js test çalıştırıcısını** (`tests/unit/`) kullanır ve `npm run test:unit` aracılığıyla çalıştırılır. `src/` altındaki kaynak kod **TypeScript** (`.ts`/`.tsx`) kullanır; `open-sse/` çalışma alanı ise TypeScript (`.ts`) olarak kalır.
 8. Ayarlar sayfası 7 sekme hâlinde düzenlenmiştir: Genel, Görünüm, Yapay Zekâ, Güvenlik, Yönlendirme, Dayanıklılık, Gelişmiş. Dayanıklılık sayfası yalnızca istek kuyruğunu, bağlantı bekleme süresini, sağlayıcı devre kesicisini ve bekleme süresinin dolmasını bekleme davranışını yapılandırır; canlı devre kesici çalışma zamanı durumu Sağlık sayfasında gösterilir.
 9. **Context Relay** stratejisi (`context-relay`) iki katmana ayrılmıştır: `combo.ts` bir aktarım oluşturulup oluşturulmayacağına karar verir, `chat.ts` ise hesap çözümlemesinden sonra aktarımı ekler. Aktarım verileri `context_handoffs` SQLite tablosunda bulunur. Bu ayrım bilinçlidir; çünkü gerçek hesabın değişip değişmediğini yalnızca `chat.ts` bilir.
 10. **Proxy zorunluluğu** artık kapsamlıdır: `tokenHealthCheck.ts` proxy'yi bağlantı başına çözümler, `/api/providers/validate` `runWithProxyContext` kullanır ve `proxyFetch.ts`, Node 22'de yönlendirici uyumluluğunu korumak için `undici.fetch()` kullanır.

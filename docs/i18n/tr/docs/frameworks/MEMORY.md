@@ -561,7 +561,7 @@ Bellek ve Qdrant ayarları, eski/genel ayarlar yüzeyi için ayrıca
 ## Önbelleğe Alma
 
 `src/lib/memory/store.ts`, `getMemory(id)` okumaları için işlem içi LRU benzeri
-bir önbellek (`MEMORY_CACHE_TTL = 1 dk`, `MEMORY_MAX_CACHE_SIZE = 500`, en eski
+bir önbellek (`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, en eski
 %20'lik bölümün çıkarılmasıyla) ve ayrıca kendi kapsamlı önbelleğini kullanmak
 isteyen çağıranlar tarafından kullanılan `get`/`set`/`invalidate` yöntemlerine
 sahip genel bir anahtar/değer `memoryCache` katmanı (`src/lib/memory/cache.ts`)
@@ -741,7 +741,8 @@ Bir kullanıcı şunu söylediğinde:
 
 Kontrolsüz çıkarmayı önlemek için aşağıdaki sınırlar uygulanır:
 
-| Minimum içerik uzunluğu | 3 karakter |
+| Minimum içerik uzunluğu  | 3 karakter   |
+| ------------------------ | ------------ |
 | Maksimum içerik uzunluğu | 500 karakter |
 
 ### Çıkarma Ne Zaman Devre Dışı Bırakılmalı?

@@ -154,10 +154,10 @@ Trenutni projekat ne postavlja `INITIAL_PASSWORD` jer ovaj deployment to ne zaht
 
 Ako nije postavljen:
 
-- Log pri pokretanju će ukazati da je defaultna lozinka `CHANGEME`
-- Trebali biste promijeniti lozinku za prijavu u sistemskim postavkama što je prije moguće nakon deploymenta
+- Lozinku kontrolne table kreirate u čarobnjaku za početno podešavanje prilikom prve posjete. Dovršite korak za lozinku: njegovo preskakanje isključuje prijavu na kontrolnu tablu, čime ona ostaje otvorena svima koji mogu pristupiti URL-u aplikacije
+- Fly proxy pristupa aplikaciji s adrese koja nije loopback, pa nakon što pošaljete lozinku čarobnjak traži jednokratni bootstrap token, koji aplikacija u tom trenutku ispisuje u svoj dnevnik: `flyctl logs --no-tail -a omniroute | Select-String BOOTSTRAP`. Ako ta linija više nije dostupna u dnevniku zbog novih zapisa, ponovo pokrenite aplikaciju i ponovo pošaljite obrazac čarobnjaka da se ispiše novi token
 
-Ako želite inicijalizovati lozinku backenda bez nadzora, možete je dodati kasnije:
+Da biste umjesto toga postavili lozinku bez nadzora, dodajte je prije prve posjete kontrolnoj tabli (nakon što je lozinka spremljena, `INITIAL_PASSWORD` se zanemaruje):
 
 - `INITIAL_PASSWORD`
 
@@ -453,7 +453,7 @@ Provjerite obje sljedeće stavke:
 
 ### 12.5 Može li raditi bez `INITIAL_PASSWORD`?
 
-Da, može raditi. Koristit će podrazumijevanu lozinku `CHANGEME`. Preporučuje se da lozinka backend-a u produkciji bude promijenjena što je prije moguće.
+Da. Kada `INITIAL_PASSWORD` nije postavljen, lozinku kontrolne table kreirate u čarobnjaku za početno podešavanje prilikom prve posjete (odjeljak 5.2 objašnjava jednokratni bootstrap token i korak za lozinku).
 
 ---
 

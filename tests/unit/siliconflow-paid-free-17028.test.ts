@@ -29,11 +29,17 @@ const formerlyMisclassifiedIds = [
 ];
 
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
-  it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
+  it("never counts SiliconFlow as a static free model, pool or uncapped provider", () => {
     const totals = computeFreeModelTotals();
-    assert.equal(totals.modelCount, 467);
-    assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
+    // Other providers can grow without changing SiliconFlow's paid-only contract.
+    // Aggregate counting and pool deduplication have their own catalog fixtures.
+    const siliconflow = computeFreeModelTotals({
+      entries: FREE_MODEL_BUDGETS.filter((row) => row.provider === "siliconflow"),
+    });
+    assert.equal(siliconflow.modelCount, 0);
+    assert.equal(siliconflow.poolCount, 0);
+    assert.equal(siliconflow.steadyRecurringTokens, 0);
   });
 
   it("vetoes any contradictory paid flag, including nested pricing and is_free badges", () => {

@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { availableParallelism } from "node:os";
 
 export default defineConfig({
   test: {
@@ -8,7 +9,9 @@ export default defineConfig({
     globals: true,
     setupFiles: ["./tests/_setup/vitestUiPolyfills.ts"],
     pool: "threads",
-    maxWorkers: 20,
+    // Keep headroom for Vite transforms, React setup and the runner process.
+    // The full inventory still runs across four required CI shards.
+    maxWorkers: Math.min(2, availableParallelism()),
     fileParallelism: true,
     maxConcurrency: 20,
     include: [

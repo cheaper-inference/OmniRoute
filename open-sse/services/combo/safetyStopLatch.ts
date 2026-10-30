@@ -13,7 +13,7 @@ async function isSafetyRejection(result: Response): Promise<boolean> {
   try {
     parsed = await result.clone().json();
   } catch {
-    // Non-JSON errors retain ordinary routing behavior.
+    // no-effect: non-JSON is not safety evidence; the strategy still receives the original error.
     return false;
   }
   const error = extractJsonErrorFields(parsed);

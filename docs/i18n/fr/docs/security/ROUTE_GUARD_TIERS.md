@@ -210,7 +210,7 @@ le jeton de l’API REST d’Obsidian. GHSA-62vw masquait uniquement la divulgat
 se trouvait toujours dans le niveau autorisant l’accès en cas de défaillance (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` refuse en outre
 un coffre qui correspond au répertoire de données, se trouve à l’intérieur de celui-ci ou le contient.
 
-#### Les exportations d’identifiants sont réservées aux opérateurs
+#### Les exportations d’identifiants et les restaurations sont réservées aux opérateurs
 
 Le niveau ci-dessus détermine uniquement si _un_ identifiant est requis. Les routes qui téléchargent
 les identifiants stockés ajoutent une seconde vérification dans le gestionnaire : `GET /api/settings/export-json` (connexions
@@ -221,22 +221,9 @@ une instance sur laquelle la connexion est désactivée, et répond par `403` au
 et `admin`), ainsi qu’aux jetons d’accès `oma_`. L’émission de jetons de synchronisation (`POST /api/sync/tokens`) utilise le
 même utilitaire, en plus du jeton de service interne de bouclage approuvé.
 
-#### Credential exports and restores are operator-only
+Les opérations destructives correspondantes respectent la même limite : `POST /api/db-backups/import` (fichier `.sqlite` téléversé, y compris avec `dryRun=true`), `POST /api/db-backups` (restauration d’une sauvegarde stockée par son id) et `POST /api/settings/import-json` (restauration de l’ancien format JSON) remplacent la base active ou l’ensemble des paramètres, connexions et clés API. Un identifiant de machine ne peut donc pas non plus les déclencher.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+La suppression des points de restauration respecte la même limite : `DELETE /api/db-backups` (nettoyage — conserver les N derniers ou supprimer ceux de plus de D jours) et `PATCH /api/db-backups` (paramètres de conservation). La politique enregistrée est précisément celle que `cleanupDbBackups()` applique après chaque sauvegarde automatique (`src/lib/db/backup.ts`) ; un identifiant de machine capable d’enregistrer `keepLatest: 1` pourrait donc supprimer les anciens points de restauration au prochain instantané. L’affichage et la création de sauvegardes (`GET`/`PUT /api/db-backups`) conservent l’authentification de gestion habituelle.
 
 ### L’amorçage d’une nouvelle installation est limité au bouclage — selon le pair réel, pas `Host`
 

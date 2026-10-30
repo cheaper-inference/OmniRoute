@@ -580,28 +580,28 @@ post_install() {
 
 ### Biến môi trường
 
-| Biến                                    | Mặc định                             | Mô tả                                                                                                                              |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Khóa bí mật dùng để ký JWT (**phải thay đổi trong môi trường production**)                                                         |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Mật khẩu đăng nhập lần đầu                                                                                                         |
-| `DATA_DIR`                              | `~/.omniroute`                       | Thư mục dữ liệu (cơ sở dữ liệu, mức sử dụng, nhật ký)                                                                              |
-| `PORT`                                  | mặc định của framework               | Cổng dịch vụ (`20128` trong các ví dụ)                                                                                             |
-| `HOSTNAME`                              | mặc định của framework               | Máy chủ để liên kết (Docker mặc định là `0.0.0.0`)                                                                                 |
-| `NODE_ENV`                              | mặc định của runtime                 | Đặt thành `production` khi triển khai                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL cơ sở công khai được cung cấp cho bảng điều khiển và máy chủ (thay thế `BASE_URL` cũ)                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL cơ sở của điểm cuối đồng bộ đám mây (thay thế `CLOUD_URL` cũ)                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Khóa bí mật HMAC dành cho các khóa API được tạo                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Bắt buộc sử dụng khóa API Bearer trên `/v1/*`                                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Cho phép người dùng bảng điều khiển đã xác thực xem toàn bộ giá trị khóa API được lưu trữ khi có yêu cầu                           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Chu kỳ làm mới phía máy chủ cho dữ liệu Giới hạn Nhà cung cấp được lưu đệm; các nút làm mới trên UI vẫn kích hoạt đồng bộ thủ công |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Tắt ảnh chụp nhanh SQLite tự động trước khi ghi/nhập/khôi phục; sao lưu thủ công vẫn hoạt động                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Bật ghi nhật ký ứng dụng và nhật ký kiểm tra vào ổ đĩa                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Bắt buộc cookie xác thực có thuộc tính `Secure` (khi đặt sau proxy ngược HTTPS)                                                    |
-| `CLOUDFLARED_BIN`                       | chưa đặt                             | Sử dụng tệp nhị phân `cloudflared` hiện có thay vì tải xuống bản được quản lý                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Giao thức truyền tải cho Quick Tunnels được quản lý (`http2`, `quic` hoặc `auto`)                                                  |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Giới hạn heap của Node.js tính bằng MB                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Số mục tối đa trong bộ nhớ đệm prompt                                                                                              |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Số mục tối đa trong bộ nhớ đệm ngữ nghĩa                                                                                           |
+| Biến                                    | Mặc định                 | Mô tả                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(được tạo tự động)_     | Khóa bí mật dùng để ký JWT — được tạo tự động trong lần khởi động đầu tiên và lưu bền vững vào `server.env`; hãy đặt rõ ràng khi thư mục dữ liệu là tạm thời |
+| `INITIAL_PASSWORD`                      | _(chưa đặt)_             | Mật khẩu đăng nhập lần đầu. Bản cài đặt từ npm/mã nguồn bắt đầu bằng `CHANGEME`: hãy thay thế. Chưa đặt: trình hướng dẫn làm quen                            |
+| `DATA_DIR`                              | `~/.omniroute`           | Thư mục dữ liệu (cơ sở dữ liệu, mức sử dụng, nhật ký)                                                                                                        |
+| `PORT`                                  | mặc định của framework   | Cổng dịch vụ (`20128` trong các ví dụ)                                                                                                                       |
+| `HOSTNAME`                              | mặc định của framework   | Máy chủ để liên kết (Docker mặc định là `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | mặc định của runtime     | Đặt thành `production` khi triển khai                                                                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL cơ sở công khai được cung cấp cho bảng điều khiển và máy chủ (thay thế `BASE_URL` cũ)                                                                    |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | URL cơ sở của điểm cuối đồng bộ đám mây (thay thế `CLOUD_URL` cũ)                                                                                            |
+| `API_KEY_SECRET`                        | _(được tạo tự động)_     | Khóa bí mật checksum cho các khóa API gắn với máy — bootstrap khởi động tự động tạo khi chưa đặt và lưu vào `server.env` có thể ghi                          |
+| `REQUIRE_API_KEY`                       | `false`                  | Bắt buộc sử dụng khóa API Bearer trên `/v1/*`                                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Cho phép người dùng bảng điều khiển đã xác thực xem toàn bộ giá trị khóa API được lưu trữ khi có yêu cầu                                                     |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Chu kỳ làm mới phía máy chủ cho dữ liệu Giới hạn Nhà cung cấp được lưu đệm; các nút làm mới trên UI vẫn kích hoạt đồng bộ thủ công                           |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Tắt ảnh chụp nhanh SQLite tự động trước khi ghi/nhập/khôi phục; sao lưu thủ công vẫn hoạt động                                                               |
+| `APP_LOG_TO_FILE`                       | `true`                   | Bật ghi nhật ký ứng dụng và nhật ký kiểm tra vào ổ đĩa                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Bắt buộc cookie xác thực có thuộc tính `Secure` (khi đặt sau proxy ngược HTTPS)                                                                              |
+| `CLOUDFLARED_BIN`                       | chưa đặt                 | Sử dụng tệp nhị phân `cloudflared` hiện có thay vì tải xuống bản được quản lý                                                                                |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Giao thức truyền tải cho Quick Tunnels được quản lý (`http2`, `quic` hoặc `auto`)                                                                            |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Giới hạn heap của Node.js tính bằng MB                                                                                                                       |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Số mục tối đa trong bộ nhớ đệm prompt                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Số mục tối đa trong bộ nhớ đệm ngữ nghĩa                                                                                                                     |
 
 Để xem tài liệu tham khảo đầy đủ về các biến môi trường, hãy xem [README](../README.md).
 

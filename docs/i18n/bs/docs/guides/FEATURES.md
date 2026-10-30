@@ -319,10 +319,10 @@ Konfiguracijski paket izrađuje `src/lib/sync/bundle.ts`. Klijenti porede zaglav
 
 Svi pozivi za validaciju providera i otkrivanje modela sada prolaze kroz dvoslojni outbound guard:
 
-1. **URL guard** (`src/shared/network/outboundUrlGuard.ts`) — Blokira privatne/loopback/link-local IP opsege prije nego što se socket otvori.
-2. **Safe fetch wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Primjenjuje URL guard, normalizuje timeout-e i ponavlja privremene greške uz exponential backoff.
+1. **URL guard** (`src/shared/network/outboundUrlGuard.ts`) — Prvo provjerava naziv hosta ili IP literal odredišta tačno onako kako je naveden; u režimu public-only safe-fetch wrapper također razrješava naziv i odbija odgovore s privatnim adresama. Podrazumijevano blokira krajnje tačke metapodataka u oblaku — cijeli raspon 169.254.0.0/16 i poznate nazive hostova za metapodatke; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokira i privatne i loopback hostove; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (ili naslijeđeni `OUTBOUND_SSRF_GUARD_ENABLED=false`) isključuje provjere. Vrijednost spremljena putem prekidača za zastavicu na kontrolnoj tabli ima prednost nad njenom varijablom, a ugrađeni lokalni provideri preskaču guard tokom validacije ključa. Pogledajte `docs/reference/ENVIRONMENT.md`.
+2. **Safe fetch wrapper** (`src/shared/network/safeOutboundFetch.ts`) — Primjenjuje URL guard, normalizuje vremenska ograničenja i ponavlja privremene greške uz eksponencijalno povećavanje razmaka između pokušaja.
 
-Kršenja guard-a se pojavljuju kao HTTP 422 (`URL_GUARD_BLOCKED`) i zapisuju se u compliance audit log putem `providerAudit.ts`.
+Kršenja guard-a se pojavljuju kao `URL_GUARD_BLOCKED` — HTTP 503 putem `getSafeOutboundFetchErrorStatus` (400 na ruti za otkrivanje modela) — a stvarna SSRF blokiranja tokom validacije zapisuju se u revizijski dnevnik kao događaji `provider.validation.ssrf_blocked`.
 
 ---
 

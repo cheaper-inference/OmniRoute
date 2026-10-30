@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Vilihamishwa kutoka mzizi katika v3.8.26 (kupunguza msongamano):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` inayozalishwa (haifuatiliwi na git). Tazama [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, na `quality-metrics.json` inayozalishwa (haifuatiliwi na git). Tazama [`## config/`](#config--mipangilio-tuli--hali-ya-kizuizi-cha-ubora).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Saraka ndogo          | Madhumuni                                                                                                                                                                                                                |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Tafsiri za hati zilizobinafsishwa kwa lugha mbalimbali (lugha 41)                                                                                                                                                        |
+| `docs/i18n/`          | Tafsiri za hati zilizobinafsishwa kwa lugha mbalimbali (lugha 66)                                                                                                                                                        |
 | `docs/screenshots/`   | Rasilimali za picha kwa miongozo                                                                                                                                                                                         |
 | `_tasks/superpowers/` | Mipango/vipimo kutoka superpowers (`writing-plans`/`brainstorming`) + utafiti — repo iliyotengwa, yenye matoleo yake tofauti, na iliyopuuzwa na git katika mti mkuu. Tazama CLAUDE.md → "Planning & Research Artifacts". |
 

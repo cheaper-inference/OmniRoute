@@ -4,7 +4,7 @@
 # vez de depender do snapshot gravado no deploy. Fonte: scripts/release/radar-export.mjs.
 #
 # A URL estável resultante (definir em RADAR_EXPORT_URL no .env do radar-server):
-#   https://github.com/diegosouzapw/OmniRoute/releases/download/radar-export-latest/export-omniroute.json
+#   https://github.com/cheaper-inference/OmniRoute/releases/download/radar-export-latest/export-omniroute.json
 name: Radar Export
 
 on:
@@ -39,18 +39,18 @@ env:
 
 jobs:
   publish-export:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write # gh release upload — clobra o asset estável do export
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false # publish usa GH_TOKEN via gh release, não a credencial do checkout
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ env.CI_NODE_VERSION }}
-          cache: npm
+          package-manager-cache: false
       - run: npm ci
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"

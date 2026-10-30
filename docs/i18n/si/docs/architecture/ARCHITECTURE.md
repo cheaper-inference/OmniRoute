@@ -15,7 +15,7 @@ OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය 
 
 ප්රධාන හැකියාවන්:
 
-- CLI/මෙවලම් සඳහා OpenAI-අනුකූල API අතුරුමුහුණත (සපයන්නන් 375ක්, executor මොඩියුල 154ක්)
+- CLI/මෙවලම් සඳහා OpenAI-අනුකූල API අතුරුමුහුණත (සපයන්නන් 375ක්, executor මොඩියුල 156ක්)
 - සපයන්නන්ගේ ආකෘති අතර ඉල්ලීම්/ප්රතිචාර පරිවර්තනය
 - Model combo fallback (බහු-මාදිලි අනුක්රමය)
 - `compositeTiers` අනුව runtime අනුපිළිවෙළ සහිත ව්යුහගත combo පියවර (`provider + model + connection`)
@@ -31,7 +31,7 @@ OmniRoute යනු Next.js මත ගොඩනගා ඇති දේශීය 
 - `/v1/search` හරහා වෙබ් සෙවීම (සපයන්නන් 20ක්)
 - `/v1/moderations` හරහා අන්තර්ගත පාලනය
 - `/v1/rerank` හරහා නැවත ශ්රේණිගත කිරීම
-- තර්කන මාදිලි සඳහා think tag විග්රහ කිරීම (``)
+- තර්කන මාදිලි සඳහා think tag විග්රහ කිරීම (`<think>...</think>`)
 - දැඩි OpenAI SDK අනුකූලතාව සඳහා ප්රතිචාර පිරිසිදු කිරීම
 - සපයන්නන් අතර අනුකූලතාව සඳහා භූමිකා සාමාන්යකරණය (developer→system, system→user)
 - ව්යුහගත ප්රතිදාන පරිවර්තනය (json_schema → Gemini responseSchema)
@@ -1087,11 +1087,11 @@ flowchart LR
 - ආරම්භයේදී SQLite schema migrations සහ ස්වයංක්රීය උත්ශ්රේණි hooks
 - පැරණි JSON → SQLite migration ගැළපුම් මාර්ගය
 
-## 6) SSRF / පිටතට යන URL ආරක්ෂකය
+## 6) SSRF / පිටතට යන URL ආරක්ෂණය
 
-- `src/shared/network/outboundUrlGuard.ts` මඟින් සියලු private/loopback/link-local ඉලක්ක URL, provider executors වෙත ළඟා වීමට පෙර අවහිර කරයි
-- Provider model සොයාගැනීමේ සහ තහවුරු කිරීමේ routes සෑම පිටතට යන ඉල්ලීමකටම පෙර ආරක්ෂකය යොදන `src/shared/network/safeOutboundFetch.ts` භාවිත කරයි
-- ආරක්ෂක දෝෂ HTTP 422 සමඟ `URL_GUARD_BLOCKED` ලෙස පෙන්වන අතර `providerAudit.ts` හරහා අනුකූලතා විගණන සටහනට ලොග් කරනු ලැබේ
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) විසින් `BaseExecutor.execute()` හරහා යවනු ලබන chat ඉල්ලීම් සඳහා `src/shared/network/outboundUrlGuard.ts` යොදයි. public-only ප්රකාරයේදී (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` සහ private ධජය අක්රියව ඇති විට), එය private සහ loopback hosts මෙන්ම 169.254.0.0/16 ද අවහිර කරයි; අනෙකුත් සෑම ප්රකාරයකදීම එය cloud-metadata hosts අවහිර කරයි. කිසියම් DNS සෙවීමකට පෙර, ලියා ඇති ආකාරයටම hostname හෝ IP literal එක එය පරීක්ෂා කරයි. අන්තර්ගත local providers මෙය මඟ හරියි.
+- Provider model සොයාගැනීමේ සහ වලංගුකරණ routes විසින් සෑම පිටතට යන ඉල්ලීමකටම පෙර ආරක්ෂණය යොදන `src/shared/network/safeOutboundFetch.ts` භාවිත කරයි
+- ආරක්ෂණ දෝෂ HTTP 503 සමඟ `URL_GUARD_BLOCKED` ලෙස මතු වේ (`getSafeOutboundFetchErrorStatus`; model-discovery route එක 400 ආපසු ලබා දෙයි), එමෙන්ම වලංගුකරණය අතරතුර සිදුවන සැබෑ SSRF අවහිර කිරීම් `provider.validation.ssrf_blocked` events ලෙස audit trail එකට සටහන් කෙරේ
 
 ## නිරීක්ෂණ හැකියාව සහ මෙහෙයුම් සංඥා
 
@@ -1142,7 +1142,7 @@ flowchart LR
 4. Cloud හැසිරීම නිවැරදි `NEXT_PUBLIC_BASE_URL` සහ cloud අන්ත ලක්ෂ්ය වෙත ළඟා වීමේ හැකියාව මත රඳා පවතී.
 5. `open-sse/` නාමාවලිය `@omniroute/open-sse` **npm workspace පැකේජය** ලෙස ප්රකාශයට පත් කෙරේ. මූලාශ්ර කේතය එය `@omniroute/open-sse/...` හරහා ආයාත කරයි (Next.js `transpilePackages` මඟින් විසඳනු ලැබේ). අනුකූලතාව සඳහා මෙම ලේඛනයේ ගොනු මාර්ග තවමත් `open-sse/` නාමාවලි නාමය භාවිත කරයි.
 6. උපකරණ පුවරුවේ ප්රස්ථාර, ප්රවේශ විය හැකි අන්තර්ක්රියාකාරී විශ්ලේෂණ දෘශ්යකරණ සඳහා (මාදිලි භාවිත තීරු ප්රස්ථාර, සාර්ථකත්ව අනුපාත සහිත සැපයුම්කරු විස්තරාත්මක වගු) **Recharts** (SVG-පාදක) භාවිත කරයි.
-7. E2E පරීක්ෂණ **Playwright** (`tests/e2e/`) භාවිත කරන අතර `npm run test:e2e` හරහා ධාවනය කෙරේ. ඒකක පරීක්ෂණ **Node.js test runner** (`tests/unit/`) භාවිත කරන අතර `npm run test:unit` හරහා ධාවනය කෙරේ. `src/` යටතේ ඇති මූලාශ්ර කේතය **TypeScript** (`.ts`/`.tsx`) වේ; `open-sse/` workspace එක JavaScript (`.js`) ලෙසම පවතී.
+7. E2E පරීක්ෂණ **Playwright** (`tests/e2e/`) භාවිත කරන අතර `npm run test:e2e` හරහා ධාවනය කෙරේ. ඒකක පරීක්ෂණ **Node.js test runner** (`tests/unit/`) භාවිත කරන අතර `npm run test:unit` හරහා ධාවනය කෙරේ. `src/` යටතේ ඇති මූලාශ්ර කේතය **TypeScript** (`.ts`/`.tsx`) වේ; `open-sse/` workspace එක TypeScript (`.ts`) ලෙසම පවතී.
 8. සැකසුම් පිටුව පටිති 7කට සංවිධානය කර ඇත: සාමාන්ය, පෙනුම, AI, ආරක්ෂාව, මාර්ගගත කිරීම, ප්රතිරෝධීතාව සහ උසස්. ප්රතිරෝධීතා පිටුව ඉල්ලීම් පෝලිම, සම්බන්ධතා cooldown, සැපයුම්කරු breaker සහ cooldown අවසන් වන තෙක් රැඳී සිටීමේ හැසිරීම පමණක් වින්යාස කරයි; සජීවී breaker ධාවනකාල තත්ත්වය සෞඛ්ය පිටුවෙහි පෙන්වයි.
 9. **Context Relay** උපායමාර්ගය (`context-relay`) ස්තර දෙකකට බෙදා ඇත: handoff එකක් ජනනය කළ යුතුද යන්න `combo.ts` තීරණය කරන අතර, ගිණුම විසඳීමෙන් පසු `chat.ts` විසින් handoff එක ඇතුළත් කරයි. Handoff දත්ත `context_handoffs` SQLite වගුවෙහි පවතී. මෙම බෙදීම චේතාන්විතය, මන්ද සැබෑ ගිණුම වෙනස් වූයේදැයි දන්නේ `chat.ts` පමණක් බැවිනි.
 10. **Proxy බලාත්මක කිරීම** දැන් පරිපූර්ණය: `tokenHealthCheck.ts` සෑම සම්බන්ධතාවක් සඳහාම proxy විසඳයි, `/api/providers/validate` විසින් `runWithProxyContext` භාවිත කරයි, සහ Node 22 මත dispatcher අනුකූලතාව පවත්වා ගැනීමට `proxyFetch.ts` විසින් `undici.fetch()` භාවිත කරයි.

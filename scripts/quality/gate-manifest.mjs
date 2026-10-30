@@ -3,7 +3,8 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const VALIDATION_ALIAS = /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:)/;
+const VALIDATION_ALIAS =
+  /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:|audit:|i18n:check)/;
 const DISPOSITIONS = new Set(["separately-invoked", "maintenance"]);
 
 // Inventory membership does not imply execution, requiredness or acceptance.

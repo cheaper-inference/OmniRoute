@@ -210,7 +210,7 @@ it-token tal-API REST ta’ Obsidian. GHSA-62vw ħeba biss l-iżvelar tal-passwo
 kien għadu fil-livell fail-open (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` barra minn hekk
 jirrifjuta vault li jkun id-direttorju tad-data, jinsab fih, jew ikun fih id-direttorju tad-data.
 
-#### L-esportazzjonijiet tal-kredenzjali huma għall-operaturi biss
+#### L-esportazzjonijiet tal-kredenzjali u r-restawr huma għall-operaturi biss
 
 Il-livell ta’ hawn fuq jiddeċiedi biss jekk hijiex meħtieġa _xi_ kredenzjali. Ir-rotot li jniżżlu
 l-kredenzjali maħżuna jżidu verifika oħra fil-handler: `GET /api/settings/export-json` (konnessjonijiet
@@ -221,22 +221,9 @@ istanza bil-login diżattivat, u twieġeb b’`403` għal ċwievet API ta’ kwa
 u `admin`) u għal tokens ta’ aċċess `oma_`. Il-ħruġ ta’ tokens tas-sinkronizzazzjoni (`POST /api/sync/tokens`) juża
 l-istess helper, flimkien mat-token fdat tas-servizz intern fuq il-loopback.
 
-#### Credential exports and restores are operator-only
+L-operazzjonijiet distruttivi korrispondenti għandhom l-istess limitu: `POST /api/db-backups/import` (fajl `.sqlite` imtella’, inkluż `dryRun=true`), `POST /api/db-backups` (restawr ta’ backup maħżun skont l-id tiegħu) u `POST /api/settings/import-json` (restawr tal-format JSON antik) jissostitwixxu d-database attiva jew is-sett kollu tas-settings, il-konnessjonijiet u ċ-ċwievet API. Għalhekk kredenzjal ta’ magna lanqas ma jista’ jibdiehom.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+It-tħassir tal-punti ta’ restawr għandu l-istess limitu: `DELETE /api/db-backups` (tindif — żomm l-aħħar N jew ħassar dawk eqdem minn D ijiem) u `PATCH /api/db-backups` (settings taż-żamma). Ir-regoli salvati huma eżattament dawk li `cleanupDbBackups()` japplika wara kull backup awtomatiku (`src/lib/db/backup.ts`); kredenzjal ta’ magna li jista’ jsalva `keepLatest: 1` għalhekk jista’ jħassar il-punti ta’ restawr preċedenti fl-isnapshot li jmiss. L-elenkar u l-ħolqien ta’ backups (`GET`/`PUT /api/db-backups`) jibqgħu jużaw l-awtentikazzjoni normali tal-ġestjoni.
 
 ### Il-bootstrap ta’ installazzjoni ġdida huwa limitat għal-loopback — skont il-peer reali, mhux `Host`
 

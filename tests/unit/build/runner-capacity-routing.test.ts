@@ -20,7 +20,7 @@ interface Job {
   "runs-on"?: string;
   "timeout-minutes"?: number;
   env?: Record<string, unknown>;
-  steps?: Array<{ env?: Record<string, unknown> }>;
+  steps?: Array<{ env?: Record<string, unknown>; run?: string }>;
 }
 interface Workflow {
   concurrency?: { group?: string; "cancel-in-progress"?: unknown };
@@ -74,3 +74,61 @@ test("the VPS deploy job cannot hang for the 6-hour default", () => {
   const minutes = deploy["timeout-minutes"] ?? 0;
   assert.ok(minutes > 0 && minutes <= 120, `timeout-minutes is ${minutes}`);
 });
+
+// Role labels describe a workload; the capacity label certifies that the runner
+// has the measured 60 GiB build budget. This inspects declared labels only, not
+// GitHub's scheduler or event-expression evaluation (covered by heavy-build-queue).
+const buildJobs = fs
+  .readdirSync(workflowDir)
+  .filter((file) => /\.ya?ml$/.test(file))
+  .flatMap((file) =>
+    Object.entries(read(file).jobs ?? {})
+      .filter(([, job]) => String(job["runs-on"] ?? "").includes("omni-build"))
+      .map(([name, job]) => ({ file, name, job }))
+  );
+
+test("the build-capacity contract covers a nonempty runner pool", () => {
+  assert.ok(buildJobs.length > 0, "find the actual build selectors before checking their labels");
+});
+
+for (const { file, name, job } of buildJobs) {
+  test(`${file}:${name} requires the build role and its 60 GiB capability`, () => {
+    const selection = String(job["runs-on"] ?? "");
+    const expression = selection.match(/fromJSON\('([^']+)'\)/);
+    assert.ok(expression, "the self-hosted branch declares its runner-label array");
+    const labels: string[] = JSON.parse(expression[1]);
+    assert.deepEqual(labels, ["self-hosted", "omni-build", "omni-build-60gb"]);
+
+    const pool = [
+      { name: "omniroute-113-7", labels: ["self-hosted", "omni-build"] },
+      { name: "omniroute-113-5", labels: ["self-hosted", "omni-build", "omni-build-60gb"] },
+      { name: "capability-without-role", labels: ["self-hosted", "omni-build-60gb"] },
+    ];
+    const matchingLabels = pool.filter((runner) =>
+      labels.every((label) => runner.labels.includes(label))
+    );
+    assert.deepEqual(
+      matchingLabels.map((runner) => runner.name),
+      ["omniroute-113-5"]
+    );
+  });
+}
+
+for (const name of ["runner-preflight", "runner-alert"]) {
+  test(`Docker ${name} checks online runners with both build labels`, () => {
+    const job = read("docker-publish.yml").jobs?.[name];
+    assert.ok(job, `docker-publish.yml defines ${name}`);
+    const step = job.steps?.find((item) => item.run?.includes("actions/runners"));
+    assert.ok(step?.run, "use the real workflow API query");
+    const query = step.run.match(/--jq '([^']+)'/);
+    assert.ok(query, "the availability query is explicit");
+    assert.equal(
+      query[1],
+      [
+        '[.runners[] | select(.status == "online")',
+        'select(any(.labels[]; .name == "omni-build"))',
+        'select(any(.labels[]; .name == "omni-build-60gb"))] | length',
+      ].join(" | ")
+    );
+  });
+}

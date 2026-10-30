@@ -6607,7 +6607,7 @@
       "xai": "xAI (Grok)ን በAPI ቁልፍ ያገናኙ።",
       "xiaomi-mimo": "Xiaomi MiMoን በAPI ቁልፍ ያገናኙ።",
       "yi": "የAPI ቁልፍን ከ platform.lingyiwanwu.com ያግኙ",
-      "zai": "የAPI ቁልፍ ከ https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "የAPI ቁልፍ ከ https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux በ /api/v1/chat/completions ላይ OpenAI-ተኳሃኝ የውይይት ማጠናቀቂያ መገናኛ ነጥብን፣ እንዲሁም Anthropic Messages (/api/anthropic/v1/messages) እና Google Gemini (/api/vertex-ai) የፕሮቶኮል በይነገጾችን ያቀርባል። OmniRoute የOpenAI ፕሮቶኮልን ይጠቀማል።",
       "galadriel": "Galadrielን በAPI ቁልፍ ያገናኙ።",
       "predibase": "$25 የነጻ ሙከራ ክሬዲት (ለ30 ቀናት የሚሰራ)",

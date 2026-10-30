@@ -11,13 +11,13 @@ OmniRoute રનર પાસે **એક ભૂમિકા**, એક લેબ
 webpack બિલ્ડ અને lint જોબ એકસાથે ચાલે; હોસ્ટ swap (16 GB) તેને સંભાળી લે છે અને pull-request Builds
 હોસ્ટેડ પર ચાલતા હોવાથી, Turbopack સ્લોટ મોટાભાગે નિષ્ક્રિય રહે છે:
 
-| રનર                  | લેબલ           | ભૂમિકા                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack બિલ્ડ્સ: `ci.yml` `Build` (માત્ર push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, રાત્રિકાલીન a11y બિલ્ડ | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack બિલ્ડ                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`   | રાત્રિકાલીન જોબ્સ (Schemathesis, promptfoo, garak, k6) અને `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`   | ઉપર દર્શાવેલો જ પૂલ                                                                                                                                    | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (તેમની repos)  | માત્ર Dependabot (દરેકનું મહત્તમ 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | દરેક માટે 200 % |
+| રનર                  | લેબલ                            | ભૂમિકા                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack બિલ્ડ્સ: `ci.yml` `Build` (માત્ર push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, રાત્રિકાલીન a11y બિલ્ડ | 56 GB / 60 GB (swap 0)     | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack બિલ્ડ                                                                                          | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | રાત્રિકાલીન જોબ્સ (Schemathesis, promptfoo, garak, k6) અને `quality.yml` `lint-guard`                                                                  | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
+| `omniroute-113`      | `omni-light`                    | ઉપર દર્શાવેલો જ પૂલ                                                                                                                                    | 8 GB / 12 GB               | 400 %           |
+| OmniHeuris, OmniMind | (તેમની repos)                   | માત્ર Dependabot (દરેકનું મહત્તમ 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | દરેક માટે 200 % |
 
 2026-10-18ના રોજ માપેલું:
 
@@ -58,7 +58,7 @@ Runnerનું ડિફૉલ્ટ `KillMode=process`, unitને બંધ �
 ## સંચાલનના નિયમો
 
 - **એક સમયે માત્ર એક Turbopack બિલ્ડ — લેબલ દ્વારા લાગુ કરાયેલ.** સંપૂર્ણ Turbopack
-  `next build` ચલાવતી દરેક job `[self-hosted, omni-build]`ને લક્ષ્ય બનાવે છે, અને માત્ર **`omniroute-113-5`**
+  `next build` ચલાવતી દરેક job `[self-hosted, omni-build, omni-build-60gb]`ને લક્ષ્ય બનાવે છે, અને માત્ર **`omniroute-113-5`**
   પાસે જ એ લેબલ છે: `ci.yml`નું `Build`, `npm-publish.yml`નું `publish`, `nightly-v4-build`,
   `preview-artifact`, રાત્રિનું a11y બિલ્ડ (#16853) અને `docker-publish.yml`નું **amd64** (BuildKitની અંદર webpack —
   ત્યાં Turbopack પૅનિક થયું હતું, run 33253576569). arm64 Docker લેગ `ubuntu-24.04-arm` પર જ રહે છે.

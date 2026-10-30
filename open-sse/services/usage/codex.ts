@@ -10,6 +10,7 @@
 
 import { buildCodexUsageQuotas } from "../codexUsageQuotas.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
+import { throttleQuotaFetch } from "../quotaFetchThrottle.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
 
@@ -56,20 +57,27 @@ export async function getCodexUsage(
       headers["chatgpt-account-id"] = accountId;
     }
 
-    const response = connectionId
-      ? await fetchWithConnectionProxy(
-          connectionId,
-          CODEX_CONFIG.usageUrl,
-          {
-            method: "GET",
-            headers,
-          },
-          { fetchFn: codexUsageFetch }
-        )
-      : await codexUsageFetch(CODEX_CONFIG.usageUrl, {
+    let response: Response | null;
+    if (connectionId) {
+      // Keep the gate immediately adjacent to the network boundary, after proxy
+      // resolution. The helper also invalidates a gated task when proxy
+      // fast-fail settles first, so a reported failure cannot dispatch later.
+      response = await fetchWithConnectionProxy(
+        connectionId,
+        CODEX_CONFIG.usageUrl,
+        {
           method: "GET",
           headers,
-        });
+        },
+        { fetchFn: codexUsageFetch, beforeFetch: throttleQuotaFetch }
+      );
+    } else {
+      await throttleQuotaFetch();
+      response = await codexUsageFetch(CODEX_CONFIG.usageUrl, {
+        method: "GET",
+        headers,
+      });
+    }
     if (!response) {
       throw new Error("Codex API error: proxied request failed");
     }

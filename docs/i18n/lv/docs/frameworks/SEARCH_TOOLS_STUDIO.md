@@ -54,7 +54,7 @@ Jauna cilne satura izgūšanai no URL, izmantojot `POST /v1/web/fetch` (izveidot
 - Ievade: URL + pilnas lapas pārslēgs + formāta atlasītājs (markdown / teksts / HTML).
 - Iesniegšana → izgūšana → `ScrapeResult.tsx` atveidošana.
 - `ScrapeResult` atveido markdown priekšskatījumu un neapstrādātā satura pārslēgu.
-- Ierobežojums: ja atbildes pamatteksts pārsniedz **256 KB**, lietotāja saskarnē tiek parādīts `(saīsināts, skatīt neapstrādāto saturu)`, un neapstrādātais saturs tiek atvērts Monaco modālajā logā (D21).
+- Ierobežojums: ja atbildes pamatteksts pārsniedz **256 KB**, lietotāja saskarnē tiek parādīts `View full raw content`, un neapstrādātais saturs tiek atvērts modālajā logā (D21).
 - Metadatu panelis: pakalpojumu sniedzējs (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentums, izmaksas, atbildes lielums, saišu skaits.
 - Izmanto `useScrapeFetch.ts` āķi.
 

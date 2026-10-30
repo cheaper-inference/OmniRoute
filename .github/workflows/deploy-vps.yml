@@ -12,7 +12,13 @@ permissions:
 jobs:
   deploy:
     if: >-
-      (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
+      (github.event_name == 'workflow_dispatch' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_repository.id == github.event.repository.id &&
+        contains(fromJSON('["push","release","workflow_dispatch"]'), github.event.workflow_run.event) &&
+        (github.event.workflow_run.head_branch == 'main' ||
+         startsWith(github.event.workflow_run.head_branch, 'release/v') ||
+         startsWith(github.event.workflow_run.head_branch, 'v'))))
       && vars.DEPLOY_ENABLED == 'true'
     name: Deploy OmniRoute to VPS
     runs-on: ubuntu-latest
@@ -34,6 +40,8 @@ jobs:
           # unable to reach it. An enabled deployment that cannot start is a failed
           # deployment, not success. Keep DEPLOY_ENABLED=false when this runner has
           # no authorized route; do not convert a requested deployment into green.
+          # Expand the environment inside the timeout child (#17219).
+          # shellcheck disable=SC2016
           if timeout 15 bash -c 'exec 3<>"/dev/tcp/${VPS_HOST}/22"' 2>/dev/null; then
             echo "reachable=true" >> "$GITHUB_OUTPUT"
             echo "✅ VPS_HOST:22 reachable from the runner — proceeding with deploy."
@@ -45,7 +53,7 @@ jobs:
 
       - name: Deploy via SSH
         if: steps.reach.outputs.reachable == 'true'
-        uses: appleboy/ssh-action@v1
+        uses: appleboy/ssh-action@0ff4204d59e8e51228ff73bce53f80d53301dee2 # v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}

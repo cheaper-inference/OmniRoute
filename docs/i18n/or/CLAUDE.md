@@ -11,16 +11,18 @@
 PII ଶିକ୍ଷା)। ଏହାକୁ ସମ୍ପୂର୍ଣ୍ଣ ପଢ଼ନ୍ତୁ; ପ୍ରକଳ୍ପ ନିୟମଗୁଡ଼ିକୁ ଏଠାରେ ପୁନଃ ଯୋଗ କରନ୍ତୁ ନାହିଁ। ନିମ୍ନରେ ଥିବା ସବୁକିଛି କେବଳ
 Claude Code ପାଇଁ ପ୍ରଯୁଜ୍ୟ — `AGENTS.md`-ରେ ପୂର୍ବରୁ ପରିଭାଷିତ ନିୟମଗୁଡ଼ିକର ପରିଚାଳନାଗତ ସୁଧାର।
 
-## Worktree ପୃଥକୀକରଣ — Claude Code-ନିର୍ଦ୍ଦିଷ୍ଟ ବିବରଣୀ
+## Worktree ବିଚ୍ଛିନ୍ନତା — Claude Code ସମ୍ବନ୍ଧୀୟ ବିଶେଷ ବିଷୟଗୁଡ଼ିକ
 
-ସମ୍ପୂର୍ଣ୍ଣ ବାଧ୍ୟତାମୂଳକ worktree ପ୍ରୋଟୋକଲ୍ (ମୂଳ branch ନିଶ୍ଚିତକରଣ, `.claude/worktrees/` ପ୍ରାମାଣିକ
-ପଥ, `cp -al` node_modules, ବିଲୋପ ନିୟମ) `AGENTS.md` → Git Workflow → "Worktree
-isolation"-ରେ ରହିଛି। Claude-Code-ନିର୍ଦ୍ଦିଷ୍ଟ ବିଷୟଗୁଡ଼ିକ:
+ସମ୍ପୂର୍ଣ୍ଣ ବାଧ୍ୟତାମୂଳକ worktree ପ୍ରୋଟୋକଲ (base-branch ନିଶ୍ଚିତକରଣ, `.claude/worktrees/` ମାନକ ପଥ,
+`cp -al` node_modules, teardown ନିୟମଗୁଡ଼ିକ)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) ରେ ଅଛି (`AGENTS.md` →
+Git Workflow → "Worktree isolation" ରେ ସାରାଂଶିତ)। Claude-Code-ସମ୍ବନ୍ଧୀୟ ବିଷୟଗୁଡ଼ିକ:
 
-- ଅପରେଟର୍ ପୂର୍ବରୁ ଜଣାଇ ନଥିଲେ, `AskUserQuestion` ମାଧ୍ୟମରେ ତାଙ୍କ ସହିତ ମୂଳ branch ନିଶ୍ଚିତ କରନ୍ତୁ (କଠୋର ନିୟମ #19)।
-- ମୂଳ `EnterWorktree` ଟୁଲ୍କୁ ପ୍ରାଥମିକତା ଦିଅନ୍ତୁ — ଏହା ପୂର୍ବରୁ
-  `.claude/worktrees/` (ପ୍ରାମାଣିକ ପଥ) ଅଧୀନରେ worktree ସୃଷ୍ଟି କରେ। ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା `git
-worktree add` କମାଣ୍ଡ୍ରେ worktree ସୃଷ୍ଟି କରନ୍ତୁ, ତା’ପରେ ଏହାର `path` ସହିତ `EnterWorktree` କଲ୍ କରନ୍ତୁ।
+- ଯଦି ଅପରେଟର ଆପଣଙ୍କୁ ପୂର୍ବରୁ କହି ନାହାଁନ୍ତି, ତେବେ `AskUserQuestion` ମାଧ୍ୟମରେ ସେମାନଙ୍କ ସହିତ base
+  branch ନିଶ୍ଚିତ କରନ୍ତୁ (କଠୋର ନିୟମ #19)।
+- ନେଟିଭ୍ `EnterWorktree` ଟୁଲ୍ କୁ ଅଗ୍ରାଧିକାର ଦିଅନ୍ତୁ — ଏହା ପୂର୍ବରୁ `.claude/worktrees/`
+  (ମାନକ ପଥ) ଅଧୀନରେ worktrees ସୃଷ୍ଟି କରିଥାଏ। ଡକ୍ୟୁମେଣ୍ଟ କରାଯାଇଥିବା `git
+worktree add` କମାଣ୍ଡ ସହିତ worktree ସୃଷ୍ଟି କରନ୍ତୁ, ତାପରେ ଏହାର `path` ସହିତ `EnterWorktree` କୁ କଲ୍ କରନ୍ତୁ।
 
 ## କ୍ରସ୍-ସେସନ୍ ସୁରକ୍ଷା — Claude Code-ନିର୍ଦ୍ଦିଷ୍ଟ ବିବରଣୀ
 
@@ -70,4 +72,4 @@ skill-ଗୁଡ଼ିକ ସହିତ ଆସୁଥିବା ଡିଫଲ୍ଟ�
 କୌଣସି branch କାଟିବା କିମ୍ବା PR ଖୋଲିବା ପୂର୍ବରୁ, base-green ଯାଞ୍ଚ ଚଲାନ୍ତୁ (`AGENTS.md` → Git Workflow →
 "Base-green check"; ପ୍ରକଳ୍ପ skill-ଗୁଡ଼ିକ ଏହାକୁ `.agents/skills/_shared/base-green.md` ଭାବେ ସନ୍ଦର୍ଭ କରନ୍ତି)। base tip red ଥିବାବେଳେ
 ଖୋଲାଯାଇଥିବା PR-ର body-ରେ `⚠️ base-red inherited: #<issue>` ରହିବା ଆବଶ୍ୟକ। ସଞ୍ଚିତ red ଅବସ୍ଥା (base tip + red PR-ଗୁଡ଼ିକ) ନିଷ୍କାସନ କରିବାକୁ,
-/sweep-reds skill ବ୍ୟବହାର କରନ୍ତୁ।
+`/sweep-reds` skill ବ୍ୟବହାର କରନ୍ତୁ।

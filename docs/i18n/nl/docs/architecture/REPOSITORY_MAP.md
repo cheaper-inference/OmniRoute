@@ -106,7 +106,7 @@ OmniRoute/
 
 > **In v3.8.26 uit de hoofdmap verplaatst (opruiming):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` en het gegenereerde `quality-metrics.json` (genegeerd door git). Zie [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` en het gegenereerde `quality-metrics.json` (genegeerd door git). Zie [`## config/`](#config--statische-configuraties--status-van-kwaliteitscontroles).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Submap                | Doel                                                                                                                                                                                                                                  |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (41 locales)                                                                                                                                                                                   |
+| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (66 locales)                                                                                                                                                                                   |
 | `docs/screenshots/`   | Afbeeldingsbestanden voor handleidingen                                                                                                                                                                                               |
 | `_tasks/superpowers/` | Plannen/specificaties van superpowers (`writing-plans`/`brainstorming`) + onderzoek — geïsoleerde repository met afzonderlijk versiebeheer, genegeerd door Git in de hoofdstructuur. Zie CLAUDE.md → "Planning & Research Artifacts". |
 

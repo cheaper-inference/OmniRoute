@@ -18,35 +18,24 @@ OmniRoute는 npm + Docker 아티팩트를 게시합니다. 이러한 게이트�
 
 이미지 CVE 래칫은 `docker-publish.yml`에서 **두 단계**를 사용합니다. SARIF 단계(`HIGH,CRITICAL`, `exit-code: 0`)는 HIGH+CRITICAL을 차단 없이 보안 탭에 표시합니다. _CRITICAL 게이트_ 단계(`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`)는 **수정 가능한** CRITICAL CVE에 대해 릴리스를 실패시킵니다. `ignore-unfixed`는 업스트림 패치가 없는 기본 이미지 CVE로 인해 릴리스가 차단되는 것을 방지합니다.
 
-## ⚠️ CVE 변동성 (osv/Trivy 게이트 차단)
+## ⚠️ CVE 변동성(차단형 osv/Trivy 게이트)
 
-osv와 Trivy는 **지속적으로 증가하는** CVE 데이터베이스와 종속성을 비교합니다. **어떤 종속성도 건드리지 않은** PR이 기존 종속성에서 새로운 CVE가 공개되어 갑자기 빨간색으로 변할 수 있습니다 (osv: 측정된 `vulnCount` > 기준선; Trivy: 이미지에 새로운 수정 가능한 CRITICAL). **이는 차단 CVE 게이트의 예상되는 운영 동작이며, 제품 회귀가 아닙니다.**
+osv와 Trivy는 **지속적으로 증가하는** CVE 데이터베이스를 기준으로 의존성을 비교합니다. **의존성을 전혀 변경하지 않은** PR도 기존 의존성에서 새로운 CVE가 공개되면 갑자기 실패 상태가 될 수 있습니다(osv: 측정된 `vulnCount` > 기준선, Trivy: 이미지에서 수정 가능한 새로운 CRITICAL 발견). **이는 차단형 CVE 게이트에서 예상되는 운영 동작이며, 제품 회귀가 아닙니다.**
 
-새로 공개된 CVE로 인해 osv 또는 Trivy가 빨간색으로 변할 경우, 해결책은 다음과 같습니다.
+새로 공개된 CVE로 인해 osv 또는 Trivy가 실패하면 다음과 같이 조치합니다.
 
-1.  **영향받는 종속성 업데이트** (권장) — `package.json` `overrides` (전이 종속성)를 통해 패치된 버전으로 업그레이드하거나, 패치된 기반으로 이미지를 재구축합니다.
-2.  **업스트림 수정 사항이 없는 경우:**
-    - **osv:** `config/quality/quality-baseline.json`에서 `metrics.vulnCount`를 재기준선화합니다 (`npm run quality:ratchet -- --update`는 전용 게이트를 다루지 않으므로, 값을 수동으로 편집하고 `direction:down`으로 설정) (정당화 메모 + 추적 이슈 포함).
-    - **Trivy:** `.trivyignore`에 항목을 추가합니다 (줄당 CVE-ID) (정당화 주석 + 추적 이슈 포함). `ignore-unfixed: true`는 패치 없는 CVE를 자동으로 처리합니다.
+1. **영향받는 의존성 버전 상향**(권장) — `package.json`의 `overrides`(전이 의존성)를 통해 패치된 버전으로 업그레이드하거나, 패치된 베이스를 사용해 이미지를 다시 빌드합니다.
+2. **업스트림 수정 사항이 없는 경우:**
+   - **osv:** 정당한 사유를 설명하는 메모와 추적 이슈를 추가하고 `config/quality/quality-baseline.json`의 `metrics.vulnCount` 기준선을 다시 설정합니다(`npm run quality:ratchet -- --update`는 전용 게이트를 처리하지 않으므로 `direction:down`으로 값을 직접 편집).
+   - **Trivy:** 정당한 사유를 설명하는 주석과 추적 이슈를 포함하여 `.trivyignore`에 항목을 추가합니다(줄마다 CVE-ID 하나). `ignore-unfixed: true`는 패치가 없는 CVE를 이미 자동으로 처리합니다.
 
-두 게이트 모두 도구가 없거나 측정에 실패할 경우 (PATH에 osv-scanner 없음, osv.dev/네트워크 연결 불가, 유효하지 않은 JSON) **정상적으로 건너뜠니다** (exit 0). — **측정** 실패는 절대 차단하지 않으며, **측정된** 회귀만 차단합니다.
+필수 OSV 실행(`check:vuln-ratchet -- --ratchet`)에서는 스캐너, 보고서 또는 기준선을 검증할 수 없는 경우 `INCOMPLETE`와 종료 코드 2로 폐쇄형 실패가 발생합니다. 측정된 회귀의 종료 코드는 1입니다. 권고 실행은 여전히 종료 코드 0과 함께 `SKIP`을 보고할 수 있지만, 이는 의존성이 스캔을 통과했음을 입증하지 않습니다. 차단형 Trivy 단계에서도 성공적인 측정이 필요합니다. 사용할 수 없는 도구, 실패한 작업, 이미지 증거 누락으로는 이미지가 안전하다고 인증할 수 없습니다.
 
-## 알려진 허용된 위험
+## 폐기된 종속성 위험
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+고정된 promptfoo 개발 도구를 업그레이드한 후 루트 잠금 파일에는 더 이상 `extract-zip` 또는 이를 가리키는 종속성 연결이 포함되지 않습니다. 이로써 #14482에서 추적된, 이전에 허용되었던 `promptfoo` → `@openai/codex-security` → `extract-zip` 체인이 폐기되었습니다. `tests/unit/extract-zip-14482-exposure.test.ts`의 회귀 검사는 이 체인의 재도입을 거부하며 프로덕션 코드에서의 가져오기 금지를 계속 유지합니다.
 
-`extract-zip@2.0.1`에는 패치되지 않은 두 가지 심각도 높은 심볼릭 링크 트래버설 권고 사항이 있습니다.
-위의 CVE Variance 해결책 중 "업스트림 수정 없음" 분기에 따라, 이는
-**허용된 위험**이며, 버전 업그레이드가 아닙니다:
-
-- **체인:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json`을 통해 확인되었습니다 — 전체 의존성 트리에서 정확히 하나의 패키지(`@openai/codex-security`)가 `extract-zip`을 선언하고, 정확히 하나의 패키지(`promptfoo`)가 `@openai/codex-security`를 선언합니다.
-- **체인 내 어디에도 수정된 릴리스가 존재하지 않습니다.** `extract-zip@2.0.1` (2020년 발행)은 해당 패키지의 최종 릴리스이며, 더 이상 유지보수되지 않습니다. `@openai/codex-security`의 현재 npm-latest (`0.1.29`)는 여전히 `extract-zip@2.0.1`을 사용합니다.
-- **프로덕션에서 접근 불가능.** `promptfoo`는 devDependency 전용이며 (`dependencies`에 절대 나열되지 않음), `src/`, `open-sse/`, `bin/` 아래의 어떤 파일도 `extract-zip` npm 패키지를 임포트하지 않습니다 — OmniRoute 자체의 `extractZip()` 헬퍼 (`src/lib/versionManager/binaryManager.ts:93`)는 네이티브 `unzip`/`tar`를 호출하며 관련이 없습니다. `@openai/codex-security` 또한 extract-zip의 `onEntry` 콜백 위에 자체 심볼릭 링크 트래버설 가드를 제공합니다.
-- `package.json` `overrides`를 통해 `extract-zip`을 별칭으로 지정**하지 마십시오** — 유일하게 실행 가능한 드롭인 대체품은 Electron-org-internal이며 `@openai/codex-security` 자체의 `onEntry`/`defaultDirMode`/`defaultFileMode` 검사와 API 호환되지 않습니다. 이를 오버라이드하면 해당 패키지의 보안 검사가 조용히 중단될 것입니다.
-- **기준선:** 측정된 osv `vulnCount` (3)는 이미 고정된 `config/quality/quality-baseline.json` 기준선 (27)보다 훨씬 낮습니다 — 래칫 변경이 필요하지 않습니다.
-- **회귀 방지:** `tests/unit/extract-zip-14482-exposure.test.ts`는 위에서 언급한 체인과 프로덕션 임포트 불가 불변성을 단언합니다. 만약 둘 중 하나라도 깨지면 (예: 향후 PR이 `extract-zip`을 프로덕션에서 접근 가능하게 만들면) CI가 실패합니다.
-- **추적:** 이슈 #14482.
+현재 종속성 수정에서는 호환성 재정의 범위도 Azure identity의 MSAL 클라이언트, get-uri의 FTP 클라이언트 및 OpenCode v1 SDK의 Zod 종속성으로 한정합니다. Azure 토큰 획득과 FTP 검색은 제어된 전송 계층으로 테스트되며, 두 OpenCode 패키지는 각각 자체 빌드 및 테스트 스위트를 실행합니다. 레지스트리 보안 권고 수는 특정 시점의 측정값이며 잠금 파일이 커밋된 후 변경될 수 있습니다.
 
 ## 백로그: Scorecard 권고 → 차단
 

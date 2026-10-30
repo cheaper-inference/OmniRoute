@@ -1,15 +1,8 @@
-# Claude Code CLI — Configuration with OmniRoute (Polski)
+# Claude Code CLI — konfiguracja z OmniRoute (Polski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇭 [th](../../../th/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
 
 ---
-
-title: "Claude Code CLI — konfiguracja z OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-07-24
----
-
-# Claude Code CLI — konfiguracja z OmniRoute
 
 Skieruj CLI **Claude Code** (`claude`) na OmniRoute — lokalnie lub na zdalny VPS —
 z profilami per model, na wzór konfiguracji Codex.
@@ -55,15 +48,11 @@ po prostu działa), sprawdza zdrowie serwera i execuje `claude`.
 
 ---
 
-## Aliasy discovery — pokaż modele spoza Claude w pickerze `/model`
+## Aliasy wykrywania — pokazywanie modeli innych niż Claude w selektorze `/model`
 
-Discovery modeli bramki w Claude Code listuje tylko identyfikatory zaczynające się od `claude`
-lub `anthropic`, więc przy `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` natywny
-picker `/model` zwykle pokazuje **tylko** modele Claude/Anthropic z OmniRoute — `kimi/kimi-k2.6`
-lub `glm/glm-5.2` się nie pojawią, mimo że routują poprawnie.
+Wykrywanie modeli bramy w Claude Code wyświetla tylko identyfikatory zaczynające się od `claude` lub `anthropic`, więc przy ustawieniu `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` natywny selektor `/model` pokazuje zazwyczaj **tylko** modele Claude/Anthropic z OmniRoute — `kimi/kimi-k2.6` czy `glm/glm-5.2` nigdy się w nim nie pojawią, mimo że routing do nich działa bez problemu.
 
-OmniRoute może odzwierciedlić dowolny włączony model (i combo) pod identyfikatorem `claude/…`,
-aby przeszedł ten filtr i pojawił się w pickerze:
+OmniRoute może odwzorować dowolny włączony model (oraz combo) pod identyfikatorem `claude/…`, dzięki czemu przechodzi on przez ten filtr i pojawia się w selektorze:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -71,32 +60,21 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Gdy wybierzesz jeden z nich w Claude Code, OmniRoute zdejmuje opakowanie `claude/`
-z powrotem do prawdziwego id przed routingiem — autentyczny id `claude/<real-claude-model>`
-(właściwy provider Claude OAuth) zawsze pozostaje nietknięty.
+Gdy wybierzesz jeden z nich w Claude Code, OmniRoute zdejmuje otoczkę `claude/`, przywracając przed routingiem właściwy identyfikator — autentyczny identyfikator `claude/<real-claude-model>` (rzeczywisty dostawca Claude OAuth) zawsze pozostaje nietknięty.
 
-**Domyślnie wyłączone** i sterowane trójpoziomową bramką (najbardziej szczegółowy
-wygrywa), więc zwykły OmniRoute nie podwaja katalogu dla klientów, które nie używają
-Claude Code:
+Domyślnie odwzorowywane są tylko podstawowe identyfikatory. Po włączeniu opcjonalnej flagi funkcji `CATALOG_MIRROR_REFINEMENTS_ENABLED` warianty poziomu nakładu rozumowania (reasoning effort), które katalog już zawiera (np. `codex/gpt-6-sol-high`), są odwzorowywane jak każdy inny identyfikator, dzięki czemu Claude Code może jawnie wybrać poziom nakładu, a wbudowane identyfikatory `auto/*`, których ścieżka żądania nie potrafi zmaterializować, nie są odwzorowywane. To, czy warianty nakładu są w ogóle wyświetlane, nadal reguluje `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — mechanizm odwzorowania nigdy nie dodaje wariantu, którego nie ma w katalogu podstawowym.
 
-| Poziom   | Gdzie                                                                                            |
-| -------- | ------------------------------------------------------------------------------------------------ |
-| Model    | Strona szczegółów providera → przełącznik per model „Expose in Claude Code”                      |
-| Provider | Strona szczegółów providera → przełącznik na poziomie providera (obejmuje wszystkie jego modele) |
-| Globalny | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (domyślnie wyłączone)                   |
+**Ta funkcja jest domyślnie wyłączona** i sterowana trójpoziomową bramką (najbardziej szczegółowy poziom ma pierwszeństwo), więc zwykła instalacja OmniRoute nigdy nie podwaja katalogu dla klientów, którzy nie korzystają z Claude Code:
 
-Zmienna środowiskowa `EXPOSE_CC_DISCOVERY_ALIASES` wymusza włączenie poziomu globalnego
-i ma pierwszeństwo przed nadpisaniem w dashboardzie (ekran Feature Flags pokazuje wtedy
-notatkę „active via environment variable”). Przełączniki per provider i per model
-doprecyzowują dalej — np. globalnie wyłączone + provider Kimi włączony eksponuje
-tylko modele Kimi.
+| Poziom   | Gdzie                                                                                          |
+| -------- | ---------------------------------------------------------------------------------------------- |
+| Model    | Strona szczegółów dostawcy → przełącznik „Expose in Claude Code” dla danego modelu             |
+| Dostawca | Strona szczegółów dostawcy → przełącznik na poziomie dostawcy (obejmuje wszystkie jego modele) |
+| Globalny | Ustawienia → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (domyślnie wyłączona)               |
 
-> ⚠️ **Niezgodność okna w modelach spoza Claude.** Claude Code zakłada okno kontekstu 200K
-> dla każdego id, którego nie rozpoznaje (nie odczytuje prawdziwego okna z
-> `/v1/models`). Dla modelu z większym oknem (np. Kimi K2 — 256K) ustaw
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na wartość poniżej realnego okna modelu, aby
-> auto-kompaktowanie nie odpalało się przedwcześnie. Wygenerowane profile powyżej już
-> robią to per model.
+Zmienna środowiskowa `EXPOSE_CC_DISCOVERY_ALIASES` wymusza włączenie poziomu globalnego i ma pierwszeństwo przed nadpisaniem z panelu (ekran Feature Flags pokazuje wówczas notatkę „active via environment variable”). Przełączniki na poziomie dostawcy i modelu precyzują ustawienia dalej — np. globalnie wyłączone + dostawca Kimi włączony udostępnia tylko modele Kimi.
+
+> ⚠️ **Niezgodność okna kontekstu w modelach innych niż Claude.** Claude Code zakłada okno kontekstu 200K dla każdego identyfikatora, którego nie rozpoznaje (nie potrafi odczytać rzeczywistego okna z `/v1/models`). W przypadku modelu z większym oknem (np. 256K w Kimi K2) ustaw `CLAUDE_CODE_AUTO_COMPACT_WINDOW` na wartość poniżej rzeczywistego okna modelu, aby automatyczna kompaktyzacja nie uruchamiała się przedwcześnie. Wygenerowane powyżej profile robią to już dla każdego modelu.
 
 ---
 

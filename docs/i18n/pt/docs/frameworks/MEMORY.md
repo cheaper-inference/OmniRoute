@@ -339,11 +339,11 @@ A extração é **baseada em expressões regulares**, não num LLM — é execut
 `setImmediate()`, para nunca bloquear o fluxo da resposta:
 
 - **Padrões de preferência** → `MemoryType.FACTUAL`
-  (por exemplo, `Prefiro …`, `Gosto muito de …`, `o meu favorito é …`, `Odeio …`)
+  (por exemplo, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Padrões de decisão** → `MemoryType.EPISODIC`
-  (por exemplo, `Vou utilizar …`, `Escolhi …`, `Optei por …`, `Vou adotar …`)
+  (por exemplo, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Padrões comportamentais** → `MemoryType.FACTUAL`
-  (por exemplo, `Normalmente …`, `Faço sempre …`, `Tenho tendência para …`)
+  (por exemplo, `I usually …`, `I always …`, `I tend to …`)
 
 Cada correspondência é sanitizada (`trim`, redução de espaços em branco, limitada a 500 caracteres),
 desduplicada dentro do lote através de uma `factKey(category, content)` estável e
@@ -570,7 +570,7 @@ Consulte [MCP-SERVER.md](./MCP-SERVER.md) para obter detalhes sobre o transporte
 - Cartão de configuração da reordenação (opção de ativação, seletor de fornecedor/modelo).
 
 As definições de memória e do Qdrant também se encontram em
-`/dashboard/settings → Memória e competências` (`MemorySkillsTab.tsx`) para
+`/dashboard/settings → Memória e competências` (`/dashboard/settings → Memory & Skills`) (`MemorySkillsTab.tsx`) para
 a interface de definições legada/global.
 
 ## Colocação em cache
@@ -756,7 +756,8 @@ Quando um utilizador diz:
 
 Para evitar uma extração descontrolada, aplicam-se os seguintes limites:
 
-| Comprimento mínimo do conteúdo | 3 caracteres |
+| Comprimento mínimo do conteúdo | 3 caracteres   |
+| ------------------------------ | -------------- |
 | Comprimento máximo do conteúdo | 500 caracteres |
 
 ### Quando Desativar a Extração

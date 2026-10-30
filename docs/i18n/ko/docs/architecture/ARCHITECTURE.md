@@ -15,7 +15,7 @@ OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨�
 
 핵심 기능:
 
-- CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 375개, 실행기 모듈 154개)
+- CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 375개, 실행기 모듈 156개)
 - 공급자 형식 간 요청/응답 변환
 - 모델 콤보 폴백(다중 모델 시퀀스)
 - 구조화된 콤보 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
@@ -31,7 +31,7 @@ OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨�
 - `/v1/search`를 통한 웹 검색(공급자 20개)
 - `/v1/moderations`를 통한 콘텐츠 검토
 - `/v1/rerank`를 통한 재순위화
-- 추론 모델을 위한 Think 태그 파싱(``)
+- 추론 모델을 위한 Think 태그 파싱(`<think>...</think>`)
 - 엄격한 OpenAI SDK 호환성을 위한 응답 정리
 - 공급자 간 호환성을 위한 역할 정규화(developer→system, system→user)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
@@ -1070,9 +1070,9 @@ flowchart LR
 
 ## 6) SSRF / 아웃바운드 URL 가드
 
-- `src/shared/network/outboundUrlGuard.ts`는 제공자 실행기에 도달하기 전에 모든 비공개/루프백/링크 로컬 대상 URL을 차단함
-- 제공자 모델 검색 및 검증 라우트는 모든 아웃바운드 요청 전에 가드를 적용하는 `src/shared/network/safeOutboundFetch.ts`를 사용함
-- 가드 오류는 HTTP 422와 함께 `URL_GUARD_BLOCKED`로 노출되며 `providerAudit.ts`를 통해 규정 준수 감사 추적에 기록됨
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`)는 `BaseExecutor.execute()`를 통해 전송되는 채팅 요청에 `src/shared/network/outboundUrlGuard.ts`를 적용합니다. 공개 전용 모드(비공개 플래그가 꺼져 있고 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`인 경우)에서는 사설 및 루프백 호스트와 169.254.0.0/16을 차단하며, 그 외 모든 모드에서는 클라우드 메타데이터 호스트를 차단합니다. DNS 조회 전에 작성된 그대로의 호스트 이름 또는 IP 리터럴을 검사합니다. 기본 제공 로컬 공급자는 이 검사를 건너뜁니다.
+- 공급자 모델 검색 및 검증 라우트는 모든 아웃바운드 요청 전에 가드를 적용하는 `src/shared/network/safeOutboundFetch.ts`를 사용합니다.
+- 가드 오류는 HTTP 503과 함께 `URL_GUARD_BLOCKED`로 노출되며(`getSafeOutboundFetchErrorStatus`; 모델 검색 라우트는 400을 반환), 검증 중 실제 SSRF 차단은 `provider.validation.ssrf_blocked` 이벤트로 감사 추적에 기록됩니다.
 
 ## 관측 가능성 및 운영 신호
 
@@ -1123,7 +1123,7 @@ flowchart LR
 4. 클라우드 동작은 올바른 `NEXT_PUBLIC_BASE_URL`과 클라우드 엔드포인트의 연결 가능 여부에 따라 달라집니다.
 5. `open-sse/` 디렉터리는 `@omniroute/open-sse` **npm 워크스페이스 패키지**로 게시됩니다. 소스 코드는 `@omniroute/open-sse/...`를 통해 이를 가져옵니다(Next.js `transpilePackages`로 해석됨). 이 문서의 파일 경로는 일관성을 위해 계속 `open-sse/` 디렉터리 이름을 사용합니다.
 6. 대시보드의 차트는 접근성 높은 대화형 분석 시각화(모델 사용량 막대 차트, 성공률이 포함된 공급자 분석 표)를 위해 **Recharts**(SVG 기반)를 사용합니다.
-7. E2E 테스트는 **Playwright**(`tests/e2e/`)를 사용하며 `npm run test:e2e`를 통해 실행합니다. 단위 테스트는 **Node.js 테스트 러너**(`tests/unit/`)를 사용하며 `npm run test:unit`을 통해 실행합니다. `src/` 아래의 소스 코드는 **TypeScript**(`.ts`/`.tsx`)이며, `open-sse/` 워크스페이스는 JavaScript(`.js`)로 유지됩니다.
+7. E2E 테스트는 **Playwright**(`tests/e2e/`)를 사용하며 `npm run test:e2e`를 통해 실행합니다. 단위 테스트는 **Node.js 테스트 러너**(`tests/unit/`)를 사용하며 `npm run test:unit`을 통해 실행합니다. `src/` 아래의 소스 코드는 **TypeScript**(`.ts`/`.tsx`)이며, `open-sse/` 워크스페이스는 TypeScript(`.ts`)로 유지됩니다.
 8. 설정 페이지는 일반, 모양, AI, 보안, 라우팅, 복원력, 고급의 7개 탭으로 구성됩니다. 복원력 페이지에서는 요청 큐, 연결 쿨다운, 공급자 서킷 브레이커 및 쿨다운 대기 동작만 구성하며, 실시간 서킷 브레이커 런타임 상태는 상태 페이지에 표시됩니다.
 9. **Context Relay** 전략(`context-relay`)은 두 계층으로 나뉩니다. `combo.ts`는 핸드오프 생성 여부를 결정하고, `chat.ts`는 계정 확인 후 핸드오프를 삽입합니다. 핸드오프 데이터는 `context_handoffs` SQLite 테이블에 저장됩니다. 실제 계정이 변경되었는지는 `chat.ts`만 알 수 있으므로 이러한 분리는 의도된 것입니다.
 10. **프록시 적용**은 이제 포괄적으로 이루어집니다. `tokenHealthCheck.ts`는 연결별로 프록시를 확인하고, `/api/providers/validate`는 `runWithProxyContext`를 사용하며, `proxyFetch.ts`는 Node 22에서 디스패처 호환성을 유지하기 위해 `undici.fetch()`를 사용합니다.

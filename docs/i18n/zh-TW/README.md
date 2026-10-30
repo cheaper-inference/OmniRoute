@@ -23,15 +23,15 @@
 
 </div>
 
-> **使用您自己的提供者帳戶。** 這是針對各自符合資格的第三方免費方案所估算的總量，並非 OmniRoute 提供的 Token 額度。請註冊帳戶、在需要時取得憑證，並連接您可使用的提供者；各提供者均自行管理其限制、可用性與條款。
+> **使用您自己的提供者帳戶。** 這是根據您可分別取得資格的第三方免費方案所估算的總量，並非 OmniRoute 提供的 Token 額度。請註冊、在需要時取得憑證，並連接您可使用的提供者；每家提供者均自行管理其限制、可用性與條款。
 >
-> 手動疊加免費方案非常麻煩——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 收錄了**分布於 34 個週期性共用額度集區鍵的 467 個免費方案項目**，並根據**具有已公布正數每月預算的 17 個集區，加上五個 Groq 單模型上限**計算 Token 標題數字，同時依共用集區去除重複計算。只有通過區域身分檢查後才會開放的配額（目前為 ModelScope）會另外顯示，即通過區域身分驗證後可取得約 +6M，且絕不計入標題總數。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
+> 手動疊加免費方案非常麻煩——數十套 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 收錄了**分布於 34 個週期性資源池鍵的 467 個免費方案項目**，並根據**具有已公布正數月度預算的 17 個資源池，加上五個 Groq 各模型上限**計算 Token 標示總量，同時依共享資源池進行去重。僅在通過區域身分驗證後才開放的額度（目前為 ModelScope）會另外顯示，即通過區域身分驗證後可額外取得約 6M，且絕不計入標示總量。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，若計入註冊贈送額度，首月最高可達約 2.22B；透過單一端點存取 34 個有文件記錄的週期性集區鍵，涵蓋 467 個已收錄的免費方案項目。採用誠實且依集區去除重複計算的方式——每個共用集區僅計算一次，其中包括 17 個具有已公布正數每月 Token 預算的週期性集區，以及五個 Groq 單模型上限；條款風險目錄中有 12 家提供者被標示為應避免使用，讓您自行決定。預算長條包括 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個單模型上限）以及較小的集區；首月註冊贈送額度與永久免費且無 Token 上限的提供者會另外顯示，因此絕不會膨脹標題數字。即時已用量／剩餘量請見 /dashboard/free-tiers。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，若加上註冊贈送額度，首月最高可達約 2.22B；這些額度來自 34 個已有文件記載的週期性資源池鍵，涵蓋透過單一端點存取的 467 個已收錄免費方案項目。採用誠實的資源池去重計算方式——每個共享資源池僅計算一次，包括 17 個具有已公布正數月度 Token 預算的週期性資源池，以及五個 Groq 各模型上限；條款風險目錄中有 12 家提供者被標記為避免使用，讓您自行決定。預算長條包括 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個各模型上限）及其他較小的資源池；首月註冊贈送額度與永久免費且無 Token 上限的提供者則會分開顯示，絕不誇大標示總量。可在 /dashboard/free-tiers 查看即時已用量與剩餘量。"/>
 
-> 即時 `/dashboard/free-tiers` 頁面的動畫摘要。完整方法（集區去重、額度層級、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> 即時 `/dashboard/free-tiers` 頁面的動畫摘要。完整方法（資源池去重、額度層級、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
-> <sub>我們每兩週會根據即時目錄重新稽核這些數字，而且數字**可能上升，也可能下降**——某家提供者終止免費方案，數字就會下降；新增免費方案時，數字就會上升。我們公布的是目錄實際計算出的結果，絕不採用向上取整的最佳情境數字。</sub>
+> <sub>我們每兩週都會根據即時目錄重新稽核這些數據，而且數字**可能上升，也可能下降**——如果提供者終止免費方案，數字就會下降；如果新增免費方案，數字就會上升。我們公布的是目錄實際計算出的結果，絕不採用向上取整的最佳情況數字。</sub>
 
 <br/>
 
@@ -39,29 +39,29 @@
 
 <h3>
 
-⭐ 如果 OMNIROUTE 幫助您節省費用並讓工作更輕鬆，請為此儲存庫加上星標。
+⭐ 如果 OMNIROUTE 幫您省下費用並讓工作更輕鬆，請為此儲存庫加星。
 
 </h3>
 
-[![星標](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![星數](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![星標歷史排名](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![星數歷史排名](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 加入社群
 
-**👋 追蹤維護者——搶先取得新提供者、版本發布與實用技巧：**
+**👋 追蹤維護者——搶先獲得新提供者、版本發布與實用技巧：**
 
 [![在 LinkedIn 上追蹤 Diego](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
 [![在 GitHub 上追蹤 @diegosouzapw](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp 全球](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp 巴西](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp 全球社群](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp 巴西社群](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![網站](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**問題、提供者建議、開發藍圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 全球](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 巴西](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [入口網站](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**問題、提供者技巧、開發藍圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 全球社群](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 巴西社群](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [入口網站](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
@@ -226,19 +226,19 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="三個步驟：安裝並啟動 OmniRoute、使用您自己的帳號或 API 金鑰連接符合資格的提供者，接著使用 OmniRoute API 金鑰與 auto 模型，將您的工具指向 localhost:20128/v1。路由取決於可用且符合資格的連線及提供者限制。"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="三個步驟：安裝並啟動 OmniRoute、使用您自己的帳戶或 API 金鑰連接符合資格的提供者，然後使用 OmniRoute API 金鑰及 auto 模型，將您的工具指向 localhost:20128/v1。路由取決於可用且符合資格的連線及提供者限制。"/>
 
 ```bash
-# 連接提供者後，從「儀表板」→「端點」複製您的 OmniRoute 金鑰：
+# 連接提供者後，從「儀表板 → 端點」複製您的 OmniRoute 金鑰：
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` 需要符合資格的路由。全新安裝可能沒有符合資格的免金鑰目標，而免金鑰提供者也可能拒絕第三方用戶端。標示為 `tos: avoid` 的提供者（包括 Kiro）預設會從自動路由中排除；連接帳號不會覆寫此設定。選擇提供者前，請參閱[免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)。</sub>
+<sub>`auto` 需要符合資格的路由。全新安裝可能沒有符合資格的無金鑰目標，而且無金鑰提供者可能會拒絕第三方用戶端。標示為 `tos: avoid` 的提供者（包括 Kiro）預設不納入自動路由；連接帳戶不會覆寫此設定。選擇提供者前，請參閱[免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)。</sub>
 
-<sub>📦 適用於 **Python、Node.js、PHP 與 cURL**、可直接複製貼上的快速入門指令碼 → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 適用於 **Python、Node.js、PHP 與 cURL** 的可直接複製貼上快速入門指令碼 → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我們的承諾 — 單一端點與 375 個提供者。只要仍有其他健康的目標可用，自動容錯移轉便會持續進行路由。六大支柱：跨 375 個提供者的彈性容錯移轉 · 在符合資格的工作負載上最多節省 95% 的權杖 · 以 $0 起步，提供 150+ 個免費方案及 52 個週期性／免金鑰、永久免費的提供者 · 透過單一設定支援 37 種 CLI／代理程式整合 · 在 /v1 相容 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制功能，包括斷路器、TLS 隱匿、具備 110 項工具的 MCP、A2A、記憶、護欄、評估，以及分布於 7,800+ 個追蹤測試檔案中的 56,000+ 項靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="我們的承諾 — 單一端點與 375 家提供者。只要仍有其他健康的目標可用，自動容錯移轉就會維持路由。六大支柱：跨 375 家提供者的彈性容錯移轉 · 符合資格的工作負載最高可節省 95% 權杖 · 以 $0 起步，提供 150+ 個免費方案，以及 51 個定期續期／無金鑰的永久免費提供者 · 透過一項設定支援 37 種 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制功能，包括斷路器、TLS 隱匿、具備 110 項工具的 MCP、A2A、記憶體、護欄、評估，以及分布於 7,800+ 個追蹤測試檔案中的 56,000+ 項靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -259,11 +259,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="為什麼選擇 OmniRoute — 不必再周旋於 10 個儀表板、失效的 API 金鑰與意外帳單之間。十項日常痛點與解決方案：額度未使用便到期 → 充分利用訂閱；寫程式途中遇到速率限制 → 4 層自動容錯移轉（訂閱 → API → 低價 → 免費）；工具輸出耗費權杖 → RTK + Caveman 壓縮（15–95%）；昂貴的 API → 成本最佳化路由；每個工具都要個別設定 → 單一端點、單一儀表板；AI 遭封鎖 → 3 級代理 + TLS 隱匿；失效金鑰 → 3 層韌性機制（斷路器、金鑰冷卻、模型鎖定）；團隊共用一份訂閱 → 具公平配額的金鑰池；提示詞經過他人的雲端 → 本機優先，並以 AES-256-GCM 加密金鑰；無法掌握支出 → 即時分析（用量、配額、節省金額、p95 延遲）。"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="為什麼選擇 OmniRoute — 不必再應付 10 個儀表板、失效的 API 金鑰及意外帳單。十大日常痛點與解決方案：配額尚未使用便到期 → 充分利用訂閱；編寫程式期間遇到速率限制 → 四層自動容錯移轉（訂閱 → API → 低成本 → 免費）；工具輸出消耗大量權杖 → RTK + Caveman 壓縮（15–95%）；昂貴的 API → 成本最佳化路由；每個工具都需要個別設定 → 單一端點、單一儀表板；AI 遭到封鎖 → 三層代理伺服器 + TLS 隱匿；失效金鑰 → 三層韌性機制（斷路器、金鑰冷卻、模型鎖定）；團隊共用一項訂閱 → 具備公平配額的金鑰集區；提示詞經由他人的雲端傳送 → 本機優先，並以 AES-256-GCM 加密金鑰；無法掌握支出 → 即時分析（用量、配額、節省金額、p95 延遲）。"/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute 請求流程：您的 IDE 或 CLI（Claude Code、Cursor、Cline……）呼叫單一本機端點（http://localhost:20128/v1）；只要仍有符合資格且健康的目標可用，OmniRoute Smart Router（RTK + Caveman 壓縮、20 種路由策略、斷路器、TLS 隱匿、MCP、A2A、護欄）便可在 4 個提供者層級之間進行容錯移轉 — 第 1 層：訂閱、第 2 層：API 金鑰、第 3 層：低價、第 4 層：免費。"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute 請求流程：您的 IDE 或 CLI（Claude Code、Cursor、Cline……）呼叫單一本機端點（http://localhost:20128/v1）；只要仍有符合資格且健康的目標，OmniRoute Smart Router（RTK + Caveman 壓縮、20 種路由策略、斷路器、TLS 隱匿、MCP、A2A、護欄）就能在四個提供者層級之間進行容錯移轉 — 第 1 層：訂閱、第 2 層：API 金鑰、第 3 層：低成本、第 4 層：免費。"/>
 
 </div>
 
@@ -687,15 +687,15 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
 
 <div align="center">
 
-## 🌐 375 個 AI 提供者 — 153 個經目錄標記為免費
+## 🌐 375 個 AI 提供者 — 153 個標記為免費
 
 </div>
 
-> **375 個已註冊提供者**，涵蓋標準聊天、媒體、搜尋、本機、雲端代理程式與系統集合，其中 **153 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 組不同的提供者—模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **467 筆逐模型資料列**、**34 個週期性資源池**，以及 **52 個週期性／無需金鑰的永久免費提供者**。這些統計刻意採用不同的分母；定義與資源池去重後的計算方式請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
+> 在標準聊天、媒體、搜尋、本機、雲端代理與系統集合中，共有 **375 個已註冊的提供者**，其中 **153 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 個不同的提供者－模型組合 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **467 筆逐模型記錄**、**34 個週期性額度池**，以及 **51 個週期性／免金鑰且永久免費的提供者**。這些分母依設計而有所不同；定義與依額度池去重後的計算方式，請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
-### 🏢 所有主要實驗室 — 透過單一端點存取
+### 🏢 每家主要實驗室 — 皆可透過單一端點存取
 
 <table>
   <tr>
@@ -724,7 +724,7 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
   </tr>
 </table>
 
-<sub>……以及另外 350 多個提供者 — 每個圖示都會即時從儀表板的提供者目錄載入。📖 [提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>……以及另外 350 多個提供者 — 每個圖示都會從儀表板的提供者目錄即時解析。📖 [提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
@@ -732,7 +732,7 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4、Nemotron 3<br/>無權杖上限</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4、Nemotron 3<br/>無 token 上限</sub></td>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>自動路由、Tencent Hy3<br/>永久免費</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B、Nemotron<br/>永久免費</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>免費方案</sub></td>
@@ -740,11 +740,11 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>永久免費</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>免費且不限量</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>無限量免費</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT、Llama、Claude<br/>無需金鑰</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ 個模型<br/>每天 10K 個神經元</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50 多個模型<br/>每日 10K 個神經元</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM、MiniMax<br/>免費約 40 RPM</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7、GPT-OSS<br/>一次性 $5 額度；需綁定信用卡</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7、GPT-OSS<br/>一次性 $5 額度；需信用卡</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free 模型<br/>+$10 → 更高 RPM</sub></td>
   </tr>
 </table>
@@ -927,9 +927,9 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
 
 ### 📖 運作方式 — 管線、架構與節省量計算
 
-<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute 壓縮管線：一個包含 10,000 個 Token 的用戶端請求會通過 12 個可組合引擎——Session-Dedup、CCR、Lite、RTK、Responses Tool Output、Headroom、Relevance、Caveman、Aggressive、LLMLingua-2、Ultra 與 OmniGlyph——在文件所述的堆疊範例中，到達提供者時可縮減至約 1,080 個 Token。結構化內容受到保留防護機制與逐步保真閘門的保護；明確啟用的有損或實驗模式可能會轉換符合條件的內容。"/>
+<img src="./docs/diagrams/compression-pipeline.svg" width="100%" alt="OmniRoute 壓縮管線：一個示意性的 10,000-token 用戶端請求會通過 12 個可組合引擎——Session-Dedup、CCR、Lite、RTK、Responses Tool Output、Headroom、Relevance、Caveman、Aggressive、LLMLingua-2、Ultra 與 OmniGlyph——在文件所述的堆疊範例中，送達提供者時可降至約 1,080 tokens。結構化內容會受到保留防護機制與逐步保真閘門的保護；明確啟用的有損或實驗性模式可能會轉換符合條件的內容。"/>
 
-預設的堆疊組合會依序執行 `RTK → Caveman`。當兩者處理相同的工具／上下文酬載時，節省效果會複合疊加：
+預設堆疊組合會依序執行 `RTK → Caveman`。當兩者作用於相同的工具／上下文酬載時，節省效果會複合疊加：
 
 ```txt
 combined = 1 − (1 − RTK) × (1 − Caveman_input)
@@ -937,74 +937,74 @@ average  = 1 − (1 − 0.80) × (1 − 0.46) = 89.2%
 range    = 78.4 – 94.6%
 ```
 
-程式碼區塊、URL、JSON 與結構化資料**一律受到**保留引擎的保護。
+程式碼區塊、URL、JSON 與結構化資料會由保留引擎**始終加以保護**。
 
-> **能用少量 Token 完成的事，何必使用大量 Token？** 每個請求都會**透明地**通過 OmniRoute 的壓縮管線——無須變更用戶端。它現在是由 **12 個可組合引擎構成的堆疊**，會依序執行，並可針對每個路由組合自由搭配——其概念建立於 [RTK](https://github.com/rtk-ai/rtk)、[Caveman](https://github.com/JuliusBrussee/caveman)（⭐ 90K+）、[LLMLingua-2](https://github.com/microsoft/LLMLingua) 與 [Troglodita](https://github.com/leninejunior/troglodita)（PT-BR）之上。
+> **少量 Token 就能完成的事，為什麼要使用大量 Token？** 每個請求都會**透明地**通過 OmniRoute 的壓縮管線——無須變更用戶端。現在它是一個由 **12 個可組合引擎構成的堆疊**，這些引擎會依序執行，並可根據每個路由組合自由搭配——建基於 [RTK](https://github.com/rtk-ai/rtk)、[Caveman](https://github.com/JuliusBrussee/caveman)（⭐ 90K+）、[LLMLingua-2](https://github.com/microsoft/LLMLingua) 與 [Troglodita](https://github.com/leninejunior/troglodita)（PT-BR）的理念。
 
 ### 🧱 12 引擎堆疊
 
-引擎會依管線順序執行；每個引擎都可獨立切換，並可針對各組合進行設定：
+引擎會依管線順序執行；每個引擎都可針對各個組合獨立切換與設定：
 
 <table>
   <tr><th align="center">#</th><th align="left">引擎</th><th align="left">功能</th></tr>
-  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">移除不同對話輪次間重複的內容（內容定址、跨輪次）</td></tr>
-  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">將大型區塊封存於擷取標記之後，並按需取得</td></tr>
-  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">修剪空白與圖片 URL（低延遲基準）</td></tr>
-  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">智慧篩選工具結果、去除重複內容並截斷（可辨識命令）</td></tr>
-  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">針對 shell／patch／搜尋／建置輸出，進行無損優先的 JSON 壓縮與有界診斷壓縮（Responses API）</td></tr>
-  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">透過內嵌的 <b>GCF</b> 轉碼器，對 JSON 陣列進行無損表格式壓縮（約 30%）</td></tr>
-  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">依據最後一個使用者查詢，對擷取出的句子評分</td></tr>
-  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">基於規則的散文壓縮（輸出約可壓縮 65–75%）</td></tr>
-  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">摘要並逐步老化較舊的對話輪次</td></tr>
-  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">透過 MobileBERT ONNX 進行機器學習語意修剪——程式碼安全、非同步</td></tr>
-  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">啟發式 Token 修剪，並可選用小型模型（SLM）層級</td></tr>
-  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">實驗性的上下文即圖片編碼，適用於經測量的 Claude Fable 5，透過直接 Anthropic 線路傳輸；在收到提供者回執前，GPT 5.6 轉換器仍採失敗關閉機制。四種壓縮設定檔（預設積極、平衡、程式碼安全、直通）（最積極；須選擇啟用）</td></tr>
+  <tr><td align="center" nowrap>1</td><td align="left" nowrap><b>Session-Dedup</b></td><td align="left">移除在多輪對話中重複出現的內容（內容定址、跨輪次）</td></tr>
+  <tr><td align="center" nowrap>2</td><td align="left" nowrap><b>CCR</b></td><td align="left">將大型區塊封存於擷取標記之後，並按需擷取</td></tr>
+  <tr><td align="center" nowrap>3</td><td align="left" nowrap><b>Lite</b></td><td align="left">修整空白字元與圖片 URL（低延遲基準）</td></tr>
+  <tr><td align="center" nowrap>4</td><td align="left" nowrap><b>RTK</b></td><td align="left">智慧工具結果篩選、去重與截斷（可感知命令）</td></tr>
+  <tr><td align="center" nowrap>5</td><td align="left" nowrap><b>Responses Tool Output</b></td><td align="left">針對 shell／修補程式／搜尋／建置輸出，提供無損優先的 JSON 與有界診斷壓縮（Responses API）</td></tr>
+  <tr><td align="center" nowrap>6</td><td align="left" nowrap><b>Headroom</b></td><td align="left">透過內嵌的 <b>GCF</b> 編解碼器，對 JSON 陣列進行無損表格化壓縮（約 30%）</td></tr>
+  <tr><td align="center" nowrap>7</td><td align="left" nowrap><b>Relevance</b></td><td align="left">根據最後一個使用者查詢，對擷取出的句子進行相關性評分</td></tr>
+  <tr><td align="center" nowrap>8</td><td align="left" nowrap><b>Caveman</b></td><td align="left">以規則為基礎的文章壓縮（輸出約可壓縮 65–75%）</td></tr>
+  <tr><td align="center" nowrap>9</td><td align="left" nowrap><b>Aggressive</b></td><td align="left">摘要處理與舊輪次的漸進式老化</td></tr>
+  <tr><td align="center" nowrap>10</td><td align="left" nowrap><b>LLMLingua-2</b></td><td align="left">透過 MobileBERT ONNX 進行 ML 語意剪枝——程式碼安全、非同步</td></tr>
+  <tr><td align="center" nowrap>11</td><td align="left" nowrap><b>Ultra</b></td><td align="left">啟發式 Token 剪枝，並提供選用的小型模型（SLM）層級</td></tr>
+  <tr><td align="center" nowrap>12</td><td align="left" nowrap><b>OmniGlyph</b></td><td align="left">實驗性的「上下文即圖片」編碼，用於透過 Anthropic 直接連線實測的 Claude Fable 5；在取得提供者回條前，GPT 5.6 transformers 仍採失敗關閉機制。四種壓縮設定檔（預設激進、平衡、程式碼安全、直通）（最為激進；需選擇加入）</td></tr>
 </table>
 
-程式碼區塊、URL 與結構化資料**一律會以位元組完全一致的方式保留**。**一鍵預設集**可組合這些引擎：
+程式碼區塊、URL 與結構化資料會**始終以位元組完全一致的方式保留**。**一鍵式預設集**可組合這些引擎：
 
 <table>
   <tr><th align="left">模式</th><th align="left">節省量</th><th align="left">最適合</th></tr>
-  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">可常駐啟用的安全預設值</td></tr>
-  <tr><td align="left" nowrap>🪨 <b>Standard（Caveman）</b></td><td align="left" nowrap>~30%</td><td align="left">日常程式開發</td></tr>
+  <tr><td align="left" nowrap>🪶 <b>Lite</b></td><td align="left" nowrap>~15%</td><td align="left">安全且可常駐啟用的預設模式</td></tr>
+  <tr><td align="left" nowrap>🪨 <b>Standard (Caveman)</b></td><td align="left" nowrap>~30%</td><td align="left">日常程式開發</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Aggressive</b></td><td align="left" nowrap>~50%</td><td align="left">長時間且大量使用工具的工作階段</td></tr>
   <tr><td align="left" nowrap>🔥 <b>Ultra</b></td><td align="left" nowrap>~75%</td><td align="left">最大化節省量</td></tr>
   <tr><td align="left" nowrap>🧰 <b>RTK</b></td><td align="left" nowrap>60–90%</td><td align="left">Shell／測試／建置／git 輸出</td></tr>
-  <tr><td align="left" nowrap>🔗 <b>Stacked（RTK → Caveman）</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">混合提示詞與工具日誌</td></tr>
+  <tr><td align="left" nowrap>🔗 <b>Stacked (RTK → Caveman)</b></td><td align="left" nowrap><b>78–95%</b></td><td align="left">混合提示詞與工具日誌</td></tr>
 </table>
 
-**實際範例 — Standard 模式：**
+**實際範例——Standard 模式：**
 
-> **壓縮前（69 個 Token）：** _「你的 React 元件會重新渲染，可能是因為你在每次渲染週期中都建立了新的物件參照。當你將內嵌物件作為 prop 傳遞時，React 的淺層比較會在每次都將其視為不同的物件，因而觸發重新渲染。我建議使用 useMemo 來記憶化該物件。」_
+> **之前（69 tokens）：** _「你的 React 元件之所以會重新渲染，很可能是因為你在每次渲染週期都建立了新的物件參照。當你將行內物件作為 prop 傳入時，React 的淺層比較每次都會將它視為不同的物件，因而觸發重新渲染。我建議使用 useMemo 記憶該物件。」_
 >
-> **壓縮後（19 個 Token）：** _「每次渲染都有新物件參照。內嵌物件 prop = 新參照 = 重新渲染。使用 useMemo 包裝。」_
+> **之後（19 tokens）：** _「每次渲染都有新物件參照。行內物件 prop = 新參照 = 重新渲染。使用 useMemo 包裝。」_
 >
 > **答案相同。Token 減少 72%。準確度零損失。** ✅
 
-**PT-BR 範例 — [Troglodita](https://github.com/leninejunior/troglodita) 模式：**
+**PT-BR 範例——[Troglodita](https://github.com/leninejunior/troglodita) 模式：**
 
-> **之前（42 個 token）：** _「問題在於元件會重新渲染，因為每個渲染週期都會建立新的物件參照。我建議使用 useMemo。」_
+> **之前（42 個 tokens）：** _「問題在於元件正在重新渲染，因為每次渲染週期都會建立新的物件參照。我建議使用 useMemo。」_
 >
-> **之後（12 個 token）：** _「重新渲染：每個週期都有新參照（重新建立行內物件）。使用 `useMemo`。」_
+> **之後（12 個 tokens）：** _「重新渲染：每輪皆有新參照（重新建立行內物件）。使用 `useMemo`。」_
 >
-> **相同答案。token 減少約 70%。技術精確度不變。** ✅
+> **相同答案。tokens 減少約 70%。技術準確性絲毫未損。** ✅
 
 <br/>
 
-### 🎚️ 不僅是引擎 — 輸出風格、自適應旋鈕與逐請求控制
+### 🎚️ 不只引擎——輸出風格、自適應旋鈕與逐請求控制
 
-上述 12 個引擎會縮減**輸入**內容。另有三個層面決定**如何**、**何時**以及實際**輸出**的內容：
+上述 12 個引擎會縮減**輸入**內容。另有三個層級可塑造回應的**方式**、**時機**，以及最終的**輸出**：
 
-- **🪄 輸出風格** _（輸出軸向引導）_ — 注入確定性且快取安全的回應塑形指令；可組合使用，每種風格皆有 `lite` / `full` / `ultra` 強度。新增風格只需在登錄檔加入一行：
-  - **精簡文字** — 移除贅詞／冠詞／模糊措辭；完整保留技術實質。
-  - **減少程式碼** — 「懶惰資深開發者」式 YAGNI：只做最小可運作的變更，不加入未要求的基礎架構。
-  - **馬尾（懶惰資深開發者）** — 沿著 YAGNI 階梯向上，修正根本原因，採用最小可運作的差異。
-  - **我有 ADHD（行動優先）** — 先列下一步行動、步驟編號、只給一個具體的下一步，不加前言。
-  - **精簡 CJK（文言）** — 極度精簡的文言文風格（僅限 `zh` 語系）。
-- **🎯 自適應上下文預算** _（旋鈕）_ — 不再只用單一開／關 token 閾值，而是僅在必要範圍內逐步啟用成本最低、資訊損失最少的引擎，以**符合模型的上下文視窗**。策略：`reserve-output`（預設，依模型調整）· `percentage` · `absolute`。模式：`floor`（保證容納）· `replace-autotrigger`（以你的明確選擇為準）· `off`（舊版閾值）。
-- **🎛️ 壓縮決策的位置** _（優先順序，由高至低）_ — 逐請求 `x-omniroute-compression` 標頭 › 路由組合覆寫 › 使用中的具名設定檔 › 自適應／自動觸發 › 面板預設值 › 關閉。套用的方案會在 `X-OmniRoute-Compression: <mode>; source=<source>` 回應標頭中回傳。
+- **🪄 輸出風格** _（輸出軸向調控）_——注入具確定性、快取安全的回應塑形指令；可組合使用，且各自支援 `lite` / `full` / `ultra` 強度。新增風格只需在登錄檔加入一行：
+  - **精簡敘述**——移除贅詞／冠詞／保留語氣；完整保留技術實質。
+  - **減少程式碼**——「慵懶資深開發者」式 YAGNI：採用最小可行變更，不加入未要求的鷹架程式碼。
+  - **馬尾辮（慵懶資深開發者）**——循 YAGNI 階梯而上，修正根本原因，採用最小可行差異。
+  - **我有 ADHD（行動優先）**——先給下一步行動、步驟編號、一次只提供一個具體下一步，且不加前言。
+  - **精簡 CJK（文言）**——極度精簡的古典中文風格（僅限 `zh` 語系）。
+- **🎯 自適應上下文預算** _（旋鈕）_——不再使用單一開／關 token 閾值，而是僅視需要逐步啟用成本最低、資訊損失最少的引擎，直到內容**符合模型的上下文視窗**。策略：`reserve-output`（預設，依模型調整）· `percentage` · `absolute`。模式：`floor`（保證符合）· `replace-autotrigger`（以你的明確選擇為準）· `off`（舊版閾值）。
+- **🎛️ 壓縮決策位置** _（優先順序，由高至低）_——逐請求 `x-omniroute-compression` 標頭 › 路由組合覆寫 › 使用中的具名設定檔 › 自適應／自動觸發 › 面板預設值 › 關閉。套用的方案會透過 `X-OmniRoute-Compression: <mode>; source=<source>` 回應標頭傳回。
 
-可依 token 閾值自動觸發、開啟自適應旋鈕、固定使用具名設定檔、為單次請求指定設定，或為每個路由組合指派管線 — 選擇最符合工作負載的方式即可。選擇性啟用的離線**評估工具**（`npm run eval:compression`）可在你正式採用變更前，使用固定語料庫評估保真度與節省量。
+你可以依工作負載選擇：依 token 閾值自動觸發、開啟自適應旋鈕、固定使用具名設定檔、針對單次請求設定，或為每個路由組合指派管線。選用式離線**評估工具**（`npm run eval:compression`）會在固定語料庫上評估保真度與節省幅度，讓你在推廣變更前先行驗證。
 
 📖 [`COMPRESSION_GUIDE.md`](docs/compression/COMPRESSION_GUIDE.md) · [`RTK_COMPRESSION.md`](docs/compression/RTK_COMPRESSION.md) · [`COMPRESSION_ENGINES.md`](docs/compression/COMPRESSION_ENGINES.md)
 
@@ -1016,7 +1016,7 @@ range    = 78.4 – 94.6%
 
 </div>
 
-**1) 安裝並執行**
+**1）安裝並執行**
 
 ```bash
 npm install -g omniroute
@@ -1024,59 +1024,59 @@ omniroute
 ```
 
 > 💡 看到 `npm warn ERESOLVE` 或 peer-dep 警告嗎？[這些警告無害](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)。
-> **使用 npm 11 或更新版本？** 除非明確允許，否則 npm 可能會封鎖套件生命週期指令碼。必須執行 OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`），才能準備其原生執行階段檔案。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.51 回報的套件集合：
+> **使用 npm 11 或更新版本？** 除非明確允許，否則 npm 可能會阻擋套件生命週期指令碼。OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`）是準備原生執行階段檔案的必要步驟。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.52 回報的套件組合：
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
 > ```
 >
-> 若要在未來的全域安裝中重複使用此允許清單，請先設定一次，再照常安裝：
+> 若要在未來的全域安裝中重複使用此允許清單，請先設定一次，之後即可正常安裝：
 >
 > ```bash
 > npm config set allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 > npm install -g omniroute
 > ```
 >
-> 相依套件清單可能會隨版本而變；如果 npm 回報不同的清單，請使用該警告中的套件名稱。允許某個套件，即代表允許執行其安裝指令碼。
-> **使用 Gemini Web 或其他以網頁 Cookie 驗證的提供者？** npm 套件包含
-> Playwright，但不包含其 Chromium 二進位檔。首次發出網頁提供者請求前，請參閱
+> 相依套件清單可能會隨版本變更；若 npm 回報不同清單，請使用該警告中列出的套件名稱。允許某個套件，即代表准許執行其安裝指令碼。
+> **使用 Gemini Web 或其他網頁 Cookie 提供者？** npm 套件包含
+> Playwright，但不包含其 Chromium 二進位檔。首次向網頁提供者發出請求前，請參閱
 > [Playwright Chromium 設定](docs/guides/TROUBLESHOOTING.md#gemini-web-and-playwright-chromium)
 > 說明。
 
 儀表板位於 `http://localhost:20128` · API 位於 `http://localhost:20128/v1`。
 
-**2) 使用你自己的帳戶連接符合資格的提供者**
+**2）使用你自己的帳戶連接符合資格的提供者**
 
-儀表板 → **提供者** → 選擇目前條款與配額符合你使用情境的提供者 → 新增其 API 金鑰或完成帳戶流程。免費方案可能需要註冊、審核或付款方式。請參閱[免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)；不保證一定有無需金鑰的選項，且標記為 `tos: avoid` 的提供者預設不會納入 `auto`。
+儀表板 → **提供者** → 選擇目前條款與配額符合你使用情境的提供者 → 新增其 API 金鑰或完成帳戶流程。免費方案可能需要註冊、審核或付款方式。請參閱[免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)；不保證一定能免金鑰使用，且標記為 `tos: avoid` 的提供者預設會排除於 `auto` 之外。
 
-**3) 設定你的程式開發工具**
+**3）將程式設計工具指向服務**
 
 ```txt
-基礎 URL： http://localhost:20128/v1
-API 金鑰： [從儀表板 → 端點複製]
-模型：     auto            （在符合資格的連線之間進行路由，或選擇提供者／模型）
+基底 URL：http://localhost:20128/v1
+API 金鑰：[從「儀表板 → 端點」複製]
+模型：    auto            （在符合資格的連線間路由——或選擇提供者／模型）
 ```
 
-**4) 驗證是否正常運作**
+**4）確認服務正常運作**
 
 ```bash
 curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 ```
 
-你應該會看到已連接的模型清單。🎉 就這樣 — 開始撰寫程式碼，OmniRoute 會自動為你進行路由與容錯切換。
+你應會看到已連接的模型清單。🎉 就這樣——開始編寫程式碼，OmniRoute 會自動為你進行路由與容錯移轉。
 
-如果你的用戶端無法傳送自訂標頭，OmniRoute 也提供含 token 的相容性別名：
+若用戶端無法傳送自訂標頭，OmniRoute 也提供帶有 token 的相容性別名：
 
 ```txt
-OpenAI 目錄： http://localhost:20128/vscode/YOUR_KEY/
-OpenAI 模型： http://localhost:20128/vscode/YOUR_KEY/models
-OpenAI 聊天： http://localhost:20128/vscode/YOUR_KEY/chat/completions
-OpenAI 回應： http://localhost:20128/vscode/YOUR_KEY/responses
-Ollama 聊天： http://localhost:20128/vscode/YOUR_KEY/api/chat
-Ollama 標籤： http://localhost:20128/vscode/YOUR_KEY/api/tags
+OpenAI 目錄：    http://localhost:20128/vscode/YOUR_KEY/
+OpenAI 模型：    http://localhost:20128/vscode/YOUR_KEY/models
+OpenAI 聊天：    http://localhost:20128/vscode/YOUR_KEY/chat/completions
+OpenAI 回應：    http://localhost:20128/vscode/YOUR_KEY/responses
+Ollama 聊天：    http://localhost:20128/vscode/YOUR_KEY/api/chat
+Ollama 標籤：    http://localhost:20128/vscode/YOUR_KEY/api/tags
 ```
 
-這些別名僅供無法附加 `Authorization: Bearer ...` 的用戶端使用。標頭驗證仍是建議的方式。
+僅應對無法附加 `Authorization: Bearer ...` 的用戶端使用這些別名。標頭驗證仍是建議方式。
 
 <br/>
 
@@ -1089,13 +1089,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` 會跟隨已**發布**的最高穩定 SemVer 版本，而不會追蹤 git `main`。若使用 GitOps，請固定為 `:X.Y.Z`。請參閱 [Docker 發布頻道](docs/guides/DOCKER_GUIDE.md#release-channels)。此映像檔固定設定 **`OMNIROUTE_MEMORY_MB=1024`**。這足以執行儀表板和輕量聊天。**程式設計代理程式**（來自 Claude Code、Codex、Grok 等的 `POST /v1/responses`）需要大得多的 V8 堆積，否則當兩個長上下文重疊時，程序會在約 12 GiB 處發生 `FATAL ERROR`。容器容量應高於堆積大小（原生緩衝區位於 V8 之外）：
+`:latest` 會跟隨已**發布**且版本最高的穩定 SemVer。它不會追蹤 git `main`。若用於 GitOps，請固定為 `:X.Y.Z`。請參閱 [Docker 發布通道](docs/guides/DOCKER_GUIDE.md#release-channels)。此映像檔固定設定了 **`OMNIROUTE_MEMORY_MB=1024`**。這足以執行儀表板與輕量聊天。**程式設計代理程式**（來自 Claude Code、Codex、Grok 等的 `POST /v1/responses`）需要大得多的 V8 堆積空間，否則當兩個長上下文重疊時，程序會在約 12 GiB 時發生 `FATAL ERROR`。容器大小應高於堆積大小（原生緩衝區位於 V8 之外）：
 
-| 工作負載                         | 堆積（`-e OMNIROUTE_MEMORY_MB`） | 容器（`--memory`） |
-| -------------------------------- | -------------------------------- | ------------------ |
-| 儀表板／輕量聊天                 | `1024`（映像檔預設值）           | ≥2 g               |
-| 一個程式設計代理程式             | `8192`                           | ≥10 g              |
-| 兩個並行的長時間 `/v1/responses` | `10240`–`12288`                  | ≥12–16 g           |
+| 工作負載                     | 堆積 (`-e OMNIROUTE_MEMORY_MB`) | 容器 (`--memory`) |
+| ---------------------------- | ------------------------------- | ----------------- |
+| 儀表板／輕量聊天             | `1024`（映像檔預設值）          | ≥2 g              |
+| 一個程式設計代理程式         | `8192`                          | ≥10 g             |
+| 兩個並行的長 `/v1/responses` | `10240`–`12288`                 | ≥12–16 g          |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1105,19 +1105,19 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 完整表格：[Docker 指南 — 執行階段 RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)。
 
-> **預發行 Docker 頻道：** `diegosouzapw/omniroute:next` 和
+> **預發布 Docker 通道：** `diegosouzapw/omniroute:next` 和
 > `diegosouzapw/omniroute:next-web` 會跟隨目前預設的 `release/v*`
-> 分支。這些可變標籤僅用於測試尚未發布的修正，
+> 分支。這些可變標籤僅供測試尚未發布的修正，
 > **不支援用於正式環境**。請參閱
-> [Docker 發布頻道](docs/guides/DOCKER_GUIDE.md#release-channels)。
+> [Docker 發布通道](docs/guides/DOCKER_GUIDE.md#release-channels)。
 
 **🥟 Bun**
 
-透過 Bun 執行階段偵測，支援標準的 `bun install` 和全域安裝（`bun install -g omniroute`）：
+透過 Bun 執行階段偵測，支援標準的 `bun install` 與全域安裝（`bun install -g omniroute`）：
 
-- **內建 `bun:sqlite`**：在 Bun 下執行時，OmniRoute 會使用 Bun 內建的 `bun:sqlite` 驅動程式；在 Node.js 下則會回退至 `better-sqlite3` 或 `sql.js`。
-- **開發環境中自動選擇 Webpack 打包工具**：開發模式（`bun run dev`）會自動偵測 Bun，並停用 Turbopack、改用 Webpack，以避免原生 V8 繫結不相容。正式環境建置（`bun run build`）會和 Node 上一樣，完全依照 `OMNIROUTE_USE_TURBOPACK`：預設使用 Turbopack；設定 `OMNIROUTE_USE_TURBOPACK=0` 則使用 Webpack 建置（`Dockerfile.bun` 將其公開為 `--build-arg`）。
-- **專用 Bun Dockerfile**：用於原生 Bun 正式環境部署的多階段 `Dockerfile.bun`（`docker build -f Dockerfile.bun -t omniroute:bun .`）。
+- **內建 `bun:sqlite`**：在 Bun 下執行時，OmniRoute 會使用 Bun 內建的 `bun:sqlite` 驅動程式；在 Node.js 上則會回退至 `better-sqlite3` 或 `sql.js`。
+- **開發環境中自動選擇 Webpack 打包工具**：開發模式（`bun run dev`）會自動偵測 Bun，並停用 Turbopack、改用 Webpack，以避免原生 V8 繫結不相容。正式環境建置（`bun run build`）與 Node 上相同，會完全依照 `OMNIROUTE_USE_TURBOPACK`：預設使用 Turbopack；設定 `OMNIROUTE_USE_TURBOPACK=0` 則使用 Webpack 建置（`Dockerfile.bun` 將其公開為 `--build-arg`）。
+- **專用 Bun Dockerfile**：提供多階段 `Dockerfile.bun`，用於原生 Bun 正式環境部署（`docker build -f Dockerfile.bun -t omniroute:bun .`）。
 
 ```bash
 # 使用 Bun 安裝並執行
@@ -1138,13 +1138,13 @@ PORT=20128 npm run dev
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core && omniroute
 ```
 
-**🐧 Arch Linux（AUR）**
+**🐧 Arch Linux (AUR)**
 
 ```bash
 yay -S omniroute-bin && systemctl --user enable --now omniroute.service
 ```
 
-**🔧 Nix（Flake）**
+**🔧 Nix (Flake)**
 
 ```bash
 # 使用 Nix flakes
@@ -1163,37 +1163,32 @@ devbox run npm run dev
 # 1. 準備繫結掛載的資料目錄
 mkdir -p data
 
-# 2. 僅限 Linux + 本機 rootless Podman（絕不可用於遠端 Podman Machine 用戶端）：
+# 2. 僅適用於 Linux + 本機無 root 的 Podman（絕不可用於遠端 Podman Machine 用戶端）：
 podman unshare chown 1000:1000 ./data
 
-# 3. 設定執行階段提示、建置本機 Compose 映像檔並啟動
+# 3. 設定執行階段提示、建置本機 Compose 映像檔，然後啟動
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-在 macOS 或 Windows 上，Podman 使用遠端 Podman Machine：請略過 `podman unshare`，並
-遵循[針對各拓撲的資料目錄指引](contrib/podman/README.md#data-directory-permissions-by-topology)。
+在 macOS 或 Windows 上，Podman 會使用遠端 Podman Machine：請略過 `podman unshare`，並遵循[依拓撲而定的資料目錄指引](contrib/podman/README.md#data-directory-permissions-by-topology)。
 
 📖 [Podman 指南](contrib/podman/README.md) — Compose 建置、Podman Machine，以及
 Linux/systemd Quadlet 設定。
 
 **⚡ 更快速／更精簡的安裝方式（略過原生建置）**
 
-原生 SQLite 引擎（`better-sqlite3`）是**選用**相依套件，因此全域
-安裝絕不會因原始碼編譯而受阻：當預先建置的二進位檔與您的
-平台／Node 相符時便會使用該檔案，否則會透明地回退至純 JS 引擎
-（Node 22+ 使用 `node:sqlite`，否則使用隨附的 `sql.js` WASM）— 無需建置工具。
+原生 SQLite 引擎（`better-sqlite3`）是**選用**相依套件，因此全域安裝永遠不會因從原始碼編譯而受阻：當有符合您平台／Node 的預建二進位檔時，就會使用該檔案；否則會無縫回退至純 JS 引擎（Node 22+ 使用 `node:sqlite`，否則使用隨附的 `sql.js` WASM）——不需要建置工具。
 
-若要完全略過安裝後的原生預熱（適用於 CI、無頭環境或較慢的機器）：
+若要完全略過安裝後的**原生預熱**步驟（適用於 CI、無頭環境或速度較慢的機器），請使用以下設定。注意：這只會略過原生 SQLite 預熱步驟（`scripts/postinstall.mjs`）；二進位檔複製／修復掛鉤（`scripts/build/postinstall.mjs`）仍會正常執行：
 
 ```bash
-OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
+OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過此步驟
 ```
 
-若要獲得最快的安裝速度，建議使用 **pnpm**（內容定址儲存區 + 硬連結 — 請見上文）。
-若需要不含儀表板的無頭執行階段，請使用 Docker `base` 設定檔（見上文）或
-[Termux 指南](docs/guides/TERMUX_GUIDE.md)。CLI 和網頁儀表板由同一個
-程序透過同一個連接埠提供，因此目前沒有獨立的純 CLI 套件。
+若要獲得最快的安裝速度，建議使用 **pnpm**（內容定址儲存區 + 硬連結——請參閱上文）。
+若要使用不含儀表板的無頭執行階段，請使用 Docker `base` 設定檔（見上文）或
+[Termux 指南](docs/guides/TERMUX_GUIDE.md)。CLI 與網頁儀表板由同一程序透過單一連接埠提供服務，因此目前沒有獨立的純 CLI 套件。
 
 <br/>
 
@@ -1302,21 +1297,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 <table>
   <tr><th align="left">層級</th><th align="left">技術</th></tr>
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <code>src/</code> 與 <code>open-sse/</code> 全面採用 <b>100% TypeScript</b>（自 v2.0 起核心中零 <code>any</code>）</td></tr>
+  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — 在 <code>src/</code> 與 <code>open-sse/</code> 中皆為 <b>100% TypeScript</b>（自 v2.0 起核心中完全沒有 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
   <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌模式）+ LowDB（舊版 JSON）— 147 個領域模組、209 次遷移</td></tr>
-  <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文檢索 + int8 量化向量嵌入、類型化衰減</td></tr>
-  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具輸入／輸出驗證 + API 契約</td></tr>
-  <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
+  <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、類型化衰減</td></tr>
+  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具輸入／輸出驗證 + API 合約</td></tr>
+  <tr><td nowrap><b>協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
   <tr><td nowrap><b>串流</b></td><td>伺服器傳送事件（SSE）+ WebSocket 橋接器（<code>/v1/ws</code>）</td></tr>
   <tr><td nowrap><b>壓縮</b></td><td>12 引擎管線 — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
   <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API 金鑰 + MCP 範圍式驗證 · 靜態資料採用 AES-256-GCM 加密 · DOMPurify</td></tr>
-  <tr><td nowrap><b>隱匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指紋模擬、3 層代理</td></tr>
-  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防驚群機制、自動組合自我修復</td></tr>
-  <tr><td nowrap><b>記錄</b></td><td>pino — 包含請求內容的結構化 JSON 日誌</td></tr>
-  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 在 7,800 多個追蹤的測試檔案中包含<b>超過 56,000 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
+  <tr><td nowrap><b>隱匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指紋模擬、3 級代理</td></tr>
+  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防驚群、自動組合自我修復</td></tr>
+  <tr><td nowrap><b>日誌</b></td><td>pino — 包含請求上下文的結構化 JSON 日誌</td></tr>
+  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 在 7,800+ 個追蹤中的測試檔案裡共有 <b>56,000+ 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
   <tr><td nowrap><b>平台</b></td><td>桌面版（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發布版本時自動發布至 npm + Docker Hub</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發布版本時自動發佈至 npm 與 Docker Hub</td></tr>
   <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1328,29 +1323,29 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 
 </div>
 
-### 📘 開始使用
+### 📘 入門指南
 
 <table>
   <tr><th align="left">文件</th><th align="left">說明</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">使用者指南</a></b></td><td>提供者、組合、CLI 整合、部署</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">設定指南</a></b></td><td>完整安裝方法、CLI 工具設定、協定設定、逾時調校</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">設定指南</a></b></td><td>完整安裝方法、CLI 工具設定、通訊協定設定、逾時調校</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI 工具指南</a></b></td><td>Claude Code、Codex、Cursor、Cline、OpenClaw、Kilo、Copilot 的個別工具設定</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">遠端模式</a></b></td><td>透過限定範圍的存取權杖，從筆記型電腦的 CLI 操控遠端 OmniRoute（VPS）</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">遠端模式</a></b></td><td>透過具有限定範圍的存取權杖，從筆記型電腦的 CLI 操控遠端 OmniRoute（VPS）</td></tr>
   <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code 設定</a></b></td><td>使用 <code>launch</code> 與各模型設定檔，將 Claude Code 指向 OmniRoute（本機／遠端）</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">快速入門</a></b></td><td>3 個步驟：安裝 → 連線 → 設定</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">快速開始</a></b></td><td>3 個步驟：安裝 → 連線 → 設定</td></tr>
 </table>
 
 ### 🔧 維運與部署
 
 <table>
   <tr><th align="left">文件</th><th align="left">說明</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker 指南</a></b></td><td>Docker 執行、Compose 設定檔、Caddy HTTPS、通道、映像標籤</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker 指南</a></b></td><td>Docker 執行、Compose 設定檔、Caddy HTTPS、隧道、映像標籤</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman 指南</a></b></td><td>Quadlet systemd 整合、podman-compose、SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM 部署</a></b></td><td>完整指南：VM + nginx + Cloudflare 設定</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io 部署</a></b></td><td>使用持久化儲存空間部署至 Fly.io</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io 部署</a></b></td><td>使用持久性儲存空間部署至 Fly.io</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux 指南</a></b></td><td>透過 Termux 在 Android 上執行 OmniRoute</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA 指南</a></b></td><td>漸進式網頁應用程式安裝、快取、架構</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">解除安裝指南</a></b></td><td>適用於所有安裝方式的完整移除步驟</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA 指南</a></b></td><td>漸進式網路應用程式的安裝、快取、架構</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">解除安裝指南</a></b></td><td>適用於所有安裝方式的完整移除流程</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">環境設定</a></b></td><td>完整的 <code>.env</code> 變數與參考資料</td></tr>
 </table>
 
@@ -1359,20 +1354,20 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 <table>
   <tr><th align="left">文件</th><th align="left">說明</th></tr>
   <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">架構</a></b></td><td>系統架構、資料流程與內部機制</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">壓縮指南</a></b></td><td>7 選項管線：關閉／輕量／標準／積極／超高／RTK／堆疊</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">壓縮指南</a></b></td><td>7 選項管線：關閉／輕量／標準／積極／極致／RTK／堆疊</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK 壓縮</a></b></td><td>命令輸出壓縮、篩選器、信任、驗證、原始輸出復原</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">壓縮引擎</a></b></td><td>Caveman、RTK、堆疊管線、儀表板／API／MCP 介面</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">壓縮規則格式</a></b></td><td>Caveman 與 RTK 篩選器的 JSON 規則套件結構描述</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">壓縮規則格式</a></b></td><td>適用於 Caveman 與 RTK 篩選器的 JSON 規則套件結構描述</td></tr>
   <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">壓縮語言套件</a></b></td><td>語言偵測與 Caveman 規則套件編寫</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">韌性指南</a></b></td><td>斷路器、冷卻期、佇列、防止驚群效應、TLS 偽裝</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">韌性指南</a></b></td><td>斷路器、冷卻期、佇列、防驚群效應、TLS 偽裝</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自動組合引擎</a></b></td><td>16 因素評分、模式套件、自我修復</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy 指南</a></b></td><td>3 層級 Proxy 系統、1proxy 市集、登錄檔 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>整合目錄：34 個已有文件記載的週期性資源池／467 個已收錄的免費方案項目</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>含螢幕擷取畫面的視覺化儀表板導覽</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理指南</a></b></td><td>3 層代理系統、1proxy 市集、登錄檔 CRUD</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>整合目錄：34 個有文件記載的週期性資源池／467 個已編錄的免費方案項目</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>附有螢幕截圖的視覺化儀表板導覽</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">程式碼庫文件</a></b></td><td>適合初學者的程式碼庫導覽</td></tr>
 </table>
 
-### 🤖 協定與 API
+### 🤖 通訊協定與 API
 
 <table>
   <tr><th align="left">文件</th><th align="left">說明</th></tr>
@@ -1380,8 +1375,8 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI 規格</a></b></td><td>OpenAPI 3.0 規格</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP 伺服器</a></b></td><td>110 個 MCP 工具、IDE 設定、Python／TS／Go 用戶端</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP 伺服器指南</a></b></td><td>MCP 安裝、傳輸方式與工具參考</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A 伺服器</a></b></td><td>JSON-RPC 2.0 協定、技能、串流、工作管理</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A 伺服器指南</a></b></td><td>A2A 代理程式卡片、工作、技能與串流</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A 伺服器</a></b></td><td>JSON-RPC 2.0 通訊協定、技能、串流、工作管理</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A 伺服器指南</a></b></td><td>A2A 代理卡、工作、技能與串流</td></tr>
 </table>
 
 ### 📋 專案與品質
@@ -1390,11 +1385,11 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><th align="left">文件</th><th align="left">說明</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">貢獻指南</a></b></td><td>開發環境設定與準則</td></tr>
   <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">分支與發布模型</a></b></td><td>PR 的目標分支（<code>release/*</code>），以及 <code>main</code> 和標籤的含義</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">變更記錄</a></b></td><td>各版本的完整發布歷史</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">變更日誌</a></b></td><td>各版本的完整發布歷史</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">安全性政策</a></b></td><td>漏洞回報與安全性實務</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n 指南</a></b></td><td>支援 67 種語言、翻譯工作流程、RTL</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n 指南</a></b></td><td>67 種語言支援、翻譯工作流程、RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">發布檢查清單</a></b></td><td>發布前驗證步驟</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆蓋率計畫</a></b></td><td>針對 7,800 多個受追蹤測試檔案中 56,000 多項靜態測試宣告的測試覆蓋率策略</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">覆蓋率計畫</a></b></td><td>涵蓋 7,800 多個受追蹤測試檔案中 56,000 多項靜態測試宣告的測試覆蓋率策略</td></tr>
 </table>
 
 <br/>
@@ -1403,12 +1398,12 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 
 # ⭐ 頂尖貢獻者
 
-> OmniRoute 由充滿熱忱的開源社群共同塑造。這些貢獻者做出了卓越貢獻，直接影響專案的品質、穩定性與觸及範圍。**謝謝你們。**
+> OmniRoute 由充滿熱忱的開源社群共同塑造。這些貢獻者做出了傑出的貢獻，直接影響了專案的品質、穩定性與影響範圍。**感謝各位。**
 
-### 依已合併拉取請求數量排列的外部貢獻者
+### 依已合併拉取請求數量排序的外部貢獻者
 
 <table>
-  <tr><th align="center">排名</th><th align="left">貢獻者</th><th align="center">已合併 PR</th><th align="right">約略變更行數</th></tr>
+  <tr><th align="center">排名</th><th align="left">貢獻者</th><th align="center">已合併 PR 數</th><th align="right">約略變更行數</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
@@ -1431,9 +1426,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>統計於 2026-10-18 15:09:09 UTC 進行，採用即時 <code>release/v3.8.52</code> 最新提交 <code>656f01cb43</code>。分頁式 GitHub GraphQL 統計包含 9,191 個已合併 PR：3,834 個來自儲存庫擁有者、229 個來自 Dependabot、6 個來自其他機器人／應用程式，以及<b>來自 835 位不同貢獻者的 5,122 個外部 PR</b>。「變更行數」是 GitHub 的新增行數加刪除行數，並包含產生的檔案、鎖定檔、目錄、翻譯與文件；此數字表示變動量，而非撰寫的程式碼行數。49 個 PR 回報的 GitHub 差異超過 500,000 行（例如 #13399，僅新增一個提供者，卻列出 2,347 個變更檔案），導致上述數個總數膨脹。相同數值並列同一名次。</sub>
+<sub>統計於 2026-10-18 15:09:09 UTC 進行，採用當時最新的 <code>release/v3.8.52</code> 分支頂端提交 <code>656f01cb43</code>。分頁擷取的 GitHub GraphQL 統計資料包含 9,191 個已合併 PR：其中 3,834 個來自儲存庫擁有者、229 個來自 Dependabot、6 個來自其他機器人／應用程式，以及<b>由 835 位不同貢獻者提交的 5,122 個外部 PR</b>。「變更行數」是 GitHub 新增行數與刪除行數之和，並包含產生的檔案、鎖定檔、目錄、翻譯與文件；此數值表示程式碼變動量，而非實際撰寫的程式碼行數。49 個 PR 的 GitHub 差異超過 500,000 行（例如 #13399 僅新增一個提供者，卻列出 2,347 個變更檔案），導致上述數個總計數值偏高。並列者採用相同排名。</sub>
 
-### GitHub 歸屬的提交
+### GitHub 歸屬的提交數
 
 <table>
   <tr>
@@ -1519,9 +1514,9 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   </tr>
 </table>
 
-<sub>於 2026-10-18 14:44:45 UTC 重新檢查：由儲存庫 Contributors API 回報 <code>release/v3.8.52</code> 預設分支中歸屬於 GitHub 帳號的提交。API 回傳了 849 個身分（429 位使用者、2 個機器人、418 位匿名貢獻者）；此表排除維護者、機器人及匿名身分，並保留並列名次。此表與上方的已合併 PR 排名及下方的 Git 中繼資料統計均有所區別。</sub>
+<sub>於 2026-10-18 14:44:45 UTC 重新檢查：由儲存庫 Contributors API 回報、歸屬於 <code>release/v3.8.52</code> 預設分支 GitHub 帳號的提交。API 回傳了 849 個身分（429 位使用者、2 個機器人、418 個匿名身分）；此表排除了維護者、機器人及匿名身分，並保留並列名次。此排名不同於上方的已合併 PR 排名以及下方的 Git 中繼資料統計。</sub>
 
-> 🙏 這些貢獻者所提供的功能、錯誤修正及基礎架構改進，是 OmniRoute 能夠可靠且功能豐富的**核心部分**。每個拉取請求、每個測試案例，以及每個 i18n 翻譯檔案都至關重要。開放原始碼正是由像他們這樣的人所打造。
+> 🙏 這些貢獻者提供的功能、錯誤修正及基礎架構改進，是讓 OmniRoute 可靠且功能豐富的**核心部分**。每個拉取請求、每個測試案例，以及每個 i18n 翻譯檔案都至關重要。開放原始碼正是由像他們這樣的人共同打造的。
 
 </div>
 

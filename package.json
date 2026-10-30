@@ -138,7 +138,7 @@
     "test": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 \"tests/unit/dashboard/**/*.test.ts\" && npm run test:unit:serial",
     "test:unit": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 \"tests/unit/dashboard/**/*.test.ts\" && npm run test:unit:serial",
     "test:unit:ci": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 \"tests/unit/dashboard/**/*.test.ts\" && npm run test:unit:serial",
-    "test:unit:ci:shard": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 --test-shard=$TEST_SHARD tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=4 --test-shard=$TEST_SHARD \"tests/unit/dashboard/**/*.test.ts\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-concurrency=1 --test-shard=$TEST_SHARD \"tests/unit/serial/**/*.test.ts\"",
+    "test:unit:ci:shard": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true OMNIROUTE_UNIT_PHASE=primary node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-reporter=spec --test-reporter=./scripts/ci/unit-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr --test-force-exit --test-concurrency=4 --test-shard=$TEST_SHARD tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true OMNIROUTE_UNIT_PHASE=dashboard node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-reporter=spec --test-reporter=./scripts/ci/unit-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr --test-force-exit --test-concurrency=4 --test-shard=$TEST_SHARD \"tests/unit/dashboard/**/*.test.ts\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true OMNIROUTE_UNIT_PHASE=serial node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-reporter=spec --test-reporter=./scripts/ci/unit-progress-reporter.mjs --test-reporter-destination=stdout --test-reporter-destination=stderr --test-force-exit --test-concurrency=1 --test-shard=$TEST_SHARD \"tests/unit/serial/**/*.test.ts\"",
     "test:unit:fast": "cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx/esm --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-isolation=none tests/unit/*.test.ts \"tests/unit/{api,auth,authz,build,chatcore,cli,cli-helper,combo,compression,correctness,cors,db,db-adapters,docs,gamification,guardrails,lib,mcp,memory,runtime,security,services,settings,shared,translator,ui,usage}/**/*.test.ts\" \"tests/unit/**/*.test.mjs\" && cross-env DISABLE_SQLITE_AUTO_BACKUP=true node --max-old-space-size=8192 --import tsx --import ./open-sse/utils/setupPolyfill.ts --import ./tests/_setup/isolateDataDir.ts --test --test-force-exit --test-isolation=none \"tests/unit/dashboard/**/*.test.ts\" && npm run test:unit:serial",
     "test:scoped": "bash scripts/quality/test-scoped.sh",
     "test:scoped:staged": "bash scripts/quality/test-scoped.sh --staged",
@@ -258,7 +258,7 @@
     "check:quality-skill-contract": "node scripts/quality/check-skill-contract.mjs",
     "quality:scan": "node scripts/quality/run-all-gates.mjs",
     "quality:scan:fast": "node scripts/quality/run-all-gates.mjs --fast",
-    "audit:deps": "npm audit --audit-level=critical && (npm audit --audit-level=high || echo '::warning::high-severity advisories present (non-blocking)') && npm run audit:electron",
+    "audit:deps": "node scripts/quality/audit-dependencies.mjs",
     "audit:electron": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
@@ -315,7 +315,8 @@
     "i18n:translate-new-keys": "bash scripts/i18n/translate-new-keys.sh",
     "i18n:check-keys": "node scripts/i18n/check-key-completeness.mjs",
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
-    "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs"
+    "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
+    "check:test-tla-order": "node scripts/check/check-test-tla-order.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
@@ -348,7 +349,7 @@
     "commander": "^15.0.0",
     "cron-parser": "^5.10.0",
     "csv-stringify": "^6.8.3",
-    "dompurify": "^3.4.14",
+    "dompurify": "^3.4.17",
     "express": "^5.2.1",
     "fetch-socks": "^1.3.3",
     "fflate": "^0.8.3",
@@ -370,7 +371,7 @@
     "material-symbols": "^0.47.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
-    "next": "16.3.8",
+    "next": "16.4.2",
     "next-intl": "^4.14.0",
     "next-themes": "^0.4.6",
     "node-machine-id": "^1.1.12",
@@ -451,7 +452,7 @@
     "dpdm": "^4.3.0",
     "esbuild": "0.28.2",
     "eslint": "^10.10.0",
-    "eslint-config-next": "16.3.8",
+    "eslint-config-next": "16.4.2",
     "eslint-plugin-react-hooks": "7.1.1",
     "eslint-plugin-sonarjs": "^4.1.0",
     "espree": "^11.2.0",
@@ -473,13 +474,13 @@
     "opencode-ai": "1.18.34",
     "playwright-ctrf-json-reporter": "^0.1.0",
     "prettier": "^3.9.6",
-    "promptfoo": "0.123.0",
+    "promptfoo": "0.125.1",
     "size-limit": "^14.1.0",
     "tailwindcss": "^4.3.0",
     "type-coverage": "^2.30.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vite": "^8.0.16",
+    "vite": "^8.3.3",
     "vitest": "^5.0.0",
     "wait-on": "^9.1.0",
     "wtfnode": "^0.10.1"
@@ -529,18 +530,18 @@
     "fast-xml-parser": "^5.10.1",
     "sharp": "^0.35.5",
     "postcss": "^8.5.18",
-    "ip-address": "^10.7.2",
+    "ip-address": "^10.7.4",
     "axios": "^1.20.0",
-    "qs": "^6.16.0",
+    "qs": "^6.16.1",
     "uuid": "^14.0.2",
     "form-data": "^4.0.6",
-    "vite": "^8.0.16",
+    "vite": "^8.3.3",
     "protobufjs": "^7.6.5",
     "@babel/core": "^7.29.6",
-    "hono": "^4.13.7",
-    "@hono/node-server": "^2.0.5",
-    "fast-uri": "^3.1.7",
-    "body-parser": "^2.3.0",
+    "hono": "^4.13.13",
+    "@hono/node-server": "^2.1.5",
+    "fast-uri": "^3.1.9",
+    "body-parser": "^2.4.0",
     "@yarnpkg/parsers": {
       "js-yaml": "^4.3.2"
     },
@@ -592,8 +593,14 @@
     },
     "nanoid": "^3.3.17",
     "monaco-editor": {
-      "dompurify": "^3.4.14"
+      "dompurify": "^3.4.17"
     },
-    "csv-parse": "^7.0.2"
+    "csv-parse": "^7.0.2",
+    "@azure/identity": {
+      "@azure/msal-node": "^7.1.0"
+    },
+    "get-uri": {
+      "basic-ftp": "^6.2.3"
+    }
   }
 }

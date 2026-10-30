@@ -15,7 +15,7 @@ Egyetlen, OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és fordítással,
 
 Fő képességek:
 
-- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (375 szolgáltató, 154 végrehajtómodul)
+- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (375 szolgáltató, 156 végrehajtómodul)
 - Kérések és válaszok fordítása a szolgáltatói formátumok között
 - Modellkombinációs tartalék útvonal (többmodelles sorozat)
 - Strukturált kombinációs lépések (`provider + model + connection`), futásidejű rendezéssel a `compositeTiers` alapján
@@ -31,7 +31,7 @@ Fő képességek:
 - Webes keresés a `/v1/search` végponton keresztül (20 szolgáltató)
 - Moderálás a `/v1/moderations` végponton keresztül
 - Újrarangsorolás a `/v1/rerank` végponton keresztül
-- Gondolkodási címkék (``) feldolgozása következtetési modellekhez
+- Gondolkodási címkék (`<think>...</think>`) feldolgozása következtetési modellekhez
 - Válaszok megtisztítása a szigorú OpenAI SDK-kompatibilitás érdekében
 - Szerepkör-normalizálás (developer→system, system→user) a szolgáltatók közötti kompatibilitás érdekében
 - Strukturált kimenet átalakítása (json_schema → Gemini responseSchema)
@@ -1080,11 +1080,11 @@ A régebbi, fájlalapú kérésnaplózó (`open-sse/utils/requestLogger.ts`) csa
 - SQLite-sémamigrációk és automatikus frissítési horgok indításkor
 - visszamenőleges kompatibilitási útvonal a régi JSON → SQLite migrációhoz
 
-## 6) SSRF / kimenő URL-ek védelme
+## 6) SSRF / Kimenő URL-ek védelme
 
-- a `src/shared/network/outboundUrlGuard.ts` blokkol minden privát, visszacsatolási és helyi kapcsolati cél-URL-t, mielőtt azok elérnék a szolgáltatói végrehajtókat
-- a szolgáltatói modellek felderítési és ellenőrzési útvonalai a `src/shared/network/safeOutboundFetch.ts` fájlt használják, amely minden kimenő kérés előtt alkalmazza a védelmet
-- a védelmi hibák `URL_GUARD_BLOCKED` hibakóddal és HTTP 422-es állapotkóddal jelennek meg, és a `providerAudit.ts` segítségével bekerülnek a megfelelőségi auditnaplóba
+- A `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) a `src/shared/network/outboundUrlGuard.ts` védelmet alkalmazza a `BaseExecutor.execute()` metóduson keresztül elküldött csevegési kérésekre. Kizárólag nyilvános mód esetén (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, kikapcsolt privát jelzővel) blokkolja a privát és visszacsatolási hosztokat, valamint a 169.254.0.0/16 tartományt; minden más módban a felhőalapú metaadat-szolgáltatások hosztjait blokkolja. A hosztnevet vagy a literálisan megadott IP-címet minden DNS-keresés előtt ellenőrzi. A beépített helyi szolgáltatók esetén ez az ellenőrzés kimarad.
+- A szolgáltatói modellek felderítésére és ellenőrzésére szolgáló útvonalak a `src/shared/network/safeOutboundFetch.ts` fájlt használják, amely minden kimenő kérés előtt alkalmazza a védelmet
+- A védelem hibái `URL_GUARD_BLOCKED` hibaként, HTTP 503-as állapotkóddal jelennek meg (`getSafeOutboundFetchErrorStatus`; a modellfelderítési útvonal 400-as kódot ad vissza), a valódi SSRF-blokkolásokat pedig az ellenőrzés során `provider.validation.ssrf_blocked` eseményként rögzíti az auditnapló
 
 ## Megfigyelhetőség és üzemeltetési jelzések
 
@@ -1135,7 +1135,7 @@ A kód által aktívan használt környezeti változók:
 4. A felhőbeli működés a `NEXT_PUBLIC_BASE_URL` helyes beállításától és a felhővégpont elérhetőségétől függ.
 5. Az `open-sse/` könyvtár `@omniroute/open-sse` **npm workspace csomagként** van közzétéve. A forráskód a `@omniroute/open-sse/...` útvonalon importálja (a Next.js `transpilePackages` oldja fel). A dokumentumban szereplő fájlútvonalak a következetesség érdekében továbbra is az `open-sse/` könyvtárnevet használják.
 6. Az irányítópult diagramjai **Recharts** (SVG-alapú) használatával biztosítanak akadálymentes, interaktív analitikai vizualizációkat (modellhasználati oszlopdiagramok, szolgáltatói bontást és sikerességi arányokat tartalmazó táblázatok).
-7. Az E2E-tesztek **Playwright** használatával készülnek (`tests/e2e/`), és az `npm run test:e2e` paranccsal futtathatók. Az egységtesztek a **Node.js test runner** használatával készülnek (`tests/unit/`), és az `npm run test:unit` paranccsal futtathatók. A `src/` alatti forráskód **TypeScript** (`.ts`/`.tsx`); az `open-sse/` workspace továbbra is JavaScript (`.js`).
+7. Az E2E-tesztek **Playwright** használatával készülnek (`tests/e2e/`), és az `npm run test:e2e` paranccsal futtathatók. Az egységtesztek a **Node.js test runner** használatával készülnek (`tests/unit/`), és az `npm run test:unit` paranccsal futtathatók. A `src/` alatti forráskód **TypeScript** (`.ts`/`.tsx`); az `open-sse/` workspace továbbra is TypeScript (`.ts`).
 8. A beállítások oldala 7 lapra tagolódik: Általános, Megjelenés, MI, Biztonság, Útválasztás, Hibatűrés, Speciális. A Hibatűrés oldal kizárólag a kérési sort, a kapcsolat-várakoztatást, a szolgáltatói megszakítót és a lehűlés kivárásának viselkedését konfigurálja; a megszakító élő futásidejű állapota az Állapot oldalon jelenik meg.
 9. A **Context Relay** stratégia (`context-relay`) két réteg között oszlik meg: a `combo.ts` dönti el, hogy kell-e átadást generálni, a `chat.ts` pedig a fiók feloldása után illeszti be az átadást. Az átadási adatok a `context_handoffs` SQLite-táblában találhatók. Ez a felosztás szándékos, mert csak a `chat.ts` tudja, hogy a tényleges fiók megváltozott-e.
 10. A **proxykényszerítés** immár átfogó: a `tokenHealthCheck.ts` kapcsolatonként oldja fel a proxyt, az `/api/providers/validate` a `runWithProxyContext` használatával működik, a `proxyFetch.ts` pedig az `undici.fetch()` függvényt használja a diszpécser-kompatibilitás fenntartásához Node 22 alatt.

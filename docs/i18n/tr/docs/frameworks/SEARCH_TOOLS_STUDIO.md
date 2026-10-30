@@ -53,7 +53,7 @@ Mevcut `SearchForm` + `ResultsPanel` + `RerankPanel` bileşenlerini bir sekmeye 
 - Girdi: URL + tam sayfa geçiş düğmesi + biçim seçici (markdown / metin / HTML).
 - Gönder → getir → `ScrapeResult.tsx` bileşeninde görüntüle.
 - `ScrapeResult`, markdown önizlemesi + ham veri geçiş düğmesini görüntüler.
-- Sınır: Yanıt gövdesi **256 KB**'tan büyükse kullanıcı arayüzü `(kesildi, ham veriyi görüntüle)` ifadesini gösterir ve ham veriyi bir Monaco modalında açar (D21).
+- Sınır: Yanıt gövdesi **256 KB**'tan büyükse kullanıcı arayüzü `View full raw content` ifadesini gösterir ve ham veriyi bir modalda açar (D21).
 - Meta veri paneli: sağlayıcı (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), gecikme, maliyet, yanıt boyutu, bağlantı sayısı.
 - `useScrapeFetch.ts` hook'unu kullanır.
 

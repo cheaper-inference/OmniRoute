@@ -6607,7 +6607,7 @@
       "xai": "Միացրեք xAI (Grok)-ը API բանալիով։",
       "xiaomi-mimo": "Միացրեք Xiaomi MiMo-ն API բանալիով։",
       "yi": "Ստացեք API բանալի platform.lingyiwanwu.com կայքում",
-      "zai": "API բանալի՝ https://open.bigmodel.cn/usercenter/apikeys-ից",
+      "zai": "API բանալի՝ https://z.ai/manage-apikey/apikey-list-ից",
       "zenmux": "ZenMux-ը տրամադրում է OpenAI-ի հետ համատեղելի զրույցի լրացումների վերջնակետ՝ /api/v1/chat/completions հասցեում, ինչպես նաև Anthropic Messages (/api/anthropic/v1/messages) և Google Gemini (/api/vertex-ai) արձանագրությունների միջերեսներ։ OmniRoute-ն օգտագործում է OpenAI արձանագրությունը։",
       "galadriel": "Միացրեք Galadriel-ը API բանալիով։",
       "predibase": "$25 արժողությամբ անվճար փորձաշրջանային կրեդիտներ (վավերականությունը՝ 30 օր)",

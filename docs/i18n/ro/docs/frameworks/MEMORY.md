@@ -313,11 +313,11 @@ Extragerea este **bazată pe expresii regulate**, nu pe LLM — rulează în cad
 `setImmediate()`, astfel încât nu blochează niciodată fluxul de răspuns:
 
 - **Tipare de preferințe** → `MemoryType.FACTUAL`
-  (de ex. `Prefer …`, `Îmi place foarte mult …`, `preferatul meu este …`, `Urăsc …`)
+  (de ex. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Tipare de decizii** → `MemoryType.EPISODIC`
-  (de ex. `Voi folosi …`, `Am ales …`, `Am optat pentru …`, `Voi adopta …`)
+  (de ex. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Tipare comportamentale** → `MemoryType.FACTUAL`
-  (de ex. `De obicei …`, `Întotdeauna …`, `Am tendința să …`)
+  (de ex. `I usually …`, `I always …`, `I tend to …`)
 
 Fiecare potrivire este igienizată (`trim`, restrângerea spațiilor albe, limitare la 500 de caractere),
 deduplicată în cadrul lotului printr-un `factKey(category, content)` stabil și
@@ -689,11 +689,11 @@ Modulul `extraction.ts` (`src/lib/memory/extraction.ts`) utilizează **potrivire
 
 ### Categorii implicite de modele
 
-| Categorie           | Exemplu de model                                          | Ce capturează                        |
-| ------------------- | --------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Prefer <X>"`, `"Îmi place <X>"`, `"Urăsc <X>"`          | Preferințele utilizatorului          |
-| DECISION_PATTERNS   | `"Voi folosi <X>"`, `"Am decis să <X>"`, `"Am ales <X>"`  | Deciziile utilizatorului (episodice) |
-| PATTERN_PATTERNS    | `"De obicei <X>"`, `"Întotdeauna <X>"`, `"Niciodată <X>"` | Modele comportamentale persistente   |
+| Categorie           | Exemplu de model                                            | Ce capturează                        |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferințele utilizatorului          |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Deciziile utilizatorului (episodice) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Modele comportamentale persistente   |
 
 ### Exemple de modele (simplificate)
 
@@ -729,7 +729,8 @@ Când un utilizator spune:
 
 Pentru a preveni extragerea necontrolată, se aplică următoarele limite:
 
-| Lungimea minimă a conținutului | 3 caractere |
+| Lungimea minimă a conținutului | 3 caractere   |
+| ------------------------------ | ------------- |
 | Lungimea maximă a conținutului | 500 caractere |
 
 ### Când să dezactivați extragerea

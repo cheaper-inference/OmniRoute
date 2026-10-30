@@ -146,33 +146,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## የሚገኙ ክህሎቶች
+## ዝግጁ ችሎታዎች
 
-OmniRoute በ`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተገናኙ 6 A2A ክህሎቶችን ያቀርባል። እያንዳንዱ የክህሎት ሞጁል በ`src/lib/a2a/skills/` ውስጥ ይገኛል።
+OmniRoute 6 A2A ችሎታዎችን ያቀርባል፣ እነዚህም በ `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` ውስጥ የተገናኙ ናቸው። እያንዳንዱ የችሎታ ሞጁል በ `src/lib/a2a/skills/` ውስጥ ይገኛል።
 
-| ክህሎት        | ID                   | መግለጫ                                                                                                                 | መለያዎች            | ምሳሌዎች                        |
-| :---------- | :------------------- | :------------------------------------------------------------------------------------------------------------------- | :--------------- | :--------------------------- |
-| ብልህ ማዘዋወር   | `smart-routing`      | የOmniRouteን combo engine + scoring በመጠቀም ጥያቄን በተመቻቸው አቅራቢ/ጥምረት በኩል ያዘዋውራል                                            | ማዘዋወር፣ አቅራቢዎች    | "ይህን ጥያቄ በምርጡ ሞዴል በኩል አዘዋውር" |
-| የኮታ አስተዳደር  | `quota-management`   | የእያንዳንዱን አቅራቢ የኮታ ሁኔታ ሪፖርት ያደርጋል፤ ጠሪዎች መቼ ፍጥነት መገደብ/መቀየር እንዳለባቸው እንዲወስኑ ያግዛል                                         | ኮታ፣ አቅራቢዎች       | "ለanthropic ኮታውን ፈትሽ"        |
-| የአቅራቢ ፍለጋ   | `provider-discovery` | የተጫኑ አቅራቢዎችን ከችሎታዎቻቸው፣ የነጻ ደረጃ ምልክቶች እና የOAuth ሁኔታ ጋር ይዘረዝራል                                                         | አቅራቢዎች፣ ፍለጋ      | "የትኞቹ አቅራቢዎች ይገኛሉ?"          |
-| የወጪ ትንተና    | `cost-analysis`      | ካታሎጉን + የቅርብ ጊዜ አጠቃቀምን መሠረት በማድረግ የአንድን ጥያቄ/ውይይት ወጪ ይገምታል                                                            | ወጪ፣ አጠቃቀም        | "የዚህን ውይይት ወጪ ገምት"           |
-| የጤና ሪፖርት    | `health-report`      | ለእያንዳንዱ አቅራቢ የcircuit breaker፣ cooldown እና lockout ሁኔታን ያጠቃልላል                                                       | ጤና፣ መቋቋም         | "የሁሉንም አቅራቢዎች የጤና ሁኔታ አሳይ"   |
-| ችሎታዎችን ዘርዝር | `list-capabilities`  | ሙሉውን 45-ግቤት የAgent Skills ካታሎግ (23 API + 21 CLI + 1 config) ለአውድ ማስገባት ከጥሬ SKILL.md URLs ጋር እንደ markdown ሰንጠረዥ ይመልሳል | ካታሎግ፣ ፍለጋ፣ ክህሎቶች | "ሁሉንም የOmniRoute ችሎታዎች ዘርዝር" |
+| ችሎታ                | ID                   | መግለጫ                                                                                                                         | መለያዎች                      | ምሳሌዎች                              |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------- |
+| Smart Routing      | `smart-routing`      | ፕሮምፕትን በOmniRoute ኮምቦ ሞተር + ነጥብ አሰጣጥ በመጠቀም በምርጡ አቅራቢ/ኮምቢኔሽን አማካኝነት ያስተላልፋል                                                   | routing, providers         | "ይህን ፕሮምፕት በምርጡ ሞዴል አማካኝነት አስተላልፍ" |
+| Quota Management   | `quota-management`   | የእያንዳንዱን አቅራቢ የኮታ ሁኔታ ያቀርባል፣ ጠሪዎች መቼ ማቀነስ/መቀያየር እንዳለባቸው እንዲወስኑ ይረዳል                                                          | quota, providers           | "የanthropic ኮታን አረጋግጥ"             |
+| Provider Discovery | `provider-discovery` | የተጫኑ አቅራቢዎችን ከችሎታዎቻቸው፣ ከነፃ-ደረጃ ምልክቶች እና ከOAuth ሁኔታ ጋር ይዘረዝራል                                                                 | providers, discovery       | "ምን ምን አቅራቢዎች ዝግጁ ናቸው?"            |
+| Cost Analysis      | `cost-analysis`      | ካታሎጉን እና የቅርብ ጊዜ አጠቃቀምን በመጠቀም የጥያቄን/የውይይትን ወጪ ይገምታል                                                                          | cost, usage                | "ለዚህ ውይይት ወጪን ግምት"                 |
+| Health Report      | `health-report`      | የcircuit breaker፣ የcooldown እና የlockout ሁኔታዎችን በአቅራቢ ደረጃ ይሰበስባል                                                              | health, resilience         | "የሁሉንም አቅራቢዎች የጤና ሁኔታ አሳይ"         |
+| List Capabilities  | `list-capabilities`  | ሙሉውን 45-እዴታ የAgent Skills ካታሎግ (23 API + 21 CLI + 1 config) ከጥሬ SKILL.md URLs ጋር እንደ markdown ሰንጠረዥ ለcontext injection ይመልሳል | catalog, discovery, skills | "ሁሉንም የOmniRoute ችሎታዎች ዘርዝር"       |
 
-> Agent Card ከቀጥታው የ374 አቅራቢዎች ካታሎግ ጋር የተጣጣመ ሆኖ መቆየት አለበት፤ የአቅራቢዎች ብዛት እና የነጻ/ማረጋገጫ-የማያስፈልገው ሜታዳታ ከruntime registry ይመጣሉ።
+> የAgent Card ከሕያው 375-አቅራቢ ካታሎግ ጋር የተጣጣመ መሆን አለበት፤ የአቅራቢ ብዛቶች እና free/no-auth ሜታዳታ ከruntime registry የሚወሰዱ ናቸው።
 
-### የ`list-capabilities` ክህሎት ዝርዝር
+### የ`list-capabilities` ችሎታ ዝርዝር
 
-የ`list-capabilities` ክህሎት API ጥሪዎችን ከመላካቸው በፊት OmniRoute ምን እንደሚያቀርብ ማወቅ ለሚፈልጉ ውጫዊ ወኪሎች በተለይ ጠቃሚ ነው። የተዋቀረ የmarkdown ሰንጠረዥ ውጤት ይመልሳል፦
+የ`list-capabilities` ችሎታ API ጥሪዎችን ከመላካቸው በፊት OmniRoute ምን እንደሚያቀርብ ማወቅ ለሚያስፈልጋቸው ውጫዊ ወኪሎች በተለይ ጠቃሚ ነው። የተዋቀረ የmarkdown ሰንጠረዥ artifact ይመልሳል፦
 
 ```
-| ID | ስም | ምድብ | አካባቢ | Endpoints/Commands | ጥሬ URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | ማረጋገጫ እና ክፍለ-ጊዜዎች | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-ወኪሎች ሙሉውን SKILL.md ወዲያውኑ ማምጣት እንዲችሉ እያንዳንዱ ረድፍ የ`rawUrl` ዓምድን ያካትታል። የ`metadata.totalSkills` መስክ የካታሎጉን መጠን ያንጸባርቃል (ዛሬ 45)። ትግበራ፦ `src/lib/a2a/skills/listCapabilities.ts`። እንዲሁም [AGENT-SKILLS.md](./AGENT-SKILLS.md)ን ይመልከቱ።
+እያንዳንዱ ረድፍ የ`rawUrl` አምድ ያካትታል፣ ስለዚህ ወኪሎች ሙሉውን SKILL.md ወዲያውኑ ማግኘት ይችላሉ። የ`metadata.totalSkills` መስክ የካታሎጉን መጠን ያንፀባርቃል (ዛሬ 45)። ትግበራ፦ `src/lib/a2a/skills/listCapabilities.ts`። እንዲሁም [AGENT-SKILLS.md](./AGENT-SKILLS.md)ን ይመልከቱ።
 
 ---
 

@@ -216,7 +216,7 @@ seguía estando en el nivel que permitía el acceso en caso de fallo (GHSA-7pq4-
 `enableObsidianVaultSync()` también rechaza una bóveda que sea el directorio de datos, esté
 dentro de él o lo contenga.
 
-#### Las exportaciones de credenciales son exclusivas del operador
+#### Las exportaciones de credenciales y las restauraciones son exclusivas del operador
 
 El nivel anterior solo decide si se requiere _alguna_ credencial. Las rutas que descargan
 credenciales almacenadas añaden una segunda comprobación en el manejador: `GET /api/settings/export-json` (conexiones
@@ -227,22 +227,9 @@ una instancia con el inicio de sesión deshabilitado, y responde con `403` a las
 y `admin`) y a los tokens de acceso `oma_`. La emisión de tokens de sincronización (`POST /api/sync/tokens`) utiliza el
 mismo auxiliar, además del token de servicio interno de loopback de confianza.
 
-#### Credential exports and restores are operator-only
+Las operaciones destructivas correspondientes mantienen el mismo límite: `POST /api/db-backups/import` (un archivo `.sqlite` cargado, incluido `dryRun=true`), `POST /api/db-backups` (restaurar una copia guardada por su id) y `POST /api/settings/import-json` (restauración del formato JSON anterior) reemplazan la base de datos activa o todo el conjunto de ajustes, conexiones y claves API. Por tanto, una credencial de máquina tampoco puede iniciarlas.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Eliminar puntos de restauración mantiene el mismo límite: `DELETE /api/db-backups` (limpieza — conservar los N más recientes o eliminar los de más de D días) y `PATCH /api/db-backups` (ajustes de retención). La retención guardada es exactamente la que aplica `cleanupDbBackups()` después de cada copia automática (`src/lib/db/backup.ts`); una credencial de máquina que pudiera guardar `keepLatest: 1` eliminaría los puntos de restauración anteriores en la siguiente instantánea. Listar y crear copias (`GET`/`PUT /api/db-backups`) conserva la autenticación de administración habitual.
 
 ### El arranque de una instalación nueva es exclusivo de loopback — según el par real, no `Host`
 

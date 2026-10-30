@@ -94,7 +94,8 @@ export const testDestination: LogExportDestinationType = {
         }
         if (config.mode === "crash" && batches === 3 && process.send) process.exit(23);
         if (config.mode === "hang" && process.send) {
-          process.on("SIGTERM", () => {});
+          process.on("SIGTERM", () => fs.writeFileSync(`${output}.term-ignored`, "ready"));
+          fs.writeFileSync(`${output}.hang-ready`, "ready");
           await new Promise(() => {
             setInterval(() => {}, 1000);
           });

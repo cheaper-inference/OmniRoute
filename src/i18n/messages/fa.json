@@ -5593,7 +5593,7 @@
     "resetToUpstreamDefaults": "بازگرداندن تنظیمات پیش‌فرض upstream",
     "resetToUpstreamDefaultsSuccess": "تنظیمات پیش‌فرض مدل بالادستی بازیابی شد",
     "resetToUpstreamDefaultsFailed": "بازگردانی پیش‌فرض‌های مدل upstream ناموفق بود",
-    "autoSyncTooltip": "تازهسازی خودکار فهرست مدلها هر ۲۴ ساعت (قابل تنظیم از طریق MODEL_SYNC_INTERVAL_HOURS)",
+    "autoSyncTooltip": "تازهسازی خودکار فهرست مدلها به‌طور پیش‌فرض هر ۶ ساعت (قابل تنظیم از طریق MODEL_SYNC_INTERVAL_HOURS)",
     "autoSyncEnabled": "همگامسازی خودکار فعال شد — مدلها بهصورت دورهای تازهسازی خواهند شد",
     "autoSyncDisabled": "همگامسازی خودکار غیرفعال شد",
     "autoSyncLastSynced": "همگام‌سازی‌شده در {time}",

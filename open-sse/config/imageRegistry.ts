@@ -49,7 +49,9 @@ function visibleImageProviders(): Record<string, ImageProviderConfig> {
   return { ...IMAGE_PROVIDERS, ...XAI_SUBSCRIPTION_IMAGE_PROVIDERS };
 }
 
-function resolveImageModelAlias(modelStr) {
+function resolveImageModelAlias(
+  modelStr: string
+): Pick<ImageModelAliasEntry, "provider" | "model"> | null {
   const alias = IMAGE_MODEL_ALIASES[modelStr];
   return alias ? { provider: alias.provider, model: alias.model } : null;
 }
@@ -60,12 +62,12 @@ function resolveImageModelAlias(modelStr) {
 // must NOT override an explicit prefix — #9982 removed the unconditional bare
 // fallback because `fal-ai/flux-2-max` was being hijacked to black-forest-labs
 // by the bare `flux-2-max` alias.
-function resolveSameProviderBareAlias(providerId, model) {
+function resolveSameProviderBareAlias(providerId: string, model: string) {
   const aliased = resolveImageModelAlias(model);
   return aliased && aliased.provider === providerId ? aliased : null;
 }
 
-function findImageModelConfig(providerId, modelId) {
+function findImageModelConfig(providerId: string, modelId: string): ImageModelEntry | null {
   const provider = visibleImageProviders()[providerId];
   if (!provider) return null;
   return (
@@ -73,21 +75,24 @@ function findImageModelConfig(providerId, modelId) {
   );
 }
 
-function resolveImageProviderModelId(providerId, modelId) {
+function resolveImageProviderModelId(providerId: string, modelId: string): string {
   return findImageModelConfig(providerId, modelId)?.id || modelId;
 }
 
 // Kept out of getImageModelEntry() (which sits at the complexity-ratchet cap) — an
 // alias can override imageRequired directly, else it falls back to its target
 // model's own flag. Consumers coerce the result with Boolean(), so no `?? false`.
-function resolveAliasImageRequired(alias, modelConfig) {
+function resolveAliasImageRequired(
+  alias: ImageModelAliasEntry,
+  modelConfig: ImageModelEntry | null
+): boolean | undefined {
   return alias.imageRequired ?? modelConfig?.imageRequired;
 }
 
 /**
  * Get image provider config by ID
  */
-export function getImageProvider(providerId) {
+export function getImageProvider(providerId: string): ImageProviderConfig | null {
   const providers = visibleImageProviders();
   if (providers[providerId]) return providers[providerId];
   if (!providerId) return null;
@@ -101,7 +106,10 @@ export function getImageProvider(providerId) {
  * Parse image model string (format: "provider/model")
  * Returns { provider, model }
  */
-export function parseImageModel(modelStr) {
+export function parseImageModel(modelStr: string | null | undefined): {
+  provider: string | null;
+  model: string | null;
+} {
   if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   const directAlias = resolveImageModelAlias(modelStr);
@@ -208,11 +216,11 @@ export function getImageModelAliases() {
  * `/v1/models`, which returns image/diffusion models with no modality field)
  * out of the chat listing when they are already known image-only models.
  */
-export function isRegisteredImageModel(providerId, modelId) {
+export function isRegisteredImageModel(providerId: string, modelId: string): boolean {
   return Boolean(findImageModelConfig(providerId, modelId));
 }
 
-export function getImageModelEntry(modelStr) {
+export function getImageModelEntry(modelStr: string | null | undefined) {
   if (!modelStr) return null;
 
   const alias = IMAGE_MODEL_ALIASES[modelStr];
@@ -254,7 +262,7 @@ export function isImageOnlyModel(modelStr: string): boolean {
 }
 
 /** Image input is mandatory only for edit-only models (`["image"]`, no `"text"`). Dual-modality models also accept pure t2i. */
-export function modalitiesRequireImageInput(inputModalities) {
+export function modalitiesRequireImageInput(inputModalities: unknown): boolean {
   const list = Array.isArray(inputModalities) ? inputModalities : ["text"];
   return list.includes("image") && !list.includes("text");
 }

@@ -12,13 +12,13 @@ webpack बिल्ड र lint job एकै समयमा पर्दा �
 होस्ट swap (16 GB) ले त्यसलाई सम्हाल्छ, र pull-request का बिल्डहरू hosted मा चल्ने भएकाले
 Turbopack स्लट अधिकांश समय निष्क्रिय रहन्छ:
 
-| रनर                  | लेबल           | भूमिका                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack बिल्डहरू: `ci.yml` `Build` (push/dispatch मात्र), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रातिको a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`   | रातिका job हरू (Schemathesis, promptfoo, garak, k6) र `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`   | माथिको जस्तै पूल                                                                                                                                   | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (तिनका repos)  | Dependabot मात्र (प्रत्येकको उच्चतम खपत 155 MB, 2026-10-18)                                                                                        | 4 GB / 6 GB                | प्रत्येक 200 % |
+| रनर                  | लेबल                            | भूमिका                                                                                                                                             | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack बिल्डहरू: `ci.yml` `Build` (push/dispatch मात्र), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, रातिको a11y बिल्ड | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack बिल्ड                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | रातिका job हरू (Schemathesis, promptfoo, garak, k6) र `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | माथिको जस्तै पूल                                                                                                                                   | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (तिनका repos)                   | Dependabot मात्र (प्रत्येकको उच्चतम खपत 155 MB, 2026-10-18)                                                                                        | 4 GB / 6 GB                | प्रत्येक 200 % |
 
 2026-10-18 मा मापन गरिएको:
 
@@ -76,7 +76,7 @@ CPU खाइरहन्छ। प्रत्येक OmniRoute unit मा
 ## सञ्चालन नियमहरू
 
 - **एक पटकमा एउटा मात्र Turbopack बिल्ड — लेबलद्वारा लागू गरिएको।** पूर्ण Turbopack
-  `next build` चलाउने प्रत्येक job ले `[self-hosted, omni-build]` लाई लक्षित गर्छ, र त्यो
+  `next build` चलाउने प्रत्येक job ले `[self-hosted, omni-build, omni-build-60gb]` लाई लक्षित गर्छ, र त्यो
   लेबल **`omniroute-113-5`** मा मात्र छ: `ci.yml` को `Build`, `npm-publish.yml` को `publish`, `nightly-v4-build`, `preview-artifact`,
   nightly a11y बिल्ड (#16853) र `docker-publish.yml` को **amd64** (BuildKit भित्र webpack —
   त्यहाँ Turbopack क्र्यास भएको थियो, run 33253576569)। arm64 Docker चरण `ubuntu-24.04-arm` मै रहन्छ।

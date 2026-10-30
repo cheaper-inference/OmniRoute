@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 ਵਿੱਚ ਰੂਟ ਤੋਂ ਬਾਹਰ ਭੇਜਿਆ ਗਿਆ (ਗੈਰ-ਜ਼ਰੂਰੀ ਭੀੜ ਘਟਾਉਣ ਲਈ):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ਅਤੇ ਤਿਆਰ ਕੀਤੀ `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) ਵੇਖੋ।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ਅਤੇ ਤਿਆਰ ਕੀਤੀ `quality-metrics.json` (gitignored)। [`## config/`](#config--ਸਥਿਰ-ਕੌਂਫਿਗਰੇਸ਼ਨ--ਕੁਆਲਿਟੀ-ਗੇਟ-ਸਥਿਤੀ) ਵੇਖੋ।
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ਉਪ-ਡਾਇਰੈਕਟਰੀ          | ਉਦੇਸ਼                                                                                                                                                                                                      |
 | --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ਸਥਾਨਕੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                                     |
+| `docs/i18n/`          | ਸਥਾਨਕੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (66 ਲੋਕੇਲ)                                                                                                                                                                     |
 | `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਸਰੋਤ                                                                                                                                                                                       |
 | `_tasks/superpowers/` | superpowers ਤੋਂ ਯੋਜਨਾਵਾਂ/ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (`writing-plans`/`brainstorming`) + ਖੋਜ — ਅਲੱਗ, ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵਰਜਨ ਕੀਤਾ ਰਿਪੋ, ਮੁੱਖ ਟ੍ਰੀ ਵੱਲੋਂ gitignore ਕੀਤਾ ਹੋਇਆ। CLAUDE.md → "Planning & Research Artifacts" ਵੇਖੋ। |
 

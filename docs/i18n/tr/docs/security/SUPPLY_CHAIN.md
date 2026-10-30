@@ -24,51 +24,24 @@ _KRİTİK geçit_ adımı (`severity: CRITICAL`, `ignore-unfixed: true`,
 `exit-code: 1`), **düzeltmesi mevcut olan** KRİTİK bir CVE'de yayını başarısız kılar. `ignore-unfixed`
 yukarı akış yaması olmayan bir temel imaj CVE'si için yayının engellenmesini önler.
 
-## ⚠️ CVE Varyansı (osv/Trivy geçitlerini engelleme)
+## ⚠️ CVE Değişkenliği (osv/Trivy kapılarını engeller)
 
-osv ve Trivy, bağımlılıkları **sürekli büyüyen** CVE veritabanlarına karşı karşılaştırır.
-**Hiçbir bağımlılığa dokunmayan** bir PR, mevcut bir bağımlılıkta yeni bir CVE
-açıklandığı için aniden kırmızıya dönebilir (osv: ölçülen `vulnCount` > temel çizgi; Trivy:
-imajda yeni düzeltilebilir bir KRİTİK). **Bu, engelleme yapan bir CVE geçidinin BEKLENEN
-operasyonel davranışıdır, bir ürün gerilemesi değildir.**
+osv ve Trivy, bağımlılıkları **sürekli büyüyen** CVE veritabanlarıyla karşılaştırır. **Hiçbir bağımlılığa dokunmayan** bir PR, mevcut bir bağımlılıkta yeni bir CVE açıklandığı için aniden başarısız olabilir (osv: ölçülen `vulnCount` > temel değer; Trivy: imajda düzeltilebilir yeni bir CRITICAL). **Bu, ürün regresyonu değil, engelleyici bir CVE kapısının BEKLENEN operasyonel davranışıdır.**
 
-Yeni açıklanan bir CVE nedeniyle osv veya Trivy kırmızıya döndüğünde, çözüm şudur:
+osv veya Trivy yeni açıklanan bir CVE nedeniyle başarısız olduğunda çözüm şudur:
 
-1. **Etkilenen bağımlılığı yükseltin** (tercih edilen) — `package.json`
-   `overrides` (geçişli bağımlılıklar) aracılığıyla yamalı sürüme yükseltin veya yamalı bir temel üzerinde imajı yeniden oluşturun.
+1. **Etkilenen bağımlılığın sürümünü yükseltin** (tercih edilen) — `package.json` içindeki `overrides` aracılığıyla yamalı sürüme yükseltin (geçişli bağımlılıklar için) veya imajı yamalı bir temel üzerinde yeniden oluşturun.
 2. **Yukarı akışta bir düzeltme yoksa:**
-   - **osv:** `config/quality/quality-baseline.json` içindeki `metrics.vulnCount` değerini yeniden temel alın
-     (`npm run quality:ratchet -- --update` özel geçitleri kapsamaz — değeri elle düzenleyin,
-     `direction:down`) bir gerekçe notu + takip sorunu ile.
-   - **Trivy:** `.trivyignore` dosyasına (her satırda CVE-ID) bir gerekçe
-     yorum + takip sorunu ile bir giriş ekleyin. `ignore-unfixed: true` zaten
-     yaması olmayan CVE'leri otomatik olarak kapsar.
+   - **osv:** `config/quality/quality-baseline.json` içindeki `metrics.vulnCount` için yeniden temel değer belirleyin (`npm run quality:ratchet -- --update`, özel kapıları kapsamaz — değeri gerekçe notu ve takip sorunuyla birlikte elle düzenleyin, `direction:down`).
+   - **Trivy:** `.trivyignore` dosyasına gerekçe yorumu ve takip sorunuyla birlikte bir kayıt ekleyin (satır başına CVE kimliği). `ignore-unfixed: true`, yaması olmayan CVE'leri zaten otomatik olarak kapsar.
 
-Her iki geçit de araç yoksa veya ölçüm başarısız olursa (osv-scanner PATH'de yok,
-osv.dev/ağ erişilemez, geçersiz JSON) **zarifçe ATLAR** (çıkış 0) — bir
-**ölçüm** hatası asla engellemez, yalnızca **ölçülen** bir gerileme engeller.
+Zorunlu OSV yürütmeleri (`check:vuln-ratchet -- --ratchet`), tarayıcı, rapor veya temel değer doğrulanamadığında güvenli biçimde başarısız olur; `INCOMPLETE` ile çıkış kodu 2 döndürür. Ölçülen bir regresyon, çıkış kodu 1 döndürür. Tavsiye niteliğindeki yürütme yine de `SKIP` bildirip çıkış kodu 0 döndürebilir; bu, bağımlılıkların taramayı geçtiğini kanıtlamaz. Engelleyici Trivy adımı da başarılı bir ölçüm gerektirir: kullanılamayan araçlar, başarısız işler ve eksik imaj kanıtları, bir imajın temiz olduğunu doğrulayamaz.
 
-## Bilinen Kabul Edilmiş Riskler
+## Kullanımdan kaldırılan bağımlılık riski
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Sabitlenmiş promptfoo geliştirme aracının yükseltilmesinden sonra kök kilit dosyası artık `extract-zip` paketini veya ona uzanan bir bağımlılık bağlantısını içermiyor. Bu değişiklik, #14482 kapsamında izlenen ve daha önce kabul edilmiş `promptfoo` → `@openai/codex-security` → `extract-zip` zincirini kullanımdan kaldırıyor. `tests/unit/extract-zip-14482-exposure.test.ts` içindeki regresyon kontrolleri, bu zincirin yeniden eklenmesini engelliyor ve üretim kodundan içe aktarma yasağını sürdürüyor.
 
-`extract-zip@2.0.1` iki adet yamalanmamış yüksek önem dereceli sembolik bağlantı geçişi danışmanlığı içermektedir.
-Yukarıdaki CVE Varyans çözümünün "üst akım düzeltmesi yok" dalına göre, bu bir **kabul edilmiş risktir**, bir yükseltme değildir:
-
-- **Zincir:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json` aracılığıyla doğrulandı — tüm bağımlılık ağacında tam olarak bir paket (`@openai/codex-security`) `extract-zip`'i bildiriyor ve tam olarak bir paket (`promptfoo`) `@openai/codex-security`'yi bildiriyor.
-- **Zincirin hiçbir yerinde sabit bir sürüm mevcut değil.** `extract-zip@2.0.1` (2020'de yayınlandı) paketin son sürümüdür — bakımı yapılmamaktadır. `@openai/codex-security`'nin
-  mevcut npm-latest (`0.1.29`) hala `extract-zip@2.0.1`'i çekiyor.
-- **Üretimden ulaşılamaz.** `promptfoo` yalnızca devDependency'dir (asla `dependencies` altında listelenmez) ve `src/`, `open-sse/` veya `bin/` altındaki hiçbir dosya
-  `extract-zip` npm paketini içe aktarmaz — OmniRoute'un kendi `extractZip()` yardımcısı
-  (`src/lib/versionManager/binaryManager.ts:93`) yerel `unzip`/`tar`'a kabuk komutu gönderir ve ilgisizdir. `@openai/codex-security` ayrıca extract-zip'in onEntry geri çağrısının üzerine kendi sembolik bağlantı geçişi korumasını da gönderir.
-- `package.json` `overrides` aracılığıyla `extract-zip`'i takma ad olarak **kullanmayın** — tek uygun
-  yerine geçen Electron-org-internal'dır ve `@openai/codex-security`'nin kendi onEntry/defaultDirMode/defaultFileMode kontrolleriyle API uyumlu değildir;
-  onu geçersiz kılmak, o paketin güvenlik kontrollerini sessizce bozacaktır.
-- **Temel:** ölçülen osv `vulnCount` (3) zaten dondurulmuş
-  `config/quality/quality-baseline.json` temelinin (27) oldukça altındadır — mandal değişikliğine gerek yoktur.
-- **Regresyon koruması:** `tests/unit/extract-zip-14482-exposure.test.ts` zinciri ve yukarıdaki üretim dışı içe aktarma değişmezini doğrular; eğer bunlardan herhangi biri bozulursa (örneğin, gelecekteki bir PR `extract-zip`'i üretimden erişilebilir hale getirirse) CI'yi başarısız kılar.
-- **Takip:** sorun #14482.
+Mevcut bağımlılık düzeltmesi ayrıca uyumluluk geçersiz kılmalarını Azure Identity'nin MSAL istemcisi, get-uri'nin FTP istemcisi ve OpenCode v1 SDK'sının Zod bağımlılığıyla sınırlandırıyor. Azure belirteci alma ve FTP üzerinden veri getirme işlemleri kontrollü taşıma katmanlarıyla test ediliyor; her iki OpenCode paketi de kendi derleme ve test paketlerini çalıştırıyor. Kayıt defteri güvenlik önerisi sayıları belirli bir andaki ölçümlerdir ve kilit dosyası kaydedildikten sonra değişebilir.
 
 ## Bekleyenler: Scorecard danışmanlığı → engelleme
 

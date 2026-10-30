@@ -11,13 +11,13 @@ mafi girman amfani da aka auna. Na’urar tana yin overcommit ne kawai idan buil
 da aikin lint; swap na host (16 GB) yana ɗaukar wannan, kuma saboda Builds na pull-request suna gudana a kan hosted runners,
 slot ɗin Turbopack ba ya aiki a mafi yawan lokaci:
 
-| runner               | lakabi         | matsayi                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
-| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
-| `omniroute-113-5`    | `omni-build`   | Builds na Turbopack: `ci.yml` `Build` (push/dispatch kawai), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build na a11y na dare | 56 GB / 60 GB (swap 0)     | 1600 %        |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), build na webpack                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
-| `omniroute-113-2`    | `omni-light`   | ayyukan dare (Schemathesis, promptfoo, garak, k6) da `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
-| `omniroute-113`      | `omni-light`   | pool iri ɗaya da na sama                                                                                                                                | 8 GB / 12 GB               | 400 %         |
-| OmniHeuris, OmniMind | (repos nasu)   | Dependabot kawai (kololuwa 155 MB kowanne, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200 % kowanne |
+| runner               | lakabi                          | matsayi                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`    |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Builds na Turbopack: `ci.yml` `Build` (push/dispatch kawai), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, build na a11y na dare | 56 GB / 60 GB (swap 0)     | 1600 %        |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), build na webpack                                                                                        | 20 GB / 24 GB (swap 4 GB)  | 800 %         |
+| `omniroute-113-2`    | `omni-light`                    | ayyukan dare (Schemathesis, promptfoo, garak, k6) da `quality.yml` `lint-guard`                                                                         | 12 GB / 16 GB (swap 4 GB)  | 600 %         |
+| `omniroute-113`      | `omni-light`                    | pool iri ɗaya da na sama                                                                                                                                | 8 GB / 12 GB               | 400 %         |
+| OmniHeuris, OmniMind | (repos nasu)                    | Dependabot kawai (kololuwa 155 MB kowanne, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200 % kowanne |
 
 An auna a 2026-10-18:
 
@@ -81,7 +81,7 @@ kowane lokaci, sai lokacin da ba ya aiki**, tare da binciken rashin aiki da sake
 ## Dokokin aiki
 
 - **Ginin Turbopack guda ɗaya a lokaci guda — ana tilasta hakan ta hanyar lakabi.** Duk aikin da ke gudanar da cikakken
-  `next build` na Turbopack yana nufin `[self-hosted, omni-build]`, kuma **`omniroute-113-5`** kaɗai ke ɗauke da wannan
+  `next build` na Turbopack yana nufin `[self-hosted, omni-build, omni-build-60gb]`, kuma **`omniroute-113-5`** kaɗai ke ɗauke da wannan
   lakabi: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   ginin a11y na dare (#16853) da kuma **amd64** na `docker-publish.yml` (webpack a cikin BuildKit —
   Turbopack ya durƙushe a can, gudu na 33253576569). Bangaren arm64 na Docker yana ci gaba da kasancewa a `ubuntu-24.04-arm`.

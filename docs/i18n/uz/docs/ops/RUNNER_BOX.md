@@ -12,13 +12,13 @@ buildi Release-Green webpack buildi va lint job bilan bir vaqtda ishlaganda orti
 host swap (16 GB) buni qoplaydi, pull-request Buildlari esa hostingdagi runnerlarda ishlagani uchun
 Turbopack sloti ko‘pincha bo‘sh turadi:
 
-| runner               | label               | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
-| -------------------- | ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
-| `omniroute-113-5`    | `omni-build`        | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
-| `omniroute-113-6`    | `omni-release`      | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
-| `omniroute-113-2`    | `omni-light`        | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
-| `omniroute-113`      | `omni-light`        | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
-| OmniHeuris, OmniMind | (ularning repolari) | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
+| runner               | label                           | rol                                                                                                                                                 | `MemoryHigh` / `MemoryMax` | `CPUQuota`           |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildlari: `ci.yml` `Build` (faqat push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, tungi a11y buildi | 56 GB / 60 GB (swap 0)     | 1600 %               |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack buildi                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %                |
+| `omniroute-113-2`    | `omni-light`                    | tungi ishlar (Schemathesis, promptfoo, garak, k6) va `quality.yml` faylidagi `lint-guard`                                                           | 12 GB / 16 GB (swap 4 GB)  | 600 %                |
+| `omniroute-113`      | `omni-light`                    | yuqoridagi bilan bir xil pool                                                                                                                       | 8 GB / 12 GB               | 400 %                |
+| OmniHeuris, OmniMind | (ularning repolari)             | faqat Dependabot (har biri uchun eng yuqori ko‘rsatkich 155 MB, 2026-10-18)                                                                         | 4 GB / 6 GB                | har biri uchun 200 % |
 
 2026-10-18 sanasida o‘lchangan:
 
@@ -89,7 +89,7 @@ ishga tushirish bitta buyruq ichida bajarilsin.
 ## Ishlatish qoidalari
 
 - **Bir vaqtda faqat bitta Turbopack build — label orqali majburiy cheklangan.** To‘liq Turbopack
-  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build]`ni nishonga oladi va bu
+  `next build` ishga tushiradigan har bir job `[self-hosted, omni-build, omni-build-60gb]`ni nishonga oladi va bu
   label faqat **`omniroute-113-5`**da mavjud: `ci.yml`dagi `Build`, `npm-publish.yml`dagi `publish`,
   `nightly-v4-build`, `preview-artifact`, tungi a11y build (#16853) va `docker-publish.yml`dagi
   **amd64** (BuildKit ichidagi webpack — u yerda Turbopack vahimali xato bilan to‘xtagan,

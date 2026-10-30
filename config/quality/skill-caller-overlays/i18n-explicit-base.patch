@@ -1,0 +1,871 @@
+--- a/.agents/skills/_shared/i18n-translate-new-keys.md
++++ b/.agents/skills/_shared/i18n-translate-new-keys.md
+@@ -3,8 +3,8 @@
+ > **Mandatory for ANY branch that adds or changes keys in `src/i18n/messages/en.json` or
+ > `bin/cli/locales/en.json`.** Read by `/implement-features`, `/implement-fix-bugs`,
+ > `/port-upstream-features`, `/port-upstream-issues` and `/merge-prs` at the validation battery
+-> that precedes `gh pr create` (or the merge). It runs **in parallel** with the rest of the
+-> battery — it must never slow the flow, and it must never be skipped.
++> that precedes `gh pr create` (or the merge). Follow `validation-gate.md` for resource
++> admission; parallel work is allowed within that admission. Its completed evidence cannot be skipped.
+ 
+ ## Why (incident 2026-09-16)
+ 
+@@ -19,24 +19,50 @@
+ 
+ ### 0. Pinned-name guard FIRST (before any translation run)
+ 
+-Some tests pin a key to its English value (product, engine and flag names). A translation run
+-that touches one of them breaks the test. Find them and put every pinned key in the allowlist
+-**before** launching the runner:
++Some tests pin English product, engine or flag names. Inspect those assertions and the
++product meaning before translating; a pinned test alone does not justify a new exception.
++Fix the cause first. An allowlist entry is only for a pre-existing violation that cannot
++be fixed in the same PR, with a justification and tracking issue under
++`docs/architecture/QUALITY_GATES.md`. Never add entries merely to make the gate green;
++remove the entry when its tracked cause is fixed.
+ 
+ ```bash
+ rg -n 'assert\.equal\(.*messages\.[a-zA-Z.]+, "' tests/unit
+-# every key that must stay English → scripts/i18n/untranslatable-keys.json ("keys": [...])
+-# (CLI catalog: scripts/i18n/untranslatable-cli-keys.json)
++# Review existing UI exceptions: scripts/i18n/untranslatable-keys.json
++# Review existing CLI exceptions: scripts/i18n/untranslatable-cli-keys.json
+ ```
+ 
+ ### 1. Detect the touched keys
+ 
++Use the actual PR target, or the target already approved for a new branch, from
++`base-green.md`. Fetch and verify that target before this step; set `BASE_REF` to its
++reviewed ref or commit, then pin it locally. In CI, preserve the already resolved SHA pair
++instead of running this local preparation. A package version is not a comparison base.
++
+ ```bash
+-git fetch origin "$RELEASE_BRANCH" --quiet
+-git diff "origin/$RELEASE_BRANCH" -- src/i18n/messages/en.json bin/cli/locales/en.json
++: "${BASE_REF:?Set BASE_REF to the reviewed PR target ref or commit}"
++I18N_TARGET_COMMIT=$(git rev-parse --verify "${BASE_REF}^{commit}") || exit 2
++I18N_CHECKED_HEAD=$(git rev-parse --verify "HEAD^{commit}") || exit 2
++BASE_REF="$I18N_TARGET_COMMIT"
++export BASE_REF
++I18N_DIFF_BASE=$(git merge-base "$BASE_REF" "$I18N_CHECKED_HEAD") || exit 2
++[ "$I18N_DIFF_BASE" != "$I18N_CHECKED_HEAD" ] || exit 2
++git diff "$I18N_DIFF_BASE" -- src/i18n/messages/en.json bin/cli/locales/en.json
+ ```
+ 
+-No hunk → this module does not apply; carry on. Hunks in `bin/cli/locales/en.json` → the
++Both differential UI gates (`i18n:check-new-keys` and `i18n:check-value-drift`) require
++this explicit local base. Check that each reported candidate SHA equals the recorded head,
++and record the comparison and scope. CI resolves one
++`I18N_BASE_SHA` / `I18N_CANDIDATE_SHA` pair for both gates; preserve that pair when
++invoked inside CI. Missing history, an empty comparison, malformed catalogs or a moved
++candidate return **2 / INCOMPLETE**: repair the evidence and rerun, retaining HOLD.
++The verification commands below forward local `BASE_REF` when set and preserve
++the CI pair when it is absent; an empty forwarded value does not supply a base.
++The gates enforce complete comparison context. Exit 1 is a measured gap; exit 0
++only covers the complete reported comparison. A changed
++base/head invalidates the prior report. `--warn` is not an admission check.
++
++No hunk against the valid comparison → this module does not apply; carry on. Hunks in `bin/cli/locales/en.json` → the
+ same flow with `--catalog=cli`. Hunks that are NOT yours → the base drifted; rebase onto the
+ release tip first so the runner translates only your keys.
+ 
+@@ -56,24 +82,19 @@
+ `_artifacts/i18n-new-keys/<code>.log`, and writes `batch.rc` (0/1) **last** — poll that file.
+ It exits non-zero while any selected locale still carries a marker.
+ 
+-**Backend env (item d).** The five variables live in the repo `.env` (gitignored) of the main
+-checkout — the LAN OmniRoute instance, model `codex/gpt-5.6-sol-low`:
++**Backend environment.** Reuse the previously authorized private environment injection
++for this translation session. The runner accepts inherited `OMNIROUTE_TRANSLATION_API_URL`,
++`OMNIROUTE_TRANSLATION_API_KEY` and `OMNIROUTE_TRANSLATION_MODEL`; concurrency and timeout
++variables are optional. Preserve the selected backend and model from that authorized
++configuration instead of choosing them from historical examples.
+ 
+-```
+-OMNIROUTE_TRANSLATION_API_URL   OMNIROUTE_TRANSLATION_API_KEY   OMNIROUTE_TRANSLATION_MODEL
+-OMNIROUTE_TRANSLATION_CONCURRENCY   OMNIROUTE_TRANSLATION_TIMEOUT_MS
+-```
+-
+-A fresh worktree has no `.env` (`scripts/dev/new-worktree.sh` does not copy it). Bring only
+-the block over — never commit it:
+-
+-```bash
+-MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+-grep '^OMNIROUTE_TRANSLATION_' "$MAIN/.env" >> .env
+-```
+-
+-If the block is absent the runner **refuses to start and prints the five names** (exit 2) —
+-it never leaves markers silently. Do not "fix" that by stamping markers; fix the env.
++Do not inspect, copy, source or print dotenv contents, dump process environments, or put
++credential values in commands, prompts, logs or artifacts. The private mechanism supplies
++the environment directly to the child process; this module does not prescribe a new
++credential-transfer command. Existing authorization remains valid. If that mechanism or
++required variables are unavailable, report INCOMPLETE for translation and continue only
++independent work; do not create markers or a passing report. The runner's missing-variable
++error lists names/status, not values, and exits 2 before translating.
+ 
+ **Launch (detached — the shell returns immediately):**
+ 
+@@ -85,12 +106,13 @@
+ 
+ **Inside an agent that can dispatch subagents (Claude Code / Workflow):** dispatch **ONE**
+ background subagent (`run_in_background` / `agent()` with the default model, high effort)
+-whose ONLY job is:
++whose ONLY job is (pass the pinned local `BASE_REF` and recorded head, or the complete
++CI comparison environment, in its task context):
+ 
+ 1. run `bash scripts/i18n/translate-new-keys.sh` (foreground inside the subagent is fine),
+ 2. poll `_artifacts/i18n-new-keys/batch.rc` until it exists (`tail
+    _artifacts/i18n-new-keys/batch.log` for progress; a locale's `<code>.exit` = its verdict),
+-3. run and **report verbatim** `npm run i18n:check-keys && npm run i18n:check-ratio && npm run i18n:check-new-keys`,
++3. run and **report verbatim** `npm run i18n:check-keys && npm run i18n:check-ratio && BASE_REF="${BASE_REF:-}" npm run i18n:check-new-keys && BASE_REF="${BASE_REF:-}" npm run i18n:check-value-drift`,
+ 4. list the locale files it changed (`git status --short src/i18n/messages bin/cli/locales`).
+ 
+ The main flow keeps running the rest of the battery (typecheck, lint, tests, complexity gates)
+@@ -102,14 +124,21 @@
+ 
+ ### 4. Verify, then commit the locales WITH the feature
+ 
++`uplift-prs/scripts/fill_missing_i18n.py` is a legacy-named, read-only inventory of
++new-key gaps. It consumes the gate's JSON, preserves exit 0/1/2 and never creates
++translations or markers. For exit 1, translate the reported keys through the reviewed
++flow above, then rerun the inventory with the same reviewed comparison. Exit 2 requires
++repairing the comparison/tool/report first and makes no catalog changes.
++
+ ```bash
+-npm run i18n:check-keys && npm run i18n:check-ratio && npm run i18n:check-new-keys
++npm run i18n:check-keys && npm run i18n:check-ratio && BASE_REF="${BASE_REF:-}" npm run i18n:check-new-keys && BASE_REF="${BASE_REF:-}" npm run i18n:check-value-drift
+ git add src/i18n/messages/*.json          # (bin/cli/locales/*.json for the CLI catalog)
+ ```
+ 
+-A red `i18n:check-ratio` after a clean runner = the pinned-name guard (step 0) was skipped or
+-the base was already red (base-green check) — never rebaseline in a feature branch. Failed
+-locales: `bash scripts/i18n/translate-new-keys.sh --locales=<csv>` re-runs just those.
++A red `i18n:check-ratio` after a completed runner still requires diagnosis against the
++exact base under the same profile. Distinguish inherited debt, a new translation defect
++and incomplete evidence; a completed runner does not prove the ratio passed. Fix the
++cause without raising baselines or adding exceptions to obtain green. Failed locales: `bash scripts/i18n/translate-new-keys.sh --locales=<csv>` re-runs just those.
+ 
+ Reference: `docs/guides/I18N.md` → "Translating the keys a branch adds", and
+ `docs/architecture/QUALITY_GATES.md` → `check-new-key-coverage`.
+--- a/.agents/skills/i18n-waves/references/scope-map.md
++++ b/.agents/skills/i18n-waves/references/scope-map.md
+@@ -8,7 +8,7 @@
+ 
+ | Superfície | Onde | Gate (CI) | Corretor | Observação |
+ |---|---|---|---|---|
+-| Espelhos de docs | `docs/i18n/<loc>/docs/**.md`, `docs/i18n/<loc>/{README,AGENTS,CLAUDE,GEMINI,CONTRIBUTING,SECURITY}.md` | `npm run i18n:check` (= `scripts/i18n/check-translation-drift.mjs`, job «i18n Validation») | `scripts/i18n/run-translation.mjs --files=<doc>` (por seção) + kit desta skill | **O gate só compara hashes** do `.i18n-state.json`; não vê conteúdo errado. Escopo padrão = *docs core set* (`config/i18n.json` + `scripts/i18n/lib/docs-core-set.mjs`, 152 fontes); `--all` mostra o estado inteiro. |
++| Espelhos de docs | `docs/i18n/<loc>/docs/**.md`, `docs/i18n/<loc>/{README,AGENTS,CLAUDE,GEMINI,CONTRIBUTING,SECURITY}.md` | `npm run i18n:check` (= `scripts/i18n/check-translation-drift.mjs`, job «i18n Validation») | `scripts/i18n/run-translation.mjs --files=<doc>` (por seção) + kit desta skill | O gate verifica hashes, proveniência registrada e inconsistências de cache de seções; não certifica a qualidade semântica da tradução. Meça o escopo padrão no *docs core set* do candidato (`config/i18n.json` + `scripts/i18n/lib/docs-core-set.mjs`); `--all` mostra o estado inteiro. |
+ | Espelhos de `llm.txt` | `docs/i18n/<loc>/llm.txt` | `npm run check:docs-sync` («Docs Sync (Strict)») | `node scripts/i18n/sync-llm-mirrors.mjs` | Cópia **estrita** do corpo da raiz (sem tradução), preservando título + barra de idioma. Idempotente. Superfície protegida. |
+ | Espelhos de CHANGELOG | `docs/i18n/<loc>/CHANGELOG.md` | `check:docs-sync` (seções de versão presentes) | `npm run release:sync-changelog-i18n` | Do fluxo de release. Se drifta fora de release, pergunte. |
+ | Barras de idioma (`🌐 **Languages:** …`) | fontes e espelhos | `check:docs-sync` | `node scripts/i18n/sync-language-bars.mjs` (`--dry-run` lista) | Nunca insere barra onde não há; só reescreve a existente. |
+@@ -16,6 +16,12 @@
+ | Chaves de CLI | `bin/cli` + catálogo `--catalog=cli` | `npm run i18n:check-keys:cli`, `npm run check:cli-i18n` | `sync-ui-keys.mjs --catalog=cli --translate-markers`; `translate-new-keys.sh --catalog=cli` | Mesmo backend e env das docs; allowlist `scripts/i18n/untranslatable-cli-keys.json`. |
+ | Catálogo do site | `omnirouteSite/lang/<code>.json` | — (não é gate de CI) | `node scripts/i18n/retranslate-site.mjs` | Fora da onda, salvo pedido. |
+ | Espelhos de skills do produto | `skills/**/SKILL.md`, `skills/**/references/endpoints.md` | `npm run check:agent-skills-sync` («Merge integrity») | `node --import tsx/esm scripts/skills/generate-agent-skills.mjs --apply` | Não é tradução: é **superfície protegida** gerada do `docs/openapi.yaml`. PR própria, diff revisado, aprovação do dono. |
++
++Para os gates diferenciais de UI (`i18n:check-new-keys` e `i18n:check-value-drift`),
++prepare e passe `BASE_REF` explícita pelo procedimento de `_shared/i18n-translate-new-keys.md`,
++seção 1, vinculada à base real da PR e ao candidato atual. Preserve o par de SHAs fornecido
++pelo CI quando existir. `2 / INCOMPLETE` exige corrigir a evidência; não é PASS nem uma
++regressão atribuível ao contribuinte. Mudança de base/head exige nova comparação.
+ 
+ Fonte inglesa defasada (contagens como «193 migrations», «358 providers» nos `Docs Gates`) é
+ `npm run check:docs-counts` / `npm run gen:provider-reference`, não i18n.
+@@ -32,28 +38,39 @@
+ | `- <doc> (source-changed)` | a fonte inglesa mudou desde a última tradução | onda: retradução por seção, 66 locales |
+ | `- <doc> (source-missing)` | a fonte sumiu do repo mas segue no state | pergunte: remover a entrada do state (doc apagado/renomeado) |
+ | `- <doc> [<loc>] (stale)` | o locale foi traduzido de uma versão mais antiga da fonte do que a registrada | onda (é o que `rebase_stale.py` produz de propósito) |
+-| `- <doc> [<loc>]` em «drifted targets» | o espelho foi editado depois da tradução (prettier, PR da base, correção manual) | `run-translation.mjs` **não** retraduz drift só de alvo (fonte igual → `skipped=66`); a onda aceita a edição pela readoção dirigida do fim (`readopt_targets.py <doc>`). Se a edição quebrou a estrutura (`audit_all`), `--force` naquele locale |
++| `- <doc> [<loc>]` em «drifted targets» | o espelho foi editado depois da tradução (prettier, PR da base, correção manual) | Revisar o diff e a proveniência de cada par fonte/locale. Rehash dirigido só depois de provar que os bytes finais correspondem à tradução revisada da fonte registrada; formatação mecânica comprovada é um caso possível. Fonte defasada, cache incompatível, conteúdo incorreto ou evidência ausente exigem correção/retradução, nunca adoção para limpar o gate |
+ | `- <doc> [<loc>]` em «missing targets» | o espelho não existe no disco | onda cria |
+ | `PASS — all sources and targets match recorded hashes` | hashes batem | **não** prova conteúdo: rode as auditorias |
++
++Com `--base-report`, compare a mesma política nos checkouts exatos da base e do candidato:
++a assinatura completa distingue drift herdado de novo, incluindo stale e cache inconsistente.
++Sem esse recorte, avisos globais não provam responsabilidade da PR. Um PASS de hashes
++não autoriza adoção nem dispensa revisão do conteúdo.
+ 
+ ## 3. O `.i18n-state.json`
+ 
+ `sources[<rel>] = { source_hash, locales: { <loc>: { source_hash, target_hash, section_hashes?, updated_at } } }`.
+-`source_hash` = sha256 dos bytes da fonte; `target_hash` = sha256 dos bytes do espelho **já formatado
+-pelo prettier** (o pre-commit reformata; por isso a onda termina readotando os alvos que processou);
+-espelho em `docs/i18n/<loc>/<rel>` (raiz incluída, ex.: `docs/i18n/bs/AGENTS.md`). `section_hashes`
+-permite a retradução por seção: `resolveSectionPlan` recupera o texto antigo por hash
+-(`findSourceTextByHash`) e traduz só o que mudou. Hash e caminhos: `scripts/i18n/lib/translation-state.mjs`.
++`source_hash` = sha256 dos bytes da fonte; `target_hash` = sha256 dos bytes finais do espelho **já formatado pelo prettier**.
++Uma regravação mecânica exige diff revisado e vínculo comprovado à fonte antes de atualizar o hash;
++espelho em `docs/i18n/<loc>/<rel>` (raiz incluída, ex.: `docs/i18n/bs/AGENTS.md`). Para reutilizar
++seções, `resolveSectionPlan` tenta obter o snapshot exato por hash (`findSourceTextByHash`);
++quando disponível, invalida `section_hashes` comprovadamente divergente desse snapshot.
++Sem o snapshot exato, o planner mantém o caminho de fallback; isso não comprova compatibilidade
++nem tradução atual. Cache ausente admite bootstrap, sujeito às mesmas limitações de evidência.
++Hash e caminhos: `scripts/i18n/lib/translation-state.mjs`.
+ 
+ Três armadilhas que já custaram dias:
+ 
+ 1. **Stale escondido.** Alguém roda `--adopt` depois que a fonte mudou; o espelho velho passa a valer
+-   para a fonte nova e o gate diz PASS para sempre. Só aparece em `audit_all.py` (estrutura) e
+-   `audit_spans.py` (code spans). Casos reais: TROUBLESHOOTING (#15570), API_REFERENCE, ENVIRONMENT,
++   para a fonte nova sem que a tradução tenha sido feita. Nunca avance `source_hash` para
++   esconder esse estado. `audit_all.py` (estrutura) e `audit_spans.py` (code spans) complementam
++   o gate; nenhuma dessas verificações isolada prova equivalência semântica. Casos reais: TROUBLESHOOTING (#15570), API_REFERENCE, ENVIRONMENT,
+    ERROR_SANITIZATION, OPENCODE-V2-PLUGIN, FEATURES em 25 locales (#15618 traduziu 41 e adotou os 66).
+ 2. **`--adopt --targets-only` é global.** O código diz: «cobre o estado INTEIRO (`--files`/`--locale`
+-   não restringem)». Ele abençoa também espelhos editados à mão por outras PRs. Para readotar só
+-   alguns docs use `readopt_targets.py <doc…>`.
++   não restringem)». Não o use nesta onda. `readopt_targets.py <doc…>` restringe os docs,
++   mas considera todos os locales registrados desses docs: antes de usá-lo, revisar e vincular
++   todos os pares que terão hashes alterados. Preservar fonte/cache compatíveis e registrar
++   hashes anteriores/finais; evidência incompleta mantém HOLD, sem adoção automática.
+ 3. **Dois escritores no mesmo state.** Cada `run-translation.mjs` regrava o `.i18n-state.json`
+    inteiro; dois em paralelo na mesma worktree apagaram 162 mil linhas (2026-09-24). O `wave.sh` tem
+    lock por worktree e recusa partir se há outro `run-translation` nela.
+@@ -72,14 +89,17 @@
+ | Script | Para quê |
+ |---|---|
+ | `bootstrap.sh <branch> [base]` | Reconhecimento + worktree + diagnóstico num comando. Só lê. Painel em `_artifacts/i18n-waves/bootstrap-<branch>.txt`. |
+-| `wave.sh <worktree> <nome>` | A onda (seção 5 da skill). Lock por worktree; probe/backoff de cota; drift via `--json` em arquivo; commit+push por doc; readoção dirigida. `FILES=…`, `FORCE=1`, `QUOTA_WAIT/MAX`, `DOWN_WAIT/MAX`. |
+-| `readopt_targets.py <doc…>` | Rehash de `target_hash` só dos docs dados; `source_hash` intocado. Substitui o adopt global. |
++| `wave.sh <worktree> <nome>` | A onda (seção 5 da skill). Lock por worktree; probe/backoff de cota; drift via `--json` em arquivo; commit+push por doc dentro da autoridade vigente; rehash dirigido exige a revisão de proveniência descrita acima. `FILES=…`, `FORCE=1`, `QUOTA_WAIT/MAX`, `DOWN_WAIT/MAX`. |
++| `readopt_targets.py <doc…>` | Rehash de `target_hash` dos docs dados, em todos os locales registrados; preserva `source_hash`. Só após revisão dos bytes finais e prova de compatibilidade fonte/espelho/cache; não corrige conteúdo defasado. |
+ | `resolve_state_merge.py` | Resolve `git merge origin/<base>` parado em conflito de `.i18n-state.json`/espelhos, doc a doc, e rehasheia alvos do working tree. Não commita. |
+ | `rebase_stale.py <doc…> [--locales=a,b] [--at=<ref>]` | Expõe stale escondido: regrava `source_hash` por locale para a fonte de quando o espelho foi commitado (ou de `--at`), remove `section_hashes`. |
+ | `audit_all.py` | Estrutura de todo espelho vs fonte atual: títulos (±1), fences (exato), linhas de tabela (±3). |
+ | `audit_spans.py` | Code spans inline: espelho que perdeu ou ganhou >10 % dos `` `spans` `` da fonte. |
+-| `validate_vs_base.py` | Espelhos alterados vs `I18N_BASE` (padrão: maior `origin/release/v*`): regressão estrutural nova e vazamento de raciocínio. |
++| `validate_vs_base.py` | Espelhos alterados vs `I18N_BASE`: forneça explicitamente a base real revisada; não use a escolha heurística da maior release como evidência de admissão. Mede regressão estrutural nova e vazamento de raciocínio. |
+ 
+ Variáveis: `I18N_BASE` (ref da base), `I18N_OUT` (logs e JSON; padrão `_artifacts/i18n-waves`),
+ `I18N_ENV` (arquivo de env do backend; fallback `_artifacts/i18n-completion/env.translation`, depois
+-o `.env` da worktree). Rode os `.py` com `python3 -I` a partir da raiz da worktree.
++o `.env` da worktree). A seleção de arquivo pelo runner não autoriza inspecionar/copiar
++seu conteúdo: reutilize apenas o mecanismo privado já autorizado, sem imprimir valores
++ou despejar ambientes. Ausência desse mecanismo mantém tradução INCOMPLETE. Rode os
++`.py` com `python3 -I` a partir da raiz da worktree.
+--- a/.agents/skills/implement-features/SKILL.md
++++ b/.agents/skills/implement-features/SKILL.md
+@@ -99,7 +99,7 @@
+-
++
+ ```bash
+ git branch --show-current                                                                # must be release/vX.Y.Z, not main
+-gh issue list --repo diegosouzapw/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty'   # label filtered LOCALLY — server-side --label has confirmed index lag
++gh issue list --repo cheaper-inference/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty'   # label filtered LOCALLY — server-side --label has confirmed index lag
+ git ls-remote --heads origin 'release/v*' | sed 's#.*refs/heads/##' | sort -V | tail -1   # $ACTIVE (highest release/v*)
+ git worktree list                                                                        # note OTHER sessions' worktrees — off-limits
+ ```
+@@ -227,7 +227,7 @@
+ ```bash
+ git fetch origin "$RELEASE_BRANCH"
+ # base-green (../_shared/base-green.md) — 1 API call, do NOT run local suites to rediscover it:
+-BASE_RED_ISSUE=$(gh issue list --repo diegosouzapw/OmniRoute --state open \
++BASE_RED_ISSUE=$(gh issue list --repo cheaper-inference/OmniRoute --state open \
+   --search "Release branch not green: $RELEASE_BRANCH in:title" --json number,title,body \
+   --jq '.[0] // empty')
+ git worktree add "<main>/.claude/worktrees/feat-<NUMBER>" -b "feat/<NUMBER>-<slug>" "origin/$RELEASE_BRANCH"
+@@ -368,7 +368,7 @@
+ 
+ If any item fails, **fix root cause** before committing. Do NOT bypass with `--no-verify` (hard rule #10).
+ 
+-> **🌐 i18n keys added? (`../_shared/i18n-translate-new-keys.md`)** — if the feature touched `src/i18n/messages/en.json` (or `bin/cli/locales/en.json`), translate the new keys BEFORE opening the PR: the new-key gate now rejects `__MISSING__` markers. Launch the detached runner / ONE background subagent while the rest of this battery runs, and open the PR only after its report (`i18n:check-keys` + `i18n:check-ratio` + `i18n:check-new-keys`) is green.
++> **🌐 i18n keys added? (`../_shared/i18n-translate-new-keys.md`)** — if the feature touched `src/i18n/messages/en.json` (or `bin/cli/locales/en.json`), translate the new keys BEFORE opening the PR: the new-key gate now rejects `__MISSING__` markers. Launch the detached runner / ONE background subagent while the rest of this battery runs, pass the reviewed `BASE_REF` from section 1 of that shared module to the worker, and open the PR only after its report (`i18n:check-keys` + `i18n:check-ratio` + `i18n:check-new-keys` + `i18n:check-value-drift`) passes on the current comparison. Missing or changed base/head and exit 2 (`INCOMPLETE`) remain HOLD until the comparison is repaired and both differential gates are rerun.
+ 
+ ### 3.3 Commit + open a PR (one feature = one branch = one PR — immediately)
+ 
+@@ -475,7 +475,7 @@
+ >
+ > ```bash
+ > # label filtered LOCALLY — server-side --label has confirmed index lag
+-> FREEZE_TITLE=$(gh issue list --repo diegosouzapw/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty')
++> FREEZE_TITLE=$(gh issue list --repo cheaper-inference/OmniRoute --state open --json title,labels --limit 100 --jq '[.[] | select([.labels[].name] | index("release-freeze"))][0].title // empty')
+ > ACTIVE=$(git ls-remote --heads origin 'release/v*' | sed 's#.*refs/heads/##' | sort -V | tail -1)
+ > if [ -n "$FREEZE_TITLE" ]; then
+ >   FROZEN="release/v$(echo "$FREEZE_TITLE" | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')"
+--- a/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
++++ b/.agents/skills/uplift-prs/scripts/fill_missing_i18n.py
+@@ -1,42 +1,86 @@
+ #!/usr/bin/env python3
+-"""Run scripts/i18n/check-new-key-coverage.mjs; for every reported `✗ <key> — missing in N: a, b`
+-fill the key in those locales with `__MISSING__:<english>` (vi must be translated by hand: it is
+-left alone and reported). Re-runs the gate at the end. Exit 0 when the gate passes."""
+-import json, re, subprocess, sys
++"""Legacy entrypoint: report new-key translation gaps without modifying catalogs.
++
++Set BASE_REF to the reviewed PR target ref/commit locally, or provide the CI's
++I18N_BASE_SHA/I18N_CANDIDATE_SHA pair. Prints the gate's JSON and preserves strict
++exit semantics: 0 complete/pass, 1 complete/gaps, 2 incomplete evidence. Translation
++belongs to the reviewed i18n workflow; this helper never fills placeholders.
++"""
++import json
++import os
++import re
++import subprocess
++import sys
++
++SHA = re.compile(r"[0-9a-f]{40}\Z")
++
++
++def valid_sha(value):
++    return isinstance(value, str) and bool(SHA.fullmatch(value)) and value != "0" * 40
++
++
++def incomplete(reason):
++    return 2, {"ok": False, "incomplete": True, "reason": reason}
++
++
+ def run_gate():
+-    r = subprocess.run(["node", "scripts/i18n/check-new-key-coverage.mjs"], capture_output=True, text=True)
+-    return r.returncode, r.stdout + r.stderr
+-def get_path(obj, key):
+-    # flat key first, then dotted traversal
+-    if key in obj: return obj[key], "flat"
+-    cur = obj
+-    for part in key.split("."):
+-        if not isinstance(cur, dict) or part not in cur: return None, None
+-        cur = cur[part]
+-    return cur, "nested"
+-def set_path(obj, key, value, mode):
+-    if mode == "flat": obj[key] = value; return
+-    parts = key.split("."); cur = obj
+-    for part in parts[:-1]: cur = cur.setdefault(part, {})
+-    cur[parts[-1]] = value
+-rc, out = run_gate()
+-if rc == 0: print(out.strip().splitlines()[-1]); sys.exit(0)
+-en = json.load(open("src/i18n/messages/en.json", encoding="utf-8"))
+-todo = {}
+-for m in re.finditer(r"✗ (\S+) — missing in \d+: ([a-zA-Z\-, ]+)", out):
+-    key, locs = m.group(1), [x.strip() for x in m.group(2).split(",") if x.strip()]
+-    for loc in locs: todo.setdefault(loc, []).append(key)
+-skipped_vi = []
+-for loc, keys in sorted(todo.items()):
+-    if loc == "vi": skipped_vi = keys; continue
+-    p = f"src/i18n/messages/{loc}.json"; data = json.load(open(p, encoding="utf-8"))
+-    for key in keys:
+-        val, mode = get_path(en, key)
+-        if val is None: print("no english value for", key); continue
+-        cur, _ = get_path(data, key)
+-        if cur is not None: continue
+-        set_path(data, key, f"__MISSING__:{val}" if isinstance(val, str) else val, mode)
+-    open(p, "w", encoding="utf-8").write(json.dumps(data, ensure_ascii=False, indent=2) + "\n")
+-    print(f"filled {loc}: {len(keys)} key(s)")
+-if skipped_vi: print("vi needs real translations for:", skipped_vi)
+-rc, out = run_gate(); print(out.strip().splitlines()[-1]); sys.exit(rc)
++    env = os.environ.copy()
++    base, candidate = env.get("I18N_BASE_SHA"), env.get("I18N_CANDIDATE_SHA")
++    if base or candidate:
++        if not valid_sha(base) or not valid_sha(candidate) or base == candidate:
++            return incomplete("Provide a complete, distinct I18N_BASE_SHA/I18N_CANDIDATE_SHA pair")
++    elif not env.get("BASE_REF", "").strip():
++        return incomplete("Set BASE_REF to the reviewed PR target ref/commit before running this helper")
++
++    try:
++        result = subprocess.run(
++            ["node", "scripts/i18n/check-new-key-coverage.mjs", "--json"],
++            env=env, stdin=subprocess.DEVNULL, capture_output=True, text=True, timeout=120,
++        )
++    except (OSError, subprocess.TimeoutExpired):
++        return incomplete("The new-key gate could not complete")
++    try:
++        report = json.loads(result.stdout)
++    except (ValueError, TypeError):
++        return incomplete("The new-key gate did not return one valid JSON report")
++    if not isinstance(report, dict):
++        return incomplete("The new-key gate returned an invalid report shape")
++    if result.returncode == 2 and report.get("ok") is False and report.get("incomplete") is True:
++        if isinstance(report.get("reason"), str) and report["reason"].strip():
++            return 2, report
++        return incomplete("The new-key gate returned incomplete evidence without a reason")
++
++    comparison, gaps = report.get("comparison"), report.get("gaps")
++    if not isinstance(comparison, dict) or not isinstance(gaps, list):
++        return incomplete("The new-key gate report lacks its comparison or gaps inventory")
++    if not all(valid_sha(comparison.get(key)) for key in ("baseSha", "baseTipSha", "candidateSha")):
++        return incomplete("The new-key gate report lacks an immutable comparison")
++    if comparison["baseSha"] == comparison["candidateSha"] or not all(
++        isinstance(comparison.get(key), str) and comparison[key].strip() for key in ("source", "scope")
++    ):
++        return incomplete("The new-key gate reported an empty or unspecified comparison")
++    if base and (comparison["baseSha"] != base or comparison["candidateSha"] != candidate):
++        return incomplete("The new-key gate report differs from the pinned CI comparison")
++    base_tip = env.get("I18N_BASE_TIP_SHA") if base else env.get("BASE_REF")
++    if valid_sha(base_tip) and comparison["baseTipSha"] != base_tip:
++        return incomplete("The new-key gate report differs from the requested target commit")
++    if any(not isinstance(gap, dict) or not all(
++        isinstance(gap.get(key), str) and gap[key].strip() for key in ("key", "locale")
++    ) for gap in gaps):
++        return incomplete("The new-key gate returned an invalid translation gap")
++    expected_exit = 1 if gaps else 0
++    if result.returncode != expected_exit or report.get("ok") is not (not gaps) or report.get("incomplete"):
++        return incomplete("The new-key gate exit and report contradict one another")
++    return expected_exit, report
++
++
++def main():
++    code, report = run_gate()
++    print(json.dumps(report, ensure_ascii=False, indent=2))
++    if code == 1:
++        print("Real translations are required. Follow the shared i18n workflow and rerun this inventory; no catalogs changed.", file=sys.stderr)
++    return code
++
++
++if __name__ == "__main__":
++    sys.exit(main())
+--- a/.agents/skills/generate-release/phases/phase-0-preflight.md
++++ b/.agents/skills/generate-release/phases/phase-0-preflight.md
+@@ -4,37 +4,17 @@
+ 
+ ## Phase 0 (pre-flight): Release-green sweep — make the release branch green BEFORE you start (Solution E)
+ 
+-> **🔴 FIRST OF ALL — read the nightly release-green tracking issue. It is the base-red list, pre-computed.**
+-> The `nightly-release-green` workflow runs `validate-release-green.mjs --with-build` on the active
+-> release branch every night and, on HARD failures, opens/updates **`🔴 Release branch not green:
+-> release/vX.Y.Z`**. In v3.8.43 that issue (**#5906**) was OPEN with all 5 HARD failures listed
+-> (typecheck `base.ts`, db-rules, unit, docs, pack-artifact) — the exact base-reds that then cost ~2h
+-> of layered CI — and the release started **without reading it**. Do this before anything else:
+-> ```bash
+-> VERSION=$(node -p "require('./package.json').version")
+-> gh issue list --repo diegosouzapw/OmniRoute --state open \
+->   --search "Release branch not green: release/v$VERSION in:title" --json number,body \
+->   --jq '.[0] | "#\(.number)\n\(.body)"'
+-> ```
+-> Treat its fenced verdict block as your starting base-red worklist. **Close the issue** once the
+-> release PR merges (the base-reds are fixed and shipped) — do it alongside the freeze-lift in step 12c.
+->
+-> **⚠️ It is a SNAPSHOT, not a worklist. Re-measure before acting on it.** The issue is written by
+-> the nightly against whatever the tip was at ~04:30Z. In the v3.8.49 run it was written at 04:32Z
+-> against `1f04333a1`; by 18:30Z the tip had ~16 more merges and the **only HARD red it listed
+-> (`env-doc-sync`: 2 vars missing from `.env.example`) was already fixed**. All three drift numbers
+-> were stale too. Acting on it directly means "fixing" things that are not broken and rebaselining
+-> against numbers that are not current.
+->
+-> ```bash
+-> # Compare the issue's "Offending push range" sha against the tip you are actually releasing.
+-> ISSUE_SHA=<from the issue body>
+-> git rev-parse --short HEAD
+-> git rev-list --count "$ISSUE_SHA..HEAD"    # 0 = the snapshot is current
+-> ```
+->
+-> If they diverge, treat every item in the issue as a **floor** — something that was broken once —
+-> and re-measure each one on the current tip before touching it.
++> **Read current base evidence before preparing the release.** Read
++> `../../_shared/base-green.md` and `../../_shared/validation-gate.md`. Resolve the
++> actual reviewed release target, its current SHA and the candidate; do not infer
++> the target from package.version or a remembered release name. Inspect the matching
++> nightly incident and retained workflow receipts as diagnostic history. An open
++> issue is not proof of a current failure; no issue or a closed issue is not PASS.
++>
++> Compare each recorded failure with a complete current run under the same profile
++> before acting. Record the checked SHA, run/attempt, manifest/profile and terminal
++> outcome. Close an incident only through the authorized process after its own
++> requirements are verified; a release merge alone does not prove them.
+ 
+ > **🔴 ORDER — READ THIS FIRST. This phase is NOT the first action.** It used to say it was, and
+ > that contradicted `SKILL.md`, which calls Phase 0a the "FIRST STEP, MANDATORY". 0a is right, and
+@@ -47,49 +27,52 @@
+ >
+ > 1. **0a.0** — raise the release-freeze (Hard Rule #21). Costs minutes.
+ > 2. **0a.0b** — cut the next cycle's branch `vX+1` from the frozen tip, and **back-merge `main`
+->    into the release branch here**. Do it now and the release PR is never `CONFLICTING`, which is
+->    the single most expensive failure mode in this whole skill (see phase-1, gap 5).
+-> 3. **this phase** — the pre-flight, now against a tip nothing can move.
++>    into the release branch here** within the approved scope. Recheck the resulting
++>    candidate ancestry and conflicts; an earlier sync does not guarantee later mergeability.
++> 3. **this phase** — pre-flight against the recorded candidate; monitor its identity throughout.
+ > 4. the rest of 0a — reconciliation.
+ >
+ > The freeze costs minutes and protects hours. Inverting that trade is how a release loses a day.
+ >
+-> **Why the pre-flight matters at all:** the full gate
+-> (`ci.yml`) only runs on the release PR (`PR → main`), so reds accrue silently on `release/**`
+-> through the cycle and explode **in ~40-min layers** on the release PR (the v3.8.33 incident: 4
+-> CI rounds, each revealing the next inherited base-red — INTENTIONALLY_INTERNAL count, audio
+-> handler, model-lockout wiring, busy_timeout, essential-tools count, src/models pack-policy, plus
+-> eslint/cognitive ratchet drift). This pre-flight reproduces the release-equivalent validation
+-> locally so the release PR is green on its **first** run.
+-
+-> **⚙️ Running any of this on the `.113` — two things that will bite, both measured.**
+->
+-> 1. **`npm ci` never finishes in the foreground.** It exceeds the 2-minute Bash timeout, and it
+->    also fails outright with `command sh -c husky` on a box whose git hooks are not usable.
+->    Always:
+->    ```bash
+->    setsid nohup env HUSKY=0 npm ci > /tmp/npmci.log 2>&1 < /dev/null &
+->    # poll the log; do not block on it
+->    ```
++> **Why pre-flight matters:** it detects defects in the selected candidate before
++> public admission. Inspect that candidate's workflows, package.json and versioned
++> profiles to identify required lanes. The local observer covers its measured profile;
++> it does not reproduce all CI jobs or guarantee that the first hosted run will pass.
++
++> **Historical `.113` incidents: use current resource measurements before applying their lessons.**
++>
++> 1. Dependency installation needs the approved resource admission and process
++>    supervisor. Use the official `npm ci` path with normal hooks, retain the actual
++>    exit and wait for completion. Do not suppress Husky or replace a failed setup
++>    with an unverified dependency tree to make validation continue.
+ > 2. **`systemctl stop` on a runner is GRACEFUL.** The job in flight runs to completion, so
+ >    stopping runners mid-round relieves nothing immediately — it only stops NEW jobs being
+ >    picked up. If a round is already thrashing, the round has to finish or be cancelled.
+ >
+-> And on memory: the `.113` has 32 cores but **memory is the scarce resource, not CPU**. With
++> In that incident the `.113` had 32 cores; **memory was the scarce resource, not CPU**. With
+ > `USE_VPS_RUNNER=true` the whole round descends at once — 8-9 concurrent `npm ci`, 1.7-3.8 GB RSS
+ > each, RAM and swap exhausted and load 30-51 **before** Turbopack even starts. That is the same
+ > condition that kills a hosted runner, self-inflicted.
+ 
+ From an **isolated worktree on the release branch** (Rule #19 — never the shared checkout):
+ 
++Before any `check:release-green --full-ci` invocation below, capture `BASE_TIP_SHA`
++from the reviewed actual target of the release PR and `CANDIDATE_SHA` from its
++checked-out candidate, as full commit IDs. Read `../../validate-release-green/SKILL.md`
++for the comparison contract. Pass that pair with `--i18n-scope candidate`; the
++observer computes the merge base and records the target tip separately. Verify
++those IDs and scope in the report. Missing context, a self comparison or a moved
++checkout is INCOMPLETE and retains HOLD. A `last-commit` tip observation is not a
++whole-release-PR check. Refresh the pair after any target/candidate change.
++
+ > **🔴 Cross-session safety (CLAUDE.md Hard Rule #22) — MANDATORY; put this verbatim in every subagent prompt (agents don't inherit CLAUDE.md).** Many sessions/agents work this repo in parallel during a release:
+ >
+ > - **NEVER `git stash` / `git stash pop` — anywhere, including inside this worktree and inside any subagent.** `git stash` hits the **shared object store**, not the worktree, so it silently clobbers/resurrects another session's uncommitted work (2026-07-02: a `#5923` change leaked into the unrelated `#2296` worktree via a global `stash pop`; reincided via a subagent). To diff working changes against a base ref without stashing: `git show <ref>:<path>` or `git diff <ref> -- <path>`.
+ > - **NEVER merge / push / rebase / force-push a PR, branch, or worktree another session is actively working** — an open PR whose head is a live worktree in `.claude/worktrees/` you did not create (even under the shared `diegosouzapw` identity) is **HOLD**; only the owning session merges it. Before touching any PR you did not open this session, check `git worktree list` + `gh pr view <N> --json state,headRefOid`. (The release captain's own reconciliation/cycle pushes are the exception — they _are_ the release; see Rule #21.)
+ 
+ ```bash
+-# Run it in BACKGROUND and do not read the log until it contains `EXIT=`. See the rule below.
+-npm run check:release-green -- --with-build --full-ci   # Solution C — full release-equivalent validation + the ci.yml static gate set (see the --full-ci note below)
++# Command selection only; execute through the single-phase supervisor wrapper below.
++npm run check:release-green -- --with-build --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate # Selected observer profile; verify its measured scope below
+ ```
+ 
+ > **🔴 NEVER read the tail while it is still running.** The verdict block is printed only at the
+@@ -99,27 +82,30 @@
+ > (`check:route-validation:t06` and `check:test-masking`); both came back red on CI 40 minutes
+ > later.
+ >
+-> This is the same discipline the phase already mandates for the unit suite. Apply it here:
+->
+-> ```bash
+-> setsid nohup npm run check:release-green -- --with-build --full-ci \
+->   > /tmp/relgreen.log 2>&1 < /dev/null &
+-> # then, and ONLY then:
+-> grep -q 'EXIT=' /tmp/relgreen.log && sed -n '/──── verdict ────/,$p' /tmp/relgreen.log
+-> ```
+->
+-> Read the **entire** `──── verdict ────` block, never the tail. Count the HARD failures against
+-> what the block itself reports as the total.
+-
+-> **🔴 MANDATORY — also run the FULL unit + integration suites yourself (do NOT trust check:release-green alone).**
+-> `check:release-green` **bails at the FIRST hard failure** and reports only that one. In the v3.8.42
+-> release it stopped at `docs-sync` and **never ran the unit suite**, so **15 inherited base-red tests**
+-> from 4 cycle PRs (#5480/#5527/#5427/#5521) stayed hidden until they exploded on the release PR
+-> (PR→main). Root cause: the fast-path (PR→`release/**`) does **not** run the full unit+integration
+-> suites per-PR, so merged feature PRs ship stale/incorrect tests that only surface here. The
+-> monolithic `npm test` **hangs** (unreleased DB handle), but the direct invocation with
+-> `--test-force-exit` **completes** (~15min, ~19.5k tests) — run it in the background and read the
+-> summary:
++> Run each wrapper below in its own child shell under the admitted supervisor.
++> The wrapper records the command status and returns it to the supervisor, including
++> when Bash uses `-e`. A missing marker or marker-write failure is incomplete evidence.
++>
++> ```bash
++> if npm run check:release-green -- --with-build --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate \
++>   > /tmp/relgreen.log 2>&1; then
++>   PHASE_OBSERVER_EXIT=0
++> else
++>   PHASE_OBSERVER_EXIT=$?
++> fi
++> printf 'EXIT=%s\n' "$PHASE_OBSERVER_EXIT" >> /tmp/relgreen.log || exit 2
++> exit "$PHASE_OBSERVER_EXIT"
++> ```
++>
++> After terminal completion, verify the marker and read the **entire**
++> `──── verdict ────` block. Count the HARD failures against the reported total;
++> report inspection does not replace the supervisor's captured exit status.
++
++> **Run every required suite in its actual runner.** Inspect the current workflow
++> selection and observer manifest before deciding what remains. A local profile can
++> omit lanes or stop before them; skipped or absent evidence is INCOMPLETE. Unit,
++> integration and Vitest cover different files. Keep heavy phases sequential under
++> the shared resource admission and preserve raw output and each real exit.
+ >
+ > ```bash
+ > # FULL unit suite — run in BACKGROUND (run_in_background).
+@@ -134,14 +120,31 @@
+ > #   DISABLE_SQLITE_AUTO_BACKUP=true + --max-old-space-size=8192.
+ > # In the v3.8.50 pre-flight the hand-rolled line reported 60 failures; 3 of the ones
+ > # investigated were pure invocation artifacts. Just run:
+-> npm run test:unit > /tmp/relgreen_unit.log 2>&1; echo "EXIT=$?" >> /tmp/relgreen_unit.log
+-> # then: grep -E '^(not ok|✖)|ℹ (tests|pass|fail)|EXIT=' /tmp/relgreen_unit.log | tail
+->
+-> # FULL integration suite (CI 'Integration Tests' shards — live/VPS-gated tests skip locally)
+-> node --import tsx/esm --test --test-force-exit "tests/integration/*.test.ts" 2>&1 | grep -E '^✖|ℹ fail'
+-> ```
+->
+-> Fix EVERY red here (align tests to the new correct behavior — never weaken an assert; Rule #18).
++> if npm run test:unit > /tmp/relgreen_unit.log 2>&1; then
++>   PHASE_UNIT_EXIT=0
++> else
++>   PHASE_UNIT_EXIT=$?
++> fi
++> printf 'EXIT=%s\n' "$PHASE_UNIT_EXIT" >> /tmp/relgreen_unit.log || exit 2
++> exit "$PHASE_UNIT_EXIT"
++> ```
++>
++> Schedule integration as a separate admitted phase with its own child shell and
++> receipt. Each wrapper completes independently; keep required failures as HOLD.
++>
++> ```bash
++> # Official integration runner; local skips do not satisfy required hosted lanes.
++> if npm run test:integration > /tmp/relgreen_integration.log 2>&1; then
++>   PHASE_INTEGRATION_EXIT=0
++> else
++>   PHASE_INTEGRATION_EXIT=$?
++> fi
++> printf 'EXIT=%s\n' "$PHASE_INTEGRATION_EXIT" >> /tmp/relgreen_integration.log || exit 2
++> exit "$PHASE_INTEGRATION_EXIT"
++> ```
++>
++> Resolve every required failure or incomplete result by its measured cause; update tests only
++> for proven intended behavior, preserving assertions (Rule #18).
+ > A broad sweep beats whack-a-mole: in v3.8.42 the CI shard 1/8 showed 9 fails but the full local
+ > sweep surfaced 15 (engine-toggle, base-thinking-budget, 2 integration). Common inherited-red shapes:
+ > a new aggregate guard reverting growth-mock fixtures (#5527 inflation guard → give mocks a droppable
+@@ -158,86 +161,93 @@
+ > treating them as defects.
+ >
+ > **🔴 LOAD SELF-MASKING — the full unit suite lies in BOTH directions (v3.8.46, 2026-07-07).**
+-> `node --test` with process isolation spawns ~22 concurrent workers → **load ~50 on its own**, even
++> Historically, `node --test` with ~22 workers produced **load ~50 on its own**, even
+ > on an otherwise-idle box. NEVER run the heavy suites concurrently (unit + integration + vitest +
+ > release-green at once → load 48, dozens of phantom fails). Even run alone, the suite's self-load
+ > distorts the signal two ways — always **classify each ✖ by its error signature, then re-run the
+ > suspect FILE isolated** on the freed machine before believing it:
+-> - **False POSITIVE (timeout flake):** `Test timed out in Nms` / `Timed out waiting for OmniRoute to
+->   start` on breaker/cooldown/quota (`setTimeout`) or server-boot E2E tests → CPU starvation, not a
+->   defect. Passes 100% isolated. In v3.8.46: 3 `audit.test.ts` (vitest) + 3 combo/quota files, all flakes.
++> - **Timeout signature:** `Test timed out in Nms` / `Timed out waiting for OmniRoute to
++>   start` on breaker/cooldown/quota (`setTimeout`) or server-boot E2E tests → possible timing or
++>   capacity problem; reproduce the signature and measure capacity before classifying it.
++>   An isolated pass is diagnostic and does not replace a failed required suite.
+ > - **False NEGATIVE (the dangerous one):** tests around a short TTL cache (e.g. #6408's 1.5s `/v1/models`
+ >   cache) **PASS under load** (the TTL expires between the slow steps) but **FAIL isolated** (fast → TTL
+ >   never expires → stale reply). In v3.8.46 `models-catalog-route.test.ts` was **26/43 failing isolated
+ >   but 0/43 in the full run** — a real 3-defect base-red (#6408: stale cache, duplicated headers, 500
+ >   replayed as 200) that the full sweep was BLIND to and nearly shipped. The reliable signal for the
+->   cache-timing class is the ISOLATED run, never the full suite (CI load masks it too).
++>   cache-timing class needs an ISOLATED diagnostic alongside the required full suite; CI load can mask it too.
+ > Rule of thumb: full sweep catches DETERMINISTIC base-reds (assertion mismatches); for anything
+-> timing/cache-sensitive, trust only the single-file isolated run on an unloaded machine.
++> timing/cache-sensitive, use a single-file diagnostic on an admitted idle worker and still require
++> the applicable full suites to complete successfully. Read current concurrency from package.json.
+ 
+ Resolve the output BEFORE proceeding to Phase 0a:
+ 
+-- **HARD failures** (typecheck / lint errors / unit / vitest / db-rules / public-creds /
+-  package-artifact) → real defects. If the originating PR is still open, fix in **its** branch via
+-  co-authorship (`/merge-prs` Step 1); if already merged, fix on the release branch with a test
+-  (Rule #18). These MUST be empty before tagging.
+-- **DRIFT** (eslint warnings / cognitive-complexity / file-size over baseline) → expected
+-  cycle drift accrued from many merges; **this is where it gets rebaselined** — bump the
+-  affected `quality-baseline.json` / `file-size-baseline.json` values with a justification key
+-  (verify your own changes contribute ~0 via delta), exactly as the v3.8.32/v3.8.33 cycle-close
+-  rebaselines did. Drift is the maintainer's to absorb here — never pushed onto contributors.
+-
+-> If `/green-prs` (Solution A) has been keeping the queue green and the `nightly-release-green`
+-> signal (Solution D) is quiet, this pre-flight is usually a no-op — which is the point. Run it
+-> regardless; it is the backstop that guarantees a first-try-green release PR.
++- **HARD failures** require diagnosis and correction before admission. Compare exact
++  base and candidate evidence to separate defects from environment/tool failures.
++  Use the authorized owned repair worktree, preserve contributor credit, and prove
++  a behavior repair with the required tests. Missing evidence remains INCOMPLETE.
++- **DRIFT** is a classification, not permission to increase a budget. Reproduce it on
++  the exact pure base and candidate. Fix new regressions through code/test correction
++  or refactoring; keep inherited debt visible. Update a baseline only after a genuine
++  measured improvement under `docs/architecture/QUALITY_GATES.md`, with the evidence
++  and change reviewed together. Never raise a ceiling or absorb cycle drift merely
++  to make the release green.
++
++> Run pre-flight even when earlier queue or nightly evidence was green. Its result
++> covers only the current identity and selected profile; hosted required lanes still
++> need their own current successful receipts.
+ 
+ > **🔴 PR-CONTEXT GATES — the #1 cause of layered ~40-min CI round-trips (v3.8.43: 3 of them, ~2h).**
+-> `check:release-green` does NOT run the three gates that compare against the PR base, so they only
+-> fire on the release PR and explode one-per-push. Run them YOURSELF here (and again after any
+-> base-red fix — see below), against `origin/main`:
++> Determine remaining PR-context checks from the candidate's observer manifest and
++> workflows. Do not assume that a historical list is complete or that an observer
++> already ran a gate. For a release PR whose reviewed actual target is `main`, use
++> the current main context below; if the target differs, resolve that target before
++> selecting the checker's supported base arguments. Refresh after any candidate change.
+ > ```bash
+ > git fetch origin main --quiet
+ > GITHUB_BASE_REF=main npm run check:test-masking   # net-assert reductions in the aggregate diff
+ > npm run check:file-size                           # any file grown past its frozen cap
+ > ```
+-> - `check:test-masking` red → for EACH flagged file, verify the reduction is a legitimate
+->   refactor/field-removal (not weakening), then allowlist it in
+->   `config/quality/test-masking-allowlist.json` with a `vX.Y.Z #PR:` justification. Tautology /
+->   new `.skip` / deletion signals are NEVER allowlistable — restore those asserts instead.
+-> - `check:file-size` red → rebaseline the file's cap in `config/quality/file-size-baseline.json`
+->   (test files) with a justification, OR extract/modularize a production file if the growth is real bloat.
+-> - `check:pr-evidence`: the release PR body MUST carry a `## Evidence` block with a fenced code
+->   block BEFORE the first `git push` — `ci.yml` ignores the `edited` event, so adding it after a
+->   push does NOT re-run the gate (costs an extra push). Set the PR body at the same step you push.
+-
+-> **🔴 RE-RUN THE DRIFT + PR-CONTEXT GATES AFTER LANDING BASE-RED FIXES.** This pre-flight runs on
++> - `check:test-masking` red: inspect the assertion diff and fix weakening. An exception
++>   is only for a pre-existing violation that cannot be corrected in the same PR, with
++>   justification and a tracking issue under QUALITY_GATES. Never allowlist a new skip,
++>   tautology or deletion to obtain green.
++> - `check:file-size` red: extract/refactor or correct the cause. Do not increase caps;
++>   baseline updates in this flow require a genuine measured improvement.
++> - `check:pr-evidence`: prepare the required Evidence block before the public run.
++>   Inspect the current workflow's event and metadata handling instead of assuming a
++>   body edit reruns, skips or replaces a required candidate check.
++
++> **🔴 RE-RUN THE DRIFT + PR-CONTEXT GATES AFTER INCORPORATING FIXES INTO THE CANDIDATE.** This pre-flight runs on
+ > the pristine tip, but the base-red fixes you make next (aligning tests, small code fixes) can grow
+ > files past `file-size` caps, add eslint warnings, or trip `test-masking` — none of which the early
+ > pre-flight saw. After all base-red fixes are in and the full unit suite is green, RE-RUN:
+ > `npm run check:file-size && GITHUB_BASE_REF=main npm run check:test-masking && npm run check:any-budget:t11 && npm run lint`,
+-> and fold any new drift (file-size / eslintWarnings rebaselines, test-masking allowlist) into the
+-> SAME release commit. This is what turns "green on the first CI run" from aspiration into fact.
+-
+-> **🔴 The static CI-job gate set — now reproduced by `--full-ci` (added v3.8.46, 2026-07-07).**
+-> Plain `check:release-green` (even the FULL run) does NOT reproduce the `ci.yml`
+-> `lint` / `docs-sync-strict` / `quality-extended` / `quality-gate` / `pr-test-policy` jobs' ~38
+-> `check:*` gates — v3.8.46 cost ~2h of layered CI rounds because 11 static base-reds leaked past
+-> the pre-flight. **Run them all in ONE command now** (the script reads `ci.yml` itself, so the set
+-> never drifts as gates are added):
+-> ```bash
+-> npm run check:release-green -- --quick --full-ci   # drift ratchets + fast HARD + ALL ci.yml static gates
+-> # or the complete pass (adds the slow unit/vitest/integration suites + pack-artifact):
+-> npm run check:release-green -- --full-ci --with-build
+-> ```
+-> Fix or rebaseline every red BEFORE the first push. `--full-ci` covers the exact gates that bit
+-> v3.8.46 (`check:route-validation:t06`, `check:docs-symbols`, `check:bundle-size -- --ratchet`,
+-> `check:test-masking` with `GITHUB_BASE_REF=main`, `check:file-size`, …). It intentionally skips two
+-> that can't run in a local working-tree pre-flight — `check:pr-evidence` (needs the PR body) and
+-> `check:codeql-ratchet` (queries the remote main's code-scanning alerts); check those on the release
+-> PR itself. `check:docs-counts` runs inside `check:docs-all`. GOLDEN tests (`*-golden.test.ts`) that
+-> drift with a new provider → `UPDATE_GOLDEN=1` regen, then eyeball the diff is purely additive.
+-> The `nightly-release-green` workflow now also runs `--full-ci`, so a static base-red opens a
+-> tracking issue the night it lands instead of accruing to the release PR.
++> Diagnose any new result on that exact candidate and fix its cause. Preserve the
++> existing budgets and assertions; only bank genuine measured improvements. These
++> local reruns do not certify unexecuted hosted lanes.
++
++> **Measure the selected static profile.** `--full-ci` selects the versioned
++> `config/quality/release-green-static-profile.json`; the loader checks its modeled
++> declarations against package.json and workflow sources. Inspect its membership,
++> exclusions and the actual run receipt on the candidate. This is not automatic
++> parity with every CI job or matrix leg, and no fixed remembered gate count applies.
++> Select one command below for the supervisor wrapper above:
++> ```bash
++> npm run check:release-green -- --quick --full-ci --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate # quick observer plus its modeled static profile
++> ```
++>
++> Or select the broader local observer profile; inspect actual executed/omitted lanes:
++>
++> ```bash
++> npm run check:release-green -- --full-ci --with-build --i18n-base-sha "${BASE_TIP_SHA:?reviewed PR target commit required}" --i18n-candidate-sha "${CANDIDATE_SHA:?checked-out candidate commit required}" --i18n-scope candidate
++> ```
++> Fix the cause of every applicable blocking failure and retain incomplete evidence
++> as HOLD. Record which required workflow lanes remain outside the observer, including
++> hosted matrices, external services and package/deployment checks where applicable.
++> Fixture regeneration is only for a proven intended behavior change with its diff
++> reviewed and tests preserved; never regenerate expected output to hide a regression.
++> A nightly observer uses its own SHA/event/profile and does not certify this release PR.
+ 
+ > **🔴 A partial unit run is NOT a clean unit run — verify the `EXIT=` marker (v3.8.46, 2026-07-07).**
+ > The full `node --test` sweep can be killed / stall / never finish (esp. under the self-inflicted
+@@ -249,3 +259,84 @@
+-
++
+ ---
+-
++
++
++### 0.v 🧪 Additional build pre-flight recipe (2026-10-20)
++
++These recipes supplement the mandatory order above: 0a.0 → 0a.0b → this phase
++on the recorded candidate. Before selecting any command in 0.v–0.x, verify its
++script, supported flags and workflow behavior in that candidate; these tools
++are not present on every base. An absent tool is NOT AVAILABLE for this recipe,
++not PASS and not permission to omit an applicable gate. Select the candidate’s
++actual versioned profile and record the remaining evidence.
++
++Admit dependency, test, coverage and build work through
++`../../_shared/validation-gate.md`, one heavy phase at a time. Inspect any remote
++operation and confirm it is already within the authorized scope before running
++the wrapper. Capture each real exit and terminal receipt. These examples do not
++replace the release candidate’s required hosted checks.
++
++```bash
++scripts/release/preflight-build.sh            # full: claims + lockfiles + vitest + build:cli + pack-boot + bun apt smoke
++scripts/release/preflight-build.sh --no-build # when the frozen tip's CI next-build artifact is already proven
++scripts/release/preflight-build.sh --quick    # ~20 s: claims + the two lockfiles (mid-cycle sanity)
++```
++
++It bundles 0.x/0.y/0.z below plus the packaging path `npm-publish.yml` runs and the Bun
++`runner-web` apt smoke (`scripts/release/preflight-bun-apt-smoke.sh`, builds the apt block
++alone on the Bun base image over ssh on the .113 — the stage is `continue-on-error` in CI, so
++a dead package never fails a PR, only the release manifest: #17223/#17236). One table, one
++log per check under `_artifacts/preflight/`, exit 1 after running everything. The unit shards
++remain separate CI evidence under the current workflow matrix; read its shard count
++and timeouts rather than reusing historical estimates. Record the table in the
++benchmark folder. Repair a FAIL in the authorized owned worktree, refresh the
++candidate binding and repeat affected evidence before admission; keep the
++mandatory freeze/reconciliation order above.
++
++### 0.z 🔒 Desktop lockfile pre-flight (10 s — v3.8.51 AND v3.8.52 shipped a tag that failed here)
++
++`electron-release.yml` installs with `npm ci`, while `ci.yml`'s Electron smoke uses `npm install`
++(which silently repairs a stale lock) — so a lock that drifted from `electron/package.json` is
++invisible to every PR and only explodes on the tag (#15157, #17212: the same 195 missing lines of
++the `electron-builder-squirrel-windows` / `postject` subtree, twice). Prove it before the push:
++
++```bash
++(cd electron && npm ci --dry-run --ignore-scripts)   # must print "added N packages" — EUSAGE = fix now
++npm ci --dry-run --ignore-scripts                     # root lock too
++```
++
++On EUSAGE: `(cd electron && npm install --package-lock-only --ignore-scripts)` from the unchanged
++`package.json` (expect +N/-0, no version changes), re-run the dry-run, commit on the release branch
++(we are before the freeze's squash, so it ships in the tag). Also check `scripts/release/sync-next-cycle.mjs`
++did not resolve the lock as "ours" in the last sync-back (phase-5 §20).
++
++### 0.y 📛 Version-claim pre-flight (1 s)
++
++```bash
++node scripts/release/bump-version-claims.mjs --check --to "$(node -p "require('./package.json').version")"
++```
++
++Every "current version" claim in README.md / llm.txt (footer, `` `vX+` `` floor, `**vA → vX**` range,
++"Current version:", headings) must already equal package.json — the same detector Docs sync strict runs.
++A stale claim here may indicate a missed cycle update (as in v3.8.53). On a candidate
++that provides this tool, inspect its supported repair mode and reviewed source/mirror
++scope before using `--from <stale> --to <version>`. Preserve the mandatory phase order
++and refresh candidate evidence after the change.
++
++Other **measured numbers** the gate reports as `[soft]` drift (executors count, A2A skills, cloud agents…)
++are fixed the same mechanical way — never by hand in the English file alone, which creates 66 stale
++mirrors: `node scripts/release/bump-version-claims.mjs --near '<literal anchor>' --old '<token>' --new '<token>'
++--files <doc>` rewrites the whole token found within 80 chars after the anchor, in the source and in
++every mirror that still carries it (mirrors translate the prose but keep the digits next to the
++anchor), and refreshes `.i18n-state.json` only when the source was in sync (v3.8.52 close:
++`--near 375 --old 154 --new 156` for ARCHITECTURE.md, `--near executors/ --old 150 --new 156` for
++CODEBASE_DOCUMENTATION.md). Literal on purpose — no RegExp built from an argument (CodeQL).
++
++### 0.x 🌐 Translation drift: what is yours and what is inherited
++
++`Docs Sync (Strict)` is **PR-scoped since 2026-10-20**: on a pull request `check-translation-drift.mjs
++--base-report` fails only on drift the PR introduces; drift the base already carried is printed as
++inherited. The push run and the nightly Release-Green keep the full strict verdict, so a red
++`release/vX+1` tip for translation drift is the **i18n wave's** debt (`/i18n-waves`), not something a
++release fix PR or the sync-back may "repair" by adopting hashes. Before the freeze, read the nightly's
++drift list and ask the owner for the wave (or the backend credentials/balance it needs) — do not carry
++14 drifted sources into the release expecting the squash to clear them (v3.8.52 shipped that way).

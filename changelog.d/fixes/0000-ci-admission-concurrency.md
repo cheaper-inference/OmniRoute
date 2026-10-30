@@ -1,0 +1,1 @@
+- **fix(ci):** Serialize CI and Quality workflow runs without cancelling active fail-closed admission gates, so superseded PR updates cannot strand the latest candidate behind an `always()` aggregator.

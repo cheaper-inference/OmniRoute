@@ -12,13 +12,13 @@ isang Turbopack build, isang Release-Green webpack build, at isang lint job; sin
 (16 GB), at dahil tumatakbo sa mga hosted runner ang mga Build ng pull request, idle ang Turbopack slot sa
 halos lahat ng oras:
 
-| runner               | label               | tungkulin                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
-| -------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------- |
-| `omniroute-113-5`    | `omni-build`        | Mga Turbopack build: `ci.yml` `Build` (push/dispatch lang), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ang nightly a11y build | 56 GB / 60 GB (swap 0)     | 1600 %          |
-| `omniroute-113-6`    | `omni-release`      | Release-Green (`release-green` + `main-green`), webpack build                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
-| `omniroute-113-2`    | `omni-light`        | mga nightly (Schemathesis, promptfoo, garak, k6) at `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
-| `omniroute-113`      | `omni-light`        | kaparehong pool gaya ng nasa itaas                                                                                                                      | 8 GB / 12 GB               | 400 %           |
-| OmniHeuris, OmniMind | (kanilang mga repo) | Dependabot lang (155 MB na peak bawat isa, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200 % bawat isa |
+| runner               | label                           | tungkulin                                                                                                                                               | `MemoryHigh` / `MemoryMax` | `CPUQuota`      |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Mga Turbopack build: `ci.yml` `Build` (push/dispatch lang), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ang nightly a11y build | 56 GB / 60 GB (swap 0)     | 1600 %          |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                           | 20 GB / 24 GB (swap 4 GB)  | 800 %           |
+| `omniroute-113-2`    | `omni-light`                    | mga nightly (Schemathesis, promptfoo, garak, k6) at `quality.yml` `lint-guard`                                                                          | 12 GB / 16 GB (swap 4 GB)  | 600 %           |
+| `omniroute-113`      | `omni-light`                    | kaparehong pool gaya ng nasa itaas                                                                                                                      | 8 GB / 12 GB               | 400 %           |
+| OmniHeuris, OmniMind | (kanilang mga repo)             | Dependabot lang (155 MB na peak bawat isa, 2026-10-18)                                                                                                  | 4 GB / 6 GB                | 200 % bawat isa |
 
 Nasukat noong 2026-10-18:
 
@@ -82,7 +82,7 @@ bawat pagkakataon, at kapag idle lamang**, na nasa iisang command ang pag-check 
 ## Mga panuntunan sa pagpapatakbo
 
 - **Isang Turbopack build lamang sa bawat pagkakataon — ipinapatupad sa pamamagitan ng label.** Ang bawat job na nagpapatakbo ng buong Turbopack
-  `next build` ay tina-target ang `[self-hosted, omni-build]`, at **`omniroute-113-5`** lamang ang may taglay ng
+  `next build` ay tina-target ang `[self-hosted, omni-build, omni-build-60gb]`, at **`omniroute-113-5`** lamang ang may taglay ng
   label na iyon: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   ang nightly a11y build (#16853), at ang **amd64** ng `docker-publish.yml` (webpack sa loob ng BuildKit —
   nag-panic doon ang Turbopack, run 33253576569). Nananatili sa `ubuntu-24.04-arm` ang arm64 Docker leg.

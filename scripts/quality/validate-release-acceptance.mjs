@@ -4,6 +4,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv from "ajv";
 import { reduce } from "./release-acceptance/reduce.mjs";
+import { verifyEvidenceFiles } from "./release-acceptance/evidence.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -33,11 +34,17 @@ export function validateReport(report, schema) {
 }
 
 function parseArgs(argv) {
-  const out = { plan: null, manifests: null, out: join(ROOT, "release-acceptance-report.json") };
+  const out = {
+    plan: null,
+    manifests: null,
+    evidenceRoot: null,
+    out: join(ROOT, "_artifacts", "release-acceptance", "report.json"),
+  };
   for (let i = 2; i < argv.length; i++) {
     if (argv[i] === "--plan") out.plan = argv[++i];
     else if (argv[i] === "--manifests") out.manifests = argv[++i];
     else if (argv[i] === "--out") out.out = argv[++i];
+    else if (argv[i] === "--evidence-root") out.evidenceRoot = argv[++i];
   }
   return out;
 }
@@ -50,13 +57,18 @@ export async function main(argv = process.argv) {
     .filter((f) => f.endsWith(".json"))
     .map((f) => loadJson(join(args.manifests, f)));
   const reduced = reduceManifests(plan, files);
+  const evidenceErrors = await verifyEvidenceFiles(reduced.gates, args.evidenceRoot);
   const report = {
     schema_version: 1,
+    // This reducer validates a supplied plan, not the complete release pipeline
+    // or the immutable artifact promoted by a deployment/publication workflow.
+    releaseAcceptance: false,
     identity: plan.identity,
     required_gates: plan.required_gates ?? [],
     gates: reduced.gates,
-    evidence_errors: reduced.evidence_errors,
-    verdict: reduced.verdict,
+    evidence_errors: [...reduced.evidence_errors, ...evidenceErrors],
+    verdict:
+      evidenceErrors.length > 0 && reduced.verdict !== "FAILED" ? "UNVERIFIED" : reduced.verdict,
     artifact: plan.artifact ?? null,
   };
   const { ok, errors } = validateReport(report, schema);

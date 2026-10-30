@@ -209,7 +209,7 @@ ang Obsidian REST API token. Tinakpan lamang ng GHSA-62vw ang paglalantad ng pas
 nasa fail-open tier pa rin (GHSA-7pq4-8pvv-rx7r). Bukod pa rito, tumatanggi ang `enableObsidianVaultSync()`
 sa isang vault na siyang data directory, nasa loob nito, o naglalaman nito.
 
-#### Ang mga credential export ay para lamang sa operator
+#### Ang pag-export ng credential at pag-restore ay para lamang sa operator
 
 Ang antas sa itaas ay nagpapasya lamang kung kailangan ang _anumang_ kredensyal. Ang mga rutang nagda-download ng
 mga nakaimbak na kredensyal ay nagdaragdag ng pangalawang pagsusuri sa handler: ang `GET /api/settings/export-json` (mga na-decrypt na
@@ -220,22 +220,9 @@ instance na naka-disable ang pag-login, at sumasagot ng `403` sa mga API key ng 
 at `admin`) at sa mga `oma_` access token. Ang pag-isyu ng sync token (`POST /api/sync/tokens`) ay gumagamit ng
 parehong helper, kasama ang pinagkakatiwalaang internal-service token sa loopback.
 
-#### Credential exports and restores are operator-only
+Pareho ang hangganan para sa mga kaugnay na mapanirang operasyon: pinapalitan ng `POST /api/db-backups/import` (na-upload na `.sqlite` file, kasama ang `dryRun=true`), `POST /api/db-backups` (pag-restore ng nakaimbak na backup gamit ang id nito) at `POST /api/settings/import-json` (pag-restore ng lumang JSON format) ang aktibong database o ang buong hanay ng settings, koneksyon at API key. Kaya hindi rin maaaring simulan ang mga ito gamit ang credential ng makina.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Pareho ang hangganan para sa pagbura ng mga restore point: `DELETE /api/db-backups` (paglilinis — itira ang pinakabagong N o burahin ang mas matanda sa D araw) at `PATCH /api/db-backups` (settings ng retention). Ang nakaimbak na retention ang mismong ginagamit ng `cleanupDbBackups()` pagkatapos ng bawat awtomatikong backup (`src/lib/db/backup.ts`); kung makakapag-save ang isang credential ng makina ng `keepLatest: 1`, maaari nitong burahin ang mga naunang restore point sa susunod na snapshot. Nananatili ang karaniwang authentication sa pamamahala para sa paglilista at paggawa ng backup (`GET`/`PUT /api/db-backups`).
 
 ### Ang bootstrap ng bagong pag-install ay para lamang sa loopback — batay sa tunay na peer, hindi sa `Host`
 

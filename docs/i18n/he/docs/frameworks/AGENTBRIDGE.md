@@ -16,34 +16,34 @@ AgentBridge הוא פרוקסי ה-MITM (אדם בתווך) של OmniRoute, שמ
 
 ### מהו AgentBridge?
 
-כאשר סוכן IDE (למשל GitHub Copilot,‏ Cursor,‏ Claude Code) מבצע קריאת API, הוא מתחבר ישירות לספק ה-AI במעלה הזרם (OpenAI,‏ Anthropic וכו'). AgentBridge מיירט את החיבור הזה באופן שקוף בשכבת TLS — ללא צורך בשינוי כלשהו בתצורת הסוכן — ומשכתב את הבקשה דרך OmniRoute.
+כאשר סוכן IDE (למשל GitHub Copilot, Cursor, Claude Code) מבצע קריאת API, הוא מתחבר ישירות לספק ה-AI שב-upstream (OpenAI, Anthropic וכדומה). AgentBridge מיירט את החיבור הזה באופן שקוף ברמת ה-TLS — מבלי לדרוש שום שינוי בתצורת הסוכן — ומשכתב את הבקשה דרך OmniRoute.
 
-כך ניתן:
+משמעות הדבר היא שאתם יכולים:
 
-- **לנתב מחדש כל סוכן לכל ספק**: Copilot מתקשר עם OpenAI? הפנו אותו אל Anthropic Claude,‏ Gemini או לכל אחד מ-374 הספקים של OmniRoute.
-- **להחיל מיפויי מודלים**: `gemini-3-flash` → `claude-sonnet-4.7` באופן שקוף ברמת המטפל.
-- **לצפות בכל תעבורת הסוכנים**: כל בקשה שיורטה מתפרסמת ב[מפקח התעבורה](./TRAFFIC_INSPECTOR.md).
-- **להחיל את מנגנוני העמידות של OmniRoute**: ניתוב משולב, מפסקי זרם, חלופות ומעקב עלויות פועלים גם עבור תעבורת סוכני IDE.
+- **לנתב מחדש כל סוכן לכל ספק**: Copilot מדבר מול OpenAI? הפנו אותו ל-Anthropic Claude, ל-Gemini, או לכל אחד מ-375 הספקים של OmniRoute.
+- **להחיל מיפויי מודלים**: `gemini-3-flash` → `claude-sonnet-4.7` באופן שקוף ברמת ה-handler.
+- **לצפות בכל תעבורת הסוכנים**: כל בקשה מיורטת מתפרסמת אל [סוקר התעבורה (Traffic Inspector)](./TRAFFIC_INSPECTOR.md).
+- **להחיל את השרידות של OmniRoute**: ניתוב combo, מנגנוני circuit breaker, נתיבי fallback ומעקב עלויות פועלים גם עבור תעבורת סוכני IDE.
 
 ### מיצוב מול השוק
 
-| תכונה               | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity         |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot      |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)          |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex        |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE          |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries      |    —    |    ✓     |        —        |             ✓             |
-| Claude Code         |    —    |    —     |        ✓        |             ✓             |
-| Open Code           |    —    |    —     |        ✓        |             ✓             |
-| Trae                |    —    |    —     |        —        |         🔍 בבדיקה         |
-| ממשק לוח בקרה       |    ✓    |    ✗     |        ✗        |             ✓             |
-| מפקח תעבורה         |    ✗    |    ✗     |        ✓        |             ✓             |
-| ניתוב OmniRoute     |    ✗    |    ✗     |        ✗        |             ✓             |
-| ממשק מיפוי מודלים   |    ✗    |    ✗     |        ✗        |             ✓             |
-| רשימת עקיפה         |    ✗    |    ✗     |        ✓        |             ✓             |
-| אישור CA במעלה הזרם |    ✗    |    ✗     |        ✓        |             ✓             |
+| תכונה                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries       |    —    |    ✓     |        —        |             ✓             |
+| Claude Code          |    —    |    —     |        ✓        |             ✓             |
+| Open Code            |    —    |    —     |        ✓        |             ✓             |
+| Trae                 |    —    |    —     |        —        |         🔍 בבדיקה         |
+| ממשק ניהול           |    ✓    |    ✗     |        ✗        |             ✓             |
+| סוקר תעבורה          |    ✗    |    ✗     |        ✓        |             ✓             |
+| ניתוב OmniRoute      |    ✗    |    ✗     |        ✗        |             ✓             |
+| ממשק מיפוי מודלים    |    ✗    |    ✗     |        ✗        |             ✓             |
+| רשימת עקיפה          |    ✗    |    ✗     |        ✓        |             ✓             |
+| אישור CA של upstream |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

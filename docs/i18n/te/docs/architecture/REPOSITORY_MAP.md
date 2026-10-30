@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26లో రూట్ వెలుపలకు తరలించబడింది (అవ్యవస్థ తగ్గింపు):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, మరియు రూపొందించబడిన `quality-metrics.json` (gitignore చేయబడింది). [`## config/`](#config--static-configs--quality-gate-state) చూడండి.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, మరియు రూపొందించబడిన `quality-metrics.json` (gitignore చేయబడింది). [`## config/`](#config--స్టాటిక్-కాన్ఫిగ్లు--క్వాలిటీ-గేట్-స్థితి) చూడండి.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ఉపడైరెక్టరీ           | ఉద్దేశ్యం                                                                                                                                                                                                                             |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | స్థానికీకరించిన డాక్ అనువాదాలు (41 లొకేల్లు)                                                                                                                                                                                          |
+| `docs/i18n/`          | స్థానికీకరించిన డాక్ అనువాదాలు (66 లొకేల్లు)                                                                                                                                                                                          |
 | `docs/screenshots/`   | గైడ్ల కోసం చిత్ర అసెట్లు                                                                                                                                                                                                              |
 | `_tasks/superpowers/` | superpowers నుండి ప్రణాళికలు/స్పెసిఫికేషన్లు (`writing-plans`/`brainstorming`) + పరిశోధన — వేరుచేయబడిన, విడిగా వెర్షన్ చేయబడిన రిపోజిటరీ; ప్రధాన ట్రీ ద్వారా gitignore చేయబడింది. CLAUDE.md → "Planning & Research Artifacts" చూడండి. |
 

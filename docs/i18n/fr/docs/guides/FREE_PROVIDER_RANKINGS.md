@@ -11,30 +11,32 @@
 
 ---
 
-## Présentation
+## Ce que c'est
 
-OmniRoute répertorie 374 fournisseurs, dont 155 entrées de catalogue marquées **gratuites/sans authentification**
-(sans authentification,
-OAuth avec offre gratuite ou clé API avec offre gratuite — consultez le
-[Guide des offres gratuites](../getting-started/FREE-TIERS-GUIDE.md) et le
-[répertoire complet des offres gratuites](../reference/FREE_TIERS.md)). Le problème : la qualité des modèles proposés par les fournisseurs gratuits varie
-considérablement. Un fournisseur sans authentification proposant un modèle de pointe est bien plus utile
-qu'un fournisseur proposant un petit modèle ancien.
+OmniRoute répertorie 375 fournisseurs, dont 155 entrées de catalogue marquées **free/no-auth**
+(sans authentification, OAuth avec niveau gratuit ou clé API avec niveau gratuit — voir le
+[Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le
+[répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md)). Le hic : la qualité
+des modèles varie énormément d'un fournisseur gratuit à l'autre. Un fournisseur sans
+authentification proposant un modèle de pointe est bien plus utile qu'un fournisseur
+proposant un petit modèle obsolète.
 
-Le **Classement des fournisseurs gratuits** répond à la question « **quel fournisseur gratuit me propose le meilleur modèle ?** » en
-croisant le catalogue de chaque fournisseur gratuit avec des **scores de qualité issus de la communauté** provenant du
-**classement Arena AI** (ELO fondé sur les préférences humaines, selon le même principe que l'arène de
-chatbots LMArena). Les fournisseurs sont ensuite classés en fonction des performances de leur **meilleur modèle gratuit**.
+**Le classement des fournisseurs gratuits** répond à la question « **quel fournisseur
+gratuit me donne le meilleur modèle ?** » en croisant le catalogue de chaque fournisseur
+gratuit avec des **scores de qualité participatifs** issus du **classement Arena AI**
+(ELO basé sur les préférences humaines, le même principe que l'arène de chatbots LMArena).
+Les fournisseurs sont ensuite classés selon la puissance de leur **meilleur modèle gratuit**.
 
 Le classement est calculé à partir de trois sources réelles :
 
-1. Les listes de fournisseurs gratuits — `NOAUTH_PROVIDERS`, ainsi que les entrées `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` marquées `hasFree`
+1. Les listes de fournisseurs gratuits — `NOAUTH_PROVIDERS`, ainsi que les entrées
+   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marquées `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Le catalogue de modèles de chaque fournisseur provenant du registre des fournisseurs
+2. Le catalogue de modèles de chaque fournisseur, issu du registre des fournisseurs
    (`open-sse/config/providerRegistry.ts`).
-3. Les scores d'adéquation aux tâches dérivés de l'ELO, stockés dans la table de base de données `model_intelligence` par le
-   moteur de synchronisation ELO d'Arena (`src/lib/arenaEloSync.ts`).
+3. Les scores d'adéquation aux tâches dérivés de l'ELO, stockés dans la table de base de
+   données `model_intelligence` par le moteur de synchronisation Arena ELO
+   (`src/lib/arenaEloSync.ts`).
 
 La logique de jointure se trouve dans `src/lib/freeProviderRankings.ts`.
 

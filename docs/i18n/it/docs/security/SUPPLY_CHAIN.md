@@ -25,59 +25,46 @@ senza bloccare; il passaggio del _CRITICAL gate_ (`severity: CRITICAL`, `ignore-
 `exit-code: 1`) fa fallire il rilascio in caso di CVE CRITICAL **con una correzione disponibile**. `ignore-unfixed`
 impedisce di bloccare il rilascio per una CVE dell'immagine di base senza una patch a monte.
 
-## ⚠️ Varianza CVE (gate bloccanti osv/Trivy)
+## ⚠️ Variabilità delle CVE (gate osv/Trivy bloccanti)
 
-osv e Trivy confrontano le dipendenze con database CVE che **crescono continuamente**. Una PR
-che **non tocca alcuna dipendenza** può improvvisamente diventare rossa perché una nuova CVE è stata
-divulgata in una dipendenza esistente (osv: `vulnCount` misurato > baseline; Trivy: una nuova
-CRITICAL risolvibile nell'immagine). **Questo è il comportamento operativo PREVISTO di un gate CVE bloccante,
-non una regressione del prodotto.**
+osv e Trivy confrontano le dipendenze con database di CVE che **crescono continuamente**. Una PR
+che **non modifica alcuna dipendenza** può improvvisamente diventare rossa perché una nuova CVE è stata
+divulgata in una dipendenza esistente (osv: valore `vulnCount` misurato > baseline; Trivy: una nuova
+vulnerabilità CRITICAL correggibile nell'immagine). **Questo è il comportamento operativo PREVISTO di un gate
+CVE bloccante, non una regressione del prodotto.**
 
-Quando osv o Trivy diventano rossi a causa di una CVE appena divulgata, il rimedio è:
+Quando osv o Trivy diventano rossi a causa di una CVE appena divulgata, la soluzione è:
 
-1.  **Aggiornare la dipendenza interessata** (preferito) — aggiornare alla versione patchata tramite `overrides` di `package.json`
-    (dipendenze transitive) o ricostruire l'immagine su una base patchata.
-2.  **Se non c'è una correzione a monte:**
-    - **osv:** ri-baselinare `metrics.vulnCount` in `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` non copre i gate dedicati — modificare il valore manualmente,
-      `direction:down`) con una nota di giustificazione + issue di tracciamento.
-    - **Trivy:** aggiungere una voce in `.trivyignore` (CVE-ID per riga) con un commento di giustificazione
-      - issue di tracciamento. `ignore-unfixed: true` copre già automaticamente le CVE senza patch.
+1. **Aggiornare la dipendenza interessata** (opzione preferita) — eseguire l'upgrade alla versione corretta tramite
+   `overrides` in `package.json` (dipendenze transitive) oppure ricostruire l'immagine su una base corretta.
+2. **Se non è disponibile alcuna correzione upstream:**
+   - **osv:** ridefinire la baseline di `metrics.vulnCount` in `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` non copre i gate dedicati — modificare il valore
+     manualmente, `direction:down`) aggiungendo una nota giustificativa e un issue di tracciamento.
+   - **Trivy:** aggiungere una voce in `.trivyignore` (un ID CVE per riga) con un commento
+     giustificativo e un issue di tracciamento. `ignore-unfixed: true` gestisce già automaticamente le CVE
+     prive di patch.
 
-Entrambi i gate **SKIPPANO elegantemente** (exit 0) quando lo strumento è assente o la misurazione
-fallisce (osv-scanner non nel PATH, osv.dev/rete irraggiungibile, JSON non valido) — un
-fallimento della **misurazione** non blocca mai, solo una regressione **misurata** blocca.
+Le esecuzioni OSV obbligatorie (`check:vuln-ratchet -- --ratchet`) falliscono in modalità chiusa con
+`INCOMPLETE` e codice di uscita 2 quando non è possibile convalidare lo scanner, il report o la baseline.
+Una regressione misurata restituisce il codice di uscita 1. Un'esecuzione consultiva può comunque segnalare `SKIP` con
+codice di uscita 0, il che non dimostra che le dipendenze abbiano superato la scansione. Anche il passaggio
+Trivy bloccante richiede una misurazione riuscita: strumenti non disponibili, job non riusciti
+e prove mancanti relative all'immagine non possono certificare un'immagine come pulita.
 
-## Rischi Accettati Noti
+## Rischio relativo a dipendenze ritirate
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Il lockfile radice non include più `extract-zip` né una dipendenza che conduce a esso dopo
+l'aggiornamento dello strumento di sviluppo promptfoo alla versione fissata. Questo elimina la catena
+`promptfoo` → `@openai/codex-security` → `extract-zip`, precedentemente accettata e tracciata nel ticket #14482.
+I controlli di regressione in `tests/unit/extract-zip-14482-exposure.test.ts` ne impediscono
+la reintroduzione e mantengono il divieto di importazione dal codice di produzione.
 
-`extract-zip@2.0.1` presenta due avvisi di attraversamento di symlink ad alta gravità non patchati.
-Secondo il ramo "nessuna correzione a monte" del rimedio CVE Variance di cui sopra, questo è un
-**rischio accettato**, non un aggiornamento:
-
-- **Catena:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Confermato tramite `package-lock.json` — esattamente un pacchetto nell'intero albero delle dipendenze
-  (`@openai/codex-security`) dichiara `extract-zip`, ed esattamente un pacchetto
-  (`promptfoo`) dichiara `@openai/codex-security`.
-- **Non esiste alcuna release corretta in nessuna parte della catena.** `extract-zip@2.0.1` (pubblicato nel 2020) è la release finale del pacchetto — non è mantenuto. `@openai/codex-security`'s
-  attuale npm-latest (`0.1.29`) continua a utilizzare `extract-zip@2.0.1`.
-- **Non raggiungibile dalla produzione.** `promptfoo` è solo una devDependency (mai elencata
-  sotto `dependencies`), e nessun file sotto `src/`, `open-sse/`, o `bin/` importa il
-  pacchetto npm `extract-zip` — l'helper `extractZip()` di OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) si affida a `unzip`/`tar` nativi
-  ed è estraneo. `@openai/codex-security` include anche una propria protezione contro l'attraversamento di symlink
-  oltre al callback `onEntry` di `extract-zip`.
-- **Non** creare un alias per `extract-zip` tramite `package.json` `overrides` — l'unico sostituto
-  diretto praticabile è Electron-org-internal e API-incompatibile con
-  i controlli `onEntry`/`defaultDirMode`/`defaultFileMode` di `@openai/codex-security`;
-  sovrascriverlo romperebbe silenziosamente i controlli di sicurezza di quel pacchetto.
-- **Baseline:** il `vulnCount` osv misurato (3) è già ben al di sotto della baseline congelata
-  `config/quality/quality-baseline.json` (27) — nessuna modifica a cricchetto necessaria.
-- **Protezione dalla regressione:** `tests/unit/extract-zip-14482-exposure.test.ts` asserisce la
-  catena e l'invariante di non importazione in produzione di cui sopra; fallisce la CI se uno dei due
-  si rompe (ad esempio, una futura PR rende `extract-zip` raggiungibile dalla produzione).
-- **Tracciamento:** issue #14482.
+L'attuale correzione delle dipendenze limita inoltre gli override di compatibilità al client
+MSAL di Azure Identity, al client FTP di get-uri e alla dipendenza Zod dell'SDK OpenCode v1. L'acquisizione
+dei token di Azure e il recupero tramite FTP vengono testati con trasporti controllati; entrambi i pacchetti OpenCode
+eseguono le proprie suite di build e test. I conteggi degli avvisi del registry sono misurazioni
+riferite a un determinato momento e possono cambiare dopo il commit del lockfile.
 
 ## Backlog: Avviso Scorecard → bloccante
 

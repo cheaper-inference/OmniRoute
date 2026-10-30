@@ -3,9 +3,8 @@ import fs from "node:fs";
 import { Socket } from "node:net";
 import os from "node:os";
 import path from "node:path";
-import { performance } from "node:perf_hooks";
-import test from "node:test";
-import { setTimeout as sleep } from "node:timers/promises";
+import test, { type TestContext } from "node:test";
+import { setImmediate as nextTurn } from "node:timers/promises";
 import { kiroEventFrame } from "../_helpers/kiroEventStreamFixture.ts";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-15260-kiro-"));
@@ -45,7 +44,8 @@ type RunOptions = {
   thinkingExpected?: boolean;
 };
 
-async function runKiroStream(steps: Step[], options: RunOptions = {}) {
+async function runKiroStream(t: TestContext, steps: Step[], options: RunOptions = {}) {
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
   const errors: string[] = [];
   const errorTimes: number[] = [];
   const sentSteps: { event: string; at: number }[] = [];
@@ -60,7 +60,7 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
     clientResponseFormat: "openai",
     onError(event) {
       errors.push(String(event.message));
-      errorTimes.push(performance.now() - startedAt);
+      errorTimes.push(Date.now() - startedAt);
       return true;
     },
   });
@@ -119,29 +119,12 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
     stallTimeoutMs: 5000,
     activeTimeoutMs: options.activeTimeoutMs ?? 5000,
   });
-  startedAt = performance.now();
-  const producer = (async () => {
-    try {
-      for (const step of steps) {
-        await sleep(step.delayMs ?? 25, undefined, { signal: controller.signal });
-        if (sourceClosed || controller.signal.aborted) return;
-        sentSteps.push({ event: step.event, at: performance.now() - startedAt });
-        upstream.enqueue(step.bytes ?? kiroEventFrame(step.event, step.payload));
-      }
-      if (!sourceClosed && !controller.signal.aborted) {
-        sourceClosed = true;
-        upstream.close();
-      }
-    } catch (error) {
-      if (!(error instanceof Error && error.name === "AbortError")) throw error;
-    }
-  })();
+  startedAt = Date.now();
   let text = "";
   const decoder = new TextDecoder();
   const reader = stream.getReader();
   const watcher = createStreamContentWatcher();
-  let finished = false;
-  try {
+  const consumer = (async () => {
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -163,13 +146,34 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
     }
     text += decoder.decode();
     watcher.finish();
-    await producer;
+  })();
+  let finished = false;
+  try {
+    await nextTurn();
+    for (const step of steps) {
+      t.mock.timers.tick(step.delayMs ?? 25);
+      await nextTurn();
+      if (sourceClosed || controller.signal.aborted) break;
+      sentSteps.push({ event: step.event, at: Date.now() - startedAt });
+      upstream.enqueue(step.bytes ?? kiroEventFrame(step.event, step.payload));
+      // Let the actual decoder and watchdog consume each fragment before advancing
+      // logical time. A busy host must not turn a 5ms fixture gap into a 100ms stall.
+      await nextTurn();
+    }
+    if (!sourceClosed && !controller.signal.aborted) {
+      sourceClosed = true;
+      upstream.close();
+    }
+    await consumer;
     finished = true;
-    if (options.cancelAfterProgress) await sleep(CONTENT_BUDGET_MS * 2);
+    if (options.cancelAfterProgress) {
+      t.mock.timers.tick(CONTENT_BUDGET_MS * 2);
+      await nextTurn();
+    }
   } finally {
     await reader.cancel().catch(() => {});
     if (!finished) controller.abort();
-    await producer;
+    await consumer;
   }
   assert.equal(fetches, 1);
   assert.equal(socketAttempts, 0);
@@ -181,7 +185,7 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
     snapshots,
     cancelled,
     aborts,
-    durationMs: performance.now() - startedAt,
+    durationMs: Date.now() - startedAt,
     watcher,
   };
 }
@@ -189,8 +193,8 @@ async function runKiroStream(steps: Step[], options: RunOptions = {}) {
 test(
   "#15260 setup control: real Kiro executor/readiness/watchdog deliver text",
   { timeout: 5000 },
-  async () => {
-    const result = await runKiroStream([
+  async (t) => {
+    const result = await runKiroStream(t, [
       { event: "assistantResponseEvent", payload: { content: ANSWER } },
       { event: "messageStopEvent", payload: {} },
     ]);
@@ -204,8 +208,8 @@ test(
 test(
   "#15260 Kiro signatures keep the real content watchdog live until the answer",
   { timeout: 5000 },
-  async () => {
-    const result = await runKiroStream([
+  async (t) => {
+    const result = await runKiroStream(t, [
       ...Array.from({ length: 12 }, (_, i) => ({
         event: "reasoningContentEvent",
         payload: { signature: `synthetic-signature-${i}` },
@@ -238,8 +242,8 @@ test(
   }
 );
 
-test("#15260 native reasoning text still keeps the watchdog live", { timeout: 5000 }, async () => {
-  const result = await runKiroStream([
+test("#15260 native reasoning text still keeps the watchdog live", { timeout: 5000 }, async (t) => {
+  const result = await runKiroStream(t, [
     ...Array.from({ length: 12 }, () => ({
       event: "reasoningContentEvent",
       payload: { reasoningText: { text: "thinking" } },
@@ -252,8 +256,9 @@ test("#15260 native reasoning text still keeps the watchdog live", { timeout: 50
   assert.equal(result.aborts, 0);
 });
 
-test("#15260 inline thinking still keeps the watchdog live", { timeout: 5000 }, async () => {
+test("#15260 inline thinking still keeps the watchdog live", { timeout: 5000 }, async (t) => {
   const result = await runKiroStream(
+    t,
     [
       { event: "assistantResponseEvent", payload: { content: "<thinking>" } },
       ...Array.from({ length: 12 }, () => ({
@@ -272,7 +277,7 @@ test("#15260 inline thinking still keeps the watchdog live", { timeout: 5000 }, 
 test(
   "#15260 fragmented prelude, headers and payload preserve complete reasoning events",
   { timeout: 5000 },
-  async () => {
+  async (t) => {
     const steps: Step[] = [];
     for (let i = 0; i < 12; i++) {
       const frame = kiroEventFrame("reasoningContentEvent", {
@@ -289,7 +294,7 @@ test(
       }
     }
     steps.push({ event: "assistantResponseEvent", payload: { content: ANSWER } });
-    const result = await runKiroStream(steps);
+    const result = await runKiroStream(t, steps);
     assert.deepEqual(result.errors, []);
     assert.equal(result.watcher.reasoningProgress(), 12);
     assert.match(result.text, /ANSWER_15260/);
@@ -302,8 +307,11 @@ for (const [label, event, payload] of [
   ["unknown event with a signature", "unknownEvent", { signature: "not-reasoning" }],
   ["empty reasoning signature", "reasoningContentEvent", { text: "", signature: " " }],
 ] as const) {
-  test(`#15260 ${label} does not postpone content stall`, { timeout: 5000 }, async () => {
-    const result = await runKiroStream(Array.from({ length: 12 }, () => ({ event, payload })));
+  test(`#15260 ${label} does not postpone content stall`, { timeout: 5000 }, async (t) => {
+    const result = await runKiroStream(
+      t,
+      Array.from({ length: 12 }, () => ({ event, payload }))
+    );
     assert.equal(result.errors.length, 1);
     assert.match(result.errors[0], /stream content stall/);
     assert.equal(result.watcher.reasoningProgress(), 0);
@@ -316,11 +324,11 @@ for (const [label, event, payload] of [
 test(
   "#15260 incomplete and corrupt reasoning frames are not progress",
   { timeout: 5000 },
-  async () => {
+  async (t) => {
     const corrupt = kiroEventFrame("reasoningContentEvent", { signature: "corrupt" });
     corrupt[corrupt.length - 1] ^= 0xff;
     const incomplete = kiroEventFrame("reasoningContentEvent", { signature: "incomplete" });
-    const result = await runKiroStream([
+    const result = await runKiroStream(t, [
       { event: "corrupt", bytes: corrupt },
       ...Array.from({ length: 12 }, (_, i) => ({
         event: "incomplete",
@@ -338,8 +346,8 @@ test(
 test(
   "#15260 metadata after reasoning stops still expires one content budget later",
   { timeout: 5000 },
-  async () => {
-    const result = await runKiroStream([
+  async (t) => {
+    const result = await runKiroStream(t, [
       ...Array.from({ length: 4 }, () => ({
         event: "reasoningContentEvent",
         payload: { signature: "synthetic" },
@@ -355,7 +363,7 @@ test(
     const lastProgress = result.sentSteps
       .filter((step) => step.event === "reasoningContentEvent")
       .at(-1)!;
-    assert.ok(result.errorTimes[0] - lastProgress.at >= CONTENT_BUDGET_MS - 5);
+    assert.equal(result.errorTimes[0] - lastProgress.at, CONTENT_BUDGET_MS);
     assert.equal(result.cancelled, 1);
   }
 );
@@ -363,8 +371,9 @@ test(
 test(
   "#15260 opaque reasoning cannot extend the independent active timeout",
   { timeout: 5000 },
-  async () => {
+  async (t) => {
     const result = await runKiroStream(
+      t,
       Array.from({ length: 30 }, () => ({
         event: "reasoningContentEvent",
         payload: { signature: "synthetic" },
@@ -381,8 +390,9 @@ test(
 test(
   "#15260 client cancellation stops reasoning and clears watchdogs",
   { timeout: 5000 },
-  async () => {
+  async (t) => {
     const result = await runKiroStream(
+      t,
       Array.from({ length: 30 }, () => ({
         event: "reasoningContentEvent",
         payload: { signature: "synthetic" },

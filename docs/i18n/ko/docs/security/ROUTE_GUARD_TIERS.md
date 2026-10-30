@@ -208,7 +208,7 @@ Next.js보다 먼저 커스텀 Node 계층이 제공하는 WebDAV 파일 서비�
 (GHSA-7pq4-8pvv-rx7r). 또한 `enableObsidianVaultSync()`는 데이터 디렉터리 자체이거나,
 그 내부에 있거나, 데이터 디렉터리를 포함하는 볼트를 거부합니다.
 
-#### 자격 증명 내보내기는 운영자 전용입니다
+#### 자격 증명 내보내기와 복원은 운영자 전용입니다
 
 상위 티어는 _어떤_ 자격 증명이 필요한지 여부만 결정합니다. 저장된 자격 증명을 다운로드하는
 라우트는 핸들러에서 두 번째 검사를 추가합니다. `GET /api/settings/export-json`(복호화된
@@ -220,22 +220,9 @@ Next.js보다 먼저 커스텀 Node 계층이 제공하는 WebDAV 파일 서비�
 (`POST /api/sync/tokens`)도 동일한 헬퍼와 신뢰할 수 있는 루프백 내부 서비스 토큰을
 사용합니다.
 
-#### Credential exports and restores are operator-only
+이에 대응하는 파괴적 작업에도 같은 경계가 적용됩니다. `POST /api/db-backups/import`(업로드한 `.sqlite` 파일, `dryRun=true` 포함), `POST /api/db-backups`(id로 저장된 백업 복원), `POST /api/settings/import-json`(기존 JSON 형식 복원)는 실행 중인 데이터베이스 또는 설정·연결·API 키 전체를 교체합니다. 따라서 머신 자격 증명으로는 이러한 작업도 시작할 수 없습니다.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+복원 지점을 없애는 작업에도 같은 경계가 적용됩니다. `DELETE /api/db-backups`(정리 — 최신 N개를 유지하거나 D일보다 오래된 항목 삭제)과 `PATCH /api/db-backups`(보존 설정)이 해당합니다. 저장된 보존 규칙은 자동 백업을 만들 때마다 `cleanupDbBackups()`가 적용하는 규칙입니다(`src/lib/db/backup.ts`). 따라서 머신 자격 증명으로 `keepLatest: 1`을 저장할 수 있다면 다음 스냅샷에서 이전 복원 지점을 삭제할 수 있게 됩니다. 백업 목록 조회와 생성(`GET`/`PUT /api/db-backups`)은 일반 관리 인증을 유지합니다.
 
 ### 신규 설치 부트스트랩은 루프백으로만 제한됨 — `Host`가 아닌 실제 피어 기준
 

@@ -1,10 +1,8 @@
-# Quality Gates Reference (Bosanski)
+# Referenca za Quality Gates (Bosanski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/QUALITY_GATES.md) · 🇪🇹 [am](../../../am/docs/architecture/QUALITY_GATES.md) · 🇸🇦 [ar](../../../ar/docs/architecture/QUALITY_GATES.md) · 🇦🇿 [az](../../../az/docs/architecture/QUALITY_GATES.md) · 🇧🇬 [bg](../../../bg/docs/architecture/QUALITY_GATES.md) · 🇧🇩 [bn](../../../bn/docs/architecture/QUALITY_GATES.md) · 🇨🇿 [cs](../../../cs/docs/architecture/QUALITY_GATES.md) · 🇩🇰 [da](../../../da/docs/architecture/QUALITY_GATES.md) · 🇩🇪 [de](../../../de/docs/architecture/QUALITY_GATES.md) · 🇬🇷 [el](../../../el/docs/architecture/QUALITY_GATES.md) · 🇪🇸 [es](../../../es/docs/architecture/QUALITY_GATES.md) · 🇪🇪 [et](../../../et/docs/architecture/QUALITY_GATES.md) · 🇮🇷 [fa](../../../fa/docs/architecture/QUALITY_GATES.md) · 🇫🇮 [fi](../../../fi/docs/architecture/QUALITY_GATES.md) · 🇫🇷 [fr](../../../fr/docs/architecture/QUALITY_GATES.md) · 🇮🇪 [ga](../../../ga/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [gu](../../../gu/docs/architecture/QUALITY_GATES.md) · 🇳🇬 [ha](../../../ha/docs/architecture/QUALITY_GATES.md) · 🇮🇱 [he](../../../he/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [hi](../../../hi/docs/architecture/QUALITY_GATES.md) · 🇭🇷 [hr](../../../hr/docs/architecture/QUALITY_GATES.md) · 🇭🇺 [hu](../../../hu/docs/architecture/QUALITY_GATES.md) · 🇦🇲 [hy](../../../hy/docs/architecture/QUALITY_GATES.md) · 🇮🇩 [id](../../../id/docs/architecture/QUALITY_GATES.md) · 🇳🇬 [ig](../../../ig/docs/architecture/QUALITY_GATES.md) · 🇮🇹 [it](../../../it/docs/architecture/QUALITY_GATES.md) · 🇯🇵 [ja](../../../ja/docs/architecture/QUALITY_GATES.md) · 🇬🇪 [ka](../../../ka/docs/architecture/QUALITY_GATES.md) · 🇰🇭 [km](../../../km/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [kn](../../../kn/docs/architecture/QUALITY_GATES.md) · 🇰🇷 [ko](../../../ko/docs/architecture/QUALITY_GATES.md) · 🇱🇹 [lt](../../../lt/docs/architecture/QUALITY_GATES.md) · 🇱🇻 [lv](../../../lv/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [ml](../../../ml/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [mr](../../../mr/docs/architecture/QUALITY_GATES.md) · 🇲🇾 [ms](../../../ms/docs/architecture/QUALITY_GATES.md) · 🇲🇹 [mt](../../../mt/docs/architecture/QUALITY_GATES.md) · 🇲🇲 [my](../../../my/docs/architecture/QUALITY_GATES.md) · 🇳🇵 [ne](../../../ne/docs/architecture/QUALITY_GATES.md) · 🇳🇱 [nl](../../../nl/docs/architecture/QUALITY_GATES.md) · 🇳🇴 [no](../../../no/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [or](../../../or/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [pa](../../../pa/docs/architecture/QUALITY_GATES.md) · 🇵🇭 [phi](../../../phi/docs/architecture/QUALITY_GATES.md) · 🇵🇱 [pl](../../../pl/docs/architecture/QUALITY_GATES.md) · 🇵🇹 [pt](../../../pt/docs/architecture/QUALITY_GATES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/QUALITY_GATES.md) · 🇷🇴 [ro](../../../ro/docs/architecture/QUALITY_GATES.md) · 🇷🇺 [ru](../../../ru/docs/architecture/QUALITY_GATES.md) · 🇱🇰 [si](../../../si/docs/architecture/QUALITY_GATES.md) · 🇸🇰 [sk](../../../sk/docs/architecture/QUALITY_GATES.md) · 🇸🇮 [sl](../../../sl/docs/architecture/QUALITY_GATES.md) · 🇷🇸 [sr](../../../sr/docs/architecture/QUALITY_GATES.md) · 🇸🇪 [sv](../../../sv/docs/architecture/QUALITY_GATES.md) · 🇰🇪 [sw](../../../sw/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [ta](../../../ta/docs/architecture/QUALITY_GATES.md) · 🇮🇳 [te](../../../te/docs/architecture/QUALITY_GATES.md) · 🇹🇭 [th](../../../th/docs/architecture/QUALITY_GATES.md) · 🇹🇷 [tr](../../../tr/docs/architecture/QUALITY_GATES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/QUALITY_GATES.md) · 🇵🇰 [ur](../../../ur/docs/architecture/QUALITY_GATES.md) · 🇺🇿 [uz](../../../uz/docs/architecture/QUALITY_GATES.md) · 🇻🇳 [vi](../../../vi/docs/architecture/QUALITY_GATES.md) · 🇳🇬 [yo](../../../yo/docs/architecture/QUALITY_GATES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/QUALITY_GATES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/QUALITY_GATES.md)
 
 ---
-
-# Referenca za Quality Gates
 
 Ovaj dokument je mjerodavna referenca za sve CI quality gates u OmniRoute-u.
 Opisuje svaku kapiju, šta ona validira, u kojem CI poslu se izvršava, da li koristi
@@ -17,28 +15,82 @@ istog sistema nezavisan od alata, pogledajte
 
 ---
 
-## Inventar kontrolnih tačaka i profili izvršavanja
+## Inventar kontrola i profili izvršavanja
 
-### Prihvat kandidata
+### Prihvatanje kandidata
 
-CI i Quality Gates radni tokovi emituju stabilne rezultate: `Gate / CI` i
-`Gate / Quality`. Njihova verzionirana politika prihvata navodi svaki prethodni posao
-kao obavezan ili savjetodavan. Primjenjivi obavezni posao mora biti uspješan: rezultat koji
-nedostaje, koji je otkazan, preskočen, na čekanju ili nepoznat ne može uspostaviti PASS. Važeća
-klasifikacija samo za dokumentaciju ili samo za katalog može učiniti stazu koda neprimjenjivom;
+Tokovi rada CI i Quality Gates daju stabilne rezultate: `Gate / CI` i
+`Gate / Quality`. Njihova verzionirana politika prihvatanja navodi svaki prethodni posao
+kao obavezan ili savjetodavan. Primjenjivi obavezni posao mora uspjeti: nedostajući,
+otkazani, preskočeni, neriješeni i nepoznati rezultati ne mogu uspostaviti PASS. Važeća
+klasifikacija samo za dokumentaciju ili samo za katalog može učiniti programsku granu neprimjenjivom;
 nacrt PR-a nije prihvaćen kandidat. Oznaka `hotfix` ne ukida obavezu pružanja dokaza.
 
-Oba radna toka obuhvataju PR-ove i slanja na glavne/release grane, ručno pokretanje i
-događaje grupe spajanja. Slanje, pokretanje i grupa spajanja izvršavaju puni odabir. Forkovi
-i grupe spajanja koriste hostovane pokretače za poslove koji bi inače odabrali samostalno
-hostovane pokretače; prije uvođenja mora se provjeriti dovoljan hostovani kapacitet.
+Oba toka rada obuhvataju PR-ove prema glavnim/release granama, slanja na `main`, ručno pokretanje
+i događaje grupe spajanja. Slanje, ručno pokretanje i grupa spajanja izvršavaju puni odabir. Slanja na
+`release/**` ih ne pokreću (2026-10-18): svaka promjena je već izvršila matricu u svom PR-u,
+a spojena kombinacija je zadatak sistema Release-Green (`docs/ops/RUNNER_BOX.md` → hostovana grana). Forkovi
+i grupe spajanja koriste hostovane izvršioce za poslove koji bi inače odabrali samostalno hostovane
+izvršioce; dovoljan hostovani kapacitet mora se provjeriti prije uvođenja.
 
-Svaka JSON potvrda identifikuje preuzeti SHA, pokretanje radnog toka i pokušaj.
-CLI odbija nepodudaranje SHA-a preuzetog koda i događaja. Testovi radnog toka vezuju članstvo u politici
-za listu `needs` posla koji donosi rezultat, tako da nova ili uklonjena staza ne može neprimjetno nestati.
-Potvrde obuhvataju vlastiti radni tok, a ne objavljivanje, implementaciju ili unutrašnji rad
-postojećeg savjetodavnog skenera. Aktiviranje oba naziva provjera u pravilima grane zasebna je
-administrativna promjena; dodavanje ovih poslova samo po sebi ne štiti granu.
+Svaka JSON potvrda identificira preuzeti SHA, izvršavanje toka rada i pokušaj.
+CLI odbija nepodudaranje SHA vrijednosti preuzetog stanja i događaja. Testovi toka rada povezuju članstvo u politici
+s listom `needs` posla koji daje rezultat, tako da nova ili uklonjena grana ne može neprimjetno nestati.
+Potvrde pokrivaju vlastiti radni tok, a ne objavljivanje, implementaciju ili interne dijelove
+postojećeg savjetodavnog skenera. Postavljanje primjenjivih provjera kao obaveznih u pravilima grane
+zasebna je administrativna promjena; samo definiranje njihovih poslova ne štiti granu.
+
+`API Route Typecheck` je nezavisna provjera radnog toka, izvan obje zbirne odluke
+i statičkog profila lokalnog potpunog posmatrača. Zasebno pregledajte njen rezultat za tačno
+određenog kandidata. `.github/workflows/api-route-typecheck.yml` pokreće se za PR-ove prema `main` ili
+`release/**`, slanja promjena u bilo koju porodicu grana i ručno pokretanje. Nema filter putanja.
+Promjene ciljne grane PR-a zahtijevaju novu provjeru; izmjene tijela/naslova koriste naziv samo za posmatranje
+`Admission not requested / API Route Typecheck` i ne mogu zamijeniti provjeru prijema.
+Radni tok ne definira okidač grupe za spajanje. Svako uvođenje reda čekanja za spajanje koje zahtijeva
+ovu provjeru mora prvo uspostaviti njeno izvršavanje za taj događaj.
+
+### Kapacitet izvršavanja korisničkog interfejsa
+
+CI izvršava puni inventar korisničkog interfejsa kao četiri `test-vitest` dijela matrice, od kojih svaki ima najviše
+dva radnika i postojeći rok od 15 minuta po poslu. Prvi dio također izvršava
+MCP/autoCombo Vitest paket. Rezultat obaveznog posla obuhvata svaki dio matrice; neuspjeh
+ili otkazivanje jednog dijela ne može uspostaviti prihvatanje kandidata.
+
+Noćni posmatrač zadržava zasebnu potvrdu tačnog kandidata za svaki dio korisničkog interfejsa,
+uključujući MCP izvršavanje u prvoj potvrdi. Obavezne su sve četiri potvrde, zapisnici i odgovarajući
+identiteti izvršavanja. Lokalni `npm run test:vitest:ui` i dalje odabire
+kompletan paket; jedno izvršavanje s `--shard` predstavlja samo djelimičan dokaz.
+
+### Prikupljanje pokrivenosti jediničnih testova
+
+Dvanaest dijelova jediničnih testova prikuplja V8 pokrivenost tokom postojećeg izvršavanja testova. Uspješan
+dio izvršava `scripts/ci/compact-v8-coverage.mjs` kako bi komprimirao izvorne datoteke bez generiranja
+privremenog Istanbul izvještaja. Završni posao Coverage provjerava svih dvanaest manifesta u odnosu na
+SHA kandidata, okruženje izvršavanja, korijenski direktorij izvornog koda i sažetke podataka, a zatim pokreće c8 izvještaje i postojeće
+pragove pokrivenosti. Ulazni podaci zadržavaju c8 globalni redoslijed naziva datoteka; prethodno spajanje po dijelovima nije sigurno
+za mješovitu pokrivenost funkcija/blokova. Nedostajući, neispravni ili nekompatibilni dijelovi onemogućavaju prihvatanje.
+Neuspješni dijelovi testova zasebno zadržavaju sirovu dijagnostičku pokrivenost; ona ne može ući u završno spajanje.
+
+### Potvrde o napretku izvršavanja jediničnih testova
+
+Zajednička naredba `test:unit:ci:shard` bilježi faze `primary`, `dashboard` i `serial`
+putem `scripts/ci/unit-progress-reporter.mjs`. Uobičajeni izvještaj o testiranju ostaje
+dostupan. Zasebna potvrda koja sadrži samo metapodatke bilježi početak i završetak svake datoteke,
+dok 30-sekundni signal aktivnosti navodi datoteke koje su još uvijek aktivne i njihovo proteklo vrijeme. Bilježe se
+samo metapodaci o izvršavanju s liste dozvoljenih stavki; opisi testova, izlazni podaci, sadržaji grešaka i cjelokupno
+okruženje ne serijaliziraju se.
+
+CI i Quality čuvaju JSONL datoteke kao `unit-progress-ci-<run>-<attempt>-<shard>` i
+`unit-progress-quality-<run>-<attempt>-<shard>`. Istek vremena zadatka može spriječiti kasnije otpremanje;
+već emitirani signali aktivnosti ostaju dijagnostički dokaz. Nedostatak signala aktivnosti također može ukazivati
+na blokiran ili prekinut proces izvršavača. Ove potvrde zadržavaju postojeći odabir testova,
+konkurentnost, rokove i izlazni status; one nisu odluke o prihvatanju kandidata.
+
+### Sačuvani dokazi u modulu za objedinjavanje prihvatanja
+
+`scripts/quality/validate-release-acceptance.mjs` objedinjuje dostavljeni plan i njegove manifeste; ne utvrđuje da plan pokriva cijeli proces izdavanja. Njegovi izvještaji izričito postavljaju `releaseAcceptance: false`, čak i kada plan ima status `VERIFIED`. Tok rada `release-acceptance.yml` i dalje koristi testne podatke u shadow režimu, a ne stvarne potvrde izgradnje, pakovanja, pokretanja ili promocije.
+
+CLI zahtijeva `--evidence-root` za provjeru sačuvanih dokaza. Datoteke se pronalaze putem `<evidence-root>/<artifact_id>/<member>` i heširaju algoritmom SHA-256. PASS zapis bez dokaza, nedostajuća ili izmijenjena datoteka, nesigurna putanja ili simbolička veza onemogućavaju potvrdu. Datoteke koje nedostaju nisu isto što i prazni zapisi uspješnog izvršavanja. Postojeće provjere SHA/run/attempt ostaju nezavisne: podudaranje bajtova ne može učiniti zastarjelu potvrdu važećom. Integritet datoteke nije dokaz autentičnosti izvršavanja niti promocije artefakta.
 
 ### Inventar statičkog skeniranja
 
@@ -46,187 +98,219 @@ Verzionirani inventar npm aliasa i članstvo u statičkom skeniranju nalaze se u
 `config/quality/gate-manifest.json`. Pokrenite `npm run check:gate-manifest` kako biste provjerili
 nazive skripti i tačne naredbe u odnosu na `package.json`; dodavanja, uklanjanja i
 odstupanja naredbi uzrokuju neuspjeh i lokalne kuke i poslova klasifikacije promjena u CI-ju.
-Alias nije posao radnog toka, instanca matrice niti testni slučaj: ovi brojevi
-ne smiju se predstavljati kao međusobno zamjenjivi.
+Alias nije posao toka rada, instanca matrice niti testni slučaj: ovi brojevi se
+ne smiju predstavljati kao međusobno zamjenjivi.
 
 Koristite `npm run quality:scan -- --list` ili `npm run quality:scan:fast -- --list`
-kako biste pregledali odabrane aliase bez njihovog izvršavanja. Pokretač poziva
-npm ulaznu tačku, pa se njeno okruženje izvršavanja (uključujući Bun gdje je konfigurisan) zadržava.
+da pregledate odabrane aliase bez njihovog izvršavanja. Izvršilac poziva
+npm ulaznu tačku, tako da je njeno okruženje izvršavanja (uključujući Bun gdje je konfiguriran) sačuvano.
 Manifest bilježi aliase izvan tih profila kao zasebno pozvane, a
-naredbe održavanja zabranjene su u profilima skeniranja samo za čitanje.
+naredbe za održavanje zabranjene su u profilima skeniranja samo za čitanje.
 
-Ovi profili obuhvataju samo statičko skeniranje. Oni ne potvrđuju testove proizvoda,
-pokrivenost, pakovanje, vanjske provjere niti potpuni prihvat kandidata za izdanje.
-Prihvat u radnom toku koristi povezani `config/quality/admission-policy.json` i
-`scripts/quality/admission-verdict.mjs`. Profili za praćenje izdanja ostaju odvojeni;
-nezavisno pregledajte njihove primjenjive provjere i potvrde. Tekstualni
-inventar u nastavku predstavlja referencu, a ne dokaz da je kontrolna tačka zaista pokrenuta.
+Ovi profili pokrivaju samo statičko skeniranje. Oni ne potvrđuju testove proizvoda,
+pokrivenost, pakovanje, vanjske provjere niti potpuno odobrenje kandidata za izdavanje.
+Prihvatanje u toku rada koristi povezane `config/quality/admission-policy.json` i
+`scripts/quality/admission-verdict.mjs`. Profili posmatrača izdanja ostaju zasebni;
+nezavisno pregledajte njihove primjenjive provjere i potvrde. Statičke naredbe punog posmatrača
+deklarirane su u `config/quality/release-green-static-profile.json`, uključujući
+`audit:deps`, odabir mutacijskih testova i provjere prijevoda. Učitavač provjerava npm
+naredbe u odnosu na package.json i modelirane CI/Quality deklaracije; odbija odstupanja
+umjesto izvršavanja tokena ljuske kao argumenata. Obavezni izlaz skenera SKIP/INCOMPLETE
+ne može uspostaviti PASS. Profil bilježi svoja vanjska izuzimanja i ne zamjenjuje
+hostovanu pokrivenost, testne matrice, dokaze o paketu ili implementaciji. Tekstualni inventar u nastavku
+služi kao referenca, a ne kao dokaz da je kontrola zaista izvršena.
 
-Skripte se nalaze pod `scripts/check/` (kontrolne tačke politike) i `scripts/quality/` (mehanizam postepenog pooštravanja).
+Skripte se nalaze u `scripts/check/` (kontrole politike) i `scripts/quality/` (mehanizam postepenog pooštravanja).
 CI izvor istine je `.github/workflows/ci.yml`.
 
-### Brza putanja PR-a izdanja (`quality.yml`)
+### Stanje dokumentacije objavljene osnove
 
-`.github/workflows/quality.yml` dopunjuje CI za PR-ove prema glavnim/release granama, slanja na zaštićene grane,
-pokretanje i grupe spajanja. PR-ovi koriste brze provjere filtrirane prema putanjama. Trajno
-onemogućena duplicirana izgradnja je uklonjena; stvarne provjere izgradnje/pakovanja/pokretanja ostaju u CI-ju.
+`.github/workflows/i18n-base-health.yml` prati stanje dokumentacije nakon odabranih
+slanja na `main` i `release/v*`, kao i pri ručnom pokretanju. Njegovi filteri obuhvataju dokumentaciju,
+Markdown datoteke u korijenskom direktoriju, `llm.txt`, stanje/konfiguraciju prijevoda i relevantne i18n alate.
+Jedini zadatak `Published base documentation health` koristi hostovani Ubuntu i vremensko
+ograničenje od pet minuta. Obavlja provjeru samo za čitanje i zapisuje dijagnostičku potvrdu bez
+instaliranja zavisnosti, prevođenja ili usvajanja stanja.
 
-| Posao                                            | Opseg                                                                                                                                                                                                                                  | Blokirajući             |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `Docs Gates (fast-path)`                         | PR-ovi dokumentacije/koda; reference API dokumentacije i sva dokumentacija                                                                                                                                                             | Da                      |
-| `Fast Quality Gates`                             | PR-ovi koda; statičke provjere, provjera tipova, provjera tipova kontrolne ploče, pogođeni jedinični testovi                                                                                                                           | Da                      |
-| `Forgotten sibling tests`                        | PR-ovi koda; izmijenjeni moduli praćeni do statičkih potrošača i kandidatskih srodnih testova; putanje preko barrel datoteka i dinamičkog uvoza prijavljuju se kao savjetodavna dijagnostika, uz navedene izuzetke s liste dozvoljenih | **Savjetodavno**        |
-| `Vitest (fast-path)`                             | PR-ovi koda; brzi vitest paket                                                                                                                                                                                                         | Da                      |
-| `Unit Tests fast-path`                           | PR-ovi koda; jedinični paket u 4 segmenta                                                                                                                                                                                              | Da                      |
-| `No new ESLint warnings`                         | PR-ovi koda; zaštita lintanja svjesna potiskivanja                                                                                                                                                                                     | Da, uključujući forkove |
-| `Merge integrity (changelog + generated skills)` | PR-ovi koji nisu nacrti; sinhronizacija dnevnika promjena i generisanih vještina                                                                                                                                                       | Da, uključujući forkove |
+`scripts/i18n/check-base-health.mjs` zahtijeva da ne postoje nedosljednosti izvornog sažetka, nedostajućeg cilja, ciljnog sažetka,
+zastarjelog prijevoda i predmemorije odjeljaka. Također provjerava trenutni opseg osnovnih
+dokumenata/lokalizacija i njihovo zabilježeno porijeklo. Nevažeći kontekst, nepotpuna pokrivenost
+ili prekinuta provjera daje rezultat `INCOMPLETE`; potvrđeno odstupanje daje rezultat `FAIL`. Oba
+vraćaju izlazni status neuspjeha. Potvrda je vezana za SHA odjave, radni tok, pokretanje i
+pokušaj te se čuva kao `i18n-base-health-<sha>-<run>-<attempt>`.
 
-#### Izvještaj o zaboravljenim srodnim testovima
+Ovo je nezavisno praćenje objavljene osnove. Ono ne dodaje događaj PR-a ili
+grupe spajanja, obaveznu PR provjeru, npm pseudonim niti člana profila statičkog skeniranja.
+Postojeća diferencijalna PR pravila i savjetodavne klasifikacije osnovnog alata za provjeru
+ostaju odvojeni. Uspješno učitavanje ne može neuspješan rezultat provjere stanja pretvoriti u PASS.
 
-`npm run check:forgotten-sibling-tests` ponovo koristi razrješivač uvoza na kojem se zasniva mapa uticaja testova.
+### Ubrzana putanja za release PR (`quality.yml`)
+
+`.github/workflows/quality.yml` dopunjuje CI za PR-ove prema glavnim/release granama, slanja na `main`,
+ručno pokretanje i grupe spajanja. PR-ovi koriste brze provjere filtrirane prema putanjama. Trajno
+onemogućena duplicirana izgradnja je uklonjena; stvarne provjere izgradnje/paketa/pokretanja ostaju u CI-ju.
+
+| Zadatak                                          | Opseg                                                                                                                                                                                                                                 | Blokira                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `Docs Gates (fast-path)`                         | PR-ovi za dokumentaciju/kôd; reference API dokumentacije i docs-all                                                                                                                                                                   | Da                      |
+| `Fast Quality Gates`                             | PR-ovi za kôd; statičke provjere, provjera tipova, provjera tipova kontrolne ploče, pogođeni jedinični testovi                                                                                                                        | Da                      |
+| `Forgotten sibling tests`                        | PR-ovi za kôd; izmijenjeni moduli prate se do statičkih potrošača i kandidata za povezane testove; putanje kroz barrel module i dinamički uvoz prijavljuju se kao savjetodavna dijagnostika, uz navedene izuzetke s liste dozvoljenih | **Savjetodavno**        |
+| `Vitest (fast-path)`                             | PR-ovi za kôd; brzi paket vitest testova                                                                                                                                                                                              | Da                      |
+| `Unit Tests fast-path`                           | PR-ovi za kôd; paket jediničnih testova u 4 segmenta                                                                                                                                                                                  | Da                      |
+| `No new ESLint warnings`                         | PR-ovi za kôd; zaštita za lint koja uzima u obzir potiskivanja                                                                                                                                                                        | Da, uključujući forkove |
+| `Merge integrity (changelog + generated skills)` | PR-ovi koji nisu nacrti; sinhronizacija evidencije promjena i generisanih vještina                                                                                                                                                    | Da, uključujući forkove |
+
+#### Izvještaj o zaboravljenim povezanim testovima
+
+`npm run check:forgotten-sibling-tests` ponovo koristi razrješivač uvoza koji stoji iza mape uticaja testova.
 Za svaki izmijenjeni produkcijski modul prijavljuje determinističke lance
-`izmijenjeni modul/simbol -> statički potrošač -> kandidatski srodni test` kada kandidatski
-test nije prisutan u razlikama zahtjeva za povlačenje. Markdown sažetak i JSON rezultat čuvaju se kao
-artefakt radnog toka `forgotten-sibling-tests` radi kalibracije prije bilo kakvog uvođenja blokiranja.
+`changed module/symbol -> static consumer -> candidate sibling test` kada kandidat za test
+nije prisutan u razlikama zahtjeva za povlačenje. Markdown sažetak i JSON rezultat čuvaju se kao
+artefakt toka rada `forgotten-sibling-tests` radi kalibracije prije uvođenja bilo kakvog blokiranja.
 
-Barrel ponovni izvozi i dinamički uvozi služe samo kao dijagnostika razrješavanja; nikada ne stvaraju
-blokirajući nalaz. Pregledani izuzeci nalaze se u
-`config/quality/forgotten-sibling-allowlist.json`. Svaki unos mora navesti potrošača i kandidatski
-test, dati konkretno obrazloženje i sadržavati poveznicu na GitHub problem ili zahtjev za spajanje. Neispravni unosi
-uzrokuju zatvoreni neuspjeh. Izuzeci ne mogu potisnuti izbrisani kandidatski test niti razliku koja dodaje `.skip`/`.todo`;
-slabljenje tvrdnji i druga prikrivanja ostaju u nadležnosti nezavisno blokirajuće
-`check:test-masking` kontrole.
+Ponovni izvozi kroz barrel module i dinamički uvozi služe samo kao dijagnostika razrješavanja; nikada ne stvaraju
+nalaz koji blokira. Pregledani izuzeci nalaze se u
+`config/quality/forgotten-sibling-allowlist.json`. Svaka stavka mora navesti potrošača i kandidata za
+test, dati konkretno obrazloženje i sadržavati poveznicu na GitHub problem ili zahtjev za povlačenje. Neispravne stavke
+podrazumijevano uzrokuju neuspjeh. Izuzeci ne mogu potisnuti izbrisanog kandidata za test niti razliku koja dodaje `.skip`/`.todo`;
+slabljenje tvrdnji i druga prikrivanja ostaju u nadležnosti nezavisne blokirajuće
+kontrole `check:test-masking`.
 
 ### Zadatak: `lint`
 
-Pokreće se za svaki PR prema grani `main`. U slučaju neuspjeha blokira spajanje.
+Pokreće se za svaki PR prema `main`. U slučaju neuspjeha blokira spajanje.
 
-| Skripta (`npm run ...`)           | Provjerava                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Blokira                                      |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `check:node-runtime`              | Verzija Node.js-a nalazi se unutar podržanog raspona                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Da                                           |
-| `check:cycles`                    | Kružne uvoze u cijelom `src/` + `open-sse/` (zasnovano na AST-u, razriješene tsconfig `paths`). Osnovna provjera završava kodom 1 kad god postoji bilo koji ciklus (zatvoreni neuspjeh od #15281) i navodi SCC-ove. `check:cycles:ratchet` (ono što CI pokreće) blokira kada broj premaši gornju granicu `metrics.cycles` u `quality-baseline.json` — trenutno 14, `direction: down`, pa se može samo smanjivati (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Da (ratchet)                                 |
-| `check:boundary`                  | Povezanost `open-sse → src`: jedinstvene uvoze između datoteka iz pogonskog sistema u aplikaciju (`scripts/quality/measure-boundary.mjs`; lista veza predstavlja zaostatak zadataka za sanaciju razdvajanja jezgre/modula v4). Osnovna provjera = savjetodavni izvještaj (isto kao `quality:boundary`). `check:boundary:ratchet` (ono što CI pokreće, također u ratchet petlji brzih kontrola datoteke `quality.yml`) blokira kada broj premaši gornju granicu `metrics.boundaryOpenSseToSrc` u `quality-baseline.json` — početno postavljenu na izmjerenih 771, `direction: down`; `--update` je može samo smanjiti; relativno prema osnovnoj grani na PR-ovima (`--base-ref`, pogledajte ispod)                                                                                                                                                                                                           | Da (ratchet)                                 |
-| `check:route-validation:t06`      | Prisustvo Zod shema na svim rutama (pravilo nivoa 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Da                                           |
-| `check:any-budget:t11`            | Broj `@ts-expect-error // any` ne prelazi dozvoljeni budžet (Nivo 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Da                                           |
-| `check:provider-consistency`      | Svaki pružalac u `providers.ts` ima odgovarajući unos u `providerRegistry.ts` (i obrnuto, unutar liste dozvoljenih)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Da                                           |
-| `check:model-lifecycle`           | Tri ručno održavane tabele usmjeravanja ostaju usklađene sa snimkom životnog ciklusa pohranjenom u repozitoriju (#11503): `FITNESS_TABLE` (`taskFitness.ts`) ne boduje nijedan povučeni ID koji `REGISTRY` može usmjeriti; svaki cilj iz `BUILT_IN_ALIASES` prisutan je u `REGISTRY` i ne postoji u snimci povučenih ID-ova; svaki povučeni ID koji je još uvijek u `REGISTRY` prosljeđuje se ili je naveden u `allowedRetiredInCatalog`; i nijedan izvor ili cilj iz `DEFAULT_DEGRADATION_MAP` nije označen kao povučen u toj snimci. Ovo ne dokazuje da model trenutno opslužuje aktivni vanjski servis. Van mreže — poredi sa `config/quality/model-lifecycle.json`, koji se ručno osvježava pomoću `npm run quality:refresh-model-lifecycle` (zahtijeva mrežu; nije uključen u CI). `allowedRetiredInCatalog` je zupčasti mehanizam za postepeno smanjivanje: unos dodajte samo uz problem za praćenje. | Da                                           |
-| `check:fetch-targets`             | Svaki `fetch("/api/...")` u klijentskom `src/` razrješava se na stvarnu datoteku `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Da                                           |
-| `check:deps`                      | Sve zavisnosti koje se mogu instalirati pomoću `npm install` iz svake datoteke `package.json` u repozitoriju nalaze se u `dependency-allowlist.json`; nove nefiksirane ili slopsquattovane pakete sistem označava                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Da                                           |
-| `audit:deps`                      | `npm audit` (korijenski direktorij + electron) — nema upozorenja visoke/kritične ozbiljnosti (preklapa se sa osv `check:vuln-ratchet`; pogledajte Zaostatak racionalizacije)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Da                                           |
-| `check:lockfile`                  | Integritet datoteke `package-lock.json` — https registar, hash vrijednosti integriteta, bez zamjena hosta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                           |
-| `check:licenses`                  | Lista dozvoljenih SPDX licenci za produkcijske zavisnosti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                           |
-| `check:tracked-artifacts`         | Bez artefakata izgradnje / commitovanih `node_modules` simboličkih veza (također se izvršava u husky pre-commit hooku; pre-push je namjerno jednostavan — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Da                                           |
-| `check:ai-attribution`            | Bez AI/bot `Co-Authored-By` trailera ili podnožja o AI generisanju u commitovima, naslovu ili tijelu PR-a — strogo pravilo #16 (u petlji brzih provjera `quality.yml` za PR→`release/**` — čita sadržaj događaja, ne radi ništa izvan PR-ova — i korak samo za PR u lint provjeri datoteke `ci.yml` za PR→`main`; također i husky `commit-msg` hook; ljudski koautori su dozvoljeni; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `check:vitest-exclusions`         | Svako Vitest izuzimanje navodi problem za praćenje i nalazi se u `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Da                                           |
-| `check:file-size`                 | Izvorne datoteke (`.ts`/`.tsx` u `src/`, `open-sse/`, `electron/`, `bin/`) ostaju unutar ograničenja `cap`, a testne datoteke (`*.test.ts(x)`) unutar `testCap`; datoteke zamrznute u `file-size-baseline.json` (`frozen` / `testFrozen`) ne smiju premašiti svoju zabilježenu veličinu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Da                                           |
-| `check:error-helper`              | Odgovori na greške u izvršiteljima/rukovateljima koriste `buildErrorBody()` / `sanitizeErrorMessage()` (Strogo pravilo #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Da                                           |
-| `check:migration-numbering`       | Migracijske SQL datoteke numerisane su redoslijedom, bez praznina ili duplikata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Da                                           |
-| `check:public-creds`              | Nema doslovnih OAuth vrijednosti `client_id`/`client_secret` niti Firebase Web ključeva izvan `publicCreds.ts` (Strogo pravilo #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Da                                           |
-| `check:db-rules`                  | Nema sirovog SQL-a izvan modula `src/lib/db/`; nema zbirnih uvoza iz `localDb.ts` (Stroga pravila #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Da                                           |
-| `check:known-symbols`             | Izvršitelji pružatelja, strategije usmjeravanja i prevoditelji registrirani u svojim tabelama za otpremu odgovaraju datotekama na disku — nema napuštenih ili nedeklarisanih simbola                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Da                                           |
-| `check:route-guard-membership`    | Svaka ruta koja pokreće podređeni proces klasificirana je pomoću `isLocalOnlyPath()` (Stroga pravila #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Da                                           |
-| `check:test-discovery`            | Svaka `*.test.ts` / `*.spec.ts` datoteka u repozitoriju obuhvaćena je barem jednim pokretačem testova (mehanizam postepenog poboljšanja: lista nepokrivenih datoteka u `test-discovery-baseline.json` može se samo smanjivati)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Da                                           |
-| `check:agent-skills-sync`         | Generirani artefakti vještina agenata odgovaraju svom izvornom katalogu (bez odstupanja)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `check:provider-asset-provenance` | Logotipi/resursi pružatelja imaju evidentiran zapis o porijeklu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `lint:json`                       | JSON konfiguracijske datoteke mogu se parsirati i zadovoljavaju pravila provjere koda u repozitoriju                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `typecheck:core`                  | TypeScript kompilacija bez grešaka (samo savjetodavna upozorenja)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Da                                           |
-| `typecheck:noimplicit:core`       | Strogi `noImplicitAny` — usmjeren na budućnost; mnoga postojeća mjesta poziva još uvijek trebaju anotacije                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | **Savjetodavno** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` ograničen na `src/app/(dashboard)/**` (#7033) — pažljivo odabrana lista dopuštenih 27 datoteka za `typecheck:core` ne uključuje nijedan dashboard TSX, a ni `next build` ih nikada ne provjerava po tipovima (`next.config.mjs` postavlja `ignoreBuildErrors: true`), pa su regresije napuštenih identifikatora tamo (#6625/#6909) bile nevidljive CI-ju. Razlike se porede sa zamrznutom početnom osnovom broja grešaka po datoteci i po TS kodu (`config/quality/dashboard-typecheck-baseline.json`, isti obrazac provođenja zastarjelosti kao za `check:known-symbols`) — samo NOVE greške iznad početnog broja uzrokuju neuspjeh kontrolne tačke; smanjite početnu osnovu pomoću `--update` kada se ispravi postojeća greška.                                                                                                                                                                     | Da                                           |
+| Skripta (`npm run ...`)           | Provjerava                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Blokirajuće                                  |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `check:node-runtime`              | Verzija Node.js-a je unutar podržanog raspona                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Da                                           |
+| `check:test-tla-order`            | Nijedna `node:test` datoteka u `tests/unit` ne registruje test, naiđe na `await` najvišeg nivoa, a zatim registruje dodatne testove (#18045; mehanizam postepenog pooštravanja: `test-tla-order-allowlist.json` može se samo smanjivati)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Da                                           |
+| `check:cycles`                    | Kružne uvoze u cijelom `src/` + `open-sse/` (zasnovano na AST-u, uz razriješene tsconfig `paths`). Osnovna provjera završava s kodom 1 kad god postoji bilo koji ciklus (princip sigurnog neuspjeha od #15281) i navodi SCC-ove. `check:cycles:ratchet` (koji CI pokreće) blokira kada broj premaši gornju granicu `metrics.cycles` u `quality-baseline.json` — trenutno 14, `direction: down`, pa se može samo smanjivati (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                | Da (postepeno pooštravanje)                  |
+| `check:boundary`                  | Povezanost `open-sse → src`: jedinstveni uvozi između datoteka iz pogonskog mehanizma u aplikaciju (`scripts/quality/measure-boundary.mjs`; lista veza predstavlja zaostatak za sanaciju razdvajanja jezgre/modula v4). Osnovna provjera = savjetodavni izvještaj (isto kao `quality:boundary`). `check:boundary:ratchet` (koji CI pokreće, također u petlji postepenog pooštravanja brzih provjera u `quality.yml`) blokira kada broj premaši gornju granicu `metrics.boundaryOpenSseToSrc` u `quality-baseline.json` — početno postavljenu na izmjerenih 771, `direction: down`; `--update` je može samo smanjiti; relativno u odnosu na osnovnu granu u PR-ovima (`--base-ref`, pogledajte ispod)                                                                                                                                                                                         | Da (postepeno pooštravanje)                  |
+| `check:route-validation:t06`      | Zod sheme prisutne su na svim rutama (politika nivoa 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Da                                           |
+| `check:any-budget:t11`            | Broj `@ts-expect-error // any` ne premašuje budžet (catraca nivoa 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Da                                           |
+| `check:provider-consistency`      | Svaki pružalac u `providers.ts` ima odgovarajući unos u `providerRegistry.ts` (i obrnuto, unutar liste dozvoljenih stavki)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                           |
+| `check:model-lifecycle`           | Tri ručno održavane tabele usmjeravanja ostaju usklađene sa pohranjenim snimkom životnog ciklusa (#11503): `FITNESS_TABLE` (`taskFitness.ts`) ne boduje nijedan povučeni ID koji `REGISTRY` može usmjeriti; svaki cilj iz `BUILT_IN_ALIASES` prisutan je u `REGISTRY` i nije prisutan u snimku povučenih ID-ova; svaki povučeni ID koji je još uvijek u `REGISTRY` prosljeđuje se ili je naveden u `allowedRetiredInCatalog`; te se nijedan izvor ili cilj iz `DEFAULT_DEGRADATION_MAP` ne pojavljuje kao povučen u tom snimku. Ovo ne dokazuje da model trenutno poslužuje aktivni nadređeni servis. Van mreže — poredi sa `config/quality/model-lifecycle.json`, koji se ručno osvježava pomoću `npm run quality:refresh-model-lifecycle` (mreža; nije povezan s CI-jem). `allowedRetiredInCatalog` je jednosmjerna kontrola postepenog smanjivanja: unos dodajte samo uz prateći problem. | Da                                           |
+| `check:fetch-targets`             | Svaki `fetch("/api/...")` u klijentskom `src/` razrješava se na stvarni `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Da                                           |
+| `check:deps`                      | Sve zavisnosti koje se mogu instalirati pomoću `npm install` u svakom `package.json` u repozitoriju nalaze se u `dependency-allowlist.json`; novi neprikovani paketi ili paketi koji predstavljaju slopsquatting označavaju se                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Da                                           |
+| `audit:deps`                      | npm revizija svih pet nezavisnih lockfileova (korijenski, Electron, OpenCode dodaci v1/v2 i provider). Kritična upozorenja blokiraju; upozorenja visokog nivoa ostaju vidljiva upozorenja. Nedostajuće/neuspjele revizije imaju status INCOMPLETE i blokiraju; hash vrijednosti lockfileova i izvještaji zadržavaju se za svaki opseg.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Da                                           |
+| `check:lockfile`                  | Integritet datoteke `package-lock.json` — https registar, hash vrijednosti integriteta, bez zamjena hosta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Da                                           |
+| `check:licenses`                  | Lista dozvoljenih SPDX licenci za produkcijske zavisnosti                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Da                                           |
+| `check:tracked-artifacts`         | Bez artefakata izgradnje / evidentiranih `node_modules` simboličkih veza (također se pokreće u husky pre-commit; pre-push je namjerno pojednostavljen — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Da                                           |
+| `check:ai-attribution`            | Bez AI/bot `Co-Authored-By` završne oznake ili podnožja o AI generiranju u commitima, naslovu ili tijelu PR-a — strogo pravilo br. 16 (u `quality.yml` petlji brzih provjera za PR→`release/**` — čita sadržaj događaja, ne radi ništa izvan PR-ova — i korak samo za PR u `ci.yml` lint provjeri za PR→`main`; također i husky `commit-msg` hook; ljudski koautori su dozvoljeni; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `check:vitest-exclusions`         | Svako Vitest izuzimanje navodi prateći problem i nalazi se u `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Da                                           |
+| `check:file-size`                 | Izvorne datoteke (`.ts`/`.tsx` u `src/`, `open-sse/`, `electron/`, `bin/`) ostaju unutar ograničenja `cap`, a testne datoteke (`*.test.ts(x)`) unutar `testCap`; datoteke zamrznute u `file-size-baseline.json` (`frozen` / `testFrozen`) ne smiju premašiti svoju zabilježenu veličinu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Da                                           |
+| `check:error-helper`              | Odgovori o greškama u izvršiteljima/rukovateljima koriste `buildErrorBody()` / `sanitizeErrorMessage()` (Strogo pravilo #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Da                                           |
+| `check:migration-numbering`       | SQL datoteke migracija numerisane su uzastopno, bez praznina ili duplikata                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                           |
+| `check:public-creds`              | Nema doslovnih OAuth vrijednosti `client_id`/`client_secret` ni Firebase Web ključeva izvan `publicCreds.ts` (Strogo pravilo #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Da                                           |
+| `check:db-rules`                  | Nema direktnog SQL-a izvan modula `src/lib/db/`; nema zbirnih uvoza iz `localDb.ts` (Stroga pravila #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                           |
+| `check:known-symbols`             | Izvršitelji pružalaca usluga, strategije usmjeravanja i prevodioci registrirani u svojim tabelama otpreme odgovaraju datotekama na disku — nema nepovezanih ili nedeklariranih simbola                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Da                                           |
+| `check:route-guard-membership`    | Svaka ruta koja pokreće podređeni proces klasificirana je pomoću `isLocalOnlyPath()` (Stroga pravila #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Da                                           |
+| `check:test-discovery`            | Svaku `*.test.ts` / `*.spec.ts` datoteku u repozitoriju prikuplja najmanje jedan pokretač testova (mehanizam postepenog pooštravanja: lista nepovezanih testova u `test-discovery-baseline.json` može se samo smanjivati)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Da                                           |
+| `check:agent-skills-sync`         | Generirani artefakti vještina agenata podudaraju se sa svojim izvornim katalogom (bez odstupanja)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `check:provider-asset-provenance` | Logotipi/resursi pružatelja imaju evidentiran zapis o porijeklu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `lint:json`                       | JSON konfiguracijske datoteke mogu se parsirati i zadovoljavaju pravila lintanja repozitorija                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `typecheck:core`                  | Kompilacija TypeScripta bez grešaka (samo savjetodavna upozorenja)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Da                                           |
+| `typecheck:noimplicit:core`       | Strogi `noImplicitAny` — usmjeren na budućnost; mnoga postojeća mjesta poziva još uvijek trebaju anotacije                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **Savjetodavno** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` ograničen na `src/app/(dashboard)/**` (#7033) — pažljivo odabrana lista od 27 datoteka za `typecheck:core` ne uključuje nijedan TSX kontrolne ploče, a ni `next build` nikada ne provjerava njihove tipove (`next.config.mjs` postavlja `ignoreBuildErrors: true`), pa su regresije nepovezanih identifikatora u njima (#6625/#6909) bile nevidljive CI-ju. Razlike se porede sa zamrznutom osnovnom vrijednošću broja po datoteci/TS kodu (`config/quality/dashboard-typecheck-baseline.json`, isti obrazac provođenja zastarjelosti kao kod `check:known-symbols`) — samo NOVO nastale greške iznad broja u osnovnoj vrijednosti uzrokuju neuspjeh provjere; smanjite osnovnu vrijednost pomoću `--update` kada se ispravi prethodno postojeća greška.                                                                                                                               | Da                                           |
 
 ### Zadatak: `quality-gate`
 
-Pokreće se nakon `test-coverage`. Blokira spajanje u slučaju neuspjeha.
+Pokreće se nakon `test-coverage`. U slučaju neuspjeha blokira spajanje.
 
-| Skripta                      | Provjerava                                                                                                                                                                                                 | Blokiranje                       |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
-| `quality:collect`            | Generira `quality-metrics.json` (broj ESLint upozorenja, pokrivenost iz objedinjenog izvještaja dijelova)                                                                                                  | Da (prethodi kontroli regresije) |
-| `quality:ratchet`            | Nijedna metrika u `quality-baseline.json` nije nazadovala (ESLint upozorenja ≤ početna vrijednost; pokrivenost ≥ početna vrijednost)                                                                       | Da                               |
-| `check:duplication`          | Dupliranje koda (jscpd@4) ne prelazi početnu vrijednost iz `quality-baseline.json`                                                                                                                         | Da                               |
-| `check:complexity`           | Ciklomatska složenost na nivou datoteke ne prelazi ograničenje (osnovni ESLint `complexity` + `max-lines-per-function`)                                                                                    | Da                               |
-| `check:cognitive-complexity` | Kontrola regresije kognitivne složenosti (`eslint-plugin-sonarjs`) — zaseban prolaz kroz ESLint; CI pokreće oba objedinjena u jednom koraku `check:complexity-ratchets`                                    | Da                               |
-| `check:dead-code`            | Kontrola regresije nekorištenih izvoza/datoteka (knip) ne pokazuje nazadovanje u odnosu na početnu vrijednost                                                                                              | Da                               |
-| `check:compression-budget`   | Budžet mjerila kompresije — minimalne uštede tokena po mehanizmu ne smiju nazadovati                                                                                                                       | Da                               |
-| `check:type-coverage`        | Kontrola regresije procenta tipiziranog koda (`type-coverage`) ne pokazuje nazadovanje; uglavnom obuhvata `typecheck:noimplicit:core`                                                                      | Da                               |
-| `check:codeql-ratchet`       | Broj otvorenih CodeQL upozorenja ne pokazuje nazadovanje (čita putem `gh api`; uredno preskače bez tokena) — učestalost osvježavanja i ručno pokretanje: pogledajte „CodeQL kontrola regresije“ u nastavku | Da                               |
+| Skripta                      | Provjerava                                                                                                                                                                        | Blokirajuće                       |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------- |
+| `quality:collect`            | Generiše `quality-metrics.json` (broj ESLint upozorenja, pokrivenost iz objedinjenog izvještaja dijelova)                                                                         | Da (prethodi mehanizmu zupčanika) |
+| `quality:ratchet`            | Nijedna metrika u `quality-baseline.json` nije nazadovala (ESLint upozorenja ≤ osnovna vrijednost; pokrivenost ≥ osnovna vrijednost)                                              | Da                                |
+| `check:duplication`          | Dupliciranje koda (jscpd@4) ne premašuje osnovnu vrijednost iz `quality-baseline.json`                                                                                            | Da                                |
+| `check:complexity`           | Ciklomatska složenost na nivou datoteke ne premašuje ograničenje (osnovni ESLint `complexity` + `max-lines-per-function`)                                                         | Da                                |
+| `check:cognitive-complexity` | Zupčanik kognitivne složenosti (`eslint-plugin-sonarjs`) — zasebno ESLint pokretanje; CI pokreće oba objedinjena kao jedan korak `check:complexity-ratchets`                      | Da                                |
+| `check:dead-code`            | Zupčanik nekorištenih izvoza/datoteka (knip) ne nazaduje u odnosu na osnovnu vrijednost                                                                                           | Da                                |
+| `check:compression-budget`   | Budžet testa performansi kompresije — minimalne uštede tokena za svaki pogon ne smiju nazadovati                                                                                  | Da                                |
+| `check:type-coverage`        | Zupčanik procenta tipiziranog koda (`type-coverage`) ne nazaduje; u velikoj mjeri obuhvata `typecheck:noimplicit:core`                                                            | Da                                |
+| `check:codeql-ratchet`       | Broj otvorenih CodeQL upozorenja ne nazaduje (čita putem `gh api`; uredno preskače bez tokena) — za učestalost osvježavanja i ručno pokretanje pogledajte „CodeQL zupčanik“ ispod | Da                                |
 
 ### Zadatak: `quality-extended`
 
-Cijeli zadatak je savjetodavan (`continue-on-error: true`). Kontrole regresije zasnovane na npm-u
-izvršavaju se stvarno; vanjski skeneri instaliraju se putem `gh release download` i sami se preskaču (izlazni kod 0)
-kada binarna datoteka još uvijek nije prisutna.
+Zadatak blokira primjenjive kandidate. Veličina paketa, pronalasci tajni, pronalasci
+ranjivosti, pronalasci toka rada i OpenAPI promjene provjeravaju se obaveznim zupčanicima.
+Dijagnostika kružnih zavisnosti ostaje savjetodavna. Instalacija skenera je obavezna:
+`scripts/ci/install-quality-scanners.sh` instalira fiksirane verzije i propagira
+neuspjehe instalacije. Alati koji nedostaju, nevažeći izvještaji ili osnovne vrijednosti
+koje nedostaju ostavljaju obaveznu provjeru skenera NEPOTPUNOM.
 
-| Skripta                  | Provjerava                                                                                                                                                                                                                                                                      | Blokiranje                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| `check:circular-deps`    | Nema kružnih zavisnosti (dpdm)                                                                                                                                                                                                                                                  | **Savjetodavno**                                                  |
-| `check:bundle-size`      | Veličina paketa ne prelazi ograničenje                                                                                                                                                                                                                                          | **Savjetodavno**                                                  |
-| `check:secrets`          | Skeniranje tajni (gitleaks) — preskače se ako binarna datoteka nije prisutna                                                                                                                                                                                                    | **Savjetodavno**                                                  |
-| `check:vuln-ratchet`     | Ranjivosti zavisnosti (osv-scanner) ne pokazuju nazadovanje — preskače se ako binarna datoteka nije prisutna                                                                                                                                                                    | **Savjetodavno**                                                  |
-| `check:workflows`        | Provjera toka rada (actionlint + zizmor); nedostajući/neispravni skeneri, nevažeći izvještaji ili nedostajuća početna vrijednost kontrole regresije završavaju statusom INCOMPLETE. Važeći nalazi slijede odabranu strogu/savjetodavnu politiku ili politiku kontrole regresije | Izvršavanje je obavezno; zizmor kontrola regresije blokira u CI-u |
-| `check:openapi-breaking` | Nekompatibilne promjene javnog API ugovora (`openapi.yaml`) u odnosu na osnovnu granu (oasdiff) — generira `openapiBreaking=N`; preskače se ako oasdiff nije prisutan ili se osnovna specifikacija ne može razriješiti                                                          | **Savjetodavno**                                                  |
+| Skripta                  | Provjerava                                                                                                                                                                                                                                     | Blokiranje                                           |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `check:circular-deps`    | Nema kružnih zavisnosti (dpdm)                                                                                                                                                                                                                 | **Savjetodavno**                                     |
+| `check:bundle-size`      | Veličina paketa ne premašuje ograničenje; nedostupno mjerenje uzrokuje neuspjeh                                                                                                                                                                | **Blokirajuće uz --ratchet**                         |
+| `check:secrets`          | Nalazi alata Gitleaks ne nazaduju; obavezna skeniranja odbijaju nedostajuće alate/izvor/osnovnu vrijednost, neuspješna skeniranja i nevažeće izvještaje                                                                                        | **Blokirajuće uz --ratchet**                         |
+| `check:vuln-ratchet`     | Ranjivosti zavisnosti ne nazaduju; obavezna skeniranja odbijaju nedostajuće alate, nevažeće izvještaje ili nedostajuće osnovne vrijednosti                                                                                                     | **Blokirajuće uz --ratchet**                         |
+| `check:workflows`        | Provjera workflowa (actionlint + zizmor); nedostajući/neispravni skeneri, nevažeći izvještaji ili nedostajuća ratchet osnovna vrijednost uzrokuju neuspjeh kao INCOMPLETE. Važeći nalazi slijede odabranu strogu/savjetodavnu/ratchet politiku | Izvršavanje je obavezno; zizmor ratchet blokira u CI |
+| `check:openapi-breaking` | Javni API ugovor u odnosu na zakačene commitove događaja (PR merge-base, stanje prije pusha, osnova merge grupe; za zakazano/ručno izvršavanje prvi roditelj checkouta); obavezno mjerenje se zatvara uz neuspjeh                              | **Blokirajuće uz --ratchet**                         |
 
-### Zadatak: `docs-sync-strict`
+### Posao: `docs-sync-strict`
 
-Pokreće se za svaki PR prema grani `main`. Blokira spajanje u slučaju neuspjeha.
+Za pull requestove prema `main` ili `release/**`, ovaj posao se pokreće samo za kandidate koji nisu nacrti (ili su u pouzdanom redu) i klasificirani su kao promjene dokumentacije ili koda. Pokreće se i za CI događaje koji nisu PR-ovi; push okidač ovog workflowa obuhvata samo `main`, ne i `release/**`. Korak koji završi izlaznim kodom različitim od nule blokira posao; nalazi koji se samo prijavljuju i dokumentovani izuzeci navedeni ispod ga ne blokiraju.
 
-| Skripta                        | Provjerava                                                                                                                                                                               | Blokirajuće                   |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `check:docs-all`               | Meta-kontrola koja redom pokreće 6 podređenih kontrola u nastavku                                                                                                                        | Da                            |
-| ↳ `check:docs-sync`            | Usklađenost verzija između CHANGELOG-a, OpenAPI-ja i llm.txt                                                                                                                             | Da                            |
-| ↳ `check:docs-counts`          | Brojevi u tekstu (broj pružalaca, broj migracija itd.) nalaze se unutar raspona postepenog pooštravanja u odnosu na stvarne brojeve                                                      | Da                            |
-| ↳ `check:env-doc-sync`         | Svaka varijabla okruženja iz `.env.example` dokumentovana je u tabeli dokumentacije i obrnuto                                                                                            | Da                            |
-| ↳ `check:deprecated-versions`  | U dokumentaciji nema zastarjelih oznaka verzija                                                                                                                                          | Da                            |
-| ↳ `check:doc-links`            | Interne markdown veze u dokumentaciji vode do stvarnih datoteka (oblik `[tekst]`/`(putanja)`)                                                                                            | Da                            |
-| ↳ `check:fabricated-docs`      | Rute, varijable okruženja, CLI naredbe, nazivi hookova i putanje datoteka navedeni u dokumentaciji postoje u bazi koda. Stroga kontrola putem `--strict`; bez te opcije samo upozorenje. | Da (putem `--strict` u CI-ju) |
-| `check:cli-i18n`               | Tekstovi CLI naredbi prisutni su u svim i18n datotekama lokalizacija                                                                                                                     | Da                            |
-| `check:openapi-coverage`       | OpenAPI specifikacija pokriva najmanje postepeno povećavani minimalni prag stvarnih ruta                                                                                                 | Da                            |
-| `check:openapi-security-tiers` | Oznake sigurnosnih nivoa u `openapi.yaml` usklađene su s klasifikacijama u `routeGuard.ts`                                                                                               | **Savjetodavno**              |
-| `check:openapi-routes`         | Svaka putanja u `openapi.yaml` vodi do stvarne datoteke `route.ts` (sprečavanje halucinacija)                                                                                            | Da                            |
-| `check:docs-symbols`           | Svaka referenca `/api/...` u `docs/**/*.md` vodi do stvarne datoteke `route.ts` (sprečavanje halucinacija)                                                                               | Da                            |
-| `i18n translation drift`       | Neprevedeni ključevi u i18n datotekama lokalizacija — samo upozorenje                                                                                                                    | **Savjetodavno**              |
+| Skripta                        | Provjerava                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Blokiranje                                                                                                                           |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `check:docs-all`               | Meta-kontrola koja redom pokreće 7 podređenih kontrola navedenih ispod                                                                                                                                                                                                                                                                                                                                                                                                                                     | Da                                                                                                                                   |
+| ↳ `check:docs-sync`            | Usklađenost verzija paketa/OpenAPI-ja/CHANGELOG-a, tačne kopije `llm.txt`, invarijante odjeljaka/veličine prevedenog CHANGELOG-a i odsustvo zamijenjenih duplih dokumenata                                                                                                                                                                                                                                                                                                                                 | Da                                                                                                                                   |
+| ↳ `check:docs-frontmatter`     | Kompajlirane stranice dokumentacije sadrže važeće naslove u frontmatteru                                                                                                                                                                                                                                                                                                                                                                                                                                   | Da                                                                                                                                   |
+| ↳ `check:docs-counts`          | Invarijante brojeva s visokom pouzdanošću su stroge; heurističke provjere broja datoteka samo upozoravaju osim ako skripta dobije `--strict` (CI meta-kontrola ga ne prosljeđuje)                                                                                                                                                                                                                                                                                                                          | Strogi nivo blokira; blagi nivo je savjetodavan                                                                                      |
+| ↳ `check:env-doc-sync`         | Čitanja varijabli okruženja u izvornom kodu, `.env.example` i `docs/reference/ENVIRONMENT.md` usklađeni su nakon primjene eksplicitnih lista izuzetaka ignore, doc-only i env-only                                                                                                                                                                                                                                                                                                                         | Da, izvan dokumentovanih lista izuzetaka                                                                                             |
+| ↳ `check:deprecated-versions`  | Prijavljuje moguće zastarjele verzije izvan sigurnih historijskih konteksta i zastarjele datume ažuriranja, isključujući ignorisane dokumente                                                                                                                                                                                                                                                                                                                                                              | Savjetodavno u trenutnoj CI konfiguraciji (`--strict` se ne prosljeđuje)                                                             |
+| ↳ `check:doc-links`            | Interne markdown veze u dokumentaciji vode do stvarnih datoteka (oblik `[text]`/`(path)`)                                                                                                                                                                                                                                                                                                                                                                                                                  | Da                                                                                                                                   |
+| ↳ `check:fabricated-docs`      | Rute, varijable okruženja, CLI naredbe, nazivi hookova i putanje datoteka navedeni u dokumentaciji postoje u bazi koda. Stroga kontrola uz `--strict`; blagi neuspjeh bez zastavice.                                                                                                                                                                                                                                                                                                                       | Da (putem `--strict` u CI-ju)                                                                                                        |
+| `check:cli-i18n`               | Korišteni CLI `t()` ključevi postoje u `en`; `pt-BR` zadržava svaki odjeljak najvišeg nivoa; `zh-CN` i `zh-TW` sadrže svaki ključ iz `en`                                                                                                                                                                                                                                                                                                                                                                  | Da                                                                                                                                   |
+| `check:openapi-coverage`       | OpenAPI specifikacija pokriva najmanje ratchetom utvrđenu donju granicu stvarnih ruta                                                                                                                                                                                                                                                                                                                                                                                                                      | Da                                                                                                                                   |
+| `check:openapi-security-tiers` | Deklarisane anotacije `x-loopback-only`/`x-always-protected` moraju imati pokriće u `routeGuard.ts`; greške parsera i nepodudarnosti u provjeri unaprijed blokiraju. Obrnuta provjera nedostajućih `x-loopback-only` ispod prefiksa samo za lokalni pristup upozorava, a rute definisane samo obrascem isključene su iz te obrnute provjere.                                                                                                                                                               | Parser/provjere unaprijed blokiraju; obrnuta provjera je savjetodavna                                                                |
+| `check:openapi-routes`         | Svaka putanja `/api...` u `openapi.yaml` odgovara stvarnoj ruti bez obzira na nazive parametara nakon primjene obrazložene liste izuzetaka `KNOWN_STALE_SPEC`; zastarjeli unosi na listi također uzrokuju neuspjeh                                                                                                                                                                                                                                                                                         | Da                                                                                                                                   |
+| `check:docs-symbols`           | Interne URL reference `/api/...` u kanonskim dokumentima koji nisu prijevodne kopije odgovaraju stvarnoj ruti ili porodici ruta; proxy/upstream/placeholder/datotečne reference i obrazloženi unosi `KNOWN_STALE_DOC_REFS` su isključeni, a zastarjeli unosi liste uzrokuju neuspjeh                                                                                                                                                                                                                       | Da                                                                                                                                   |
+| `i18n translation drift`       | Provjerava hash vrijednosti izvora/cilja osnovnih dokumenata i porijeklo prijevoda. Poređenje u PR-u dopušta samo identične naslijeđene greške; nove ili neprovjerene nedosljednosti izvora, nedostajućeg cilja, ciljnog hasha, zastarjelog prijevoda ili keša odjeljaka blokiraju. Izvan poređenja u PR-u greške izvora/nedostajućeg cilja/ciljnog hasha blokiraju, dok zastarjeli prijevodi i nedosljedni keševi odjeljaka ostaju samo upozorenja. Odsustvo keša odjeljaka u starom formatu nije greška. | Novo/neprovjereno PR odstupanje blokira; identično naslijeđeno odstupanje je savjetodavno; pravila izvan PR-a zavise od vrste greške |
 
 ### Posao: `i18n-ui-coverage`
 
-| Skripta                             | Provjerava                                                                                                                                                                                                                           | Blokirajuće      |
-| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `check-ui-keys-coverage` (ugrađeno) | Pokrivenost UI i18n ključeva iznosi ≥ 65%                                                                                                                                                                                            | Da               |
-| `check-ui-value-drift` (ugrađeno)   | Prepisana engleska **vrijednost** ne ostavlja nijedan zastarjeli prijevod                                                                                                                                                            | Da               |
-| `check-new-key-coverage` (ugrađeno) | **Novi** engleski ključ preveden je u svakoj lokalizaciji — oznaka `__MISSING__:` se odbija                                                                                                                                          | Da               |
-| `check-translation-ratio`           | Omjer stvarnih prijevoda po lokalizaciji (listovi identični engleskom / rezervisana mjesta / nedostajući listovi izvan liste dozvoljenih izuzetaka) ne smije premašiti `config/quality/i18n-translation-baseline.json` + toleranciju | **Savjetodavno** |
+| Skripta                             | Provjerava                                                                                                                                                                                                       | Blokira         |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
+| `check-ui-keys-coverage` (ugrađeno) | Pokrivenost UI i18n ključeva je ≥ 65%                                                                                                                                                                            | Da              |
+| `check-ui-value-drift` (ugrađeno)   | Prepisana engleska **vrijednost** ne ostavlja zastarjele prijevode                                                                                                                                               | Da              |
+| `check-new-key-coverage` (ugrađeno) | **Novi** engleski ključ preveden je u svakom lokalitetu — oznaka `__MISSING__:` se odbija                                                                                                                        | Da              |
+| `check-translation-ratio`           | Omjer stvarnih prijevoda po lokalitetu (identično engleskom / rezervirano mjesto / nedostajući listovi izvan liste dozvoljenih) ne smije premašiti `config/quality/i18n-translation-baseline.json` + toleranciju | **Blokirajuće** |
 
 Zahtijeva `fetch-depth: 0` — kontrola odstupanja vrijednosti poredi `en.json` s bazom spajanja.
 
 #### `check-ui-value-drift` — kontrola zastarjelih prijevoda
 
-Otkriva onu i18n regresiju koju druge kontrole strukturno ne mogu uočiti: engleska vrijednost
-se prepiše, a prijevodi izvedeni iz _prethodne_ engleske verzije ostanu, pa korisnici koji
-ne koriste engleski nastavljaju čitati samouvjereno formulisan, ali sada pogrešan tekst.
+Otkriva onu i18n regresiju koju ostale kontrole strukturno ne mogu vidjeti: engleska vrijednost
+se prepiše, a prijevodi izvedeni iz _prethodne_ engleske vrijednosti ostanu, pa
+korisnici koji ne govore engleski nastavljaju čitati samouvjereno formuliran, ali sada pogrešan tekst.
 
-Ovo se zaista našlo u izdanju. `oauthModal.googleOAuthWarning` je prepisan kada je uveden
-Antigravity pomoćnik za prijavu (#5203); **39 od 43 lokalizacije** zadržalo je tekst koji
-operaterima govori da „kopiraju puni URL i zalijepe ga ispod“ — tok koji se za tog pružaoca
-ne može dovršiti. To je ostalo neprimijećeno sve do #8463 jer:
+Ovo je zaista dospjelo u izdanje. `oauthModal.googleOAuthWarning` je prepisan kada je uveden
+Antigravity pomoćnik za prijavu (#5203); **39 od 43 lokaliteta** zadržalo je tekst koji operaterima
+govori da „kopiraju cijeli URL i zalijepe ga ispod” — tok koji se ne može dovršiti za tog pružaoca.
+Problem nije primijećen sve do #8463 jer:
 
 - `sync-ui-keys` dopunjava samo ključeve koji su **odsutni**, nikada one koji su **zastarjeli**;
-- `check-ui-keys-coverage` broji _prisutnost_ ključa, pa se zastarjeli prijevod računa kao pokriven;
+- `check-ui-keys-coverage` broji _prisutnost_ ključeva, pa se zastarjeli prijevod računa kao pokriven;
 - `check-translation-drift` prati dokumentacijske kopije `docs/i18n/<locale>/**.md` —
   nikada ne čita `src/i18n/messages/*.json`. Blokira u poslu `docs-sync-strict` od
   ponovne sinhronizacije 2026-09: uredite osnovni dokument → `npm run i18n:run -- --files=<doc>` (na nivou odjeljka, jeftino).
 
-**Svjestan razlika, bez oslanjanja na referentno stanje.** Poredi `en.json` na bazi spajanja s
-radnim stablom; za svaki ključ čija se engleska vrijednost promijenila, svaki lokal koji još sadrži
-neizmijenjeni prijevod smatra se zastarjelim. Ovo namjerno **zamrzava postojeći dug** — razlika
-ne može otkriti iz kojeg je starog engleskog teksta nastao dugogodišnji prijevod, pa kontrola procjenjuje
-samo ono čega se trenutna izmjena dotiče. Alternativa (referentno stanje hash vrijednosti po ključu) zahtijevala bi
-generiranu datoteku od ~600 KB, 3× veću od najvećeg postojećeg referentnog stanja, koja bi se mijenjala pri svakom i18n PR-u.
+**Svjesno razlika, bez oslanjanja na osnovnu liniju.** Poredi `en.json` na bazi spajanja s
+radnim stablom; za svaki ključ čija se engleska vrijednost promijenila, svaki lokalitet koji još uvijek
+sadrži netaknut prijevod smatra se zastarjelim. Time se namjerno **zamrzava prethodno postojeći dug** — razlika
+ne može otkriti iz koje je stare engleske vrijednosti dugogodišnji prijevod nastao, pa kontrola procjenjuje
+samo ono što trenutna promjena dotiče. Alternativa (osnovna linija heševa po ključu) zahtijevala bi
+generiranu datoteku od ~600 KB, 3× veću od najveće postojeće osnovne linije, koja bi se mijenjala pri svakom i18n PR-u.
 
-Postoje dva načina da se provjera zadovolji:
+Dva su načina da se kontrola zadovolji:
 
-1. ažurirati zahvaćene prijevode ili
-2. postaviti ih na `__MISSING__:<novi engleski tekst>` — izvršno okruženje tada isporučuje ispravljeni engleski tekst
-   (`src/i18n/request.ts::deepMergeFallback`, #7258), a ključ se stavlja u red za prijevod.
+1. ažurirajte zahvaćene prijevode ili
+2. postavite ih na `__MISSING__:<new english>` — izvršno okruženje tada isporučuje ispravljeni engleski
+   (`src/i18n/request.ts::deepMergeFallback`, #7258), a ključ se stavlja u red za prevođenje.
 
-Ako se promijenilo **značenje** niza, bolje je **preimenovati ključ**: novi ključ ne može naslijediti
-zastarjeli prijevod. To je obrazac korišten u #8463.
+Ako se promijenilo **značenje** niza, poželjno je **preimenovati ključ**: novi ključ ne može naslijediti
+zastarjeli prijevod. Taj obrazac je korišten u #8463.
 
 ```bash
 npm run i18n:check-value-drift          # strogo (ono što CI pokreće)
@@ -234,50 +318,61 @@ npm run i18n:check-value-drift:warn     # samo izvještaj
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Završava s kodom 0 i porukom `SKIP reason=base-unresolved` kada se osnovni katalog ne može pročitati (plitko
-kloniranje bez osnovne reference), kao i `check-openapi-breaking`.
+Kontrole odstupanja vrijednosti i novih ključeva dijele jedno nepromjenjivo poređenje iz
+`scripts/i18n/resolve-ui-diff-base.mjs`. Tok rada prosljeđuje isti osnovni SHA, SHA vrha osnove i
+SHA kandidata objema provjerama. Pokretanja za PR/promjenu ciljne osnove, push i merge-group koriste svoj kontekst
+događaja. Pokretanje grane kandidata zahtijeva njen tačno određeni otvoreni PR ili eksplicitni
+ulaz `i18n_base_sha`. Pokretanje ili planirano posmatranje grane `main` ili `release/vX.Y.Z`
+bez tog ulaza poredi posljednji commit s njegovim prvim roditeljem; to nije revizija
+svih naslijeđenih dugovanja u prijevodima. Lokalno pokretanje zahtijeva eksplicitnu osnovu poređenja,
+naprimjer naredbu `BASE_REF` iznad.
+
+Nedostajući ili dvosmislen kontekst poređenja, nečitljiv ili nevažeći obavezni katalog i
+izmijenjeni kandidat daju `INCOMPLETE` uz izlazni kôd **2**, uključujući i režim upozorenja.
+Katalozi se čitaju pomoću `scripts/i18n/read-ui-catalog.mjs`; greške pri čitanju ne zamjenjuju se
+praznim objektima. Ni nedostupna osnova ni nepotpun ulaz ne uspostavljaju PASS.
 
 ### Posao: `i18n`
 
-Potpuna matrica i18n provjera (jedan posao po lokalu). Cijeli posao je savjetodavan.
+Potpuna matrica i18n validacije (jedan posao po lokalitetu). Cijeli posao je savjetodavan.
 
-| Skripta                         | Provjerava                    | Blokiranje                                                   |
-| ------------------------------- | ----------------------------- | ------------------------------------------------------------ |
-| `validate_translation.py quick` | Potpunost prijevoda po lokalu | **Savjetodavno** (`continue-on-error: true` za cijeli posao) |
+| Skripta                         | Provjerava                        | Blokira                                                       |
+| ------------------------------- | --------------------------------- | ------------------------------------------------------------- |
+| `validate_translation.py quick` | Potpunost prijevoda po lokalitetu | **Savjetodavno** (`continue-on-error: true` na cijelom poslu) |
 
 ### Posao: `pr-test-policy`
 
-Pokreće se samo za zahtjeve za povlačenje.
+Pokreće se samo za zahtjeve za spajanje.
 
-| Skripta                | Provjerava                                                                                                                                          | Blokiranje |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check:pr-test-policy` | PR-ovi koji mijenjaju produkcijski kod u `src/`, `open-sse/`, `electron/` ili `bin/` moraju uključiti ili ažurirati testove (Strogo pravilo #8)     | Da         |
-| `check:test-masking`   | Izmijenjene testne datoteke ne smanjuju ukupan broj tvrdnji niti dodaju tautologije `assert.ok(true)`                                               | Da         |
-| `check:pr-evidence`    | Tijelo PR-a navodi dokaze testiranja/VPS-a za izmjenu (automatizira Strogo pravilo #18 pretraživanjem teksta PR-a — nepouzdano, pogledajte Backlog) | Da         |
+| Skripta                | Provjerava                                                                                                                                      | Blokira |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| `check:pr-test-policy` | PR-ovi koji mijenjaju produkcijski kôd u `src/`, `open-sse/`, `electron/` ili `bin/` moraju uključiti ili ažurirati testove (Strogo pravilo #8) | Da      |
+| `check:test-masking`   | Izmijenjene testne datoteke ne smanjuju neto broj provjera niti dodaju tautologije `assert.ok(true)`                                            | Da      |
+| `check:pr-evidence`    | Tijelo PR-a navodi dokaze testiranja/VPS-a za promjenu (automatizira Strogo pravilo #18 pretraživanjem teksta PR-a — krhko, pogledajte Backlog) | Da      |
 
 ### Posao: `test-vitest`
 
-Pokreće se nakon `build`. Neuspjeh blokira spajanje.
+Zahtijeva posao klasifikacije `changes`. Neuspjeh primjenjivih dijelova matrice blokira spajanje.
 
-| Paket            | Provjerava                                                        | Blokiranje                                                                                               |
-| ---------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP server (110 alata), autoCombo, predmemoriju — vitest pokretač | Da                                                                                                       |
-| `test:vitest:ui` | Testove UI komponenti — vitest pokretač                           | **Blokira** — postojeći neuspjesi izričito su isključeni u `vitest.config.ts`; novi neuspjesi ruše posao |
+| Paket            | Provjerava                                               | Blokirajuće                                                                                                                 |
+| ---------------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP server (110 alata), autoCombo, keš — vitest pokretač | Da                                                                                                                          |
+| `test:vitest:ui` | Testovi UI komponenti — vitest pokretač                  | **Blokirajuće** — postojeći neuspjesi su izričito isključeni u `vitest.config.ts`; novi neuspjesi uzrokuju neuspjeh zadatka |
 
 ### Noćni radni tokovi (zakazani, savjetodavni)
 
-Pokreću se prema cron rasporedu (i putem `workflow_dispatch`), nikada na PR-ovima. Svi su savjetodavni.
+Oni se pokreću prema cron rasporedu (i putem `workflow_dispatch`), nikada na PR-ovima. Svi su savjetodavni.
 
-| Radni tok              | Provjerava                                                                                                                                                                     | Blokiranje       |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `nightly-property`     | fast-check testove svojstava s nasumičnim sjemenom i velikim brojem pokretanja                                                                                                 | **Savjetodavno** |
-| `nightly-resilience`   | kontrolu rasta heap memorije, haotično ubrizgavanje grešaka, k6 testove opterećenja/izdržljivosti                                                                              | **Savjetodavno** |
-| `nightly-llm-security` | promptfoo zaštitu od ubacivanja (način blokiranja) + garak sonde (preskaču se bez tajne pružatelja usluge)                                                                     | **Savjetodavno** |
-| `nightly-schemathesis` | neodređeno testiranje OpenAPI ugovora (schemathesis) na aktivnom OmniRouteu koristeći `docs/openapi.yaml` — otkriva kršenja specifikacije / neobrađene greške 500 (Faza 8 B.4) | **Savjetodavno** |
-| `nightly-mutation`     | rezultat Stryker mutacijskog testiranja nad brzom jedinicom testiranja — preživjeli mutanti otkrivaju slabe tvrdnje                                                            | **Savjetodavno** |
-| `nightly-compat`       | matricu kompatibilnosti Node izvršnog okruženja kroz podržane raspone `engines.node`                                                                                           | **Savjetodavno** |
+| Radni tok              | Provjerava                                                                                                                                                               | Blokirajuće      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
+| `nightly-property`     | fast-check testovi svojstava s nasumičnim početnim brojem i velikim brojem pokretanja                                                                                    | **Savjetodavno** |
+| `nightly-resilience`   | kontrola rasta heapa, chaos ubrizgavanje grešaka, k6 testiranje opterećenja/izdržljivosti                                                                                | **Savjetodavno** |
+| `nightly-llm-security` | promptfoo zaštita od ubrizgavanja (način blokiranja) + garak probe (preskaču se bez tajne pružaoca usluge)                                                               | **Savjetodavno** |
+| `nightly-schemathesis` | Fuzz testiranje OpenAPI ugovora (schemathesis) na aktivnom OmniRouteu koristeći `docs/openapi.yaml` — otkriva kršenja specifikacije / neobrađene greške 500 (Faza 8 B.4) | **Savjetodavno** |
+| `nightly-mutation`     | Rezultat Stryker mutacijskog testiranja na brzoj traci jediničnih testova — preživjeli mutanti otkrivaju slabe provjere                                                  | **Savjetodavno** |
+| `nightly-compat`       | Matrica kompatibilnosti Node enginea kroz podržane raspone `engines.node`                                                                                                | **Savjetodavno** |
 
-Referentne vrijednosti performansi (heap memorija, TTFB, vrijeme izgradnje) bilježe se, ali ne služe kao kontrola: pogledajte [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+Osnovne vrijednosti performansi (heap, TTFB, vrijeme izgradnje) bilježe se, ali se ne koriste kao uslov: pogledajte [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
@@ -330,8 +425,9 @@ izmijenio** (`scripts/check/newCodeMode.mjs`: baza spajanja materijalizira se u 
 
 - **blokirajuće** — PR je dodao kršenja ciklomatske/kognitivne složenosti ili mrtve izvoze u datotekama koje je izmijenio
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` u zapisniku);
-- **savjetodavno** — globalni zbir u odnosu na zamrznutu osnovnu vrijednost. Naslijeđeno odstupanje nikada ne obara
-  nedužan PR; odstupanje se ponovo zamrzava pri usklađivanju izdanja i prati ga posao za rezervu.
+- **savjetodavno** — globalni zbir u odnosu na zamrznutu osnovnu vrijednost. Naslijeđeno odstupanje nikada ne označava
+  ispravan PR crvenim; odstupanje se prati radi ispravke tokom usklađivanja izdanja, a nadzire ga
+  zadatak za rezervni kapacitet.
 
 `check:file-size` koristi baznu referencu prema vlastitim pravilima (`scripts/check/check-file-size.mjs`, #8522):
 provjerava svaku izvornu i testnu datoteku u stablu, čita broj linija svake od njih na PR bazi
@@ -354,11 +450,11 @@ Pokretanja putem `workflow_dispatch`, završna provjera zelenog statusa izdanja 
 3. Postavite strožije granice od izmjerenih tamo gdje se modularizacija isplatila: vratite `cap` veličine datoteke na 1000
    (ili 800), povećajte minimalnu pokrivenost za 5, postavite mrtve izvoze na 0 za modularizirane pakete.
 
-## Ratchet osnova (`quality-baseline.json`)
+## Ratchet osnovna vrijednost (`quality-baseline.json`)
 
 Ratchet mehanizam (`scripts/quality/check-quality-ratchet.mjs`) čita `quality-baseline.json`
-i upoređuje ga sa svježe prikupljenim `quality-metrics.json`. Svaka metrika koja regresira
-izvan svoje epsilon vrijednosti uzrokuje neuspjeh build-a.
+i poredi ga s upravo prikupljenim `quality-metrics.json`. Svaka metrika koja nazaduje
+izvan svoje epsilon vrijednosti uzrokuje neuspjeh builda.
 
 Trenutno praćene metrike:
 
@@ -370,48 +466,49 @@ Trenutno praćene metrike:
 | `coverage.functions`  | `up`   | Pokrivenost funkcija ne smije opasti  |
 | `coverage.branches`   | `up`   | Pokrivenost grana ne smije opasti     |
 
-Za ažuriranje osnove nakon stvarnog poboljšanja:
+Za ažuriranje osnovne vrijednosti nakon stvarnog poboljšanja:
 
 ```bash
 npm run quality:ratchet -- --update
 git add quality-baseline.json
 ```
 
-Flag `--update` upisuje trenutno izmjerene vrijednosti u `quality-baseline.json`.
-Commit-ujte ovu datoteku zajedno sa izmjenom koja je poboljšala metriku. PR koji poboljšava
-metriku bez ažuriranja osnove će biti uhvaćen pomoću `--require-tighten` (Faza 6A.5,
+Oznaka `--update` upisuje trenutno izmjerene vrijednosti u `quality-baseline.json`.
+Commitujte ovu datoteku zajedno s izmjenom koja je poboljšala metriku. PR koji poboljša
+metriku bez ažuriranja osnovne vrijednosti bit će otkriven pomoću `--require-tighten` (Faza 6A.5,
 implementacija na čekanju).
 
 ### CodeQL ratchet: učestalost osvježavanja i ručno pokretanje
 
-`check:codeql-ratchet` čita **stanje repozitorija, osvježeno prema rasporedu — ne po PR-u.**
+`check:codeql-ratchet` čita **stanje repozitorija koje se osvježava prema rasporedu — ne za svaki PR.**
 `gh api repos/diegosouzapw/OmniRoute/code-scanning/default-setup` prijavljuje
-`state: configured`, `schedule: weekly`: GitHub-ovo skeniranje putem 'default-setup', a ne
-analiza po push-u. Posljedica: nakon što se PR koji POPRAVLJA upozorenja merge-uje,
-ratchet nastavlja čitati stari, veći broj sve dok se ne pokrene sljedeće zakazano skeniranje
-— tako da prijavljuje regresiju na svakom otvorenom PR-u, uključujući i naknadne izmjene
-samog PR-a koji vrši popravku, sve dok skeniranje ne sustigne stanje.
+`state: configured`, `schedule: weekly`: GitHubovo skeniranje sa zadanim postavkama, a ne analiza
+pri svakom pushu. Posljedica: nakon spajanja PR-a koji POPRAVLJA upozorenja, ratchet nastavlja čitati
+stari, veći broj sve dok se ne izvrši sljedeće zakazano skeniranje — pa prijavljuje regresiju
+na svakom otvorenom PR-u, uključujući naknadne PR-ove povezane s PR-om koji je sadržavao popravak,
+sve dok skeniranje ne sustigne promjene.
 
 **Ručno osvježavanje**: `gh workflow run codeql.yml --ref release/vX.Y.Z` ponovo pokreće
-analizu i ponovo objavljuje upozorenja u roku od nekoliko minuta. Prvo pročitajte
-`.github/workflows/codeql.yml` — njegovo zaglavlje objašnjava da je samo za
-`workflow_dispatch` **zato što je u sukobu sa GitHub-ovim "default setup-om"**
-(`CodeQL analize iz naprednih konfiguracija se ne mogu obraditi kada je omogućen 'default setup'`).
-Vraćanje `push`/`pull_request`/`schedule` okidača zahtijeva **prvo akciju vlasnika**:
-Settings → Code security → CodeQL: Default → Advanced. Nemojte dodavati `schedule:`
-okidač bez tog prekidača — to će samo proizvesti neuspješna pokretanja.
+analizu i ponovo objavljuje upozorenja u roku od nekoliko minuta. Prvo pročitajte `.github/workflows/codeql.yml`
+— njegovo zaglavlje objašnjava da koristi isključivo `workflow_dispatch` **jer je u sukobu s
+GitHubovom „zadanom postavkom“** (`CodeQL analyses from advanced configurations cannot be
+processed when the default setup is enabled`). Vraćanje `push`/`pull_request`/
+`schedule` okidača prvo zahtijeva **radnju vlasnika**: Settings → Code security →
+CodeQL: Default → Advanced. Nemojte dodavati `schedule:` okidač bez te promjene — on će
+samo proizvoditi neuspješna izvršavanja.
 
-**Postrožite osnovu nakon što broj opadne** — `node scripts/check/check-codeql-ratchet.mjs
+**Postrožite osnovnu vrijednost nakon što broj opadne** — `node scripts/check/check-codeql-ratchet.mjs
 --update` upisuje novi izmjereni broj u `quality-baseline.json` →
-`metrics.codeqlAlerts.value`, tako da ratchet ne dozvoli tiho regresiju nazad do starog
-limita. Primjer iz prakse (2026-09-02/03): PR #12502 popravio 7 stvarnih upozorenja
-(13 → 6 izmjerenih otvorenih); PR #12530 postrožio zamrznutu osnovu sa 11 na 6 kako bi se
-podudarala; preostalih 6 je zatim odbačeno uz obrazloženje za svako upozorenje, sve do 0 otvorenih.
+`metrics.codeqlAlerts.value`, tako da ratchet ne dozvoli neprimjetnu regresiju nazad
+do starog gornjeg praga. Primjer iz prakse (2026-09-02/03): PR #12502 popravio je 7 stvarnih upozorenja
+(13 → 6 izmjerenih otvorenih); PR #12530 postrožio je zamrznutu osnovnu vrijednost sa 11 → 6 radi usklađivanja;
+preostalih 6 zatim je odbačeno uz pojedinačno obrazloženje za svako upozorenje, čime je broj otvorenih
+upozorenja smanjen na 0.
 
-**Odbacivanja su odluka operatera (Strogo pravilo #14)** — nikada ne odbacujte CodeQL
-upozorenje bez bilježenja tehničkog obrazloženja u komentaru odbacivanja: `won't fix` za
-zahtjev upstream protokola, `used in tests` za test fixture, `false positive` za
-sanitizer koji CodeQL ne može vidjeti (presedan: `docs/security/ERROR_SANITIZATION.md`).
+**Odbacivanja su odluka operatera (Strogo pravilo #14)** — nikada nemojte odbaciti CodeQL upozorenje
+bez navođenja tehničkog obrazloženja u komentaru odbacivanja: `won't fix` za
+zahtjev uzvodnog protokola, `used in tests` za testni fixture, `false positive`
+za sanitizer koji CodeQL ne može prepoznati (presedan: `docs/security/ERROR_SANITIZATION.md`).
 
 ---
 
@@ -459,37 +556,39 @@ Sve ostalo ne uspijeva: povećanje broja, dodavanje unosa, promjena `cap`/`testC
 
 Posao nikada ne gura (push) na `release/*` — čovjek spaja PR, tako da loše mjerenje ne može dospjeti bez pregleda.
 
-## Politika liste dozvoljenih (Allowlist Policy)
+## Politika liste dozvoljenih stavki
 
-Svaka kapija koja ne može pasti zbog već postojećih kršenja koristi zamrznutu listu dozvoljenih
-(npr. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Politika je:
+Svaka kontrola koja ne može pasti zbog prethodno postojećih kršenja koristi zamrznutu listu dozvoljenih stavki
+(npr. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Pravilo glasi:
 
-**Otklonite osnovni uzrok; koristite listu dozvoljenih samo kada je kršenje već postojeće i
-ne može se popraviti u istom PR-u.**
+**Otklonite osnovni uzrok; koristite listu dozvoljenih stavki samo kada je kršenje prethodno postojalo i
+ne može se otkloniti u istom PR-u.**
 
-Kada dodajete unos na listu dozvoljenih:
+Prilikom dodavanja stavke na listu dozvoljenih stavki:
 
-1. Uključite komentar sa obrazloženjem.
-2. Referencirajte problem praćenja (npr. `// #3498 — Funkcionalnost faze 2, još nije implementirana`).
-3. Uklonite unos u istom PR-u koji popravlja kršenje — zastarjeli unos koji više ne
-   potiskuje aktivno kršenje je sam po sebi defekt (6A.3 stale-enforcement će oboriti
-   kapiju na napuštenom unosu liste dozvoljenih kada se implementira).
+1. Uključite komentar s obrazloženjem.
+2. Navedite povezani problem za praćenje (npr. `// #3498 — Phase 2 feature, not yet implemented`).
+3. Uklonite stavku u istom PR-u koji otklanja kršenje — zastarjela stavka koja više
+   ne potiskuje aktivno kršenje i sama predstavlja grešku (6A.3 provjera zastarjelih pravila
+   oborit će kontrolu zbog nepovezane stavke na listi dozvoljenih stavki nakon što bude implementirana).
 
-Nemojte **dodavati** unose na listu dozvoljenih da bi testovi brže prolazili. Zelena kapija sa rastućom
-listom dozvoljenih je lažni osjećaj kvaliteta.
+**Nemojte** dodavati stavke na listu dozvoljenih stavki samo da bi testovi brže prošli. Uspješna kontrola uz rastuću
+listu dozvoljenih stavki stvara lažan osjećaj kvaliteta.
 
-### Kada kapija padne na vašem PR-u
+### Kada kontrola ne prođe za vaš PR
 
-1. **Pažljivo pročitajte izlaz kapije** — on vam tačno govori koji fajl ili simbol je prekršio
+1. **Pažljivo pročitajte izlaz kontrole** — on vam tačno govori koja je datoteka ili simbol prekršio
    pravilo.
-2. **Popravite kršenje** — većina kapija su determinističke provjere sistema datoteka koje prolaze čim je kod ispravan.
-3. **Ako je kršenje već postojeće** (tj. niste ga vi uveli, ali ga kapija sada pokriva): dodajte unos na listu dozvoljenih sa komentarom obrazloženja i problemom praćenja.
-4. **Ako je kapija ratchet** (pokrivenost, ESLint upozorenja, duplikacija, kompleksnost):
-   vaša izmjena je pogoršala metriku. Popravite osnovni problem, ili (rijetko) pokrenite
-   `npm run quality:ratchet -- --update` ako je izmjena namjerna i degradacija metrike
-   prihvatljiva — ali dokumentujte zašto u opisu PR-a.
-5. **Savjetodavne kapije** (`continue-on-error: true`) su informativne — one ne blokiraju
-   spajanje (merge), ali se pojavljuju u CI sažetku. Svejedno ih popravite.
+2. **Otklonite kršenje** — većina kontrola su determinističke provjere sistema datoteka koje prolaze čim
+   je kôd ispravan.
+3. **Ako je kršenje prethodno postojalo** (tj. niste ga vi uveli, ali ga kontrola sada
+   obuhvata): dodajte stavku na listu dozvoljenih stavki uz komentar s obrazloženjem i problem za praćenje.
+4. **Ako je kontrola zapinjača** (pokrivenost, ESLint upozorenja, dupliciranje, složenost):
+   vaša izmjena je pogoršala metriku. Otklonite osnovni problem ili (rijetko) pokrenite
+   `npm run quality:ratchet -- --update` ako je izmjena namjerna i pogoršanje metrike
+   prihvatljivo — ali dokumentujte razlog u opisu PR-a.
+5. **Savjetodavne kontrole** (`continue-on-error: true`) služe za informisanje — ne blokiraju
+   spajanje, ali se pojavljuju u CI sažetku. Svejedno ih otklonite.
 
 ---
 
@@ -497,7 +596,11 @@ listom dozvoljenih je lažni osjećaj kvaliteta.
 
 1. Kreirajte `scripts/check/check-<name>.mjs` (ili `.ts`). Kapije politike izlaze sa 0/1.
    Kapije tipa ratchet emituju metriku u `quality-metrics.json` putem `collect-metrics.mjs`.
-2. Dodajte `"check:<name>": "node scripts/check/check-<name>.mjs"` u `package.json`.
+2. Dodajte `"check:<name>": "node scripts/check/check-<name>.mjs"` u `package.json` i
+   sinhronizirajte alias i njegovu tačnu komandu u `config/quality/gate-manifest.json`.
+   Primijenite istu sinhronizaciju prilikom izmjene ili uklanjanja postojećeg aliasa za validaciju.
+   Pokrenite `npm run check:gate-manifest`; pre-commit hook i klasifikacija promjena u CI-ju
+   provode ovaj ugovor.
 3. Povežite je u `.github/workflows/ci.yml` pod odgovarajućim poslom
    (policy → `lint` ili `docs-sync-strict`; ratchet → `quality-gate`).
 4. Ako ima listu dozvoljenih, primijenite `reportStaleEntries()` iz
@@ -520,67 +623,109 @@ nije automatski učitan (vi birate i verifikujete MCP↔LSP most); neispravan un
 
 ## Zaostatak racionalizacije (pregled ROI-ja — Faza 9 Talas 3)
 
-Ovaj inventar je usklađen sa `ci.yml` 2026-06-17 (prethodna verzija je izostavila
+Ovaj inventar je usklađen s `ci.yml` 2026-06-17 (prethodna verzija je izostavila
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
 `check:codeql-ratchet`, `check:pr-evidence`). Pregled ROI-ja usklađenog skupa
 identificirao je sljedeće kandidate za racionalizaciju. **Spajanja su mehaničke CI
-izmjene; promjene statusa/uklanjanja su odluke o pravilima rezervirane za operatera.** Ništa od navedenog
+izmjene; promjene statusa/uklanjanja su odluke o pravilima rezervirane za operatora.** Ništa navedeno
 još nije primijenjeno.
 
-**Također nije dokumentirano iznad** (savjetodavno, slab signal): zadatak `docs-lint`
-(markdownlint + Vale, cijeli zadatak ima `continue-on-error`) i samostalni tokovi rada skenera
+**Također nije dokumentirano iznad** (savjetodavno, slab signal): `docs-lint` posao
+(markdownlint + Vale, cijeli posao ima `continue-on-error`) i samostalni tokovi rada skenera
 `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` se nalazi u
-`quality-baseline.json`, ali nije povezan s blokirajućim mehanizmom postepenog pooštravanja u `ci.yml` — metrika je
+`quality-baseline.json`, ali nije povezan s blokirajućim mehanizmom praga u `ci.yml` — metrika je
 trenutno nepovezana.
 
-### Spajanje / uklanjanje duplikata (mehanički, manji rizik)
+### Spajanje / deduplikacija (mehanički, manji rizik)
 
-Svaki kandidat je provjeren u odnosu na aktivno stanje kontrolnih tačaka 2026-06-17 (vjeruj, ali provjeri);
-ispostavilo se da nekoliko „očiglednih” spajanja skriva dug i **nisu** neposredno primjenjiva.
+Svaki kandidat je provjeren u odnosu na stvarno stanje kontrolnih tačaka 2026-06-17 (vjeruj, ali provjeri);
+ispostavilo se da nekoliko „očiglednih” spajanja skriva dug i **nisu** direktne zamjene bez problema.
 
-- **`check:docs-sync` se pokreće dvaput** — samostalno u zadatku `lint` i ponovo unutar `check:docs-all` (`docs-sync-strict`) te u husky pre-commit kuki. ✅ **ZAVRŠENO** — samostalno pokretanje u zadatku `lint` je uklonjeno.
-- **CVE skeniranje** — ❌ **NIJE jednostavno spajanje.** `audit:deps` bezuslovno ne prolazi za bilo koji CVE visoke/kritične ozbiljnosti; `check:vuln-ratchet` (osv) ne prolazi samo pri _regresiji_ u odnosu na osnovno stanje (trenutno 1 MODERATE). Različite semantike — uklanjanjem `audit:deps` izgubila bi se apsolutna kontrolna tačka za visoku/kritičnu ozbiljnost. Zadržati oba.
-- **Otkrivanje ciklusa** — ✅ **ZAVRŠENO** (#15159 G-01/G-02). Stari tekst je ovdje nazivao `check:cycles` „zelenom, pažljivo odabranom” kontrolnom tačkom i opravdavao njeno zadržavanje kao blokirajuće jer je `check:circular-deps` (dpdm) prijavljivao 91 ciklus. To zeleno stanje bilo je **lažno zeleno**: `check:cycles` je skenirao 5 poddirektorija (450 datoteka), prepoznavao samo statičke izraze `import|export … from` i odbacivao svaki specifikator `@/` i `@omniroute/open-sse/`, pa nije mogao uočiti cikluse dinamičkog uvoza + aliasa koji su dominirali repozitorijem. Ispravljeno: kontrolna tačka sada prolazi kroz `src` + `open-sse` (5023 datoteke), prikuplja specifikatore iz TypeScript AST-a (tako da se `import("…")` računa, dok se `typeof import("…")` na poziciji tipa ne računa) i razrješava tsconfig `paths`. Pronalazi **14** ciklusa, a ne 0. Budući da se 14 prethodno postojećih ciklusa ne može ispraviti u PR-u kontrolne tačke, `check:cycles` je sada **mehanizam postepenog pooštravanja** (`--ratchet`, gornja granica `metrics.cycles.value = 14` u `quality-baseline.json`, `direction: down`) — blokira svaku _regresiju_, a broj se može samo smanjivati. CI pokreće `npm run check:cycles:ratchet`. Postepeno uklanjanje duga odvija se u sklopu **A-01**. `check:circular-deps` (dpdm) ostaje savjetodavan kao šire drugo mišljenje.
-- **Složenost** — ✅ **ZAVRŠENO** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): jedan ESLint prolaz, brojanje prema ruleId-u kako bi osnovna stanja ciklomatske složenosti + maksimalnog broja linija i kognitivne složenosti ostala nezavisna; pojedinačne provjere `check:complexity` / `check:cognitive-complexity` ostaju za lokalni `--update`.
-- **`/api` zaštita od halucinacija** — ✅ **ZAVRŠENO** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): jedan FS inventar za `src/app/api`, openapi-routes + docs-symbols i dalje izvještavaju nezavisno; pojedinačne provjere ostaju za lokalna pokretanja.
-- **`check:node-runtime` se pokreće u 11 zadataka** — ⚠️ **nizak ROI.** Svaki je zaseban izvršitelj, a provjera traje <1s; ukupna ušteda je ~10s, uz gubitak jeftine zaštite za svaki zadatak. Nije vrijedno izmjena.
-- **`typecheck:noimplicit:core` u CI lint zadatku** — ✅ **uklonjeno iz lint zadatka** (bilo je savjetodavno uz `continue-on-error`); blokirajuću površinu tipova čine `typecheck:core` + `check:type-coverage`. Lokalna skripta je zadržana.
+- **`check:docs-sync` se pokreće dvaput** — samostalno u `lint` poslu i ponovo unutar `check:docs-all` (`docs-sync-strict`) te u husky pre-commit hooku. ✅ **ZAVRŠENO** — uklonjeno samostalno pozivanje iz `lint` posla.
+- **CVE skeniranje** — ❌ **NIJE čisto spajanje.** `audit:deps` blokira kritična upozorenja i nepotpune revizije za svih pet lockfileova, dok upozorenja visokog nivoa prijavljuje kao upozorenja prema trenutnim pravilima; `check:vuln-ratchet` (osv) pada samo pri _regresiji_ u odnosu na pohranjenu početnu vrijednost i odbija nedostajuća mjerenja kada su obavezna. Različita semantika — uklanjanjem `audit:deps` izgubila bi se apsolutna kontrolna tačka za kritične probleme i nezavisne potvrde revizije paketa. Zadržati oba.
+- **Otkrivanje ciklusa** — ✅ **ZAVRŠENO** (#15159 G-01/G-02). Stari tekst je ovdje nazivao `check:cycles` „zelenom, kuriranom” kontrolnom tačkom i opravdavao njeno zadržavanje kao blokirajuće jer je `check:circular-deps` (dpdm) prijavljivao 91 ciklus. To zeleno stanje bilo je **lažno zeleno**: `check:cycles` je skenirao 5 poddirektorija (450 datoteka), podudarao samo statičke `import|export … from` izraze i odbacivao svaki `@/` i `@omniroute/open-sse/` specifikator, pa nije mogao vidjeti cikluse dinamičkih importa i aliasa koji su dominirali repozitorijem. Ispravljeno: kontrolna tačka sada prolazi kroz `src` + `open-sse` (5023 datoteke), prikuplja specifikatore iz TypeScript AST-a (tako da se `import("…")` računa, a `typeof import("…")` na poziciji tipa ne računa) i razrješava tsconfig `paths`. Pronalazi **14** ciklusa, a ne 0. Budući da se 14 postojećih ciklusa ne može ispraviti u PR-u kontrolne tačke, `check:cycles` je sada **mehanizam praga** (`--ratchet`, gornja granica `metrics.cycles.value = 14` u `quality-baseline.json`, `direction: down`) — blokira svaku _regresiju_, a broj se može samo smanjivati. CI pokreće `npm run check:cycles:ratchet`. Postepeno smanjenje prati **A-01**. `check:circular-deps` (dpdm) ostaje savjetodavan kao šire drugo mišljenje.
+- **Složenost** — ✅ **ZAVRŠENO** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): jedan ESLint prolaz, brojanje prema ruleId-u tako da početne vrijednosti za ciklomatsku složenost + maksimalni broj linija i kognitivnu složenost ostanu nezavisne; pojedinačni `check:complexity` / `check:cognitive-complexity` ostaju za lokalni `--update`.
+- **`/api` zaštita od halucinacija** — ✅ **ZAVRŠENO** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): jedan FS inventar direktorija `src/app/api`, openapi-routes + docs-symbols i dalje izvještavaju nezavisno; pojedinačne provjere ostaju za lokalna pokretanja.
+- **`check:node-runtime` se pokreće u 11 poslova** — ⚠️ **nizak ROI.** Svaki koristi zaseban runner, a provjera traje <1s; ukupna ušteda je ~10s, naspram gubitka jeftine zaštite po poslu. Nije vrijedno izmjena.
+- **`typecheck:noimplicit:core` u CI lint poslu** — ✅ **uklonjeno iz lint posla** (bilo je savjetodavno uz `continue-on-error`); blokirajuću površinu tipova čine `typecheck:core` + `check:type-coverage`. Lokalna skripta je zadržana.
 
-### Promijeniti status / odlučiti (pravila operatera)
+### Promijeniti status / odlučiti (pravila operatora)
 
-- `check:openapi-security-tiers` (savjetodavno) — ❌ **NE MOŽE se jednostavno učiniti blokirajućim.** Završava s kodom 0, ali upozorava da nekolicini `traffic-inspector` ruta pod `LOCAL_ONLY_API_PREFIXES` nedostaje anotacija `x-loopback-only: true`. Njegovo nametanje prvo zahtijeva dodavanje tih anotacija u `openapi.yaml`.
-- `typecheck:noimplicit:core` (savjetodavno) — u velikoj mjeri ga zamjenjuje blokirajući mehanizam postepenog pooštravanja `check:type-coverage`. Pretvoriti ga u mehanizam postepenog pooštravanja ili ukloniti redundantni drugi `tsc` prolaz.
-- `test:vitest:ui` (sada **blokirajuće**) — prethodno postojeći neuspjesi izričito su isključeni u `vitest.config.ts` pomoću komentara za praćenje `// #8618`; novi neuspjesi obaraju zadatak.
-- `check:secrets` (gitleaks, blokirajući mehanizam postepenog pooštravanja zamrznut na 3 dokumentirana lažno pozitivna rezultata) — dodati ta 3 rezultata na listu dozvoljenih kako bi se došlo do 0 ili ga spustiti na savjetodavni status. Preklapa se s GitHubovim izvornim skeniranjem tajni + `check:public-creds`.
-- `check:pr-evidence` (blokirajuće, pretražuje prozni tekst tijela PR-a) — visok rizik od lažno pozitivnih rezultata; uklanjanje bi oslabilo provođenje strogog pravila br. 18, tako da je ovo stvarna odluka o pravilima.
-- `semgrep` (savjetodavni samostalni tok) — preklapa se s CodeQL-om za OWASP porodice; povezati njegovo osnovno stanje s mehanizmom postepenog pooštravanja ili ga ukloniti.
+- `check:openapi-security-tiers` (savjetodavno) — ❌ **NIJE moguće jednostavno učiniti blokirajućim.** Završava s kodom 0, ali upozorava da nekoliko `traffic-inspector` ruta pod `LOCAL_ONLY_API_PREFIXES` nema oznaku `x-loopback-only: true`. Njegovo provođenje prvo zahtijeva dodavanje tih oznaka u `openapi.yaml`.
+- `typecheck:noimplicit:core` (savjetodavno) — uglavnom ga zamjenjuje blokirajući mehanizam praga `check:type-coverage`. Pretvoriti ga u mehanizam praga ili ukloniti redundantni drugi `tsc` prolaz.
+- `test:vitest:ui` (sada **blokirajući**) — postojeći kvarovi su eksplicitno isključeni u `vitest.config.ts` uz `// #8618` komentare za praćenje; novi kvarovi obaraju posao.
+- `check:secrets` (gitleaks, blokirajući mehanizam praga) — trenutna gornja granica je `metrics.secretFindings` u `quality-baseline.json`. Svaki izuzetak zahtijeva opravdan unos u `.gitleaks.toml`; nedostupno mjerenje ima status NEPOTPUNO. Skeniranje dopunjuje GitHubovo ugrađeno skeniranje tajni i `check:public-creds`.
+- `check:pr-evidence` (blokirajući, pretražuje prozni tekst tijela PR-a) — visok rizik lažno pozitivnih rezultata; njegovo uklanjanje slabi provođenje Strogog pravila #18, pa je ovo stvarna odluka o pravilima.
+- `semgrep` (samostalni savjetodavni tok) — preklapa se s CodeQL-om za OWASP porodice; povezati njegovu početnu vrijednost s mehanizmom praga ili ga ukloniti.
 
 ---
 
 ## Povezana dokumentacija
 
-- Lanac snabdijevanja (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Lanac snabdijevanja (porijeklo, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — kapija pariteta skupa ključeva
+#### `check-key-completeness` — kontrola podudarnosti skupova ključeva
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, posao `i18n-ui-coverage`).
-Upoređuje skup listovnih ključeva svakog `src/i18n/messages/<locale>.json` sa `en.json` i ne prolazi ako postoji bilo koji nedostajući ili dodatni list, bez obzira na to kada je ključ dodan. `__MISSING__:` rezervisana mjesta se računaju kao prisutna (njihov sadržaj je stvar kapije omjera). Ovo je apsolutni komplement dvije kapije zasnovane na diff-u/procentima: `check-ui-keys-coverage` nameće prag od 80 % po lokalu (43 nedostajuća ključa od ~13.000 i dalje daju 99,7 %) i `check-new-key-coverage` procjenjuje samo ključeve koje PR dodaje u `en.json`. Lokalna serija (batch) se generiše iz `en.json` na dan kada je njena grana isječena i prevodi se danima dok baza nastavlja dodavati ključeve; batch PR sam po sebi ne dodaje nijedan ključ, tako da su oba srodnika ostala tiha kada je batch 1 (#13044) stigao sa 43 ključa manje u devet lokala, a batch 2 (#13660) sa 10 ključeva manje u osam (15.09.2026.). Popravite crvenu (grešku) sa `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; `extra` list znači da ga je izvor odbacio — izbrišite ga iz lokala. `--warn` izvještava bez neuspjeha. `--catalog=cli` pokreće isto poređenje nad `bin/cli/locales` (`npm run i18n:check-keys:cli`); oba koraka žive u poslu `i18n-ui-coverage`.
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, zadatak `i18n-ui-coverage`).
+Poredi skup krajnjih ključeva svake datoteke `src/i18n/messages/<locale>.json` s datotekom `en.json` i prijavljuje
+neuspjeh za svaki ključ koji nedostaje ili je suvišan, bez obzira na to kada je ključ dodan. Rezervirana mjesta
+`__MISSING__:` računaju se kao prisutna (njihov sadržaj je odgovornost kontrole omjera). To je apsolutna dopuna
+dviju kontrola zasnovanih na razlikama/postocima: `check-ui-keys-coverage` provodi donju granicu od 80 % po
+lokalizaciji (43 ključa koja nedostaju od ~13.000 i dalje daju 99,7 %), dok `check-new-key-coverage` procjenjuje
+samo ključeve koje PR dodaje u `en.json`. Paket lokalizacija generira se iz verzije datoteke `en.json` na dan
+kada se napravi njegova grana i prevodi se danima dok osnovna grana nastavlja dodavati ključeve; PR paketa sam
+ne dodaje nijedan ključ, pa su obje srodne kontrole ostale nijeme kada je paket 1 (#13044) spojen s 43 ključa
+koja su nedostajala u devet lokalizacija, a paket 2 (#13660) s 10 ključeva koji su nedostajali u osam lokalizacija
+(2026-09-15). Neuspješnu kontrolu ispravite pomoću
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; krajnji ključ označen kao `extra`
+znači da ga je izvor uklonio — izbrišite ga iz lokalizacije. `--warn` izvještava bez prijavljivanja neuspjeha.
+`--catalog=cli` pokreće isto poređenje nad `bin/cli/locales` (`npm run i18n:check-keys:cli`);
+oba koraka nalaze se u zadatku `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — i18n kapija za nove ključeve
+#### `check-new-key-coverage` — i18n kontrola novih ključeva
 
-Srodnik `check-ui-value-drift`. Taj hvata englesku vrijednost koja je **prepisana** dok su njeni prijevodi ostavljeni iza; ovaj hvata engleski ključ koji je **dodan** dok ga neki lokali nikada nisu primili.
+Srodna kontrola za `check-ui-value-drift`. Ona otkriva vrijednost na engleskom koja je **prepisana**
+dok su njeni prijevodi ostali nepromijenjeni; ova otkriva ključ na engleskom koji je **dodan**
+dok ga neke lokalizacije nikada nisu dobile.
 
-`check-ui-keys-coverage` ne može vidjeti ovu klasu: ona nameće procentualni prag po lokalu, a jedanaest nedostajućih ključeva od ~13.000 ostavlja pokrivenost na 99,9%. Procenat po jeziku ne može izraziti "ova funkcija je isporučena neprevedena" — cijela funkcija može sletjeti u novi lokal bez teksta i nikada ne pomjeriti broj.
+`check-ui-keys-coverage` ne može otkriti ovu kategoriju: ona provodi donju granicu postotka po lokalizaciji, a
+jedanaest ključeva koji nedostaju od ~13.000 ostavlja pokrivenost na 99,9 %. Postotak po jeziku ne može
+izraziti „ova funkcionalnost je objavljena neprevedena” — cijela funkcionalnost može biti uvedena u novu lokalizaciju
+bez ikakvog teksta, a da se broj nikada ne promijeni.
 
-Incident koji kodira: Faza 3 Orchestration Canvas-a prevela je svojih jedanaest ključeva kroz 42 lokala koji su postojali u to vrijeme. Sati kasnije, EU-jezični batch (#13044) doveo je repo do 51 lokala, a devet pridošlica (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) ih nikada nije primilo. `deepMergeFallback` zamjenjuje engleski za nedostajući ključ, tako da je način neuspjeha bio nepreveden UI umjesto praznog UI-a — stvaran, i tih po konstrukciji.
+Incident koji ova kontrola kodificira: Faza 3 platna Orchestration Canvas prevela je svojih jedanaest ključeva u
+42 lokalizacije koje su postojale u tom trenutku. Nekoliko sati kasnije paket jezika EU-a (#13044) povećao je broj
+lokalizacija u repozitoriju na 51, a devet novih (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) nikada
+ih nije dobilo. `deepMergeFallback` zamjenjuje ključ koji nedostaje engleskim tekstom, pa je rezultat bio
+neprevedeno, a ne prazno korisničko sučelje — stvaran problem koji je po samoj konstrukciji ostao neprimijećen.
 
-Kao i njegov srodnik, on je **svjestan razlika (diff-aware)**, upoređujući engleski na bazi spajanja (merge base) sa radnim stablom, tako da prethodno postojeće praznine ostaju zamrznute i kapiji nije bila potrebna migracija da bi se uključila.
+Poput srodne kontrole, i ova je **svjesna razlika** te poredi engleski sadržaj na osnovi spajanja s radnim
+stablom, tako da postojeći nedostaci ostaju zamrznuti i za uključivanje kontrole nije bila potrebna migracija.
 
-**Oznaka `__MISSING__:<english>` ga ne zadovoljava (od 17.09.2026.).** To je nekada bilo dokumentovano odlaganje — runtime se vraća na ispravan engleski — sve dok osam PR-ova funkcija 16.09.2026. nije dodalo 61 ključ i utisnulo oznaku u svih 65 lokala umjesto prevođenja: ova kapija je prihvatila svaki, ništa nije blokiralo PR-ove, a blokirajuća kapija omjera stvarnog prijevoda je tada pala na vrhu izdanja za sve (pt-BR 3,2 % > 2,5 % + 0,5). Oznaka se sada procjenjuje kao nedostajući prijevod. Popravite crvenu (grešku) sa `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`, ili sve lokale paralelno sa `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, detached-safe, odbija da se pokrene bez `OMNIROUTE_TRANSLATION_*` env). Ključ koji mora ostati na engleskom (fiksirani naziv proizvoda/mašine/fleg-a) pripada `scripts/i18n/untranslatable-keys.json`, nikada iza oznake. `vi` potpuno zabranjuje oznake (`tests/unit/i18n-vi-completeness.test.ts`).
+**Marker `__MISSING__:<english>` ne zadovoljava ovu kontrolu (od 2026-09-17).** Ranije je služio kao
+dokumentirano odgađanje — izvršno okruženje koristi ispravan engleski tekst kao rezervu — sve dok osam PR-ova
+s funkcionalnostima 2026-09-16 nije dodalo 61 ključ i postavilo marker u svih 65 lokalizacija umjesto da ih
+prevede: ova je kontrola prihvatila svaki od njih, ništa nije blokiralo PR-ove, a blokirajuća kontrola omjera
+stvarnih prijevoda zatim je prijavila neuspjeh na vrhu izdanja za sve (pt-BR 3,2 % > 2,5 % + 0,5). Marker se sada
+smatra prijevodom koji nedostaje. Neuspješnu kontrolu ispravite pomoću
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` ili
+paralelno za sve lokalizacije pomoću `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
+sigurno za odvojeni HEAD, odbija se pokrenuti bez varijabli okruženja `OMNIROUTE_TRANSLATION_*`). Ključ koji mora
+ostati na engleskom (fiksirani naziv proizvoda/mehanizma/zastavice) pripada u `scripts/i18n/untranslatable-keys.json`,
+nikada iza markera. `vi` u potpunosti zabranjuje markere (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — kapija za parkirane testove
+#### `check-vitest-exclusions` — kontrola odloženih testova
 
-Datoteka na listi `exclude` u `vitest.config.ts` je test koji se ne pokriva, i izgleda kao pokrivenost svakome ko čita stablo. Šezdeset dvije datoteke su se akumulirale iza komentara `// #8618 — prethodno postojeći neuspjeh; uklonite ovo isključenje kada se popravi`. Problem #8618 je zatvoren 11.08.2026. dok je lista koju je pratio porasla sa 45 unosa na 62, pri čemu je svaki novi naslijedio komentar koji ukazuje na mrtav problem. Kada je lista konačno izmjerena datoteku po datoteku (#13204), **51 od 62 je prošlo protiv trenutnog stabla bez promjene izvora**.
+Datoteka na popisu `exclude` u `vitest.config.ts` predstavlja test koji se ne pokreće, a svakome ko pregleda
+stablo izgleda kao pokrivenost. Šezdeset dvije datoteke nakupile su se iza komentara
+`// #8618 — pre-existing failure; remove this exclusion when fixed`. Problem #8618 zatvoren je
+2026-08-11 dok je popis koji je pratio narastao s 45 na 62 unosa, pri čemu je svaki novi unos naslijedio komentar
+koji je upućivao na zatvoren problem. Kada je popis napokon izmjeren datoteku po datoteku (#13204), **51 od 62
+testa prošao je na trenutnom stablu bez ikakve promjene izvornog koda**.
 
-Kapija zahtijeva da svako isključenje koje se razrješava u stvarnu datoteku (a) imenuje problem praćenja i (b) pojavi se u `config/quality/vitest-exclusions.json` sa svojim izmjerenim statusom, tako da je dodavanje jednog diff koji se može pregledati u namjenskoj datoteci, a ne još jedan red u nizu od 60 unosa. Namjerno ne ponovo pokreće isključene testove — to košta ~10 minuta i pripada periodičnom poslu; inventar bilježi kada je svaki posljednji put izmjeren.
+Kontrola zahtijeva da svako izuzimanje koje se razrješava u stvarnu datoteku (a) navodi problem za praćenje i
+(b) bude navedeno u `config/quality/vitest-exclusions.json` sa svojim izmjerenim statusom, tako da je dodavanje
+izuzimanja pregledljiva razlika u namjenskoj datoteci, umjesto još jednog reda u nizu od 60 unosa. Namjerno
+ne pokreće ponovo izuzete testove — to traje ~10 minuta i pripada periodičnom zadatku; evidencija bilježi kada
+je svaki od njih posljednji put izmjeren.

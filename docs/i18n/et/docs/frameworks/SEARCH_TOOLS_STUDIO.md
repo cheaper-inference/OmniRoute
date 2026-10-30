@@ -54,7 +54,7 @@ Uus vahekaart sisu eraldamiseks URL-ilt `POST /v1/web/fetch` kaudu (loodud plaan
 - Sisend: URL + kogu lehekülje lüliti + vorminguvalija (markdown / tekst / HTML).
 - Saatmine → toomine → `ScrapeResult.tsx` renderdamine.
 - `ScrapeResult` renderdab markdown-eelvaate + toorkuva lüliti.
-- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides `(kärbitud, kuva toorandmeid)` ja avab toorandmed Monaco modaalaknas (D21).
+- Piirang: kui vastuse keha on suurem kui **256 KB**, kuvab kasutajaliides `View full raw content` ja avab toorandmed modaalaknas (D21).
 - Metaandmete paneel: pakkuja (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latentsus, maksumus, vastuse suurus, linkide arv.
 - Kasutab `useScrapeFetch.ts` hook'i.
 

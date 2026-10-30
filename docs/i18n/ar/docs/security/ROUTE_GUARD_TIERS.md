@@ -208,7 +208,7 @@ Tunnel أو Tailscale أو Ngrok)، فسيظل فحص العنوان الاست�
 فظل ضمن الطبقة المفتوحة عند الفشل (GHSA-7pq4-8pvv-rx7r). بالإضافة إلى ذلك، ترفض
 `enableObsidianVaultSync()` أي مخزن يكون هو دليل البيانات، أو يقع داخله، أو يحتوي عليه.
 
-#### عمليات تصدير بيانات الاعتماد مخصصة للمشغّل فقط
+#### تصدير بيانات الاعتماد والاستعادة مخصصان للمشغّل فقط
 
 تحدد الطبقة أعلاه فقط ما إذا كان يلزم وجود _نوع ما_ من بيانات الاعتماد. تضيف المسارات التي تنزّل
 بيانات الاعتماد المخزّنة تحققًا ثانيًا في المعالج: تستدعي `GET /api/settings/export-json` (اتصالات
@@ -219,22 +219,9 @@ Tunnel أو Tailscale أو Ngrok)، فسيظل فحص العنوان الاست�
 و`admin`) ولرموز الوصول التي تبدأ بـ `oma_`. يستخدم إصدار رموز المزامنة (`POST /api/sync/tokens`)
 الدالة المساعدة نفسها، بالإضافة إلى رمز الخدمة الداخلية الموثوق به عبر عنوان الاسترجاع المحلي.
 
-#### Credential exports and restores are operator-only
+تخضع العمليات المدمّرة المقابلة للحد نفسه: تستبدل `POST /api/db-backups/import` (ملف `.sqlite` مرفوع، بما في ذلك `dryRun=true`) و`POST /api/db-backups` (استعادة نسخة محفوظة باستخدام معرّفها) و`POST /api/settings/import-json` (استعادة تنسيق JSON القديم) قاعدة البيانات النشطة أو مجموعة الإعدادات والاتصالات ومفاتيح API بأكملها. لذلك لا تستطيع بيانات اعتماد الآلة تشغيل هذه العمليات أيضًا.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+يخضع إتلاف نقاط الاستعادة للحد نفسه: `DELETE /api/db-backups` (التنظيف — الاحتفاظ بآخر N أو حذف ما يزيد عمره عن D يومًا) و`PATCH /api/db-backups` (إعدادات الاحتفاظ). القواعد المحفوظة هي نفسها التي تطبقها `cleanupDbBackups()` بعد كل نسخة احتياطية تلقائية (`src/lib/db/backup.ts`)؛ لذا فإن بيانات اعتماد آلة تستطيع حفظ `keepLatest: 1` قد تحذف نقاط الاستعادة السابقة عند اللقطة التالية. يظل عرض النسخ وإنشاؤها (`GET`/`PUT /api/db-backups`) خاضعًا لمصادقة الإدارة العادية.
 
 ### تمهيد التثبيت الجديد مخصّص لعنوان الاسترجاع المحلي فقط — وفقًا للنظير الحقيقي، وليس `Host`
 

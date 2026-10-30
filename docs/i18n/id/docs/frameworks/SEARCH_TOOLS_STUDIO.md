@@ -54,7 +54,7 @@ Tab baru untuk mengekstrak konten dari URL melalui `POST /v1/web/fetch` (dibuat 
 - Input: URL + tombol aktif/nonaktif halaman penuh + pemilih format (markdown / teks / HTML).
 - Kirim → ambil → render `ScrapeResult.tsx`.
 - `ScrapeResult` merender pratinjau markdown + tombol aktif/nonaktif konten mentah.
-- Batas: jika isi respons > **256 KB**, UI menampilkan `(dipotong, lihat versi mentah)` dan membuka konten mentah dalam modal Monaco (D21).
+- Batas: jika isi respons > **256 KB**, UI menampilkan `View full raw content` dan membuka konten mentah dalam modal (D21).
 - Panel metadata: penyedia (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latensi, biaya, ukuran respons, jumlah tautan.
 - Menggunakan hook `useScrapeFetch.ts`.
 

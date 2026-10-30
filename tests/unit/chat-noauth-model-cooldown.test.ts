@@ -97,18 +97,36 @@ test("with the wait disabled, a locked model answers 429 with a Retry-After, not
   assert.equal(fetchCalls, 0);
 });
 
-test("a lock longer than the wait ceiling answers 429 at once with the remaining time", async () => {
-  await lockModelWithAnUpstream502();
-  await settingsDb.updateSettings({ requestRetry: 1, maxRetryIntervalSec: 1 });
-  globalThis.fetch = async () => buildOpenAIResponse("must not be reached");
+test(
+  "a lock longer than the wait ceiling answers 429 at once with the remaining time",
+  { timeout: 30_000 },
+  async (t) => {
+    await lockModelWithAnUpstream502();
+    t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
+    try {
+      await settingsDb.updateSettings({ requestRetry: 1, maxRetryIntervalSec: 1 });
+      let fetchCalls = 0;
+      globalThis.fetch = async () => {
+        fetchCalls++;
+        return buildOpenAIResponse("must not be reached");
+      };
 
-  const startedAt = Date.now();
-  const response = await handleChat(buildRequest({ body: chatBody("lock beyond the ceiling") }));
+      const response = await handleChat(
+        new Request(buildRequest({ body: chatBody("lock beyond the ceiling") }), {
+          signal: AbortSignal.timeout(30_000),
+        })
+      );
 
-  assert.equal(response.status, 429);
-  assert.ok(Date.now() - startedAt < 700, "no server-side wait beyond the ceiling");
-  assert.ok(Number(response.headers.get("Retry-After")) >= 2);
-});
+      assert.equal(response.status, 429);
+      // Logical time never advances: a server-side wait would leave this request
+      // pending and fail the watchdog instead of depending on host scheduling.
+      assert.ok(Number(response.headers.get("Retry-After")) >= 2);
+      assert.equal(fetchCalls, 0, "a lock beyond the ceiling never reaches upstream");
+    } finally {
+      t.mock.timers.reset();
+    }
+  }
+);
 
 test("a client that disconnects during the wait triggers no upstream call", async () => {
   await lockModelWithAnUpstream502();
@@ -147,40 +165,54 @@ test("a lock on one model leaves another model of the provider served immediatel
   assert.equal(response.status, 200);
 });
 
-test("a combo skips a locked no-auth member at once, without waiting, and serves the next member", async () => {
-  await seedConnection("openai", { apiKey: "sk-openai-combo-member" });
-  await combosDb.createCombo({
-    name: "noauth-locked-then-keyed",
-    strategy: "priority",
-    config: { maxRetries: 0, retryDelayMs: 0 },
-    models: [`unc/${MODEL}`, "openai/gpt-4.1"],
-  });
-  await lockModelWithAnUpstream502();
-  await settingsDb.updateSettings({ requestRetry: 3, maxRetryIntervalSec: 10 });
-  let noAuthCalls = 0;
-  let keyedCalls = 0;
-  globalThis.fetch = async (url) => {
-    if (new URL(String(url)).hostname === "hermes.ai.unturf.com") {
-      noAuthCalls += 1;
-      return new Response("{}", { status: 502 });
+test(
+  "a combo skips a locked no-auth member at once, without waiting, and serves the next member",
+  { timeout: 30_000 },
+  async (t) => {
+    await seedConnection("openai", { apiKey: "sk-openai-combo-member" });
+    await combosDb.createCombo({
+      name: "noauth-locked-then-keyed",
+      strategy: "priority",
+      config: { maxRetries: 0, retryDelayMs: 0 },
+      models: [`unc/${MODEL}`, "openai/gpt-4.1"],
+    });
+    await lockModelWithAnUpstream502();
+    // Keep the lock alive while DB and module I/O complete. A retry sleep cannot
+    // complete because the test never advances this clock.
+    t.mock.timers.enable({ apis: ["Date", "setTimeout"], now: Date.now() });
+    try {
+      await settingsDb.updateSettings({ requestRetry: 3, maxRetryIntervalSec: 10 });
+      let noAuthCalls = 0;
+      let keyedCalls = 0;
+      globalThis.fetch = async (url) => {
+        if (new URL(String(url)).hostname === "hermes.ai.unturf.com") {
+          noAuthCalls += 1;
+          return new Response("{}", { status: 502 });
+        }
+        keyedCalls += 1;
+        return buildOpenAIResponse("served by the second member");
+      };
+
+      const response = await handleChat(
+        new Request(
+          buildRequest({
+            body: {
+              model: "noauth-locked-then-keyed",
+              stream: false,
+              messages: [{ role: "user", content: "combo with a locked member" }],
+            },
+          }),
+          { signal: AbortSignal.timeout(30_000) }
+        )
+      );
+
+      assert.equal(response.status, 200);
+      assert.equal(keyedCalls, 1);
+      assert.equal(noAuthCalls, 0, "the locked member isn't dialled");
+      const body = await response.json();
+      assert.equal(body.choices[0].message.content, "served by the second member");
+    } finally {
+      t.mock.timers.reset();
     }
-    keyedCalls += 1;
-    return buildOpenAIResponse("served by the second member");
-  };
-
-  const startedAt = Date.now();
-  const response = await handleChat(
-    buildRequest({
-      body: {
-        model: "noauth-locked-then-keyed",
-        stream: false,
-        messages: [{ role: "user", content: "combo with a locked member" }],
-      },
-    })
-  );
-
-  assert.equal(response.status, 200);
-  assert.equal(keyedCalls, 1);
-  assert.equal(noAuthCalls, 0, "the locked member isn't dialled");
-  assert.ok(Date.now() - startedAt < 1500, "no server-side wait inside a combo");
-});
+  }
+);

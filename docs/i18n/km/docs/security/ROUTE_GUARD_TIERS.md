@@ -207,7 +207,7 @@ Obsidian REST API token។ GHSA-62vw គ្រាន់តែបិទបាំ�
 នៅតែស្ថិតក្នុងថ្នាក់ fail-open (GHSA-7pq4-8pvv-rx7r)។ `enableObsidianVaultSync()` ក៏
 បដិសេធ vault ដែលជាថតទិន្នន័យ ស្ថិតនៅក្នុងថតទិន្នន័យ ឬផ្ទុកថតទិន្នន័យនៅខាងក្នុងផងដែរ។
 
-#### ការនាំចេញ credential គឺសម្រាប់តែប្រតិបត្តិករប៉ុណ្ណោះ
+#### ការនាំចេញព័ត៌មានសម្គាល់អត្តសញ្ញាណ និងការស្ដារឡើងវិញ គឺសម្រាប់ប្រតិបត្តិករតែប៉ុណ្ណោះ
 
 កម្រិតខាងលើកំណត់តែថាតើត្រូវការព័ត៌មានសម្ងាត់ _ណាមួយ_ ឬអត់ប៉ុណ្ណោះ។ Route ដែលទាញយក
 ព័ត៌មានសម្ងាត់ដែលបានរក្សាទុក បន្ថែមការត្រួតពិនិត្យទីពីរនៅក្នុង handler៖ `GET /api/settings/export-json` (ការតភ្ជាប់
@@ -218,22 +218,9 @@ instance ដែលបានបិទការចូល ហើយឆ្លើយ�
 និង `admin`) និងចំពោះ access token ដែលមានបុព្វបទ `oma_`។ ការចេញ sync token (`POST /api/sync/tokens`) ប្រើ
 helper ដូចគ្នា បូករួមទាំង internal-service token ដែលគួរឱ្យទុកចិត្តតាម loopback។
 
-#### Credential exports and restores are operator-only
+សកម្មភាពបំផ្លាញទិន្នន័យដែលពាក់ព័ន្ធក៏មានដែនកំណត់ដូចគ្នា៖ `POST /api/db-backups/import` (ឯកសារ `.sqlite` ដែលបានផ្ទុកឡើង រួមទាំង `dryRun=true`), `POST /api/db-backups` (ស្ដារច្បាប់ចម្លងបម្រុងដែលបានរក្សាទុកតាម id) និង `POST /api/settings/import-json` (ស្ដារពីទ្រង់ទ្រាយ JSON ចាស់) ជំនួសមូលដ្ឋានទិន្នន័យកំពុងប្រើ ឬសំណុំការកំណត់ ការតភ្ជាប់ និងសោ API ទាំងមូល។ ដូច្នេះព័ត៌មានសម្គាល់អត្តសញ្ញាណរបស់ម៉ាស៊ីនក៏មិនអាចចាប់ផ្ដើមសកម្មភាពទាំងនេះបានដែរ។
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ការលុបចំណុចស្ដារឡើងវិញក៏មានដែនកំណត់ដូចគ្នា៖ `DELETE /api/db-backups` (សម្អាត — រក្សា N ចុងក្រោយ ឬលុបអ្វីដែលចាស់ជាង D ថ្ងៃ) និង `PATCH /api/db-backups` (ការកំណត់រក្សាទុក)។ ច្បាប់ដែលបានរក្សាទុកគឺជាច្បាប់ដែល `cleanupDbBackups()` អនុវត្តបន្ទាប់ពីការបម្រុងទុកស្វ័យប្រវត្តិរាល់លើក (`src/lib/db/backup.ts`); ព័ត៌មានសម្គាល់អត្តសញ្ញាណរបស់ម៉ាស៊ីនដែលអាចរក្សាទុក `keepLatest: 1` នឹងអាចលុបចំណុចស្ដារមុនៗនៅពេលថតស្ថានភាពបន្ទាប់។ ការរាយបញ្ជី និងការបង្កើតច្បាប់ចម្លងបម្រុង (`GET`/`PUT /api/db-backups`) នៅតែប្រើការផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវសម្រាប់ការគ្រប់គ្រងធម្មតា។
 
 ### Bootstrap សម្រាប់ការដំឡើងថ្មី អាចប្រើបានតែតាម loopback ប៉ុណ្ណោះ — ផ្អែកលើ peer ពិត មិនមែន `Host`
 

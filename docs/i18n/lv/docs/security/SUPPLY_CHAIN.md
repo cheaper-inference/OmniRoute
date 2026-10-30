@@ -25,60 +25,38 @@ nebloķējot; _KRITISKO vārtu_ solis (`severity: CRITICAL`, `ignore-unfixed: tr
 `exit-code: 1`) aptur izlaišanu, ja ir KRITISKS CVE **ar pieejamu labojumu**. `ignore-unfixed`
 novērš izlaišanas bloķēšanu bāzes attēla CVE gadījumā bez augšupējā labojuma.
 
-## ⚠️ CVE Novirze (bloķējošie osv/Trivy vārti)
+## ⚠️ CVE mainīgums (bloķējošās osv/Trivy pārbaudes)
 
 osv un Trivy salīdzina atkarības ar CVE datubāzēm, kas **nepārtraukti aug**. PR,
-kas **neskar nekādas atkarības**, pēkšņi var kļūt sarkans, jo esošā atkarībā tika
-atklāts jauns CVE (osv: izmērītais `vulnCount` > bāzes līmenis; Trivy: jauns
-labojams KRITISKS attēlā). **Šī ir GAIDĀMA bloķējošu CVE vārtu darbības uzvedība,
-nevis produkta regresija.**
+kurā **netiek mainīta neviena atkarība**, var pēkšņi kļūt sarkans, jo esošā
+atkarībā ir atklāta jauna CVE (osv: izmērītais `vulnCount` > bāzes vērtība; Trivy:
+attēlā ir jauna labojama CRITICAL ievainojamība). **Tā ir PAREDZAMA bloķējošas
+CVE pārbaudes darbība, nevis produkta regresija.**
 
-Kad osv vai Trivy kļūst sarkans jaunatklāta CVE dēļ, risinājums ir:
+Ja osv vai Trivy kļūst sarkans jaunatklātas CVE dēļ, risinājums ir šāds:
 
-1.  **Atjaunināt ietekmēto atkarību** (vēlams) — jaunināt uz laboto versiju, izmantojot `package.json`
-    `overrides` (tranzitīvās atkarības), vai pārbūvēt attēlu uz labotas bāzes.
-2.  **Ja nav augšupējā labojuma:**
-    - **osv:** atkārtoti noteikt bāzes līmeni `metrics.vulnCount` failā `config/quality/quality-baseline.json`
-      (`npm run quality:ratchet -- --update` neattiecas uz īpašiem vārtiem — rediģējiet vērtību
-      manuāli, `direction:down`) ar pamatojuma piezīmi + izsekošanas problēmu.
-    - **Trivy:** pievienojiet ierakstu failā `.trivyignore` (CVE-ID katrā rindā) ar pamatojuma
-      komentāru + izsekošanas problēmu. `ignore-unfixed: true` jau automātiski aptver CVE bez
-      labojumiem.
+1. **Atjauniniet skarto atkarību** (ieteicams) — jauniniet uz izlaboto versiju, izmantojot `package.json`
+   `overrides` (tranzitīvajām atkarībām), vai no jauna izveidojiet attēlu uz izlabātas bāzes.
+2. **Ja augšupējā projektā nav labojuma:**
+   - **osv:** no jauna iestatiet `metrics.vulnCount` bāzes vērtību failā `config/quality/quality-baseline.json`
+     (`npm run quality:ratchet -- --update` neaptver specializētās pārbaudes — rediģējiet vērtību
+     manuāli, `direction:down`), pievienojot pamatojuma piezīmi un izsekošanas pieteikumu.
+   - **Trivy:** pievienojiet ierakstu failā `.trivyignore` (viens CVE-ID katrā rindā) kopā ar pamatojuma
+     komentāru un izsekošanas pieteikumu. `ignore-unfixed: true` jau automātiski aptver CVE,
+     kurām nav labojumu.
 
-Abi vārti **eleganti IZLAIŽ** (exit 0), ja rīks nav pieejams vai mērījums
-neizdodas (osv-scanner nav PATH, osv.dev/network nav sasniedzams, nederīgs JSON) —
-**mērījuma** kļūme nekad nebloķē, bloķē tikai **izmērīta** regresija.
+Obligātās OSV izpildes (`check:vuln-ratchet -- --ratchet`) drošības nolūkā beidzas ar
+`INCOMPLETE` un izejas kodu 2, ja skeneri, pārskatu vai bāzes vērtību nevar validēt.
+Izmērīta regresija beidzas ar izejas kodu 1. Konsultatīva izpilde joprojām var ziņot `SKIP` ar
+izejas kodu 0, taču tas neapliecina, ka atkarības ir sekmīgi izturējušas skenēšanu. Arī bloķējošajai
+Trivy darbībai ir nepieciešams sekmīgs mērījums: nepieejami rīki, neizdevušies uzdevumi
+un trūkstoši attēla pārbaudes dati nevar apliecināt, ka attēls ir tīrs.
 
-## Zināmi Akceptēti Riski
+## Izņemtas atkarības risks
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Pēc piesaistītā promptfoo izstrādes rīka jaunināšanas saknes bloķēšanas failā vairs nav iekļauts `extract-zip` vai atkarības saite uz to. Tādējādi tiek izņemta iepriekš akceptētā `promptfoo` → `@openai/codex-security` → `extract-zip` ķēde, kas izsekota #14482. Regresijas pārbaudes failā `tests/unit/extract-zip-14482-exposure.test.ts` nepieļauj tās atkārtotu ieviešanu un saglabā aizliegumu to importēt produkcijas kodā.
 
-`extract-zip@2.0.1` satur divus nelāpītus augstas smaguma pakāpes symlink-traversal brīdinājumus.
-Saskaņā ar iepriekš minēto CVE novirzes risinājuma "nav augšupējā labojuma" atzaru, tas ir
-**akceptēts risks**, nevis paaugstinājums:
-
-- **Ķēde:** `promptfoo` (izstrādes atkarība) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Apstiprināts, izmantojot `package-lock.json` — tieši viena pakotne visā atkarību kokā
-  (`@openai/codex-security`) deklarē `extract-zip`, un tieši viena pakotne
-  (`promptfoo`) deklarē `@openai/codex-security`.
-- **Ķēdē neeksistē neviena labota versija.** `extract-zip@2.0.1` (publicēta 2020. gadā) ir pakotnes pēdējā versija — tā netiek uzturēta. `@openai/codex-security`
-  pašreizējā npm-latest (`0.1.29`) joprojām izmanto `extract-zip@2.0.1`.
-- **Nav sasniedzams no ražošanas.** `promptfoo` ir tikai izstrādes atkarība (nekad nav norādīta
-  sadaļā `dependencies`), un neviens fails `src/`, `open-sse/` vai `bin/` neimportē
-  `extract-zip` npm pakotni — OmniRoute paša `extractZip()` palīgfunkcija
-  (`src/lib/versionManager/binaryManager.ts:93`) izmanto vietējos `unzip`/`tar`
-  un nav saistīta. `@openai/codex-security` arī nodrošina savu symlink-traversal
-  aizsardzību papildus `extract-zip` onEntry atzvanam.
-- **Ne** aizstāt `extract-zip` ar `package.json` `overrides` — vienīgais dzīvotspējīgais
-  aizstājējs ir Electron-org-internal un API-nesaderīgs ar
-  `@openai/codex-security` paša onEntry/defaultDirMode/defaultFileMode pārbaudēm;
-  tā aizstāšana klusi sabojātu šīs pakotnes drošības pārbaudes.
-- **Bāzes līnija:** izmērītais osv `vulnCount` (3) jau ir krietni zem iesaldētās
-  `config/quality/quality-baseline.json` bāzes līnijas (27) — nav nepieciešamas izmaiņas.
-- **Regresijas aizsardzība:** `tests/unit/extract-zip-14482-exposure.test.ts` apstiprina
-  ķēdi un iepriekš minēto bez-ražošanas-importa invariantu; tas izgāž CI, ja kāds no tiem jebkad
-  sabojājas (piemēram, nākotnes PR padara `extract-zip` sasniedzamu no ražošanas).
-- **Izsekošana:** problēma #14482.
+Pašreizējais atkarību labojums arī ierobežo saderības pārrakstīšanu līdz Azure identitātes MSAL klientam, get-uri FTP klientam un OpenCode v1 SDK Zod atkarībai. Azure pilnvaru iegūšana un FTP izguve tiek testēta ar kontrolētiem transportiem; abas OpenCode pakotnes izpilda savus būvēšanas un testēšanas komplektus. Reģistra drošības ieteikumu skaits ir konkrētā brīža mērījums un var mainīties pēc bloķēšanas faila komitēšanas.
 
 ## Atpalicība: Scorecard brīdinājums → bloķēšana
 

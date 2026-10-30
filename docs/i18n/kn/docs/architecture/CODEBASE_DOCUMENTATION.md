@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 ಪೂರೈಕೆದಾರರ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಪ್ರೊಫೈಲ್ಗಳು, ಗುರುತು, …
 ├── handlers/               ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (ಚಾಟ್, ಎಂಬೆಡಿಂಗ್ಗಳು, ಆಡಿಯೊ, ಚಿತ್ರ, …)
-├── executors/              150 ಪೂರೈಕೆದಾರ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕಗಳು)
+├── executors/              156 ಪೂರೈಕೆದಾರ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರರ ಸಹಾಯಕಗಳು)
 ├── translator/             ಸ್ವರೂಪ ಪರಿವರ್ತನೆ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ಸ್ಟ್ರೀಮ್ ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್
 ├── services/               80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (ಸಂಯೋಜನೆಗಳು, ಫಾಲ್ಬ್ಯಾಕ್, ಕೋಟಾಗಳು, ಗುರುತು, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 ಉನ್ನತ-ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ನಿಂದ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಈ ಸಂಖ್ಯೆಯನ್ನು
+156 ಉನ್ನತ-ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ನಿಂದ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಈ ಸಂಖ್ಯೆಯನ್ನು
 `npm run check:docs-counts` ಅಳೆಯುತ್ತದೆ). ಪ್ರತಿಯೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ `BaseExecutor` (`base.ts`) ಅನ್ನು,
 ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಮತ್ತೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರರ
 ಸಹಾಯಕಗಳಾಗಿವೆ (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, ಫೆಚ್/TTS ಅಡಾಪ್ಟರ್ಗಳು, ವೈಶಿಷ್ಟ್ಯ ನಿರ್ವಹಣಾ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು ಇವುಗಳನ್ನು ಒಳಗೊಂಡಿವೆ:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` ಅನ್ನು ವಿಸ್ತರಿಸಿ).
 2. `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿ ಸೂಕ್ತ scope(ಗಳನ್ನು) ನಿಯೋಜಿಸಿ.
 3. `open-sse/mcp-server/server.ts` ನಲ್ಲಿ tool ಅನ್ನು ನೋಂದಾಯಿಸಿ.
-4. `open-sse/mcp-server/__tests__/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳನ್ನು ಸೇರಿಸಿ.
+4. `tests/unit/` ಅಡಿಯಲ್ಲಿ ಪರೀಕ್ಷೆಗಳನ್ನು ಸೇರಿಸಿ.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) ಅನ್ನು ನವೀಕರಿಸಿ.
 
 ### ಹೊಸ A2A skill ಅನ್ನು ಸೇರಿಸಿ
@@ -790,7 +790,7 @@ bin/
 - **Naming**: files `camelCase` ಅಥವಾ `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: ಎಲ್ಲೆಡೆ `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` ಮತ್ತು `tests/` ನಲ್ಲಿ `no-explicit-any` = `warn`, ಇತರೆಡೆ error.
+  `open-sse/**/*.ts` ಮತ್ತು `tests/**/*.ts` ನಲ್ಲಿ `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (legacy ನಿಲುವು). Cross-module boundaries ಗಾಗಿ
   inference ಗಿಂತ explicit types ಗೆ ಆದ್ಯತೆ ನೀಡಿ.
 - **Database**: routes ಅಥವಾ handlers ನಲ್ಲಿ raw SQL ಅನ್ನು ಎಂದಿಗೂ ಬರೆಯಬೇಡಿ — ಯಾವಾಗಲೂ
@@ -817,8 +817,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main` ಗೆ ಎಂದಿಗೂ ನೇರವಾಗಿ commit ಮಾಡಬೇಡಿ.
-- **Husky**: pre-commit ವೇಳೆ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ರನ್ ಆಗುತ್ತವೆ; pre-push ವೇಳೆ `check:any-budget:t11` + `check:tracked-artifacts` ರನ್ ಆಗುತ್ತವೆ (ವೇಗದ gates; `test:unit` ಅನ್ನು ಹೊರತುಪಡಿಸುತ್ತದೆ).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -6607,7 +6607,7 @@
       "xai": "xAI (Grok)’ni API kaliti bilan ulang.",
       "xiaomi-mimo": "Xiaomi MiMo’ni API kaliti bilan ulang.",
       "yi": "API kalitini platform.lingyiwanwu.com saytidan oling",
-      "zai": "https://open.bigmodel.cn/usercenter/apikeys saytidan API kaliti",
+      "zai": "https://z.ai/manage-apikey/apikey-list saytidan API kaliti",
       "zenmux": "ZenMux /api/v1/chat/completions manzilida OpenAI bilan mos chat yakunlash endpointini, shuningdek Anthropic Messages (/api/anthropic/v1/messages) va Google Gemini (/api/vertex-ai) protokol interfeyslarini taqdim etadi. OmniRoute OpenAI protokolidan foydalanadi.",
       "galadriel": "Galadriel’ni API kaliti bilan ulang.",
       "predibase": "$25 miqdoridagi bepul sinov krediti (30 kun amal qiladi)",

@@ -18,33 +18,24 @@ OmniRouteはnpmとDockerのアーティファクトを公開しています。�
 
 イメージCVEラチェットは、`docker-publish.yml`で**2つのステップ**を使用します。SARIFステップ（`HIGH,CRITICAL`、`exit-code: 0`）は、HIGH+CRITICALをブロックせずにセキュリティタブに表示します。_CRITICALゲート_ステップ（`severity: CRITICAL`、`ignore-unfixed: true`、`exit-code: 1`）は、**修正が利用可能な**CRITICAL CVEでリリースを失敗させます。`ignore-unfixed`は、アップストリームのパッチがないベースイメージのCVEによるリリースブロックを防ぎます。
 
-## ⚠️ CVEの変動 (osv/Trivyゲートのブロック)
+## ⚠️ CVE の変動（ブロッキング osv/Trivy ゲート）
 
-osvとTrivyは、**継続的に増加する**CVEデータベースに対して依存関係を比較します。**依存関係に全く触れていない**PRでも、既存の依存関係に新しいCVEが公開されたために突然赤くなることがあります（osv: 測定された`vulnCount` > ベースライン; Trivy: イメージ内の新しい修正可能なCRITICAL）。**これは、ブロックするCVEゲートの予期される運用上の動作であり、製品の退行ではありません。**
+osv と Trivy は、依存関係を**継続的に増加する** CVE データベースと照合します。**依存関係を一切変更していない** PR でも、既存の依存関係に新しい CVE が公開されたことで、突然失敗することがあります（osv：測定された `vulnCount` がベースラインを超過、Trivy：イメージ内に修正可能な新しい CRITICAL が存在）。**これは、ブロッキング CVE ゲートで想定される運用上の挙動であり、製品のリグレッションではありません。**
 
-osvまたはTrivyが新たに公開されたCVEによって赤くなった場合の対処法は次のとおりです。
+新たに公開された CVE によって osv または Trivy が失敗した場合は、次のように対処します。
 
-1.  **影響を受ける依存関係を更新する**（推奨） — `package.json`の`overrides`（推移的依存関係）を介してパッチ適用済みのバージョンにアップグレードするか、パッチ適用済みのベースでイメージを再構築します。
-2.  **アップストリームの修正がない場合：**
-    - **osv:** `config/quality/quality-baseline.json`内の`metrics.vulnCount`を再ベースライン化します（`npm run quality:ratchet -- --update`は専用ゲートをカバーしないため、手動で値を編集し、`direction:down`を設定します）。これには正当化のメモと追跡課題を添えます。
-    - **Trivy:** `.trivyignore`にエントリを追加します（1行に1つのCVE-ID）。これには正当化のコメントと追跡課題を添えます。`ignore-unfixed: true`は、パッチのないCVEを自動的にカバーします。
+1. **影響を受ける依存関係を更新する**（推奨）— `package.json` の `overrides`（推移的依存関係の場合）を使用して修正済みバージョンへアップグレードするか、修正済みのベースイメージ上でイメージを再ビルドします。
+2. **アップストリームに修正がない場合：**
+   - **osv：** `config/quality/quality-baseline.json` の `metrics.vulnCount` を再ベースライン化します（`npm run quality:ratchet -- --update` は専用ゲートを対象としないため、`direction:down` の値を手動で編集）。その際、理由を示す注記と追跡用 Issue を追加します。
+   - **Trivy：** `.trivyignore` にエントリ（1 行につき 1 つの CVE-ID）を追加し、理由を示すコメントと追跡用 Issue を記載します。パッチが存在しない CVE は、`ignore-unfixed: true` によってすでに自動的に除外されます。
 
-ツールが存在しない場合や測定が失敗した場合（osv-scannerがPATHにない、osv.dev/ネットワークに到達できない、無効なJSONなど）、両方のゲートは**正常にスキップ**します（終了コード0）。 — **測定**の失敗がブロックすることはなく、**測定された**退行のみがブロックします。
+必須の OSV 実行（`check:vuln-ratchet -- --ratchet`）では、スキャナー、レポート、またはベースラインを検証できない場合、`INCOMPLETE` と終了コード 2 でフェイルクローズします。測定結果にリグレッションがある場合は終了コード 1 となります。アドバイザリー実行では、引き続き終了コード 0 で `SKIP` が報告されることがありますが、これは依存関係がスキャンに合格したことを証明するものではありません。ブロッキング Trivy ステップでも、測定が正常に完了している必要があります。ツールが利用できない場合、ジョブが失敗した場合、またはイメージのエビデンスが欠落している場合、そのイメージがクリーンであるとは認定できません。
 
-## 既知の許容リスク
+## 廃止された依存関係のリスク
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+固定された promptfoo 開発ツールをアップグレードしたことで、ルートのロックファイルには `extract-zip` およびそれへの依存関係エッジが含まれなくなりました。これにより、#14482 で追跡され、以前は許容されていた `promptfoo` → `@openai/codex-security` → `extract-zip` の依存関係チェーンが廃止されました。`tests/unit/extract-zip-14482-exposure.test.ts` のリグレッションチェックでは、このチェーンの再導入を拒否し、本番コードからのインポート禁止を維持します。
 
-`extract-zip@2.0.1` には、未パッチの2つの高深刻度シンボリックリンクトラバーサルアドバイザリが含まれています。
-上記のCVE Varianceの是正策の「上流での修正なし」のブランチに従い、これはバージョンアップではなく、**許容リスク**と見なされます。
-
-- **連鎖:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`。`package-lock.json` で確認済み — 依存関係ツリー全体で、`extract-zip` を宣言しているパッケージは1つ (`@openai/codex-security`) だけであり、`@openai/codex-security` を宣言しているパッケージも1つ (`promptfoo`) だけです。
-- **連鎖内のどこにも修正版リリースが存在しません。** `extract-zip@2.0.1` (2020年公開) はこのパッケージの最終リリースであり、メンテナンスされていません。`@openai/codex-security` の現在の npm-latest (`0.1.29`) は、依然として `extract-zip@2.0.1` を使用しています。
-- **本番環境からは到達不能。** `promptfoo` は devDependency のみであり (`dependencies` には決してリストされません)、`src/`、`open-sse/`、または `bin/` の下のどのファイルも `extract-zip` npm パッケージをインポートしていません — OmniRoute 独自の `extractZip()` ヘルパー (`src/lib/versionManager/binaryManager.ts:93`) はネイティブの `unzip`/`tar` を呼び出しており、無関係です。`@openai/codex-security` も、extract-zip の onEntry コールバックの上に独自のシンボリックリンクトラバーサルガードを搭載しています。
-- `package.json` の `overrides` を介して `extract-zip` をエイリアス**しないでください** — 唯一の実行可能なドロップイン代替品は Electron-org-internal であり、`@openai/codex-security` 独自の onEntry/defaultDirMode/defaultFileMode チェックとはAPI互換性がありません。これをオーバーライドすると、そのパッケージのセキュリティチェックがサイレントに破損します。
-- **ベースライン:** 測定された osv `vulnCount` (3) は、凍結された `config/quality/quality-baseline.json` ベースライン (27) をすでに大幅に下回っています — ラチェット変更は不要です。
-- **リグレッションガード:** `tests/unit/extract-zip-14482-exposure.test.ts` は、上記の連鎖と本番環境からのインポートなしの不変条件をアサートします。どちらかが破られた場合 (例: 将来のPRで `extract-zip` が本番環境から到達可能になった場合)、CIは失敗します。
-- **追跡:** issue #14482。
+現在の依存関係の修正では、互換性オーバーライドの適用範囲も、Azure identity の MSAL クライアント、get-uri の FTP クライアント、および OpenCode v1 SDK の Zod 依存関係に限定しています。Azure のトークン取得と FTP 取得は、制御されたトランスポートを使用してテストされています。両方の OpenCode パッケージでは、それぞれ独自のビルドスイートとテストスイートが実行されます。レジストリのアドバイザリ件数は特定時点での測定値であり、ロックファイルのコミット後に変化する可能性があります。
 
 ## バックログ: Scorecardアドバイザリ → ブロッキング
 

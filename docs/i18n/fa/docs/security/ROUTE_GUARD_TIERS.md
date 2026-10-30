@@ -206,7 +206,7 @@ Tunnel، Tailscale، Ngrok) اجرا میکنید، بررسی loopback همچن
 همچنان در سطح fail-open قرار داشت (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` همچنین
 هر vaultی را که خود data directory باشد، داخل آن قرار داشته باشد، یا آن را در بر بگیرد، رد میکند.
 
-#### export کردن credentialها فقط برای اپراتور مجاز است
+#### صدور اطلاعات احراز هویت و بازیابی فقط برای اپراتور مجاز است
 
 سطح بالا فقط تعیین میکند که آیا _نوعی_ اعتبارنامه لازم است یا نه. مسیرهایی که اعتبارنامههای
 ذخیرهشده را دانلود میکنند، بررسی دومی را در handler انجام میدهند: `GET /api/settings/export-json` (اتصالهای
@@ -217,22 +217,9 @@ Tunnel، Tailscale، Ngrok) اجرا میکنید، بررسی loopback همچن
 و `admin`) و توکنهای دسترسی `oma_`، پاسخ `403` میدهد. صدور توکن همگامسازی (`POST /api/sync/tokens`) از
 همین تابع کمکی، بهعلاوهٔ توکن سرویس داخلی loopback مورد اعتماد، استفاده میکند.
 
-#### Credential exports and restores are operator-only
+عملیات مخرب متناظر نیز همین مرز را دارند: `POST /api/db-backups/import` (فایل `.sqlite` بارگذاری‌شده، حتی با `dryRun=true`)، `POST /api/db-backups` (بازیابی نسخهٔ پشتیبان ذخیره‌شده با شناسهٔ آن) و `POST /api/settings/import-json` (بازیابی قالب قدیمی JSON) پایگاه دادهٔ فعال یا کل مجموعهٔ تنظیمات، اتصال‌ها و کلیدهای API را جایگزین می‌کنند. بنابراین اطلاعات احراز هویت ماشینی نمی‌توانند این عملیات را هم آغاز کنند.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+حذف نقاط بازیابی نیز همین مرز را دارد: `DELETE /api/db-backups` (پاک‌سازی — نگه داشتن N مورد آخر یا حذف موارد قدیمی‌تر از D روز) و `PATCH /api/db-backups` (تنظیمات نگه‌داری). قواعد ذخیره‌شده دقیقاً همان قواعدی هستند که `cleanupDbBackups()` پس از هر پشتیبان‌گیری خودکار اعمال می‌کند (`src/lib/db/backup.ts`)؛ پس اطلاعات احراز هویت ماشینی با امکان ذخیرهٔ `keepLatest: 1` می‌توانند نقاط بازیابی قبلی را در تصویر لحظه‌ای بعدی حذف کنند. فهرست کردن و ساختن نسخه‌های پشتیبان (`GET`/`PUT /api/db-backups`) همچنان از احراز هویت معمول مدیریت استفاده می‌کنند.
 
 ### راهاندازی اولیهٔ نصب جدید فقط از طریق loopback ممکن است — بر اساس همتای واقعی، نه `Host`
 

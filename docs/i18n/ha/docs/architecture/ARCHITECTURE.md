@@ -15,7 +15,7 @@ Tana samar da endpoint guda ɗaya mai dacewa da OpenAI (`/v1/*`) sannan tana rar
 
 Manyan ƙwarewa:
 
-- API mai dacewa da OpenAI don CLI/kayan aiki (providers 375, executor modules 154)
+- API mai dacewa da OpenAI don CLI/kayan aiki (providers 375, executor modules 156)
 - Fassarar request/response tsakanin tsare-tsaren providers
 - Fallback na haɗin models (jerin models da yawa)
 - Matakan combo masu tsari (`provider + model + connection`) tare da jeren lokacin aiki bisa `compositeTiers`
@@ -31,7 +31,7 @@ Manyan ƙwarewa:
 - Binciken yanar gizo ta `/v1/search` (providers 20)
 - Tantance abun ciki ta `/v1/moderations`
 - Sake jeri ta `/v1/rerank`
-- Tantance think tag (``) don reasoning models
+- Tantance think tag (`<think>...</think>`) don reasoning models
 - Tsabtace response don cikakkiyar dacewa da OpenAI SDK
 - Daidaita roles (developer→system, system→user) don dacewa tsakanin providers
 - Sauya structured output (json_schema → Gemini responseSchema)
@@ -1096,9 +1096,9 @@ dacewa da tsofaffin tsare-tsare. Yarjejeniyar lokacin aiki ta yanzu tana amfani 
 
 ## 6) SSRF / Kariyar URL Mai Fita
 
-- `src/shared/network/outboundUrlGuard.ts` yana toshe duk URL ɗin manufa masu zaman kansu/loopback/link-local kafin su isa ga masu aiwatar da buƙatun mai samar da sabis
-- Hanyoyin gano da tabbatar da samfuran mai samar da sabis suna amfani da `src/shared/network/safeOutboundFetch.ts`, wanda ke amfani da kariyar kafin kowace buƙata mai fita
-- Kurakuran kariyar suna bayyana a matsayin `URL_GUARD_BLOCKED` tare da HTTP 422 kuma ana rubuta su a rajistar binciken bin ƙa'ida ta hanyar `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) yana amfani da `src/shared/network/outboundUrlGuard.ts` ga buƙatun taɗi da ake aikawa ta `BaseExecutor.execute()`. A yanayin na jama'a kaɗai (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` tare da kashe tutar masu zaman kansu), yana toshe masauƙan masu zaman kansu da na loopback da kuma 169.254.0.0/16; a kowane sauran yanayi, yana toshe masauƙan metadata na girgije. Yana bincika sunan masauki ko rubutacciyar adireshin IP yadda aka rubuta shi, kafin kowane binciken DNS. Ginannun masu samarwa na gida suna tsallake shi.
+- Hanyoyin gano da tabbatar da samfurin mai samarwa suna amfani da `src/shared/network/safeOutboundFetch.ts`, wanda ke amfani da kariyar kafin kowace buƙata mai fita.
+- Kurakuran kariyar suna bayyana a matsayin `URL_GUARD_BLOCKED` tare da HTTP 503 (`getSafeOutboundFetchErrorStatus`; hanyar gano samfuri tana mayar da 400), sannan ana rubuta ainihin toshewar SSRF yayin tabbatarwa a cikin kundin binciken tsaro a matsayin abubuwan da suka faru na `provider.validation.ssrf_blocked`.
 
 ## Sa Ido da Alamomin Aiki
 
@@ -1149,7 +1149,7 @@ Sauye-sauyen muhalli da lambar ke amfani da su kai tsaye:
 4. Halayen cloud sun dogara da daidaiton `NEXT_PUBLIC_BASE_URL` da samun damar isa wurin ƙarshen cloud.
 5. Ana wallafa kundin `open-sse/` a matsayin **npm workspace package** na `@omniroute/open-sse`. Lambar tushe tana shigo da shi ta `@omniroute/open-sse/...` (wanda Next.js `transpilePackages` ke warwarewa). Har yanzu hanyoyin fayiloli a wannan takarda suna amfani da sunan kundin `open-sse/` domin daidaito.
 6. Charts da ke cikin dashboard suna amfani da **Recharts** (mai tushe a SVG) domin zane-zanen nazari masu sauƙin isa da hulɗa (bar charts na amfani da model, teburan rarrabuwar masu samarwa tare da ƙimar nasara).
-7. Gwaje-gwajen E2E suna amfani da **Playwright** (`tests/e2e/`), ana gudanar da su ta `npm run test:e2e`. Gwaje-gwajen unit suna amfani da **Node.js test runner** (`tests/unit/`), ana gudanar da su ta `npm run test:unit`. Lambar tushe da ke ƙarƙashin `src/` **TypeScript** ce (`.ts`/`.tsx`); workspace na `open-sse/` ya ci gaba da kasancewa JavaScript (`.js`).
+7. Gwaje-gwajen E2E suna amfani da **Playwright** (`tests/e2e/`), ana gudanar da su ta `npm run test:e2e`. Gwaje-gwajen unit suna amfani da **Node.js test runner** (`tests/unit/`), ana gudanar da su ta `npm run test:unit`. Lambar tushe da ke ƙarƙashin `src/` **TypeScript** ce (`.ts`/`.tsx`); workspace na `open-sse/` ya ci gaba da kasancewa TypeScript (`.ts`).
 8. An tsara shafin saituna zuwa tabs guda 7: Gabaɗaya, Bayyanar, AI, Tsaro, Routing, Juriya, Na Ci-gaba. Shafin Juriya yana saita request queue, connection cooldown, provider breaker, da halayen wait-for-cooldown kawai; ana nuna halin breaker na runtime kai tsaye a shafin Health.
 9. An raba dabarar **Context Relay** (`context-relay`) zuwa matakai biyu: `combo.ts` yana yanke shawarar ko ya kamata a ƙirƙiri handoff, `chat.ts` kuma yana saka handoff bayan warware account. Bayanai na handoff suna cikin teburin SQLite na `context_handoffs`. Wannan rabuwar da gangan aka yi ta domin `chat.ts` ne kawai ya san ko ainihin account ya canza.
 10. **Tilasta amfani da proxy** yanzu ya zama cikakke: `tokenHealthCheck.ts` yana warware proxy ga kowace connection, `/api/providers/validate` yana amfani da `runWithProxyContext`, sannan `proxyFetch.ts` yana amfani da `undici.fetch()` domin kiyaye dacewa da dispatcher a Node 22.

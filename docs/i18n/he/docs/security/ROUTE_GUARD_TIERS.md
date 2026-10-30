@@ -206,7 +206,7 @@ Tunnel, Tailscale, Ngrok), בדיקת ה-loopback עדיין מגינה על ה�
 עדיין הייתה ברובד הפתוח במקרה של כשל (GHSA-7pq4-8pvv-rx7r). בנוסף, `enableObsidianVaultSync()`
 מסרבת לכספת שהיא ספריית הנתונים, נמצאת בתוכה או מכילה אותה.
 
-#### ייצוא פרטי גישה מיועד למפעילים בלבד
+#### ייצוא פרטי גישה ושחזור מיועדים למפעילים בלבד
 
 הרובד שלעיל קובע רק אם נדרש אישור גישה _כלשהו_. הנתיבים שמורידים
 פרטי גישה שמורים מוסיפים בדיקה שנייה ב-handler: ‏`GET /api/settings/export-json` (חיבורי
@@ -217,22 +217,9 @@ Tunnel, Tailscale, Ngrok), בדיקת ה-loopback עדיין מגינה על ה�
 ו-`admin`) ולאסימוני גישה מסוג `oma_`. הנפקת אסימוני סנכרון (`POST /api/sync/tokens`) משתמשת
 באותו helper, בתוספת אסימון השירות הפנימי המהימן דרך loopback.
 
-#### Credential exports and restores are operator-only
+אותו גבול חל גם על הפעולות ההרסניות המקבילות: `POST /api/db-backups/import` (קובץ `.sqlite` שהועלה, כולל `dryRun=true`), `POST /api/db-backups` (שחזור גיבוי שמור לפי המזהה שלו) ו־`POST /api/settings/import-json` (שחזור תבנית JSON הישנה) מחליפים את מסד הנתונים הפעיל או את כל מערך ההגדרות, החיבורים ומפתחות ה־API. לכן גם אותן אי אפשר להפעיל באמצעות פרטי גישה של מכונה.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+אותו גבול חל על מחיקת נקודות שחזור: `DELETE /api/db-backups` (ניקוי — שמירת N האחרונות או מחיקת אלה שגילן עולה על D ימים) ו־`PATCH /api/db-backups` (הגדרות שמירה). הכללים השמורים הם בדיוק אלה ש־`cleanupDbBackups()` מחיל אחרי כל גיבוי אוטומטי (`src/lib/db/backup.ts`); פרטי גישה של מכונה שיכלו לשמור `keepLatest: 1` היו יכולים למחוק את נקודות השחזור הקודמות בתמונת המצב הבאה. הצגת גיבויים ויצירתם (`GET`/`PUT /api/db-backups`) ממשיכות להשתמש באימות הניהול הרגיל.
 
 ### אתחול של התקנה חדשה מוגבל ל-loopback — לפי העמית האמיתי, לא לפי `Host`
 

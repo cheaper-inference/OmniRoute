@@ -445,7 +445,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Provayder reyestrləri, başlıq profilləri, identiklik, …
 ├── handlers/               Sorğu emalçıları (söhbət, yerləşdirmələr, audio, şəkil, …)
-├── executors/              150 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
+├── executors/              156 provayder icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
 ├── translator/             Format çevrilməsi (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions axın transformatoru
 ├── services/               80+ xidmət modulu (kombinasiyalar, ehtiyat mexanizmi, kvotalar, identiklik, …)
@@ -475,7 +475,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 üst səviyyəli icraçı modulu (`*.ts`, `base.ts`, `index.ts` və testlər istisna olmaqla — sayı
+156 üst səviyyəli icraçı modulu (`*.ts`, `base.ts`, `index.ts` və testlər istisna olmaqla — sayı
 `npm run check:docs-counts` ölçür). Hər icraçı sinfi birbaşa və ya `DefaultExecutor`, yaxud başqa
 bir icraçı vasitəsilə `BaseExecutor` (`base.ts`) sinfini genişləndirir; qalan modullar hər provayder
 üçün köməkçilərdir (alət sxemləri, fetch/TTS adapterləri, özəllik emalçıları). İcraçılara daxildir:
@@ -771,7 +771,7 @@ Müştəri sorğusu
    `open-sse/mcp-server/schemas/tools.ts` faylını genişləndirin).
 2. `src/shared/constants/mcpScopes.ts` faylında uyğun əhatə dairəsini və ya dairələrini təyin edin.
 3. Aləti `open-sse/mcp-server/server.ts` faylında qeydiyyatdan keçirin.
-4. Testləri `open-sse/mcp-server/__tests__/` altında əlavə edin.
+4. Testləri `tests/unit/` altında əlavə edin.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) faylını yeniləyin.
 
 ### Yeni A2A bacarığı əlavə etmək
@@ -789,7 +789,7 @@ Müştəri sorğusu
 - **Adlandırma**: fayllar `camelCase` və ya `kebab-case`, komponentlər `PascalCase`,
   sabitlər `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = hər yerdə `error`;
-  `no-explicit-any` = `open-sse/` və `tests/` daxilində `warn`, digər yerlərdə isə xəta.
+  `no-explicit-any` = `open-sse/**/*.ts` və `tests/**/*.ts` daxilində `error`.
 - **TypeScript**: `strict: false` (köhnə yanaşma). Modullar arası sərhədlərdə çıxarış əvəzinə
   aşkar tiplərə üstünlük verin.
 - **Verilənlər bazası**: marşrutlarda və ya emalçılarda heç vaxt birbaşa SQL yazmayın — həmişə
@@ -818,8 +818,7 @@ Müştəri sorğusu
   `a2a`, `memory`, `skills`.
 - **Budaqlar**: prefikslər `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Heç vaxt birbaşa `main` budağına kommit etməyin.
-- **Husky**: pre-commit zamanı `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push zamanı isə `check:any-budget:t11` + `check:tracked-artifacts` işə salınır (sürətli yoxlamalar; `test:unit` daxil deyil).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

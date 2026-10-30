@@ -11,13 +11,13 @@ OmniRoute runner ପାଖରେ **ଗୋଟିଏ ଭୂମିକା**, ଗୋ�
 webpack ବିଲ୍ଡ ଏବଂ ଗୋଟିଏ lint କାର୍ଯ୍ୟ ଏକାସାଙ୍ଗରେ ଚାଲିଲେ ମେସିନ୍ଟି overcommit କରେ; host swap (16 GB) ତାହାକୁ ସମ୍ଭାଳେ, ଏବଂ pull-request ବିଲ୍ଡଗୁଡ଼ିକ
 ହୋଷ୍ଟେଡ୍ ପରିବେଶରେ ଚାଲୁଥିବାରୁ Turbopack ସ୍ଲଟ୍ ଅଧିକାଂଶ ସମୟ ନିଷ୍କ୍ରିୟ ରହେ:
 
-| runner               | ଲେବଲ୍             | ଭୂମିକା                                                                                                                                                    | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`      | Turbopack ବିଲ୍ଡଗୁଡ଼ିକ: `ci.yml` `Build` (କେବଳ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ରାତ୍ରିକାଳୀନ a11y ବିଲ୍ଡ | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`    | Release-Green (`release-green` + `main-green`), webpack ବିଲ୍ଡ                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`      | ରାତ୍ରିକାଳୀନ କାର୍ଯ୍ୟଗୁଡ଼ିକ (Schemathesis, promptfoo, garak, k6) ଏବଂ `quality.yml` `lint-guard`                                                             | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`      | ଉପରୋକ୍ତ ସମାନ ପୁଲ୍                                                                                                                                         | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (ସେମାନଙ୍କର repos) | କେବଳ Dependabot (ପ୍ରତ୍ୟେକର ସର୍ବୋଚ୍ଚ ବ୍ୟବହାର 155 MB, 2026-10-18)                                                                                           | 4 GB / 6 GB                | ପ୍ରତ୍ୟେକ 200 % |
+| runner               | ଲେବଲ୍                           | ଭୂମିକା                                                                                                                                                    | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack ବିଲ୍ଡଗୁଡ଼ିକ: `ci.yml` `Build` (କେବଳ push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, ରାତ୍ରିକାଳୀନ a11y ବିଲ୍ଡ | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack ବିଲ୍ଡ                                                                                             | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | ରାତ୍ରିକାଳୀନ କାର୍ଯ୍ୟଗୁଡ଼ିକ (Schemathesis, promptfoo, garak, k6) ଏବଂ `quality.yml` `lint-guard`                                                             | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | ଉପରୋକ୍ତ ସମାନ ପୁଲ୍                                                                                                                                         | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (ସେମାନଙ୍କର repos)               | କେବଳ Dependabot (ପ୍ରତ୍ୟେକର ସର୍ବୋଚ୍ଚ ବ୍ୟବହାର 155 MB, 2026-10-18)                                                                                           | 4 GB / 6 GB                | ପ୍ରତ୍ୟେକ 200 % |
 
 2026-10-18 ରେ ମାପାଯାଇଛି:
 
@@ -83,7 +83,7 @@ CPU ବ୍ୟବହାର କରିଚାଲେ। ପ୍ରତ୍ୟେକ Omni
 ## ପରିଚାଳନା ନିୟମଗୁଡ଼ିକ
 
 - **ଏକ ସମୟରେ ଗୋଟିଏ Turbopack ବିଲ୍ଡ — label ଦ୍ୱାରା ବାଧ୍ୟତାମୂଳକ।** ସମ୍ପୂର୍ଣ୍ଣ Turbopack
-  `next build` ଚଲାଉଥିବା ପ୍ରତ୍ୟେକ job `[self-hosted, omni-build]`କୁ ଲକ୍ଷ୍ୟ କରେ, ଏବଂ କେବଳ
+  `next build` ଚଲାଉଥିବା ପ୍ରତ୍ୟେକ job `[self-hosted, omni-build, omni-build-60gb]`କୁ ଲକ୍ଷ୍ୟ କରେ, ଏବଂ କେବଳ
   **`omniroute-113-5`** ପାଖରେ ସେହି label ଅଛି: `ci.yml` `Build`, `npm-publish.yml` `publish`,
   `nightly-v4-build`, `preview-artifact`, nightly a11y build (#16853) ଏବଂ `docker-publish.yml`
   **amd64** (BuildKit ଭିତରେ webpack — ସେଠାରେ Turbopack ବିଫଳ ହୋଇଥିଲା, run 33253576569)।

@@ -11,13 +11,13 @@ izmjerenim vršnim vrijednostima. Server prekoračuje raspoložive resurse samo 
 webpack buildom i lint zadatkom; swap hosta (16 GB) to apsorbuje, a pošto se buildovi za pull requestove
 izvršavaju na hostovanim runnerima, Turbopack slot je većinu vremena neaktivan:
 
-| runner               | oznaka                 | uloga                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
-| -------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
-| `omniroute-113-5`    | `omni-build`           | Turbopack buildovi: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noćni a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
-| `omniroute-113-6`    | `omni-release`         | Release-Green (`release-green` + `main-green`), webpack build                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
-| `omniroute-113-2`    | `omni-light`           | noćni zadaci (Schemathesis, promptfoo, garak, k6) i `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
-| `omniroute-113`      | `omni-light`           | isti skup kao iznad                                                                                                                              | 8 GB / 12 GB               | 400 %          |
-| OmniHeuris, OmniMind | (njihovi repozitoriji) | samo Dependabot (vršna vrijednost 155 MB za svaki, 2026-10-18)                                                                                   | 4 GB / 6 GB                | 200 % za svaki |
+| runner               | oznaka                          | uloga                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota`     |
+| -------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------- | -------------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack buildovi: `ci.yml` `Build` (samo push/dispatch), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, noćni a11y build | 56 GB / 60 GB (swap 0)     | 1600 %         |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                    | 20 GB / 24 GB (swap 4 GB)  | 800 %          |
+| `omniroute-113-2`    | `omni-light`                    | noćni zadaci (Schemathesis, promptfoo, garak, k6) i `quality.yml` `lint-guard`                                                                   | 12 GB / 16 GB (swap 4 GB)  | 600 %          |
+| `omniroute-113`      | `omni-light`                    | isti skup kao iznad                                                                                                                              | 8 GB / 12 GB               | 400 %          |
+| OmniHeuris, OmniMind | (njihovi repozitoriji)          | samo Dependabot (vršna vrijednost 155 MB za svaki, 2026-10-18)                                                                                   | 4 GB / 6 GB                | 200 % za svaki |
 
 Izmjereno 2026-10-18:
 
@@ -82,7 +82,7 @@ odjednom, samo kada nije aktivan**, pri čemu provjera neaktivnosti i ponovno po
 ## Operativna pravila
 
 - **Jedan Turbopack build istovremeno — nametnuto oznakom.** Svaki posao koji pokreće puni Turbopack
-  `next build` cilja `[self-hosted, omni-build]`, a samo **`omniroute-113-5`** ima tu
+  `next build` cilja `[self-hosted, omni-build, omni-build-60gb]`, a samo **`omniroute-113-5`** ima tu
   oznaku: `ci.yml` `Build`, `npm-publish.yml` `publish`, `nightly-v4-build`, `preview-artifact`,
   noćni a11y build (#16853) i `docker-publish.yml` **amd64** (webpack unutar BuildKita —
   Turbopack je tamo panično prekinuo rad, pokretanje 33253576569). Dockerova arm64 grana ostaje na `ubuntu-24.04-arm`.

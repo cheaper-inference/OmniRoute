@@ -54,7 +54,7 @@ Search Tools Studio صفحهٔ `/dashboard/search-tools` را از یک محیط
 - ورودی: URL + کلید تغییر وضعیت تمامصفحه + انتخابگر قالب (markdown / متن / HTML).
 - ارسال ← دریافت ← رندر `ScrapeResult.tsx`.
 - `ScrapeResult` پیشنمایش markdown + کلید تغییر وضعیت نمایش خام را رندر میکند.
-- محدودیت: اگر بدنه پاسخ بیش از **256 KB** باشد، رابط کاربری `(کوتاهشده، مشاهده نسخه خام)` را نمایش میدهد و محتوای خام را در یک پنجره مودال Monaco باز میکند (D21).
+- محدودیت: اگر بدنه پاسخ بیش از **256 KB** باشد، رابط کاربری `View full raw content` را نمایش میدهد و محتوای خام را در یک پنجره مودال باز میکند (D21).
 - پنل فراداده: ارائهدهنده (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)، تأخیر، هزینه، اندازه پاسخ، تعداد پیوندها.
 - از هوک `useScrapeFetch.ts` استفاده میکند.
 

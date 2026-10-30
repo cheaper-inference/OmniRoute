@@ -703,7 +703,11 @@ test("ensureStreamReadiness returns 502 when stream ends without a non-ping SSE 
   assert.equal("upstream_details" in body, false);
 });
 
-test("ensureStreamReadiness preserves sanitized error-only diagnostics on early EOF (#8972)", async () => {
+test("ensureStreamReadiness preserves sanitized error-only diagnostics on early EOF (#8972)", async (t) => {
+  // These chunks and EOF are already buffered. Sanitizer/instrumentation CPU
+  // cost must not turn this diagnostic contract into a wall-clock timeout.
+  // The dedicated stalled-stream test still exercises the timeout outcome.
+  t.mock.timers.enable({ apis: ["Date", "setTimeout"] });
   const warnings: string[] = [];
   const response = new Response(
     streamFromChunks([

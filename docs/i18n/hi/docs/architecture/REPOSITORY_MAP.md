@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 में रूट से बाहर स्थानांतरित किया गया (अव्यवस्था कम करने के लिए):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, और जनरेट की गई `quality-metrics.json` (gitignored)। [`## config/`](#config--static-configs--quality-gate-state) देखें।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, और जनरेट की गई `quality-metrics.json` (gitignored)। [`## config/`](#config--स्टैटिक-कॉन्फ़िगरेशन--क्वालिटी-गेट-स्थिति) देखें।
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | उपनिर्देशिका          | उद्देश्य                                                                                                                                                                                                  |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | स्थानीयकृत दस्तावेज़ अनुवाद (41 लोकेल)                                                                                                                                                                    |
+| `docs/i18n/`          | स्थानीयकृत दस्तावेज़ अनुवाद (66 लोकेल)                                                                                                                                                                    |
 | `docs/screenshots/`   | गाइडों के लिए इमेज एसेट                                                                                                                                                                                   |
 | `_tasks/superpowers/` | superpowers से योजनाएँ/विनिर्देश (`writing-plans`/`brainstorming`) + शोध — पृथक, अलग से संस्करण-नियंत्रित रिपॉज़िटरी, मुख्य ट्री द्वारा gitignore की गई। CLAUDE.md → "योजना एवं शोध आर्टिफ़ैक्ट्स" देखें। |
 

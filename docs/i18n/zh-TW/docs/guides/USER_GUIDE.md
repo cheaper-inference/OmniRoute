@@ -579,28 +579,28 @@ post_install() {
 
 ### 環境變數
 
-| 變數                                    | 預設值                               | 說明                                                                             |
-| --------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 簽署密鑰（**在正式環境中請務必更改**）                                       |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 首次登入密碼                                                                     |
-| `DATA_DIR`                              | `~/.omniroute`                       | 資料目錄（資料庫、使用量、日誌）                                                 |
-| `PORT`                                  | 框架預設值                           | 服務連接埠（範例中為 `20128`）                                                   |
-| `HOSTNAME`                              | 框架預設值                           | 綁定主機（Docker 預設為 `0.0.0.0`）                                              |
-| `NODE_ENV`                              | 執行階段預設值                       | 部署時設為 `production`                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | 提供給儀表板並公開給伺服器的公開基礎 URL（取代舊版的 `BASE_URL`）                |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | 雲端同步端點的基礎 URL（取代舊版的 `CLOUD_URL`）                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 用於產生 API 金鑰的 HMAC 密鑰                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | 強制要求在 `/v1/*` 使用 Bearer API 金鑰                                          |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 允許已驗證的儀表板使用者視需要顯示完整的已儲存 API 金鑰值                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | 伺服器端重新整理快取 Provider Limits 資料的頻率；UI 重新整理按鈕仍會觸發手動同步 |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 停用寫入／匯入／還原前的自動 SQLite 快照；手動備份仍可運作                       |
-| `APP_LOG_TO_FILE`                       | `true`                               | 啟用將應用程式與稽核日誌輸出至磁碟                                               |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | 強制使用 `Secure` 驗證 Cookie（位於 HTTPS 反向代理之後）                         |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 使用現有的 `cloudflared` 二進位檔，而非受管理的下載版本                          |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 受管理 Quick Tunnels 的傳輸協定（`http2`、`quic` 或 `auto`）                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js 堆積記憶體限制（MB）                                                     |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | 提示詞快取項目的最大數量                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | 語意快取項目的最大數量                                                           |
+| 變數                                    | 預設值                   | 說明                                                                                               |
+| --------------------------------------- | ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(自動產生)_             | JWT 簽署密鑰 — 首次啟動時自動產生並持久儲存至 `server.env`；若資料目錄是暫時的，請明確設定         |
+| `INITIAL_PASSWORD`                      | _(未設定)_               | 首次登入密碼。透過 npm/原始碼安裝時初始值為 `CHANGEME`：請取代它。未設定時：進入新手引導精靈       |
+| `DATA_DIR`                              | `~/.omniroute`           | 資料目錄（資料庫、使用量、日誌）                                                                   |
+| `PORT`                                  | 框架預設值               | 服務連接埠（範例中為 `20128`）                                                                     |
+| `HOSTNAME`                              | 框架預設值               | 綁定主機（Docker 預設為 `0.0.0.0`）                                                                |
+| `NODE_ENV`                              | 執行階段預設值           | 部署時設為 `production`                                                                            |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | 提供給儀表板並公開給伺服器的公開基礎 URL（取代舊版的 `BASE_URL`）                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | 雲端同步端點的基礎 URL（取代舊版的 `CLOUD_URL`）                                                   |
+| `API_KEY_SECRET`                        | _(自動產生)_             | 綁定機器的 API 金鑰之校驗和密鑰 — 未設定時，啟動 bootstrap 會自動產生並儲存至可寫入的 `server.env` |
+| `REQUIRE_API_KEY`                       | `false`                  | 強制要求在 `/v1/*` 使用 Bearer API 金鑰                                                            |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允許已驗證的儀表板使用者視需要顯示完整的已儲存 API 金鑰值                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 伺服器端重新整理快取 Provider Limits 資料的頻率；UI 重新整理按鈕仍會觸發手動同步                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 停用寫入／匯入／還原前的自動 SQLite 快照；手動備份仍可運作                                         |
+| `APP_LOG_TO_FILE`                       | `true`                   | 啟用將應用程式與稽核日誌輸出至磁碟                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | 強制使用 `Secure` 驗證 Cookie（位於 HTTPS 反向代理之後）                                           |
+| `CLOUDFLARED_BIN`                       | 未設定                   | 使用現有的 `cloudflared` 二進位檔，而非受管理的下載版本                                            |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | 受管理 Quick Tunnels 的傳輸協定（`http2`、`quic` 或 `auto`）                                       |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Node.js 堆積記憶體限制（MB）                                                                       |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | 提示詞快取項目的最大數量                                                                           |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | 語意快取項目的最大數量                                                                             |
 
 如需完整的環境變數參考，請參閱 [README](../README.md)。
 
@@ -806,7 +806,7 @@ curl http://localhost:20128/api/models/catalog
 - OmniRoute 或容器重新啟動後，不會自動還原 Quick Tunnel；需要時請從儀表板重新啟用
 - Tunnel URL 為暫時性，每次停止／啟動 Tunnel 時都會變更
 - 受管理的 Quick Tunnel 預設使用 HTTP/2 傳輸，以避免在資源受限的容器中出現大量 QUIC UDP 緩衝區警告
-- 若要覆寫受管理的傳輸方式，請將 `CLOUDFLARED_PROTOCOL` 設為 `quic` 或 `auto`
+- 若要覆寫受管理的傳輸方式，請將 `CLOUDFLARED_PROTOCOL` 設為 `quic` 或 `auto` (`CLOUDFLARED_PROTOCOL=quic`)
 - 若您偏好使用預先安裝的 `cloudflared` 執行檔，而非受管理的下載版本，請設定 `CLOUDFLARED_BIN`
 - Cloudflare Quick Tunnel、Tailscale Funnel 與 ngrok Tunnel 面板可在 **設定 → 外觀** 中顯示或隱藏。隱藏面板不會停止正在執行的 Tunnel。
 

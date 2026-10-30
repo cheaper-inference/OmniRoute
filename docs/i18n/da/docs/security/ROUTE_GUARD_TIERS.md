@@ -206,7 +206,7 @@ serverprocessen.
 | `/api/settings/obsidian`                  | Udsteder genanvendelige WebDAV-legitimationsoplysninger for enhver vault-rod |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                 |
 
-**Svar ved overtrædelse:** `401 Godkendelse påkrævet`
+**Svar ved overtrædelse:** `401 Authentication required`
 
 `/api/settings/obsidian` dækker dens underordnede `/webdav`-rute: `POST` retter WebDAV-filtjenesten —
 som betjenes af det brugerdefinerede Node-lag før Next.js og uden for denne pipeline — mod en rod,
@@ -216,7 +216,7 @@ adgangskoden via `GET`; udstedelsen befandt sig stadig på fail-open-niveauet
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` afviser desuden en vault, der er datamappen,
 ligger i den eller indeholder den.
 
-#### Eksport af legitimationsoplysninger er kun for operatører
+#### Eksport af legitimationsoplysninger og gendannelser er kun for operatører
 
 Niveauet ovenfor afgør kun, om _en eller anden_ legitimationsoplysning er påkrævet. De ruter, der downloader
 gemte legitimationsoplysninger, tilføjer endnu en kontrol i handleren: `GET /api/settings/export-json` (dekrypterede
@@ -227,22 +227,9 @@ en instans, hvor login er deaktiveret, og svarer med `403` på API-nøgler uanse
 og `admin`) samt på `oma_`-adgangstokens. Udstedelse af synkroniseringstokens (`POST /api/sync/tokens`) bruger den
 samme hjælpefunktion samt den betroede interne tjenestetoken via loopback.
 
-#### Credential exports and restores are operator-only
+De tilsvarende destruktive handlinger har samme adgangsgrænse: `POST /api/db-backups/import` (en uploadet `.sqlite`-fil, også med `dryRun=true`), `POST /api/db-backups` (gendannelse af en gemt backup ud fra dens id) og `POST /api/settings/import-json` (gendannelse af ældre JSON-data) erstatter den aktive database eller hele sættet af indstillinger, forbindelser og API-nøgler. Derfor kan maskinlegitimationsoplysninger heller ikke udløse dem.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Sletning af gendannelsespunkter har samme grænse: `DELETE /api/db-backups` (oprydning — behold de seneste N eller fjern dem, der er ældre end D dage) og `PATCH /api/db-backups` (opbevaringsindstillinger). De gemte opbevaringsregler er netop dem, som `cleanupDbBackups()` anvender efter hver automatisk backup (`src/lib/db/backup.ts`); en maskinlegitimationsoplysning, der kunne gemme `keepLatest: 1`, kunne derfor rydde de tidligere gendannelsespunkter ved næste snapshot. Visning og oprettelse af backups (`GET`/`PUT /api/db-backups`) bruger fortsat almindelig administrationsgodkendelse.
 
 ### Bootstrap ved ny installation er begrænset til loopback — baseret på den faktiske peer, ikke `Host`
 

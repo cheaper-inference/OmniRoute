@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 मध्ये रूटमधून बाहेर हलवले (अव्यवस्था कमी करण्यासाठी):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेली `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) पहा.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, आणि व्युत्पन्न केलेली `quality-metrics.json` (gitignored). [`## config/`](#config--स्थिर-कॉन्फिगरेशन्स--गुणवत्ता-द्वार-स्थिती) पहा.
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | उपडिरेक्टरी           | उद्देश                                                                                                                                                                                                       |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | स्थानिकीकरण केलेली दस्तऐवज भाषांतरे (41 लोकेल्स)                                                                                                                                                             |
+| `docs/i18n/`          | स्थानिकीकरण केलेली दस्तऐवज भाषांतरे (66 लोकेल्स)                                                                                                                                                             |
 | `docs/screenshots/`   | मार्गदर्शिकांसाठी प्रतिमा संसाधने                                                                                                                                                                            |
 | `_tasks/superpowers/` | superpowers मधील योजना/तपशील (`writing-plans`/`brainstorming`) + संशोधन — विलग, स्वतंत्रपणे आवृत्ती-नियंत्रित रेपॉझिटरी, मुख्य ट्रीद्वारे gitignore केलेली. CLAUDE.md → "Planning & Research Artifacts" पहा. |
 

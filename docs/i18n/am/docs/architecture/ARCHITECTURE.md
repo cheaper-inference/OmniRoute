@@ -15,7 +15,7 @@ OmniRoute በNext.js ላይ የተገነባ አካባቢያዊ የAI ማዘዋ�
 
 ዋና ችሎታዎች፦
 
-- ለCLI/መሣሪያዎች ከOpenAI ጋር ተኳሃኝ የAPI በይነገጽ (375 አቅራቢዎች፣ 154 አስፈጻሚ ሞጁሎች)
+- ለCLI/መሣሪያዎች ከOpenAI ጋር ተኳሃኝ የAPI በይነገጽ (375 አቅራቢዎች፣ 156 አስፈጻሚ ሞጁሎች)
 - በተለያዩ የአቅራቢ ቅርጸቶች መካከል የጥያቄ/ምላሽ ትርጉም
 - የሞዴል ጥምረት አማራጭ ውድቀት መቋቋሚያ (ባለብዙ-ሞዴል ቅደም ተከተል)
 - በ`compositeTiers` መሠረት በአሂድ ጊዜ የሚደረደሩ የተዋቀሩ የጥምረት ደረጃዎች (`provider + model + connection`)
@@ -31,7 +31,7 @@ OmniRoute በNext.js ላይ የተገነባ አካባቢያዊ የAI ማዘዋ�
 - በ`/v1/search` በኩል የድር ፍለጋ (20 አቅራቢዎች)
 - በ`/v1/moderations` በኩል የይዘት ልከኝነት ቁጥጥር
 - በ`/v1/rerank` በኩል ዳግም ደረጃ መስጠት
-- ለማመዛዘኛ ሞዴሎች የThink መለያ ምልክት ትንተና (``)
+- ለማመዛዘኛ ሞዴሎች የThink መለያ ምልክት ትንተና (`<think>...</think>`)
 - ከጥብቅ የOpenAI SDK ተኳሃኝነት ጋር እንዲስማሙ ምላሾችን ማጽዳት
 - ለአቅራቢ-ተሻጋሪ ተኳሃኝነት የሚደረግ የሚና መደበኛነት (developer→system, system→user)
 - የተዋቀረ ውጤት ልወጣ (json_schema → Gemini responseSchema)
@@ -1026,7 +1026,7 @@ flowchart LR
 
 - **የምላሽ ማጽዳት** — ጥብቅ የSDK ተኳሃኝነትን ለማረጋገጥ፣ መደበኛ ያልሆኑ መስኮችን ከOpenAI-ቅርጸት ምላሾች (ዥረት ያላቸውም ሆነ ዥረት የሌላቸው) ያስወግዳል
 - **የሚና መደበኛነት** — OpenAI ላልሆኑ ዒላማዎች `developer` → `system` ይቀይራል፤ የስርዓት ሚናን ውድቅ ለሚያደርጉ ሞዴሎች (GLM፣ ERNIE) `system` → `user` ያዋህዳል
-- **የThink መለያ ማውጣት** — ከይዘት ውስጥ ያሉ `\<think>...\</think>` ብሎኮችን በመተንተን ወደ `reasoning_content` መስክ ያስገባል
+- **የThink መለያ ማውጣት** — ከይዘት ውስጥ ያሉ `<think>...</think>` ብሎኮችን በመተንተን ወደ `reasoning_content` መስክ ያስገባል
 - **የተዋቀረ ውፅዓት** — የOpenAI `response_format.json_schema`ን ወደ Gemini `responseMimeType` + `responseSchema` ይቀይራል
 
 ## የሚደገፉ የAPI መጨረሻ ነጥቦች
@@ -1092,11 +1092,11 @@ flowchart LR
 - የSQLite የመርሃ ግብር ፍልሰቶች እና በጅምር ጊዜ ራስ-ሰር የማሻሻያ ማያያዣዎች
 - የቆየ JSON → SQLite የፍልሰት ተኳሃኝነት መንገድ
 
-## 6) SSRF / የወጪ URL ጥበቃ
+## 6) SSRF / ወደ ውጭ የሚላኩ URL-ዎች ጥበቃ
 
-- `src/shared/network/outboundUrlGuard.ts` ሁሉንም የግል/loopback/link-local ዒላማ URLዎች ወደ አቅራቢ አስፈጻሚዎች ከመድረሳቸው በፊት ያግዳል
-- የአቅራቢ ሞዴል ፍለጋ እና የማረጋገጫ መስመሮች `src/shared/network/safeOutboundFetch.ts`ን ይጠቀማሉ፤ ይህም ከእያንዳንዱ የወጪ ጥያቄ በፊት ጥበቃውን ይተገብራል
-- የጥበቃ ስህተቶች HTTP 422 ያለው `URL_GUARD_BLOCKED` ሆነው ይታያሉ፣ እና በ`providerAudit.ts` በኩል በተገዢነት ኦዲት ዱካ ውስጥ ይመዘገባሉ
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) በ`BaseExecutor.execute()` በኩል በሚላኩ የውይይት ጥያቄዎች ላይ `src/shared/network/outboundUrlGuard.ts`ን ይተገብራል። ለሕዝብ ብቻ በተዘጋጀ ሁነታ (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` ሆኖ የግል ምልክቱ ሲጠፋ) የግል እና loopback አስተናጋጆችን እንዲሁም 169.254.0.0/16ን ያግዳል፤ በሌሎች ሁነታዎች ሁሉ የደመና ሜታዳታ አስተናጋጆችን ያግዳል። ማንኛውም የDNS ፍለጋ ከመከናወኑ በፊት፣ የአስተናጋጁን ስም ወይም የIP ቀጥተኛ እሴት በተጻፈበት መልኩ ይፈትሻል። አብረው የተካተቱ አካባቢያዊ አቅራቢዎች ይህን ጥበቃ ያልፋሉ።
+- የአቅራቢ ሞዴል ፍለጋ እና የማረጋገጫ መስመሮች `src/shared/network/safeOutboundFetch.ts`ን ይጠቀማሉ፤ ይህም ከእያንዳንዱ ወደ ውጭ የሚላክ ጥያቄ በፊት ጥበቃውን ይተገብራል
+- የጥበቃ ስህተቶች እንደ `URL_GUARD_BLOCKED` ከHTTP 503 ጋር ይታያሉ (`getSafeOutboundFetchErrorStatus`፤ የሞዴል ፍለጋ መስመሩ 400ን ይመልሳል)፣ እና በማረጋገጥ ወቅት የሚከሰቱ እውነተኛ የSSRF እገዳዎች እንደ `provider.validation.ssrf_blocked` ክስተቶች በኦዲት መዝገብ ውስጥ ይመዘገባሉ
 
 ## ምልከታ እና የክወና ምልክቶች
 
@@ -1147,7 +1147,7 @@ flowchart LR
 4. የደመና ባህሪ በትክክለኛው `NEXT_PUBLIC_BASE_URL` እና የደመና መጨረሻ ነጥብ ተደራሽነት ላይ ይመረኮዛል።
 5. የ`open-sse/` ማውጫ እንደ `@omniroute/open-sse` **npm workspace package** ታትሟል። የምንጭ ኮዱ በ`@omniroute/open-sse/...` በኩል ያስመጣዋል (በNext.js `transpilePackages` የሚፈታ)። በዚህ ሰነድ ውስጥ ያሉ የፋይል ዱካዎች ለወጥነት አሁንም `open-sse/` የሚለውን የማውጫ ስም ይጠቀማሉ።
 6. በዳሽቦርዱ ውስጥ ያሉ ገበታዎች ተደራሽ እና መስተጋብራዊ የትንታኔ ምስላዊ ማሳያዎችን (የሞዴል አጠቃቀም የአሞሌ ገበታዎች፣ የስኬት መጠኖችን የያዙ የአቅራቢ ክፍፍል ሰንጠረዦች) ለማቅረብ **Recharts**ን (በSVG ላይ የተመሠረተ) ይጠቀማሉ።
-7. የE2E ሙከራዎች **Playwright**ን (`tests/e2e/`) ይጠቀማሉ፣ እና በ`npm run test:e2e` ይከናወናሉ። የአሃድ ሙከራዎች **Node.js test runner**ን (`tests/unit/`) ይጠቀማሉ፣ እና በ`npm run test:unit` ይከናወናሉ። በ`src/` ስር ያለው የምንጭ ኮድ **TypeScript** (`.ts`/`.tsx`) ነው፤ የ`open-sse/` workspace ግን JavaScript (`.js`) ሆኖ ይቆያል።
+7. የE2E ሙከራዎች **Playwright**ን (`tests/e2e/`) ይጠቀማሉ፣ እና በ`npm run test:e2e` ይከናወናሉ። የአሃድ ሙከራዎች **Node.js test runner**ን (`tests/unit/`) ይጠቀማሉ፣ እና በ`npm run test:unit` ይከናወናሉ። በ`src/` ስር ያለው የምንጭ ኮድ **TypeScript** (`.ts`/`.tsx`) ነው፤ የ`open-sse/` workspace ግን TypeScript (`.ts`) ሆኖ ይቆያል።
 8. የቅንብሮች ገጽ በ7 ትሮች ተደራጅቷል፦ አጠቃላይ፣ ገጽታ፣ AI፣ ደህንነት፣ መስመር ማስያዝ፣ የመቋቋም ችሎታ፣ የላቀ። የመቋቋም ችሎታ ገጹ የጥያቄ ወረፋን፣ የግንኙነት ማቀዝቀዣ ጊዜን፣ የአቅራቢ ወረዳ ቆራጭን እና ማቀዝቀዣውን-የመጠበቅ ባህሪን ብቻ ያዋቅራል፤ ቀጥታ የወረዳ ቆራጭ አሂድ-ጊዜ ሁኔታ በጤና ገጹ ላይ ይታያል።
 9. የ**Context Relay** ስትራቴጂ (`context-relay`) በሁለት ንብርብሮች የተከፈለ ነው፦ `combo.ts` ርክክብ መመንጨት እንዳለበት ይወስናል፣ `chat.ts` ደግሞ ከመለያ መፍታት በኋላ ርክክቡን ያስገባል። የርክክብ ውሂብ በ`context_handoffs` SQLite ሰንጠረዥ ውስጥ ይኖራል። ይህ ክፍፍል ሆን ተብሎ የተደረገ ነው፣ ምክንያቱም ትክክለኛው መለያ መቀየሩን የሚያውቀው `chat.ts` ብቻ ነው።
 10. **የፕሮክሲ ማስፈጸሚያ** አሁን ሁሉን አቀፍ ነው፦ `tokenHealthCheck.ts` ለእያንዳንዱ ግንኙነት ፕሮክሲን ይፈታል፣ `/api/providers/validate` `runWithProxyContext`ን ይጠቀማል፣ እና `proxyFetch.ts` በNode 22 ላይ የdispatcher ተኳኋኝነትን ለመጠበቅ `undici.fetch()`ን ይጠቀማል።

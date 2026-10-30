@@ -580,28 +580,28 @@ post_install() {
 
 ### Miljøvariabler
 
-| Variabel                                | Standardverdi                        | Beskrivelse                                                                                                                                             |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Hemmelighet for JWT-signering (**må endres i produksjon**)                                                                                              |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Passord for første innlogging                                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Datakatalog (database, bruk, logger)                                                                                                                    |
-| `PORT`                                  | rammeverkets standardverdi           | Tjenesteport (`20128` i eksemplene)                                                                                                                     |
-| `HOSTNAME`                              | rammeverkets standardverdi           | Vert det skal bindes til (Docker bruker `0.0.0.0` som standard)                                                                                         |
-| `NODE_ENV`                              | kjøretidsmiljøets standardverdi      | Sett til `production` ved distribusjon                                                                                                                  |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Offentlig basis-URL som vises i kontrollpanelet og eksponeres for serveren (erstatter eldre `BASE_URL`)                                                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Basis-URL for endepunktet for skysynkronisering (erstatter eldre `CLOUD_URL`)                                                                           |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC-hemmelighet for genererte API-nøkler                                                                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | Krev Bearer-API-nøkkel på `/v1/*`                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Tillat autentiserte kontrollpanelbrukere å vise fullstendige lagrede API-nøkkelverdier ved behov                                                        |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Oppdateringsfrekvens på serversiden for bufrede Provider Limits-data; oppdateringsknapper i brukergrensesnittet utløser fortsatt manuell synkronisering |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Deaktiver automatiske SQLite-øyeblikksbilder før skriving/import/gjenoppretting; manuelle sikkerhetskopier fungerer fortsatt                            |
-| `APP_LOG_TO_FILE`                       | `true`                               | Aktiverer lagring av program- og revisjonslogger på disk                                                                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Tving bruk av `Secure`-informasjonskapsel for autentisering (bak en HTTPS-reversproxy)                                                                  |
-| `CLOUDFLARED_BIN`                       | ikke angitt                          | Bruk en eksisterende `cloudflared`-binærfil i stedet for administrert nedlasting                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Transport for administrerte Quick Tunnels (`http2`, `quic` eller `auto`)                                                                                |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Grense for Node.js-heap i MB                                                                                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Maksimalt antall oppføringer i promptbufferen                                                                                                           |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Maksimalt antall oppføringer i den semantiske bufferen                                                                                                  |
+| Variabel                                | Standardverdi                   | Beskrivelse                                                                                                                                                        |
+| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(automatisk generert)_         | Hemmelighet for JWT-signering — genereres automatisk ved første oppstart og lagres varig i `server.env`; angi den eksplisitt når datakatalogen er midlertidig      |
+| `INITIAL_PASSWORD`                      | _(ikke angitt)_                 | Passord for første innlogging. npm-/kildeinstallasjoner starter med `CHANGEME`: erstatt det. Ikke angitt: onboardingveiviser                                       |
+| `DATA_DIR`                              | `~/.omniroute`                  | Datakatalog (database, bruk, logger)                                                                                                                               |
+| `PORT`                                  | rammeverkets standardverdi      | Tjenesteport (`20128` i eksemplene)                                                                                                                                |
+| `HOSTNAME`                              | rammeverkets standardverdi      | Vert det skal bindes til (Docker bruker `0.0.0.0` som standard)                                                                                                    |
+| `NODE_ENV`                              | kjøretidsmiljøets standardverdi | Sett til `production` ved distribusjon                                                                                                                             |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Offentlig basis-URL som vises i kontrollpanelet og eksponeres for serveren (erstatter eldre `BASE_URL`)                                                            |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Basis-URL for endepunktet for skysynkronisering (erstatter eldre `CLOUD_URL`)                                                                                      |
+| `API_KEY_SECRET`                        | _(automatisk generert)_         | Kontrollsumhemmelighet for maskinbundne API-nøkler — oppstarts-bootstrap genererer den automatisk når den ikke er angitt, og lagrer den i en skrivbar `server.env` |
+| `REQUIRE_API_KEY`                       | `false`                         | Krev Bearer-API-nøkkel på `/v1/*`                                                                                                                                  |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Tillat autentiserte kontrollpanelbrukere å vise fullstendige lagrede API-nøkkelverdier ved behov                                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Oppdateringsfrekvens på serversiden for bufrede Provider Limits-data; oppdateringsknapper i brukergrensesnittet utløser fortsatt manuell synkronisering            |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | Deaktiver automatiske SQLite-øyeblikksbilder før skriving/import/gjenoppretting; manuelle sikkerhetskopier fungerer fortsatt                                       |
+| `APP_LOG_TO_FILE`                       | `true`                          | Aktiverer lagring av program- og revisjonslogger på disk                                                                                                           |
+| `AUTH_COOKIE_SECURE`                    | `false`                         | Tving bruk av `Secure`-informasjonskapsel for autentisering (bak en HTTPS-reversproxy)                                                                             |
+| `CLOUDFLARED_BIN`                       | ikke angitt                     | Bruk en eksisterende `cloudflared`-binærfil i stedet for administrert nedlasting                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Transport for administrerte Quick Tunnels (`http2`, `quic` eller `auto`)                                                                                           |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                           | Grense for Node.js-heap i MB                                                                                                                                       |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimalt antall oppføringer i promptbufferen                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimalt antall oppføringer i den semantiske bufferen                                                                                                             |
 
 Du finner en fullstendig oversikt over miljøvariabler i [README](../README.md).
 
@@ -915,7 +915,7 @@ Her er eksempelmønstre for å kombinere flere leverandører og rute mellom dem 
 
 Ideell for kodeagenter (OpenCode, Claude Code, Cursor, Cline). Ruter først til ledende resonneringsmodeller, med overgang til raske kodemodeller ved oppbrukt kvote eller feil.
 
-- **Kontrollpanel**: Kombinasjoner → Ny kombinasjon → Navn: `agent-coding` → Strategi: `Prioritet`
+- **Kontrollpanel**: Kombinasjoner → Ny kombinasjon → Navn: `agent-coding` → Strategi: `Priority`
 - **Modeller**:
   1. `claude/claude-sonnet-4-6` (Primær kodeagent)
   2. `openai/gpt-4o` (Sekundært reservealternativ med høy kapasitet)

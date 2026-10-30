@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Teikėjų registrai, antraščių profiliai, tapatybė, …
 ├── handlers/               Užklausų apdorojimo moduliai (pokalbiai, įterpiniai, garsas, vaizdai, …)
-├── executors/              150 teikėjų vykdyklių modulių (vykdyklių klasės + kiekvieno teikėjo pagalbiniai moduliai)
+├── executors/              156 teikėjų vykdyklių modulių (vykdyklių klasės + kiekvieno teikėjo pagalbiniai moduliai)
 ├── translator/             Formatų konvertavimas (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions srauto transformatorius
 ├── services/               Daugiau nei 80 paslaugų modulių (deriniai, atsarginiai variantai, kvotos, tapatybė, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 aukščiausio lygio vykdyklių modulių (`*.ts`, išskyrus `base.ts`, `index.ts` ir testus — šį skaičių
+156 aukščiausio lygio vykdyklių modulių (`*.ts`, išskyrus `base.ts`, `index.ts` ir testus — šį skaičių
 nustato `npm run check:docs-counts`). Kiekviena vykdyklės klasė tiesiogiai arba per
 `DefaultExecutor` ar kitą vykdyklę išplečia `BaseExecutor` (`base.ts`); likę moduliai yra konkretiems
 teikėjams skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adapteriai, ypatumų apdorojimo moduliai). Vykdyklės apima:
@@ -772,7 +772,7 @@ Kliento užklausa
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Priskirkite tinkamą (-as) aprėptį (-is) faile `src/shared/constants/mcpScopes.ts`.
 3. Užregistruokite įrankį faile `open-sse/mcp-server/server.ts`.
-4. Pridėkite testus kataloge `open-sse/mcp-server/__tests__/`.
+4. Pridėkite testus kataloge `tests/unit/`.
 5. Atnaujinkite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Pridėti naują A2A įgūdį
@@ -790,7 +790,7 @@ Kliento užklausa
 - **Pavadinimai**: failams naudojamas `camelCase` arba `kebab-case`, komponentams `PascalCase`,
   konstantoms `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` visur;
-  `no-explicit-any` = `warn` kataloguose `open-sse/` ir `tests/`, kitur — klaida.
+  `no-explicit-any` = `error` kataloguose `open-sse/**/*.ts` ir `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (paveldėta nuostata). Tarpmodulinėse ribose pirmenybę
   teikite aiškiai nurodytiems tipams, o ne jų išvedimui.
 - **Duomenų bazė**: niekada nerašykite neapdoroto SQL maršrutuose ar apdorojimo funkcijose — visada naudokite
@@ -819,8 +819,7 @@ Kliento užklausa
   `a2a`, `memory`, `skills`.
 - **Šakos**: priešdėliai `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Niekada neįsipareigokite tiesiogiai į `main`.
-- **Husky**: prieš įsipareigojimą vykdomi `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; prieš išsiuntimą vykdomi `check:any-budget:t11` + `check:tracked-artifacts` (greitosios patikros; neįtraukiamas `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

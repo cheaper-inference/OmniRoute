@@ -233,7 +233,7 @@ chronologické řazení, pokud tabulka FTS chybí nebo dotaz FTS vyvolá chybu.
 
 Soubor `src/lib/memory/qdrant.ts` implementuje volitelnou integraci Qdrant jako
 vektorové úložiště 2. úrovně. Načítání je směrováno do Qdrant pouze tehdy, když
-má selektor enginu `memoryVectorStore` hodnotu `"qdrant"` — výchozí hodnota
+má selektor enginu `memoryVectorStore` hodnotu `"qdrant"` (`memoryVectorStore === "qdrant"`) — výchozí hodnota
 `"auto"` (ani `"sqlite-vec"`) Qdrant **nikdy** nevybere. Přepínač na kartě
 Engine nastavuje současně **obě** hodnoty `qdrantEnabled` a `memoryVectorStore`:
 povolení nastaví Qdrant jako primární úložiště, zakázání obnoví hodnotu `"auto"`
@@ -708,11 +708,11 @@ Modul `extraction.ts` (`src/lib/memory/extraction.ts`) používá **porovnáván
 
 ### Výchozí kategorie vzorů
 
-| Kategorie           | Příklad vzoru                                                     | Zachycuje                         |
-| ------------------- | ----------------------------------------------------------------- | --------------------------------- |
-| PREFERENCE_PATTERNS | `"Preferuji <X>"`, `"Mám rád/a <X>"`, `"Nesnáším <X>"`            | Uživatelské preference            |
-| DECISION_PATTERNS   | `"Použiji <X>"`, `"Rozhodl/a jsem se <X>"`, `"Zvolil/a jsem <X>"` | Rozhodnutí uživatele (epizodická) |
-| PATTERN_PATTERNS    | `"Obvykle <X>"`, `"Vždy <X>"`, `"Nikdy <X>"`                      | Trvalé vzorce chování             |
+| Kategorie           | Příklad vzoru                                               | Zachycuje                         |
+| ------------------- | ----------------------------------------------------------- | --------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Uživatelské preference            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Rozhodnutí uživatele (epizodická) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Trvalé vzorce chování             |
 
 ### Příklady vzorů (zjednodušené)
 
@@ -748,7 +748,8 @@ Když uživatel řekne:
 
 Aby se zabránilo nekontrolované extrakci, platí následující limity:
 
-| Minimální délka obsahu | 3 znaky |
+| Minimální délka obsahu | 3 znaky   |
+| ---------------------- | --------- |
 | Maximální délka obsahu | 500 znaků |
 
 ### Kdy extrakci vypnout

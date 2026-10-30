@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Премештено из кореног директоријума у v3.8.26 (рашчишћавање):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерисани `quality-metrics.json` (игнорише га git). Погледајте [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерисани `quality-metrics.json` (игнорише га git). Погледајте [`## config/`](#config--статичке-конфигурације--стање-контроле-квалитета).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Потфасцикла           | Намена                                                                                                                                                                                                                                        |
 | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Локализовани преводи документације (41 локализација)                                                                                                                                                                                          |
+| `docs/i18n/`          | Локализовани преводи документације (66 локализација)                                                                                                                                                                                          |
 | `docs/screenshots/`   | Сликовни ресурси за водиче                                                                                                                                                                                                                    |
 | `_tasks/superpowers/` | Планови/спецификације из superpowers (`writing-plans`/`brainstorming`) + истраживање — изолован репозиторијум са засебним верзионисањем, који главно стабло игнорише путем git-а. Погледајте CLAUDE.md → „Артефакти планирања и истраживања“. |
 

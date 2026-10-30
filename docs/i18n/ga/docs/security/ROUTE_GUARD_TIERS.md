@@ -185,7 +185,7 @@ a roghnaíonn an glaoiteoir agus macallaíonn sé dintiúir Basic nuaghinte; rot
 a cheilt; bhí an t-eisiúint fós ar an tsraith a theipeann ar oscailt (GHSA-7pq4-8pvv-rx7r). Diúltaíonn
 `enableObsidianVaultSync()` freisin do bhoghta arb é an t-eolaire sonraí é, atá laistigh de, nó ina bhfuil sé.
 
-#### Is d'oibreoirí amháin atá easpórtálacha dintiúr
+#### Is d’oibreoirí amháin atá easpórtálacha dintiúr agus athchóirithe
 
 Ní chinneann an tsraith thuas ach an bhfuil dintiúr _éigin_ riachtanach. Cuireann na bealaí a íoslódálann
 dintiúir stóráilte an dara seiceáil leis sa láimhseálaí: glaonn `GET /api/settings/export-json` (naisc soláthraithe
@@ -196,22 +196,9 @@ le hásc ina bhfuil logáil isteach díchumasaithe, agus freagraíonn sé le `40
 agus `admin` san áireamh) agus ar chomharthaí rochtana `oma_`. Úsáideann eisiúint comharthaí sioncronaithe (`POST /api/sync/tokens`)
 an cúntóir céanna, chomh maith le comhartha iontaofa na seirbhíse inmheánaí aisfhillte.
 
-#### Credential exports and restores are operator-only
+Tá an teorainn chéanna leis na gníomhartha millteacha comhfhreagracha: cuireann `POST /api/db-backups/import` (comhad `.sqlite` uaslódáilte, lena n-áirítear `dryRun=true`), `POST /api/db-backups` (cúltaca stóráilte a athchóiriú de réir a aitheantais) agus `POST /api/settings/import-json` (athchóiriú ón seanfhormáid JSON) an bunachar sonraí beo nó an tacar iomlán socruithe, nasc agus eochracha API in ionad an tseanchinn. Mar sin ní féidir le dintiúr meaisín iad a thionscnamh ach oiread.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Tá an teorainn chéanna le scriosadh pointí athchóirithe: `DELETE /api/db-backups` (glanadh — coinnigh na N cinn is déanaí nó scrios na cinn atá níos sine ná D lá) agus `PATCH /api/db-backups` (socruithe coinneála). Is iad na socruithe sábháilte go díreach a chuireann `cleanupDbBackups()` i bhfeidhm tar éis gach cúltaca uathoibríoch (`src/lib/db/backup.ts`); dá bhféadfadh dintiúr meaisín `keepLatest: 1` a shábháil, d’fhéadfadh sé na seanphointí athchóirithe a scriosadh ag an gcéad seat eile. Coinníonn liostú agus cruthú cúltacaí (`GET`/`PUT /api/db-backups`) gnáthfhíordheimhniú bainistíochta.
 
 ### Is le haghaidh aisfhillte amháin atá túsú suiteála úire — de réir an fhíorphiara, ní `Host`
 

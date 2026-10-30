@@ -207,7 +207,7 @@ Tunnel, Tailscale, Ngrok), ο έλεγχος loopback εξακολουθεί ν�
 παρέμενε στο fail-open επίπεδο (GHSA-7pq4-8pvv-rx7r). Το `enableObsidianVaultSync()` επιπλέον
 απορρίπτει ένα vault που είναι ο κατάλογος δεδομένων, βρίσκεται μέσα σε αυτόν ή τον περιέχει.
 
-#### Οι εξαγωγές διαπιστευτηρίων προορίζονται αποκλειστικά για τον διαχειριστή
+#### Οι εξαγωγές διαπιστευτηρίων και οι επαναφορές προορίζονται αποκλειστικά για τον διαχειριστή
 
 Το παραπάνω επίπεδο αποφασίζει μόνο αν απαιτείται _κάποιο_ διαπιστευτήριο. Οι διαδρομές που πραγματοποιούν λήψη
 αποθηκευμένων διαπιστευτηρίων προσθέτουν έναν δεύτερο έλεγχο στον χειριστή: τα `GET /api/settings/export-json` (αποκρυπτογραφημένες
@@ -218,22 +218,9 @@ Tunnel, Tailscale, Ngrok), ο έλεγχος loopback εξακολουθεί ν�
 και `admin`) και σε διακριτικά πρόσβασης `oma_`. Η έκδοση διακριτικών συγχρονισμού (`POST /api/sync/tokens`) χρησιμοποιεί τον
 ίδιο βοηθό, καθώς και το διακριτικό εσωτερικής υπηρεσίας από αξιόπιστο loopback.
 
-#### Credential exports and restores are operator-only
+Το ίδιο όριο ισχύει για τις αντίστοιχες καταστροφικές ενέργειες: `POST /api/db-backups/import` (μεταφορτωμένο αρχείο `.sqlite`, ακόμη και με `dryRun=true`), `POST /api/db-backups` (επαναφορά αποθηκευμένου αντιγράφου με το id του) και `POST /api/settings/import-json` (επαναφορά της παλαιότερης μορφής JSON) αντικαθιστούν την ενεργή βάση ή ολόκληρο το σύνολο ρυθμίσεων, συνδέσεων και κλειδιών API. Επομένως ούτε αυτές μπορούν να ενεργοποιηθούν με διαπιστευτήρια μηχανής.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Το ίδιο όριο ισχύει για την καταστροφή σημείων επαναφοράς: `DELETE /api/db-backups` (εκκαθάριση — διατήρηση των τελευταίων N ή διαγραφή όσων είναι παλαιότερα από D ημέρες) και `PATCH /api/db-backups` (ρυθμίσεις διατήρησης). Οι αποθηκευμένοι κανόνες είναι ακριβώς αυτοί που εφαρμόζει το `cleanupDbBackups()` μετά από κάθε αυτόματο αντίγραφο (`src/lib/db/backup.ts`)· ένα διαπιστευτήριο μηχανής που θα μπορούσε να αποθηκεύσει `keepLatest: 1` θα μπορούσε έτσι να διαγράψει τα προηγούμενα σημεία στο επόμενο στιγμιότυπο. Η εμφάνιση και η δημιουργία αντιγράφων (`GET`/`PUT /api/db-backups`) διατηρούν τον συνηθισμένο έλεγχο ταυτότητας διαχείρισης.
 
 ### Η αρχική ρύθμιση νέας εγκατάστασης είναι διαθέσιμη μόνο μέσω loopback — βάσει του πραγματικού ομότιμου και όχι του `Host`
 

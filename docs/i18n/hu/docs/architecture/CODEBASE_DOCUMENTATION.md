@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Szolgáltatói nyilvántartások, fejlécprofilok, identitás, …
 ├── handlers/               Kéréskezelők (csevegés, beágyazások, hang, kép, …)
-├── executors/              150 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
+├── executors/              156 szolgáltatói végrehajtómodul (végrehajtóosztályok + szolgáltatónkénti segédmodulok)
 ├── translator/             Formátumkonverzió (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions adatfolyam-transzformátor
 ├── services/               Több mint 80 szolgáltatásmodul (kombinációk, tartalékmechanizmusok, kvóták, identitás, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
+156 felső szintű végrehajtómodul (`*.ts`, a `base.ts`, az `index.ts` és a tesztek nélkül — ezt a számot
 az `npm run check:docs-counts` méri). Minden végrehajtóosztály a `BaseExecutor` (`base.ts`) osztályt
 terjeszti ki közvetlenül, vagy a `DefaultExecutor`, illetve egy másik végrehajtó közvetítésével; a fennmaradó modulok szolgáltatónkénti
 segédmodulok (eszközsémák, lekérési/TTS-adapterek, sajátosságkezelők). A végrehajtók közé tartoznak:
@@ -774,7 +774,7 @@ Lásd a [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) fájlt és a
    `open-sse/mcp-server/schemas/tools.ts` fájlt).
 2. Rendeld hozzá a megfelelő hatókör(öke)t a `src/shared/constants/mcpScopes.ts` fájlban.
 3. Regisztráld az eszközt az `open-sse/mcp-server/server.ts` fájlban.
-4. Adj hozzá teszteket az `open-sse/mcp-server/__tests__/` könyvtárban.
+4. Adj hozzá teszteket az `tests/unit/` könyvtárban.
 5. Frissítsd az [MCP-SERVER.md](../frameworks/MCP-SERVER.md) fájlt.
 
 ### Új A2A-képesség hozzáadása
@@ -792,7 +792,7 @@ Lásd: [A2A-SERVER.md § Új képesség hozzáadása](../frameworks/A2A-SERVER.m
 - **Elnevezés**: fájloknál `camelCase` vagy `kebab-case`, komponenseknél `PascalCase`,
   konstansoknál `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` mindenhol;
-  `no-explicit-any` = `warn` az `open-sse/` és a `tests/` könyvtárban, máshol `error`.
+  `no-explicit-any` = `error` az `open-sse/**/*.ts` és a `tests/**/*.ts` könyvtárban.
 - **TypeScript**: `strict: false` (örökölt beállítás). A modulok közötti határokon részesítsd előnyben az explicit típusokat
   a típuskövetkeztetéssel szemben.
 - **Adatbázis**: soha ne írj nyers SQL-t útvonalakba vagy kezelőkbe — mindig a
@@ -821,8 +821,7 @@ Lásd: [A2A-SERVER.md § Új képesség hozzáadása](../frameworks/A2A-SERVER.m
   `a2a`, `memory`, `skills`.
 - **Ágak**: előtagok: `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Soha ne commitolj közvetlenül a `main` ágba.
-- **Husky**: a pre-commit futtatja a `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` feladatokat; a pre-push futtatja a `check:any-budget:t11` + `check:tracked-artifacts` feladatokat (gyors ellenőrzőkapuk; a `test:unit` nincs köztük).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

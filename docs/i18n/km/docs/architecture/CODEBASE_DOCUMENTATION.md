@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 បញ្ជីអ្នកផ្តល់សេវា ទម្រង់បឋមកថា អត្តសញ្ញាណ …
 ├── handlers/               កម្មវិធីដោះស្រាយសំណើ (ការជជែក embedding អូឌីយ៉ូ រូបភាព …)
-├── executors/              ម៉ូឌុលប្រតិបត្តិរបស់អ្នកផ្តល់សេវាចំនួន 150 (ថ្នាក់ប្រតិបត្តិ + មុខងារជំនួយតាមអ្នកផ្តល់សេវា)
+├── executors/              ម៉ូឌុលប្រតិបត្តិរបស់អ្នកផ្តល់សេវាចំនួន 156 (ថ្នាក់ប្រតិបត្តិ + មុខងារជំនួយតាមអ្នកផ្តល់សេវា)
 ├── translator/             ការបម្លែងទម្រង់ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            ម៉ូឌុលបម្លែងស្ទ្រីម Responses API ↔ Chat Completions
 ├── services/               ម៉ូឌុលសេវាកម្មជាង 80 (បន្សំ fallback កូតា អត្តសញ្ញាណ …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-ម៉ូឌុលប្រតិបត្តិកម្រិតកំពូលចំនួន 150 (`*.ts` ដក `base.ts`, `index.ts` និងតេស្តចេញ — ចំនួននេះត្រូវបានវាស់ដោយ
+ម៉ូឌុលប្រតិបត្តិកម្រិតកំពូលចំនួន 156 (`*.ts` ដក `base.ts`, `index.ts` និងតេស្តចេញ — ចំនួននេះត្រូវបានវាស់ដោយ
 `npm run check:docs-counts`)។ ថ្នាក់ប្រតិបត្តិនីមួយៗពង្រីកពី `BaseExecutor` (`base.ts`)
 ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` ឬម៉ូឌុលប្រតិបត្តិផ្សេងទៀត។ ម៉ូឌុលដែលនៅសល់គឺជា
 មុខងារជំនួយតាមអ្នកផ្តល់សេវា (ស្គីមាឧបករណ៍ អាដាប់ទ័រ fetch/TTS និងកម្មវិធីដោះស្រាយលក្ខណៈពិសេស)។ ម៉ូឌុលប្រតិបត្តិរួមមាន៖
@@ -771,7 +771,7 @@ Command ដែលប្រើជាទូទៅ៖
    `open-sse/mcp-server/schemas/tools.ts`)។
 2. កំណត់ scope ដែលសមស្របក្នុង `src/shared/constants/mcpScopes.ts`។
 3. ចុះឈ្មោះឧបករណ៍ក្នុង `open-sse/mcp-server/server.ts`។
-4. បន្ថែមការធ្វើតេស្តក្រោម `open-sse/mcp-server/__tests__/`។
+4. បន្ថែមការធ្វើតេស្តក្រោម `tests/unit/`។
 5. ធ្វើបច្ចុប្បន្នភាព [MCP-SERVER.md](../frameworks/MCP-SERVER.md)។
 
 ### បន្ថែមជំនាញ A2A ថ្មី
@@ -789,7 +789,7 @@ Command ដែលប្រើជាទូទៅ៖
 - **ការដាក់ឈ្មោះ**៖ ឯកសារប្រើ `camelCase` ឬ `kebab-case`, components ប្រើ `PascalCase`,
   constants ប្រើ `UPPER_SNAKE`។
 - **ESLint**៖ `no-eval`, `no-implied-eval`, `no-new-func` = `error` គ្រប់ទីកន្លែង;
-  `no-explicit-any` = `warn` ក្នុង `open-sse/` និង `tests/`, ជា error នៅកន្លែងផ្សេង។
+  `no-explicit-any` = `error` ក្នុង `open-sse/**/*.ts` និង `tests/**/*.ts`។
 - **TypeScript**៖ `strict: false` (ជំហរដើម្បីគាំទ្រប្រព័ន្ធចាស់)។ គួរប្រើ types ដែលបញ្ជាក់ច្បាស់លាស់ជំនួស
   inference សម្រាប់ព្រំដែនឆ្លងម៉ូឌុល។
 - **មូលដ្ឋានទិន្នន័យ**៖ មិនត្រូវសរសេរ SQL ដើមក្នុង routes ឬ handlers ឡើយ — ត្រូវឆ្លងកាត់
@@ -819,8 +819,7 @@ Command ដែលប្រើជាទូទៅ៖
   `a2a`, `memory`, `skills`។
 - **Branches**៖ prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`។ មិនត្រូវ commit ដោយផ្ទាល់ទៅ `main` ឡើយ។
-- **Husky**៖ pre-commit ដំណើរការ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push ដំណើរការ `check:any-budget:t11` + `check:tracked-artifacts` (ការត្រួតពិនិត្យរហ័ស; មិនរាប់បញ្ចូល `test:unit`)។
+- **Husky**៖ [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

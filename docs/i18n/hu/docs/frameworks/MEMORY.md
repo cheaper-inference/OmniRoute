@@ -711,11 +711,11 @@ Az `extraction.ts` modul (`src/lib/memory/extraction.ts`) **reguláris kifejezé
 
 ### Alapértelmezett mintakategóriák
 
-| Kategória           | Példaminta                                                                         | Kinyert adatok                       |
-| ------------------- | ---------------------------------------------------------------------------------- | ------------------------------------ |
-| PREFERENCE_PATTERNS | `"Előnyben részesítem: <X>"`, `"Szeretem: <X>"`, `"Utálom: <X>"`                   | Felhasználói preferenciák            |
-| DECISION_PATTERNS   | `"<X>-et fogok használni"`, `"Úgy döntöttem, hogy <X>"`, `"<X> mellett döntöttem"` | Felhasználói döntések (epizodikusak) |
-| PATTERN_PATTERNS    | `"Általában <X>"`, `"Mindig <X>"`, `"Soha nem <X>"`                                | Tartós viselkedési minták            |
+| Kategória           | Példaminta                                                  | Kinyert adatok                       |
+| ------------------- | ----------------------------------------------------------- | ------------------------------------ |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Felhasználói preferenciák            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Felhasználói döntések (epizodikusak) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Tartós viselkedési minták            |
 
 ### Példaminták (egyszerűsítve)
 
@@ -751,7 +751,8 @@ Amikor egy felhasználó ezt mondja:
 
 A túlzott kinyerés megelőzése érdekében a következő korlátok érvényesek:
 
-| Minimális tartalomhossz | 3 karakter |
+| Minimális tartalomhossz | 3 karakter   |
+| ----------------------- | ------------ |
 | Maximális tartalomhossz | 500 karakter |
 
 ### Mikor érdemes letiltani a kinyerést

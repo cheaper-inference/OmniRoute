@@ -106,7 +106,7 @@ OmniRoute/
 
 > **Inilipat mula sa root sa v3.8.26 (pag-aayos):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, at ang nabuong `quality-metrics.json` (naka-gitignore). Tingnan ang [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, at ang nabuong `quality-metrics.json` (naka-gitignore). Tingnan ang [`## config/`](#config--mga-static-config--kalagayan-ng-quality-gate).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Subdirectory          | Layunin                                                                                                                                                                                                                               |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mga naka-localize na salin ng dokumentasyon (41 locale)                                                                                                                                                                               |
+| `docs/i18n/`          | Mga naka-localize na salin ng dokumentasyon (66 locale)                                                                                                                                                                               |
 | `docs/screenshots/`   | Mga image asset para sa mga gabay                                                                                                                                                                                                     |
 | `_tasks/superpowers/` | Mga plano/spec mula sa superpowers (`writing-plans`/`brainstorming`) + pananaliksik — nakahiwalay at may sariling versioning na repo, at naka-gitignore sa pangunahing tree. Tingnan ang CLAUDE.md → "Planning & Research Artifacts". |
 

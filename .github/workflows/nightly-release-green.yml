@@ -50,7 +50,6 @@ on:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
   # push storms during merge campaigns collapse to the newest commit per branch;
@@ -70,7 +69,7 @@ jobs:
   # Resolved once so a push landing mid-sweep cannot split the lanes across two commits.
   resolve-target:
     name: Resolve sweep target
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -112,37 +111,46 @@ jobs:
   suites:
     name: Hosted suite (${{ matrix.name }})
     needs: resolve-target
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
-          - { name: unit-1, script: "test:unit:ci:shard", shard: "1/8" }
-          - { name: unit-2, script: "test:unit:ci:shard", shard: "2/8" }
-          - { name: unit-3, script: "test:unit:ci:shard", shard: "3/8" }
-          - { name: unit-4, script: "test:unit:ci:shard", shard: "4/8" }
-          - { name: unit-5, script: "test:unit:ci:shard", shard: "5/8" }
-          - { name: unit-6, script: "test:unit:ci:shard", shard: "6/8" }
-          - { name: unit-7, script: "test:unit:ci:shard", shard: "7/8" }
-          - { name: unit-8, script: "test:unit:ci:shard", shard: "8/8" }
-          - { name: integration-1, script: "test:integration:ci", shard: "1/2" }
-          - { name: integration-2, script: "test:integration:ci", shard: "2/2" }
-          - { name: vitest, script: "test:vitest", shard: "" }
+          - { name: unit-1, script: "test:unit:ci:shard", shard: "1/12" }
+          - { name: unit-2, script: "test:unit:ci:shard", shard: "2/12" }
+          - { name: unit-3, script: "test:unit:ci:shard", shard: "3/12" }
+          - { name: unit-4, script: "test:unit:ci:shard", shard: "4/12" }
+          - { name: unit-5, script: "test:unit:ci:shard", shard: "5/12" }
+          - { name: unit-6, script: "test:unit:ci:shard", shard: "6/12" }
+          - { name: unit-7, script: "test:unit:ci:shard", shard: "7/12" }
+          - { name: unit-8, script: "test:unit:ci:shard", shard: "8/12" }
+          - { name: unit-9, script: "test:unit:ci:shard", shard: "9/12" }
+          - { name: unit-10, script: "test:unit:ci:shard", shard: "10/12" }
+          - { name: unit-11, script: "test:unit:ci:shard", shard: "11/12" }
+          - { name: unit-12, script: "test:unit:ci:shard", shard: "12/12" }
+          - { name: integration-1, script: "test:integration:ci", shard: "1/4" }
+          - { name: integration-2, script: "test:integration:ci", shard: "2/4" }
+          - { name: integration-3, script: "test:integration:ci", shard: "3/4" }
+          - { name: integration-4, script: "test:integration:ci", shard: "4/4" }
+          - { name: vitest-1, script: "test:vitest:ui", shard: "1/4" }
+          - { name: vitest-2, script: "test:vitest:ui", shard: "2/4" }
+          - { name: vitest-3, script: "test:vitest:ui", shard: "3/4" }
+          - { name: vitest-4, script: "test:vitest:ui", shard: "4/4" }
     env:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ needs.resolve-target.outputs.sha }}
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version }}
-          cache: npm
+          package-manager-cache: false
       - uses: ./.github/actions/npm-ci-retry
       - name: Run the suite and record its result
         env:
@@ -158,8 +166,11 @@ jobs:
             export INITIAL_PASSWORD=ci-test-password-for-integration
           fi
           (
-            if [ "$NAME" = "vitest" ]; then
-              npm run test:vitest && npm run test:vitest:ui
+            if [[ "$NAME" == vitest-* ]]; then
+              if [ "$NAME" = "vitest-1" ]; then
+                npm run test:vitest || exit "$?"
+              fi
+              npm run "$SUITE" -- --shard="$TEST_SHARD"
             else
               npm run "$SUITE"
             fi
@@ -170,7 +181,7 @@ jobs:
           exit "$code"
       - name: Upload the suite result
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-suite-${{ github.run_attempt }}-${{ matrix.name }}
           path: suite-results/
@@ -178,13 +189,16 @@ jobs:
           retention-days: 7
 
   release-green:
+    permissions:
+      contents: read
+      issues: write
     name: Validate active release branch
     # On a push, only run for release/* pushes — a push to main is handled by the
     # main-green job below. Schedule/dispatch always run (they validate the highest release).
     # On push the two jobs above are skipped; !cancelled() keeps this job from being skipped
     # with them, and on schedule/dispatch it still reports when a suite job failed.
     needs: [resolve-target, suites]
-    if: ${{ !cancelled() && (github.event_name != 'push' || startsWith(github.ref_name, 'release/')) && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ !cancelled() && (github.event_name != 'push' || startsWith(github.ref_name, 'release/')) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     # Dynamic runner: with USE_VPS_RUNNER=true (release window / on-demand pre-flight)
     # this runs on the dedicated VPS runner — clean env (no operator OMNIROUTE_API_KEY,
     # no local noauth CLIs => zero machine-specific false positives) and no contention.
@@ -201,7 +215,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
@@ -261,23 +275,42 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
         continue-on-error: true
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
           # A partial re-run cannot reuse receipts from an earlier attempt;
           # rerun all suite jobs for a new complete observation of the same tip.
           pattern: release-green-suite-${{ github.run_attempt }}-*
           path: suite-results
           merge-multiple: true
+
+      # Tooling belongs to the immutable workflow revision. Quick needs the
+      # workflow pair; the full static profile also requires security scanners.
+      - name: Prepare pinned quality scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Release-green validation (full)
         id: validate
@@ -302,9 +335,14 @@ jobs:
             MODE="--with-build --full-ci --suites-from suite-results"
           fi
           echo "[release-green] mode: $MODE (event: $EVENT_NAME)"
+          # This observer selected an exact main/release tip. Its UI differential scope
+          # is the last commit; the workflow revision may belong to another branch.
+          I18N_BASE_SHA="$(git rev-parse --verify "${VALIDATED_SHA}^1")"
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --i18n-base-sha "$I18N_BASE_SHA" \
+            --i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit \
             --suites-workflow-sha "$GITHUB_WORKFLOW_SHA" \
             1> release-green.json 2> release-green.log
           validation_exit=$?
@@ -312,24 +350,51 @@ jobs:
           echo "------- report -------"
           cat release-green.log
 
+      - name: Record incomplete validation after setup failure
+        if: ${{ failure() && !cancelled() && steps.validate.outcome == 'skipped' }}
+        env:
+          TARGET: ${{ steps.branch.outputs.target }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+          SCANNER_OUTCOME: ${{ steps.workflow_scanners.outcome }}
+        run: |
+          set -euo pipefail
+          # No validator ran: retain a diagnostic, never a fabricated gate report
+          # or a report left by an earlier attempt on a persistent runner.
+          rm -f -- release-green.json
+          {
+            echo '{"exit":1,"verdict":"UNKNOWN","evidenceState":"INCOMPLETE","reason":"Validation did not run after setup failed"}'
+            printf 'Target: %s\nRevision: %s\nValidation step: %s\nScanner setup: %s\n' \
+              "${TARGET:-UNKNOWN}" "${VALIDATED_SHA:-UNKNOWN}" \
+              "${VALIDATION_OUTCOME:-UNKNOWN}" "${SCANNER_OUTCOME:-UNKNOWN}"
+          } > release-green.log
+          cat release-green.log >> "$GITHUB_STEP_SUMMARY"
+
       - name: Open / update tracking issue on HARD failure
-        if: steps.validate.outputs.exit != '0'
+        if: ${{ !cancelled() && steps.revision.outputs.sha != '' && steps.branch.outputs.target != '' && steps.validate.outputs.exit != '0' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET: ${{ steps.branch.outputs.target }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.event.after }}
         run: |
           set -euo pipefail
+          if ! [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || \
+             ! [[ "${TARGET:-}" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Missing or invalid observed revision/target; retaining diagnostics without changing issues."
+            exit 0
+          fi
           TITLE="🔴 Release branch not green: ${TARGET}"
           {
-            echo "The **release-green** validation found HARD failures on \`${TARGET}\`."
+            echo "The **release-green** observation did not complete successfully on \`${TARGET}\`."
             echo "The required validation failed or its evidence was incomplete. Compare the"
             echo "signature on the exact base before attributing a defect to a contributor."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "**Observed revision:** \`${VALIDATED_SHA}\`"
             # This is an observed range, not proof of causality. Compare with the base.
             if [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && \
                git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
@@ -341,7 +406,9 @@ jobs:
             fi
             echo ""
             echo '```'
-            if grep -q '──────── verdict ────────' release-green.log; then
+            if [ ! -s release-green.log ]; then
+              echo '{"verdict":"UNKNOWN","evidenceState":"INCOMPLETE","reason":"Validation log is missing"}'
+            elif grep -q '──────── verdict ────────' release-green.log; then
               sed -n '/──────── verdict ────────/,$p' release-green.log
             else
               tail -40 release-green.log
@@ -394,7 +461,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: release-green-report
           path: |
@@ -420,6 +487,9 @@ jobs:
   # opens a "🔴 main not green" tracking issue. The PREVENTION is the companion-PR reflex
   # (Hard Rule #21 area / _shared/merge-gates.md §8); this is the automated backstop.
   main-green:
+    permissions:
+      contents: read
+      issues: write
     name: Validate main branch
     # On a push, only run for a push to main — a push to release/* is handled by
     # release-green above. Dispatch always runs. On schedule, only the 05:23 cron sweeps
@@ -427,7 +497,7 @@ jobs:
     # re-validated the same commit and held the single `omni-release` slot for ~2 h each
     # (2026-10-19: 08:04–10:01 right after the 2 h20 release sweep, while a `--quick` push
     # run waited ~4 h in the group). The release branch keeps all three sweeps.
-    if: ${{ (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'diegosouzapw/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
+    if: ${{ (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
     # Own slot (docs/ops/RUNNER_BOX.md): `omni-release` is omniroute-113-6 only, so the
     # validation no longer queues on the single `omni-build` slot (the 2026-10-18 05:29
     # sweep waited 6 h for it). That slot is capped at 24 GB, so the validation's build
@@ -440,7 +510,7 @@ jobs:
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event_name == 'push' && github.sha || 'main' }}
           fetch-depth: 0
@@ -450,12 +520,30 @@ jobs:
         id: revision
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
+
+      # main can predate the installers: materialize both from the workflow SHA.
+      - name: Prepare pinned quality scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Main-green validation
         id: validate
@@ -471,38 +559,64 @@ jobs:
             MODE="--with-build --full-ci"
           fi
           echo "[main-green] mode: $MODE (event: $EVENT_NAME)"
+          # This observer selected an exact main/release tip. Its UI differential scope
+          # is the last commit; the workflow revision may belong to another branch.
+          I18N_BASE_SHA="$(git rev-parse --verify "${VALIDATED_SHA}^1")"
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --i18n-base-sha "$I18N_BASE_SHA" \
+            --i18n-candidate-sha "$VALIDATED_SHA" --i18n-scope last-commit \
             1> main-green.json 2> main-green.log
           validation_exit=$?
           node scripts/ci/release-green-result.mjs main-green.json "$validation_exit" "$VALIDATED_SHA" "$EVENT_NAME" >> main-green.log
           echo "------- report -------"
           cat main-green.log
 
+      - name: Record incomplete validation after setup failure
+        if: ${{ failure() && !cancelled() && steps.validate.outcome == 'skipped' }}
+        env:
+          TARGET: main
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+          SCANNER_OUTCOME: ${{ steps.workflow_scanners.outcome }}
+        run: |
+          set -euo pipefail
+          rm -f -- main-green.json
+          {
+            echo '{"exit":1,"verdict":"UNKNOWN","evidenceState":"INCOMPLETE","reason":"Validation did not run after setup failed"}'
+            printf 'Target: %s\nRevision: %s\nValidation step: %s\nScanner setup: %s\n' \
+              "${TARGET:-UNKNOWN}" "${VALIDATED_SHA:-UNKNOWN}" \
+              "${VALIDATION_OUTCOME:-UNKNOWN}" "${SCANNER_OUTCOME:-UNKNOWN}"
+          } > main-green.log
+          cat main-green.log >> "$GITHUB_STEP_SUMMARY"
+
       - name: Open / update tracking issue on HARD failure
-        if: steps.validate.outputs.exit != '0'
+        if: ${{ !cancelled() && steps.revision.outputs.sha != '' && steps.validate.outputs.exit != '0' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          if ! [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Missing or invalid observed revision; retaining diagnostics without changing issues."
+            exit 0
+          fi
           TITLE="🔴 main branch not green"
           {
-            echo "The **main-green** validation found HARD failures on \`main\`."
-            echo ""
-            echo "Because \`main\` only receives merged work at the release squash, a gate/infra"
-            echo "fix that landed only on the release branch leaves \`main\` broken for the whole"
-            echo "cycle — and repo-wide gates (CodeQL alert count, ratchet baselines) then turn"
-            echo "**every open PR into main** red on a check unrelated to its diff. The fix is a"
-            echo "companion PR \`--base main\` carrying the release-side fix (see"
-            echo "\`_shared/merge-gates.md\` §8), NOT chasing each contributor PR."
+            echo "The **main-green** observation did not complete successfully on \`main\`."
+            echo "The required validation failed or its evidence was incomplete. Compare the"
+            echo "signature on the exact base before attributing a defect to a contributor."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "**Observed revision:** \`${VALIDATED_SHA}\`"
             echo ""
             echo '```'
-            if grep -q '──────── verdict ────────' main-green.log; then
+            if [ ! -s main-green.log ]; then
+              echo '{"verdict":"UNKNOWN","evidenceState":"INCOMPLETE","reason":"Validation log is missing"}'
+            elif grep -q '──────── verdict ────────' main-green.log; then
               sed -n '/──────── verdict ────────/,$p' main-green.log
             else
               tail -40 main-green.log
@@ -550,7 +664,7 @@ jobs:
       - name: Upload report artifact
         if: always()
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: main-green-report
           path: |
@@ -594,15 +708,16 @@ jobs:
   # walk each time. Detection stays on push (release-green above); banking is batched.
   bank-ratchet-shrinks:
     name: Bank ratchet shrinks
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Resolve active release branch
         id: branch
@@ -635,10 +750,10 @@ jobs:
           git checkout "$TARGET"
           git log -1 --oneline
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
@@ -688,7 +803,8 @@ jobs:
           git checkout -B "$BANK_BRANCH"
           git add config/quality/
           git commit -m "chore(quality): bank ratchet shrinks measured on ${TARGET}"
-          git push --force origin "$BANK_BRANCH"
+          gh auth setup-git
+          git push --force-with-lease origin "$BANK_BRANCH"
 
           {
             echo "Automated banking of quality-ratchet **shrinks** already present in"
@@ -725,21 +841,21 @@ jobs:
   # out of the issue queue; the existing quality gates still enforce their budgets.
   baseline-headroom:
     name: Baseline headroom
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     timeout-minutes: 60
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 1
           persist-credentials: false
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
-          cache: npm
+          package-manager-cache: false
 
       - uses: ./.github/actions/npm-ci-retry
 
@@ -752,7 +868,7 @@ jobs:
 
       - name: Upload headroom report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: baseline-headroom-${{ github.run_id }}
           path: reports/quality/headroom.*

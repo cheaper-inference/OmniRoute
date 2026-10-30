@@ -15,7 +15,7 @@ Den tillhandahåller en enda OpenAI-kompatibel endpoint (`/v1/*`) och dirigerar 
 
 Centrala funktioner:
 
-- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (375 leverantörer, 154 exekveringsmoduler)
+- OpenAI-kompatibelt API-gränssnitt för CLI/verktyg (375 leverantörer, 156 exekveringsmoduler)
 - Översättning av begäranden/svar mellan leverantörsformat
 - Reservlösning med modellkombinationer (sekvens med flera modeller)
 - Strukturerade kombinationssteg (`provider + model + connection`) med ordning vid körning baserad på `compositeTiers`
@@ -31,7 +31,7 @@ Centrala funktioner:
 - Webbsökning via `/v1/search` (20 leverantörer)
 - Moderering via `/v1/moderations`
 - Omrangordning via `/v1/rerank`
-- Tolkning av think-taggar (``) för resonemangsmodeller
+- Tolkning av think-taggar (`<think>...</think>`) för resonemangsmodeller
 - Sanering av svar för strikt kompatibilitet med OpenAI SDK
 - Rollnormalisering (developer→system, system→user) för kompatibilitet mellan leverantörer
 - Konvertering av strukturerade utdata (json_schema → Gemini responseSchema)
@@ -1094,11 +1094,11 @@ bakåtkompatibilitet. Det aktuella körningskontraktet använder:
 - SQLite-schemamigreringar och krokar för automatisk uppgradering vid start
 - kompatibilitetsväg för migrering från äldre JSON-format till SQLite
 
-## 6) SSRF-/skydd för utgående URL:er
+## 6) SSRF-/utgående URL-skydd
 
-- `src/shared/network/outboundUrlGuard.ts` blockerar alla privata, lokala och länklokala mål-URL:er innan de når leverantörsexekverarna
-- Rutter för identifiering och validering av leverantörsmodeller använder `src/shared/network/safeOutboundFetch.ts`, som tillämpar skyddet före varje utgående förfrågan
-- Skyddsfel exponeras som `URL_GUARD_BLOCKED` med HTTP 422 och loggas i efterlevnadsgranskningsloggen via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) tillämpar `src/shared/network/outboundUrlGuard.ts` på chattförfrågningar som skickas via `BaseExecutor.execute()`. I läget endast offentlig åtkomst (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` med den privata flaggan avstängd) blockerar det privata värdar, loopback-värdar och 169.254.0.0/16. I alla andra lägen blockerar det värdar för molnmetadata. Det kontrollerar värdnamnet eller den ordagranna IP-adressen exakt som den skrivits, före DNS-uppslagning. Inbyggda lokala leverantörer kringgår kontrollen.
+- Rutter för identifiering och validering av leverantörsmodeller använder `src/shared/network/safeOutboundFetch.ts`, som tillämpar skyddet före varje utgående förfrågan.
+- Skyddsfel visas som `URL_GUARD_BLOCKED` med HTTP 503 (`getSafeOutboundFetchErrorStatus`; rutten för modellidentifiering returnerar 400), och faktiska SSRF-blockeringar under validering loggas i granskningsloggen som `provider.validation.ssrf_blocked`-händelser.
 
 ## Observerbarhet och driftssignaler
 
@@ -1149,7 +1149,7 @@ Miljövariabler som används aktivt av koden:
 4. Molnbeteendet är beroende av att `NEXT_PUBLIC_BASE_URL` är korrekt och att molnslutpunkten kan nås.
 5. Katalogen `open-sse/` publiceras som **npm-arbetsytepaketet `@omniroute/open-sse`**. Källkoden importerar det via `@omniroute/open-sse/...` (löses av Next.js `transpilePackages`). Filsökvägar i detta dokument använder fortfarande katalognamnet `open-sse/` för konsekvens.
 6. Diagrammen på instrumentpanelen använder **Recharts** (SVG-baserat) för tillgängliga och interaktiva analysvisualiseringar (stapeldiagram över modellanvändning och tabeller med leverantörsfördelning och lyckandefrekvenser).
-7. E2E-tester använder **Playwright** (`tests/e2e/`) och körs via `npm run test:e2e`. Enhetstester använder **Node.js test runner** (`tests/unit/`) och körs via `npm run test:unit`. Källkoden under `src/` är **TypeScript** (`.ts`/`.tsx`); arbetsytan `open-sse/` förblir JavaScript (`.js`).
+7. E2E-tester använder **Playwright** (`tests/e2e/`) och körs via `npm run test:e2e`. Enhetstester använder **Node.js test runner** (`tests/unit/`) och körs via `npm run test:unit`. Källkoden under `src/` är **TypeScript** (`.ts`/`.tsx`); arbetsytan `open-sse/` förblir TypeScript (`.ts`).
 8. Inställningssidan är organiserad i 7 flikar: Allmänt, Utseende, AI, Säkerhet, Routning, Motståndskraft, Avancerat. Sidan Motståndskraft konfigurerar endast begärandekö, nedkylningsperiod för anslutningar, leverantörsbrytare och beteende för väntan på att nedkylningsperioden ska löpa ut; brytarnas aktuella körningstillstånd visas på sidan Hälsa.
 9. Strategin **Context Relay** (`context-relay`) är uppdelad i två lager: `combo.ts` avgör om en överlämning ska genereras och `chat.ts` infogar överlämningen efter kontomatchningen. Överlämningsdata lagras i SQLite-tabellen `context_handoffs`. Uppdelningen är avsiktlig eftersom endast `chat.ts` vet om det faktiska kontot ändrades.
 10. **Proxytillämpningen** är nu heltäckande: `tokenHealthCheck.ts` matchar proxy per anslutning, `/api/providers/validate` använder `runWithProxyContext` och `proxyFetch.ts` använder `undici.fetch()` för att bibehålla dispatcher-kompatibilitet i Node 22.

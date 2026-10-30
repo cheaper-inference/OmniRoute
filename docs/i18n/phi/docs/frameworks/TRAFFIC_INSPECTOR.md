@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mekanismo:** Gumagamit ng mga OS API upang i-redirect ang lahat ng HTTP/HTTPS traffic sa HTTP_PROXY listener:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` at mga setting ng host/port para sa HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Saklaw:** Bawat application sa machine na sumusunod sa mga system proxy setting
   **Tandaan:** `source` = `"system-proxy"`
 
 **Mga mekanismo sa kaligtasan:**
 
-- Timer para sa awtomatikong pag-disable (default na 30 min, maaaring i-configure sa pamamagitan ng `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Sine-save sa DB ang nakaraang state ng system proxy at nire-restore kapag nag-revert
-- Ipinapakita ng dashboard ang prompt na "Ibinabalik ang system proxy" kung aalis ang user habang aktibo ito
-- Ipinapakita ng UI ang badge na `⚠ Advanced` + explicit na confirmation checkbox
+- Ang paglalapat ng proxy ay nagtatakda ng timer ng pagbabalik na nasa loob lang ng proseso at sumusubok sa abot ng makakaya, nang walang garantiya (default na 30 minuto, maaaring itakda sa `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Hindi nananatili ang timer kapag natapos ang proseso ng server.
+- Ang dating estado ng proxy ay nasa memorya ng proseso; hindi ito permanenteng sine-save sa database ng imbakan na ito ng estado ng capture. Ibinabalik ng revert ang naka-save na mga setting ng macOS/GNOME; sa Windows, nire-reset nito ang WinHTTP proxy sa halip na ibalik ang dating configuration.
+- Habang iniulat na nailapat ang proxy, ang pag-unload ng pahina ay nagpapadala ng keepalive na kahilingan sa pagbabalik sa abot ng makakaya at humihiling ng katutubong kumpirmasyon na ang browser ang nagtatakda ng teksto. Sinusubukan din ang pagbabalik kapag in-unmount ang inspector sa SPA navigation, nang wala ang prompt na iyon ng browser.
+- Ipinapakita ng toolbar ng capture ang isinaling `System-wide` control na may icon ng babala. Sa kasalukuyan, ang pag-click ay nagpapalit lamang ng lokal na estado ng UI; hindi ito nagpapakita ng checkbox ng kumpirmasyon o naglalapat o nagbabalik ng system proxy.
 
 ### Mode 5 — TPROXY transparent decrypt (Linux, root, opt-in)
 
@@ -113,13 +113,13 @@ Isa itong malaking subsystem na may sarili nitong nakalaang gabay para sa operat
 
 ### Paghahambing ng mga mode ng pag-capture
 
-| Mode              | Pag-set up                      |             Sudo?             | Saklaw                                   | Mga tala                                                                                                                                         |
-| ----------------- | ------------------------------- | :---------------------------: | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 1. AgentBridge    | Awtomatiko                      |   Isang beses (cert+hosts)    | 9 na IDE agent                           | Naka-on bilang default                                                                                                                           |
-| 2. Custom Hosts   | Input kada host                 |        Oo (hosts file)        | Anumang app na gumagamit sa host na iyon | Naka-persist sa DB                                                                                                                               |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`        |             Hindi             | Mga app na sumusunod sa env              | Port 8080; naka-CONNECT tunnel ang HTTPS (metadata lang, hindi kailanman dine-decrypt)                                                           |
-| 4. System-wide    | I-toggle + kumpirmahin          |              Oo               | Lahat ng app sa machine                  | Awtomatikong madi-disable pagkalipas ng 30 min                                                                                                   |
-| 5. TPROXY decrypt | I-toggle (Linux + native addon) | Oo (root + pag-install ng CA) | Anumang host sa target port              | Dine-decrypt ang anumang host; naka-off bilang default — tingnan ang `docs/security/MITM-TPROXY-DECRYPT.md` (git; hindi kino-compile sa `/docs`) |
+| Mode              | Pag-set up                                                     |             Sudo?             | Saklaw                                   | Mga tala                                                                                                                                         |
+| ----------------- | -------------------------------------------------------------- | :---------------------------: | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 1. AgentBridge    | Awtomatiko                                                     |   Isang beses (cert+hosts)    | 9 na IDE agent                           | Naka-on bilang default                                                                                                                           |
+| 2. Custom Hosts   | Input kada host                                                |        Oo (hosts file)        | Anumang app na gumagamit sa host na iyon | Naka-persist sa DB                                                                                                                               |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |             Hindi             | Mga app na sumusunod sa env              | Port 8080; naka-CONNECT tunnel ang HTTPS (metadata lang, hindi kailanman dine-decrypt)                                                           |
+| 4. System-wide    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Oo               | Lahat ng app sa machine                  | Timer ng pagbabalik sa abot ng makakaya, walang garantiya (default na 30 minuto)                                                                 |
+| 5. TPROXY decrypt | I-toggle (Linux + native addon)                                | Oo (root + pag-install ng CA) | Anumang host sa target port              | Dine-decrypt ang anumang host; naka-off bilang default — tingnan ang `docs/security/MITM-TPROXY-DECRYPT.md` (git; hindi kino-compile sa `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ ay nakalaan bilang kasunod na gawain).
 ### 5.1 Pagre-record ng session
 
 1. I-click ang **"● I-record ang session"** sa toolbar → maglagay ng pangalan (opsyonal)
-2. Magpapatuloy nang normal ang live tail; ipapakita ng pulang kumikislap na indicator ang `◉ REC · <name> · 00:42 · 23 reqs`
+2. Nagpapatuloy nang normal ang live na pagsubaybay; ipinapakita ng recording bar ang pumipintig na pulang tuldok, lumipas na oras, pangalan ng session kung mayroon, at isinaling control para huminto.
 3. I-click ang **"⏹ Ihinto"** → mase-save ang snapshot ng session sa `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Pagtingin sa na-record na session
@@ -322,7 +322,7 @@ ay nakalaan bilang kasunod na gawain).
 Inililista ng dropdown na **Mga Session** sa toolbar ang mga naka-save na session. Kapag pumili ng isa:
 
 - Ilo-load ang snapshot ng session (naka-freeze na estado)
-- May banner na magpapakita ng: `Tinitingnan ang na-record na session "<name>" — [Bumalik sa live]`
+- Ipinapakita ng banner ang isinaling label ng recorded session at pangalan ng session (o isinaling pamalit na teksto para sa session na walang pamagat), katabi ng isinaling button na bumalik sa live na view.
 - Magiging available ang tab na Stats na may mga aggregate ng Recharts
 
 ### 5.3 Mga format ng pag-export
@@ -346,7 +346,7 @@ Ipinapakita ng Traffic Inspector ang **lahat ng naharang na trapiko ng HTTPS**, 
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                        | Ang lahat ng route at ang WebSocket endpoint ay loopback-only (ipinatutupad sa `routeGuard.ts` bago ang auth)                                                                               |
 | **Pagtatago ng lihim**                | Ang linear na `maskSecret()` scanner ay nagre-redact ng mga kredensyal na Bearer ng RFC 6750, mga key na may prefix ng provider, at mahahabang opaque token bago ang `TrafficBuffer.push()` |
-| **Limitasyon sa laki ng body**        | Ang mga body na > `INSPECTOR_MAX_BODY_KB` (default na 1024 KB) ay pinuputol nang may abisong `"(pinutol para sa performance)"`                                                              |
+| **Limitasyon sa laki ng body**        | Ang mga body na > `INSPECTOR_MAX_BODY_KB` (default na 1024 KB) ay pinuputol nang may abisong `"(truncated for performance)"`                                                                |
 | **Paglilinis ng header**              | Ginagawang lowercase ang mga pangalan; inaalis ang framing/hop-by-hop at proxy-auth header; ganap na nire-redact ang cookies; ipinapasa ang mga value ng kredensyal sa `maskSecret()`       |
 | **CSP**                               | Mahigpit na Content Security Policy sa mga page ng Traffic Inspector upang maiwasan ang XSS sa pamamagitan ng mga ini-inject na response body                                               |
 | **Walang persistence bilang default** | Nasa memory ang `TrafficBuffer` at nawawala kapag nag-restart ang server. Pine-persist lamang ang mga session kapag tahasang nire-record                                                    |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Mag-aalok din ang dashboard ng "Ibalik ang system proxy" sa susunod na pag-load kung matutukoy nitong ipinapahiwatig ng estado ng DB na aktibo ang proxy.
+Nasa proseso lamang ng server ang naka-save na estado ng proxy. Pagkatapos ng pag-crash o pag-restart, hindi maibabalik ng kasalukuyang imbakan ng estado ng capture ang snapshot na iyon mula sa database; gamitin ang mga recovery command ng platform sa itaas kapag kailangan ng manu-manong pagbawi.
 
 ### Puno ang buffer
 

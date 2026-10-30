@@ -11,13 +11,13 @@ OmniRoute runner එකකටම **එක් භූමිකාවක්**, එ�
 webpack build එකක් සහ lint job එකක් සමඟ එකවර ක්රියාත්මක වන විට පමණි; host swap (16 GB) එය දරාගන්නා අතර,
 pull-request Builds hosted runners මත ක්රියාත්මක වන බැවින් Turbopack slot එක බොහෝ වේලාවට නිෂ්ක්රීයව පවතී:
 
-| runner               | label          | භූමිකාව                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
-| -------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
-| `omniroute-113-5`    | `omni-build`   | Turbopack builds: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්රී a11y build එක | 56 GB / 60 GB (swap 0)     | 1600 %     |
-| `omniroute-113-6`    | `omni-release` | Release-Green (`release-green` + `main-green`), webpack build                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
-| `omniroute-113-2`    | `omni-light`   | රාත්රී jobs (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
-| `omniroute-113`      | `omni-light`   | ඉහත සඳහන් සංචිතයම                                                                                                                                  | 8 GB / 12 GB               | 400 %      |
-| OmniHeuris, OmniMind | (ඒවායේ repos)  | Dependabot පමණි (එකකට උපරිමය 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | එකකට 200 % |
+| runner               | label                           | භූමිකාව                                                                                                                                            | `MemoryHigh` / `MemoryMax` | `CPUQuota` |
+| -------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack builds: `ci.yml` `Build` (push/dispatch පමණි), Docker amd64, `npm-publish`, `nightly-v4-build`, `preview-artifact`, රාත්රී a11y build එක | 56 GB / 60 GB (swap 0)     | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green (`release-green` + `main-green`), webpack build                                                                                      | 20 GB / 24 GB (swap 4 GB)  | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | රාත්රී jobs (Schemathesis, promptfoo, garak, k6) සහ `quality.yml` `lint-guard`                                                                     | 12 GB / 16 GB (swap 4 GB)  | 600 %      |
+| `omniroute-113`      | `omni-light`                    | ඉහත සඳහන් සංචිතයම                                                                                                                                  | 8 GB / 12 GB               | 400 %      |
+| OmniHeuris, OmniMind | (ඒවායේ repos)                   | Dependabot පමණි (එකකට උපරිමය 155 MB, 2026-10-18)                                                                                                   | 4 GB / 6 GB                | එකකට 200 % |
 
 2026-10-18 දින මනින ලදී:
 
@@ -83,7 +83,7 @@ build එකක් RAM සහ CPU දිගටම භාවිත කරයි. 
 ## මෙහෙයුම් නීති
 
 - **වරකට එක් Turbopack build එකක් පමණයි — ලේබලය මඟින් බලාත්මක කෙරේ.** සම්පූර්ණ Turbopack
-  `next build` එකක් ධාවනය කරන සෑම job එකක්ම `[self-hosted, omni-build]` ඉලක්ක කරන අතර, එම
+  `next build` එකක් ධාවනය කරන සෑම job එකක්ම `[self-hosted, omni-build, omni-build-60gb]` ඉලක්ක කරන අතර, එම
   ලේබලය දරන්නේ **`omniroute-113-5`** පමණි: `ci.yml` හි `Build`, `npm-publish.yml` හි `publish`, `nightly-v4-build`, `preview-artifact`,
   රාත්රී a11y build එක (#16853) සහ `docker-publish.yml` හි **amd64** (BuildKit තුළ webpack —
   එහිදී Turbopack බිඳ වැටිණි, run 33253576569). arm64 Docker කොටස `ubuntu-24.04-arm` මතම පවතී.

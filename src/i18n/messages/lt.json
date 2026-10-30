@@ -6600,7 +6600,7 @@
       "xai": "Prijunkite xAI (Grok) naudodami API raktą.",
       "xiaomi-mimo": "Prijunkite Xiaomi MiMo naudodami API raktą.",
       "yi": "Gaukite API raktą adresu platform.lingyiwanwu.com",
-      "zai": "API raktas iš https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "API raktas iš https://z.ai/manage-apikey/apikey-list",
       "zenmux": "ZenMux suteikia su OpenAI suderinamą pokalbių užbaigimų galinį tašką adresu /api/v1/chat/completions, taip pat Anthropic Messages (/api/anthropic/v1/messages) ir Google Gemini (/api/vertex-ai) protokolų sąsajas. OmniRoute naudoja OpenAI protokolą.",
       "galadriel": "Prijunkite Galadriel naudodami API raktą.",
       "predibase": "$25 nemokamų bandomųjų kreditų (galioja 30 dienų)",

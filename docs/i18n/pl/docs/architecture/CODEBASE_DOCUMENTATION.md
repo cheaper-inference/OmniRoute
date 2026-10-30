@@ -4,14 +4,7 @@
 
 ---
 
-title: "Dokumentacja bazy kodu OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Dokumentacja bazy kodu OmniRoute
-
-> **Wersja:** v3.8.0
+> **Wersja:** v3.8.51
 > **Ostatnia aktualizacja:** 2026-06-28
 > **Odbiorcy:** Inżynierowie współtworzący OmniRoute lub budujący na nim integracje.
 >
@@ -454,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Rejestry dostawców, profile nagłówków, tożsamość, …
 ├── handlers/               Procedury obsługi żądań (czat, osadzanie, audio, obrazy, …)
-├── executors/              150 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
+├── executors/              156 modułów wykonawczych dostawców (klasy wykonawcze + narzędzia pomocnicze dla poszczególnych dostawców)
 ├── translator/             Konwersja formatów (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformator strumienia Responses API ↔ Chat Completions
 ├── services/               Ponad 80 modułów usług (kombinacje, mechanizm zapasowy, limity, tożsamość, …)
@@ -484,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
+156 modułów wykonawczych najwyższego poziomu (`*.ts` z wyłączeniem `base.ts`, `index.ts` i testów — tę liczbę
 mierzy `npm run check:docs-counts`). Każda klasa wykonawcza rozszerza `BaseExecutor` (`base.ts`),
 bezpośrednio albo za pośrednictwem `DefaultExecutor` lub innego modułu wykonawczego; pozostałe moduły to
 narzędzia pomocnicze dla poszczególnych dostawców (schematy narzędzi, adaptery pobierania/TTS, procedury obsługi niestandardowych zachowań). Moduły wykonawcze obejmują:
@@ -639,28 +632,28 @@ Dwa binaria są wystawione w `package.json` → `bin`:
 
 ## 7. `tests/`
 
-| Katalog                                              | Typ                                                                                                       |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `tests/unit/`                                        | Testy jednostkowe przez Node native test runner (1821 plików, plus `api/`, `auth/`, `authz/` podkatalogi) |
-| `tests/integration/`                                 | Testy cross-module + stan DB                                                                              |
-| `tests/e2e/`                                         | Playwright UI tests                                                                                       |
-| `tests/protocols-e2e/`                               | MCP/A2A protocol e2e                                                                                      |
-| `tests/translator/`                                  | Translator-specific tests                                                                                 |
-| `tests/security/`                                    | Security regressions                                                                                      |
-| `tests/load/`                                        | Load / stress tests                                                                                       |
-| `tests/golden-set/`                                  | Reference outputs for translator regressions                                                              |
-| `tests/helpers/`, `tests/fixtures/`, `tests/manual/` | Support                                                                                                   |
+| Katalog                                              | Typ                                                                                                                         |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `tests/unit/`                                        | Testy jednostkowe uruchamiane przez natywny mechanizm testowy Node (1821 plików oraz podkatalogi `api/`, `auth/`, `authz/`) |
+| `tests/integration/`                                 | Testy obejmujące wiele modułów i stan bazy danych                                                                           |
+| `tests/e2e/`                                         | Testy interfejsu użytkownika Playwright                                                                                     |
+| `tests/e2e/protocol-clients.test.ts`                 | Testy e2e protokołów MCP/A2A                                                                                                |
+| `tests/translator/`                                  | Testy specyficzne dla translatora                                                                                           |
+| `tests/security/`                                    | Testy regresji zabezpieczeń                                                                                                 |
+| `tests/load/`                                        | Testy obciążeniowe / wydajnościowe                                                                                          |
+| `tests/golden-set/`                                  | Wyniki referencyjne dla testów regresji translatora                                                                         |
+| `tests/helpers/`, `tests/fixtures/`, `tests/manual/` | Pliki pomocnicze                                                                                                            |
 
-Common commands:
+Typowe polecenia:
 
-| Command                                                  | What it runs                                                     |
-| -------------------------------------------------------- | ---------------------------------------------------------------- |
-| `npm run test:unit`                                      | All `tests/unit/*.test.ts` via Node test runner (concurrency 10) |
-| `npm run test:vitest`                                    | Vitest suite (MCP, autoCombo, cache)                             |
-| `npm run test:e2e`                                       | Pakiet UI Playwright                                             |
-| `npm run test:protocols:e2e`                             | e2e protokołów MCP + A2A                                         |
-| `npm run test:coverage`                                  | Coverage gate (≥60% lines/statements/functions/branches)         |
-| `node --import tsx/esm --test tests/unit/<file>.test.ts` | Single file run                                                  |
+| Polecenie                                                | Co uruchamia                                                                                   |
+| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run test:unit`                                      | Wszystkie pliki `tests/unit/*.test.ts` za pomocą mechanizmu testowego Node (współbieżność: 10) |
+| `npm run test:vitest`                                    | Zestaw testów Vitest (MCP, autoCombo, pamięć podręczna)                                        |
+| `npm run test:e2e`                                       | Zestaw testów interfejsu użytkownika Playwright                                                |
+| `npm run test:protocols:e2e`                             | Testy e2e protokołów MCP i A2A                                                                 |
+| `npm run test:coverage`                                  | Próg pokrycia (≥60% wierszy/instrukcji/funkcji/gałęzi)                                         |
+| `node --import tsx/esm --test tests/unit/<file>.test.ts` | Uruchomienie pojedynczego pliku                                                                |
 
 ---
 
@@ -740,109 +733,108 @@ Zob. [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) oraz dedykowaną sekcję w
 
 ---
 
-## 10. Jak współtworzyć
+## 10. Jak współtworzyć projekt
 
-### Dodaj nowego providera
+### Dodawanie nowego dostawcy
 
-1. Zarejestruj w `src/shared/constants/providers.ts` (walidacja Zod przy ładowaniu).
-2. Dodaj executor w `open-sse/executors/`, jeśli wymagana jest własna logika
+1. Zarejestruj go w `src/shared/constants/providers.ts` (walidacja za pomocą Zod podczas ładowania).
+2. Dodaj moduł wykonawczy w `open-sse/executors/`, jeśli wymagana jest niestandardowa logika
    (rozszerz `BaseExecutor`).
-3. Dodaj translator w `open-sse/translator/`, jeśli nie mówi formatem OpenAI.
-4. Jeśli OAuth, dodaj konfigurację w `src/lib/oauth/providers/` oraz
+3. Dodaj translator w `open-sse/translator/`, jeśli dostawca nie obsługuje formatu OpenAI.
+4. Jeśli korzysta z OAuth, dodaj konfigurację w `src/lib/oauth/providers/` oraz
    `src/lib/oauth/services/`.
-5. Zarejestruj modele w `open-sse/config/providerRegistry.ts` (lub w rejestrze
-   specyficznym dla formatu w `open-sse/config/`).
+5. Zarejestruj modele w `open-sse/config/providerRegistry.ts` (lub w rejestrze właściwym dla danego
+   formatu w `open-sse/config/`).
 6. Napisz testy w `tests/unit/`.
 
-### Dodaj nową trasę API
+### Dodawanie nowej trasy API
 
 1. Utwórz `src/app/api/your-route/route.ts`.
-2. Stosuj wzorzec: CORS → walidacja body Zod → auth → delegacja do handlera.
-3. Jeśli nowy kształt requestu: dodaj schemat Zod w `src/shared/validation/schemas.ts`.
-4. Jeśli tylko management: dodaj ścieżkę do `src/shared/constants/publicApiRoutes.ts`
-   (denylist dla publicznej powierzchni API).
+2. Postępuj zgodnie ze schematem: CORS → walidacja treści żądania za pomocą Zod → uwierzytelnianie → delegowanie do procedury obsługi.
+3. Jeśli żądanie ma nową strukturę, dodaj schemat Zod w `src/shared/validation/schemas.ts`.
+4. Jeśli trasa jest przeznaczona wyłącznie do zarządzania, dodaj ścieżkę do `src/shared/constants/publicApiRoutes.ts`
+   (lista blokowanych ścieżek publicznego interfejsu API).
 5. Dodaj testy w `tests/unit/`.
 6. Zaktualizuj `docs/reference/API_REFERENCE.md` oraz `docs/openapi.yaml`.
 
-### Dodaj nowy moduł DB
+### Dodawanie nowego modułu bazy danych
 
-1. Utwórz `src/lib/db/yourModule.ts` i importuj `getDbInstance()` z `./core.ts`.
-2. Eksportuj funkcje CRUD dla swojej domeny.
-3. Jeśli nowe tabele: dodaj migrację w `src/lib/db/migrations/`, numerowaną
-   sekwencyjnie, idempotentną, transakcyjną.
-4. Re-export z `src/lib/localDb.ts` (tylko re-export — **bez logiki**).
+1. Utwórz `src/lib/db/yourModule.ts` i zaimportuj `getDbInstance()` z `./core.ts`.
+2. Wyeksportuj funkcje CRUD dla swojej domeny.
+3. Jeśli dodajesz nowe tabele, dodaj migrację w `src/lib/db/migrations/`, z kolejnym
+   numerem, idempotentną i transakcyjną.
+4. Moduły importujące korzystają z bezpośrednich importów z `@/lib/db/yourModule` (bez pliku zbiorczego — stara warstwa reeksportu `localDb.ts` została usunięta).
 5. Dodaj testy w `tests/unit/`.
 
-### Dodaj nowe narzędzie MCP
+### Dodawanie nowego narzędzia MCP
 
 1. Dodaj definicję narzędzia w `open-sse/mcp-server/tools/` (lub rozszerz
    `open-sse/mcp-server/schemas/tools.ts`).
-2. Przypisz odpowiednie scope'y w `src/shared/constants/mcpScopes.ts`.
+2. Przypisz odpowiednie zakresy w `src/shared/constants/mcpScopes.ts`.
 3. Zarejestruj narzędzie w `open-sse/mcp-server/server.ts`.
-4. Dodaj testy w `open-sse/mcp-server/__tests__/`.
+4. Dodaj testy w `tests/unit/`.
 5. Zaktualizuj [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
-### Dodaj nowy skill A2A
+### Dodawanie nowej umiejętności A2A
 
-Zob. [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Skille żyją w
-`src/lib/a2a/skills/` i są rejestrowane przez task manager A2A.
+Zobacz [A2A-SERVER.md § Dodawanie nowej umiejętności](../frameworks/A2A-SERVER.md). Umiejętności znajdują się w
+`src/lib/a2a/skills/` i są rejestrowane za pośrednictwem menedżera zadań A2A.
 
 ---
 
 ## 11. Konwencje
 
-- **Styl kodu**: wcięcie 2 spacje, podwójne cudzysłowy, szerokość 100 znaków, średniki,
-  trailing commas `es5` — egzekwowane przez Prettier via `lint-staged`.
-- **Importy**: external → internal (`@/`, `@omniroute/open-sse`) → relative.
+- **Styl kodu**: wcięcia 2-spacjowe, podwójne cudzysłowy, szerokość 100 znaków, średniki,
+  końcowe przecinki `es5` — wymuszane przez Prettier za pośrednictwem `lint-staged`.
+- **Importy**: zewnętrzne → wewnętrzne (`@/`, `@omniroute/open-sse`) → względne.
 - **Nazewnictwo**: pliki `camelCase` lub `kebab-case`, komponenty `PascalCase`,
   stałe `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` wszędzie;
-  `no-explicit-any` = `warn` w `open-sse/` i `tests/`, error gdzie indziej.
-- **TypeScript**: `strict: false` (postawa legacy). Preferuj jawne typy zamiast
-  inferencji na granicach między modułami.
-- **Baza danych**: nigdy nie pisz surowego SQL w trasach ani handlerach — zawsze idź przez
-  moduły `src/lib/db/`. Nigdy nie dodawaj logiki do `src/lib/localDb.ts`.
-- **Typowanie encji DB (#3512)**: funkcja, która zapisuje lub czyta kształt wiersza tabeli DB,
-  powinna przyjmować/zwracać nazwany interfejs TS odzwierciedlający kolumny tej tabeli
-  1:1, a nie `any` ani anonimowy typ inline w miejscu wywołania. Umieść
+  `no-explicit-any` = `error` w `open-sse/**/*.ts` i `tests/**/*.ts`.
+- **TypeScript**: `strict: false` (podejście wynikające ze zgodności ze starszym kodem). Na granicach
+  między modułami preferuj jawne typy zamiast wnioskowania.
+- **Baza danych**: nigdy nie zapisuj surowego SQL w trasach ani procedurach obsługi — zawsze korzystaj
+  z modułów `src/lib/db/`. Nigdy nie używaj importów zbiorczych — importuj bezpośrednio konkretne moduły `src/lib/db/*`.
+- **Typowanie encji DB (#3512)**: funkcja, która zapisuje lub odczytuje kształt
+  wiersza tabeli DB, powinna przyjmować/zwracać nazwany interfejs TS odwzorowujący kolumny tej tabeli
+  w stosunku 1:1, a nie `any` ani anonimowy typ zadeklarowany bezpośrednio w miejscu wywołania. Umieść
   interfejs obok funkcji (np. `export interface UsageEntry` w
-  `src/lib/usage/usageHistory.ts` nad `saveRequestUsage`), trzymaj poszczególne
-  pola opcjonalne/nullable, gdy różni writerzy wypełniają wiersz
-  przyrostowo, i preferuj `unknown` zamiast `any` dla pola, którego kształt
-  różni się między callerami (udokumentowane na polu, np. `UsageEntry.tokens`
-  akceptuje zarówno surowe usage w kształcie providera, jak i znormalizowany kształt). Gdy
-  liczba `any` w pliku spadnie w ten sposób do zera, dodaj go do
-  allowlisty `check:any-budget:t11` (`scripts/check/check-t11-any-budget.mjs`,
-  `maxAny: 0`), żeby nie regresował. To konwencja first-slice — szersze
-  sprzątanie „no anonymous `any`” jest iteracyjne w reszcie
-  codebase.
-- **Błędy**: try/catch ze specyficznymi typami błędów, loguj z kontekstem pino. Nigdy
-  nie połykaj błędów w strumieniach SSE; używaj abort signal do cleanup.
-- **Bezpieczeństwo**: nigdy nie używaj `eval()` / `new Function()` / implied eval. Waliduj
-  wszystkie wejścia Zod. Szyfruj poświadczenia w spoczynku (AES-256-GCM). Trzymaj
-  denylist `src/shared/constants/upstreamHeaders.ts` zsynchronizowaną z
-  warstwą sanitize/validation.
-- **Commity**: Conventional Commits — `feat(scope): subject`. Dozwolone scope'y:
+  `src/lib/usage/usageHistory.ts` nad `saveRequestUsage`), pozostaw poszczególne
+  pola opcjonalne/dopuszczające wartość null, gdy różne procedury zapisujące wypełniają wiersz
+  przyrostowo, oraz preferuj `unknown` zamiast `any` dla pola, którego kształt
+  różni się między wywołującymi (należy to udokumentować przy polu, np. `UsageEntry.tokens`
+  akceptuje zarówno surowe dane użycia w formacie dostawcy, jak i postać znormalizowaną). Gdy dzięki
+  temu liczba wystąpień `any` w pliku spadnie do zera, dodaj go do listy dozwolonych
+  `check:any-budget:t11` (`scripts/check/check-t11-any-budget.mjs`,
+  `maxAny: 0`), aby zapobiec regresji. Jest to konwencja dotycząca pierwszego etapu — szersze
+  usuwanie „anonimowych `any`” jest prowadzone iteracyjnie w pozostałej części
+  bazy kodu.
+- **Błędy**: używaj try/catch z konkretnymi typami błędów i zapisuj logi wraz z kontekstem pino. Nigdy
+  nie ignoruj po cichu błędów w strumieniach SSE; do sprzątania zasobów używaj sygnałów przerwania.
+- **Bezpieczeństwo**: nigdy nie używaj `eval()` / `new Function()` / niejawnego eval. Waliduj
+  wszystkie dane wejściowe za pomocą Zod. Szyfruj dane uwierzytelniające przechowywane w spoczynku (AES-256-GCM). Utrzymuj
+  listę blokowanych elementów `src/shared/constants/upstreamHeaders.ts` w zgodności z
+  warstwą oczyszczania/walidacji.
+- **Commity**: Conventional Commits — `feat(scope): subject`. Dozwolone zakresy:
   `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`,
   `a2a`, `memory`, `skills`.
-- **Branche**: prefiksy `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
+- **Gałęzie**: prefiksy `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nigdy nie commituj bezpośrednio do `main`.
-- **Husky**: pre-commit uruchamia `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push uruchamia `check:any-budget:t11` + `check:tracked-artifacts` (szybkie bramki; wyklucza `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 
-## 12. Twarde reguły (z CLAUDE.md)
+## 12. Bezwzględne zasady (z CLAUDE.md)
 
-1. Nigdy nie commituj sekretów ani poświadczeń.
-2. Nigdy nie dodawaj logiki do `src/lib/localDb.ts`.
-3. Nigdy nie używaj `eval()` / `new Function()` / implied eval.
-4. Nigdy nie commituj bezpośrednio do `main`.
-5. Nigdy nie pisz surowego SQL w trasach — zawsze idź przez moduły `src/lib/db/`.
-6. Nigdy nie połykaj błędów w strumieniach SSE.
-7. Zawsze waliduj wejścia schematami Zod.
-8. Zawsze dołączaj testy przy zmianie kodu produkcyjnego.
-9. Pokrycie musi pozostać ≥ 60% (statements, lines, functions, branches).
+1. Nigdy nie zatwierdzaj sekretów ani danych uwierzytelniających.
+2. Nigdy nie używaj importów zbiorczych — korzystaj bezpośrednio z konkretnych modułów `src/lib/db/*`.
+3. Nigdy nie używaj `eval()` / `new Function()` / niejawnego eval.
+4. Nigdy nie zatwierdzaj zmian bezpośrednio do `main`.
+5. Nigdy nie umieszczaj surowego SQL w trasach — zawsze korzystaj z modułów `src/lib/db/`.
+6. Nigdy nie ignoruj po cichu błędów w strumieniach SSE.
+7. Zawsze waliduj dane wejściowe za pomocą schematów Zod.
+8. Zawsze dołączaj testy podczas modyfikowania kodu produkcyjnego.
+9. Pokrycie testami musi pozostać na poziomie ≥ 60% (instrukcje, wiersze, funkcje, gałęzie).
 
 ---
 

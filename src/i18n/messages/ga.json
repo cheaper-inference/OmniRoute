@@ -6600,7 +6600,7 @@
       "xai": "Ceangail xAI (Grok) le heochair API.",
       "xiaomi-mimo": "Ceangail Xiaomi MiMo le heochair API.",
       "yi": "Faigh eochair API ag platform.lingyiwanwu.com",
-      "zai": "Eochair API ó https://open.bigmodel.cn/usercenter/apikeys",
+      "zai": "Eochair API ó https://z.ai/manage-apikey/apikey-list",
       "zenmux": "Cuireann ZenMux críochphointe comhlánuithe comhrá atá comhoiriúnach le OpenAI ar fáil ag /api/v1/chat/completions, chomh maith le dromchlaí prótacail Anthropic Messages (/api/anthropic/v1/messages) agus Google Gemini (/api/vertex-ai). Úsáideann OmniRoute prótacal OpenAI.",
       "galadriel": "Ceangail Galadriel le heochair API.",
       "predibase": "Creidmheasanna trialach saor in aisce ar fiú $25 iad (bailí ar feadh 30 lá)",

@@ -4,327 +4,337 @@
 
 ---
 
-OmniRoute มีกลไกความยืดหยุ่นที่แตกต่างกันแต่เกี่ยวข้องกันอยู่สามกลไก แต่ละกลไกมีขอบเขตและวัตถุประสงค์ต่างกัน ควรแยกกลไกเหล่านี้ออกจากกันเมื่อแก้ไขข้อบกพร่องเกี่ยวกับพฤติกรรมการกำหนดเส้นทาง
+OmniRoute มีกลไกด้านความทนทาน (resilience) สามชั้นที่แตกต่างแต่เกี่ยวข้องกัน แต่ละชั้นมีขอบเขตและวัตถุประสงค์ต่างกัน โปรดแยกกลไกเหล่านี้ออกจากกันเมื่อดีบั๊กพฤติกรรมการเราต์
 
-![โมเดลความยืดหยุ่น 3 ชั้น](../diagrams/exported/resilience-3layers.svg)
+![โมเดลความทนทาน 3 ชั้น](../diagrams/exported/resilience-3layers.svg)
 
-> แหล่งที่มา: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
+> ที่มา: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)
 
-## 1. ตัวตัดวงจรระดับผู้ให้บริการ
+## 1. Circuit Breaker ระดับผู้ให้บริการ
 
 **ขอบเขต:** ผู้ให้บริการทั้งราย (เช่น `glm`, `openai`, `anthropic`)
 
-**วัตถุประสงค์:** หยุดส่งทราฟฟิกไปยังผู้ให้บริการที่ล้มเหลวซ้ำๆ ในระดับอัปสตรีมหรือบริการ
+**วัตถุประสงค์:** หยุดส่งทราฟฟิกไปยังผู้ให้บริการที่ล้มเหลวซ้ำ ๆ ในระดับอัปสตรีม/บริการ
 
-**การใช้งาน:**
+**ส่วนประกอบการทำงาน:**
 
 - คลาสหลัก: `src/shared/utils/circuitBreaker.ts`
-- การเชื่อมต่อระบบ: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
-- API สถานะ: `GET /api/monitoring/health`
+- จุดเชื่อมต่อ (wiring): `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- API ตรวจสถานะ: `GET /api/monitoring/health`
 - API รีเซ็ต: `POST /api/resilience/reset`
-- ตัวห่อหุ้ม: `open-sse/services/accountFallback.ts`
+- ตัวครอบ (wrappers): `open-sse/services/accountFallback.ts`
 - ตารางฐานข้อมูล: `domain_circuit_breakers`
 
 **สถานะ:**
 
-- `CLOSED` — อนุญาตให้รับส่งทราฟฟิกตามปกติ
-- `DEGRADED` — ยังคงอนุญาตให้รับส่งทราฟฟิก แต่จะติดตามความล้มเหลวของผู้ให้บริการที่เพิ่มสูงขึ้น
-- `OPEN` — บล็อกผู้ให้บริการชั่วคราว และการกำหนดเส้นทางแบบคอมโบจะข้ามผู้ให้บริการดังกล่าว
-- `HALF_OPEN` — หมดเวลารอการรีเซ็ตแล้ว และอนุญาตให้ส่งคำขอทดสอบได้
+- `CLOSED` — อนุญาตทราฟฟิกตามปกติ
+- `DEGRADED` — ยังอนุญาตทราฟฟิกอยู่ แต่ระบบกำลังติดตามความล้มเหลวของผู้ให้บริการที่เพิ่มสูงขึ้น; จะกลับสู่ `CLOSED` เมื่อสำเร็จครบตามจำนวนที่กำหนด เมื่อการทดสอบการเชื่อมต่อผ่าน หรือเมื่อผ่านพ้นช่วงระงับ `OPEN` ที่ยาวที่สุดสำหรับความล้มเหลวชนิดล่าสุด (ค่า `cooldownByKind` ของชนิดนั้น หากไม่มีให้ใช้ `resetTimeout` × `maxBackoffMultiplier` อย่างน้อยหนึ่งรอบคูลดาวน์) โดยไม่มีความล้มเหลวใหม่เกิดขึ้น
+- `OPEN` — ผู้ให้บริการถูกบล็อกชั่วคราว; การเราต์แบบ combo จะข้ามไป
+- `HALF_OPEN` — หมดเวลารีเซ็ตแล้ว; อนุญาตให้ส่งรีเควสต์สำรวจ (probe)
 
-**ค่าเริ่มต้นที่กำหนดค่าได้ (`open-sse/config/constants.ts` ซึ่งเปิดให้ตั้งค่าใน Dashboard → Settings → Resilience):**
+**ค่าเริ่มต้นที่ปรับแต่งได้ (`open-sse/config/constants.ts` แสดงอยู่ใน Dashboard → Settings → Resilience):**
 
-| คลาส    | เริ่มเสื่อมสภาพเมื่อ | เปิดวงจรเมื่อ    | เวลารอการรีเซ็ต |
-| ------- | -------------------- | ---------------- | --------------- |
-| OAuth   | ล้มเหลว 5 ครั้ง      | ล้มเหลว 8 ครั้ง  | 60s             |
-| API-key | ล้มเหลว 7 ครั้ง      | ล้มเหลว 12 ครั้ง | 30s             |
-| Local   | คำนวณจากค่าอื่น      | ล้มเหลว 2 ครั้ง  | 15s             |
+| Class   | Degraded at       | Opens at         | Reset timeout |
+| ------- | ----------------- | ---------------- | ------------- |
+| OAuth   | ล้มเหลว 5 ครั้ง   | ล้มเหลว 8 ครั้ง  | 60s           |
+| API-key | ล้มเหลว 7 ครั้ง   | ล้มเหลว 12 ครั้ง | 30s           |
+| Local   | คำนวณให้อัตโนมัติ | ล้มเหลว 2 ครั้ง  | 15s           |
 
-`degradationThreshold` ควบคุมว่าเมื่อใดผู้ให้บริการจะเข้าสู่สถานะ `DEGRADED` ส่วน `failureThreshold` ควบคุมว่าเมื่อใดวงจรจะเปิดและผู้ให้บริการจะถูกข้าม ขณะนี้โปรไฟล์ผู้ให้บริการภายในระบบยังไม่ปรากฏในหน้าการตั้งค่า Resilience
+`degradationThreshold` ควบคุมว่าผู้ให้บริการจะเข้าสู่ `DEGRADED` เมื่อใด; `failureThreshold` ควบคุมว่าเมื่อใดจะเข้าสู่สถานะเปิด (OPEN) และถูกข้าม โปรไฟล์ผู้ให้บริการแบบ Local ยังไม่แสดงในหน้าตั้งค่า Resilience
 
-**รหัสที่ทำให้วงจรตัด:** เฉพาะสถานะระดับผู้ให้บริการ `[408, 500, 502, 503, 504]` เท่านั้น ห้ามตัดวงจรสำหรับข้อผิดพลาดระดับบัญชี (ส่วนใหญ่คือ 401/403/429 ซึ่งควรจัดการด้วยช่วงพักหรือการล็อกบัญชี)
+**รหัสที่ทำให้ทริป:** เฉพาะสถานะระดับผู้ให้บริการ `[408, 500, 502, 503, 504]` ห้ามทริปกับข้อผิดพลาดระดับบัญชี (401/403/429 ส่วนใหญ่ — เหล่านั้นเป็นหน้าที่ของคูลดาวน์หรือการล็อกเอาต์)
 
-**การกู้คืนแบบ Lazy:** เมื่อสถานะ `OPEN` หมดอายุ `getStatus()`, `canExecute()`, `getRetryAfterMs()` จะรีเฟรชสถานะเป็น `HALF_OPEN` โดยไม่จำเป็นต้องใช้ตัวจับเวลาเบื้องหลัง
+**การฟื้นตัวแบบ lazy:** เมื่อ `OPEN` หมดอายุ `getStatus()`, `canExecute()`, `getRetryAfterMs()` จะรีเฟรชสถานะเป็น `HALF_OPEN` การอ่านค่าเหล่านั้น (และความล้มเหลวครั้งถัดไป) จะทำให้ `DEGRADED` ที่ค้างเก่าค่อย ๆ กลับเป็น `CLOSED` ไม่จำเป็นต้องใช้ตัวจับเวลาพื้นหลัง
 
 ---
 
-### ช่วงพักระดับผู้ให้บริการแบบส่วนกลางที่เลือกเปิดใช้ได้ (เกตตามกรอบเวลา)
+### Provider Cooldown ระดับโกลบอลแบบเลือกเปิดใช้ (window gate)
 
-ชั้นที่สี่ซึ่ง**เลือกเปิดใช้ได้** (`PROVIDER_COOLDOWN_ENABLED` โดยค่าเริ่มต้นคือ**ปิด**) จะเก็บ
-สถานะผู้ให้บริการที่ล้มเหลวไว้ในหน่วยความจำร่วมกันระหว่างคำขอใน
-`open-sse/services/providerCooldownTracker.ts` และระบบการระบุเป้าหมายแบบคอมโบจะตรวจสอบข้อมูลนี้
-เพื่อไม่ให้คำขอแบบคอมโบที่ต่อเนื่องย้อนกลับไปลองผู้ให้บริการที่เพิ่งล้มเหลวซ้ำอีก
-รายการระดับผู้ให้บริการจะใช้เกตตามกรอบเวลาของ `PROVIDER_PROFILES`:
+ชั้นที่สี่ซึ่งเป็นแบบ **opt-in** (`PROVIDER_COOLDOWN_ENABLED` ค่าเริ่มต้น **ปิด**) จะเก็บหน่วยความจำข้ามรีเควสต์ของผู้ให้บริการที่ล้มเหลวไว้ใน `open-sse/services/providerCooldownTracker.ts` ซึ่งการคัดเลือกเป้าหมายของ combo จะนำมาใช้อ้างอิง เพื่อให้รีเควสต์ combo ที่ต่อเนื่องกันหยุดวนซ้ำไปยังผู้ให้บริการที่เพิ่งล้มเหลว รายการระดับผู้ให้บริการจะปฏิบัติตาม window gate ของ `PROVIDER_PROFILES`:
 
-| โปรไฟล์  | ตัดวงจรหลังจาก (`providerFailureThreshold`) | ภายใน (`providerFailureWindowMs`) | พักเป็นเวลา (`providerCooldownMs`) |
-| -------- | ------------------------------------------: | --------------------------------: | ---------------------------------: |
-| OAuth    |                                        `10` |                           `15min` |                             `5min` |
-| คีย์ API |                                        `15` |                           `30min` |                            `10min` |
+| Profile | trips after (`providerFailureThreshold`) | inside (`providerFailureWindowMs`) | cools for (`providerCooldownMs`) |
+| ------- | ---------------------------------------: | ---------------------------------: | -------------------------------: |
+| OAuth   |                                     `10` |                            `15min` |                           `5min` |
+| API key |                                     `15` |                            `30min` |                          `10min` |
 
-หากยังไม่ถึงเกณฑ์ ระบบจะ**ไม่**ถือว่าผู้ให้บริการอยู่ในช่วงพัก และเมื่อสำเร็จ
-กรอบเวลาดังกล่าวจะถูกล้าง รายการระดับการเชื่อมต่อ (`provider:connectionId`) จะยังคงใช้
-การถอยกลับแบบทวีคูณ `minRetryCooldownMs → maxRetryCooldownMs` แทน ค่าที่ใช้เขียนทับ:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
-ตัวป้องกันการถดถอย: `tests/unit/provider-cooldown-window-gate.test.ts`.
+หากต่ำกว่าเกณฑ์ ผู้ให้บริการจะ **ไม่** ถูกถือว่ากำลังคูลดาวน์; ความสำเร็จหนึ่งครั้งจะล้างหน้าต่างเวลานั้น รายการระดับการเชื่อมต่อ (`provider:connectionId`) จะยังคงใช้แบ็กออฟแบบเอ็กซ์โพเนนเชียล `minRetryCooldownMs → maxRetryCooldownMs` แทน การเขียนทับค่า: `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`
+การป้องกันการถดถอย (regression guard): `tests/unit/provider-cooldown-window-gate.test.ts`
 
-## 2. ช่วงพักการเชื่อมต่อ
+## 2. คูลดาวน์ของ Connection
 
-**ขอบเขต:** การเชื่อมต่อ/บัญชี/คีย์ของผู้ให้บริการหนึ่งรายการ
+**ขอบเขต:** connection/บัญชี/คีย์ของผู้ให้บริการ (provider) เพียงหนึ่งรายการ
 
-**วัตถุประสงค์:** ข้ามคีย์ที่มีปัญหาหนึ่งรายการ ขณะที่การเชื่อมต่ออื่นของผู้ให้บริการเดียวกันยังคงให้บริการต่อไป
+**วัตถุประสงค์:** ข้ามคีย์ที่มีปัญหาไปหนึ่งคีย์ ในขณะที่ connection อื่น ๆ ของ provider เดียวกันยังคงให้บริการต่อไป
 
-**การนำไปใช้:**
+**การนำไปใช้งาน:**
 
 - ทำเครื่องหมายว่าไม่พร้อมใช้งาน: `src/sse/services/auth.ts::markAccountUnavailable()`
 - การเลือก: `getProviderCredentials*` ในไฟล์เดียวกัน
-- การคำนวณช่วงพัก: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- การคำนวณคูลดาวน์: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - การตั้งค่า: `src/lib/resilience/settings.ts`
 
-**ฟิลด์ต่อการเชื่อมต่อ:**
+**ฟิลด์ต่อ connection:**
 
-- `rateLimitedUntil` — การประทับเวลาจนกว่าช่วงพักจะสิ้นสุด
+- `rateLimitedUntil` — เวลา (timestamp) ที่คูลดาวน์จะสิ้นสุด
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — ตัวนับการถอยแบบเอ็กซ์โพเนนเชียล
+- `backoffLevel` — ตัวนับ exponential backoff
 
-**ช่วงพักเริ่มต้น:**
+**ค่าคูลดาวน์เริ่มต้น:**
 
-- ฐาน OAuth: 5 วินาที
-- ฐาน API-key: 3 วินาที
-- API-key 429: เลือกใช้ `Retry-After`/ส่วนหัวการรีเซ็ต/ข้อความเวลารีเซ็ตที่แยกวิเคราะห์ได้จากต้นทางก่อน
-- การถอย: `baseCooldownMs * 2 ** failureIndex`
+- ค่าพื้นฐานของ OAuth: 5 วินาที
+- ค่าพื้นฐานของ API-key: 3 วินาที
+- API-key 429: ให้ความสำคัญกับ header `Retry-After`/reset จาก upstream หรือข้อความ reset ที่แยกค่าได้
+- การ backoff: `baseCooldownMs * 2 ** failureIndex`
 
-**กลไกป้องกัน thundering herd:** ป้องกันไม่ให้ความล้มเหลวที่เกิดขึ้นพร้อมกันยืดช่วงพักมากเกินไป หรือเพิ่ม `backoffLevel` ซ้ำสองครั้ง
+**ตัวป้องกัน thundering herd:** ป้องกันไม่ให้ความล้มเหลวที่เกิดขึ้นพร้อมกันหลายรายการขยายคูลดาวน์ให้นานเกินจำเป็น หรือเพิ่มค่า `backoffLevel` ซ้ำสองรอบ
 
-**ข้อผิดพลาด 429 จากขีดจำกัดการทำงานพร้อมกันจะไม่ไต่ระดับการถอย** `429` ที่เนื้อหาการตอบกลับรายงานขีดจำกัดการทำงานพร้อมกัน ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`) หมายความว่าบัญชียังทำงานปกติแต่กำลังยุ่งอยู่
-`checkFallbackError()` จะคืนเหตุผล `concurrency_limited`: สลับไปยังการเชื่อมต่อถัดไปทันที พักการเชื่อมต่อนี้เป็นเวลา `CONCURRENCY_LIMIT_COOLDOWN_MS` คงที่ (1 วินาที) หรือตามคำแนะนำให้ลองใหม่จากต้นทาง คงค่า `backoffLevel` ไว้ไม่เปลี่ยนแปลง และตั้งค่า `skipProviderBreaker`
-เนื้อหาที่ระบุโควตาอย่างชัดเจนยังคงมีลำดับความสำคัญเหนือกว่า ดังนั้นเนื้อหาที่ตรงกับรูปแบบโควตาด้วยจะยังคงได้รับคำตัดสินว่าเป็นโควตา
-การตรวจจับ: `looksLikeConcurrencyLimit()` ใน `src/shared/utils/classify429.ts`;
-คำตัดสิน: `open-sse/services/accountFallback/concurrencyLimit429.ts` ส่วน `classify429()` (`FailureKind` ของเบรกเกอร์) ยังคงไม่เปลี่ยนแปลง และยังอ่านค่าเป็น `rate_limit` สำหรับเนื้อหาเหล่านี้
+**429 จากการจำกัด concurrency จะไม่ไต่ขั้นบันได backoff** `429` ที่ body รายงานว่าเป็น
+การจำกัด concurrency ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`) หมายความว่าบัญชีนั้นปกติดีแต่กำลังยุ่งอยู่
+`checkFallbackError()` จะคืนค่าเหตุผลเป็น `concurrency_limited`: ให้ fail over ไปยัง
+connection ถัดไปทันที คูลดาวน์ connection นี้ด้วยค่าคงที่ `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 วินาที)
+หรือตาม retry hint จาก upstream คงค่า `backoffLevel` ไว้เท่าเดิม และตั้งค่า `skipProviderBreaker`
+body ที่ระบุโควตาอย่างชัดเจนยังคงชนะอยู่ ดังนั้น body ที่ตรงกับรูปแบบโควตาด้วยจะยังคง
+ถูกตัดสินเป็นโควตา การตรวจจับ: `looksLikeConcurrencyLimit()` ใน `src/shared/utils/classify429.ts`;
+ผลการตัดสิน: `open-sse/services/accountFallback/concurrencyLimit429.ts` ส่วน `classify429()`
+(`FailureKind` ของ breaker) ไม่เปลี่ยนแปลงและยังคงอ่าน body เหล่านี้เป็น `rate_limit` เช่นเดิม
 
-**การหยุดชะงักของเนื้อหาสตรีมจะไม่ทำให้บัญชีเข้าสู่ช่วงพัก** เมื่อกลไกเฝ้าระวังการหยุดชะงักของเนื้อหา
-(`open-sse/utils/streamHandler.ts`) ยุติสตรีมที่ไม่ส่งเอาต์พุตของโมเดลภายในเวลาที่กำหนด `markAccountUnavailable()` จะบันทึกข้อผิดพลาดในการเชื่อมต่อ แต่ไม่ตั้งค่าช่วงพัก: การหยุดชะงักดังกล่าวเป็นของคำขอนั้น โดยส่วนใหญ่มักเป็นช่วงการใช้เหตุผลที่ยาวนานและยังไม่มีเอาต์พุต ผู้ดูแลระบบสามารถเลือกเปิดใช้งานอีกครั้งได้ด้วย `resilienceSettings.streamStallCooldown.enabled`
+**การหยุดชะงักของเนื้อหา stream (content stall) จะไม่คูลดาวน์บัญชี** เมื่อ content-stall
+watchdog (`open-sse/utils/streamHandler.ts`) ยอมแพ้กับ stream ที่ไม่ได้ส่ง output ของโมเดล
+ทันภายในเวลาที่กำหนด `markAccountUnavailable()` จะบันทึกข้อผิดพลาดไว้ที่ connection
+แต่จะไม่ตั้งคูลดาวน์: เพราะการหยุดชะงักนั้นเป็นของ request นั้น ๆ ซึ่งส่วนใหญ่มักเป็น
+เทิร์น reasoning ที่ยาวนานและยังไม่มี output ออกมา ผู้ดูแลระบบสามารถเลือกกลับมาเปิดใช้งานได้ด้วย
+`resilienceSettings.streamStallCooldown.enabled`
 (ค่าเริ่มต้น `false`)
 
-**เฟรมการใช้เหตุผลจะเริ่มงบเวลาการหยุดชะงักของเนื้อหาใหม่** โมเดลการใช้เหตุผลอาจคิดเป็นเวลาหลายนาทีก่อนส่งโทเค็นแรกที่มองเห็นได้: Claude สตรีมเฟรม `thinking_delta` ซึ่งข้อความการคิดอาจว่างเปล่า และ Responses API จะสตรีมรายการการใช้เหตุผลทีละรายการ
-`isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) จะจดจำเฟรมเหล่านี้ และกลไกเฝ้าระวังจะเริ่มงบเวลาใหม่เมื่อได้รับแต่ละเฟรม แทนที่จะยกเลิกการทำงาน
-อย่างไรก็ตาม เฟรมเหล่านี้ยังไม่ถือเป็นเอาต์พุตของโมเดล ดังนั้นการทำงานที่สิ้นสุดลงโดยมีเพียงการใช้เหตุผลจะยังคงถูกรายงานว่าว่างเปล่า และการทำงานที่หยุดใช้เหตุผลแล้วส่งเพียงสัญญาณ heartbeat จะยังคงกระตุ้นกลไกเฝ้าระวัง
+**เฟรม reasoning จะรีสตาร์ทงบเวลาของ content-stall** โมเดล reasoning อาจใช้เวลาคิดอยู่
+หลายนาทีก่อนจะปล่อย token แรกที่มองเห็นได้: Claude สตรีมเฟรม `thinking_delta` ซึ่ง
+ข้อความ thinking อาจว่างเปล่า และ Responses API สตรีม reasoning item ออกมา
+ทีละรายการต่อเนื่องกัน `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) จะรู้จัก
+เฟรมเหล่านี้ และ watchdog จะรีสตาร์ทงบเวลาของตนทุกครั้งที่พบแต่ละเฟรม แทนที่จะยกเลิก
+เทิร์น อย่างไรก็ตามเฟรมเหล่านี้ยังไม่นับเป็น output ของโมเดล ดังนั้นเทิร์นที่จบลงด้วย
+reasoning เพียงอย่างเดียวจะยังคงถูกรายงานว่าว่างเปล่า และเทิร์นที่หยุด reasoning แล้ว
+ส่งเฉพาะ heartbeat จะยังคงกระตุ้นให้ watchdog ทำงาน
 
-เฟรมไบนารี `reasoningContentEvent` ของ Kiro ที่มีลายเซ็นซึ่งไม่ว่างเปล่า จะรักษากิจกรรมการใช้เหตุผลนี้ผ่าน executor ในรูปเดลตา `reasoning_content` ที่ว่างเปล่า ลายเซ็นจะไม่ถูกส่งต่อ เมทาดาทา เฟรมที่ไม่สมบูรณ์ และลายเซ็นที่ว่างเปล่าจะไม่เริ่มงบเวลาเนื้อหาใหม่ ส่วนการหมดเวลาของสตรีมที่ทำงานอยู่ซึ่งเป็นอิสระต่อกัน และการยกเลิกโดยไคลเอนต์ยังคงมีผล
-(`open-sse/executors/kiro/reasoning.ts`)
+เฟรม binary `reasoningContentEvent` ของ Kiro ที่มี signature ไม่ว่างเปล่า จะคงกิจกรรม
+reasoning นี้ไว้ผ่าน executor ในรูปแบบ delta `reasoning_content` ที่ว่างเปล่า โดยจะไม่
+ส่ง signature ต่อไป ส่วน metadata, เฟรมที่ไม่สมบูรณ์ และ signature ที่ว่างเปล่า
+จะไม่รีสตาร์ทงบเวลาของเนื้อหา; timeout ของ active-stream ที่ทำงานแยกอิสระและ
+การยกเลิกจาก client ยังคงมีผลใช้บังคับอยู่ (`open-sse/executors/kiro/reasoning.ts`)
 
-**สถานะสิ้นสุด (ไม่ใช่ช่วงพัก):**
+**สถานะสิ้นสุด (Terminal states) (ไม่ใช่คูลดาวน์):**
 
-- `banned` — ตั้งค่าโดยการตรวจจับคีย์เวิร์ดการแบน/การแบนบัญชี (ดู [BAN_DETECTION](../security/BAN_DETECTION.md)) และโดยการปฏิเสธต่อคำขอจากต้นทางติดต่อกันสามครั้ง (`request_rejected` เช่น Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); การปฏิเสธเพียงครั้งเดียวจะทำให้การเชื่อมต่อเข้าสู่ช่วงพักเท่านั้น
-- `expired` (เปลี่ยนเป็นสถานะสิ้นสุดหลังจากลองใหม่ครบจำนวนที่กำหนด — `EXPIRED_RETRY_MAX = 3` พร้อมการถอยแบบเอ็กซ์โพเนนเชียล — เพื่อให้ข้อผิดพลาด OAuth ชั่วคราวสามารถฟื้นตัวได้เองก่อนที่บัญชีจะถูกปิดใช้งานอย่างถาวร)
+- `banned` — ถูกตั้งค่าโดยการตรวจจับคีย์เวิร์ดต้องห้าม / การแบนบัญชี (ดู [BAN_DETECTION](../security/BAN_DETECTION.md)) และโดยการที่ upstream ปฏิเสธ request รายครั้งติดต่อกันสามครั้ง (`request_rejected` เช่น Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); การปฏิเสธเพียงครั้งเดียวจะแค่คูลดาวน์ connection เท่านั้น
+- `expired` (เปลี่ยนเข้าสู่สถานะสิ้นสุดหลังจาก retry ภายในจำนวนครั้งที่จำกัด — `EXPIRED_RETRY_MAX = 3` พร้อมกับ exponential backoff — เพื่อให้ข้อผิดพลาด OAuth แบบชั่วคราวสามารถกู้คืนตัวเองได้ก่อนที่บัญชีจะถูกปิดใช้งานอย่างถาวร)
 - `credits_exhausted`
 
-สถานะเหล่านี้จะคงอยู่จนกว่าข้อมูลรับรองจะเปลี่ยนแปลงหรือผู้ดูแลระบบจะรีเซ็ต อย่าเขียนทับสถานะสิ้นสุดด้วยสถานะช่วงพักชั่วคราว
+สถานะเหล่านี้จะคงอยู่จนกว่า credentials จะเปลี่ยนแปลงหรือผู้ดูแลระบบจะรีเซ็ต อย่าเขียนทับสถานะสิ้นสุดด้วยสถานะคูลดาวน์ชั่วคราว
 
-**การกู้คืนแบบ Lazy:** เมื่อพ้นเวลา `rateLimitedUntil` แล้ว การเชื่อมต่อจะกลับมามีสิทธิ์ถูกเลือกอีกครั้ง เมื่อใช้งานสำเร็จ `clearAccountError()` จะล้างฟิลด์ข้อผิดพลาดทั้งหมด
+**การกู้คืนแบบ lazy:** เมื่อเวลาใน `rateLimitedUntil` ผ่านไปแล้ว connection จะกลับมามีสิทธิ์ถูกเลือกอีกครั้ง เมื่อใช้งานสำเร็จ `clearAccountError()` จะล้างฟิลด์ข้อผิดพลาดทั้งหมด
 
-### กำแพงการใช้งาน Claude OAuth: ช่องทางลำดับความสำคัญต่ำกว่า + การรีเซ็ตขีดจำกัดเซสชัน
+### Usage wall ของ Claude OAuth: เลนลำดับความสำคัญต่ำ + การรีเซ็ต session-limit
 
-**ขอบเขต:** การเชื่อมต่อการสมัครสมาชิก Claude (OAuth) หนึ่งรายการ คุณลักษณะทั้งสองเป็นแบบ **เลือกเปิดใช้ต่อการเชื่อมต่อ**
-(แก้ไขการเชื่อมต่อ → ส่วน Claude → `lowPriorityMode` / `autoLimitReset` ใน
-`providerSpecificData` โดยทั้งคู่ปิดไว้เป็นค่าเริ่มต้น) และทำงานสอดคล้องกับคำสั่ง `/low-priority` และ
-`/limit-reset` ของ Claude Code (บันทึกสัญญาการสื่อสารจาก Claude Code 2.1.263)
+**ขอบเขต:** connection ของ Claude subscription (OAuth) หนึ่งรายการ ฟีเจอร์ทั้งสองเป็นแบบ
+**opt-in ราย connection** (แก้ไข connection → ส่วน Claude → `lowPriorityMode` / `autoLimitReset` ใน
+`providerSpecificData` โดยค่าเริ่มต้นปิดไว้ทั้งคู่) และทำหน้าที่เหมือนคำสั่ง `/low-priority` และ
+`/limit-reset` ของ Claude Code (wire contract บันทึกมาจาก Claude Code 2.1.263)
 
-**การนำไปใช้:**
+**การนำไปใช้งาน:**
 
-- สเตตแมชชีน + การจำแนกการตอบกลับ: `open-sse/services/claudeLowPriority.ts`
-- ไคลเอนต์สำหรับสถานะ/การขอสิทธิ์รีเซ็ต: `open-sse/services/claudeLimitReset.ts`
-- ฮุกของ executor (การแทรกส่วนหัว + การลองใหม่ด้วยบัญชีเดิม): `open-sse/executors/base.ts::execute()`
-- การคงอยู่ของการเลือกเปิดใช้: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- state machine + การจำแนก response: `open-sse/services/claudeLowPriority.ts`
+- client สำหรับตรวจสถานะ/เคลมการรีเซ็ต: `open-sse/services/claudeLimitReset.ts`
+- hook ของ executor (การแทรก header + retry ด้วยบัญชีเดิม): `open-sse/executors/base.ts::execute()`
+- การจัดเก็บค่า opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**ตัวกระตุ้น:** กำแพงการใช้งาน 5 ชั่วโมง — `429` ที่ส่วนหัวมี
-`anthropic-ratelimit-unified-status: rejected` และเมื่อบัญชีมีสิทธิ์
-`anthropic-ratelimit-unified-slow-offer: treatment` จะไม่มีการส่งสิ่งใดก่อนพบ 429 จากกำแพงดังกล่าวเป็นครั้งแรก ส่วน burst 429 ที่ไม่มีส่วนหัว unified จะเข้าสู่เส้นทางช่วงพักตามปกติ
+**ตัวกระตุ้น:** usage wall 5 ชั่วโมง — คือ `429` ที่ header
+มีค่า `anthropic-ratelimit-unified-status: rejected` และเมื่อบัญชีมีสิทธิ์
+จะมี `anthropic-ratelimit-unified-slow-offer: treatment` ด้วย จะไม่มีการส่งสิ่งใดออกไปก่อนที่จะเจอ
+wall 429 ครั้งแรก; ส่วน burst 429 ที่ไม่มี unified header จะเดินตามเส้นทาง
+คูลดาวน์ปกติ
 
-**ช่องทางลำดับความสำคัญต่ำกว่า** (`lowPriorityMode`):
+**เลนลำดับความสำคัญต่ำ (Lower-priority lane)** (`lowPriorityMode`):
 
-- เมื่อถึงกำแพง 429 ตัวดำเนินการจะยอมรับข้อเสนอและลองบัญชี **เดิม** ใหม่ทันทีด้วย `anthropic-usage-limit: slow`; เลนจะยังคงทำงานจนถึงเวลา `anthropic-ratelimit-unified-reset` ที่ประกาศไว้ (+ช่วงผ่อนผัน 60 วินาที) และทุกคำขอในช่วงเวลาดังกล่าวจะมีส่วนหัวนี้ 429 ที่ถูกดักไว้จะไม่ไปถึง `handleChatCore` ดังนั้นการเชื่อมต่อจะ **ไม่** ถูกพักการใช้งานและไม่ถูกสลับออก
-- `anthropic-ratelimit-unified-slow-status` ในการตอบกลับภายหลัง: `active` / `not_needed` จะคงเลนไว้; `slot_busy` (429) หรือ `529` จะรอตาม `anthropic-ratelimit-unified-slow-retry-after` ของเซิร์ฟเวอร์ (ค่าเริ่มต้น 20 วินาที จำกัดให้อยู่ในช่วง 5–600 วินาที พร้อม jitter ±30%) แล้วลองใหม่ โดยถูกจำกัดด้วย `anthropic-ratelimit-unified-slow-max-wait` (ค่าเริ่มต้น 20 นาที จำกัดให้อยู่ในช่วง 1 นาที–6 ชั่วโมง) — เมื่อเกินระยะเวลาดังกล่าว เลนจะสิ้นสุดและช่วงพัก 10 นาทีจะบล็อกการยอมรับข้อเสนอซ้ำ นอกจากนี้ เวลารอยังถูกจำกัดด้วยเวลาที่เหลือจากไทม์เอาต์เริ่มต้นอัปสตรีมของคำขอเอง (`resolveFetchStartTimeout`, ค่าเริ่มต้น 10 นาที) ลบด้วยระยะเผื่อ 5 วินาที: หากไม่มีขีดจำกัดนี้ ค่าเริ่มต้นเวลารอสูงสุด 20 นาทีจะยาวนานเกินอายุคำขอ และการพักจะถูกยกเลิกกลางคัน ทำให้เกิด `TimeoutError` แทนการสิ้นสุดแบบ `max_wait` อย่างราบรื่นพร้อมช่วงพัก
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, การเปลี่ยนรอบหน้าต่าง 5 ชั่วโมง หรือ `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ซึ่งจะสิ้นสุดเป็น `extra_usage` ไม่ว่าสถานะใด เนื่องจากตอนนี้การใช้งานเกินโควตาแบบชำระเงินครอบคลุมกำแพงแล้ว) จะยุติเลน; จากนั้นการตอบกลับจะไหลเข้าสู่เส้นทางพักการใช้งานตามปกติ ระบบจะจดจำ `budget_exhausted` จนถึงเวลาการรีเซ็ตงบประมาณที่ประกาศไว้ (≤ 8 วัน)
-- การตรวจสอบกำแพงจะทำงานหลังจากการลองซ้ำภายในความพยายามเดียวกันที่ขับเคลื่อนด้วย 400 ของตัวดำเนินการเอง (การแก้ไขบริบท, การจำกัด thinking/effort, การเรียนรู้พารามิเตอร์อัตโนมัติ) ดังนั้น 429 จากกำแพงที่ปรากฏเฉพาะในการลองซ้ำครั้งใดครั้งหนึ่งจะยังคงถูกดักไว้ แทนที่จะไปถึงเส้นทางพักการใช้งาน
-- สถานะถูกเก็บไว้ในหน่วยความจำแยกตามการเชื่อมต่อ (การรีสตาร์ตทำให้เสีย 429 จากกำแพงเพิ่มหนึ่งครั้งเพื่อยอมรับข้อเสนอใหม่)
+- เมื่อเจอ wall 429 ตัว executor จะยอมรับข้อเสนอและลองใหม่ทันทีบนบัญชี**เดิม**ด้วย `anthropic-usage-limit: slow`; lane จะยังคงทำงานอยู่จนถึงเวลาที่ประกาศไว้ใน `anthropic-ratelimit-unified-reset` (+ช่วงผ่อนผัน 60 วินาที) และทุก request ในช่วงเวลานั้นจะแนบ header นี้ไปด้วย 429 ที่ถูกดักจับจะไม่ถูกส่งไปถึง `handleChatCore` ดังนั้น connection จึง**ไม่**ถูกนำเข้าสู่ cooldown และไม่ถูกหมุนเวียนออกไป
+- `anthropic-ratelimit-unified-slow-status` บน response ถัดๆ ไป: `active` / `not_needed` จะรักษา lane ไว้; `slot_busy` (429) หรือ `529` จะรอตามค่า `anthropic-ratelimit-unified-slow-retry-after` ของ server (ค่าเริ่มต้น 20 วินาที, clamp ที่ 5–600 วินาที, jitter ±30%) แล้วลองใหม่ โดยถูกจำกัดด้วย `anthropic-ratelimit-unified-slow-max-wait` (ค่าเริ่มต้น 20 นาที, clamp ที่ 1 นาที–6 ชั่วโมง) — เกินกว่านั้น lane จะสิ้นสุดและจะมีช่วง cool-off 10 นาทีที่ขัดขวางการยอมรับใหม่ ระยะเวลารอยังถูกจำกัดเพิ่มเติมด้วยเวลาที่เหลืออยู่ของ upstream-start timeout ของ request นั้นเอง (`resolveFetchStartTimeout`, ค่าเริ่มต้น 10 นาที) หักลบด้วย margin 5 วินาที: หากไม่มีการจำกัดนี้ ค่า max-wait เริ่มต้น 20 นาทีจะอยู่ยาวเกินอายุของ request และการ sleep จะถูกยกเลิกกลางคันระหว่างรอ ทำให้เกิด `TimeoutError` แทนที่จะเป็นการสิ้นสุดแบบ `max_wait` ที่เรียบร้อยพร้อมกับ cool-off
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, การ rollover ของหน้าต่างเวลา 5 ชั่วโมง หรือ `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ซึ่งจะสิ้นสุด lane ในสถานะ `extra_usage` ไม่ว่าจะเจอ status ใดก็ตาม เพราะ overage แบบเสียเงินครอบคลุม wall แล้ว) จะสิ้นสุด lane; จากนั้น response จะไหลเข้าสู่เส้นทาง cooldown ปกติ สถานะ `budget_exhausted` จะถูกจดจำไว้จนถึงการ reset งบประมาณที่ประกาศไว้ (≤ 8 วัน)
+- การตรวจสอบ wall จะทำงานหลังจากการ retry ภายในความพยายามเดียวกันที่ถูกกระตุ้นด้วย 400 ของ executor เอง (context editing, thinking/effort clamps, param auto-learn) ดังนั้น wall 429 ที่ปรากฏขึ้นเฉพาะในการ retry เหล่านั้นก็ยังคงถูกดักจับไว้ แทนที่จะไหลไปถึงเส้นทาง cooldown
+- สถานะถูกเก็บไว้ในหน่วยความจำแยกตาม connection (การ restart จะต้องเสีย wall 429 เพิ่มอีกหนึ่งครั้งเพื่อยอมรับใหม่)
 
-**การรีเซ็ตขีดจำกัดเซสชัน** (`autoLimitReset`, จะลองก่อนเลนเมื่อเปิดใช้ทั้งสองอย่าง):
+**การรีเซ็ต session-limit** (`autoLimitReset`, จะถูกลองก่อน lane เมื่อทั้งสองเปิดใช้งาน):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → บล็อก `juniper_tide`; เมื่อ `arm: "reset"` และ `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` พร้อม
-  `{ "program": "juniper_tide" }` (UUID ขององค์กรจาก
-  `providerSpecificData.organizationUUID` โดยใช้ค่าจาก bootstrap เป็นทางเลือกสำรอง)
-- `result: reset|not_limited` → คำขอจะถูกลองใหม่ด้วยความเร็วเต็มที่ (ไม่มีส่วนหัว slow)
-  `already_used` / `not_offered` จะจดจำ `next_available_at` (ค่าเริ่มต้นหนึ่งสัปดาห์); ความล้มเหลวใด ๆ จะถอยรอ 15 นาที การรีเซ็ตทำได้สัปดาห์ละครั้งและยังคงนับรวมในขีดจำกัดรายสัปดาห์
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → block `juniper_tide`; เมื่อ `arm: "reset"` และ `available: true` จะทำการ `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` พร้อมกับ `{ "program": "juniper_tide" }` (organization UUID มาจาก `providerSpecificData.organizationUUID`, มี bootstrap fallback)
+- `result: reset|not_limited` → request จะถูกลองใหม่ที่ความเร็วเต็มที่ (ไม่มี slow header) `already_used` / `not_offered` จะจดจำ `next_available_at` (ค่าเริ่มต้นหนึ่งสัปดาห์); ความล้มเหลวใดๆ จะ back off 15 นาที การรีเซ็ตทำได้สัปดาห์ละครั้งและยังคงถูกนับรวมในขีดจำกัดรายสัปดาห์
 
-ตัวป้องกันการถดถอย: `tests/unit/claude-low-priority-mode.test.ts`,
+ตัวป้องกัน regression: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`
 
-### ความผูกพันของเซสชัน (#7274)
+### การยึดติดเซสชัน (Session affinity) (#7274)
 
-**ขอบเขต:** เซสชันไคลเอนต์หนึ่งรายการ (ส่วนหัว `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) จะถูกตรึงไว้กับการเชื่อมต่อหนึ่งรายการ สำหรับผู้ให้บริการ **ใด ๆ**
+**ขอบเขต:** เซสชันไคลเอนต์หนึ่งเดียว (header `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) ถูกปักหมุดไว้กับ connection เดียว สำหรับ provider **ใดก็ตาม**
 
-**วัตถุประสงค์:** ทำให้เอเจนต์หลายรอบการโต้ตอบ (Claude Code, aider, เอเจนต์ที่กำหนดเอง) อยู่ในบัญชีเดิมตลอดคำขอต่าง ๆ เพื่อลดการสูญเสียบริบทข้ามบัญชีและ 429 จากการเริ่มต้นแบบ cold start ซ้ำ ๆ บนผู้ให้บริการที่มีสถานะเซสชันแยกตามบัญชี
+**วัตถุประสงค์:** รักษา agent แบบ multi-turn (Claude Code, aider, custom agents) ให้อยู่บนบัญชีเดียวกันข้าม request ต่างๆ ลดการสูญเสีย context ข้ามบัญชี และลด 429 แบบ cold-start ที่เกิดซ้ำๆ บน provider ที่มีสถานะเซสชันแยกตามบัญชี
 
-**การนำไปใช้:**
+**รายละเอียดการพัฒนา:**
 
-- การกำหนด TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- การเลือก/สร้างการตรึง: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- การดึงส่วนหัว (แบบทั่วไป สำหรับผู้ให้บริการใด ๆ): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- ตารางการตรึงที่จัดเก็บถาวร: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- การตั้งค่า: `sessionAffinityTtlMs` (TTL ส่วนกลางในหน่วยมิลลิวินาที, `0` หมายถึงปิดใช้งาน) — `src/lib/db/settings.ts` เปลี่ยนชื่อมาจาก `codexSessionAffinityTtlMs` ที่ใช้กับ Codex เท่านั้นโดยการย้ายข้อมูล `124_generic_session_affinity_ttl.sql` ซึ่งนำค่า Codex TTL ที่เคยกำหนดค่าไว้มาใช้เป็นค่าเริ่มต้นใหม่
+- การแปลงค่า TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- การเลือก/สร้าง pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- การสกัด header (แบบทั่วไป, ใช้ได้กับทุก provider): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- ตาราง pin ที่ถูกบันทึกถาวร: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- การตั้งค่า: `sessionAffinityTtlMs` (TTL ระดับ global หน่วยเป็นมิลลิวินาที, `0` คือปิดใช้งาน) — `src/lib/db/settings.ts` เปลี่ยนชื่อมาจาก `codexSessionAffinityTtlMs` ที่ใช้ได้เฉพาะ Codex โดย migration `124_generic_session_affinity_ttl.sql` ซึ่งจะยกค่า TTL ของ Codex ที่ตั้งค่าไว้ก่อนหน้ามาเป็นค่าเริ่มต้นใหม่
 
-ก่อน #7274 `resolveSessionAffinityTtlMs()` จะออกก่อนกำหนดโดยคืนค่า `0` สำหรับผู้ให้บริการทุกรายนอกเหนือจาก `codex` ดังนั้นการตั้งค่า TTL (รวมถึงส่วนหัวเซสชัน) จึงไม่มีผลในที่อื่น แม้ว่ากลไกการตรึงและการดึงส่วนหัวจะไม่ขึ้นกับผู้ให้บริการอยู่แล้วก็ตาม การแก้ไขนี้นำการคืนค่าก่อนกำหนดดังกล่าวออก; ขณะนี้ TTL มีผลอย่างสม่ำเสมอกับผู้ให้บริการทุกรายเมื่อกำหนดค่าส่วนกลางให้มากกว่า `0`
+ก่อน #7274, `resolveSessionAffinityTtlMs()` จะคืนค่า `0` ทันทีสำหรับทุก provider ยกเว้น `codex` ทำให้การตั้งค่า TTL (และ session header ต่างๆ) ไม่มีผลที่อื่นเลย แม้ว่ากลไกการปักหมุดและการสกัด header จะเป็น provider-agnostic อยู่แล้วก็ตาม การแก้ไขได้ลบ early-return นั้นออก; ตอนนี้ TTL จะมีผลกับทุก provider อย่างเท่าเทียมกันเมื่อถูกตั้งค่าระดับ global ให้มากกว่า `0`
 
-ส่วนหัวความผูกพันของเซสชันทั้งสามรายการจะไม่ถูกส่งต่อไปยังอัปสตรีม — ตัวดำเนินการจะสร้างส่วนหัวอัปสตรีมของตนเองใหม่ทั้งหมดแทนการส่งผ่านส่วนหัวของไคลเอนต์ ดังนั้นส่วนหัวเหล่านี้จึงยังคงเป็นเพียง ID สำหรับเชื่อมโยงข้อมูลภายในเท่านั้น
+session-affinity header ทั้งสามไม่เคยถูกส่งต่อไปยัง upstream — executor สร้าง upstream header ของตัวเองขึ้นมาใหม่ทั้งหมด แทนที่จะส่งต่อ header ของไคลเอนต์ผ่านไป ดังนั้นค่านี้จึงเป็นเพียง correlation id ภายในเท่านั้น
 
-### สัญญาเช่าการเชื่อมต่อเซสชันที่มีการจัดการแบบเอกสิทธิ์
+### การเช่า (lease) connection แบบเอกสิทธิ์สำหรับเซสชันที่ถูกจัดการ
 
-**ขอบเขต:** ไคลเอนต์/เซสชัน HTTP ที่มีการจัดการและทำงานอยู่หนึ่งรายการจะเป็นเจ้าของการเชื่อมต่อ OmniRoute ที่มีสิทธิ์หนึ่งรายการ
+**ขอบเขต:** ไคลเอนต์/เซสชัน HTTP แบบ managed ที่ active หนึ่งเดียวเป็นเจ้าของ connection OmniRoute ที่มีสิทธิ์หนึ่งเดียว
 
-**วัตถุประสงค์:** มอบสิทธิ์เป็นเจ้าของการเชื่อมต่อแบบเอกสิทธิ์และคงทนแก่ไคลเอนต์ที่ต้องการขอบเขตการกำหนดเส้นทางที่เข้มงวดตลอดคำขอต่าง ๆ ซึ่งแตกต่างจากความผูกพันของเซสชันที่เป็นเพียงการตั้งค่าแบบอ่อนเพื่อให้เกิดความต่อเนื่อง: สัญญาเช่าแบบเอกสิทธิ์จะเก็บสถานะวงจรชีวิตไว้ใน SQLite, บังคับใช้ความเป็นเอกลักษณ์ของเจ้าของที่ทำงานอยู่และการเชื่อมต่อที่ทำงานอยู่ในระดับส่วนกลาง และปฏิเสธ generation ที่ล้าสมัยก่อนส่งต่อไปยังผู้ให้บริการ
+**วัตถุประสงค์:** มอบความเป็นเจ้าของ connection แบบเอกสิทธิ์ที่คงทนให้กับไคลเอนต์ที่ต้องการรั้วกั้นการ route แบบแข็งข้าม request ต่างๆ สิ่งนี้แตกต่างจาก session affinity ซึ่งเป็นเพียงการตั้งค่าความต่อเนื่องแบบอ่อน: lease แบบเอกสิทธิ์จะบันทึกสถานะวงจรชีวิตไว้ใน SQLite, บังคับใช้ความไม่ซ้ำกันของ active-owner และ active-connection ในระดับ global, และปฏิเสธ generation ที่ล้าสมัยก่อนการ dispatch ไปยัง provider
 
-ฟีเจอร์นี้เป็นแบบเลือกใช้แยกตาม API key คีย์ที่มีการจัดการต้องมีขอบเขต `lease:exclusive` และรายการ `allowedConnections` ที่ระบุอย่างชัดเจนและไม่ว่างเปล่า ไคลเอนต์ HTTP ใด ๆ สามารถใช้ endpoint ของวงจรชีวิตได้ โดยไม่จำเป็นต้องระบุชื่อไคลเอนต์, user-agent, ผู้ให้บริการ, วิธี OAuth หรือโมเดล สัญญาเช่าจะเป็นเจ้าของการเชื่อมต่อ ไม่ใช่โมเดล ดังนั้นการเปลี่ยนโมเดลจะยังคงการผูกไว้ ตราบใดที่การเชื่อมต่อยังคงมีสิทธิ์ตามปกติ กฎทั่วไปเกี่ยวกับโมเดล, โควตา, สถานภาพ, การพักการใช้งาน และ allowlist ยังคงมีอำนาจสูงสุด และอาจย้าย generation เดิมไปยังการเชื่อมต่ออื่นที่ว่างและมีสิทธิ์ได้
+ฟีเจอร์นี้เป็นแบบ opt-in ต่อ API key key แบบ managed ต้องมี scope `lease:exclusive` และรายการ `allowedConnections` ที่ระบุชัดเจนและไม่ว่างเปล่า ไคลเอนต์ HTTP ใดก็สามารถใช้ lifecycle endpoint ได้; ไม่จำเป็นต้องระบุชื่อไคลเอนต์, user-agent, provider, วิธี OAuth, หรือโมเดล lease เป็นเจ้าของ connection ไม่ใช่โมเดล ดังนั้นการเปลี่ยนโมเดลจะยังคงการผูกไว้ตราบใดที่ connection ยังคงมีสิทธิ์ตามปกติ กฎปกติเรื่องโมเดล, quota, health, cooldown และ allowlist ยังคงเป็นผู้มีอำนาจตัดสินขั้นสุดท้าย และอาจย้าย generation เดียวกันไปยัง connection อื่นที่ว่างและมีสิทธิ์
 
-วงจรการทำงานคือ `POST /api/v1/session-leases` โดยมีการดำเนินการใน JSON ได้แก่ `acquire`, `renew` และ `release`
-คำขออนุมานที่มีการจัดการจะส่งค่าแบบทึบ `X-OmniRoute-Lease-Owner` และค่า
-`X-OmniRoute-Lease-Generation` ที่ตรงกันทุกประการ ค่า owner ใช้ `vlo_` ตามด้วยอักขระ base64url จำนวน 43 ตัว โดยจะจัดเก็บเฉพาะ
-แฮช SHA-256 ของค่านี้เท่านั้น ทุกขอบเขตป้องกันของการส่งต่อขั้นสุดท้ายยังผูกกับ ID คีย์ API ที่ผ่านการตรวจสอบสิทธิ์และ
-ID การเชื่อมต่อที่ใช้งานอยู่ด้วย ส่วนหัวควบคุม lease จะถูกนำออกจากบันทึก สแนปช็อตคำขอที่เก็บรักษาไว้ และ
-ส่วนหัวของตัวประมวลผลต้นทาง
+วงจรชีวิต (lifecycle) คือ `POST /api/v1/session-leases` พร้อม JSON actions ได้แก่ `acquire`, `renew` และ `release`
+คำขอ inference ที่อยู่ภายใต้การจัดการ (managed) จะส่งค่า `X-OmniRoute-Lease-Owner` แบบทึบ (opaque)
+และค่า `X-OmniRoute-Lease-Generation` ที่ตรงกันพอดี ค่า owner ใช้ `vlo_` ตามด้วยอักขระ base64url จำนวน 43 ตัว
+โดยระบบจัดเก็บเฉพาะแฮช SHA-256 เท่านั้น ทุก dispatch fence ขั้นสุดท้ายยังผูกกับ API key ID ที่ผ่านการยืนยันตัวตน
+และ connection ID ที่ใช้งานอยู่ด้วย Lease control headers จะถูกลบออกจาก logs, request snapshots ที่เก็บไว้
+และ headers ที่ส่งไปยัง upstream executor
 
-หากการกำหนดเส้นทางตามปกติมีตัวเลือกที่มีการจัดการซึ่งเข้าเกณฑ์ แต่ตัวเลือกว่างทั้งหมดถูกครอบครองโดย
-lease ที่ใช้งานอยู่ของผู้ถือครองรายอื่น OmniRoute จะส่งคืน HTTP `429`, รหัส lease-capacity-unavailable,
-สถานะรอความจุ และ `Retry-After` ที่มีขอบเขตจำกัดซึ่งคำนวณจากเวลาหมดอายุที่เกี่ยวข้องซึ่งมาถึงเร็วที่สุด
-กรณีที่ไม่มีตัวเลือกเข้าเกณฑ์ตามปกติไม่ถือเป็นการแข่งขันแย่ง lease และยังคงใช้ความหมายของข้อผิดพลาดในการกำหนดเส้นทางที่มีอยู่เดิม
+หากการกำหนดเส้นทาง (routing) ปกติพบ managed candidate ที่มีสิทธิ์ แต่ candidate ที่ว่างทุกตัวถูกครอบครอง
+โดย lease ที่ใช้งานอยู่จากภายนอก OmniRoute จะส่งกลับ HTTP `429` พร้อมรหัส lease-capacity-unavailable,
+สถานะ waiting-for-capacity และค่า `Retry-After` ที่มีขอบเขตจำกัด ซึ่งคำนวณจากเวลาหมดอายุที่เกี่ยวข้องเร็วที่สุด
+กรณีที่ไม่มี candidate ที่มีสิทธิ์เลยแบบปกติ ไม่ถือเป็น lease contention และยังคงใช้ความหมายของ routing error เดิม
 
 กลไกที่เกี่ยวข้องยังคงแยกจากกัน:
 
-- การครอบครองเซสชัน OAuth เป็นการกระจายแบบไม่เคร่งครัดภายในแต่ละโปรเซสสำหรับบัญชี OAuth
-- semaphore ของบัญชีให้สิทธิ์สำหรับการประมวลผลคำขอพร้อมกัน และสิทธิ์ดังกล่าวสิ้นสุดลงเมื่อคำขอเสร็จสมบูรณ์
-- lease เซสชันที่มีการจัดการแบบเอกสิทธิ์คือการถือครองตลอดวงจรการทำงานอย่างคงทน พร้อมขอบเขตป้องกันด้วย generation
+- OAuth session occupancy เป็นการกระจายโหลดแบบ soft ภายใน process สำหรับบัญชี OAuth
+- Account semaphores มอบสิทธิ์ request-concurrency และสิ้นสุดเมื่อคำขอเสร็จสมบูรณ์
+- Exclusive managed session leases เป็นการครอบครองวงจรชีวิตแบบถาวร (durable) พร้อม generation fence
 
 ---
 
-## 3. การล็อกโมเดล
+## 3. การล็อกโมเดล (Model Lockout)
 
-**ขอบเขต:** ชุดสามค่า provider + connection + model
+**ขอบเขต:** ชุดค่า provider + connection + model
 
-**ขอบเขตคีย์ตามสถานะ:** สถานะที่ล้มเหลวจะเป็นตัวกำหนดว่าการล็อกจะเขียนไปยังคีย์ใด
+**ขอบเขตของคีย์ตามสถานะ:** สถานะที่ล้มเหลวเป็นตัวกำหนดว่าการล็อกจะเขียนไปยังคีย์ใด
 (`resolveLockoutScope()` ใน `open-sse/services/accountFallback/exactModelLock.ts`):
 
-- `429` / `403` / `402` — สัญญาณเกี่ยวกับโควตาหรือสิทธิ์การใช้งาน — ล็อก **กลุ่มโควตา**:
-  สำหรับ codex ให้ล็อกขอบเขต `codex` / `spark` ทั้งหมด (ทุกโมเดล `gpt-5*` ของ
-  connection) ส่วน provider อื่นให้ใช้ `getQuotaScopedModelForProvider()`
-- `404` ล็อกเฉพาะโมเดลโดยตรง (`getModelLockKey()` จำกัดขอบเขต `not_found` ให้แคบลง)
-- สถานะอื่นทั้งหมด — ความล้มเหลวด้านการรับส่งข้อมูล/เซิร์ฟเวอร์ `5xx` และ `502` ที่
-  OmniRoute สังเคราะห์ขึ้นเองจากการตรวจสอบคุณภาพ — ล็อกเฉพาะชุด
-  provider/connection/model ที่ตรงกันเท่านั้น สตรีมที่มีปัญหาในโมเดลหนึ่งไม่ใช่หลักฐาน
-  ว่าโควตาของบัญชีมีปัญหา ก่อนมีกฎนี้ การตอบกลับว่างเพียงครั้งเดียวจาก
-  `codex/gpt-5.6-luna` จะทำให้ทุกโมเดล `gpt-5*` ของ connection นั้นถูกนำออกจาก
-  การกำหนดเส้นทางเป็นเวลา 2–30 นาที (และเพิ่มขึ้นเรื่อย ๆ) ทั้งที่โควตายังไม่ได้ถูกใช้
-- ตัวเลือก `scope` ที่ caller ระบุไว้อย่างชัดเจนจะมีลำดับความสำคัญสูงสุดเสมอ (Antigravity ส่งค่า `"exact"`)
+- `429` / `403` / `402` — สัญญาณด้านโควตาหรือสิทธิ์การใช้งาน — ล็อกทั้ง**กลุ่มโควตา**:
+  สำหรับ codex คือทั้งขอบเขต `codex` / `spark` (ทุกโมเดล `gpt-5*` ของ
+  connection นั้น) สำหรับ provider อื่นใช้ `getQuotaScopedModelForProvider()`
+- `404` ล็อกเฉพาะโมเดลนั้นโดยตรง (`getModelLockKey()` จำกัด `not_found` ให้แคบลง)
+- สถานะอื่นใด — ความล้มเหลว `5xx` ระดับ transport/server และ `502` ที่ OmniRoute
+  สังเคราะห์ขึ้นเองจากการตรวจสอบคุณภาพ — ล็อกเฉพาะชุดค่า
+  provider/connection/model ที่แน่ชัด (exact) เท่านั้น stream ที่เสียของโมเดลเดียว
+  ไม่ใช่หลักฐานเกี่ยวกับโควตาของบัญชี ก่อนหน้ากฎนี้ response ว่างเพียงครั้งเดียวบน
+  `codex/gpt-5.6-luna` จะนำทุกโมเดล `gpt-5*` ของ connection นั้นออกจาก
+  การกำหนดเส้นทางนาน 2–30 นาที (เพิ่มขึ้นเรื่อยๆ) ทั้งที่โควตายังไม่ได้ถูกแตะต้อง
+- ตัวเลือก `scope` ที่ผู้เรียกระบุอย่างชัดเจนจะมีความสำคัญสูงสุดเสมอ (Antigravity ส่ง `"exact"`)
 
-**วัตถุประสงค์:** หลีกเลี่ยงการปิดใช้งาน connection ทั้งหมด เมื่อมีเพียงโมเดลเดียวที่ไม่พร้อมใช้งานหรือถูกจำกัดโควตา
+**วัตถุประสงค์:** หลีกเลี่ยงการปิดใช้งานทั้ง connection เมื่อมีเพียงโมเดลเดียวที่ไม่พร้อมใช้งานหรือถูกจำกัดโควตา
 
 **ตัวอย่าง:**
 
-- provider ที่กำหนดโควตาแยกตามโมเดลส่งคืน 429
-- provider ภายในระบบส่งคืน 404 สำหรับโมเดลหนึ่งที่ไม่มีอยู่
-- ความล้มเหลวด้านสิทธิ์ของโหมด/โมเดลที่เฉพาะเจาะจงกับ provider (เช่น โหมดของ Grok)
+- provider ที่กำหนดโควตาต่อโมเดลส่งคืน 429
+- provider ภายในเครื่องส่งคืน 404 สำหรับโมเดลที่หายไปหนึ่งตัว
+- ความล้มเหลวด้านสิทธิ์ของโหมด/โมเดลเฉพาะ provider (เช่น โหมดของ Grok)
 
 **การนำไปใช้:** `open-sse/services/accountFallback.ts` — `lockModel()`, `clearModelLock()`, `getAllModelLockouts()`
 
-### แดชบอร์ดคูลดาวน์ของโมเดล (v3.8.0)
+### แดชบอร์ด Model Cooldowns (v3.8.0)
 
-UI: Settings → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
+UI: การตั้งค่า → Model Cooldowns (`src/app/(dashboard)/dashboard/settings/components/ModelCooldownsCard.tsx`)
 
-แสดงรายการการล็อกที่ใช้งานอยู่พร้อมข้อมูล: provider, connection, model, reason, expiresAt ผู้ดูแลระบบสามารถเปิดใช้งานโมเดลอีกครั้งด้วยตนเองจากการ์ดนี้
+แสดงรายการการล็อกที่ใช้งานอยู่พร้อมกับ: provider, connection, model, reason, expiresAt ผู้ดูแลระบบสามารถเปิดใช้งานโมเดลอีกครั้งด้วยตนเองจากการ์ดนี้ได้
 
 **REST API:**
 
 - `GET /api/resilience/model-cooldowns` — แสดงรายการการล็อกที่ใช้งานอยู่
-- `DELETE /api/resilience/model-cooldowns` — เปิดใช้งานอีกครั้งด้วยตนเอง เนื้อหา: `{provider, connection, model}` การยืนยันตัวตน: management
+- `DELETE /api/resilience/model-cooldowns` — เปิดใช้งานอีกครั้งด้วยตนเอง Body: `{provider, connection, model}` การยืนยันตัวตน: management
 
-### ตัวจัดการคูลดาวน์
+### ตัวจัดการ Cooldown
 
 UI: Monitoring → Cooldown Manager (`src/app/(dashboard)/dashboard/resilience/cooldowns/`)
 
-หน้าเดียวสำหรับทุก connection ที่ถูกนำออกจากการกำหนดเส้นทางด้วยเหตุผลชั่วคราว แทนการ
-เปิดหน้าของแต่ละ provider หน้านี้แสดงรายการคูลดาวน์ของ connection, การล็อกโมเดล และ
-สถานะสิ้นสุด รวมถึงล้างสถานะเหล่านี้แยกตาม connection, ตามรายการที่เลือก หรือสำหรับ connection
-ทั้งหมดของ provider และแก้ไขกฎคูลดาวน์ที่มีการปรับแต่งบ่อยที่สุด ได้แก่ `streamStallCooldown.enabled`
-และคูลดาวน์พื้นฐาน `connectionCooldown` สำหรับ OAuth / API-key รวมถึงจำนวนขั้นสูงสุดของ
-backoff (บันทึกผ่าน `PATCH /api/resilience`) สถานะสิ้นสุด (`banned`, `expired`, `credits_exhausted`)
-จะแสดงในรายการ แต่จะไม่ถูกล้างที่นี่
+หน้าเดียวสำหรับทุก connection ที่ถูกนำออกจากการกำหนดเส้นทางด้วยเหตุผลชั่วคราว
+แทนที่จะต้องเปิดหน้าของแต่ละ provider หน้านี้แสดง connection cooldown
+การล็อกโมเดล และสถานะสิ้นสุด (terminal states) ล้างค่าเหล่านั้นได้ทีละ connection
+ตามที่เลือก หรือสำหรับทุก connection ของ provider หนึ่งๆ
+และแก้ไขกฎ cooldown ที่ปรับจูนบ่อยที่สุด: `streamStallCooldown.enabled` และ
+base cooldown กับจำนวนขั้นสูงสุดของ backoff ของ `connectionCooldown`
+สำหรับ OAuth / API-key (บันทึกผ่าน
+`PATCH /api/resilience`) สถานะสิ้นสุด (`banned`, `expired`, `credits_exhausted`)
+จะถูกแสดงแต่จะไม่ถูกล้างที่นี่
 
 **REST API** (`src/lib/resilience/cooldownManager.ts`, การยืนยันตัวตน: management):
 
-- `GET /api/resilience/cooldowns[?provider=]` — connection พร้อมสถานะ, เวลาคูลดาวน์ที่เหลือ,
-  ระดับ backoff, ประเภทข้อผิดพลาดล่าสุด และการล็อกโมเดล (ไม่มีข้อมูลประจำตัว)
-- `POST /api/resilience/cooldowns` — เนื้อหา `{connectionIds: string[]}` หรือ
-  `{all: true, provider?}`; ส่งคืน `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
+- `GET /api/resilience/cooldowns[?provider=]` — connection พร้อมสถานะ cooldown
+  ที่เหลือ ระดับ backoff ประเภทข้อผิดพลาดล่าสุด และการล็อกโมเดล (ไม่มีข้อมูลรับรอง)
+- `POST /api/resilience/cooldowns` — body `{connectionIds: string[]}` หรือ
+  `{all: true, provider?}` ส่งคืน `{cleared, unchanged, skippedTerminal, lockoutsCleared}`
 
-### UI การตั้งค่าการล็อก + การกู้คืนด้วยการลดค่าหลังสำเร็จ (v3.8.23)
+### UI การตั้งค่าการล็อก + การกู้คืนแบบ success-decay (v3.8.23)
 
-การล็อกโมเดลเปลี่ยนจากพฤติกรรมแบบเปิดใช้งานตลอดเวลาที่ฮาร์ดโค้ดไว้ มาเป็น
-ฟีเจอร์ที่กำหนดค่าได้อย่างสมบูรณ์และต้องเลือกเปิดใช้งานเอง พร้อมการกู้คืนแบบซ่อมแซมตัวเอง
+การล็อกโมเดลเปลี่ยนจากพฤติกรรมที่เปิดตลอดและเขียนตายตัว (hardcoded)
+มาเป็นฟีเจอร์แบบ opt-in ที่กำหนดค่าได้เต็มรูปแบบ พร้อมการ์ดตั้งค่าของตัวเอง
+และเส้นทางการกู้คืนที่ซ่อมตัวเองได้
 
-**การ์ดการตั้งค่า:** Settings → Model Lockout
+**การ์ดตั้งค่า:** การตั้งค่า → Model Lockout
 (`src/app/(dashboard)/dashboard/settings/components/ModelLockoutCard.tsx`)
-การ์ดนี้ **แตกต่าง** จาก `ModelCooldownsCard` แบบอ่านอย่างเดียวด้านบน (ซึ่งมีไว้เพียง
-_แสดงรายการ_ การล็อกที่ใช้งานอยู่) — การ์ดใหม่นี้ใช้ _กำหนดค่าพารามิเตอร์_ ค่าเริ่มต้น
-อยู่ใน `DEFAULT_MODEL_LOCKOUT_SETTINGS`
+การ์ดนี้**แตกต่าง**จาก `ModelCooldownsCard` แบบอ่านอย่างเดียวด้านบน
+(ซึ่งเพียง _แสดงรายการ_ การล็อกที่ใช้งานอยู่) — การ์ดใหม่นี้ _กำหนดค่าพารามิเตอร์_
+ค่าเริ่มต้นอยู่ใน `DEFAULT_MODEL_LOCKOUT_SETTINGS`
 (`src/lib/resilience/modelLockoutSettings.ts`):
 
-| การตั้งค่า              | ค่าเริ่มต้น                      | ความหมาย                                              |
-| ----------------------- | -------------------------------- | ----------------------------------------------------- |
-| `enabled`               | `false`                          | สวิตช์หลัก — การล็อกโมเดล **ปิดอยู่โดยค่าเริ่มต้น**   |
-| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | สถานะจาก upstream ที่นับเป็นความล้มเหลวระดับโมเดล     |
-| `baseCooldownMs`        | `120_000` (120 วินาที)           | ระยะเวลาล็อกเริ่มต้นสำหรับความล้มเหลวครั้งแรก         |
-| `maxCooldownMs`         | `1_800_000` (30 นาที)            | ขีดจำกัดสูงสุดของคูลดาวน์ที่เพิ่มระดับแล้ว            |
-| `maxBackoffSteps`       | `10`                             | จำนวนขั้นสูงสุดของการเพิ่มระดับ exponential backoff   |
-| `useExponentialBackoff` | `true`                           | กำหนดว่าความล้มเหลวซ้ำจะเพิ่มคูลดาวน์แบบทวีคูณหรือไม่ |
+| การตั้งค่า              | ค่าเริ่มต้น                      | ความหมาย                                                         |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------------- |
+| `enabled`               | `false`                          | สวิตช์หลัก — การล็อกโมเดล**ปิดโดยค่าเริ่มต้น**                   |
+| `errorCodes`            | `[403, 404, 429, 502, 503, 504]` | สถานะ upstream ที่นับเป็นความล้มเหลวระดับโมเดล                   |
+| `baseCooldownMs`        | `120_000` (120 วินาที)           | ระยะเวลาล็อกเริ่มต้นสำหรับความล้มเหลวครั้งแรก                    |
+| `maxCooldownMs`         | `1_800_000` (30 นาที)            | เพดานของ cooldown ที่เพิ่มขึ้น                                   |
+| `maxBackoffSteps`       | `10`                             | จำนวนขั้นสูงสุดของการเพิ่มระดับ exponential backoff              |
+| `useExponentialBackoff` | `true`                           | กำหนดว่าความล้มเหลวซ้ำๆ จะเพิ่ม cooldown แบบ exponential หรือไม่ |
 
-การตั้งค่าจะคงอยู่ผ่าน settings store ตามปกติ และตรวจสอบความถูกต้องผ่าน
+การตั้งค่าจะถูกบันทึกผ่าน settings store ปกติและตรวจสอบความถูกต้องผ่าน
 resilience settings schema การ์ดจะจำกัดค่า `baseCooldownMs`/`maxCooldownMs`
 (โดย `maxCooldownMs ≥ baseCooldownMs`) และ `maxBackoffSteps`
 
-**การกู้คืนด้วยการลดค่าหลังสำเร็จ:** การกู้คืน **ไม่ได้** อาศัยเพียงการหมดเวลาเท่านั้น การตอบกลับ
-ที่สมบูรณ์จะค่อย ๆ ลดจำนวนความล้มเหลวของโมเดลลง เพื่อให้โมเดลที่กู้คืนได้ระหว่างช่วงเวลา
-หยุดเพิ่มระดับ (และถูกปลดล็อก) ก่อนที่ตัวจับเวลาจะสิ้นสุด เมื่อ combo target สำเร็จ
+**การกู้คืนแบบ success-decay:** การกู้คืน**ไม่ใช่**เพียงการหมดเวลาของตัวจับเวลา
+response ที่ปกติดีจะค่อยๆ ลดจำนวนความล้มเหลวของโมเดลลง
+ดังนั้นโมเดลที่ฟื้นตัวกลางช่วงเวลาจะหยุดการเพิ่มระดับ (และถูกล้าง)
+ก่อนที่ตัวจับเวลาจะหมด เมื่อเป้าหมายของ combo สำเร็จ
 `open-sse/services/combo.ts` จะเรียก `decayModelFailureCount()`
-(`open-sse/services/accountFallback.ts`) ซึ่งจะ **หารครึ่ง** ค่า
-`failureCount` ที่จัดเก็บไว้ (`Math.floor(failureCount / 2)`); เมื่อค่าลดลงถึง `0` รายการล็อก
-จะถูกลบทั้งหมด ส่วนฟังก์ชันคู่กันอย่าง `recordModelLockoutFailure()`
-จะเพิ่มจำนวนครั้ง (และเพิ่มระดับคูลดาวน์) เมื่อเกิดความล้มเหลวภายใน
-ช่วงเวลาการเพิ่มระดับ การลดค่าหลังสำเร็จนี้ทำงานเพิ่มเติมจากการหมดเวลาตามปกติ —
-ทั้งสองเส้นทางสามารถเปิดใช้งานโมเดลอีกครั้งได้
+(`open-sse/services/accountFallback.ts`) ซึ่งจะ**ลดครึ่งหนึ่ง**ของ `failureCount`
+ที่จัดเก็บไว้ (`Math.floor(failureCount / 2)`) เมื่อถึง `0`
+รายการล็อกจะถูกลบออกทั้งหมด ฟังก์ชันคู่กัน `recordModelLockoutFailure()`
+จะเพิ่มจำนวน (และเพิ่มระดับ cooldown) เมื่อเกิดความล้มเหลวภายในช่วงเวลาเพิ่มระดับ
+success-decay นี้มาเพิ่มเติมจากการหมดเวลาปกติ —
+เส้นทางใดเส้นทางหนึ่งก็สามารถเปิดใช้งานโมเดลอีกครั้งได้
 
-**สถานะ:** การล็อกถูกเก็บไว้ **ในหน่วยความจำ** (`Map` ของแต่ละ process สำหรับ
-`ModelLockoutEntry` ซึ่งใช้ `provider:connectionId:model` เป็นคีย์ ส่วนการล็อกขอบเขต exact ใช้
-`provider:connectionId:exact:model`) และไม่ได้คงอยู่ใน
-DB — ข้อมูลเหล่านี้จะสูญหายเมื่อรีสตาร์ต ส่วน _การตั้งค่า_ จะถูกบันทึกอย่างถาวร แต่
-_สถานะ_ การล็อกที่ใช้งานอยู่เป็นข้อมูลชั่วคราว
+**สถานะ:** การล็อกถูกเก็บไว้**ในหน่วยความจำ** (`Map` ต่อ process ของ
+`ModelLockoutEntry` ที่ใช้คีย์ `provider:connectionId:model` ส่วนการล็อกแบบ
+exact-scope ใช้คีย์ `provider:connectionId:exact:model`)
+ไม่ได้บันทึกลง DB — จะหายไปเมื่อรีสตาร์ท _การตั้งค่า_จะถูกบันทึก
+แต่_สถานะ_การล็อกที่ใช้งานอยู่นั้นชั่วคราว
 
 ---
 
-## 4. การควบคุมคำขอพร้อมกันแบบ Quota-Share (v3.8.36)
+## 4. การควบคุมการทำงานพร้อมกันแบบ Quota-Share (v3.8.36)
 
-บัญชีแบบสมัครสมาชิก (GLM, MiniMax ฯลฯ) มักรองรับคำขอพร้อมกันได้เพียงประมาณ 1–3 รายการเท่านั้น การส่งเกินขีดจำกัดนี้จะทำให้เกิด 429 และช่วงพักการใช้งาน ปัญหานี้รุนแรงเป็นพิเศษภายใต้คอมโบแบบ **quota-share** (`qtSd/…`) ซึ่ง API key หลายรายการใช้บัญชีต้นทางเดียวกันร่วมกัน ระบบสามชั้นต่อไปนี้ช่วยป้องกันไม่ให้บัญชีที่ใช้ร่วมกันได้รับคำขอมากเกินไป
+บัญชีแบบสมัครสมาชิก (GLM, MiniMax ฯลฯ) มักรับคำขอพร้อมกันได้เพียงประมาณ 1–3 คำขอเท่านั้น หากเกินกว่านั้นจะทำให้เกิด 429 และ cooldown ปัญหานี้รุนแรงเป็นพิเศษภายใต้คอมโบแบบ **quota-share** (`qtSd/…`) ซึ่งมี API key หลายตัวใช้บัญชี upstream เดียวกัน กลไกสามชั้นต่อไปนี้ช่วยป้องกันไม่ให้บัญชีที่ใช้ร่วมกันถูกคำขอท่วม
 
-### ขีดจำกัดคำขอพร้อมกันต่อการเชื่อมต่อ (`max_concurrent`)
+### เพดานการทำงานพร้อมกันต่อการเชื่อมต่อ (`max_concurrent`)
 
-การเชื่อมต่อของผู้ให้บริการแต่ละรายการสามารถกำหนดเพดาน `max_concurrent`
-(`provider_connections.max_concurrent` ซึ่งตั้งค่าได้ในหน้าต่างการเชื่อมต่อ / API / DB)
-ปล่อยว่างไว้หากไม่ต้องการจำกัด ค่านี้เป็นตัวควบคุมหลักเพียงค่าเดียวสำหรับชั้นการจัดลำดับคำขอด้านล่าง โดยให้ตั้งค่าตามจำนวนคำขอพร้อมกันจริงที่บัญชีรองรับ (เช่น GLM ประมาณ 1, MiniMax ประมาณ 2)
+การเชื่อมต่อ provider แต่ละรายการสามารถประกาศเพดาน `max_concurrent` ได้
+(`provider_connections.max_concurrent` ตั้งค่าได้ใน connection modal / API / DB)
+เว้นว่างไว้หากไม่ต้องการจำกัด นี่คือตัวควบคุมเพียงตัวเดียวที่ขับเคลื่อนเลเยอร์ serialization ด้านล่าง — ตั้งค่าให้ตรงกับระดับการทำงานพร้อมกันจริงของบัญชี (เช่น GLM ~1, MiniMax ~2)
 
-### ขีดจำกัดคำขอพร้อมกันต่อโมเดล (`modelConcurrency`)
+### เพดานการทำงานพร้อมกันระดับโมเดล (`modelConcurrency`)
 
-การเชื่อมต่อยังสามารถกำหนดเพดานคำขอพร้อมกันแยกตามโมเดลอย่างเจาะจงเพิ่มเติมได้
-ภายในแมป `rateLimitOverrides`:
+การเชื่อมต่อยังสามารถประกาศเพดานการทำงานพร้อมกันระดับโมเดลแบบระบุชัดเจนได้ภายใน map `rateLimitOverrides`:
 
 ```json
 {
@@ -335,74 +345,40 @@ _สถานะ_ การล็อกที่ใช้งานอยู่�
 }
 ```
 
-ตั้งค่าได้ในหน้าต่างการเชื่อมต่อ (**การแทนที่ขีดจำกัดอัตรา → ขีดจำกัดคำขอพร้อมกันต่อโมเดล**
-โดยระบุ `model=cap` หนึ่งรายการต่อบรรทัด) หรือผ่าน
-`PATCH /api/providers/[id]` โดยใช้โครงสร้าง JSON เดียวกัน ความหมายสำคัญมีดังนี้:
+ตั้งค่าได้ใน connection modal (**Rate limit overrides → Per-model
+concurrency caps** โดยใส่ `model=cap` หนึ่งรายการต่อบรรทัด) หรือผ่าน
+`PATCH /api/providers/[id]` ด้วยโครงสร้าง JSON เดียวกัน หลักการสำคัญ:
 
-- **ทั้งการเชื่อมต่อเทียบกับเฉพาะโมเดล:** `maxConcurrent` ยังคงเป็นเพดานร่วมสำหรับ
-  การเชื่อมต่อทั้งหมด เมื่อมีผลทั้งสองค่า ระบบจะยึดเกตทั้งสองแบบอะตอมมิก
-  ภายในเกตแบบประกอบเดียวกัน
-  (`global → provider → account → model`) โดยพฤติกรรมที่มีผลจริงจะใช้
-  ขีดจำกัดที่เข้มงวดกว่าซึ่งเกี่ยวข้อง
-- **การจับคู่คีย์โมเดลแบบตรงกันทุกประการ:** คีย์คือสตริงโมเดลที่ส่งไปยัง
-  ตัวประมวลผลหลังจากแก้ไขการกำหนดเส้นทางแล้ว ซึ่งโดยปกติคือ ID โมเดลต้นทางแบบไม่มีคำนำหน้า
-  (`glm-5`) ไม่ใช่นามแฝง `provider/model` ฝั่งไคลเอนต์ (`zai/glm-5` จะไม่
-  ตรงกับ `glm-5`) ค่าต้องเป็นจำนวนเต็มบวกที่กำหนดเพดานจำนวนคำขอพร้อมกัน
-- **เข้าคิวภายในระบบโดยไม่มีการค้นหานโยบาย:** คำขอที่เกินขีดจำกัดจะเข้าคิวภายในระบบ
-  โดยใช้ความหมายเดิมของคิว/การหมดเวลา (ข้อผิดพลาดการรับเข้าแบบระบุประเภท
-  `SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`) OmniRoute จะไม่ค้นหาหรือ
-  อนุมานนโยบายของต้นทาง แต่จะบังคับใช้เพดานที่ผู้ดูแลระบบกำหนดไว้อย่างเคร่งครัด
-  เกตของโมเดลที่เต็มจะไม่ปิดใช้งานผู้ให้บริการ และจะไม่ทำให้โมเดลถูกล็อกอย่างถาวร
-  พฤติกรรม 429/ช่วงพัก/การใช้ตัวเลือกสำรองจากต้นทางยังคงเป็นกลไกสำรองในการจัดการข้อผิดพลาด
-- **ขอบเขตต่อการเชื่อมต่อและต่อโปรเซส:** ขีดจำกัดใช้แยกตามการเชื่อมต่อในฐานข้อมูล
-  และเก็บไว้ในหน่วยความจำ ดังนั้นการเชื่อมต่อสองรายการที่ใช้ API key ต้นทางเดียวกันซ้ำ
-  จะไม่ประสานงานกัน
-- **ไม่ได้กำหนดค่าหมายถึงไม่มีการเปลี่ยนแปลง:** การละเว้นแมป (หรือปล่อยช่องใน
-  แดชบอร์ดว่างไว้) จะไม่เพิ่มเกตของโมเดล ตัวอย่างการกำหนดค่าโดยไม่ยืนยันว่าเป็น
-  ขีดจำกัดสากลของผู้ให้บริการ:
+- **ทั้งการเชื่อมต่อเทียบกับเฉพาะโมเดล:** `maxConcurrent` ยังคงเป็นเพดานกลางระดับการเชื่อมต่อ เมื่อใช้ทั้งสองอย่างพร้อมกัน เกตทั้งสองจะถูกจองแบบ atomic ใน composite gate เดียวกัน
+  (`global → provider → account → model`) พฤติกรรมที่มีผลจริงคือขีดจำกัดที่เข้มงวดกว่าในบรรดาที่ใช้บังคับ
+- **การจับคู่ model key แบบตรงตัว:** key คือสตริงโมเดลที่ส่งให้ executor หลังจาก resolve เส้นทางแล้ว — โดยปกติคือ upstream model id ล้วน ๆ
+  (`glm-5`) ไม่ใช่ alias ฝั่งไคลเอนต์แบบ `provider/model` (`zai/glm-5` ไม่ตรงกับ
+  `glm-5`) ค่าต้องเป็นจำนวนเต็มบวกที่เป็นเพดานจำนวนคำขอพร้อมกัน
+- **คิวในเครื่อง ไม่มีการค้นหานโยบาย:** คำขอส่วนเกินจะเข้าคิวในเครื่องด้วย semantics ของคิว/timeout เดิม (ข้อผิดพลาด admission ที่มีชนิดเป็น `SEMAPHORE_TIMEOUT` /
+  `SEMAPHORE_QUEUE_FULL`) OmniRoute ไม่ค้นหาหรืออนุมานนโยบายของ upstream — มันบังคับใช้เพดานตามที่ผู้ดูแลกำหนดไว้เท่านั้น เกตโมเดลที่อิ่มตัวจะไม่ปิดการใช้งาน provider และไม่สร้างการล็อกโมเดลแบบถาวร พฤติกรรม 429/cooldown/fallback ของ upstream ยังคงเป็นตัวรองรับข้อผิดพลาด
+- **ขอบเขตต่อการเชื่อมต่อ ต่อโปรเซส:** เพดานผูกกับการเชื่อมต่อในฐานข้อมูลแต่ละรายการและถูกเก็บไว้ในหน่วยความจำ ดังนั้นการเชื่อมต่อสองรายการที่ใช้ upstream API key เดียวกันจะไม่ประสานงานกัน
+- **ไม่ตั้งค่าหมายถึงไม่เปลี่ยนแปลง:** การไม่ใส่ map (หรือเว้นช่องในแดชบอร์ดว่างไว้) จะไม่เพิ่มเกตโมเดลใด ๆ ตัวอย่างการตั้งค่าโดยไม่ยืนยันขีดจำกัดสากลของ provider ใด ๆ:
 
 ```text
 glm-5=1
 glm-4.7=3
 ```
 
-### การจัดลำดับคำขอของ Quota-share
+### การทำ serialization ของคำขอแบบ quota-share
 
-เมื่อการส่งต่อแบบ quota-share เลือกการเชื่อมต่อที่กำหนด `max_concurrent`
-เป็นค่าบวก คำขอพร้อมกันไปยัง **บัญชี** นั้นจะถูกจัดลำดับผ่านเซมาฟอร์
-แยกตามการเชื่อมต่อ (คีย์ `qsconn:<connectionId>`) โดยคำขอส่วนเกินจะ
-**รออยู่ในคิว** แทนที่จะหลั่งไหลเข้าบัญชี กลไกนี้เป็นแบบ **fail-open** กล่าวคือ
-เมื่อคิวเต็มหรือหมดเวลา ระบบจะดำเนินการต่อโดยไม่ต้องมีสล็อต แทนที่จะปฏิเสธ
-คำขอที่สามารถส่งต่อได้ เปิดหรือปิดได้ที่ **การตั้งค่า → ความยืดหยุ่น →
-คำขอพร้อมกันต่อการเชื่อมต่อของ Quota-share**
-(`resilienceSettings.quotaShareConcurrencyLimit.enabled` ซึ่งเปิดไว้โดยค่าเริ่มต้น)
-หากไม่มีขีดจำกัด `max_concurrent` พฤติกรรมจะไม่เปลี่ยนแปลง
+เมื่อการ dispatch แบบ quota-share มุ่งไปยังการเชื่อมต่อที่ประกาศ `max_concurrent` เป็นค่าบวก คำขอพร้อมกันที่ไปยัง**บัญชี**นั้นจะถูกทำ serialization ผ่าน semaphore ต่อการเชื่อมต่อ (key `qsconn:<connectionId>`): คำขอส่วนเกินจะ**รอในคิว**แทนที่จะท่วมบัญชี กลไกนี้เป็นแบบ **fail-open** — คิวที่อิ่มตัวหรือ timeout จะดำเนินการต่อโดยไม่มี slot แทนที่จะปฏิเสธคำขอที่ dispatch ได้ สลับการใช้งานได้ที่ **Settings → Resilience → Quota-share per-connection
+concurrency** (`resilienceSettings.quotaShareConcurrencyLimit.enabled` ค่าเริ่มต้นคือเปิด) หากไม่มีเพดาน `max_concurrent` พฤติกรรมจะไม่เปลี่ยนแปลง
 
-> เกตการกำหนดเส้นทางของ quota-share (`selectQuotaShareTarget`, DRR + P2C)
-> เป็นแบบ fail-open เช่นกัน และเพียง _ลดลำดับความสำคัญ_ ของการเชื่อมต่อที่ถึงขีดจำกัด
-> เท่านั้น เมื่อพูลมีเพียงการเชื่อมต่อเดียว เกตนี้ไม่สามารถบังคับขีดจำกัดแบบตายตัวได้
-> ดังนั้นเซมาฟอร์นี้จึงเป็นกลไกที่ควบคุมไม่ให้คำขอหลั่งไหลเข้ามามากเกินไปจริง ๆ
+> เกตการกำหนดเส้นทางของ quota-share (`selectQuotaShareTarget`, DRR + P2C) นั้นเป็น fail-open ในตัวเอง และเพียงแค่_ลดลำดับความสำคัญ_ของการเชื่อมต่อที่ถึงขีดจำกัด — ด้วยพูลที่มีการเชื่อมต่อเพียงตัวเดียว มันไม่สามารถจำกัดแบบ hard-limit ได้ ดังนั้น semaphore นี้จึงเป็นตัวที่ยับยั้งการท่วมจริง ๆ
 
-### การลองใหม่โดยคำนึงถึงช่วงพักของคอมโบ
+### การ retry ที่รับรู้ cooldown ของคอมโบ
 
-สำหรับกลยุทธ์คอมโบทุกแบบ (เมื่อเปิดใช้งาน) คำขอที่อาจทำให้เกิด 429 อย่างแน่นอน
-เนื่องจากช่วงพักชั่วคราวแบบ SHORT จะรอจนช่วงพักสิ้นสุดแล้วส่งต่อใหม่
-แทนที่จะส่งคืน 429 ซึ่งครอบคลุมช่วงเวลา TPM/RPM แบบ Gemini (ค่า retry-after
-ประมาณ 60 วินาที) สำหรับคอมโบหลายโมเดล เช่น เป้าหมายทั้งสองของคอมโบ 2 โมเดล
-ชนขีดจำกัดอัตราต่อโมเดล ระบบจะถูกจำกัดด้วย `comboCooldownWait`
-(`enabled`, `maxWaitMs`, `maxAttempts`, `budgetMs`) ใน
-**การตั้งค่า → ความยืดหยุ่น** และจะไม่รอสำหรับ `quota_exhausted`
-(ถูกล็อกจนถึงเที่ยงคืน) หรือสาเหตุจากการยืนยันตัวตน/ไม่พบทรัพยากร
+สำหรับกลยุทธ์คอมโบทุกแบบ (เมื่อเปิดใช้งาน) คำขอที่กำลังจะตกผลึกเป็น 429 เนื่องจาก cooldown ชั่วคราวระยะสั้นจะรอจนหมดเวลาแล้ว dispatch ใหม่แทนที่จะส่ง 429 กลับ — ซึ่งครอบคลุมหน้าต่าง TPM/RPM ระดับ Gemini (retry-after ประมาณ 60 วินาที) บนคอมโบหลายโมเดล เช่น เป้าหมายทั้งสองของคอมโบ 2 โมเดลติด rate limit ระดับโมเดลพร้อมกัน ถูกจำกัดขอบเขตด้วย `comboCooldownWait` (`enabled`, `maxWaitMs`, `maxAttempts`,
+`budgetMs`) ใน **Settings → Resilience** โดยจะไม่รอในกรณี `quota_exhausted`
+(ล็อกจนถึงเที่ยงคืน) หรือเหตุผลด้าน auth/not-found
 
-เกตเดียวกันนี้ครอบคลุมกรณีก่อนส่งต่อด้วย (#16319): เมื่อเป้าหมายทั้งหมดของ
-คอมโบถูกข้ามก่อนมีการลองดำเนินการใด ๆ เนื่องจากโมเดลอยู่ในสถานะล็อกชั่วคราว
-ระยะสั้น เส้นทางที่ไม่มีการลองดำเนินการจะรอจนสถานะล็อกสิ้นสุดภายใต้เพดานเดียวกัน
-แล้วส่งต่อใหม่ แทนที่จะตอบกลับด้วย `503 ALL_TARGETS_SKIPPED` ที่ไม่มีข้อมูลแนะนำ
-เมื่อไม่อนุญาตให้รอ (ถึงเพดาน จำนวนครั้งที่ลอง หรืองบประมาณหมดแล้ว หรือปิดฟีเจอร์อยู่)
-การตอบกลับสุดท้ายจะถูกเปลี่ยนเป็น `429 rate_limit_error` พร้อม
-`retry_after` / `reset_at` จากเวลาสิ้นสุดของสถานะล็อกชั่วคราวที่เร็วที่สุด
-ส่วนการล็อกจากโควตา การยืนยันตัวตน และการไม่พบทรัพยากร จะยังคงใช้ 503
-ที่ไม่มีข้อมูลแนะนำ
+เกตเดียวกันนี้ยังครอบคลุมกรณีก่อน dispatch ด้วย (#16319): เมื่อเป้าหมายทุกตัวของคอมโบถูกข้ามก่อนที่จะมีการพยายามใด ๆ เนื่องจากโมเดลของมันติดการล็อกชั่วคราวระยะสั้น เส้นทางแบบ zero-attempt จะรอการล็อกนั้นภายใต้เพดานเดียวกันแล้ว dispatch ใหม่ แทนที่จะตอบกลับด้วย `503 ALL_TARGETS_SKIPPED` ที่ไม่มีคำใบ้ เมื่อไม่อนุญาตให้รอ (เพดาน จำนวนครั้ง หรืองบประมาณหมด หรือฟีเจอร์ถูกปิด) การตอบกลับขั้นสุดท้ายจะถูกอัปเกรดเป็น
+`429 rate_limit_error` พร้อมพก `retry_after` / `reset_at` จากการหมดอายุของการล็อกชั่วคราวที่เร็วที่สุด ส่วนการล็อก quota, auth และ not-found จะยังคงเป็น 503 ที่ไม่มีคำใบ้
 
 ```text
 #16319 · comboCooldownWait · pre-dispatch (attempts = 0)
@@ -417,414 +393,566 @@ quota_exhausted / auth_error / not_found / not_found_local:
 
 ---
 
-## 5. การควบคุมการรับคำขอเข้าสู่คิว (v3.8.49 · issue #6593)
+## 5. การควบคุมการเข้าคิวของ Request (v3.8.49 · issue #6593)
 
-**ขอบเขต**: คิวจำกัดอัตราเฉพาะเครื่องแบบต่อ provider+connection (`open-sse/services/rateLimitManager.ts`
-ซึ่งทำงานบน Bottleneck) โดยอยู่ต่ำกว่ากลไกทั้งสามข้างต้นหนึ่งชั้น
+**ขอบเขต**: คิว rate-limit ภายในเครื่องต่อ provider+connection (`open-sse/services/rateLimitManager.ts`
+ซึ่งทำงานบน Bottleneck) อยู่ชั้นถัดลงไปจากกลไกทั้งสามข้างต้น
 
-**`maxWaitMs` จำกัดเวลารอในคิว ส่วน `executionMaxWaitMs` จำกัดเวลาประมวลผล**
-ทั้งสองส่วนถูกแยกออกจากกันโดยตั้งใจ และไม่มีส่วนใดนำค่าของอีกส่วนมาใช้
+**`maxWaitMs` กำหนดขอบเขตการรอในคิว; `executionMaxWaitMs` กำหนดขอบเขตการทำงาน**
+ทั้งสองถูกแยกออกจากกันโดยเจตนา และไม่มีตัวใดส่งค่าให้กัน
 
-`resilienceSettings.requestQueue.maxWaitMs` คือ **งบเวลารอในคิว**:
-ครอบคลุมทั้งการรอสล็อตของผู้ให้บริการและการอยู่ในสถานะ QUEUED โดยตัวจับเวลา
-จะถูกล้างทันทีที่งานออกจากสถานะ QUEUED และเริ่มประมวลผล
-(`rateLimitManager.ts`, `wrappedFn`) คำขอที่ใช้เวลาเกินค่านี้จะไม่ถูกส่งไปยัง
-ต้นทาง ค่าเริ่มต้นคือ 30000ms ซึ่งกำหนดโดย `DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS`
-ใน `src/lib/resilience/settings.ts` และตรึงไว้โดย
-`tests/unit/ratelimit-admission-control-6593.test.ts` ดังนั้นการเปลี่ยนค่านี้จะทำให้
-การทดสอบดังกล่าวล้มเหลว แทนที่จะปล่อยให้ย่อหน้านี้ล้าสมัยโดยไม่มีสัญญาณเตือน
+`resilienceSettings.requestQueue.maxWaitMs` คือ **งบประมาณการรอในคิว**: ครอบคลุม
+การรอ slot ของ provider แล้วรออยู่ในสถานะ QUEUED และตัวจับเวลาจะถูกล้าง
+ทันทีที่งานออกจากสถานะ QUEUED และเริ่มทำงาน
+(`rateLimitManager.ts`, `wrappedFn`) request ที่เกินค่านี้จะไม่มีวันไปถึง
+upstream ค่าเริ่มต้น 30000ms กำหนดโดย `DEFAULT_REQUEST_QUEUE_MAX_WAIT_MS`
+ใน `src/lib/resilience/settings.ts` และถูกปักหมุดโดย
+`tests/unit/ratelimit-admission-control-6593.test.ts` ดังนั้นการเปลี่ยนค่านี้
+จะทำให้ test นั้นเป็นสีแดง แทนที่จะทิ้งย่อหน้านี้ให้ล้าสมัยอย่างเงียบ ๆ
 
 `resilienceSettings.requestQueue.executionMaxWaitMs` คือค่าที่ Bottleneck
-ได้รับเป็น `expiration` ของงาน ซึ่งตัวจับเวลาจะเริ่มหลังจากส่งงานออกไปแล้วเท่านั้น ค่านี้เป็น
-กลไกสำรองสำหรับตัวประมวลผลที่ไม่มีการหมดเวลาของต้นทางเป็นของตนเอง และจะถูก
-เพิ่มให้เท่ากับการหมดเวลาเริ่มต้นการดึงข้อมูลของตัวประมวลผล หากค่านั้นยาวกว่า เพื่อไม่ให้
-ตัดการตอบกลับที่ยังทำงานตามปกติระหว่างดำเนินการ ค่าเริ่มต้นคือ 600000ms (10 นาที)
+รับเข้าไปเป็น `expiration` ของงาน ซึ่งตัวจับเวลาจะเริ่มหลังจาก dispatch เท่านั้น
+เป็นตัวกันชนสำรองสำหรับ executor ที่ไม่มี upstream timeout ของตัวเอง
+และจะถูกยกขึ้นให้เท่ากับ fetch-start timeout ของ executor เองหากค่านั้นสูงกว่า
+จึงไม่สามารถตัด response ที่กำลังทำงานอยู่อย่างสมบูรณ์กลางคันได้ ค่าเริ่มต้น
+600000ms (10 นาที)
 
-การนำงบเวลาของคิวไปใช้เป็น `expiration` คือสาเหตุที่เคยทำให้เกตเวย์แบบไม่เพิ่มข้อมูลทีละส่วน
-ถูกยุติกลางคัน — เกตเวย์เหล่านี้ทำงานหลายนาทีก่อนส่งไบต์แรกได้โดยชอบธรรม —
-และนี่คือเหตุผลที่การหมดอายุจะแสดงเป็น `code:
-"RATE_LIMIT_EXECUTION_TIMEOUT"` (HTTP 504) ขณะที่งบเวลาของคิวจะใช้
-รหัสการหมดเวลาของคิว กำหนดค่าใดค่าหนึ่งทับได้ผ่าน `RATE_LIMIT_MAX_WAIT_MS` /
-`RATE_LIMIT_EXECUTION_MAX_WAIT_MS` (env) หรือแดชบอร์ด
-(**Settings → Resilience**) ทั้งสองค่าจะถูกจำกัดให้อยู่ในช่วง 1ms–24h เมื่อทำให้เป็นมาตรฐาน
+การส่งงบประมาณคิวเข้าไปใน `expiration` คือสิ่งที่เคยฆ่า gateway แบบ non-incremental
+กลางเที่ยวบิน — เพราะพวกมันทำงานเป็นหลายนาทีอย่างถูกต้องก่อนจะได้ byte แรก —
+และเป็นเหตุผลที่ expiration จะถูกเปิดเผยเป็น `code:
+"RATE_LIMIT_EXECUTION_TIMEOUT"` (HTTP 504) ในขณะที่งบประมาณคิวใช้
+รหัส queue-timeout แทน สามารถ override ค่าใดก็ได้ผ่าน `RATE_LIMIT_MAX_WAIT_MS` /
+`RATE_LIMIT_EXECUTION_MAX_WAIT_MS` (env) หรือ dashboard
+(**Settings → Resilience**) ทั้งคู่ถูก clamp ให้อยู่ในช่วง 1ms–24h เมื่อถูก normalize
 
-**ลำดับความสำคัญสำหรับทั้งสองค่า:** ตัวแปร env ใช้กำหนดเพียงค่า _เริ่มต้น_ เท่านั้น ค่าที่
-บันทึกถาวรไว้ใน `resilienceSettings.requestQueue` (แพตช์จากแดชบอร์ด / API ซึ่งจัดเก็บ
-ใน `key_value`) จะมีลำดับความสำคัญสูงกว่า และค่า
-`rateLimitOverrides.maxWaitMs` / `.executionMaxWaitMs` รายการเชื่อมต่อ
-จะมีลำดับความสำคัญสูงกว่านั้นอีก ดังนั้น การตั้งค่าตัวแปร env ในการปรับใช้งานที่มีค่าบันทึกถาวร
-อยู่แล้วจะไม่ทำให้เกิดการเปลี่ยนแปลง — ให้ล้างหรืออัปเดตค่าที่บันทึกถาวรแทน
+**ลำดับความสำคัญ สำหรับทั้งคู่:** env var จะให้เพียง _ค่าเริ่มต้น_ เท่านั้น ค่า
+ที่บันทึกไว้ใน `resilienceSettings.requestQueue` (dashboard / API patch จัดเก็บ
+ใน `key_value`) จะชนะ และค่า
+`rateLimitOverrides.maxWaitMs` / `.executionMaxWaitMs` ต่อ connection จะชนะอีกที ดังนั้นการตั้ง
+env var บน deployment ที่มีค่าที่บันทึกไว้แล้วจึง
+ไม่เปลี่ยนแปลงอะไรเลย — ให้ล้างหรืออัปเดตค่าที่บันทึกไว้แทน
 
-ระยะเวลาที่อยู่ในคิวถูกจำกัดด้วย `maxWaitMs` ส่วน `maxQueueDepth` ด้านล่างจำกัดจำนวน
-ผู้เรียกที่สามารถอยู่ในคิวพร้อมกันได้
+ระยะเวลาอยู่ในคิวถูกจำกัดโดย `maxWaitMs`; `maxQueueDepth` ด้านล่างจำกัดว่า
+จะมี caller คิวอยู่พร้อมกันได้กี่ตัว
 
-**`maxQueueDepth` — ขีดจำกัดการรับเข้าแบบเลือกเปิดใช้ (ใหม่)** `resilienceSettings.requestQueue.maxQueueDepth`
-จำกัดจำนวนคำขอที่สามารถอยู่ในคิว (ยังไม่ถูกส่งไปประมวลผล) พร้อมกันสำหรับ
-provider+connection หนึ่งรายการ เมื่อคิวมีคำขออยู่ `maxQueueDepth`
-รายการแล้ว คำขอใหม่จะถูกปฏิเสธทันทีด้วยข้อผิดพลาดแบบมีชนิด
-`code: "RATE_LIMIT_QUEUE_FULL"` **ก่อน**ที่จะไปถึง `limiter.schedule()`
-— ดังนั้นการปฏิเสธจึงมีต้นทุนต่ำและเกิดขึ้นก่อนงานบีบอัดพรอมต์ / แปลภาษา
-ในลำดับถัดไปสำหรับคำขอนั้น ค่าเริ่มต้น `0` = ปิดใช้งาน เพื่อคงพฤติกรรมคิวแบบไม่จำกัด
-ที่มีอยู่เดิม โดยจำกัดช่วงไว้ที่ 0–100000 กำหนดค่าทับได้ผ่าน
-`RATE_LIMIT_MAX_QUEUE_DEPTH` (env) หรือ
-`resilienceSettings.requestQueue.maxQueueDepth` (แพตช์จากแดชบอร์ด/API)
+**การ retry ที่ระบุในบอดี: pacing vs lockout** บอดีของ 429 สามารถระบุเวลารอ
+ของตัวเองได้ (Gemini `RetryInfo.retryDelay` ข้อความ "retry after Ns") ซึ่ง
+`updateFromResponseBody` จะอ่าน เวลารอที่พอดีกับ `maxWaitMs` ของ connection
+คือ pacing: limiter จะล้าง reservoir ของตัวเองตามเวลานั้นและ call ที่คิวอยู่
+จะ dispatch เมื่อ reservoir เติมเต็ม เวลารอที่นานกว่า `maxWaitMs` ไม่ใช่สิ่งที่
+คิวจะรอครบได้ — Gemini ตอบ quota รายวันที่หมดแล้วด้วย
+`retryDelay: "86399s"` `Retry-After` ที่ถูก relay บน 429 ที่สร้างใหม่ (#16528)
+ทำให้ fallback engine ล็อกโมเดลตามช่วงเวลานั้นอยู่แล้ว แต่การหยุด limiter
+ไปด้วยจะยังทำให้ call ใดก็ตามที่มาถึง key เร็วเกินไป (เช่น หลังการ reset
+resilience) หยุดชะงักตลอดทั้ง `maxWaitMs` เมื่อเวลารอเช่นนี้มาจาก detail
+แบบ `RetryInfo` ของ Google ที่มีชนิด (provenance แบบ `google_rpc_retry_info`)
+และ limiter ของ key นั้น scope อยู่กับโมเดลแล้ว (ดู `getLimiterKey`) 429 จะกลายเป็น
+การล็อกโมเดลบน connection นั้นแทน (`lockModelForLongBodyRetry` ใน
+`open-sse/services/rateLimitManager/bodyRetryPause.ts` จำกัดสูงสุดที่ 24h) และ
+limiter จะไม่ถูกหยุด การเลือก account จะข้ามเมื่อพบการล็อกนั้นผ่าน
+`isModelLocked()` เช่นเดียวกับ gate ก่อน dispatch ของ combo สำหรับ target ที่
+ปักหมุดกับ connection นั้น บน antigravity ซึ่ง limiter เป็นต่อ quota family
+การล็อกจะอยู่บนโมเดลที่แน่นอน เหมือนการล็อก quota อื่น ๆ ของมัน ชื่อที่
+client ขอมาก็ถูกล็อกด้วยเมื่อ alias ถูก resolve ไปที่โมเดลนั้น เพราะการตรวจสอบ
+เหล่านั้นใช้ชื่อที่ร้องขอ; มันถูกล็อกแบบแน่นอน (`lockExactModel`) ดังนั้น alias
+ที่ข้าม quota family ของ antigravity หรือ scope ของ codex จะไม่ล็อกของตัวเอง
+คำใบ้แบบ prose, `retryDelay` ที่ไม่มีชนิด หรือ
+limiter ที่ใช้ร่วมกันทั้ง connection จะคงการหยุดชั่วคราวไว้ เมื่อ limiter ที่
+เส้นทาง 429 เพิ่งสร้างใหม่ถูกหยุดจริง caller ที่เวลาคิวที่เหลือจะสิ้นสุดก่อน
+การหยุดจะถูกปฏิเสธทันทีด้วยรหัส queue-timeout (`checkLimiterPause`)
+แทนที่จะรอจนครบเวลานั้น; เวลาสิ้นสุดที่บันทึกไว้ถูกยึดก่อนที่ limiter จะถูกสร้าง
+ตรงจุดที่ Bottleneck เริ่มนาฬิกา refresh ของมัน และการเปลี่ยนแปลงใด ๆ ของ
+reservoir ในภายหลังจะลืมมันไป ครอบคลุมโดย
+`tests/unit/rate-limit-long-body-retry-lockout.test.ts` และ
+`tests/unit/rate-limit-body-retry-pause.test.ts`
 
-การตรวจสอบการรับเข้าเป็นฟังก์ชันบริสุทธิ์
+**`maxQueueDepth` — เพดานการยอมรับแบบ opt-in (ใหม่)** `resilienceSettings.requestQueue.maxQueueDepth`
+จำกัดว่ามี request ได้สูงสุดเท่าใดที่นั่งคิวอยู่ (ยังไม่ได้ dispatch) สำหรับ
+provider+connection เดียวพร้อมกัน เมื่อคิวมี request ครบ `maxQueueDepth`
+แล้ว request ใหม่จะถูกปฏิเสธอย่างรวดเร็วด้วย error ที่มีชนิด
+`code: "RATE_LIMIT_QUEUE_FULL"` **ก่อน** ที่มันจะไปถึง `limiter.schedule()`
+เสียอีก — การปฏิเสธจึงถูกและเกิดก่อนงาน
+prompt-compression / translation ขั้นปลายทางใด ๆ สำหรับ request นั้น ค่าเริ่มต้น `0` =
+ปิดใช้งาน ซึ่งคงพฤติกรรมคิวไม่จำกัดเดิมไว้; จำกัดช่วง 0–100000
+override ผ่าน `RATE_LIMIT_MAX_QUEUE_DEPTH` (env) หรือ
+`resilienceSettings.requestQueue.maxQueueDepth` (dashboard/API patch)
+
+การตรวจสอบการยอมรับเข้าคิวเองเป็น pure function
 (`open-sse/services/rateLimitManager/admission.ts::checkQueueAdmission`) จึง
-สามารถทดสอบแบบหน่วยได้โดยไม่ต้องใช้ตัวจำกัด Bottleneck จริง
+ทำ unit test ได้โดยไม่ต้องมี Bottleneck limiter จริง
 
 > RFC ที่เปิด #6593 ยังเสนอแฟล็ก `bypassCompressionOnRateLimit`
-> ด้วย ไปป์ไลน์ `open-sse/services/compression/` ของ repo นี้ทำหน้าที่
-> บีบอัดพรอมต์/บริบทในคำขอ LLM ขาออก (`chatCore.ts`
+> ไว้ด้วย อย่างไรก็ตาม pipeline ใน `open-sse/services/compression/` ของ repo นี้
+> เป็นการบีบอัด prompt/context บน LLM request ฝั่งขาออก (`chatCore.ts`
 > บริเวณบล็อก `resolveCompressionSettings`/`selectCompressionStrategy`)
-> ไม่ใช่การบีบอัดการตอบกลับ HTTP สำหรับเนื้อหา 429 ที่สร้างขึ้น — จึงไม่มี
-> เส้นทางโค้ดที่ตรงกับแฟล็กบายพาสดังกล่าวโดยตรง ปัจจุบันขั้นตอนการบีบอัดพรอมต์นั้น
-> ยังทำงาน _ก่อน_ `withRateLimit()` ในไปป์ไลน์คำขอ ดังนั้น
-> การจัดลำดับใหม่เพื่อข้ามขั้นตอนนี้เมื่อถูกปฏิเสธเพราะคิวเต็มจึงเป็นการเปลี่ยนแปลงที่แยกต่างหากและใหญ่กว่า
-> ขอบเขตของ issue นี้ โดยตั้งใจ **ไม่** นำมาปรับใช้
-> ที่นี่ และปล่อยไว้เป็นงานต่อเนื่องหากประโยชน์ด้านการประหยัด CPU คุ้มกับ
-> ความเสี่ยงจากการจัดลำดับใหม่
+> ไม่ใช่ HTTP response compression บน body ของ 429 ที่สร้างขึ้น — จึงไม่มี
+> code path ที่ตรงกับแฟล็ก bypass ตามตัวอักษร นอกจากนี้ ขั้นตอนการบีบอัด prompt
+> ยังทำงาน _ก่อน_ `withRateLimit()` ใน request pipeline อยู่แล้ว ดังนั้น
+> การสลับลำดับเพื่อข้ามขั้นตอนนี้เมื่อเกิดการปฏิเสธแบบ queue-full เป็นการเปลี่ยนแปลง
+> ที่แยกออกไปและใหญ่กว่าขอบเขตของ issue นี้ จึงตั้งใจ **ไม่** implement
+> ไว้ที่นี่ และทิ้งไว้เป็นงานต่อเนื่อง หากการประหยัด CPU ที่ได้คุ้มกับ
+> ความเสี่ยงจากการสลับลำดับ
+
+### ตาข่ายนิรภัยเปิดใช้ Rate-Limit อัตโนมัติ และการป้องกัน Connection (`rateLimitProtection`)
+
+**ตาข่ายนิรภัยเปิดใช้อัตโนมัติ** (`resilienceSettings.requestQueue.autoEnableApiKeyProviders` ค่าเริ่มต้น `true`):
+โดยค่าเริ่มต้น OmniRoute จะเปิดใช้การป้องกันด้วย rate-limit queue ให้กับ provider connection ทุกตัวที่ใช้งานอยู่และเป็นประเภท API key (`getProviderCategory(provider) === "apikey"` โดยอัตโนมัติ สิ่งนี้ช่วยให้มั่นใจว่า request ขาเข้าที่ส่งไปยัง upstream API key ที่ไวต่อ rate limit จะถูกจัดคิวและควบคุมอัตราผ่าน Bottleneck แทนที่จะพุ่งชนจนเกิด 429 error จาก upstream ตาข่ายนิรภัยนี้สามารถเขียนทับได้ผ่าน environment variable `RATE_LIMIT_AUTO_ENABLE` (`false`/`0`/`off` เพื่อปิด, `true`/`1`/`on` เพื่อบังคับเปิด) ซึ่งมีความสำคัญเหนือกว่าการตั้งค่าบน dashboard ที่บันทึกไว้ (**Settings → Resilience** / `PATCH /api/resilience`)
+
+**ความหมายของ `rateLimitProtection` ระดับ connection:**
+การป้องกัน rate limit ระดับ connection ถูกติดตามผ่านฟิลด์ boolean `rateLimitProtection` บน provider connection (บันทึกเป็น `rate_limit_protection` ใน SQLite):
+
+- **เปิดอย่างชัดเจน (`rateLimitProtection === true`)**: เปิดใช้การป้องกัน rate limit สำหรับ connection นี้อย่างชัดเจน โดยไม่ขึ้นกับประเภทของ provider หรือสถานะของตาข่ายนิรภัยเปิดใช้อัตโนมัติ
+- **ปิดอย่างชัดเจน (`rateLimitProtection === false`)**: ปิดการป้องกันแบบชัดเจน แต่ **ไม่ได้** ถอน connection แบบ API key ที่ใช้งานอยู่ออกจากตาข่ายนิรภัยเปิดใช้อัตโนมัติระดับ global ใน `reconcileEnabledConnections` (`open-sse/services/rateLimitManager.ts`) ค่า `false` และ `undefined` มีความหมายเทียบเท่ากัน: เฉพาะ `rateLimitProtection === true` เท่านั้นที่ถือเป็นการ override อย่างชัดเจน หาก `rateLimitProtection` เป็น `false` (หรือไม่ได้ตั้งค่า) connection แบบ API key ที่ใช้งานอยู่จะยังตรงเงื่อนไขการเปิดใช้อัตโนมัติและยังคงอยู่ภายใต้การป้องกัน rate limit
+- **ไม่มีการ opt-out ระดับ connection**: ขณะนี้ผู้ดูแลระบบยังไม่สามารถระบุว่า "connection แบบ API key ที่ใช้งานอยู่เพียงตัวเดียวนี้ต้องทำงานโดยไม่มีการป้องกันด้วย rate-limit queue" ในขณะที่ยังเปิดใช้ auto-enable สำหรับตัวอื่นอยู่ หากต้องการให้ connection แบบ API key ทำงานโดยไม่มี rate-limit queue ทั้งหมด จะต้องปิดตาข่ายนิรภัยในระดับ global (`RATE_LIMIT_AUTO_ENABLE=false` หรือ `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false`)
+
+**เส้นทางการเขียนที่รองรับ:**
+
+- **`POST /api/rate-limits`**: เส้นทางการเขียนสำหรับจัดการที่รองรับ เพื่อสลับค่า `rateLimitProtection` ของ connection (`{ connectionId: string, enabled: boolean }`) การเรียกด้วย `enabled: true` จะเปิดการป้องกันแบบชัดเจน การเรียกด้วย `enabled: false` จะลบการป้องกันแบบชัดเจนออก (แม้ว่า connection แบบ API key ที่ใช้งานอยู่จะยังคงอยู่ภายใต้ตาข่ายนิรภัยระดับ global หากเปิดใช้ auto-enable อยู่)
+- **`PUT /api/providers/[id]`**: ตั้งใจ **ไม่** รับหรือสลับค่า `rateLimitProtection` (#11278) การอัปเดต metadata ของ provider connection ผ่าน `PUT /api/providers/[id]` จะไม่เปลี่ยนแปลงสถานะการป้องกัน rate limit ที่บันทึกไว้เสมอ
 
 ---
 
-## 6. ตัวเฝ้าระวังอัตราการส่งผ่านของสตรีมที่ช้า (#9709)
+## 6. Watchdog สำหรับ throughput ของสตรีมที่ช้า (#9709)
 
-กลไกป้องกัน `resilienceSettings.streamRecovery.throughputWatchdog` ซึ่งเป็นทางเลือก จะตรวจจับ
-อัปสตรีมที่ยังคงส่งชิ้นข้อมูลอยู่ แต่สร้างเอาต์พุตของผู้ช่วยต่ำกว่า
-อัตราเอาต์พุตที่มีประโยชน์ซึ่งกำหนดค่าไว้ กลไกนี้แยกจากการหมดเวลาเมื่อไม่มีการใช้งานโดยเจตนา:
-ฮาร์ตบีตและเมทาดาทาจะไม่รีเซ็ตตัวจับเวลาทั้งสอง และไม่นับเป็นความคืบหน้า นอกจากนี้ยัง
-แยกจากกำหนดเวลาสิ้นสุดแบบตายตัวของความพยายาม (#9153) ซึ่งยังคงเป็นเพดานความปลอดภัย
-สูงสุดโดยไม่คำนึงถึงคุณภาพของเอาต์พุต
+การป้องกันเสริม `resilienceSettings.streamRecovery.throughputWatchdog` จะตรวจจับ
+upstream ที่ยังคงส่ง chunk อยู่ แต่ผลิต output ของ assistant ต่ำกว่าอัตรา
+useful-output ที่กำหนดไว้ โดยถูกออกแบบให้แยกจาก idle timeout อย่างชัดเจน:
+heartbeat และ metadata จะไม่รีเซ็ตตัวจับเวลาฝั่งใดฝั่งหนึ่งและไม่ถือเป็นความคืบหน้า
+นอกจากนี้ยังแยกจาก hard attempt deadline (#9153) ซึ่งยังคงเป็นเพดานความปลอดภัย
+แบบสัมบูรณ์โดยไม่คำนึงถึงคุณภาพของ output
 
-ตัวเฝ้าระวังต้องผ่านช่วงอุ่นเครื่อง ตามด้วยหน้าต่างแบบเลื่อนที่ครบถ้วนก่อน
-จึงจะสามารถยุติการทำงานได้ โดยจะนับเดลตาข้อความจากเหตุการณ์เอาต์พุตของ Chat Completions และ Responses API
-(ใช้จำนวนไบต์ UTF-8 เป็นค่าประมาณแบบระมัดระวัง) ละเว้นเหตุการณ์ที่มีเฉพาะข้อมูลการใช้งานและเหตุการณ์ว่าง และ
-ระงับการตัดสินขณะที่เหตุการณ์การเรียกใช้เครื่องมือหรือการให้เหตุผลกำลังดำเนินอยู่ กลไกนี้ถูกปิดใช้งาน
-โดยค่าเริ่มต้น และสามารถเปิดใช้งานด้วย `STREAM_THROUGHPUT_WATCHDOG_ENABLED=true`;
-หน้าต่าง ช่วงอุ่นเครื่อง อัตราขั้นต่ำ และเอาต์พุตขั้นต่ำที่สามารถวัดได้ จะถูกจำกัดโดย
-เลเยอร์การปรับค่าการตั้งค่าความยืดหยุ่นตามปกติ
+Watchdog ต้องการช่วง warm-up ตามด้วย rolling window ที่สมบูรณ์ก่อนจึงจะสามารถ
+abort ได้ โดยจะนับ text delta จาก output event ของ Chat Completions และ Responses API
+(ใช้ตัวประมาณค่าแบบ UTF-8 byte อย่างระมัดระวัง) ไม่นับ event ที่มีแต่ usage และ event
+ว่างเปล่า และระงับการตัดสินในขณะที่ tool-call หรือ reasoning event กำลังดำเนินการอยู่
+โดยค่าเริ่มต้นจะถูกปิดใช้งาน และสามารถเปิดใช้งานได้ด้วย
+`STREAM_THROUGHPUT_WATCHDOG_ENABLED=true` ส่วนค่า window, warm-up,
+minimum rate และ minimum measurable output จะถูกจำกัดขอบเขตโดยชั้น normalization
+ของ resilience-settings ตามปกติ
 
-เมื่อเปิดใช้งาน การยุติโดยตัวเฝ้าระวังจะมีผลเฉพาะกับความพยายามของอัปสตรีมที่กำลังทำงานอยู่เท่านั้น ก่อนที่
-ไบต์ใดๆ จะปรากฏต่อไคลเอนต์ เส้นทางกู้คืนล่วงหน้าสำหรับบัญชีเดียวกันที่มีอยู่เดิมอาจเปิด
-ความพยายามนั้นใหม่ได้ หลังจากคอมมิตแล้ว สตรีมจะไม่ถูกเล่นซ้ำโดยไม่ตรวจสอบเด็ดขาด มีเพียงสัญญา
-การดำเนินการต่อกลางสตรีมอย่างปลอดภัยที่มีอยู่เดิมเท่านั้นที่สามารถเชื่อมส่วนต่อท้ายได้ การสิ้นสุดการทำงานยังคง
-เกิดขึ้นเพียงครั้งเดียว ดังนั้นการบันทึกการใช้งานและการคืนเซมาฟอร์จึงไม่ถูกทำซ้ำ
+เมื่อเปิดใช้งาน การ abort ของ watchdog จะถูกนำไปใช้กับ upstream attempt ที่กำลังทำงาน
+อยู่เท่านั้น ก่อนที่จะมี byte ใด ๆ ที่ client มองเห็น เส้นทาง early-recovery ของบัญชี
+เดิมที่มีอยู่แล้วอาจเปิด attempt นั้นขึ้นมาใหม่ได้ หลังจาก commit แล้ว สตรีมจะไม่ถูก
+replay แบบไม่ตรวจสอบเด็ดขาด มีเพียงสัญญา mid-stream continuation ที่ปลอดภัยซึ่งมี
+อยู่แล้วเท่านั้นที่สามารถต่อ suffix ได้ การ finalization ยังคงเป็น single-shot ดังนั้น
+การบัญชี usage และการปล่อย semaphore จึงไม่ถูกทำซ้ำ
 
 ---
 
-## 7. การระบุสถานะอัปสตรีมใหม่ (ข้อผิดพลาดโควตาที่รายงานสถานะผิด)
+## 7. การตีความสถานะ Upstream ใหม่ (ข้อผิดพลาดโควตาที่รายงานสถานะผิด)
 
-**ขอบเขต:** เกตเวย์อัปสตรีมหนึ่งแห่งที่รายงานการใช้โควตาหมดชั่วคราวด้วยสถานะ HTTP ที่ไม่ถูกต้อง
+**ขอบเขต:** เกตเวย์ upstream แห่งเดียวที่รายงานการหมดโควตาชั่วคราวด้วยสถานะ HTTP ที่ไม่ถูกต้อง
 
-**วัตถุประสงค์:** แก้ไขสถานะที่ทำให้เข้าใจผิดก่อนการจำแนกประเภท เพื่อให้ผู้ใช้งานดาวน์สตรีม (กลไกสำรอง การรวมผลแบบคอมโบ และการตอบกลับที่แสดงต่อไคลเอนต์) เห็นลักษณะของความล้มเหลวที่สามารถลองใหม่ได้อย่างถูกต้อง
+**วัตถุประสงค์:** แก้ไขสถานะที่ทำให้เข้าใจผิดก่อนการจำแนกประเภท (classification) เพื่อให้ผู้ใช้ปลายทาง (fallback engine, combo aggregation, และ response ที่ส่งถึง client) เห็นธรรมชาติที่แท้จริงของความล้มเหลวว่าสามารถ retry ได้
 
-เกตเวย์บางแห่งส่งสัญญาณว่าโควตาหมด **ชั่วคราว** ด้วยสถานะ HTTP
-ที่ไม่สามารถลองใหม่ได้ `agentrouter.org` ส่งคืน `403` (บางครั้งเป็น `400`) พร้อมเนื้อหาภาษาจีน
-(`用户额度不足` / `额度不足`) แทน `429` ซึ่งเป็นค่ามาตรฐาน ไคลเอนต์อย่าง Claude
-Code มอง `403` ว่าเป็นข้อผิดพลาดถาวรและยุติเซสชัน และหากไม่มีการแก้ไข
-กลไกสำรองจะจำแนกข้อผิดพลาดนี้เป็น `AUTH_ERROR` แทนที่จะเป็นเหตุการณ์
-เกี่ยวกับโควตา
+เกตเวย์บางแห่งส่งสัญญาณการหมดโควตาชั่วคราวด้วยสถานะ HTTP ที่ไม่สามารถ retry ได้ `agentrouter.org` ส่งกลับ `403` (บางครั้ง `400`) พร้อมเนื้อความภาษาจีน (`用户额度不足` / `额度不足`) แทนที่จะเป็น `429` ตามมาตรฐาน Client อย่าง Claude Code ตีความ `403` เป็นความล้มเหลวถาวรและยกเลิกเซสชัน และหากไม่มีการแก้ไข fallback engine จะจำแนกมันเป็น `AUTH_ERROR` แทนที่จะเป็นเหตุการณ์โควตา
 
-**การติดตั้งใช้งาน:**
+**การ implement:**
 
-- รีจิสทรี + ตัวจับคู่: `open-sse/config/upstreamStatusRestatement.ts` — รายการ
-  กฎแยกตามผู้ให้บริการ (`{id, fromStatuses, toStatus, textMarkers,
-excludeMarkers, defaultRetryAfterMs}`) ซึ่งจับคู่ผ่าน `applyStatusRestatement()`
-- จุดเรียกใช้: บล็อก `providerFailure:` ใน `open-sse/handlers/chatCore.ts`
-  (บริเวณบรรทัด 3654) หลังจาก `parseUpstreamError()` แยกวิเคราะห์การตอบกลับจากอัปสตรีม
-  ที่มีสถานะ HTTP ข้อผิดพลาด (`!providerResponse.ok`) ทันที และก่อนที่จะมี
-  การจำแนกประเภทใดๆ เพื่อให้ผู้ใช้งานดาวน์สตรีมทุกรายเห็นสถานะที่แก้ไขแล้ว
-  ข้อผิดพลาดที่ฝังอยู่ภายในสตรีม SSE สถานะ `200` จะผ่านเส้นทาง
-  การแยกวิเคราะห์สตรีมอีกเส้นทางหนึ่งในภายหลัง และ **ยังไม่** ครอบคลุมโดยฮุกนี้ในปัจจุบัน —
-  นี่เป็นข้อจำกัดที่ทราบแล้ว และยังไม่จำเป็นสำหรับสถานะที่ผิดของ agentrouter (ซึ่ง
-  ปรากฏเป็นสถานะ HTTP ข้อผิดพลาด)
-- สิทธิ์ในการลองใหม่: `429` อยู่ใน `RETRY_AFTER_ELIGIBLE_STATUSES`
-  (`open-sse/services/combo/unavailableRetryGate.ts`) ดังนั้นข้อผิดพลาดที่ได้รับการระบุสถานะใหม่
-  จะมีช่วงเวลาลองใหม่จริง แทนที่จะปรากฏเป็น `403` ที่ใช้การไม่ได้
-- ค่า `60s` สังเคราะห์ของ `defaultRetryAfterMs` (`upstreamStatusRestatement.ts`)
-  เป็นเพียงสิ่งที่การตอบกลับซึ่งได้รับการระบุสถานะใหม่แจ้งแก่ **ไคลเอนต์** เท่านั้น ไม่ใช่
-  ระยะเวลาคูลดาวน์/ล็อกเอาต์ภายในของการเชื่อมต่อ — ระยะเวลาดังกล่าวถูกควบคุม
-  แยกต่างหากโดยกลไกที่จัดการข้อผิดพลาดซึ่งได้รับการระบุสถานะใหม่จริง
-  (การคูลดาวน์การเชื่อมต่อที่เพิ่มระยะเวลาแบ็กออฟ, §2, โดยมีค่าฐาน `3s` สำหรับผู้ให้บริการ
-  ที่ใช้ API key; หรือการล็อกเอาต์โมเดล, §3, สำหรับผู้ให้บริการโควตาแยกตามโมเดลอย่าง
-  agentrouter) เราเตอร์อาจมีสิทธิ์ลองใหม่ภายในได้เร็วกว่าช่วงเวลา 60s
-  ที่แจ้งแก่ไคลเอนต์ — นี่คือระยะเผื่อที่ตั้งใจไว้ ไม่ใช่ข้อบกพร่อง
+- Registry + matcher: `open-sse/config/upstreamStatusRestatement.ts` — รายการกฎต่อ provider หนึ่งรายการ (`{id, fromStatuses, toStatus, textMarkers,
+excludeMarkers, defaultRetryAfterMs}`) จับคู่ผ่าน `applyStatusRestatement()`
+- จุดเรียกใช้: บล็อก `providerFailure:` ใน `open-sse/handlers/chatCore.ts` (ประมาณบรรทัดที่ 3654) ทันทีหลังจากที่ `parseUpstreamError()` แยกวิเคราะห์ response จาก upstream ที่มีสถานะ HTTP แสดงข้อผิดพลาด (`!providerResponse.ok`) และก่อนที่การจำแนกประเภทใด ๆ จะทำงาน เพื่อให้ผู้ใช้ปลายทางทุกตัวเห็นสถานะที่แก้ไขแล้ว ข้อผิดพลาดที่ฝังอยู่ภายใน SSE stream ที่มีสถานะ `200` จะไปตามเส้นทางการแยกวิเคราะห์ stream แยกต่างหากในภายหลัง และ**ไม่**อยู่ภายใต้ hook นี้ในปัจจุบัน — เป็นข้อจำกัดที่รู้กัน ซึ่งยังไม่จำเป็นสำหรับสถานะผิดของ agentrouter (ซึ่งปรากฏเป็นสถานะ HTTP แสดงข้อผิดพลาด)
+- สิทธิ์ในการ retry: `429` อยู่ใน `RETRY_AFTER_ELIGIBLE_STATUSES` (`open-sse/services/combo/unavailableRetryGate.ts`) ดังนั้นข้อผิดพลาดที่ถูกตีความใหม่จึงมีช่วงเวลา retry ที่แท้จริง แทนที่จะปรากฏเป็น `403` ที่ตายสนิท
+- `defaultRetryAfterMs` แบบสังเคราะห์ `60s` (`upstreamStatusRestatement.ts`) เป็นเพียงสิ่งที่ response ที่ถูกตีความใหม่บอกกับ **client** เท่านั้น มันไม่ใช่ระยะเวลา cooldown/lockout ภายในของ connection — ส่วนนั้นถูกควบคุมแยกต่างหากโดยกลไกที่จัดการข้อผิดพลาดที่ถูกตีความใหม่จริง ๆ (backoff ที่เพิ่มขึ้นเรื่อย ๆ ของ Connection Cooldown, §2, ฐาน `3s` สำหรับ provider แบบ API-key หรือ Model Lockout, §3 สำหรับ provider แบบ per-model-quota เช่น agentrouter) Router สามารถกลับมามีสิทธิ์ retry ภายในได้เร็วกว่าช่วงเวลา 60 วินาทีที่ประกาศให้ client ทราบ — เป็นส่วนเผื่อที่ตั้งใจไว้ ไม่ใช่บั๊ก
 
-ข้อผิดพลาดถาวร (`无权访问模型` ของ agentrouter — ไม่มีสิทธิ์เข้าถึงโมเดลนี้) จะ
-**ไม่ถูก** ระบุสถานะใหม่เด็ดขาด: `excludeMarkers` จะยับยั้งกฎแม้เมื่อ `textMarkers` ตรงกัน
-ดังนั้นข้อผิดพลาดจึงคงสถานะเดิมไว้ และจะไม่มีสิ่งใดลองข้อผิดพลาดนั้นใหม่อย่างไม่สิ้นสุด
-กฎการจำแนกประเภทผู้ให้บริการที่ตรงกัน
-(`agentrouter-model-access-denied` ใน `open-sse/config/providerErrorRules.ts`:
-`reason: "auth_error"`, `scope: "model"`, ระยะเวลาคูลดาวน์ฐานที่ประกาศไว้ `6h`) จะถูก
-ตรวจสอบโดย `checkFallbackError` (`open-sse/services/accountFallback.ts`)
-_ก่อน_ การส่งคืนก่อนกำหนดสำหรับ `FORBIDDEN` ในหมวด apikey แบบทั่วไป โดยมีเงื่อนไขจาก
-`honorsRuleLockScope(provider)` (#10334 — ปัจจุบันใช้เฉพาะกับ agentrouter ผ่าน
-รายการอนุญาต `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ใน
-`providerErrorRules.ts`) ระยะเวลาคูลดาวน์ 6h ที่ประกาศโดยกฎจะถูกส่งต่อเป็น
-`fallbackResult.baseCooldownMs` แต่ยังคงเข้าสู่เส้นทางล็อกเอาต์
-โควตาแยกตามโมเดลที่มีอยู่เดิม (`lockModelIfPerModelQuota()` /
-`recordModelLockoutFailure()` ซึ่ง #10334 ไม่ได้เปลี่ยนแปลง ยกเว้นแหล่งที่มาของระยะเวลาคูลดาวน์):
-ค่านี้จะถูกจำกัดลงตาม `mlSettings.maxCooldownMs` ของผู้ดำเนินการ
-(ค่าเริ่มต้น `1_800_000ms` / 30min) เช่นเดียวกับการล็อกเอาต์โมเดลอื่นๆ และ
-_เหตุผลการล็อกเอาต์ที่บันทึกแบบถาวร_ ยังคงเป็น `"forbidden"` ที่ฮาร์ดโค้ดไว้เดิม
-ไม่ใช่ `"auth_error"` ของกฎ — มีเพียงระยะเวลาคูลดาวน์เท่านั้นที่ได้รับการใช้
-ตลอดทั้งกระบวนการ ไม่ใช่สตริงเหตุผล ตัวการเชื่อมต่อเองยังคงทำงานอยู่
-โมเดลอื่นๆ ที่ใช้การเชื่อมต่อเดียวกันจะไม่ได้รับผลกระทบ
+ข้อผิดพลาดถาวร (`无权访问模型` ของ agentrouter — ไม่มีสิทธิ์เข้าถึงโมเดลนี้) จะไม่ถูกตีความใหม่เสมอ: `excludeMarkers` คัดค้านกฎแม้ว่า `textMarkers` จะตรง ดังนั้นข้อผิดพลาดจึงคงสถานะเดิมไว้ และไม่มีอะไร retry มันไปตลอดกาล กฎการจำแนกประเภท provider ที่ตรงกัน (`agentrouter-model-access-denied` ใน `open-sse/config/providerErrorRules.ts`: `reason: "auth_error"`, `scope: "model"`, มี base cooldown ที่ประกาศไว้ `6h`) ถูกปรึกษาโดย `checkFallbackError` (`open-sse/services/accountFallback.ts`) _ก่อน_ early-return แบบทั่วไปของหมวด apikey `FORBIDDEN` โดยมีเงื่อนไขที่ `honorsRuleLockScope(provider)` (#10334 — ปัจจุบันใช้เฉพาะ agentrouter ผ่าน allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ใน `providerErrorRules.ts`) cooldown 6 ชั่วโมงที่ประกาศไว้ของกฎไหลผ่านไปเป็น `fallbackResult.baseCooldownMs` แต่ยังคงป้อนเข้าสู่เส้นทาง lockout แบบ per-model-quota ที่มีอยู่เดิม (`lockModelIfPerModelQuota()` / `recordModelLockoutFailure()` ไม่เปลี่ยนแปลงโดย #10334 ยกเว้นแหล่งที่มาของ cooldown): มันถูก clamp ลงให้เท่ากับ `mlSettings.maxCooldownMs` ของผู้ดูแลระบบ (ค่าเริ่มต้น `1_800_000ms` / 30 นาที) เช่นเดียวกับ model lockout อื่น ๆ ทุกตัว และ _เหตุผล lockout ที่ถูกบันทึกถาวร_ ยังคงเป็น `"forbidden"` ที่ hardcode ไว้เดิม ไม่ใช่ `"auth_error"` ของกฎ — มีเพียงระยะเวลา cooldown เท่านั้นที่ถูกนำไปใช้ตลอดทั้งเส้นทาง ไม่ใช่สตริงเหตุผล ตัว connection เองยังคง active อยู่ โมเดลอื่น ๆ บน connection เดียวกันไม่ได้รับผลกระทบ
 
-ข้อผิดพลาดโควตาที่มีการระบุสถานะใหม่ (`额度不足`) จะไปถึงกฎของผู้ให้บริการในสภาพแวดล้อมการใช้งานจริง
-(`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope:
-"connection"` โดยไม่ได้ประกาศช่วงพักของตัวเอง — จึงใช้ค่าเริ่มต้นของ backoff
-แบบปรับสเกลจากเลเยอร์การคงสถานะ) ตั้งแต่ #10334 เป็นต้นมา `scope` บน
-`ProviderErrorRuleMatch` ถูกนำไปใช้ตั้งแต่ต้นทางถึงปลายทางแล้ว แต่ **เฉพาะ**
-สำหรับผู้ให้บริการใน allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-(`providerErrorRules.ts` — ปัจจุบันมีเพียง `"agentrouter"` และควบคุมผ่าน
-`honorsRuleLockScope()`) สำหรับผู้ให้บริการรายอื่นทั้งหมด `scope` ยังคงเป็น
-ข้อมูลประกอบเท่านั้น เหมือนกับก่อน #10334 ทุกประการ
-`checkFallbackError` เปิดเผย scope ของกฎที่ตรงกันเป็น
-`fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()`
-(`src/sse/services/auth.ts`) คือ guard ที่ใช้ร่วมกันเพื่อยืนยันว่า
-`ruleScope` ปลอดภัยจริงสำหรับการปฏิบัติตามในฐานะสัญญาณระดับการเชื่อมต่อที่
-กู้คืนตัวเองได้ (scope `"connection"`, reason `quota_exhausted`, ไม่เป็น
-`permanent` และไม่เป็น `creditsExhausted` — เป็นการป้องกันกรณีที่กฎในอนาคต
-จับคู่ scope `"connection"` กับสถานะบัญชีแบบถาวร) มี consumer สองจุดที่เรียกใช้:
+ข้อผิดพลาดโควตาที่ถูกตีความใหม่ (`额度不足`) ไปถึงกฎ provider ใน production (`agentrouter-user-quota-exhausted`: `reason: "quota_exhausted"`, `scope: "connection"`, ไม่มี cooldown ที่ประกาศไว้เอง — ใช้ค่าเริ่มต้น backoff แบบปรับสเกลของชั้น persistence) ตั้งแต่ #10334 เป็นต้นมา `scope` บน `ProviderErrorRuleMatch` ถูกนำไปใช้ตลอดทั้งเส้นทาง แต่**เฉพาะ**สำหรับ provider ที่อยู่ใน allowlist `HONORS_RULE_LOCK_SCOPE_PROVIDERS` (`providerErrorRules.ts` — วันนี้มีเฉพาะ `"agentrouter"` ควบคุมผ่าน `honorsRuleLockScope()`) สำหรับ provider อื่นทุกตัว `scope` ยังคงเป็นเพียงข้อมูลประกอบ เช่นเดียวกับก่อน #10334 `checkFallbackError` แสดง scope ของกฎที่ตรงกันเป็น `fallbackResult.ruleScope`; `isAgentrouterConnectionQuotaScope()` (`src/sse/services/auth.ts`) คือ guard ที่ใช้ร่วมกันซึ่งยืนยันว่า `ruleScope` ปลอดภัยที่จะนำไปใช้เป็นสัญญาณระดับ connection ที่กู้คืนตัวเองได้อย่างแท้จริง (scope `"connection"`, reason `quota_exhausted`, ไม่เคยเป็น `permanent`, ไม่เคยเป็น `creditsExhausted` — เป็นการป้องกันกฎในอนาคตที่จับคู่ scope `"connection"` กับสถานะบัญชีถาวร) มีผู้ใช้สองรายที่เรียกใช้มัน:
 
 - **การคงสถานะ** (`markAccountUnavailable()`, `src/sse/services/auth.ts`):
-  แทนที่จะเข้าสู่ branch การล็อก **รายโมเดล** ของผู้ให้บริการแบบ passthrough
-  (agentrouter มี `passthroughModels: true` → `hasPerModelQuota()`
-  คืนค่า `true`) ระบบจะใช้ **ช่วงพักชั่วคราวระดับการเชื่อมต่อ** —
-  `testStatus: "unavailable"` + `rateLimitedUntil` และจะไม่ใช้สถานะสิ้นสุด
-  (`credits_exhausted`/`banned`/`expired`) — เพื่อให้การเชื่อมต่อกู้คืนตัวเอง
-  เมื่อช่วงพักสิ้นสุดลง แทนที่จะต้องรีเซ็ตข้อมูลรับรองด้วยตนเอง
-  ระบบจะข้ามพฤติกรรมนี้สำหรับการเชื่อมต่อที่มี `disableCooling: true` (#2997):
-  การเลือกไม่ใช้ดังกล่าวจะไหลต่อไปยังการล็อกรายโมเดลแทน (เป็นข้อแลกเปลี่ยนที่
-  มีการบันทึกไว้ — ดูความคิดเห็นในโค้ดเหนือ branch)
-- **การกำหนดเส้นทางแบบ combo ภายในคำขอเดียวกัน** (`applyComboTargetExhaustion()`,
+  แทนที่จะเข้าสู่แขนงการล็อก **รายโมเดล** ของผู้ให้บริการแบบส่งผ่าน
+  (agentrouter มีค่า `passthroughModels: true` → `hasPerModelQuota()`
+  คืนค่า `true`) ระบบจะใช้ **ช่วงพักการเชื่อมต่อชั่วคราว** —
+  `testStatus: "unavailable"` + `rateLimitedUntil` โดยไม่กำหนดสถานะสิ้นสุดถาวร
+  (`credits_exhausted`/`banned`/`expired`) — เพื่อให้การเชื่อมต่อกู้คืนได้เอง
+  เมื่อช่วงพักสิ้นสุดลง แทนที่จะต้องรีเซ็ตข้อมูลประจำตัวด้วยตนเอง
+  ระบบจะข้ามขั้นตอนนี้สำหรับการเชื่อมต่อที่มี `disableCooling: true` (#2997):
+  การเลือกไม่ใช้ดังกล่าวจะเข้าสู่การล็อกรายโมเดลแทน (เป็นข้อแลกเปลี่ยนที่มีการบันทึกไว้ —
+  ดูความคิดเห็นในโค้ดเหนือแขนงนี้)
+- **การกำหนดเส้นทางแบบผสมภายในคำขอเดียวกัน** (`applyComboTargetExhaustion()`,
   `open-sse/services/combo/targetExhaustion.ts`): guard เดียวกันจะทำเครื่องหมาย
-  การเชื่อมต่อลงในชุด `exhaustedConnections` ในหน่วยความจำ โดยใช้คีย์
-  `${provider}:${connectionId}` สิ่งนี้จะข้ามเฉพาะเป้าหมายที่เหลืออยู่ใน
-  คำขอเดียวกัน ซึ่ง _ตัวเป้าหมายนั้นมี `connectionId` เดียวกันทุกประการอยู่แล้ว_
-  บนออบเจ็กต์เป้าหมายของตน (`getExhaustedTargetSkipReason()`,
+  การเชื่อมต่อไว้ในชุดข้อมูล `exhaustedConnections` ภายในหน่วยความจำ โดยใช้คีย์
+  `${provider}:${connectionId}` การดำเนินการนี้จะข้ามเฉพาะเป้าหมายที่เหลือใน
+  คำขอเดียวกันซึ่ง _มี `connectionId` เดียวกันนั้นอยู่แล้ว_ ในออบเจ็กต์เป้าหมาย
+  ของตัวเอง (`getExhaustedTargetSkipReason()`,
   `open-sse/services/combo/comboPredicates.ts`, `if (provider &&
-connectionId)` ก่อนค้นหาใน `exhaustedConnections`) — combo แบบรายการโมเดลทั่วไป
-  ซึ่งเป้าหมายข้างเคียงไม่มี `connectionId` ที่ตรึงไว้เป็นของตนเอง และค่า
-  ดังกล่าวจะถูก resolve ต่อการ dispatch จาก header
-  `X-OmniRoute-Selected-Connection-Id` ของการตอบกลับเท่านั้น จะไม่มีวันพบ
-  คีย์ที่ตรงกัน สำหรับกรณีทั่วไปนี้ การป้องกันที่แท้จริงไม่ให้ leg ที่เหลือ
-  นำบัญชีที่เพิ่งหมดโควตากลับมาใช้ซ้ำ **ไม่ใช่** Set นี้ — แต่เป็นเลเยอร์การ
-  คงสถานะข้างต้น (`rateLimitedUntil` ของการเชื่อมต่อถูกกำหนดให้เป็นเวลาในอนาคตแล้ว)
-  ร่วมกับการที่ guard เดียวกันนี้ระงับ `transientRateLimitedProviders` สำหรับ
-  ความล้มเหลวดังกล่าว (ดู "การออกแบบสองขั้นตอน" และความคิดเห็นในโค้ดของ branch
-  `isAgentrouterConnectionQuotaScope` ใน `targetExhaustion.ts`): เมื่อ Set
-  ดังกล่าวไม่ถูกทำเครื่องหมาย การบังคับอนุญาตด้วย `allowRateLimitedConnection`
-  ของ `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`)
-  จะ **ไม่** ทำงานสำหรับ leg ที่เหลือของผู้ให้บริการ ดังนั้นตัวกรอง
-  `rateLimitedUntil` ของการเลือกข้อมูลรับรอง
-  (`src/sse/services/auth.ts:1238`) จึงถูกใช้ตามปกติ และ leg ที่เหลือจะเลือก
-  การเชื่อมต่อ agentrouter อื่นที่ยังใช้งานได้ หรือไม่ก็ล้มเหลวเนื่องจากไม่มี
-  ข้อมูลรับรองที่พร้อมใช้งาน — มันจะไม่บังคับย้อนกลับไปใช้การเชื่อมต่อที่
-  branch นี้เพิ่งกำหนดช่วงพักไว้
+connectionId)` ก่อนค้นหาใน `exhaustedConnections`) — ชุดผสมแบบรายการโมเดลธรรมดา
+  ซึ่งเป้าหมายข้างเคียงไม่มี `connectionId` ที่ตรึงไว้เป็นของตัวเอง และระบบจะระบุ
+  การเชื่อมต่อเฉพาะในแต่ละครั้งที่ส่งคำขอจากส่วนหัว
+  `X-OmniRoute-Selected-Connection-Id` ของการตอบกลับ จะไม่มีทางพบคีย์ที่ตรงกันนั้น
+  สำหรับกรณีทั่วไปนี้ กลไกป้องกันที่แท้จริงไม่ให้ส่วนที่เหลือนำบัญชีที่เพิ่งหมดโควตา
+  กลับมาใช้ซ้ำจึงไม่ใช่ Set นี้ — แต่เป็นเลเยอร์การคงสถานะข้างต้น
+  (`rateLimitedUntil` ของการเชื่อมต่อถูกกำหนดเป็นเวลาในอนาคตแล้ว) ร่วมกับ guard
+  เดียวกันนี้ที่ระงับ `transientRateLimitedProviders` สำหรับความล้มเหลวดังกล่าว
+  (ดู "การออกแบบสองขั้นตอน" และความคิดเห็นในโค้ดของแขนง
+  `isAgentrouterConnectionQuotaScope` ใน `targetExhaustion.ts`): เมื่อ Set นั้น
+  ไม่ถูกทำเครื่องหมาย การบังคับอนุญาตด้วย `allowRateLimitedConnection` ของ
+  `combo.ts` (`open-sse/services/combo.ts:1005-1013`, `:2734-2738`) จะไม่ทำงาน
+  กับส่วนที่เหลือของผู้ให้บริการ ดังนั้นตัวกรอง `rateLimitedUntil` ของการเลือก
+  ข้อมูลประจำตัว (`src/sse/services/auth.ts:1238`) จึงถูกใช้งานตามปกติ และส่วนที่เหลือ
+  จะเลือกการเชื่อมต่อ agentrouter อื่นที่ยังใช้งานได้ หรือไม่ก็ล้มเหลวเนื่องจาก
+  ไม่มีข้อมูลประจำตัวที่พร้อมใช้งาน — โดยจะไม่บังคับย้อนกลับไปใช้การเชื่อมต่อ
+  ที่แขนงนี้เพิ่งกำหนดช่วงพักไว้
 
-### การออกแบบสองขั้นตอน: ระบุสถานะใหม่ แล้วจึงจำแนกประเภท
+### การออกแบบสองขั้นตอน: กำหนดสถานะใหม่ แล้วจึงจัดประเภท
 
-การระบุสถานะใหม่ (`upstreamStatusRestatement.ts`) และกฎการจำแนกประเภทของ
-ผู้ให้บริการ (`open-sse/config/providerErrorRules.ts`,
-`providerRuleRegistry`) เป็น registry แยกกัน ซึ่งทั้งคู่ใช้ id ของผู้ให้บริการ
-และตัวบ่งชี้ข้อความเป็นคีย์ แต่ทำงานคนละตำแหน่งและมีวัตถุประสงค์ต่างกัน:
-การระบุสถานะใหม่จะแก้ไขสถานะ HTTP ตั้งแต่ช่วงต้นใน `chatCore.ts`;
-กฎการจำแนกประเภทจะเลือก `reason` สำหรับ fallback และ `scope` สำหรับการล็อก
+การกำหนดสถานะใหม่ (`upstreamStatusRestatement.ts`) และกฎการจัดประเภทผู้ให้บริการ
+(`open-sse/config/providerErrorRules.ts`, `providerRuleRegistry`) เป็นรีจิสทรี
+คนละชุดที่ต่างก็ใช้รหัสผู้ให้บริการและตัวบ่งชี้ข้อความเป็นคีย์ แต่ทำงานคนละตำแหน่ง
+และมีวัตถุประสงค์ต่างกัน: การกำหนดสถานะใหม่จะแก้ไขสถานะ HTTP ตั้งแต่ช่วงต้นใน
+`chatCore.ts`; ส่วนกฎการจัดประเภทจะเลือก `reason` สำรองและ `scope` ของการล็อก
 (`model` / `provider` / `connection`) ภายใน `checkFallbackError()`
 (`open-sse/services/accountFallback.ts`)
 
-กฎการจำแนกประเภทจะเห็น **ข้อความ** ข้อผิดพลาดแบบเต็มเท่านั้น (จำเป็นสำหรับ
-จับคู่ตัวบ่งชี้ใน body เช่น `额度不足`) สำหรับผู้ให้บริการที่อยู่ใน allowlist
+กฎการจัดประเภทจะมองเห็น **ข้อความ** ข้อผิดพลาดฉบับเต็มเท่านั้น (ซึ่งจำเป็นต่อการจับคู่
+ตัวบ่งชี้ในเนื้อหา เช่น `额度不足`) สำหรับผู้ให้บริการที่อยู่ในรายการอนุญาต
 `FULL_TEXT_RULE_PROVIDERS` ใน `providerErrorRules.ts` — ปัจจุบันมีเพียง
-`"agentrouter"` สำหรับผู้ให้บริการรายอื่นทั้งหมดใน **แค็ตตาล็อกที่มีมาให้**
-`checkFallbackError` จะส่งให้ `getProviderErrorRuleMatch` เฉพาะข้อผิดพลาดแบบ
-มีโครงสร้าง (`{code, type}`) ซึ่งเพียงพอสำหรับกฎที่อิงกับ header/status/code
-แต่ไม่สามารถเห็นตัวบ่งชี้ในข้อความของ body ได้ helper
-`resolveRuleMatchBody()` เป็นผู้ดำเนินการเลือกนี้: ใช้ข้อความข้อผิดพลาดแบบเต็ม
-สำหรับผู้ให้บริการที่อยู่ใน allowlist และใช้ข้อผิดพลาดแบบมีโครงสร้างสำหรับ
-ผู้ให้บริการรายอื่น การเพิ่มผู้ให้บริการ **ที่มีมาให้** ลงใน
+`"agentrouter"` สำหรับผู้ให้บริการรายอื่นทุกรายใน **แค็ตตาล็อกที่มีมาให้ในระบบ**
+`checkFallbackError` จะส่งให้ `getProviderErrorRuleMatch` เฉพาะข้อผิดพลาดแบบมีโครงสร้าง
+(`{code, type}`) ซึ่งเพียงพอสำหรับกฎที่อิงส่วนหัว/สถานะ/รหัส แต่ไม่สามารถตรวจจับ
+ตัวบ่งชี้ในข้อความเนื้อหาได้ ตัวช่วย `resolveRuleMatchBody()` เป็นผู้ดำเนินการเลือกนี้:
+ใช้ข้อความข้อผิดพลาดฉบับเต็มสำหรับผู้ให้บริการในรายการอนุญาต และใช้ข้อผิดพลาด
+แบบมีโครงสร้างสำหรับรายอื่น การเพิ่มผู้ให้บริการ **ที่มีมาให้ในระบบ** ลงใน
 `FULL_TEXT_RULE_PROVIDERS` เป็นการเลือกใช้โดยชัดแจ้งแยกตามผู้ให้บริการ —
-สิ่งนี้มีไว้เพื่อให้เส้นทางเริ่มต้นของผู้ให้บริการทุกรายที่ไม่อยู่ในรายการ
+กลไกนี้มีไว้เพื่อให้เส้นทางเริ่มต้นของผู้ให้บริการทุกรายที่ไม่อยู่ในรายการ
 ยังคงเหมือนเดิมทุกไบต์
 
-`scope` ของกฎ (`model` / `provider` / `connection`) เป็นการเลือกใช้ที่แยกจาก
-`FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` เพียงเปิดเผยค่าเป็น
-`fallbackResult.ruleScope` และ consumer ปลายทางจะปฏิบัติตามค่านี้ในฐานะสิ่งอื่น
-นอกเหนือจากป้ายกำกับข้อมูล เฉพาะสำหรับผู้ให้บริการใน allowlist
-`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ภายในไฟล์เดียวกัน (`ควบคุมผ่าน
-honorsRuleLockScope()` — ปัจจุบันมีเพียง `"agentrouter"`) ดูหัวข้อ
-"ข้อผิดพลาดโควตาที่มีการระบุสถานะใหม่" ข้างต้นสำหรับรายละเอียดว่าการจับคู่
-`scope: "connection"` ทำสิ่งใดจริง ๆ เมื่อผู้ให้บริการอยู่ใน allowlist ดังกล่าว
+`scope` ของกฎ (`model` / `provider` / `connection`) เป็นการเลือกใช้ที่แยกต่างหาก
+จาก `FULL_TEXT_RULE_PROVIDERS`: `checkFallbackError` เพียงเปิดเผยค่านี้เป็น
+`fallbackResult.ruleScope` และตัวใช้งานปลายทางจะปฏิบัติต่อค่านี้เป็นอย่างอื่น
+นอกเหนือจากป้ายกำกับให้ข้อมูล เฉพาะสำหรับผู้ให้บริการที่อยู่ในรายการอนุญาต
+`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกันเท่านั้น (ควบคุมผ่าน
+`honorsRuleLockScope()` — ปัจจุบันมีเพียง `"agentrouter"`) ดูหัวข้อ
+"ข้อผิดพลาดโควตาที่กำหนดสถานะใหม่" ด้านบนสำหรับรายละเอียดว่าการจับคู่
+`scope: "connection"` จะทำอะไรจริงเมื่อผู้ให้บริการอยู่ในรายการอนุญาตดังกล่าว
 
-**#11104 — กฎที่ประกาศโดยโอเปอเรเตอร์จะข้าม allowlist ทั้งสองรายการ** โอเปอเรเตอร์สามารถ
-ประกาศกฎเฉพาะผู้ให้บริการขณะรันไทม์ผ่าน `settings.providerErrorRules`
+**#11104 — กฎที่ผู้ปฏิบัติงานประกาศจะข้ามรายการอนุญาตทั้งสองรายการ**
+ผู้ปฏิบัติงานสามารถประกาศกฎแยกตามผู้ให้บริการขณะรันไทม์ผ่าน
+`settings.providerErrorRules`
 (`open-sse/config/providerErrorRules.ts::setOperatorProviderErrorRules`)
-โดยไม่ต้องแก้ไขไฟล์นี้ การกำหนดให้กฎของโอเปอเรเตอร์ต้องผ่าน
-`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` ซึ่งเป็น allowlist
-ที่มีไว้เพื่อปกป้องพฤติกรรม **ค่าเริ่มต้น** ของกฎแค็ตตาล็อกที่มีมาให้
-จะทำให้กลไกการตั้งค่าไม่ทำงานสำหรับผู้ให้บริการทุกรายนอกเหนือจากรายที่อยู่ใน
-รายการเหล่านั้นแล้ว เนื่องจากการประกาศกฎถือเป็นการเลือกใช้อย่างชัดเจนของ
-โอเปอเรเตอร์อยู่แล้ว ทั้ง `resolveRuleMatchBody()` และ `honorsRuleLockScope()`
-จะตรวจสอบ `hasOperatorRuleForProvider()` ก่อนเสมอ: ผู้ให้บริการที่มีกฎของ
-โอเปอเรเตอร์จะได้รับข้อความข้อผิดพลาดดิบ และ `scope` ที่ประกาศไว้จะได้รับ
-การเคารพ ไม่ว่าผู้ให้บริการนั้นจะอยู่ใน allowlist ใดหรือไม่ก็ตาม
+โดยไม่ต้องแก้ไขไฟล์นี้ การนำกฎของผู้ปฏิบัติงานไปควบคุมด้วย
+`FULL_TEXT_RULE_PROVIDERS`/`HONORS_RULE_LOCK_SCOPE_PROVIDERS` — ซึ่งเป็น
+รายการอนุญาตที่มีไว้เพื่อปกป้องพฤติกรรม **เริ่มต้น** ของกฎในแค็ตตาล็อกที่มีมาให้ในระบบ —
+จะทำให้กลไกการตั้งค่าไม่เกิดผลกับผู้ให้บริการทุกราย ยกเว้นรายที่มีอยู่ในรายการแล้ว
+เนื่องจากการประกาศกฎก็คือการเลือกใช้อย่างชัดแจ้งของผู้ปฏิบัติงานอยู่แล้ว
+ทั้ง `resolveRuleMatchBody()` และ `honorsRuleLockScope()` จะตรวจสอบ
+`hasOperatorRuleForProvider()` ก่อน: ผู้ให้บริการที่มีกฎของผู้ปฏิบัติงานจะได้รับ
+ข้อความข้อผิดพลาดดิบและมีการบังคับใช้ `scope` ที่ประกาศไว้ ไม่ว่าจะปรากฏอยู่ใน
+รายการอนุญาตใดรายการหนึ่งด้วยหรือไม่ก็ตาม
 
-**ช่องว่างที่ทราบ — ไม่มีการตรวจสอบ `providerRuleRegistry` สำหรับ HTTP 400**
-แขนง `BAD_REQUEST` ของ `checkFallbackError` จำแนกสถานะ 400 ทั้งหมด
+**ช่องว่างที่ทราบ — ไม่มีการเรียกใช้ `providerRuleRegistry` สำหรับ HTTP 400**
+แขนง `BAD_REQUEST` ของ `checkFallbackError` จะจัดประเภทสถานะ 400 ทั้งหมด
 ผ่านอาร์เรย์รูปแบบของตัวเอง (`MODEL_ACCESS_DENIED_PATTERNS`,
-`CONTEXT_OVERFLOW_PATTERNS` ฯลฯ ใน `accountFallback.ts`) และคืนค่าก่อนที่
-จะไปถึงแขนง `configuredRule`/`getProviderErrorRuleMatch` ที่อยู่ด้านบน
-กฎแค็ตตาล็อกที่มีมาให้ (หรือกฎของโอเปอเรเตอร์) ซึ่งมี `status: 400`
-สามารถใช้ได้ในเชิงไวยากรณ์ แต่จะไม่มีวันทำงาน ปัจจุบันยังไม่มีกฎใดที่มุ่งเป้าไปยัง 400
-ดังนั้นจึงไม่มีสิ่งใดในระบบใช้งานจริงได้รับผลกระทบ — แต่กฎ 400 ในอนาคตจำเป็นต้อง
-แก้ไขแขนงนี้ก่อน ซึ่งเป็นการเปลี่ยนแปลงที่ใหญ่กว่าการเพิ่มกฎ (เพราะจะจำแนก 400
-ใหม่สำหรับผู้ให้บริการทุกรายที่พึ่งพาพฤติกรรมของอาร์เรย์รูปแบบอยู่แล้ว)
-และอยู่นอกขอบเขตของการเพิ่มกฎสำหรับผู้ให้บริการรายเดียว
+`CONTEXT_OVERFLOW_PATTERNS` และอื่น ๆ ใน `accountFallback.ts`) และคืนค่าก่อน
+ที่จะไปถึงแขนง `configuredRule`/`getProviderErrorRuleMatch` ที่อยู่ด้านบน
+กฎในแค็ตตาล็อกที่มีมาให้ในระบบ (หรือกฎของผู้ปฏิบัติงาน) ที่มี `status: 400`
+มีไวยากรณ์ที่ถูกต้อง แต่จะไม่มีวันทำงาน ปัจจุบันไม่มีกฎใดกำหนดเป้าหมายเป็น 400
+ดังนั้นจึงไม่มีสิ่งใดในระบบที่ใช้งานจริงได้รับผลกระทบ — แต่กฎ 400 ในอนาคต
+จำเป็นต้องแก้ไขแขนงนี้ก่อน ซึ่งเป็นการเปลี่ยนแปลงที่ใหญ่กว่าการเพิ่มกฎ
+(เพราะจะจัดประเภท 400 ใหม่สำหรับผู้ให้บริการทุกรายที่พึ่งพาพฤติกรรมของอาร์เรย์รูปแบบ
+อยู่แล้ว) และอยู่นอกขอบเขตของการเพิ่มกฎสำหรับผู้ให้บริการเพียงรายเดียว
 
-### การเพิ่มเกตเวย์ใหม่ที่รายงานโควตาผิด
+### การเพิ่มเกตเวย์ที่รายงานสถานะโควตาผิดพลาด
 
-1. ลงทะเบียนอาร์เรย์กฎหนึ่งรายการใน `statusRestatementRegistry`
-   (`open-sse/config/upstreamStatusRestatement.ts`) กำหนด `textMarkers`
-   ให้เฉพาะเจาะจงกับผู้ให้บริการ อย่านำวลีภาษาอังกฤษทั่วไปที่อาจชนกับ
-   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`)
-   มาใช้ซ้ำ
-2. หากต้องการ ให้ลงทะเบียนกฎการจำแนกใน
-   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) เพื่อเลือก
-   ขอบเขตการล็อกที่ถูกต้อง (`connection` สำหรับโควตาระดับทั้งบัญชี, `model`
-   สำหรับข้อผิดพลาดเฉพาะโมเดล) ขั้นตอนนี้จะมีผลในระบบใช้งานจริงเฉพาะกับ
-   ผู้ให้บริการที่กฎจำเป็นต้องใช้ข้อความข้อผิดพลาดฉบับเต็ม (ตัวบ่งชี้ใน body):
-   ให้เพิ่ม id ของผู้ให้บริการลงใน `FULL_TEXT_RULE_PROVIDERS` ในไฟล์เดียวกัน
-   — มิฉะนั้น `checkFallbackError` จะส่งให้กฎเฉพาะข้อผิดพลาดแบบมีโครงสร้าง
-   `{code, type}` เท่านั้น และกฎที่อิงข้อความใน body จะไม่มีวันตรงกับทราฟฟิกจริง
-   กฎที่จับคู่จาก `status`/`headers` เพียงอย่างเดียว (เช่นของ Opencode หรือ
-   Minimax) ไม่จำเป็นต้องเลือกใช้กลไกนี้ นอกจากนี้ หากกฎประกาศ
-   `scope: "connection"` และต้องการให้เกิดคูลดาวน์ระดับทั้งการเชื่อมต่อจริง
-   พร้อมทั้งข้ามคอมโบภายในคำขอเดียวกัน (ไม่ใช่แค่ป้ายกำกับเพื่อให้ข้อมูล)
-   ให้เพิ่ม id ของผู้ให้บริการลงใน `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-   ในไฟล์เดียวกัน — รายการนี้เป็นตัวควบคุมการใช้ค่าในลักษณะเดียวกับ
-   `isAgentrouterConnectionQuotaScope()` ภายใน
+1. ลงทะเบียนอาร์เรย์กฎหนึ่งชุดใน `statusRestatementRegistry`
+   (`open-sse/config/upstreamStatusRestatement.ts`) โดยต้องทำให้ `textMarkers`
+   เฉพาะเจาะจงกับผู้ให้บริการแต่ละราย ห้ามนำวลีภาษาอังกฤษทั่วไปที่ชนกับ
+   `CREDITS_EXHAUSTED_SIGNALS` (`open-sse/services/accountFallback.ts`) มาใช้ซ้ำ
+2. (ไม่บังคับ) ลงทะเบียนกฎการจำแนกประเภทใน
+   `open-sse/config/providerErrorRules.ts` (`providerRuleRegistry`) เพื่อเลือกขอบเขต
+   การล็อกที่ถูกต้อง (`connection` สำหรับโควตาระดับบัญชี, `model` สำหรับ
+   ข้อผิดพลาดระดับโมเดล) ขั้นตอนนี้จะมีผลใน production เฉพาะกับผู้ให้บริการ
+   ที่กฎของตนต้องการข้อความข้อผิดพลาดแบบเต็ม (body markers): ให้เพิ่ม provider id
+   ลงใน `FULL_TEXT_RULE_PROVIDERS` ในไฟล์เดียวกัน — มิฉะนั้น
+   `checkFallbackError` จะส่งเฉพาะข้อผิดพลาดที่มีโครงสร้าง `{code, type}`
+   ให้กับกฎเสมอ และกฎที่อิงข้อความ body จะไม่มีวันตรงกับทราฟฟิกจริง
+   กฎที่ตรงจาก `status`/`headers` เพียงอย่างเดียว (เช่น ของ Opencode หรือ
+   Minimax) ไม่จำเป็นต้อง opt-in นี้ อีกประการหนึ่ง หากกฎประกาศ
+   `scope: "connection"` และเจตนาคือการคูลดาวน์ทั้งการเชื่อมต่อจริง พร้อมข้าม
+   combo ในรีเควสต์เดียวกัน (ไม่ใช่แค่ป้ายกำกับเพื่อให้ข้อมูล) ให้เพิ่ม
+   provider id ลงใน `HONORS_RULE_LOCK_SCOPE_PROVIDERS` ในไฟล์เดียวกัน —
+   นี่คือสิ่งที่ควบคุมการใช้งานสไตล์ `isAgentrouterConnectionQuotaScope()` ใน
    `markAccountUnavailable()` (`src/sse/services/auth.ts`) และ
    `applyComboTargetExhaustion()`
-   (`open-sse/services/combo/targetExhaustion.ts`); หากไม่เพิ่ม `scope`
-   จะยังคงส่งต่อผ่าน `fallbackResult.ruleScope` แต่จะไม่มีส่วนใดดำเนินการตามค่านั้น
-3. เพิ่มการทดสอบหน่วยโดยยึดรูปแบบจาก
-   `tests/unit/upstream-status-restatement.test.ts` และ
-   `tests/unit/agentrouter-error-rules.test.ts` (รวมถึงตัวป้องกัน
-   not-permanent / not-creditsExhausted และ — หากผู้ให้บริการจำเป็นต้องใช้
-   allowlist — การทดสอบที่ยืนยันว่า `resolveRuleMatchBody()` คืนข้อความฉบับเต็ม
-   เฉพาะสำหรับผู้ให้บริการรายนั้น)
+   (`open-sse/services/combo/targetExhaustion.ts`) หากไม่มีสิ่งนี้ `scope`
+   จะยังคงไหลผ่าน `fallbackResult.ruleScope` แต่จะไม่มีอะไรนำไปใช้งาน
+3. เพิ่ม unit test โดยอิงตาม `tests/unit/upstream-status-restatement.test.ts`
+   และ `tests/unit/agentrouter-error-rules.test.ts` (รวมถึง guard สำหรับ
+   not-permanent / not-creditsExhausted และ — หากผู้ให้บริการต้องการ allowlist —
+   เทสต์ที่ยืนยันว่า `resolveRuleMatchBody()` คืนข้อความเต็มเฉพาะสำหรับ
+   ผู้ให้บริการนั้น)
 
-ไม่จำเป็นต้องเปลี่ยนแปลง `chatCore.ts`, `classifyError` หรือคอมโบ
+ไม่จำเป็นต้องเปลี่ยนแปลง `chatCore.ts`, `classifyError` หรือ combo แต่อย่างใด
 
-#### การล็อกแบบแบ่งบักเก็ตตาม egress (#10880)
+#### การล็อกแบบกลุ่ม egress (#10880)
 
-ผู้ให้บริการใน `EGRESS_BUCKETED_LOCK_PROVIDERS` (ตระกูล opencode) จะถูก
-ปฏิบัติเสมือนเป็น upstream ที่แบ่งบักเก็ตตาม IP (แพ็กเกจฟรีของ opencode
-แบ่งบักเก็ตตาม IP ไม่ใช่ตามบัญชี — ดู #9611): สถานะ 429 ที่ถูกจำแนกเป็น
-`quota_exhausted` **หรือ** `rate_limit_exceeded` จะทำให้ทุกการเชื่อมต่อ
-ในตระกูลที่อยู่ใน allowlist ซึ่งมี egress IP ล่าสุดที่ทราบตรงกับการเชื่อมต่อ
-ที่ล้มเหลวเข้าสู่คูลดาวน์ ก่อนที่การหมุนเวียนจะลองใช้การเชื่อมต่อเหล่านั้น
-— เพื่อหลีกเลี่ยงการเรียก upstream ที่รับประกันว่าจะล้มเหลวจำนวน N-1 ครั้ง
-(รูปแบบเดียวกับ #10460/#10525)
-มีการรวม `rate_limit_exceeded` ไว้โดยเจตนา: บนเส้นทาง
-`markAccountUnavailable` กฎเฉพาะของ opencode จะไม่มีวันตรงกัน
-(ไม่มีการส่ง headers/body ให้ `checkFallbackError` และ opencode ไม่อยู่ใน
-`FULL_TEXT_RULE_PROVIDERS`) ดังนั้น 429 ที่ body มีข้อความโควตาการสมัครสมาชิก
-("monthly usage limit reached") จะถูกจำแนกเป็น `quota_exhausted`
-โดย fallback ที่อิงข้อความโควตา (`buildSubscriptionQuotaFallback`,
-`accountFallback.ts`; คูลดาวน์ 1 ชั่วโมง) ก่อนที่จะไปถึงกฎ `status_429`
-— ขณะที่ 429 ที่ไม่มีข้อความโควตา (เป็นเพียงการจำกัดอัตราปกติ)
-จะถูกจำแนกผ่านกฎ `status_429` เป็น `rate_limit_exceeded` และยังคงทำให้
-ตระกูล IP เข้าสู่คูลดาวน์ สำหรับผู้ให้บริการที่อยู่ใน allowlist
-การจำกัดอัตราแบบแบ่งบักเก็ตตาม IP ถือเป็นสัญญาณเดียวกับโควตาที่ใช้หมดแล้ว
-ข้อจำกัดที่ควรระบุอย่างตรงไปตรงมา:
+ผู้ให้บริการใน `EGRESS_BUCKETED_LOCK_PROVIDERS` (กลุ่ม opencode) จะถูกปฏิบัติ
+เหมือน upstream ที่จัดกลุ่มตาม IP (free tier ของ opencode จัดกลุ่มตาม IP
+ไม่ใช่ตามบัญชี — ดู #9611): เมื่อ status-429 ถูกจำแนกเป็น `quota_exhausted`
+**หรือ** `rate_limit_exceeded` การเชื่อมต่อทุกตัวในกลุ่มที่อยู่ใน allowlist
+ซึ่งมี egress IP ล่าสุดที่ทราบตรงกับของการเชื่อมต่อที่ล้มเหลว จะถูกคูลดาวน์
+ก่อนที่ rotation จะได้ลองใช้งาน
+— เพื่อหลีกเลี่ยงการเรียก upstream ที่รับประกันว่าล้มเหลว N-1 ครั้ง (รูปแบบเดียวกับ #10460/#10525)
+การรวม `rate_limit_exceeded` นั้นตั้งใจไว้โดยเจตนา: บนเส้นทาง `markAccountUnavailable`
+กฎเฉพาะของ opencode จะไม่ตรงเลย (ไม่มี headers/body ถูกส่งให้
+`checkFallbackError`, opencode ไม่ได้อยู่ใน `FULL_TEXT_RULE_PROVIDERS`) ดังนั้น
+429 ที่ body มีข้อความโควตาสมาชิก ("monthly usage limit
+reached") จะถูกจำแนกเป็น `quota_exhausted` โดย quota-text fallback
+(`buildSubscriptionQuotaFallback`, `accountFallback.ts`; คูลดาวน์ 1 ชั่วโมง)
+ก่อนที่กฎ `status_429` จะถูกพิจารณา — ขณะที่ 429 ที่ไม่มีข้อความโควตา
+(rate limiting ธรรมดา) จะถูกจำแนกผ่านกฎ `status_429` เป็น `rate_limit_exceeded`
+และยังคงคูลดาวน์กลุ่ม IP นั้นอยู่ดี สำหรับผู้ให้บริการที่อยู่ใน allowlist
+rate limit แบบจัดกลุ่มตาม IP คือสัญญาณเดียวกับโควตาที่หมดไป ข้อจำกัดที่ต้องยอมรับ:
 
-- **พยายามให้ดีที่สุด (Best-effort)**: การล็อกจะหา `egress_ip` ล่าสุดที่ทราบของการเชื่อมต่อ
-  จาก `proxy_logs` (ช่วงเวลา 24 ชม., ทำงานแบบ synchronous, ไม่มีแคช) หากเป็น cold cache (ไม่เคย
-  ตรวจสอบ egress IP) หรือไม่พบแถวข้อมูล → การเชื่อมต่อที่ล้มเหลวยังคงถูกพักการใช้งานโดย
-  branch นี้ (บันทึกเหมือนในปัจจุบัน) เพียงแต่จะไม่มีการล็อก sibling
-- **ไม่มีวันเป็น terminal**: cooldown เป็นหน้าต่างโควตาที่ต่ออายุได้
-  (`testStatus: "unavailable"`); จะไม่มีการอนุมานสถานะถาวรจากสัญญาณระดับ
-  IP การเชื่อมต่อที่มี `disableCooling` จะข้าม branch นี้ทั้งหมด
-- **ความละเอียดของการล็อกเปลี่ยนไปสำหรับตระกูลที่อยู่ใน allowlist**: นี่เป็นการเปลี่ยน
-  scope ไม่ใช่เพียงการเพิ่มประสิทธิภาพสำหรับ sibling เท่านั้น opencode เป็น provider แบบ
-  `passthroughModels` ดังนั้นก่อนมี branch นี้ ข้อผิดพลาด 429 จะทำให้เกิดการล็อกระดับ MODEL;
-  ตอนนี้จะทำให้เกิด cooldown ระดับการเชื่อมต่อ — รวมถึงกรณีที่ผู้ดูแลระบบใช้งานเพียง
-  การเชื่อมต่อเดียวโดยไม่มี sibling เลย นี่คือความละเอียดที่ตารางกฎของ opencode
-  ประกาศไว้อยู่แล้วว่าถูกต้อง (`scope: "connection"`,
-  `providerErrorRules.ts`) แต่ไม่เคยถูกใช้จนถึงตอนนี้ เพราะ opencode ไม่ได้อยู่ใน
-  `HONORS_RULE_LOCK_SCOPE_PROVIDERS` branch นี้จะเขียน cooldown +
-  `backoffLevel` ของการเชื่อมต่อที่ล้มเหลวด้วยตัวเอง โดยสะท้อนพฤติกรรมของ
-  branch agentrouter ที่มี scope ระดับการเชื่อมต่อ แล้วจึง return — จะไม่มีทางไปถึง
-  การบล็อกระดับโมเดลและเส้นทางทั่วไปด้านล่าง
-- **รวม combo ด้วย**: เช่นเดียวกับ branch agentrouter โดยเจตนา scope นี้จะ
-  ไม่สนใจการ downgrade ผ่าน `persistUnavailableState`/`isCombo` ที่ผู้เรียกแบบ combo
-  นำไปใช้กับข้อผิดพลาด 429 การล็อกระดับโมเดลไม่ใช่รูปแบบที่อ่อนกว่าของ scope นี้ แต่เป็น
-  หน่วยที่ไม่ถูกต้อง: มันไม่ได้บอกอะไรเกี่ยวกับ IP ที่ใช้โควตาหมดแล้ว ดังนั้นการหมุนเวียน
-  combo จะยังคงสิ้นเปลืองการเรียกที่รับประกันว่าจะล้มเหลวหนึ่งครั้งต่อ sibling
-- **ความปลอดภัยของ sibling**: sibling ที่อยู่ในสถานะ terminal แล้ว
-  (banned/credits_exhausted) หรืออยู่ใน cooldown ที่ยาวนานกว่าอยู่แล้วจะไม่ถูกเขียนทับ
-- **allowlist แบบเฉพาะเจาะจง**: การขยาย `EGRESS_BUCKETED_LOCK_PROVIDERS` เป็น
-  การตัดสินใจโดยชัดแจ้งของ owner; ไม่มีการเชื่อมโยงแบบทั่วไป (รูปแบบ #10334/#10419)
-  query สำหรับ sibling จะผูกกับ allowlist เดียวกันแทนการเขียนซ้ำเป็น SQL
-  literal ดังนั้นการขยายรายการจึงยังคงเป็นการแก้ไขเพียงบรรทัดเดียว
-- **การหมุนเวียน Egress IP ทั้งสองทิศทาง**: ช่วงเวลาการค้นหา (24 ชม.) กว้างกว่า
-  TTL ของแคช egress-IP (5 นาที) มาก ดังนั้น "IP ล่าสุดที่ทราบ" จึงเป็นประวัติ
-  ไม่ใช่สถานะปัจจุบัน หาก proxy ของการเชื่อมต่อหมุนเวียนภายในช่วงเวลาดังกล่าว
-  การล็อกอาจ **พลาด** IP ที่ใช้งานร่วมกันจริง (IP ที่บันทึกไว้เป็น IP ใหม่
-  ซึ่งยังใช้โควตาไม่หมด) — และในทางกลับกันอาจ **พักการใช้งาน sibling ที่ได้
-  หมุนเวียนออกไปแล้ว** จาก IP ที่ใช้โควตาหมดแล้ว กรณีที่สองทำให้ sibling นั้นเสียเวลา
-  หนึ่งช่วง cooldown; ทั้งสองกรณีเป็นข้อจำกัดแบบ best-effort ที่ยอมรับได้ของการค้นหา
-  ที่อิงประวัติ
-- **ต้นทุน**: การสแกน `proxy_logs` แบบมีขอบเขตสองครั้ง (กรองตามช่วงเวลาผ่าน
-  `idx_pl_timestamp`) เฉพาะเมื่อเกิดข้อผิดพลาด 429 เท่านั้น ไม่มีดัชนีใหม่ (migration 134
-  YAGNI) วัดผลบนสำเนาฐานข้อมูลจากทราฟฟิกจริงที่มีขนาดปานกลาง; instance ที่มี
-  throughput สูงจะเก็บแถวข้อมูลในช่วงเวลาเดียวกันมากขึ้นตามสัดส่วน
+- **แบบพยายามเต็มที่ (best-effort)**: ล็อกจะแกะหา `egress_ip` ล่าสุดที่ทราบ
+  ของการเชื่อมต่อจาก `proxy_logs` (ช่วงย้อนหลัง 24 ชั่วโมง แบบ synchronous
+  ไม่มีแคช) กรณีแคชว่าง (ไม่เคยตรวจสอบ egress IP มาก่อน) หรือไม่มีแถวข้อมูล
+  → การเชื่อมต่อที่ล้มเหลวยังคงถูก cool โดย branch นั้น (บันทึกเหมือนปัจจุบัน)
+  เพียงแต่ไม่มี sibling ใดถูกล็อก
+- **ไม่เป็นสถานะสิ้นสุดเสมอ (never terminal)**: cooldown คือหน้าต่างโควต้าที่
+  ต่ออายุได้ (`testStatus: "unavailable"`); สถานะถาวรจะไม่ถูกอนุมานมาจาก
+  สัญญาณระดับ IP เสมอไป การเชื่อมต่อแบบ `disableCooling` จะข้าม branch
+  นี้ไปทั้งหมด
+- **ความละเอียดของล็อกเปลี่ยนไปสำหรับตระกูลที่อยู่ใน allowlist**: นี่คือการ
+  เปลี่ยนขอบเขต ไม่ใช่เพียงการเพิ่มประสิทธิภาพ sibling opencode เป็น
+  provider แบบ `passthroughModels` ดังนั้นก่อน branch นี้ 429 จะทำให้เกิด
+  การล็อกเอาต์ระดับต่อ-MODEL; ตอนนี้มันสร้าง connection cooldown แทน —
+  รวมถึงกรณี operator ที่รันการเชื่อมต่อเพียงตัวเดียวโดยไม่มี sibling เลย
+  นั่นคือความละเอียดที่ตารางกฎของ opencode ประกาศไว้แล้วว่าถูกต้อง
+  (`scope: "connection"`, `providerErrorRules.ts`) แต่ยังไม่เคยถูกใช้จริง
+  เพราะ opencode ไม่ได้อยู่ใน `HONORS_RULE_LOCK_SCOPE_PROVIDERS` branch
+  นี้เขียน cooldown + `backoffLevel` ของการเชื่อมต่อที่ล้มเหลวเอง โดยเลียนแบบ
+  branch ของ agentrouter ที่ใช้ขอบเขตระดับ connection แล้ว return —
+  การบล็อกแบบต่อ-model และเส้นทางทั่วไปด้านล่างจะไม่ถูกเรียกถึงเลย
+- **รวม combo ด้วย**: เช่นเดียวกับ branch ของ agentrouter ขอบเขตนี้จงใจ
+  เพิกเฉยต่อการลดระดับ `persistUnavailableState`/`isCombo` ที่ผู้เรียกแบบ
+  combo ใช้กับ 429 การล็อกเอาต์แบบต่อ-model ไม่ใช่รูปแบบที่อ่อนกว่าของ
+  ขอบเขตนี้ แต่เป็นหน่วยที่ผิด: มันไม่ได้บอกอะไรเลยเกี่ยวกับ IP ที่หมดโควต้า
+  ดังนั้นการหมุนเวียน combo จะยังคงเผาการเรียกที่การันตีว่าล้มเหลวหนึ่งครั้ง
+  ต่อ sibling หนึ่งตัว
+- **ความปลอดภัยของ sibling**: sibling ที่เป็นสถานะสิ้นสุดอยู่แล้ว
+  (banned/credits_exhausted) หรืออยู่ใน cooldown ที่ยาวกว่าอยู่แล้ว
+  จะไม่ถูกเขียนทับเด็ดขาด
+- **Allowlist แบบจำกัดเฉพาะ**: การขยาย `EGRESS_BUCKETED_LOCK_PROVIDERS`
+  เป็นการตัดสินใจโดยชัดแจ้งของเจ้าของ; ไม่มีการเดินสายแบบทั่วไป
+  (pattern #10334/#10419) คิวรี sibling จะผูกกับ allowlist เดียวกันนั้น
+  แทนที่จะเขียนซ้ำเป็น SQL literal ดังนั้นการขยายจึงยังคงเป็นการเปลี่ยนแปลง
+  เพียงบรรทัดเดียว
+- **การหมุนเวียน Egress IP ทั้งสองทิศทาง**: ช่วงเวลาการค้นหา (24 ชั่วโมง)
+  กว้างกว่า TTL ของแคช egress-IP (5 นาที) มาก ดังนั้น "IP ล่าสุดที่ทราบ"
+  จึงเป็นประวัติ ไม่ใช่สถานะปัจจุบัน หากพร็อกซีของการเชื่อมต่อหมุนเวียน
+  ภายในช่วงเวลานั้น ล็อกอาจ **พลาด** IP ที่ใช้ร่วมกันจริง (IP ที่บันทึกไว้
+  คือ IP ใหม่ที่ยังไม่หมดโควต้า) — และในทางกลับกันอย่างสมมาตร อาจ
+  **cool sibling ที่หมุนออกไปแล้ว** จาก IP ที่หมดโควต้า กรณีหลังทำให้
+  sibling นั้นเสียหน้าต่าง cooldown ไปหนึ่งรอบ; ทั้งสองกรณีถือเป็นข้อจำกัด
+  แบบ best-effort ที่ยอมรับได้ของการค้นหาที่อิงประวัติ
+- **ต้นทุน**: การสแกน `proxy_logs` แบบจำกัดขอบเขตสองครั้ง (กรองตามช่วงเวลา
+  ผ่าน `idx_pl_timestamp`) เฉพาะตามความถี่ของ 429 เท่านั้น ไม่มีดัชนีใหม่
+  (migration 134 YAGNI) วัดผลบนสำเนาฐานข้อมูลทราฟฟิกจริงขนาดปานกลาง;
+  อินสแตนซ์ที่มีทรูพุตสูงจะเก็บแถวในช่วงเวลาเดียวกันมากขึ้นตามสัดส่วน
 
 ---
 
-## ฟีเจอร์ด้านความยืดหยุ่นอื่นๆ
+## ฟีเจอร์ Resilience อื่นๆ
 
-- **19 กลยุทธ์การกำหนดเส้นทาง** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — ดู [AUTO-COMBO.md](../routing/AUTO-COMBO.md)
-- **การกำหนดเส้นทางโดยคำนึงถึงการรีเซ็ต** (v3.8.0) — จัดลำดับความสำคัญของการเชื่อมต่อตามเวลารีเซ็ตโควตา
-- **การลดระดับโหมดเบื้องหลัง** — Responses API ที่ใช้ `background: true` จะถูกลดระดับเป็นการทำงานแบบซิงโครนัสพร้อมคำเตือน
-- **การตรวจหาขีดจำกัดเครื่องมือแบบไดนามิก** — ลดการใช้งานผู้ให้บริการเมื่อถึงขีดจำกัดจำนวนเครื่องมือ
-- **การสำรองฉุกเฉิน** — ควบคุมโดย `OMNIROUTE_EMERGENCY_FALLBACK`; ผู้ปฏิบัติงานสามารถแทนที่ค่าได้จากหน้า Feature Flags โดยไม่ต้องรีสตาร์ต
+- **กลยุทธ์การกำหนดเส้นทาง 20 แบบ** (priority, weighted, round-robin, context-relay, fill-first, p2c, random, least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted, strict-random, auto, lkgp, context-optimized, cache-optimized, fusion, pipeline) — ดู [AUTO-COMBO.md](../routing/AUTO-COMBO.md)
+- **การกำหนดเส้นทางแบบรับรู้การรีเซ็ต** (v3.8.0) — จัดลำดับความสำคัญของการเชื่อมต่อตามเวลารีเซ็ตโควต้า
+- **การลดประสิทธิภาพโหมด background** — Responses API `background: true` จะถูกลดระดับเป็นแบบ sync พร้อมคำเตือน
+- **การตรวจจับขีดจำกัดเครื่องมือแบบไดนามิก** — ถอยการใช้งาน provider เมื่อถึงขีดจำกัดจำนวนเครื่องมือ
+- **Emergency fallback** — ควบคุมโดย `OMNIROUTE_EMERGENCY_FALLBACK`; ผู้ดูแลระบบสามารถแทนที่ค่านี้ได้จากหน้า Feature Flags โดยไม่ต้องรีสตาร์ท
 
 ---
 
 ## การดีบัก
 
-- คำตอบจากคอมโบแบบถ่วงน้ำหนักเป็น `503 all_targets_cooling_down` (มีการตั้งค่า `Retry-After` และ `diagnostics.excluded` แสดงเป้าหมายทั้งหมดพร้อม `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → พูลได้รับการกำหนดค่าและเชื่อมต่อแล้ว แต่ทุกเป้าหมายถูกตัดออกโดยตัวจับเวลาความทนทาน คำเตือน `[COMBO] Weighted selection: every target excluded before dispatch — …` จะระบุสาเหตุและจำนวนวินาทีที่เหลืออยู่ ส่วน `404 no_executable_targets` จากคอมโบเดียวกันหมายความว่าไม่มีตัวจับเวลาความทนทานเข้ามาเกี่ยวข้อง (ไม่มีสิ่งใดให้เรียกใช้ หรือทุกบัญชีไม่ผ่านการตรวจสอบความพร้อมใช้งาน) กลไกนี้สร้างอยู่ใน `open-sse/services/combo/pinRecovery.ts` จากรายการที่ถูกตัดออกซึ่งรวบรวมไว้ใน `targetResolution.ts`
-- คีย์ทั้งหมดของผู้ให้บริการถูกข้าม → ตรวจสอบทั้งสถานะของ circuit breaker และ `rateLimitedUntil`/`testStatus` ของแต่ละการเชื่อมต่อ
-- ผู้ให้บริการถูกตัดออกอย่างถาวรหลังพ้นช่วงเวลารีเซ็ต → โค้ดกำลังอ่านค่า `state` โดยตรง แทนที่จะใช้ `getStatus()`/`canExecute()`
-- คีย์หนึ่งล้มเหลว แต่คีย์อื่นควรทำงานได้ → ควรใช้ช่วงพักการเชื่อมต่อแทน circuit breaker
-- มีเพียงโมเดลเดียวที่ล้มเหลว → ควรใช้การล็อกโมเดลแทนช่วงพักการเชื่อมต่อ
-- สถานะควรฟื้นตัวได้เองแต่ไม่เป็นเช่นนั้น → ตรวจสอบการประทับเวลาในอนาคต + เส้นทางการอ่านที่รีเฟรชสถานะซึ่งหมดอายุแล้ว สถานะแบบถาวรจำเป็นต้องแก้ไขด้วยตนเอง
+- Weighted combo ตอบกลับด้วย `503 all_targets_cooling_down` (มีการตั้งค่า `Retry-After`, `diagnostics.excluded` แสดงรายการทุก target พร้อม `model_lockout` / `circuit_open` / `provider_cooldown` / `unavailable`) → pool ได้รับการกำหนดค่าและเชื่อมต่อแล้ว เพียงแต่ทุก target ถูกแยกออกโดยตัวจับเวลา resilience; คำเตือน `[COMBO] Weighted selection: every target excluded before dispatch — …` จะระบุเหตุผลและวินาทีที่เหลือ ส่วน `404 no_executable_targets` จาก combo เดียวกันหมายความว่าไม่มีตัวจับเวลา resilience เกี่ยวข้อง (ไม่มีอะไรให้รัน หรือทุกบัญชีไม่ผ่านการตรวจสอบความพร้อมใช้งาน) สร้างขึ้นใน `open-sse/services/combo/pinRecovery.ts` จากรายการ exclusion ที่รวบรวมใน `targetResolution.ts`
+- ทุก key ของ provider ถูกข้าม → ตรวจสอบทั้งสถานะ circuit breaker และ `rateLimitedUntil`/`testStatus` ของแต่ละการเชื่อมต่อ
+- Provider ถูกแยกออกถาวรหลังช่วงเวลารีเซ็ต → โค้ดอ่าน `state` ดิบแทนที่จะใช้ `getStatus()`/`canExecute()`
+- key หนึ่งล้มเหลว แต่ key อื่นควรทำงาน → ควรใช้ connection cooldown แทน circuit breaker
+- โมเดลเดียวล้มเหลว → ควรใช้ model lockout แทน connection cooldown
+- สถานะควรกู้คืนตัวเองแต่ไม่ทำ → ตรวจสอบ timestamp ในอนาคต + เส้นทางการอ่านที่รีเฟรชสถานะที่หมดอายุ สถานะถาวรต้องมีการเปลี่ยนแปลงด้วยตนเอง
 
 ---
 
-## การทำ Fingerprinting ของ TLS และโหมดพรางตัว
+## สถานะ Runtime — ข้อมูลอ้างอิงด่วนสำหรับ agent
 
-โหมดพรางตัวเฉพาะผู้ให้บริการ (JA3/JA4, CCH, obfuscation) มีเอกสารแยกต่างหาก — ดู `docs/security/STEALTH_GUIDE.md` (git; ไม่ได้คอมไพล์ไว้ใน `/docs`)
+> ย้ายมาแบบตรงตัวจาก `AGENTS.md` → "Resilience Runtime State" (PR #12743) เพื่อให้
+> คู่มือ agent อยู่ภายใต้งบประมาณ context 40k นี่คือมุมมองแบบย่อที่มุ่งเน้น agent ของ
+> ส่วนต่างๆ ข้างต้น; ส่วนที่มีหมายเลขกำกับยังคงเป็นข้อมูลอ้างอิงฉบับเต็ม
+
+OmniRoute มีกลไจความล้มเหลวชั่วคราวสามแบบที่เกี่ยวข้องแต่แตกต่างกัน โปรดแยก
+ขอบเขตของแต่ละกลไจออกจากกันเมื่อดีบักพฤติกรรมการกำหนดเส้นทาง ดู
+[ไดอะแกรม resilience 3 ชั้น](../diagrams/exported/resilience-3layers.svg)
+(ต้นฉบับ: [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd))
+สำหรับแผนที่ภาพรวม
+
+### Provider Circuit Breaker
+
+**ขอบเขต**: ทั้ง provider เช่น `glm`, `openai`, `anthropic`
+
+**วัตถุประสงค์**: หยุดส่งทราฟฟิกไปยัง provider ที่ล้มเหลวซ้ำๆ ในระดับ
+upstream/บริการ เพื่อไม่ให้ provider ที่ไม่สมบูรณ์เพียงตัวเดียวทำให้ทุกคำขอช้าลง
+
+**การนำไปใช้งาน**:
+
+- คลาสหลัก: `src/shared/utils/circuitBreaker.ts`
+- การเชื่อมต่อ gate/การทำงานของ Chat: `src/sse/handlers/chatHelpers.ts`, `src/sse/handlers/chat.ts`
+- API สถานะ runtime: `src/app/api/monitoring/health/route.ts`
+- Wrapper ที่ใช้ร่วมกัน: `open-sse/services/accountFallback.ts`
+- ตารางสถานะที่จัดเก็บ: `domain_circuit_breakers`
+
+**สถานะ** (4 — `src/shared/utils/circuitBreaker.ts`):
+
+- `CLOSED`: อนุญาตทราฟฟิกปกติ
+- `DEGRADED`: แถบเตือนล่วงหน้า — ความล้มเหลวข้ามเกณฑ์ degradation แต่ยังไม่ถึง
+  เกณฑ์ breaker; ทราฟฟิกยังคงไหล แดชบอร์ดแสดงคำเตือน การทดสอบการเชื่อมต่อที่ผ่าน
+  หรือช่วงเวลาที่เงียบโดยไม่มีความล้มเหลวใหม่จะทำให้กลับสู่ `CLOSED`
+  (`docs/architecture/RESILIENCE_GUIDE.md` มีรายละเอียดของช่วงเวลานี้)
+- `OPEN`: provider ถูกบล็อกชั่วคราว; ผู้เรียกจะได้รับการตอบกลับแบบ provider-circuit-open
+  หรือ combo routing จะข้ามไปยัง target อื่น
+- `HALF_OPEN`: หมดเวลารีเซ็ตแล้ว; อนุญาตคำขอตรวจสอบ หากสำเร็จจะปิด
+  breaker หากล้มเหลวจะเปิดอีกครั้ง
+
+**ค่าเริ่มต้น** (`open-sse/config/constants.ts` → `PROVIDER_PROFILES` ใช้งานผ่าน
+`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` ใน `src/lib/resilience/settings.ts` →
+`getCircuitBreaker(provider, …)` ใน `src/sse/handlers/chatHelpers.ts`) breaker ระดับ
+provider ทั้งตัวทำงานบน `circuitBreakerThreshold` / `circuitBreakerReset`:
+
+| โปรไฟล์ | degrade ที่ | เปิดที่ (`circuitBreakerThreshold`) | รีเซ็ต (`circuitBreakerReset`) |
+| ------- | ----------: | ----------------------------------: | -----------------------------: |
+| OAuth   |         `5` |                                 `8` |                          `60s` |
+| API key |         `7` |                                `12` |                          `30s` |
+| Local   |  (ได้มาจาก) |                                 `2` |                          `15s` |
+
+`PROVIDER_PROFILES` ยังกำหนด `providerFailureThreshold` (10/15/2),
+`providerFailureWindowMs` (15/30/5 นาที) และ `providerCooldownMs` (5/10/1 นาที): สิ่งเหล่านี้ขับเคลื่อน
+**window gate ของ Provider Cooldown ระดับ global แบบ opt-in** (`PROVIDER_COOLDOWN_ENABLED` ค่าเริ่มต้น
+ปิดอยู่) — รายการระดับ provider ใน `open-sse/services/providerCooldownTracker.ts` จะนับเป็น
+กำลัง cooldown ก็ต่อเมื่อมีความล้มเหลว `providerFailureThreshold` ครั้งภายใน `providerFailureWindowMs` แล้วจึง
+cooldown เป็นเวลา `providerCooldownMs` ค่าเหล่านี้ไม่ใช่เกณฑ์ของ breaker ที่กำลังทำงานอยู่ — อย่าปรับค่าเหล่านี้
+โดยคาดหวังพฤติกรรมของ breaker ทุกค่าเริ่มต้นสามารถแทนที่ได้ผ่าน
+ตัวแปรสภาพแวดล้อม `OMNIROUTE_PROVIDER_BREAKER_*` และ `OMNIROUTE_CIRCUIT_BREAKER_*`;
+ตารางอ้างอิงที่ถูกต้องตาม runtime อยู่ใน `docs/architecture/RESILIENCE_GUIDE.md`
+
+เฉพาะสถานะความล้มเหลวระดับ provider เท่านั้นที่ควรทำให้ provider breaker ทำงาน:
+
+```ts
+(408, 500, 502, 503, 504);
+```
+
+อย่าทำให้ breaker ของทั้ง provider ทำงานสำหรับข้อผิดพลาดปกติระดับบัญชี/key/โมเดล เช่น กรณี
+`401`, `403` หรือ `429` ส่วนใหญ่ กรณีเหล่านั้นมักจะอยู่ในขอบเขตของ connection cooldown หรือ model
+lockout ข้อผิดพลาด `403` ของ provider แบบ API key ทั่วไปควรสามารถกู้คืนได้ เว้นแต่จะถูกจัดประเภท
+เป็นข้อผิดพลาดระดับ provider/บัญชีที่สิ้นสุดถาวร
+
+Breaker ใช้การกู้คืนแบบ lazy ไม่ได้ใช้ background timer เมื่อ `OPEN` หมดอายุ
+การอ่านค่าเช่น `getStatus()`, `canExecute()` และ `getRetryAfterMs()` จะรีเฟรชสถานะเป็น
+`HALF_OPEN` เพื่อให้แดชบอร์ดและตัวสร้าง combo candidate ไม่ตัด provider
+ที่หมดอายุแล้วออกไปตลอดกาล
+
+### คูลดาวน์ของ Connection
+
+**ขอบเขต**: connection/บัญชี/คีย์หนึ่งรายการของ provider
+
+**วัตถุประสงค์**: ข้ามคีย์/บัญชีที่มีปัญหาชั่วคราวหนึ่งรายการ โดยยังอนุญาตให้ connection
+อื่นของ provider เดียวกันยังให้บริการ request ต่อไปได้
+
+**การ implement**:
+
+- เส้นทางการเขียน/อัปเดต: `src/sse/services/auth.ts::markAccountUnavailable()`
+- การเลือก/กรองบัญชี: `src/sse/services/auth.ts::getProviderCredentials...`
+- การคำนวณคูลดาวน์: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- การตั้งค่า: `src/lib/resilience/settings.ts`
+
+ฟิลด์สำคัญบน connection ของ provider:
+
+```ts
+rateLimitedUntil;
+testStatus: "unavailable";
+lastError;
+lastErrorType;
+errorCode;
+backoffLevel;
+```
+
+ในระหว่างการเลือกบัญชี connection จะถูกข้ามเมื่อ:
+
+```ts
+new Date(rateLimitedUntil).getTime() > Date.now();
+```
+
+คูลดาวน์ก็เป็นแบบ lazy เช่นกัน: เมื่อ `rateLimitedUntil` ผ่านไปแล้ว connection จะกลับมา
+มีสิทธิ์ถูกเลือกอีกครั้ง เมื่อใช้งานสำเร็จ `clearAccountError()` จะล้าง `testStatus`,
+`rateLimitedUntil`, ฟิลด์ error และ `backoffLevel`
+
+พฤติกรรมคูลดาวน์เริ่มต้นของ connection:
+
+- คูลดาวน์พื้นฐานของ OAuth: `5s`
+- คูลดาวน์พื้นฐานของ API-key: `3s`
+- กรณี `429` ของ API-key ควรใช้คำใบ้การ retry จาก upstream (`Retry-After`, reset headers หรือ
+  ข้อความ reset ที่ parse ได้) ก่อนเสมอเมื่อมีให้ใช้
+- ความล้มเหลวที่กู้คืนได้ซ้ำๆ จะใช้ exponential backoff:
+
+```ts
+baseCooldownMs * 2 ** failureIndex;
+```
+
+ตัวป้องกัน anti-thundering-herd ป้องกันไม่ให้ความล้มเหลวที่เกิดพร้อมกันบน connection
+เดียวกันขยายคูลดาวน์ซ้ำหลายครั้ง หรือเพิ่ม `backoffLevel` ซ้ำสอง
+
+สถานะแบบ terminal ไม่ใช่คูลดาวน์ `banned`, `expired` (ซึ่งจะกลายเป็น terminal ก็ต่อเมื่อ
+retry แบบจำกัดจำนวนครบ N ครั้งผ่าน `EXPIRED_RETRY_MAX` แล้ว) และ `credits_exhausted`
+มีเจตนาให้คงสถานะไม่พร้อมใช้งานไว้จนกว่า credentials/การตั้งค่าจะเปลี่ยน หรือผู้ดูแลระบบ
+รีเซ็ตเอง อย่าเขียนทับสถานะ terminal ด้วยสถานะคูลดาวน์ชั่วคราว
+
+### การ Lockout โมเดล
+
+**ขอบเขต**: provider + connection + model
+
+**วัตถุประสงค์**: หลีกเลี่ยงการปิดใช้งาน connection ทั้งหมดเมื่อมีเพียงโมเดลเดียวที่
+ไม่พร้อมใช้งานหรือถูกจำกัดโควตาสำหรับ connection นั้น
+
+ตัวอย่าง:
+
+- Provider ที่มีโควตาแยกต่อโมเดล ส่งกลับ `429`
+- Provider แบบ local ส่งกลับ `404` สำหรับโมเดลที่ไม่มีอยู่
+- ความล้มเหลวด้านสิทธิ์ของโหมด/โมเดลเฉพาะ provider เช่น โหมดของ Grok ที่เลือกไว้
+
+Model lockout อยู่ใน `open-sse/services/accountFallback.ts` และช่วยให้ connection
+เดียวกันยังให้บริการโมเดลอื่นต่อไปได้
+
+### คำแนะนำในการดีบัก
+
+- หากคีย์ทั้งหมดของ provider ถูกข้าม ให้ตรวจสอบทั้งสถานะของ provider breaker และ
+  `rateLimitedUntil`/`testStatus` ของแต่ละ connection
+- หาก provider ดูเหมือนถูกตัดออกอย่างถาวรหลังช่วงเวลารีเซ็ต ให้ตรวจสอบว่าโค้ดกำลัง
+  อ่าน `state` ดิบแทนที่จะใช้ `getStatus()`/`canExecute()` หรือไม่
+- หากคีย์ของ provider ตัวหนึ่งล้มเหลวแต่ตัวอื่นควรทำงานได้ ให้เลือกใช้ connection cooldown
+  มากกว่า provider breaker
+- หากมีเพียงโมเดลเดียวที่ล้มเหลว ให้เลือกใช้ model lockout มากกว่า connection cooldown
+- หากสถานะใดควรกู้คืนตัวเองได้ สถานะนั้นควรมี timestamp/reset timeout ในอนาคต และมี
+  เส้นทางการอ่านที่รีเฟรชสถานะที่หมดอายุ ส่วนสถานะถาวรจำเป็นต้องเปลี่ยน credential
+  หรือ config ด้วยตนเอง
 
 ---
 
-## การทดสอบความยืดหยุ่น (Phase 8 · Block C)
+## การระบุลายนิ้วมือ TLS และการซ่อนตัว (Stealth)
 
-นอกเหนือจาก unit test สำหรับตรรกะด้านความยืดหยุ่นแล้ว ยังมีการทดสอบสามรายการที่ทดสอบ runtime ภายใต้
-สภาวะความเครียด/ความล้มเหลวจริง (ทั้งหมดเป็น integration/nightly — ไม่มีรายการใดบล็อก PR):
+การซ่อนตัวเฉพาะผู้ให้บริการ (JA3/JA4, CCH, obfuscation) มีเอกสารแยกต่างหาก — ดู `docs/security/STEALTH_GUIDE.md` (git; ไม่ได้คอมไพล์รวมอยู่ใน `/docs`)
 
-| การทดสอบ    | สิ่งที่ทดสอบ                                                                                                                                                           | การเรียกใช้                              |
+---
+
+## การทดสอบความทนทาน (Phase 8 · Block C)
+
+นอกเหนือจาก unit test สำหรับตรรกะด้านความทนทานแล้ว ยังมีการทดสอบอีกสามรายการที่ทดสอบ runtime ภายใต้สภาวะที่มีภาระหนัก/ข้อขัดข้องจริง (ทั้งหมดเป็น integration/nightly — ไม่มีตัวไหนบล็อก PR):
+
+| การทดสอบ    | รายละเอียด                                                                                                                                                             | วิธีรัน                                  |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
-| Chaos       | โหนด upstream จำลองจะแทรก latency/reset/timeout/503 จริง; ตรวจสอบว่า circuit breaker เปิด/ฟื้นตัวได้ และ `checkFallbackError` จัดประเภท 503 เป็น fallback ที่กู้คืนได้ | `RUN_CHAOS_INT=1 npm run test:chaos`     |
-| Heap-growth | ประมาณ 500 สตรีมต่อ `createSSEStream` ภายใต้ `--expose-gc`; ล้มเหลวหาก heap เติบโตเกินเพดาน (ตัวป้องกัน OOM #3069)                                                     | `npm run test:heap`                      |
-| k6 soak     | โหลดต่อเนื่องไปยัง `/api/monitoring/health`; เกณฑ์ p95/ข้อผิดพลาด                                                                                                      | `k6 run tests/load/k6-soak.js` (nightly) |
+| Chaos       | โหนด fake-upstream ฉีด latency/reset/timeout/503 จริงเข้าไป; ตรวจสอบว่า circuit breaker เปิด/ฟื้นตัว และ `checkFallbackError` จัดประเภท 503 เป็น fallback ที่กู้คืนได้ | `RUN_CHAOS_INT=1 npm run test:chaos`     |
+| Heap-growth | สตรีม ~500 รายการต่อ `createSSEStream` ภายใต้ `--expose-gc`; ล้มเหลวหาก heap เติบโตเกินเพดานที่กำหนด (ตัวป้องกัน OOM #3069)                                            | `npm run test:heap`                      |
+| k6 soak     | โหลดต่อเนื่องยิงไปยัง `/api/monitoring/health`; มีเกณฑ์ p95/error                                                                                                      | `k6 run tests/load/k6-soak.js` (nightly) |
 
-ควบคุมการทำงานโดย `.github/workflows/nightly-resilience.yml` (cron + dispatch) ใน
-`test:integration` เริ่มต้น การทดสอบ chaos และ heap จะข้ามตัวเอง (หากไม่มี `RUN_CHAOS_INT`/`--expose-gc`)
+ประสานงานโดย `.github/workflows/nightly-resilience.yml` (cron + dispatch) ใน `test:integration` แบบค่าเริ่มต้น การทดสอบ chaos และ heap จะข้ามตัวเอง (หากไม่มี `RUN_CHAOS_INT`/`--expose-gc`)
 
 ---
 
@@ -832,4 +960,4 @@ honorsRuleLockScope()` — ปัจจุบันมีเพียง `"agent
 
 - [คู่มือสถาปัตยกรรม](./ARCHITECTURE.md) — สถาปัตยกรรมระบบและการทำงานภายใน
 - [คู่มือผู้ใช้](../guides/USER_GUIDE.md) — ผู้ให้บริการ คอมโบ และการผสานรวม CLI
-- [กลไกคอมโบอัตโนมัติ](../routing/AUTO-COMBO.md) — การให้คะแนนด้วย 16 ปัจจัย และชุดโหมด
+- [กลไก Auto-Combo](../routing/AUTO-COMBO.md) — การให้คะแนน 16 ปัจจัย ชุดโหมด (mode packs)

@@ -12,13 +12,13 @@ Release-Green webpack ビルド、lint ジョブが同時に実行された場�
 不足分を吸収します。また、プルリクエストの Builds はホステッドランナーで実行されるため、Turbopack スロットは
 ほとんどの時間アイドル状態です。
 
-| ランナー             | ラベル           | 役割                                                                                                                                                  | `MemoryHigh` / `MemoryMax`     | `CPUQuota` |
-| -------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------- |
-| `omniroute-113-5`    | `omni-build`     | Turbopack ビルド：`ci.yml` の `Build`（push/dispatch のみ）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、nightly a11y ビルド | 56 GB / 60 GB（スワップ 0）    | 1600 %     |
-| `omniroute-113-6`    | `omni-release`   | Release-Green（`release-green` + `main-green`）、webpack ビルド                                                                                       | 20 GB / 24 GB（スワップ 4 GB） | 800 %      |
-| `omniroute-113-2`    | `omni-light`     | nightly ジョブ（Schemathesis、promptfoo、garak、k6）および `quality.yml` の `lint-guard`                                                              | 12 GB / 16 GB（スワップ 4 GB） | 600 %      |
-| `omniroute-113`      | `omni-light`     | 上記と同じプール                                                                                                                                      | 8 GB / 12 GB                   | 400 %      |
-| OmniHeuris, OmniMind | （各リポジトリ） | Dependabot のみ（各ランナーのピークは 155 MB、2026-10-18）                                                                                            | 4 GB / 6 GB                    | 各 200 %   |
+| ランナー             | ラベル                          | 役割                                                                                                                                                  | `MemoryHigh` / `MemoryMax`     | `CPUQuota` |
+| -------------------- | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ---------- |
+| `omniroute-113-5`    | `omni-build`, `omni-build-60gb` | Turbopack ビルド：`ci.yml` の `Build`（push/dispatch のみ）、Docker amd64、`npm-publish`、`nightly-v4-build`、`preview-artifact`、nightly a11y ビルド | 56 GB / 60 GB（スワップ 0）    | 1600 %     |
+| `omniroute-113-6`    | `omni-release`                  | Release-Green（`release-green` + `main-green`）、webpack ビルド                                                                                       | 20 GB / 24 GB（スワップ 4 GB） | 800 %      |
+| `omniroute-113-2`    | `omni-light`                    | nightly ジョブ（Schemathesis、promptfoo、garak、k6）および `quality.yml` の `lint-guard`                                                              | 12 GB / 16 GB（スワップ 4 GB） | 600 %      |
+| `omniroute-113`      | `omni-light`                    | 上記と同じプール                                                                                                                                      | 8 GB / 12 GB                   | 400 %      |
+| OmniHeuris, OmniMind | （各リポジトリ）                | Dependabot のみ（各ランナーのピークは 155 MB、2026-10-18）                                                                                            | 4 GB / 6 GB                    | 各 200 %   |
 
 2026-10-18 測定：
 
@@ -76,7 +76,7 @@ SIGKILL を送ります。この設定は、ユニットの次回再起動時に
 ## 運用ルール
 
 - **Turbopack ビルドは一度に 1 つのみ — ラベルで強制。** 完全な Turbopack
-  `next build` を実行するすべてのジョブは `[self-hosted, omni-build]` を対象とし、その
+  `next build` を実行するすべてのジョブは `[self-hosted, omni-build, omni-build-60gb]` を対象とし、その
   ラベルを持つのは **`omniroute-113-5`** のみです: `ci.yml` の `Build`、`npm-publish.yml` の `publish`、`nightly-v4-build`、`preview-artifact`、
   nightly a11y ビルド（#16853）、および `docker-publish.yml` の **amd64**（BuildKit 内では webpack —
   Turbopack はそこでパニックしました。実行 33253576569）。arm64 Docker の処理は引き続き `ubuntu-24.04-arm` で実行します。

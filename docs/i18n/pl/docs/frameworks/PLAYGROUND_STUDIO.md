@@ -4,13 +4,6 @@
 
 ---
 
-title: "Playground Studio"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Playground Studio
-
 > **Feature:** Playground Studio — ujednolicona przestrzeń testowa AI dla `/dashboard/playground`.
 > **Plans:** `17-playground-studio-redesign.plan.md` + `_orchestration/master-plan-group-C.md`
 > **Status:** Wydane w v3.8.6

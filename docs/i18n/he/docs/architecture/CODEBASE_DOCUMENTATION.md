@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 רישומי ספקים, פרופילי כותרות, זהות, …
 ├── handlers/               מטפלי בקשות (צ'אט, הטמעות, שמע, תמונה, …)
-├── executors/              150 מודולי הרצה של ספקים (מחלקות הרצה + כלי עזר לכל ספק)
+├── executors/              156 מודולי הרצה של ספקים (מחלקות הרצה + כלי עזר לכל ספק)
 ├── translator/             המרת פורמטים (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            ממיר הזרמה של Responses API ↔ Chat Completions
 ├── services/               יותר מ-80 מודולי שירות (שילובים, גיבוי, מכסות, זהות, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 מודולי הרצה ברמה העליונה (`*.ts` למעט `base.ts`,‏ `index.ts` ובדיקות — המספר
+156 מודולי הרצה ברמה העליונה (`*.ts` למעט `base.ts`,‏ `index.ts` ובדיקות — המספר
 נמדד באמצעות `npm run check:docs-counts`). כל מחלקת הרצה יורשת מ-`BaseExecutor` (`base.ts`),
 ישירות או דרך `DefaultExecutor` או מריץ אחר; המודולים הנותרים הם כלי עזר ייעודיים לכל ספק
 (סכמות כלים, מתאמי אחזור/TTS, מטפלים בהתנהגויות חריגות). המריצים כוללים:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. הקצו את ההרשאה או ההרשאות המתאימות ב-`src/shared/constants/mcpScopes.ts`.
 3. רשמו את הכלי ב-`open-sse/mcp-server/server.ts`.
-4. הוסיפו בדיקות תחת `open-sse/mcp-server/__tests__/`.
+4. הוסיפו בדיקות תחת `tests/unit/`.
 5. עדכנו את [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### הוספת מיומנות A2A חדשה
@@ -790,7 +790,7 @@ bin/
 - **מתן שמות**: קבצים ב-`camelCase` או `kebab-case`, רכיבים ב-`PascalCase`,
   קבועים ב-`UPPER_SNAKE`.
 - **ESLint**:‏ `no-eval`,‏ `no-implied-eval`,‏ `no-new-func` =‏ `error` בכל מקום;
-  `no-explicit-any` =‏ `warn` ב-`open-sse/` וב-`tests/`, ושגיאה במקומות אחרים.
+  `no-explicit-any` =‏ `error` ב-`open-sse/**/*.ts` וב-`tests/**/*.ts`.
 - **TypeScript**:‏ `strict: false` (מצב תאימות למערכת ותיקה). העדיפו טיפוסים מפורשים על פני
   הסקת טיפוסים בגבולות שבין מודולים.
 - **מסד נתונים**: לעולם אל תכתבו SQL גולמי בנתיבים או במטפלים — עברו תמיד דרך
@@ -820,8 +820,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **ענפים**: הקידומות `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. לעולם אל תבצעו commit ישירות ל-`main`.
-- **Husky**: לפני commit מופעלים `lint-staged` +‏ `check:docs-sync` +
-  `check:any-budget:t11`; לפני push מופעלים `check:any-budget:t11` +‏ `check:tracked-artifacts` (שערים מהירים; לא כולל `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

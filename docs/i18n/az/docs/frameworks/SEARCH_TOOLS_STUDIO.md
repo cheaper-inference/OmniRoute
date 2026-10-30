@@ -53,7 +53,7 @@ Mövcud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlərini taba çev
 - Giriş: URL + tam səhifə keçidi + format seçicisi (markdown / mətn / HTML).
 - Göndər → əldə et → `ScrapeResult.tsx` komponentində göstər.
 - `ScrapeResult` markdown önizləməsini və xam görünüş keçidini göstərir.
-- Məhdudiyyət: cavab gövdəsi **256 KB**-dan böyükdürsə, UI `(qısaldılıb, xam versiyaya baxın)` göstərir və xam məzmunu Monaco modal pəncərəsində açır (D21).
+- Məhdudiyyət: cavab gövdəsi **256 KB**-dan böyükdürsə, UI `View full raw content` göstərir və xam məzmunu modal pəncərəsində açır (D21).
 - Metadata paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), gecikmə, xərc, cavab ölçüsü, keçid sayı.
 - `useScrapeFetch.ts` hook-undan istifadə edir.
 

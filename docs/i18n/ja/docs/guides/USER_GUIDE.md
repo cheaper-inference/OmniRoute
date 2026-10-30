@@ -578,28 +578,28 @@ post_install() {
 
 ### 環境変数
 
-| 変数                                    | デフォルト                           | 説明                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 署名用シークレット（**本番環境では変更してください**）                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 初回ログイン用パスワード                                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | データディレクトリ（データベース、使用状況、ログ）                                                          |
-| `PORT`                                  | フレームワークのデフォルト           | サービスポート（例では `20128`）                                                                            |
-| `HOSTNAME`                              | フレームワークのデフォルト           | バインド先ホスト（Docker のデフォルトは `0.0.0.0`）                                                         |
-| `NODE_ENV`                              | ランタイムのデフォルト               | デプロイ時には `production` に設定                                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ダッシュボードに表示され、サーバーにも公開される公開ベース URL（従来の `BASE_URL` を置き換え）              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | クラウド同期エンドポイントのベース URL（従来の `CLOUD_URL` を置き換え）                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 生成される API キー用の HMAC シークレット                                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` で Bearer API キーを必須にする                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 認証済みのダッシュボードユーザーが、保存されている API キーの完全な値をオンデマンドで表示できるようにする   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | キャッシュされたプロバイダー制限データのサーバー側更新間隔。UI の更新ボタンでは引き続き手動同期が実行される |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 書き込み、インポート、復元前の SQLite 自動スナップショットを無効化する。手動バックアップは引き続き利用可能  |
-| `APP_LOG_TO_FILE`                       | `true`                               | アプリケーションログと監査ログのディスクへの出力を有効にする                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 認証 Cookie を強制する（HTTPS リバースプロキシの背後で使用）                                       |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 管理対象としてダウンロードする代わりに、既存の `cloudflared` バイナリを使用する                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 管理対象の Quick Tunnels 用トランスポート（`http2`、`quic`、または `auto`）                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js のヒープ上限（MB）                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | プロンプトキャッシュの最大エントリ数                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | セマンティックキャッシュの最大エントリ数                                                                    |
+| 変数                                    | デフォルト                 | 説明                                                                                                                                               |
+| --------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(自動生成)_               | JWT 署名用シークレット — 初回起動時に自動生成されて `server.env` に永続化されます。データディレクトリが一時的な場合は明示的に設定してください      |
+| `INITIAL_PASSWORD`                      | _(未設定)_                 | 初回ログイン用パスワード。npm/ソースインストールでは `CHANGEME` で始まるため、変更してください。未設定の場合: オンボーディングウィザード           |
+| `DATA_DIR`                              | `~/.omniroute`             | データディレクトリ（データベース、使用状況、ログ）                                                                                                 |
+| `PORT`                                  | フレームワークのデフォルト | サービスポート（例では `20128`）                                                                                                                   |
+| `HOSTNAME`                              | フレームワークのデフォルト | バインド先ホスト（Docker のデフォルトは `0.0.0.0`）                                                                                                |
+| `NODE_ENV`                              | ランタイムのデフォルト     | デプロイ時には `production` に設定                                                                                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | ダッシュボードに表示され、サーバーにも公開される公開ベース URL（従来の `BASE_URL` を置き換え）                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | クラウド同期エンドポイントのベース URL（従来の `CLOUD_URL` を置き換え）                                                                            |
+| `API_KEY_SECRET`                        | _(自動生成)_               | マシンに紐づく API キーのチェックサム用シークレット — 未設定の場合、起動時のブートストラップが自動生成し、書き込み可能な `server.env` に保存します |
+| `REQUIRE_API_KEY`                       | `false`                    | `/v1/*` で Bearer API キーを必須にする                                                                                                             |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | 認証済みのダッシュボードユーザーが、保存されている API キーの完全な値をオンデマンドで表示できるようにする                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | キャッシュされたプロバイダー制限データのサーバー側更新間隔。UI の更新ボタンでは引き続き手動同期が実行される                                        |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | 書き込み、インポート、復元前の SQLite 自動スナップショットを無効化する。手動バックアップは引き続き利用可能                                         |
+| `APP_LOG_TO_FILE`                       | `true`                     | アプリケーションログと監査ログのディスクへの出力を有効にする                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | `Secure` 認証 Cookie を強制する（HTTPS リバースプロキシの背後で使用）                                                                              |
+| `CLOUDFLARED_BIN`                       | 未設定                     | 管理対象としてダウンロードする代わりに、既存の `cloudflared` バイナリを使用する                                                                    |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | 管理対象の Quick Tunnels 用トランスポート（`http2`、`quic`、または `auto`）                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | Node.js のヒープ上限（MB）                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | プロンプトキャッシュの最大エントリ数                                                                                                               |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | セマンティックキャッシュの最大エントリ数                                                                                                           |
 
 環境変数の完全なリファレンスについては、[README](../README.md) を参照してください。
 

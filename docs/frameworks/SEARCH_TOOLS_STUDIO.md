@@ -56,7 +56,7 @@ New tab for extracting content from a URL via `POST /v1/web/fetch` (created in p
 - Input: URL + full-page toggle + format selector (markdown / text / HTML).
 - Submit → fetch → render `ScrapeResult.tsx`.
 - `ScrapeResult` renders markdown preview + raw toggle.
-- Cap: if response body > **256 KB**, UI shows `(truncated, view raw)` and opens raw in a Monaco modal (D21).
+- Cap: if response body > **256 KB**, UI shows `View full raw content` and opens raw in a modal (D21).
 - Metadata panel: provider (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latency, cost, response size, links count.
 - Uses `useScrapeFetch.ts` hook.
 

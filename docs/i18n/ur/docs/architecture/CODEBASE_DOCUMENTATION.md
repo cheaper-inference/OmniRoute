@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 فراہم کنندہ registries، header profiles، identity، …
 ├── handlers/               درخواست handlers (چیٹ، embeddings، آڈیو، تصویر، …)
-├── executors/              فراہم کنندگان کے 150 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
+├── executors/              فراہم کنندگان کے 156 executor modules (executor classes + ہر فراہم کنندہ کے helpers)
 ├── translator/             فارمیٹ کی تبدیلی (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions اسٹریم transformer
 ├── services/               80+ service modules (combos، fallback، quotas، identity، …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
+156 اعلیٰ سطحی executor modules (`*.ts` میں سے `base.ts`، `index.ts` اور tests کے علاوہ — یہ تعداد
 `npm run check:docs-counts` ناپتا ہے)۔ ہر executor class، براہ راست یا `DefaultExecutor` یا کسی دوسرے
 executor کے ذریعے، `BaseExecutor` (`base.ts`) کو extend کرتی ہے؛ باقی modules ہر فراہم کنندہ کے
 لیے مخصوص helpers ہیں (tool schemas، fetch/TTS adapters، quirk handlers)۔ Executors میں شامل ہیں:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` کو extend کریں)۔
 2. `src/shared/constants/mcpScopes.ts` میں مناسب scope(s) تفویض کریں۔
 3. tool کو `open-sse/mcp-server/server.ts` میں رجسٹر کریں۔
-4. `open-sse/mcp-server/__tests__/` کے تحت tests شامل کریں۔
+4. `tests/unit/` کے تحت tests شامل کریں۔
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) کو اپ ڈیٹ کریں۔
 
 ### نئی A2A skill شامل کریں
@@ -790,7 +790,7 @@ bin/
 - **Naming**: فائلیں `camelCase` یا `kebab-case`، components `PascalCase`،
   constants `UPPER_SNAKE`۔
 - **ESLint**: `no-eval`، `no-implied-eval`، `no-new-func` = ہر جگہ `error`؛
-  `no-explicit-any` = `open-sse/` اور `tests/` میں `warn`، دیگر جگہوں پر error۔
+  `no-explicit-any` = `open-sse/**/*.ts` اور `tests/**/*.ts` میں `error`۔
 - **TypeScript**: `strict: false` (وراثتی طرزِ عمل)۔ modules کے درمیان حدود کے لیے
   inference کے بجائے explicit types کو ترجیح دیں۔
 - **Database**: routes یا handlers میں کبھی raw SQL نہ لکھیں — ہمیشہ
@@ -819,8 +819,7 @@ bin/
   `a2a`، `memory`، `skills`۔
 - **Branches**: prefixes `feat/`، `fix/`، `refactor/`، `docs/`، `test/`،
   `chore/`۔ کبھی براہِ راست `main` پر commit نہ کریں۔
-- **Husky**: pre-commit پر `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` چلتے ہیں؛ pre-push پر `check:any-budget:t11` + `check:tracked-artifacts` چلتے ہیں (تیز gates؛ `test:unit` شامل نہیں)۔
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

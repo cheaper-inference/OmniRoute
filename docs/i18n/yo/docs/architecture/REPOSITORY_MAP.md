@@ -106,7 +106,7 @@ OmniRoute/
 
 > **A gbé e kúrò ní root nínú v3.8.26 (láti dín rúdurùdu kù):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, àti `quality-metrics.json` tí a ṣẹ̀dá (git kò tọpinpin rẹ̀). Wo [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, àti `quality-metrics.json` tí a ṣẹ̀dá (git kò tọpinpin rẹ̀). Wo [`## config/`](#config--àwọn-àtúnṣe-aimi--ipò-ìdènà-dídára).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Àpò-ìwé abẹ́nú         | Ìdí                                                                                                                                                                                                                      |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Àwọn ìtumọ̀ ìwé sí àwọn èdè agbègbè (agbègbè èdè 41)                                                                                                                                                                      |
+| `docs/i18n/`          | Àwọn ìtumọ̀ ìwé sí àwọn èdè agbègbè (agbègbè èdè 66)                                                                                                                                                                      |
 | `docs/screenshots/`   | Àwọn ohun-èlò àwòrán fún àwọn ìtọ́sọ́nà                                                                                                                                                                                    |
 | `_tasks/superpowers/` | Àwọn ètò/àwọn àlàyé pàtó láti inú superpowers (`writing-plans`/`brainstorming`) + ìwádìí — repo tí a yà sọ́tọ̀, tí ó ní ìṣàkóso ẹ̀yà tirẹ̀, tí igi àkọ́kọ́ sì fi sínú gitignore. Wo CLAUDE.md → "Àwọn Àṣàwárí Ètò àti Ìwádìí". |
 

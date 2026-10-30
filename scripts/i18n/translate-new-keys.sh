@@ -255,5 +255,6 @@ log "BATCH END ok $(date -Is)"
 echo done >"$ART/batch.status"
 echo 0 >"$ART/batch.rc"
 echo "[i18n-new-keys] DONE — ${#selected[@]} locale(s) translated, no __MISSING__ marker left."
-echo "  Now: npm run i18n:check-keys && npm run i18n:check-ratio && npm run i18n:check-new-keys"
+echo '  Use the complete pinned CI comparison, or pin local BASE_REF to the reviewed PR target commit; incomplete comparison is not PASS.'
+echo '  Now: npm run i18n:check-keys && npm run i18n:check-ratio && BASE_REF="${BASE_REF:-}" npm run i18n:check-new-keys && BASE_REF="${BASE_REF:-}" npm run i18n:check-value-drift'
 exit 0

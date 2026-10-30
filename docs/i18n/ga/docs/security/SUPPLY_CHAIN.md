@@ -18,32 +18,38 @@ Foilsíonn OmniRoute airteagail npm + Docker. Soláthraíonn na geataí seo bun�
 
 Úsáideann an ratchet CVE íomhá **dhá chéim** i `docker-publish.yml`: coinníonn an chéim SARIF (`HIGH,CRITICAL`, `exit-code: 0`) ARD+CRITICIÚIL le feiceáil sa chluaisín Slándála gan bac a chur air; teipeann ar an gcéim _geata CRITICIÚIL_ (`severity: CRITICAL`, `ignore-unfixed: true`, `exit-code: 1`) an scaoileadh ar CVE CRITICIÚIL **le réiteach ar fáil**. Cuireann `ignore-unfixed` cosc ar bhac a chur ar an scaoileadh le haghaidh CVE buníomhá gan paiste uas-srutha.
 
-## ⚠️ Éagsúlacht CVE (geataí osv/Trivy ag cur bac)
+## ⚠️ Athraitheacht CVE (geataí blocála osv/Trivy)
 
-Déanann osv agus Trivy comparáid idir spleáchais agus bunachair shonraí CVE a **fhásann go leanúnach**. Is féidir le PR nach **dteagmhaíonn le spleáchais ar bith** éirí dearg go tobann toisc gur nochtadh CVE nua i spleáchas atá ann cheana (osv: `vulnCount` tomhaiste > bunlíne; Trivy: CRITICIÚIL nua inréitigh san íomhá). **Is iompar oibríochtúil IONCHASACH é seo de gheata CVE atá ag cur bac, ní cúlchéimniú táirge.**
+Cuireann osv agus Trivy spleáchais i gcomparáid le bunachair sonraí CVE a fhásann **go leanúnach**. Is féidir le PR
+nach **mbaineann le haon spleáchas** éirí dearg go tobann toisc gur nochtadh CVE nua
+i spleáchas atá ann cheana (osv: `vulnCount` tomhaiste > bunlíne; Trivy: CVE CRITICAL nua
+inshocraithe san íomhá). **Is é seo an t-iompar oibríochtúil a bhfuiltear ag súil leis ó gheata blocála
+CVE, ní cúlchéimniú táirge.**
 
-Nuair a éiríonn osv nó Trivy dearg mar gheall ar CVE nua-nochta, is é an leigheas:
+Nuair a éiríonn osv nó Trivy dearg de bharr CVE nuanochtaithe, seo a leanas an réiteach:
 
-1.  **Méadaigh an spleáchas atá buailte** (is fearr) — uasghrádaigh go dtí an leagan paistithe trí `overrides` `package.json` (spleáchais trasdultacha) nó atóg an íomhá ar bhunús paistithe.
-2.  **Mura bhfuil réiteach uas-srutha ann:**
-    - **osv:** athbhunlíneáil `metrics.vulnCount` i `config/quality/quality-baseline.json` (`npm run quality:ratchet -- --update` ní chlúdaíonn sé geataí tiomnaithe — cuir an luach in eagar de láimh, `direction:down`) le nóta údarúcháin + saincheist rianaithe.
-    - **Trivy:** cuir isteach iontráil i `.trivyignore` (CVE-ID in aghaidh na líne) le trácht údarúcháin + saincheist rianaithe. Clúdaíonn `ignore-unfixed: true` CVEanna gan paistí go huathoibríoch cheana féin.
+1. **Nuashonraigh an spleáchas lena mbaineann** (an rogha is fearr) — uasghrádaigh go dtí an leagan paisteáilte trí `package.json`
+   `overrides` (spleáchais indíreacha) nó atóg an íomhá ar bhonn paisteáilte.
+2. **Mura bhfuil aon réiteach upstream ann:**
+   - **osv:** athshocraigh bunlíne `metrics.vulnCount` in `config/quality/quality-baseline.json`
+     (ní chumhdaíonn `npm run quality:ratchet -- --update` geataí tiomnaithe — cuir an luach in eagar
+     de láimh, `direction:down`) agus cuir nóta réasúnaithe + saincheist rianaithe leis.
+   - **Trivy:** cuir iontráil le `.trivyignore` (CVE-ID amháin in aghaidh na líne) mar aon le nóta
+     réasúnaithe + saincheist rianaithe. Cumhdaíonn `ignore-unfixed: true` CVEanna gan
+     phaistí go huathoibríoch cheana féin.
 
-Déanann an dá gheata SCIORADH go galánta (exit 0) nuair a bhíonn an uirlis in easnamh nó nuair a theipeann ar an tomhas (osv-scanner nach bhfuil i PATH, osv.dev/network do-rochtain, JSON neamhbhailí) — ní chuireann teip **tomhais** bac riamh, ní chuireann ach cúlchéimniú **tomhaiste** bac.
+Teipeann dúnta ar rití riachtanacha OSV (`check:vuln-ratchet -- --ratchet`) le
+`INCOMPLETE` agus cód scortha 2 nuair nach féidir an scanóir, an tuarascáil ná an bhunlíne a bhailíochtú.
+Tugann cúlchéimniú tomhaiste cód scortha 1. Is féidir le rith comhairleach `SKIP` a thuairisciú fós le
+cód scortha 0, ach ní chruthaíonn sé sin gur éirigh leis na spleáchais sa scanadh. Éilíonn céim bhlocála
+Trivy tomhas rathúil freisin: ní féidir le huirlisí nach bhfuil ar fáil, jabanna ar theip orthu
+ná fianaise íomhá atá in easnamh a dheimhniú go bhfuil íomhá glan.
 
-## Rioscaí Glactha Aitheanta
+## Riosca spleáchais scortha
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Ní áirítear `extract-zip` ná imeall spleáchais chuige sa bhunchomhad glasála a thuilleadh tar éis uasghrádú a dhéanamh ar an uirlis forbartha promptfoo a bhfuil a leagan pionnáilte. Cuireann sé seo deireadh leis an slabhra `promptfoo` → `@openai/codex-security` → `extract-zip`, ar glacadh leis roimhe seo agus a rianaítear in #14482. Diúltaíonn na seiceálacha aischéimnithe in `tests/unit/extract-zip-14482-exposure.test.ts` dá thabhairt isteach arís agus coimeádann siad an toirmeasc ar iompórtálacha ó chód táirgthe.
 
-`extract-zip@2.0.1` tá dhá chomhairle neamhphaisteáilte ard-déine maidir le trasnú siombalach aige. De réir an ghéag "gan réiteach in aghaidh an tsrutha" den leigheas Éagsúlachta CVE thuas, is **riosca glactha** é seo, ní ardú:
-
-- **Slabhra:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`. Deimhnithe trí `package-lock.json` — ní dhearbhaíonn ach pacáiste amháin sa chrann spleáchais iomlán (`@openai/codex-security`) `extract-zip`, agus ní dhearbhaíonn ach pacáiste amháin (`promptfoo`) `@openai/codex-security`.
-- **Níl aon scaoileadh seasta ann in áit ar bith sa slabhra.** Is é `extract-zip@2.0.1` (foilsithe 2020) an scaoileadh deiridh den phacáiste — níl sé á chothabháil. Tarraingíonn an npm-latest reatha de `@openai/codex-security` (`0.1.29`) `extract-zip@2.0.1` fós.
-- **Neamh-inrochtana ó tháirgeadh.** Níl `promptfoo` ach mar devDependency (ní liostaítear é faoi `dependencies` riamh), agus ní allmhairíonn aon chomhad faoi `src/`, `open-sse/`, nó `bin/` an pacáiste npm `extract-zip` — déanann cúntóir `extractZip()` OmniRoute féin (`src/lib/versionManager/binaryManager.ts:93`) feidhmeanna `unzip`/`tar` dúchasacha a ghlaoch agus níl baint aige leis. Seolann `@openai/codex-security` a gharda trasnaithe siombalach féin freisin ar bharr an ghlao ar ais onEntry de extract-zip.
-- **Ná** déan ailiasú ar `extract-zip` trí `overrides` i `package.json` — is é an t-aon ionadach inmharthana atá ar fáil ná Electron-org-internal agus tá sé neamh-chomhoiriúnach le API le seiceálacha onEntry/defaultDirMode/defaultFileMode `@openai/codex-security` féin; bhrisfeadh sé go ciúin seiceálacha slándála an phacáiste sin dá ndéanfaí é a shárú.
-- **Bunlíne:** tá an `vulnCount` (3) osv tomhaiste i bhfad faoi bhun an bhunlíne reoite `config/quality/quality-baseline.json` (27) cheana féin — níl aon athrú ratchet ag teastáil.
-- **Cosaint ar aisghabháil:** dearbhaíonn `tests/unit/extract-zip-14482-exposure.test.ts` an slabhra agus an t-athraitheach gan allmhairiú táirgeachta thuas; teipeann ar CI má bhriseann ceachtar acu riamh (m.sh. má dhéanann PR sa todhchaí `extract-zip` inrochtana ó tháirgeadh).
-- **Rianú:** eisiúint #14482.
+Cuireann an deisiú spleáchais reatha teorainn freisin le sáruithe comhoiriúnachta, á gcur i bhfeidhm ar chliant MSAL aitheantais Azure, ar chliant FTP get-uri, agus ar spleáchas Zod SDK v1 OpenCode. Déantar éadáil chomharthaí Azure agus aisghabháil FTP a thástáil le hiompróirí rialaithe; ritheann an dá phacáiste OpenCode a bhfoirgnimh agus a sraitheanna tástála féin. Is tomhais ag pointe áirithe ama iad comhairimh chomhairleacha na clárlainne agus féadfaidh siad athrú tar éis an comhad glasála a chur i ngeall.
 
 ## Cúlra: Comhairle Scorecard → blocáil
 

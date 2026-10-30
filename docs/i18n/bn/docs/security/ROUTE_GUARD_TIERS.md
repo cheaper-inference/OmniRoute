@@ -150,7 +150,7 @@ route-গুলোকে সুরক্ষিত রাখে — যে reques
 
 `/api/settings/obsidian` এর `/webdav` child-কে কভার করে: `POST` WebDAV file service-কে — যা এই pipeline-এর বাইরে, Next.js-এর আগে custom Node layer দ্বারা পরিবেশিত হয় — caller-নির্বাচিত root-এর দিকে নির্দেশ করে এবং সদ্য তৈরি Basic credential ফিরিয়ে দেয়, `DELETE` সেগুলো rotate করে, আর parent `POST` Obsidian REST API token সংরক্ষণ করে। GHSA-62vw কেবল `GET` password প্রকাশ আড়াল করেছিল; issuance তখনও fail-open স্তরে ছিল (GHSA-7pq4-8pvv-rx7r)। `enableObsidianVaultSync()` অতিরিক্তভাবে এমন vault প্রত্যাখ্যান করে যা data directory নিজেই, তার ভেতরে অবস্থিত, অথবা সেটিকে ধারণ করে।
 
-#### Credential export কেবল operator-এর জন্য
+#### ক্রেডেনশিয়াল রপ্তানি ও পুনরুদ্ধার কেবল অপারেটরের জন্য
 
 উপরের টিয়ারটি শুধু নির্ধারণ করে যে _কোনো_ ক্রেডেনশিয়াল প্রয়োজন কি না। সংরক্ষিত
 ক্রেডেনশিয়াল ডাউনলোড করা রুটগুলো হ্যান্ডলারে দ্বিতীয়বার পরীক্ষা করে: `GET /api/settings/export-json` (ডিক্রিপ্ট করা
@@ -161,22 +161,9 @@ route-গুলোকে সুরক্ষিত রাখে — যে reques
 ও `admin`-সহ) এবং `oma_` অ্যাক্সেস টোকেনকে `403` উত্তর দেয়। সিঙ্ক টোকেন ইস্যু করা (`POST /api/sync/tokens`) একই
 হেল্পার এবং অতিরিক্তভাবে বিশ্বস্ত লুপব্যাক অভ্যন্তরীণ-সেবা টোকেন ব্যবহার করে।
 
-#### Credential exports and restores are operator-only
+সংশ্লিষ্ট ধ্বংসাত্মক কাজগুলোর ক্ষেত্রেও একই সীমা প্রযোজ্য: `POST /api/db-backups/import` (আপলোড করা `.sqlite` ফাইল, `dryRun=true` সহ), `POST /api/db-backups` (id দিয়ে সংরক্ষিত ব্যাকআপ পুনরুদ্ধার) এবং `POST /api/settings/import-json` (পুরোনো JSON ফরম্যাট থেকে পুনরুদ্ধার) সক্রিয় ডেটাবেস অথবা সব সেটিংস, সংযোগ ও API কী প্রতিস্থাপন করে। তাই মেশিনের ক্রেডেনশিয়াল দিয়েও এগুলো শুরু করা যায় না।
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+পুনরুদ্ধার বিন্দু মুছে ফেলার ক্ষেত্রেও একই সীমা রয়েছে: `DELETE /api/db-backups` (পরিষ্কার করা — সর্বশেষ Nটি রাখা বা D দিনের বেশি পুরোনো মুছে ফেলা) এবং `PATCH /api/db-backups` (ধরে রাখার সেটিংস)। সংরক্ষিত নিয়মগুলোই `cleanupDbBackups()` প্রতিটি স্বয়ংক্রিয় ব্যাকআপের পরে প্রয়োগ করে (`src/lib/db/backup.ts`); তাই কোনো মেশিন ক্রেডেনশিয়াল `keepLatest: 1` সংরক্ষণ করতে পারলে পরের স্ন্যাপশটে আগের পুনরুদ্ধার বিন্দুগুলো মুছে দিতে পারত। ব্যাকআপের তালিকা দেখা ও তৈরি করা (`GET`/`PUT /api/db-backups`) সাধারণ ব্যবস্থাপনা প্রমাণীকরণেই থাকে।
 
 ### নতুন ইনস্টলের বুটস্ট্র্যাপ শুধু লুপব্যাকের জন্য — প্রকৃত পিয়ার দ্বারা, `Host` দ্বারা নয়
 

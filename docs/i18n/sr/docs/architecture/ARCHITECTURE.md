@@ -15,7 +15,7 @@ OmniRoute је локални мрежни пролаз за усмеравањ�
 
 Кључне могућности:
 
-- API површина компатибилна са OpenAI-јем за CLI/алате (375 добављача, 154 извршна модула)
+- API површина компатибилна са OpenAI-јем за CLI/алате (375 добављача, 156 извршна модула)
 - Превођење захтева/одговора између формата добављача
 - Резервни избор комбинације модела (секвенца више модела)
 - Структурирани кораци комбинације (`provider + model + connection`) са редоследом током извршавања према `compositeTiers`
@@ -31,7 +31,7 @@ OmniRoute је локални мрежни пролаз за усмеравањ�
 - Веб-претрага путем `/v1/search` (20 добављача)
 - Модерација путем `/v1/moderations`
 - Поновно рангирање путем `/v1/rerank`
-- Рашчлањивање ознака за размишљање (``) за моделе резоновања
+- Рашчлањивање ознака за размишљање (`<think>...</think>`) за моделе резоновања
 - Санитизација одговора ради строге компатибилности са OpenAI SDK-ом
 - Нормализација улога (developer→system, system→user) ради компатибилности између добављача
 - Конверзија структурираних излаза (json_schema → Gemini responseSchema)
@@ -1027,7 +1027,7 @@ flowchart LR
 
 - **Санитизација одговора** — Уклања нестандардна поља из одговора у OpenAI формату (и стриминг и не-стриминг) ради обезбеђивања строге усклађености са SDK-ом
 - **Нормализација улога** — Конвертује `developer` → `system` за не-OpenAI циљеве; спаја `system` → `user` за моделе који одбијају улогу system (GLM, ERNIE)
-- **Екстракција think ознака** — Парсира `` блокове из садржаја у поље `reasoning_content`
+- **Екстракција think ознака** — Парсира `<think>...</think>` блокове из садржаја у поље `reasoning_content`
 - **Структурисани излаз** — Конвертује OpenAI `response_format.json_schema` у Gemini-јев `responseMimeType` + `responseSchema`
 
 ## Подржани API крајњи циљеви (endpoints)
@@ -1094,11 +1094,11 @@ legacy компатибилност. Тренутни runtime уговор ко�
 - SQLite шема миграције и куке за аутоматско ажурирање при покретању
 - путања компатибилности за миграцију legacy JSON → SQLite
 
-## 6) SSRF / Заштита излазних URL адреса
+## 6) SSRF / Zaštita odlaznih URL-ova
 
-- `src/shared/network/outboundUrlGuard.ts` блокира све приватне/loopback/link-local циљне URL адресе пре него што стигну до извршиоца провајдера
-- Руте за откривање и валидацију модела провајдера користе `src/shared/network/safeOutboundFetch.ts`, који примењује заштиту пре сваког излазног захтева
-- Грешке заштите се приказују као `URL_GUARD_BLOCKED` са HTTP 422 статусом и логују се у трагу ревизије усклађености (compliance audit trail) путем `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) primenjuje `src/shared/network/outboundUrlGuard.ts` na zahteve za ćaskanje koji se šalju putem `BaseExecutor.execute()`. U režimu samo za javne adrese (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` kada je oznaka za privatne adrese isključena), blokira privatne i povratne hostove, kao i opseg 169.254.0.0/16; u svakom drugom režimu blokira hostove metapodataka u oblaku. Proverava ime hosta ili doslovno navedenu IP adresu onako kako je zapisana, pre bilo kakvog DNS upita. Ugrađeni lokalni provajderi preskaču ovu proveru.
+- Rute za otkrivanje i validaciju modela provajdera koriste `src/shared/network/safeOutboundFetch.ts`, koji primenjuje zaštitu pre svakog odlaznog zahteva
+- Greške zaštite prikazuju se kao `URL_GUARD_BLOCKED` uz HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruta za otkrivanje modela vraća 400), a stvarne SSRF blokade tokom validacije beleže se u revizionom tragu kao događaji `provider.validation.ssrf_blocked`
 
 ## Опсервабилност и оперативни сигнали
 
@@ -1149,7 +1149,7 @@ Promenljive okruženja koje aktivno koristi kod:
 4. Ponašanje облака zavisi od pravilno podešenog `NEXT_PUBLIC_BASE_URL` i dostupnosti krajnje tačke облака.
 5. Direktorijum `open-sse/` se objavljuje kao **npm workspace paket** `@omniroute/open-sse`. Izvorni kod ga uvozi preko `@omniroute/open-sse/...` (razrešava se putem Next.js `transpilePackages`). Putanje fajlova u ovom dokumentu i dalje koriste naziv direktorijuma `open-sse/` radi konzistentnosti.
 6. Grafikoni na kontrolnoj tabli koriste **Recharts** (zasnovan na SVG-u) za pristupačne, interaktivne vizualizacije analitike (bar grafikoni korišćenja modela, tabele pregleda po provajderima sa stopama uspešnosti).
-7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je napisan u **TypeScript-u** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u JavaScript-u (`.js`).
+7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je napisan u **TypeScript-u** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u TypeScript-u (`.ts`).
 8. Stranica podešavanja organizovana je u 7 tabova: General, Appearance, AI, Security, Routing, Resilience, Advanced. Stranica Resilience konfiguriše samo red čekanja zahteva, hlađenje veze (connection cooldown), prekidač provajdera (provider breaker) i ponašanje čekanja na hlađenje; stanje prekidača u realnom vremenu prikazano je na stranici Health.
 9. Strategija **Context Relay** (`context-relay`) je podeljena na dva sloja: `combo.ts` odlučuje da li treba generisati predaju (handoff), `chat.ts` ubacuje predaju nakon razrešavanja naloga. Podaci o predaji se čuvaju u SQLite tabeli `context_handoffs`. Ova podela je namerna jer samo `chat.ts` zna da li se stvarni nalog promenio.
 10. **Sprovođenje proxy politike** je sada sveobuhvatno: `tokenHealthCheck.ts` razrešava proxy po konekciji, `/api/providers/validate` koristi `runWithProxyContext`, a `proxyFetch.ts` koristi `undici.fetch()` da bi se održala kompatibilnost dispečera na Node 22.

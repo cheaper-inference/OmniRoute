@@ -447,7 +447,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 प्रोवाइडर रजिस्ट्रियाँ, हेडर प्रोफ़ाइलें, पहचान, …
 ├── handlers/               अनुरोध हैंडलर्स (चैट, एम्बेडिंग्स, ऑडियो, इमेज, …)
-├── executors/              150 प्रोवाइडर एक्ज़ीक्यूटर मॉड्यूल (एक्ज़ीक्यूटर क्लासेस + प्रत्येक प्रोवाइडर के सहायक)
+├── executors/              156 प्रोवाइडर एक्ज़ीक्यूटर मॉड्यूल (एक्ज़ीक्यूटर क्लासेस + प्रत्येक प्रोवाइडर के सहायक)
 ├── translator/             फ़ॉर्मेट रूपांतरण (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions स्ट्रीम ट्रांसफ़ॉर्मर
 ├── services/               80+ सेवा मॉड्यूल (कॉम्बो, फ़ॉलबैक, कोटा, पहचान, …)
@@ -477,7 +477,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 शीर्ष-स्तरीय एक्ज़ीक्यूटर मॉड्यूल (`*.ts` में से `base.ts`, `index.ts` और परीक्षणों को छोड़कर — यह संख्या
+156 शीर्ष-स्तरीय एक्ज़ीक्यूटर मॉड्यूल (`*.ts` में से `base.ts`, `index.ts` और परीक्षणों को छोड़कर — यह संख्या
 `npm run check:docs-counts` द्वारा मापी जाती है)। प्रत्येक एक्ज़ीक्यूटर क्लास, सीधे या `DefaultExecutor`
 अथवा किसी अन्य एक्ज़ीक्यूटर के माध्यम से, `BaseExecutor` (`base.ts`) को एक्सटेंड करती है; शेष मॉड्यूल प्रत्येक प्रोवाइडर के
 सहायक हैं (टूल स्कीमा, फ़ेच/TTS अडैप्टर, विशिष्ट व्यवहार हैंडलर)। एक्ज़ीक्यूटर्स में शामिल हैं:
@@ -772,7 +772,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` को विस्तारित करें)।
 2. `src/shared/constants/mcpScopes.ts` में उपयुक्त स्कोप निर्दिष्ट करें।
 3. टूल को `open-sse/mcp-server/server.ts` में पंजीकृत करें।
-4. `open-sse/mcp-server/__tests__/` के अंतर्गत परीक्षण जोड़ें।
+4. `tests/unit/` के अंतर्गत परीक्षण जोड़ें।
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) को अपडेट करें।
 
 ### नया A2A कौशल जोड़ें
@@ -790,7 +790,7 @@ bin/
 - **नामकरण**: फ़ाइलें `camelCase` या `kebab-case`, कॉम्पोनेंट `PascalCase`,
   कॉन्स्टेंट `UPPER_SNAKE`।
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = हर जगह `error`;
-  `no-explicit-any` = `open-sse/` और `tests/` में `warn`, अन्यत्र `error`।
+  `no-explicit-any` = `open-sse/**/*.ts` और `tests/**/*.ts` में `error`।
 - **TypeScript**: `strict: false` (विरासती स्थिति)। क्रॉस-मॉड्यूल सीमाओं के लिए
   अनुमानित प्रकारों की तुलना में स्पष्ट प्रकारों को प्राथमिकता दें।
 - **डेटाबेस**: रूट या हैंडलर में कभी भी रॉ SQL न लिखें — हमेशा
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`।
 - **ब्रांच**: प्रीफ़िक्स `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`। कभी भी सीधे `main` में कमिट न करें।
-- **Husky**: प्री-कमिट में `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` चलते हैं; प्री-पुश में `check:any-budget:t11` + `check:tracked-artifacts` चलते हैं (त्वरित गेट; `test:unit` को शामिल नहीं करते)।
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

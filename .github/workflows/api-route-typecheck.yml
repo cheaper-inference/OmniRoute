@@ -5,13 +5,14 @@ on:
     branches:
       - main
       - "release/**"
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [opened, synchronize, reopened, ready_for_review, edited]
   push:
-    branches: [main]
+    branches: [main, "release/**"]
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  # Metadata edits must not evict a pending candidate or cancel a running check.
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event.action == 'edited' && github.event.changes.base == null && github.run_id || 'candidate' }}
   cancel-in-progress: true
 
 permissions:
@@ -19,7 +20,10 @@ permissions:
 
 jobs:
   api-typecheck:
-    name: API Route Typecheck
+    # A skipped job reports success. Reserve the required name for real candidates.
+    name: ${{ (github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null) && 'API Route Typecheck' || 'Admission not requested / API Route Typecheck' }}
+    # Base retargets arrive as edited too; body/title edits are observation-only.
+    if: ${{ github.event_name != 'pull_request' || github.event.action != 'edited' || github.event.changes.base != null }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
@@ -28,8 +32,12 @@ jobs:
       - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7
         with:
           node-version: "24"
-          cache: npm
+          # Release pushes validate a fresh install; existing event caches stay enabled.
+          package-manager-cache: false
+          cache: ${{ (github.event_name != 'push' || !startsWith(github.ref, 'refs/heads/release/')) && 'npm' || '' }}
       - uses: ./.github/actions/npm-ci-retry
+        with:
+          cache: ${{ github.event_name != 'push' || !startsWith(github.ref, 'refs/heads/release/') }}
       - name: Reject new API-route TypeScript diagnostics
         run: node scripts/check/check-api-typecheck.mjs
       - name: API typecheck gate unit tests

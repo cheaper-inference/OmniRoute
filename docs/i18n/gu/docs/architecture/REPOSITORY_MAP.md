@@ -106,7 +106,7 @@ OmniRoute/
 
 > **v3.8.26 માં root માંથી ખસેડવામાં આવ્યું (અવ્યવસ્થા ઘટાડવા માટે):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલી `quality-metrics.json` (gitignored). જુઓ [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલી `quality-metrics.json` (gitignored). જુઓ [`## config/`](#config--સ્ટેટિક-કન્ફિગ્સ--ક્વૉલિટી-ગેટ-સ્થિતિ).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | ઉપડિરેક્ટરી           | હેતુ                                                                                                                                                                                                                       |
 | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (41 લોકેલ્સ)                                                                                                                                                                                  |
+| `docs/i18n/`          | સ્થાનિકીકૃત દસ્તાવેજ અનુવાદો (66 લોકેલ્સ)                                                                                                                                                                                  |
 | `docs/screenshots/`   | માર્ગદર્શિકાઓ માટેની છબી એસેટ્સ                                                                                                                                                                                            |
 | `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) તરફથી યોજનાઓ/સ્પેસિફિકેશન્સ + સંશોધન — અલગ રાખેલ, સ્વતંત્ર રીતે વર્ઝન કરાયેલ રિપોઝિટરી, મુખ્ય ટ્રી દ્વારા gitignore કરાયેલ. CLAUDE.md → "Planning & Research Artifacts" જુઓ. |
 

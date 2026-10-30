@@ -2,6 +2,7 @@ import { spawn } from "node:child_process";
 import { closeSync, mkdirSync, openSync, writeFileSync, writeSync } from "node:fs";
 import { dirname } from "node:path";
 import { StringDecoder } from "node:string_decoder";
+import { listProcessGroupMembers } from "../dev/resource-budget-process.mjs";
 
 /** Run one gate without a shell; persist progress before computing its verdict. */
 export async function runGateProcess(command, args, options) {
@@ -116,8 +117,16 @@ export async function runGateProcess(command, args, options) {
         exitSignal = receivedSignal;
         if (process.platform !== "win32" && child.pid) {
           try {
-            process.kill(-child.pid, 0);
-            terminate("ORPHANED_DESCENDANTS");
+            if (process.platform === "linux") {
+              // kill(pgid, 0) also finds exited zombies awaiting the OS parent or
+              // subreaper. Inspect executable members; incomplete scans stay red.
+              const group = listProcessGroupMembers(child.pid);
+              if (group.unknown) terminate("CLEANUP_ERROR");
+              else if (group.members.length > 0) terminate("ORPHANED_DESCENDANTS");
+            } else {
+              process.kill(-child.pid, 0);
+              terminate("ORPHANED_DESCENDANTS");
+            }
           } catch (error) {
             if (error.code !== "ESRCH") terminate("CLEANUP_ERROR");
           }

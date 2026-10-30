@@ -155,7 +155,7 @@ Tunnel, Tailscale, Ngrok) പിന്നിലാണ് പ്രവർത്�
 
 `/api/settings/obsidian` അതിന്റെ `/webdav` child-നെയും ഉൾക്കൊള്ളുന്നു: Next.js-ന് മുമ്പായി ഈ pipeline-ന് പുറത്തുള്ള custom Node layer സേവനം നൽകുന്ന WebDAV file service-നെ `POST`, കോളർ തിരഞ്ഞെടുത്ത root-ലേക്ക് ചൂണ്ടിക്കാണിക്കുകയും പുതുതായി സൃഷ്ടിച്ച Basic credentials തിരികെ നൽകുകയും ചെയ്യുന്നു; `DELETE` അവ rotate ചെയ്യുന്നു; parent `POST` Obsidian REST API token സംഭരിക്കുന്നു. GHSA-62vw, `GET` password വെളിപ്പെടുത്തൽ മാത്രമാണ് മറച്ചത്; issuance അപ്പോഴും fail-open ടയറിലായിരുന്നു (GHSA-7pq4-8pvv-rx7r). data directory തന്നെയായതോ അതിനുള്ളിലിരിക്കുന്നതോ അതിനെ ഉൾക്കൊള്ളുന്നതോ ആയ ഒരു vault `enableObsidianVaultSync()` അധികമായി നിരസിക്കുന്നു.
 
-#### ക്രെഡൻഷ്യൽ exports operators-ക്ക് മാത്രം
+#### ക്രെഡൻഷ്യൽ കയറ്റുമതിയും പുനഃസ്ഥാപിക്കലും ഓപ്പറേറ്റർമാർക്കു മാത്രം
 
 മുകളിലുള്ള ടയർ _ഏതെങ്കിലും_ ക്രെഡൻഷ്യൽ ആവശ്യമാണോ എന്ന് മാത്രമാണ് തീരുമാനിക്കുന്നത്. സംഭരിച്ച ക്രെഡൻഷ്യലുകൾ
 ഡൗൺലോഡ് ചെയ്യുന്ന റൂട്ടുകൾ ഹാൻഡ്ലറിൽ രണ്ടാമതൊരു പരിശോധന ചേർക്കുന്നു: `GET /api/settings/export-json` (ഡീക്രിപ്റ്റ് ചെയ്ത
@@ -166,22 +166,9 @@ Tunnel, Tailscale, Ngrok) പിന്നിലാണ് പ്രവർത്�
 `admin` എന്നിവ ഉൾപ്പെടെ) `oma_` ആക്സസ് ടോക്കണുകൾക്കും `403` മറുപടി നൽകുകയും ചെയ്യുന്നു. സിങ്ക് ടോക്കൺ നൽകൽ (`POST /api/sync/tokens`)
 ഇതേ ഹെൽപ്പറും കൂടാതെ വിശ്വസനീയമായ ലൂപ്പ്ബാക്ക് ഇന്റേണൽ-സർവീസ് ടോക്കണും ഉപയോഗിക്കുന്നു.
 
-#### Credential exports and restores are operator-only
+ബന്ധപ്പെട്ട നശീകരണ പ്രവർത്തനങ്ങൾക്കും ഇതേ പരിധിയാണ്: `POST /api/db-backups/import` (അപ്‌ലോഡ് ചെയ്ത `.sqlite` ഫയൽ, `dryRun=true` ഉൾപ്പെടെ), `POST /api/db-backups` (സംരക്ഷിച്ച ബാക്കപ്പ് അതിന്റെ id ഉപയോഗിച്ച് പുനഃസ്ഥാപിക്കൽ), `POST /api/settings/import-json` (പഴയ JSON രൂപത്തിൽനിന്നുള്ള പുനഃസ്ഥാപിക്കൽ) എന്നിവ സജീവ ഡാറ്റാബേസ് അല്ലെങ്കിൽ ക്രമീകരണങ്ങൾ, കണക്ഷനുകൾ, API കീകൾ എന്നിവയുടെ മുഴുവൻ കൂട്ടം മാറ്റിസ്ഥാപിക്കുന്നു. അതിനാൽ മെഷീൻ ക്രെഡൻഷ്യലുകൾക്ക് ഇവയും ആരംഭിക്കാനാവില്ല.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+പുനഃസ്ഥാപന പോയിന്റുകൾ നീക്കുന്നതിനും ഇതേ പരിധിയുണ്ട്: `DELETE /api/db-backups` (ശുചീകരണം — ഏറ്റവും പുതിയ N എണ്ണം സൂക്ഷിക്കുക അല്ലെങ്കിൽ D ദിവസത്തിലധികം പഴക്കമുള്ളവ നീക്കുക), `PATCH /api/db-backups` (സംരക്ഷണ ക്രമീകരണങ്ങൾ). സംരക്ഷിച്ച നിയമങ്ങളാണ് ഓരോ സ്വയമേവയുള്ള ബാക്കപ്പിനുശേഷവും `cleanupDbBackups()` പ്രയോഗിക്കുന്നത് (`src/lib/db/backup.ts`); അതിനാൽ `keepLatest: 1` സംരക്ഷിക്കാവുന്ന ഒരു മെഷീൻ ക്രെഡൻഷ്യലിന് അടുത്ത സ്നാപ്‌ഷോട്ടിൽ പഴയ പുനഃസ്ഥാപന പോയിന്റുകൾ നീക്കാനാകുമായിരുന്നു. ബാക്കപ്പുകൾ പട്ടികപ്പെടുത്തുന്നതും സൃഷ്ടിക്കുന്നതും (`GET`/`PUT /api/db-backups`) സാധാരണ മാനേജ്മെന്റ് പ്രാമാണീകരണം നിലനിർത്തുന്നു.
 
 ### പുതിയ ഇൻസ്റ്റാളേഷനിലെ ബൂട്ട്സ്ട്രാപ്പ് ലൂപ്പ്ബാക്കിന് മാത്രമാണ് — `Host` അടിസ്ഥാനമാക്കിയല്ല, യഥാർഥ പിയർ അടിസ്ഥാനമാക്കി
 

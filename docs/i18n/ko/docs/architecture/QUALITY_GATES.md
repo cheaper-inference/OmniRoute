@@ -18,262 +18,352 @@
 
 ### 후보 승인
 
-CI 및 Quality Gates 워크플로는 각각 `Gate / CI`와
-`Gate / Quality`라는 안정적인 판정을 생성합니다. 버전 관리되는 승인 정책은 모든 업스트림 작업을
-필수 또는 권고로 열거합니다. 적용 가능한 필수 작업은 반드시 성공해야 합니다. 누락,
-취소, 건너뜀, 대기 중 및 알 수 없는 결과로는 PASS를 확정할 수 없습니다. 유효한
-문서 전용 또는 카탈로그 전용 분류에 따라 코드 레인이 적용되지 않을 수 있지만,
-초안 PR은 승인된 후보가 아닙니다. `hotfix` 레이블이 있다고 해서 증거가 면제되지는 않습니다.
+CI 및 Quality Gates 워크플로는 각각 안정적인 판정 결과인 `Gate / CI`와
+`Gate / Quality`를 생성합니다. 버전이 지정된 승인 정책은 모든 업스트림 작업을
+필수 또는 권고 항목으로 열거합니다. 적용 가능한 필수 작업은 반드시 성공해야 합니다.
+누락, 취소, 건너뜀, 대기 중 및 알 수 없는 결과로는 PASS를 확정할 수 없습니다. 유효한
+문서 전용 또는 카탈로그 전용 분류를 통해 코드 레인을 적용 대상에서 제외할 수 있지만,
+초안 PR은 승인된 후보가 아닙니다. `hotfix` 레이블이 증거 요건을 면제하지는 않습니다.
 
-두 워크플로 모두 PR, main/release 브랜치로의 푸시, 수동 디스패치 및
-병합 그룹 이벤트를 지원합니다. 푸시, 디스패치 및 병합 그룹은 전체 선택 항목을 실행합니다. 포크와
-병합 그룹은 원래 자체 호스팅 러너를 선택하는 작업에 호스팅 러너를 사용합니다.
-출시 전에 충분한 호스팅 용량을 검증해야 합니다.
+두 워크플로는 main/release 브랜치로 향하는 PR, `main`으로의 푸시, 수동 디스패치
+및 병합 그룹 이벤트를 모두 처리합니다. 푸시, 디스패치 및 병합 그룹에서는 전체 선택 항목을 실행합니다.
+`release/**`로의 푸시는 이 워크플로를 시작하지 않습니다(2026-10-18). 각 변경 사항은 이미 해당 PR에서
+매트릭스를 실행했으며, 병합된 조합은 Release-Green이 담당하기 때문입니다
+(`docs/ops/RUNNER_BOX.md` → 호스팅 레인). 포크와 병합 그룹은 원래 자체 호스팅
+러너를 선택하는 작업에도 호스팅 러너를 사용합니다. 출시 전에 충분한 호스팅 용량을
+검증해야 합니다.
 
 각 JSON 영수증은 체크아웃된 SHA, 워크플로 실행 및 시도를 식별합니다.
 CLI는 체크아웃 SHA와 이벤트 SHA가 일치하지 않으면 거부합니다. 워크플로 테스트는 정책 멤버십을
-판정 작업의 `needs` 목록에 연결하므로, 새 레인이나 제거된 레인이 조용히 사라질 수 없습니다.
-영수증은 해당 워크플로 자체만 다루며, 게시, 배포 또는 기존 권고 스캐너의
-내부 동작은 다루지 않습니다. 브랜치 규칙에서 두 검사 이름을 모두 활성화하는 것은
-별도의 관리 변경 사항입니다. 이러한 작업을 추가하는 것만으로는 브랜치가 보호되지 않습니다.
+판정 작업의 `needs` 목록에 연결하므로, 레인이 추가되거나 제거되더라도 자동으로 누락될 수 없습니다.
+영수증은 자체 워크플로만 다루며, 게시, 배포 또는 기존 권고성
+스캐너의 내부 구조는 다루지 않습니다. 브랜치 규칙에서 해당 검사를 필수로 지정하는 것은
+별도의 관리 변경 사항이며, 작업을 정의하는 것만으로는 브랜치가 보호되지 않습니다.
+
+`API Route Typecheck`은 두 종합 판정 및 로컬 전체 옵저버의 정적 프로필
+모두에 포함되지 않는 독립적인 워크플로 검사입니다. 정확한 후보에 대한 결과를 별도로
+검사하십시오. `.github/workflows/api-route-typecheck.yml`은 `main` 또는
+`release/**`을 대상으로 하는 PR, 두 브랜치 계열 중 하나에 대한 푸시, 수동 디스패치에서 실행됩니다. 경로 필터는
+없습니다. PR 대상 베이스를 변경하면 새 검사가 요청됩니다. 본문/제목 편집에는 관찰 전용 이름
+`Admission not requested / API Route Typecheck`이 사용되며 승인 검사를 대체할 수 없습니다.
+이 워크플로는 병합 그룹 트리거를 선언하지 않습니다. 이 검사를 요구하는 병합 큐를 도입하려면
+먼저 해당 이벤트에 대해 이 검사가 실행되도록 설정해야 합니다.
+
+### UI 실행 용량
+
+CI는 전체 UI 인벤토리를 네 개의 `test-vitest` 매트릭스 샤드로 실행하며, 각 샤드는 최대
+두 개의 워커와 기존 15분 작업 제한 시간을 사용합니다. 첫 번째 샤드는
+MCP/autoCombo Vitest 스위트도 실행합니다. 필수 작업 결과는 모든 매트릭스 실행 단위를 포함합니다.
+샤드 하나라도 실패하거나 취소되면 후보 승인을 확정할 수 없습니다.
+
+야간 옵저버는 각 UI 샤드에 대해 정확한 후보별 영수증을 별도로 유지하며,
+첫 번째 영수증에는 MCP 실행도 포함됩니다. 네 개의 영수증, 로그 및 일치하는
+실행 ID가 모두 필요합니다. 로컬 `npm run test:vitest:ui`는 여전히
+전체 스위트를 선택합니다. 단일 `--shard` 실행은 부분적인 증거에 불과합니다.
+
+### 유닛 커버리지 수집
+
+12개의 유닛 샤드는 기존 테스트 실행 중에 V8 커버리지를 수집합니다. 성공한
+샤드는 `scripts/ci/compact-v8-coverage.mjs`를 실행하여 중간 Istanbul 보고서를
+생성하지 않고 원본 파일을 압축합니다. 최종 Coverage 작업은 12개 매니페스트 모두를
+후보 SHA, 런타임, 소스 루트 및 데이터 해시와 대조하여 검증한 다음, c8 리포터와 기존
+커버리지 임계값을 실행합니다. 입력은 c8의 전역 파일 이름 순서를 유지합니다. 함수/블록 커버리지가
+혼합된 경우 샤드별 사전 병합은 안전하지 않습니다. 샤드가 누락되거나 형식이 잘못되었거나
+호환되지 않으면 승인이 실패합니다. 실패한 테스트 샤드의 원시 진단 커버리지는 별도로
+보존되며, 최종 병합에 포함할 수 없습니다.
+
+### 유닛 실행 진행 상황 영수증
+
+공유 `test:unit:ci:shard` 명령은 `scripts/ci/unit-progress-reporter.mjs`를 통해 `primary`, `dashboard`, `serial`
+단계를 기록합니다. 일반 테스트 보고서는 계속
+사용할 수 있습니다. 별도의 메타데이터 전용 영수증은 각 파일의 시작과 완료를 기록하며,
+30초 간격의 하트비트에는 아직 활성 상태인 파일과 해당 파일의 경과 시간이 나열됩니다. 허용 목록에 포함된
+실행 메타데이터만 기록하며, 테스트 설명, 출력, 오류 본문 및 전체
+환경은 직렬화하지 않습니다.
+
+CI와 Quality는 JSONL 파일을 `unit-progress-ci-<run>-<attempt>-<shard>` 및
+`unit-progress-quality-<run>-<attempt>-<shard>`로 보관합니다. 작업 시간 초과로 인해 이후 업로드가 수행되지 않을 수 있지만,
+이미 전송된 하트비트는 진단 증거로 남습니다. 하트비트가 누락된 경우
+러너 프로세스가 차단되었거나 종료되었음을 나타낼 수도 있습니다. 이러한 영수증은 기존 테스트 선택,
+동시성, 기한 및 종료 상태를 그대로 유지하며, 후보 승인 여부에 대한 판정은 아닙니다.
+
+### 승인 결과 집계기의 보관 증거
+
+`scripts/quality/validate-release-acceptance.mjs`는 제공된 계획과 매니페스트를 집계하며, 그 계획이 전체 릴리스 파이프라인을 포괄한다는 사실을 입증하지는 않습니다. 계획이 `VERIFIED`인 경우에도 보고서에는 명시적으로 `releaseAcceptance: false`가 설정됩니다. `release-acceptance.yml` 워크플로는 여전히 섀도 테스트 픽스처를 사용하며 실제 빌드, 패키징, 부팅 또는 승격의 실행 기록을 사용하지 않습니다.
+
+보관된 증거를 검증하려면 CLI에 `--evidence-root`가 필요합니다. 파일은 `<evidence-root>/<artifact_id>/<member>` 경로에서 확인하고 SHA-256 해시를 계산합니다. 증거 없는 PASS 레코드, 누락되거나 변경된 파일, 안전하지 않은 경로 또는 심볼릭 링크는 검증을 막습니다. 누락된 파일은 성공한 실행의 빈 로그와 같지 않습니다. 기존 SHA/run/attempt 검사는 독립적으로 유지됩니다. 바이트가 일치해도 오래된 실행 기록을 유효하게 만들 수는 없습니다. 파일 무결성은 실행의 진위나 아티팩트 승격을 입증하지 않습니다.
 
 ### 정적 스캔 인벤토리
 
-버전 관리되는 npm 별칭 인벤토리와 정적 스캔 멤버십은
-`config/quality/gate-manifest.json`에 있습니다. `package.json`과 비교하여 스크립트 이름과
-정확한 명령을 검증하려면 `npm run check:gate-manifest`를 실행하십시오. 추가, 제거 및
-명령 변경이 있으면 로컬 훅과 CI의 변경 분류 작업이 모두 실패합니다.
+버전이 지정된 npm 별칭 인벤토리와 정적 스캔 멤버십은
+`config/quality/gate-manifest.json`에 있습니다. `npm run check:gate-manifest`를 실행하여
+스크립트 이름과 정확한 명령을 `package.json`과 대조해 검증하십시오. 추가, 제거 및
+명령 드리프트는 로컬 훅과 CI의 변경 분류 작업을 모두 실패시킵니다.
 별칭은 워크플로 작업, 매트릭스 인스턴스 또는 테스트 케이스가 아닙니다. 이러한 수치를
-서로 바꿔 쓸 수 있는 것처럼 제시해서는 안 됩니다.
+서로 동등한 것으로 제시해서는 안 됩니다.
 
 선택된 별칭을 실행하지 않고 확인하려면 `npm run quality:scan -- --list` 또는
 `npm run quality:scan:fast -- --list`를 사용하십시오. 러너는
-npm 진입점을 호출하므로, 구성된 경우 Bun을 포함한 해당 런타임이 유지됩니다.
+npm 진입점을 호출하므로, 구성된 경우 Bun을 포함하여 해당 런타임이 그대로 유지됩니다.
 매니페스트는 이러한 프로필 외부의 별칭을 별도 호출 항목으로 기록하며,
-읽기 전용 스캔 프로필에서는 유지보수 명령이 금지됩니다.
+읽기 전용 스캔 프로필에서는 유지관리 명령이 금지됩니다.
 
-이러한 프로필은 정적 스캔만 다룹니다. 제품 테스트,
-커버리지, 패키징, 외부 검사 또는 후보의 전체 릴리스 승인을 인증하지 않습니다.
-워크플로 승인은 연결된 `config/quality/admission-policy.json`과
-`scripts/quality/admission-verdict.mjs`를 사용합니다. 릴리스 옵서버 프로필은 별도로 유지됩니다.
-적용 가능한 검사와 영수증을 독립적으로 확인하십시오. 아래의 설명형
-인벤토리는 참고 자료일 뿐, 게이트가 실제로 실행되었다는 증거가 아닙니다.
+이러한 프로필은 정적 스캔만 다룹니다. 제품 테스트, 커버리지, 패키징,
+외부 검사 또는 후보의 전체 릴리스 승인을 보증하지 않습니다.
+워크플로 승인은 연결된 `config/quality/admission-policy.json` 및
+`scripts/quality/admission-verdict.mjs`를 사용합니다. 릴리스 옵저버 프로필은 별도로 유지됩니다.
+적용 가능한 검사와 영수증을 독립적으로 확인하십시오. 전체 옵저버의 정적
+명령은 `config/quality/release-green-static-profile.json`에 선언되어 있으며,
+`audit:deps`, 변이 테스트 선택 및 번역 검사를 포함합니다. 로더는 npm
+명령을 package.json 및 모델링된 CI/Quality 선언과 대조하여 검증합니다. 셸 토큰을 인수로
+실행하는 대신 드리프트를 거부합니다. 필수 스캐너의 SKIP/INCOMPLETE 출력으로는
+PASS를 확정할 수 없습니다. 프로필은 외부 제외 항목을 기록하며, 호스팅 커버리지,
+테스트 매트릭스, 패키지 또는 배포 증거를 대체하지 않습니다. 아래의 설명형 인벤토리는
+참고 자료일 뿐, 게이트가 실제로 실행되었다는 증거가 아닙니다.
 
-스크립트는 `scripts/check/`(정책 게이트)와 `scripts/quality/`(래칫 엔진) 아래에 있습니다.
-CI의 단일 진실 공급원은 `.github/workflows/ci.yml`입니다.
+스크립트는 `scripts/check/`(정책 게이트) 및 `scripts/quality/`(래칫 엔진) 아래에 있습니다.
+CI의 단일 기준 정보원은 `.github/workflows/ci.yml`입니다.
+
+### 게시된 기준 문서 상태
+
+`.github/workflows/i18n-base-health.yml`은 선택된 `main` 및 `release/v*` 브랜치 푸시 후와
+수동 디스패치 시 문서 상태를 관찰합니다. 해당 필터는 문서, 루트 Markdown, `llm.txt`,
+번역 상태/구성 및 관련 i18n 도구를 포함합니다.
+단일 `Published base documentation health` 작업은 호스팅된 Ubuntu를 사용하며 제한 시간은
+5분입니다. 이 작업은 읽기 전용 검증을 수행하고, 종속성 설치, 번역 또는 상태 적용 없이
+진단 영수증을 기록합니다.
+
+`scripts/i18n/check-base-health.mjs`는 소스 해시 불일치, 대상 누락, 대상 해시 불일치,
+오래된 번역 및 섹션 캐시 불일치가 하나도 없어야 합니다. 또한 현재 핵심
+문서/로케일 범위와 기록된 출처를 검증합니다. 유효하지 않은 컨텍스트, 불완전한 범위
+또는 중단된 검사기는 `INCOMPLETE`를 생성하며, 드리프트가 확인되면 `FAIL`을 생성합니다. 둘 다
+실패 종료 상태를 반환합니다. 영수증은 체크아웃 SHA, 워크플로, 실행 및
+시도에 연결되며 `i18n-base-health-<sha>-<run>-<attempt>`로 보존됩니다.
+
+이는 게시된 기준 문서에 대한 독립적인 관찰입니다. PR 또는
+병합 그룹 이벤트, 필수 PR 검사, npm 별칭 또는 정적 스캔 프로필 구성원을 추가하지 않습니다.
+기존의 차등 PR 정책과 기본 검사기의 권고 분류는
+서로 별개로 유지됩니다. 업로드에 성공해도 실패한 상태 결과를 PASS로 바꿀 수 없습니다.
 
 ### 릴리스 PR 빠른 경로(`quality.yml`)
 
-`.github/workflows/quality.yml`은 main/release PR, 보호된 브랜치로의
-푸시, 디스패치 및 병합 그룹에서 CI를 보완합니다. PR은 경로 필터링된 빠른 검사를 사용합니다. 영구적으로
-비활성화되어 있던 중복 빌드는 제거되었으며, 실제 빌드/패키지/부팅 검사는 CI에 남아 있습니다.
+`.github/workflows/quality.yml`은 main/release PR, `main`으로의 푸시,
+디스패치 및 병합 그룹에서 CI를 보완합니다. PR은 경로 필터가 적용된 빠른 검사를 사용합니다.
+영구적으로 비활성화되었던 중복 빌드는 제거되었으며, 실제 빌드/패키지/부팅 검사는 CI에 그대로 남아 있습니다.
 
 | 작업                                             | 범위                                                                                                                                            | 차단 여부     |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `Docs Gates (fast-path)`                         | 문서/코드 PR, API 문서 참조 및 전체 문서                                                                                                        | 예            |
-| `Fast Quality Gates`                             | 코드 PR, 정적 검사, 타입 검사, 대시보드 타입 검사, 영향받는 단위 테스트                                                                         | 예            |
-| `Forgotten sibling tests`                        | 코드 PR, 변경된 모듈을 정적 소비자 및 후보 형제 테스트까지 추적, 배럴 및 동적 가져오기 경로는 참조된 허용 목록 예외와 함께 권고 진단으로 보고됨 | **권고**      |
-| `Vitest (fast-path)`                             | 코드 PR, 빠른 vitest 제품군                                                                                                                     | 예            |
-| `Unit Tests fast-path`                           | 코드 PR, 4개 샤드 단위 테스트 제품군                                                                                                            | 예            |
-| `No new ESLint warnings`                         | 코드 PR, 억제 규칙을 인식하는 린트 가드                                                                                                         | 예, 포크 포함 |
-| `Merge integrity (changelog + generated skills)` | 초안이 아닌 PR, 변경 로그 및 생성된 스킬 동기화                                                                                                 | 예, 포크 포함 |
+| `Docs Gates (fast-path)`                         | 문서/코드 PR; API 문서 참조 및 docs-all                                                                                                         | 예            |
+| `Fast Quality Gates`                             | 코드 PR; 정적 검사, 타입 검사, 대시보드 타입 검사, 영향받는 단위 테스트                                                                         | 예            |
+| `Forgotten sibling tests`                        | 코드 PR; 변경된 모듈을 정적 소비자 및 후보 형제 테스트까지 추적; 배럴 및 동적 가져오기 경로는 참조된 허용 목록 예외와 함께 권고 진단으로 보고됨 | **권고**      |
+| `Vitest (fast-path)`                             | 코드 PR; 빠른 vitest 스위트                                                                                                                     | 예            |
+| `Unit Tests fast-path`                           | 코드 PR; 4개 샤드 단위 테스트 스위트                                                                                                            | 예            |
+| `No new ESLint warnings`                         | 코드 PR; 억제 설정을 인식하는 린트 가드                                                                                                         | 예, 포크 포함 |
+| `Merge integrity (changelog + generated skills)` | 초안이 아닌 PR; 변경 로그 및 생성된 스킬 동기화                                                                                                 | 예, 포크 포함 |
 
 #### 누락된 형제 테스트 보고서
 
-`npm run check:forgotten-sibling-tests`는 테스트 영향 맵에서 사용하는 가져오기 리졸버를 재사용합니다.
-변경된 각 프로덕션 모듈에 대해 후보 테스트가
-풀 리퀘스트 diff에 없으면 결정론적인
+`npm run check:forgotten-sibling-tests`는 테스트 영향도 맵에서 사용하는 가져오기 해석기를 재사용합니다.
+변경된 각 프로덕션 모듈에 대해, 후보 테스트가 풀 리퀘스트 diff에 없으면 결정론적인
 `changed module/symbol -> static consumer -> candidate sibling test` 체인을 보고합니다. Markdown 요약과 JSON 결과는
-차단 방식으로 출시하기 전 보정을 위해 `forgotten-sibling-tests` 워크플로 아티팩트로 보존됩니다.
+차단 방식으로 전환하기 전의 보정을 위해 `forgotten-sibling-tests` 워크플로 아티팩트로 보관됩니다.
 
-Barrel 재내보내기와 동적 import는 오직 해석 진단용이며, 차단 항목을 생성하지 않습니다.
+배럴 재내보내기와 동적 가져오기는 해석 진단일 뿐이며, 차단 결과를 생성하지 않습니다.
 검토된 예외는 `config/quality/forgotten-sibling-allowlist.json`에 있습니다. 각 항목에는 소비자와 후보
-테스트를 명시하고, 구체적인 근거를 제시하며, GitHub 이슈 또는 pull request를 링크해야 합니다. 형식이 잘못된 항목은
-폐쇄적으로 실패합니다. 예외로 삭제된 후보 테스트나 `.skip`/`.todo`를 추가하는 diff를 억제할 수 없습니다.
-어서션 약화 및 기타 마스킹은 독립적으로 차단하는
+테스트를 명시하고, 구체적인 근거를 제시하며, GitHub 이슈 또는 풀 리퀘스트 링크를 포함해야 합니다. 형식이 잘못된 항목은
+폐쇄적으로 실패 처리됩니다. 예외는 삭제된 후보 테스트나 `.skip`/`.todo`를 추가하는 diff를 억제할 수 없습니다.
+어설션 약화 및 기타 마스킹은 별도로 차단 기능을 수행하는
 `check:test-masking` 게이트에서 계속 담당합니다.
 
 ### 작업: `lint`
 
-`main`을 대상으로 하는 모든 PR에서 실행됩니다. 실패 시 병합을 차단합니다.
+`main`에 대한 모든 PR에서 실행됩니다. 실패 시 병합을 차단합니다.
 
-| 스크립트 (`npm run ...`)          | 검증 항목                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 차단 여부                            |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------ |
-| `check:node-runtime`              | Node.js 버전이 지원 범위 내에 있는지 확인                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 예                                   |
-| `check:cycles`                    | `src/` + `open-sse/` 전체의 순환 import를 검사합니다(AST 기반, tsconfig `paths` 해석). 기본 실행은 순환이 하나라도 존재하면 항상 종료 코드 1을 반환하며(#15281부터 폐쇄형 실패), SCC 목록을 표시합니다. CI에서 실행하는 `check:cycles:ratchet`은 순환 수가 `quality-baseline.json`의 `metrics.cycles` 상한을 초과하면 차단합니다. 현재 상한은 14이고 `direction: down`이므로 감소만 가능합니다(#15159 G-01/G-02).                                                                                                                                                                                                                                                                                                                                                                                                                                      | 예(ratchet)                          |
-| `check:boundary`                  | `open-sse → src` 결합도를 검사합니다. 즉, 엔진에서 앱으로 향하는 고유한 파일 간 import를 측정합니다(`scripts/quality/measure-boundary.mjs`; edge 목록은 v4 코어/모듈 분리 개선 백로그입니다). 기본 실행은 권고 보고서이며(`quality:boundary`와 동일), CI에서 실행되고 `quality.yml`의 fast-gates ratchet 루프에도 포함된 `check:boundary:ratchet`은 개수가 `quality-baseline.json`의 `metrics.boundaryOpenSseToSrc` 상한을 초과하면 차단합니다. 상한은 측정값 771로 초기화되었고 `direction: down`이며, `--update`는 상한을 낮추기만 합니다. PR에서는 base 기준으로 비교합니다(`--base-ref`, 아래 참조).                                                                                                                                                                                                                                               | 예(ratchet)                          |
-| `check:route-validation:t06`      | 모든 route에 Zod schema가 있는지 확인합니다(Tier 6 정책).                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | 예                                   |
-| `check:any-budget:t11`            | `@ts-expect-error // any` 개수가 예산을 초과하지 않음(Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 예                                   |
-| `check:provider-consistency`      | `providers.ts`의 모든 provider에는 `providerRegistry.ts`에 일치하는 항목이 있으며, 그 반대도 동일함(allowlist 범위 내)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | 예                                   |
-| `check:model-lifecycle`           | 수동으로 유지 관리되는 세 개의 routing table이 체크인된 lifecycle snapshot(#11503)과 일관성을 유지함: `FITNESS_TABLE`(`taskFitness.ts`)은 `REGISTRY`가 routing할 수 있는 retired id에 점수를 부여하지 않음. 모든 `BUILT_IN_ALIASES` target은 `REGISTRY`에 존재하고 retired-id snapshot에는 없음. `REGISTRY`에 여전히 존재하는 모든 retired id는 forwarding되거나 `allowedRetiredInCatalog`에 나열됨. 또한 `DEFAULT_DEGRADATION_MAP`의 source나 target은 해당 snapshot에서 retired 상태가 아님. 이는 model이 현재 실제 upstream에서 제공되고 있음을 입증하지는 않음. Offline — `config/quality/model-lifecycle.json`과 비교하며, `npm run quality:refresh-model-lifecycle`을 사용해 수동으로 갱신함(network 필요, CI에는 연결되지 않음). `allowedRetiredInCatalog`는 점진적으로 줄여 나가는 ratchet임. tracking issue가 있는 경우에만 항목을 추가할 것. | 예                                   |
-| `check:fetch-targets`             | client-side `src/`에 있는 모든 `fetch("/api/...")`가 실제 `route.ts`로 resolve됨                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 예                                   |
-| `check:deps`                      | repo 내 모든 `package.json`에서 `npm install` 가능한 모든 deps가 `dependency-allowlist.json`에 포함됨. 새로 추가된 unpinned 또는 slopsquatted package를 표시함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `audit:deps`                      | `npm audit`(root + electron) — high/critical advisory 없음(osv `check:vuln-ratchet`과 중복됨. Rationalization Backlog 참조)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 예                                   |
-| `check:lockfile`                  | `package-lock.json` 무결성 — https 레지스트리, 무결성 해시, 호스트 재정의 없음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `check:licenses`                  | 프로덕션 종속성에 대한 SPDX 라이선스 허용 목록                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `check:tracked-artifacts`         | 빌드 산출물 / 커밋된 `node_modules` 심볼릭 링크 없음(husky pre-commit에서도 실행됨; pre-push는 의도적으로 가볍게 유지 — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `check:ai-attribution`            | PR 커밋, 제목 또는 본문에 AI/봇 `Co-Authored-By` 트레일러나 AI 생성 푸터가 없어야 함 — 엄격한 규칙 #16(PR→`release/**`에 대한 `quality.yml` 빠른 게이트 루프에서 실행 — 이벤트 페이로드를 읽으며 PR이 아니면 아무 작업도 하지 않음 — 및 PR→`main`에 대한 `ci.yml` 린트의 PR 전용 단계; husky `commit-msg` 훅에서도 실행; 사람 공동 작성자는 허용됨; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `check:vitest-exclusions`         | 모든 Vitest 제외 항목은 추적 이슈를 명시하고 `config/quality/vitest-exclusions.json`에 있어야 함(#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 예                                   |
-| `check:file-size`                 | 소스 파일(`src/`, `open-sse/`, `electron/`, `bin/`의 `.ts`/`.tsx`)은 `cap` 이내로, 테스트 파일(`*.test.ts(x)`)은 `testCap` 이내로 유지해야 함; `file-size-baseline.json`에서 고정된 파일(`frozen` / `testFrozen`)은 기록된 크기를 초과해 커지면 안 됨                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 예                                   |
-| `check:error-helper`              | 실행기/핸들러의 오류 응답은 `buildErrorBody()` / `sanitizeErrorMessage()`를 사용함(필수 규칙 #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 예                                   |
-| `check:migration-numbering`       | 마이그레이션 SQL 파일은 누락되거나 중복된 번호 없이 순차적으로 번호가 매겨짐                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 예                                   |
-| `check:public-creds`              | `publicCreds.ts` 외부에 OAuth `client_id`/`client_secret` 또는 Firebase Web 키 리터럴이 없음(필수 규칙 #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 예                                   |
-| `check:db-rules`                  | `src/lib/db/` 모듈 외부에 원시 SQL이 없으며, `localDb.ts`에서 배럴 임포트를 사용하지 않음(필수 규칙 #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 예                                   |
-| `check:known-symbols`             | 디스패치 테이블에 등록된 제공자 실행기, 라우팅 전략 및 변환기가 디스크의 파일과 일치하며, 고립되거나 선언되지 않은 심볼이 없음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `check:route-guard-membership`    | 하위 프로세스를 생성하는 모든 라우트가 `isLocalOnlyPath()`에 의해 분류됨(필수 규칙 #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 예                                   |
-| `check:test-discovery`            | 저장소의 모든 `*.test.ts` / `*.spec.ts` 파일이 하나 이상의 테스트 러너에 의해 수집됨(래칫: `test-discovery-baseline.json`의 고아 목록은 줄어들기만 할 수 있음)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | 예                                   |
-| `check:agent-skills-sync`         | 생성된 에이전트 스킬 아티팩트가 소스 카탈로그와 일치함(드리프트 없음)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `check:provider-asset-provenance` | 공급자 로고/에셋에 기록된 출처 항목이 있음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `lint:json`                       | JSON 구성 파일이 정상적으로 파싱되고 저장소의 린트 규칙을 충족함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `typecheck:core`                  | 오류 없는 TypeScript 컴파일(권고 경고만 허용)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 예                                   |
-| `typecheck:noimplicit:core`       | 엄격한 `noImplicitAny` — 향후 적용을 위한 검사이며, 기존의 많은 호출 지점에는 여전히 타입 주석이 필요함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | **권고** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `src/app/(dashboard)/**`로 범위가 제한된 `tsc` 검사(#7033) — `typecheck:core`의 엄선된 27개 파일 허용 목록에는 대시보드 TSX가 하나도 포함되지 않으며, `next build` 역시 이를 타입 검사하지 않으므로(`next.config.mjs`에서 `ignoreBuildErrors: true` 설정), 해당 영역의 고아 식별자 회귀(#6625/#6909)가 CI에서 감지되지 않았음. 고정된 파일별/TS 코드별 개수 기준선(`config/quality/dashboard-typecheck-baseline.json`, `check:known-symbols`와 동일한 오래된 항목 강제 검사 패턴)과 비교함 — 기준선 개수를 초과하는 새로운 오류만 게이트를 실패시키며, 기존 오류를 수정한 경우 `--update`로 래칫을 낮춤.                                                                                                                                                                                                                                               | 예                                   |
+| 스크립트 (`npm run ...`)          | 검증 항목                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | 차단 여부                            |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------ |
+| `check:node-runtime`              | Node.js 버전이 지원 범위 내에 있는지                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 예                                   |
+| `check:test-tla-order`            | `tests/unit` 아래의 `node:test` 파일이 테스트를 등록한 후 최상위 `await`를 실행하고 다시 추가 테스트를 등록하지 않는지 검증합니다(#18045; 래칫: `test-tla-order-allowlist.json`은 축소만 가능)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 예                                   |
+| `check:cycles`                    | `src/` + `open-sse/` 전체의 순환 import(AST 기반, tsconfig `paths` 해석). 단독 실행 시 순환이 하나라도 있으면 종료 코드 1을 반환하고(#15281부터 실패 시 차단) SCC를 나열합니다. `check:cycles:ratchet`(CI에서 실행하는 항목)은 순환 수가 `quality-baseline.json`의 `metrics.cycles` 상한을 초과하면 차단합니다. 현재 값은 14이고 `direction: down`이므로 감소만 가능합니다(#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 예(래칫)                             |
+| `check:boundary`                  | `open-sse → src` 결합도: 엔진에서 앱으로의 고유한 파일 간 import 수(`scripts/quality/measure-boundary.mjs`; 엣지 목록은 v4 코어/모듈 분할 개선 백로그). 단독 실행 = 권고 보고서(`quality:boundary`와 동일). `check:boundary:ratchet`(CI에서 실행하며 `quality.yml`의 빠른 게이트 래칫 루프에도 포함)은 수치가 `quality-baseline.json`의 `metrics.boundaryOpenSseToSrc` 상한을 초과하면 차단합니다. 상한은 측정값 771로 초기 설정되었고 `direction: down`이며, `--update`는 이 값을 낮추기만 합니다. PR에서는 기준 브랜치 대비로 동작합니다(`--base-ref`, 아래 참조)                                                                                                                                                                                                                                                                           | 예(래칫)                             |
+| `check:route-validation:t06`      | 모든 라우트에 Zod 스키마가 있음(Tier 6 정책)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 예                                   |
+| `check:any-budget:t11`            | `@ts-expect-error // any` 개수가 예산을 초과하지 않음(Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 예                                   |
+| `check:provider-consistency`      | `providers.ts`의 모든 provider에 `providerRegistry.ts`의 일치하는 항목이 있으며, 그 반대도 성립함(allowlist 범위 내)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 예                                   |
+| `check:model-lifecycle`           | 수동으로 유지 관리되는 세 개의 라우팅 테이블이 체크인된 수명 주기 스냅샷(#11503)과 일관성을 유지함: `FITNESS_TABLE`(`taskFitness.ts`)은 `REGISTRY`가 라우팅할 수 있는 폐기된 id에 점수를 부여하지 않음. 모든 `BUILT_IN_ALIASES` 대상은 `REGISTRY`에 존재하고 폐기된 id 스냅샷에는 없음. `REGISTRY`에 여전히 존재하는 모든 폐기된 id는 포워딩되거나 `allowedRetiredInCatalog`에 나열됨. 또한 `DEFAULT_DEGRADATION_MAP`의 어떤 소스나 대상도 해당 스냅샷에서 폐기된 것으로 표시되지 않음. 이는 모델이 현재 실제 upstream에서 제공되고 있음을 입증하지는 않음. 오프라인 검사 — `config/quality/model-lifecycle.json`과 비교하며, `npm run quality:refresh-model-lifecycle`을 사용해 수동으로 갱신함(네트워크 필요, CI에는 연결되지 않음). `allowedRetiredInCatalog`는 점진적으로 줄여 나가는 래칫임. 추적 이슈가 있는 경우에만 항목을 추가할 것. | 예                                   |
+| `check:fetch-targets`             | 클라이언트 측 `src/`의 모든 `fetch("/api/...")`가 실제 `route.ts`로 해석됨                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 예                                   |
+| `check:deps`                      | 저장소 내 모든 `package.json`에서 `npm install`로 설치 가능한 모든 의존성이 `dependency-allowlist.json`에 포함되어 있음. 새로 추가된 버전이 고정되지 않은 패키지 또는 slopsquatting 패키지는 플래그로 표시됨                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 예                                   |
+| `audit:deps`                      | 독립된 5개 잠금 파일(루트, Electron, OpenCode 플러그인 v1/v2 및 provider) 전체에 대한 npm 감사. 심각도 Critical 권고 사항은 차단하며, 심각도 High 권고 사항은 표시되는 경고로 유지됩니다. 누락되거나 실패한 감사는 INCOMPLETE로 간주되어 차단되며, 범위별 잠금 해시와 보고서는 보존됩니다.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | 예                                   |
+| `check:lockfile`                  | `package-lock.json` 무결성 — https 레지스트리, 무결성 해시, 호스트 재정의 없음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 예                                   |
+| `check:licenses`                  | 프로덕션 종속성에 대한 SPDX 라이선스 허용 목록                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 예                                   |
+| `check:tracked-artifacts`         | 빌드 아티팩트 및 커밋된 `node_modules` 심볼릭 링크 없음(husky pre-commit에서도 실행됨. pre-push는 의도적으로 가볍게 유지 — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | 예                                   |
+| `check:ai-attribution`            | PR 커밋, 제목 또는 본문에 AI/봇 `Co-Authored-By` 트레일러나 AI 생성 푸터가 없어야 함 — 엄격한 규칙 #16(`quality.yml`의 PR→`release/**`용 빠른 게이트 루프에서 이벤트 페이로드를 읽으며 PR이 아니면 아무 작업도 하지 않음. 또한 `ci.yml` 린트의 PR→`main`용 PR 전용 단계 및 husky `commit-msg` 훅에서도 적용됨. 사람 공동 작성자는 허용됨. #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `check:vitest-exclusions`         | 모든 Vitest 제외 항목은 추적 이슈를 명시하고 `config/quality/vitest-exclusions.json`에 포함되어야 함(#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 예                                   |
+| `check:file-size`                 | 소스 파일(`src/`, `open-sse/`, `electron/`, `bin/`의 `.ts`/`.tsx`)은 `cap` 이내로, 테스트 파일(`*.test.ts(x)`)은 `testCap` 이내로 유지해야 하며, `file-size-baseline.json`에 고정된 파일(`frozen` / `testFrozen`)은 기록된 크기를 초과해서 증가해서는 안 됨                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 예                                   |
+| `check:error-helper`              | 실행기/핸들러의 오류 응답은 `buildErrorBody()` / `sanitizeErrorMessage()`를 사용해야 함(엄격한 규칙 #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 예                                   |
+| `check:migration-numbering`       | 마이그레이션 SQL 파일은 누락되거나 중복된 번호 없이 순차적으로 번호가 지정되어야 함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | 예                                   |
+| `check:public-creds`              | `publicCreds.ts` 외부에는 리터럴 OAuth `client_id`/`client_secret` 또는 Firebase Web 키가 없어야 함(엄격한 규칙 #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | 예                                   |
+| `check:db-rules`                  | `src/lib/db/` 모듈 외부에는 원시 SQL이 없어야 하며, `localDb.ts`에서 배럴 임포트를 사용해서는 안 됨(엄격한 규칙 #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 예                                   |
+| `check:known-symbols`             | 디스패치 테이블에 등록된 공급자 실행기, 라우팅 전략 및 변환기는 디스크의 파일과 일치해야 하며, 고립되거나 선언되지 않은 심벌이 없어야 함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 예                                   |
+| `check:route-guard-membership`    | 자식 프로세스를 생성하는 모든 라우트가 `isLocalOnlyPath()`로 분류됨(Hard Rules #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | 예                                   |
+| `check:test-discovery`            | 저장소의 모든 `*.test.ts` / `*.spec.ts` 파일이 하나 이상의 테스트 러너에 의해 수집됨(래칫: `test-discovery-baseline.json`의 고아 목록은 줄어들기만 할 수 있음)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 예                                   |
+| `check:agent-skills-sync`         | 생성된 에이전트 스킬 아티팩트가 원본 카탈로그와 일치함(드리프트 없음)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `check:provider-asset-provenance` | 제공자 로고/에셋에 기록된 출처 항목이 있음                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `lint:json`                       | JSON 구성 파일이 정상적으로 파싱되고 저장소 린트 규칙을 충족함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `typecheck:core`                  | 오류 없이 TypeScript 컴파일됨(권고 경고만 있음)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 예                                   |
+| `typecheck:noimplicit:core`       | 엄격한 `noImplicitAny` — 향후 적용 예정이며, 기존의 많은 호출 지점에 여전히 타입 주석이 필요함                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | **권고** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `src/app/(dashboard)/**`로 범위가 지정된 `tsc` (#7033) — `typecheck:core`의 선별된 27개 파일 허용 목록에는 대시보드 TSX가 전혀 포함되지 않으며, `next build` 역시 이를 타입 검사하지 않으므로(`next.config.mjs`에서 `ignoreBuildErrors: true` 설정), 해당 위치에서 발생한 고립된 식별자 회귀(#6625/#6909)가 CI에 감지되지 않았습니다. 고정된 파일별/TS 코드별 개수 기준선(`config/quality/dashboard-typecheck-baseline.json`, `check:known-symbols`와 동일한 오래된 항목 강제 적용 패턴)과 비교합니다. 기준선의 개수를 초과하는 새로운 오류만 게이트를 실패시키며, 기존 오류가 수정되면 `--update`를 사용하여 기준값을 낮춥니다.                                                                                                                                                                                                              | 예                                   |
 
 ### 작업: `quality-gate`
 
 `test-coverage` 이후에 실행됩니다. 실패 시 병합을 차단합니다.
 
-| 스크립트                     | 검증 항목                                                                                                                                                      | 차단 여부            |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `quality:collect`            | `quality-metrics.json` 생성(ESLint 경고 수, 병합된 샤드 보고서의 커버리지)                                                                                     | 예(래칫의 선행 단계) |
-| `quality:ratchet`            | `quality-baseline.json`의 각 메트릭이 저하되지 않았는지 확인(ESLint 경고 ≤ 기준선, 커버리지 ≥ 기준선)                                                          | 예                   |
-| `check:duplication`          | 코드 중복(jscpd@4)이 `quality-baseline.json`의 기준선을 초과하지 않는지 확인                                                                                   | 예                   |
-| `check:complexity`           | 파일 수준 순환 복잡도가 상한을 초과하지 않는지 확인(핵심 ESLint `complexity` + `max-lines-per-function`)                                                       | 예                   |
-| `check:cognitive-complexity` | 인지 복잡도 래칫(`eslint-plugin-sonarjs`) — 별도의 ESLint 패스이며, CI에서는 두 검사를 단일 `check:complexity-ratchets` 단계로 병합하여 실행                   | 예                   |
-| `check:dead-code`            | 사용되지 않는 내보내기/파일 래칫(knip)이 기준선 대비 저하되지 않는지 확인                                                                                      | 예                   |
-| `check:compression-budget`   | 압축 벤치마크 예산 — 엔진별 토큰 절감률 하한이 저하되지 않아야 함                                                                                              | 예                   |
-| `check:type-coverage`        | 타입 지정 비율 래칫(`type-coverage`)이 저하되지 않는지 확인하며, 대부분 `typecheck:noimplicit:core`를 포괄함                                                   | 예                   |
-| `check:codeql-ratchet`       | 미해결 CodeQL 경고 수가 증가하지 않는지 확인(`gh api`를 통해 조회하며, 토큰이 없으면 정상적으로 건너뜀) — 갱신 주기 및 수동 트리거는 아래의 "CodeQL 래칫" 참조 | 예                   |
+| 스크립트                     | 검증 항목                                                                                                                                                                        | 차단 여부           |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `quality:collect`            | `quality-metrics.json`을 생성합니다(ESLint 경고 수, 병합된 샤드 보고서의 커버리지).                                                                                              | 예(래칫의 업스트림) |
+| `quality:ratchet`            | `quality-baseline.json`의 각 메트릭이 회귀하지 않았는지 확인합니다(ESLint 경고 ≤ 기준선, 커버리지 ≥ 기준선).                                                                     | 예                  |
+| `check:duplication`          | 코드 중복(jscpd@4)이 `quality-baseline.json`의 기준선을 초과하지 않는지 확인합니다.                                                                                              | 예                  |
+| `check:complexity`           | 파일 수준 순환 복잡도가 상한을 초과하지 않는지 확인합니다(핵심 ESLint `complexity` + `max-lines-per-function`).                                                                  | 예                  |
+| `check:cognitive-complexity` | 인지 복잡도 래칫(`eslint-plugin-sonarjs`) — 별도의 ESLint 패스이며, CI에서는 두 검사를 하나의 `check:complexity-ratchets` 단계로 병합하여 실행합니다.                            | 예                  |
+| `check:dead-code`            | 사용되지 않는 내보내기/파일 래칫(knip)이 기준선 대비 회귀하지 않는지 확인합니다.                                                                                                 | 예                  |
+| `check:compression-budget`   | 압축 벤치마크 예산 — 엔진별 토큰 절감 하한이 회귀하지 않아야 합니다.                                                                                                             | 예                  |
+| `check:type-coverage`        | 타입 적용 비율 래칫(`type-coverage`)이 회귀하지 않는지 확인합니다. 대체로 `typecheck:noimplicit:core`를 포괄합니다.                                                              | 예                  |
+| `check:codeql-ratchet`       | 열린 CodeQL 경고 수가 회귀하지 않는지 확인합니다(`gh api`를 통해 읽으며, 토큰이 없으면 정상적으로 건너뜁니다). 새로 고침 주기와 수동 트리거는 아래의 "CodeQL 래칫"을 참조하세요. | 예                  |
 
 ### 작업: `quality-extended`
 
-전체 작업은 권고 사항입니다(`continue-on-error: true`). npm 기반 래칫은 실제로
-실행되며, 외부 스캐너는 `gh release download`를 통해 설치되고 바이너리가 여전히
-없으면 자체적으로 건너뜁니다(exit 0).
+이 작업은 해당되는 후보를 차단합니다. 번들 크기, 비밀 정보 탐지 결과, 취약점
+탐지 결과, 워크플로 탐지 결과 및 OpenAPI 변경 사항은 필수 래칫으로 검사됩니다.
+순환 종속성 진단은 계속 권고 사항으로 유지됩니다. 스캐너 설치는 필수입니다.
+`scripts/ci/install-quality-scanners.sh`는 고정된 버전을 프로비저닝하고 설치
+실패를 전파합니다. 도구 누락, 유효하지 않은 보고서 또는 기준선 누락이 있으면
+필수 스캐너 게이트는 INCOMPLETE 상태로 남습니다.
 
-| 스크립트                 | 검증 항목                                                                                                                                                                   | 차단 여부                                 |
-| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `check:circular-deps`    | 순환 종속성이 없는지 확인(dpdm)                                                                                                                                             | **권고 사항**                             |
-| `check:bundle-size`      | 번들 크기가 상한을 초과하지 않는지 확인                                                                                                                                     | **권고 사항**                             |
-| `check:secrets`          | 비밀 정보 스캔(gitleaks) — 바이너리가 없으면 건너뜀                                                                                                                         | **권고 사항**                             |
-| `check:vuln-ratchet`     | 종속성 취약점(osv-scanner)이 증가하지 않는지 확인 — 바이너리가 없으면 건너뜀                                                                                                | **권고 사항**                             |
-| `check:workflows`        | 워크플로 린트(actionlint + zizmor); 스캐너 누락/고장, 유효하지 않은 보고서 또는 래칫 기준선 누락 시 INCOMPLETE로 실패. 유효한 탐지 결과에는 선택된 엄격/권고/래칫 정책 적용 | 실행 필수, CI에서 zizmor 래칫은 차단 항목 |
-| `check:openapi-breaking` | 기본 브랜치 대비 공개 API 계약(`openapi.yaml`)의 호환성을 깨는 변경(oasdiff) — `openapiBreaking=N` 생성; oasdiff가 없거나 기본 사양을 확인할 수 없으면 건너뜀               | **권고 사항**                             |
+| 스크립트                 | 검증 항목                                                                                                                                                                          | 차단 여부                             |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `check:circular-deps`    | 순환 종속성이 없음(dpdm)                                                                                                                                                           | **권고**                              |
+| `check:bundle-size`      | 번들 크기가 상한을 초과하지 않으며, 측정할 수 없는 경우 실패                                                                                                                       | **--ratchet 사용 시 차단**            |
+| `check:secrets`          | Gitleaks 탐지 결과가 악화되지 않으며, 필수 스캔에서는 도구/소스/기준선 누락, 스캔 실패 및 유효하지 않은 보고서를 거부                                                              | **--ratchet 사용 시 차단**            |
+| `check:vuln-ratchet`     | 종속성 취약점이 악화되지 않으며, 필수 스캔에서는 도구 누락, 유효하지 않은 보고서 또는 기준선 누락을 거부                                                                           | **--ratchet 사용 시 차단**            |
+| `check:workflows`        | 워크플로 린트(actionlint + zizmor); 스캐너 누락/고장, 유효하지 않은 보고서 또는 ratchet 기준선 누락은 INCOMPLETE로 실패. 유효한 탐지 결과에는 선택한 엄격/권고/ratchet 정책을 적용 | 실행 필수; CI에서 zizmor ratchet 차단 |
+| `check:openapi-breaking` | 고정된 이벤트 커밋(PR merge-base, push before, merge-group base; 예약/수동 실행은 체크아웃한 첫 번째 부모)을 기준으로 공개 API 계약을 검사하며, 필수 측정 실패 시 차단             | **--ratchet 사용 시 차단**            |
 
 ### 작업: `docs-sync-strict`
 
-`main`을 대상으로 하는 모든 PR에서 실행됩니다. 실패 시 병합을 차단합니다.
+`main` 또는 `release/**`를 대상으로 하는 풀 리퀘스트에서는 초안이 아닌 후보(또는 신뢰할 수 있는 큐의 후보) 중 문서 또는 코드 변경으로 분류된 경우에만 이 작업이 실행됩니다. PR이 아닌 CI 이벤트에서도 실행되며, 이 워크플로의 push 트리거는 `main`만 포함하고 `release/**`는 포함하지 않습니다. 종료 코드가 0이 아닌 단계는 작업을 차단하지만, 보고만 하는 발견 사항과 아래에 문서화된 예외는 차단하지 않습니다.
 
-| 스크립트                       | 검증 내용                                                                                                                                                        | 차단 여부                  |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `check:docs-all`               | 아래의 6개 하위 게이트를 순차적으로 실행하는 메타 게이트                                                                                                         | 예                         |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt 버전 일관성                                                                                                                        | 예                         |
-| ↳ `check:docs-counts`          | 본문에 명시된 수치(제공자 수, 마이그레이션 수 등)가 실제 수치의 래칫 허용 범위 내에 있는지 검증                                                                  | 예                         |
-| ↳ `check:env-doc-sync`         | `.env.example`의 모든 환경 변수가 문서 표에 기록되어 있고, 그 반대도 성립하는지 검증                                                                             | 예                         |
-| ↳ `check:deprecated-versions`  | 문서에 지원 중단된 버전 문자열이 없는지 검증                                                                                                                     | 예                         |
-| ↳ `check:doc-links`            | 문서의 내부 마크다운 링크가 실제 파일로 연결되는지 검증(`[text]`/`(path)` 형식)                                                                                  | 예                         |
-| ↳ `check:fabricated-docs`      | 문서에 언급된 라우트, 환경 변수, CLI 명령, 훅 이름 및 파일 경로가 코드베이스에 존재하는지 검증. `--strict` 사용 시 하드 게이트이며, 플래그가 없으면 소프트 실패. | 예(CI에서 `--strict` 사용) |
-| `check:cli-i18n`               | CLI 명령 문자열이 모든 i18n 로케일 파일에 존재하는지 검증                                                                                                        | 예                         |
-| `check:openapi-coverage`       | OpenAPI 명세가 실제 라우트에 대해 래칫 방식으로 설정된 최소 기준 이상을 포괄하는지 검증                                                                          | 예                         |
-| `check:openapi-security-tiers` | `openapi.yaml`의 보안 계층 주석이 `routeGuard.ts` 분류와 일치하는지 검증                                                                                         | **권고**                   |
-| `check:openapi-routes`         | `openapi.yaml`의 모든 경로가 실제 `route.ts`로 연결되는지 검증(허위 생성 방지)                                                                                   | 예                         |
-| `check:docs-symbols`           | `docs/**/*.md`의 모든 `/api/...` 참조가 실제 `route.ts`로 연결되는지 검증(허위 생성 방지)                                                                        | 예                         |
-| `i18n translation drift`       | i18n 로케일 파일에서 번역되지 않은 키 — 경고만 표시                                                                                                              | **권고**                   |
+| 스크립트                       | 검증 항목                                                                                                                                                                                                                                                                                                                                                                                     | 차단 여부                                                                                                              |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `check:docs-all`               | 아래 7개 하위 게이트를 순차적으로 실행하는 메타 게이트                                                                                                                                                                                                                                                                                                                                        | 예                                                                                                                     |
+| ↳ `check:docs-sync`            | 패키지/OpenAPI/CHANGELOG의 버전 일관성, `llm.txt` 미러의 정확한 일치, 번역된 CHANGELOG의 섹션 및 크기 불변 조건, 대체되어 더 이상 유효하지 않은 중복 문서의 부재                                                                                                                                                                                                                              | 예                                                                                                                     |
+| ↳ `check:docs-frontmatter`     | 컴파일된 문서 페이지에 유효한 frontmatter 제목이 포함되어 있는지 확인                                                                                                                                                                                                                                                                                                                         | 예                                                                                                                     |
+| ↳ `check:docs-counts`          | 신뢰도가 높은 개수 불변 조건은 엄격하게 적용되며, 휴리스틱 파일 수 검사는 스크립트에 `--strict`가 전달되지 않으면 경고만 표시함(CI 메타 게이트는 이 플래그를 전달하지 않음)                                                                                                                                                                                                                   | 엄격한 계층은 차단; 완화된 계층은 권고                                                                                 |
+| ↳ `check:env-doc-sync`         | 무시 대상, 문서에만 있는 항목, 환경에만 있는 항목에 대한 명시적 허용 목록을 적용한 뒤, 소스 코드의 환경 변수 읽기와 `.env.example`, `docs/reference/ENVIRONMENT.md`가 일치함                                                                                                                                                                                                                  | 예, 문서화된 허용 목록에 해당하지 않는 경우                                                                            |
+| ↳ `check:deprecated-versions`  | 안전한 과거 기록 문맥 밖의 오래되었을 가능성이 있는 버전과 오래된 업데이트 날짜를 보고하며, 무시 대상으로 지정된 문서는 제외함                                                                                                                                                                                                                                                                | 현재 CI 구성에서는 권고(`--strict`가 전달되지 않음)                                                                    |
+| ↳ `check:doc-links`            | 문서의 내부 markdown 링크가 실제 파일로 해석되는지 확인(`[text]`/`(path)` 형식)                                                                                                                                                                                                                                                                                                               | 예                                                                                                                     |
+| ↳ `check:fabricated-docs`      | 문서에 언급된 라우트, 환경 변수, CLI 명령어, 훅 이름 및 파일 경로가 코드베이스에 존재하는지 확인. `--strict` 사용 시 하드 게이트이며, 플래그가 없으면 소프트 실패.                                                                                                                                                                                                                            | 예(CI에서 `--strict` 사용)                                                                                             |
+| `check:cli-i18n`               | CLI에서 사용하는 `t()` 키가 `en`에 존재함; `pt-BR`은 모든 최상위 섹션을 유지함; `zh-CN`과 `zh-TW`는 `en`의 모든 키를 포함함                                                                                                                                                                                                                                                                   | 예                                                                                                                     |
+| `check:openapi-coverage`       | OpenAPI 명세가 실제 라우트 중 ratchet으로 설정된 최소 기준 이상을 포함하는지 확인                                                                                                                                                                                                                                                                                                             | 예                                                                                                                     |
+| `check:openapi-security-tiers` | 선언된 `x-loopback-only`/`x-always-protected` 주석은 `routeGuard.ts`의 규칙으로 뒷받침되어야 하며, 파서 오류와 정방향 불일치는 차단함. 로컬 전용 접두사 아래에서 누락된 `x-loopback-only`를 찾는 역방향 검사는 경고하며, 패턴으로만 정의된 라우트는 이 역방향 검사에서 제외됨.                                                                                                                | 파서/정방향 검사는 차단; 역방향 검사는 권고                                                                            |
+| `check:openapi-routes`         | 근거가 명시된 `KNOWN_STALE_SPEC` 허용 목록을 적용한 뒤, `openapi.yaml`의 각 `/api...` 경로가 매개변수 차이와 무관하게 실제 라우트와 일치함; 오래되어 더 이상 유효하지 않은 허용 목록 항목도 실패를 유발함                                                                                                                                                                                     | 예                                                                                                                     |
+| `check:docs-symbols`           | 미러가 아닌 정본 문서의 내부 `/api/...` URL 참조가 실제 라우트 또는 라우트 계열과 일치함; 프록시/업스트림/자리표시자/파일 참조와 근거가 명시된 `KNOWN_STALE_DOC_REFS` 항목은 제외하며, 오래되어 더 이상 유효하지 않은 허용 목록 항목은 실패를 유발함                                                                                                                                          | 예                                                                                                                     |
+| `i18n translation drift`       | 핵심 문서의 소스/대상 해시와 번역의 출처를 확인합니다. PR 비교에서는 완전히 동일한 상속된 실패만 허용하며, 소스, 대상 누락, 대상 해시, 오래된 번역 또는 섹션 캐시의 새롭거나 검증되지 않은 불일치는 차단합니다. PR 비교 밖에서는 소스/대상 누락/대상 해시 실패가 차단하고, 오래된 번역과 일관되지 않은 섹션 캐시는 계속 경고만 제공합니다. 이전 형식의 섹션 캐시가 없는 것은 실패가 아닙니다. | 새롭거나 검증되지 않은 PR 편차는 차단; 완전히 동일한 상속된 편차는 경고만 제공; PR 외부 규칙은 실패 유형에 따라 달라짐 |
 
 ### 작업: `i18n-ui-coverage`
 
-| 스크립트                          | 검증 내용                                                                                                                                                                     | 차단 여부 |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `check-ui-keys-coverage` (인라인) | UI i18n 키 커버리지가 65% 이상인지 검증                                                                                                                                       | 예        |
-| `check-ui-value-drift` (인라인)   | 다시 작성된 영어 **값**으로 인해 오래된 번역이 남지 않는지 검증                                                                                                               | 예        |
-| `check-new-key-coverage` (인라인) | **새로운** 영어 키가 모든 로케일에서 번역되었는지 검증 — `__MISSING__:` 마커는 거부됨                                                                                         | 예        |
-| `check-translation-ratio`         | 로케일별 실제 번역 비율(허용 목록 외부에서 영어와 동일하거나, 자리 표시자이거나, 누락된 리프)이 `config/quality/i18n-translation-baseline.json` + 여유분을 초과하지 않아야 함 | **권고**  |
+| 스크립트                          | 검증 항목                                                                                                                                                             | 차단 여부 |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check-ui-keys-coverage` (인라인) | UI i18n 키 커버리지가 ≥ 65%인지                                                                                                                                       | 예        |
+| `check-ui-value-drift` (인라인)   | 재작성된 영어 **값**으로 인해 오래된 번역이 남지 않는지                                                                                                               | 예        |
+| `check-new-key-coverage` (인라인) | **새로운** 영어 키가 모든 로케일에서 번역되었는지 — `__MISSING__:` 마커는 거부됨                                                                                      | 예        |
+| `check-translation-ratio`         | 로케일별 실제 번역 비율(허용 목록 외의 영어와 동일한 값 / 플레이스홀더 / 누락된 리프)이 `config/quality/i18n-translation-baseline.json` + 여유분을 초과하지 않아야 함 | **차단**  |
 
-`fetch-depth: 0`이 필요합니다 — 값 드리프트 게이트는 병합 기준점을 기준으로 `en.json`의 차이를 비교합니다.
+`fetch-depth: 0`이 필요합니다 — 값 드리프트 게이트는 병합 베이스를 기준으로 `en.json`의 차이를 비교합니다.
 
 #### `check-ui-value-drift` — 오래된 번역 게이트
 
 다른 게이트가 구조적으로 감지할 수 없는 한 가지 i18n 회귀를 포착합니다. 영어 값이
-다시 작성되었지만 _이전_ 영어에서 파생된 번역은 그대로 남아 있어,
-비영어권 사용자가 확신에 찬 어조의 잘못된 문구를 계속 읽게 되는 문제입니다.
+재작성되었지만 _이전_ 영어에서 파생된 번역이 그대로 남아, 비영어권 사용자가
+확신에 찬 어조로 작성된, 이제는 잘못된 문구를 계속 읽게 되는 문제입니다.
 
-이 문제는 실제로 배포되었습니다. Antigravity 로그인 도우미가 추가되었을 때(#5203)
-`oauthModal.googleOAuthWarning`이 다시 작성되었지만, **43개 로케일 중 39개**에는 운영자에게
-"전체 URL을 복사하여 아래에 붙여 넣으라"고 안내하는 문구가 그대로 남았습니다 — 해당 제공자에서는
-완료할 수 없는 흐름입니다. 이 문제는 다음 이유로 #8463까지 발견되지 않았습니다.
+이 문제는 실제로 릴리스되었습니다. Antigravity 로그인 도우미가 도입되었을 때(#5203)
+`oauthModal.googleOAuthWarning`이 재작성되었지만, **43개 로케일 중 39개**에는 운영자에게
+"전체 URL을 복사해 아래에 붙여넣으라"고 안내하는 텍스트가 그대로 남았습니다. 해당
+제공자에서는 완료할 수 없는 흐름입니다. 다음 이유로 #8463까지 발견되지 않았습니다.
 
 - `sync-ui-keys`는 **없는** 키만 채우며, **오래된** 키는 절대 갱신하지 않습니다.
-- `check-ui-keys-coverage`는 키의 _존재 여부_를 집계하므로 오래된 번역도 커버된 것으로 간주합니다.
-- `check-translation-drift`는 `docs/i18n/<locale>/**.md` 문서 미러를 추적하며 —
-  `src/i18n/messages/*.json`은 전혀 읽지 않습니다. 2026-09 재동기화 이후 작업 `docs-sync-strict`에서 차단됩니다.
-  핵심 문서를 수정하면 → `npm run i18n:run -- --files=<doc>`을 실행하세요(섹션 단위이며 비용이 적음).
+- `check-ui-keys-coverage`는 키의 _존재 여부_를 계산하므로, 오래된 번역도 적용된 것으로 집계됩니다.
+- `check-translation-drift`는 `docs/i18n/<locale>/**.md` 문서 미러를 추적하며,
+  `src/i18n/messages/*.json`은 전혀 읽지 않습니다. 2026-09 재동기화 이후
+  `docs-sync-strict` 작업에서 차단됩니다. 핵심 문서 편집 → `npm run i18n:run -- --files=<doc>`
+  (섹션 수준이며 비용이 적음).
 
-**차이 인식 방식이며, 기준선에 의존하지 않습니다.** 병합 기준점의 `en.json`과
-작업 트리를 비교합니다. 영어 값이 변경된 각 키에 대해, 여전히 수정되지 않은
-번역을 보유한 로케일은 오래된 것으로 간주됩니다. 이는 의도적으로 **기존 부채를 동결**합니다. 차이만으로는
-오래된 번역이 어떤 이전 영어 문구에서 비롯되었는지 알 수 없으므로, 이 게이트는
-현재 변경 사항이 건드린 항목만 판정합니다. 대안인 키별 해시 기준선은
-약 600 KB의 생성 파일이 필요하며, 이는 현재 가장 큰 기준선의 3배이고 모든 i18n PR마다 변경됩니다.
+**차이 인식 방식이며 기준선 기반이 아닙니다.** 병합 베이스의 `en.json`과 작업 트리를
+비교합니다. 영어 값이 변경된 모든 키에 대해, 어떤 로케일이 수정되지 않은 번역을
+그대로 보유하고 있다면 오래된 것으로 간주합니다. 이는 의도적으로 **기존 부채를
+동결**합니다. 차이만으로는 오래된 번역이 과거의 어떤 영어에서 유래했는지 알 수
+없으므로, 게이트는 현재 변경 사항이 건드린 항목만 판단합니다. 대안인 키별 해시
+기준선은 약 600 KB의 생성 파일이 필요하며, 이는 기존 최대 기준선의 3배 크기이고
+모든 i18n PR에서 변경됩니다.
 
 이를 충족하는 방법은 두 가지입니다.
 
 1. 영향을 받는 번역을 업데이트하거나
-2. 해당 값을 `__MISSING__:<new english>`로 설정합니다. 그러면 런타임은 수정된 영어를 제공하고
-   (`src/i18n/request.ts::deepMergeFallback`, #7258), 해당 키는 번역 대기열에 추가됩니다.
+2. 해당 값을 `__MISSING__:<new english>`로 설정합니다. 그러면 런타임이 수정된 영어를
+   제공합니다(`src/i18n/request.ts::deepMergeFallback`, #7258). 또한 해당 키는 번역 대기열에 추가됩니다.
 
-문자열의 **의미**가 변경되었다면 **키 이름을 변경**하는 편이 좋습니다. 새 키는
-오래된 번역을 상속할 수 없습니다. #8463에서 사용한 패턴이 바로 이것입니다.
+문자열의 **의미**가 변경되었다면 **키 이름 변경**을 권장합니다. 새 키는 오래된
+번역을 상속할 수 없습니다. #8463에서 사용한 패턴이 바로 이것입니다.
 
 ```bash
-npm run i18n:check-value-drift          # 엄격 모드(CI에서 실행하는 방식)
+npm run i18n:check-value-drift          # 엄격 모드(CI에서 실행되는 방식)
 npm run i18n:check-value-drift:warn     # 보고만 수행
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-기준 카탈로그를 읽을 수 없는 경우(기준 ref가 없는 얕은
-클론) `SKIP reason=base-unresolved`와 함께 종료 코드 0으로 종료하며, 이는 `check-openapi-breaking`의 동작과 동일합니다.
+값 드리프트 게이트와 새 키 게이트는 `scripts/i18n/resolve-ui-diff-base.mjs`에서 확인되는 하나의 불변 비교 기준을 공유합니다. 워크플로는 두 검사 모두에 동일한 기준, 기준 팁 및 후보 SHA를 전달합니다. PR/기준 리타기팅, 푸시 및 병합 그룹 실행은 해당 이벤트 컨텍스트를 사용합니다. 후보 브랜치를 디스패치하려면 정확히 일치하는 열린 PR 또는 명시적인 `i18n_base_sha` 입력이 필요합니다. 해당 입력 없이 `main` 또는 `release/vX.Y.Z`를 디스패치하거나 예약 관찰하는 경우 마지막 커밋을 첫 번째 부모와 비교하며, 이는 상속된 모든 번역 부채에 대한 감사가 아닙니다. 로컬 호출에는 명시적인 비교 기준이 필요합니다. 예를 들면 위의 `BASE_REF` 명령을 사용할 수 있습니다.
+
+비교 컨텍스트가 없거나 모호한 경우, 필수 카탈로그를 읽을 수 없거나 유효하지 않은 경우, 또는 후보가 변경된 경우에는 경고 모드에서도 종료 코드 **2**와 함께 `INCOMPLETE`가 생성됩니다. 카탈로그 읽기에는 `scripts/i18n/read-ui-catalog.mjs`를 사용하며, 읽기 실패를 빈 객체로 대체하지 않습니다. 기준을 사용할 수 없거나 입력이 불완전한 경우에는 PASS로 판정되지 않습니다.
 
 ### 작업: `i18n`
 
 전체 i18n 검증 매트릭스입니다(로케일당 하나의 작업). 전체 작업은 권고 사항입니다.
 
-| 스크립트                        | 검증 항목            | 차단 여부                                                 |
-| ------------------------------- | -------------------- | --------------------------------------------------------- |
-| `validate_translation.py quick` | 로케일별 번역 완성도 | **권고 사항**(전체 작업에 `continue-on-error: true` 적용) |
+| 스크립트                        | 검증 항목            | 차단 여부                                            |
+| ------------------------------- | -------------------- | ---------------------------------------------------- |
+| `validate_translation.py quick` | 로케일별 번역 완성도 | **권고 사항**(전체 작업에 `continue-on-error: true`) |
 
 ### 작업: `pr-test-policy`
 
 풀 리퀘스트에서만 실행됩니다.
 
-| 스크립트               | 검증 항목                                                                                                                         | 차단 여부 |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 PR에는 테스트 추가 또는 업데이트가 필요함(강행 규칙 #8)   | 예        |
-| `check:test-masking`   | 변경된 테스트 파일이 순 어설션 수를 줄이거나 `assert.ok(true)`와 같은 항진식을 추가하지 않음                                      | 예        |
-| `check:pr-evidence`    | PR 본문에 변경 사항에 대한 테스트/VPS 증거가 기재되어 있음(PR 설명을 grep하여 강행 규칙 #18을 자동화함 — 취약하므로 Backlog 참조) | 예        |
+| 스크립트               | 검증 항목                                                                                                                          | 차단 여부 |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| `check:pr-test-policy` | `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 PR에는 테스트가 포함되거나 업데이트되어야 함(엄격 규칙 #8) | 예        |
+| `check:test-masking`   | 변경된 테스트 파일이 순 어설션 수를 줄이거나 `assert.ok(true)` 동어반복을 추가하지 않는지                                          | 예        |
+| `check:pr-evidence`    | PR 본문이 변경 사항에 대한 테스트/VPS 근거를 명시하는지(PR 문구를 grep하여 엄격 규칙 #18을 자동화 — 취약함, 백로그 참조)           | 예        |
 
 ### 작업: `test-vitest`
 
-`build` 이후에 실행됩니다. 실패하면 병합을 차단합니다.
+`changes` 분류 작업이 필요합니다. 해당하는 매트릭스 샤드는 실패 시 병합을 차단합니다.
 
-| 제품군           | 검증 항목                                           | 차단 여부                                                                                                 |
-| ---------------- | --------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP 서버(도구 110개), autoCombo, 캐시 — vitest 러너 | 예                                                                                                        |
-| `test:vitest:ui` | UI 컴포넌트 테스트 — vitest 러너                    | **차단함** — 기존 실패는 `vitest.config.ts`에서 명시적으로 제외되며, 새로운 실패가 발생하면 작업이 실패함 |
+| 스위트           | 검증 대상                                           | 차단 여부                                                                                               |
+| ---------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP 서버(도구 110개), autoCombo, 캐시 — vitest 러너 | 예                                                                                                      |
+| `test:vitest:ui` | UI 컴포넌트 테스트 — vitest 러너                    | **차단** — 기존 실패는 `vitest.config.ts`에서 명시적으로 제외되며, 새로운 실패가 발생하면 작업이 실패함 |
 
-### 야간 워크플로(예약 실행, 권고 사항)
+### 야간 워크플로(예약 실행, 권고용)
 
-이 워크플로는 cron 일정에 따라 실행되며(`workflow_dispatch`로도 실행 가능), PR에서는 실행되지 않습니다. 모두 권고 사항입니다.
+이 워크플로는 cron 일정에 따라(그리고 `workflow_dispatch`를 통해) 실행되며, PR에서는 절대 실행되지 않습니다. 모두 권고용입니다.
 
-| 워크플로               | 검증 항목                                                                                                                                                     | 차단 여부     |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| `nightly-property`     | 무작위 시드와 높은 실행 횟수를 사용하는 fast-check 속성 테스트                                                                                                | **권고 사항** |
-| `nightly-resilience`   | 힙 증가 게이트, 카오스 장애 주입, k6 부하/지속 테스트                                                                                                         | **권고 사항** |
-| `nightly-llm-security` | promptfoo 인젝션 방어(차단 모드) + garak 프로브(프로바이더 시크릿이 없으면 건너뜀)                                                                            | **권고 사항** |
-| `nightly-schemathesis` | `docs/openapi.yaml`을 사용하여 실행 중인 OmniRoute를 대상으로 수행하는 OpenAPI 계약 퍼징(schemathesis) — 사양 위반/처리되지 않은 500 오류를 드러냄(8단계 B.4) | **권고 사항** |
-| `nightly-mutation`     | 빠른 유닛 테스트 레인에 대한 Stryker 변이 테스트 점수 — 살아남은 변이는 취약한 어설션을 드러냄                                                                | **권고 사항** |
-| `nightly-compat`       | 지원되는 `engines.node` 범위 전반의 Node 엔진 호환성 매트릭스                                                                                                 | **권고 사항** |
+| 워크플로               | 검증 대상                                                                                                                                                  | 차단 여부  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `nightly-property`     | 무작위 시드와 높은 실행 횟수를 사용하는 fast-check 속성 테스트                                                                                             | **권고용** |
+| `nightly-resilience`   | 힙 증가 게이트, 카오스 장애 주입, k6 부하/소크 테스트                                                                                                      | **권고용** |
+| `nightly-llm-security` | promptfoo 인젝션 가드(차단 모드) + garak 프로브(프로바이더 시크릿이 없으면 건너뜀)                                                                         | **권고용** |
+| `nightly-schemathesis` | `docs/openapi.yaml`을 사용하여 실행 중인 OmniRoute를 대상으로 하는 OpenAPI 계약 퍼징(schemathesis) — 명세 위반/처리되지 않은 500 오류를 드러냄(Fase 8 B.4) | **권고용** |
+| `nightly-mutation`     | 빠른 단위 테스트 레인에 대한 Stryker 변이 테스트 점수 — 살아남은 변이는 취약한 어설션을 드러냄                                                             | **권고용** |
+| `nightly-compat`       | 지원되는 `engines.node` 범위 전반의 Node 엔진 호환성 매트릭스                                                                                              | **권고용** |
 
-성능 기준선(힙, TTFB, 빌드 시간)은 기록만 하며 게이트로 사용하지 않습니다. [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`)를 참조하세요.
+성능 기준선(힙, TTFB, 빌드 시간)은 기록만 하고 게이트로 사용하지 않습니다. [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md)(`npm run perf:lts-baseline`)를 참조하세요.
 
 ---
 
@@ -326,8 +416,9 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 - **차단** — PR이 변경한 파일에 순환/인지 복잡도 위반 또는 데드 익스포트를 추가한 경우
   (로그의 `complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=`);
-- **권고** — 고정된 기준선과 비교한 전역 총계. 상속된 드리프트 때문에 무관한 PR이
-  실패 처리되는 일은 없습니다. 해당 드리프트는 릴리스 조정 시 다시 고정되며 여유분 작업에서 감시합니다.
+- **권고** — 전역 합계와 고정된 기준선의 비교입니다. 상속된 드리프트로 인해 무관한 PR이
+  실패 처리되는 일은 없습니다. 드리프트는 릴리스 조정 시 수정할 수 있도록 추적되며
+  헤드룸 작업에서 모니터링됩니다.
 
 `check:file-size`는 자체 규칙에 따라 기준 참조를 사용합니다(`scripts/check/check-file-size.mjs`, #8522).
 트리의 모든 소스 및 테스트 파일을 검사하고 `git show`를 사용하여 PR 기준점에서 각 파일의 줄 수를
@@ -499,25 +590,35 @@ PR도 열지 않습니다.
 기존 위반으로 인해 실패할 수 없는 모든 게이트는 고정된 허용 목록
 (예: `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`)을 사용합니다. 정책은 다음과 같습니다.
 
-**근본 원인을 수정하세요. 위반이 기존에 존재했고 동일한 PR에서 수정할 수 없는 경우에만 허용 목록을 사용하세요.**
+**근본 원인을 해결하세요. 위반이 기존부터 존재하고 동일한 PR에서 수정할 수 없는 경우에만 허용 목록을 사용하세요.**
 
-허용 목록에 항목을 추가할 때는 다음을 준수하세요.
+허용 목록에 항목을 추가할 때:
 
-1. 근거를 설명하는 주석을 포함합니다.
-2. 추적 이슈를 참조합니다(예: `// #3498 — 2단계 기능으로, 아직 구현되지 않음`).
-3. 위반을 수정하는 동일한 PR에서 해당 항목을 제거합니다. 더 이상 활성 위반을 억제하지 않는 오래된 항목은 그 자체로 결함입니다(6A.3 오래된 적용 검사가 구현되면 고립된 허용 목록 항목으로 인해 게이트가 실패합니다).
+1. 근거를 설명하는 주석을 포함하세요.
+2. 추적 이슈를 참조하세요(예: `// #3498 — Phase 2 feature, not yet implemented`).
+3. 위반을 수정하는 동일한 PR에서 해당 항목을 제거하세요. 더 이상 활성 위반을
+   억제하지 않는 오래된 항목은 그 자체로 결함입니다(6A.3 오래된 적용 항목 검사가
+   구현되면 고립된 허용 목록 항목으로 인해 게이트가 실패합니다).
 
-테스트를 더 빨리 통과시키기 위해 허용 목록 항목을 추가하지 **마세요**. 허용 목록이 계속 늘어나는 상태에서 통과하는 게이트는 품질에 대한 잘못된 확신을 줍니다.
+테스트를 더 빨리 통과시키기 위해 허용 목록 항목을 추가하지 **마세요**. 허용 목록이
+계속 늘어나는 상태에서 게이트가 통과하는 것은 품질에 대한 잘못된 확신을 줍니다.
 
 ### PR에서 게이트가 실패하는 경우
 
-1. **게이트 출력을 주의 깊게 읽으세요** — 어떤 파일이나 심볼이 규칙을 위반했는지 정확히 알려 줍니다.
-2. **위반을 수정하세요** — 대부분의 게이트는 코드가 올바르게 수정되는 즉시 통과하는 결정론적 파일 시스템 검사입니다.
-3. **기존에 존재하던 위반인 경우**(즉, 본인이 새로 발생시킨 것은 아니지만 이제 게이트의 검사 범위에 포함된 경우): 근거 주석과 추적 이슈를 포함하여 허용 목록 항목을 추가합니다.
+1. **게이트 출력을 주의 깊게 읽으세요** — 어떤 파일이나 심볼이 규칙을 위반했는지
+   정확히 알려 줍니다.
+2. **위반을 수정하세요** — 대부분의 게이트는 코드가 올바르면 즉시 통과하는
+   결정론적 파일 시스템 검사입니다.
+3. **위반이 기존부터 존재한 경우**(즉, 직접 도입하지 않았지만 이제 게이트의
+   검사 대상이 된 경우): 근거를 설명하는 주석 및 추적 이슈와 함께 허용 목록
+   항목을 추가하세요.
 4. **게이트가 래칫인 경우**(커버리지, ESLint 경고, 중복, 복잡도):
-   변경으로 인해 지표가 악화된 것입니다. 근본적인 문제를 수정하거나, 변경이 의도된 것이고 지표 저하를 수용할 수 있는 경우에 한해 드물게
-   `npm run quality:ratchet -- --update`를 실행하세요. 단, PR 설명에 그 이유를 문서화해야 합니다.
-5. **권고 게이트**(`continue-on-error: true`)는 정보 제공용입니다. 병합을 차단하지는 않지만 CI 요약에 표시됩니다. 그래도 수정하세요.
+   변경으로 인해 지표가 악화된 것입니다. 근본적인 문제를 수정하거나, 변경이
+   의도적이고 지표 저하를 허용할 수 있는 경우에만 드물게
+   `npm run quality:ratchet -- --update`를 실행하세요. 단, PR 설명에 그 이유를
+   문서화해야 합니다.
+5. **권고 게이트**(`continue-on-error: true`)는 정보 제공용입니다. 병합을 차단하지는
+   않지만 CI 요약에는 표시됩니다. 그래도 수정하세요.
 
 ---
 
@@ -525,7 +626,11 @@ PR도 열지 않습니다.
 
 1. `scripts/check/check-<name>.mjs`(또는 `.ts`)를 생성합니다. 정책 게이트는 0/1로 종료됩니다.
    래칫 방식의 게이트는 `collect-metrics.mjs`를 통해 `quality-metrics.json`에 지표를 출력합니다.
-2. `package.json`에 `"check:<name>": "node scripts/check/check-<name>.mjs"`를 추가합니다.
+2. `package.json`에 `"check:<name>": "node scripts/check/check-<name>.mjs"`를 추가하고,
+   `config/quality/gate-manifest.json`에서 해당 별칭과 정확한 명령을 동기화합니다.
+   기존 검증 별칭을 변경하거나 제거할 때도 동일하게 동기화합니다.
+   `npm run check:gate-manifest`를 실행합니다. pre-commit 훅과 CI 변경 분류가
+   이 규약을 강제합니다.
 3. `.github/workflows/ci.yml`의 적절한 작업 아래에 연결합니다
    (정책 → `lint` 또는 `docs-sync-strict`, 래칫 → `quality-gate`).
 4. 허용 목록이 있는 경우 오래된 항목이 자동으로 감지되도록
@@ -547,119 +652,116 @@ CI 게이트 외에도 OmniRoute는 **선택 사항**인 `agent-lsp` 스캐폴�
 
 ---
 
-## 합리화 백로그(ROI 검토 — 9단계 3차)
+## 합리화 백로그(ROI 검토 — 9단계 웨이브 3)
 
-이 인벤토리는 2026-06-17에 `ci.yml`을 기준으로 대조되었습니다(이전 버전에는
+이 인벤토리는 2026-06-17에 `ci.yml`을 기준으로 대조되었습니다(이전 버전에서는
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`가 누락되어 있었습니다). 대조된 항목에 대한 ROI 검토를 통해
-다음과 같은 합리화 후보를 식별했습니다. **병합은 기계적인 CI
-변경이며, 전환/제거는 운영자가 결정해야 하는 정책 사항입니다.** 아래 항목은 아직
+`check:codeql-ratchet`, `check:pr-evidence`가 누락됨). 대조된 항목에 대한 ROI 검토 결과,
+다음과 같은 합리화 후보가 확인되었습니다. **병합은 기계적인 CI 변경이며,
+전환/제거는 운영자가 결정해야 하는 정책 사항입니다.** 아래 항목은 아직
 적용되지 않았습니다.
 
 **위에 문서화되지 않은 추가 항목**(권고 수준, 낮은 신호): `docs-lint` 작업
-(markdownlint + Vale, 전체 작업에 `continue-on-error` 적용)과 독립형 스캐너 워크플로
+(markdownlint + Vale, 전체 작업에 `continue-on-error` 적용)과 독립 실행형 스캐너 워크플로
 `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0`은
-`quality-baseline.json`에 있지만 `ci.yml`의 차단형 래칫과 연결되어 있지 않습니다. 즉, 현재 이 메트릭은
-고립된 상태입니다.
+`quality-baseline.json`에 있지만 `ci.yml`의 차단형 래칫과 연결되어 있지 않습니다. 즉, 이 메트릭은
+현재 고립된 상태입니다.
 
-### 병합 / 중복 제거(기계적, 낮은 위험)
+### 병합 / 중복 제거(기계적 변경, 낮은 위험)
 
-각 후보는 2026-06-17의 실제 게이트 상태를 기준으로 검증되었습니다(신뢰하되 검증);
-여러 "명백한" 병합이 실제로는 부채를 숨기고 있는 것으로 드러났으며 **즉시 대체할 수 있는 깔끔한 변경이 아닙니다**.
+각 후보는 2026-06-17의 실제 게이트 상태를 기준으로 검증되었습니다(신뢰하되 검증).
+몇몇 "명백해 보이는" 병합은 실제로 부채를 숨기고 있는 것으로 드러났으며, **깔끔하게 대체할 수 있는
+항목이 아닙니다.**
 
 - **`check:docs-sync`가 두 번 실행됨** — `lint` 작업에서 독립적으로 실행되고, `check:docs-all`(`docs-sync-strict`) 및 husky pre-commit 훅 내부에서 다시 실행됩니다. ✅ **완료** — 독립적인 `lint` 호출을 제거했습니다.
-- **CVE 스캔** — ❌ **깔끔하게 병합할 수 없습니다.** `audit:deps`는 high/critical CVE가 하나라도 있으면 즉시 실패합니다. 반면 `check:vuln-ratchet`(osv)은 기준선(현재 MODERATE 1개) 대비 _회귀_가 있을 때만 실패합니다. 의미 체계가 다르므로 `audit:deps`를 제거하면 high/critical에 대한 절대적 게이트를 잃게 됩니다. 둘 다 유지합니다.
-- **순환 감지** — ✅ **완료**(#15159 G-01/G-02). 이전 설명에서는 `check:cycles`를 "정상 상태인 선별된" 게이트로 부르고, `check:circular-deps`(dpdm)가 순환 91개를 보고했기 때문에 이를 차단형으로 유지해야 한다고 정당화했습니다. 그러나 그 정상 상태는 **거짓 정상**이었습니다. `check:cycles`는 5개 하위 디렉터리(파일 450개)를 스캔하고 정적 `import|export … from`만 일치시켰으며, 모든 `@/` 및 `@omniroute/open-sse/` 지정자를 누락했기 때문에 저장소의 대부분을 차지하는 동적 import + 별칭 순환을 감지할 수 없었습니다. 수정 후 게이트는 이제 `src` + `open-sse`(파일 5023개)를 순회하고 TypeScript AST에서 지정자를 수집하며(`import("…")`는 계산하고 타입 위치의 `typeof import("…")`는 계산하지 않음), tsconfig `paths`를 해석합니다. 발견되는 순환은 0개가 아니라 **14개**입니다. 기존 순환 14개는 게이트 PR에서 수정할 수 없으므로, `check:cycles`는 이제 **래칫**입니다(`--ratchet`, `quality-baseline.json`의 상한 `metrics.cycles.value = 14`, `direction: down`). 모든 _회귀_를 차단하며 개수는 감소만 가능합니다. CI는 `npm run check:cycles:ratchet`을 실행합니다. 점진적 감소 작업은 **A-01**과 함께 진행합니다. `check:circular-deps`(dpdm)는 더 광범위한 보조 검증 수단으로서 권고 수준으로 유지합니다.
-- **복잡도** — ✅ **완료**(`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): 단일 ESLint 순회에서 ruleId별로 집계하므로 순환 복잡도+최대 줄 수와 인지 복잡도 기준선이 서로 독립적으로 유지됩니다. 개별 `check:complexity` / `check:cognitive-complexity`는 로컬 `--update`를 위해 유지합니다.
-- **`/api` 환각 방지** — ✅ **완료**(`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): `src/app/api`에 대한 단일 FS 인벤토리를 사용하며, openapi-routes + docs-symbols는 계속 독립적으로 보고합니다. 개별 항목은 로컬 실행을 위해 유지합니다.
-- **`check:node-runtime`이 11개 작업에서 실행됨** — ⚠️ **낮은 ROI.** 각각 별도의 러너이며 검사는 1초 미만입니다. 총 절감 시간은 약 10초인 반면, 저비용 작업별 가드가 사라집니다. 변경에 따른 혼란을 감수할 가치가 없습니다.
-- **CI lint의 `typecheck:noimplicit:core`** — ✅ **lint 작업에서 제거됨**(기존에는 `continue-on-error`가 적용된 권고 수준이었음). 차단형 타입 범위는 `typecheck:core` + `check:type-coverage`입니다. 로컬 스크립트는 유지했습니다.
+- **CVE 스캔** — ❌ **깔끔하게 병합할 수 없습니다.** `audit:deps`는 5개 lockfile 전체에서 치명적 권고 및 불완전한 감사를 차단하는 한편, 현재 정책에 따라 높은 심각도의 권고는 경고로 보고합니다. 반면 `check:vuln-ratchet`(osv)은 체크인된 기준선 대비 _회귀_가 있을 때만 실패하며, 필수 측정값이 누락된 경우 이를 거부합니다. 의미가 서로 다릅니다. `audit:deps`를 제거하면 절대적인 치명적 취약점 게이트와 독립적인 패키지 감사 증빙이 사라집니다. 둘 다 유지합니다.
+- **순환 종속성 감지** — ✅ **완료**(#15159 G-01/G-02). 이곳의 이전 설명에서는 `check:cycles`를 "통과 중인 선별된" 게이트라고 표현하고, `check:circular-deps`(dpdm)가 91개의 순환을 보고한다는 이유로 이를 차단형으로 유지해야 한다고 정당화했습니다. 하지만 그 통과 상태는 **거짓 통과**였습니다. `check:cycles`는 5개 하위 디렉터리(450개 파일)만 스캔했고, 정적 `import|export … from`만 일치시켰으며, 모든 `@/` 및 `@omniroute/open-sse/` 지정자를 제외했기 때문에 저장소를 지배하던 동적 import + 별칭 순환을 감지할 수 없었습니다. 수정 결과: 이제 게이트는 `src` + `open-sse`(5023개 파일)를 순회하고 TypeScript AST에서 지정자를 수집하며(`import("…")`는 포함하고 타입 위치의 `typeof import("…")`는 포함하지 않음), tsconfig `paths`를 해석합니다. 0개가 아니라 **14개**의 순환을 발견합니다. 기존 순환 14개는 게이트 PR에서 수정할 수 없으므로 이제 `check:cycles`는 **래칫**입니다(`--ratchet`, `quality-baseline.json`의 상한 `metrics.cycles.value = 14`, `direction: down`). 모든 _회귀_를 차단하며 개수는 감소만 할 수 있습니다. CI는 `npm run check:cycles:ratchet`을 실행합니다. 단계적 해소는 **A-01**과 함께 진행됩니다. `check:circular-deps`(dpdm)는 더 광범위한 보조 검증 수단으로 권고 수준을 유지합니다.
+- **복잡도** — ✅ **완료**(`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): ESLint를 한 번 순회하고 ruleId별로 집계하므로 순환 복잡도+최대 줄 수 기준선과 인지 복잡도 기준선이 서로 독립적으로 유지됩니다. 개별 `check:complexity` / `check:cognitive-complexity`는 로컬 `--update`를 위해 유지됩니다.
+- **`/api` 환각 방지** — ✅ **완료**(`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): `src/app/api`에 대한 파일 시스템 인벤토리를 한 번 수행하며, openapi-routes + docs-symbols는 여전히 독립적으로 보고합니다. 개별 항목은 로컬 실행을 위해 유지됩니다.
+- **`check:node-runtime`이 11개 작업에서 실행됨** — ⚠️ **낮은 ROI.** 각각 별도 러너이며 검사는 1초 미만입니다. 저렴한 작업별 가드 하나를 잃는 대신 얻는 총 절감 시간은 약 10초입니다. 변경에 따른 혼란을 감수할 가치가 없습니다.
+- **CI lint의 `typecheck:noimplicit:core`** — ✅ **lint 작업에서 제거됨**(이전에는 권고 수준의 `continue-on-error`). 차단형 타입 표면은 `typecheck:core` + `check:type-coverage`입니다. 로컬 스크립트는 유지됩니다.
 
 ### 전환 / 결정(운영자 정책)
 
-- `check:openapi-security-tiers`(권고 수준) — ❌ **깔끔하게 전환할 수 없습니다.** 종료 코드는 0이지만, `LOCAL_ONLY_API_PREFIXES` 아래의 여러 `traffic-inspector` 라우트에 `x-loopback-only: true` 주석이 없다고 경고합니다. 이를 강제하려면 먼저 해당 주석을 `openapi.yaml`에 추가해야 합니다.
+- `check:openapi-security-tiers`(권고 수준) — ❌ **깔끔하게 전환할 수 없습니다.** 종료 코드는 0이지만 `LOCAL_ONLY_API_PREFIXES` 아래의 여러 `traffic-inspector` 라우트에 `x-loopback-only: true` 주석이 없다고 경고합니다. 이를 강제하려면 먼저 해당 주석을 `openapi.yaml`에 추가해야 합니다.
 - `typecheck:noimplicit:core`(권고 수준) — 차단형 `check:type-coverage` 래칫이 대부분 대체합니다. 래칫으로 전환하거나 중복되는 두 번째 `tsc` 패스를 제거합니다.
 - `test:vitest:ui`(현재 **차단형**) — 기존 실패는 `vitest.config.ts`에서 `// #8618` 추적 주석과 함께 명시적으로 제외되어 있습니다. 새로운 실패가 발생하면 작업이 실패합니다.
-- `check:secrets`(gitleaks, 문서화된 오탐 3개에서 고정된 차단형 래칫) — 3개 항목을 허용 목록에 추가하여 0을 달성하거나 권고 수준으로 강등합니다. GitHub 네이티브 비밀 스캔 + `check:public-creds`와 중복됩니다.
-- `check:pr-evidence`(차단형, PR 본문 산문을 grep으로 검색) — 오탐 위험이 높습니다. 제거하면 Hard Rule #18의 강제력이 약화되므로 이는 실질적인 정책 결정 사항입니다.
-- `semgrep`(권고 수준의 독립형 작업) — OWASP 계열에 대해 CodeQL과 중복됩니다. 기준선을 래칫에 연결하거나 제거합니다.
+- `check:secrets`(gitleaks, 차단형 래칫) — 현재 상한은 `quality-baseline.json`의 `metrics.secretFindings`입니다. 예외에는 정당한 근거가 있는 `.gitleaks.toml` 항목이 필요하며, 측정값을 사용할 수 없는 경우 INCOMPLETE로 처리됩니다. 이 스캔은 GitHub의 네이티브 비밀 정보 스캔 및 `check:public-creds`를 보완합니다.
+- `check:pr-evidence`(차단형, PR 본문 텍스트에 grep 적용) — 오탐 위험이 높습니다. 제거하면 엄격 규칙 #18의 집행력이 약화되므로 이는 실질적인 정책 결정 사항입니다.
+- `semgrep`(독립 실행형, 권고 수준) — OWASP 계열에서 CodeQL과 중복됩니다. 기준선을 래칫에 연결하거나 제거합니다.
 
 ---
 
 ## 관련 문서
 
-- 공급망(출처 증명, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- 공급망(출처, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
 #### `check-key-completeness` — 키 집합 동등성 게이트
 
 `scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, 작업 `i18n-ui-coverage`).
-모든 `src/i18n/messages/<locale>.json`의 리프 키 집합을 `en.json`과 비교하며, 키가 추가된
-시점과 관계없이 누락되거나 추가된 리프가 하나라도 있으면 실패합니다. `__MISSING__:`
-자리표시자는 존재하는 것으로 간주됩니다(그 내용은 비율 게이트가 처리할 사안입니다).
-이는 두 개의 diff 기반/백분율 게이트를 완전히 보완합니다. `check-ui-keys-coverage`는 로케일별
-최저 80 %를 강제하고(약 13,000개 중 43개 키가 누락되어도 여전히 99.7 %로 표시됨),
-`check-new-key-coverage`는 PR이 `en.json`에 추가한 키만 판정합니다. 로케일 배치는 브랜치를
-분기한 날의 `en.json`에서 생성된 뒤 기본 브랜치에 키가 계속 추가되는 동안 며칠에 걸쳐
-번역됩니다. 배치 PR 자체는 키를 추가하지 않으므로, 배치 1(#13044)이 9개 로케일에서 43개
-키가 부족한 상태로 병합되고 배치 2(#13660)가 8개 로케일에서 10개 키가 부족한 상태로
-병합되었을 때에도 두 형제 게이트는 모두 아무 경고도 내지 않았습니다(2026-09-15).
-실패를 해결하려면 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`를
-실행하세요. `extra` 리프는 원본에서 해당 키가 제거되었다는 뜻이므로 로케일에서도
-삭제하세요. `--warn`은 실패시키지 않고 보고만 합니다. `--catalog=cli`는
-`bin/cli/locales`에 대해 동일한 비교를 실행합니다(`npm run i18n:check-keys:cli`).
-두 단계 모두 `i18n-ui-coverage` 작업에 포함됩니다.
+모든 `src/i18n/messages/<locale>.json`의 리프 키 집합을 `en.json`과 비교하며,
+키가 추가된 시점과 관계없이 누락되거나 추가된 리프가 하나라도 있으면 실패합니다. `__MISSING__:`
+자리표시자는 존재하는 것으로 간주됩니다(그 내용은 비율 게이트가 다룰 사항입니다). 이는 두 가지
+diff 기반/백분율 게이트를 절대적으로 보완합니다. `check-ui-keys-coverage`는 로케일별로 80 %의
+하한을 적용하지만(약 13,000개 중 43개 키가 누락되어도 여전히 99.7 %로 표시됨),
+`check-new-key-coverage`는 PR이 `en.json`에 추가하는 키만 판정합니다. 로케일 배치는
+브랜치가 분기된 날의 `en.json`에서 생성되고 베이스에 키가 계속 추가되는 동안 며칠에 걸쳐
+번역됩니다. 배치 PR 자체는 키를 추가하지 않으므로, 배치 1(#13044)이 9개 로케일에서 43개 키가
+누락된 채 병합되고 배치 2(#13660)가 8개 로케일에서 10개 키가 누락된 채 병합되었을 때
+두 형제 게이트 모두 아무 경고도 내지 않았습니다(2026-09-15). 실패를 수정하려면
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`를 사용하세요. `extra` 리프는
+소스에서 해당 키가 삭제되었다는 의미이므로 로케일에서도 삭제하세요. `--warn`은 실패 처리 없이
+보고만 합니다. `--catalog=cli`는 `bin/cli/locales`에서 동일한 비교를 실행합니다
+(`npm run i18n:check-keys:cli`). 두 단계 모두 작업 `i18n-ui-coverage`에 포함됩니다.
 
 #### `check-new-key-coverage` — 새 키 i18n 게이트
 
 `check-ui-value-drift`의 형제 게이트입니다. 후자는 영어 값이 **다시 작성되었지만**
-번역은 그대로 남은 경우를 탐지하고, 이 게이트는 영어 키가 **추가되었지만** 일부
-로케일에 반영되지 않은 경우를 탐지합니다.
+번역은 갱신되지 않은 경우를 탐지하고, 이 게이트는 영어 키가 **추가되었지만**
+일부 로케일에 해당 키가 전혀 추가되지 않은 경우를 탐지합니다.
 
-`check-ui-keys-coverage`는 이런 문제를 탐지할 수 없습니다. 로케일별 백분율 하한을
-강제하므로 약 13,000개의 리프 중 11개 키가 누락되어도 커버리지는 99.9%로 유지됩니다.
-언어별 백분율로는 "이 기능이 번역되지 않은 채 출시되었다"는 상황을 표현할 수 없습니다.
-새 로케일에 전체 기능의 텍스트가 하나도 없어도 수치가 전혀 변하지 않을 수 있습니다.
+`check-ui-keys-coverage`는 이 유형을 탐지할 수 없습니다. 이 게이트는 로케일별 백분율 하한을
+적용하며, 약 13,000개 중 11개 키가 누락되어도 커버리지는 99.9%로 유지됩니다. 언어별
+백분율로는 "이 기능이 번역되지 않은 채 출시되었다"는 사실을 표현할 수 없습니다. 새로운
+로케일에서 기능 전체에 텍스트가 없어도 수치는 전혀 변하지 않을 수 있습니다.
 
-이 게이트가 반영하는 사고는 다음과 같습니다. Orchestration Canvas의 Phase 3에서는 당시
-존재하던 42개 로케일 전체에 11개 키를 번역했습니다. 몇 시간 뒤 EU 언어 배치(#13044)로
-저장소의 로케일 수가 51개가 되었지만, 새로 추가된 9개 로케일(`el`, `et`, `ga`, `hr`,
-`lt`, `lv`, `mt`, `sl`, `sr`)에는 해당 키가 전혀 반영되지 않았습니다.
-`deepMergeFallback`은 누락된 키를 영어로 대체하므로, 실패 양상은 빈 UI가 아니라 번역되지
-않은 UI였습니다. 이는 실제 문제이면서도 설계상 조용히 발생했습니다.
+이 게이트가 방지하도록 설계된 사고는 다음과 같습니다. Orchestration Canvas의 Phase 3에서는
+당시 존재했던 42개 로케일 전체에 11개 키를 번역했습니다. 몇 시간 후 EU 언어 배치(#13044)로
+저장소의 로케일이 51개로 늘었지만, 새로 추가된 9개 로케일(`el`, `et`, `ga`, `hr`, `lt`, `lv`,
+`mt`, `sl`, `sr`)에는 해당 키가 전혀 추가되지 않았습니다. `deepMergeFallback`은 키가 없으면
+영어로 대체하므로 장애 형태는 빈 UI가 아니라 번역되지 않은 UI였습니다. 이는 실제 문제였으며,
+설계상 아무 경고 없이 발생했습니다.
 
-형제 게이트와 마찬가지로 이 게이트는 **diff를 인식**하며, 병합 기준점의 영어와 작업
-트리를 비교합니다. 따라서 기존의 누락은 고정된 상태로 유지되며, 게이트를 활성화하는 데
-마이그레이션이 필요하지 않았습니다.
+형제 게이트와 마찬가지로 이 게이트도 **diff를 인식**하여 병합 베이스의 영어와 작업 트리를
+비교하므로, 기존 격차는 그대로 유지되며 게이트를 활성화하기 위한 마이그레이션이 필요하지
+않았습니다.
 
-**`__MISSING__:<english>` 마커는 이를 충족하지 않습니다(2026-09-17 이후).** 이전에는
-런타임이 올바른 영어로 폴백하므로 이 마커가 문서화된 연기 방법이었습니다. 그러나
-2026-09-16에 8개의 기능 PR이 61개 키를 추가하면서 번역 대신 65개 로케일 모두에 마커를
-찍었습니다. 이 게이트는 모든 PR을 통과시켰고 아무것도 PR을 차단하지 않았으며, 이후
-차단형 실제 번역 비율 게이트가 릴리스 팁에서 모든 사람에게 실패했습니다
-(pt-BR 3.2 % > 2.5 % + 0.5). 이제 마커는 번역이 누락된 것으로 판정됩니다. 실패를
-해결하려면
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`을
-실행하거나, `npm run i18n:translate-new-keys`
-(`scripts/i18n/translate-new-keys.sh`, 분리 실행에 안전하며 `OMNIROUTE_TRANSLATION_*`
-환경 변수 없이는 시작을 거부함)를 사용해 모든 로케일을 병렬로 처리하세요. 영어로
-유지해야 하는 키(고정된 제품/엔진/플래그 이름)는 마커 뒤에 두지 말고
-`scripts/i18n/untranslatable-keys.json`에 추가해야 합니다. `vi`에서는 마커가 완전히
-금지됩니다(`tests/unit/i18n-vi-completeness.test.ts`).
+**`__MISSING__:<english>` 마커는 이를 충족하지 않습니다(2026-09-17부터).** 이전에는 런타임이
+올바른 영어로 폴백하므로 이 마커가 문서화된 연기 방법이었습니다. 그러나 2026-09-16에 8개의
+기능 PR이 61개 키를 추가하면서 번역 대신 65개 로케일 모두에 이 마커를 찍었습니다. 이 게이트는
+모두 통과시켰고 PR을 차단한 것은 아무것도 없었으며, 이후 차단 방식의 실제 번역 비율 게이트가
+릴리스 팁에서 모든 사람에게 실패했습니다(pt-BR 3.2 % > 2.5 % + 0.5). 이제 마커는 번역이
+없는 것으로 판정됩니다. 실패를 수정하려면
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40`을 사용하거나,
+`npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`, 분리 실행에 안전하며
+`OMNIROUTE_TRANSLATION_*` 환경 변수가 없으면 시작을 거부함)를 사용해 모든 로케일을 병렬로
+처리하세요. 영어로 유지해야 하는 키(고정된 제품/엔진/플래그 이름)는 마커 뒤에 두지 말고
+`scripts/i18n/untranslatable-keys.json`에 넣어야 합니다. `vi`는 마커를 전면 금지합니다
+(`tests/unit/i18n-vi-completeness.test.ts`).
 
 #### `check-vitest-exclusions` — 보류된 테스트 게이트
 
-`vitest.config.ts`의 `exclude` 목록에 있는 파일은 실행되지 않는 테스트이지만, 트리를
-읽는 사람에게는 커버리지처럼 보입니다. 62개 파일이
-`// #8618 — 기존 실패; 수정되면 이 제외 항목을 제거할 것`이라는 주석 뒤에 누적되었습니다.
-이 목록을 추적하던 이슈 #8618은 2026-08-11에 종료되었지만, 목록은 45개 항목에서 62개
-항목으로 늘어났고 새 항목마다 종료된 이슈를 가리키는 주석을 물려받았습니다. 마침내
-파일별로 목록을 측정했을 때(#13204), **62개 중 51개가 소스 변경 없이 현재 트리에서
-통과했습니다**.
+`vitest.config.ts`의 `exclude` 목록에 있는 파일은 실행되지 않는 테스트이며, 트리를 읽는
+사람에게는 커버리지처럼 보입니다. 62개 파일이
+`// #8618 — pre-existing failure; remove this exclusion when fixed` 주석 뒤에 누적되었습니다.
+이슈 #8618은 2026-08-11에 종료되었지만, 이 이슈가 추적하던 목록은 45개 항목에서 62개로
+늘어났고 새 항목마다 종료된 이슈를 가리키는 주석을 그대로 물려받았습니다. 마침내 파일별로
+목록을 측정했을 때(#13204), **62개 중 51개가 소스 변경 없이 현재 트리에서 통과했습니다**.
 
-이 게이트는 실제 파일로 해석되는 모든 제외 항목이 (a) 추적 이슈를 명시하고
-(b) 측정된 상태와 함께 `config/quality/vitest-exclusions.json`에 나타나도록 요구합니다.
-따라서 제외 항목 추가는 60개 항목 배열에 한 줄을 더하는 것이 아니라 전용 파일에서
-검토 가능한 diff가 됩니다. 이 게이트는 의도적으로 제외된 테스트를 다시 실행하지
-않습니다. 그렇게 하면 약 10분이 소요되며 주기적 작업에서 수행해야 합니다. 인벤토리에는
-각 항목을 마지막으로 측정한 시점이 기록됩니다.
+이 게이트는 실제 파일로 확인되는 모든 제외 항목이 (a) 추적 이슈를 명시하고 (b) 측정된 상태와
+함께 `config/quality/vitest-exclusions.json`에 나타나도록 요구합니다. 따라서 제외 항목을
+추가하는 작업은 60개 항목 배열에 한 줄을 더하는 대신 전용 파일에서 검토 가능한 diff가 됩니다.
+이 게이트는 의도적으로 제외된 테스트를 다시 실행하지 않습니다. 그렇게 하면 약 10분이 걸리며
+주기적 작업에서 수행하는 것이 적절하기 때문입니다. 인벤토리에는 각 항목을 마지막으로 측정한
+시점이 기록됩니다.

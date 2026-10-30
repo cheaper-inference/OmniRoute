@@ -6607,7 +6607,7 @@
       "xai": "ഒരു API കീ ഉപയോഗിച്ച് xAI (Grok) കണക്റ്റ് ചെയ്യുക.",
       "xiaomi-mimo": "ഒരു API കീ ഉപയോഗിച്ച് Xiaomi MiMo കണക്റ്റ് ചെയ്യുക.",
       "yi": "platform.lingyiwanwu.com-ൽ നിന്ന് API കീ നേടുക",
-      "zai": "https://open.bigmodel.cn/usercenter/apikeys-ൽ നിന്നുള്ള API കീ",
+      "zai": "https://z.ai/manage-apikey/apikey-list-ൽ നിന്നുള്ള API കീ",
       "zenmux": "ZenMux /api/v1/chat/completions-ൽ OpenAI-അനുയോജ്യമായ ചാറ്റ് കംപ്ലീഷൻസ് എൻഡ്പോയിന്റും Anthropic Messages (/api/anthropic/v1/messages), Google Gemini (/api/vertex-ai) പ്രോട്ടോക്കോൾ ഇന്റർഫേസുകളും ലഭ്യമാക്കുന്നു. OmniRoute OpenAI പ്രോട്ടോക്കോൾ ഉപയോഗിക്കുന്നു.",
       "galadriel": "ഒരു API കീ ഉപയോഗിച്ച് Galadriel കണക്റ്റ് ചെയ്യുക.",
       "predibase": "$25 സൗജന്യ ട്രയൽ ക്രെഡിറ്റുകൾ (30 ദിവസത്തെ കാലാവധി)",

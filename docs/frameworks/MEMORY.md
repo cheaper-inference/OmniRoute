@@ -752,7 +752,8 @@ When a user says:
 
 To prevent runaway extraction, the following limits apply:
 
-| Min content length | 3 chars |
+| Min content length | 3 chars   |
+| ------------------ | --------- |
 | Max content length | 500 chars |
 
 ### When to Disable Extraction

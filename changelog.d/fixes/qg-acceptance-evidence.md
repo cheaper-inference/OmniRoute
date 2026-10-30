@@ -1,0 +1,1 @@
+- **fix(ci):** Verify retained release-acceptance evidence against its declared SHA-256 instead of trusting hash syntax alone; missing, changed or unsafe file references remain unverified. Supplied-plan reports explicitly do not certify the complete release pipeline.

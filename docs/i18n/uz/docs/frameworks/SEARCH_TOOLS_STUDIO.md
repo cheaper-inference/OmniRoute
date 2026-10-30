@@ -53,7 +53,7 @@ Mavjud `SearchForm` + `ResultsPanel` + `RerankPanel` komponentlarini tabga aylan
 - Kiritish: URL + toʻliq sahifa almashtirgichi + format selektori (markdown / matn / HTML).
 - Yuborish → olish → `ScrapeResult.tsx`ni render qilish.
 - `ScrapeResult` markdown oldindan koʻrish oynasi + xom format almashtirgichini render qiladi.
-- Cheklov: agar javob tanasi **256 KB**dan katta boʻlsa, UI `(qisqartirilgan, xom holatda ko‘rish)` yozuvini koʻrsatadi va xom kontentni Monaco modal oynasida ochadi (D21).
+- Cheklov: agar javob tanasi **256 KB**dan katta boʻlsa, UI `View full raw content` yozuvini koʻrsatadi va xom kontentni modal oynasida ochadi (D21).
 - Metamaʼlumotlar paneli: provayder (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), kechikish, narx, javob hajmi, havolalar soni.
 - `useScrapeFetch.ts` hukidan foydalanadi.
 

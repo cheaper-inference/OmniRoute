@@ -15,7 +15,7 @@ OmniRoute は、Next.js 上に構築されたローカル AI ルーティング�
 
 主な機能：
 
-- CLI／ツール向けの OpenAI 互換 API サーフェス（375 プロバイダー、154 エグゼキューターモジュール）
+- CLI／ツール向けの OpenAI 互換 API サーフェス（375 プロバイダー、156 エグゼキューターモジュール）
 - プロバイダー形式間のリクエスト／レスポンス変換
 - モデルコンボによるフォールバック（複数モデルのシーケンス）
 - 構造化コンボステップ（`provider + model + connection`）と、`compositeTiers` による実行時の順序付け
@@ -31,7 +31,7 @@ OmniRoute は、Next.js 上に構築されたローカル AI ルーティング�
 - `/v1/search` による Web 検索（20 プロバイダー）
 - `/v1/moderations` によるモデレーション
 - `/v1/rerank` による再ランキング
-- 推論モデル向けの思考タグ解析（``）
+- 推論モデル向けの思考タグ解析（`<think>...</think>`）
 - 厳密な OpenAI SDK 互換性のためのレスポンスサニタイズ
 - プロバイダー間の互換性を確保するためのロール正規化（developer→system、system→user）
 - 構造化出力の変換（json_schema → Gemini responseSchema）
@@ -1070,11 +1070,11 @@ flowchart LR
 - 起動時の SQLite スキーママイグレーションおよび自動アップグレードフック
 - レガシー JSON → SQLite マイグレーションの互換パス
 
-## 6) SSRF／送信先 URL ガード
+## 6) SSRF / 外向き URL ガード
 
-- `src/shared/network/outboundUrlGuard.ts` は、プロバイダーエグゼキューターに到達する前に、すべてのプライベート／ループバック／リンクローカルのターゲット URL をブロックします
-- プロバイダーモデルの検出および検証ルートでは、すべての送信リクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
-- ガードエラーは HTTP 422 の `URL_GUARD_BLOCKED` として通知され、`providerAudit.ts` を介してコンプライアンス監査証跡に記録されます
+- `BaseExecutor.assertOutboundUrlAllowed`（`open-sse/executors/base.ts`）は、`BaseExecutor.execute()` を通じて送信されるチャットリクエストに `src/shared/network/outboundUrlGuard.ts` を適用します。公開 URL のみを許可するモード（`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` かつプライベートフラグがオフ）では、プライベートホスト、ループバックホスト、および 169.254.0.0/16 をブロックします。それ以外のすべてのモードでは、クラウドメタデータホストをブロックします。DNS ルックアップを実行する前に、記述されたとおりのホスト名または IP リテラルを確認します。組み込みのローカルプロバイダーでは、このチェックはスキップされます。
+- プロバイダーモデルの検出および検証ルートでは、すべての外向きリクエストの前にガードを適用する `src/shared/network/safeOutboundFetch.ts` を使用します
+- ガードエラーは、HTTP 503（`getSafeOutboundFetchErrorStatus`。モデル検出ルートは 400 を返します）とともに `URL_GUARD_BLOCKED` として表面化し、検証中に実際に発生した SSRF ブロックは、`provider.validation.ssrf_blocked` イベントとして監査証跡に記録されます
 
 ## オブザーバビリティと運用シグナル
 
@@ -1125,7 +1125,7 @@ flowchart LR
 4. クラウドの動作は、正しい `NEXT_PUBLIC_BASE_URL` とクラウドエンドポイントへの到達可能性に依存する。
 5. `open-sse/` ディレクトリは、`@omniroute/open-sse` **npm ワークスペースパッケージ**として公開される。ソースコードでは `@omniroute/open-sse/...` を介してインポートされる（Next.js の `transpilePackages` によって解決される）。一貫性を保つため、このドキュメント内のファイルパスでは引き続きディレクトリ名 `open-sse/` を使用する。
 6. ダッシュボードのチャートでは、アクセシブルでインタラクティブな分析可視化（モデル使用量の棒グラフ、成功率を含むプロバイダー内訳表）のために、**Recharts**（SVG ベース）を使用する。
-7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き JavaScript（`.js`）を使用する。
+7. E2E テストでは **Playwright**（`tests/e2e/`）を使用し、`npm run test:e2e` で実行する。ユニットテストでは **Node.js test runner**（`tests/unit/`）を使用し、`npm run test:unit` で実行する。`src/` 配下のソースコードは **TypeScript**（`.ts`／`.tsx`）であり、`open-sse/` ワークスペースは引き続き TypeScript（`.ts`）を使用する。
 8. 設定ページは、General、Appearance、AI、Security、Routing、Resilience、Advanced の 7 つのタブで構成される。Resilience ページでは、リクエストキュー、接続クールダウン、プロバイダーブレーカー、およびクールダウン待機動作のみを設定する。ブレーカーの実行時状態は Health ページに表示される。
 9. **Context Relay** ストラテジー（`context-relay`）は 2 つのレイヤーに分割されている。`combo.ts` はハンドオフを生成すべきかどうかを決定し、`chat.ts` はアカウント解決後にハンドオフを挿入する。ハンドオフデータは SQLite の `context_handoffs` テーブルに格納される。この分割は、実際のアカウントが変更されたかどうかを把握できるのが `chat.ts` だけであるため、意図的に行われている。
 10. **プロキシの適用**は現在包括的に行われる。`tokenHealthCheck.ts` は接続ごとにプロキシを解決し、`/api/providers/validate` は `runWithProxyContext` を使用し、`proxyFetch.ts` は Node 22 でディスパッチャーの互換性を維持するために `undici.fetch()` を使用する。

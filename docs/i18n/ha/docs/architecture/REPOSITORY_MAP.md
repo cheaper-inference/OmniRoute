@@ -106,7 +106,7 @@ OmniRoute/
 
 > **An fitar da su daga tushen a v3.8.26 (don rage cunkoso):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da kuma `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, da kuma `quality-metrics.json` da aka samar (gitignored). Duba [`## config/`](#config--saitunan-tsaye--matsayin-matakin-tabbatar-da-inganci).
 
 ---
 
@@ -446,7 +446,7 @@ open-sse/
 
 | Ƙaramin kundin adireshi | Manufa                                                                                                                                                                                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`            | Fassarar takardu zuwa harsuna daban-daban (harsuna 41)                                                                                                                                                                                                 |
+| `docs/i18n/`            | Fassarar takardu zuwa harsuna daban-daban (harsuna 66)                                                                                                                                                                                                 |
 | `docs/screenshots/`     | Albarkatun hotuna don jagorori                                                                                                                                                                                                                         |
 | `_tasks/superpowers/`   | Tsare-tsare/ƙayyadaddun bayanai daga superpowers (`writing-plans`/`brainstorming`) + bincike — keɓantaccen ma'ajiya mai nau'in sarrafa kansa daban, wanda babban bishiyar ta yi watsi da shi ta git. Duba CLAUDE.md → "Planning & Research Artifacts". |
 

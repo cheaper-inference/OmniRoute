@@ -214,7 +214,7 @@ Obsidian REST API prieigos raktą. GHSA-62vw tik paslėpė slaptažodžio atskle
 vis dar priklausė prieigos leidimo gedimo atveju lygiui (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` papildomai
 atmeta saugyklą, kuri yra duomenų katalogas, yra jo viduje arba jį apima.
 
-#### Kredencialų eksportavimas skirtas tik operatoriui
+#### Kredencialų eksportavimas ir atkūrimas skirti tik operatoriui
 
 Aukščiau aprašytas lygmuo tik nustato, ar reikalingi _kokie nors_ prisijungimo duomenys. Maršrutai, kuriais atsisiunčiami
 saugomi prisijungimo duomenys, apdorojimo funkcijoje atlieka antrą patikrą: `GET /api/settings/export-json` (iššifruoti
@@ -225,22 +225,9 @@ egzempliorių, kuriame prisijungimas išjungtas, ir pateikia atsakymą `403` bet
 ir `admin`) bei `oma_` prieigos prieigos raktams. Sinchronizavimo prieigos raktų išdavimas (`POST /api/sync/tokens`) naudoja tą pačią
 pagalbinę funkciją ir patikimą vidinės paslaugos prieigos raktą iš grįžtamojo ryšio sąsajos.
 
-#### Credential exports and restores are operator-only
+Ta pati riba galioja atitinkamiems destruktyviems veiksmams: `POST /api/db-backups/import` (įkeltas `.sqlite` failas, taip pat su `dryRun=true`), `POST /api/db-backups` (išsaugotos atsarginės kopijos atkūrimas pagal jos id) ir `POST /api/settings/import-json` (senojo JSON formato atkūrimas) pakeičia veikiančią duomenų bazę arba visą nuostatų, ryšių ir API raktų rinkinį. Todėl mašinos kredencialas negali inicijuoti ir šių veiksmų.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Ta pati riba taikoma atkūrimo taškų naikinimui: `DELETE /api/db-backups` (valymas — palikti naujausius N arba pašalinti senesnius nei D dienų) ir `PATCH /api/db-backups` (saugojimo nuostatos). Būtent išsaugotas taisykles `cleanupDbBackups()` taiko po kiekvieno automatinio atsarginio kopijavimo (`src/lib/db/backup.ts`); mašinos kredencialas, galintis išsaugoti `keepLatest: 1`, galėtų pašalinti ankstesnius atkūrimo taškus per kitą momentinę kopiją. Kopijų sąrašo peržiūrai ir kūrimui (`GET`/`PUT /api/db-backups`) lieka įprastas valdymo tapatybės patvirtinimas.
 
 ### Pirminis diegimo parengimas galimas tik per grįžtamojo ryšio sąsają — pagal tikrąjį lygiavertį mazgą, o ne `Host`
 

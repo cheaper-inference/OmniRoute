@@ -192,7 +192,7 @@ LOCAL_ONLYగా వర్గీకరించబడాలి.
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` అదనంగా, డేటా డైరెక్టరీగానే ఉన్న,
 దాని లోపల ఉన్న లేదా దాన్ని కలిగి ఉన్న vaultను తిరస్కరిస్తుంది.
 
-#### క్రెడెన్షియల్ ఎక్స్పోర్ట్లు ఆపరేటర్లకు మాత్రమే
+#### క్రెడెన్షియల్ ఎగుమతి మరియు పునరుద్ధరణ ఆపరేటర్లకు మాత్రమే
 
 పై స్థాయి _ఏదైనా_ క్రెడెన్షియల్ అవసరమా అనే విషయాన్ని మాత్రమే నిర్ణయిస్తుంది. నిల్వ చేసిన
 క్రెడెన్షియల్లను డౌన్లోడ్ చేసే రూట్లు హ్యాండ్లర్లో రెండవ తనిఖీని జోడిస్తాయి: `GET /api/settings/export-json` (డీక్రిప్ట్ చేసిన
@@ -203,22 +203,9 @@ LOCAL_ONLYగా వర్గీకరించబడాలి.
 మరియు `admin`తో సహా), ఇంకా `oma_` యాక్సెస్ టోకెన్లకు `403`తో ప్రతిస్పందిస్తుంది. సింక్ టోకెన్ జారీ (`POST /api/sync/tokens`) అదే
 హెల్పర్ను, దానితో పాటు విశ్వసనీయ లూప్బ్యాక్ అంతర్గత-సేవ టోకెన్ను ఉపయోగిస్తుంది.
 
-#### Credential exports and restores are operator-only
+సంబంధిత విధ్వంసక చర్యలకూ అదే హద్దు వర్తిస్తుంది: `POST /api/db-backups/import` (అప్‌లోడ్ చేసిన `.sqlite` ఫైల్, `dryRun=true` సహా), `POST /api/db-backups` (నిల్వ చేసిన బ్యాకప్‌ను దాని id ద్వారా పునరుద్ధరించడం), `POST /api/settings/import-json` (పాత JSON ఆకృతి నుంచి పునరుద్ధరణ) నడుస్తున్న డేటాబేస్‌ను లేదా సెట్టింగ్‌లు, కనెక్షన్‌లు, API కీల మొత్తం సమూహాన్ని భర్తీ చేస్తాయి. అందువల్ల మెషీన్ క్రెడెన్షియల్‌తో ఈ చర్యలను కూడా ప్రారంభించలేరు.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+పునరుద్ధరణ పాయింట్లను తొలగించడానికీ అదే హద్దు ఉంది: `DELETE /api/db-backups` (శుభ్రపరచడం — తాజా N ఉంచడం లేదా D రోజుల కంటే పాతవి తొలగించడం), `PATCH /api/db-backups` (నిలుపుదల సెట్టింగ్‌లు). నిల్వ చేసిన నియమాలనే `cleanupDbBackups()` ప్రతి ఆటోమేటిక్ బ్యాకప్ తర్వాత అమలు చేస్తుంది (`src/lib/db/backup.ts`); కాబట్టి `keepLatest: 1` సేవ్ చేయగల మెషీన్ క్రెడెన్షియల్ తదుపరి స్నాప్‌షాట్‌లో పాత పునరుద్ధరణ పాయింట్లను తొలగించగలదు. బ్యాకప్‌ల జాబితాను చూడటం మరియు సృష్టించడం (`GET`/`PUT /api/db-backups`) సాధారణ నిర్వహణ ప్రమాణీకరణనే కొనసాగిస్తాయి.
 
 ### తాజా-ఇన్స్టాల్ బూట్స్ట్రాప్ లూప్బ్యాక్కు మాత్రమే — వాస్తవ పీర్ ఆధారంగా, `Host` ఆధారంగా కాదు
 

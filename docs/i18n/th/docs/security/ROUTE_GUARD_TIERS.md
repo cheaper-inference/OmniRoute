@@ -209,7 +209,7 @@ Tunnel, Tailscale, Ngrok) การตรวจสอบลูปแบ็กย
 (GHSA-7pq4-8pvv-rx7r) นอกจากนี้ `enableObsidianVaultSync()` จะปฏิเสธ vault
 ที่เป็นไดเรกทอรีข้อมูล อยู่ภายในไดเรกทอรีข้อมูล หรือครอบคลุมไดเรกทอรีข้อมูล
 
-#### การส่งออกข้อมูลประจำตัวสงวนไว้สำหรับผู้ดูแลระบบเท่านั้น
+#### การส่งออกข้อมูลประจำตัวและการกู้คืนสงวนไว้สำหรับผู้ดูแลระบบเท่านั้น
 
 ระดับข้างต้นกำหนดเพียงว่าจำเป็นต้องใช้ข้อมูลประจำตัว _บางอย่าง_ หรือไม่ เส้นทางที่ใช้ดาวน์โหลด
 ข้อมูลประจำตัวที่จัดเก็บไว้จะมีการตรวจสอบครั้งที่สองในตัวจัดการ: `GET /api/settings/export-json` (การเชื่อมต่อ
@@ -220,22 +220,9 @@ Tunnel, Tailscale, Ngrok) การตรวจสอบลูปแบ็กย
 และ `admin`) และโทเค็นการเข้าถึง `oma_` การออกโทเค็นซิงค์ (`POST /api/sync/tokens`) ใช้
 ตัวช่วยเดียวกัน รวมถึงโทเค็นบริการภายในบนลูปแบ็กที่เชื่อถือได้
 
-#### Credential exports and restores are operator-only
+การดำเนินการที่ทำลายหรือแทนที่ข้อมูลก็มีขอบเขตเดียวกัน: `POST /api/db-backups/import` (ไฟล์ `.sqlite` ที่อัปโหลด รวมถึงกรณี `dryRun=true`), `POST /api/db-backups` (กู้คืนข้อมูลสำรองที่เก็บไว้ตาม id) และ `POST /api/settings/import-json` (กู้คืนจากรูปแบบ JSON เดิม) จะแทนที่ฐานข้อมูลที่ใช้งานอยู่ หรือชุดการตั้งค่า การเชื่อมต่อ และคีย์ API ทั้งหมด ดังนั้นข้อมูลประจำตัวของเครื่องจึงไม่สามารถเริ่มการดำเนินการเหล่านี้ได้เช่นกัน
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+การลบจุดกู้คืนมีขอบเขตเดียวกัน: `DELETE /api/db-backups` (ล้างข้อมูล — เก็บ N รายการล่าสุด หรือลบรายการที่เก่ากว่า D วัน) และ `PATCH /api/db-backups` (การตั้งค่าการเก็บรักษา) กฎที่บันทึกไว้คือกฎที่ `cleanupDbBackups()` ใช้หลังการสำรองข้อมูลอัตโนมัติทุกครั้ง (`src/lib/db/backup.ts`) หากข้อมูลประจำตัวของเครื่องบันทึก `keepLatest: 1` ได้ ก็อาจลบจุดกู้คืนก่อนหน้าทั้งหมดในสแนปช็อตถัดไป การแสดงรายการและสร้างข้อมูลสำรอง (`GET`/`PUT /api/db-backups`) ยังคงใช้การยืนยันตัวตนสำหรับการจัดการตามปกติ
 
 ### การบูตสแตรปของการติดตั้งใหม่ใช้ได้เฉพาะลูปแบ็ก — พิจารณาจากเพียร์จริง ไม่ใช่ `Host`
 

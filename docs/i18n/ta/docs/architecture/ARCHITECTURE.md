@@ -15,7 +15,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 
 முக்கியத் திறன்கள்:
 
-- CLI/கருவிகளுக்கான OpenAI-இணக்கமான API பரப்பு (375 வழங்குநர்கள், 154 இயக்கி தொகுதிகள்)
+- CLI/கருவிகளுக்கான OpenAI-இணக்கமான API பரப்பு (375 வழங்குநர்கள், 156 இயக்கி தொகுதிகள்)
 - வழங்குநர் வடிவங்களுக்கு இடையிலான கோரிக்கை/பதில் மொழிமாற்றம்
 - மாதிரித் தொகுப்பு மாற்று வழித்தடம் (பல-மாதிரி வரிசை)
 - `compositeTiers` அடிப்படையிலான இயக்கநேர வரிசைப்படுத்தலுடன் கட்டமைக்கப்பட்ட தொகுப்புப் படிகள் (`provider + model + connection`)
@@ -31,7 +31,7 @@ OmniRoute என்பது Next.js அடிப்படையில் உர
 - `/v1/search` வழியாக இணையத் தேடல் (20 வழங்குநர்கள்)
 - `/v1/moderations` வழியாக உள்ளடக்க நெறிப்படுத்தல்
 - `/v1/rerank` வழியாக மறுதரவரிசைப்படுத்தல்
-- பகுத்தறிவு மாதிரிகளுக்கான Think குறிச்சொல் பகுப்பாய்வு (``)
+- பகுத்தறிவு மாதிரிகளுக்கான Think குறிச்சொல் பகுப்பாய்வு (`<think>...</think>`)
 - கடுமையான OpenAI SDK இணக்கத்தன்மைக்கான பதில் தூய்மைப்படுத்தல்
 - வழங்குநர்களுக்கு இடையிலான இணக்கத்தன்மைக்கான பாத்திர இயல்பாக்கம் (developer→system, system→user)
 - கட்டமைக்கப்பட்ட வெளியீட்டு மாற்றம் (json_schema → Gemini responseSchema)
@@ -1089,9 +1089,9 @@ flowchart LR
 
 ## 6) SSRF / வெளிச்செல்லும் URL பாதுகாப்பு
 
-- `src/shared/network/outboundUrlGuard.ts`, அனைத்து தனிப்பட்ட/லூப்பேக்/இணைப்பு-உள்ளூர் இலக்கு URL-களும் வழங்குநர் செயலாக்கிகளை அடைவதற்கு முன் அவற்றைத் தடுக்கிறது
-- வழங்குநர் மாடல் கண்டறிதல் மற்றும் சரிபார்ப்புப் பாதைகள் `src/shared/network/safeOutboundFetch.ts`-ஐப் பயன்படுத்துகின்றன; இது ஒவ்வொரு வெளிச்செல்லும் கோரிக்கைக்கும் முன் பாதுகாப்பைப் பயன்படுத்துகிறது
-- பாதுகாப்புப் பிழைகள் HTTP 422 உடன் `URL_GUARD_BLOCKED` ஆக வெளிப்படுத்தப்பட்டு, `providerAudit.ts` வழியாக இணக்கத் தணிக்கைத் தடத்தில் பதிவு செய்யப்படுகின்றன
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ஆனது `BaseExecutor.execute()` வழியாக அனுப்பப்படும் அரட்டை கோரிக்கைகளுக்கு `src/shared/network/outboundUrlGuard.ts`-ஐப் பயன்படுத்துகிறது. பொது-மட்டும் பயன்முறையில் (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, தனிப்பட்ட கொடி முடக்கப்பட்ட நிலையில்), இது தனிப்பட்ட மற்றும் loopback புரவலன்களையும் 169.254.0.0/16-ஐயும் தடுக்கிறது; மற்ற எல்லாப் பயன்முறைகளிலும் cloud-metadata புரவலன்களைத் தடுக்கிறது. எந்தவொரு DNS தேடலுக்கும் முன்பாக, எழுதப்பட்டுள்ளபடியே புரவலன் பெயர் அல்லது IP literal-ஐ இது சரிபார்க்கிறது. உள்ளமைக்கப்பட்ட உள்ளூர் வழங்குநர்கள் இந்தச் சரிபார்ப்பைத் தவிர்க்கின்றனர்.
+- வழங்குநரின் மாதிரி கண்டறிதல் மற்றும் சரிபார்ப்பு வழித்தடங்கள் `src/shared/network/safeOutboundFetch.ts`-ஐப் பயன்படுத்துகின்றன; இது ஒவ்வொரு வெளிச்செல்லும் கோரிக்கைக்கும் முன் பாதுகாப்பைப் பயன்படுத்துகிறது
+- பாதுகாப்புப் பிழைகள் HTTP 503 உடன் `URL_GUARD_BLOCKED` ஆக வெளிப்படுகின்றன (`getSafeOutboundFetchErrorStatus`; மாதிரி-கண்டறிதல் வழித்தடம் 400-ஐ வழங்குகிறது), மேலும் சரிபார்ப்பின்போது நிகழும் உண்மையான SSRF தடுப்புகள் `provider.validation.ssrf_blocked` நிகழ்வுகளாகத் தணிக்கைப் பதிவில் பதியப்படுகின்றன
 
 ## கண்காணிப்புத் திறனும் செயல்பாட்டுச் சமிக்ஞைகளும்
 
@@ -1142,7 +1142,7 @@ flowchart LR
 4. Cloud செயல்பாடு சரியான `NEXT_PUBLIC_BASE_URL` மற்றும் cloud endpoint-ஐ அணுகக்கூடிய தன்மையைச் சார்ந்துள்ளது.
 5. `open-sse/` அடைவு `@omniroute/open-sse` **npm workspace package** ஆக வெளியிடப்படுகிறது. Source code அதை `@omniroute/open-sse/...` வழியாக import செய்கிறது (Next.js `transpilePackages` மூலம் resolve செய்யப்படுகிறது). ஒருமைப்பாட்டிற்காக இந்த ஆவணத்திலுள்ள file paths இன்னும் `open-sse/` என்ற அடைவுப் பெயரையே பயன்படுத்துகின்றன.
 6. அணுகக்கூடிய, ஊடாடும் analytics காட்சிப்படுத்தல்களுக்காக (model பயன்பாட்டு bar charts, வெற்றி விகிதங்களுடன் கூடிய provider breakdown tables) டாஷ்போர்டிலுள்ள charts **Recharts**-ஐ (SVG-அடிப்படையிலானது) பயன்படுத்துகின்றன.
-7. E2E சோதனைகள் **Playwright**-ஐ (`tests/e2e/`) பயன்படுத்துகின்றன; அவை `npm run test:e2e` வழியாக இயக்கப்படுகின்றன. Unit சோதனைகள் **Node.js test runner**-ஐ (`tests/unit/`) பயன்படுத்துகின்றன; அவை `npm run test:unit` வழியாக இயக்கப்படுகின்றன. `src/`-இன் கீழுள்ள source code **TypeScript** (`.ts`/`.tsx`) ஆகும்; `open-sse/` workspace JavaScript (`.js`) ஆகவே உள்ளது.
+7. E2E சோதனைகள் **Playwright**-ஐ (`tests/e2e/`) பயன்படுத்துகின்றன; அவை `npm run test:e2e` வழியாக இயக்கப்படுகின்றன. Unit சோதனைகள் **Node.js test runner**-ஐ (`tests/unit/`) பயன்படுத்துகின்றன; அவை `npm run test:unit` வழியாக இயக்கப்படுகின்றன. `src/`-இன் கீழுள்ள source code **TypeScript** (`.ts`/`.tsx`) ஆகும்; `open-sse/` workspace TypeScript (`.ts`) ஆகவே உள்ளது.
 8. Settings பக்கம் 7 tabs ஆக ஒழுங்கமைக்கப்பட்டுள்ளது: பொது, தோற்றம், AI, பாதுகாப்பு, Routing, Resilience, மேம்பட்டவை. Resilience பக்கம் request queue, connection cooldown, provider breaker மற்றும் wait-for-cooldown நடத்தையை மட்டுமே உள்ளமைக்கிறது; நேரடி breaker runtime நிலை Health பக்கத்தில் காட்டப்படுகிறது.
 9. **Context Relay** உத்தி (`context-relay`) இரண்டு அடுக்குகளாகப் பிரிக்கப்பட்டுள்ளது: handoff உருவாக்கப்பட வேண்டுமா என்பதை `combo.ts` தீர்மானிக்கிறது; account resolution-க்குப் பிறகு `chat.ts` handoff-ஐ உட்செலுத்துகிறது. Handoff தரவு `context_handoffs` SQLite table-இல் உள்ளது. உண்மையான account மாறியதா என்பது `chat.ts`-க்கு மட்டுமே தெரியும் என்பதால் இந்தப் பிரிப்பு நோக்கத்துடன் செய்யப்பட்டதாகும்.
 10. **Proxy அமலாக்கம்** இப்போது விரிவானதாக உள்ளது: `tokenHealthCheck.ts` ஒவ்வொரு connection-க்கும் proxy-ஐ resolve செய்கிறது, `/api/providers/validate` ஆனது `runWithProxyContext`-ஐப் பயன்படுத்துகிறது, மேலும் Node 22-இல் dispatcher இணக்கத்தன்மையைப் பராமரிக்க `proxyFetch.ts` ஆனது `undici.fetch()`-ஐப் பயன்படுத்துகிறது.

@@ -991,50 +991,49 @@ X-OmniRoute-No-Cache: true
 
 ---
 
-## 仪表板与管理
+## 仪表盘与管理
 
-管理路由（除公开身份验证/登录之外的 `/api/*`）**不**接受普通推理 API 密钥的授权。有关凭据类别、作用域和 curl 示例，请参阅：
-[管理身份验证](../guides/MANAGEMENT-AUTH.md)。
+管理路由（`/api/*`，公开的 auth/login 除外）**无法**通过普通推理 API 密钥授权。凭证类别、作用域及 curl 示例：[管理认证](../guides/MANAGEMENT-AUTH.md)。
 
-### 身份验证
+### 认证
 
-| 端点                          | 方法     | 描述                                                                                                                                                                                                                           |
-| ----------------------------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/api/auth/login`             | POST     | 登录                                                                                                                                                                                                                           |
-| `/api/auth/logout`            | POST     | 退出登录                                                                                                                                                                                                                       |
-| `/api/settings/require-login` | GET/POST | 登录状态（GET，公开）。POST 用于设置密码/切换是否需要登录：密码一旦存在，就仅限操作员执行（通过仪表板会话、本地 CLI，或在禁用登录时执行——API 密钥和 `oma_` 令牌会收到 `403`）；仪表板会话通过发送 `currentPassword` 来替换密码 |
+| 端点                          | 方法     | 描述                                                                                                                                                                                                           |
+| ----------------------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/auth/login`             | POST     | 登录                                                                                                                                                                                                           |
+| `/api/auth/logout`            | POST     | 登出                                                                                                                                                                                                           |
+| `/api/settings/require-login` | GET/POST | 登录状态（GET，公开）。POST 用于设置密码/切换登录开关：一旦密码已存在，仅操作者可执行（仪表盘会话、本地 CLI，或已禁用登录——API 密钥和 `oma_` 令牌会收到 `403`）；仪表盘会话会发送 `currentPassword` 以替换密码 |
 
 ### 提供者管理
 
-| 端点                                    | 方法                      | 描述                                                                                                            |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `/api/providers`                        | GET/POST                  | 列出/创建提供者                                                                                                 |
-| `/api/providers/[id]`                   | GET/PUT/DELETE            | 管理提供者                                                                                                      |
-| `/api/providers/[id]/test`              | POST                      | 测试提供者连接                                                                                                  |
-| `/api/providers/[id]/models`            | GET                       | 列出提供者模型                                                                                                  |
-| `/api/providers/validate`               | POST                      | 验证提供者配置                                                                                                  |
-| `/api/providers/bulk`                   | POST                      | 为单个提供者批量添加 API 密钥                                                                                   |
-| `/api/providers/import`                 | POST                      | 从已解析的 CSV/JSON 文件导入异构提供者列表（#6836）；返回逐行的部分失败结果                                     |
-| `/api/provider-nodes*`                  | 多种                      | 提供者节点管理                                                                                                  |
-| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | 自定义模型和各模型的覆盖设置（添加、更新、隐藏/显示、删除）                                                     |
-| `/api/provider-models/validate-and-add` | POST                      | 经过管理身份验证、可选启用的严格连接验证和原子化自定义模型注册；请参阅[模型验证](../guides/MODEL-VALIDATION.md) |
+| 端点                                    | 方法                      | 描述                                                                                                      |
+| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `/api/providers`                        | GET/POST                  | 列出/创建提供者                                                                                           |
+| `/api/providers/[id]`                   | GET/PUT/DELETE            | 管理单个提供者                                                                                            |
+| `/api/providers/[id]/test`              | POST                      | 测试提供者连接                                                                                            |
+| `/api/providers/[id]/models`            | GET                       | 列出提供者模型                                                                                            |
+| `/api/providers/validate`               | POST                      | 验证提供者配置                                                                                            |
+| `/api/providers/bulk`                   | POST                      | 为单个提供者批量添加 API 密钥                                                                             |
+| `/api/providers/import`                 | POST                      | 从解析后的 CSV/JSON 文件导入异构提供者列表（#6836）；返回逐行的部分失败结果                               |
+| `/api/provider-nodes*`                  | 多种                      | 提供者节点管理                                                                                            |
+| `/api/provider-models`                  | GET/POST/PUT/PATCH/DELETE | 自定义模型及按模型覆盖（添加、更新、隐藏/显示、删除）                                                     |
+| `/api/provider-models/validate-and-add` | POST                      | 经管理认证的、可选启用的严格连接验证与原子化自定义模型注册；参见[模型验证](../guides/MODEL-VALIDATION.md) |
 
 对于已同步/导入的模型，`PUT /api/provider-models` 接受 `provider`、`modelId` 和
-`maxOutputTokenOverride`：正整数用于设置手动输出 token 上限，`null`
-用于清除该设置并恢复默认值。`GET /api/provider-models?provider=<provider>` 会在
-`modelOutputOverrides` 中返回这些值，包括没有自定义模型记录的模型。该覆盖设置
-使用运行时的 `max_output_tokens` 能力，并且在模型重新同步后仍然保留。兼容 OpenAI 的
-提供者页面提供相同的编辑/清除控件，并会标记明确支持视觉能力的模型。
+`maxOutputTokenOverride`：正整数用于设置手动输出令牌上限，`null`
+则清除该设置以恢复默认值。`GET /api/provider-models?provider=<provider>` 会在
+`modelOutputOverrides` 中返回这些值，包括没有自定义模型行的模型。该覆盖
+使用运行时的 `max_output_tokens` 能力，并在模型重新同步后仍然保留。OpenAI 兼容
+提供者页面提供相同的编辑/清除控件，并会标记具有显式视觉支持的模型。
 
-自定义 Chat Completions 节点会针对上游后端调整显式禁用推理的设置。连接测试
-成功后，会自动为每个精确模型 ID 选择聊天模板控件，前提是其 `/models` 条目能够证明
-`owned_by` 值属于以下已识别值之一：`vllm`、`sglang` 或 `llamacpp`。
-透明的 OpenAI 兼容包装器可能会将原始模型条目保留在嵌套的
-`openai` 对象中；检测过程最多会沿三层此类封装继续查找。所有权信息缺失、未知或
-存在冲突的模型会保留普通的 OpenAI 行为。检测会复用现有的目录请求，
-不会生成任何补全 token，并且会在连接端点发生变化时失效。
+自定义 Chat Completions 节点会将显式的推理禁用适配到上游后端。连接测试成功
+后，会为每个精确模型 ID 自动选择聊天模板控件——前提是其 `/models` 条目
+包含可识别的 `owned_by` 值：`vllm`、`sglang` 或 `llamacpp`。
+透明的 OpenAI 兼容封装层可能会将原始模型条目保留在嵌套的
+`openai` 对象中；检测最多会追踪三层此类封装。所有权缺失、未知或
+冲突的模型将保持普通的 OpenAI 行为。检测复用现有的目录请求，
+不生成任何补全令牌，并在连接端点更改时失效。
 
-若要为未公开该元数据的后端固定此行为，请使用现有的部分
+对于不暴露该元数据的后端，如需固定此行为，请使用现有的部分
 提供者更新 API：
 
 ```json
@@ -1045,72 +1044,72 @@ X-OmniRoute-No-Cache: true
 }
 ```
 
-将该请求体通过 `PUT /api/providers/<connection-id>` 发送。在该连接上，显式指定的推理强度 `none` 会作为 `chat_template_kwargs.thinking=false` 和 `chat_template_kwargs.enable_thinking=false` 发送。除非服务器端推理规则强制指定某种强度，否则显式的原生模板值仍具有最高权威性。仅当自定义 OpenAI 兼容连接分派 Chat Completions 请求体时，此设置才适用；Responses 请求和普通提供者仍保持其原生请求格式。将 `reasoningControl` 设置为 `openai` 可强制直接透传常规 OpenAI `reasoning_effort`，也可以省略该字段或将其设置为 `null`，以使用自动检测。
+将该请求体通过 `PUT /api/providers/<connection-id>` 发送。在该连接上，显式的推理力度 `none` 会以 `chat_template_kwargs.thinking=false` 和 `chat_template_kwargs.enable_thinking=false` 的形式发送。除非服务端推理规则强制指定推理力度，否则显式的原生模板值保持权威。该设置仅在自定义 OpenAI 兼容连接分发 Chat Completions 请求体时生效；Responses 请求和普通提供者保持其原生请求结构。将 `reasoningControl` 设为 `openai` 可强制普通 OpenAI 的 `reasoning_effort` 透传；省略它或将其设为 `null` 则使用自动检测。
 
-当 Claude Code 自动模式分类器请求中不包含显式推理控制时，默认会禁用原生思考。检测使用 Claude 格式请求中的分类器系统标记，而非模型名称或补全限制。显式请求体控制、受支持的推理强度/思考请求头、路由规则和已解析的模型推理强度仍保持原有优先级。分类器的两个阶段均保留各自的提示词、补全限制、停止序列以及真实的上游权限判定结果；第二阶段仍可将其请求的可见推理作为普通文本输出。
+当 Claude Code 自动模式分类器请求不包含显式推理控制时，原生思考功能默认禁用。检测基于 Claude 格式请求中分类器的系统标记，而非模型名称或补全上限。显式请求体控制、受支持的 effort/thinking 请求头、路由规则以及解析后的模型推理力度保持其现有优先级。分类器的两个阶段均保留其提示词、补全上限、停止序列以及真实的上游权限判定；第二阶段仍可以普通文本形式产出其请求的可见推理内容。
 
 ### OAuth 流程
 
-| 端点                             | 方法 | 描述                    |
-| -------------------------------- | ---- | ----------------------- |
-| `/api/oauth/[provider]/[action]` | 多种 | 提供者特定的 OAuth 流程 |
+| 端点                             | 方法    | 描述               |
+| -------------------------------- | ------- | ------------------ |
+| `/api/oauth/[provider]/[action]` | Various | 提供者特定的 OAuth |
 
 ### 路由与配置
 
-| 端点                  | 方法     | 描述                         |
-| --------------------- | -------- | ---------------------------- |
-| `/api/models/alias`   | GET/POST | 模型别名                     |
-| `/api/models/catalog` | GET      | 按提供者和类型列出的所有模型 |
-| `/api/combos*`        | 多种     | 组合管理                     |
-| `/api/keys*`          | 多种     | API 密钥管理                 |
-| `/api/pricing`        | GET      | 模型定价                     |
+| 端点                  | 方法     | 描述                       |
+| --------------------- | -------- | -------------------------- |
+| `/api/models/alias`   | GET/POST | 模型别名                   |
+| `/api/models/catalog` | GET      | 按提供者和类型列出所有模型 |
+| `/api/combos*`        | Various  | 组合管理                   |
+| `/api/keys*`          | Various  | API 密钥管理               |
+| `/api/pricing`        | GET      | 模型定价                   |
 
-### 使用情况与分析
+### 用量与分析
 
-| 端点                             | 方法            | 描述                                                                                                                                                                                                                                                       |
-| -------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/usage/history`             | GET             | 使用历史                                                                                                                                                                                                                                                   |
-| `/api/usage/logs`                | GET             | 使用日志                                                                                                                                                                                                                                                   |
-| `/api/usage/request-logs`        | GET             | 请求级日志                                                                                                                                                                                                                                                 |
-| `/api/usage/[connectionId]`      | GET             | 每个连接的使用情况                                                                                                                                                                                                                                         |
-| `/api/usage/token-limits`        | GET/POST/DELETE | 每个 API 密钥的令牌限制预算                                                                                                                                                                                                                                |
-| `/api/usage/model-latency-stats` | GET             | 按提供者/模型统计的滚动延迟汇总（avg/p50/p95/p99、成功率）；筛选器：`windowHours`/`minSamples`/`maxRows`/`provider`/`model` (#6873)                                                                                                                        |
-| `/api/usage/cache-health`        | GET             | 基于 `call_logs` 的提示词缓存健康状况摘要——写入/读取比率、写入大小的 p50/p90/p99 分布、大量写入集中度、按模型细分，以及 `healthy`/`degraded`/`thrash`/`no-data` 判定；查询参数为 `range`（`1h`\|`24h`\|`7d`\|`30d`，默认为 `24h`）和可选的 `model` (#8827) |
+| 端点                             | 方法            | 描述                                                                                                                                                                                                                                               |
+| -------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/usage/history`             | GET             | 用量历史                                                                                                                                                                                                                                           |
+| `/api/usage/logs`                | GET             | 用量日志                                                                                                                                                                                                                                           |
+| `/api/usage/request-logs`        | GET             | 请求级日志                                                                                                                                                                                                                                         |
+| `/api/usage/[connectionId]`      | GET             | 按连接统计的用量                                                                                                                                                                                                                                   |
+| `/api/usage/token-limits`        | GET/POST/DELETE | 按 API 密钥设置的 token 限额预算                                                                                                                                                                                                                   |
+| `/api/usage/model-latency-stats` | GET             | 按提供者/模型滚动的延迟聚合（avg/p50/p95/p99、成功率）；筛选参数：`windowHours`/`minSamples`/`maxRows`/`provider`/`model`（#6873）                                                                                                                 |
+| `/api/usage/cache-health`        | GET             | 基于 `call_logs` 的提示词缓存健康摘要 —— 写/读比率、p50/p90/p99 写入大小分布、重度写入集中度、按模型拆分，以及 `healthy`/`degraded`/`thrash`/`no-data` 判定结果；查询参数 `range`（`1h`\|`24h`\|`7d`\|`30d`，默认 `24h`）和可选的 `model`（#8827） |
 
 ### API 密钥权限
 
-`PATCH /api/keys/{id}` 用于更新现有密钥的权限。与所有 `/api/keys*` 路由一样，它需要管理授权（请参阅[管理身份验证](../guides/MANAGEMENT-AUTH.md)），而非推理密钥。请仅发送要更改的字段；不包含任何此类字段的请求将被拒绝，并返回 `No valid fields to update`。接受的字段由 `src/shared/validation/schemas/keys.ts` 中的 `updateKeyPermissionsSchema` 定义。
+`PATCH /api/keys/{id}` 用于更新现有密钥的权限。与所有 `/api/keys*` 路由一样，它需要管理授权（参见[管理认证](../guides/MANAGEMENT-AUTH.md)），而非推理密钥。仅发送你想要修改的字段；不包含任何这些字段的请求会被拒绝并返回 `No valid fields to update`。可接受的字段由 `src/shared/validation/schemas/keys.ts` 中的 `updateKeyPermissionsSchema` 定义。
 
-| 字段                                        | 类型                                                    | 说明                                                                                           |
-| ------------------------------------------- | ------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| `name`                                      | 字符串，1-200 个字符                                    |                                                                                                |
-| `isActive`                                  | 布尔值                                                  |                                                                                                |
-| `isBanned`                                  | 布尔值                                                  |                                                                                                |
-| `expiresAt`                                 | ISO 8601 日期时间或 `null`                              | `null` 会清除过期时间                                                                          |
-| `modelAccessMode`                           | `all` \| `restricted`                                   | 当模式为 `all` 时，`allowedModels` 必须为空                                                    |
-| `allowedModels`, `blockedModels`            | 字符串数组，最多 1000 个                                |                                                                                                |
-| `allowedCombos`                             | 字符串数组，最多 500 个                                 | 限制该密钥可以调用哪些组合；直接模型由 `modelAccessMode` / `allowedModels` 控制                |
-| `connectionAccessMode`                      | `all` \| `restricted`                                   | 当值为 `restricted` 时，`allowedConnections` 必须非空；当值为 `all` 时则必须为空               |
-| `allowedConnections`                        | UUID 数组，最多 100 个                                  |                                                                                                |
-| `allowAutoCombos`                           | 布尔值                                                  | `false` 会拒绝使用此密钥对 `auto/*` 模型发出的请求；从未设置此项的密钥将被允许                 |
-| `catalogScope`                              | `all` \| `combos` \| `models`                           | 指定 `GET /v1/models` 为此密钥列出的内容（仅组合、仅模型或两者）；不会改变该密钥可以调用的内容 |
-| `forcedModel`                               | 最多 300 个字符的字符串，或 `null`                      | 将聊天请求路由到此模型/组合，优先级高于 `X-Route-Model` 和 `body.model`；该密钥的限制仍然适用  |
-| `noLog`, `autoResolve`                      | 布尔值                                                  |                                                                                                |
-| `throttleDelayMs`                           | 整数，0-300000                                          |                                                                                                |
-| `maxSessions`                               | 整数，0-10000                                           |                                                                                                |
-| `rateLimits`                                | `{ limit, window }` 数组（正整数，最多 50 个）或 `null` | `null` 会清除限制                                                                              |
-| `accessSchedule`                            | 调度对象或 `null`                                       | `null` 会清除调度                                                                              |
-| `scopes`                                    | 字符串数组，最多 32 个                                  |                                                                                                |
-| `allowedEndpoints`                          | 字符串数组，最多 20 个                                  |                                                                                                |
-| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                                |
-| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 请参阅[按密钥绕过缓存](#per-key-cache-bypass)                                                  |
-| `compressionEnabled`                        | 布尔值                                                  |                                                                                                |
-| `codexServiceMode`                          | Codex 服务模式之一                                      |                                                                                                |
-| `disableNonPublicModels`                    | boolean                                                 |                                                                                                |
-| `allowUsageCommand`                         | boolean                                                 |                                                                                                |
-| `usageLimitEnabled`                         | boolean                                                 |                                                                                                |
-| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | 大于等于 0 的 number 或 `null`                          |                                                                                                |
-| `chaosModeEnabled`                          | boolean                                                 |                                                                                                |
+| 字段                                        | 类型                                                    | 备注                                                                                             |
+| ------------------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `name`                                      | 字符串，1-200 个字符                                    |                                                                                                  |
+| `isActive`                                  | 布尔值                                                  |                                                                                                  |
+| `isBanned`                                  | 布尔值                                                  |                                                                                                  |
+| `expiresAt`                                 | ISO 8601 日期时间或 `null`                              | `null` 表示清除过期时间                                                                          |
+| `modelAccessMode`                           | `all` \| `restricted`                                   | 当模式为 `all` 时，`allowedModels` 必须为空                                                      |
+| `allowedModels`、`blockedModels`            | 字符串数组，最多 1000 个                                |                                                                                                  |
+| `allowedCombos`                             | 字符串数组，最多 500 个                                 | 控制该密钥可调用哪些组合；直接模型由 `modelAccessMode` / `allowedModels` 控制                    |
+| `connectionAccessMode`                      | `all` \| `restricted`                                   | 当为 `restricted` 时 `allowedConnections` 必须非空，当为 `all` 时必须为空                        |
+| `allowedConnections`                        | UUID 数组，最多 100 个                                  |                                                                                                  |
+| `allowAutoCombos`                           | 布尔值                                                  | `false` 会拒绝此密钥对 `auto/*` 模型的请求；从未设置过该字段的密钥则允许请求                     |
+| `catalogScope`                              | `all` \| `combos` \| `models`                           | 决定 `GET /v1/models` 为该密钥列出哪些内容（仅组合、仅模型或两者）；它不会改变该密钥可调用的内容 |
+| `forcedModel`                               | 最长 300 个字符的字符串，或 `null`                      | 将聊天请求路由到此模型/组合，优先级高于 `X-Route-Model` 和 `body.model`；该密钥的限制仍然生效    |
+| `noLog`、`autoResolve`                      | 布尔值                                                  |                                                                                                  |
+| `throttleDelayMs`                           | 整数，0-300000                                          |                                                                                                  |
+| `maxSessions`                               | 整数，0-10000                                           |                                                                                                  |
+| `rateLimits`                                | `{ limit, window }` 数组（正整数，最多 50 个）或 `null` | `null` 表示清除限制                                                                              |
+| `accessSchedule`                            | 计划对象或 `null`                                       | `null` 表示清除计划                                                                              |
+| `scopes`                                    | 字符串数组，最多 32 个                                  |                                                                                                  |
+| `allowedEndpoints`                          | 字符串数组，最多 20 个                                  |                                                                                                  |
+| `streamDefaultMode`                         | `legacy` \| `json`                                      |                                                                                                  |
+| `cacheDefaultMode`                          | `legacy` \| `bypass`                                    | 参见 [按密钥绕过缓存](#per-key-cache-bypass)                                                     |
+| `compressionEnabled`                        | 布尔值                                                  |                                                                                                  |
+| `codexServiceMode`                          | Codex 服务模式之一                                      |                                                                                                  |
+| `disableNonPublicModels`                    | boolean                                                 |                                                                                                  |
+| `allowUsageCommand`                         | boolean                                                 |                                                                                                  |
+| `usageLimitEnabled`                         | boolean                                                 |                                                                                                  |
+| `dailyUsageLimitUsd`, `weeklyUsageLimitUsd` | number >= 0 or `null`                                   |                                                                                                  |
+| `chaosModeEnabled`                          | boolean                                                 |                                                                                                  |
 
 ```bash
 curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
@@ -1121,16 +1120,16 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 
 ### 设置
 
-| 端点                                  | 方法          | 描述                                                                                                                                                                                                                    |
-| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/settings`                       | GET/PUT/PATCH | 常规设置。安全策略键（`requireLogin`、`newPassword`、`oidc*`、`corsOrigins`、`bruteForceProtection`）需要 `currentPassword` 和操作员凭据——API 密钥和 `oma_` 令牌会收到 `403`；每次修改都需要访问令牌具有 `admin` 作用域 |
-| `/api/settings/proxy`                 | GET/PUT       | 网络代理配置                                                                                                                                                                                                            |
-| `/api/settings/proxy/test`            | POST          | 测试代理连接                                                                                                                                                                                                            |
-| `/api/settings/ip-filter`             | GET/PUT       | IP 允许列表/阻止列表                                                                                                                                                                                                    |
-| `/api/settings/thinking-budget`       | GET/PUT       | 思考/推理**请求**重写模式（透传 / 自动剥离 / 自定义 / 自适应）。与压缩无关。请参阅 [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)。                                                                                 |
-| `/api/settings/system-prompt`         | GET/PUT       | 全局系统提示词                                                                                                                                                                                                          |
-| `/api/settings/compression`           | GET/PUT       | 全局压缩配置                                                                                                                                                                                                            |
-| `/api/settings/purge-request-history` | POST          | 清除请求日志行和本地调用日志工件                                                                                                                                                                                        |
+| 端点                                  | 方法          | 描述                                                                                                                                                                                                                          |
+| ------------------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/settings`                       | GET/PUT/PATCH | 通用设置。安全策略相关的键（`requireLogin`、`newPassword`、`oidc*`、`corsOrigins`、`bruteForceProtection`）需要 `currentPassword` 以及操作员凭据 —— API 密钥和 `oma_` 令牌会收到 `403`；每次变更都需要 `admin` 访问令牌作用域 |
+| `/api/settings/proxy`                 | GET/PUT       | 网络代理配置                                                                                                                                                                                                                  |
+| `/api/settings/proxy/test`            | POST          | 测试代理连接                                                                                                                                                                                                                  |
+| `/api/settings/ip-filter`             | GET/PUT       | IP 白名单/黑名单                                                                                                                                                                                                              |
+| `/api/settings/thinking-budget`       | GET/PUT       | 思考/推理**请求**重写模式（passthrough / auto-strip / custom / adaptive）。独立于压缩功能。参见 [THINKING_BUDGET.md](../guides/THINKING_BUDGET.md)。                                                                          |
+| `/api/settings/system-prompt`         | GET/PUT       | 全局系统提示词                                                                                                                                                                                                                |
+| `/api/settings/compression`           | GET/PUT       | 全局压缩配置                                                                                                                                                                                                                  |
+| `/api/settings/purge-request-history` | POST          | 清除请求日志记录和本地调用日志文件                                                                                                                                                                                            |
 
 ### 上下文与压缩
 
@@ -1142,64 +1141,56 @@ curl -X PATCH "$OMNIROUTE_URL/api/keys/$KEY_ID" \
 | `/api/context/caveman/config`          | GET/PUT        | Caveman 专用设置别名                                     |
 | `/api/context/rtk/config`              | GET/PUT        | RTK 专用设置，包括自定义过滤器和原始输出保留             |
 | `/api/context/rtk/filters`             | GET            | RTK 过滤器目录和自定义过滤器诊断                         |
-| `/api/context/rtk/test`                | POST           | 针对文本负载运行 RTK 预览/测试                           |
-| `/api/context/rtk/raw-output/[id]`     | GET            | 通过指针 ID 读取保留的已脱敏原始输出                     |
-| `/api/context/combos`                  | GET/POST       | 列出/创建压缩组合                                        |
+| `/api/context/rtk/test`                | POST           | 对文本负载运行 RTK 预览/测试                             |
+| `/api/context/rtk/raw-output/[id]`     | GET            | 按指针 id 读取已保留的脱敏原始输出                       |
+| `/api/context/combos`                  | GET/POST       | 压缩组合列表/创建                                        |
 | `/api/context/combos/[id]`             | GET/PUT/DELETE | 压缩组合详情/更新/删除                                   |
 | `/api/context/combos/[id]/assignments` | GET/PUT        | 将压缩组合分配给路由组合                                 |
 | `/api/context/analytics`               | GET            | 压缩分析别名                                             |
 
 ### 监控
 
-| 端点                                 | 方法       | 描述                                                                                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------ | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/api/sessions`                      | GET        | 活跃会话跟踪                                                                                                                                                                                                                                                                                                                                                           |
-| `/api/rate-limits`                   | GET        | 每账户速率限制                                                                                                                                                                                                                                                                                                                                                         |
-| `/api/monitoring/health`             | GET        | 健康检查 + 提供者摘要（`catalogCount`、`configuredCount`、`activeCount`、`monitoredCount`）。管理视图包含 `credentialHealth`：探测缓存标量、当 `failed>0` 时的 `failedConnections`，以及 `staleDbNonOkCount`（SQLite 粘滞型 `test_status`，并非仪表值）。请参阅 [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)。 |
-| `/api/cache/stats`                   | GET/DELETE | 缓存统计信息/清除缓存                                                                                                                                                                                                                                                                                                                                                  |
-| `/api/modality-bridge/stats`         | GET        | 内存中的 `attempts`、成功次数/`bridged`、失败次数、缓存命中次数、`totalLatencyMs`、`latencySamples`、以样本数为分母的 `averageLatencyMs`，以及最后使用时间（重启时重置；需要管理身份验证）                                                                                                                                                                             |
-| `/api/modality-bridge/video/runtime` | GET        | 在管理身份验证/探测之前执行严格的可信回环检查；返回经过净化处理的 FFmpeg/ffprobe 可用性和版本信息（no-store）                                                                                                                                                                                                                                                          |
-| `/api/modality-bridge/video/extract` | POST       | 内部经身份验证的可信回环字节代理；输入上限为 50 MiB、有界队列/输出上限为 32 MiB、`503` 表示容量不足、`499` 表示连接断开、`504` 表示超时；并非公共上传 API                                                                                                                                                                                                              |
+| 端点                                 | 方法       | 描述                                                                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------ | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/api/sessions`                      | GET        | 活动会话跟踪                                                                                                                                                                                                                                                                                                                                                             |
+| `/api/rate-limits`                   | GET        | 每账户速率限制                                                                                                                                                                                                                                                                                                                                                           |
+| `/api/monitoring/health`             | GET        | 健康检查 + 提供者摘要（`catalogCount`、`configuredCount`、`activeCount`、`monitoredCount`）。管理视图包含 `credentialHealth`：探测缓存标量、当 `failed>0` 时的 `failedConnections`，以及 `staleDbNonOkCount`（SQLite 粘性 `test_status`，而非仪表盘指标）。请参阅 [MONITORING_GUIDE.md](../ops/MONITORING_GUIDE.md#credentialhealth-probe-cache-vs-sqlite-test_status)。 |
+| `/api/cache/stats`                   | GET/DELETE | 缓存统计 / 清除                                                                                                                                                                                                                                                                                                                                                          |
+| `/api/modality-bridge/stats`         | GET        | 内存中的 `attempts`、成功数/`bridged`、失败数、缓存命中数、`totalLatencyMs`、`latencySamples`、以样本数为分母的 `averageLatencyMs`，以及最后使用时间（重启时重置；需要管理认证）                                                                                                                                                                                         |
+| `/api/modality-bridge/video/runtime` | GET        | 在管理认证/探测之前进行严格的可信回环检查；经过脱敏处理的 FFmpeg/ffprobe 可用性与版本信息（no-store）                                                                                                                                                                                                                                                                    |
+| `/api/modality-bridge/video/extract` | POST       | 内部认证的可信回环字节代理；50 MiB 输入、有界队列/32 MiB 输出、`503` 容量限制、`499` 断开连接、`504` 超时；非公开上传 API                                                                                                                                                                                                                                                |
 
 ### 备份与导出/导入
 
-| 端点                        | 方法   | 描述                                                       |
-| --------------------------- | ------ | ---------------------------------------------------------- |
-| `/api/db-backups`           | GET    | 列出可用备份                                               |
-| `/api/db-backups`           | PUT    | 创建手动备份                                               |
-| `/api/db-backups`           | POST   | 从指定备份恢复                                             |
-| `/api/db-backups`           | PATCH  | 保存备份保留设置（仅限操作员）                             |
-| `/api/db-backups`           | DELETE | 根据保留设置清理已存储的备份（仅限操作员）                 |
-| `/api/db-backups/export`    | GET    | 将数据库下载为 .sqlite 文件                                |
-| `/api/db-backups/import`    | POST   | 上传 .sqlite 文件以替换数据库（`?dryRun=true` 仅执行验证） |
-| `/api/db-backups/exportAll` | GET    | 将完整备份下载为 .tar.gz 归档文件                          |
+| 端点                        | 方法   | 描述                                                   |
+| --------------------------- | ------ | ------------------------------------------------------ |
+| `/api/db-backups`           | GET    | 列出可用的备份                                         |
+| `/api/db-backups`           | PUT    | 创建手动备份                                           |
+| `/api/db-backups`           | POST   | 从指定的备份恢复                                       |
+| `/api/db-backups`           | PATCH  | 保存备份保留设置（仅限操作员）                         |
+| `/api/db-backups`           | DELETE | 按保留设置清理已存储的备份（仅限操作员）               |
+| `/api/db-backups/export`    | GET    | 下载数据库为 .sqlite 文件                              |
+| `/api/db-backups/import`    | POST   | 上传 .sqlite 文件以替换数据库（`?dryRun=true` 仅验证） |
+| `/api/db-backups/exportAll` | GET    | 下载完整备份为 .tar.gz 压缩包                          |
 
-`/api/db-backups/export`、`/api/db-backups/exportAll` 和 `/api/settings/export-json` 会提供
-所有已存储的凭据，因此它们需要仪表板会话或本地 CLI（或者已禁用登录）。
-任何权限范围的 API 密钥和 `oma_` 访问令牌都会收到 `403`。恢复操作也遵循相同的
-边界：`POST /api/db-backups/import`（包括 `dryRun=true`）、`POST /api/db-backups`（按
-id 恢复）和 `POST /api/settings/import-json` 会替换实时数据库或设置，因此机器
-凭据在这些端点上也会收到 `403`；`omniroute sync import` 会发送本地 CLI 凭据。
-`DELETE /api/db-backups`（清理已存储的备份）和 `PATCH /api/db-backups`（保留设置：
-持久化的值会驱动每次备份后的自动清理）同样如此。列出备份（`GET`）和创建
-手动备份（`PUT`）仍使用普通管理身份验证。
+`/api/db-backups/export`、`/api/db-backups/exportAll` 和 `/api/settings/export-json` 会暴露所有已存储的凭据，因此它们要求仪表盘会话或本地 CLI（或禁用登录）。任何作用域的 API 密钥以及 `oma_` 访问令牌都会收到 `403`。恢复操作遵循相同的边界：`POST /api/db-backups/import`（包括 `dryRun=true`）、`POST /api/db-backups`（按 id 恢复）以及 `POST /api/settings/import-json` 会替换在线数据库或设置，因此机器凭据在这些端点同样会收到 `403`；`omniroute sync import` 会发送本地 CLI 凭据。`DELETE /api/db-backups`（清理已存储的备份）和 `PATCH /api/db-backups`（保留设置：持久化的值会在每次备份后驱动自动清理）也是如此。列出（`GET`）和创建手动备份（`PUT`）则保留常规的管理认证。
 
 ### 云同步
 
 | 端点                   | 方法 | 描述       |
 | ---------------------- | ---- | ---------- |
-| `/api/sync/cloud`      | 各种 | 云同步操作 |
+| `/api/sync/cloud`      | 多种 | 云同步操作 |
 | `/api/sync/initialize` | POST | 初始化同步 |
-| `/api/cloud/*`         | 各种 | 云管理     |
+| `/api/cloud/*`         | 多种 | 云管理     |
 
 ### 隧道
 
-| 端点                       | 方法 | 描述                                                           |
-| -------------------------- | ---- | -------------------------------------------------------------- |
-| `/api/tunnels/cloudflared` | GET  | 读取 Cloudflare Quick Tunnel 的安装/运行时状态，以供仪表板使用 |
-| `/api/tunnels/cloudflared` | POST | 启用或禁用 Cloudflare Quick Tunnel（`action=enable/disable`）  |
-| `/api/tunnels/ngrok`       | GET  | 读取 ngrok Tunnel 的运行时状态，以供仪表板使用                 |
-| `/api/tunnels/ngrok`       | POST | 启用或禁用 ngrok Tunnel（`action=enable/disable`）             |
+| 端点                       | 方法 | 描述                                                          |
+| -------------------------- | ---- | ------------------------------------------------------------- |
+| `/api/tunnels/cloudflared` | GET  | 为仪表盘读取 Cloudflare Quick Tunnel 的安装/运行状态          |
+| `/api/tunnels/cloudflared` | POST | 启用或禁用 Cloudflare Quick Tunnel（`action=enable/disable`） |
+| `/api/tunnels/ngrok`       | GET  | 为仪表盘读取 ngrok Tunnel 的运行状态                          |
+| `/api/tunnels/ngrok`       | POST | 启用或禁用 ngrok Tunnel（`action=enable/disable`）            |
 
 ### CLI 工具
 
@@ -1211,7 +1202,7 @@ id 恢复）和 `POST /api/settings/import-json` 会替换实时数据库或设�
 | `/api/cli-tools/openclaw-settings` | GET  | OpenClaw CLI 状态 |
 | `/api/cli-tools/runtime/[toolId]`  | GET  | 通用 CLI 运行时   |
 
-CLI 响应包括：`installed`、`runnable`、`command`、`commandPath`、`runtimeMode`、`reason`。
+CLI 响应包含：`installed`、`runnable`、`command`、`commandPath`、`runtimeMode`、`reason`。
 
 ### ACP 代理
 
@@ -1219,36 +1210,36 @@ CLI 响应包括：`installed`、`runnable`、`command`、`commandPath`、`runti
 | ----------------- | ------ | --------------------------------------------- |
 | `/api/acp/agents` | GET    | 列出所有检测到的代理（内置 + 自定义）及其状态 |
 | `/api/acp/agents` | POST   | 添加自定义代理或刷新检测缓存                  |
-| `/api/acp/agents` | DELETE | 通过 `id` 查询参数移除自定义代理              |
+| `/api/acp/agents` | DELETE | 通过 `id` 查询参数删除自定义代理              |
 
-GET 响应包括 `agents[]`（id、name、binary、version、installed、protocol、isCustom）和 `summary`（total、installed、notFound、builtIn、custom）。
+GET 响应包含 `agents[]`（id, name, binary, version, installed, protocol, isCustom）和 `summary`（total, installed, notFound, builtIn, custom）。
 
-### 韧性与速率限制
+### 弹性与速率限制
 
-| 端点                              | 方法      | 描述                                                                          |
-| --------------------------------- | --------- | ----------------------------------------------------------------------------- |
-| `/api/resilience`                 | GET/PATCH | 获取/更新请求队列、连接冷却、提供者断路器和等待设置                           |
-| `/api/resilience/reset`           | POST      | 重置提供者断路器                                                              |
-| `/api/resilience/model-cooldowns` | GET       | 列出每个（提供者、连接、模型）当前生效的锁定，并按剩余时间排序                |
-| `/api/resilience/model-cooldowns` | DELETE    | 清除模型锁定——请求体为 `{provider, model}`，或使用 `{all: true}` 清除全部锁定 |
-| `/api/rate-limits`                | GET       | 每个账户的速率限制状态                                                        |
-| `/api/rate-limit`                 | GET       | 全局速率限制配置                                                              |
+| 端点                              | 方法      | 描述                                                                                                                                                                                                                                                                                                                              |
+| --------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/api/resilience`                 | GET/PATCH | 获取/更新请求队列、连接冷却、提供方熔断器及等待设置                                                                                                                                                                                                                                                                               |
+| `/api/resilience/reset`           | POST      | 重置提供方熔断器                                                                                                                                                                                                                                                                                                                  |
+| `/api/resilience/model-cooldowns` | GET       | 列出当前生效的按（提供方、连接、模型）维度的锁定，按剩余时间排序                                                                                                                                                                                                                                                                  |
+| `/api/resilience/model-cooldowns` | DELETE    | 清除某个模型锁定——请求体为 `{provider, model}`，或使用 `{all: true}` 清除全部                                                                                                                                                                                                                                                     |
+| `/api/rate-limits`                | GET/POST  | 查看每个账号的速率限制状态（GET），或为某个连接开启/关闭速率限制保护（POST `{connectionId, enabled}`）。这是 `rateLimitProtection` 支持的写入路径（绝不能通过 `PUT /api/providers/[id]` 修改）。注意：`enabled: false` 会关闭显式保护，但不会让处于激活状态的 API 密钥连接脱离全局自动启用安全网（`autoEnableApiKeyProviders`）。 |
+| `/api/rate-limit`                 | GET       | 全局速率限制配置（已弃用；为 `/api/rate-limits` 的别名）                                                                                                                                                                                                                                                                          |
 
-> 所有四个 `/api/resilience/*` 路由都需要**管理身份验证**（`requireManagementAuth`）。有关提供者断路器、连接冷却和模型锁定之间差异的完整说明，请参阅[韧性（扩展）](#resilience-extended)。
+> 所有四个 `/api/resilience/*` 路由都需要**管理认证**（`requireManagementAuth`）。有关提供方熔断器、连接冷却与模型锁定三者的完整区别说明，请参阅[弹性（扩展）](#resilience-extended)。
 
-### 评估
+### 评估（Evals）
 
-| 端点         | 方法     | 描述                  |
-| ------------ | -------- | --------------------- |
-| `/api/evals` | GET/POST | 列出评估套件/运行评估 |
+| 端点         | 方法     | 描述                    |
+| ------------ | -------- | ----------------------- |
+| `/api/evals` | GET/POST | 列出评估套件 / 运行评估 |
 
-### 策略
+### 策略（Policies）
 
 | 端点            | 方法            | 描述         |
 | --------------- | --------------- | ------------ |
 | `/api/policies` | GET/POST/DELETE | 管理路由策略 |
 
-### 合规性
+### 合规（Compliance）
 
 | 端点                        | 方法 | 描述                      |
 | --------------------------- | ---- | ------------------------- |
@@ -1261,21 +1252,21 @@ GET 响应包括 `agents[]`（id、name、binary、version、installed、protoco
 | `/v1beta/models`           | GET  | 以 Gemini 格式列出模型        |
 | `/v1beta/models/{...path}` | POST | Gemini `generateContent` 端点 |
 
-这些端点采用与 Gemini API 相同的格式，以便需要原生 Gemini SDK 兼容性的客户端使用。
+这些端点镜像了 Gemini 的 API 格式，面向需要原生 Gemini SDK 兼容性的客户端。
 
 ### 内部 / 系统 API
 
-| 端点                     | 方法 | 描述                                             |
-| ------------------------ | ---- | ------------------------------------------------ |
-| `/api/init`              | GET  | 应用程序初始化检查（首次运行时使用）             |
-| `/api/tags`              | GET  | 与 Ollama 兼容的模型标签（供 Ollama 客户端使用） |
-| `/api/restart`           | POST | 触发服务器优雅重启                               |
-| `/api/shutdown`          | POST | 触发服务器优雅关闭                               |
-| `/api/system/env/repair` | POST | 修复 OAuth 提供者环境变量                        |
-| `/api/system/version`    | GET  | 当前/最新版本、更新状态、发布通道                |
-| `/api/system/version`    | POST | 启动可感知部署方式的最新版本更新                 |
+| 端点                     | 方法 | 描述                                           |
+| ------------------------ | ---- | ---------------------------------------------- |
+| `/api/init`              | GET  | 应用初始化检查（首次运行时使用）               |
+| `/api/tags`              | GET  | 兼容 Ollama 的模型标签（供 Ollama 客户端使用） |
+| `/api/restart`           | POST | 触发服务器优雅重启                             |
+| `/api/shutdown`          | POST | 触发服务器优雅关闭                             |
+| `/api/system/env/repair` | POST | 修复 OAuth 提供方的环境变量                    |
+| `/api/system/version`    | GET  | 当前/最新版本、更新状态、发布渠道              |
+| `/api/system/version`    | POST | 启动一次可感知部署方式的更新，升级到最新版本   |
 
-> **注意：** 这些端点由系统内部使用，或用于兼容 Ollama 客户端。最终用户通常不会调用它们。
+> **注意：**这些端点由系统内部使用，或用于兼容 Ollama 客户端，最终用户通常不会调用它们。
 
 ### OAuth 环境修复 _(v3.6.1+)_
 
@@ -1288,7 +1279,7 @@ Content-Type: application/json
 }
 ```
 
-修复指定提供者缺失或损坏的 OAuth 环境变量。返回：
+修复特定提供者缺失或损坏的 OAuth 环境变量。返回：
 
 ```json
 {
@@ -1298,13 +1289,13 @@ Content-Type: application/json
 }
 ```
 
-### 版本和发布通道
+### 版本与发布渠道
 
 ```bash
 GET /api/system/version
 ```
 
-仅限环回地址访问的管理路由（需要管理员身份验证）。返回当前运行版本、已发布的最新版本以及自动更新状态。`releaseChannel` 和 `channels` 是新增字段（轨道 3.8.54）；`channel` 保持原有含义——即仪表板更新程序所使用的部署模式（`npm`、`source` 或 `docker-compose`）。
+仅限回环地址访问的管理路由（管理员认证）。返回当前运行的版本、最新发布的版本以及自动更新状态。`releaseChannel` 和 `channels` 为新增字段（rail 3.8.54）；`channel` 保持其原有含义——仪表板更新器所使用的部署模式（`npm`、`source` 或 `docker-compose`）。
 
 ```json
 {
@@ -1320,10 +1311,10 @@ GET /api/system/version
 }
 ```
 
-- `releaseChannel` — 当前运行构建的 npm 通道：版本为 `-nightly.*` 时是 `nightly`；其他预发布版本（`-rc.*`、`-beta.*`、`-alpha.*`）为 `next`；当某个稳定版本的主版本号低于 `channels.latest` 时为 `lts`；其他情况则为 `latest`。规则与 `scripts/release/dist-tag.mjs` 相同，该脚本在发布时选择 npm dist-tag。
-- `channels` — 各个 dist-tag 的最新已发布版本，来源于 `npm view omniroute dist-tags`（以注册表 HTTP 请求作为回退），并使用与 `latest` 相同的 10 分钟 TTL 进行缓存。`latest` 始终存在（依次回退到 `latest` 字段和 `"unavailable"`）；`next`、`nightly` 和 `lts` 仅在相应 dist-tag 存在时出现。带有 `Cache-Control: no-cache` 的请求会刷新这两项查询。
+- `releaseChannel` — 当前运行构建所属的 npm 渠道：`-nightly.*` 版本为 `nightly`，其他预发布版本（`-rc.*`、`-beta.*`、`-alpha.*`）为 `next`，低于 `channels.latest` 的旧主版本的稳定版为 `lts`，其余情况为 `latest`。规则与 `scripts/release/dist-tag.mjs` 相同，该脚本在发布时选择 npm dist-tag。
+- `channels` — 各 dist-tag 已发布的最新版本，来自 `npm view omniroute dist-tags`（registry HTTP 回退），与 `latest` 使用相同的 10 分钟 TTL 缓存。`latest` 始终存在（先回退到 `latest` 字段，再回退到 `"unavailable"`）；`next`、`nightly` 和 `lts` 仅在对应 dist-tag 存在时出现。携带 `Cache-Control: no-cache` 的请求会同时刷新这两项查询。
 
-通道模型（`latest` = 4.0 正式发布前的 v3，`next` = rc，`nightly` = `develop` 构建，`lts` = 4.0 正式发布后的 v3 补丁）在 `docs/ops/RELEASE_STRATEGY.md` 中进行了说明。
+渠道模型（`latest` = 4.0 GA 之前的 v3，`next` = rc，`nightly` = `develop` 构建，`lts` = 4.0 GA 之后的 v3 补丁）在 `docs/ops/RELEASE_STRATEGY.md` 中有详细说明。
 
 ---
 
@@ -1455,7 +1446,7 @@ Content-Type: application/json
 }
 ```
 
-> **架构说明**（`setBudgetSchema`）：`apiKeyId` 为必填项；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一项必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 格式会返回 `400 Bad Request`。
+> **Schema 说明**（`setBudgetSchema`）：`apiKeyId` 为必填；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一个必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 格式将返回 `400 Bad Request`。
 
 ## Token 限制
 
@@ -1596,17 +1587,17 @@ curl -X POST http://localhost:20128/api/v1/agents/tasks \
 
 ---
 
-## 弹性机制（扩展）
+## 弹性（扩展）
 
-OmniRoute 提供三种相互独立的临时故障处理机制；以下管理端点可供运维人员读取和覆盖这些机制：
+OmniRoute 提供三种相互独立的临时故障处理机制；以下管理端点允许运维人员读取和覆盖它们：
 
-| 作用域       | 状态存储                          | 读取                                      | 重置 / 清除                              |
+| 范围         | 状态存储                          | 读取                                      | 重置 / 清除                              |
 | ------------ | --------------------------------- | ----------------------------------------- | ---------------------------------------- |
-| 提供者断路器 | `domain_circuit_breakers` + 内存  | `/api/monitoring/health`                  | `POST /api/resilience/reset`             |
-| 连接冷却     | 提供者连接上的 `rateLimitedUntil` | `/api/rate-limits`, `/api/providers/[id]` | （延迟重新启用；可通过提供者 PUT 清除）  |
+| 提供方熔断器 | `domain_circuit_breakers` + 内存  | `/api/monitoring/health`                  | `POST /api/resilience/reset`             |
+| 连接冷却     | 提供方连接上的 `rateLimitedUntil` | `/api/rate-limits`、`/api/providers/[id]` | （惰性重新启用；通过提供方 PUT 清除）    |
 | 模型锁定     | 内存中的模型可用性注册表          | `GET /api/resilience/model-cooldowns`     | `DELETE /api/resilience/model-cooldowns` |
 
-`PATCH /api/resilience` 接受 `providerBreaker.oauth` 和 `providerBreaker.apikey` 下的提供者断路器覆盖配置。每个配置均支持 `degradationThreshold`、`failureThreshold` 和 `resetTimeoutMs`；相同字段也可在控制面板 → 设置 → 弹性机制中配置。
+`PATCH /api/resilience` 接受位于 `providerBreaker.oauth` 和 `providerBreaker.apikey` 下的提供方熔断器覆盖配置。每个配置档都支持 `degradationThreshold`、`failureThreshold` 和 `resetTimeoutMs`；同样的字段也在 Dashboard → Settings → Resilience 中开放。
 
 ```bash
 # 清除单个模型锁定
@@ -1621,7 +1612,13 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
   -d '{"all":true}'
 ```
 
-完整的概念参考和断路器默认值：请参阅 [`CLAUDE.md`](../../CLAUDE.md) →“弹性机制运行时状态”。
+完整的概念参考和熔断器默认值：参见 [`CLAUDE.md`](../../CLAUDE.md) 中的 "Resilience Runtime State" 以及 [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md)。
+
+### 速率限制队列与自动启用安全网
+
+- **受支持的写入路径**：`POST /api/rate-limits`，请求体为 `{"connectionId": "<id>", "enabled": true|false}`，这是用于切换连接速率限制保护的受支持管理端点。`PUT /api/providers/[id]` 特意不修改或翻转 `rateLimitProtection`（#11278）。
+- **`enabled: false` 的语义**：设置 `enabled: false` 会移除该连接的显式保护，但**不会**使处于活动状态的 API 密钥连接脱离全局自动启用安全网（`autoEnableApiKeyProviders = true`）。在 `reconcileEnabledConnections`（`open-sse/services/rateLimitManager.ts`）中，`false` 和 `undefined` 是等效的；没有显式保护的活动 API 密钥连接仍会处于自动启用安全网的保护之下。
+- **全局禁用**：若要让 API 密钥连接在不使用速率限制队列的情况下运行，请通过 `RATE_LIMIT_AUTO_ENABLE=false`（环境变量）或 `resilienceSettings.requestQueue.autoEnableApiKeyProviders = false`（Settings → Resilience / `PATCH /api/resilience`）全局禁用该安全网。
 
 ---
 

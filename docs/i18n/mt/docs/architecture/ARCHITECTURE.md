@@ -15,7 +15,7 @@ Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-tr
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 154 modulu ta’ eżekuzzjoni)
+- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (375 fornitur, 156 modulu ta’ eżekuzzjoni)
 - Traduzzjoni tat-talbiet/tweġibiet bejn il-formati tal-fornituri
 - Fallback ta’ kombinazzjonijiet ta’ mudelli (sekwenza b’diversi mudelli)
 - Passi strutturati tal-kombinazzjonijiet (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`
@@ -31,7 +31,7 @@ Kapaċitajiet ewlenin:
 - Tiftix fuq il-web permezz ta’ `/v1/search` (20 fornitur)
 - Moderazzjonijiet permezz ta’ `/v1/moderations`
 - Klassifikazzjoni mill-ġdid permezz ta’ `/v1/rerank`
-- Analiżi tat-tikketti tal-ħsieb (``) għal mudelli ta’ raġunament
+- Analiżi tat-tikketti tal-ħsieb (`<think>...</think>`) għal mudelli ta’ raġunament
 - Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta mal-OpenAI SDK
 - Normalizzazzjoni tar-rwoli (developer→system, system→user) għal kompatibbiltà bejn il-fornituri
 - Konverżjoni ta’ output strutturat (json_schema → Gemini responseSchema)
@@ -839,62 +839,63 @@ flowchart LR
     Next --> SyncCloud
 ```
 
-## Tqassim tal-Moduli (Kritiku għad-Deċiżjonijiet)
+## Immappjar tal-Moduli (Kritiku għad-Deċiżjonijiet)
 
-### Rotot u Moduli API
+### Moduli tar-Rotot u tal-API
 
-- `src/app/api/v1/*`, `src/app/api/v1beta/*`: APIs għall-kompatibbiltà
-- `src/app/api/v1/providers/[provider]/*`: rotot dedikati għal kull fornitur (chat, embeddings, images)
-- `src/app/api/providers*`: CRUD tal-fornituri, validazzjoni, ttestjar
-- `src/app/api/provider-nodes*`: ġestjoni ta' nodi kompatibbli personalizzati
-- `src/app/api/provider-models`: ġestjoni ta' mudelli personalizzati (CRUD)
-- `src/app/api/models/route.ts`: API tal-katalogu tal-mudelli (alias + mudelli personalizzati)
-- `src/app/api/oauth/*`: flussi OAuth/device-code
-- `src/app/api/keys*`: ħajja tal-API key lokali
-- `src/app/api/models/alias`: ġestjoni tal-alias
-- `src/app/api/combos*`: ġestjoni tal-kombinazzjonijiet għar-riserv
-- `src/app/api/pricing`: prezzijiet għall-kalkolu tal-ispiża
-- `src/app/api/settings/proxy`: konfigurazzjoni proxy (GET/PUT/DELETE)
-- `src/app/api/settings/proxy/test`: test tal-konnettività proxy ġewwa (POST)
-- `src/app/api/usage/*`: APIs tal-użu u logs
-- `src/app/api/sync/*` + `src/app/api/cloud/*`: sinkronizzazzjoni n-nuttira u għajnuna għall-wiċċ tal-cloud
-- `src/app/api/cli-tools/*`: kittieba/sejjers ta' konfigurazzjoni CLI lokali
-- `src/app/api/settings/ip-filter`: allowlist/blocklist tal-IP (GET/PUT)
-- `src/app/api/settings/thinking-budget`: konfigurazzjoni tal-budget tal-token għar-riflessjoni (GET/PUT)
-- `src/app/api/settings/system-prompt`: prompt tas-sistema globali (GET/PUT)
+- `src/app/api/v1/*`, `src/app/api/v1beta/*`: APIs ta’ kompatibbiltà
+- `src/app/api/v1/providers/[provider]/*`: rotot iddedikati għal kull fornitur (chat, embeddings, stampi)
+- `src/app/api/providers*`: CRUD, validazzjoni u ttestjar tal-fornituri
+- `src/app/api/provider-nodes*`: ġestjoni ta’ nodi kompatibbli personalizzati
+- `src/app/api/provider-models`: ġestjoni ta’ mudelli personalizzati (CRUD)
+- `src/app/api/models/route.ts`: API tal-katalgu tal-mudelli (psewdonimi + mudelli personalizzati)
+- `src/app/api/oauth/*`: flussi OAuth/kodiċi tal-apparat
+- `src/app/api/keys*`: ċiklu tal-ħajja taċ-ċwievet API lokali
+- `src/app/api/models/alias`: ġestjoni tal-psewdonimi
+- `src/app/api/combos*`: ġestjoni ta’ kombinazzjonijiet ta’ riżerva
+- `src/app/api/pricing`: sostituzzjonijiet tal-prezzijiet għall-kalkolu tal-ispejjeż
+- `src/app/api/settings/proxy`: konfigurazzjoni tal-proxy (GET/PUT/DELETE)
+- `src/app/api/settings/proxy/test`: test tal-konnettività tal-proxy tal-ħruġ (POST)
+- `src/app/api/usage/*`: APIs tal-użu u tar-reġistri
+- `src/app/api/sync/*` + `src/app/api/cloud/*`: sinkronizzazzjoni mal-cloud u għodod ta’ assistenza għall-cloud
+- `src/app/api/cli-tools/*`: kittieba/verifikaturi lokali tal-konfigurazzjoni tas-CLI
+- `src/app/api/settings/ip-filter`: lista ta’ permessi/lista ta’ mblukkar tal-IP (GET/PUT)
+- `src/app/api/settings/thinking-budget`: konfigurazzjoni tal-baġit tat-tokens tal-ħsieb (GET/PUT)
+- `src/app/api/settings/system-prompt`: prompt globali tas-sistema (GET/PUT)
 - `src/app/api/settings/compression`: settings globali tal-kompressjoni (GET/PUT)
-- `src/app/api/compression/*`: preview tal-kompressjoni, metadata tar-regoli, u pakketti tal-lingwa
-- `src/app/api/context/caveman/config`: alias għal-settings Caveman (GET/PUT)
-- `src/app/api/context/rtk/*`: konfigurazzjoni RTK, katalogu tal-filtri, endpoint tat-test, u rkupru tal-output express
-- `src/app/api/context/combos*`: CRUD tal-kombinazzjonijiet tal-kompressjoni u tal-qrara tal-kombinazzjonijiet tar-rotot
-- `src/app/api/context/analytics`: alias tal-analiżi tal-kompressjoni
-- `src/app/api/sessions`: lista ta' sessjonijiet attivi (GET)
-- `src/app/api/rate-limits`: statut tal-limitu tal-veloċità għal kull kont (GET)
-- `src/app/api/sync/tokens`: CRUD ta' token għas-sinkronizzazzjoni (GET/POST)
-- `src/app/api/sync/tokens/[id]`: get/delete ta' token għas-sinkronizzazzjoni (GET/DELETE)
-- `src/app/api/sync/bundle`: tniżżil tal-pakkett ta' konfigurazzjoni (GET, tivjarja ETag)
-- `src/app/api/v1/ws`: handlier ta' titjib WebSocket għal klijenti WS kompatibbli mal-OpenAI
+- `src/app/api/compression/*`: previżjoni tal-kompressjoni, metadata tar-regoli u pakketti tal-lingwi
+- `src/app/api/context/caveman/config`: psewdonimu tas-settings ta’ Caveman (GET/PUT)
+- `src/app/api/context/rtk/*`: konfigurazzjoni RTK, katalgu tal-filtri, endpoint tat-test u rkupru tal-output mhux ipproċessat
+- `src/app/api/context/combos*`: CRUD tal-kombinazzjonijiet tal-kompressjoni u assenjazzjonijiet tal-kombinazzjonijiet tar-routing
+- `src/app/api/context/analytics`: psewdonimu tal-analitika tal-kompressjoni
+- `src/app/api/sessions`: elenkar tas-sessjonijiet attivi (GET)
+- `src/app/api/rate-limits`: status tal-limitu tar-rata għal kull kont (GET)
+- `src/app/api/sync/tokens`: CRUD tat-tokens tas-sinkronizzazzjoni (GET/POST)
+- `src/app/api/sync/tokens/[id]`: ksib/tħassir ta’ token tas-sinkronizzazzjoni (GET/DELETE)
+- `src/app/api/sync/bundle`: tniżżil tal-pakkett tal-konfigurazzjoni (GET, verżjonar bl-ETag)
+- `src/app/api/v1/ws`: handler tal-aġġornament tal-WebSocket għal klijenti WS kompatibbli ma’ OpenAI
 
-### Qalb tar-Rotot u l-Eżekuzzjoni
+### Il-Qalba tar-Routing u tal-Eżekuzzjoni
 
-- `src/sse/handlers/chat.ts`: parsjar tal-ħtiġijiet, ġestjoni tal-kombinazzjoni, ċiklu tal-għażla tal-kont
-- `open-sse/handlers/chatCore.ts`: traduzzjoni, spedizzjoni tal-eżekuttur, ġestjoni tal-ġdid/tneħħija, twaqqif tat-stream
+- `src/sse/handlers/chat.ts`: parsing tat-talba, trattament tal-kombinazzjonijiet, ċiklu tal-għażla tal-kont
+- `open-sse/handlers/chatCore.ts`: traduzzjoni, dispaċċ tal-eżekutur, trattament tal-provi mill-ġdid/aġġornamenti, inizjalizzazzjoni tal-fluss
+- `open-sse/executors/*`: imġiba tan-network u tal-format speċifika għall-fornitur
 
-### Reġistru tal-Traduzzjoni u Konvertituri tal-Format
+### Reġistru tat-Traduzzjoni u Konvertituri tal-Format
 
-- `open-sse/translator/index.ts`: reġistru u orkestrazzjoni tal-jsarrif
-- Tradutturi tal-ħtiġijiet: `open-sse/translator/request/*` (9 moduli — `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`)
-- Tradutturi tal-wasla: `open-sse/translator/response/*` (11 moduli — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`, `openai-to-gemini`, `openai-to-gemini-sse`, `responsesToolItem`)
-- Għajnuna: `open-sse/translator/helpers/*` (12 moduli — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `jsonUtil`, `markdownBoundary`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `strictSystemHoist`, `toolCallHelper`, `toolCallShim`)
-- Konstanti tal-format: `open-sse/translator/formats.ts`
+- `open-sse/translator/index.ts`: reġistru tat-tradutturi u orkestrazzjoni
+- Tradutturi tat-talbiet: `open-sse/translator/request/*` (9 moduli — `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`)
+- Tradutturi tat-tweġibiet: `open-sse/translator/response/*` (11-il modulu — `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`, `openai-to-gemini`, `openai-to-gemini-sse`, `responsesToolItem`)
+- Għodod ta’ assistenza: `open-sse/translator/helpers/*` (12-il modulu — `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `jsonUtil`, `markdownBoundary`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `strictSystemHoist`, `toolCallHelper`, `toolCallShim`)
+- Kostanti tal-format: `open-sse/translator/formats.ts`
 - Bootstrap u reġistru: `open-sse/translator/bootstrap.ts`, `open-sse/translator/registry.ts`
-- Għajnuna tal-format tal-istampi: `open-sse/translator/image/`
+- Għodod ta’ assistenza għall-format tal-immaġnijiet: `open-sse/translator/image/`
 
-### Perżistenza
+### Persistenza
 
-- `src/lib/db/*`: perżistenza tal-konfigurazzjoni/l-istat u tal-qasam fuq SQLite
-- `src/lib/db/*`: importa moduli speċifiċi direttament — ebda barrel (il-qatgħa tal-esportazzjoni mill-ġdid `localDb.ts` kienet tneħħiet)
-- `src/lib/usageDb.js`: fatiċa tal-istorja tal-użu/logs tal-sejħa fuq tabelli SQLite
+- `src/lib/db/*`: konfigurazzjoni/stat persistenti u persistenza tad-dominju fuq SQLite
+- `src/lib/db/*`: importa moduli speċifiċi direttament — mingħajr barrel (is-saff l-antik ta’ esportazzjoni mill-ġdid `localDb.ts` tneħħa)
+- `src/lib/usageDb.ts`: faċċata għall-istorja tal-użu/reġistri tas-sejħiet fuq it-tabelli SQLite
 
 ## Kopertura tal-Ezekutturi tal-Provider (Patern tal-Strateġija")
 
@@ -1027,8 +1028,8 @@ Oqsma ta' proċessar addizzjonali fil-pipeline tat-tarjonizzjoni:
 
 - **Sanitizzazzjoni tar-rispons** — Neħħi l-oqsma li mhumiex standard minn risponsi f'format OpenAI (tatti u mhux tatti) biex jiżgura konformità stretta mal-SDK
 - **Normalizzazzjoni tar-rwol** — Jinkonverti `developer` → `system` għal miri mhux OpenAI; jgħaqqad `system` → `user` għal mudelli li jimlew ir-rwol tas-sistema (GLM, ERNIE)
-- **Sfasar tat-tikketta ta' ħsieb** — Jiġbor blokki `...</think>` mill-kontenut fil-qasam `reasoning_content`
-- **Rabta strutturata** — Jinkonverti `response_format.json_schema` ta' OpenAI f'responseMimeType' + `responseSchema' ta' Gemini
+- **Sfasar tat-tikketta ta' ħsieb** — Jiġbor blokki `<think>...</think>` mill-kontenut fil-qasam `reasoning_content`
+- **Rabta strutturata** — Jinkonverti `response_format.json_schema` ta' OpenAI f'`responseMimeType` + `responseSchema` ta' Gemini
 
 ## Eponti Appoġġjati
 
@@ -1093,11 +1094,11 @@ Il-fajl tal-qadim tal-tniġġis tal-ħruġ (`open-sse/utils/requestLogger.ts`) j
 - tkaxkir ta' skema SQLite u ganci ta' titjieb awtomatiku meta jibda
 - kompatibilità tat-tħarrix tal-ħruż antik JSON → SQLite
 
-## 6) Gwardija ta' Ħruġ tal-URL / SSRF
+## 6) Protezzjoni kontra SSRF / URLs Ħerġin
 
-- `src/shared/network/outboundUrlGuard.ts` iwaqqaf kollha URLs tal-mira privati/link-local/qabel ma jaslu għall-eżekuturi tal-fornitur
-- l-iskoprija u validazzjoni tar-rotot tal-mudell tal-fornitur juża `src/shared/network/safeOutboundFetch.ts` li japplika l-gwardija qabel kull talba ta' barra
-- l-erba' tal-gwardija jitwasslu bħala `URL_GUARD_BLOCKED` b'HTTP 422 u jitniġġesu fil-vettra tal-audit tal-konformità permezz ta' `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) japplika `src/shared/network/outboundUrlGuard.ts` għat-talbiet taċ-chat mibgħuta permezz ta’ `BaseExecutor.execute()`. Fil-modalità pubblika biss (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` bil-flag privat diżattivat), jimblokka hosts privati u loopback kif ukoll 169.254.0.0/16; f’kull modalità oħra jimblokka hosts tal-metadata tal-cloud. Jivverifika l-isem tal-host jew il-litteral tal-IP kif inkiteb, qabel kwalunkwe tiftix fid-DNS. Il-fornituri lokali integrati ma jgħaddux minn din il-verifika.
+- Ir-rotot għall-iskoperta u l-validazzjoni tal-mudelli tal-fornituri jużaw `src/shared/network/safeOutboundFetch.ts`, li japplika l-protezzjoni qabel kull talba ħierġa
+- L-iżbalji tal-protezzjoni jidhru bħala `URL_GUARD_BLOCKED` b’HTTP 503 (`getSafeOutboundFetchErrorStatus`; ir-rotta għall-iskoperta tal-mudelli tirritorna 400), u l-imblukkar reali ta’ SSRF waqt il-validazzjoni jiġi rreġistrat fir-reġistru tal-awditjar bħala avvenimenti `provider.validation.ssrf_blocked`
 
 ## Osservabilità u Sinjali Operazzjonali
 
@@ -1130,7 +1131,7 @@ Id-dettalji tal-pajp tal-talba jaħżnu sa erba' stadji JSON tal-pajp għal kull
 
 Variabli tal-ambjent użati b'mod attiv mill-kodice:
 
-- App/auth: `JWT_SECRET`, `_INITIAL_PASSWORD`
+- App/auth: `JWT_SECRET`, `INITIAL_PASSWORD`
 - Storage: `DATA_DIR`
 - Override tal-bażi tal-storage fakultattiv (Linux/metaS meta `DATA_DIR` mhux issettjat): `XDG_CONFIG_HOME`
 - Tħaris tas-sigurtà: `API_KEY_SECRET`, `MACHINE_ID_SALT`
@@ -1148,7 +1149,7 @@ Variabli tal-ambjent użati b'mod attiv mill-kodice:
 4. L-imġiba tal-cloud tiddependi minn `NEXT_PUBLIC_BASE_URL` korrett u mill-aċċessibbiltà tal-endpoint tal-cloud.
 5. Id-direttorija `open-sse/` hija ppubblikata bħala l-pakkett tal-**workspace npm** `@omniroute/open-sse`. Il-kodice sors jimportaha permezz ta' `@omniroute/open-sse/...` (soluzzjonat minn `transpilePackages` ta' Next.js). L-isħab tal-fajls f'dan id-dokument għadhom jużaw l-isem tad-direttorija `open-sse/` għall-konsistenza.
 6. Charts fid-dashboard jużaw **Recharts** (bbażat fuq SVG) għal analiżi interattivi u aċċessibbli (charts tal-użu tal-mudelli, tabelli tal-iskop tal-fornituri b'rati ta' suċċess).
-7. Tests E2E jużaw **Playwright** (`tests/e2e/`), imħaddma permezz ta' `npm run test:e2e`. Tests unitarji jużaw it-**test runner ta' Node.js** (`tests/unit/`), imħaddma permezz ta' `npm run test:unit`. Is-sors taħt `src/` huwa **TypeScript** (`.ts`/`.tsx`); il-workspace `open-sse/` jibqa' JavaScript (`.js`).
+7. Tests E2E jużaw **Playwright** (`tests/e2e/`), imħaddma permezz ta' `npm run test:e2e`. Tests unitarji jużaw it-**test runner ta' Node.js** (`tests/unit/`), imħaddma permezz ta' `npm run test:unit`. Is-sors taħt `src/` huwa **TypeScript** (`.ts`/`.tsx`); il-workspace `open-sse/` jibqa' TypeScript (`.ts`).
 8. Il-paġna tas-Settings hija organizzata f'7 tabs: Ġenerali, Dehra, AI, Sigurtà, Routing, Reżiljenza, Avvanzata. Il-paġna Reżiljenza tikkonfigura biss il-queue tal-ħtiġijiet, il-cooldown tal-konnessjoni, il-breaker tal-fornitur, u l-imġiba ta' wait-for-cooldown; l-istat live tal-breaker jitwera fil-paġna tal-Health.
 9. L-istrateġija ta' **Context Relay** (`context-relay`) hi maqsusa bejn żewġ livelli: `combo.ts` jiddeċiedi jekk handoff għandux jiġiġġenerat, `chat.ts` jinjetta l-handoff wara r-riżoluzzjoni tal-kont. Id-dejta tal-handoff tinsab fil-tabla SQLite `context_handoffs`. Din is-sħiqa hija intenzjonata għax biss `chat.ts` jaf jekk il-kont attiv bidilx.
 10. L-**enforcement tal-proxy** huwa kompreħensiv issa: `tokenHealthCheck.ts` jirrisolvi l-proxy għal kull konnessjoni, `/api/providers/validate` juża `runWithProxyContext`, u `proxyFetch.ts` juża `undici.fetch()` biex iżomm il-kompatibilità tal-dispatcher fuq Node 22.

@@ -48,15 +48,15 @@ funciona de imediato), verifica o estado do servidor e executa `claude`.
 
 ---
 
-## Aliases de descoberta — apresentar modelos que não são Claude no seletor `/model`
+## Aliases de discovery — expor modelos não-Claude no seletor `/model`
 
-A descoberta de modelos do gateway do Claude Code apresenta apenas ids que começam por `claude`
-ou `anthropic`, pelo que, com `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, o seletor
-nativo `/model` apresenta normalmente **apenas** os modelos Claude/Anthropic do OmniRoute — um
-`kimi/kimi-k2.6` ou `glm/glm-5.2` nunca aparece, apesar de o encaminhamento funcionar corretamente.
+A descoberta de modelos do gateway do Claude Code apenas lista ids que começam com `claude`
+ou `anthropic`, pelo que com `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` o seletor
+nativo `/model` mostra normalmente **apenas** os modelos Claude/Anthropic do OmniRoute — um
+`kimi/kimi-k2.6` ou `glm/glm-5.2` nunca aparece, embora o encaminhamento funcione.
 
-O OmniRoute pode espelhar qualquer modelo ativo (e combinação) sob um id `claude/…`, para que este
-passe pelo filtro e apareça no seletor:
+O OmniRoute pode espelhar qualquer modelo ativado (e combo) sob um id `claude/…` para que
+passe nesse filtro e apareça no seletor:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,34 +64,40 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Quando seleciona um destes modelos no Claude Code, o OmniRoute remove o prefixo `claude/`
-e repõe o id real antes do encaminhamento — um id `claude/<real-claude-model>` genuíno
-(o fornecedor OAuth real do Claude) permanece sempre inalterado.
+Quando escolhe um destes no Claude Code, o OmniRoute remove o wrapper `claude/`
+para repor o id real antes do encaminhamento — um id `claude/<real-claude-model>`
+genuíno (o verdadeiro fornecedor Claude OAuth) é sempre deixado intacto.
 
-**Esta funcionalidade está desativada por predefinição** e é controlada por uma hierarquia de três níveis (o mais específico
-prevalece), para que uma instalação normal do OmniRoute nunca duplique o respetivo catálogo para clientes que não utilizam
+Por predefinição, apenas os ids base são espelhados. Com a feature flag opt-in
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` ativada, as variantes de nível de esforço de raciocínio que
+o catálogo já lista (por ex. `codex/gpt-6-sol-high`) são espelhadas como qualquer outro
+id, para que o Claude Code possa escolher um nível de esforço explícito, e os ids `auto/*`
+incorporados que o caminho de pedido não consegue materializar não são espelhados. A listagem
+das variantes de esforço continua a ser regida por `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — o
+espelho nunca adiciona uma variante que o catálogo base não tenha.
+
+**Isto está desativado por predefinição** e é controlado por um gate de três níveis (o mais específico
+prevalece), para que um OmniRoute simples nunca duplique o seu catálogo para clientes que não usam
 o Claude Code:
 
-| Nível      | Localização                                                                                     |
+| Nível      | Onde                                                                                            |
 | ---------- | ----------------------------------------------------------------------------------------------- |
-| Modelo     | Página de detalhes do fornecedor → opção "Expose in Claude Code" por modelo                     |
-| Fornecedor | Página de detalhes do fornecedor → opção ao nível do fornecedor (abrange todos os seus modelos) |
-| Global     | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (desativado por predefinição)          |
+| Modelo     | Página de detalhe do fornecedor → toggle "Expor no Claude Code" por modelo                      |
+| Fornecedor | Página de detalhe do fornecedor → toggle ao nível do fornecedor (abrange todos os seus modelos) |
+| Global     | Definições → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (desativado por predefinição)        |
 
 A variável de ambiente `EXPOSE_CC_DISCOVERY_ALIASES` força a ativação do nível global
-e tem precedência sobre a configuração do painel (o ecrã Feature Flags apresenta
-uma nota "active via environment variable" quando isso acontece). As opções por fornecedor e
-por modelo permitem refinar a partir daí — por exemplo, global desativado + fornecedor Kimi ativado expõe
+e tem precedência sobre a anulação definida no dashboard (o ecrã Feature Flags mostra
+uma nota "ativo via variável de ambiente" quando isso acontece). Os toggles por fornecedor e
+por modelo refinam a partir daí — por ex. global desativado + fornecedor Kimi ativado expõe
 apenas os modelos da Kimi.
 
-> ⚠️ **Incompatibilidade da janela em modelos que não são Claude.** O Claude Code assume uma janela de contexto de 200K
-> para qualquer id que não reconheça (não consegue obter a janela real a partir de
-> `/v1/models`). Para um modelo com uma janela maior (por exemplo, os 256K do Kimi K2), defina
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` com um valor inferior à janela real do modelo, para que
-> a compactação automática não seja acionada prematuramente. Os perfis gerados acima já
-> fazem isto para cada modelo.
-
----
+> ⚠️ **Desajuste de janela em modelos não-Claude.** O Claude Code assume uma janela de contexto
+> de 200K para qualquer id que não reconheça (não consegue ler uma janela real a partir de
+> `/v1/models`). Para um modelo com uma janela maior (por ex. os 256K do Kimi K2), defina
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` para um valor abaixo da janela real do modelo, de modo a que
+> a compactação automática não dispare prematuramente. Os perfis gerados acima já
+> fazem isto por modelo.
 
 ## Bloco de integração no painel
 

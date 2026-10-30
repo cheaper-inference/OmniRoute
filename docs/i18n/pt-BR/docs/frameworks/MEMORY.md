@@ -342,11 +342,11 @@ A extração é **baseada em expressões regulares**, não em LLM — ela é exe
 no processo com `setImmediate()`, portanto nunca bloqueia o fluxo de resposta:
 
 - **Padrões de preferência** → `MemoryType.FACTUAL`
-  (por exemplo, `Eu prefiro …`, `Eu gosto muito de …`, `meu favorito é …`, `Eu odeio …`)
+  (por exemplo, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Padrões de decisão** → `MemoryType.EPISODIC`
-  (por exemplo, `Vou usar …`, `Eu escolhi …`, `Optei por …`, `Vou adotar …`)
+  (por exemplo, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Padrões comportamentais** → `MemoryType.FACTUAL`
-  (por exemplo, `Eu geralmente …`, `Eu sempre …`, `Eu costumo …`)
+  (por exemplo, `I usually …`, `I always …`, `I tend to …`)
 
 Cada correspondência é sanitizada (`trim`, compactação de espaços em branco,
 limite de 500 caracteres), desduplicada dentro do lote por meio de uma
@@ -760,7 +760,8 @@ Quando um usuário diz:
 
 Para evitar extrações descontroladas, aplicam-se os seguintes limites:
 
-| Tamanho mínimo do conteúdo | 3 caracteres |
+| Tamanho mínimo do conteúdo | 3 caracteres   |
+| -------------------------- | -------------- |
 | Tamanho máximo do conteúdo | 500 caracteres |
 
 ### Quando Desativar a Extração

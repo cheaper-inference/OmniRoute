@@ -1,25 +1,17 @@
-# Security and Cleanliness Rules for AI Assistants (తెలుగు)
+# GEMINI.md (తెలుగు)
 
 🌐 **Languages:** 🇺🇸 [English](../../../GEMINI.md) · 🇪🇹 [am](../am/GEMINI.md) · 🇸🇦 [ar](../ar/GEMINI.md) · 🇦🇿 [az](../az/GEMINI.md) · 🇧🇬 [bg](../bg/GEMINI.md) · 🇧🇩 [bn](../bn/GEMINI.md) · 🇧🇦 [bs](../bs/GEMINI.md) · 🇨🇿 [cs](../cs/GEMINI.md) · 🇩🇰 [da](../da/GEMINI.md) · 🇩🇪 [de](../de/GEMINI.md) · 🇬🇷 [el](../el/GEMINI.md) · 🇪🇸 [es](../es/GEMINI.md) · 🇪🇪 [et](../et/GEMINI.md) · 🇮🇷 [fa](../fa/GEMINI.md) · 🇫🇮 [fi](../fi/GEMINI.md) · 🇫🇷 [fr](../fr/GEMINI.md) · 🇮🇪 [ga](../ga/GEMINI.md) · 🇮🇳 [gu](../gu/GEMINI.md) · 🇳🇬 [ha](../ha/GEMINI.md) · 🇮🇱 [he](../he/GEMINI.md) · 🇮🇳 [hi](../hi/GEMINI.md) · 🇭🇷 [hr](../hr/GEMINI.md) · 🇭🇺 [hu](../hu/GEMINI.md) · 🇦🇲 [hy](../hy/GEMINI.md) · 🇮🇩 [id](../id/GEMINI.md) · 🇳🇬 [ig](../ig/GEMINI.md) · 🇮🇹 [it](../it/GEMINI.md) · 🇯🇵 [ja](../ja/GEMINI.md) · 🇬🇪 [ka](../ka/GEMINI.md) · 🇰🇭 [km](../km/GEMINI.md) · 🇮🇳 [kn](../kn/GEMINI.md) · 🇰🇷 [ko](../ko/GEMINI.md) · 🇱🇹 [lt](../lt/GEMINI.md) · 🇱🇻 [lv](../lv/GEMINI.md) · 🇮🇳 [ml](../ml/GEMINI.md) · 🇮🇳 [mr](../mr/GEMINI.md) · 🇲🇾 [ms](../ms/GEMINI.md) · 🇲🇹 [mt](../mt/GEMINI.md) · 🇲🇲 [my](../my/GEMINI.md) · 🇳🇵 [ne](../ne/GEMINI.md) · 🇳🇱 [nl](../nl/GEMINI.md) · 🇳🇴 [no](../no/GEMINI.md) · 🇮🇳 [or](../or/GEMINI.md) · 🇮🇳 [pa](../pa/GEMINI.md) · 🇵🇭 [phi](../phi/GEMINI.md) · 🇵🇱 [pl](../pl/GEMINI.md) · 🇵🇹 [pt](../pt/GEMINI.md) · 🇧🇷 [pt-BR](../pt-BR/GEMINI.md) · 🇷🇴 [ro](../ro/GEMINI.md) · 🇷🇺 [ru](../ru/GEMINI.md) · 🇱🇰 [si](../si/GEMINI.md) · 🇸🇰 [sk](../sk/GEMINI.md) · 🇸🇮 [sl](../sl/GEMINI.md) · 🇷🇸 [sr](../sr/GEMINI.md) · 🇸🇪 [sv](../sv/GEMINI.md) · 🇰🇪 [sw](../sw/GEMINI.md) · 🇮🇳 [ta](../ta/GEMINI.md) · 🇹🇭 [th](../th/GEMINI.md) · 🇹🇷 [tr](../tr/GEMINI.md) · 🇺🇦 [uk-UA](../uk-UA/GEMINI.md) · 🇵🇰 [ur](../ur/GEMINI.md) · 🇺🇿 [uz](../uz/GEMINI.md) · 🇻🇳 [vi](../vi/GEMINI.md) · 🇳🇬 [yo](../yo/GEMINI.md) · 🇨🇳 [zh-CN](../zh-CN/GEMINI.md) · 🇹🇼 [zh-TW](../zh-TW/GEMINI.md)
 
 ---
 
-## 1. File Placement & Organization
+> **ఏకైక ప్రామాణిక మూలం:** AI సహాయకుల కోసం అన్ని ప్రాజెక్ట్ నియమాలు
+> [`AGENTS.md`](AGENTS.md)లో ఉన్నాయి. ఏ మార్పు చేయడానికి ముందైనా దానిని పూర్తిగా చదవండి — 23 కఠిన నియమాలు,
+> నాణ్యతా ప్రమాణాలు, కోడ్ సంప్రదాయాలు, ఫైల్-స్థానం / repo-root పరిశుభ్రత నియమాలు, రిపోజిటరీ మ్యాప్
+> మరియు గతంలో ఈ ఫైల్లో ఉన్న స్థానిక డెవలప్మెంట్ యాక్సెస్ గమనికలు ఇందులో ఉన్నాయి.
 
-- **Test Files**: ALL unit tests, integration tests, ecosystem tests, or Vitest files MUST strictly be placed within the `tests/` directory (e.g., `tests/unit/`, `tests/integration/`). NEVER create test files in the project root (`/`).
-- **Scripts and Utilities**: ALL maintenance, debugging, generation, or experimental scripts (`.cjs`, `.mjs`, `.js`, `.ts`) MUST be placed strictly inside the `scripts/` directory or `scripts/scratch/` for temporary one-offs. NEVER dump loose scripts in the project root (`/`).
+Gemini-నిర్దిష్ట గమనికలు:
 
-**The Project Root MUST ONLY CONTAIN:**
-
-- Configuration files (`vitest.config.ts`, `next.config.mjs`, `eslint.config.mjs`, etc.)
-- Dependency files (`package.json`, `package-lock.json`)
-- Documentation files (`README.md`, `CHANGELOG.md`, `AGENTS.md`)
-- CI/CD files and ignore definitions (`.gitignore`, `.dockerignore`)
-
-When creating _any_ validation tests or one-off logic scripts, default to using `scripts/scratch/` or the `tests/unit/` directories according to your goals. Do not pollute the `/` root context.
-
-## 2. VPS Dashboard Credentials
-
-| Environment | URL                       | Password |
-| ----------- | ------------------------- | -------- |
-| Local VPS   | http://192.168.0.15:20128 | 123456   |
+- నైపుణ్యాలు `activate_skill` సాధనం ద్వారా సక్రియమవుతాయి (సెషన్ ప్రారంభంలో నైపుణ్య మెటాడేటా లోడ్ అవుతుంది మరియు
+  అవసరమైనప్పుడు పూర్తి కంటెంట్ సక్రియం చేయబడుతుంది).
+- ప్రస్తుతం Geminiకి మాత్రమే వర్తించే ఇతర నియమాలు ఏవీ లేవు. ప్రాజెక్ట్ నియమాలను ఇక్కడ మళ్లీ జోడించవద్దు — బదులుగా
+  `AGENTS.md`ను సవరించండి, తద్వారా ప్రతి సహాయకుడు ఒకే సూచనలను చూస్తారు.

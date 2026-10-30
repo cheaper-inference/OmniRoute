@@ -40,6 +40,10 @@ import { vi } from "vitest";
 import { createTranslator } from "use-intl/core";
 import en from "../../src/i18n/messages/en.json";
 
+// Manual createRoot tests also use act(); RTL sets this only for its own imports.
+// Keep React's checks for genuinely unwrapped updates enabled across both styles.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+
 type Messages = Record<string, unknown>;
 
 // Real next-intl's `useTranslations(namespace)` returns a REFERENTIALLY STABLE function

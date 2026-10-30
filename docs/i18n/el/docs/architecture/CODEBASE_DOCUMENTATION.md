@@ -446,7 +446,7 @@ open-sse/
 ├── types.d.ts
 ├── config/                 Μητρώα παρόχων, προφίλ κεφαλίδων, ταυτότητα, …
 ├── handlers/               Χειριστές αιτημάτων (συνομιλία, embeddings, ήχος, εικόνα, …)
-├── executors/              150 μονάδες executor παρόχων (κλάσεις executor + βοηθητικά ανά πάροχο)
+├── executors/              156 μονάδες executor παρόχων (κλάσεις executor + βοηθητικά ανά πάροχο)
 ├── translator/             Μετατροπή μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformer ροής Responses API ↔ Chat Completions
 ├── services/               80+ μονάδες υπηρεσιών (συνδυασμοί, fallback, ποσοστώσεις, ταυτότητα, …)
@@ -476,7 +476,7 @@ open-sse/
 
 ### 4.2 `open-sse/executors/`
 
-150 μονάδες executor ανώτατου επιπέδου (`*.ts` χωρίς τα `base.ts`, `index.ts` και τις δοκιμές — αυτό το πλήθος μετρά η εντολή
+156 μονάδες executor ανώτατου επιπέδου (`*.ts` χωρίς τα `base.ts`, `index.ts` και τις δοκιμές — αυτό το πλήθος μετρά η εντολή
 `npm run check:docs-counts`). Κάθε κλάση executor επεκτείνει την `BaseExecutor` (`base.ts`),
 είτε απευθείας είτε μέσω της `DefaultExecutor` ή άλλου executor· οι υπόλοιπες μονάδες είναι βοηθητικά
 ανά πάροχο (σχήματα εργαλείων, προσαρμογείς fetch/TTS, χειριστές ιδιαιτεροτήτων). Οι executors περιλαμβάνουν:
@@ -771,7 +771,7 @@ bin/
    το `open-sse/mcp-server/schemas/tools.ts`).
 2. Αναθέστε τα κατάλληλα scope(s) στο `src/shared/constants/mcpScopes.ts`.
 3. Καταχωρίστε το εργαλείο στο `open-sse/mcp-server/server.ts`.
-4. Προσθέστε δοκιμές στο `open-sse/mcp-server/__tests__/`.
+4. Προσθέστε δοκιμές στο `tests/unit/`.
 5. Ενημερώστε το [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Προσθήκη νέου A2A skill
@@ -789,7 +789,7 @@ bin/
 - **Ονοματολογία**: αρχεία `camelCase` ή `kebab-case`, components `PascalCase`,
   σταθερές `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` παντού·
-  `no-explicit-any` = `warn` στα `open-sse/` και `tests/`, error αλλού.
+  `no-explicit-any` = `error` στα `open-sse/**/*.ts` και `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (παλαιά στάση). Προτιμήστε ρητούς τύπους αντί
   συμπερασμού για cross-module όρια.
 - **Βάση δεδομένων**: μην γράφετε ποτέ ακατέργαστη SQL σε routes ή handlers — χρησιμοποιείτε
@@ -819,8 +819,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: προθέματα `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Μην κάνετε ποτέ commit απευθείας στο `main`.
-- **Husky**: το pre-commit εκτελεί `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`· το pre-push εκτελεί `check:any-budget:t11` + `check:tracked-artifacts` (γρήγορες πύλες· εξαιρεί το `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 
