@@ -891,7 +891,8 @@ The generic `time_range` now reaches both providers: Exa gets `startPublishedDat
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
 overrides the mapped one.
 
-Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
+Exa results keep `id`, `highlights` (every highlight, not only the first one used as the
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
 Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for

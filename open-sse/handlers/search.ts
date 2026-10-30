@@ -855,6 +855,8 @@ function normalizeExaResponse(
         text_format: "text",
         provider_raw: compactProviderRaw({
           id: item.id,
+          // The snippet only shows the first highlight; keep all of them next to their scores.
+          highlights: item.highlights,
           highlight_scores: item.highlightScores,
           summary: item.summary,
           subpages: item.subpages,
