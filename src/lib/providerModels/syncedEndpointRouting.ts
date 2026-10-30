@@ -23,14 +23,12 @@ export async function resolveLocalSyncedEndpointRoute(
   const providerPrefix = modelStr.slice(0, slashIndex);
   const provider = resolveProviderId(providerPrefix);
   let providerNode: Record<string, unknown> | null | undefined;
-  if (endpoint === "images") {
-    try {
-      providerNode = (await getCachedProviderNodes({ type: "openai-compatible" })).find(
-        (node) => node?.id === provider
-      );
-    } catch {
-      // Keep explicit per-model routing available when provider-node metadata cannot be read.
-    }
+  try {
+    providerNode = (await getCachedProviderNodes({ type: "openai-compatible" })).find(
+      (node) => node?.id === provider
+    );
+  } catch {
+    // Keep explicit per-model routing available when provider-node metadata cannot be read.
   }
   // #14989: a user-defined openai-compatible node (internal id
   // "openai-compatible-…") can sync image models too. Also accept imported
@@ -51,6 +49,12 @@ export async function resolveLocalSyncedEndpointRoute(
   // ("<prefix>/models/foo.gguf") should still resolve -- try the raw model
   // id both as given and with a leading "/" restored.
   const modelCandidates = rawSuffix.startsWith("/") ? [rawSuffix] : [rawSuffix, `/${rawSuffix}`];
+
+  // Write paths store node rows under the bare upstream id; accept both the
+  // stored form and its node-prefixed form so overrides and synced caches
+  // written before/after that contract keep resolving.
+  const nodePrefixedModel =
+    typeof providerNode?.prefix === "string" ? `${providerNode.prefix}/${rawSuffix}` : null;
 
   // Most local servers' own /v1/models response carries no capability data at
   // all (llama.cpp included -- unlike Ollama's /api/show, there is nothing to
@@ -75,16 +79,25 @@ export async function resolveLocalSyncedEndpointRoute(
           (entry) =>
             entry.id === modelStr ||
             entry.id === `${providerPrefix}/${model}` ||
+            // Rows are stored under the bare upstream id (see
+            // normalizeNodeModelId); the override row for "this model does
+            // support <endpoint>" carries that bare id. Images always
+            // accepted the raw bare form; embeddings accepts it for plain
+            // node ids and absolute-path ids ("/models/…gguf") only — a
+            // relative multi-segment suffix ("org/model") is another row's
+            // full namespace and must not broaden routing onto this request.
+            ((endpoint === "images" || model.startsWith("/") || !model.includes("/")) &&
+              entry.id === model) ||
             (endpoint === "images" &&
-              (entry.id === model ||
-                (configuredNodePrefix !== null && entry.id === `${configuredNodePrefix}/${model}`)))
+              configuredNodePrefix !== null &&
+              entry.id === `${configuredNodePrefix}/${model}`)
         )?.supportedEndpoints
       : undefined;
 
     const connectionIds = Object.entries(byConnection)
       .filter(([, models]) =>
         models.some((candidate) => {
-          if (candidate.id !== model) return false;
+          if (candidate.id !== model && candidate.id !== nodePrefixedModel) return false;
           if (endpoint === "embeddings") {
             return (
               (Array.isArray(overrideEndpoints) && overrideEndpoints.includes(endpoint)) ||

@@ -2633,6 +2633,33 @@ paths:
       responses:
         "200":
           description: Provider model list
+    post:
+      tags: [Provider Nodes]
+      summary: Add a custom model
+      description: >-
+        Requires management authentication. On a compatible provider node the
+        stored modelId is the bare upstream id: a leading copy of the node's
+        prefix is stripped (and canonical providers' slashed ids pass through
+        untouched). The response echoes the stored id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [provider, modelId]
+              properties:
+                provider:
+                  type: string
+                modelId:
+                  type: string
+                modelName:
+                  type: string
+      responses:
+        "200":
+          description: Model added (echoes the stored id)
+        "400":
+          description: Invalid request body
     put:
       tags: [Provider Nodes]
       summary: Update model metadata or per-model overrides
@@ -2680,6 +2707,8 @@ paths:
         exact JSON model field. Specialized executors and other providers are unsupported;
         session pools, extra-key rotation, HTTP redirects and credential refresh are refused.
         Active runtime plugins also fail closed; plugin policies are not silently skipped.
+        On a compatible provider node the inserted modelId is stored as the
+        bare upstream id (a leading copy of the node's prefix is stripped).
       security:
         - BearerAuth: []
       requestBody:

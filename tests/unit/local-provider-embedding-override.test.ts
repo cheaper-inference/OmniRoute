@@ -221,3 +221,24 @@ test("resolveLocalSyncedEndpointRoute: a non-embedding manual row does not hide 
   assert.ok(route, "existing synced embedding support remains authoritative for embeddings");
   assert.deepEqual(route!.connectionIds, [CONNECTION_ID]);
 });
+
+test("resolveLocalSyncedEndpointRoute: a bare-stored override row (node write-path normalization) still resolves", async () => {
+  // Node write paths store custom rows under the bare upstream id
+  // (normalizeNodeModelId). An override row saved that way — bare id, no
+  // prefix — must still be found when a client requests the prefixed
+  // catalog id.
+  seedSyncedModelWithNoCapabilityData();
+  const bareId = RAW_MODEL_ID;
+  await modelsDb.updateCustomModel(
+    PROVIDER,
+    bareId,
+    { supportedEndpoints: ["embeddings"] },
+    { createIfMissing: true }
+  );
+
+  const resolved = await resolveLocalSyncedEndpointRoute(ALIAS_MODEL_ID, "embeddings");
+  assert.ok(resolved, "the bare-stored override must make the route resolve");
+  assert.equal(resolved!.provider, PROVIDER);
+  assert.equal(resolved!.model, RAW_MODEL_ID);
+  assert.deepEqual(resolved!.connectionIds, [CONNECTION_ID]);
+});

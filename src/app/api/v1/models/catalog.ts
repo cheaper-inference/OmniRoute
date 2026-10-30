@@ -142,6 +142,7 @@ import { incrementCcDiscoveryHitCount } from "@/lib/db/ccDiscoveryMetrics";
 import { isUnifiedChatSourceModelSelectable } from "./catalogModelPolicy";
 import { decideHidePaid } from "./catalogPaidFilter";
 import { isModelExposureAllowed } from "@/shared/utils/modelExposureList";
+import { collapseProviderPrefix, resolveProviderNodePrefix } from "@/shared/utils/modelIdPrefix";
 import { isCodexDiscoveryModelExcluded } from "@/shared/services/codexDiscoveryPolicy";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 
@@ -435,14 +436,9 @@ async function buildUnifiedModelsResponseCore(
     const nodeIdToProviderType: Record<string, string> = {};
     const nodeApiTypes = indexNodeApiTypes(providerNodes);
     for (const node of providerNodes) {
-      const resolvedPrefix =
-        node.prefix?.trim() ||
-        node.name
-          ?.trim()
-          ?.toLowerCase()
-          ?.replace(/\s+/g, "-")
-          ?.replace(/[^a-z0-9-]/g, "") ||
-        null;
+      const resolvedPrefix = resolveProviderNodePrefix(
+        node as { prefix?: unknown; name?: unknown } | null
+      );
       if (resolvedPrefix) {
         providerIdToPrefix[node.id] = resolvedPrefix;
       }
@@ -1326,7 +1322,28 @@ async function buildUnifiedModelsResponseCore(
           if (canonicalProviderId === "codex" && isCodexDiscoveryModelExcluded(sm)) {
             continue;
           }
-          if (isModelHiddenBulk(providerId, sm.id, canonicalProviderId)) continue;
+          const registryEntry = REGISTRY[providerId];
+          const displayModelId =
+            registryEntry?.modelIdPrefix && sm.id.startsWith(registryEntry.modelIdPrefix)
+              ? sm.id.slice(registryEntry.modelIdPrefix.length)
+              : sm.id;
+          // A chain-proxied node (modelsPath aimed at another router's
+          // prefixed catalog) can sync ids that already carry this node's
+          // prefix; collapse so emission stays `<alias>/<bare>`. Scoped to
+          // nodes with a prefix (see the custom-row loop).
+          const bareModelId = prefix
+            ? collapseProviderPrefix(`${alias}/${displayModelId}`, [
+                alias,
+                providerId,
+                canonicalProviderId,
+              ])
+            : displayModelId;
+          if (
+            isModelHiddenBulk(providerId, sm.id, canonicalProviderId) ||
+            (bareModelId !== sm.id &&
+              isModelHiddenBulk(providerId, bareModelId, canonicalProviderId))
+          )
+            continue;
           if (isExcludedByProviderConnections(canonicalProviderId, sm.id)) continue;
           // #6457: some upstream discovery catalogs (e.g. HuggingFace's live
           // `/v1/models`) return image/diffusion models with no modality info,
@@ -1350,17 +1367,23 @@ async function buildUnifiedModelsResponseCore(
           // free-tier rows (catalog + isFree). Custom rows with isFree:true are
           // already exempt via the isFreeModel gate; other non-free synced rows
           // are hidden when hidePaid is on.
-          if (shouldHidePaid(canonicalProviderId, sm.id, (sm as { pricing?: unknown }).pricing))
+          if (
+            shouldHidePaid(canonicalProviderId, sm.id, (sm as { pricing?: unknown }).pricing) ||
+            (bareModelId !== sm.id &&
+              shouldHidePaid(
+                canonicalProviderId,
+                bareModelId,
+                (sm as { pricing?: unknown }).pricing
+              ))
+          )
             continue;
-          if (shouldHideByExposure(canonicalProviderId, sm.id)) continue;
+          if (
+            shouldHideByExposure(canonicalProviderId, sm.id) ||
+            (bareModelId !== sm.id && shouldHideByExposure(canonicalProviderId, bareModelId))
+          )
+            continue;
 
-          const registryEntry = REGISTRY[providerId];
-          const displayModelId =
-            registryEntry?.modelIdPrefix && sm.id.startsWith(registryEntry.modelIdPrefix)
-              ? sm.id.slice(registryEntry.modelIdPrefix.length)
-              : sm.id;
-
-          const aliasId = `${alias}/${displayModelId}`;
+          const aliasId = `${alias}/${bareModelId}`;
           const endpoints = nodeModelEndpoints(sm.supportedEndpoints, nodeApiTypes[providerId]);
           const apiFormat = typeof sm.apiFormat === "string" ? sm.apiFormat : "chat-completions";
           const classification = classifyModelSupportedEndpoints(endpoints);
@@ -1788,33 +1811,88 @@ async function buildUnifiedModelsResponseCore(
           await maybeYieldCatalogBuild();
           const modelId = typeof model.id === "string" ? model.id : null;
           if (!modelId) continue;
+          // A stored row can carry a stacked copy of this node's own prefix
+          // (written before the write paths normalized ids); collapse it so
+          // the row emits `<alias>/<bare>` instead of stacking another
+          // prefix. Scoped to nodes with a prefix: a canonical provider's ids
+          // may legitimately begin with its own name. Composing the alias
+          // into the collapse means a bare, single- or multi-prefixed stored
+          // id all emit the same `<alias>/<bare>`.
+          const bareModelId = prefix
+            ? collapseProviderPrefix(`${alias}/${modelId}`, [
+                alias,
+                providerId,
+                canonicalProviderId,
+              ])
+            : modelId;
           if (curatedProvider && isDiscoveryImportedCustomSource(model.source)) continue;
           if (!isUnifiedChatSourceModelSelectable(canonicalProviderId, { ...model, id: modelId }))
             continue;
           if (model.isHidden === true && !revealHidden) continue;
-          if (isModelHiddenBulk(providerId, modelId, canonicalProviderId)) continue;
-          if (isExcludedByProviderConnections(canonicalProviderId, modelId)) continue;
+          if (
+            isModelHiddenBulk(providerId, modelId, canonicalProviderId) ||
+            (bareModelId !== modelId &&
+              isModelHiddenBulk(providerId, bareModelId, canonicalProviderId))
+          )
+            continue;
+          // Gate on the emitted identity too: rules keyed on the bare
+          // upstream id (hide lists, exposure denylist, connection
+          // eligibility) must also catch a legacy stacked row.
+          if (
+            isExcludedByProviderConnections(canonicalProviderId, modelId) ||
+            (bareModelId !== modelId &&
+              isExcludedByProviderConnections(canonicalProviderId, bareModelId))
+          )
+            continue;
           // #6328: apply hidePaidModels to user-defined custom rows too. A local custom
           // row flagged isFree:true stays trusted, even outside the free-tier catalog.
           if (
             (model as { isFree?: unknown }).isFree !== true &&
-            shouldHidePaid(
+            (shouldHidePaid(
               canonicalProviderId,
               modelId,
               (model as { pricing?: unknown }).pricing,
               (model as any).isFree
-            )
+            ) ||
+              (bareModelId !== modelId &&
+                shouldHidePaid(
+                  canonicalProviderId,
+                  bareModelId,
+                  (model as { pricing?: unknown }).pricing,
+                  (model as any).isFree
+                )))
           )
             continue;
-          if (shouldHideByExposure(canonicalProviderId, modelId)) continue;
+          if (
+            shouldHideByExposure(canonicalProviderId, modelId) ||
+            (bareModelId !== modelId && shouldHideByExposure(canonicalProviderId, bareModelId))
+          )
+            continue;
           // noAuth providers have no connection rows; keep auth providers gated. (#2798/#3200)
           const isNoAuthProvider = isNoAuthProviderKey(canonicalProviderId, providerId, alias);
           if (
             (!isNoAuthProvider ||
               isNoAuthProviderBlocked(blockedProviders, canonicalProviderId, providerId, alias)) &&
-            !hasEligibleConnectionForModel(
-              getConnectionsForProvider(alias, canonicalProviderId, providerId, parentProviderType),
-              modelId
+            !(
+              hasEligibleConnectionForModel(
+                getConnectionsForProvider(
+                  alias,
+                  canonicalProviderId,
+                  providerId,
+                  parentProviderType
+                ),
+                modelId
+              ) ||
+              (bareModelId !== modelId &&
+                hasEligibleConnectionForModel(
+                  getConnectionsForProvider(
+                    alias,
+                    canonicalProviderId,
+                    providerId,
+                    parentProviderType
+                  ),
+                  bareModelId
+                ))
             )
           ) {
             continue;
@@ -1823,7 +1901,7 @@ async function buildUnifiedModelsResponseCore(
           // A custom row is the operator-owned overlay for the same provider/model.
           // Preserve catalog identity and discovered metadata, but let every field
           // explicitly stored on the custom row determine the effective metadata.
-          const aliasId = `${alias}/${modelId}`;
+          const aliasId = `${alias}/${bareModelId}`;
           const existingIndex = models.findIndex((m) => m.id === aliasId);
           if (existingIndex !== -1) {
             const existing = models[existingIndex] as Record<string, unknown> & { id: string };
@@ -1834,7 +1912,7 @@ async function buildUnifiedModelsResponseCore(
             const visionFields =
               typeof model.supportsVision === "boolean"
                 ? model.supportsVision
-                  ? getCustomVisionCapabilityFields(model, aliasId, modelId)
+                  ? getCustomVisionCapabilityFields(model, aliasId, bareModelId)
                   : {
                       capabilities: {
                         ...((existing.capabilities as Record<string, unknown>) || {}),
@@ -1868,12 +1946,12 @@ async function buildUnifiedModelsResponseCore(
           const modelType = classification.type;
           if (
             modelType &&
-            hasEquivalentSpecialtyModel(canonicalProviderId, modelId, modelType, aliasId)
+            hasEquivalentSpecialtyModel(canonicalProviderId, bareModelId, modelType, aliasId)
           ) {
             continue;
           }
           const visionFields = !modelType
-            ? getCustomVisionCapabilityFields(model, aliasId, modelId)
+            ? getCustomVisionCapabilityFields(model, aliasId, bareModelId)
             : null;
 
           if (includeAlias || Boolean(prefix) || selfAliased) {
@@ -1883,7 +1961,7 @@ async function buildUnifiedModelsResponseCore(
               created: timestamp,
               owned_by: resolvePublicOwnerId(providerId, canonicalProviderId),
               permission: [],
-              root: modelId,
+              root: bareModelId,
               parent: null,
               custom: true,
               ...(modelType ? { type: modelType } : {}),
@@ -1903,10 +1981,10 @@ async function buildUnifiedModelsResponseCore(
           }
 
           if (includeCanonical && canonicalProviderId !== alias && !prefix && !isNoAuthProvider) {
-            const providerPrefixedId = `${canonicalProviderId}/${modelId}`;
+            const providerPrefixedId = `${canonicalProviderId}/${bareModelId}`;
             if (models.some((m) => m.id === providerPrefixedId)) continue;
             const providerVisionFields = !modelType
-              ? getCustomVisionCapabilityFields(model, providerPrefixedId, modelId)
+              ? getCustomVisionCapabilityFields(model, providerPrefixedId, bareModelId)
               : null;
             models.push({
               id: providerPrefixedId,
@@ -1914,7 +1992,7 @@ async function buildUnifiedModelsResponseCore(
               created: timestamp,
               owned_by: resolvePublicOwnerId(providerId, canonicalProviderId),
               permission: [],
-              root: modelId,
+              root: bareModelId,
               parent: includeAlias ? aliasId : null,
               custom: true,
               ...(modelType ? { type: modelType } : {}),
@@ -1973,15 +2051,41 @@ async function buildUnifiedModelsResponseCore(
           continue;
         }
 
-        if (isModelHiddenBulk(providerKey, modelId, canonicalProviderId)) continue;
-        if (isExcludedByProviderConnections(canonicalProviderId, modelId)) continue;
+        // Alias values can embed the node prefix twice (qualified from an
+        // already-prefixed id); collapse so emission stays `<alias>/<bare>`.
+        // Scoped to nodes with a prefix (see the custom-row loop).
+        const bareModelId = nodePrefix
+          ? collapseProviderPrefix(`${alias}/${modelId}`, [alias, providerKey, canonicalProviderId])
+          : modelId;
+
+        if (
+          isModelHiddenBulk(providerKey, modelId, canonicalProviderId) ||
+          (bareModelId !== modelId &&
+            isModelHiddenBulk(providerKey, bareModelId, canonicalProviderId))
+        )
+          continue;
+        // Gate on the emitted identity too (see the custom-row loop).
+        if (
+          isExcludedByProviderConnections(canonicalProviderId, modelId) ||
+          (bareModelId !== modelId &&
+            isExcludedByProviderConnections(canonicalProviderId, bareModelId))
+        )
+          continue;
         // #6328: apply hidePaidModels to alias-backed rows too. Alias mappings
         // point at providerKey/modelId with no pricing, so shouldHidePaid()
         // decides via the FREE_MODEL_IDS_BY_PROVIDER catalog tier.
-        if (shouldHidePaid(canonicalProviderId, modelId)) continue;
-        if (shouldHideByExposure(canonicalProviderId, modelId)) continue;
+        if (
+          shouldHidePaid(canonicalProviderId, modelId) ||
+          (bareModelId !== modelId && shouldHidePaid(canonicalProviderId, bareModelId))
+        )
+          continue;
+        if (
+          shouldHideByExposure(canonicalProviderId, modelId) ||
+          (bareModelId !== modelId && shouldHideByExposure(canonicalProviderId, bareModelId))
+        )
+          continue;
 
-        const aliasId = `${alias}/${modelId}`;
+        const aliasId = `${alias}/${bareModelId}`;
         const rawPrefixedId = `${providerKey}/${modelId}`;
         if (
           models.some((m: any) => m?.id === aliasId) ||
@@ -1991,7 +2095,9 @@ async function buildUnifiedModelsResponseCore(
         }
 
         const visionFields =
-          getVisionCapabilityFields(aliasId) || getVisionCapabilityFields(modelId);
+          getVisionCapabilityFields(aliasId) ||
+          getVisionCapabilityFields(modelId) ||
+          (bareModelId !== modelId && getVisionCapabilityFields(bareModelId));
 
         // #12058: see the static loop — the alias row is the only row here.
         const selfAliased = canonicalProviderId === alias;
@@ -2002,7 +2108,7 @@ async function buildUnifiedModelsResponseCore(
             created: timestamp,
             owned_by: resolvePublicOwnerId(providerKey, canonicalProviderId),
             permission: [],
-            root: modelId,
+            root: bareModelId,
             parent: null,
             ...(visionFields || {}),
           });
@@ -2014,17 +2120,19 @@ async function buildUnifiedModelsResponseCore(
           !isNoAuthProviderKey(canonicalProviderId) &&
           prefixRoutesToProvider(canonicalProviderId, canonicalProviderId)
         ) {
-          const providerPrefixedId = `${canonicalProviderId}/${modelId}`;
+          const providerPrefixedId = `${canonicalProviderId}/${bareModelId}`;
           if (models.some((m: any) => m?.id === providerPrefixedId)) continue;
           const providerVisionFields =
-            getVisionCapabilityFields(providerPrefixedId) || getVisionCapabilityFields(modelId);
+            getVisionCapabilityFields(providerPrefixedId) ||
+            getVisionCapabilityFields(modelId) ||
+            (bareModelId !== modelId && getVisionCapabilityFields(bareModelId));
           models.push({
             id: providerPrefixedId,
             object: "model",
             created: timestamp,
             owned_by: resolvePublicOwnerId(providerKey, canonicalProviderId),
             permission: [],
-            root: modelId,
+            root: bareModelId,
             parent: includeAlias ? aliasId : null,
             ...(providerVisionFields || {}),
           });
