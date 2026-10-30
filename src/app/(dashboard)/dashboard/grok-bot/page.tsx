@@ -266,7 +266,7 @@ export default function GrokBotPage() {
         request = { phase: next.phase, after: next.after };
         remembered.current[`${selectedAccount}:${selectedBot}`] = {
           after: request.after,
-          seenAt: connectionUpdatedAt,
+          messages: shown,
         };
         if (next.stop) apply({ type: "cutover" });
         return { phase: next.phase, after: next.after, stop: next.stop };
@@ -322,7 +322,7 @@ export default function GrokBotPage() {
     }
     setCardState("");
     setCardBusy(false);
-    const identity = card.entryId !== "" ? card.entryId : card.seq;
+    const identity = card.entryId;
     if (close && identity !== "") {
       closedNow.current = [...closedNow.current, identity];
       setClosedCards(closedNow.current);

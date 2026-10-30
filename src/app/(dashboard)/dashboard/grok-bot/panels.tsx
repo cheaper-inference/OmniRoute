@@ -203,7 +203,7 @@ function MessageCards({
               {card.multiSelect ? (
                 <form className="flex flex-wrap items-center gap-2" onSubmit={(event) => {
                   event.preventDefault();
-                  const chosen = Array.from(event.currentTarget.querySelectorAll("input:checked")).map((item) => item.value);
+                  const chosen = Array.from(event.currentTarget.querySelectorAll<HTMLInputElement>("input:checked")).map((item) => item.value);
                   if (chosen.length > 0) onWidget(card, chosen.join("\n"));
                 }}>
                   {card.options.map((option) => (

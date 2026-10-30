@@ -93,6 +93,17 @@ type Body = {
   kind?: unknown;
   message?: Message | null;
   text?: unknown;
+  type?: unknown;
+  connector?: unknown;
+  requestId?: unknown;
+  variant?: unknown;
+  prompt?: unknown;
+  options?: unknown;
+  allowCustom?: unknown;
+  multiSelect?: unknown;
+  dismissOnMoveOn?: unknown;
+  secretRequest?: { label?: unknown };
+  draft?: { from?: unknown; to?: unknown; subject?: unknown; target?: unknown; body?: unknown };
 };
 
 function readBody(entry: Entry): Body | null {
@@ -124,7 +135,7 @@ function cardOf(entry: Entry, body: Body): TranscriptCard | null {
   const seq = typeof entry.updatedSeq === "string" ? entry.updatedSeq : "";
   const entryId = typeof entry.entryId === "string" ? entry.entryId : "";
   const message = body.message;
-  const source = typeof body.type === "string" ? body : message;
+  const source = (typeof body.type === "string" ? body : message) as Message | undefined;
   const type = typeof source?.type === "string" ? source.type : "";
   if (type === "attachment") {
     const fileName = typeof message?.file_name === "string" ? message.file_name : "";

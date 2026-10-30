@@ -239,7 +239,7 @@ const DEVELOPER_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
   "changelog",
 ]);
 
-const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
+const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set<HideableSidebarItemId>([
   "home",
   "endpoints",
   "api-manager",
@@ -253,7 +253,6 @@ const ADMIN_SHOWN: ReadonlySet<HideableSidebarItemId> = new Set([
   "costs-pricing",
   "costs-budget",
   "costs-quota-share",
-  "costs-teams",
   "radar-admin",
   "cache",
   "logs",
