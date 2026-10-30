@@ -51,6 +51,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
   return (
     <RootProvider
       theme={{
+        enabled: false,
         defaultTheme: "dark",
         attribute: "class",
       }}
