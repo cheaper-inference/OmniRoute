@@ -85,11 +85,19 @@ test("normalizeSystemRole merges system and developer content into the first use
 
   const result = normalizeSystemRole(messages, "openai", "glm-4.5");
 
+  // Structured first-user content now keeps its parts: the system/developer
+  // instructions are prepended as a leading text part instead of flattening
+  // the message to a string (which used to drop non-text parts like images).
   assert.deepEqual(result, [
     {
       role: "user",
-      content:
-        "[System Instructions]\nfollow policy\n\nprefer concise answers\n\n[User Message]\nsay hello",
+      content: [
+        {
+          type: "text",
+          text: "[System Instructions]\nfollow policy\n\nprefer concise answers\n\n[User Message]",
+        },
+        { type: "text", text: "say hello" },
+      ],
     },
     { role: "assistant", content: "prior answer" },
   ]);
