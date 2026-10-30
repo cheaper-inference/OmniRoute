@@ -31,6 +31,7 @@ const RESET_AWARE_DEFAULTS = {
   weeklyWeight: 0.65,
   tieBandPercent: 5,
   exhaustionGuardPercent: 10,
+  noQuotaFloor: 0.5,
 };
 const RESET_WINDOW_DEFAULT_TIE_BAND_MS = 60_000;
 
@@ -50,6 +51,12 @@ function getPercentConfig(value: unknown, fallback: number): number {
   const numericValue = finiteNumberOrNull(value);
   if (numericValue === null) return fallback;
   return Math.max(0, Math.min(100, numericValue));
+}
+
+function getUnitConfig(value: unknown, fallback: number): number {
+  const numericValue = finiteNumberOrNull(value);
+  if (numericValue === null) return fallback;
+  return Math.max(0, Math.min(1, numericValue));
 }
 
 function getWeightConfig(value: unknown, fallback: number): number {
@@ -89,6 +96,7 @@ export function resolveResetAwareConfig(config: Record<string, unknown> | null |
       ) / 100,
     quotaCacheTtlMs: getDurationConfig(config?.resetAwareQuotaCacheTtlMs, 0, 300_000),
     quotaCacheMaxStaleMs: getDurationConfig(config?.resetAwareQuotaCacheMaxStaleMs, 0, 3_600_000),
+    noQuotaFloor: getUnitConfig(config?.resetAwareNoQuotaFloor, RESET_AWARE_DEFAULTS.noQuotaFloor),
   };
 }
 
@@ -346,7 +354,7 @@ export function scoreResetAwareQuota(
   quota: unknown,
   config: ReturnType<typeof resolveResetAwareConfig>
 ) {
-  if (!quota || !isRecord(quota)) return { score: 0.5 };
+  if (!quota || !isRecord(quota)) return { score: config.noQuotaFloor };
   if (quota.limitReached === true) return { score: -Infinity };
 
   const {

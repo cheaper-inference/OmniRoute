@@ -1,0 +1,1 @@
+- **feat(auto-combo):** the reset-aware no-quota floor score is now a per-combo config field (`resetAwareNoQuotaFloor`, default stays 0.5) instead of a hardcoded midpoint ([#18435](https://github.com/cheaper-inference/OmniRoute/pull/18435)) — thanks @jjxyxsjr
