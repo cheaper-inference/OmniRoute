@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   AntigravityExecutor,
   __test_stripTrailingAntigravityAssistantTurn,
+  normalizeAntigravityClaudeContents,
 } from "../../open-sse/executors/antigravity.ts";
 
 /**
@@ -126,4 +127,88 @@ test("empty/missing contents does not throw", () => {
 
   const request2 = __test_stripTrailingAntigravityAssistantTurn({});
   assert.equal(request2.contents, undefined);
+});
+
+test("(f) strips <total_tokens> budget notices and moves functionResponse parts before text parts for Claude models", async () => {
+  const request = await transform("antigravity/claude-opus-5-5-medium", [
+    { role: "user", parts: [{ text: "Run ls" }] },
+    {
+      role: "model",
+      parts: [{ functionCall: { id: "toolu_vrtx_01Tpd", name: "Bash", args: { command: "ls" } } }],
+    },
+    {
+      role: "user",
+      parts: [
+        { text: "<total_tokens>14999775 tokens left</total_tokens>" },
+        {
+          functionResponse: {
+            id: "toolu_vrtx_01Tpd",
+            name: "Bash",
+            response: { result: "file.txt" },
+          },
+        },
+      ],
+    },
+  ]);
+
+  const contents = request.contents as Array<{
+    role: string;
+    parts: Array<Record<string, unknown>>;
+  }>;
+  assert.equal(contents.length, 3);
+  assert.deepEqual(contents[2].parts, [
+    {
+      functionResponse: {
+        id: "toolu_vrtx_01Tpd",
+        name: "Bash",
+        response: { result: "file.txt" },
+      },
+    },
+  ]);
+});
+
+test("(g) preserves non-budget user text parts after all functionResponse parts", () => {
+  const normalized = normalizeAntigravityClaudeContents([
+    {
+      role: "user",
+      parts: [
+        { text: "Additional user context" },
+        { text: "<total_tokens>12345 tokens left</total_tokens>" },
+        { functionResponse: { id: "call_1", name: "Bash", response: { result: "ok" } } },
+        { functionResponse: { id: "call_2", name: "Read", response: { result: "data" } } },
+      ],
+    },
+  ]) as Array<{ role: string; parts: Array<Record<string, unknown>> }>;
+
+  assert.equal(normalized[0].parts.length, 3);
+  assert.deepEqual(normalized[0].parts, [
+    { functionResponse: { id: "call_1", name: "Bash", response: { result: "ok" } } },
+    { functionResponse: { id: "call_2", name: "Read", response: { result: "data" } } },
+    { text: "Additional user context" },
+  ]);
+});
+
+test("(h) native Gemini models keep functionResponse ordering unchanged", async () => {
+  const request = await transform("antigravity/gemini-3.1-pro", [
+    { role: "user", parts: [{ text: "Run ls" }] },
+    {
+      role: "model",
+      parts: [{ functionCall: { id: "call_1", name: "Bash", args: { command: "ls" } } }],
+    },
+    {
+      role: "user",
+      parts: [
+        { text: "Context before tool response" },
+        { functionResponse: { id: "call_1", name: "Bash", response: { result: "file.txt" } } },
+      ],
+    },
+  ]);
+
+  const contents = request.contents as Array<{
+    role: string;
+    parts: Array<Record<string, unknown>>;
+  }>;
+  assert.equal(contents.length, 3);
+  assert.equal(contents[2].parts.length, 2);
+  assert.deepEqual(contents[2].parts[0], { text: "Context before tool response" });
 });

@@ -466,13 +466,59 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
     : { ...request, systemInstruction };
 }
 
+/**
+ * Vertex AI (via Google Cloud Code for Claude models) enforces Anthropic's strict
+ * tool protocol: every tool_use must be immediately followed by a tool_result.
+ * In Gemini contents format, user turns merging tool results with demoted system/user
+ * turns (e.g. Claude Code's `<total_tokens>` budget notices) had `functionResponse`
+ * sorted to the end by `moveFunctionResponsesLast`, causing Vertex AI HTTP 400
+ * "tool_use ids were found without tool_result blocks immediately after".
+ *
+ * For Claude models, strip synthetic `<total_tokens>` budget blocks and ensure all
+ * `functionResponse` parts are placed first in the user turn.
+ */
+export function normalizeAntigravityClaudeContents(contents: unknown[]): unknown[] {
+  return contents.map((content) => {
+    if (!content || typeof content !== "object") return content;
+    const c = content as { role?: unknown; parts?: unknown[] };
+    if (c.role !== "user" || !Array.isArray(c.parts)) return content;
+
+    const hasFunctionResponse = c.parts.some(
+      (p) => p && typeof p === "object" && "functionResponse" in p
+    );
+    if (!hasFunctionResponse) return content;
+
+    const filteredParts = c.parts.filter((p) => {
+      if (p && typeof p === "object" && typeof (p as { text?: unknown }).text === "string") {
+        const text = (p as { text: string }).text.trim();
+        if (text.startsWith("<total_tokens>") && text.endsWith("</total_tokens>")) {
+          return false;
+        }
+      }
+      return true;
+    });
+
+    const responses: unknown[] = [];
+    const others: unknown[] = [];
+    for (const part of filteredParts) {
+      if (part && typeof part === "object" && "functionResponse" in part) {
+        responses.push(part);
+      } else {
+        others.push(part);
+      }
+    }
+
+    return { ...c, parts: [...responses, ...others] };
+  });
+}
+
 function sanitizeAntigravityGeminiRequest(
   request: Record<string, unknown>
 ): Record<string, unknown> {
   const clean: Record<string, unknown> = {};
 
   if (Array.isArray(request.contents)) {
-    clean.contents = request.contents;
+    clean.contents = normalizeAntigravityClaudeContents(request.contents);
   }
 
   if (asRecord(request.systemInstruction)) {
