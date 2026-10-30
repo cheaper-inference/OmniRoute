@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Watoa wote",
     "noApiKeyRequired": "Hakuna funguo ya API inayohitajika",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Tafuta modeli, mkuja…",
     "searchAria": "Tafuta modeli huria",
     "filterProviderAria": "Chuja kulingana na mkuja",

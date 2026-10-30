@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Svi davatelji usluga",
     "noApiKeyRequired": "API ključ nije potreban",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Pretraži model, pružatelj…",
     "searchAria": "Pretraži besplatne modele",
     "filterProviderAria": "Filtriraj po pružatelju",

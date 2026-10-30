@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Tất cả nhà cung cấp",
     "noApiKeyRequired": "Không cần khóa API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Tìm kiếm model, nhà cung cấp…",
     "searchAria": "Tìm kiếm model miễn phí",
     "filterProviderAria": "Lọc theo nhà cung cấp",

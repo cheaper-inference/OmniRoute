@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Semua penyedia",
     "noApiKeyRequired": "Tidak diperlukan kunci API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Cari model, provider…",
     "searchAria": "Cari model gratis",
     "filterProviderAria": "Filter berdasarkan provider",

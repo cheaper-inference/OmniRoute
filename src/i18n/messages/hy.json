@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Բոլոր մատակարարները",
     "noApiKeyRequired": "API բանալի չի պահանջվում",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Շրջուն գտնել, մատակարար…",
     "searchAria": "Անվճար գտնել",
     "filterProviderAria": "Բուֆերայնացնել մատակարարի ըստ",

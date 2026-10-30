@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Minden szolgáltató",
     "noApiKeyRequired": "API kulcs nem szükséges",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Modellek, szolgáltatók keresése…",
     "searchAria": "Ingyenes modellek keresése",
     "filterProviderAria": "Szűrés szolgáltató szerint",

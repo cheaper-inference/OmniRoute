@@ -14841,6 +14841,7 @@
     },
     "allProviders": "ဝန်ဆောင်မှုပေးသူအားလုံး",
     "noApiKeyRequired": "API ကီး မလိုအပ်ပါ",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "မော်ဒယ်၊ ပရော်ဝိုင်ဒါရှာဖွေပါ...",
     "searchAria": "မိခမ္ဘာ model များကို အဖွယ်ဖွာကြည့်ရှုပါ",
     "filterProviderAria": "ပေးစီးမှုအမျိုးအစားအရ စစ်ထုတ်ရန်",

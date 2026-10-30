@@ -14841,6 +14841,7 @@
     },
     "allProviders": "সমস্ত প্রদানকারী",
     "noApiKeyRequired": "কোনও API কী প্রয়োজন নেই",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "মডেল, প্রোভাইডার খুঁজুন…",
     "searchAria": "মুক্ত মডেল খুঁজুন",
     "filterProviderAria": "প্রোভাইডার অনুযায়ী ফিল্টার করুন",

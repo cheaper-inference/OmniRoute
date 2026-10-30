@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Всички доставчици",
     "noApiKeyRequired": "Не е необходим API ключ",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Търсене на модел, доставчик…",
     "searchAria": "Търсене на безплатни модели",
     "filterProviderAria": "Филтър по доставчик",

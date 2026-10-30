@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Gbogbo àwọn olùpèsè",
     "noApiKeyRequired": "Kò nílò kọ́kọ́rọ́ API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Ṣẹ́wàṣe model, awọn olupamọ́…",
     "searchAria": "Ṣẹ́wàṣe awọn model ńlá",
     "filterProviderAria": "Yàtú nípasẹ̀ olupamọ́",

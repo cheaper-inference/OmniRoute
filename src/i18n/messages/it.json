@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Tutti i fornitori",
     "noApiKeyRequired": "Nessuna chiave API richiesta",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Cerca modello, provider…",
     "searchAria": "Cerca modelli gratuiti",
     "filterProviderAria": "Filtra per provider",

@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Усі постачальники",
     "noApiKeyRequired": "Не потрібен API-ключ",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Пошук моделі, провайдера…",
     "searchAria": "Пошук безкоштовних моделей",
     "filterProviderAria": "Фільтрувати за провайдером",

@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Tüm sağlayıcılar",
     "noApiKeyRequired": "API anahtarı gerekmez",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Model, sağlayıcı ara…",
     "searchAria": "Ücretsiz modelleri ara",
     "filterProviderAria": "Sağlayıcıya göre filtrele",

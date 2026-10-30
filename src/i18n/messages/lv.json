@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Visi pakalpojumu sniedzēji",
     "noApiKeyRequired": "API atslēga nav nepieciešama",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Meklēt modeli, sniegumu…",
     "searchAria": "Meklēt bezmaksas modelus",
     "filterProviderAria": "Filtrēt pēc sniedzēja",

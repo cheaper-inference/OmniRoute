@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Bütün təminatçılar",
     "noApiKeyRequired": "API açarı tələb olunmur",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Model, təchizatçı axtar…",
     "searchAria": "Pulsuz modelləri axtar",
     "filterProviderAria": "Təchizatçıya görə filtrlə",

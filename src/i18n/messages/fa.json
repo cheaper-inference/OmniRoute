@@ -14764,6 +14764,7 @@
     },
     "allProviders": "تمام ارائه‌دهندگان",
     "noApiKeyRequired": "نیازی به کلید API نیست",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "جستجوی مدل، ارائه‌دهنده…",
     "searchAria": "جستجوی مدل‌های رایگان",
     "filterProviderAria": "فیلتر بر اساس ارائه‌دهنده",

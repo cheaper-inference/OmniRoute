@@ -14841,6 +14841,7 @@
     },
     "allProviders": "എല്ലാ ദാതാക്കളും",
     "noApiKeyRequired": "API കീ ആവശ്യമില്ല",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "മോഡൽ, പ്രോവൈഡർ തെരയുക…",
     "searchAria": "ജഡ്ജിത മോഡലുകൾ തെരയുക",
     "filterProviderAria": "പ്രോവൈഡർ അനുസരിച്ച് ചതിയുക",

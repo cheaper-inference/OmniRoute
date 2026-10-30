@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Alle leverandører",
     "noApiKeyRequired": "Ingen API-nøkkel nødvendig",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Søk modell, leverandør…",
     "searchAria": "Søk gratis modeller",
     "filterProviderAria": "Filtrer etter leverandør",

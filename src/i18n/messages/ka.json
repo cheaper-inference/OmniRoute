@@ -14841,6 +14841,7 @@
     },
     "allProviders": "ყველა პროვაიდერი",
     "noApiKeyRequired": "API გასაღები არ არის საჭირო",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "მოძიარ მოდელის, პროვაიდერის…",
     "searchAria": "მოძიარ უფასო მოდელების",
     "filterProviderAria": "გამოყვანა პროვაიდერის მიხედვით",

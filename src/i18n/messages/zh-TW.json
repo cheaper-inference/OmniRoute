@@ -14764,6 +14764,7 @@
     },
     "allProviders": "所有提供者",
     "noApiKeyRequired": "不需要 API 金鑰",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "搜尋模型、提供者…",
     "searchAria": "搜尋免費模型",
     "filterProviderAria": "按提供者篩選",

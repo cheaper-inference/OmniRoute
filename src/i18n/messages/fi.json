@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Kaikki palveluntarjoajat",
     "noApiKeyRequired": "Ei API-avainta vaadita",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Etsi malli, tarjoaja…",
     "searchAria": "Etsi ilmaisia malleja",
     "filterProviderAria": "Suodata tarjoajan mukaan",

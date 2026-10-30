@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Duk masu samarwa",
     "noApiKeyRequired": "Ba a buƙatar maɓallin API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Nemo model, mai ba da sabis…",
     "searchAria": "Nemo model mai kyauta",
     "filterProviderAria": "Sauton ta mai ba da sabis",

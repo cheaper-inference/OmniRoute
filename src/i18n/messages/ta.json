@@ -14764,6 +14764,7 @@
     },
     "allProviders": "எல்லா வழங்குநர்கள்",
     "noApiKeyRequired": "API விசை தேவையில்லை",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "மாதிரி, வழங்குநரைத் தேடு…",
     "searchAria": "இலவச மாதிரிகளைத் தேடு",
     "filterProviderAria": "வழங்குநர் அடிப்படையில் வடிகட்டு",

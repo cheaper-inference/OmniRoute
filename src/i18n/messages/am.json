@@ -14841,6 +14841,7 @@
     },
     "allProviders": "ሁሉም አቅራቢዎች",
     "noApiKeyRequired": "የAPI ቁልፍ አያስፈልግም",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "አቅራቢ፣ ሞዴል ፈልግ…",
     "searchAria": "ነጻ ሞዴሎችን ፈልግ",
     "filterProviderAria": "በአቅራቢ አጣራ",

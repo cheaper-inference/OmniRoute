@@ -14841,6 +14841,7 @@
     },
     "allProviders": "جميع المزودين",
     "noApiKeyRequired": "لا حاجة لمفتاح API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "ابحث عن النموذج، المزوّد…",
     "searchAria": "ابحث عن النماذج المجانية",
     "filterProviderAria": "تصفية حسب المزوّد",

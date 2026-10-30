@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Il-fornituri kollha",
     "noApiKeyRequired": "Ma hija meħtieġa l-ebda ċavetta tal-API",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Fittex mudell, provdidur…",
     "searchAria": "Fittex mudelli ħielsa",
     "filterProviderAria": "Iffittex bil-provvedur",

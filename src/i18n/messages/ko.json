@@ -14764,6 +14764,7 @@
     },
     "allProviders": "모든 공급자",
     "noApiKeyRequired": "API 키가 필요하지 않습니다",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "모델, 제공업체 검색...",
     "searchAria": "무료 모델 검색",
     "filterProviderAria": "제공업체로 필터링",

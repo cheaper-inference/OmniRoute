@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Alle aanbieders",
     "noApiKeyRequired": "Geen API-sleutel vereist",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Zoek model, provider…",
     "searchAria": "Zoek gratis modellen",
     "filterProviderAria": "Filteren op provider",

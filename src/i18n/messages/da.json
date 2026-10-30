@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Alle udbydere",
     "noApiKeyRequired": "Ingen API-nøgle kræves",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Søg efter model, udbyder…",
     "searchAria": "Søg efter gratis modeller",
     "filterProviderAria": "Filtrer efter udbyder",

@@ -14764,6 +14764,7 @@
     },
     "allProviders": "ผู้ให้บริการทั้งหมด",
     "noApiKeyRequired": "ไม่ต้องใช้ API key",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "ค้นหาโมเดล, ผู้ให้บริการ...",
     "searchAria": "ค้นหาโมเดลฟรี",
     "filterProviderAria": "กรองตามผู้ให้บริการ",

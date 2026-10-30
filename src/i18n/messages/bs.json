@@ -14841,6 +14841,7 @@
     },
     "allProviders": "Svi provajderi",
     "noApiKeyRequired": "API ključ nije potreban",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Pretraži model, provajder…",
     "searchAria": "Pretraži besplatne modele",
     "filterProviderAria": "Filteriraj po provajderu",

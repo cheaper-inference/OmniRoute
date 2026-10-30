@@ -14764,6 +14764,7 @@
     },
     "allProviders": "සියලු සපයන්නන්",
     "noApiKeyRequired": "API යතුරක් අවශ්ය නොවේ",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "මෝඩලය, සැපයුම්කරු සොයන්න…",
     "searchAria": "නොමැකින මෝඩල සොයන්න",
     "filterProviderAria": "සැපයුම්කරු අනුව හැරවීම",

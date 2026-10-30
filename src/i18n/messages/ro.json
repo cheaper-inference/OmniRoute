@@ -14764,6 +14764,7 @@
     },
     "allProviders": "Toți furnizorii",
     "noApiKeyRequired": "Nu este necesar un API key",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "Caută model, furnizor…",
     "searchAria": "Caută modele gratuite",
     "filterProviderAria": "Filtrează după furnizor",

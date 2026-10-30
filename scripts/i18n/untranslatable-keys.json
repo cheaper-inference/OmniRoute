@@ -67,6 +67,7 @@
     "endpoint.mcpCardTitle",
     "endpoint.rerank",
     "featureFlags.definitions.SERVER_OWNED_TOOL_LOOP_ENABLED.label",
+    "freeBudget.keylessCount",
     "header.a2a",
     "header.mcp",
     "health.cpu",

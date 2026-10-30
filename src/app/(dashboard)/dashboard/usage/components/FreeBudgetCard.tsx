@@ -115,6 +115,7 @@ interface FreeBudgetLabels {
   freeTypes: Record<string, string>;
   tosTitles: Record<string, string>;
   noApiKey: string;
+  keylessCount: (models: number, providers: number) => string;
 }
 
 const DEFAULT_LABELS: FreeBudgetLabels = {
@@ -139,6 +140,8 @@ const DEFAULT_LABELS: FreeBudgetLabels = {
   tokensMonth: "Tokens/mo",
   credit: (tokens) => `${tokens} credit`,
   noApiKey: "No API key required",
+  keylessCount: (models, providers) =>
+    `${models} model${models === 1 ? "" : "s"} · ${providers} provider${providers === 1 ? "" : "s"}`,
   freeTypes: {
     "recurring-daily": "daily",
     "recurring-monthly": "monthly",
@@ -440,7 +443,7 @@ export function FreeBudgetView({
             <Icon name="lock_open" size={14} className="text-success" />
             <span className="text-[11px] font-semibold text-success">{labels.noApiKey}</span>
             <span className="text-[10.5px] text-text-muted">
-              ({keylessModels.length}个模型 · {keylessProviders.length}个提供者)
+              ({labels.keylessCount(keylessModels.length, keylessProviders.length)})
             </span>
           </div>
           <div className="mt-1 flex flex-wrap gap-1">
@@ -698,6 +701,7 @@ export default function FreeBudgetCard() {
           tokensMonth: t("tokensMonth"),
           credit: (tokens) => t("credit", { tokens }),
           noApiKey: t("noApiKeyRequired"),
+          keylessCount: (models, providers) => t("keylessCount", { models, providers }),
           freeTypes: {
             "recurring-daily": t("freeType.daily"),
             "recurring-monthly": t("freeType.monthly"),

@@ -14764,6 +14764,7 @@
     },
     "allProviders": "सभी प्रदाता",
     "noApiKeyRequired": "कोई API कुंजी आवश्यक नहीं है",
+    "keylessCount": "{models, plural, one {# model} other {# models}} · {providers, plural, one {# provider} other {# providers}}",
     "searchPlaceholder": "मॉडल, प्रोवाइडर खोजें…",
     "searchAria": "मुफ्त मॉडल खोजें",
     "filterProviderAria": "प्रोवाइडर द्वारा फ़िल्टर करें",
