@@ -33,6 +33,7 @@ import {
 } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import type { MediaGenerationResultLike } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
 import {
   isVideoPromptOptional,
   resolveLocalOverrideCredentials,
@@ -197,17 +198,25 @@ async function postHandler(request, context) {
     credentials = local.credentials;
   }
 
-  const result: MediaGenerationResultLike = await withApiKeyContext(() =>
-    handleVideoGeneration({
-      body,
-      credentials,
-      log,
-      // #16372 — auth-gated job results are stored under this caller's owner and served
-      // from the caller-facing origin (configured public URL / trusted proxy / Host).
-      mediaSink,
-      ...(isCustomModel && { resolvedProvider: provider }),
-    })
-  );
+  const execution = await executeImageWithCredentialFallback({
+    provider: resolveVideoCredentialProvider(provider),
+    requestedModel,
+    credentials,
+    allowedConnections,
+    execute: (attemptCredentials) =>
+      withApiKeyContext(() =>
+        handleVideoGeneration({
+          body,
+          credentials: attemptCredentials,
+          log,
+          mediaSink,
+          ...(isCustomModel && { resolvedProvider: provider }),
+        })
+      ),
+  });
+
+  credentials = execution.credentials;
+  const result: MediaGenerationResultLike = execution.result;
 
   if (isMediaGenerationFailure(result)) {
     return failedMediaGenerationResponse(result, "Video generation provider error");
