@@ -29,6 +29,28 @@ async function text(stream: ReadableStream<Uint8Array>): Promise<string> {
   return chunks.join("");
 }
 
+test("the first watch keeps cursor zero", async () => {
+  let sent = "";
+  const body = await text(
+    watchStream({
+      accessToken: "token",
+      agentId: "agent-1",
+      after: "0",
+      signal: new AbortController().signal,
+      release: () => {},
+      frames: (input) => {
+        sent = String(
+          (input.payload.cursors as Array<{ afterUpdatedSeq: string }>)[0].afterUpdatedSeq
+        );
+        return readerFrames([])();
+      },
+      pressure: () => "read",
+    })
+  );
+  assert.equal(sent, "0");
+  assert.equal(body, "");
+});
+
 test("each upstream frame becomes one server-sent event", async () => {
   const body = await text(
     watchStream({

@@ -573,6 +573,7 @@ export default function GrokBotPage() {
               fanState,
               uploadNote,
               historyUnavailable,
+              loading: session.phase === "opening",
               linkLost,
               messages,
               window: windowSize,

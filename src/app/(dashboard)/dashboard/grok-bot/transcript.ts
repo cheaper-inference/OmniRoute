@@ -38,7 +38,7 @@ export type TranscriptCard =
       entryId: string;
       kind: "widget";
       prompt: string;
-      options: string[];
+      options: Array<{ label: string; value: string }>;
       allowCustom: boolean;
       multiSelect: boolean;
       dismissOnMoveOn: boolean;
@@ -172,9 +172,18 @@ function cardOf(entry: Entry, body: Body): TranscriptCard | null {
     return name === "" ? null : { seq, entryId, kind: "connector", name, requestId, action };
   }
   if (type === "widget") {
-    const options = Array.isArray(source?.options)
-      ? source.options.filter((option): option is string => typeof option === "string").slice(0, 12)
-      : [];
+    const raw = Array.isArray(source?.options) ? source.options : [];
+    const options = raw
+      .flatMap((option) => {
+        if (typeof option === "string" && option !== "") return [{ label: option, value: option }];
+        if (option && typeof option === "object") {
+          const label = typeof option.label === "string" ? option.label : "";
+          const value = typeof option.value === "string" ? option.value : label;
+          return label === "" ? [] : [{ label, value }];
+        }
+        return [];
+      })
+      .slice(0, 12);
     return {
       seq,
       entryId,
@@ -390,7 +399,7 @@ export function resumeTranscript(
     found.after === "" ||
     (connectionUpdatedAt !== "" && found.seenAt !== connectionUpdatedAt)
   ) {
-    return { phase: "snapshot", after: "0", messages: [], cards: [] };
+    return { phase: "snapshot", after: "0", generation: 0, messages: [], cards: [] };
   }
   return { phase: "live", after: found.after, messages: [], cards: [] };
 }

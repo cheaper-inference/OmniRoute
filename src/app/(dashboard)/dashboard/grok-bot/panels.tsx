@@ -225,9 +225,9 @@ function MessageCards({
                   }}
                 >
                   {card.options.map((option) => (
-                    <label className="text-xs" key={option}>
-                      <input className="mr-1" type="checkbox" value={option} />
-                      {option}
+                    <label className="text-xs" key={option.value}>
+                      <input className="mr-1" type="checkbox" value={option.value} />
+                      {option.label}
                     </label>
                   ))}
                   <button
@@ -244,11 +244,11 @@ function MessageCards({
                     <button
                       className="rounded-control border px-2 py-1 text-xs"
                       disabled={busy}
-                      key={option}
-                      onClick={() => onWidget(card, option)}
+                      key={option.value}
+                      onClick={() => onWidget(card, option.value)}
                       type="button"
                     >
-                      {option}
+                      {option.label}
                     </button>
                   ))}
                 </div>
@@ -339,16 +339,20 @@ function MessageList({
   t,
   messages,
   hidden,
+  loading,
   onOlder,
 }: {
   t: Translate;
   messages: TranscriptItem[];
   hidden: number;
+  loading: boolean;
   onOlder: () => void;
 }) {
   if (messages.length === 0) {
     return (
-      <p className="px-4 py-8 text-center text-sm text-text-muted">{t("conversationEmpty")}</p>
+      <p className="px-4 py-8 text-center text-sm text-text-muted">
+        {loading ? t("conversationLoading") : t("conversationEmpty")}
+      </p>
     );
   }
   return (
@@ -510,6 +514,7 @@ export type ConversationState = {
   blocked: boolean;
   needsSignIn: boolean;
   historyUnavailable: boolean;
+  loading: boolean;
   terminal: boolean;
   messages: TranscriptItem[];
   window: number;
@@ -577,6 +582,7 @@ export function ConversationPanel({
       <div className="min-h-0 flex-1 space-y-3 overflow-y-auto py-3" ref={scroller}>
         <MessageList
           hidden={Math.max(0, state.messages.length - state.window)}
+          loading={state.loading}
           messages={state.messages.slice(-state.window)}
           onOlder={handlers.onOlder}
           t={t}

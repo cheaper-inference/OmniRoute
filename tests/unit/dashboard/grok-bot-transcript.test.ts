@@ -350,7 +350,10 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
               message: {
                 type: "widget",
                 prompt: "Pick one",
-                options: ["A", "B"],
+                options: [
+                  { label: "A", value: "A" },
+                  { label: "B", value: "B" },
+                ],
                 allowCustom: true,
                 multiSelect: false,
                 dismissOnMoveOn: false,
@@ -385,7 +388,10 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
       entryId: "choice",
       kind: "widget",
       prompt: "Pick one",
-      options: ["A", "B"],
+      options: [
+        { label: "A", value: "A" },
+        { label: "B", value: "B" },
+      ],
       allowCustom: true,
       multiSelect: false,
       dismissOnMoveOn: false,
@@ -393,6 +399,46 @@ test("attachment, notice, connector, widget and unknown rows keep their own shap
     { seq: "34", entryId: "other", kind: "unknown", type: "canvas" },
   ]);
   assert.equal(JSON.stringify(state.cards).includes("secret"), false);
+});
+
+test("a widget option object shows its label and returns its value", () => {
+  const state = applyTranscriptFrame(
+    { cursor: "0", visible: [], cards: [], permissions: [], sealed: false },
+    {
+      rows: {
+        entries: [
+          wire(
+            "send-message",
+            {
+              message: {
+                type: "widget",
+                prompt: "Land?",
+                options: [{ label: "Yes", value: "land-now", style: "primary" }, { label: "Hold" }],
+              },
+            },
+            "35",
+            "ask"
+          ),
+        ],
+      },
+    }
+  );
+  assert.deepEqual(state.cards, [
+    {
+      seq: "35",
+      entryId: "ask",
+      kind: "widget",
+      prompt: "Land?",
+      options: [
+        { label: "Yes", value: "land-now" },
+        { label: "Hold", value: "Hold" },
+      ],
+      allowCustom: false,
+      multiSelect: false,
+      dismissOnMoveOn: false,
+    },
+  ]);
+  assert.equal(JSON.stringify(state.cards).includes("primary"), false);
 });
 
 test("an oversized or deeply nested body becomes unsupported", () => {

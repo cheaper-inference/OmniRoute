@@ -21,6 +21,7 @@ test("a newer connection login does not restore the previous conversation", () =
   assert.deepEqual(resumeTranscript(saved, "acct", "bot", "200"), {
     phase: "snapshot",
     after: "0",
+    generation: 0,
     messages: [],
     cards: [],
   });
@@ -30,6 +31,7 @@ test("a bot never opened starts a snapshot from zero", () => {
   assert.deepEqual(resumeTranscript({}, "acct", "bot"), {
     phase: "snapshot",
     after: "0",
+    generation: 0,
     messages: [],
     cards: [],
   });
