@@ -43,22 +43,28 @@ Because the number is an estimate:
 ### The pricing source
 
 Costs come from a pricing table resolved in this precedence order
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+([`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts)):
 
-1. **User overrides** — prices you set in the dashboard / via `PATCH /api/pricing`.
-2. **Synced external pricing** — fetched from LiteLLM's public
-   `model_prices_and_context_window.json` when sync is enabled (stored in a separate
-   `pricing_synced` namespace so it never clobbers your overrides).
-3. **Hardcoded defaults** — shipped with OmniRoute.
+1. **User overrides** — prices you set in the dashboard / via `PATCH /api/pricing`
+   (stored in the `pricing` namespace).
+2. **models.dev synced pricing** — fetched from the models.dev catalog when sync is
+   enabled (stored in the `models_dev_pricing` namespace so it never clobbers your overrides).
+3. **LiteLLM synced pricing** — fetched from LiteLLM's public
+   `model_prices_and_context_window.json` when sync is enabled (stored in the
+   `pricing_synced` namespace).
+4. **Hardcoded defaults** — shipped with OmniRoute in
+   `src/shared/constants/pricing/inference-hosts.ts`.
+
+Each layer overrides the previous one; user overrides always win.
 
 External pricing sync is **opt-in**, disabled by default. Relevant env vars
 (see [`.env.example`](../../.env.example)):
 
-| Env var                 | Default   | Purpose                                                          |
-| ----------------------- | --------- | ---------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`   | Enable the background LiteLLM pricing sync at startup.           |
-| `PRICING_SYNC_INTERVAL` | `86400`   | Sync interval in **seconds** (default daily).                    |
-| `PRICING_SYNC_SOURCES`  | `litellm` | Comma-separated source list (only `litellm` is supported today). |
+| Env var                 | Default   | Purpose                                                                      |
+| ----------------------- | --------- | ---------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Enable the background pricing sync (LiteLLM + models.dev) at startup.        |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Sync interval in **seconds** (default daily).                                |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Comma-separated source list (`litellm`, `models_dev`, or both).              |
 
 ### The cost formula
 
