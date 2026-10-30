@@ -380,6 +380,7 @@
       "tests/unit/gemini-deprecated-model-lockout.test.ts",
       "tests/unit/gemini-web-capabilities-9356.test.ts",
       "tests/unit/gemini-web-missing-browser-3516.test.ts",
+      "tests/unit/github-credit-limit-policy.test.ts",
       "tests/unit/github-model-not-supported-lockout.test.ts",
       "tests/unit/grok-cli-oauth.test.ts",
       "tests/unit/guardrail-pipeline-characterization.test.ts",
