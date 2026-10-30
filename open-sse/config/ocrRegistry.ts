@@ -186,7 +186,12 @@ export const OCR_PROVIDERS: Record<string, OcrProvider> = {
     baseUrl: "https://api.mistral.ai/v1/ocr",
     authType: "apikey",
     authHeader: "bearer",
-    models: [{ id: "mistral-ocr-latest", name: "Mistral OCR" }],
+    models: [
+      { id: "mistral-ocr-latest", name: "Mistral OCR" },
+      { id: "mistral-ocr-2503", name: "Mistral OCR 2503" },
+      { id: "mistral-ocr-2505", name: "Mistral OCR 2505" },
+      { id: "mistral-ocr-2512", name: "Mistral OCR 3" },
+    ],
   },
   "azure-document-intelligence": {
     id: "azure-document-intelligence",
@@ -232,6 +237,10 @@ export function parseOcrModel(modelStr: string | null | undefined): ParsedOcrMod
     if (config.models.some((m) => m.id === modelStr)) {
       return { provider: providerId, model: modelStr };
     }
+  }
+
+  if (modelStr.startsWith("mistral-ocr-")) {
+    return { provider: "mistral", model: modelStr };
   }
 
   return { provider: null, model: modelStr };

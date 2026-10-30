@@ -67,6 +67,9 @@ function labelsIncludeVision(value: unknown): boolean {
 export function detectVisionInput(record: JsonRecord): boolean {
   if (record.supportsVision === true || record.vision === true) return true;
 
+  const caps = asRecord(record.capabilities);
+  if (caps.vision === true) return true;
+
   const architecture = asRecord(record.architecture);
   if (modalitiesIncludeImage(architecture.input_modalities)) return true;
   if (modalitiesIncludeImage(record.input_modalities)) return true;
@@ -467,10 +470,12 @@ export function detectModelModality(
   );
 
   // An explicit chat endpoint is authoritative: a model that upstream says serves
-  // chat (e.g. `supportedEndpoints: ["chat", "embeddings"]`) must never be
-  // downgraded to embedding/rerank/image by the id/label heuristics below —
+  // chat (e.g. `supportedEndpoints: ["chat", "embeddings"]` or `capabilities.completion_chat`)
+  // must never be downgraded to embedding/rerank/image by the id/label heuristics below —
   // that would drop it from the chat catalog (#14159 re-land of #12630).
-  const hasChatEndpoint = rawEndpoints.some((endpoint) => CHAT_ENDPOINT_HINTS.has(endpoint));
+  const hasChatEndpoint =
+    rawEndpoints.some((endpoint) => CHAT_ENDPOINT_HINTS.has(endpoint)) ||
+    caps.completion_chat === true;
 
   const isRerank =
     !hasChatEndpoint &&
@@ -589,6 +594,17 @@ export function normalizeDiscoveredModels(
           : undefined;
     const explicitInputTypes = Array.isArray(record.supportedInputTypes);
 
+    const caps = asRecord(record.capabilities);
+    const declaredEndpointsFromCaps: string[] = [];
+    if (caps.audio_speech === true) declaredEndpointsFromCaps.push("audio-speech");
+    if (caps.audio_transcription === true) declaredEndpointsFromCaps.push("audio-transcriptions");
+    if (caps.ocr === true) declaredEndpointsFromCaps.push("ocr");
+    if (caps.embeddings === true || caps.embedding === true)
+      declaredEndpointsFromCaps.push("embeddings");
+    if (caps.completion_chat === true) declaredEndpointsFromCaps.push("chat");
+
+    const hasNonChatCaps = declaredEndpointsFromCaps.some((e) => e !== "chat");
+
     const supportedEndpoints = Array.isArray(record.supportedEndpoints)
       ? Array.from(
           new Set(
@@ -597,16 +613,18 @@ export function normalizeDiscoveredModels(
               .filter((endpoint): endpoint is string => Boolean(endpoint))
           )
         ).sort()
-      : modality.isEmbedding
-        ? ["embeddings"]
-        : modality.isRerank
-          ? ["rerank"]
-          : modality.isImage
-            ? ["images"]
-            : undefined;
+      : hasNonChatCaps
+        ? Array.from(new Set(declaredEndpointsFromCaps)).sort()
+        : modality.isEmbedding
+          ? ["embeddings"]
+          : modality.isRerank
+            ? ["rerank"]
+            : modality.isImage
+              ? ["images"]
+              : undefined;
 
     // #16929 provenance. Only a parser that genuinely reads the upstream's own
-    // capability declaration (e.g. Gemini supportedGenerationMethods) stamps
+    // capability declaration (e.g. Gemini supportedGenerationMethods or Mistral capabilities) stamps
     // "declared" explicitly on the record. A bare supportedEndpoints array is NOT
     // proof of declaration: OpenAI/OpenRouter/Ollama/codex/compatible parsers fill it
     // from heuristics or fixed defaults, so it stays unmarked (= defaulted, never
@@ -617,10 +635,12 @@ export function normalizeDiscoveredModels(
       record.endpointCapabilitySource === "declared" ||
       record.endpointCapabilitySource === "inferred"
         ? record.endpointCapabilitySource
-        : !Array.isArray(record.supportedEndpoints) &&
-            (modality.isEmbedding || modality.isRerank || modality.isImage)
-          ? "inferred"
-          : undefined;
+        : !Array.isArray(record.supportedEndpoints) && hasNonChatCaps
+          ? "declared"
+          : !Array.isArray(record.supportedEndpoints) &&
+              (modality.isEmbedding || modality.isRerank || modality.isImage)
+            ? "inferred"
+            : undefined;
 
     const apiFormat =
       toNonEmptyString(record.apiFormat) ||
@@ -647,8 +667,14 @@ export function normalizeDiscoveredModels(
     // Anthropic Models API reports the window as `max_input_tokens` and the output
     // cap as `max_tokens`. #14159 briefly treated `max_tokens` as a window candidate;
     // that mapped Claude Opus 5 to 128K instead of 1M. Do not put `max_tokens` here.
+    // Mistral's /v1/models cards carry the total window as `max_context_length`
+    // (BaseModelCard — the same semantic as a plain `context_length`: the combined
+    // prompt+output budget). Without it, a synced Mistral model reached the catalog
+    // with no window at all and the read path handed out the 128K default, masking
+    // the real 256K/1M windows.
     const contextWindow = firstPositiveNumber(
       record.context_length,
+      record.max_context_length,
       record.contextLength,
       record.contextWindow,
       record.max_model_len,
@@ -666,6 +692,12 @@ export function normalizeDiscoveredModels(
       record.inputTokenLimit,
       ...(isVertexProvider ? [] : [contextWindow])
     );
+    // Mistral publishes NO per-model output cap in its model cards — the context
+    // window is the combined prompt+output budget, so `max_context_length` above
+    // must never feed an output limit. Omitting `outputTokenLimit` (spread below
+    // stays closed) is the correct behavior: `capMaxOutputTokens` then leaves the
+    // requested value uncapped, and read paths that require a number fall back to
+    // their own defaults. Never fabricate one here.
     const outputTokenLimit = firstPositiveNumber(
       record.outputTokenLimit,
       record.max_output_tokens,
@@ -726,7 +758,11 @@ export function normalizeDiscoveredModels(
           ? { supportsThinking: true }
           : {}),
       ...(record.alwaysThinking === true ? { alwaysThinking: true } : {}),
-      ...(typeof record.supportsTools === "boolean" ? { supportsTools: record.supportsTools } : {}),
+      ...(typeof record.supportsTools === "boolean"
+        ? { supportsTools: record.supportsTools }
+        : caps.function_calling === true || caps.tools === true
+          ? { supportsTools: true }
+          : {}),
       ...(typeof record.supportsVideo === "boolean" ? { supportsVideo: record.supportsVideo } : {}),
       // Keep a paid verdict through the cache round trip: dropping false would
       // let a :free suffix or a prior optimistic flag grant access again.

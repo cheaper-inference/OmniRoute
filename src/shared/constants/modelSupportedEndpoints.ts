@@ -9,6 +9,7 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-transcriptions",
   "music",
   "images-generations",
+  "ocr",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
   "audio",
@@ -36,7 +37,7 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music" | "ocr";
   subtype?: "speech" | "transcription";
 } {
   // "chat" and "responses" are text-conversation endpoints; they carry no
@@ -51,6 +52,7 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
       ["videos", "video"],
       ["video", "video"],
       ["music", "music"],
+      ["ocr", "ocr"],
     ] as const
   ).find(([endpoint]) => endpoints.includes(endpoint));
   if (primary) return { type: primary[1] };
@@ -90,6 +92,8 @@ export function defaultEndpointsForProviderNodeApiType(
       return ["audio-transcriptions"];
     case "images-generations":
       return ["images"];
+    case "ocr":
+      return ["ocr"];
     default:
       return ["chat"];
   }
