@@ -450,6 +450,33 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       });
     });
 
+    // Ensure video mode is selected in project settings if project defaulted to image
+    try {
+      const settingsTrigger = page.locator(".settings-trigger-button").first();
+      if (await settingsTrigger.isVisible({ timeout: 3_000 }).catch(() => false)) {
+        const triggerText = await settingsTrigger.innerText().catch(() => "");
+        if (triggerText.includes("Banana") || !triggerText.toLowerCase().includes("veo")) {
+          console.log("[FLOW_DEBUG] Switching mode to Video in project settings...");
+          await settingsTrigger.click();
+          await page.waitForTimeout(1_000);
+          const videoModeBtn = page
+            .locator(
+              "button:has-text('Видео'), button:has-text('Video'), [role='menuitem']:has-text('Видео'), [role='menuitem']:has-text('Video')"
+            )
+            .first();
+          if (await videoModeBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+            await videoModeBtn.click();
+            await page.waitForTimeout(1_000);
+          }
+          // Close settings popover by clicking outside or pressing Escape
+          await page.keyboard.press("Escape").catch(() => {});
+          await page.waitForTimeout(500);
+        }
+      }
+    } catch (e) {
+      console.warn("[FLOW_DEBUG] Failed to ensure video mode:", e);
+    }
+
     const videoPrompt = `Create a video: ${opts.prompt}`;
 
     console.log("[FLOW_DEBUG] Typing prompt:", videoPrompt.slice(0, 50));
