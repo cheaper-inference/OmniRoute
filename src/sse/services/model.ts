@@ -1,6 +1,6 @@
 // Re-export from open-sse with localDb integration
 import { getModelAliases, getCustomModels } from "@/lib/db/models";
-import { getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
+import { getComboById, getComboByName, getComboByNameInsensitive } from "@/lib/db/combos";
 import { getCachedComboByName } from "@/lib/db/readCache";
 import { getCachedProviderNodes, getCachedSettings } from "@/lib/db/readCache";
 
