@@ -8,7 +8,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { requestQueueSettingsSchema } from "../../../src/shared/validation/schemas/settings.ts";
+import {
+  requestQueueSettingsSchema,
+  updateResilienceSchema,
+  waitForCooldownSettingsSchema,
+} from "../../../src/shared/validation/schemas/settings.ts";
 
 test("requestQueueSettingsSchema accepts maxWaitMs=0 (disable sentinel)", () => {
   const result = requestQueueSettingsSchema.safeParse({ maxWaitMs: 0 });
@@ -26,4 +30,53 @@ test("requestQueueSettingsSchema still rejects a negative maxWaitMs", () => {
 test("requestQueueSettingsSchema still rejects executionMaxWaitMs=0 (untouched by #12902)", () => {
   const result = requestQueueSettingsSchema.safeParse({ executionMaxWaitMs: 0 });
   assert.equal(result.success, false);
+});
+
+test("requestQueueSettingsSchema accepts globalConcurrentRequests runtime bounds", () => {
+  for (const globalConcurrentRequests of [0, 100_000]) {
+    const result = requestQueueSettingsSchema.safeParse({ globalConcurrentRequests });
+    assert.equal(result.success, true);
+    if (result.success) {
+      assert.equal(result.data.globalConcurrentRequests, globalConcurrentRequests);
+    }
+  }
+});
+
+test("requestQueueSettingsSchema rejects globalConcurrentRequests outside runtime bounds", () => {
+  assert.equal(
+    requestQueueSettingsSchema.safeParse({ globalConcurrentRequests: -1 }).success,
+    false
+  );
+  assert.equal(
+    requestQueueSettingsSchema.safeParse({ globalConcurrentRequests: 100_001 }).success,
+    false
+  );
+});
+
+test("waitForCooldownSettingsSchema accepts budgetMs runtime bounds", () => {
+  for (const budgetMs of [0, 300_000]) {
+    const result = waitForCooldownSettingsSchema.safeParse({ budgetMs });
+    assert.equal(result.success, true);
+    if (result.success) {
+      assert.equal(result.data.budgetMs, budgetMs);
+    }
+  }
+});
+
+test("waitForCooldownSettingsSchema rejects budgetMs outside runtime bounds", () => {
+  assert.equal(waitForCooldownSettingsSchema.safeParse({ budgetMs: -1 }).success, false);
+  assert.equal(waitForCooldownSettingsSchema.safeParse({ budgetMs: 300_001 }).success, false);
+});
+
+test("updateResilienceSchema accepts both runtime-consumed fields and remains strict", () => {
+  const valid = updateResilienceSchema.safeParse({
+    requestQueue: { globalConcurrentRequests: 0 },
+    waitForCooldown: { budgetMs: 300_000 },
+  });
+  assert.equal(valid.success, true);
+
+  const unknown = updateResilienceSchema.safeParse({
+    requestQueue: { globalConcurrentRequests: 0, unexpected: true },
+  });
+  assert.equal(unknown.success, false);
 });
