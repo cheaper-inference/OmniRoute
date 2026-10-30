@@ -1,0 +1,1 @@
+- **fix(api):** A combo member listed by a connection's synced catalog but carrying no limit evidence (no registry row, static spec, synced capability, or persisted override) no longer pulls the combo's advertised `max_input_tokens` down to its provider's `defaultContextLength`; confirmed sibling caps still bound the combo (#18609).
