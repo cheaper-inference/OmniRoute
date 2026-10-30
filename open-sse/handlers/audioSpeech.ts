@@ -1055,6 +1055,10 @@ export async function handleAudioSpeech({
         voice: body.voice || providerConfig.defaultVoice || "alloy",
         response_format: normalizeSpeechResponseFormat(body.response_format),
         speed: body.speed || 1.0,
+        // OpenAI's voice-steering field (gpt-4o-mini-tts, deAPI VoiceDesign); only sent when given.
+        ...(typeof body.instructions === "string" && body.instructions
+          ? { instructions: body.instructions }
+          : {}),
       }),
     });
 

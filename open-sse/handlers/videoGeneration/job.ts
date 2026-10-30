@@ -108,6 +108,14 @@ export type VideoJobPreset = {
   /** dot path into the poll response holding the finished video URL/array */
   resultPath: string;
   /**
+   * Result location for providers whose finished poll response carries no URL at
+   * all (deAPI only serves the clip from `GET /v1/videos/{id}/content`). Contains
+   * {taskId} and optionally {model}; resolved against the job base URL and used
+   * instead of `resultPath`. Pair it with `resultNeedsAuth` when that route is
+   * gated by the provider key.
+   */
+  resultUrlTemplate?: string;
+  /**
    * When true, the finished artifact is fetched with the provider credential and
    * stored locally, then reported as a URL on this gateway. Some providers publish
    * results behind their own auth (OpenRouter's `unsigned_urls` point at
@@ -275,6 +283,40 @@ const VIDEO_JOB_PRESETS: Record<string, VideoJobPreset> = {
     resultFormat: "mp4",
     maxPolls: 180,
     pollIntervalMs: 2000,
+  },
+  // deAPI OpenAI-compatible gateway (https://docs.deapi.ai/openai-compatibility#video).
+  // POST /v1/videos → { id, status: "queued" }; GET /v1/videos/{id} moves through
+  // queued → in_progress → completed | failed and never carries a URL. The clip is
+  // served by the key-gated GET /v1/videos/{id}/content, so it is downloaded with the
+  // caller's deAPI key and re-served from this gateway. `seconds` is a string, as in
+  // the Sora contract; renders take minutes, hence the 5 s × 120 poll budget.
+  "deapi-video-job": {
+    id: "deapi-video-job",
+    displayName: "deAPI Video",
+    authHeaderName: "Authorization",
+    authScheme: "bearer",
+    baseUrlFallback: "https://oai.deapi.ai",
+    submit: {
+      method: "POST",
+      path: "/v1/videos",
+      buildBody: ({ model, prompt, duration, extras }) => ({
+        model,
+        prompt,
+        ...(typeof duration === "number" ? { seconds: String(duration) } : {}),
+        ...extras,
+      }),
+    },
+    taskIdPath: "id",
+    poll: { pathTemplate: "/v1/videos/{taskId}" },
+    statusPath: "status",
+    statusDone: ["completed"],
+    statusFailed: ["failed"],
+    resultPath: "url",
+    resultUrlTemplate: "/v1/videos/{taskId}/content",
+    resultNeedsAuth: true,
+    resultFormat: "mp4",
+    maxPolls: 120,
+    pollIntervalMs: 5000,
   },
 };
 
@@ -478,9 +520,7 @@ async function runVideoJobGeneration({
     await sleep(nextDelay, signal);
     if (signal?.aborted) return abortedVideoResult();
     nextDelay = pollInterval;
-    const pollUrl = `${baseUrl}${preset.poll.pathTemplate
-      .replace("{taskId}", encodeURIComponent(taskId))
-      .replace("{model}", encodeURIComponent(model))}`;
+    const pollUrl = `${baseUrl}${fillJobPathTemplate(preset.poll.pathTemplate, taskId, model)}`;
     const pollResult = await fetchJson(pollUrl, {
       method: "GET",
       headers: buildJobHeaders(preset, credentials),
@@ -514,7 +554,9 @@ async function runVideoJobGeneration({
       readPath(pollResult.data, "state");
     const jobState = isDoneStatus(status, preset.statusDone, preset.statusFailed);
     if (jobState === "done") {
-      const url = readResultUrl(pollResult.data, preset.resultPath);
+      const url = preset.resultUrlTemplate
+        ? `${baseUrl}${fillJobPathTemplate(preset.resultUrlTemplate, taskId, model)}`
+        : readResultUrl(pollResult.data, preset.resultPath);
       if (!url) {
         return {
           success: false,
@@ -560,6 +602,13 @@ async function runVideoJobGeneration({
     status: 504,
     error: `Video job timed out after ${maxPolls} polls (${presetName})`,
   };
+}
+
+/** Substitute the URL-encoded job id and model into a preset path template. */
+function fillJobPathTemplate(template: string, taskId: string, model: string): string {
+  return template
+    .replace("{taskId}", encodeURIComponent(taskId))
+    .replace("{model}", encodeURIComponent(model));
 }
 
 function buildJobHeaders(preset: VideoJobPreset, credentials?: unknown): Record<string, string> {

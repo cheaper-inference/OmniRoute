@@ -689,6 +689,24 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
 
   // Segmind (#6656): 200+ models, `POST /v1/{model}`, x-api-key, raw image bytes.
   segmind: SEGMIND_IMAGE_PROVIDER,
+
+  // deAPI OpenAI-compatible gateway (https://docs.deapi.ai/openai-compatibility).
+  // Native model ids only (no dall-e-3 alias); `size` is validated per model and
+  // `quality` maps to a per-model step preset. Output is always PNG.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/images/generations",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "openai",
+    models: [
+      { id: "ZImageTurbo_INT8", name: "Z-Image Turbo (deAPI)" },
+      { id: "Flux_2_Klein_4B_BF16", name: "FLUX.2 Klein 4B (deAPI)" },
+      { id: "Flux1schnell", name: "FLUX.1 schnell (deAPI)" },
+      { id: "ZAnimeDistill_8Step_INT8", name: "Z-Anime (deAPI)" },
+    ],
+    supportedSizes: ["512x512", "768x768", "1024x1024", "1024x1536", "1536x1024"],
+  },
   nanogpt: {
     id: "nanogpt",
     baseUrl: "https://nano-gpt.com/api/v1/images/generations",

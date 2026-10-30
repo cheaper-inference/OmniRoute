@@ -390,6 +390,23 @@ export const VIDEO_PROVIDERS: Record<string, VideoProvider> = {
     models: SEGMIND_VIDEO_MODELS,
   },
 
+  // deAPI OpenAI-compatible gateway: POST /v1/videos → poll GET /v1/videos/{id};
+  // the finished clip is only served from the auth-gated /v1/videos/{id}/content,
+  // handled by the "deapi-video-job" preset. `seconds`/`size` are validated per model.
+  deapi: {
+    id: "deapi",
+    baseUrl: "https://oai.deapi.ai/v1/videos",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "deapi-video-job",
+    models: [
+      { id: "Ltx2_5_22B_Dist_INT8", name: "LTX-2.5 22B (deAPI)" },
+      { id: "MiniMaxH3_33B_Turbo_INT8", name: "MiniMax H3 Turbo (deAPI)" },
+      { id: "Ltx2_3_22B_Dist_INT8", name: "LTX-2.3 22B (deAPI)" },
+      { id: "Ltxv_13B_0_9_8_Distilled_FP8", name: "LTX-Video 13B Distilled (deAPI)" },
+    ],
+  },
+
   novita: {
     id: "novita",
     // Novita's async video APIs are per-model: the model id IS the submit path
