@@ -149,6 +149,7 @@ test("non-streaming HTTP errors hand the parsed upstream body to call-log persis
     getCurrentConnectionId: () => "test-connection",
     syncExecuteTranslatedBody: noop,
     assertManagedLeaseFence: noop,
+    pendingScope: {},
     updatePendingScope: noop,
     updateFromHeaders: noop,
     updateFromResponseBody: noop,

@@ -23,7 +23,7 @@ const core = await import("../../../src/lib/db/core.ts");
 const settingsDb = await import("../../../src/lib/db/settings.ts");
 const runtime = await import("../../../src/lib/config/runtimeSettings.ts");
 const route = await import("../../../src/app/api/settings/cli-versions/route.ts");
-const cliVersions = await import("../../../src/shared/constants/cliVersions.ts");
+const cliVersions = await import("../../../open-sse/config/cliVersions.ts");
 const claude = await import("../../../src/shared/constants/claudeCodeClient.ts");
 
 const ROUTE_URL = "http://localhost/api/settings/cli-versions";
