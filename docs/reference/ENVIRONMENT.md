@@ -1970,5 +1970,8 @@ Used by `open-sse/services/combo.ts` and `src/lib/quota/quotaScheduler.ts` for p
 | `ROSEBUD_CLI_SCRIPT` | empty | Absolute path to its JavaScript entrypoint, run by the server Node runtime. |
 | `ROSEBUD_DATA_DIR` | `$DATA_DIR/rosebud` | Private persistent account profiles, jobs and generated artifacts. |
 | `ROSEBUD_CONCURRENCY` | `2` | Concurrent CLI processes, not a credit limit. |
+| `SYSTEMROOT` | inherited from the OS | Windows system directory passed through to the CLI. Normally leave unset in `.env`. |
+| `TMPDIR` | inherited from the OS | POSIX temporary directory passed through to the CLI when present. Normally leave unset in `.env`. |
+| `TEMP` | inherited from the OS | Temporary directory passed through to the CLI when present. Normally leave unset in `.env`. |
 
 See [Rosebud](../providers/ROSEBUD.md).
