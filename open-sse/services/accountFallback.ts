@@ -119,15 +119,12 @@ import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWall
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
-import {
-  isFeatureFlagEnabled,
-  isMistralAmbiguous401SoftLockoutEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { boundedMap } from "@/lib/quota/boundedMap";
 // #16797: providerErrorRules.ts stays free of src/ imports; its opt-in flags
 // (OpenCode Zen egress-IP lock, full-text rule bodies) read the flag store through
 // this injected reader. Not registered = flags off (release default).
-setProviderErrorRuleFlagReader(isFeatureFlagEnabled);
+setProviderErrorRuleFlagReader(isRegisteredFeatureFlagEnabled);
 
 export type ProviderProfile = {
   baseCooldownMs: number;
@@ -2245,7 +2242,7 @@ export function checkFallbackError(
       status === HTTP_STATUS.UNAUTHORIZED &&
       !providerMatch &&
       isMistralAmbiguous401(provider, errorStr) &&
-      isMistralAmbiguous401SoftLockoutEnabled()
+      isRegisteredFeatureFlagEnabled("MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT")
     ) {
       return { ...buildRetryableFallback(RateLimitReason.UNKNOWN), ambiguousAuth: true };
     }

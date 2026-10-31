@@ -16,7 +16,7 @@
  * so the stream readiness timeout stays the only bound, as before.
  */
 
-import { isOpencodeResponsesStallRotationEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import {
   DEFAULT_STREAM_READINESS_TIMEOUT_MS,
   getResponsesFirstByteTimeoutMs,
@@ -76,7 +76,7 @@ export function resolveResponsesStallWindowMs(
   capMs?: number
 ): number {
   if (!stream || requestFormat !== "openai-responses") return 0;
-  if (!isOpencodeResponsesStallRotationEnabled()) return 0;
+  if (!isRegisteredFeatureFlagEnabled("OPENCODE_RESPONSES_STALL_ROTATION")) return 0;
   const configured = getResponsesFirstByteTimeoutMs();
   if (configured === 0) return 0;
   const cap = capMs ?? DEFAULT_STREAM_READINESS_TIMEOUT_MS;

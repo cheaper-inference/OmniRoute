@@ -26,10 +26,7 @@ import { sanitizeTransportError } from "./proxyTransportError.ts";
 import { isProxyReachable } from "@/lib/proxyHealth";
 import { isDirectBypassHost } from "./proxyDirectBypass.ts";
 import { noProxyMatch, resolveEnvProxyUrl } from "./proxyEnv.ts";
-import {
-  isControlPlaneProxyDirectFallbackEnabled,
-  isFeatureFlagEnabled,
-} from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import {
   directFetchWithBoundedResponseStart,
   isDirectResponseStartTimeout,
@@ -531,7 +528,8 @@ export async function runWithProxyContext(
   // The caller must opt in, and the runtime feature flag must also be enabled.
   // This fallback changes egress IP, so upgrades must not silently turn it on.
   const directFallbackOnUnreachable =
-    opts?.directFallbackOnUnreachable === true && isControlPlaneProxyDirectFallbackEnabled();
+    opts?.directFallbackOnUnreachable === true &&
+    isRegisteredFeatureFlagEnabled("OMNIROUTE_CONTROL_PLANE_PROXY_DIRECT_FALLBACK");
   // Keep an explicit direct sentinel so resolveProxyForRequest cannot re-read
   // HTTPS_PROXY/HTTP_PROXY after the control-plane route decision.
   const runDirect = () => proxyContext.run(DIRECT_PROXY_CONTEXT, fn);
@@ -894,7 +892,7 @@ async function patchedFetchUnrecorded(
           if (
             !tlsDirectFallback &&
             source === "direct" &&
-            isFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
+            isRegisteredFeatureFlagEnabled("PROXY_AUTO_SELECT_ENABLED")
           ) {
             let targetHostname = "";
             try {

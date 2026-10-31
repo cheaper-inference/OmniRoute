@@ -11,7 +11,7 @@
  * without real sockets. The ReadableStream wiring lives in `createRecoverableStream`.
  */
 import { STREAM_RECOVERY } from "../config/constants.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import {
   createThroughputWatchdog,
   ThroughputWatchdogError,
@@ -28,7 +28,7 @@ const TOOLCALL_ORDER_FIX_FLAG = "STREAM_RECOVERY_TOOLCALL_ORDER_FIX";
  */
 function isToolcallOrderFixEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled(TOOLCALL_ORDER_FIX_FLAG);
+    return isRegisteredFeatureFlagEnabled(TOOLCALL_ORDER_FIX_FLAG);
   } catch {
     return false;
   }
@@ -42,7 +42,7 @@ export const EMPTY_STREAM_SIBLING_RECOVERY_FLAG = "EMPTY_STREAM_SIBLING_RECOVERY
  */
 export function isEmptyStreamSiblingRecoveryEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled(EMPTY_STREAM_SIBLING_RECOVERY_FLAG);
+    return isRegisteredFeatureFlagEnabled(EMPTY_STREAM_SIBLING_RECOVERY_FLAG);
   } catch {
     return false;
   }

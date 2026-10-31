@@ -11,7 +11,7 @@ import { getDefaultErrorMessage, getErrorInfo } from "../config/errorConfig.ts";
 import { normalizePayloadForLog } from "@/lib/logPayloads";
 import type { ModelCooldownErrorPayload } from "@/types";
 import { buildPassthroughErrorResponse } from "./upstreamErrorPassthrough.ts";
-import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isRegisteredFeatureFlagEnabled } from "./registeredFeatureFlag.ts";
 import { resolveRetryAfterInstant } from "./retryAfterInstant.ts";
 import { parseAntigravityRetryTime, parseProseRetryDelayMs } from "./proseRetryDelay.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
@@ -378,7 +378,7 @@ function normalizeRetryAfterSeconds(retryAfter?: string | number | Date | null):
  */
 export function isRetryAfterProvenanceEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("RETRY_AFTER_PROVENANCE_ENABLED");
+    return isRegisteredFeatureFlagEnabled("RETRY_AFTER_PROVENANCE_ENABLED");
   } catch {
     return false;
   }
@@ -392,7 +392,7 @@ export function isRetryAfterProvenanceEnabled(): boolean {
  */
 export function isContentPolicyRefusalComboStopEnabled(): boolean {
   try {
-    return isFeatureFlagEnabled("CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED");
+    return isRegisteredFeatureFlagEnabled("CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED");
   } catch {
     return false;
   }
