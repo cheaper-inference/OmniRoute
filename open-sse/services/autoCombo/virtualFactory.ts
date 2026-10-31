@@ -352,7 +352,9 @@ const SYNTHETIC_NOAUTH_CONNECTION_ID = RESILIENCE_NOAUTH_CONNECTION_ID;
 // No-auth providers must opt into prompt-emulated tool calling before entering
 // reliability-curated auto/* pools. Local CLI providers additionally need a
 // successful readiness probe before they are admitted; direct provider/model
-// routing remains unaffected.
+// routing remains unaffected. Family pools bypass only the allowlist: the
+// readiness probe applies to every pool, because a provider that cannot run on
+// this host is never a usable candidate (#18417).
 function isChatAutoComboNoAuthProvider(
   providerDef: NoAuthProviderDefinition,
   bypassAllowlist: boolean
@@ -360,7 +362,7 @@ function isChatAutoComboNoAuthProvider(
   if (providerDef.noAuth !== true) return false;
   if (!bypassAllowlist && !getAutoRoutableEmulatedNoAuthProviders().has(providerDef.id))
     return false;
-  if (!bypassAllowlist && !isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
+  if (!isNoAuthProviderReadyForAutoRouting(providerDef.id)) return false;
   if (!Array.isArray(providerDef.serviceKinds) || providerDef.serviceKinds.length === 0)
     return true;
   return providerDef.serviceKinds.includes("llm");

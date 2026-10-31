@@ -25,7 +25,7 @@ import {
 // First-touch DB migrations run once per worker and can exceed vitest's 5s
 // default in a cold thread. auto/glm then materializes a ~50-candidate cartesian
 // pool across connected GLM backends plus always-on no-auth catalogs (auggie,
-// cloudflare-playground, devin-cli-agentic, zcode); that step measured ~35s on
+// cloudflare-playground, zcode); that step measured ~35s on
 // a loaded runner and blew the previous 20s budget (base-red #15306).
 vi.setConfig({ testTimeout: 90_000 });
 
@@ -165,23 +165,16 @@ describe("auto/<family> materialization (#6453)", () => {
     // "degrades gracefully" test below documents for opencode/minimax — a
     // no-auth backend that genuinely serves a family model IS a legitimate
     // member of the family pool, not just credentialed provider_connections rows.
-    // `devin-cli-agentic` joined for the same documented reason as `auggie`:
-    // #8914 added the Devin ACP bridge whose catalog (registry/devin/catalog.ts)
-    // advertises the glm-5-2* line, so it genuinely serves the family.
+    // `devin-cli-agentic` also advertises the glm-5-2* line (#8914), but it is a
+    // local CLI behind the #15446 readiness gate. No probe is registered here, so it
+    // fails closed and stays out of the family pool too (#18417).
     // `zcode` joined for the same documented reason too — #10184 added the local
     // ZCode app-server backend whose registry (registry/zcode) advertises the
     // full GLM_SHARED_MODELS line-up, so it genuinely serves the family.
     // `cloudflare-playground` joined on the same rule — its registry
     // (open-sse/config/providers/registry/cloudflare-playground/index.ts) advertises
     // zai-org/glm-5.2 and zai-org/glm-4.7-flash, so it genuinely serves the family.
-    assert.deepEqual(providerIds, [
-      "auggie",
-      "cloudflare-playground",
-      "devin-cli-agentic",
-      "glm",
-      "zai",
-      "zcode",
-    ]);
+    assert.deepEqual(providerIds, ["auggie", "cloudflare-playground", "glm", "zai", "zcode"]);
     // Every candidate must be a glm-family model (the Cartesian pool now surfaces
     // each backend's full glm line-up, not only the glm-5.2 default), and the
     // connected openai/gpt-4o-mini backend must be excluded — same family
