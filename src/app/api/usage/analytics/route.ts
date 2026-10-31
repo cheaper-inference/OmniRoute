@@ -4,10 +4,11 @@ import { getProviderById } from "@/shared/constants/providers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { serveAnalyticsCached } from "@/lib/usage/analyticsResponseCache";
 import { getApiKeys } from "@/lib/db/apiKeys";
-import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
+import { getDbInstance } from "@/lib/db/core";
 import {
   buildUnifiedSource,
   buildPresetUnifiedSource,
+  readPublishedCutoffDate,
   getUsageSummary,
   getDailyUsage,
   getDailyCostRows,
@@ -534,14 +535,7 @@ async function computeAnalyticsResponse(
       }
     }
 
-    // Raw-data cutoff: must match cleanupUsageHistory's rollup/delete boundary —
-    // retention.usageHistory (src/lib/db/cleanup.ts), NOT aggregation.rawDataRetentionDays.
-    const dbSettings = getUserDatabaseSettings();
-    const rawRetentionDays = dbSettings.retention?.usageHistory ?? 30;
-    const rawCutoff = new Date();
-    rawCutoff.setDate(rawCutoff.getDate() - rawRetentionDays);
-    const rawCutoffIso = rawCutoff.toISOString();
-
+    const rawCutoffDate = readPublishedCutoffDate(getDbInstance());
     const conditions = [];
     const params: Record<string, string> = {};
 
@@ -568,7 +562,6 @@ async function computeAnalyticsResponse(
 
     // Build the UNION data source that merges recent raw rows with older aggregated history.
     // SQL is encapsulated in usageAnalytics.ts — the route only supplies filter parameters.
-    const rawCutoffDate = rawCutoffIso.split("T")[0];
     const apiKeyParamEntries: Record<string, string> = {};
     apiKeyIds.forEach((key, i) => {
       apiKeyParamEntries[`apiKey${i}`] = key;

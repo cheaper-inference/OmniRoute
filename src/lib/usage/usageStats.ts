@@ -13,7 +13,8 @@ import { getPendingRequests } from "./usageHistory";
 import { getAccountDisplayName } from "@/lib/display/names";
 import { calculateCost } from "./costCalculator";
 import { isFlatRateProvider } from "./flatRateProviders";
-import { getRawDataCutoffDate, isAggregationEnabled } from "./aggregateHistory";
+import { isAggregationEnabled } from "./aggregateHistory";
+import { readPublishedCutoffDate } from "../db/usageAnalytics/sources";
 import { toNumber } from "@/shared/utils/numeric";
 
 type JsonRecord = Record<string, unknown>;
@@ -144,7 +145,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
       COALESCE(service_tier, 'standard') as service_tier,
       1 as request_count
     FROM usage_history
-    WHERE DATE(timestamp) >= ?
+    WHERE DATE(timestamp) > ?
 
     UNION ALL
 
@@ -157,19 +158,19 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
       NULL as api_key_name,
       COALESCE(total_input_tokens, 0) as tokens_input,
       COALESCE(total_output_tokens, 0) as tokens_output,
-      0 as tokens_cache_read,
-      0 as tokens_cache_creation,
-      0 as tokens_reasoning,
-      0 as cost_tokens_input,
-      0 as cost_tokens_output,
-      0 as cost_tokens_cache_read,
-      0 as cost_tokens_cache_creation,
-      0 as cost_tokens_reasoning,
-      COALESCE(total_cost, 0.0) as stored_cost,
-      'standard' as service_tier,
+      COALESCE(total_cache_read_tokens, 0) as tokens_cache_read,
+      COALESCE(total_cache_creation_tokens, 0) as tokens_cache_creation,
+      COALESCE(total_reasoning_tokens, 0) as tokens_reasoning,
+      COALESCE(total_input_tokens, 0) as cost_tokens_input,
+      COALESCE(total_output_tokens, 0) as cost_tokens_output,
+      COALESCE(total_cache_read_tokens, 0) as cost_tokens_cache_read,
+      COALESCE(total_cache_creation_tokens, 0) as cost_tokens_cache_creation,
+      COALESCE(total_reasoning_tokens, 0) as cost_tokens_reasoning,
+      0.0 as stored_cost,
+      service_tier,
       COALESCE(total_requests, 0) as request_count
-    FROM daily_usage_summary
-    WHERE date < ?
+    FROM usage_daily_summary
+    WHERE date <= ?
   `;
 }
 
@@ -333,7 +334,7 @@ export async function getConnectionSpendUsdSinceAdded(
 export async function getUsageStats() {
   const db = getDbInstance();
   const aggregationEnabled = await isAggregationEnabled();
-  const cutoffDate = aggregationEnabled ? await getRawDataCutoffDate() : null;
+  const cutoffDate = aggregationEnabled ? readPublishedCutoffDate(getDbInstance()) : null;
   const sourceSql = buildUsageSourceSql(aggregationEnabled);
   const sourceParams = aggregationEnabled && cutoffDate ? [cutoffDate, cutoffDate] : [];
 

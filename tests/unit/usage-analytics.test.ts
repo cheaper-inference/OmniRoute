@@ -524,16 +524,16 @@ test("clearPendingRequests allows fresh tracking after clearing", () => {
   assert.ok(pending.details["conn-4"]);
 });
 
-test("getUsageSummary counts total_requests from daily_usage_summary, not 1-per-row (#usage-stats-fix)", async () => {
+test("getUsageSummary counts total_requests from usage_daily_summary, not 1-per-row (#usage-stats-fix)", async () => {
   const db = core.getDbInstance();
 
-  // Insert a daily_usage_summary row with total_requests=50, 1000 input, 500 output.
+  // Insert a usage_daily_summary row with total_requests=50, 1000 input, 500 output.
   // With the old COUNT(*) query this would count as 1 request; with SUM(requests)
   // it must count as 50.
   db.prepare(
     `
-    INSERT INTO daily_usage_summary (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
-    VALUES ('openai', 'gpt-4', '2024-01-10', 50, 1000, 500, 0.02)
+    INSERT INTO usage_daily_summary (provider, model, service_tier, date, total_requests, total_input_tokens, total_output_tokens, total_cost)
+    VALUES ('openai', 'gpt-4', 'standard', '2024-01-10', 50, 1000, 500, 0.02)
   `
   ).run();
 
@@ -559,15 +559,15 @@ test("getUsageSummary counts total_requests from daily_usage_summary, not 1-per-
 
   const summary = getUsageSummary(unifiedSource, unifiedParams);
 
-  // 50 from daily_usage_summary + 1 from raw usage_history = 51
+  // 50 from usage_daily_summary + 1 from raw usage_history = 51
   assert.equal(
     summary.totalRequests,
     51,
     "totalRequests must be 50 (aggregated) + 1 (raw), not 1+1"
   );
-  // 1000 from daily_usage_summary + 100 from raw = 1100
+  // 1000 from usage_daily_summary + 100 from raw = 1100
   assert.equal(summary.promptTokens, 1100, "promptTokens must merge aggregated + raw token sums");
-  // 500 from daily_usage_summary + 50 from raw = 550
+  // 500 from usage_daily_summary + 50 from raw = 550
   assert.equal(
     summary.completionTokens,
     550,

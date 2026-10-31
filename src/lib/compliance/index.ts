@@ -33,19 +33,6 @@ function getDb() {
   }
 }
 
-type AuditLogWriteEntry = {
-  action: string;
-  actor?: string;
-  target?: string;
-  details?: unknown;
-  metadata?: unknown;
-  ipAddress?: string;
-  resourceType?: string;
-  status?: string;
-  requestId?: string;
-  createdAt?: string;
-};
-
 type AuditLogFilter = {
   action?: string;
   actor?: string;
@@ -527,8 +514,30 @@ export async function cleanupExpiredLogs() {
   let trimmedProxyLogs = 0;
 
   try {
-    const r1 = db.prepare("DELETE FROM usage_history WHERE timestamp < ?").run(usageCutoff);
-    deletedUsage = r1.changes;
+    // The Team summary is built from the rows this pass deletes, so fold them
+    // before the delete. A failed fold must not stop the delete: the guard
+    // keeps every row the fold has not marked, so the cost of a failure here
+    // is disk space rather than the Team usage itself.
+    let foldError: unknown = null;
+    try {
+      const { rollupTeamUsageBefore } = await import("../usage/aggregateHistory");
+      db.transaction((cutoff: string) => rollupTeamUsageBefore(db, cutoff))(usageCutoff);
+    } catch (error) {
+      foldError = error;
+    }
+    deletedUsage = db
+      .prepare(
+        `DELETE FROM usage_history WHERE timestamp < ?
+         AND (billing_team_id IS NULL OR billing_team_id = ''
+           OR team_rollup_processed_at IS NOT NULL)`
+      )
+      .run(usageCutoff).changes;
+    if (foldError) {
+      console.error(
+        "[compliance] Team usage fold failed; unmarked Team rows are kept, not deleted",
+        foldError
+      );
+    }
   } catch {
     /* table may not exist */
   }

@@ -1,8 +1,8 @@
 /**
  * db/usageAnalytics/sources.ts — Pure SQL source-string builders for usage analytics.
  *
- * Builds the UNION subqueries that merge recent `usage_history` rows with older
- * `daily_usage_summary` aggregates. These functions are pure (no DB calls, no imports)
+ * Builds the UNION subqueries that merge recent `usage_history` rows with
+ * published `usage_daily_summary` days. These functions are pure (no DB calls, no imports)
  * and are consumed by the query functions in the parent `usageAnalytics.ts` module.
  */
 
@@ -17,14 +17,17 @@ export interface BuildUnifiedSourceOptions {
   sinceIso: string | null;
   /** ISO-8601 timestamp upper bound. Null = no upper bound. */
   untilIso: string | null;
-  /** YYYY-MM-DD date string: rows older than this have been rolled up to daily_usage_summary. */
-  rawCutoffDate: string;
+  /**
+   * YYYY-MM-DD of the last published day. Null means nothing is published yet,
+   * so the read stays on usage_history.
+   */
+  rawCutoffDate: string | null;
   /**
    * SQL condition fragment for API-key filtering, e.g.
    * "(api_key_name IN (@apiKey0) OR api_key_id IN (@apiKey0))".
-   * Empty string = no API-key filter.
+   * Empty string or null = no API-key filter.
    */
-  apiKeyWhere: string;
+  apiKeyWhere: string | null;
   /** Named-param entries for the apiKey placeholders (apiKey0, apiKey1, …). */
   apiKeyParams: AnalyticsParams;
 }
@@ -51,21 +54,50 @@ const RAW_COST_COLUMNS = `
           CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END as cost_tokens_reasoning`;
 
 /**
- * The same columns for a daily_usage_summary row. Its `total_cost` is already
+ * The same columns for a usage_daily_summary row. Its `total_cost` is already
  * priced at rollup time; a legacy zero-cost summary falls back to its
  * input/output totals (see computeUsageRowCost in the analytics route).
+ * Cache and reasoning totals are kept so a published day is priced the same
+ * way a raw day is.
  */
 const SUMMARY_COST_COLUMNS = `
           COALESCE(total_cost, 0.0) as stored_cost,
           total_input_tokens as cost_tokens_input,
           total_output_tokens as cost_tokens_output,
-          0 as cost_tokens_cache_read,
-          0 as cost_tokens_cache_creation,
-          0 as cost_tokens_reasoning`;
+          total_cache_read_tokens as cost_tokens_cache_read,
+          total_cache_creation_tokens as cost_tokens_cache_creation,
+          total_reasoning_tokens as cost_tokens_reasoning`;
+
+/**
+ * A date no usage row can precede. Passing it as the cutoff selects no
+ * summary rows, which is what a NULL pointer must do.
+ */
+export const UNPUBLISHED_CUTOFF_DATE = "0000-01-01";
+
+/**
+ * The last day published with no gap. NULL until the first day is published,
+ * in which case the read stays on usage_history.
+ */
+export function readPublishedCutoffDate(db: {
+  prepare: (sql: string) => { get: () => unknown };
+}): string {
+  const pointer = db
+    .prepare("SELECT last_completed_date FROM rollup_state WHERE tier = 'daily'")
+    .get() as { last_completed_date: string | null } | undefined;
+  return pointer?.last_completed_date ?? UNPUBLISHED_CUTOFF_DATE;
+}
+
+function includesPublishedDays(
+  rawCutoffDate: string,
+  sinceDate: string | null,
+  apiKeyWhere: string | null
+): boolean {
+  return (!sinceDate || sinceDate <= rawCutoffDate) && !apiKeyWhere;
+}
 
 /**
  * Builds the UNION subquery that merges recent `usage_history` rows with
- * older `daily_usage_summary` aggregates, preventing double-counting and
+ * published `usage_daily_summary` days, preventing double-counting and
  * preventing api_key leakage from summary rows.
  *
  * The returned `unifiedSource` is a parenthesised subquery suitable for use
@@ -76,15 +108,18 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
   const { sinceIso, untilIso, rawCutoffDate, apiKeyWhere, apiKeyParams } = opts;
   const sinceDate = sinceIso?.split("T")[0] ?? null;
 
-  // Include summaries only when the window starts before rawCutoffDate and no api_key filter is active.
-  const needsAggregated = (!sinceDate || sinceDate < rawCutoffDate) && !apiKeyWhere;
+  // A null pointer means no day is published, so the read stays on raw rows.
+  // Include summaries only when the window starts on or before the last
+  // published day and no api_key filter is active.
+  const needsAggregated =
+    rawCutoffDate !== null && includesPublishedDays(rawCutoffDate, sinceDate, apiKeyWhere);
 
   const unifiedParams: AnalyticsParams = {};
 
-  // Floor raw rows at rawCutoffDate when summary rows are included to avoid double-counting.
+  // Raw rows start after the last published day, so that day is not counted twice.
   const rawConditions: string[] = [];
   if (needsAggregated) {
-    rawConditions.push("timestamp >= @rawCutoff");
+    rawConditions.push("DATE(timestamp) > @rawCutoff");
     unifiedParams.rawCutoff = rawCutoffDate;
   } else if (sinceIso) {
     rawConditions.push("timestamp >= @since");
@@ -100,7 +135,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
   }
   const rawWhere = rawConditions.length > 0 ? `WHERE ${rawConditions.join(" AND ")}` : "";
 
-  // Aggregated leg: bounded strictly before rawCutoffDate so it never overlaps raw.
+  // Aggregated leg includes the published cutoff day itself.
   const aggConditions: string[] = [];
   if (needsAggregated) {
     if (sinceIso) {
@@ -111,7 +146,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
       aggConditions.push("date <= @untilDate");
       unifiedParams.untilDate = untilIso.split("T")[0];
     }
-    aggConditions.push("date < @rawCutoffDate");
+    aggConditions.push("date <= @rawCutoffDate");
     unifiedParams.rawCutoffDate = rawCutoffDate;
   }
   const aggWhere = aggConditions.length > 0 ? `WHERE ${aggConditions.join(" AND ")}` : "";
@@ -145,10 +180,10 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           model,
           total_input_tokens as tokens_input,
           total_output_tokens as tokens_output,
-          0 as tokens_cache_read,
-          0 as tokens_cache_creation,
-          0 as tokens_reasoning,
-          'standard' as service_tier,
+          total_cache_read_tokens as tokens_cache_read,
+          total_cache_creation_tokens as tokens_cache_creation,
+          total_reasoning_tokens as tokens_reasoning,
+          service_tier,
           1 as success,
           NULL as latency_ms,
           NULL as connection_id,
@@ -158,7 +193,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           ${SUMMARY_COST_COLUMNS},
           1 as is_aggregated,
           total_requests as requests
-        FROM daily_usage_summary
+        FROM usage_daily_summary
         ${aggWhere}
        )`
     : `(SELECT
@@ -185,13 +220,14 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
   const { sinceIso, untilIso, rawCutoffDate, apiKeyWhere, apiKeyParams } = opts;
   const sinceDate = sinceIso?.split("T")[0] ?? null;
 
-  const needsAggregated = (!sinceDate || sinceDate < rawCutoffDate) && !apiKeyWhere;
+  const needsAggregated =
+    rawCutoffDate !== null && includesPublishedDays(rawCutoffDate, sinceDate, apiKeyWhere);
 
   const presetParams: AnalyticsParams = {};
 
   const rawConditions: string[] = [];
   if (needsAggregated) {
-    rawConditions.push("timestamp >= @presetRawCutoff");
+    rawConditions.push("DATE(timestamp) > @presetRawCutoff");
     presetParams.presetRawCutoff = rawCutoffDate;
   } else if (sinceIso) {
     rawConditions.push("timestamp >= @presetSince");
@@ -209,7 +245,7 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
       aggConditions.push("date >= @presetSinceDate");
       presetParams.presetSinceDate = sinceDate!;
     }
-    aggConditions.push("date < @presetRawCutoffDate");
+    aggConditions.push("date <= @presetRawCutoffDate");
     presetParams.presetRawCutoffDate = rawCutoffDate;
   }
   const presetAggWhere = aggConditions.length > 0 ? `WHERE ${aggConditions.join(" AND ")}` : "";
@@ -227,15 +263,15 @@ export function buildPresetUnifiedSource(opts: BuildUnifiedSourceOptions): Unifi
         SELECT
           date || 'T12:00:00.000Z' as timestamp,
           provider, model,
-          'standard' as service_tier,
+          service_tier,
           total_input_tokens as tokens_input,
           total_output_tokens as tokens_output,
-          0 as tokens_cache_read,
-          0 as tokens_cache_creation,
-          0 as tokens_reasoning,
+          total_cache_read_tokens as tokens_cache_read,
+          total_cache_creation_tokens as tokens_cache_creation,
+          total_reasoning_tokens as tokens_reasoning,
           ${SUMMARY_COST_COLUMNS},
           1 as is_aggregated
-        FROM daily_usage_summary
+        FROM usage_daily_summary
         ${presetAggWhere}
       )`
     : `(SELECT timestamp, provider, model, service_tier,

@@ -224,7 +224,7 @@ test("a retention rollup archives reported costs and prices only unreported requ
   const summary = core
     .getDbInstance()
     .prepare(
-      "SELECT total_requests, total_input_tokens, total_cost FROM daily_usage_summary WHERE provider = 'rollup-example' AND model = 'old-model'"
+      "SELECT total_requests, total_input_tokens, total_cost FROM usage_daily_summary WHERE provider = 'rollup-example' AND model = 'old-model'"
     )
     .get() as { total_requests: number; total_input_tokens: number; total_cost: number };
   assert.equal(summary.total_requests, 2);

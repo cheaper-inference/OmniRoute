@@ -1168,11 +1168,6 @@
       "count": 1
     }
   },
-  "src/lib/compliance/index.ts": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 1
-    }
-  },
   "src/lib/copilot/engine.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 2

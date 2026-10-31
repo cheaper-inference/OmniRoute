@@ -4,7 +4,7 @@
  * @module lib/db/cleanup
  */
 
-import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
+import { publishDay, rollupTeamUsageBefore } from "@/lib/usage/aggregateHistory";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
@@ -115,39 +115,92 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   const cutoffDateStr = cutoffISO.split("T")[0];
 
   const result: CleanupResult = { deleted: 0, errors: 0 };
+  const dates = db
+    .prepare(
+      "SELECT DISTINCT DATE(timestamp) AS day FROM usage_history WHERE timestamp < ? ORDER BY day"
+    )
+    .all(cutoffDateStr) as Array<{ day: string }>;
 
-  // Roll up rows that are about to be deleted into daily_usage_summary so that the
-  // analytics route can still surface historical data via the UNION query. The rollup
-  // uses the exact same day boundary as the DELETE below, so every deleted row
-  // is guaranteed to have been aggregated first.
-  //
-  // rollupUsageHistoryBeforeDate catches its own errors and reports them via the
-  // returned result, so we inspect that rather than relying on a thrown exception.
-  // If the rollup failed, abort the DELETE to avoid permanently losing raw usage data
-  // that was never aggregated.
-  const rollupResult = await rollupUsageHistoryBeforeDate(cutoffDateStr);
-  if (rollupResult.errors > 0) {
-    console.error(
-      "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
-    );
-    result.errors += rollupResult.errors;
-    return result;
+  for (const { day } of dates) {
+    const snapshot = db.transaction(() => readRetiringDay(db, day))() as RetiringDay;
+    if (snapshot.revision === null && snapshot.summaryCount > 0) {
+      continue;
+    }
+
+    let published;
+    let removed = 0;
+    try {
+      published = await publishDay(day, {
+        onCommit: (tx) => {
+          // Team summaries are built from the raw rows, so fold this day's
+          // unprocessed Team rows in before they are deleted, in the same commit.
+          rollupTeamUsageBefore(tx, nextUtcDay(day));
+          // The fold compares timestamp strings while this DELETE buckets by
+          // DATE(), so a row with a non-UTC offset can miss the fold. Never
+          // delete a Team row that has not been folded.
+          removed = tx
+            .prepare(
+              `DELETE FROM usage_history WHERE DATE(timestamp) = ?
+               AND (billing_team_id IS NULL OR billing_team_id = ''
+                 OR team_rollup_processed_at IS NOT NULL)`
+            )
+            .run(day).changes;
+          notePublishedDay(tx, day);
+        },
+      });
+    } catch (error) {
+      console.error("[Cleanup] Error cleaning usage_history:", error);
+      result.errors++;
+      return result;
+    }
+
+    if (!published.published && published.reason === "retired") continue;
+    if (!published.published) {
+      console.error(
+        "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
+      );
+      result.errors++;
+      return result;
+    }
+    result.deleted += removed;
   }
 
-  try {
-    const stmt = db.prepare("DELETE FROM usage_history WHERE timestamp < ?");
-    const runResult = stmt.run(cutoffDateStr);
-    result.deleted = runResult.changes;
-
-    console.log(
-      `[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`
-    );
-  } catch (err: unknown) {
-    console.error("[Cleanup] Error cleaning usage_history:", err);
-    result.errors++;
-  }
-
+  console.log(`[Cleanup] Deleted ${result.deleted} usage_history older than ${retentionDays} days`);
   return result;
+}
+
+type RetiringDay = {
+  revision: number | null;
+  rawCount: number;
+  summaryCount: number;
+};
+
+function readRetiringDay(db: ReturnType<typeof getDbInstance>, day: string): RetiringDay {
+  const dirty = db.prepare("SELECT revision FROM rollup_dirty_day WHERE date = ?").get(day) as
+    { revision: number } | undefined;
+  const raw = db
+    .prepare("SELECT COUNT(*) AS n FROM usage_history WHERE DATE(timestamp) = ?")
+    .get(day) as { n: number };
+  const summary = db
+    .prepare("SELECT COUNT(*) AS n FROM usage_daily_summary WHERE date = ?")
+    .get(day) as { n: number };
+  return { revision: dirty?.revision ?? null, rawCount: raw.n, summaryCount: summary.n };
+}
+
+function nextUtcDay(day: string): string {
+  const [year, month, date] = day.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, date + 1)).toISOString().slice(0, 10);
+}
+
+function notePublishedDay(db: ReturnType<typeof getDbInstance>, day: string): void {
+  db.prepare(
+    `INSERT INTO rollup_state (tier, last_completed_date)
+     VALUES ('daily', ?)
+     ON CONFLICT (tier) DO UPDATE SET
+       last_completed_date = excluded.last_completed_date
+     WHERE rollup_state.last_completed_date IS NULL
+        OR rollup_state.last_completed_date < excluded.last_completed_date`
+  ).run(day);
 }
 
 /**
@@ -849,10 +902,10 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
 
 /**
  * On-demand, period-scoped reset of usage analytics data (`usage_history`,
- * `daily_usage_summary`, `hourly_usage_summary`).
+ * `usage_daily_summary`, `daily_usage_summary`, `hourly_usage_summary`).
  *
  * Unlike {@link cleanupUsageHistory} (retention-based background cleanup,
- * which rolls up rows into `daily_usage_summary` before deleting them), this
+ * which rolls up rows into `usage_daily_summary` before deleting them), this
  * is a destructive user-triggered reset — it intentionally does NOT roll up
  * first, since the whole point is to wipe the data the user selected.
  *
@@ -860,11 +913,25 @@ function isResetUsageHistoryPeriod(period: string): period is ResetUsageHistoryP
  *   every reset target, including conversation identity metadata; any other
  *   value deletes only time-scoped usage/log rows older than `now - period`.
  *   Throws on an invalid period.
+ *
+ * A reset deletes `usage_daily_summary` too, so the panel and the rollup agree
+ * that the day is gone. Publishing a closed day is asynchronous and carries no
+ * generation stamp, so a publish that started before the reset can still land
+ * one of its rows afterwards. That race predates this table — the retention
+ * rollup had the same shape against `daily_usage_summary` — and closing it
+ * needs a persisted reset generation the publisher checks before writing, which
+ * is tracked separately rather than widened into this change.
  */
 const RESET_TARGETS: Array<
   DeleteByPeriodTarget & { resultKey: keyof ResetUsageHistoryResult; allOnly?: boolean }
 > = [
   { table: "usage_history", column: "timestamp", cutoff: "iso", resultKey: "deletedUsageHistory" },
+  {
+    table: "usage_daily_summary",
+    column: "date",
+    cutoff: "date",
+    resultKey: "deletedDailySummary",
+  },
   {
     table: "daily_usage_summary",
     column: "date",
@@ -979,7 +1046,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     const runReset = db.transaction(() => {
       if (period === "all") {
         for (const target of RESET_TARGETS) {
-          (result[target.resultKey] as number) = deleteAllFromTable(target.table);
+          (result[target.resultKey] as number) += deleteAllFromTable(target.table);
         }
         return;
       }
@@ -988,7 +1055,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
       artifactsToDelete = collectCallLogArtifactsBefore(cutoffIso);
       for (const target of RESET_TARGETS) {
         if (target.allOnly) continue;
-        (result[target.resultKey] as number) = deleteFromTableBefore(target, cutoffIso);
+        (result[target.resultKey] as number) += deleteFromTableBefore(target, cutoffIso);
       }
     });
 
@@ -1004,7 +1071,15 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     result.deletedArtifacts = artifactResult.deletedArtifacts;
     result.errors += artifactResult.errors;
 
-    result.deleted = RESET_TARGETS.reduce((sum, t) => sum + (result[t.resultKey] as number), 0);
+    result.deleted = RESET_TARGETS.reduce(
+      (sum, target) => {
+        if (sum.seen.has(target.resultKey)) return sum;
+        sum.seen.add(target.resultKey);
+        sum.deleted += result[target.resultKey] as number;
+        return sum;
+      },
+      { deleted: 0, seen: new Set<keyof ResetUsageHistoryResult>() }
+    ).deleted;
 
     console.log(
       `[Cleanup] Reset usage/log data (period=${period}): ${result.deleted} row(s), ` +
