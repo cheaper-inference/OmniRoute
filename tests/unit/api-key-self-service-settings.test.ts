@@ -230,6 +230,66 @@ test("historical self-service migration 213 moves to 229 and frees the slot for 
   assert.ok(columns.some((column) => column.name === "preferred_connections"));
 });
 
+test("historical self-service migration 218 preserves settings and installs upstream mirror URLs", async () => {
+  const db = core.getDbInstance();
+  const saved = settingsDb.updateApiKeySelfServiceSettings("historical-218-key", {
+    sharedQuotaProviders: ["claude"],
+    anthropicRateLimitHeaders: "strip",
+  });
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version = '218';
+    UPDATE _omniroute_migrations SET version = '218'
+      WHERE version = '229' AND name = 'api_key_self_service_settings';
+    ALTER TABLE proxy_subscriptions DROP COLUMN mirror_urls;
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  settingsDb.clearApiKeySelfServiceSettingsCache();
+  assert.deepEqual(settingsDb.getApiKeySelfServiceSettings("historical-218-key"), saved);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('218', '229') ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "218", name: "proxy_subscription_mirror_urls" },
+      { version: "229", name: "api_key_self_service_settings" },
+    ]
+  );
+  const columns = db.prepare("PRAGMA table_info(proxy_subscriptions)").all() as { name: string }[];
+  assert.ok(columns.some((column) => column.name === "mirror_urls"));
+});
+
+test("historical turn-node index migration 207 does not skip upstream provider cleanup", async () => {
+  const db = core.getDbInstance();
+  db.exec(`
+    DELETE FROM _omniroute_migrations WHERE version = '207';
+    UPDATE _omniroute_migrations SET version = '207'
+      WHERE version = '211' AND name = 'recreate_turn_nodes_content_hash_index';
+    INSERT INTO provider_connections (id, provider, auth_type, name, created_at, updated_at)
+      VALUES ('historical-index-207-key', 'opencode', 'apikey', 'Historical index test',
+        datetime('now'), datetime('now'));
+  `);
+  const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
+  runMigrations(db);
+  assert.deepEqual(
+    db
+      .prepare(
+        "SELECT version, name FROM _omniroute_migrations WHERE version IN ('207', '211') ORDER BY version"
+      )
+      .all(),
+    [
+      { version: "207", name: "remove_opencode_free_provider" },
+      { version: "211", name: "recreate_turn_nodes_content_hash_index" },
+    ]
+  );
+  assert.equal(
+    db.prepare("SELECT id FROM provider_connections WHERE id = 'historical-index-207-key'").get(),
+    undefined
+  );
+});
+
 test("historical turn-node index migration 206 moves to 211 and frees the slot for codex_wakeup_tasks", async () => {
   // Builds of this PR shipped the index recreate as 206; release/v3.8.53 ships it as 211 and
   // assigns 206 to codex_wakeup_tasks, whose tables must still be created.
