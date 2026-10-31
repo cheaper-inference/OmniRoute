@@ -15,7 +15,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 
 const core = await import("../../src/lib/db/core.ts");
-const { transformToOmniRoute, saveSyncedPricing } = await import("../../src/lib/pricingSync.ts");
+const { transformToOmniRoute, saveSyncedPricing, getSyncedPricing } =
+  await import("../../src/lib/pricingSync.ts");
 const { calculateCostDetailed } = await import("../../src/lib/usage/costCalculator.ts");
 
 // Shape and values copied from LiteLLM's model_prices_and_context_window.json.
@@ -48,4 +49,24 @@ test("an opencode-go request is priced from LiteLLM-synced pricing", async () =>
   });
   assert.equal(result.priced, true);
   assert.ok(Math.abs(result.costUsd - 5.8) < 1e-9, `expected $5.80, got ${result.costUsd}`);
+});
+
+test("a row a pre-fix sync stored under opencode_go still prices opencode-go before a re-sync", async () => {
+  saveSyncedPricing({ opencode_go: { "glm-5.2": { input: 1.4, output: 4.4 } } });
+  const result = await calculateCostDetailed("opencode-go", "glm-5.2", {
+    prompt_tokens: 1_000_000,
+    completion_tokens: 1_000_000,
+  });
+  assert.equal(result.priced, true);
+  assert.ok(Math.abs(result.costUsd - 5.8) < 1e-9, `expected $5.80, got ${result.costUsd}`);
+});
+
+test("a row already stored under opencode-go wins over a historical opencode_go row", () => {
+  saveSyncedPricing({
+    opencode_go: { "glm-5.2": { input: 9, output: 9 }, "kimi-k3": { input: 3, output: 15 } },
+    "opencode-go": { "glm-5.2": { input: 1.4, output: 4.4 } },
+  });
+  const synced = getSyncedPricing();
+  assert.equal(synced["opencode-go"]["glm-5.2"].input, 1.4);
+  assert.equal(synced["opencode-go"]["kimi-k3"].input, 3);
 });
