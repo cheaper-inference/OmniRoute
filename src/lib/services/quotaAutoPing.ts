@@ -315,6 +315,24 @@ function buildFactoryPingBody(providerConfig: ResolvedQuotaAutoPingProviderConfi
   };
 }
 
+async function drainResponseBody(response: Response | undefined): Promise<void> {
+  if (!response) return;
+  if (typeof response.text === "function") {
+    await response.text().catch(() => undefined);
+    return;
+  }
+  const reader = response.body?.getReader?.();
+  if (!reader) return;
+  try {
+    for (;;) {
+      const { done } = await reader.read();
+      if (done) return;
+    }
+  } finally {
+    reader.releaseLock?.();
+  }
+}
+
 async function sendFactoryPing(
   connection: QuotaAutoPingConnection,
   providerConfig: ResolvedQuotaAutoPingProviderConfig,
