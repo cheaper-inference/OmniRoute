@@ -492,7 +492,7 @@
     "opencode-ai": "1.18.34",
     "playwright-ctrf-json-reporter": "^0.1.0",
     "prettier": "^3.9.6",
-    "promptfoo": "0.123.0",
+    "promptfoo": "0.125.1",
     "size-limit": "^14.1.0",
     "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.0",
