@@ -192,6 +192,7 @@ import { getKimiTemporaryRateLimitResetAt } from "./chatCore/kimiQuotaRecovery.t
 import {
   getCallLogPipelineCaptureStreamChunks,
   getCallLogPipelineMaxSizeBytes,
+  resolveCallLogPipelineEnabled,
 } from "@/lib/logEnv";
 import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
@@ -872,11 +873,9 @@ async function handleChatCoreInner({
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
   echoModel = resolveNoAuthEchoModel(requestedModel, provider) ?? echoModel;
-  const detailedLoggingEnabled =
-    !noLogEnabled &&
-    (settings.call_log_pipeline_enabled === true ||
-      settings.call_log_pipeline_enabled === "1" ||
-      settings.call_log_pipeline_enabled === "true");
+  // Same resolver as isDetailedLoggingEnabled(): ENABLE_REQUEST_LOGS first, then
+  // the stored value parsed the way the dashboard parses it (#17998).
+  const detailedLoggingEnabled = !noLogEnabled && resolveCallLogPipelineEnabled(settings);
   const capturePipelineStreamChunks =
     detailedLoggingEnabled && getCallLogPipelineCaptureStreamChunks();
   const skillRequestId = generateRequestId();

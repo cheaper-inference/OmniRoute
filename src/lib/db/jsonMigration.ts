@@ -15,6 +15,7 @@ import type { SqliteAdapter } from "./adapters/types";
 import { normalizeRoutingStrategy } from "@/shared/constants/routingStrategies";
 import { normalizeComboRecord } from "@/lib/combos/steps";
 import { validateComboInvariant } from "@/lib/combos/invariants";
+import { toBooleanSetting } from "./booleanSetting";
 import { getTableColumns } from "./jsonMigration/columnUpsert";
 import { getApiKeyImportColumns, importApiKeyRecord } from "./jsonMigration/apiKeysImport";
 import { importProviderConnectionRecord } from "./jsonMigration/connectionsImport";
@@ -158,7 +159,11 @@ export function runJsonMigration(
 
     // 3. Key-Value Settings (caller must have stripped password / requireLogin)
     for (const [key, value] of Object.entries(data.settings ?? {})) {
-      insertKv.run("settings", key, JSON.stringify(value));
+      // Store the call-log toggle as a real boolean so the dashboard and the
+      // request path read the same thing (#17998). Unrecognized values become
+      // false, which is what the request path already did with them.
+      const stored = key === "call_log_pipeline_enabled" ? toBooleanSetting(value) === true : value;
+      insertKv.run("settings", key, JSON.stringify(stored));
     }
 
     // 4. Legacy key-value namespaces

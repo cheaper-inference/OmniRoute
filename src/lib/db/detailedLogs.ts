@@ -8,6 +8,7 @@
 import { v4 as uuidv4 } from "uuid";
 import { getDbInstance } from "./core";
 import { getSettings } from "./settings";
+import { resolveCallLogPipelineEnabled } from "../logEnv";
 import { isNoLog } from "../compliance/noLog";
 import {
   protectPayloadForLog,
@@ -54,15 +55,10 @@ export function resetRequestDetailLogsTableExistsCache(): void {
 
 /** Returns true if detailed logging is enabled in settings */
 export async function isDetailedLoggingEnabled(): Promise<boolean> {
-  const envOverride = process.env.ENABLE_REQUEST_LOGS;
-  if (envOverride !== undefined) {
-    return envOverride.trim().toLowerCase() === "true";
-  }
-
+  // The env override must not depend on the settings read succeeding.
+  if (process.env.ENABLE_REQUEST_LOGS !== undefined) return resolveCallLogPipelineEnabled({});
   try {
-    const settings = await getSettings();
-    const val = settings.call_log_pipeline_enabled;
-    return val === true || val === "1" || val === "true";
+    return resolveCallLogPipelineEnabled(await getSettings());
   } catch {
     return false;
   }

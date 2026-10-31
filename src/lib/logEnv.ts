@@ -1,5 +1,6 @@
 import path from "path";
 import { resolveDataDir } from "@/lib/dataPaths";
+import { toStrictBooleanSetting } from "@/lib/db/booleanSetting";
 
 const DEFAULT_APP_LOG_RETENTION_DAYS = 7;
 const DEFAULT_CALL_LOG_RETENTION_DAYS = 7;
@@ -117,6 +118,25 @@ export function getCallLogsTableMaxRows(): number {
 
 export function getCallLogPipelineCaptureStreamChunks(): boolean {
   return parseBoolean(process.env.CALL_LOG_PIPELINE_CAPTURE_STREAM_CHUNKS, false);
+}
+
+/**
+ * Single source of truth for whether call-log pipeline capture is on. Used by
+ * isDetailedLoggingEnabled() and by the chatCore request path.
+ *
+ * `ENABLE_REQUEST_LOGS` wins when set (documented as overriding the dashboard
+ * setting). Otherwise the stored `call_log_pipeline_enabled` value is read with
+ * the same strict parser the panel uses, so the panel and the request path
+ * agree and a non-canonical stored value does not start capture on its own.
+ */
+export function resolveCallLogPipelineEnabled(settings: Record<string, unknown>): boolean {
+  const envOverride = process.env.ENABLE_REQUEST_LOGS;
+  if (envOverride !== undefined) {
+    // Same parser as the stored value, so "1"/"true" mean the same thing
+    // whichever side of the switch the operator used.
+    return toStrictBooleanSetting(envOverride) === true;
+  }
+  return toStrictBooleanSetting(settings.call_log_pipeline_enabled) === true;
 }
 
 export function getCallLogPipelineMaxSizeBytes(): number {
