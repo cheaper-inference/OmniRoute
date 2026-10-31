@@ -11,14 +11,33 @@ const ADAPTA_PUBLIC_STREAM_ERROR = `\n\n[Erro: ${sanitizeErrorMessage("Adapta up
 const DEFAULT_MODEL_KEY = "ONE";
 
 // Map from OmniRoute model IDs to Adapta catalog model keys.
-const MODEL_KEY_MAP: Record<string, string> = {
+export const MODEL_KEY_MAP: Record<string, string> = {
   "adapta-one": "ONE",
-  "adapta-gpt": "GPT_6_LUNA",
-  "adapta-claude": "CLAUDE_5_5_SONNET",
-  "adapta-gemini": "GEMINI_3_1_PRO_PREVIEW",
-  "adapta-grok": "GROK_43",
-  "adapta-deepseek": "DEEPSEEK_V4_PRO_0813",
-  "adapta-llama": "MUSE_SPARK_1_3",
+  "adapta-gpt-6-luna": "GPT_6_LUNA",
+  "adapta-claude-5-5-haiku": "CLAUDE_5_5_HAIKU",
+  "adapta-claude-5-5-sonnet": "CLAUDE_5_5_SONNET",
+  "adapta-claude-5-sonnet": "CLAUDE_5_SONNET",
+  "adapta-gemini-3-8-flash": "GEMINI_3_8_FLASH",
+  "adapta-gemini-3-7-flash": "GEMINI_3_7_FLASH",
+  "adapta-gemini-3-1-pro-preview": "GEMINI_3_1_PRO_PREVIEW",
+  "adapta-deepseek-v4-1-flash-1017": "DEEPSEEK_V4_1_FLASH_1017",
+  "adapta-deepseek-v4-flash-updated": "DEEPSEEK_V4_FLASH_UPDATED",
+  "adapta-deepseek-v4-pro-0813": "DEEPSEEK_V4_PRO_0813",
+  "adapta-kimi-k2-7-code": "KIMI_K2_7_CODE",
+  "adapta-kimi-k2-6": "KIMI_K2_6",
+  "adapta-minimax-m3": "MINIMAX_M3",
+  "adapta-minimax-m3-1-flash": "MINIMAX_M3_1_FLASH",
+  "adapta-minimax-m2-7-highspeed": "MINIMAX_M2_7_HIGHSPEED",
+  "adapta-minimax-m2-7": "MINIMAX_M2_7",
+  "adapta-qwen-3-8-27b": "QWEN_3_8_27B",
+  "adapta-qwen-3-8-flash": "QWEN_3_8_FLASH",
+  "adapta-qwen-3-7-plus": "QWEN_3_7_PLUS",
+  "adapta-glm-5-3-flash": "GLM_5_3_FLASH",
+  "adapta-glm-5-2": "GLM_5_2",
+  "adapta-grok-43": "GROK_43",
+  "adapta-muse-spark-1-3": "MUSE_SPARK_1_3",
+  "adapta-sonar-pro": "SONAR_PRO",
+  "adapta-nvidia-nemotron-super": "NVIDIA_NEMOTRON_SUPER",
 };
 
 const USER_AGENT =
