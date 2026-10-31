@@ -40,6 +40,7 @@ import {
   isRateLimitEnabled,
   withRateLimit,
   resolveRequestQueueMaxWaitMs,
+  computeNonStreamExecutionExpirationMs,
 } from "../../services/rateLimitManager.ts";
 import { acquireMany as acquireConcurrencyGates } from "../../services/accountSemaphore.ts";
 import { rethrowAdmissionError, remainingQueueBudgetMs } from "./queueBudget.ts";
@@ -366,6 +367,16 @@ export async function executeProviderRequest(
               {
                 executor: executor as unknown as { getTimeoutMs?: () => unknown },
                 providerSpecificData: execCreds?.providerSpecificData,
+                // Opt-in (OMNIROUTE_EXECUTION_EXPIRATION_MS=auto): raise the
+                // execution deadline for large non-streaming generations so a
+                // legitimately long decode is not killed at the base deadline.
+                executionExpirationMs:
+                  upstreamStream === true
+                    ? undefined
+                    : computeNonStreamExecutionExpirationMs(
+                        resolveRequestQueueMaxWaitMs(provider, undefined, attemptConnectionId),
+                        Number(bodyToSend?.max_tokens ?? bodyToSend?.max_output_tokens ?? 0)
+                      ),
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
