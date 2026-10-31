@@ -28,13 +28,13 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-const repoRoot = path.join(path.dirname(new URL(import.meta.url).pathname), "..", "..");
-
 process.env.DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-14298f-"));
 process.env.OMNIROUTE_API_KEY = "***";
 process.env.NODE_ENV = "test";
 
-const { runOAuthStart } = await import(path.join(repoRoot, "bin/cli/commands/oauth.mjs"));
+const { runOAuthStart } = await import(
+  new URL("../../bin/cli/commands/oauth.mjs", import.meta.url).href
+);
 
 function startFakeServer(handler) {
   const requests = [];
@@ -62,6 +62,13 @@ function startFakeServer(handler) {
 function respondJson(res, status, obj) {
   res.writeHead(status, { "content-type": "application/json" });
   res.end(JSON.stringify(obj));
+}
+
+async function closeFakeServer(server: http.Server) {
+  server.closeAllConnections();
+  await new Promise<void>((resolve, reject) =>
+    server.close((error) => (error ? reject(error) : resolve()))
+  );
 }
 
 // process.exit is called by the CLI on failure paths; capture the code and
@@ -140,7 +147,7 @@ test("#14298: codex uses the server-hosted callback flow, not a device flow", as
     );
     assert.ok(pollReqs.length >= 2, "poll-callback must be called until the callback lands");
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -220,7 +227,7 @@ test("#14298 + review: kiro social-exchange non-200 terminal error fails fast", 
       "a non-200 terminal error must stop the poll loop after the first exchange"
     );
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -259,7 +266,7 @@ test("#14298 + review: the non-200 terminal error message carries status and err
       `the CLI must fail fast instead of timing out, got: ${stderr}`
     );
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -297,7 +304,7 @@ test("#14298 + review: non-200 slow_down on social-exchange keeps polling", asyn
     const exchangeReqs = requests.filter((r) => r.url.includes("/social-exchange"));
     assert.ok(exchangeReqs.length >= 2, "the loop must retry after slow_down");
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -329,11 +336,7 @@ test("#14298 + review: poll-callback 500 exchange failure fails fast", async () 
         timeout: 15000,
       })
     );
-    assert.equal(
-      exitCode,
-      1,
-      `the 500 exchange failure must exit 1 immediately (got ${exitCode})`
-    );
+    assert.equal(exitCode, 1, `the 500 exchange failure must exit 1 immediately (got ${exitCode})`);
 
     const pollReqs = requests.filter(
       (r) => r.method === "POST" && r.url === "/api/oauth/codex/poll-callback"
@@ -352,7 +355,7 @@ test("#14298 + review: poll-callback 500 exchange failure fails fast", async () 
       `the CLI must fail fast instead of timing out, got: ${stderr}`
     );
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });
 
@@ -439,6 +442,6 @@ test("#14298: kiro social flow uses GET social-authorize and POST social-exchang
       "the social flow must not poll by state (the response has none)"
     );
   } finally {
-    server.close();
+    await closeFakeServer(server);
   }
 });

@@ -3,8 +3,8 @@
  *
  * Rather than mocking node:child_process (fragile under ESM without
  * --experimental-vm-modules — see tests/unit/dns-config-generic.test.ts for the
- * same tradeoff), these tests point `AUGGIE_BIN` at small real, disposable shell
- * scripts that stand in for the `auggie` CLI. No live `auggie` binary is required
+ * same tradeoff), these tests point `AUGGIE_BIN` at small real, disposable
+ * Node programs that stand in for the `auggie` CLI. No live `auggie` binary is required
  * or touched — CI never needs the real Augment CLI installed.
  */
 
@@ -13,17 +13,16 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { writeNodeCliFixture } from "../helpers/nodeCliFixture.ts";
 
 const { AuggieExecutor, buildAuggiePrompt, resolveAuggieBin, resolveAuggieModel } =
   await import("@omniroute/open-sse/executors/auggie");
 
 const TMP_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-auggie-test-"));
 
-/** Write an executable shell script and return its absolute path. */
+/** Write an executable Node fixture and return its platform-specific launch path. */
 function writeFakeBin(name: string, script: string): string {
-  const p = path.join(TMP_DIR, name);
-  fs.writeFileSync(p, `#!/bin/sh\n${script}\n`, { mode: 0o755 });
-  return p;
+  return writeNodeCliFixture(TMP_DIR, name, script);
 }
 
 async function readSseEvents(response: Response): Promise<Record<string, unknown>[]> {
@@ -144,7 +143,7 @@ test("execute() surfaces a sanitized 'CLI not found' error on ENOENT (non-stream
 test("execute() surfaces a sanitized error when the CLI exits non-zero (streaming)", async () => {
   const bin = writeFakeBin(
     "fake-auggie-fail.sh",
-    'echo "boom at /home/attacker/secret.ts:42" 1>&2\nexit 3'
+    'process.stderr.write("boom at /home/attacker/secret.ts:42\\n"); process.exitCode = 3;'
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
@@ -169,7 +168,7 @@ test("execute() surfaces a sanitized error when the CLI exits non-zero (streamin
 });
 
 test("execute() surfaces a sanitized error when the CLI exits non-zero (non-streaming)", async () => {
-  const bin = writeFakeBin("fake-auggie-fail2.sh", "exit 1");
+  const bin = writeFakeBin("fake-auggie-fail2", "process.exitCode = 1;");
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -192,7 +191,7 @@ test("execute() surfaces a sanitized error when the CLI exits non-zero (non-stre
 // ─── execute(): stream vs non-stream shape ─────────────────────────────────
 
 test("execute() with stream=true returns SSE deltas + [DONE]", async () => {
-  const bin = writeFakeBin("fake-auggie-echo.sh", 'printf "hello world"');
+  const bin = writeFakeBin("fake-auggie-echo", 'process.stdout.write("hello world");');
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -222,7 +221,7 @@ test("execute() with stream=true returns SSE deltas + [DONE]", async () => {
 });
 
 test("execute() with stream=false returns a single chat.completion JSON body", async () => {
-  const bin = writeFakeBin("fake-auggie-echo2.sh", 'printf "hello world"');
+  const bin = writeFakeBin("fake-auggie-echo2", 'process.stdout.write("hello world");');
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -325,7 +324,10 @@ test("resolveAuggieModel's success arm resolves a model and reports no error", (
 
 test("execute() rejects a model not in the registry allowlist and never spawns", async () => {
   const marker = path.join(TMP_DIR, "spawned-unknown-model.marker");
-  const bin = writeFakeBin("fake-auggie-unknown.sh", `touch "${marker}"\nprintf "hi"`);
+  const bin = writeFakeBin(
+    "fake-auggie-unknown",
+    `require("node:fs").writeFileSync(${JSON.stringify(marker)}, ""); process.stdout.write("hi");`
+  );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -348,7 +350,10 @@ test("execute() rejects a model not in the registry allowlist and never spawns",
 
 test("execute() rejects a model starting with '-' (flag smuggling) and never spawns (streaming)", async () => {
   const marker = path.join(TMP_DIR, "spawned-flag-smuggle.marker");
-  const bin = writeFakeBin("fake-auggie-flag.sh", `touch "${marker}"\nprintf "hi"`);
+  const bin = writeFakeBin(
+    "fake-auggie-flag",
+    `require("node:fs").writeFileSync(${JSON.stringify(marker)}, ""); process.stdout.write("hi");`
+  );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -371,11 +376,11 @@ test("execute() rejects a model starting with '-' (flag smuggling) and never spa
   }
 });
 
-test("execute() spawns with a valid allowlisted model, no shell, and a '--' argv separator", async () => {
+test("execute() spawns with a valid allowlisted model and a '--' argv separator", async () => {
   const argvFile = path.join(TMP_DIR, "captured-argv.txt");
   const bin = writeFakeBin(
     "fake-auggie-argv.sh",
-    `for a in "$@"; do printf '%s\\n' "$a" >> "${argvFile}"; done\nprintf "ok"`
+    `require("node:fs").writeFileSync(${JSON.stringify(argvFile)}, process.argv.slice(2).join("\\n") + "\\n"); process.stdout.write("ok");`
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
@@ -399,11 +404,11 @@ test("execute() spawns with a valid allowlisted model, no shell, and a '--' argv
   }
 });
 
-// ─── execute(): abort kills the subprocess promptly ────────────────────────
+// ─── execute(): abort closes the response stream promptly ──────────────────
 
-test("execute() aborts a long-running CLI process instead of hanging (streaming)", async () => {
-  // Sleeps far longer than the test timeout unless killed on abort.
-  const bin = writeFakeBin("fake-auggie-sleep.sh", "sleep 30");
+test("execute() closes the response stream promptly on abort", async () => {
+  // Keep the fixture alive so this measures stream closure, not natural exit.
+  const bin = writeFakeBin("fake-auggie-sleep", "setTimeout(() => {}, 30_000);");
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
   try {
@@ -455,7 +460,7 @@ test("initAuggieModels discovers models from `auggie model list` output", async 
   __resetAuggieModels(); // wipe stale cache from previous tests
   const bin = writeFakeBin(
     "fake-auggie-list.sh",
-    `printf '[new-model-alpha]\\nignored\\n[new-model-beta]'`
+    `process.stdout.write("[new-model-alpha]\\nignored\\n[new-model-beta]");`
   );
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
@@ -476,15 +481,11 @@ test("execute() spawns a model discovered via auto-fetch", async () => {
   const bin = writeFakeBin(
     "fake-auggie-autofetch.sh",
     [
-      `case "$*" in`,
-      `  *model\\ list*)`,
-      `    printf '[auto-discovered-model]'`,
-      `    exit 0`,
-      `    ;;`,
-      `  *)`,
-      `    printf 'auto-ok'`,
-      `    ;;`,
-      `esac`,
+      `if (process.argv[2] === "model" && process.argv[3] === "list") {`,
+      `  process.stdout.write("[auto-discovered-model]");`,
+      `} else {`,
+      `  process.stdout.write("auto-ok");`,
+      `}`,
     ].join("\n")
   );
   const prevBin = process.env.AUGGIE_BIN;
@@ -513,14 +514,11 @@ test("initAuggieModels failure does not block execute() for a known model", asyn
   const bin = writeFakeBin(
     "fake-auggie-crash.sh",
     [
-      `case "$*" in`,
-      `  *model\\ list*)`,
-      `    exit 1  # crash on model list so init fails`,
-      `    ;;`,
-      `  *)`,
-      `    printf 'known-model-ok'`,
-      `    ;;`,
-      `esac`,
+      `if (process.argv[2] === "model" && process.argv[3] === "list") {`,
+      `  process.exitCode = 1;`,
+      `} else {`,
+      `  process.stdout.write("known-model-ok");`,
+      `}`,
     ].join("\n")
   );
   const prevBin = process.env.AUGGIE_BIN;
