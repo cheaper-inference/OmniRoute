@@ -3952,6 +3952,15 @@ paths:
                 url:
                   type: string
                   minLength: 1
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Optional extra feed URLs fetched next to `url`. Entries
+                    are trimmed and deduplicated, the primary URL is dropped
+                    and the first 5 are kept.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -4041,6 +4050,15 @@ paths:
                   type: string
                 url:
                   type: string
+                mirrorUrls:
+                  type: array
+                  nullable: true
+                  items:
+                    type: string
+                  description: >-
+                    Replaces the extra feed URLs (trimmed, deduplicated,
+                    primary dropped, first 5 kept). A redacted mirror sent
+                    back as returned keeps its stored credentials.
                 mode:
                   type: string
                   enum: [global, rule]
@@ -6605,6 +6623,186 @@ paths:
       summary: Toggle LLMLingua auto-restart-when-adopted
       description: >-
         When enabled, an externally-adopted (not OmniRoute-spawned) LLMLingua
+        process is restarted under OmniRoute's own supervisor on the next
+        health-check cycle instead of being left as adopted-only.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "204":
+          description: Flag updated
+        "400":
+          description: Invalid request body
+        "500":
+          description: Update failed
+
+  /api/services/singbox/install:
+    post:
+      tags: [Embedded Services]
+      summary: Install sing-box
+      description: >-
+        Downloads the pinned sing-box release binary from GitHub
+        (SagerNet/sing-box) and verifies its SHA256 against a checksum baked
+        into `src/lib/services/installers/singbox.ts` before writing it to
+        DATA_DIR/services/singbox/. Any version other than the pinned one is
+        rejected. **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                version:
+                  type: string
+                  default: latest
+      responses:
+        "200":
+          description: Install succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  installedVersion:
+                    type: string
+        "400":
+          description: Invalid request body, or a version with no pinned checksum
+        "500":
+          description: Download failed or checksum verification failed
+
+  /api/services/singbox/start:
+    post:
+      tags: [Embedded Services]
+      summary: Start sing-box
+      description: >-
+        Spawns `sing-box run -c config.json`. Idempotent if already running.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+        "409":
+          description: sing-box is not installed
+        "503":
+          description: Start failed
+
+  /api/services/singbox/stop:
+    post:
+      tags: [Embedded Services]
+      summary: Stop sing-box
+      description: >-
+        Gracefully stops sing-box. Idempotent.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service stopped
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/restart:
+    post:
+      tags: [Embedded Services]
+      summary: Restart sing-box
+      description: >-
+        stop() then start() under the operation lock.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Service restarted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/update:
+    post:
+      tags: [Embedded Services]
+      summary: Re-verify/reinstall the pinned sing-box release
+      description: >-
+        Stops, re-downloads and checksum-verifies the pinned release, restarts.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Update succeeded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+                  installedVersion:
+                    type: string
+        "500":
+          description: Update failed
+
+  /api/services/singbox/status:
+    get:
+      tags: [Embedded Services]
+      summary: Get sing-box status
+      description: >-
+        Returns live supervisor state and DB metadata.
+        **LOCAL_ONLY** — loopback only.
+      responses:
+        "200":
+          description: Status response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ServiceStatus"
+
+  /api/services/singbox/auto-start:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle sing-box auto-start
+      description: >-
+        When enabled, sing-box starts automatically on the next OmniRoute boot.
+        **LOCAL_ONLY** — loopback only.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [enabled]
+              properties:
+                enabled:
+                  type: boolean
+      responses:
+        "200":
+          description: Auto-start flag updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  autoStart:
+                    type: boolean
+        "400":
+          description: Invalid request body
+
+  /api/services/singbox/auto-restart-adopted:
+    post:
+      tags: [Embedded Services]
+      summary: Toggle sing-box auto-restart-when-adopted
+      description: >-
+        When enabled, an externally-adopted (not OmniRoute-spawned) sing-box
         process is restarted under OmniRoute's own supervisor on the next
         health-check cycle instead of being left as adopted-only.
         **LOCAL_ONLY** — loopback only.
@@ -14987,6 +15185,8 @@ paths:
         Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope
         `self:usage`. `accountQuotas` / `accountQuota` are included only with scope
         `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting.
+        `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly`
+        are cached per key for 60 s, so they may lag by up to 60 s.
       security:
         - BearerAuth: []
         - XApiKeyAuth: []
@@ -17477,6 +17677,16 @@ components:
             are allowed by default (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS`);
             cloud-metadata / link-local endpoints (169.254.0.0/16) are always
             blocked.
+        mirrorUrls:
+          type: array
+          nullable: true
+          maxItems: 5
+          items:
+            type: string
+          description: >-
+            Extra feed URLs, redacted like `url`. Each feed is fetched
+            on its own; a partial failure keeps the unavailable feeds'
+            last nodes.
         enabled:
           type: boolean
         mode:
@@ -17603,6 +17813,21 @@ components:
           format: date-time
         costUsd:
           type: number
+          description: >-
+            Metered spend in the window from the budget ledger (what budgets and usage limits
+            count). Flat-rate / subscription providers count $0.
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the window, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests that used tokens but have no known price for their provider /
+            model; they add $0 to listPriceUsd.
         requests:
           type: integer
         tokens:
@@ -17620,6 +17845,54 @@ components:
               type: integer
             total:
               type: integer
+    ApiKeySelfServiceCost:
+      type: object
+      description: >-
+        Spend in the key's budget period (the current UTC month when the key has no budget).
+      properties:
+        period:
+          type: string
+          description: The budget's reset interval, or monthly without a budget.
+        currency:
+          type: string
+          example: USD
+        usedUsd:
+          type: number
+          description: >-
+            Metered spend in the period from the budget ledger (what the budget counts).
+            Flat-rate / subscription providers count $0.
+        limitUsd:
+          type: number
+          nullable: true
+        remainingUsd:
+          type: number
+          nullable: true
+        usedPercent:
+          type: number
+          nullable: true
+        warningThreshold:
+          type: number
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the same period, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests in the period that used tokens but have no known price for their
+            provider / model; they add $0 to listPriceUsd.
     ApiKeySelfServiceLimit:
       type: object
       properties:
@@ -17681,11 +17954,18 @@ components:
           type: object
           additionalProperties:
             type: object
+            description: >-
+              One quota window as a percentage. Windows without a known fraction (for example a
+              credit balance) are omitted.
             properties:
               usedPercentage:
                 type: number
+                minimum: 0
+                maximum: 100
               remainingPercentage:
                 type: number
+                minimum: 0
+                maximum: 100
               resetAt:
                 type: string
                 format: date-time
@@ -17719,8 +17999,7 @@ components:
           type: object
           properties:
             cost:
-              type: object
-              additionalProperties: true
+              $ref: "#/components/schemas/ApiKeySelfServiceCost"
             tokens:
               type: object
               additionalProperties: true

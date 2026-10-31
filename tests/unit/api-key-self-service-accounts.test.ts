@@ -18,6 +18,7 @@ import {
   listApiKeyReachableProviders,
 } from "../../src/lib/usage/apiKeySelfService.ts";
 import { createQuotaRefreshTracker } from "../../src/lib/usage/apiKeySelfServiceAccounts.ts";
+import { createListPriceCache } from "../../src/lib/usage/apiKeySelfServiceListPrice.ts";
 
 const NOW = Date.UTC(2026, 4, 27, 15, 30, 0);
 const MINUTE = 60_000;
@@ -37,7 +38,9 @@ type QuotaEntry = {
   reason?: string;
 };
 
-const QUOTAS = { session: { used: 20, remaining: 80, resetAt: "2026-05-27T18:00:00.000Z" } };
+const QUOTAS = {
+  session: { used: 20, total: 100, remaining: 80, resetAt: "2026-05-27T18:00:00.000Z" },
+};
 
 function makeDeps(overrides: Record<string, unknown> = {}) {
   return {
@@ -78,6 +81,10 @@ function makeDeps(overrides: Record<string, unknown> = {}) {
       monthlyExceeded: false,
       windowResetAtIso: "2026-05-27T15:31:00.000Z",
     }),
+    listApiKeyUsageSlices: () => [],
+    calculateCostDetailed: async () => ({ costUsd: 0, priced: true }),
+    getPricingTable: async () => ({}),
+    listPriceCache: createListPriceCache(),
     ...overrides,
   };
 }
@@ -234,7 +241,7 @@ test("a cache entry older than 5 minutes is refreshed with the scheduled source"
     fetchAndPersistProviderLimits: async (_id: string, source: string) => {
       sources.push(source);
       return {
-        usage: { plan: "Pro+", quotas: { session: { used: 55, remaining: 45 } } },
+        usage: { plan: "Pro+", quotas: { session: { used: 55, total: 100, remaining: 45 } } },
         cache: { fetchedAt: "2026-05-27T15:30:00.000Z" },
       };
     },
@@ -354,6 +361,81 @@ test("concurrent reads share one in-flight refresh", async () => {
   assert.equal(fetches, 1);
   assert.equal(a.entries[0].fetchedAt, "2026-05-27T15:30:00.000Z");
   assert.deepEqual(a.entries, b.entries);
+});
+
+async function quotaWindowsFor(provider: string, quotas: Record<string, unknown>) {
+  const deps = makeDeps({
+    getProviderConnections: async () => [
+      { id: `conn-${provider}`, provider, isActive: true, name: "Team" },
+    ],
+    getProviderLimitsCache: () => ({ quotas, plan: null, fetchedAt: new Date(NOW).toISOString() }),
+  });
+  const { entries } = await quotasFor(quotaMetadata(), deps);
+  return entries[0].quotas;
+}
+
+test("an Antigravity quota counted out of 1000 is reported as a percentage", async () => {
+  const resetAt = "2026-05-27T18:00:00.000Z";
+  const quotas = await quotaWindowsFor("antigravity", {
+    "gemini-3-pro": {
+      used: 1000,
+      total: 1000,
+      remainingPercentage: 0,
+      resetAt,
+      unlimited: false,
+      fractionReported: true,
+    },
+    "gemini-3-flash": {
+      used: 250,
+      total: 1000,
+      remainingPercentage: 75,
+      resetAt,
+      unlimited: false,
+      fractionReported: true,
+    },
+    "tab-completion": {
+      used: 0,
+      total: 0,
+      remainingPercentage: 100,
+      resetAt: null,
+      unlimited: true,
+    },
+    // The AI-credit balance is a count with no total: it is not a percentage window.
+    credits: { used: 0, total: 0, remaining: 4200, resetAt: null, unlimited: false },
+  });
+
+  assert.deepEqual(quotas, {
+    "gemini-3-pro": { usedPercentage: 100, remainingPercentage: 0, resetAt },
+    "gemini-3-flash": { usedPercentage: 25, remainingPercentage: 75, resetAt },
+    "tab-completion": { usedPercentage: 0, remainingPercentage: 100, resetAt: null },
+  });
+});
+
+test("quota percentages follow usedPercentage, then used/total, then remainingPercentage", async () => {
+  const resetAt = "2026-05-27T18:00:00.000Z";
+  const quotas = await quotaWindowsFor("codex", {
+    // Codex and Claude report a percentage on a total of 100.
+    codex: { used: 35, total: 100, remaining: 65, resetAt },
+    claude: { used: 42, total: 100, remaining: 58, remainingPercentage: 58, resetAt },
+    // GLM credit rows and GitHub premium requests report counts.
+    glmCredits: { used: 3341, total: 28000, remaining: 24659, remainingPercentage: 88, resetAt },
+    github: { used: 120, total: 300, remaining: 180, remainingPercentage: 60, resetAt },
+    explicit: { usedPercentage: 35, remainingPercentage: 65, resetAt },
+    percentOnly: { used: 0, total: 0, remainingPercentage: 30, resetAt },
+    overshoot: { used: 1200, total: 1000, resetAt },
+    negative: { usedPercentage: -5, remainingPercentage: 140, resetAt },
+  });
+
+  assert.deepEqual(quotas, {
+    codex: { usedPercentage: 35, remainingPercentage: 65, resetAt },
+    claude: { usedPercentage: 42, remainingPercentage: 58, resetAt },
+    glmCredits: { usedPercentage: 11.93, remainingPercentage: 88, resetAt },
+    github: { usedPercentage: 40, remainingPercentage: 60, resetAt },
+    explicit: { usedPercentage: 35, remainingPercentage: 65, resetAt },
+    percentOnly: { usedPercentage: 70, remainingPercentage: 30, resetAt },
+    overshoot: { usedPercentage: 100, remainingPercentage: 0, resetAt },
+    negative: { usedPercentage: 0, remainingPercentage: 100, resetAt },
+  });
 });
 
 test("providers without quota support are reported as not_supported without fetching", async () => {
