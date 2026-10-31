@@ -614,7 +614,7 @@ Radar ixtiyoriy ravishda yoqiladi va faqat GET so‘rovlaridan foydalanadi. Omni
 
 ## 🤖 mos CLIs va kodlash agentlari
 
-> Bitta konfiguratsiya - `http://localhost:20128/v1` - va** har** AI IDE yoki CLI bepul va arzon modellarda ishlaydi.
+> Bitta konfiguratsiya - `http://localhost:20128/v1` - va **har** AI IDE yoki CLI bepul va arzon modellarda ishlaydi.
 
 <div align="center">
 <table>
@@ -757,14 +757,14 @@ Har bir buyruq faol masofaviy kontekstni (`omniroute connect <host>`) hurmat qil
 
 </div>
 
-> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan** telefoningiz** Termux orqali.
+> Xuddi shu dastur, sizning mashinangiz, sizning qoidalaringiz. Global npm o'rnatishdan **telefoningiz** Termux orqali.
 
 <table>
-  <tr><th align="left"> Platformasi </th><th align="left"><th align="left"></tr> o‘rnatish </th></th>
+  <tr><th align="left">Platforma</th><th align="left">O'rnatish</th><th align="left">Tavsif</th></tr>
   <tr><td align="left" nowrap>📦 <b> npm (global)</b></td><td align="left" nowrap><code> npm o‘rnatish -g omniroute </code></td><td align="left"> Bitta buyruq, har qanday OS</td></tr>
   <tr><td align="left" nowrap>⚡ <b>Bun (global)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Xuddi shu registr tarball, tezroq o‘rnatish </td></tr>
   <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b> Desktop (Electron</tr></b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td>
+  <tr><td align="left" nowrap>🖥️ <b>Desktop (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Mahalliy + tizim tepsisi — <b>Windows / macOS / Linux</b></td></tr>
   <tr><td align="left" nowrap>🎩 <b> Menyu-bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew o‘rnatish --cask zoispag/tap/omniroute-tray</code></td><td align="left">&amp; serverni avtomatik yangilashini nazorat qiladi — <b>macOS</b></td></tr>
   <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> mahalliy <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM serverlari, Apple Silicon </td></tr>
   <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y omniroute </code></td><td align="left"> Telefoningizda <b> ishlaydi </b>, 24/7, root </tr></td>
@@ -784,17 +784,17 @@ Har bir buyruq faol masofaviy kontekstni (`omniroute connect <host>`) hurmat qil
 
 </div>
 
-> Yangi yon panel yo'q, yangi chat UI yo'q — har bir OmniRoute xizmat modeli to'g'ridan-to'g'ri ekranda ko'rinadi** Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan beri provayder modellari GitHub tizimiga kirish yoki Copilot obunasisiz ishlaydi — agent rejimi, asboblarni chaqirish va ko‘rish, bepul.
+> Yangi yon panel yo'q, yangi chat UI yo'q — har bir OmniRoute xizmat modeli to'g'ridan-to'g'ri ekranda ko'rinadi **Siz allaqachon foydalanayotgan Copilot Chat modeli tanlagichi** . VS Code 1.122 dan beri provayder modellari GitHub tizimiga kirish yoki Copilot obunasisiz ishlaydi — agent rejimi, asboblarni chaqirish va ko‘rish, bepul.
 
-ni o'rnating** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching.** Modellarni boshqarish…** →**OmniRoute** .
+**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kengaytmasini o'rnating, uni OmniRoute serveringizga yo'naltiring (birlamchi `localhost:20128` ga), keyin Copilot Chat → model tanlash → oching. **Modellarni boshqarish…** → **OmniRoute** .
 
 <table>
-  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"></th></tr> bilan ishlaydi
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> o‘rnating →</a ></td >< td align ="chapga">VS Code — barqaror &amp; Insiders </td></tr>
-  <tr><td align="left" nowrap>🔓 <b>VSX registrini oching </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> o‘rnating →</a ></td >< td align ="chapga">Cursor, Windsurf, VSCodium, Theia </td> code-server </tr>Antigravity, Kiro
+  <tr><th align="left">Do'kon</th><th align="left">Havola</th><th align="left">Mos keladi</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">O'rnatish →</a></td><td align="left">VS Code — barqaror &amp; Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>VSX Open Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">O'rnatish →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Antigravity, Kiro</td></tr>
 </table>
 
-Muharrir ichidan: ni oching** Kengaytmalar** ko'rish, qidirish** "OmniRoute"** , bosing** O'rnatish** — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
+Muharrir ichidan: **Kengaytmalar** ko'rishni oching, "OmniRoute" ni qidiring, **O'rnatish** tugmasini bosing — ikkala do'konda ham xuddi shunday ishlaydi. Manba, muammolar va nashriyot kitobi [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) da jonli.
 
 <sub>📖 [VS Code Copilot Chat qo‘llanmasi](docs/guides/VSCODE-COPILOT.md) — sozlash, tanlovchi nimani ko‘rsatadi, paneldagi panel, muammolarni bartaraf etish </sub>
 
@@ -806,9 +806,9 @@ Muharrir ichidan: ni oching** Kengaytmalar** ko'rish, qidirish** "OmniRoute"** ,
 
 </div>
 
-> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi —** hech qanday terminal oynasi ochiq qolmagan, bolaga qarash uchun `npm install -g omniroute` yo'q.**
+> `omniroute serve` doimo yoqilgan bo'lsa, eng baxtlidir. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)** uni macOS uchun sozlash va unutish menyusi ilovasiga aylantiradi: u serverni ishga tushiradi, uni qayta yuklashda saqlab turadi, uni yangilaydi va jonli token byudjetingizni bir marta bosish masofasiga joylashtiradi — **hech qanday terminal oynasi ochiq qolmagan, bolaga qarash uchun `npm install -g omniroute` yo'q.**
 
-[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu** mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
+[Tauri v2](https://v2.tauri.app/) (yaxlitlash xatosi oʻlchamidagi Rust yadrosi) bilan yaratilgan u oʻzining imzolangan 24-tugun ish vaqtini joʻnatadi va ilovaga tegishli OmniRoute oʻrnatishni boshqaradi, shuning uchun u hech qachon global `node`/`bun` bilan kurashmaydi. Bu **mavjud `~/.omniroute/` konfiguratsiyasi va ma'lumotlar bazasini baham ko'radi** — demak, siz allaqachon shlyapa bilan OmniRoute. 🎩
 
 <table>
   <tr><th align="left"> nima qiladi </th><th align="left"> Qanday qilib </th></tr>
@@ -1051,7 +1051,7 @@ curl http://localhost:20128/v1/models -H "Authorization: Bearer YOUR_KEY"
 
 Ulangan modellaringiz ro'yxatda ko'rinishi kerak. 🎉 Bo'ldi — kodlashni boshlang, OmniRoute esa siz uchun avtomatik marshrutlaydi va zaxira variantga o'tadi.
 
-Agar mijoziingiz maxsus sarlavhalar yubora olmasa, OmniRoute tokenlashtirilgan moslik aliaslarini ham taqdim etadi:
+Agar mijozingiz maxsus sarlavhalar yubora olmasa, OmniRoute tokenlashtirilgan moslik aliaslarini ham taqdim etadi:
 
 ```txt
 OpenAI catalog:   http://localhost:20128/vscode/YOUR_KEY/
