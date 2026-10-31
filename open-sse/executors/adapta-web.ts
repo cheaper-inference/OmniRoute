@@ -7,20 +7,18 @@ const ADAPTA_CLERK_URL = "https://clerk.agent.adapta.one";
 const ADAPTA_STREAM_URL = `${ADAPTA_APP_URL}/api/chat/stream/v1`;
 const ADAPTA_PUBLIC_STREAM_ERROR = `\n\n[Erro: ${sanitizeErrorMessage("Adapta upstream error")}]`;
 
-// Default model ID in Adapta's internal system (corresponds to "ONE" / auto-select)
-const DEFAULT_AI_MODEL_ID = 14;
+// Default model key in Adapta's catalog (auto-select).
+const DEFAULT_MODEL_KEY = "ONE";
 
-// Map from OmniRoute model IDs to Adapta internal model IDs.
-// 14 = "ONE" (auto), values confirmed via chat history inspection.
-// Additional IDs can be added as they are discovered.
-const MODEL_ID_MAP: Record<string, number> = {
-  "adapta-one": 14,
-  "adapta-gpt": 14,
-  "adapta-claude": 14,
-  "adapta-gemini": 14,
-  "adapta-grok": 14,
-  "adapta-deepseek": 14,
-  "adapta-llama": 14,
+// Map from OmniRoute model IDs to Adapta catalog model keys.
+const MODEL_KEY_MAP: Record<string, string> = {
+  "adapta-one": "ONE",
+  "adapta-gpt": "GPT_6_LUNA",
+  "adapta-claude": "CLAUDE_5_5_SONNET",
+  "adapta-gemini": "GEMINI_3_1_PRO_PREVIEW",
+  "adapta-grok": "GROK_43",
+  "adapta-deepseek": "DEEPSEEK_V4_PRO_0813",
+  "adapta-llama": "MUSE_SPARK_1_3",
 };
 
 const USER_AGENT =
@@ -190,13 +188,17 @@ interface OpenAIMessage {
 }
 
 interface AdaptaPart {
-  type: "text";
-  text: string;
+  type: "text" | "step-start";
+  text?: string;
+  state?: string;
 }
 
 interface AdaptaMessage {
+  id: string;
   role: string;
   parts: AdaptaPart[];
+  metadata?: Record<string, unknown>;
+  state?: string;
 }
 
 /** Extract plain text from an OpenAI message content (string or content-parts array). */
@@ -212,7 +214,11 @@ function extractText(content: unknown): string {
 }
 
 /** Build the final Adapta messages array, injecting system prompt into first user message. */
-function buildAdaptaMessages(messages: OpenAIMessage[]): AdaptaMessage[] {
+export function buildAdaptaMessages(
+  messages: OpenAIMessage[],
+  modelKey: string,
+  chatId: string
+): AdaptaMessage[] {
   let systemText = "";
   const rest: OpenAIMessage[] = [];
 
@@ -231,16 +237,30 @@ function buildAdaptaMessages(messages: OpenAIMessage[]): AdaptaMessage[] {
   for (const msg of rest) {
     if (msg.role !== "user" && msg.role !== "assistant") continue;
     const text = extractText(msg.content);
-    if (!text.trim()) continue;
+    if (!text.trim() && msg.role !== "assistant") continue;
+
+    const id = crypto.randomUUID();
+
+    if (msg.role === "assistant") {
+      adapted.push({
+        id,
+        role: "assistant",
+        parts: [{ type: "text", text }],
+        metadata: { model: modelKey, chatId, messageId: id, isPaused: false },
+        state: "done",
+      });
+      continue;
+    }
 
     if (!systemInjected && systemText && msg.role === "user") {
       adapted.push({
+        id,
         role: "user",
         parts: [{ type: "text", text: `${systemText}\n\n${text}` }],
       });
       systemInjected = true;
     } else {
-      adapted.push({ role: msg.role, parts: [{ type: "text", text }] });
+      adapted.push({ id, role: "user", parts: [{ type: "text", text }] });
     }
   }
 
@@ -327,7 +347,7 @@ function transformStream(adaptaStream: ReadableStream, model: string): ReadableS
               chunk({ content: ADAPTA_PUBLIC_STREAM_ERROR });
               finalize();
               return;
-            } else if (type === "done" || type === "end") {
+            } else if (type === "done" || type === "end" || type === "finish") {
               finalize();
               return;
             }
@@ -400,8 +420,9 @@ export class AdaptaWebExecutor extends BaseExecutor {
     }
 
     // 2. Build Adapta request body
-    const aiModelId = MODEL_ID_MAP[model] ?? DEFAULT_AI_MODEL_ID;
-    const adaptaMessages = buildAdaptaMessages(effectiveMessages);
+    const modelKey = MODEL_KEY_MAP[model] ?? DEFAULT_MODEL_KEY;
+    const chatId = crypto.randomUUID();
+    const adaptaMessages = buildAdaptaMessages(effectiveMessages, modelKey, chatId);
 
     if (adaptaMessages.length === 0) {
       return {
@@ -413,8 +434,14 @@ export class AdaptaWebExecutor extends BaseExecutor {
     }
 
     const requestPayload = {
+      chatId,
+      id: chatId,
+      isTemporaryChat: false,
+      mandatoryTools: [],
+      skipImagePromptOptimization: true,
+      modelAi: modelKey,
+      trigger: "submit-message",
       messages: adaptaMessages,
-      aiModelId,
     };
 
     const headers: Record<string, string> = {
@@ -428,7 +455,7 @@ export class AdaptaWebExecutor extends BaseExecutor {
 
     log?.info?.(
       "ADAPTA-WEB",
-      `POST ${ADAPTA_STREAM_URL} | model=${model} aiModelId=${aiModelId} msgs=${adaptaMessages.length}`
+      `POST ${ADAPTA_STREAM_URL} | model=${model} modelAi=${modelKey} msgs=${adaptaMessages.length}`
     );
 
     // 3. Fire request
