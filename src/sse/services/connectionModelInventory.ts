@@ -2,6 +2,7 @@ import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/r
 import { isRegisteredImageModel } from "@omniroute/open-sse/config/imageRegistry";
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
+import { inventoryOrFailOpen, isPerAccountCatalogProvider } from "./perAccountCatalogFilter.ts";
 import { type ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
 import {
   getSyncedAvailableModelsByConnection,
@@ -60,10 +61,17 @@ export async function loadAdvertisedModelsForConnections(
       .filter(
         (p): p is string =>
           typeof p === "string" &&
-          (isSelfHostedChatProvider(p) || (p === "codex" && !isCodexImageModel(requestedModel)))
+          (isSelfHostedChatProvider(p) ||
+            (p === "codex" && !isCodexImageModel(requestedModel)) ||
+            isPerAccountCatalogProvider(p))
       )
   );
   if (inventoryProviders.size === 0) return advertised;
+
+  // Per-account catalogs (Antigravity plans): `antigravity` and `agy` connections share one pool,
+  // so their inventories are merged and judged together before the fail-open rule applies.
+  const perAccountInventory = new Map<string, Set<string>>();
+  let perAccountMalformed = false;
 
   await Promise.all(
     [...inventoryProviders].map(async (providerId) => {
@@ -71,10 +79,14 @@ export async function loadAdvertisedModelsForConnections(
       try {
         byConnection = await getSyncedAvailableModelsByConnection(providerId);
       } catch {
+        if (isPerAccountCatalogProvider(providerId)) perAccountMalformed = true;
         return;
       }
       // Malformed persisted rows: fail open for the whole provider.
-      if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) return;
+      if (byConnection[SYNCED_AVAILABLE_MODELS_MALFORMED]) {
+        if (isPerAccountCatalogProvider(providerId)) perAccountMalformed = true;
+        return;
+      }
       if (
         providerId === "codex" &&
         Object.values(byConnection).some((models) => Array.isArray(models) && models.length > 0)
@@ -85,10 +97,20 @@ export async function loadAdvertisedModelsForConnections(
       }
       for (const [connectionId, models] of Object.entries(byConnection)) {
         if (!Array.isArray(models) || models.length === 0) continue;
-        advertised.set(connectionId, new Set(models.map((m) => m.id)));
+        const ids = new Set(models.map((m) => m.id));
+        if (isPerAccountCatalogProvider(providerId)) perAccountInventory.set(connectionId, ids);
+        else advertised.set(connectionId, ids);
       }
     })
   );
+
+  if (!perAccountMalformed) {
+    // When no account advertises the model the lists are stale/incomplete: fail open instead of
+    // emptying the pool.
+    for (const [connectionId, ids] of inventoryOrFailOpen(requestedModel, perAccountInventory)) {
+      advertised.set(connectionId, ids);
+    }
+  }
 
   return advertised;
 }
