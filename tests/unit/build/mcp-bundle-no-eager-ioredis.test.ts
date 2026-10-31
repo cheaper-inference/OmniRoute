@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
 import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { buildSync } from "esbuild";
 
 // #6559 — `omniroute --mcp` crashed at Node ESM link time with
 // ERR_MODULE_NOT_FOUND for 'ioredis'.
@@ -29,19 +29,15 @@ test("MCP server bundle has no top-level static import of ioredis", () => {
   const outFile = join(outDir, "server.js");
 
   try {
-    execFileSync(
-      "npx",
-      [
-        "esbuild",
-        "open-sse/mcp-server/server.ts",
-        "--bundle",
-        "--platform=node",
-        "--packages=external",
-        "--format=esm",
-        `--outfile=${outFile}`,
-      ],
-      { cwd: repoRoot, stdio: "pipe" }
-    );
+    buildSync({
+      absWorkingDir: repoRoot,
+      entryPoints: ["open-sse/mcp-server/server.ts"],
+      bundle: true,
+      platform: "node",
+      packages: "external",
+      format: "esm",
+      outfile: outFile,
+    });
 
     const bundled = readFileSync(outFile, "utf8");
 

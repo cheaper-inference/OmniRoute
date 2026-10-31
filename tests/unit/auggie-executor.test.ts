@@ -404,10 +404,10 @@ test("execute() spawns with a valid allowlisted model and a '--' argv separator"
   }
 });
 
-// ─── execute(): abort kills the subprocess promptly ────────────────────────
+// ─── execute(): abort closes the response stream promptly ──────────────────
 
-test("execute() aborts a long-running CLI process instead of hanging (streaming)", async () => {
-  // Sleeps far longer than the test timeout unless killed on abort.
+test("execute() closes the response stream promptly on abort", async () => {
+  // Keep the fixture alive so this measures stream closure, not natural exit.
   const bin = writeFakeBin("fake-auggie-sleep", "setTimeout(() => {}, 30_000);");
   const prevBin = process.env.AUGGIE_BIN;
   process.env.AUGGIE_BIN = bin;
