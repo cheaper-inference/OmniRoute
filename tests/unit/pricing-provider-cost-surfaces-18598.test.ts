@@ -255,7 +255,7 @@ test("partial models.dev and user overrides preserve legacy fields equally in ca
   assert.equal((await getPricingWithSources()).sourceMap["opencode-go"]["glm-5.2"], "user");
 });
 
-test("models.dev reasoning pricing overrides the default in catalog enrichment", () => {
+test("models.dev and user reasoning pricing preserve catalog precedence", async () => {
   saveModelsDevPricing({
     deepseek: {
       "deepseek-v4-flash": { input: 1, output: 2, reasoning: 9 },
@@ -268,6 +268,17 @@ test("models.dev reasoning pricing overrides the default in catalog enrichment",
     reasoning: 9,
     cache_creation: 0.22,
   });
+  await patchPricing({ deepseek: { "deepseek-v4-flash": { reasoning: 0 } } });
+  const expected = {
+    input: 1,
+    output: 2,
+    cached: 0.007,
+    reasoning: 0,
+    cache_creation: 0.22,
+  };
+  assert.deepEqual(await getPricingForModel("deepseek", "deepseek-v4-flash"), expected);
+  assert.deepEqual(catalogPricing("deepseek-v4-flash", "deepseek"), expected);
+  assert.equal((await getPricingWithSources()).sourceMap.deepseek["deepseek-v4-flash"], "user");
 });
 
 test("exact provider costs including zero beat conflicting local token rates", async () => {
