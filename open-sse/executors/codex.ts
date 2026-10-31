@@ -84,6 +84,8 @@ import { CodexAppServerExecutor } from "./codex-app-server.ts";
 // Re-exported for external importers (tests + provider services).
 export { isCodexFreePlan, normalizeCodexTools } from "./codex/tools.ts";
 
+import { guardReadableStream, StreamGuardError } from "../utils/streamGuards.ts";
+
 // ─── wreq-js lazy loader ───────────────────────────────────────────────────
 // wreq-js is a Rust-native module that requires platform-specific .node binaries.
 // Loading it eagerly crashes the server when the binary is missing (pnpm, Docker
@@ -578,24 +580,21 @@ export function terminateCodexHttpStreamOnTerminal(response: Response): Response
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        while (!closed) {
-          const { done, value } = await reader.read();
-          if (done) {
-            buffer += decoder.decode();
-            if (buffer.length > 0 && !closed) {
-              controller.enqueue(encoder.encode(buffer));
-            }
-            if (!closed) {
-              closed = true;
-              controller.close();
-            }
-            return;
-          }
+        // P0 FIX: Use guardReadableStream to prevent infinite hanging
+        // Max 5000 chunks, 50MB, 30s timeout per chunk
+        for await (const chunk of guardReadableStream(reader, {
+          maxChunks: 5000,
+          maxBytes: 50 * 1024 * 1024,
+          timeoutMs: 30_000,
+        })) {
+          if (closed) break;
 
-          buffer += decoder.decode(value, { stream: true });
+          buffer += decoder.decode(chunk, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
+
           for (const line of lines) {
+            if (closed) break;
             controller.enqueue(encoder.encode(line + "\n"));
             if (isResponsesTerminalLine(line)) {
               closed = true;
@@ -606,11 +605,27 @@ export function terminateCodexHttpStreamOnTerminal(response: Response): Response
             }
           }
         }
+
+        // Stream ended naturally without terminal line
+        if (!closed) {
+          if (buffer.length > 0) {
+            controller.enqueue(encoder.encode(buffer));
+          }
+          controller.close();
+        }
       } catch (err) {
         if (!closed) {
           closed = true;
+          // Log the guard error but don't crash
+          if (err instanceof StreamGuardError) {
+            console.warn("[codex] Stream guard triggered:", err.message);
+          }
           controller.error(err);
         }
+      } finally {
+        try {
+          await reader.cancel();
+        } catch {}
       }
     },
     cancel(reason) {
@@ -995,6 +1010,8 @@ export class CodexExecutor extends BaseExecutor {
     let closed = false;
     let ws: WreqWebSocket | null = null;
     let streamController: ReadableStreamDefaultController<Uint8Array> | null = null;
+    // P1 FIX: Track terminal state to prevent enqueue after close
+    let terminalReceived = false;
 
     const closeUpstream = (reason: string) => {
       try {
@@ -1002,6 +1019,14 @@ export class CodexExecutor extends BaseExecutor {
       } catch {
         console.warn("[codex] closeUpstream: socket close race ignored");
         // ignore close races
+      }
+    };
+
+    const cleanupWsListeners = () => {
+      if (ws) {
+        ws.onmessage = null;
+        ws.onerror = null;
+        ws.onclose = null;
       }
     };
 
@@ -1025,7 +1050,9 @@ export class CodexExecutor extends BaseExecutor {
     }) => {
       if (closed) return;
       closed = true;
+      terminalReceived = true;
       removeAbortListener();
+      cleanupWsListeners();
       if (closeSocket) closeUpstream(reason);
 
       const controller = streamController;
@@ -1088,13 +1115,13 @@ export class CodexExecutor extends BaseExecutor {
             return;
           }
           ws.onmessage = (event) => {
-            if (closed) return;
+            if (closed || terminalReceived) return;
             const raw =
               typeof event.data === "string"
                 ? event.data
                 : Buffer.from(event.data as Buffer).toString("utf8");
             const sseEvent = encodeResponseSseEvent(raw);
-            if (closed) return;
+            if (closed || terminalReceived) return;
             // Filtered events (codex.* / empty payload) return an empty `sse` —
             // skip them so no empty frame reaches the client.
             if (sseEvent.sse) {
@@ -1110,6 +1137,7 @@ export class CodexExecutor extends BaseExecutor {
               }
             }
             if (sseEvent.terminal) {
+              terminalReceived = true;
               finishStream({ reason: "terminal_event" });
             }
           };
@@ -1124,7 +1152,8 @@ export class CodexExecutor extends BaseExecutor {
             // A close before any terminal event means the upstream died mid-response:
             // emit a terminal response.failed instead of ending the client stream as
             // if it completed normally (silent truncation).
-            if (closed) return;
+            if (closed || terminalReceived) return;
+            cleanupWsListeners();
             const closeDetail = event
               ? ` (code ${event.code ?? "unknown"}${event.reason ? `: ${event.reason}` : ""})`
               : "";
@@ -1145,7 +1174,12 @@ export class CodexExecutor extends BaseExecutor {
         }
       },
       cancel() {
-        finishStream({ reason: "client_cancelled", emitDone: false, closeController: false });
+        finishStream({
+          reason: "client_cancelled",
+          emitDone: false,
+          closeController: false,
+          closeSocket: true,
+        });
       },
     });
 

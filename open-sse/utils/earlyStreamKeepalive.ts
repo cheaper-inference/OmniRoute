@@ -555,7 +555,9 @@ export async function withEarlyStreamKeepalive(
       let nextApplicationKeepaliveAt = applicationKeepalive
         ? performance.now() + applicationKeepalive.intervalMs
         : Number.POSITIVE_INFINITY;
-      const interval = setInterval(() => {
+      let keepaliveInterval: ReturnType<typeof setInterval> | null = null;
+
+      keepaliveInterval = setInterval(() => {
         if (stopped) return;
         try {
           const now = performance.now();
@@ -568,11 +570,15 @@ export async function withEarlyStreamKeepalive(
           recordClientBytes(frame);
         } catch {
           stopped = true;
-          clearInterval(interval);
+          if (keepaliveInterval) clearInterval(keepaliveInterval);
         }
       }, intervalMs);
-      if (typeof interval === "object" && interval !== null && "unref" in interval) {
-        interval.unref?.();
+      if (
+        typeof keepaliveInterval === "object" &&
+        keepaliveInterval !== null &&
+        "unref" in keepaliveInterval
+      ) {
+        keepaliveInterval.unref?.();
       }
       // First frame immediately on commit so the client sees a byte right away.
       // An SSE comment here would be ignored by Anthropic clients' watchdog on a
@@ -584,10 +590,15 @@ export async function withEarlyStreamKeepalive(
         /* consumer already gone */
       }
 
-      stopKeepalive = () => {
+      const clearKeepalive = () => {
         stopped = true;
-        clearInterval(interval);
+        if (keepaliveInterval) {
+          clearInterval(keepaliveInterval);
+          keepaliveInterval = null;
+        }
       };
+
+      stopKeepalive = clearKeepalive;
 
       const onAbort = () => {
         if (aborted) return;
@@ -599,6 +610,12 @@ export async function withEarlyStreamKeepalive(
           return;
         }
         aborted = true;
+        // P1 FIX: Explicitly abort the deadline controller to propagate abort downstream
+        try {
+          deadlineController?.abort();
+        } catch {
+          /* abort must never throw */
+        }
         stopDeadline();
         stopKeepalive();
         upstreamReader?.cancel().catch(() => {});
@@ -758,7 +775,13 @@ export async function withEarlyStreamKeepalive(
       aborted = true;
       stopDeadline();
       stopKeepalive();
-      upstreamReader?.cancel().catch(() => {});
+      // P2 FIX: Wrap upstreamReader.cancel() with timeout to prevent hanging
+      if (upstreamReader) {
+        Promise.race([
+          upstreamReader.cancel().catch(() => undefined),
+          new Promise<void>((resolve) => setTimeout(resolve, 2000)),
+        ]).catch(() => undefined);
+      }
     },
   });
 
