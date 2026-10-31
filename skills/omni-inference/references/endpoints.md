@@ -93,11 +93,16 @@
 - [`PUT /api/v1/management/proxies/bulk-assign`](#put-apiv1managementproxiesbulk-assign)
 - [`GET /api/v1/management/proxies/health`](#get-apiv1managementproxieshealth)
 - [`GET /api/v1/me/status`](#get-apiv1mestatus)
+- [`GET /api/v1/me/sessions`](#get-apiv1mesessions)
+- [`GET /api/v1/me/sessions/{id}`](#get-apiv1mesessionsid)
+- [`GET /api/v1/me/sessions/{id}/messages`](#get-apiv1mesessionsidmessages)
 - [`GET /api/v1/muse-code/models`](#get-apiv1muse-codemodels)
 - [`GET /api/v1/music/generations`](#get-apiv1musicgenerations)
 - [`POST /api/v1/music/generations`](#post-apiv1musicgenerations)
 - [`GET /api/v1/providers/{provider}/limits`](#get-apiv1providersproviderlimits)
 - [`PUT /api/v1/providers/{provider}/limits`](#put-apiv1providersproviderlimits)
+- [`GET /api/v1/quota-recoveries/{id}`](#get-apiv1quota-recoveriesid)
+- [`DELETE /api/v1/quota-recoveries/{id}`](#delete-apiv1quota-recoveriesid)
 - [`GET /api/v1/quotas/check`](#get-apiv1quotascheck)
 - [`GET /api/v1/registered-keys`](#get-apiv1registered-keys)
 - [`POST /api/v1/registered-keys`](#post-apiv1registered-keys)
@@ -1116,8 +1121,43 @@ curl http://localhost:20128/api/v1/management/proxies/health \
 
 GET me › status
 
+Self-service usage status for the calling API key (also served at /v1/me/status). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope `self:usage`. `accountQuotas` / `accountQuota` are included only with scope `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting. `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly` are cached per key for 60 s, so they may lag by up to 60 s.
+
 ```bash
 curl http://localhost:20128/api/v1/me/status \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions
+
+GET me › sessions
+
+List agent sessions opened by the calling API key (also served at /v1/me/sessions). Authenticate with `Authorization: Bearer <key>`; requires scope `self:usage`. Every filter applies on top of the calling key, so other keys' sessions are never listed. Session `costUsd` is the list-price cost of the session's requests; flat-rate providers are not counted as $0. It has the same meaning as `/v1/me/status` `listPriceUsd`, except that sessions are priced when each request is recorded and status with the current prices, so the two differ if prices changed in between. `unpricedCount` counts the requests that used tokens but had no known price and are therefore missing from `costUsd`, like status `unpricedRequests`.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}
+
+GET me › sessions › <id>
+
+Get details and recent requests of a session owned by the calling API key.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/v1/me/sessions/{id}/messages
+
+GET me › sessions › <id> › messages
+
+Simplified conversation turns for a session owned by the calling API key.
+
+```bash
+curl http://localhost:20128/api/v1/me/sessions/{id}/messages \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
@@ -1168,6 +1208,26 @@ curl -X PUT http://localhost:20128/api/v1/providers/{provider}/limits \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/v1/quota-recoveries/{id}
+
+Poll a quota recovery ticket
+
+Opt-in recovery of a non-streaming `POST /api/v1/chat/completions` or `POST /api/v1/responses` turn that failed with a terminal quota error. A request opts in with `x-omniroute-quota-recovery: auto`, `x-omniroute-session` and `x-omniroute-recovery-turn` (each `[A-Za-z0-9._:-]{1,128}`); it must be `stream: false`, carry no tools / tool history / `previous_response_id`, and not pin a connection. Recovery needs `STORAGE_ENCRYPTION_KEY` (the request is stored encrypted for up to 24 h). Instead of the quota error the caller then receives `202` with `recovery.poll` pointing here. Tickets are visible only to the API key that created them.
+
+```bash
+curl http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### DELETE /api/v1/quota-recoveries/{id}
+
+Cancel a quota recovery ticket
+
+```bash
+curl -X DELETE http://localhost:20128/api/v1/quota-recoveries/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### GET /api/v1/quotas/check
