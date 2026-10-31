@@ -11,6 +11,7 @@ import {
   FAL_IMAGE_EDIT_MAX_REFERENCES,
   isFalImageEditModel,
 } from "@omniroute/open-sse/handlers/imageGeneration/providers/fal.ts";
+import { handleLeonardoImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration/providers/leonardo.ts";
 import { createInjectionGuard } from "@/middleware/promptInjectionGuard";
 import {
   buildAdobeFireflyEditDataUrls,
@@ -346,8 +347,8 @@ interface EditComboTarget {
 /**
  * Decide whether a prefix-resolved combo target can service an image edit, and
  * return the credential key to resolve it with. Mirrors postHandler's provider
- * branches: codex-responses, fal-ai edit models, adobe-firefly, built-in
- * openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
+ * branches: codex-responses, fal-ai edit models, adobe-firefly, syntx, leonardo,
+ * built-in openrouter, and custom OpenAI-compatible nodes are edit-capable; every other
  * built-in provider is not (it exposes no OpenAI-compatible edit endpoint).
  */
 function classifyImageEditTarget(
@@ -360,6 +361,7 @@ function classifyImageEditTarget(
       providerConfig.format === "codex-responses" ||
       providerConfig.format === "adobe-firefly-image" ||
       providerConfig.format === "syntx-image" ||
+      providerConfig.format === "leonardo-image" ||
       (providerConfig.format === "fal-ai" && isFalImageEditModel(parsed.model)) ||
       providerConfig.id === "openrouter"
     ) {
@@ -513,6 +515,19 @@ async function dispatchImageEditTarget(
       credentials: credentials as never,
       log,
       signal: request.signal,
+    })) as ImageComboDispatchResult;
+  }
+
+  // #18671: Leonardo uploads the reference as an init image and runs image-to-image.
+  if (providerConfig?.format === "leonardo-image") {
+    return (await handleLeonardoImageGeneration({
+      provider: parsed.provider,
+      model: parsed.model,
+      providerConfig,
+      body: { prompt },
+      credentials: credentials as never,
+      log,
+      initImage: images[0] ?? null,
     })) as ImageComboDispatchResult;
   }
 
@@ -959,6 +974,33 @@ async function postHandler(request: Request, _context?: unknown) {
     });
   }
 
+  // #18671: Leonardo uploads the reference as an init image and runs image-to-image.
+  if (providerConfig?.format === "leonardo-image") {
+    const preflight = await syntxEditPreflight(parsed.provider, allowedConnections, resolvedModel);
+    if (preflight instanceof Response) return preflight;
+    const result = await runImageRequestWithAccounting(
+      editAccounting(accounting, parsed.provider, parsed.model, preflight.credentials),
+      () =>
+        handleLeonardoImageGeneration({
+          provider: parsed.provider,
+          model: parsed.model,
+          providerConfig,
+          body: { prompt },
+          credentials: preflight.credentials as never,
+          log,
+          initImage: images[0] ?? null,
+        })
+    );
+    if (result.success) {
+      await clearRecoveredProviderState(preflight.credentials);
+      return jsonResponse(result.data);
+    }
+    return jsonResponse(
+      toJsonErrorPayload(result.error, "Image edit provider error"),
+      result.status ?? HTTP_STATUS.BAD_GATEWAY
+    );
+  }
+
   // Built-in OpenRouter uses its unified Image API for reference-image
   // edits: POST /api/v1/images with input_references. Forward through the
   // provider-specific adapter (#10197), rather than the multipart
@@ -1086,7 +1128,7 @@ async function postHandler(request: Request, _context?: unknown) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
       `Image edit is not supported for built-in provider "${parsed.provider}". ` +
-        `Use adobe-firefly, syntx, codex, or a custom OpenAI-compatible image provider.`
+        `Use adobe-firefly, syntx, codex, leonardo, or a custom OpenAI-compatible image provider.`
     );
   }
 
