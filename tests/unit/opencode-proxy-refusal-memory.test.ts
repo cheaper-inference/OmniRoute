@@ -116,12 +116,52 @@ describe("OpencodeExecutor proxy refusal memory", () => {
     const first = await run(exec, proxied(), [429, 200]);
     assert.deepStrictEqual(first.observed, [port(0), port(1)]);
     assert.strictEqual(first.status, 200);
-    assert.strictEqual(memory.isProxyAvoided(keyFor(0)), true);
+    // A quota 429 is keyed by the model that hit it: that model is set aside…
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+    // …and a model-less read no longer sees it (no cross-model eviction).
+    assert.strictEqual(memory.isProxyAvoided(keyFor(0)), false);
 
     clearCooldowns(exec);
     assert.deepStrictEqual((await run(exec, proxied(), [200])).observed, [port(2)]);
     clearCooldowns(exec);
     assert.deepStrictEqual((await run(exec, proxied(), [200])).observed, [port(1)]);
+  });
+
+  it("a success through a member erases that member's model-scoped 429 entry", async () => {
+    const creds = credentials([
+      { fp: FINGERPRINTS[0], proxyIndex: 0 },
+      { fp: FINGERPRINTS[1], proxyIndex: 1 },
+    ]);
+    const exec = new OpencodeExecutor("opencode-zen");
+    // Both members hit the quota 429 for model-a: both egress keys are set aside
+    // for model-a, so a model-a request finds no clean candidate.
+    const first = await run(exec, creds, [429, 429]);
+    assert.strictEqual(first.status, 429);
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(1), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
+
+    clearCooldowns(exec);
+    // With both members drained for model-a the rotation falls back to serving one
+    // anyway; that member's success is noted for model-a, erasing its entry.
+    assert.deepStrictEqual((await run(exec, creds, [200])).observed, [port(0)]);
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      false
+    );
+    // The member that never served keeps its model-scoped refusal.
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(1), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
   });
 
   it("with the flag opted out the refused proxy is tried again in turn", async () => {
@@ -143,7 +183,11 @@ describe("OpencodeExecutor proxy refusal memory", () => {
 
     // The previous two-minute default would already have returned it.
     mock.timers.tick(2 * 60_000 + 1);
-    assert.strictEqual(memory.isProxyAvoided(keyFor(0)), true);
+    // Model-scoped like the write above: the 429 set-aside is keyed by model.
+    assert.strictEqual(
+      memory.isProxyAvoided(keyFor(0), undefined, "muse-spark-1.3-contributor-free"),
+      true
+    );
 
     mock.timers.tick(3 * 60_000);
     clearCooldowns(exec);
@@ -262,5 +306,28 @@ describe("lastResort429", () => {
     assert.strictEqual(spare.take(403, accounts[0], never), null);
     assert.strictEqual(spare.take(429, accounts[0], never), accounts[1]);
     assert.strictEqual(spare.take(429, accounts[0], never), null);
+  });
+
+  it("a model-scoped 429 set-aside drains that member for the model that hit it", () => {
+    process.env.PROXY_SKIP_RECENTLY_FAILED = "true";
+    try {
+      const accounts = [
+        account("a", { host: "10.0.0.1", port: 1 }),
+        account("b", { host: "10.0.0.2", port: 2 }),
+      ];
+      const key0 = memory.proxyEgressKey(accounts[0].proxy);
+      assert.ok(key0);
+      memory.noteProxyRefusal(key0, "ip_quota_429", Date.now(), "model-a");
+
+      // For model-a, member a is drained by its own model-scoped 429 → b is served.
+      const forA = lastResort429(accounts, { nextAccountIdx: 0 }, new Set(), "model-a");
+      assert.strictEqual(forA.take(429, accounts[0], never), accounts[1]);
+
+      // For another model the set-aside is invisible → a is served.
+      const forB = lastResort429(accounts, { nextAccountIdx: 0 }, new Set(), "model-b");
+      assert.strictEqual(forB.take(429, accounts[0], never), accounts[0]);
+    } finally {
+      delete process.env.PROXY_SKIP_RECENTLY_FAILED;
+    }
   });
 });

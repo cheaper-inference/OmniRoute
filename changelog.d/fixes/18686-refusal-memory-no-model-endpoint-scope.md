@@ -1,0 +1,1 @@
+- **fix(sse):** scope the OpenCode 429 quota refusal memory to the model that hit it, so one model's quota exhaustion no longer sets the shared egress aside for every other model while egress-health set-asides (geo, transport, slow, unreachable) stay visible to all models ([#18686](https://github.com/cheaper-inference/OmniRoute/pull/18686)) — thanks @maxmad64bis

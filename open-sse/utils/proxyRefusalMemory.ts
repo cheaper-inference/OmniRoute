@@ -223,8 +223,12 @@ export function proxyEgressKey(proxy: unknown): string | null {
   }
 }
 
-function entryId(key: string, kind: ProxyRefusalKind): string {
-  return `${kind} ${key}`;
+// The model dimension is optional: when the caller knows which model just
+// failed it is appended, so one model's quota 429 does not set aside the
+// whole egress for every other model. When it is absent the key is
+// byte-identical to the model-less form (exact fallback).
+function entryId(key: string, kind: ProxyRefusalKind, model?: string | null): string {
+  return model ? `${kind} ${key} ${model}` : `${kind} ${key}`;
 }
 
 /**
@@ -255,13 +259,18 @@ function readMemberState(
 }
 
 // Shared insert: same curve, same seq, same oldest-first eviction as entries.
-function insertState(key: string, kind: ProxyRefusalKind, nowMs: number): number {
-  const state = readState(key, kind, nowMs);
+function insertState(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): number {
+  const state = readState(key, kind, nowMs, model);
   if (state && state.until > nowMs) return -1;
   const policy = REFUSAL_POLICIES[kind];
   const streak = (state?.streak ?? 0) + 1;
   const periodMs = Math.min(policy.baseMs * 2 ** (streak - 1), policy.maxMs);
-  const id = entryId(key, kind);
+  const id = entryId(key, kind, model);
   memory.delete(id);
   memory.set(id, { streak, until: nowMs + periodMs, seq: ++store.seq.value });
   if (memory.size > MAX_ENTRIES) {
@@ -271,9 +280,16 @@ function insertState(key: string, kind: ProxyRefusalKind, nowMs: number): number
   return periodMs;
 }
 
-// Read one (key, kind) state, dropping it once its period ended more than 2 x maxMs ago.
-function readState(key: string, kind: ProxyRefusalKind, nowMs: number): RefusalState | undefined {
-  const id = entryId(key, kind);
+// Read one (key, kind, model?) state, dropping it once its period ended more
+// than 2 x maxMs ago. When model is null/undefined the key is the model-less
+// form; otherwise the model-scoped form.
+function readState(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): RefusalState | undefined {
+  const id = entryId(key, kind, model);
   const state = memory.get(id);
   if (state && nowMs - state.until >= 2 * REFUSAL_POLICIES[kind].maxMs) {
     memory.delete(id);
@@ -282,20 +298,47 @@ function readState(key: string, kind: ProxyRefusalKind, nowMs: number): RefusalS
   return state;
 }
 
-/** Set a proxy aside for `kind`. Returns the new period in ms, or null if nothing changed. */
+/**
+ * Read the set-aside still in force for a (key, kind), honoring the model
+ * dimension. A model-less read returns the model-less entry (current behavior).
+ * A model-scoped read returns the LATEST of the model-scoped entry and the
+ * model-less entry: the model-less kinds (transport, slow, unreachable, geo,
+ * operator) are shared by every model, while a model-scoped quota refusal must
+ * not hide them.
+ */
+function readStateAnyModel(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number,
+  model?: string | null
+): RefusalState | undefined {
+  const scoped = readState(key, kind, nowMs, model);
+  if (model == null || model === "") return scoped;
+  const shared = readState(key, kind, nowMs, undefined);
+  if (scoped === undefined || shared === undefined) return scoped ?? shared;
+  return shared.seq > scoped.seq ? shared : scoped;
+}
+
+/**
+ * Set a proxy aside for `kind`. Returns the new period in ms, or null if
+ * nothing changed. When `model` is given the entry is scoped to that model so
+ * one model's 429 does not set aside the egress for every other model.
+ */
 export function noteProxyRefusal(
   key: string | null,
   kind: ProxyRefusalKind,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  model?: string | null
 ): number | null {
   if (key === null) return null;
-  const before = readState(key, kind, nowMs);
-  const periodMs = insertState(key, kind, nowMs);
+  const before = readState(key, kind, nowMs, model);
+  const periodMs = insertState(key, kind, nowMs, model);
   if (periodMs < 0) return null;
   const streak = (before?.streak ?? 0) + 1;
   notifyProxyTransition({ key, kind, periodMs, until: nowMs + periodMs });
   console.warn(
-    `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}`
+    `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}` +
+      (model ? ` model=${model}` : "")
   );
   return periodMs;
 }
@@ -327,28 +370,35 @@ export function noteProxyMemberRefusal(
 export function noteProxyRecovered(
   key: string | null,
   kind: ProxyRefusalKind,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  model?: string | null
 ): void {
   if (key === null) return;
-  const state = readState(key, kind, nowMs);
+  const state = readState(key, kind, nowMs, model);
   if (!state || state.until <= nowMs) return;
   const policy = REFUSAL_POLICIES[kind];
   const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
   const setAsideAt = state.until - periodMs;
   console.warn(
-    `[ProxyRefusalMemory] recovered ${describeEgressForLog(key)} kind=${kind} setAsideMs=${nowMs - setAsideAt} streak=${state.streak}`
+    `[ProxyRefusalMemory] recovered ${describeEgressForLog(key)} kind=${kind} setAsideMs=${nowMs - setAsideAt} streak=${state.streak}` +
+      (model ? ` model=${model}` : "")
   );
   state.until = nowMs;
 }
 
 /** A response came back through this proxy: forget every refusal kind for it. */
-export function noteProxyServed(key: string | null): void {
+export function noteProxyServed(key: string | null, model?: string | null): void {
   if (key === null) return;
   for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind));
+  if (model) for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind, model));
 }
 
-export function isProxyAvoided(key: string | null, nowMs: number = Date.now()): boolean {
-  return proxySetAsideSeq(key, nowMs) !== null;
+export function isProxyAvoided(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): boolean {
+  return proxySetAsideSeq(key, nowMs, model) !== null;
 }
 
 /**
@@ -356,11 +406,15 @@ export function isProxyAvoided(key: string | null, nowMs: number = Date.now()): 
  * null when it is not set aside. Compare with getProxyRefusalSeq() captured earlier to
  * know whether the event happened after that point.
  */
-export function proxySetAsideSeq(key: string | null, nowMs: number = Date.now()): number | null {
+export function proxySetAsideSeq(
+  key: string | null,
+  nowMs: number = Date.now(),
+  model?: string | null
+): number | null {
   if (key === null || memory.size === 0) return null;
   let latest: number | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = readStateAnyModel(key, kind, nowMs, model);
     if (state && state.until > nowMs && (latest === null || state.seq > latest)) {
       latest = state.seq;
     }
@@ -409,10 +463,11 @@ function snapshotLatestSetAside(
 
 export function snapshotProxySetAside(
   key: string | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  model?: string | null
 ): ProxySetAsideSnapshot | null {
   if (key === null || memory.size === 0) return null;
-  return snapshotLatestSetAside((kind) => readState(key, kind, nowMs), nowMs);
+  return snapshotLatestSetAside((kind) => readStateAnyModel(key, kind, nowMs, model), nowMs);
 }
 
 /**
@@ -430,14 +485,15 @@ export interface ProxySetAsideStatus {
 
 export function proxySetAsideStatus(
   key: string | null,
-  nowMs: number = Date.now()
+  nowMs: number = Date.now(),
+  model?: string | null
 ): ProxySetAsideStatus {
   if (key === null || memory.size === 0) return { setAside: false, quotaOnly: false, endsAt: null };
   let found = false;
   let quotaOnly = true;
   let endsAt = 0;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = readStateAnyModel(key, kind, nowMs, model);
     if (!state || state.until <= nowMs) continue;
     found = true;
     if (kind !== "ip_quota_429") quotaOnly = false;
