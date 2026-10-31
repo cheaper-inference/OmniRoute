@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — tasuta tehisintellekti lüüs
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Kõik tehisintellekti tööriistad → 377 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity TASUTA Claude'i / GPT / Gemini juurde automaatse ümberlülitusega. RTK + Cavemani kombineeritud tihendus säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei saa kunagi takistuseks. 377 tehisintellekti teenusepakkujat · üle 150 tasuta taseme · ~1,62 miljardit tasuta tokenit kuus · 20 marsruutimisstrateegiat · alustamine maksab $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Kõik tehisintellekti tööriistad → 380 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity TASUTA Claude'i / GPT / Gemini juurde automaatse ümberlülitusega. RTK + Cavemani kombineeritud tihendus säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei saa kunagi takistuseks. 380 tehisintellekti teenusepakkujat · üle 150 tasuta taseme · ~1,62 miljardit tasuta tokenit kuus · 20 marsruutimisstrateegiat · alustamine maksab $0."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                               |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 pakkujad                   |            352            |   **358**   |          377          |
+| 🌐 pakkujad                   |            352            |   **358**   |          380          |
 | 🧠 Unikaalne vestlusmudel IDs |           1320            |  **1374**   |         1475          |
 | 🖼️ Modality Bridge            | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radari tasuta kataloog     |         🆕 opt-in         |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funktsioonid</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombod</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Teenusepakkujad</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Teenusepakkujad</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 377 teenusepakkujat. Automaatne ümberlülitumine jätkab suunamist, kuni saadaval on mõni muu terve sihtmärk. Kuus sammast: vastupidav ümberlülitumine 377 teenusepakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · alustamine 0 $-ga koos 150+ tasuta taseme ja 52 korduva/võtmeta igavesti tasuta teenusepakkujaga · 37 CLI/agendi integratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmise juhtelemendid, sealhulgas kaitselülitid, TLS-i varjestus, MCP 110 tööriista, A2A, mälu, kaitsepiired, hindamised ja 56 000+ staatilist testideklaratsiooni enam kui 7 800 jälgitavas testifailis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 380 teenusepakkujat. Automaatne ümberlülitumine jätkab suunamist, kuni saadaval on mõni muu terve sihtmärk. Kuus sammast: vastupidav ümberlülitumine 380 teenusepakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · alustamine 0 $-ga koos 150+ tasuta taseme ja 52 korduva/võtmeta igavesti tasuta teenusepakkujaga · 37 CLI/agendi integratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmise juhtelemendid, sealhulgas kaitselülitid, TLS-i varjestus, MCP 110 tööriista, A2A, mälu, kaitsepiired, hindamised ja 56 000+ staatilist testideklaratsiooni enam kui 7 800 jälgitavas testifailis."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Kõik **20** strateegiat — kombineeri neid kombo igas etapis:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeseis võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 377 teenusepakkujat, sisseehitatud 150+ tasuta taset, 20 marsruutimisstrateegiat, 12 mootoriga tokenite tihendamine, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsemeetmed, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 67 lokaliseeritud kasutajaliidese keelt. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeseis võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 380 teenusepakkujat, sisseehitatud 150+ tasuta taset, 20 marsruutimisstrateegiat, 12 mootoriga tokenite tihendamine, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsemeetmed, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 67 lokaliseeritud kasutajaliidese keelt. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
 
 <sub>📊 Täielik metoodika &amp; funktsioonipõhised üksikasjad võrreldes 9routeri, OpenRouteri, CLIProxyAPI &amp; LiteLLM-iga → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ praeguse kataloogi kohta leiate teavet aadressilt **[radar.omniroute.online/plan
 - **🖼️ Uued lõpp-punktid** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisperi-stiilis) täiendavad meediapinda. → [API viide](docs/reference/API_REFERENCE.md)
 - **🎨 Pildi / video / heli genereerimine** — üks API meedia jaoks: xAI Grok Imagine ja Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ning kõnepakkujad nagu ElevenLabs. → [API viide](docs/reference/API_REFERENCE.md)
 - **🌍 Kasutuselevõtt ja haldus** — pöördpuhverserveri `basePath`, brauserikeele automaattuvastus, võtmepõhine seadmete jälgimine, root-õigusteta MITM-usaldus, zh-TW lokaliseerimine. → [Keskkond](docs/reference/ENVIRONMENT.md)
-- **🤝 Rohkem pakkujaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauseri + OAuth-sisselogimisega, Ollama esmaklassiline kaart, Claude Opus 5 ja Sonnet 5, Kimi ametlik partnerlus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning värskendatud **377 pakkujaga kataloog**. → [Pakkujad](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Rohkem pakkujaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauseri + OAuth-sisselogimisega, Ollama esmaklassiline kaart, Claude Opus 5 ja Sonnet 5, Kimi ametlik partnerlus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning värskendatud **380 pakkujaga kataloog**. → [Pakkujad](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Marsruutimise läbipaistvus** — iga vastus kannab `X-OmniRoute-Decision` päist, mis nimetab seda teenindanud strateegia/pakkuja/latentsuse, uus `cache-optimized` kombostrateegia + Auto-Combo `cacheAffinity` tegur suunavad korduvad päringud tagasi vahemälus eesliidet hoidva ühenduse juurde ning kirjutuskaitstud `/v1/auto-combo/{channel}/candidates` lõpp-punkt paljastab `auto/*` kanali reaalajas kandidaatide kogumi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Kohalik jõudlus ja taristu** — ühe klõpsuga käivitatav kohalik Redis, Cloudflare Workers / Deno Deploy releejuurutajad, Bifrost ja Mux järelevalvatute sisseehitatud teenustena. → [Sisseehitatud teenused](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Samuti komplektis** — pluginaraamistik + turg, Omni/Agent/GitHub oskusteraamistikud, Obsidiani vault-integratsioon (22 MCP tööriista), OpenAI-ühilduvad Batch & Files API-d, semantiline vastuste vahemälu, mängustamine edetabelitega, ACP agentide tuvastus (15 sisseehitatud agenti), ajastatud logide eksport BigQuery'sse, `auto/chaos` paralleelne mitme mudeli fan-out, Telegrami boti sild, rakendusesisene versioonihaldur ja LMArena-ELO tasuta pakkujate edetabelid. → [Dokumendid](docs/README.md)
@@ -693,11 +693,11 @@ Iga käsk austab aktiivset kaugkonteksti (`omniroute connect <host>`), `--dry-ru
 
 <div align="center">
 
-## 🌐 377 tehisintellekti pakkujat — 153 kataloogis tasuta teenusena märgitud
+## 🌐 380 tehisintellekti pakkujat — 153 kataloogis tasuta teenusena märgitud
 
 </div>
 
-> **377 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohalike, pilveagentide ja süsteemi kogudes, sealhulgas **153 pakkujat, millel on tuvastusmetaandmed `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta kasutusmahu kataloogis on **471 mudelipõhist kirjet**, **34 korduvat kogumit** ja **52 korduva või võtmeta igavesti tasuta pakkujat**. Need nimetajad on teadlikult erinevad; määratlused ja kogumite duplikaate eemaldavad arvutused leiate jaotistest [Pakkujate teatmik](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta kasutustasemed](docs/reference/FREE_TIERS.md).
+> **380 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohalike, pilveagentide ja süsteemi kogudes, sealhulgas **153 pakkujat, millel on tuvastusmetaandmed `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta kasutusmahu kataloogis on **471 mudelipõhist kirjet**, **34 korduvat kogumit** ja **52 korduva või võtmeta igavesti tasuta pakkujat**. Need nimetajad on teadlikult erinevad; määratlused ja kogumite duplikaate eemaldavad arvutused leiate jaotistest [Pakkujate teatmik](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta kasutustasemed](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1302,7 +1302,7 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b>Käituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kaustades <code>src/</code> ja <code>open-sse/</code> (tuumas pole alates v2.0 ühtegi <code>any</code>-tüüpi)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-journalimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 213 migratsiooni</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-journalimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 219 migratsiooni</td></tr>
   <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstotsing + int8-kvantiseeritud vektor-embeddingud, tüübitud hääbumine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP tööriistade I/O valideerimine + API-lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

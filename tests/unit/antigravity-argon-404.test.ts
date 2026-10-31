@@ -8,13 +8,13 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-argon-404
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.API_KEY_SECRET = "test-argon-404-secret";
 
-const core = await import("../../../src/lib/db/core.ts");
-const { AntigravityExecutor } = await import("../../../open-sse/executors/antigravity.ts");
-const { markAccountUnavailable } = await import("../../../src/sse/services/auth.ts");
+const core = await import("../../src/lib/db/core.ts");
+const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+const { markAccountUnavailable } = await import("../../src/sse/services/auth.ts");
 const { createProviderConnection, getProviderConnectionById } =
-  await import("../../../src/lib/db/providers.ts");
+  await import("../../src/lib/db/providers.ts");
 const { isModelLocked, clearAllModelLockouts } =
-  await import("../../../open-sse/services/accountFallback.ts");
+  await import("../../open-sse/services/accountFallback.ts");
 
 test.after(() => {
   core.resetDbInstance();

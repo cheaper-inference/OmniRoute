@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — मोफत AI गेटवे
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिंग कधीही थांबवू नका. प्रत्येक AI साधन → 377 प्रदाते — 150+ मोफत — एका एंडपॉइंटद्वारे. Claude Code, Codex, Cursor, Cline, Copilot आणि Antigravity यांना स्वयं-फॉलबॅकसह मोफत Claude / GPT / Gemini शी जोडा. RTK + Caveman स्टॅक्ड कॉम्प्रेशनमुळे 15–95% टोकनची बचत होते (सरासरी ~89%) — मर्यादा कधीही गाठू नका. 377 AI प्रदाते · 150+ मोफत स्तर · दरमहा ~1.62B मोफत टोकन · 20 रूटिंग धोरणे · सुरुवात करण्यासाठी $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — कोडिंग कधीही थांबवू नका. प्रत्येक AI साधन → 380 प्रदाते — 150+ मोफत — एका एंडपॉइंटद्वारे. Claude Code, Codex, Cursor, Cline, Copilot आणि Antigravity यांना स्वयं-फॉलबॅकसह मोफत Claude / GPT / Gemini शी जोडा. RTK + Caveman स्टॅक्ड कॉम्प्रेशनमुळे 15–95% टोकनची बचत होते (सरासरी ~89%) — मर्यादा कधीही गाठू नका. 380 AI प्रदाते · 150+ मोफत स्तर · दरमहा ~1.62B मोफत टोकन · 20 रूटिंग धोरणे · सुरुवात करण्यासाठी $0."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                           |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 प्रदाता                |            352             |   **358**   |          377          |
+| 🌐 प्रदाता                |            352             |   **358**   |          380          |
 | 🧠 अद्वितीय चॅट मॉडेल IDs |            1320            |  **1374**   |         1475          |
 | 🖼️ मोडॅलिटी ब्रिज         | 🆕 व्हिजन + ऑडिओ + व्हिडिओ |      ✓      |           ✓           |
 | 📡 रडार विनामूल्य कॅटलॉग  |          🆕 निवड           |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ वैशिष्ट्ये</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 कॉम्बोज</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 प्रदाते</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 प्रदाते</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="आश्वासन — एक एंडपॉइंट आणि 377 प्रोव्हायडर्स. दुसरे निरोगी लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग चालू ठेवते. सहा स्तंभ: 377 प्रोव्हायडर्समध्ये अडथळामुक्त फॉलबॅक · पात्र वर्कलोडवर 95% पर्यंत टोकन बचत · 150+ मोफत टिअर्स आणि 52 आवर्ती/keyless कायम-मोफत प्रोव्हायडर्ससह $0 पासून सुरुवात · एका कॉन्फिगद्वारे 37 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · सर्किट ब्रेकर्स, TLS stealth, MCP 110 टूल्स, A2A, मेमरी, गार्डरेल्स, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्टॅटिक टेस्ट घोषणांसह प्रोडक्शन नियंत्रणे."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="आश्वासन — एक एंडपॉइंट आणि 380 प्रोव्हायडर्स. दुसरे निरोगी लक्ष्य उपलब्ध असेपर्यंत स्वयंचलित फॉलबॅक रूटिंग चालू ठेवते. सहा स्तंभ: 380 प्रोव्हायडर्समध्ये अडथळामुक्त फॉलबॅक · पात्र वर्कलोडवर 95% पर्यंत टोकन बचत · 150+ मोफत टिअर्स आणि 52 आवर्ती/keyless कायम-मोफत प्रोव्हायडर्ससह $0 पासून सुरुवात · एका कॉन्फिगद्वारे 37 CLI/एजंट इंटिग्रेशन्स · /v1 वर OpenAI, Claude, Gemini आणि Responses API सुसंगतता · सर्किट ब्रेकर्स, TLS stealth, MCP 110 टूल्स, A2A, मेमरी, गार्डरेल्स, evals आणि 7,800+ ट्रॅक केलेल्या टेस्ट फाइल्समधील 56,000+ स्टॅटिक टेस्ट घोषणांसह प्रोडक्शन नियंत्रणे."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute चे वेगळेपण — 13 क्षमतांमध्ये 9router, OpenRouter, CLIProxyAPI आणि LiteLLM यांच्या तुलनेतील दिनांकित वैशिष्ट्य-स्नॅपशॉट. OmniRoute: 377 प्रदाते, अंगभूत 150+ मोफत स्तर, 20 राउटिंग धोरणे, 12-इंजिन टोकन कॉम्प्रेशन, 110 साधनांसह अंगभूत MCP सर्व्हर, A2A एजंट प्रोटोकॉल, कायमस्वरूपी मेमरी, संरक्षक मर्यादा, क्लाउड एजंट्स, TLS फिंगरप्रिंट स्टेल्थ, Desktop/Termux/PWA आणि 67 i18n UI लोकेल्स. OmniRoute हे MIT परवानाधारक असून स्व-होस्ट करता येते. स्पर्धकांच्या क्षमता आणि संख्या बदलू शकतात; लिंक केलेली कार्यपद्धती पहा."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute चे वेगळेपण — 13 क्षमतांमध्ये 9router, OpenRouter, CLIProxyAPI आणि LiteLLM यांच्या तुलनेतील दिनांकित वैशिष्ट्य-स्नॅपशॉट. OmniRoute: 380 प्रदाते, अंगभूत 150+ मोफत स्तर, 20 राउटिंग धोरणे, 12-इंजिन टोकन कॉम्प्रेशन, 110 साधनांसह अंगभूत MCP सर्व्हर, A2A एजंट प्रोटोकॉल, कायमस्वरूपी मेमरी, संरक्षक मर्यादा, क्लाउड एजंट्स, TLS फिंगरप्रिंट स्टेल्थ, Desktop/Termux/PWA आणि 67 i18n UI लोकेल्स. OmniRoute हे MIT परवानाधारक असून स्व-होस्ट करता येते. स्पर्धकांच्या क्षमता आणि संख्या बदलू शकतात; लिंक केलेली कार्यपद्धती पहा."/>
 
 <sub>📊 संपूर्ण कार्यपद्धती आणि 9router, OpenRouter, CLIProxyAPI व LiteLLM यांच्या तुलनेतील प्रत्येक वैशिष्ट्याचा तपशील → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar वापरणे ऐच्छिक असून तो केवळ GET
 - **🖼️ नवीन एंडपॉइंट्स** — `/v1/ocr` (Mistral OCR) आणि `/v1/audio/translations` (Whisper-शैली) मीडिया पृष्ठभाग पूर्ण करतात. → [API संदर्भ](docs/reference/API_REFERENCE.md)
 - **🎨 प्रतिमा / व्हिडिओ / ऑडिओ जनरेशन** — मीडियासाठी एकच API: xAI Grok Imagine व Novita AI व्हिडिओ, ComfyUI, Magnific, Adobe Firefly, Segmind, आणि ElevenLabs सारखे स्पीच प्रोव्हायडर. → [API संदर्भ](docs/reference/API_REFERENCE.md)
 - **🌍 डिप्लॉयमेंट व ऑप्स** — रिव्हर्स-प्रॉक्सी `basePath`, ब्राउझर-भाषा ऑटो-डिटेक्ट, प्रति-की डिव्हाइस ट्रॅकिंग, रूट-लेस MITM ट्रस्ट, zh-TW स्थानिकीकरण. → [एन्व्हायरनमेंट](docs/reference/ENVIRONMENT.md)
-- **🤝 आणखी प्रोव्हायडर व एजंट** — क्लाउड एजंट (Codex Cloud, Cursor, Devin, Jules), ब्राउझर + OAuth लॉगिनसह Grok Build (xAI), Ollama फर्स्ट-क्लास कार्ड, Claude Opus 5 व Sonnet 5, Kimi अधिकृत भागीदारी (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… आणि ताजे केलेले **377-प्रोव्हायडर कॅटलॉग**. → [प्रोव्हायडर](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 आणखी प्रोव्हायडर व एजंट** — क्लाउड एजंट (Codex Cloud, Cursor, Devin, Jules), ब्राउझर + OAuth लॉगिनसह Grok Build (xAI), Ollama फर्स्ट-क्लास कार्ड, Claude Opus 5 व Sonnet 5, Kimi अधिकृत भागीदारी (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… आणि ताजे केलेले **380-प्रोव्हायडर कॅटलॉग**. → [प्रोव्हायडर](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 राउटिंग पारदर्शकता** — प्रत्येक प्रतिसादासोबत `X-OmniRoute-Decision` हेडर असते जी त्याला सेवा देणाऱ्या रणनीती/प्रोव्हायडर/विलंबाचे नाव देते, नवीन `cache-optimized` कॉम्बो रणनीती + Auto-Combo `cacheAffinity` घटक पुनरावृत्त विनंत्या कॅश केलेला प्रीफिक्स धरलेल्या कनेक्शनकडे परत पाठवतात, आणि रीड-ओन्ली `/v1/auto-combo/{channel}/candidates` एंडपॉइंट `auto/*` चॅनेलचा थेट उमेदवार पूल उघड करतो. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ स्थानिक कार्यक्षमता आणि इन्फ्रा** — वन-क्लिक स्थानिक Redis, Cloudflare Workers / Deno Deploy रिले डिप्लॉयर, Bifrost आणि Mux पर्यवेक्षित एम्बेडेड सेवांसारखे. → [एम्बेडेड सेवा](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 बॉक्समध्ये आणखी काय आहे** — प्लगइन फ्रेमवर्क + मार्केटप्लेस, Omni/Agent/GitHub स्किल्स फ्रेमवर्क, Obsidian व्हॉल्ट इंटिग्रेशन (22 MCP टूल्स), OpenAI-सुसंगत Batch आणि Files API, सिमॅंटिक रिस्पॉन्स कॅशे, लीडरबोर्डसह गेमिफिकेशन, ACP एजंट डिस्कव्हरी (15 अंगभूत एजंट), BigQuery कडे शेड्यूल्ड लॉग एक्सपोर्ट, `auto/chaos` समांतर मल्टी-मॉडेल फॅन-आउट, Telegram बॉट ब्रिज, इन-अॅप व्हर्जन मॅनेजर आणि LMArena-ELO फ्री-प्रोव्हायडर रँकिंग. → [दस्तऐवज](docs/README.md)
@@ -684,11 +684,11 @@ omniroute configure codex          # also: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 377 AI प्रदाते — कॅटलॉगमध्ये मोफत म्हणून चिन्हांकित 153
+## 🌐 380 AI प्रदाते — कॅटलॉगमध्ये मोफत म्हणून चिन्हांकित 153
 
 </div>
 
-> चॅट, मीडिया, शोध, स्थानिक, क्लाउड-एजंट आणि सिस्टमच्या प्रमाणित संग्रहांमध्ये **377 नोंदणीकृत प्रदाते** आहेत, ज्यांपैकी **153 प्रदात्यांकडे `hasFree: true` डिस्कव्हरी मेटाडेटा आहे**. चॅट मॉडेल रजिस्ट्रीमध्ये **239 प्रदाते / 3,059 स्वतंत्र प्रदाता-मॉडेल जोड्या / 1,475 रॉ मॉडेल IDs** समाविष्ट आहेत; स्वतंत्र मोफत-बजेट कॅटलॉगमध्ये **प्रत्येक मॉडेलसाठी 471 पंक्ती**, **34 आवर्ती पूल** आणि **52 आवर्ती/कीविरहित कायमस्वरूपी मोफत प्रदाते** आहेत. हे परिमाण हेतुपुरस्सर भिन्न आहेत; व्याख्या आणि पूलमधील डुप्लिकेट काढून केलेली गणना [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) आणि [मोफत स्तर](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहे.
+> चॅट, मीडिया, शोध, स्थानिक, क्लाउड-एजंट आणि सिस्टमच्या प्रमाणित संग्रहांमध्ये **380 नोंदणीकृत प्रदाते** आहेत, ज्यांपैकी **153 प्रदात्यांकडे `hasFree: true` डिस्कव्हरी मेटाडेटा आहे**. चॅट मॉडेल रजिस्ट्रीमध्ये **239 प्रदाते / 3,059 स्वतंत्र प्रदाता-मॉडेल जोड्या / 1,475 रॉ मॉडेल IDs** समाविष्ट आहेत; स्वतंत्र मोफत-बजेट कॅटलॉगमध्ये **प्रत्येक मॉडेलसाठी 471 पंक्ती**, **34 आवर्ती पूल** आणि **52 आवर्ती/कीविरहित कायमस्वरूपी मोफत प्रदाते** आहेत. हे परिमाण हेतुपुरस्सर भिन्न आहेत; व्याख्या आणि पूलमधील डुप्लिकेट काढून केलेली गणना [प्रदाता संदर्भ](docs/reference/PROVIDER_REFERENCE.md) आणि [मोफत स्तर](docs/reference/FREE_TIERS.md) मध्ये उपलब्ध आहे.
 
 <div align="center">
 
@@ -1290,7 +1290,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 देखील �
   <tr><td nowrap><b>रनटाइम</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>भाषा</b></td><td>TypeScript 6.0 — <code>src/</code> आणि <code>open-sse/</code> मध्ये <b>100% TypeScript</b> (v2.0 पासून कोअरमध्ये शून्य <code>any</code>)</td></tr>
   <tr><td nowrap><b>फ्रेमवर्क</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 213 माइग्रेशन</td></tr>
+  <tr><td nowrap><b>डेटाबेस</b></td><td>better-sqlite3 (SQLite, WAL जर्नलिंग) + LowDB (JSON लेगसी) — 147 डोमेन मॉड्यूल्स, 219 माइग्रेशन</td></tr>
   <tr><td nowrap><b>मेमरी</b></td><td>SQLite FTS5 फुल-टेक्स्ट + int8-quantized व्हेक्टर एम्बेडिंग्ज, टाइप्ड डिके</td></tr>
   <tr><td nowrap><b>स्कीमा</b></td><td>Zod 4 — MCP टूल I/O वैधता तपासणी + API करार</td></tr>
   <tr><td nowrap><b>प्रोटोकॉल</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

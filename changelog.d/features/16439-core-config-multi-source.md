@@ -1,0 +1,1 @@
+- **feat(core-config):** a subscription can now ingest several feeds with per-source isolation: a failing feed only skips its own nodes while the others still render ([#16439](https://github.com/diegosouzapw/OmniRoute/pull/16439)) — thanks @maxmad64bis

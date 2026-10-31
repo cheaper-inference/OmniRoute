@@ -7,6 +7,11 @@ import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { STACKED_PIPELINE_ENGINE_INTENSITIES } from "@/shared/validation/compressionConfigSchemas";
 import { CompressionPipelineEditor } from "@/shared/components/compression/CompressionPipelineEditor";
+import {
+  OUTPUT_STYLE_IDS,
+  outputStyleMeta,
+} from "../../../../../../open-sse/services/compression/outputStyles/catalog.ts";
+import { buildOutputStylesInstruction } from "../../../../../../open-sse/services/compression/outputStyles/apply.ts";
 import { ComboCompressionModeSelect } from "@/shared/components/compression/ComboCompressionModeSelect";
 import { Alert } from "@omniroute/ui-kit/alert";
 import { SectionHeader } from "@omniroute/ui-kit/page-header";
@@ -19,6 +24,7 @@ import Select from "@/shared/components/Select";
 import CompressionHub from "./CompressionHub";
 
 type PipelineStep = { engine: string; intensity?: string };
+type OutputStyleSelection = { id: string; level: "lite" | "full" | "ultra" };
 type CompressionCombo = {
   id: string;
   name: string;
@@ -27,6 +33,7 @@ type CompressionCombo = {
   languagePacks: string[];
   outputMode: boolean;
   outputModeIntensity: string;
+  outputStyles: OutputStyleSelection[];
   isDefault: boolean;
 };
 type RoutingCombo = {
@@ -59,6 +66,7 @@ function NamedCombosManager() {
   const [selectedPacks, setSelectedPacks] = useState<string[]>(["en"]);
   const [outputMode, setOutputMode] = useState(false);
   const [outputModeIntensity, setOutputModeIntensity] = useState("full");
+  const [outputStyles, setOutputStyles] = useState<OutputStyleSelection[]>([]);
   const [assignmentIds, setAssignmentIds] = useState<string[]>([]);
   const [saving, setSaving] = useState(false);
   const [activeComboId, setActiveComboId] = useState<string | null>(null);
@@ -119,6 +127,7 @@ function NamedCombosManager() {
     setSelectedPacks(["en"]);
     setOutputMode(false);
     setOutputModeIntensity("full");
+    setOutputStyles([]);
     setAssignmentIds([]);
     setError(null);
   };
@@ -140,6 +149,7 @@ function NamedCombosManager() {
     setSelectedPacks(combo.languagePacks?.length ? combo.languagePacks : ["en"]);
     setOutputMode(Boolean(combo.outputMode));
     setOutputModeIntensity(combo.outputModeIntensity ?? "full");
+    setOutputStyles((combo.outputStyles ?? []) as OutputStyleSelection[]);
     setAssignmentIds(await loadAssignments(combo.id));
   };
 
@@ -163,6 +173,7 @@ function NamedCombosManager() {
         languagePacks: selectedPacks,
         outputMode,
         outputModeIntensity,
+        outputStyles,
       };
       const res = await fetch(
         editingId ? `/api/context/combos/${editingId}` : "/api/context/combos",
@@ -194,6 +205,24 @@ function NamedCombosManager() {
     if (!confirm(t("deleteNamedConfirm", { name: combo.name }))) return;
     const res = await fetch(`/api/context/combos/${combo.id}`, { method: "DELETE" });
     if (res.ok) refresh();
+  };
+
+  // Output styles supersede the legacy terse toggle above; an empty selection inherits
+  // the global Compression Engine panel, matching the API/DB semantics.
+  const setOutputStyle = (
+    id: string,
+    patch: { enabled?: boolean; level?: OutputStyleSelection["level"] }
+  ) => {
+    setOutputStyles((current) => {
+      const existing = current.find((style) => style.id === id);
+      if (patch.enabled === false) return current.filter((style) => style.id !== id);
+      if (existing) {
+        return current.map((style) =>
+          style.id === id ? { ...style, level: patch.level ?? style.level } : style
+        );
+      }
+      return [...current, { id, level: patch.level ?? "full" }];
+    });
   };
 
   const togglePack = (language: string, enabled: boolean) => {
@@ -334,6 +363,73 @@ function NamedCombosManager() {
               )}
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 border-t border-border/30 pt-4">
+          <h3 className="text-sm font-semibold text-text-main">
+            {tSettings("compressionSettingsOutputStyles")}
+          </h3>
+          <p className="mt-1 text-xs text-text-muted">
+            {tSettings("compressionOutputStylesDescription")}
+          </p>
+          <div className="mt-3 flex flex-col gap-2">
+            {OUTPUT_STYLE_IDS.filter((id) => {
+              const meta = outputStyleMeta(id);
+              return !meta.locale || selectedPacks.includes(meta.locale);
+            }).map((id) => {
+              const styleLabel = tSettings(`compressionOutputStyle.${id}.label`);
+              const selected = outputStyles.find((style) => style.id === id);
+              return (
+                <div key={id} className="flex items-center justify-between gap-2">
+                  <Checkbox
+                    className="min-w-0 flex-1"
+                    data-testid={`combo-output-style-toggle-${id}`}
+                    label={<span className="truncate">{styleLabel}</span>}
+                    checked={Boolean(selected)}
+                    onChange={(event) => setOutputStyle(id, { enabled: event.target.checked })}
+                  />
+                  <Select
+                    compact
+                    className="w-24 shrink-0"
+                    selectClassName="text-xs"
+                    value={selected?.level ?? "full"}
+                    aria-label={`${styleLabel} level`}
+                    disabled={!selected}
+                    onChange={(event) =>
+                      setOutputStyle(id, {
+                        enabled: true,
+                        level: event.target.value as OutputStyleSelection["level"],
+                      })
+                    }
+                  >
+                    <option value="lite">{tSettings("compressionLevel.lite")}</option>
+                    <option value="full">{tSettings("compressionLevel.full")}</option>
+                    <option value="ultra">{tSettings("compressionLevel.ultra")}</option>
+                  </Select>
+                </div>
+              );
+            })}
+          </div>
+          {outputStyles.length > 0 && (
+            <>
+              <pre
+                data-testid="combo-output-styles-preview"
+                className="mt-3 max-h-48 overflow-auto whitespace-pre-wrap rounded-lg border border-border bg-bg p-2 font-mono text-[11px] text-text-muted"
+              >
+                {/* One block per selected pack: the runtime language is detected per request,
+                    so a zh pack must show its 文言 text instead of packs[0] only. */}
+                {[...new Set(selectedPacks.length ? selectedPacks : ["en"])]
+                  .map((pack) => buildOutputStylesInstruction(outputStyles, pack))
+                  .filter(Boolean)
+                  .join("\n\n")}
+              </pre>
+              {selectedPacks.length > 1 && (
+                <p className="mt-1 text-xs text-text-muted">
+                  {tSettings("compressionOutputStylesPreviewNote")}
+                </p>
+              )}
+            </>
+          )}
         </div>
 
         {error && (

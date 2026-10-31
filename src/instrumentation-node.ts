@@ -741,7 +741,8 @@ export async function registerNodejs(): Promise<void> {
     // than relying on applyRuntimeSettings alone (same shape as the two restores above,
     // and for the same #5312 RC-A reason: an in-memory map with no boot read reverts to
     // "no override" on every restart).
-    const { hydrateCliVersionOverrides } = await import("@/shared/constants/cliVersions");
+    const { hydrateCliVersionOverrides } =
+      await import("@omniroute/open-sse/config/cliVersions.ts");
     if (hydrateCliVersionOverrides(settings)) {
       console.log("[STARTUP] CLI client-version overrides restored from settings");
     }
@@ -784,6 +785,10 @@ export async function registerNodejs(): Promise<void> {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn("[STARTUP] Could not restore runtime settings:", msg);
   }
+
+  // open-sse handlers renew OAuth tokens through a registered refresher (the Grok media
+  // routes load no other src/sse module), so it must be in place before the first request.
+  await import("@/sse/services/tokenRefresh");
 
   // Proactively start the credential-health sweep at boot so stale web-session
   // connections (cookies that expired overnight) get re-probed and recovered on

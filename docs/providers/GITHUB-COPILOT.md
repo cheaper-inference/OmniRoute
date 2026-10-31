@@ -1,3 +1,9 @@
+---
+title: "GitHub Copilot Provider"
+version: 3.8.53
+lastUpdated: 2026-10-30
+---
+
 # GitHub Copilot Provider
 
 **Status: Experimental / Policy-ambiguous**

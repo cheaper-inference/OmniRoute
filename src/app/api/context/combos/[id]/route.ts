@@ -10,6 +10,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import {
   cavemanIntensitySchema,
+  outputStyleSelectionSchema,
   stackedPipelineStepSchema,
 } from "@/shared/validation/compressionConfigSchemas";
 
@@ -22,6 +23,7 @@ export const compressionComboUpdateSchema = z
     pipeline: z.array(pipelineStepSchema).min(1).optional(),
     languagePacks: z.array(z.string().trim().min(1)).optional(),
     outputMode: z.boolean().optional(),
+    outputStyles: z.array(outputStyleSelectionSchema).optional(),
     outputModeIntensity: cavemanIntensitySchema.optional(),
     isDefault: z.boolean().optional(),
   })

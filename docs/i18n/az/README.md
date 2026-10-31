@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Pulsuz Süni İntellekt Şlüzü
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmağı heç vaxt dayandırmayın. Hər bir süni intellekt aləti → 377 provayder — 150+ pulsuz — vahid son nöqtə vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity-ni avtomatik ehtiyat keçidlə PULSUZ Claude / GPT / Gemini-yə qoşun. RTK + Caveman çoxqatlı sıxılması tokenlərə 15–95% (~orta hesabla 89%) qənaət edir — limitlərə heç vaxt çatmayın. 377 süni intellekt provayderi · 150+ pulsuz tarif · ayda ~1.62 mlrd pulsuz token · 20 marşrutlaşdırma strategiyası · başlamaq üçün $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Kod yazmağı heç vaxt dayandırmayın. Hər bir süni intellekt aləti → 380 provayder — 150+ pulsuz — vahid son nöqtə vasitəsilə. Claude Code, Codex, Cursor, Cline, Copilot və Antigravity-ni avtomatik ehtiyat keçidlə PULSUZ Claude / GPT / Gemini-yə qoşun. RTK + Caveman çoxqatlı sıxılması tokenlərə 15–95% (~orta hesabla 89%) qənaət edir — limitlərə heç vaxt çatmayın. 380 süni intellekt provayderi · 150+ pulsuz tarif · ayda ~1.62 mlrd pulsuz token · 20 marşrutlaşdırma strategiyası · başlamaq üçün $0."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                   |          v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
 | --------------------------------- | :-----------------------: | :---------: | :--------------------: |
-| 🌐 Provayderləri                  |            352            |   **358**   |          377           |
+| 🌐 Provayderləri                  |            352            |   **358**   |          380           |
 | 🧠 Unikal söhbət modeli IDs       |           1320            |  **1374**   |          1475          |
 | 🖼️ Modallıq Körpüsü               | 🆕 vision + audio + video |      ✓      |           ✓            |
 | 📡 radar pulsuz kataloqu          |       🆕 daxil olun       |      ✓      |           ✓            |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Xüsusiyyətlər</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinasiyalar</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 Provayderlər</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Provayderlər</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI və MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vədimiz — Bir endpoint və 377 provayder. Başqa sağlam hədəf mövcud olduqca avtomatik fallback yönləndirməni davam etdirir. Altı sütun: 377 provayder üzrə davamlı fallback · uyğun iş yüklərində 95%-ə qədər token qənaəti · 150+ pulsuz tarif və 52 təkrarlanan/açarsız əbədi pulsuz provayder ilə $0-a başlanğıc · bir konfiqurasiya ilə 37 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 alət, A2A, yaddaş, guardrail-lər, eval-lər və 7,800+ izlənən test faylı üzrə 56,000+ statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Vədimiz — Bir endpoint və 380 provayder. Başqa sağlam hədəf mövcud olduqca avtomatik fallback yönləndirməni davam etdirir. Altı sütun: 380 provayder üzrə davamlı fallback · uyğun iş yüklərində 95%-ə qədər token qənaəti · 150+ pulsuz tarif və 52 təkrarlanan/açarsız əbədi pulsuz provayder ilə $0-a başlanğıc · bir konfiqurasiya ilə 37 CLI/agent inteqrasiyası · /v1 ünvanında OpenAI, Claude, Gemini və Responses API uyğunluğu · circuit breaker-lər, TLS stealth, MCP 110 alət, A2A, yaddaş, guardrail-lər, eval-lər və 7,800+ izlənən test faylı üzrə 56,000+ statik test deklarasiyası daxil olmaqla istehsal nəzarətləri."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Bütün **20** strategiya — hər kombo addımında qarışdırıb uyğunlaşd�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-u fərqləndirən cəhətlər — 13 imkan üzrə 9router, OpenRouter, CLIProxyAPI və LiteLLM ilə müqayisədə müəyyən tarixə aid funksiyalar icmalı. OmniRoute: 377 provayder, daxili 150+ pulsuz səviyyə, 20 marşrutlaşdırma strategiyası, 12 mühərrikli token sıxışdırması, 110 aləti olan daxili MCP serveri, A2A agent protokolu, davamlı yaddaş, qoruyucu məhdudiyyətlər, bulud agentləri, TLS barmaq izi gizliliyi, Desktop/Termux/PWA və 67 beynəlmiləlləşdirilmiş interfeys lokalizasiyası. OmniRoute MIT lisenziyalıdır və şəxsi serverdə yerləşdirilə bilər. Rəqiblərin imkanları və göstəriciləri dəyişə bilər; keçiddəki metodologiyaya baxın."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-u fərqləndirən cəhətlər — 13 imkan üzrə 9router, OpenRouter, CLIProxyAPI və LiteLLM ilə müqayisədə müəyyən tarixə aid funksiyalar icmalı. OmniRoute: 380 provayder, daxili 150+ pulsuz səviyyə, 20 marşrutlaşdırma strategiyası, 12 mühərrikli token sıxışdırması, 110 aləti olan daxili MCP serveri, A2A agent protokolu, davamlı yaddaş, qoruyucu məhdudiyyətlər, bulud agentləri, TLS barmaq izi gizliliyi, Desktop/Termux/PWA və 67 beynəlmiləlləşdirilmiş interfeys lokalizasiyası. OmniRoute MIT lisenziyalıdır və şəxsi serverdə yerləşdirilə bilər. Rəqiblərin imkanları və göstəriciləri dəyişə bilər; keçiddəki metodologiyaya baxın."/>
 
 <sub>📊 Tam metodologiya və 9router, OpenRouter, CLIProxyAPI və LiteLLM ilə müqayisədə hər funksiya üzrə ətraflı məlumat → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar-a qoşulmaq ixtiyaridir və o, yalnız GET sorğularından istifadə edir.
 - **🖼️ Yeni son nöqtələr** — `/v1/ocr` (Mistral OCR) və `/v1/audio/translations` (Whisper tərzi) media səthini tamamlayır. → [API arayışı](docs/reference/API_REFERENCE.md)
 - **🎨 Şəkil / video / audio generasiyası** — media üçün bir API: xAI Grok Imagine və Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind və ElevenLabs kimi səs provayderləri. → [API arayışı](docs/reference/API_REFERENCE.md)
 - **🌍 Yerləşdirmə və əməliyyatlar** — tərs-proksi `basePath`, brauzer dilinin avtomatik aşkarlanması, açar-başına cihaz izləməsi, rootsuz MITM etibarı, zh-TW lokallaşdırması. → [Mühit](docs/reference/ENVIRONMENT.md)
-- **🤝 Daha çox provayder və agent** — bulud agentləri (Codex Cloud, Cursor, Devin, Jules), brauzer + OAuth girişi ilə Grok Build (xAI), Ollama birinci sinif kartı, Claude Opus 5 və Sonnet 5, Kimi rəsmi tərəfdaşlığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… və yenilənmiş **377 provayderlik kataloq**. → [Provayderlər](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daha çox provayder və agent** — bulud agentləri (Codex Cloud, Cursor, Devin, Jules), brauzer + OAuth girişi ilə Grok Build (xAI), Ollama birinci sinif kartı, Claude Opus 5 və Sonnet 5, Kimi rəsmi tərəfdaşlığı (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… və yenilənmiş **380 provayderlik kataloq**. → [Provayderlər](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Marşrutlaşdırma şəffaflığı** — hər cavab ona xidmət edən strategiyanı/provayderi/gecikməni göstərən `X-OmniRoute-Decision` başlığı daşıyır, yeni `cache-optimized` kombo strategiyası + Auto-Combo `cacheAffinity` faktoru təkrar sorğuları keşlənmiş prefiksi saxlayan bağlantıya geri yönləndirir və yalnız-oxunan `/v1/auto-combo/{channel}/candidates` son nöqtəsi `auto/*` kanalının canlı namizəd hovuzunu açır. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Yerli performans və infrastruktur** — bir kliklə yerli Redis, Cloudflare Workers / Deno Deploy relay yerləşdiriciləri, nəzarət olunan daxili xidmətlər kimi Bifrost və Mux. → [Daxili Xidmətlər](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Həmçinin daxildir** — plagin framework-u + marketplace, Omni/Agent/GitHub bacarıq framework-ları, Obsidian vault inteqrasiyası (22 MCP aləti), OpenAI ilə uyğun Batch və Files API-ləri, semantik cavab keşi, liderlik tabloları ilə oyunlaşdırma, ACP agent kəşfi (15 daxili agent), BigQuery-yə planlaşdırılmış log ixracı, `auto/chaos` paralel çoxmodelli fan-out, Telegram bot körpüsü, tətbiqdaxili versiya meneceri və LMArena-ELO pulsuz provayder reytinqləri. → [Sənədlər](docs/README.md)
@@ -684,11 +684,11 @@ Hər bir əmr aktiv uzaq kontekstə (`omniroute connect <host>`) hörmət edir, 
 
 <div align="center">
 
-## 🌐 377 Süni İntellekt Provayderi — 153-ü Kataloqda Pulsuz kimi İşarələnib
+## 🌐 380 Süni İntellekt Provayderi — 153-ü Kataloqda Pulsuz kimi İşarələnib
 
 </div>
 
-> Kanonik çat, media, axtarış, lokal, bulud agenti və sistem kolleksiyalarında **377 qeydiyyatdan keçmiş provayder**, o cümlədən **`hasFree: true` aşkarlama metadatasına malik 153 provayder** var. Çat modeli reyestri **239 provayderi / 3,059 fərqli provayder-model cütünü / 1,475 xam model ID-sini** əhatə edir; ayrıca pulsuz büdcə kataloqunda isə **model üzrə 471 sətir**, **34 təkrarlanan hovuz** və **52 təkrarlanan/açarsız həmişəlik pulsuz provayder** var. Bunlar məqsədli şəkildə fərqli məxrəclərdir; təriflər və hovuzların təkrarları aradan qaldırılmaqla aparılan hesablamalar [Provayder Arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz Tariflər](docs/reference/FREE_TIERS.md) sənədlərində verilib.
+> Kanonik çat, media, axtarış, lokal, bulud agenti və sistem kolleksiyalarında **380 qeydiyyatdan keçmiş provayder**, o cümlədən **`hasFree: true` aşkarlama metadatasına malik 153 provayder** var. Çat modeli reyestri **239 provayderi / 3,059 fərqli provayder-model cütünü / 1,475 xam model ID-sini** əhatə edir; ayrıca pulsuz büdcə kataloqunda isə **model üzrə 471 sətir**, **34 təkrarlanan hovuz** və **52 təkrarlanan/açarsız həmişəlik pulsuz provayder** var. Bunlar məqsədli şəkildə fərqli məxrəclərdir; təriflər və hovuzların təkrarları aradan qaldırılmaqla aparılan hesablamalar [Provayder Arayışı](docs/reference/PROVIDER_REFERENCE.md) və [Pulsuz Tariflər](docs/reference/FREE_TIERS.md) sənədlərində verilib.
 
 <div align="center">
 
@@ -1289,7 +1289,7 @@ bir portda təqdim olunur, buna görə hazırda ayrıca yalnız CLI üçün pake
   <tr><td nowrap><b>İcra mühiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Dil</b></td><td>TypeScript 6.0 — <code>src/</code> və <code>open-sse/</code> üzrə <b>100% TypeScript</b> (v2.0-dan bəri nüvədə sıfır <code>any</code>)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırma) + LowDB (köhnə JSON) — 147 domen modulu, 213 miqrasiya</td></tr>
+  <tr><td nowrap><b>Verilənlər bazası</b></td><td>better-sqlite3 (SQLite, WAL jurnallaşdırma) + LowDB (köhnə JSON) — 147 domen modulu, 219 miqrasiya</td></tr>
   <tr><td nowrap><b>Yaddaş</b></td><td>SQLite FTS5 tam mətn axtarışı + int8-kvantlaşdırılmış vektor embeddings, tipləndirilmiş decay</td></tr>
   <tr><td nowrap><b>Sxemlər</b></td><td>Zod 4 — MCP alət I/O validasiyası + API müqavilələri</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

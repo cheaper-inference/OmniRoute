@@ -467,6 +467,18 @@
       "verifiedBy": "OmniRoute maintainers",
       "summary": "The unauthenticated onomeo /api/info endpoint lists this exact model id in its freeModels field (not in modelsPaused), served with no per-token charge.",
       "limitations": "Metered by calls, not tokens: 30 calls per 5 hours per account (perAccountWindowMax 30, windowMinutes 300) and 12 requests/min per key, inside a site-wide pool shared by all accounts; the pool can be exhausted for everyone. The site is in public beta and the free set and pauses change without notice. Upstream training is per model (modelTraining) and the terms-of-service rating stays at caution. This record does not establish unlimited capacity or billing protection."
+    },
+    {
+      "provider": "tokenharbor",
+      "modelId": "claude-haiku-5.5:free",
+      "catalogHash": "8fb6456c60000aedd34cbe5ae8971cda61bce8111a6ee8ca3f177f756aea8d90",
+      "sourceType": "public-page",
+      "sourceUrl": "https://tokenharbor.ai/docs/billing/cashback",
+      "checkedAt": "2026-10-30",
+      "claim": "recurring-free-access",
+      "verifiedBy": "OmniRoute maintainers",
+      "summary": "Official Token Harbor rewards docs state that selected models are available through explicit :free model IDs, that the free allowance renews on a personal rolling 7x24-hour period, and that free routes never charge the balance.",
+      "limitations": "The allowance is measured by list-price value on a 0-100% dashboard bar; no numeric token allowance is published. The set of free models changes over time, and prompts on free routes may be retained or used under the serving providers' terms. This record does not establish unlimited capacity or billing protection."
     }
   ]
 }

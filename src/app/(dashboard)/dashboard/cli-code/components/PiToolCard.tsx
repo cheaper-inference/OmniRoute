@@ -1,7 +1,10 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import Image from "next/image";
 import CliStatusBadge from "./CliStatusBadge";
 import { useTranslations } from "next-intl";
@@ -13,9 +16,7 @@ const PI_PROVIDER_API = "openai-completions";
 const PI_SETTINGS_URL = "/api/cli-tools/pi-settings";
 const PI_BACKUPS_URL = "/api/cli-tools/backups";
 const JSON_HEADERS = { "Content-Type": "application/json" };
-const INPUT_CLASS =
-  "bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50";
-const CODE_CLASS = "px-1 py-0.5 rounded bg-black/5 dark:bg-white/10";
+const CODE_CLASS = "px-1 py-0.5 rounded bg-bg-subtle";
 
 /** Pi requires an explicit `/v1` suffix on OmniRoute's base URL. */
 function ensurePiV1BaseUrl(baseUrl) {
@@ -261,8 +262,8 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
               }}
             />
           ) : (
-            <span className="material-symbols-outlined text-xl" style={{ color: tool.color }}>
-              terminal
+            <span className="inline-flex" style={{ color: tool.color }}>
+              <Icon name="terminal" size={20} />
             </span>
           )}
         </div>
@@ -274,11 +275,11 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
           <p className="text-xs text-text-muted truncate">{t("toolDescriptions.pi")}</p>
         </div>
       </div>
-      <span
-        className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-      >
-        expand_more
-      </span>
+      <Icon
+        name="expand_more"
+        size={20}
+        className={`text-text-muted transition-transform ${isExpanded ? "rotate-180" : ""}`}
+      />
     </div>
   );
 }
@@ -293,11 +294,11 @@ function runtimeHeadline(t, piStatus, cliReady) {
 function PiRuntimeStatus({ t, piStatus, cliReady }) {
   return (
     <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-secondary/50 border-border">
-      <span
-        className={`material-symbols-outlined text-lg ${cliReady ? "text-green-500" : "text-yellow-500"}`}
-      >
-        {cliReady ? "check_circle" : "warning"}
-      </span>
+      <Icon
+        name={cliReady ? "check_circle" : "warning"}
+        size={18}
+        className={cliReady ? "text-success" : "text-warning"}
+      />
       <div className="flex flex-col gap-1">
         <p className="text-sm font-medium">{runtimeHeadline(t, piStatus, cliReady)}</p>
         {piStatus.commandPath && (
@@ -320,7 +321,7 @@ function PiInstallHint({ t }) {
     <div className="rounded-lg border border-border bg-bg-secondary/50 p-3">
       <p className="text-sm font-medium mb-1">{t("piInstallTitle")}</p>
       <p className="text-xs text-text-muted mb-2">{t("piInstallInstructions")}</p>
-      <code className="block overflow-x-auto whitespace-pre rounded bg-black/5 dark:bg-white/10 px-3 py-2 text-xs">
+      <code className="block overflow-x-auto whitespace-pre rounded bg-bg-subtle px-3 py-2 text-xs">
         {t("piInstallCommand")}
       </code>
       <a
@@ -338,10 +339,10 @@ function PiInstallHint({ t }) {
 /** Corrupt / foreign models.json — do not let this read as "empty". */
 function PiConfigErrorNotice({ t, configError }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-red-500/10 border border-red-500/30 rounded-lg">
-      <span className="material-symbols-outlined text-red-500 text-lg">error</span>
+    <div className="flex items-start gap-3 p-3 bg-error/10 border border-error/30 rounded-lg">
+      <Icon name="error" size={18} className="text-error" />
       <div className="flex flex-col gap-1">
-        <p className="text-sm text-red-600 dark:text-red-400">{t("piConfigInvalidTitle")}</p>
+        <p className="text-sm text-error">{t("piConfigInvalidTitle")}</p>
         <p className="text-xs text-text-muted">{configError}</p>
       </div>
     </div>
@@ -350,19 +351,17 @@ function PiConfigErrorNotice({ t, configError }) {
 
 function PiConfiguredNotice({ t, piStatus }) {
   return (
-    <div className="flex items-start gap-3 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
-      <span className="material-symbols-outlined text-green-500 text-lg">check_circle</span>
+    <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
+      <Icon name="check_circle" size={18} className="text-success" />
       <div className="flex flex-col gap-1">
-        <p className="text-sm text-green-700 dark:text-green-300">{t("piOmnirouteConfigured")}</p>
+        <p className="text-sm text-success">{t("piOmnirouteConfigured")}</p>
         <p className="text-xs text-text-muted">
           {t("provider")}: <strong>{piStatus.baseUrl || "—"}</strong>
         </p>
         <p className="text-xs text-text-muted">
           {t("model")}: <strong>{piStatus.model || "—"}</strong>
         </p>
-        {piStatus.omniRouteUnowned && (
-          <p className="text-xs text-yellow-600 dark:text-yellow-400">{t("piUnownedNote")}</p>
-        )}
+        {piStatus.omniRouteUnowned && <p className="text-xs text-warning">{t("piUnownedNote")}</p>}
       </div>
     </div>
   );
@@ -374,14 +373,13 @@ function PiEndpointField({ t, endpointUrl, onChange }) {
       <label className="text-sm text-text-muted" htmlFor="pi-omniroute-endpoint">
         {t("piEndpoint")}
       </label>
-      <input
+      <Input
         id="pi-omniroute-endpoint"
         type="url"
         value={endpointUrl}
         onChange={(event) => onChange(event.target.value)}
         placeholder={DEFAULT_DISPLAY_BASE_URL}
         autoComplete="url"
-        className={`w-full px-3 py-2 ${INPUT_CLASS}`}
       />
       <p className="text-xs text-text-muted">{t("piEndpointHelp")}</p>
     </div>
@@ -393,18 +391,17 @@ function PiModelField({ t, selectedModel, onChange, onPick, onManual, hasActiveP
     <div className="flex flex-col gap-2">
       <label className="text-sm text-text-muted">{t("model")}</label>
       <div className="flex items-center gap-2">
-        <input
+        <Input
           type="text"
           value={selectedModel}
           onChange={(e) => onChange(e.target.value)}
           placeholder={t("providerModelPlaceholder")}
-          className={`flex-1 px-3 py-2 ${INPUT_CLASS}`}
+          className="flex-1"
         />
         <Button variant="outline" size="sm" onClick={onPick} disabled={!hasActiveProviders}>
           {t("select")}
         </Button>
-        <Button variant="ghost" size="sm" onClick={onManual}>
-          <span className="material-symbols-outlined text-[16px]">edit</span>
+        <Button variant="ghost" size="sm" icon="edit" onClick={onManual}>
           {t("manualConfig")}
         </Button>
       </div>
@@ -418,17 +415,13 @@ function PiApiKeyField({ t, apiKeys, effectiveApiKeyId, onChange, cloudEnabled }
     <div className="flex flex-col gap-2">
       <label className="text-sm text-text-muted">{t("apiKey")}</label>
       {apiKeys && apiKeys.length > 0 ? (
-        <select
-          value={effectiveApiKeyId}
-          onChange={(e) => onChange(e.target.value)}
-          className={`px-3 py-2 ${INPUT_CLASS}`}
-        >
+        <Select value={effectiveApiKeyId} onChange={(e) => onChange(e.target.value)}>
           {apiKeys.map((key) => (
             <option key={key.id} value={key.id}>
               {key.key}
             </option>
           ))}
-        </select>
+        </Select>
       ) : (
         <p className="text-sm text-text-muted">
           {cloudEnabled ? t("noApiKeysAvailable") : t("usingDefaultOmniroute")}
@@ -444,21 +437,21 @@ function PiActionButtons({ t, configured, canReset, selectedModel, actions, onAp
       <Button
         variant="primary"
         size="sm"
+        icon="save"
         onClick={onApply}
         disabled={!selectedModel}
         loading={actions.applying}
       >
-        <span className="material-symbols-outlined text-[14px] mr-1">save</span>
         {configured ? t("updateConfig") : t("applyConfig")}
       </Button>
       {canReset && (
         <Button
           variant="outline"
           size="sm"
+          icon="restart_alt"
           onClick={actions.handleReset}
           loading={actions.restoring}
         >
-          <span className="material-symbols-outlined text-[14px] mr-1">restart_alt</span>
           {t("reset")}
         </Button>
       )}
@@ -470,11 +463,9 @@ function PiMessageBanner({ message }) {
   const success = message.type === "success";
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${success ? "bg-green-500/10 text-green-600" : "bg-red-500/10 text-red-600"}`}
+      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${success ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
     >
-      <span className="material-symbols-outlined text-[16px]">
-        {success ? "check_circle" : "error"}
-      </span>
+      <Icon name={success ? "check_circle" : "error"} size={16} />
       <span className={message.containerEphemeralTarget ? "whitespace-pre-line" : ""}>
         {message.text}
       </span>
@@ -518,18 +509,20 @@ function PiBackupRow({ t, backup, restoringBackup, onRestore }) {
 function PiBackupsSection({ t, backups, restoringBackup, onRestore, showBackups, setShowBackups }) {
   return (
     <div className="border-t border-border pt-3 mt-1">
-      <button
+      <Button
+        variant="ghost"
+        size="sm"
+        className="text-text-muted"
         onClick={() => setShowBackups(!showBackups)}
-        className="flex items-center gap-2 text-sm text-text-muted hover:text-text transition-colors"
       >
-        <span
-          className={`material-symbols-outlined text-[16px] transition-transform ${showBackups ? "rotate-90" : ""}`}
-        >
-          chevron_right
-        </span>
-        <span className="material-symbols-outlined text-[16px]">backup</span>
+        <Icon
+          name="chevron_right"
+          size={16}
+          className={`transition-transform ${showBackups ? "rotate-90" : ""}`}
+        />
+        <Icon name="backup" size={16} />
         {t("backups")} {backups.length > 0 && `(${backups.length})`}
-      </button>
+      </Button>
       {showBackups && backups.length > 0 && (
         <div className="mt-2 flex flex-col gap-1.5 pl-6">
           {backups.map((b) => (
@@ -604,9 +597,7 @@ function PiExpandedBody({ card }) {
     <div className="mt-6 pt-6 border-t border-border">
       {checkingPi && (
         <div className="flex items-center gap-2 text-text-muted text-sm">
-          <span className="material-symbols-outlined animate-spin text-base">
-            progress_activity
-          </span>
+          <Icon name="progress_activity" size={16} className="animate-spin" />
           <span>{t("checkingCli", { tool: "Pi" })}</span>
         </div>
       )}

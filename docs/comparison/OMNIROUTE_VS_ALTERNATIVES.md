@@ -22,7 +22,7 @@ Objective feature comparison vs popular open-source AI routers.
 | **Tier 1/2/3 fallback (subscription→cheap→free)**  |                   ✅ + UI                   |     manual     |        n/a        |   manual    |
 | **Token compression**                              | 12-engine stack (RTK + Caveman + LLMLingua) |      none      |       none        |    none     |
 | **Multimodal generation (speech/music/video)**     |                     ✅                      |       ❌       |    passthrough    |     ❌      |
-| **Built-in MCP server**                            |           ✅ 110 tools, 33 scopes           |       ❌       |        ❌         |     ❌      |
+| **Built-in MCP server**                            |           ✅ 129 tools, 33 scopes           |       ❌       |        ❌         |     ❌      |
 | **A2A protocol**                                   |                 ✅ 6 skills                 |       ❌       |        ❌         |     ❌      |
 | **Memory (FTS5 + vector)**                         |                     ✅                      |       ❌       |        ❌         |     ❌      |
 | **Guardrails (PII, injection, vision)**            |                     ✅                      |    partial     |        ❌         |   ✅ paid   |
@@ -41,7 +41,7 @@ Objective feature comparison vs popular open-source AI routers.
 
 ## When to choose OmniRoute
 
-- You self-host and want **maximum provider coverage** (377 providers, 155 free/no-auth catalog entries)
+- You self-host and want **maximum provider coverage** (381 providers, 155 free/no-auth catalog entries)
 - You need a **built-in MCP server** (LLM tools, memory, skills exposed as tools)
 - You need **A2A protocol** for agent-to-agent workflows
 - You want **fingerprint stealth** (JA3/JA4) to avoid detection by upstream CAPTCHAs

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — නොමිලේ AI ද්වාරය
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — කිසිදා කේතනය නවත්වන්න එපා. සෑම AI මෙවලමක්ම → සපයන්නන් 377ක් — නොමිලේ 150+ක් — එක් අන්ත ලක්ෂ්යයක් හරහා. Claude Code, Codex, Cursor, Cline, Copilot සහ Antigravity, ස්වයංක්රීය විකල්ප මාරුව සමඟ නොමිලේ Claude / GPT / Gemini වෙත. RTK + Caveman ස්ථරගත සම්පීඩනය ටෝකනවලින් 15–95%ක් (සාමාන්යයෙන් ~89%ක්) ඉතිරි කරයි — කිසිදා සීමාවලට ළඟා නොවන්න. AI සපයන්නන් 377ක් · නොමිලේ ස්ථර 150+ක් · මසකට නොමිලේ ටෝකන ~1.62Bක් · මාර්ගගත කිරීමේ උපායමාර්ග 20ක් · ආරම්භ කිරීමට $0යි."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — කිසිදා කේතනය නවත්වන්න එපා. සෑම AI මෙවලමක්ම → සපයන්නන් 380ක් — නොමිලේ 150+ක් — එක් අන්ත ලක්ෂ්යයක් හරහා. Claude Code, Codex, Cursor, Cline, Copilot සහ Antigravity, ස්වයංක්රීය විකල්ප මාරුව සමඟ නොමිලේ Claude / GPT / Gemini වෙත. RTK + Caveman ස්ථරගත සම්පීඩනය ටෝකනවලින් 15–95%ක් (සාමාන්යයෙන් ~89%ක්) ඉතිරි කරයි — කිසිදා සීමාවලට ළඟා නොවන්න. AI සපයන්නන් 380ක් · නොමිලේ ස්ථර 150+ක් · මසකට නොමිලේ ටෝකන ~1.62Bක් · මාර්ගගත කිරීමේ උපායමාර්ග 20ක් · ආරම්භ කිරීමට $0යි."/>
 
 </div>
 
@@ -71,7 +71,7 @@
 
 |                                |            v3.8.50            | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------ | :---------------------------: | :---------: | :-------------------: |
-| 🌐 සපයන්නන්                    |              352              |   **358**   |          377          |
+| 🌐 සපයන්නන්                    |              352              |   **358**   |          380          |
 | 🧠 අද්විතීය කතාබස් ආකෘතිය IDs  |             1320              |  **1374**   |         1475          |
 | 🖼️ මොඩලිටි පාලම                | 🆕 vision + ශ්‍රව්‍ය + වීඩියෝ |      ✓      |           ✓           |
 | 📡 රේඩාර් නොමිලේ නාමාවලිය      |           🆕 තේරීම            |      ✓      |           ✓           |
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ විශේෂාංග</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 සංයෝජන</a></td>
-    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 සැපයුම්කරුවන්</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 සැපයුම්කරුවන්</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI සහ MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ සපයන්නන් 377ක්. වෙනත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබෙන අතරතුර ස්වයංක්රීය fallback රවුටිං දිගටම කරගෙන යයි. කුළුණු හයක්: සපයන්නන් 377 හරහා ඔරොත්තු දෙන fallback · සුදුසුකම් ලත් වැඩ ප්රමාණවලදී token ඉතිරිකිරීම් 95% දක්වා · නොමිලේ මට්ටම් 150+ සහ නිරන්තර/keyless සදාකාලික නොමිලේ සපයන්නන් 52ක් සමඟ $0 ට ආරම්භ කරන්න · එක් config එකක් හරහා CLI/agent ඒකාබද්ධ කිරීම් 37ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API අනුකූලතාව · circuit breakers, TLS stealth, MCP මෙවලම් 110, A2A, memory, guardrails, evals සහ නිරීක්ෂණය කරන test ගොනු 7,800+ හරහා ස්ථිර test ප්රකාශන 56,000+ ඇතුළු නිෂ්පාදන පාලන."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ සපයන්නන් 380ක්. වෙනත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබෙන අතරතුර ස්වයංක්රීය fallback රවුටිං දිගටම කරගෙන යයි. කුළුණු හයක්: සපයන්නන් 380 හරහා ඔරොත්තු දෙන fallback · සුදුසුකම් ලත් වැඩ ප්රමාණවලදී token ඉතිරිකිරීම් 95% දක්වා · නොමිලේ මට්ටම් 150+ සහ නිරන්තර/keyless සදාකාලික නොමිලේ සපයන්නන් 52ක් සමඟ $0 ට ආරම්භ කරන්න · එක් config එකක් හරහා CLI/agent ඒකාබද්ධ කිරීම් 37ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API අනුකූලතාව · circuit breakers, TLS stealth, MCP මෙවලම් 110, A2A, memory, guardrails, evals සහ නිරීක්ෂණය කරන test ගොනු 7,800+ හරහා ස්ථිර test ප්රකාශන 56,000+ ඇතුළු නිෂ්පාදන පාලන."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ combo එකක් සෑදීමට අවශ්ය නැත. ඔබේ ම�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute සුවිශේෂී කරන දෑ — හැකියාවන් 13ක් හරහා 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ කළ, නිශ්චිත දිනයකට අදාළ විශේෂාංග සැසඳීමකි. OmniRoute: සැපයුම්කරුවන් 377ක්, අන්තර්ගත නිදහස් මට්ටම් 150කට වැඩි ප්රමාණයක්, මාර්ගගත කිරීමේ උපායමාර්ග 20ක්, එන්ජින් 12ක ටෝකන් සම්පීඩනය, මෙවලම් 110ක් සහිත අන්තර්ගත MCP සේවාදායකයක්, A2A නියෝජිත ප්රොටෝකෝලය, ස්ථිර මතකය, ආරක්ෂක සීමා, ක්ලවුඩ් නියෝජිතයන්, TLS ඇඟිලි සලකුණු සැඟවීම, Desktop/Termux/PWA සහ i18n UI පෙදෙස් 67ක්. OmniRoute MIT බලපත්රලාභී වන අතර ස්වයං-සත්කාරක කළ හැකිය. තරඟකරුවන්ගේ හැකියාවන් සහ සංඛ්යා වෙනස් විය හැකිය; සබැඳි ක්රමවේදය බලන්න."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute සුවිශේෂී කරන දෑ — හැකියාවන් 13ක් හරහා 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ කළ, නිශ්චිත දිනයකට අදාළ විශේෂාංග සැසඳීමකි. OmniRoute: සැපයුම්කරුවන් 380ක්, අන්තර්ගත නිදහස් මට්ටම් 150කට වැඩි ප්රමාණයක්, මාර්ගගත කිරීමේ උපායමාර්ග 20ක්, එන්ජින් 12ක ටෝකන් සම්පීඩනය, මෙවලම් 110ක් සහිත අන්තර්ගත MCP සේවාදායකයක්, A2A නියෝජිත ප්රොටෝකෝලය, ස්ථිර මතකය, ආරක්ෂක සීමා, ක්ලවුඩ් නියෝජිතයන්, TLS ඇඟිලි සලකුණු සැඟවීම, Desktop/Termux/PWA සහ i18n UI පෙදෙස් 67ක්. OmniRoute MIT බලපත්රලාභී වන අතර ස්වයං-සත්කාරක කළ හැකිය. තරඟකරුවන්ගේ හැකියාවන් සහ සංඛ්යා වෙනස් විය හැකිය; සබැඳි ක්රමවේදය බලන්න."/>
 
 <sub>📊 සම්පූර්ණ ක්රමවේදය සහ 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ එක් එක් විශේෂාංගය පිළිබඳ සවිස්තර සැසඳීම → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar භාවිතය තෝරාගත හැකි අතර එය GET �
 - **🖼️ නව endpoints** — `/v1/ocr` (Mistral OCR) සහ `/v1/audio/translations` (Whisper-විලාසයේ) මාධ්ය මතුපිට සම්පූර්ණ කරයි. → [API යොමුව](docs/reference/API_REFERENCE.md)
 - **🎨 රූප / වීඩියෝ / ශ්රව්ය උත්පාදනය** — මාධ්ය සඳහා එක් API එකක්: xAI Grok Imagine & Novita AI වීඩියෝ, ComfyUI, Magnific, Adobe Firefly, Segmind, සහ ElevenLabs වැනි කථන providers. → [API යොමුව](docs/reference/API_REFERENCE.md)
 - **🌍 යෙදවීම සහ මෙහෙයුම්** — reverse-proxy `basePath`, browser-භාෂා ස්වයං-හඳුනාගැනීම, per-key උපාංග නිරීක්ෂණය, root-less MITM trust, zh-TW දේශීයකරණය. → [පරිසරය](docs/reference/ENVIRONMENT.md)
-- **🤝 තවත් providers සහ agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login සමඟ Grok Build (xAI), Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi නිල හවුල්කාරිත්වය (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… සහ යාවත්කාලීන කළ **377-provider catalog** එකක්. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 තවත් providers සහ agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login සමඟ Grok Build (xAI), Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi නිල හවුල්කාරිත්වය (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… සහ යාවත්කාලීන කළ **380-provider catalog** එකක්. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 යොමු කිරීමේ විනිවිදභාවය** — සෑම ප්රතිචාරයක්ම එය සේවය කළ strategy/provider/latency නම් කරන `X-OmniRoute-Decision` header එකක් රැගෙන යයි, නව `cache-optimized` combo strategy එකක් + Auto-Combo `cacheAffinity` සාධකය නැවත නැවත එන ඉල්ලීම් cached prefix එක තබා ඇති connection එක වෙත යොමු කරයි, සහ read-only `/v1/auto-combo/{channel}/candidates` endpoint එකක් `auto/*` channel එකක සජීවී අපේක්ෂක සංචය හෙළි කරයි. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ දේශීය කාර්යසාධනය සහ යටිතල්හිතුම්** — එක්-ක්ලික් දේශීය Redis, Cloudflare Workers / Deno Deploy relay deploy කරන්නන්, අධීක්ෂණය කරන ලද කාවැද්දූ සේවාවන් ලෙස Bifrost සහ Mux. → [කාවැද්දූ සේවාවන්](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 පෙට්ටියේ තවත් දේ** — plugin රාමුව + marketplace, Omni/Agent/GitHub skills රාමු, Obsidian vault ඒකාබද්ධ කිරීම (MCP මෙවලම් 22ක්), OpenAI-අනුකූල Batch & Files APIs, අර්ථාධාරිත ප්රතිචාර cache, leaderboards සමඟ gamification, ACP agent සොයාගැනීම (බිල්ට්-ඉන් agents 15ක්), BigQuery වෙත උපලේඛිත log නිර්යාතය, `auto/chaos` සමාන්තර බහු-ආකෘති fan-out, Telegram bot පාලමක්, යෙදුම්-ඇතුළත අනුවාද කළමනාකරු සහ LMArena-ELO නොමිලේ-සපයන්නන්ගේ ශ්රේණිගත කිරීම්. → [ලියකියවිලි](docs/README.md)
@@ -684,11 +684,11 @@ omniroute configure codex          # also: claude opencode qwen aider goose gemi
 
 <div align="center">
 
-## 🌐 AI සපයන්නන් 377ක් — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153ක්
+## 🌐 AI සපයන්නන් 380ක් — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153ක්
 
 </div>
 
-> කැනොනිකල් කතාබස්, මාධ්ය, සෙවුම්, දේශීය, ක්ලවුඩ් නියෝජිත සහ පද්ධති එකතු පුරා **ලියාපදිංචි සපයන්නන් 377ක්** සිටින අතර, ඒවායින් **153ක් `hasFree: true` සොයාගැනීමේ පාරදත්ත දරයි**. කතාබස් ආකෘති රෙජිස්ට්රිය **සපයන්නන් 239ක් / එකිනෙකට වෙනස් සපයන්නා-ආකෘති යුගල 3,059ක් / අමු ආකෘති ID 1,475ක්** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියෙහි **එක් එක් ආකෘතිය සඳහා පේළි 471ක්**, **පුනරාවර්තන සංචිත 34ක්** සහ **පුනරාවර්තන/යතුරු රහිත සදාකාලික නොමිලේ සපයන්නන් 52ක්** ඇත. සැලසුම අනුව මේවා වෙනස් හරයන් වේ; අර්ථදැක්වීම් සහ සංචිත-අනුපිටපත් ඉවත් කළ ගණනය කිරීම් [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) තුළ ඇත.
+> කැනොනිකල් කතාබස්, මාධ්ය, සෙවුම්, දේශීය, ක්ලවුඩ් නියෝජිත සහ පද්ධති එකතු පුරා **ලියාපදිංචි සපයන්නන් 380ක්** සිටින අතර, ඒවායින් **153ක් `hasFree: true` සොයාගැනීමේ පාරදත්ත දරයි**. කතාබස් ආකෘති රෙජිස්ට්රිය **සපයන්නන් 239ක් / එකිනෙකට වෙනස් සපයන්නා-ආකෘති යුගල 3,059ක් / අමු ආකෘති ID 1,475ක්** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියෙහි **එක් එක් ආකෘතිය සඳහා පේළි 471ක්**, **පුනරාවර්තන සංචිත 34ක්** සහ **පුනරාවර්තන/යතුරු රහිත සදාකාලික නොමිලේ සපයන්නන් 52ක්** ඇත. සැලසුම අනුව මේවා වෙනස් හරයන් වේ; අර්ථදැක්වීම් සහ සංචිත-අනුපිටපත් ඉවත් කළ ගණනය කිරීම් [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) තුළ ඇත.
 
 <div align="center">
 
@@ -1289,7 +1289,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td nowrap><b>ධාවන කාලය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <code>src/</code> සහ <code>open-sse/</code> හරහා <b>100% TypeScript</b> (v2.0 සිට මූලික කේතයේ <code>any</code> ශූන්යයි)</td></tr>
   <tr><td nowrap><b>රාමුව</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — වසම් මොඩියුල 147, සංක්රමණ 213</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — වසම් මොඩියුල 147, සංක්රමණ 219</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 සම්පූර්ණ-පෙළ සෙවීම + int8-ප්රමාණිකෘත දෛශික කාවැද්දීම්, වර්ගීකෘත ක්ෂය වීම</td></tr>
   <tr><td nowrap><b>යෝජනා ක්රම</b></td><td>Zod 4 — MCP මෙවලම් I/O වලංගු කිරීම + API ගිවිසුම්</td></tr>
   <tr><td nowrap><b>ප්රොටොකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

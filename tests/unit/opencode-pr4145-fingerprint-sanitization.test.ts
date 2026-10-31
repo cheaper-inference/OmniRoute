@@ -36,6 +36,25 @@ describe("PR #4145 OpenCode Responses API sanitization", () => {
       assert.equal(input[0].encrypted_content, undefined);
     });
 
+    it("keeps a reasoning item with readable text, without its encrypted payload", () => {
+      const body: Record<string, unknown> = {
+        input: [
+          { type: "reasoning", content: [{ type: "reasoning_text", text: "because" }] },
+          { type: "reasoning", summary: [], content: [], encrypted_content: "secret" },
+          {
+            type: "reasoning",
+            summary: [{ type: "summary_text", text: "short" }],
+            encrypted_content: "secret",
+          },
+        ],
+      };
+      sanitizeResponsesBody(body);
+      assert.deepEqual(body.input, [
+        { type: "reasoning", content: [{ type: "reasoning_text", text: "because" }] },
+        { type: "reasoning", summary: [{ type: "summary_text", text: "short" }] },
+      ]);
+    });
+
     it("ensures empty parameters object has properties map", () => {
       const body: Record<string, unknown> = {
         tools: [

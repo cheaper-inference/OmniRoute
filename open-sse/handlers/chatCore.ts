@@ -1408,6 +1408,27 @@ async function handleChatCoreInner({
           "Named combos load skipped: " + (err instanceof Error ? err.message : String(err))
         );
       }
+      // The ACTIVE profile (activeComboId) reaches the resolver only as a PIPELINE:
+      // buildNamedComboLookup keeps `pipeline` and drops the combo's outputMode, outputStyles
+      // and language packs — so a combo the operator selected as active silently injected no
+      // output style while also blocking the default-combo fallback below. Fold those
+      // settings in here as well. Empty routingOverrideIds: an active profile is not a
+      // routing-combo assignment, so no comboOverrides entry is pinned.
+      if (!compressionComboApplied && config.activeComboId && namedCombos[config.activeComboId]) {
+        try {
+          const { getCompressionCombo } = await import("../../src/lib/db/compressionCombos.ts");
+          const activeCompressionCombo = getCompressionCombo(config.activeComboId);
+          if (activeCompressionCombo) {
+            applyCompressionComboConfig(activeCompressionCombo as RuntimeCompressionCombo);
+          }
+        } catch (err) {
+          log?.debug?.(
+            "COMPRESSION",
+            "Active combo output settings skipped: " +
+              (err instanceof Error ? err.message : String(err))
+          );
+        }
+      }
       // Phase 3: per-request override. Unknown values fall through in the resolver (never error).
       const compressionHeader = resolveCompressionHeader(clientRawRequest?.headers ?? null);
       if (compressionHeader) {
