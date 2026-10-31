@@ -27,13 +27,12 @@ webpack build, lint job ఒకేసారి జరిగినప్పుడ�
 | swap      | 16 GB                           | `omniroute-113-5` swap నిలిపివేసి (`MemorySwapMax=0`) నడుస్తుంది, కాబట్టి నియంత్రణ తప్పిన build బాక్స్ను swap చేయించే బదులు దాని పరిమితి వద్ద నిలిపివేయబడుతుంది                                                                                                                                                                                                                       |
 | `/tmp`    | **12 GB tmpfs = RAM**           | అక్కడ ఉంచిన ప్రతిదీ memoryని ఉపయోగిస్తుంది; మిగిలిపోయినవి 3 గంటల తర్వాత తొలగించబడతాయి                                                                                                                                                                                                                                                                                                 |
 | CPU       | 32 coresపై load 60 గమనించబడింది | quotas అమలు చేయడానికి ముందు, ఒక Turbopack build (~1166 % CPU)తో పాటు అదే బాక్స్పై coverage suite నడవడం వల్ల ఇతర listeners heartbeatలకు వనరులు అందలేదు (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                           |
-| runners   | **6 listeners**                 | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` నిలిపివేయబడ్డాయి (`systemctl enable --now` వాటిలో ఒకదాన్ని తిరిగి ప్రారంభిస్తుంది)                                                                                                                                                                                                                                    |
+| runners   | **7 listeners** (2026-10-28)    | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build`ను కూడా నిర్వహిస్తుంది; `omniroute-113-3/-4/-8` repo నుంచి తొలగించబడ్డాయి (2026-10-28)                                                                                                                                                                                                                             |
 
 పరిమితులు ప్రతి unitకు చెందిన `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`లో ఉన్నాయి
 (మునుపటి విలువలు `override.conf.bak-20261018`గా ఉంచబడ్డాయి), అలాగే అవి
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…`తో ప్రత్యక్షంగా వర్తింపజేయబడ్డాయి — restart చేయలేదు, కాబట్టి
-నడుస్తున్న ఏ jobకూ అంతరాయం కలగలేదు. Labelsను runners API ద్వారా
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+నడుస్తున్న ఏ jobకూ అంతరాయం కలగలేదు. Labelsను runners API ద్వారా (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) ప్రత్యక్షంగానే మార్చారు.
 
 ## జానిటర్ను ఇన్స్టాల్ చేయండి (ఒక్కసారి మాత్రమే, మెషీన్పై)
@@ -42,7 +41,7 @@ webpack build, lint job ఒకేసారి జరిగినప్పుడ�
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): ప్రతి 30 నిమిషాలకు, /var/log/runner-janitor.logలో లాగ్ చేయండి
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` అవసరం: ఏదైనా పాత్ను తొలగించే ముందు, తెరిచి ఉన్న ఫైళ్ల యొక్క ఒక స్నాప్షాట్తో అది నిష్క్రియంగా ఉందని జానిటర్ నిర్ధారిస్తుంది; ఈ సాధనం లేకపోతే అది ఏదీ తొలగించదు మరియు ఆ విషయాన్ని తెలియజేస్తుంది
@@ -121,8 +120,9 @@ CPUని వినియోగిస్తూనే ఉంటుంది. ప�
   throttlingను తొలగిస్తుంది.
 - **ఉద్దేశపూర్వకంగానే తక్కువ listeners.** 2026-08-29న నాలుగు OmniRoute unitsను నిలిపివేశారు —
   ప్రతి అదనపు listener పైన పేర్కొన్న memory budgetలో మరో tenant అవుతుంది. janitor గరిష్ఠ పరిమితి
-  6 (cronలో `MAX_ACTIVE_RUNNERS=6`): అది బాక్స్లోని ప్రతి `Runner.Listener`ను లెక్కిస్తుంది,
-  అలాగే మా నాలుగింటికి OmniHeuris + OmniMind మరో రెండింటిని జోడిస్తాయి.
+  8 (cronలో `MAX_ACTIVE_RUNNERS=8`): అది బాక్స్లోని ప్రతి `Runner.Listener`ను లెక్కిస్తుంది,
+  అలాగే మా ఐదింటికి OmniHeuris + OmniMind మరో రెండింటిని జోడిస్తాయి.
+- **Unit మరియు Vitest jobs హోస్ట్ చేసినవిగానే ఉంటాయి.** repository variable `vars.USE_VPS_TEST_RUNNER` `true` అయినప్పుడు మాత్రమే `ci.yml` తన unit shards మరియు Vitest jobను `[self-hosted, omni-ci]`కు పంపుతుంది, అప్పుడు కూడా అదే repository నుంచి వచ్చే `pull_request` runs కోసం మాత్రమే; forks, `merge_group` మరియు pushes `ubuntu-latest`పైనే ఉంటాయి (`tests/unit/vps-runner-variable-scope.test.ts`). ఈ variable `false`. 2026-10-28న మూడు 4-core `omni-ci` listeners `npm ci` కోసం 250–270 s తీసుకున్నాయి, ప్రతి unit shard 30 నిమిషాల job పరిమితిని తాకింది, అయితే హోస్ట్ చేసిన shardకు ~634 s మాత్రమే పడుతుంది; ఆ సమయంలో బాక్స్ load 17–24. ఆ listeners తొలగించబడ్డాయి. unit shardకు తగిన పరిమాణంలో listeners లేకుండా ఈ variableను మళ్లీ ఆన్ చేయవద్దు.
 - **ఏ runner అయినా busyగా ఉన్నప్పుడు `/tmp` లేదా `_work`ను చేతితో ఎప్పుడూ శుభ్రం చేయవద్దు.**
   తనిఖీ చేయడం, తొలగించడం మధ్య విరామం ఉన్న check-then-delete కారణంగానే 2026-08-27న నడుస్తున్న
   Build జాబ్ తన `_work`ను కోల్పోయింది. janitor తనిఖీని, తొలగింపును ఒకే దశలో చేస్తుంది;
@@ -136,8 +136,7 @@ CPUని వినియోగిస్తూనే ఉంటుంది. ప�
 
 ## హోస్ట్ చేసిన లేన్ (GitHub-హోస్ట్ చేసిన రన్నర్లు)
 
-ఖాతా **Pro** ప్లాన్లో ఉంది: **40 ఏకకాల హోస్ట్ చేసిన జాబ్లు**, ప్రతి PR తనిఖీ,
-ప్రతి పుష్-ట్రిగ్గర్ చేసిన వర్క్ఫ్లో మరియు CodeQL డిఫాల్ట్ సెటప్ వీటిని పంచుకుంటాయి. 2026-10-18న
+ఈ repository `cheaper-inference` సంస్థకు చెందినది, **Team** ప్లాన్‌లో ఉంది: **60 ఏకకాల హోస్ట్ చేసిన జాబ్‌లు**, సంస్థలోని ప్రతి repository, ప్రతి PR తనిఖీ, ప్రతి పుష్-ట్రిగ్గర్ చేసిన వర్క్‌ఫ్లో మరియు CodeQL డిఫాల్ట్ సెటప్ వీటిని పంచుకుంటాయి. కింది గణాంకాలు **Pro** ప్లాన్‌పై (40 ఏకకాల హోస్ట్ చేసిన జాబ్‌లు) కొలిచినవి. 2026-10-18న
 ఒక మెర్జ్ ప్రచారం సమయంలో (~10 మెర్జ్లు/గంట, `release/v3.8.52`పై) కొలిచినవి: **24 hలో
 2,500 వర్క్ఫ్లో రన్లు సృష్టించబడ్డాయి**, 6 hలో బ్రాంచ్కు 44 పుష్లు, PR తనిఖీలు
 గంటల తరబడి వేచి ఉండగా **106 హోస్ట్ చేసిన జాబ్లు క్యూలో ఉన్నాయి**, మరియు అవి లేకుండానే PRలు మెర్జ్ చేయబడ్డాయి. బ్రాంచ్కు ప్రతి పుష్పై తొమ్మిది వర్క్ఫ్లోలు ప్రారంభమయ్యాయి:

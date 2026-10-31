@@ -165,14 +165,14 @@ provider ទាំងអស់ប្រើ `DefaultExecutor` (`executors/default
 
 ---
 
-## ការពិនិត្យស៊ីជម្រៅលើឯកសារសំខាន់ៗ
+## ការស្ទាប់ស្ទង់ឯកសារសំខាន់ៗ
 
 ### chatCore.ts (5977 បន្ទាត់)
 
-**កម្មវិធីដោះស្រាយសំណើចម្បង**។ ទោះបីជាវាមានទំហំធំក៏ដោយ វាមានរចនាសម្ព័ន្ធច្បាស់លាស់៖
+**កម្មវិធីដោះស្តាយសំណើចម្បង**។ ទោះបីវាមានទំហំធំក្តី វាមានរចនាសម្ព័ន្ធច្បាស់លាស់៖
 
 ```ts
-// រចនាសម្ព័ន្ធក្លែងក្លាយរបស់ chatCore.ts
+// រចនាសម្ព័ន្ធក្លែងក្លាយ (pseudo) នៃ chatCore.ts
 export async function handleChat(request: NextRequest) {
   // 1. ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ + CORS
   await authenticateRequest(request);
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. ការកំណត់ផ្លូវ combo
+  // 4. ការរ៉ោតទីង combo
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -196,20 +196,20 @@ export async function handleChat(request: NextRequest) {
       await recordUsage(result);
       return result;
     } catch (err) {
-      // បន្តទៅ target បន្ទាប់
+      // បន្តទៅគោលដៅបន្ទាប់
     }
   }
 
-  // 5. ជម្រើសបម្រុងពេលមានអាសន្ន
+  // 5. ការបម្រុងបន្ទាន់
   return await emergencyFallback(body);
 }
 ```
 
-ទោះបីជាវាជា function ដ៏ធំតែមួយក៏ដោយ វាត្រូវបានរៀបចំជា **ផ្នែកដែលមានមតិយោបល់ពន្យល់** ដែលផ្គូផ្គងទៅនឹង pipeline 5 ដំណាក់កាល។
+ទោះបីជាអនុគមន៍ធំមួយក្តី វាត្រូវបានរៀបចំជា **ផ្នែកដែលមានកំណត់សម្គាល់** ដែលត្រូវនឹងបំពង់ដំណើរការ 5 ដំណាក់កាល។
 
-### combo.ts (4456 LOC)
+### combo.ts (4456 បន្ទាត់)
 
-**ម៉ាស៊ីនកំណត់ផ្លូវ** ដែលដោះស្រាយ combo ទៅជា targets តាមលំដាប់។
+**ម៉ាស៊ីនរ៉ោតទីង** ដែលបំបែក combo មួយទៅជាគោលដៅដែលមានលំដាប់។
 
 ```ts
 // services/combo.ts
@@ -226,46 +226,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-គាំទ្រ **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 19** (សូមមើល `src/shared/constants/routingStrategies.ts`)៖
+គាំទ្រ **យុទ្ធសាស្ត្ររ៉ោតទីង 20** (មើល `src/shared/constants/routingStrategies.ts`)៖
 
-| យុទ្ធសាស្ត្រ        | ឥរិយាបថ                                                                        |
-| ------------------- | ------------------------------------------------------------------------------ |
-| `priority`          | បញ្ជីតាមលំដាប់ដែលផ្តល់អាទិភាពដល់ target ទីមួយ                                  |
-| `weighted`          | ជ្រើសរើសតាមប្រូបាប៊ីលីតេដោយផ្អែកលើទម្ងន់របស់ target នីមួយៗ                     |
-| `round-robin`       | ប្តូរវេនឆ្លងកាត់ targets តាមលំដាប់                                             |
-| `context-relay`     | ផ្ទេរ context ឆ្លងកាត់ targets                                                 |
-| `fill-first`        | ប្រើ quota ឱ្យពេញមុននឹងបន្តទៅ target បន្ទាប់                                   |
-| `p2c`               | អំណាចនៃជម្រើសពីរ                                                               |
-| `random`            | ចៃដន្យដោយមានប្រូបាប៊ីលីតេស្មើគ្នា                                              |
-| `least-used`        | ជ្រើសរើសមួយដែលត្រូវបានប្រើតិចបំផុតក្នុងពេលថ្មីៗនេះ                             |
-| `cost-optimized`    | ជ្រើសរើស target ដែលដំណើរការល្អ និងថោកបំផុតមុន                                  |
-| `reset-aware`       | គិតគូរអំពីចន្លោះពេល reset របស់ provider                                        |
-| `reset-window`      | ការកំណត់ផ្លូវដោយផ្អែកលើចន្លោះពេល reset                                         |
-| `headroom`          | ជ្រើសរើស quota ដែលនៅសល់ច្រើនបំផុតមុន                                           |
-| `strict-random`     | ចៃដន្យស្មើគ្នាពិតប្រាកដ (គ្មានការកំណត់ទម្ងន់តាមគុណភាព)                         |
-| `auto`              | ប្រើការដាក់ពិន្ទុដោយផ្អែកលើកត្តា 16 (`autoCombo/`)                             |
-| `lkgp`              | ជ្រើសរើស provider ចុងក្រោយដែលគេដឹងថាដំណើរការល្អមុន                             |
-| `context-optimized` | ល្អបំផុតសម្រាប់សំណើដែលមាន context វែង                                          |
-| `fusion`            | បញ្ជូនទៅកាន់ panel ជាច្រើនស្របពេលគ្នា បន្ទាប់មកសំយោគតាមរយៈ judge (`fusion.ts`) |
+| យុទ្ធសាស្ត្រ        | អាកប្បកិរិយា                                                                         |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| `priority`          | បញ្ជីមានលំដាប់តាមគោលដៅដំបូង                                                          |
+| `weighted`          | តាមប្រូបាប៊ីលីតេដោយផ្អែកលើទំងន់នៃគោលដៅនីមួយៗ                                         |
+| `round-robin`       | វិលវេនគោលដៅតាមលំដាប់                                                                 |
+| `context-relay`     | បញ្ជូនបន្តបរិបទឆ្លងកាត់គោលដៅ                                                         |
+| `fill-first`        | បំពេញកូតាមុនពេលផ្លាស់ទៅបន្ទាប់                                                       |
+| `p2c`               | អំណាចនៃជម្រើសពីរ (power of two choices)                                              |
+| `random`            | ចៃដន្យសរម៉ូត                                                                         |
+| `least-used`        | ជ្រើសរើសអ្វីដែលត្រូវបានប្រើតិចបំផុតនាពេលថ្មីៗនេះ                                     |
+| `cost-optimized`    | គោលដៅដែលមានសុខភាពល្អ ថោកបំផុតមុនគេ                                                   |
+| `reset-aware`       | ដឹងពីបង្អួចកំណត់ឡើងវិញរបស់អ្នកផ្តល់សេវា                                              |
+| `reset-window`      | ការរ៉ោតទីងផ្អែកលើបង្អួចកំណត់ឡើងវិញ                                                   |
+| `headroom`          | កន្លែងទំនេរកូតានៅសល់ច្រើនបំផុតមុនគេ                                                  |
+| `quota-weighted`    | រំលងគណនីដែលអស់កូតា បន្ទាប់មកចាប់ឆ្នោតតាមកូតានៅសល់ ÷ បន្ទុកកំពុងដំណើរការ              |
+| `strict-random`     | សរម៉ូតពិតប្រាកដ (គ្មានការដាក់ទំងន់គុណភាព)                                            |
+| `auto`              | ប្រើការដាក់ពិន្ទុកត្ថាភាព 16 (`autoCombo/`)                                          |
+| `lkgp`              | អ្នកផ្តល់សេវាល្អចុងក្រោយដែលបានស្គាល់មុនគេ                                            |
+| `context-optimized` | ល្អបំផុតសម្រាប់សំណើដែលមានបរិបទវែង                                                    |
+| `cache-optimized`   | ខ្ទាស់ prefix នៃ prompt ដែលអាចប្រើឡើងវិញបាននីមួយៗទៅគណនីដូចគ្នា (ការប៉ះ prompt-cache) |
+| `fusion`            | បញ្ជូនចេញទៅក្រុមមួយដោយស្របគ្នា បន្ទាប់មកសំយោគតាមរយៈអ្នកជំនុំជម្រះ (`fusion.ts`)      |
+| `pipeline`          | ខ្សែជំហាន — លទ្ធផលរបស់គោលដៅនីមួយៗផ្គត់ផ្គង់ទៅគោលដៅបន្ទាប់                            |
 
-### base.ts (1170 LOC)
+### base.ts (1170 បន្ទាត់)
 
-**កម្មវិធីប្រតិបត្តិអរូបី** ដែលគ្រប់ executor class ទាំងអស់ពង្រីកពីវា (ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` និង subclasses ផ្សេងទៀត)។ វាមាន៖
+**អ្នកប្រតិបត្តិអរូបី** ដែលថ្នាក់ executor ទាំងអស់ពង្រីកចេញពី (ដោយផ្ទាល់ ឬតាមរយៈ `DefaultExecutor` និងថ្នាក់កូនផ្សេងៗទៀត)។ វាមាន៖
 
-- `buildUrl()` — ការបង្កើត URL លំនាំដើម (subclasses override សម្រាប់ការកំណត់តាមតម្រូវការ)
-- `buildHeaders()` — headers លំនាំដើម (ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ, content-type)
-- `transformRequest()` — បញ្ជូនឆ្លងកាត់តាមលំនាំដើម
-- `execute()` — HTTP loop ចម្បងដែលមាន retry/backoff/breaker
+- `buildUrl()` — ការសាងសង់ URL លំនាំដើម (ថ្នាក់កូនសរសេរជាន់សម្រាប់ការកំណត់ផ្ទាល់ខ្លួន)
+- `buildHeaders()` — headers លំនាំដើម (auth, content-type)
+- `transformRequest()` — បញ្ជូនឆ្លងត្រង់តាមលំនាំដើម
+- `execute()` — រង្វង់ HTTP ចម្បងដែលមាន retry/backoff/breaker
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
-  // គ្រប់គ្រង providers ទាំងអស់ដែលត្រូវគ្នាជាមួយ OpenAI/Anthropic
-  // Providers ចុះឈ្មោះ configurations (URL, auth, headers) ប៉ុន្តែប្រើ executor logic រួមគ្នា
+  // ដោះស្តាយអ្នកផ្តល់សេវាទាំងអស់ដែលឆបគ្នានឹង OpenAI/Anthropic
+  // អ្នកផ្តល់សេវាចុះបញ្ជីការកំណត់រចនាសម្ព័ន្ធ (URL, auth, headers) ប៉ុន្តែចែករំលែកតក្កវិជ្ជា executor ដូចគ្នា
 }
 ```
 
-ឥរិយាបថជាក់លាក់របស់ provider (auth headers, base URL, version headers) ត្រូវបានកំណត់រចនាសម្ព័ន្ធតាមរយៈ provider registry មិនមែនតាមរយៈ executor classes ដាច់ដោយឡែកទេ។
+អាកប្បកិរិយាជាក់លាក់របស់អ្នកផ្តល់សេវា (auth headers, base URL, version headers) ត្រូវបានកំណត់តាមរយៈ provider registry មិនមែនតាមថ្នាក់ executor ដាច់ដោយឡែកទេ។
 
 ````
 
@@ -273,82 +276,82 @@ export class DefaultExecutor extends BaseExecutor {
 
 ## សេវាកម្ម (117 ម៉ូឌុល)
 
-សេវាកម្មគឺជា **ម៉ូឌុលដែលផ្តោតលើគោលបំណងតែមួយជាក់លាក់** ដែល handlers ផ្សំបញ្ចូលគ្នា។ ប្រភេទធំៗរួមមាន៖
+សេវាកម្មគឺជា **ម៉ូឌុលដែលផ្តោតលើគោលបំណងតែមួយ** ដែល handlers ផ្សំភ្ជាប់ជាមួយគ្នា។ ប្រភេទធំៗមាន៖
 
-### ការកំណត់ផ្លូវ & Combo
+### ការរ៉ោត & Combo
 
-- `combo.ts` — ចំណុចចូលសម្រាប់សំណើដែលកំណត់ផ្លូវតាម combo
-- `services/autoCombo/` — ការដាក់ពិន្ទុតាមកត្តា 16 និងយុទ្ធសាស្ត្រកំណត់ផ្លូវស្វ័យប្រវត្តិ 8
+- `combo.ts` — ចំណុចចូលសម្រាប់សំណើដែលរ៉ោតតាម combo
+- `services/autoCombo/` — ការដាក់ពិន្ទុតាមកត្តា 16 យុទ្ធសាស្ត្ររ៉ោតស្វ័យប្រវត្តិ 8
 - `wildcardRouter.ts` — ផ្គូផ្គងផ្លូវ wildcard (`gpt-*`)
 - `modelFamilyFallback.ts` — fallback ក្នុងគ្រួសារ T5
 
-### ការកំណត់អត្រា & កូតា
+### ការដាក់កម្រិតអត្រា & កូតា
 
-- `rateLimitManager.ts` — token bucket សម្រាប់ key+provider នីមួយៗ
+- `rateLimitManager.ts` — token bucket ក្នុងមួយ key+provider
 - `usage.ts` — ការកត់ត្រាការប្រើប្រាស់
-- `quotaCache.ts` — snapshot កូតាក្នុងអង្គចងចាំ
+- `quotaCache.ts` — រូបថតកូតាក្នុងអង្គចងចាំ
 
 ### គណនី & Token
 
-- `tokenRefresh.ts` — refresh OAuth នៅពេលទទួល 401
+- `tokenRefresh.ts` — refresh OAuth នៅពេល 401
 - `accountFallback.ts` — ប្តូរទៅគណនីជំនួស
 - `sessionManager.ts` — ស្ថានភាព session ពហុវេន
 
 ### ភាពឆ្លាតវៃ
 
-- `intentClassifier.ts` — ចាត់ថ្នាក់បំណងរបស់សំណើ
-- `taskAwareRouter.ts` — កំណត់ផ្លូវតាមប្រភេទកិច្ចការ
-- `thinkingBudget.ts` — បែងចែក thinking tokens
-- `contextManager.ts` — បញ្ចូលបរិបទកំណត់ផ្លូវ
+- `intentClassifier.ts` — ចាត់ថ្នាក់ចេតនានៃសំណើ
+- `taskAwareRouter.ts` — រ៉ោតតាមប្រភេទការងារ
+- `thinkingBudget.ts` — ចែកចាយ thinking tokens
+- `contextManager.ts` — បញ្ចូល context សម្រាប់រ៉ោត
 
 ### ភាពធន់
 
-- `resilience.ts` — សម្របសម្រួលការព្យាយាមម្តងទៀត ការពន្យារពេល និង breaker
+- `resilience.ts` — ការរៀបចំសម្របសម្រួល retry, backoff និង breaker
 - `emergencyFallback.ts` — fallback ជាជម្រើសចុងក្រោយ
-- `modelDeprecation.ts` — កំណត់ផ្លូវដោយស្វ័យប្រវត្តិទៅម៉ូដែលបន្តវេន
+- `modelDeprecation.ts` — រ៉ោតស្វ័យប្រវត្តិទៅម៉ូដែលជំនួស
 
 ### ស្ថានភាព
 
-- `signatureCache.ts` — លុបធាតុស្ទួនតាមហត្ថលេខាសំណើ
-- `volumeDetector.ts` — កាត់បន្ថយបន្ទុក
-- `contextHandoff.ts` — បម្លែង session ជាទម្រង់ដែលអាចរក្សាទុក ឬផ្ទេរបាន
+- `signatureCache.ts` — លុបទិន្នន័យស្ទួនតាម signature របស់សំណើ
+- `volumeDetector.ts` — ការបោះបង់បន្ទុក
+- `contextHandoff.ts` — serialization របស់ session
 
 ### ការបង្ហាប់
 
-- `compression/` (ថតរង) — ខ្សែដំណើរការបង្ហាប់ពេញលេញ
-- ឯកសារ 39 ដែលគ្របដណ្តប់លើ engines, rule packs និង adapters
+- `compression/` (ថតរង) — pipeline បង្ហាប់ពេញលេញ
+- ឯកសារ 39 គ្របដណ្តប់ engines, rule packs និង adapters
 
 ### ជំនាញ
 
-- (បានរៀបរាប់ក្នុង [SKILLS.md](./SKILLS.md))
+- (ពិពណ៌នានៅក្នុង [SKILLS.md](./SKILLS.md))
 
 ### អង្គចងចាំ
 
-- (បានរៀបរាប់ក្នុង [MEMORY.md](./MEMORY.md))
+- (ពិពណ៌នានៅក្នុង [MEMORY.md](./MEMORY.md))
 
 ---
 
-## កម្មវិធីប្រតិបត្តិ (150 ម៉ូឌុល)
+## Executors (150 ម៉ូឌុល)
 
-ភាគច្រើនមានឯកសារមួយសម្រាប់ provider នីមួយៗ។ គ្រប់ executor classes ទាំងអស់ពង្រីកពី `BaseExecutor` ហើយ override តែផ្នែកដែលខុសគ្នា។ ម៉ូឌុលផ្សេងទៀតគឺជា helpers សម្រាប់ provider នីមួយៗ (tool schemas, fetch/TTS adapters និង quirk handlers)។
+ភាគច្រើនមានមួយឯកសារក្នុងមួយ provider។ ថ្នាក់ executor ទាំងអស់ extend ពី `BaseExecutor` ហើយ override អ្វីដែលខុសគ្នា។ ម៉ូឌុលដទៃទៀតគឺជាឧបករណ៍ជំនួយក្នុងមួយ provider (tool schemas, fetch/TTS adapters, quirk handlers)។
 
 ### លំនាំទូទៅ
 
-Providers ត្រូវបានកំណត់តាមរយៈ `getExecutor(providerId)` ដែលត្រឡប់ executor ដែលបានកំណត់រចនាសម្ព័ន្ធ។ Providers ដែលឆបគ្នាជាមួយ OpenAI/Anthropic ប្រើ `DefaultExecutor` (`executors/default.ts`)។ ឥរិយាបថជាក់លាក់តាម provider (base URL, auth headers, API version) ត្រូវបានកំណត់រចនាសម្ព័ន្ធក្នុង `open-sse/config/providers/` ខណៈដែលការបម្លែង request body ត្រូវបានគ្រប់គ្រងក្នុង `open-sse/translator/`។
+Providers ត្រូវបានដោះស្រាយតាម `getExecutor(providerId)` ដែលត្រឡប់ executor ដែលបានកំណត់រចនាសម្ព័ន្ធ។ Providers ដែលឆបគ្នាជាមួយ OpenAI/Anthropic ប្រើ `DefaultExecutor` (`executors/default.ts`)។ អាកប្បកិរិយាជាក់លាក់របស់ provider (base URL, auth headers, API version) ត្រូវបានកំណត់រចនាសម្ព័ន្ធនៅក្នុង `open-sse/config/providers/` ខណៈដែលការបំប្លែង request body ត្រូវបានដោះស្រាយនៅក្នុង `open-sse/translator/`។
 
-**URL ផ្ទាល់ខ្លួន** ត្រូវបានកំណត់តាមរយៈការកំណត់រចនាសម្ព័ន្ធ provider៖
+**URL ផ្ទាល់ខ្លួន** ត្រូវបានកំណត់តាមការកំណត់រចនាសម្ព័ន្ធ provider៖
 
 ```ts
-// ការកំណត់រចនាសម្ព័ន្ធ provider ក្នុង open-sse/config/providers/
+// ការកំណត់រចនាសម្ព័ន្ធ provider នៅក្នុង open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណផ្ទាល់ខ្លួន** ត្រូវបានគ្រប់គ្រងតាមរយៈការកំណត់រចនាសម្ព័ន្ធ auth របស់ provider registry (API key, OAuth និង header profiles)។
+**Auth ផ្ទាល់ខ្លួន** ត្រូវបានដោះស្រាយតាមការកំណត់រចនាសម្ព័ន្ធ auth របស់ provider registry (API key, OAuth, header profiles)។
 
-ការបម្លែង **request body ផ្ទាល់ខ្លួន** (ឧ. Anthropic បំបែក `system` ចេញពី `messages`) ត្រូវបានចុះបញ្ជីតាម provider នីមួយៗក្នុង `open-sse/translator/`។
+ការបំប្លែង **request body ផ្ទាល់ខ្លួន** (ឧ. Anthropic បំបែក `system` ចេញពី `messages`) ត្រូវបានចុះបញ្ជីក្នុងមួយ provider នៅក្នុង `open-sse/translator/`។
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-ការដោះស្រាយឆ្លងកាត់ `ExecutorRegistry` (`executors/registry.ts`)៖ executor ឯកទេសនីមួយៗត្រូវបានប្រកាសក្នុងតារាងដែលភ្ជាប់មកជាស្រេចរបស់ `executors/index.ts` ហើយត្រូវបានចុះបញ្ជីតាមរយៈ `registerExecutor(alias, instance)` នៅពេលផ្ទុកម៉ូឌុល។ `getExecutor()` ពិនិត្យ registry ហើយ fallback ទៅ `DefaultExecutor` ដែលបាន memoize សម្រាប់ provider ណាមួយដែលគ្មាន entry ឯកទេស។ ការផ្គូផ្គង alias → executor ពេញលេញត្រូវបានកំណត់លក្ខណៈដោយ golden test `tests/unit/executor-map-golden.test.ts`។
+ការដោះស្រាយឆ្លងកាត់ `ExecutorRegistry` (`executors/registry.ts`)៖ executor ឯកទេសនីមួយៗត្រូវបានប្រកាសក្នុងតារាងដែលមានស្រាប់នៃ `executors/index.ts` ហើយចុះបញ្ជីតាម `registerExecutor(alias, instance)` នៅពេលផ្ទុកម៉ូឌុល។ `getExecutor()` ពិនិត្យមើល registry ហើយ fallback ទៅ `DefaultExecutor` ដែលបាន memoize សម្រាប់ provider ណាដែលគ្មានធាតុឯកទេស។ ការផ្គូផ្គង alias → executor ពេញលេញត្រូវបានកំណត់លក្ខណៈដោយ golden test `tests/unit/executor-map-golden.test.ts`។
 
 ---
 
@@ -483,15 +486,15 @@ createResponsesApiTransformStream(): TransformStream
 
 `open-sse/config/` ផ្ទុកស្រទាប់កំណត់រចនាសម្ព័ន្ធ៖
 
-| ឯកសារ                            | គោលបំណង                                                |
-| -------------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`            | បញ្ជីចុះឈ្មោះម៉ូដែលជជែកលើកាតាឡុកអ្នកផ្តល់សេវាចំនួន 374 |
-| `providerModels.ts`              | ឈ្មោះក្លែងក្លាយរបស់ម៉ូដែល និងការផ្គូផ្គងទម្រង់         |
-| `constants.ts`                   | ពេលអស់កំណត់ ដែនកំណត់ និងកូដស្ថានភាព                    |
-| `defaultThinkingSignature.ts`    | ហត្ថលេខាការគិតលំនាំដើមរបស់ Claude                      |
-| `modelStrip.ts` (ក្នុង services) | ការដកវាលតាមអ្នកផ្តល់សេវានីមួយៗ                         |
+| ឯកសារ                             | គោលបំណង                                         |
+| --------------------------------- | ----------------------------------------------- |
+| `providerRegistry.ts`             | ការចុះឈ្មោះម៉ូដែលជជែកលើកាតាឡុកអ្នកផ្តល់សេវា 377 |
+| `providerModels.ts`               | ឈ្មោះក្លែងក្លាយ គំរូ ការធ្វើផែនទីទម្រង់         |
+| `constants.ts`                    | អស់ពេលកំណត់ លេខកូដស្ថានភាព                      |
+| `defaultThinkingSignature.ts`     | ហត្ថលេខាការគិត Claude លំនាំដើម                  |
+| `modelStrip.ts` (នៅក្នុងសេវាកម្ម) | ការដកយកវាលតាមអ្នកផ្ដល់                          |
 
-### គ្រោងការណ៍បញ្ជីចុះឈ្មោះអ្នកផ្តល់សេវា
+### គ្រោងការណ៍ចុះបញ្ជីអ្នកផ្តល់សេវា
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-ការផ្ទៀងផ្ទាត់ Zod នៅពេលផ្ទុកម៉ូឌុល ធានាថាការកំណត់រចនាសម្ព័ន្ធអ្នកផ្តល់សេវាទាំងអស់មានសុពលភាព។
+Zod សុពលភាពនៅពេលផ្ទុកម៉ូឌុលធានាថាការកំណត់អ្នកផ្តល់សេវាទាំងអស់មានសុពលភាព។
 
 ---
 

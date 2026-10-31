@@ -34,89 +34,80 @@ Solicitarea clientului
 
 ### Off
 
-Nu se aplică nicio compresie. Toate mesajele sunt transmise fără modificări.
+Nicio compresie aplicată. Toate mesajele trec neschimbate.
 
-### Modul Lite (economii de ~15%, latență <1ms)
+### Modul Lite (~15% economii, latență <1 ms)
 
-Cel mai sigur mod — fără nicio modificare semantică, doar curățarea formatării:
+Cel mai sigur mod — zero modificări semantice, doar curățarea formatării:
 
-| Tehnică                  | Descriere                                                    |
-| ------------------------ | ------------------------------------------------------------ |
-| `collapseWhitespace`     | Combină liniile goale consecutive și spațiile finale         |
-| `dedupSystemPrompt`      | Elimină mesajele de sistem duplicate                         |
-| `compressToolResults`    | Comprimă rezultatele detaliate ale instrumentelor/funcțiilor |
-| `removeRedundantContent` | Elimină instrucțiunile repetate                              |
-| `replaceImageUrls`       | Scurtează URI-urile de date pentru imagini base64            |
+| Tehnică                  | Descriere                                                           |
+| ------------------------ | ------------------------------------------------------------------- |
+| `collapseWhitespace`     | Îmbină liniile goale consecutive și spațiile de la finalul liniilor |
+| `dedupSystemPrompt`      | Elimină mesajele de sistem duplicate                                |
+| `compressToolResults`    | Comprimă ieșirile prolixe ale uneltelor/funcțiilor                  |
+| `removeRedundantContent` | Elimină instrucțiunile repetate                                     |
+| `replaceImageUrls`       | Scurtează URI-urile de date base64 ale imaginilor                   |
 
-**Recomandat pentru:** Utilizare permanentă și fluxuri de lucru în care siguranța este esențială.
+**Ideal pentru:** Utilizare permanentă, fluxuri de lucru în care siguranța este critică.
 
-### Modul Standard (economii de ~30%)
+### Modul Standard (~30% economii)
 
 Inspirat de [Caveman](https://github.com/JuliusBrussee/caveman) — elimină cuvintele de umplutură și formulările prolixe, păstrând sensul:
 
-- Elimină cuvintele de umplutură („please”, „I think”, „basically”, „actually”)
-- Condensează expresiile prolixe („in order to” → „to”, „as a result of” → „because”)
-- Elimină formulările excesiv de politicoase și ezitante („Would you mind...”, „If you could possibly...”)
-- Peste 30 de reguli regex optimizate pentru prompturi de programare
+- Elimină cuvintele de umplutură ("please", "I think", "basically", "actually")
+- Condensează expresiile prolixe ("in order to" → "to", "as a result of" → "because")
+- Elimină ocolirile politicoase ("Would you mind...", "If you could possibly...")
+- Peste 30 de reguli regex ajustate pentru prompturi de programare
 
-**Recomandat pentru:** Fluxuri zilnice de programare și echipe preocupate de costuri.
+**Ideal pentru:** Fluxuri de lucru zilnice de programare, echipe atente la costuri.
 
-### Modul Aggressive (economii de ~50%)
+### Modul Aggressive (~50% economii)
 
 Gestionare inteligentă a istoricului pentru sesiuni lungi:
 
-- **Învechirea mesajelor** — mesajele mai vechi sunt comprimate progresiv
-- **Compresia rezultatelor instrumentelor** — rezultatele lungi ale instrumentelor sunt trunchiate sau omise (primele/ultimele linii,
-  filtrarea liniilor cu potriviri, compactarea cheilor JSON)
-- **Mecanisme de protecție a integrității structurale** — asigură consecvența perechilor `tool_use` + `tool_result`
-- **Adaptare la fereastra de context** — respectă limitele de tokenuri ale fiecărui model
+- **Îmbătrânirea mesajelor** — mesajele mai vechi sunt comprimate progresiv
+- **Comprimarea rezultatelor uneltelor** — ieșirile lungi ale uneltelor sunt trunchiate sau elidate (primele/ultimele linii, filtrarea liniilor care se potrivesc, compactarea cheilor JSON)
+- **Protecții de integritate structurală** — asigură că perechile `tool_use` + `tool_result` rămân coerente
+- **Conștientizarea ferestrei de context** — respectă limitele de tokeni ale fiecărui model
 
-**Recomandat pentru:** Sesiuni extinse de depanare și baze de cod mari.
+**Ideal pentru:** Sesiuni extinse de depanare, baze de cod mari.
 
-### Modul Ultra (economii de ~75%)
+### Modul Ultra (~75% economii)
 
-Compresie maximă pentru scenarii în care economisirea tokenurilor este esențială:
+Compresie maximă pentru scenarii în care tokenii sunt critici:
 
-- **Eliminare euristică** — eliminarea tokenurilor din proză pe baza unui scor
-- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt
-  înlocuiți temporar cu marcaje și reintegrați textual, fără a fi eliminați vreodată
+- **Eliminare euristică** — eliminarea tokenilor din proză pe baza unui scor
+- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt marcate cu tombstone-uri și reasamblate verbatim, niciodată eliminate
 - **Nivel SLM opțional** — un model local mic poate rafina eliminarea atunci când este configurat
-- Independent de modul Aggressive: nu efectuează învechirea mesajelor, compresia rezultatelor instrumentelor
-  sau rezumarea de rezervă (doar o eroare la nivelul SLM poate direcționa o etapă de rezervă prin modul
-  Aggressive)
+- Independent de modul Aggressive: nu execută îmbătrânirea mesajelor, compresia rezultatelor uneltelor sau rezumarea de rezervă (doar un eșec al nivelului SLM poate direcționa o trecere de rezervă prin aggressive)
 
-**Recomandat pentru:** Situațiile în care atingeți în mod repetat limitele contextului.
+**Ideal pentru:** Când atingi în mod repetat limitele de context.
 
-### Modul RTK (interval de 60-90% în amonte)
+### Modul RTK (interval upstream de 60-90%)
 
-Modul RTK este optimizat pentru rezultatele detaliate ale instrumentelor care apar în sesiunile agenților de programare:
+Modul RTK este optimizat pentru ieșirile prolixe ale uneltelor care apar în sesiunile agenților de programare:
 
-- Detectează clase de comenzi/rezultate precum `git status`, `git diff`, `git log`, instrumente de rulare a testelor,
-  compilări TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audituri/instalări npm, jurnale Docker, rezultate de infrastructură
-  și rezultate generice de shell
+- Detectează clase de comenzi/ieșiri precum `git status`, `git diff`, `git log`, rulatoare de teste, build-uri TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalări, jurnale Docker, ieșiri de infrastructură și ieșiri generice de shell
 - Aplică pachete de filtre JSON din `open-sse/services/compression/engines/rtk/filters/`
-- Importă filtrele RTK cu schema TOML v1 din fișierele `filters.toml` ale proiectului sau globale, cu validarea testelor
-  inline și verificarea încrederii pentru fișierele proiectului
-- Include 55 de filtre încorporate, cu exemple de verificare inline
-- Elimină secvențele de control ANSI, barele de progres, liniile repetate și zgomotul care nu permite acțiuni utile
-- Păstrează eșecurile, erorile, avertismentele, fișierele modificate, rezumatele și finalul rezultatelor lungi
-- Acceptă filtre de proiect bazate pe încredere, filtre globale și recuperarea opțională a rezultatelor brute redactate
+- Importă filtre din schema RTK TOML v1 din fișiere `filters.toml` de proiect sau globale, cu validare prin teste inline și control de încredere (trust-gating) pentru fișierele de proiect
+- Se livrează cu 56 de filtre încorporate, cu mostre de verificare inline
+- Elimină secvențele de control ANSI, barele de progres, liniile repetate și zgomotul neacționabil
+- Păstrează eșecurile, erorile, avertismentele, fișierele modificate, rezumatele și finalul ieșirilor lungi
+- Acceptă filtre de proiect cu control de încredere, filtre globale și recuperarea opțională a ieșirilor brute mascate
 
-**Recomandat pentru:** Sesiuni ale agenților cu shell, compilare, teste, git, grep și transcrieri ale rezultatelor fișierelor.
+**Ideal pentru:** Sesiuni de agent cu transcrieri de shell, build, teste, git, grep și ieșiri de fișiere.
 
 ### Modul Stacked (interval eligibil de 78-95%)
 
-Modul Stacked rulează mai multe motoare de compresie într-o ordine deterministă. Fluxul implicit este:
+Modul Stacked rulează mai multe motoare de compresie într-o ordine deterministă. Pipeline-ul implicit este:
 
 ```txt
 RTK -> Caveman
 ```
 
-Această ordine compactează mai întâi rezultatele terminalului/instrumentelor, apoi aplică condensarea semantică Caveman
-promptului rămas în limbaj natural. Fluxurile Stacked pot fi configurate global sau prin
-combinații de compresie atribuite combinațiilor de rutare.
+Această ordine menține mai întâi compactă ieșirea terminalului/uneltelor, apoi aplică condensarea semantică Caveman asupra promptului rămas în limbaj natural. Pipeline-urile Stacked pot fi configurate global sau prin combo-uri de compresie atribuite combo-urilor de rutare.
 
-**Recomandat pentru:** Contexte mixte, cu jurnale voluminoase ale instrumentelor plus instrucțiuni umane sau rezumate ale asistentului.
+**Ideal pentru:** Context mixt cu jurnale mari de unelte, plus instrucțiuni umane sau rezumate ale asistentului.
 
 ---
 

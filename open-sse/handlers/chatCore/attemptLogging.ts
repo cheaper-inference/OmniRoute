@@ -26,6 +26,7 @@ import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
 import { readAddedWait } from "../../utils/proxyFetch.ts";
 import { discardSessionTurnAttempt } from "./sessionTurnAttempts.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -254,6 +255,7 @@ export type PersistAttemptLogsArgs = {
   clientResponse?: unknown;
   claudeCacheMeta?: Record<string, unknown>;
   claudeCacheUsageMeta?: Record<string, unknown>;
+  geminiPromptCache?: Record<string, unknown> | null;
   cacheSource?: "upstream" | "semantic";
   /**
    * #13130: time to the first forwarded stream chunk (ms), as measured by
@@ -283,7 +285,7 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
-  clientRawRequest: { endpoint?: string; body?: unknown } | null | undefined;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   /** This attempt's agent context; identifies the attempt whose session turn a failure drops. */
   agentContext?: object | null;
   requestedModel: unknown;
@@ -412,6 +414,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     clientResponse,
     claudeCacheMeta,
     claudeCacheUsageMeta,
+    geminiPromptCache,
     cacheSource,
     ttft,
   } = args;
@@ -596,6 +599,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       attachLogMeta(truncateForLog(retainedRequest as Record<string, unknown>), {
         ...accountRotationMeta,
         claudePromptCache: claudeCacheMeta,
+        geminiPromptCache,
       })
     ),
     responseBody: cloneBoundedChatLogPayload(
@@ -609,6 +613,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
             }
           : null,
         claudePromptCacheUsage: claudeCacheUsageMeta,
+        geminiPromptCache,
         // Operators can tell estimated token counts (and the cost derived from them)
         // apart from provider-reported ones. Log-only: billing is unchanged.
         usageEstimated: isEstimatedUsage(tokens) ? true : null,
@@ -629,6 +634,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     correlationId: correlationId || traceId,
     modelPinned: modelPinned || false,
     sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,

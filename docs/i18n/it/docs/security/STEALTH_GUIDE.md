@@ -20,60 +20,60 @@ Le funzionalità stealth esistono affinché OmniRoute possa fungere da livello d
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Le sessioni persistenti di `wreq-js` vengono create in modo lazy per ogni ambito di account e proxy risolto. Il
-`TlsClient` a livello di processo raggruppa al massimo 128 sessioni che simulano **Chrome 124 su macOS** per
-i servizi a monte protetti da Cloudflare. `TlsClient.fetch()` si arresta in modo sicuro quando il runtime nativo
-non è disponibile; il chiamante può selezionare esplicitamente un fallback al di fuori di questo wrapper.
+Le sessioni persistenti `wreq-js` vengono create in modo lazy per ambito dell'account e proxy risolto. Il
+`TlsClient` a livello di processo gestisce un pool di non più di 128 sessioni che impersonano **Chrome 124 su macOS** per
+gli upstream protetti da Cloudflare. `TlsClient.fetch()` fallisce in modalità chiusa quando il runtime nativo non è
+disponibile; un chiamante può selezionare esplicitamente un fallback esterno a questo wrapper.
 
 - Profilo della sessione: `browser: "chrome_124", os: "macos"`
 - Risoluzione del proxy (priorità): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (anche in minuscolo)
-- Timeout: `TLS_CLIENT_TIMEOUT_MS` (eredita da `FETCH_TIMEOUT_MS`, valore predefinito 600000)
+- Timeout: `TLS_CLIENT_TIMEOUT_MS` (ereditato da `FETCH_TIMEOUT_MS`, valore predefinito 600000)
 - La Response di `wreq-js` è compatibile con fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Watchdog del primo byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  si risolve non appena arrivano gli header dal servizio a monte, quindi `TLS_CLIENT_TIMEOUT_MS` da solo non può imporre un limite a un
-  corpo che non restituisce mai un primo byte. `guardTlsFirstByte()` mette in competizione la prima `read()` del corpo
-  con `TLS_FIRST_BYTE_WATCHDOG_MS` (valore predefinito `10000`; `0` lo disabilita); un corpo integro
-  non viene influenzato, mentre un corpo bloccato annulla il lettore wreq e consente alla logica di fallback TLS
-  esistente di `proxyFetch` di passare al dispatcher diretto/proxy (una richiesta non sicura da ritrasmettere, ad esempio
-  una POST con un corpo, genera comunque un errore anziché essere ritentata silenziosamente).
+  si risolve non appena arrivano gli header dall'upstream, quindi `TLS_CLIENT_TIMEOUT_MS` da solo non può imporre un limite a un
+  body che non produce mai un primo byte. `guardTlsFirstByte()` mette in competizione il primo `read()` del body
+  con `TLS_FIRST_BYTE_WATCHDOG_MS` (valore predefinito `10000`, `0` lo disabilita); un body integro non viene
+  influenzato, mentre un body bloccato annulla il reader wreq e consente alla logica di fallback TLS esistente di
+  `proxyFetch` di passare al dispatcher diretto/proxy (una richiesta che non può essere riprodotta in sicurezza, ad es.
+  una POST con un body, genera comunque un errore invece di essere ritentata silenziosamente).
 
-### Trasporto dei provider basato su cookie web — wreq-js 3.2.0
+### Trasporto dei provider basati su cookie web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` è l'adattatore condiviso per i cinque trasporti specializzati
-basati su cookie web riportati di seguito. Ogni sottile wrapper del provider seleziona un profilo browser/OS. L'adattatore
-utilizza il singolo loader del runtime wreq e il pool di trasporto in `open-sse/utils/tlsClient.ts`, indicizzati per
-profilo + OS + proxy risolto, mentre ogni richiesta usa `cookieMode: "ephemeral"`. Gli account e
-le richieste condividono quindi le connessioni a livello di trasporto, ma mai una sessione wreq o un cookie jar.
+`open-sse/services/tlsClientBase.ts` è l'adapter condiviso per i cinque trasporti specializzati
+basati su cookie web riportati di seguito. Ogni sottile wrapper del provider seleziona un profilo browser/SO. L'adapter
+utilizza l'unico loader del runtime wreq e il pool di trasporto in `open-sse/utils/tlsClient.ts`, indicizzato per
+profilo + SO + proxy risolto, mentre ogni richiesta utilizza `cookieMode: "ephemeral"`. Gli account e le
+richieste condividono quindi le connessioni a livello di trasporto, ma mai una sessione wreq o un cookie jar.
 
-| Provider   | Profilo       | OS emulato | Criterio EOF dello stream                  |
+| Provider   | Profilo       | SO emulato | Criterio EOF dello stream                  |
 | ---------- | ------------- | ---------- | ------------------------------------------ |
 | Claude     | `chrome_146`  | Linux      | include `[DONE]`                           |
-| Perplexity | `firefox_148` | macOS      | include `event: end_of_stream`             |
+| Perplexity | `firefox_151` | macOS      | include `event: end_of_stream`             |
 | Grok       | `chrome_146`  | Linux      | esclude `[DONE]`                           |
 | Notion     | `chrome_146`  | Windows    | include `[DONE]`                           |
 | LMArena    | `chrome_146`  | Windows    | nessun sentinella; chiusura all'EOF nativo |
 
-- Lo streaming utilizza direttamente il `ReadableStream` della risposta nativa; non viene creato
-  alcun file temporaneo o sidecar.
+- Lo streaming utilizza direttamente il `ReadableStream` della risposta nativa; non viene creato alcun file temporaneo o
+  processo sidecar.
 - Vengono esaminati fino a 256 byte iniziali prima di esporre uno stream. I provider SSE memorizzano nel buffer gli errori
-  non SSE; Grok/LMArena mappano le challenge di Cloudflare a `403` e le pagine interstiziali HTML a `502`.
-- Il timeout della richiesta nativa rimane racchiuso in una scadenza rigida assoluta JS. Un blocco invalida
-  e chiude soltanto il trasporto interessato relativo a profilo/OS/proxy, prima che la richiesta successiva lo ricrei.
-- La priorità di risoluzione del proxy è `proxyUrl` per chiamata → contesto dell'account/dashboard con ambito di richiesta →
+  non SSE; Grok/LMArena associano le challenge Cloudflare a `403` e le pagine HTML interstiziali a `502`.
+- Il timeout nativo della richiesta rimane racchiuso da una scadenza massima assoluta in JS. Un blocco invalida
+  e chiude soltanto il trasporto interessato per profilo/SO/proxy, prima che la richiesta successiva lo ricrei.
+- La priorità di risoluzione del proxy è, per ogni chiamata, `proxyUrl` → contesto dell'account/dashboard con ambito limitato alla richiesta →
   `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (incluse le varianti in minuscolo). Gli errori di risoluzione causano
-  un arresto sicuro anziché consentire la fuoriuscita di una connessione diretta. LMArena esegue intenzionalmente la risoluzione rispetto ad `arena.ai`.
-- `byteResponse` restituisce un URL `data:` con il tipo di contenuto appropriato, senza corruzione UTF-8.
+  un fallimento in modalità chiusa, anziché esporre una connessione diretta. LMArena esegue deliberatamente la risoluzione rispetto a `arena.ai`.
+- `byteResponse` restituisce un URL `data:` con tipo di contenuto, senza corruzione UTF-8.
 - Gli errori sono `TlsClientUnavailableError` (pacchetto/addon non disponibile), `TlsClientHangError`
-  (scadenza superata) e `WreqTransportCapacityError` (il codice di errore condiviso relativo alla capacità delle sessioni)
-  quando tutti i 128 slot limitati per profilo/OS/proxy sono attivi o in fase di chiusura.
+  (scadenza superata) e `WreqTransportCapacityError` (il codice di errore condiviso per la capacità delle sessioni)
+  quando tutti i 128 slot limitati per profilo/SO/proxy sono attivi o in fase di chiusura.
 
-La sessione generica di `TlsClient` descritta sopra rimane specializzata per lo stato persistente dei cookie
-gestito dal browser. Entrambi i percorsi riutilizzano un unico loader del modulo wreq memorizzato nella cache e un hook del ciclo di vita del processo; i rispettivi pool rimangono
-separati perché i cicli di vita dei cookie sono intenzionalmente diversi.
+La sessione generica `TlsClient` descritta sopra rimane specializzata per lo stato persistente dei cookie supportato
+dal browser. Entrambi i percorsi riutilizzano un unico loader del modulo wreq memorizzato nella cache e un hook del ciclo di vita del processo; i rispettivi pool rimangono
+separati perché la durata dei cookie è intenzionalmente diversa.
 
-I profili sono supportati dal pacchetto fissato, ma l'accettazione effettiva da parte dei WAF può cambiare indipendentemente
-dai test locali del contratto. Convalidare le modifiche delle impronte digitali rispetto a un account live esplicitamente autorizzato
-prima di dichiarare la parità con un browser del servizio a monte.
+I profili sono supportati dal pacchetto con versione fissata, ma l'effettiva accettazione da parte dei WAF può cambiare indipendentemente
+dai test locali del contratto. Convalidare le modifiche al fingerprint rispetto a un account live esplicitamente autorizzato
+prima di dichiarare la parità con un browser upstream.
 
 ---
 

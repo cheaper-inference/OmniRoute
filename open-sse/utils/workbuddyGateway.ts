@@ -1,5 +1,13 @@
 import { createHash, randomBytes } from "node:crypto";
 
+import {
+  getWorkbuddyChatHeaders,
+  WORKBUDDY_UA_VERSION,
+  WORKBUDDY_USER_AGENT,
+} from "../config/providerHeaderProfiles.ts";
+
+export { WORKBUDDY_UA_VERSION, WORKBUDDY_USER_AGENT };
+
 /**
  * WorkBuddy gateway compliance utilities (Issue #16978).
  *
@@ -8,20 +16,7 @@ import { createHash, randomBytes } from "node:crypto";
  * and competitor prompt anti-ban sanitization (preventing 11128 errors).
  */
 
-export const WORKBUDDY_UA_VERSION = "5.5.6";
-export const WORKBUDDY_USER_AGENT = `WorkBuddy/${WORKBUDDY_UA_VERSION}`;
-
-export const WORKBUDDY_DEFAULT_HEADERS: Record<string, string> = {
-  "User-Agent": WORKBUDDY_USER_AGENT,
-  "X-Product": "SaaS",
-  "X-IDE-Type": "WorkBuddy",
-  "X-IDE-Name": "WorkBuddy",
-  "X-IDE-Version": WORKBUDDY_UA_VERSION,
-  "X-Requested-With": "XMLHttpRequest",
-  "X-Agent-Intent": "craft",
-  "X-Agent-Purpose": "conversation",
-  "X-Agent-Type": "main",
-};
+export const WORKBUDDY_DEFAULT_HEADERS: Record<string, string> = getWorkbuddyChatHeaders();
 
 const SALT = randomBytes(16).toString("hex");
 
@@ -425,6 +420,21 @@ export function fitTools(body: Record<string, unknown>): {
     for (const m of body.messages as Array<Record<string, unknown>>)
       renameMessageToolRefs(m, theirs);
   }
+  if (names.size) {
+    const merged =
+      body._toolNameMap instanceof Map
+        ? new Map(body._toolNameMap as Map<string, string>)
+        : new Map<string, string>();
+    for (const [alias, original] of names) {
+      merged.set(alias, original);
+    }
+    Object.defineProperty(body, "_toolNameMap", {
+      value: merged,
+      enumerable: false,
+      configurable: true,
+      writable: true,
+    });
+  }
   return { changed, names };
 }
 
@@ -466,6 +476,16 @@ export function sanitizeToolChoice(body: Record<string, unknown>): boolean {
   return true;
 }
 
+export function alignTurnOrder(messages: Array<Record<string, unknown>>): boolean {
+  let i = messages.length - 1;
+  while (i >= 0 && messages[i]?.role === "user") i--;
+  if (i < messages.length - 1 && i >= 0 && messages[i]?.role === "tool") {
+    messages.splice(i + 1, 0, { role: "assistant", content: "" });
+    return true;
+  }
+  return false;
+}
+
 const BILLING_HEADER_RE = /x-anthropic-billing-header:[^\n]*\n?/gi;
 
 export function sanitizeWorkbuddyBody(body: unknown): unknown {
@@ -495,13 +515,8 @@ export function sanitizeWorkbuddyBody(body: unknown): unknown {
       msgs.unshift({ role: "system", content: "You are a helpful assistant." });
     }
 
-    // Gemini turn alignment (error 11153):
-    // If ending with tool results followed by user messages, pad with an empty assistant message
-    let i = msgs.length - 1;
-    while (i >= 0 && msgs[i]?.role === "user") i--;
-    if (i < msgs.length - 1 && i >= 0 && msgs[i]?.role === "tool") {
-      msgs.splice(i + 1, 0, { role: "assistant", content: "" });
-    }
+    // Gemini turn alignment (error 11153)
+    alignTurnOrder(msgs);
 
     b.messages = msgs;
   }

@@ -44,20 +44,57 @@ export function findStaleTargets(sources) {
   return stale;
 }
 
+/**
+ * Pure. Splits a drift report into what the BASE branch already had (`inherited`) and what
+ * only this tree adds (`fresh`). A PR gate fails on `fresh` alone: 14 sources edited without a
+ * re-translation on release/v3.8.53 (translation backend down until ~2026-10-24) painted every
+ * unrelated PR red, which is exactly the "never treat an inherited base-red in your branch" rule
+ * the repo already applies to humans. Identity = source path (+ locale for targets); a source
+ * drifted at base that the PR edits again stays inherited — the wave owns it either way.
+ */
+export function partitionAgainstBase(report, base) {
+  const key = (x) => `${x.rel}::${x.locale ?? ""}`;
+  const fresh = {};
+  const inherited = {};
+  for (const bucket of ["driftedSources", "missingTargets", "driftedTargets"]) {
+    const seen = new Set((base?.[bucket] ?? []).map(key));
+    fresh[bucket] = (report?.[bucket] ?? []).filter((x) => !seen.has(key(x)));
+    inherited[bucket] = (report?.[bucket] ?? []).filter((x) => seen.has(key(x)));
+  }
+  const count = (b) => b.driftedSources.length + b.missingTargets.length + b.driftedTargets.length;
+  return {
+    fresh,
+    inherited,
+    freshCount: count(fresh),
+    inheritedCount: count(inherited),
+    ok: count(fresh) === 0,
+  };
+}
+
 function parseArgs(argv) {
-  const opts = { mode: "strict", json: false };
-  for (const arg of argv.slice(2)) {
+  const opts = { mode: "strict", json: false, root: null, baseReport: null };
+  const args = argv.slice(2);
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
     if (arg === "--warn") opts.mode = "warn";
     else if (arg === "--strict") opts.mode = "strict";
     else if (arg === "--json") opts.json = true;
+    else if (arg === "--root") opts.root = args[++i];
+    else if (arg.startsWith("--root=")) opts.root = arg.slice(7);
+    else if (arg === "--base-report") opts.baseReport = args[++i];
+    else if (arg.startsWith("--base-report=")) opts.baseReport = arg.slice(14);
     else if (arg === "--help" || arg === "-h") {
       console.log(
         [
-          "Usage: node scripts/i18n/check-translation-drift.mjs [--strict|--warn] [--json]",
+          "Usage: node scripts/i18n/check-translation-drift.mjs [--strict|--warn] [--json] [--root <dir>] [--base-report <json>]",
           "",
-          "  --strict   (default) exit 1 when any source or target is out of date",
-          "  --warn     report drift but exit 0",
-          "  --json     write a machine-readable report to stdout",
+          "  --strict        (default) exit 1 when any source or target is out of date",
+          "  --warn          report drift but exit 0",
+          "  --json          write a machine-readable report to stdout",
+          "  --root <dir>    check another checkout (e.g. the PR base) with THIS script",
+          "  --base-report   JSON report of the base checkout: drift already present there is",
+          "                  reported as inherited and does not fail the gate; only drift this",
+          "                  tree introduces does (PR-scoped gate, 2026-10-20)",
         ].join("\n")
       );
       process.exit(0);
@@ -72,8 +109,10 @@ function sha256(buf) {
 
 async function main() {
   const opts = parseArgs(process.argv);
+  const ROOT_DIR = opts.root ? path.resolve(opts.root) : ROOT;
+  const STATE_FILE = opts.root ? path.join(ROOT_DIR, ".i18n-state.json") : STATE_PATH;
 
-  if (!existsSync(STATE_PATH)) {
+  if (!existsSync(STATE_FILE)) {
     const msg = ".i18n-state.json not found — run `npm run i18n:run` to bootstrap.";
     if (opts.json) {
       process.stdout.write(JSON.stringify({ ok: false, reason: "missing-state" }) + "\n");
@@ -83,13 +122,13 @@ async function main() {
     process.exit(opts.mode === "warn" ? 0 : 1);
   }
 
-  const state = JSON.parse(await fs.readFile(STATE_PATH, "utf8"));
+  const state = JSON.parse(await fs.readFile(STATE_FILE, "utf8"));
   // Scope: only the documentation core set is translated on purpose (PR-0 decision, 22
   // sources); state entries for other docs (older per-locale extras) are not a CI concern.
   // `--all` restores the full-state behaviour for local inspection.
   const { computeDocsCoreSet } = await import("./lib/docs-core-set.mjs");
-  const config = JSON.parse(await fs.readFile(path.join(ROOT, "config", "i18n.json"), "utf8"));
-  const coreSet = computeDocsCoreSet({ root: ROOT, config });
+  const config = JSON.parse(await fs.readFile(path.join(ROOT_DIR, "config", "i18n.json"), "utf8"));
+  const coreSet = computeDocsCoreSet({ root: ROOT_DIR, config });
   const coreList = Array.isArray(coreSet)
     ? coreSet
     : (coreSet.coreSet ?? coreSet.files ?? Object.keys(coreSet));
@@ -107,7 +146,7 @@ async function main() {
 
   for (const [rel, entry] of Object.entries(sources)) {
     checkedSources++;
-    const absSource = path.join(ROOT, rel);
+    const absSource = path.join(ROOT_DIR, rel);
     if (!existsSync(absSource)) {
       driftedSources.push({ rel, reason: "source-missing" });
       continue;
@@ -126,8 +165,8 @@ async function main() {
       checkedTargets++;
       // Mirror the path layout used by run-translation.mjs.
       const targetAbs = rel.includes("/")
-        ? path.join(ROOT, "docs", "i18n", locale, rel)
-        : path.join(ROOT, "docs", "i18n", locale, rel);
+        ? path.join(ROOT_DIR, "docs", "i18n", locale, rel)
+        : path.join(ROOT_DIR, "docs", "i18n", locale, rel);
       if (!existsSync(targetAbs)) {
         missingTargets.push({ rel, locale });
         continue;
@@ -145,8 +184,25 @@ async function main() {
   // backend outage nobody can fix in-branch helps no one. The list is the
   // work order for `npm run i18n:run -- --locale=<code> --files=<sources>`.
   const staleTargets = findStaleTargets(sources);
-  const ok =
+  let ok =
     driftedSources.length === 0 && missingTargets.length === 0 && driftedTargets.length === 0;
+  // PR-scoped gate: with the base checkout's report, only drift THIS tree introduces blocks;
+  // drift the base already carried is inherited (printed, not fatal — the i18n wave owns it).
+  let partition = null;
+  if (opts.baseReport) {
+    const base = JSON.parse(await fs.readFile(path.resolve(opts.baseReport), "utf8"));
+    partition = partitionAgainstBase({ driftedSources, missingTargets, driftedTargets }, base);
+    ok = partition.ok;
+    if (!opts.json) {
+      console.log(
+        `[i18n-check] base-report: ${partition.inheritedCount} inherited drift item(s) (not blocking), ${partition.freshCount} introduced by this tree`
+      );
+      for (const b of ["driftedSources", "missingTargets", "driftedTargets"]) {
+        for (const x of partition.fresh[b])
+          console.log(`  ✗ NEW ${b}: ${x.rel}${x.locale ? ` [${x.locale}]` : ""}`);
+      }
+    }
+  }
 
   if (opts.json) {
     process.stdout.write(
@@ -159,6 +215,7 @@ async function main() {
           missingTargets,
           driftedTargets,
           staleTargets,
+          ...(partition ? { fresh: partition.fresh, inherited: partition.inherited } : {}),
         },
         null,
         2

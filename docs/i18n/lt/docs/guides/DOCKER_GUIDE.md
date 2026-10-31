@@ -649,27 +649,29 @@ sudo systemctl enable --now omniroute-update.path
 Prieš atsisiųsdama paslauga pašalina užklausą, kad nesėkmingas vykdymas nesikartotų cikliškai. Jei
 `DOCKER_UPDATE_TRIGGER_FILE` nenustatytas, valdymo skydelyje išlieka rankinių komandų eiga.
 
-## Pasiekiamumas: numatytoji SQLite konfigūracija skirta vienai replikai
+## Prieinamumas: numatytasis SQLite yra vienos replikos
 
-Standartinėje Docker / Kubernetes OmniRoute konfigūracijoje veikia **vienas Node procesas ir vienas SQLite rašymo procesas**. Toks išdėstymas **nepalaiko didelio pasiekiamumo**.
+Akcijų Docker / Kubernetes OmniRoute yra** vienas mazgas apdoroja + vieną SQLite rašytoją** . Didelis prieinamumas yra** nepalaikoma** toje topologijoje.
 
-| Apribojimas                                                    | Pasekmė                                                                                                                                                                                                                                                                                                                                                                |
-| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Vienas rašymo procesas                                         | **Neleiskite** kelioms replikoms naudoti to paties SQLite failo. Taip sugadinama DB.                                                                                                                                                                                                                                                                                   |
-| Perkūrimas / paleidimas iš naujo / nutraukimas dėl HEALTHCHECK | **Visiškai nutrūksta** vykdomi SSE srautai, valdymo skydelio sesijos ir atmintyje laikoma būsena. Atjungiami visi prisijungę klientai. Naujos užklausos laikotarpiu, kai nėra pasiekiamo galinio taško, iš atvirkštinio tarpinio serverio gauna **`502 Bad Gateway: Unknown error`**, o ne OmniRoute JSON – klientai negali to atskirti nuo teikėjo trikties (#11015). |
-| Ta pati įvykių kilpa kaip `/healthz`                           | Apkrautas katalogo ar glaudinimo ciklas gali uždelsti patikras; dėl trumpo skirtojo laiko tada iš naujo paleidžiama **vienintelė** replika.                                                                                                                                                                                                                            |
+| Apribojimas                                    | Pasekmė                                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Vienišas rašytojas                             | Daryk** ne** paleiskite kelias kopijas tame pačiame SQLite faile. Tai sugadina DB.                                                                                                                                                                                                                                                         |
+| Atkurti / paleisti iš naujo / HEALTHCHECK kill | **Visiškas išjungimas** SSE skrydžio metu, prietaisų skydelio seansų ir atminties būsenos. Kiekvienas prijungtas klientas nukrenta. Naujos užklausos tuščiame galutinio taško lange gauna atvirkštinį tarpinį serverį**`502 Bad Gateway: Unknown error`** , o ne OmniRoute JSON – klientai negali to atskirti nuo teikėjo gedimo (#11015). |
+| Tas pats įvykio ciklas kaip `/healthz`         | Užimtas katalogas arba suspaudimo žymė gali atidėti zondus; trumpas skirtasis laikas, tada paleidžiamas iš naujo** tik** replika.                                                                                                                                                                                                          |
 
-**Patikrų matrica** (taip pat žr. [Kubernetes patikrų rekomendacijas](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Zondo matrica** (taip pat žr. [Kubernetes zondo rekomendacijas](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Patikra          | Tikslas                                                                            | Nenaudokite                                                               |
-| ---------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Gyvybingumo      | TCP per `PORT` (numatytoji reikšmė `20128`) arba negriežta HTTP `/healthz` patikra | `/api/monitoring/health`                                                  |
-| Parengties       | HTTP `GET /healthz`                                                                | Trumpų skirtųjų laikų, dėl kurių užimta įvykių kilpa laikoma neveikiančia |
-| Išsami / žmonėms | `/api/monitoring/health`                                                           | Automatinei kubelet gyvybingumo patikrai                                  |
+| Zondas          | Tikslas                                                            | Nenaudoti                                                            |
+| --------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| Gyvumas         | TCP ant `PORT` (numatytasis `20128`) arba minkštas HTTP `/healthz` | `/api/monitoring/health`                                             |
+| Pasirengimas    | HTTP `GET /healthz`                                                | Trumpas skirtasis laikas, dėl kurio įvykių ciklas užimtas kaip miręs |
+| Giliai / žmonės | `/api/monitoring/health`                                           | Automatizuotas kubeleto gyvumas                                      |
 
-**Naujinimai:** tikėkitės, kad kiekviena sesija nutrūks. Jei galite, prieš naujindami užbaikite klientų aptarnavimą; naudojant numatytąją SQLite konfigūraciją slenkamasis naujinimas negalimas. Compose `restart: unless-stopped` kartu su Docker `HEALTHCHECK` taip pat pakeis vienintelį procesą, kai konteinerio būsena taps Unhealthy – poveikio mastas bus toks pats.
+**Atnaujinimai:** tikisi, kad kiekviena sesija sumažės. Jei galite, nusausinkite klientus; nėra atnaujinamo numatytojo SQLite atnaujinimo. Sukurti `restart: unless-stopped` plus Docker `HEALTHCHECK` taip pat pakeis vienintelį procesą, kai konteineris yra nesveikas – toks pat sprogimo spindulys.
 
-Kubernetes fragmentas, skirtas **vienai replikai** (būtina naudoti Recreate; nedidinkite `replicas`, kai naudojamas vienas SQLite failas):
+Paruošti aprašai ir vairo diagrama veikia `deploy/kubernetes/` ir `deploy/helm/omniroute/` – žr. [Kubernetes diegimo vadovą](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+„Kubernetes“ fragmentas, skirtas a** viena kopija** (Reikia sukurti iš naujo; nekelkite `replicas` prieš vieną SQLite failą):
 
 ```yaml
 spec:
@@ -696,9 +698,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` užlaikymas leidžia kube pašalinti Service galinius taškus prieš SIGTERM, todėl **naujas** srautas nebesiunčiamas į stabdomą procesą. Vykdomiems `/v1/responses` SSE srautams leidžiama užsibaigti per laikotarpį iki `SHUTDOWN_TIMEOUT_MS` (numatytoji reikšmė – 30 s), naudojant didelės apkrovos priėmimo nuomas (#11015). Naujos užklausos, kurios vis dar pasiekia procesą, gauna `503` + `Retry-After: 5`. Recreate režimu susidaranti spraga be galinių taškų, kol pakaitinis egzempliorius tampa Ready, vis tiek reiškia visišką paslaugos nutrūkimą — tai SQLite topologijos, o ne klaidingos zondų konfigūracijos pasekmė.
+`preStop` sleep“ leidžia „kube“ atsisakyti paslaugų galinių taškų prieš SIGTERM.** naujas** eismas nustoja smogti mirštančiam procesui. Skrydžio metu `/v1/responses` SSE išleidžiamas iki `SHUTDOWN_TIMEOUT_MS` (numatytasis 30 s) pagal sunkiasvorių įleidimo nuomos sutartis (#11015). Naujos užklausos, kurios vis dar pasiekia procesą, gauna `503` + `Retry-After: 5`. Atkurti tuščią galinio taško spragą, kol pakeitimas bus paruoštas, išlieka rimtu gedimu – tai yra SQLite topologija, o ne zondo klaidinga konfigūracija.
 
-Išorinis Postgres / kelių rašytojų HA **nėra** dokumentuotas standartinis naudojimo būdas. Jei jums reikia HA, naudokite vieną repliką arba topologiją, kurią projektas atskirai išbandė ir dokumentavo. Su Postgres/MySQL susiję darbai vykdomi [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kol tai nebus išleista, vienintelis palaikomas būdas padidinti **didelių** `/v1/responses` užklausų apdorojimo pajėgumą yra N nepriklausomų procesų (žr. kitą skyrių), o ne `replicas > 1` viename tome.
+Išorinis Postgres / multi-writer HA yra** ne** dokumentais patvirtintas atsargų kelias. Jei jums reikia HA, pasilikite vieną kopiją arba paleiskite topologiją, kurią projektas išbandė ir dokumentavo atskirai. Postgres/MySQL darbas gyvena [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Kol bus išsiųstas, vienintelis palaikomas būdas daugintis** didelis** `/v1/responses` talpa yra N nepriklausomų procesų (kitas skyrius), o ne `replicas > 1` viename tome.
 
 ## Horizontalusis mastelio didinimas: N nepriklausomų procesų
 

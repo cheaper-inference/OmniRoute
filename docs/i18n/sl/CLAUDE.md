@@ -11,17 +11,18 @@ pomočnika AI (arhitektura, konvencije, testiranje, merila kakovosti, potek dela
 spoznanja o PII). Preberite jo v celoti; projektnih pravil ne dodajajte znova sem. Vse spodaj navedeno velja SAMO
 za Claude Code — gre za operativne dopolnitve pravil, ki so že opredeljena v `AGENTS.md`.
 
-## Izolacija delovnih dreves — posebnosti za Claude Code
+## Izolacija worktree-jev — posebnosti za Claude Code
 
-Celoten obvezni protokol za delovna drevesa (potrditev osnovne veje, kanonična pot
-`.claude/worktrees/`, `cp -al` node_modules, pravila odstranjevanja) je v `AGENTS.md` → Potek dela Git → »Izolacija
-delovnih dreves«. Točke, značilne za Claude Code:
+Celoten obvezni protokol za worktree-je (potrditev osnovne veje, kanonična pot
+`.claude/worktrees/`, `cp -al` za node_modules, pravila za razgradnjo) je v
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (povzet v `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Posebnosti za Claude Code:
 
-- Osnovno vejo potrdite z upravljavcem prek `AskUserQuestion` (strogo pravilo št. 19), razen če vam jo je
-  že navedel.
-- Prednost dajte izvornemu orodju `EnterWorktree` — delovna drevesa že ustvarja pod
-  `.claude/worktrees/` (kanonična pot). Delovno drevo ustvarite z dokumentiranim ukazom `git
-worktree add`, nato pa pokličite `EnterWorktree` z njegovo `path`.
+- Z operaterjem potrdite osnovno vejo prek `AskUserQuestion` (Hard Rule #19), razen če vam
+  tega ni že povedal.
+- Po možnosti uporabite vgrajeno orodje `EnterWorktree` — že samo ustvarja worktree-je v
+  `.claude/worktrees/` (kanonična pot). Ustvarite worktree z dokumentiranim ukazom
+  `git worktree add`, nato pokličite `EnterWorktree` z njegovim `path`.
 
 ## Varnost med sejami — posebnosti za Claude Code
 

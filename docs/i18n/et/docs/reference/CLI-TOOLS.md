@@ -6,15 +6,15 @@
 
 Viimati uuendatud: 2026-08-23
 
-OmniRoute integreerub kolme kategooria CLI-tööriistadega, mis on jaotatud kolme eraldi töölaualehe vahel:
+OmniRoute integreerub kolme kategooria CLI tööriistadega, mis on jagatud kolmele spetsiaalsele armatuurlaua lehele:
 
-| Leht            | Marsruut                | Põhimõte                                                                             | Arv          |
-| --------------- | ----------------------- | ------------------------------------------------------------------------------------ | ------------ |
-| **CLI-koodid**  | `/dashboard/cli-code`   | Kodeerimistööriistad, mille suunate OmniRoute'i (klient → CLI → OmniRoute → pakkuja) | 26           |
-| **CLI-agendid** | `/dashboard/cli-agents` | Autonoomsed agendid, mille suunate OmniRoute'i (sama voog, laiem ulatus)             | 10           |
-| **ACP-agendid** | `/dashboard/acp-agents` | CLI-d, mille OmniRoute käivitab stdio/ACP kaudu taustsüsteemina (vastupidine voog)   | vt registrit |
+| Lehekülg        | Marsruut                | Kontseptsioon                                                                         | Count           |
+| --------------- | ----------------------- | ------------------------------------------------------------------------------------- | --------------- |
+| **CLI koodid**  | `/dashboard/cli-code`   | Kodeerimistööriistad, millele osutate OmniRoute (kliendi → CLI → OmniRoute → pakkuja) | 26              |
+| **CLI agendid** | `/dashboard/cli-agents` | Autonoomsed agendid, millele osutate OmniRoute (sama voog, laiem ulatus)              | 11              |
+| **ACP agendid** | `/dashboard/acp-agents` | CLIs et OmniRoute sünnib taustaprogrammina stdio/ACP (vastuvoolu) kaudu               | vaata registrit |
 
-Pärandmarsruudid suunatakse 308 kaudu ümber: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Pärandmarsruudid suunavad ümber 308 kaudu: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP-agendid (vastupidine käivitusvoog):
 
 ---
 
-## Automaatne seadistamine käskudega `setup-*`
+## Automaatne konfigureerimine `setup-*`
 
-Iga tööriista konfiguratsiooni ei pea käsitsi kirjutama. OmniRoute sisaldab iga toetatud CLI jaoks käsku `setup-*`, mis loeb töötava OmniRoute’i (kohaliku või kaug-) **reaalajas** mudelikataloogi ja kirjutab teie masinasse tööriista enda konfiguratsiooni:
+Te ei pea iga tööriista konfiguratsiooni käsitsi kirjutama. OmniRoute saadab toetatud CLI kohta `setup-*` käsu, mis loeb** elada** mudelikataloogi töötavast OmniRoute (kohalikust või kaugjuhtimispuldist) ja kirjutab teie masinasse tööriista enda konfiguratsiooni:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,19 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Kõik käsud aktsepteerivad suvandeid `--remote <url> --api-key <key>` (kohaliku tööriista seadistamiseks kaug-OmniRoute’iga), `--dry-run` (eelvaade ilma kirjutamiseta) ja `--port`. Mudelite automaatse tuvastamiseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) võtavad suvandi `--model <id>` (ja mitteinteraktiivsete käivituste jaoks `--yes`). `setup-5dive` on ainus retsept, mis ei kirjuta asukohta `$HOME`: see seadistab 5dive’i agentide parve, kirjutades parve hosti juurkasutajale kuuluva autentimisprofiili, mistõttu käivitab see end uuesti käsu `sudo` kaudu ja sellel puudub oma kaugrežiim. CLI käivitamiseks õigesti sisestatud keskkonnamuutujatega ja ilma konfiguratsiooni kirjutamata kasutage üldist käivitajat `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — sihtmärgid ja aliased pärinevad failist `bin/cli/cli-manifest.mjs`); pärandkäivitajad `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) on endiselt saadaval. Gemini CLI-d saab ainult käivitada: see on käsu `omniroute run` sihtmärk, kuid sellel puudub `setup-*`/`configure`-retsept.
+Kõik aktsepteerivad `--remote <url> --api-key <key>` (kohaliku tööriista seadistamine kaug- OmniRoute vastu), `--dry-run` (eelvaade ilma kirjutamata) ja `--port`. Ilma mudeli automaattuvastuseta tööriistad (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) võtavad `--model <id>` (ja `--yes` mitteinteraktiivsete jooksude jaoks). `setup-5dive` on üks retsept, mis ei kirjuta `$HOME` alla: see konfigureerib 5dive'i agendipargi, kirjutades masinapargi hostile juuromaniku autentimisprofiili, nii et see käivitab uuesti `sudo` kaudu ja sellel pole oma kaugrežiimi. Kui soovite käivitada CLI mille env on sisestatud õige ja konfiguratsiooni pole üldse kirjutatud, kasutage üldist `omniroute run <target>` käivitajat (claude, codex, aider, goose, opencode, qwen, gemini, whycodes – sihtmärgid ja varjunimed pärinevad `bin/cli/cli-manifest.mjs`); pärand tööriistapõhised kanderaketid `omniroute launch` (Claude Code) ja `omniroute launch-codex` (Codex) jäävad kättesaadavaks. Gemini CLI on ainult käivitamine: see on `omniroute run` sihtmärk, kuid sellel pole `setup-*`/`configure` retsepti.
 
-> **Täielik viide:** põhitabel — mida iga käsk kirjutab, kõik lipud, kohalik ja kaugrežiim ning millised tööriistad vajavad järelliidet `/v1` — asub jaotises
-> **[CLI integratsioonid](../guides/CLI-INTEGRATIONS.md)**.
+> **Täielik viide:** põhitabel – mida iga käsk kirjutab, iga lipp, kohalik vs kaugjuhtimispult ja millised tööriistad soovivad `/v1` järelliidet – asub** [CLI integratsioonid](../guides/CLI-INTEGRATIONS.md)** .
 
-### Nende käskude käitamine konteineris
+### Nende kasutamine konteineris
 
-OmniRoute’i konteineris käivitatud käsk `setup-*` kirjutab konteineri enda kodukataloogi, mida ükski hosti CLI ei loe ja mis kaob koos konteineriga. OmniRoute tuvastab selle ning lõpetab kirjutamise asemel koodiga `2` ja kuvab juhised. Edasi liikumiseks on kaks toetatud viisi — installige CLI hosti ja looge konteineriga ühendus käsu `omniroute connect` abil või haakige konfiguratsioonikataloogid bind-mount-meetodil ja määrake `CLI_CONFIG_HOME` (compose’i profiil `host`). Iga käsk `setup-*`, samuti `omniroute configure` ja `omniroute config set`, aktsepteerib suvandit `--allow-container-write`, kui tegelikult soovitegi seadistada konteineri enda CLI-sid; serveri puhul teeb sama `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. Vaadake
-[Dockeri juhend → Hosti CLI-tööriistade seadistamine](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute konteineris käivitatud `setup-*` käsk kirjutab konteineri enda koju, mida ükski host CLI ei loe ja mis kaob koos konteineriga. OmniRoute tuvastab selle ja väljub `2` koos juhistega, mitte kirjutades. Kaks toetatud teed – installige CLI hostile ja `omniroute connect` konteinerisse või ühendage konfiguratsioonikataloogid ja määrake `CLI_CONFIG_HOME` ( `host` koostamise profiil). Iga `setup-*` käsk, pluss `omniroute configure` ja `omniroute config set`, aktsepteerib `--allow-container-write` konteineri enda CLIs seadistamisel, mida sa tegelikult mõtlesid; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` teeb sama serveri jaoks. Vaadake [Docker juhendit → Hosti CLI tööriistade konfigureerimine](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Töölaua **rakendamise lõpp-punkt** (`POST /api/cli-tools/apply`) jõustab sama kaitse: konteineris vastab hostist bind-mount-meetodil haakimata sihtkohta kirjutamise katse koodiga **`422`**, sisaldades väärtust `containerEphemeralTarget: true`, turvalist veateksti ning — hostiretseptiga tööriistade puhul (claude, codex, opencode, cline, kilo, continue) — väljal `hostSetupCommand` hostis käivitatavat käsku (nt `omniroute setup-opencode`); midagi ei kirjutata. `dryRun: true` töötab ka konteinerirežiimis ning tagastab redigeeritud eelvaate ja sihttee ilma ketast muutmata. Eelvaate sisu ei ole mandaate sisaldav konfiguratsioon, mida saaks kopeerida või importida. Rakendage algsete tööriista, baas-URL-i, API-võtme ja mudeli sisenditega hostis või kasutage näidatud hostipoolset seadistuskäsku. Eelvaate päise ja päringulepingu kohta vaadake dokumenti [CLI konfiguratsiooni turvalisus](../security/CLI-CONFIGURATION.md). Selline käitumine on tahtlik ja regressioonide eest kaitstud testiga `tests/unit/api/cli-tools/apply-container-guard.test.ts` — ärge kunagi „parandage” vastust 422 kaitse eemaldamisega.
+Armatuurlaua oma** rakenda lõpp-punkti** (`POST /api/cli-tools/apply`) rakendab sama kaitset: konteineris vastab kiri, mille sihtmärk ei ole hostist seotud**`422`** koos `containerEphemeralTarget: true`, ohutu veatekst ja — hostiretseptiga tööriistade puhul (claude, codex, opencode, cline, kilo, Jätka) — `hostSetupCommand` (nt `omniroute setup-opencode`), mis töötab selle asemel hostis; pole midagi kirjas. `dryRun: true` töötab konteinerrežiimis ja tagastab redigeeritud eelvaate + sihttee ilma ketast puudutamata. Eelvaate sisu ei ole kopeerimiseks või importimiseks mandaati kandev konfiguratsioon. Rakendage hosti algsete tool/base URL/API key/model sisenditega või kasutage näidatud hostipoolse häälestuskäsku. Eelvaate päise ja lepingu taotlemise kohta vaadake jaotist [CLI konfiguratsiooni turvalisus](../security/CLI-CONFIGURATION.md). Selline käitumine on tahtlik ja `tests/unit/api/cli-tools/apply-container-guard.test.ts` kaitseb regressiooni eest – ärge kunagi "parandage" 422 kaitset eemaldades.
 
 ---
 
@@ -106,59 +105,60 @@ ning lipu `--model` sidumise. Kõrvalekallete kontroll
 kasutajaliidese kataloog ja kõik tarbijaliidesed püsivad sünkroonis — ühele
 liidesele ilma teisteta lisatud siht põhjustab testikomplekti nurjumise, mitte märkamatu kõrvalekalde.
 
-## 1. CLI Code'i kataloog (27 tööriista)
+## 1. CLI koodi kataloog (27 tööriista)
 
-Kõik tööriistad, mis kuvatakse jaotises `/dashboard/cli-code`. Tööriistad, millel on `baseUrlSupport: none`, ühendatakse kohandatud baas-URL-i asemel MITM-i või käsitsi seadistamise juhendi kaudu:
+Kõik `/dashboard/cli-code` kuvatavad tööriistad. Need, millel on `baseUrlSupport: none` ühendatakse kohandatud baasi URL asemel läbi MITM või käsitsi juhiku:
 
-| id           | nimi                    | tarnija             | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Kohandatud CLI          | —                   | full           | custom-builder | false        |
+| id                | nimi                        | müüja                   | baseUrlSupport | configType            | acpSpawnable |
+| ----------------- | --------------------------- | ----------------------- | -------------- | --------------------- | ------------ |
+| claude            | Claude kood                 | Anthropic               | täis           | env                   | tõsi         |
+| koodeks           | OpenAI Codex CLI            | OpenAI                  | täis           | kohandatud            | tõsi         |
+| zcode             | ZCode (GLM kodeerimisplaan) | Z.ai                    | mitte ühtegi   | kohandatud            | vale         |
+| kliin             | Cline                       | OSS (endine Claude Dev) | täis           | kohandatud            | tõsi         |
+| kilo              | Kilo kood                   | Kilo-Org                | täis           | kohandatud            | vale         |
+| roo               | Roo kood                    | Roo (OSS)               | täis           | juhend                | vale         |
+| jätka             | Jätka                       | jätka.dev               | täis           | juhend                | vale         |
+| abistaja          | Abimees                     | OSS (P. Gauthier)       | täis           | juhend                | tõsi         |
+| sepik             | ForgeCode                   | Antinoomia HQ           | täis           | kohandatud            | tõsi         |
+| jcode             | jcode                       | 1jehuang (OSS)          | täis           | kohandatud            | vale         |
+| deepseek-tui      | DeepSeek TUI                | Hunter Bown (OSS)       | täis           | kohandatud            | vale         |
+| koodvaal          | CodeWhale                   | hmbown (OSS)            | täis           | kohandatud            | vale         |
+| avatud kood       | OpenCode                    | Anomaalia (endine SST)  | täis           | juhend                | tõsi         |
+| droid             | Tehase droid                | Tehase AI               | osaline        | juhend                | vale         |
+| kaaspiloot        | GitHub Copilot CLI          | GitHub/MS               | täis           | kohandatud            | vale         |
+| kursor-klikk      | Cursor CLI                  | Suvaline sfäär          | osaline        | juhend                | tõsi         |
+| haises            | Lõhn                        | leonardcser (OSS)       | täis           | kohandatud            | vale         |
+| pi                | Pi (pi-kodeerimisagent)     | M. Zechner (OSS)        | täis           | kohandatud            | vale         |
+| grok-ehitama      | Grok Build                  | xAI                     | täis           | kohandatud            | vale         |
+| purustada         | Purustama                   | OSS (võlu)              | täis           | kohandatud            | vale         |
+| qwen              | Qwen kood                   | Alibaba                 | täis           | juhend                | tõsi         |
+| zed               | Zed                         | Zed Industries          | täis           | juhend                | vale         |
+| kursor            | Cursor                      | Suvaline sfäär          | mitte ühtegi   | juhend                | vale         |
+| antigravitatsioon | Antigravity                 | Google                  | mitte ühtegi   | mitm                  | vale         |
+| hermes            | Hermes                      | Nous Research           | mitte ühtegi   | juhend                | vale         |
+| kiro              | Kiro AI                     | Amazon                  | mitte ühtegi   | mitm                  | vale         |
+| kohandatud        | Kohandatud CLI              | —                       | täis           | eritellimusel ehitaja | vale         |
 
-Tööriistade puhul, millel on `baseUrlSupport: "partial"`, kuvatakse töölaua kaardil märk „⚠ Osaline baas-URL”.
+`baseUrlSupport: "partial"` -ga tööriistad näitavad armatuurlaua kaardil märki "⚠ Base URL parcial".
 ---
 
-## 2. CLI-agentide kataloog (10 tööriista)
+## 2. CLI agentide kataloog (11 tööriista)
 
-Autonoomsed agendid, mis kuvatakse asukohas `/dashboard/cli-agents`:
+`/dashboard/cli-agents` esinevad autonoomsed agendid:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id             | nimi          | müüja                    | baseUrlSupport | acpSpawnable |
+| -------------- | ------------- | ------------------------ | -------------- | ------------ |
+| hermes-agent   | Hermese agent | Nous Research            | täis           | vale         |
+| lahtine küünis | OpenClaw      | OSS (P. Steinberger)     | täis           | tõsi         |
+| hani           | Hani          | Plokk / Linux sihtasutus | täis           | tõsi         |
+| tõlk           | Avage Tõlk    | OSS                      | täis           | tõsi         |
+| lõime          | Warp AI       | Warp Inc.                | osaline        | tõsi         |
+| agent-tekk     | Agent Deck    | ashgoplani (OSS)         | täis           | vale         |
+| omp            | Oh mu Pi      | OSS                      | täis           | tõsi         |
+| letta          | Letta CLI     | Letta                    | täis           | vale         |
+| peamine agent  | Peaagent      | Esmane intellekt (OSS)   | täis           | vale         |
+| 5 sukelduda    | 5 sukelduda   | OSS (5 dive-ai)          | täis           | vale         |
+| miks koodid    | WhyCodes      | Miks korporatsioon       | täis           | vale         |
 
 ---
 

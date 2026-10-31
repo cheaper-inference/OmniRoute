@@ -6,15 +6,15 @@
 
 Paskutinį kartą atnaujinta: 2026-08-23
 
-„OmniRoute“ integruojamas su trijų kategorijų CLI įrankiais, išdėstytais trijuose atskiruose valdymo skydelio puslapiuose:
+OmniRoute integruojasi su trijų kategorijų CLI įrankiais, paskirstytais trijuose tam skirtuose prietaisų skydelio puslapiuose:
 
-| Puslapis        | Maršrutas               | Koncepcija                                                                                 | Skaičius     |
-| --------------- | ----------------------- | ------------------------------------------------------------------------------------------ | ------------ |
-| **CLI kodai**   | `/dashboard/cli-code`   | Programavimo įrankiai, nukreipiami į „OmniRoute“ (klientas → CLI → „OmniRoute“ → teikėjas) | 26           |
-| **CLI agentai** | `/dashboard/cli-agents` | Autonominiai agentai, nukreipiami į „OmniRoute“ (tokia pati eiga, platesnė aprėptis)       | 10           |
-| **ACP agentai** | `/dashboard/acp-agents` | CLI, kuriuos „OmniRoute“ paleidžia kaip vidinę sistemą per stdio/ACP (atvirkštinė eiga)    | žr. registrą |
+| Puslapis        | Maršrutas               | Koncepcija                                                                                        | Suskaičiuoti       |
+| --------------- | ----------------------- | ------------------------------------------------------------------------------------------------- | ------------------ |
+| **CLI kodas**   | `/dashboard/cli-code`   | Kodavimo įrankiai, kuriuos nurodote į OmniRoute (kliento → CLI → OmniRoute → teikėjas)            | 26                 |
+| **CLI agentai** | `/dashboard/cli-agents` | Savarankiški agentai, į kuriuos nukreipiate OmniRoute (tas pats srautas, platesnė taikymo sritis) | 11                 |
+| **ACP agentai** | `/dashboard/acp-agents` | CLIs, kad OmniRoute atsiranda kaip backend per stdio/ACP (atvirkštinis srautas)                   | žiūrėkite registrą |
 
-Seni maršrutai peradresuojami naudojant 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Seni maršrutai peradresuoja per 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,9 +45,7 @@ ACP agentai (atvirkštinė paleidimo eiga):
 
 ## Automatinis konfigūravimas naudojant `setup-*`
 
-Nereikia kiekvieno įrankio konfigūracijos rašyti rankiniu būdu. Su OmniRoute pateikiama po vieną `setup-*`
-komandą kiekvienai palaikomai CLI; ji nuskaito **tiesioginį** modelių katalogą iš veikiančio
-OmniRoute egzemplioriaus (vietinio arba nuotolinio) ir įrašo paties įrankio konfigūraciją jūsų kompiuteryje:
+Nereikia rašyti kiekvieno įrankio konfigūracijos ranka. OmniRoute kiekvienam palaikomam CLI siunčia `setup-*` komandą, kuri nuskaito** gyventi** modelių katalogą iš veikiančio OmniRoute (vietinio arba nuotolinio) ir įrašo įrankio konfigūraciją jūsų kompiuteryje:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,53 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Kiekviena jų priima `--remote <url> --api-key <key>` (vietiniam įrankiui sukonfigūruoti naudoti
-nuotolinį OmniRoute), `--dry-run` (peržiūrai nieko neįrašant) ir `--port`. Įrankiams,
-kurie modelių neaptinka automatiškai (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive), reikia
-`--model <id>` (ir `--yes`, kai komandos vykdomos neinteraktyviai). `setup-5dive` yra vienintelis
-receptas, kuris nerašo į `$HOME`: jis sukonfigūruoja 5dive agentų parką
-parko pagrindiniame kompiuteryje įrašydamas root priklausantį autentifikavimo profilį, todėl iš naujo paleidžia save per `sudo`
-ir neturi atskiro nuotolinio režimo. Norėdami paleisti CLI su
-įterptais tinkamais aplinkos kintamaisiais ir visiškai neįrašyti konfigūracijos, naudokite bendrąją
-`omniroute run <target>` paleidyklę (claude, codex, aider, goose, opencode, qwen,
-gemini — paskirties elementai ir alternatyvūs pavadinimai paimami iš `bin/cli/cli-manifest.mjs`); senosios
-atskiriems įrankiams skirtos paleidyklės `omniroute launch` (Claude Code) ir `omniroute launch-codex`
-(Codex) tebėra prieinamos. Gemini CLI galima tik paleisti: tai yra `omniroute run`
-paskirties elementas, tačiau jam nėra `setup-*`/`configure` recepto.
+Kiekvienas priima `--remote <url> --api-key <key>` (konfigūruoti vietinį įrankį prieš nuotolinį OmniRoute), `--dry-run` (peržiūra be rašymo) ir `--port`. Įrankiai be automatinio modelio atradimo (Cline, Kilo , Roo , Goose , Aider , Qwen, 5dive, WhyCodes) naudoja `--model <id>` (ir `--yes` neinteraktyviems važiavimams). `setup-5dive` yra vienas receptas, kuris neįrašo po `$HOME`: jis sukonfigūruoja 5dive agentų parką įrašydamas root priklausantį autentifikavimo profilį parko priegloboje, todėl jis iš naujo vykdo per `sudo` ir neturi savo nuotolinio režimo. Norėdami paleisti CLI su įvestu tinkamu env ir visai neparašyta konfigūracija, naudokite bendrąją `omniroute run <target>` paleidimo priemonę (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes – taikiniai ir slapyvardžiai kilę iš `bin/cli/cli-manifest.mjs`); pasenusios kiekvienam įrankiui skirtos paleidimo priemonės `omniroute launch` (Claude Code) ir `omniroute launch-codex` (Codex) išlieka prieinamos. Gemini CLI yra tik paleidimas: tai `omniroute run` taikinys, bet neturi `setup-*`/`configure` recepto.
 
-> **Išsami dokumentacija:** pagrindinė lentelė — ką įrašo kiekviena komanda, visos parinktys,
-> vietinis ir nuotolinis režimai bei kuriems įrankiams reikia `/v1` priesagos — pateikta
-> **[CLI integracijose](../guides/CLI-INTEGRATIONS.md)**.
+> **Visa nuoroda:** pagrindinė lentelė – tai, ką rašo kiekviena komanda, kiekviena vėliavėlė, vietinis ir nuotolinis ir kurie įrankiai nori `/v1` priesagos – yra** [CLI integracijos](../guides/CLI-INTEGRATIONS.md)** .
 
-### Šių komandų vykdymas konteineryje
+### Paleisti juos konteineryje
 
-Konteineryje OmniRoute vykdoma `setup-*` komanda įrašo duomenis į
-paties konteinerio namų katalogą, kurio neskaito jokia pagrindinio kompiuterio CLI ir kuris išnyksta kartu su
-konteineriu. OmniRoute tai aptinka ir, užuot ką nors įrašęs, baigia darbą su kodu `2` bei pateikia
-instrukcijas. Galimi du palaikomi sprendimai — įdiegti CLI pagrindiniame kompiuteryje ir
-naudojant `omniroute connect` prisijungti prie konteinerio arba prijungti konfigūracijos katalogus susiejamuoju prijungimu ir nustatyti
-`CLI_CONFIG_HOME` (compose profilis `host`). Kiekviena `setup-*` komanda, taip pat
-`omniroute configure` ir `omniroute config set`, priima
-`--allow-container-write`, kai iš tikrųjų norite konfigūruoti paties konteinerio CLI;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` tą patį atlieka serveryje. Žr.
-[Docker vadovas → Pagrindinio kompiuterio CLI įrankių konfigūravimas](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+`setup-*` komanda, vykdoma OmniRoute konteineryje, įrašo į konteinerio pagrindinį puslapį, kurio joks pagrindinis CLI neskaito ir kuris išnyksta kartu su konteineriu. OmniRoute aptinka tai ir išeina iš `2` su instrukcijomis, o ne rašydamas. Du palaikomi būdai – įdiekite CLI pagrindiniame kompiuteryje ir `omniroute connect` prie talpyklos arba prijunkite konfigūracijos katalogus ir nustatykite `CLI_CONFIG_HOME` (sukurti `host` profilį). Kiekviena `setup-*` komanda, taip pat `omniroute configure` ir `omniroute config set`, priima `--allow-container-write` kai konfigūruojate konteinerio CLIs ką jūs iš tikrųjų turėjote omenyje; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` tą patį daro serveriui. Žr. [Docker vadovą → Pagrindinio kompiuterio CLI įrankių konfigūravimas](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Valdymo skydelio **taikymo galinis taškas** (`POST /api/cli-tools/apply`) užtikrina
-tos pačios apsaugos veikimą: konteineryje į rašymo užklausą, kurios paskirties vieta nėra susiejamuoju būdu prijungta iš
-pagrindinio kompiuterio, atsakoma **`422`**, nurodant `containerEphemeralTarget: true`, saugų klaidos
-tekstą ir — įrankiams, turintiems pagrindinio kompiuterio receptą (claude, codex, opencode, cline,
-kilo, continue) — `hostSetupCommand` (pvz., `omniroute setup-opencode`), kurią reikia vykdyti
-pagrindiniame kompiuteryje; niekas neįrašoma. `dryRun: true` ir toliau veikia konteinerio
-režimu ir, neliesdamas disko, grąžina paslėptais slaptais duomenimis papildytą peržiūrą bei paskirties kelią. Peržiūros
-turinys nėra prisijungimo duomenis apimanti konfigūracija, kurią reikėtų kopijuoti ar importuoti. Taikykite
-pradinius įrankio / bazinio URL / API rakto / modelio įvesties duomenis pagrindiniame kompiuteryje arba naudokite nurodytą
-pagrindinio kompiuterio sąrankos komandą. Peržiūros antraštė ir užklausos sutartis aprašytos
-[CLI konfigūracijos saugumo dokumentacijoje](../security/CLI-CONFIGURATION.md).
-Toks veikimas yra sąmoningas ir nuo regresijų apsaugotas testu
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — niekada „netaisykite“ 422
-pašalindami apsaugą.
+Prietaisų skydelis** taikyti galinį tašką** (`POST /api/cli-tools/apply`) užtikrina tą pačią apsaugą: konteineryje atsako įrašas, kurio taikinys nėra susietas.**`422`** su `containerEphemeralTarget: true`, saugios klaidos tekstas ir – įrankiams su pagrindinio kompiuterio receptu (claude, codex, opencode, cline, kilo, tęsti) – `hostSetupCommand` (pvz., `omniroute setup-opencode`), kuris paleidžiamas pagrindiniame kompiuteryje; nieko nerasoma. `dryRun: true` toliau dirba konteinerio režimu ir grąžina redaguotą peržiūros + tikslinį kelią neliesdamas disko. Peržiūros turinys nėra kredencialų konfigūracija, skirta kopijuoti ar importuoti. Taikykite su originaliomis tool/base URL/API key/model įvestimis pagrindiniame kompiuteryje arba naudokite nurodytą pagrindinio kompiuterio sąrankos komandą. Žr. [CLI konfigūracijos saugumą](../security/CLI-CONFIGURATION.md), kad gautumėte peržiūros antraštę ir užklausą dėl sutarties. Toks elgesys yra tyčinis ir `tests/unit/api/cli-tools/apply-container-guard.test.ts` apsaugotas nuo regresijos – niekada „nepataisykite“ 422 pašalindami apsaugą.
 
 ---
 
@@ -144,59 +107,60 @@ vienos sąsajos, bet nepridėjus prie kitų, testų rinkinys nepavyksta, užuot 
 
 ---
 
-## 1. CLI Code katalogas (27 įrankiai)
+## 1. CLI kodo katalogas (27 įrankiai)
 
-Visi įrankiai, rodomi `/dashboard/cli-code`. Įrankiai, kurių `baseUrlSupport: none`, prijungiami per MITM arba naudojant rankinį vadovą, o ne pasirinktinį bazinį URL:
+Visi įrankiai, kurie rodomi `/dashboard/cli-code`. Tie, kurie turi `baseUrlSupport: none` yra prijungti per MITM arba rankinį vadovą, o ne tinkintą bazinį URL:
 
-| id           | pavadinimas             | tiekėjas            | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Pasirinktinis CLI       | —                   | full           | custom-builder | false        |
+| id               | pavadinimas                 | pardavėjas                  | baseUrlSupport | configType                | acpSpawnable |
+| ---------------- | --------------------------- | --------------------------- | -------------- | ------------------------- | ------------ |
+| claude           | Claude kodas                | Anthropic                   | pilnas         | env                       | tiesa        |
+| kodeksas         | OpenAI Codex CLI            | OpenAI                      | pilnas         | paprotys                  | tiesa        |
+| zcode            | ZCode (GLM kodavimo planas) | Z.ai                        | jokios         | paprotys                  | klaidinga    |
+| klinika          | Cline                       | OSS (buvęs Claude'as Devas) | pilnas         | paprotys                  | tiesa        |
+| kilogramas       | Kilo kodas                  | Kilo-Org                    | pilnas         | paprotys                  | klaidinga    |
+| roo              | Roo kodas                   | Roo (OSS)                   | pilnas         | vadovas                   | klaidinga    |
+| tęsti            | Tęsti                       | tęsti.dev                   | pilnas         | vadovas                   | klaidinga    |
+| pagalbininkas    | Pagalbininkas               | OSS (P. Gauthier)           | pilnas         | vadovas                   | tiesa        |
+| kalvė            | ForgeCode                   | Antinomija HQ               | pilnas         | paprotys                  | tiesa        |
+| jcode            | jcode                       | 1jehuang (OSS)              | pilnas         | paprotys                  | klaidinga    |
+| deepseek-tui     | DeepSeek TUI                | Hunter Bown (OSS)           | pilnas         | paprotys                  | klaidinga    |
+| kodinis banginis | CodeWhale                   | hmbown (OSS)                | pilnas         | paprotys                  | klaidinga    |
+| atvirasis kodas  | OpenCode                    | Anomalija (buvęs SST)       | pilnas         | vadovas                   | tiesa        |
+| droidas          | Gamyklinis Droidas          | Gamyklinis AI               | dalinis        | vadovas                   | klaidinga    |
+| antrasis pilotas | GitHub Copilot CLI          | GitHub/MS                   | pilnas         | paprotys                  | klaidinga    |
+| cursor-cli       | Cursor CLI                  | Bet kuri sfera              | dalinis        | vadovas                   | tiesa        |
+| stintų           | Stintos                     | Leonardcser (OSS)           | pilnas         | paprotys                  | klaidinga    |
+| pi               | Pi (pi kodavimo agentas)    | M. Zechner (OSS)            | pilnas         | paprotys                  | klaidinga    |
+| grok-statyti     | Grok Build                  | xAI                         | pilnas         | paprotys                  | klaidinga    |
+| sutraiškyti      | Sutraiškyti                 | OSS (žavesys)               | pilnas         | paprotys                  | klaidinga    |
+| qwen             | Qwen kodas                  | Alibaba                     | pilnas         | vadovas                   | tiesa        |
+| zed              | Zed                         | Zed Industries              | pilnas         | vadovas                   | klaidinga    |
+| žymeklį          | Cursor                      | Bet kuri sfera              | jokios         | vadovas                   | klaidinga    |
+| antigravitacija  | Antigravity                 | Google                      | jokios         | mitm                      | klaidinga    |
+| hermes           | Hermes                      | Nous tyrimai                | jokios         | vadovas                   | klaidinga    |
+| kiro             | Kiro AI                     | Amazon                      | jokios         | mitm                      | klaidinga    |
+| paprotys         | Individualus CLI            | —                           | pilnas         | statytojas pagal užsakymą | klaidinga    |
 
-Įrankių, kurių `baseUrlSupport: "partial"`, informacijos suvestinės kortelėje rodoma žyma „⚠ Dalinis bazinis URL“.
+Įrankiai su `baseUrlSupport: "partial"` prietaisų skydelio kortelėje rodo ženklelį „⚠ Base URL parcial“.
 ---
 
-## 2. CLI agentų katalogas (10 įrankių)
+## 2. CLI agentų katalogas (11 įrankių)
 
-Autonominiai agentai, rodomi `/dashboard/cli-agents`:
+Autonominiai agentai, kurie atsiranda `/dashboard/cli-agents`:
 
-| id           | pavadinimas      | tiekėjas                 | baseUrl palaikymas | galima paleisti per ACP |
-| ------------ | ---------------- | ------------------------ | ------------------ | ----------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full               | false                   |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                    |
-| goose        | Goose            | Block / Linux Foundation | full               | true                    |
-| interpreter  | Open Interpreter | OSS                      | full               | true                    |
-| warp         | Warp AI          | Warp Inc.                | partial            | true                    |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                   |
-| omp          | Oh My Pi         | OSS                      | full               | true                    |
-| letta        | Letta CLI        | Letta                    | full               | false                   |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                   |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                   |
+| id                  | pavadinimas         | pardavėjas                   | baseUrlSupport | acpSpawnable |
+| ------------------- | ------------------- | ---------------------------- | -------------- | ------------ |
+| hermes-agentas      | Hermes agentas      | Nous tyrimai                 | pilnas         | klaidinga    |
+| atviras letena      | OpenClaw            | OSS (P. Steinbergeris)       | pilnas         | tiesa        |
+| žąsis               | Žąsis               | Blokas / Linux fondas        | pilnas         | tiesa        |
+| vertėjas            | Atidarykite vertėją | OSS                          | pilnas         | tiesa        |
+| metmenys            | Warp AI             | Warp Inc.                    | dalinis        | tiesa        |
+| agentas-denis       | Agentas Dekas       | ashgoplani (OSS)             | pilnas         | klaidinga    |
+| omp                 | O mano Pi           | OSS                          | pilnas         | tiesa        |
+| letta               | Letta CLI           | Letta                        | pilnas         | klaidinga    |
+| pagrindinis agentas | Pagrindinis agentas | Pagrindinis intelektas (OSS) | pilnas         | klaidinga    |
+| 5 nardymas          | 5 nardymas          | OSS (5dive-ai)               | pilnas         | klaidinga    |
+| kodėl kodai         | WhyCodes            | Kodėl korporacija            | pilnas         | klaidinga    |
 
 ---
 

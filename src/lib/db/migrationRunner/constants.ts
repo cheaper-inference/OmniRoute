@@ -166,6 +166,84 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "081",
     toName: "inspector_custom_hosts",
   },
+  // PR #10409 circulated through these draft slots before the current release
+  // claimed them. The name guard is mandatory: canonical migrations using the
+  // same numbers must never be rehomed as Team state.
+  {
+    fromVersion: "153",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "154",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "155",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "161",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "163",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    fromVersion: "164",
+    fromName: "team_cost_centers",
+    toVersion: "215",
+    toName: "team_cost_centers",
+  },
+  {
+    // A later pushed #14771 build used the upstream mirror-URL slot.
+    fromVersion: "218",
+    fromName: "api_key_self_service_settings",
+    toVersion: "229",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // The index also circulated as 207 before upstream provider cleanup claimed it.
+    fromVersion: "207",
+    fromName: "recreate_turn_nodes_content_hash_index",
+    toVersion: "211",
+    toName: "recreate_turn_nodes_content_hash_index",
+  },
+  // Published message-capture drafts must not occupy upstream schema slots.
+  {
+    fromVersion: "199",
+    fromName: "agent_session_messages",
+    toVersion: "232",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "200",
+    fromName: "agent_session_messages",
+    toVersion: "232",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "210",
+    fromName: "agent_session_messages",
+    toVersion: "232",
+    toName: "agent_session_messages",
+  },
+  {
+    fromVersion: "216",
+    fromName: "agent_session_messages",
+    toVersion: "232",
+    toName: "agent_session_messages",
+  },
   {
     fromVersion: "134",
     fromName: "ccr_blocks",
@@ -227,21 +305,21 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     // Early self-service stack builds occupied the upstream attempt-timing slot.
     fromVersion: "194",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
     // Later self-service stack builds (#14771) used 197, now proxy_subscription_core_config.
     fromVersion: "197",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
     // #14771 builds then used 207, now remove_opencode_free_provider.
     fromVersion: "207",
     fromName: "api_key_self_service_settings",
-    toVersion: "213",
+    toVersion: "229",
     toName: "api_key_self_service_settings",
   },
   {
@@ -253,76 +331,74 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "recreate_turn_nodes_content_hash_index",
   },
   {
+    // #14771 builds on release/v3.8.53 then used 213, now api_key_preferred_connections.
+    fromVersion: "213",
+    fromName: "api_key_self_service_settings",
+    toVersion: "229",
+    toName: "api_key_self_service_settings",
+  },
+  {
     // Agent-session builds (#14833) shipped agent_sessions + usage_history.agent_session_id
-    // as 190/191, then 197/198, then 198/199, then 208/209. Upstream owns all of those slots
-    // (call_logs_content_provenance … call_logs_artifact_relpath_index); they now live at 214/215.
+    // as 190/191, then 197/198, 198/199, 208/209 and 214/215. Upstream owns all of those
+    // slots (call_logs_content_provenance … team_cost_centers); they now live at 230/231.
     fromVersion: "190",
     fromName: "agent_sessions",
-    toVersion: "214",
+    toVersion: "230",
     toName: "agent_sessions",
   },
   {
     fromVersion: "191",
     fromName: "usage_history_agent_session_id",
-    toVersion: "215",
+    toVersion: "231",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "197",
     fromName: "agent_sessions",
-    toVersion: "214",
+    toVersion: "230",
     toName: "agent_sessions",
   },
   {
     fromVersion: "198",
     fromName: "usage_history_agent_session_id",
-    toVersion: "215",
+    toVersion: "231",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "198",
     fromName: "agent_sessions",
-    toVersion: "214",
+    toVersion: "230",
     toName: "agent_sessions",
   },
   {
     fromVersion: "199",
     fromName: "usage_history_agent_session_id",
-    toVersion: "215",
+    toVersion: "231",
     toName: "usage_history_agent_session_id",
   },
   {
     fromVersion: "208",
     fromName: "agent_sessions",
-    toVersion: "214",
+    toVersion: "230",
     toName: "agent_sessions",
   },
   {
     fromVersion: "209",
     fromName: "usage_history_agent_session_id",
-    toVersion: "215",
+    toVersion: "231",
     toName: "usage_history_agent_session_id",
   },
   {
-    // Session-turn capture builds (#14864) shipped agent_session_messages as 199, then 200,
-    // then 210 (now proxy_operator_egress, provider_health_matrix_covering_index and
-    // call_logs_detail_pending upstream); it now lives at 216.
-    fromVersion: "199",
-    fromName: "agent_session_messages",
-    toVersion: "216",
-    toName: "agent_session_messages",
+    fromVersion: "214",
+    fromName: "agent_sessions",
+    toVersion: "230",
+    toName: "agent_sessions",
   },
   {
-    fromVersion: "200",
-    fromName: "agent_session_messages",
-    toVersion: "216",
-    toName: "agent_session_messages",
-  },
-  {
-    fromVersion: "210",
-    fromName: "agent_session_messages",
-    toVersion: "216",
-    toName: "agent_session_messages",
+    fromVersion: "215",
+    fromName: "usage_history_agent_session_id",
+    toVersion: "231",
+    toName: "usage_history_agent_session_id",
   },
 ] as const;
 

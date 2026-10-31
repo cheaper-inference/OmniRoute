@@ -120,6 +120,39 @@ export function normalizeComplianceEventTypes(
   };
 }
 
+/**
+ * Webpack builds load each locale catalog as its raw JSON text (`asset/source`
+ * rule in next.config.mjs) so the compiler does not hold every catalog as an
+ * object tree; Turbopack, tsx and Node still hand back the parsed object.
+ * Accept both.
+ */
+export function parseLocaleMessages(source: unknown): Record<string, unknown> {
+  return (typeof source === "string" ? JSON.parse(source) : source) as Record<string, unknown>;
+}
+
+type CatalogImporter = (locale: string) => Promise<unknown>;
+
+/**
+ * Parses each locale's catalog once and then returns the same object for the
+ * life of the process, the lifetime the module cache gave the parsed JSON
+ * before. In `next dev` an edited catalog still shows up: the rebuild
+ * re-evaluates this module, and with it the cache.
+ */
+export function createLocaleMessagesLoader(importCatalog: CatalogImporter) {
+  const parsed = new Map<string, Record<string, unknown>>();
+  return async function loadLocaleMessages(locale: string): Promise<Record<string, unknown>> {
+    const cached = parsed.get(locale);
+    if (cached) return cached;
+    const messages = parseLocaleMessages(await importCatalog(locale));
+    parsed.set(locale, messages);
+    return messages;
+  };
+}
+
+const loadLocaleMessages = createLocaleMessagesLoader(
+  async (locale) => (await import(`./messages/${locale}.json`)).default
+);
+
 export default getRequestConfig(async () => {
   const cookieStore = await cookies();
   let locale: string = cookieStore.get(LOCALE_COOKIE)?.value || "";
@@ -131,16 +164,14 @@ export default getRequestConfig(async () => {
 
   locale = resolveRequestedLocale(locale, LOCALES, LOCALE_ALIASES, DEFAULT_LOCALE);
 
-  const localeMessages = normalizeComplianceEventTypes(
-    (await import(`./messages/${locale}.json`)).default as Record<string, unknown>
-  );
+  const localeMessages = normalizeComplianceEventTypes(await loadLocaleMessages(locale));
 
   // G1: fall back to EN for any missing key. EN is loaded only once per request
   // and only when the active locale is not EN itself (no-op).
   let messages = localeMessages as Record<string, unknown>;
   if (locale !== FALLBACK_LOCALE) {
     const fallbackMessages = normalizeComplianceEventTypes(
-      (await import(`./messages/${FALLBACK_LOCALE}.json`)).default as Record<string, unknown>
+      await loadLocaleMessages(FALLBACK_LOCALE)
     );
     messages = deepMergeFallback({ ...localeMessages }, fallbackMessages);
   }
@@ -154,9 +185,7 @@ export default getRequestConfig(async () => {
   //    translations are shipped.
   let mergedMessages: Record<string, unknown> = messages as Record<string, unknown>;
   if (locale !== DEFAULT_LOCALE) {
-    const enMessages = normalizeComplianceEventTypes(
-      (await import(`./messages/${DEFAULT_LOCALE}.json`)).default as Record<string, unknown>
-    );
+    const enMessages = normalizeComplianceEventTypes(await loadLocaleMessages(DEFAULT_LOCALE));
     mergedMessages = { ...enMessages, ...mergedMessages };
   }
 

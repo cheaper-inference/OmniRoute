@@ -249,7 +249,7 @@ export type ChatAdmissionShedReason =
  * "critical", a passive read here sheds every subsequent request before any
  * of those downstream paths can run, which means `check()` never gets called
  * again and the guard can never observe recovery. See
- * https://github.com/diegosouzapw/OmniRoute/issues/13821.
+ * https://github.com/cheaper-inference/OmniRoute/issues/13821.
  *
  * `checkResourcePressureGuard()` is cheap on the hot path: it only does a
  * synchronous `process.memoryUsage()` read plus a timestamp comparison per

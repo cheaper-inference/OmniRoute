@@ -1,4 +1,5 @@
 import { splitCodexReasoningSuffix } from "@omniroute/open-sse/executors/codex/reasoningSuffix.ts";
+import { isRegisteredImageModel } from "@omniroute/open-sse/config/imageRegistry";
 import { isModelAdvertisedByConnection } from "@/domain/connectionModelRules";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
 import { type ProviderConnectionView } from "@/lib/db/providers/lazyConnectionView";
@@ -7,6 +8,18 @@ import {
   SYNCED_AVAILABLE_MODELS_MALFORMED,
   type SyncedAvailableModelsByConnection,
 } from "@/lib/db/models";
+
+/**
+ * The Codex live catalog (`/backend-api/codex/models`), and so every synced Codex
+ * inventory, lists chat models only. Registered Codex image models are served by the
+ * dedicated Images routes, so the inventory carries no evidence about them and must not
+ * filter accounts for them — otherwise every Codex account is ineligible and
+ * `/v1/images/generations` fails with "No credentials for image provider: codex".
+ */
+function isCodexImageModel(requestedModel: string): boolean {
+  const rawModel = requestedModel.slice(requestedModel.lastIndexOf("/") + 1);
+  return isRegisteredImageModel("codex", rawModel);
+}
 
 /**
  * Does this connection's synced inventory advertise the requested model?
@@ -45,7 +58,9 @@ export async function loadAdvertisedModelsForConnections(
     connections
       .map((c) => c.provider)
       .filter(
-        (p): p is string => typeof p === "string" && (isSelfHostedChatProvider(p) || p === "codex")
+        (p): p is string =>
+          typeof p === "string" &&
+          (isSelfHostedChatProvider(p) || (p === "codex" && !isCodexImageModel(requestedModel)))
       )
   );
   if (inventoryProviders.size === 0) return advertised;

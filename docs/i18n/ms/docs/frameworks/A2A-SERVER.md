@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Untuk `smart-routing`, `metadata.combo` ialah penggantian eksplisit bagi
+`metadata.model` untuk permintaan get laluan; ia dihantar sebagai `model` sebenar,
+bukan sebagai medan JSON `x-combo` yang diabaikan. Kunci API biasa get laluan dan
+pemberian kuasa bagi setiap sasaran masih terpakai. Kombo yang tidak sah atau kosong akan ditolak.
+
+Hasilnya mendedahkan `requested_combo` (niat pemanggil), `dispatched_model`
+(permintaan get laluan sebenar), `response_model` (respons get laluan) dan
+`confirmed_combo`. Medan terakhir ialah `null` melainkan get laluan mengenal pasti
+kombo secara eksplisit. Log keputusan A2A mengaitkan pelaksanaan hanya kepada
+kombo yang disahkan, sambil mengekalkan permintaan yang belum disahkan sebagai `requestedCombo`.
+
 **Respons:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Penstriman SSE
 
-Sama seperti `message/send`, tetapi mengembalikan Peristiwa Dihantar Pelayan untuk penstriman masa nyata.
+Sama seperti `message/send` tetapi mengembalikan Peristiwa Dihantar Pelayan untuk penstriman masa nyata.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Menanyakan Status Tugasan
+### `tasks/get` — Tanya Status Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Membatalkan Tugasan
+### `tasks/cancel` — Batalkan Tugas
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kemahiran Tersedia
+## Kemahiran yang Ada
 
-OmniRoute menyediakan 6 kemahiran A2A yang disambungkan dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran terletak dalam `src/lib/a2a/skills/`.
+OmniRoute mendedahkan 6 kemahiran A2A berwayar dalam `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Setiap modul kemahiran hidup dalam `src/lib/a2a/skills/`.
 
-| Kemahiran            | ID                   | Penerangan                                                                                                                                                        | Tag                          | Contoh                                      |
-| :------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
-| Penghalaan Pintar    | `smart-routing`      | Menghalakan gesaan melalui penyedia/gabungan optimum menggunakan enjin gabungan + pemarkahan OmniRoute                                                            | penghalaan, penyedia         | "Halakan gesaan ini melalui model terbaik"  |
-| Pengurusan Kuota     | `quota-management`   | Melaporkan keadaan kuota bagi setiap penyedia, membantu pemanggil menentukan masa untuk mendikit/bertukar                                                         | kuota, penyedia              | "Semak kuota untuk anthropic"               |
-| Penemuan Penyedia    | `provider-discovery` | Menyenaraikan penyedia yang dipasang berserta keupayaan, penanda peringkat percuma dan status OAuth                                                               | penyedia, penemuan           | "Apakah penyedia yang tersedia?"            |
-| Analisis Kos         | `cost-analysis`      | Menganggarkan kos permintaan/perbualan berdasarkan katalog + penggunaan terkini                                                                                   | kos, penggunaan              | "Anggarkan kos untuk perbualan ini"         |
-| Laporan Kesihatan    | `health-report`      | Mengagregatkan keadaan pemutus litar, tempoh bertenang dan sekatan bagi setiap penyedia                                                                           | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua penyedia" |
-| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog lengkap 45 entri Kemahiran Ejen (23 API + 21 CLI + 1 konfigurasi) sebagai jadual markdown dengan URL SKILL.md mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute"      |
+| Kemahiran            | ID                   | Penerangan                                                                                                                                                                   | Tag                          | Contoh                                      |
+| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------------- | :------------------------------------------ |
+| Penghalaan Pintar    | `smart-routing`      | Halakan gesaan melalui provider/combo optimum menggunakan pemarkahan + enjin kombo OmniRoute                                                                                 | penghalaan, pembekal         | "Halakan gesaan ini melalui model terbaik"  |
+| Pengurusan Kuota     | `quota-management`   | Laporan menyatakan kuota setiap pembekal, membantu pemanggil memutuskan bila untuk throttle/switch                                                                           | kuota, pembekal              | "Semak kuota untuk antropik"                |
+| Penemuan Pembekal    | `provider-discovery` | Menyenaraikan pembekal yang dipasang dengan keupayaan, bendera peringkat percuma, status OAuth                                                                               | pembekal, penemuan           | "Pembekal apa yang tersedia?"               |
+| Analisis Kos         | `cost-analysis`      | Anggaran kos request/conversation berdasarkan katalog + penggunaan terkini                                                                                                   | kos, penggunaan              | "Anggaran kos untuk perbualan ini"          |
+| Laporan Kesihatan    | `health-report`      | Agregat pemutus litar, cooldown, keadaan kunci keluar bagi setiap pembekal                                                                                                   | kesihatan, daya tahan        | "Tunjukkan status kesihatan semua pembekal" |
+| Senaraikan Keupayaan | `list-capabilities`  | Mengembalikan katalog Kemahiran Ejen 45 penyertaan penuh (23 API + 21 CLI + 1 konfigurasi) sebagai jadual penurunan harga dengan SKILL.md URLs mentah untuk suntikan konteks | katalog, penemuan, kemahiran | "Senaraikan semua keupayaan OmniRoute "     |
 
-> Kad Ejen hendaklah sentiasa diselaraskan dengan katalog langsung yang mengandungi 374 penyedia; bilangan penyedia dan metadata percuma/tanpa pengesahan diperoleh daripada daftar masa jalan.
+> Kad Ejen hendaklah sentiasa sejajar dengan katalog 377-pembekal langsung; kiraan pembekal dan metadata free/no-auth diperoleh daripada pendaftaran masa jalan.
 
-### Perincian Kemahiran `list-capabilities`
+### `list-capabilities` Butiran Kemahiran
 
-Kemahiran `list-capabilities` amat berguna untuk ejen luaran yang perlu mengetahui perkara yang disediakan oleh OmniRoute sebelum menghantar panggilan API. Ia mengembalikan artifak jadual markdown berstruktur:
+Kemahiran `list-capabilities` amat berguna untuk ejen luar yang perlu mengetahui perkara yang OmniRoute dedahkan sebelum menghantar panggilan API. Ia mengembalikan artifak jadual penurunan nilai berstruktur:
 
 ```
-| ID | Nama | Kategori | Bidang | Titik Akhir/Perintah | URL Mentah |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Pengesahan & Sesi | api | pengesahan | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Setiap baris merangkumi lajur `rawUrl` supaya ejen boleh mendapatkan SKILL.md penuh dengan serta-merta. Medan `metadata.totalSkills` mencerminkan saiz katalog (45 pada masa ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Setiap baris termasuk lajur `rawUrl` supaya ejen boleh segera mengambil SKILL.md penuh . Medan `metadata.totalSkills` mencerminkan saiz katalog (45 hari ini). Pelaksanaan: `src/lib/a2a/skills/listCapabilities.ts`. Lihat juga [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -193,11 +197,11 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
 
 ---
 
-## Menambahkan Kemahiran Baharu
+## Menambah Kemahiran Baharu
 
 1. **Cipta fail kemahiran:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksport fungsi tak segerak `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
+   Eksport fungsi async `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Ikuti struktur kemahiran sedia ada seperti `smartRouting.ts`.
 
 2. **Daftarkan pengendali:** dalam `src/lib/a2a/taskExecution.ts`, tambahkan entri kepada `A2A_SKILL_HANDLERS`:
 
@@ -211,15 +215,15 @@ Titik akhir JSON-RPC `/a2a` ialah titik masuk A2A kanonik. Titik akhir REST di b
    };
    ```
 
-3. **Dedahkan dalam Kad Ejen:** dalam `src/app/.well-known/agent.json/route.ts`, tambahkan kepada tatasusunan `skills`:
+3. **Dedahkan dalam Kad Ejen:** dalam `src/lib/a2a/agentCardMetadata.ts` (dikongsi oleh `/.well-known/agent.json` dan `/.well-known/agent-card.json`), tambahkan pada tatasusunan `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "Kemahiran Anda",
+     "description": "Penerangan ringkas yang memfokuskan niat",
+     "tags": ["penghalaan", "kuota"],
+     "examples": ["Contoh seruan bahasa semula jadi"]
    }
    ```
 
@@ -264,7 +268,7 @@ diserahkan → sedang diproses → selesai
 
 ## Contoh Integrasi
 
-### Python (requests)
+### Python (permintaan)
 
 ```python
 import requests
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (ambil)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -49,52 +49,33 @@ bhfreastalaí, agus ritheann sé `claude` trí exec.
 
 ---
 
-## Ailiasanna fionnachtana — taispeáin samhlacha nach samhlacha Claude iad sa roghnóir `/model`
+## Ailiasanna fionnachtana — nocht samhlacha neamh-Claude sa roghnóir `/model`
 
-Ní liostaíonn fionnachtain samhlacha geata Claude Code ach aitheantais a thosaíonn le
-`claude` nó `anthropic`, mar sin le `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
-ní thaispeánann an roghnóir dúchasach `/model` de ghnáth **ach** samhlacha
-Claude/Anthropic OmniRoute — ní bhíonn `kimi/kimi-k2.6` ná `glm/glm-5.2` le feiceáil
-riamh, cé go ndéantar iad a ródú gan stró.
+Ní liostaíonn fionnachtain samhail gheata Claude Code ach aitheantais a thosaíonn le `claude` nó `anthropic`, mar sin le `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ní thaispeánann an roghnóir dúchais `/model` de ghnáth samhlacha Claude/Anthropic OmniRoute **amháin** — ní thagann `kimi/kimi-k2.6` ná `glm/glm-5.2` chun cinn riamh, cé go ródófar iad gan aon fhadhb.
 
-Is féidir le OmniRoute aon samhail chumasaithe (agus teaglaim) a mhacasamhlú faoi
-aitheantas `claude/…` ionas go n-éiríonn léi dul tríd an scagaire sin agus go
-mbíonn sí le feiceáil sa roghnóir:
+Is féidir le OmniRoute aon tsamhail (agus teaglaim) atá cumasaithe a scáthánú faoi aitheantas `claude/…` ionas go dtéann sí tríd an scagaire sin agus go dtaispeánfar í sa roghnóir:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<teaglaim "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Nuair a roghnaíonn tú ceann díobh seo in Claude Code, baineann OmniRoute an fillteán
-`claude/` chun filleadh ar an bhfíoraitheantas roimh an ródú — fágtar aitheantas
-fíor `claude/<real-claude-model>` (soláthraí iarbhír Claude OAuth) gan athrú i gcónaí.
+Nuair a roghnaíonn tú ceann díobh seo in Claude Code, baineann OmniRoute an timfhilleadh `claude/` den aitheantas agus tugtar ar ais go dtí an fíoraitheantas é sula ródófar é — fágtar aitheantas fíor `claude/<real-claude-model>` (an soláthraí OAuth Claude féin) gan bhaint i gcónaí.
 
-**Tá sé seo múchta de réir réamhshocraithe** agus rialaítear é le geata trí leibhéal
-(bíonn an bua ag an gceann is sainiúla), ionas nach ndéanann gnáthshuiteáil OmniRoute
-a chatalóg a dhúbailt do chliaint nach n-úsáideann Claude Code:
+De réir réamhshocraithe, ní scáthánaítear ach bunaiteantais. Leis an mbratach gnéithe roghnacha `CATALOG_MIRROR_REFINEMENTS_ENABLED` ar siúl, scáthánaítear leaganacha dícheall-réasúnaíochta atá liostaithe ag an gcatalóg cheana féin (m.sh. `codex/gpt-6-sol-high`) mar aon le haon aitheantas eile, ionas gur féidir le Claude Code leibhéal dícheall sainráite a roghnú, agus ní scáthánaítear aitheantais ionsuite `auto/*` nach féidir le conair an iarratais a réadú. Is é `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` a rialaíonn fós cé acu a liostaítear leaganacha dícheall ar chor ar bith — ní chuireann an scáthán leagan leis riamh nach bhfuil sa bhunchatalóg.
 
-| Leibhéal  | Cá háit                                                                                                     |
-| --------- | ----------------------------------------------------------------------------------------------------------- |
-| Samhail   | Leathanach sonraí an tsoláthraí → scorán "Taispeáin in Claude Code" de réir samhla                          |
-| Soláthraí | Leathanach sonraí an tsoláthraí → scorán ar leibhéal an tsoláthraí (clúdaíonn sé a chuid samhlacha go léir) |
-| Domhanda  | Socruithe → Bratacha Gné → `EXPOSE_CC_DISCOVERY_ALIASES` (múchta de réir réamhshocraithe)                   |
+**Tá sé seo múchta de réir réamhshocraithe** agus tá sé faoi rialú geata trí leibhéal (is é an leibhéal is sainiúla a bhuaileann), ionas nach ndúbálann OmniRoute simplí a chatalóg riamh do chliaint nach n-úsáideann Claude Code:
 
-Cuireann an athróg timpeallachta `EXPOSE_CC_DISCOVERY_ALIASES` an leibhéal domhanda
-i bhfeidhm agus bíonn tosaíocht aici ar an sárú ón deais (taispeánann an scáileán
-Bratacha Gné nóta "gníomhach trí athróg timpeallachta" nuair a tharlaíonn sé sin).
-Déanann na scoráin de réir soláthraí agus de réir samhla an roghnú a bheachtú as sin
-amach — m.sh. má tá an socrú domhanda múchta ach soláthraí Kimi casta air, ní
-thaispeántar ach samhlacha Kimi.
+| Leibhéal  | Cá háit                                                                                                  |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| Samhail   | Leathanach sonraí an tsoláthraí → lasc "Nocht in Claude Code" in aghaidh na samhla                       |
+| Soláthraí | Leathanach sonraí an tsoláthraí → lasc ar leibhéal an tsoláthraí (clúdaíonn sí a cuid samhlacha go léir) |
+| Domhanda  | Socruithe → Bratacha Gnéithe → `EXPOSE_CC_DISCOVERY_ALIASES` (múchta de réir réamhshocraithe)            |
 
-> ⚠️ **Neamhréir fuinneoige ar shamhlacha nach samhlacha Claude iad.** Glacann
-> Claude Code leis go bhfuil fuinneog chomhthéacs 200K ag aon aitheantas nach
-> n-aithníonn sé (ní féidir leis fíorfhuinneog a léamh ó `/v1/models`). I gcás
-> samhla a bhfuil fuinneog níos mó aici (m.sh. 256K Kimi K2), socraigh
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` chuig luach atá faoi bhun fhíorfhuinneog na
-> samhla ionas nach dtosaíonn an t-uath-chomhbhrú róluath. Déanann na próifílí
-> ginte thuas é seo de réir samhla cheana féin.
+Cuirfidh an athróg chomhshaoil `EXPOSE_CC_DISCOVERY_ALIASES` an leibhéal domhanda ar siúl de ghnáth agus beidh tosach aici thar an sárú deise (taispeánann scáileán na mBratacha Gnéithe nóta "gníomhach trí athróg chomhshaoil" nuair is amhlaidh). Déanann na lasca in aghaidh an tsoláthraí agus in aghaidh na samhla an scagadh a mhionchoigeartú as sin amach — m.sh. leis an leibhéal domhanda múchta agus soláthraí Kimi ar siúl, ní nochtaítear ach samhlacha Kimi.
+
+> ⚠️ **Neamhréir fuinneoige ar shamhlacha neamh-Claude.** Glacann Claude Code le fuinneog comhthéacs 200K d'aon aitheantas nach n-aithníonn sé (ní féidir leis fíorfhuinneog a léamh ó `/v1/models`). I gcás samhail le fuinneog níos mó (m.sh. 256K ag Kimi K2), socraigh `CLAUDE_CODE_AUTO_COMPACT_WINDOW` go luach faoi bhun fíorfhuinneog na samhla ionas nach rachaidh an féin-dhlúthú i bhfeidhm roimh am. Déanann na próifílí ginte thuas é seo cheana féin in aghaidh gach samhla.
 
 ---
 

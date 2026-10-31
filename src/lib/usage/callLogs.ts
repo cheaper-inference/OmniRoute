@@ -128,6 +128,7 @@ type CallLogSummaryRow = {
   correlation_id?: string | null;
   model_pinned?: number | null;
   session_tag?: string | null;
+  client_session_id?: string | null;
   resilience_actions?: string | null;
   has_content?: number | null;
   usage_provenance?: string | null;
@@ -428,6 +429,7 @@ function mapSummaryRow(row: CallLogSummaryRow) {
     correlationId: row.correlation_id || null,
     modelPinned: toNumber(row.model_pinned) === 1,
     sessionTag: row.session_tag || null,
+    clientSessionId: row.client_session_id || null,
     resilienceActions: parseResilienceActions(row.resilience_actions ?? null),
   };
 }
@@ -669,6 +671,9 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     addedWaitCause: toStringOrNull(entry.addedWaitCause),
     modelPinned: entry.modelPinned ? 1 : 0,
     sessionTag: entry.sessionTag || null,
+    // The client's own session id (call_logs.client_session_id, migration 214); NULL for
+    // writers that have no client request to read it from.
+    clientSessionId: toStringOrNull(entry.clientSessionId)?.slice(0, 128) || null,
     // OpenAI Responses API response id, when this attempt produced one --
     // indexed so a later request's `previous_response_id` can resolve
     // this row's artifact for OmniRoute-native continuation. See
@@ -754,7 +759,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         combo_name, combo_step_id, combo_execution_key, error_summary, detail_state,
         detail_pending_until, artifact_relpath, artifact_size_bytes, artifact_sha256,
         has_request_body, has_response_body, has_pipeline_details, request_summary,
-        correlation_id, model_pinned, session_tag, response_id, error_type,
+        correlation_id, model_pinned, session_tag, client_session_id, response_id, error_type,
         video_content_removed, has_content, usage_provenance,
         added_wait_ms, added_wait_cause${resilienceCol}
       )
@@ -769,7 +774,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
         @comboName, @comboStepId, @comboExecutionKey, @errorSummary, @detailState,
         @detailPendingUntil, @artifactRelPath, @artifactSizeBytes, @artifactSha256,
         @hasRequestBody, @hasResponseBody, @hasPipelineDetails, @requestSummary,
-        @correlationId, @modelPinned, @sessionTag, @responseId, @errorType,
+        @correlationId, @modelPinned, @sessionTag, @clientSessionId, @responseId, @errorType,
         @videoContentRemoved, @hasContent, @usageProvenance,
         @addedWaitMs, @addedWaitCause${resilienceParam}
       )

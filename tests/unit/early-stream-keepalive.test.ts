@@ -22,6 +22,31 @@ import {
 import { takeEarlyKeepaliveBytes } from "../../open-sse/utils/earlyKeepaliveByteBuffer.ts";
 import { OPENAI_RESPONSES_IN_PROGRESS_FRAME } from "../../open-sse/utils/sseHeartbeat.ts";
 
+// #17825: the keepalive is a complete, spec-valid Responses event.
+type InProgressEvent = {
+  type: string;
+  sequence_number: number;
+  response: {
+    id: string;
+    object: string;
+    status: string;
+    created_at: number;
+    model: string;
+    output: unknown[];
+  };
+};
+
+function assertCompleteInProgress(event: InProgressEvent) {
+  assert.equal(event.type, "response.in_progress");
+  assert.equal(event.sequence_number, 1);
+  assert.equal(event.response.id, "resp_keepalive_omniroute");
+  assert.equal(event.response.object, "response");
+  assert.equal(event.response.status, "in_progress");
+  assert.equal(typeof event.response.created_at, "number");
+  assert.equal(typeof event.response.model, "string");
+  assert.deepEqual(event.response.output, []);
+}
+
 async function readAll(response: Response): Promise<string> {
   const reader = response.body!.getReader();
   const decoder = new TextDecoder();
@@ -202,11 +227,7 @@ test("slow Responses handler uses comments plus sparse in_progress events", asyn
   // #14330 / #15202: the frame now carries a required `sequence_number`, a
   // `response` object, and a STRING `response.id` so a strict Responses decoder
   // does not abort on it.
-  assert.deepEqual(JSON.parse(earlyFrames[0].slice("data: ".length)), {
-    type: "response.in_progress",
-    sequence_number: 1,
-    response: { id: "resp_keepalive_omniroute", status: "in_progress" },
-  });
+  assertCompleteInProgress(JSON.parse(earlyFrames[0].slice("data: ".length)));
   assert.ok(
     earlyFrames.some((frame) => frame === ": keepalive"),
     "transport ticks must remain lightweight SSE comments"
@@ -214,11 +235,7 @@ test("slow Responses handler uses comments plus sparse in_progress events", asyn
   const applicationFrames = earlyFrames.filter((frame) => frame.startsWith("data: "));
   assert.ok(applicationFrames.length >= 2, "expected startup and sparse application keepalives");
   for (const frame of applicationFrames) {
-    assert.deepEqual(JSON.parse(frame.slice("data: ".length)), {
-      type: "response.in_progress",
-      sequence_number: 1,
-      response: { id: "resp_keepalive_omniroute", status: "in_progress" },
-    });
+    assertCompleteInProgress(JSON.parse(frame.slice("data: ".length)));
     assert.doesNotMatch(frame, /output_item|reasoning|✨/);
   }
   assert.ok(

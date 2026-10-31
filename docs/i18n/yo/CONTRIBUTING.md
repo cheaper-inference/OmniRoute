@@ -178,20 +178,20 @@ refactor(db): consolidate rate limit tables
 # Gbogbo ìdánwò (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Fáìlì ìdánwò kan ṣoṣo (ẹ̀rọ ìṣiṣẹ́ ìdánwò abinibi Node.js — èyí ni ọ̀pọ̀ ìdánwò ń lò)
+# Fáìlì ìdánwò kan ṣoṣo (olùṣiṣẹ́ ìdánwò abinibi Node.js — èyí ni ọ̀pọ̀ ìdánwò ń lò)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Àwọn ìdánwò unit tí àyípadà rẹ kan nìkan (TIA selector kan náà bí ẹnu-ọ̀nà CI, #8084)
-npm run test:scoped            # àwọn àyípadà nínú commit tó kọjá (tàbí igi iṣẹ́)
+# Àwọn ìdánwò unit tí àyípadà rẹ ní ipa lórí nìkan (olùyan TIA kan náà bí ẹnubodè CI, #8084)
+npm run test:scoped            # àwọn àyípadà inú commit tó kẹ́yìn (tàbí working tree)
 npm run test:scoped:staged     # àwọn àyípadà staged nìkan — ó bá ìṣiṣẹ́ pre-commit mu dáadáa
-npm run test:scoped:full       # kọ́ àwòrán import-graph náà padà kọ́kọ́ (lẹ́yìn fífi fáìlì kún un/gbigbé àwọn fáìlì)
-# Exit 1 + "run the full suite" túmọ̀ sí pé fáìlì hub kan (tsconfig, package.json, …) tàbí
-# orísun tí kò sí lórí àwòrán yí padà — selector náà máa ń kùnà láìléwu, kì í fo ohun kankan ní ìkọ̀kọ̀.
+npm run test:scoped:full       # kọ́ máàpù import-graph náà padà kọ́kọ́ (lẹ́yìn fífi fáìlì kún un/gbígbé fáìlì)
+# Exit 1 + "ṣe gbogbo suite náà" túmọ̀ sí pé fáìlì hub kan (tsconfig, package.json, …) tàbí
+# source tí kò sí nínú máàpù yí padà — olùyan náà máa ń kùnà lọ́nà ààbò, kì í fo ohunkóhun ní ìdákẹ́jẹ láé.
 
-# Vitest (sáfà MCP, autoCombo, cache)
+# Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
 
-# Àwọn ìdánwò E2E (ń béèrè Playwright)
+# Àwọn ìdánwò E2E (ó nílò Playwright)
 npm run test:e2e
 
 # E2E àwọn client protocol (àwọn transport MCP, A2A)
@@ -200,7 +200,7 @@ npm run test:protocols:e2e
 # Àwọn ìdánwò ìbámu ecosystem
 npm run test:ecosystem
 
-# Ẹnu-ọ̀nà coverage: 60% statements/lines/functions/branches
+# Ẹnubodè coverage: 60% statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
@@ -208,41 +208,42 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Ìdánwò combo smoke real-upstream tí a fi ẹnu-ọ̀nà dáàbò bo (ń béèrè ààyè sí VPS + kirẹ́díìtì provider gidi)
-# Ó kan àwọn provider GIDI — ó ná díẹ̀. KÌ Í ṣiṣẹ́ nínú CI LÁÉ. Ó máa fo lọ́nà tó bójú mu láìsí ẹnu-ọ̀nà náà.
-# Ohun tí a nílò: ààyè ssh root@192.168.0.15 (ó ń gba snapshot DB kíkà-nìkan láti VPS).
+# Ìdánwò smoke combo real-upstream tí gate ń ṣàkóso (ó nílò àyè sí VPS + kirẹditi provider gidi)
+# Ó ń kan àwọn provider GIDI — ó ná owó díẹ̀. KÒ ṢE ṣiṣẹ́ nínú CI LÁÉ. Ó máa ń fo lọ́nà tó mọ́ láìsí gate náà.
+# Ó nílò: àyè ssh root@192.168.0.15 (ó ń gba snapshot DB read-only láti VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Ìdánwò smoke VPS live Phase-3 — àwọn script Node ESM lásán, wọ́n kan sáfà .15 live tààrà.
-# Ó nílò: ààyè ssh root@192.168.0.15 (a ń ṣẹ̀dá/tú àwọn combo ká nípasẹ̀ SSH sqlite).
-# Ó kan àwọn provider GIDI (owó díẹ̀). Ó ṣẹ̀dá/pa àwọn combo __live_test__* nìkan. KÌ Í ṣiṣẹ́ nínú CI LÁÉ.
-# REQUIRE_API_KEY=false lórí .15 nítorí náà kò nílò API key, ṣùgbọ́n ó bọ̀wọ̀ fún COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY bí a bá ṣètò wọn.
+# Ìdánwò smoke live VPS Phase-3 — àwọn script Node ESM lásán, wọ́n ń kan server .15 live náà tààrà.
+# Ó nílò: àyè ssh root@192.168.0.15 (a ń ṣẹ̀dá/tú àwọn combo ká nípasẹ̀ SSH sqlite).
+# Ó ń kan àwọn provider GIDI (ìnáwó kékeré). Àwọn combo __live_test__* nìkan ni ó ń ṣẹ̀dá/parẹ́. KÒ ṢE ṣiṣẹ́ nínú CI LÁÉ.
+# REQUIRE_API_KEY=false lórí .15, nítorí náà kò nílò API key, ṣùgbọ́n ó ń tẹ̀lé COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY bí a bá ṣètò wọn.
 npm run test:combo:live:vps              # àwọn scenario HTTP 7 (priority/round-robin/weighted/cost/fusion/auto + health)
 npm run test:combo:live:vps:failover     # ó ṣàfikún scenario failover cross-provider gidi kan (8 lápapọ̀)
 ```
 
 Àwọn àkíyèsí coverage:
 
-- `npm run test:coverage` ń díwọ̀n coverage orísun fún àkójọpọ̀ ìdánwò unit àkọ́kọ́, ó yọ `tests/**` kúrò, ó sì fi `open-sse/**` kún un
-- Àwọn Pull Request gbọ́dọ̀ jẹ́ kí ẹnu-ọ̀nà coverage wà ní **60%+** fún statements/lines/functions/branches
-- Bí PR kan bá yí kóòdù production padà nínú `src/`, `open-sse/`, `electron/`, tàbí `bin/`, ó gbọ́dọ̀ ṣàfikún tàbí ṣàfikún sí àwọn ìdánwò aládàáṣiṣẹ́ nínú PR kan náà
-- `npm run coverage:report` ń tẹ̀ jáde ìròyìn fáìlì-kọ̀ọ̀kan tó kún fún ìṣiṣẹ́ coverage tuntun jù lọ
+- `npm run test:coverage` ń díwọ̀n coverage source fún suite ìdánwò unit àkọ́kọ́, ó yọ `tests/**` kúrò, ó sì fi `open-sse/**` sínú rẹ̀
+- Àwọn pull request gbọ́dọ̀ jẹ́ kí ẹnubodè coverage dúró ní **60%+** fún statements/lines/functions/branches
+- Tí PR bá yí code production padà nínú `src/`, `open-sse/`, `electron/`, tàbí `bin/`, ó gbọ́dọ̀ ṣàfikún tàbí ṣe ìmúdójúìwọ̀n àwọn ìdánwò aládàáṣiṣẹ́ nínú PR kan náà
+- `npm run coverage:report` ń tẹ̀jáde report ẹ̀kúnrẹ́rẹ́ fún fáìlì kọ̀ọ̀kan láti inú ìṣiṣẹ́ coverage tó ṣẹ̀ṣẹ̀ parí
 - `npm run test:coverage:legacy` ń pa metric àtijọ́ mọ́ fún ìfiwéra ìtàn
-- Wo `docs/ops/COVERAGE_PLAN.md` fún ètò-ọ̀nà ìmúdára coverage ní ipele-ìpele
+- Wo `docs/ops/COVERAGE_PLAN.md` fún roadmap ìmúdára coverage ní ìpele-ìpele
 
-### Àwọn Ohun Tí Pull Request Gbọ́dọ̀ Ní
+### Àwọn Ohun Tí Pull Request Gbọdọ̀ Ní
 
-Kí o tó ṣí PR kan, lo
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) láti ṣiṣẹ́ loop tó dojú kọ
-ohun tí o yí padà. Gbogbo àkójọpọ̀ unit (àwọn shard CI 4), Vitest, ẹnu-ọ̀nà coverage **60%+**, àti
-build production jẹ́ ojúṣe CI — ṣíṣe wọn ní local kò fi àmì tuntun kankan kún ohun tí àwọn àyẹ̀wò PR
-kò ní fún ọ tẹ́lẹ̀, àti pé lórí àwọn ẹ̀rọ kékeré ó lè mú kí host kún rẹ́rẹ́ (#8084):
+Ṣáájú ṣíṣí PR, lo
+[Ọ̀nà Àkọ́kọ́ fún Ìkópa](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) láti ṣiṣẹ́ loop tó dá lórí
+ohun tí o yí padà. Suite unit kíkún (àwọn shard CI 4), Vitest, ẹnubodè coverage **60%+**, àti
+build production jẹ́ ojúṣe CI — ṣíṣe wọn lórí ẹ̀rọ abínibí kò fi àmì tuntun kankan kún ohun tí àwọn
+àyẹ̀wò PR yóò ti fún ọ, ó sì lè mú kí host kún dé ààlà lórí àwọn ẹ̀rọ kéékèèké (#8084):
 
 - Ṣiṣẹ́ àwọn fáìlì ìdánwò tó bo àyípadà rẹ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Ṣiṣẹ́ `npm run lint`
-- Fi àwọn ìdánwò aládàáṣiṣẹ́ kún un tàbí ṣàfikún sí wọn nínú PR kan náà ní gbogbo ìgbà tí kóòdù production bá yí padà
-- Fi àwọn fáìlì ìdánwò tí a yí padà tàbí tí a ṣàfikún sí àpèjúwe PR nígbà tí kóòdù production bá yí padà
-- Ṣàyẹ̀wò àbájáde SonarQube lórí PR nígbà tí a bá ti ṣètò àwọn àṣírí project nínú CI
+- Ṣàfikún tàbí ṣe ìmúdójúìwọ̀n àwọn ìdánwò aládàáṣiṣẹ́ nínú PR kan náà nígbàkigbà tí code production bá yí padà
+- Nínú àwọn fáìlì `node:test`, fi gbogbo `await` tó wà ní top-level (gẹ́gẹ́ bí `await import(...)`) ṣáájú `test()` / `describe()` àkọ́kọ́: lábẹ́ `--test-force-exit`, àwọn ìdánwò tí a forúkọsílẹ̀ lẹ́yìn rẹ̀ lè má ṣiṣẹ́ láìsí ìkìlọ̀ (#18045; `npm run check:test-tla-order` ló ń mú èyí ṣẹ)
+- Fi àwọn fáìlì ìdánwò tí a yí padà tàbí ṣàfikún sínú àpèjúwe PR nígbà tí code production bá yí padà
+- Ṣàyẹ̀wò àbájáde SonarQube lórí PR nígbà tí a bá ti ṣètò àwọn secret project nínú CI
 
 Ipò ìdánwò lọ́wọ́lọ́wọ́: **àwọn fáìlì ìdánwò unit 122** tó bo:
 
@@ -250,10 +251,10 @@ Ipò ìdánwò lọ́wọ́lọ́wọ́: **àwọn fáìlì ìdánwò unit 122**
 - Rate limiting, circuit breaker, àti resilience
 - Semantic cache, idempotency, àti títọpa progress
 - Àwọn iṣẹ́ database àti schema (àwọn module DB 21)
-- Àwọn ìṣàn OAuth àti authentication
+- Àwọn flow OAuth àti authentication
 - Ìfọwọ́sí endpoint API (Zod v4)
-- Àwọn irinṣẹ́ sáfà MCP àti fífi scope múlò
-- Àwọn ètò Memory àti Skills
+- Àwọn tool server MCP àti fífi scope múlẹ̀
+- Àwọn system Memory àti Skills
 
 ---
 

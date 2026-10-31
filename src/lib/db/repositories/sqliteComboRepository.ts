@@ -14,6 +14,7 @@ import { getDbInstance } from "../core";
 import { deleteLKGPRowsByComboName } from "../settings/lkgp";
 import { clearRotationState } from "../proxies/rotation";
 import { bumpProxyRegistryGeneration } from "../proxies/registryGeneration";
+import { revokeComboGrantsByName } from "../apiKeys/comboGrantRevocation";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -356,7 +357,8 @@ export async function deleteCombo(id: string) {
     const combo = db.prepare("SELECT name FROM combos WHERE id = ?").get(id) as
       { name?: string } | undefined;
     const result = db.prepare("DELETE FROM combos WHERE id = ?").run(id);
-    if (result.changes === 0) return { deleted: false, lkgpKeys: [] as string[], purged: 0 };
+    if (result.changes === 0)
+      return { deleted: false, lkgpKeys: [] as string[], purged: 0, revokedKeys: 0 };
     // Purge the combo's proxy assignments and rotation cursor with the combo row
     // (#14553, same shape as the account-scope purge in providers/deletion.ts
     // for #9232): orphaned proxy_assignments rows would keep answering for a
@@ -365,15 +367,26 @@ export async function deleteCombo(id: string) {
       .prepare("DELETE FROM proxy_assignments WHERE scope = 'combo' AND scope_id IS ?")
       .run(id).changes;
     clearRotationState(db, "combo", id);
+    // Grants are stored by name: revoke them with the row, or a combo recreated
+    // under the same name would inherit every key's old grant.
+    const revokedKeys = combo?.name ? revokeComboGrantsByName(db, combo.name).length : 0;
     return {
       deleted: true,
       lkgpKeys: combo?.name ? deleteLKGPRowsByComboName(combo.name) : ([] as string[]),
       purged,
+      revokedKeys,
     };
   });
 
-  const { deleted, lkgpKeys, purged } = deleteTransaction();
+  const { deleted, lkgpKeys, purged, revokedKeys } = deleteTransaction();
   if (!deleted) return false;
+
+  if (revokedKeys > 0) {
+    const { clearApiKeyCaches } = await import("../apiKeys");
+    const { invalidateModelCatalogCache } = await import("../readCache");
+    clearApiKeyCaches();
+    invalidateModelCatalogCache();
+  }
 
   if (purged > 0) {
     bumpProxyRegistryGeneration();

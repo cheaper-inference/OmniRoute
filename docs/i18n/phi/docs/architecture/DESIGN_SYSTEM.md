@@ -4,228 +4,133 @@
 
 ---
 
-> **Katayuan:** sanggunian — ang standardisasyong inilalarawan dito ay **naipatupad na** (mga yugto 1–6: grid wallpaper, primitives, sentralisasyon ng status-color, mono token, paglipat ng DataTable sa mga token, focus-ring → accent, Checkbox/Textarea primitives, `cn()` → tailwind-merge, grid sa bawat standalone screen, fluid na 4K content shell, opaque na mga surface ng data-table). Ang dokumentong ito ang kanonikal na paglalarawan ng mga design token, component, at convention ng dashboard; pinanatili ang balangkas ng mga yugto sa ibaba bilang batayan ng bawat desisyon.
-> **Saklaw:** ang OmniRoute dashboard (`src/`) at ang marketing site (`_mono_repo/omnirouteSite/`) ay may **iisang biswal na identidad** — parehong graph-paper grid background (32px), parehong mga color token, at mga standardized na component.
->
-> Mga praktikal na tala para sa mga maintainer:
->
-> - Ang ilang natitirang hardcoded na hex value ay **sinadya** (palaging-dark na console terminal, mga ReactFlow SVG stroke) at **HINDI** dapat ilipat sa mga token.
-> - Ang "mas malaking" grid sa isang tumatakbong instance ay dulot ng stale build, hindi ng code — 32px ang laki ng grid, kapareho ng sa site.
-> - Ang mga value na `--table-*` ng dark theme ay byte-identical sa hardcoded rgba bago ang migration; inayos ang light theme (may bug ito at palaging dark dahil sa mga dead na `var()` fallback).
+> **Katayuan:** ang dashboard ay binuo sa** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ibinebenta bilang workspace `packages/ui-kit` (`@omniroute/ui-kit`; ang upstream snapshot ay naka-pin sa `packages/ui-kit/UPSTREAM.md` at binabantayan ng `npm run check:ui-kit-snapshot`). Ang liwanag ay ang kanonikal na tema; ang default na kagustuhan ay `system`. Ang impit ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang nag-iisang pamilya para sa UI, display at code text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Ang bawat icon ay isang Lucide glyph.
 
----
+## 1. Saan matatagpuan ang mga bagay
 
-## 1. Layunin
+- **Kit.** Ang `packages/ui-kit/src` ay kopyang byte-for-byte ng upstream `src/` sa commit na naka-pin sa
+  `packages/ui-kit/UPSTREAM.md` (na nagtatala rin ng awtorisasyon ng lisensya); ang `PATCHES.md` ay naglilista ng mga lokal
+  na patch (wala). Kinokonsumo ito bilang source, nang walang build: tinatranspile ito ng `next.config.mjs`, at
+  inimamapa ng `tsconfig.json` ang `@omniroute/ui-kit` → `packages/ui-kit/src` at ang `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (parehong alias ang dala ng `vitest.config.ts` at `vitest.mcp.config.ts`). Mag-import ng
+  component ng kit sa pamamagitan ng subpath nito (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), hindi kailanman
+  sa pamamagitan ng barrel na `@omniroute/ui-kit`: hinihila ng barrel ang bawat component (kabilang ang date picker)
+  papunta sa bawat importer. Ang stylesheet ng kit ay pumapasok sa pamamagitan ng `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Mga Token.** Idinedeklara ng `packages/ui-kit/src/ci-tokens.css` ang mga token na `--ci-*`; tinitulay ng `src/app/globals.css`
+  ang mga ito sa mga legacy na pangalan ng OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), kaya tuloy na gumagana ang mga kasalukuyang pagbabasa ng `var(--color-*)` at mga
+  utility ng Tailwind. Ang bagong code ay gumagamit ng mga utility ng Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) o mga klase ng kit — hindi kailanman ang hex value
+  (ipinapatupad ng `tests/unit/design-kit-bridge.test.ts` ang bridge). Ang `text-primary` ay nagre-resolve sa
+  `--color-primary-ink` sa pamamagitan ng `--text-color-primary` (lime-800 sa light, ang lime accent sa dark), kaya
+  ang primary na teksto ay nananatiling nababasa habang pinapanatili ng `bg-primary`/`border-primary` ang lime surface. Ang mga chart
+  series ay gumagamit ng `--color-chart-1` … `--color-chart-5`.
+- **Mga Tema.** Ang `<html className="ci-theme">` (`src/app/layout.tsx`) ay nag-opt-in ng dokumento sa tema ng kit.
+  Ang preference ay `light`, `dark` o `system` (`THEME_CONFIG.defaultTheme = "system"` sa
+  `src/shared/constants/appConfig.ts`; sumusunod ang `system` sa `prefers-color-scheme`). Ang `applyTheme()` sa
+  `src/store/themeStore.ts` (na sinasalamin ng inline bootstrap script sa `src/app/layout.tsx`, na tumatakbo
+  bago ang hydration) ay nagse-set ng `data-theme="dark"|"light"` at sabay na nagto-toggle ng `.dark` class sa `<html>`.
+  Ang dark token set ng kit ay naka-key sa `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  ang sariling dark override ng OmniRoute (ang `.dark` block sa `globals.css`) at ang mga legacy na Tailwind na
+  utility na `dark:` ay naka-key sa `.dark` class. Walang mga preset ng accent color: ang accent ay laging nagmumula sa
+  kit, at ang na-persist na preset mula sa mas lumang build ay itinatapon kapag nag-load ang store.
+- **Mga Component (mga adapter).** Pinapanatili ng `src/shared/components/index.tsx` ang component API ng OmniRoute (mga parehong
+  pangalan, default export at props), at ang mga primitive sa likod nito ay mga adapter sa ibabaw ng kit: mga form
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), mga overlay at feedback
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  istraktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) at mga table
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Ang isang adapter ay nag-i-import ng
+  component ng kit sa pamamagitan ng subpath at inimamapa ang mga legacy na props dito — halimbawa ang `Button variant="primary"` ay ang
+  `default` na button ng kit (`--ci-button-primary-*`: ang inverse surface sa light, ang accent na may
+  `--ci-color-accent-foreground` na ink nito sa dark), ang `danger` ay `destructive`, at ang `warning` ay `outline` kasama
+  ang extension na `.ci-button--warning`. Ang mga panuntunang `.ci-button--warning` at `.ci-badge[data-tone]` sa
+  dulo ng `globals.css` (`@layer components`) ay mga extension ng OmniRoute sa ibabaw ng mga klase ng kit.
+  Ang `tests/unit/ui/adapters/*.test.tsx` ay nagpi-pin ng bawat adapter.
+- **Shell.** Ang `src/app/(dashboard)/layout.tsx` ay nagre-render ng `DashboardLayout`, na nagre-render ng
+  `src/shared/components/layouts/DashboardShell.tsx`: ang `SidebarProvider` / `Sidebar` /
+  `SidebarInset` ng kit (`packages/ui-kit/src/sidebar.tsx`), na may navigation logic ng OmniRoute sa
+  `src/shared/components/Sidebar.tsx`. Ang "skip to content" na link papunta sa `#main-content` ang unang focusable
+  na elemento. Ang `src/shared/components/Header.tsx` ang may hawak ng `SidebarTrigger` ng kit (ang tanging
+  toggle ng sidebar ng shell), ang Keak `ProductSwitcher` at ang command-palette opener; ipinapakita nito ang route title lamang habang
+  walang `PageHeader` ng kit (`.ci-page-header`) na naka-mount sa loob ng `#main-content`, kaya ang isang pahina na may sariling
+  `PageHeader` ay may iisang `h1`. Ang `src/shared/components/CommandPalette.tsx` ay isang `Dialog` ng kit.
+- **Mga Icon.** Ang `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ay nagre-resolve ng pangalan (ang
+  bokabularyo ng Material Symbols na ginagamit ng mga screen) sa pamamagitan ng `ICON_MAP` (`src/shared/constants/iconMap.ts`) papunta sa isang
+  Lucide glyph. Wala na ang Material Symbols font at package: ang pangalang wala sa map ay nagre-render ng
+  neutral na placeholder glyph (`data-icon-missing="true"`) at naglo-log ng console warning sa labas ng production.
+  Ang `npm run gen:icon-map` ay nagpi-print ng mga pangalang ginagamit na wala sa map
+  (ang `tests/unit/icon-map-coverage.test.ts` ay nagfa-fail sa anumang pangalan na walang Lucide icon;
+  ang `tests/unit/icon-map-object-values.test.ts` ay sumasaklaw sa mga pangalang nakaimbak sa mga lookup object);
+  ang `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` ay nagre-rewrite ng mga literal na
+  `<span className="material-symbols-outlined">` span papunta sa `<Icon>`.
+- **Brand.** Ang `src/shared/components/OmniRouteLogo.tsx` ay nagba-wrap ng kit: ang default export na `OmniRouteLogo`
+  ay nagre-render ng `ProductIcon product="omniroute" variant="glyph"` (inline SVG, ligtas sa `basePath`) at
+  ang `OmniRouteLockup` ay nagre-render ng `ProductLockup product="omniroute"` (accessible name na "Keak OmniRoute") o, para sa
+  mga white-label operator, ang kanilang sariling `name`/`logoSrc`. Ang mga destinasyon ng product-switcher ay nasa
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Ang mga standalone
+  na screen — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` at `src/shared/components/ErrorPageScaffold.tsx`
+  — ay nagpapakita ng lockup; binabantayan ito ng `tests/unit/brand-pages-static.test.ts`.
 
-Dapat magmukhang **iisang produkto** ang marketing site (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) at ang product dashboard. Hiniram na ng site ang palette nito mula sa dashboard — sinasabi pa nga ng `css/tokens.css` nito na _"Ginagaya ng palette ang OmniRoute dashboard (src/app/globals.css)"_. Kaya humigit-kumulang 80% nang magkatugma ang dalawa sa antas ng kulay. Ang kulang sa dashboard:
+## 2. Mga Panuntunan
 
-1. Ang **graph-paper grid wallpaper** na ginagamit ng site sa bawat page.
-2. Ilang **shared design token** na mayroon ang site ngunit wala sa dashboard (radius scale, brand gradient, `surface-2`, mono font).
-3. **Consistency sa antas ng component** — nilalampasan ng ilang dashboard component ang mga theme token gamit ang mga hardcoded na hex/rgba.
+1. Token, hindi literal. Ang mga pagbubukod na sinadya: ang palaging madilim na console terminal at `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ang nalutas-hex na salamin ng palette ng status ng kit para sa mga tumatawag na nangangailangan ng literal na hex. Ang mga kategoryang palette ay wala nang exception: sumasakay sila sa limang chart token ng kit (`--color-chart-1..5`) sa `src/shared/utils/categoricalPalette.ts` at, para sa mga diskarte sa pagruruta, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges at ang orchestration canvas ay nagbabasa ng theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).
+2. Huwag kailanman i-patch `packages/ui-kit/src` sa pamamagitan ng kamay: i-sync sa `scripts/dev/sync-ui-kit.sh <commit>`; nabigo ang pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sa anumang byte na naiiba sa naka-pin na upstream commit (lumalaktaw ito nang may babala kapag wala ang upstream clone, `UI_KIT_CLONE` o `_references/cheaper-inference-ui-kit`). Kapag may kulang sa kit, ayusin ito sa adapter o sa screen at hilingin ito sa upstream.
+3. Ang mga default ng kit text ay English (`label = "Loading"`, `loadingLabel = "Loading table"`...) — ipasa ang mga isinaling string mula sa `useTranslations(...)` sa tuwing ang isang bahagi ng kit ay nag-render ng text.
+4. Ang mga utility ng Tailwind ay nanalo sa mga klase ng bahagi ng kit (nagdedeklara ang kit `@layer theme, base, components, utilities` at ang mga panuntunan nito ay nakatira sa `components`) — gumamit ng mga utility para sa spacing at layout, hindi para muling kulayan ang mga bahagi ng kit.
+5. Mga Heading: `.ci-heading` para sa mga pamagat ng pahina at seksyon; `.ci-dashboard-display` para lang sa malaki, kalat-kalat na display text gaya ng error-page status code. Parehong gumagamit ng Switzerland.
+6. binabantayan `tests/unit/dashboard-kit-sweep.test.ts` ang kit adoption: walang Material ligature span sa ilalim ng `src/app` o `src/shared/components`; sa dashboard tree (`src/app/(dashboard)` at `src/shared/components`) walang raw `<select>`, `<textarea>` o `<table>` at walang hand-rolled `role="dialog"` sa labas ng mga nakalistang exception (ang katutubong sangay ng `Select` adapter, `RequestLoggerDetail`); bawat hilaw na `<button>` o `<input>` ay nangangailangan ng komentong naglalaman ng `kit-exception:` (na may dahilan) na nagtatapos ng hindi hihigit sa 3 linya sa itaas nito; palette hues at `dark:` variants lamang sa mga file ang mga listahan ng pagsubok.
+7. I-verify ang parehong mga tema at ang 390 px viewport bago ang isang PR (mga screenshot); `tests/e2e/a11y.spec.ts` nagpapatakbo ng palakol.
 
-Ang dokumentong ito ang pagsusuri at plano.
+## 3. Pagdaragdag ng screen
 
----
+1. Buksan ang pahina gamit ang kit `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` sa loob ng dashboard) — pamagat, paglalarawan at `actions`. Aalisin na ng shell header ang sarili nitong pamagat.
+2. Bumuo ng mga control mula sa `@/shared/components` (ang mga adapter) at gumamit ng mga kit component ayon sa subpath kung saan walang adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…).
+3. Mga icon: `<Icon name="…" />`. Ang bagong pangalan ay papasok sa `ICON_MAP` kasama ang semantikong tumutugmang Lucide component; inililista ng `npm run gen:icon-map` ang mga pangalang nawawala pa.
+4. Mga kulay: mga semantic utility (`text-success`, `bg-warning-bg`, `border-border`…) at `var(--color-chart-N)` para sa mga chart series; walang mga hex value at walang mga `dark:` na variant na umuulit lamang ng kulay.
+5. Teksto: bawat string, kabilang ang mga label na ipinapasa mo sa mga kit component, ay nagmumula sa `useTranslations`. Ang mga bagong key ay papasok sa `src/i18n/messages/en.json`, `pt-BR.json` at `vi.json` (pinipirmi ng Vietnamese parity test ang bawat English key); ang iba pang mga locale ay pinupunan ng i18n sync.
+6. Patakbuhin ang mga guard bago ang PR: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck` (ang tanging check na nakahuhuli ng duplicate na import sa `iconMap.ts`), `npm run check:ui-icu`, at ang sariling mga test ng screen.
 
-## 2. Mga Prinsipyo
+## 4. Pagdaragdag o pagpapalit ng adapter
 
-- **Iisang source of truth = `src/app/globals.css`.** Ginagaya ng site ang dashboard, at hindi kailanman ang kabaligtaran. Sa `globals.css` muna inilalagay ang mga bagong token.
-- **Mga token, hindi mga literal.** Gumagamit ang mga component ng mga semantic token (`bg-surface`, `text-primary`, `border-border`), hindi ng raw na `#hex`.
-- **Banayad, hindi matingkad.** Ang grid ay isang mahinang wallpaper na nasa likod ng content — hindi nito kailanman dapat pababain ang contrast ng text o makipag-agawan ng pansin sa UI.
-- **Theme-aware.** Gumagana ang lahat sa `.dark` (ang natatanging hitsura ng produkto) at sa light.
-- **Maingat na rollout.** I-release muna ang grid + mga token (mababang panganib, mataas ang visibility), pagkatapos ay ang mga component cleanup nang paunti-unting wave.
+1. Panatilihin ang public API ng `src/shared/components/index.tsx`: parehong mga pangalan ng export, mga default export at
+   mga tinatanggap na props. I-map ang mga legacy prop papunta sa kit sa loob ng adapter (tingnan ang `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. I-import ang kit gamit ang subpath (`@omniroute/ui-kit/<component>`).
+3. Ang mga workaround para sa mga kakulangan ng kit ay nasa adapter (o sa `globals.css` `@layer components` kapag ang fix ay isang
+   style), hindi kailanman sa `packages/ui-kit/src`.
+4. Magdagdag o mag-update ng `tests/unit/ui/adapters/<name>.test.tsx`. Para sa adapter na may maraming caller, ihambing ang
+   na-render na markup bago at pagkatapos ng pagbabago — ang mga pagbabago sa padding o wrapper ay kumakalat sa bawat screen.
 
----
+## 5. Pag-update ng kit
 
-## 3. Kasalukuyang kalagayan — ano ang magkatugma na at ano ang hindi
+Inihahambing `npm run check:ui-kit-upstream` ang bersyon na naka-pin sa `packages/ui-kit/UPSTREAM.md` sa pinakabagong `v*` tag ng upstream na repo at nagpi-print ng utos sa pag-sync kapag lumabas ang isang release. Ang lingguhang `UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) ay nagpapatakbo ng parehong pagsusuri at pinananatiling bukas ang isang isyu sa pagsubaybay habang nasa likod ang pin; pribado ang upstream repo, kaya kailangan ng workflow ng read-only na token sa `UI_KIT_READ_TOKEN` secret at mananatiling inert kung wala ito.
 
-### 3.1 Mga kulay — pinag-isa na ✅
+Kinokopya `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ang upstream `src/` sa commit na iyon (`latest` = ang pinakabagong `v*` tag) sa `packages/ui-kit/src`, inilalapat ang nag-iisang pinapayagang pagbabago (binabagsak nito ang `.js` suffix mula sa mga kaugnay na pag-import), at itinatakda ang bersyon ng workspace sa `packages/ui-kit/package.json` at `package-lock.json` sa upstream. Pagkatapos: suriin ang `git diff packages/ui-kit`, gumawa ng visual pass sa mga provider, setting, combo, paggamit at endpoint sa parehong tema, patakbuhin `npm run check:ui-kit-snapshot` at `npm run test:vitest:ui`, at buksan ang PR gamit ang upstream changelog.
 
-Ang bawat brand color at surface ay tumutugma na sa site **ayon sa value** (mga pangalan lang ang naiiba — gumagamit ang dashboard ng prefix na `--color-`). Na-verify sa `src/app/globals.css:30-128`:
+## 6. README diagram
 
-| Konsepto                   | Token ng site (`tokens.css`)                | Token ng dashboard (`globals.css`) | Pagkakatugma                |
-| -------------------------- | ------------------------------------------- | ---------------------------------- | --------------------------- |
-| primary                    | `--primary #e54d5e`                         | `--color-primary #e54d5e`          | ✅                          |
-| primary-hover              | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`    | ✅                          |
-| accent                     | `--accent #6366f1`                          | `--color-accent #6366f1`           | ✅                          |
-| accent-2                   | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`     | ✅ (pinalitan ang pangalan) |
-| accent-3                   | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`     | ✅ (pinalitan ang pangalan) |
-| success / warning / error  | `#22c55e / #f59e0b / #ef4444`               | magkapareho                        | ✅                          |
-| mga traffic light          | `#ff5f56 / #ffbd2e / #27c93f`               | magkapareho                        | ✅                          |
-| dark bg / surface / border | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | magkapareho                        | ✅                          |
-| light bg / surface / text  | `#f9f9fb / #fff / #1a1a2e`                  | magkapareho                        | ✅                          |
+Ang labindalawang diagram na naka-embed ng root `README.md` (`docs/diagrams/*.svg`) ay ang kit na inilapat sa isang static na imahe, at nabuo ang mga ito, hindi iginuhit ng kamay: 13 generator file sa `scripts/docs/gen-readme-*.mjs` (labindalawang diagram kasama ang `gen-readme-diagrams.mjs` driver) at 12 staleness test sa `tests/unit/docs/readme-*-svg.test.ts`, isa sa bawat diagram, bawat byte-paghahambing ng ginawang file ng `test-unit`(job generator's output file nito).
 
-**Konklusyon:** walang kailangang gawing color migration. Iisa na ang identidad; _tinatapos_ natin ito, hindi muling binubuo.
+- **Mga token.** Kinokopya `scripts/docs/readme-diagram-theme.mjs` ang palette mula sa `packages/ui-kit/src/ci-tokens.css` (naka-pin laban sa file na iyon ni `tests/unit/docs/readme-diagram-theme.test.ts`) at tinutukoy ang mga text role sa mga naunang mukha ng kit — Instrument Serif para sa display, Inter para sa UI text, IBM Plex Mono para sa mga figure at code — mula sa `@fontsource` packages (ang dashboard mismo ay gumagamit ng Switzer ng kit mula noong kit 0.0.66). Ang mga light value ay nasa `:root`, dark values sa likod ng `prefers-color-scheme: dark`, sa loob ng file, kaya ang bawat larawan ay sumusunod sa scheme ng viewer sa GitHub.
+- **Mga font.** Inilalagay `scripts/docs/readme-fonts.mjs` ang mga woff2 file na iyon sa mga glyph na iginuhit ng bawat diagram at ine-embed ang mga ito bilang `@font-face` `data:` URIs — ang tanging paraan upang maabot ng kit typography ang isang README na imahe, dahil walang CSS GitHub Markdown at hinaharangan ng camo proxy ang bawat external na pagkuha. Ang mga subset ay latin-only; ang mga simbolo na glyph na bumabalik sa system stack ay pinapayagan nang paisa-isa sa `SYMBOL_FALLBACKS`, at anumang iba pang natuklasang glyph throws.
+- **Magbagong-buhay.** Isinulat muli `npm run docs:readme-diagrams` ang lahat ng labindalawa sa README order at nagpi-print ng isang linya bawat file na may sukat nito. Ang isang generator ay tumatakbo din sa sarili nitong (`node scripts/docs/gen-readme-<name>.mjs`; kailangan ng `free-tier-budget` `node --import tsx/esm` dahil ang mga numero nito ay nagmumula sa live na catalog loader sa `open-sse/config/freeModelCatalog.ts`; ang CI na kinahinatnan ng pagbabago ng catalog ay nasa `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). I-commit ang generator at ang SVG nang magkasama.
+- **Patunay.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ay nagre-render ng isang file sa paraang inihahatid ito ng GitHub (isang `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), kumukuha ng liwanag at madilim na frame at nag-uulat sa mga kahilingan ng panlabas na font na ginawa ang pahina (dapat ay 0).
+- **Badyet.** Sa ilalim ng 200 KB bawat file (iginigiit ito ng bawat pagsubok sa staleness); 500 KB ang hard cap para sa anumang README na imahe (ang tuntunin ng validator ng SVG studio).
+- **Kopyahin ang hindi nabago, mga bilang mula sa gate.** Binago ng rebrand ang uri at palette, hindi mga salita: dinadala ng bawat generator ang kopya ng diagram nito sa isang `*_COPY` constant (o binubuo ito mula sa live na catalog) na parehong iginuhit na text at input ng font-subset. Ang mga Canonical figure ay nananatili sa mga `<text>` node, na binabasa ng `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); ang staleness test ng mga diagram na binabasa ng gate ay nagpapatakbo din ng mga validator nito sa nabuong file, kaya ang figure na naaanod mula sa code ay nabigo sa pagsubok - ayusin ang pinagmulan na binabasa ng gate, hindi ang numero sa generator.
 
-### 3.2 Mga puwang — kung ano ang kulang sa dashboard
+## 7. Indeks ng sanggunian
 
-| Agwat                   | Taglay ng site                                                                    | Dashboard                                                                         | Aksiyon                   |
-| ----------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------- |
-| **Grid na wallpaper**   | `body::before` na graph-paper, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ idinagdag (Yugto 1)**                                                        | **Bahagi A**              |
-| **Iskala ng radius**    | `--radius 14px`, `--radius-sm 9px`                                                | idinagdag ang `--radius 14px`; nakabinbin ang `-sm` + muling pagturo ng component | **Bahagi B / Yugto 2**    |
-| **Gradient ng brand**   | `--grad-brand 135deg primary→accent-3`                                            | **✅ idinagdag ang token (Yugto 1)**; gagamitin sa Yugto 2                        | **Bahagi B**              |
-| **Nested na surface**   | `--surface-2 #1c2230`                                                             | **✅ idinagdag (Yugto 1)**                                                        | **Bahagi B**              |
-| **Mono na font**        | `--font-mono` (ui-monospace stack)                                                | nakabinbin (Yugto 4, kasama ang mga gagamit nito)                                 | **Bahagi B**              |
-| **`text-muted` (dark)** | `#8b8b9e`                                                                         | `#a1a1aa` (zinc-400)                                                              | pagtugmain — **Bahagi B** |
-
-### 3.3 Mekanismo ng pag-theme (upang walang masira)
-
-- **Tailwind v4, CSS-first** (walang `tailwind.config.*`). Tinutukoy ang mga token sa `:root`/`.dark` at inilalantad sa mga utility sa pamamagitan ng `@theme inline` (`globals.css:130-179`).
-- **Dark sa pamamagitan ng `.dark` class** sa `<html>` (`@custom-variant dark` sa `globals.css:22`), na tina-toggle ng custom na Zustand store (`src/store/themeStore.ts`), default na theme = `system` (`src/shared/constants/appConfig.ts:11`). Sa halip, ginagamit ng site ang `html[data-theme="light"]` — **magkaiba ang mga mekanismo ngunit hindi kailanman nagsasalubong** (magkahiwalay na origin), kaya walang conflict. Pananatilihin natin ang mekanismong `.dark` ng dashboard.
-- **May runtime primary override** (`themeStore.ts:85-97`, mga preset sa `COLOR_THEMES`) — maaaring palitan ng mga user ang `--color-primary`. Awtomatikong namamana ng anumang bagong token (gradient, atbp.) na tumutukoy sa `--color-primary` ang mga override na iyon. ✅
-- **Mga reserved na pangalan ng radius sa Tailwind v4:** sinusuportahan ng `--radius-sm/md/lg/...` ang mga utility na `rounded-*`. Kapag muling tinukoy ang mga ito, retroaktibong mababago ang bawat umiiral na `rounded-*` (hal., ginagamit ang `rounded-sm` sa 12 file). Kaya sadyang ipinagpaliban sa Yugto 2 ang value ng maliit na radius at ang muling pagturo ng component, kung saan sabay na babaguhin ang mga gagamit nito.
-
----
-
-## 4. Bahagi A — Ang graph-paper grid na background (pangunahing kahilingan) — IPINATUPAD (Yugto 1)
-
-### 4.1 Ano ito
-
-Ang eksaktong recipe mula sa site (`_mono_repo/omnirouteSite/css/base.css`): isang **fixed at full-viewport na pseudo-element** na naglalagay ng dalawang 1px line gradient, at nakaposisyon sa `z-index:-1` sa likod ng lahat ng content.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Bakit ito gumagana kahit may opaque na `background-color` ang `body`:** ang `::before` na may `z-index:-1` ay ipinipinta _sa ibabaw_ ng sariling background ng elemento ngunit _sa ilalim_ ng in-flow content nito. Kaya ang `--color-bg` ang nagsisilbing base fill, naka-layer ang grid sa ibabaw nito, at nire-render ang app sa ibabaw ng grid.
-
-### 4.2 Precedent na nasa codebase na
-
-**Ipinapatupad na ng** `src/app/landing/page.tsx:16-26` ang parehong grid na ito kada page — ngunit may **pulang** mga linya (`#E54D5E`, opacity na `0.06`) sa **50px**, kasama ang mga animated orb. Kaya subok na ang pattern sa produkto; itinataas ito ng gawaing ito bilang isang **global at theme-aware** na wallpaper.
-
-### 4.3 Mga idinagdag na token (sa `globals.css`)
-
-```css
-:root {
-  /* light — tinaasan ang opacity ng grid mula sa 0.045 ng site upang maging
-     tunay na nakikita ang wallpaper sa siksik na dashboard (natatakpan ng mga card/chrome ang karamihan ng viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* dark — tinaasan mula sa 0.035 para sa parehong dahilan */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Ang nag-iisang blocker — inalis na
-
-Global ang grid ayon sa pagkakagawa nito (sinasaklaw nito ang panel, `auth`/`login`, mga error page — lahat ng route — nang sabay-sabay). Eksaktong **isang** elemento ang nagtago rito sa loob ng panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — naglalagay ang panlabas na wrapper ng opaque na `bg-bg`. Transparent na ang lahat ng nasa ilalim nito (`<main>`, ang scroll container, ang `max-w-7xl` na inner), kaya sa **pag-alis ng `bg-bg`** ay makikita ang body grid sa content area (nananatiling base fill ang `--color-bg` ng body).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interaksiyon sa chrome (sidebar / header)
-
-- Nananatiling **opaque** ang `Header` (`Header.tsx:207`, `bg-bg`) at `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) → lumilitaw ang grid sa **content area lamang**, na napapalibutan ng solid na chrome. Kalmadong default ito at tumutugma sa paraan ng site sa paghihiwalay ng chrome mula sa canvas (desisyong D3 = solid).
-
-### 4.6 Mga login / auth / error page
-
-Direktang nire-render ang mga ito sa ilalim ng `<body>` (walang panel chrome), kaya dapat awtomatikong lumitaw ang global grid sa likod ng mga ito. **Yugto 5 — TAPOS NA:** opaque pala ang mga standalone full-screen wrapper (`min-h-screen … bg-bg`, kung saan ang `bg-bg` ay parehong solid na fill ng `<body>`), na siyang nagtago sa grid sa bawat screen na hindi dashboard — hindi lamang sa login. Transparent na ngayon ang lahat ng ito upang makita ang shared wallpaper: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, at `ErrorPageScaffold` (sumasaklaw sa `400`/`401`). Tinatapos nito ang **D4** (pinalawak mula sa login lamang patungo sa bawat standalone screen). Binabantayan ng `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Landing page
-
-Pinananatili ng `landing/page.tsx` ang mas mayamang animated background nito (mga orb + vignette) — ang sarili nitong marketing splash (desisyong D5 = panatilihin nang walang pagbabago).
-
----
-
-## 5. Bahagi B — Pag-iisa ng mga token
-
-Idinaragdag ng Phase 1 ang mga inert at collision-free na identity token (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Ikinokonekta ng Phase 2 ang radius scale sa Tailwind at itinuturo muli ang mga component; idinaragdag ng Phase 4 ang `--font-mono` kasama ang mga consumer nito.
-
-| Token                             | Bakit                                                                          | Phase                                   |
-| --------------------------------- | ------------------------------------------------------------------------------ | --------------------------------------- |
-| `--radius` / `--radius-sm`        | Isang radius scale (14/9) sa halip na ad-hoc na 6/8/12                         | 1 (value) / 2 (ikonekta + iturong muli) |
-| `--grad-brand`                    | Brand gradient para sa mga pangunahing CTA (pula→violet), na tumutugma sa site | 1 (token) / 2 (Button)                  |
-| `--surface-2`                     | Mga nested panel / header ng table / inset row                                 | 1                                       |
-| `--font-mono`                     | Mga code block, terminal, ID, endpoint                                         | 4                                       |
-| Pagre-reconcile ng `--text-muted` | Pumili ng iisang value para sa site↔panel (`#a1a1aa` ang inirerekomenda)       | 2                                       |
-
-**D2 (text-muted):** site `#8b8b9e` kumpara sa dashboard `#a1a1aa`. Inirerekomendang panatilihin ang **`#a1a1aa` ng dashboard** at i-update ang _site_ upang tumugma. Kosmetiko.
-
----
-
-## 6. Bahagi C — Pag-standardize ng mga component (Phase 2–4)
-
-Mga custom na component (walang shadcn/Radix), Tailwind v4, **karamihan** ay gumagamit na ng mga semantic token (195 file ang nag-i-import ng shared barrel). Ang gawain ay alisin ang mga **bypass**. Lokasyon: `src/shared/components/`.
-
-| #   | Item                                       | File(s)                                                                                                                 | Problema → Target                                                                                                                                  | Phase |
-| --- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----- |
-| C1  | **Pag-align ng radius**                    | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                               | magkakahalong 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                           | 2     |
-| C2  | **Button gradient + `accent` variant**     | `Button.tsx:5-12`                                                                                                       | ang primary ay patag na pula→pula; i-align sa `--grad-brand`; idagdag ang nawawalang `accent` variant. ~195 importer — pinakamataas ang visibility | 2     |
-| C3  | **Mga table**                              | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                     | 100% inline na hardcoded rgba + mga hindi umiiral na var; ilipat sa mga token, ihinto ang magkakaibang style                                       | 3     |
-| C4  | **Isentralisa ang mga status color**       | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helper | 6+ kopya ng parehong hex → isang module mula sa `--color-success/warning/error`                                                                    | 3     |
-| C5  | **Border ng Card**                         | `Card.tsx:39`                                                                                                           | `border-white/5` → brand `/8`                                                                                                                      | 2     |
-| C6  | **Pagre-reconcile ng focus ring** ✅ TAPOS | `globals.css` `--focus-ring` (accent) kumpara sa `ring-primary/30` ng mga form control                                  | pinag-isa sa **accent (violet)** upang tumugma sa global ring + maiba sa pulang error ring; nananatiling pula ang error                            | 4     |
-| C7  | **Idagdag ang `Checkbox` + `Textarea`**    | raw na `<input>`/`<textarea>` na may inline na `accentColor:#6366f1`                                                    | mga primitive na pinapagana ng token                                                                                                               | 4     |
-| C8  | **Pagsuyod sa hardcoded hex**              | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, mga tuldok ng Modal, ~14 na chart file                           | mga literal → mga token                                                                                                                            | 4     |
-| C9  | **`cn()` → clsx + tailwind-merge**         | `src/shared/utils/cn.ts`                                                                                                | nagsasalansan ang magkakasalungat na class; kailangan para sa mga override ng C1                                                                   | 2     |
-
-**Nakaayon na sa brand (token-driven, radius lang ang kailangan):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Plano ng rollout
-
-- **Phase 1 — Grid + mga identity token (ANG PR NA ITO).** Grid sa `globals.css` + mga token na `--surface-2`/`--grad-brand`/`--radius`; wallpaper na `body::before`; alisin ang humaharang na `bg-bg`; static guard test. Mababang panganib, maaaring ibalik sa isang commit.
-- **Phase 2 — Mga primitive (C1, C2, C5) — TAPOS na sa PR na ito.** Idinagdag sa pamamagitan ng `@theme` ang mga semantic radius utility na `rounded-card` (14px) / `rounded-control` (9px) (mga custom na pangalan, kaya hindi nabago ang default na `rounded-sm/md/lg/xl` — walang malawakang pagbabago sa 400 file); Card/Modal → 14px, Button/Input/Select → 9px; Button primary → `--grad-brand` (pula→violet) + bagong variant na `accent`; mga border ng Card → ang token na `border-border` (0.08). **Ipinagpaliban:** nangangailangan ng mga bagong dependency ang `cn()`→tailwind-merge (C9); iniwang walang pagbabago ang ad-hoc na pagwawalis sa `rounded-lg` (326 file) dahil saklaw ng mga primitive ang karamihan ng surface.
-- **Phase 3 — Mga kulay ng status + mga table (C3, C4) — TAPOS na sa PR na ito.** ✅ **C4** (`src/shared/constants/statusColors.ts` — iisang source na `STATUS_HEX`; itinuro rito ang `flow/edgeStyles.ts` + `TokenHealthBadge`, tapat/parehong hex). ✅ Token na **`--font-mono`**. ✅ **C3 (DataTable)** — pinalitan ang bawat inline rgba + ang mga hindi nagagamit na fallback na `var(--bg-table-header)` / `var(--text-secondary)` ng isang hanay ng token na `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) na ang **mga dark value ay eksaktong katumbas ng lumang hardcoded rgba** (byte-identical sa dark) at inaayos ng mga light value ang dating palaging-dark na light theme. Border ng header → `--color-border`, secondary text → `--color-text-muted`. **Kailangan ng visual na pagsusuri bago i-merge.** (Hindi ginalaw: `logTableStyles.ts` at ang mga legacy na rule ng Ant na `.ant-table` — hiwalay at mas mababa ang priyoridad.)
-- **Phase 4 — Paglilinis (tapos na ang C6, C7, C9; nakabinbin ang C8).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (idinagdag ang clsx + tailwind-merge bilang mga dependency) — tama nang _pinapalitan_ ng `className` ng caller ang sumasalungat na class ng isang primitive sa halip na i-stack ito. ✅ **C7** mga bagong primitive na `Checkbox` + `Textarea` (nakabatay sa token, naka-export mula sa barrel; additive — maaaring unti-unting sundan ang paggamit sa 32 raw checkbox / 41 raw textarea). ✅ **C6** pagtutugma ng focus ring — ang mga form control (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) ay nakatuon na ngayon sa **accent (violet)** na ring upang tumugma sa global na `--focus-ring` at hindi na sumalungat sa pulang error ring; hindi binago ang pulang error state. ⏳ **Ang C8 hex-sweep ay HINDI bulag na find/replace** — mga nakumpirmang kaso na _sinadya_ at dapat manatili: `ConsoleLogViewer.tsx:240` (palaging-dark na terminal), popover ng `TokenHealthBadge`, mga SVG stroke ng ReactFlow. I-migrate lamang ang hex na talagang nilalayong sumunod sa theme.
-
-Bawat phase: `npm run lint` + `npm run typecheck:core` + isang visual na pagsusuri.
-
----
-
-## 8. Mga bukas na pagpapasya (mga rekomendasyon)
-
-- **D1 — Button primary:** panatilihin ang pula→pula o lumipat sa **pula→violet na `--grad-brand`**? Rekomendasyon: **pula→violet** (Phase 2).
-- **D2 — Kulay ng grid line:** **neutral** (estilo ng site) — napili — kumpara sa brand-red. Laki: **32px** (pinaliit nang ~30% mula sa orihinal na 46px batay sa feedback ng owner — mukhang masyadong malalaki ang mga 46px na cell sa layout ng dashboard).
-- **D3 — Vibrancy ng chrome:** **solid** na sidebar/header — napili.
-- **D4 — Grid ng auth/login:** ✅ **TAPOS NA (Phase 5)** — inalis ang opaque na `bg-bg` sa bawat standalone na full-screen wrapper (hindi lang sa login), kaya lumalabas ang grid sa lahat ng screen. Tingnan ang §4.6.
-- **D5 — Landing page:** iwanang walang pagbabago ang animated splash. Napili.
-- **D6 — Radius na 14/9 sa buong produkto:** Rekomendasyon: oo (Phase 2).
-- **D7 — Phase 1 ang unang ire-release:** Napili.
-- **D8 — Lapad ng layout (Phase 5):** nilimitahan dati sa `max-w-7xl` (1280px) ang content shell ng dashboard, kaya nakagitna ito at may malalawak na bakanteng gutter sa magkabilang gilid sa malalaking monitor. ✅ **TAPOS NA** — itinaas sa fluid na `max-w-[3840px]` (tunay na 4K): sinusundan na ngayon ng content ang viewport hanggang ~4K at saka lamang ito nakagitna kapag lumampas doon (`DashboardLayout.tsx`). Nananatiling makitid ayon sa disenyo ang mga sadyang makitid na page (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Mga opaque na data table (Phase 6):** dahil transparent na ngayon ang content area ng dashboard (upang lumitaw ang grid wallpaper, Phase 5), nakikita ang grid sa mga transparent na even-row / low-alpha zebra ng mga data table na ang container ay _hindi_ isang opaque na surface. ✅ **TAPOS NA** — naglalagay na ngayon ng `bg-surface` ang bawat table na walang card (o, para sa primitive na `<DataTable>`, `background: var(--color-surface)` sa scroll container nito). Inayos: `DataTable` (primitive), `ProxyLogger`/`RequestLoggerV2` (nanaig ang tint na `bg-black/5 dark:bg-black/20` ng kanilang `<Card>` laban sa `bg-surface` ng Card sa pamamagitan ng tailwind-merge → ~95% transparent), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, pati ang dalawang CSS-grid na "table" sa mga cache view (`bg-surface/35` → `bg-surface`). Sinuring opaque ang mga table na nasa loob na ng isang `<Card>`/Modal at sadyang hindi ginalaw ang mga iyon (ang bg-surface doon ay isang kalabisan at walang epektong operasyon). **Walang kailangang baguhin** sa mismong grid — byte-identical ang `body::before` ng dashboard sa site (`--grid-size: 32px`); anumang "mas malaking grid" na nakikita sa isang tumatakbong instance ay mula sa lumang pre-`#4143` build, hindi sa code. Binabantayan ng `tests/unit/design-grid-background.test.ts` (block ng Phase 6).
-
----
-
-## 9. Hindi saklaw / mga panganib
-
-- **Walang pagbabago sa palette** — tugma na ang mga kulay; idaragdag lang natin ang mga nawawalang token. Walang panganib na magbago ang mga kulay ng produkto.
-- **Walang pagbabago sa theme engine** — panatilihin ang `.dark` + Zustand store.
-- **Malawak ang pagbabago sa radius (Phase 2)** — naaapektuhan ang bawat card/button/input; biswal na suriin ang mga abalang screen (mga table, modal) bago mag-merge.
-- **Ang mga table (C3)** ang may pinakamaraming hardcoded na styling at pinakamalawak na posibilidad ng regression — ihiwalay ang mga ito sa sarili nilang PR.
-
----
-
-## 10. Indeks ng sanggunian
-
-| Bahagi                                 | Path                                                                                                                 |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Mga token ng dashboard                 | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Theme store                            | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Panel shell (na-unblock dito ang grid) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                 | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Naunang halimbawa ng grid              | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Mga primitive                          | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Mga source ng status-color             | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` util                              | `src/shared/utils/cn.ts`                                                                                             |
-| Guard test ng Phase 1                  | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Sanggunian ng site                     | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — bridge ng token, mga override ng `.dark`, mga extension ng OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — naka-pin na upstream commit at awtorisasyon ng lisensya; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` at ang mga adapter sa tabi nito; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

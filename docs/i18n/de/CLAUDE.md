@@ -11,17 +11,18 @@ Assistenten (Architektur, Konventionen, Tests, Qualitätsprüfungen, Git-Workflo
 Erkenntnisse zu personenbezogenen Daten). Lies sie vollständig; füge hier keine Projektregeln erneut hinzu. Alles Folgende gilt AUSSCHLIESSLICH
 für Claude Code — operative Präzisierungen der bereits in `AGENTS.md` definierten Regeln.
 
-## Worktree-Isolierung — Besonderheiten für Claude Code
+## Worktree-Isolation — Besonderheiten bei Claude Code
 
-Das vollständige verbindliche Worktree-Protokoll (Bestätigung des Basis-Branches, kanonischer
-Pfad `.claude/worktrees/`, `cp -al` für node_modules, Regeln zum Abbau) befindet sich in `AGENTS.md` → Git-Workflow → „Worktree-
-Isolierung“. Claude-Code-spezifische Punkte:
+Das vollständige verbindliche Worktree-Protokoll (Bestätigung des Basis-Branches, kanonischer Pfad
+`.claude/worktrees/`, `cp -al` für node_modules, Regeln zum Aufräumen) befindet sich in
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (zusammengefasst in `AGENTS.md` →
+Git-Workflow → „Worktree-Isolation"). Claude-Code-spezifische Hinweise:
 
-- Bestätige den Basis-Branch über `AskUserQuestion` mit dem Bediener (verbindliche Regel Nr. 19), sofern er
-  ihn dir nicht bereits genannt hat.
-- Bevorzuge das native Tool `EnterWorktree` — es erstellt Worktrees bereits unter
-  `.claude/worktrees/` (dem kanonischen Pfad). Erstelle den Worktree mit dem dokumentierten Befehl `git
-worktree add` und rufe anschließend `EnterWorktree` mit seinem `path` auf.
+- Bestätige den Basis-Branch über `AskUserQuestion` mit dem Operator (Harte Regel Nr. 19), es sei
+  denn, er hat ihn dir bereits genannt.
+- Bevorzuge das native `EnterWorktree`-Tool — es erstellt Worktrees bereits unter
+  `.claude/worktrees/` (dem kanonischen Pfad). Erstelle den Worktree mit dem dokumentierten Befehl
+  `git worktree add` und rufe anschließend `EnterWorktree` mit dessen `path` auf.
 
 ## Sitzungsübergreifende Sicherheit — Besonderheiten für Claude Code
 

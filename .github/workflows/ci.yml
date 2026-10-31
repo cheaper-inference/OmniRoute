@@ -191,6 +191,7 @@ jobs:
       - run: npm run check:known-symbols
       - run: npm run check:route-guard-membership
       - run: npm run check:test-discovery
+      - run: npm run check:test-tla-order
       - run: npm run check:radar-sentinels
       - run: npm run check:tracked-artifacts
       - name: AI attribution in commit / PR metadata (Hard Rule #16)
@@ -526,7 +527,37 @@ jobs:
       # Blocking since the 2026-09 docs re-sync: a core doc edited without `npm run i18n:run
       # --files=<doc>` (or `--adopt` for a mechanical edit) leaves 65 stale mirrors behind;
       # the run only retranslates the `## ` sections whose text changed, so it is cheap.
+      #
+      # PR-scoped since 2026-10-20: on a pull request the gate compares against the BASE
+      # checkout and fails only on drift this PR introduces. Drift the base already carried
+      # (release/v3.8.53 inherited 14 drifted sources while the translation backend was down)
+      # is printed as inherited — the branch's own push run and the nightly Release-Green keep
+      # the full strict verdict, so the debt stays visible without painting every PR red.
+      #
+      # Advisory on pull requests since 2026-10-28: an English doc edit no longer has to ship
+      # its 66 mirrors in the same PR. Per-PR translation serialised every doc PR behind one
+      # translation backend (a 6-day quota outage froze 8 PRs; one doc took 6.6 h of retries)
+      # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
+      # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
+      # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
+      - name: Base checkout for the i18n drift baseline (PR only)
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: .i18n-base
+          persist-credentials: false
+      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          set -euo pipefail
+          node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
+          node scripts/i18n/check-translation-drift.mjs --base-report /tmp/i18n-base-drift.json --warn | tee /tmp/i18n-pr-drift.txt
+          if grep -q "WARN — drift detected" /tmp/i18n-pr-drift.txt; then
+            echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
+          fi
       - name: i18n docs drift (sources changed since their translation)
+        if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:
@@ -792,6 +823,12 @@ jobs:
         run: node --import tsx/esm --test tests/integration/compression-worker-standalone.int.test.ts
         env:
           RUN_STANDALONE_INT: "1"
+      - name: Verify colocated LLMLingua worker
+        # Starts the optional ONNX worker from the standalone artifact and asserts its
+        # dependency closure resolves inside standalone/node_modules (#12796).
+        run: node --import tsx/esm --test tests/integration/llmlingua-worker-standalone.int.test.ts
+        env:
+          RUN_STANDALONE_INT: "1"
       - name: Archive Next.js build for downstream jobs
         # Use tar so the archive preserves paths relative to CWD (.build/next/...).
         # upload-artifact path-stripping is ambiguous when exclude patterns are used;
@@ -812,7 +849,11 @@ jobs:
   package-artifact:
     name: Package Artifact
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, changes]
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true' }}
     env:
       JWT_SECRET: ci-build-secret-with-sufficient-length-for-validation
     steps:
@@ -899,7 +940,11 @@ jobs:
     name: Electron Package Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
-    needs: build
+    needs: [build, changes]
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true' }}
     # WS1.5 (v3.8.49 plan): the Electron native-module path previously executed for
     # the FIRST time on the release tag — the v3.8.48 Windows bug (npx.cmd spawned
     # without shell, CVE-2024-27980 behavior change) could only surface at release.
@@ -968,9 +1013,13 @@ jobs:
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
     # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
     # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
     timeout-minutes: 25
     # needs: changes (not build) — this job never downloads the next-build artifact;
     # gating it on Build only serialized ~20min of wall-clock for nothing. Jobs that
@@ -1049,7 +1098,10 @@ jobs:
     continue-on-error: ${{ matrix.os == 'windows-latest' }}
     timeout-minutes: 10
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -1080,9 +1132,13 @@ jobs:
     # governed the build and the test jobs, which want OPPOSITE machines: the build needs the
     # .113's RAM, the tests need the hosted runner's link. Measured on 2026-07-29 —
     # actions/setup-node took 20m06s on .113 with 4 concurrent runners versus 16s hosted (npm
-    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31. So
-    # self-hosted is strictly worse here and there is nothing to configure.
-    runs-on: ubuntu-latest
+    # cache restore saturating the link), while the tests themselves tied, 2m54 vs 2m31.
+    # 2026-10-27 (owner): the hosted pool is now the bottleneck — the free org plan runs ~20
+    # hosted jobs at once and PR runs waited 5+ h in the queue. USE_VPS_TEST_RUNNER opts
+    # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
+    # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
+    # re-measured. Default off; forks, merge_group and push always stay hosted.
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     # needs: changes (not build) — no artifact consumed; see test-unit note.
     needs: changes
@@ -1137,7 +1193,11 @@ jobs:
     # the budget on two consecutive main runs (33207760653, 33215115341); the job ended
     # `cancelled` and dragged the whole run's conclusion to `cancelled` although every
     # blocking job was green. The upload step now has its own ceiling; this is headroom.
-    timeout-minutes: 30
+    # 45, not 30 (2026-10-20): the budget was eaten by growth — on six PRs the job took
+    # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
+    # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
+    # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
+    timeout-minutes: 45
     needs: test-unit
     if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
     env:
@@ -1165,9 +1225,16 @@ jobs:
         # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
         # keeps the V8 coverage merge incremental instead of loading every raw
         # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
+        # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
+        # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
+        # on a measured PR against the org's 20-job hosted cap.
         env:
           NODE_OPTIONS: --max-old-space-size=8192
+          EVENT_NAME: ${{ github.event_name }}
         run: |
+          LCOV_REPORTER=()
+          if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
           mkdir -p coverage
           first_coverage_file=""
           if [ -d coverage-shards ]; then
@@ -1190,7 +1257,7 @@ jobs:
             --merge-async \
             --reporter=text-summary \
             --reporter=json-summary \
-            --reporter=lcov \
+            "${LCOV_REPORTER[@]}" \
             --exclude=tests/** \
             --exclude=**/*.test.* \
             --check-coverage \
@@ -1218,7 +1285,9 @@ jobs:
       # reporter above also fixes coverage/lcov.info being silently absent
       # (if-no-files-found: warn) — Sonar consumes the same file.
       - name: Upload coverage to Codecov (informational)
-        if: always()
+        # Push/merge-queue only: on a PR it cost ~5 min of the job for an informational
+        # patch-coverage note, and the PR no longer writes lcov.info (see the merge step).
+        if: ${{ always() && github.event_name != 'pull_request' }}
         # Informational means informational: its own ceiling and continue-on-error, so a
         # stalled upload can neither eat the job's budget nor turn a green job cancelled.
         timeout-minutes: 5
@@ -1384,7 +1453,10 @@ jobs:
     needs: [build, changes]
     # Tests-only diffs outside tests/e2e/ cannot change the served app. A hotfix
     # label is not evidence for this candidate and cannot waive required tests.
-    if: ${{ needs.changes.outputs.testsOnly != 'true' }}
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ needs.changes.outputs.testsOnly != 'true' && (github.event_name != 'pull_request' || needs.changes.outputs.queueCandidate == 'true') }}
     strategy:
       fail-fast: false
       matrix:
@@ -1462,7 +1534,10 @@ jobs:
     timeout-minutes: 15
     # needs: changes (not build) — no artifact consumed; see test-unit note.
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
     strategy:
       fail-fast: false
       matrix:
@@ -1527,7 +1602,10 @@ jobs:
     timeout-minutes: 20
     # needs: changes (not build) — the runner boots its own dev server.
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
     env:
       JWT_SECRET: ci-test-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-test-api-key-secret-long
@@ -1552,7 +1630,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     needs: changes
-    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && (github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true')) }}
+    # Full-matrix lane (2026-10-27): ordinary PRs skip it; push, dispatch, merge_group and the
+    # Mergify queue candidate run it (admission condition full-code). Before a manual merge:
+    # gh workflow run ci.yml --ref <branch>.
+    if: ${{ github.event_name != 'pull_request' || (needs.changes.outputs.code == 'true' && needs.changes.outputs.queueCandidate == 'true') }}
     # ADVISORY until #10049 is resolved. Restoring this suite immediately surfaced a
     # real discrepancy that had been invisible while it could not run: GET
     # /api/mcp/audit answers 403 over loopback where the suite expects 200|401. That

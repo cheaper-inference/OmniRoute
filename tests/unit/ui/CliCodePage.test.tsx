@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EXPECTED_CODE_COUNT } from "@/shared/schemas/cliCatalog";
 import type { ToolBatchStatusMap } from "@/shared/types/cliBatchStatus";
+import enMessages from "@/i18n/messages/en.json";
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -250,6 +251,16 @@ describe("CliCodePageClient", () => {
     expect(container.querySelector('[data-testid="cli-comparison-card"]')).not.toBeNull();
   });
 
+  it("1b. page header renders the cliCode.title catalog value, not a missing-key fallback", async () => {
+    // Pins the key the component reads: the catalog renamed cliCode.pageTitle to
+    // cliCode.title, so reading the old key would render the raw "pageTitle" fallback.
+    const container = await renderPage();
+    const heading = container.querySelector("h1");
+    expect(heading?.textContent).toBe(enMessages.cliCode.title);
+    expect(heading?.textContent).toBe("CLI Code");
+    expect(container.textContent).not.toContain("pageTitle");
+  });
+
   it("2. renders every code tool card when catalogue is OK", async () => {
     const container = await renderPage();
     const cards = container.querySelectorAll('[data-testid="cli-tool-card"]');
@@ -271,11 +282,9 @@ describe("CliCodePageClient", () => {
     expect(container.textContent).toContain("Claude Code profiles");
     expect(container.textContent).not.toContain("HTTP");
 
-    const codexToggle = container.querySelector(
-      'button[role="switch"][aria-label="Codex profiles"]'
-    );
+    const codexToggle = container.querySelector('[role="switch"][aria-label="Codex profiles"]');
     const claudeToggle = container.querySelector(
-      'button[role="switch"][aria-label="Claude Code profiles"]'
+      '[role="switch"][aria-label="Claude Code profiles"]'
     );
 
     expect(codexToggle?.getAttribute("aria-checked")).toBe("true");
@@ -286,7 +295,7 @@ describe("CliCodePageClient", () => {
   it("2c. persists CLI profile auto-sync toggle changes", async () => {
     const container = await renderPage();
     const codexToggle = container.querySelector(
-      'button[role="switch"][aria-label="Codex profiles"]'
+      '[role="switch"][aria-label="Codex profiles"]'
     ) as HTMLButtonElement;
 
     expect(codexToggle).not.toBeNull();

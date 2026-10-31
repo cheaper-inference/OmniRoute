@@ -70,8 +70,8 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 48 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 48);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 60 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 60);
     for (const e of RENAMED_MIGRATION_COMPATIBILITY) {
       assert.equal(typeof e.fromVersion, "string");
       assert.equal(typeof e.fromName, "string");
@@ -177,19 +177,19 @@ describe("migrationRunner/constants — large-table integrity", () => {
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-15), {
       fromVersion: "194",
       fromName: "api_key_self_service_settings",
-      toVersion: "213",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-14), {
       fromVersion: "197",
       fromName: "api_key_self_service_settings",
-      toVersion: "213",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-13), {
       fromVersion: "207",
       fromName: "api_key_self_service_settings",
-      toVersion: "213",
+      toVersion: "229",
       toName: "api_key_self_service_settings",
     });
     assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-12), {
@@ -198,32 +198,41 @@ describe("migrationRunner/constants — large-table integrity", () => {
       toVersion: "211",
       toName: "recreate_turn_nodes_content_hash_index",
     });
-    // #14833 agent-session builds: 190/191, 197/198, 198/199 and 208/209 now live at 214/215
+    assert.deepEqual(RENAMED_MIGRATION_COMPATIBILITY.at(-11), {
+      fromVersion: "213",
+      fromName: "api_key_self_service_settings",
+      toVersion: "229",
+      toName: "api_key_self_service_settings",
+    });
+    // #14833 agent-session builds (190/191 through 214/215) now live at 230/231
     assert.deepEqual(
-      RENAMED_MIGRATION_COMPATIBILITY.slice(-11, -3).map(
+      RENAMED_MIGRATION_COMPATIBILITY.slice(-10).map(
         (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
       ),
       [
-        "190_agent_sessions->214_agent_sessions",
-        "191_usage_history_agent_session_id->215_usage_history_agent_session_id",
-        "197_agent_sessions->214_agent_sessions",
-        "198_usage_history_agent_session_id->215_usage_history_agent_session_id",
-        "198_agent_sessions->214_agent_sessions",
-        "199_usage_history_agent_session_id->215_usage_history_agent_session_id",
-        "208_agent_sessions->214_agent_sessions",
-        "209_usage_history_agent_session_id->215_usage_history_agent_session_id",
+        "190_agent_sessions->230_agent_sessions",
+        "191_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "197_agent_sessions->230_agent_sessions",
+        "198_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "198_agent_sessions->230_agent_sessions",
+        "199_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "208_agent_sessions->230_agent_sessions",
+        "209_usage_history_agent_session_id->231_usage_history_agent_session_id",
+        "214_agent_sessions->230_agent_sessions",
+        "215_usage_history_agent_session_id->231_usage_history_agent_session_id",
       ]
     );
-    // #14864 session-turn builds: 199, 200 and 210 now live at 216
+  });
+
+  it("name-locks every published Team draft slot to canonical migration 215", () => {
     assert.deepEqual(
-      RENAMED_MIGRATION_COMPATIBILITY.slice(-3).map(
-        (e) => `${e.fromVersion}_${e.fromName}->${e.toVersion}_${e.toName}`
-      ),
-      [
-        "199_agent_session_messages->216_agent_session_messages",
-        "200_agent_session_messages->216_agent_session_messages",
-        "210_agent_session_messages->216_agent_session_messages",
-      ]
+      RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.toName === "team_cost_centers"),
+      ["153", "154", "155", "161", "163", "164"].map((fromVersion) => ({
+        fromVersion,
+        fromName: "team_cost_centers",
+        toVersion: "215",
+        toName: "team_cost_centers",
+      }))
     );
   });
 

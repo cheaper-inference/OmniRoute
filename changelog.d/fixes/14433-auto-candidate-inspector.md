@@ -1,0 +1,1 @@
+- Bound auto-candidate inspection work by projecting only routing identities, bulk-loading reachability metadata, memoizing provider breaker reads, and yielding cooperatively while large pools are built.

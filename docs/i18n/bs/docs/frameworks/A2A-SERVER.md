@@ -47,9 +47,9 @@ A2A je kontrolisan prekozogtača **Endpoints → A2A** i je onemogućen podrazum
 
 ## JSON-RPC 2.0 metode
 
-### `message/send` — Sinhron izvršavanje
+### `message/send` — Sinhrono izvršavanje
 
-Šalje poruku vještini i čeka kompletan odgovor.
+Šalje poruku vještini i čeka potpuni odgovor.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -67,6 +67,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Za `smart-routing`, `metadata.combo` predstavlja eksplicitno nadjačavanje vrijednosti
+`metadata.model` za zahtjev prema mrežnom prolazu; šalje se kao stvarni `model`,
+a ne kao zanemareno JSON polje `x-combo`. Uobičajena autorizacija mrežnog prolaza putem API ključa i
+autorizacija po ciljnom sistemu i dalje se primjenjuju. Nevažeća ili prazna kombinacija se odbija.
+
+Rezultat izlaže `requested_combo` (namjera pozivaoca), `dispatched_model`
+(stvarni zahtjev prema mrežnom prolazu), `response_model` (odgovor mrežnog prolaza) i
+`confirmed_combo`. Posljednje polje je `null` osim ako mrežni prolaz eksplicitno
+identificira kombinaciju. A2A zapisnici odluka pripisuju izvršavanje samo
+potvrđenoj kombinaciji, zadržavajući nepotvrđeni zahtjev kao `requestedCombo`.
+
 **Odgovor:**
 
 ```json
@@ -78,30 +89,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE streaming
+### `message/stream` — SSE prijenos
 
-Isto kao `message/send` ali vraća Server-Sent Events za real-time streaming.
+Isto kao `message/send`, ali vraća događaje koje šalje server radi prijenosa u stvarnom vremenu.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -128,7 +132,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Upit za status zadatka
+### `tasks/get` — Provjera statusa zadatka
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -150,31 +154,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostupne vještine
 
-OmniRoute izlaže 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Svaki modul vještine nalazi se u `src/lib/a2a/skills/`.
+OmniRoute otkriva 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Svaki modul vještina živi u `src/lib/a2a/skills/`.
 
-| Vještina             | ID                   | Opis                                                                                                                                                       | Oznake                        | Primjeri                                   |
-| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :----------------------------------------- |
-| Pametno usmjeravanje | `smart-routing`      | Usmjerava upit putem optimalnog pružaoca/kombinacije koristeći OmniRouteov mehanizam za kombinovanje + bodovanje                                           | usmjeravanje, pružaoci        | "Usmjeri ovaj upit putem najboljeg modela" |
-| Upravljanje kvotama  | `quota-management`   | Izvještava o stanju kvote za svakog pružaoca i pomaže pozivaocima da odluče kada ograničiti promet/promijeniti pružaoca                                    | kvota, pružaoci               | "Provjeri kvotu za anthropic"              |
-| Otkrivanje pružalaca | `provider-discovery` | Navodi instalirane pružaoce s mogućnostima, oznakama besplatnog nivoa i OAuth statusom                                                                     | pružaoci, otkrivanje          | "Koji su pružaoci dostupni?"               |
-| Analiza troškova     | `cost-analysis`      | Procjenjuje trošak zahtjeva/razgovora na osnovu kataloga + nedavne upotrebe                                                                                | trošak, upotreba              | "Procijeni trošak ovog razgovora"          |
-| Izvještaj o stanju   | `health-report`      | Objedinjuje stanje prekidača strujnog kruga, perioda čekanja i zaključavanja za svakog pružaoca                                                            | stanje, otpornost             | "Prikaži stanje svih pružalaca"            |
-| Popis mogućnosti     | `list-capabilities`  | Vraća potpuni katalog od 45 vještina agenata (23 API + 21 CLI + 1 konfiguracijska) kao markdown tabelu sa sirovim SKILL.md URL-ovima za umetanje konteksta | katalog, otkrivanje, vještine | "Navedi sve mogućnosti OmniRoutea"         |
+| Vještina            | ID                   | Opis                                                                                                                                               | Oznake                     | Primjeri                                           |
+| :------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------- |
+| Smart Routing       | `smart-routing`      | Usmjerava prompt kroz optimalni provider/combo koristeći OmniRoute combo engine + bodovanje                                                        | rutiranje, provajderi      | "Usmjerite ovaj upit preko najboljeg modela"       |
+| Upravljanje kvotama | `quota-management`   | Izvještava o stanju kvote po provajderu, pomaže pozivaocima da odluče kada da throttle/switch                                                      | kvota, provajderi          | "Provjerite kvotu za antropske životinje"          |
+| Provider Discovery  | `provider-discovery` | Popisuje instalirane provajdere sa mogućnostima, free-tier flags, OAuth status                                                                     | provajderi, otkriće        | "Koji su provajderi dostupni?"                     |
+| Analiza troškova    | `cost-analysis`      | Procjenjuje cijenu request/conversation s obzirom na nedavnu upotrebu kataloga +                                                                   | trošak, upotreba           | "Procjena cijene za ovaj razgovor"                 |
+| Health Report       | `health-report`      | Zbirni prekidač, hlađenje, stanje zaključavanja po dobavljaču                                                                                      | zdravlje, otpornost        | "Prikaži zdravstveno stanje svih pružalaca usluga" |
+| Navedite mogućnosti | `list-capabilities`  | Vraća puni katalog vještina agenta od 45 unosa (23 API + 21 CLI + 1 konfig) kao tablicu smanjenja sa sirovim SKILL.md URLs za ubacivanje konteksta | katalog, otkriće, vještine | "Popis svih OmniRoute mogućnosti"                  |
 
-> Kartica agenta treba biti usklađena s aktivnim katalogom od 374 pružaoca; broj pružalaca i metapodaci o besplatnom pristupu/pristupu bez autentifikacije preuzimaju se iz registra izvršnog okruženja.
+> Kartica agenta treba da bude usklađena sa aktivnim katalogom 377 provajdera; Broj provajdera i free/no-auth metapodaci su izvorni iz registra vremena izvršavanja.
 
-### Detalji vještine `list-capabilities`
+### `list-capabilities` Detalji vještine
 
-Vještina `list-capabilities` naročito je korisna za vanjske agente koji trebaju otkriti šta OmniRoute izlaže prije slanja API poziva. Vraća strukturirani artefakt u obliku markdown tabele:
+Vještina `list-capabilities` je posebno korisna za vanjske agente koji trebaju otkriti šta OmniRoute otkriva prije slanja API poziva. Vraća strukturirani artefakt tabele maraka:
 
 ```
-| ID | Naziv | Kategorija | Područje | Krajnje tačke/Komande | Izvorni URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Autentifikacija i sesije | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Svaki red uključuje kolonu `rawUrl` kako bi agenti mogli odmah preuzeti puni SKILL.md. Polje `metadata.totalSkills` odražava veličinu kataloga (danas 45). Implementacija: `src/lib/a2a/skills/listCapabilities.ts`. Pogledajte također [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Svaki red uključuje `rawUrl` kolonu tako da agenti mogu odmah dohvatiti puni SKILL.md. Polje `metadata.totalSkills` odražava veličinu kataloga (45 danas). Implementacija: `src/lib/a2a/skills/listCapabilities.ts`. Vidi također [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -195,13 +199,13 @@ JSON-RPC endpoint `/a2a` je kanonični A2A ulazni punkt. Ispod navedeni REST end
 
 ---
 
-## Dodavanje nove vještine (Skill)
+## Dodavanje nove vještine
 
 1. **Kreirajte datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezite async funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Pratite strukturu postojećih vještina kao što je `smartRouting.ts`.
+   Izvezite asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedite strukturu postojećih vještina, kao što je `smartRouting.ts`.
 
-2. **Registrujte handler:** u `src/lib/a2a/taskExecution.ts`, dodajte unos u `A2A_SKILL_HANDLERS`:
+2. **Registrujte obrađivač:** u `src/lib/a2a/taskExecution.ts` dodajte unos u `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -213,21 +217,21 @@ JSON-RPC endpoint `/a2a` je kanonični A2A ulazni punkt. Ispod navedeni REST end
    };
    ```
 
-3. **Izložite u Agent Card-u:** u `src/app/.well-known/agent.json/route.ts`, dodajte u `skills` niz:
+3. **Izložite u kartici agenta:** u `src/lib/a2a/agentCardMetadata.ts` (koju zajednički koriste `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodajte u niz `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Kratak opis fokusiran na namjeru",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Primjer poziva u prirodnom jeziku"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspješan put (happy path) + put greške (error path).
+4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Obuhvatite uspješan scenarij i scenarij s greškom.
 
-5. **Dokumentujte** novu vještinu u tabeli `Available Skills` unutar ove datoteke.
+5. **Dokumentujte** novu vještinu u tabeli `Available Skills` ove datoteke.
 
 ---
 
@@ -266,7 +270,7 @@ predano → u radu → završeno
 
 ## Primjeri integracije
 
-### Python (requests)
+### Python (zahtjevi)
 
 ```python
 import requests
@@ -285,7 +289,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (dohvatiti)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

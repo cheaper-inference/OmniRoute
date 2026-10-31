@@ -18,7 +18,6 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import type { SqliteAdapter } from "./adapters/types";
-import { DEFAULT_DATABASE_SETTINGS } from "@/types/databaseSettings";
 import { isAutomatedTestProcess } from "@/shared/utils/testProcess";
 import {
   LEGACY_VERSION_SLOT_MIGRATIONS,
@@ -620,9 +619,13 @@ function isSchemaAlreadyApplied(
       // would answer for another migration's schema and skip it.
       return hasColumn(db, "proxy_logs", "attempt_number");
     case "194":
-      // Same shape as 179/181/183/184/187: ensureProxyLogsColumns may have
-      // added headers_ms at boot. Keyed by version only.
-      return hasColumn(db, "proxy_logs", "headers_ms");
+      // 194 adds TWO timing columns. Boot-time ensureProxyLogsColumns can
+      // independently install either one; the presence of headers_ms alone
+      // must not mark first_chunk_ms as migrated. The migration runner can
+      // replay only the missing ADD COLUMN via stripExistingAddColumns.
+      return (
+        hasColumn(db, "proxy_logs", "headers_ms") && hasColumn(db, "proxy_logs", "first_chunk_ms")
+      );
     case "212":
       // Provider-reported cost columns (#16087, renumbered 206 -> 212: the 206 slot
       // went to 206_codex_wakeup_tasks first). A DB that already applied the old
@@ -1181,41 +1184,15 @@ export function runMigrations(
     console.log(`[Migration] ${count} migration(s) applied successfully.`);
   }
 
-  // After applying all migrations, insert default settings if we just ran migration 46
-  try {
-    if (appliedRecords.some((m) => m.name.startsWith("051_"))) {
-      insertDefaultDatabaseSettings(db);
-    }
-  } catch (error) {
-    console.error("Error inserting default database settings:", error);
-  }
+  // #17186: the "insert default settings after migration 051" guard that used
+  // to live here was unreachable — `name` is the filename's SECOND capture group
+  // (text after the numeric prefix), so it never starts with "051_". The seeded
+  // defaults were also redundant: the read path (optimizationSettings.ts) merges
+  // DEFAULT_DATABASE_SETTINGS on read, so absent rows are the normal case.
+  // Removed along with the dead insertDefaultDatabaseSettings() helper and its
+  // now-unused import.
 
   return count;
-}
-
-function insertDefaultDatabaseSettings(db: SqliteAdapter) {
-  const tx = db.transaction(() => {
-    // Insert all default settings
-    for (const [section, values] of Object.entries(DEFAULT_DATABASE_SETTINGS)) {
-      for (const [key, value] of Object.entries(values as Record<string, unknown>)) {
-        db.prepare("INSERT OR IGNORE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
-          "databaseSettings",
-          `${section}.${key}`,
-          JSON.stringify(value)
-        );
-      }
-    }
-  });
-
-  // Run in an immediate transaction to avoid nested transactions
-  try {
-    runImmediateTransaction(db, () => {
-      tx();
-    });
-  } catch (error) {
-    console.error("Transaction error inserting default settings:", error);
-    throw error;
-  }
 }
 
 /**

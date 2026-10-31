@@ -129,16 +129,24 @@ function isGlmThinkingModel(model: string): boolean {
  */
 const GLM_THINKING_DEFAULT_MAX_TOKENS = 131072;
 
-function applyGlmRequestDefaults(body: unknown, defaults?: JsonRecord | null): unknown {
+function applyGlmRequestDefaults(
+  body: unknown,
+  defaults?: JsonRecord | null,
+  clientThinkingType?: unknown
+): unknown {
   const record = asRecord(body);
   if (!record || !defaults) return body;
 
   const next = { ...(applyProviderRequestDefaults(record, defaults) as JsonRecord) };
   const thinkingType = typeof defaults.thinkingType === "string" ? defaults.thinkingType : null;
 
-  if (thinkingType && next.thinking === undefined) {
-    next.thinking = { type: thinkingType };
-  } else if (thinkingType && asRecord(next.thinking)?.type === "enabled") {
+  // Apply the connection default only when the client did not set a thinking
+  // type of its own; other thinking fields are merged and preserved.
+  if (
+    thinkingType &&
+    clientThinkingType === undefined &&
+    (next.thinking === undefined || asRecord(next.thinking))
+  ) {
     next.thinking = { ...asRecord(next.thinking), type: thinkingType };
   }
 
@@ -217,14 +225,15 @@ export function translateSseResponse(
   response: Response,
   provider: string,
   model: string,
-  suppressThinkClose: boolean = false
+  suppressThinkClose: boolean = false,
+  streamBufferBytes: number = GLM_STREAM_BUFFER_BYTES
 ): Response {
   if (!response.body) return response;
   // GLM is a high-throughput provider: a 64 KB queue budget keeps provider ->
   // client pacing ahead of the model's emission rate. #12179 asked for this by
   // passing a 16th positional the helper did not take (a TS2554 that never
-  // reached the TransformStream); the helper now accepts it as its last
-  // parameter, so the request finally takes effect (#12925).
+  // reached the TransformStream); the helper now accepts it in slot 18
+  // (#12925). The outer request owns pending cleanup; this adapter only translates.
   const transform = createSSETransformStreamWithLogger(
     FORMATS.CLAUDE,
     FORMATS.OPENAI,
@@ -242,7 +251,9 @@ export function translateSseResponse(
     undefined,
     undefined,
     undefined,
-    GLM_STREAM_BUFFER_BYTES
+    null,
+    streamBufferBytes,
+    false
   );
   const headers = cloneHeaders(response.headers);
   headers.set("content-type", "text/event-stream");
@@ -309,8 +320,13 @@ export class GlmExecutor extends DefaultExecutor {
     stream: boolean,
     credentials: ProviderCredentials
   ) {
+    const clientThinkingType = asRecord(asRecord(body)?.thinking)?.type;
     const cleanedBody = super.transformRequest(model, body, stream, credentials);
-    return applyGlmRequestDefaults(cleanedBody, this.config.requestDefaults as JsonRecord | null);
+    return applyGlmRequestDefaults(
+      cleanedBody,
+      this.config.requestDefaults as JsonRecord | null,
+      clientThinkingType
+    );
   }
 
   transformForTransport(

@@ -1,0 +1,1 @@
+- **feat(search):** Exa 3.0 `type: "lite"` is billed at $0.004 per call (legacy `instant` too) and drops the fields lite rejects instead of failing with a 400; the deprecated `subpages`, `subpageTarget`, `highlights.numSentences` and `highlights.highlightsPerUrl` are no longer forwarded ([#17394](https://github.com/diegosouzapw/OmniRoute/pull/17394)) — thanks @yourspraveen

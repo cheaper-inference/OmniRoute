@@ -18,6 +18,7 @@ import { maybeReapDispatcherPool } from "./proxyDispatcherReap.ts";
 import tlsClient, { type TlsFetchOptions, guardTlsFirstByte } from "./tlsClient.ts";
 import { withUpstreamStatusCapture } from "./upstreamStatusCapture.ts";
 import { stampOwnListenerSelfHop } from "./selfHop.ts";
+import { sanitizeHeaderValues } from "./headerSanitize.ts";
 import { tlsFingerprintProviderAllowed } from "./tlsFingerprintExclusions.ts";
 import { describeFallbackFailure, redactProxyDetailsInMessage } from "./proxyFetchRedaction.ts";
 import { recordFinalTransportOutcome, recordProxiedSuccess } from "./proxyTransportOutcome.ts";
@@ -92,23 +93,6 @@ const RETRY_BACKOFF_MS = Math.max(Number(process.env.OMNIROUTE_RETRY_BACKOFF_MS)
 
 function isTlsFingerprintEnabled() {
   return process.env.ENABLE_TLS_FINGERPRINT === "true";
-}
-
-/**
- * Per-provider TLS impersonation profile. Most providers use the default
- * Chrome/macOS wreq profile; providers that must match a specific browser
- * fingerprint (e.g. MaxAI expects a Windows Firefox-150 client) override it here.
- * Returns undefined to keep the tlsClient default (chrome_124 / macos).
- */
-const TLS_PROVIDER_PROFILE: Record<string, { browser: string; os: string }> = {
-  maxai: { browser: "firefox_150", os: "windows" },
-};
-
-type TlsProfileResult = { browserProfile?: string; os?: string };
-function tlsProfileForProvider(provider: string | null | undefined): TlsProfileResult {
-  if (!provider) return {};
-  const p = TLS_PROVIDER_PROFILE[provider.trim().toLowerCase()];
-  return p ? { browserProfile: p.browser, os: p.os } : {};
 }
 
 type TlsClientLike = {
@@ -713,6 +697,10 @@ async function patchedFetchUnrecorded(
   options: FetchWithDispatcherOptions = {},
   deps: ProxyFetchDeps = {}
 ) {
+  // Drop invisible characters (ZWSP, BOM, stray controls) a pasted key can carry;
+  // undici would otherwise reject every request. Clean headers keep the same object.
+  const cleanHeaders = options?.headers ? sanitizeHeaderValues(options.headers) : undefined;
+  if (cleanHeaders !== options?.headers) options = { ...options, headers: cleanHeaders };
   // #13593: a hop back to this listener carries the process self-hop token
   // so admission does not shed it with public traffic.
   stampOwnListenerSelfHop(input, options);
@@ -762,7 +750,6 @@ async function patchedFetchUnrecorded(
           signal: getEffectiveSignal(input, options),
           proxy: null,
           sessionScope: tlsStore?.sessionScope,
-          ...tlsProfileForProvider(tlsStore?.provider),
         });
         if (tlsStore) tlsStore.used = true;
         return await guardTlsFirstByte(response);
@@ -1091,7 +1078,6 @@ async function patchedFetchUnrecorded(
         signal: getEffectiveSignal(input, options),
         proxy: proxyUrl,
         sessionScope: tlsStore?.sessionScope,
-        ...tlsProfileForProvider(tlsStore?.provider),
       });
       if (tlsStore) tlsStore.used = true;
       return await guardTlsFirstByte(response);

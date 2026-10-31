@@ -31,6 +31,28 @@ function mount(ui: React.ReactElement): HTMLElement {
   return container;
 }
 
+it("clears the saved-status timer on unmount", async () => {
+  vi.useFakeTimers();
+  try {
+    setupFetchMock();
+    const { default: CompressionPanel } =
+      await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
+    const container = mount(<CompressionPanel />);
+    await flush();
+    // The Toggle adapter renders the kit Switch, an <input type="checkbox" role="switch">
+    // (KEA-7886), so the switch is matched by role rather than by <button>.
+    const toggle = container.querySelector("[role='switch']") as HTMLInputElement;
+    expect(toggle).not.toBeNull();
+    await act(async () => toggle.click());
+    await flush();
+    expect(vi.getTimerCount()).toBeGreaterThan(0);
+    await act(async () => roots.pop()?.unmount());
+    expect(vi.getTimerCount()).toBe(0);
+  } finally {
+    vi.useRealTimers();
+  }
+});
+
 beforeEach(() => {
   (
     globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
@@ -186,7 +208,7 @@ describe("CompressionPanel", () => {
     // The data-testid hook wraps the Toggle; its inner <button role="switch"> is the
     // clickable element.
     const toggle = container.querySelector(
-      `[data-testid="engine-toggle-caveman"] button`
+      `[data-testid="engine-toggle-caveman"] [role="switch"]`
     ) as HTMLButtonElement | null;
     expect(toggle, "caveman toggle must exist").toBeTruthy();
 
@@ -506,7 +528,7 @@ describe("CompressionPanel", () => {
     const container = await renderPanel();
     const autoTrigger = container.querySelector(`input[type="number"]`) as HTMLInputElement;
     const cavemanToggle = container.querySelector(
-      `[data-testid="engine-toggle-caveman"] button`
+      `[data-testid="engine-toggle-caveman"] [role="switch"]`
     ) as HTMLButtonElement;
     const user = userEvent.setup();
     await user.clear(autoTrigger);
@@ -706,7 +728,7 @@ describe("CompressionPanel", () => {
     const { puts, answer } = holdSettingsPuts();
     const container = await renderPanel();
     const toggle = container.querySelector(
-      `[data-testid="engine-toggle-caveman"] button`
+      `[data-testid="engine-toggle-caveman"] [role="switch"]`
     ) as HTMLButtonElement;
     await act(async () => {
       toggle.click();

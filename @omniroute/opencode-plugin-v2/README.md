@@ -117,12 +117,15 @@ server reads it, not only in the shell that runs `opencode models`.
 | `usableOnly`                            | `false`                                                    | Filter to healthy provisioned providers (`/api/providers`)                                                                                                                                                                                                                               |
 | `combosSource`                          | `"api"`                                                    | Combo source. `"api"` reads `/api/combos` and publishes a combo only when every member passes the filters; `"models"` skips that request and publishes the combo rows `/v1/models` serves. Any preset, `usableOnly`, `providersAllow` or visible/hidden list keeps `"api"`               |
 | `freeOnly` / `toolsOnly` / `visionOnly` | `false` / `false` / `false`                                | Filter to free-tier / tool-calling / image-input models; combos with a filtered member are dropped, never partial. Presets filter the pool before the default view ranks it, and a combo publishes only when every resolved member passes (dropped when a member fails or none resolves) |
+| `freeSignals`                           | `["declared"]`                                             | Extra signals that admit a model under `freeOnly`: `priced`, `named`, `provider-named` (see below)                                                                                                                                                                                       |
+| `freeProviders`                         | none                                                       | Provider prefixes counted as free by `provider-named`                                                                                                                                                                                                                                    |
 | `showcasePerOwner`                      | `10`                                                       | Default-view entries kept per provider                                                                                                                                                                                                                                                   |
 | `freshPerOwner`                         | `10`                                                       | Default-view fresh entries kept per provider                                                                                                                                                                                                                                             |
 | `freshWindowDays`                       | `90`                                                       | Freshness window in days for the fresh branch                                                                                                                                                                                                                                            |
 | `usageMemory`                           | `true`                                                     | Restore statically dropped entries named by 30-day usage analytics (needs a management token; inert without one)                                                                                                                                                                         |
-| `visibleModels` / `hiddenModels`        | `[]`                                                       | Exact-or-suffix allowlists, deny wins                                                                                                                                                                                                                                                    |
-| `providersAllow`                        | `[]`                                                       | Provider allowlist by id prefix (empty = full catalog); unknown names warn once, empty result publishes empty + warns. Unknown catalog prefixes always pass, and an allowlist or vocabulary that names nothing known keeps the full catalog + warns                                      |
+| `visibleModels` / `hiddenModels`        | `[]`                                                       | Exact (`cc/keep-me`), suffix (`keep-me`), or branch (`prefix/*`) entries ; deny wins ; `"*"` publishes the full catalog and skips narrowing                                                                                                                                              |
+| `providersAllow`                        | `[]`                                                       | Provider allowlist by flat name, or branch claim (`prefix/*`) for exhaustive mode ; a branch claim names a branch, a flat entry names a provider prefix                                                                                                                                  |
+| `combos`                                | `true`                                                     | Set to `false` to hide every combo (no `/api/combos` request, no combo rows from `/v1/models`) ; models are unchanged                                                                                                                                                                    |
 | `apiFormat.allowAnthropic`              | `false`                                                    | Route allowlisted ids to the Anthropic API block                                                                                                                                                                                                                                         |
 | `apiFormat.anthropicModels`             | `[]`                                                       | Full model ids routed to Anthropic                                                                                                                                                                                                                                                       |
 | `apiFormat.anthropicPrefixes`           | v1 defaults                                                | Deprecated, warns once — prefer `anthropicModels`                                                                                                                                                                                                                                        |
@@ -136,6 +139,35 @@ the catalog size, and a very large catalog can still slow the host picker (see
 
 Usage memory is on by default. Without a management token it stays inert
 (a startup notice is logged) and nothing is restored — the picker stays filtered.
+
+`"*"` publishes the full catalog and ignores showcase and fresh narrowing.
+
+A visible branch keeps a combo when any member is in the branch ; `hiddenModels` removes the same combo the same way. Combos are filtered by members, not by combo id.
+
+A visible entry pins its branch : the whole branch is published, including rows the default view would drop (retired rows, rows past the fresh and showcase caps) ; capability filters and `usableOnly` still apply.
+
+## Inferred free models
+
+`freeOnly` keeps the models the free-tier catalog classifies. That list can lag what the gateway serves, so `freeSignals` lets you opt into a few weaker signals. The default stays `["declared"]`; nothing changes unless you set it. Models admitted by an inferred signal are labelled `(free, inferred)`.
+
+| Signal           | Admits a model when                                                                             |
+| ---------------- | ----------------------------------------------------------------------------------------------- |
+| `priced`         | the pricing table lists `input` and `output` at `0` for its `<provider>/<model>` id             |
+| `named`          | its id ends in `-free` or `:free` and the pricing table holds no price for it (any price field) |
+| `provider-named` | its provider prefix ends in `-free`, or is listed in `freeProviders`                            |
+
+```json
+{ "freeOnly": true, "freeSignals": ["declared", "priced", "named"] }
+```
+
+What the signals do not do:
+
+- A declared classification always wins. `one-time-initial` and `discontinued` entries are never promoted, and any price field other than zero (`input`, `output`, `cacheRead`, `cacheWrite`) vetoes every inferred signal.
+- Bare ids (no provider prefix) are never inferred, and a price stored under a bare id is ignored.
+- Router entries (an `auto` or `auto-*` segment after the provider prefix) carry a placeholder zero price, so `priced` skips them. Routers whose price depends on the routed target (`pareto-code`, `bodybuilder`) are not recognised and may be admitted by `priced`, `named` or `provider-named`.
+- `freeProviders` matches the provider prefix as served or its alias/canonical twin, case-insensitively.
+- With `provider-named` on, no overlay is needed, so the empty-overlay warning is not issued; with the other signals it still is when the overlay is fully empty.
+- A zero price can also mean a trial credit or a quota the pricing table does not model. Treat `(free, inferred)` as "looks free", not as a contract.
 
 ## Tool calling on Gemini models
 

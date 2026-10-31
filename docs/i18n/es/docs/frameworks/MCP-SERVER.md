@@ -72,6 +72,16 @@ curl -i \
 
 Una clave sin el ámbito manage (o sin Bearer) devuelve `403 LOCAL_ONLY`. El prefijo relacionado `/api/cli-tools/runtime/*` no permite esta omisión de forma intencionada; consulte [Niveles de protección de rutas — Excepción para el ámbito manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validación de Origin
+
+Tras la autenticación, toda solicitud a `/api/mcp/*` —los transportes y las rutas de gestión como `status`, `tools`, `audit`, `restart`— valida su cabecera `Origin`, sea cual sea el llamante (clave de API, token de la CLI, sesión del dashboard o loopback anónimo con el inicio de sesión desactivado). Es la protección contra DNS rebinding que exige la especificación MCP Streamable HTTP.
+
+- **Sin cabecera `Origin`** → permitida. La CLI de OmniRoute, el SDK y los clientes de IDE no la envían.
+- **`Origin` permitido** → `localhost` / `127.0.0.1` / `[::1]` en cualquier puerto, o el origen público de OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, el origen reenviado por un proxy inverso de confianza (`OMNIROUTE_TRUST_PROXY`, solo si no hay base URL configurada) o un host IP de loopback/LAN directo. La cabecera `Host` por sí sola nunca hace confiable un origen.
+- **Cualquier otro `Origin`, incluido `null`** → `403` con un cuerpo de error JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Una sesión del dashboard que presenta un token CSRF válido sigue aceptándose, igual que en otras escrituras del dashboard.
+
+Un cliente MCP de navegador servido detrás de un proxy inverso necesita `OMNIROUTE_PUBLIC_BASE_URL`; no hay lista de permitidos para otros orígenes. La verificación previa CORS (`OPTIONS`) no comprueba el Origin; la solicitud que la sigue, sí.
+
 ## Configuración del IDE
 
 Consulta [Configuración del cliente MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) para configurar Claude Desktop,
@@ -291,113 +301,107 @@ Tanto el transporte SSE como el HTTP con streaming permanecen bloqueados hasta q
 
 ## Autenticación y ámbitos
 
-Las llamadas a herramientas MCP leen las cadenas de ámbitos del autor de la llamada. Esa comprobación forma parte de tres
-espacios de nombres independientes. La aprobación de un comprobador no implica la aprobación de los demás.
-Las reglas se describen en [Tres espacios de nombres de ámbitos](#three-scope-namespaces).
-El catálogo de herramientas se encuentra en [Ámbitos de herramientas MCP](#mcp-tool-scopes).
+Las llamadas a herramientas MCP leen las cadenas de ámbito del llamante. Esa comprobación es una de tres espacios de nombres independientes. Superar un verificador no equivale a superar los demás. Las reglas están en [Tres espacios de nombres de ámbito](#three-scope-namespaces). El catálogo de herramientas está en [Ámbitos de herramientas MCP](#mcp-tool-scopes).
 
-### Tres espacios de nombres de ámbitos
+### Tres espacios de nombres de ámbito
 
-`manage` en una clave de API, `read:compression` en una herramienta MCP y `read` en un
-token de acceso `oma_live_…` son tres concesiones diferentes. Los autores de llamadas que envíen un token de acceso
-`read` a una ruta de administración que realice modificaciones recibirán HTTP 403:
-`Access token scope 'read' is insufficient; 'write' required.`
-Ese rango corresponde a `scopeSatisfies`. No consulta la tabla de MCP y el comparador de MCP
-tampoco lo consulta.
+`manage` en una clave de API, `read:compression` en una herramienta MCP y `read` en un token de acceso `oma_live_…` son tres concesiones distintas. Los llamantes que envían un token de acceso `read` a una ruta de gestión que muta datos reciben HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` Ese rango es `scopeSatisfies`. No consulta la tabla de MCP, y el verificador de MCP tampoco la consulta.
 
-| Espacio de nombres                   | Credencial                                                           | Comprobador                | Una aprobación permite                                           |
-| :----------------------------------- | :------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------------------- |
-| Administración mediante clave de API | `api_keys.scopes`                                                    | `hasManageScope`           | API REST de administración para esa clave Bearer                 |
-| Ámbito aditivo de clave de API       | el mismo array, una cadena exacta                                    | el auxiliar indicado abajo | Solo esa capacidad                                               |
-| Ámbitos de herramientas MCP          | el mismo array, o bien `_meta` de MCP, o bien `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Esa herramienta, una vez activada la aplicación de ámbitos       |
-| Token de acceso                      | `oma_live_…`                                                         | `scopeSatisfies`           | La ruta de administración cuyo método y ruta requieran ese rango |
+| Espacio de nombres          | Credencial                                                                               | Verificador                | Superar permite                                           |
+| :-------------------------- | :--------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------------------- |
+| Gestión por clave de API    | `api_keys.scopes`                                                                        | `hasManageScope`           | La gestión REST para esa clave Bearer                     |
+| Aditivo por clave de API    | la misma matriz, una cadena exacta                                                       | el ayudante indicado abajo | Solo esa capacidad concreta                               |
+| Ámbitos de herramientas MCP | la misma matriz; si no, el `_meta` de MCP (solo HTTP/SSE); si no, `OMNIROUTE_MCP_SCOPES` | `scopeMatches`             | Esa herramienta, una vez activada la aplicación           |
+| Token de acceso             | `oma_live_…`                                                                             | `scopeSatisfies`           | La ruta de gestión cuyo método y su ruta exigen ese rango |
 
-La emisión de cada credencial se explica en
-[Autenticación de administración](../guides/MANAGEMENT-AUTH.md).
+La emisión de cada credencial se describe en
+[Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
-#### Ámbitos de claves de API
+#### Ámbitos de la clave de API
 
-Un mismo array `api_keys.scopes` cumple dos funciones. Cada una utiliza funciones diferentes.
+Una misma matriz `api_keys.scopes` alimenta dos tareas. Usan funciones distintas.
 
-**API REST de administración.** `manage` y `admin` son los miembros de
+**Gestión REST.** `manage` y `admin` son los miembros de
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` es lo que autoriza las rutas de administración para esa clave. `admin`
-permite realizar operaciones de administración en esas rutas. En este contexto, la palabra `admin` no es el
+`hasManageScope` es lo que autoriza las rutas de gestión para esa clave. `admin` tiene
+capacidad de gestión en esas rutas. La palabra `admin` aquí no es el
 rango del token de acceso ni se expande a ámbitos de herramientas MCP.
 
-**Cadenas aditivas.** Cada una se comprueba mediante una prueba de pertenencia exacta y todas permanecen
-fuera de `MANAGEMENT_API_KEY_SCOPES`.
+**Cadenas aditivas.** Cada una es una prueba de pertenencia exacta y todas
+permanecen fuera de `MANAGEMENT_API_KEY_SCOPES`.
 
-| Ámbito                         | Una aprobación permite                                                                                                                                                         |
-| :----------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Únicamente la excepción LOCAL_ONLY de `/api/mcp/` que no sea de loopback (`hasMcpConnectOrManageScope`). Una clave con `manage` o `admin` también supera esa excepción.        |
-| `self:usage`                   | `GET /api/v1/me/status` para esta clave (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` añade este ámbito durante la creación (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Cuotas de cuentas ascendentes incluidas en esa carga útil de estado (`src/lib/usage/apiKeySelfService.ts`). La ruta de estado sigue requiriendo `self:usage`.                  |
-| `policy:bypass-provider-quota` | Las llamadas de inferencia de esta clave omiten la política de cuotas del proveedor (`hasProviderQuotaBypassScope` en `src/sse/handlers/chat.ts`).                             |
+| Ámbito                         | Superar permite                                                                                                                                                     |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Únicamente la excepción LOCAL_ONLY de `/api/mcp/` fuera del loopback (`hasMcpConnectOrManageScope`). Una clave con `manage` o `admin` también supera esa excepción. |
+| `self:usage`                   | `GET /api/v1/me/status` para esta clave (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` añade este ámbito al crear (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Las cuotas de cuenta upstream dentro de esa carga de estado (`src/lib/usage/apiKeySelfService.ts`). La ruta de estado sigue exigiendo `self:usage`.                 |
+| `policy:bypass-provider-quota` | Las llamadas de inferencia de esta clave omiten la política de cuota del proveedor (`hasProviderQuotaBypassScope` en `src/sse/handlers/chat.ts`).                   |
 
-#### Correspondencia
+#### Emparejamiento
 
-El catálogo es la tabla situada bajo [Ámbitos de herramientas MCP](#mcp-tool-scopes). No se debe
-tratar `MCP_SCOPE_LIST` en `src/shared/constants/mcpScopes.ts` como si fuera ese catálogo:
-es el subconjunto tipado original. Las herramientas posteriores declaran ámbitos adicionales junto a él
-(`read:notion`, `read:skills`, `read:local-corpus` y el resto de la tabla).
+El catálogo es la tabla que figura en [Ámbitos de herramientas MCP](#mcp-tool-scopes). No
+tomes `MCP_SCOPE_LIST` en `src/shared/constants/mcpScopes.ts` como ese catálogo:
+es el subconjunto tipado original. Herramientas posteriores declaran ámbitos
+adicionales junto a él (`read:notion`, `read:skills`, `read:local-corpus` y el resto
+de la tabla).
 
 `evaluateToolScopes` en `open-sse/mcp-server/scopeEnforcement.ts` permite una llamada
 cuando cada ámbito requerido coincide con algún ámbito concedido:
 
-- `*` coincide con todos los ámbitos requeridos.
-- Un ámbito concedido que termine en `*` coincide con un ámbito requerido que comience con
+- `*` coincide con cualquier ámbito requerido.
+- Un ámbito concedido que termina en `*` coincide con un ámbito requerido que empieza por
   el prefijo anterior al asterisco. `read:*` coincide con `read:compression`.
-- Cualquier otro ámbito concedido coincide únicamente con la cadena requerida idéntica.
+- Cualquier otro ámbito concedido coincide solo con la cadena requerida idéntica.
 
-Una clave cuyos ámbitos sean `["manage"]` no supera `scopeMatches` para `read:compression`.
-La misma llamada tampoco se permite con `admin`, `mcp:connect`, `read` ni `write` cuando esas
-son las únicas cadenas concedidas. No existe ninguna jerarquía entre los ámbitos de herramientas MCP
-más allá del `*` final.
+Una clave cuyos ámbitos son `["manage"]` no supera `scopeMatches` para `read:compression`.
+La misma llamada tampoco la supera con `admin`, `mcp:connect`, `read` y `write` cuando esas
+son las únicas cadenas concedidas. Entre los ámbitos de herramientas MCP no existe
+jerarquía más allá del `*` final.
 
-La aplicación de ámbitos está desactivada salvo que `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (valor predeterminado:
-`false`). Mientras esté desactivada, `evaluateToolScopes` permite la llamada y omite el
-catálogo. Mientras esté activada, HTTP utiliza `api_keys.scopes` de la clave Bearer como
-`authInfo` (consulte [Vinculación de ámbitos HTTP por clave](#per-key-http-scope-binding-7895)).
-Cuando no se resuelve ningún ámbito de clave, el conjunto concedido pasa a `_meta` de MCP y, posteriormente,
-a `OMNIROUTE_MCP_SCOPES`.
+La aplicación está desactivada salvo que `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (por defecto
+`false`). Mientras está desactivada, `evaluateToolScopes` permite la llamada y omite el
+catálogo. Mientras está activada, HTTP usa los `api_keys.scopes` de la clave Bearer como
+`authInfo` (consulta [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
+Cuando no se resuelven ámbitos de clave, el conjunto concedido pasa al `_meta` de MCP
+(honrado solo para llamantes HTTP/SSE, dentro de un contexto de autenticación HTTP; el `_meta` de un llamante stdio se ignora porque lo controla el cliente y no transporta identidad por llamante) y después a
+`OMNIROUTE_MCP_SCOPES`.
 
-#### Ámbitos de tokens de acceso
+#### Ámbitos de los tokens de acceso
 
-Los tokens `oma_live_…` (`src/lib/accessTokens/scopes.ts`) incluyen `read`, `write`
-o `admin`. `scopeSatisfies` utiliza una jerarquía: `admin` abarca `write` y `read`, y
-`write` abarca `read`. Los ámbitos desconocidos no abarcan nada.
+Los tokens `oma_live_…` (`src/lib/accessTokens/scopes.ts`) llevan `read`, `write` o
+`admin`. `scopeSatisfies` es un rango: `admin` cubre `write` y `read`, y `write` cubre
+`read`. Los ámbitos desconocidos no cubren nada.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) compara esa
-jerarquía con `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) compara ese rango con
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` y `OPTIONS` requieren `read`.
 - Cualquier otro método requiere `write`.
-- Las rutas incluidas en `ADMIN_SCOPE_PREFIXES` requieren `admin` para todos los métodos. `/api/mcp`
-  figura en esa lista, por lo que un token de acceso `write` tampoco puede llamar a la superficie HTTP
-  de MCP.
-- Las rutas incluidas en `ADMIN_MUTATION_PREFIXES` requieren `admin` únicamente para las mutaciones.
-- Las rutas incluidas en `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) requieren `admin` únicamente para las mutaciones y solo en
-  esa ruta exacta; las demás subrutas `/api/settings/*` siguen requiriendo `write`.
+- Las rutas en `ADMIN_SCOPE_PREFIXES` requieren `admin` para todos los métodos. `/api/mcp`
+  está en esa lista, por lo que un token de acceso `write` todavía no puede invocar la
+  superficie HTTP de MCP.
+- Las rutas en `ADMIN_MUTATION_PREFIXES` requieren `admin` solo para mutaciones.
+- Las rutas en `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) requieren `admin` solo para mutaciones, y únicamente en
+  esa ruta exacta — otras subrutas de `/api/settings/*` mantienen `write`.
 
-`PATCH /api/keys/{id}` es una mutación y no está en esas listas de administración, por lo que un
-token `read` recibe un 403:
+`PATCH /api/keys/{id}` es una mutación y no figura en esas listas de administración, por lo que un
+token `read` recibe 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Un token de acceso `write` o `admin` cumple los requisitos de esa ruta. Un JWT del panel, el
-token de machine-id de la CLI mediante loopback y una clave de API con `manage` o `admin` siguen
-otras ramas y no están limitados por esta jerarquía.
+Un token de acceso `write` o `admin` satisface esa ruta. Un JWT del panel, el token
+machine-id de la CLI en loopback y una clave de API con `manage` o `admin` siguen otros caminos
+y no se ven afectados por este nivel.
 
-Un token de acceso que supera `scopeSatisfies` para `/api/mcp` solo ha superado la
-puerta de administración. Las llamadas a herramientas siguen ejecutando `scopeMatches` con los ámbitos de
-la clave de API. La jerarquía del token de acceso no es una entrada para `scopeMatches`.
+Un token de acceso que supera `scopeSatisfies` para `/api/mcp` solo ha superado el control de
+gestión. Las llamadas a herramientas siguen ejecutando `scopeMatches` contra los ámbitos de las
+claves de API. El nivel del token de acceso no es un dato de entrada de `scopeMatches`.
 
 ### Ámbitos de las herramientas MCP
 
 La aplicación de los ámbitos está centralizada en `open-sse/mcp-server/scopeEnforcement.ts`.
-Cada herramienta requiere ámbitos específicos:
+Cada herramienta requiere ámbitos concretos:
 
-| Alcance               | Herramientas                                                                                                                                                                              |
+| Ámbito                | Herramientas                                                                                                                                                                              |
 | :-------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                         |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                                 |
@@ -433,47 +437,17 @@ Cada herramienta requiere ámbitos específicos:
 | `write:obsidian`      | 9 herramientas de escritura — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …              |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                         |
 
-Se admiten ámbitos con comodines: `read:*` concede todos los ámbitos de lectura y `*` concede acceso completo.
+Se admiten ámbitos de comodín: `read:*` concede todos los ámbitos de lectura, `*` concede acceso total.
 
-### `mcp:connect` — capacidad de ruta restringida (#7895)
+### `mcp:connect` — capacidad de ruta estrecha (#7895)
 
-Acceder al transporte MCP HTTP/SSE (`/api/mcp/*`) desde una dirección que no sea de loopback requiere la
-excepción LOCAL_ONLY de `/api/mcp/` (consulte `docs/security/ROUTE_GUARD_TIERS.md`). Históricamente,
-esa excepción solo aceptaba una clave de API con ámbito completo `manage`/`admin`, demasiado amplio para un
-cliente que solo necesita comunicarse con MCP. `src/shared/constants/managementScopes.ts` ahora
-exporta `MCP_CONNECT_SCOPE = "mcp:connect"`: un ámbito adicional y restringido (siguiendo el mismo precedente que
-`SELF_USAGE_SCOPE`) que autoriza ÚNICAMENTE la omisión para `/api/mcp/` en
-`src/server/authz/policies/management.ts`; no concede acceso a ninguna otra ruta de administración
-y se mantiene deliberadamente FUERA de `MANAGEMENT_API_KEY_SCOPES`. Una clave que posea `manage`/`admin`
-sigue superando la excepción sin cambios; `mcp:connect` es una alternativa con menos privilegios para
-clientes remotos que solo utilizan MCP, verificada mediante `hasMcpConnectOrManageScope()`.
+Acceder al transporte MCP por HTTP/SSE (`/api/mcp/*`) desde una dirección que no sea loopback requiere la excepción `/api/mcp/` LOCAL_ONLY (consulta `docs/security/ROUTE_GUARD_TIERS.md`). Históricamente, esa excepción solo aceptaba una clave API con ámbito `manage`/`admin` completo, demasiado amplio para un llamador que únicamente necesita hablar MCP. `src/shared/constants/managementScopes.ts` ahora exporta `MCP_CONNECT_SCOPE = "mcp:connect"`: un ámbito estrecho y aditivo (mismo precedente que `SELF_USAGE_SCOPE`) que autoriza ÚNICAMENTE el bypass `/api/mcp/` en `src/server/authz/policies/management.ts`; no otorga ningún otro acceso a rutas de gestión y se mantiene deliberadamente FUERA de `MANAGEMENT_API_KEY_SCOPES`. Una clave que posea `manage`/`admin` sigue.npmás-fragmento de la excepción sin cambios; `mcp:connect` es una alternativa de menor privilegio para llamadores remotos exclusivos de MCP, comprobada mediante `hasMcpConnectOrManageScope()`.
 
-### Vinculación de ámbitos HTTP por clave (#7895)
+### Vinculación del ámbito HTTP por clave (#7895)
 
-A través de HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` ahora resuelve los
-`api_keys.scopes` reales del cliente mediante `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-y los pasa al método `transport.handleRequest(req, { authInfo })` del SDK de MCP, de modo que
-`extra.authInfo.scopes`, que llega a cada llamada de herramienta, refleja los ámbitos propios de la clave Bearer.
-`resolveCallerScopeContext()` de `scopeEnforcement.ts` ya priorizaba `authInfo` sobre
-`_meta` y la alternativa de la variable de entorno `OMNIROUTE_MCP_SCOPES`; este cambio solo rellena esa primera
-fuente, la de mayor prioridad, que anteriormente no recibía datos a través de HTTP. Cuando no se resuelve ninguna clave de API
-(sin encabezado o con una clave no válida), `authInfo` permanece como `undefined` y la resolución continúa con la
-cadena existente de `meta`/variable de entorno sin cambios. stdio no tiene identidad por cliente (consulte
-`mcpCallerIdentity.ts`) y no se ve afectado: continúa utilizando la cadena alternativa de `_meta`/variable de entorno.
+Por HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` ahora resuelve los `api_keys.scopes` reales del llamador mediante `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) y los pasa a `transport.handleRequest(req, { authInfo })` del SDK de MCP, de modo que `extra.authInfo.scopes` que llega a cada llamada de herramienta refleja los ámbitos propios de la clave Bearer. El `resolveCallerScopeContext()` de `scopeEnforcement.ts` ya priorizaba `authInfo` sobre el repliegue de `_meta` y del entorno `OMNIROUTE_MCP_SCOPES`; esto solo puebla esa primera fuente, la de mayor prioridad, que antes no se alimentaba por HTTP. Cuando no se resuelve ninguna clave API (sin cabecera, clave inválida), `authInfo` permanece `undefined` y la resolución cae hasta la cadena existente `meta`/entorno sin cambios. stdio no tiene identidad por llamador (consulta `mcpCallerIdentity.ts`) y no le afecta la vinculación por clave: omite el paso de `_meta` (`_meta` solo se respeta dentro de un contexto de autenticación HTTP, #15159) y resuelve únicamente a partir de la clave de entorno `OMNIROUTE_MCP_SCOPES`.
 
-**La aplicación de ámbitos se activa obligatoriamente para los clientes HTTP/SSE con ámbitos restringidos, independientemente de
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Que `OMNIROUTE_MCP_ENFORCE_SCOPES` tenga como valor predeterminado `false` solo es
-seguro para el flujo local/stdio de un único operador, donde no existe una identidad por cliente con la que contrastar los ámbitos.
-`open-sse/mcp-server/server.ts::withScopeEnforcement()` activa incondicionalmente la aplicación de ámbitos
-por herramienta (`shouldForceScopeEnforcement()` en `scopeEnforcement.ts`)
-siempre que `resolveCallerScopeContext()` haya resuelto
-`source === "authInfo"` (es decir, un encabezado HTTP Authorization real por clave, solo para HTTP/SSE) Y esa
-clave no posea el ámbito completo `manage`/`admin`. Esto cierra la brecha por la que una clave que poseyera ÚNICAMENTE
-el ámbito restringido de omisión `mcp:connect` —documentado anteriormente como autorización exclusiva para la
-excepción LOCAL_ONLY de `/api/mcp/`— podría, de otro modo, invocar todas las herramientas MCP una vez que un operador
-habilitara el acceso MCP remoto o no loopback, simplemente porque `OMNIROUTE_MCP_ENFORCE_SCOPES` se distribuye
-con `false` de forma predeterminada. Una clave con ámbito completo `manage`/`admin` a través de HTTP, así como todos los clientes stdio/locales, mantienen
-sin cambios el comportamiento existente condicionado por `OMNIROUTE_MCP_ENFORCE_SCOPES`.
+**La aplicación de ámbitos se fuerza para los llamadores HTTP/SSE con ámbitos estrechos, independientemente de `OMNIROUTE_MCP_ENFORCE_SCOPES`.** Que `OMNIROUTE_MCP_ENFORCE_SCOPES` tenga `false` por defecto solo es seguro en el flujo local/stdio de un único operador, donde no existe identidad por llamador contra la cual aplicar ámbitos. `open-sse/mcp-server/server.ts::withScopeEnforcement()` activa incondicionalmente la aplicación de ámbitos por herramienta (`shouldForceScopeEnforcement()` en `scopeEnforcement.ts`) siempre que `resolveCallerScopeContext()` haya resuelto `source === "authInfo"` (es decir, una cabecera de autorización HTTP real por clave, exclusiva de HTTP/SSE) Y que esa clave no posea el ámbito `manage`/`admin` completo. Esto cierra la brecha por la que una clave que posee ÚNICAMENTE el ámbito estrecho de bypass `mcp:connect` —documentado arriba como algo que no autoriza más que la excepción `/api/mcp/` LOCAL_ONLY— podía invocar de lo contrario todas las herramientas MCP en cuanto un operador habilitaba el acceso MCP remoto/no-loopback, simplemente porque `OMNIROUTE_MCP_ENFORCE_SCOPES` se distribuye con `false` por defecto. Una clave `manage`/`admin` completa por HTTP y cualquier llamador stdio/local mantienen sin cambios el comportamiento existente condicionado por `OMNIROUTE_MCP_ENFORCE_SCOPES`.
 
 ---
 

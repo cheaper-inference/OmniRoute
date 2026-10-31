@@ -12,6 +12,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { AUTO_DISABLE_BANNED_SCOPES } from "@/shared/utils/autoDisableBanned";
+import { CLI_VERSION_KEYS, CLI_VERSION_PATTERN } from "@omniroute/open-sse/config/cliVersions.ts";
 
 // Single source of truth: ../settingsSchemas (the schema the runtime settings route validates
 // against). Re-exported here so this modular barrel stays in exact lockstep — a divergent local
@@ -120,6 +121,13 @@ export const streamStallCooldownSettingsSchema = z
   })
   .strict();
 
+// Opt-in latency term for p2c account selection. Bounds mirror normalizeP2CLatencySettings.
+export const p2cLatencySettingsSchema = z
+  .object({
+    weight: z.number().int().min(0).max(20).optional(),
+  })
+  .strict();
+
 // Mid-stream recovery block. Bounds mirror normalizeStreamRecoverySettings in
 // src/lib/resilience/settings/normalize.ts.
 export const throughputWatchdogSettingsSchema = z
@@ -217,6 +225,7 @@ export const updateResilienceSchema = z
     comboCooldownWait: comboCooldownWaitSettingsSchema.optional(),
     quotaShareConcurrencyLimit: quotaShareConcurrencyLimitSettingsSchema.optional(),
     streamStallCooldown: streamStallCooldownSettingsSchema.optional(),
+    p2cLatency: p2cLatencySettingsSchema.optional(),
     streamRecovery: streamRecoverySettingsSchema.optional(),
     providerCooldown: providerCooldownSettingsSchema.optional(),
     // Quota preflight cutoff (auth-level account skipping) — surfaced in the
@@ -261,6 +270,7 @@ export const updateResilienceSchema = z
       value.comboCooldownWait,
       value.quotaShareConcurrencyLimit,
       value.streamStallCooldown,
+      value.p2cLatency,
       value.streamRecovery,
       value.providerCooldown,
       value.quotaPreflight,
@@ -342,6 +352,42 @@ export const updateThinkingBudgetSchema = z
         message: "No valid fields to update",
         path: [],
       });
+    }
+  });
+
+// Operator-set CLI client-version overrides for the Claude Code / Codex identity
+// presets (Dashboard -> Providers -> claude/codex card). `null` is an explicit
+// "clear this override" sentinel; omitting a key leaves its current value alone.
+// Values are validated HERE as well as in the store so the route can reject a bad
+// version loudly: the #12417 env vars fail silently and fall back to the captured
+// pin, which is the very footgun this control exists to remove.
+export const updateCliVersionSchema = z
+  .object({
+    claude: z.string().trim().nullable().optional(),
+    codex: z.string().trim().nullable().optional(),
+  })
+  .strict()
+  .superRefine((value, ctx) => {
+    if (value.claude === undefined && value.codex === undefined) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "No valid fields to update",
+        path: [],
+      });
+      return;
+    }
+    // Mirrors the store's drop-don't-coerce rule, but reported per field so the
+    // operator sees WHICH value the wire would otherwise have silently dropped.
+    for (const key of CLI_VERSION_KEYS) {
+      const raw = value[key];
+      if (raw === undefined || raw === null) continue;
+      if (!CLI_VERSION_PATTERN.test(raw)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Must be a version token like 2.1.259, or null to clear the override",
+          path: [key],
+        });
+      }
     }
   });
 

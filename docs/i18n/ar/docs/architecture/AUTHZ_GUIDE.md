@@ -13,48 +13,111 @@
 
 > المصدر: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## نمطا المصادقة
+## وضعا المصادقة
 
-### 1. مفتاح API (Bearer)
+### 1. مفتاح API ‏(Bearer)
 
-يُستخدم مع واجهات برمجة التطبيقات للعملاء المتوافقة مع OpenAI وAnthropic وGemini، وفي بعض مسارات الإدارة، عندما يملك المفتاح النطاق `manage`.
+يُستخدم لواجهات API الخاصة بالعملاء المتوافقة مع OpenAI/Anthropic/Gemini، ولبعض مسارات الإدارة عندما يتضمن المفتاح نطاق `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-يتحقق منه `isValidApiKey()` / `extractApiKey()` في `src/sse/services/auth.ts`، ويُعاد تصديرهما عبر `src/shared/utils/apiAuth.ts`. ويقبل المدقق أيضًا متغيّري البيئة `OMNIROUTE_API_KEY` و`ROUTER_API_KEY` بوصفهما مفاتيح تمرير دائمة (issue #1350).
+يتم التحقق منه بواسطة `isValidApiKey()` / `extractApiKey()` في `src/sse/services/auth.ts`، وتُعاد تصديرهما عبر `src/shared/utils/apiAuth.ts`. تقبل أداة التحقق أيضًا متغيرَي البيئة `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` كمفتاحَي تمرير دائمين (المشكلة #1350).
 
-### 2. جلسة لوحة التحكم (ملف الارتباط auth_token)
+### 2. جلسة لوحة المعلومات (ملف تعريف الارتباط auth_token)
 
-لصفحات لوحة التحكم وعمليات الإدارة.
+لصفحات لوحة المعلومات وعمليات الإدارة.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-لا يُعدّ ملف الارتباط جلسةً إلا إذا تحقّق رمز JWT الخاص به **و**كان يحمل `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). ويمرّ كل مستهلك لملف الارتباط — حارس مسارات لوحة التحكم (`isDashboardSessionAuthenticated()`)، وخط معالجة تحديث المصادقة، ومصافحة WebSocket، والخادم الحي، و`/api/settings/require-login`، و`/api/auth/status` — عبر هذه الدالة المساعدة.
-توجد رموز JWT أخرى موقّعة بـ `JWT_SECRET`، إذ تصدر رموز Cursor CLI passthrough الرمز `iss "omniroute" / aud "cursor-cli"` لحاملي المفاتيح، وهي لا تُعدّ جلسات أبدًا (#13298).
+لا يُعد ملف تعريف الارتباط جلسة إلا عندما يجتاز JWT التحقق **ويحمل** `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` ← `verifyDashboardSessionToken`). يمر كل
+مستهلك لملف تعريف الارتباط (حارس مسارات لوحة المعلومات (`isDashboardSessionAuthenticated()`)، وتحديث مسار التفويض، ومصافحة WebSocket، والخادم
+المباشر، و`/api/settings/require-login`، و`/api/auth/status`) عبر تلك الدالة المساعدة.
+توجد رموز JWT أخرى موقعة باستخدام `JWT_SECRET` — إذ ينشئ التمرير عبر Cursor CLI
+رموزًا تتضمن `iss "omniroute" / aud "cursor-cli"` لحاملي المفاتيح — ولا تُعد جلسات مطلقًا
+(#13298).
 
-تُتحقَّق الجلسة عبر `isDashboardSessionAuthenticated()` في `src/shared/utils/apiAuth.ts`. ويجدّد خط المعالجة رمز JWT تلقائيًا عندما يبقى له أقل من 7 أيام من عمره البالغ 30 يومًا.
+يتم التحقق منها بواسطة `isDashboardSessionAuthenticated()` في `src/shared/utils/apiAuth.ts`. يُحدّث مسار المعالجة JWT تلقائيًا عندما يتبقى أقل من 7 أيام من مدة صلاحيته البالغة 30 يومًا.
 
-قد تنتهي الجلسة قبل انقضاء أيامها الثلاثين، لأن كل جهة إصدار تمرّ عبر `mintDashboardSessionToken` (وتحمل وقت إصدار `iat` ومعرّفًا `jti`)، ويتحقق المُدقّق من إعدادين: `sessionsValidAfter`، الذي تضبطه عملية تغيير كلمة المرور فتتوقف عن التحقق كل جلسة صدرت قبله (ويحصل المتصفح الذي غيّر كلمة المرور على ملف ارتباط جديد)، و`revokedDashboardSessions`، الذي يضيف إليه `POST /api/auth/logout` قيمة `jti` الخاصة بالجلسة المُنهاة. والجلسات التي تصدرها نسخة أقدم لا تحمل أيًّا من المطالبتين، فتبقى صالحة حتى أول تغيير لكلمة المرور. وإذا تعذّرت قراءة الإعدادات فلا تُعتمد الجلسة.
+يمكن أن تنتهي الجلسة أيضًا قبل اكتمال أيامها الثلاثين، لأن كل جهة مُصدرة تمر عبر `mintDashboardSessionToken` (وقت إصدار `iat` ومعرّف `jti`)، ولأن أداة التحقق تفحص إعدادين: `sessionsValidAfter`، الذي يُضبط عند تغيير كلمة المرور بحيث يتوقف التحقق من كل جلسة صدرت قبله (ويحصل المتصفح الذي غيّر كلمة المرور على ملف تعريف ارتباط جديد)، و`revokedDashboardSessions`، الذي يضيف إليه `POST /api/auth/logout` قيمة `jti` الخاصة بالجلسة التي سُجل الخروج منها. لا تحمل الجلسات الصادرة عن إصدار أقدم أيًا من الادعاءين، وتظل صالحة حتى أول تغيير لكلمة المرور. إذا تعذرت قراءة الإعدادات، فلا تُعد الجلسة موثوقة.
 
-تقبل بعض مسارات الإدارة **أيًّا** من النمطين: ملف الارتباط، أو `Bearer <key>` عندما يملك المفتاح النطاق `manage` (أو `admin`). وهذا ما يتيح سير العمل "القابل للتهيئة عبر استدعاءات API" الذي أُضيف في الإصدار v3.8.
+تقبل بعض مسارات الإدارة **أيًا من** الوضعين: ملف تعريف الارتباط أو `Bearer <key>` عندما يتضمن مفتاح API نطاق `manage` (أو `admin`). وهذا ما يتيح سير العمل «القابل للتهيئة عبر استدعاءات API» الذي أُضيف في v3.8.
 
 #### بوابة تسجيل دخول OIDC الاختيارية (#6973)
 
-يدعم تسجيل دخول مدير لوحة التحكم أيضًا تدفق OIDC (OpenID Connect) **الاختياري** إلى جانب تسجيل الدخول الافتراضي بكلمة المرور، فلا يُزال تسجيل الدخول بكلمة المرور أبدًا، بل يُكمَّل فقط:
+يدعم تسجيل دخول مسؤول لوحة المعلومات أيضًا تدفق OIDC ‏(OpenID Connect) **اختياريًا**
+إلى جانب تسجيل الدخول الافتراضي باستخدام كلمة المرور — ولا يُزال تسجيل الدخول باستخدام كلمة المرور مطلقًا، بل
+يُستكمل فقط:
 
-- معطّل ما لم يكن `settings.oidcEnabled === true` **و**كانت `oidcIssuer` و`oidcClientId` و`oidcClientSecret` مُعدّة كلها (الإعدادات ← المصادقة). ويعيد `GET /api/auth/oidc/login` الاستجابة `400` في غير ذلك.
-- يكتشف `GET /api/auth/oidc/login` قيمة `authorization_endpoint` من `/.well-known/openid-configuration` الخاص بالمُصدِر (ويعود إلى `<issuer>/authorize` عند الفشل)، ويبني عنوان إعادة التوجيه (redirect URI) من الطلب الوارد مع مراعاة `x-forwarded-proto`، ثم يعيد التوجيه إلى مزوّد الهوية مع قيمة `state` عشوائية مخزّنة في ملف الارتباط `oidc_state` بخاصية `httpOnly`.
-- يتحقق `GET /api/auth/oidc/callback` من `state`، ويستبدل رمز التفويض (authorization code)، ويتحقق من توقيع رمز الهوية (ID token) عبر JWKS الخاص بالمُصدِر (`createRemoteJWKSet` من `jose`، مع تخزينه مؤقتًا لكل عنوان JWKS) مع فحوص `issuer` و`audience`. قائمة السماح `oidcAllowedSubjects` إلزامية: فهي تُطابَق مع المطالبة `sub` في الرمز أو مع المطالبة `email`، ولا تُعتمد مطالبة البريد إلا عندما تكون `email_verified === true`، فلا يستطيع بريد غير موثّق لدى مزوّد الهوية أن يجتاز البوابة. وإذا كانت القائمة فارغة رفض الاستدعاء كل تسجيل دخول (`not_configured`).
-- عند النجاح يُصدر **الرمز نفسه** `auth_token` من نوع JWT لمدة 30 يومًا الذي يُصدره تسجيل الدخول بكلمة المرور (`src/app/api/auth/login/route.ts`)، فتبقى بقية خط معالجة جلسة لوحة التحكم (التحديث التلقائي وعلامات ملف الارتباط) دون تغيير، إذ يغيّر OIDC طريقة إصدار ملف الارتباط فقط، لا ما يمنحه.
-- تدخل كل إعدادات `oidc*` (`oidcEnabled` و`oidcDisablePasswordLogin` و`oidcIssuer` و`oidcClientId` و`oidcClientSecret` و`oidcAllowedSubjects` و`oidcRedirectPath` و`oidcScopes`) في `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`): فيجيب `PATCH /api/settings` بالخطأ `400 PASSWORD_REQUIRED` ما لم يحمل الطلب كلمة مرور الإدارة بوصفها `currentPassword` (ويعيد `401 PASSWORD_MISMATCH` عند خطئها). ويرفض `oidcDisablePasswordLogin` تسجيل الدخول بكلمة المرور (`POST /api/auth/login`) دون أن يحذف تجزئة كلمة المرور المخزّنة، ويظل تحقق إعادة المصادقة يقارن `currentPassword` بها.
-- و`corsOrigins` و`bruteForceProtection` موجودان في `SECURITY_IMPACTING_SETTINGS_KEYS` أيضًا: فتوسيع أيٍّ منهما يُضعف دفاعات تسجيل الدخول، لذلك يتطلبان إعادة المصادقة نفسها بـ`currentPassword` (وتطلبها تبويبة الأمان)، ويُسقطهما استيراد JSON.
-- كل مفتاح سياسة أمنية، أي مدخلات `SECURITY_IMPACTING_SETTINGS_KEYS` وكل مفتاح `oidc*` وحالة جلسة لوحة التحكم، **مخصص للمشغّل فقط** في `PATCH /api/settings`: يُرفض مفتاح بنطاق `manage` أو رمز وصول `oma_` بالخطأ `403` حتى لو أرسل `currentPassword` الصحيح، ويُدقَّق الرفض بوصفه `settings.update_failed` مع `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` في `src/lib/api/operatorCredential.ts`). أما الإعدادات العادية (السمة وتفضيلات العرض) فتبقى قابلة للكتابة لمفتاح `manage` أو لرمز وصول `admin`. وكل تعديل على `/api/settings` نفسه (وعلى `/api/settings/require-login`) يتطلب أيضًا نطاق رمز الوصول `admin` (`ADMIN_MUTATION_EXACT_PATHS` في `src/server/authz/accessScopes.ts`، بمطابقة المسار تمامًا)؛ أما `GET` فيبقى `read`، وتحتفظ مسارات `/api/settings/*` الفرعية الأخرى (الوكلاء، والإعدادات الافتراضية للتركيبات، والأسماء المستعارة للنماذج، والضغط، وعمليات التطهير…) بنطاق `write` المستنتج من طريقة الطلب.
-- يتجاوز `POST /api/settings/import-json` إعادة المصادقة تلك، لذلك يُسقط كل مفتاح في `IMPORT_STRIPPED_SETTINGS_KEYS` (في الملف نفسه) قبل الكتابة: كلمة المرور و`currentPassword`، وكل مدخل في `SECURITY_IMPACTING_SETTINGS_KEYS`، وحالة جلسة لوحة التحكم (`sessionsValidAfter` و`revokedDashboardSessions`). ولذلك لا يستطيع استيراد نسخة احتياطية قديمة إحياء جلسة أنهاها تغيير كلمة مرور أو تسجيل خروج.
+- يكون معطّلًا ما لم تكن `settings.oidcEnabled === true` **وتكون** جميع القيم `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` مهيّأة (الإعدادات ← المصادقة).
+  وإلا، فسيُرجع `GET /api/auth/oidc/login` الاستجابة `400`.
+- يكتشف `GET /api/auth/oidc/login` نقطة النهاية `authorization_endpoint` من
+  `/.well-known/openid-configuration` الخاصة بجهة الإصدار (مع الرجوع احتياطيًا إلى
+  `<issuer>/authorize`)، وينشئ عنوان URI لإعادة التوجيه من الطلب الوارد
+  (مع مراعاة `x-forwarded-proto`)، ثم يعيد التوجيه إلى موفّر الهوية IdP باستخدام قيمة `state`
+  عشوائية مخزّنة في ملف تعريف ارتباط `oidc_state` من النوع `httpOnly`.
+- يتحقق `GET /api/auth/oidc/callback` من `state`، ويستبدل رمز التفويض،
+  ويتحقق من توقيع رمز ID عبر JWKS الخاص بجهة الإصدار
+  (باستخدام `createRemoteJWKSet` من `jose`، مع التخزين المؤقت لكل عنوان URI خاص بـ JWKS) مع
+  فحوصات `issuer`/`audience`. يتطلب السماح بالدخول إلى لوحة المعلومات قائمة
+  `oidcAllowedSubjects` غير فارغة، أو سياسة `oidcAdmissionClaim`، أو كليهما.
+  تطابق قائمة الهويات `sub` أو `email` فقط عندما تكون `email_verified === true`.
+  تأخذ سياسة المطالبة الاختيارية مسار مطالبة ضمن رمز ID مفصولًا بنقاط (مثل
+  `realm_access.roles`) ومصفوفة من القيم المقبولة؛ ويجب أن تكون المطالبة الناتجة
+  مصفوفة من السلاسل النصية تحتوي على قيمة مقبولة واحدة على الأقل. إذا كانت كلتا
+  السياستين مهيّأتين، فيجب اجتياز كلتيهما. تؤدي المطالبات المفقودة أو المشوّهة
+  إلى الرفض الآمن، ومن دون أي من السياستين ترفض معاودة الاتصال تسجيل الدخول
+  (`not_configured`). وتستمر عمليات التهيئة الحالية المعتمدة على الهوية فقط دون تغيير.
+- يعيّن Keycloak عادةً أدوار النطاق إلى رموز الوصول، وليس بالضرورة إلى رموز ID.
+  لاشتراط دور النطاق `admin`، هيّئ مخطط بروتوكول لهذا العميل يتضمن
+  `realm_access.roles` في **رمز ID** الخاص به، ثم عيّن
+  `oidcAdmissionClaim` إلى `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  تحقّق من المطالبة الفعلية في رمز ID لهذا العميل قبل تمكين السماح بالدخول
+  استنادًا إلى الدور فقط؛ فالتطبيق لا يقرأ أدوار رمز الوصول. يمكن لرفض الرمز
+  من جانب موفّر الهوية IdP أن يكمّل هذا الفحص من جانب التطبيق، لكنه لا يحل محله.
+- عند النجاح، يُصدر **رمز JWT نفسه تمامًا** لمدة 30 يومًا في `auth_token` الذي
+  يصدره تسجيل الدخول بكلمة المرور (`src/app/api/auth/login/route.ts`)، ولذلك تظل بقية
+  آلية جلسة لوحة المعلومات (التحديث التلقائي، وسمات ملفات تعريف الارتباط) دون تغيير —
+  إذ لا يستبدل OIDC سوى طريقة إصدار ملف تعريف الارتباط، وليس ما يمنحه. لا تؤدي
+  التغييرات في أدوار/مجموعات موفّر الهوية IdP إلى إبطال جلسات OmniRoute الحالية؛
+  إذ يظل تسجيل الخروج أو تدوير كلمة المرور أو انتهاء صلاحية الجلسة هو ما يحكم مدتها.
+- يندرج كل إعداد يبدأ بـ `oidc*` (`oidcEnabled`، و`oidcDisablePasswordLogin`،
+  و`oidcIssuer`، و`oidcClientId`، و`oidcClientSecret`، و`oidcAllowedSubjects`،
+  و`oidcAdmissionClaim`، و`oidcRedirectPath`، و`oidcScopes`) ضمن `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): يستجيب `PATCH /api/settings`
+  بـ `400 PASSWORD_REQUIRED` ما لم يتضمن جسم الطلب كلمة مرور الإدارة بوصفها
+  `currentPassword` (وبـ `401 PASSWORD_MISMATCH` عندما تكون خاطئة).
+  يرفض `oidcDisablePasswordLogin` _تسجيل الدخول_ بكلمة المرور (`POST /api/auth/login`)
+  لكنه يحتفظ بتجزئة كلمة المرور المخزّنة، كما تظل إعادة المصادقة تتحقق من
+  `currentPassword` بمقارنتها بها.
+- يندرج `corsOrigins` و`bruteForceProtection` ضمن `SECURITY_IMPACTING_SETTINGS_KEYS`
+  أيضًا: يؤدي تخفيف أي منهما إلى إضعاف وسائل الحماية الخاصة بتسجيل الدخول، ولذلك
+  يتطلبان إعادة المصادقة نفسها باستخدام `currentPassword` (تطلبها علامة تبويب الأمان)،
+  كما يؤدي استيراد JSON إلى إسقاطهما.
+- كل مفتاح لسياسة الأمان — أي إدخالات `SECURITY_IMPACTING_SETTINGS_KEYS`،
+  وكل مفتاح يبدأ بـ `oidc*`، وحالة جلسة لوحة المعلومات — **مقصور على المشغّل** في
+  `PATCH /api/settings`: يُرفض مفتاح API ذو نطاق `manage` أو رمز وصول يبدأ بـ `oma_`
+  باستخدام `403` حتى عند إرساله `currentPassword` الصحيحة، ويُسجّل الرفض في سجل
+  التدقيق بوصفه `settings.update_failed` مع `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` في `src/lib/api/operatorCredential.ts`).
+  تظل الإعدادات العادية (السمة وتفضيلات العرض) قابلة للكتابة باستخدام مفتاح `manage`
+  أو رمز وصول `admin`. تتطلب أيضًا كل عملية تعديل على `/api/settings` نفسها (وعلى
+  `/api/settings/require-login`) نطاق رمز الوصول `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` في `src/server/authz/accessScopes.ts`، مع مطابقة
+  المسار بدقة)؛ ويظل `GET` ضمن النطاق `read`، بينما تحتفظ المسارات الفرعية الأخرى
+  لـ `/api/settings/*` (الوكلاء، والقيم الافتراضية للمجموعات، والأسماء المستعارة
+  للنماذج، والضغط، وعمليات الحذف…) بنطاق `write` المستنتج من الطريقة.
+- يتجاوز `POST /api/settings/import-json` إعادة المصادقة تلك، ولذلك يسقط كل مفتاح في
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (الملف نفسه) قبل الكتابة: كلمة المرور و
+  `currentPassword`، وكل إدخال في `SECURITY_IMPACTING_SETTINGS_KEYS`، وحالة
+  جلسة لوحة المعلومات (`sessionsValidAfter`، و`revokedDashboardSessions`).
+  لذلك لا يمكن لاستيراد نسخة احتياطية أقدم إحياء جلسة سبق أن أنهاها تغيير كلمة
+  المرور أو تسجيل الخروج.
 
 ## فئات المسارات
 

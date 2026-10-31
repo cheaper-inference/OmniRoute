@@ -640,27 +640,29 @@ sudo systemctl enable --now omniroute-update.path
 
 Dịch vụ xóa yêu cầu trước khi kéo image để một lần chạy thất bại không tạo thành vòng lặp. Nếu không có `DOCKER_UPDATE_TRIGGER_FILE`, dashboard sẽ tiếp tục sử dụng quy trình lệnh thủ công.
 
-## Khả năng sẵn sàng: SQLite mặc định chỉ hỗ trợ một replica
+## Tính khả dụng: SQLite mặc định là bản sao đơn
 
-Cấu hình Docker / Kubernetes OmniRoute tiêu chuẩn là **một tiến trình Node + một trình ghi SQLite**. Khả năng sẵn sàng cao **không được hỗ trợ** trên cấu trúc này.
+Cổ phiếu Docker / Kubernetes OmniRoute là** một quy trình nút + một nhà văn SQLite** . Tính sẵn sàng cao là** không được hỗ trợ** trên cấu trúc liên kết đó.
 
-| Ràng buộc                                     | Hệ quả                                                                                                                                                                                                                                                                                                                                                                                       |
-| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Một trình ghi                                 | **Không** chạy nhiều replica dùng chung một tệp SQLite. Việc đó sẽ làm hỏng DB.                                                                                                                                                                                                                                                                                                              |
-| Tạo lại / khởi động lại / bị HEALTHCHECK dừng | **Gián đoạn hoàn toàn** đối với các kết nối SSE đang hoạt động, phiên dashboard và trạng thái trong bộ nhớ. Mọi máy khách đang kết nối đều bị ngắt. Các yêu cầu mới trong khoảng thời gian không có endpoint sẽ nhận được lỗi **`502 Bad Gateway: Unknown error`** từ reverse proxy, không phải JSON của OmniRoute — máy khách không thể phân biệt lỗi này với lỗi từ nhà cung cấp (#11015). |
-| Cùng event loop với `/healthz`                | Một lượt xử lý catalog hoặc nén bận có thể làm chậm các probe; timeout ngắn sau đó sẽ khởi động lại replica **duy nhất**.                                                                                                                                                                                                                                                                    |
+| ràng buộc                                   | Kết quả                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Nhà văn độc thân                            | LÀM** không** chạy nhiều bản sao đối với cùng một tệp SQLite. Điều đó làm hỏng DB.                                                                                                                                                                                                                                                                                   |
+| Tái tạo/khởi động lại/tiêu diệt HEALTHCHECK | **Mất điện hoàn toàn** về SSE trong chuyến bay, các phiên trên trang tổng quan và trạng thái trong bộ nhớ. Mọi máy khách được kết nối đều bị rớt. Các yêu cầu mới trong cửa sổ điểm cuối trống sẽ nhận được proxy ngược**`502 Bad Gateway: Unknown error`** , không phải OmniRoute JSON — khách hàng không thể phân biệt điều này với lỗi của nhà cung cấp (#11015). |
+| Vòng lặp sự kiện tương tự như `/healthz`    | Danh mục bận rộn hoặc đánh dấu nén có thể trì hoãn việc thăm dò; một thời gian chờ ngắn sau đó khởi động lại** chỉ một** bản sao.                                                                                                                                                                                                                                    |
 
-**Ma trận probe** (xem thêm [khuyến nghị về probe Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Ma trận thăm dò** (xem thêm [đề xuất thăm dò Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe           | Mục tiêu                                                     | Không sử dụng                                             |
-| --------------- | ------------------------------------------------------------ | --------------------------------------------------------- |
-| Liveness        | TCP trên `PORT` (mặc định `20128`), hoặc HTTP mềm `/healthz` | `/api/monitoring/health`                                  |
-| Readiness       | HTTP `GET /healthz`                                          | Timeout ngắn coi event loop đang bận là đã dừng hoạt động |
-| Sâu / con người | `/api/monitoring/health`                                     | Liveness tự động của kubelet                              |
+| thăm dò         | Mục tiêu                                                     | không sử dụng                                               |
+| --------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| Sự sống động    | TCP trên `PORT` ( `20128` mặc định) hoặc HTTP `/healthz` mềm | `/api/monitoring/health`                                    |
+| Sẵn sàng        | HTTP `GET /healthz`                                          | Thời gian chờ chặt chẽ coi vòng lặp sự kiện bận như đã chết |
+| Sâu / con người | `/api/monitoring/health`                                     | Hoạt động kubelet tự động                                   |
 
-**Nâng cấp:** mọi phiên đều sẽ bị ngắt. Hãy ngừng tiếp nhận máy khách nếu có thể; không có cập nhật cuốn chiếu trên SQLite mặc định. Compose `restart: unless-stopped` kết hợp với Docker `HEALTHCHECK` cũng sẽ thay thế tiến trình duy nhất khi container ở trạng thái Unhealthy — phạm vi ảnh hưởng là như nhau.
+**Nâng cấp:** mong mỗi phiên sẽ giảm. Hãy rút cạn khách hàng nếu bạn có thể; không có bản cập nhật luân phiên trên SQLite mặc định. Soạn `restart: unless-stopped` cộng với Docker `HEALTHCHECK` cũng sẽ thay thế quy trình duy nhất khi vùng chứa không tốt - cùng bán kính vụ nổ.
 
-Đoạn cấu hình Kubernetes cho **một replica** (bắt buộc sử dụng Recreate; không tăng `replicas` khi chỉ dùng một tệp SQLite):
+Các bảng kê khai được tạo sẵn và biểu đồ Helm tồn tại ở `deploy/kubernetes/` và `deploy/helm/omniroute/` — xem [hướng dẫn triển khai Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Đoạn mã Kubernetes cho một** bản sao duy nhất** (Cần phải tạo lại; không nâng `replicas` lên một tệp SQLite ):
 
 ```yaml
 spec:
@@ -687,9 +689,9 @@ spec:
             periodSeconds: 20
 ```
 
-Khoảng chờ `preStop` cho phép kube loại bỏ các endpoint của Service trước SIGTERM để lưu lượng truy cập **mới** ngừng được chuyển đến tiến trình đang dừng. Các kết nối SSE `/v1/responses` đang diễn ra được chờ hoàn tất trong tối đa `SHUTDOWN_TIMEOUT_MS` (mặc định là 30 giây) thông qua các lease tiếp nhận heavyweight (#11015). Những yêu cầu mới vẫn đến được tiến trình sẽ nhận `503` + `Retry-After: 5`. Khoảng trống không có endpoint của Recreate cho đến khi bản thay thế ở trạng thái Ready vẫn là một sự cố gián đoạn hoàn toàn — đó là đặc điểm của cấu trúc liên kết SQLite, không phải do cấu hình probe sai.
+`preStop` sleep cho phép kube bỏ điểm cuối dịch vụ trước SIGTERM vậy** mới** giao thông dừng lại quá trình chết. `/v1/responses` SSE trên chuyến bay được tiêu tốn tới `SHUTDOWN_TIMEOUT_MS` (mặc định là 30 giây) thông qua hợp đồng thuê nhập học hạng nặng (#11015). Các yêu cầu mới vẫn đạt được quy trình sẽ nhận được `503` + `Retry-After: 5`. Khoảng trống điểm cuối trống cho đến khi thay thế sẵn sàng vẫn bị ngừng hoạt động nghiêm trọng — đó là cấu trúc liên kết SQLite, không phải là cấu hình sai thăm dò.
 
-Postgres bên ngoài / HA đa trình ghi **không** phải là một phương án mặc định đã được ghi tài liệu. Nếu cần HA, hãy duy trì một replica duy nhất hoặc chạy một cấu trúc liên kết đã được dự án kiểm thử và ghi tài liệu riêng. Công việc về Postgres/MySQL nằm trong [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Cho đến khi tính năng đó được phát hành, cách duy nhất được hỗ trợ để nhân rộng dung lượng `/v1/responses` **lớn** là chạy N tiến trình độc lập (phần tiếp theo), không phải `replicas > 1` trên cùng một volume.
+Postgres bên ngoài / HA nhiều người viết là** không** một đường dẫn chứng khoán được ghi lại. Nếu bạn cần HA, hãy giữ một bản sao duy nhất hoặc chạy cấu trúc liên kết mà dự án đã kiểm tra và ghi lại riêng biệt. Công việc Postgres/MySQL tồn tại ở [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Cho đến khi tàu được vận chuyển, cách duy nhất được hỗ trợ để nhân lên** lớn** dung lượng `/v1/responses` là N quy trình độc lập (phần tiếp theo), không phải `replicas > 1` trên một ổ đĩa.
 
 ## Mở rộng theo chiều ngang: N tiến trình độc lập
 

@@ -11,17 +11,18 @@
 висновки щодо PII). Прочитайте його повністю; не додавайте правила проєкту сюди повторно. Усе нижче стосується ЛИШЕ
 Claude Code — це операційні уточнення правил, уже визначених в `AGENTS.md`.
 
-## Ізоляція worktree — особливості Claude Code
+## Ізоляція worktree — специфіка Claude Code
 
-Повний обов’язковий протокол worktree (підтвердження базової гілки, канонічний
-шлях `.claude/worktrees/`, `cp -al` node_modules, правила очищення) наведено в `AGENTS.md` → Git Workflow → "Worktree
-isolation". Особливості Claude Code:
+Повний обов'язковий протокол ізоляції worktree (підтвердження базової гілки, канонічний шлях
+`.claude/worktrees/`, `cp -al` node_modules, правила завершення роботи) наведено в
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (стисло викладено в `AGENTS.md` →
+Робочий процес Git → «Ізоляція worktree»). Специфічні для Claude Code моменти:
 
-- Підтвердьте базову гілку з оператором через `AskUserQuestion` (жорстке правило №19), якщо він
-  ще не повідомив її.
-- Віддавайте перевагу вбудованому інструменту `EnterWorktree` — він уже створює worktree у
-  `.claude/worktrees/` (канонічний шлях). Створіть worktree за допомогою задокументованої команди `git
-worktree add`, а потім викличте `EnterWorktree`, передавши його `path`.
+- Підтвердьте базову гілку в оператора через `AskUserQuestion` (Жорстке правило №19), якщо він
+  її ще не вказав.
+- Надавайте перевагу вбудованому інструменту `EnterWorktree` — він уже створює worktree в
+  `.claude/worktrees/` (канонічний шлях). Створіть worktree задокументованою командою `git
+worktree add`, потім викличте `EnterWorktree` з його `path`.
 
 ## Безпека між сеансами — особливості Claude Code
 

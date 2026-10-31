@@ -16,6 +16,7 @@ import {
   isNimFunctionDegraded,
 } from "../config/errorConfig.ts";
 import {
+  getCodebuddyRequestIllegalMatch,
   getOpencodeModelUnavailableMatch,
   getProviderErrorRuleMatch,
   resolveRuleMatchBody,
@@ -2291,6 +2292,9 @@ export function checkFallbackError(
   if (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
     const modelUnavailable = getOpencodeModelUnavailableMatch(provider, status, headers, errorStr);
     if (modelUnavailable) return ruleScopedResult(modelUnavailable);
+    // CodeBuddy Intl wraps its connection-wide WAF block in a 400 "request illegal".
+    const codebuddyBlocked = getCodebuddyRequestIllegalMatch(provider, status, headers, errorStr);
+    if (codebuddyBlocked) return ruleScopedResult(codebuddyBlocked);
     // Check structured error codes first (more reliable, no false positives)
     // OpenAI:  error.code === "model_not_found"
     // Anthropic: error.type === "not_found_error" / "permission_error"

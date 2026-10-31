@@ -35,11 +35,13 @@ export async function handleImageUpscale({
   credentials,
   log,
   fetchImpl,
+  signal = null,
 }: {
   body: Record<string, unknown>;
   credentials: UpscaleCredentials | null;
   log?: UpscaleLogger;
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }): Promise<UpscaleHandlerResult> {
   const requestedModel = typeof body.model === "string" ? body.model : "";
   const { provider, model } = parseUpscaleModel(requestedModel);
@@ -77,6 +79,7 @@ export async function handleImageUpscale({
     body,
     credentials: resolvedCredentials,
     log,
+    signal,
     ...(fetchImpl ? { fetchImpl } : {}),
   };
   return dispatchUpscaleFormat(providerConfig.format, args);
@@ -91,6 +94,7 @@ function dispatchUpscaleFormat(
     body: Record<string, unknown>;
     credentials: UpscaleCredentials;
     log?: UpscaleLogger;
+    signal: AbortSignal | null;
     fetchImpl?: typeof fetch;
   }
 ): Promise<UpscaleHandlerResult> {

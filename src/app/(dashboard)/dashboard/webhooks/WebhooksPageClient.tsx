@@ -2,7 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, ConfirmModal } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
+import { ConfirmModal } from "@/shared/components/Modal";
 import { AddWebhookWizard } from "./components/AddWebhookWizard";
 import { HowItWorksSidebar } from "./components/HowItWorksSidebar";
 import { WebhooksList } from "./components/WebhooksList";
@@ -22,6 +27,7 @@ export function WebhooksPageClient() {
   const [webhooks, setWebhooks] = useState<WebhookItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [testingId, setTestingId] = useState<string | null>(null);
+  const tc = useTranslations("common");
   const [feedback, setFeedback] = useState<FeedbackState>(null);
   const [wizardOpen, setWizardOpen] = useState(false);
   const [editingWebhook, setEditingWebhook] = useState<WebhookItem | null>(null);
@@ -145,31 +151,24 @@ export function WebhooksPageClient() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-text-main">{t("title")}</h1>
-          <p className="mt-0.5 text-sm text-text-muted">{t("description")}</p>
-        </div>
-        <button
-          type="button"
-          onClick={handleAddWebhook}
-          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
-        >
-          <span className="material-symbols-outlined text-[18px]">add</span>
-          {t("addWebhook")}
-        </button>
-      </div>
+      <PageHeader
+        compact
+        title={t("title")}
+        description={t("description")}
+        actions={
+          <Button variant="primary" icon="add" onClick={handleAddWebhook}>
+            {t("addWebhook")}
+          </Button>
+        }
+      />
 
       {feedback && (
-        <div
-          className={`rounded-lg border px-4 py-3 text-sm ${
-            feedback.type === "success"
-              ? "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300"
-              : "border-red-500/30 bg-red-500/10 text-red-600 dark:text-red-300"
-          }`}
-        >
-          {feedback.message}
-        </div>
+        <Alert
+          variant={feedback.type === "success" ? "success" : "critical"}
+          description={feedback.message}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setFeedback(null)}
+        />
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_280px]">
@@ -181,7 +180,7 @@ export function WebhooksPageClient() {
                 label: t("active"),
                 value: stats.active,
                 icon: "check_circle",
-                tone: "text-emerald-500",
+                tone: "text-success",
               },
               {
                 label: t("inactive"),
@@ -189,7 +188,7 @@ export function WebhooksPageClient() {
                 icon: "pause_circle",
                 tone: "text-text-muted",
               },
-              { label: t("errored"), value: stats.errored, icon: "error", tone: "text-red-500" },
+              { label: t("errored"), value: stats.errored, icon: "error", tone: "text-error" },
             ].map((stat) => (
               <Card key={stat.label} className="p-4">
                 <div className="flex items-center justify-between gap-3">
@@ -199,9 +198,7 @@ export function WebhooksPageClient() {
                     </p>
                     <p className="mt-1 text-2xl font-semibold text-text-main">{stat.value}</p>
                   </div>
-                  <span className={`material-symbols-outlined text-[24px] ${stat.tone}`}>
-                    {stat.icon}
-                  </span>
+                  <Icon name={stat.icon} size={24} className={stat.tone} />
                 </div>
               </Card>
             ))}
@@ -209,27 +206,26 @@ export function WebhooksPageClient() {
 
           <Card className="overflow-hidden">
             <div className="border-b border-border p-4">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <h2 className="text-base font-semibold text-text-main">
-                    {t("configuredWebhooks")}
-                  </h2>
-                  <p className="mt-1 text-xs text-text-muted">{t("configuredWebhooksDesc")}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => void load()}
-                  disabled={loading}
-                  title={t("refresh")}
-                  className="rounded-lg border border-border p-2 text-text-muted transition-colors hover:bg-surface/60 hover:text-text-main disabled:opacity-40"
-                >
-                  <span
-                    className={`material-symbols-outlined text-[18px] ${loading ? "animate-spin" : ""}`}
+              <SectionHeader
+                title={t("configuredWebhooks")}
+                description={t("configuredWebhooksDesc")}
+                actions={
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => void load()}
+                    disabled={loading}
+                    title={t("refresh")}
+                    aria-label={t("refresh")}
                   >
-                    refresh
-                  </span>
-                </button>
-              </div>
+                    <Icon
+                      name="refresh"
+                      size={18}
+                      className={loading ? "animate-spin" : undefined}
+                    />
+                  </Button>
+                }
+              />
             </div>
             <div className="p-4">
               <WebhooksList

@@ -650,25 +650,27 @@ Perkhidmatan tersebut mengalih keluar permintaan sebelum menarik imej supaya pel
 
 ## Ketersediaan: SQLite lalai ialah replika tunggal
 
-Docker / Kubernetes OmniRoute standard ialah **satu proses Node + satu penulis SQLite**. Ketersediaan tinggi **tidak disokong** pada topologi tersebut.
+Stok Docker / Kubernetes OmniRoute adalah** satu proses Nod + satu penulis SQLite** . Ketersediaan yang tinggi adalah** tidak disokong** pada topologi itu.
 
-| Kekangan                                           | Akibat                                                                                                                                                                                                                                                                                                                                                                                     |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Penulis tunggal                                    | **Jangan** jalankan berbilang replika terhadap fail SQLite yang sama. Tindakan itu akan merosakkan DB.                                                                                                                                                                                                                                                                                     |
-| Cipta semula / mula semula / penamatan HEALTHCHECK | **Gangguan perkhidmatan sepenuhnya** bagi SSE yang sedang berjalan, sesi papan pemuka dan keadaan dalam memori. Setiap klien yang tersambung akan terputus. Permintaan baharu semasa tempoh tanpa titik akhir akan menerima **`502 Bad Gateway: Unknown error`** daripada proksi songsang, bukannya JSON OmniRoute — klien tidak dapat membezakannya daripada kegagalan penyedia (#11015). |
-| Gelung peristiwa yang sama dengan `/healthz`       | Kitaran katalog atau pemampatan yang sibuk boleh melengahkan prob; tamat masa yang singkat kemudiannya memulakan semula **satu-satunya** replika.                                                                                                                                                                                                                                          |
+| Kekangan                                        | Akibat                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Penulis tunggal                                 | buat** bukan** jalankan berbilang replika terhadap fail SQLite yang sama. Itu merosakkan DB.                                                                                                                                                                                                                                                                 |
+| Buat semula / mulakan semula / HEALTHCHECK kill | **Gangguan sepenuhnya** SSE dalam penerbangan, sesi papan pemuka dan keadaan dalam ingatan. Setiap pelanggan yang disambungkan jatuh. Permintaan baharu semasa tetingkap titik akhir kosong mendapat proksi terbalik**`502 Bad Gateway: Unknown error`** , bukan OmniRoute JSON — pelanggan tidak dapat membezakan ini daripada kegagalan pembekal (#11015). |
+| Gelung peristiwa yang sama seperti `/healthz`   | Katalog yang sibuk atau tanda mampatan boleh melambatkan probe; tamat masa yang singkat kemudian memulakan semula** sahaja** replika.                                                                                                                                                                                                                        |
 
-**Matriks prob** (lihat juga [Cadangan prob Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Matriks siasatan** (lihat juga [cadangan siasatan Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Prob               | Sasaran                                                      | Jangan gunakan                                                                  |
-| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------------------------- |
-| Keaktifan          | TCP pada `PORT` (lalai `20128`), atau HTTP lembut `/healthz` | `/api/monitoring/health`                                                        |
-| Kesediaan          | HTTP `GET /healthz`                                          | Tamat masa ketat yang menganggap gelung peristiwa sibuk sebagai tidak berfungsi |
-| Mendalam / manusia | `/api/monitoring/health`                                     | Keaktifan kubelet automatik                                                     |
+| Siasatan        | Sasaran                                                        | Jangan gunakan                                                        |
+| --------------- | -------------------------------------------------------------- | --------------------------------------------------------------------- |
+| Kemeriahan      | TCP pada `PORT` ( `20128` lalai ), atau HTTP `/healthz` lembut | `/api/monitoring/health`                                              |
+| Kesediaan       | HTTP `GET /healthz`                                            | Tamat masa yang ketat yang menganggap gelung acara sibuk sebagai mati |
+| Dalam / manusia | `/api/monitoring/health`                                       | Keaktifan kubelet automatik                                           |
 
-**Naik taraf:** jangkakan setiap sesi akan terputus. Salirkan klien jika boleh; tiada kemas kini berperingkat pada SQLite lalai. Compose `restart: unless-stopped` bersama Docker `HEALTHCHECK` juga akan menggantikan satu-satunya proses apabila bekas berstatus Unhealthy — dengan skop kesan yang sama.
+**Peningkatan:** menjangkakan setiap sesi akan turun. Toskan pelanggan jika anda boleh; tiada kemas kini bergulir pada SQLite lalai. Karang `restart: unless-stopped` tambah Docker `HEALTHCHECK` juga akan menggantikan satu-satunya proses apabila bekas itu Tidak Sihat — jejari letupan yang sama.
 
-Petikan Kubernetes untuk **replika tunggal** (Recreate diperlukan; jangan tingkatkan `replicas` terhadap satu fail SQLite):
+Manifes sedia dibuat dan carta Helm secara langsung dalam `deploy/kubernetes/` dan `deploy/helm/omniroute/` — lihat [panduan penggunaan Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+
+Coretan Kubernetes untuk a** replika tunggal** (Buat semula diperlukan; jangan naikkan `replicas` pada satu fail SQLite ):
 
 ```yaml
 spec:
@@ -695,9 +697,9 @@ spec:
             periodSeconds: 20
 ```
 
-Jeda `preStop` membolehkan kube menggugurkan titik akhir Service sebelum SIGTERM supaya trafik **baharu** berhenti mencapai proses yang sedang ditamatkan. SSE `/v1/responses` yang sedang berlangsung dikosongkan sehingga `SHUTDOWN_TIMEOUT_MS` (lalai 30s) melalui pajakan kemasukan heavyweight (#11015). Permintaan baharu yang masih sampai kepada proses akan menerima `503` + `Retry-After: 5`. Jurang tanpa titik akhir Recreate sehingga pengganti menjadi Ready masih merupakan gangguan menyeluruh — itu ialah topologi SQLite, bukannya salah konfigurasi probe.
+`preStop` sleep membolehkan kube menggugurkan titik akhir Perkhidmatan sebelum SIGTERM jadi** baru** lalu lintas berhenti melanda proses mati. `/v1/responses` SSE dalam penerbangan disalirkan sehingga `SHUTDOWN_TIMEOUT_MS` (lalai 30s) melalui pajakan kemasukan kelas berat (#11015). Permintaan baharu yang masih mencapai proses dapatkan `503` + `Retry-After: 5`. Cipta semula jurang titik akhir kosong sehingga penggantian Sedia kekal sebagai gangguan yang teruk — iaitu topologi SQLite, bukan misconfig probe.
 
-Postgres luaran / HA multi-penulis **bukan** laluan standard yang didokumentasikan. Jika anda memerlukan HA, kekalkan satu replika atau jalankan topologi yang telah diuji dan didokumentasikan secara berasingan oleh projek. Kerja Postgres/MySQL terdapat dalam [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sehingga ia dilancarkan, satu-satunya cara yang disokong untuk meningkatkan kapasiti `/v1/responses` **besar** ialah N proses bebas (bahagian seterusnya), bukannya `replicas > 1` pada satu volum.
+Postgres luaran / HA berbilang penulis ialah** bukan** laluan stok yang didokumenkan. Jika anda memerlukan HA, simpan satu replika atau jalankan topologi yang telah diuji dan didokumenkan oleh projek secara berasingan. Kerja Postgres/MySQL tinggal di [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Sehingga kapal itu, satu-satunya cara yang disokong untuk membiak** besar** kapasiti `/v1/responses` ialah N proses bebas (bahagian seterusnya), bukan `replicas > 1` pada satu volum.
 
 ## Penskalaan keluar: N proses bebas
 

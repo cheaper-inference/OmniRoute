@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button, Input, Modal } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 export interface MitmSudoPasswordModalProps {
   isOpen: boolean;
@@ -47,15 +48,22 @@ export function MitmSudoPasswordModal({
   const displayError = error ?? localError;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title={tCli("sudoPasswordRequiredTitle")} size="sm">
+    <Modal
+      isOpen={isOpen}
+      onClose={handleClose}
+      title={tCli("sudoPasswordRequiredTitle")}
+      size="sm"
+    >
       <div className="flex flex-col gap-4">
-        <div className="flex items-start gap-3 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-3">
-          <span className="material-symbols-outlined text-[20px] text-yellow-500">warning</span>
+        <div className="flex items-start gap-3 rounded-control border border-warning/30 bg-warning-bg p-3">
+          <Icon name="warning" size={20} className="text-warning" />
           <p className="text-xs text-text-muted">{tCli("sudoPasswordHint")}</p>
         </div>
 
         <Input
           type="password"
+          aria-label={tCli("enterSudoPassword")}
+          error={displayError ?? undefined}
           placeholder={tCli("enterSudoPassword")}
           value={sudoPassword}
           onChange={(event) => setSudoPassword(event.target.value)}
@@ -63,13 +71,6 @@ export function MitmSudoPasswordModal({
             if (event.key === "Enter" && !busy) handleConfirm();
           }}
         />
-
-        {displayError && (
-          <div className="flex items-center gap-2 rounded bg-red-500/10 px-2 py-1.5 text-xs text-red-600">
-            <span className="material-symbols-outlined text-[14px]">error</span>
-            <span>{displayError}</span>
-          </div>
-        )}
 
         <div className="flex items-center justify-end gap-2">
           <Button variant="ghost" size="sm" onClick={handleClose} disabled={busy}>

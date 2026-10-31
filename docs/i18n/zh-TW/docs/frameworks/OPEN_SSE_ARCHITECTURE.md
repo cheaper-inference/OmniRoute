@@ -167,14 +167,14 @@ needsTranslation(source, target): boolean
 
 ## 關鍵檔案深入解析
 
-### chatCore.ts（5977 行）
+### chatCore.ts(5977 行)
 
-**主要請求處理器**。儘管檔案很大，但結構相當清晰：
+**主要的請求處理器**。儘管規模龐大,它具有清晰的結構:
 
 ```ts
-// chatCore.ts 的虛擬結構
+// chatCore.ts 的偽結構
 export async function handleChat(request: NextRequest) {
-  // 1. 驗證 + CORS
+  // 1. 身分驗證 + CORS
   await authenticateRequest(request);
   applyCorsHeaders(response);
 
@@ -188,7 +188,7 @@ export async function handleChat(request: NextRequest) {
     body = translateRequest(body, sourceFormat, targetFormat);
   }
 
-  // 4. 組合路由
+  // 4. Combo 路由
   const targets = await resolveComboTargets(comboId, body);
   for (const target of targets) {
     try {
@@ -200,16 +200,16 @@ export async function handleChat(request: NextRequest) {
     }
   }
 
-  // 5. 緊急備援
+  // 5. 緊急後備
   return await emergencyFallback(body);
 }
 ```
 
-儘管它是一個巨型函式，但已組織為多個**附有註解的區段**，分別對應五階段管線。
+儘管是一個巨大的函式,它仍被組織成對應 5 階段管線的**註解區段**。
 
-### combo.ts（4456 LOC）
+### combo.ts(4456 行)
 
-將組合解析為有序目標的**路由引擎**。
+將 combo 解析為有序目標的**路由引擎**。
 
 ```ts
 // services/combo.ts
@@ -226,46 +226,49 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 }
 ```
 
-支援 **19 種路由策略**（請參閱 `src/shared/constants/routingStrategies.ts`）：
+支援 **20 種路由策略**(參見 `src/shared/constants/routingStrategies.ts`):
 
-| 策略                | 行為                                                    |
-| ------------------- | ------------------------------------------------------- |
-| `priority`          | 以第一個目標為優先的有序清單                            |
-| `weighted`          | 依各目標權重進行機率式選擇                              |
-| `round-robin`       | 依序循環使用各個目標                                    |
-| `context-relay`     | 在各目標之間交接上下文                                  |
-| `fill-first`        | 先用滿配額，再移至下一個目標                            |
-| `p2c`               | 兩個隨機選擇的冪次方                                    |
-| `random`            | 均勻隨機選擇                                            |
-| `least-used`        | 選擇近期使用次數最少的目標                              |
-| `cost-optimized`    | 優先選擇成本最低且健康的目標                            |
-| `reset-aware`       | 考量提供者的重設時間窗                                  |
-| `reset-window`      | 依據重設時間窗進行路由                                  |
-| `headroom`          | 優先選擇剩餘配額空間最多的目標                          |
-| `strict-random`     | 真正的均勻隨機選擇（不採用品質權重）                    |
-| `auto`              | 使用 16 因子評分（`autoCombo/`）                        |
-| `lkgp`              | 優先選擇最後已知可用的提供者                            |
-| `context-optimized` | 最適合長上下文請求                                      |
-| `fusion`            | 平行分派至一組目標，再透過評判器進行綜合（`fusion.ts`） |
+| 策略                | 行為                                                       |
+| ------------------- | ---------------------------------------------------------- |
+| `priority`          | 以第一個目標為優先的有序清單                               |
+| `weighted`          | 依各目標權重進行機率性選取                                 |
+| `round-robin`       | 依序循環輪轉各目標                                         |
+| `context-relay`     | 在各目標之間交接上下文                                     |
+| `fill-first`        | 先填滿配額再移至下一個目標                                 |
+| `p2c`               | 二擇一冪次法(Power of Two Choices)                         |
+| `random`            | 均勻隨機                                                   |
+| `least-used`        | 選擇最近使用次數最少者                                     |
+| `cost-optimized`    | 優先選擇最便宜且健康的目標                                 |
+| `reset-aware`       | 感知提供者的重置時間窗                                     |
+| `reset-window`      | 基於重置時間窗的路由                                       |
+| `headroom`          | 優先選擇剩餘配額餘裕最多者                                 |
+| `quota-weighted`    | 跳過配額用盡的帳號,再依「剩餘配額 ÷ 進行中負載」加權抽取   |
+| `strict-random`     | 真正均勻隨機(不做品質加權)                                 |
+| `auto`              | 使用 16 因子評分(`autoCombo/`)                             |
+| `lkgp`              | 優先採用最近已知良好的提供者                               |
+| `context-optimized` | 最適合長上下文請求                                         |
+| `cache-optimized`   | 將每個可重複使用的提示前綴固定在同一帳號上(以命中提示快取) |
+| `fusion`            | 並行扇出至一組模型,再經由裁判模型合成結果(`fusion.ts`)     |
+| `pipeline`          | 串聯各步驟 — 每個目標的輸出會作為下一個目標的輸入          |
 
-### base.ts（1170 LOC）
+### base.ts(1170 行)
 
-所有執行器類別都會直接或透過 `DefaultExecutor` 與其他子類別繼承的**抽象執行器**。它包含：
+每個執行器類別都繼承自這個**抽象執行器**(直接繼承,或透過 `DefaultExecutor` 及其他子類別)。它包含:
 
-- `buildUrl()` — 預設 URL 建構（子類別可針對自訂需求覆寫）
-- `buildHeaders()` — 預設標頭（驗證、內容類型）
+- `buildUrl()` — 預設的 URL 建構(子類別可覆寫以自訂)
+- `buildHeaders()` — 預設標頭(驗證、content-type)
 - `transformRequest()` — 預設為直接傳遞
-- `execute()` — 包含重試、退避與斷路器的主要 HTTP 迴圈
+- `execute()` — 具備重試/退避/熔斷機制的主要 HTTP 迴圈
 
 ```ts
 // open-sse/executors/default.ts
 export class DefaultExecutor extends BaseExecutor {
   // 處理所有與 OpenAI/Anthropic 相容的提供者
-  // 提供者註冊設定（URL、驗證、標頭），但共用執行器邏輯
+  // 提供者註冊設定(URL、驗證、標頭),但共享執行器邏輯
 }
 ```
 
-提供者特定行為（驗證標頭、基礎 URL、版本標頭）是透過提供者登錄檔進行設定，而不是使用個別的執行器類別。
+提供者專屬行為(驗證標頭、基礎 URL、版本標頭)是透過提供者註冊表來設定的,而非各自獨立的執行器類別。
 
 ````
 
@@ -273,82 +276,82 @@ export class DefaultExecutor extends BaseExecutor {
 
 ## 服務（117 個模組）
 
-服務是由處理器組合而成的**聚焦、單一用途模組**。主要類別包括：
+服務是**專注、單一用途的模組**，由 handler 組合使用。主要分類如下：
 
-### 路由與組合
+### 路由與組合（Routing & Combo）
 
-- `combo.ts` — 組合路由請求的進入點
+- `combo.ts` — combo 路由請求的進入點
 - `services/autoCombo/` — 16 因子評分、8 種自動路由策略
 - `wildcardRouter.ts` — 比對萬用字元路由（`gpt-*`）
-- `modelFamilyFallback.ts` — T5 系列內部備援
+- `modelFamilyFallback.ts` — T5 同家族內的 fallback
 
 ### 速率限制與配額
 
-- `rateLimitManager.ts` — 每個金鑰與提供者組合的權杖桶
-- `usage.ts` — 使用量記錄
-- `quotaCache.ts` — 記憶體內配額快照
+- `rateLimitManager.ts` — 以 key + provider 為單位的 token bucket
+- `usage.ts` — 用量記錄
+- `quotaCache.ts` — 記憶體內的配額快照
 
-### 帳戶與權杖
+### 帳號與 Token
 
-- `tokenRefresh.ts` — 收到 401 時重新整理 OAuth
-- `accountFallback.ts` — 切換至替代帳戶
-- `sessionManager.ts` — 多輪工作階段狀態
+- `tokenRefresh.ts` — 401 時的 OAuth 重新整理
+- `accountFallback.ts` — 切換至替代帳號
+- `sessionManager.ts` — 多輪對話的 session 狀態
 
 ### 智慧功能
 
 - `intentClassifier.ts` — 分類請求意圖
-- `taskAwareRouter.ts` — 依任務類型進行路由
-- `thinkingBudget.ts` — 分配思考權杖
+- `taskAwareRouter.ts` — 依任務類型路由
+- `thinkingBudget.ts` — 分配 thinking token
 - `contextManager.ts` — 注入路由上下文
 
 ### 韌性
 
-- `resilience.ts` — 重試、退避與斷路器協調
-- `emergencyFallback.ts` — 最後手段的備援
+- `resilience.ts` — 重試、退避、熔斷器的協調
+- `emergencyFallback.ts` — 最後手段的 fallback
 - `modelDeprecation.ts` — 自動路由至後繼模型
 
 ### 狀態
 
-- `signatureCache.ts` — 依請求簽章去除重複項目
-- `volumeDetector.ts` — 負載卸除
-- `contextHandoff.ts` — 工作階段序列化
+- `signatureCache.ts` — 依請求簽章去重
+- `volumeDetector.ts` — 負載卸除（load shedding）
+- `contextHandoff.ts` — session 序列化
 
 ### 壓縮
 
 - `compression/`（子目錄）— 完整的壓縮管線
-- 39 個檔案，涵蓋引擎、規則套件與介面卡
+- 共 39 個檔案，涵蓋引擎、規則包、轉接器
 
-### 技能
+### 技能（Skills）
 
-- （於 [SKILLS.md](./SKILLS.md) 中說明）
+- （詳見 [SKILLS.md](./SKILLS.md)）
 
-### 記憶體
+### 記憶（Memory）
 
-- （於 [MEMORY.md](./MEMORY.md) 中說明）
+- （詳見 [MEMORY.md](./MEMORY.md)）
 
 ---
 
 ## 執行器（150 個模組）
 
-大多數提供者各有一個檔案。所有執行器類別皆擴充 `BaseExecutor`，並覆寫不同之處；其他模組則是各提供者專用的輔助工具（工具結構描述、擷取/TTS 介面卡、特殊行為處理器）。
+大致上每個 provider 一個檔案。所有 executor 類別都繼承 `BaseExecutor`，只覆寫有差異的部分；其餘模組則是各 provider 的輔助工具（tool schema、fetch/TTS 轉接器、特殊行為處理器）。
 
 ### 常見模式
 
-提供者透過 `getExecutor(providerId)` 解析，此函式會傳回已設定的執行器。相容 OpenAI/Anthropic 的提供者使用 `DefaultExecutor`（`executors/default.ts`）。提供者特定行為（基礎 URL、驗證標頭、API 版本）在 `open-sse/config/providers/` 中設定，而請求主體轉換則由 `open-sse/translator/` 處理。
+Provider 透過 `getExecutor(providerId)` 解析，該函式會回傳已設定的 executor。與 OpenAI/Anthropic 相容的 provider 使用 `DefaultExecutor`（`executors/default.ts`）。Provider 專屬行為（base URL、認證標頭、API 版本）設定於 `open-sse/config/providers/`，而請求主體的轉換則在 `open-sse/translator/` 中處理。
 
-**自訂 URL** 透過提供者設定指定：
+**自訂 URL** 透過 provider 設定來指定：
 
 ```ts
-// 位於 open-sse/config/providers/ 的提供者設定
+// Provider config in open-sse/config/providers/
 export default {
   id: "together",
   baseURL: "https://api.together.xyz/v1/chat/completions",
 }
 ````
 
-**自訂驗證**透過提供者登錄檔的驗證設定處理（API 金鑰、OAuth、標頭設定檔）。
+**自訂認證** 透過 provider 註冊表的認證設定處理（API key、OAuth、標頭設定檔）。
 
-**自訂請求主體**轉換（例如 Anthropic 將 `system` 與 `messages` 分開）會依提供者註冊於 `open-sse/translator/` 中。
+**自訂請求主體** 轉換（例如 Anthropic 將 `system` 與 `messages` 分開）以 provider 為單位註冊於 `open-sse/translator/`。
 
 ````
 
@@ -366,7 +369,7 @@ const result = await executor.execute({
 });
 ````
 
-解析會經過 `ExecutorRegistry`（`executors/registry.ts`）：每個特製執行器都會宣告於 `executors/index.ts` 的內建表格中，並在模組載入時透過 `registerExecutor(alias, instance)` 註冊；`getExecutor()` 會查詢登錄檔，若提供者沒有特製項目，則退回使用已記憶化的 `DefaultExecutor`。完整的別名 → 執行器對應關係由黃金測試 `tests/unit/executor-map-golden.test.ts` 描述。
+解析過程會經過 `ExecutorRegistry`（`executors/registry.ts`）：每個特化的 executor 都宣告於 `executors/index.ts` 的內建表格中，並在模組載入時透過 `registerExecutor(alias, instance)` 註冊；`getExecutor()` 會查詢註冊表，若該 provider 沒有特化項目，則退回使用經記憶化（memoized）的 `DefaultExecutor`。完整的別名 → executor 對應關係由黃金測試 `tests/unit/executor-map-golden.test.ts` 所刻畫。
 
 ---
 
@@ -479,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## 組態設定
+## 配置
 
-`open-sse/config/` 包含組態設定層：
+`open-sse/config/`持有配置層：
 
-| 檔案                                | 用途                                      |
-| ----------------------------------- | ----------------------------------------- |
-| `providerRegistry.ts`               | 以 374 個提供者目錄為基礎的聊天模型註冊表 |
-| `providerModels.ts`                 | 模型別名、格式對應                        |
-| `constants.ts`                      | 逾時、限制、狀態碼                        |
-| `defaultThinkingSignature.ts`       | 預設 Claude 思考簽章                      |
-| `modelStrip.ts`（位於 services 中） | 依提供者移除欄位                          |
+| 文件                          | 目的                               |
+| ----------------------------- | ---------------------------------- |
+| `providerRegistry.ts`         | 377 個提供者目錄上的聊天模型註冊表 |
+| `providerModels.ts`           | 模型別名、格式映射                 |
+| `constants.ts`                | 逾時、限制、狀態代碼               |
+| `defaultThinkingSignature.ts` | 預設Claude思維簽名                 |
+| `modelStrip.ts` （服務中）    | 每個提供者的欄位剝離               |
 
-### 提供者註冊表結構描述
+### 提供者註冊架構
 
 ```ts
 interface ProviderConfig {
@@ -506,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-在模組載入時進行 Zod 驗證，以確保所有提供者組態設定皆有效。
+模組載入時的Zod驗證可確保所有提供者配置均有效。
 
 ---
 

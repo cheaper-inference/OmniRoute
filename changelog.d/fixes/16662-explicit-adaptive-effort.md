@@ -1,0 +1,1 @@
+- fix(sse): preserve explicit OpenAI, Responses, Claude and recognized thinking-level effort in adaptive mode while retaining automatic budget scaling and provider capability sanitization (refs #16662).

@@ -1,0 +1,1 @@
+- **fix(translator):** Claude Code `WebSearch` routed to Codex now uses Codex's native `web_search` instead of the empty `omniroute_web_search` fallback and returns `server_tool_use` + `web_search_tool_result` blocks ([#16365](https://github.com/diegosouzapw/OmniRoute/pull/16365)) — thanks @wray-lee

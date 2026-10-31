@@ -10,6 +10,7 @@ import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 import { getDbInstance } from "./core";
 import { deleteAgentSessionMessagesBefore } from "./agentSessionMessages";
 import { getUserDatabaseSettings } from "./databaseSettings";
+import { maintainSqlitePlannerStats } from "./sqlitePlannerStats";
 import {
   describeReclaim,
   reclaimFreedPages,
@@ -844,6 +845,7 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedUsageHistory: number;
   deletedAgentSessionMessages: number;
   deletedDailySummary: number;
+  deletedDailyTeamSummary: number;
   deletedHourlySummary: number;
   deletedCallLogs: number;
   deletedCallLogArtifacts: number;
@@ -898,6 +900,12 @@ const RESET_TARGETS: Array<
     column: "date",
     cutoff: "date",
     resultKey: "deletedDailySummary",
+  },
+  {
+    table: "daily_team_usage_summary",
+    column: "date",
+    cutoff: "date",
+    resultKey: "deletedDailyTeamSummary",
   },
   {
     table: "hourly_usage_summary",
@@ -977,6 +985,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deletedUsageHistory: 0,
     deletedAgentSessionMessages: 0,
     deletedDailySummary: 0,
+    deletedDailyTeamSummary: 0,
     deletedHourlySummary: 0,
     deletedCallLogs: 0,
     deletedCallLogArtifacts: 0,
@@ -1117,6 +1126,9 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
   } catch (reclaimErr) {
     console.error(`[Cleanup] Space reclamation after ${phase} cleanup failed:`, reclaimErr);
   }
+
+  // Independent of retention settings; runs after migrations, never on a request path.
+  maintainSqlitePlannerStats();
 }
 /**
  * Start the background cleanup scheduler. Runs cleanup on startup and then

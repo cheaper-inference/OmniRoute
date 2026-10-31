@@ -18,7 +18,14 @@ test("memory: health auto-checks on mount + 30s polling", () => {
 test("memory: page wires enable/disable toggle via useMemorySettings", () => {
   const src = read("src/app/(dashboard)/dashboard/memory/page.tsx");
   assert.ok(src.includes("useMemorySettings"), "uses the settings hook");
-  assert.ok(/role="switch"/.test(src), "renders a switch control");
+  // The kit Switch (@omniroute/ui-kit/switch) renders <input role="switch"> (KEA-7886).
+  assert.ok(
+    /role="switch"/.test(src) ||
+      /<Switch\b[\s\S]*@omniroute\/ui-kit\/switch|@omniroute\/ui-kit\/switch[\s\S]*<Switch\b/.test(
+        src
+      ),
+    "renders a switch control"
+  );
   assert.ok(src.includes("save({ enabled:"), "persists enabled via save()");
 });
 

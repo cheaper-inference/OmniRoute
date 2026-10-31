@@ -1,0 +1,1 @@
+- **fix(compression):** the headroom engine now compacts Anthropic `tool_result` content — string content and nested text parts were skipped, so tool outputs from Claude Code traffic were never compacted; shared `contentTextChunks` / `mapContentPartText` helpers feed crush, collect and reconstruct, keeping the CCR restore path symmetric (#17258).

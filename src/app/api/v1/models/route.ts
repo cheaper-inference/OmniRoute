@@ -22,7 +22,7 @@ export async function OPTIONS() {
  * Explicit handler prevents Next.js auto-derived HEAD from streaming the full
  * GET body (200+ providers enumerated on-demand), which caused ~6s hang for
  * clients like the OpenAI SDK that use HEAD as a health/preflight probe.
- * See: https://github.com/diegosouzapw/OmniRoute/issues/6400
+ * See: https://github.com/cheaper-inference/OmniRoute/issues/6400
  */
 export async function HEAD() {
   return new Response(null, {

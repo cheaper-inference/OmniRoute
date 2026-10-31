@@ -1,0 +1,1 @@
+- **fix(capabilities):** resolve `modelCompatOverrides.supportsVision` for custom openai-compatible nodes addressed by their routing prefix, not only by their internal node id — an image request to a prefix-addressed combo target was rejected as vision-incapable even though the operator had flagged the model ([#17252](https://github.com/diegosouzapw/OmniRoute/pull/17252))

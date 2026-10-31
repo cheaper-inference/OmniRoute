@@ -27,8 +27,13 @@ import { GttsUpstreamError, normalizeGttsLang, synthesizeGtts } from "../executo
 import { handleFishAudioSpeech } from "../executors/fishAudioTts.ts";
 import { handleDashscopeTtsSpeech } from "../executors/dashscopeTts.ts";
 import { errorResponse } from "../utils/error.ts";
+import { handleGrokSpeech } from "./grokMedia.ts";
 import { resolveElevenLabsVoiceId } from "./elevenLabsVoiceMap.ts";
-import { audioStreamResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
+import {
+  audioErrorResponse,
+  audioStreamResponse,
+  upstreamErrorResponse,
+} from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
 import {
   getKieCallbackUrl,
@@ -917,6 +922,10 @@ export async function handleAudioSpeech({
 
   try {
     // Route to provider-specific handler
+    if (providerConfig.format === "grok-tts") {
+      return handleGrokSpeech(providerConfig, body, credentials);
+    }
+
     if (providerConfig.format === "uc-tts") {
       const { handleUcTextToSpeech } = await import("./uc/ucTts.ts");
       const result = await handleUcTextToSpeech({
@@ -1055,6 +1064,6 @@ export async function handleAudioSpeech({
 
     return audioStreamResponse(res);
   } catch (err) {
-    return errorResponse(500, `Speech request failed: ${err.message}`);
+    return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }
 }

@@ -1,0 +1,1 @@
+- **fix(veoaifree):** executor forwards stored web-session credentials in Cookie header and fails fast with 401/429/502 on unauthenticated HTML instead of polling for ten minutes ([#17047](https://github.com/diegosouzapw/OmniRoute/pull/17047)) — thanks @PrinceThummar011

@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Card, Button, Input, EmptyState } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { Card, Button, Input, EmptyState, Select, Checkbox } from "@/shared/components";
 import { useNotificationStore } from "@/store/notificationStore";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 // ────────────────────────────────────────────────────────────────────────────
@@ -124,24 +125,24 @@ function projectEndOfMonth(monthlyCost: number, now = new Date()): number {
 const STATUS_META: Record<StatusKey, { tone: string; bg: string; dot: string }> = {
   all: { tone: "text-text-main", bg: "bg-bg-subtle", dot: "var(--color-text-muted)" },
   blocked: {
-    tone: "text-red-400",
-    bg: "bg-red-500/10 border-red-500/30",
-    dot: "#ef4444",
+    tone: "text-error",
+    bg: "bg-error/10 border-error/30",
+    dot: "var(--color-error)",
   },
   alerting: {
-    tone: "text-amber-400",
-    bg: "bg-amber-500/10 border-amber-500/30",
-    dot: "#f59e0b",
+    tone: "text-warning",
+    bg: "bg-warning/10 border-warning/30",
+    dot: "color-mix(in srgb, var(--color-warning) 55%, var(--color-error))",
   },
   warning: {
-    tone: "text-yellow-400",
-    bg: "bg-yellow-500/10 border-yellow-500/30",
-    dot: "#eab308",
+    tone: "text-warning",
+    bg: "bg-warning/10 border-warning/30",
+    dot: "var(--color-warning)",
   },
   safe: {
-    tone: "text-emerald-400",
-    bg: "bg-emerald-500/10 border-emerald-500/30",
-    dot: "#22c55e",
+    tone: "text-success",
+    bg: "bg-success/10 border-success/30",
+    dot: "var(--color-success)",
   },
   "no-limit": {
     tone: "text-text-muted",
@@ -156,6 +157,7 @@ const STATUS_META: Record<StatusKey, { tone: string; bg: string; dot: string }> 
 
 export default function BudgetTab() {
   const t = useTranslations("usage");
+  const tCommon = useTranslations("common");
   const locale = useLocale();
   const notify = useNotificationStore();
 
@@ -422,7 +424,7 @@ export default function BudgetTab() {
   if (loading) {
     return (
       <div className="flex items-center gap-2 text-text-muted p-8 animate-pulse">
-        <span className="material-symbols-outlined text-[20px]">account_balance_wallet</span>
+        <Icon name="account_balance_wallet" size={20} />
         {t("loadingBudgetData")}
       </div>
     );
@@ -455,9 +457,7 @@ export default function BudgetTab() {
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
             <h2 className="text-xl font-bold flex items-center gap-2">
-              <span className="material-symbols-outlined text-[22px] text-primary">
-                account_balance_wallet
-              </span>
+              <Icon name="account_balance_wallet" size={22} className="text-primary" />
               {t("budgetPageTitle")}
             </h2>
             <p className="text-text-muted text-xs mt-0.5">{t("budgetPageDescription")}</p>
@@ -498,28 +498,26 @@ export default function BudgetTab() {
       {/* Filters + Templates */}
       <div className="flex flex-col gap-2">
         <div className="flex flex-wrap gap-2 items-center">
-          <div className="relative flex-1 min-w-[260px]">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-lg">
-              search
-            </span>
-            <input
-              type="text"
-              placeholder={t("budgetSearchKeysPlaceholder")}
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-3 py-2 bg-bg-base border border-border rounded-lg focus:outline-none focus:border-primary text-sm"
-            />
-          </div>
-          <select
+          <Input
+            type="search"
+            icon="search"
+            placeholder={t("budgetSearchKeysPlaceholder")}
+            aria-label={t("budgetSearchKeysPlaceholder")}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="flex-1 min-w-[260px]"
+          />
+          <Select
             value={sortKey}
             onChange={(e) => setSortKey(e.target.value as typeof sortKey)}
-            className="bg-bg-base border border-border rounded-md px-2 py-1.5 text-xs text-text-main cursor-pointer"
+            aria-label={t("budgetSortPctUsed")}
+            className="w-auto"
           >
             <option value="usedDesc">{t("budgetSortPctUsed")}</option>
             <option value="todayDesc">{t("budgetSortTodayDollar")}</option>
             <option value="monthDesc">{t("budgetSortMonthDollar")}</option>
             <option value="name">{t("budgetSortNameAZ")}</option>
-          </select>
+          </Select>
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -530,14 +528,14 @@ export default function BudgetTab() {
               const count = statusCounts[key] || 0;
               if (key !== "all" && count === 0) return null;
               return (
-                <button
+                <Button
                   key={key}
-                  type="button"
+                  variant="outline"
+                  size="sm"
+                  aria-pressed={active}
                   onClick={() => setStatusFilter(key)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-colors cursor-pointer ${
-                    active
-                      ? meta.bg + " " + meta.tone
-                      : "border-border text-text-muted bg-bg-subtle hover:text-text-main"
+                  className={`h-7 min-h-7 gap-1.5 rounded-full px-2.5 text-xs ${
+                    active ? meta.bg + " " + meta.tone : "text-text-muted"
                   }`}
                 >
                   {key !== "all" && (
@@ -545,7 +543,7 @@ export default function BudgetTab() {
                   )}
                   <span>{t(`budgetStatus.${key}`)}</span>
                   <span className="opacity-70">{count}</span>
-                </button>
+                </Button>
               );
             }
           )}
@@ -557,9 +555,10 @@ export default function BudgetTab() {
               {t("budgetTemplates")}:
             </span>
             {templates.map((tpl) => (
-              <button
+              <Button
                 key={tpl.id}
-                type="button"
+                variant="outline"
+                size="sm"
                 onClick={() => applyTemplateToSelected(tpl)}
                 disabled={selectedIds.size === 0 || saving}
                 title={
@@ -567,7 +566,7 @@ export default function BudgetTab() {
                     ? t("budgetSelectKeysFirst")
                     : t("budgetApplyToSelected", { count: selectedIds.size })
                 }
-                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md border border-border bg-bg-subtle text-text-main hover:bg-black/[0.04] dark:hover:bg-white/[0.04] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                className="h-7 min-h-7 gap-1 px-2.5 text-[11px]"
               >
                 <span>{tpl.emoji}</span>
                 <span>{templateName(tpl)}</span>
@@ -576,7 +575,7 @@ export default function BudgetTab() {
                     ? t("budgetTemplateMonthlyAmount", { amount: tpl.monthlyLimitUsd })
                     : t("budgetTemplateDailyAmount", { amount: tpl.dailyLimitUsd })}
                 </span>
-              </button>
+              </Button>
             ))}
             {selectedIds.size > 0 && (
               <span className="text-text-muted ml-2">
@@ -598,8 +597,8 @@ export default function BudgetTab() {
           }}
         >
           <div>
-            <input
-              type="checkbox"
+            <Checkbox
+              aria-label={tCommon("selectAll")}
               checked={selectedIds.size > 0 && selectedIds.size === visibleRows.length}
               ref={(el) => {
                 if (el)
@@ -667,7 +666,7 @@ function KpiBlock({
   tone?: "amber" | "red";
 }) {
   const color =
-    tone === "red" ? "text-red-400" : tone === "amber" ? "text-amber-400" : "text-text-main";
+    tone === "red" ? "text-error" : tone === "amber" ? "text-warning" : "text-text-main";
   return (
     <div className="rounded-lg border border-border/40 bg-bg-subtle/30 px-3 py-2">
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold truncate">
@@ -681,9 +680,17 @@ function KpiBlock({
 
 function ProgressBarTinyColored({ value, max }: { value: number; max: number }) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
-  const color = pct >= 100 ? "#ef4444" : pct >= 80 ? "#f59e0b" : pct >= 50 ? "#eab308" : "#22c55e";
+  // Same four steps as before, on the status tokens (100 % danger, 80 % alerting, 50 % warning).
+  const color =
+    pct >= 100
+      ? STATUS_META.blocked.dot
+      : pct >= 80
+        ? STATUS_META.alerting.dot
+        : pct >= 50
+          ? STATUS_META.warning.dot
+          : STATUS_META.safe.dot;
   return (
-    <div className="w-full h-1 rounded-sm bg-black/[0.06] dark:bg-white/[0.06] overflow-hidden">
+    <div className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden">
       <div className="h-full" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -726,7 +733,7 @@ function BudgetRow({
   return (
     <div style={{ borderBottom: !isLast || isExpanded ? "1px solid var(--color-border)" : "none" }}>
       <div
-        className="items-center px-3 py-2.5 hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+        className="items-center px-3 py-2.5 hover:bg-surface-2 transition-colors"
         style={{
           display: "grid",
           gridTemplateColumns: "24px 28px minmax(180px,1.6fr) 90px 100px 90px 100px 80px 100px",
@@ -740,26 +747,30 @@ function BudgetRow({
           onClick={(e) => e.stopPropagation()}
           onKeyDown={(e) => e.stopPropagation()}
         >
-          <input type="checkbox" checked={isSelected} onChange={onToggleSelect} />
+          <Checkbox
+            aria-label={row.name || row.id}
+            checked={isSelected}
+            onChange={onToggleSelect}
+          />
         </div>
 
         {/* Expand chevron (clickable trigger) */}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          icon={isExpanded ? "expand_more" : "chevron_right"}
           onClick={onToggleExpand}
-          className="border-none bg-transparent p-0 flex items-center justify-center cursor-pointer"
           aria-expanded={isExpanded}
-        >
-          <span className="material-symbols-outlined text-[18px] text-text-muted">
-            {isExpanded ? "expand_more" : "chevron_right"}
-          </span>
-        </button>
+          aria-label={isExpanded ? t("cardCollapse") : t("cardExpand")}
+          className="size-6 min-h-6 text-text-muted"
+        />
 
         {/* Key info */}
-        <button
-          type="button"
+        <Button
+          variant="ghost"
           onClick={onToggleExpand}
-          className="text-left border-none bg-transparent p-0 cursor-pointer min-w-0"
+          aria-expanded={isExpanded}
+          className="block h-auto min-h-0 min-w-0 p-0 text-left font-normal hover:bg-transparent"
         >
           <div className="text-[13px] font-semibold text-text-main truncate">
             {row.name || row.id}
@@ -768,7 +779,7 @@ function BudgetRow({
             {row.provider ? `${row.provider} · ` : ""}
             {row.id}
           </div>
-        </button>
+        </Button>
 
         <div className="text-right text-[12px] tabular-nums">{formatCurrency(today)}</div>
         <div className="text-right text-[12px] tabular-nums">{formatCurrency(month)}</div>
@@ -883,7 +894,7 @@ function BudgetRowExpanded({
               <div className="text-[10px] text-text-muted">{t("budgetProjectedEndOfMonth")}</div>
               <div
                 className={`text-lg font-bold tabular-nums ${
-                  projectionOver ? "text-amber-400" : "text-emerald-400"
+                  projectionOver ? "text-warning" : "text-success"
                 }`}
               >
                 {formatCurrency(projection)}
@@ -915,7 +926,7 @@ function BudgetRowExpanded({
               {breakdown.slice(0, 5).map((b) => (
                 <div key={b.provider} className="flex items-center gap-2 text-[11px]">
                   <span className="font-medium text-text-main w-24 truncate">{b.provider}</span>
-                  <div className="flex-1 h-1.5 rounded-sm bg-black/[0.08] dark:bg-white/[0.06] overflow-hidden">
+                  <div className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden">
                     <div
                       className="h-full bg-primary rounded-sm"
                       style={{ width: `${Math.min(b.pct, 100)}%` }}
@@ -977,18 +988,17 @@ function BudgetRowExpanded({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
           <div>
-            <label className="text-[11px] text-text-muted block mb-1">{t("resetInterval")}</label>
-            <select
+            <Select
+              label={t("resetInterval")}
               value={form.resetInterval}
               onChange={(e) =>
                 setForm({ ...form, resetInterval: e.target.value as typeof form.resetInterval })
               }
-              className="w-full px-2 py-1.5 rounded border border-border bg-bg-base text-sm"
             >
               <option value="daily">{t("budgetResetDaily")}</option>
               <option value="weekly">{t("budgetResetWeekly")}</option>
               <option value="monthly">{t("budgetResetMonthly")}</option>
-            </select>
+            </Select>
           </div>
           <Input
             label={t("resetTimeUtc")}
