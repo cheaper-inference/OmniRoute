@@ -398,6 +398,7 @@ function lookupCatalogPricing(
         if (typeof input === "number") pricing.input = input;
         if (typeof output === "number") pricing.output = output;
         if (typeof modelPricing.cached === "number") pricing.cached = modelPricing.cached;
+        if (typeof modelPricing.reasoning === "number") pricing.reasoning = modelPricing.reasoning;
         if (typeof modelPricing.cache_creation === "number") {
           pricing.cache_creation = modelPricing.cache_creation;
         }
