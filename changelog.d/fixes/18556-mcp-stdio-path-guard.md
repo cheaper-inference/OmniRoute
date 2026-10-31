@@ -1,0 +1,1 @@
+- **fix(mcp):** `omniroute --mcp` no longer exits silently when the install path contains a space (or `%`, `#`, non-ASCII, or a symlinked install) — the direct-run guard compares real filesystem paths instead of a percent-encoded `file:` URL against the raw `argv[1]`, so the stdio transport starts and answers `initialize` (#18556)
