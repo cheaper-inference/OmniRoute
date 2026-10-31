@@ -5679,6 +5679,7 @@
     "filterError": "त्रुटि",
     "filterBanned": "प्रतिबंधित",
     "filterCreditsExhausted": "क्रेडिट समाप्त",
+    "filterVerificationRequired": "सत्यापन आवश्यक",
     "accountSearchPlaceholder": "खाते खोजें…",
     "noFilteredConnections": "वर्तमान फ़िल्टर से कोई कनेक्शन मेल नहीं खाता।",
     "failedSetAlias": "उपनाम सेट करने में विफल",

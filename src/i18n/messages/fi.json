@@ -5679,6 +5679,7 @@
     "filterError": "Virhe",
     "filterBanned": "Estetty",
     "filterCreditsExhausted": "Krediitit lopussa",
+    "filterVerificationRequired": "Vaatii vahvistuksen",
     "accountSearchPlaceholder": "Hae tilejä…",
     "noFilteredConnections": "Mikään yhteys ei vastaa nykyistä suodatinta.",
     "failedSetAlias": "Aliaksen asettaminen epäonnistui",

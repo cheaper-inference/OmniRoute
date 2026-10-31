@@ -5756,6 +5756,7 @@
     "filterError": "Żball",
     "filterBanned": "Ipprojbit",
     "filterCreditsExhausted": "Il-krediti ġew eżawriti",
+    "filterVerificationRequired": "Teħtieġ verifika",
     "accountSearchPlaceholder": "Fittex fil-kontijiet…",
     "noFilteredConnections": "L-ebda konnessjoni ma taqbel mal-filtru attwali.",
     "failedSetAlias": "Ma rnexxiex l-issettjar tal-isem alternattiv",

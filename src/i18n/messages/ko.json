@@ -5679,6 +5679,7 @@
     "filterError": "오류",
     "filterBanned": "차단됨",
     "filterCreditsExhausted": "크레딧 소진",
+    "filterVerificationRequired": "인증 필요",
     "accountSearchPlaceholder": "계정 검색…",
     "noFilteredConnections": "현재 필터와 일치하는 연결이 없습니다.",
     "failedSetAlias": "별칭을 설정하지 못했습니다.",

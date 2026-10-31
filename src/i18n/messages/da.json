@@ -5756,6 +5756,7 @@
     "filterError": "Fejl",
     "filterBanned": "Blokeret",
     "filterCreditsExhausted": "Kreditter opbrugt",
+    "filterVerificationRequired": "Kræver bekræftelse",
     "accountSearchPlaceholder": "Søg efter konti…",
     "noFilteredConnections": "Ingen forbindelser matcher det aktuelle filter.",
     "failedSetAlias": "Aliaset kunne ikke indstilles",

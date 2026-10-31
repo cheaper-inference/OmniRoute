@@ -5679,6 +5679,7 @@
     "filterError": "Помилка",
     "filterBanned": "Заблоковано",
     "filterCreditsExhausted": "Кредити вичерпано",
+    "filterVerificationRequired": "Потрібне підтвердження",
     "accountSearchPlaceholder": "Пошук облікових записів…",
     "noFilteredConnections": "Жодне підключення не відповідає поточному фільтру.",
     "failedSetAlias": "Не вдалося встановити псевдонім",

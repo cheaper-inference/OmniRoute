@@ -5679,6 +5679,7 @@
     "filterError": "Hata",
     "filterBanned": "Yasaklandı",
     "filterCreditsExhausted": "Krediler tükendi",
+    "filterVerificationRequired": "Doğrulama gerekiyor",
     "accountSearchPlaceholder": "Hesaplarda ara…",
     "noFilteredConnections": "Mevcut filtreyle eşleşen bağlantı yok.",
     "failedSetAlias": "Takma ad ayarlanamadı",

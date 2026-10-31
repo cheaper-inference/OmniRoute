@@ -5679,6 +5679,7 @@
     "filterError": "Fehler",
     "filterBanned": "Gesperrt",
     "filterCreditsExhausted": "Guthaben aufgebraucht",
+    "filterVerificationRequired": "Verifizierung erforderlich",
     "accountSearchPlaceholder": "Konten durchsuchen…",
     "noFilteredConnections": "Keine Verbindungen entsprechen dem aktuellen Filter.",
     "failedSetAlias": "Alias konnte nicht festgelegt werden",

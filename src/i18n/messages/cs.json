@@ -5756,6 +5756,7 @@
     "filterError": "Chyba",
     "filterBanned": "Zablokováno",
     "filterCreditsExhausted": "Vyčerpané kredity",
+    "filterVerificationRequired": "Vyžaduje ověření",
     "accountSearchPlaceholder": "Hledat účty…",
     "noFilteredConnections": "Aktuálnímu filtru neodpovídají žádná připojení.",
     "failedSetAlias": "Nastavení aliasu selhalo",

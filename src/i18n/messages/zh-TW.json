@@ -5679,6 +5679,7 @@
     "filterError": "錯誤",
     "filterBanned": "封禁",
     "filterCreditsExhausted": "額度耗盡",
+    "filterVerificationRequired": "需要驗證",
     "accountSearchPlaceholder": "搜尋帳戶…",
     "noFilteredConnections": "沒有符合當前篩選條件的連線。",
     "failedSetAlias": "設定別名失敗",

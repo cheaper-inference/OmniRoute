@@ -5679,6 +5679,7 @@
     "filterError": "Lỗi",
     "filterBanned": "Bị cấm",
     "filterCreditsExhausted": "Hết tín dụng",
+    "filterVerificationRequired": "Cần xác minh",
     "accountSearchPlaceholder": "Tìm kiếm tài khoản…",
     "noFilteredConnections": "Không có kết nối nào khớp với bộ lọc hiện tại.",
     "failedSetAlias": "Không thể đặt bí danh",

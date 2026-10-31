@@ -5679,6 +5679,7 @@
     "filterError": "خرابی",
     "filterBanned": "پابندی شدہ",
     "filterCreditsExhausted": "کریڈٹ ختم",
+    "filterVerificationRequired": "تصدیق درکار ہے",
     "accountSearchPlaceholder": "اکاؤنٹس تلاش کریں…",
     "noFilteredConnections": "کوئی بھی کنکشن موجودہ فلٹر سے مماثل نہیں ہے۔",
     "failedSetAlias": "عرف مقرر کرنے میں ناکامی",
