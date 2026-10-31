@@ -649,6 +649,40 @@ function getLimiter(provider, connectionId, model = null) {
  * @param {AbortSignal} signal - Optional abort signal to cancel waiting
  * @returns {Promise<unknown>} Result of fn()
  */
+/**
+ * Optional, opt-in scaling of the execution deadline for large NON-STREAMING
+ * generations. The base deadline (per-connection executionMaxWaitMs / upstream
+ * fetch-start timeout) assumes an interactive call; a non-streaming request
+ * that legitimately asks for tens of thousands of output tokens can still be
+ * mid-generation when that deadline fires — the client sees a hard 504 while
+ * the upstream was healthy and working (observed: max_tokens=32768 vision
+ * requests killed at exactly the 120s default, ten times in a row).
+ *
+ * Controlled by OMNIROUTE_EXECUTION_EXPIRATION_MS:
+ *  - unset (default): returns baseMs unchanged — zero behavior change
+ *  - "auto": scale by max_tokens at a conservative ~20ms/token decode floor
+ *    (50 tok/s), clamped to [baseMs, 15min]
+ *  - a number: use it as a fixed floor (ms)
+ * The result is a floor for withRateLimit's three-way max — it can only raise
+ * the deadline, never undercut the per-connection / upstream floors.
+ */
+export function computeNonStreamExecutionExpirationMs(
+  baseMs: number,
+  maxTokens: number | undefined,
+  env: Record<string, string | undefined> = process.env
+): number {
+  const raw = env.OMNIROUTE_EXECUTION_EXPIRATION_MS;
+  if (raw === undefined || raw === "") return baseMs;
+  if (raw !== "auto") {
+    const parsed = Number(raw);
+    // Non-numeric or negative values are ignored (keep the base deadline).
+    if (Number.isFinite(parsed) && parsed >= 0) return parsed;
+    return baseMs;
+  }
+  const budgetMs = Number(maxTokens) > 0 ? Number(maxTokens) * 20 : 0;
+  return Math.max(baseMs, Math.min(budgetMs, 900_000));
+}
+
 export async function withRateLimit(
   provider,
   connectionId,
@@ -658,7 +692,15 @@ export async function withRateLimit(
   remainingBudgetMs = undefined,
   correlationId = undefined,
   opts:
-    | { executor?: { getTimeoutMs?: () => unknown }; providerSpecificData?: unknown }
+    | {
+        executor?: { getTimeoutMs?: () => unknown };
+        providerSpecificData?: unknown;
+        /** Optional floor for the execution deadline (ms), e.g. a
+         *  max_tokens-scaled budget for large non-streaming generations
+         *  (see computeNonStreamExecutionExpirationMs). Never undercuts the
+         *  per-connection / upstream floors — the three values are max()'d. */
+        executionExpirationMs?: number;
+      }
     | undefined = undefined
 ) {
   if (!enabledConnections.has(connectionId)) {
@@ -724,7 +766,14 @@ export async function withRateLimit(
         )
       )
     : undefined;
-  const executionExpirationMs = upstreamMs ? Math.max(perConnExec, upstreamMs) : perConnExec;
+  // Three-way max: a caller-supplied floor (e.g. max_tokens-scaled budget for
+  // large non-streaming generations) can only raise the deadline, never
+  // undercut the per-connection / upstream floors.
+  const executionExpirationMs = Math.max(
+    perConnExec,
+    opts?.executionExpirationMs ?? 0,
+    upstreamMs ?? 0
+  );
   if (upstreamMs && perConnExec < upstreamMs) {
     logRateLimit(
       `[RATE-LIMIT] executionMaxWaitMs ${perConnExec}ms clamped to upstream ${upstreamMs}ms for ${provider}/${model ?? ""}`
