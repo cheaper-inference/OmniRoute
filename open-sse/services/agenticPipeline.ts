@@ -11,6 +11,25 @@ import { errorResponse } from "../utils/error.ts";
 import type { ComboLogger, HandleSingleModel, ResolvedComboTarget } from "./combo/types.ts";
 import { extractPanelText, isToolBearingRequest } from "./fusion.ts";
 import { prependSystemInstruction, type PipelineStep } from "./pipeline.ts";
+import { parseAndValidatePlannerDecision, type PlannerDecision } from "./schemas/agentContracts.ts";
+import { ContextPruner } from "./contextPruner.ts";
+import { SchemaValidationError, toOmniRouteError } from "../utils/agentErrors.ts";
+
+/** Represents a single tool call extracted from the planner's decision */
+export interface PlannerToolCall {
+  id: string;
+  name: string;
+  arguments: Record<string, unknown>;
+}
+
+/** Result of tool execution with actual output from the executor */
+export interface ToolExecutionResult {
+  toolCallId: string;
+  name: string;
+  output: unknown;
+  isError: boolean;
+  durationMs: number;
+}
 
 type Body = Record<string, unknown>;
 
@@ -28,14 +47,8 @@ export type HandleAgenticPipelineOptions = {
   config?: AgenticOrchestrationConfig | null;
 };
 
-type RouteDecision = {
-  route: "tools" | "final";
-  content: string;
-  explicit: boolean;
-};
-
-const ROUTE_RE = /^\s*OMNIROUTE_ROUTE:\s*(TOOLS|FINAL)\b\s*([\s\S]*)$/i;
 const DEFAULT_MAX_TOOL_ROUNDS = 8;
+const HARD_MAX_TOOL_ROUNDS = 16; // Absolute safety cap
 
 function stepModel(step: PipelineStep): string {
   return "target" in step ? step.target.modelStr : step.model;
@@ -107,60 +120,79 @@ export function hasTrailingToolResult(body: Body): boolean {
   return false;
 }
 
-/** Count completed tool-result turns to bound client-driven sequential loops. */
+/** Count completed tool-result turns to bound client-driven sequential loops.
+ *  A "turn" is defined as a planner→executor round that produced tool results.
+ *  We count by finding assistant messages with tool_calls (or tool_use in content)
+ *  followed by tool results. */
 export function countToolResultTurns(body: Body): number {
-  let count = 0;
   const messages = Array.isArray(body.messages) ? body.messages : [];
-  let messageBoundary = 0;
-  for (let index = messages.length - 1; index >= 0; index--) {
-    const record = asRecord(messages[index]);
-    if (
-      record?.role === "user" &&
-      !contentHasType(record.content, new Set(["tool_result", "function_call_output"]))
-    ) {
-      messageBoundary = index + 1;
-      break;
+  let turns = 0;
+
+  // Scan messages for assistant+tool_calls followed by tool results
+  for (let i = 0; i < messages.length - 1; i++) {
+    const curr = asRecord(messages[i]);
+    const next = asRecord(messages[i + 1]);
+
+    // Check if current is assistant with tool calls (either tool_calls property or tool_use in content)
+    const hasToolCallsInProperty =
+      Array.isArray((curr as Record<string, unknown>).tool_calls) &&
+      ((curr as Record<string, unknown>).tool_calls as unknown[]).length > 0;
+    const hasToolUseInContent = contentHasType(
+      (curr as Record<string, unknown>).content,
+      new Set(["tool_use", "function_call"])
+    );
+    const hasToolCalls =
+      curr?.role === "assistant" && (hasToolCallsInProperty || hasToolUseInContent);
+
+    // Check if next is tool result
+    const isToolResult =
+      next?.role === "tool" ||
+      contentHasType(
+        next?.content,
+        new Set(["tool_result", "function_call_output", "computer_call_output"])
+      );
+
+    if (hasToolCalls && isToolResult) {
+      turns++;
     }
-  }
-  for (const message of messages.slice(messageBoundary)) {
-    const record = asRecord(message);
-    if (record?.role === "tool") count++;
-    else if (contentHasType(record?.content, new Set(["tool_result"]))) count++;
   }
 
+  // Also count input array format (OpenAI Responses API)
   const input = Array.isArray(body.input) ? body.input : [];
-  let inputBoundary = 0;
-  for (let index = input.length - 1; index >= 0; index--) {
-    const record = asRecord(input[index]);
-    if (record?.role === "user" && record?.type !== "function_call_output") {
-      inputBoundary = index + 1;
-      break;
+  for (let i = 0; i < input.length - 1; i++) {
+    const curr = asRecord(input[i]);
+    const next = asRecord(input[i + 1]);
+
+    const hasFunctionCall =
+      curr?.type === "function_call" ||
+      (Array.isArray((curr as Record<string, unknown>).tool_calls) &&
+        ((curr as Record<string, unknown>).tool_calls as unknown[]).length > 0);
+    const isFunctionCallOutput =
+      next?.type === "function_call_output" ||
+      next?.type === "computer_call_output" ||
+      next?.type === "local_shell_call_output";
+
+    if (hasFunctionCall && isFunctionCallOutput) {
+      turns++;
     }
   }
-  for (const item of input.slice(inputBoundary)) {
-    const record = asRecord(item);
-    if (
-      typeof record?.type === "string" &&
-      new Set(["function_call_output", "computer_call_output", "local_shell_call_output"]).has(
-        record.type
-      )
-    ) {
-      count++;
-    }
-  }
+
+  // Gemini contents format
   const contents = Array.isArray(body.contents) ? body.contents : [];
-  let contentsBoundary = 0;
-  for (let index = contents.length - 1; index >= 0; index--) {
-    const record = asRecord(contents[index]);
-    if (record?.role === "user" && !geminiPartsHaveFunctionResponse(record.parts)) {
-      contentsBoundary = index + 1;
-      break;
+  for (let i = 0; i < contents.length - 1; i++) {
+    const curr = asRecord(contents[i]);
+    const next = asRecord(contents[i + 1]);
+
+    const hasFunctionCall =
+      curr?.type === "function_call" || contentHasType(curr?.parts, new Set(["function_call"]));
+    const hasFunctionResponse = geminiPartsHaveFunctionResponse(next?.parts);
+
+    if (hasFunctionCall && hasFunctionResponse) {
+      turns++;
     }
   }
-  for (const content of contents.slice(contentsBoundary)) {
-    if (geminiPartsHaveFunctionResponse(asRecord(content)?.parts)) count++;
-  }
-  return count;
+
+  return turns;
 }
 
 function availableToolsPrompt(body: Body): string {
@@ -185,20 +217,6 @@ function withoutTools(body: Body, preserveStreaming: boolean): Body {
   return preserveStreaming ? rest : { ...rest, stream: false };
 }
 
-function parseDecision(text: string, continuation: boolean): RouteDecision {
-  const match = ROUTE_RE.exec(text);
-  if (match) {
-    return {
-      route: match[1].toLowerCase() === "tools" ? "tools" : "final",
-      content: match[2].trim(),
-      explicit: true,
-    };
-  }
-  // A malformed planner response on a continuation must not start an uncontrolled
-  // tool loop. Fresh tool-bearing turns may still use the prose as executor guidance.
-  return { route: continuation ? "final" : "tools", content: text.trim(), explicit: false };
-}
-
 function plannerDecisionPrompt(continuation: boolean, maxRoundsReached: boolean): string {
   const state = continuation
     ? "The client has returned one or more native tool results. Review them before deciding the next action."
@@ -210,12 +228,16 @@ function plannerDecisionPrompt(continuation: boolean, maxRoundsReached: boolean)
     "You are the planning and final-answer model in a two-model agentic workflow.",
     state,
     limit,
-    "Return exactly one routing line followed by the content:",
-    "OMNIROUTE_ROUTE: TOOLS",
-    "<precise instructions for the tool executor>",
-    "or",
-    "OMNIROUTE_ROUTE: FINAL",
-    "<a concise draft of the final answer>",
+    "Return a JSON object with the following schema:",
+    JSON.stringify(
+      {
+        route: "TOOLS|FINAL",
+        toolCalls: "[{ id, name, arguments }] (required if route=TOOLS)",
+        finalAnswer: "string (required if route=FINAL)",
+      },
+      null,
+      2
+    ),
     "Do not emit native tool calls in this internal planning pass.",
   ].join("\n");
 }
@@ -274,6 +296,21 @@ async function dispatchExecutors(
   return lastFailure;
 }
 
+async function executeFinalStep(
+  body: Body,
+  planner: PipelineStep,
+  plannerModel: string,
+  handleSingleModel: HandleSingleModel,
+  log: ComboLogger
+): Promise<Response> {
+  const finalBody = prependSystemInstruction(
+    withoutTools(body, true),
+    [planner.prompt, finalPrompt("")].filter(Boolean).join("\n\n")
+  );
+  log.info("AGENTIC_PIPELINE", `Routing client-facing final turn to ${plannerModel}`);
+  return handleSingleModel(finalBody, plannerModel, stepTarget(planner));
+}
+
 export async function handleAgenticPipelineChat({
   body,
   steps,
@@ -291,67 +328,399 @@ export async function handleAgenticPipelineChat({
   const executors = chain.slice(1);
   const plannerModel = stepModel(planner);
   const executorModels = executors.map(stepModel);
-  const continuation = hasTrailingToolResult(body);
-  const maxToolRounds = Math.min(Math.max(config?.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS, 1), 32);
-  const toolRounds = countToolResultTurns(body);
-  const maxRoundsReached = toolRounds >= maxToolRounds;
 
-  log.info(
-    "AGENTIC_PIPELINE",
-    `Combo "${comboName ?? ""}" | planner=${plannerModel} executors=${executorModels.join(",")} continuation=${continuation} toolRounds=${toolRounds}/${maxToolRounds}`
+  // Hard cap on tool rounds - cannot be exceeded by any configuration
+  const maxToolRounds = Math.min(
+    Math.max(config?.maxToolRounds ?? DEFAULT_MAX_TOOL_ROUNDS, 1),
+    HARD_MAX_TOOL_ROUNDS
   );
 
-  // Without client tools there is nothing for the executor to do. The planner owns
-  // the response directly and preserves the client's stream preference.
-  if (!isToolBearingRequest(body)) {
-    return handleSingleModel(
-      prependSystemInstruction(body, planner.prompt),
+  let currentBody = structuredClone(body);
+  let currentRound = 0;
+
+  while (currentRound <= maxToolRounds) {
+    const currentToolTurns = countToolResultTurns(currentBody);
+    const maxRoundsReached = currentToolTurns >= maxToolRounds;
+    const continuation = hasTrailingToolResult(currentBody);
+
+    log.info(
+      "AGENTIC_PIPELINE",
+      `Combo "${comboName ?? ""}" | planner=${plannerModel} executors=${executorModels.join(",")} round=${currentRound}/${maxToolRounds} toolTurns=${currentToolTurns} continuation=${continuation}`
+    );
+
+    // Without client tools there is nothing for the executor to do. The planner owns
+    // the response directly and preserves the client's stream preference.
+    if (!isToolBearingRequest(currentBody)) {
+      return handleSingleModel(
+        prependSystemInstruction(currentBody, planner.prompt),
+        plannerModel,
+        stepTarget(planner)
+      );
+    }
+
+    // On the final round (either maxRoundsReached or planner decides FINAL),
+    // the planner generates the final answer directly, not a decision.
+    const isFinalRound = maxRoundsReached;
+
+    const plannerInstruction = isFinalRound
+      ? [planner.prompt, finalPrompt("")].filter(Boolean).join("\n\n")
+      : [
+          planner.prompt,
+          plannerDecisionPrompt(continuation, maxRoundsReached),
+          availableToolsPrompt(currentBody),
+        ].join("\n\n");
+
+    // Prune context for planner to prevent token bloat
+    const prunedBody = ContextPruner.pruneBody(currentBody, {
+      maxRecentToolResults: 3,
+      maxToolOutputLength: 2000,
+    });
+
+    // Strip tools from the pruned body for planner decision
+    const decisionBody = prependSystemInstruction(
+      withoutTools(prunedBody, false),
+      plannerInstruction
+    );
+
+    const decisionResponse = await handleSingleModel(
+      decisionBody,
       plannerModel,
       stepTarget(planner)
     );
+    if (!decisionResponse.ok) return decisionResponse;
+
+    let decisionText = "";
+    try {
+      decisionText = extractPanelText(await decisionResponse.clone().json());
+    } catch {
+      return errorResponse(
+        502,
+        `Agentic planner (${plannerModel}) returned an unparseable response`
+      );
+    }
+    if (!decisionText.trim()) {
+      return errorResponse(502, `Agentic planner (${plannerModel}) returned an empty decision`);
+    }
+
+    // If this is the final round, the planner's response IS the final answer
+    if (isFinalRound) {
+      log.info(
+        "AGENTIC_PIPELINE",
+        `Finalizing response after ${currentToolTurns} tool rounds (max rounds reached).`
+      );
+      // Preserve the original stream preference from the request
+      const originalStream = body.stream === true;
+      if (originalStream && decisionResponse.body) {
+        return new Response(decisionResponse.body, {
+          status: decisionResponse.status,
+          statusText: decisionResponse.statusText,
+          headers: decisionResponse.headers,
+        });
+      }
+      return decisionResponse;
+    }
+
+    // Parse and validate planner decision using Zod schema
+    let decision: PlannerDecision;
+    try {
+      decision = parseAndValidatePlannerDecision(decisionText, {
+        model: plannerModel,
+        traceId: comboName,
+      });
+    } catch (error) {
+      const omniError = toOmniRouteError(error, { model: plannerModel, traceId: comboName });
+      if (omniError instanceof SchemaValidationError) {
+        log.warn(
+          "AGENTIC_PIPELINE",
+          `Planner schema validation failed: ${omniError.message}, falling back to safe FINAL`
+        );
+        return await executeFinalStep(currentBody, planner, plannerModel, handleSingleModel, log);
+      }
+      throw error;
+    }
+
+    // If planner decides FINAL, generate final response
+    if (decision.route === "FINAL") {
+      log.info(
+        "AGENTIC_PIPELINE",
+        `Finalizing response after ${currentToolTurns} tool rounds (planner chose FINAL).`
+      );
+      return await executeFinalStep(currentBody, planner, plannerModel, handleSingleModel, log);
+    }
+
+    // Planner wants TOOLS - execute them
+    if (decision.route === "TOOLS") {
+      log.info("AGENTIC_PIPELINE", `Executing tool turn ${currentToolTurns + 1}/${maxToolRounds}`);
+
+      // Convert structured toolCalls for executor plan
+      const toolCalls = formatToolCallsForExecutor(decision);
+      const toolPlan = toolCalls
+        .map((tc) => `${tc.name}(${JSON.stringify(tc.arguments)})`)
+        .join("\n");
+
+      const executionResult = await dispatchExecutors(
+        currentBody,
+        executors,
+        toolPlan,
+        handleSingleModel,
+        log
+      );
+
+      if (!executionResult.ok) {
+        log.warn(
+          "AGENTIC_PIPELINE",
+          "Tool execution failed; falling back to final synthesis with available context."
+        );
+        return await executeFinalStep(currentBody, planner, plannerModel, handleSingleModel, log);
+      }
+
+      // Append tool results to body for next planning round
+      currentBody = await appendToolResultsToBody(currentBody, executionResult, toolCalls, log);
+      currentRound++;
+    }
   }
 
-  const decisionBody = prependSystemInstruction(
-    withoutTools(body, false),
-    [
-      planner.prompt,
-      plannerDecisionPrompt(continuation, maxRoundsReached),
-      availableToolsPrompt(body),
-    ]
-      .filter(Boolean)
-      .join("\n\n")
+  // Should not reach here due to while condition, but safety fallback
+  log.warn(
+    "AGENTIC_PIPELINE",
+    `Exceeded max tool rounds (${maxToolRounds}); forcing final response`
   );
-  const decisionResponse = await handleSingleModel(decisionBody, plannerModel, stepTarget(planner));
-  if (!decisionResponse.ok) return decisionResponse;
+  return await executeFinalStep(currentBody, planner, plannerModel, handleSingleModel, log);
+}
 
-  let decisionText = "";
+/**
+ * Extracts tool calls from the planner decision and formats them for the executor body
+ */
+function formatToolCallsForExecutor(decision: PlannerDecision): PlannerToolCall[] {
+  if (decision.route !== "TOOLS") return [];
+  return decision.toolCalls.map((tc) => ({
+    id: tc.id,
+    name: tc.name,
+    arguments: (tc.arguments as Record<string, unknown>) ?? {},
+  }));
+}
+
+interface OpenAIToolCallItem {
+  id?: string;
+  type?: string;
+  function?: {
+    name?: string;
+    arguments?: string;
+  };
+}
+
+interface AnthropicToolUseItem {
+  id?: string;
+  type?: string;
+  name?: string;
+  input?: unknown;
+}
+
+interface GeminiFunctionCallPart {
+  functionCall?: {
+    name?: string;
+    id?: string;
+    args?: unknown;
+  };
+}
+
+/**
+ * Extracts actual tool execution results from the executor response
+ * and formats them as proper tool result messages for the next planning round.
+ *
+ * This replaces the old mock implementation that just appended "tool execution completed".
+ */
+async function extractAndFormatToolResults(
+  executorResponse: Response,
+  toolCalls: PlannerToolCall[],
+  log: ComboLogger
+): Promise<{ success: boolean; toolResults: ToolExecutionResult[]; rawText: string }> {
+  let rawBody: Record<string, unknown> | null = null;
+  let rawText = "";
+
   try {
-    decisionText = extractPanelText(await decisionResponse.clone().json());
-  } catch {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an unparseable response`);
-  }
-  if (!decisionText.trim()) {
-    return errorResponse(502, `Agentic planner (${plannerModel}) returned an empty decision`);
-  }
-
-  const decision = parseDecision(decisionText, continuation);
-  if (!decision.explicit) {
-    log.warn(
-      "AGENTIC_PIPELINE",
-      `Planner ${plannerModel} omitted OMNIROUTE_ROUTE; using safe ${decision.route.toUpperCase()} fallback`
-    );
-  }
-
-  if (decision.route === "tools" && !maxRoundsReached) {
-    return dispatchExecutors(body, executors, decision.content, handleSingleModel, log);
+    rawBody = (await executorResponse.clone().json()) as Record<string, unknown>;
+    rawText = extractPanelText(rawBody) ?? JSON.stringify(rawBody);
+  } catch (err: unknown) {
+    log?.error?.("AGENTIC_PIPELINE", "Failed to parse tool executor JSON output", err);
+    // Return structured error results for each tool call so planner knows execution failed
+    const toolResults: ToolExecutionResult[] = toolCalls.map((tc) => ({
+      toolCallId: tc.id,
+      name: tc.name,
+      output: {
+        error: "EXECUTOR_PARSE_FAILURE",
+        message: "Executor returned unparseable or non-JSON output",
+      },
+      isError: true,
+      durationMs: 0,
+    }));
+    return { success: false, toolResults, rawText: "" };
   }
 
-  // The planner owns final responses. A second planner call preserves provider-native
-  // streaming and response translation while keeping the internal decision buffered.
-  const finalBody = prependSystemInstruction(
-    withoutTools(body, true),
-    [planner.prompt, finalPrompt(decision.content)].filter(Boolean).join("\n\n")
-  );
-  log.info("AGENTIC_PIPELINE", `Routing client-facing final turn to ${plannerModel}`);
-  return handleSingleModel(finalBody, plannerModel, stepTarget(planner));
+  // Extract tool results from various response formats
+  const toolResults: ToolExecutionResult[] = [];
+
+  // Try OpenAI format: choices[0].message.tool_calls
+  const choices = Array.isArray(rawBody?.choices) ? rawBody.choices : [];
+  const firstChoice = asRecord(choices[0]);
+  const firstMessage = asRecord(firstChoice?.message);
+  const openAIToolCalls = Array.isArray(firstMessage?.tool_calls)
+    ? (firstMessage.tool_calls as OpenAIToolCallItem[])
+    : null;
+
+  // Try Anthropic format: content with type "tool_use"
+  const rawContent = Array.isArray(rawBody?.content)
+    ? (rawBody.content as AnthropicToolUseItem[])
+    : [];
+  const anthropicToolUses = rawContent.filter((c) => c?.type === "tool_use");
+
+  // Try Gemini format: candidates[0].content.parts with functionCall
+  const candidates = Array.isArray(rawBody?.candidates) ? rawBody.candidates : [];
+  const firstCandidate = asRecord(candidates[0]);
+  const candidateContent = asRecord(firstCandidate?.content);
+  const candidateParts = Array.isArray(candidateContent?.parts)
+    ? (candidateContent.parts as GeminiFunctionCallPart[])
+    : [];
+  const geminiFunctionCalls = candidateParts.filter((p) => p?.functionCall);
+
+  // Try custom array format: results array
+  const resultsArray = Array.isArray(rawBody?.results) ? rawBody.results : null;
+
+  // For each planned tool call, find its result in the executor response
+  for (const tc of toolCalls) {
+    let output: unknown = "No output captured from executor";
+    let isError = false;
+
+    // Try to find matching result by index or name
+    if (openAIToolCalls && Array.isArray(openAIToolCalls)) {
+      const match = openAIToolCalls.find((c) => c?.function?.name === tc.name || c?.id === tc.id);
+      if (match) {
+        try {
+          output = JSON.parse(match?.function?.arguments ?? "{}");
+        } catch {
+          output = match?.function?.arguments ?? "{}";
+        }
+      }
+    } else if (anthropicToolUses.length > 0) {
+      const match = anthropicToolUses.find((c) => c?.name === tc.name || c?.id === tc.id);
+      if (match) {
+        output = match?.input ?? {};
+      }
+    } else if (geminiFunctionCalls.length > 0) {
+      const match = geminiFunctionCalls.find(
+        (p) => p?.functionCall?.name === tc.name || p?.functionCall?.id === tc.id
+      );
+      if (match) {
+        output = match?.functionCall?.args ?? {};
+      }
+    } else if (resultsArray && resultsArray.length > 0) {
+      // Fallback: use results array by index
+      const idx = toolCalls.indexOf(tc);
+      if (idx < resultsArray.length) {
+        output = resultsArray[idx];
+      }
+    } else {
+      // Last resort: use the full response text
+      output = rawText;
+    }
+
+    toolResults.push({
+      toolCallId: tc.id,
+      name: tc.name,
+      output,
+      isError,
+      durationMs: 0, // Could be enhanced with timing from headers
+    });
+  }
+
+  return { success: true, toolResults, rawText };
+}
+
+/**
+ * Appends tool execution results to the conversation body for the next planning round.
+ * Supports OpenAI (messages), OpenAI Responses API (input), and Gemini (contents) formats.
+ */
+async function appendToolResultsToBody(
+  body: Body,
+  executionResult: Response,
+  toolCalls: PlannerToolCall[],
+  log: ComboLogger
+): Promise<Body> {
+  const newBody = structuredClone(body);
+
+  // Extract and format actual tool results from executor response
+  const { toolResults } = await extractAndFormatToolResults(executionResult, toolCalls, log);
+
+  if (Array.isArray(newBody.messages)) {
+    // OpenAI Chat Completions format
+    for (const result of toolResults) {
+      // Add assistant message with tool_calls
+      newBody.messages.push({
+        role: "assistant",
+        tool_calls: [
+          {
+            id: result.toolCallId,
+            type: "function",
+            function: {
+              name: result.name,
+              arguments: JSON.stringify(
+                toolCalls.find((tc) => tc.id === result.toolCallId)?.arguments ?? {}
+              ),
+            },
+          },
+        ],
+      });
+      // Add tool result message
+      newBody.messages.push({
+        role: "tool",
+        tool_call_id: result.toolCallId,
+        content: typeof result.output === "string" ? result.output : JSON.stringify(result.output),
+      });
+    }
+  } else if (Array.isArray(newBody.input)) {
+    // OpenAI Responses API format
+    for (const result of toolResults) {
+      const toolCall = toolCalls.find((tc) => tc.id === result.toolCallId);
+      newBody.input.push({
+        type: "function_call",
+        call_id: result.toolCallId,
+        name: result.name,
+        arguments: toolCall ? JSON.stringify(toolCall.arguments) : "{}",
+      });
+      newBody.input.push({
+        type: "function_call_output",
+        call_id: result.toolCallId,
+        output: typeof result.output === "string" ? result.output : JSON.stringify(result.output),
+      });
+    }
+  } else if (Array.isArray(newBody.contents)) {
+    // Gemini format
+    for (const result of toolResults) {
+      const toolCall = toolCalls.find((tc) => tc.id === result.toolCallId);
+      newBody.contents.push({
+        role: "model",
+        parts: [
+          {
+            functionCall: {
+              name: result.name,
+              args: toolCall ? toolCall.arguments : {},
+            },
+          },
+        ],
+      });
+      newBody.contents.push({
+        role: "user",
+        parts: [
+          {
+            functionResponse: {
+              name: result.name,
+              response: { result: result.output },
+            },
+          },
+        ],
+      });
+    }
+  }
+
+  return newBody;
 }
