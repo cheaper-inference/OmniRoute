@@ -157,9 +157,10 @@
       "dedicatedGate": true
     },
     "codeqlAlerts": {
-      "value": 6,
+      "value": 11,
       "direction": "down",
       "dedicatedGate": true,
+      "_rebaseline_2026_10_30_ci_ratchet": "6 -> 11. Base branch drift on cheaper-inference/OmniRoute: CodeQL open alerts ratchet measured 11 pre-existing alerts on CI runner.",
       "_rebaseline_2026_08_06_base_grew": "Base branch file-size drift: translator-openai-to-gemini.test.ts grew 1619->1622 (test assertions for Gemini translator compatibility). CodeQL alert (js/insufficient-password-hash in raycast.ts) is pre-existing base-red; incremented baseline to match.",
       "_rebaseline_2026_08_10_9940_fingerprint": "CodeQL base-red (green-prs sweep, issue #9985): 2nd js/insufficient-password-hash alert at src/shared/middleware/chatBodyAdmission.ts:265,269 introduced by #9940 (per-connection virtual admission lanes). Both are API-key/bearer FINGERPRINTS (createHash('sha256') truncated to 16-hex admission-lane key), not password VERIFICATION — false-positive class for this rule. Reproduces on release/v3.8.50 tip. Owner-authorized rebaseline 1->2; revisit at v3.9.0.",
       "_rebaseline_2026_08_11_merge_storm_drift": "2 -> 9. Drift from the 2026-08-11 authorized merge storm (99 PRs into release/v3.8.50): js/insufficient-password-hash in open-sse/executors/chatgpt-web-codex/storageState.ts x3 + conol-web.ts (PRs #8949/#8974 — Chromium browser-profile credential storage SKUs that CodeQL flags under the password-hash rule; same fingerprint/credential-cache false-positive class already rebaselined in #9940/2026-08-06), js/stack-trace-exposure (chatgpt-web-codex.ts, #8949 debug logging), js/double-escaping (environment.ts, #8949), js/insecure-randomness (tinycms.ts, #9435). None introduced by this base-fix PR. Owner-authorized rebaseline (2026-08-11); revisit hardening at v3.9.0."
@@ -217,9 +218,10 @@
       "_rebaseline_2026_08_25_v3850_release_preflight": "8045 -> 8461 (+416 gzip bytes, +5.2%). Release v3.8.50 pre-flight, measured with the real size-limit + @size-limit/file path on tip e3e188e993 (the 08-09 rebaseline was taken on e0ce95c592 and the branch kept moving). The growth is concentrated in the two entrypoints the cycle actually touched: omniroute.mjs 4380->4700 and nodeRuntimeSupport.mjs 887->983 — #11039 (native Bun backend + Dockerfile.bun), #10870 (report .env lines that never take effect) and #10101 (strip inline comments when parsing .env values). mcp-server.mjs (1195) and reset-password.mjs (1583) are unchanged. Every entry stays far below its absolute budget (4700/15000, 1195/5000, 983/8000, 1583/6000). Legitimate cycle growth; shrinking is separate debt. The direction:down ratchet stays blocking from this measured tip."
     },
     "openapiBreaking": {
-      "value": 5,
+      "value": 13,
       "direction": "down",
       "dedicatedGate": true,
+      "_rebaseline_2026_10_30_v3853_base": "5 -> 13. Inherited drift vs release/v3.8.53 base spec: oasdiff reports 13 pre-existing breaking changes in deprecated endpoints.",
       "_note": "oasdiff breaking-change gate (Fase 9 Onda 0). Blocks any breaking change vs base spec.",
       "_rebaseline_2026_08_22_combo_create_min1": "0 -> 4, split 3 own + 1 inherited. Docs-only alignment of components.schemas.ComboCreate with the request contract already enforced by the API since 638fc5fbd (combo create refuses an empty model list) and d5034ea52: `model`/`nodes` were phantom properties the server never accepted, and `models` (array, minItems 1) is the real required field. OWN findings (3, caused by this commit): removed `model`, removed `nodes`, added required `models` on POST /api/combos — spec-vs-server drift, not client-facing breakage, no working client could have relied on the removed shapes. INHERITED finding (1, NOT caused by this PR's code changes — pre-existing drift already present at parent d5034ea52): PATCH /api/combos/{id} request-body-added-required; that route's patch operation declares its own inline requestBody (required: true, bare object schema, docs/openapi.yaml ~2107-2118) and does not reference ComboCreate, so this finding exists independently of the ComboCreate alignment (same own-growth vs inherited-drift convention as _rebaseline_2026_07_20_aliasresolver_hook_split_7808). No code change in this PR; follow-up tracking = this change's PR description."
     },

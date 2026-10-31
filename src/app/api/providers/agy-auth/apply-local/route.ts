@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
-import os from "os";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
   AgyAuthFileError,
   parseAndValidateAgyToken,
   enrichWithAntigravityBackend,
   createConnectionFromAgyToken,
+  detectLocalAgyTokenRaw,
 } from "@/lib/oauth/utils/agyAuthImport";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import { getProviderAuditTarget } from "@/lib/compliance/providerAudit";
@@ -15,17 +13,6 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { applyLocalAgyAuthSchema } from "@/shared/validation/schemas";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { sanitizeProviderSpecificDataForResponse } from "@/lib/providers/requestDefaults";
-
-/**
- * Resolve the Antigravity CLI token-file path. The path is fixed (no request input
- * reaches the filesystem APIs); an operator-controlled env override is allowed for
- * non-standard installs. Default: ~/.gemini/antigravity-cli/antigravity-oauth-token.
- */
-function getAgyTokenFilePath(): string {
-  const override = process.env.AGY_TOKEN_FILE;
-  if (override && override.trim()) return override.trim();
-  return path.join(os.homedir(), ".gemini", "antigravity-cli", "antigravity-oauth-token");
-}
 
 function sanitizeConnectionForResponse(connection: Record<string, unknown>) {
   const safe = { ...connection };
@@ -62,25 +49,21 @@ export async function POST(request: Request) {
   // any existing connection for the same account unless the caller opts out.
   const { name, email, overwriteExisting = true } = parsedBody.data;
 
-  const tokenPath = getAgyTokenFilePath();
   let rawJson: unknown;
+  let source = "apply-local";
   try {
-    const content = await fs.readFile(tokenPath, "utf8");
-    rawJson = JSON.parse(content);
+    const detected = await detectLocalAgyTokenRaw();
+    rawJson = detected.raw;
+    source = detected.source;
   } catch (error) {
-    const code = (error as NodeJS.ErrnoException)?.code;
-    if (code === "ENOENT") {
+    if (error instanceof AgyAuthFileError) {
       return NextResponse.json(
-        {
-          error:
-            "No local Antigravity CLI login found. Run `agy`, sign in with Google, then try again.",
-          code: "no_local_login",
-        },
-        { status: 404 }
+        { error: error.message, code: error.code },
+        { status: error.status }
       );
     }
     return NextResponse.json(
-      { error: "Could not read the local agy token file", code: "read_failed" },
+      { error: "Could not read local Antigravity credentials", code: "read_failed" },
       { status: 500 }
     );
   }
@@ -105,7 +88,7 @@ export async function POST(request: Request) {
       metadata: {
         provider: "agy",
         created,
-        source: "apply-local",
+        source: `apply-local:${source}`,
         email: enriched.email || email,
         hasProjectId: !!enriched.projectId,
       },
@@ -117,7 +100,10 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     if (error instanceof AgyAuthFileError) {
-      return NextResponse.json({ error: error.message, code: error.code }, { status: error.status });
+      return NextResponse.json(
+        { error: error.message, code: error.code },
+        { status: error.status }
+      );
     }
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) || "Failed to import local Antigravity CLI login" },

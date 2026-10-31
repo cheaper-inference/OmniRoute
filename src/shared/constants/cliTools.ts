@@ -741,7 +741,6 @@ openclaude --provider openai
     settingsFile: "~/.pi/agent/models.json",
     // Hand-edit fallback shown by the guided card's manual-configuration block.
     codeBlock: {
-      title: "~/.pi/agent/models.json",
       language: "json",
       code: [
         "{",
