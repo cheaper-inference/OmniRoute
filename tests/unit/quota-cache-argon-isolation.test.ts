@@ -4,7 +4,7 @@ import {
   setQuotaCache,
   isQuotaExhaustedForRequest,
   __clearForTests,
-} from "../../../src/domain/quotaCache.ts";
+} from "../../src/domain/quotaCache.ts";
 
 test("Argon weekly exhaustion isolates gemini-4-argon without blocking gemini-3.8-flash", () => {
   __clearForTests();
