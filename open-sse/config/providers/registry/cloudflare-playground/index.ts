@@ -35,6 +35,11 @@ export const cloudflarePlaygroundProvider: RegistryEntry = {
       supportsReasoning: true,
     },
     { id: "deepseek-ai/deepseek-v4-flash-0731", name: "DeepSeek V4 Flash (DeepSeek)" },
+    {
+      id: "deepseek-ai/deepseek-v4.1-flash-1017",
+      name: "DeepSeek V4.1 Flash (DeepSeek)",
+      supportsReasoning: true,
+    },
     { id: "zai-org/glm-4.7-flash", name: "GLM 4.7 Flash (Z.ai)", supportsReasoning: true },
     { id: "openai/gpt-oss-120b", name: "GPT-OSS 120B (OpenAI)" },
     { id: "openai/gpt-oss-20b", name: "GPT-OSS 20B (OpenAI)" },

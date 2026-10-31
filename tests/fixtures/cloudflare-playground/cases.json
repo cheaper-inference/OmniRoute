@@ -1,0 +1,128 @@
+{
+  "_comment": [
+    "Redacted regression corpus for emulated tool calling on the Cloudflare Playground.",
+    "Every case is derived from a live capture in ~/.omniroute/call_logs (cloudflare-playground).",
+    "Absolute paths were replaced with /repo/..., file bodies with <redacted N chars>,",
+    "and the per-request nonce with NONCE. Shapes and tag nesting are untouched.",
+    "`expect.calls` is the ordered list of tool names the text actually declares.",
+    "`expect.finalize` is what finalizeCfToolCalls must return for those calls:",
+    "  ok   -> a validated batch (arguments satisfy the declared schema)",
+    "  null -> rejected, so the executor burns its one repair retry",
+    "`expect.malformed` is hasMalformedCfToolIntent for the same text."
+  ],
+  "nonce": "NONCE",
+  "cases": [
+    {
+      "id": "wrapper-nested-open",
+      "note": "2026-10-28T01:44 — <tool_call> around <tool name=read>, no closing wrapper. Parsed as edit before the fix.",
+      "tools": "opencode",
+      "text": "<tool_call>\n<tool name=\"read\">{\"path\":\"/repo/main.py\",\"offset\":240,\"limit\":200}</tool>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "wrapper-nested-closed",
+      "note": "2026-10-28T01:51 — same capture, wrapper closed.",
+      "tools": "opencode",
+      "text": "<tool_call>\n<tool name=\"read\">{\"path\":\"/repo/main.py\"}</tool>\n</tool_call>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "wrapper-nested-two-calls",
+      "note": "A container must keep N nested calls as N calls, in document order.",
+      "tools": "opencode",
+      "text": "<tool_call>\n<tool name=\"read\">{\"path\":\"/repo/a.py\"}</tool>\n<tool name=\"read\">{\"path\":\"/repo/b.py\"}</tool>\n</tool_call>",
+      "expect": { "calls": ["read", "read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "wrapper-nested-declared-tag",
+      "note": "Wrapper around a name-as-tag call.",
+      "tools": "opencode",
+      "text": "<tool_call><read>{\"path\":\"/repo/a.py\"}</read></tool_call>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "wrapper-json-with-markup",
+      "note": "A JSON body that merely CONTAINS markup must not be unwrapped as a container.",
+      "tools": "opencode",
+      "text": "<tool_call>{\"name\":\"write\",\"arguments\":{\"path\":\"/repo/a.html\",\"content\":\"<div>x</div>\"}}</tool_call>",
+      "expect": { "calls": ["write"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "mismatched-closer-write",
+      "note": "2026-10-27T13:16 — valid 11.7 KB write body closed with </path>.",
+      "tools": "opencode",
+      "text": "<write>{\"path\":\"/repo/main.py\",\"content\":\"<redacted 11689 chars>\"}</path>",
+      "expect": { "calls": ["write"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "mismatched-closer-tool-name",
+      "note": "2026-10-27T10:39 / 10:44 — <tool name=write> body closed with </path>.",
+      "tools": "opencode",
+      "text": "<tool name=\"write\">{\"path\":\"/repo/query_processor.py\",\"content\":\"<redacted 8322 chars>\"}</path>",
+      "expect": { "calls": ["write"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "mismatched-closer-read",
+      "note": "Same defect with a read: the model closes with a different tag.",
+      "tools": "opencode",
+      "text": "<tool name=\"read\">{\"path\":\"/repo/a.py\"}</read>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "nameless-schema-read",
+      "note": "Name omitted; only read accepts {path}. Used to become availableTools[0] (edit).",
+      "tools": "opencode",
+      "text": "<tool>{\"path\":\"/repo/a.py\"}</tool>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "nameless-schema-shell",
+      "note": "Name omitted; only shell accepts {command}.",
+      "tools": "opencode",
+      "text": "<tool>{\"command\":\"ls -la\"}</tool>",
+      "expect": { "calls": ["shell"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "nameless-ambiguous",
+      "note": "{pattern} fits both glob and grep — refuse to guess and let the retry run.",
+      "tools": "opencode",
+      "text": "<tool>{\"pattern\":\"*.ts\"}</tool>",
+      "expect": { "calls": [], "finalize": "null", "malformed": true }
+    },
+    {
+      "id": "name-hint-recover",
+      "note": "2026-10-28T02:15 — the model copies the contract example tag and puts the intended tool in \"arg\". The real arguments are present, so honour them.",
+      "tools": "opencode",
+      "text": "<edit>{\"arg\": \"read\", \"path\": \"/repo/NODES.md\", \"_nonce\": \"NONCE\"}</edit>",
+      "expect": { "calls": ["read"], "finalize": "ok", "malformed": false }
+    },
+    {
+      "id": "name-hint-no-args",
+      "note": "Same shape with no real arguments: nothing executable, so the repair retry must fire instead of calling edit.",
+      "tools": "opencode",
+      "text": "<edit>{\"arg\": \"read\", \"_nonce\": \"NONCE\"}</edit>",
+      "expect": { "calls": [], "finalize": "null", "malformed": true }
+    },
+    {
+      "id": "colon-style-call",
+      "note": "2026-10-25T14:06 — name(key: value). Still not parsed, but it must NOT leak silently.",
+      "tools": "opencode",
+      "text": "<tool_call>read(path: \"/repo/a.py\")",
+      "expect": { "calls": [], "finalize": "null", "malformed": true }
+    },
+    {
+      "id": "prose-mention",
+      "note": "2026-10-27T13:19 — a checkpoint that talks about <write>. Correctly ignored.",
+      "tools": "opencode",
+      "text": "## Objective\n- Start the text model server on port 8080\n\n### Blocked\n- Tool call format error: used `<write>` instead of `<edit>` for file creation\n\n## Next Move\n1. Correct the tool call format",
+      "expect": { "calls": [], "finalize": "null", "malformed": false }
+    },
+    {
+      "id": "truncated-write",
+      "note": "Output limit hit mid-payload. A last-resort recovery must NOT accept an incomplete object.",
+      "tools": "opencode",
+      "text": "<write>{\"path\":\"/repo/a.py\",\"content\":\"def main():\\n    return 0",
+      "expect": { "calls": [], "finalize": "null", "malformed": true }
+    }
+  ]
+}

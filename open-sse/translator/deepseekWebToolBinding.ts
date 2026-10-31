@@ -2,8 +2,6 @@
 // calls (#15448). Split from deepseekWebTools.ts so the parser stays under its size cap;
 // deepseekWebTools.ts re-exports the public detectors.
 
-import Ajv2020, { type ValidateFunction } from "ajv/dist/2020.js";
-
 import {
   getRequestedToolNames,
   getToolNonce,
@@ -11,53 +9,12 @@ import {
   resolveRequestedToolName,
   type OpenAIToolCall,
 } from "./webTools.ts";
+import { asRecord, validateToolArguments, type OpenAIToolDef } from "./toolArgValidation.ts";
 
-export interface OpenAIToolDef {
-  type?: string;
-  function?: { name?: string; description?: string; parameters?: unknown };
-}
-
-const ajv = new Ajv2020({ strict: false, allErrors: false, validateFormats: false });
-const toolValidatorCache = new WeakMap<object, Map<string, ValidateFunction | null>>();
-
-export function asRecord(value: unknown): Record<string, unknown> | null {
-  return value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : null;
-}
-
-function requestedToolDefinition(requestedTools: unknown, name: string): OpenAIToolDef | null {
-  if (!Array.isArray(requestedTools)) return null;
-  return (requestedTools as OpenAIToolDef[]).find((tool) => tool?.function?.name === name) ?? null;
-}
-
-export function validateToolArguments(
-  requestedTools: unknown,
-  name: string,
-  args: Record<string, unknown>
-): boolean {
-  const definition = requestedToolDefinition(requestedTools, name);
-  if (!definition) return false;
-  const schema = definition.function?.parameters;
-  if (schema === undefined) return true;
-  if ((typeof schema !== "object" || schema === null) && typeof schema !== "boolean") return false;
-
-  let validators = toolValidatorCache.get(requestedTools as object);
-  if (!validators) {
-    validators = new Map();
-    toolValidatorCache.set(requestedTools as object, validators);
-  }
-  let validate = validators.get(name);
-  if (validate === undefined) {
-    try {
-      validate = ajv.compile(schema as object | boolean);
-    } catch {
-      validate = null;
-    }
-    validators.set(name, validate);
-  }
-  return validate ? validate(args) === true : false;
-}
+// Nonce/schema plumbing shared with every other emulated-tool-calling provider;
+// re-exported here so this module's public surface is unchanged.
+export { asRecord, validateToolArguments };
+export type { OpenAIToolDef };
 
 /**
  * Binding-aware finaliser for the shared tag/DSML path.
