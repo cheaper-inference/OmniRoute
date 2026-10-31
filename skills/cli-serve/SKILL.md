@@ -17,66 +17,7 @@ omniroute --version
 
 ## Subcommands
 
-### `dashboard`
-
-**Flags:**
-
-- `--url`
-- `--port <port>`
-- `--tui`
-
-**Example:**
-
-```bash
-omniroute dashboard
-```
-
-### `restart`
-
-**Flags:**
-
-- `--port <port>`
-
-**Example:**
-
-```bash
-omniroute restart
-```
-
-### `serve`
-
-**Flags:**
-
-- `--port <port>`
-- `--no-open`
-- `--daemon`
-- `--log`
-- `--no-recovery`
-- `--max-restarts <n>`
-- `--headless`
-- `--tray`
-- `--no-tray`
-- `--ready-timeout <ms>`
-- `--tls-cert <path>`
-- `--tls-key <path>`
-
-**Example:**
-
-```bash
-omniroute serve
-```
-
-### `stop`
-
-**Flags:**
-
-- `--port <port>`
-
-**Example:**
-
-```bash
-omniroute stop
-```
+_No CLI subcommands mapped for this family yet._
 
 <!-- skill:custom-start -->
 <!-- Aggregated from: omniroute-cli (setup + index), omniroute-cli-admin (lifecycle/setup/backup/tunnel) -->
