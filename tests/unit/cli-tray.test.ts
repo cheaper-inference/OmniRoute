@@ -7,12 +7,17 @@ import { tmpdir } from "node:os";
 let tmpDir: string;
 let origHome: string | undefined;
 let origPath: string | undefined;
+let origAppData: string | undefined;
 
 test.before(() => {
   tmpDir = mkdtempSync(join(tmpdir(), "omniroute-tray-test-"));
   origHome = process.env.HOME;
   // Redirecionar HOME para tmpDir para isolar testes de autostart
   process.env.HOME = tmpDir;
+  // On Windows the autostart VBS lives under %APPDATA%\...\Startup, not HOME, so
+  // HOME alone leaves the developer's REAL Startup folder visible to the suite.
+  origAppData = process.env.APPDATA;
+  process.env.APPDATA = join(tmpDir, "AppData", "Roaming");
 
   // HOME alone does NOT isolate this test: `enable()`/`disable()` shell out to
   // `systemctl --user enable|start` and `systemctl --user disable --now
@@ -34,6 +39,8 @@ test.before(() => {
 test.after(() => {
   if (origHome === undefined) delete process.env.HOME;
   else process.env.HOME = origHome;
+  if (origAppData === undefined) delete process.env.APPDATA;
+  else process.env.APPDATA = origAppData;
   if (origPath === undefined) delete process.env.PATH;
   else process.env.PATH = origPath;
   try {
