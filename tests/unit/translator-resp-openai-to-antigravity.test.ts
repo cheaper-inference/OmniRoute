@@ -131,6 +131,92 @@ test("OpenAI -> Antigravity: usage-only chunks are remembered for the final resp
   });
 });
 
+const USAGE_WITH_DETAILS = {
+  prompt_tokens: 10,
+  completion_tokens: 6,
+  total_tokens: 16,
+  prompt_tokens_details: { cached_tokens: 4 },
+  completion_tokens_details: { reasoning_tokens: 2 },
+};
+
+test("OpenAI -> Antigravity: a trailing usage-only chunk (choices: []) after the finish chunk is forwarded as usageMetadata", () => {
+  const state = {};
+  const finish = openaiToAntigravityResponse(
+    {
+      id: "chatcmpl-5",
+      model: "gpt-4.1",
+      choices: [{ index: 0, delta: { content: "hi" }, finish_reason: "stop" }],
+    },
+    state
+  );
+  const trailing = openaiToAntigravityResponse(
+    { id: "chatcmpl-5", model: "gpt-4.1", choices: [], usage: USAGE_WITH_DETAILS },
+    state
+  );
+
+  assert.equal(finish.response.usageMetadata, undefined);
+  assert.ok(trailing, "usage-only chunk after the finish chunk must reach the client");
+  assert.deepEqual(trailing.response.usageMetadata, {
+    promptTokenCount: 10,
+    candidatesTokenCount: 6,
+    totalTokenCount: 16,
+    thoughtsTokenCount: 2,
+    cachedContentTokenCount: 4,
+  });
+  assert.equal(trailing.response.candidates[0].finishReason, undefined);
+  assert.deepEqual(trailing.response.candidates[0].content.parts, [{ text: "" }]);
+  assert.equal(trailing.response.modelVersion, "gpt-4.1");
+  assert.equal(trailing.response.responseId, "chatcmpl-5");
+});
+
+test("OpenAI -> Antigravity: usage already sent on the finish chunk is not repeated by a trailing usage-only chunk", () => {
+  const state = {};
+  const finish = openaiToAntigravityResponse(
+    {
+      id: "chatcmpl-6",
+      model: "gpt-4.1",
+      choices: [{ index: 0, delta: {}, finish_reason: "stop" }],
+      usage: USAGE_WITH_DETAILS,
+    },
+    state
+  );
+  const trailing = openaiToAntigravityResponse(
+    { id: "chatcmpl-6", model: "gpt-4.1", choices: [], usage: USAGE_WITH_DETAILS },
+    state
+  );
+
+  assert.equal(finish.response.usageMetadata.cachedContentTokenCount, 4);
+  assert.equal(trailing, null);
+});
+
+test("OpenAI -> Antigravity: usage stashed before the finish chunk is not repeated by a second usage-only chunk", () => {
+  const state = {};
+  openaiToAntigravityResponse(
+    { id: "c7", model: "m", choices: [], usage: USAGE_WITH_DETAILS },
+    state
+  );
+  const finish = openaiToAntigravityResponse(
+    { id: "c7", model: "m", choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    state
+  );
+  const again = openaiToAntigravityResponse(
+    { id: "c7", model: "m", choices: [], usage: USAGE_WITH_DETAILS },
+    state
+  );
+
+  assert.equal(finish.response.usageMetadata.totalTokenCount, 16);
+  assert.equal(again, null);
+});
+
+test("OpenAI -> Antigravity: a trailing chunk without usage stays dropped", () => {
+  const state = {};
+  openaiToAntigravityResponse(
+    { id: "c8", model: "m", choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    state
+  );
+  assert.equal(openaiToAntigravityResponse({ id: "c8", model: "m", choices: [] }, state), null);
+});
+
 test("OpenAI -> Antigravity: content_filter maps to SAFETY", () => {
   const result = openaiToAntigravityResponse(
     {
@@ -146,4 +232,27 @@ test("OpenAI -> Antigravity: content_filter maps to SAFETY", () => {
 
 test("OpenAI -> Antigravity: null chunks are ignored", () => {
   assert.equal(openaiToAntigravityResponse(null, {}), null);
+});
+
+test("translateResponse OPENAI -> ANTIGRAVITY: usageMetadata from a trailing usage-only chunk reaches the client; the flush adds nothing", async () => {
+  await import("../../open-sse/translator/bootstrap.ts");
+  const { translateResponse, initState } = await import("../../open-sse/translator/index.ts");
+  const { FORMATS } = await import("../../open-sse/translator/formats.ts");
+  const state = initState(FORMATS.ANTIGRAVITY);
+  const out = [
+    {
+      id: "c9",
+      model: "m",
+      choices: [{ index: 0, delta: { content: "hi" }, finish_reason: null }],
+    },
+    { id: "c9", model: "m", choices: [{ index: 0, delta: {}, finish_reason: "stop" }] },
+    { id: "c9", model: "m", choices: [], usage: USAGE_WITH_DETAILS },
+    null,
+  ].flatMap((chunk) => translateResponse(FORMATS.OPENAI, FORMATS.ANTIGRAVITY, chunk, state));
+
+  const withUsage = out.filter((item) => item.response.usageMetadata);
+  assert.equal(withUsage.length, 1);
+  assert.equal(withUsage[0].response.usageMetadata.cachedContentTokenCount, 4);
+  assert.equal(withUsage[0].response.usageMetadata.thoughtsTokenCount, 2);
+  assert.equal(out[out.length - 1], withUsage[0]);
 });
