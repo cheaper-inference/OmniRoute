@@ -6,6 +6,19 @@ import { saveCallLog } from "@/lib/usageDb";
 import { sleep } from "../../../utils/sleep.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
+// Leonardo's v1 API takes a platform-model UUID as `modelId` and answers a catalog id such
+// as "phoenix" with HTTP 500 "internal error". UUIDs from GET /api/rest/v1/platformModels.
+const LEONARDO_MODEL_IDS: Record<string, string> = {
+  phoenix: "de7d3faf-762f-48e0-b3b7-9d0ac3a3fcf3", // Phoenix 1.0
+  sdxl: "16e7060a-803e-4df3-97ee-edcfa5dc9cc8", // SDXL 1.0
+};
+
+/** The catalog id's platform-model UUID; anything else (e.g. a raw UUID) passes through. */
+export function resolveLeonardoModelId(model: string | undefined): string {
+  const id = model || "phoenix";
+  return LEONARDO_MODEL_IDS[id] ?? id;
+}
+
 export async function handleLeonardoImageGeneration({
   model,
   provider,
@@ -13,6 +26,7 @@ export async function handleLeonardoImageGeneration({
   body,
   credentials,
   log,
+  pollIntervalMs = 5000,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
@@ -25,7 +39,7 @@ export async function handleLeonardoImageGeneration({
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       body: JSON.stringify({
-        modelId: model || "phoenix",
+        modelId: resolveLeonardoModelId(model),
         prompt,
         width: body.width || 1024,
         height: body.height || 1024,
@@ -61,7 +75,7 @@ export async function handleLeonardoImageGeneration({
     }
     const deadline = Date.now() + 300000;
     while (Date.now() < deadline) {
-      await sleep(5000);
+      await sleep(pollIntervalMs);
       const statusRes = await fetch(`${providerConfig.baseUrl}/${genId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -137,4 +151,3 @@ export async function handleLeonardoImageGeneration({
     };
   }
 }
-

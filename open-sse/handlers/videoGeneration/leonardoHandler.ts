@@ -1,5 +1,5 @@
 /**
- * Leonardo AI (Phoenix) video generation: submit → poll → fetch output.
+ * Leonardo AI (Motion 2.0) text-to-video: submit → poll → fetch the mp4.
  *
  * Extracted out of the frozen `videoGeneration.ts` god-file (unchanged behavior) to make
  * room for the new DeepInfra video adapter without pushing the file-size ratchet over its
@@ -9,6 +9,49 @@
 import { saveCallLog } from "@/lib/usageDb";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 
+// Catalog id -> Leonardo `model` enum for POST /generations-text-to-video. `phoenix` was the
+// old catalog id (an image model); it keeps working as Motion 2.0. Anything else passes
+// through as the enum itself.
+const LEONARDO_VIDEO_MODELS: Record<string, string> = {
+  "motion-2.0": "MOTION2",
+  "motion-2.0-fast": "MOTION2FAST",
+  phoenix: "MOTION2",
+};
+
+/** Catalog id -> Leonardo `model` enum; an unknown id is sent as the enum itself. */
+export function resolveLeonardoVideoModel(model: string): string {
+  return LEONARDO_VIDEO_MODELS[model] ?? model;
+}
+
+// Leonardo's video sizes as [long side, short side].
+const LEONARDO_VIDEO_SIZES = {
+  RESOLUTION_480: [832, 480],
+  RESOLUTION_720: [1280, 720],
+} as const;
+
+function parseVideoSize(size: unknown): [number, number] {
+  const match = typeof size === "string" ? size.trim().match(/^(\d+)x(\d+)$/i) : null;
+  return match ? [Number(match[1]), Number(match[2])] : [0, 0];
+}
+
+/** A `WxH` size with a short side <= 480 picks RESOLUTION_480, else RESOLUTION_720. */
+export function resolveLeonardoVideoSize(size: unknown) {
+  const [width, height] = parseVideoSize(size);
+  const resolution =
+    width > 0 && Math.min(width, height) <= 480 ? "RESOLUTION_480" : "RESOLUTION_720";
+  const [long, short] = LEONARDO_VIDEO_SIZES[resolution];
+  return height > width
+    ? { resolution, width: short, height: long }
+    : { resolution, width: long, height: short };
+}
+
+/** The finished video: `motionMP4URL`, since `url` on a video generation is a jpg thumbnail. */
+function leonardoVideoUrl(generation: {
+  generated_images?: Array<{ motionMP4URL?: string }>;
+}): string | undefined {
+  return generation.generated_images?.[0]?.motionMP4URL;
+}
+
 export async function handleLeonardoVideoGeneration({
   model,
   provider,
@@ -17,6 +60,7 @@ export async function handleLeonardoVideoGeneration({
   credentials,
   log,
   signal = null,
+  pollIntervalMs = 5000,
 }) {
   const startTime = Date.now();
   const token = credentials?.apiKey || "";
@@ -24,11 +68,10 @@ export async function handleLeonardoVideoGeneration({
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify({
-      modelId: "phoenix",
+      model: resolveLeonardoVideoModel(model),
       prompt: body.prompt,
-      width: 1024,
-      height: 576,
-      num_frames: 24,
+      ...resolveLeonardoVideoSize(body.size),
+      isPublic: false,
     }),
   });
   if (!res.ok) {
@@ -44,8 +87,8 @@ export async function handleLeonardoVideoGeneration({
     }).catch(() => {});
     return { success: false, status: res.status, error: errorText };
   }
-  const { sdGenerationJob } = await res.json();
-  const genId = sdGenerationJob?.generationId;
+  const { motionVideoGenerationJob } = await res.json();
+  const genId = motionVideoGenerationJob?.generationId;
   if (!genId) {
     saveCallLog({
       method: "POST",
@@ -61,18 +104,17 @@ export async function handleLeonardoVideoGeneration({
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
     const status = await pollJsonAfter(
-      5000,
-
-      `${providerConfig.baseUrl}/${genId}`,
+      pollIntervalMs,
+      `${providerConfig.statusUrl}/${genId}`,
       { Authorization: `Bearer ${token}` },
       signal
     );
     if (status === POLL_ABORTED) return abortedVideoResult();
     const gen = status.generations_by_pk || status;
     if (gen.status === "COMPLETE") {
-      const imgUrl = gen.generated_images?.[0]?.url;
-      if (imgUrl) {
-        const videoRes = await fetch(imgUrl);
+      const videoUrl = leonardoVideoUrl(gen);
+      if (videoUrl) {
+        const videoRes = await fetch(videoUrl);
         const buf = await videoRes.arrayBuffer();
         saveCallLog({
           method: "POST",
