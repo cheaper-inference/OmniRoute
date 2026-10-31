@@ -1,0 +1,1 @@
+Unrolled recursive retry loops into iterative attempts with RecursionGuard bounds, added decorrelated full jitter to prevent thundering herd retries on HTTP 429, and made payload size estimation circular-reference safe.

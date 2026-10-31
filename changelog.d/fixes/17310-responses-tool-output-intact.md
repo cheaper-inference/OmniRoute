@@ -1,1 +1,0 @@
-- **fix(compression):** Responses API bodies keep their newest tool output and engine-injected messages — `lite` no longer truncates the trailing `function_call_output` (it now counts as the current turn), and messages an engine injects (such as the CCR protocol instruction) are restored as new input items instead of being dropped (#17310).

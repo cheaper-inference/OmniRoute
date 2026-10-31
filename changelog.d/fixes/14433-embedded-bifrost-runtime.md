@@ -1,1 +1,0 @@
-- Harden embedded Bifrost by keeping its cache under the data directory, bypassing provider proxying for loopback health checks, and exposing only the spawn-free cliproxy status route remotely.

@@ -1,1 +1,0 @@
-- **fix(combo):** Clear completed sets' safety timers before retrying, preventing stale timeout warnings while preserving active-set timeout protection ([#17885](https://github.com/cheaper-inference/OmniRoute/pull/17885)) — thanks @AiCaptain357

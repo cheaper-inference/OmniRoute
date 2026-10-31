@@ -1,1 +1,0 @@
-- **fix(combos):** Expose configured static image, speech, and video registry models in the Combo Builder while preserving their routing metadata ([#17975](https://github.com/diegosouzapw/OmniRoute/pull/17975)) — thanks @seanford

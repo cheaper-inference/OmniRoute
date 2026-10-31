@@ -1,1 +1,0 @@
-- **docs(auto-combo):** the `nadir` strategy section links to Nadir key creation and the setup guide ([#18028](https://github.com/diegosouzapw/OmniRoute/pull/18028)) — thanks @doramirdor

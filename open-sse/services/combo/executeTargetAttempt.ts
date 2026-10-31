@@ -114,6 +114,7 @@ import {
   isReadinessFailure,
 } from "./emptyContentRetry.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../streamRecovery.ts";
+import { calculateFullJitter } from "../../utils/jitterBackoff.ts";
 
 export async function executeTargetAttempt(
   opts: ExecuteTargetAttemptOptions
@@ -196,12 +197,17 @@ export async function executeTargetAttempt(
     }
 
     if (retry > 0) {
+      // P0 FIX: Apply Full Jitter to prevent thundering herd on retries
+      const jitteredRetryDelay = calculateFullJitter(retry, {
+        baseDelayMs: retryDelayMs,
+        maxDelayMs: retryDelayMs * 10,
+      });
       deps.log.info(
         "COMBO",
-        `Retrying ${modelStr} in ${retryDelayMs}ms (attempt ${retry + 1}/${deps.maxRetries + 1})`
+        `Retrying ${modelStr} in ${jitteredRetryDelay}ms (attempt ${retry + 1}/${deps.maxRetries + 1}, base: ${retryDelayMs}ms)`
       );
       await new Promise((resolve) => {
-        const timer = setTimeout(resolve, retryDelayMs);
+        const timer = setTimeout(resolve, jitteredRetryDelay);
         deps.signal?.addEventListener(
           "abort",
           () => {
@@ -1287,9 +1293,17 @@ export async function executeTargetAttempt(
         ? Math.min(cooldownMs, fallbackDelayMs)
         : 0;
     if ([502, 503, 504].includes(result.status) && fallbackWaitMs > 0) {
-      deps.log.debug?.("COMBO", `Waiting ${fallbackWaitMs}ms before fallback to next model`);
+      // P0 FIX: Apply Full Jitter to fallback wait to prevent synchronized fallback storms
+      const jitteredFallbackWait = calculateFullJitter(0, {
+        baseDelayMs: fallbackWaitMs,
+        maxDelayMs: fallbackWaitMs * 3,
+      });
+      deps.log.debug?.(
+        "COMBO",
+        `Waiting ${jitteredFallbackWait}ms (jittered, base: ${fallbackWaitMs}ms) before fallback to next model`
+      );
       await new Promise((resolve) => {
-        const timer = setTimeout(resolve, fallbackWaitMs);
+        const timer = setTimeout(resolve, jitteredFallbackWait);
         deps.signal?.addEventListener(
           "abort",
           () => {

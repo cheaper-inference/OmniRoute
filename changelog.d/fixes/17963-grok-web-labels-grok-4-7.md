@@ -1,1 +1,0 @@
-- fix(providers): grok-web fast/expert labels now say Grok 4.7 and grok-cli no longer lists the removed Composer 2.5 model (#17963)

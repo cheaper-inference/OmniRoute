@@ -1,1 +1,0 @@
-- **fix(sse):** Cancel TLS response bodies when the caller aborts after headers and release their session leases without disturbing active responses.
