@@ -206,6 +206,20 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toName: "team_cost_centers",
   },
   {
+    // A later pushed #14771 build used the upstream mirror-URL slot.
+    fromVersion: "218",
+    fromName: "api_key_self_service_settings",
+    toVersion: "229",
+    toName: "api_key_self_service_settings",
+  },
+  {
+    // The index also circulated as 207 before upstream provider cleanup claimed it.
+    fromVersion: "207",
+    fromName: "recreate_turn_nodes_content_hash_index",
+    toVersion: "211",
+    toName: "recreate_turn_nodes_content_hash_index",
+  },
+  {
     fromVersion: "134",
     fromName: "ccr_blocks",
     toVersion: "139",
