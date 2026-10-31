@@ -15185,6 +15185,8 @@ paths:
         Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`. Requires scope
         `self:usage`. `accountQuotas` / `accountQuota` are included only with scope
         `self:account-quota` and are filtered by the key's `sharedQuotaProviders` setting.
+        `listPriceUsd` / `unpricedRequests` in `usage.cost`, `usage.daily` and `usage.weekly`
+        are cached per key for 60 s, so they may lag by up to 60 s.
       security:
         - BearerAuth: []
         - XApiKeyAuth: []
@@ -17811,6 +17813,21 @@ components:
           format: date-time
         costUsd:
           type: number
+          description: >-
+            Metered spend in the window from the budget ledger (what budgets and usage limits
+            count). Flat-rate / subscription providers count $0.
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the window, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests that used tokens but have no known price for their provider /
+            model; they add $0 to listPriceUsd.
         requests:
           type: integer
         tokens:
@@ -17828,6 +17845,54 @@ components:
               type: integer
             total:
               type: integer
+    ApiKeySelfServiceCost:
+      type: object
+      description: >-
+        Spend in the key's budget period (the current UTC month when the key has no budget).
+      properties:
+        period:
+          type: string
+          description: The budget's reset interval, or monthly without a budget.
+        currency:
+          type: string
+          example: USD
+        usedUsd:
+          type: number
+          description: >-
+            Metered spend in the period from the budget ledger (what the budget counts).
+            Flat-rate / subscription providers count $0.
+        limitUsd:
+          type: number
+          nullable: true
+        remainingUsd:
+          type: number
+          nullable: true
+        usedPercent:
+          type: number
+          nullable: true
+        warningThreshold:
+          type: number
+          nullable: true
+        resetAt:
+          type: string
+          format: date-time
+          nullable: true
+        periodStartAt:
+          type: string
+          format: date-time
+          nullable: true
+        listPriceUsd:
+          type: number
+          description: >-
+            List-price value of the key's successful requests in the same period, priced when the
+            status is read with no flat-rate zeroing (a provider-reported exact cost, when
+            recorded, is used as is). Not money spent. Partial when unpricedRequests > 0. May lag
+            by up to 60 s.
+        unpricedRequests:
+          type: integer
+          description: >-
+            Successful requests in the period that used tokens but have no known price for their
+            provider / model; they add $0 to listPriceUsd.
     ApiKeySelfServiceLimit:
       type: object
       properties:
@@ -17889,11 +17954,18 @@ components:
           type: object
           additionalProperties:
             type: object
+            description: >-
+              One quota window as a percentage. Windows without a known fraction (for example a
+              credit balance) are omitted.
             properties:
               usedPercentage:
                 type: number
+                minimum: 0
+                maximum: 100
               remainingPercentage:
                 type: number
+                minimum: 0
+                maximum: 100
               resetAt:
                 type: string
                 format: date-time
@@ -17927,8 +17999,7 @@ components:
           type: object
           properties:
             cost:
-              type: object
-              additionalProperties: true
+              $ref: "#/components/schemas/ApiKeySelfServiceCost"
             tokens:
               type: object
               additionalProperties: true

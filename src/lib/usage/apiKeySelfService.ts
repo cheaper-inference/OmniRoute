@@ -1,3 +1,4 @@
+import type { ApiKeyUsageSlice } from "@/lib/db/apiKeyUsageSlices";
 import { hasSelfAccountQuotaScope, hasSelfUsageScope } from "@/shared/constants/selfServiceScopes";
 
 import {
@@ -20,6 +21,13 @@ import {
   type TokenLimitLike,
   type UsageLimitStatusLike,
 } from "./apiKeySelfServiceLimits";
+import {
+  collectLongContextCuts,
+  defaultListPriceCache,
+  summarizeListPrice,
+  type ListPriceCache,
+  type PriceTokensFn,
+} from "./apiKeySelfServiceListPrice";
 import {
   isoOrNull,
   roundNumber,
@@ -50,6 +58,7 @@ export interface ApiKeySelfServiceOptions {
 
 interface StatementLike {
   get: (...params: unknown[]) => unknown;
+  all: (...params: unknown[]) => unknown[];
 }
 
 interface DbLike {
@@ -97,6 +106,17 @@ export interface ApiKeySelfServiceDeps {
     now: number
   ) => { periodStartAt: number; nextResetAt: number };
   getKeyQuotaStatus?: (apiKeyId: string, deps: { now: () => number }) => KeyQuotaStatusLike;
+  listApiKeyUsageSlices?: (
+    db: DbLike,
+    apiKeyId: string,
+    windowStarts: string[],
+    promptBandCuts: number[]
+  ) => ApiKeyUsageSlice[];
+  calculateCostDetailed?: PriceTokensFn;
+  /** The merged pricing table (provider -> model -> row), read for long-context thresholds. */
+  getPricingTable?: () => Promise<unknown>;
+  /** Per-key list-price summaries, reused for 60 s. */
+  listPriceCache?: ListPriceCache;
 }
 
 interface TokenTotals {
@@ -257,12 +277,31 @@ const DEFAULT_DEPS_LOADERS: DefaultDepsLoader[] = [
       getKeyQuotaStatus: (await import("@/lib/db/keyQuota")).getKeyQuotaStatus,
     }),
   },
+  {
+    keys: ["listApiKeyUsageSlices"],
+    load: async () => ({
+      listApiKeyUsageSlices: (await import("@/lib/db/apiKeyUsageSlices")).listApiKeyUsageSlices,
+    }),
+  },
+  {
+    keys: ["calculateCostDetailed"],
+    load: async () => ({
+      calculateCostDetailed: (await import("./costCalculator")).calculateCostDetailed,
+    }),
+  },
+  {
+    keys: ["getPricingTable"],
+    load: async () => ({
+      getPricingTable: (await import("@/lib/db/readCache")).getCachedPricing,
+    }),
+  },
 ];
 
 async function normalizeDeps(deps: ApiKeySelfServiceDeps): Promise<RequiredDeps> {
   const resolved: Partial<RequiredDeps> = {
     now: Date.now,
     quotaRefreshTracker: defaultQuotaRefreshTracker,
+    listPriceCache: defaultListPriceCache,
   };
   for (const loader of DEFAULT_DEPS_LOADERS) {
     if (loader.keys.some((key) => deps[key] === undefined)) {
@@ -329,12 +368,10 @@ export async function buildApiKeySelfServiceStatus(
   const summary = resolvedDeps.getCostSummary(metadata.id);
 
   const cost = buildCostStatus(summary, now);
+  const costPeriodStartAt =
+    cost.periodStartAt ?? new Date(getCurrentMonthWindow(now).periodStartAt).toISOString();
   const db = resolvedDeps.getDbInstance() as DbLike;
-  const tokens = aggregateTokens(
-    db,
-    metadata.id,
-    cost.periodStartAt ?? new Date(getCurrentMonthWindow(now).periodStartAt).toISOString()
-  );
+  const tokens = aggregateTokens(db, metadata.id, costPeriodStartAt);
   const daily = buildUsageWindowSummary(
     db,
     metadata.id,
@@ -347,18 +384,37 @@ export async function buildApiKeySelfServiceStatus(
     getUtcIsoWeekWindow(now),
     resolvedDeps.getBudgetWindowTotal
   );
-  const [limits, accountQuotas] = await Promise.all([
-    buildSelfServiceLimits(
-      {
-        id: metadata.id,
-        usageLimitEnabled: metadata.usageLimitEnabled,
-        dailyUsageLimitUsd: metadata.dailyUsageLimitUsd,
-        weeklyUsageLimitUsd: metadata.weeklyUsageLimitUsd,
-      },
-      limitDeps(resolvedDeps)
-    ),
-    resolveAccountQuotas(metadata, resolvedDeps, options),
-  ]);
+  // List-price value next to the metered spend, for the usage.cost, daily and weekly windows.
+  // Cached per key and window starts, so a new day, week or budget period is never served old.
+  const windowStarts = [costPeriodStartAt, daily.periodStartAt, weekly.periodStartAt];
+  const listPrices = resolvedDeps.listPriceCache.memoize(
+    JSON.stringify([metadata.id, ...windowStarts]),
+    now,
+    async () => {
+      const promptBandCuts = collectLongContextCuts(await resolvedDeps.getPricingTable());
+      const slices = resolvedDeps.listApiKeyUsageSlices(
+        db,
+        metadata.id,
+        windowStarts,
+        promptBandCuts
+      );
+      return summarizeListPrice(slices, windowStarts.length, resolvedDeps.calculateCostDetailed);
+    }
+  );
+  const [[costListPrice, dailyListPrice, weeklyListPrice], limits, accountQuotas] =
+    await Promise.all([
+      listPrices,
+      buildSelfServiceLimits(
+        {
+          id: metadata.id,
+          usageLimitEnabled: metadata.usageLimitEnabled,
+          dailyUsageLimitUsd: metadata.dailyUsageLimitUsd,
+          weeklyUsageLimitUsd: metadata.weeklyUsageLimitUsd,
+        },
+        limitDeps(resolvedDeps)
+      ),
+      resolveAccountQuotas(metadata, resolvedDeps, options),
+    ]);
   const accountQuota = accountQuotas && accountQuotas.length === 1 ? accountQuotas[0] : undefined;
 
   return {
@@ -368,13 +424,13 @@ export async function buildApiKeySelfServiceStatus(
     },
     generatedAt: new Date(now).toISOString(),
     usage: {
-      cost,
+      cost: { ...cost, ...costListPrice },
       tokens: {
         periodStartAt: cost.periodStartAt,
         ...tokens,
       },
-      daily,
-      weekly,
+      daily: { ...daily, ...dailyListPrice },
+      weekly: { ...weekly, ...weeklyListPrice },
     },
     limits,
     ...(accountQuotas !== undefined && { accountQuotas }),
