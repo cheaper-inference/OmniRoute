@@ -4,7 +4,7 @@
 // in `data.image_urls`. This normalizes that response into the OpenAI-compatible
 // images payload the rest of the handler expects.
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 interface MinimaxImageGenArgs {
@@ -46,7 +46,11 @@ function logMinimaxCall(params: MinimaxCallLogParams): void {
 }
 
 /** Builds the upstream MiniMax request body from the OpenAI-shaped input body. */
-function buildMinimaxUpstreamBody(model: string, prompt: string, body: MinimaxImageGenArgs["body"]) {
+function buildMinimaxUpstreamBody(
+  model: string,
+  prompt: string,
+  body: MinimaxImageGenArgs["body"]
+) {
   return {
     model: model || "image-01",
     prompt,
@@ -59,7 +63,13 @@ function buildMinimaxUpstreamBody(model: string, prompt: string, body: MinimaxIm
 /** Handles a non-2xx MiniMax response: logs, records the call, and shapes the error result. */
 async function handleMinimaxUpstreamError(
   response: Response,
-  ctx: { provider: string; model: string; startTime: number; upstreamBody: unknown; log?: MinimaxImageGenArgs["log"] }
+  ctx: {
+    provider: string;
+    model: string;
+    startTime: number;
+    upstreamBody: unknown;
+    log?: MinimaxImageGenArgs["log"];
+  }
 ) {
   const errorText = await response.text();
   ctx.log?.error?.("IMAGE", `${ctx.provider} error ${response.status}: ${errorText.slice(0, 200)}`);
@@ -172,7 +182,13 @@ export async function handleMinimaxImageGeneration({
     });
 
     if (!response.ok) {
-      return handleMinimaxUpstreamError(response, { provider, model, startTime, upstreamBody, log });
+      return handleMinimaxUpstreamError(response, {
+        provider,
+        model,
+        startTime,
+        upstreamBody,
+        log,
+      });
     }
 
     const data = await response.json();

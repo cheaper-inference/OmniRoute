@@ -13,7 +13,7 @@
 // — normalizeNvidiaNimImages() accepts every variant so a NIM response-shape change
 // degrades to "no images" rather than throwing.
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 const FLUX_1_DEV = "black-forest-labs/flux.1-dev";
@@ -93,7 +93,10 @@ export function buildNvidiaNimRequestBody(
   const dimensions = parseDimensions(body);
 
   if (dimensions && model !== FLUX_1_KONTEXT_DEV) {
-    if (model !== FLUX_1_DEV || (isFlux1DevDimension(dimensions.width) && isFlux1DevDimension(dimensions.height))) {
+    if (
+      model !== FLUX_1_DEV ||
+      (isFlux1DevDimension(dimensions.width) && isFlux1DevDimension(dimensions.height))
+    ) {
       req.width = dimensions.width;
       req.height = dimensions.height;
     }
@@ -124,7 +127,9 @@ export function buildNvidiaNimRequestBody(
   return req;
 }
 
-function imageItemFromValue(value: unknown): { b64_json?: string; url?: string; finish_reason?: string } | null {
+function imageItemFromValue(
+  value: unknown
+): { b64_json?: string; url?: string; finish_reason?: string } | null {
   if (!value) return null;
   if (typeof value === "string") return { b64_json: value };
   if (typeof value !== "object") return null;
@@ -170,7 +175,9 @@ export function normalizeNvidiaNimImages(responseBody: unknown): {
 
   return {
     created: Math.floor(Date.now() / 1000),
-    data: candidates.map(imageItemFromValue).filter((item): item is NonNullable<typeof item> => item !== null),
+    data: candidates
+      .map(imageItemFromValue)
+      .filter((item): item is NonNullable<typeof item> => item !== null),
   };
 }
 

@@ -2,7 +2,7 @@
 // Family: hyperbolic | Module: hyperbolic | Lines: 2661-2758 (98 LOC)
 // Ref: see open-sse/handlers/imageGeneration.ts top-of-file comment for split rationale
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 export async function handleHyperbolicImageGeneration({

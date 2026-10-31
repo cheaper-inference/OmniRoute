@@ -7,7 +7,7 @@
  * handler exposes.
  */
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../imageResult.ts";
 import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
 import { stringifyImageErrorForLog } from "../imageErrorLog.ts";
 
