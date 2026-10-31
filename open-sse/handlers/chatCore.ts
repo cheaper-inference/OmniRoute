@@ -123,6 +123,7 @@ import {
   stripIncompatibleMessageContent,
 } from "../services/modelStrip.ts";
 import { echoModelInObject } from "../services/responseModelEcho.ts";
+import { extractClientRequestedModel, resolveChatCoreEchoModel } from "./chatCore/echoModel.ts";
 import { getUnsupportedParams, REGISTRY } from "../config/providerRegistry.ts";
 
 import { checkToolCallingRequiredButUnsupported } from "./chatCore/toolCallingRequiredCheck.ts";
@@ -863,12 +864,17 @@ async function handleChatCoreInner({
   // `opencode-zen/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
   const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
 
-  let echoModel =
-    (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
-      : null;
+  // #18494: prefer the model name the client actually sent. Combo dispatch rewrites
+  // body.model to the leaf `provider/model` before this handler runs, so echoing
+  // `requestedModel` as-is advertises the leaf to strict clients (Claude Desktop
+  // validation, Codex CLI model picker). clientRawRequest.body is the bounded
+  // pre-routing snapshot; the dispatched name stays the fallback when absent.
+  let echoModel = resolveChatCoreEchoModel({
+    echoEnabled:
+      settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient,
+    requestedModel,
+    clientRequestedModel: extractClientRequestedModel(clientRawRequest?.body),
+  });
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
   echoModel = resolveNoAuthEchoModel(requestedModel, provider) ?? echoModel;
