@@ -89,14 +89,16 @@ type PricingBundle = {
   sources?: Record<string, Record<string, PricingSource>>;
   sync?: SyncStatus;
   connectedProviderIds?: Set<string>;
+  blockedProviders?: string[];
 };
 
 async function fetchPricingBundle(): Promise<PricingBundle> {
-  const [catalogRes, pricingRes, syncRes, connectionsRes] = await Promise.all([
+  const [catalogRes, pricingRes, syncRes, connectionsRes, settingsRes] = await Promise.all([
     fetch("/api/pricing/models"),
     fetch("/api/pricing?includeSources=1"),
     fetch("/api/pricing/sync"),
     fetch("/api/providers"),
+    fetch("/api/settings", { cache: "no-store" }),
   ]);
   const bundle: PricingBundle = {};
   if (catalogRes.ok) {
@@ -119,6 +121,10 @@ async function fetchPricingBundle(): Promise<PricingBundle> {
       Array.isArray(connections) ? connections : []
     );
   }
+  if (settingsRes.ok) {
+    const { blockedProviders } = (await settingsRes.json()) as { blockedProviders?: unknown };
+    bundle.blockedProviders = Array.isArray(blockedProviders) ? blockedProviders : [];
+  }
   return bundle;
 }
 
@@ -132,6 +138,7 @@ export default function PricingTab() {
   >({});
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
   const [connectedProviderIds, setConnectedProviderIds] = useState<Set<string>>(new Set());
+  const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -162,6 +169,7 @@ export default function PricingTab() {
     if (bundle.sources) setPricingSources(bundle.sources);
     if (bundle.sync) setSyncStatus(bundle.sync);
     if (bundle.connectedProviderIds) setConnectedProviderIds(bundle.connectedProviderIds);
+    if (bundle.blockedProviders) setBlockedProviders(bundle.blockedProviders);
     setLoading(false);
   }, []);
 
@@ -238,7 +246,8 @@ export default function PricingTab() {
     };
 
     const matchesDisplayMode = (p: (typeof allProviders)[number]) =>
-      displayMode === "all" || isPricingProviderConfigured(p, connectedProviderIds);
+      displayMode === "all" ||
+      isPricingProviderConfigured(p, connectedProviderIds, blockedProviders);
 
     const filtered = allProviders.filter(
       (p) =>
@@ -269,6 +278,7 @@ export default function PricingTab() {
     authFilter,
     displayMode,
     connectedProviderIds,
+    blockedProviders,
     sortKey,
   ]);
 
@@ -284,8 +294,11 @@ export default function PricingTab() {
   }, [allProviders]);
 
   const configuredCount = useMemo(
-    () => allProviders.filter((p) => isPricingProviderConfigured(p, connectedProviderIds)).length,
-    [allProviders, connectedProviderIds]
+    () =>
+      allProviders.filter((p) =>
+        isPricingProviderConfigured(p, connectedProviderIds, blockedProviders)
+      ).length,
+    [allProviders, connectedProviderIds, blockedProviders]
   );
 
   const coverageGapCount = useMemo(

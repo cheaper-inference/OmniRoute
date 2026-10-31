@@ -1,5 +1,6 @@
 import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers/noauth";
+import { isNoAuthProviderBlocked } from "@/shared/utils/noAuthProviders";
 import { matchesSearch } from "@/shared/utils/turkishText";
 
 export type PricingDisplayMode = "all" | "configured";
@@ -28,16 +29,19 @@ export function collectConnectedProviderIds(
 }
 
 /**
- * Same rule as the Providers page "Configured only" mode: a provider counts when any
- * connection belongs to its family, and no-auth providers always count because they
- * never create a connection row. Compatible nodes match by node id, which is the
- * catalog entry's `id`.
+ * A provider counts as configured when any connection belongs to its family, or when it
+ * is a no-auth provider (no connection row) that is not turned off in
+ * `settings.blockedProviders`, which is also what stops it being routed to. Compatible
+ * nodes match by node id, which is the catalog entry's `id`.
  */
 export function isPricingProviderConfigured(
   provider: PricingFilterProvider,
-  connectedProviderIds: ReadonlySet<string>
+  connectedProviderIds: ReadonlySet<string>,
+  blockedProviders: unknown = []
 ): boolean {
-  if (Object.hasOwn(NOAUTH_PROVIDERS, provider.id)) return true;
+  if (Object.hasOwn(NOAUTH_PROVIDERS, provider.id)) {
+    return !isNoAuthProviderBlocked(blockedProviders, provider.id, provider.alias);
+  }
   return getProviderConnectionFamilyIds(provider.id).some((id) => connectedProviderIds.has(id));
 }
 

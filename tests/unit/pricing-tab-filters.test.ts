@@ -50,11 +50,18 @@ test("a compatible node matches by node id even though the catalog lists its pre
   );
 });
 
-test("no-auth providers count as configured without a connection, like the Providers page", () => {
+test("a no-auth provider counts as configured without a connection while it is turned on", () => {
   assert.equal(
     isPricingProviderConfigured({ id: "devin-cli-agentic", alias: "dva" }, new Set()),
     true
   );
+});
+
+test("a no-auth provider turned off in blockedProviders is not configured, by id or alias", () => {
+  const provider = { id: "devin-cli-agentic", alias: "dva" };
+  assert.equal(isPricingProviderConfigured(provider, new Set(), ["devin-cli-agentic"]), false);
+  assert.equal(isPricingProviderConfigured(provider, new Set(), ["dva"]), false);
+  assert.equal(isPricingProviderConfigured(provider, new Set(), ["openrouter"]), true);
 });
 
 const MODELS = [
