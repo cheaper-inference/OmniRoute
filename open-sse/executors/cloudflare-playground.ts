@@ -852,12 +852,6 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     let timedOut = attempt.timedOut;
     let toolCalls = parseAttempt(parser.text);
 
-    // Check if the last message ends with ":" (mid-sentence stop) and retry
-    const lastAssistantMessage = [...originalMessages]
-      .reverse()
-      .find((m) => m.role === "assistant" && typeof m.content === "string");
-    const endsWithColon = lastAssistantMessage?.content?.trim().endsWith(":");
-
     // Retry loop for tool call validation failures (up to MAX_TOOL_RETRIES times)
     let retryCount = 0;
     while (toolCalls === null && retryCount < MAX_TOOL_RETRIES) {
@@ -905,8 +899,10 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       toolCalls = [];
     }
 
-    // Retry if last assistant message ends with colon (mid-sentence)
-    if (endsWithColon && toolCalls.length === 0 && !timedOut) {
+    // Retry if the current response ends with a colon (mid-sentence stop) and
+    // no tool call was produced — the model stopped before finishing its answer.
+    const responseEndsWithColon = parser.text.trim().endsWith(":");
+    if (responseEndsWithColon && toolCalls.length === 0 && !timedOut) {
       const colonRetry = await runAttempt(attemptMessages(), "-colon-retry");
       if (colonRetry.ok === true) {
         parser = colonRetry.parser;
