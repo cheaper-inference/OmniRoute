@@ -82,3 +82,75 @@ test("saved family reader preserves the lock sets and deadlines of hydration", (
     clearAllModelLockouts();
   }
 });
+
+for (const provider of ["agy", "antigravity"]) {
+  test(`${provider} restores only the saved Argon family for both aliases`, (t) => {
+    const now = Date.parse("2099-01-01T00:00:00Z");
+    const until = now + 600_000;
+    t.mock.method(Date, "now", () => now);
+    t.after(clearAllModelLockouts);
+    for (const value of [until, String(until), new Date(until).toISOString()]) {
+      clearAllModelLockouts();
+      const psd = { antigravityFamilyRateLimitedUntil: { argon: value } };
+      assert.equal(getAntigravityFamilyCooldownUntil(psd, "argon", now), until);
+      assert.deepEqual(getAllModelLockouts(), [], "reading Argon installs no locks");
+      rehydrateAntigravityFamilyLocks(provider, "argon-restart", psd);
+      const locks = getAllModelLockouts();
+      assert.deepEqual(
+        locks.map(({ provider, connectionId, model, reason, until, remainingMs }) => ({
+          provider,
+          connectionId,
+          model,
+          reason,
+          until,
+          remainingMs,
+        })),
+        ["agy", "antigravity"].map((alias) => ({
+          provider: alias,
+          connectionId: "argon-restart",
+          model: "family:argon",
+          reason: "quota_exhausted",
+          until,
+          remainingMs: until - now,
+        })),
+        "restore exactly the Argon family, not Gemini or Claude, with the saved deadline"
+      );
+      assert.deepEqual(psd, { antigravityFamilyRateLimitedUntil: { argon: value } });
+    }
+  });
+
+  test(`${provider} ignores missing, expired and malformed Argon deadlines`, (t) => {
+    const now = Date.parse("2099-01-01T00:00:00Z");
+    t.mock.method(Date, "now", () => now);
+    t.after(clearAllModelLockouts);
+    for (const value of [
+      undefined,
+      null,
+      false,
+      "",
+      " ",
+      "invalid",
+      NaN,
+      Infinity,
+      now - 1,
+      now,
+      [],
+      {},
+    ]) {
+      clearAllModelLockouts();
+      const psd = { antigravityFamilyRateLimitedUntil: { argon: value } };
+      assert.equal(getAntigravityFamilyCooldownUntil(psd, "argon", now), null);
+      rehydrateAntigravityFamilyLocks(provider, "argon-restart", psd);
+      assert.deepEqual(getAllModelLockouts(), [], String(value));
+      lockModel("agy", "unrelated", "claude-family-lock", "quota_exhausted", 900_000);
+      const existingLocks = getAllModelLockouts();
+      rehydrateAntigravityFamilyLocks(provider, "argon-restart", psd);
+      assert.deepEqual(getAllModelLockouts(), existingLocks, "existing locks are unchanged");
+    }
+    clearAllModelLockouts();
+    rehydrateAntigravityFamilyLocks("openai", "argon-restart", {
+      antigravityFamilyRateLimitedUntil: { argon: now + 600_000 },
+    });
+    assert.deepEqual(getAllModelLockouts(), [], "non-Antigravity providers stay untouched");
+  });
+}
