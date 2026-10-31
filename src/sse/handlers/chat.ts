@@ -1618,7 +1618,7 @@ async function handleSingleModelChat(
   })();
   const resolvedModelGate = resolvedPolicy.createVisibleResolvedModelGate({
     apiKeyInfo,
-    apiKey: (await resolveClientApiKey(request)).apiKey,
+    request,
     contextModel: runtimeOptions.authorizationContextModel,
     comboGrantsTargets: runtimeOptions.comboGrantsTargets,
     provider,
