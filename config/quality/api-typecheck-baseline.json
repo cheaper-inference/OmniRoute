@@ -8,9 +8,6 @@
   "open-sse/utils/sseHeartbeat.ts": {
     "TS2353": 1
   },
-  "open-sse/utils/stream.ts": {
-    "TS2353": 1
-  },
   "src/app/api/assess/route.ts": {
     "TS2339": 1
   },
@@ -32,23 +29,11 @@
   "src/app/api/cli-tools/grok-build-settings/route.ts": {
     "TS2304": 1
   },
-  "src/app/api/cli-tools/hermes-agent-settings/route.ts": {
-    "TS2345": 1
-  },
-  "src/app/api/cli-tools/letta-settings/route.ts": {
-    "TS2339": 1
-  },
-  "src/app/api/cli-tools/omp-settings/route.ts": {
-    "TS2339": 8
-  },
   "src/app/api/cli-tools/qwen-settings/route.ts": {
     "TS2322": 1
   },
   "src/app/api/combos/auto/route.ts": {
     "TS2322": 1
-  },
-  "src/app/api/combos/test/route.ts": {
-    "TS2345": 1
   },
   "src/app/api/compression/compare/route.ts": {
     "TS2345": 1
@@ -126,8 +111,7 @@
     "TS2367": 1,
     "TS2339": 2,
     "TS2322": 2,
-    "TS2554": 2,
-    "TS2345": 3
+    "TS2554": 2
   },
   "src/app/api/providers/[id]/refresh-cursor/route.ts": {
     "TS2352": 1
@@ -152,7 +136,6 @@
   },
   "src/app/api/providers/route.ts": {
     "TS2352": 1,
-    "TS2322": 2,
     "TS2345": 3
   },
   "src/app/api/providers/test-batch/route.ts": {
@@ -189,11 +172,7 @@
     "TS2339": 1
   },
   "src/app/api/settings/cache-config/route.ts": {
-    "TS2339": 1,
     "TS2322": 1
-  },
-  "src/app/api/settings/database/route.ts": {
-    "TS2345": 1
   },
   "src/app/api/settings/models-dev/route.ts": {
     "TS2339": 1
@@ -234,17 +213,12 @@
   "src/app/api/tools/agent-bridge/agents/[id]/detected-models/route.ts": {
     "TS2769": 1
   },
-  "src/app/api/tools/traffic-inspector/internal/ingest/route.ts": {
-    "TS1117": 2,
-    "TS2345": 1
-  },
   "src/app/api/tools/traffic-inspector/ws/route.ts": {
     "TS2578": 1
   },
   "src/app/api/translator/send/route.ts": {
     "TS2345": 1,
-    "TS2322": 1,
-    "TS2339": 1
+    "TS2322": 1
   },
   "src/app/api/translator/translate/route.ts": {
     "TS2345": 1,
@@ -269,11 +243,11 @@
     "TS2339": 1
   },
   "src/app/api/v1/images/edits/route.ts": {
-    "TS2339": 18,
-    "TS2322": 4
+    "TS2339": 15,
+    "TS2322": 3
   },
   "src/app/api/v1/messages/count_tokens/route.ts": {
-    "TS2339": 2,
+    "TS2339": 1,
     "TS2322": 1
   },
   "src/app/api/v1/music/generations/route.ts": {
@@ -289,9 +263,6 @@
   "src/app/api/v1/providers/[provider]/embeddings/route.ts": {
     "TS2339": 3,
     "TS2322": 1
-  },
-  "src/app/api/v1/providers/[provider]/images/generations/route.ts": {
-    "TS2339": 5
   },
   "src/app/api/v1/rerank/route.ts": {
     "TS2339": 2
@@ -322,9 +293,6 @@
   "src/app/api/version-manager/start/route.ts": {
     "TS2339": 1
   },
-  "src/app/api/version-manager/stop/route.ts": {
-    "TS2339": 1
-  },
   "src/app/api/webhooks/[id]/route.ts": {
     "TS2554": 1
   },
@@ -337,10 +305,6 @@
   },
   "src/lib/db/tierConfig.ts": {
     "TS2345": 2
-  },
-  "src/lib/monitoring/comboHealthAutopilot.ts": {
-    "TS2305": 1,
-    "TS2345": 1
   },
   "src/lib/monitoring/providerHealthAutopilot.ts": {
     "TS2352": 4
@@ -361,10 +325,10 @@
   "src/lib/quota/quotaResetTimers.ts": {
     "TS2769": 2
   },
-  "src/lib/usage/comboForecast.ts": {
+  "src/lib/usage/availabilityRouterFilters.ts": {
     "TS2345": 1
   },
-  "src/lib/usage/comboHealth.ts": {
+  "src/lib/usage/comboForecast.ts": {
     "TS2345": 1
   },
   "src/lib/usage/comboScoringInspector.ts": {
@@ -383,11 +347,8 @@
   "src/lib/ws/handshake.ts": {
     "TS2339": 1
   },
-  "src/mitm/detection/index.ts": {
-    "TS2741": 1
-  },
-  "src/mitm/inspector/httpProxyServer.ts": {
-    "TS2769": 1
+  "src/shared/constants/cliTools.ts": {
+    "TS2353": 1
   },
   "src/shared/schemas/cliCatalog.ts": {
     "TS2554": 2
