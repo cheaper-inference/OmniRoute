@@ -17,4 +17,81 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `suggest`
+
+**Flags:**
+
+- `--task <description>`
+- `--max-cost <usd>`
+- `--max-latency-ms <ms>`
+- `--weights <json>`
+- `--top <n>`
+- `--explain`
+- `--switch`
+
+**Example:**
+
+```bash
+omniroute suggest
+```
+
+### `combo combo`
+
+**Example:**
+
+```bash
+omniroute combo combo
+```
+
+### `combo list`
+
+List configured routing combos
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute combo list
+```
+
+### `combo switch <name>`
+
+Activate a routing combo
+
+**Example:**
+
+```bash
+omniroute combo switch <name>
+```
+
+### `combo create <name>`
+
+Create a new routing combo
+
+**Flags:**
+
+- `--models <spec>`
+- `--model <spec>`
+
+**Example:**
+
+```bash
+omniroute combo create <name>
+```
+
+### `combo delete <name>`
+
+Delete a routing combo
+
+**Flags:**
+
+- `--yes`
+
+**Example:**
+
+```bash
+omniroute combo delete <name>
+```

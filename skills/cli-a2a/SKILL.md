@@ -17,4 +17,126 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `a2a`
+
+Agent-to-Agent (A2A) server
+
+**Example:**
+
+```bash
+omniroute a2a
+```
+
+### `a2a status`
+
+Show A2A server status
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute a2a status
+```
+
+### `a2a card`
+
+Print the Agent Card JSON
+
+**Example:**
+
+```bash
+omniroute a2a card
+```
+
+### `a2a skills`
+
+**Example:**
+
+```bash
+omniroute a2a skills
+```
+
+### `a2a invoke <skill>`
+
+**Flags:**
+
+- `--input <json>`
+- `--input-file <path>`
+- `--wait`
+- `--timeout <ms>`
+
+**Example:**
+
+```bash
+omniroute a2a invoke <skill>
+```
+
+### `a2a tasks`
+
+**Example:**
+
+```bash
+omniroute a2a tasks
+```
+
+### `a2a list`
+
+**Flags:**
+
+- `--status <s>`
+- `--skill <s>`
+- `--limit <n>`
+- `--since <ts>`
+
+**Example:**
+
+```bash
+omniroute a2a list
+```
+
+### `a2a get <id>`
+
+**Example:**
+
+```bash
+omniroute a2a get <id>
+```
+
+### `a2a cancel <id>`
+
+**Flags:**
+
+- `--yes`
+
+**Example:**
+
+```bash
+omniroute a2a cancel <id>
+```
+
+### `a2a watch <id>`
+
+**Example:**
+
+```bash
+omniroute a2a watch <id>
+```
+
+### `a2a stream <id>`
+
+**Example:**
+
+```bash
+omniroute a2a stream <id>
+```
+
+### `a2a logs <id>`
+
+**Example:**
+
+```bash
+omniroute a2a logs <id>
+```

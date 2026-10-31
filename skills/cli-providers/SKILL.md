@@ -17,7 +17,174 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `provider-cmd provider [subcommand]`
+
+Manage provider connections (use 
+
+**Example:**
+
+```bash
+omniroute provider-cmd provider [subcommand]
+```
+
+### `providers`
+
+**Example:**
+
+```bash
+omniroute providers
+```
+
+### `providers available`
+
+Show available providers in the OmniRoute catalog
+
+**Flags:**
+
+- `--json`
+- `--search <query>`
+- `-q, --q <query>`
+- `--category <category>`
+
+**Example:**
+
+```bash
+omniroute providers available
+```
+
+### `providers list`
+
+List configured provider connections
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute providers list
+```
+
+### `providers test <idOrName>`
+
+Test a configured provider connection
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute providers test <idOrName>
+```
+
+### `providers test-all`
+
+Test all active provider connections
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute providers test-all
+```
+
+### `providers validate`
+
+Validate local provider configuration without calling upstream
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute providers validate
+```
+
+### `providers rotate <idOrName>`
+
+**Flags:**
+
+- `--new-key <key>`
+- `--from-env <VAR>`
+- `--oauth`
+- `--yes`
+- `--skip-test`
+- `--dry-run`
+
+**Example:**
+
+```bash
+omniroute providers rotate <idOrName>
+```
+
+### `providers status`
+
+**Flags:**
+
+- `--provider <name>`
+- `--json`
+
+**Example:**
+
+```bash
+omniroute providers status
+```
+
+### `providers metrics`
+
+**Flags:**
+
+- `--provider <id>`
+- `--connection-id <id>`
+- `--period <p>`
+- `--metric <m>`
+- `--sort-by <field>`
+- `--limit <n>`
+- `--watch`
+- `--compare <list>`
+
+**Example:**
+
+```bash
+omniroute providers metrics
+```
+
+### `providers metric <connectionId> <metric>`
+
+**Flags:**
+
+- `--period <p>`
+
+**Example:**
+
+```bash
+omniroute providers metric <connectionId> <metric>
+```
+
+### `test-provider test [provider] [model]`
+
+**Flags:**
+
+- `--all-providers`
+- `--json`
+- `--latency`
+- `--repeat <n>`
+- `--compare <models>`
+- `--save <path>`
+
+**Example:**
+
+```bash
+omniroute test-provider test [provider] [model]
+```
 
 <!-- skill:custom-start -->
 <!-- Migrated from skills/omniroute-cli-providers/SKILL.md (preserved curated content) -->

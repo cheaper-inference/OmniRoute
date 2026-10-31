@@ -17,4 +17,72 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `doctor`
+
+**Flags:**
+
+- `--no-liveness`
+- `--host <host>`
+- `--liveness-url <url>`
+
+**Example:**
+
+```bash
+omniroute doctor
+```
+
+### `health`
+
+**Flags:**
+
+- `-v, --verbose`
+- `--json`
+- `--alerts-only`
+
+**Example:**
+
+```bash
+omniroute health
+```
+
+### `health components`
+
+List health components and their status
+
+**Flags:**
+
+- `--alerts-only`
+
+**Example:**
+
+```bash
+omniroute health components
+```
+
+### `health watch`
+
+Live dashboard — refresh every N seconds
+
+**Flags:**
+
+- `--interval <s>`
+
+**Example:**
+
+```bash
+omniroute health watch
+```
+
+### `status`
+
+Show OmniRoute status dashboard
+
+**Flags:**
+
+- `-v, --verbose`
+
+**Example:**
+
+```bash
+omniroute status
+```

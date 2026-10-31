@@ -17,4 +17,62 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `chat [prompt]`
+
+**Flags:**
+
+- `--file <path>`
+- `--stdin`
+- `-s, --system <prompt>`
+- `-m, --model <id>`
+- `--max-tokens <n>`
+- `--temperature <t>`
+- `--top-p <p>`
+- `--reasoning-effort <level>`
+- `--thinking-budget <tokens>`
+- `--combo <name>`
+- `--responses-api`
+- `--stream`
+- `--no-history`
+
+**Example:**
+
+```bash
+omniroute chat [prompt]
+```
+
+### `repl`
+
+**Flags:**
+
+- `-m, --model <id>`
+- `--combo <name>`
+- `-s, --system <prompt>`
+- `--resume <session>`
+
+**Example:**
+
+```bash
+omniroute repl
+```
+
+### `stream [prompt]`
+
+**Flags:**
+
+- `--file <path>`
+- `--stdin`
+- `-m, --model <id>`
+- `-s, --system <prompt>`
+- `--combo <name>`
+- `--max-tokens <n>`
+- `--responses-api`
+- `--raw`
+- `--debug`
+- `--save <path>`
+
+**Example:**
+
+```bash
+omniroute stream [prompt]
+```

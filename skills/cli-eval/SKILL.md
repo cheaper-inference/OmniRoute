@@ -17,7 +17,137 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `eval`
+
+**Example:**
+
+```bash
+omniroute eval
+```
+
+### `eval suites`
+
+**Example:**
+
+```bash
+omniroute eval suites
+```
+
+### `eval list`
+
+**Example:**
+
+```bash
+omniroute eval list
+```
+
+### `eval get <suiteId>`
+
+**Example:**
+
+```bash
+omniroute eval get <suiteId>
+```
+
+### `eval create`
+
+**Flags:**
+
+- `--file <path>`
+
+**Example:**
+
+```bash
+omniroute eval create
+```
+
+### `eval run <suiteId>`
+
+**Flags:**
+
+- `-m, --model <id>`
+- `--combo <name>`
+- `--concurrency <n>`
+- `--tag <tag>`
+- `--watch`
+
+**Example:**
+
+```bash
+omniroute eval run <suiteId>
+```
+
+### `eval list`
+
+**Flags:**
+
+- `--suite <id>`
+- `--status <s>`
+- `--since <ts>`
+- `--limit <n>`
+
+**Example:**
+
+```bash
+omniroute eval list
+```
+
+### `eval get <runId>`
+
+**Example:**
+
+```bash
+omniroute eval get <runId>
+```
+
+### `eval results <runId>`
+
+**Flags:**
+
+- `--failed`
+
+**Example:**
+
+```bash
+omniroute eval results <runId>
+```
+
+### `eval cancel <runId>`
+
+**Flags:**
+
+- `--yes`
+
+**Example:**
+
+```bash
+omniroute eval cancel <runId>
+```
+
+### `eval scorecard <runId>`
+
+**Example:**
+
+```bash
+omniroute eval scorecard <runId>
+```
+
+### `simulate [prompt]`
+
+**Flags:**
+
+- `--file <path>`
+- `-m, --model <id>`
+- `--combo <name>`
+- `--reasoning-effort <level>`
+- `--thinking-budget <n>`
+- `--explain`
+
+**Example:**
+
+```bash
+omniroute simulate [prompt]
+```
 
 <!-- skill:custom-start -->
 <!-- Migrated from skills/omniroute-cli-eval/SKILL.md (preserved curated content) -->

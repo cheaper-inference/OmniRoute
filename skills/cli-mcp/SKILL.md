@@ -17,4 +17,81 @@ omniroute --version
 
 ## Subcommands
 
-_No CLI subcommands mapped for this family yet._
+### `mcp`
+
+**Example:**
+
+```bash
+omniroute mcp
+```
+
+### `mcp status`
+
+Show MCP server status
+
+**Flags:**
+
+- `--json`
+
+**Example:**
+
+```bash
+omniroute mcp status
+```
+
+### `mcp restart`
+
+Restart the MCP server
+
+**Example:**
+
+```bash
+omniroute mcp restart
+```
+
+### `mcp enable`
+
+**Flags:**
+
+- `--transport <transport>`
+
+**Example:**
+
+```bash
+omniroute mcp enable
+```
+
+### `mcp disable`
+
+**Example:**
+
+```bash
+omniroute mcp disable
+```
+
+### `mcp call <tool> [argsJson]`
+
+**Flags:**
+
+- `--args <json>`
+- `--args-file <path>`
+- `--stream`
+- `--scope <s>`
+
+**Example:**
+
+```bash
+omniroute mcp call <tool> [argsJson]
+```
+
+### `mcp scopes`
+
+**Flags:**
+
+- `--tool <name>`
+
+**Example:**
+
+```bash
+omniroute mcp scopes
+```
