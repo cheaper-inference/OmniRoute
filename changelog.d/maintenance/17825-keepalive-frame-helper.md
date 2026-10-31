@@ -1,1 +1,0 @@
-- **refactor(api):** move the per-request Responses keepalive frame into a helper so `/v1/responses` stays under the cognitive-complexity ratchet after #18197 (#17825)

@@ -1,1 +1,0 @@
-- **fix(api):** List eligible provider-wildcard combos in `/v1/models` with metadata from their current model pool, without changing saved wildcard definitions or access rules ([#18182](https://github.com/cheaper-inference/OmniRoute/pull/18182)) — thanks @trespassmk

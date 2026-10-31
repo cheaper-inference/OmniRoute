@@ -1,1 +1,0 @@
-- **fix(proxy):** Prevent quota timeouts from interrupting active SOCKS streams while preserving connection reuse and pool limits ([#17949](https://github.com/cheaper-inference/OmniRoute/pull/17949)) — thanks @AiCaptain357
