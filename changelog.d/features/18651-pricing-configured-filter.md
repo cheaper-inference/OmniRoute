@@ -1,0 +1,1 @@
+- **feat(dashboard):** Costs > Pricing gets a Providers "Configured only" filter (providers with a connection, plus no-auth providers that are turned on), and a model search lists only the matching models under each provider ([#18651](https://github.com/cheaper-inference/OmniRoute/pull/18651))

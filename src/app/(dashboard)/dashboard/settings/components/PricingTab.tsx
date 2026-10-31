@@ -18,6 +18,12 @@ import InfoTooltip from "@/shared/components/InfoTooltip";
 import { compareTr, matchesSearch } from "@/shared/utils/turkishText";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { FilterSelect, HeroStat, SyncMini } from "./PricingTabHelpers";
+import {
+  collectConnectedProviderIds,
+  isPricingProviderConfigured,
+  modelsMatchingSearch,
+  type PricingDisplayMode,
+} from "./pricingTabFilters";
 
 type CoverageFilter = "all" | "lt50" | "gte50lt100" | "full";
 type AuthFilter = "all" | "oauth" | "apikey" | "unknown";
@@ -82,13 +88,17 @@ type PricingBundle = {
   pricing?: Record<string, Record<string, Record<string, number>>>;
   sources?: Record<string, Record<string, PricingSource>>;
   sync?: SyncStatus;
+  connectedProviderIds?: Set<string>;
+  blockedProviders?: string[];
 };
 
 async function fetchPricingBundle(): Promise<PricingBundle> {
-  const [catalogRes, pricingRes, syncRes] = await Promise.all([
+  const [catalogRes, pricingRes, syncRes, connectionsRes, settingsRes] = await Promise.all([
     fetch("/api/pricing/models"),
     fetch("/api/pricing?includeSources=1"),
     fetch("/api/pricing/sync"),
+    fetch("/api/providers"),
+    fetch("/api/settings", { cache: "no-store" }),
   ]);
   const bundle: PricingBundle = {};
   if (catalogRes.ok) {
@@ -105,6 +115,16 @@ async function fetchPricingBundle(): Promise<PricingBundle> {
   if (syncRes.ok) {
     bundle.sync = (await syncRes.json()) as SyncStatus;
   }
+  if (connectionsRes.ok) {
+    const { connections } = (await connectionsRes.json()) as { connections?: unknown };
+    bundle.connectedProviderIds = collectConnectedProviderIds(
+      Array.isArray(connections) ? connections : []
+    );
+  }
+  if (settingsRes.ok) {
+    const { blockedProviders } = (await settingsRes.json()) as { blockedProviders?: unknown };
+    bundle.blockedProviders = Array.isArray(blockedProviders) ? blockedProviders : [];
+  }
   return bundle;
 }
 
@@ -117,6 +137,8 @@ export default function PricingTab() {
     Record<string, Record<string, PricingSource>>
   >({});
   const [syncStatus, setSyncStatus] = useState<SyncStatus | null>(null);
+  const [connectedProviderIds, setConnectedProviderIds] = useState<Set<string>>(new Set());
+  const [blockedProviders, setBlockedProviders] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [syncing, setSyncing] = useState(false);
@@ -125,6 +147,7 @@ export default function PricingTab() {
   const [searchQuery, setSearchQuery] = useState("");
   const [coverageFilter, setCoverageFilter] = useState<CoverageFilter>("all");
   const [authFilter, setAuthFilter] = useState<AuthFilter>("all");
+  const [displayMode, setDisplayMode] = useState<PricingDisplayMode>("all");
   const [sortKey, setSortKey] = useState<SortKey>("modelsDesc");
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE);
   const [editedProviders, setEditedProviders] = useState<Set<string>>(new Set());
@@ -133,6 +156,7 @@ export default function PricingTab() {
     message: string;
   } | null>(null);
   const t = useTranslations("settings");
+  const tGlobal = useTranslations();
 
   const showStatus = useCallback((tone: "success" | "error" | "info", message: string) => {
     setStatusMessage({ tone, message });
@@ -144,6 +168,8 @@ export default function PricingTab() {
     if (bundle.pricing) setPricingData(bundle.pricing);
     if (bundle.sources) setPricingSources(bundle.sources);
     if (bundle.sync) setSyncStatus(bundle.sync);
+    if (bundle.connectedProviderIds) setConnectedProviderIds(bundle.connectedProviderIds);
+    if (bundle.blockedProviders) setBlockedProviders(bundle.blockedProviders);
     setLoading(false);
   }, []);
 
@@ -219,8 +245,13 @@ export default function PricingTab() {
       );
     };
 
+    const matchesDisplayMode = (p: (typeof allProviders)[number]) =>
+      displayMode === "all" ||
+      isPricingProviderConfigured(p, connectedProviderIds, blockedProviders);
+
     const filtered = allProviders.filter(
-      (p) => providerMatchesSearch(p) && matchesCoverage(p) && matchesAuth(p)
+      (p) =>
+        providerMatchesSearch(p) && matchesCoverage(p) && matchesAuth(p) && matchesDisplayMode(p)
     );
 
     // Sort
@@ -240,7 +271,16 @@ export default function PricingTab() {
         break;
     }
     return sorted;
-  }, [allProviders, searchQuery, coverageFilter, authFilter, sortKey]);
+  }, [
+    allProviders,
+    searchQuery,
+    coverageFilter,
+    authFilter,
+    displayMode,
+    connectedProviderIds,
+    blockedProviders,
+    sortKey,
+  ]);
 
   const authCounts = useMemo(() => {
     const counts = { oauth: 0, apikey: 0, unknown: 0 };
@@ -253,13 +293,21 @@ export default function PricingTab() {
     return counts;
   }, [allProviders]);
 
+  const configuredCount = useMemo(
+    () =>
+      allProviders.filter((p) =>
+        isPricingProviderConfigured(p, connectedProviderIds, blockedProviders)
+      ).length,
+    [allProviders, connectedProviderIds, blockedProviders]
+  );
+
   const coverageGapCount = useMemo(
     () => allProviders.filter((p) => p.modelCount > 0 && p.pricedModels / p.modelCount < 1).length,
     [allProviders]
   );
 
   // Reset visible count when filters change (state adjustment during render)
-  const filtersKey = `${searchQuery}|${coverageFilter}|${authFilter}|${sortKey}`;
+  const filtersKey = `${searchQuery}|${coverageFilter}|${authFilter}|${displayMode}|${sortKey}`;
   const [prevFiltersKey, setPrevFiltersKey] = useState(filtersKey);
   if (prevFiltersKey !== filtersKey) {
     setPrevFiltersKey(filtersKey);
@@ -651,6 +699,19 @@ export default function PricingTab() {
           />
 
           <FilterSelect
+            label={t("providers")}
+            value={displayMode}
+            onChange={(v) => setDisplayMode(v as PricingDisplayMode)}
+            options={[
+              { value: "all", label: `${t("pricingAll")} (${allProviders.length})` },
+              {
+                value: "configured",
+                label: `${tGlobal("providers.showConfiguredOnly")} (${configuredCount})`,
+              },
+            ]}
+          />
+
+          <FilterSelect
             label={t("pricingAuth")}
             value={authFilter}
             onChange={(v) => setAuthFilter(v as AuthFilter)}
@@ -692,6 +753,7 @@ export default function PricingTab() {
           {(searchQuery ||
             coverageFilter !== "all" ||
             authFilter !== "all" ||
+            displayMode !== "all" ||
             sortKey !== "modelsDesc" ||
             selectedProvider) && (
             <Button
@@ -702,6 +764,7 @@ export default function PricingTab() {
                 setSearchQuery("");
                 setCoverageFilter("all");
                 setAuthFilter("all");
+                setDisplayMode("all");
                 setSortKey("modelsDesc");
                 setSelectedProvider(null);
               }}
@@ -726,6 +789,7 @@ export default function PricingTab() {
           <ProviderSection
             key={provider.alias}
             provider={provider}
+            visibleModels={modelsMatchingSearch(provider, provider.models, searchQuery)}
             pricingData={pricingData[provider.pricingKey || provider.alias] || {}}
             sourceMap={pricingSources[provider.pricingKey || provider.alias] || {}}
             isExpanded={expandedProviders.has(provider.alias)}
@@ -770,6 +834,7 @@ export default function PricingTab() {
 
 function ProviderSection({
   provider,
+  visibleModels,
   pricingData,
   sourceMap,
   isExpanded,
@@ -782,6 +847,8 @@ function ProviderSection({
   getSourceLabel,
 }: {
   provider: PricingCatalogProvider;
+  /** The provider's models narrowed to the current search. */
+  visibleModels: PricingCatalogModel[];
   pricingData: Record<string, Record<string, number>>;
   sourceMap: Record<string, PricingSource>;
   isExpanded: boolean;
@@ -944,7 +1011,7 @@ function ProviderSection({
               </TableRow>
             </TableHeader>
             <TableBody>
-              {provider.models.map((model) => (
+              {visibleModels.map((model) => (
                 <ModelRow
                   key={model.id}
                   model={model}
