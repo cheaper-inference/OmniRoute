@@ -1,3 +1,12 @@
+import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { rosebudModelConnections } from "@/lib/rosebud/provider";
+import {
+  rosebudImageBinding,
+  scopedRosebudKey,
+  matchesRosebudPin,
+  selectRosebudImageCredentials,
+} from "@omniroute/open-sse/services/rosebud/imageBinding.ts";
+import { RosebudError } from "@omniroute/open-sse/services/rosebud/cli.ts";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
@@ -126,7 +135,7 @@ function publicBaseUrlHeaders(headers: Headers): Record<string, string> {
   return out;
 }
 
-async function postHandler(request, context) {
+async function postHandler(request, _context) {
   let rawBody;
   try {
     rawBody = await request.json();
@@ -294,8 +303,72 @@ async function postHandler(request, context) {
   }
 
   // Get credentials — skip for local providers (authType: "none")
+  if (
+    provider === "rosebud" &&
+    !policy.apiKeyInfo?.id &&
+    !(await isDashboardSessionAuthenticated(request))
+  )
+    return errorResponse(401, "Rosebud image generation requires authentication");
+  if (provider === "rosebud" && request.headers.has("idempotency-key"))
+    body.idempotency_key = request.headers.get("idempotency-key");
+  let rosebudPinned: string | undefined;
+  const bindRosebud = (candidate?: string) =>
+    rosebudImageBinding(
+      policy.apiKeyInfo?.id || "dashboard",
+      body.idempotency_key,
+      body,
+      allowedConnections,
+      candidate
+    );
+  if (provider === "rosebud") {
+    try {
+      rosebudPinned = await bindRosebud();
+    } catch (error) {
+      return errorResponse(
+        error instanceof RosebudError ? error.status : 503,
+        error instanceof RosebudError ? error.code : "Rosebud retry binding unavailable"
+      );
+    }
+  }
+  let rosebudEligible: string[] | null = null;
+  if (provider === "rosebud") {
+    try {
+      rosebudEligible = await rosebudModelConnections(body.model, allowedConnections);
+    } catch {
+      return errorResponse(503, "Rosebud model discovery unavailable");
+    }
+    if (!rosebudEligible.length)
+      return errorResponse(404, "No connected Rosebud account supports this model");
+    if (rosebudPinned && !rosebudEligible.includes(rosebudPinned))
+      return errorResponse(409, "Original Rosebud account is unavailable for this model");
+  }
   let credentials = null;
-  if (providerConfig && providerConfig.authType !== "none") {
+  if (provider === "rosebud") {
+    try {
+      const selected = await selectRosebudImageCredentials({
+        pinned: rosebudPinned,
+        eligible: rosebudEligible || [],
+        lookup: (ids, forced) =>
+          getProviderCredentialsWithQuotaPreflight(
+            provider,
+            null,
+            narrowConnectionScope(allowedConnections, ids),
+            requestedModel,
+            forced ? { forcedConnectionId: forced } : {}
+          ),
+        bind: (id) => bindRosebud(id),
+        usable: (value) =>
+          !isKeyScopeBlockedCredentials(value) && !isAllRateLimitedCredentials(value),
+      });
+      credentials = selected.credentials;
+      rosebudPinned = selected.pinned;
+    } catch (error) {
+      return errorResponse(
+        error instanceof RosebudError ? error.status : 503,
+        error instanceof RosebudError ? error.code : "Rosebud account selection unavailable"
+      );
+    }
+  } else if (providerConfig && providerConfig.authType !== "none") {
     credentials = await getProviderCredentialsWithQuotaPreflight(
       provider,
       null,
@@ -368,12 +441,22 @@ async function postHandler(request, context) {
     }
   }
 
+  if (provider === "rosebud" && typeof body.idempotency_key === "string")
+    body.idempotency_key = scopedRosebudKey(
+      policy.apiKeyInfo?.id || "dashboard",
+      body.idempotency_key
+    );
   const execution = await executeImageWithCredentialFallback({
     provider,
     requestedModel,
     credentials,
     allowedConnections,
     execute: async (attemptCredentials) => {
+      if (
+        provider === "rosebud" &&
+        !matchesRosebudPin(rosebudPinned, attemptCredentials?.connectionId)
+      )
+        return { success: false, status: 409, error: "Original Rosebud account is unavailable" };
       let proxyInfo = null;
       if (attemptCredentials?.connectionId) {
         try {
@@ -434,8 +517,12 @@ async function postHandler(request, context) {
     // Bill the images actually delivered: a provider that returns fewer than the
     // requested `n` must not be charged for the missing ones (#16398 follow-up).
     const n = (result as { data?: { data?: unknown[] } }).data?.data?.length || 1;
-    const costUsd = await calculateModalCost("image", provider, body.model, { n });
-    recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
+    const costUsd =
+      provider === "rosebud"
+        ? undefined
+        : await calculateModalCost("image", provider, body.model, { n });
+    if (costUsd !== undefined)
+      recordModalCallCost(policy.apiKeyInfo?.id, { provider, model: body.model, costUsd });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,
@@ -460,7 +547,16 @@ async function postHandler(request, context) {
     typeof errorPayload?.error?.message === "string"
       ? errorPayload.error.message
       : "Image generation provider error";
-  return errorResponse((result as any).status, message);
+  const response = errorResponse((result as any).status, message);
+  if (provider === "rosebud") {
+    const usage = (result as { rosebudUsage?: unknown }).rosebudUsage;
+    if (usage)
+      return Response.json(
+        { ...(await response.json()), rosebud_usage: usage },
+        { status: response.status, headers: { "x-should-retry": "false" } }
+      );
+  }
+  return response;
 }
 
 const guardedPost = withInjectionGuard(postHandler);

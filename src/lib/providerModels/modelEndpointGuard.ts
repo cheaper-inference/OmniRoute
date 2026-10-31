@@ -61,6 +61,9 @@ export function getModelEndpointMismatchMessage(
   model: TaggedModel | null | undefined,
   requested: RequestedEndpoint
 ): string | null {
+  if (fullModelId.startsWith("rosebud/") && requested === "chat") {
+    return "Rosebud generates assets and does not support chat completions.";
+  }
   if (!model?.supportedEndpoints?.length) return null;
   // Neither a legacy/missing source nor an assumed chat default may impose
   // a hard upstream gate. Declared, user-owned and specialty-ID inference do.
@@ -93,6 +96,8 @@ export async function getRequestedModelEndpointMismatch(
   fullModelId: string,
   requested: RequestedEndpoint
 ): Promise<string | null> {
+  if (typeof fullModelId === "string" && fullModelId.startsWith("rosebud/") && requested === "chat")
+    return "Rosebud generates assets and does not support chat completions.";
   if (typeof fullModelId !== "string" || !isModelEndpointCapabilityGateEnabled()) return null;
   const slash = fullModelId.indexOf("/");
   if (slash <= 0 || slash >= fullModelId.length - 1) return null;

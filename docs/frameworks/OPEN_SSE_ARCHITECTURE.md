@@ -409,9 +409,9 @@ Common translations:
 
 `open-sse/mcp-server/` implements the **Model Context Protocol** server:
 
-- **110 tools** (provider management, combos, memory, cache, compression, proxy, skills, gamification, plugins, Notion, Obsidian, local corpus)
+- **129 tools** (provider management, combos, memory, cache, compression, proxy, skills, gamification, plugins, Notion, Obsidian, local corpus)
 - **3 transports**: stdio, SSE, Streamable HTTP
-- **33 scopes** for fine-grained authorization
+- **34 scopes** for fine-grained authorization
 
 ### Tool Registration
 
@@ -490,7 +490,7 @@ This handles:
 
 | File                          | Purpose                                           |
 | ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registry over the 380-provider catalog |
+| `providerRegistry.ts`         | Chat-model registry over the 381-provider catalog |
 | `providerModels.ts`           | Model aliases, format mapping                     |
 | `constants.ts`                | Timeouts, limits, status codes                    |
 | `defaultThinkingSignature.ts` | Default Claude thinking signature                 |

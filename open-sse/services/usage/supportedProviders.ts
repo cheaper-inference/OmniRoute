@@ -23,6 +23,7 @@ export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "agy",
   "kiro",
   "amazon-q",
+  "rosebud",
   "github",
   "codex",
   "claude",

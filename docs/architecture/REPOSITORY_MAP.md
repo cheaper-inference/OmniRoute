@@ -244,7 +244,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: adapters over `packages/ui-kit` — see `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: icon names used by the screens → Lucide components (`<Icon>`)                           |
-| `constants/providers.ts`         | **380 providers** with Zod validation (source of truth)                                             |
+| `constants/providers.ts`         | **381 providers** with Zod validation (source of truth)                                             |
 | `constants/cliTools.ts`          | External CLI tool registry                                                                          |
 | `constants/routingStrategies.ts` | **20 routing strategies** with priorities                                                           |
 | `constants/publicApiRoutes.ts`   | Routes that require Bearer (vs management) auth                                                     |
@@ -271,7 +271,7 @@ open-sse/
 ├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
-├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── mcp-server/          # MCP server (129 tools, 3 transports, 34 scopes)
 ├── config/              # Provider/model registries, header config, model aliases
 ├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
 ├── index.ts             # Workspace entry
@@ -414,13 +414,13 @@ open-sse/
 | `CLI-TOOLS.md`              | External CLI integrations + Internal OmniRoute CLI                                    |
 | `I18N.md`                   | i18n architecture, adding a language, 67 locales                                      |
 | `UNINSTALL.md`              | Clean uninstall steps                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 380 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Auto-generated** catalog of 381 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dives
 
 | Doc                                         | Purpose                                                              |
 | ------------------------------------------- | -------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP server: 110 tools, 3 transports, 33 scopes, REST endpoints       |
+| `MCP-SERVER.md`                             | MCP server: 129 tools, 3 transports, 34 scopes, REST endpoints       |
 | `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skills, REST helpers, agent card               |
 | `AGENT_PROTOCOLS_GUIDE.md`                  | Unified guide: A2A vs ACP vs Cloud Agents                            |
 | `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules orchestration                            |

@@ -1,3 +1,4 @@
+import { rosebudTools, rosebudToolResult } from "./tools/rosebudTools.ts";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { APP_CONFIG } from "@/shared/constants/appConfig";
@@ -132,6 +133,7 @@ const TOTAL_MCP_TOOL_COUNT = countUniqueMcpTools({
   pluginTools,
   notionTools,
   obsidianTools,
+  rosebudTools,
   localCorpusTools,
   compressionTools,
 });
@@ -312,6 +314,7 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
     ...pluginTools.map((t) => t.name),
     ...gamificationTools.map((t) => t.name),
     ...obsidianTools.map((t) => t.name),
+    ...rosebudTools.map((t) => t.name),
     ...notionTools.map((t) => t.name),
     ...localCorpusTools.map((t) => t.name),
   ]);
@@ -946,6 +949,32 @@ export function createMcpServer(options?: CreateMcpServerOptions): McpServer {
   });
 
   // ── Obsidian Context Source Tools ─────────────
+  rosebudTools.forEach((tool) => {
+    server.registerTool(
+      tool.name,
+      { description: tool.description, inputSchema: tool.inputSchema },
+      withScopeEnforcement(
+        tool.name,
+        async (args) => {
+          try {
+            return rosebudToolResult(await tool.handler(args));
+          } catch (error) {
+            return {
+              isError: true,
+              content: [
+                {
+                  type: "text" as const,
+                  text: toSafeMcpErrorMessage(error, "Rosebud operation failed"),
+                },
+              ],
+            };
+          }
+        },
+        tool.scopes
+      )
+    );
+  });
+
   obsidianTools.forEach((toolDef) => {
     server.registerTool(
       toolDef.name,

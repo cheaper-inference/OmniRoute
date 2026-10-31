@@ -1,3 +1,5 @@
+import { requireRosebudAccess } from "@/lib/rosebud/authorization";
+import { rosebudAccount } from "@/lib/rosebud/provider";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -987,6 +989,25 @@ export async function testSingleConnection(
       latencyMs: 0,
     };
   }
+  if (provider === "rosebud") {
+    if (options.allowLocalSpawn === false)
+      return { valid: false, error: "Local Rosebud access required", latencyMs: 0 };
+    const started = Date.now();
+    try {
+      const account = await rosebudAccount(connectionId);
+      return {
+        valid: account.status === "active",
+        error: account.status === "active" ? null : "Rosebud authorization required",
+        latencyMs: Date.now() - started,
+      };
+    } catch {
+      return {
+        valid: false,
+        error: "Rosebud account check failed",
+        latencyMs: Date.now() - started,
+      };
+    }
+  }
   retirement.assertProviderAvailable(provider);
 
   let proxyInfo: any = null;
@@ -1180,6 +1201,11 @@ export async function testSingleConnection(
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const { id } = await params;
+    const target = await getCachedProviderConnectionById(id);
+    if (target?.provider === "rosebud") {
+      const denied = await requireRosebudAccess(request, id);
+      if (denied) return denied;
+    }
 
     let rawBody: unknown = {};
     try {

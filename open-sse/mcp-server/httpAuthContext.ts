@@ -1,6 +1,7 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 
 type McpHttpAuthContext = {
+  peerLocality?: string;
   authorization?: string;
   cookie?: string;
   xApiKey?: string;
@@ -48,6 +49,10 @@ export function getMcpHttpAuthHeadersForInternalFetch(): Record<string, string> 
  * which scope it is in — that is the only way to make the env key a *stdio-only*
  * fallback instead of a silent substitute for a missing HTTP caller identity.
  */
+export function getMcpHttpPeerLocality(): string | undefined {
+  return mcpHttpAuthContext.getStore()?.peerLocality;
+}
+
 export function hasMcpHttpAuthContext(): boolean {
   return mcpHttpAuthContext.getStore() !== undefined;
 }
@@ -98,8 +103,10 @@ export async function withMcpHttpAuthContext<T>(
   request: Request,
   callback: () => Promise<T>
 ): Promise<T> {
+  const { getRequestPeerLocality } = await import("../../src/shared/utils/apiAuth.ts");
   return mcpHttpAuthContext.run(
     {
+      peerLocality: getRequestPeerLocality(request),
       authorization: headerValue(request, "authorization"),
       cookie: headerValue(request, "cookie"),
       xApiKey: headerValue(request, "x-api-key"),

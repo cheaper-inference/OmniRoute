@@ -5,7 +5,7 @@ import {
   renderComparisonTable,
   COMPARISON_TABLE_COPY,
 } from "../../../scripts/docs/gen-readme-comparison-table.mjs";
-import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
+import { buildChecks, readProviderTotal } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 // The committed comparison table must be exactly what the generator produces, carry the UI kit
 // fonts inline, draw every string it subsets, keep the counts gate's numbers readable as text
@@ -13,6 +13,13 @@ import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 const FILE = "docs/diagrams/comparison-table.svg";
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+test("the visible provider total matches the live catalog", () => {
+  assert.ok(
+    COMPARISON_TABLE_COPY.values.includes(String(readProviderTotal())),
+    "the visible provider cell must match the catalog, not only the SVG description"
+  );
+});
 
 test("the committed comparison table is exactly what the generator produces", async () => {
   const generated = await renderComparisonTable();
