@@ -77,20 +77,173 @@ const BLOCKED_MESSAGE =
   "Cloudflare Playground blocked the headless browser (fingerprint check). Set CLOUDFLARE_PLAYGROUND_CHROME_PATH to a full desktop Chrome binary and retry.";
 
 /**
- * Re-ask sent to a fresh room when a reply carried tool intent the parser could
- * not read. It restates the contract's hard requirements (one JSON object per
- * call, the `type`/`name`/`arguments` keys, the nonce included verbatim) because
- * the models that invent their own envelope are the same ones that skim the
- * contract.
+ * Maximum number of retry attempts for tool call validation failures.
  */
-const CF_TOOL_REPAIR_NOTE =
-  "Your previous response contained a tool call that the client could not read, so it was rejected. " +
-  "Retry the requested next action from scratch, following the tool contract exactly: " +
-  "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
-  '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "<nonce>"}, with the ' +
-  "arguments as a single JSON object and the _nonce binding copied verbatim. " +
-  "If your previous reply was cut off, send every call again, complete: a single object, or one " +
-  "array holding all of them. No XML tags and no code fences.";
+const MAX_TOOL_RETRIES = 3;
+
+/**
+ * Delay between retry attempts in milliseconds.
+ */
+const RETRY_DELAY_MS = 5000;
+
+/**
+ * Build a targeted corrective reminder based on the specific validation failure.
+ */
+function buildToolRetryReminder(
+  failure:
+    | "invalid_json"
+    | "missing_type"
+    | "wrong_type"
+    | "missing_name"
+    | "invalid_name"
+    | "missing_arguments"
+    | "malformed_intent",
+  availableTools: CfToolDef[],
+  nonce: string
+): string {
+  const toolNames = availableTools.map((t) => t.name).join(", ");
+  const schemaExample =
+    '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "' + nonce + '"}';
+
+  switch (failure) {
+    case "invalid_json":
+      return (
+        "Your previous response was not valid JSON. The tool contract requires a single JSON object (or an array of them) " +
+        "with no syntax errors. " +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        "Reply with ONLY the JSON call(s), no markdown, no explanation."
+      );
+    case "missing_type":
+      return (
+        "Your previous response is missing the required 'type' field. Every tool call must include " +
+        '"type": "tool_call" to mark it as a call. ' +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        "Retry with the correct type field."
+      );
+    case "wrong_type":
+      return (
+        'Your previous response has an invalid "type" value. It must be exactly "tool_call" (case-sensitive). ' +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        'Retry with type set to exactly "tool_call".'
+      );
+    case "missing_name":
+      return (
+        "Your previous response is missing the required 'name' field. Every tool call must specify " +
+        "which tool to invoke. " +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        "Retry with a valid tool name from the list above."
+      );
+    case "invalid_name":
+      return (
+        "Your previous response specified a tool name that is not available. " +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        "Retry with a valid tool name from the list above."
+      );
+    case "missing_arguments":
+      return (
+        "Your previous response is missing the required 'arguments' field, or it is null/empty. " +
+        "Every tool call must include an 'arguments' object with the tool's declared parameters. " +
+        "Here is the expected format:\n" +
+        schemaExample +
+        "\n\n" +
+        "Available tools: " +
+        toolNames +
+        "\n" +
+        "Retry with a valid arguments object."
+      );
+    case "malformed_intent":
+    default:
+      return (
+        "Your previous response contained a tool call that the client could not read, so it was rejected. " +
+        "Retry the requested next action from scratch, following the tool contract exactly: " +
+        "reply with ONLY a JSON object (or an array of them for several calls) shaped like " +
+        '{"type": "tool_call", "name": "<tool>", "arguments": {...}, "_nonce": "' +
+        nonce +
+        '"}, with the ' +
+        "arguments as a single JSON object and the _nonce binding copied verbatim. " +
+        "If your previous reply was cut off, send every call again, complete: a single object, or one " +
+        "array holding all of them. No XML tags and no code fences."
+      );
+  }
+}
+
+/**
+ * Validate a parsed tool call object for required fields and correctness.
+ * Returns null if valid, or a failure reason string if invalid.
+ */
+function validateParsedToolCall(
+  call: unknown,
+  availableTools: CfToolDef[]
+):
+  | "invalid_json"
+  | "missing_type"
+  | "wrong_type"
+  | "missing_name"
+  | "invalid_name"
+  | "missing_arguments"
+  | null {
+  // Must be a valid JSON object
+  if (!call || typeof call !== "object" || Array.isArray(call)) {
+    return "invalid_json";
+  }
+
+  const obj = call as Record<string, unknown>;
+
+  // Check type field exists and is exactly "tool_call"
+  if (!Object.hasOwn(obj, "type")) {
+    return "missing_type";
+  }
+  if (obj.type !== "tool_call") {
+    return "wrong_type";
+  }
+
+  // Check name field exists, is non-null, and is a declared tool
+  if (!Object.hasOwn(obj, "name") || obj.name === null || obj.name === undefined) {
+    return "missing_name";
+  }
+  if (typeof obj.name !== "string") {
+    return "invalid_name";
+  }
+  const toolNames = new Set(availableTools.map((t) => t.name));
+  if (!toolNames.has(obj.name)) {
+    return "invalid_name";
+  }
+
+  // Check arguments field exists and is a non-null object
+  if (!Object.hasOwn(obj, "arguments") || obj.arguments === null || obj.arguments === undefined) {
+    return "missing_arguments";
+  }
+  if (typeof obj.arguments !== "object" || Array.isArray(obj.arguments)) {
+    return "missing_arguments";
+  }
+
+  return null;
+}
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
 
@@ -642,10 +795,15 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     };
 
     /**
+     * Sleep helper for retry delays.
+     */
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+    /**
      * Turn one raw reply into tool calls, held to the nonce + argument-schema
-     * contract. `null` means the reply expressed tool intent but did not hold up,
-     * so the caller retries once rather than shipping a turn that silently lost
-     * the call.
+     * contract. Returns null if the reply expressed tool intent but failed
+     * validation (triggering a retry), or an empty array if no tool calls.
+     * Returns the accepted calls on success.
      */
     const parseAttempt = (text: string): CfParsedToolCall[] | null => {
       if (!hasTools) return [];
@@ -656,6 +814,24 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
         return hasMalformedCfToolIntent(text, toolNames, availableTools) ? null : [];
       }
       return finalizeCfToolCalls(parsed, tools, nonce);
+    };
+
+    /**
+     * Validate tool calls from the parser output. Checks each call for required
+     * fields (type, name, arguments) and correctness. Returns null if all valid,
+     * or a failure reason string for the first invalid call.
+     */
+    const validateToolCalls = (calls: CfParsedToolCall[]): string | null => {
+      for (const call of calls) {
+        // The parser returns objects with id, name, arguments - we need to check
+        // the original parsed format which should have type, name, arguments
+        const validation = validateParsedToolCall(
+          { type: "tool_call", name: call.name, arguments: JSON.parse(call.arguments) },
+          availableTools
+        );
+        if (validation) return validation;
+      }
+      return null;
     };
 
     const attemptMessages = (repairNote?: string) =>
@@ -676,20 +852,66 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     let timedOut = attempt.timedOut;
     let toolCalls = parseAttempt(parser.text);
 
-    // A reply that carried tool intent but no readable call gets exactly one
-    // retry in a fresh room, with an explicit repair instruction. Before this an
-    // unrecognised markup shape silently became a text answer with the call
-    // buried inside it, and the client treated the turn as finished.
-    if (toolCalls === null) {
-      const repair = await runAttempt(attemptMessages(CF_TOOL_REPAIR_NOTE), "-repair");
-      if (repair.ok === true) {
-        parser = repair.parser;
-        timedOut = repair.timedOut;
-        // A second failure is answered as plain text: the model's own words are
-        // still more useful to the client than a 502, and a loop is worse.
-        toolCalls = parseAttempt(parser.text) ?? [];
+    // Check if the last message ends with ":" (mid-sentence stop) and retry
+    const lastAssistantMessage = [...originalMessages]
+      .reverse()
+      .find((m) => m.role === "assistant" && typeof m.content === "string");
+    const endsWithColon = lastAssistantMessage?.content?.trim().endsWith(":");
+
+    // Retry loop for tool call validation failures (up to MAX_TOOL_RETRIES times)
+    let retryCount = 0;
+    while (toolCalls === null && retryCount < MAX_TOOL_RETRIES) {
+      retryCount++;
+
+      // Determine the failure reason for targeted reminder
+      let failureReason:
+        | "invalid_json"
+        | "missing_type"
+        | "wrong_type"
+        | "missing_name"
+        | "invalid_name"
+        | "missing_arguments"
+        | "malformed_intent" = "malformed_intent";
+
+      if (hasTools && parser.text) {
+        const parsed = parseCfToolCalls(parser.text, availableTools, { nonce });
+        if (parsed.length > 0) {
+          const validationFailure = validateToolCalls(parsed);
+          if (validationFailure) {
+            failureReason = validationFailure;
+          }
+        }
+      }
+
+      const reminder = buildToolRetryReminder(failureReason, availableTools, nonce);
+      const retrySuffix = `-retry-${retryCount}`;
+
+      await sleep(RETRY_DELAY_MS);
+
+      const retry = await runAttempt(attemptMessages(reminder), retrySuffix);
+      if (retry.ok === true) {
+        parser = retry.parser;
+        timedOut = retry.timedOut;
+        toolCalls = parseAttempt(parser.text);
       } else {
         toolCalls = [];
+        break;
+      }
+    }
+
+    // A reply that carried tool intent but no readable call gets handled above
+    // via the retry loop. If still null after retries, treat as plain text.
+    if (toolCalls === null) {
+      toolCalls = [];
+    }
+
+    // Retry if last assistant message ends with colon (mid-sentence)
+    if (endsWithColon && toolCalls.length === 0 && !timedOut) {
+      const colonRetry = await runAttempt(attemptMessages(), "-colon-retry");
+      if (colonRetry.ok === true) {
+        parser = colonRetry.parser;
+        timedOut = colonRetry.timedOut;
+        toolCalls = parseAttempt(parser.text) ?? [];
       }
     }
 

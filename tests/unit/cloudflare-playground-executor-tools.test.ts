@@ -731,6 +731,8 @@ test("executor gives up after one repair retry instead of looping", async () => 
   const { executor, rooms } = makeSequencedExecutor([
     (chatId) => buildSuccessFrames(chatId, broken),
     (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
   ]);
 
   const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
@@ -744,7 +746,7 @@ test("executor gives up after one repair retry instead of looping", async () => 
   assert.equal(parsed.choices[0].finish_reason, "stop");
   assert.equal(parsed.choices[0].message.content, broken);
   assert.ok(!parsed.choices[0].message.tool_calls);
-  assert.equal(rooms.length, 2);
+  assert.equal(rooms.length, 4); // initial + 3 retries
 });
 
 test("executor retries a cut-off multi-call reply instead of executing a prefix", async () => {
@@ -804,6 +806,8 @@ test("executor never executes a call bound to another request's nonce", async ()
   const { executor, rooms } = makeSequencedExecutor([
     (chatId) => buildSuccessFrames(chatId, stale),
     (chatId) => buildSuccessFrames(chatId, stale),
+    (chatId) => buildSuccessFrames(chatId, stale),
+    (chatId) => buildSuccessFrames(chatId, stale),
   ]);
 
   const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
@@ -815,7 +819,7 @@ test("executor never executes a call bound to another request's nonce", async ()
 
   assert.equal(parsed.choices[0].finish_reason, "stop");
   assert.ok(!parsed.choices[0].message.tool_calls);
-  assert.equal(rooms.length, 2);
+  assert.equal(rooms.length, 4); // initial + 3 retries
 });
 
 test("executor strips the nonce from a correctly bound call", async () => {
