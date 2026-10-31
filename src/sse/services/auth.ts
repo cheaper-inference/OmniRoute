@@ -105,6 +105,7 @@ import {
   getRuntimeProviderProfile,
   recordModelLockoutFailure,
   retryHintBypassesMaxCooldownMs,
+  isAuthoritativeRetryHintSource,
   isProviderModelUnsupported400,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { copilotRejectionFlag, lockCopilotModelNotSupported } from "./copilotModelNotSupportedLock";
@@ -3139,6 +3140,10 @@ export async function markAccountUnavailable(
           exactCooldownMs:
             fallbackResult.usedUpstreamRetryHint === true ? fallbackResult.cooldownMs : null,
           maxCooldownMs: mlSettings.maxCooldownMs,
+          // A structured upstream reset (reset_at/retry_after JSON or header) is the
+          // provider's own clock: a new, shorter hint must shrink a stale longer
+          // lock, otherwise the model stays parked after the provider recovered.
+          authoritativeBodyReset: isAuthoritativeRetryHintSource(fallbackResult.retryHintSource),
         }
       );
       updateProviderConnection(connectionId, {
