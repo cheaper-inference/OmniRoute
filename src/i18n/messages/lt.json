@@ -5679,6 +5679,7 @@
     "filterError": "Klaida",
     "filterBanned": "Užblokuotas",
     "filterCreditsExhausted": "Kreditai išnaudoti",
+    "filterVerificationRequired": "Reikia patvirtinimo",
     "accountSearchPlaceholder": "Ieškoti paskyrų…",
     "noFilteredConnections": "Nė vienas ryšys neatitinka dabartinio filtro.",
     "failedSetAlias": "Nepavyko nustatyti alternatyvaus pavadinimo",

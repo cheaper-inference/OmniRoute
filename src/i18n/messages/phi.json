@@ -5679,6 +5679,7 @@
     "filterError": "Pagkakamali",
     "filterBanned": "Naka-ban",
     "filterCreditsExhausted": "Ubos na ang kredito",
+    "filterVerificationRequired": "Kailangan ng beripikasyon",
     "accountSearchPlaceholder": "Maghanap ng mga account…",
     "noFilteredConnections": "Walang koneksyon na tumutugma sa kasalukuyang filter.",
     "failedSetAlias": "Nabigong itakda ang alias",

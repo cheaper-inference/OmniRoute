@@ -5679,6 +5679,7 @@
     "filterError": "Hiba",
     "filterBanned": "Letiltva",
     "filterCreditsExhausted": "Elfogyott kreditek",
+    "filterVerificationRequired": "Ellenőrzés szükséges",
     "accountSearchPlaceholder": "Fiókok keresése…",
     "noFilteredConnections": "Egyetlen kapcsolat sem felel meg a jelenlegi szűrőnek.",
     "failedSetAlias": "Nem sikerült beállítani az aliast",

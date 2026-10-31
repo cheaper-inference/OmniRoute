@@ -5756,6 +5756,7 @@
     "filterError": "错误",
     "filterBanned": "封禁",
     "filterCreditsExhausted": "额度耗尽",
+    "filterVerificationRequired": "需要验证",
     "accountSearchPlaceholder": "搜索账户...",
     "noFilteredConnections": "没有符合当前筛选条件的连接。",
     "failedSetAlias": "设置别名失败",

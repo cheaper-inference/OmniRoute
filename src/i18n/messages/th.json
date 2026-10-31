@@ -5679,6 +5679,7 @@
     "filterError": "ข้อผิดพลาด",
     "filterBanned": "ถูกแบน",
     "filterCreditsExhausted": "เครดิตหมด",
+    "filterVerificationRequired": "ต้องยืนยันตัวตน",
     "accountSearchPlaceholder": "ค้นหาบัญชี…",
     "noFilteredConnections": "ไม่มีการเชื่อมต่อที่ตรงกับตัวกรองปัจจุบัน",
     "failedSetAlias": "ไม่สามารถตั้งชื่อแทนได้",

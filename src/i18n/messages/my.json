@@ -5756,6 +5756,7 @@
     "filterError": "အမှား",
     "filterBanned": "ပိတ်ပင်ခံထားရသည်",
     "filterCreditsExhausted": "ခရက်ဒစ်များ ကုန်ဆုံးသွားပြီ",
+    "filterVerificationRequired": "အတည်ပြုရန် လိုအပ်သည်",
     "accountSearchPlaceholder": "အကောင့်များကို ရှာဖွေပါ…",
     "noFilteredConnections": "လက်ရှိစစ်ထုတ်မှုနှင့် ကိုက်ညီသော ချိတ်ဆက်မှုမရှိပါ။",
     "failedSetAlias": "အမည်လွှဲ သတ်မှတ်၍မရပါ",
