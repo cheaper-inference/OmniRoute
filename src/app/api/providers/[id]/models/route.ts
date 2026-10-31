@@ -1603,8 +1603,9 @@ export async function GET(
 
         const modelsResp = await safeOutboundFetch(
           "https://platformapi.innerai.com/api/v1/ai_models",
-          { headers: innerAiHeaders },
-          getProviderOutboundGuard(provider)
+          // The guard is an option, not a third positional argument; passing it
+          // separately left this request running under the default "none".
+          { headers: innerAiHeaders, guard: getProviderOutboundGuard() }
         );
         if (!modelsResp.ok) {
           throw new Error(`Inner.ai models API returned HTTP ${modelsResp.status}`);

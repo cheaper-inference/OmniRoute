@@ -78,8 +78,11 @@ import {
   isIntelligentBuilderStrategy,
   parseQualifiedModel,
   resolveComboBuilderProviderId,
+  type ComboBuilderStage,
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
+import type { z } from "zod";
+import { comboRuntimeConfigSchema } from "@/shared/validation/schemas/combo";
 import AutoComboCatalog from "./AutoComboCatalog";
 import {
   AutoComboTruncatedNote,
@@ -135,11 +138,13 @@ const STRATEGY_OPTIONS = ROUTING_STRATEGIES.map((strategy) => ({
 }));
 
 const STRATEGY_LABEL_FALLBACK = {
+  priority: "Priority",
   "context-relay": "Context Relay",
   "reset-aware": "Reset-Aware RR",
 };
 
 const STRATEGY_DESC_FALLBACK = {
+  priority: "Use one primary model and keep the fallback chain short and reliable.",
   "context-relay":
     "Priority-style routing with automatic context handoffs when account rotation happens.",
   "reset-aware":
@@ -258,14 +263,20 @@ const NON_PERSISTED_COMBO_CONFIG_KEYS = new Set([
   "healthCheckTimeoutMs",
 ]);
 
-function sanitizeComboRuntimeConfig(config) {
+/**
+ * The combo runtime config as the API validates it. Named from the zod schema
+ * rather than hand-written so the client and the request validator cannot drift.
+ */
+type ComboRuntimeConfig = z.infer<typeof comboRuntimeConfigSchema>;
+
+function sanitizeComboRuntimeConfig(config?: Record<string, unknown> | null): ComboRuntimeConfig {
   if (!config || typeof config !== "object") return {};
   return Object.fromEntries(
     Object.entries(config).filter(
       ([key, value]) =>
         value !== undefined && value !== null && !NON_PERSISTED_COMBO_CONFIG_KEYS.has(key)
     )
-  );
+  ) as ComboRuntimeConfig;
 }
 
 function updateFusionTuning(config, field, rawValue) {
@@ -466,7 +477,12 @@ function isStaleIntelligentSelection(
   if (intelligentCombos.length === 0) return true;
   return !intelligentCombos.some((combo) => combo.id === selectedId);
 }
-const COMBO_FORM_STAGE_META = [
+const COMBO_FORM_STAGE_META: ReadonlyArray<{
+  id: ComboBuilderStage;
+  fallbackLabel: string;
+  fallbackDescription: string;
+  icon: string;
+}> = [
   {
     id: "basics",
     fallbackLabel: "Basics",
@@ -2259,7 +2275,7 @@ function ComboFormModal({
   const [manualModelError, setManualModelError] = useState("");
   const [builderComboRefName, setBuilderComboRefName] = useState("");
   const [builderError, setBuilderError] = useState("");
-  const [builderStage, setBuilderStage] = useState<string>(COMBO_BUILDER_STAGES[0]);
+  const [builderStage, setBuilderStage] = useState<ComboBuilderStage>(COMBO_BUILDER_STAGES[0]);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [config, setConfig] = useState(sanitizeComboRuntimeConfig(combo?.config));
   // Validate persisted enum; ensure reset on combo change not just first mount.

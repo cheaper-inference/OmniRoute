@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import type { PoolAllocation } from "@/lib/quota/dimensions";
 import type { PoolUsageSnapshot } from "@/lib/quota/types";
 import { getSeriesColor } from "@/shared/components/analytics/chartColors";
+import type { JSX } from "react";
 
 export interface StackedAllocationBarProps {
   allocations: PoolAllocation[];

@@ -20,6 +20,7 @@ import { MusicExampleCard } from "@/app/(dashboard)/dashboard/media-providers/co
 import type { ServiceKind } from "@/shared/constants/providers";
 import { AI_PROVIDERS } from "@/shared/constants/providers";
 import { providerText } from "../providerPageHelpers";
+import type { JSX } from "react";
 
 export const MEDIA_SERVICE_KINDS: ServiceKind[] = [
   "embedding",

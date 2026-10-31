@@ -246,7 +246,7 @@ export async function refreshWithRetry(
         if (result === NO_REFRESH_NEEDED) return null;
         log?.warn?.(
           "TOKEN_REFRESH",
-          `Unrecoverable refresh error for ${key}: ${result.error} — skipping retries`
+          `Unrecoverable refresh error for ${key}: ${(result as { error?: string }).error} — skipping retries`
         );
         return result;
       }

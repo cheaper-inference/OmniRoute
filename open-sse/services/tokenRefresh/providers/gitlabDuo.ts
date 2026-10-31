@@ -1,4 +1,3 @@
-// @ts-nocheck
 // Extracted from open-sse/services/tokenRefresh.ts — see ../shared.ts for
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS } from "../../../config/constants.ts";

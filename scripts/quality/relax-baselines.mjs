@@ -193,6 +193,9 @@ for (const f of [
   "api-typecheck-baseline.json",
   "dashboard-typecheck-baseline.json",
   "open-sse-typecheck-baseline.json",
+  // build-typecheck-baseline.json is deliberately absent: it was frozen after the
+  // 2026-08-30 velocity phase and holds raw counts, so loosening it here would
+  // grant new headroom rather than preserve historical headroom.
 ]) {
   if (!fs.existsSync(Q(f))) continue;
   const j = read(f);

@@ -82,3 +82,28 @@ test("saved family reader preserves the lock sets and deadlines of hydration", (
     clearAllModelLockouts();
   }
 });
+
+// argon is a real bucket (gemini-4* / gemini_4_argon_weekly), and
+// persistAntigravityFamilyCooldown writes it, so the reader has to return it.
+// Before the parameter type was widened this case could not even be expressed.
+test("saved family reader returns an argon deadline without leaking it to other families", (t) => {
+  const now = Date.parse("2099-01-01T00:00:00Z");
+  t.mock.method(Date, "now", () => now);
+  const until = now + 600_000;
+
+  assert.equal(
+    getAntigravityFamilyCooldownUntil({ antigravityFamilyRateLimitedUntil: { argon: until } }, "argon", now),
+    until,
+    "a stored argon deadline must be readable"
+  );
+  assert.equal(
+    getAntigravityFamilyCooldownUntil({ antigravityFamilyRateLimitedUntil: { argon: until } }, "gemini", now),
+    null,
+    "an argon deadline must not answer for gemini"
+  );
+  assert.equal(
+    getAntigravityFamilyCooldownUntil({ antigravityFamilyRateLimitedUntil: { gemini: until } }, "argon", now),
+    null,
+    "a gemini deadline must not answer for argon"
+  );
+});

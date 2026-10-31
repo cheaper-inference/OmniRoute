@@ -50,3 +50,5 @@ for (const name of allTemplates) {
 }
 
 console.log(JSON.stringify(results, null, 2));
+
+export {};

@@ -807,12 +807,19 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    // The credential resolver returns a union of fifteen shapes; only the
+    // rate-limited one carries these fields. Same narrowing the call sites above use.
+    const rateLimitInfo = credentials as {
+      allRateLimited?: boolean;
+      retryAfter?: string | number | Date | null;
+      retryAfterHuman?: string;
+    };
+    if (rateLimitInfo.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
-        credentials.retryAfter,
-        credentials.retryAfterHuman
+        rateLimitInfo.retryAfter,
+        rateLimitInfo.retryAfterHuman
       );
     }
     const credentialDetails = credentials as {
@@ -839,7 +846,12 @@ async function postHandler(request: Request, _context?: unknown) {
 
     const editImage = () =>
       runImageRequestWithAccounting(
-        editAccounting(accounting, parsed.provider, parsed.model, credentials),
+        editAccounting(
+          accounting,
+          parsed.provider,
+          parsed.model,
+          credentials as { apiKey?: string; accessToken?: string }
+        ),
         () =>
           handleCodexImageEdit({
             provider: parsed.provider,
@@ -888,12 +900,19 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    // The credential resolver returns a union of fifteen shapes; only the
+    // rate-limited one carries these fields. Same narrowing the call sites above use.
+    const rateLimitInfo = credentials as {
+      allRateLimited?: boolean;
+      retryAfter?: string | number | Date | null;
+      retryAfterHuman?: string;
+    };
+    if (rateLimitInfo.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
-        credentials.retryAfter,
-        credentials.retryAfterHuman
+        rateLimitInfo.retryAfter,
+        rateLimitInfo.retryAfterHuman
       );
     }
 
@@ -911,12 +930,14 @@ async function postHandler(request: Request, _context?: unknown) {
             n: 1,
           },
           images,
-          credentials,
+          credentials: credentials as Record<string, unknown>,
           log,
         })
     );
 
-    if (result.success) {
+    // Both members declare `success: boolean`, so that is not a discriminant; the
+    // presence of `data` is.
+    if ("data" in result) {
       await clearRecoveredProviderState(credentials);
       return jsonResponse(result.data);
     }
@@ -976,12 +997,19 @@ async function postHandler(request: Request, _context?: unknown) {
         `No credentials for provider: ${parsed.provider}`
       );
     }
-    if (credentials.allRateLimited) {
+    // The credential resolver returns a union of fifteen shapes; only the
+    // rate-limited one carries these fields. Same narrowing the call sites above use.
+    const rateLimitInfo = credentials as {
+      allRateLimited?: boolean;
+      retryAfter?: string | number | Date | null;
+      retryAfterHuman?: string;
+    };
+    if (rateLimitInfo.allRateLimited) {
       return unavailableResponse(
         HTTP_STATUS.RATE_LIMITED,
         `[${parsed.provider}] All accounts rate limited`,
-        credentials.retryAfter,
-        credentials.retryAfterHuman
+        rateLimitInfo.retryAfter,
+        rateLimitInfo.retryAfterHuman
       );
     }
 
@@ -992,7 +1020,7 @@ async function postHandler(request: Request, _context?: unknown) {
           provider: parsed.provider,
           model: parsed.model,
           baseUrl: providerConfig.baseUrl,
-          credentials,
+          credentials: credentials as { apiKey?: string; accessToken?: string },
           prompt,
           imageBytes,
           imageMime,
@@ -1114,22 +1142,44 @@ async function postHandler(request: Request, _context?: unknown) {
       `No credentials for custom image provider: ${customProviderId}`
     );
   }
-  if (credentials.allRateLimited) {
+  // The credential resolver returns a union of fifteen shapes; only the
+  // rate-limited one carries these fields. Same narrowing the call sites above use.
+  const rateLimitInfo = credentials as {
+    allRateLimited?: boolean;
+    retryAfter?: string | number | Date | null;
+    retryAfterHuman?: string;
+  };
+  if (rateLimitInfo.allRateLimited) {
     return unavailableResponse(
       HTTP_STATUS.RATE_LIMITED,
       `[${customProviderId}] All accounts rate limited`,
-      credentials.retryAfter,
-      credentials.retryAfterHuman
+      rateLimitInfo.retryAfter,
+      rateLimitInfo.retryAfterHuman
     );
   }
 
   const result = await runImageRequestWithAccounting(
-    editAccounting(accounting, customProviderId, customModel, credentials),
+    editAccounting(
+      accounting,
+      customProviderId,
+      customModel,
+      credentials as {
+        apiKey?: string;
+        accessToken?: string;
+        baseUrl?: unknown;
+        providerSpecificData?: { baseUrl?: unknown };
+      }
+    ),
     () =>
       handleOpenAIImageEdit({
         provider: customProviderId,
         model: customModel,
-        credentials,
+        credentials: credentials as {
+          apiKey?: string;
+          accessToken?: string;
+          baseUrl?: unknown;
+          providerSpecificData?: { baseUrl?: unknown };
+        },
         prompt,
         imageBytes,
         imageMime,

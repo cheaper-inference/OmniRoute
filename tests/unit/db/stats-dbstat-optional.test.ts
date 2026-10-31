@@ -37,7 +37,7 @@ function createFakeDb({
   failOnlyOn,
   nullSize,
 }: FakeOptions = {}): SqliteAdapter {
-  const prepare = (sql: string): PreparedStatement => {
+  const prepare = ((sql: string): PreparedStatement => {
     const touchesDbstat = /\bdbstat\b/i.test(sql);
 
     return {
@@ -67,7 +67,7 @@ function createFakeDb({
         throw new Error(`unexpected all(): ${sql}`);
       },
     };
-  };
+  }) as unknown as SqliteAdapter["prepare"];
 
   return {
     driver: "sql.js",

@@ -15,6 +15,7 @@ import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
 import type { OmniSkill } from "./OmniSkillCard";
+import type { JSX } from "react";
 
 interface SkillDetail extends OmniSkill {
   schema?: {

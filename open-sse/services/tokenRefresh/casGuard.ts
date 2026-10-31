@@ -1,4 +1,3 @@
-// @ts-nocheck
 //
 // Compare-and-swap (CAS) guard on the refresh persist — extracted from
 // open-sse/services/tokenRefresh.ts. See ../shared.ts for provenance notes.

@@ -66,7 +66,8 @@ export const clientApiPolicy: RoutePolicy = {
     if (looksLikeEntraJwt(primary) && (await isEntraSsoEnabled())) {
       const verdict = await evaluateSsoAuth(primary);
       if (!verdict.ok) {
-        return reject(verdict.status, verdict.code, verdict.message);
+        const failure = verdict as { status: number; code: string; message: string };
+        return reject(failure.status, failure.code, failure.message);
       }
       return allow({
         kind: "sso_user",

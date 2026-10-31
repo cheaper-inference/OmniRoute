@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import type { SkillCoverage } from "@/lib/agentSkills/types";
+import type { JSX } from "react";
 
 interface CoverageBarProps {
   coverage: SkillCoverage;

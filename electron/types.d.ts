@@ -25,12 +25,34 @@ export interface ServerStatus {
   remoteUrl?: string;
 }
 
+/** Payload of the `update-status` channel; electron/main.js emits these fields. */
+export interface UpdateStatus {
+  status: string;
+  version?: string;
+  percent?: number;
+  [key: string]: unknown;
+}
+
 export interface ElectronAPI {
   // ── Invoke (async) ─────────────────────────────────────
   getAppInfo(): Promise<AppInfo>;
   openExternal(url: string): Promise<void>;
   getDataDir(): Promise<string>;
   restartServer(): Promise<{ success: boolean }>;
+  getAppVersion(): Promise<string>;
+
+  // ── Auto-update (preload.js: check-for-updates / download-update /
+  //    install-update, plus the update-status receive channel) ────────────
+  checkForUpdates(): Promise<void>;
+  downloadUpdate(): Promise<void>;
+  installUpdate(): Promise<void>;
+
+  // ── Autostart ──────────────────────────────────────────────────────────
+  // main.js returns a plain boolean on every platform branch (true on success,
+  // false on a thrown error), and AppearanceTab branches on it.
+  getAutostartStatus(): Promise<boolean>;
+  enableAutostart(): Promise<boolean>;
+  disableAutostart(): Promise<boolean>;
 
   // ── Send (fire-and-forget) ─────────────────────────────
   minimizeWindow(): void;
@@ -40,6 +62,7 @@ export interface ElectronAPI {
   // ── Receive (returns disposer for cleanup) ─────────────
   onServerStatus(callback: (data: ServerStatus) => void): () => void;
   onPortChanged(callback: (port: number) => void): () => void;
+  onUpdateStatus(callback: (data: UpdateStatus) => void): () => void;
 
   // ── Static Properties ──────────────────────────────────
   isElectron: boolean;

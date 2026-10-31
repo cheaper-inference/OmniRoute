@@ -109,10 +109,18 @@ export async function evaluateSsoAuth(token: string): Promise<SsoAuthResult> {
   }
 
   const verified = await verifyEntraToken(token, config);
-  if (!verified.ok) return verified;
+  // `strict` is off in this tsconfig, so discriminating the union on `ok` does not
+  // narrow; the two failure shapes are identical, so state the read explicitly.
+  if (!verified.ok) {
+    const failure = verified as { status: number; code: string; message: string };
+    return { ok: false, status: failure.status, code: failure.code, message: failure.message };
+  }
 
   const groups = await resolveKeyGroups(verified.identity, config);
-  if (!groups.ok) return groups;
+  if (!groups.ok) {
+    const failure = groups as { status: number; code: string; message: string };
+    return { ok: false, status: failure.status, code: failure.code, message: failure.message };
+  }
 
   let secret: string | null;
   try {

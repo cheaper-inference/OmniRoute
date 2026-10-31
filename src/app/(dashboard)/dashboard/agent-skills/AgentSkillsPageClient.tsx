@@ -16,6 +16,7 @@ import { McpA2aLinksBar } from "./components/McpA2aLinksBar";
 import { SkillCard } from "./components/SkillCard";
 import { SkillPreviewPane } from "./components/SkillPreviewPane";
 import type { AgentSkill, SkillCoverage } from "@/lib/agentSkills/types";
+import type { JSX } from "react";
 
 type FilterCategory = "all" | "api" | "cli" | "config";
 

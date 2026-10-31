@@ -35,8 +35,19 @@ export type ProviderPlan = z.infer<typeof ProviderPlanSchema>;
 
 export const QuotaPoolSchema = z.object({
   id: z.string().min(1),
+  /** Primary / legacy single connection. Kept for back-compat. */
   connectionId: z.string().min(1),
+  /**
+   * Every member connection; the primary is always connectionIds[0].
+   *
+   * Optional because older payloads and the legacy single-connection form carry
+   * only connectionId, and consumers already fall back to it. The DB layer has
+   * this as a required field after backfill.
+   */
+  connectionIds: z.array(z.string()).optional(),
   name: z.string().min(1),
+  /** Group this pool belongs to. Defaults to 'group-demo' for legacy pools. */
+  groupId: z.string().optional(),
   createdAt: z.string().datetime(),
   allocations: z.array(PoolAllocationSchema).default([]),
 });
