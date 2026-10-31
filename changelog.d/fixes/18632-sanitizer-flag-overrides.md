@@ -1,0 +1,1 @@
+- **fix(security):** the input sanitizer now honors dashboard Feature Flags overrides — `INPUT_SANITIZER_ENABLED` and `PII_REDACTION_ENABLED` resolve DB override first with the env var as fallback (the same pattern as `INJECTION_GUARD_MODE`), so toggling them in the Feature Flags UI takes effect without an env edit or restart (#18632)
