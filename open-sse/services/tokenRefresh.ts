@@ -213,6 +213,11 @@ export function setRefreshMutexMaxMsForTest(ms: number | null) {
   refreshMutexMaxMs = typeof ms === "number" ? ms : REFRESH_MUTEX_MAX_MS_DEFAULT;
 }
 
+// Cap for the grouped refresh wave (getAllAccessTokens): keeps one OAuth token
+// endpoint from seeing hundreds of parallel refreshes, same order as the quota
+// fetch caps in combo strategies.
+const BULK_TOKEN_REFRESH_CONCURRENCY = 8;
+
 // Token Rotation Map (codex-multi-auth pattern) lives in
 // ./tokenRefresh/rotationMap.ts — see that leaf for the in-memory rotation
 // cache + getRefreshCacheKey. Imported above and re-exported for tests.
@@ -830,28 +835,117 @@ export function formatProviderCredentials(provider, credentials, log) {
   }
 }
 
+/** Connection id when usable (a non-empty string), else null. */
+function bulkConnectionId(connection) {
+  return typeof connection.connectionId === "string" && connection.connectionId
+    ? connection.connectionId
+    : null;
+}
+
+/** Result map key: per connection when it has an id, else by provider. */
+function bulkConnectionKey(connection) {
+  const connectionId = bulkConnectionId(connection);
+  return connectionId ? `${connection.provider}:${connectionId}` : connection.provider;
+}
+
+/** Write a rotated refresh result back to the connection row. */
+async function persistBulkRefreshResult(connectionId, refreshResult) {
+  const { updateProviderConnection } = await import("@/lib/db/providers");
+  const updateData: Record<string, unknown> = {
+    accessToken: refreshResult.accessToken,
+  };
+  if (refreshResult.refreshToken) {
+    updateData.refreshToken = refreshResult.refreshToken;
+  }
+  if (refreshResult.expiresAt) {
+    updateData.expiresAt = refreshResult.expiresAt;
+    updateData.tokenExpiresAt = refreshResult.expiresAt;
+  } else if (refreshResult.expiresIn) {
+    const expiresAt = new Date(Date.now() + refreshResult.expiresIn * 1000).toISOString();
+    updateData.expiresAt = expiresAt;
+    updateData.tokenExpiresAt = expiresAt;
+  }
+  await updateProviderConnection(connectionId, updateData);
+}
+
+/**
+ * Refresh one grouped-connection credential and store the token in `results`
+ * under its bulk key. A usable result carries an access token; error markers
+ * and failures leave the pre-seeded null in place. Rotated refresh tokens are
+ * persisted to the connection row when it has an id.
+ */
+async function refreshBulkConnection(connection, results, log) {
+  const key = bulkConnectionKey(connection);
+  const connectionId = bulkConnectionId(connection);
+  const onPersist = connectionId
+    ? async (refreshResult) => {
+        try {
+          await persistBulkRefreshResult(connectionId, refreshResult);
+        } catch (persistErr) {
+          log?.warn?.(
+            "TOKEN_REFRESH",
+            `Bulk refresh: failed to persist rotated token for ${key}: ${
+              persistErr instanceof Error ? persistErr.message : String(persistErr)
+            }`
+          );
+        }
+      }
+    : undefined;
+
+  try {
+    const token = await getAccessToken(
+      connection.provider,
+      {
+        connectionId: connectionId || undefined,
+        refreshToken: connection.refreshToken,
+        accessToken: connection.accessToken || null,
+        expiresAt: connection.expiresAt,
+        providerSpecificData: connection.providerSpecificData,
+      },
+      log,
+      null,
+      onPersist
+    );
+    if (token && typeof token === "object" && token.accessToken) {
+      results[key] = token;
+    }
+  } catch {
+    results[key] = null;
+  }
+}
+
 /**
  * Get all access tokens for a user
+ *
+ * Refreshes the user's active connections in a bounded wave (up to
+ * BULK_TOKEN_REFRESH_CONCURRENCY in flight) instead of serially. Results are
+ * keyed per connection (`provider:connectionId`) when the connection has an id,
+ * otherwise by provider; failed connections are present with a `null` value so
+ * callers can tell "refreshed" from "failed" without guessing.
  */
 export async function getAllAccessTokens(userInfo, log) {
   const results = {};
+  const connections = userInfo?.connections;
+  if (connections && Array.isArray(connections)) {
+    const eligible = connections.filter((connection) => connection.isActive && connection.provider);
 
-  if (userInfo.connections && Array.isArray(userInfo.connections)) {
-    for (const connection of userInfo.connections) {
-      if (connection.isActive && connection.provider) {
-        const token = await getAccessToken(
-          connection.provider,
-          {
-            refreshToken: connection.refreshToken,
-          },
-          log
-        );
-
-        if (token) {
-          results[connection.provider] = token;
-        }
-      }
+    // Pre-seed so a failed connection is present with null (entry order preserved).
+    for (const connection of eligible) {
+      results[bulkConnectionKey(connection)] = null;
     }
+
+    const next = { index: 0 };
+    const worker = async () => {
+      while (next.index < eligible.length) {
+        await refreshBulkConnection(eligible[next.index++], results, log);
+      }
+    };
+
+    await Promise.all(
+      Array.from({ length: Math.min(BULK_TOKEN_REFRESH_CONCURRENCY, eligible.length) }, () =>
+        worker()
+      )
+    );
   }
 
   return results;

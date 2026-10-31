@@ -1,0 +1,1 @@
+- **perf(sse):** The grouped token refresh now updates every connection in one bounded wave instead of one serial round trip per connection, keeps one result per connection, and writes rotated refresh tokens back to the connection row. ([#18666](https://github.com/cheaper-inference/OmniRoute/pull/18666)) — thanks @maxmad64bis
