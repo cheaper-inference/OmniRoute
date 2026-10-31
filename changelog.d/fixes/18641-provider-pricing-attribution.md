@@ -1,0 +1,1 @@
+- **fix(api):** Resolve OpenCode Go pricing attribution while preserving pricing precedence ([#18641](https://github.com/cheaper-inference/OmniRoute/pull/18641)) — thanks @trespassmk

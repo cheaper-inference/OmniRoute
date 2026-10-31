@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { z } from "zod";
+import { updatePricingSchema } from "../../src/shared/validation/schemas/pricing.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-pricing-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -15,6 +17,7 @@ interface PricingWithSourcesPayload {
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const pricingRoute = await import("../../src/app/api/pricing/route.ts");
+const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
 
 function resetDb() {
   core.resetDbInstance();
@@ -24,6 +27,44 @@ function resetDb() {
 
 test.beforeEach(() => {
   resetDb();
+});
+
+test("pricing GET exposes historical Go prices under the canonical bucket and source", async () => {
+  core
+    .getDbInstance()
+    .prepare("INSERT INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "pricing_synced",
+      "opencode_go",
+      JSON.stringify({ "glm-5.2": { input: 1.4, output: 4.4, cached: 0.26 } })
+    );
+  invalidateDbCache("pricing");
+  const legacyResponse = await pricingRoute.GET(new Request("http://localhost/api/pricing"));
+  assert.equal(legacyResponse.status, 200);
+  const legacy = updatePricingSchema.parse(await legacyResponse.json());
+  assert.deepEqual(legacy["opencode-go"]["glm-5.2"], { input: 1.4, output: 4.4, cached: 0.26 });
+  assert.equal(legacy.opencode_go, undefined);
+  const response = await pricingRoute.GET(
+    new Request("http://localhost/api/pricing?includeSources=1")
+  );
+  assert.equal(response.status, 200);
+  const payload = z
+    .object({
+      pricing: updatePricingSchema,
+      sourceMap: z.record(
+        z.string(),
+        z.record(z.string(), z.enum(["default", "litellm", "modelsDev", "user"]))
+      ),
+    })
+    .strict()
+    .parse(await response.json());
+  assert.deepEqual(payload.pricing["opencode-go"]["glm-5.2"], {
+    input: 1.4,
+    output: 4.4,
+    cached: 0.26,
+  });
+  assert.equal(payload.sourceMap["opencode-go"]["glm-5.2"], "litellm");
+  assert.equal(payload.sourceMap.opencode_go, undefined);
 });
 
 test.after(() => {
