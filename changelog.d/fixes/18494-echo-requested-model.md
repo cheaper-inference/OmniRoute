@@ -1,0 +1,1 @@
+- **fix(sse):** the response-model echo now writes the model name the client actually sent (`clientRawRequest.body.model`) instead of the combo leaf `provider/model` the dispatcher rewrote the body to — combo, nested-combo and alias responses stop advertising the leaf to strict clients like the Codex CLI model picker and Claude Desktop validation (#18494)
