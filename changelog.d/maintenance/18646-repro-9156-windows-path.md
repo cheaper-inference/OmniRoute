@@ -1,0 +1,1 @@
+- **test(cli):** `repro-9156.test.ts` resolves its own path with `fileURLToPath`, so it no longer builds a `D:\D:\...` path on Windows ([#18646](https://github.com/diegosouzapw/OmniRoute/pull/18646)) — thanks @AndresDiagoM
