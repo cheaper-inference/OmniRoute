@@ -1,0 +1,1 @@
+- **fix(release):** ten open-sse files import the numeric helpers from `open-sse/utils/numeric.ts` instead of the `src/shared/utils/numeric.ts` re-export, removing 10 open-sse → src edges; the seam test now fails if an engine file goes back to the re-export ([#18627](https://github.com/diegosouzapw/OmniRoute/pull/18627)) — thanks @AndresDiagoM

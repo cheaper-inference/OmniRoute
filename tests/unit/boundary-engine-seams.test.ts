@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
 
 // The open-sse → src boundary ratchet (quality-baseline.json) counts one edge per importing file.
 // These seams keep engine code off src/: the numeric helpers live in open-sse and src re-exports
@@ -38,6 +39,17 @@ test("engine files touched by the seams do not import src/ directly", () => {
       f
     );
   }
+});
+
+test("no open-sse file imports the numeric helpers through the src re-export", () => {
+  const offenders = readdirSync("open-sse", { recursive: true, encoding: "utf8" })
+    .filter((f) => /\.(?:ts|tsx|mts|js|mjs)$/.test(f) && !f.includes("node_modules"))
+    .filter((f) =>
+      /from ["'](?:@\/|(?:\.\.\/)+src\/)shared\/utils\/numeric(?:\.ts)?["']/.test(
+        readFileSync(join("open-sse", f), "utf8")
+      )
+    );
+  assert.deepEqual(offenders, [], "import from open-sse/utils/numeric.ts instead");
 });
 
 test("combo services reach the dashboard event bus through rrDashboardEvents", async () => {

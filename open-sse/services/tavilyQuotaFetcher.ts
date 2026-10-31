@@ -26,7 +26,7 @@ import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { isUrlHost } from "../utils/urlHost.ts";
-import { toNumberOrNull } from "@/shared/utils/numeric";
+import { toNumberOrNull } from "../utils/numeric.ts";
 
 const TAVILY_USAGE_URL = "https://api.tavily.com/usage";
 const CACHE_TTL_MS = 60_000;
