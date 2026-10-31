@@ -4,228 +4,89 @@
 
 ---
 
-> **Status:** referenza — l-istandardizzazzjoni deskritta hawnhekk hija **implimentata** (fażijiet 1–6: wallpaper bi gradilja, primitives, ċentralizzazzjoni tal-kuluri tal-istatus, token mono, migrazzjoni tat-tokens ta’ DataTable, focus-ring → accent, primitives ta’ Checkbox/Textarea, `cn()` → tailwind-merge, gradilja fuq kull skrin awtonomu, qoxra tal-kontenut fluwida għal 4K, uċuħ opaki tat-tabella tad-data). Dan id-dokument huwa d-deskrizzjoni kanonika tat-tokens tad-disinn, tal-komponenti u tal-konvenzjonijiet tad-dashboard; l-istruttura f’fażijiet hawn taħt tinżamm bħala r-raġunament wara kull deċiżjoni.
-> **Ambitu:** id-dashboard ta’ OmniRoute (`src/`) u s-sit tal-marketing (`_mono_repo/omnirouteSite/`) jaqsmu **identità viżiva waħda** — l-istess sfond bi gradilja bħal karta grafika (32px), l-istess tokens tal-kulur, u komponenti standardizzati.
->
-> Noti prattiċi għall-mantenituri:
->
-> - Diversi valuri hex hardcoded li għad fadal huma **intenzjonati** (terminal tal-console dejjem skur, strokes SVG ta’ ReactFlow) u **M’GĦANDHOMX** jiġu migrati lejn tokens.
-> - Gradilja "akbar" fuq istanza li tkun qed taħdem hija build antika, mhux problema fil-code — id-daqs tal-gradilja huwa 32px, identiku għal dak tas-sit.
-> - Il-valuri `--table-*` tat-tema skura huma identiċi byte b’byte għall-rgba hardcoded ta’ qabel il-migrazzjoni; it-tema ċara ġiet irranġata (kienet b’mod żbaljat dejjem skura minħabba fallbacks `var()` inattivi).
+> **Status:** id-daxxbord huwa mibni fuq il-** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), mibjugħa bħala l-ispazju tax-xogħol `packages/ui-kit` (`@omniroute/ui-kit`; l-istampa upstream hija ippinjata `packages/ui-kit/UPSTREAM.md` u mħarsa minn `npm run check:ui-kit-snapshot`). Id-dawl huwa t-tema kanonika; il-preferenza default hija `system`. L-aċċent huwa Keak lime (`--ci-color-accent`). Switzer hija l-familja waħda għal UI, wiri u test tal-kodiċi (`--ci-font-ui`; `--ci-font-display` u `--ci-font-mono` jirrisolvu għaliha), ospitat waħdu mill-kit innifsu (`packages/ui-kit/src/ci-fonts.css`, importat minn `ci-tokens.css`). Kull ikona hija glifa Lucide.
 
----
+## 1. Fejn jinsabu l-affarijiet
 
-## 1. Għan
+- **Kit.** `packages/ui-kit/src` hija kopja identika byte għal byte tal-`src/` tal-upstream fil-commit imfissar f'`packages/ui-kit/UPSTREAM.md` (li jirrekordja wkoll l-awtorizzazzjoni tal-liċenzja); `PATCHES.md` jelenka l-patches lokali (l-ebda). Jintuża bħala sors, mingħajr ebda build: `next.config.mjs` jagħmilha transpile, u `tsconfig.json` jimmappa `@omniroute/ui-kit` → `packages/ui-kit/src` u `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` u `vitest.mcp.config.ts` jġorru l-istess alias). Importa komponent tal-kit bis-subpath tiegħu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), qatt permezz tal-barrel `@omniroute/ui-kit`: il-barrel jiġbed kull komponent (inkluż il-date picker) f'kull importer. L-istylesheet tal-kit jidħol permezz ta' `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` jidikjara t-tokens `--ci-*`; `src/app/globals.css` jgħaqqadhom mal-ismijiet legacy ta' OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), sabiex il-qari eżistenti ta' `var(--color-*)` u l-utilities ta' Tailwind jibqgħu jaħdmu. Il-kodiċi ġdid juża l-utilities ta' Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) jew klassijiet tal-kit — qatt valur hex (`tests/unit/design-kit-bridge.test.ts` jinfurza dan il-bridge). `text-primary` jirriżolvi għal `--color-primary-ink` permezz ta' `--text-color-primary` (lime-800 fil-modalità ċara, l-aċċent lime fil-modalità skura), sabiex it-test primarju jibqa' jinqara filwaqt li `bg-primary`/`border-primary` jżommu s-superfiċje lime. Is-serje tal-charts jużaw `--color-chart-1` … `--color-chart-5`.
+- **Temi.** `<html className="ci-theme">` (`src/app/layout.tsx`) jattiva t-tema tal-kit għad-dokument. Il-preferenza hija `light`, `dark` jew `system` (`THEME_CONFIG.defaultTheme = "system"` f'`src/shared/constants/appConfig.ts`; `system` isegwi `prefers-color-scheme`). `applyTheme()` f'`src/store/themeStore.ts` (mirjata mill-iskript bootstrap inline f'`src/app/layout.tsx`, li jaħdem qabel l-idratazzjoni) issettja `data-theme="dark"|"light"` u jixgħel jew jitfi l-klassi `.dark` fuq `<html>` flimkien. Is-sett ta' tokens skuri tal-kit huwa marbut ma' `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); l-overrides skuri ta' OmniRoute stess (il-blokk `.dark` f'`globals.css`) u l-utilities `dark:` legacy ta' Tailwind huma marbuta mal-klassi `.dark`. M'hemm l-ebda presets għall-kulur tal-aċċent: l-aċċent dejjem jiġi mill-kit, u preset ppersistjat minn build eqdem jintrema meta l-store jitgħabba.
+- **Komponenti (adapters).** `src/shared/components/index.tsx` iżomm l-API tal-komponenti ta' OmniRoute (l-istess ismijiet, default exports u props), u l-primitives wara l-API huma adapters fuq il-kit: formoli (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), overlays u feedback (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`), struttura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) u tabelli (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adapter jimporta l-komponent tal-kit permezz tas-subpath u jimmappjalu l-props legacy — per eżempju `Button variant="primary"` huwa l-buttuna `default` tal-kit (`--ci-button-primary-*`: is-superfiċje inversa fil-modalità ċara, l-aċċent bil-linka `--ci-color-accent-foreground` tiegħu fil-modalità skura), `danger` huwa `destructive`, u `warning` huwa `outline` flimkien mal-estensjoni `.ci-button--warning`. Ir-regoli `.ci-button--warning` u `.ci-badge[data-tone]` fit-tarf ta' `globals.css` (`@layer components`) huma estensjonijiet ta' OmniRoute fuq il-klassijiet tal-kit. `tests/unit/ui/adapters/*.test.tsx` jiffissaw kull adapter.
+- **Shell.** `src/app/(dashboard)/layout.tsx` jirrendi `DashboardLayout`, li jirrendi `src/shared/components/layouts/DashboardShell.tsx`: il-`SidebarProvider` / `Sidebar` / `SidebarInset` tal-kit (`packages/ui-kit/src/sidebar.tsx`), bil-loġika tan-navigazzjoni ta' OmniRoute f'`src/shared/components/Sidebar.tsx`. Link "aqbeż għall-kontenut" lejn `#main-content` huwa l-ewwel element li jista' jirċievi l-fokus. `src/shared/components/Header.tsx` fih il-`SidebarTrigger` tal-kit (l-unika toggle tas-sidebar fl-shell), il-`ProductSwitcher` ta' Keak u l-element li jiftaħ il-command palette; juri t-titlu tar-rotta biss sakemm ma jkunx hemm `PageHeader` tal-kit (`.ci-page-header`) immuntat ġewwa `#main-content`, sabiex paġna bil-`PageHeader` tagħha stess ikollha `h1` wieħed biss. `src/shared/components/CommandPalette.tsx` huwa `Dialog` tal-kit.
+- **Ikoni.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) jirriżolvi l-isem (il-vokabularju tal-Material Symbols li l-iskrins jużaw) permezz ta' `ICON_MAP` (`src/shared/constants/iconMap.ts`) għal glyph ta' Lucide. Il-font u l-pakkett tal-Material Symbols ma għadhomx jeżistu: isem li nież mill-mappa jirrendi glyph placeholder newtrali (`data-icon-missing="true"`) u jagħmel log ta' twissija fil-console barra mill-produzzjoni. `npm run gen:icon-map` jistampa l-ismijiet li qed jintużaw li huma nieża mill-mappa (`tests/unit/icon-map-coverage.test.ts` ifallja fuq kwalunkwe isem mingħajr ikona Lucide; `tests/unit/icon-map-object-values.test.ts` jkopri ismijiet maħżuna f'oġġetti ta' lookup); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` jikteb mill-ġdid l-ispans litterali `<span className="material-symbols-outlined">` għal `<Icon>`.
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` huwa wrapper tal-kit: il-default export `OmniRouteLogo` jirrendi `ProductIcon product="omniroute" variant="glyph"` (SVG inline, sikur għal `basePath`) u `OmniRouteLockup` jirrendi `ProductLockup product="omniroute"` (isem aċċessibbli "Keak OmniRoute") jew, għal operaturi white-label, il-`name`/`logoSrc` tagħhom stess. Id-destinazzjonijiet tal-product switcher jinsabu f'`src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). L-iskrins standalone — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` u `src/shared/components/ErrorPageScaffold.tsx` — juru l-lockup; `tests/unit/brand-pages-static.test.ts` jħares dan.
 
-Is-sit tal-marketing (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) u d-dashboard tal-prodott għandhom jidhru bħala **prodott wieħed**. Is-sit diġà ssellef il-paletta tiegħu mid-dashboard — il-`css/tokens.css` tiegħu saħansitra jgħid _"Il-paletta tirrifletti d-dashboard ta’ OmniRoute (src/app/globals.css)"_. Għalhekk, it-tnejn diġà huma allinjati madwar 80% fil-livell tal-kuluri. Dan huwa dak li għadu nieqes fid-dashboard:
+## 2. Regoli
 
-1. Il-**wallpaper bi gradilja bħal karta grafika** li s-sit juża f’kull paġna.
-2. Għadd żgħir ta’ **tokens tad-disinn kondiviżi** li għandu s-sit iżda li huma neqsin fid-dashboard (skala tar-radius, gradient tal-marka, `surface-2`, font mono).
-3. **Konsistenza fil-livell tal-komponenti** — għadd ta’ komponenti tad-dashboard jaqbżu t-tokens tat-tema billi jużaw hex/rgba hardcoded.
+1. Tokens, qatt letterali. Eċċezzjonijiet miżmuma apposta: it-terminal tal-console dejjem skur u `STATUS_HEX` (`src/shared/constants/statusColors.ts`), il-mera hex solvuta tal-paletta tal-istatus tal-kit għal min iċempel li jeħtieġ hex letterali. Il-paletti kategoriċi m'għadhomx eċċezzjoni: jirkbu fuq il-ħames chart tokens tal-kit (`--color-chart-1..5`) permezz `src/shared/utils/categoricalPalette.ts` u, għal strateġiji ta' rotta, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; truf ReactFlow u l-kanvas tal-orkestrazzjoni jaqraw il-varjabbli `--orch-status-*` konxji mit-tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Qatt ma garża `packages/ui-kit/src` bl-idejn: sync with `scripts/dev/sync-ui-kit.sh <commit>`; il-pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli fuq kwalunkwe byte li jvarja mill-pinned upstream commit (jaqbeż bi twissija meta l-klonu upstream, `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ikun assenti). Meta l-kit ikun nieqes minn xi ħaġa, aħdem madwaru fl-adapter jew fl-iskrin u staqsi upstream għaliha.
+3. In-nuqqasijiet tat-test tal-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`...) — jgħaddi strings tradotti minn `useTranslations(...)` kull meta komponent tal-kit jirrendi test.
+4. L-utilitajiet Tailwind jirbħu fuq il-klassijiet tal-komponenti tal-kit (il-kit jiddikjara `@layer theme, base, components, utilities` u r-regoli tiegħu jgħixu `components`) — uża l-utilitajiet għall-ispazjar u t-tqassim, mhux biex terġa' tikkuluri l-komponenti tal-kit.
+5. Intestaturi: `.ci-heading` għat-titli tal-paġni u tat-taqsimiet; `.ci-dashboard-display` biss għal test tal-wiri kbir u skars bħall-kodiċi tal-istatus tal-paġna tal-iżball. It-tnejn jużaw l-Isvizzera.
+6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span taħt `src/app` jew `src/shared/components`; fis-siġra tad-dashboard (`src/app/(dashboard)` u `src/shared/components`) l-ebda `<select>` mhux maħdum , `<textarea>` jew `<table>` u l-ebda `role="dialog"` rrumblat bl-idejn barra l-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter `Select`, `RequestLoggerDetail`); kull `<button>` jew `<input>` mhux ipproċessat hemm bżonn kumment li jkun fih `kit-exception:` (bir-raġuni) li jispiċċa mhux aktar minn 3 linji 'l fuq; lwien tal-paletta u varjanti `dark:` biss fil-fajls il-listi tat-test.
+7. Ivverifika ż-żewġ temi u l-viewport 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` runs axe.
 
-Dan id-dokument huwa l-analiżi u l-pjan.
+## 3. Żieda ta' skrin
 
----
+1. Ibda l-paġna bil-`PageHeader` tal-kit (`@omniroute/ui-kit/page-header`, `compact` ġewwa
+   d-dashboard) — titlu, deskrizzjoni u `actions`. L-header tas-shell imbagħad ineħħi t-titlu tiegħu
+   stess.
+2. Ibni l-kontrolli minn `@/shared/components` (l-adapters) u uża l-komponenti tal-kit bi subpath
+   fejn ma jeżistix adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+   `RadioGroup`, `Slider`…).
+3. Ikoni: `<Icon name="…" />`. Isem ġdid jidħol f'`ICON_MAP` mal-komponent Lucide li jaqbel
+   semantikament; `npm run gen:icon-map` jelenka l-ismijiet li għadhom nieqsa.
+4. Kuluri: utilities semantiċi (`text-success`, `bg-warning-bg`, `border-border`…) u
+   `var(--color-chart-N)` għas-serje tal-graffs; l-ebda valuri hex u l-ebda varjanti `dark:` li
+   jirrepetu biss kulur.
+5. Test: kull string, inkluż il-labels li tgħaddi lill-komponenti tal-kit, għandu jiġi minn
+   `useTranslations`. Ċwievet ġodda jmorru f'`src/i18n/messages/en.json`, `pt-BR.json` u `vi.json`
+   (it-test tal-parità Vjetnamiż jippinja kull ċavetta Ingliża); il-locales l-oħra jimtlew mis-sync
+   tal-i18n.
+6. Mexxi l-guards qabel il-PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (l-unika verifika li taqbad import duplikat f'`iconMap.ts`),
+   `npm run check:ui-icu`, u t-testijiet tal-iskrin innifsu.
 
-## 2. Prinċipji
+## 4. Żieda jew bidla ta' adapter
 
-- **Sors uniku tal-verità = `src/app/globals.css`.** Is-sit jirrifletti d-dashboard, qatt bil-maqlub. Tokens ġodda jiżdiedu l-ewwel f’`globals.css`.
-- **Tokens, qatt valuri litterali.** Il-komponenti jużaw tokens semantiċi (`bg-surface`, `text-primary`, `border-border`), qatt `#hex` mhux ipproċessat.
-- **Sottili, mhux qawwi.** Il-gradilja hija wallpaper ħafif wara l-kontenut — qatt m’għandha tnaqqas il-kuntrast tat-test jew tikkompeti mal-UI.
-- **Konxju mit-tema.** Kollox jaħdem kemm f’`.dark` (id-dehra distintiva tal-prodott) kif ukoll fit-tema ċara.
-- **Introduzzjoni gradwali u preċiża.** L-ewwel nintroduċu l-gradilja + it-tokens (riskju baxx, viżibbiltà għolja), imbagħad it-tindif tal-komponenti f’mewġiet.
+1. Żomm l-API pubblika ta' `src/shared/components/index.tsx`: l-istess ismijiet tal-esportazzjoni, default exports u
+   props aċċettati. Mappja l-props legacy fuq il-kit ġewwa l-adapter (ara `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Importa l-kit b'subpath (`@omniroute/ui-kit/<component>`).
+3. Il-workarounds għan-nuqqasijiet tal-kit għandhom jgħixu fl-adapter (jew f'`globals.css` `@layer components` meta t-tiswija tkun
+   stil), qatt f'`packages/ui-kit/src`.
+4. Żid jew aġġorna `tests/unit/ui/adapters/<name>.test.tsx`. Għal adapter b'ħafna callers, qabbel
+   il-markup irrendut qabel u wara l-bidla — bidliet fil-padding jew fil-wrapper jinxterdu fuq kull skrin.
 
----
+## 5. Aġġornament tal-kit
 
-## 3. L-istat attwali — x’inhu diġà allinjat u x’mhuwiex
+`npm run check:ui-kit-upstream` tqabbel il-verżjoni ippinjat `v*` `packages/ui-kit/UPSTREAM.md` -aktar ġdida tar-repo upstream u tipprintja l-kmand tas-sinkronizzazzjoni meta rilaxx ikun barra. Il-fluss tax-xogħol `UI Kit upstream watch` ta 'kull ġimgħa (`.github/workflows/ui-kit-upstream-watch.yml`) imexxi l-istess kontroll u jżomm kwistjoni ta' traċċar waħda miftuħa waqt li l-pin ikun lura; ir-repo upstream huwa privat, għalhekk il-fluss tax-xogħol jeħtieġ token li jinqara biss fis-sigriet `UI_KIT_READ_TOKEN` u jibqa 'inert mingħajru.
 
-### 3.1 Kuluri — diġà unifikati ✅
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` tikkopja `src/` upstream f'dak il-commit (`latest` = l-aktar tikketta `v*` ġdida) `packages/ui-kit/src`, tapplika t-trasformazzjoni permessa waħda (tneħħi s-suffiss `.js` minn importazzjonijiet relattivi), u tistabbilixxi l-verżjoni tal-ispazju tax-xogħol `packages/ui-kit/package.json` u `package-lock.json` għal dik upstream. Imbagħad: irrevedi `git diff packages/ui-kit`, agħmel pass viżwali fuq il-fornituri, is-settings, il-combos, l-użu u l-endpoint fiż-żewġ temi, mexxi `npm run check:ui-kit-snapshot` u `npm run test:vitest:ui`, u tiftaħ il- PR bil-changelog upstream.
 
-Kull kulur tal-marka u kull wiċċ diġà jaqblu mas-sit **skont il-valur** (huma differenti biss l-ismijiet — id-dashboard iżid il-prefiss `--color-`). Dan ġie vverifikat f’`src/app/globals.css:30-128`:
+## 6. dijagrammi README
 
-| Kunċett                      | Token tas-sit (`tokens.css`)                | Token tad-dashboard (`globals.css`) | Taqbila          |
-| ---------------------------- | ------------------------------------------- | ----------------------------------- | ---------------- |
-| primarju                     | `--primary #e54d5e`                         | `--color-primary #e54d5e`           | ✅               |
-| primarju-hover               | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`     | ✅               |
-| aċċent                       | `--accent #6366f1`                          | `--color-accent #6366f1`            | ✅               |
-| aċċent-2                     | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`      | ✅ (isem mibdul) |
-| aċċent-3                     | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`      | ✅ (isem mibdul) |
-| suċċess / twissija / żball   | `#22c55e / #f59e0b / #ef4444`               | identiċi                            | ✅               |
-| dwal tat-traffiku            | `#ff5f56 / #ffbd2e / #27c93f`               | identiċi                            | ✅               |
-| sfond / wiċċ / bordura skuri | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | identiċi                            | ✅               |
-| sfond / wiċċ / test ċari     | `#f9f9fb / #fff / #1a1a2e`                  | identiċi                            | ✅               |
+It-tnax-il dijagramma li l-għerq `README.md` jinkorpora (`docs/diagrams/*.svg`) huma l-kit applikat għal immaġni statika, u huma ġġenerati, mhux miġbuda bl-idejn: 13-il fajl tal-ġeneratur `scripts/docs/gen-readme-*.mjs` (tnax-il dijagramma flimkien mal- `test-unit` `gen-readme-diagrams.mjs` ) u 12-il test ta’ staleness `tests/unit/docs/readme-*-svg.test.ts`, wieħed għal kull dijagramma, kull byte-fajl li jqabbel il-fajl iġġenerat tiegħu (output) .
 
-**Konklużjoni:** m’hemm l-ebda migrazzjoni tal-kuluri xi ssir. L-identità hija diġà kondiviża; qegħdin _inlestuha_, mhux nibnuha mill-ġdid.
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` tikkopja l-paletta minn `packages/ui-kit/src/ci-tokens.css` (imqabbad ma dak il-fajl minn `tests/unit/docs/readme-diagram-theme.test.ts`) u jiddefinixxi r-rwoli tat-test fuq l-uċuħ preċedenti tal-kit — Instrument Serif għall-wiri, Inter għat-test UI, IBM Plex Mono għall-figuri u l-kodiċi — mill-pakketti `@fontsource` (id-dashboard innifsu juża s-Switzer tal-kit.660.0.66). Valuri ħfief ipoġġu fuq `:root`, valuri skuri wara `prefers-color-scheme: dark`, ġewwa l-fajl, għalhekk kull immaġni ssegwi l-iskema tat-telespettatur fuq GitHub.
+- **Fonts.** `scripts/docs/readme-fonts.mjs` jissottosettja dawk il-fajls woff2 mal-glyphs li kull dijagramma tiġbed u jinkorporahom bħala `@font-face` `data:` URIs — l-uniku mod kif it-tipografija tal-kit tilħaq immaġni README, peress li GitHub Markdown ma jġorr l-ebda CSS u l-proxy camo jimblokka kull fetch estern. Is-sottosettijiet huma latin biss; il-glifi tas-simbolu li jaqgħu lura għall-munzell tas-sistema huma permessi wieħed wieħed `SYMBOL_FALLBACKS`, u kwalunkwe glifi oħra mikxufa throws.
+- **Riġenera.** `npm run docs:readme-diagrams` jikteb mill-ġdid it-tnax kollha f'ordni README u jistampa linja waħda għal kull fajl bid-daqs tiegħu. Ġeneratur wieħed jaħdem waħdu wkoll (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` jeħtieġ `node --import tsx/esm` minħabba li l-figuri tiegħu ġejjin mill-loader tal-katalgu ħajjin `open-sse/config/freeModelCatalog.ts`; il-konsegwenza CI ta 'bidla fil-katalgu hija `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Kommetti l-ġeneratur u l- SVG flimkien.
+- **Prova.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` jirrendi fajl bil-mod kif GitHub jaqdih (tag `<img>`, `Content-Security-Policy` ta' camo , `image/svg+xml`), jaqbad qafas ċar u skur u jirrapporta li t-tipa esterna titlob il-paġna magħmula (għandha tkun 0).
+- **Baġit.** Taħt 200 KB għal kull fajl (kull test ta’ staleness jasserha); 500 KB huwa l-limitu iebes għal kwalunkwe immaġni README (ir-regola tal-validatur tal-istudjo SVG ).
+- **Kopja mhux mibdula, għadd mill-bieb.** Il-marka mill-ġdid bidlet it-tip u l-paletta, mhux il-kliem: kull ġeneratur iġorr il-kopja tad-dijagramma tiegħu f'kostanti `*_COPY` (jew jibniha mill-katalgu ħaj) li hija kemm it-test imfassal kif ukoll l-input tas-subsett tat-tipa. Il-figuri kanoniċi jibqgħu f'nodes `<text>`, moqrija minn `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); it-testijiet ta 'staleness tad-dijagrammi li jaqra gate wkoll imexxu l-validaturi tagħha fuq il-fajl iġġenerat, għalhekk ċifra li tinqala' mill-kodiċi tonqos mit-test - tiffissa s-sors li jaqra l-bieb, qatt in-numru fil-ġeneratur.
 
-### 3.2 Lakuni — x’inhu nieqes fid-dashboard
+## 7. Indiċe ta' referenza
 
-| Diskrepanza             | Is-sit għandu                                                                         | Dashboard                                                                           | Azzjoni                    |
-| ----------------------- | ------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | -------------------------- |
-| **Sfond bi grilja**     | `body::before` bħal karta grafika, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ miżjud (Fażi 1)**                                                              | **Parti A**                |
-| **Skala tar-raġġ**      | `--radius 14px`, `--radius-sm 9px`                                                    | `--radius 14px` miżjud; `-sm` + l-ippuntar mill-ġdid tal-komponent għadhom pendenti | **Parti B / Fażi 2**       |
-| **Gradjent tal-marka**  | `--grad-brand 135deg primary→accent-3`                                                | **✅ token miżjud (Fażi 1)**; jintuża fil-Fażi 2                                    | **Parti B**                |
-| **Wiċċ imbejjet**       | `--surface-2 #1c2230`                                                                 | **✅ miżjud (Fażi 1)**                                                              | **Parti B**                |
-| **Font mono**           | `--font-mono` (munzell ui-monospace)                                                  | pendenti (Fażi 4, flimkien mal-konsumaturi)                                         | **Parti B**                |
-| **`text-muted` (skur)** | `#8b8b9e`                                                                             | `#a1a1aa` (zinc-400)                                                                | irrikonċilja — **Parti B** |
-
-### 3.3 Mekkaniżmi tat-tema (biex ma nkissru xejn)
-
-- **Tailwind v4, CSS-first** (mingħajr `tailwind.config.*`). It-tokens huma definiti f’`:root`/`.dark` u esposti għall-utilitajiet permezz ta’ `@theme inline` (`globals.css:130-179`).
-- **Tema skura permezz tal-klassi `.dark`** fuq `<html>` (`@custom-variant dark` f’`globals.css:22`), attivata u diżattivata minn store personalizzat ta’ Zustand (`src/store/themeStore.ts`), tema predefinita = `system` (`src/shared/constants/appConfig.ts:11`). Minflok, is-sit juża `html[data-theme="light"]` — **il-mekkaniżmi huma differenti iżda qatt ma jiltaqgħu** (oriġini separati), għalhekk ma hemm l-ebda kunflitt. Inżommu l-mekkaniżmu `.dark` tad-dashboard.
-- **Jeżisti override runtime tal-kulur primarju** (`themeStore.ts:85-97`, presets f’`COLOR_THEMES`) — l-utenti jistgħu jibdlu `--color-primary`. Kwalunkwe token ġdid (gradjent, eċċ.) li jirreferi għal `--color-primary` jiret dawk l-overrides mingħajr ebda xogħol addizzjonali. ✅
-- **Ismijiet tar-raġġ riżervati ta’ Tailwind v4:** `--radius-sm/md/lg/...` jirfdu l-utilitajiet `rounded-*`. Id-definizzjoni mill-ġdid tagħhom tibdel retroattivament kull `rounded-*` eżistenti (eż. `rounded-sm` jintuża fi 12-il fajl). Għalhekk, il-valur tar-raġġ żgħir u l-ippuntar mill-ġdid tal-komponent huma intenzjonalment posposti għall-Fażi 2, fejn il-konsumaturi jinbidlu flimkien.
-
----
-
-## 4. Parti A — L-isfond bi gradilja ta’ karta kwadrettata (it-talba ewlenija) — IMPLIMENTAT (Fażi 1)
-
-### 4.1 X’inhu
-
-Ir-riċetta eżatta mis-sit (`_mono_repo/omnirouteSite/css/base.css`): **psewdoelement fiss li jkopri l-viewport kollu** u jpinġi żewġ gradjenti ta’ linji ta’ 1px, imqiegħed f’`z-index:-1` wara l-kontenut kollu.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Għaliex dan jaħdem minkejja li `body` għandu `background-color` opak:** `::before` b’`z-index:-1` jitpinġa _fuq_ l-isfond tal-element innifsu iżda _taħt_ il-kontenut tiegħu li jinsab fil-fluss. Għalhekk `--color-bg` huwa l-mili bażi, il-gradilja titqiegħed f’saff fuqu, u l-app tirrendi fuq il-gradilja.
-
-### 4.2 Preċedent li diġà jinsab fil-codebase
-
-`src/app/landing/page.tsx:16-26` **diġà jimplimenta din l-istess gradilja għal kull paġna** — iżda b’linji **ħomor** (`#E54D5E`, opaċità `0.06`) f’**50px**, flimkien ma’ sferi animati. Għalhekk il-mudell huwa diġà ppruvat fil-prodott; dan ix-xogħol jgħollih għal wallpaper **globali u konxju mit-tema**.
-
-### 4.3 Tokens miżjuda (f’`globals.css`)
-
-```css
-:root {
-  /* ċar — l-opaċità tal-gradilja żdiedet minn 0.045 tas-sit sabiex il-wallpaper
-     ikun tassew viżibbli fid-dashboard dens (il-kards/chrome jgħattu l-parti l-kbira tal-viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* skur — żdiedet minn 0.035 għall-istess raġuni */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 L-uniku ostaklu — tneħħa
-
-Il-gradilja hija globali min-natura tagħha (tkopri l-panel, `auth`/`login`, il-paġni tal-iżbalji — kull rotta — f’daqqa). Eżattament element **wieħed** kien jaħbiha ġewwa l-panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — il-wrapper ta’ barra kien ipinġi `bg-bg` opak. Dak kollu taħtu diġà huwa trasparenti (`<main>`, il-kontenitur tal-iskrolljar, u l-element intern `max-w-7xl`), għalhekk it-**tneħħija ta’ `bg-bg`** tippermetti li l-gradilja tal-body tidher miż-żona tal-kontenut (il-`--color-bg` tal-body jibqa’ l-mili bażi).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Interazzjoni mal-chrome (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) u `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) jibqgħu **opaki** → il-gradilja tidher fiż-**żona tal-kontenut biss**, b’chrome solidu jinkwadraha. Konfigurazzjoni predefinita kalma, li taqbel mal-mod kif is-sit jissepara l-chrome mill-canvas (deċiżjoni D3 = solidu).
-
-### 4.6 Paġni tal-login / auth / żbalji
-
-Dawn jirrendu direttament taħt `<body>` (mingħajr il-chrome tal-panel), għalhekk il-gradilja globali għandha tidher warajhom awtomatikament. **Fażi 5 — LESTA:** il-wrappers standalone li jkopru l-iskrin kollu kienu fil-fatt opaki (`min-h-screen … bg-bg`, fejn `bg-bg` huwa l-istess mili solidu bħal `<body>`), u dan kien jaħbi l-gradilja fuq kull skrin li mhuwiex tad-dashboard — mhux biss il-login. Issa kollha huma trasparenti sabiex il-wallpaper kondiviż jidher minn taħthom: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, u `ErrorPageScaffold` (ikopri `400`/`401`). Dan jagħlaq **D4** (estiż minn login biss għal kull skrin standalone). Protett minn `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Paġna tal-wasla
-
-`landing/page.tsx` iżomm l-isfond animat aktar rikk tiegħu (sferi + vinjetta) — l-isplash tal-marketing tiegħu stess (deċiżjoni D5 = ħallih kif inhu).
-
----
-
-## 5. Parti B — Unifikazzjoni tat-tokens
-
-Il-Fażi 1 iżżid it-tokens tal-identità inattivi u mingħajr kolliżjonijiet (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Il-Fażi 2 tintegra l-iskala tar-raġġ f’Tailwind u terġa’ torbot il-komponenti; il-Fażi 4 iżżid `--font-mono` flimkien mal-konsumaturi tiegħu.
-
-| Token                               | Għaliex                                                                  | Fażi                                            |
-| ----------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------- |
-| `--radius` / `--radius-sm`          | Skala waħda tar-raġġ (14/9) minflok valuri ad-hoc ta’ 6/8/12             | 1 (valur) / 2 (integrazzjoni + rabta mill-ġdid) |
-| `--grad-brand`                      | Gradjent tal-marka għas-CTAs primarji (aħmar→vjola), konsistenti mas-sit | 1 (token) / 2 (Button)                          |
-| `--surface-2`                       | Pannelli annidati / intestaturi tat-tabelli / ringieli imdaħħla          | 1                                               |
-| `--font-mono`                       | Blokki tal-code, terminal, IDs, endpoints                                | 4                                               |
-| Rikonċiljazzjoni ta’ `--text-muted` | Agħżel valur wieħed bejn is-sit u l-pannell (`#a1a1aa` rakkomandat)      | 2                                               |
-
-**D2 (text-muted):** is-sit `#8b8b9e` kontra d-dashboard `#a1a1aa`. Huwa rakkomandat li jinżamm **`#a1a1aa` tad-dashboard** u li s-_sit_ jiġi aġġornat biex jaqbel. Bidla kożmetika.
-
----
-
-## 6. Parti C — Standardizzazzjoni tal-komponenti (Fażijiet 2–4)
-
-Komponenti personalizzati (mingħajr shadcn/Radix), Tailwind v4, tokens semantiċi adottati **fil-biċċa l-kbira** (195 fajl jimportaw il-barrel kondiviż). Ix-xogħol jikkonsisti fit-tneħħija tal-**bypasses**. Post: `src/shared/components/`.
-
-| #   | Element                                     | Fajl(s)                                                                                                                  | Problema → Mira                                                                                                                      | Fażi |
-| --- | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ | ---- |
-| C1  | **Allinjament tar-raġġ**                    | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | taħlita ta’ 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                               | 2    |
-| C2  | **Gradjent tal-button + varjant `accent`**  | `Button.tsx:5-12`                                                                                                        | il-primarju huwa aħmar→aħmar ċatt; allinjah ma’ `--grad-brand`; żid il-varjant `accent` nieqes. ~195 importatur — l-ogħla viżibbiltà | 2    |
-| C3  | **Tabelli**                                 | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% inline b’rgba hardcoded + vars ineżistenti; emigra lejn tokens u rtira l-istili diverġenti                                      | 3    |
-| C4  | **Iċċentralizza l-kuluri tal-istatus**      | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | 6+ kopji tal-istess hex → modulu wieħed ibbażat fuq `--color-success/warning/error`                                                  | 3    |
-| C5  | **Bordura tal-card**                        | `Card.tsx:39`                                                                                                            | `border-white/5` → marka `/8`                                                                                                        | 2    |
-| C6  | **Rikonċiljazzjoni tal-focus ring** ✅ LEST | `globals.css` `--focus-ring` (accent) kontra `ring-primary/30` tal-kontrolli tal-formola                                 | unifikat fuq **accent (vjola)** biex jaqbel mar-ring globali + jiddistingwih mir-ring aħmar tal-iżball; l-iżball jibqa’ aħmar        | 4    |
-| C7  | **Żid `Checkbox` + `Textarea`**             | `<input>`/`<textarea>` mhux ipproċessati b’`accentColor:#6366f1` inline                                                  | primitives immexxija mit-tokens                                                                                                      | 4    |
-| C8  | **Tindif tal-hex hardcoded**                | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, tikek tal-Modal, ~14-il fajl taċ-charts                           | literals → tokens                                                                                                                    | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**          | `src/shared/utils/cn.ts`                                                                                                 | klassijiet kunfliġġenti jinġabru fuq xulxin; meħtieġ għall-overrides ta’ C1                                                          | 2    |
-
-**Diġà konsistenti mal-marka (immexxija mit-tokens, jeħtieġu biss ir-raġġ):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Pjan ta’ introduzzjoni
-
-- **Fażi 1 — Grilja + tokens tal-identità (DIN IL-PR).** Grilja f’`globals.css` + tokens `--surface-2`/`--grad-brand`/`--radius`; wallpaper `body::before`; neħħi l-ostaklu `bg-bg`; test statiku ta’ protezzjoni. Riskju baxx, riversibbli f’commit wieħed.
-- **Fażi 2 — Elementi bażiċi (C1, C2, C5) — LESTI f’din il-PR.** Utilitajiet semantiċi tar-raġġ `rounded-card` (14px) / `rounded-control` (9px) miżjuda permezz ta’ `@theme` (ismijiet personalizzati, għalhekk il-valuri predefiniti `rounded-sm/md/lg/xl` jibqgħu mhux mittiefsa — l-ebda impatt fuq 400 fajl); Card/Modal → 14px, Button/Input/Select → 9px; Button primarja → `--grad-brand` (aħmar→vjola) + varjant ġdid `accent`; borduri tal-Card → it-token `border-border` (0.08). **Pospost:** `cn()`→tailwind-merge (C9) jeħtieġ dipendenzi ġodda; ir-reviżjoni ad hoc ta’ `rounded-lg` (326 fajl) tħalliet kif inhi, peress li l-elementi bażiċi jkopru l-biċċa l-kbira tal-uċuħ.
-- **Fażi 3 — Kuluri tal-istatus + tabelli (C3, C4) — LESTI f’din il-PR.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` bħala sors uniku; `flow/edgeStyles.ts` + `TokenHealthBadge` issa jippuntaw lejh, b’hex identiku/fidil). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — kull rgba inline u l-fallbacks mhux użati `var(--bg-table-header)` / `var(--text-secondary)` ġew sostitwiti b’sett ta’ tokens `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) li l-**valuri skuri tiegħu huma eżattament ugwali għall-rgba preċedenti miktuba direttament fil-kodiċi** (identiku byte b’byte fil-modalità skura) u li l-valuri ċari tiegħu jirranġaw it-tema ċara li qabel kienet dejjem skura. Bordura tal-header → `--color-border`, test sekondarju → `--color-text-muted`. **Jeħtieġ reviżjoni viżwali qabel il-merge.** (Ma ntmessux: `logTableStyles.ts` u r-regoli antiki ta’ Ant `.ant-table` — separati, bi prijorità aktar baxxa.)
-- **Fażi 4 — Tindif (C6, C7, C9 lesti; C8 pendenti).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge miżjuda bħala dipendenzi) — il-`className` ta’ min isejjaħ issa _jissostitwixxi_ b’mod korrett il-class kunfliġġenti ta’ element bażiku minflok ma jakkumulaha. ✅ **C7** elementi bażiċi ġodda `Checkbox` + `Textarea` (immexxija mit-tokens, esportati mill-barrel; żieda mhux distruttiva — l-adozzjoni tat-32 checkbox mhux astratti / 41 textarea mhux astratti tista’ ssir inkrementalment). ✅ **C6** rikonċiljazzjoni tal-focus ring — il-kontrolli tal-formola (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) issa, meta jkollhom il-focus, jużaw iċ-ċirku tal-**accent (vjola)** biex jaqblu mal-`--focus-ring` globali u biex ma jibqgħux jaħbtu maċ-ċirku aħmar tal-iżball; l-istat aħmar tal-iżball ma nbidilx. ⏳ **Ir-reviżjoni tal-hex ta’ C8 MHIX find/replace għamja** — każijiet ikkonfermati li huma _intenzjonati_ u jridu jibqgħu: `ConsoleLogViewer.tsx:240` (terminal dejjem skur), il-popover ta’ `TokenHealthBadge`, u l-istrokes SVG ta’ ReactFlow. Emigra biss hex li verament għandu jkun konxju mit-tema.
-
-Kull fażi: `npm run lint` + `npm run typecheck:core` + reviżjoni viżwali.
-
----
-
-## 8. Deċiżjonijiet miftuħa (rakkomandazzjonijiet)
-
-- **D1 — Button primarja:** inżommu aħmar→aħmar jew naqilbu għal **aħmar→vjola `--grad-brand`**? Rakkomandazzjoni: **aħmar→vjola** (Fażi 2).
-- **D2 — Kulur tal-linji tal-grilja:** **newtrali** (stil tas-sit) — magħżul — kontra aħmar tal-marka. Daqs **32px** (imnaqqas b’madwar 30% mill-46px oriġinali wara feedback mis-sid — iċ-ċelloli ta’ 46px dehru kbar wisq fit-tqassim tad-dashboard).
-- **D3 — Intensità viżwali tal-chrome:** sidebar/header **solidi** — magħżul.
-- **D4 — Grilja tal-awtentikazzjoni/login:** ✅ **LEST (Fażi 5)** — `bg-bg` opak tneħħa minn kull wrapper full-screen indipendenti (mhux biss mil-login), sabiex il-grilja tidher fuq l-iskrins kollha. Ara §4.6.
-- **D5 — Paġna ewlenija:** ħalli l-isplash animat kif inhu. Magħżul.
-- **D6 — Raġġ 14/9 mal-prodott kollu:** Rakkomandazzjoni: iva (Fażi 2).
-- **D7 — Fażi 1 tiġi rilaxxata l-ewwel:** Magħżul.
-- **D8 — Wisa’ tat-tqassim (Fażi 5):** il-qoxra tal-kontenut tad-dashboard kienet limitata għal `max-w-7xl` (1280px), u b’hekk kienet tiġi ċċentrata b’marġnijiet laterali vojta u wesgħin fuq monitors kbar. ✅ **LEST** — żdiedet għal `max-w-[3840px]` fluwida (4K reali): il-kontenut issa jsegwi l-viewport sa madwar 4K u jiġi ċċentrat biss lil hinn minnu (`DashboardLayout.tsx`). Paġni intenzjonalment dojoq jibqgħu dojoq bid-disinn (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Tabelli tad-data opaki (Fażi 6):** billi ż-żona tal-kontenut tad-dashboard issa hija trasparenti (sabiex il-wallpaper tal-grilja jidher minnha, Fażi 5), it-tabelli tad-data li l-container tagħhom _ma kienx_ wiċċ opak kienu jħallu l-grilja tidher mir-ringieli pari trasparenti / miż-żebra b’alpha baxxa. ✅ **LEST** — kull tabella mingħajr Card issa tiġi mpinġija b’`bg-surface` (jew, għall-element bażiku `<DataTable>`, b’`background: var(--color-surface)` fuq il-container tal-iscroll tagħha). Irranġati: `DataTable` (element bażiku), `ProxyLogger`/`RequestLoggerV2` (it-tint `bg-black/5 dark:bg-black/20` tal-`<Card>` tagħhom kien qed jegħleb il-`bg-surface` tal-Card permezz ta’ tailwind-merge → madwar 95% trasparenti), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, flimkien maż-żewġ “tabelli” CSS-grid fil-veduti tal-cache (`bg-surface/35` → `bg-surface`). It-tabelli li diġà jinsabu ġewwa `<Card>`/Modal ġew ivverifikati bħala opaki u intenzjonalment tħallew mhux mittiefsa (`bg-surface` hemmhekk huwa no-op żejjed). Il-grilja nnifisha **ma kellha bżonn l-ebda bidla** — `body::before` tad-dashboard huwa identiku byte b’byte għal dak tas-sit (`--grid-size: 32px`); kwalunkwe “grilja akbar” li tidher fuq istanza qed taħdem hija build antika ta’ qabel `#4143`, mhux il-kodiċi. Protett minn `tests/unit/design-grid-background.test.ts` (blokka tal-Fażi 6).
-
----
-
-## 9. Barra mill-ambitu / riskji
-
-- **L-ebda bidla fil-paletta** — il-kuluri diġà jaqblu; inżidu biss it-tokens neqsin. Riskju żero li jinbidlu l-kuluri tal-prodott.
-- **L-ebda bidla fil-magna tat-temi** — żomm `.dark` + il-maħżen Zustand.
-- **Il-bidla fir-raġġ (Fażi 2) hija mifruxa** — taffettwa kull karta/buttuna/input; ivverifika viżwalment l-iskrins impenjattivi (tabelli, modali) qabel il-merge.
-- **It-tabelli (C3)** għandhom l-aktar stil ikkodifikat b’mod fiss u l-akbar wiċċ ta’ rigressjoni — iżolahom fil-PR tagħhom stess.
-
----
-
-## 10. Indiċi ta’ referenza
-
-| Żona                                      | Path                                                                                                                 |
-| ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Tokens tad-dashboard                      | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Maħżen tat-tema                           | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Qoxra tal-pannell (il-grid żblokkat hawn) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                    | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Preċedent tal-grid                        | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Elementi bażiċi                           | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Sorsi tal-kuluri tal-istatus              | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Utilità `cn`                              | `src/shared/utils/cn.ts`                                                                                             |
-| Test ta’ protezzjoni tal-Fażi 1           | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Referenza tas-sit                         | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — pont tat-tokens, sostituzzjonijiet għal `.dark`, estensjonijiet OmniRoute `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — commit upstream ffissat u awtorizzazzjoni tal-liċenzja; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` u l-adapters ħdejh; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

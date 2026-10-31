@@ -1,15 +1,28 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
-import Card from "./Card";
-import ProxyLogDetail from "./ProxyLogDetail";
 import {
-  TYPE_COLORS,
-  LEVEL_COLORS,
-  PROVIDER_COLORS,
-  getProxyStatusStyle as getStatusStyle,
-} from "@/shared/constants/colors";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import { DataTableShell } from "@omniroute/ui-kit/data-table-shell";
+import { TableLoadingState } from "@omniroute/ui-kit/table-loading";
+import { cn } from "@/shared/utils/cn";
+import Badge from "./Badge";
+import Button from "./Button";
+import ColumnToggle from "./ColumnToggle";
+import EmptyState from "./EmptyState";
+import Input from "./Input";
+import Select from "./Select";
+import ProxyLogDetail from "./ProxyLogDetail";
+import { TYPE_COLORS, LEVEL_COLORS, PROVIDER_COLORS } from "@/shared/constants/colors";
 import {
   formatTime,
   formatDuration as formatLatency,
@@ -19,14 +32,6 @@ import {
 } from "@/shared/utils/formatting";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
-import {
-  LOG_TABLE_CLASS,
-  LOG_TABLE_HEAD_CLASS,
-  LOG_TABLE_HEADER_BG_STYLE,
-  LOG_TABLE_HEADER_CELL_CLASS,
-  LOG_TABLE_HEADER_CELL_RIGHT_CLASS,
-  LOG_TABLE_ROW_CLASS,
-} from "./logTableStyles";
 
 const PROXY_COLUMN_KEYS = [
   "status",
@@ -57,10 +62,19 @@ function isProviderTestLog(log) {
   return typeof log.targetUrl === "string" && log.targetUrl.endsWith("/connection-test");
 }
 
+// Proxy status string → kit Badge tone.
+function proxyStatusTone(status: unknown) {
+  if (status === "success") return "success" as const;
+  if (status === "error") return "error" as const;
+  if (status === "timeout") return "warning" as const;
+  return "default" as const;
+}
+
 const DEFAULT_VISIBLE = Object.fromEntries(PROXY_COLUMN_KEYS.map((key) => [key, true]));
 
 export default function ProxyLogger() {
   const t = useTranslations("proxyLogger");
+  const tCommon = useTranslations("common");
   const { emailsVisible } = useEmailPrivacyStore();
   const [logs, setLogs] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -235,449 +249,455 @@ export default function ProxyLogger() {
   return (
     <div className="flex flex-col gap-4">
       {/* Header Bar */}
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-wrap items-center gap-2">
         {/* Recording Toggle */}
-        <button
+        <Button
+          variant="outline"
+          size="sm"
+          aria-pressed={recording}
           onClick={() => setRecording(!recording)}
-          className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-            recording
-              ? "bg-red-500/10 border-red-500/30 text-red-400"
-              : "bg-bg-subtle border-border text-text-muted"
-          }`}
+          className={cn(
+            "rounded-full",
+            recording ? "border-error/30 bg-error/10 text-error" : "text-text-muted"
+          )}
         >
           <span
-            className={`w-2 h-2 rounded-full ${recording ? "bg-red-500 animate-pulse" : "bg-text-muted"}`}
+            aria-hidden="true"
+            className={cn(
+              "size-2 rounded-full",
+              recording ? "bg-error animate-pulse" : "bg-text-muted"
+            )}
           />
           {recording ? t("recording") : t("paused")}
-        </button>
-
-        {/* Search */}
-        <div className="flex-1 min-w-[200px] relative">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-text-muted text-[18px]">
-            search
-          </span>
-          <input
-            type="text"
-            placeholder={t("searchPlaceholder")}
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary"
-          />
-        </div>
-
-        {/* Type Dropdown */}
-        <select
-          value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[120px]"
-        >
-          <option value="">{t("allTypes")}</option>
-          {uniqueTypes.map((t) => (
-            <option key={t} value={t}>
-              {(TYPE_COLORS[t]?.label || t).toUpperCase()}
-            </option>
-          ))}
-        </select>
-
-        {/* Level Dropdown */}
-        <select
-          value={selectedLevel}
-          onChange={(e) => setSelectedLevel(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[120px]"
-        >
-          <option value="">{t("allLevels")}</option>
-          {uniqueLevels.map((l) => (
-            <option key={l} value={l}>
-              {LEVEL_COLORS[l]?.label || l}
-            </option>
-          ))}
-        </select>
-
-        {/* Provider Dropdown */}
-        <select
-          value={selectedProvider}
-          onChange={(e) => setSelectedProvider(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[140px]"
-        >
-          <option value="">{t("allProviders")}</option>
-          {uniqueProviders.map((p) => {
-            const pc = PROVIDER_COLORS[p];
-            return (
-              <option key={p} value={p}>
-                {pc?.label || p.toUpperCase()}
-              </option>
-            );
-          })}
-        </select>
+        </Button>
 
         {/* Stats */}
-        <div className="flex items-center gap-2 text-xs text-text-muted">
-          <span className="px-2 py-1 rounded bg-bg-subtle border border-border font-mono">
+        <div className="flex flex-wrap items-center gap-1.5 font-mono">
+          <Badge size="sm">
             {totalCount} {t("total")}
-          </span>
-          <span className="px-2 py-1 rounded bg-emerald-500/10 text-emerald-400 font-mono">
+          </Badge>
+          <Badge size="sm" variant="success">
             {okCount} {t("ok")}
-          </span>
+          </Badge>
           {errorCount > 0 && (
-            <span className="px-2 py-1 rounded bg-red-500/10 text-red-400 font-mono">
+            <Badge size="sm" variant="error">
               {errorCount} {t("err")}
-            </span>
+            </Badge>
           )}
           {timeoutCount > 0 && (
-            <span className="px-2 py-1 rounded bg-amber-500/10 text-amber-400 font-mono">
+            <Badge size="sm" variant="warning">
               {timeoutCount} {t("timeoutShort")}
-            </span>
+            </Badge>
           )}
           {directCount > 0 && (
-            <span className="px-2 py-1 rounded bg-gray-500/10 text-gray-400 font-mono">
+            <Badge size="sm">
               {directCount} {t("direct")}
-            </span>
+            </Badge>
           )}
           {tlsCount > 0 && (
-            <span className="px-2 py-1 rounded bg-cyan-500/10 text-cyan-400 font-mono">
+            <Badge size="sm" variant="info">
               🔒 {tlsCount} TLS
-            </span>
+            </Badge>
           )}
           {testsCount > 0 && (
-            <span className="px-2 py-1 rounded bg-violet-500/10 text-violet-400 font-mono">
+            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
               {testsCount} {t("filterTests")}
-            </span>
+            </Badge>
           )}
         </div>
-
-        {/* Sort */}
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="px-3 py-2 rounded-lg bg-bg-subtle border border-border text-sm text-text-primary focus:outline-none focus:border-primary appearance-none cursor-pointer min-w-[140px]"
-        >
-          <option value="newest">{t("newest")}</option>
-          <option value="oldest">{t("oldest")}</option>
-          <option value="latency_desc">{t("latencyDesc")}</option>
-          <option value="latency_asc">{t("latencyAsc")}</option>
-        </select>
 
         {/* Refresh */}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
+          className="ms-auto"
           onClick={() => fetchLogs(false)}
-          className="p-2 rounded-lg hover:bg-bg-subtle text-text-muted hover:text-text-primary transition-colors"
           title={t("refresh")}
+          aria-label={t("refresh")}
         >
-          <span className="material-symbols-outlined text-[18px]">refresh</span>
-        </button>
+          <Icon name="refresh" size={18} />
+        </Button>
       </div>
 
-      {/* Quick Filters */}
-      <div className="flex flex-wrap items-center gap-2">
-        {statusFilters.map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setActiveFilter(activeFilter === f.key ? "all" : f.key)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-              activeFilter === f.key
-                ? f.key === "error"
-                  ? "bg-red-500/20 text-red-400 border-red-500/40"
-                  : f.key === "ok"
-                    ? "bg-emerald-500/20 text-emerald-400 border-emerald-500/40"
-                    : f.key === "timeout"
-                      ? "bg-amber-500/20 text-amber-400 border-amber-500/40"
-                      : "bg-primary text-white border-primary"
-                : "bg-bg-subtle border-border text-text-muted hover:border-text-muted"
-            }`}
-          >
-            {f.icon && <span className="material-symbols-outlined text-[14px]">{f.icon}</span>}
-            {f.label}
-          </button>
-        ))}
+      <DataTableShell
+        filterAlignment="end"
+        filters={
+          <>
+            {/* Search */}
+            <Input
+              type="text"
+              icon="search"
+              placeholder={t("searchPlaceholder")}
+              aria-label={t("searchPlaceholder")}
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full sm:w-72"
+            />
 
-        {uniqueProviders.length > 0 && <span className="w-px h-5 bg-border mx-1" />}
-
-        <span className="text-[10px] text-text-muted uppercase tracking-wider mr-1">
-          {t("filterSource")}
-        </span>
-        {sourceFilters.map((f) => (
-          <button
-            key={`source-${f.key}`}
-            onClick={() => setSourceFilter(sourceFilter === f.key ? "all" : f.key)}
-            className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-all ${
-              sourceFilter === f.key
-                ? "bg-primary text-white border-primary"
-                : "bg-bg-subtle border-border text-text-muted hover:border-text-muted"
-            }`}
-          >
-            {f.label}
-          </button>
-        ))}
-
-        {uniqueProviders.length > 0 && <span className="w-px h-5 bg-border mx-1" />}
-
-        {uniqueProviders.map((p) => {
-          const pc = PROVIDER_COLORS[p] || { bg: "#374151", text: "#fff", label: p.toUpperCase() };
-          const isActive = selectedProvider === p;
-          return (
-            <button
-              key={p}
-              onClick={() => setSelectedProvider(isActive ? "" : p)}
-              className={`px-3 py-1 rounded-full text-xs font-bold uppercase border transition-all ${
-                isActive
-                  ? "border-white/40 ring-1 ring-white/20"
-                  : "border-transparent opacity-70 hover:opacity-100"
-              }`}
-              style={{
-                backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
-                color: isActive ? pc.text : pc.bg,
-              }}
+            {/* Type Dropdown */}
+            <Select
+              className="w-auto"
+              value={selectedType}
+              onChange={(e) => setSelectedType(e.target.value)}
+              aria-label={t("colType")}
+              selectClassName="min-w-[120px]"
             >
-              {pc.label}
-            </button>
-          );
-        })}
-      </div>
+              <option value="">{t("allTypes")}</option>
+              {uniqueTypes.map((type) => (
+                <option key={type} value={type}>
+                  {(TYPE_COLORS[type]?.label || type).toUpperCase()}
+                </option>
+              ))}
+            </Select>
 
-      {/* Column Visibility Toggles */}
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span className="text-[10px] text-text-muted uppercase tracking-wider mr-1">
-          {t("columns")}
-        </span>
-        {columns.map((col) => (
-          <button
-            key={col.key}
-            onClick={() => toggleColumn(col.key)}
-            className={`px-2 py-0.5 rounded text-[10px] font-medium border transition-all ${
-              visibleColumns[col.key]
-                ? "bg-primary/15 text-primary border-primary/30"
-                : "bg-bg-subtle text-text-muted border-border opacity-50 hover:opacity-80"
-            }`}
-          >
-            {col.label}
-          </button>
-        ))}
-      </div>
+            {/* Level Dropdown */}
+            <Select
+              className="w-auto"
+              value={selectedLevel}
+              onChange={(e) => setSelectedLevel(e.target.value)}
+              aria-label={t("colLevel")}
+              selectClassName="min-w-[120px]"
+            >
+              <option value="">{t("allLevels")}</option>
+              {uniqueLevels.map((l) => (
+                <option key={l} value={l}>
+                  {LEVEL_COLORS[l]?.label || l}
+                </option>
+              ))}
+            </Select>
 
-      {/* Table */}
-      <Card className="overflow-hidden bg-surface">
-        <div className="p-0 overflow-x-auto max-h-[calc(100vh-320px)] overflow-y-auto">
-          {loading && logs.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">{t("loadingProxyLogs")}</div>
-          ) : logs.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">
-              <span className="material-symbols-outlined text-[48px] mb-2 block opacity-40">
-                vpn_lock
-              </span>
-              {t("noProxyLogs")}
-            </div>
-          ) : sortedLogs.length === 0 ? (
-            <div className="p-8 text-center text-text-muted">{t("noMatchingLogs")}</div>
-          ) : (
-            <table className={LOG_TABLE_CLASS}>
-              <thead className={LOG_TABLE_HEAD_CLASS} style={LOG_TABLE_HEADER_BG_STYLE}>
-                <tr className={LOG_TABLE_ROW_CLASS} style={LOG_TABLE_HEADER_BG_STYLE}>
-                  {visibleColumns.status && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colStatus")}</th>
-                  )}
-                  {visibleColumns.proxy && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colProxy")}</th>
-                  )}
-                  {visibleColumns.tls && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colTls")}</th>
-                  )}
-                  {visibleColumns.type && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colType")}</th>
-                  )}
-                  {visibleColumns.level && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colLevel")}</th>
-                  )}
-                  {visibleColumns.provider && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colProvider")}</th>
-                  )}
-                  {visibleColumns.upstream && (
-                    <th className={LOG_TABLE_HEADER_CELL_RIGHT_CLASS}>{t("colUpstream")}</th>
-                  )}
-                  {visibleColumns.egress && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colEgress")}</th>
-                  )}
-                  {visibleColumns.correlation && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colCorrelation")}</th>
-                  )}
-                  {visibleColumns.servedBy && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colServedBy")}</th>
-                  )}
-                  {visibleColumns.target && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colTarget")}</th>
-                  )}
-                  {visibleColumns.latency && (
-                    <th className={LOG_TABLE_HEADER_CELL_RIGHT_CLASS}>{t("colLatency")}</th>
-                  )}
-                  {visibleColumns.ip && (
-                    <th className={LOG_TABLE_HEADER_CELL_CLASS}>{t("colClientIp")}</th>
-                  )}
-                  {visibleColumns.time && (
-                    <th className={LOG_TABLE_HEADER_CELL_RIGHT_CLASS}>{t("colTime")}</th>
-                  )}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/30">
-                {sortedLogs.map((log) => {
-                  const statusStyle = getStatusStyle(log.status);
-                  const typeColor = TYPE_COLORS[log.proxy?.type] || {
-                    bg: "#6B7280",
-                    text: "#fff",
-                    label: log.proxy?.type || "-",
-                  };
-                  const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
-                  const resolvedProviderLabel =
-                    getProviderDisplayLabel(log.provider, providerNodes) ||
-                    (log.provider || "-").toUpperCase();
-                  const providerColor = PROVIDER_COLORS[log.provider] || {
-                    bg: "#374151",
-                    text: "#fff",
-                    label: resolvedProviderLabel,
-                  };
-                  const isError = log.status === "error" || log.status === "timeout";
+            {/* Provider Dropdown */}
+            <Select
+              className="w-auto"
+              value={selectedProvider}
+              onChange={(e) => setSelectedProvider(e.target.value)}
+              aria-label={t("colProvider")}
+              selectClassName="min-w-[140px]"
+            >
+              <option value="">{t("allProviders")}</option>
+              {uniqueProviders.map((p) => {
+                const pc = PROVIDER_COLORS[p];
+                return (
+                  <option key={p} value={p}>
+                    {pc?.label || p.toUpperCase()}
+                  </option>
+                );
+              })}
+            </Select>
 
-                  return (
-                    <tr
-                      key={log.id}
-                      onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
-                      className={`cursor-pointer hover:bg-sky-500/10 dark:hover:bg-sky-400/10 transition-colors ${isError ? "bg-red-500/5" : ""}`}
-                    >
-                      {visibleColumns.status && (
-                        <td className="px-3 py-2">
-                          <span
-                            className="inline-block px-2 py-0.5 rounded text-[10px] font-bold min-w-[50px] text-center uppercase"
-                            style={{ backgroundColor: statusStyle.bg, color: statusStyle.text }}
-                          >
-                            {log.status}
-                          </span>
-                        </td>
-                      )}
-                      {visibleColumns.proxy && (
-                        <td className="px-3 py-2 font-mono text-[11px] text-primary">
-                          {log.proxy
-                            ? log.proxy.name || `${log.proxy.host}:${log.proxy.port}`
-                            : "—"}
-                        </td>
-                      )}
-                      {visibleColumns.tls && (
-                        <td className="px-3 py-2">
-                          {log.tlsFingerprint ? (
-                            <span
-                              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                              style={{
-                                backgroundColor: "rgba(6, 182, 212, 0.15)",
-                                color: "#22d3ee",
-                              }}
-                              title={t("tlsFingerprint")}
-                            >
-                              <span style={{ fontSize: "10px" }}>🔒</span> TLS
-                            </span>
-                          ) : (
-                            <span className="text-text-muted text-[10px]">—</span>
-                          )}
-                        </td>
-                      )}
-                      {visibleColumns.type && (
-                        <td className="px-3 py-2">
-                          <span
-                            className="inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                            style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
-                          >
-                            {typeColor.label}
-                          </span>
-                        </td>
-                      )}
-                      {visibleColumns.level && (
-                        <td className="px-3 py-2">
-                          <span
-                            className="inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                            style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
-                          >
-                            {levelColor.label}
-                          </span>
-                        </td>
-                      )}
-                      {visibleColumns.provider && (
-                        <td className="px-3 py-2">
-                          {log.provider ? (
-                            <span
-                              className="inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase"
-                              style={{
-                                backgroundColor: providerColor.bg,
-                                color: providerColor.text,
-                              }}
-                            >
-                              {providerColor.label}
-                            </span>
-                          ) : (
-                            <span className="text-text-muted text-[10px]">—</span>
-                          )}
-                        </td>
-                      )}
-                      {visibleColumns.upstream && (
-                        <td className="px-3 py-2 text-right text-text-muted font-mono">
-                          {typeof log.upstreamStatus === "number"
-                            ? String(log.upstreamStatus)
-                            : "—"}
-                        </td>
-                      )}
-                      {visibleColumns.egress && (
-                        <td className="px-3 py-2 font-mono text-[11px] text-emerald-400">
-                          {maskSegment(log.egressIp) || "—"}
-                        </td>
-                      )}
-                      {visibleColumns.correlation && (
-                        <td className="px-3 py-2 font-mono text-[11px]">
-                          {log.correlationId ? (
-                            <a
-                              href={`/dashboard/logs?correlationId=${encodeURIComponent(log.correlationId)}`}
-                              onClick={(e) => e.stopPropagation()}
-                              title={log.correlationId}
-                              className="text-primary hover:underline"
-                            >
-                              {log.correlationId.slice(0, 12)}…
-                            </a>
-                          ) : (
-                            <span className="text-text-muted text-[10px]">—</span>
-                          )}
-                        </td>
-                      )}
-                      {visibleColumns.servedBy && (
-                        <td className="px-3 py-2 font-mono text-[11px] text-text-muted">
-                          {maskAccount(log.rotationAccount ?? log.account, emailsVisible) || "—"}
-                        </td>
-                      )}
-                      {visibleColumns.target && (
-                        <td
-                          className="px-3 py-2 text-text-muted truncate max-w-[200px] font-mono text-[10px]"
-                          title={log.targetUrl}
-                        >
-                          {truncateUrl(log.targetUrl)}
-                        </td>
-                      )}
-                      {visibleColumns.latency && (
-                        <td className="px-3 py-2 text-right text-text-muted font-mono">
-                          {formatLatency(log.latencyMs)}
-                        </td>
-                      )}
-                      {visibleColumns.ip && (
-                        <td className="px-3 py-2 font-mono text-[11px] text-emerald-400">
-                          {log.clientIp || "—"}
-                        </td>
-                      )}
-                      {visibleColumns.time && (
-                        <td className="px-3 py-2 text-right text-text-muted">
-                          {formatTime(log.timestamp)}
-                        </td>
-                      )}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+            {/* Sort */}
+            <Select
+              className="w-auto"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              aria-label={t("sortLogs")}
+              selectClassName="min-w-[140px]"
+            >
+              <option value="newest">{t("newest")}</option>
+              <option value="oldest">{t("oldest")}</option>
+              <option value="latency_desc">{t("latencyDesc")}</option>
+              <option value="latency_asc">{t("latencyAsc")}</option>
+            </Select>
+
+            {/* Column visibility — kit DropdownMenu checkbox items via the adapter. */}
+            <ColumnToggle columns={columns} visible={visibleColumns} onToggle={toggleColumn} />
+          </>
+        }
+      >
+        {/* Quick Filters */}
+        <div
+          role="group"
+          aria-label={tCommon("filters")}
+          className="flex flex-wrap items-center gap-2 border-b border-border px-3 py-2.5"
+        >
+          {statusFilters.map((f) => (
+            <Button
+              key={f.key}
+              variant="outline"
+              size="sm"
+              aria-pressed={activeFilter === f.key}
+              onClick={() => setActiveFilter(activeFilter === f.key ? "all" : f.key)}
+              className={cn(
+                "h-7 min-h-7 rounded-full px-3 text-xs",
+                activeFilter === f.key
+                  ? f.key === "error"
+                    ? "bg-error/20 text-error border-error/40"
+                    : f.key === "ok"
+                      ? "bg-success/20 text-success border-success/40"
+                      : f.key === "timeout"
+                        ? "bg-warning/20 text-warning border-warning/40"
+                        : "bg-primary text-accent-foreground border-primary"
+                  : "text-text-muted"
+              )}
+            >
+              {f.icon && <Icon name={f.icon} size={14} />}
+              {f.label}
+            </Button>
+          ))}
+
+          {uniqueProviders.length > 0 && (
+            <span aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
           )}
-        </div>
-      </Card>
 
+          <span className="mr-1 text-[10px] uppercase tracking-wider text-text-muted">
+            {t("filterSource")}
+          </span>
+          {sourceFilters.map((f) => (
+            <Button
+              key={`source-${f.key}`}
+              variant="outline"
+              size="sm"
+              aria-pressed={sourceFilter === f.key}
+              onClick={() => setSourceFilter(sourceFilter === f.key ? "all" : f.key)}
+              className={cn(
+                "h-7 min-h-7 rounded-full px-3 text-xs",
+                sourceFilter === f.key
+                  ? "bg-primary text-accent-foreground border-primary"
+                  : "text-text-muted"
+              )}
+            >
+              {f.label}
+            </Button>
+          ))}
+
+          {uniqueProviders.length > 0 && (
+            <span aria-hidden="true" className="mx-1 h-5 w-px bg-border" />
+          )}
+
+          {uniqueProviders.map((p) => {
+            // Provider identity colours (brand palette in constants/colors), not status tones.
+            const pc = PROVIDER_COLORS[p] || {
+              bg: "#374151",
+              text: "#fff",
+              label: p.toUpperCase(),
+            };
+            const isActive = selectedProvider === p;
+            return (
+              <Button
+                key={p}
+                variant="ghost"
+                size="sm"
+                aria-pressed={isActive}
+                onClick={() => setSelectedProvider(isActive ? "" : p)}
+                className={cn(
+                  "h-7 min-h-7 rounded-full border px-3 text-xs font-bold uppercase",
+                  isActive
+                    ? "border-border-strong ring-1 ring-border-strong"
+                    : "border-transparent opacity-70 hover:opacity-100"
+                )}
+                style={{
+                  backgroundColor: isActive ? pc.bg : `${pc.bg}33`,
+                  color: isActive ? pc.text : pc.bg,
+                }}
+              >
+                {pc.label}
+              </Button>
+            );
+          })}
+        </div>
+
+        {/* Table */}
+        {loading && logs.length === 0 ? (
+          <TableLoadingState label={t("loadingProxyLogs")} />
+        ) : logs.length === 0 ? (
+          <EmptyState icon="vpn_lock" title={t("noProxyLogs")} />
+        ) : sortedLogs.length === 0 ? (
+          <EmptyState icon="search_off" title={t("noMatchingLogs")} />
+        ) : (
+          <Table
+            scrollbarLabel={t("tableLabel")}
+            // Opaque bg-surface viewport (#4233); it scrolls both axes under a sticky header.
+            containerClassName="max-h-[calc(100vh-320px)] overflow-auto rounded-none border-0 bg-surface"
+            className="text-left text-xs"
+          >
+            <TableHeader className="sticky top-0 z-10">
+              <TableRow>
+                {visibleColumns.status && <TableHead className="px-3">{t("colStatus")}</TableHead>}
+                {visibleColumns.proxy && <TableHead className="px-3">{t("colProxy")}</TableHead>}
+                {visibleColumns.tls && <TableHead className="px-3">{t("colTls")}</TableHead>}
+                {visibleColumns.type && <TableHead className="px-3">{t("colType")}</TableHead>}
+                {visibleColumns.level && <TableHead className="px-3">{t("colLevel")}</TableHead>}
+                {visibleColumns.provider && (
+                  <TableHead className="px-3">{t("colProvider")}</TableHead>
+                )}
+                {visibleColumns.upstream && (
+                  <TableHead className="ci-table__head--numeric px-3">{t("colUpstream")}</TableHead>
+                )}
+                {visibleColumns.egress && <TableHead className="px-3">{t("colEgress")}</TableHead>}
+                {visibleColumns.correlation && (
+                  <TableHead className="px-3">{t("colCorrelation")}</TableHead>
+                )}
+                {visibleColumns.servedBy && (
+                  <TableHead className="px-3">{t("colServedBy")}</TableHead>
+                )}
+                {visibleColumns.target && <TableHead className="px-3">{t("colTarget")}</TableHead>}
+                {visibleColumns.latency && (
+                  <TableHead className="ci-table__head--numeric px-3">{t("colLatency")}</TableHead>
+                )}
+                {visibleColumns.ip && <TableHead className="px-3">{t("colClientIp")}</TableHead>}
+                {visibleColumns.time && (
+                  <TableHead className="ci-table__head--numeric px-3">{t("colTime")}</TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedLogs.map((log) => {
+                // Proxy type / level keep their categorical palettes (constants/colors).
+                const typeColor = TYPE_COLORS[log.proxy?.type] || {
+                  bg: "#6B7280",
+                  text: "#fff",
+                  label: log.proxy?.type || "-",
+                };
+                const levelColor = LEVEL_COLORS[log.level] || LEVEL_COLORS.direct;
+                const resolvedProviderLabel =
+                  getProviderDisplayLabel(log.provider, providerNodes) ||
+                  (log.provider || "-").toUpperCase();
+                const providerColor = PROVIDER_COLORS[log.provider] || {
+                  bg: "#374151",
+                  text: "#fff",
+                  label: resolvedProviderLabel,
+                };
+                const isError = log.status === "error" || log.status === "timeout";
+
+                return (
+                  <TableRow
+                    key={log.id}
+                    onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
+                    className={cn(
+                      "cursor-pointer hover:bg-info/10 transition-colors",
+                      isError && "bg-error/5"
+                    )}
+                  >
+                    {visibleColumns.status && (
+                      <TableCell className="px-3 py-2">
+                        <Badge
+                          size="sm"
+                          variant={proxyStatusTone(log.status)}
+                          className="min-w-[50px] justify-center font-bold uppercase"
+                        >
+                          {log.status}
+                        </Badge>
+                      </TableCell>
+                    )}
+                    {visibleColumns.proxy && (
+                      <TableCell className="px-3 py-2 font-mono text-[11px] text-primary">
+                        {log.proxy ? log.proxy.name || `${log.proxy.host}:${log.proxy.port}` : "—"}
+                      </TableCell>
+                    )}
+                    {visibleColumns.tls && (
+                      <TableCell className="px-3 py-2">
+                        {log.tlsFingerprint ? (
+                          <Badge
+                            size="sm"
+                            variant="info"
+                            className="text-[9px] font-bold uppercase"
+                            title={t("tlsFingerprint")}
+                          >
+                            <span aria-hidden="true">🔒</span> TLS
+                          </Badge>
+                        ) : (
+                          <span className="text-[10px] text-text-muted">—</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {visibleColumns.type && (
+                      <TableCell className="px-3 py-2">
+                        <span
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          style={{ backgroundColor: typeColor.bg, color: typeColor.text }}
+                        >
+                          {typeColor.label}
+                        </span>
+                      </TableCell>
+                    )}
+                    {visibleColumns.level && (
+                      <TableCell className="px-3 py-2">
+                        <span
+                          className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                          style={{ backgroundColor: levelColor.bg, color: levelColor.text }}
+                        >
+                          {levelColor.label}
+                        </span>
+                      </TableCell>
+                    )}
+                    {visibleColumns.provider && (
+                      <TableCell className="px-3 py-2">
+                        {log.provider ? (
+                          <span
+                            className="inline-block rounded px-2 py-0.5 text-[9px] font-bold uppercase"
+                            style={{
+                              backgroundColor: providerColor.bg,
+                              color: providerColor.text,
+                            }}
+                          >
+                            {providerColor.label}
+                          </span>
+                        ) : (
+                          <span className="text-[10px] text-text-muted">—</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {visibleColumns.upstream && (
+                      <TableCell className="px-3 py-2 text-right font-mono text-text-muted">
+                        {typeof log.upstreamStatus === "number" ? String(log.upstreamStatus) : "—"}
+                      </TableCell>
+                    )}
+                    {visibleColumns.egress && (
+                      <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
+                        {maskSegment(log.egressIp) || "—"}
+                      </TableCell>
+                    )}
+                    {visibleColumns.correlation && (
+                      <TableCell className="px-3 py-2 font-mono text-[11px]">
+                        {log.correlationId ? (
+                          <a
+                            href={`/dashboard/logs?correlationId=${encodeURIComponent(log.correlationId)}`}
+                            onClick={(e) => e.stopPropagation()}
+                            title={log.correlationId}
+                            className="text-primary hover:underline"
+                          >
+                            {log.correlationId.slice(0, 12)}…
+                          </a>
+                        ) : (
+                          <span className="text-[10px] text-text-muted">—</span>
+                        )}
+                      </TableCell>
+                    )}
+                    {visibleColumns.servedBy && (
+                      <TableCell className="px-3 py-2 font-mono text-[11px] text-text-muted">
+                        {maskAccount(log.rotationAccount ?? log.account, emailsVisible) || "—"}
+                      </TableCell>
+                    )}
+                    {visibleColumns.target && (
+                      <TableCell
+                        className="max-w-[200px] truncate px-3 py-2 font-mono text-[10px] text-text-muted"
+                        title={log.targetUrl}
+                      >
+                        {truncateUrl(log.targetUrl)}
+                      </TableCell>
+                    )}
+                    {visibleColumns.latency && (
+                      <TableCell className="px-3 py-2 text-right font-mono text-text-muted">
+                        {formatLatency(log.latencyMs)}
+                      </TableCell>
+                    )}
+                    {visibleColumns.ip && (
+                      <TableCell className="px-3 py-2 font-mono text-[11px] text-success">
+                        {log.clientIp || "—"}
+                      </TableCell>
+                    )}
+                    {visibleColumns.time && (
+                      <TableCell className="px-3 py-2 text-right text-text-muted">
+                        {formatTime(log.timestamp)}
+                      </TableCell>
+                    )}
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </DataTableShell>
       {/* Detail Panel */}
       {selectedLog && <ProxyLogDetail log={selectedLog} onClose={() => setSelectedLog(null)} />}
     </div>

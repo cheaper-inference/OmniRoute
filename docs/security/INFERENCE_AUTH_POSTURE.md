@@ -15,6 +15,10 @@ protected?" can therefore return the wrong answer.
 | `GET /v1/models`                                                                   | The dashboard login posture — `isAuthRequired()`, overridable per-instance with `requireAuthForModels` (`src/app/api/v1/models/catalogRequest.ts`) |
 | `POST /v1/chat/completions`, `POST /v1/responses`, and the other client API routes | `REQUIRE_API_KEY` (`src/server/authz/policies/clientApi.ts`)                                                                                       |
 
+The Responses WebSocket (`/v1/responses` upgraded to `ws://`) follows the same
+`REQUIRE_API_KEY` gate: with it on, the handshake needs a valid API key or
+dashboard session, even when the `wsAuth` setting is off.
+
 On an instance that has an admin password set and `REQUIRE_API_KEY=false`,
 `/v1/models` answers `401` while inference is open to anyone who can reach the
 port.

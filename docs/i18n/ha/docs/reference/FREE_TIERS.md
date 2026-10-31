@@ -44,17 +44,18 @@ Manyan masu bayar da gudummawa da aka **rubuta hujjojinsu**: `mistral` 1.00B, `n
 
 ---
 
-## Sabuntawar 2026-06-17 — abin da ya canza tun daga 2026-06-05
+## 2026-06-17 sabuntawa — abin da ya canza tun 2026-06-05
 
-An sabunta dukan kundin bayan wani zagaye na binciken yanar gizo da wakilai 50 suka yi (takardun hukuma + labaran kwanaki 7 da suka gabata, tare da tantancewa ta hanyar ƙalubale). Muhimman bayanai:
+Wani zagayen binciken yanar gizo da wakilai 50 (takardun hukuma + labaran kwanaki 7 da suka gabata, an tantance ta hanyar bincike mai tsanani) ya sabunta dukkan katalog. Fitattun abubuwa:
 
-- **An cire / babu matakin kyauta (2026):** `chutes` (matakin kyauta ya ƙare 2026-03), `phind` (kamfanin ya rufe 2026-01), `kluster` (an dakatar da shi 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (an soke kyautar MiMo 2026-05-24, tayin Nemotron ya ƙare 2026-06 — an sake tabbatarwa 2026-06-18), `aimlapi` (an dakatar da matakin kyauta — an sake tabbatarwa 2026-06-18), `yi` (an yi ritaya ga Yi-Light, yanzu biyan gwargwadon amfani ne — an sake tabbatarwa 2026-06-18), `featherless-ai` (babu matakin kyauta a halin yanzu), `chipotle` ("Pepper AI" na Chipotle — widget ɗin tattaunawa na Amelia da aka gano yadda yake aiki ta hanyar nazarin baya, wato `amelia.chipotle.com`, wanda mai samarwar ke sadarwa da shi yanzu yana mayar da 404 a kowace hanya, har da tushen shafin; an kashe/matsar da backend ɗin, an tabbatar 2026-09-15 — an cire shi gaba ɗaya daga kundin, #13131/#4037). `iflytek` / `sparkdesk` suna nan a jeri amma suna ɗauke da bayanin taka-tsantsan game da ToS (Spark Lite kyauta ne; ToS yana taƙaita amfani da proxy/relay).
-- **Gemini** — an kashe `2.0 Flash` / `2.0 Flash-Lite` a 2026-06-01, sannan `2.5 Pro` ya fita daga matakin kyauta (2026-04); yanzu matakin kyauta na **iyalan Flash kaɗai** ne (2.5/3/3.1/3.5 Flash + Gemma). Yanzu kundin yana **haɗa** iyalan Flash a matsayin rukuni guda (a baya an ƙara adadin fiye da gaskiya ta hanyar ƙirga kowane nau'i dabam: 462M → 60M).
-- **Adadin da aka gyara:** `cloudflare-ai` 122M → **30M** (ainihin 10k-Neurons/rana), an sake ware `doubao` a matsayin kuɗin kyautar rajista na sau ɗaya (ba mai maimaituwa ba), `llm7` 4M → **150M** (an rubuta cewa tokens miliyan 5/rana), an dakatar da endpoints na `together` masu "-Free" → an kuma cire kyautar rajista ta $25 (ana buƙatar aƙalla sayen $5, babu gwajin kyauta), Preview na `longcat` ya ƙare + an yi ritaya ga samfurorin Flash → **LongCat-2.0** kaɗai, an sake ware shi a matsayin kuɗin kyautar rajista na tokens **10M** na sau ɗaya (yana buƙatar KYC, ba mai maimaituwa ba).
-- **Sabbin masu samar da kyauta da aka gano:** ⭐ **Kilo Code** (`kilo-gateway` — jerin "Auto Free" mai sauyawa: iyalan NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — samfurorin coding na kyauta guda 6 masu sauyawa), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash kyauta na dindindin + kyautar rajista ta 20M), da `arcee-ai` Trinity Large Preview.
-- **Sabbin matakai na gaskiya** (duba Tsarin Aiki): rukunin _kyauta-na-dindindin-amma-ba-ma'aunin-iyaka_ (ainihin damar shiga mai maimaituwa, ba tare da iyakar token da za a ƙirga ba) da _ƙarin damar da ajiya ke buɗewa_ (OpenRouter $10 → +24M/wata), an nuna dukansu **dabam** domin kada su taɓa ƙara adadin kanun labari fiye da gaskiya.
+- **An cire / babu matakin kyauta (2026):** `chutes` (matakin kyauta ya ƙare 2026-03), `phind` (kamfanin ya rufe 2026-01), `kluster` (an ƙare shi 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (an soke kyautar MiMo 2026-05-24, tallan Nemotron ya ƙare 2026-06 — an sake tabbatarwa 2026-06-18), `aimlapi` (an dakatar da matakin kyauta — an sake tabbatarwa 2026-06-18), `yi` (an janye Yi-Light, biya-yadda-ka-yi-amfani — an sake tabbatarwa 2026-06-18), `featherless-ai` (babu matakin kyauta a yanzu), `chipotle` ("Pepper AI" na Chipotle — widget ɗin hira na Amelia na `amelia.chipotle.com` da aka yi reverse-engineering wanda mai samarwa ke magana da shi yanzu yana ba da 404 a kowace hanya, har da tushe; an cire/matsar da backend, an tabbatar 2026-09-15 — an cire shi gaba ɗaya daga katalog, #13131/#4037). `iflytek` / `sparkdesk` suna ci gaba da kasancewa a jerin amma suna ɗauke da bayanin gargadi kan ToS (Spark Lite kyauta ne; ToS yana hana amfani da proxy/relay).
+- **Gemini** — an rufe `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01 kuma `2.5 Pro` ya bar matakin kyauta (2026-04); matakin kyauta yanzu **iyalin Flash kawai** (2.5/3/3.1/3.5 Flash + Gemma). Katalog yanzu yana **tattara** iyalin Flash tare (a da yana wuce girma ta hanyar ƙidaya kowace bambancewa daban: 462M → 60M).
+- **Lambobi da aka gyara:** `cloudflare-ai` 122M → **30M** (10k-Neurons/rana na gaske), `doubao` an sake rarraba shi a matsayin bashin rajista na sau ɗaya (ba mai maimaitawa ba), `llm7` 4M → **150M** (5M tokens/rana da aka rubuta a takarda), `together` an dakatar da endpoints "-Free" → an kuma cire bashin rajista na $25 (yana buƙatar ƙaramin sayayya na $5, babu gwaji na kyauta), `longcat` Preview ya ƙare + an janye Flash models → **LongCat-2.0** kawai, an sake rarraba shi a matsayin bashin rajista na **10M**-token na sau ɗaya (yana buƙatar KYC, ba mai maimaitawa ba).
+- **Ƙarewar inference na kai tsaye na Poolside (an tabbatar 2026-10-20):** [dandalin hukuma](https://platform.poolside.ai/) yana sanar da rufewa a **2026-10-31** kuma yana neman masu amfani su sauke models ɗinsa daga Hugging Face don self-hosting. Mai samarwa na kai tsaye `poolside` yana ɗauke da wannan gargadi. Katalog na kyauta da aka tsara da hannu ba shi da shigarwar Poolside ta kai tsaye; shigarwarsa masu sunan Poolside na `kilo-gateway` ne. Wannan sanarwa ba ta tabbatar da samuwar models da Kilo, Cline, NVIDIA ko wasu gateways ke hidima, don haka ba a janye waɗannan jerin bisa wannan dalili.
+- **Sabbin masu samarwa na kyauta da aka gano:** ⭐ **Kilo Code** (`kilo-gateway` — saitin "Auto Free" mai jujjuyawa: iyalin NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — models 10 na coding na kyauta masu jujjuyawa, an sabunta 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash kyauta har abada + 20M kyautar rajista), da `arcee-ai` Trinity Large Preview.
+- **Sabbin matakai na gaskiya** (dubi Methodology): rukuni na _kyauta-har-abada-amma-babu-iyaka_ (damar yin amfani ta gaske mai maimaitawa, babu iyakar token da za a ƙidaya) da _deposit-unlock boost_ (OpenRouter $10 → +24M/wata), dukkansu an bayyana su **daban** don kada su taɓa ƙara girman babban jigo.
 
-> Cikakken teburin kowane mai samarwa da ke ƙasa shi ne **hoton yanayin 2026-06-05**; sauye-sauyen da ke sama sun maye gurbinsa. Tushen hukuma na kai-tsaye shi ne kundin kowane samfuri `open-sse/config/freeModelCatalog.ts`.
+> Teburin cikakken bayani na kowane mai samarwa a ƙasa shine **hoton yanayi na 2026-06-05**; canje-canjen da ke sama sun maye gurbinsa. Tushen rayayyu na hukuma shine katalog na kowane model `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -110,7 +111,7 @@ da gangan.
 ## Hanyar aiki da abubuwan lura
 
 - Lambobin **hasashen iyaka mafi girma** ne daga iyakokin matakin kyauta da kowanne mai samarwa ya rubuta zuwa **2026-06-17**, waɗanda aka tattara ta binciken yanar gizo. Matakan kyauta suna canzawa koyaushe — sake tabbatarwa kafin dogaro da kowace ƙima.
-- **Abin da kowace shigarwa take tabbatarwa a zahiri.** Babu shigarwar da ke ɗauke da ma'aunin amincewa na kowane layi, kuma API ba ya bayar da ko ɗaya — ɗauki kowace ƙimar da ke sama a matsayin hasashe mai inganci iri ɗaya wanda ba a bayyana ba. Abubuwa biyu sun bambanta, domin ana tsara su da hannu maimakon a fitar da su ta hasashe: shigarwa 44 suna da tsayayyen wurin dakatarwa da aka rubuta daga tushe mai zaman kansa (39 daga cikinsu layukan xKiro ne, waɗanda duk suke amfani da adadin yau da kullum guda ɗaya), sannan shigarwa 12 suna da bayanin bayyana horarwa da prompt. Ana saita `hardStopGuaranteed` ne kawai idan sharuɗɗan mai samarwar da kansa suka ce wuce adadin kyauta zai sa a ƙi buƙatar maimakon fara cajin kuɗi a ɓoye, tare da tushe a cikin sharhi kusa da shigarwar; ba a taɓa saita shi zuwa `true` ta tsohuwa ba, kuma shigarwar da babu wanda ya tabbatar da ita tana kasancewa ba a saita ba. Saboda haka, rashin tutar tsayayyen dakatarwa yana nufin "ba a tabbatar ba", ba "an san zai caje ka" ba. **Yanayin STRICT** (matakin kariyar turawa na zaɓi `freeAccessPolicy=strict`) yana amincewa ne kawai da shigarwar da ke ɗauke da tutar; ana cire duk sauran matakan kyauta a matsayin `no-hard-stop` (duba `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Lokacin da matakin kariyar ya tace tarin, log ɗin da ma'aikaci zai iya gani yana bayar da rahoton adadin abubuwan da aka cire da kuma kaso na `no-hard-stop` a cikinsu.
+- **Abin da kowace shigarwa take tabbatarwa a zahiri.** Babu shigarwar da ke ɗauke da ma'aunin amincewa na kowane layi, kuma API ba ya bayar da ko ɗaya — ɗauki kowace ƙimar da ke sama a matsayin hasashe mai inganci iri ɗaya wanda ba a bayyana ba. Abubuwa biyu sun bambanta, domin ana tsara su da hannu maimakon a fitar da su ta hasashe: shigarwa 44 suna da tsayayyen wurin dakatarwa da aka rubuta daga tushe mai zaman kansa (39 daga cikinsu layukan xKiro ne, waɗanda duk suke amfani da adadin yau da kullum guda ɗaya), sannan shigarwa 20 suna da bayanin bayyana horarwa da prompt. Ana saita `hardStopGuaranteed` ne kawai idan sharuɗɗan mai samarwar da kansa suka ce wuce adadin kyauta zai sa a ƙi buƙatar maimakon fara cajin kuɗi a ɓoye, tare da tushe a cikin sharhi kusa da shigarwar; ba a taɓa saita shi zuwa `true` ta tsohuwa ba, kuma shigarwar da babu wanda ya tabbatar da ita tana kasancewa ba a saita ba. Saboda haka, rashin tutar tsayayyen dakatarwa yana nufin "ba a tabbatar ba", ba "an san zai caje ka" ba. **Yanayin STRICT** (matakin kariyar turawa na zaɓi `freeAccessPolicy=strict`) yana amincewa ne kawai da shigarwar da ke ɗauke da tutar; ana cire duk sauran matakan kyauta a matsayin `no-hard-stop` (duba `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Lokacin da matakin kariyar ya tace tarin, log ɗin da ma'aikaci zai iya gani yana bayar da rahoton adadin abubuwan da aka cire da kuma kaso na `no-hard-stop` a cikinsu.
 - `estMonthlyFreeTokens` = token masu maimaituwa na wata-wata kawai. **Kiredit na rajista na sau ɗaya ba sa maimaituwa** kuma ana lissafa su a matsayin 0. Matakan da aka dakatar su ma 0 ne.
 - Iyakar token ta yau da kullum → `monthly = daily × 30`. Idan RPD kaɗai aka rubuta → `RPD × ~800 output tokens × 30`. Idan RPM/TPM kaɗai ne (babu iyakar yau da kullum) → **ba shi da iyaka** (duba ƙasa).
 - **Kyauta ta dindindin, amma babu iyakar token da aka wallafa** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): waɗannan samun dama na kyauta ne na gaske kuma mai maimaituwa, amma an iyakance su ta adadin buƙatu/aiwatarwa a lokaci guda. Muna rarraba su a matsayin `recurring-uncapped` kuma **ba ma taɓa haɗa su cikin jimla** — ninka `RPM × 24/7 × 30d` zai samar da iyakar ƙarya (kumburin ƙididdigar da muke ƙin yarda da shi). An jera su ne domin ka san suna nan.
@@ -238,75 +239,75 @@ Yawancin alkaluman "free tokens per month" a wannan fanni jimillar lambobin da a
 
 ---
 
-## Matakin kyauta na kowane mai samarwa (an duba Bytez/Nous 2026-10-15; an sake tantance layuka 2026-09-02; sauran 2026-06-17)
+## Matakin kyauta na kowane mai samarwa (an duba Bytez/Nous a 2026-10-15; an sake tantance layuka a 2026-09-02; sauran a 2026-06-17)
 
-> An sake samar da shi daga kundin kowane samfuri (`open-sse/config/freeModelCatalog.ts`), tare da cire maimaituwa bisa rukuni. An jera shi bisa adadin tokens/mo mai ɗorewa da ake samu akai-akai. `uncapped*` = kyauta ne na dindindin amma babu iyakar token da aka wallafa (an iyakance ƙimar amfani/yawan ayyukan lokaci guda) — ana iya amfani da shi da gaske, **ba** a haɗa shi cikin jimillar kanun labari ba. `—` = na kuɗin amfani kawai / ba sai maɓalli ba / ba za a iya ƙididdige shi da token ba.
+> An sake samar da shi daga kundin kowane samfurin (`open-sse/config/freeModelCatalog.ts`), tare da cire maimaituwa a cikin pool. An jera shi bisa adadin token na yau da kullum da ake samu a kowane wata. `uncapped*` = kyauta na dindindin amma babu iyakar token da aka wallafa (ana iyakance sauri/yawan aiki a lokaci guda) — samun dama ne na gaske, **amma ba a haɗa shi** cikin babban jimillar. `—` = na kuɗin kiredit kawai / ba tare da maɓalli ba / ba za a iya ƙididdige shi da token ba.
 
-| Mai samarwa      | Nau'in kyauta            | Token tabbatattu/wata | Kireditin watan farko | Sharuɗɗan Sabis | Samfura |
-| ---------------- | ------------------------ | --------------------- | --------------------- | --------------- | ------- |
-| `mistral`        | mai maimaituwa           | ~1.00B                | —                     | yi hattara      | 5       |
-| `nara`           | mai maimaituwa           | ~210M                 | —                     | yi hattara      | 8       |
-| `llm7`           | mai maimaituwa           | ~150M                 | —                     | yi hattara      | 4       |
-| `xkiro`          | mai maimaituwa           | ~150M                 | —                     | yi hattara      | 39      |
-| `longcat`        | sau ɗaya                 | —                     | 10M                   | yi hattara      | 1       |
-| `cerebras`       | sau ɗaya                 | —                     | kiredit na $5         | yi hattara      | 2       |
-| `cloudflare-ai`  | mai maimaituwa           | ~30M                  | —                     | yi hattara      | 9       |
-| `groq`           | mai maimaituwa           | ~30M                  | —                     | yi hattara      | 5       |
-| `api-airforce`   | mai maimaituwa           | ~24M                  | —                     | yi hattara      | 7       |
-| `bluesminds`     | mai maimaituwa           | ~7M                   | —                     | marar fayyace   | 22      |
-| `sambanova`      | mai maimaituwa           | ~6M                   | —                     | yi hattara      | 5       |
-| `arcee-ai`       | mai maimaituwa           | ~5M                   | —                     | yi hattara      | 1       |
-| `bazaarlink`     | mai maimaituwa           | ~4M                   | —                     | yi hattara      | 32      |
-| `openrouter`     | mai maimaituwa           | ~1M                   | —                     | yi hattara      | 1       |
-| `cohere`         | mai maimaituwa           | ~800K                 | —                     | yi hattara      | 6       |
-| `huggingchat`    | mai maimaituwa           | ~500K                 | —                     | yi hattara      | 4       |
-| `morph`          | mai maimaituwa           | ~400K                 | —                     | lafiya          | 2       |
-| `huggingface`    | mai maimaituwa           | ~200K                 | —                     | yi hattara      | 6       |
-| `kiro`           | mai maimaituwa           | ~25K                  | —                     | guje masa       | 12      |
-| `glm-cn`         | marar iyaka              | marar iyaka\*         | ~20M                  | lafiya          | 4       |
-| `baidu`          | marar iyaka              | marar iyaka\*         | —                     | yi hattara      | 1       |
-| `gemini`         | marar iyaka              | marar iyaka\*         | —                     | yi hattara      | 4       |
-| `kilo-gateway`   | marar iyaka              | marar iyaka\*         | —                     | yi hattara      | 7       |
-| `ollama-cloud`   | marar iyaka              | marar iyaka\*         | —                     | marar fayyace   | 8       |
-| `opencode-zen`   | marar iyaka              | marar iyaka\*         | —                     | yi hattara      | 6       |
-| `tencent`        | marar iyaka              | marar iyaka\*         | —                     | yi hattara      | 1       |
-| `vertex`         | kireditin rajista        | —                     | ~300M                 | yi hattara      | 10      |
-| `agentrouter`    | kireditin rajista        | —                     | ~200M                 | yi hattara      | 4       |
-| `predibase`      | kireditin rajista        | —                     | ~25M                  | yi hattara      | 1       |
-| `doubao`         | kireditin rajista        | —                     | ~15M                  | marar fayyace   | 1       |
-| `ai21`           | kireditin rajista        | —                     | ~10M                  | guje masa       | 2       |
-| `deepseek`       | kireditin rajista        | —                     | ~5M                   | lafiya          | 2       |
-| `hyperbolic`     | kireditin rajista        | —                     | ~5M                   | lafiya          | 8       |
-| `nscale`         | kireditin rajista        | —                     | ~5M                   | yi hattara      | 6       |
-| `bytez`          | kiredit (mai maimaituwa) | —                     | ba a sani ba          | marar fayyace   | 1       |
-| `deepinfra`      | kireditin rajista        | —                     | ~1M                   | yi hattara      | 22      |
-| `fireworks`      | kireditin rajista        | —                     | ~1M                   | guje masa       | 10      |
-| `nebius`         | kireditin rajista        | —                     | ~1M                   | yi hattara      | 1       |
-| `qoder`          | kireditin rajista        | —                     | ~1M                   | yi hattara      | 14      |
-| `scaleway`       | kireditin rajista        | —                     | ~1M                   | lafiya          | 6       |
-| `novita`         | kireditin rajista        | —                     | ~500K                 | yi hattara      | 1       |
-| `agy`            | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 16      |
-| `baichuan`       | ba tare da maɓalli ba    | —                     | —                     | marar fayyace   | 1       |
-| `blackbox`       | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 6       |
-| `coze`           | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 1       |
-| `duckduckgo-web` | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 6       |
-| `freemodel-dev`  | ba tare da maɓalli ba    | —                     | —                     | ba a sani ba    | 4       |
-| `friendliai`     | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 2       |
-| `iflytek`        | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 1       |
-| `inference-net`  | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 3       |
-| `liquid`         | ba tare da maɓalli ba    | —                     | —                     | ba a sani ba    | 1       |
-| `monsterapi`     | ba tare da maɓalli ba    | —                     | —                     | marar fayyace   | 1       |
-| `muse-spark-web` | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 3       |
-| `nlpcloud`       | ba tare da maɓalli ba    | —                     | —                     | guje masa       | 1       |
-| `nvidia`         | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 13      |
-| `pollinations`   | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 31      |
-| `publicai`       | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 3       |
-| `reka`           | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 2       |
-| `sensenova`      | ba tare da maɓalli ba    | —                     | —                     | yi hattara      | 1       |
-| `sparkdesk`      | marar maɓalli            | —                     | —                     | yi hattara      | 1       |
-| `stepfun`        | marar maɓalli            | —                     | —                     | lafiya          | 1       |
-| `t3-web`         | marar maɓalli            | —                     | —                     | guje wa         | 23      |
-| `uncloseai`      | marar maɓalli            | —                     | —                     | yi hattara      | 3       |
+| Mai samarwa      | Nau'in kyauta         | Tsayayyun token/wata | Kiredit na watan farko | Sharuɗɗan amfani | Samfura |
+| ---------------- | --------------------- | -------------------- | ---------------------- | ---------------- | ------- |
+| `mistral`        | mai maimaituwa        | ~1.00B               | —                      | yi hattara       | 5       |
+| `nara`           | mai maimaituwa        | ~210M                | —                      | yi hattara       | 8       |
+| `llm7`           | mai maimaituwa        | ~150M                | —                      | yi hattara       | 4       |
+| `xkiro`          | mai maimaituwa        | ~150M                | —                      | yi hattara       | 39      |
+| `longcat`        | sau ɗaya              | —                    | 10M                    | yi hattara       | 1       |
+| `cerebras`       | sau ɗaya              | —                    | Kiredit na $5          | yi hattara       | 2       |
+| `cloudflare-ai`  | mai maimaituwa        | ~30M                 | —                      | yi hattara       | 9       |
+| `groq`           | mai maimaituwa        | ~30M                 | —                      | yi hattara       | 5       |
+| `api-airforce`   | mai maimaituwa        | ~24M                 | —                      | yi hattara       | 7       |
+| `bluesminds`     | mai maimaituwa        | ~7M                  | —                      | maras tabbas     | 22      |
+| `sambanova`      | mai maimaituwa        | ~6M                  | —                      | yi hattara       | 5       |
+| `arcee-ai`       | mai maimaituwa        | ~5M                  | —                      | yi hattara       | 1       |
+| `bazaarlink`     | mai maimaituwa        | ~4M                  | —                      | yi hattara       | 32      |
+| `openrouter`     | mai maimaituwa        | ~1M                  | —                      | yi hattara       | 1       |
+| `cohere`         | mai maimaituwa        | ~800K                | —                      | yi hattara       | 6       |
+| `huggingchat`    | mai maimaituwa        | ~500K                | —                      | yi hattara       | 4       |
+| `morph`          | mai maimaituwa        | ~400K                | —                      | babu matsala     | 2       |
+| `huggingface`    | mai maimaituwa        | ~200K                | —                      | yi hattara       | 6       |
+| `kiro`           | mai maimaituwa        | ~25K                 | —                      | a guje wa        | 12      |
+| `glm-cn`         | mara iyaka            | mara iyaka\*         | ~20M                   | babu matsala     | 4       |
+| `baidu`          | mara iyaka            | mara iyaka\*         | —                      | yi hattara       | 1       |
+| `gemini`         | mara iyaka            | mara iyaka\*         | —                      | yi hattara       | 4       |
+| `kilo-gateway`   | mara iyaka            | mara iyaka\*         | —                      | yi hattara       | 7       |
+| `ollama-cloud`   | mara iyaka            | mara iyaka\*         | —                      | maras tabbas     | 8       |
+| `opencode-zen`   | mara iyaka            | mara iyaka\*         | —                      | yi hattara       | 10      |
+| `tencent`        | mara iyaka            | mara iyaka\*         | —                      | yi hattara       | 1       |
+| `vertex`         | kiredit na rajista    | —                    | ~300M                  | yi hattara       | 10      |
+| `agentrouter`    | kiredit na rajista    | —                    | ~200M                  | yi hattara       | 4       |
+| `predibase`      | kiredit na rajista    | —                    | ~25M                   | yi hattara       | 1       |
+| `doubao`         | kiredit na rajista    | —                    | ~15M                   | maras tabbas     | 1       |
+| `ai21`           | kiredit na rajista    | —                    | ~10M                   | a guje wa        | 2       |
+| `deepseek`       | kiredit na rajista    | —                    | ~5M                    | babu matsala     | 2       |
+| `hyperbolic`     | kiredit na rajista    | —                    | ~5M                    | babu matsala     | 8       |
+| `nscale`         | kiredit na rajista    | —                    | ~5M                    | yi hattara       | 6       |
+| `bytez`          | kiredit (mai maim.)   | —                    | ba a sani ba           | maras tabbas     | 1       |
+| `deepinfra`      | kiredit na rajista    | —                    | ~1M                    | yi hattara       | 22      |
+| `fireworks`      | kiredit na rajista    | —                    | ~1M                    | a guje wa        | 10      |
+| `nebius`         | kiredit na rajista    | —                    | ~1M                    | yi hattara       | 1       |
+| `qoder`          | kiredit na rajista    | —                    | ~1M                    | yi hattara       | 14      |
+| `scaleway`       | kiredit na rajista    | —                    | ~1M                    | babu matsala     | 6       |
+| `novita`         | kiredit na rajista    | —                    | ~500K                  | yi hattara       | 1       |
+| `agy`            | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 16      |
+| `baichuan`       | ba tare da maɓalli ba | —                    | —                      | maras tabbas     | 1       |
+| `blackbox`       | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 6       |
+| `coze`           | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 1       |
+| `duckduckgo-web` | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 6       |
+| `freemodel-dev`  | ba tare da maɓalli ba | —                    | —                      | ba a sani ba     | 4       |
+| `friendliai`     | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 2       |
+| `iflytek`        | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 1       |
+| `inference-net`  | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 3       |
+| `liquid`         | ba tare da maɓalli ba | —                    | —                      | ba a sani ba     | 1       |
+| `monsterapi`     | ba tare da maɓalli ba | —                    | —                      | maras tabbas     | 1       |
+| `muse-spark-web` | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 3       |
+| `nlpcloud`       | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 1       |
+| `nvidia`         | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 13      |
+| `pollinations`   | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 31      |
+| `publicai`       | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 3       |
+| `reka`           | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 2       |
+| `sensenova`      | ba tare da maɓalli ba | —                    | —                      | yi hattara       | 1       |
+| `sparkdesk`      | ba tare da maɓalli ba | —                    | —                      | a yi hattara     | 1       |
+| `stepfun`        | ba tare da maɓalli ba | —                    | —                      | lafiya           | 1       |
+| `t3-web`         | ba tare da maɓalli ba | —                    | —                      | a guje wa        | 23      |
+| `uncloseai`      | ba tare da maɓalli ba | —                    | —                      | a yi hattara     | 3       |
 
 ---
 

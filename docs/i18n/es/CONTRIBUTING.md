@@ -173,15 +173,15 @@ refactor(db): consolidate rate limit tables
 # Todas las pruebas (unitarias + vitest + ecosistema + e2e)
 npm run test:all
 
-# Un solo archivo de pruebas (ejecutor de pruebas nativo de Node.js; la mayoría de las pruebas usan este)
+# Un único archivo de prueba (ejecutor de pruebas nativo de Node.js; la mayoría de las pruebas usa este)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Solo las pruebas unitarias afectadas por tu cambio (el mismo selector TIA que en la comprobación de CI, #8084)
+# Solo las pruebas unitarias afectadas por el cambio (el mismo selector TIA que la comprobación de CI, #8084)
 npm run test:scoped            # cambios en el último commit (o en el árbol de trabajo)
-npm run test:scoped:staged     # solo cambios en staging; combina bien con una ejecución previa al commit
-npm run test:scoped:full       # primero reconstruye el mapa del grafo de importaciones (tras añadir/mover archivos)
-# El código de salida 1 + «ejecuta la suite completa» significa que ha cambiado un archivo central (tsconfig, package.json, …) o
-# un archivo fuente no mapeado; el selector falla de forma segura, nunca omite pruebas silenciosamente.
+npm run test:scoped:staged     # solo cambios preparados; combina bien con una ejecución previa al commit
+npm run test:scoped:full       # primero vuelve a generar el mapa del grafo de importaciones (tras añadir/mover archivos)
+# Un código de salida 1 + "ejecutar la suite completa" significa que cambió un archivo central
+# (tsconfig, package.json, …) o código fuente sin asignar; el selector aplica un modo seguro y nunca omite pruebas silenciosamente.
 
 # Vitest (servidor MCP, autoCombo, caché)
 npm run test:vitest
@@ -189,7 +189,7 @@ npm run test:vitest
 # Pruebas E2E (requieren Playwright)
 npm run test:e2e
 
-# Pruebas E2E de clientes de protocolo (transportes MCP, A2A)
+# E2E de clientes de protocolo (transportes MCP, A2A)
 npm run test:protocols:e2e
 
 # Pruebas de compatibilidad del ecosistema
@@ -203,15 +203,15 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Prueba de humo combinada y controlada con servicios upstream reales (requiere acceso al VPS y créditos reales del proveedor)
-# Accede a proveedores REALES; tiene un pequeño coste. NUNCA se ejecuta en CI. Se omite correctamente sin la activación.
+# Prueba de humo combinada y controlada con servicios ascendentes reales (requiere acceso al VPS y créditos reales de proveedores)
+# Contacta con proveedores REALES; tiene un pequeño coste. NUNCA se ejecuta en CI. Se omite limpiamente sin la activación.
 # Requiere: acceso mediante ssh root@192.168.0.15 (obtiene del VPS una instantánea de la base de datos de solo lectura).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Prueba de humo en vivo del VPS de la fase 3: scripts ESM de Node sin formato adicional que acceden directamente al servidor .15 en vivo.
-# Requiere: acceso mediante ssh root@192.168.0.15 (los combos se crean/eliminan mediante SQLite por SSH).
-# Accede a proveedores REALES (coste reducido). Crea/elimina únicamente combos __live_test__*. NUNCA se ejecuta en CI.
-# REQUIRE_API_KEY=false en .15, por lo que no se necesita ninguna clave de API, pero respeta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY si están definidos.
+# Prueba de humo en vivo de la fase 3 en el VPS: scripts ESM de Node sin intermediarios que acceden directamente al servidor .15 activo.
+# Requiere: acceso mediante ssh root@192.168.0.15 (las combinaciones se crean y eliminan mediante SQLite por SSH).
+# Contacta con proveedores REALES (coste reducido). Solo crea/elimina combinaciones __live_test__*. NUNCA se ejecuta en CI.
+# REQUIRE_API_KEY=false en .15, por lo que no se necesita ninguna clave de API, pero respeta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY si están establecidas.
 npm run test:combo:live:vps              # 7 escenarios HTTP (prioridad/round-robin/ponderado/coste/fusión/automático + estado)
 npm run test:combo:live:vps:failover     # añade un escenario real de conmutación por error entre proveedores (8 en total)
 ```
@@ -219,32 +219,33 @@ npm run test:combo:live:vps:failover     # añade un escenario real de conmutaci
 Notas sobre la cobertura:
 
 - `npm run test:coverage` mide la cobertura del código fuente para la suite principal de pruebas unitarias, excluye `tests/**` e incluye `open-sse/**`
-- Las solicitudes de incorporación de cambios deben mantener el umbral de cobertura en **60 % o más** de sentencias/líneas/funciones/ramas
-- Si un PR cambia código de producción en `src/`, `open-sse/`, `electron/` o `bin/`, debe añadir o actualizar pruebas automatizadas en el mismo PR
-- `npm run coverage:report` muestra el informe detallado archivo por archivo de la última ejecución de cobertura
-- `npm run test:coverage:legacy` conserva la métrica anterior para realizar comparaciones históricas
+- Las solicitudes de incorporación de cambios deben mantener el umbral de cobertura en **60 % o más** para sentencias/líneas/funciones/ramas
+- Si una solicitud de incorporación de cambios modifica código de producción en `src/`, `open-sse/`, `electron/` o `bin/`, debe añadir o actualizar pruebas automatizadas en la misma solicitud
+- `npm run coverage:report` muestra el informe detallado archivo por archivo de la ejecución de cobertura más reciente
+- `npm run test:coverage:legacy` conserva la métrica anterior para comparaciones históricas
 - Consulta `docs/ops/COVERAGE_PLAN.md` para ver la hoja de ruta por fases destinada a mejorar la cobertura
 
 ### Requisitos de las solicitudes de incorporación de cambios
 
-Antes de abrir un PR, usa la
+Antes de abrir una solicitud de incorporación de cambios, utiliza la
 [Ruta recomendada para contribuir](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) para ejecutar el ciclo específico correspondiente a
-lo que hayas cambiado. La suite unitaria completa (4 particiones de CI), Vitest, el umbral de cobertura de **60 % o más** y
-la compilación de producción son responsabilidad de CI; ejecutarlos localmente no aporta ninguna señal que las
-comprobaciones del PR no vayan a proporcionar ya y, en máquinas más pequeñas, puede saturar el host (#8084):
+lo que hayas cambiado. La suite completa de pruebas unitarias (4 particiones de CI), Vitest, el umbral de cobertura de **60 % o más** y
+la compilación de producción son responsabilidad de CI; ejecutarlos localmente no aporta ninguna señal que las comprobaciones de la solicitud
+no vayan a proporcionar ya y, en equipos menos potentes, puede saturar el sistema (#8084):
 
-- Ejecuta los archivos de pruebas que cubren tu cambio: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Ejecuta los archivos de prueba que cubran tu cambio: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Ejecuta `npm run lint`
-- Incluye o actualiza pruebas automatizadas en el mismo PR siempre que cambie el código de producción
-- Incluye en la descripción del PR los archivos de pruebas modificados o añadidos cuando haya cambiado el código de producción
-- Comprueba el resultado de SonarQube en el PR cuando los secretos del proyecto estén configurados en CI
+- Incluye o actualiza pruebas automatizadas en la misma solicitud siempre que cambie el código de producción
+- En archivos de `node:test`, coloca cada `await` de nivel superior (como `await import(...)`) antes del primer `test()` / `describe()`: con `--test-force-exit`, las pruebas registradas después podrían no ejecutarse silenciosamente (#18045; aplicado mediante `npm run check:test-tla-order`)
+- Incluye en la descripción de la solicitud los archivos de prueba modificados o añadidos cuando haya cambiado el código de producción
+- Comprueba el resultado de SonarQube en la solicitud cuando los secretos del proyecto estén configurados en CI
 
 Estado actual de las pruebas: **122 archivos de pruebas unitarias** que cubren:
 
 - Traductores de proveedores y conversión de formatos
-- Limitación de velocidad, disyuntor y resiliencia
+- Limitación de frecuencia, disyuntor y resiliencia
 - Caché semántica, idempotencia y seguimiento del progreso
-- Operaciones de base de datos y esquema (21 módulos de base de datos)
+- Operaciones y esquema de la base de datos (21 módulos de base de datos)
 - Flujos de OAuth y autenticación
 - Validación de endpoints de API (Zod v4)
 - Herramientas del servidor MCP y aplicación de ámbitos

@@ -25,8 +25,10 @@
     "confirm": "Onayla",
     "refresh": "Yenile",
     "close": "Kapat",
+    "dialogTitleFallback": "İletişim kutusu",
     "previousPage": "Önceki sayfa",
     "nextPage": "Sonraki sayfa",
+    "pagination": "Sayfalama",
     "capsLockOn": "Caps Lock açık",
     "dismissNotification": "Bildirimi kapat",
     "toggleColumns": "Sütunları aç/kapat",
@@ -182,6 +184,7 @@
     "combos": "Kombinasyonlar",
     "noModelsFound": "Model bulunamadı",
     "clear": "Temizle",
+    "clearFilters": "Filtreleri temizle",
     "done": "Tamam",
     "selectAll": "Tümünü seç",
     "unselectAll": "Seçimi kaldır",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# parti} other {# parti}}",
     "batchFilePreview": "Önizleme",
     "batchFilePreviewTruncated": "İlk {shown} satır gösteriliyor ({total} toplam satır)",
-    "batchFileDownloadFull": "Tam Dosyayı İndir"
+    "batchFileDownloadFull": "Tam Dosyayı İndir",
+    "tokensPageTitle": "Tokenlar",
+    "tokensPageDescription": "API anahtarları arasında token gönderin, davet kodlarını paylaşın ve topluluk sunucularına bağlanın.",
+    "tokensServerUrlLabel": "Sunucu URL'si"
   },
   "disabled": "Devre dışı",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Bütçesi tükenmiş istekleri acil durum ücretsiz yedek sağlayıcıya/modele yönlendirin.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Proxy sunucusu durduruldu veya yeniden başlatılıyor.",
     "expandSidebar": "Kenar çubuğunu genişlet",
     "collapseSidebar": "Kenar çubuğunu daralt",
-    "themes": "Temalar",
-    "presetColors": "Popüler renkler",
     "createTheme": "Tema oluştur",
     "chooseColor": "Bir renk seç",
-    "themeCoral": "Mercan",
-    "themeBlue": "Mavi",
-    "themeRed": "Kırmızı",
-    "themeGreen": "Yeşil",
-    "themeViolet": "Menekşe",
-    "themeOrange": "Turuncu",
-    "themeCyan": "Camgöbeği",
     "cliToolsShort": "Araçlar",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Tema Sistemi",
     "whitelabelingDesc": "Beyaz Etiketleme Açıklaması",
     "switchThemes": "Temaları Değiştir",
-    "themeAccentDesc": "Tema Vurgu Rengi Açıklaması",
     "uploadFavicon": "Favicon Yükle",
     "themeDark": "Koyu Tema",
     "customLogoDesc": "Özel Logo Açıklaması",
     "sidebarVisibilityToggle": "Kenar Çubuğu Görünürlüğü Anahtarı",
-    "themeAccent": "Tema Vurgu Rengi",
     "resetFavicon": "Favicon'u Sıfırla",
     "whitelabeling": "Beyaz Etiketleme",
     "darkMode": "Koyu Mod",
@@ -1122,10 +1117,8 @@
     "customLogo": "Özel Logo",
     "appearance": "Görünüm",
     "themeSelectionAria": "Tema Seçimi ARIA",
-    "themeCreate": "Tema Oluştur",
     "customFaviconDesc": "Özel Favicon Açıklaması",
     "logoPreview": "Logo Önizlemesi",
-    "themeCustom": "Özel Tema",
     "hideHealthLogsDesc": "Sağlık Günlüklerini Gizleme Açıklaması",
     "faviconPreview": "Favicon Önizlemesi",
     "changelog": "Değişiklik Günlüğü",
@@ -1352,7 +1345,9 @@
       "open": "açık",
       "close": "kapat"
     },
-    "noResults": "Sonuç yok"
+    "noResults": "Sonuç yok",
+    "costsTeams": "Ekipler",
+    "costsTeamsSubtitle": "Ekip maliyet merkezleri"
   },
   "webhooks": {
     "title": "Web kancaları",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 veya @channelname",
       "chatIdHint": "Sohbetin/kanalın benzersiz sayısal tanımlayıcısı veya herkese açık kullanıcı adı.",
       "tutorial": "Telegram webhook'u nasıl yapılandırılır:"
-    }
+    },
+    "copy": "Kopyala",
+    "copied": "Kopyalandı!",
+    "expandDetails": "Ayrıntıları göster",
+    "collapseDetails": "Ayrıntıları gizle"
   },
   "compliance": {
     "auditTitle": "Denetim",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Aramalar (24s)",
     "mcpMetricSuccessRate": "Başarı oranı",
     "mcpMetricAvgDuration": "Ortalama süre",
-    "mcpMetricTopTool": "En iyi araç"
-  },
-  "themesPage": {
-    "title": "Temalar",
-    "description": "Hazır bir tema seçin veya tek bir renkle kendi temanızı oluşturun",
-    "presetColors": "Popüler renkler",
-    "customTheme": "Özel tema",
-    "customThemeDesc": "Tema oluştur seçeneğine tıklayın ve bir renk seçin",
-    "createTheme": "Tema oluştur",
-    "activePreset": "Aktif tema"
+    "mcpMetricTopTool": "En iyi araç",
+    "dismissError": "Hatayı kapat"
   },
   "header": {
     "logout": "Oturumu kapat",
     "quickNavigation": "Hızlı gezinme",
     "quickNavigationTitle": "Hızlı gezinme (⌘K / Ctrl+K)",
     "openQuickNavigation": "Hızlı gezinmeyi aç",
+    "openMenu": "Menüyü aç",
+    "products": "Keak ürünleri",
     "switchToLightMode": "Açık moda geç",
     "switchToDarkMode": "Koyu moda geç",
     "language": "Dil",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic Uyumlu",
     "media": "Medya",
     "mediaDescription": "Görüntüler, videolar ve müzik oluşturun",
-    "themes": "Temalar",
-    "themesDescription": "Kontrol panelinin tamamı için bir renk teması seçin",
     "costsDescription": "Tüm sağlayıcılardaki harcamaları takip edin, eğilimleri analiz edin ve AI bütçenizi yönetin",
     "cacheDescription": "Sağlayıcı istem önbelleği verimliliğini ve yerel anlamsal yanıtların yeniden kullanımını izleyin.",
     "limitsDescription": "API anahtarı ve sağlayıcı başına hız sınırlarını ve kotaları yapılandırın",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Gelişmiş yük kuralları, istek sınırları ve proxy API ayarları",
     "mitmProxyDescription": "Trafik incelemesi ve hata ayıklama için MITM proxy ayarlarını yapılandırın",
     "oneProxyDescription": "Gelişmiş proxy zincirleme için 1Proxy ayarlarını yapılandırın",
-    "omniSkillsDescription": "Otomatik istem ve araç yürütme için korumalı alan becerilerini yükleyin ve yönetin"
+    "omniSkillsDescription": "Otomatik istem ve araç yürütme için korumalı alan becerilerini yükleyin ve yönetin",
+    "teamsDescription": "Ekip maliyet tahminleri ve paylaşılan esnek bütçeler"
   },
   "cloudSyncStatus": {
     "synced": "Eşitlendi",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Uç noktanızı kopyalayın",
     "readinessStep4": "Bir test isteği gönderin",
     "readinessContinue": "Kuruluma devam edin",
-    "readinessDismiss": "Şimdilik kapatın"
+    "readinessDismiss": "Şimdilik kapatın",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# model}} yakın zamanda kullanılmış ancak fiyatı yapılandırılmamış",
+    "unpricedUsageFailClosed": "{keys, plural, one {# kullanım sınırı olan API anahtarı} other {# kullanım sınırı olan API anahtarları}} son 8 günde bu modelleri kullandı. Bu kullanım bir anahtarın günlük veya haftalık dönemindeyse, anahtar kota aşılmış sayılır ve istekleri engellenir (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Bu kullanım, anahtar başına kullanım limitlerine $0 olarak sayılır (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# istek} other {# istek}}, {keys, plural, one {# sınırlı anahtar} other {# sınırlı anahtar}}",
+    "unpricedUsageMore": "…ve {count} tane daha",
+    "unpricedUsageConfigure": "Fiyatlandırmayı yapılandır",
+    "unpricedUsageDismiss": "Kapat"
   },
   "analytics": {
     "title": "Analitik",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Yalnızca seçili bağlantılar",
     "selectAtLeastOneConnection": "En az bir bağlantı seçin veya “Tüm bağlantılar” seçeneğini belirleyin.",
     "allConnectionsDesc": "Bu anahtar herhangi bir etkin bağlantıyı kullanabilir.",
-    "restrictedToConnections": "{count, plural, one {# bağlantıyla} other {# bağlantıyla}} sınırlandırıldı."
+    "restrictedToConnections": "{count, plural, one {# bağlantıyla} other {# bağlantıyla}} sınırlandırıldı.",
+    "preferredConnections": "Tercih edilen bağlantılar",
+    "preferredConnectionsDesc": "Anahtar başına öncelik sırası. Tercih edilen bir bağlantı kullanılamıyorsa yönlendirme bir sonraki uygun bağlantıya geçer.",
+    "preferredConnectionsNone": "Tercih ayarlanmadı — varsayılan yönlendirme stratejisi kullanılır.",
+    "preferredConnectionsClear": "Temizle",
+    "removeSelection": "{name} öğesini kaldır"
   },
   "auditLog": {
     "title": "Denetim Günlüğü",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Modality Bridge ayarlarında Görüntü→Metin köprüsünü yapılandırın",
     "sttBridgeCta": "Modality Bridge ayarlarında Konuşma→Metin köprüsünü yapılandırın",
     "existingConnection": "Mevcut bağlantı",
-    "openrouterSttDescription": "OpenRouter konuşmadan metne modelleri, yapılandırılmış OpenRouter bağlantınızı kullanır. Ayrı bir kimlik bilgisi gereklidir."
+    "openrouterSttDescription": "OpenRouter konuşmadan metne modelleri, yapılandırılmış OpenRouter bağlantınızı kullanır. Ayrı bir kimlik bilgisi gereklidir.",
+    "modalityTabsAria": "Medya türü",
+    "serviceKindsAria": "Hizmet türü"
   },
   "search": {
     "searchQuery": "Arama Sorgusu",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manuel Yapılandırma",
     "clineManualConfiguration": "Cline Manuel Yapılandırma",
     "kiloManualConfiguration": "Kilo Code Manuel Yapılandırma",
+    "piManualConfiguration": "Pi - Manuel Yapılandırma",
+    "piConfigInvalidTitle": "Pi models.json okunamıyor",
+    "piOmnirouteConfigured": "OmniRoute Pi özel sağlayıcısı olarak yapılandırılmıştır",
+    "piModelHelp": "Pi, özel uç noktalar — için modelleri otomatik olarak keşfetmez, seçtiğiniz model açıkça models.json yazılır.",
+    "piManualConfigTitle": "Veya ~/.pi/agent/models.json manuel olarak düzenleyin",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Daha sonra Pi'yi başlatın ve omniroute sağlayıcısını seçin. Aracı dizinin tamamını taşımak için PI_CODING_AGENT_DIR ayarlayın.",
+    "piUnownedNote": "Bu giriş OmniRoute dışına eklendi (örn. pi-gui'nin Özel uç noktaları). Başvurmak onu benimseyecektir; Sıfırla yalnızca OmniRoute yazdığı girişleri kaldırır.",
     "whenToUseLabel": "Ne zaman kullanılmalı",
     "openToolDocs": "Araç belgelerini aç",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Hızlı görevler için hafif, terminalde yerleşik bir yapay zeka asistanına ihtiyaç duyduğunuzda kullanın.",
       "hermes-agent": "Varsayılan, delegasyon, görme ve yardımcı modelleri OmniRoute üzerinden yönlendirilen Hermes Agent (Nousresearch tarafından) gerektiğinde kullanın.",
+      "whycodes": "WhyCodes'u OmniRoute'a yönlendirilmiş çok amaçlı otonom bir CLI aracısı (TUI, adlandırılmış aracılar, bellek, swarm) olarak kullanmak istediğinizde tercih edin.",
       "custom": "Özel araç uygulamaları veya genel OpenAI uyumlu yapılandırmalar için kullanın."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Özel sağlayıcı desteğine sahip xAI Grok Build TUI kodlama aracısı",
       "droid": "Factory Droid AI Asistanı",
       "openclaw": "Open Claw AI Asistanı",
+      "openclaude": "OpenAI uyumlu sağlayıcı desteğine sahip OpenClaude kodlama aracısı CLI",
       "cline": "Cline AI Kodlama Asistanı CLI",
       "kilo": "Kilo Code AI Asistanı CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Özel sağlayıcı desteğine sahip Warp AI terminali",
       "agent-deck": "Agent Deck çoklu aracı orkestratörü",
       "5dive": "5dive — kendi sunucunuzda çalışan kodlama aracıları filosu; tek bir auth profili hepsini OmniRoute'a yönlendirir",
+      "whycodes": "OpenAI uyumlu temel URL'ye sahip WhyCodes otonom CLI aracısı",
       "zed": "Zed kod düzenleyicisi — OpenAI uyumlu bir sağlayıcı üzerinden yerleşik ajan"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Bilinmiyor",
     "cliproxyapiUpdate": "Güncelle",
     "cliproxyapiUpdateAvailable": "Güncelleme mevcut: v{current} → v{latest}",
-    "cliproxyapiVersion": "Sürüm"
+    "cliproxyapiVersion": "Sürüm",
+    "piInstallTitle": "Pi Kodlama Aracısını Yükleyin",
+    "piInstallInstructions": "Pi CLI yükleyin, ardından OmniRoute bağlamak için buraya dönün.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi'yi çalıştıran makineden erişilebilen URL kullanın. OpenAI uyumlu /v1 uç noktası otomatik olarak eklenir.",
+    "piManualMergeHint": "Yalnızca önizleme. Diğer sağlayıcılarınızın ve ayarlarınızın bozulmadan kalması için bu providers.omniroute girişini models.json ile birleştirin.",
+    "removeMapping": "Eşlemeyi kaldır",
+    "customUrl": "Özel URL",
+    "customEndpointAria": "Özel uç nokta",
+    "useDefaultKey": "OmniRoute varsayılan anahtarını kullanın",
+    "mainModelAria": "Ana model",
+    "manualConfigTitle": "Grok Build manuel yapılandırma"
   },
   "modelCatalog": {
     "title": "Modeller ve Kombolar",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "ör. 10",
     "testSelected": "Seçilenleri test et ({count})",
     "testAllFiltered": "Filtrelenenlerin tümünü test et ({count})",
+    "visibility": "Görünürlük",
+    "allVisibility": "Görünür ve gizli",
+    "visibleOnly": "Görünür",
+    "hiddenOnly": "Gizli",
+    "visibleColumn": "Görünür",
+    "hideModel": "{name} modelini /v1/models listesinden gizle",
+    "showModel": "{name} modelini /v1/models listesinde göster",
+    "hiddenBadge": "Gizli",
+    "hideFiltered": "Filtrelenenleri gizle ({count})",
+    "showFiltered": "Filtrelenenleri göster ({count})",
+    "visibilityCounts": "{visible} görünür · {hidden} gizli · {total} toplam",
+    "visibilityUpdateFailed": "Model görünürlüğü güncellenemedi",
     "cancel": "İptal",
     "clearResults": "Sonuçları temizle",
     "testing": "Test ediliyor...",
@@ -3397,16 +3438,53 @@
     "httpError": "İstek HTTP {status} ile başarısız oldu",
     "testFailedNoDetail": "Test bir hata mesajı olmadan başarısız oldu",
     "additionalCapabilities": "Ek yetenekler: {list}",
-    "comboRefMember": "Kombinasyon → {name}"
+    "comboRefMember": "Kombinasyon → {name}",
+    "keyAccessButton": "API anahtarı erişimi",
+    "allowedInKeys": "İzin verilen: {count, plural, one {# anahtar} other {# anahtar}}",
+    "keysLoading": "API anahtarları yükleniyor…",
+    "keysRetry": "Anahtarları yüklemeyi yeniden dene",
+    "accessViaPattern": "{pattern} üzerinden",
+    "accessBlocked": "{pattern} tarafından engellendi",
+    "editKeyAccess": "Anahtar erişimini düzenle",
+    "toggleKeyAccess": "{name} üzerinde {item} öğesine izin ver",
+    "resultNetworkError": "Atama başarısız oldu",
+    "resultWouldEmptyModels": "Bu işlem anahtarda izin verilen hiçbir model bırakmaz — bunun yerine anahtar erişimini düzenleyin",
+    "resultWouldEmptyCombos": "Bu işlem anahtarda izin verilen hiçbir kombo bırakmaz — bunun yerine anahtar erişimini düzenleyin",
+    "keyUpdatePending": "{name} hâlâ güncelleniyor. Kısa süre sonra tekrar deneyin.",
+    "assignToKeys": "API anahtarlarına ata…",
+    "assignApply": "Değişiklikleri uygula",
+    "assignComplete": "API anahtarı erişimi güncellendi",
+    "assignFailed": "Bazı API anahtarı güncellemeleri başarısız oldu",
+    "assignNoChanges": "Hiçbir API anahtarı erişimi değiştirilmedi",
+    "selectedAccessItems": "Seçilen öğeler: {count}",
+    "assignExcludedCombos": "{count, plural, one {# seçilen kombo satırı bir model değildir ve burada atlanacaktır} other {# seçilen kombo satırı model değildir ve burada atlanacaktır}}. Komboları Kombolar sekmesinden atayın.",
+    "assignActionAdd": "Ekle",
+    "assignActionRemove": "Kaldır",
+    "searchKeys": "API anahtarlarını ara",
+    "selectApiKey": "{name} API anahtarını seç",
+    "allModelsAccess": "Tüm modeller",
+    "allCombosAccess": "Tüm kombinasyonlar",
+    "modelAccessCount": "Modeller: {count}",
+    "comboAccessCount": "Kombinasyonlar: {count}",
+    "keyInactive": "Devre dışı",
+    "keyBanned": "Engellendi",
+    "keyRevoked": "İptal edildi",
+    "switchRestrictedConfirm": "Bu anahtarı kısıtlı erişime geçirin: yalnızca seçilen öğelere izin verilecektir",
+    "removeNoChangeHint": "Bu anahtar her şeye izin verir; seçilen öğeleri kaldırmak hiçbir şeyi değiştirmeyecektir",
+    "removeStaysAllowedHint": "{patterns} aracılığıyla bu anahtarda hâlâ izinli",
+    "resultChanged": "Değiştirildi",
+    "resultUnchanged": "Değişiklik yok",
+    "resultSkipped": "Atlandı",
+    "resultNeedsSwitch": "Kısıtlı erişime geçirilmesi gerekiyor"
   },
   "combos": {
+    "title": "Kombolar",
+    "description": "Ağırlıklı yönlendirme ve yedek model desteğiyle model komboları oluşturun",
+    "autoCatalogTitle": "Otomatik yönlendirme kataloğu",
     "autoTosLoadError": "ToS politikası yüklenemedi. Değiştirmeden önce yeniden deneyin.",
     "autoTosSaveError": "ToS politikası kaydedilemedi. Önceki ayar gösterilmeye devam ediyor. Yeniden deneyin.",
     "autoTosIncludeLabel": "ToS: avoid olarak işaretlenen sağlayıcıları auto'ya dahil et",
     "autoTosDescription": "Varsayılan olarak kapalıdır. Yalnızca bir hesaba değil, tüm auto kombinasyonlarına uygulanır. Sağlayıcı bağlamak bu seçeneği açmaz.",
-    "title": "Kombolar",
-    "description": "Ağırlıklı yönlendirme ve yedek model desteğiyle model komboları oluşturun",
-    "autoCatalogTitle": "Otomatik yönlendirme kataloğu",
     "autoCatalogTemplateCount": "{count} şablonları",
     "autoCatalogDescription": "Yerleşik otomatik/* kombinasyonları, bağlı sağlayıcılardan dinamik olarak çözümlenir. Bu kimliklerden herhangi birini model alanı olarak kullanın; kurulum gerekmez.",
     "autoCatalogExpand": "Otomatik yönlendirme kataloğunu genişletin",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Kombo güncellenirken hata oluştu",
     "errorDeleting": "Kombo silinirken hata oluştu",
     "testFailed": "Test isteği başarısız oldu",
+    "removeErrorModels": "{count} başarısız modeli sil",
+    "removingErrorModels": "Kaldırılıyor…",
+    "errorModelsRemoved": "{count} başarısız model kombodan kaldırıldı",
+    "noErrorModelsFound": "Bu kombonun kendi adımları arasında başarısız model bulunamadı",
+    "cannotRemoveAllModels": "Kombodaki tüm modeller kaldırılamaz",
+    "removeErrorModelsConfirm": "“{name}” kombosundan {count} başarısız model kaldırılsın mı? Zaman aşımları ve hız sınırları sayılmaz.",
     "failedToggle": "Kombo durumu değiştirilemedi",
     "testResults": "Test Sonuçları — {name}",
     "resolvedBy": "Çözen model:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Yukarı taşı",
     "moveDown": "Aşağı taşı",
     "removeModel": "Kaldır",
+    "testStep": "Bu modeli test et",
+    "testStepRunning": "Test ediliyor…",
+    "testStepNotTestable": "Yalnızca tek modelli adımlar test edilebilir",
     "saving": "Kaydediliyor...",
     "liveNoProviders": "Henüz hiçbir sağlayıcı gözlemlenmedi.",
     "liveFleetDataHint": "Filo verileri canlı kombo etkinlikleri aracılığıyla gelir.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Henüz yapılandırılmış kombo yok.",
     "playgroundCreateFirst": "Önce bir tane oluşturun",
     "weighted": "Ağırlıklı",
+    "weightPercent": "Ağırlık (%)",
     "leastUsed": "En Az Kullanılan",
     "costOpt": "Maliyet Odaklı",
     "strategyGuideTitle": "Bu strateji nasıl kullanılır",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# hesap} other {# hesap}}",
     "builderGlobalAdded": "Eklendi",
     "builderGlobalAdd": "Ekle",
+    "clearSearch": "Aramayı temizle",
     "manualModel": "Manuel model",
     "manualModelInvalid": "Modeli provider/model olarak girin.",
     "manualModelUnknownProvider": "Bilinmeyen sağlayıcı öneki.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Kombinasyon referansı ekle",
     "builderPinnedAccount": "Sabitlenmiş Hesap",
     "builderLegacyEntry": "Eski kayıt",
+    "builderStaleModel": "Canlı katalogda yok",
     "reviewName": "Ad",
     "reviewStrategy": "Strateji",
     "reviewSteps": "Adımlar",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Minimum içerik uzunluğu (karakter)",
     "responseValidationJsonPaths": "JSON-path kontrolleri",
     "responseValidationAddCheck": "+ Kontrol ekle",
+    "responseValidationRemoveCheck": "Kontrolü kaldır",
+    "responseValidationPath": "JSON yolu",
+    "responseValidationCondition": "Koşul",
+    "responseValidationValue": "Beklenen değer",
     "agentFeaturesSystemMessageOverride": "Sistem mesajını geçersiz kıl",
     "agentFeaturesSystemMessagePlaceholder": "Sen uzman bir asistanın...",
     "agentFeaturesSystemMessageHint": "Temsilciler için sistem mesajını geçersiz kılma",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Toplam Kayıt",
     "type": "Tür",
-    "memoryEnabled": "Bellek etkinleştirildi"
+    "memoryEnabled": "Bellek etkinleştirildi",
+    "qdrantTutorialTitle": "Hızlı eğitim: Qdrant ile hafıza",
+    "qdrantTutorialIntro": "Qdrant, ilgili bağlamın alınabilmesi için hafızaların vektörlerini ve üst verilerini depolar. Tokenları doğrudan sıkıştırmaz; tasarruf, istekle ilgili olmayan bağlamdan kaçınarak dolaylı olarak sağlanır.",
+    "qdrantTutorialStep1": "Üretim ortamında kullanmadan önce sunucuyu HTTPS ve bir API anahtarı ile güvence altına alın.",
+    "qdrantTutorialStep2": "Host, port, koleksiyon ve yapılandırılmış bir kimlik bilgisiyle provider/model biçiminde bir model girin.",
+    "qdrantTutorialStep3": "Koleksiyon boyutu, modelin ürettiği boyutla eşleşmelidir. Mevcut 2048 boyutlu bir koleksiyon, 1536 boyutlu gömütlere kabul etmez.",
+    "qdrantTutorialStep4": "Bağlantıyı kaydedin, testi çalıştırın ve arama testini gerçekleştirin. Yalnızca ardından Qdrant'ı etkinleştirin.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Kredi: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Yetenekler",
@@ -5288,7 +5390,8 @@
         "skipped": "zaten yapılandırılmış",
         "failed": "başarısız"
       }
-    }
+    },
+    "stepProgress": "Kurulum ilerlemesi"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Bu sağlayıcı varsayılan olarak auto'dan hariç tutulur",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV şablonunu indir",
     "importFromFileMoreErrors": "+{count} tane daha",
     "importFromFileSchemaHint": "CSV sütunları konuma dayalıdır: provider, name, apiKey, baseUrl (isteğe bağlı), priority (isteğe bağlı). provider sütunu, mevcut bir yönetilen sağlayıcı kimliği veya önceden kaydedilmiş OpenAI/Anthropic uyumlu bir düğüm kimliği olmalıdır. Bu içe aktarma işlemi yeni uç nokta düğümleri oluşturmaz.",
+    "importOAuthExport": "OAuth dışa aktarımını içe aktar",
+    "oauthExportTitle": "Hesap yöneticisi dışa aktarımını içe aktar",
+    "oauthExportDescription": "Bir hesap yöneticisinden düz metin dışa aktarımı yükleyin (ör. Antigravity Manager’ın cloud-accounts dışa aktarımı). Belirteçler sunucu tarafında yenilenir ve her hesap bir OAuth bağlantısına dönüşür — yinelenenler yerinde yenilenir.",
+    "oauthExportProviderLabel": "Sağlayıcı",
+    "oauthExportChoose": "Dosya seç",
+    "oauthExportFileAria": "Hesap dışa aktarım JSON dosyası",
+    "oauthExportSchemaHint": "Kabul edilenler: \"accounts\" dizisi içeren bir belge, yalın bir dizi veya tek bir kayıt. Belirteçler iç içe bir token nesnesinde ya da doğrudan kayıtta bulunabilir.",
+    "oauthExportDetected": "{count} hesap algılandı",
+    "oauthExportSelectAll": "Tüm hesapları seç",
+    "oauthExportSelectAccount": "{index}. hesabı seç",
+    "oauthExportColEmail": "E-posta",
+    "oauthExportColProvider": "Sağlayıcı",
+    "oauthExportColRefresh": "Yenileme belirteci",
+    "oauthExportNoEmail": "(e-posta yok)",
+    "oauthExportYes": "evet",
+    "oauthExportNo": "hayır",
+    "oauthExportImporting": "İçe aktarılıyor…",
+    "oauthExportImport": "{count} hesabı içe aktar",
+    "oauthExportResult": "{imported}/{total} içe aktarıldı — {failed} başarısız",
+    "oauthExportParseError": "Bu dosyadan hiçbir hesap okunamadı.",
+    "oauthExportUnknownError": "bilinmeyen hata",
     "adaptaTutorial": {
       "title": "Adapta Web'e nasıl bağlanılır",
       "introPrefix": "Adapta, Clerk aracılığıyla kimlik doğrulaması yapar. Token",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Tüm modeller zaten içe aktarıldı",
     "noNewModelsToImport": "İçe aktarılacak yeni model yok — tüm modeller zaten kayıt defterinde veya özel modeller listesinde",
     "localCatalogFallbackStatus": "Sağlayıcının model listesine ulaşılamadı — yerleşik katalog gösteriliyor",
+    "discoveryDegradedStatus": "Model keşfi başarısız {time}",
     "skippingExistingModels": "{count} mevcut model atlanıyor",
     "autoSync": "Otomatik Senkronizasyon",
     "autoSyncShort": "Senkronize Et",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "örn. 131072",
     "contextWindowOverrideHint": "Sağlayıcı yanlış bildirdiğinde bu modelin gerçek bağlam penceresini (token) manuel olarak ayarlayın. Otomatik algılanan/katalog değerlerinin üzerine yazar ve kombo yönlendirmenin modeli devre dışı bırakmasını önler.",
     "contextWindowOverrideInvalid": "Bağlam penceresi geçersiz kılma değeri pozitif bir tam sayı (token) olmalıdır",
+    "maxOutputTokenOverrideInvalid": "Maksimum çıkış token geçersiz kılma değeri pozitif bir tam sayı (token) olmalıdır",
     "visionCapableLabel": "Görsel destekli",
     "visionCapableHint": "Sağlayıcının keşif meta verileri bir görsel girdi modalitesi bildirmediğinde (kendi kendine barındırılan/yerel arka uçlar için yaygındır) bu modeli manuel olarak görsel destekli olarak işaretleyin.",
     "compatParamFiltersLabel": "Parametre Filtreleri",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Geçersiz kılma ekle",
     "ccAliasLoadError": "Keşif takma adı ayarları yüklenemedi: {error}",
     "ccAliasSaveError": "Keşif takma adı ayarı kaydedilemedi: {error}",
+    "cliVersionSectionTitle": "Reklamı yapılan CLI istemci sürümü",
+    "cliVersionEffectiveLabel": "Şu anda reklamı yapılıyor",
+    "cliVersionSourceLabel": "Çözümlendi: {source}",
+    "cliVersionPinnedLabel": "Yakalanan varsayılan: {pinned}",
+    "cliVersionSourceSettings": "kontrol panelini geçersiz kılma",
+    "cliVersionSourceEnv": "ortam değişkeni",
+    "cliVersionSourceDiscovered": "otomatik olarak keşfedilen son sürüm",
+    "cliVersionSourceDefault": "yakalanan varsayılan",
+    "cliVersionInputLabel": "Sürümü geçersiz kıl",
+    "cliVersionInputPlaceholder": "Sürümü geçersiz kıl; boş temizler",
+    "cliVersionSaveButton": "Kaydetmek",
+    "cliVersionResetButton": "Varsayılana sıfırla",
+    "cliVersionLoadError": "CLI sürüm ayarları yüklenemedi: {error}",
+    "cliVersionSaveError": "CLI sürümü kaydedilemedi: {error}",
+    "cliVersionLoadFailed": "Geçerli CLI sürüm ayarları yüklenemedi.",
+    "cliVersionHintClaude": "Antropik kapılar, gördüğü Claude Code istemci sürümünde daha yeni Claude modellerini kapsıyor. Bu, OmniRoute Antropik bağlantılı her istekte reklamını yaptığı sürümdür.",
+    "cliVersionCaveatClaude": "Faturalandırma uyarısı: Faturalandırma sürümü '<version>'.'<build-revision>' ve yapı revizyonu ayrı bir yakalanan sabittir. Reklam 2.1.260, 2.1.260.1e2'yi rapor eder; bu, gerçek bir 2.1.260 ikili dosyasının gönderdiği şey değildir.",
+    "cliVersionHintCodex": "OpenAI gördüğü Codex istemci sürümünde daha yeni modelleri kapıyor; örneğin şu hata: 'gpt-6-astra' modeli, Codex daha yeni bir sürümünü gerektiriyor.",
+    "cliVersionCaveatCodex": "Çıkarım uyarısı: Arayanın bildirdiği bir sürüm hala CODEX_CLIENT_VERSION env var'ı geçiyor, ancak bu geçersiz kılma her ikisini de geçiyor çünkü operatörün açık niyetidir.",
     "compatUpstreamHeadersLabel": "Ek yukarı akış başlıkları",
     "compatUpstreamHeadersHint": "Yüksek ayrıcalıklı ayar: sağlayıcı API kimlik bilgilerini düzenlemekle aynı güven düzeyine sahiptir; yalnızca güvenilir yöneticiler kullanmalıdır. OmniRoute, sağlayıcı API anahtarından kimlik doğrulama başlığını ekledikten sonra bu başlıklar birleştirilir. Özel bir başlık mevcut bir başlıkla aynı adı kullanıyorsa (ör. Authorization), verdiğiniz değer otomatik oluşturulan başlığın (Bearer token dahil) tamamının yerini alır; yukarı akış yalnızca sizin yazdığınız değeri görür. Hatalı yapılandırma 401 hatalarına veya bozuk yukarı akış kimlik doğrulamasına yol açabilir. Her başlık için bir satır kullanın (ör. bazı geçitler için ek Authentication başlığı). Önizlemek için değerin üzerine gelin veya odaklayın. Bu panelde bulanıklaştırma, dışarı tıklama veya paneli kapatma sırasında otomatik kaydedilir.",
     "compatUpstreamHeaderName": "Başlık adı",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "API Biçimi Etiketi",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API Bölgesi: Çin",
-    "apiRegionHint": "API Bölgesi İpucu",
-    "apiRegionInternational": "API Bölgesi: Uluslararası",
-    "apiRegionLabel": "API Bölgesi Etiketi",
+    "apiRegionChina": "Çin Anakarası",
+    "apiRegionHint": "API erişimi ve kota takibi için kullanılan uç nokta bölgesini seçin.",
+    "apiRegionInternational": "Uluslararası",
+    "apiRegionLabel": "API Bölgesi",
     "apikey": "API anahtarı",
     "audio": "Ses",
     "audioProvidersHeading": "Ses Sağlayıcıları Başlığı",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Bu hesap 5 saatlik kullanım sınırına ulaştığında ve Anthropic daha düşük öncelikli hattı sunduğunda, OmniRoute bunu kabul eder ve pencere sıfırlanana kadar bağlantıyı beklemeye almak yerine anthropic-usage-limit: slow ile istek göndermeye devam eder. Haftalık sınır uygulanmaya devam eder ve yanıtlar boş kapasite oluşana kadar bekleyebilir.",
     "claudeAutoLimitResetLabel": "Oturum sınırını otomatik olarak sıfırla (haftada bir kez)",
     "claudeAutoLimitResetDescription": "Bu hesap 5 saatlik kullanım sınırına ulaştığında ve oturum sınırı sıfırlaması kullanılabilir olduğunda, OmniRoute bunu otomatik olarak talep eder ve tam hızda yeniden dener. Hesabın haftada bir kez kullanılabilen sıfırlama hakkını kullanır ve kullanım yine haftalık sınıra dahil edilir.",
+    "codexPaidCreditsShort": "Ek krediler",
+    "codexPaidCreditsToggleTitle": "Abonelik kotası bittikten sonra ücretli Codex kredilerine izin ver (ek ücret uygulanabilir)",
+    "codexPaidCreditsEnabled": "Ücretli Codex kredileri etkin (ek ücret uygulanabilir)",
+    "codexPaidCreditsDisabled": "Ücretli Codex kredileri devre dışı",
+    "failedUpdateCodexPaidCredits": "Codex ücretli kredi ilkesi güncellenemedi",
+    "allowCodexPaidCreditsLabel": "Ücretli Codex kredilerine izin ver",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Geçici bekleme süresini atlayın; böylece bu bağlantı kurtarılabilir hatalardan sonra bile uygun kalmaya devam eder (yasaklandı/süresi doldu gibi nihai durumlar yine de geçerlidir).",
     "disableCoolingLabel": "Bu bağlantı için bekleme süresini devre dışı bırak",
     "bulkPasteAdded": "{count, plural, one {1 anahtar eklendi} other {# anahtar eklendi}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "API anahtarını monsterapi.ai adresinden alın",
       "moonshot": "Moonshot AI'ı bir API anahtarı ile bağlayın.",
       "morph": "Ücretsiz katman: Aylık 250 bin kredi, 0 $",
+      "apmix": "apmix.ai/dashboard'tan bir API anahtarıyla Apmix'i bağlayın — tek abonelik, çok sayıda model.",
       "nanogpt": "NanoGPT'yi bir API anahtarı ile bağlayın.",
       "nebius": "API testi için kayıtta ~1 $ deneme kredisi",
       "nlpcloud": "NLP Cloud, OpenAI chat/completions yerine tescilli bir sohbet robotu API'si kullanır. OmniRoute, OpenAI mesajlarını girdi/bağlam/geçmişe uyarlar ve desteklenen sohbet robotu modellerinin yerel bir kataloğunu sunar.",
@@ -6620,7 +6773,7 @@
       "claude": "Mevcut OAuth akışıyla Claude Code'u bağlayın.",
       "cline": "Mevcut OAuth akışıyla Cline'ı bağlayın.",
       "cursor": "Mevcut OAuth akışıyla Cursor IDE'yi bağlayın.",
-      "cursor-api": "Cursor'ı cursor.com/dashboard/api adresinden alınan bir kullanıcı API anahtarıyla (crsr_...) bağlayın; IDE oturumu gerekmez.",
+      "cursor-api": "Cursor'ı cursor.com/dashboard/api adresinden alınan bir kullanıcı API anahtarıyla (crsr_... veya grok_...) bağlayın; IDE oturumu gerekmez.",
       "github": "Mevcut OAuth akışıyla GitHub Copilot'ı bağlayın.",
       "gitlab-duo": "ai_features + read_user kapsamlarına sahip OAuth uygulaması. Bu OmniRoute örneğinde GITLAB_DUO_OAUTH_CLIENT_ID ve isteğe bağlı olarak GITLAB_DUO_OAUTH_CLIENT_SECRET yapılandırın.",
       "kilocode": "Mevcut OAuth akışıyla Kilo Code'u bağlayın.",
@@ -6628,8 +6781,7 @@
       "kiro": "Ücretsiz katman: ayda 50 kredi (~25 bin–100 bin jeton). ⚠️ Kiro Kullanım Koşulları, üçüncü taraf proxy/çalıştırma düzeneği kullanımını yasaklar.",
       "codex": "Mevcut OAuth akışı ile OpenAI Codex'i bağlayın.",
       "qwen": "Mevcut OAuth akışı ile Qwen Code'u bağlayın.",
-      "github-models": "github.com/settings/tokens adresinde 'models: read' kapsamına sahip bir GitHub PAT oluşturun",
-      "apmix": "apmix.ai/dashboard'tan bir API anahtarıyla Apmix'i bağlayın — tek abonelik, çok sayıda model."
+      "github-models": "github.com/settings/tokens adresinde 'models: read' kapsamına sahip bir GitHub PAT oluşturun"
     },
     "passthroughModelsDescription": "{provider} sağlayıcıya özgü model kimliklerini kabul eder. /models'den içe aktarın veya yönlendirme için özel kimlikler ekleyin.",
     "bedrockModelsDescription": "Amazon Bedrock modelleri AWS bölgesi kapsamındadır. /models'den içe aktarın veya seçilen bölgede etkin olan Bedrock model kimliklerini ekleyin.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "İsteğe bağlı: her satıra bir model=cap yazın; yukarı akıştaki tam model kimliğiyle eşleştirilir. Fazla istekler yerelde kuyruğa alınır; boş bırakılırsa model başına üst sınır yoktur.",
     "rateLimitOverridesModelConcurrencyInvalid": "Geçersiz model başına eşzamanlılık girdisi \"{entry}\" — model=cap biçimini kullanın; cap, 1 ile {max} arasında bir tam sayı olmalıdır.",
-    "codexPaidCreditsShort": "Ek krediler",
-    "codexPaidCreditsToggleTitle": "Abonelik kotası bittikten sonra ücretli Codex kredilerine izin ver (ek ücret uygulanabilir)",
-    "codexPaidCreditsEnabled": "Ücretli Codex kredileri etkin (ek ücret uygulanabilir)",
-    "codexPaidCreditsDisabled": "Ücretli Codex kredileri devre dışı",
-    "failedUpdateCodexPaidCredits": "Codex ücretli kredi ilkesi güncellenemedi",
-    "allowCodexPaidCreditsLabel": "Ücretli Codex kredilerine izin ver",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "{count} kombinasyonda kullanılıyor: {combos}",
+    "openComboTooltip": "Kombinasyonları aç — {combo} tarafından kullanılıyor",
+    "claudeCodeRoutingTitle": "Claude Code trafiği için üstel proxy yönlendirme",
+    "routingNative": "Yerel",
+    "routingFallback": "Yedek",
+    "rerank": "Yeniden sırala",
+    "video": "Video",
+    "markFreeTierTitle": "Ücretsiz katman olarak işaretle (ücretli modeller gizlenirken bile gösterilir)",
+    "codexTunnelTitle": "Codex araç bağlantısı",
+    "codexTunnelDescription": "Tüneller yalnızca giden yönlü olarak çalışır. Yerel araçlar hâlâ yalnızca Codex tarafından, kum havuzu ve onay politikası altında yürütülür.",
+    "tunnelIdLabel": "Tünel ID’si",
+    "tunnelRuntimeKeyLabel": "Tünel çalışma zamanı anahtarı",
+    "tunnelRuntimeKeyPlaceholder": "Çalışma zamanı anahtarı",
+    "tunnelRuntimeKeyHint": "Çerezle birlikte şifreli olarak saklanır ve asla günlüklere yazılmaz.",
+    "tunnelRuntimeKeyNewLabel": "Yeni tünel çalışma zamanı anahtarı",
+    "tunnelRuntimeKeyNewHint": "Yalnızca taze bir çerezle birlikte girin. Değer şifreli olarak saklanır.",
+    "chatgptConnectorLabel": "ChatGPT özel bağlantı noktası",
+    "doctorChecking": "Durum kontrol ediliyor…",
+    "doctorCheck": "Doktor durumunu kontrol et",
+    "fallbackRetryBackendTitle": "Yedekleme yeniden deneme arka ucu"
   },
   "settings": {
     "title": "Ayarlar",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Gösterilecek kenar çubuğu öğelerini seçin. Temel modda Gelişmiş araçlar aranabilir durumda kalır.",
     "hideHealthLogs": "Sağlık Kontrolü Günlüklerini Gizle",
     "hideHealthLogsDesc": "Açıkken, sunucu konsolundaki [HealthCheck] mesajlarını gizler.",
-    "themeAccent": "Tema rengi",
-    "themeAccentDesc": "Önceden ayarlanmış bir renk seçin veya tek renkle kendi temanızı oluşturun",
-    "themeCreate": "Tema oluştur",
-    "themeCustom": "Özel tema",
-    "themeBlue": "Mavi",
-    "themeRed": "Kırmızı",
-    "themeGreen": "Yeşil",
-    "themeViolet": "Menekşe",
-    "themeOrange": "Turuncu",
-    "themeCyan": "Camgöbeği",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Uygulama adını ve logosunu özelleştirin",
     "appName": "Uygulama Adı",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Şimdi",
       "coreConfigPath": "Çekirdek yapılandırma dosyası",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Mutlak .json yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
+      "coreConfigPathDesc": "Mutlak .json/.yaml/.yml yolu (küçük harfli uzantı). Boş = oluşturma. Her eşitleme, uygulanan dosyanın yanına '<path>'.generated yazar, dosyanın kendisine asla yazmaz.",
       "lastSwitchKind": "Geçiş nedeni",
       "switchKind": {
         "ip_quota_429": "kota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Uygulayan: {mode}",
       "coreBinaryPath": "Çekirdek ikili dosya yolu",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "İsteğe bağlı: benimsenmiş dosyayı değiştirmeden önce oluşturulan dosyayı çekirdek ikili dosyasıyla doğrular. Yanında yazmaya devam etmek için boş bırakın. Dizin yoksa oluşturulur."
+      "coreBinaryPathHelp": "İsteğe bağlı: benimsenmiş dosyayı değiştirmeden önce oluşturulan dosyayı çekirdek ikili dosyasıyla doğrular. Yanında yazmaya devam etmek için boş bırakın. Dizin yoksa oluşturulur.",
+      "urlFeedlessHint": "Yalnızca seçici aboneliği için boş bırakın: aşağıda bir denetim URL'si belirleyin, hiçbir akış getirilmez, yenilenmez veya bağlanmaz."
     },
     "bulkHealthcheck": "Toplu Durum Denetimi",
     "bulkHealthcheckDesc": "Hangilerinin çalıştığını belirlemek için yapılandırılmış tüm proxy'leri bir hedef URL ile test edin.",
@@ -7706,6 +7862,7 @@
     "configured": "yapılandırıldı",
     "none": "Yok",
     "modelOverrideValuePlaceholder": "Sayısal değer",
+    "modelOverrideKey": "Geçersiz kılma anahtarı",
     "modelOverrideReasoningEffortsPlaceholder": "İngilizce ve virgülle ayrılmış, ör. low, medium, high",
     "addKeyValue": "Anahtar değer ekle",
     "noModelOverrides": "Bu model için yapılandırılmış geçersiz kılma yok.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Belirli modeller için varsayılan fiyatlandırmayı geçersiz kılabilirsiniz. Özel geçersiz kılmalar, otomatik algılanan fiyatlandırmaya göre öncelik kazanır.",
     "editPricing": "Fiyatlandırmayı Düzenle",
     "viewFullDetails": "Tüm Ayrıntıları Görüntüle",
-    "themeCoral": "Mercan",
     "adaptiveVolumeRouting": "Uyarlanabilir Hacim Yönlendirmesi",
     "adaptiveVolumeRoutingDesc": "Bağlantıları yük hacmine ve işleme kapasitesi baskısına göre dinamik olarak ölçeklendirin.",
     "lkgpToggleTitle": "Son Bilinen İyi Sağlayıcı (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Sağlayıcılara göndermeden önce istemleri sıkıştırarak token kullanımını azaltın",
     "autoCombosTitle": "Otomatik Kombinasyonlar",
     "autoCombosDesc": "Bu anahtarın, yapılandırılmış tüm sağlayıcılar arasından otomatik olarak bir model seçen yerleşik auto/* kombinasyonlarını kullanmasına izin ver",
+    "ccDiscoveryAliasesTitle": "Claude Code keşif takma adları",
+    "ccDiscoveryAliasesDesc": "Bu anahtarın zaten erişebildiği modeller ve kombinasyonlar için claude/... uyumluluk aynalarını duyur",
     "compressionGuidanceFullGuideLink": "Tam sıkıştırma kılavuzu",
     "compressionGuidanceShow": "Ayrıntılar",
     "compressionGuidanceHide": "Ayrıntıları gizle",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Pencere yüzdesi",
     "compressionAdaptivePolicyAbsolute": "Mutlak belirteç bütçesi",
     "compressionOutputStylesDescription": "Sağlayıcı çıktısını yeniden yazmadan yanıt şekillendirme talimatları ekleyin. Serbestçe birleştirin.",
+    "compressionOutputStylesPreviewNote": "Bir istek yalnızca bir dili enjekte eder: algılanan dil, aksi takdirde ilk paket. Yukarıdaki bloklar, kombine enjeksiyon değil, paket başına çeşitlerdir.",
     "mcpAccessibilityDescription": "MCP araç çıktılarını kapsama alır (ayrı depo).",
     "compressionStylesTileSummary": "{tokens, number} token tasarruf edildi · {runs, plural, one {# çalıştırma stillendirildi} other {# çalıştırma stillendirildi}}",
     "compressionStylesTileEmpty": "Henüz stillendirilmiş çalıştırma yok.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Ana Bilgisayar",
     "qdrantCollection": "Koleksiyon",
     "catalogVisibilityHint": "Gizlenen model kimlikleri aynı erişim izinleriyle çağrılmaya devam edebilir.",
+    "exposeCombosOnly": "/v1/models içinde yalnızca kombinasyonları listele",
+    "exposeCombosOnlyDesc": "Modelleri otomatik keşfeden istemciler ham sağlayıcı modelleri yerine kombinasyonlarınızı (ve gizlenmedikçe auto/*) görür. Açık provider/model kimlikleri yönlendirilmeye devam eder.",
     "catalogScopeTitle": "Models API listelemesi",
     "catalogScopeDesc": "GET /v1/models uç noktasının bu anahtar için gösterdiği modeller. Listeyi daraltmak, anahtarın çağırabileceği modelleri değiştirmez.",
     "catalogScopeAll": "Her ikisi",
@@ -8918,7 +9079,9 @@
         "financial": "Finansal",
         "brazilian": "Brezilya",
         "usa": "ABD",
-        "full": "Tam"
+        "full": "Tam",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Güney Afrika)"
       },
       "builtinTypes": "Yerleşik türler",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4 adresleri",
         "ipv6_address": "IPv6 adresleri",
         "aws_key": "AWS erişim anahtarları",
-        "api_key_generic": "API anahtarları ve belirteçler"
+        "api_key_generic": "API anahtarları ve belirteçler",
+        "iban": "IBAN banka hesap numaraları",
+        "eu_vat": "EU VAT numaraları",
+        "es_dni_nie": "İspanyolca DNI / NIE",
+        "it_codice_fiscale": "İtalyanca Codice Fiscale",
+        "pl_pesel": "Polonya PESEL",
+        "nl_bsn": "Hollandalı BSN",
+        "de_steuer_id": "Alman Steuer-ID",
+        "se_personnummer": "İsveçli kişi numarası",
+        "za_id": "Güney Afrika ID numaraları",
+        "za_phone": "Güney Afrika telefon numaraları",
+        "za_vat": "Güney Afrika VAT numaraları",
+        "za_tax_ref": "Güney Afrika vergi referansları"
       },
       "customPatterns": "Özel desenler",
       "customPatternsDesc": "Eşleşmeler [CUSTOM_REDACTED] ile değiştirilir. En fazla {max} desen. Felaket düzeyinde geri izleme riski taşıyan desenler reddedilir.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Geçti",
     "tomlTestFailed": "Başarısız",
     "tomlImportError": "RTK TOML dosyası işlenemedi.",
-    "tomlFileReadError": "Seçilen TOML dosyası okunamadı."
+    "tomlFileReadError": "Seçilen TOML dosyası okunamadı.",
+    "viewMode": "Görünüm modu"
   },
   "compressionEngineConfig": {
     "loading": "Yükleniyor…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Dil paketleri: {packs}",
     "dragToReorder": "Adımı yeniden sıralamak için sürükleyin",
     "engine": "Motor",
-    "intensity": "Yoğunluk"
+    "intensity": "Yoğunluk",
+    "compressionOverride": "Sıkıştırmayı geçersiz kılma"
   },
   "compressionStudio": {
     "noRun": "Kullanılabilir sıkıştırma çalışması yok.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "kazanan: {winner}",
     "encoder": "kodlayıcı",
     "bytes": "bayt",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Studio görünümleri"
   },
   "omniglyph": {
     "preview": "Önizleme",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Bundan daha kısa mesajlar sıkıştırılmaz. Daha düşük = daha fazla sıkıştırma.",
     "tooltipMinSavings": "Yalnızca en az bu kadar jeton tasarrufu sağlıyorsa sıkıştırın.",
     "ultraSettings": "Ultra Ayarlar",
-    "ultraSettingsDesc": "SLM destekli anlamsal sıkıştırma"
+    "ultraSettingsDesc": "SLM destekli anlamsal sıkıştırma",
+    "defaultLanguage": "Varsayılan dil",
+    "viewMode": "Görünüm modu"
   },
   "translator": {
     "title": "Çeviri",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Akış dönüştürülemedi"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kota tükendi; ek kullanıma izin verildiği için hizmet devam ediyor.",
+    "healthPaidCreditsBypass": "Kota tükendi; kullanılabilir ücretli krediler hizmetin sürmesini sağlıyor.",
+    "healthFilteringBypass": "Kota tükendi; yerel kota filtreleme kapalı olduğu için hizmet devam ediyor.",
     "title": "Kullanım",
     "grokExtraUsageCredits": "Ekstra Kullanım Kredileri",
     "grokAutoTopUp": "Otomatik Yenileme",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Sağlayıcı Limitleri",
     "noProviders": "Bağlı sağlayıcı yok",
+    "quotaAuthRequired": "Kimlik doğrulama gerekli - kontrol panelinde oturum açın",
+    "quotaAuthRequiredHint": "Kontrol paneli oturumu olmadığı veya süresi dolduğu için sağlayıcı bağlantıları yüklenemedi. Kota sınırlarınızı görmek için oturum açıp sayfayı yenileyin.",
     "connectProvidersForQuota": "API kota sınırlarınızı ve kullanımınızı takip etmek için OAuth ile sağlayıcılara bağlanın.",
     "accountsCount": "{count, plural, one {# hesap} other {# hesap}}",
     "filteredFromCount": "(toplam {count} içinden filtrelendi)",
@@ -10046,9 +10231,6 @@
     "tierLite": "Hafif",
     "tierUnknown": "Bilinmiyor",
     "statTotal": "Toplam",
-    "statCritical": "Kritik",
-    "statAlert": "Uyarı",
-    "statHealthy": "Sağlıklı",
     "filterPurchaseTypeLabel": "Tür",
     "filterTierLabel": "Katman",
     "purchaseAll": "Tümü",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Son yenileme",
     "providerQuota": "Sağlayıcı Kotası",
     "providerQuotaHomeHint": "Bağlı hesaplar genelinde canlı durum",
+    "claudeResetCreditDefaultTitle": "Claude limit sıfırlama",
+    "confirmRedeemClaudeResetCredit": "Kullanmak, uygun Claude kullanım limitlerini anında sıfırlar ve bu krediyi kalıcı olarak tüketir.",
+    "claudeResetCreditsModalTitle": "Claude sıfırlama kredileri",
+    "claudeResetCreditsModalExplainer": "Bu hesap için kullanılabilir Claude sıfırlama kredileri ve haftalık oturum sıfırlamaları.",
     "codexPaidCreditsLabel": "Ücretli Codex kredileri",
     "codexPaidCreditsAvailable": "Kullanılabilir (bakiye bildirilmedi)",
     "codexPaidCreditsUnavailable": "Kullanılamıyor veya harcama limitine ulaşıldı",
-    "codexPaidCreditsUnlimited": "Sınırsız"
+    "codexPaidCreditsUnlimited": "Sınırsız",
+    "healthAccountHint": "Son gözlemlere dayanır, canlı bir test değildir. Ayrıntılar için bir hesap seçin.",
+    "healthRecovery": "Beklenen düzelme zamanı",
+    "healthAvailable": "Mevcut",
+    "healthRestricted": "Kısmen kısıtlı",
+    "healthUnavailable": "Kullanılamıyor",
+    "healthPeakHourProtection": "Yoğun saat koruması",
+    "healthCooldown": "Bekleme süresi",
+    "healthQuotaExhausted": "Kota tükendi",
+    "healthOverview": "Genel bakış",
+    "layoutFull": "Tam",
+    "layoutCompact": "Kompakt",
+    "healthQuotaError": "Kota okunamadı",
+    "healthNoRuntime": "Çalışma durumu kullanılamıyor",
+    "healthPreviousSnapshot": "Son yenileme başarısız; önceki sonuç gösteriliyor",
+    "healthPreviousFailure": "Son istek başarısız; bekleme süresi bitti",
+    "healthAwaitingSync": "Sıfırlama zamanı geçti; eşitleme bekleniyor",
+    "healthVerdictUnavailable": "Kullanılabilirlik denetimi sonucu alınamıyor; yalnızca kota seviyeleri gösteriliyor",
+    "healthSummaryFailed": "Çalışma özeti okunamadı; model kilitleri eksik olabilir",
+    "healthRuntimeObserved": "Durum güncellendi: {time}",
+    "healthQuotaObserved": "Kota gözlemlendi: {time}",
+    "healthOldestQuota": "En eski kota görüntüsü: {time}",
+    "healthRecoveryUnknown": "Kurtarma zamanı bilinmiyor",
+    "healthDetailsHint": "Ayrıntılar ve işlemler için tıklayın",
+    "healthFiveHour": "5 saat",
+    "healthOverall": "Genel",
+    "healthAction": "İşlem gerekli",
+    "healthTitle": "Hesap kullanılabilirliği",
+    "healthDrag": "Sağlayıcı sırasını değiştirmek için sürükleyin",
+    "healthDragPosition": "{provider}, {count, plural, one {# içinde {position, number}. sıra} other {# içinde {position, number}. sıra}}",
+    "healthResetOrder": "Varsayılan sırayı geri yükle",
+    "healthPool": "{name} havuzu",
+    "healthOtherPool": "Aynı hesap · {pool}: {status} ({remaining} kaldı)",
+    "healthIncluded": "{count, plural, one {Kısmen kısıtlı # hesap içerir} other {Kısmen kısıtlı # hesap içerir}}",
+    "healthBannerUnavailable": "{count, plural, one {# hesap geçici olarak kullanılamıyor} other {# hesap geçici olarak kullanılamıyor}}",
+    "healthBannerAvailable": "{count, plural, one {# hesap kullanılabilir} other {# hesabın tamamı kullanılabilir}}",
+    "healthLegendHide": "Gösterge açıklamasını gizle",
+    "healthLegendShow": "Gösterge açıklamasını göster",
+    "healthLegendOk": "Dolu = kalan kota; yarı saydam = kullanılan.",
+    "healthLegendCooldown": "{window} kotası tükendi. Dolu = geçen bekleme; yarı saydam = kalan bekleme.",
+    "healthLegendAction": "Yetkilendirme sona ermiş veya hesap engellenmiş; beklemek çözmez.",
+    "healthLegendPartial": "Hâlâ kullanılabilir. Sarı tepe = model veya havuz kısıtlı.",
+    "healthWaited": "Beklenen süre: {percent}",
+    "healthWait": "{duration} daha ({time} itibarıyla düzelir)",
+    "healthFastest": "En erken düzelme: {duration} sonra",
+    "healthRatio": "{available, plural, one {# / {active, number} kullanılabilir} other {# / {active, number} kullanılabilir}}",
+    "healthCd5": "5 saat · Bekleme süresi",
+    "healthCdw": "Haftalık · Bekleme süresi",
+    "healthRecentSuccessBypass": "Yakın zamanda bir istek başarılı olduğu için yönlendirme bu hesaba izin verir.",
+    "healthPurchasedBalanceBypass": "Dahil edilen kota tükendikten sonra satın alınan bakiye kullanılabilir.",
+    "healthCutoffAtRequest": "Canlı kota eşikleri, istek yönlendirilirken kontrol edilir."
   },
   "modals": {
     "waitingAuth": "Yetkilendirme bekleniyor",
@@ -11077,7 +11313,8 @@
       "message": "Mesaj",
       "error": "Hata",
       "completion": "Tamamlama"
-    }
+    },
+    "statusFilter": "Durum"
   },
   "templateNames": {
     "simple-chat": "Basit Sohbet",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes} dk önce",
     "hoursAgo": "{hours} sa önce",
     "daysAgo": "{days} gün önce",
-    "entries": "Kayıtlar"
+    "entries": "Kayıtlar",
+    "viewSwitcherAria": "Önbellek görünümü"
   },
   "proxyConfigModal": {
     "levelGlobal": "Küresel",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth yapılandırılmamış. {applicationsUrl} adresinde bir OAuth uygulaması kaydedin, yönlendirme URI'sı {redirectUri} ve kapsamlar \"{scopes}\" ile birlikte, ardından {clientIdEnv} (ve isteğe bağlı olarak {clientSecretEnv}) ayarlayın ve yeniden başlatın.",
     "gitlabDuoSetupDescription": "Uygulama kaydedildikten ve bu OmniRoute örneğinde ortam değişkenleri ayarlandıktan sonra, OAuth oturum açma işlemini başlatmak için Devam'a tıklayın.",
     "continue": "Devam Et",
+    "copilotPolicyTitle": "Deneysel sağlayıcı: Politika durumu belirsiz",
+    "copilotPolicyLine1": "OmniRoute, GitHub genel bir üçüncü taraf çıkarımı olarak yayınlamadığı api.githubcopilot.com aracılığıyla bağlanır API. Bu entegrasyon deneyseldir ve önceden bildirilmeksizin değiştirilebilir.",
+    "copilotPolicyLine2": "Yalnızca kendi GitHub hesabınız bağlanabilir. Kimlik bilgilerini, havuz hesaplarını asla paylaşmayın veya plan sınırlarınızı aşmaya çalışmayın.",
+    "copilotPolicyLine3": "Ücretsiz ve Öğrenci planı kullanıcıları yalnızca otomatik model seçimi hakkına sahiptir. Copilot planı koşullarınız ve her türlü kullanım sınırı sizin sorumluluğunuzdadır.",
+    "copilotPolicyAcknowledge": "anladım bağlan",
     "tabPasteSetupToken": "Kurulum belirteci",
     "claudeSetupTokenDescription": "Bir terminalde `claude setup-token` komutunu çalıştırın ve yazdırdığı belirteci yapıştırın. Belirteç bir yıl geçerlidir ve yenileme belirteci yoktur. OmniRoute, kaydetmeden önce Anthropic'e bir test isteği gönderir.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Diğer işlemler",
     "test": "Test Et",
     "edit": "Düzenle",
     "delete": "Sil",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Geçerli giriş bulunamadı. Formatı kontrol edip tekrar deneyin.",
     "bulkImportSuccess": "İçe aktarma tamamlandı: {created} oluşturuldu, {updated} güncellendi, {failed} başarısız oldu",
     "bulkImportErrorLine": "Satır {line}: {reason}",
-    "bulkImportMaxExceeded": "İçe aktarma başına maksimum 100 proxy",
+    "bulkImportMaxExceeded": "İçe aktarma başına maksimum {max} proxy",
     "bulkImportPreview": "Önizleme",
     "clearAssignment": "(açık atama)",
     "bulkProxyAssignment": "Toplu Vekalet Ataması",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP hız sınırı (429)",
     "poolSetAsideKindSlow": "yavaş yanıtlar",
     "poolSetAsideKindGeoBlocked": "bölge engelli (403/451)",
+    "poolSetAsideKindOperatorReported": "operatör tarafından bildirilen kesinti",
     "poolSetAsideUntil": "Rotasyona geri döndü {endsAt}",
     "poolSetAsideRepeat": "Kenara ayrıldı {count, plural, one {# kez} other {# kez}}",
     "poolUnknownAddress": "Bilinmeyen adres",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Kodu dışa aktar",
     "exportShort": "Dışa aktar",
     "noStateToExport": "Deneme alanında dışa aktarılabilecek bir durum yok.",
-    "closeExportModal": "Dışa aktarma penceresini kapat",
     "close": "Kapat",
     "exportRealKeyWarning": "Güvenlik uyarısı: dışa aktarma engellendi — çıktıda gerçek bir API anahtarı tespit edildi. Lütfen API anahtarınızı sıfırlayıp tekrar deneyin.",
     "placeholderHintPrefix": "Değiştirin",
@@ -11808,7 +12052,8 @@
       "nextButton": "Sonraki",
       "runButton": "Çalıştır",
       "promptPlaceholder": "Mesajınızı girin… (Göndermek için Enter, yeni satır için Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground modları"
   },
   "miniPlayground": {
     "endpoint": "Uç Nokta",
@@ -11879,7 +12124,8 @@
     "assistant": "Asistan",
     "errorLabel": "Hata",
     "requestFailed": "İstek başarısız oldu",
-    "stop": "Durdur"
+    "stop": "Durdur",
+    "messageInputAria": "Mesaj"
   },
   "requestLogger": {
     "recording": "Kayıt yapılıyor",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} hesap rotasyonu",
       "resilienceRetried": "Boş tur yeniden denendi",
       "resilienceContinued": "Akış ortasında devam edildi",
-      "resilienceRecovered": "Dayanıklılık eylemiyle kurtarıldı"
-    }
+      "resilienceRecovered": "Dayanıklılık eylemiyle kurtarıldı",
+      "conversationContext": "Konuşma Bağlamı",
+      "goToBottom": "En alta git",
+      "liveRefreshOn": "Canlı yenileme: açık",
+      "liveRefreshOff": "Canlı yenileme: kapalı",
+      "liveRefresh": "Canlı yenileme",
+      "continuesFromParent": "üst öğeden devam eder",
+      "continuesFrom": "{id} üzerinden devam eder",
+      "viewConversation": "konuşmayı görüntüle",
+      "openConversation": "{id} konuşmasını aç"
+    },
+    "tableLabel": "İstek günlükleri",
+    "throughputPostFirstToken": "İlk token sonrası",
+    "throughputEndToEnd": "Uçtan uca",
+    "throughputRate": "{value} token/sn",
+    "throughputExplanation": "Her iki oran da çıktı ve akıl yürütme token sayılarından büyük olanını kullanır. İlk token sonrası, geçerli bir TTFT'yi hariç tutar; aksi durumda tam süreyi kullanır. Uçtan uca her zaman tam süreyi kullanır. Tamponlanmış bir yanıt, daha hızlı model üretimi olmadan yüksek ani teslim hızına sahip olabilir."
   },
   "proxyLogger": {
     "filterAll": "Tümü",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Tarafından Sunuldu",
     "filterTraffic": "Trafik",
     "filterTests": "Testler",
-    "filterSource": "Kaynak"
+    "filterSource": "Kaynak",
+    "tableLabel": "Proxy günlükleri",
+    "sortLogs": "Günlükleri sırala"
   },
   "endpointOptions": {
     "speech": "Konuşma",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "TÜKENDİ",
     "statusAlerting": "UYARI VERİLİYOR",
     "statusError": "HATA",
-    "moreSuffix": "+{count} tane daha"
+    "moreSuffix": "+{count} tane daha",
+    "feedFilterLabel": "Olayları filtrele"
   },
   "quotaShare": {
     "weightPercent": "Ağırlık %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Gruplanmamış",
     "ungroupedHint": "Bu havuzlar bilinen bir gruba atanmamış. Gerçek bir gruba taşımak için bir havuzu düzenleyin.",
     "removeFailed": "Bu havuz kaldırılamadı.",
-    "dismiss": "Kapat"
+    "dismiss": "Kapat",
+    "allocationsHeading": "Tahsisler",
+    "wizardRemoveDimension": "Boyutu kaldır",
+    "wizardRemoveKey": "Anahtarı kaldır"
   },
   "plugins": {
     "title": "Eklentiler",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Ayar güncellemesi başarısız oldu",
       "serviceRevealApiKey": "{actor} {target} için API anahtarını görüntüledi",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Hatayı kapat"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Şimdi git",
       "message": "MITM Proxy artık AgentBridge altında yer alıyor.",
       "title": "Bu sayfa taşındı"
-    }
+    },
+    "dnsOn": "DNS açık",
+    "dnsOff": "DNS kapalı",
+    "showServerSettings": "Sunucu ayarlarını göster",
+    "hideServerSettings": "Sunucu ayarlarını gizle",
+    "upstreamCaTesting": "Test ediliyor…",
+    "removeMapping": "Eşlemeyi kaldır",
+    "mappingSourcePlaceholder": "ör. gemini-3.6-flash-medium veya eşlenmemiş tüm modeller için *",
+    "mappingWildcardHint": "Açık bir eşlemesi olmayan her modeli OmniRoute üzerinden seçilen hedefe yönlendirmek için kaynak olarak * kullanın. Tam kaynak eşleşmeleri her zaman * işaretine göre önceliklidir.",
+    "wizardDetectingModels": "Yönlendirilen trafikteki modeller algılanıyor...",
+    "wizardDetectedModels": "Yönlendirilen trafikte {count, plural, one {# model} other {# model}} bulundu. Eklemek istediklerinizi seçin:",
+    "wizardSelectedModels": "{count, plural, one {# model} other {# model}} seçildi. Bunları bir sonraki ekranda OmniRoute modelleriyle eşleyeceksiniz.",
+    "wizardAddModels": "{count, plural, one {# model} other {# model}} ekle",
+    "wizardNoModelsDetected": "Henüz model algılanmadı. Bir istekte bulunmak için {agent} kullanın, ardından trafikteki modelleri otomatik olarak algılamak için bu sihirbazı tekrar çalıştırın.",
+    "wizardNoModelsHint": "Veya bu sihirbazı kapatıp aracı kartında eşlemeleri manuel olarak ekleyin."
   },
   "providerStats": {
     "unknownError": "Bilinmeyen hata",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Ort. TTFT",
     "avgTotal": "Ort. Toplam",
     "requestTelemetry": "İstek Telemetrisi",
-    "requestTelemetryDescription": "7 aşamalı işlem hattı dağılımı (son 5 dakika)"
+    "requestTelemetryDescription": "7 aşamalı işlem hattı dağılımı (son 5 dakika)",
+    "title": "Sağlayıcı istatistikleri",
+    "description": "Sağlayıcı ve model bazında trafik, gecikme ve başarı oranları",
+    "combo": "Kombinasyon",
+    "toggleModels": "{provider} modellerini göster",
+    "windowSince": "{date} tarihinden beri"
   },
   "relay": {
     "title": "Serverless Relay Proxy'leri",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "İstek gövdesi yok.",
     "noResponseBody": "Yanıt gövdesi yok.",
     "formatted": "Biçimlendirilmiş",
-    "raw": "Ham"
+    "raw": "Ham",
+    "requestCount": "{count, plural, one {# istek} other {# istek}}",
+    "expandList": "Listeyi genişlet",
+    "collapseList": "Listeyi daralt",
+    "snippetLanguage": "Kod parçacığı dili",
+    "headersTable": "Üstbilgiler",
+    "showSecrets": "Gizli bilgileri göster",
+    "maskSecrets": "Gizli bilgileri maskele",
+    "llmNotAvailable": "Bu istek için LLM meta verileri mevcut değil.",
+    "llmStreamYes": "evet (SSE)",
+    "llmStreamNo": "hayır",
+    "llmTotalTokens": "Toplam: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI Kodları",
     "pageSubtitle": "OmniRoute'a yönlendiren kod araçları",
     "searchPlaceholder": "CLI ara…",
     "filterDetectionLabel": "Algılama",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Bulunamadı",
     "baseUrlAll": "Tümü",
     "baseUrlFull": "Tam",
-    "baseUrlPartial": "Kısmi"
+    "baseUrlPartial": "Kısmi",
+    "title": "CLI Kodu"
   },
   "cliAgents": {
     "pageTitle": "CLI Ajanları",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Bu sağlayıcının son 24 saat içinde gerçekten yanıtladığı çağrıların oranı. Kısa çizgi, oran belirtmek için çok az trafik işlediği anlamına gelir.",
     "reliabilitySample": "Son {hours} saatte {requests} çağrıdan {successes} tanesi başarılı oldu",
     "reliabilityTooFew": "Son {hours} saatte yalnızca {requests} çağrı — oran belirtmek için çok az",
-    "reliabilityNoTraffic": "Son 24 saatte kaydedilmiş çağrı yok"
+    "reliabilityNoTraffic": "Son 24 saatte kaydedilmiş çağrı yok",
+    "categoryFilter": "Görev kategorisi"
   },
   "discovery": {
     "title": "Sağlayıcı Keşfi",
@@ -13330,7 +13628,11 @@
     "method": "Yöntem",
     "auth": "Kimlik Doğrulama",
     "feasibility": "Uygulanabilirlik",
-    "models": "Modeller"
+    "models": "Modeller",
+    "provider": "Sağlayıcı",
+    "status": "Durum",
+    "endpoint": "Uç nokta",
+    "actions": "İşlemler"
   },
   "noAuthProvider": {
     "title": "Kimlik doğrulama gerekmiyor",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Kendi proxy'n",
     "freeTierPause": "{model} modeli duraklatıldı (429), dönüş: {time}",
     "freeTierPauseProvider": "Duraklatıldı (429), dönüş: {time}",
-    "freeTierPauseNote": "Bu örnekte süreç içi duraklatma"
+    "freeTierPauseNote": "Bu örnekte süreç içi duraklatma",
+    "proxyType": "Proxy türü"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Gizli bir başarı bekliyor...",
         "criteria": "Bu rozeti açmak için gizli başarıyı tamamlayın."
       }
-    }
+    },
+    "leaderboardTitle": "Liderlik tablosu",
+    "leaderboardDescription": "API anahtarlarınızdaki sıralamalar ve başarılar",
+    "badgeLocked": "Kilitli"
   },
   "featureFlags": {
     "title": "Özellik Bayrakları",
@@ -13610,7 +13916,9 @@
       "disabled": "Devre Dışı",
       "dual": "İkili",
       "alias": "Takma Ad",
-      "canonical": "Kanonik"
+      "canonical": "Kanonik",
+      "fail_closed": "Engelle (fail_closed)",
+      "count_as_zero": "$0 olarak say (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Korumalı Öncelikli Altyapı Durdurmaları 502 Olarak Döndürülür",
         "description": "Yalnızca kota durumunda yedeğe geçen öncelikli bir hedef, kota olmadığı kanıtlanabilen bir nedenle (açık bir sağlayıcı devre kesicisi veya tahmine dayalı gecikme atlaması) combo'yu durdurduğunda 503 yerine 502 yanıtı verin."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Hesap Kimliklerini Kaydet",
+        "description": "AUTH log satırlarında hesap önekinin dahil edilmesine izin ver (ör. \"'<provider>' hesabı kullanılıyor: abc12345...\"). Paylaşılan/çok kiracılı süreç loglarından hesap tanımlayıcılarının kısaltılması için varsayılan olarak devre dışıdır. Hata Ayıklama Modundan bağımsızdır; Hata Ayıklama Modunun değiştirilmesi bu ayarı açığa çıkarmaz."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC ile Şifre Girişini Devre Dışı Bırak",
+        "description": "OIDC etkinleştirildiğinde, kullanıcıların yalnızca OIDC Tek Kimlik Doğrulaması ile kimlik doğrulaması yapabilmesi için şifre girişini devre dışı bırakır. Devre dışı olduğunda (varsayılan), hem şifre girişi hem de OIDC kullanılabilir."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Uzak Ses Sağlayıcı Düğümleri",
+        "description": "/v1/audio/* rotalarının yerel ana bilgisayar dışında barındırılan OpenAI uyumlu sağlayıcı düğümlerini kullanmasına izin ver. Varsayılan olarak kapalıdır — sesi uzak bir ana bilgisayara yönlendirmek çıkış kimliğini değiştirir ve açık bir operatör kararı gerektirir. Yerel bağlantı düğümleri her zaman izin verilir ve etkilenmez."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Uzak Yeniden Sıralama Sağlayıcı Düğümleri",
+        "description": "POST /v1/rerank (ve bunu yerel bağlantı üzerinden çağıran hafıza motorunun yeniden sıralama adımını) yerel ana bilgisayar dışında barındırılan OpenAI uyumlu sağlayıcı düğümlerini kullanmasına izin ver — TEI, Infinity, vLLM vb. çalıştıran bir yerel ağ kutusu veya Tailscale akranı. Varsayılan olarak kapalıdır — uzak bir ana bilgisayara yönlendirme çıkış kimliğini değiştirir ve açık bir operatör kararı gerektirir. Yerel bağlantı düğümleri her zaman izin verilir ve etkilenmez. Uzak düğümlerin sağlayıcı çıktı URL politikasını geçmesi de gereklidir."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Ağ Döndürme Paylaşılan-Çıkış Koruması",
+        "description": "Çok hesaplı döndürme yürütücüsünde bir ağ istisnası (zaman aşımı, bağlantı reddi/sıfırlanması) olduğunda, başarısız olan hesabın özel bir vekili yoksa kısa bir soğuma süresi uygulayın ve yeniden denememek için talebin geri kalanında diğer vekilsiz hesapları atlayın. Varsayılan olarak açıktır (güvenli: çıkış IP değişikliği yoktur, yalnızca paylaşılan-çıkış hesaplarında gecikme/soğuma riskini azaltır). İlk vekilsiz istisnada anında yayılımı yeniden etkinleştirmek için devre dışı bırakın."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Son Zamanlarda Başarısız Olan Vekilleri Atla",
+        "description": "Vekil havuzları ve opencode için hesap bazlı rotasyon, kısa süre önce başarısız olan bir vekili (TCP probu reddi veya üzerinden 429 kodu alımı) süreç başına bir dönem boyunca yeniden sunmayı durdurur; her tekrarda bu süre iki katına çıkar ve bir sınıra kadar devam eder. Vekil durumu yazılmaz; tüm adaylar kenara alınmışsa seçim değişmez. Varsayılan olarak açıktır: PROXY_SKIP_RECENTLY_FAILED=false ise seçim sırası tamamen düz rotasyonla aynıdır."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Paylaşılan Egress Havuzu Sıralaması",
+        "description": "Kotası çıkış adresine göre bölünmüş sağlayıcılar için, son zamanlarda reddedilen bir üyenin gözlemlenen çıkış adresini paylaşan havuz üyesini, sağlıklı üyelerin hemen altına sıralayın. Yalnızca sıralama, asla hariç tutulma gerekçesi. Bunu okuyan reddetme sinyalini üreten PROXY_SKIP_RECENTLY_FAILED gerektirir. Varsayılan olarak kapalıdır: seçim sırası tamamen düz rotasyonla aynıdır."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotasyon Nispetlendirme Kaydına (Log) Yazma",
+        "description": "Opencode rotasyonu, hangi hesabın hizmet verdiğini veya atlandığını (yalnızca maskeli kimlikler, asla tam hesap kimlikleri değil) kaydeder ve vekil log kayıtlarını istekle ilişkilendirir; böylece operatör atlanan hesapları kullanılmayanlardan ayırt edebilir. Varsayılan olarak kapalıdır: ek log satırı yok, yazılan ek sütun yok."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Vekil Havuzu Egress Gözlemi",
+        "description": "Pano (dashboard) üzerinden bir vekil havuzunun altında, son 24 saat içinde üyelerine kaç gözlemlenen çıkış IP'si hizmet verdiğini, kaç bağlantının bunları kullandığını ve tek bir IP arkasında en çok görülen sayısını gösterin. Salt okunur, vekil logdan hesaplanır, yönlendirme için asla kullanılmaz. Varsayılan olarak kapalıdır: havuz düzenleyicisi değişmez ve gözlem rotası null döner."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Vekil Operatörü Egress",
+        "description": "Havuz üyesi başına operatör tarafından itilen (push) tarihli gözlemlenen adresleri kabul edin ve görüntüleme ile havuz sıralaması için günlük okumasıyla birleştirin. Varsayılan olarak kapalıdır: itme rotası 404 döner ve havuz okumaları tam olarak önceki gibi davranır."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Yanıtları Bekleme Rotasyonu",
+        "description": "OpenCode yürütücüsü için, yayımlanan Responses yanıtının ilk gövde baytını izleyin (pencere: RESPONSES_FIRST_BYTE_TIMEOUT_MS, varsayılan 15000). Pencereyi aşarak sessiz kalan 2xx Responses akışı beklemede kaldı olarak değerlendirilir: hesap soğutulur ve istek bir kez sonraki hesaba rotasyona uğrar; ikinci bir bekleme hızlı başarısızlıkla sonuçlanır. Varsayılan olarak kapalıdır: beklemede kalan akışlar, akış hazırlık zaman aşımına kadar bugünkü bekleme süresini korur."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked Rotasyonu",
+        "description": "OpenCode yürütücüsü için, bir sunucu üstü 403 veya 451 yanıtı verdiğinde ve bu yanıtta user_blocked reddi (coğrafi blok değil, Cloudflare parmak izi reddi değil) taşındığında, reddedilen hesabı soğutun ve istek başına en fazla bir kez sonraki hesaba rotasyon uygulayın; ikinci bir reddi başarı işareti olmadan olduğu gibi döndürün. Varsayılan olarak kapalıdır: sunucu üstü kullanıcı engelinden yandan dolaşım kaçınma gibi görünebilir ve bu bayrağı hesap filosunda yayılabilir, bu nedenle operatör müdahale etmedikçe red, değiştirilmeden döndürülür."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode Geçici Hata Dönüş Arka Planı",
+        "description": "OpenCode çoklu hesap rotasyonu için, iki ardışık deneme geçici sunucu üstü hatası (5xx veya boş 400 reddi) ile başarısız olduğunda, sonraki hesaba gönderimden önce bir duraklama ekleyin. Bu duraklama 1,5 sn'de başlar, her eklenen ardışık hata ile iki katına çıkar, duraklama başına 6 sn ve istek başına 10 sn olarak sınırlandırılır, istemci bağlantısını kestiğinde atlanır ve beklenmeden önce başarısız yanıt gövdesi serbest bırakılır. Varsayılan olarak kapalıdır: hata dönümü anında kalır."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Boş Tur Yeniden Deneme",
+        "description": "Çevrilen akışlı turlarda, sunucu üstü tur kullanışlı içerik taşımıyorsa (yalnızca çıkarım tamamlaması veya sıfır değerli parçacık), herhangi bir şey istemciye açılmadan önce normal kimlik bilgisi yolu üzerinden sınırlı yeniden denemeler yapın (en fazla `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`). Varsayılan olarak kapalıdır: boş turlar mevcut davranışı korur (boş 200 veya boş içerik 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Boş Akış Kardeş Geri Kazanımı",
+        "description": "Claude/Codex akışı: ilk yaşam döngüsü olayından sonra, kullanışlı çıktı için kısa bir sondaj yapın (en fazla 1 sn / 64 KiB); içeriksiz sona eren bir akış, uygun başka bir bağlantıda mevcut sınırlı yeniden denemeyi harcamak üzere empty_content hatasına dönüşür (soğutma yok, model kilitlenmesi yok) ve tur-robin kombinasyonları istemci bağlantısını kestiğinde yeniden denemeyi durdurur. Ayrıca reddi, pause_turn ve model_context_window_exceeded durumlarını sondaj içinde meşru boş sonlamalar olarak ele alır. Varsayılan olarak kapalıdır: hazırlık, boş içerik işleme ve kombinasyon yeniden denemeleri öncekiyle tamamen aynı kalır."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Geç Çıktı Sondasını Dökümle",
+        "description": "Döküm çıktı sondası: İlk 64 ileri aktarılan parçadan sonra, ilk görünür çıktı için her 16 parçadan birini örneklemeye devam et; böylece geç başlayan çıktılar bile akışın çıktı üretmiş olduğunu işaretler. Bu noktadan sonra tek başına gelen bir 5xx, model yalnızca kilitlenmesini kaydetmek yerine istek kapsamına kalır ve firstOutputMs, mevcut örnekleme boşluğunun ilk çıktı parçasına geriye dönük olarak doldurulur. Varsayılan olarak kapalıdır: yalnızca ilk 64 ileri aktarılan parça sondalanır, tıpkı öncekiler gibi."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode Hız Sınırlı 429 Erken Durdurma",
+        "description": "OpenCode çoklu hesap rotasyonu için, gerçek bir hız sınırı olarak sınıflandırılan ilk 429'da (çözümleyebilir bir Retry-After başlığı veya hız/kullanım sınırını adlandıran bir gövde) hesap dalgasını durdurun ve bu yukarı akış 429'ü değiştirmeden (durum, gövde, Retry-After ve kota başlıklarıyla) geri verin; kalan her hesaptan denemek yerine. Sınıflandırılmamış 429'ler rotasyona devam eder. Varsayılan olarak kapalıdır: ücretsiz katman her egress IP başına sınırlanmıştır (#9611), bu nedenle her 429 bir sonraki hesaba rotasyona gider ve tükenmiş bir dalga son yukarı akış 429'ü döndürür."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 Park Et ve Devam Et",
+        "description": "OpenCode çoklu hesap rotasyonu için, tekrar eden geçici 429'lardan (veya taze bir havuz gerginliği işaretinden) sonra isteği bir kalp atışıyla park edin, sonra tüm filoyu yelpaze şeklinde dağıtmak yerine en fazla 3 ardışık hesaptan oluşan sınırlı bir ayağı yeniden oynatın. Varsayılan olarak kapalıdır: her 429, tıpkı öncekiler gibi bir sonraki hesaba rotasyona gider."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Döküm Hazırlık Tahteri Yeniden Dene",
+        "description": "Döküm sohbet istekleri için, ilk yukarı akış gövdesi kullanılabilir bir olay üretebilmekden önce tahteride kalırsa, aynı hesap cezası olmadan ve aynı hazırlık bütçesiyle aynı yönlendirme yolu üzerinden sınırlı bir ikinci deneme yapın. Varsayılan olarak kapalıdır: tahteri kalmış bir ilk gövde, yeniden deneme olmadan isteği başarısız sayar."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 Havuz Yeniden Seçimi",
+        "description": "Proxy'siz bir hesapta ve ortam havuz bağlamında egress-bucket'li bir sağlayıcıdan gelen 429 için OpenCode çoklu hesap rotasyonunda, aynı egress adresini yeniden denemek yerine bir sonraki deneme için bağlantı havuzundan başka bir üye isteyin. Sıralar, asla hariç tutmaz: tükenmiş bir havuz mevcut davranışı korur. Varsayılan olarak kapalıdır: her 429, tıpkı öncekiler gibi bir sonraki hesaba rotasyona gider."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 İstemci Parmak İzi",
+        "description": "OpenCode Zen/Go isteklerinde OpenCode v2 CLI istemci parmak izini gönder (#16571): User-Agent opencode/latest/<2.x>/cli ve x-opencode-client cli, yalnızca 2.x OpenCode istemcisi olduğunda korunan istemci User-Agent'ı, kapılı ücretsiz katman isteklerinde x-opencode-request yok, oturum x-opencode-session-id/x-session-affinity/x-session-id üzerine aynalanır, v2 CLI okuma/istem şemaları enjekte edilen yer tutucu araçlarda ve tool_choice'ü \"none\" olanlar kaldırılır. Varsayılan olarak kapalıdır: tüm OpenCode istekleri mevcut kimliği, başlıkları ve gövdeyi bayt bayt korur."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Çıkış-IP Kilitlenmesi",
+        "description": "OpenCode Zen (opencode-zen) varsayılan çıkış-IP kilitlenme ailesine eklenir, böylece bir Zen bağlantısında 429 verilmesi, aynı çıkış IP'sini paylaşan tüm diğer Zen bağlantılarını da serinletir. Varsayılan olarak kapalıdır: Zen anahtarlanır ve her bağlantı tam olarak daha önce olduğu gibi kendi kendine serinletir. Açıkça belirtilen bir OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS değeri bu bayrağa her zaman önceliklidir."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode Tam Metin Hata Kuralları",
+        "description": "Yerleşik OpenCode hata kurallarının (opencode-zen, opencode-go, opencode-cli) tam upstream hata metniyle eşleşmesine izin verin, böylece organization_quota_exceeded veya \"monthly usage limit reached\" gibi gövde işaretleri 429'yu bağlantı kapsamındaki bir kilitlemeyle kota tükendi olarak sınıflandırır. Varsayılan olarak kapalıdır: o kurallar yalnızca yapılandırılmış hata kodunu görür ve böyle bir 429 tam olarak daha önce olduğu gibi kısa süreli bir hız sınırı olarak kalır."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI Tam Metin Hata Kuralları",
+        "description": "Yerleşik Cloudflare Workers AI hata kuralının tam upstream hata metniyle eşleşmesine izin verin, böylece 429 \"daily free allocation\" gövdesi kısa süreli bir hız sınırı yerine kota tükendi olarak sınıflandırılır. Varsayılan olarak kapalıdır: kural yalnızca yapılandırılmış hata kodunu görür, tam olarak daha önce olduğu gibi."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Yetenek Filtresi",
+        "description": "Hedef modelin gerekli yeteneklere (görüntü, araçlar, yapılandırılmış çıktı, bağlam penceresi) sahip olmadığında istekleri dağıtmadan önce reddet. Combo-katman uyumluluk filtresini atlayan doğrudan tek sağlayıcı isteklerini korur."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD Kontalarında Fiyatlandırılmamış Kullanımı Yoksay",
+        "description": "Fiyatlandırılmamış modellerin kullanımını anahtar başına USD kullanım kotalarında kota aşımı olarak değil, $0 olarak sayın. Varsayılan olarak kapalıdır: fiyatlandırılmamış bir model veya yönlendirme takma adı gerçek harcamayı gizleyebileceğinden, kota güvende kalır."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar modülünü (katalog besleme ekranları ve senkronizasyon) etkinleştirin. Varsayılan olarak kapalıdır; etkinleştirmek yalnızca arayüzü kilidi açar — veri senkronizasyonu ayrı bir tercihle yapılır."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Model Uç Noktası Yetenek Kapısı",
+        "description": "Güvenilir model uç noktası etiketlerini uygulamaya konun (sağlayıcı kataloğu tarafından beyan edilen, bir uzmanlık model kimliğinden çıkarılan veya operatör tarafından ayarlanan): modelin hizmet etmediği bir uç noktasına gönderilen istekleri, /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations ve /v1/audio/* üzerinde dağıtım öncesi HTTP 400 ile reddedilen; etiketlenmiş uç noktalarının OmniRoute adaptörü olmayan modelleri /v1/models'ten gizleyen; ve bu modeller için gösterge paneli model testine 422 yanıt veren. Varsayılan olarak kapalıdır: uç noktası etiketleri bilgi niteliğinde kalır ve istekler daha önceki gibi tam olarak dağıtılır."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Evrensel Bağlam Devri",
+        "description": "Kombo yönlendirme modelleri değiştirirken sohbet özetlerini üretin ve enjekte edin. Model değişimlerini bağımsız olarak ele almak ve tüm mevcut ve gelecekteki kombolar için arka plan devir isteklerini önlemek için devre dışı bırakın."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Düşünme Tekrarı",
+        "description": "Model düşünme süreçlerini çoklu tur sohbetler arasında önbelleğe alın ve tekrarlayın. Saklamayı ve yeniden enjekte etmeyi durdurmak için devre dışı bırakın."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex Uygulama Sunucusu Taşıma Sistemi",
+        "description": "Codex'in yerel uygulama sunucusu WebSocket JSON-RPC taşıma sistemini (codexTransport=app-server) kullanmasına izin verin. Kapalıyken, uygulama sunucusuna ayrılan bağlantılar, Codex'in diğer taşıma sistemlerine geri döner."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Keşif Takma Adları",
+        "description": "/v1/models üzerinde claude/'<provider>'/'<model>' ayna kimliklerini duyurun, böylece Claude Code geçit model keşfi, Claude olmayan modelleri listeler. Uyarı: Küresel olarak etkinleştirildiğinde, tüm istemciler için katalog girişlerini ikiye katlar."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Düşünme-İstemeyen Model Takma Adları",
+        "description": "no-think/'<provider>'/'<model>' geçit takma adlarının ana anahtarı. Açık (varsayılan): /v1/models, uygun her düşünme yetenekli Claude modeli için bir düşünme-istemeyen varyantı duyurur ve bir istekte gönderilen no-think/ kimliği, akıl yürütme bastırılmış gerçek modele geri çözümlenir. Kapalı: hiçbir varyant duyurulmaz ve no-think/ kimliği, diğer herhangi bir bilinmeyen model kimliği gibi davranır. Bu açıkken model başına ModelSpec.noThinkingAlias seçim yapma/vazgeçme özelliği yine de geçerlidir."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Düşünme Seviyesi Varyantlarını Devre Dışı Bırak",
+        "description": "/v1/models kataloğunda düşünme seviyesi varyantlarının (ör. -low, -medium, -high) oluşturulmasını devre dışı bırakır."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Uyarlama Sanal Kabul Yolları",
+        "description": "Sağlayıcı dağıtımı için kiracı başına uyarlama sanal kabul yollarını etkinleştir (#9654): Bir kiracının ani yük artışı artık diğerini 503 yapmaz. OMNIROUTE_CHAT_VIRTUAL_LANES çevre değişkeni bu gösterge panosu geçersiz kılma üzerinden önceliklidir; değişiklikler sunucu yeniden başlatıldığında etkinleşir."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Fonksiyonel Geçit Aynaları",
+        "description": "Resmi sahibinin aktif bir kimlik bilgisi olmayan, ancak aktif bir kimlik bilgisi olan bir geçiş geçidi tarafından yönlendirilen modeller için /v1/models üzerinden '<gateway-alias>'/'<model>' ayna kimliklerini ilan edin. Uyarı: global olarak etkinleştirildiğinde, tüm istemciler için katalog girişleri ekler."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API Toplayıcı Bakiyesi",
+        "description": "New-API / One-API / Sub2API toplayıcı uyumlu düğümler için bakiye algılamayı etkinleştirin. Etkinleştirildiğinde, toplayıcı işareti ayarlanmış uyumlu düğümler, bakiyelerini panelde ve kota ön kontrol yönlendirmede raporlar."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Silinen Arama Bağlantılarını Gizle",
+        "description": "Arama istatistikleri ve son aramalar yalnızca canlı bir bağlantısı hâlâ olan sağlayıcıları sayar (duckduckgo-free gibi anahtarsız sağlayıcılar her zaman sayılır). Kapalı, sağlayıcı kimliği olan her saklanan arama satırını korur."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Kesin Ücretsiz Rozeti",
+        "description": "Panel sağlayıcı sayfaları: Ücretsiz rozetini yalnızca sağlayıcının kabul ettiği sinyallerde gösterin — serbest bırakılan gösterim adı sezgiselini, mantıksal olmayan ücretsiz alanları ve kayıtlı sağlayıcılarda dokümante edilmemiş ücretsiz katmanlar için :free soneklerini kaldırır. Kapalı, tarihsel rozet kuralını korur."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Otomatik Kombo: Boş Havuz 503 Yanıtlar",
+        "description": "Otomatik kombo'nun aday havuzu, araç çağıran ön filtresi çalışmadan önce zaten boşsa (her hedef soğuma süresi, kilitlenme veya tükenme nedeniyle atlandıysa), geleneksel 400 'No target supports tool calling' capability_mismatch yerine 503 no_eligible_targets yanıtı verir. Varsayılan olarak kapalıdır: boş havuz geleneksel 400'ü korur."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Belirsiz 401 Yumuşak Kilitleme",
+        "description": "Ham Mistral 401 yanıtı ('{\"detail\":\"Unauthorized\"}', açık bir kimlik doğrulama sinyali yok), devre dışı bırakılmış bir anahtarla tükendiği kota için bayt bayt aynıdır. Etkinleştirildiğinde, bu tür bir 401 yanıtı bağlantıyı park yerine almak yerine en fazla 1 saat içinde 3 kez soğutur; sonraki 401 yine de bağlantıyı expirer park eder, böylece devre dışı bırakılmış anahtarlar yakınsar. Varsayılan olarak kapalıdır: her ham Mistral 401 yanıtı, eskiden olduğu gibi bağlantıyı expirer park eder."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Toplu İş ve Dosya Otomatik Temizlemesi",
+        "description": "Otomatik temizlik taramasının, OMNIROUTE_BATCH_RETENTION_DAYS gününden eski uç durumlu (tamamlanmış/hata/iptal/sona ermiş) Toplu API işlerini, satır bazlı denetim noktalarını ve yüklü dosyaların BLOB içeriğinin kendi expires_at sürelerini aşanlarını silmesine izin verir. Varsayılan olarak kapalıdır: her mevcut kurulum, bir operatör dahil olmadıkça bu veriyi öncekiyle birebir aynı şekilde korur. Operatör tetikli DELETE /api/v1/batches/delete-completed rotası etkilenmez; bu ayrı, koşulsuz bir genel API sözleşmesidir."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity Hesap Kiralama",
+        "description": "Hesabını seçen isteğin akış yaşam döngüsü için seçilen Antigravity hesabını ayırmak, böylece eş zamanlı bir yeniden deneme veya kimlik bilgisi devri, yerinde bir akışa atanmış bir hesabı yeniden seçemez. Rezervasyon (bağlantı, çağrılabilir üst akış modeli) kapsamına sahiptir, böylece bir hesap hâlâ aynı anda iki farklı modele hizmet verebilir. Uygulanan tüm hesaplar o model için kiralıksa, istek meşgul hesaba yığın bindirmek yerine sınırlı bir Retry-After ile yapılandırılmış bir 503 POOL_BUSY döndürür. Varsayılan olarak kapalıdır: hesap seçimi öncekiyle aynıdır ve rezervasyon yapılmaz."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Eski Combo Adımlarını Otomatik Budal",
+        "description": "Yetkili canlı bir kataloğa karşı başarılı bir model senkronizasyonundan sonra, kataloğun artık listelemediği modellere sabitlenmiş combo adımlarını kaldırır ve kaldırılan her adım için bir denetim kaydı oluşturur. Başarısız, yetersiz veya ücretsiz senkronizasyonlarda asla budamaz ve bir combo'yu asla boşaltmaz. Varsayılan olarak kapalıdır: eski adımlar yalnızca işaretlenir."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth Özetlenmiş Düşünme",
+        "description": "Okunabilir düşünme (thinking.display \"summarized\") isteyen bir Claude OAuth isteğinin, Anthropic'in boş, yalnızca imzalı düşünme blokları dönmesine neden olan redact-thinking-2026-02-12 Anthropic beta'sını bırakmasına izin verir. Varsayılan olarak kapalıdır: bu beta, Claude Code OAuth kablosu parmak izininin bir parçasıdır, bu nedenle OAuth istekleri değiştirilmeksizin korunur. API anahtarlı Claude istekleri bu bayrağı olmadan özetlenmiş düşünmeyi zaten onurlandırır; OMNIROUTE_REDACT_THINKING=false yalnızca bu bayrak açıkken OAuth'a ulaşır."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Araç Çağrısı Onarımı",
+        "description": "Bir Kiro yayın akışı, görünen bir çıktı üretilmeden önce biçimsiz bir tool_call sarmalayıcısı (giriş.name veya giriş.arguments eksik) yaydığında, bunu baskıla ve turneyi geçersiz_invalid_kiro_tool_call ile sonlandırmak yerine düzeltici bir talimatla isteği bir kez yeniden gönder. Yeniden deneme bir ek Kiro isteğine mal olur; ikinci bir başarısızlık turneyi kiro_tool_call_repair_retry_failed ile sonlandırır. Varsayılan olarak açıktır. İlk biçimsiz sarmalayıcıda turneyi hata olarak sonlandırmak için false olarak ayarlayın."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev Çaba Kademeleri",
+        "description": "Operatör geçersiz kılma (override) veya sağlayıcı kayıt defteri herhangi bir çaba kademesi bildirmediğinde, models.dev'in yayımladığı akıl yürütme çaba kademelerini (bilinen çaba sözlüğüne daraltılmış halde) kullanın ve /v1/models effort_tiers ile kombine kademe kesişimlerinde bildirilen boş kademe listesini \"kademe yok\" olarak kabul edin. Varsayılan olarak kapalıdır: effort_tiers ve çözümlenmiş supportedThinkingEfforts tamamen eskisi gibi kalır."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena Sentezlenmiş cx Telemetrisi",
+        "description": "Sentetik programatik cx istemci etkileşimi blob'unu (kayıtlı etkileşimi olmayan bir sayfa için arena.ai'nin kendisinin gönderdiği değer) operatör tarafından sağlanan providerSpecificData.cx içermeyen her Arena (lmarena) create-evaluation isteğine ekleyin. Varsayılan olarak kapalıdır: cx alanı bir Arena otomasyonu karşıtı sinyaldir, bu nedenle OmniRoute yalnızca operatörün gerçek bir tarayıcı oturumundan yakaladığı bir değer (providerSpecificData.cx) iletmekle yetinir ve aksi halde hiçbir cx göndermez. Baştan doğrulanmamış bir fayda; yalnızca Arena, cx'siz istekleri reddetmeye başladığında etkinleştirin."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Yerel Codex Reaktif Sıkıştırma (Compaction)",
+        "description": "Eşiğe dayalı (reaktif) ve son çare bağlam sıkıştırma (compaction) geçişlerinin, bağlam bütçesini aştıklarında yerel Codex passthrough geçmişlerini (codex sağlayıcısına POST /v1/responses) da Responses input[] uyarlayıcısını kullanarak yeniden yazmasını sağlayın. Varsayılan olarak kapalıdır: yerel Codex geçmişleri Codex istemcisinin mülkiyetindedir ve sıkıştırma tarafından asla yeniden yazılmaz; aşırı boyutlu istekler bağlam bütçesi kontrolünü eskisi gibi hata olarak sonlandırmaya devam eder. Küresel sıkıştırmanın açık olması ve modelin hariç tutulmaması gerekir."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kota Penceresi: Sınırlı Bekleme Alanına Uyum (Bounded Park)",
+        "description": "Pencere başına kota politikasının (hesap seçiminde kullanılan oturum/haftalık eşikleri) sınırlı tükenmiş bekleme alanına (bounded exhaustion park) uymasını sağlayın: sınırlı bekleme alanı son kullanma süresi geçtiğinde veya önbelleğe alınmış kota gözlemi bekleme alanı tavanından daha eski olduğunda, pencere taze bir kota alımı gerçekleşene kadar hesabı hariç tutmayı durdurur. Varsayılan olarak kapalıdır: önbelleğe alınmış bir pencere, kendi sıfırlanma zamanına kadar son bildirilen yüzdesi üzerine bloke kalmaya devam eder."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Görüntü Oluşturma: Uzun Süreli İşlemler",
+        "description": "OpenAI uyumlu görüntü oluşturma için: sabit 120 s'lik görüntü bütçesi yerine bağlantı zaman aşımını (providerSpecificData.timeoutMs), yoksa merkezi üst akış getirme zaman aşımını (FETCH_TIMEOUT_MS, ardından REQUEST_TIMEOUT_MS, varsayılan 600 s) kullanın; çağıran tarafından iptal edilen istekleri 499 ile sonlandırın; ve Playground'un uzun süreli görüntü işlemlerini canlandırma kalp atışı (keepalive heartbeats) içeren bir SSE akışı olarak almasına izin verin. Varsayılan olarak kapalıdır: sabit bütçe uygulanır ve çağıran iptali iletilmez. Yanıt gövdesi okuma süresini kapsayan son zaman (deadline) her zaman açıktır."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Katalog Ayna İyileştirmeleri",
+        "description": "/v1/models üzerindeki claude/ keşif ve işlevsel geçit aynalarını iyileştirin. Varsayılan olarak kapalıdır: her iki ayna geçişi de tam olarak eskisi gibi davranır. Açıkken: claude/ keşif aynaları, listelenmiş akıl yürütme çabası değişkenlerini (-low/-medium/-high/-xhigh) de kapsar, istek yolu tarafından somutlaştırılamayan yerleşik auto/* kimliklerini ve zaten listelenmiş bir takma adı atlar; işlevsel geçit aynaları, kombinasyonları ve OmniRoute-sentetik kimlikleri (claude/, no-think/) atlar, sahibini owned_by'dan alır, asla geçidi sahibinin kendisi olarak kullanmaz, blockedProviders'te devre dışı bırakılmış geçitleri ve bir geçidin yetkili canlı katalogunun dışındaki modelleri atlar."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Vekil Sağlığı: Red, Başarısızlık Serisini Sıfırlar",
+        "description": "Vekil sağlık taramasında, hedefin reddettiği (401/403/429: vekil iletti, varış noktası bu çıkış IP'sini reddetti) bir sonda, sağlanan bir sonda gibi vekilin ardışık başarısızlık serisini sıfırlamasına izin verin. Varsayılan olarak kapalıdır: bir red nötr kalır ve seriyi korur (#10654). 5xx her durumda sonuçsuz (inconclusive) kalır ve bir red, bir vekili asla kaldırır, devre dışı bırakmaz veya yeniden etkinleştirmez."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok Abonelikli Görseller",
+        "description": "xai-oauth (xao) ve grok-cli görüntü yollarını kaydedin ve OpenAI kalitesini high/hd'yi xAI medium'a eşleyin. Varsayılan olarak kapalıdır: API anahtarlı xAI görüntü yolu mevcut OpenAI uyumlu istekte kalır ve abonelik yolları kaydedilmez."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth Canlı Model Keşfi",
+        "description": "xai-oauth bağlantıları için canlı xAI model kataloğunu donmuş statik tohum yerine OAuth bearer jetonu kullanarak https://api.x.ai/v1/models adresinden getirin. Varsayılan olarak açıktır. Statik tohumun sunulmaya devam edilmesini sağlamak için bayrağı false olarak ayarlayın. HTTP hatalarında keşif rotasında tohum'a geri düşülür; bayrağın kendisi HTTP isteği başlatmaz."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-Uyumlu Ortadan Sohbet Sistemi Dönüşleri",
+        "description": "Düz anthropic-compatible-* rölelerinde (claude → claude geçişli), önbelleğe alınan istek önekinin turlar arasında kararlı kalması için, mid-conversation role:system dönüşlerini messages[] içinde tutun ve bunları üst düzey system parametresine taşımayın. Bu uygulama, yalnızca istemcinin kendisinin mid-conversation-system-2026-04-07 anthropic-beta'sını (yukarıda olduğu gibi iletilen) göndermesi durumunda geçerlidir. Varsayılan olarak kapalıdır: her system dönüşü, röleler beta'yı desteklemiyorsa role:system iletilerini 400 ile reddettiği için, daha önceki gibi tamamen üst düzey parametreye taşınır."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB Sağlık Kontrolü: Başlangıç Taramasını Ertele",
+        "description": "Başlangıçta DB bütünlük/sağlık kontrolünün sunucu istekleri kabul etmeye başladıktan sonra (setImmediate ile) çalıştırılmasını sağlar, böylece başlangıç kontrol tamamlanana kadar bloke olmaz. Varsayılan olarak kapalıdır: başlangıç, #13717'den önceki gibi kontrolün tamamlanmasını bekler, bu da bozuk bir veritabanının ilk isteğe yanıt vermeden önce tespit edilmesini sağlar. Açıkken: başlangıç anında yanıt verir ve kontrol (şu anda sınırlı/sayfalı ve gerçek dosya tabanlı bir DB için iptal edilebilir bir alt işlemde izole edilmiş) hemen sonra çalışır."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode Yayımlanmış Katalog Yönlendirmesi",
+        "description": "Açık bir kayıt ortamı uç noktası olmayan OpenCode Zen ve OpenCode Go modellerinin, istek yüzeyini (Responses için @ai-sdk/openai, Messages için @ai-sdk/anthropic) her 6 saatte bir arka planda okunan yayımlanmış models.opencode.ai kataloğundan almasını sağlar. Varsayılan olarak kapalıdır: uç nokta, daha önceki gibi tam olarak kayıt ortamı sezgiselliklerinden gelir ve katalog asla getirilmez."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Otomatik İstekler: Çözülen Yetenek Ağırlıkları",
+        "description": "Otomatik/* isteklerinin (resolveModelOrError ve otomatik yönlendirme sarmalayıcısı) aday havuzunu çözümlenmiş model yetenekleri (görüntü, akıl yürütme, düşünme) ve gözlemlenen kalite puanlarıyla, /v1/models kataloğu gibi tek bir toplu okuma geçişinde oluşturmasını sağlar. Varsayılan olarak kapalıdır: istek zamanı anlık görüntü ağırlıkları daha önceki gibi tam olarak kalır (yetenekler talebe bağlı olarak çözülür ve ağırlıklara beslenmez). Açıkken: bu sinyaller anlık görüntü ağırlıklarına beslenir, böylece aday ağırlıkları ve dolayısıyla seçim değişebilir."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Otomatik-Kombo: Anahtarsız Taşıma Kapısı",
+        "description": "Yerel bir tarayıcıya (browserBacked) veya yerel olarak yüklenmiş bir CLI'ye (isLocalCli) ihtiyaç duyan taşıma gerektiren anahtarsız (kimlik doğrulaması olmayan) sağlayıcıları, takılmış bir üyenin otomatik isteğin hedef başına zaman aşımına (#17036) kadar ilerlemesini engellemek için otomatik/* aday havuzundan dışarıda tutun. Varsayılan olarak kapalıdır: sahte aracı çağrısı olan her kimlik doğrulaması olmayan sağlayıcı, daha önceki gibi tam olarak havuzda kalır. Doğrudan '<alias>'/'<model>' çağrıları her iki durumda da çalışır."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Satır İçi Çıkarım Yeniden Oynatma",
+        "description": "CodeBuddy-CN düşünme modelleri için (çıkarım yeniden oynatması gereken DeepSeek-V4 / Kimi-K2 aileleri), her yeniden oynatılan asistan reasoning_content değerini, reasoning_content alanını düşüren bir geçide hayatta kalabilmesi için (#13632), mesaj içeriğinin başında görünür bir '<thought>' bloğu olarak satır içi gösterir. Varsayılan olarak kapalıdır: codebuddy-cn istekleri değiştirilmeden gönderilir; reasoning_content alanının kendisi her zaman korunur."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Sağlayıcı Güvenlik Durdurmacaları: Sonlandırma",
+        "description": "Belirli bir sağlayıcı güvenlik durdurmalarını (misalignment_policy_violation, content_policy_violation veya tam olarak 'güvenlik sistemlerimiz tarafından engellendi' etiketine sahip eski provider_safety_rejection) sonlandırıcı, istek kapsamlı bir reddetme olarak korur: kodu HTTP, Responses, WebSocket ve tamamlanmış akış hataları boyunca korunur ve kombinasyon, bu noktada durarak diğer hedefleri denemek yerine kabul edilmiş kardeş işlemleri iptal eder (#17049). Varsayılan olarak kapalıdır: bu hatalar mevcut işleme mantıklarını korur ve kombinasyon yönlendirmesi değişmez."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Kimlik Bilgisi Sağlığı: Otomatik Devre Dışı Bırakılan Bağlantıları Yeniden Test Et",
+        "description": "Kimlik bilgisi sağlık taramasının, geçidin kendi kendine devre dışı bıraktığı bağlantıları (autoDisabledAt olarak işaretlenmiş; her birinde 6 saatte en fazla bir kez ve tarama başına 5 adet) yeniden test etmesine ve yeniden testi geçtiğinde bağlantıyı tekrar aktif hale getirmesine izin verir (#16190). Varsayılan olarak kapalıdır: devre dışı bırakılan bağlantılar, bir operatör tarafından yeniden etkinleştirilene veya yeniden test edilene kadar devre dışı kalır, tam olarak önceki durumla aynı şekilde. Operatör tarafından devre dışı bırakılan bağlantılar ve kalıcı yasak sonrasında devre dışı bırakılan bağlantılar asla yeniden test edilmez."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Kimlik Bilgisi Geçidi: Yalnızca Kimlik Doğrulama Teşhisleri",
+        "description": "Kombinasyon kimlik bilgisi geçidini daraltarak, önbelleğe alınmış başarısız bir kimlik bilgisi sorgusunun yalnızca teşhisi kötü kimlik bilgilerini kanıtladığında (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) bağlantıyı engellemesini sağlar. Belirsiz hatalar (zaman aşımı, hız sınırlaması, kesintiler, desteklenmeyen sorgular ve tipsiz planlayıcı hataları) bilinmeyen olarak kabul edilir ve bağlantı trafiği almaya devam eder. Varsayılan olarak kapalıdır: önbelleğe alınmış herhangi bir sorgu hatası, bağlantıyı önbellek TTL süresi (5 dakika) boyunca engeller."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Kombinasyon: İçerik Politikası Reddinde Dur",
+        "description": "Bir kombinasyon hedefi tam bir içerik politikası reddiyle (kod veya tür cyber_policy / content_policy_violation) yanıt verdiğinde, kalan hedefler farklı modeller olsa bile kombinasyonu durdurur ve bu reddi döndürür, bir sonraki hedefe ilerlemek yerine. Varsayılan olarak kapalıdır: bu reddi, hesabı soğutmaz veya sağlayıcı sigortasını tetiklemez; kombinasyon tam olarak önceki gibi bir sonraki hedefine ilerler."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Soğuma Yeniden Denemesi: 403/410 Redlerini Atla",
+        "description": "Tüm hesaplar soğuma modundayken ve en kısa sürede bitecek soğumanın bir 403 (erişim reddedildi) veya 410 (kaynak yok) hatasından kaynaklanması durumunda, soğuma süresini bekleyip isteği yeniden göndermek yerine o reddi anında geri döndürün; bu durumda, yenidenlanan agentrouter bağlantı kapsamındaki kota 403 hatası, yeniden denenebilir kalması için errorCode 429 ile kalıcı hale getirilir. Varsayılan olarak kapalıdır: yalnızca 401 bekleme adımını atlar ve her red, geldiği durum koduyla kalıcı hale getirilir."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Fiyatlandırılmamış Kullanım Bütçe Politikası",
+        "description": "Anahtar başına günlük/haftalık USD limitlerinin, sağlayıcısı/modeli için fiyat satırı olmayan başarılı kullanımı nasıl ele aldığı. fail_closed (varsayılan) pencereyi aşılmış olarak işaretler; böylece bilinmeyen bir maliyet sert bir üst sınırı aşamaz. count_as_zero bu kullanımı $0 olarak sayar ve fiyatlandırılmış harcamayı uygulamaya devam eder. Fiyatlandırılmamış modeller her durumda pano ana sayfasında listelenir."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Gecikme",
     "quota": "Kota",
     "rangeWindow": "{range} penceresi",
+    "timeRange": "Zaman aralığı",
     "runtimeHealthBlend": "çalışma zamanı/sağlık karışımı",
     "averageResponseTime": "ortalama yanıt süresi",
     "worstQuota": "En kötü kota",
@@ -13923,7 +14500,11 @@
       "ok": "Genel olarak izin verici"
     },
     "allProviders": "Tüm sağlayıcılar",
-    "noApiKeyRequired": "API anahtarı gerekmez"
+    "noApiKeyRequired": "API anahtarı gerekmez",
+    "searchPlaceholder": "Model, sağlayıcı ara…",
+    "searchAria": "Ücretsiz modelleri ara",
+    "filterProviderAria": "Sağlayıcıya göre filtrele",
+    "keylessOnly": "Yalnızca anahtarsız"
   },
   "providerHealthAutopilot": {
     "title": "Sağlayıcı Sağlığı Otopilotu",
@@ -13994,7 +14575,11 @@
     "learnMore": "Daha fazla bilgi edinin",
     "changelogLoadFailed": "Değişiklik günlüğü yüklenemedi. Lütfen daha sonra tekrar deneyin.",
     "retry": "Yeniden Dene",
-    "viewFullHistory": "Tüm geçmişi GitHub'da görüntüleyin"
+    "viewFullHistory": "Tüm geçmişi GitHub'da görüntüleyin",
+    "title": "Haberler ve değişiklik günlüğü",
+    "description": "OmniRoute ekibinden duyurular ve en son sürüm notları",
+    "viewLabel": "Görüntüle",
+    "loadingNews": "Duyurular yükleniyor..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Sağlayıcı Devre Kesici Durumu",
       "lastUpdate": "Son güncelleme: {timestamp}",
       "uptimeMinutes": "{minutes}d",
-      "uptimeHoursMinutes": "{hours}s {minutes}d"
+      "uptimeHoursMinutes": "{hours}s {minutes}d",
+      "breakerClosed": "Kapalı",
+      "breakerNotClosed": "Açık veya yarı açık"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Bakım Detayları",
         "secondaryAction": "Sistem Durumu"
       }
+    },
+    "miniapp": {
+      "askAnything": "İstediğiniz her şeyi sorun…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP aracı",
     "scope": "Kapsam",
-    "apiKey": "API anahtarı"
+    "apiKey": "API anahtarı",
+    "visibleCount": "{visible} görünür / toplam {total}",
+    "modeLabel": "Görünüm modu",
+    "jumpToNow": "Geçerli zamana git; ŞİMDİ çizgisi %{position} konumuna sıfırlanır",
+    "laneReuse": "Satır yeniden kullanımı",
+    "laneReuseLabel": "Satır yeniden kullanım aralığı (dakika)",
+    "laneReuseHint": "Aynı konuşma kimliğini paylaşan istekler, aralarındaki süre bu dakika değerinin altında olduğu sürece aynı zaman çizelgesi satırında kalır.",
+    "laneReuseUnit": "dk.",
+    "autoRefresh": "Otomatik yenileme",
+    "autoRefreshLabel": "Otomatik yenileme aralığı (saniye)",
+    "autoRefreshHint": "Zaman çizelgesinin istek listesini sunucudan ne sıklıkta yeniden aldığını belirler.",
+    "autoRefreshUnit": "sn.",
+    "zoomOut": "Uzaklaştır",
+    "zoomIn": "Yakınlaştır"
   },
   "metadata": {
     "compressionTitle": "Sıkıştırma",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Kapat"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models kataloğunda düşünme düzeyi varyantlarının (ör. -low, -medium, -high) oluşturulmasını devre dışı bırakın.",
+  "teamCosts": {
+    "title": "Ekip maliyetleri",
+    "subtitle": "Paylaşılan esnek bütçeleri ve katalog maliyet tahminlerini yönetin.",
+    "refresh": "Yenile",
+    "create": "Ekip oluştur",
+    "edit": "Ekibi düzenle",
+    "archive": "Arşivle",
+    "selectTeam": "Ekipler",
+    "searchTeams": "Ekip ara",
+    "statusFilter": "Ekip durumu",
+    "active": "Etkin",
+    "archived": "Arşivlendi · salt okunur",
+    "allTeams": "Tüm ekipler",
+    "noTeams": "Eşleşen ekip yok.",
+    "selectHint": "Maliyetleri görmek için bir ekip oluşturun veya seçin.",
+    "loading": "Ekip maliyetleri yükleniyor…",
+    "budgetTitle": "Geçerli esnek bütçe",
+    "budgetSubtitle": "Başarılı işlenmiş kullanım · kayan pencere · rapor tarihlerinden bağımsız",
+    "archivedBudget": "Arşivlendi: bütçe uygulaması devre dışı. Geçmiş raporlar erişilebilir kalır.",
+    "unlimited": "Sınırsız — paylaşılan esnek bütçe yapılandırılmamış.",
+    "budgetUnavailable": "Bütçe durumu kullanılamıyor. Yeniden denemek için yenileyin.",
+    "used": "Başarılı kullanım",
+    "maximum": "Bütçe üst sınırı",
+    "remaining": "Bilinen kalan",
+    "resets": "Sıfırlanır",
+    "unpricedBudget": "Başarılı kullanımın bir kısmının fiyatı bilinmiyor. Bilinen toplam eksik; bütçe uygulaması bu pencereyi aşılmış sayar.",
+    "overBudget": "Bütçeye ulaşıldı veya aşıldı · {amount} fazla",
+    "reportTitle": "Kullanım raporu",
+    "reportSubtitle": "Tüm denemeler · USD cinsinden katalog tahmini, fatura değildir · tam UTC tarihleri",
+    "reportPeriod": "Rapor dönemi",
+    "day1": "1 gün",
+    "day7": "7 gün",
+    "day30": "30 gün",
+    "allTime": "Tüm zamanlar",
+    "reportSpend": "Tahmini rapor harcaması",
+    "requests": "İstekler",
+    "assignedKeys": "Atanan anahtarlar",
+    "unpricedReport": "Bu rapor bilinmeyen fiyatlar içeriyor. Tahmini harcama eksik.",
+    "breakdown": "API anahtarına göre maliyet",
+    "noUsage": "Bu rapor döneminde kullanım yok.",
+    "keyName": "API anahtarı adı",
+    "tokens": "Girdi + çıktı token'ları",
+    "unnamedKey": "Adsız veya silinmiş anahtar",
+    "unpriced": "Bilinmeyen fiyat",
+    "members": "Üyelik",
+    "memberSubtitle": "Üyeliği değiştirmek geçmiş harcamayı özgün ekipte tutar.",
+    "searchKeys": "Anahtar veya mevcut sahip ara",
+    "chooseKey": "Bir API anahtarı seçin",
+    "unassigned": "Atanmamış",
+    "ownership": "Mevcut faturalama ekibi: {team}",
+    "assign": "Ata",
+    "remove": "Kaldır",
+    "noMembers": "Mevcut üye yok. Geçmiş kullanım yine de bütçeye sayılabilir.",
+    "assignedAt": "{date} tarihinde atandı (UTC)",
+    "name": "Ekip adı",
+    "description": "Açıklama",
+    "enableBudget": "Paylaşılan esnek bütçeyi etkinleştir",
+    "amount": "Bütçe tutarı (USD)",
+    "duration": "Kayan bütçe penceresi",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "confirm": "Onayla",
+    "transferTitle": "Anahtar aktarımını onaylayın",
+    "transferMessage": "Bu anahtar “{source}” ekibinden “{destination}” ekibine taşınsın mı? Geçmiş harcama özgün ekipte kalır.",
+    "removeTitle": "Anahtar atamasını kaldır",
+    "removeMessage": "Bu anahtar “{team}” ekibinden kaldırılsın mı? Geçmiş harcama bu ekipte kalır.",
+    "archiveTitle": "Ekibi arşivle",
+    "archiveMessage": "“{team}” arşivlensin mi? Tüm mevcut bağlantılar kapanır ve bütçe uygulaması durur. Geçmiş raporlar erişilebilir kalır.",
+    "invalidName": "Bir ad (1–200 karakter) ve en fazla 2.000 karakterlik bir açıklama girin.",
+    "invalidAmount": "Sıfırdan büyük, sonlu bir bütçe tutarı girin.",
+    "unauthorized": "Devam etmek için yönetim panosunda oturum açın.",
+    "forbidden": "Ekipleri yönetme izniniz yok. Girdiğiniz bilgiler korundu.",
+    "notFound": "Bu ekip veya atama artık yok.",
+    "conflict": "Atama veya ekip değişti. Yeniden denemeden önce yenileyin ve mevcut sahipliği onaylayın.",
+    "failed": "İstek başarısız oldu. Girdiğiniz bilgiler korundu; lütfen tekrar deneyin.",
+    "partialBudget": "Bazı saklanan günlük kovalar pencere sınırıyla çakışıyor ve tam olarak paylaştırılamıyor. Gösterilen harcama eksik; kalan pay kullanılamıyor. Mevcut esnek bütçe politikası değişmedi."
+  },
   "connectionTest": {
     "title": "Test mesajı",
     "description": "Bu hesap üzerinden gerçek bir istek gönderin. Bu işlem az miktarda kota kullanır ve sağlayıcıya bağlı olarak bir kullanım dönemi başlatabilir.",
@@ -15073,5 +15753,118 @@
     "importButton": "İçe aktar",
     "importFailed": "İçe aktarma başarısız oldu.",
     "importSuccess": "{connections} hesap ve {nodes} sağlayıcı düğümü içe aktarıldı; {skipped} atlandı."
+  },
+  "conversations": {
+    "title": "Sohbetler",
+    "countSummary": "2+ turlu {total, plural, one {# sohbet} other {# sohbet}}",
+    "autoRefreshTitle": "Bu listenin sunucudan ne sıklıkla yeniden alındığı.",
+    "autoRefresh": "Otomatik yenileme",
+    "loading": "Sohbetler yükleniyor...",
+    "colConversation": "Sohbet",
+    "colTurns": "Turlar",
+    "colContinuation": "Devam",
+    "colLastModel": "Son Model",
+    "colProvider": "Sağlayıcı",
+    "colStatus": "Durum",
+    "colLastSeen": "Son Görülme",
+    "drawerTitle": "Sohbet",
+    "prevConversation": "Önceki sohbet",
+    "nextConversation": "Sonraki sohbet",
+    "gotoLatestRequest": "En son isteğe git",
+    "goToBottom": "Alta git",
+    "statusInProgress": "Devam ediyor",
+    "continuationGenuineTitle": "En son tur previous_response_id'yi kullandı ve sunucu tarafında çözüldü",
+    "continuationBadge": "devam",
+    "stalledTitle": "En son tur stop'ta bitmedi ve 5 dakikadan fazla hiçbir şey devam etmedi",
+    "stalledBadge": "durmuş",
+    "noTurns": "Bu sohbet için kaydedilmiş tur yok."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Geçerli konumdan başla (mevcut günlükleri atla)",
+    "pageTitle": "Günlük dışa aktarımı",
+    "pageSubtitle": "Günlükler sekmesindeki çağrı kayıtlarını sürekli olarak harici bir analiz deposuna gönderin.",
+    "addDestination": "Hedef ekleyin",
+    "scheduleTitle": "Zaman Çizelgesi",
+    "cronLabel": "Cron",
+    "notScheduled": "zaman çizelgesi ayarlanmadı",
+    "lastScheduledRun": "Son zaman çizelgesi çalıştırması",
+    "lastRunSummary": "{startedAt} — {status}, {rows} satır",
+    "never": "asla",
+    "highWaterMark": "Çağrı kayıtları yüksek su işareti",
+    "rowPrefix": "satır {id}",
+    "noDestinations": "Dışa aktarma hedefi yok",
+    "noDestinationsHint": "Saatlik takvimde arama günlüklerini göndermeye başlamak için bir hedef ekleyin.",
+    "errLoadStatus": "Dışa aktarma durumu yüklenemedi",
+    "errSaveDestination": "Hedef kaydedilemedi",
+    "msgDestinationSaved": "Hedef kaydedildi.",
+    "errConnectionTest": "Bağlantı testi başarısız oldu",
+    "msgRunInFlight": "Bu hedef için bir çalıştırma zaten devam ediyor; hiçbir şey iki kez gönderilmedi.",
+    "errExportRun": "Dışa aktarma çalıştırması başarısız oldu",
+    "errUpdateDestination": "Hedef güncellenemedi",
+    "errDeleteDestination": "Hedef silinemedi",
+    "deleteTitle": "Varış noktasını sil",
+    "deleteConfirm": "\"{name}\" silinsin mi? Dışa aktarma imleci de kaldırıldığından, yeniden eklenmesi en eski korunan çağrı kaydıyla başlar.",
+    "statusDisabled": "Devre dışı",
+    "statusFailing": "Başarısız",
+    "statusHealthy": "Sağlıklı",
+    "statusNotRunYet": "Henüz çalıştırılmadı",
+    "typeNotInstalled": "Tip yüklü değil",
+    "metaLine": "Son çalışma {lastRun} · {exported} satır dışa aktarıldı · {pending} bekleyen · imleç {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Şimdi çalıştır",
+    "btnDisable": "Devre dışı bırak",
+    "btnEnable": "Etkinleştir",
+    "btnEdit": "Düzenle",
+    "btnDelete": "Sil"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI hesapları",
+    "cardSubtitle": "Kimlik doğrulaması yapılmış yönetim API'sinden salt okunur durum",
+    "btnRefresh": "Yenile",
+    "listAria": "CLIProxyAPI hesap sağlığı",
+    "noAccounts": "CLIProxyAPI hesabı bulunamadı.",
+    "loading": "Hesap sağlığı yükleniyor…",
+    "stateReady": "Hesap sağlığı",
+    "stateDisabled": "CLIProxyAPI yüklü değil",
+    "stateMissingKey": "Yönetim anahtarı yapılandırılmamış",
+    "stateUnreachable": "Yönetim API'sine ulaşılamıyor",
+    "stateUnauthorized": "Yönetim anahtarı reddedildi",
+    "stateUnsupported": "Bu CLIProxyAPI sürümü hesap sağlığını açıklamıyor",
+    "stateInvalidResponse": "Yönetim API'si desteklenmeyen bir yanıt döndürdü"
+  },
+  "darioPanel": {
+    "title": "Claude hesapları",
+    "description": "Dario'yu Claude Pro/Max aboneliğiniz ile kimlik doğrulaması yapın. Trafik aboneliğinizin havuzuna faturalandırılır. Dario istekleri yönlendirebilen en az bir hesabın yapılandırılması gerekir (o zamana kadar /health bozulmuş raporlar).",
+    "noAccounts": "Henüz yapılandırılmış hesap yok.",
+    "importTitle": "OmniRoute'tan içe aktar",
+    "importDescription": "Yeniden giriş yapmak yerine mevcut bir OmniRoute Claude bağlantısının OAuth jetonlarını yeniden kullanın — tarayıcı onay adımını tamamen atlar.",
+    "importPendingTooltip": "OmniRoute'ta bir Claude bağlantısı olduğunda etkin olacaktır.",
+    "btnImport": "İçe Aktar",
+    "btnImporting": "İçe aktarılıyor…",
+    "aliasPlaceholder": "takma ad (isteğe bağlı)",
+    "btnStartLogin": "Girişi Başlat",
+    "btnStarting": "Başlatılıyor…",
+    "btnCompleteLogin": "Girişi Tamamla",
+    "btnCompleting": "Tamamlanıyor…",
+    "codePlaceholder": "code#state veya yalnızca code",
+    "noticeImported": "\"{alias}\" hesabı olarak içe aktarıldı — Dario tarafından algılanması için yeniden başlatıldı.",
+    "noticeAdded": "\"{alias}\" hesabı eklendi.",
+    "expiresInHours": "~{hours} saat içinde sona eriyor",
+    "expiresInMinutes": "~{minutes} dakika içinde sona eriyor",
+    "expiresAt": "{date} tarihinde sona eriyor",
+    "scopes": "{count, plural, one {# kapsam} other {# kapsam}}",
+    "btnRemove": "Kaldır",
+    "btnRefresh": "Yenile",
+    "loginStep1": "1. Bu URL'yi tarayıcınızda açıp <mono>{alias}</mono> hesabı için erişimi onaylayın:",
+    "pendingExpires": "Bekleyen oturum {time} içinde dolacak",
+    "loginStep2": "2. Anthropic'in gösterdiği kodu yapıştırın:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini Uygulaması",
+    "errTelegramOnly": "Bu sayfa yalnızca Telegram Mini Uygulaması içinde açılmalıdır.",
+    "greeting": "👋 Merhaba {name}! OmniRoute geçiş noktanız üzerinden sohbet etmek için bir mesaj gönderin.",
+    "greetingFallbackName": "orada",
+    "errNoReply": "⚠️ Geçiş noktasından yanıt gelmedi.",
+    "btnSend": "Gönder"
   }
 }

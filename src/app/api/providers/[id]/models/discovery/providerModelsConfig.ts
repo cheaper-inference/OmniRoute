@@ -5,6 +5,7 @@ import {
   GROK_BUILD_SUPPORTED_REASONING_EFFORTS,
 } from "@omniroute/open-sse/config/grokBuild.ts";
 import { grok_cliProvider } from "@omniroute/open-sse/config/providers/registry/grok-cli/index.ts";
+import { getWorkbuddyClientHeaders } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { getAntigravityContentHeaders } from "@omniroute/open-sse/services/antigravityHeaders.ts";
 import { parseGeminiModelsList } from "@/lib/providerModels/geminiModelsParser";
 import { buildClaudeModelsHeaders } from "@/lib/providerModels/claudeModelsHeaders";
@@ -27,10 +28,27 @@ import { shouldUseLiveAlibabaFreeModelDiscovery } from "@omniroute/open-sse/serv
 import { isDashscopeTextModelId } from "@omniroute/open-sse/services/dashscopeTextModels.ts";
 import { extractZaiToken } from "@omniroute/open-sse/services/zaiWebCredentials.ts";
 import { buildOpencodeBackgroundHeaders } from "@omniroute/open-sse/utils/opencodeHeaders.ts";
+import { CODEBUDDY_CN_USER_AGENT } from "@omniroute/open-sse/config/providerHeaderProfiles.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import { applyConnectionCustomHeaders } from "./connectionCustomHeaders";
 import { buildChatPlaygroundModelsDiscoveryEntry } from "@omniroute/open-sse/services/chatplaygroundModels.ts";
-import { normalizeOpenAiLikeModelsResponse, normalizeWorkbuddyModelsResponse } from "./normalizers";
+import {
+  normalizeCodeBuddyCnModelsResponse,
+  normalizeOpenAiLikeModelsResponse,
+  normalizeWorkbuddyModelsResponse,
+} from "./normalizers";
+
+/**
+ * `type` values AI/ML API uses for models routable through /v1/chat/completions.
+ *
+ * `openai/chat-completions` is the current vocabulary (353 of 936 catalog rows on
+ * 2026-09-03); `chat-completion` is the pre-rename spelling, kept so a future
+ * rename in either direction cannot silently empty the provider's model list
+ * again. Everything else the catalog publishes — video, image, TTS, STT,
+ * `openai/responses/submit`, `anthropic/messages`, batches — is a different
+ * upstream surface and must not reach a chat model picker.
+ */
+export const AIMLAPI_CHAT_MODEL_TYPES = new Set(["openai/chat-completions", "chat-completion"]);
 
 const QWEN_CLOUD_TEXT_MODEL_IDS = new Set(QWEN_CLOUD_TEXT_MODELS.map((model) => model.id));
 const ALIBABA_MODEL_STUDIO_MODEL_IDS = new Set(
@@ -251,6 +269,32 @@ function grokBuildPositiveNumber(...values: unknown[]): number | undefined {
   );
 }
 
+/**
+ * Ceiling the Grok Build backend actually serves. Requests above it are rejected
+ * upstream, so the discovery layer never advertises more than this.
+ */
+const GROK_BUILD_MAX_CONTEXT_WINDOW = 500000;
+
+/**
+ * Largest tier in an advertised `context_windows` list.
+ *
+ * Grok Build reports every model with `context_window: 256000` plus a tier list
+ * such as `[256000, 500000]`; the top tier is the window the backend actually
+ * serves. Reading only the scalar pinned every model the registry does not know
+ * (grok-4.7-build-fast) to half its capacity.
+ */
+function grokBuildLargestContextWindow(...values: unknown[]): number | undefined {
+  let largest: number | undefined;
+  for (const value of values) {
+    if (!Array.isArray(value)) continue;
+    for (const entry of value) {
+      if (typeof entry !== "number" || !Number.isFinite(entry) || entry <= 0) continue;
+      largest = largest === undefined ? entry : Math.max(largest, entry);
+    }
+  }
+  return largest;
+}
+
 const GROK_CLI_REGISTRY_CONTEXT_BY_ID = new Map<string, number>(
   grok_cliProvider.models.flatMap((model) => {
     const window = model.contextLength;
@@ -269,16 +313,25 @@ function resolveGrokBuildInputTokenLimit(
   // model, yet the backend serves grok-4.6 up to 500k (prod: 88 successful requests
   // with 256k-485k input; upstream rejects at "> 500000 tokens"). Trusting the
   // advertised number pinned 256k auto:discovery overrides over the verified window.
-  // Models the registry does not know keep the upstream number — under-advertising
-  // only makes clients compact early — and never get an invented default.
+  // Models the registry does not know take the larger of the advertised scalar and
+  // the advertised tier list: upstream reports `context_window: 256000` next to
+  // `context_windows: [256000, 500000]` for all four models (live 2026-10-23), so
+  // reading only one of the two halves their capacity. The ceiling is the measured
+  // upstream limit — requests above it are rejected — so a bogus tier list cannot
+  // promise a window the backend will not serve.
+  const advertisedScalar = grokBuildPositiveNumber(
+    model.contextWindow,
+    model.context_window,
+    metadata.contextWindow,
+    metadata.totalContextTokens
+  );
+  const advertisedBest = Math.max(
+    advertisedScalar ?? 0,
+    grokBuildLargestContextWindow(model.context_windows, metadata.context_windows) ?? 0
+  );
   return (
     GROK_CLI_REGISTRY_CONTEXT_BY_ID.get(id) ??
-    grokBuildPositiveNumber(
-      model.contextWindow,
-      model.context_window,
-      metadata.contextWindow,
-      metadata.totalContextTokens
-    )
+    (advertisedBest > 0 ? Math.min(advertisedBest, GROK_BUILD_MAX_CONTEXT_WINDOW) : undefined)
   );
 }
 
@@ -466,6 +519,16 @@ function readOpencodeBackgroundSeed(connection?: ProviderModelsHeaderContext): s
  * header is announced from 2026-09-06. The session id is a stable
  * per-workspace/connection fingerprint so background discovery groups under
  * one identity upstream instead of a fresh anonymous client per call.
+ *
+ * The catalog endpoint authenticates with `x-api-key`. Live probes on
+ * 2026-10-23 (three accounts, zen and go) answered a bearer with
+ * 401 {"code":"api_key_expired"} while the same key returned the full catalog
+ * under `x-api-key` (85 zen models, 36 go models). Sending both headers still
+ * 401s — the bearer branch wins — so the bearer must not be present here.
+ * Inference keeps its own headers in `open-sse/executors/opencode.ts`, which
+ * authenticates the Zen responses endpoint with `x-api-key` and the chat and
+ * opencode-go responses endpoints with a bearer; that split is the executor's
+ * concern and is left untouched here.
  */
 function buildOpencodeModelsDiscoveryEntry(url: string): ProviderModelsConfigEntry {
   return {
@@ -474,7 +537,7 @@ function buildOpencodeModelsDiscoveryEntry(url: string): ProviderModelsConfigEnt
     headers: { Accept: "application/json" },
     buildHeaders: (token, connection) => ({
       Accept: "application/json",
-      Authorization: `Bearer ${token}`,
+      "x-api-key": token,
       ...buildOpencodeBackgroundHeaders({ seed: readOpencodeBackgroundSeed(connection) }),
     }),
     parseResponse: OPENCODE_DISCOVERY_PARSE,
@@ -621,17 +684,32 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
     parseResponse: (data) => data.data || [],
   },
   aimlapi: {
-    // #5570: AI/ML API's live catalog (400+ models) lives at the public,
-    // auth-free /models database endpoint (NOT /v1/models). The registry has no
-    // modelsUrl, so without this entry the route fell back to a stale 6-model
-    // seed. Response is a bare array of { id, type, info: { name } }.
+    // #5570: AI/ML API's live catalog lives at the public, auth-free /models
+    // database endpoint (NOT /v1/models). The registry has no modelsUrl, so
+    // without this entry the route falls back to the static seed.
+    //
+    // The two premises in the original #5570 comment went stale and silently
+    // zeroed this provider out (936 catalog rows -> 0 discovered models -> the
+    // 6-entry static seed):
+    //   1. the response is NOT a bare array — it is the OpenAI-style envelope
+    //      `{ "object": "list", "data": [...] }`, so `Array.isArray(data)` was
+    //      false and every row was discarded before the filter even ran;
+    //   2. the chat `type` vocabulary is now `openai/chat-completions`; the old
+    //      `chat-completion` spelling matches 0 of 936 rows (verified against the
+    //      live catalog 2026-09-03).
+    // Both spellings are accepted below so a future vocabulary change degrades to
+    // "older models missing" rather than "provider has no models", and the bare
+    // array is still unwrapped for the same reason. Non-chat rows (video, image,
+    // TTS, batches) are dropped outright — the previous `chat.length ? chat : all`
+    // fallback would have surfaced 583 non-chat ids in a chat model picker, which
+    // is what hid defect 2 from the tests.
     url: "https://api.aimlapi.com/models",
     method: "GET",
     headers: { "Content-Type": "application/json" },
     parseResponse: (data) => {
-      const all = Array.isArray(data) ? data : [];
-      const chat = all.filter((m) => m?.type === "chat-completion");
-      return (chat.length > 0 ? chat : all)
+      const rows = Array.isArray(data) ? data : Array.isArray(data?.data) ? data.data : [];
+      return rows
+        .filter((m) => AIMLAPI_CHAT_MODEL_TYPES.has(m?.type))
         .map((m) => ({ id: m?.id, name: m?.info?.name || m?.id }))
         .filter((m) => typeof m.id === "string" && m.id);
     },
@@ -952,6 +1030,25 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   },
   chatplayground: buildChatPlaygroundModelsDiscoveryEntry(),
   cpl: buildChatPlaygroundModelsDiscoveryEntry(),
+  // CodeBuddy CN's official CLI reads this authenticated product catalog. Keep
+  // the registry snapshot as offline fallback and replace it with the account's
+  // live chat roster after a successful discovery sync.
+  "codebuddy-cn": {
+    url: "https://copilot.tencent.com/v3/config",
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "User-Agent": CODEBUDDY_CN_USER_AGENT,
+      "X-Product": "SaaS",
+      "X-IDE-Type": "CLI",
+      "X-IDE-Name": "CLI",
+      "x-requested-with": "XMLHttpRequest",
+      "x-codebuddy-request": "1",
+    },
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+    parseResponse: (data) => normalizeCodeBuddyCnModelsResponse(data),
+  },
   // WorkBuddy serves no OpenAI-shaped /models endpoint (/v1/models and
   // /v2/models both 404) and its bundled catalog is known to be stale, so the
   // roster is read from the authenticated config the official CLI itself uses.
@@ -961,7 +1058,7 @@ export const PROVIDER_MODELS_CONFIG: Record<string, ProviderModelsConfigEntry> =
   workbuddy: {
     url: "https://www.workbuddy.ai/v3/config",
     method: "GET",
-    headers: { "Content-Type": "application/json", "X-Product": "SaaS" },
+    headers: { "Content-Type": "application/json", ...getWorkbuddyClientHeaders() },
     authHeader: "Authorization",
     authPrefix: "Bearer ",
     parseResponse: (data) => normalizeWorkbuddyModelsResponse(data),

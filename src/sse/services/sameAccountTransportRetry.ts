@@ -34,6 +34,9 @@ const RETRYABLE_TRANSPORT_TEXT = [
   /und_err_socket/i,
 ];
 
+// 499 = client closed request; 4xx auth/quota/validation errors never succeed on a replay.
+const NON_RETRYABLE_TRANSPORT_STATUSES = new Set([499, 429, 401, 400]);
+
 const NON_RETRYABLE_ERROR_TYPES = new Set([
   "lease_error",
   "account_semaphore_capacity",
@@ -56,7 +59,7 @@ export function isRetryablePreOutputTransportError(
 
   const text = String(errorText || "");
   const numericStatus = Number(status);
-  if (numericStatus === 429 || numericStatus === 401 || numericStatus === 400) return false;
+  if (NON_RETRYABLE_TRANSPORT_STATUSES.has(numericStatus)) return false;
   if (/quota (threshold|exhausted)|credits exhausted/i.test(text)) return false;
   if (/invalid_request|prompt is too long|context.?length|unsupported model/i.test(text)) {
     return false;
@@ -81,6 +84,7 @@ export function sameAccountTransportRetryDelayMs(random: () => number = Math.ran
 }
 
 export function shouldRetrySameAccountTransport(options: {
+  provider?: string;
   status: unknown;
   errorText?: string | null;
   errorCode?: string | null;
@@ -91,6 +95,16 @@ export function shouldRetrySameAccountTransport(options: {
 }): boolean {
   if (options.hasForcedConnection) return false;
   if (options.hasEmittedOutput) return false;
+  // Antigravity 504 commonly means the upstream produced NO response headers
+  // for the entire readiness budget. Retrying the same account doubles that
+  // wait; select a different eligible account instead. Keep Codex's #9708
+  // transient 504 retry behavior unchanged.
+  if (
+    options.errorCode === "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT" ||
+    ((options.provider === "antigravity" || options.provider === "agy") &&
+      (options.errorType === "upstream_timeout" || Number(options.status) === 504))
+  )
+    return false;
   if (options.attempt >= SAME_ACCOUNT_TRANSPORT_RETRY_MAX) return false;
   return isRetryablePreOutputTransportError(
     options.status,

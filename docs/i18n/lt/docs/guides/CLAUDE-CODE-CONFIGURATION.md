@@ -48,48 +48,55 @@ tiesiog veikia), patikrina serverio būklę ir paleidžia `claude`.
 
 ---
 
-## Aptikimo pseudonimai — pateikite ne Claude modelius `/model` parinkiklyje
+## Aptikimo slapyvardžiai — ne Claude modelių rodymas `/model` pasirinkiklyje
 
-Claude Code šliuzo modelių aptikimo funkcija pateikia tik tuos ID, kurie prasideda `claude`
-arba `anthropic`, todėl, kai `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, vietinis
-`/model` parinkiklis paprastai rodo **tik** OmniRoute Claude / Anthropic modelius —
-`kimi/kimi-k2.6` arba `glm/glm-5.2` niekada nepateikiami, nors į juos užklausos nukreipiamos tinkamai.
+Claude Code šliuzo modelių aptikimas išvardija tik ID, kurie prasideda `claude`
+arba `anthropic`, todėl su `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` įgimtasis
+`/model` pasirinkiklis paprastai rodo **tik** OmniRoute Claude/Anthropic modelius —
+`kimi/kimi-k2.6` ar `glm/glm-5.2` niekada nepasirodo, nors nukreipimas į juos veikia gerai.
 
-OmniRoute gali dubliuoti bet kurį įjungtą modelį (ir derinį), suteikdamas jam `claude/…` ID, kad jis
-praeitų šį filtrą ir būtų rodomas parinkiklyje:
+OmniRoute gali dubliuoti bet kurį įjungtą modelį (ir kombinaciją) su `claude/…` ID, kad jis
+praeitų šį filtrą ir atsirastų pasirinkiklyje:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<derinys "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kai Claude Code pasirenkate vieną iš jų, prieš nukreipdamas užklausą OmniRoute pašalina `claude/`
-apvalkalą ir atkuria tikrąjį ID — autentiškas `claude/<real-claude-model>` ID
-(tikrasis Claude OAuth teikėjas) visada paliekamas nepakeistas.
+Kai Claude Code pasirenkate vieną iš jų, OmniRoute prieš nukreipimą nuima `claude/` apvalkalą
+ir atkuria tikrąjį ID — tikras `claude/<real-claude-model>` ID
+(faktinis Claude OAuth teikėjas) visada paliekamas nepaliestas.
 
-**Pagal numatytuosius nustatymus ši funkcija išjungta** ir valdoma trijų lygių mechanizmu (pirmenybė
-teikiama konkrečiausiam nustatymui), todėl įprastas OmniRoute nedubliuoja savo katalogo klientams, kurie
-nenaudoja Claude Code:
+Pagal numatymą dubliuojami tik baziniai ID. Įjungus pasirenkamą
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` funkcijų vėliavėlę, samprotavimo intensyvumo variantai,
+kuriuos katalogas jau išvardija (pvz., `codex/gpt-6-sol-high`), dubliuojami kaip bet kuris
+kitas ID, todėl Claude Code gali pasirinkti aiškų intensyvumo lygį, o integruoti `auto/*` ID,
+kurių užklausos kelias negali materializuoti, nedubliuojami. Ar intensyvumo variantai
+apskritai išvardijami, vis dar lemia `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` —
+dubliavimas niekada neprideda varianto, kurio neturi bazinis katalogas.
 
-| Lygis      | Kur                                                                                                |
-| ---------- | -------------------------------------------------------------------------------------------------- |
-| Modelis    | Teikėjo išsamios informacijos puslapis → kiekvieno modelio „Expose in Claude Code“ jungiklis       |
-| Teikėjas   | Teikėjo išsamios informacijos puslapis → teikėjo lygio jungiklis (taikomas visiems jo modeliams)   |
-| Visuotinis | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (pagal numatytuosius nustatymus išjungta) |
+**Pagal numatymą tai išjungta** ir valdoma trijų lygių kontrole (svarbiausias labiausiai
+specifinis lygmuo), todėl paprastas OmniRoute niekada nedvigubina savo katalogo klientams,
+kurie nenaudoja Claude Code:
 
-Aplinkos kintamasis `EXPOSE_CC_DISCOVERY_ALIASES` priverstinai įjungia visuotinį lygį
-ir turi pirmenybę prieš valdymo skydelio nuostatą (Feature Flags ekrane rodoma
-pastaba „active via environment variable“, kai jis naudojamas). Teikėjų ir
-modelių jungikliai leidžia nustatymą patikslinti — pvz., išjungus visuotinį lygį ir įjungus Kimi teikėją,
-pateikiami tik Kimi modeliai.
+| Lygmuo   | Kur                                                                                |
+| -------- | ---------------------------------------------------------------------------------- |
+| Modelis  | Teikėjo detalių puslapis → kiekvieno modelio perjungiklis „Expose in Claude Code"  |
+| Teikėjas | Teikėjo detalių puslapis → teikėjo lygmens perjungiklis (apima visus jo modelius)  |
+| Globalus | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (pagal numatymą išjungta) |
 
-> ⚠️ **Ne Claude modelių lango neatitikimas.** Claude Code daro prielaidą, kad bet kurio
-> neatpažįstamo ID konteksto langas yra 200K (tikrojo lango dydžio jis negali nuskaityti iš
-> `/v1/models`). Jei modelio langas didesnis (pvz., Kimi K2 yra 256K), nustatykite
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` reikšmę, mažesnę už tikrąjį modelio langą, kad
-> automatinis sutankinimas nebūtų atliekamas per anksti. Anksčiau minėti sugeneruoti profiliai tai jau
-> nustato kiekvienam modeliui.
+Aplinkos kintamasis `EXPOSE_CC_DISCOVERY_ALIASES` priverčia įjungti globalų lygmenį
+ir turi pirmenybę prieš valdymo skydo pakeitimą (tokiu atveju Feature Flags ekrane rodoma
+pastaba „active via environment variable"). Teikėjo ir modelio lygmens perjungikliai toliau
+tikslina nustatymus — pvz., globaliai išjungus + Kimi teikėjui įjungus atidengiami tik Kimi modeliai.
+
+> ⚠️ **Lango neatitikimas ne Claude modeliuose.** Claude Code bet kuriam neatpažįstamam ID
+> daro prielaidą, kad konteksto langas yra 200K (jis negali nuskaityti tikro lango iš
+> `/v1/models`). Modeliui su didesniu langu (pvz., Kimi K2 su 256K) nustatykite
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` į reikšmę, mažesnę už tikrą modelio langą, kad
+> automatinis sutankinimas neįsijungtų per anksti. Aukščiau sugeneruoti profiliai tai jau
+> atlieka kiekvienam modeliui.
 
 ---
 

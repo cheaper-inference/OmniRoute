@@ -14,36 +14,36 @@ AgentBridge je MITM (Man-in-the-Middle) proxy server OmniRoute, ktorý zachytáv
 
 ## §1 Prehľad
 
-### Čo je AgentBridge?
+### čo je AgentBridge?
 
-Keď agent IDE (napr. GitHub Copilot, Cursor, Claude Code) uskutoční volanie API, pripojí sa priamo k nadradenému poskytovateľovi AI (OpenAI, Anthropic atď.). AgentBridge toto pripojenie transparentne zachytí na úrovni TLS — bez potreby akejkoľvek zmeny konfigurácie agenta — a prepíše požiadavku prostredníctvom OmniRoute.
+Keď agent IDE (napr. GitHub Copilot, Cursor, Claude Code) uskutoční volanie API, pripojí sa priamo k poskytovateľovi AI upstream (OpenAI, Anthropic atď.). AgentBridge zachytí toto spojenie transparentne na úrovni TLS – bez toho, aby vyžadoval akúkoľvek zmenu konfigurácie agenta – a prepíše požiadavku cez OmniRoute.
 
 To znamená, že môžete:
 
-- **Presmerovať ľubovoľného agenta k ľubovoľnému poskytovateľovi**: Komunikuje Copilot s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo ktoréhokoľvek z 374 poskytovateľov OmniRoute.
-- **Použiť mapovania modelov**: `gemini-3-flash` → `claude-sonnet-4.7` transparentne na úrovni obslužnej rutiny.
-- **Sledovať všetku komunikáciu agentov**: každá zachytená požiadavka sa zverejní v nástroji [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Využiť odolnosť OmniRoute**: kombinované smerovanie, ističe, záložné mechanizmy a sledovanie nákladov fungujú aj pre komunikáciu agentov IDE.
+- **Presmerujte akéhokoľvek agenta k akémukoľvek poskytovateľovi** : Copilot hovorí s OpenAI? Presmerujte ho na Anthropic Claude, Gemini alebo ktoréhokoľvek z 377 poskytovateľov OmniRoute.
+- **Použiť modelové mapovania** : `gemini-3-flash` → `claude-sonnet-4.7` transparentne na úrovni obsluhy.
+- **Sledujte všetku návštevnosť agentov** : každá zachytená žiadosť je zverejnená [dopravnému inšpektorovi](./TRAFFIC_INSPECTOR.md).
+- **Použiť odolnosť OmniRoute** : kombinované smerovanie, ističe, núdzové riešenia a sledovanie nákladov fungujú aj pre prevádzku agentov IDE.
 
-### Postavenie na trhu
+### Umiestňovanie vs. trh
 
-| Funkcia                                    | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------------------ | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                                |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                             |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                                 |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                               |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                                 |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                             |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                                |    —    |    —     |        ✓        |             ✓             |
-| Open Code                                  |    —    |    —     |        ✓        |             ✓             |
-| Trae                                       |    —    |    —     |        —        |        🔍 Skúma sa        |
-| Používateľské rozhranie ovládacieho panela |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector                          |    ✗    |    ✗     |        ✓        |             ✓             |
-| Smerovanie OmniRoute                       |    ✗    |    ✗     |        ✗        |             ✓             |
-| Používateľské rozhranie mapovania modelov  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Zoznam výnimiek                            |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certifikát nadradenej CA                   |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcia              | 9 smerovač | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| -------------------- | :--------: | :------: | :-------------: | :-----------------------: |
+| Antigravity          |     ✓      |    ✓     |        —        |             ✓             |
+| GitHub Copilot       |     ✓      |    ✓     |        —        |             ✓             |
+| Kiro (AWS)           |     ✓      |    ✓     |        —        |             ✓             |
+| OpenAI Codex         |     —      |    ✓     |        —        |             ✓             |
+| Cursor IDE           |     ✓      |    ✓     |        —        |             ✓             |
+| Zed Industries       |     —      |    ✓     |        —        |             ✓             |
+| Claude kód           |     —      |    —     |        ✓        |             ✓             |
+| Otvorte kód          |     —      |    —     |        ✓        |             ✓             |
+| Trae                 |     —      |    —     |        —        |      🔍 Vyšetrovanie      |
+| Prístrojová doska UI |     ✓      |    ✗     |        ✗        |             ✓             |
+| Dopravný inšpektor   |     ✗      |    ✗     |        ✓        |             ✓             |
+| smerovanie OmniRoute |     ✗      |    ✗     |        ✗        |             ✓             |
+| Mapovanie modelu UI  |     ✗      |    ✗     |        ✗        |             ✓             |
+| Zoznam obchvatov     |     ✗      |    ✗     |        ✓        |             ✓             |
+| Upstream CA cert     |     ✗      |    ✗     |        ✓        |             ✓             |
 
 ---
 

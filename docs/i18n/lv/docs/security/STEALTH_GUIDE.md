@@ -16,60 +16,60 @@ Maskēšanās funkcijas pastāv, lai OmniRoute varētu darboties kā saderības 
 
 ---
 
-## TLS pirkstu nospiedumu veidošanas slānis
+## TLS digitālnospiedumu slānis
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Pastāvīgas `wreq-js` sesijas tiek izveidotas atlikti katram konta tvērumam un atrisinātajam starpniekserverim. Procesa mēroga `TlsClient` pūlā ir ne vairāk kā 128 sesijas, kas augšupējiem pakalpojumiem aiz Cloudflare imitē **Chrome 124 operētājsistēmā macOS**. `TlsClient.fetch()` pārtrauc darbību, ja vietējā izpildvide nav pieejama; izsaucējs var nepārprotami atlasīt atkāpšanās variantu ārpus šī ietinēja.
+Pastāvīgas `wreq-js` sesijas tiek izveidotas atlikti katram konta tvērumam un atrisinātajam starpniekserverim. Procesa mēroga `TlsClient` pūlā ir ne vairāk kā 128 sesijas, kas augšupējiem pakalpojumiem aiz Cloudflare atdarina **Chrome 124 operētājsistēmā macOS**. `TlsClient.fetch()` droši pārtrauc darbību, ja vietējā izpildlaika vide nav pieejama; izsaucējs var tieši izvēlēties atkāpšanās risinājumu ārpus šī ietinēja.
 
 - Sesijas profils: `browser: "chrome_124", os: "macos"`
-- Starpniekservera noteikšana (prioritārā secībā): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (arī ar mazajiem burtiem)
-- Noildze: `TLS_CLIENT_TIMEOUT_MS` (manto no `FETCH_TIMEOUT_MS`, noklusējums — 600000)
+- Starpniekservera atrisināšana (prioritātes secībā): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (arī ar mazajiem burtiem)
+- Taimauts: `TLS_CLIENT_TIMEOUT_MS` (manto no `FETCH_TIMEOUT_MS`, noklusējums 600000)
 - `wreq-js` Response ir saderīga ar fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Pirmā baita uzraugs (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  tiek izpildīts, tiklīdz saņemtas augšupējā pakalpojuma galvenes, tādēļ `TLS_CLIENT_TIMEOUT_MS` vien nevar ierobežot
-  pamattekstu, kas nekad neatgriež pirmo baitu. `guardTlsFirstByte()` sacenšas ar pamatteksta pirmo `read()`
-  par izpildi `TLS_FIRST_BYTE_WATCHDOG_MS` laikā (noklusējums `10000`, `0` to atspējo); darbspējīgs pamatteksts
-  netiek ietekmēts, savukārt iestrēdzis pamatteksts atceļ wreq lasītāju un ļauj `proxyFetch` esošajai
-  TLS atkāpšanās loģikai pāriet uz tiešo/starpniekservera dispečeru (atkārtotai atskaņošanai nedrošs pieprasījums, piem.,
-  POST ar pamattekstu, joprojām izmet kļūdu, nevis tiek nemanāmi atkārtots).
+  tiek atrisināts, tiklīdz pienāk augšupējā pakalpojuma galvenes, tāpēc `TLS_CLIENT_TIMEOUT_MS` viens pats nevar ierobežot
+  ķermeni, kas nekad neatgriež pirmo baitu. `guardTlsFirstByte()` sacensina ķermeņa pirmo `read()`
+  ar `TLS_FIRST_BYTE_WATCHDOG_MS` (noklusējums `10000`, `0` to atspējo); vesels ķermenis
+  netiek ietekmēts, savukārt iestrēdzis ķermenis atceļ wreq lasītāju un ļauj `proxyFetch` esošajai
+  TLS atkāpšanās loģikai pāriet uz tiešo/starpniekservera dispečeru (pieprasījums, kuru nav droši atkārtoti atskaņot, piemēram,
+  POST ar ķermeni, joprojām izraisa kļūdu, nevis tiek nemanāmi atkārtots).
 
-### Tīmekļa sīkdatņu pakalpojumu sniedzēju transports — wreq-js 3.2.0
+### Tīmekļa sīkdatņu nodrošinātāja transports — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` ir kopīgais adapteris pieciem tālāk norādītajiem specializētajiem
-tīmekļa sīkdatņu transportiem. Katrs plānais pakalpojumu sniedzēja ietinējs atlasa pārlūkprogrammas/OS profilu. Adapteris
-izmanto vienoto wreq izpildvides ielādētāju un transporta pūlu no `open-sse/utils/tlsClient.ts`, kas indeksēts pēc
-profila + OS + atrisinātā starpniekservera, savukārt katrs pieprasījums izmanto `cookieMode: "ephemeral"`. Tādējādi konti un
+tīmekļa sīkdatņu transportiem. Katrs vienkāršotais nodrošinātāja ietinējs izvēlas pārlūka/OS profilu. Adapteris
+izmanto vienoto wreq izpildlaika ielādētāju un transporta pūlu failā `open-sse/utils/tlsClient.ts`, kam
+atslēga tiek veidota pēc profila + OS + atrisinātā starpniekservera, savukārt katrs pieprasījums izmanto `cookieMode: "ephemeral"`. Tādēļ konti un
 pieprasījumi koplieto transporta līmeņa savienojumus, bet nekad nekoplieto wreq sesiju vai sīkdatņu krātuvi.
 
-| Pakalpojumu sniedzējs | Profils       | Emulētā OS | Straumes EOF politika                       |
-| --------------------- | ------------- | ---------- | ------------------------------------------- |
-| Claude                | `chrome_146`  | Linux      | iekļaut `[DONE]`                            |
-| Perplexity            | `firefox_148` | macOS      | iekļaut `event: end_of_stream`              |
-| Grok                  | `chrome_146`  | Linux      | neiekļaut `[DONE]`                          |
-| Notion                | `chrome_146`  | Windows    | iekļaut `[DONE]`                            |
-| LMArena               | `chrome_146`  | Windows    | nav kontrollieluma; aizvērt pie vietējā EOF |
+| Nodrošinātājs | Profils       | Emulētā OS | Straumes EOF politika                 |
+| ------------- | ------------- | ---------- | ------------------------------------- |
+| Claude        | `chrome_146`  | Linux      | iekļaut `[DONE]`                      |
+| Perplexity    | `firefox_151` | macOS      | iekļaut `event: end_of_stream`        |
+| Grok          | `chrome_146`  | Linux      | neiekļaut `[DONE]`                    |
+| Notion        | `chrome_146`  | Windows    | iekļaut `[DONE]`                      |
+| LMArena       | `chrome_146`  | Windows    | nav marķiera; aizvērt pie vietējā EOF |
 
 - Straumēšana tieši patērē vietējās atbildes `ReadableStream`; netiek izveidots ne pagaidu fails, ne blakusprocess.
-- Pirms straumes nodošanas tiek pārbaudīti līdz 256 sākotnējiem baitiem. SSE pakalpojumu sniedzēji buferē kļūdas, kas nav SSE;
-  Grok/LMArena kartē Cloudflare pārbaudes uz `403`, bet HTML starplapas — uz `502`.
-- Vietējā pieprasījuma noildzi joprojām aptver absolūts JS stingrais termiņš. Iestrēgšana padara nederīgu
-  un aizver tikai ietekmēto profila/OS/starpniekservera transportu, pirms nākamais pieprasījums to izveido no jauna.
-- Starpniekservera noteikšanas prioritāte ir katra izsaukuma `proxyUrl` → pieprasījuma tvēruma konta/informācijas paneļa konteksts →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (tostarp varianti ar mazajiem burtiem). Atrisināšanas kļūdas pārtrauc
-  darbību, nevis pieļauj tiešā savienojuma noplūdi. LMArena apzināti veic atrisināšanu pret `arena.ai`.
-- `byteResponse` atgriež atbilstoši satura tipam formatētu `data:` URL bez UTF-8 bojājumiem.
+- Pirms straumes nodošanas tiek pārbaudīti līdz 256 sākotnējiem baitiem. SSE nodrošinātāji buferē kļūdas, kas nav SSE;
+  Grok/LMArena Cloudflare pārbaudes kartē uz `403`, bet HTML starplapas — uz `502`.
+- Vietējā pieprasījuma taimautu joprojām aptver absolūts JS stingrais termiņš. Iestrēgšana padara nederīgu
+  un aizver tikai skarto profila/OS/starpniekservera transportu, pirms nākamais pieprasījums to izveido no jauna.
+- Starpniekservera atrisināšanas prioritāte ir katra izsaukuma `proxyUrl` → pieprasījuma tvēruma konta/informācijas paneļa konteksts →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (tostarp varianti ar mazajiem burtiem). Atrisināšanas kļūdas droši pārtrauc darbību,
+  nevis pieļauj tiešā savienojuma noplūdi. LMArena apzināti veic atrisināšanu pret `arena.ai`.
+- `byteResponse` atgriež saturam atbilstoši tipizētu `data:` URL bez UTF-8 bojājumiem.
 - Kļūdas ir `TlsClientUnavailableError` (pakotne/papildmodulis nav pieejams), `TlsClientHangError`
-  (pārsniegts termiņš) un `WreqTransportCapacityError` (koplietotais sesiju ietilpības kļūdas kods),
+  (termiņš pārsniegts) un `WreqTransportCapacityError` (koplietotās sesiju ietilpības kļūdas kods),
   ja visas 128 ierobežotās profila/OS/starpniekservera vietas ir aktīvas vai tiek aizvērtas.
 
-Iepriekš minētā vispārīgā `TlsClient` sesija joprojām ir specializēta pastāvīgam pārlūkprogrammas atbalstītam sīkdatņu
+Iepriekš minētais vispārīgais `TlsClient` joprojām ir specializēts pastāvīgam, pārlūka nodrošinātam sīkdatņu
 stāvoklim. Abi ceļi atkārtoti izmanto vienu kešotu wreq moduļa ielādētāju un procesa dzīves cikla āķi; to pūli paliek
-nodalīti, jo to sīkdatņu dzīves ilgumi ir apzināti atšķirīgi.
+nodalīti, jo to sīkdatņu dzīves cikli ir apzināti atšķirīgi.
 
-Profili tiek atbalstīti ar fiksēto pakotni, taču faktiskā WAF pieņemšana var mainīties neatkarīgi
-no vietējiem līguma testiem. Pirms apgalvojat paritāti ar augšupējo pārlūkprogrammu, pārbaudiet pirkstu nospiedumu izmaiņas,
-izmantojot nepārprotami autorizētu aktīvu kontu.
+Profili tiek atbalstīti piesaistītajā pakotnes versijā, taču faktiskā WAF akceptēšana var mainīties neatkarīgi
+no lokālajiem līguma testiem. Pirms apgalvot paritāti ar augšupējo pārlūku, pārbaudiet digitālnospiedumu izmaiņas,
+izmantojot nepārprotami autorizētu reālu kontu.
 
 ---
 

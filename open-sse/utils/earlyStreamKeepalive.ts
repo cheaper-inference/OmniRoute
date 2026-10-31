@@ -551,6 +551,7 @@ export async function withEarlyStreamKeepalive(
   const stream = new ReadableStream<Uint8Array>({
     async start(controller) {
       let stopped = false;
+      let streamErrored = false;
       let nextApplicationKeepaliveAt = applicationKeepalive
         ? performance.now() + applicationKeepalive.intervalMs
         : Number.POSITIVE_INFINITY;
@@ -692,15 +693,17 @@ export async function withEarlyStreamKeepalive(
                   bytesForwarded += value.byteLength;
                 }
               }
-            } catch (readErr) {
-              // Upstream stream failed mid-flight. Only emit an error frame if
-              // NO content was forwarded yet — otherwise the client already
-              // received partial content and a late error frame would corrupt
-              // the SSE stream. Silently close instead; the client will see
-              // the stream end naturally.
+            } catch {
+              if (aborted) return;
               if (bytesForwarded === 0) {
                 controller.enqueue(errorFrame);
                 recordClientBytes(errorFrame);
+              } else {
+                // The last forwarded bytes may end inside an SSE frame. Fail the
+                // transport instead of appending invalid SSE or reporting clean EOF.
+                // Never expose the upstream exception, its stack, or its cause.
+                streamErrored = true;
+                controller.error(new Error("Upstream stream failed before completion."));
               }
             }
           } else {
@@ -744,7 +747,7 @@ export async function withEarlyStreamKeepalive(
           deadlineController.signal.removeEventListener("abort", onExpired);
         }
         try {
-          controller.close();
+          if (!streamErrored) controller.close();
         } catch {
           /* already closed */
         }

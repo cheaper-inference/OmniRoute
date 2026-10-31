@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "အဖွဲ့ကုန်ကျစရိတ်များ",
+    "subtitle": "မျှဝေထားသော Soft ဘတ်ဂျက်များနှင့် ကတ်တလော့ဂ် ကုန်ကျစရိတ် ခန့်မှန်းချက်များကို စီမံပါ။",
+    "refresh": "ပြန်လည်စတင်ရန်",
+    "create": "အဖွဲ့ဖန်တီးရန်",
+    "edit": "အဖွဲ့ကို တည်းဖြတ်ရန်",
+    "archive": "မှတ်တမ်းသိမ်းရန်",
+    "selectTeam": "အဖွဲ့များ",
+    "searchTeams": "အဖွဲ့များ ရှာရန်",
+    "statusFilter": "အဖွဲ့အခြေအနေ",
+    "active": "အသုံးပြုနေသည်",
+    "archived": "မှတ်တမ်းသိမ်းထားသည် · ဖတ်ရန်သာ",
+    "allTeams": "အဖွဲ့အားလုံး",
+    "noTeams": "ကိုက်ညီသော အဖွဲ့မရှိပါ။",
+    "selectHint": "ကုန်ကျစရိတ်ကြည့်ရန် အဖွဲ့တစ်ခု ဖန်တီးပါ သို့မဟုတ် ရွေးပါ။",
+    "loading": "အဖွဲ့ကုန်ကျစရိတ်များ ဖွင့်နေသည်…",
+    "budgetTitle": "လက်ရှိ Soft ဘတ်ဂျက်",
+    "budgetSubtitle": "အောင်မြင်စွာ မှတ်တမ်းတင်ထားသော အသုံးပြုမှု · လှိမ့်ဝင်းဒိုး · အစီရင်ခံစာရက်များနှင့် သီးခြား",
+    "archivedBudget": "မှတ်တမ်းသိမ်းထားသည်- ဘတ်ဂျက်ကျင့်သုံးမှု မလုပ်ဆောင်ပါ။ သမိုင်းဆိုင်ရာ အစီရင်ခံစာများ ဆက်လက်ရနိုင်သည်။",
+    "unlimited": "ကန့်သတ်မထား — မျှဝေထားသော Soft ဘတ်ဂျက် မသတ်မှတ်ရသေးပါ။",
+    "budgetUnavailable": "ဘတ်ဂျက်အခြေအနေ မရနိုင်ပါ။ ထပ်စမ်းရန် ပြန်လည်စတင်ပါ။",
+    "used": "အောင်မြင်သော အသုံးပြုမှု",
+    "maximum": "ဘတ်ဂျက် အများဆုံး",
+    "remaining": "သိထားသော ကျန်ငွေ",
+    "resets": "ပြန်လည်သတ်မှတ်ချိန်",
+    "unpricedBudget": "အောင်မြင်သော အသုံးပြုမှု၏ တစ်စိတ်တစ်ပိုင်းတွင် စျေးနှုန်း မသိပါ။ သိထားသော စုစုပေါင်းမှာ မပြည့်စုံပါ၊ ဘတ်ဂျက်ကျင့်သုံးမှုက ဤဝင်းဒိုးကို ကျော်လွန်သည်ဟု သတ်မှတ်သည်။",
+    "overBudget": "ဘတ်ဂျက်ပြည့်သွားသည် သို့မဟုတ် ကျော်လွန်သွားသည် · {amount} ပိုနေသည်",
+    "reportTitle": "အသုံးပြုမှု အစီရင်ခံစာ",
+    "reportSubtitle": "ကြိုးစားမှုအားလုံး · USD ဖြင့် ကတ်တလော့ဂ် ခန့်မှန်းချက်၊ ငွေတောင်းခံလွှာ မဟုတ်ပါ · UTC ရက်အပြည့်",
+    "reportPeriod": "အစီရင်ခံစာကာလ",
+    "day1": "၁ ရက်",
+    "day7": "၇ ရက်",
+    "day30": "၃၀ ရက်",
+    "allTime": "အချိန်ကာလအားလုံး",
+    "reportSpend": "ခန့်မှန်း အစီရင်ခံစာ အသုံးစရိတ်",
+    "requests": "တောင်းဆိုမှုများ",
+    "assignedKeys": "သတ်မှတ်ထားသော ကီးများ",
+    "unpricedReport": "ဤအစီရင်ခံစာတွင် မသိသော စျေးနှုန်းများ ပါဝင်သည်။ ခန့်မှန်းအသုံးစရိတ် မပြည့်စုံပါ။",
+    "breakdown": "API ကီးအလိုက် ကုန်ကျစရိတ်",
+    "noUsage": "ဤအစီရင်ခံစာကာလတွင် အသုံးပြုမှု မရှိပါ။",
+    "keyName": "API ကီး အမည်",
+    "tokens": "ထည့်သွင်း + ထုတ်ပေး တိုကင်များ",
+    "unnamedKey": "အမည်မရှိ သို့မဟုတ် ဖျက်ထားသော ကီး",
+    "unpriced": "မသိသော စျေးနှုန်း",
+    "members": "အဖွဲ့ဝင်ဖြစ်မှု",
+    "memberSubtitle": "အဖွဲ့ဝင်ဖြစ်မှု ပြောင်းလဲသော်လည်း သမိုင်းဆိုင်ရာ အသုံးစရိတ်သည် မူလအဖွဲ့တွင်သာ ရှိနေမည်။",
+    "searchKeys": "ကီးများ သို့မဟုတ် လက်ရှိပိုင်ရှင်များ ရှာရန်",
+    "chooseKey": "API ကီးတစ်ခု ရွေးပါ",
+    "unassigned": "မသတ်မှတ်ရသေးပါ",
+    "ownership": "လက်ရှိ ငွေတောင်းခံအဖွဲ့- {team}",
+    "assign": "သတ်မှတ်ရန်",
+    "remove": "ဖယ်ရှားရန်",
+    "noMembers": "လက်ရှိ အဖွဲ့ဝင် မရှိပါ။ သမိုင်းဆိုင်ရာ အသုံးပြုမှုကို ဘတ်ဂျက်တွင် ဆက်လက်ရေတွက်နိုင်သည်။",
+    "assignedAt": "{date} တွင် သတ်မှတ်ခဲ့သည် (UTC)",
+    "name": "အဖွဲ့အမည်",
+    "description": "ဖော်ပြချက်",
+    "enableBudget": "မျှဝေထားသော Soft ဘတ်ဂျက် ဖွင့်ရန်",
+    "amount": "ဘတ်ဂျက်ပမာဏ (USD)",
+    "duration": "လှိမ့်ဘတ်ဂျက်ဝင်းဒိုး",
+    "cancel": "မလုပ်တော့ပါ",
+    "save": "သိမ်းရန်",
+    "confirm": "အတည်ပြုရန်",
+    "transferTitle": "ကီးလွှဲပြောင်းမှုကို အတည်ပြုပါ",
+    "transferMessage": "ဤကီးကို “{source}” မှ “{destination}” သို့ ရွှေ့မလား။ သမိုင်းဆိုင်ရာ အသုံးစရိတ်သည် မူလအဖွဲ့တွင်သာ ကျန်ရှိမည်။",
+    "removeTitle": "ကီးသတ်မှတ်ချက်ကို ဖယ်ရှားရန်",
+    "removeMessage": "ဤကီးကို “{team}” မှ ဖယ်ရှားမလား။ သမိုင်းဆိုင်ရာ အသုံးစရိတ်သည် ဤအဖွဲ့တွင်သာ ကျန်ရှိမည်။",
+    "archiveTitle": "အဖွဲ့ကို မှတ်တမ်းသိမ်းရန်",
+    "archiveMessage": "“{team}” ကို မှတ်တမ်းသိမ်းမလား။ လက်ရှိ ချိတ်ဆက်မှုအားလုံး ပိတ်သွားပြီး ဘတ်ဂျက်ကျင့်သုံးမှု ရပ်သွားမည်။ သမိုင်းဆိုင်ရာ အစီရင်ခံစာများ ဆက်လက်ရနိုင်သည်။",
+    "invalidName": "အမည် (စာလုံး ၁–၂၀၀) နှင့် စာလုံး ၂,၀၀၀ ထက်မပိုသော ဖော်ပြချက် ထည့်ပါ။",
+    "invalidAmount": "သုညထက်ကြီးသော ကန့်သတ်ဘတ်ဂျက်ပမာဏ ထည့်ပါ။",
+    "unauthorized": "ဆက်လုပ်ရန် စီမံခန့်ခွဲမှု ဒက်ရှ်ဘုတ်သို့ ဝင်ရောက်ပါ။",
+    "forbidden": "အဖွဲ့များကို စီမံခွင့် မရှိပါ။ သင်ထည့်သွင်းထားသည်များ ထိန်းသိမ်းထားသည်။",
+    "notFound": "ဤအဖွဲ့ သို့မဟုတ် သတ်မှတ်ချက် မရှိတော့ပါ။",
+    "conflict": "သတ်မှတ်ချက် သို့မဟုတ် အဖွဲ့ ပြောင်းလဲသွားသည်။ ထပ်မစမ်းမီ ပြန်လည်စတင်ပြီး လက်ရှိပိုင်ဆိုင်မှုကို အတည်ပြုပါ။",
+    "failed": "တောင်းဆိုမှု မအောင်မြင်ပါ။ သင်ထည့်သွင်းထားသည်များ ထိန်းသိမ်းထားသည်၊ ထပ်စမ်းကြည့်ပါ။",
+    "partialBudget": "ထိန်းသိမ်းထားသော နေ့စဉ် ပုံးအချို့သည် ဝင်းဒိုးအနားသတ်နှင့် ထပ်နေပြီး တိကျစွာ ခွဲဝေ၍ မရပါ။ ပြသထားသော အသုံးစရိတ် မပြည့်စုံပါ၊ ကျန်ရှိသော ခွင့်ပြုငွေ မရနိုင်ပါ။ လက်ရှိ Soft ဘတ်ဂျက်မူဝါဒ မပြောင်းလဲပါ။"
+  },
   "codexKeyServiceMode": {
     "title": "ဤ API key အတွက် Codex ဝန်ဆောင်မှုမုဒ်",
     "description": "ပေါင်းစပ်မော်ဒယ်များအတွင်းရှိ Codex မော်ဒယ်များအပါအဝင် Codex တောင်းဆိုမှုများနှင့် သက်ဆိုင်သည်။ အတင်းသတ်မှတ်ထားသော မုဒ်များသည် client၊ စနစ်တစ်ခုလုံးဆိုင်ရာ ဆက်တင်များနှင့် ချိတ်ဆက်မှု မူလသတ်မှတ်ချက်များကို လွှမ်းမိုးပယ်ဖျက်သည်။ အခြား provider များမှာ မပြောင်းလဲဘဲ ရှိနေမည်။",
@@ -25,8 +102,10 @@
     "confirm": "သေချာပါသလား။",
     "refresh": "ပြန်လည်တင်မည်",
     "close": "ပိတ်မည်",
+    "dialogTitleFallback": "ဒိုင်ယာလော့ဂ်",
     "previousPage": "ယခင်စာမျက်နှာ",
     "nextPage": "နောက်စာမျက်နှာ",
+    "pagination": "စာမျက်နှာခွဲခြင်း",
     "capsLockOn": "Caps Lock ဖွင့်ထားသည်",
     "dismissNotification": "အကြောင်းကြားချက်ကို ပယ်မည်",
     "toggleColumns": "ကော်လံများကို ပြောင်းလဲပြသမည်",
@@ -182,6 +261,7 @@
     "combos": "ပေါင်းစပ်မှုများ",
     "noModelsFound": "မော်ဒယ်များ မတွေ့ပါ",
     "clear": "ရှင်းလင်းရန်",
+    "clearFilters": "စစ်ထုတ်မှုများကို ရှင်းလင်းရန်",
     "done": "ပြီးပါပြီ",
     "selectAll": "အားလုံးကို ရွေးရန်",
     "unselectAll": "အားလုံးကို မရွေးတော့ရန်",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "{count, plural, one {# အသုတ်} other {# အသုတ်}} တွင် အသုံးပြုထားသည်",
     "batchFilePreview": "အစမ်းကြည့်ရှုခြင်း",
     "batchFilePreviewTruncated": "ပထမ {shown} ကြောင်းကို ပြသနေသည် (စုစုပေါင်း {total} ကြောင်း)",
-    "batchFileDownloadFull": "ဖိုင်အပြည့်အစုံကို ဒေါင်းလုဒ်လုပ်ရန်"
+    "batchFileDownloadFull": "ဖိုင်အပြည့်အစုံကို ဒေါင်းလုဒ်လုပ်ရန်",
+    "tokensPageTitle": "တိုကင်များ",
+    "tokensPageDescription": "API ကီးများအကြား တိုကင်များ ပေးပို့ခြင်း၊ ဖိတ်ခေါ်ကုဒ်များ မျှဝေခြင်းနှင့် အသိုင်းအဝိုင်းဆာဗာများကို ချိတ်ဆက်ခြင်း ပြုလုပ်ပါ။",
+    "tokensServerUrlLabel": "ဆာဗာ URL"
   },
   "disabled": "ပိတ်ထားသည်",
   "featureFlagOmnirouteEmergencyFallbackDescription": "ဘတ်ဂျက်ကုန်ဆုံးသွားသော တောင်းဆိုမှုများကို အရေးပေါ် အခမဲ့ အရန် provider/model သို့ လမ်းကြောင်းပြောင်းပါ။",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "ပရောက်စီဆာဗာကို ရပ်တန့်ထားသည် သို့မဟုတ် ပြန်လည်စတင်နေသည်။",
     "expandSidebar": "ဘေးဘားကို ချဲ့ရန်",
     "collapseSidebar": "ဘေးဘားကို ခေါက်သိမ်းရန်",
-    "themes": "အပြင်အဆင်များ",
-    "presetColors": "လူကြိုက်များသော အရောင်များ",
     "createTheme": "အပြင်အဆင် ဖန်တီးရန်",
     "chooseColor": "အရောင်တစ်ရောင် ရွေးချယ်ပါ",
-    "themeCoral": "သန္တာရောင်",
-    "themeBlue": "အပြာရောင်",
-    "themeRed": "အနီရောင်",
-    "themeGreen": "အစိမ်းရောင်",
-    "themeViolet": "ခရမ်းရောင်",
-    "themeOrange": "လိမ္မော်ရောင်",
-    "themeCyan": "စိမ်းပြာရောင်",
     "cliToolsShort": "ကိရိယာများ",
     "cache": "ကက်ရှ်",
     "cacheShort": "ကက်ရှ်",
@@ -1103,12 +1177,10 @@
     "themeSystem": "အပြင်အဆင်စနစ်",
     "whitelabelingDesc": "ကိုယ်ပိုင်အမှတ်တံဆိပ် သတ်မှတ်ခြင်းဆိုင်ရာ ဖော်ပြချက်",
     "switchThemes": "အပြင်အဆင်များ ပြောင်းရန်",
-    "themeAccentDesc": "အပြင်အဆင် အလေးပေးအရောင်ဆိုင်ရာ ဖော်ပြချက်",
     "uploadFavicon": "Favicon အပ်လုဒ်လုပ်ရန်",
     "themeDark": "အမှောင်အပြင်အဆင်",
     "customLogoDesc": "စိတ်ကြိုက်လိုဂိုဆိုင်ရာ ဖော်ပြချက်",
     "sidebarVisibilityToggle": "ဘေးဘား မြင်နိုင်မှု အဖွင့်အပိတ်ခလုတ်",
-    "themeAccent": "အပြင်အဆင် အလေးပေးအရောင်",
     "resetFavicon": "Favicon ကို မူလအတိုင်း ပြန်ထားရန်",
     "whitelabeling": "ကိုယ်ပိုင်အမှတ်တံဆိပ် သတ်မှတ်ခြင်း",
     "darkMode": "အမှောင်မုဒ်",
@@ -1122,10 +1194,8 @@
     "customLogo": "စိတ်ကြိုက်လိုဂို",
     "appearance": "အသွင်အပြင်",
     "themeSelectionAria": "အပြင်အဆင် ရွေးချယ်မှု Aria",
-    "themeCreate": "အပြင်အဆင် ဖန်တီးရန်",
     "customFaviconDesc": "စိတ်ကြိုက် Favicon ဖော်ပြချက်",
     "logoPreview": "လိုဂို အစမ်းကြည့်ရှုမှု",
-    "themeCustom": "စိတ်ကြိုက် အပြင်အဆင်",
     "hideHealthLogsDesc": "စနစ်အခြေအနေ မှတ်တမ်းများကို ဖျောက်ခြင်းဆိုင်ရာ ဖော်ပြချက်",
     "faviconPreview": "Favicon အစမ်းကြည့်ရှုမှု",
     "changelog": "ပြောင်းလဲမှုမှတ်တမ်း",
@@ -1352,7 +1422,9 @@
       "open": "ဖွင့်ရန်",
       "close": "ပိတ်ရန်"
     },
-    "noResults": "ရလဒ်မရှိပါ"
+    "noResults": "ရလဒ်မရှိပါ",
+    "costsTeams": "အဖွဲ့များ",
+    "costsTeamsSubtitle": "အဖွဲ့ကုန်ကျစရိတ်စင်တာများ"
   },
   "webhooks": {
     "title": "ဝဘ်ဟုတ်များ",
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 သို့မဟုတ် @channelname",
       "chatIdHint": "chat/channel ၏ သီးသန့်ဂဏန်းအမှတ်အသား သို့မဟုတ် အများသုံးအသုံးပြုသူအမည်။",
       "tutorial": "Telegram webhook ပြင်ဆင်သတ်မှတ်နည်း-"
-    }
+    },
+    "copy": "ကူးယူရန်",
+    "copied": "ကူးယူပြီးပါပြီ!",
+    "expandDetails": "အသေးစိတ်ကို ပြရန်",
+    "collapseDetails": "အသေးစိတ်ကို ဖျောက်ရန်"
   },
   "compliance": {
     "auditTitle": "စာရင်းစစ်",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "ခေါ်ဆိုမှုများ (24 နာရီ)",
     "mcpMetricSuccessRate": "အောင်မြင်မှုနှုန်း",
     "mcpMetricAvgDuration": "ပျမ်းမျှကြာချိန်",
-    "mcpMetricTopTool": "အသုံးအများဆုံးကိရိယာ"
-  },
-  "themesPage": {
-    "title": "အပြင်အဆင်များ",
-    "description": "အသင့်သတ်မှတ်ထားသော အပြင်အဆင်တစ်ခုကို ရွေးချယ်ပါ သို့မဟုတ် အရောင်တစ်ရောင်တည်းဖြင့် သင့်စိတ်ကြိုက်ဖန်တီးပါ",
-    "presetColors": "လူကြိုက်များသောအရောင်များ",
-    "customTheme": "စိတ်ကြိုက်အပြင်အဆင်",
-    "customThemeDesc": "အပြင်အဆင်ဖန်တီးရန် နှိပ်ပြီး အရောင်တစ်ရောင်ကို ရွေးပါ",
-    "createTheme": "အပြင်အဆင်ဖန်တီးရန်",
-    "activePreset": "လက်ရှိအသုံးပြုနေသောအပြင်အဆင်"
+    "mcpMetricTopTool": "အသုံးအများဆုံးကိရိယာ",
+    "dismissError": "အမှားကို ပယ်ရန်"
   },
   "header": {
+    "teamsDescription": "အဖွဲ့ကုန်ကျစရိတ် ခန့်မှန်းချက်များနှင့် မျှဝေထားသော Soft ဘတ်ဂျက်များ",
     "logout": "ထွက်ရန်",
     "quickNavigation": "အမြန်လမ်းညွှန်",
     "quickNavigationTitle": "အမြန်လမ်းညွှန် (⌘K / Ctrl+K)",
     "openQuickNavigation": "အမြန်လမ်းညွှန်ကို ဖွင့်ရန်",
+    "openMenu": "မီနူးကို ဖွင့်ရန်",
+    "products": "Keak ထုတ်ကုန်များ",
     "switchToLightMode": "အလင်းရောင်မုဒ်သို့ ပြောင်းရန်",
     "switchToDarkMode": "အမှောင်မုဒ်သို့ ပြောင်းရန်",
     "language": "ဘာသာစကား",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "Anthropic နှင့် တွဲဖက်အသုံးပြုနိုင်သည်",
     "media": "မီဒီယာ",
     "mediaDescription": "ပုံများ၊ ဗီဒီယိုများနှင့် တေးဂီတများ ဖန်တီးပါ",
-    "themes": "အပြင်အဆင်များ",
-    "themesDescription": "ဒက်ရှ်ဘုတ်အကန့်တစ်ခုလုံးအတွက် အရောင်အပြင်အဆင်တစ်ခုကို ရွေးချယ်ပါ",
     "costsDescription": "ပံ့ပိုးသူအားလုံးအနှံ့ သုံးစွဲမှုကို ခြေရာခံ၍ လမ်းကြောင်းများကို ဆန်းစစ်ပြီး သင်၏ AI ဘတ်ဂျက်ကို စီမံပါ",
     "cacheDescription": "ပံ့ပိုးသူ၏ prompt cache ထိရောက်မှုနှင့် စက်တွင်း semantic တုံ့ပြန်မှု ပြန်လည်အသုံးပြုခြင်းကို စောင့်ကြည့်ပါ။",
     "limitsDescription": "API key နှင့် ပံ့ပိုးသူတစ်ခုချင်းစီအတွက် နှုန်းကန့်သတ်ချက်များနှင့် ခွဲတမ်းများကို သတ်မှတ်ပါ",
@@ -1933,7 +2002,14 @@
     "readinessStep3": "သင်၏ endpoint ကို ကူးယူပါ",
     "readinessStep4": "စမ်းသပ်တောင်းဆိုမှုတစ်ခု ပို့ပါ",
     "readinessContinue": "စနစ်ထည့်သွင်းမှုကို ဆက်လုပ်ပါ",
-    "readinessDismiss": "ယခုအတွက် ပိတ်ထားပါ"
+    "readinessDismiss": "ယခုအတွက် ပိတ်ထားပါ",
+    "unpricedUsageTitle": "{count, plural, one {# မော်ဒယ်} other {# မော်ဒယ်များ}} တွင် မကြာသေးမီက အသုံးပြုမှုရှိသော်လည်း ဈေးနှုန်း သတ်မှတ်ထားခြင်းမရှိပါ။",
+    "unpricedUsageFailClosed": "{keys, plural, one {# အကန့်အသတ်ပါ API ကီး} other {# အကန့်အသတ်ပါ API ကီးများ}} များသည် မကြာသေးခင် ၈ ရက်အတွင်း ဒီမော်ဒယ်များကို အသုံးပြုခဲ့သည်။ ထိုအသုံးပြုမှုသည် ကီး၏ နေ့စဉ် သို့မဟုတ် အပတ်စဉ် ကန့်သတ်ကာလ အတွင်း ဖြစ်နေစဉ် ကီးကို ခွင့်အတိုင်းအတာကျော်လွန်ဟု သတ်မှတ်၍ ၎င်း၏ တောင်းဆိုချက်များကို ပိတ်ထားသည် (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "ဤအသုံးပြုမှုကို သော့တစ်ခုချင်းစီ၏ အသုံးပြုမှု ကန့်သတ်ချက်များဆီသို့ $0 အဖြစ် တွက်ချက်ပေးပါသည် (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# တောင်းဆိုချက်} other {# တောင်းဆိုချက်များ}}, {keys, plural, one {# ကန့်သတ်ထားသော ကီး} other {# ကန့်သတ်ထားသော ကီးများ}}",
+    "unpricedUsageMore": "…နှင့် {count} ခု အပိုရှိသည်",
+    "unpricedUsageConfigure": "စျေးနှုန်း သတ်မှတ်ရန်",
+    "unpricedUsageDismiss": "ပယ်ဖျက်"
   },
   "analytics": {
     "title": "ခွဲခြမ်းစိတ်ဖြာချက်များ",
@@ -2495,7 +2571,12 @@
     "onlySelectedConnections": "ရွေးချယ်ထားသော ချိတ်ဆက်မှုများသာ",
     "selectAtLeastOneConnection": "အနည်းဆုံး ချိတ်ဆက်မှုတစ်ခုကို ရွေးပါ သို့မဟုတ် ချိတ်ဆက်မှုအားလုံးကို ရွေးပါ။",
     "allConnectionsDesc": "ဤ key သည် အသက်ဝင်နေသော မည်သည့်ချိတ်ဆက်မှုကိုမဆို အသုံးပြုနိုင်သည်။",
-    "restrictedToConnections": "{count, plural, one {ချိတ်ဆက်မှု # ခု} other {ချိတ်ဆက်မှု # ခု}} သာ အသုံးပြုခွင့်ရှိသည်။"
+    "restrictedToConnections": "{count, plural, one {ချိတ်ဆက်မှု # ခု} other {ချိတ်ဆက်မှု # ခု}} သာ အသုံးပြုခွင့်ရှိသည်။",
+    "preferredConnections": "ဦးစားပေး ချိတ်ဆက်မှုများ",
+    "preferredConnectionsDesc": "ကီးတစ်ခုချင်းစီအတွက် ဦးစားပေးအစီအစဉ်။ ဦးစားပေးချိတ်ဆက်မှု မရရှိနိုင်ပါက လမ်းကြောင်းပေးခြင်းသည် နောက်ထပ်အရည်အချင်းပြည့်မီသော ချိတ်ဆက်မှုသို့ ပြောင်းသွားပါမည်။",
+    "preferredConnectionsNone": "ဦးစားပေးမှု သတ်မှတ်ထားခြင်းမရှိပါ — မူလ လမ်းကြောင်းပေးနည်းဗျူဟာကို အသုံးပြုပါသည်။",
+    "preferredConnectionsClear": "ရှင်းလင်းရန်",
+    "removeSelection": "{name} ကို ဖယ်ရှားရန်"
   },
   "auditLog": {
     "title": "စစ်ဆေးမှတ်တမ်း",
@@ -2607,7 +2688,9 @@
     "imageToTextBridgeCta": "Modality Bridge ဆက်တင်များတွင် ပုံ→စာသား bridge ကို စီစဉ်သတ်မှတ်ပါ",
     "sttBridgeCta": "Modality Bridge ဆက်တင်များတွင် စကားသံ→စာသား bridge ကို စီစဉ်သတ်မှတ်ပါ",
     "existingConnection": "ရှိပြီးသား ချိတ်ဆက်မှု",
-    "openrouterSttDescription": "OpenRouter စကားသံမှစာသားသို့ ပြောင်းလဲသည့် မော်ဒယ်များသည် သင်စီစဉ်သတ်မှတ်ထားသော OpenRouter ချိတ်ဆက်မှုကို အသုံးပြုသည်။ သီးခြား အထောက်အထားအချက်အလက် မလိုအပ်ပါ။"
+    "openrouterSttDescription": "OpenRouter စကားသံမှစာသားသို့ ပြောင်းလဲသည့် မော်ဒယ်များသည် သင်စီစဉ်သတ်မှတ်ထားသော OpenRouter ချိတ်ဆက်မှုကို အသုံးပြုသည်။ သီးခြား အထောက်အထားအချက်အလက် မလိုအပ်ပါ။",
+    "modalityTabsAria": "မီဒီယာအမျိုးအစား",
+    "serviceKindsAria": "ဝန်ဆောင်မှုအမျိုးအစား"
   },
   "search": {
     "searchQuery": "ရှာဖွေမှု မေးမြန်းချက်",
@@ -2963,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - ကိုယ်တိုင် ဖွဲ့စည်းသတ်မှတ်ခြင်း",
     "clineManualConfiguration": "Cline ကိုယ်တိုင် ဖွဲ့စည်းသတ်မှတ်ခြင်း",
     "kiloManualConfiguration": "Kilo Code ကိုယ်တိုင် ဖွဲ့စည်းသတ်မှတ်ခြင်း",
+    "piManualConfiguration": "Pi - ကိုယ်တိုင် ပြင်ဆင်သတ်မှတ်ခြင်း",
+    "piConfigInvalidTitle": "Pi models.json ကို ဖတ်၍မရပါ။",
+    "piOmnirouteConfigured": "OmniRoute Pi စိတ်ကြိုက်ဝန်ဆောင်မှုပေးသူအဖြစ် ပြင်ဆင်သတ်မှတ်ထားသည်။",
+    "piModelHelp": "Pi သည် သင်ရွေးချယ်သော မော်ဒယ်ကို models.json တွင် အတိအလင်း ရေးထားသော စိတ်ကြိုက် endpoints — အတွက် မော်ဒယ်များကို အလိုအလျောက် ရှာဖွေတွေ့ရှိမည်မဟုတ်ပါ။",
+    "piManualConfigTitle": "သို့မဟုတ် ~/.pi/agent/models.json ကိုယ်တိုင်တည်းဖြတ်ပါ။",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ထို့နောက် Pi ကို စတင်ပြီး omniroute ဝန်ဆောင်မှုပေးသူကို ရွေးပါ။ အေးဂျင့်လမ်းညွှန်တစ်ခုလုံးကို ရွှေ့ရန် PI_CODING_AGENT_DIR သတ်မှတ်ပါ။",
+    "piUnownedNote": "ဤထည့်သွင်းမှုကို OmniRoute ပြင်ပတွင် ထည့်ထားသည် (ဥပမာ pi-gui ၏ စိတ်ကြိုက်အဆုံးမှတ်များ)။ လျှောက်ထားခြင်းသည် လက်ခံမည်; ပြန်လည်သတ်မှတ်ခြင်းသည် OmniRoute ရေးထားသော ထည့်သွင်းမှုများကိုသာ ဖယ်ရှားသည်။",
     "whenToUseLabel": "မည်သည့်အချိန်တွင် အသုံးပြုရမည်",
     "openToolDocs": "ကိရိယာဆိုင်ရာ စာရွက်စာတမ်းများကို ဖွင့်ရန်",
     "toolUseCases": {
@@ -2982,6 +3073,7 @@
       "amp": "Amp ၏ အတိုချုံး workflow များကို အသုံးပြုလိုသော်လည်း OmniRoute alias နှင့် routing စည်းမျဉ်းများကို မဖြစ်မနေလိုက်နာစေရန် လိုအပ်သည့်အခါ အသုံးပြုပါ။",
       "hermes": "အမြန်လုပ်ဆောင်ရမည့် အလုပ်များအတွက် ပေါ့ပါးသော terminal-native AI assistant လိုအပ်သည့်အခါ အသုံးပြုပါ။",
       "hermes-agent": "OmniRoute မှတစ်ဆင့် လမ်းကြောင်းသတ်မှတ်ထားသော default၊ delegation၊ vision နှင့် auxiliary model များပါဝင်သည့် Hermes Agent (by Nousresearch) ကို လိုအပ်သည့်အခါ အသုံးပြုပါ။",
+      "whycodes": "WhyCodes ကို OmniRoute သို့ ညွှန်ပြထားသော ရည်ရွယ်ချက်စုံ အလိုအလျောက် CLI အေးဂျင့် (TUI၊ အမည်ပေးထားသော အေးဂျင့်များ၊ မှတ်ဉာဏ်၊ swarm) အဖြစ် လိုချင်သည့်အခါ အသုံးပြုပါ။",
       "custom": "စိတ်ကြိုက် tool အကောင်အထည်ဖော်မှုများ သို့မဟုတ် ယေဘုယျ OpenAI-compatible ဖွဲ့စည်းပုံများအတွက် အသုံးပြုပါ။"
     },
     "toolDescriptions": {
@@ -2991,6 +3083,7 @@
       "grok-build": "စိတ်ကြိုက် provider ပံ့ပိုးမှုပါဝင်သော xAI Grok Build TUI ကုဒ်ရေးအေးဂျင့်",
       "droid": "Factory Droid AI လက်ထောက်",
       "openclaw": "Open Claw AI လက်ထောက်",
+      "openclaude": "OpenAI နှင့် ကိုက်ညီသော ပံ့ပိုးသူ အထောက်အပံ့ပါသည့် OpenClaude ကုဒ်ရေးအေးဂျင့် CLI",
       "cline": "Cline AI ကုဒ်ရေးလက်ထောက် CLI",
       "kilo": "Kilo Code AI လက်ထောက် CLI",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3022,6 +3115,7 @@
       "warp": "စိတ်ကြိုက် provider ပံ့ပိုးမှုပါဝင်သော Warp AI terminal",
       "agent-deck": "Agent Deck အေးဂျင့်မျိုးစုံ စီမံညှိနှိုင်းရေးကိရိယာ",
       "5dive": "5dive — ကိုယ်တိုင် host လုပ်ထားသော ကုဒ်ရေးအေးဂျင့်အုပ်စု၊ auth profile တစ်ခုတည်းဖြင့် ၎င်းတို့အားလုံးကို OmniRoute သို့ ချိတ်ဆက်ပေးသည်",
+      "whycodes": "OpenAI နှင့် ကိုက်ညီသော base URL ပါသည့် WhyCodes အလိုအလျောက် လုပ်ဆောင်နိုင်သော CLI အေးဂျင့်",
       "zed": "Zed ကုဒ်တည်းဖြတ်ကိရိယာ — OpenAI နှင့် ကိုက်ညီသော ပံ့ပိုးသူမှတစ်ဆင့် ပါဝင်ပြီးသား အေးဂျင့်"
     },
     "guides": {
@@ -3278,7 +3372,19 @@
     "cliproxyapiUnknown": "မသိရပါ",
     "cliproxyapiUpdate": "အပ်ဒိတ်လုပ်ရန်",
     "cliproxyapiUpdateAvailable": "အပ်ဒိတ်ရရှိနိုင်သည်- v{current} → v{latest}",
-    "cliproxyapiVersion": "ဗားရှင်း"
+    "cliproxyapiVersion": "ဗားရှင်း",
+    "piInstallTitle": "Pi Coding Agent ကို ထည့်သွင်းပါ။",
+    "piInstallInstructions": "Pi CLI ကို ထည့်သွင်းပါ၊ ထို့နောက် OmniRoute သို့ ချိတ်ဆက်ရန် ဤနေရာသို့ ပြန်သွားပါ။",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi လည်ပတ်နေသည့်စက်မှ လက်လှမ်းမီနိုင်သော URL သုံးပါ။ OpenAI-သဟဇာတဖြစ်သော /v1 အဆုံးမှတ်ကို အလိုအလျောက် ထည့်သွင်းထားသည်။",
+    "piManualMergeHint": "အစမ်းကြည့်ရန်သာ။ ဤ providers.omniroute ထဲသို့ ဝင်ရောက်မှုကို models.json တွင် ပေါင်းစည်းခြင်းဖြင့် သင်၏ အခြားသော ဝန်ဆောင်မှုပေးသူများနှင့် ဆက်တင်များ မပျက်မစီး ရှိနေစေရန်။",
+    "removeMapping": "ချိတ်ဆက်သတ်မှတ်မှုကို ဖယ်ရှားရန်",
+    "customUrl": "စိတ်ကြိုက် URL",
+    "customEndpointAria": "ကွဲပြားသော endpoint",
+    "useDefaultKey": "OmniRoute ကိုယ်ပိုင် default key ကို အသုံးပြုပါ",
+    "mainModelAria": "လက်မောင်းမုခ်ခံစက်",
+    "manualConfigTitle": "Grok Build manual ကွန်ဖစ်ဂျူးရင်"
   },
   "modelCatalog": {
     "title": "မော်ဒယ်များနှင့် Combos",
@@ -3342,6 +3448,18 @@
     "maxMembersPlaceholder": "ဥပမာ 10",
     "testSelected": "ရွေးထားသည်များကို စမ်းသပ်ရန် ({count})",
     "testAllFiltered": "စစ်ထုတ်ထားသည်များ အားလုံးကို စမ်းသပ်ရန် ({count})",
+    "visibility": "မြင်နိုင်မှု",
+    "allVisibility": "မြင်ရသောနှင့် ဝှက်ထားသော",
+    "visibleOnly": "မြင်ရသော",
+    "hiddenOnly": "ဝှက်ထားသော",
+    "visibleColumn": "မြင်ရသည်",
+    "hideModel": "{name} ကို /v1/models မှ ဝှက်ရန်",
+    "showModel": "{name} ကို /v1/models တွင် ပြရန်",
+    "hiddenBadge": "ဝှက်ထားသည်",
+    "hideFiltered": "စစ်ထုတ်ထားသည်များကို ဝှက်ရန် ({count})",
+    "showFiltered": "စစ်ထုတ်ထားသည်များကို ပြရန် ({count})",
+    "visibilityCounts": "မြင်ရ {visible} · ဝှက်ထား {hidden} · စုစုပေါင်း {total}",
+    "visibilityUpdateFailed": "မော်ဒယ်၏ မြင်နိုင်မှုကို အပ်ဒိတ်လုပ်၍ မရပါ",
     "cancel": "မလုပ်တော့ပါ",
     "clearResults": "ရလဒ်များကို ရှင်းလင်းရန်",
     "testing": "စမ်းသပ်နေသည်...",
@@ -3397,16 +3515,53 @@
     "httpError": "တောင်းဆိုမှုသည် HTTP {status} ဖြင့် မအောင်မြင်ပါ",
     "testFailedNoDetail": "အမှားသတင်းစကား မပါဘဲ စမ်းသပ်မှု မအောင်မြင်ပါ",
     "additionalCapabilities": "ထပ်ဆောင်း လုပ်ဆောင်နိုင်စွမ်းများ- {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "API key အသုံးပြုခွင့်",
+    "allowedInKeys": "ခွင့်ပြုထားသည် - {count, plural, one {ကီး # ခု} other {ကီး # ခု}}",
+    "keysLoading": "API key များကို တင်နေသည်…",
+    "keysRetry": "Key များ ပြန်လည်ရယူရန် ထပ်ကြိုးစားပါ",
+    "accessViaPattern": "{pattern} မှတစ်ဆင့်",
+    "accessBlocked": "{pattern} ကြောင့် ပိတ်ဆို့ထားသည်",
+    "editKeyAccess": "Key အသုံးပြုခွင့်ကို ပြင်ဆင်ရန်",
+    "toggleKeyAccess": "{name} တွင် {item} ကို ခွင့်ပြုရန်",
+    "resultNetworkError": "သတ်မှတ်ပေးမှု မအောင်မြင်ပါ",
+    "resultWouldEmptyModels": "ဤကီးတွင် ခွင့်ပြုထားသော မော်ဒယ်များ မကျန်တော့ဘဲ ဖြစ်သွားပါမည် — ၎င်းအစား ကီးအသုံးပြုခွင့်ကို တည်းဖြတ်ပါ",
+    "resultWouldEmptyCombos": "ဤကီးတွင် ခွင့်ပြုထားသော combo များ မကျန်တော့ဘဲ ဖြစ်သွားပါမည် — ၎င်းအစား ကီးအသုံးပြုခွင့်ကို တည်းဖြတ်ပါ",
+    "keyUpdatePending": "{name} ကို အပ်ဒိတ်လုပ်နေဆဲဖြစ်သည်။ ခဏအကြာတွင် ထပ်စမ်းကြည့်ပါ။",
+    "assignToKeys": "API key များသို့ သတ်မှတ်ပေးရန်…",
+    "assignApply": "အပြောင်းအလဲများကို အတည်ပြုရန်",
+    "assignComplete": "API key အသုံးပြုခွင့်ကို အပ်ဒိတ်လုပ်ပြီးပါပြီ",
+    "assignFailed": "အချို့သော API key အပ်ဒိတ်များ မအောင်မြင်ပါ",
+    "assignNoChanges": "API ကီး အသုံးပြုခွင့် ပြောင်းလဲမှု မရှိပါ",
+    "selectedAccessItems": "ရွေးချယ်ထားသော အရာများ- {count}",
+    "assignExcludedCombos": "{count, plural, one {ရွေးချယ်ထားသော combo အတန်း # ခုသည် မော်ဒယ်မဟုတ်သဖြင့် ဤနေရာတွင် ကျော်သွားပါမည်} other {ရွေးချယ်ထားသော combo အတန်း # ခုသည် မော်ဒယ်များမဟုတ်သဖြင့် ဤနေရာတွင် ကျော်သွားပါမည်}}။ Combos တက်ဘ်မှ combo များကို သတ်မှတ်ပါ။",
+    "assignActionAdd": "ထည့်ရန်",
+    "assignActionRemove": "ဖယ်ရှားရန်",
+    "searchKeys": "API key များကို ရှာဖွေရန်",
+    "selectApiKey": "API key {name} ကို ရွေးရန်",
+    "allModelsAccess": "မော်ဒယ်အားလုံး",
+    "allCombosAccess": "Combo အားလုံး",
+    "modelAccessCount": "မော်ဒယ်များ- {count}",
+    "comboAccessCount": "Combo များ- {count}",
+    "keyInactive": "အသုံးမပြုပါ",
+    "keyBanned": "ပိတ်ပင်ထားသည်",
+    "keyRevoked": "ရုပ်သိမ်းထားသည်",
+    "switchRestrictedConfirm": "ဤ key ကို ကန့်သတ်အသုံးပြုခွင့်သို့ ပြောင်းပါ- ရွေးချယ်ထားသော အရာများကိုသာ ခွင့်ပြုပါမည်",
+    "removeNoChangeHint": "ဤ key သည် အရာအားလုံးကို ခွင့်ပြုထားသည်၊ ရွေးချယ်ထားသော အရာများကို ဖယ်ရှားခြင်းက မည်သည့်ပြောင်းလဲမှုမျှ ဖြစ်စေမည်မဟုတ်ပါ",
+    "removeStaysAllowedHint": "{patterns} မှတစ်ဆင့် ဤကီးတွင် ဆက်လက်ခွင့်ပြုထားဆဲဖြစ်သည်",
+    "resultChanged": "ပြောင်းလဲပြီး",
+    "resultUnchanged": "ပြောင်းလဲမှုမရှိပါ",
+    "resultSkipped": "ကျော်သွားသည်",
+    "resultNeedsSwitch": "ကန့်သတ်အသုံးပြုခွင့်သို့ ပြောင်းရန် လိုအပ်သည်"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid ဟု သတ်မှတ်ထားသော ဝန်ဆောင်မှုပေးသူများကို auto တွင် ထည့်သွင်းရန်",
-    "autoTosDescription": "မူလအတိုင်း ပိတ်ထားသည်။ အကောင့်တစ်ခုတည်းအတွက် မဟုတ်ဘဲ auto combo အားလုံးအတွက် သက်ရောက်သည်။ ဝန်ဆောင်မှုပေးသူကို ချိတ်ဆက်ခြင်းက ဤရွေးချယ်မှုကို ဖွင့်မပေးပါ။",
-    "autoTosSaveError": "ToS မူဝါဒကို မသိမ်းဆည်းနိုင်ပါ။ ယခင်ဆက်တင်ကိုသာ ပြထားဆဲဖြစ်သည်။ ထပ်မံကြိုးစားပါ။",
-    "autoTosLoadError": "ToS မူဝါဒကို မဖတ်ယူနိုင်ပါ။ မပြောင်းမီ ထပ်မံကြိုးစားပါ။",
     "title": "ပေါင်းစပ်မော်ဒယ်များ",
     "description": "အလေးချိန်အလိုက် လမ်းကြောင်းခွဲခြင်းနှင့် အရန်ပံ့ပိုးမှုပါဝင်သော မော်ဒယ်ပေါင်းစပ်မှုများကို ဖန်တီးပါ",
     "autoCatalogTitle": "အလိုအလျောက် လမ်းကြောင်းခွဲခြင်း ကတ်တလောက်",
+    "autoTosLoadError": "ToS မူဝါဒကို မဖတ်ယူနိုင်ပါ။ မပြောင်းမီ ထပ်မံကြိုးစားပါ။",
+    "autoTosSaveError": "ToS မူဝါဒကို မသိမ်းဆည်းနိုင်ပါ။ ယခင်ဆက်တင်ကိုသာ ပြထားဆဲဖြစ်သည်။ ထပ်မံကြိုးစားပါ။",
+    "autoTosIncludeLabel": "ToS: avoid ဟု သတ်မှတ်ထားသော ဝန်ဆောင်မှုပေးသူများကို auto တွင် ထည့်သွင်းရန်",
+    "autoTosDescription": "မူလအတိုင်း ပိတ်ထားသည်။ အကောင့်တစ်ခုတည်းအတွက် မဟုတ်ဘဲ auto combo အားလုံးအတွက် သက်ရောက်သည်။ ဝန်ဆောင်မှုပေးသူကို ချိတ်ဆက်ခြင်းက ဤရွေးချယ်မှုကို ဖွင့်မပေးပါ။",
     "autoCatalogTemplateCount": "တမ်းပလိတ် {count} ခု",
     "autoCatalogDescription": "ချိတ်ဆက်ထားသော ဝန်ဆောင်မှုပေးသူများမှ ပြောင်းလဲမှုနှင့်အညီ သတ်မှတ်ပေးသည့် အသင့်ပါ auto/* ပေါင်းစပ်မှုများ။ ဤ ID များထဲမှ မည်သည့်တစ်ခုကိုမဆို model အကွက်အဖြစ် အသုံးပြုနိုင်ပြီး စနစ်ထည့်သွင်းရန် မလိုပါ။",
     "autoCatalogExpand": "အလိုအလျောက် လမ်းကြောင်းခွဲခြင်း ကတ်တလောက်ကို ဖြန့်ကြည့်ရန်",
@@ -3451,6 +3606,12 @@
     "errorUpdating": "ပေါင်းစပ်မော်ဒယ်ကို အပ်ဒိတ်လုပ်ရာတွင် အမှားဖြစ်ပွားခဲ့သည်",
     "errorDeleting": "ကွန်ဘိုကို ဖျက်ရာတွင် အမှားဖြစ်ပွားခဲ့သည်",
     "testFailed": "စမ်းသပ်တောင်းဆိုမှု မအောင်မြင်ပါ",
+    "removeErrorModels": "မအောင်မြင်သော မော်ဒယ် {count} ခုကို ဖျက်မည်",
+    "removingErrorModels": "ဖယ်ရှားနေသည်…",
+    "errorModelsRemoved": "ပေါင်းစပ်မော်ဒယ်မှ မအောင်မြင်သော မော်ဒယ် {count} ခုကို ဖယ်ရှားပြီးပါပြီ",
+    "noErrorModelsFound": "ဤပေါင်းစပ်မော်ဒယ်၏ ကိုယ်ပိုင်အဆင့်များတွင် မအောင်မြင်သော မော်ဒယ် မတွေ့ပါ",
+    "cannotRemoveAllModels": "ပေါင်းစပ်မော်ဒယ်မှ မော်ဒယ်အားလုံးကို ဖယ်ရှား၍ မရပါ",
+    "removeErrorModelsConfirm": "“{name}” မှ မအောင်မြင်သော မော်ဒယ် {count} ခုကို ဖယ်ရှားမည်လား။ အချိန်ကုန်ဆုံးမှုနှင့် နှုန်းကန့်သတ်ချက်များကို မရေတွက်ပါ။",
     "failedToggle": "ကွန်ဘိုကို ဖွင့်/ပိတ် ပြောင်းလဲ၍ မရပါ",
     "testResults": "စမ်းသပ်မှုရလဒ်များ — {name}",
     "resolvedBy": "ဖြေရှင်းပေးသူ:",
@@ -3518,6 +3679,9 @@
     "moveUp": "အပေါ်သို့ ရွှေ့ရန်",
     "moveDown": "အောက်သို့ ရွှေ့ရန်",
     "removeModel": "ဖယ်ရှားရန်",
+    "testStep": "ဤမော်ဒယ်ကို စမ်းသပ်ရန်",
+    "testStepRunning": "စမ်းသပ်နေသည်…",
+    "testStepNotTestable": "မော်ဒယ်တစ်ခုတည်းပါသော အဆင့်များကိုသာ စမ်းသပ်နိုင်သည်",
     "saving": "သိမ်းဆည်းနေသည်...",
     "liveNoProviders": "Provider များကို မတွေ့ရှိရသေးပါ။",
     "liveFleetDataHint": "Fleet ဒေတာကို တိုက်ရိုက် combo event များမှတစ်ဆင့် ရရှိပါသည်။",
@@ -3559,6 +3723,7 @@
     "playgroundNoCombosYet": "ကွန်ဘိုများကို မဖွဲ့စည်းရသေးပါ။",
     "playgroundCreateFirst": "ပထမဦးစွာ တစ်ခုဖန်တီးပါ",
     "weighted": "အလေးချိန်အလိုက်",
+    "weightPercent": "အလေးချိန် (%)",
     "leastUsed": "အသုံးပြုမှုအနည်းဆုံး",
     "costOpt": "ကုန်ကျစရိတ် အကောင်းဆုံးဖြစ်အောင်",
     "strategyGuideTitle": "ဤနည်းဗျူဟာကို အသုံးပြုနည်း",
@@ -3720,6 +3885,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# အကောင့်} other {# အကောင့်များ}}",
     "builderGlobalAdded": "ထည့်ပြီး",
     "builderGlobalAdd": "ထည့်မည်",
+    "clearSearch": "ရှာဖွေမှုကို ရှင်းလင်းရန်",
     "manualModel": "ကိုယ်တိုင်သတ်မှတ်သည့် မော်ဒယ်",
     "manualModelInvalid": "မော်ဒယ်တစ်ခုကို provider/model ပုံစံဖြင့် ထည့်သွင်းပါ။",
     "manualModelUnknownProvider": "မသိသော ဝန်ဆောင်မှုပေးသူ ရှေ့ဆက်စာသား။",
@@ -3936,6 +4102,7 @@
     "builderComboRefStep": "ကွန်ဘို ကိုးကားချက် ထည့်ရန်",
     "builderPinnedAccount": "ပင်တွဲထားသော အကောင့်",
     "builderLegacyEntry": "စနစ်ဟောင်းမှ ထည့်သွင်းမှု",
+    "builderStaleModel": "တိုက်ရိုက်ကတ်တလောက်တွင် မရှိပါ",
     "reviewName": "အမည်",
     "reviewStrategy": "မဟာဗျူဟာ",
     "reviewSteps": "အဆင့်များ",
@@ -3973,6 +4140,10 @@
     "responseValidationMinLength": "အနည်းဆုံး အကြောင်းအရာအရှည် (အက္ခရာများ)",
     "responseValidationJsonPaths": "JSON-path စစ်ဆေးချက်များ",
     "responseValidationAddCheck": "+ စစ်ဆေးချက် ထည့်ရန်",
+    "responseValidationRemoveCheck": "စစ်ဆေးမှုကို ဖယ်ရှားရန်",
+    "responseValidationPath": "JSON လမ်းကြောင်း",
+    "responseValidationCondition": "အခြေအနေ",
+    "responseValidationValue": "မျှော်မှန်းတန်ဖိုး",
     "agentFeaturesSystemMessageOverride": "စနစ်မက်ဆေ့ချ်ကို အစားထိုးသတ်မှတ်ရန်",
     "agentFeaturesSystemMessagePlaceholder": "သင်သည် ကျွမ်းကျင်သော လက်ထောက်တစ်ဦးဖြစ်သည်...",
     "agentFeaturesSystemMessageHint": "အေးဂျင့်များအတွက် စနစ်မက်ဆေ့ချ် အစားထိုးသတ်မှတ်ချက်",
@@ -4792,7 +4963,15 @@
     },
     "totalEntries": "စာရင်းသွင်းချက် စုစုပေါင်း",
     "type": "အမျိုးအစား",
-    "memoryEnabled": "မှတ်ဉာဏ်ကို ဖွင့်ထားသည်"
+    "memoryEnabled": "မှတ်ဉာဏ်ကို ဖွင့်ထားသည်",
+    "qdrantTutorialTitle": "မြန်ဆန်သောသင်ခန်းစာ: Qdrant ဖြင့် memory",
+    "qdrantTutorialIntro": "Qdrant သည် memory တွေ၏ vectors နှင့် metadata များကို သိမ်းဆည်းထားပြီး သက်ဆိုင်ရာ context ကို ရှာဖွေနိုင်စေသည်။ ၎င်းသည် tokens များကို တိုက်ရိုက် နှမ်းမိစေခြင်း မဟုတ်ပါ; ငွေပမာဏ ကျဆုံးမှုကို တိုက်ရိုက် မဟုတ်ဘဲ request နှင့် မသက်ဆိုင်သော context များကို ဖြစ်ပေါ်မှုကို ရှောင်ရှားခြင်းဖြင့် တိုက်ရိုက်မဟုတ်ဘဲ လုပ်ဆောင်ပါသည်။",
+    "qdrantTutorialStep1": "production မှာ အသုံးပြုမလျှင် အဆုံးအခွင်တွင် HTTPS နှင့် API key ဖြင့် server ကို သိမ်းဆည်းထားပါ။",
+    "qdrantTutorialStep2": "ဟို့စ် (host)၊ ပို့တ် (port)၊ စုစည်းမှု (collection) နှင့် အထောက်အထား (credential) သတ်မှတ်ပြီးသော provider/model ပုံစံဖြင့် မော်ဒယ်တစ်ခုကို ထည့်ပါ။",
+    "qdrantTutorialStep3": "collection ၏ အတိုင်းအတာ (dimension) သည် မော်ဒယ်က ထုတ်ပေးသော အတိုင်းအတာနှင့် ကိုက်ညီရမည်။ ရှိပြီးသား 2048 အတိုင်းအတာ collection သည် 1536 အတိုင်းအတာ embedding များကို လက်မခံပါ။",
+    "qdrantTutorialStep4": "သိမ်းဆည်းပါ၊ ချိတ်ဆက်မှုကို စစ်ဆေးပြီး ရှာဖွေမှု စစ်ဆေးမှုကို လည်ပတ်ပါ။ ထို့နောက်မှသာ Qdrant ကို ဖွင့်တင်ပါ။",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "ဖန်တီးသူ: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "ကျွမ်းကျင်မှုများ",
@@ -5288,7 +5467,8 @@
         "skipped": "စီစဉ်သတ်မှတ်ပြီးသား",
         "failed": "မအောင်မြင်ပါ"
       }
-    }
+    },
+    "stepProgress": "စနစ်ထည့်သွင်းမှု တိုးတက်မှု"
   },
   "providers": {
     "tosAvoidNoticeTitle": "ဤဝန်ဆောင်မှုပေးသူကို မူလအတိုင်း auto မှ ဖယ်ထားသည်",
@@ -5329,6 +5509,27 @@
     "importFromFileDownloadTemplate": "CSV နမူနာပုံစံကို ဒေါင်းလုဒ်လုပ်ရန်",
     "importFromFileMoreErrors": "+{count} ခု ထပ်ရှိသည်",
     "importFromFileSchemaHint": "CSV ကော်လံများ၏ အစီအစဉ်မှာ provider, name, apiKey, baseUrl (ချန်လှပ်နိုင်), priority (ချန်လှပ်နိုင်) ဖြစ်သည်။ provider ကော်လံသည် လက်ရှိ စီမံခန့်ခွဲထားသော ပံ့ပိုးသူ id သို့မဟုတ် မှတ်ပုံတင်ပြီးသား OpenAI/Anthropic-compatible node id ဖြစ်ရမည် — ဤထည့်သွင်းမှုသည် endpoint node အသစ်များကို မဖန်တီးပါ။",
+    "importOAuthExport": "OAuth ထုတ်ယူမှုကို တင်သွင်းရန်",
+    "oauthExportTitle": "အကောင့်မန်နေဂျာ ထုတ်ယူမှုကို တင်သွင်းရန်",
+    "oauthExportDescription": "အကောင့်မန်နေဂျာမှ စာသားရိုးရိုး ထုတ်ယူမှုကို အပ်လုဒ်လုပ်ပါ (ဥပမာ Antigravity Manager ၏ cloud-accounts ထုတ်ယူမှု)။ တိုကင်များကို ဆာဗာဘက်တွင် ပြန်လည်ဆန်းသစ်ပြီး အကောင့်တစ်ခုစီသည် OAuth ချိတ်ဆက်မှုတစ်ခု ဖြစ်လာသည် — ထပ်နေသောအကောင့်များကို နေရာတွင်ပင် ပြန်လည်ဆန်းသစ်သည်။",
+    "oauthExportProviderLabel": "ဝန်ဆောင်မှုပေးသူ",
+    "oauthExportChoose": "ဖိုင်ရွေးချယ်ရန်",
+    "oauthExportFileAria": "အကောင့်ထုတ်ယူမှု JSON ဖိုင်",
+    "oauthExportSchemaHint": "လက်ခံသည်- \"accounts\" array ပါသော စာရွက်စာတမ်း၊ array သီးသန့် သို့မဟုတ် မှတ်တမ်းတစ်ခုတည်း။ တိုကင်များသည် အတွင်းထည့်ထားသော token object ထဲတွင် သို့မဟုတ် မှတ်တမ်းပေါ်တွင် တိုက်ရိုက် ရှိနိုင်သည်။",
+    "oauthExportDetected": "အကောင့် {count} ခု တွေ့ရှိသည်",
+    "oauthExportSelectAll": "အကောင့်အားလုံးကို ရွေးရန်",
+    "oauthExportSelectAccount": "အကောင့် {index} ကို ရွေးရန်",
+    "oauthExportColEmail": "အီးမေးလ်",
+    "oauthExportColProvider": "ဝန်ဆောင်မှုပေးသူ",
+    "oauthExportColRefresh": "ပြန်လည်ဆန်းသစ်ရေး တိုကင်",
+    "oauthExportNoEmail": "(အီးမေးလ် မရှိ)",
+    "oauthExportYes": "ဟုတ်",
+    "oauthExportNo": "မဟုတ်",
+    "oauthExportImporting": "ထည့်သွင်းနေသည်…",
+    "oauthExportImport": "အကောင့် {count} ခု တင်သွင်းရန်",
+    "oauthExportResult": "{imported}/{total} တင်သွင်းပြီး — {failed} မအောင်မြင်",
+    "oauthExportParseError": "ဤဖိုင်မှ မည်သည့်အကောင့်ကိုမျှ ဖတ်၍မရပါ။",
+    "oauthExportUnknownError": "မသိသော အမှား",
     "adaptaTutorial": {
       "title": "Adapta Web ကို ချိတ်ဆက်နည်း",
       "introPrefix": "Adapta သည် Clerk မှတစ်ဆင့် အထောက်အထားစိစစ်သည်။ တိုကင်",
@@ -5579,6 +5780,7 @@
     "allModelsAlreadyImported": "မော်ဒယ်အားလုံးကို ထည့်သွင်းပြီးဖြစ်သည်",
     "noNewModelsToImport": "ထည့်သွင်းရန် မော်ဒယ်အသစ်မရှိပါ — မော်ဒယ်အားလုံးသည် မှတ်ပုံတင်စာရင်း သို့မဟုတ် စိတ်ကြိုက်မော်ဒယ်စာရင်းတွင် ရှိပြီးဖြစ်သည်",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "မော်ဒယ်ရှာဖွေတွေ့ရှိမှု မအောင်မြင် {time}",
     "skippingExistingModels": "ရှိပြီးသား မော်ဒယ် {count} ခုကို ကျော်နေသည်",
     "autoSync": "အလိုအလျောက် စင့်ခ်လုပ်ခြင်း",
     "autoSyncShort": "စင့်ခ်လုပ်မည်",
@@ -5797,6 +5999,7 @@
     "contextWindowOverridePlaceholder": "ဥပမာ 131072",
     "contextWindowOverrideHint": "ပံ့ပိုးသူက မှားယွင်းဖော်ပြသည့်အခါ ဤမော်ဒယ်၏ အမှန်တကယ် context window (တိုကင်များ) ကို ကိုယ်တိုင် သတ်မှတ်ပါ။ ၎င်းသည် အလိုအလျောက် ရှာဖွေသတ်မှတ်ထားသော တန်ဖိုးများနှင့် catalog တန်ဖိုးများထက် ဦးစားပေးမည်ဖြစ်ပြီး combo routing က မော်ဒယ်ကို ဖယ်ရှားခြင်းမှ တားဆီးပေးသည်။",
     "contextWindowOverrideInvalid": "Context window အစားထိုးသတ်မှတ်ချက်သည် သုညထက်ကြီးသော ကိန်းပြည့်တိုကင်အရေအတွက် ဖြစ်ရမည်",
+    "maxOutputTokenOverrideInvalid": "အများဆုံး ထုတ်ပေး Token အစားထိုးသတ်မှတ်ချက်သည် သုညထက်ကြီးသော ကိန်းပြည့်တိုကင်အရေအတွက် ဖြစ်ရမည်",
     "visionCapableLabel": "Vision အသုံးပြုနိုင်သည်",
     "visionCapableHint": "ပံ့ပိုးသူ၏ ရှာဖွေတွေ့ရှိမှု metadata တွင် ရုပ်ပုံထည့်သွင်းမှု modality ကို မဖော်ပြထားသည့်အခါ ဤမော်ဒယ်ကို vision အသုံးပြုနိုင်သည်ဟု ကိုယ်တိုင် အမှတ်အသားပြုပါ (ကိုယ်တိုင် host လုပ်ထားသော/local backend များတွင် အဖြစ်များသည်)။",
     "compatParamFiltersLabel": "Parameter စစ်ထုတ်မှုများ",
@@ -5838,6 +6041,25 @@
     "ccAliasAddModelButton": "အစားထိုးသတ်မှတ်ချက် ထည့်ရန်",
     "ccAliasLoadError": "ရှာဖွေတွေ့ရှိမှု အမည်ပွား ဆက်တင်များကို ဖတ်ယူ၍မရပါ: {error}",
     "ccAliasSaveError": "ရှာဖွေတွေ့ရှိမှု အမည်ပွား ဆက်တင်ကို သိမ်းဆည်း၍မရပါ: {error}",
+    "cliVersionSectionTitle": "ကြော်ငြာထားသော CLI client ဗားရှင်း",
+    "cliVersionEffectiveLabel": "လောလောဆယ် ကြော်ငြာထားပါတယ်။",
+    "cliVersionSourceLabel": "ဖြေရှင်းထားသည်: {source}",
+    "cliVersionPinnedLabel": "ဖမ်းယူထားသော မူရင်း- {pinned}",
+    "cliVersionSourceSettings": "ဒက်ရှ်ဘုတ်ကို ထပ်ရေးပါ။",
+    "cliVersionSourceEnv": "ပတ်ဝန်းကျင် ပြောင်းလဲမှု",
+    "cliVersionSourceDiscovered": "အလိုအလျောက် ရှာဖွေတွေ့ရှိသည့် နောက်ဆုံးထွက်ရှိမှု",
+    "cliVersionSourceDefault": "ပုံသေဖမ်းထားသည်။",
+    "cliVersionInputLabel": "ဗားရှင်းကို အစားထိုးပါ။",
+    "cliVersionInputPlaceholder": "ဗားရှင်းကို အစားထိုးပါ။ အလွတ်ရှင်းလင်းသည်။",
+    "cliVersionSaveButton": "သိမ်းဆည်းပါ။",
+    "cliVersionResetButton": "မူရင်းသို့ ပြန်လည်သတ်မှတ်ပါ။",
+    "cliVersionLoadError": "CLI ဗားရှင်းဆက်တင်များကို တင်ရန် မအောင်မြင်ပါ- {error}",
+    "cliVersionSaveError": "CLI ဗားရှင်း- {error} ကို သိမ်းဆည်းရန် မအောင်မြင်ပါ။",
+    "cliVersionLoadFailed": "လက်ရှိ CLI ဗားရှင်းဆက်တင်များကို မတင်နိုင်ပါ။",
+    "cliVersionHintClaude": "သူမြင်ရတဲ့ Claude Code client ဗားရှင်းမှာ ပိုသစ်တဲ့ Claude မော်ဒယ်တွေကို Anthropic gate က ထုတ်ပေးပါတယ်။ ဤသည်မှာ မနုဿ-ဘောင်သွင်းတောင်းဆိုမှုတိုင်းအတွက် OmniRoute ကြော်ငြာထားသောဗားရှင်းဖြစ်သည်။",
+    "cliVersionCaveatClaude": "ငွေတောင်းခံခြင်းသတိပေးချက်- ငွေပေးချေမှုဗားရှင်းမှာ '<version>' ဖြစ်သည်။'<build-revision>' နှင့် build revision သည် သီးခြားဖမ်းယူထားသော constant ဖြစ်သည်။ ကြော်ငြာ 2.1.260 သည် 2.1.260.1e2 အစီရင်ခံသည် ၊ ၎င်းသည် အမှန်တကယ် 2.1.260 binary ပေးပို့သည်မဟုတ်ပါ။",
+    "cliVersionHintCodex": "OpenAI သည် ၎င်းမြင်ရသည့် Codex ကလိုင်းယင့်ဗားရှင်းတွင် မော်ဒယ်အသစ်များကို ဂိတ်ပေါက်ပေးသည်၊ ဥပမာ အမှားဖြစ်သည်- 'gpt-6-astra' မော်ဒယ်သည် Codex ဗားရှင်းအသစ် လိုအပ်သည်။",
+    "cliVersionCaveatCodex": "အနုမာနသတိပေးချက်- သင့်ကိုယ်ပိုင်ခေါ်ဆိုသူအစီရင်ခံချက်ဗားရှင်းသည် CODEX_CLIENT_VERSION env var ထက်သာလွန်နေသေးသော်လည်း၊ ဤအရာသည် တိကျပြတ်သားသောအော်ပရေတာရည်ရွယ်ချက်ဖြစ်သောကြောင့် နှစ်ခုစလုံးကို ကျော်သွားပါသည်။",
     "compatUpstreamHeadersLabel": "အထက်ရင်းမြစ်အတွက် ထပ်ဆောင်း header များ",
     "compatUpstreamHeadersHint": "အထူးလုပ်ပိုင်ခွင့်မြင့် ဆက်တင် — provider API အထောက်အထားများကို တည်းဖြတ်ခြင်းနှင့် ယုံကြည်မှုအဆင့်တူညီသောကြောင့် ယုံကြည်ရသည့် စီမံခန့်ခွဲသူများသာ အသုံးပြုသင့်သည်။ OmniRoute က provider API key မှ auth ထည့်ပြီးနောက် ပေါင်းစည်းပေးသည်။ စိတ်ကြိုက် header တစ်ခုသည် ရှိပြီးသား header တစ်ခုနှင့် အမည်တူပါက (ဥပမာ Authorization) သင်ထည့်ထားသောတန်ဖိုးက အလိုအလျောက်ဖန်တီးထားသည့် header (Bearer token အပါအဝင်) ကို လုံးဝအစားထိုးမည် — အထက်ရင်းမြစ်က ဆက်တင်များရှိ key ကို မမြင်ဘဲ သင်ရိုက်ထည့်ထားသည့်တန်ဖိုးကိုသာ မြင်ရမည်။ မှားယွင်းစွာ စီစဉ်သတ်မှတ်ပါက 401 ဖြစ်စေနိုင်သည် သို့မဟုတ် အထက်ရင်းမြစ် auth ပျက်ယွင်းနိုင်သည်။ Header တစ်ခုလျှင် အတန်းတစ်တန်း ထည့်ပါ (ဥပမာ အချို့ gateway များအတွက် ထပ်ဆောင်း Authentication)။ အစမ်းကြည့်ရန် တန်ဖိုးပေါ်တွင် မောက်စ်တင်ပါ သို့မဟုတ် focus လုပ်ပါ။ Focus ဖယ်ရှားချိန်၊ အပြင်ဘက်ကို နှိပ်ချိန် သို့မဟုတ် ဤ panel ကို ပိတ်ချိန်တွင် သိမ်းဆည်းမည်။",
     "compatUpstreamHeaderName": "Header အမည်",
@@ -6055,10 +6277,10 @@
     "apiFormatLabel": "API Format အညွှန်း",
     "apiKeyOptionalHint": "သင့် local setup သို့မဟုတ် provider က authentication မလိုအပ်ပါက ကွက်လပ်ထားပါ။",
     "apiKeyOptionalLabel": "API Key (မဖြစ်မနေမဟုတ်ပါ)",
-    "apiRegionChina": "API ဒေသ — တရုတ်",
-    "apiRegionHint": "API ဒေသဆိုင်ရာ အကြံပြုချက်",
-    "apiRegionInternational": "API ဒေသ — နိုင်ငံတကာ",
-    "apiRegionLabel": "API ဒေသ အညွှန်း",
+    "apiRegionChina": "တရုတ်ပြည်မကြီး",
+    "apiRegionHint": "API အသုံးပြုမှုနှင့် quota ခြေရာခံခြင်းအတွက် အသုံးပြုမည့် endpoint ဒေသကို ရွေးချယ်ပါ။",
+    "apiRegionInternational": "နိုင်ငံတကာ",
+    "apiRegionLabel": "API ဒေသ",
     "apikey": "API Key",
     "audio": "အသံ",
     "audioProvidersHeading": "အသံ Provider များ၏ ခေါင်းစဉ်",
@@ -6539,6 +6761,7 @@
       "monsterapi": "monsterapi.ai တွင် API key ရယူပါ",
       "moonshot": "Kimi ကို API key ဖြင့် ချိတ်ဆက်ပါ။",
       "morph": "အခမဲ့အဆင့်- တစ်လလျှင် credits 250K၊ $0",
+      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။",
       "nanogpt": "NanoGPT ကို API key ဖြင့် ချိတ်ဆက်ပါ။",
       "nebius": "API စမ်းသပ်ရန် စာရင်းသွင်းချိန်တွင် စမ်းသပ်သုံးစွဲခွင့် credits ~$1 ရရှိပါသည်",
       "nlpcloud": "NLP Cloud သည် OpenAI chat/completions အစား ကိုယ်ပိုင် chatbot API ကို အသုံးပြုသည်။ OmniRoute သည် OpenAI messages များကို input/context/history အဖြစ် ပြောင်းလဲညှိနှိုင်းပြီး ပံ့ပိုးထားသော chatbot models များ၏ local catalog ကို ဖော်ပြပေးသည်။",
@@ -6635,8 +6858,7 @@
       "kiro": "အခမဲ့အဆင့်- တစ်လလျှင် credit 50 (~25K–100K tokens)။ ⚠️ Kiro ToS သည် ပြင်ပ proxy/harness အသုံးပြုမှုကို တားမြစ်ထားသည်။",
       "codex": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် OpenAI Codex ကို ချိတ်ဆက်ပါ။",
       "qwen": "လက်ရှိ OAuth လုပ်ငန်းစဉ်ဖြင့် Qwen Code ကို ချိတ်ဆက်ပါ။",
-      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ",
-      "apmix": "apmix.ai/dashboard မှ API key ဖြင့် Apmix ကို ချိတ်ဆက်ပါ — စာရင်းသွင်းမှုတစ်ခု၊ မော်ဒယ်များစွာ။"
+      "github-models": "github.com/settings/tokens တွင် 'models: read' scope ပါဝင်သည့် GitHub PAT တစ်ခု ဖန်တီးပါ"
     },
     "passthroughModelsDescription": "{provider} သည် provider-native model IDs များကို လက်ခံသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် routing အတွက် စိတ်ကြိုက် IDs များ ထည့်ပါ။",
     "bedrockModelsDescription": "Amazon Bedrock မော်ဒယ်များကို AWS region အလိုက် ကန့်သတ်ထားသည်။ /models မှ ထည့်သွင်းပါ သို့မဟုတ် ရွေးချယ်ထားသည့် region တွင် ဖွင့်ထားသော Bedrock model IDs များ ထည့်ပါ။",
@@ -6808,7 +7030,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "ပေါင်းစပ်မှု {count} ခုတွင် အသုံးပြုထားသည်- {combos}",
+    "openComboTooltip": "ပေါင်းစပ်မှုများကို ဖွင့်ရန် — {combo} က အသုံးပြုထားသည်",
+    "claudeCodeRoutingTitle": "Claude Code traffic အတွက် Upstream proxy routing",
+    "routingNative": "Native",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "အသံတိုရုပ်ရှင်",
+    "markFreeTierTitle": "အခမဲ့ တစ်လတစ်ပြိုင်နက်ဖြစ်အောင် မှတ်သားပါ (ပေးခမ်းမပေးပဲ ကိုယ်ပိုင် model များကို ကိုယ်တိုင် ကြည့်ရှုရန်)",
+    "codexTunnelTitle": "Codex tool ချိတ်ဆက်မှု",
+    "codexTunnelDescription": "တနယ်သည် တိကျစွာ outbound အမျိုးအစားသာဖြစ်ပါသည်။ ဒေသသုံး tools များကို Codex က saja ဖြင့်သာ၊ ယင်း၏ sandbox နှင့် approval policy အောက်တွင် လည်ပတ်နေဆဲဖြစ်ပါသည်။",
+    "tunnelIdLabel": "တနယ် ID",
+    "tunnelRuntimeKeyLabel": "တနယ် runtime key",
+    "tunnelRuntimeKeyPlaceholder": "Runtime ကီး",
+    "tunnelRuntimeKeyHint": "cookie နှင့်အတူ encrypted ဖြင့် သိမ်းဆည်းထားပြီး log များထဲသို့ မှတ်သားခြင်းမရှိပါ။",
+    "tunnelRuntimeKeyNewLabel": "သစ်တနယ် runtime key",
+    "tunnelRuntimeKeyNewHint": "သစ် cookie နှင့်အတူသာ ထည့်ပါ။ တန်ဖိုးကို encrypted ဖြင့် သိမ်းဆည်းထားပါမည်။",
+    "chatgptConnectorLabel": "ChatGPT စိတ်ကြိုက် connector",
+    "doctorChecking": "အခြေအနေစစ်ဆေးနေသည်…",
+    "doctorCheck": "doctor အခြေအနေ စစ်ဆေးရန်",
+    "fallbackRetryBackendTitle": "အစမ်းပြန်လည်စက်"
   },
   "settings": {
     "title": "ဆက်တင်များ",
@@ -7104,16 +7346,6 @@
     "settingsSidebarDesc": "ပြသမည့် ဘေးဘားအရာများကို ရွေးချယ်ပါ။ အခြေခံလိုအပ်ချက်များကို ရွေးထားလျှင် အဆင့်မြင့်ကိရိယာများကို ဆက်လက်ရှာဖွေနိုင်သည်။",
     "hideHealthLogs": "ကျန်းမာရေးစစ်ဆေးမှု မှတ်တမ်းများကို ဖျောက်ရန်",
     "hideHealthLogsDesc": "ဖွင့်ထားသောအခါ ဆာဗာကွန်ဆိုးလ်ရှိ [HealthCheck] မက်ဆေ့ချ်များကို မပြသပါ",
-    "themeAccent": "အပြင်အဆင်အရောင်",
-    "themeAccentDesc": "ကြိုတင်သတ်မှတ်ထားသောအရောင်ကို ရွေးချယ်ပါ သို့မဟုတ် အရောင်တစ်ရောင်ဖြင့် သင့်ကိုယ်ပိုင်အပြင်အဆင်ကို ဖန်တီးပါ",
-    "themeCreate": "အပြင်အဆင် ဖန်တီးရန်",
-    "themeCustom": "စိတ်ကြိုက်အပြင်အဆင်",
-    "themeBlue": "အပြာရောင်",
-    "themeRed": "အနီရောင်",
-    "themeGreen": "အစိမ်းရောင်",
-    "themeViolet": "ခရမ်းရောင်",
-    "themeOrange": "လိမ္မော်ရောင်",
-    "themeCyan": "စိမ်းပြာရောင်",
     "whitelabeling": "အမှတ်တံဆိပ် စိတ်ကြိုက်ပြင်ဆင်ခြင်း",
     "whitelabelingDesc": "အက်ပ်အမည်နှင့် လိုဂိုကို စိတ်ကြိုက်ပြင်ဆင်ပါ",
     "appName": "အက်ပ်အမည်",
@@ -7254,7 +7486,7 @@
       "nextSwitchNow": "ယခု",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7497,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "အခြေခံ binary လမ်းကြောင်း",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "ရွေးချယ်နိုင်သည်: လက်ခံထားသော ဖိုင်ကို အစားမထိုးမီ အခြေခံ binary ဖြင့် ဖန်တီးထားသော ဖိုင်ကို စစ်ဆေးပါသည်။ ဘေးနားတွင် ဆက်လက် ရေးသားရန် ကွက်လပ်ထားပါ။ ဖိုင်တွဲမရှိပါက ဖန်တီးပါမည်။"
+      "coreBinaryPathHelp": "ရွေးချယ်နိုင်သည်: လက်ခံထားသော ဖိုင်ကို အစားမထိုးမီ အခြေခံ binary ဖြင့် ဖန်တီးထားသော ဖိုင်ကို စစ်ဆေးပါသည်။ ဘေးနားတွင် ဆက်လက် ရေးသားရန် ကွက်လပ်ထားပါ။ ဖိုင်တွဲမရှိပါက ဖန်တီးပါမည်။",
+      "urlFeedlessHint": "ရွေးချယ်မှုအတွက်သာ မှတ်ပုံတင်ခြင်းကို ဗလာထားပါ—အောက်တွင် ထိန်းချုပ် URL တစ်ခု သတ်မှတ်ပါ၊ feed ကို မရယူ၊ မပြန်လည်သစ်မြှောက် မချိတ်ဆက်ပါ။"
     },
     "bulkHealthcheck": "အစုလိုက် အခြေအနေစစ်ဆေးမှု",
     "bulkHealthcheckDesc": "အလုပ်လုပ်သည့် ပရောက်စီများကို ရှာဖွေရန် စီစဉ်သတ်မှတ်ထားသော ပရောက်စီအားလုံးကို ပစ်မှတ် URL တစ်ခုဖြင့် စမ်းသပ်ပါ။",
@@ -7706,6 +7939,7 @@
     "configured": "စီစဉ်သတ်မှတ်ပြီး",
     "none": "မရှိပါ",
     "modelOverrideValuePlaceholder": "ကိန်းဂဏန်းတန်ဖိုး",
+    "modelOverrideKey": "အစားထိုးသတ်မှတ်သည့် ကီး",
     "modelOverrideReasoningEffortsPlaceholder": "အင်္ဂလိပ်ကော်မာဖြင့် ခွဲထားပါ၊ ဥပမာ low, medium, high",
     "addKeyValue": "ကီး-တန်ဖိုး ထည့်ရန်",
     "noModelOverrides": "ဤမော်ဒယ်အတွက် အစားထိုးသတ်မှတ်ချက်များ မရှိသေးပါ။",
@@ -7754,7 +7988,6 @@
     "customPricingNote": "သတ်မှတ်ထားသော model များအတွက် မူလစျေးနှုန်းကို ပြောင်းလဲသတ်မှတ်နိုင်သည်။ စိတ်ကြိုက်ပြောင်းလဲသတ်မှတ်မှုများသည် အလိုအလျောက် ရှာဖွေသတ်မှတ်ထားသော စျေးနှုန်းထက် ဦးစားပေးခံရသည်။",
     "editPricing": "စျေးနှုန်းကို တည်းဖြတ်ရန်",
     "viewFullDetails": "အသေးစိတ်အပြည့်အစုံ ကြည့်ရန်",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "ဒေတာပမာဏအပေါ် မူတည်၍ အလိုက်သင့် လမ်းကြောင်းသတ်မှတ်မှု",
     "adaptiveVolumeRoutingDesc": "ပေးပို့ဒေတာပမာဏနှင့် ဖြတ်သန်းနိုင်မှုဖိအားအပေါ် အခြေခံ၍ ချိတ်ဆက်မှုများကို အလိုအလျောက် တိုးချဲ့ သို့မဟုတ် လျှော့ချပါ။",
     "lkgpToggleTitle": "နောက်ဆုံး အောင်မြင်စွာအသုံးပြုခဲ့သော Provider (LKGP)",
@@ -7849,6 +8082,8 @@
     "compressionDesc": "ဝန်ဆောင်မှုပေးသူများထံ မပို့မီ ပရောမ့်များကို ချုံ့ခြင်းဖြင့် တိုကင်အသုံးပြုမှုကို လျှော့ချပါ",
     "autoCombosTitle": "အလိုအလျောက် ပေါင်းစပ်မှုများ",
     "autoCombosDesc": "စီစဉ်သတ်မှတ်ထားသော provider တစ်ခုစီမှ model တစ်ခုကို အလိုအလျောက်ရွေးချယ်ပေးသည့် built-in auto/* ပေါင်းစပ်မှုများကို ဤ key အား အသုံးပြုခွင့်ပြုပါ",
+    "ccDiscoveryAliasesTitle": "Claude Code ရှာဖွေတွေ့ရှိမှုအတွက် alias များ",
+    "ccDiscoveryAliasesDesc": "ဤ key ဖြင့် ဝင်ရောက်အသုံးပြုနိုင်ပြီးဖြစ်သော မော်ဒယ်များနှင့် ကွန်ဘိုများအတွက် claude/... compatibility mirror များကို ကြေငြာပါ",
     "compressionGuidanceFullGuideLink": "ချုံ့ခြင်းဆိုင်ရာ လမ်းညွှန်အပြည့်အစုံ",
     "compressionGuidanceShow": "အသေးစိတ်",
     "compressionGuidanceHide": "အသေးစိတ်ကို ဖျောက်ရန်",
@@ -8222,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "ဝင်းဒိုး၏ ရာခိုင်နှုန်း",
     "compressionAdaptivePolicyAbsolute": "ပုံသေ တိုကင်ဘတ်ဂျက်",
     "compressionOutputStylesDescription": "ပံ့ပိုးသူ၏ အထွက်ကို ပြန်လည်ရေးသားခြင်းမရှိဘဲ တုံ့ပြန်မှုပုံစံကို သတ်မှတ်သည့် ညွှန်ကြားချက်များ ထည့်သွင်းပါ။ လွတ်လပ်စွာ ပေါင်းစပ်နိုင်သည်။",
+    "compressionOutputStylesPreviewNote": "တောင်းဆိုချက်တစ်ခုသည် ဘာသာစကားတစ်ခုတည်းကိုသာ ထိုးသွင်းသည်- ရှာဖွေတွေ့ရှိထားသောဘာသာစကား၊ အခြားပထမအထုပ်။ အထက်ဖော်ပြပါ အကွက်များသည် ပေါင်းစပ်ဆေးထိုးခြင်းမဟုတ်ဘဲ တစ်ထုပ်ချင်းအမျိုးအစားများဖြစ်သည်။",
     "mcpAccessibilityDescription": "MCP ကိရိယာအထွက်များ၏ နယ်ပယ်ကို ကန့်သတ်သည် (သီးခြားသိုလှောင်ရာ)။",
     "compressionStylesTileSummary": "တိုကင် {tokens, number} ခု ချွေတာပြီး · {runs, plural, one {ပုံစံသတ်မှတ်ထားသော လုပ်ဆောင်မှု # ကြိမ်} other {ပုံစံသတ်မှတ်ထားသော လုပ်ဆောင်မှု # ကြိမ်}}",
     "compressionStylesTileEmpty": "ပုံစံသတ်မှတ်ထားသော လုပ်ဆောင်မှု မရှိသေးပါ။",
@@ -8799,6 +9035,8 @@
     "qdrantHost": "ဟို့စ်",
     "qdrantCollection": "စုစည်းမှု",
     "catalogVisibilityHint": "ဖျောက်ထားသော မော်ဒယ် ID များကို တူညီသော ဝင်ရောက်ခွင့်များဖြင့် ဆက်လက်ခေါ်ဆိုနိုင်သည်။",
+    "exposeCombosOnly": "/v1/models တွင် ပေါင်းစပ်မှုများကိုသာ ပြပါ",
+    "exposeCombosOnlyDesc": "မော်ဒယ်များကို အလိုအလျောက် ရှာဖွေသော client များသည် provider မော်ဒယ်အကြမ်းများအစား သင်၏ ပေါင်းစပ်မှုများ (ဖျောက်မထားလျှင် auto/* ပါ) ကို မြင်ရမည်။ ရှင်းလင်းစွာ ဖော်ပြသော provider/model ID များကို ဆက်လက် လမ်းကြောင်းပေးမည်။",
     "catalogScopeTitle": "Models API စာရင်း",
     "catalogScopeDesc": "ဤ key အတွက် GET /v1/models က ဖော်ပြပေးသည့်အရာ။ စာရင်းကို ကျဉ်းမြောင်းစေခြင်းသည် key က ခေါ်ဆိုနိုင်သည့်အရာကို မည်သည့်အခါမျှ ပြောင်းလဲစေမည်မဟုတ်ပါ။",
     "catalogScopeAll": "နှစ်မျိုးလုံး",
@@ -8918,7 +9156,9 @@
         "financial": "ငွေကြေး",
         "brazilian": "ဘရာဇီး",
         "usa": "အမေရိကန်",
-        "full": "အပြည့်အစုံ"
+        "full": "အပြည့်အစုံ",
+        "gdpr": "GDPR (ဥရောပသမဂ္ဂ)",
+        "popia": "POPIA (တောင်အာဖရိက)"
       },
       "builtinTypes": "မူလပါဝင်သော အမျိုးအစားများ",
       "types": {
@@ -8932,7 +9172,19 @@
         "ip_address": "IPv4 လိပ်စာများ",
         "ipv6_address": "IPv6 လိပ်စာများ",
         "aws_key": "AWS ဝင်ရောက်ခွင့် ကီးများ",
-        "api_key_generic": "API ကီးများနှင့် တိုကင်များ"
+        "api_key_generic": "API ကီးများနှင့် တိုကင်များ",
+        "iban": "IBAN ဘဏ်အကောင့်နံပါတ်များ",
+        "eu_vat": "EU VAT နံပါတ်များ",
+        "es_dni_nie": "စပိန် DNI / NIE",
+        "it_codice_fiscale": "အီတလီ Codice Fiscale",
+        "pl_pesel": "ပိုလန် PESEL",
+        "nl_bsn": "ဒတ်ခ်ျ BSN",
+        "de_steuer_id": "ဂျာမန် Steuer-ID",
+        "se_personnummer": "ဆွီဒင် personnummer",
+        "za_id": "တောင်အာဖရိက မှတ်ပုံတင်နံပါတ်များ",
+        "za_phone": "တောင်အာဖရိက ဖုန်းနံပါတ်များ",
+        "za_vat": "တောင်အာဖရိက VAT နံပါတ်များ",
+        "za_tax_ref": "တောင်အာဖရိက အခွန်ကိုးကားနံပါတ်များ"
       },
       "customPatterns": "စိတ်ကြိုက် ပုံစံများ",
       "customPatternsDesc": "ကိုက်ညီမှုများကို [CUSTOM_REDACTED] ဖြင့် အစားထိုးသည်။ ပုံစံ {max} ခုအထိ။ ဆိုးရွားသော backtracking အန္တရာယ်ရှိသော ပုံစံများကို ငြင်းပယ်သည်။",
@@ -9034,7 +9286,8 @@
     "tomlTestPassed": "အောင်မြင်သည်",
     "tomlTestFailed": "မအောင်မြင်ပါ",
     "tomlImportError": "RTK TOML ဖိုင်ကို လုပ်ဆောင်၍မရပါ။",
-    "tomlFileReadError": "ရွေးချယ်ထားသော TOML ဖိုင်ကို ဖတ်၍မရပါ။"
+    "tomlFileReadError": "ရွေးချယ်ထားသော TOML ဖိုင်ကို ဖတ်၍မရပါ။",
+    "viewMode": "ကြည့်ရှုမှုပုံစံ"
   },
   "compressionEngineConfig": {
     "loading": "တင်နေသည်…",
@@ -9256,7 +9509,8 @@
     "languagePacksList": "ဘာသာစကားပက်ကေ့များ: {packs}",
     "dragToReorder": "အဆင့်အစီအစဉ် ပြောင်းရန် ဆွဲရွှေ့ပါ",
     "engine": "အင်ဂျင်",
-    "intensity": "ပြင်းအား"
+    "intensity": "ပြင်းအား",
+    "compressionOverride": "ချုံ့သိပ်မှု အစားထိုးသတ်မှတ်ချက်"
   },
   "compressionStudio": {
     "noRun": "ချုံ့မှုလုပ်ဆောင်ချက် မရှိသေးပါ။",
@@ -9316,7 +9570,8 @@
     "encoderWinner": "အနိုင်ရသူ: {winner}",
     "encoder": "ကုဒ်ပြောင်းစက်",
     "bytes": "ဘိုက်များ",
-    "tokensCl100k": "တိုကင်များ (cl100k)"
+    "tokensCl100k": "တိုကင်များ (cl100k)",
+    "studioViews": "Studio မြင်ကွင်းများ"
   },
   "omniglyph": {
     "preview": "အစမ်းကြည့်ရန်",
@@ -9522,7 +9777,9 @@
     "tooltipMinLength": "ဤအရွယ်အစားထက်တိုသော မက်ဆေ့ချ်များကို မချုံ့ပါ။ နိမ့်လေလေ = ပိုမိုချုံ့လေလေ။",
     "tooltipMinSavings": "အနည်းဆုံး ဤမျှသော token အရေအတွက်ကို ချွေတာနိုင်မှသာ ချုံ့ပါ။",
     "ultraSettings": "အလွန်ပြင်းထန်သော ဆက်တင်များ",
-    "ultraSettingsDesc": "SLM ဖြင့် လုပ်ဆောင်သော အဓိပ္ပာယ်အခြေပြု ချုံ့ခြင်း"
+    "ultraSettingsDesc": "SLM ဖြင့် လုပ်ဆောင်သော အဓိပ္ပာယ်အခြေပြု ချုံ့ခြင်း",
+    "defaultLanguage": "မူလဘာသာစကား",
+    "viewMode": "ကြည့်ရှုမှုပုံစံ"
   },
   "translator": {
     "title": "ဘာသာပြန်ကိရိယာ",
@@ -9834,6 +10091,9 @@
     "streamTransformFailed": "ဒေတာစီးကြောင်းကို ပြောင်းလဲ၍ မရပါ"
   },
   "usage": {
+    "healthExtraUsageBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အပိုအသုံးပြုခွင့်ရှိသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
+    "healthPaidCreditsBypass": "ခွဲတမ်းကုန်သွားသော်လည်း အသုံးပြုနိုင်သော အခပေးခရက်ဒစ်များဖြင့် ဝန်ဆောင်မှု ဆက်ပေးနိုင်သည်။",
+    "healthFilteringBypass": "ခွဲတမ်းကုန်သွားသော်လည်း စက်တွင်းခွဲတမ်းစစ်ထုတ်မှု ပိတ်ထားသဖြင့် ဝန်ဆောင်မှု ဆက်လက်ပေးနေသည်။",
     "codexPaidCreditsLabel": "အခပေး Codex ခရက်ဒစ်များ",
     "codexPaidCreditsAvailable": "ရရှိနိုင်သည် (လက်ကျန်ပမာဏကို မဖော်ပြထားပါ)",
     "codexPaidCreditsUnavailable": "မရရှိနိုင်ပါ သို့မဟုတ် သုံးစွဲမှုကန့်သတ်ချက်သို့ ရောက်ရှိနေသည်",
@@ -10001,6 +10261,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provider ကန့်သတ်ချက်များ",
     "noProviders": "ချိတ်ဆက်ထားသော Provider မရှိပါ",
+    "quotaAuthRequired": "အထောက်အထားစိစစ်ရန် လိုအပ်သည် - dashboard သို့ အကောင့်ဝင်ပါ",
+    "quotaAuthRequiredHint": "dashboard session မရှိသောကြောင့် သို့မဟုတ် သက်တမ်းကုန်ဆုံးသွားသောကြောင့် provider ချိတ်ဆက်မှုများကို ဖွင့်၍မရပါ။ သင်၏ quota ကန့်သတ်ချက်များကို ကြည့်ရန် အကောင့်ဝင်ပြီး refresh လုပ်ပါ။",
     "connectProvidersForQuota": "သင်၏ API quota ကန့်သတ်ချက်များနှင့် အသုံးပြုမှုကို ခြေရာခံရန် OAuth ဖြင့် provider များသို့ ချိတ်ဆက်ပါ။",
     "accountsCount": "{count, plural, one {# အကောင့်} other {# အကောင့်}}",
     "filteredFromCount": "({count} ခုမှ စစ်ထုတ်ထားသည်)",
@@ -10050,9 +10312,6 @@
     "tierLite": "အပေါ့စား",
     "tierUnknown": "မသိ",
     "statTotal": "စုစုပေါင်း",
-    "statCritical": "အရေးကြီး",
-    "statAlert": "သတိပေးချက်",
-    "statHealthy": "ကောင်းမွန်",
     "filterPurchaseTypeLabel": "အမျိုးအစား",
     "filterTierLabel": "အဆင့်",
     "purchaseAll": "အားလုံး",
@@ -10290,7 +10549,61 @@
     "updatedShort": "အပ်ဒိတ်လုပ်ထားသည်",
     "lastRefreshed": "နောက်ဆုံး ပြန်လည်ရယူခဲ့ချိန်",
     "providerQuota": "ဝန်ဆောင်မှုပေးသူ၏ ခွဲတမ်း",
-    "providerQuotaHomeHint": "ချိတ်ဆက်ထားသောအကောင့်များအားလုံး၏ လက်ရှိအခြေအနေ"
+    "providerQuotaHomeHint": "ချိတ်ဆက်ထားသောအကောင့်များအားလုံး၏ လက်ရှိအခြေအနေ",
+    "claudeResetCreditDefaultTitle": "Claude ကန့်သတ်ချက် ပြန်လည်သတ်မှတ်ခြင်း",
+    "confirmRedeemClaudeResetCredit": "လဲလှယ်အသုံးပြုခြင်းသည် သတ်မှတ်အရည်အချင်းပြည့်မီသော Claude အသုံးပြုမှုကန့်သတ်ချက်များကို ချက်ချင်း ပြန်လည်သတ်မှတ်ပေးပြီး ဤခရက်ဒစ်ကို အပြီးတိုင် သုံးစွဲသွားမည်ဖြစ်သည်။",
+    "claudeResetCreditsModalTitle": "Claude ပြန်လည်သတ်မှတ်ခြင်း ခရက်ဒစ်များ",
+    "claudeResetCreditsModalExplainer": "ဤအကောင့်အတွက် ရရှိနိုင်သော Claude ပြန်လည်သတ်မှတ်ခြင်း ခရက်ဒစ်များနှင့် အပတ်စဉ် session ပြန်လည်သတ်မှတ်မှုများ။",
+    "healthAccountHint": "မကြာသေးမီက လေ့လာချက်များအပေါ် အခြေခံသည်၊ တိုက်ရိုက်စမ်းသပ်မှု မဟုတ်ပါ။ အသေးစိတ်အတွက် အကောင့်ကို ရွေးပါ။",
+    "healthRecovery": "ပြန်လည်အသုံးပြုနိုင်မည့် ခန့်မှန်းချိန်",
+    "healthAvailable": "ရရှိနိုင်သည်",
+    "healthRestricted": "တစ်စိတ်တစ်ပိုင်း ကန့်သတ်ထားသည်",
+    "healthUnavailable": "အသုံးမပြုနိုင်ပါ",
+    "healthPeakHourProtection": "အလုပ်အများဆုံးအချိန် ကာကွယ်မှု",
+    "healthCooldown": "စောင့်ဆိုင်းချိန်",
+    "healthQuotaExhausted": "ခွဲတမ်း ကုန်ဆုံးသွားပြီ",
+    "healthOverview": "ခြုံငုံသုံးသပ်ချက်",
+    "layoutFull": "အပြည့်အစုံ",
+    "layoutCompact": "ကျစ်လျစ်",
+    "healthQuotaError": "ခွဲတမ်းဖတ်ခြင်း မအောင်မြင်ပါ",
+    "healthNoRuntime": "လုပ်ဆောင်မှုအခြေအနေ မရရှိနိုင်ပါ",
+    "healthPreviousSnapshot": "နောက်ဆုံးပြန်တင်ခြင်း မအောင်မြင်၍ ယခင်ရလဒ်ကို ပြသထားသည်",
+    "healthPreviousFailure": "နောက်ဆုံးတောင်းဆိုမှု မအောင်မြင်ပါ၊ စောင့်ဆိုင်းချိန် ပြီးဆုံးပြီ",
+    "healthAwaitingSync": "ပြန်သတ်မှတ်ချိန် ကျော်လွန်ပြီ၊ ထပ်တူပြုခြင်းကို စောင့်နေသည်",
+    "healthVerdictUnavailable": "အသုံးပြုနိုင်မှု စစ်ဆေးချက်ရလဒ် မရရှိနိုင်ပါ၊ ခွဲတမ်းပမာဏများကိုသာ ပြထားသည်",
+    "healthSummaryFailed": "လုပ်ဆောင်မှုအနှစ်ချုပ် ဖတ်မရပါ၊ မော်ဒယ်ပိတ်ဆို့မှုအချက်အလက် ပျောက်နေနိုင်သည်",
+    "healthRuntimeObserved": "အခြေအနေ ပြင်ဆင်ခဲ့သည် {time}",
+    "healthQuotaObserved": "ခွဲတမ်း စောင့်ကြည့်ခဲ့သည် {time}",
+    "healthOldestQuota": "အဟောင်းဆုံး ခွဲတမ်းမှတ်တမ်း: {time}",
+    "healthRecoveryUnknown": "ပြန်လည်ရရှိချိန် မသိပါ",
+    "healthDetailsHint": "အသေးစိတ်နှင့် လုပ်ဆောင်ချက်များအတွက် နှိပ်ပါ",
+    "healthFiveHour": "၅ နာရီ",
+    "healthOverall": "စုစုပေါင်း",
+    "healthAction": "ဆောင်ရွက်ရန်လိုအပ်",
+    "healthTitle": "အကောင့်ရရှိနိုင်မှု",
+    "healthDrag": "ဝန်ဆောင်မှုပေးသူအစီအစဉ်ကို ပြောင်းရန် ဆွဲပါ",
+    "healthDragPosition": "{provider}, {count, plural, other {# အနက် အနေအထား {position, number}}}",
+    "healthResetOrder": "မူလအစီအစဉ် ပြန်ထားရန်",
+    "healthPool": "{name} အုပ်စု",
+    "healthOtherPool": "အကောင့်တူ · {pool}: {status} (ကျန် {remaining})",
+    "healthIncluded": "တစ်စိတ်တစ်ပိုင်း ကန့်သတ်ထားမှု {count, number}",
+    "healthBannerUnavailable": "ယာယီအသုံးမပြုနိုင်သော အကောင့် {count, number}",
+    "healthBannerAvailable": "အကောင့် {count, number} ခုလုံး အသုံးပြုနိုင်",
+    "healthLegendHide": "သင်္ကေတရှင်းလင်းချက်ကို ဖျောက်ရန်",
+    "healthLegendShow": "သင်္ကေတရှင်းလင်းချက်ကို ပြရန်",
+    "healthLegendOk": "အပြည့်ရောင် = ကျန်ခွဲတမ်း၊ ဖောက်မြင်ရောင် = သုံးပြီး။",
+    "healthLegendCooldown": "{window} ခွဲတမ်းကုန်ပြီ။ အပြည့်ရောင် = စောင့်ပြီးချိန်၊ ဖောက်မြင်ရောင် = ကျန်စောင့်ချိန်။",
+    "healthLegendAction": "ခွင့်ပြုချက်သက်တမ်းကုန် သို့မဟုတ် အကောင့်ပိတ်ထား၍ စောင့်ရုံဖြင့် မပြေလည်ပါ။",
+    "healthLegendPartial": "အသုံးပြုနိုင်သေးသည်။ အဝါထိပ် = မော်ဒယ် သို့မဟုတ် အုပ်စု ကန့်သတ်ထားသည်။",
+    "healthWaited": "စောင့်ပြီး {percent}",
+    "healthWait": "နောက်ထပ် {duration} ({time} တွင် ပြန်ရ)",
+    "healthFastest": "အမြန်ဆုံး {duration} နောက် ပြန်ရ",
+    "healthRatio": "{available, number} / {active, number} အသုံးပြုနိုင်",
+    "healthCd5": "၅ နာရီ · စောင့်ဆိုင်းချိန်",
+    "healthCdw": "အပတ်စဉ် · စောင့်ဆိုင်းချိန်",
+    "healthRecentSuccessBypass": "မကြာသေးမီက တောင်းဆိုမှုအောင်မြင်ခဲ့သဖြင့် လမ်းကြောင်းစနစ်က ဤအကောင့်ကို ခွင့်ပြုထားသည်။",
+    "healthPurchasedBalanceBypass": "ပါဝင်သော ခွဲတမ်းကုန်သွားပြီးနောက် ဝယ်ယူထားသော လက်ကျန်ဖြင့် ဆက်သုံးနိုင်သည်။",
+    "healthCutoffAtRequest": "တောင်းဆိုမှုကို လမ်းကြောင်းသတ်မှတ်ချိန်တွင် လက်ရှိခွဲတမ်း ကန့်သတ်ချက်များကို စစ်ဆေးသည်။"
   },
   "modals": {
     "waitingAuth": "ခွင့်ပြုချက်ကို စောင့်ဆိုင်းနေသည်",
@@ -11077,7 +11390,8 @@
       "message": "မက်ဆေ့ချ်",
       "error": "အမှား",
       "completion": "ပြီးစီးမှု"
-    }
+    },
+    "statusFilter": "အခြေအနေ"
   },
   "templateNames": {
     "simple-chat": "ရိုးရှင်းသော ချတ်",
@@ -11258,7 +11572,8 @@
     "minutesAgo": "လွန်ခဲ့သော {minutes} မိနစ်",
     "hoursAgo": "လွန်ခဲ့သော {hours} နာရီ",
     "daysAgo": "လွန်ခဲ့သော {days} ရက်",
-    "entries": "မှတ်တမ်းများ"
+    "entries": "မှတ်တမ်းများ",
+    "viewSwitcherAria": "ကက်ရှ်မြင်ကွင်း"
   },
   "proxyConfigModal": {
     "levelGlobal": "စနစ်တစ်ခုလုံးဆိုင်ရာ",
@@ -11371,6 +11686,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth ကို ပြင်ဆင်သတ်မှတ်ထားခြင်း မရှိသေးပါ။ redirect URI {redirectUri} နှင့် scope များ \"{scopes}\" ကို အသုံးပြု၍ {applicationsUrl} တွင် OAuth application တစ်ခု မှတ်ပုံတင်ပါ၊ ထို့နောက် {clientIdEnv} (နှင့် လိုအပ်ပါက {clientSecretEnv}) ကို သတ်မှတ်ပြီး ပြန်လည်စတင်ပါ။",
     "gitlabDuoSetupDescription": "Application ကို မှတ်ပုံတင်ပြီး ဤ OmniRoute instance တွင် env var များကို သတ်မှတ်ပြီးပါက OAuth အကောင့်ဝင်ခြင်းကို စတင်ရန် ဆက်လုပ်ရန် ခလုတ်ကို နှိပ်ပါ။",
     "continue": "ဆက်လုပ်ရန်",
+    "copilotPolicyTitle": "စမ်းသပ်ပံ့ပိုးပေးသူ- မူဝါဒအခြေအနေသည် ရှုပ်ထွေးနေပါသည်။",
+    "copilotPolicyLine1": "OmniRoute သည် api.githubcopilot.com မှတစ်ဆင့် ချိတ်ဆက်ပါသည်။ ၎င်းကို GitHub က ယေဘုယျ ပြင်ပအဖွဲ့ inference API အဖြစ် ထုတ်ပြန်ထားခြင်း မရှိပါ။ ဤပေါင်းစပ်မှုသည် စမ်းသပ်ဆဲဖြစ်ပြီး ကြိုတင်အသိပေးခြင်းမရှိဘဲ ပြောင်းလဲနိုင်ပါသည်။",
+    "copilotPolicyLine2": "သင့်ကိုယ်ပိုင် GitHub အကောင့်ကိုသာ ချိတ်ဆက်နိုင်ပါသည်။ အထောက်အထားများ၊ စုပေါင်းအကောင့်များကို မျှဝေခြင်း သို့မဟုတ် သင့်အစီအစဉ်ကန့်သတ်ချက်များကို ကျော်လွန်ရန် ဘယ်သောအခါမှ မကြိုးစားပါနှင့်။",
+    "copilotPolicyLine3": "အခမဲ့နှင့် Student plan အသုံးပြုသူများသည် အလိုအလျောက် မော်ဒယ်ရွေးချယ်မှုသာ ရရှိသည်။ သင်၏ Copilot အစီအစဉ် စည်းကမ်းချက်များနှင့် အသုံးပြုမှု ကန့်သတ်ချက်များသည် သင့်တွင် တာဝန်ရှိပါသည်။",
+    "copilotPolicyAcknowledge": "နားလည်တယ်၊ ချိတ်ဆက်တယ်။",
     "tabPasteSetupToken": "စနစ်ထည့်သွင်းမှု တိုကင်",
     "claudeSetupTokenDescription": "တာမီနယ်တွင် `claude setup-token` ကို လုပ်ဆောင်ပြီး ၎င်းထုတ်ပြသော တိုကင်ကို ကူးထည့်ပါ။ ၎င်းသည် တစ်နှစ်အထိ အကျုံးဝင်ပြီး ပြန်လည်စတင်ရန် တိုကင် မရှိပါ။ မသိမ်းဆည်းမီ OmniRoute သည် Anthropic သို့ စမ်းသပ်တောင်းဆိုမှု တစ်ခု ပို့ပါသည်။",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11766,7 @@
     "tableHealth": "လုပ်ဆောင်မှုအခြေအနေ (24h)",
     "tableUsage": "အသုံးပြုမှု",
     "tableActions": "လုပ်ဆောင်ချက်များ",
+    "moreActions": "နောက်ထပ်လုပ်ဆောင်ချက်များ",
     "test": "စမ်းသပ်ရန်",
     "edit": "တည်းဖြတ်ရန်",
     "delete": "ဖျက်ရန်",
@@ -11525,7 +11846,7 @@
     "bulkImportNoValidEntries": "အကျုံးဝင်သော အချက်အလက်များ မတွေ့ပါ။ ဖော်မတ်ကို စစ်ဆေးပြီး ထပ်မံကြိုးစားပါ။",
     "bulkImportSuccess": "တင်သွင်းမှု ပြီးပါပြီ− {created} ခု ဖန်တီးခဲ့သည်၊ {updated} ခု အပ်ဒိတ်လုပ်ခဲ့သည်၊ {failed} ခု မအောင်မြင်ပါ",
     "bulkImportErrorLine": "စာကြောင်း {line}− {reason}",
-    "bulkImportMaxExceeded": "တစ်ကြိမ်တင်သွင်းလျှင် ပရောက်စီ 100 ခုအထိသာ",
+    "bulkImportMaxExceeded": "တစ်ကြိမ်တင်သွင်းလျှင် ပရောက်စီ {max} ခုအထိသာ",
     "bulkImportPreview": "အစမ်းကြည့်ရန်",
     "clearAssignment": "(သတ်မှတ်မှုကို ရှင်းလင်းရန်)",
     "bulkProxyAssignment": "ပရောက်စီများကို အစုလိုက် သတ်မှတ်ခြင်း",
@@ -11586,6 +11907,7 @@
     "poolSetAsideKindIpQuota429": "IP နှုန်းကန့်သတ်ချက် (429)",
     "poolSetAsideKindSlow": "နှေးကွေးသော တုံ့ပြန်ချက်များ",
     "poolSetAsideKindGeoBlocked": "ဒေသကတားမြစ်ထားသည် (403/451)",
+    "poolSetAsideKindOperatorReported": "လုပ်ငန်းဆောင်ရွက်သူမှ အစီရင်ခံသော ပြတ်တောက်မှု",
     "poolSetAsideUntil": "အလှည့်သို့ ပြန်ရောက်မည် {endsAt}",
     "poolSetAsideRepeat": "ဖယ်ထားသည် {count, plural, one {# ကြိမ်} other {# ကြိမ်}}",
     "poolUnknownAddress": "မသိသောလိပ်စာ",
@@ -11695,7 +12017,6 @@
     "exportCodeTitle": "ကုဒ်ကို ထုတ်ယူရန်",
     "exportShort": "ထုတ်ယူရန်",
     "noStateToExport": "ထုတ်ယူရန် playground အခြေအနေ မရှိပါ။",
-    "closeExportModal": "ထုတ်ယူမှု ဒိုင်ယာလော့ဂ်ကို ပိတ်ရန်",
     "close": "ပိတ်မည်",
     "exportRealKeyWarning": "လုံခြုံရေး သတိပေးချက်- အထွက်တွင် API key အစစ်ကို တွေ့ရှိသောကြောင့် ထုတ်ယူမှုကို ပိတ်ထားသည်။ သင်၏ API key ကို ပြန်လည်သတ်မှတ်ပြီး ထပ်မံကြိုးစားပါ။",
     "placeholderHintPrefix": "အောက်ပါ",
@@ -11808,7 +12129,8 @@
       "nextButton": "နောက်တစ်ဆင့်",
       "runButton": "လုပ်ဆောင်ရန်",
       "promptPlaceholder": "သင့်မက်ဆေ့ချ်ကို ထည့်သွင်းပါ… (ပို့ရန် Enter၊ စာကြောင်းအသစ်အတွက် Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground မုဒ်များ"
   },
   "miniPlayground": {
     "endpoint": "အဆုံးမှတ်",
@@ -11879,7 +12201,8 @@
     "assistant": "အကူအညီပေးသူ",
     "errorLabel": "အမှား",
     "requestFailed": "တောင်းဆိုမှု မအောင်မြင်ပါ",
-    "stop": "ရပ်ရန်"
+    "stop": "ရပ်ရန်",
+    "messageInputAria": "မက်ဆေ့ချ်"
   },
   "requestLogger": {
     "recording": "မှတ်တမ်းတင်နေသည်",
@@ -12066,8 +12389,22 @@
       "resilienceRotations": "အကောင့်လှည့်ပတ်မှု {count} ကြိမ်",
       "resilienceRetried": "အလွတ်အလှည့်ကို ထပ်မံကြိုးစားခဲ့သည်",
       "resilienceContinued": "စထရီးမ်အလယ်မှ ပြန်လည်စတင်ခဲ့သည်",
-      "resilienceRecovered": "ခံနိုင်ရည်လုပ်ဆောင်ချက်ဖြင့် ပြန်လည်ရယူခဲ့သည်"
-    }
+      "resilienceRecovered": "ခံနိုင်ရည်လုပ်ဆောင်ချက်ဖြင့် ပြန်လည်ရယူခဲ့သည်",
+      "conversationContext": "စကားဝိုင်း အကြောင်းအရာ",
+      "goToBottom": "အောက်ဆုံးသို့ သွားရန်",
+      "liveRefreshOn": "တိုက်ရိုက် ပြန်လည်စတင်ခြင်း- ဖွင့်ထားသည်",
+      "liveRefreshOff": "တိုက်ရိုက် ပြန်လည်စတင်ခြင်း- ပိတ်ထားသည်",
+      "liveRefresh": "တိုက်ရိုက် ပြန်လည်စတင်ခြင်း",
+      "continuesFromParent": "မိခင်မှ ဆက်လက်သည်",
+      "continuesFrom": "{id} မှ ဆက်လက်သည်",
+      "viewConversation": "စကားဝိုင်းကို ကြည့်ရန်",
+      "openConversation": "စကားဝိုင်း {id} ကို ဖွင့်ရန်"
+    },
+    "tableLabel": "တောင်းဆိုမှုမှတ်တမ်းများ",
+    "throughputPostFirstToken": "ပထမတိုကင် နောက်ပိုင်း",
+    "throughputEndToEnd": "အစမှအဆုံး",
+    "throughputRate": "{value} တိုကင်/စက္ကန့်",
+    "throughputExplanation": "နှုန်းနှစ်ခုစလုံးသည် output နှင့် reasoning တိုကင်အရေအတွက်များထဲမှ ပိုကြီးသည့်အရေအတွက်ကို အသုံးပြုသည်။ ပထမတိုကင် နောက်ပိုင်းနှုန်းသည် တရားဝင် TTFT ကို ချန်လှပ်ထားသည်။ မဟုတ်ပါက စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ အစမှအဆုံးနှုန်းသည် အမြဲတမ်း စုစုပေါင်းကြာချိန်ကို အသုံးပြုသည်။ ဘာဖာလုပ်ထားသော တုံ့ပြန်မှုတစ်ခုသည် မော်ဒယ်ထုတ်လုပ်မှု ပိုမြန်ခြင်းမရှိဘဲ မြင့်မားသော အရှိန်အဟုန်ဖြင့် ပို့ဆောင်မှုနှုန်း ရှိနိုင်သည်။"
   },
   "proxyLogger": {
     "filterAll": "အားလုံး",
@@ -12112,7 +12449,9 @@
     "colServedBy": "ဆောင်ရွက်သူ",
     "filterTraffic": "သွားလာမှု",
     "filterTests": "စမ်းသပ်မှုများ",
-    "filterSource": "အရင်းအမြစ်"
+    "filterSource": "အရင်းအမြစ်",
+    "tableLabel": "ပရောက်စီမှတ်တမ်းများ",
+    "sortLogs": "မှတ်တမ်းများကို စီရန်"
   },
   "endpointOptions": {
     "speech": "စကားပြောအသံ",
@@ -12197,7 +12536,8 @@
     "statusExhausted": "ကုန်ဆုံးပြီ",
     "statusAlerting": "သတိပေးနေသည်",
     "statusError": "အမှား",
-    "moreSuffix": "+{count} ခု ထပ်မံ"
+    "moreSuffix": "+{count} ခု ထပ်မံ",
+    "feedFilterLabel": "ဖြစ်ရပ်များကို စစ်ထုတ်ရန်"
   },
   "quotaShare": {
     "weightPercent": "အလေးချိန် %",
@@ -12364,7 +12704,10 @@
     "ungroupedTitle": "အုပ်စုမသတ်မှတ်ထားသော",
     "ungroupedHint": "ဤ pool များကို သတ်မှတ်ထားသည့် အုပ်စုတစ်ခုသို့ ချိတ်ဆက်ထားခြင်းမရှိပါ။ pool တစ်ခုကို တကယ့်အုပ်စုတစ်ခုသို့ ရွှေ့ရန် ၎င်းကို တည်းဖြတ်ပါ။",
     "removeFailed": "ဤ pool ကို ဖယ်ရှား၍ မရပါ။",
-    "dismiss": "ပိတ်ရန်"
+    "dismiss": "ပိတ်ရန်",
+    "allocationsHeading": "ခွဲဝေမှုများ",
+    "wizardRemoveDimension": "အတိုင်းအတာကို ဖယ်ရှားရန်",
+    "wizardRemoveKey": "ကီးကို ဖယ်ရှားရန်"
   },
   "plugins": {
     "title": "Plugin များ",
@@ -12522,7 +12865,8 @@
       "settingsUpdateFailed": "ဆက်တင်များ အပ်ဒိတ်လုပ်ခြင်း မအောင်မြင်ပါ",
       "serviceRevealApiKey": "{actor} က {target} အတွက် API key ကို ဖော်ပြခဲ့သည်",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "အမှားကို ပယ်ဖျက်ရန်"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12999,21 @@
       "goNow": "ယခု သွားပါ",
       "message": "MITM Proxy ကို ယခု AgentBridge အောက်သို့ ရွှေ့ထားပါသည်။",
       "title": "ဤစာမျက်နှာကို ရွှေ့ထားပါသည်"
-    }
+    },
+    "dnsOn": "DNS ဖွင့်ထားသည်",
+    "dnsOff": "DNS ပိတ်ထားသည်",
+    "showServerSettings": "ဆာဗာဆက်တင်များကို ပြရန်",
+    "hideServerSettings": "ဆာဗာဆက်တင်များကို ဖျောက်ရန်",
+    "upstreamCaTesting": "စမ်းသပ်နေသည်…",
+    "removeMapping": "ချိတ်ဆက်သတ်မှတ်ချက်ကို ဖယ်ရှားရန်",
+    "mappingSourcePlaceholder": "ဥပမာ၊ gemini-3.6-flash-medium သို့မဟုတ် ချိတ်ဆက်မထားသည့်အားလုံးအတွက် *",
+    "mappingWildcardHint": "အတိအလင်း ချိတ်ဆက်သတ်မှတ်ထားခြင်းမရှိသည့် မော်ဒယ်တိုင်းကို OmniRoute မှတစ်ဆင့် ရွေးချယ်ထားသော ပစ်မှတ်သို့ လမ်းကြောင်းပေးရန် မူလရင်းမြစ်အဖြစ် * ကို အသုံးပြုပါ။ မူလရင်းမြစ် အတိအကျကိုက်ညီမှုများသည် * ထက် အမြဲဦးစားပေးသည်။",
+    "wizardDetectingModels": "ကြားဖြတ်ဖမ်းယူထားသော လမ်းကြောင်းမှ မော်ဒယ်များကို ရှာဖွေနေသည်...",
+    "wizardDetectedModels": "ကြားဖြတ်ဖမ်းယူထားသော လမ်းကြောင်းတွင် {count, plural, one {မော်ဒယ် # ခု} other {မော်ဒယ် # ခု}} တွေ့ရှိခဲ့သည်။ ထည့်လိုသည့် မော်ဒယ်များကို ရွေးချယ်ပါ၊",
+    "wizardSelectedModels": "{count, plural, one {မော်ဒယ် # ခု} other {မော်ဒယ် # ခု}} ရွေးချယ်ထားသည်။ နောက်မျက်နှာပြင်တွင် ၎င်းတို့ကို OmniRoute မော်ဒယ်များနှင့် ချိတ်ဆက်သတ်မှတ်ပါမည်။",
+    "wizardAddModels": "{count, plural, one {မော်ဒယ် # ခု} other {မော်ဒယ် # ခု}} ထည့်ရန်",
+    "wizardNoModelsDetected": "မော်ဒယ်များကို မတွေ့ရှိသေးပါ။ တောင်းဆိုမှုတစ်ခုပြုလုပ်ရန် {agent} ကို အသုံးပြုပြီးနောက် လမ်းကြောင်းမှ မော်ဒယ်များကို အလိုအလျောက်ရှာဖွေရန် ဤလမ်းညွှန်ကို ထပ်မံလုပ်ဆောင်ပါ။",
+    "wizardNoModelsHint": "သို့မဟုတ် ဤလမ်းညွှန်ကို ပိတ်ပြီး အေးဂျင့်ကတ်တွင် ချိတ်ဆက်သတ်မှတ်ချက်များကို ကိုယ်တိုင်ထည့်ပါ။"
   },
   "providerStats": {
     "unknownError": "မသိသော အမှား",
@@ -12685,7 +13043,12 @@
     "avgTtft": "ပျမ်းမျှ TTFT",
     "avgTotal": "စုစုပေါင်း ပျမ်းမျှ",
     "requestTelemetry": "တောင်းဆိုမှု တယ်လီမက်ထရီ",
-    "requestTelemetryDescription": "အဆင့် ၇ ဆင့်ပါ ပိုက်လိုင်း ခွဲခြမ်းစိတ်ဖြာမှု (ပြီးခဲ့သည့် ၅ မိနစ်)"
+    "requestTelemetryDescription": "အဆင့် ၇ ဆင့်ပါ ပိုက်လိုင်း ခွဲခြမ်းစိတ်ဖြာမှု (ပြီးခဲ့သည့် ၅ မိနစ်)",
+    "title": "ပံ့ပိုးသူ စာရင်းအင်းများ",
+    "description": "ပံ့ပိုးသူတစ်ဦးချင်းနှင့် မော်ဒယ်တစ်ခုချင်းအလိုက် လမ်းကြောင်းပမာဏ၊ တုံ့ပြန်ကြာချိန်နှင့် အောင်မြင်မှုနှုန်းများ",
+    "combo": "ပေါင်းစပ်",
+    "toggleModels": "{provider} အတွက် မော်ဒယ်များကို ပြရန်",
+    "windowSince": "{date} မှစ၍"
   },
   "relay": {
     "title": "ဆာဗာမဲ့ Relay ပရောက်စီများ",
@@ -12846,7 +13209,18 @@
     "noRequestBody": "တောင်းဆိုမှု body မရှိပါ။",
     "noResponseBody": "တုံ့ပြန်မှု body မရှိပါ။",
     "formatted": "ပုံစံချထားသည်",
-    "raw": "မူရင်း"
+    "raw": "မူရင်း",
+    "requestCount": "{count, plural, one {တောင်းဆိုမှု # ခု} other {တောင်းဆိုမှု # ခု}}",
+    "expandList": "စာရင်းကို ဖြန့်ရန်",
+    "collapseList": "စာရင်းကို ခေါက်ရန်",
+    "snippetLanguage": "ကုဒ်နမူနာ ဘာသာစကား",
+    "headersTable": "ခေါင်းစီးများ",
+    "showSecrets": "လျှို့ဝှက်တန်ဖိုးများကို ပြရန်",
+    "maskSecrets": "လျှို့ဝှက်တန်ဖိုးများကို ဖုံးကွယ်ရန်",
+    "llmNotAvailable": "ဤတောင်းဆိုမှုအတွက် LLM မက်တာဒေတာ မရနိုင်ပါ။",
+    "llmStreamYes": "ဟုတ်သည် (SSE)",
+    "llmStreamNo": "မဟုတ်ပါ",
+    "llmTotalTokens": "စုစုပေါင်း: တိုကင် {count} ခု"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13325,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI Code များ",
     "pageSubtitle": "OmniRoute သို့ ညွှန်ထားသော code tool များ",
     "searchPlaceholder": "CLI ရှာရန်…",
     "filterDetectionLabel": "ရှာဖွေတွေ့ရှိမှု",
@@ -12961,7 +13334,8 @@
     "detectionNotFound": "မတွေ့ပါ",
     "baseUrlAll": "အားလုံး",
     "baseUrlFull": "အပြည့်အစုံ",
-    "baseUrlPartial": "တစ်စိတ်တစ်ပိုင်း"
+    "baseUrlPartial": "တစ်စိတ်တစ်ပိုင်း",
+    "title": "CLI ကုဒ်"
   },
   "cliAgents": {
     "pageTitle": "CLI Agent များ",
@@ -13305,7 +13679,8 @@
     "colReliabilityHelp": "ပြီးခဲ့သည့် ၂၄ နာရီအတွင်း ဤဝန်ဆောင်မှုပေးသူက အမှန်တကယ် တုံ့ပြန်ပေးခဲ့သော ခေါ်ဆိုမှုအချိုးအစား။ မျဉ်းတိုတစ်ခု ပြထားပါက နှုန်းထားသတ်မှတ်ရန် ကိုင်တွယ်ပေးခဲ့သည့် ခေါ်ဆိုမှုအရေအတွက် နည်းလွန်းသည်ဟု ဆိုလိုသည်။",
     "reliabilitySample": "ပြီးခဲ့သည့် {hours} နာရီအတွင်း ခေါ်ဆိုမှု {requests} ခုအနက် {successes} ခု အောင်မြင်ခဲ့သည်",
     "reliabilityTooFew": "ပြီးခဲ့သည့် {hours} နာရီအတွင်း ခေါ်ဆိုမှု {requests} ခုသာရှိသည် — နှုန်းထားသတ်မှတ်ရန် နည်းလွန်းသည်",
-    "reliabilityNoTraffic": "ပြီးခဲ့သည့် ၂၄ နာရီအတွင်း မှတ်တမ်းတင်ထားသော ခေါ်ဆိုမှုမရှိပါ"
+    "reliabilityNoTraffic": "ပြီးခဲ့သည့် ၂၄ နာရီအတွင်း မှတ်တမ်းတင်ထားသော ခေါ်ဆိုမှုမရှိပါ",
+    "categoryFilter": "လုပ်ဆောင်ချက် အမျိုးအစား"
   },
   "discovery": {
     "title": "ဝန်ဆောင်မှုပေးသူ ရှာဖွေခြင်း",
@@ -13330,7 +13705,11 @@
     "method": "နည်းလမ်း",
     "auth": "အထောက်အထားစိစစ်ခြင်း",
     "feasibility": "လက်တွေ့လုပ်ဆောင်နိုင်မှု",
-    "models": "မော်ဒယ်များ"
+    "models": "မော်ဒယ်များ",
+    "provider": "ဝန်ဆောင်မှုပေးသူ",
+    "status": "အခြေအနေ",
+    "endpoint": "Endpoint",
+    "actions": "လုပ်ဆောင်ချက်များ"
   },
   "noAuthProvider": {
     "title": "အထောက်အထားစိစစ်ရန် မလိုပါ",
@@ -13379,7 +13758,8 @@
     "ownProxy": "ကိုယ်ပိုင် proxy",
     "freeTierPause": "မော်ဒယ် {model} ကို ရပ်ထားပါသည် (429)，{time} တွင် ပြန်လည်စတင်ပါမည်",
     "freeTierPauseProvider": "ရပ်ထားပါသည် (429)，{time} တွင် ပြန်လည်စတင်ပါမည်",
-    "freeTierPauseNote": "ဤဖြစ်စဉ်အတွင်း ခေတ္တရပ်နားခြင်း"
+    "freeTierPauseNote": "ဤဖြစ်စဉ်အတွင်း ခေတ္တရပ်နားခြင်း",
+    "proxyType": "Proxy အမျိုးအစား"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13932,10 @@
         "description": "လျှို့ဝှက် အောင်မြင်မှုတစ်ခု စောင့်ကြိုနေသည်...",
         "criteria": "ဤတံဆိပ်ကို ဖော်ထုတ်ရန် လျှို့ဝှက် အောင်မြင်မှုကို ပြီးမြောက်အောင် လုပ်ဆောင်ပါ။"
       }
-    }
+    },
+    "leaderboardTitle": "ဦးဆောင်သူစာရင်း",
+    "leaderboardDescription": "သင့် API key များအားလုံး၏ အဆင့်သတ်မှတ်ချက်များနှင့် အောင်မြင်မှုများ",
+    "badgeLocked": "လော့ခ်ချထားသည်"
   },
   "featureFlags": {
     "title": "လုပ်ဆောင်ချက် အလံများ",
@@ -13610,7 +13993,9 @@
       "disabled": "ပိတ်ထားသည်",
       "dual": "နှစ်မျိုးလုံး",
       "alias": "အခြားအမည်",
-      "canonical": "စံအမည်"
+      "canonical": "စံအမည်",
+      "fail_closed": "ပိတ်ဆို့ရန် (fail_closed)",
+      "count_as_zero": "$0 အဖြစ် တွက်ချက်ရန် (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14142,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "ကာကွယ်ထားသော ဦးစားပေး အခြေခံစနစ် ရပ်တန့်မှုများကို 502 အဖြစ် သတ်မှတ်ခြင်း",
         "description": "quota ကြောင့်သာ fallback လုပ်သည့် ဦးစားပေး target တစ်ခုက quota မဟုတ်ကြောင်း သက်သေပြနိုင်သော အကြောင်းရင်း—ဖွင့်နေသည့် provider circuit breaker သို့မဟုတ် ကြိုတင်ခန့်မှန်းထားသော latency ကြောင့် ကျော်သွားခြင်း—ကြောင့် ပေါင်းစပ်မှုကို ရပ်တန့်သည့်အခါ 503 အစား 502 ဖြင့် တုံ့ပြန်ပါ။"
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "အကောင့် ID များမှတ်တမ်းတင်ခြင်း",
+        "description": "AUTH log lines များတွင် အကောင့် prefix မှန်ကန်စွာဖော်ပြပါ (ဥပဒေသ \"Using '<provider>' account: abc12345...\"). Account identifiers များကို shared/multi-tenant process log များမှ ဖုံးကွယ်ထားနိုင်ရန် မူရင်းအတိုင်း ပိတ်ထားသည်။ Debug Mode မှ တစ်ခြားနားကွဲပြားခြင်းရှိသည်; Debug Mode ကို ပြောင်းလဲခြင်းဖြင့် ဤချက်ကို မဖော်ပြနိုင်ပါ။"
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC ဖြင့် စကားဝှက်ဖြင့် အကောင့်ဝင်ခြင်းကို ပိတ်ပါ",
+        "description": "OIDC ကို ဖွင့်ထားသည့်အခါ အသုံးပြုသူများသည် OIDC Single Sign-On မှတစ်ဆင့်သာ အထောက်အထား စိစစ်နိုင်ရန် စကားဝှက်ဖြင့် အကောင့်ဝင်ခြင်းကို ပိတ်ထားပါ။ ပိတ်ထားပါက (မူရင်းသတ်မှတ်ချက်) စကားဝှက်ဖြင့် အကောင့်ဝင်ခြင်းနှင့် OIDC နှစ်မျိုးစလုံးကို အသုံးပြုနိုင်ပါသည်။"
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "အဝေးရှိ Audio Provider Node များ",
+        "description": "localhost ပြင်ပတွင် လက်ခံဆောင်ရွက်ထားသော OpenAI-သဟဇာတဖြစ်သည့် provider node များကို အသုံးပြုရန် /v1/audio/* လမ်းကြောင်းများကို ခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည် — အသံကို အဝေးရှိ host သို့ လမ်းကြောင်းပြောင်းခြင်းသည် egress identity ကို ပြောင်းလဲစေပြီး စနစ်စီမံခန့်ခွဲသူ၏ တိကျသော ဆုံးဖြတ်ချက် ဖြစ်ရပါမည်။ Loopback node များကို အမြဲတမ်း ခွင့်ပြုထားပြီး သက်ရောက်မှု မရှိပါ။"
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "အဝေးရှိ Rerank Provider Node များ",
+        "description": "POST /v1/rerank (နှင့် ၎င်းကို loopback မှတစ်ဆင့် ခေါ်ယူသည့် memory engine ၏ rerank အဆင့်) အား localhost ပြင်ပတွင် လက်ခံဆောင်ရွက်ထားသော OpenAI-သဟဇာတဖြစ်သည့် provider node များ — TEI, Infinity, vLLM စသည်တို့ကို လုပ်ဆောင်နေသည့် LAN box သို့မဟုတ် Tailscale peer ကို အသုံးပြုရန် ခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည် — အဝေးရှိ host သို့ လမ်းကြောင်းပြောင်းခြင်းသည် egress identity ကို ပြောင်းလဲစေပြီး စနစ်စီမံခန့်ခွဲသူ၏ တိကျသော ဆုံးဖြတ်ချက် ဖြစ်ရပါမည်။ Loopback node များကို အမြဲတမ်း ခွင့်ပြုထားပြီး သက်ရောက်မှု မရှိပါ။ အဝေးရှိ node များသည် provider outbound URL မူဝါဒကိုလည်း ကိုက်ညီရပါမည်။"
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Network Rotation မျှဝေသုံး-Egress ကာကွယ်ရေးစနစ်",
+        "description": "multi-account rotation executor တစ်ခုအတွက် ကွန်ရက် ချို့ယွင်းချက် (အချိန်ကုန်ဆုံးခြင်း၊ ချိတ်ဆက်မှု ငြင်းပယ်ခံရခြင်း/ပြန်လည်သတ်မှတ်ခြင်း) ဖြစ်ပေါ်ပြီး မအောင်မြင်သော အကောင့်တွင် သီးသန့် proxy မရှိပါက၊ တစ်ခုချင်းစီကို ပြန်လည်ကြိုးစားမည့်အစား ခေတ္တ cooldown ချမှတ်ပြီး ကျန်တောင်းဆိုမှုအတွက် အခြား proxy မပါသော အကောင့်များကို ကျော်သွားပါ။ မူရင်းအတိုင်း ဖွင့်ထားပါသည် (ဘေးကင်းသည်- egress IP ပြောင်းလဲမှုမရှိပါ၊ မျှဝေသုံး egress အကောင့်များတွင် ကြန့်ကြာမှု/cooldown အန္တရာယ်ကိုသာ လျှော့ချပေးသည်)။ ပထမဆုံး proxy မပါသော ချို့ယွင်းမှု ဖြစ်ပေါ်ချိန်တွင် ချက်ချင်း ဆက်လက်ပို့လွှတ်ရန် ပိတ်ထားပါ။"
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "မကြာသေးမီက မအောင်မြင်ခဲ့သော Proxy များကို ကျော်ရန်",
+        "description": "Proxy pool များနှင့် opencode ၏ အကောင့်အလိုက် အလှည့်ကျစနစ် (per-account rotation) သည် မကြာသေးမီက မအောင်မြင်ခဲ့သော proxy (ငြင်းပယ်ခံရသော TCP probe သို့မဟုတ် ၎င်းမှတစ်ဆင့် လက်ခံရရှိသည့် 429) အား သတ်မှတ်ကန့်သတ်ချက် (cap) အထိ ထပ်ခါတလဲလဲဖြစ်တိုင်း နှစ်ဆတိုးသည့် process တစ်ခုချင်းစီအလိုက် သတ်မှတ်ကာလအတွင်း ပြန်လည်အသုံးပြုခြင်းကို ရပ်တန့်စေသည်။ မည်သည့် proxy အခြေအနေကိုမျှ မှတ်တမ်းမတင်ပါ၊ လျာထားချက်တိုင်းကို ဖယ်ထားသော်လည်း ရွေးချယ်မှုမှာ မပြောင်းလဲပါ။ မူရင်းအတိုင်း ဖွင့်ထားသည်- PROXY_SKIP_RECENTLY_FAILED=false ဖြစ်မှသာ ရွေးချယ်မှုအစီအစဉ်သည် သာမန် အလှည့်ကျစနစ်အတိုင်း အတိအကျ ဖြစ်သည်။"
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Shared Egress Pool အစီအစဉ်",
+        "description": "Quota ကို egress လိပ်စာအလိုက် ခွဲဝေသတ်မှတ်ထားသည့် provider များအတွက် မကြာသေးမီက ငြင်းပယ်ခံခဲ့ရသောအဖွဲ့ဝင်နှင့် တူညီသော egress လိပ်စာကို မျှဝေသုံးစွဲနေသည့် pool အဖွဲ့ဝင်အား ကောင်းမွန်သောအဖွဲ့ဝင်များ၏ အောက်တွင် အဆင့်သတ်မှတ်ပေးသည်။ အစီအစဉ်သတ်မှတ်ရုံသာဖြစ်ပြီး မည်သည့်အခါမျှ ဖယ်ထုတ်မည် မဟုတ်ပါ။ ၎င်းဖတ်ရှုမည့် ငြင်းပယ်မှုအချက်ပြသင်္ကေတကို ထုတ်ပေးသော PROXY_SKIP_RECENTLY_FAILED လိုအပ်ပါသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ရွေးချယ်မှုအစီအစဉ်သည် သာမန် အလှည့်ကျစနစ်အတိုင်း အတိအကျ ဖြစ်သည်။"
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Rotation Attribution မှတ်တမ်းတင်ခြင်း",
+        "description": "Opencode အလှည့်ကျစနစ်သည် မည်သည့်အကောင့်က ဝန်ဆောင်မှုပေးခဲ့သည် သို့မဟုတ် ကျော်သွားခဲ့သည်ကို မှတ်တမ်းတင်ပြီး (ဖုံးကွယ်ထားသော ID များကိုသာဖြစ်ပြီး အကောင့် ID အပြည့်အစုံ မဟုတ်ပါ) proxy log မှတ်တမ်းများကို သက်ဆိုင်ရာ request နှင့် ချိတ်ဆက်ပေးသောကြောင့် operator အနေဖြင့် ကျော်သွားသောအကောင့်များနှင့် အသုံးမပြုသောအကောင့်များကို ခွဲခြားသိရှိနိုင်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- log လိုင်းအပိုများနှင့် ကော်လံအပိုများ ရေးသားမည်မဟုတ်ပါ။"
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Proxy Pool Egress စောင့်ကြည့်လေ့လာမှု",
+        "description": "Dashboard ရှိ proxy pool အောက်တွင် လွန်ခဲ့သော ၂၄ နာရီအတွင်း ၎င်း၏ အဖွဲ့ဝင်များကို မည်မျှသော egress IP အရေအတွက်က ဝန်ဆောင်မှုပေးခဲ့သည်၊ ချိတ်ဆက်မှု မည်မျှက ၎င်းတို့ကို အသုံးပြုခဲ့သည်နှင့် IP တစ်ခုတည်းနောက်တွင် အများဆုံးတွေ့ရှိရသည့် ပမာဏတို့ကို ပြသပေးသည်။ ဖတ်ရှုရန်သာဖြစ်ပြီး proxy log မှ တွက်ချက်ထားကာ routing အတွက် ဘယ်သောအခါမျှ အသုံးမပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- pool editor မှာ မပြောင်းလဲဘဲ observation route သည် null ဟု တုံ့ပြန်မည်ဖြစ်သည်။"
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proxy Operator Egress",
+        "description": "Pool အဖွဲ့ဝင်တစ်ဦးစီအတွက် operator မှ push လုပ်ပေးပို့ထားသော ရက်စွဲပါ စောင့်ကြည့်လေ့လာတွေ့ရှိရသည့် လိပ်စာများကို လက်ခံပြီး ဖော်ပြရန်နှင့် pool အစီအစဉ်သတ်မှတ်ရန်အတွက် journal read နှင့် ပေါင်းစပ်ပေးသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- push route သည် 404 ဖြင့် တုံ့ပြန်မည်ဖြစ်ပြီး pool ဖတ်ရှုမှုများသည် ယခင်အတိုင်း အတိအကျ လုပ်ဆောင်မည်ဖြစ်သည်။"
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses ရပ်တန့်မှု အလှည့်ကျပြောင်းလဲခြင်း",
+        "description": "OpenCode executor အတွက် stream ပြုလုပ်ထားသော Responses ပြန်ကြားချက်၏ ပထမဆုံး body byte ကို စောင့်ကြည့်ပါ (window: RESPONSES_FIRST_BYTE_TIMEOUT_MS၊ မူရင်း 15000)။ သတ်မှတ် window ထက်ကျော်လွန်၍ အသံတိတ်နေသော 2xx Responses stream ကို ရပ်တန့်သွားသည် (stalled) ဟု သတ်မှတ်သည်- အကောင့်ကို cooldown ပြုလုပ်ပြီး တောင်းဆိုချက်ကို နောက်အကောင့်သို့ တစ်ကြိမ် အလှည့်ကျပြောင်းပေးသည်၊ ဒုတိယအကြိမ် ရပ်တန့်ပါက ချက်ချင်း fail ဖြစ်စေသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ရပ်တန့်သွားသော stream များသည် stream readiness timeout အထိ လက်ရှိစောင့်ဆိုင်းချိန်အတိုင်း ဆက်လက်စောင့်ဆိုင်းမည်ဖြစ်သည်။"
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked အလှည့်ကျပြောင်းလဲခြင်း",
+        "description": "OpenCode executor အတွက် upstream မှ user_blocked ငြင်းပယ်မှုပါဝင်သော 403 သို့မဟုတ် 451 ဖြင့် ပြန်ကြားလာပါက (geo block မဟုတ်၊ Cloudflare fingerprint ပယ်ချမှု မဟုတ်ပါ) ငြင်းပယ်ခံရသော အကောင့်ကို cooldown ပြုလုပ်ပြီး တောင်းဆိုချက်တစ်ခုလျှင် အများဆုံးတစ်ကြိမ် နောက်အကောင့်သို့ အလှည့်ကျပြောင်းပေးပါမည်၊ ဒုတိယအကြိမ် ငြင်းပယ်ခံရပါက success mark မပါဘဲ မူလအတိုင်း ပြန်လည်ပေးပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- upstream user block တစ်ခုကို ရှောင်ကွင်းလမ်းကြောင်းပြောင်းခြင်းသည် စည်းမျဉ်းရှောင်လွှဲမှုအဖြစ် ပေါ်ပေါက်နိုင်ပြီး အကောင့်အစုအဖွဲ့တစ်ခုလုံးသို့ flag ပျံ့နှံ့သွားနိုင်သဖြင့် အော်ပရေတာမှ ရွေးချယ်သတ်မှတ်ထားခြင်း မရှိပါက ငြင်းပယ်ချက်ကို အပြောင်းအလဲမရှိ ပြန်လည်ပေးပို့မည်ဖြစ်သည်။"
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode ယာယီချို့ယွင်းမှု Failover Backoff",
+        "description": "OpenCode အကောင့်အများအပြား အလှည့်ကျသုံးစွဲမှုအတွက် ယာယီ upstream အမှားတစ်ခု (5xx သို့မဟုတ် အကြောင်းအရာမပါသော 400 ပယ်ချမှု) ကြောင့် နှစ်ကြိမ်ဆက်တိုက် မအောင်မြင်ပါက နောက်အကောင့်သို့ မပို့လွှတ်မီ ခေတ္တရပ်တန့်ပါမည်။ ရပ်တန့်ချိန်သည် 1.5s မှ စတင်ပြီး ဆက်တိုက်မအောင်မြင်မှုတိုင်းအတွက် နှစ်ဆတိုးသွားမည်ဖြစ်ကာ တစ်ကြိမ်ရပ်တန့်လျှင် အများဆုံး 6s နှင့် တောင်းဆိုချက်တစ်ခုလျှင် အများဆုံး 10s အထိ ကန့်သတ်ထားပြီး client ချိတ်ဆက်မှုပြတ်တောက်ပါက ကျော်သွားမည်ဖြစ်ကာ မစောင့်ဆိုင်းမီ မအောင်မြင်သော response body ကို ရှင်းလင်းထုတ်ပေးမည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- failover သည် ချက်ချင်းလုပ်ဆောင်နေမည်ဖြစ်သည်။"
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Flush Empty Turn ပြန်လည်ကြိုးစားမှု",
+        "description": "ဘာသာပြန်ထားသော streaming turn များတွင် upstream turn ၌ အသုံးပြုနိုင်သော အကြောင်းအရာ မပါရှိပါက (reasoning-only ပြီးမြောက်မှု သို့မဟုတ် အသုံးဝင်သော chunk လုံးဝမပါရှိခြင်း) client ထံသို့ တစ်စုံတစ်ရာ မဖော်ပြမီ ပုံမှန် credential လမ်းကြောင်းမှတစ်ဆင့် ကန့်သတ်ထားသော ပြန်လည်ကြိုးပမ်းမှုများ (`STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX` အထိ) ကို ပြုလုပ်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- အကြောင်းအရာမပါသော turn များသည် လက်ရှိလုပ်ဆောင်ချက်အတိုင်း ဆက်လက်ရှိနေမည်ဖြစ်သည် (အလွတ်ဖြစ်နေသော 200 သို့မဟုတ် အကြောင်းအရာမပါသော 502)။"
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "အကြောင်းအရာမပါသော Stream ၏ Sibling ပြန်လည်ရယူမှု",
+        "description": "Claude/Codex streaming- ပထမဆုံး lifecycle event ပြီးနောက် အသုံးပြုနိုင်သော output ရှိမရှိ ခေတ္တစစ်ဆေးပါ (1s / 64 KiB အထိ)။ အကြောင်းအရာမပါဘဲ ပြီးဆုံးသွားသော stream သည် empty_content ချို့ယွင်းမှု ဖြစ်လာပြီး လက်ရှိကန့်သတ်ထားသော ပြန်လည်ကြိုးပမ်းမှုကို အခြားအသုံးပြုနိုင်သည့် ချိတ်ဆက်မှုတစ်ခုတွင် အသုံးပြုပါမည် (cooldown မရှိ၊ model lockout မရှိ)၊ client ချိတ်ဆက်မှု ပြတ်တောက်သွားပါက round-robin ပေါင်းစပ်မှုများသည် ပြန်လည်ကြိုးစားခြင်းကို ရပ်တန့်မည်ဖြစ်သည်။ ထို့အပြင် စစ်ဆေးမှုအတွင်း refusal၊ pause_turn နှင့် model_context_window_exceeded တို့ကို တရားဝင်အကြောင်းအရာမဲ့ အဆုံးသတ်များအဖြစ် သတ်မှတ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- readiness၊ empty-content ကိုင်တွယ်မှုနှင့် combo ပြန်လည်ကြိုးပမ်းမှုများသည် ယခင်အတိုင်း အတိအကျ ဆက်လက်တည်ရှိမည်ဖြစ်သည်။"
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Stream Late Output စစ်ဆေးမှု",
+        "description": "Streaming output စစ်ဆေးမှု- ပထမဆုံး ပေးပို့ထားသော chunk 64 ခု ပြီးနောက် ပထမဆုံး မြင်သာသော output အတွက် chunk 16 ခုလျှင် 1 ခုနှုန်း နမူနာရယူစစ်ဆေးပေးသဖြင့် နောက်ကျမှ စတင်ထွက်ရှိသော output ဖြစ်စေ stream သည် output ထုတ်လွှင့်ပြီးဖြစ်ကြောင်း မှတ်သားထားဆဲ ဖြစ်ပါသည်။ ထိုအခြေအနေနောက်ပိုင်းတွင် ဖြစ်ပေါ်သော သီးသန့် 5xx သည် model-only lockout အဖြစ် မှတ်တမ်းတင်မည့်အစား request-scoped အဖြစ်သာ တည်ရှိနေမည်ဖြစ်ပြီး firstOutputMs ကို လက်ရှိ နမူနာရယူမှု ကွာဟချက်၏ ပထမဆုံး output chunk သို့ ပြန်လည်ဖြည့်သွင်းပေးပါသည်။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- ယခင်အတိုင်း ပထမဆုံး ပေးပို့ထားသော chunk 64 ခုကိုသာ စစ်ဆေးပါမည်။"
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode Rate-Limited 429 စောစီးစွာ ရပ်တန့်ခြင်း",
+        "description": "OpenCode multi-account rotation အတွက် ကျန်ရှိသောအကောင့်အားလုံးကို စမ်းသပ်မည့်အစား စစ်မှန်သော rate limit အဖြစ် သတ်မှတ်ထားသည့် ပထမဆုံး 429 တွင် account wave ကို ရပ်တန့်ပါ (parse ပြုလုပ်နိုင်သော Retry-After header သို့မဟုတ် rate/usage limit ကို ဖော်ပြထားသော body)၊ ထို့နောက် ထို upstream 429 (status၊ body၊ Retry-After နှင့် quota headers) ကို မပြောင်းလဲဘဲ ပြန်ပို့ပေးပါ။ သတ်မှတ်ချက်မခွဲခြားထားသော 429 များသည် ဆက်လက်လှည့်လည်နေမည် ဖြစ်ပါသည်။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- free tier သည် egress IP တစ်ခုစီအလိုက် ကန့်သတ်ထားသောကြောင့် (#9611) 429 တိုင်းသည် နောက်အကောင့်တစ်ခုသို့ လှည့်လည်သွားမည်ဖြစ်ပြီး ကုန်ဆုံးသွားသော wave သည် နောက်ဆုံး upstream 429 ကို ပြန်ပို့ပေးပါမည်။"
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 ခေတ္တရပ်နားပြီး ပြန်လည်စတင်ခြင်း",
+        "description": "OpenCode multi-account rotation အတွက် ယာယီ 429 များ ထပ်ခါတလဲလဲ ဖြစ်ပေါ်ပြီးနောက် (သို့မဟုတ် pool-strain အမှတ်အသား အသစ်တစ်ခုပြီးနောက်) heartbeat ဖြင့် request ကို ခေတ္တရပ်နားထားပါ၊ ထို့နောက် စနစ်တစ်ခုလုံးသို့ ဖြန့်ကြက်မည့်အစား အစဉ်လိုက်အကောင့် 3 ခုအထိ ကန့်သတ်ထားသော အပိုင်းတစ်ခုကို ပြန်လည် run ပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- 429 တိုင်းသည် ယခင်အတိုင်း နောက်အကောင့်တစ်ခုသို့ အတိအကျ လှည့်လည်သွားပါမည်။"
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Stream Readiness ရပ်တန့်မှု ပြန်လည်ကြိုးစားခြင်း",
+        "description": "Streaming chat တောင်းဆိုမှုများအတွက် အသုံးပြုနိုင်သော event တစ်ခု မထုတ်လုပ်မီ ပထမဆုံး upstream body ရပ်တန့်သွားပါက တူညီသော routing လမ်းကြောင်းနှင့် တူညီသော readiness budget ဖြင့် အကောင့်ပြစ်ဒဏ်မရှိဘဲ ကန့်သတ်ထားသော ဒုတိယအကြိမ်ကြိုးစားမှုကို ပြုလုပ်ပေးပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- ရပ်တန့်သွားသော ပထမဆုံး body သည် ပြန်လည်ကြိုးစားခြင်းမရှိဘဲ တောင်းဆိုမှုကို ကျရှုံးစေပါမည်။"
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 Pool ပြန်လည်ရွေးချယ်ခြင်း",
+        "description": "OpenCode multi-account rotation အတွက် ambient pool context အောက်ရှိ proxy မပါသော အကောင့်တစ်ခုပေါ်တွင် egress-bucketed provider ထံမှ 429 ရရှိပြီးနောက် တူညီသော egress address ကို ထပ်မံကြိုးစားမည့်အစား နောက်တစ်ကြိမ်ကြိုးစားမှုအတွက် အခြား member တစ်ခုကို connection pool ထံ တောင်းဆိုပါ။ အစီအစဉ်ချပေးရုံသာဖြစ်ပြီး ဖယ်ထုတ်ခြင်းမပြုပါ- ကုန်ဆုံးသွားသော pool သည် လက်ရှိအပြုအမူအတိုင်း ဆက်လက်ရှိနေပါမည်။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- 429 တိုင်းသည် ယခင်အတိုင်း နောက်အကောင့်တစ်ခုသို့ အတိအကျ လှည့်လည်သွားပါမည်။"
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 ကလိုင်းရန့် လက်ဗွေရာ",
+        "description": "OpenCode Zen/Go တောင်းဆိုမှုများတွင် OpenCode v2 CLI ကလိုင်းရန့် လက်ဗွေရာကို ပေးပို့ပါ (#16571) - User-Agent opencode/latest/<2.x>/cli နှင့် x-opencode-client cli၊ client User-Agent ကို 2.x OpenCode client ဖြစ်သည့်အခါတွင်သာ ထိန်းသိမ်းထားရှိပြီး၊ ကန့်သတ်ထားသော free-tier တောင်းဆိုမှုများတွင် x-opencode-request မပါဝင်စေဘဲ session ကို x-opencode-session-id/x-session-affinity/x-session-id သို့ mirror ပြုလုပ်ကာ၊ ထည့်သွင်းထားသော placeholder tools များပေါ်ရှိ v2 CLI read/shell schemas များနှင့် tool_choice \"none\" ကို ဖယ်ရှားပေးသည်။ ပုံသေအားဖြင့် ပိတ်ထားသည်- OpenCode တောင်းဆိုမှုတိုင်းသည် လက်ရှိ identity၊ headers နှင့် body တို့ကို byte အလိုက် မူရင်းအတိုင်း တိကျစွာ ထိန်းသိမ်းထားသည်။"
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP ပိတ်ဆို့မှု",
+        "description": "OpenCode Zen (opencode-zen) ကို မူရင်း egress-IP lockout အုပ်စုထဲသို့ ထည့်သွင်းပါ၊ သို့မှသာ Zen ချိတ်ဆက်မှုတစ်ခုတွင် 429 ဖြစ်ပေါ်ပါက ၎င်း၏ egress IP ကို မျှဝေသုံးစွဲထားသော အခြား Zen ချိတ်ဆက်မှုအားလုံးကိုပါ cool down ဖြစ်စေမည်ဖြစ်သည်။ ပုံသေအားဖြင့် ပိတ်ထားသည်- Zen ကို key သတ်မှတ်ထားပြီး ချိတ်ဆက်မှုတစ်ခုစီသည် ယခင်အတိုင်း သီးခြားစီ cool down ဖြစ်ပါမည်။ သီးသန့်သတ်မှတ်ထားသော OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS တန်ဖိုးသည် ဤ flag ထက် အမြဲတမ်း ဦးစားပေး အကျုံးဝင်မည်ဖြစ်သည်။"
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode စာသားအပြည့်အစုံ Error စည်းမျဉ်းများ",
+        "description": "ပါဝင်ပြီးသား OpenCode error စည်းမျဉ်းများ (opencode-zen, opencode-go, opencode-cli) ကို upstream error စာသားအပြည့်အစုံပေါ်တွင် တိုက်ဆိုင်စစ်ဆေးခွင့်ပြုပါ၊ သို့မှသာ organization_quota_exceeded သို့မဟုတ် \"monthly usage limit reached\" ကဲ့သို့သော body marker များသည် 429 ကို connection-scoped lock ဖြင့် quota ကုန်ဆုံးမှုအဖြစ် သတ်မှတ်ပေးနိုင်မည်ဖြစ်သည်။ ပုံသေအားဖြင့် ပိတ်ထားသည်- ထိုစည်းမျဉ်းများသည် တည်ဆောက်ပုံပြု error code ကိုသာ မြင်တွေ့ရမည်ဖြစ်ပြီး ထိုကဲ့သို့သော 429 သည် ယခင်အတိုင်း အချိန်တို rate limit အဖြစ်သာ ဆက်လက်ရှိနေမည်ဖြစ်သည်။"
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI စာသားအပြည့်အစုံ Error စည်းမျဉ်းများ",
+        "description": "ပါဝင်ပြီးသား Cloudflare Workers AI error စည်းမျဉ်းကို upstream error စာသားအပြည့်အစုံပေါ်တွင် တိုက်ဆိုင်စစ်ဆေးခွင့်ပြုပါ၊ သို့မှသာ 429 \"daily free allocation\" body ကို အချိန်တို rate limit အစား quota ကုန်ဆုံးမှုအဖြစ် သတ်မှတ်ပေးမည်ဖြစ်သည်။ ပုံသေအားဖြင့် ပိတ်ထားသည်- ဤစည်းမျဉ်းသည် တည်ဆောက်ပုံပြု error code ကိုသာ မြင်တွေ့ရမည်ဖြစ်ပြီး ယခင်အတိုင်း ဆောင်ရွက်မည်ဖြစ်သည်။"
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "လုပ်ဆောင်နိုင်စွမ်း စစ်ထုတ်မှု",
+        "description": "ပစ်မှတ်ထားသော မော်ဒယ်တွင် လိုအပ်သည့် လုပ်ဆောင်နိုင်စွမ်းများ (vision, tools, structured output, context window) မရှိပါက dispatch မပြုမီ တောင်းဆိုမှုများကို ငြင်းပယ်ပါ။ combo-layer compatibility filter ကို ကျော်လွှားသည့် တိုက်ရိုက် single-provider တောင်းဆိုမှုများကို ကာကွယ်ပေးသည်။"
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD သုံးစွဲမှုကန့်သတ်ချက်များတွင် စျေးနှုန်းမသတ်မှတ်ထားသော အသုံးပြုမှုကို လျစ်လျူရှုရန်",
+        "description": "သုံးစွဲမှုကန့်သတ်ချက် ကျော်လွန်သွားသည်ဟု သတ်မှတ်မည့်အစား key တစ်ခုချင်းစီအလိုက် USD သုံးစွဲမှုကန့်သတ်ချက်များတွင် စျေးနှုန်းမရှိသော မော်ဒယ်များ၏ အသုံးပြုမှုကို $0 အဖြစ် ထည့်သွင်းတွက်ချက်ပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- စျေးနှုန်းမသတ်မှတ်ထားသော မော်ဒယ် သို့မဟုတ် routing alias သည် အမှန်တကယ်ကုန်ကျစရိတ်ကို ဖုံးကွယ်ထားနိုင်သောကြောင့် သုံးစွဲမှုကန့်သတ်ချက်ကို ပိတ်ထားပေးသည် (fails closed)။"
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "OmniRoute Radar မော်ဂျူးကို ဖွင့်ရန် (ကက်တလောက် feed မျက်နှာပြင်များနှင့် စင့်ခ်လုပ်ခြင်း)။ မူရင်းအတိုင်း ပိတ်ထားပါသည်၊ ဖွင့်ထားခြင်းသည် UI ကိုသာ အသုံးပြုခွင့်ပေးမည်ဖြစ်ပြီး ဒေတာစင့်ခ်လုပ်ခြင်းမှာ သီးခြားရွေးချယ်ခွင့် (opt-in) အဖြစ်သာ ရှိနေပါမည်။"
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "မော်ဒယ် Endpoint စွမ်းဆောင်ရည် Gate",
+        "description": "စိတ်ချရသော မော်ဒယ် endpoint တဂ်များ (ဝန်ဆောင်မှုပေးသူ ကက်တလောက်မှ ကြေညာထားသော၊ သီးသန့်မော်ဒယ် id မှ ခန့်မှန်းထားသော သို့မဟုတ် အော်ပရေတာမှ သတ်မှတ်ထားသော) ကို အတည်ပြုကျင့်သုံးပါ- /v1/chat/completions၊ /v1/embeddings၊ /v1/rerank၊ /v1/images/generations၊ /v1/videos/generations၊ /v1/music/generations နှင့် /v1/audio/* တို့သို့ မပို့လွှတ်မီ မော်ဒယ်မှ ဝန်ဆောင်မှုမပေးသော endpoint သို့ ပေးပို့လာသည့် တောင်းဆိုချက်ကို HTTP 400 ဖြင့် ပယ်ချပါ၊ တဂ်တပ်ထားသော endpoint များအတွက် OmniRoute adapter မရှိသည့် မော်ဒယ်များကို /v1/models မှ ဝှက်ထားပါ၊ ၎င်းအပြင် အဆိုပါမော်ဒယ်များအတွက် dashboard မော်ဒယ်စမ်းသပ်ချက်ကို 422 ဖြင့် အကြောင်းပြန်ပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- endpoint တဂ်များသည် အချက်အလက်ဆိုင်ရာအဖြစ်သာ ဆက်လက်ရှိနေမည်ဖြစ်ပြီး တောင်းဆိုချက်များကို ယခင်အတိုင်း အတိအကျ ပို့လွှတ်မည်ဖြစ်ပါသည်။"
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universal Context လွှဲပြောင်းမှု",
+        "description": "combo routing မှ မော်ဒယ်များကို ပြောင်းလဲသည့်အခါ စကားပြောဆိုမှု အကျဉ်းချုပ်များကို ထုတ်ယူ၍ ထည့်သွင်းပေးပါ။ မော်ဒယ်ပြောင်းလဲမှုများကို သီးခြားစီ သဘောထားရန်နှင့် လက်ရှိနှင့် နောင်လာမည့် combo အားလုံးအတွက် နောက်ခံ handoff တောင်းဆိုမှုများကို တားဆီးရန် ပိတ်ထားပါ။"
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reasoning ပြန်လည်အသုံးပြုခြင်း",
+        "description": "အပြန်အလှန် စကားပြောဆိုမှုများတစ်လျှောက် မော်ဒယ်၏ reasoning ကို ကက်ရှ် (cache) လုပ်ပြီး ပြန်လည်အသုံးပြုပါ။ reasoning သိမ်းဆည်းခြင်းနှင့် ပြန်လည်ထည့်သွင်းခြင်းတို့ကို ရပ်တန့်ရန် ပိတ်ထားပါ။"
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server ပို့ဆောင်မှုစနစ်",
+        "description": "Codex အား local app-server WebSocket JSON-RPC ပို့ဆောင်မှုစနစ် (codexTransport=app-server) ကို အသုံးပြုခွင့်ပေးပါ။ ပိတ်ထားပါက app-server ကို အသုံးပြုရန် ရွေးချယ်ထားသော ချိတ်ဆက်မှုများသည် Codex ၏ အခြားပို့ဆောင်မှုစနစ်များသို့ ပြန်လည်ပြောင်းလဲအသုံးပြုသွားပါမည်။"
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code Discovery Aliases",
+        "description": "Claude Code gateway model discovery တွင် non-Claude models များကို စာရင်းဝင်စေရန် /v1/models ပေါ်တွင် claude/'<provider>'/'<model>' mirror ids များကို ကြေညာပါ။ သတိပြုရန်: ဂလိုဘယ်အဆင့်တွင် အသုံးပြုပါက သားရင်းလေးများအားလုံးအတွက် catalog entries များ နှစ်ဆဖြစ်စေသည်။"
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "No-Thinking Model Aliases",
+        "description": "no-think/'<provider>'/'<model>' gateway aliases များအတွက် အဓိပ္ပာယ်တကျ switch မှန်ကန်စွာဖော်ပြပါ။ ဖွင့်ထားပါက (default): thinking-capable Claude models များအားလုံးအတွက် no-thinking variant တစ်ခုကို /v1/models တွင် ကြေညာပြီး၊ request တစ်ခုဖြင့် ပေးပို့သော no-think/ id သည် reasoning ကို ဖိအားပေးထားသော စစ်မှန်သော model သို့ ပြန်လည်ရှာဖွေနိုင်သည်။ ပိတ်ထားပါက variant များကို မကြေညာဘဲ no-think/ id ကို အခြားသိမ်းစာရင်းမပါသော model id များနှင့် သက်ဆိုင်မိရောမိဖြစ်စေသည်။ ဤချက်အား ဖွင့်ထားစဉ်တွင် per-model ModelSpec.noThinkingAlias opt-in/opt-out ပုံစံများကို ဆက်လက်အသုံးပြုနိုင်သည်။"
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Thinking Level မူကွဲများကို ပိတ်ရန်",
+        "description": "/v1/models catalog တွင် thinking level မူကွဲများ (ဥပမာ -low, -medium, -high) ထုတ်ပေးခြင်းကို ပိတ်ပါ။"
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "အလိုက်သင့်ပြောင်းလဲနိုင်သော Virtual Admission လမ်းကြောင်းများ",
+        "description": "provider dispatch အတွက် tenant အလိုက် အလိုက်သင့်ပြောင်းလဲနိုင်သော virtual admission လမ်းကြောင်းများကို ဖွင့်ပါ (#9654)- tenant တစ်ခု၏ ရုတ်တရက် လုပ်ဆောင်ချက်များပြားမှုကြောင့် အခြား tenant တစ်ခုတွင် 503 error မဖြစ်ပေါ်စေတော့ပါ။ OMNIROUTE_CHAT_VIRTUAL_LANES env var သည် ဤ dashboard ပြင်ဆင်သတ်မှတ်မှုထက် ဦးစားပေးအကျုံးဝင်ပြီး အပြောင်းအလဲများသည် server ကို ပြန်လည်စတင်ချိန်တွင် အသက်ဝင်ပါမည်။"
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Functional Gateway Mirrors",
+        "description": "canonical owner တွင် active credential မရှိသော်လည်း active credential ဖြင့် passthrough gateway ကို ရာဇဝင်လမ်းကြောင်းဖြင့် ချိတ်ဆက်ထားသော models များအတွက် /v1/models ပေါ်တွင် '<gateway-alias>'/'<model>' mirror ids များကို ကြေညာပါ။ သတိပြုရန်: ဂလိုဘယ်အဆင့်တွင် အသုံးပြုပါက သားရင်းလေးများအားလုံးအတွက် catalog entries များ တိုးစေသည်။"
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API Aggregator လက်ကျန်ငွေ",
+        "description": "New-API / One-API / Sub2API aggregator နှင့် တွဲဖက်အသုံးပြုနိုင်သော node များအတွက် လက်ကျန်ငွေ စစ်ဆေးခြင်းကို ဖွင့်ပါ။ ဖွင့်ထားပါက aggregator flag သတ်မှတ်ထားသော တွဲဖက် node များသည် dashboard နှင့် quota-preflight routing တွင် ၎င်းတို့၏ လက်ကျန်ငွေကို အစီရင်ခံပါမည်။"
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "ဖျက်လိုက်သော Search ချိတ်ဆက်မှုများကို ဝှက်ထားပါ",
+        "description": "Search စာရင်းအင်းများနှင့် လတ်တလောရှာဖွေမှုများသည် လက်ရှိချိတ်ဆက်မှု (live connection) ရှိနေဆဲဖြစ်သော provider များကိုသာ ထည့်တွက်ပါသည် (duckduckgo-free ကဲ့သို့သော key မလိုသည့် provider များကို အမြဲထည့်တွက်ပါသည်)။ ပိတ်ထားပါက provider id ပါရှိသော သိမ်းဆည်းထားသည့် search row တိုင်းကို ဆက်လက်ထိန်းသိမ်းထားမည်ဖြစ်သည်။"
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "တင်းကျပ်သော Free တံဆိပ်",
+        "description": "Dashboard provider စာမျက်နှာများ- provider မှ အမှန်တကယ် လက်ခံအတည်ပြုသော အချက်ပြမှုများတွင်သာ Free တံဆိပ်ကို ပြသပါမည် — display-name heuristic များ၊ boolean မဟုတ်သော free field များနှင့် တရားဝင်မှတ်တမ်းတင်ထားသော free tier မရှိသည့် မှတ်ပုံတင်ထားသော provider များပေါ်ရှိ :free နောက်ဆက်တွဲများကို ပယ်ဖျက်ပါမည်။ ပိတ်ထားပါက ယခင်တံဆိပ် စည်းမျဉ်းအတိုင်း ဆက်လက်ထားရှိမည်ဖြစ်သည်။"
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Pool အလွတ်ဖြစ်ပါက 503 ဖြင့် ဖြေကြားမည်",
+        "description": "tool-calling pre-filter မ run မီ auto combo ၏ candidate pool သည် အလွတ်ဖြစ်နေပါက (cooldowns၊ lockouts သို့မဟုတ် exhaustion များကြောင့် ပစ်မှတ်တိုင်းကို ကျော်သွားခဲ့လျှင်) ယခင် 400 \"No target supports tool calling\" capability_mismatch အစား 503 no_eligible_targets ဖြင့် တုံ့ပြန်ပါမည်။ ပုံမှန်အားဖြင့် ပိတ်ထားပါသည်- pool အလွတ်အတွက် ယခင် 400 အတိုင်း ဆက်လက်ထားရှိမည်ဖြစ်သည်။"
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Ambiguous 401 Soft Lockout",
+        "description": "သေချာချက်မရှိသော Mistral 401 ('{\"detail\":\"Unauthorized\"}', သေချာသော auth signal မရှိဘဲ) သည် revoked key နှင့် quota အကျိုးအမြတ်ကွဲပြားမှုအတွက် byte-identical ဖြစ်သည်။ ဖွင့်ထားပါက ထိုအမျိုးအစား 401 သည် connection ကို expired ဟု မသတ်မှတ်ဘဲ အနည်းဆုံး ၁ နာရီအတွင်း ၃ ကြိမ်အထိ cooldown တင်သည်; ထို့နောက်တစ်ခုမှာ expired ဟု သတ်မှတ်သဖြင့် revoked key သည် အလုံးစုံပြင်ဆင်နိုင်သည်။ ပိတ်ထားသည် (default): သေချာချက်မရှိသော Mistral 401 များအားလုံးသည် ယခင်ကဲ့သို့ပင် connection ကို expired ဟု သတ်မှတ်သည်။"
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Batch နှင့် ဖိုင် အလိုအလျောက် ရှင်းလင်းခြင်း",
+        "description": "အလိုအလျောက် ရှင်းလင်းရေးစနစ်အား OMNIROUTE_BATCH_RETENTION_DAYS ထက် ပိုမိုကြာမြင့်နေသော အဆုံးသတ်အဆင့် (ပြီးစီး/မအောင်မြင်/ပယ်ဖျက်/သက်တမ်းကုန်) Batch API လုပ်ငန်းများကို ၎င်းတို့၏ တစ်ကြောင်းချင်းအလိုက် checkpoints များနှင့်အတူ ဖျက်ပစ်စေပြီး၊ သတ်မှတ်ထားသော expires_at ကျော်လွန်သွားသည့် တင်ထားသောဖိုင်များ၏ BLOB အကြောင်းအရာများကို ရှင်းလင်းစေပါသည်။ မူရင်းအတိုင်း ပိတ်ထားသည် - စနစ်ကိုင်တွယ်သူ (operator) ဘက်မှ ရွေးချယ်အသုံးမပြုမချင်း လက်ရှိစနစ်ထည့်သွင်းမှုတိုင်းတွင် ဤဒေတာများကို ယခင်အတိုင်း ဆက်လက်ထားရှိမည်ဖြစ်သည်။ မည်သို့ပင်ဖြစ်စေ စနစ်ကိုင်တွယ်သူက စတင်လုပ်ဆောင်သော DELETE /api/v1/batches/delete-completed route ကို ထိခိုက်မှုမရှိပါ -- ၎င်းသည် သီးခြားဖြစ်ပြီး မည်သည့်အခြေအနေတွင်မဆို အလုပ်လုပ်သော အများသုံး API သဘောတူညီချက်တစ်ခု ဖြစ်သည်။"
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity အကောင့် ငှားရမ်းမှု",
+        "description": "ရွေးချယ်ထားသော Antigravity အကောင့်ကို ၎င်းအား ရွေးယူခဲ့သည့် တောင်းဆိုချက်၏ streaming သက်တမ်းတစ်ခုလုံးအတွက် သီးသန့်ဖယ်ထားပေးပါသည်၊ သို့မှသာ ပြိုင်တူ ထပ်ကြိုးစားမှု သို့မဟုတ် credential လွှဲပြောင်းပေးမှုများသည် လုပ်ဆောင်ဆဲ stream တစ်ခုသို့ ချိတ်ဆက်ထားပြီးဖြစ်သော အကောင့်တစ်ခုကို ထပ်မံရွေးယူနိုင်မည် မဟုတ်ပါ။ ဤသီးသန့်ဖယ်ထားမှုသည် (connection, callable upstream model) အတိုင်းအတာအတွင်းသာ သက်ရောက်သဖြင့် အကောင့်တစ်ခုတည်းက မတူညီသော မော်ဒယ်နှစ်ခုကို တစ်ပြိုင်နက်တည်း ဝန်ဆောင်မှုပေးနိုင်ဆဲ ဖြစ်သည်။ အဆိုပါ မော်ဒယ်အတွက် သတ်မှတ်ချက်ပြည့်မီသော အကောင့်အားလုံးကို ငှားရမ်းထားပြီးဖြစ်ပါက၊ အလုပ်များနေသော အကောင့်ပေါ်သို့ ထပ်မံစုပြုံမည့်အစား တောင်းဆိုချက်သည် အချိန်အတိုင်းအတာ သတ်မှတ်ထားသော Retry-After ပါဝင်သည့် ဖွဲ့စည်းတည်ဆောက်ထားသော 503 POOL_BUSY ကို ပြန်လည်ပေးပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည် - အကောင့်ရွေးချယ်မှုသည် ယခင်အတိုင်း အတိအကျရှိနေမည်ဖြစ်ပြီး မည်သည့်သီးသန့်ဖယ်ထားမှုကိုမျှ ပြုလုပ်မည်မဟုတ်ပါ။"
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "မလိုအပ်တော့သော Combo Steps များကို အလိုအလျောက် ဖယ်ရှားရှင်းလင်းခြင်း",
+        "description": "တရားဝင် live catalog နှင့် model sync အောင်မြင်စွာ ပြုလုပ်ပြီးနောက်၊ အဆိုပါ catalog တွင် စာရင်းမပါဝင်တော့သော မော်ဒယ်များသို့ ချိတ်ဆက်ထားသည့် combo steps များကို ဖယ်ရှားပေးမည်ဖြစ်ပြီး ဖယ်ရှားလိုက်သည့် step တစ်ခုစီအတွက် စစ်ဆေးမှုမှတ်တမ်း (audit entry) တစ်ခုကို ထည့်သွင်းပေးပါသည်။ မအောင်မြင်သော၊ အခြေအနေကျဆင်းနေသော သို့မဟုတ် free-only sync များတွင် မည်သည့်အခါမျှ ဖယ်ရှားရှင်းလင်းမည် မဟုတ်သည့်အပြင် combo တစ်ခုလုံးကိုလည်း လုံးဝ ဗလာဖြစ်သွားစေမည် မဟုတ်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည် - မလိုအပ်တော့သော steps များကို အလံပြအမှတ်အသားပြုရုံသာ ဆောင်ရွက်မည်ဖြစ်သည်။"
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth အကျဉ်းချုပ် တွေးခေါ်မှု",
+        "description": "ဖတ်ရှုနိုင်သော တွေးခေါ်မှု (thinking.display \"summarized\") ကို တောင်းဆိုသည့် Claude OAuth တောင်းဆိုချက်အား redact-thinking-2026-02-12 Anthropic beta ကို ချန်လှပ်ထားခွင့်ပြုပါသည်၊ သို့မဟုတ်ပါက Anthropic သည် signature သာပါဝင်ပြီး အကြောင်းအရာမပါသော thinking blocks အလွတ်များကို ပြန်လည်ပေးပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည် - အဆိုပါ beta သည် Claude Code OAuth wire fingerprint ၏ အစိတ်အပိုင်းတစ်ခုဖြစ်သောကြောင့် OAuth တောင်းဆိုချက်များတွင် ၎င်းကို မပြောင်းလဲဘဲ ဆက်လက်ထားရှိမည်ဖြစ်သည်။ API-key အသုံးပြုသည့် Claude တောင်းဆိုချက်များသည် ဤ flag မပါဘဲ အကျဉ်းချုပ်တွေးခေါ်မှုကို ပံ့ပိုးပေးပြီးဖြစ်သည်၊ OMNIROUTE_REDACT_THINKING=false သည်လည်း ဤ flag ကို ဖွင့်ထားမှသာ OAuth သို့ သက်ရောက်မည်ဖြစ်သည်။"
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call ပြုပြင်ခြင်း",
+        "description": "မြင်သာသော output မထွက်ပေါ်မီ streaming Kiro တုံ့ပြန်မှုတစ်ခုက ပုံစံမမှန်သော tool_call wrapper (input.name သို့မဟုတ် input.arguments ပျောက်ဆုံးနေခြင်း) တစ်ခု ထုတ်လွှတ်သောအခါ၊ အလှည့်ကို invalid_kiro_tool_call ဖြင့် အဆုံးသတ်မည့်အစား ၎င်းကို ဖိနှိပ်ထားပြီး တည့်မတ်ပေးသည့် ညွှန်ကြားချက်တစ်ခုနှင့်အတူ တောင်းဆိုချက်ကို တစ်ကြိမ် ပြန်လည်ပေးပို့ပါ။ ထပ်မံကြိုးပမ်းမှုသည် Kiro တောင်းဆိုချက် အပိုတစ်ခု ကုန်ကျမည်ဖြစ်ပြီး၊ ဒုတိယအကြိမ် မအောင်မြင်ပါက အလှည့်ကို kiro_tool_call_repair_retry_failed ဖြင့် အဆုံးသတ်မည်ဖြစ်သည်။ မူရင်းအတိုင်း ဖွင့်ထားသည်။ ပထမဆုံး ပုံစံမမှန်သော wrapper တွင် အလှည့်ကို ကျရှုံးစေရန် false ဟု သတ်မှတ်ပါ။"
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev အားထုတ်မှုအဆင့်များ",
+        "description": "အော်ပရေတာ အစားထိုးသတ်မှတ်ချက် သို့မဟုတ် provider registry နှစ်ခုစလုံးမှ မည်သည့်အရာမျှ ကြေညာထားခြင်းမရှိသည့်အခါ models.dev မှ ထုတ်ပြန်သော (သိရှိထားသည့် effort ဝေါဟာရဘောင်အတွင်း ကျဉ်းမြောင်းထားသော) reasoning effort tiers များကို အသုံးပြုပြီး၊ /v1/models effort_tiers နှင့် combo tier ဆုံချက်များတွင် ကြေညာထားသော tier စာရင်းအလွတ်ကို \"no tiers\" အဖြစ် သတ်မှတ်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- effort_tiers နှင့် ဖြေရှင်းပြီးသော supportedThinkingEfforts များသည် ယခင်အတိုင်း အတိအကျ ဆက်လက်တည်ရှိနေမည်ဖြစ်သည်။"
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena ပေါင်းစပ်ဖန်တီးထားသော cx တယ်လီမီထရီ",
+        "description": "အော်ပရေတာက ထောက်ပံ့ပေးထားသော providerSpecificData.cx မပါဝင်သည့် Arena (lmarena) ၏ create-evaluation တောင်းဆိုချက်တိုင်းတွင် ပရိုဂရမ်အရ ပေါင်းစပ်ဖန်တီးထားသော cx client-interaction blob (မည်သည့် အပြန်အလှန်တုံ့ပြန်မှုမျှ မှတ်တမ်းမရှိသော စာမျက်နှာတစ်ခုအတွက် arena.ai ကိုယ်တိုင် ပေးပို့သည့် တန်ဖိုး) ကို တွဲထည့်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- cx အကွက်သည် Arena ၏ အလိုအလျောက်စနစ်တားဆီးမှု (anti-automation) အချက်ပြတစ်ခုဖြစ်သောကြောင့် OmniRoute သည် အော်ပရေတာက အမှန်တကယ် ဘရောက်ဆာ session မှ ဖမ်းယူထားသော တန်ဖိုးတစ်ခု (providerSpecificData.cx) ကိုသာ ထပ်ဆင့်ပို့ပေးမည်ဖြစ်ပြီး၊ သို့မဟုတ်ပါက မည်သည့် cx ကိုမျှ ပေးပို့မည်မဟုတ်ပါ။ upstream အကျိုးကျေးဇူးကို သက်သေမပြနိုင်သေးပါ၊ cx မပါဝင်သည့် တောင်းဆိုချက်များကို Arena က စတင်ငြင်းပယ်မှသာ ဖွင့်ပါ။"
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Native Codex Reactive ချုံ့ကျစ်ခြင်း",
+        "description": "native Codex passthrough မှတ်တမ်းများ (codex provider သို့ POST /v1/responses) သည် context ဘတ်ဂျက်ထက် ကျော်လွန်သောအခါ Responses input[] adapter ကို အသုံးပြု၍ reactive (သတ်မှတ်ချက်) နှင့် နောက်ဆုံးနည်းလမ်း context compaction အဆင့်များက ၎င်းတို့ကို ပြန်လည်ရေးသားခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- native Codex မှတ်တမ်းများကို Codex client က ပိုင်ဆိုင်ပြီး compaction ကြောင့် မည်သည့်အခါမျှ ပြန်လည်ရေးသားမည် မဟုတ်ပါ၊ အရွယ်အစားလွန်ကဲသော တောင်းဆိုချက်များသည် ယခင်အတိုင်း context ဘတ်ဂျက်စစ်ဆေးမှုကို ဆက်လက်ကျရှုံးနေမည်ဖြစ်သည်။ global compression ဖွင့်ထားရန်နှင့် မော်ဒယ်ကို ချန်လှပ်မထားရန် လိုအပ်သည်။"
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Quota Window: Bounded Park ကို လိုက်နာခြင်း",
+        "description": "ဝင်းဒိုးအလိုက် quota မူဝါဒ (အကောင့်ရွေးချယ်မှုတွင် အသုံးပြုသော session/အပတ်စဉ် သတ်မှတ်ချက်များ) အား ကန့်သတ်ထားသော ကုန်ဆုံးမှုရပ်နားခြင်း (bounded exhaustion park) ကို လိုက်နာခွင့်ပြုပါ- ကန့်သတ်ထားသော ရပ်နားမှု သတ်မှတ်ရက် ကျော်လွန်သွားပါက သို့မဟုတ် သိမ်းဆည်းထားသော quota စောင့်ကြည့်တွေ့ရှိချက်သည် park ကန့်သတ်ချက်ထက် ပိုမိုဟောင်းနွမ်းနေပါက၊ ဝင်းဒိုးသည် quota အသစ်ပြန်လည်ရယူသည်အထိ အကောင့်ကို ဖယ်ထုတ်ထားခြင်းအား ရပ်တန့်မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- သိမ်းဆည်းထားသော ဝင်းဒိုးတစ်ခုသည် ၎င်း၏ကိုယ်ပိုင် reset အချိန်အထိ နောက်ဆုံးတင်ပြထားသော ရာခိုင်နှုန်းအတိုင်း ဆက်လက်ပိတ်ဆို့နေမည်ဖြစ်သည်။"
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "ရုပ်ပုံထုတ်လုပ်ခြင်း- ကြာမြင့်သော လုပ်ဆောင်ချက်များ",
+        "description": "OpenAI နှင့် ကိုက်ညီသော ရုပ်ပုံထုတ်လုပ်ခြင်းအတွက်- ပုံသေ 120 s ရုပ်ပုံဘတ်ဂျက်အစား ချိတ်ဆက်မှု၏ အချိန်ကုန်ဆုံးမှု (providerSpecificData.timeoutMs)၊ မဟုတ်ပါက ဗဟို upstream fetch အချိန်ကုန်ဆုံးမှု (FETCH_TIMEOUT_MS၊ ထို့နောက် REQUEST_TIMEOUT_MS၊ မူရင်း 600 s) ကို အသုံးပြုပါ၊ ခေါ်ဆိုသူ ပယ်ဖျက်ခဲ့သော တောင်းဆိုမှုကို 499 ဖြင့် အဆုံးသတ်ပါ၊ ထို့အပြင် Playground အား ကြာမြင့်သော ရုပ်ပုံလုပ်ဆောင်ချက်များကို keepalive heartbeats ပါဝင်သည့် SSE stream အဖြစ် လက်ခံရရှိစေပါသည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ပုံသေ ဘတ်ဂျက်ကို အသုံးပြုပြီး ခေါ်ဆိုသူ ပယ်ဖျက်မှုကို ဆက်လက်လွှဲပြောင်းမည် မဟုတ်ပါ။ response body ဖတ်ရှုမှုကို အကျုံးဝင်သည့် သတ်မှတ်ချိန်သည် အမြဲတမ်း ဖွင့်ထားပါသည်။"
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Catalog Mirror မွမ်းမံပြင်ဆင်မှုများ",
+        "description": "/v1/models ပေါ်ရှိ claude/ ရှာဖွေတွေ့ရှိမှုနှင့် functional-gateway mirror များကို ပိုမိုမွမ်းမံပြင်ဆင်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- mirror လုပ်ဆောင်မှု နှစ်ခုစလုံးသည် ယခင်အတိုင်း အတိအကျ လုပ်ဆောင်ပါမည်။ ဖွင့်ထားပါက- claude/ ရှာဖွေတွေ့ရှိမှု mirror များသည် စာရင်းသွင်းထားသော reasoning-effort မူကွဲများ (-low/-medium/-high/-xhigh) ကိုပါ အကျုံးဝင်စေမည်ဖြစ်ပြီး တောင်းဆိုမှု လမ်းကြောင်းမှ ဖော်ဆောင်၍ မရနိုင်သော built-in auto/* id များကို ကျော်သွားမည်ဖြစ်ကာ စာရင်းသွင်းပြီးသား alias တစ်ခုကိုလည်း ကျော်သွားပါမည်။ functional-gateway mirror များသည် combo များနှင့် OmniRoute မှ ပေါင်းစပ်ဖန်တီးထားသော id များ (claude/, no-think/) ကို ကျော်သွားမည်ဖြစ်ပြီး ပိုင်ရှင်ကို owned_by ထံမှ ရယူကာ ပိုင်ရှင်ကို ၎င်း၏ ကိုယ်ပိုင် gateway အဖြစ် ဘယ်တော့မှ အသုံးမပြုပါ၊ blockedProviders တွင် ပိတ်ထားသော gateway များနှင့် gateway တစ်ခု၏ တရားဝင် တိုက်ရိုက်ကတ်တလောက် ပြင်ပရှိ မော်ဒယ်များကို ကျော်သွားပါမည်။"
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy Health- ငြင်းပယ်ခံရမှုက ဆက်တိုက်ကျရှုံးမှုမှတ်တမ်းကို ပြန်လည်သတ်မှတ်သည်",
+        "description": "proxy health sweep တွင် ပစ်မှတ်မှ ငြင်းပယ်ခဲ့သော probe တစ်ခု (401/403/429- proxy က လွှဲပြောင်းပေးခဲ့သော်လည်း ပန်းတိုင်မှ ဤ egress IP ကို ငြင်းပယ်ခဲ့သည်) အား ဝန်ဆောင်မှုပေးပြီးသော probe ကဲ့သို့ပင် proxy ၏ ဆက်တိုက်ကျရှုံးမှု အရေအတွက်ကို မူလအတိုင်း ပြန်လည်သတ်မှတ်ခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- ငြင်းပယ်ခံရမှုသည် ဘက်မလိုက်ဘဲ ဆက်တိုက်ကျရှုံးမှု အရေအတွက်ကို ဆက်လက်ထိန်းသိမ်းထားပါသည် (#10654)။ 5xx သည် မည်သည့်ဘက်တွင်မဆို အတည်မပြုနိုင်ဘဲ ကျန်ရှိနေမည်ဖြစ်ပြီး ငြင်းပယ်ခံရမှုသည် proxy တစ်ခုကို ဖယ်ရှားခြင်း၊ ပိတ်ခြင်း သို့မဟုတ် ပြန်လည်အသက်သွင်းခြင်း ဘယ်သောအခါမျှ ပြုလုပ်မည်မဟုတ်ပါ။"
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok Subscription ရုပ်ပုံများ",
+        "description": "xai-oauth (xao) နှင့် grok-cli ရုပ်ပုံ လမ်းကြောင်းများကို မှတ်ပုံတင်ပြီး OpenAI quality high/hd ကို xAI medium သို့ ချိတ်ဆက်သတ်မှတ်ပါ။ မူရင်းအတိုင်း ပိတ်ထားသည်- API-key xAI ရုပ်ပုံလမ်းကြောင်းသည် ရှိပြီးသား OpenAI နှင့် ကိုက်ညီသော တောင်းဆိုမှုအတိုင်း ဆက်ရှိနေမည်ဖြစ်ပြီး subscription လမ်းကြောင်းများကို မှတ်ပုံတင်မည် မဟုတ်ပါ။"
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth တိုက်ရိုက် မော်ဒယ် ရှာဖွေတွေ့ရှိမှု",
+        "description": "အသေထားရှိသော static seed အစား OAuth bearer token ကို အသုံးပြု၍ https://api.x.ai/v1/models မှတစ်ဆင့် xai-oauth ချိတ်ဆက်မှုများအတွက် တိုက်ရိုက် xAI မော်ဒယ် ကတ်တလောက်ကို ရယူပါ။ မူရင်းအတိုင်း ဖွင့်ထားသည်။ static seed ကို ဆက်လက် အသုံးပြုနိုင်ရန် အဆိုပါ flag ကို false အဖြစ် သတ်မှတ်ပါ။ ရှာဖွေတွေ့ရှိမှု လမ်းကြောင်းတွင် HTTP ကျရှုံးမှုများ ဖြစ်ပေါ်ပါက seed သို့ ပြန်လည်ဆုတ်ခွာ အသုံးပြုမည်ဖြစ်ပြီး flag getter ကိုယ်တိုင်က HTTP တောင်းဆိုမှုကို ထုတ်ပေးမည် မဟုတ်ပါ။"
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic နှင့် ကိုက်ညီသော စကားဝိုင်းတွင်း System အလှည့်များ",
+        "description": "ရိုးရိုး anthropic-compatible-* relays (claude → claude passthrough) များတွင် cached prompt prefix သည် အလှည့်တစ်ခုနှင့်တစ်ခုအကြား တည်ငြိမ်နေစေရန် စကားဝိုင်းတွင်း role:system အလှည့်များကို ထိပ်တန်းအဆင့် system parameter သို့ ဆွဲတင်မည့်အစား messages[] အတွင်း၌သာ ဆက်လက်ထားရှိပါ။ client ကိုယ်တိုင်က mid-conversation-system-2026-04-07 anthropic-beta ကို ပေးပို့ထားသည့်အခါမှသာ သက်ရောက်ပါသည် (upstream သို့ မူရင်းအတိုင်း ပေးပို့သည်)။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- beta ကို မထောက်ပံ့သော relays များသည် role:system မက်ဆေ့ဂျ်များကို 400 ဖြင့် ငြင်းပယ်သောကြောင့် system အလှည့်တိုင်းကို ယခင်အတိုင်းပင် ထိပ်သို့ ဆွဲတင်ပါမည်။"
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB ကျန်းမာရေး စစ်ဆေးမှု- Startup Scan ကို ရွှေ့ဆိုင်းခြင်း",
+        "description": "startup ပြီးဆုံးသည်အထိ စောင့်ဆိုင်းပိတ်ဆို့ထားမည့်အစား ဆာဗာမှ တောင်းဆိုမှုများကို စတင်လက်ခံပြီးနောက်မှသာ startup DB ကြံ့ခိုင်မှု/ကျန်းမာရေး စစ်ဆေးမှုကို လုပ်ဆောင်ပါ (setImmediate မှတစ်ဆင့်)။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- ပထမဆုံး တောင်းဆိုမှုကို မလုပ်ဆောင်မီ ပျက်စီးနေသော ဒေတာဘေ့စ်ကို စစ်ဆေးတွေ့ရှိနိုင်ရန်အတွက် startup သည် #13717 မတိုင်မီကဲ့သို့ပင် စစ်ဆေးမှုအပေါ်တွင် ရပ်တန့်ဆိုင်းငံ့ထားမည်ဖြစ်သည်။ ဖွင့်ထားပါက- startup သည် ချက်ချင်းပြီးဆုံးမည်ဖြစ်ပြီး စစ်ဆေးမှု (ယခုအခါ bounded/paged ဖြစ်ပြီး အမှန်တကယ် ဖိုင်အခြေပြု DB အတွက် ပယ်ဖျက်နိုင်သော child process တွင် သီးခြားခွဲထုတ်ထားသည်) ကို ချက်ချင်း ဆက်လက်လုပ်ဆောင်မည်ဖြစ်သည်။"
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode ထုတ်ဝေထားသော ကတ်တလောက် လမ်းကြောင်းသတ်မှတ်ခြင်း",
+        "description": "တိကျသော registry endpoint မရှိသည့် OpenCode Zen နှင့် OpenCode Go မော်ဒယ်များအား နောက်ခံတွင် 6 h လျှင် တစ်ကြိမ် ဖတ်ရှုသည့် ထုတ်ဝေထားသော models.opencode.ai ကတ်တလောက်မှ ၎င်းတို့၏ request surface (@ai-sdk/openai အတွက် Responses၊ @ai-sdk/anthropic အတွက် Messages) ကို ရယူခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- endpoint သည် ယခင်အတိုင်း registry heuristics မှ လာမည်ဖြစ်ပြီး ကတ်တလောက်ကို မည်သည့်အခါမျှ ဆွဲယူမည်မဟုတ်ပါ။"
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto တောင်းဆိုမှုများ- စိစစ်တွက်ချက်ပြီး စွမ်းဆောင်ရည် အလေးချိန်များ",
+        "description": "auto/* တောင်းဆိုမှုများ (resolveModelOrError နှင့် auto-routing wrapper) ကို /v1/models ကတ်တလောက်ကဲ့သို့ တစ်ပြိုင်နက်တည်း အစုလိုက်ဖတ်ရှုထားသော စိစစ်တွက်ချက်ပြီး မော်ဒယ်စွမ်းဆောင်ရည်များ (vision, reasoning, thinking) နှင့် လေ့လာတွေ့ရှိထားသော အရည်အသွေးရမှတ်များဖြင့် candidate pool ကို တည်ဆောက်ခွင့်ပြုပါ။ မူရင်းအတိုင်း ပိတ်ထားပါသည်- တောင်းဆိုချိန် snapshot အလေးချိန်များသည် ယခင်အတိုင်း တသမတ်တည်း ရှိနေမည် (စွမ်းဆောင်ရည်များကို လိုအပ်မှသာ တွက်ချက်မည်ဖြစ်ပြီး အလေးချိန်များထဲသို့ ပေါင်းထည့်မည်မဟုတ်ပါ)။ ဖွင့်ထားပါက- ထိုအချက်ပြမှုများသည် snapshot အလေးချိန်များထဲသို့ ပေါင်းထည့်ပေးမည်ဖြစ်သောကြောင့် candidate အလေးချိန်များနှင့် ရွေးချယ်မှုများ ပြောင်းလဲသွားနိုင်ပါသည်။"
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "transport အတွက် local browser (browserBacked) သို့မဟုတ် စက်တွင်း ထည့်သွင်းထားသော CLI (isLocalCli) လိုအပ်သည့် keyless (no-auth) provider များကို auto/* ကိုယ်စားလှယ်စု (candidate pool) ထဲမှ ဖယ်ထားပါ၊ သို့မှသာ တုံ့ပြန်မှုမရှိတော့သော အဖွဲ့ဝင်တစ်ခုက auto request ကို target တစ်ခုချင်းစီ၏ timeout အထိ ရပ်တန့်မနေစေနိုင်ပါ (#17036)။ မူရင်းအားဖြင့် ပိတ်ထားသည်- tool ခေါ်ဆိုမှုကို အတုပြုလုပ်ပေးသော (emulated tool calling) no-auth provider တိုင်းသည် ယခင်အတိုင်း pool ထဲတွင် ရှိနေမည်။ တိုက်ရိုက် '<alias>'/'<model>' ခေါ်ဆိုမှုများသည် မည်သည့်အခြေအနေတွင်မဆို အလုပ်လုပ်သည်။"
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "codebuddy-cn စဉ်းစားသော မော်ဒယ်များ (reasoning replay လိုအပ်သော DeepSeek-V4 / Kimi-K2 မိသားစုများ) အတွက်၊ ပြန်လည်ပို့သော assistant reasoning_content တစ်ခုစီကို message content ၏ ရှေ့ဆုံးတွင် မြင်သာသော '<thought>' block အဖြစ် ထည့်သွင်းပါ၊ သို့မှသာ reasoning_content field ကို ဖယ်ရှားသည့် gateway ကို ဖြတ်သွားသော်လည်း ကျန်ရှိနေမည် (#13632)။ မူရင်းအားဖြင့် ပိတ်ထားသည်- codebuddy-cn request များကို မပြောင်းလဲဘဲ ပို့သည်၊ reasoning_content field ကိုယ်တိုင်ကို အမြဲ ထိန်းသိမ်းထားသည်။"
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider ဘေးကင်းလုံခြုံရေး ရပ်တန့်မှုများ- အပြီးသတ်",
+        "description": "တိကျသေချာသော provider ဘေးကင်းလုံခြုံရေး ရပ်တန့်မှုတစ်ခု (misalignment_policy_violation၊ content_policy_violation သို့မဟုတ် provider_safety_rejection ဟု သတ်မှတ်ထားသော ယခင် 'blocked by our safety systems' တိကျသည့် ငြင်းပယ်မှု) ကို terminal ဖြစ်သော တောင်းဆိုချက်အဆင့် ငြင်းပယ်မှုအဖြစ် ထားရှိမည်- ၎င်း၏ ကုဒ်ကို HTTP၊ Responses၊ WebSocket နှင့် completed-stream အမှားများတစ်လျှောက် ထိန်းသိမ်းထားပြီး combo သည် အခြားပစ်မှတ်များကို ထပ်မံကြိုးစားမည့်အစား ဤနေရာတွင် ရပ်တန့်ကာ လက်ခံထားပြီးဖြစ်သော sibling များကို ပယ်ဖျက်မည်ဖြစ်သည် (#17049)။ မူရင်းအတိုင်း ပိတ်ထားသည်- ဤအမှားများသည် ရှိပြီးသား ကိုင်တွယ်ပုံအတိုင်း ဆက်ရှိနေမည်ဖြစ်ပြီး combo လမ်းကြောင်းသတ်မှတ်မှုမှာ ပြောင်းလဲမည်မဟုတ်ပါ။"
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential ကျန်းမာရေး- အလိုအလျောက် ပိတ်ထားသော ချိတ်ဆက်မှုများကို ပြန်လည်စစ်ဆေးခြင်း",
+        "description": "ဂိတ်ဝေးမှ အလိုအလျောက်ပိတ်ထားသော ချိတ်ဆက်မှုများ (autoDisabledAt အဖြစ် သတ်မှတ်ထားပြီး တစ်ခုလျှင် အများဆုံး ၆ နာရီလျှင်တစ်ကြိမ်နှင့် sweep တစ်ကြိမ်လျှင် ၅ ခုနှုန်း) ကို credential health sweep မှ ပြန်လည်စစ်ဆေးခွင့်ပြုပြီး စစ်ဆေးမှုအောင်မြင်ပါက ချိတ်ဆက်မှုကို ပြန်လည်ဖွင့်ပေးမည်ဖြစ်သည် (#16190)။ မူရင်းအတိုင်း ပိတ်ထားသည်- ပိတ်ထားသော ချိတ်ဆက်မှုများသည် ယခင်အတိုင်း အော်ပရေတာမှ ပြန်လည်ဖွင့်ပေးခြင်း သို့မဟုတ် ပြန်လည်စစ်ဆေးခြင်း မပြုလုပ်မချင်း ပိတ်ထားဆဲဖြစ်မည်။ အော်ပရေတာ ပိတ်ထားသော ချိတ်ဆက်မှုများနှင့် အပြီးအပိုင် ပိတ်ပင်ခံရပြီးနောက် ပိတ်သွားသော ချိတ်ဆက်မှုများကို မည်သည့်အခါမျှ ပြန်လည်စစ်ဆေးမည်မဟုတ်ပါ။"
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate- Auth စစ်ဆေးချက်များသာ",
+        "description": "ကက်ရှ်လုပ်ထားသော မအောင်မြင်သည့် credential probe တစ်ခုသည် ၎င်း၏ စစ်ဆေးချက်အရ မမှန်ကန်သော credentials ဖြစ်ကြောင်း သက်သေပြနိုင်မှသာ ချိတ်ဆက်မှုကို ပိတ်ဆို့ရန်အတွက် combo credential gate ကို ကန့်သတ်ပါ (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required)။ အတည်မပြုနိုင်သော ကျရှုံးမှုများ (timeouts, rate limits, outages, unsupported probes နှင့် အမျိုးအစားသတ်မှတ်မထားသော scheduler အမှားများ) ကို unknown အဖြစ် သဘောထားမည်ဖြစ်ပြီး ချိတ်ဆက်မှုသည် traffic ကို ဆက်လက်လက်ခံရရှိမည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ကက်ရှ်လုပ်ထားသော မည်သည့် probe အမှားမဆို cache TTL (၅ မိနစ်) အတွက် ချိတ်ဆက်မှုကို ပိတ်ဆို့ထားမည်။"
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo- Content-Policy ငြင်းပယ်မှုတွင် ရပ်တန့်မည်",
+        "description": "combo ပစ်မှတ်တစ်ခုက တိကျသော content-policy ငြင်းပယ်မှု (ကုဒ် သို့မဟုတ် အမျိုးအစား cyber_policy / content_policy_violation) ဖြင့် တုံ့ပြန်သည့်အခါ နောက်ပစ်မှတ်သို့ ရှေ့ဆက်မည့်အစား combo ကို ရပ်တန့်ပြီး ကျန်ရှိသော ပစ်မှတ်များသည် မတူညီသော မော်ဒယ်များဖြစ်နေလျှင်ပင် ထိုငြင်းပယ်မှုကို ပြန်ပို့မည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- ထိုငြင်းပယ်မှုသည် အကောင့်ကို အေးခဲစေခြင်း သို့မဟုတ် provider breaker ကို ဖြတ်တောက်စေခြင်း မရှိဘဲ combo သည် ယခင်အတိုင်းပင် နောက်ပစ်မှတ်သို့ ရှေ့ဆက်သွားမည်ဖြစ်သည်။"
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown Retry: 403/410 ငြင်းပယ်မှုများကို ကျော်ရန်",
+        "description": "အကောင့်အားလုံး cooldown ဖြစ်နေပြီး အစောဆုံးပြီးဆုံးမည့် cooldown သည် 403 (access refused) သို့မဟုတ် 410 (gone) ကြောင့် ဖြစ်ပေါ်ခဲ့ပါက cooldown ကုန်ဆုံးသည်အထိ စောင့်ဆိုင်းကာ တောင်းဆိုမှုကို ထပ်မံပေးပို့မည့်အစား ထိုငြင်းပယ်မှုကို ချက်ချင်း ပြန်ပေးပါမည်။ သက်တမ်းတိုးနေသော agentrouter connection-scoped quota 403 ကို ထပ်မံကြိုးစားနိုင်စေရန် errorCode 429 ဖြင့် သိမ်းဆည်းထားမည်ဖြစ်သည်။ မူရင်းအတိုင်း ပိတ်ထားသည်- 401 တစ်ခုတည်းသာ စောင့်ဆိုင်းမှုကို ကျော်သွားမည်ဖြစ်ပြီး ငြင်းပယ်မှုတိုင်းကို ရောက်ရှိလာသည့် status အတိုင်း သိမ်းဆည်းထားမည်ဖြစ်သည်။"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "စျေးမရှိသော အသုံးပြုမှု ဘတ်ဂျက် မူဝါဒ",
+        "description": "သော့တစ်ခုချင်းစီအတွက် နေ့စဉ်/အပတ်စဉ် USD ကန့်သတ်ချက်များသည် ပေးသွင်းသူ/မော်ဒယ်အတွက် ဈေးနှုန်းစာရင်းတန်း မရှိသော အောင်မြင်အသုံးပြုမှုကို မည်သို့ ကိုင်တွယ်သနည်း။ fail_closed (ပုံမှန်) သည် အဆိုပါ ကာလကို ကျော်လွန်သွားကြောင်း မှတ်သားပေး၍ မသိရသေးသော ကုန်ကျစရိတ်သည် ခိုင်မာသော ကန့်သတ်ကို မဖြတ်ကျော်နိုင်စေပါ။ count_as_zero သည် ထိုအသုံးပြုမှုကို $0 အဖြစ် သတ်မှတ်ကာ ဈေးနှုန်း သတ်မှတ်ထားသော အသုံးစရိတ်ကို ဆက်လက် အကောင်အထည်ဖော်နေပါသည်။ ဈေးနှုန်း မရှိသေးသော မော်ဒယ်များကို မည်သည့်နည်းဖြင့်မဆို ဒက်ရှ်ဘုတ် မူလစာမျက်နှာတွင် စာရင်းပြထားပါသည်။"
       }
     }
   },
@@ -13793,6 +14446,7 @@
     "latency": "ကြာချိန်",
     "quota": "ခွဲတမ်း",
     "rangeWindow": "{range} အချိန်ကာလ",
+    "timeRange": "အချိန်အပိုင်းအခြား",
     "runtimeHealthBlend": "လည်ပတ်မှု/စနစ်အခြေအနေ ပေါင်းစပ်မှု",
     "averageResponseTime": "ပျမ်းမျှတုံ့ပြန်ချိန်",
     "worstQuota": "အဆိုးဆုံး ခွဲတမ်း",
@@ -13923,7 +14577,11 @@
       "ok": "ယေဘုယျအားဖြင့် ကန့်သတ်ချက်နည်းသည်"
     },
     "allProviders": "ဝန်ဆောင်မှုပေးသူအားလုံး",
-    "noApiKeyRequired": "API ကီး မလိုအပ်ပါ"
+    "noApiKeyRequired": "API ကီး မလိုအပ်ပါ",
+    "searchPlaceholder": "မော်ဒယ်၊ ပရော်ဝိုင်ဒါရှာဖွေပါ...",
+    "searchAria": "မိခမ္ဘာ model များကို အဖွယ်ဖွာကြည့်ရှုပါ",
+    "filterProviderAria": "ပေးစီးမှုအမျိုးအစားအရ စစ်ထုတ်ရန်",
+    "keylessOnly": "ကီးမရှိ"
   },
   "providerHealthAutopilot": {
     "title": "ဝန်ဆောင်မှုပေးသူ အခြေအနေ အလိုအလျောက်စီမံမှု",
@@ -13994,7 +14652,11 @@
     "learnMore": "ပိုမိုလေ့လာရန်",
     "changelogLoadFailed": "ပြောင်းလဲမှုမှတ်တမ်းကို ဖွင့်၍မရပါ။ နောက်မှ ထပ်မံကြိုးစားပါ။",
     "retry": "ထပ်မံကြိုးစားရန်",
-    "viewFullHistory": "မှတ်တမ်းအပြည့်အစုံကို GitHub တွင် ကြည့်ရန်"
+    "viewFullHistory": "မှတ်တမ်းအပြည့်အစုံကို GitHub တွင် ကြည့်ရန်",
+    "title": "သတင်းနှင့် ပြောင်းလဲမှုမှတ်တမ်း",
+    "description": "OmniRoute အဖွဲ့၏ ကြေညာချက်များနှင့် နောက်ဆုံးထွက်ဗားရှင်း မှတ်စုများ",
+    "viewLabel": "ကြည့်ရန်",
+    "loadingNews": "ကြေညာချက်များကို ဖွင့်နေသည်..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15207,9 @@
       "circuitBreakerState": "ဝန်ဆောင်မှုပေးသူ Circuit Breaker အခြေအနေ",
       "lastUpdate": "နောက်ဆုံးအပ်ဒိတ်: {timestamp}",
       "uptimeMinutes": "{minutes} မိနစ်",
-      "uptimeHoursMinutes": "{hours} နာရီ {minutes} မိနစ်"
+      "uptimeHoursMinutes": "{hours} နာရီ {minutes} မိနစ်",
+      "breakerClosed": "ပိတ်ထားသည်",
+      "breakerNotClosed": "ဖွင့်ထားသည် သို့မဟုတ် တစ်ဝက်ဖွင့်ထားသည်"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15284,9 @@
         "primaryAction": "ပြုပြင်ထိန်းသိမ်းမှု အသေးစိတ်များ",
         "secondaryAction": "စနစ်အခြေအနေ"
       }
+    },
+    "miniapp": {
+      "askAnything": "ဘာမဆို မေးပါ…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15477,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "မြင်နိုင်သည် {visible} / စုစုပေါင်း {total}",
+    "modeLabel": "မြင်ကွင်းမုဒ်",
+    "jumpToNow": "လက်ရှိအချိန်သို့ ခုန်သွားပါ၊ NOW လိုင်းသည် အနေအထား {position}% သို့ ပြန်လည်သတ်မှတ်မည်",
+    "laneReuse": "Lane ပြန်လည်အသုံးပြုခြင်း",
+    "laneReuseLabel": "Lane ပြန်လည်အသုံးပြုနိုင်သည့် အချိန်ကာလ (မိနစ်)",
+    "laneReuseHint": "တူညီသော conversation id ကို မျှဝေသည့် တောင်းဆိုချက်များအကြား အချိန်ကွာဟချက်သည် ဤမိနစ်အရေအတွက်အောက် ဖြစ်နေသရွေ့ တူညီသော timeline အတန်းတွင် ဆက်လက်ရှိနေမည်။",
+    "laneReuseUnit": "မိနစ်",
+    "autoRefresh": "အလိုအလျောက် ပြန်လည်စစ်ဆေးခြင်း",
+    "autoRefreshLabel": "အလိုအလျောက် ပြန်လည်စစ်ဆေးသည့် ကြားကာလ (စက္ကန့်)",
+    "autoRefreshHint": "Timeline က ဆာဗာမှ တောင်းဆိုချက်စာရင်းကို ပြန်လည်ရယူသည့် အကြိမ်ရေ။",
+    "autoRefreshUnit": "စက္ကန့်",
+    "zoomOut": "ချုံ့ကြည့်ရန်",
+    "zoomIn": "ချဲ့ကြည့်ရန်"
   },
   "metadata": {
     "compressionTitle": "ချုံ့ခြင်း",
@@ -15073,5 +15753,118 @@
     "importButton": "တင်သွင်းရန်",
     "importFailed": "တင်သွင်းမှု မအောင်မြင်ပါ။",
     "importSuccess": "အကောင့် {connections} ခုနှင့် ဝန်ဆောင်မှုပေးသူ node {nodes} ခု တင်သွင်းပြီး {skipped} ခု ကျော်ခဲ့သည်။"
+  },
+  "conversations": {
+    "title": "စကားပြောများ",
+    "countSummary": "{total, plural, one {# စကားပြော} other {# စကားပြော}} (အလှည့် ၂ ကြိမ်နှင့်အထက်)",
+    "autoRefreshTitle": "ဒီစာရင်းကို ဆာဗာမှ ပြန်ယူခေါ်ယူသည့် ကြိမ်ရေ",
+    "autoRefresh": "အလိုအလွန် ပြန်လည်ဖော်ပြ",
+    "loading": "စမာသဝင်များ ဝင်ယူနေသည်...",
+    "colConversation": "ဆက်ကြွိဳ",
+    "colTurns": "အသိုပိန်များ",
+    "colContinuation": "ဆက်လက်သြားမှု",
+    "colLastModel": "နောက်ဆုံးမိုဒယ်",
+    "colProvider": "ပြင်ပမူဝါဒ",
+    "colStatus": "အခြေအနေ",
+    "colLastSeen": "နောက်ဆုံးကြည့်ရှုချက်",
+    "drawerTitle": "ဆက်ကြွိဳ",
+    "prevConversation": "ယခင်ဆက်ကြွိဳ",
+    "nextConversation": "နောက်ဆက်ကြွိဳ",
+    "gotoLatestRequest": "နောက်ဆုံးနေရာသို့ ပြန်သွားရန်",
+    "goToBottom": "အောက်ဆုံးသို့ ပြန်သွားရန်",
+    "statusInProgress": "လုပ်ငန်းဆောင်ချက်ဆက်လုပ်နေသည်",
+    "continuationGenuineTitle": "နောက်ဆုံးအဆင့်သည် previous_response_id ကို အသုံးပြုပြီး server-side မှ ဖြေရှင်းပြီးပါသည်",
+    "continuationBadge": "ဆက်လက်လုပ်ဆောင်မှု",
+    "stalledTitle": "နောက်ဆုံးအဆင့်သည် stop ၌ မဆုံးရှုံးဘဲ ၅ မိနစ်ကျော် ပြီးသွားပြီ",
+    "stalledBadge": "ခေတ္တံ",
+    "noTurns": "ဤအကြောင်းအရာအသွင်အတွက် လက်မှတ်မသိမ်းရှိပါ။"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "လက်ရှိနေရာမှ စတင်ပါ (ရှိပြီးသား မှတ်တမ်းများကို ကျော်ပါ)",
+    "pageTitle": "Log ကို ထုတ်ယူမည်",
+    "pageSubtitle": "Logs တက်ဘ်မှ ခေါ်ဆိုမှုမှတ်တမ်းများကို ပြင်ပ ခွဲခြမ်းစိတ်ဖြာမှုသိုလှောင်ရာသို့ အဆက်မပြတ် ပို့ပါ။",
+    "addDestination": "ရောက်ရှိရာနေရာ ထည့်ပါ",
+    "scheduleTitle": "အစီအစဉ်",
+    "cronLabel": "Cron",
+    "notScheduled": "အစီအစဉ်မရှိ",
+    "lastScheduledRun": "နောက်ဆုံး အစီအစဉ်အရ ရွေးချယ်မှု",
+    "lastRunSummary": "{startedAt} — {status}, {rows} အကြောင်းအရာများ",
+    "never": "မဖော်ပြရ",
+    "highWaterMark": "ခေါ်ဆိုမှုမှတ်တမ်း အမြင့်ဆုံးအမှတ် (high-water mark)",
+    "rowPrefix": "အကြောင်းအရာ {id}",
+    "noDestinations": "စုေဆာ္ရန်အရည်မရှိ",
+    "noDestinationsHint": "တစ်နာရီစီစီမ်းအချိန်အလိုက်ဈောင့်လှမ်းလွှဲလှယ်ရန်အရည်ထပ်မင်အစီအစဉ်တန်းထပ်တင်။",
+    "errLoadStatus": "စုဆောင်းမှုသတင်းပြန်လက်ခံမှုမအောင်မြင်ပါ",
+    "errSaveDestination": "အရည်သိမ်းမအောင်မြင်ပါ",
+    "msgDestinationSaved": "အရည်သိမ်းပြီးပါပြီ။",
+    "errConnectionTest": "ချိတ်ဆက်မှုစမ်းသပ်မှုမအောင်မြင်ပါ",
+    "msgRunInFlight": "ဤအရည်အတွက်လွှဲလှယ်မှုတစ်ခုအလုပ်လုပ်နေပြီးဖြစ်သဖြင့်၊ နှစ်ကြိမ်ပေါက်အာသို့မဟုတ်နှစ်ကြိမ်ပေါက်အာမတော့ဘူး။",
+    "errExportRun": "စုဆောင်းမှုလွှဲလှယ်မှုမအောင်မြင်ပါ",
+    "errUpdateDestination": "အရည်တိုးမြှင့်မအောင်မြင်ပါ",
+    "errDeleteDestination": "အရည်ဖျက်မအောင်မြင်ပါ",
+    "deleteTitle": "သတ်မှတ်ရန် ဖုံးမဖွင့်",
+    "deleteConfirm": "\"{name}\" ကိုဖွင့်မည်လား? ၎င်း၏ ဖော်တော့စာ ကိုယ်သိမ်းဆည်းမှုလည်း ဖုံးမဖွင့်မည်ဖြစ်၍၊ ထပ်မံထည့်ခြင်းများအတွက် အသက်ဝင်သော ကိုယ်အသေးအငယ် ဆက်သွယ်မှု မှတ်တမ်းမှ စတင်လိမ့်မည်။",
+    "statusDisabled": "ဖွင့်မည်မဟုတ်",
+    "statusFailing": "မတော်တဆဖြစ်ပေါ်နေသည်",
+    "statusHealthy": "အာန်းဆက်တမ်းသည်",
+    "statusNotRunYet": "ကိတ်ဆက်ဆွန့်ခြင်း မရှိသေးပါ",
+    "typeNotInstalled": "အသားထောင် လွဲမဟုတ်",
+    "metaLine": "နောက်ဆုံး ကိတ်ဆက်ဆွန့်ခြင်း {lastRun} · {exported} စာမျက်နှာ ကိုယ်သိမ်းဆည်းမှု · {pending} ဟိုက်ပန်ဖွင့်ခြင်း · ကိတ်ဆက်ဆွန့်ခြင်း {cursor}",
+    "btnTest": "ထင်ရှားသည်",
+    "btnRunNow": "ယခု ကိတ်ဆက်ဆွန့်ခြင်း",
+    "btnDisable": "ဖျောက်သည်",
+    "btnEnable": "ဖွင့်သည်",
+    "btnEdit": "ပြင်ဆင်",
+    "btnDelete": "ဖျက်သည်"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI အကောင့်များ",
+    "cardSubtitle": "စာရင်းအသွင်ခွဲခံယူသည့် မျက်စီး API မှ ရာထုပုံသေ",
+    "btnRefresh": "သန့်ရှင်းစေသည်",
+    "listAria": "CLIProxyAPI အကောင့် ဆေးကူ",
+    "noAccounts": "CLIProxyAPI အကောင့် မတွေ့ပါ။",
+    "loading": "အကောင့် ဆေးကူ သွင်းဆင်းနေသည်...",
+    "stateReady": "အကောင့် ကျန်းမာရေး",
+    "stateDisabled": "CLIProxyAPI ကို တပ်ဆင်ထားမသေးပါ",
+    "stateMissingKey": "စီမံခန့်ခွဲမှု key ကို မချိန်ညှိထားသေးပါ",
+    "stateUnreachable": "စီမံခန့်ခွဲမှု API သို့ ဆက်သွယ်၍ မရပါ",
+    "stateUnauthorized": "စီမံခန့်ခွဲမှု key ကို ပယ်ဖျက်ခံရသည်",
+    "stateUnsupported": "ဤ CLIProxyAPI version တွင် account health ကို မပြသပါ",
+    "stateInvalidResponse": "စီမံခန့်ခွဲမှု API မှ မပံ့ပိုးပေးသော ဖြေကြားချက် ပြန်လည်လာသည်"
+  },
+  "darioPanel": {
+    "title": "Claude အကောင့်များ",
+    "description": "သင့် Claude Pro/Max subscription ဖြင့် Dario ကို အတည်ပြုပါ။ Traffic ကို သင့် subscription pool မှ ငွေတောင်းခံပါမည်။ Dario က request များကို route မလုပ်နိုင်မီ အနည်းဆုံး အကောင့် တစ်ခု လိုအပ်ပါသည် (ထိုအချိန်အထိ /health က degraded ဟု ပြပါမည်)။",
+    "noAccounts": "အကောင့်များ မှတ်ပုံတင်ထားသေးပါ။",
+    "importTitle": "OmniRoute မှ Import လုပ်ပါ",
+    "importDescription": "တဖန် login လုပ်ရန် မလိုဘဲ ရှိပြီးသား OmniRoute Claude connection ၏ OAuth tokens များကို ပြန်သုံးပါ — browser approval အဆင့်ကို လုံးဝ ကျော်လွှားသည်။",
+    "importPendingTooltip": "OmniRoute တွင် Claude connection တစ်ခု ရှိလာမှ အသက်ဝင်မည်။",
+    "btnImport": "Import",
+    "btnImporting": "Import လုပ်နေသည်…",
+    "aliasPlaceholder": "alias (ရွေးချယ်နိုင်)",
+    "btnStartLogin": "Login စတင်",
+    "btnStarting": "စတင်နေသည်…",
+    "btnCompleteLogin": "Login ပြီးဆုံး",
+    "btnCompleting": "ပြီးဆုံးနေသည်…",
+    "codePlaceholder": "code#state သို့မဟုတ် code သီးသန့်",
+    "noticeImported": "အကောင့် \"{alias}\" အဖြစ် တင်သွင်းပြီးပါပြီ — ၎င်းကို အသုံးပြုရန် Dario ကို ပြန်လည်စတင်ခဲ့သည်။",
+    "noticeAdded": "အကောင့် \"{alias}\" ထည့်ပြီးပါပြီ။",
+    "expiresInHours": "~{hours} နာရီထဲမှာ ခြားမပြီ",
+    "expiresInMinutes": "~{minutes} မိနစ်ထဲမှာ ခြားမပြီ",
+    "expiresAt": "{date} မှာ ခြားမပြီ",
+    "scopes": "{count, plural, one {# နယ်ပယ်} other {# နယ်ပယ်}}",
+    "btnRemove": "ဖျက်သွင်းပါ",
+    "btnRefresh": "အသစ်ပြသပါ",
+    "loginStep1": "1. ဤ URL ကို သင့်ဘရောက်ဆာတွင် ဖွင့်ပြီး အကောင့် <mono>{alias}</mono> အတွက် ဝင်ရောက်ခွင့်ကို အတည်ပြုပါ:",
+    "pendingExpires": "တည်ငြိမ်နေသော အချက်အလက်လက်ခံမှုသည် {time} တွင်ကုန်ခန်းမည်",
+    "loginStep2": "2. Anthropic သည် ပြသသော ကုဒ်ကို ကူးယူပါ။"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "ဤစာမျက်နှာကို Telegram Mini App ထဲတွင်သာ ဖွင့်ရပါမည်။",
+    "greeting": "👋 မင်္ဂလာပါ {name}! သင်၏ OmniRoute gateway မှတစ်ဆင့် စကားပြောရန် မက်ဆေ့ချ် ပို့ပါ။",
+    "greetingFallbackName": "မိတ်ဆွေ",
+    "errNoReply": "⚠️ Gateway မှ အဖြေမရပါ။",
+    "btnSend": "ပို့ရန်"
   }
 }

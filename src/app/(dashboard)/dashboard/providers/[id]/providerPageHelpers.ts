@@ -94,6 +94,10 @@ export type CompatModelRow = {
   compatByProtocol?: CompatByProtocolMap;
   /** #2905: per-model upstream wire-format override. */ targetFormat?: string;
   /** #4125: manual context-window override (tokens), when set. */ contextWindowOverride?: number;
+  /** Manual output-token-limit override (tokens), when set. Same persistence
+   * path as contextWindowOverride but via maxOutputTokenOverride / the
+   * `max_output_tokens` model-capability-override key. */
+  maxOutputTokenOverride?: number;
   /** #1904: manual vision-capability override for custom models whose upstream
    * discovery metadata doesn't self-report an image input modality. */
   supportsVision?: boolean;

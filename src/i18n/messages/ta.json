@@ -25,8 +25,10 @@
     "confirm": "நிச்சயமாகத் தொடர விரும்புகிறீர்களா?",
     "refresh": "புதுப்பி",
     "close": "மூடு",
+    "dialogTitleFallback": "உரையாடல் பெட்டி",
     "previousPage": "முந்தைய பக்கம்",
     "nextPage": "அடுத்த பக்கம்",
+    "pagination": "பக்கப் பிரிப்பு",
     "capsLockOn": "Caps Lock இயக்கத்தில் உள்ளது",
     "dismissNotification": "அறிவிப்பை நிராகரிக்கவும்",
     "toggleColumns": "நெடுவரிசைகளை நிலைமாற்றவும்",
@@ -182,6 +184,7 @@
     "combos": "சேர்க்கைகள்",
     "noModelsFound": "மாதிரிகள் எதுவும் கிடைக்கவில்லை",
     "clear": "அழிக்கவும்",
+    "clearFilters": "வடிப்பான்களை அழி",
     "done": "முடிந்தது",
     "selectAll": "அனைத்தையும் தேர்ந்தெடு",
     "unselectAll": "தேர்வை நீக்கு",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "{count, plural, one {# தொகுப்பு} other {# தொகுப்புகள்}}",
     "batchFilePreview": "முன்காட்சி",
     "batchFilePreviewTruncated": "முதல் {shown} வரிகளை காட்டு ({total} மொத்த வரிகள்)",
-    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க"
+    "batchFileDownloadFull": "முழு கோப்பை பதிவிறக்கம் செய்க",
+    "tokensPageTitle": "டோக்கன்கள்",
+    "tokensPageDescription": "API விசைகளுக்கு இடையே டோக்கன்களை அனுப்பவும், அழைப்புக் குறியீடுகளைப் பகிரவும், சமூக சேவையகங்களை இணைக்கவும்.",
+    "tokensServerUrlLabel": "சேவையக URL"
   },
   "disabled": "முடக்கப்பட்டது",
   "featureFlagOmnirouteEmergencyFallbackDescription": "பட்ஜெட் தீர்ந்த கோரிக்கைகளை அவசரகால இலவச ஃபால்பேக் வழங்குநர்/மாடலுக்கு வழிசெலுத்துங்கள்.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "பதிலி சேவையகம் நிறுத்தப்பட்டுள்ளது அல்லது மறுதொடக்கம் செய்யப்படுகிறது.",
     "expandSidebar": "பக்கப்பட்டியை விரிவாக்கு",
     "collapseSidebar": "பக்கப்பட்டியைச் சுருக்கு",
-    "themes": "தீம்கள்",
-    "presetColors": "பிரபலமான நிறங்கள்",
     "createTheme": "தீம் ஒன்றை உருவாக்கு",
     "chooseColor": "ஒரு நிறத்தைத் தேர்ந்தெடுக்கவும்",
-    "themeCoral": "பவள நிறம்",
-    "themeBlue": "நீலம்",
-    "themeRed": "சிவப்பு",
-    "themeGreen": "பச்சை",
-    "themeViolet": "ஊதா",
-    "themeOrange": "ஆரஞ்சு",
-    "themeCyan": "சியான்",
     "cliToolsShort": "கருவிகள்",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "தீம் அமைப்பு",
     "whitelabelingDesc": "தனிப்பயன் பிராண்டிங் விளக்கம்",
     "switchThemes": "தீம்களை மாற்று",
-    "themeAccentDesc": "தீமின் சிறப்பம்ச நிற விளக்கம்",
     "uploadFavicon": "Favicon-ஐப் பதிவேற்று",
     "themeDark": "இருண்ட தீம்",
     "customLogoDesc": "தனிப்பயன் Logo விளக்கம்",
     "sidebarVisibilityToggle": "பக்கப்பட்டித் தெரிவுநிலை மாற்றி",
-    "themeAccent": "தீமின் சிறப்பம்ச நிறம்",
     "resetFavicon": "Favicon-ஐ மீட்டமை",
     "whitelabeling": "தனிப்பயன் பிராண்டிங்",
     "darkMode": "இருண்ட பயன்முறை",
@@ -1122,10 +1117,8 @@
     "customLogo": "தனிப்பயன் Logo",
     "appearance": "தோற்றம்",
     "themeSelectionAria": "தீம் தேர்வு Aria",
-    "themeCreate": "தீம் உருவாக்கம்",
     "customFaviconDesc": "தனிப்பயன் Favicon விளக்கம்",
     "logoPreview": "Logo முன்னோட்டம்",
-    "themeCustom": "தனிப்பயன் தீம்",
     "hideHealthLogsDesc": "நலநிலைப் பதிவுகளின் விளக்கத்தை மறை",
     "faviconPreview": "ஃபேவிகான் முன்னோட்டம்",
     "changelog": "மாற்றப் பதிவு",
@@ -1352,7 +1345,9 @@
       "open": "திறக்கவும்",
       "close": "மூடு"
     },
-    "noResults": "எந்த முடிவுகளும் இல்லை"
+    "noResults": "எந்த முடிவுகளும் இல்லை",
+    "costsTeams": "குழுக்கள்",
+    "costsTeamsSubtitle": "குழு செலவு மையங்கள்"
   },
   "webhooks": {
     "title": "வெப்ஹூக்ஸ்",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 அல்லது @channelname",
       "chatIdHint": "சாட்/சேனலின் தனித்துவமான எண் அடையாளங்காட்டி அல்லது பொதுப் பயனர் பெயர்.",
       "tutorial": "Telegram வெப்ஹூக்கை எவ்வாறு கட்டமைப்பது:"
-    }
+    },
+    "copy": "நகலெடு",
+    "copied": "நகலெடுக்கப்பட்டது!",
+    "expandDetails": "விவரங்களைக் காட்டு",
+    "collapseDetails": "விவரங்களை மறை"
   },
   "compliance": {
     "auditTitle": "தணிக்கை",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "அழைப்புகள் (24மா)",
     "mcpMetricSuccessRate": "வெற்றி வீதம்",
     "mcpMetricAvgDuration": "சராசரி காலம்",
-    "mcpMetricTopTool": "மேலான கருவி"
-  },
-  "themesPage": {
-    "title": "தீம்கள்",
-    "description": "முன்னமைக்கப்பட்ட தீம் ஒன்றைத் தேர்ந்தெடுக்கவும் அல்லது ஒரே நிறத்தைப் பயன்படுத்தி உங்களுக்கென ஒன்றை உருவாக்கவும்",
-    "presetColors": "பிரபலமான நிறங்கள்",
-    "customTheme": "தனிப்பயன் தீம்",
-    "customThemeDesc": "தீமை உருவாக்கு என்பதைக் கிளிக் செய்து ஒரு நிறத்தைத் தேர்ந்தெடுக்கவும்",
-    "createTheme": "தீமை உருவாக்கு",
-    "activePreset": "செயலில் உள்ள தீம்"
+    "mcpMetricTopTool": "மேலான கருவி",
+    "dismissError": "பிழையை நிராகரி"
   },
   "header": {
     "logout": "வெளியேறு",
     "quickNavigation": "விரைவு வழிசெலுத்தல்",
     "quickNavigationTitle": "விரைவு வழிசெலுத்தல் (⌘K / Ctrl+K)",
     "openQuickNavigation": "விரைவு வழிசெலுத்தலைத் திறக்கவும்",
+    "openMenu": "பட்டியைத் திற",
+    "products": "Keak தயாரிப்புகள்",
     "switchToLightMode": "வெளிச்சப் பயன்முறைக்கு மாறவும்",
     "switchToDarkMode": "இருண்ட பயன்முறைக்கு மாறவும்",
     "language": "மொழி",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic இணக்கமானது",
     "media": "ஊடகம்",
     "mediaDescription": "படங்கள், காணொளிகள் மற்றும் இசையை உருவாக்கவும்",
-    "themes": "தீம்கள்",
-    "themesDescription": "முழு டாஷ்போர்டு பலகைக்கும் ஒரு வண்ணத் தீமைத் தேர்ந்தெடுக்கவும்",
     "costsDescription": "அனைத்து வழங்குநர்களிலும் செலவினத்தைக் கண்காணித்து, போக்குகளைப் பகுப்பாய்ந்து, உங்கள் AI வரவுசெலவுத் திட்டத்தை நிர்வகிக்கவும்",
     "cacheDescription": "வழங்குநரின் ப்ராம்ப்ட் கேச் செயல்திறன் மற்றும் உள்ளூர் சொற்பொருள் பதில் மறுபயன்பாட்டைக் கண்காணிக்கவும்.",
     "limitsDescription": "ஒவ்வொரு API விசைக்கும் வழங்குநருக்கும் வீத வரம்புகளையும் ஒதுக்கீடுகளையும் உள்ளமைக்கவும்",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "மேம்பட்ட பேலோடு விதிகள், கோரிக்கை வரம்புகள் மற்றும் ப்ராக்ஸி API அமைப்புகள்",
     "mitmProxyDescription": "போக்குவரத்து ஆய்வு மற்றும் பிழைத்திருத்தத்திற்கான MITM ப்ராக்ஸி அமைப்புகளை உள்ளமைக்கவும்",
     "oneProxyDescription": "மேம்பட்ட ப்ராக்ஸி சங்கிலியிடலுக்கான 1Proxy அமைப்புகளை உள்ளமைக்கவும்",
-    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்"
+    "omniSkillsDescription": "தானியங்கி தூண்டுதல் மற்றும் கருவி செயலாக்கத்திற்கான சாண்ட்பாக்ஸ் திறன்களை நிறுவி நிர்வகிக்கவும்",
+    "teamsDescription": "குழு செலவு மதிப்பீடுகள் மற்றும் பகிரப்பட்ட மென் பட்ஜெட்டுகள்"
   },
   "cloudSyncStatus": {
     "synced": "ஒத்திசைக்கப்பட்டது",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "உங்கள் இறுதிப்புள்ளியை நகலெடுக்கவும்",
     "readinessStep4": "ஒரு சோதனைக் கோரிக்கையை அனுப்பவும்",
     "readinessContinue": "அமைப்பைத் தொடரவும்",
-    "readinessDismiss": "இப்போதைக்கு மூடவும்"
+    "readinessDismiss": "இப்போதைக்கு மூடவும்",
+    "unpricedUsageTitle": "{count, plural, one {# மாதிரி} other {# மாதிரிகள்}} சமீபத்திய பயன்பாடு உண்டு, ஆனால் விலை அமைக்கப்படவில்லை",
+    "unpricedUsageFailClosed": "{keys, plural, one {பயன்பாடு வரம்பு கொண்ட # API விசை} other {பயன்பாடு வரம்பு கொண்ட # API விசைகள்}} கடந்த 8 நாட்களில் இந்த மாதிரிகளை பயன்படுத்தியுள்ளனர். அந்த பயன்பாடு ஒரு விசையின் தினசரி அல்லது வாராந்திர கணக்கீட்டு காலத்திற்கு உட்பட்டால், அந்த விசையை கூடுதல் வரம்பு மீறியதாக கருதி அதன் கோரிக்கைகள் தடுக்கப்படுகின்றன (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "இந்த பயன்பாடு $0 ஆக ஒரு விசைக்கு விதிக்கப்பட்ட பயன்பாடு வரம்புகளில் கணக்காகப் பெறப்படும் (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}, {keys, plural, one {# வரையறுக்கப்பட்ட விசை} other {# வரையறுக்கப்பட்ட விசைகள்}}",
+    "unpricedUsageMore": "…மற்றும் {count} மேலும்",
+    "unpricedUsageConfigure": "விலை அமைக்கவும்",
+    "unpricedUsageDismiss": "மறுக்கவும்"
   },
   "analytics": {
     "title": "பகுப்பாய்வு",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "தேர்ந்தெடுக்கப்பட்ட இணைப்புகள் மட்டும்",
     "selectAtLeastOneConnection": "குறைந்தது ஓர் இணைப்பையாவது தேர்ந்தெடுக்கவும் அல்லது அனைத்து இணைப்புகளும் என்பதைத் தேர்வுசெய்யவும்.",
     "allConnectionsDesc": "இந்த விசை செயலில் உள்ள எந்த இணைப்பையும் பயன்படுத்தலாம்.",
-    "restrictedToConnections": "{count, plural, one {# இணைப்புக்கு} other {# இணைப்புகளுக்கு}} வரையறுக்கப்பட்டுள்ளது."
+    "restrictedToConnections": "{count, plural, one {# இணைப்புக்கு} other {# இணைப்புகளுக்கு}} வரையறுக்கப்பட்டுள்ளது.",
+    "preferredConnections": "விருப்ப இணைப்புகள்",
+    "preferredConnectionsDesc": "ஒவ்வொரு விசைக்குமான முன்னுரிமை வரிசை. விருப்ப இணைப்பு கிடைக்கவில்லை என்றால், ரூட்டிங் அடுத்த தகுதியான இணைப்புக்கு மாறும்.",
+    "preferredConnectionsNone": "எந்த விருப்பமும் அமைக்கப்படவில்லை — இயல்புநிலை ரூட்டிங் உத்தி பயன்படுத்தப்படுகிறது.",
+    "preferredConnectionsClear": "அழி",
+    "removeSelection": "{name} என்பதை அகற்று"
   },
   "auditLog": {
     "title": "தணிக்கைப் பதிவு",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Modality Bridge அமைப்புகளில் Image→Text பாலத்தை கட்டமைக்கவும்",
     "sttBridgeCta": "Modality Bridge அமைப்புகளில் Speech→Text பாலத்தை அமைக்கவும்",
     "existingConnection": "இருக்கிற இணைப்பு",
-    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை."
+    "openrouterSttDescription": "OpenRouter பேச்சு-இலக்கணம் மாதிரிகள் உங்கள் கட்டமைக்கப்பட்ட OpenRouter இணைப்பைப் பயன்படுத்துகின்றன. தனித்துவமான அங்கீகாரம் தேவை இல்லை.",
+    "modalityTabsAria": "ஊடக வகை",
+    "serviceKindsAria": "சேவை வகை"
   },
   "search": {
     "searchQuery": "தேடல் வினவல்",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - கைமுறை உள்ளமைவு",
     "clineManualConfiguration": "Cline கைமுறை உள்ளமைவு",
     "kiloManualConfiguration": "Kilo Code கைமுறை உள்ளமைவு",
+    "piManualConfiguration": "பை - கையேடு கட்டமைப்பு",
+    "piConfigInvalidTitle": "Pi models.json படிக்க முடியாதது",
+    "piOmnirouteConfigured": "OmniRoute பை தனிப்பயன் வழங்குநராக கட்டமைக்கப்பட்டுள்ளது",
+    "piModelHelp": "நீங்கள் தேர்ந்தெடுக்கும் மாதிரியானது models.json இல் வெளிப்படையாக எழுதப்பட்டிருக்கும் தனிப்பயன் இறுதிப்புள்ளிகளுக்கான — மாதிரிகளை Pi தானாகவே கண்டறியாது.",
+    "piManualConfigTitle": "அல்லது ~/.pi/agent/models.json கைமுறையாக திருத்தவும்",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "பின்னர் Pi ஐ ஆரம்பித்து omniroute வழங்குநரைத் தேர்ந்தெடுக்கவும். முழு முகவர் கோப்பகத்தையும் நகர்த்த PI_CODING_AGENT_DIR அமைக்கவும்.",
+    "piUnownedNote": "இந்த உள்ளீடு OmniRoute க்கு வெளியே சேர்க்கப்பட்டது (எ.கா. pi-gui's Custom endpoints). விண்ணப்பிப்பது அதை ஏற்றுக்கொள்ளும்; மீட்டமைப்பது OmniRoute எழுதிய உள்ளீடுகளை மட்டுமே நீக்குகிறது.",
     "whenToUseLabel": "எப்போது பயன்படுத்த வேண்டும்",
     "openToolDocs": "கருவியின் ஆவணங்களைத் திறக்கவும்",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Amp சுருக்கெழுத்துப் பணிப்பாய்வுகளை விரும்பினாலும், OmniRoute மாற்றுப்பெயர் மற்றும் வழித்தட விதிகளின் அமலாக்கம் தேவைப்படும்போது பயன்படுத்தவும்.",
       "hermes": "விரைவான பணிகளுக்கு இலகுரக, டெர்மினலுக்கே உரிய AI உதவியாளர் தேவைப்படும்போது பயன்படுத்தவும்.",
       "hermes-agent": "இயல்புநிலை, பிரதிநிதித்துவம், பார்வை மற்றும் துணை மாதிரிகள் OmniRoute வழியாக வழிநடத்தப்படும் Hermes Agent (Nousresearch வழங்கும்) உங்களுக்குத் தேவைப்படும்போது இதைப் பயன்படுத்தவும்.",
+      "whycodes": "WhyCodes-ஐ OmniRoute-ஐ நோக்கி அமைக்கப்பட்ட பல்நோக்கு தன்னாட்சி CLI முகவராக (TUI, பெயரிடப்பட்ட முகவர்கள், நினைவகம், swarm) விரும்பும்போது பயன்படுத்தவும்.",
       "custom": "தனிப்பயன் கருவிச் செயலாக்கங்கள் அல்லது பொதுவான OpenAI-இணக்கமான உள்ளமைவுகளுக்குப் பயன்படுத்தவும்."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "தனிப்பயன் வழங்குநர் ஆதரவுடன் கூடிய xAI Grok Build TUI குறியீட்டு முகவர்",
       "droid": "Factory Droid AI உதவியாளர்",
       "openclaw": "Open Claw AI உதவியாளர்",
+      "openclaude": "OpenAI-இணக்கமான வழங்குநர் ஆதரவுடன் OpenClaude குறியீட்டு முகவர் CLI",
       "cline": "Cline AI குறியீட்டாக்க உதவியாளர் CLI",
       "kilo": "Kilo Code AI உதவியாளர் CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "தனிப்பயன் வழங்குநர் ஆதரவுடன் கூடிய Warp AI டெர்மினல்",
       "agent-deck": "Agent Deck பல-முகவர் ஒருங்கிணைப்பாளர்",
       "5dive": "5dive — சுய-ஹோஸ்ட் செய்யப்பட்ட குறியீட்டு முகவர்களின் கூட்டம்; ஒரு auth சுயவிவரம் அனைத்தையும் OmniRoute-க்கு திருப்புகிறது",
+      "whycodes": "OpenAI-இணக்கமான base URL கொண்ட WhyCodes தன்னாட்சி CLI முகவர்",
       "zed": "Zed குறியீட்டு எடிட்டர் — OpenAI-இணக்கமான வழங்குநர் மூலம் உள்ளமைந்த முகவர்"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "அறியப்படாதது",
     "cliproxyapiUpdate": "புதுப்பிக்கவும்",
     "cliproxyapiUpdateAvailable": "புதுப்பிப்பு கிடைக்கிறது: v{current} → v{latest}",
-    "cliproxyapiVersion": "பதிப்பு"
+    "cliproxyapiVersion": "பதிப்பு",
+    "piInstallTitle": "பை குறியீட்டு முகவரை நிறுவவும்",
+    "piInstallInstructions": "Pi CLI ஐ நிறுவவும், பின்னர் அதை OmniRoute உடன் இணைக்க இங்கே திரும்பவும்.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Pi இயங்கும் இயந்திரத்திலிருந்து URL ஐப் பயன்படுத்தவும். OpenAI-இணக்கமான /v1 எண்ட்பாயிண்ட் தானாகவே சேர்க்கப்படும்.",
+    "piManualMergeHint": "முன்னோட்டம் மட்டும். இந்த providers.omniroute நுழைவை models.json இல் இணைக்கவும், அதனால் உங்கள் மற்ற வழங்குநர்களும் அமைப்புகளும் அப்படியே இருக்கும்.",
+    "removeMapping": "மேப்பிங்கை அகற்று",
+    "customUrl": "பொருத்த URL",
+    "customEndpointAria": "பொருத்த உச்சிப்புள்ளி",
+    "useDefaultKey": "OmniRoute இயல்பிழை முத்திரையைப் பயன்படுத்தவும்",
+    "mainModelAria": "முதன்மை மாதிரி",
+    "manualConfigTitle": "Grok உருவாக்க நிரல் கைவினை அமைப்பு"
   },
   "modelCatalog": {
     "title": "மாடல்கள் & காம்போக்கள்",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "எ.கா. 10",
     "testSelected": "தேர்ந்தெடுக்கப்பட்டதைச் சோதிக்கவும் ({count})",
     "testAllFiltered": "வடிகட்டப்பட்ட அனைத்தையும் சோதிக்கவும் ({count})",
+    "visibility": "தெரிவுநிலை",
+    "allVisibility": "தெரிபவை மற்றும் மறைக்கப்பட்டவை",
+    "visibleOnly": "தெரிபவை",
+    "hiddenOnly": "மறைக்கப்பட்டவை",
+    "visibleColumn": "தெரியும்",
+    "hideModel": "/v1/models இலிருந்து {name} ஐ மறை",
+    "showModel": "/v1/models இல் {name} ஐக் காட்டு",
+    "hiddenBadge": "மறைக்கப்பட்டது",
+    "hideFiltered": "வடிகட்டியவற்றை மறை ({count})",
+    "showFiltered": "வடிகட்டியவற்றைக் காட்டு ({count})",
+    "visibilityCounts": "{visible} தெரிபவை · {hidden} மறைக்கப்பட்டவை · மொத்தம் {total}",
+    "visibilityUpdateFailed": "மாடலின் தெரிவுநிலையைப் புதுப்பிக்க முடியவில்லை",
     "cancel": "ரத்துசெய்",
     "clearResults": "முடிவுகளை அழிக்கவும்",
     "testing": "சோதிக்கப்படுகிறது...",
@@ -3397,16 +3438,53 @@
     "httpError": "HTTP {status} உடன் கோரிக்கை தோல்வியடைந்தது",
     "testFailedNoDetail": "பிழைச் செய்தி ஏதுமின்றி சோதனை தோல்வியடைந்தது",
     "additionalCapabilities": "கூடுதல் திறன்கள்: {list}",
-    "comboRefMember": "காம்போ → {name}"
+    "comboRefMember": "காம்போ → {name}",
+    "keyAccessButton": "API விசை அணுகல்",
+    "allowedInKeys": "இதில் அனுமதிக்கப்பட்டுள்ளது: {count, plural, one {# விசை} other {# விசைகள்}}",
+    "keysLoading": "API விசைகள் ஏற்றப்படுகின்றன…",
+    "keysRetry": "விசைகளை ஏற்றுவதை மீண்டும் முயலவும்",
+    "accessViaPattern": "{pattern} வழியாக",
+    "accessBlocked": "{pattern} ஆல் தடுக்கப்பட்டது",
+    "editKeyAccess": "விசை அணுகலைத் திருத்து",
+    "toggleKeyAccess": "{name}-இல் {item}-ஐ அனுமதி",
+    "resultNetworkError": "ஒதுக்கீடு தோல்வியடைந்தது",
+    "resultWouldEmptyModels": "இந்த விசையில் அனுமதிக்கப்பட்ட மாதிரிகள் எதுவும் இல்லாமல் போய்விடும் — அதற்குப் பதிலாக விசை அணுகலைத் திருத்தவும்",
+    "resultWouldEmptyCombos": "இந்த விசையில் அனுமதிக்கப்பட்ட காம்போக்கள் எதுவும் இல்லாமல் போய்விடும் — அதற்குப் பதிலாக விசை அணுகலைத் திருத்தவும்",
+    "keyUpdatePending": "{name} இன்னும் புதுப்பிக்கப்பட்டு வருகிறது. சிறிது நேரத்தில் மீண்டும் முயற்சிக்கவும்.",
+    "assignToKeys": "API விசைகளுக்கு ஒதுக்கு…",
+    "assignApply": "மாற்றங்களைப் பயன்படுத்து",
+    "assignComplete": "API விசை அணுகல் புதுப்பிக்கப்பட்டது",
+    "assignFailed": "சில API விசை புதுப்பிப்புகள் தோல்வியடைந்தன",
+    "assignNoChanges": "API விசை அணுகல் எதுவும் மாற்றப்படவில்லை",
+    "selectedAccessItems": "தேர்ந்தெடுக்கப்பட்ட உருப்படிகள்: {count}",
+    "assignExcludedCombos": "{count, plural, one {# தேர்ந்தெடுக்கப்பட்ட காம்போ வரிசை ஒரு மாதிரி அல்ல, எனவே இங்கே தவிர்க்கப்படும்} other {# தேர்ந்தெடுக்கப்பட்ட காம்போ வரிசைகள் மாதிரிகள் அல்ல, எனவே இங்கே தவிர்க்கப்படும்}}. Combos தாவலில் இருந்து காம்போக்களை ஒதுக்கவும்.",
+    "assignActionAdd": "சேர்",
+    "assignActionRemove": "நீக்கு",
+    "searchKeys": "API விசைகளைத் தேடு",
+    "selectApiKey": "API விசை {name}-ஐத் தேர்ந்தெடு",
+    "allModelsAccess": "அனைத்து மாடல்களும்",
+    "allCombosAccess": "அனைத்து சேர்க்கைகளும்",
+    "modelAccessCount": "மாடல்கள்: {count}",
+    "comboAccessCount": "சேர்க்கைகள்: {count}",
+    "keyInactive": "செயலற்றது",
+    "keyBanned": "தடைசெய்யப்பட்டது",
+    "keyRevoked": "ரத்து செய்யப்பட்டது",
+    "switchRestrictedConfirm": "இந்த விசையைக் கட்டுப்படுத்தப்பட்ட அணுகலுக்கு மாற்றவும்: தேர்ந்தெடுக்கப்பட்ட உருப்படிகள் மட்டுமே அனுமதிக்கப்படும்",
+    "removeNoChangeHint": "இந்த விசை அனைத்தையும் அனுமதிக்கிறது; தேர்ந்தெடுக்கப்பட்ட உருப்படிகளை நீக்குவது எந்த மாற்றத்தையும் ஏற்படுத்தாது",
+    "removeStaysAllowedHint": "{patterns} மூலம் இந்த விசையில் இன்னும் அனுமதிக்கப்படுகிறது",
+    "resultChanged": "மாற்றப்பட்டது",
+    "resultUnchanged": "மாற்றமில்லை",
+    "resultSkipped": "தவிர்க்கப்பட்டது",
+    "resultNeedsSwitch": "கட்டுப்படுத்தப்பட்ட முறைக்கு மாற வேண்டும்"
   },
   "combos": {
-    "autoTosIncludeLabel": "ToS: avoid எனக் குறிக்கப்பட்ட வழங்குநர்களை auto-வில் சேர்க்கவும்",
-    "autoTosDescription": "இயல்பாக முடக்கப்பட்டுள்ளது. ஒரு கணக்குக்கு மட்டுமல்ல, அனைத்து auto கூட்டுகளுக்கும் பொருந்தும். வழங்குநரை இணைப்பதால் இந்தத் தேர்வு இயக்கப்படாது.",
-    "autoTosSaveError": "ToS கொள்கையைச் சேமிக்க முடியவில்லை. முந்தைய அமைப்பே இன்னும் காட்டப்படுகிறது. மீண்டும் முயலவும்.",
-    "autoTosLoadError": "ToS கொள்கையை ஏற்ற முடியவில்லை. மாற்றுவதற்கு முன் மீண்டும் முயலவும்.",
     "title": "காம்போக்கள்",
     "description": "எடையிட்ட வழிப்படுத்தல் மற்றும் மாற்று ஆதரவுடன் மாதிரி காம்போக்களை உருவாக்கவும்",
     "autoCatalogTitle": "தானாக ரூட்டிங் பட்டியல்",
+    "autoTosLoadError": "ToS கொள்கையை ஏற்ற முடியவில்லை. மாற்றுவதற்கு முன் மீண்டும் முயலவும்.",
+    "autoTosSaveError": "ToS கொள்கையைச் சேமிக்க முடியவில்லை. முந்தைய அமைப்பே இன்னும் காட்டப்படுகிறது. மீண்டும் முயலவும்.",
+    "autoTosIncludeLabel": "ToS: avoid எனக் குறிக்கப்பட்ட வழங்குநர்களை auto-வில் சேர்க்கவும்",
+    "autoTosDescription": "இயல்பாக முடக்கப்பட்டுள்ளது. ஒரு கணக்குக்கு மட்டுமல்ல, அனைத்து auto கூட்டுகளுக்கும் பொருந்தும். வழங்குநரை இணைப்பதால் இந்தத் தேர்வு இயக்கப்படாது.",
     "autoCatalogTemplateCount": "{count} டெம்ப்ளேட்கள்",
     "autoCatalogDescription": "இணைக்கப்பட்ட வழங்குநர்களிடமிருந்து உள்ளமைந்த தானியங்கு/* சேர்க்கைகள் மாறும் வகையில் தீர்க்கப்படுகின்றன. இந்த ஐடிகளில் ஏதேனும் ஒன்றை மாதிரி புலமாகப் பயன்படுத்தவும் - அமைப்பு தேவையில்லை.",
     "autoCatalogExpand": "தானாக ரூட்டிங் பட்டியலை விரிவாக்குங்கள்",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "காம்போவைப் புதுப்பிப்பதில் பிழை",
     "errorDeleting": "காம்போவை நீக்குவதில் பிழை",
     "testFailed": "சோதனைக் கோரிக்கை தோல்வியடைந்தது",
+    "removeErrorModels": "தோல்வியடைந்த {count} மாடல்களை நீக்கு",
+    "removingErrorModels": "அகற்றுகிறது…",
+    "errorModelsRemoved": "காம்போவிலிருந்து தோல்வியடைந்த {count} மாடல்கள் அகற்றப்பட்டன",
+    "noErrorModelsFound": "இந்தக் காம்போவின் சொந்த படிகளில் தோல்வியடைந்த மாடல் எதுவும் இல்லை",
+    "cannotRemoveAllModels": "காம்போவிலிருந்து எல்லா மாடல்களையும் அகற்ற முடியாது",
+    "removeErrorModelsConfirm": "“{name}” இலிருந்து தோல்வியடைந்த {count} மாடல்களை அகற்றவா? நேர முடிவுகளும் வீத வரம்புகளும் கணக்கிடப்படாது.",
     "failedToggle": "காம்போவின் நிலையை மாற்ற முடியவில்லை",
     "testResults": "சோதனை முடிவுகள் — {name}",
     "resolvedBy": "தீர்வு வழங்கியது:",
@@ -3518,6 +3602,9 @@
     "moveUp": "மேலே நகர்த்து",
     "moveDown": "கீழே நகர்த்து",
     "removeModel": "அகற்று",
+    "testStep": "இந்த மாதிரியைச் சோதிக்கவும்",
+    "testStepRunning": "சோதிக்கப்படுகிறது…",
+    "testStepNotTestable": "ஒற்றை-மாதிரி படிகளை மட்டுமே சோதிக்க முடியும்",
     "saving": "சேமிக்கிறது...",
     "liveNoProviders": "வழங்குநர்கள் இன்னும் கண்டறியப்படவில்லை.",
     "liveFleetDataHint": "ஃப்ளீட் தரவு நேரலை காம்போ நிகழ்வுகள் மூலம் பெறப்படுகிறது.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "இன்னும் எந்த காம்போக்களும் கட்டமைக்கப்படவில்லை.",
     "playgroundCreateFirst": "முதலில் ஒன்றை உருவாக்கவும்",
     "weighted": "எடையிடப்பட்டது",
+    "weightPercent": "எடை (%)",
     "leastUsed": "மிகக் குறைவாகப் பயன்படுத்தப்பட்டது",
     "costOpt": "செலவு-உகப்பாக்கம்",
     "strategyGuideTitle": "இந்த உத்தியைப் பயன்படுத்துவது எப்படி",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# கணக்கு} other {# கணக்குகள்}}",
     "builderGlobalAdded": "சேர்க்கப்பட்டது",
     "builderGlobalAdd": "சேர்க்கவும்",
+    "clearSearch": "தேடலை அழி",
     "manualModel": "கைமுறை மாதிரி",
     "manualModelInvalid": "வழங்குநர்/மாதிரி என ஒரு மாதிரியை உள்ளிடவும்.",
     "manualModelUnknownProvider": "அறியப்படாத வழங்குநர் முன்னொட்டு.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Combo குறிப்பைச் சேர்க்கவும்",
     "builderPinnedAccount": "நிலையாகப் பொருத்தப்பட்ட கணக்கு",
     "builderLegacyEntry": "பழைய பதிவு",
+    "builderStaleModel": "நேரடி பட்டியலில் இல்லை",
     "reviewName": "பெயர்",
     "reviewStrategy": "உத்தி",
     "reviewSteps": "படிகள்",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "குறைந்தபட்ச உள்ளடக்க நீளம் (எழுத்துக்கள்)",
     "responseValidationJsonPaths": "JSON-பாதை சோதனைகள்",
     "responseValidationAddCheck": "+ சோதனையைச் சேர்",
+    "responseValidationRemoveCheck": "சரிபார்ப்பை அகற்று",
+    "responseValidationPath": "JSON பாதை",
+    "responseValidationCondition": "நிபந்தனை",
+    "responseValidationValue": "எதிர்பார்க்கப்படும் மதிப்பு",
     "agentFeaturesSystemMessageOverride": "அமைப்புச் செய்தியை மேலெழுது",
     "agentFeaturesSystemMessagePlaceholder": "நீங்கள் ஒரு நிபுணத்துவ உதவியாளர்...",
     "agentFeaturesSystemMessageHint": "முகவர்களுக்கான அமைப்புச் செய்தி மேலெழுதுதல்",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "மொத்தப் பதிவுகள்",
     "type": "வகை",
-    "memoryEnabled": "நினைவகம் இயக்கப்பட்டது"
+    "memoryEnabled": "நினைவகம் இயக்கப்பட்டது",
+    "qdrantTutorialTitle": "விரைவுப் பாடம்: Qdrant மூலம் நினைவுகள்",
+    "qdrantTutorialIntro": "Qdrant நினைவுகளுக்கான சார்புகளையும் (vectors) சார்பு தரவுகளையும் (metadata) சேமிக்கிறது, இதன் மூலம் தொடர்புடைய சூழல்களை மீட்டெடுக்க முடிகிறது. இது நேரடியாக டோக்கன்களை சுருக்குவதில்லை; கோரியதற்குத் தொடர்பில்லாத சூழல்களைப் பரிந்து பார்ப்பதன் மூலம் விளைவுகளான மிச்சம் நிகழ்கிறது.",
+    "qdrantTutorialStep1": "பயன்பாட்டுக்கு முன் சேவகத்தை HTTPS மற்றும் API முத்திரையுடன் பாதுகாக்கவும்.",
+    "qdrantTutorialStep2": "ஹோஸ்ட், துறைமுகம், சேகரிப்பு (collection), மற்றும் provider/model வடிவத்தில் ஒரு மாடலை உள்ளிடுங்கள், ஒரு அமைப்பு விருப்பம் (credential) உடையது.",
+    "qdrantTutorialStep3": "சேகரிப்பின் பரிமாணம் (dimension), மாடல் உருவாக்கும் பரிமாணத்துடன் பொருந்த வேண்டும். ஏற்கனவே உள்ள 2048-பரிமாண சேகரிப்பு 1536-பரிமாண எம்பெடிங்குகளை (embeddings) ஏற்காது.",
+    "qdrantTutorialStep4": "சேமிக்கவும், இணைப்பை முயற்சித்தல், மற்றும் தேடல் சோதனை நிறைவு செய்தல். பின்னர் Qdrant-ஐ செயலாக்கவும்.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "கிரெடிட்ஸ்: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "திறன்கள்",
@@ -5288,7 +5390,8 @@
         "skipped": "முன்னதாக கட்டமைக்கப்பட்டுள்ளது",
         "failed": "தோல்வி"
       }
-    }
+    },
+    "stepProgress": "அமைவு முன்னேற்றம்"
   },
   "providers": {
     "tosAvoidNoticeTitle": "இந்த வழங்குநர் இயல்பாக auto-விலிருந்து விலக்கப்பட்டுள்ளார்",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "CSV வார்ப்புருவைப் பதிவிறக்கவும்",
     "importFromFileMoreErrors": "+{count} மேலும்",
     "importFromFileSchemaHint": "CSV நெடுவரிசைகள் வரிசை நிலையை அடிப்படையாகக் கொண்டவை: provider, name, apiKey, baseUrl (விருப்பத்தேர்வு), priority (விருப்பத்தேர்வு). provider நெடுவரிசை ஏற்கனவே உள்ள நிர்வகிக்கப்பட்ட வழங்குநர் id அல்லது முன்பே பதிவுசெய்யப்பட்ட OpenAI/Anthropic-இணக்கமான node id ஆக இருக்க வேண்டும் — இந்த இறக்குமதி புதிய endpoint nodes-ஐ உருவாக்காது.",
+    "importOAuthExport": "OAuth ஏற்றுமதியை இறக்குமதி செய்",
+    "oauthExportTitle": "கணக்கு மேலாளர் ஏற்றுமதியை இறக்குமதி செய்",
+    "oauthExportDescription": "கணக்கு மேலாளரிலிருந்து எளிய உரை ஏற்றுமதியைப் பதிவேற்றவும் (எ.கா. Antigravity Manager-இன் cloud-accounts ஏற்றுமதி). டோக்கன்கள் சேவையகத்தில் புதுப்பிக்கப்படும், ஒவ்வொரு கணக்கும் ஒரு OAuth இணைப்பாக மாறும் — நகல்கள் அதே இடத்தில் புதுப்பிக்கப்படும்.",
+    "oauthExportProviderLabel": "வழங்குநர்",
+    "oauthExportChoose": "கோப்பைத் தேர்வுசெய்க",
+    "oauthExportFileAria": "கணக்கு ஏற்றுமதி JSON கோப்பு",
+    "oauthExportSchemaHint": "ஏற்கப்படுபவை: \"accounts\" வரிசை கொண்ட ஆவணம், வெறும் வரிசை அல்லது ஒற்றைப் பதிவு. டோக்கன்கள் உள்ளமைந்த token பொருளிலோ நேரடியாகப் பதிவிலோ இருக்கலாம்.",
+    "oauthExportDetected": "{count} கணக்கு(கள்) கண்டறியப்பட்டன",
+    "oauthExportSelectAll": "அனைத்து கணக்குகளையும் தேர்ந்தெடு",
+    "oauthExportSelectAccount": "கணக்கு {index} ஐத் தேர்ந்தெடு",
+    "oauthExportColEmail": "மின்னஞ்சல்",
+    "oauthExportColProvider": "வழங்குநர்",
+    "oauthExportColRefresh": "புதுப்பிப்பு டோக்கன்",
+    "oauthExportNoEmail": "(மின்னஞ்சல் இல்லை)",
+    "oauthExportYes": "ஆம்",
+    "oauthExportNo": "இல்லை",
+    "oauthExportImporting": "இறக்குமதி செய்கிறது…",
+    "oauthExportImport": "{count} கணக்கு(களை) இறக்குமதி செய்",
+    "oauthExportResult": "{imported}/{total} இறக்குமதி செய்யப்பட்டது — {failed} தோல்வி",
+    "oauthExportParseError": "இந்தக் கோப்பிலிருந்து எந்தக் கணக்கையும் படிக்க முடியவில்லை.",
+    "oauthExportUnknownError": "அறியப்படாத பிழை",
     "adaptaTutorial": {
       "title": "Adapta Web-ஐ எவ்வாறு இணைப்பது",
       "introPrefix": "Adapta ஆனது Clerk மூலம் அங்கீகரிக்கிறது. டோக்கன்",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "அனைத்து மாடல்களும் ஏற்கனவே இறக்குமதி செய்யப்பட்டுள்ளன",
     "noNewModelsToImport": "இறக்குமதி செய்யப் புதிய மாடல்கள் எதுவும் இல்லை — அனைத்து மாடல்களும் ஏற்கனவே பதிவகத்தில் அல்லது தனிப்பயன் மாடல்கள் பட்டியலில் உள்ளன",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "மாடல் கண்டுபிடிப்பு தோல்வியடைந்தது {time}",
     "skippingExistingModels": "ஏற்கனவே உள்ள {count} மாடல்கள் தவிர்க்கப்படுகின்றன",
     "autoSync": "தானியங்கு ஒத்திசைவு",
     "autoSyncShort": "ஒத்திசைக்கவும்",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "எ.கா. 131072",
     "contextWindowOverrideHint": "வழங்குநர் தவறாகப் புகாரளிக்கும் போது, இந்த மாடலின் உண்மையான சூழல் சாளரத்தை (டோக்கன்கள்) கைமுறையாக அமைக்கவும். இது தானாகக் கண்டறியப்பட்ட/கேட்டலாக் மதிப்புகளை விட முன்னுரிமை பெறும் மற்றும் காம்போ ரூட்டிங் மாடலை கைவிடுவதைத் தடுக்கும்.",
     "contextWindowOverrideInvalid": "சூழல் சாளர மேலெழுதல் என்பது டோக்கன்களின் நேர்மறை முழு எண்ணாக இருக்க வேண்டும்",
+    "maxOutputTokenOverrideInvalid": "அதிகபட்ச வெளியீட்டு டோக்கன்கள் மேலெழுதல் என்பது டோக்கன்களின் நேர்மறை முழு எண்ணாக இருக்க வேண்டும்",
     "visionCapableLabel": "பார்வைத் திறன் கொண்டது",
     "visionCapableHint": "வழங்குநரின் கண்டுபிடிப்பு மெட்டாடேட்டா பட உள்ளீட்டு முறையைப் புகாரளிக்காதபோது (சுயமாக ஹோஸ்ட் செய்யப்பட்ட/உள்ளூர் பின்தளங்களுக்குப் பொதுவானது), இந்த மாடலை பார்வைத் திறன் கொண்டதாக கைமுறையாகக் குறிக்கவும்.",
     "compatParamFiltersLabel": "அளவுரு வடிகட்டிகள்",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "மேலெழுதலைச் சேர்",
     "ccAliasLoadError": "கண்டறிதல் மாற்றுப்பெயர் அமைப்புகளை ஏற்ற முடியவில்லை: {error}",
     "ccAliasSaveError": "கண்டறிதல் மாற்றுப்பெயர் அமைப்பைச் சேமிக்க முடியவில்லை: {error}",
+    "cliVersionSectionTitle": "விளம்பரப்படுத்தப்பட்ட CLI கிளையன்ட் பதிப்பு",
+    "cliVersionEffectiveLabel": "தற்போது விளம்பரப்படுத்தப்பட்டுள்ளது",
+    "cliVersionSourceLabel": "இதிலிருந்து தீர்க்கப்பட்டது: {source}",
+    "cliVersionPinnedLabel": "கைப்பற்றப்பட்ட இயல்புநிலை: {pinned}",
+    "cliVersionSourceSettings": "டாஷ்போர்டு மேலெழுதல்",
+    "cliVersionSourceEnv": "சுற்றுச்சூழல் மாறி",
+    "cliVersionSourceDiscovered": "தானாக கண்டறியப்பட்ட சமீபத்திய வெளியீடு",
+    "cliVersionSourceDefault": "இயல்புநிலை கைப்பற்றப்பட்டது",
+    "cliVersionInputLabel": "பதிப்பு மேலெழுதவும்",
+    "cliVersionInputPlaceholder": "பதிப்பு மேலெழுதல்; வெற்று துடைக்கிறது",
+    "cliVersionSaveButton": "சேமிக்கவும்",
+    "cliVersionResetButton": "இயல்புநிலைக்கு மீட்டமைக்கவும்",
+    "cliVersionLoadError": "CLI பதிப்பு அமைப்புகளை ஏற்றுவதில் தோல்வி: {error}",
+    "cliVersionSaveError": "CLI பதிப்பைச் சேமிப்பதில் தோல்வி: {error}",
+    "cliVersionLoadFailed": "தற்போதைய CLI பதிப்பு அமைப்புகளை ஏற்ற முடியவில்லை.",
+    "cliVersionHintClaude": "அது பார்க்கும் கிளாட் கோட் கிளையன்ட் பதிப்பில் ஆந்த்ரோபிக் கேட்ஸ் புதிய கிளாட் மாடல்கள். இது ஒவ்வொரு மானுடவியல் சார்ந்த கோரிக்கையிலும் OmniRoute விளம்பரப்படுத்தும் பதிப்பு.",
+    "cliVersionCaveatClaude": "பில்லிங் எச்சரிக்கை: பில்லிங் பதிப்பு '<version>'.'<build-revision>', மற்றும் பில்ட் ரிவிஷன் ஒரு தனி கைப்பற்றப்பட்ட மாறிலி. விளம்பரம் 2.1.260 2.1.260.1e2 ஐப் புகாரளிக்கிறது, இது உண்மையான 2.1.260 பைனரி அனுப்புவது அல்ல.",
+    "cliVersionHintCodex": "OpenAI புதிய மாடல்களை Codex கிளையன்ட் பதிப்பில் பார்க்கிறது, எடுத்துக்காட்டாக பிழை: 'gpt-6-astra' மாதிரிக்கு Codex இன் புதிய பதிப்பு தேவைப்படுகிறது.",
+    "cliVersionCaveatCodex": "அனுமான எச்சரிக்கை: உங்கள் சொந்த அழைப்பாளர் அறிக்கையிடும் பதிப்பு இன்னும் CODEX_CLIENT_VERSION env var ஐத் தோற்கடிக்கிறது, ஆனால் இது வெளிப்படையான ஆபரேட்டர் நோக்கம் என்பதால், இந்த இரண்டையும் மீறுகிறது.",
     "compatUpstreamHeadersLabel": "கூடுதல் அப்ஸ்ட்ரீம் தலைப்புகள்",
     "compatUpstreamHeadersHint": "உயர்-அதிகார அமைப்பு — வழங்குநரின் API நற்சான்றுகளைத் திருத்துவதற்கு இணையான நம்பிக்கை நிலை கொண்டது; நம்பகமான நிர்வாகிகள் மட்டுமே இதைப் பயன்படுத்த வேண்டும். வழங்குநரின் API விசையிலிருந்து OmniRoute அங்கீகாரத்தைச் சேர்த்த பிறகு இது ஒன்றிணைக்கப்படும். தனிப்பயன் தலைப்பு ஏற்கனவே உள்ள தலைப்பின் அதே பெயரைப் பயன்படுத்தினால் (எ.கா. Authorization), தானாக உருவாக்கப்பட்ட தலைப்பை (Bearer டோக்கன் உட்பட) உங்கள் மதிப்பு முழுமையாக மாற்றிவிடும் — அமைப்புகளில் உள்ள விசையை அல்லாமல், நீங்கள் உள்ளிட்டதை மட்டுமே அப்ஸ்ட்ரீம் காணும். தவறான உள்ளமைவு 401 பிழையை அல்லது செயலிழந்த அப்ஸ்ட்ரீம் அங்கீகாரத்தை ஏற்படுத்தலாம். ஒவ்வொரு தலைப்புக்கும் ஒரு வரி (எ.கா. சில கேட்வேகளுக்கான கூடுதல் Authentication). முன்னோட்டமிட மதிப்பின் மீது சுட்டியை நகர்த்தவும் அல்லது அதில் கவனம் செலுத்தவும். கவனம் நீங்கும்போது, வெளியில் கிளிக் செய்யும்போது அல்லது இந்தப் பலகையை மூடும்போது சேமிக்கப்படும்.",
     "compatUpstreamHeaderName": "தலைப்புப் பெயர்",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "API வடிவ லேபிள்",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API பிராந்தியம்: சீனா",
-    "apiRegionHint": "API பிராந்தியக் குறிப்பு",
-    "apiRegionInternational": "API பிராந்தியம்: சர்வதேசம்",
-    "apiRegionLabel": "API பிராந்திய லேபிள்",
+    "apiRegionChina": "மெயின்லாந்து சீனா",
+    "apiRegionHint": "API அணுகல் மற்றும் ஒதுக்கீடு கண்காணிப்பிற்குப் பயன்படுத்தப்படும் எண்ட்பாயிண்ட் பிராந்தியத்தைத் தேர்ந்தெடுக்கவும்.",
+    "apiRegionInternational": "சர்வதேசம்",
+    "apiRegionLabel": "API பிராந்தியம்",
     "apikey": "API விசை",
     "audio": "ஆடியோ",
     "audioProvidersHeading": "ஆடியோ வழங்குநர்களுக்கான தலைப்பு",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "இந்தக் கணக்கு அதன் 5 மணிநேரப் பயன்பாட்டு வரம்பை அடைந்து, Anthropic குறைந்த முன்னுரிமை வழித்தடத்தை வழங்கும்போது, OmniRoute அதை ஏற்றுக்கொண்டு, இணைப்பைத் தற்காலிகமாக நிறுத்துவதற்குப் பதிலாக, காலச் சாளரம் மீட்டமைக்கப்படும் வரை anthropic-usage-limit: slow என்பதுடன் கோரிக்கைகளைத் தொடர்ந்து அனுப்பும். வாராந்திர வரம்பு தொடர்ந்து பொருந்தும், மேலும் உபரித் திறன் கிடைக்கும் வரை பதில்கள் காத்திருக்கக்கூடும்.",
     "claudeAutoLimitResetLabel": "அமர்வு வரம்பைத் தானாக மீட்டமை (வாரத்திற்கு ஒருமுறை)",
     "claudeAutoLimitResetDescription": "இந்தக் கணக்கு அதன் 5 மணிநேரப் பயன்பாட்டு வரம்பை அடைந்து, அமர்வு வரம்பை மீட்டமைக்கும் வாய்ப்பு கிடைக்கும்போது, OmniRoute அதைத் தானாகப் பயன்படுத்தி முழு வேகத்தில் மீண்டும் முயற்சிக்கும். இது கணக்கின் வாரத்திற்கு ஒருமுறை கிடைக்கும் மீட்டமைப்பைப் பயன்படுத்தும்; மேலும், பயன்பாடு வாராந்திர வரம்பில் தொடர்ந்து கணக்கிடப்படும்.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "தற்காலிக கூல்டவுனைத் தவிர்க்கவும், இதனால் மீட்டெடுக்கக்கூடிய பிழைகளுக்குப் பிறகும் இந்த இணைப்பு தகுதியுடையதாக இருக்கும் (தடைசெய்யப்பட்ட/காலாவதியான போன்ற இறுதி நிலைகள் இன்னும் பொருந்தும்).",
     "disableCoolingLabel": "இந்த இணைப்பிற்கான கூல்டவுனை முடக்கவும்",
     "bulkPasteAdded": "{count, plural, one {1 விசை சேர்க்கப்பட்டது} other {# விசைகள் சேர்க்கப்பட்டன}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "monsterapi.ai இல் API விசையைப் பெறுக",
       "moonshot": "Moonshot AI ஐ ஒரு API விசையுடன் இணைக்கவும்.",
       "morph": "இலவச அடுக்கு: 250K கிரெடிட்கள்/மாதம், $0",
+      "apmix": "apmix.ai/dashboard இலிருந்து API விசையுடன் Apmix ஐ இணைக்கவும் — ஒரு சந்தா, பல மாடல்கள்.",
       "nanogpt": "NanoGPT ஐ ஒரு API விசையுடன் இணைக்கவும்.",
       "nebius": "API சோதனைக்காக பதிவு செய்யும் போது ~$1 சோதனை கிரெடிட்கள்",
       "nlpcloud": "NLP Cloud ஆனது OpenAI chat/completions க்கு பதிலாக ஒரு தனியுரிம சாட்பாட் API ஐப் பயன்படுத்துகிறது. OmniRoute ஆனது OpenAI செய்திகளை உள்ளீடு/சூழல்/வரலாறுக்கு ஏற்ப மாற்றி, ஆதரிக்கப்படும் சாட்பாட் மாடல்களின் உள்ளூர் பட்டியலை வழங்குகிறது.",
@@ -6628,8 +6781,7 @@
       "kiro": "இலவச அடுக்கு: 50 கிரெடிட்கள்/மாதம் (~25K–100K டோக்கன்கள்). ⚠️ Kiro ToS மூன்றாம் தரப்பு proxy/harness பயன்பாட்டைத் தடைசெய்கிறது.",
       "codex": "தற்போதுள்ள OAuth செயல்முறையுடன் OpenAI Codex-ஐ இணைக்கவும்.",
       "qwen": "தற்போதுள்ள OAuth செயல்முறையுடன் Qwen Code-ஐ இணைக்கவும்.",
-      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்",
-      "apmix": "apmix.ai/dashboard இலிருந்து API விசையுடன் Apmix ஐ இணைக்கவும் — ஒரு சந்தா, பல மாடல்கள்."
+      "github-models": "github.com/settings/tokens இல் 'models: read' வரம்புடன் ஒரு GitHub PAT ஐ உருவாக்கவும்"
     },
     "passthroughModelsDescription": "{provider} வழங்குநரின் சொந்த மாதிரி ஐடிகளை ஏற்றுக்கொள்கிறது. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது ரூட்டிங் செய்ய தனிப்பயன் ஐடிகளைச் சேர்க்கவும்.",
     "bedrockModelsDescription": "அமேசான் பெட்ராக் மாதிரிகள் AWS பிராந்தியத்தால் ஸ்கோப் செய்யப்படுகின்றன. /மாடல்களில் இருந்து இறக்குமதி செய்யவும் அல்லது தேர்ந்தெடுக்கப்பட்ட பகுதியில் செயல்படுத்தப்பட்ட பெட்ராக் மாடல் ஐடிகளைச் சேர்க்கவும்.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "{count} காம்போக்களில் பயன்படுத்தப்படுகிறது: {combos}",
+    "openComboTooltip": "காம்போக்களைத் திற — {combo} பயன்படுத்துகிறது",
+    "claudeCodeRoutingTitle": "Claude Code போக்குவரத்துக்கான அப்பஸ்ட்ரீம் ப்ரொக்சி றவுட்டிங்",
+    "routingNative": "இயல்பானது",
+    "routingFallback": "பின்தொடர்வு",
+    "rerank": "மீள்வரிசைப்படுத்தல்",
+    "video": "வீடியோ",
+    "markFreeTierTitle": "இலவச அளவாக குறிப்பிடவும் (பணம் செலுத்தும் மாதிரிகள் மறைக்கப்பட்டுள்ள போதும் காட்டப்படும்)",
+    "codexTunnelTitle": "Codex கருவி இணைப்பு",
+    "codexTunnelDescription": "காலணை (Tunnel) தீவிரமாக வெளியே (outbound) செல்கிறது. உள்ளூர் கருவிகள் Codex மூலம் மட்டுமே அதன் மீன்வாசிப்பகம் (sandbox) மற்றும் ஒப்புதல் கொள்கையின் கீழ் இயக்கப்படுகின்றன.",
+    "tunnelIdLabel": "காலணை விதிதெரிவிப்பான் (Tunnel ID)",
+    "tunnelRuntimeKeyLabel": "காலணை இயக்ககல்வி விசை (Tunnel runtime key)",
+    "tunnelRuntimeKeyPlaceholder": "இயக்ககல்வி விசை (Runtime key)",
+    "tunnelRuntimeKeyHint": "கூகியுடன் சேர்த்து குறியாக்கம் செய்யப்பட்டு சேமிக்கப்படுகிறது, மேலும் எப்போதும் பதிவுகளில் (logs) எழுதப்படுவதில்லை.",
+    "tunnelRuntimeKeyNewLabel": "புதிய காலணை இயக்ககல்வி விசை (New tunnel runtime key)",
+    "tunnelRuntimeKeyNewHint": "புதிய கூகியுடன் மட்டுமே உள்ளிடவும். மதிப்பு குறியாக்கம் செய்யப்பட்டு சேமிக்கப்படுகிறது.",
+    "chatgptConnectorLabel": "ChatGPT தனிப்பயன் இணைப்பி (custom connector)",
+    "doctorChecking": "நிலையை பரிசீலிக்கிறது… (Checking status…)",
+    "doctorCheck": "மருத்துவர் நிலையைப் பரிசீலிக்கவும் (Check doctor status)",
+    "fallbackRetryBackendTitle": "கழித்தல் மீண்டும் முயற்சி பின்னணி"
   },
   "settings": {
     "title": "அமைப்புகள்",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "எந்தப் பக்கப்பட்டை உருப்படிகளைக் காட்ட வேண்டும் என்பதைத் தேர்வுசெய்யவும். அத்தியாவசியங்கள் மேம்பட்ட கருவிகளைத் தேடக்கூடியவையாக வைத்திருக்கும்.",
     "hideHealthLogs": "நிலைச் சரிபார்ப்புப் பதிவுகளை மறை",
     "hideHealthLogsDesc": "இயக்கப்பட்டிருக்கும்போது, சேவையகக் கன்சோலில் [HealthCheck] செய்திகள் காட்டப்படுவதைத் தடுக்கும்",
-    "themeAccent": "தீம் நிறம்",
-    "themeAccentDesc": "முன்னமைக்கப்பட்ட நிறத்தைத் தேர்வுசெய்யவும் அல்லது ஒரே நிறத்தைக் கொண்டு உங்கள் சொந்த தீமை உருவாக்கவும்",
-    "themeCreate": "தீமை உருவாக்கு",
-    "themeCustom": "தனிப்பயன் தீம்",
-    "themeBlue": "நீலம்",
-    "themeRed": "சிவப்பு",
-    "themeGreen": "பச்சை",
-    "themeViolet": "ஊதா",
-    "themeOrange": "ஆரஞ்சு",
-    "themeCyan": "சியான்",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "பயன்பாட்டின் பெயரையும் இலச்சினையையும் தனிப்பயனாக்கவும்",
     "appName": "பயன்பாட்டின் பெயர்",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "இப்போது",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "மூல பைனரி பாதை",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "விருப்பம்: ஏற்றுக்கொள்ளப்பட்ட கோப்பை மாற்றுவதற்கு முன், உருவாக்கப்பட்ட கோப்பை மூல பைனரியுடன் சரிபார்க்கிறது. அருகிலேயே எழுதுவதைத் தொடர, காலியாக விடவும். இல்லாவிட்டால் கோப்புறை உருவாக்கப்படும்."
+      "coreBinaryPathHelp": "விருப்பம்: ஏற்றுக்கொள்ளப்பட்ட கோப்பை மாற்றுவதற்கு முன், உருவாக்கப்பட்ட கோப்பை மூல பைனரியுடன் சரிபார்க்கிறது. அருகிலேயே எழுதுவதைத் தொடர, காலியாக விடவும். இல்லாவிட்டால் கோப்புறை உருவாக்கப்படும்.",
+      "urlFeedlessHint": "தேர்வானியை மட்டுமே கொண்ட சந்தாவுக்கு காலியாக விடவும்: கீழே ஒரு URL கட்டுப்பாட்டை அமைக்கவும், எந்த ஊட்டமும் பெறப்படவோ, புதுப்பிக்கப்படவோ அல்லது இணைக்கப்படவோ இல்லை."
     },
     "bulkHealthcheck": "தொகுதி செயல்நிலைச் சோதனை",
     "bulkHealthcheckDesc": "இலக்கு URL-க்கு எதிராக உள்ளமைக்கப்பட்ட அனைத்து ப்ராக்ஸிகளையும் சோதித்து, செயல்படுபவற்றைக் கண்டறியவும்.",
@@ -7706,6 +7862,7 @@
     "configured": "கட்டமைக்கப்பட்டது",
     "none": "ஏதுமில்லை",
     "modelOverrideValuePlaceholder": "எண் மதிப்பு",
+    "modelOverrideKey": "மேலெழுதும் விசை",
     "modelOverrideReasoningEffortsPlaceholder": "ஆங்கிலக் காற்புள்ளியால் பிரிக்கப்பட்டவை, எ.கா. low, medium, high",
     "addKeyValue": "விசை மதிப்பைச் சேர்",
     "noModelOverrides": "இந்த மாதிரிக்கு மேலெழுதல்கள் எதுவும் கட்டமைக்கப்படவில்லை.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "குறிப்பிட்ட மாதிரிகளுக்கான இயல்புநிலை விலை நிர்ணயத்தை நீங்கள் மாற்றியமைக்கலாம். தனிப்பயன் மாற்றங்கள் தானாகக் கண்டறியப்பட்ட விலை நிர்ணயத்தைவிட முன்னுரிமை பெறும்.",
     "editPricing": "விலை நிர்ணயத்தைத் திருத்து",
     "viewFullDetails": "முழு விவரங்களைக் காண்க",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "தகவமைப்பு அளவு வழிப்படுத்தல்",
     "adaptiveVolumeRoutingDesc": "பேலோட் அளவு மற்றும் செயலாக்க வீத அழுத்தத்தின் அடிப்படையில் இணைப்புகளை மாறும் வகையில் அளவிடுகிறது.",
     "lkgpToggleTitle": "கடைசியாகச் சரியாகச் செயல்பட்ட வழங்குநர் (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "வழங்குநர்களுக்கு அனுப்புவதற்கு முன் தூண்டுரைகளைச் சுருக்கி டோக்கன் பயன்பாட்டைக் குறைக்கவும்",
     "autoCombosTitle": "தானியங்கு சேர்க்கைகள்",
     "autoCombosDesc": "உள்ளமைக்கப்பட்ட auto/* சேர்க்கைகளைப் பயன்படுத்த இந்த விசையை அனுமதிக்கவும்; இவை உள்ளமைக்கப்பட்ட ஒவ்வொரு வழங்குநரிலிருந்தும் ஒரு மாதிரியைத் தானாகத் தேர்ந்தெடுக்கும்",
+    "ccDiscoveryAliasesTitle": "Claude Code கண்டுபிடிப்பு மாற்றுப்பெயர்கள்",
+    "ccDiscoveryAliasesDesc": "இந்த விசை ஏற்கனவே அணுகக்கூடிய மாடல்கள் மற்றும் காம்போக்களுக்கான claude/... இணக்கத்தன்மை நகல்களை விளம்பரப்படுத்து",
     "compressionGuidanceFullGuideLink": "முழு சுருக்க வழிகாட்டி",
     "compressionGuidanceShow": "விவரங்கள்",
     "compressionGuidanceHide": "விவரங்களை மறை",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "சாளரத்தின் சதவீதம்",
     "compressionAdaptivePolicyAbsolute": "நிலையான டோக்கன் பட்ஜெட்",
     "compressionOutputStylesDescription": "வழங்குநரின் வெளியீட்டை மீண்டும் எழுதாமல் பதில்-வடிவமைப்பு வழிமுறைகளை உட்செலுத்தவும். தாராளமாக இணைக்கவும்.",
+    "compressionOutputStylesPreviewNote": "ஒரு கோரிக்கை ஒரு மொழியை மட்டுமே செலுத்துகிறது: கண்டறியப்பட்ட மொழி, மற்றொன்று முதல் பேக். மேலே உள்ள தொகுதிகள் ஒவ்வொரு பேக்கிற்கும் மாறுபாடுகள், ஒருங்கிணைந்த ஊசி அல்ல.",
     "mcpAccessibilityDescription": "MCP கருவி வெளியீடுகளை வரம்பிற்குள் வைக்கிறது (தனிச் சேமிப்பகம்).",
     "compressionStylesTileSummary": "{tokens, number} டோக்கன்கள் சேமிக்கப்பட்டன · {runs, plural, one {# இயக்கம் வடிவமைக்கப்பட்டது} other {# இயக்கங்கள் வடிவமைக்கப்பட்டன}}",
     "compressionStylesTileEmpty": "இன்னும் வடிவமைக்கப்பட்ட இயக்கங்கள் எதுவும் இல்லை.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "விருந்தினர்",
     "qdrantCollection": "கலெக்ஷன்",
     "catalogVisibilityHint": "மறைக்கப்பட்ட மாதிரி ID-களை அதே அணுகல் அனுமதிகளுடன் தொடர்ந்து அழைக்கலாம்.",
+    "exposeCombosOnly": "/v1/models-இல் சேர்க்கைகளை மட்டும் பட்டியலிடு",
+    "exposeCombosOnlyDesc": "மாடல்களைத் தானாகக் கண்டறியும் கிளையண்ட்கள் மூல வழங்குநர் மாடல்களுக்குப் பதிலாக உங்கள் சேர்க்கைகளை (மறைக்கப்படவில்லை எனில் auto/* உட்பட) காண்பார்கள். வெளிப்படையான provider/model ID-கள் தொடர்ந்து வழிசெலுத்தப்படும்.",
     "catalogScopeTitle": "Models API பட்டியல்",
     "catalogScopeDesc": "இந்த விசைக்காக GET /v1/models எவற்றை அறிவிக்கிறது. பட்டியலைக் குறைப்பது, இந்த விசை எவற்றை அழைக்க முடியும் என்பதை ஒருபோதும் மாற்றாது.",
     "catalogScopeAll": "இரண்டும்",
@@ -8918,7 +9079,9 @@
         "financial": "நிதி",
         "brazilian": "பிரேசில்",
         "usa": "அமெரிக்கா",
-        "full": "முழுமை"
+        "full": "முழுமை",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (தென் ஆப்பிரிக்கா)"
       },
       "builtinTypes": "உள்ளமைந்த வகைகள்",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4 முகவரிகள்",
         "ipv6_address": "IPv6 முகவரிகள்",
         "aws_key": "AWS அணுகல் விசைகள்",
-        "api_key_generic": "API விசைகள் மற்றும் டோக்கன்கள்"
+        "api_key_generic": "API விசைகள் மற்றும் டோக்கன்கள்",
+        "iban": "IBAN வங்கி கணக்கு எண்கள்",
+        "eu_vat": "EU VAT எண்கள்",
+        "es_dni_nie": "ஸ்பானிஷ் DNI / NIE",
+        "it_codice_fiscale": "இத்தாலிய கோடிஸ் ஃபிஸ்கேல்",
+        "pl_pesel": "போலிஷ் PESEL",
+        "nl_bsn": "டச்சு BSN",
+        "de_steuer_id": "ஜெர்மன் ஸ்டீயர்-ஐடி",
+        "se_personnummer": "ஸ்வீடிஷ் நபர்",
+        "za_id": "தென்னாப்பிரிக்க ID எண்கள்",
+        "za_phone": "தென்னாப்பிரிக்க தொலைபேசி எண்கள்",
+        "za_vat": "தென்னாப்பிரிக்க VAT எண்கள்",
+        "za_tax_ref": "தென்னாப்பிரிக்க வரி குறிப்புகள்"
       },
       "customPatterns": "தனிப்பயன் வடிவங்கள்",
       "customPatternsDesc": "பொருத்தங்கள் [CUSTOM_REDACTED] ஆக மாற்றப்படும். அதிகபட்சம் {max} வடிவங்கள். பேரழிவு பின்னோக்கித் தேடல் அபாயமுள்ள வடிவங்கள் நிராகரிக்கப்படும்.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "வெற்றிபெற்றது",
     "tomlTestFailed": "தோல்வியடைந்தது",
     "tomlImportError": "RTK TOML கோப்பை செயலாக்க முடியவில்லை.",
-    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை."
+    "tomlFileReadError": "தேர்ந்தெடுக்கப்பட்ட TOML கோப்பைப் படிக்க முடியவில்லை.",
+    "viewMode": "காட்சி முறை"
   },
   "compressionEngineConfig": {
     "loading": "ஏற்றுகிறது…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "மொழிப் பொதிகள்: {packs}",
     "dragToReorder": "படியை மறுவரிசைப்படுத்த இழுக்கவும்",
     "engine": "எஞ்சின்",
-    "intensity": "தீவிரம்"
+    "intensity": "தீவிரம்",
+    "compressionOverride": "சுருக்க மேலெழுதல்"
   },
   "compressionStudio": {
     "noRun": "சுருக்க இயக்கம் எதுவும் கிடைக்கவில்லை.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "வெற்றியாளர்: {winner}",
     "encoder": "என்கோடர்",
     "bytes": "பைட்டுகள்",
-    "tokensCl100k": "டோக்கன்கள் (cl100k)"
+    "tokensCl100k": "டோக்கன்கள் (cl100k)",
+    "studioViews": "Studio காட்சிகள்"
   },
   "omniglyph": {
     "preview": "முன்னோட்டம்",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "இதை விட குறைவான செய்திகள் சுருக்கப்படாது. கீழ் = அதிக சுருக்கம்.",
     "tooltipMinSavings": "குறைந்தபட்சம் இத்தனை டோக்கன்களைச் சேமித்தால் மட்டுமே சுருக்கவும்.",
     "ultraSettings": "அல்ட்ரா அமைப்புகள்",
-    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்"
+    "ultraSettingsDesc": "SLM-இயங்கும் சொற்பொருள் சுருக்கம்",
+    "defaultLanguage": "இயல்புநிலை மொழி",
+    "viewMode": "காட்சி முறை"
   },
   "translator": {
     "title": "மொழிபெயர்ப்பி",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "ஸ்ட்ரீமை மாற்ற முடியவில்லை"
   },
   "usage": {
+    "healthExtraUsageBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; கூடுதல் பயன்பாடு அனுமதிக்கப்பட்டுள்ளதால் சேவை தொடர்கிறது.",
+    "healthPaidCreditsBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; கிடைக்கும் கட்டணக் கிரெடிட்களால் சேவை தொடரலாம்.",
+    "healthFilteringBypass": "ஒதுக்கீடு தீர்ந்துவிட்டது; உள்ளூர் ஒதுக்கீட்டு வடிகட்டல் முடக்கப்பட்டுள்ளதால் சேவை தொடர்கிறது.",
     "title": "பயன்பாடு",
     "grokExtraUsageCredits": "கூடுதல் பயன்பாட்டு கிரெடிட்கள்",
     "grokAutoTopUp": "தானியங்கி மேலேற்றம்",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "வழங்குநர் வரம்புகள்",
     "noProviders": "வழங்குநர்கள் எதுவும் இணைக்கப்படவில்லை",
+    "quotaAuthRequired": "அங்கீகாரம் தேவை - கட்டுப்பாட்டுப் பலகையில் உள்நுழையவும்",
+    "quotaAuthRequiredHint": "கட்டுப்பாட்டுப் பலகை அமர்வு இல்லை அல்லது காலாவதியாகிவிட்டதால் வழங்குநர் இணைப்புகளை ஏற்ற முடியவில்லை. உங்கள் ஒதுக்கீட்டு வரம்புகளைக் காண உள்நுழைந்து புதுப்பிக்கவும்.",
     "connectProvidersForQuota": "உங்கள் API ஒதுக்கீட்டு வரம்புகளையும் பயன்பாட்டையும் கண்காணிக்க OAuth மூலம் வழங்குநர்களுடன் இணையவும்.",
     "accountsCount": "{count, plural, one {# கணக்கு} other {# கணக்குகள்}}",
     "filteredFromCount": "({count} இலிருந்து வடிகட்டப்பட்டது)",
@@ -10046,9 +10231,6 @@
     "tierLite": "லைட்",
     "tierUnknown": "தெரியாதது",
     "statTotal": "மொத்தம்",
-    "statCritical": "கடுமையானது",
-    "statAlert": "எச்சரிக்கை",
-    "statHealthy": "ஆரோக்கியமானது",
     "filterPurchaseTypeLabel": "வகை",
     "filterTierLabel": "அடுக்கு",
     "purchaseAll": "அனைத்தும்",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "கடைசியாகப் புதுப்பிக்கப்பட்டது",
     "providerQuota": "வழங்குநர் ஒதுக்கீடு",
     "providerQuotaHomeHint": "இணைக்கப்பட்ட கணக்குகளின் நேரலை நிலை",
+    "claudeResetCreditDefaultTitle": "Claude வரம்பு மீட்டமைப்பு",
+    "confirmRedeemClaudeResetCredit": "மீட்பதன் மூலம் தகுதியுள்ள Claude பயன்பாட்டு வரம்புகள் உடனடியாக மீட்டமைக்கப்படும் மற்றும் இந்தக் கிரெடிட் நிரந்தரமாகப் பயன்படுத்தப்படும்.",
+    "claudeResetCreditsModalTitle": "Claude மீட்டமைப்பு கிரெடிட்கள்",
+    "claudeResetCreditsModalExplainer": "இந்தக் கணக்கிற்குக் கிடைக்கும் Claude மீட்டமைப்பு கிரெடிட்கள் மற்றும் வாராந்திர அமர்வு மீட்டமைப்புகள்.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "சமீபத்திய கண்காணிப்புகளின் அடிப்படையில், நேரடி சோதனை அல்ல. விவரங்களுக்கு ஒரு கணக்கைத் தேர்ந்தெடுக்கவும்.",
+    "healthRecovery": "எதிர்பார்க்கப்படும் மீட்பு நேரம்",
+    "healthAvailable": "கிடைக்கிறது",
+    "healthRestricted": "பகுதியளவு கட்டுப்படுத்தப்பட்டது",
+    "healthUnavailable": "கிடைக்கவில்லை",
+    "healthPeakHourProtection": "உச்ச நேரப் பாதுகாப்பு",
+    "healthCooldown": "காத்திருப்பு காலம்",
+    "healthQuotaExhausted": "ஒதுக்கீடு தீர்ந்தது",
+    "healthOverview": "கண்ணோட்டம்",
+    "layoutFull": "முழுமை",
+    "layoutCompact": "சுருக்கம்",
+    "healthQuotaError": "ஒதுக்கீட்டைப் படிக்க முடியவில்லை",
+    "healthNoRuntime": "இயக்க நிலை கிடைக்கவில்லை",
+    "healthPreviousSnapshot": "கடைசிப் புதுப்பிப்பு தோல்வி; முந்தைய முடிவு காட்டப்படுகிறது",
+    "healthPreviousFailure": "கடைசிக் கோரிக்கை தோல்வி; காத்திருப்பு முடிந்தது",
+    "healthAwaitingSync": "மீட்டமைப்பு நேரம் கடந்தது; ஒத்திசைவுக்காகக் காத்திருக்கிறது",
+    "healthVerdictUnavailable": "கிடைப்புநிலைச் சரிபார்ப்பு முடிவு கிடைக்கவில்லை; ஒதுக்கீட்டு அளவுகள் மட்டும் காட்டப்படுகின்றன",
+    "healthSummaryFailed": "இயக்கச் சுருக்கத்தைப் படிக்க முடியவில்லை; மாதிரிப் பூட்டுத் தகவல் விடுபட்டிருக்கலாம்",
+    "healthRuntimeObserved": "இயக்க நிலை புதுப்பிக்கப்பட்டது {time}",
+    "healthQuotaObserved": "ஒதுக்கீடு கவனிக்கப்பட்டது {time}",
+    "healthOldestQuota": "மிகப் பழைய ஒதுக்கீட்டுப் பதிவு: {time}",
+    "healthRecoveryUnknown": "மீட்பு நேரம் தெரியவில்லை",
+    "healthDetailsHint": "விவரங்கள் மற்றும் செயல்களுக்கு அழுத்தவும்",
+    "healthFiveHour": "5 மணிநேரம்",
+    "healthOverall": "ஒட்டுமொத்தம்",
+    "healthAction": "நடவடிக்கை தேவை",
+    "healthTitle": "கணக்குகளின் கிடைப்புநிலை",
+    "healthDrag": "வழங்குநர் வரிசையை மாற்ற இழுக்கவும்",
+    "healthDragPosition": "{provider}, {count, plural, one {# இல் {position, number} ஆம் இடம்} other {# இல் {position, number} ஆம் இடம்}}",
+    "healthResetOrder": "இயல்பு வரிசையை மீட்டமை",
+    "healthPool": "{name} தொகுப்பு",
+    "healthOtherPool": "அதே கணக்கின் {pool}: {status} ({remaining} மீதம்)",
+    "healthIncluded": "{count, plural, one {பகுதி கட்டுப்பாடுள்ள # கணக்கு அடங்கும்} other {பகுதி கட்டுப்பாடுள்ள # கணக்குகள் அடங்கும்}}",
+    "healthBannerUnavailable": "{count, plural, one {# கணக்கு தற்காலிகமாகக் கிடைக்கவில்லை} other {# கணக்குகள் தற்காலிகமாகக் கிடைக்கவில்லை}}",
+    "healthBannerAvailable": "{count, plural, one {# கணக்கு கிடைக்கிறது} other {அனைத்து # கணக்குகளும் கிடைக்கின்றன}}",
+    "healthLegendHide": "குறியீட்டு விளக்கத்தை மறை",
+    "healthLegendShow": "குறியீட்டு விளக்கத்தைக் காட்டு",
+    "healthLegendOk": "திட நிறம் = மீதமுள்ள ஒதுக்கீடு; அரை ஒளிபுகும் = பயன்படுத்தியது.",
+    "healthLegendCooldown": "{window} ஒதுக்கீடு தீர்ந்தது. திட நிறம் = கடந்த காத்திருப்பு; அரை ஒளிபுகும் = மீதமுள்ள காத்திருப்பு.",
+    "healthLegendAction": "அனுமதி காலாவதியானது அல்லது கணக்கு தடைசெய்யப்பட்டது; காத்திருப்பது தீர்வல்ல.",
+    "healthLegendPartial": "இன்னும் பயன்படுத்தலாம். மஞ்சள் உச்சி = மாதிரி அல்லது தொகுப்பு கட்டுப்பாடு.",
+    "healthWaited": "காத்திருந்தது {percent}",
+    "healthWait": "இன்னும் {duration} ({time}க்கு மீட்பு)",
+    "healthFastest": "விரைவான மீட்பு {duration} கழித்து",
+    "healthRatio": "{available, plural, one {# / {active, number} கிடைக்கும்} other {# / {active, number} கிடைக்கும்}}",
+    "healthCd5": "5 மணிநேரம் · காத்திருப்பு காலம்",
+    "healthCdw": "வாரந்தோறும் · காத்திருப்பு காலம்",
+    "healthRecentSuccessBypass": "சமீபத்தில் கோரிக்கை வெற்றியடைந்ததால் இந்தக் கணக்கை வழிசெலுத்தல் அனுமதிக்கிறது.",
+    "healthPurchasedBalanceBypass": "சேர்க்கப்பட்ட ஒதுக்கீடு தீர்ந்தபின் வாங்கிய இருப்பைக் கொண்டு தொடர்ந்து பயன்படுத்தலாம்.",
+    "healthCutoffAtRequest": "கோரிக்கையை வழிசெலுத்தும்போது நேரடி ஒதுக்கீட்டு வரம்புகள் சரிபார்க்கப்படும்."
   },
   "modals": {
     "waitingAuth": "அங்கீகாரத்திற்காகக் காத்திருக்கிறது",
@@ -11077,7 +11313,8 @@
       "message": "செய்தி",
       "error": "பிழை",
       "completion": "நிறைவு"
-    }
+    },
+    "statusFilter": "நிலை"
   },
   "templateNames": {
     "simple-chat": "எளிய அரட்டை",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m முன்",
     "hoursAgo": "{hours}h முன்",
     "daysAgo": "{days}d முன்",
-    "entries": "பதிவுகள்"
+    "entries": "பதிவுகள்",
+    "viewSwitcherAria": "தற்காலிகச் சேமிப்பகக் காட்சி"
   },
   "proxyConfigModal": {
     "levelGlobal": "உலகளாவிய",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth அமைக்கப்படவில்லை. {applicationsUrl} இல் ஒரு OAuth பயன்பாட்டை பதிவு செய்யவும், மறுபடியும் URI {redirectUri} மற்றும் அளவைகள் \"{scopes}\" உடன், பின்னர் {clientIdEnv} (மற்றும் விருப்பமாக {clientSecretEnv}) ஐ அமைத்து மீண்டும் தொடங்கவும்.",
     "gitlabDuoSetupDescription": "அப்ப்ளிகேஷன் பதிவு செய்யப்பட்ட பிறகு மற்றும் இந்த OmniRoute instance இல் env vars அமைக்கப்பட்ட பிறகு, OAuth உள்நுழைவுக்கு தொடங்க Continue ஐ கிளிக் செய்யவும்.",
     "continue": "தொடர்ந்து",
+    "copilotPolicyTitle": "பரிசோதனை வழங்குநர்: கொள்கை நிலை தெளிவற்றதாக உள்ளது",
+    "copilotPolicyLine1": "OmniRoute api.githubcopilot.com வழியாக இணைக்கிறது, இது GitHub ஒரு பொதுவான மூன்றாம் தரப்பு அனுமானமாக வெளியிடப்படவில்லை API. இந்த ஒருங்கிணைப்பு சோதனையானது மற்றும் முன்னறிவிப்பின்றி மாறலாம்.",
+    "copilotPolicyLine2": "உங்கள் சொந்த GitHub கணக்கு மட்டுமே இணைக்கப்பட்டிருக்கலாம். நற்சான்றிதழ்களைப் பகிர வேண்டாம், கணக்குகளைச் சேகரிக்க வேண்டாம் அல்லது உங்கள் திட்ட வரம்புகளை மீற முயற்சிக்காதீர்கள்.",
+    "copilotPolicyLine3": "இலவச மற்றும் மாணவர் திட்ட பயனர்கள் தானியங்கி மாதிரி தேர்வை மட்டுமே பெறுவார்கள். உங்கள் Copilot திட்ட விதிமுறைகள் மற்றும் ஏதேனும் பயன்பாட்டு வரம்புகள் உங்கள் பொறுப்பாக இருக்கும்.",
+    "copilotPolicyAcknowledge": "எனக்கு புரிகிறது, இணைக்கவும்",
     "tabPasteSetupToken": "அமைவு டோக்கன்",
     "claudeSetupTokenDescription": "டெர்மினலில் `claude setup-token` ஐ இயக்கி, அது அச்சிடும் டோக்கனை ஒட்டவும். இது ஒரு வருடத்திற்குச் செல்லுபடியாகும், புதுப்பிப்பு டோக்கன் இல்லை. சேமிப்பதற்கு முன் OmniRoute Anthropic-க்கு ஒரு சோதனைக் கோரிக்கையை அனுப்புகிறது.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "செயல்நலம் (24 மணி)",
     "tableUsage": "பயன்பாடு",
     "tableActions": "செயல்கள்",
+    "moreActions": "மேலும் செயல்கள்",
     "test": "சோதனை",
     "edit": "திருத்து",
     "delete": "நீக்கு",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "சரியான உள்ளீடுகள் எதுவும் இல்லை. வடிவமைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.",
     "bulkImportSuccess": "இறக்குமதி முடிந்தது: {created} உருவாக்கப்பட்டது, {updated} புதுப்பிக்கப்பட்டது, {failed} தோல்வியடைந்தது",
     "bulkImportErrorLine": "வரி {line}: {reason}",
-    "bulkImportMaxExceeded": "ஒரு இறக்குமதிக்கு அதிகபட்சம் 100 ப்ராக்ஸிகள்",
+    "bulkImportMaxExceeded": "ஒரு இறக்குமதிக்கு அதிகபட்சம் {max} ப்ராக்ஸிகள்",
     "bulkImportPreview": "முன்னோட்டம்",
     "clearAssignment": "(தெளிவான பணி)",
     "bulkProxyAssignment": "மொத்த ப்ராக்ஸி ஒதுக்கீடு",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP விகித வரம்பு (429)",
     "poolSetAsideKindSlow": "மெதுவான பதில்கள்",
     "poolSetAsideKindGeoBlocked": "பகுதி தடைசெய்யப்பட்டது (403/451)",
+    "poolSetAsideKindOperatorReported": "ஆபரேட்டர் புகாரளித்த செயலிழப்பு",
     "poolSetAsideUntil": "சுழற்சிக்கு திரும்பு {endsAt}",
     "poolSetAsideRepeat": "ஒதுக்கி வைக்கப்பட்டது {count, plural, one {# முறை} other {# முறை}}",
     "poolUnknownAddress": "தெரியாத முகவரி",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "குறியீட்டை ஏற்றுமதி செய்",
     "exportShort": "ஏற்றுமதி",
     "noStateToExport": "ஏற்றுமதி செய்வதற்கான playground நிலை எதுவும் இல்லை.",
-    "closeExportModal": "ஏற்றுமதி சாளரத்தை மூடு",
     "close": "மூடு",
     "exportRealKeyWarning": "பாதுகாப்பு எச்சரிக்கை: ஏற்றுமதி தடுக்கப்பட்டது — வெளியீட்டில் உண்மையான API key கண்டறியப்பட்டது. உங்கள் API key-ஐ மீட்டமைத்து மீண்டும் முயற்சிக்கவும்.",
     "placeholderHintPrefix": "மாற்று",
@@ -11808,7 +12052,8 @@
       "nextButton": "அடுத்து",
       "runButton": "இயக்கு",
       "promptPlaceholder": "உங்கள் செய்தியை உள்ளிடவும்… (அனுப்ப Enter, புதிய வரிக்காக Shift+Enter)"
-    }
+    },
+    "playgroundTabs": "Playground முறைகள்"
   },
   "miniPlayground": {
     "endpoint": "இறுதிப்புள்ளி",
@@ -11879,7 +12124,8 @@
     "assistant": "உதவியாளர்",
     "errorLabel": "பிழை",
     "requestFailed": "கோரிக்கை தோல்வியடைந்தது",
-    "stop": "நிறுத்து"
+    "stop": "நிறுத்து",
+    "messageInputAria": "செய்தி"
   },
   "requestLogger": {
     "recording": "பதிவுசெய்கிறது",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} கணக்கு சுழற்சிகள்",
       "resilienceRetried": "வெற்று முறை மீண்டும் முயற்சிக்கப்பட்டது",
       "resilienceContinued": "ஸ்ட்ரீமின் நடுவில் தொடரப்பட்டது",
-      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது"
-    }
+      "resilienceRecovered": "மீள்தன்மை செயலால் மீட்கப்பட்டது",
+      "conversationContext": "உரையாடல் சூழல்",
+      "goToBottom": "கீழே செல்",
+      "liveRefreshOn": "நேரடிப் புதுப்பிப்பு: இயக்கத்தில்",
+      "liveRefreshOff": "நேரடிப் புதுப்பிப்பு: முடக்கப்பட்டுள்ளது",
+      "liveRefresh": "நேரடிப் புதுப்பிப்பு",
+      "continuesFromParent": "பெற்றோரிலிருந்து தொடர்கிறது",
+      "continuesFrom": "{id} இலிருந்து தொடர்கிறது",
+      "viewConversation": "உரையாடலைக் காண்க",
+      "openConversation": "{id} உரையாடலைத் திறக்கவும்"
+    },
+    "tableLabel": "கோரிக்கைப் பதிவுகள்",
+    "throughputPostFirstToken": "முதல் டோக்கனுக்குப் பின்",
+    "throughputEndToEnd": "தொடக்கம் முதல் முடிவு வரை",
+    "throughputRate": "{value} டோக்கன்கள்/வினாடி",
+    "throughputExplanation": "இரண்டு விகிதங்களும் வெளியீடு மற்றும் பகுத்தறிவு டோக்கன் எண்ணிக்கைகளில் பெரியதைப் பயன்படுத்துகின்றன. முதல் டோக்கனுக்குப் பின் என்பது செல்லுபடியான TTFT-ஐ விலக்குகிறது; இல்லையெனில் அது முழு கால அளவைப் பயன்படுத்துகிறது. தொடக்கம் முதல் முடிவு வரை எப்போதும் முழு கால அளவைப் பயன்படுத்துகிறது. பஃபர் செய்யப்பட்ட பதிலுக்கு, மாடல் வேகமாக உருவாக்கப்படாமலேயே அதிக வெடிப்பு வழங்கல் விகிதம் இருக்கலாம்."
   },
   "proxyLogger": {
     "filterAll": "அனைத்தும்",
@@ -12112,7 +12372,9 @@
     "colServedBy": "சேவையளிக்கப்படுகிறது",
     "filterTraffic": "போக்குவரத்து",
     "filterTests": "சோதனைகள்",
-    "filterSource": "மூலம்"
+    "filterSource": "மூலம்",
+    "tableLabel": "பதிலாள் பதிவுகள்",
+    "sortLogs": "பதிவுகளை வரிசைப்படுத்துக"
   },
   "endpointOptions": {
     "speech": "பேச்சு",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "தீர்ந்துவிட்டது",
     "statusAlerting": "எச்சரிக்கை நிலையில்",
     "statusError": "பிழை",
-    "moreSuffix": "+{count} கூடுதல்"
+    "moreSuffix": "+{count} கூடுதல்",
+    "feedFilterLabel": "நிகழ்வுகளை வடிகட்டுக"
   },
   "quotaShare": {
     "weightPercent": "எடை %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "குழுப்படுத்தப்படாதவை",
     "ungroupedHint": "இந்தப் பூல்கள் அறியப்பட்ட எந்தக் குழுவிலும் ஒதுக்கப்படவில்லை. ஒரு பூலை உண்மையான குழுவிற்கு நகர்த்த அதைத் திருத்தவும்.",
     "removeFailed": "இந்தத் தொகுப்பை அகற்ற முடியவில்லை.",
-    "dismiss": "மூடு"
+    "dismiss": "மூடு",
+    "allocationsHeading": "ஒதுக்கீடுகள்",
+    "wizardRemoveDimension": "பரிமாணத்தை அகற்றுக",
+    "wizardRemoveKey": "விசையை அகற்றுக"
   },
   "plugins": {
     "title": "செருகுநிரல்கள்",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "அமைப்புகள் புதுப்பிப்பு தோல்வியடைந்தது",
       "serviceRevealApiKey": "{actor} {target}-க்கான API விசையை வெளிப்படுத்தினார்",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "பிழையை நிராகரிக்கவும்"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "இப்போது செல்",
       "message": "MITM Proxy இப்போது AgentBridge-இன் கீழ் உள்ளது.",
       "title": "இந்தப் பக்கம் மாற்றப்பட்டுள்ளது"
-    }
+    },
+    "dnsOn": "DNS இயக்கத்தில் உள்ளது",
+    "dnsOff": "DNS முடக்கப்பட்டுள்ளது",
+    "showServerSettings": "சேவையக அமைப்புகளைக் காட்டுக",
+    "hideServerSettings": "சேவையக அமைப்புகளை மறைக்கவும்",
+    "upstreamCaTesting": "சோதிக்கப்படுகிறது…",
+    "removeMapping": "மேப்பிங்கை அகற்றுக",
+    "mappingSourcePlaceholder": "எ.கா., gemini-3.6-flash-medium, அல்லது மேப்பிங் செய்யப்படாத அனைத்திற்கும் *",
+    "mappingWildcardHint": "வெளிப்படையான மேப்பிங் இல்லாத ஒவ்வொரு மாடலையும் OmniRoute வழியாகத் தேர்ந்தெடுக்கப்பட்ட இலக்கிற்கு அனுப்ப, மூலமாக *-ஐப் பயன்படுத்தவும். துல்லியமான மூலப் பொருத்தங்கள் எப்போதும் *-ஐ விட முன்னுரிமை பெறும்.",
+    "wizardDetectingModels": "இடைமறிக்கப்பட்ட போக்குவரத்திலிருந்து மாடல்கள் கண்டறியப்படுகின்றன...",
+    "wizardDetectedModels": "இடைமறிக்கப்பட்ட போக்குவரத்தில் {count, plural, one {# மாடல்} other {# மாடல்கள்}} கண்டறியப்பட்டன. நீங்கள் சேர்க்க விரும்புவனவற்றைத் தேர்ந்தெடுக்கவும்:",
+    "wizardSelectedModels": "{count, plural, one {# மாடல்} other {# மாடல்கள்}} தேர்ந்தெடுக்கப்பட்டன. அடுத்த திரையில் அவற்றை OmniRoute மாடல்களுடன் மேப்பிங் செய்வீர்கள்.",
+    "wizardAddModels": "{count, plural, one {# மாடலை} other {# மாடல்களை}} சேர்க்கவும்",
+    "wizardNoModelsDetected": "இதுவரை எந்த மாடலும் கண்டறியப்படவில்லை. ஒரு கோரிக்கையைச் செய்ய {agent}-ஐப் பயன்படுத்தி, பின்னர் போக்குவரத்திலிருந்து மாடல்களைத் தானாகக் கண்டறிய இந்த வழிகாட்டியை மீண்டும் இயக்கவும்.",
+    "wizardNoModelsHint": "அல்லது இந்த வழிகாட்டியை மூடிவிட்டு, முகவர் அட்டையில் மேப்பிங்குகளை கைமுறையாகச் சேர்க்கவும்."
   },
   "providerStats": {
     "unknownError": "தெரியாத பிழை",
@@ -12685,7 +12966,12 @@
     "avgTtft": "சராசரி TTFT",
     "avgTotal": "சராசரி மொத்தம்",
     "requestTelemetry": "கோரிக்கை டெலிமெட்ரி",
-    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)"
+    "requestTelemetryDescription": "7-கட்ட பைப்லைன் விவரப்பிரிப்பு (கடைசி 5 நிமிடங்கள்)",
+    "title": "வழங்குநர் புள்ளிவிவரங்கள்",
+    "description": "ஒவ்வொரு வழங்குநர் மற்றும் மாடலுக்குமான போக்குவரத்து, தாமதம் மற்றும் வெற்றி விகிதங்கள்",
+    "combo": "சேர்க்கை",
+    "toggleModels": "{provider} மாடல்களைக் காட்டுக",
+    "windowSince": "{date} முதல்"
   },
   "relay": {
     "title": "சர்வர்லெஸ் ரிலே ப்ராக்ஸிகள்",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "கோரிக்கை உடல் இல்லை.",
     "noResponseBody": "பதில் உடல் இல்லை.",
     "formatted": "வடிவமைக்கப்பட்டது",
-    "raw": "மூல"
+    "raw": "மூல",
+    "requestCount": "{count, plural, one {# கோரிக்கை} other {# கோரிக்கைகள்}}",
+    "expandList": "பட்டியலை விரிவாக்குக",
+    "collapseList": "பட்டியலைச் சுருக்குக",
+    "snippetLanguage": "குறியீட்டுத் துணுக்கின் மொழி",
+    "headersTable": "தலைப்புகள்",
+    "showSecrets": "இரகசியங்களைக் காட்டுக",
+    "maskSecrets": "இரகசியங்களை மறைக்கவும்",
+    "llmNotAvailable": "இந்தக் கோரிக்கைக்கான LLM மெட்டாடேட்டா கிடைக்கவில்லை.",
+    "llmStreamYes": "ஆம் (SSE)",
+    "llmStreamNo": "இல்லை",
+    "llmTotalTokens": "மொத்தம்: {count} டோக்கன்கள்"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI குறியீடுகள்",
     "pageSubtitle": "OmniRoute-ஐச் சுட்டிக்காட்டும் குறியீட்டுக் கருவிகள்",
     "searchPlaceholder": "CLI-ஐத் தேடவும்…",
     "filterDetectionLabel": "கண்டறிதல்",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "கண்டறியப்படவில்லை",
     "baseUrlAll": "அனைத்தும்",
     "baseUrlFull": "முழுமையானது",
-    "baseUrlPartial": "பகுதியளவு"
+    "baseUrlPartial": "பகுதியளவு",
+    "title": "CLI கோடு"
   },
   "cliAgents": {
     "pageTitle": "CLI முகவர்கள்",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "கடந்த 24 மணிநேரத்தில் இந்த வழங்குநர் உண்மையில் பதிலளித்த அழைப்புகளின் விகிதம். கோடு காட்டப்பட்டால், விகிதத்தைக் குறிப்பிட முடியாத அளவிற்கு மிகக் குறைந்த போக்குவரத்தையே அது கையாண்டது என்று பொருள்.",
     "reliabilitySample": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகளில் {successes} வெற்றிபெற்றன",
     "reliabilityTooFew": "கடந்த {hours} மணிநேரத்தில் {requests} அழைப்புகள் மட்டுமே — விகிதத்தைக் குறிப்பிடப் போதுமானவை அல்ல",
-    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை"
+    "reliabilityNoTraffic": "கடந்த 24 மணிநேரத்தில் அழைப்புகள் எதுவும் பதிவாகவில்லை",
+    "categoryFilter": "பணி வகை"
   },
   "discovery": {
     "title": "வழங்குநர் கண்டறிதல்",
@@ -13330,7 +13628,11 @@
     "method": "முறை",
     "auth": "அங்கீகாரம்",
     "feasibility": "சாத்தியக்கூறு",
-    "models": "மாதிரிகள்"
+    "models": "மாதிரிகள்",
+    "provider": "வழங்குநர்",
+    "status": "நிலை",
+    "endpoint": "முனைப்புள்ளி",
+    "actions": "செயல்கள்"
   },
   "noAuthProvider": {
     "title": "அங்கீகாரம் தேவையில்லை",
@@ -13379,7 +13681,8 @@
     "ownProxy": "சொந்த ப்ராக்ஸி",
     "freeTierPause": "மாதிரி {model} இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
     "freeTierPauseProvider": "இடைநிறுத்தப்பட்டது (429), {time} அன்று மீண்டும்",
-    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்"
+    "freeTierPauseNote": "இந்த நிகழ்வில் செயல்முறை இடையே இடைநிறுத்தம்",
+    "proxyType": "பதிலாள் வகை"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "ஒரு மறைக்கப்பட்ட சாதனை காத்திருக்கிறது...",
         "criteria": "இந்த பேட்ஜை வெளிப்படுத்த மறைக்கப்பட்ட சாதனையை முடிக்கவும்."
       }
-    }
+    },
+    "leaderboardTitle": "தரவரிசைப் பட்டியல்",
+    "leaderboardDescription": "உங்கள் API விசைகள் அனைத்திற்குமான தரவரிசைகள் மற்றும் சாதனைகள்",
+    "badgeLocked": "பூட்டப்பட்டது"
   },
   "featureFlags": {
     "title": "அம்சக் கொடிகள்",
@@ -13610,7 +13916,9 @@
       "disabled": "முடக்கப்பட்டது",
       "dual": "இரட்டை",
       "alias": "மாற்றுப்பெயர்",
-      "canonical": "முதன்மை"
+      "canonical": "முதன்மை",
+      "fail_closed": "தடுக்க (fail_closed)",
+      "count_as_zero": "$0 ஆக கணக்கிடு (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "பாதுகாக்கப்பட்ட-முன்னுரிமை உள்கட்டமைப்பு நிறுத்தங்கள் 502 ஆக",
         "description": "ஒதுக்கீடு-மட்டுமே-மாற்றுவழி முன்னுரிமை இலக்கு, ஒதுக்கீட்டால் ஏற்படவில்லை என உறுதியாக நிரூபிக்கக்கூடிய காரணத்திற்காக combo வை நிறுத்தும்போது 503க்குப் பதிலாக 502 எனப் பதிலளிக்கவும்: திறந்த provider circuit breaker அல்லது முன்கணிப்பு தாமதத் தவிர்ப்பு."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "கணக்கு அடையாள எண் பதிவு",
+        "description": "AUTH பதிவு வரிகளில் கணக்கு முன்னொத்தினை சேரவும் (உதாரணமாக \"'<provider>' கணக்கை பயன்படுத்தம்: abc12345...\"). பகிரப்பட்ட/பன்முதாய செயல்முறை பதிவுகளில் கணக்கு அடையாளங்களில் விளக்கப்பட்டிருக்க இயல்பாக முடக்கப்பட்டுள்ளது. டிபேட் முயையிலிருந்து சுதந்திரமானது; டிபேட் முயையை மாற்றினாலும் இது வெளியிடப்படுவதில்லை."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC மூலம் கடவுச்சொல் உள்நுழைவை முடக்கவும்",
+        "description": "OIDC இயக்கப்பட்டால், பயனர்கள் OIDC ஒற்றை சீக்-ஒன் மூலம் மட்டுமே சான்றிதழ் பெறக்கூடும் என கடவுச்சொல் உள்நுழைவை முடக்கவும். இயக்கப்படாதால் (இயல்புநிலை), கடவுச்சொல் உள்நுழைவு மற்றும் OIDC ஆகிய இரண்டும் கிடைக்கும்."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "தொலைதல் ஒலி வழங்குநர் சுழிப்புகள்",
+        "description": "/v1/audio/* வழித்தடங்கள் இயங்குதளத்திற்கு அலையில் அமைக்கப்பட்ட திறன்மையுள்ள வழங்குநர் சுழிப்புகளைப் பயன்படுத்த அனுமதிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது — தொலைதல் ஹோஸ்ட்டிற்கு ஒலியை வழிநடத்தல் வெளியேற்றம் அடையாளத்தை மாற்றுகிறது, எனவே இது ஒரு தெளிவான செயல்பாட்டாளர் முடிவாக இருக்க வேண்டும். சுழி சுழிப்புகள் எப்போதும் அனுமதிக்கப்படுகின்றன மற்றும் பாதிக்கப்படவில்லை."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "தொலைதல் மறுநிலைப்படுத்தல் வழங்குநர் சுழிப்புகள்",
+        "description": "POST /v1/rerank (மற்றும் நினைவு இயந்திரத்தின் மறுநிலைப்படுத்தல் படிநிலை, இது சுழி வழியாக அதை அழைக்கிறது) இயங்குதளத்திற்கு அலையில் அமைக்கப்பட்ட திறன்மையுள்ள வழங்குநர் சுழிப்புகளைப் பயன்படுத்த அனுமதிக்கவும் — TEI, Infinity, vLLM போன்றவற்றை இயக்கும் LAN பெட்டி அல்லது Tailscale சகோதரர். இயல்பாக முடக்கப்பட்டுள்ளது — தொலைதல் ஹோஸ்ட்டிற்கு வழிநடத்தல் வெளியேற்றம் அடையாளத்தை மாற்றுகிறது, எனவே இது ஒரு தெளிவான செயல்பாட்டாளர் முடிவாக இருக்க வேண்டும். சுழி சுழிப்புகள் எப்போதும் அனுமதிக்கப்படுகின்றன மற்றும் பாதிக்கப்படவில்லை. தொலைதல் சுழிப்புகள் வழங்குநர் வெளியேற்ற URL தந்திரவியலையும் கடக்க வேண்டும்."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "புள்ளி மாற்றம் பகிரப்பட்ட-வெளியேற்றம் பாதுகாப்பு",
+        "description": "பன்முதாய மாற்றம் நிறைவேற்றினுக்கு ஒரு நெட்வொர்க் விவரம் (நேரம் கடத்தல், இணைப்பு நிராகரிப்பு/மீட்டமைப்பு) ஏற்பட்டால், தோல்வியடைந்த கணக்குக்கு தனிப்பட்ட சார்பு இல்லையென்றால், மற்ற சார்பு-மரியாதையற்ற கணக்குகளுக்கு இந்த கோரிக்கையின் மீதமாக தாழ்வை பயன்படுத்தி, ஒவ்வொன்றையும் மீண்டும் முயற்சிசெய்யாமல் தவிர்க்கவும். இயல்புநிலையில் இயக்கப்பட்டது (பாதுகாப்பானது: வெளியேற்றம் IP மாற்றம் இல்லை, பகிரப்பட்ட-வெளியேற்ற கணக்குகளில் தாழ்வு/நேரம் கடத்தல் ஆபத்தை மட்டுமே குறைக்கிறது). முதல் சார்பு-மரியாதையற்ற விதிக்கு உடனடி பரவலை மீட்டெடுக்க இயக்கப்படும்."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "சமீபத்தில் தோல்வியடைந்த பேராக்ஸிகளை தவிர்க்கவும்",
+        "description": "opencode-இன் பேராக்ஸ் பூல்களும், கணக்குக்கு தனித்தனி சுழற்சியும், நேரடியாக தோல்வியடைந்த பேராக்ஸியை (தரவுச்சுட்டி பரிசோதனையிலோ, அல்லது அதன் வழியாக 429 பெறப்பட்டதிலோ) நிராகரிக்காதவாறு செயல்படுகின்றன. பின்னணிச் செயல்முறைக்கு வரிசையாக இருபடாக்கும், மேலும் ஒரு குவிப்பு வரம்பு வரை இருபடிப்படுத்தப்படும். பேராக்ஸ் நிலை எதுவும் எழுதப்படாது; தவிர்க்கப்பட வேண்டிய அனைத்து வேட்பாளர்களும் பக்கவாட்டம் செய்யப்பட்டால், தேர்வு மாறாமல் இருக்கும். இயல்புநிலையில் இயக்கப்படும்: PROXY_SKIP_RECENTLY_FAILED=false உடன், தேர்வு வரிசை பதிவிரல் சுழற்சிக்கு மட்டுமே சரியாக இருக்கும்."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "பங்கு எகசஸ் பூல் வரிசை",
+        "description": "egress முகவரி அடிப்படையில் ஒதுக்கீடு பிரிக்கப்படும் வழங்குநர்களுக்கு, சமீபத்தில் மறுக்கப்பட்ட உறுப்பினரின் கவனிக்கப்பட்ட egress முகவரியைப் பகிரும் pool உறுப்பினரை ஆரோக்கியமான உறுப்பினர்களுக்குச் சற்றுக் கீழே வரிசைப்படுத்தவும். வரிசை மட்டுமே; ஒருபோதும் விலக்கப்படாது. இது படிக்கும் மறுப்பு சமிக்ஞையை உருவாக்கும் PROXY_SKIP_RECENTLY_FAILED தேவை. இயல்பாக முடக்கப்பட்டது: தேர்வு வரிசை சாதாரண சுழற்சியே."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "சுழற்சி குறிப்பு ஆவணப்படுத்தல்",
+        "description": "opencode சுழற்சி எந்தக் கணக்கு பரிமாற்றம் செய்யப்பட்டது அல்லது தவிர்க்கப்பட்டது என்பதைப் பதிவு செய்கிறது (மறைமுகமான id-கள் மட்டுமே, முழு கணக்கு id-கள் எப்போதும் இல்லை), மேலும் பேராக்ஸ் நாட்குறிப்புகளை அவற்றின் கோரிக்கைகளுடன் இணைக்கிறது, மேலும் நடப்பு நபர் தவறப்பட்ட கணக்குகளைப் பயன்படுத்தப்படாத கணக்குகளில் இருந்து வேறுபடுத்தி அறிய முடியும். இயல்புநிலையில் இயக்கமில்லை: கூடுதல் ஆவண வரிகள் எதுவும் இல்லை, கூடுதல் நெடுவரிசைகள் எழுதப்படாது."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "பேராக்ஸ் பூல் எகசஸ் முறையீடு",
+        "description": "டாஷ்போர்டில் ஒரு proxy pool-இன் கீழ், கடந்த 24 மணி நேரத்தில் அதன் உறுப்பினர்களுக்குச் சேவை செய்த கவனிக்கப்பட்ட egress IP-களின் எண்ணிக்கை, அவற்றைப் பயன்படுத்திய இணைப்புகளின் எண்ணிக்கை மற்றும் ஒரே IP-க்குப் பின்னால் காணப்பட்ட அதிகபட்ச எண்ணிக்கையைக் காட்டவும். படிக்க மட்டும்; proxy பதிவிலிருந்து கணக்கிடப்படுகிறது, வழிச்செலுத்தலுக்கு ஒருபோதும் பயன்படுத்தப்படாது. இயல்பாக முடக்கப்பட்டது: pool திருத்தி மாறாது, கவனிப்பு route null என பதிலளிக்கும்."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "பேராக்ஸ் நடப்பு நபர் எகசஸ்",
+        "description": "ஒவ்வொரு பூல் உறுப்புக்கும் நடப்பு நபர் பரிந்துரைப்பதற்கு தேதியிடப்பட்ட தெரியும் முகவரிகளை ஏற்க, காட்சிப்படுத்தல் மற்றும் பூல் வரிசைக்கான நாட்குறிப்பை உருவாக்கவும். இயல்புநிலையில் இயக்கமில்லை: push முறை 404-ல் பதில் அளக்கும், பூல் படிப்புகள் முந்தையது போலவே செயல்படும்."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode பதில்கள் நிலைகுலேதல் சுழற்சி",
+        "description": "OpenCode செயல்படுத்தலுக்கான, பாய்ச்சப்படும் Responses பதிலின் முதல் உடல் பைட்டைக் கண்காணிக்கவும் (சமய அளவு: RESPONSES_FIRST_BYTE_TIMEOUT_MS, இயல்பு 15000). 2xx Responses பாய் சமய அளவை விட அமைதியாக இருந்தால் அது நிலைகுலேதல் எனக் கருதப்படும்: கணக்கு குளர்விக்கப்படும் (cooled down) மற்றும் கோரிக்கை அடுத்த கணக்குக்கு ஒருமுறை சுழல்கிறது; இரண்டாவது நிலைகுலேதல் விரைவாகத் தோல்வியடையும். இயல்பாக ஆஃப்: நிலைகுலேதும் பாய்கள் நவீன தயார்நிலை சமய அளவெச்சை (stream readiness timeout) வரை தற்போதைய காத்திருப்பைப் பராமரிக்கின்றன."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked சுழற்சி",
+        "description": "OpenCode செயல்படுத்தலுக்கான, மேல்நோக்கு (upstream) 403 அல்லது 451 பொருள் மூலம் user_blocked மறுப்பை (நிலை மதிப்பு அல்ல, Cloudflare சுவர்பட்டல் முரண்பாடு அல்ல) பதிலளிக்கிறபோது, மறுக்கப்பட்ட கணக்கை குளர்விக்கவும் (cool down) ஒவ்வொரு கோரிக்கையுக்குமாக அடுத்த கணக்குக்கு அதிகபட்சம் ஒருமுறை சுழற்றவும்; இரண்டாவது மறுப்பு வெற்றி குறிக்காது அப்படியே திரும்ப அளிக்கப்படும். இயல்பாக ஆஃப்: மேல்நோக்கு பயனர் தடைக்கு அருகிலுள்ள மார்க்கிங் ஒரு விலகல் (evasion) போல் தோன்றலாம் மற்றும் கணக்கு பட்டாளம் முழுவதும் நிலை (flag) பரவலடையலாம், எனவே ஆப்பரேட்டர் விருப்பம் (opt in) செய்து கொண்டிருந்தால் மட்டுமே மறுப்பு மாறிலித்தனமாகத் திரும்ப அளிக்கப்படுகிறது."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode புலிதோல்விகள் முன்னூட்டக் கதிர்வீச்சு (Transient Failover Backoff)",
+        "description": "OpenCode பல-கணக்கு சுழற்சிக்கான, தொடர்ச்சியான இரண்டு முயற்சிகள் ஒரு தற்காலிக மேல்நோக்கு பிழையுடன் (5xx அல்லது காலி 400 மறுப்பு) தோல்வியடைந்த பிறகும் அடுத்த கணக்கிற்கு அனுப்பப்படுவதற்கு முன் நிறுத்துங்கள். இடைநிறுத்தம் 1.5 வினாடிகளில் தொடங்குகிறது, ஒவ்வொரு தொடர்ச்சியான தோல்வியும் முன்னூட்டச் சேருதல் (exponential) முறைப்படி இரட்டிப்பாடாகிறது, ஒவ்வொரு இடைநிறுத்தத்திற்கும் 6 வினாடிகளும் ஒவ்வொரு கோரிக்கையுக்கும் 10 வினாடிகளும் வரம்பிடப்பட்டுள்ளது, கிளையண்ட் உடைப்பதில் நிறுத்தப்படுகிறது, மற்றும் தோல்வியடைந்த பதிலின் உடல் காத்திருப்பதற்கு முன் விடுவிக்கப்படுகிறது. இயல்பாக ஆஃப்: முன்னூட்டத் தோல்விகள் உடனடியாகத் தொடர்கின்றன."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "காலி அணி (Empty Turn) மீள்யோசனை",
+        "description": "மொழிபடுத்தப்பட்ட பாய் அணிகளில், மேல்நோக்கு அணியில் பயன்படுத்தக்கூடிய உள்ளடக்கம் இல்லாத போது (காரணப்படுத்தல்-மட்டுமே முடிவு அல்லது சுழல் கிளெப் சரிபார்த்தல்), எதுவும் கிளையண்ட்க்கு வெளிக்காட்டப்படும் முன் வழக்கமான நிராகரிப்புப் பாதை வழியாக வரம்பிடப்பட்ட மீள்யோசனைகளை (bounded retries) (அதிகபட்சம் `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) செய்யவும். இயல்பாக ஆஃப்: காலி அணிகள் தற்போதைய செயல்பாட்டை (காலி 200 அல்லது காலி-உள்ளடக்கம் 502) பராமரிக்கின்றன."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "காலி பாய் சகோதர வாழ்வு (Sibling Recovery)",
+        "description": "Claude/Codex பாய்: முதல் வாழ்நாள் சம்பவத்திற்குப் பிறகு, பயன்படுத்தக்கூடிய வெளியீட்டைச் சுமார் 1 வினாடி / 64 KiB வரைக் குறிப்பிட்டிருக்கும் (probe) ஒரு பாய், உள்ளடக்கம் இல்லாமல் முடிவடையும் போது, காலி_உள்ளடக்கம் தோல்வி (empty_content failure) ஆக மாறியுள்ளது மற்றும் ஏற்கனவே இருக்கும் வரம்பிடப்பட்ட மீள்யோசனை (bounded retry) மற்றொரு நியாயசார்ந்த இணைப்பில் செலவிடப்படுகிறது (குளரிக்காடு, மாடல் தடை இல்லை), மற்றும் சுற்றிச் சுழலும் கிளப்ஸ் (round-robin combos) கிளையண்ட் இணைப்பை உடைத்தால் மீள்யோசனை நிறுத்தப்படுகின்றன. மேலும், மறுப்பு, அணி இடைநிறுத்தம் (pause_turn) மற்றும் மாடல்_நிகழ்ச்சி_செயல்முறை_தொலைபாடு (model_context_window_exceeded) ஆகியவற்றை குறிப்பிட்டிருக்கும் ஒரு சரியான காலி முனையாய் (legitimate empty terminals) கருதுகிறது. இயல்பாக ஆஃப்: தயார்நிலை, காலி-உள்ளடக்கக் கவனிப்பு மற்றும் கிளப்ஸ் மீள்யோசனைகள் முந்தையது போலவே இருக்கின்றன."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "வளைய தாமதமான ஆதார ஆய்வு",
+        "description": "வளைய ஆதார ஆய்வு: முதல் 64 திருப்பி அனுப்பப்பட்ட தொகுதிகளுக்குப் பிறகு, முதல் காணக்கூடிய ஆதாரத்திற்காக 16-ல் ஒரு தொகுதியை மாதிரியாகப் பதிவு செய்யவும், இதனால் தாமதமாக தொடங்கும் ஆதாரம் வளையம் ஆதாரம் வெளியிட்டிருப்பதை குறிக்கவும். அந்தப் புள்ளியின் பிறகு தனி 5xx, மாதிரி-தனி பூட்டைப் பதிவு செய்யாமல், கோரிக்கை-அளவிட்டாகவே இருக்கும், மற்றும் firstOutputMs சந்தைப்படுத்தப்பட்ட முதல் ஆதாரத் தொகுதிக்கு (தற்போதைய மாதிரி இடைவெளியில்) பின்னோக்கி நிரப்பப்படும். இயல்பாக முடக்கப்பட்டுள்ளது: முதல் 64 திருப்பி அனுப்பப்பட்ட தொகுதிகளே ஆய்வு செய்யப்படும், முன்பு போலவே."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode விகித-தொடர்புடைய 429 முன்கூட்டியே நிறுத்தம்",
+        "description": "OpenCode பல-கணக்கு சுழற்சியில், உண்மையான விகித வரம்பாக வகைப்படுத்தப்பட்ட முதல் 429-இல் (பகுப்பாய்வு செய்யக்கூடிய Retry-After தலைப்பு, அல்லது விகித/பயன்பாட்டு வரம்பைக் குறிப்பிடும் உடல்) கணக்கு அலையை நிறுத்தி, மீதமுள்ள ஒவ்வொரு கணக்கையும் முயற்சிப்பதற்குப் பதிலாக அந்த upstream 429-ஐ மாற்றமின்றி (நிலை, உடல், Retry-After மற்றும் ஒதுக்கீட்டுத் தலைப்புகள்) திருப்பி அனுப்பவும். வகைப்படுத்தப்படாத 429-கள் தொடர்ந்து சுழலும். இயல்பாக முடக்கப்பட்டது: இலவச அடுக்கு egress IP வாரியாக வரம்பிடப்படுகிறது (#9611), எனவே ஒவ்வொரு 429-உம் அடுத்த கணக்கிற்குச் சுழலும், தீர்ந்த அலை கடைசி upstream 429-ஐத் திருப்பி அனுப்பும்."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 நிறுத்துதல் மற்றும் மீள் தொடக்கம்",
+        "description": "OpenCode பல-கணக்கு சுழற்சிக்கு, தொடர்ச்சியான தற்காலிக 429-களுக்குப் (அல்லது புதிய தொகுப்பு-அழுத்தமான குறியீட்டிற்குப்) பிறகு, மூன்றாழ் மனததைப் பாராட்டி, வலைப்பூர்வமாக முழு தளத்தையும் வெட்டி அனுப்பாமல், 3 தொடர்ச்சியான கணக்குகளுக்குள் மிகைப்படுத்தப்பட்ட ஒரு நெடியை மீள் வணியவு செய்யவும். இயல்பாக முடக்கப்பட்டுள்ளது: ஒவ்வொரு 429-வும் முன்பு போலவே அடுத்த கணக்கிற்கு சுழலும்."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "வளைய தயார்நிலை தடை மீள் முயற்சி",
+        "description": "வளைய மொழி பெயர்ப்பு கோரிக்கைகளுக்கு, பயன்படுத்தக்கூடிய நிகழ்வை உருவாக்க முன் மேல்நோக்கு உடல் தடங்கலுற்றுவிட்டால், அடுத்த முயற்சிக்கு ஒரே பகுப்பாய்வு பாதையில், ஒரே தயார்நிலை நிதிப்புள்ளியுடன், கணக்கு தண்டனை அல்லது, ஒரு பரவரல் இரண்டாவது முயற்சியை வெளியிடவும். இயல்பாக முடக்கப்பட்டுள்ளது: தடங்கலடைந்த முதல் உடல் மீள்முயற்சி இல்லாமல் கோரிக்கையைத் தோல்வியடையச் செய்யும்."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 தொகுப்பு மீள் தேர்வு",
+        "description": "OpenCode பல-கணக்கு சுழற்சிக்கு, பிரோகி-இல்லாத கணக்கின் சூழல் தொகுப்பு கட்டமைப்பின் கீழ், வெளியீட்டு-படகமைப்புடைய முன்னோக்குளியில் இருந்து 429-க்குப் பிறகு, ஒரே வெளியீட்டு முகவரியில் மீள் முயற்சிக்காமல், அடுத்த முயற்சிக்காக இன்னொரு உறுப்பைத் தொகுப்பிடமிருந்து கேட்கவும். வரிசைப்படுத்த, ஒருபோதும் நீக்குவதில்லை: ஒரு காலம் நிறைவடைந்த தொகுப்பு தற்போதைய நடத்தைக்கு ஒத்து விடும். இயல்பாக முடக்கப்பட்டுள்ளது: ஒவ்வொரு 429-வும் முன்பு போலவே அடுத்த கணக்கிற்கு சுழலும்."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 கிளையன்ட் ஃபிங்கர் பிரிண்ட்",
+        "description": "OpenCode Zen/Go கோரிக்கைகளில் OpenCode v2 CLI கிளையன்ட் ஃபிங்கர் பிரிண்ட்டை அனுப்பு (#16571): User-Agent opencode/latest/<2.x>/cli மற்றும் x-opencode-client cli, 2.x OpenCode கிளையன்ட் மட்டுமே என்றவரைகிளையன்ட் User-Agent-ஐ வைத்திருப்பது, மேலும் கேட்டெட் ஃப்ரீ-தீர் கின் கோரிக்கைகளில் x-opencode-request இல்லை, அமர்வு x-opencode-session-id/x-session-affinity/x-session-id மீது பிரதி எடுக்கப்படுவது, and v2 CLI read/shell ஸ்கீமால்கள் நேரடியாக நுழைவிடப்படும் பிளாசீஹோல்டர் கருவிகளில் மற்றும் tool_choice \"none\" நீக்கப்படுவது. இயல்பாக முடக்கப்பட்டுள்ளது: ஒவ்வொரு OpenCode கோரிக்கையும் தற்போதைய அடையாளம், தலைப்புகள் மற்றும் உடலை துளிர்முகமாக வைத்திருக்கும்."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP Lockout",
+        "description": "இயல்புநிலை egress-IP lockout குடும்பத்தில் OpenCode Zen (opencode-zen)-ஐச் சேர்க்கிறது; இதனால் ஒரு Zen இணைப்பில் 429 வந்தால், அதே egress IP-ஐப் பகிரும் மற்ற எல்லா Zen இணைப்புகளும் குளிரூட்டலுக்கு உள்ளாகும். இயல்பாக முடக்கப்பட்டுள்ளது: Zen விசை அடிப்படையிலானது, ஒவ்வொரு இணைப்பும் முன்பு போலவே தனித்தனியாகக் குளிரூட்டப்படும். வெளிப்படையாக அமைக்கப்பட்ட OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS மதிப்பு எப்போதும் இந்தக் கொடியை மீறும்."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode முழு உரை பிழை விதிமுறைகள்",
+        "description": "உள்ளிணை OpenCode பிழை விதிமுறைகள் (opencode-zen, opencode-go, opencode-cli) முழு மேலோட்டு பிழை உரையைக் கருத்தில் கொள்ள அனுமதிக்கிறது, எனவே organization_quota_exceeded அல்லது \"monthly usage limit reached\" போன்ற உடல் அடையாளப்படுத்திகள் ஒரு 429 ஐ க்வுடா தீர்வாக (quota exhausted) வகைப்படுத்தி ஒரு இணைப்பு-அளவிலான லாக்கை விடுவிக்கும். இயல்பாக முடக்கப்பட்டுள்ளது: அந்த விதிமுறைகள் நிறுவுடல் பிழை குறியை மட்டுமே பார்க்கின்றன மற்றும் அந்த 429 ஒரு சிறிது நேர ஸ்பீட் லிமிட் ஆகவே இருக்கும், முன்பு போலவே."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI முழு உரை பிழை விதிமுறைகள்",
+        "description": "உள்ளிணை Cloudflare Workers AI பிழை விதிமுறை முழு மேலோட்டு பிழை உரையைக் கருத்தில் கொள்ள அனுமதிக்கிறது, எனவே 429 \"daily free allocation\" உடல் சிறிது நேர ஸ்பீட் லிமிட் ஆகாமல் க்வுடா தீர்வாக (quota exhausted) வகைப்படுத்தப்படும். இயல்பாக முடக்கப்பட்டுள்ளது: விதிமுறை நிறுவுடல் பிழை குறியை மட்டுமே பார்க்கிறது, முன்பு போலவே."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "ஐதர ஃபில்டர்",
+        "description": "முறிப்பிடப்பெறும் கோரிக்கைகளில் மதிப்பீட்டு மாதிரி இல்லாத அடிப்படை திறன்கள் (vision, tools, structured output, context window) அமைந்தால் கோரிக்கைகளை மதிப்பீட்டிற்கு முன்னரே நிராகரிக்கவும். இது கம்போ-அடுக்கு இணைவு ஃபில்டரை அடைக்கும் நேரடி ஒற்றை-புரொவையர் கோரிக்கைகளைப் பாதுகாக்கிறது."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD குறாட்களில் விலையின்றி பயன்பாட்டை புறக்கணி",
+        "description": "விலை நிர்ணயிக்கப்படாத மாடல்களின் பயன்பாட்டை, ஒதுக்கீடு மீறப்பட்டதாகக் கருதுவதற்குப் பதிலாக, ஒவ்வொரு விசைக்குமான USD பயன்பாட்டு ஒதுக்கீடுகளில் $0 எனக் கணக்கிடவும். இயல்பாக முடக்கப்பட்டுள்ளது: விலை நிர்ணயிக்கப்படாத மாடல் அல்லது routing alias உண்மையான செலவை மறைக்கக்கூடும் என்பதால், ஒதுக்கீடு fail-closed முறையில் செயல்படும்."
+      },
+      "RADAR_ENABLED": {
+        "label": "ரேடார்",
+        "description": "OmniRoute ரேடார் டிமோடூலை செயல்படுத்துவது (கலாட்டாட் பிரிவினையும் ஸிங்கையும்). இயல்பாக முடக்கப்பட்டுள்ளது; இயக்க உரையிடைநேரமும் வெளிப்படுத்தப்படும் ஒரு தனி விருப்பம் மட்டுமே உள்ளது."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "மாதிரி எப்பாண்டு திறன் கதவு",
+        "description": "பராமரிப்பாளர் கட்டமைப்பு மாற்றம், ஒரு தனிப்பட்ட மாடல் ஐடி அல்லது ஆபரேட்டர் மூலம் அடையாளம் காட்டப்பட்ட நம்பகமான மாடல் எப்பாண்டு டேக் (சேவைவழி விளக்கமான மாற்றம், ஒரு தனிப்பட்ட மாடல் ஐடி அல்லது ஆபரேட்டர் மூலம் அமைக்கப்பட்டது): மாடல் சேவையளிக்கும் எப்பாண்டு ஒன்றில் அனுப்பப்பட்ட கோரிக்கையை அனுப்புவதற்கு முன் HTTP 400 மூலம் நிராகரிப்பது; OmniRoute அடேப்டர் இல்லாத மாடல்களின் /v1/models, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations மற்றும் /v1/audio/* இடமிருந்து மறைப்பது; மற்றும் முழு வரைபட மாதிரி சோதனைக்கு 422 ஆல் பதிலளிக்கிறது. இயல்பாக முடக்கப்பட்டுள்ளது: எப்பாண்டு டேக் களும் தகவல் வழங்குதல் மட்டுமே, கோரிக்கைகள் முன்வங்கப்பட்டு அனுப்பப்படுகின்றன."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "வெவ்வேறான சூழல் பரிமாற்றம்",
+        "description": "கம்போ பாராட்டிங் மாடல்களை மாற்றும்போது அரட்டை சுருக்கங்களை உருவாக்கவும், செலுத்தவும். முழுமையாக அறிமுகமானது தனித்துவமாக கருதவும் மற்றும் பின்னணியில் பரிமாற்ற கோரிக்கைகளை அனைத்து பழைய மற்றும் புதிய கம்போக்களுக்கும் தடுக்கவும்."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "காரணல் மீளாட்டம்",
+        "description": "பல சுற்று அரட்டைகளில் மாடல் காரணல் காட்சியை சேமித்து மீளாட்டம் செய்கிறது. சேமிப்பதை நிறுத்தவும் மற்றும் காரணல் மீண்டும் செலுத்துவதை தடுக்கவும்."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex ஆப்-சர்வர் டிரான்ஸ்போர்ட்",
+        "description": "Codex உள்ளூர் ஆப்-சர்வர் WebSocket JSON-RPC டிரான்ஸ்போர்ட்டை (codexTransport=app-server) பயன்படுத்த அனுமதிக்கவும். இது பூஜ்ஜியமாக இருக்கும்போது, ஆப்-சர்வருக்கான இணைப்புகள் Codex-ன் மற்ற டிரான்ஸ்போர்ட்களுக்கு திரும்பிச் செல்கின்றன."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code கண்டறிதல் அல்யாஸ்கள்",
+        "description": "/v1/models இல் claude/'<provider>'/'<model>' லென்னர் id களை அறிவிக்கவும், இதன் மூலம் Claude Code கேட்வே திடீர் கண்டறிதல் பட்டியலில் நான்-Claude மாதிரிகளைக் காட்ட முடியும். எச்சரிக்கை: உலகளாவியமாக இயக்கும்போது அனைத்து வாடிக்கையாளர்களுக்கும் தனிப்படுத்தல் நுழைவுகள் இரு மடங்காகிவிடும்."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "நோ-தொல்கிங் மாதிரி அல்யாஸ்கள்",
+        "description": "no-think/'<provider>'/'<model>' கேட்வே அல்யாஸ்களுக்கான முதன்மை ஸ்விச். ஆன் (இயல்புநிலை): /v1/models ஒவ்வொரு தகுதியுள்ள தொல்கிங்-சக்தி கொண்ட Claude மாதிரிக்கும் நோ-தொல்கிங் மாறுவடிவத்தை அறிவிக்கிறது, மேலும் கோரிக்கையில் அனுப்பப்படும் no-think/ id என்பது வரையறை நிறுத்தப்பட்ட அசல் மாதிரியாகப் புரிந்துகொள்ளப்படுகிறது. ஆஃப்: எந்த மாறுவடிவமும் அறிவிக்கப்படுவதில்லை, மேலும் no-think/ id பிற அறியப்படாத மாதிரி id போலவே சம்பந்தப்படுத்தப்படுகிறது. இது ஆன் ஆக இருக்கும்போது மாதிரி-விளக்கமான ModelSpec.noThinkingAlias சேர்ப்பு/விலக்கம் தொடர்ந்து பயன்படுத்தப்படுகிறது."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "தொல்கிங் நிலை மாறுவடிவங்களை முடக்கு",
+        "description": "/v1/models பட்டியலில் தொல்கிங் நிலை மாறுவடிவங்களை (எ.கா. -low, -medium, -high) உருவாக்கப்படுவதை முடக்கு."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "அழைப்பு நியமன விசியல் லேன்கள்",
+        "description": "வாடிக்கையாளர்-அடிப்படை அழைப்பு நியமன விசியல் லேன்களை இயக்கு (கேன்டிரை #9654): ஒரு வாடிக்கையாளரின் திடீர் சுமை மற்றொரு வாடிக்கையாளருக்கு 503 நிகழ்வை உண்டாக்காது. OMNIROUTE_CHAT_VIRTUAL_LANES சூழல் மாறிப்படுத்தல் இந்த டாஷ்போர்ட் மீட்டமைப்பை விட விரிவாகப் பயன்படுத்தப்படுகிறது; சர்வர் மீட்டமைப்பில் மாற்றங்கள் விதிமுறையாகும்."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "பண்புமீன் கேட்வே தூயவுகள்",
+        "description": "'<gateway-alias>'/'<model>' தூயவு அடையாளங்களை, அவதியான காரனைன் உரிமையாளருக்கு செயலில் உள்ள அங்கீகாரம் இல்லாத ஆனால் செயலில் உள்ள அங்கீகாரத்துடன் ஒரு பஸ்ஸுவர்த் கேட்வே அவற்றை வழங்கும் மாதிரிகளுக்காக /v1/models-இல் விளம்பரப்படுத்தவும். எச்சரிக்கை: உலகளாவியமாக இயக்கப்பட்டால், அனைத்து வாடிக்கையாளர்களுக்கும் கட்டலாஜ் நுழைவுகளை சேர்க்கிறது."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API தொகுப்பாளர் சமநிலை",
+        "description": "New-API / One-API / Sub2API தொகுப்பாளர் அங்கீகரிப்பு உள்ள உருவகங்களில் சமநிலை கண்டறிதலை இயக்குங்கள். இயக்கப்பட்டால், தொகுப்பாளர் கொடி அமைக்கப்பட்ட அங்கீகரிப்பு உள்ள உருவகங்கள் தங்கள் சமநிலையை டாஷ்போர்டு மற்றும் குவோட்டா-முன் பாதைமை ஆன்ரூட்டிங்கில் அறிவுறுப்பிடுவன."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "அழிக்கப்பட்ட தேடல் இணைப்புகளை மறைக்கவும்",
+        "description": "தேடல் புள்ளிவிவரங்களும் சமீபத்திய தேடல்களும் இன்னும் செயலில் உள்ள இணைப்பைக் கொண்ட வழங்குநர்களை மட்டுமே கணக்கிடும் (duckduckgo-free போன்ற key இல்லாத வழங்குநர்கள் எப்போதும் கணக்கிடப்படும்). Off எனில் வழங்குநர் id உடன் வைக்கப்பட்டுள்ள ஒவ்வொரு தேடல் வரிசையும் கணக்கிடப்படும்."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "கடுமையான இலவச பேட்ஜ்",
+        "description": "டாஷ்போர்டு உருவகப் பக்கங்கள்: உருவகம் மரியாதைசெய்கிற சிக்னல்களில் மட்டுமே Free_badge-ஐ காண்பிக்கவும் — பட்டியலிட்ட உருவகங்களில் ஆவணப்படுத்தப்படாத இலவச நிலையுள்ளவற்றில் display-name நூகஸ்டிக், non-boolean இலவச புலங்கள் மற்றும் :free சட்டகுகளை நீக்குகிறது. Off, வரலாற்று badge விதியை வைக்கிறது."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "ஆட்டோ கோம்போ: காலி முகப்புத்திரை 503 பதிலளிக்கிறது",
+        "description": "தொலைபேசி அழைப்பு முன் வடிகட்டி இயக்குவதற்கு முன்பாக ஒரு ஆட்டோ கோம்போவின் நோக்கப்புலம் ஏற்கனவே காலியாக இருந்தால் (cooldowns, lockouts அல்லது கிளிக் ஆகியவற்றால் ஒவ்வொரு நோக்கமும் தவிர்க்கப்பட்டால்), legacy 400 \"No target supports tool calling\" capability_mismatch-க்கு பதிலாக 503 no_eligible_targets பதில் அளிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது: காலி முகப்புத்திரையே legacy 400-ஐ வைத்திருக்கிறது."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral துல்லியமற்ற 401 மென் ஊடாரம்",
+        "description": "வெறும் Mistral 401 ('{\"detail\":\"Unauthorized\"}', வெளிப்படையான அங்கீகார சமிக்ஞை இல்லை) திரும்பப்பெறப்பட்ட key-க்கும் தீர்ந்த ஒதுக்கீட்டுக்கும் பைட்-அளவில் ஒரே மாதிரியானது. இயக்கப்பட்டால், அத்தகைய 401 இணைப்பைக் காலாவதியானதாக நிறுத்துவதற்குப் பதிலாக ஒரு மணி நேரத்திற்குள் அதிகபட்சம் 3 முறை குளிர்விக்கும்; அடுத்தது அதைக் காலாவதியானதாகவே நிறுத்தும், எனவே திரும்பப்பெறப்பட்ட key இறுதியில் அந்த நிலைக்கு வரும். இயல்பாக முடக்கப்பட்டது: முன்பு போலவே ஒவ்வொரு வெறும் Mistral 401-உம் இணைப்பைக் காலாவதியானதாக நிறுத்தும்."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "தொகுதி மற்றும் கோப்பு தானாக சுத்தம் செய்தல்",
+        "description": "தானாக சுத்தம் செய்தல் (sweep) மூலம், OMNIROUTE_BATCH_RETENTION_DAYS-க்கு மேல் பழைய முடிவு (நிறைவு/தோல்வி/ரத்து/காலாவதி) சேகரிப்பு API வேலைகளை (Batch API jobs), அவற்றின் வரி-செயல்பாட்டு (per-line) சோதனைப் புள்ளிகளுடன் (checkpoints), மற்றும் பதிவெடுக்கப்பட்ட கோப்புகளின் BLOB உள்ளடக்கத்தை அவற்றின் expires_at நேரத்தைத் தாண்டியுள்ள போது, நீக்குவதற்கு அனுமதிக்கிறது. இயல்பாக அணைக்கப்பட்டது: ஒரு செயல்பாட்டாளர் (operator) தேர்வு செய்யும் வரை, ஒவ்வொரு இருப்பில் உள்ள நிறுவனமும் முந்தையது போலவே இந்த தரவைத் தக்க வைக்கும். செயல்பாட்டாளர் தூண்டல் (triggered) DELETE /api/v1/batches/delete-completed வழிப்பாதை (route) எப்போதும் பாதிக்கப்படாது — அது தனி, நிபந்தனையற்ற பொது API ஒப்பந்தமாகும்."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity கணக்கு வாடகை (Lease)",
+        "description": "ஒரு கோரிக்கை (request) தேர்ந்தெடுத்த Antigravity கணக்கை, அந்தக் கோரிக்கையின் ஸ்ட்ரீமிங் (streaming) வாழ்க்கைச் சுழற்சிக்கு முன்பே ஒதுக்கவும், இதனால் ஒரே நேரத்தில் மீள்வினை (retry) அல்லது அங்கீகாரம் ஒத்துழைப்பு (credential handoff) முன்னுள்ள ஸ்ட்ரீமிங்கில் அந்த கணக்கை மீண்டும் தேர்ந்தெடுக்க முடியாது. ஒதுக்கீடு (connection, callable upstream model) சார்பில் (scoped) அமைக்கப்படுகிறது, எனவே ஒரு கணக்கு இன்னும் இரண்டு வெவ்வேறு மாதிரிகளுக்கு ஒரே நேரத்தில் சேவை செய்ய முடியும். ஒரு மாதிரிக்கு அகடகான அனைத்து கணக்குகளும் பிசியாக இருந்தால், பிசியான கணக்கில் குவிவதை விட, கட்டுப்படுத்தப்பட்ட Retry-After உடன் கட்டுப்படுத்தப்பட்ட 503 POOL_BUSY பதிலைக் கொடுக்கும். இயல்பாக அணைக்கப்பட்டது: கணக்கு தேர்வு முந்தையது போலவே உள்ளது, எந்த ஒதுக்கீதும் எடுக்கப்படாது."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "பழைய கம்போ படிவுகளை (Combo Steps) தானாக அகக்குத்தல்",
+        "description": "ஒரு தலைமை நேரடி பட்டியலுக்கு (authoritative live catalog) வெற்றிகரமான மாதிரி ஒத்திசைவின் (model sync) பின், அந்தப் பட்டியலில் இனி விவரிக்கப்படாத மாதிரிகளுக்கு பூட்டப்பட்ட (pinned) கம்போ படிவுகளை அகக்குத்தல், நீக்கப்பட்ட ஒவ்வொரு படிவுக்கும் ஒரு ஆடிட் நுழைவுடன் (audit entry). தோல், குறைவான அல்லது இலவச-மட்டும் (free-only) ஒத்திசைவில் எப்போதும் அகக்குத்தல் செய்யாது, மேலும் ஒரு கம்போவை (combo) காலியாகவும் செய்யாது. இயல்பாக அணைக்கப்பட்டது: பழைய படிவுகள் அறிமுகம் (flagged) செய்யப்படும்."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth சுருக்கிய மனோபரவளம் (Thinking)",
+        "description": "ஒரு Claude OAuth கோரிக்கை, படிக்கக்கூடிய மனோபரவளத்தை (thinking.display \"summarized\") கேட்கும்போது, redact-thinking-2026-02-12 Anthropic பீட்டாவை (beta) நீக்குவதற்கு அனுமதிப்பீது, அதுவாறில்லை என்பதால் Anthropic காலியான, சைக்னேச்சுருக்கு-மட்டும் (signature-only) மனோபரவளப் புள்ளிகளை (thinking blocks) திருப்பி அனுப்பும். இயல்பாக அணைக்கப்பட்டது: அந்தப் பீட்டா Claude Code OAuth விளிம்பு அடையாளத்தில் (wire fingerprint) ஒரு பகுதியாக இருப்பதால், OAuth கோரிக்கைகள் அதை மாற்றாது. API விசை (key) Claude கோரிக்கைகள் ஏற்கனவே இந்த அறிக்கையுடன் (flag) சுருக்கிய மனோபரவளை மரியாதை செய்கின்றன; OMNIROUTE_REDACT_THINKING=false OAuth-ஐ இந்த அறிக்கை இயக்கப்பட்டிருந்தால் மட்டுமே எட்டுகிறது."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro Tool Call திருத்தம்",
+        "description": "ஒரே ஒரு காணபெறும் வெளியீடு முன்பு, தீவிரமான Kiro பதிலில் தவறான tool_call பூட்டு (input.name அல்லது input.arguments இல்லாமல்) வெளிப்படும்போது, அதை அடக்கி, invalid_kiro_tool_call உடன் சுற்றத்தை முடிக்காமல், சீரமைப்புக் குறிப்பீட்டுடன் கோரிக்கையை ஒருமுறை மீண்டும் அனுப்பவும். மீள்சோதனை ஒரே கூடுதல் Kiro கோரிக்கையின் செலவில் நடைபெறுகிறது; இரண்டாவது தோல்வி சுற்றத்தை kiro_tool_call_repair_retry_failed உடன் முடிக்கிறது. இயல்பில் இயக்கப்பட்டுள்ளது. முதல் தவறான பூட்டில் சுற்றத்தை தோல்வியுறச் செய்ய false என அமைக்கவும்."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev முயற்சி நிலைகள்",
+        "description": "இயக்குநர் மேலெழுதலோ வழங்குநர் பதிவேடோ எதையும் அறிவிக்காதபோது, models.dev வெளியிடும் reasoning effort நிலைகளை (அறியப்பட்ட effort சொற்களஞ்சியத்திற்குள் சுருக்கப்பட்டவை) பயன்படுத்துகிறது; அறிவிக்கப்பட்ட காலியான நிலைப் பட்டியலை /v1/models effort_tiers மற்றும் combo நிலைக் குறுக்கீடுகளில் \"நிலைகள் இல்லை\" எனக் கருதுகிறது. இயல்பாக முடக்கப்பட்டுள்ளது: effort_tiers மற்றும் தீர்மானிக்கப்பட்ட supportedThinkingEfforts முன்பு இருந்தபடியே இருக்கும்."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena மூலோபாயக் cx கவனமூட்டல்",
+        "description": "operator வழங்கிய providerSpecificData.cx இல்லாத ஒவ்வொரு Arena (lmarena) create-evaluation கோரிக்கையிலும், செயற்கையாக உருவாக்கப்பட்ட நிரல்சார் cx client-interaction blob-ஐ (பதிவுசெய்யப்பட்ட தொடர்பு இல்லாத பக்கத்திற்கு arena.ai தானே அனுப்பும் மதிப்பு) இணைக்கவும். இயல்பாக முடக்கப்பட்டது: cx புலம் Arena-வின் தன்னியக்க-எதிர்ப்பு சமிக்ஞை என்பதால், operator உண்மையான உலாவி அமர்விலிருந்து பிடித்த மதிப்பை (providerSpecificData.cx) மட்டுமே OmniRoute அனுப்பும்; இல்லையெனில் cx எதையும் அனுப்பாது. upstream பயன் நிரூபிக்கப்படவில்லை; cx இல்லாத கோரிக்கைகளை Arena நிராகரிக்கத் தொடங்கினால் மட்டுமே இயக்கவும்."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "தானியங்கு Codex பதிலளவு திராக்கன்",
+        "description": "குறிப்புத்தானி (threshold) மற்றும் கடைசி-நம்பிக்கை சூழல் திராக்கன் முகவுரைகளும், context budget-த்தை மீறுும்போது, Responses input[] adapter-ஐ பயன்படுத்தி, Codex வழங்குநருக்கு POST /v1/responses ஐ நேரடியாக அனுப்பும் Codex வரலாறுகளை மீண்டும் எழுதவும். இயல்பில் ஆஃப்: Codex வரலாறுகள் Codex கிளையண்டின் சொந்தமாகும் மற்றும் திராக்கனின் மூலம் மீண்டும் எழுதப்படாது; பெரிய கோரிக்கைகள் முந்தையது போலவே context budget சோதனைக்கு தோல்வியுறும். முழுமையான அழுத்தம் இயக்கப்பட்டுள்ளதும், மாதிரி திரும்பப்பட்டுள்ளதும் வேண்டும்."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "பரபரப்பின் காலம்: எல்லை அடைவு நிலைப்பாட்டை மரியாதை செய்யவும்",
+        "description": "காலம்-அடிப்படை quota நேரடித்தன்மை (கணக்கு தேர்வு பயன்படுத்தும் session/weekly நிலைகள்) எல்லை அடிவு நிலைப்பாட்டை மரியாதை செய்யவும்: எல்லை உள் இருக்கும் park deadline கடந்த பிறகு, அல்லது cache செய்யப்பட்ட quota கவனிப்பு park cap-க்கு அளவாய் பழமையானதாக இருந்தால், புதிய quota பெறும் வரை அந்த காலம் கணக்கை திரும்பப்படுத்தி நிறுத்துகிறது. இயல்பில் ஆஃப்: cache செய்யப்பட்ட காலம், அதன் சொந்த reset நேரம் வரை, கடைசி அறிவிக்கப்பட்ட சதவீதத்தில் சூடு வைக்கிறது."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "படிம உருவாக்கம்: நீண்ட கால வேலைகள்",
+        "description": "ஆர்க்கிடி-அங்கீகரித்த படிம உருவாக்கத்திற்காக: நிலையான 120 வினாடிகள் படிம நிதி முறைக்கு பதில், இணைப்பின் தூக்கல் நேரத்தை (providerSpecificData.timeoutMs), அல்லது மைய மேல்வங்கி பெறுதல் தூக்கல் நேரத்தை (FETCH_TIMEOUT_MS, பின்னர் REQUEST_TIMEOUT_MS, இல்லை 600 வினாடிகள்) பயன்படுத்தவும்; அனுப்புநர் ரத்து செய்த வேடத்தை 499 கிளையாண்ட் கீப்பால் ரெக்யூஸ்ட் முடிக்கவும்; மேலும், Playgrounds-இல் நீண்ட படிம வேலைகளை அனுப்பவும், ஒரு SSE பாய்முறையாக கீப்பால் டோல் வேலை மூலம். இயல்பாக முடக்கப்பட்டுள்ளது: நிலையான நிதி முறை தடையிற்போர் மற்றும் அனுப்புநர் ரத்து செய்தல் பரவியவற்றிற்கு தடையிற்போர். பதில் உடலின் படிப்பை மறைத்தல் தடை நேரம் எப்போதும் தடையிற்போர்."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "முகப்பு கிளிக் இணைப்புகள்",
+        "description": "படிப்பில் /v1/models-இல் claude/ கண்டுபிடிப்பு மற்றும் செயல்பாட்டு இணைப்புகளைத் திருத்தவும். இயல்பாக முடக்கப்பட்டுள்ளது: இரண்டு இணைப்பு வழிமுறைகளும் முன்வரைவானது. இயக்கப்பட்டால்: claude/ கண்டுபிடிப்பு இணைப்புகள் பட்டியலிட்ட மாதிரி முயற்சி மாற்றுகளை (-low/-medium/-high/-xhigh) அமைக்கவும், பணிப்பாதுகாப்பு auto/* ஐட்களைத் தாக்குதல், கோரிக்கை வழிமுறை உருவாக்க முடியாதவற்றைத் தாக்குதல்; செயல்பாட்டு இணைப்புகள் இணைப்புகள் மற்றும் OmniaRoute-செய்தல் ஐட்களை (claude/, no-think/) தாக்குதல், உரிமையாளரை owned_by-இலிருந்து பெறுதல், உரிமையாளரை தன் சொந்த இணைப்பாக பயன்படுத்தாமல், தடைப்பட்ட இணைப்புகளில் தடையிற்போர் இணைப்புகள் மற்றும் ஒரு இணைப்பின் அதிகாரப்பூர்வ நேரடி பட்டியலில் வெளியே உள்ள மாதிரிகள் தாக்குதல்."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "இணைப்பு முழுமை: தவறை நிறைவு",
+        "description": "இணைப்பு முழுமை சோதனையில், ஒரு கோரியதனை இலக்கு எதிர்த்தது (401/403/429: இணைப்பு வழித்தோன்றல், இலக்கு இந்த வெளியேற்று ஐபியை எதிர்த்தது) இணைப்பின் தொடர்ச்சியான தவறை நிறைவு செய்யவும், ஒரு வழங்கிய சோதனை போல. இயல்பாக முடக்கப்பட்டுள்ளது: ஒரு எதிர்ப்பு அமைதி இருக்கிறது மற்றும் தொடர்ச்சியை வைக்கிறது (#10654). 5xx எப்போதும் முடிவுதராதது, மேலும் ஒரு எதிர்ப்பு ஒரு இணைப்பை நீக்குதல், தடைசெய்தல் அல்லது மீண்டும் செயல்படுத்துதல் இல்லாமல் இருக்கிறது."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "ஃப்ரான்ட் சப்ஸ்கிரிப்ஷன் படிமங்கள்",
+        "description": "மாதிரி ஃப்ரான்ட் (xao) மற்றும் ஃப்ரான்ட்-எஃப் படிம வழிமுறைகளை பதிவு செய்தல் மற்றும் ஆர்க்கிடி உயர்வு/எஃப்ஃபியை ஃப்ரான்ட் மத்தியில் மாற்றியமைத்தல். இயல்பாக முடக்கப்பட்டுள்ளது: API-கீ ஃப்ரான்ட் படிம வழிமுறை முந்தைய ஆர்க்கிடி-அங்கீகரித்த கோரிக்கையில் இருக்கிறது மற்றும் சப்ஸ்கிரிப்ஷன் வழிமுறைகள் பதிவு செய்யப்படவில்லை."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "ஃப்ரான்ட் ஆவ் தலைவரீச்சன் மாதிரி கண்டுபிடிப்பு",
+        "description": "மாதிரி xAI மாதிரி பட்டியலை xAI-ஆவ் தலைவரீச்சன் இணைப்புகளுக்கு https://api.x.ai/v1/models-இலிருந்து OAuth பெரர் டோகன்கொண்டு, நிலையான நிலையான விதைக்கு பதில் பெறவும். இயல்பாக இயக்கப்பட்டுள்ளது. நிலையான விதியை வழங்குவதைத் தொடர்வதற்கு கொடியை false என அமைக்கவும். HTTP தோல்விகள் கண்டுபிடிப்பு வழிமுறையில் விதைக்கு பதிலாக இருக்கின்றன; தனித்தன்மை பெறியல்வியானது HTTP துணைநாட்டின்களுக்கு வழங்கவில்லை."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "அன்ட்ரோபிக்-அனுபத்தியில் மைய அரட்டை சிஸ்டம் திரும்புகிறது",
+        "description": "சாதாரண anthropic-compatible-* relay-களில் (claude → claude passthrough), உரையாடலின் நடுவில் உள்ள role:system சுற்றுகளை மேல்நிலை system அளவுருவுக்கு உயர்த்தாமல் messages[]-க்குள்ளேயே வைத்திருக்கிறது; இதனால் cache செய்யப்பட்ட prompt முன்னொட்டு சுற்றுகளுக்கிடையே நிலையாக இருக்கும். client தானே mid-conversation-system-2026-04-07 anthropic-beta-ஐ அனுப்பியிருந்தால் மட்டுமே இது பொருந்தும் (அது upstream-க்கு அப்படியே அனுப்பப்படும்). இயல்பாக முடக்கப்பட்டுள்ளது: beta-ஐ ஆதரிக்காத relay-கள் role:system செய்திகளை 400 உடன் நிராகரிப்பதால், ஒவ்வொரு system சுற்றும் முன்பு போலவே உயர்த்தப்படும்."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB உத்தமம் சோதனை: தொடக்க ஸ்கேனை தாமதப்படுத்து",
+        "description": "server கோரிக்கைகளை ஏற்க தொடங்கிவிட்ட பின் (setImmediate மூலம்) தொடக்க DB அகோக்கிய/உத்தமம் சோதனையை இயக்கவும், தொடக்கம் முழுமையாக முடியும் வரை block செய்ய வேண்டாம். இயல்பாக முடக்கப்பட்டுள்ளது: தொடக்கம் #13717 போலவே சோதனைக்கு block செய்யப்படும், எனவே அசல் DB முதல் கோரிக்கை பரிசரைப்பதற்கு முன் பிடிக்கப்படும். இயக்கப்பட்டால்: தொடக்கம் உடனடியாக திரும்பும், சோதனை (இப்போது bounded/paged, மற்றும் real file-backed DB-க்கு, cancellable child process-ல் isolated) உடனே இயக்கப்படும்."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode வெளியிட்ட Catalog ரூட்டிங்",
+        "description": "clear registry endpoint-கொடாது OpenCode Zen மற்றும் OpenCode Go models-க்கு, அவற்றின் request surface-ம் (Responses @ai-sdk/openai-க்கு, Messages @ai-sdk/anthropic-க்கு) published models.opencode.ai catalog-லிருந்து (6 மணி நேரம் அங்காடு மூலம் படிக்கப்படும்) பெற அனுமதிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது: endpoint registry heuristics-லிருந்து அசல்படியே பெறப்படும், catalog ஒருபோதும் fetch செய்யப்படாது."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto கோரிக்கைகள்: Resolved Capability அத்தியம்",
+        "description": "auto/* கோரிக்கைகள் (resolveModelOrError மற்றும் auto-routing wrapper) resolved model capabilities (vision, reasoning, thinking) மற்றும் observed quality scores-உடன் candidate pool-ஐ build செய்ய, /v1/models catalog போல ஒரு bulk pass-ல் படிக்க அனுமதிக்கவும். இயல்பாக முடக்கப்பட்டுள்ளது: request-time snapshot அத்தியம் அசல்படியே இருக்கும் (capabilities demand-இல் resolve செய்யப்பட்டு அத்தியம் வரவழிக்கப்படாது). இயக்கப்பட்டால்: அந்த சமயம் அத்தியத்திற்கு feed செய்யப்படும், எனவே candidate அத்தியம், எனவே சீர்தூசு, மாறலாம்."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "keyless (no-auth) providers-இல், local browser (browserBacked) அல்லது locally installed CLI (isLocalCli) தேவைப்படும் transport-களை auto/* candidate pool-லிருந்து அகற்று, எனவே ஹங்க் செய்யப்பட்ட member-ம் per-target timeout (#17036) வரை auto request-ஐ stall செய்யாது. இயல்பாக முடக்கப்பட்டுள்ளது: emulated tool calling-உடன் அனைத்து no-auth providers-மும் அசல்படியே pool-லிருக்கும். Direct '<alias>'/'<model>' அழைப்புகள் இருவருக்கும் வேலை செய்யும்."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: ஓன்லைன் ரீசனிங் ரீபே (Inline Reasoning Replay)",
+        "description": "codebuddy-cn சிந்தனை மாதிரிகளுக்கு (DeepSeek-V4 / Kimi-K2 குடும்பங்களுக்கு ரீசனிங் ரீபே தேவை) ஒவ்வொரு ரீபே ஆகிய அசிஸ்டண்ட் reasoning_content-ஐ ஒரு காணக்கூடிய '<thought>' பிளாக்காக செய்து, செய்தி உள்ளடக்கத்தின் முன்னே இணைக்கவும், ஒரு கேட்வே (gateway) reasoning_content புலத்தை களையடிக்கும் போதும் அது நிலைபெற வேண்டும் (#13632). இயல்புநிலையில் அணைக்கப்பட்டது: codebuddy-cn கோரப்புகள் மாற்றமின்றி அனுப்பப்படுகின்றன; reasoning_content புலம் அப்படியே கையாளுதல்."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "பிராவிடர் தர்மானிப்பு நிறுத்தங்கள் (Provider Safety Stops): முடிவுரை",
+        "description": "வெளிப்படையான வழங்குநர் பாதுகாப்பு நிறுத்தத்தை (misalignment_policy_violation, content_policy_violation, அல்லது 'blocked by our safety systems' என பெயரிடப்பட்ட, provider_safety_rejection என வரையறுக்கப்பட்ட முந்தைய நிராகரிப்பு) ஒரு முடிவுரை, கோரப்பு-தொடர்புடைய நிராகரிப்பாக வைத்திருக்கவும்: அதன் குறியீடு HTTP, Responses, WebSocket மற்றும் முடிக்கப்பட்ட-ஸ்ட்ரீம் பிழைகள் வழியாகவும் பாதுகாக்கப்படும், மேலும் ஒரு கொம்போ (combo) மற்ற குறிப்புகளை மீண்டும் முயற்சிப்பதற்குப் பதிலாக அங்கே நிறுத்தி, ஏற்கப்பட்ட இணையான கோரிக்கைகளை ரத்து செய்யும் (#17049). இயல்புநிலையில் அணைக்கப்பட்டது: இந்த பிழைகள் அவற்றின் இருப்பு கையாளுதலையும் கொம்போ திசைவழிப்பையும் மாறாமல் வைத்திருக்கின்றன."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "கிரெடிஷியல் நலன் (Credential Health): தானாக இயக்குதல்-அணைக்கப்பட்ட இணைப்புகளை மீண்டும் சோதிக்கவும்",
+        "description": "கேட்வே (gateway) தானாக அணைத்த இணைப்புகளை (autoDisabledAt என குறிக்கப்பட்டவை; ஒவ்வொன்றும் 6 மணி நேரத்தில் அதிகபட்சம் ஒரு முறை, ஒவ்வொரு சோதனைச் சுற்றிலும் 5) மீண்டும் சோதிக்க உரிமை அளிக்கவும், அதன் மீண்டும் சோதனை வெற்றி பெற்றால் இணைப்பை மீண்டும் இயக்கவும் (#16190). இயல்புநிலையில் அணைக்கப்பட்டது: அணைக்கப்பட்ட இணைப்புகள் ஒரு செயலி (operator) மீண்டும் செயல்படுத்தும் அல்லது மீண்டும் சோதிக்கும் வரை அப்படியே அணைக்கப்படுகின்றன, முன்பு இருந்தபடி. செயலி-அணைத்த இணைப்புகள் மற்றும் நிரந்தரமாக தடைப்படுத்தப்பட்ட பிறகு அணைத்த இணைப்புகள் எப்போதும் மீண்டும் சோதிக்கப்படுவதில்லை."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "கிரெடிஷியல் கேட் (Credential Gate): அங்கீகார நோயாளிகள் மட்டுமே",
+        "description": "கொம்போ கிரெடிஷியல் கேட்டை (combo credential gate) சுருக்கவும், ஒரு கேஷ் செய்யப்பட்ட தோல்விக் கிரெடிஷியல் பாய் (probe) அதன் நோயாளி கெடுகர சான்றுகளை (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required) நிரூபிக்கும் போது மட்டுமே இணைப்பை அடைக்க வேண்டும். நிச்சயமான தோல்விகள் (நேரம் முடிதல், வரவு வரம்புகள், இடைவெளிகள், ஆதரவு இல்லாத பாய்கள், வரிசைப்படுத்தி பிழைகள்) அப்போது அறியப்படாதவை என கருதப்படுகின்றன, இணைப்பு போக்குவரத்தை பெறுவதில் தொடர்ச்சியாக இருக்கிறது. இயல்புநிலையில் அணைக்கப்பட்டது: ஒவ்வொரு கேஷ் செய்யப்பட்ட பாய் பிழையும் கேஷ் TTL (5 நிமிடங்கள்) வரை இணைப்பை அடைக்கிறது."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "கொம்போ (Combo): உள்ளடக்க-முறேக் நிராகரிப்பில் நிறுத்தவும்",
+        "description": "ஒரு கொம்போ குறிப்பு ஒரு உரிய உள்ளடக்க-முறேக் நிராகரிப்பால் (குறியீடு அல்லது வகை cyber_policy / content_policy_violation) பதிலளிக்கிறபோது, அடுத்த குறிப்புக்கு செல்லாமல், மீதமுள்ள குறிப்புகள் வேறுபட்ட மாதிரிகள் என்றாலும், கொம்போவை நிறுத்தி அந்த நிராகரிப்பை திருப்பி அனுப்பவும். இயல்புநிலையில் அணைக்கப்பட்டது: நிராகரிப்பு ஒரு கணக்கை குளிர்விக்கவோ அல்லது பிராவிடர் பிரேக்கரை (provider breaker) அடிக்கவோ செய்யாது, மேலும் கொம்போ முன்பு இருந்தபடி அதன் அடுத்த குறிப்புக்கு செல்கிறது."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "குளோடோவேன் மீண்டும் முயற்சி: 403/410 நிராகரிப்புகளை தவிர்",
+        "description": "ஒவ்வொரு கணக்கும் குளோடோவேனில் இருக்கும்போது, முதலில் முடிவடையும் குளோடோவேன் 403 (அணுகல் நிராகரிப்பு) அல்லது 410 (அகத்திரிப்பு) காரணமாக இருந்தால், கோரிக்கையை மீண்டும் அனுப்ப காத்திருக்காமல், அந்த நிராகரிப்பை உடனடியாக திருப்பி அனுப்பு; மறுபிரச்சினை செய்யப்படும் agentrouter கனெக்சன்-ஸ்கோபட் க்வோட்டா 403, மீண்டும் முயற்சி செய்யக்கூடியதாக இருக்க errorCode 429 உடன் சேமிக்கப்படும். இயல்பாக முடக்கப்பட்டுள்ளது: 401 மட்டுமே காத்திருப்பை தவிர்க்கும், ஒவ்வொரு நிராகரிப்பும் அது வந்த நிலையுடன் சேமிக்கப்படும்."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "விலை அமைக்கப்படாத பயன்பாடு பட்ஜெட் கொள்கை",
+        "description": "ஒரு விசைக்கு விதிக்கப்பட்ட தினசரி/வாராந்திர USD வரம்புகள், வழங்குநர்/மாதிரிக்கு விலை வரிசை இல்லாத வெற்றிகரமான பயன்பாட்டை எவ்வாறு கருதுகின்றன என்பதை விளக்குகிறது. fail_closed (இயல்புநிலை) கணக்கீட்டு காலத்தை மீறப்பட்டதாகக் குறிக்கிறது, ஆகவே தெரியாத செலவு கடுமையான வரம்பை சுற்றி தவறி போகாது. count_as_zero அந்த பயன்பாட்டை $0 ஆகக் கணக்கிட்டு விலை நிர்ணயிக்கப்பட்ட செலவினை தொடர்ந்து அமுல்படுத்தும். விலை மாற்றமில்லா மாதிரிகள் எந்த வழியிலும் டாஷ்போர்டு முகப்பு பக்கத்தில் பட்டியலிடப்படுகின்றன."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "தாமதம்",
     "quota": "ஒதுக்கீடு",
     "rangeWindow": "{range} சாளரம்",
+    "timeRange": "கால வரம்பு",
     "runtimeHealthBlend": "இயக்கநேரம்/ஆரோக்கிய கலவை",
     "averageResponseTime": "சராசரி பதில் நேரம்",
     "worstQuota": "மிக மோசமான ஒதுக்கீடு",
@@ -13923,7 +14500,11 @@
       "ok": "பொதுவாக அனுமதிக்கக்கூடியது"
     },
     "allProviders": "எல்லா வழங்குநர்கள்",
-    "noApiKeyRequired": "API விசை தேவையில்லை"
+    "noApiKeyRequired": "API விசை தேவையில்லை",
+    "searchPlaceholder": "மாதிரி, வழங்குநரைத் தேடு…",
+    "searchAria": "இலவச மாதிரிகளைத் தேடு",
+    "filterProviderAria": "வழங்குநர் அடிப்படையில் வடிகட்டு",
+    "keylessOnly": "நிச்சயமாக இல்லாமல்"
   },
   "providerHealthAutopilot": {
     "title": "வழங்குநர் ஆரோக்கிய ஆட்டோபைலட்",
@@ -13994,7 +14575,11 @@
     "learnMore": "மேலும் அறிய",
     "changelogLoadFailed": "மாற்றங்களின் பதிவை ஏற்ற முடியவில்லை. பின்னர் மீண்டும் முயற்சிக்கவும்.",
     "retry": "மீண்டும் முயற்சி செய்",
-    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க"
+    "viewFullHistory": "GitHub இல் முழு வரலாற்றையும் காண்க",
+    "title": "செய்திகள் & மாற்றப் பதிவு",
+    "description": "OmniRoute குழுவின் அறிவிப்புகள் மற்றும் சமீபத்திய வெளியீட்டுக் குறிப்புகள்",
+    "viewLabel": "காண்க",
+    "loadingNews": "அறிவிப்புகள் ஏற்றப்படுகின்றன..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "சேவையாளர் சுற்று முறிவு மாநிலம்",
       "lastUpdate": "கடைசி புதுப்பிப்பு: {timestamp}",
       "uptimeMinutes": "{minutes}மி",
-      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்"
+      "uptimeHoursMinutes": "{hours}மணி {minutes}நிமிடம்",
+      "breakerClosed": "மூடப்பட்டது",
+      "breakerNotClosed": "திறந்துள்ளது அல்லது பகுதியளவு திறந்துள்ளது"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "பராமரிப்பு விவரங்கள்",
         "secondaryAction": "அமைப்பு நிலை"
       }
+    },
+    "miniapp": {
+      "askAnything": "எதையும் கேளுங்கள்…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} காணக்கூடியவை / மொத்தம் {total}",
+    "modeLabel": "காட்சி முறை",
+    "jumpToNow": "தற்போதைய நேரத்திற்குச் செல்லவும்; NOW கோடு {position}% நிலைக்கு மீட்டமைக்கப்படும்",
+    "laneReuse": "வரிசை மறுபயன்பாடு",
+    "laneReuseLabel": "வரிசை மறுபயன்பாட்டுச் சாளரம் (நிமிடங்கள்)",
+    "laneReuseHint": "ஒரே உரையாடல் id-ஐப் பகிரும் கோரிக்கைகளுக்கு இடையிலான இடைவெளி இத்தனை நிமிடங்களுக்குள் இருந்தால், அவை ஒரே காலவரிசை வரிசையில் இருக்கும்.",
+    "laneReuseUnit": "நிமி",
+    "autoRefresh": "தானாகப் புதுப்பித்தல்",
+    "autoRefreshLabel": "தானாகப் புதுப்பிக்கும் இடைவெளி (விநாடிகள்)",
+    "autoRefreshHint": "சேவையகத்திலிருந்து கோரிக்கைப் பட்டியலைக் காலவரிசை எவ்வளவு அடிக்கடி மீண்டும் பெறும்.",
+    "autoRefreshUnit": "வி",
+    "zoomOut": "சிறிதாக்கு",
+    "zoomIn": "பெரிதாக்கு"
   },
   "metadata": {
     "compressionTitle": "சுருக்கம்",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "மூடு"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "/v1/models பட்டியலில் thinking level variants (எ.கா. -low, -medium, -high) உருவாக்கப்படுவதை முடக்கவும்.",
+  "teamCosts": {
+    "title": "குழு செலவுகள்",
+    "subtitle": "பகிரப்பட்ட மென் பட்ஜெட்டுகளையும் பட்டியல் செலவு மதிப்பீடுகளையும் நிர்வகிக்கவும்.",
+    "refresh": "புதுப்பி",
+    "create": "குழுவை உருவாக்கு",
+    "edit": "குழுவைத் திருத்து",
+    "archive": "காப்பகப்படுத்து",
+    "selectTeam": "குழுக்கள்",
+    "searchTeams": "குழுக்களைத் தேடு",
+    "statusFilter": "குழு நிலை",
+    "active": "செயலில்",
+    "archived": "காப்பகப்படுத்தப்பட்டது · படிக்க மட்டும்",
+    "allTeams": "அனைத்து குழுக்கள்",
+    "noTeams": "பொருந்தும் குழுக்கள் இல்லை.",
+    "selectHint": "செலவுகளைக் காண ஒரு குழுவை உருவாக்கவும் அல்லது தேர்ந்தெடுக்கவும்.",
+    "loading": "குழு செலவுகள் ஏற்றப்படுகின்றன…",
+    "budgetTitle": "தற்போதைய மென் பட்ஜெட்",
+    "budgetSubtitle": "வெற்றிகரமாகப் பதிவான பயன்பாடு · நகரும் சாளரம் · அறிக்கை தேதிகளைச் சாராதது",
+    "archivedBudget": "காப்பகப்படுத்தப்பட்டது: பட்ஜெட் அமலாக்கம் செயலற்றது. வரலாற்று அறிக்கைகள் கிடைக்கும்.",
+    "unlimited": "வரம்பற்றது — பகிரப்பட்ட மென் பட்ஜெட் அமைக்கப்படவில்லை.",
+    "budgetUnavailable": "பட்ஜெட் நிலை கிடைக்கவில்லை. மீண்டும் முயல புதுப்பிக்கவும்.",
+    "used": "வெற்றிகரமான பயன்பாடு",
+    "maximum": "பட்ஜெட் அதிகபட்சம்",
+    "remaining": "அறியப்பட்ட மீதம்",
+    "resets": "மீட்டமைவு",
+    "unpricedBudget": "வெற்றிகரமான பயன்பாட்டின் ஒரு பகுதிக்கு விலை தெரியவில்லை. அறியப்பட்ட கூட்டுத்தொகை முழுமையற்றது; பட்ஜெட் அமலாக்கம் இந்தச் சாளரத்தை மீறியதாகக் கருதுகிறது.",
+    "overBudget": "பட்ஜெட் எட்டப்பட்டது அல்லது மீறப்பட்டது · {amount} அதிகம்",
+    "reportTitle": "பயன்பாட்டு அறிக்கை",
+    "reportSubtitle": "அனைத்து முயற்சிகள் · USD-இல் பட்டியல் மதிப்பீடு, விலைப்பட்டியல் அல்ல · முழு UTC தேதிகள்",
+    "reportPeriod": "அறிக்கைக் காலம்",
+    "day1": "1 நாள்",
+    "day7": "7 நாட்கள்",
+    "day30": "30 நாட்கள்",
+    "allTime": "எல்லா நேரமும்",
+    "reportSpend": "மதிப்பிடப்பட்ட அறிக்கைச் செலவு",
+    "requests": "கோரிக்கைகள்",
+    "assignedKeys": "ஒதுக்கப்பட்ட விசைகள்",
+    "unpricedReport": "இந்த அறிக்கையில் தெரியாத விலைகள் உள்ளன. மதிப்பிடப்பட்ட செலவு முழுமையற்றது.",
+    "breakdown": "API விசை வாரியான செலவு",
+    "noUsage": "இந்த அறிக்கைக் காலத்தில் பயன்பாடு இல்லை.",
+    "keyName": "API விசைப் பெயர்",
+    "tokens": "உள்ளீடு + வெளியீட்டு டோக்கன்கள்",
+    "unnamedKey": "பெயரில்லாத அல்லது நீக்கப்பட்ட விசை",
+    "unpriced": "தெரியாத விலை",
+    "members": "உறுப்பினர்",
+    "memberSubtitle": "உறுப்பினரை மாற்றினாலும் வரலாற்றுச் செலவு அசல் குழுவிலேயே இருக்கும்.",
+    "searchKeys": "விசைகள் அல்லது தற்போதைய உரிமையாளர்களைத் தேடு",
+    "chooseKey": "ஒரு API விசையைத் தேர்ந்தெடுக்கவும்",
+    "unassigned": "ஒதுக்கப்படவில்லை",
+    "ownership": "தற்போதைய பில்லிங் குழு: {team}",
+    "assign": "ஒதுக்கு",
+    "remove": "அகற்று",
+    "noMembers": "தற்போதைய உறுப்பினர்கள் இல்லை. வரலாற்றுப் பயன்பாடு இன்னும் பட்ஜெட்டில் கணக்கிடப்படலாம்.",
+    "assignedAt": "{date} அன்று ஒதுக்கப்பட்டது (UTC)",
+    "name": "குழுப் பெயர்",
+    "description": "விளக்கம்",
+    "enableBudget": "பகிரப்பட்ட மென் பட்ஜெட்டை இயக்கு",
+    "amount": "பட்ஜெட் தொகை (USD)",
+    "duration": "நகரும் பட்ஜெட் சாளரம்",
+    "cancel": "ரத்துசெய்",
+    "save": "சேமி",
+    "confirm": "உறுதிசெய்",
+    "transferTitle": "விசை பரிமாற்றத்தை உறுதிசெய்யவும்",
+    "transferMessage": "இந்த விசையை “{source}” குழுவிலிருந்து “{destination}” குழுவுக்கு நகர்த்தவா? வரலாற்றுச் செலவு அசல் குழுவிலேயே இருக்கும்.",
+    "removeTitle": "விசை ஒதுக்கீட்டை அகற்று",
+    "removeMessage": "இந்த விசையை “{team}” குழுவிலிருந்து அகற்றவா? வரலாற்றுச் செலவு இந்தக் குழுவிலேயே இருக்கும்.",
+    "archiveTitle": "குழுவைக் காப்பகப்படுத்து",
+    "archiveMessage": "“{team}” குழுவைக் காப்பகப்படுத்தவா? தற்போதைய அனைத்து இணைப்புகளும் மூடப்பட்டு பட்ஜெட் அமலாக்கம் நிற்கும். வரலாற்று அறிக்கைகள் கிடைக்கும்.",
+    "invalidName": "ஒரு பெயரையும் (1–200 எழுத்துகள்) 2,000 எழுத்துகளுக்கு மிகாத விளக்கத்தையும் உள்ளிடவும்.",
+    "invalidAmount": "பூஜ்யத்தை விடப் பெரிய வரையறுக்கப்பட்ட பட்ஜெட் தொகையை உள்ளிடவும்.",
+    "unauthorized": "தொடர நிர்வாக டாஷ்போர்டில் உள்நுழையவும்.",
+    "forbidden": "குழுக்களை நிர்வகிக்க உங்களுக்கு அனுமதி இல்லை. நீங்கள் உள்ளிட்டது பாதுகாக்கப்பட்டுள்ளது.",
+    "notFound": "இந்தக் குழு அல்லது ஒதுக்கீடு இனி இல்லை.",
+    "conflict": "ஒதுக்கீடு அல்லது குழு மாறியுள்ளது. மீண்டும் முயலும் முன் புதுப்பித்து தற்போதைய உரிமையை உறுதிசெய்யவும்.",
+    "failed": "கோரிக்கை தோல்வியடைந்தது. நீங்கள் உள்ளிட்டது பாதுகாக்கப்பட்டுள்ளது; மீண்டும் முயலவும்.",
+    "partialBudget": "சேமிக்கப்பட்ட சில தினசரி வாளிகள் சாளர எல்லையுடன் மேற்பொருந்துகின்றன, துல்லியமாகப் பகிர முடியாது. காட்டப்படும் செலவு முழுமையற்றது; மீதமுள்ள அனுமதி கிடைக்கவில்லை. தற்போதுள்ள மென் பட்ஜெட் கொள்கை மாறவில்லை."
+  },
   "connectionTest": {
     "title": "சோதனைச் செய்தி",
     "description": "இந்தக் கணக்கின் மூலம் ஓர் உண்மையான கோரிக்கையை அனுப்பவும். இது சிறிதளவு ஒதுக்கீட்டைப் பயன்படுத்தும்; வழங்குநரைப் பொறுத்து பயன்பாட்டுக் காலச்சாளரத்தைத் தொடங்கக்கூடும்.",
@@ -15073,5 +15753,118 @@
     "importButton": "இறக்குமதி செய்",
     "importFailed": "இறக்குமதி தோல்வியடைந்தது.",
     "importSuccess": "{connections} கணக்குகளும் {nodes} வழங்குநர் முனைகளும் இறக்குமதி செய்யப்பட்டன; {skipped} தவிர்க்கப்பட்டன."
+  },
+  "conversations": {
+    "title": "அரட்டைகள்",
+    "countSummary": "2+ சுற்றுகள் கொண்ட {total, plural, one {# அரட்டை} other {# அரட்டைகள்}}",
+    "autoRefreshTitle": "இந்தப் பட்டியல் சேவகரிடமிடம் மீண்டும் பெறப்படுவதற்கான காலம்.",
+    "autoRefresh": "தானியங்கி மீட்டல்",
+    "loading": "அரட்டைகள் ஏற்று….",
+    "colConversation": "கலந்துரையாடல்",
+    "colTurns": "சுற்றுகள்",
+    "colContinuation": "தொடர்ச்சி",
+    "colLastModel": "கடைசி மாடல்",
+    "colProvider": "வழங்குநர்",
+    "colStatus": "நிலை",
+    "colLastSeen": "கடைசியாக பார்த்தது",
+    "drawerTitle": "கலந்துரையாடல்",
+    "prevConversation": "முந்தைய கலந்துரையாடல்",
+    "nextConversation": "அடுத்த கலந்துரையாடல்",
+    "gotoLatestRequest": "செயலாக்கப்பட்ட கோரலுக்கு செல்",
+    "goToBottom": "கீழே செல்",
+    "statusInProgress": "முன்னேற்றம்",
+    "continuationGenuineTitle": "செயலாக்கப்பட்ட திருப்பம் previous_response_id பயன்படுத்தியது, இது சர்வர்-சைட்டு ரீதியாக தீர்வடைந்தது",
+    "continuationBadge": "தொடர்ச்சி",
+    "stalledTitle": "செயலாக்கப்பட்ட திருப்பம் stop-இல் முடிவடையவில்லை மற்றும் 5+ நிமிடங்களுக்கு எதுவும் தொடரவில்லை",
+    "stalledBadge": "நிறுத்தப்பட்டது",
+    "noTurns": "இந்தக் கையாள்வின் மதிப்பீடு எந்தத் திருப்பங்களும் பதிவு செய்யப்படவில்லை."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "தற்போதைய இடத்திலிருந்து தொடங்கு (ஏற்கனவே உள்ள பதிவுகளைத் தவிர்)",
+    "pageTitle": "பதிவேடு ஏற்றுமதி",
+    "pageSubtitle": "பதிவுகள் தாவலிலிருந்து அழைப்புகளின் பதிவுகளை வெளிப்புற பகுப்பாய்வு களத்திற்கு தொடர்ச்சியாக அனுப்பவும்.",
+    "addDestination": "முடிவைச் சேர்",
+    "scheduleTitle": "நேரம் அமைத்தல்",
+    "cronLabel": "Cron",
+    "notScheduled": "நேரம் அமைக்கப்படவில்லை",
+    "lastScheduledRun": "கடைசி நேரம் அமைக்கப்பட்ட இயக்கம்",
+    "lastRunSummary": "{startedAt} — {status}, {rows} வரிசைகள்",
+    "never": "கடையில்லை",
+    "highWaterMark": "அழைப்புகளின் பதிவுகள் மேல்நிலை எல்லை",
+    "rowPrefix": "வரிசை {id}",
+    "noDestinations": "எக்ஸ்போர்ட் இலக்குகள் இல்லை",
+    "noDestinationsHint": "மணி ஒவ்வொரு அட்டவணைப்படியும் அழைப்பு எட்டை அனுப்பத் தொடங்க ஒரு நோக்கிடத்தை சேர்த்து.",
+    "errLoadStatus": "எக்ஸ்போர்ட் நிலையை ஏற்றத் தோல்வி",
+    "errSaveDestination": "நோக்கிடத்தை சேமிக்கத் தோல்வி",
+    "msgDestinationSaved": "நோக்கிடம் சேமிக்கப்பட்டது.",
+    "errConnectionTest": "தொடர்பு சோதனை தோல்வியுற்றது",
+    "msgRunInFlight": "இந்த நோக்கிடத்திற்கான ஓர் இயக்கம் ஏற்கனவே நடைபெறுகிறது; எதுவும் இரண்டு முறை அனுப்பப்படவில்லை.",
+    "errExportRun": "எக்ஸ்போர்ட் இயக்கம் தோல்வியுற்றது",
+    "errUpdateDestination": "நோக்கிடத்தை புதுப்பிக்கத் தோல்வி",
+    "errDeleteDestination": "நோக்கிடத்தை நீக்கத் தோல்வி",
+    "deleteTitle": "இலக்கை நீக்கு",
+    "deleteConfirm": "\"{name}\" ஐ நீக்க வேண்டுமா? அதன் எக்ஸ்போர்ட் கர்சரும் நீக்கப்படும், எனவே மீண்டும் சேர்த்தால் சேமிக்கப்பட்டுள்ள மிகப் பழைய அழைப்புப் பதிவிலிருந்து தொடங்கும்.",
+    "statusDisabled": "செயலற்றது",
+    "statusFailing": "தோல்வி",
+    "statusHealthy": "ஆரோக்கியமான",
+    "statusNotRunYet": "இன்னும் நடைபெறவில்லை",
+    "typeNotInstalled": "வகை நிறுவப்படவில்லை",
+    "metaLine": "கடைசி இயக்கம் {lastRun} · {exported} அடுக்குகள் வெளியேற்றப்பட்டன · {pending} நிலுவையில் · கர்சர் {cursor}",
+    "btnTest": "பரிசோதனை",
+    "btnRunNow": "இப்போது இயக்கு",
+    "btnDisable": "பயன்படுத்தாதே",
+    "btnEnable": "சக்திப்படுத்து",
+    "btnEdit": "திருத்து",
+    "btnDelete": "நீக்கு"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI கணக்குகள்",
+    "cardSubtitle": "அங்கீகரிக்கப்பட்ட மேலாண்மை API-ிலிருந்து படிக்க-மட்டும் நிலை",
+    "btnRefresh": "புதுப்பி",
+    "listAria": "CLIProxyAPI கணக்கு உயிர்க்நிலை",
+    "noAccounts": "CLIProxyAPI கணக்குகள் எதுவும் இல்லை.",
+    "loading": "கணக்கு உயிர்க்குறிகளைப் பள்ளிக்கொண்டிருக்கிறது…",
+    "stateReady": "கணக்கு ஆரோக்கியம்",
+    "stateDisabled": "CLIProxyAPI நிறுவப்படவில்லை",
+    "stateMissingKey": "மேலாண்மைக் விசை (Management key) உள்ளமைக்கப்படவில்லை",
+    "stateUnreachable": "மேலாண்மை API அணுக முடியவில்லை",
+    "stateUnauthorized": "மேலாண்மைக் விசை மறுக்கப்பட்டது",
+    "stateUnsupported": "இந்த CLIProxyAPI பதிப்பு கணக்கு ஆரோக்கியத்தை வெளிப்படுத்தவில்லை",
+    "stateInvalidResponse": "மேலாண்மை API ஆதரவுற்ற பதில் தரவில்லை"
+  },
+  "darioPanel": {
+    "title": "Claude கணக்குகள்",
+    "description": "உங்கள் Claude Pro/Max சந்தாவுடன் Dario-வை அங்கீகரிக்கவும். போக்குவரத்துக்கான கட்டணம் உங்கள் சந்தா தொகுப்பில் வசூலிக்கப்படும். Dario கோரிக்கைகளை வழிசெலுத்துவதற்கு முன் குறைந்தது ஒரு கணக்கு தேவை (அதுவரை /health degraded நிலையைப் புகாரளிக்கும்).",
+    "noAccounts": "இதுவரை கணக்குகள் உள்ளமைக்கப்படவில்லை.",
+    "importTitle": "OmniRoute இலிருந்து உள்மீட்பது",
+    "importDescription": "மீண்டும் உள்நுழையப் பதிலாக, இலக்கிய OmniRoute Claude இணைப்பின் OAuth டோக்கன்களை மீண்டும் பயன்படுத்துக — பரவலாளர் அங்கீகாரத்தை முழுமையாகத் தவிர்க்கிறது.",
+    "importPendingTooltip": "OmniRoute-ல் ஒரு Claude இணைப்பு இருந்தால் செயலில் இருக்கும்.",
+    "btnImport": "உள்மொட்ட",
+    "btnImporting": "உள்மொட்டுதல்…",
+    "aliasPlaceholder": "பிற்பெயர் (விருப்பம்)",
+    "btnStartLogin": "உள்நுழைவைத் தொடங்கு",
+    "btnStarting": "தொடங்குகிறது…",
+    "btnCompleteLogin": "உள்நுழைவை முடி",
+    "btnCompleting": "முடிக்கிறது…",
+    "codePlaceholder": "code#state அல்லது சாதா code",
+    "noticeImported": "\"{alias}\" கணக்கு நுழைக்கப்பட்டது — Dario அதைப் பெறுவதற்காக மீட்டமைக்கப்பட்டது.",
+    "noticeAdded": "\"{alias}\" கணக்கு சேர்க்கப்பட்டது.",
+    "expiresInHours": "~{hours} மணி நேரத்தில் காலாவதியாகும்",
+    "expiresInMinutes": "~{minutes} நிமிடங்களில் காலாவதியாகும்",
+    "expiresAt": "{date} அன்று காலாவதியாகும்",
+    "scopes": "{count, plural, one {# வரம்பு} other {# வரம்புகள்}}",
+    "btnRemove": "அகற்று",
+    "btnRefresh": "புதுப்பி",
+    "loginStep1": "1. உங்கள் உலாவியில் இந்த URL-ஐத் திறந்து <mono>{alias}</mono> கணக்கிற்கான அணுகலை அங்கீகரிக்கவும்:",
+    "pendingExpires": "பணிநிலை அறிக்கை {time} காலாவதியில் கழிக்கும்",
+    "loginStep2": "2. Anthropic காண்பிக்கும் குறியீட்டைச் சேர்க்கவும்:"
+  },
+  "miniapp": {
+    "title": "OmniRoute சிறு செயல்பாடு",
+    "errTelegramOnly": "இந்தப் பக்கத்தை Telegram சிறு செயல்பாட்டுக்குள் திறக்க வேண்டும்.",
+    "greeting": "👋 {name}! உங்கள் OmniRoute வாயில் வழியாகப் பேசத் தொடங்குங்கள்.",
+    "greetingFallbackName": "அங்கு",
+    "errNoReply": "⚠️ வாயிலிடமிருந்து பதில் இல்லை.",
+    "btnSend": "அனுப்பு"
   }
 }

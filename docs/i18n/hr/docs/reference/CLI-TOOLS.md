@@ -4,17 +4,17 @@
 
 ---
 
-Posljednje ažuriranje: 2026-08-23
+Zadnje ažuriranje: 2026-08-23
 
-OmniRoute se integrira s trima kategorijama CLI alata raspoređenima na tri namjenske stranice nadzorne ploče:
+OmniRoute se integrira s tri kategorije CLI alata raspoređenih na tri namjenske stranice nadzorne ploče:
 
-| Stranica                   | Ruta                    | Koncept                                                                                   | Broj          |
-| -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------- | ------------- |
-| **CLI alati za kodiranje** | `/dashboard/cli-code`   | Alati za kodiranje koje usmjeravate na OmniRoute (Klijent → CLI → OmniRoute → Pružatelj)  | 26            |
-| **CLI agenti**             | `/dashboard/cli-agents` | Autonomni agenti koje usmjeravate na OmniRoute (isti tijek, širi opseg)                   | 10            |
-| **ACP agenti**             | `/dashboard/acp-agents` | CLI alati koje OmniRoute pokreće kao pozadinske sustave putem stdio/ACP-a (obrnuti tijek) | vidi registar |
+| Stranica       | Ruta                    | Koncept                                                                               | Računati         |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------- | ---------------- |
+| **CLI kodovi** | `/dashboard/cli-code`   | Alati za kodiranje koje usmjerite na OmniRoute (klijent → CLI → OmniRoute → davatelj) | 26               |
+| **CLI agenti** | `/dashboard/cli-agents` | Autonomni agenti koje usmjerite na OmniRoute (isti tijek, širi opseg)                 | 11               |
+| **ACP agenti** | `/dashboard/acp-agents` | CLIs koji OmniRoute pokreće kao backend preko stdio/ACP (obrnuti tok)                 | vidjeti registar |
 
-Naslijeđene rute preusmjeravaju putem statusa 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Naslijeđene rute preusmjeravaju putem 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,9 +43,9 @@ ACP agenti (obrnuti tijek pokretanja):
 
 ---
 
-## Automatska konfiguracija pomoću `setup-*`
+## Auto-konfiguriraj sa `setup-*`
 
-Ne morate ručno pisati konfiguraciju svakog alata. OmniRoute za svaki podržani CLI isporučuje naredbu `setup-*` koja čita **aktualni** katalog modela iz pokrenutog OmniRoutea (lokalnog ili udaljenog) i zapisuje vlastitu konfiguraciju alata na vašem računalu:
+Ne morate ručno pisati konfiguraciju svakog alata. OmniRoute isporučuje naredbu `setup-*` po podržanom CLI u koja čita** živjeti** katalog modela iz pokrenutog OmniRoute (lokalnog ili udaljenog) i piše vlastitu konfiguraciju alata na vašem računalu:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,21 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Svaka prihvaća `--remote <url> --api-key <key>` (konfiguriranje lokalnog alata za udaljeni OmniRoute), `--dry-run` (pretpregled bez zapisivanja) i `--port`. Alati bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) prihvaćaju `--model <id>` (i `--yes` za neinteraktivna pokretanja). `setup-5dive` jedini je postupak koji ne zapisuje unutar `$HOME`: konfigurira skup 5dive agenata zapisivanjem autentifikacijskog profila u vlasništvu korisnika root na glavnom računalu skupa, stoga se ponovno izvršava putem `sudo` i nema vlastiti udaljeni način rada. Za pokretanje CLI-ja s umetnutim odgovarajućim varijablama okruženja i bez ikakvog zapisivanja konfiguracije upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — ciljevi i aliasi dolaze iz `bin/cli/cli-manifest.mjs`); stari pokretači za pojedinačne alate `omniroute launch` (Claude Code) i `omniroute launch-codex` (Codex) i dalje su dostupni. Gemini CLI može se samo pokretati: cilj je naredbe `omniroute run`, ali nema postupak `setup-*`/`configure`.
+Svaki prihvaća `--remote <url> --api-key <key>` (konfigurirajte lokalni alat protiv udaljenog OmniRoute), `--dry-run` (pregled bez pisanja) i `--port`. Alati bez automatskog otkrivanja modela (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) uzimaju `--model <id>` (i `--yes` za neinteraktivna izvođenja). `setup-5dive` je jedini recept koji ne piše pod `$HOME`: on konfigurira flotu 5dive agenta pisanjem autentificiranog profila u vlasništvu roota na hostu flote, tako da se ponovno izvršava kroz `sudo` i nema vlastiti daljinski način rada. Za pokretanje CLI s umetnutim pravim env-om i bez ikakve napisane konfiguracije, upotrijebite generički pokretač `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — ciljevi i aliasi dolaze iz `bin/cli/cli-manifest.mjs`); naslijeđeni pokretači po alatima `omniroute launch` (Claude kod) i `omniroute launch-codex` (Codex) ostaju dostupni. Gemini CLI je samo za pokretanje: to je `omniroute run` cilj, ali nema `setup-*`/`configure` recept.
 
-> **Potpuna referenca:** glavna tablica — što svaka naredba zapisuje, sve zastavice,
-> lokalni naspram udaljenog načina rada i koji alati zahtijevaju sufiks `/v1` — nalazi se u
-> odjeljku **[CLI integracije](../guides/CLI-INTEGRATIONS.md)**.
+> **Puna referenca:** glavna tablica — što svaka naredba piše, svaka zastavica, lokalna naspram udaljene, i koji alati žele `/v1` sufiks — živi u** [CLI integracije](../guides/CLI-INTEGRATIONS.md)** .
 
-### Pokretanje ovih naredbi unutar spremnika
+### Pokretanje ovih unutar spremnika
 
-Naredba `setup-*` izvršena unutar OmniRoute spremnika zapisuje u vlastiti početni direktorij spremnika, koji nijedan CLI glavnog računala ne čita i koji nestaje zajedno sa spremnikom. OmniRoute to otkriva i završava s kodom `2`, uz upute, umjesto da zapisuje. Postoje dva podržana načina za nastavak — instalirajte CLI na glavno računalo i povežite se sa spremnikom pomoću `omniroute connect` ili montirajte konfiguracijske direktorije vezanim montiranjem i postavite `CLI_CONFIG_HOME` (compose profil `host`). Svaka naredba `setup-*`, kao i `omniroute configure` i `omniroute config set`, prihvaća `--allow-container-write` kada doista želite konfigurirati CLI-jeve samog spremnika; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` čini isto za poslužitelj. Pogledajte
-[Docker vodič → Konfiguriranje CLI alata glavnog računala](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Naredba `setup-*` koja se izvršava unutar OmniRoute spremnika upisuje u vlastiti dom spremnika, koji nijedan host CLI ne čita i koji nestaje sa spremnikom. OmniRoute to otkriva i izlazi iz `2` s uputama umjesto pisanja. Dva podržana načina naprijed — instalirajte CLI na glavno računalo i `omniroute connect` na spremnik ili pričvrstite konfiguracijske direktorije i postavite `CLI_CONFIG_HOME` (sastavite `host` profil). Svaka naredba `setup-*`, plus `omniroute configure` i `omniroute config set`, prihvaća `--allow-container-write` kada konfigurirate vlastiti CLIs spremnika je ono što ste zapravo mislili; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` radi isto za poslužitelj. Pogledajte [Vodič Docker → Konfiguriranje host CLI alata](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Krajnja točka za primjenu** na nadzornoj ploči (`POST /api/cli-tools/apply`) provodi istu zaštitu: u spremniku, zahtjev za zapisivanje čije odredište nije vezano montirano s glavnog računala odgovara kodom **`422`** uz `containerEphemeralTarget: true`, siguran tekst pogreške i — za alate s postupkom za glavno računalo (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (npr. `omniroute setup-opencode`) koji treba pokrenuti na glavnom računalu; ništa se ne zapisuje. `dryRun: true` nastavlja raditi u načinu rada spremnika i vraća redigirani pretpregled + odredišnu putanju bez pristupanja disku. Sadržaj pretpregleda nije konfiguracija s vjerodajnicama namijenjena kopiranju ili uvozu. Primijenite konfiguraciju s izvornim unosima alata/osnovnog URL-a/API ključa/modela na glavnom računalu ili upotrijebite navedenu naredbu za postavljanje na glavnom računalu. Za zaglavlje pretpregleda i ugovor zahtjeva pogledajte [Sigurnost konfiguracije CLI-ja](../security/CLI-CONFIGURATION.md). To je ponašanje namjerno i zaštićeno od regresija testom
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nikada nemojte „popraviti” 422 uklanjanjem zaštite.
+Kontrolna ploča** primijeniti krajnju točku** (`POST /api/cli-tools/apply`) nameće istu zaštitu: u spremniku odgovara pisanje čiji cilj nije montiran vezanjem s glavnog računala**`422`** sa `containerEphemeralTarget: true`, sigurnim tekstom pogreške i — za alate s glavnim receptom (claude, codex, opencode, cline, kilo, continue) — `hostSetupCommand` (npr. `omniroute setup-opencode`) za izvođenje na glavnom računalu; ništa nije napisano. `dryRun: true` nastavlja raditi u načinu spremnika i vraća redigirani pretpregled + ciljne staze bez dodirivanja diska. Sadržaj pretpregleda nije konfiguracija koja nosi vjerodajnice za kopiranje ili uvoz. Primijenite s izvornim tool/base URL/API key/model ulazima na glavnom računalu ili upotrijebite naznačenu naredbu za postavljanje na strani glavnog računala. Pogledajte [sigurnost konfiguracije CLI](../security/CLI-CONFIGURATION.md) za zaglavlje pregleda i ugovor zahtjeva. Ovo ponašanje je namjerno i regresijski ga štiti `tests/unit/api/cli-tools/apply-container-guard.test.ts` — nikada ne "popravljajte" 422 uklanjanjem zaštite.
 
 ---
 
@@ -147,22 +144,23 @@ Svi alati koji se pojavljuju u `/dashboard/cli-code`. Oni s postavkom `baseUrlSu
 Alati s postavkom `baseUrlSupport: "partial"` na kartici nadzorne ploče prikazuju značku „⚠ Djelomični osnovni URL”.
 ---
 
-## 2. Katalog CLI agenata (10 alata)
+## 2. CLI katalog agenata (11 alata)
 
-Autonomni agenti koji se prikazuju na `/dashboard/cli-agents`:
+Autonomni agenti koji se pojavljuju u `/dashboard/cli-agents`:
 
-| id           | naziv            | dobavljač                | podrška za baseUrl | moguće pokretanje putem ACP-a |
-| ------------ | ---------------- | ------------------------ | ------------------ | ----------------------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full               | false                         |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true                          |
-| goose        | Goose            | Block / Linux Foundation | full               | true                          |
-| interpreter  | Open Interpreter | OSS                      | full               | true                          |
-| warp         | Warp AI          | Warp Inc.                | partial            | true                          |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false                         |
-| omp          | Oh My Pi         | OSS                      | full               | true                          |
-| letta        | Letta CLI        | Letta                    | full               | false                         |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false                         |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false                         |
+| id              | ime            | prodavač                 | baseUrlSupport | acpSpawnable |
+| --------------- | -------------- | ------------------------ | -------------- | ------------ |
+| hermes-agent    | Hermes agent   | Nous Research            | puna           | lažno        |
+| otvorena kandža | OpenClaw       | OSS (P. Steinberger)     | puna           | pravi        |
+| guska           | Guska          | Block / Linux Foundation | puna           | pravi        |
+| prevoditelj     | Otvorite Tumač | OSS                      | puna           | pravi        |
+| iskriviti se    | Warp AI        | Warp Inc.                | djelomičan     | pravi        |
+| agent-deck      | Agent Deck     | asheshgoplani (OSS)      | puna           | lažno        |
+| omp             | O moj Pi       | OSS                      | puna           | pravi        |
+| letta           | Letta CLI      | Letta                    | puna           | lažno        |
+| glavni agent    | Glavni agent   | Glavni intelekt (OSS)    | puna           | lažno        |
+| 5 zaroniti      | 5 zaroniti     | OSS (5dive-ai)           | puna           | lažno        |
+| zaštokodovi     | WhyCodes       | Zašto Corporation        | puna           | lažno        |
 
 ---
 

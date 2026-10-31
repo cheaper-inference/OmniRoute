@@ -14,7 +14,7 @@ export function SseEventList({ events }: SseEventListProps) {
       {events.map((ev, i) => (
         <div key={i} className="flex gap-2 border-b border-border/30 pb-1">
           <span className="text-text-muted shrink-0 w-8 text-right">{i + 1}</span>
-          <span className="text-amber-400 shrink-0">{ev.event ?? "data"}</span>
+          <span className="text-warning shrink-0">{ev.event ?? "data"}</span>
           <span className="text-text-main break-all">{ev.data}</span>
         </div>
       ))}

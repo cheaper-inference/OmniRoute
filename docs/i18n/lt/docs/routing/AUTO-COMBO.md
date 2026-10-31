@@ -489,9 +489,9 @@ Tai reiškia, kad **pridėjus naują teikėją su įjungtu `auto/*`, kandidatų 
 
 1. **Be konfigūracijos (rekomenduojama):** siųskite bet kokią pokalbio užbaigimo užklausą su `model: "auto"` arba `model: "auto/<variant>"`. Virtuali gamykla sukuria derinį kiekvienai užklausai — nereikia nei išsaugojimo, nei API iškvietimų.
 
-2. **Išsaugotas derinys su `strategy: "auto"`:** sukurkite įprastą derinį per `POST /api/combos` ir nustatykite `strategy: "auto"` bei `config.auto.weights` / `config.auto.candidatePool`. Naudojamas tas pats vertinimo variklis; derinys išsaugomas `combos` ir gali būti pakartotinai naudojamas pagal ID.
+2. **Išsaugotas derinys su `strategy: "auto"`:** sukurkite įprastą derinį per `POST /api/combos` ir nustatykite `strategy: "auto"` bei `config.auto.weights` / `config.auto.candidatePool`. Naudojamas tas pats vertinimo modulis; derinys išsaugomas lentelėje `combos` ir gali būti pakartotinai naudojamas pagal ID.
 
-Aptikimui skirta `GET /api/combos/auto` pateikia visus variantus su jų nustatytu kandidatų rinkiniu bei `context_length` / `max_output_tokens` — DIDŽIAUSIOMIS reikšmėmis iš visų kandidatų rinkinio langų. Klientai (pvz., opencode papildinys) privalo skelbti šias reikšmes vietoje `0`: nulinis kontekstas visiškai išjungia opencode automatinį sutraukimą, todėl sesijos auga tol, kol šliuzo istorijos valymas sunaikina kontekstą. Skelbti DIDŽIAUSIĄ reikšmę yra saugu, nes automatinio derinio konteksto pirminis filtras per dideles užklausas nukreipia kandidatams su dideliais langais.
+Variantams aptikti `GET /api/combos/auto` pateikia visus variantus su jų galutiniu kandidatų telkiniu ir `context_length` / `max_output_tokens` — didžiausiomis reikšmėmis tarp kandidatų telkinio langų. Klientai (pvz., opencode papildinys) turi skelbti šias reikšmes, o ne `0`: nulinis kontekstas visiškai išjungia opencode automatinį glaudinimą, todėl seansai plečiasi tol, kol tinklų sietuvo istorijos valymas sunaikina kontekstą. Skelbti didžiausią reikšmę yra saugu, nes automatinio derinio išankstinis konteksto filtras nukreipia per dideles užklausas kandidatams su dideliais langais.
 
 ```bash
 # Naudojimas be konfigūracijos (derinio kurti nereikia)
@@ -506,35 +506,35 @@ curl -X POST http://localhost:20128/api/combos \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Automatinio maršruto parinktuvo strategijos
+### Automatinio maršrutizatoriaus strategijos
 
-Išsaugotuose `strategy: "auto"` deriniuose galima nustatyti `config.routerStrategy` (arba senesnį
-`config.auto.routerStrategy`) į vieną iš šių reikšmių:
+Išsaugotuose `strategy: "auto"` deriniuose `config.routerStrategy` (arba senesnę
+`config.auto.routerStrategy`) galima nustatyti į vieną iš šių reikšmių:
 
 - `rules` — numatytasis svertinis vertinimas
-- `score` — pasirenka didžiausią sukonfigūruotą svertinį įvertį. Esant visiškai vienodiems įverčiams išlaikoma sukonfigūruota
-  kandidatų tvarka; esamas `explorationRate` atrenka iš viso surikiuoto rinkinio.
+- `score` — parenka didžiausią sukonfigūruotą svertinį įvertį. Esant visiškai vienodiems įverčiams išlaikoma sukonfigūruota
+  kandidatų tvarka; esamas `explorationRate` atrenka iš viso surikiuoto telkinio.
 - `cost` / `eco` — pigiausias tinkamai veikiantis teikėjas
-- `latency` / `fast` — mažiausia p95 delsa, pritaikius patikimumo baudą
-- `sla-aware` / `sla` — pirmenybė teikiama kandidatams, atitinkantiems p95 delsos, klaidų dažnio ir pasirinktinius
+- `latency` / `fast` — mažiausia p95 delsa, įvertinus patikimumo baudą
+- `sla-aware` / `sla` — pirmenybė teikiama kandidatams, kurie atitinka p95 delsos, klaidų dažnio ir pasirinktinius
   kainos SLO
-- `lkgp` — pirmiausia naudojamas paskutinis žinomas gerai veikiantis teikėjas
-- `nadir` — paklausia [Nadir](https://getnadir.com) sprendimų API, kurio rinkinyje esančio modelio
-  reikia užklausai; pasirenkama funkcija, o įvykus klaidai pereinama prie `rules`
+- `lkgp` — pirmiausia paskutinis žinomas tinkamai veikęs teikėjas
+- `nadir` — paklausia [Nadir](https://getnadir.com) sprendimų API, kurio telkinio modelio reikia
+  užklausai; pasirenkama funkcija, o nesėkmės atveju atviruoju režimu grįžtama prie `rules`
 
-### Išsamiai apie maršruto parinktuvo strategijas
+### Išsami informacija apie maršrutizatoriaus strategijas
 
-Automatinio derinio variklis pateikia 7 keičiamus **RouterStrategy** įgyvendinimus, kuriuos
-galite keisti naudodami `config.routerStrategy` (arba senesnį `config.auto.routerStrategy`).
-Kiekviena strategija iš kandidatų rinkinio pasirenka vieną teikėją pagal `RoutingContext`
-(užduoties tipą, įrankių / vaizdo požymius, numatomą žetonų skaičių, pasirinktinę SLA politiką, pasirinktinį
-paskutinį žinomą gerai veikiantį teikėją).
+Automatinio derinio modulis pateikia 7 pakeičiamas **RouterStrategy** realizacijas, kurias
+galite keisti naudodami `config.routerStrategy` (arba senesnę `config.auto.routerStrategy`).
+Kiekviena strategija iš kandidatų telkinio parenka vieną teikėją pagal `RoutingContext`
+(užduoties tipą, įrankių / vaizdo užuominas, numatomą leksemų skaičių, pasirinktinę SLA politiką ir pasirinktinį
+paskutinį žinomą tinkamai veikusį teikėją).
 
 #### 1. `rules` (numatytoji) — 16 veiksnių svertinis vertinimas
 
-Apgaubia esamą vertinimo variklį. Išfiltruoja kandidatus, kurių grandinės pertraukiklio
-būsena yra `OPEN`, tada paleidžia `scorePool()` su dabartiniu užduoties tipu ir `getTaskFitness()`,
-pasirinkdama didžiausią įvertį gavusį teikėją.
+Apgaubia esamą vertinimo modulį. Išfiltruoja grandinės pertraukiklio būseną `OPEN` turinčius
+kandidatus, tada vykdo `scorePool()` su dabartiniu užduoties tipu ir `getTaskFitness()`,
+pasirinkdama aukščiausią įvertį gavusį teikėją.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -556,14 +556,14 @@ class RulesStrategyImpl implements RouterStrategy {
 
 **Kada naudoti**: numatytasis pasirinkimas. Naudokite, kai norite subalansuoto kompromiso tarp visų signalų.
 
-**Alternatyvus pavadinimas**: `rules` (alternatyvaus pavadinimo nėra)
+**Pseudonimas**: `rules` (pseudonimo nėra)
 
 ---
 
 #### 2. `cost` / `eco` — pigiausias tinkamai veikiantis teikėjas
 
-Surikiuoja kandidatų rinkinį pagal `costPer1MTokens` (didėjančia tvarka) ir pasirenka pigiausią.
-Pirmiausia išfiltruoja kandidatus, kurių būsena yra `OPEN`.
+Surikiuoja kandidatų telkinį pagal `costPer1MTokens` (didėjančia tvarka) ir parenka pigiausią.
+Pirmiausia išfiltruoja `OPEN` būsenos kandidatus.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -578,13 +578,13 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada naudoti**: kainai jautriems darbo krūviams, paketiniam apdorojimui arba foninėms užduotims.
+**Kada naudoti**: kainai jautrioms apkrovoms, paketiniam apdorojimui arba foninėms užduotims.
 
-**Alternatyvūs pavadinimai**: `cost`, `eco`
+**Pseudonimai**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — mažiausia p95 delsa, pritaikius patikimumo baudą
+#### 3. `latency` / `fast` — mažiausia p95 delsa, įvertinus patikimumo baudą
 
 Rikiuoja pagal `p95LatencyMs + (errorRate * 1000)`. Bauda už klaidų dažnį užtikrina,
 kad nepatikimi teikėjai būtų reitinguojami žemiau, net jei jų nominali delsa yra maža.
@@ -604,27 +604,27 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada naudoti**: delsai jautriems darbo krūviams, pvz., pokalbiams realiuoju laiku, automatiniam užbaigimui arba
+**Kada naudoti**: delsai jautrioms apkrovoms, pvz., pokalbiams realiuoju laiku, automatiniam užbaigimui arba
 interaktyviems programavimo asistentams.
 
-**Alternatyvūs pavadinimai**: `latency`, `fast`
+**Pseudonimai**: `latency`, `fast`
 
 ---
 
 #### 4. `sla-aware` / `sla` — delsos / klaidų / kainos SLO atitiktis
 
-Kiekvieną kandidatą įvertina pagal tai, kaip gerai jis atitinka sukonfigūruotą SLO politiką:
+Kiekvienas kandidatas vertinamas pagal tai, kaip gerai jis atitinka sukonfigūruotą SLO politiką:
 
 | Veiksnys          | Svoris | Formulė                                                           |
 | ----------------- | ------ | ----------------------------------------------------------------- |
 | Delsos įvertis    | 35%    | `threshold / max(value, ε)`                                       |
 | Klaidų įvertis    | 35%    | `threshold / max(value, ε)`                                       |
-| Būsenos įvertis   | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)                 |
-| Sąnaudų įvertis   | 10%    | `threshold / max(value, ε)` arba atvirkščiai normalizuota reikšmė |
+| Būklės įvertis    | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN)                 |
+| Kainos įvertis    | 10%    | `threshold / max(value, ε)` arba atvirkščiai normalizuota reikšmė |
 | Stabilumo įvertis | 5%     | atvirkščiai normalizuotas delsos standartinis nuokrypis           |
 
 Kai `hardConstraints: true`, kandidatai pirmiausia rikiuojami pagal **pažeidimo įvertį**
-(kiek jie viršija kurį nors SLO), o tada pagal sudėtinį įvertį. Kitu atveju naudojamas tik
+(kiek jie viršija bet kurį SLO), o tada pagal sudėtinį įvertį. Kitu atveju naudojamas tik
 sudėtinis įvertis.
 
 ```ts
@@ -639,7 +639,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**SLA laukai** (nustatomi kombinacijos konfigūracijoje):
+**SLA laukai** (nustatomi kombinuotojoje konfigūracijoje):
 
 ```json
 {
@@ -654,17 +654,17 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kada naudoti**: Produkcinėms darbo apkrovoms, kurioms taikomi griežti delsos, klaidų dažnio ar sąnaudų apribojimai.
+**Kada naudoti**: produkcinėms apkrovoms, kurioms taikomi griežti delsos, klaidų dažnio ar išlaidų apribojimai.
 
-**Alternatyvūs pavadinimai**: `sla-aware`, `sla`
+**Pseudonimai**: `sla-aware`, `sla`
 
 ---
 
-#### 5. `lkgp` — pirmiausia paskutinis žinomas tinkamas teikėjas
+#### 5. `lkgp` — pirmiausia paskutinis žinomas tinkamai veikiantis teikėjas
 
-Pirmiausia bandomas **paskutinis žinomas tinkamas teikėjas** (jei nustatytas), tada pereinama prie
-`rules` strategijos. Tai naudinga sesijos susiejimui — tas pats teikėjas apdoroja
-tolesnes pokalbio užklausas.
+Pirmiausia bandomas **paskutinis žinomas tinkamai veikiantis teikėjas** (jei nustatytas), o tada grįžtama prie
+`rules` strategijos. Tai naudinga siekiant sesijos pastovumo — tolesnes pokalbio užklausas
+apdoroja tas pats teikėjas.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -685,27 +685,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Pereinama prie rules strategijos
+    // Grįžtama prie rules strategijos
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kada naudoti**: Kelių žingsnių pokalbiams, kai norite, kad tas pats teikėjas apdorotų
-tolesnes užklausas (pvz., dėl podėliavimo, konteksto tęstinumo ar kainodaros nuoseklumo).
+**Kada naudoti**: kelių etapų pokalbiams, kai norite, kad tas pats teikėjas apdorotų
+tolesnes užklausas (pvz., dėl podėlio naudojimo, konteksto tęstinumo ar kainodaros nuoseklumo).
 
-**Alternatyvus pavadinimas**: `lkgp` (nėra alternatyvaus pavadinimo)
+**Pseudonimas**: `lkgp` (kitų pseudonimų nėra)
 
 ---
 
-#### 6. `nadir` — užklausą įvertinantis modelio pasirinkimas naudojant Nadir
+#### 6. `nadir` — į užklausą atsižvelgiantis modelio pasirinkimas naudojant Nadir
 
-Kiekviena pirmiau aprašyta strategija reitinguoja kandidatus pagal savo telemetriją; nė viena iš jų neskaito
-užklausos. `nadir` siunčia paskutinę naudotojo žinutę kartu su telkinio modelių ID į
+Kiekviena pirmiau aprašyta strategija reitinguoja kandidatus pagal savo telemetriją; nė viena jų neskaito
+užklausos. `nadir` siunčia paskutinę naudotojo pokalbio repliką kartu su telkinio modelių ID į
 [Nadir](https://getnadir.com) sprendimų API (`POST /v1/bucket`) ir nukreipia į modelį,
 kurį Nadir pasirenka iš šio sąrašo (`simple` → pigiausias tinkamas modelis, `complex` → pažangiausias
-modelis). Tą modelį aptarnaujantis ryšys vis tiek parenkamas naudojant `rules`, todėl kvota,
-būsena ir sąnaudos ir toliau lemia, kuri paskyra bus pasirinkta.
+modelis). Tą modelį aptarnaujantis ryšys vis tiek parenkamas naudojant `rules`, todėl pasirenkant paskyrą
+toliau atsižvelgiama į kvotą, būklę ir kainą.
 
 ```json
 {
@@ -721,31 +721,34 @@ būsena ir sąnaudos ir toliau lemia, kuri paskyra bus pasirinkta.
 }
 ```
 
-`OMNIROUTE_NADIR_API_KEY` ir `OMNIROUTE_NADIR_BASE_URL` yra atsarginės aplinkos kintamųjų reikšmės šioms dviem
-eilutėms. `baseUrl` reikalingas tik savarankiškai talpinamam Nadir (galinis `/v1` yra leidžiamas).
-Užklausos be rakto patenka į anoniminį Nadir planą, kurio užklausų dažnis ribojamas pagal IP.
+Jei dvi eilutės nenurodytos, naudojamos aplinkos reikšmės `OMNIROUTE_NADIR_API_KEY` ir `OMNIROUTE_NADIR_BASE_URL`.
+`baseUrl` reikalingas tik savarankiškai talpinamam Nadir egzemplioriui (pabaigoje esantis `/v1` yra priimtinas).
+Užklausos be rakto patenka į anoniminį Nadir planą, kuriame užklausų dažnis ribojamas pagal IP. Naudojant raktą
+([sukurkite jį](https://app.getnadir.com/dashboard/api-keys)), kiekvienas sprendimas
+registruojamas jūsų Nadir valdymo skydelyje. Išsamios sąrankos ir patikros instrukcijos:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Kas išsiunčiama už sistemos ribų: paskutinės naudotojo žinutės tekstas (pirmieji 16 tūkst. simbolių), kandidatų
-modelių ID ir `source: "omniroute"` kanalo žyma. Nei sistemos instrukcija, nei istorija, nei įrankiai ar
+Į išorę perduodami duomenys: paskutinio naudotojo pranešimo tekstas (pirmieji 16 tūkst. simbolių), kandidatų
+modelių ID ir kanalo žyma `source: "omniroute"`. Sistemos raginimas, istorija, įrankiai ar
 antraštės nesiunčiami.
 
-Gedimo atveju taikomas atviras atsarginis režimas: pasibaigus skirtajam laikui (numatytoji reikšmė – 2000 ms), gavus ne 2xx atsakymą, nepasiekiamą
-serverį, netinkamai suformuotą atsakymą arba pasirinkimą, kurio nėra telkinyje, grąžinamas `rules`
-sprendimas, o priežasties pradžioje pridedama `NadirStrategy: fallback (…)`. Po nepavykusio iškvietimo
-strategija 30 s nesikreipia į tinklą, todėl sutrikimas kainuoja vieną laukimo laikotarpio viršijimą per 30 s, o ne
+Gedimo atveju sistema lieka veikianti: pasibaigus skirtajam laikui (numatytoji reikšmė – 2000 ms), gavus ne 2xx atsakymą,
+nepasiekiant pagrindinio kompiuterio, gavus netinkamai suformuotą atsakymą arba pasirinkus telkinyje nesantį variantą,
+naudojamas `rules` sprendimas, o priežasties pradžioje pridedama `NadirStrategy: fallback (…)`. Po nesėkmingos užklausos
+strategija 30 s nesikreipia į tinklą, todėl sutrikimas lemia vieną skirtojo laiko viršijimą per 30 s, o ne
 po vieną kiekvienai užklausai. Maršruto parinkimo įvykiuose `strategy: "nadir"` nurodoma tik tada, kai pasirinkimą
 iš tikrųjų atliko Nadir.
 
-**Kada naudoti**: skirtingo sudėtingumo srautui telkinyje, apimančiame skirtingų lygių modelius (mažą, vidutinį
-ir pažangiausią modelį), kai norite sumažinti sąnaudas, patiriamas visada naudojant pažangiausią modelį.
+**Kada naudoti**: įvairaus sudėtingumo srautui telkinyje, apimančiame skirtingų lygių modelius (mažą, vidutinį
+ir pažangiausią modelį), kai norite sumažinti išlaidas, patiriamas visada naudojant pažangiausią modelį.
 
-**Alternatyvus pavadinimas**: `nadir` (nėra alternatyvaus pavadinimo)
+**Pseudonimas**: `nadir` (kitų pseudonimų nėra)
 
 ---
 
 ### Pasirinktinės maršruto parinkimo strategijos
 
-Naudodami viešąją API galite užregistruoti savo `RouterStrategy` realizaciją:
+Galite užregistruoti savo `RouterStrategy` realizaciją naudodami viešąją API:
 
 ```ts
 import {
@@ -788,14 +791,14 @@ Tada ją naudokite:
 
 ### Maršruto parinkimo strategijos pasirinkimo vadovas
 
-| Naudojimo atvejis       | Strategija  | Priežastis                                        |
-| ----------------------- | ----------- | ------------------------------------------------- |
-| Subalansuota apkrova    | `rules`     | Numatytoji — atsižvelgiama į visus veiksnius      |
-| Sumažinti sąnaudas      | `cost`      | Visada pasirenkamas pigiausias variantas          |
-| Sumažinti delsą         | `latency`   | Pasirenkamas greičiausias patikimas teikėjas      |
-| Griežti SLO             | `sla-aware` | Filtruojama pagal p95 / klaidų / sąnaudų ribas    |
-| Kelių žingsnių pokalbis | `lkgp`      | Sesijos susiejimas                                |
-| Įvairus sudėtingumas    | `nadir`     | Modelio lygis parenkamas pagal kiekvieną užklausą |
+| Naudojimo atvejis          | Strategija  | Priežastis                                            |
+| -------------------------- | ----------- | ----------------------------------------------------- |
+| Subalansuotas darbo krūvis | `rules`     | Numatytoji — atsižvelgia į visus veiksnius            |
+| Sumažinti sąnaudas         | `cost`      | Visada pasirenka pigiausią variantą                   |
+| Sumažinti delsą            | `latency`   | Pasirenka greičiausią patikimą teikėją                |
+| Griežti SLO reikalavimai   | `sla-aware` | Filtruoja pagal p95 / klaidų / sąnaudų ribines vertes |
+| Kelių žinučių pokalbis     | `lkgp`      | Sesijos susiejimas                                    |
+| Mišrus sudėtingumas        | `nadir`     | Kiekvienai užklausai parenka modelio lygį             |
 
 SLA atsižvelgiantys laukai:
 

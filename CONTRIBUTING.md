@@ -237,6 +237,7 @@ checks will not already give you, and on smaller machines it can saturate the ho
 - Run the test files that cover your change: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Run `npm run lint`
 - Include or update automated tests in the same PR whenever production code changes
+- In `node:test` files, put every top-level `await` (such as `await import(...)`) before the first `test()` / `describe()`: under `--test-force-exit`, tests registered after it can silently never run (#18045; enforced by `npm run check:test-tla-order`)
 - Include the changed or added test files in the PR description when production code changed
 - Check the SonarQube result on the PR when the project secrets are configured in CI
 

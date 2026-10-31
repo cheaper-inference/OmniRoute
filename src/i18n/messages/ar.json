@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "تكاليف الفريق",
+    "subtitle": "أدر الميزانيات المرنة المشتركة وتقديرات التكلفة من الكتالوج.",
+    "refresh": "تحديث",
+    "create": "إنشاء فريق",
+    "edit": "تحرير الفريق",
+    "archive": "أرشفة",
+    "selectTeam": "الفرق",
+    "searchTeams": "البحث عن فرق",
+    "statusFilter": "حالة الفريق",
+    "active": "نشط",
+    "archived": "مؤرشف · للقراءة فقط",
+    "allTeams": "كل الفرق",
+    "noTeams": "لا توجد فرق مطابقة.",
+    "selectHint": "أنشئ فريقًا أو اختره لعرض التكاليف.",
+    "loading": "جارٍ تحميل تكاليف الفريق…",
+    "budgetTitle": "الميزانية المرنة الحالية",
+    "budgetSubtitle": "الاستخدام الناجح المسجَّل · نافذة متحركة · مستقل عن تواريخ التقرير",
+    "archivedBudget": "مؤرشف: تطبيق الميزانية غير نشط. تبقى التقارير التاريخية متاحة.",
+    "unlimited": "غير محدود — لم تُضبط ميزانية مرنة مشتركة.",
+    "budgetUnavailable": "حالة الميزانية غير متاحة. حدّث للمحاولة مرة أخرى.",
+    "used": "الاستخدام الناجح",
+    "maximum": "الحد الأقصى للميزانية",
+    "remaining": "المتبقي المعروف",
+    "resets": "تتم إعادة التعيين",
+    "unpricedBudget": "جزء من الاستخدام الناجح سعره غير معروف. المجموع المعروف غير مكتمل؛ يعدّ تطبيق الميزانية هذه النافذة متجاوزة.",
+    "overBudget": "تم بلوغ الميزانية أو تجاوزها · بزيادة {amount}",
+    "reportTitle": "تقرير الاستخدام",
+    "reportSubtitle": "كل المحاولات · تقدير الكتالوج بالدولار الأمريكي، وليس فاتورة · تواريخ UTC كاملة",
+    "reportPeriod": "فترة التقرير",
+    "day1": "يوم واحد",
+    "day7": "7 أيام",
+    "day30": "30 يومًا",
+    "allTime": "كل الوقت",
+    "reportSpend": "الإنفاق المقدَّر للتقرير",
+    "requests": "الطلبات",
+    "assignedKeys": "المفاتيح المعيَّنة",
+    "unpricedReport": "يحتوي هذا التقرير على أسعار غير معروفة. الإنفاق المقدَّر غير مكتمل.",
+    "breakdown": "التكلفة حسب مفتاح API",
+    "noUsage": "لا يوجد استخدام في فترة التقرير هذه.",
+    "keyName": "اسم مفتاح API",
+    "tokens": "رموز الإدخال + الإخراج",
+    "unnamedKey": "مفتاح بلا اسم أو محذوف",
+    "unpriced": "سعر غير معروف",
+    "members": "العضوية",
+    "memberSubtitle": "تغيير العضوية يُبقي الإنفاق التاريخي لدى الفريق الأصلي.",
+    "searchKeys": "ابحث عن مفاتيح أو مالكين حاليين",
+    "chooseKey": "اختر مفتاح API",
+    "unassigned": "غير معيَّن",
+    "ownership": "فريق الفوترة الحالي: {team}",
+    "assign": "تعيين",
+    "remove": "إزالة",
+    "noMembers": "لا يوجد أعضاء حاليون. قد يظل الاستخدام التاريخي محسوبًا ضمن الميزانية.",
+    "assignedAt": "تم التعيين في {date} (UTC)",
+    "name": "اسم الفريق",
+    "description": "الوصف",
+    "enableBudget": "تفعيل الميزانية المرنة المشتركة",
+    "amount": "مبلغ الميزانية (USD)",
+    "duration": "نافذة الميزانية المتحركة",
+    "cancel": "إلغاء",
+    "save": "حفظ",
+    "confirm": "تأكيد",
+    "transferTitle": "تأكيد نقل المفتاح",
+    "transferMessage": "هل تريد نقل هذا المفتاح من «{source}» إلى «{destination}»؟ يبقى الإنفاق التاريخي لدى الفريق الأصلي.",
+    "removeTitle": "إزالة تعيين المفتاح",
+    "removeMessage": "هل تريد إزالة هذا المفتاح من «{team}»؟ يبقى الإنفاق التاريخي في هذا الفريق.",
+    "archiveTitle": "أرشفة الفريق",
+    "archiveMessage": "هل تريد أرشفة «{team}»؟ تُغلق كل الارتباطات الحالية ويتوقف تطبيق الميزانية. تبقى التقارير التاريخية متاحة.",
+    "invalidName": "أدخل اسمًا (1–200 حرف) ووصفًا لا يزيد على 2000 حرف.",
+    "invalidAmount": "أدخل مبلغ ميزانية محدودًا أكبر من الصفر.",
+    "unauthorized": "سجّل الدخول إلى لوحة الإدارة للمتابعة.",
+    "forbidden": "ليست لديك صلاحية إدارة الفرق. تم الاحتفاظ بما أدخلته.",
+    "notFound": "هذا الفريق أو التعيين لم يعد موجودًا.",
+    "conflict": "تغيّر التعيين أو الفريق. حدّث وأكّد الملكية الحالية قبل المحاولة مرة أخرى.",
+    "failed": "فشل الطلب. تم الاحتفاظ بما أدخلته؛ يرجى المحاولة مرة أخرى.",
+    "partialBudget": "تتداخل بعض السلال اليومية المحتفظ بها مع حدود النافذة ولا يمكن توزيعها بدقة. الإنفاق المعروض غير مكتمل؛ المخصص المتبقي غير متاح. سياسة الميزانية المرنة الحالية لم تتغير."
+  },
   "codexKeyServiceMode": {
     "title": "وضع خدمة Codex لمفتاح API هذا",
     "description": "ينطبق على طلبات Codex، بما في ذلك نماذج Codex داخل التركيبات. تتجاوز الأوضاع المفروضة إعدادات العميل والإعدادات العامة والإعدادات الافتراضية للاتصال. يظل مقدمو الخدمات الآخرون دون تغيير.",
@@ -25,8 +102,10 @@
     "confirm": "هل أنت متأكد؟",
     "refresh": "تحديث",
     "close": "إغلاق",
+    "dialogTitleFallback": "مربع حوار",
     "previousPage": "الصفحة السابقة",
     "nextPage": "الصفحة التالية",
+    "pagination": "ترقيم الصفحات",
     "capsLockOn": "مفتاح Caps Lock قيد التشغيل",
     "dismissNotification": "تجاهل الإشعار",
     "toggleColumns": "تبديل الأعمدة",
@@ -182,6 +261,7 @@
     "combos": "المجموعات",
     "noModelsFound": "لم يتم العثور على نماذج",
     "clear": "مسح",
+    "clearFilters": "مسح عوامل التصفية",
     "done": "تم",
     "selectAll": "تحديد الكل",
     "unselectAll": "إلغاء تحديد الكل",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "مستخدم بواسطة {count, plural, one {دفعة واحدة} other {# دفعات}}",
     "batchFilePreview": "معاينة",
     "batchFilePreviewTruncated": "عرض {shown} سطرًا أوليًا ({total} سطرًا إجماليًا)",
-    "batchFileDownloadFull": "تحميل الملف الكامل"
+    "batchFileDownloadFull": "تحميل الملف الكامل",
+    "tokensPageTitle": "الرموز المميزة",
+    "tokensPageDescription": "أرسل الرموز المميزة بين مفاتيح API، وشارك رموز الدعوة، واربط خوادم المجتمع.",
+    "tokensServerUrlLabel": "عنوان URL للخادم"
   },
   "disabled": "معطل",
   "featureFlagOmnirouteEmergencyFallbackDescription": "توجيه الطلبات التي استنفدت الميزانية إلى موفر/نموذج الاحتياط المجاني للطوارئ.",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "تم إيقاف الخادم الوكيل أو يتم إعادة تشغيله.",
     "expandSidebar": "قم بتوسيع الشريط الجانبي",
     "collapseSidebar": "طي الشريط الجانبي",
-    "themes": "السمات",
-    "presetColors": "الألوان الشائعة",
     "createTheme": "إنشاء سمة",
     "chooseColor": "لون واحد",
-    "themeCoral": "مرجاني",
-    "themeBlue": "أزرق",
-    "themeRed": "أحمر",
-    "themeGreen": "أخضر",
-    "themeViolet": "بنفسجي ساحر",
-    "themeOrange": "برتقالي",
-    "themeCyan": "سماوي",
     "cliToolsShort": "أدوات",
     "cache": "ذاكرة التخزين المؤقت",
     "cacheShort": "ذاكرة التخزين المؤقت",
@@ -1103,12 +1177,10 @@
     "themeSystem": "سمة النظام",
     "whitelabelingDesc": "تخصيص الهوية البصرية",
     "switchThemes": "تبديل السمات",
-    "themeAccentDesc": "وصف اللون المميّز",
     "uploadFavicon": "تحميل الأيقونة المفضلة",
     "themeDark": "السمة الداكنة",
     "customLogoDesc": "شعار مخصص للتطبيق",
     "sidebarVisibilityToggle": "تبديل ظهور الشريط الجانبي",
-    "themeAccent": "اللون المميّز",
     "resetFavicon": "إعادة تعيين الأيقونة المفضلة",
     "whitelabeling": "تخصيص الهوية البصرية",
     "darkMode": "الوضع الداكن",
@@ -1122,10 +1194,8 @@
     "customLogo": "شعار مخصص",
     "appearance": "المظهر",
     "themeSelectionAria": "اختيار السمة",
-    "themeCreate": "إنشاء سمة",
     "customFaviconDesc": "أيقونة مفضلة مخصصة للتطبيق",
     "logoPreview": "معاينة الشعار",
-    "themeCustom": "سمة مخصصة",
     "hideHealthLogsDesc": "إخفاء سجلات فحوصات الصحة",
     "faviconPreview": "معاينة الأيقونة المفضلة",
     "changelog": "سجل التغيير",
@@ -1352,7 +1422,9 @@
       "open": "فتح",
       "close": "إغلاق"
     },
-    "noResults": "لا توجد نتائج"
+    "noResults": "لا توجد نتائج",
+    "costsTeams": "الفرق",
+    "costsTeamsSubtitle": "مراكز تكلفة الفرق"
   },
   "webhooks": {
     "title": "خطافات الويب",
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 أو @channelname",
       "chatIdHint": "المعرّف الرقمي الفريد أو اسم المستخدم العام للدردشة أو القناة.",
       "tutorial": "كيفية تكوين خطاف ويب Telegram:"
-    }
+    },
+    "copy": "نسخ",
+    "copied": "تم النسخ!",
+    "expandDetails": "إظهار التفاصيل",
+    "collapseDetails": "إخفاء التفاصيل"
   },
   "compliance": {
     "auditTitle": "التدقيق",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "المكالمات (24 ساعة)",
     "mcpMetricSuccessRate": "معدل النجاح",
     "mcpMetricAvgDuration": "متوسط المدة",
-    "mcpMetricTopTool": "أفضل أداة"
-  },
-  "themesPage": {
-    "title": "المواضيع",
-    "description": "اختر قالبًا محددًا مسبقًا أو أنشئ قالبًا خاصًا بك بلون واحد",
-    "presetColors": "الألوان الشائعة",
-    "customTheme": "قالب مخصص",
-    "customThemeDesc": "انقر على إنشاء قالب واختر لونًا واحدًا",
-    "createTheme": "إنشاء سمة",
-    "activePreset": "القالب المفعّل"
+    "mcpMetricTopTool": "أفضل أداة",
+    "dismissError": "تجاهل الخطأ"
   },
   "header": {
+    "teamsDescription": "تقديرات تكلفة الفريق والميزانيات المرنة المشتركة",
     "logout": "تسجيل الخروج",
     "quickNavigation": "تنقل سريع",
     "quickNavigationTitle": "التنقل السريع (⌘K / Ctrl+K)",
     "openQuickNavigation": "فتح التنقل السريع",
+    "openMenu": "فتح القائمة",
+    "products": "منتجات Keak",
     "switchToLightMode": "التبديل إلى الوضع الفاتح",
     "switchToDarkMode": "التبديل إلى الوضع الداكن",
     "language": "اللغة",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "متوافق مع Anthropic",
     "media": "الوسائط",
     "mediaDescription": "إنشاء الصور ومقاطع الفيديو والموسيقى",
-    "themes": "المواضيع",
-    "themesDescription": "اختر سمة لون للوحة المعلومات بأكملها",
     "costsDescription": "تتبع الإنفاق، وحلل الاتجاهات، وقم بإدارة ميزانية الذكاء الاصطناعي الخاصة بك عبر جميع مقدمي الخدمة",
     "cacheDescription": "مراقبة كفاءة ذاكرة التخزين المؤقت السريعة للموفر وإعادة استخدام الاستجابة الدلالية المحلية.",
     "limitsDescription": "قم بتكوين حدود الأسعار والحصص لكل مفتاح API وموفر",
@@ -1933,7 +2002,14 @@
     "readinessStep3": "نسخ نقطة النهاية",
     "readinessStep4": "إرسال طلب اختباري",
     "readinessContinue": "متابعة الإعداد",
-    "readinessDismiss": "تجاهل الآن"
+    "readinessDismiss": "تجاهل الآن",
+    "unpricedUsageTitle": "{count, plural, zero {# نماذج لها استخدام حديث ولكن بلا سعر مُعدّ} one {# نموذج له استخدام حديث ولكن بلا سعر مُعدّ} two {# نموذجان لهما استخدام حديث ولكن بلا سعر مُعدّ} few {# نماذج لها استخدام حديث ولكن بلا سعر مُعدّ} many {# نموذجًا لها استخدام حديث ولكن بلا سعر مُعدّ} other {# نموذج لها استخدام حديث ولكن بلا سعر مُعدّ}}",
+    "unpricedUsageFailClosed": "{keys, plural, zero {# مفاتيح API لها حد استخدام استخدمت هذه النماذج} one {# مفتاح API له حد استخدام استخدم هذه النماذج} two {# مفتاحا API لهما حد استخدام استخدما هذه النماذج} few {# مفاتيح API لها حد استخدام استخدمت هذه النماذج} many {# مفتاحًا API لها حد استخدام استخدمت هذه النماذج} other {# مفتاح API لها حد استخدام استخدمت هذه النماذج}} خلال آخر 8 أيام. طالما أن ذلك الاستخدام داخل نافذة الحد اليومي أو الأسبوعي للمفتاح، يُعتبر المفتاح متجاوزًا للحصة وتُحجب طلباته (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "يُحتسب هذا الاستخدام بمقدار $0 نحو حدود الاستخدام لكل مفتاح (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, zero {# طلبات} one {# طلب} two {# طلبان} few {# طلبات} many {# طلبًا} other {# طلب}}، {keys, plural, zero {# مفاتيح محدودة} one {# مفتاح محدود} two {# مفتاحان محدودان} few {# مفاتيح محدودة} many {# مفتاحًا محدودًا} other {# مفتاح محدود}}",
+    "unpricedUsageMore": "…و{count} أخرى",
+    "unpricedUsageConfigure": "تكوين الأسعار",
+    "unpricedUsageDismiss": "إغلاق"
   },
   "analytics": {
     "title": "التحليلات",
@@ -2495,7 +2571,12 @@
     "onlySelectedConnections": "الاتصالات المحددة فقط",
     "selectAtLeastOneConnection": "حدّد اتصالًا واحدًا على الأقل أو اختر جميع الاتصالات.",
     "allConnectionsDesc": "يمكن لهذا المفتاح استخدام أي اتصال نشط.",
-    "restrictedToConnections": "مقيّد بـ {count, plural, one {اتصال واحد} other {# اتصالات}}."
+    "restrictedToConnections": "مقيّد بـ {count, plural, one {اتصال واحد} other {# اتصالات}}.",
+    "preferredConnections": "الاتصالات المفضلة",
+    "preferredConnectionsDesc": "ترتيب أولوية خاص بكل مفتاح. إذا لم يكن الاتصال المفضل متاحًا، ينتقل التوجيه إلى الاتصال المؤهل التالي.",
+    "preferredConnectionsNone": "لم يتم تعيين تفضيل — تُستخدم استراتيجية التوجيه الافتراضية.",
+    "preferredConnectionsClear": "مسح",
+    "removeSelection": "إزالة {name}"
   },
   "auditLog": {
     "title": "سجل التدقيق",
@@ -2607,7 +2688,9 @@
     "imageToTextBridgeCta": "قم بتكوين جسر الصورة→النص في إعدادات جسر الوضعية",
     "sttBridgeCta": "قم بتكوين جسر الكلام→النص في إعدادات جسر الوضعية",
     "existingConnection": "الاتصال الحالي",
-    "openrouterSttDescription": "تستخدم نماذج تحويل الكلام إلى نص في OpenRouter اتصال OpenRouter الذي قمت بتكوينه. لا حاجة لمصادقة منفصلة."
+    "openrouterSttDescription": "تستخدم نماذج تحويل الكلام إلى نص في OpenRouter اتصال OpenRouter الذي قمت بتكوينه. لا حاجة لمصادقة منفصلة.",
+    "modalityTabsAria": "نوع الوسائط",
+    "serviceKindsAria": "نوع الخدمة"
   },
   "search": {
     "searchQuery": "استعلام البحث",
@@ -2963,6 +3046,14 @@
     "openClawManualConfiguration": "OpenClaw - التكوين اليدوي",
     "clineManualConfiguration": "التكوين اليدوي Cline",
     "kiloManualConfiguration": "التكوين اليدوي Kilo code",
+    "piManualConfiguration": "Pi - التكوين اليدوي",
+    "piConfigInvalidTitle": "Pi models.json غير قابل للقراءة",
+    "piOmnirouteConfigured": "تم تكوين OmniRoute كموفر Pi مخصص",
+    "piModelHelp": "لا يقوم Pi باكتشاف النماذج تلقائيًا لنقاط النهاية المخصصة — النموذج الذي تختاره مكتوب في models.json بشكل صريح.",
+    "piManualConfigTitle": "أو تحرير ~/.pi/agent/models.json يدويًا",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "ثم ابدأ Pi وحدد موفر omniroute. اضبط PI_CODING_AGENT_DIR لنقل دليل الوكيل بالكامل.",
+    "piUnownedNote": "تمت إضافة هذا الإدخال خارج OmniRoute (مثل نقاط النهاية المخصصة لـ pi-gui). سوف يعتمده التقديم؛ إعادة التعيين تؤدي فقط إلى إزالة الإدخالات التي كتبها OmniRoute.",
     "whenToUseLabel": "متى تستخدم",
     "openToolDocs": "افتح مستندات الأداة",
     "toolUseCases": {
@@ -2982,6 +3073,7 @@
       "amp": "استخدمه عندما تريد توجيه Amp CLI عبر OmniRoute بأسماء مستعارة مختصرة ثابتة وإعداد متوافق مع OpenAI.",
       "hermes": "استخدمه عندما تحتاج إلى مساعد AI خفيف الوزن ومعتمد على الأجهزة الطرفية للقيام بالمهام السريعة.",
       "hermes-agent": "استخدمه عندما تحتاج إلى Hermes Agent من Nousresearch مع توجيه نماذج الوضع الافتراضي والتفويض والرؤية والنماذج المساعدة عبر OmniRoute.",
+      "whycodes": "استخدمه عندما تريد WhyCodes كعميل CLI مستقل متعدد الأغراض (TUI، وكلاء مسمّون، ذاكرة، swarm) موجّه إلى OmniRoute.",
       "custom": "يستخدم لتطبيقات الأدوات المخصصة أو التكوينات العامة المتوافقة مع OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3083,7 @@
       "grok-build": "عميل برمجة TUI من xAI Grok مع دعم موفر مخصص",
       "droid": "مساعد Factory Droid AI",
       "openclaw": "Openمساعد Claw AI",
+      "openclaude": "واجهة سطر أوامر لعميل البرمجة OpenClaude مع دعم موفّر متوافق مع OpenAI",
       "cline": "مساعد Cline للبرمجة بالذكاء الاصطناعي عبر سطر الأوامر",
       "kilo": "كيلو كود AI مساعد CLI",
       "qwen": "واجهة خط أوامر Qwen Code CLI",
@@ -3022,6 +3115,7 @@
       "warp": "طرفية Warp AI مع دعم لمزودي الخدمة المخصصين",
       "agent-deck": "منسق الوكلاء المتعددين Agent Deck",
       "5dive": "5dive — أسطول ذاتي الاستضافة من وكلاء البرمجة؛ ملف اعتماد واحد يوجّهها جميعًا إلى OmniRoute",
+      "whycodes": "العميل المستقل WhyCodes عبر CLI مع عنوان URL أساسي متوافق مع OpenAI",
       "zed": "محرر الأكواد Zed — وكيل مدمج عبر مزوّد متوافق مع OpenAI"
     },
     "guides": {
@@ -3278,7 +3372,19 @@
     "cliproxyapiUnknown": "غير معروف",
     "cliproxyapiUpdate": "تحديث",
     "cliproxyapiUpdateAvailable": "تحديث متاح: v{current} → v{latest}",
-    "cliproxyapiVersion": "الإصدار"
+    "cliproxyapiVersion": "الإصدار",
+    "piInstallTitle": "قم بتثبيت وكيل Pi Coding",
+    "piInstallInstructions": "قم بتثبيت Pi CLI، ثم ارجع إلى هنا لتوصيله بـ OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "استخدم URL الذي يمكن الوصول إليه من الجهاز الذي يقوم بتشغيل Pi. تتم إضافة نقطة النهاية /v1 المتوافقة مع OpenAI تلقائيًا.",
+    "piManualMergeHint": "معاينة فقط. قم بدمج إدخال providers.omniroute هذا في models.json حتى يظل مقدمو الخدمة والإعدادات الأخرى كما هي.",
+    "removeMapping": "إزالة التعيين",
+    "customUrl": "رابط مخصص",
+    "customEndpointAria": "نقطة اتصال مخصصة",
+    "useDefaultKey": "استخدام مفتاح OmniRoute الافتراضي",
+    "mainModelAria": "النموذج الرئيسي",
+    "manualConfigTitle": "إعدادات Grok Build اليدوية"
   },
   "modelCatalog": {
     "title": "النماذج والمجموعات",
@@ -3342,6 +3448,18 @@
     "maxMembersPlaceholder": "مثلاً 10",
     "testSelected": "اختبار المحدد ({count})",
     "testAllFiltered": "اختبار جميع النتائج المصفاة ({count})",
+    "visibility": "الظهور",
+    "allVisibility": "الظاهرة والمخفية",
+    "visibleOnly": "الظاهرة",
+    "hiddenOnly": "المخفية",
+    "visibleColumn": "ظاهر",
+    "hideModel": "إخفاء {name} من /v1/models",
+    "showModel": "إظهار {name} في /v1/models",
+    "hiddenBadge": "مخفي",
+    "hideFiltered": "إخفاء المُصفّاة ({count})",
+    "showFiltered": "إظهار المُصفّاة ({count})",
+    "visibilityCounts": "{visible} ظاهر · {hidden} مخفي · {total} الإجمالي",
+    "visibilityUpdateFailed": "فشل تحديث ظهور النموذج",
     "cancel": "إلغاء",
     "clearResults": "مسح النتائج",
     "testing": "جارٍ الاختبار...",
@@ -3397,16 +3515,53 @@
     "httpError": "فشل الطلب برمز HTTP {status}",
     "testFailedNoDetail": "فشل الاختبار بدون رسالة خطأ",
     "additionalCapabilities": "إمكانيات إضافية: {list}",
-    "comboRefMember": "تركيبة → {name}"
+    "comboRefMember": "تركيبة → {name}",
+    "keyAccessButton": "صلاحية وصول مفتاح API",
+    "allowedInKeys": "مسموح به في: {count, plural, one {# مفتاح} other {# مفاتيح}}",
+    "keysLoading": "جارٍ تحميل مفاتيح API…",
+    "keysRetry": "إعادة محاولة تحميل المفاتيح",
+    "accessViaPattern": "عبر {pattern}",
+    "accessBlocked": "محظور بواسطة {pattern}",
+    "editKeyAccess": "تعديل صلاحية وصول المفتاح",
+    "toggleKeyAccess": "السماح بـ {item} على {name}",
+    "resultNetworkError": "فشل التعيين",
+    "resultWouldEmptyModels": "سيترك هذا المفتاح بدون أي نماذج مسموح بها — عدّل صلاحيات وصول المفتاح بدلاً من ذلك",
+    "resultWouldEmptyCombos": "سيترك هذا المفتاح بدون أي تجميعات مسموح بها — عدّل صلاحيات وصول المفتاح بدلاً من ذلك",
+    "keyUpdatePending": "لا يزال {name} قيد التحديث. حاول مرة أخرى بعد لحظات.",
+    "assignToKeys": "التعيين لمفاتيح API…",
+    "assignApply": "تطبيق التغييرات",
+    "assignComplete": "تم تحديث صلاحية وصول مفتاح API",
+    "assignFailed": "فشل تحديث بعض مفاتيح API",
+    "assignNoChanges": "لم يتم تغيير صلاحيات وصول مفتاح API",
+    "selectedAccessItems": "العناصر المحددة: {count}",
+    "assignExcludedCombos": "{count, plural, one {# صف تجميعة محدد ليس نموذجاً وسيتم تخطيه هنا} other {# صفوف تجميعات محددة ليست نماذج وسيتم تخطيها هنا}}. قم بتعيين التجميعات من علامة التبويب Combos.",
+    "assignActionAdd": "إضافة",
+    "assignActionRemove": "إزالة",
+    "searchKeys": "البحث في مفاتيح API",
+    "selectApiKey": "تحديد مفتاح API {name}",
+    "allModelsAccess": "جميع النماذج",
+    "allCombosAccess": "جميع التوليفات",
+    "modelAccessCount": "النماذج: {count}",
+    "comboAccessCount": "التوليفات: {count}",
+    "keyInactive": "غير نشط",
+    "keyBanned": "محظور",
+    "keyRevoked": "تم الإبطال",
+    "switchRestrictedConfirm": "تحويل هذا المفتاح إلى وصول مقيد: سيتم السماح بالعناصر المحددة فقط",
+    "removeNoChangeHint": "يسمح هذا المفتاح بكل شيء؛ لن تُحدث إزالة العناصر المحددة أي تغيير",
+    "removeStaysAllowedHint": "لا يزال مسموحاً به على هذا المفتاح من خلال {patterns}",
+    "resultChanged": "تم التغيير",
+    "resultUnchanged": "دون تغيير",
+    "resultSkipped": "تم التخطي",
+    "resultNeedsSwitch": "يتطلب التحويل إلى مقيد"
   },
   "combos": {
+    "title": "المجموعات",
+    "description": "أنشئ مجموعات نماذج باستخدام التوجيه المرجّح والتبديل الاحتياطي",
+    "autoCatalogTitle": "كتالوج التوجيه التلقائي",
     "autoTosLoadError": "تعذر تحميل سياسة شروط الخدمة. أعد المحاولة قبل تغييرها.",
     "autoTosSaveError": "تعذر حفظ سياسة شروط الخدمة. لا يزال الإعداد السابق معروضًا. أعد المحاولة.",
     "autoTosIncludeLabel": "تضمين مقدمي الخدمة المصنفين ToS: avoid في auto",
     "autoTosDescription": "معطّل افتراضيًا. يسري على جميع مجموعات auto، وليس على حساب واحد فقط. ربط مقدم خدمة لا يفعّل هذا الخيار.",
-    "title": "المجموعات",
-    "description": "أنشئ مجموعات نماذج باستخدام التوجيه المرجّح والتبديل الاحتياطي",
-    "autoCatalogTitle": "كتالوج التوجيه التلقائي",
     "autoCatalogTemplateCount": "{count} قالبًا",
     "autoCatalogDescription": "تُحل مجموعات auto/* المضمّنة ديناميكيًا من المزوّدين المتصلين. استخدم أيًا من هذه المعرّفات في حقل النموذج، دون حاجة إلى إعداد.",
     "autoCatalogExpand": "توسيع كتالوج التوجيه التلقائي",
@@ -3451,6 +3606,12 @@
     "errorUpdating": "حدث خطأ أثناء تحديث المجموعة",
     "errorDeleting": "حدث خطأ أثناء حذف المجموعة",
     "testFailed": "فشل طلب الاختبار",
+    "removeErrorModels": "حذف {count} من النماذج الفاشلة",
+    "removingErrorModels": "جارٍ الإزالة…",
+    "errorModelsRemoved": "تمت إزالة {count} من النماذج الفاشلة من المجموعة",
+    "noErrorModelsFound": "لم يتم العثور على نماذج فاشلة ضمن خطوات هذه المجموعة",
+    "cannotRemoveAllModels": "لا يمكن إزالة جميع النماذج من المجموعة",
+    "removeErrorModelsConfirm": "هل تريد إزالة {count} من النماذج الفاشلة من «{name}»؟ لا يتم احتساب انتهاء المهلة وحدود المعدل.",
     "failedToggle": "تعذر تبديل حالة المجموعة",
     "testResults": "نتائج الاختبار — {name}",
     "resolvedBy": "تم التوجيه عبر:",
@@ -3518,6 +3679,9 @@
     "moveUp": "نقل لأعلى",
     "moveDown": "نقل لأسفل",
     "removeModel": "إزالة",
+    "testStep": "اختبر هذا النموذج",
+    "testStepRunning": "جارٍ الاختبار…",
+    "testStepNotTestable": "يمكن اختبار الخطوات ذات النموذج الواحد فقط",
     "saving": "جارٍ الحفظ...",
     "liveNoProviders": "لم يتم رصد أي مزودين بعد.",
     "liveFleetDataHint": "تصل بيانات الأسطول من خلال أحداث المجموعة المباشرة.",
@@ -3559,6 +3723,7 @@
     "playgroundNoCombosYet": "لم يتم تكوين أي تركيبات بعد.",
     "playgroundCreateFirst": "أنشئ واحدة أولاً",
     "weighted": "مرجح",
+    "weightPercent": "الوزن (%)",
     "leastUsed": "الأقل استخدامًا",
     "costOpt": "الأقل تكلفة",
     "strategyGuideTitle": "كيفية استخدام هذه الاستراتيجية",
@@ -3720,6 +3885,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# حساب} other {# حسابات}}",
     "builderGlobalAdded": "تم الإضافة",
     "builderGlobalAdd": "أضف",
+    "clearSearch": "مسح البحث",
     "manualModel": "نموذج يدوي",
     "manualModelInvalid": "أدخل النموذج بالصيغة provider/model.",
     "manualModelUnknownProvider": "بادئة المزود غير معروفة.",
@@ -3936,6 +4102,7 @@
     "builderComboRefStep": "إضافة مرجع مجموعة",
     "builderPinnedAccount": "الحساب المثبّت",
     "builderLegacyEntry": "إدخال قديم",
+    "builderStaleModel": "غير موجود في الكتالوج المباشر",
     "reviewName": "الاسم",
     "reviewStrategy": "الاستراتيجية",
     "reviewSteps": "الخطوات",
@@ -3973,6 +4140,10 @@
     "responseValidationMinLength": "الحد الأدنى لطول المحتوى (بالأحرف)",
     "responseValidationJsonPaths": "فحوصات JSON-path",
     "responseValidationAddCheck": "+ إضافة فحص",
+    "responseValidationRemoveCheck": "إزالة الفحص",
+    "responseValidationPath": "مسار JSON",
+    "responseValidationCondition": "الشرط",
+    "responseValidationValue": "القيمة المتوقعة",
     "agentFeaturesSystemMessageOverride": "تجاوز رسالة النظام",
     "agentFeaturesSystemMessagePlaceholder": "أنت مساعد خبير...",
     "agentFeaturesSystemMessageHint": "تخصيص رسالة النظام للوكلاء",
@@ -4792,7 +4963,15 @@
     },
     "totalEntries": "إجمالي الإدخالات",
     "type": "النوع",
-    "memoryEnabled": "الذاكرة مُمكّنة"
+    "memoryEnabled": "الذاكرة مُمكّنة",
+    "qdrantTutorialTitle": "دليل سريع: الذاكرة باستخدام Qdrant",
+    "qdrantTutorialIntro": "تخزن Qdrant المتجهات وبيانات الوصف للذكريات حتى يمكن استرجاع السياق ذي الصلة. لا تضغط الرموز مباشرةً؛ فالتوفير غير مباشر، عبر تجنب السياق غير ذي الصلة بالطلب.",
+    "qdrantTutorialStep1": "أمّن الخادم باستخدام HTTPS ومفتاح API قبل الاستخدام في بيئة الإنتاج.",
+    "qdrantTutorialStep2": "أدخل المضيف، والمنفذ، والمجموعة، ونموذجًا بصيغة provider/model مع بيانات اعتماد مُهيّأة.",
+    "qdrantTutorialStep3": "يجب أن تتطابق بُعد المجموعة مع البُعد الذي ينتجه النموذج. المجموعة الحالية ذات البعد 2048 لا تقبل التضمينات ذات البعد 1536.",
+    "qdrantTutorialStep4": "احفظ، واختبر الاتصال، ثم نفّذ اختبار البحث. قم فقط بعد ذلك بتفعيل Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "بالمصداقية: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "المهارات",
@@ -5288,7 +5467,8 @@
         "skipped": "تم التكوين بالفعل",
         "failed": "فشل"
       }
-    }
+    },
+    "stepProgress": "تقدم الإعداد"
   },
   "providers": {
     "tosAvoidNoticeTitle": "مقدم الخدمة هذا مستبعد من auto افتراضيًا",
@@ -5329,6 +5509,27 @@
     "importFromFileDownloadTemplate": "تنزيل قالب CSV",
     "importFromFileMoreErrors": "+{count} أخطاء أخرى",
     "importFromFileSchemaHint": "أعمدة CSV موضعية: provider، name، apiKey، baseUrl (اختياري)، priority (اختياري). يجب أن يكون عمود provider معرّف موفّر مُدار موجودًا أو معرّف عقدة مسجّلة مسبقًا ومتوافقة مع OpenAI/Anthropic — لا تؤدي عملية الاستيراد هذه إلى إنشاء عقد نقاط نهاية جديدة.",
+    "importOAuthExport": "استيراد تصدير OAuth",
+    "oauthExportTitle": "استيراد تصدير مدير الحسابات",
+    "oauthExportDescription": "ارفع ملف تصدير بنص عادي من مدير حسابات (مثل تصدير cloud-accounts من Antigravity Manager). يتم تحديث الرموز المميزة على الخادم ويصبح كل حساب اتصال OAuth — ويتم تحديث الحسابات المكررة في مكانها.",
+    "oauthExportProviderLabel": "مزود",
+    "oauthExportChoose": "اختيار ملف",
+    "oauthExportFileAria": "ملف JSON لتصدير الحسابات",
+    "oauthExportSchemaHint": "المقبول: مستند يحتوي على مصفوفة \"accounts\"، أو مصفوفة مجردة، أو سجل واحد. يمكن أن تكون الرموز المميزة داخل كائن token متداخل أو مباشرة في السجل.",
+    "oauthExportDetected": "تم اكتشاف {count} حساب(ات)",
+    "oauthExportSelectAll": "تحديد كل الحسابات",
+    "oauthExportSelectAccount": "تحديد الحساب {index}",
+    "oauthExportColEmail": "البريد الإلكتروني",
+    "oauthExportColProvider": "مزود",
+    "oauthExportColRefresh": "رمز التحديث",
+    "oauthExportNoEmail": "(لا يوجد بريد إلكتروني)",
+    "oauthExportYes": "نعم",
+    "oauthExportNo": "لا",
+    "oauthExportImporting": "جاري الاستيراد…",
+    "oauthExportImport": "استيراد {count} حساب(ات)",
+    "oauthExportResult": "تم استيراد {imported}/{total} — فشل {failed}",
+    "oauthExportParseError": "تعذرت قراءة أي حسابات من هذا الملف.",
+    "oauthExportUnknownError": "خطأ غير معروف",
     "adaptaTutorial": {
       "title": "كيفية الاتصال بـ Adapta Web",
       "introPrefix": "تتم مصادقة Adapta عبر Clerk. الرمز المميز",
@@ -5579,6 +5780,7 @@
     "allModelsAlreadyImported": "جميع النماذج مستوردة بالفعل",
     "noNewModelsToImport": "لا توجد نماذج جديدة لاستيرادها — جميعها موجودة في السجل أو قائمة النماذج المخصصة",
     "localCatalogFallbackStatus": "تعذّر الوصول إلى قائمة نماذج المزود — يتم عرض الكتالوج المضمّن",
+    "discoveryDegradedStatus": "فشل اكتشاف النموذج {time}",
     "skippingExistingModels": "تخطي {count} نموذج موجود",
     "autoSync": "المزامنة التلقائية",
     "autoSyncShort": "المزامنة",
@@ -5797,6 +5999,7 @@
     "contextWindowOverridePlaceholder": "مثال: 131072",
     "contextWindowOverrideHint": "عيّن يدويًا نافذة السياق الحقيقية لهذا النموذج (بالرموز) عندما يبلغ المزوّد عنها بصورة خاطئة. تتغلب هذه القيمة على القيم المكتشفة تلقائيًا أو الواردة في الكتالوج، وتمنع توجيه المجموعات من إسقاط النموذج.",
     "contextWindowOverrideInvalid": "يجب أن يكون تجاوز نافذة السياق عددًا صحيحًا موجبًا من الرموز",
+    "maxOutputTokenOverrideInvalid": "يجب أن يكون تجاوز الحد الأقصى لرموز الإخراج عددًا صحيحًا موجبًا من الرموز",
     "visionCapableLabel": "يدعم الرؤية",
     "visionCapableHint": "علّم هذا النموذج يدويًا بأنه يدعم الرؤية عندما لا تذكر بيانات اكتشاف المزوّد إدخال الصور (وهو شائع في الواجهات الخلفية المحلية أو المستضافة ذاتيًا).",
     "compatParamFiltersLabel": "فلاتر المعلمات",
@@ -5838,6 +6041,25 @@
     "ccAliasAddModelButton": "إضافة تجاوز",
     "ccAliasLoadError": "فشل تحميل إعدادات الأسماء المستعارة للاكتشاف: {error}",
     "ccAliasSaveError": "فشل حفظ إعداد الاسم المستعار للاكتشاف: {error}",
+    "cliVersionSectionTitle": "تم الإعلان عن إصدار عميل CLI",
+    "cliVersionEffectiveLabel": "المعلن عنها حاليا",
+    "cliVersionSourceLabel": "تم الحل من: {source}",
+    "cliVersionPinnedLabel": "تم التقاط الافتراضي: {pinned}",
+    "cliVersionSourceSettings": "تجاوز لوحة القيادة",
+    "cliVersionSourceEnv": "متغير البيئة",
+    "cliVersionSourceDiscovered": "أحدث إصدار تم اكتشافه تلقائيًا",
+    "cliVersionSourceDefault": "الافتراضية التي تم التقاطها",
+    "cliVersionInputLabel": "تجاوز الإصدار",
+    "cliVersionInputPlaceholder": "تجاوز الإصدار؛ يمسح فارغة",
+    "cliVersionSaveButton": "يحفظ",
+    "cliVersionResetButton": "إعادة التعيين إلى الوضع الافتراضي",
+    "cliVersionLoadError": "فشل تحميل إعدادات إصدار CLI : {error}",
+    "cliVersionSaveError": "فشل حفظ نسخة CLI : {error}",
+    "cliVersionLoadFailed": "تعذر تحميل إعدادات إصدار CLI الحالية.",
+    "cliVersionHintClaude": "بوابات إنسانية لنماذج كلود الأحدث على إصدار عميل Claude Code الذي تراه. هذا هو الإصدار الذي تعلن عنه OmniRoute في كل طلب مرتبط بالإنسان.",
+    "cliVersionCaveatClaude": "تحذير بشأن الفواتير: إصدار الفواتير هو '<version>'.'<build-revision>'، ومراجعة البناء عبارة عن ثابت منفصل تم التقاطه. يُبلغ الإعلان 2.1.260 عن 2.1.260.1e2، وهو ليس ما يُرسله الثنائي الحقيقي 2.1.260.",
+    "cliVersionHintCodex": "يقوم OpenAI بإدخال أحدث الموديلات على إصدار عميل Codex الذي يراه، على سبيل المثال الخطأ: يتطلب النموذج 'gpt-6-astra' إصدارًا أحدث من Codex.",
+    "cliVersionCaveatCodex": "تحذير الاستدلال: لا يزال إصدار تقارير المتصل الخاص بك يتفوق على CODEX_CLIENT_VERSION env var، ولكن هذا التجاوز يتفوق على كليهما، لأنه هدف واضح للمشغل.",
     "compatUpstreamHeadersLabel": "ترويسات المنبع الإضافية",
     "compatUpstreamHeadersHint": "إعداد عالي الصلاحيات — يعامل معاملة بيانات اعتماد API الخاصة بالمزود، لذا لا ينبغي استخدامه إلا من مسؤولين موثوقين. تُدمج الترويسات بعد أن يضيف OmniRoute المصادقة. إذا استخدمت ترويسة مخصصة الاسم نفسه لترويسة موجودة (مثل Authorization)، فستستبدل قيمتك الترويسة المنشأة تلقائيًا بالكامل، بما فيها رمز Bearer. قد يؤدي الإعداد الخاطئ إلى خطأ 401 أو تعطّل مصادقة المنبع. أضف ترويسة واحدة في كل صف. تُحفظ القيمة عند فقدان التركيز أو إغلاق اللوحة.",
     "compatUpstreamHeaderName": "اسم الترويسة",
@@ -6055,10 +6277,10 @@
     "apiFormatLabel": "تنسيق API",
     "apiKeyOptionalHint": "اتركه فارغًا إذا لم يكن مفتاح API مطلوبًا",
     "apiKeyOptionalLabel": "مفتاح API (اختياري)",
-    "apiRegionChina": "الصين",
-    "apiRegionHint": "اختر منطقة API",
+    "apiRegionChina": "البر الرئيسي للصين",
+    "apiRegionHint": "اختر منطقة نقطة النهاية المستخدمة للوصول إلى واجهة برمجة التطبيقات وتتبع الحصة.",
     "apiRegionInternational": "دولي",
-    "apiRegionLabel": "منطقة API",
+    "apiRegionLabel": "منطقة واجهة برمجة التطبيقات",
     "apikey": "مفتاح API",
     "audio": "الصوت",
     "audioProvidersHeading": "مزودو الصوت",
@@ -6079,6 +6301,13 @@
     "claudeLowPriorityModeDescription": "عندما يصل هذا الحساب إلى حد الاستخدام البالغ 5 ساعات وتقدم Anthropic مسار الأولوية المنخفضة، يقبل OmniRoute ذلك ويستمر في إرسال الطلبات مع anthropic-usage-limit: slow حتى يتم إعادة تعيين النافذة، بدلاً من تهدئة الاتصال. لا يزال الحد الأسبوعي ساريًا وقد تنتظر الاستجابات توفر سعة إضافية.",
     "claudeAutoLimitResetLabel": "إعادة تعيين حد الجلسة تلقائيًا (مرة واحدة في الأسبوع)",
     "claudeAutoLimitResetDescription": "عندما يصل هذا الحساب إلى حد الاستخدام البالغ 5 ساعات وتكون إعادة تعيين حد الجلسة متاحة، يطالب OmniRoute بها تلقائيًا ويعيد المحاولة بالسرعة الكاملة. يستخدم هذا خيار إعادة التعيين الأسبوعي للحساب ولا يزال يُحتسب ضمن الحد الأسبوعي.",
+    "codexPaidCreditsShort": "أرصدة إضافية",
+    "codexPaidCreditsToggleTitle": "السماح بأرصدة Codex المدفوعة بعد نفاد حصة الاشتراك (قد تُطبّق رسوم إضافية)",
+    "codexPaidCreditsEnabled": "أرصدة Codex المدفوعة مفعّلة (قد تُطبّق رسوم إضافية)",
+    "codexPaidCreditsDisabled": "أرصدة Codex المدفوعة معطّلة",
+    "failedUpdateCodexPaidCredits": "فشل تحديث سياسة أرصدة Codex المدفوعة",
+    "allowCodexPaidCreditsLabel": "السماح بأرصدة Codex المدفوعة",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "تخطي فترة التهدئة المؤقتة حتى يظل هذا الاتصال مؤهلاً حتى بعد الأخطاء القابلة للاسترداد (لا تزال الحالات النهائية مثل banned/expired سارية).",
     "disableCoolingLabel": "تعطيل فترة التهدئة لهذا الاتصال",
     "bulkPasteAdded": "المفاتيح المضافة: {count, plural, one {أُضيف مفتاح واحد} other {أُضيف # من المفاتيح}}",
@@ -6532,6 +6761,7 @@
       "monsterapi": "احصل على مفتاح API من monsterapi.ai",
       "moonshot": "ربط Moonshot AI بمفتاح API.",
       "morph": "الفئة المجانية: 250 ألف رصيد/شهر، $0",
+      "apmix": "اربط Apmix بمفتاح API من apmix.ai/dashboard — اشتراك واحد، نماذج كثيرة.",
       "nanogpt": "ربط NanoGPT بمفتاح API.",
       "nebius": "رصيد تجريبي بقيمة ~1$ عند التسجيل لاختبار واجهة برمجة التطبيقات (API)",
       "nlpcloud": "تستخدم NLP Cloud واجهة برمجة تطبيقات روبوت دردشة خاصة بدلاً من إكمال الدردشة الخاص بـ OpenAI. تقوم OmniRoute بتكييف رسائل OpenAI مع المدخلات/السياق/السجل وتعرض كتالوجًا محليًا لنماذج روبوتات الدردشة المدعومة.",
@@ -6628,8 +6858,7 @@
       "kiro": "الفئة المجانية: 50 رصيدًا شهريًا (~25 ألف–100 ألف توكن). ⚠️ تحظر شروط خدمة Kiro استخدام وكيل/أداة خارجية.",
       "codex": "ربط OpenAI Codex باستخدام تدفق OAuth الحالي.",
       "qwen": "ربط Qwen Code باستخدام تدفق OAuth الحالي.",
-      "github-models": "أنشئ رمز وصول شخصي (PAT) لـ GitHub بنطاق 'models: read' على github.com/settings/tokens",
-      "apmix": "اربط Apmix بمفتاح API من apmix.ai/dashboard — اشتراك واحد، نماذج كثيرة."
+      "github-models": "أنشئ رمز وصول شخصي (PAT) لـ GitHub بنطاق 'models: read' على github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} يقبل معرفات النماذج الأصلية للموفر. قم بالاستيراد من /models أو قم بإضافة معرفات مخصصة للتوجيه.",
     "bedrockModelsDescription": "يتم تحديد نطاق نماذج Amazon Bedrock حسب منطقة AWS. قم بالاستيراد من /models أو قم بإضافة معرفات نماذج Bedrock الممكنة في المنطقة المحددة.",
@@ -6802,13 +7031,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "اختياري: model=cap واحد في كل سطر، يُطابَق مع معرّف نموذج المنبع بالضبط. تُوضع الطلبات الزائدة في طابور محلي؛ والفراغ يعني عدم وجود حد لكل نموذج.",
     "rateLimitOverridesModelConcurrencyInvalid": "إدخال تزامن لكل نموذج غير صالح \"{entry}\" — استخدم model=cap حيث cap عدد صحيح من 1 إلى {max}.",
-    "codexPaidCreditsShort": "أرصدة إضافية",
-    "codexPaidCreditsToggleTitle": "السماح بأرصدة Codex المدفوعة بعد نفاد حصة الاشتراك (قد تُطبّق رسوم إضافية)",
-    "codexPaidCreditsEnabled": "أرصدة Codex المدفوعة مفعّلة (قد تُطبّق رسوم إضافية)",
-    "codexPaidCreditsDisabled": "أرصدة Codex المدفوعة معطّلة",
-    "failedUpdateCodexPaidCredits": "فشل تحديث سياسة أرصدة Codex المدفوعة",
-    "allowCodexPaidCreditsLabel": "السماح بأرصدة Codex المدفوعة",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "مستخدم في {count} مجموعة: {combos}",
+    "openComboTooltip": "فتح المجموعات — مستخدم بواسطة {combo}",
+    "claudeCodeRoutingTitle": "التوجيه عبر وكيل للملفات لعملاء Claude Code",
+    "routingNative": "أصلي",
+    "routingFallback": "نقطة بديلة",
+    "rerank": "إعادة الترتيب",
+    "video": "فيديو",
+    "markFreeTierTitle": "تعيين كخيار مجاني (يظهر حتى عند إخفاء النماذج المدفوعة)",
+    "codexTunnelTitle": "اتصال أداة Codex",
+    "codexTunnelDescription": "يبقى النفق صادرًا فقط. لا يزال يتم تنفيذ الأدوات المحلية بواسطة Codex فقط، تحت سياسته الخاصة بالبيئة المعزلة والموافقة.",
+    "tunnelIdLabel": "معرف النفق",
+    "tunnelRuntimeKeyLabel": "مفتاح وقت التشغيل للنفق",
+    "tunnelRuntimeKeyPlaceholder": "مفتاح وقت التشغيل",
+    "tunnelRuntimeKeyHint": "يُخزَّن مشفَّرًا مع الكوكي ولا يُكتب أبدًا في السجلات.",
+    "tunnelRuntimeKeyNewLabel": "مفتاح وقت تشغيل جديد للنفق",
+    "tunnelRuntimeKeyNewHint": "أدخله فقط مع كوكي جديد. يُخزَّن القيمة مشفَّرًا.",
+    "chatgptConnectorLabel": "موصل ChatGPT المخصص",
+    "doctorChecking": "جارٍ التحقق من الحالة…",
+    "doctorCheck": "التحقق من حالة الطبيب",
+    "fallbackRetryBackendTitle": "الخادم الاحتياطي لإعادة المحاولة"
   },
   "settings": {
     "title": "الإعدادات",
@@ -7104,16 +7346,6 @@
     "settingsSidebarDesc": "اختر عناصر الشريط الجانبي التي تريد إظهارها. يُبقي وضع «الأساسيات» الأدوات المتقدمة قابلة للبحث.",
     "hideHealthLogs": "إخفاء سجلات التحقق من الصحة",
     "hideHealthLogsDesc": "عند التشغيل، قم بمنع رسائل [HealthCheck] في وحدة تحكم الخادم",
-    "themeAccent": "لون السمة",
-    "themeAccentDesc": "اختر لونًا جاهزًا أو أنشئ سمتك الخاصة بلون واحد",
-    "themeCreate": "إنشاء سمة",
-    "themeCustom": "سمة مخصصة",
-    "themeBlue": "أزرق",
-    "themeRed": "أحمر",
-    "themeGreen": "أخضر",
-    "themeViolet": "بنفسجي",
-    "themeOrange": "برتقالي",
-    "themeCyan": "سماوي",
     "whitelabeling": "العلامة التجارية",
     "whitelabelingDesc": "تخصيص اسم التطبيق والشعار",
     "appName": "اسم التطبيق",
@@ -7254,7 +7486,7 @@
       "nextSwitchNow": "الآن",
       "coreConfigPath": "ملف إعدادات النواة",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "مسار .json مطلق (امتداد بأحرف صغيرة). فارغ = بلا إنشاء. تكتب كل مزامنة '<path>'.generated بجوار الملف المعتمد وليس داخله أبدًا.",
+      "coreConfigPathDesc": "مسار .json/.yaml/.yml مطلق (امتداد بأحرف صغيرة). فارغ = بلا إنشاء. تكتب كل مزامنة '<path>'.generated بجوار الملف المعتمد وليس داخله أبدًا.",
       "lastSwitchKind": "سبب التبديل",
       "switchKind": {
         "ip_quota_429": "الحصة",
@@ -7265,7 +7497,8 @@
       "coreReloadAppliedBy": "طُبّق بواسطة: {mode}",
       "coreBinaryPath": "مسار ثنائي النواة",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "اختياري: يتحقق من الملف المولَّد باستخدام ثنائي النواة قبل استبدال الملف المعتمد. اتركه فارغًا للاستمرار في الكتابة بجانبه. يتم إنشاء الدليل إذا كان مفقودًا."
+      "coreBinaryPathHelp": "اختياري: يتحقق من الملف المولَّد باستخدام ثنائي النواة قبل استبدال الملف المعتمد. اتركه فارغًا للاستمرار في الكتابة بجانبه. يتم إنشاء الدليل إذا كان مفقودًا.",
+      "urlFeedlessHint": "اتركه فارغًا لاشتراك بتحديد المحدد فقط: قم بتعيين عنوان URL للتحكم أدناه، ولن يتم جلب أو تحديث أو ربط أي خلاصة."
     },
     "bulkHealthcheck": "الفحص الصحي بالجملة",
     "bulkHealthcheckDesc": "اختبر جميع الوكلاء الذين تم تكوينهم مقابل عنوان URL المستهدف للعثور على الوكلاء الذين يعملون.",
@@ -7706,6 +7939,7 @@
     "configured": "مُهيأ",
     "none": "بلا",
     "modelOverrideValuePlaceholder": "قيمة رقمية",
+    "modelOverrideKey": "مفتاح التجاوز",
     "modelOverrideReasoningEffortsPlaceholder": "قيم إنجليزية مفصولة بفواصل، مثل low, medium, high",
     "addKeyValue": "إضافة مفتاح وقيمة",
     "noModelOverrides": "لم يتم تكوين أي تجاوزات لهذا النموذج.",
@@ -7754,7 +7988,6 @@
     "customPricingNote": "يمكنك تجاوز التسعير الافتراضي لنماذج محددة. تحظى التجاوزات المخصصة بالأولوية على الأسعار التي يتم اكتشافها تلقائيًا.",
     "editPricing": "تحرير التسعير",
     "viewFullDetails": "عرض التفاصيل الكاملة",
-    "themeCoral": "مرجاني",
     "adaptiveVolumeRouting": "توجيه الحجم التكيفي",
     "adaptiveVolumeRoutingDesc": "وسّع الاتصالات ديناميكيًا بناءً على حجم الحمولة وضغط الإنتاجية.",
     "lkgpToggleTitle": "آخر مزوّد ناجح معروف (LKGP)",
@@ -7849,6 +8082,8 @@
     "compressionDesc": "يمكنك تقليل استخدام الرمز المميز عن طريق ضغط المطالبات قبل إرسالها إلى مقدمي الخدمة",
     "autoCombosTitle": "التركيبات التلقائية",
     "autoCombosDesc": "السماح لهذا المفتاح باستخدام تركيبات auto/* المضمّنة، والتي تختار نموذجًا تلقائيًا من كل موفّر تم إعداده",
+    "ccDiscoveryAliasesTitle": "الأسماء المستعارة لاكتشاف Claude Code",
+    "ccDiscoveryAliasesDesc": "الإعلان عن مرايا توافق claude/... للنماذج والتوليفات التي يمكن لهذا المفتاح الوصول إليها بالفعل",
     "compressionGuidanceFullGuideLink": "دليل الضغط الكامل",
     "compressionGuidanceShow": "التفاصيل",
     "compressionGuidanceHide": "إخفاء التفاصيل",
@@ -8222,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "النسبة المئوية من نافذة السياق",
     "compressionAdaptivePolicyAbsolute": "ميزانية مطلقة للرموز",
     "compressionOutputStylesDescription": "حقن تعليمات تشكيل الاستجابة دون إعادة كتابة مخرجات المزود. ادمج بحرية.",
+    "compressionOutputStylesPreviewNote": "يقوم الطلب بإدخال لغة واحدة فقط: اللغة المكتشفة، وإلا الحزمة الأولى. الكتل المذكورة أعلاه هي متغيرات لكل حزمة، وليست حقنة مدمجة.",
     "mcpAccessibilityDescription": "يحدد نطاق مخرجات أداة MCP (مخزن منفصل).",
     "compressionStylesTileSummary": "{tokens, number} رمز تم توفيره · {runs, plural, one {# تشغيل تم تنسيقه} other {# تشغيلات تم تنسيقها}}",
     "compressionStylesTileEmpty": "لا توجد عمليات تشغيل منسقة بعد.",
@@ -8799,6 +9035,8 @@
     "qdrantHost": "مضيف",
     "qdrantCollection": "مجموعة",
     "catalogVisibilityHint": "تظل معرّفات النماذج المخفية قابلة للاستدعاء بصلاحيات الوصول نفسها.",
+    "exposeCombosOnly": "عرض التركيبات فقط في /v1/models",
+    "exposeCombosOnlyDesc": "يرى العملاء الذين يكتشفون النماذج تلقائيًا تركيباتك (و auto/* ما لم تكن مخفية) بدلًا من نماذج المزوّدين الخام. تستمر معرّفات provider/model الصريحة في التوجيه.",
     "catalogScopeTitle": "قائمة Models API",
     "catalogScopeDesc": "ما تعرضه GET /v1/models لهذا المفتاح. لا يؤدي تضييق القائمة مطلقًا إلى تغيير ما يمكن للمفتاح استدعاؤه.",
     "catalogScopeAll": "كلاهما",
@@ -8918,7 +9156,9 @@
         "financial": "مالي",
         "brazilian": "برازيلي",
         "usa": "الولايات المتحدة",
-        "full": "كامل"
+        "full": "كامل",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (جنوب أفريقيا)"
       },
       "builtinTypes": "الأنواع المضمّنة",
       "types": {
@@ -8932,7 +9172,19 @@
         "ip_address": "عناوين IPv4",
         "ipv6_address": "عناوين IPv6",
         "aws_key": "مفاتيح وصول AWS",
-        "api_key_generic": "مفاتيح API والرموز المميزة"
+        "api_key_generic": "مفاتيح API والرموز المميزة",
+        "iban": "أرقام الحسابات البنكية IBAN",
+        "eu_vat": "أرقام EU VAT",
+        "es_dni_nie": "الاسبانية DNI / NIE",
+        "it_codice_fiscale": "المخطوطة الإيطالية Fiscale",
+        "pl_pesel": "PESEL البولندية",
+        "nl_bsn": "BSN الهولندية",
+        "de_steuer_id": "معرف Steuer الألماني",
+        "se_personnummer": "رقم الشخص السويدي",
+        "za_id": "أرقام ID في جنوب أفريقيا",
+        "za_phone": "أرقام هواتف جنوب أفريقيا",
+        "za_vat": "أرقام VAT في جنوب أفريقيا",
+        "za_tax_ref": "المراجع الضريبية في جنوب أفريقيا"
       },
       "customPatterns": "أنماط مخصصة",
       "customPatternsDesc": "تُستبدل المطابقات بـ [CUSTOM_REDACTED]. حتى {max} نمطًا. تُرفض الأنماط المعرّضة لخطر التراجع الكارثي.",
@@ -9034,7 +9286,8 @@
     "tomlTestPassed": "ناجح",
     "tomlTestFailed": "فاشل",
     "tomlImportError": "تعذر معالجة ملف RTK TOML.",
-    "tomlFileReadError": "تعذر قراءة ملف TOML المحدد."
+    "tomlFileReadError": "تعذر قراءة ملف TOML المحدد.",
+    "viewMode": "وضع العرض"
   },
   "compressionEngineConfig": {
     "loading": "جاري التحميل…",
@@ -9256,7 +9509,8 @@
     "languagePacksList": "حزم اللغات: {packs}",
     "dragToReorder": "اسحب لإعادة ترتيب الخطوة",
     "engine": "المحرك",
-    "intensity": "الشدة"
+    "intensity": "الشدة",
+    "compressionOverride": "تجاوز الضغط"
   },
   "compressionStudio": {
     "noRun": "لا يوجد تشغيل ضغط متاح.",
@@ -9316,7 +9570,8 @@
     "encoderWinner": "الفائز: {winner}",
     "encoder": "المشفر",
     "bytes": "بايتات",
-    "tokensCl100k": "رموز (cl100k)"
+    "tokensCl100k": "رموز (cl100k)",
+    "studioViews": "عروض Studio"
   },
   "omniglyph": {
     "preview": "معاينة",
@@ -9522,7 +9777,9 @@
     "tooltipMinLength": "لا يتم ضغط الرسائل الأقصر من ذلك. أقل = المزيد من الضغط.",
     "tooltipMinSavings": "قم بالضغط فقط إذا كان يحفظ هذا العدد من الرموز المميزة على الأقل.",
     "ultraSettings": "إعدادات الترا",
-    "ultraSettingsDesc": "الضغط الدلالي الذي يعمل بنظام SLM"
+    "ultraSettingsDesc": "الضغط الدلالي الذي يعمل بنظام SLM",
+    "defaultLanguage": "اللغة الافتراضية",
+    "viewMode": "وضع العرض"
   },
   "translator": {
     "title": "مترجم",
@@ -9834,6 +10091,9 @@
     "streamTransformFailed": "فشل تحويل التدفق"
   },
   "usage": {
+    "healthExtraUsageBypass": "نفدت الحصة؛ الاستخدام الإضافي مسموح، لذا تستمر الخدمة.",
+    "healthPaidCreditsBypass": "نفدت الحصة؛ تتيح الأرصدة المدفوعة المتاحة استمرار الخدمة.",
+    "healthFilteringBypass": "نفدت الحصة؛ تصفية الحصة المحلية معطلة، لذا تستمر الخدمة.",
     "title": "الاستخدام",
     "grokExtraUsageCredits": "رصيد استخدام إضافي",
     "grokAutoTopUp": "إعادة تعبئة تلقائية",
@@ -9997,6 +10257,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "حدود المزود",
     "noProviders": "لا يوجد مقدمي خدمات متصلين",
+    "quotaAuthRequired": "المصادقة مطلوبة - سجّل الدخول إلى لوحة التحكم",
+    "quotaAuthRequiredHint": "تعذّر تحميل اتصالات المزوّد لأن جلسة لوحة التحكم مفقودة أو منتهية الصلاحية. سجّل الدخول وحدّث الصفحة للاطلاع على حدود حصتك.",
     "connectProvidersForQuota": "اتصل بموفري خدمة OAuth لتتبع حدود حصص واجهة برمجة التطبيقات (API) واستخدامها.",
     "accountsCount": "الحسابات: {count, plural, one {حساب واحد} other {# حسابات}}",
     "filteredFromCount": "(تمت التصفية من {count})",
@@ -10046,9 +10308,6 @@
     "tierLite": "لايت",
     "tierUnknown": "غير معروف",
     "statTotal": "المجموع",
-    "statCritical": "حرجة",
-    "statAlert": "تنبيه",
-    "statHealthy": "صحي",
     "filterPurchaseTypeLabel": "النوع",
     "filterTierLabel": "الفئة",
     "purchaseAll": "الكل",
@@ -10287,10 +10546,64 @@
     "lastRefreshed": "آخر تحديث",
     "providerQuota": "حصة المزود",
     "providerQuotaHomeHint": "الحالة المباشرة عبر الحسابات المتصلة",
+    "claudeResetCreditDefaultTitle": "إعادة تعيين حد Claude",
+    "confirmRedeemClaudeResetCredit": "يؤدي الاسترداد إلى إعادة تعيين حدود استخدام Claude المؤهلة فورًا واستهلاك هذا الرصيد بشكل دائم.",
+    "claudeResetCreditsModalTitle": "أرصدة إعادة تعيين Claude",
+    "claudeResetCreditsModalExplainer": "أرصدة إعادة تعيين Claude المتاحة وعمليات إعادة تعيين الجلسات الأسبوعية لهذا الحساب.",
     "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
     "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
     "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",
-    "codexPaidCreditsUnlimited": "غير محدود"
+    "codexPaidCreditsUnlimited": "غير محدود",
+    "healthAccountHint": "استنادًا إلى أحدث الملاحظات، وليس فحصًا مباشرًا. حدد حسابًا لعرض التفاصيل.",
+    "healthRecovery": "وقت الاستعادة المتوقع",
+    "healthAvailable": "متاح",
+    "healthRestricted": "مقيد جزئيًا",
+    "healthUnavailable": "غير متاح",
+    "healthPeakHourProtection": "الحماية في ساعات الذروة",
+    "healthCooldown": "فترة الانتظار",
+    "healthQuotaExhausted": "نفدت الحصة",
+    "healthOverview": "نظرة عامة",
+    "layoutFull": "كامل",
+    "layoutCompact": "مضغوط",
+    "healthQuotaError": "تعذرت قراءة الحصة",
+    "healthNoRuntime": "حالة التشغيل غير متاحة",
+    "healthPreviousSnapshot": "فشل آخر تحديث؛ تُعرض النتيجة السابقة",
+    "healthPreviousFailure": "فشل آخر طلب؛ انتهت فترة الانتظار",
+    "healthAwaitingSync": "مضى وقت إعادة التعيين؛ بانتظار المزامنة",
+    "healthVerdictUnavailable": "نتيجة التحقق من التوافر غير متاحة؛ تُعرض مستويات الحصة فقط",
+    "healthSummaryFailed": "تعذرت قراءة ملخص التشغيل؛ قد تكون معلومات قفل النماذج ناقصة",
+    "healthRuntimeObserved": "حُدثت حالة التشغيل {time}",
+    "healthQuotaObserved": "رُصدت الحصة {time}",
+    "healthOldestQuota": "أقدم لقطة للحصة: {time}",
+    "healthRecoveryUnknown": "وقت الاستعادة غير معروف",
+    "healthDetailsHint": "انقر لعرض التفاصيل والإجراءات",
+    "healthFiveHour": "5 ساعات",
+    "healthOverall": "الإجمالي",
+    "healthAction": "يتطلب إجراءً",
+    "healthTitle": "توفر الحسابات",
+    "healthDrag": "اسحب لتغيير ترتيب المزوّدين",
+    "healthDragPosition": "{provider}, {count, plural, zero {الموضع {position, number} من #} one {الموضع {position, number} من #} two {الموضع {position, number} من #} few {الموضع {position, number} من #} many {الموضع {position, number} من #} other {الموضع {position, number} من #}}",
+    "healthResetOrder": "استعادة الترتيب الافتراضي",
+    "healthPool": "مجموعة {name}",
+    "healthOtherPool": "الحساب نفسه · {pool}: {status} (المتبقي {remaining})",
+    "healthIncluded": "{count, plural, zero {يتضمن # حسابات مقيّدة جزئيًا} one {يتضمن حسابًا واحدًا مقيّدًا جزئيًا (العدد: #)} two {يتضمن حسابين مقيّدين جزئيًا (العدد: #)} few {يتضمن # حسابات مقيّدة جزئيًا} many {يتضمن # حسابًا مقيّدًا جزئيًا} other {يتضمن # حساب مقيّد جزئيًا}}",
+    "healthBannerUnavailable": "{count, plural, zero {# حسابات غير متاحة مؤقتًا} one {حساب واحد غير متاح مؤقتًا (العدد: #)} two {حسابان غير متاحين مؤقتًا (العدد: #)} few {# حسابات غير متاحة مؤقتًا} many {# حسابًا غير متاح مؤقتًا} other {# حساب غير متاح مؤقتًا}}",
+    "healthBannerAvailable": "{count, plural, zero {جميع الحسابات متاحة (عددها #)} one {الحساب الوحيد متاح (العدد: #)} two {كلا الحسابين متاحان (العدد: #)} few {الحسابات الـ# كلها متاحة} many {جميع الحسابات متاحة (عددها # حسابًا)} other {جميع الحسابات متاحة (عددها # حساب)}}",
+    "healthLegendHide": "إخفاء مفتاح الرموز",
+    "healthLegendShow": "إظهار مفتاح الرموز",
+    "healthLegendOk": "الممتلئ = الحصة المتبقية؛ شبه الشفاف = المستخدم.",
+    "healthLegendCooldown": "نفدت حصة {window}. الممتلئ = وقت الانتظار المنقضي؛ شبه الشفاف = الانتظار المتبقي.",
+    "healthLegendAction": "انتهى التفويض أو حُظر الحساب؛ الانتظار لن يعالج ذلك.",
+    "healthLegendPartial": "لا يزال متاحًا. القمة الصفراء = تقييد نموذج أو مجموعة.",
+    "healthWaited": "انقضى من الانتظار {percent}",
+    "healthWait": "متبقي {duration} (الاستعادة عند {time})",
+    "healthFastest": "أقرب استعادة بعد {duration}",
+    "healthRatio": "{available, plural, zero {متاح # / {active, number}} one {متاح # / {active, number}} two {متاح # / {active, number}} few {متاح # / {active, number}} many {متاح # / {active, number}} other {متاح # / {active, number}}}",
+    "healthCd5": "5 ساعات · فترة الانتظار",
+    "healthCdw": "أسبوعيا · فترة الانتظار",
+    "healthRecentSuccessBypass": "يسمح التوجيه بهذا الحساب لأن طلبًا نجح مؤخرًا.",
+    "healthPurchasedBalanceBypass": "يتيح الرصيد المشترى الاستمرار بعد نفاد الحصة المضمّنة.",
+    "healthCutoffAtRequest": "تُفحص حدود الحصة المباشرة عند توجيه الطلب."
   },
   "modals": {
     "waitingAuth": "في انتظار التصريح",
@@ -11077,7 +11390,8 @@
       "message": "رسالة",
       "error": "خطأ",
       "completion": "الإكمال"
-    }
+    },
+    "statusFilter": "الحالة"
   },
   "templateNames": {
     "simple-chat": "دردشة بسيطة",
@@ -11258,7 +11572,8 @@
     "minutesAgo": "منذ {minutes}m",
     "hoursAgo": "منذ {hours}h",
     "daysAgo": "منذ {days}d",
-    "entries": "إدخالات"
+    "entries": "إدخالات",
+    "viewSwitcherAria": "عرض ذاكرة التخزين المؤقت"
   },
   "proxyConfigModal": {
     "levelGlobal": "عالمي",
@@ -11371,6 +11686,11 @@
     "gitlabDuoSetupMessage": "لم يتم تكوين GitLab Duo OAuth. قم بتسجيل تطبيق OAuth على {applicationsUrl} مع URI إعادة التوجيه {redirectUri} والنطاقات \"{scopes}\"، ثم قم بتعيين {clientIdEnv} (ويمكنك أيضًا {clientSecretEnv}) وأعد التشغيل.",
     "gitlabDuoSetupDescription": "بعد تسجيل التطبيق وضبط متغيرات البيئة على هذه النسخة من OmniRoute، انقر على متابعة لبدء تسجيل الدخول عبر OAuth.",
     "continue": "تابع",
+    "copilotPolicyTitle": "المزود التجريبي: حالة السياسة غامضة",
+    "copilotPolicyLine1": "يتصل OmniRoute عبر api.githubcopilot.com، والذي لم ينشره GitHub باعتباره استدلالًا عامًا لجهة خارجية API. هذا التكامل تجريبي وقد يتغير دون إشعار.",
+    "copilotPolicyLine2": "يجوز ربط حساب GitHub الخاص بك فقط. لا تشارك أبدًا بيانات الاعتماد أو الحسابات المجمعة أو تحاول تجاوز حدود خطتك.",
+    "copilotPolicyLine3": "يتلقى مستخدمو الخطة المجانية وخطة الطلاب اختيارًا تلقائيًا للنموذج فقط. تظل شروط خطة Copilot الخاصة بك وأي حدود للاستخدام هي مسؤوليتك.",
+    "copilotPolicyAcknowledge": "أنا أفهم، الاتصال",
     "tabPasteSetupToken": "رمز الإعداد",
     "claudeSetupTokenDescription": "شغّل `claude setup-token` في الطرفية والصق الرمز الذي يطبعه. الرمز صالح لمدة عام واحد ولا يملك رمز تحديث. يرسل OmniRoute طلب اختبار واحدًا إلى Anthropic قبل حفظه.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11766,7 @@
     "tableHealth": "السلامة",
     "tableUsage": "الاستخدام",
     "tableActions": "الإجراءات",
+    "moreActions": "إجراءات إضافية",
     "test": "اختبار",
     "edit": "تحرير",
     "delete": "حذف",
@@ -11525,7 +11846,7 @@
     "bulkImportNoValidEntries": "لم يتم العثور على إدخالات صالحة. تحقق من التنسيق وحاول مرة أخرى.",
     "bulkImportSuccess": "اكتمل الاستيراد: تم إنشاء {created}، وتحديث {updated}، وفشل {failed}",
     "bulkImportErrorLine": "السطر {line}: {reason}",
-    "bulkImportMaxExceeded": "الحد الأقصى 100 وكيل لكل عملية استيراد",
+    "bulkImportMaxExceeded": "الحد الأقصى {max} وكيل لكل عملية استيراد",
     "bulkImportPreview": "معاينة",
     "clearAssignment": "(مسح التعيين)",
     "bulkProxyAssignment": "تعيين بروكسي بالجملة",
@@ -11586,6 +11907,7 @@
     "poolSetAsideKindIpQuota429": "تقييد معدل عنوان IP ‏(429)",
     "poolSetAsideKindSlow": "استجابات بطيئة",
     "poolSetAsideKindGeoBlocked": "منطقة محظورة (403/451)",
+    "poolSetAsideKindOperatorReported": "عطل أبلغ عنه المشغل",
     "poolSetAsideUntil": "يعود إلى التناوب {endsAt}",
     "poolSetAsideRepeat": "مستبعد {count, plural, one {# مرة} other {# مرات}}",
     "poolUnknownAddress": "عنوان غير معروف",
@@ -11695,7 +12017,6 @@
     "exportCodeTitle": "تصدير الرمز",
     "exportShort": "تصدير",
     "noStateToExport": "لا توجد حالة لبيئة الاختبار لتصديرها.",
-    "closeExportModal": "إغلاق نافذة التصدير المنبثقة",
     "close": "إغلاق",
     "exportRealKeyWarning": "تحذير أمني: تم حظر التصدير — تم اكتشاف مفتاح API حقيقي في المخرجات. يرجى إعادة تعيين مفتاح API الخاص بك والمحاولة مرة أخرى.",
     "placeholderHintPrefix": "استبدل",
@@ -11808,7 +12129,8 @@
       "nextButton": "التالي",
       "runButton": "تشغيل",
       "promptPlaceholder": "أدخل رسالتك… (اضغط Enter للإرسال، وShift+Enter لسطر جديد)"
-    }
+    },
+    "playgroundTabs": "أوضاع ساحة التجربة"
   },
   "miniPlayground": {
     "endpoint": "نقطة النهاية",
@@ -11879,7 +12201,8 @@
     "assistant": "المساعد",
     "errorLabel": "خطأ",
     "requestFailed": "فشل الطلب",
-    "stop": "إيقاف"
+    "stop": "إيقاف",
+    "messageInputAria": "الرسالة"
   },
   "requestLogger": {
     "recording": "التسجيل",
@@ -12066,8 +12389,22 @@
       "resilienceRotations": "{count} تبديلات للحساب",
       "resilienceRetried": "إعادة المحاولة لدور فارغ",
       "resilienceContinued": "استئناف في منتصف التدفق",
-      "resilienceRecovered": "تم الاسترداد عبر إجراء المرونة"
-    }
+      "resilienceRecovered": "تم الاسترداد عبر إجراء المرونة",
+      "conversationContext": "سياق المحادثة",
+      "goToBottom": "الانتقال إلى الأسفل",
+      "liveRefreshOn": "التحديث المباشر: مفعّل",
+      "liveRefreshOff": "التحديث المباشر: متوقف",
+      "liveRefresh": "التحديث المباشر",
+      "continuesFromParent": "يتابع من الأصل",
+      "continuesFrom": "يتابع من {id}",
+      "viewConversation": "عرض المحادثة",
+      "openConversation": "فتح المحادثة {id}"
+    },
+    "tableLabel": "سجلات الطلبات",
+    "throughputPostFirstToken": "ما بعد الرمز الأول",
+    "throughputEndToEnd": "من البداية إلى النهاية",
+    "throughputRate": "{value} رمز/ثانية",
+    "throughputExplanation": "يستخدم كلا المعدلين العدد الأكبر بين رموز الإخراج ورموز الاستدلال. يستثني معدل ما بعد الرمز الأول قيمة TTFT صالحة؛ وإلا فإنه يستخدم المدة الكاملة. أما معدل البداية إلى النهاية فيستخدم دائمًا المدة الكاملة. قد يحقق الرد المخزّن مؤقتًا معدل تسليم لحظيًا مرتفعًا دون أن يكون توليد النموذج أسرع."
   },
   "proxyLogger": {
     "filterAll": "الكل",
@@ -12112,7 +12449,9 @@
     "colServedBy": "مقدم بواسطة",
     "filterTraffic": "حركة المرور",
     "filterTests": "اختبارات",
-    "filterSource": "المصدر"
+    "filterSource": "المصدر",
+    "tableLabel": "سجلات الوكيل",
+    "sortLogs": "ترتيب السجلات"
   },
   "endpointOptions": {
     "speech": "تحويل النص إلى كلام",
@@ -12197,7 +12536,8 @@
     "statusExhausted": "منهك",
     "statusAlerting": "تنبيه",
     "statusError": "خطأ",
-    "moreSuffix": "+{count} المزيد"
+    "moreSuffix": "+{count} المزيد",
+    "feedFilterLabel": "تصفية الأحداث"
   },
   "quotaShare": {
     "weightPercent": "الوزن %",
@@ -12364,7 +12704,10 @@
     "ungroupedTitle": "غير مجمع",
     "ungroupedHint": "هذه المجمعات غير مخصصة لمجموعة معروفة. قم بتحرير مجمع لنقله إلى مجموعة حقيقية.",
     "removeFailed": "تعذّرت إزالة هذا المجمّع.",
-    "dismiss": "تجاهل"
+    "dismiss": "تجاهل",
+    "allocationsHeading": "التخصيصات",
+    "wizardRemoveDimension": "إزالة البُعد",
+    "wizardRemoveKey": "إزالة المفتاح"
   },
   "plugins": {
     "title": "الإضافات",
@@ -12522,7 +12865,8 @@
       "settingsUpdateFailed": "فشل تحديث الإعدادات",
       "serviceRevealApiKey": "قام {actor} بكشف مفتاح API لـ {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "تجاهل الخطأ"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12999,21 @@
       "goNow": "الانتقال الآن",
       "message": "أصبح MITM Proxy موجودًا الآن ضمن AgentBridge.",
       "title": "تم نقل هذه الصفحة"
-    }
+    },
+    "dnsOn": "DNS مفعّل",
+    "dnsOff": "DNS معطّل",
+    "showServerSettings": "إظهار إعدادات الخادم",
+    "hideServerSettings": "إخفاء إعدادات الخادم",
+    "upstreamCaTesting": "جارٍ الاختبار…",
+    "removeMapping": "إزالة التعيين",
+    "mappingSourcePlaceholder": "مثلاً، gemini-3.6-flash-medium، أو * لجميع النماذج غير المعيّنة",
+    "mappingWildcardHint": "استخدم * كمصدر لتوجيه كل نموذج لا يملك تعيينًا صريحًا عبر OmniRoute إلى الهدف المحدد. تتفوق دائمًا مطابقات المصدر التامة على *.",
+    "wizardDetectingModels": "جارٍ اكتشاف النماذج من حركة المرور المعترضة...",
+    "wizardDetectedModels": "عُثر على {count, plural, one {نموذج واحد} other {# نماذج}} في حركة المرور المعترضة. حدد النماذج التي تريد إضافتها:",
+    "wizardSelectedModels": "تم تحديد {count, plural, one {نموذج واحد} other {# نماذج}}. ستعيّنها إلى نماذج OmniRoute في الشاشة التالية.",
+    "wizardAddModels": "إضافة {count, plural, one {نموذج واحد} other {# نماذج}}",
+    "wizardNoModelsDetected": "لم يتم اكتشاف أي نماذج بعد. استخدم {agent} لإجراء طلب، ثم شغّل هذا المعالج مجددًا لاكتشاف النماذج تلقائيًا من حركة المرور.",
+    "wizardNoModelsHint": "أو أغلق هذا المعالج وأضف التعيينات يدويًا في بطاقة الوكيل."
   },
   "providerStats": {
     "unknownError": "خطأ غير معروف",
@@ -12685,7 +13043,12 @@
     "avgTtft": "متوسط TTFT",
     "avgTotal": "المتوسط الإجمالي",
     "requestTelemetry": "بيانات تتبع الطلب",
-    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)"
+    "requestTelemetryDescription": "تفصيل مسار المعالجة المكون من 7 مراحل (آخر 5 دقائق)",
+    "title": "إحصاءات مزوّدي الخدمة",
+    "description": "حركة المرور وزمن الاستجابة ومعدلات النجاح لكل مزوّد خدمة ولكل نموذج",
+    "combo": "مركّب",
+    "toggleModels": "إظهار نماذج {provider}",
+    "windowSince": "منذ {date}"
   },
   "relay": {
     "title": "وكلاء الترحيل بلا خادم",
@@ -12846,7 +13209,18 @@
     "noRequestBody": "لا يوجد جسم طلب.",
     "noResponseBody": "لا يوجد جسم استجابة.",
     "formatted": "منسق",
-    "raw": "خام"
+    "raw": "خام",
+    "requestCount": "{count, plural, one {طلب واحد} other {# طلبات}}",
+    "expandList": "توسيع القائمة",
+    "collapseList": "طي القائمة",
+    "snippetLanguage": "لغة المقتطف",
+    "headersTable": "الترويسات",
+    "showSecrets": "إظهار القيم السرية",
+    "maskSecrets": "إخفاء القيم السرية",
+    "llmNotAvailable": "البيانات الوصفية لـ LLM غير متاحة لهذا الطلب.",
+    "llmStreamYes": "نعم (SSE)",
+    "llmStreamNo": "لا",
+    "llmTotalTokens": "الإجمالي: {count} من الرموز"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13325,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "أكواد CLI",
     "pageSubtitle": "أدوات الكود التي تشير إلى OmniRoute",
     "searchPlaceholder": "البحث في CLI…",
     "filterDetectionLabel": "الكشف",
@@ -12961,7 +13334,8 @@
     "detectionNotFound": "غير موجود",
     "baseUrlAll": "الكل",
     "baseUrlFull": "كامل",
-    "baseUrlPartial": "جزئي"
+    "baseUrlPartial": "جزئي",
+    "title": "كود سطر الأوامر"
   },
   "cliAgents": {
     "pageTitle": "وكلاء CLI",
@@ -13305,7 +13679,8 @@
     "colReliabilityHelp": "نسبة الاستدعاءات التي استجاب لها هذا المزوّد فعليًا خلال آخر 24 ساعة. تعني الشرطة أنه تعامل مع حركة مرور أقل من أن تكفي لتحديد معدل.",
     "reliabilitySample": "نجح {successes} من أصل {requests} استدعاء خلال آخر {hours} ساعة",
     "reliabilityTooFew": "فقط {requests} استدعاء خلال آخر {hours} ساعة — عدد لا يكفي لتحديد معدل",
-    "reliabilityNoTraffic": "لم تُسجّل أي استدعاءات خلال آخر 24 ساعة"
+    "reliabilityNoTraffic": "لم تُسجّل أي استدعاءات خلال آخر 24 ساعة",
+    "categoryFilter": "فئة المهمة"
   },
   "discovery": {
     "title": "اكتشاف موفري الخدمة",
@@ -13330,7 +13705,11 @@
     "method": "الطريقة",
     "auth": "المصادقة",
     "feasibility": "الجدوى",
-    "models": "النماذج"
+    "models": "النماذج",
+    "provider": "المزوّد",
+    "status": "الحالة",
+    "endpoint": "نقطة النهاية",
+    "actions": "الإجراءات"
   },
   "noAuthProvider": {
     "title": "لا تتطلب مصادقة",
@@ -13379,7 +13758,8 @@
     "ownProxy": "وكيل خاص",
     "freeTierPause": "تم إيقاف النموذج {model} مؤقتًا (429)، وسيعود في {time}",
     "freeTierPauseProvider": "تم الإيقاف مؤقتًا (429)، وسيعود في {time}",
-    "freeTierPauseNote": "إيقاف مؤقت داخل العملية على هذه النسخة"
+    "freeTierPauseNote": "إيقاف مؤقت داخل العملية على هذه النسخة",
+    "proxyType": "نوع الوكيل"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13932,10 @@
         "description": "إنجاز مخفي في انتظارك...",
         "criteria": "أكمل الإنجاز المخفي للكشف عن هذه الشارة."
       }
-    }
+    },
+    "leaderboardTitle": "لوحة المتصدرين",
+    "leaderboardDescription": "التصنيفات والإنجازات عبر مفاتيح API الخاصة بك",
+    "badgeLocked": "مقفل"
   },
   "featureFlags": {
     "title": "علامات الميزات",
@@ -13610,7 +13993,9 @@
       "disabled": "معطّل",
       "dual": "مزدوج",
       "alias": "اسم مستعار",
-      "canonical": "معياري"
+      "canonical": "معياري",
+      "fail_closed": "حظر (fail_closed)",
+      "count_as_zero": "احتساب كـ $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14142,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "إرجاع 502 لتوقفات البنية التحتية ذات الأولوية المحمية",
         "description": "أعِد 502 بدلًا من 503 عندما يوقف هدف ذو أولوية واحتياطي مخصص للحصة فقط المجموعة لسبب يمكن إثبات أنه ليس متعلقًا بالحصة: قاطع دائرة مفتوح لمزود أو تخطٍ تنبؤي بسبب زمن الاستجابة."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "تسجيل معرفات الحسابات",
+        "description": "تضمين بادئة الحساب في أسطر سجلات المصادقة (AUTH) (مثالاً: \"استخدام حساب '<provider>': abc12345...\"). معطَّل افتراضياً لضمان حجب معرِّفات الحساب من سجلات العمليات المشتركة/متعددة المستأجرين. مستقل عن وضع الاستكشاف (Debug Mode)؛ تفعيل وضع الاستكشاف لا يُظهر هذا الإعداد."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "تعطيل تسجيل الدخول بكلمة المرور عند استخدام OIDC",
+        "description": "عند تمكين OIDC، يتم تعطيل تسجيل الدخول بكلمة المرور بحيث لا يمكن للمستخدمين المصادقة إلا عبر تسجيل الدخول الأحادي (Single Sign-On) لـ OIDC. عند التعطيل (الافتراضي)، يتوفر كل من تسجيل الدخول بكلمة المرور وOIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "عُقد مزودي الصوت البعيدة",
+        "description": "السماح لمسارات /v1/audio/* باستخدام عُقد مزودين متوافقة مع OpenAI ومستضافة خارج localhost. مُعطّل افتراضيًا — يؤدي توجيه الصوت إلى مضيف بعيد إلى تغيير هوية حركة المرور الصادرة (egress identity) ويجب أن يكون قرارًا صريحًا من المشغّل. عُقد Loopback مسموح بها دائمًا ولا تتأثر."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "عُقد مزودي إعادة الترتيب (Rerank) البعيدة",
+        "description": "السماح لـ POST /v1/rerank (وخطوة rerank في محرك الذاكرة، التي تستدعيها عبر loopback) باستخدام عُقد مزودين متوافقة مع OpenAI ومستضافة خارج localhost — كجهاز على شبكة LAN أو نظير Tailscale يُشغّل TEI أو Infinity أو vLLM، إلخ. مُعطّل افتراضيًا — يؤدي التوجيه إلى مضيف بعيد إلى تغيير هوية حركة المرور الصادرة (egress identity) ويجب أن يكون قرارًا صريحًا من المشغّل. عُقد Loopback مسموح بها دائمًا ولا تتأثر. يجب أيضًا أن تجتاز العُقد البعيدة سياسة outbound URL الخاصة بالمزود."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "حارس الخروج المشترك لتدوير الشبكة",
+        "description": "عند حدوث استثناء في الشبكة (انتهاء المهلة، رفض/إعادة تعيين الاتصال) لمنفّذ تدوير الحسابات المتعددة، وعندما لا يملك الحساب المتعثر بروكسي مخصصًا، يتم تطبيق فترة تهدئة قصيرة وتخطي الحسابات الأخرى الخالية من البروكسي لبقية الطلب بدلاً من إعادة محاولة كل منها. مفعّل افتراضيًا (آمن: لا يتم تغيير عنوان IP للخروج، بل يقلل فقط من زمن الاستجابة ومخاطر فترة التهدئة على حسابات الخروج المشترك). عطّله لاستعادة التمرير الفوري عند أول استثناء لحساب بلا بروكسي."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "تخطي البروكسيات الفاشلة مؤخرًا",
+        "description": "تتوقف مجمّعات البروكسي وتدوير الحسابات في opencode عن إعادة استخدام بروكسي فشل للتو (فحص TCP مرفوض، أو تم تلقي خطأ 429 عبره) لفترة لكل عملية تتضاعف مع كل تكرار حتى حد أقصى. لا يتم تسجيل أي حالة للبروكسي؛ ومع تنحية كل مرشح جانبًا يظل الاختيار دون تغيير. مفعّل افتراضيًا: ترتيب التحديد مطابق تمامًا للتدوير العادي فقط عند ضبط PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "ترتيب مجمّع الخروج المشترك",
+        "description": "بالنسبة للمزودين الذين تُقسّم حصتهم حسب عنوان الخروج، يتم تصنيف عضو المجمّع الذي يتشارك عنوان خروج مرصود لعضو تم رفضه مؤخرًا أسفل الأعضاء السليمين مباشرة. ترتيب فقط، دون استبعاد أبدًا. يتطلب تفعيل PROXY_SKIP_RECENTLY_FAILED الذي ينتج إشارة الرفض التي يعتمد عليها. معطّل افتراضيًا: ترتيب التحديد مطابق تمامًا للتدوير العادي."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "تسجيل إسناد التدوير",
+        "description": "يسجل تدوير Opencode الحساب الذي تمت خدمته أو تخطيه (معرّفات مقنّعة فقط، دون معرّفات الحسابات الكاملة مطلقًا) ويربط إدخالات سجل البروكسي بطلبها، ليتمكن المشغّل من تمييز الحسابات التي تم تخطيها عن الحسابات غير المستخدمة. معطّل افتراضيًا: لا تتم كتابة أسطر سجلات إضافية، ولا أعمدة إضافية."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "مراقبة خروج مجمّع البروكسي",
+        "description": "اعرض، أسفل مجمّع البروكسي في لوحة التحكم، عدد عناوين IP المرصودة لحركة الخروج التي خدمت أعضاءه خلال آخر 24 ساعة، وعدد الاتصالات التي استخدمتها، والحد الأقصى المرصود خلف عنوان IP واحد. للقراءة فقط، وتُحسب من سجل البروكسي، ولا تُستخدم إطلاقًا للتوجيه. معطلة افتراضيًا: يظل محرر المجمّع دون تغيير ويُرجع مسار المراقبة null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "خروج مشغّل البروكسي",
+        "description": "قبول العناوين المرصودة المؤرخة المُرسلة من المشغّل لكل عضو في المجمّع ودمجها مع قراءة السجل للعرض وترتيب المجمّع. معطلة افتراضيًا: يستجيب مسار الإرسال بالرمز 404 وتتصرف عمليات قراءة المجمّع تمامًا كما كانت سابقًا."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "تدوير OpenCode عند توقف ردود Responses",
+        "description": "بالنسبة لمنفّذ OpenCode، راقب أول بايت من متن رد Responses المتدفق (النافذة: RESPONSES_FIRST_BYTE_TIMEOUT_MS، الافتراضي 15000). يتم التعامل مع تدفق Responses برمز 2xx الذي يظل صامتًا بعد انتهاء النافذة على أنه متوقف: يتم إدخال الحساب في فترة تهدئة وتدوير الطلب إلى الحساب التالي لمرة واحدة؛ وأي توقف ثانٍ يفشل سريعًا. معطل افتراضيًا: تحتفظ التدفقات المتوقفة بفترة الانتظار المعتادة حتى انتهاء مهلة جاهزية التدفق."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "تدوير OpenCode عند user_blocked",
+        "description": "بالنسبة لمنفّذ OpenCode، عندما يستجيب الخادم المصدر (upstream) بالرمز 403 أو 451 حاملاً رفض user_blocked (وليس حظرًا جغرافيًا أو رفضًا لبصمة Cloudflare)، يتم إدخال الحساب المرفوض في فترة تهدئة وتدوير الطلب إلى الحساب التالي لمرة واحدة كحد أقصى لكل طلب؛ ويتم إرجاع الرفض الثاني كما هو دون علامة نجاح. معطل افتراضيًا: يمكن أن يبدو التوجيه لتجاوز حظر مستخدم من المصدر كمحاولة تهرب وينشر علامة الحظر عبر أسطول الحسابات بالكامل، لذا يُعاد الرفض دون تغيير ما لم يقم المشغّل بتفعيل ذلك."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "تراجع التبديل عند الفشل المؤقت لـ OpenCode",
+        "description": "في تدوير الحسابات المتعددة لـ OpenCode، يتم التوقف مؤقتًا قبل الإرسال إلى الحساب التالي بمجرد فشل محاولتين متتاليتين بخطأ مؤقت من الخادم المصدر (5xx أو رفض 400 فارغ). يبدأ التوقف المؤقت عند 1.5 ثانية، ويتضاعف مع كل فشل متتالٍ إضافي، وبحد أقصى 6 ثوانٍ لكل توقف مؤقت و10 ثوانٍ لكل طلب، ويتم تخطيه عند انقطاع اتصال العميل، كما يتم تحرير نص الاستجابة الفاشلة قبل الانتظار. معطل افتراضيًا: يظل التبديل عند الفشل فوريًا."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "إعادة محاولة الدور الفارغ عند التفريغ",
+        "description": "في أدوار البث المترجمة، عندما لا يحمل دور الخادم المصدر أي محتوى صالح للاستخدام (إكمال يقتصر على الاستدلال فقط أو عدم وجود أي أجزاء ذات قيمة)، يتم إجراء محاولات إعادة محدودة عبر مسار بيانات الاعتماد العادي (حتى `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) قبل عرض أي شيء للعميل. معطل افتراضيًا: تحتفظ الأدوار الفارغة بالسلوك الحالي (200 فارغة أو 502 بمحتوى فارغ)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "استعادة البث الفارغ عبر الاتصال الشقيق",
+        "description": "بث Claude/Codex: بعد حدث دورة الحياة الأول، يتم إجراء فحص موجز (حتى ثانية واحدة / 64 KiB) بحثًا عن مخرجات صالحة للاستخدام؛ وأي بث ينتهي بدون محتوى يتحول إلى فشل empty_content يستهلك إعادة المحاولة المحدودة الحالية على اتصال مؤهل آخر (بدون فترة تهدئة، وبدون حظر النموذج)، وتتوقف مجموعات الترتيب الدوري (round-robin) عن إعادة المحاولة بمجرد انقطاع اتصال العميل. كما يعامل أيضًا refusal وpause_turn وmodel_context_window_exceeded كنقاط نهاية فارغة مشروعة داخل الفحص. معطل افتراضيًا: تظل الجاهزية، ومعالجة المحتوى الفارغ، وإعادة محاولات المجموعات كما هي تمامًا من قبل."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "فحص مخرجات البث المتأخرة",
+        "description": "فحص مخرجات البث: بعد أول 64 جزءًا مُمررًا، يستمر في أخذ عينة بمعدل جزء واحد من كل 16 جزءًا بحثًا عن أول مخرج مرئي، وبذلك فإن المخرجات التي تبدأ متأخرة تظل تميّز البث بأنه قد أصدر مخرجات. وبناءً عليه، يظل أي خطأ 5xx منفرد بعد تلك النقطة محصورًا في نطاق الطلب بدلاً من تسجيل حظر خاص بالنموذج فقط، كما يُملأ firstOutputMs بأثر رجعي لأول جزء مخرجات في فجوة أخذ العينات الحالية. معطل افتراضيًا: يتم فقط فحص أول 64 جزءًا مُمررًا، تمامًا كما كان من قبل."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "التوقف المبكر لـ OpenCode عند تقييد المعدل 429",
+        "description": "بالنسبة لتدوير الحسابات المتعددة في OpenCode، أوقف موجة الحسابات عند أول خطأ 429 مصنف كحد معدل حقيقي (ترويسة Retry-After قابلة للتحليل، أو نص استجابة يحدد حد المعدل/الاستخدام) وأعد خطأ 429 من الخادم المصدر دون تغيير (الحالة، ونص الاستجابة، وترويسات Retry-After والحصة)، بدلاً من تجربة كل حساب متبقٍ. تستمر أخطاء 429 غير المصنفة في التدوير. معطل افتراضيًا: الطبقة المجانية محدودة لكل عنوان IP صادر (#9611)، لذلك يتم تدوير كل خطأ 429 إلى الحساب التالي، وتعيد الموجة المستنفدة آخر خطأ 429 من الخادم المصدر."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "تعليق واستئناف 429 في OpenCode",
+        "description": "بالنسبة لتدوير الحسابات المتعددة في OpenCode، قم بتعليق الطلب بعد تكرار أخطاء 429 العابرة (أو ظهور مؤشر حديث على إجهاد التجمع) مع إرسال نبضات فحص (heartbeat)، ثم أعد تشغيل جولة واحدة مقيدة بما يصل إلى 3 حسابات متتالية بدلاً من نشر الطلب على المجموعة بأكملها. معطل افتراضيًا: يتم تدوير كل خطأ 429 إلى الحساب التالي تمامًا كما كان سابقًا."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "إعادة المحاولة عند تعثر جاهزية البث",
+        "description": "بالنسبة لطلبات الدردشة المتدفقة، عندما يتعثر أول نص استجابة من الخادم المصدر قبل إصدار حدث صالح للاستخدام، قم بإجراء محاولة ثانية محددة عبر مسار التوجيه نفسه وبميزانية الجاهزية نفسها وبدون فرض أي عقوبة على الحساب. معطل افتراضيًا: يؤدي تعثر نص الاستجابة الأول إلى فشل الطلب دون إعادة المحاولة."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "إعادة تحديد التجمع عند 429 في OpenCode",
+        "description": "بالنسبة لتدوير الحسابات المتعددة في OpenCode، بعد تلقي خطأ 429 من مزود يعتمد تقسيم الحصص حسب عنوان الخروج (egress-bucketed) على حساب بدون وكيل ضمن سياق تجمع محيط، اطلب عضوًا آخر من تجمع الاتصالات للمحاولة التالية بدلاً من إعادة المحاولة باستخدام عنوان الخروج نفسه. يرتب ولا يستبعد إطلاقًا: يحافظ التجمع المستنفد على السلوك الحالي. معطل افتراضيًا: يتم تدوير كل خطأ 429 إلى الحساب التالي تمامًا كما كان سابقًا."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "بصمة عميل OpenCode v2",
+        "description": "إرسال بصمة عميل OpenCode v2 CLI في طلبات OpenCode Zen/Go (#16571):‏ User-Agent opencode/latest/<2.x>/cli وx-opencode-client cli، والاحتفاظ بـ User-Agent الخاص بالعميل فقط عندما يكون عميل OpenCode من إصدار 2.x، وفي طلبات الفئة المجانية المقيدة عدم إرسال x-opencode-request، وعكس الجلسة على x-opencode-session-id/x-session-affinity/x-session-id، وتطبيق مخططات read/shell لـ v2 CLI على الأدوات النائبة المحقونة وإسقاط tool_choice بقيمة \"none\". معطّل افتراضيًا: يحتفظ كل طلب OpenCode بالهوية الحالية والترويسات وجسم الطلب بايت ببايت."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "قفل IP الصادر لـ OpenCode Zen",
+        "description": "إضافة OpenCode Zen (opencode-zen) إلى عائلة قفل عنوان IP الصادر الافتراضية، بحيث يؤدي تلقي 429 في أحد اتصالات Zen إلى تهدئة كل اتصال Zen شقيق يشاركه عنوان IP الصادر أيضاً. معطّل افتراضيًا: يتم تمييز Zen بمفتاح ويدخل كل اتصال في فترة تهدئة بمفرده، تماماً كما كان من قبل. تكون لأي قيمة صريحة لـ OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS الأولوية دائمًا على هذا الخيار."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "قواعد أخطاء النص الكامل لـ OpenCode",
+        "description": "السماح لقواعد أخطاء OpenCode المدمجة (opencode-zen وopencode-go وopencode-cli) بالمطابقة مع كامل نص خطأ المصدر، بحيث تؤدي علامات متن الاستجابة مثل organization_quota_exceeded أو \"monthly usage limit reached\" إلى تصنيف 429 على أنه استنفاد للحصة مع قفل على نطاق الاتصال. معطّل افتراضيًا: لا تطّلع تلك القواعد إلا على رمز الخطأ المهيكل، ويظل مثل هذا الخطأ 429 حدًا قصير المدى لمعدل الطلبات، تماماً كما كان من قبل."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "قواعد أخطاء النص الكامل لـ Cloudflare Workers AI",
+        "description": "السماح لقاعدة أخطاء Cloudflare Workers AI المدمجة بالمطابقة مع كامل نص خطأ المصدر، بحيث يُصنَّف متن الاستجابة لخطأ 429 المتضمن \"daily free allocation\" على أنه استنفاد للحصة بدلاً من حد قصير لمعدل الطلبات. معطّل افتراضيًا: لا تطّلع القاعدة إلا على رمز الخطأ المهيكل، تماماً كما كان من قبل."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "مرشح الإمكانيات",
+        "description": "رفض الطلبات قبل الإرسال عندما يفتقر النموذج المستهدف إلى الإمكانيات المطلوبة (الرؤية، الأدوات، المخرجات المنظمة، نافذة السياق). يحمي الطلبات المباشرة إلى مزود واحد التي تتجاوز مرشح التوافق لطبقة combo-layer."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "تجاهل الاستخدام غير المسعّر في حصص USD",
+        "description": "احتساب استخدام النماذج التي ليس لها سعر بقيمة $0 في حصص الاستخدام بالدولار الأمريكي (USD) لكل مفتاح بدلاً من معاملة الحصة على أنها تم تجاوزها. معطّل افتراضياً: يمكن للنموذج غير المسعّر أو الاسم المستعار للتوجيه إخفاء الإنفاق الفعلي، لذا تُغلق الحصة عند الفشل (fails closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "تفعيل وحدة OmniRoute Radar (شاشات خلاصة الكتالوج والمزامنة). معطّل افتراضياً؛ حيث يؤدي التفعيل إلى إتاحة واجهة المستخدم فقط — وتظل مزامنة البيانات ميزة تتطلب اشتراكاً منفصلاً."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "بوابة إمكانيات نقاط نهاية النماذج",
+        "description": "فرض وسوم نقاط نهاية النماذج الموثوقة (المعلنة من كتالوج المزود، أو المستنتجة من معرّف نموذج تخصصي، أو المحددة بواسطة المشغّل): رفض الطلب المرسل إلى نقطة نهاية لا يدعمها النموذج مع رمز HTTP 400 قبل الإرسال على /v1/chat/completions و /v1/embeddings و /v1/rerank و /v1/images/generations و /v1/videos/generations و /v1/music/generations و /v1/audio/*؛ وإخفاء النماذج التي لا تمتلك نقاط نهايتها الموسومة محوّلاً في OmniRoute من /v1/models؛ والرد برمز 422 على اختبار النموذج في لوحة التحكم لهذه النماذج. معطّل افتراضياً: تظل وسوم نقاط النهاية إعلامية فقط وتُرسل الطلبات تماماً كما كانت من قبل."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "تسليم السياق الشامل",
+        "description": "توليد ملخصات المحادثة وحقنها عند تبديل النماذج أثناء توجيه الـ combo. عطل الخيار لمعاملة عمليات تبديل النماذج بشكل مستقل ومنع طلبات التسليم في الخلفية لجميع توليفات combo الحالية والمستقبلية."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "إعادة تشغيل الاستدلال",
+        "description": "تخزين استدلال النموذج مؤقتًا وإعادة تشغيله عبر المحادثات متعددة الجولات. عطل الخيار لإيقاف تخزين الاستدلال وإعادة حقنه."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "وسيلة نقل Codex App-Server",
+        "description": "السماح لـ Codex باستخدام وسيلة نقل خادم التطبيق المحلي عبر WebSocket JSON-RPC ‏(codexTransport=app-server). عند التعطيل، ستتراجع الاتصالات التي اختارت app-server إلى وسائل النقل الأخرى الخاصة بـ Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "أسماء مستعالية لاكتشاف Claude Code",
+        "description": "إعلان معرفات مرآة على غرار claude/'<provider>'/'<model>' في /v1/models حتى تظهر نماذج غير Claude في قائمة اكتشاف النماذج لبوابة Claude Code. تحذير: عند التفعيل بشكل عام، يضاعف هذا عدد إدخالات الكتالوج لجميع العملاء."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "أسماء مستعالية للنماذج غير العارفة (No-Thinking)",
+        "description": "المفتاح الرئيسي لأسماء no-think/'<provider>'/'<model>' المستعالية للبوابة. مفعّل (افتراضياً): يُعلن /v1/models عن نسخة \"لا تفكير\" لكل نموذج Claude قادر على التفكير، ويُعاد المعرَّف المُرسَل بنسخة no-think/ إلى النموذج الفعلي مع قمع الاستدلال. معطّل: لا يُعلن عن نسخ، ويُعامل المعرَّف no-think/ كمعرَّف نموذج مجهول آخر. لا يزال خيار التفعيل/العتّال لنسخة no-thinking الخاصة بكل نموذج (ModelSpec.noThinkingAlias) مطبقاً أثناء تفعيل هذا الإعداد."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "تعطيل إصدارات مستويات التفكير",
+        "description": "تعطيل توليد إصدارات مستويات التفكير (مثل -low و-medium و-high) في كتالوج /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "مسارات القبول الافتراضية التكيفية",
+        "description": "تفعيل مسارات القبول الافتراضية التكيفية لكل مستأجر لإرسال المزود (#9654): لن يتسبب التدفق المفاجئ لطلبات أحد المستأجرين في أخطاء 503 لمستأجر آخر بعد الآن. يتمتع متغير البيئة OMNIROUTE_CHAT_VIRTUAL_LANES بالأولوية على هذا التجاوز من لوحة التحكم؛ وتسري التغييرات عند إعادة تشغيل الخادم."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "مرآيات البوابة الوظيفية",
+        "description": "إعلان معرفات مرآة على غرار '<gateway-alias>'/'<model>' في /v1/models للنماذج التي لا يملك مالكها الرسمي بيانات اعتماد نشطة، لكن بوابة تمرير (passthrough gateway) ببيانات اعتماد نشطة توجيه لها. تحذير: عند التفعيل بشكل عام، يضيف هذا إدخالات إلى الكتالوج لجميع العملاء."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "رصيد مجمّع New-API",
+        "description": "تمكين اكتشاف الرصيد للعقد المتوافقة مع مجمّع New-API / One-API / Sub2API. عند التمكين، ستبلغ العقد المتوافقة التي تم تعيين علامة المجمّع لها عن رصيدها في لوحة التحكم وتوجيه quota-preflight."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "إخفاء اتصالات البحث المحذوفة",
+        "description": "تحتسب إحصاءات البحث وعمليات البحث الأخيرة فقط المزودين الذين لا يزال لديهم اتصال نشط (المزودون بدون مفتاح مثل duckduckgo-free يُحتسبون دائمًا). يؤدي إيقاف التشغيل إلى الاحتفاظ بكل صف بحث محفوظ يحتوي على provider id."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "شارة \"مجاني\" الصارمة",
+        "description": "صفحات المزودين في لوحة التحكم: إظهار شارة \"مجاني\" فقط للإشارات التي يعتمدها المزود — يتم إسقاط الاستدلال القائم على اسم العرض، وحقول free غير المنطقية، ولاحقات :free لدى المزودين المسجلين بدون فئة مجانية موثقة. يؤدي إيقاف التشغيل إلى الاحتفاظ بقاعدة الشارات السابقة."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: التجمع الفارغ يرد بـ 503",
+        "description": "عندما يكون تجمع المرشحين في auto combo فارغًا بالفعل قبل تشغيل التصفية المسبقة لاستدعاء الأدوات (يتم تخطي كل هدف بسبب فترات التهدئة أو الحظر أو الاستنفاد)، يتم الرد بـ 503 no_eligible_targets بدلاً من الرمز 400 القديم \"No target supports tool calling\" capability_mismatch. معطل افتراضيًا: يحتفظ التجمع الفارغ بالرمز 400 القديم."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "الحظر اللطيف غير الحاسم لميلستال 401 الغامض",
+        "description": "رمز خطأ 401 عادي من Mistral ('{\"detail\":\"Unauthorized\"}', بدون إشارة مصادقة صريحة) مطابق حرفياً لمفتاح منسوخ ولحصة مستهلَكَة. عند التفعيل، يسخّن هذا 401 الاتصال بدلاً من إيقافه كمستوِ، حتى 3 مرات في الساعة؛ التالِي سيوقفه كمستوِ، فيقود المفاتيح المنسوخة للتقارب. معطّل افتراضياً: كل 401 عادي من Mistral يوقف الاتصال كمستوِ، كما كان سابقاً."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "التنظيف التلقائي للدفعات والملفات",
+        "description": "السماح لعملية التنظيف التلقائي بحذف مهام Batch API ذات الحالات النهائية (المكتملة/الفاشلة/الملغاة/منتهية الصلاحية) الأقدم من OMNIROUTE_BATCH_RETENTION_DAYS، إلى جانب نقاط الفحص الخاصة بكل سطر، ومسح محتوى BLOB للملفات المرفوعة التي تجاوزت expires_at الخاص بها. معطل افتراضياً: يحتفظ كل تثبيت حالي بهذه البيانات تماماً كما كانت سابقاً إلى أن يقوم المشغّل بتفعيل الخيار. لا يتأثر المسار DELETE /api/v1/batches/delete-completed الذي يُشغله المشغّل في كلتا الحالتين -- فهو عقد منفصل وغير مشروط لواجهة برمجة تطبيقات عامة."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "حجز حساب Antigravity",
+        "description": "حجز حساب Antigravity المحدد طوال دورة حياة البث للطلب الذي اختاره، بحيث لا يمكن لإعادة محاولة متزامنة أو تسليم بيانات الاعتماد إعادة اختيار حساب مخصص بالفعل لبث قيد التشغيل. يقتصر نطاق الحجز على (connection, callable upstream model)، وبذلك يظل بإمكان الحساب الواحد خدمة نموذجين مختلفين في الوقت ذاته. عندما تكون جميع الحسابات المؤهلة محجوزة بالفعل لذلك النموذج، يعيد الطلب خطأ 503 POOL_BUSY مهيكلاً مع Retry-After محدد بدلاً من التراكم على حساب مشغول. معطل افتراضياً: يظل اختيار الحساب كما كان في السابق تماماً، ولا يتم إجراء أي حجز."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "التشذيب التلقائي لخطوات Combo القديمة",
+        "description": "بعد نجاح مزامنة النماذج مع كتالوج مباشر ومعتمد، تتم إزالة خطوات combo المرتبطة بنماذج لم يعد الكتالوج يدرجها، مع إنشاء إدخال تدقيق واحد لكل خطوة محذوفة. لا يتم التشذيب أبداً عند فشل المزامنة، أو تدهورها، أو عند اقتصارها على النماذج المجانية فقط، ولا يتم إفراغ الـ combo أبداً. معطل افتراضياً: يتم فقط تمييز الخطوات القديمة بعلامة."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "التفكير المُلخَّص لـ Claude OAuth",
+        "description": "السماح لطلب Claude OAuth الذي يطلب تفكيرًا مقروءًا (thinking.display \"summarized\") بإسقاط بيتا redact-thinking-2026-02-12 من Anthropic، والتي تجعل Anthropic بخلاف ذلك يعيد كتل تفكير فارغة تحتوي على التوقيع فقط. مُعطّل افتراضيًا: تعد هذه البيتا جزءًا من بصمة Claude Code OAuth السلكية (wire fingerprint)، لذا تحافظ طلبات OAuth عليها دون تغيير. تدعم طلبات Claude عبر API-key التفكير المُلخَّص بالفعل دون هذا الخيار؛ كما أن OMNIROUTE_REDACT_THINKING=false لا يصل إلى OAuth إلا عند تفعيل هذا الخيار."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "إصلاح استدعاء أدوات Kiro",
+        "description": "عندما يُصدر رد Kiro المتدفق غلاف tool_call غير صالح (ينقصه input.name أو input.arguments) قبل أي مخرجات مرئية، يتم حجبه وإعادة إرسال الطلب مرة واحدة مع تعليمات تصحيحية بدلاً من إنهاء الجولة بـ invalid_kiro_tool_call. تستهلك إعادة المحاولة طلب Kiro إضافيًا واحدًا؛ ويؤدي الفشل الثاني إلى إنهاء الجولة بـ kiro_tool_call_repair_retry_failed. مفعّل افتراضيًا. اضبطه على false لإفشال الجولة عند أول غلاف غير صالح."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "مستويات الجهد في models.dev",
+        "description": "استخدام مستويات جهد التفكير التي ينشرها models.dev (مقصورة على مفردات الجهد المعروفة) عندما لا يحدد تجاوز المشغّل ولا سجل المزود أي مستويات، والتعامل مع قائمة المستويات الفارغة المعلنة على أنها \"no tiers\" في effort_tiers لـ /v1/models وتقاطعات مستويات المجموعات (combo tier intersections). مُعطّل افتراضيًا: تظل effort_tiers و supportedThinkingEfforts المحددة كما هي تمامًا من قبل."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "بيانات قياس عن بُعد cx الاصطناعية في Arena",
+        "description": "إرفاق كتلة تفاعل العميل cx البرمجية المصطنعة (القيمة التي يرسلها arena.ai نفسه لصفحة ليس بها أي تفاعل مسجل) بكل طلب create-evaluation في Arena (lmarena) لا يحتوي على providerSpecificData.cx مقدّم من المشغّل. مُعطّل افتراضيًا: يعد الحقل cx إشارة لمكافحة الأتمتة في Arena، لذلك يقوم OmniRoute فقط بتمرير القيمة التي التقطها المشغّل من جلسة متصفح حقيقية (providerSpecificData.cx) وبخلاف ذلك لا يرسل أي cx على الإطلاق. فائدته في المصدر (upstream) غير مؤكدة؛ لا تقم بتفعيله إلا إذا بدأت Arena في رفض الطلبات التي لا تحتوي على cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "الضغط التفاعلي لـ Codex الأصلي",
+        "description": "السماح لمراحل ضغط السياق التفاعلية (القائمة على الحد) ومراحل الملاذ الأخير بإعادة كتابة سجلات التمرير لـ Codex الأصلي أيضًا (POST /v1/responses إلى مزود codex) عندما تتجاوز ميزانية السياق، وذلك باستخدام محول Responses input[]. معطل افتراضيًا: تكون سجلات Codex الأصلية مملوكة لعميل Codex ولا تتم إعادة كتابتها مطلقًا بواسطة الضغط؛ وتستمر الطلبات ذات الحجم الزائد في الإخفاق في فحص ميزانية السياق تمامًا كما في السابق. يتطلب تفعيل الضغط العام وألا يكون النموذج مستبعدًا."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "نافذة الحصة: مراعاة الإيقاف المؤقت المقيد",
+        "description": "السماح لسياسة الحصة لكل نافذة (الحدود القصوى للجلسة/الأسبوعية المستخدمة في اختيار الحساب) بمراعاة الإيقاف المؤقت المقيد لنفاد الحصة: بمجرد انقضاء الموعد النهائي المحدد للإيقاف المؤقت، أو عندما تصبح بيانات الحصة المخزنة مؤقتًا أقدم من حد الإيقاف، تتوقف النافذة عن استبعاد الحساب حتى يتم جلب حصة جديدة. معطل افتراضيًا: تواصل النافذة المخزنة مؤقتًا الحظر بناءً على آخر نسبة مئوية تم الإبلاغ عنها حتى يحين وقت إعادة الضبط الخاص بها."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "توليد الصور: المهام الطويلة",
+        "description": "لتوليد الصور المتوافق مع OpenAI: استخدام مهلة الاتصال (providerSpecificData.timeoutMs)، وإلا فاستخدام مهلة جلب الخادم المصدر المركزية (FETCH_TIMEOUT_MS، ثم REQUEST_TIMEOUT_MS، الافتراضية 600 ثانية) بدلاً من ميزانية الصور الثابتة البالغة 120 ثانية؛ وإنهاء الطلب الذي ألغاه المتصل بالرمز 499؛ والسماح لـ Playground باستقبال مهام الصور الطويلة كبث SSE مع نبضات الحفاظ على الاتصال (keepalive heartbeats). معطل افتراضيًا: يتم تطبيق الميزانية الثابتة ولا يتم تمرير إلغاء المتصل. الموعد النهائي المخصص لقراءة جسم الاستجابة مفعل دائمًا."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "تحسينات مرايا الكتالوج",
+        "description": "تحسين مرايا استكشاف claude/ ومرايا functional-gateway على /v1/models. معطل افتراضيًا: تتصرف كلتا مرحلتي المرآة تمامًا كما في السابق. مفعّل: تغطي مرايا استكشاف claude/ أيضًا متغيرات reasoning-effort المدرجة (-low/-medium/-high/-xhigh)، وتتخطى معرّفات auto/* المضمنة التي يتعذر على مسار الطلب إنشاؤها، وتتخطى أي اسم مستعار مدرج بالفعل؛ وتتخطى مرايا functional-gateway التوليفات ومعرّفات OmniRoute المركبة (claude/، وno-think/)، وتأخذ المالك من owned_by، ولا تستخدم المالك أبدًا كبوابة خاصة به، وتتخطى البوابات المعطلة في blockedProviders والنماذج الخارجة عن الكتالوج المباشر المعتمد للبوابة."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "صحة البروكسي: الرفض يعيد تعيين سلسلة الفشل المتتالي",
+        "description": "في فحص صحة البروكسي، اسمح لعملية الفحص التي رفضها الهدف (401/403/429: قام البروكسي بالتمرير، ورفضت الوجهة عنوان IP الصادر هذا) بإعادة تعيين سلسلة الفشل المتتالي للبروكسي، تماماً كالفحص الناجح. معطّل افتراضياً: يظل الرفض محايداً ويُبقي على السلسلة (#10654). وتظل أخطاء 5xx غير حاسمة في الحالتين، ولا يؤدي الرفض أبداً إلى إزالة البروكسي أو تعطيله أو إعادة تفعيله."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "صور اشتراك Grok",
+        "description": "تسجيل مسارات صور xai-oauth (xao) وgrok-cli وتعيين جودة OpenAI من high/hd إلى medium الخاصة بـ xAI. معطّل افتراضياً: يظل مسار صور xAI عبر API-key على طلب OpenAI المتوافق الحالي ولا يتم تسجيل مسارات الاشتراك."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "الاستكشاف المباشر لنماذج xAI عبر OAuth",
+        "description": "جلب كتالوج نماذج xAI المباشر لاتصالات xai-oauth من https://api.x.ai/v1/models باستخدام OAuth bearer token، بدلاً من البيانات الأولية الثابتة المجمّدة (static seed). مفعّل افتراضياً. اضبط العلامة (flag) على false للاستمرار في تقديم البيانات الأولية الثابتة. تتراجع أخطاء HTTP احتياطياً إلى البيانات الأولية (seed) في مسار الاستكشاف؛ ولا تصدر دالة جلب العلامة (flag getter) نفسها طلبات HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "أدوار النظام في منتصف المحادثة المتوافقة مع Anthropic",
+        "description": "في مرحلات anthropic-compatible-* العادية (تمرير claude → claude)، احتفظ بأدوار role:system في منتصف المحادثة داخل messages[] بدلاً من رفعها إلى معلّمة system في المستوى الأعلى، وذلك للحفاظ على استقرار بادئة المطالبة المخزنة مؤقتاً (cached prompt prefix) عبر الأدوار. ينطبق فقط عندما يرسل العميل نفسه ميزة anthropic-beta المحددة بـ mid-conversation-system-2026-04-07 (تتم إعادة توجيهها للمصدر كما هي). معطّل افتراضياً: يتم رفع كل دور نظام تماماً كما كان في السابق، لأن المرحلات التي لا تدعم الميزة التجريبية (beta) ترفض رسائل role:system بالرمز 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "فحص سلامة قاعدة البيانات: تأجيل فحص بدء التشغيل",
+        "description": "تشغيل فحص سلامة/صحة قاعدة البيانات عند بدء التشغيل بعد أن يبدأ الخادم في قبول الطلبات (عبر setImmediate) بدلاً من حظر بدء التشغيل حتى اكتماله. معطّل افتراضيًا: يتم حظر بدء التشغيل أثناء الفحص تمامًا كما كان قبل #13717، وبالتالي لا يزال يتم اكتشاف قاعدة البيانات التالفة قبل خدمة الطلب الأول. مفعّل: يعود بدء التشغيل فورًا ويعمل الفحص (الذي أصبح الآن محدودًا/مقسمًا لصفحات، وبالنسبة لقاعدة بيانات حقيقية مستندة إلى ملف، معزولاً في عملية فرعية قابلة للإلغاء) بعد ذلك مباشرة."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "توجيه كتالوج OpenCode المنشور",
+        "description": "السماح لنماذج OpenCode Zen وOpenCode Go التي لا تحتوي على نقطة نهاية صريحة في السجل بجلب واجهة طلباتها (Responses لـ @ai-sdk/openai، وMessages لـ @ai-sdk/anthropic) من كتالوج models.opencode.ai المنشور، المقروء في الخلفية كل 6 ساعات. معطّل افتراضيًا: تأتي نقطة النهاية من القواعد الاستدلالية للسجل تمامًا كما كان من قبل ولا يتم جلب الكتالوج أبدًا."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "الطلبات التلقائية: أوزان الإمكانيات المحلولة",
+        "description": "السماح لطلبات auto/* (دالة resolveModelOrError ومغلّف التوجيه التلقائي) ببناء مجموعة المرشحين بإمكانيات النموذج المحلولة (الرؤية، الاستدلال، التفكير) ودرجات الجودة المرصودة، المقروءة في دفعة واحدة ككتالوج /v1/models. معطّل افتراضيًا: تظل أوزان لقطات وقت الطلب تمامًا كما كانت من قبل (يتم حل الإمكانيات عند الطلب ولا تغذي الأوزان). مفعّل: تغذي هذه الإشارات أوزان اللقطات، وبالتالي يمكن أن تتغير أوزان المرشحين، وبالتالي الاختيار."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "الاكتمال التلقائي: بوابة النقل بدون مفتاح",
+        "description": "منع مزودي الخدمة بدون مصادقة (no-auth) الذين يتطلب نقلهم متصفحاً محلياً (browserBacked) أو واجهة سطر أوامر مثبتة محلياً (isLocalCli) من دخول مجموعة المرشحين تلقائياً auto/*، حتى لا يؤدي تعليق أحدهم إلى تعطيل طلب تلقائي حتى انتهاء مهلة الهدف المحدد (#17036). معطّل افتراضياً: يظل كل مزوّد خدمة بدون مصادقة مع استدعاءات الأدوات المحاكية في المجموعة تماماً كما كان من قبل. تعمل استدعاءات '<alias>'/'<model>' المباشرة في كلتا الحالتين."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: إعادة عرض الاستدلال المضمن",
+        "description": "بالنسبة لنماذج التفكير في codebuddy-cn (عائلات DeepSeek-V4 / Kimi-K2 التي تتطلب إعادة عرض الاستدلال)، يتم إدراج محتوى استدلال المساعد المُعاد عرضه (reasoning_content) كلكتلة '<thought>' مرئية في بداية محتوى الرسالة، حتى تبقى قائمة على بوابة الشبكة التي تحذف حقل reasoning_content (#13632). معطّل افتراضياً: تُرسل طلبات codebuddy-cn دون تغيير؛ أما حقل reasoning_content نفسه فيبقى محفوظاً دائماً."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "إيقافات أمان المزود: نهائية",
+        "description": "التعامل مع إيقاف أمان المزود الصريح (misalignment_policy_violation أو content_policy_violation أو الرفض القديم الدقيق 'blocked by our safety systems' المسمى provider_safety_rejection) كرفض نهائي على نطاق الطلب: حيث يتم الحفاظ على رمزه عبر أخطاء HTTP و Responses و WebSocket وأخطاء completed-stream، ويتوقف الـ combo عنده بدلاً من إعادة المحاولة مع أهداف أخرى، مع إلغاء العمليات الشقيقة المقبولة (#17049). معطّل افتراضياً: تحتفظ هذه الأخطاء بمعالجتها الحالية ويبقى توجيه الـ combo دون تغيير."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "صحة بيانات الاعتماد: إعادة اختبار الاتصالات المعطلة تلقائياً",
+        "description": "السماح لعملية فحص صحة بيانات الاعتماد بإعادة اختبار الاتصالات التي أوقفتها البوابة تلقائياً (المميزة بـ autoDisabledAt؛ بحد أقصى مرة واحدة كل 6 ساعات لكل اتصال و5 لكل عملية فحص) وإعادة تشغيل الاتصال عند اجتياز إعادة اختباره بنجاح (#16190). معطّل افتراضياً: تظل الاتصالات الموقفة قيد إيقاف التشغيل حتى يعيد المشغّل تفعيلها أو إعادة اختبارها، تماماً كما في السابق. لا تتم مطلقاً إعادة اختبار الاتصالات التي عطلها المشغّل والاتصالات الموقفة بعد حظر دائم."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "بوابة بيانات الاعتماد: تشخيصات المصادقة فقط",
+        "description": "تضييق نطاق بوابة بيانات اعتماد الـ combo بحيث يحظر فحص بيانات الاعتماد الفاشل المخزن مؤقتاً الاتصال فقط عندما يثبت تشخيصه عدم صلاحية بيانات الاعتماد (upstream_auth_error أو auth_missing أو token_expired أو token_refresh_failed أو reauth_required أو account_deactivated أو auth_required). وتُعامل حالات الفشل غير الحاسمة (انتهاء المهلة، وتجاوز حدود المعدل، والانقطاعات، وعمليات الفحص غير المدعومة، وأخطاء المجدول غير المصنفة) حينئذٍ على أنها غير معروفة ويستمر الاتصال في تلقي حركة البيانات. معطّل افتراضياً: يحظر أي خطأ فحص مخزن مؤقتاً الاتصال طوال مدة TTL للتخزين المؤقت (5 دقائق)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "كومبو: التوقف عند رفض سياسة المحتوى",
+        "description": "عندما يستجيب هدف كومبو برفض صريح لسياسة المحتوى (الرمز أو النوع cyber_policy / content_policy_violation)، يتم إيقاف الكومبو وإرجاع هذا الرفض حتى إذا كانت الأهداف المتبقية نماذج مختلفة، بدلاً من الانتقال إلى الهدف التالي. معطّل افتراضيًا: لا يؤدي الرفض مطلقًا إلى تهدئة الحساب أو تفعيل قاطع دائرة المزود، وينتقل الكومبو إلى هدفه التالي تمامًا كما كان في السابق."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "إعادة المحاولة أثناء التهدئة: تخطي حالات رفض 403/410",
+        "description": "عندما تكون جميع الحسابات في فترة تهدئة وتكون فترة التهدئة التي تنتهي أولاً ناجمة عن خطأ 403 (تم رفض الوصول) أو 410 (لم يعد متاحًا)، يتم إرجاع هذا الرفض فورًا بدلاً من انتظار انتهاء التهدئة وإعادة إرسال الطلب؛ ويتم بعد ذلك حفظ خطأ 403 لحصة agentrouter المتجددة على مستوى الاتصال مع errorCode بقيمة 429 ليظل قابلاً لإعادة المحاولة. معطّل افتراضيًا: يتخطى الخطأ 401 فقط فترة الانتظار، ويتم حفظ كل رفض بنفس الحالة التي ورد بها."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "سياسة ميزانية الاستخدام غير المسعرة",
+        "description": "كيف تتعامل حدود USD اليومية/الأسبوعية لكل مفتاح مع الاستخدام الناجح الذي لا يوجد لموفّر/نموذج له صف تسعير. fail_closed (افتراضي) تعتبر النافذة متجاوزة، فلا يمكن لتكلفة غير معروفة أن تتجاوز الحد الصارم. count_as_zero يحتسب ذلك الاستخدام بمقدار $0 ويستمر في تطبيق الإنفاق الذي له سعر. تُدرج النماذج غير المسعّرة في الصفحة الرئيسية للوحة القيادة في كلتا الحالتين."
       }
     }
   },
@@ -13793,6 +14446,7 @@
     "latency": "زمن الانتقال",
     "quota": "الحصة",
     "rangeWindow": "نافذة {range}",
+    "timeRange": "النطاق الزمني",
     "runtimeHealthBlend": "مزيج وقت التشغيل/الحالة الصحية",
     "averageResponseTime": "متوسط وقت الاستجابة",
     "worstQuota": "أسوأ حصة",
@@ -13923,7 +14577,11 @@
       "ok": "مسموح به عموماً"
     },
     "allProviders": "جميع المزودين",
-    "noApiKeyRequired": "لا حاجة لمفتاح API"
+    "noApiKeyRequired": "لا حاجة لمفتاح API",
+    "searchPlaceholder": "ابحث عن النموذج، المزوّد…",
+    "searchAria": "ابحث عن النماذج المجانية",
+    "filterProviderAria": "تصفية حسب المزوّد",
+    "keylessOnly": "بدون مفاتيح فقط"
   },
   "providerHealthAutopilot": {
     "title": "الطيار الآلي لصحة المزود",
@@ -13994,7 +14652,11 @@
     "learnMore": "معرفة المزيد",
     "changelogLoadFailed": "تعذر تحميل سجل التغييرات. يرجى المحاولة مرة أخرى لاحقًا.",
     "retry": "إعادة المحاولة",
-    "viewFullHistory": "عرض السجل الكامل على GitHub"
+    "viewFullHistory": "عرض السجل الكامل على GitHub",
+    "title": "الأخبار وسجل التغييرات",
+    "description": "إعلانات فريق OmniRoute وأحدث ملاحظات الإصدار",
+    "viewLabel": "عرض",
+    "loadingNews": "جارٍ تحميل الإعلانات..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15207,9 @@
       "circuitBreakerState": "حالة قاطع الدائرة لمزود الخدمة",
       "lastUpdate": "آخر تحديث: {timestamp}",
       "uptimeMinutes": "{minutes}د",
-      "uptimeHoursMinutes": "{hours}س {minutes}د"
+      "uptimeHoursMinutes": "{hours}س {minutes}د",
+      "breakerClosed": "مغلق",
+      "breakerNotClosed": "مفتوح أو نصف مفتوح"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15284,9 @@
         "primaryAction": "تفاصيل الصيانة",
         "secondaryAction": "حالة النظام"
       }
+    },
+    "miniapp": {
+      "askAnything": "اسأل عن أي شيء…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15477,20 @@
     "mcp": "MCP",
     "mcpTool": "أداة MCP",
     "scope": "النطاق",
-    "apiKey": "مفتاح API"
+    "apiKey": "مفتاح API",
+    "visibleCount": "{visible} ظاهر / {total} إجمالي",
+    "modeLabel": "وضع العرض",
+    "jumpToNow": "الانتقال إلى الوقت الحالي، يُعاد تعيين خط NOW إلى الموضع {position}%",
+    "laneReuse": "إعادة استخدام المسار",
+    "laneReuseLabel": "نافذة إعادة استخدام المسار (بالدقائق)",
+    "laneReuseHint": "تظل الطلبات التي تشترك في معرّف محادثة واحد في الصف نفسه من المخطط الزمني ما دامت الفجوة بينها أقل من هذا العدد من الدقائق.",
+    "laneReuseUnit": "د",
+    "autoRefresh": "التحديث التلقائي",
+    "autoRefreshLabel": "الفاصل الزمني للتحديث التلقائي (بالثواني)",
+    "autoRefreshHint": "مدى تكرار إعادة جلب المخطط الزمني لقائمة الطلبات من الخادم.",
+    "autoRefreshUnit": "ث",
+    "zoomOut": "تصغير",
+    "zoomIn": "تكبير"
   },
   "metadata": {
     "compressionTitle": "ضغط",
@@ -15073,5 +15753,118 @@
     "importButton": "استيراد",
     "importFailed": "فشل الاستيراد.",
     "importSuccess": "تم استيراد {connections} حسابات و{nodes} عُقد مزوّدين؛ وتخطي {skipped}."
+  },
+  "conversations": {
+    "title": "المحادثات",
+    "countSummary": "{total, plural, one {# محادثة} other {# محادثات}} تحتوي على 2+ جولات",
+    "autoRefreshTitle": "مقدار تكرار إعادة جلب هذا القائمة من الخادم.",
+    "autoRefresh": "تحديث تلقائي",
+    "loading": "جارٍ تحميل المحادثات...",
+    "colConversation": "المحادثة",
+    "colTurns": "الدور",
+    "colContinuation": "المتابعة",
+    "colLastModel": "آخر نموذج",
+    "colProvider": "مزوّد الخدمة",
+    "colStatus": "الحالة",
+    "colLastSeen": "آخر ظهور",
+    "drawerTitle": "المحادثة",
+    "prevConversation": "المحادثة السابقة",
+    "nextConversation": "المحادثة التالية",
+    "gotoLatestRequest": "الانتقال إلى أحدث طلب",
+    "goToBottom": "الانتقال إلى الأسفل",
+    "statusInProgress": "قيد التنفيذ",
+    "continuationGenuineTitle": "استخدم أحدث رد previous_response_id وتم حلّه على مستوى الخادم",
+    "continuationBadge": "تتابع",
+    "stalledTitle": "لم ينتهِ أحدث رد بـ stop ولم يتم التتابع منذ أكثر من 5 دقائق",
+    "stalledBadge": "متوقف",
+    "noTurns": "لم تُسجَّل أي ردود لهذا المحادثة."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "البدء من الموضع الحالي (تخطي السجلات الحالية)",
+    "pageTitle": "تصدير السجل",
+    "pageSubtitle": "أرسل سجلات المكالمات بشكل مستمر من علامة تبويب السجلات إلى مخزن تحليلات خارجي.",
+    "addDestination": "إضافة وجهة",
+    "scheduleTitle": "جدولة",
+    "cronLabel": "كرون",
+    "notScheduled": "غير مجدول",
+    "lastScheduledRun": "آخر تنفيذ مجدول",
+    "lastRunSummary": "{startedAt} — {status}، {rows} صفوف",
+    "never": "أبدًا",
+    "highWaterMark": "أقصى علامة لسجلات المكالمات",
+    "rowPrefix": "صف {id}",
+    "noDestinations": "لا توجد محددات تصدير",
+    "noDestinationsHint": "أضف وجهة لبدء شطب سجلات المكالمات على الجدول الزمني بالساعات.",
+    "errLoadStatus": "فشل تحميل حالة التصدير",
+    "errSaveDestination": "فشل حفظ الوجهة",
+    "msgDestinationSaved": "تم حفظ الوجهة.",
+    "errConnectionTest": "فشل اختبار الاتصال",
+    "msgRunInFlight": "تشغيل لوجهة هذه في جاري بالفعل؛ لم يتم إرسال أي شيء مرتين.",
+    "errExportRun": "فشل تشغيل التصدير",
+    "errUpdateDestination": "فشل تحديث الوجهة",
+    "errDeleteDestination": "فشل حذف الوجهة",
+    "deleteTitle": "حذف الوجهة",
+    "deleteConfirm": "هل تريد حذف \"{name}\"؟ سيتم أيضًا إزالة مؤشّر التصدير الخاص بها، لذا عند إعادة إضافتها ستبدأ من أقدم سجل اتصال محفوظ.",
+    "statusDisabled": "معطل",
+    "statusFailing": "غير ناجح",
+    "statusHealthy": "صحي",
+    "statusNotRunYet": "لم يُنفَّذ بعد",
+    "typeNotInstalled": "النوع غير مثبّت",
+    "metaLine": "آخر تشغيل {lastRun} · تم تصدير {exported} صفوف · {pending} قيد الانتظار · المؤشّر {cursor}",
+    "btnTest": "اختبار",
+    "btnRunNow": "تشغيل الآن",
+    "btnDisable": "تعطيل",
+    "btnEnable": "تفعيل",
+    "btnEdit": "تعديل",
+    "btnDelete": "حذف"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "حسابات CLIProxyAPI",
+    "cardSubtitle": "حالة للقراءة فقط من واجهة الإدارة المصادقة",
+    "btnRefresh": "تحديث",
+    "listAria": "سلامة حسابات CLIProxyAPI",
+    "noAccounts": "لم يتم العثور على حسابات CLIProxyAPI.",
+    "loading": "جارٍ تحميل صحة الحساب…",
+    "stateReady": "صحة الحساب",
+    "stateDisabled": "CLIProxyAPI غير مثبت",
+    "stateMissingKey": "مفتاح الإدارة غير مُهيأ",
+    "stateUnreachable": "واجههة برمجة تطبيقات الإدارة غير قابلة للوصول",
+    "stateUnauthorized": "تم رفض مفتاح الإدارة",
+    "stateUnsupported": "هذا الإصدار من CLIProxyAPI لا يُظهر صحة الحساب",
+    "stateInvalidResponse": "أرجعت واجهة برمجة تطبيقات الإدارة استجابة غير مدعومة"
+  },
+  "darioPanel": {
+    "title": "حسابات Claude",
+    "description": "صادق Dario باستخدام اشتراك Claude Pro/Max الخاص بك. يُحمّل المرور على مجموعة اشتراكك. يُطلب حساب واحد على الأقل قبل أن يتمكن Dario من توجيه الطلبات (حتى ذلك الحين، يبلغ /health بتدهور الأداء).",
+    "noAccounts": "لم يتم تكوين أي حسابات بعد.",
+    "importTitle": "استيراد من OmniRoute",
+    "importDescription": "إعادة استخدام رموز OAuth المتصلة بنظير Claude في OmniRoute بدلاً من تسجيل الدخول مرة أخرى — يتخطى خطوة الموافقة في المتصفح تمامًا.",
+    "importPendingTooltip": "سيصبح نشطًا بمجرد وجود اتصال Claude في OmniRoute.",
+    "btnImport": "استيراد",
+    "btnImporting": "جارٍ الاستيراد…",
+    "aliasPlaceholder": "اسم مستعار (اختياري)",
+    "btnStartLogin": "بدء تسجيل الدخول",
+    "btnStarting": "جارٍ البدء…",
+    "btnCompleteLogin": "إكمال تسجيل الدخول",
+    "btnCompleting": "جارٍ الإكمال…",
+    "codePlaceholder": "كود #state أو كود وحده",
+    "noticeImported": "تم الاستيراد كحساب \"{alias}\" — أعاد Dario التشغيل لالتقاطه.",
+    "noticeAdded": "تمت إضافة الحساب \"{alias}\".",
+    "expiresInHours": "ينتهي خلال ~{hours}س",
+    "expiresInMinutes": "ينتهي خلال ~{minutes}د",
+    "expiresAt": "ينتهي في {date}",
+    "scopes": "{count, plural, one {# نطاق} other {# نطاقات}}",
+    "btnRemove": "إزالة",
+    "btnRefresh": "تحديث",
+    "loginStep1": "1. افتح هذا الرابط في متصفحك وامنح الوصول للحساب <mono>{alias}</mono>:",
+    "pendingExpires": "تنتهي صلاحية تسجيل الدخول المعلق بعد {time}",
+    "loginStep2": "2. الصق الكود الذي يعرضه أنثروبك:"
+  },
+  "miniapp": {
+    "title": "تطبيق Mini OmniRoute",
+    "errTelegramOnly": "يجب فتح هذه الصفحة داخل تطبيق تيليجرام المصغّر.",
+    "greeting": "👋 مرحبًا {name}! أرسل رسالة إلى الدردشة من خلال بوابة OmniRoute الخاصة بك.",
+    "greetingFallbackName": "هناك",
+    "errNoReply": "⚠️ لا توجد ردود من بوابة.",
+    "btnSend": "إرسال"
   }
 }

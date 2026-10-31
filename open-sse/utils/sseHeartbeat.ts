@@ -6,21 +6,14 @@
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
 import {
-  SYNTHETIC_RESPONSES_KEEPALIVE_ID,
-  SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
-} from "./responsesSequence.ts";
+  buildResponsesInProgressPayload,
+  createResponsesInProgressTracker,
+} from "./responsesKeepaliveFrame.ts";
 
 const HEARTBEAT_ENCODER = new TextEncoder();
-// #14330 / #15202: a bare {"type":"response.in_progress"} frame has no
-// `sequence_number` or `response` object, so a strict Responses decoder
-// (openai-python, Codex/OpenCode/Grok CLIs) aborts on it. Every typed Responses
-// event requires both fields, and `response.id` must be a string — never `null`,
-// which the 3.8.51 fix left in place and broke the same decoders it targeted.
-const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = `data: ${JSON.stringify({
-  type: "response.in_progress",
-  sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
-  response: { id: SYNTHETIC_RESPONSES_KEEPALIVE_ID, status: "in_progress" },
-})}\n\n`;
+// #14330 / #15202 / #17825: the keepalive must be a complete, spec-valid Responses event
+// (sequence_number, string response.id, created_at, model, ...) — see responsesKeepaliveFrame.ts.
+const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = buildResponsesInProgressPayload();
 
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
 
@@ -57,13 +50,13 @@ export function shapeForClientFormat(
 
 function buildHeartbeatPayload(
   shape: HeartbeatShape,
-  opts: { chunkId?: string; chunkModel?: string } = {}
+  opts: { chunkId?: string; chunkModel?: string; responsesPayload?: () => string } = {}
 ): string {
   switch (shape) {
     case HEARTBEAT_SHAPES.ANTHROPIC_PING:
       return 'event: ping\ndata: {"type":"ping"}\n\n';
     case HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS:
-      return OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD;
+      return opts.responsesPayload?.() ?? OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD;
     case HEARTBEAT_SHAPES.OPENAI_CHUNK: {
       const payload = {
         id: opts.chunkId ?? "chatcmpl-keepalive",
@@ -123,6 +116,10 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
+  const responsesTracker =
+    shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
+      ? createResponsesInProgressTracker()
+      : null;
 
   const stop = () => {
     if (!intervalId) return;
@@ -140,7 +137,13 @@ export function createSseHeartbeatTransform({
 
         try {
           controller.enqueue(
-            HEARTBEAT_ENCODER.encode(buildHeartbeatPayload(shape, { chunkId, chunkModel }))
+            HEARTBEAT_ENCODER.encode(
+              buildHeartbeatPayload(shape, {
+                chunkId,
+                chunkModel,
+                responsesPayload: responsesTracker ? () => responsesTracker.payload() : undefined,
+              })
+            )
           );
         } catch {
           stop();
@@ -155,6 +158,7 @@ export function createSseHeartbeatTransform({
     },
 
     transform(chunk, controller) {
+      responsesTracker?.observe(chunk);
       controller.enqueue(chunk);
     },
 

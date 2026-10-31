@@ -25,8 +25,10 @@
     "confirm": "esti sigur?",
     "refresh": "Reîmprospătați",
     "close": "Închide",
+    "dialogTitleFallback": "Dialog",
     "previousPage": "Pagina anterioară",
     "nextPage": "Pagina următoare",
+    "pagination": "Paginare",
     "capsLockOn": "Caps Lock este activat",
     "dismissNotification": "Închide notificarea",
     "toggleColumns": "Comută coloanele",
@@ -182,6 +184,7 @@
     "combos": "Combinații",
     "noModelsFound": "Nu s-au găsit modele",
     "clear": "Șterge",
+    "clearFilters": "Șterge filtrele",
     "done": "Gata",
     "selectAll": "Selectează tot",
     "unselectAll": "Deselectează tot",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Folosit de {count, plural, one {# lot} other {# loturi}}",
     "batchFilePreview": "Previzualizare",
     "batchFilePreviewTruncated": "Afișare primele {shown} linii ({total} linii totale)",
-    "batchFileDownloadFull": "Descarcă Fișierul Complet"
+    "batchFileDownloadFull": "Descarcă Fișierul Complet",
+    "tokensPageTitle": "Tokenuri",
+    "tokensPageDescription": "Trimite tokenuri între cheile API, distribuie coduri de invitație și conectează serverele comunității.",
+    "tokensServerUrlLabel": "URL-ul serverului"
   },
   "disabled": "Dezactivat",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Redirecționează cererile cu buget epuizat către furnizorul/modelul de rezervă gratuit de urgență.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Serverul proxy a fost oprit sau repornește.",
     "expandSidebar": "Extinde bara laterală",
     "collapseSidebar": "Restrângeți bara laterală",
-    "themes": "Teme",
-    "presetColors": "Culori populare",
     "createTheme": "Creează o temă",
     "chooseColor": "Alege o culoare",
-    "themeCoral": "Coral",
-    "themeBlue": "Albastru",
-    "themeRed": "Roșu",
-    "themeGreen": "Verde",
-    "themeViolet": "Violet",
-    "themeOrange": "Portocaliu",
-    "themeCyan": "Cian",
     "cliToolsShort": "Instrumente",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistem de teme",
     "whitelabelingDesc": "Descriere pentru personalizarea mărcii",
     "switchThemes": "Schimbă temele",
-    "themeAccentDesc": "Descrierea culorii de accent a temei",
     "uploadFavicon": "Încarcă faviconul",
     "themeDark": "Temă întunecată",
     "customLogoDesc": "Descrierea siglei personalizate",
     "sidebarVisibilityToggle": "Comutator pentru vizibilitatea barei laterale",
-    "themeAccent": "Culoarea de accent a temei",
     "resetFavicon": "Resetează faviconul",
     "whitelabeling": "Personalizarea mărcii",
     "darkMode": "Mod întunecat",
@@ -1122,10 +1117,8 @@
     "customLogo": "Siglă personalizată",
     "appearance": "Aspect",
     "themeSelectionAria": "Etichetă ARIA pentru selectarea temei",
-    "themeCreate": "Creează o temă",
     "customFaviconDesc": "Descrierea faviconului personalizat",
     "logoPreview": "Previzualizarea siglei",
-    "themeCustom": "Temă personalizată",
     "hideHealthLogsDesc": "Descriere pentru ascunderea jurnalelor de stare",
     "faviconPreview": "Previzualizarea faviconului",
     "changelog": "Jurnal de modificări",
@@ -1352,7 +1345,9 @@
       "open": "deschide",
       "close": "închide"
     },
-    "noResults": "Niciun rezultat"
+    "noResults": "Niciun rezultat",
+    "costsTeams": "Echipe",
+    "costsTeamsSubtitle": "Centre de cost ale echipelor"
   },
   "webhooks": {
     "title": "Webhook-uri",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 sau @channelname",
       "chatIdHint": "Identificatorul numeric unic sau numele de utilizator public al chatului/canalului.",
       "tutorial": "Cum se configurează webhook-ul Telegram:"
-    }
+    },
+    "copy": "Copiază",
+    "copied": "Copiat!",
+    "expandDetails": "Afișează detaliile",
+    "collapseDetails": "Ascunde detaliile"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Apeluri (24h)",
     "mcpMetricSuccessRate": "Rata de succes",
     "mcpMetricAvgDuration": "Durata medie",
-    "mcpMetricTopTool": "Instrument de top"
-  },
-  "themesPage": {
-    "title": "Teme",
-    "description": "Alegeți o temă predefinită sau creați una proprie folosind o singură culoare",
-    "presetColors": "Culori populare",
-    "customTheme": "Temă personalizată",
-    "customThemeDesc": "Faceți clic pe „Creați tema” și alegeți o culoare",
-    "createTheme": "Creați tema",
-    "activePreset": "Tema activă"
+    "mcpMetricTopTool": "Instrument de top",
+    "dismissError": "Închide eroarea"
   },
   "header": {
     "logout": "Deconectare",
     "quickNavigation": "Navigare rapidă",
     "quickNavigationTitle": "Navigare rapidă (⌘K / Ctrl+K)",
     "openQuickNavigation": "Deschide navigarea rapidă",
+    "openMenu": "Deschide meniul",
+    "products": "Produse Keak",
     "switchToLightMode": "Comută la modul luminos",
     "switchToDarkMode": "Comută la modul întunecat",
     "language": "Limba",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Compatibil antropic",
     "media": "Conținut media",
     "mediaDescription": "Generați imagini, videoclipuri și muzică",
-    "themes": "Teme",
-    "themesDescription": "Alegeți o temă cromatică pentru întregul panou de control",
     "costsDescription": "Urmăriți cheltuielile, analizați tendințele și gestionați bugetul pentru IA la nivelul tuturor furnizorilor",
     "cacheDescription": "Monitorizați eficiența memoriei cache a furnizorilor pentru prompturi și reutilizarea locală a răspunsurilor semantice.",
     "limitsDescription": "Configurați limitele de frecvență și cotele pentru fiecare cheie API și furnizor",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Reguli avansate pentru sarcina utilă, limite pentru cereri și setări API pentru proxy",
     "mitmProxyDescription": "Configurați setările proxy-ului MITM pentru inspectarea traficului și depanare",
     "oneProxyDescription": "Configurați setările 1Proxy pentru înlănțuirea avansată a proxy-urilor",
-    "omniSkillsDescription": "Instalează și gestionează abilități sandbox pentru executarea automată a prompturilor și instrumentelor"
+    "omniSkillsDescription": "Instalează și gestionează abilități sandbox pentru executarea automată a prompturilor și instrumentelor",
+    "teamsDescription": "Estimări de cost ale echipei și bugete flexibile partajate"
   },
   "cloudSyncStatus": {
     "synced": "Sincronizat",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Copiază endpointul",
     "readinessStep4": "Trimite o solicitare de test",
     "readinessContinue": "Continuă configurarea",
-    "readinessDismiss": "Ascunde pentru moment"
+    "readinessDismiss": "Ascunde pentru moment",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modele}} cu utilizare recentă dar fără preț configurat",
+    "unpricedUsageFailClosed": "{keys, plural, one {# cheie API cu o limită de utilizare} other {# chei API cu o limită de utilizare}} au folosit aceste modele în ultimele 8 zile. Când acea utilizare se încadrează în fereastra zilnică sau săptămânală a unei chei, cheia este considerată depășită de cotă și cererile sale sunt blocate (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Această utilizare este considerată $0 pentru limitele de utilizare pe cheie (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# cerere} other {# cereri}}, {keys, plural, one {# cheie limitată} other {# chei limitate}}",
+    "unpricedUsageMore": "…și încă {count}",
+    "unpricedUsageConfigure": "Configurează prețurile",
+    "unpricedUsageDismiss": "Închide"
   },
   "analytics": {
     "title": "Analiză",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Doar conexiunile selectate",
     "selectAtLeastOneConnection": "Selectați cel puțin o conexiune sau alegeți Toate conexiunile.",
     "allConnectionsDesc": "Această cheie poate utiliza orice conexiune activă.",
-    "restrictedToConnections": "Restricționată la {count, plural, one {# conexiune} other {# conexiuni}}."
+    "restrictedToConnections": "Restricționată la {count, plural, one {# conexiune} other {# conexiuni}}.",
+    "preferredConnections": "Conexiuni preferate",
+    "preferredConnectionsDesc": "Ordine de prioritate pentru fiecare cheie. Dacă o conexiune preferată nu este disponibilă, rutarea trece la următoarea eligibilă.",
+    "preferredConnectionsNone": "Nicio preferință setată — se folosește strategia de rutare implicită.",
+    "preferredConnectionsClear": "Golește",
+    "removeSelection": "Elimină {name}"
   },
   "auditLog": {
     "title": "Jurnal de audit",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Configurează puntea Imagine→Text în setările Modality Bridge",
     "sttBridgeCta": "Configurează puntea Speech→Text în setările Modality Bridge",
     "existingConnection": "Conexiune existentă",
-    "openrouterSttDescription": "Modelele de recunoaștere vocală OpenRouter folosesc conexiunea OpenRouter configurată de tine. Nu este necesară o acreditivă separată."
+    "openrouterSttDescription": "Modelele de recunoaștere vocală OpenRouter folosesc conexiunea OpenRouter configurată de tine. Nu este necesară o acreditivă separată.",
+    "modalityTabsAria": "Tip media",
+    "serviceKindsAria": "Tip serviciu"
   },
   "search": {
     "searchQuery": "Interogare de căutare",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Configurare manuală",
     "clineManualConfiguration": "Configurare manuală a liniei",
     "kiloManualConfiguration": "Configurare manuală a codului Kilo",
+    "piManualConfiguration": "Pi - Configurare manuală",
+    "piConfigInvalidTitle": "Pi models.json este ilizibil",
+    "piOmnirouteConfigured": "OmniRoute este configurat ca furnizor personalizat Pi",
+    "piModelHelp": "Pi nu descoperă automat modele pentru punctele finale personalizate — modelul pe care îl alegeți este scris în mod explicit în models.json.",
+    "piManualConfigTitle": "Sau editați ~/.pi/agent/models.json manual",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Apoi porniți Pi și selectați furnizorul omniroute. Setați PI_CODING_AGENT_DIR pentru a muta întregul director al agenților.",
+    "piUnownedNote": "Această intrare a fost adăugată în afara OmniRoute (de exemplu, punctele finale personalizate ale pi-gui). Aplicarea o va adopta; Resetarea elimină doar intrările scrise OmniRoute.",
     "whenToUseLabel": "Când să utilizați",
     "openToolDocs": "Deschideți documentele instrumentului",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Utilizați atunci când aveți nevoie de un asistent AI nativ pentru terminale ușor pentru sarcini rapide.",
       "hermes-agent": "Utilizați când aveți nevoie de Hermes Agent (de la Nousresearch) cu modele implicite, de delegare, de viziune și auxiliare redirecționate prin OmniRoute.",
+      "whycodes": "Utilizați când doriți WhyCodes ca agent CLI autonom de uz general (TUI, agenți denumiți, memorie, swarm) îndreptat către OmniRoute.",
       "custom": "Utilizați pentru implementări de instrumente personalizate sau configurații generice compatibile cu OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "Agent de programare TUI xAI Grok Build cu suport pentru furnizori personalizați",
       "droid": "Asistentul AI Factory Droid",
       "openclaw": "Deschideți Asistentul Claw AI",
+      "openclaude": "CLI pentru agentul de programare OpenClaude cu suport pentru furnizori compatibili OpenAI",
       "cline": "CLI Cline AI Coding Assistant",
       "kilo": "CLI-ul asistentului AI Kilo Code",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Terminal Warp AI cu suport pentru furnizori personalizați",
       "agent-deck": "Orchestrator multi-agent Agent Deck",
       "5dive": "5dive — flotă auto-găzduită de agenți de codare; un profil de autentificare îi îndreaptă pe toți către OmniRoute",
+      "whycodes": "Agent CLI autonom WhyCodes cu URL de bază compatibil OpenAI",
       "zed": "Editorul de cod Zed — agent integrat printr-un furnizor compatibil cu OpenAI"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Necunoscut",
     "cliproxyapiUpdate": "Actualizare",
     "cliproxyapiUpdateAvailable": "Actualizare disponibilă: v{current} → v{latest}",
-    "cliproxyapiVersion": "Versiune"
+    "cliproxyapiVersion": "Versiune",
+    "piInstallTitle": "Instalați Pi Coding Agent",
+    "piInstallInstructions": "Instalați Pi CLI, apoi reveniți aici pentru a-l conecta la OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Utilizați URL accesibil de la mașina care rulează Pi. Punctul final /v1 compatibil OpenAI este adăugat automat.",
+    "piManualMergeHint": "Doar previzualizare. Îmbinați această intrare providers.omniroute în models.json astfel încât ceilalți furnizori și setări să rămână intacte.",
+    "removeMapping": "Elimină maparea",
+    "customUrl": "URL personalizată",
+    "customEndpointAria": "Endpoint personalizat",
+    "useDefaultKey": "Utilizați cheia implicită OmniRoute",
+    "mainModelAria": "Modelul principal",
+    "manualConfigTitle": "Configurație manuală pentru Grok Build"
   },
   "modelCatalog": {
     "title": "Modele și combo-uri",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "de ex. 10",
     "testSelected": "Testează cele selectate ({count})",
     "testAllFiltered": "Testează toate cele filtrate ({count})",
+    "visibility": "Vizibilitate",
+    "allVisibility": "Vizibile și ascunse",
+    "visibleOnly": "Vizibile",
+    "hiddenOnly": "Ascunse",
+    "visibleColumn": "Vizibil",
+    "hideModel": "Ascunde {name} din /v1/models",
+    "showModel": "Afișează {name} în /v1/models",
+    "hiddenBadge": "Ascuns",
+    "hideFiltered": "Ascunde filtrate ({count})",
+    "showFiltered": "Afișează filtrate ({count})",
+    "visibilityCounts": "{visible} vizibile · {hidden} ascunse · {total} în total",
+    "visibilityUpdateFailed": "Actualizarea vizibilității modelului a eșuat",
     "cancel": "Anulează",
     "clearResults": "Șterge rezultatele",
     "testing": "Se testează...",
@@ -3397,16 +3438,53 @@
     "httpError": "Cererea a eșuat cu HTTP {status}",
     "testFailedNoDetail": "Testul a eșuat fără un mesaj de eroare",
     "additionalCapabilities": "Capabilități suplimentare: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Acces cheie API",
+    "allowedInKeys": "Permis în: {count, plural, one {# cheie} other {# chei}}",
+    "keysLoading": "Se încarcă cheile API…",
+    "keysRetry": "Reîncearcă încărcarea cheilor",
+    "accessViaPattern": "prin {pattern}",
+    "accessBlocked": "Blocat de {pattern}",
+    "editKeyAccess": "Editează accesul cheii",
+    "toggleKeyAccess": "Permite {item} pe {name}",
+    "resultNetworkError": "Atribuirea a eșuat",
+    "resultWouldEmptyModels": "Ar lăsa această cheie fără modele permise — editați în schimb accesul la cheie",
+    "resultWouldEmptyCombos": "Ar lăsa această cheie fără combo-uri permise — editați în schimb accesul la cheie",
+    "keyUpdatePending": "{name} este încă în curs de actualizare. Încercați din nou într-o clipă.",
+    "assignToKeys": "Atribuie cheilor API…",
+    "assignApply": "Aplică modificările",
+    "assignComplete": "Accesul cheii API a fost actualizat",
+    "assignFailed": "Unele actualizări ale cheilor API au eșuat",
+    "assignNoChanges": "Niciun acces la cheia API nu a fost modificat",
+    "selectedAccessItems": "Elemente selectate: {count}",
+    "assignExcludedCombos": "{count, plural, one {# rând de combo selectat nu este un model și va fi omis aici} other {# rânduri de combo selectate nu sunt modele și vor fi omise aici}}. Atribuiți combo-uri din fila Combos.",
+    "assignActionAdd": "Adaugă",
+    "assignActionRemove": "Elimină",
+    "searchKeys": "Caută chei API",
+    "selectApiKey": "Selectează cheia API {name}",
+    "allModelsAccess": "Toate modelele",
+    "allCombosAccess": "Toate combinațiile",
+    "modelAccessCount": "Modele: {count}",
+    "comboAccessCount": "Combinații: {count}",
+    "keyInactive": "Inactiv",
+    "keyBanned": "Blocat",
+    "keyRevoked": "Revocat",
+    "switchRestrictedConfirm": "Comută această cheie la acces restricționat: doar elementele selectate vor fi permise",
+    "removeNoChangeHint": "Această cheie permite totul; eliminarea elementelor selectate nu va produce nicio modificare",
+    "removeStaysAllowedHint": "Încă permis pe această cheie prin {patterns}",
+    "resultChanged": "Modificat",
+    "resultUnchanged": "Nicio modificare",
+    "resultSkipped": "Omis",
+    "resultNeedsSwitch": "Necesită comutarea la restricționat"
   },
   "combos": {
-    "autoTosIncludeLabel": "Include în auto furnizorii marcați ToS: avoid",
-    "autoTosDescription": "Dezactivat implicit. Se aplică tuturor combinațiilor auto, nu doar unui cont. Conectarea unui furnizor nu activează această opțiune.",
-    "autoTosSaveError": "Politica ToS nu a putut fi salvată. Setarea anterioară este încă afișată. Încearcă din nou.",
-    "autoTosLoadError": "Politica ToS nu a putut fi încărcată. Încearcă din nou înainte de a o modifica.",
     "title": "Combo-uri",
     "description": "Creați combinații de modele cu rutare ponderată și suport alternativ",
     "autoCatalogTitle": "Catalog de rutare automată",
+    "autoTosLoadError": "Politica ToS nu a putut fi încărcată. Încearcă din nou înainte de a o modifica.",
+    "autoTosSaveError": "Politica ToS nu a putut fi salvată. Setarea anterioară este încă afișată. Încearcă din nou.",
+    "autoTosIncludeLabel": "Include în auto furnizorii marcați ToS: avoid",
+    "autoTosDescription": "Dezactivat implicit. Se aplică tuturor combinațiilor auto, nu doar unui cont. Conectarea unui furnizor nu activează această opțiune.",
     "autoCatalogTemplateCount": "{count} șabloane",
     "autoCatalogDescription": "Combo auto/* încorporate rezolvate dinamic de la furnizorii conectați. Utilizați oricare dintre aceste ID-uri ca câmp de model - nu este necesară configurarea.",
     "autoCatalogExpand": "Extindeți catalogul de rutare automată",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Eroare la actualizarea comboiului",
     "errorDeleting": "Eroare la ștergerea combinației",
     "testFailed": "Solicitarea de testare a eșuat",
+    "removeErrorModels": "Șterge {count} model(e) eșuat(e)",
+    "removingErrorModels": "Se elimină…",
+    "errorModelsRemoved": "{count} model(e) eșuat(e) eliminat(e) din combo",
+    "noErrorModelsFound": "Nu s-au găsit modele eșuate printre pașii proprii ai acestui combo",
+    "cannotRemoveAllModels": "Nu se pot elimina toate modelele din combo",
+    "removeErrorModelsConfirm": "Eliminați {count} model(e) eșuat(e) din „{name}”? Expirările și limitele de rată nu sunt luate în calcul.",
     "failedToggle": "Combo nu a putut fi comutat",
     "testResults": "Rezultatele testului — {name}",
     "resolvedBy": "Rezolvată de:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Mișcă-te în sus",
     "moveDown": "Deplasați-vă în jos",
     "removeModel": "Eliminați",
+    "testStep": "Testează acest model",
+    "testStepRunning": "Se testează…",
+    "testStepNotTestable": "Pot fi testați doar pașii cu un singur model",
     "saving": "Se salvează...",
     "liveNoProviders": "Nu s-au observat furnizori încă.",
     "liveFleetDataHint": "Datele despre flotă sosesc prin evenimente combo live.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Nu există combinații configurate încă.",
     "playgroundCreateFirst": "Creați una mai întâi",
     "weighted": "ponderat",
+    "weightPercent": "Pondere (%)",
     "leastUsed": "Cel mai puțin folosit",
     "costOpt": "Optimizat pentru cost",
     "strategyGuideTitle": "Cum se utilizează această strategie",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# cont} other {# conturi}}",
     "builderGlobalAdded": "Adăugat",
     "builderGlobalAdd": "Adaugă",
+    "clearSearch": "Șterge căutarea",
     "manualModel": "Model manual",
     "manualModelInvalid": "Introduceți un model sub forma furnizor/model.",
     "manualModelUnknownProvider": "Prefix de furnizor necunoscut.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Adaugă o referință la combinație",
     "builderPinnedAccount": "Cont fixat",
     "builderLegacyEntry": "Intrare moștenită",
+    "builderStaleModel": "Nu este în catalogul live",
     "reviewName": "Nume",
     "reviewStrategy": "Strategie",
     "reviewSteps": "Pași",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Lungime minimă conținut (caractere)",
     "responseValidationJsonPaths": "Verificări JSON-path",
     "responseValidationAddCheck": "+ Adăugare verificare",
+    "responseValidationRemoveCheck": "Elimină verificarea",
+    "responseValidationPath": "Cale JSON",
+    "responseValidationCondition": "Condiție",
+    "responseValidationValue": "Valoare așteptată",
     "agentFeaturesSystemMessageOverride": "Ignorați mesajul de sistem",
     "agentFeaturesSystemMessagePlaceholder": "Esti un asistent expert...",
     "agentFeaturesSystemMessageHint": "Suprascrierea mesajului de sistem pentru agenți",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Total intrări",
     "type": "Tip",
-    "memoryEnabled": "Memorie activată"
+    "memoryEnabled": "Memorie activată",
+    "qdrantTutorialTitle": "Tutorial rapid: memorie cu Qdrant",
+    "qdrantTutorialIntro": "Qdrant stochează vectorii și metadatele memoriilor, astfel încât contextul relevant poate fi recuperat. Nu comprimă tokenii direct; economia este indirectă, evitând contextul nesolicitat de cerere.",
+    "qdrantTutorialStep1": "Securizați serverul cu HTTPS și o cheie API înainte de utilizarea în producție.",
+    "qdrantTutorialStep2": "Introduceți gazda, portul, colecția și un model în format furnizor/model cu o credențială configurată.",
+    "qdrantTutorialStep3": "Dimensiunea colecției trebuie să corespundă cu dimensiunea produsă de model. O colecție existentă cu 2048 de dimensiuni nu acceptă încorporări (embeddings) de 1536 de dimensiuni.",
+    "qdrantTutorialStep4": "Salvați, testați conexiunea și executați testul de căutare. Abia apoi activați Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Credite: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Abilități",
@@ -5288,7 +5390,8 @@
         "skipped": "deja configurat",
         "failed": "eșuat"
       }
-    }
+    },
+    "stepProgress": "Progresul configurării"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Acest furnizor este exclus implicit din auto",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Descarcă șablonul CSV",
     "importFromFileMoreErrors": "+ încă {count}",
     "importFromFileSchemaHint": "Coloanele CSV sunt poziționale: provider, name, apiKey, baseUrl (opțional), priority (opțional). Coloana provider trebuie să conțină id-ul unui furnizor gestionat existent sau id-ul unui nod compatibil OpenAI/Anthropic deja înregistrat — acest import nu creează noduri endpoint noi.",
+    "importOAuthExport": "Importă export OAuth",
+    "oauthExportTitle": "Importă exportul managerului de conturi",
+    "oauthExportDescription": "Încarcă un export în text simplu dintr-un manager de conturi (de ex. exportul cloud-accounts din Antigravity Manager). Tokenurile sunt reîmprospătate pe server și fiecare cont devine o conexiune OAuth — duplicatele sunt reîmprospătate pe loc.",
+    "oauthExportProviderLabel": "Furnizor",
+    "oauthExportChoose": "Alege fișierul",
+    "oauthExportFileAria": "Fișier JSON cu exportul conturilor",
+    "oauthExportSchemaHint": "Acceptat: un document cu un tablou \"accounts\", un tablou simplu sau o singură înregistrare. Tokenurile pot fi într-un obiect token imbricat sau direct în înregistrare.",
+    "oauthExportDetected": "{count} cont(uri) detectat(e)",
+    "oauthExportSelectAll": "Selectează toate conturile",
+    "oauthExportSelectAccount": "Selectează contul {index}",
+    "oauthExportColEmail": "E-mail",
+    "oauthExportColProvider": "Furnizor",
+    "oauthExportColRefresh": "Token de reîmprospătare",
+    "oauthExportNoEmail": "(fără e-mail)",
+    "oauthExportYes": "da",
+    "oauthExportNo": "nu",
+    "oauthExportImporting": "Se importă…",
+    "oauthExportImport": "Importă {count} cont(uri)",
+    "oauthExportResult": "Importate {imported}/{total} — {failed} eșuate",
+    "oauthExportParseError": "Nu s-a putut citi niciun cont din acest fișier.",
+    "oauthExportUnknownError": "eroare necunoscută",
     "adaptaTutorial": {
       "title": "Cum se conectează Adapta Web",
       "introPrefix": "Adapta se autentifică prin Clerk. Tokenul",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Toate modelele sunt deja importate",
     "noNewModelsToImport": "Niciun model nou de importat — toate modelele sunt deja în registru sau în lista de modele personalizate",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Descoperirea modelului a eșuat {time}",
     "skippingExistingModels": "Se omit {count} modele existente",
     "autoSync": "Sincronizare automată",
     "autoSyncShort": "Sincronizează",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "de ex. 131072",
     "contextWindowOverrideHint": "Setați manual fereastra de context reală a acestui model (tokeni) atunci când furnizorul o raportează greșit. Are prioritate față de valorile detectate automat/din catalog și previne eliminarea modelului de către rutarea combo.",
     "contextWindowOverrideInvalid": "Suprascrierea ferestrei de context trebuie să fie un număr întreg pozitiv de tokeni",
+    "maxOutputTokenOverrideInvalid": "Suprascrierea numărului maxim de tokeni de ieșire trebuie să fie un număr întreg pozitiv de tokeni",
     "visionCapableLabel": "Capabil de procesare vizuală",
     "visionCapableHint": "Marcați manual acest model ca fiind capabil de procesare vizuală atunci când metadatele de descoperire ale furnizorului nu raportează o modalitate de introducere a imaginilor (frecvent pentru backend-urile auto-găzduite/locale).",
     "compatParamFiltersLabel": "Filtre parametri",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Adaugă o suprascriere",
     "ccAliasLoadError": "Încărcarea setărilor pentru aliasurile de descoperire a eșuat: {error}",
     "ccAliasSaveError": "Salvarea setării pentru aliasul de descoperire a eșuat: {error}",
+    "cliVersionSectionTitle": "Versiunea client CLI anunțată",
+    "cliVersionEffectiveLabel": "Momentan reclamă",
+    "cliVersionSourceLabel": "Rezolvat din: {source}",
+    "cliVersionPinnedLabel": "Captură implicită: {pinned}",
+    "cliVersionSourceSettings": "anularea tabloului de bord",
+    "cliVersionSourceEnv": "variabila de mediu",
+    "cliVersionSourceDiscovered": "cea mai recentă versiune descoperită automat",
+    "cliVersionSourceDefault": "capturat implicit",
+    "cliVersionInputLabel": "Ignoră versiunea",
+    "cliVersionInputPlaceholder": "Versiune de anulare; goluri libere",
+    "cliVersionSaveButton": "Salva",
+    "cliVersionResetButton": "Resetați la valoarea implicită",
+    "cliVersionLoadError": "Nu s-au încărcat setările versiunii CLI : {error}",
+    "cliVersionSaveError": "Nu s-a salvat versiunea CLI : {error}",
+    "cliVersionLoadFailed": "Nu s-au putut încărca setările actuale ale versiunii CLI.",
+    "cliVersionHintClaude": "Anthropic porți modelele Claude mai noi pe versiunea client Claude Code pe care o vede. Aceasta este versiunea pe care OmniRoute o face publicitate pentru fiecare solicitare legată de antropic.",
+    "cliVersionCaveatClaude": "Avertisment de facturare: versiunea de facturare este '<version>'.'<build-revision>', iar revizuirea versiunii este o constantă separată capturată. Publicitatea 2.1.260 raportează 2.1.260.1e2, ceea ce nu este ceea ce trimite un binar 2.1.260 real.",
+    "cliVersionHintCodex": "OpenAI poartă modele mai noi pe versiunea client Codex pe care o vede, de exemplu eroarea: modelul „gpt-6-astra” necesită o versiune mai nouă a Codex.",
+    "cliVersionCaveatCodex": "Avertisment de inferență: o versiune pe care o raportează propriul apelant încă bate CODEX_CLIENT_VERSION env var, dar această modificare le bate pe ambele, deoarece este intenția explicită a operatorului.",
     "compatUpstreamHeadersLabel": "Antete upstream suplimentare",
     "compatUpstreamHeadersHint": "Setare cu privilegii ridicate — are același nivel de încredere ca editarea credențialelor API ale furnizorului; trebuie utilizată numai de administratori de încredere. Se îmbină după ce OmniRoute adaugă autentificarea din cheia API a furnizorului. Dacă un antet personalizat folosește același nume ca unul existent (de ex. Authorization), valoarea dvs. înlocuiește complet antetul generat automat (inclusiv tokenul Bearer) — serviciul upstream vede numai ceea ce ați introdus, nu cheia din setări. Configurarea incorectă poate cauza o eroare 401 sau poate întrerupe autentificarea upstream. Câte un rând pentru fiecare antet (de ex. autentificare suplimentară pentru anumite gateway-uri). Plasați cursorul deasupra valorii sau focalizați-o pentru previzualizare. Se salvează la pierderea focalizării, la un clic în exterior sau la închiderea acestui panou.",
     "compatUpstreamHeaderName": "Numele antetului",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Etichetă pentru formatul API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Regiune API: China",
-    "apiRegionHint": "Indiciu pentru regiunea API",
-    "apiRegionInternational": "Regiune API: internațională",
-    "apiRegionLabel": "Etichetă pentru regiunea API",
+    "apiRegionChina": "China continentală",
+    "apiRegionHint": "Selectați regiunea endpoint-ului utilizată pentru accesul API și urmărirea cotelor.",
+    "apiRegionInternational": "Internațional",
+    "apiRegionLabel": "Regiune API",
     "apikey": "Cheie API",
     "audio": "Audio",
     "audioProvidersHeading": "Titlu pentru furnizorii audio",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Când acest cont atinge limita de utilizare de 5 ore, iar Anthropic oferă accesul cu prioritate redusă, OmniRoute îl acceptă și continuă să trimită solicitări cu anthropic-usage-limit: slow până la resetarea intervalului, în loc să lase conexiunea să se răcească. Limita săptămânală se aplică în continuare, iar răspunsurile pot aștepta până când există capacitate disponibilă.",
     "claudeAutoLimitResetLabel": "Resetează automat limita sesiunii (o dată pe săptămână)",
     "claudeAutoLimitResetDescription": "Când acest cont atinge limita de utilizare de 5 ore și este disponibilă o resetare a limitei sesiunii, OmniRoute o revendică automat și reîncearcă la viteză maximă. Folosește resetarea disponibilă o dată pe săptămână pentru cont și continuă să fie luată în calcul pentru limita săptămânală.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Omite perioada de răcire tranzitorie, astfel încât această conexiune să rămână eligibilă chiar și după erori recuperabile (stările terminale precum blocat/expirat se aplică în continuare).",
     "disableCoolingLabel": "Dezactivează perioada de răcire pentru această conexiune",
     "bulkPasteAdded": "{count, plural, one {1 cheie adăugată} other {# chei adăugate}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Obține cheia API la monsterapi.ai",
       "moonshot": "Conectează Moonshot AI cu o cheie API.",
       "morph": "Nivel gratuit: 250K credite/lună, $0",
+      "apmix": "Conectează Apmix cu o cheie API de pe apmix.ai/dashboard — un abonament, multe modele.",
       "nanogpt": "Conectează NanoGPT cu o cheie API.",
       "nebius": "~$1 credite de încercare la înregistrare pentru testarea API-ului",
       "nlpcloud": "NLP Cloud folosește un API proprietar de chatbot în loc de OpenAI chat/completions. OmniRoute adaptează mesajele OpenAI la input/context/history și expune un catalog local de modele de chatbot acceptate.",
@@ -6620,7 +6773,7 @@
       "claude": "Conectați Claude Code cu fluxul OAuth existent.",
       "cline": "Conectați Cline cu fluxul OAuth existent.",
       "cursor": "Conectați Cursor IDE cu fluxul OAuth existent.",
-      "cursor-api": "Conectează Cursor folosind o cheie API de utilizator (crsr_...) de la cursor.com/dashboard/api; nu este necesară nicio sesiune IDE.",
+      "cursor-api": "Conectați Cursor cu o cheie API de utilizator (crsr_... sau grok_...) de pe cursor.com/dashboard/api; nu este necesară o sesiune IDE.",
       "github": "Conectați GitHub Copilot cu fluxul OAuth existent.",
       "gitlab-duo": "Aplicație OAuth cu permisiunile ai_features + read_user. Configurați GITLAB_DUO_OAUTH_CLIENT_ID și opțional GITLAB_DUO_OAUTH_CLIENT_SECRET pe această instanță OmniRoute.",
       "kilocode": "Conectați Kilo Code cu fluxul OAuth existent.",
@@ -6628,8 +6781,7 @@
       "kiro": "Nivel gratuit: 50 de credite/lună (~25K–100K tokenuri). ⚠️ Kiro ToS interzice utilizarea de proxy/harness terțe.",
       "codex": "Conectați OpenAI Codex cu fluxul OAuth existent.",
       "qwen": "Conectați Qwen Code cu fluxul OAuth existent.",
-      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens",
-      "apmix": "Conectează Apmix cu o cheie API de pe apmix.ai/dashboard — un abonament, multe modele."
+      "github-models": "Creați un GitHub PAT cu scope-ul 'models: read' la github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} acceptă ID-uri de model native ale furnizorului. Importați din /modele sau adăugați ID-uri personalizate pentru rutare.",
     "bedrockModelsDescription": "Modelele Amazon Bedrock sunt acoperite de regiunea AWS. Importați din /modele sau adăugați ID-uri de model Bedrock activate în regiunea selectată.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Folosit în {count} combo-uri: {combos}",
+    "openComboTooltip": "Deschide Combo-uri — folosit de {combo}",
+    "claudeCodeRoutingTitle": "Rutare prin proxy upstream pentru trafic Claude Code",
+    "routingNative": "Nativ",
+    "routingFallback": "Rezervat",
+    "rerank": "Reranking",
+    "video": "Video",
+    "markFreeTierTitle": "Marcați ca pachet gratuit (afișat chiar și când modelele plătite sunt ascunse)",
+    "codexTunnelTitle": "Conexiune instrument Codex",
+    "codexTunnelDescription": "Tunelul rămâne strict orientat în direcția ieșirii. Uneltele locale sunt executate în continuare exclusiv de Codex, în sandbox-ul și în baza politicii de aprobare a acestuia.",
+    "tunnelIdLabel": "ID tunel",
+    "tunnelRuntimeKeyLabel": "Cheie de runtime pentru tunel",
+    "tunnelRuntimeKeyPlaceholder": "Cheie de runtime",
+    "tunnelRuntimeKeyHint": "Stocată criptat împreună cu cookie-urile și nu este niciodată scrisă în jurnale.",
+    "tunnelRuntimeKeyNewLabel": "Cheie de runtime nouă pentru tunel",
+    "tunnelRuntimeKeyNewHint": "Introduceți-o doar împreună cu un cookie nou. Valoarea este stocată criptat.",
+    "chatgptConnectorLabel": "Conector personalizat pentru ChatGPT",
+    "doctorChecking": "Verificarea stării…",
+    "doctorCheck": "Verifică starea doctorului",
+    "fallbackRetryBackendTitle": "Backend de reîncercare pentru fallback"
   },
   "settings": {
     "title": "Setări",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Alege ce elemente să fie afișate în bara laterală. Opțiunea Elemente esențiale păstrează instrumentele avansate disponibile în căutare.",
     "hideHealthLogs": "Ascundeți jurnalele de verificare a stării de sănătate",
     "hideHealthLogsDesc": "Când este ACTIVAT, suprimați mesajele [HealthCheck] din consola serverului",
-    "themeAccent": "Culoarea temei",
-    "themeAccentDesc": "Alege o culoare presetată sau creează-ți propria temă cu o singură culoare",
-    "themeCreate": "Creează temă",
-    "themeCustom": "Temă personalizată",
-    "themeBlue": "Albastru",
-    "themeRed": "Roșu",
-    "themeGreen": "Verde",
-    "themeViolet": "Violet",
-    "themeOrange": "Portocaliu",
-    "themeCyan": "Cian",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Personalizează numele și sigla aplicației",
     "appName": "Numele aplicației",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Acum",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Cale binar de bază",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opțional: verifică fișierul generat cu binarul de bază înainte de a înlocui fișierul adoptat. Lăsați gol pentru a scrie în continuare alături. Directorul este creat dacă lipsește."
+      "coreBinaryPathHelp": "Opțional: verifică fișierul generat cu binarul de bază înainte de a înlocui fișierul adoptat. Lăsați gol pentru a scrie în continuare alături. Directorul este creat dacă lipsește.",
+      "urlFeedlessHint": "Lăsați gol pentru un abonament doar cu selector: setați un URL de control mai jos, niciun flux nu este preluat, actualizat sau legat."
     },
     "bulkHealthcheck": "Verificare în bloc a stării",
     "bulkHealthcheckDesc": "Testează toate proxy-urile configurate folosind un URL țintă pentru a identifica proxy-urile funcționale.",
@@ -7706,6 +7862,7 @@
     "configured": "configurat",
     "none": "Niciunul",
     "modelOverrideValuePlaceholder": "Valoare numerică",
+    "modelOverrideKey": "Cheie de suprascriere",
     "modelOverrideReasoningEffortsPlaceholder": "Valori în limba engleză, separate prin virgule, de ex. low, medium, high",
     "addKeyValue": "Adaugă cheie-valoare",
     "noModelOverrides": "Nu sunt configurate suprascrieri pentru acest model.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Puteți suprascrie prețurile implicite pentru anumite modele. Anulările personalizate au prioritate față de prețurile detectate automat.",
     "editPricing": "Editați prețul",
     "viewFullDetails": "Vezi detalii complete",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Rutare adaptivă în funcție de volum",
     "adaptiveVolumeRoutingDesc": "Scalează dinamic numărul de conexiuni în funcție de volumul sarcinii utile și de presiunea asupra debitului.",
     "lkgpToggleTitle": "Ultimul furnizor funcțional cunoscut (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Reduce utilizarea tokenurilor prin comprimarea prompturilor înainte de a le trimite furnizorilor",
     "autoCombosTitle": "Combinații automate",
     "autoCombosDesc": "Permite acestei chei să utilizeze combinațiile auto/* încorporate, care aleg automat un model dintre toți furnizorii configurați",
+    "ccDiscoveryAliasesTitle": "Aliasuri de descoperire Claude Code",
+    "ccDiscoveryAliasesDesc": "Anunță oglinzile de compatibilitate claude/... pentru modelele și combinațiile la care această cheie are deja acces",
     "compressionGuidanceFullGuideLink": "Ghid complet de compresie",
     "compressionGuidanceShow": "Detalii",
     "compressionGuidanceHide": "Ascunde detaliile",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Procent din fereastră",
     "compressionAdaptivePolicyAbsolute": "Buget absolut de tokenuri",
     "compressionOutputStylesDescription": "Injectează instrucțiuni de modelare a răspunsului fără a rescrie ieșirea furnizorului. Combină liber.",
+    "compressionOutputStylesPreviewNote": "O solicitare injectează o singură limbă: limba detectată, altfel primul pachet. Blocurile de mai sus sunt variantele per pachet, nu o injecție combinată.",
     "mcpAccessibilityDescription": "Limitează domeniul de aplicare al ieșirilor instrumentelor MCP (stocare separată).",
     "compressionStylesTileSummary": "{tokens, number} tokenuri salvate · {runs, plural, one {# rulare stilizată} few {# rulări stilizate} other {# de rulări stilizate}}",
     "compressionStylesTileEmpty": "Nicio rulare stilizată încă.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Gazdă",
     "qdrantCollection": "Colecție",
     "catalogVisibilityHint": "ID-urile modelelor ascunse pot fi în continuare apelate cu aceleași permisiuni de acces.",
+    "exposeCombosOnly": "Listează doar combinațiile în /v1/models",
+    "exposeCombosOnlyDesc": "Clienții care descoperă automat modelele văd combinațiile tale (și auto/*, dacă nu sunt ascunse) în locul modelelor brute ale furnizorilor. ID-urile explicite provider/model sunt în continuare rutate.",
     "catalogScopeTitle": "Listarea API-ului de modele",
     "catalogScopeDesc": "Ce afișează GET /v1/models pentru această cheie. Restrângerea listei nu modifică niciodată ce poate apela cheia.",
     "catalogScopeAll": "Ambele",
@@ -8918,7 +9079,9 @@
         "financial": "Financiar",
         "brazilian": "Brazilian",
         "usa": "SUA",
-        "full": "Complet"
+        "full": "Complet",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Africa de Sud)"
       },
       "builtinTypes": "Tipuri încorporate",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "Adrese IPv4",
         "ipv6_address": "Adrese IPv6",
         "aws_key": "Chei de acces AWS",
-        "api_key_generic": "Chei API și tokenuri"
+        "api_key_generic": "Chei API și tokenuri",
+        "iban": "IBAN numere de cont bancar",
+        "eu_vat": "EU VAT numere",
+        "es_dni_nie": "Spaniolă DNI / NIE",
+        "it_codice_fiscale": "Codice Fiscale italian",
+        "pl_pesel": "PESEL polonez",
+        "nl_bsn": "BSN olandez",
+        "de_steuer_id": "German Steuer-ID",
+        "se_personnummer": "personnummer suedez",
+        "za_id": "Numerele ID din Africa de Sud",
+        "za_phone": "numere de telefon din Africa de Sud",
+        "za_vat": "Numerele VAT din Africa de Sud",
+        "za_tax_ref": "Referințe fiscale din Africa de Sud"
       },
       "customPatterns": "Modele personalizate",
       "customPatternsDesc": "Potrivirile sunt înlocuite cu [CUSTOM_REDACTED]. Până la {max} modele. Modelele cu risc de backtracking catastrofal sunt refuzate.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Reușit",
     "tomlTestFailed": "Eșuat",
     "tomlImportError": "Nu s-a putut procesa fișierul RTK TOML.",
-    "tomlFileReadError": "Nu s-a putut citi fișierul TOML selectat."
+    "tomlFileReadError": "Nu s-a putut citi fișierul TOML selectat.",
+    "viewMode": "Mod de vizualizare"
   },
   "compressionEngineConfig": {
     "loading": "Se încarcă…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Pachete de limbi: {packs}",
     "dragToReorder": "Trageți pentru a reordona pasul",
     "engine": "Motor",
-    "intensity": "Intensitate"
+    "intensity": "Intensitate",
+    "compressionOverride": "Suprascrierea compresiei"
   },
   "compressionStudio": {
     "noRun": "Nicio rulare de compresie disponibilă.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "câștigător: {winner}",
     "encoder": "codificator",
     "bytes": "octeți",
-    "tokensCl100k": "tokeni (cl100k)"
+    "tokensCl100k": "tokeni (cl100k)",
+    "studioViews": "Vizualizări Studio"
   },
   "omniglyph": {
     "preview": "Previzualizare",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Mesajele mai scurte decât aceasta nu sunt comprimate. Mai jos = compresie mai mare.",
     "tooltipMinSavings": "Comprimați doar dacă salvează cel puțin atât de multe jetoane.",
     "ultraSettings": "Setări Ultra",
-    "ultraSettingsDesc": "Compresie semantică alimentată de SLM"
+    "ultraSettingsDesc": "Compresie semantică alimentată de SLM",
+    "defaultLanguage": "Limba implicită",
+    "viewMode": "Mod de vizualizare"
   },
   "translator": {
     "title": "Traducător",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Eșec la transformarea fluxului"
   },
   "usage": {
+    "healthExtraUsageBypass": "Cota este epuizată; utilizarea suplimentară este permisă, deci serviciul continuă.",
+    "healthPaidCreditsBypass": "Cota este epuizată; creditele plătite disponibile permit continuarea serviciului.",
+    "healthFilteringBypass": "Cota este epuizată; filtrarea locală a cotelor este dezactivată, deci serviciul continuă.",
     "title": "Utilizare",
     "grokExtraUsageCredits": "Credite Suplimentare de Utilizare",
     "grokAutoTopUp": "Reîncărcare Automată",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limitele furnizorului",
     "noProviders": "Niciun furnizor conectat",
+    "quotaAuthRequired": "Autentificare necesară - conectați-vă la panoul de control",
+    "quotaAuthRequiredHint": "Conexiunile furnizorilor nu au putut fi încărcate deoarece sesiunea panoului de control lipsește sau a expirat. Conectați-vă și reîmprospătați pagina pentru a vedea limitele cotelor.",
     "connectProvidersForQuota": "Conectați-vă la furnizori cu OAuth pentru a urmări limitele și utilizarea cotelor API.",
     "accountsCount": "{count, plural, one {# cont} other {# conturi}}",
     "filteredFromCount": "(filtrat din {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Necunoscut",
     "statTotal": "Total",
-    "statCritical": "Critic",
-    "statAlert": "Alertă",
-    "statHealthy": "Sănătos",
     "filterPurchaseTypeLabel": "Tip",
     "filterTierLabel": "Nivel",
     "purchaseAll": "Toate",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Ultima reîmprospătare",
     "providerQuota": "Cotă furnizor",
     "providerQuotaHomeHint": "Stare în timp real pentru conturile conectate",
+    "claudeResetCreditDefaultTitle": "Resetare limită Claude",
+    "confirmRedeemClaudeResetCredit": "Revendicarea resetează imediat limitele de utilizare Claude eligibile și consumă definitiv acest credit.",
+    "claudeResetCreditsModalTitle": "Credite de resetare Claude",
+    "claudeResetCreditsModalExplainer": "Credite de resetare Claude disponibile și resetări săptămânale ale sesiunilor pentru acest cont.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Pe baza observațiilor recente, nu a unui test în direct. Selectați un cont pentru detalii.",
+    "healthRecovery": "Restabilire estimată",
+    "healthAvailable": "Disponibil",
+    "healthRestricted": "Parțial restricționat",
+    "healthUnavailable": "Indisponibil",
+    "healthPeakHourProtection": "Protecție în orele de vârf",
+    "healthCooldown": "Perioadă de așteptare",
+    "healthQuotaExhausted": "Cota a fost epuizată",
+    "healthOverview": "Prezentare generală",
+    "layoutFull": "Complet",
+    "layoutCompact": "Compact",
+    "healthQuotaError": "Citirea cotei a eșuat",
+    "healthNoRuntime": "Starea de funcționare nu este disponibilă",
+    "healthPreviousSnapshot": "Ultima actualizare a eșuat; se afișează rezultatul anterior",
+    "healthPreviousFailure": "Ultima cerere a eșuat; perioada de așteptare s-a încheiat",
+    "healthAwaitingSync": "Ora resetării a trecut; se așteaptă sincronizarea",
+    "healthVerdictUnavailable": "Verificarea disponibilității nu este disponibilă; se afișează doar nivelurile cotelor",
+    "healthSummaryFailed": "Citirea rezumatului stării a eșuat; pot lipsi blocări ale modelelor",
+    "healthRuntimeObserved": "Stare actualizată {time}",
+    "healthQuotaObserved": "Cotă observată {time}",
+    "healthOldestQuota": "Cea mai veche înregistrare a cotei: {time}",
+    "healthRecoveryUnknown": "Ora recuperării este necunoscută",
+    "healthDetailsHint": "Faceți clic pentru detalii și acțiuni",
+    "healthFiveHour": "5 ore",
+    "healthOverall": "Generală",
+    "healthAction": "Necesită intervenție",
+    "healthTitle": "Disponibilitatea conturilor",
+    "healthDrag": "Trage pentru a reordona furnizorii",
+    "healthDragPosition": "{provider}, {count, plural, one {poziția {position, number} din #} few {poziția {position, number} din #} other {poziția {position, number} din #}}",
+    "healthResetOrder": "Restabilește ordinea implicită",
+    "healthPool": "Grup {name}",
+    "healthOtherPool": "Același cont · {pool}: {status} ({remaining} rămas)",
+    "healthIncluded": "{count, plural, one {Include # cont parțial restricționat} few {Include # conturi parțial restricționate} other {Include # de conturi parțial restricționate}}",
+    "healthBannerUnavailable": "{count, plural, one {# cont temporar indisponibil} few {# conturi temporar indisponibile} other {# de conturi temporar indisponibile}}",
+    "healthBannerAvailable": "{count, plural, one {# cont disponibil} few {Toate cele # conturi sunt disponibile} other {Toate cele # de conturi sunt disponibile}}",
+    "healthLegendHide": "Ascunde legenda",
+    "healthLegendShow": "Afișează legenda",
+    "healthLegendOk": "Plin = cotă rămasă; translucid = consumat.",
+    "healthLegendCooldown": "Cota pentru {window} epuizată. Plin = așteptare trecută; translucid = așteptare rămasă.",
+    "healthLegendAction": "Autorizare expirată sau cont blocat; așteptarea nu rezolvă problema.",
+    "healthLegendPartial": "Încă utilizabil. Vârf galben = model sau grup restricționat.",
+    "healthWaited": "Așteptare trecută: {percent}",
+    "healthWait": "Încă {duration} (revenire la {time})",
+    "healthFastest": "Prima revenire în {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} disponibil} few {# / {active, number} disponibile} other {# / {active, number} disponibile}}",
+    "healthCd5": "5 ore · Perioadă de așteptare",
+    "healthCdw": "Săptămânal · Perioadă de așteptare",
+    "healthRecentSuccessBypass": "Rutarea permite acest cont deoarece o cerere a reușit recent.",
+    "healthPurchasedBalanceBypass": "Soldul cumpărat permite continuarea după epuizarea cotei incluse.",
+    "healthCutoffAtRequest": "Pragurile cotei în timp real sunt verificate la rutarea unei cereri."
   },
   "modals": {
     "waitingAuth": "În așteptarea autorizației",
@@ -11077,7 +11313,8 @@
       "message": "Mesaj",
       "error": "Eroare",
       "completion": "Finalizare"
-    }
+    },
+    "statusFilter": "Stare"
   },
   "templateNames": {
     "simple-chat": "Chat simplu",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "acum {minutes}m",
     "hoursAgo": "acum {hours}h",
     "daysAgo": "acum {days}z",
-    "entries": "Intrări"
+    "entries": "Intrări",
+    "viewSwitcherAria": "Vizualizare cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nu este configurat. Înregistrează o aplicație OAuth la {applicationsUrl} cu URI de redirecționare {redirectUri} și scope-uri \"{scopes}\", apoi setează {clientIdEnv} (și opțional {clientSecretEnv}) și repornește.",
     "gitlabDuoSetupDescription": "După ce aplicația este înregistrată și variabilele de mediu sunt setate pe această instanță OmniRoute, faceți clic pe Continuare pentru a începe autentificarea OAuth.",
     "continue": "Continuă",
+    "copilotPolicyTitle": "Furnizor experimental: statutul politicii este ambiguu",
+    "copilotPolicyLine1": "OmniRoute se conectează prin api.githubcopilot.com, pe care GitHub nu l-a publicat ca o concluzie generală a terților API. Această integrare este experimentală și se poate modifica fără notificare.",
+    "copilotPolicyLine2": "Numai propriul cont GitHub poate fi conectat. Nu partajați niciodată acreditările, conturile de grup și nu încercați să depășiți limitele planului.",
+    "copilotPolicyLine3": "Utilizatorii planului gratuit și Studenți primesc doar selecția automată a modelului. Termenii planului dvs. Copilot și orice limite de utilizare rămân responsabilitatea dvs.",
+    "copilotPolicyAcknowledge": "Am înțeles, conectează-te",
     "tabPasteSetupToken": "Token de configurare",
     "claudeSetupTokenDescription": "Rulați `claude setup-token` într-un terminal și lipiți tokenul afișat. Este valabil un an și nu are token de reîmprospătare. OmniRoute trimite o cerere de test către Anthropic înainte de a-l salva.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Mai multe acțiuni",
     "test": "Testează",
     "edit": "Editează",
     "delete": "Șterge",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Nu s-au găsit intrări valide. Verificați formatul și încercați din nou.",
     "bulkImportSuccess": "Import finalizat: {created} creat, {updated} actualizat, {failed} eșuat",
     "bulkImportErrorLine": "Linia {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximum 100 de proxy per import",
+    "bulkImportMaxExceeded": "Maximum {max} de proxy per import",
     "bulkImportPreview": "Previzualizare",
     "clearAssignment": "(sarcina clară)",
     "bulkProxyAssignment": "Atribuire proxy în bloc",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "limită de rată pe IP (429)",
     "poolSetAsideKindSlow": "răspunsuri lente",
     "poolSetAsideKindGeoBlocked": "blocare regiune (403/451)",
+    "poolSetAsideKindOperatorReported": "întrerupere raportată de operator",
     "poolSetAsideUntil": "Înapoi în rotație {endsAt}",
     "poolSetAsideRepeat": "Pus deoparte {count, plural, one {# dată} other {# ori}}",
     "poolUnknownAddress": "Adresă necunoscută",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Exportă codul",
     "exportShort": "Exportă",
     "noStateToExport": "Nu există nicio stare disponibilă a spațiului de testare pentru export.",
-    "closeExportModal": "Închide fereastra modală de export",
     "close": "Închide",
     "exportRealKeyWarning": "Avertisment de securitate: export blocat — a fost detectată o cheie API reală în rezultat. Resetează cheia API și încearcă din nou.",
     "placeholderHintPrefix": "Înlocuiește",
@@ -11808,7 +12052,8 @@
       "nextButton": "Înainte",
       "runButton": "Rulează",
       "promptPlaceholder": "Introdu mesajul tău… (Enter pentru a trimite, Shift+Enter pentru rând nou)"
-    }
+    },
+    "playgroundTabs": "Moduri Playground"
   },
   "miniPlayground": {
     "endpoint": "Punct final",
@@ -11879,7 +12124,8 @@
     "assistant": "Asistent",
     "errorLabel": "Eroare",
     "requestFailed": "Solicitarea a eșuat",
-    "stop": "Oprește"
+    "stop": "Oprește",
+    "messageInputAria": "Mesaj"
   },
   "requestLogger": {
     "recording": "Înregistrare",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} rotații de cont",
       "resilienceRetried": "Tură goală reîncercată",
       "resilienceContinued": "Reluat la mijlocul fluxului",
-      "resilienceRecovered": "Recuperat printr-o acțiune de reziliență"
-    }
+      "resilienceRecovered": "Recuperat printr-o acțiune de reziliență",
+      "conversationContext": "Contextul conversației",
+      "goToBottom": "Mergi la final",
+      "liveRefreshOn": "Actualizare în timp real: activată",
+      "liveRefreshOff": "Actualizare în timp real: dezactivată",
+      "liveRefresh": "Actualizare în timp real",
+      "continuesFromParent": "continuă de la părinte",
+      "continuesFrom": "Continuă de la {id}",
+      "viewConversation": "vezi conversația",
+      "openConversation": "Deschide conversația {id}"
+    },
+    "tableLabel": "Jurnale de solicitări",
+    "throughputPostFirstToken": "După primul token",
+    "throughputEndToEnd": "De la un capăt la altul",
+    "throughputRate": "{value} tokeni/sec",
+    "throughputExplanation": "Ambele rate folosesc valoarea mai mare dintre numărul de tokeni de ieșire și cel de raționament. Rata după primul token exclude un TTFT valid; în caz contrar, folosește durata completă. Rata de la un capăt la altul folosește întotdeauna durata completă. Un răspuns tamponat poate avea o rată de livrare în rafală ridicată fără o generare mai rapidă a modelului."
   },
   "proxyLogger": {
     "filterAll": "Toate",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Servit de",
     "filterTraffic": "Trafic",
     "filterTests": "Teste",
-    "filterSource": "Sursă"
+    "filterSource": "Sursă",
+    "tableLabel": "Jurnale proxy",
+    "sortLogs": "Sortează jurnalele"
   },
   "endpointOptions": {
     "speech": "Vorbire",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "EPUIZATĂ",
     "statusAlerting": "ÎN ALERTĂ",
     "statusError": "EROARE",
-    "moreSuffix": "+încă {count}"
+    "moreSuffix": "+încă {count}",
+    "feedFilterLabel": "Filtrează evenimentele"
   },
   "quotaShare": {
     "weightPercent": "Pondere %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Negrupate",
     "ungroupedHint": "Aceste pool-uri nu sunt atribuite unui grup cunoscut. Editați un pool pentru a-l muta într-un grup real.",
     "removeFailed": "Acest grup de cote nu a putut fi eliminat.",
-    "dismiss": "Închideți"
+    "dismiss": "Închideți",
+    "allocationsHeading": "Alocări",
+    "wizardRemoveDimension": "Elimină dimensiunea",
+    "wizardRemoveKey": "Elimină cheia"
   },
   "plugins": {
     "title": "Pluginuri",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Actualizarea setărilor a eșuat",
       "serviceRevealApiKey": "{actor} a dezvăluit cheia API pentru {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Închide eroarea"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Accesează acum",
       "message": "Proxy-ul MITM se află acum în AgentBridge.",
       "title": "Această pagină a fost mutată"
-    }
+    },
+    "dnsOn": "DNS activat",
+    "dnsOff": "DNS dezactivat",
+    "showServerSettings": "Afișează setările serverului",
+    "hideServerSettings": "Ascunde setările serverului",
+    "upstreamCaTesting": "Se testează…",
+    "removeMapping": "Elimină maparea",
+    "mappingSourcePlaceholder": "de ex., gemini-3.6-flash-medium sau * pentru toate modelele nemapate",
+    "mappingWildcardHint": "Folosește * ca sursă pentru a direcționa prin OmniRoute către ținta selectată fiecare model fără o mapare explicită. Potrivirile exacte ale sursei au întotdeauna prioritate față de *.",
+    "wizardDetectingModels": "Se detectează modelele din traficul interceptat...",
+    "wizardDetectedModels": "{count, plural, one {S-a găsit # model} few {S-au găsit # modele} other {S-au găsit # de modele}} în traficul interceptat. Selectează modelele pe care vrei să le adaugi:",
+    "wizardSelectedModels": "{count, plural, one {# model selectat} few {# modele selectate} other {# de modele selectate}}. Le vei mapa la modele OmniRoute în ecranul următor.",
+    "wizardAddModels": "Adaugă {count, plural, one {# model} few {# modele} other {# de modele}}",
+    "wizardNoModelsDetected": "Nu a fost detectat încă niciun model. Folosește {agent} pentru a efectua o solicitare, apoi rulează din nou acest asistent pentru a detecta automat modelele din trafic.",
+    "wizardNoModelsHint": "Sau închide acest asistent și adaugă manual mapările în cardul agentului."
   },
   "providerStats": {
     "unknownError": "Eroare necunoscută",
@@ -12685,7 +12966,12 @@
     "avgTtft": "TTFT mediu",
     "avgTotal": "Total mediu",
     "requestTelemetry": "Telemetrie cereri",
-    "requestTelemetryDescription": "Defalcare pipeline în 7 faze (ultimele 5 minute)"
+    "requestTelemetryDescription": "Defalcare pipeline în 7 faze (ultimele 5 minute)",
+    "title": "Statistici despre furnizori",
+    "description": "Trafic, latență și rate de succes pentru fiecare furnizor și model",
+    "combo": "Combinație",
+    "toggleModels": "Afișează modelele pentru {provider}",
+    "windowSince": "Din {date}"
   },
   "relay": {
     "title": "Proxy-uri relay serverless",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Fără corp al cererii.",
     "noResponseBody": "Fără corp al răspunsului.",
     "formatted": "Formatat",
-    "raw": "Brut"
+    "raw": "Brut",
+    "requestCount": "{count, plural, one {# solicitare} few {# solicitări} other {# de solicitări}}",
+    "expandList": "Extinde lista",
+    "collapseList": "Restrânge lista",
+    "snippetLanguage": "Limbajul fragmentului de cod",
+    "headersTable": "Antete",
+    "showSecrets": "Afișează secretele",
+    "maskSecrets": "Maschează secretele",
+    "llmNotAvailable": "Metadatele LLM nu sunt disponibile pentru această solicitare.",
+    "llmStreamYes": "da (SSE)",
+    "llmStreamNo": "nu",
+    "llmTotalTokens": "Total: {count} tokenuri"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "Coduri CLI",
     "pageSubtitle": "Instrumente de cod care indică spre OmniRoute",
     "searchPlaceholder": "Caută CLI…",
     "filterDetectionLabel": "Detectare",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Negăsite",
     "baseUrlAll": "Toți",
     "baseUrlFull": "Complet",
-    "baseUrlPartial": "Parțial"
+    "baseUrlPartial": "Parțial",
+    "title": "Cod CLI"
   },
   "cliAgents": {
     "pageTitle": "Agenți CLI",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Proporția apelurilor la care acest furnizor a răspuns efectiv în ultimele 24 de ore. O liniuță înseamnă că a gestionat prea puțin trafic pentru a stabili o rată.",
     "reliabilitySample": "{successes} din {requests} apeluri au reușit în ultimele {hours} h",
     "reliabilityTooFew": "Doar {requests} apeluri în ultimele {hours} h — prea puține pentru a stabili o rată",
-    "reliabilityNoTraffic": "Niciun apel înregistrat în ultimele 24 h"
+    "reliabilityNoTraffic": "Niciun apel înregistrat în ultimele 24 h",
+    "categoryFilter": "Categoria sarcinii"
   },
   "discovery": {
     "title": "Descoperire furnizori",
@@ -13330,7 +13628,11 @@
     "method": "Metodă",
     "auth": "Autentificare",
     "feasibility": "Fezabilitate",
-    "models": "Modele"
+    "models": "Modele",
+    "provider": "Furnizor",
+    "status": "Stare",
+    "endpoint": "Punct final",
+    "actions": "Acțiuni"
   },
   "noAuthProvider": {
     "title": "Nu este necesară autentificarea",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Proxy propriu",
     "freeTierPause": "Modelul {model} este pus în pauză (429), revine la {time}",
     "freeTierPauseProvider": "Pus în pauză (429), revine la {time}",
-    "freeTierPauseNote": "Pauză în proces pe această instanță"
+    "freeTierPauseNote": "Pauză în proces pe această instanță",
+    "proxyType": "Tip de proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "O realizare ascunsă te așteaptă...",
         "criteria": "Finalizează realizarea ascunsă pentru a dezvălui această insignă."
       }
-    }
+    },
+    "leaderboardTitle": "Clasament",
+    "leaderboardDescription": "Clasamente și realizări pentru cheile tale API",
+    "badgeLocked": "Blocat"
   },
   "featureFlags": {
     "title": "Indicatori de funcționalități",
@@ -13610,7 +13916,9 @@
       "disabled": "Dezactivat",
       "dual": "Dublu",
       "alias": "Alias",
-      "canonical": "Canonic"
+      "canonical": "Canonic",
+      "fail_closed": "Blochează (fail_closed)",
+      "count_as_zero": "Contabilizează ca $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Opriri de infrastructură cu prioritate protejată returnate ca 502",
         "description": "Răspunde cu 502 în loc de 503 atunci când o țintă prioritară cu fallback exclusiv pentru cotă oprește combinația dintr-o cauză care, în mod demonstrabil, nu ține de cotă: un întrerupător de circuit deschis al furnizorului sau o omitere predictivă bazată pe latență."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Jurnalez identificatoarele conturilor",
+        "description": "Include sufixul contului în liniile de jurnal AUTH (ex. \"Se folosește contul '<provider>': abc12345...\"). Dezactivat implicit, astfel încât identificatoarele conturilor să fie mascate din jurnalele de proces partajate/ multi-tenant. Independent de Modul de Depanare; comutarea Modulului de Depanare nu dezvăluie acest lucru."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Dezactivează autentificarea cu parolă cu OIDC",
+        "description": "Când OIDC este activat, dezactivează autentificarea cu parolă, astfel încât utilizatorii să se poată autentifica doar prin OIDC Single Sign-On. Când este dezactivată (prestabilit), sunt disponibile atât autentificarea cu parolă, cât și OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Noduri de furnizor audio la distanță",
+        "description": "Permite rutelor /v1/audio/* să utilizeze noduri de furnizor compatibile cu OpenAI găzduite în afara localhost. Dezactivat în mod prestabilit — rutarea conținutului audio către o gazdă la distanță modifică identitatea traficului de ieșire (egress) și trebuie să fie o decizie explicită a operatorului. Nodurile de tip loopback sunt întotdeauna permise și nu sunt afectate."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Noduri de furnizor rerank la distanță",
+        "description": "Permite rutei POST /v1/rerank (și pasului de rerank al motorului de memorie, care o apelează prin loopback) să utilizeze noduri de furnizor compatibile cu OpenAI găzduite în afara localhost — o mașină din LAN sau un peer Tailscale care rulează TEI, Infinity, vLLM etc. Dezactivat în mod prestabilit — rutarea către o gazdă la distanță modifică identitatea traficului de ieșire (egress) și trebuie să fie o decizie explicită a operatorului. Nodurile de tip loopback sunt întotdeauna permise și nu sunt afectate. Nodurile la distanță trebuie, de asemenea, să respecte politica de URL-uri de ieșire a furnizorului."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Protecție Shared-Egress pentru rotația în rețea",
+        "description": "În cazul unei excepții de rețea (timeout, conexiune refuzată/resetată) pentru un executor de rotație multi-cont, când contul care eșuează nu are un proxy dedicat, aplică o scurtă perioadă de cooldown și omite celelalte conturi fără proxy pentru restul cererii în loc să reîncerce fiecare cont. Activat în mod prestabilit (sigur: nu modifică IP-ul de ieșire, reduce doar latența și riscul de cooldown pentru conturile cu ieșire partajată). Dezactivează pentru a restabili propagarea imediată la prima excepție aruncată fără proxy."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Omite proxy-urile eșuate recent",
+        "description": "Pool-urile de proxy-uri și rotația per cont din opencode opresc realocarea unui proxy care tocmai a eșuat (probă TCP refuzată sau un cod 429 primit prin intermediul acestuia) pentru o perioadă per proces care se dublează la fiecare repetare, până la o limită maximă. Nu se scrie nicio stare a proxy-ului; cu fiecare candidat pus deoparte, alegerea rămâne neschimbată. Activat implicit: ordinea de selecție este exact rotația simplă doar cu PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Ordine în pool pentru egress partajat",
+        "description": "Pentru furnizorii a căror cotă este grupată după adresa de egress, plasează un membru al pool-ului care partajează adresa de egress observată a unui membru refuzat recent imediat sub membrii sănătoși. Doar ordonare, nu este exclus niciodată. Necesită PROXY_SKIP_RECENTLY_FAILED, care generează semnalul de refuz pe care îl citește. Dezactivat implicit: ordinea de selecție este exact rotația simplă."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Jurnalizare atribuire rotație",
+        "description": "Rotația opencode înregistrează ce cont a servit cererea sau a fost omis (doar ID-uri mascate, niciodată ID-uri complete de cont) și asociază intrările din jurnalul proxy-ului cu cererea lor, astfel încât operatorul să poată distinge conturile omise de cele neutilizate. Dezactivat implicit: nu sunt scrise linii suplimentare în jurnal și nici coloane suplimentare."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Observare egress pool de proxy-uri",
+        "description": "Afișează, sub un pool de proxy-uri din tabloul de bord, câte IP-uri de egress observate i-au deservit membrii în ultimele 24 h, câte conexiuni le-au utilizat și numărul maxim înregistrat în spatele unui singur IP. Numai pentru citire, calculat din jurnalul de proxy, neutilizat niciodată pentru rutare. Dezactivat implicit: editorul de pool rămâne neschimbat, iar ruta de observare returnează null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Egress operator proxy",
+        "description": "Acceptă adrese observate datate transmise de operator pentru fiecare membru al pool-ului și le combină cu datele citite din jurnal pentru afișare și ordonarea pool-ului. Dezactivat implicit: ruta de push returnează 404, iar citirile pool-ului se comportă exact ca înainte."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Rotire la blocare OpenCode Responses",
+        "description": "Pentru executorul OpenCode, monitorizează primul octet din corpul unui răspuns Responses transmis prin streaming (fereastră: RESPONSES_FIRST_BYTE_TIMEOUT_MS, implicit 15000). Un flux Responses 2xx care rămâne inactiv după expirarea ferestrei este tratat ca fiind blocat: contul este trecut în răcire, iar cererea este redirecționată o singură dată către următorul cont; un al doilea blocaj eșuează rapid. Dezactivat în mod implicit: fluxurile blocate își păstrează timpul de așteptare actual până la expirarea timeout-ului de disponibilitate a fluxului."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Rotire OpenCode la user_blocked",
+        "description": "Pentru executorul OpenCode, atunci când un server upstream răspunde cu 403 sau 451 conținând un refuz user_blocked (nu o blocare geografică, nu o respingere a amprentei Cloudflare), trece contul refuzat în răcire și rotește către următorul cont cel mult o dată per cerere; un al doilea refuz este returnat ca atare, fără marcaj de succes. Dezactivat în mod implicit: ocolirea unei blocări de utilizator din upstream poate părea o încercare de eludare și poate răspândi marcajul la nivelul întregii flote de conturi, așadar refuzul este returnat neschimbat dacă operatorul nu activează explicit opțiunea."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Backoff la failover tranzitoriu OpenCode",
+        "description": "Pentru rotația multi-cont OpenCode, întrerupe temporar înainte de expedierea către următorul cont odată ce două încercări consecutive au eșuat cu o eroare tranzitorie upstream (5xx sau o respingere 400 goală). Pauza începe de la 1.5s, se dublează la fiecare eșec consecutiv suplimentar, este plafonată la 6s per pauză și 10s per cerere, este omisă dacă clientul se deconectează, iar corpul răspunsului eșuat este eliberat înainte de așteptare. Dezactivat în mod implicit: failover-ul rămâne imediat."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Reîncercare la golire pentru tur gol",
+        "description": "Pentru tururile de streaming traduse, atunci când turul upstream nu conține conținut utilizabil (completare doar cu raționament sau zero fragmente utile), emite reîncercări limitate prin calea normală de acreditare (până la `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) înainte ca orice date să fie expuse clientului. Dezactivat în mod implicit: tururile goale își păstrează comportamentul actual (200 gol sau 502 cu conținut gol)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Recuperare prin conexiuni surori pentru flux gol",
+        "description": "Streaming Claude/Codex: după primul eveniment din ciclul de viață, sondează scurt (până la 1s / 64 KiB) pentru date de ieșire utilizabile; un flux care se termină fără conținut devine o eroare empty_content care consumă reîncercarea limitată existentă pe o altă conexiune eligibilă (fără perioadă de răcire, fără blocare a modelului), iar combinațiile round-robin opresc reîncercările odată ce clientul se deconectează. De asemenea, tratează refusal, pause_turn și model_context_window_exceeded drept stări finale goale legitime în cadrul verificării. Dezactivat în mod implicit: starea de pregătire, gestionarea conținutului gol și reîncercările combinate rămân exact ca înainte."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Sondare a ieșirii întârziate a fluxului",
+        "description": "Sondare a ieșirii de streaming: după primele 64 de fragmente redirecționate, continuă să eșantioneze un fragment din 16 pentru prima ieșire vizibilă, astfel încât o ieșire care începe târziu să marcheze în continuare fluxul ca având emisă o ieșire. O eroare 5xx izolată după acel moment rămâne la nivel de cerere în loc să înregistreze o blocare exclusivă a modelului, iar firstOutputMs este completat retroactiv pentru primul fragment de ieșire din intervalul curent de eșantionare. Dezactivat în mod prestabilit: sunt sondate doar primele 64 de fragmente redirecționate, exact ca înainte."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "Oprire timpurie OpenCode la 429 cu limitare de rată",
+        "description": "Pentru rotația multi-cont OpenCode, oprește valul de conturi la primul 429 clasificat ca o limitare reală de rată (un antet Retry-After parsabil sau un corp care specifică o limită de rată/utilizare) și returnează acel 429 din amonte neschimbat (stare, corp, anteturi Retry-After și de cotă), în loc să încerce fiecare cont rămas. Răspunsurile 429 neclasificate continuă rotația. Dezactivat în mod prestabilit: nivelul gratuit este limitat per IP de ieșire (#9611), astfel că fiecare 429 trece la următorul cont, iar un val epuizat returnează ultimul 429 din amonte."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "Parcare și reluare 429 OpenCode",
+        "description": "Pentru rotația multi-cont OpenCode, parchează cererea după erori 429 tranzitorii repetate (sau un marker recent de suprasolicitare a pool-ului) cu un heartbeat, apoi reia o etapă limitată de până la 3 conturi secvențiale în loc să trimită cereri către întreaga flotă. Dezactivat în mod prestabilit: fiecare 429 trece la următorul cont, exact ca înainte."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Reîncercare la blocarea disponibilității fluxului",
+        "description": "Pentru cererile de chat cu streaming, când primul corp din amonte se blochează înainte de a produce un eveniment utilizabil, efectuează o a doua încercare limitată prin aceeași cale de rutare, cu același buget de disponibilitate și fără penalizarea contului. Dezactivat în mod prestabilit: un prim corp blocat duce la eșecul cererii fără reîncercare."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "Reselectare pool 429 OpenCode",
+        "description": "Pentru rotația multi-cont OpenCode, după un 429 primit de la un furnizor segmentat pe bază de ieșire (egress) pe un cont fără proxy într-un context de pool ambiental, solicită pool-ului de conexiuni un alt membru pentru următoarea încercare în loc să reîncerce aceeași adresă de ieșire. Ordonează, nu exclude niciodată: un pool epuizat păstrează comportamentul curent. Dezactivat în mod prestabilit: fiecare 429 trece la următorul cont, exact ca înainte."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Amprentă client OpenCode v2",
+        "description": "Trimite amprenta de client OpenCode v2 CLI la cererile OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli și x-opencode-client cli, un User-Agent de client păstrat doar când este un client OpenCode 2.x, iar la cererile din planul gratuit restricționat fără x-opencode-request, sesiunea reflectată pe x-opencode-session-id/x-session-affinity/x-session-id, schemele read/shell v2 CLI pe instrumentele placeholder injectate și un tool_choice de \"none\" eliminat. Dezactivat în mod implicit: fiecare cerere OpenCode păstrează identitatea, anteturile și corpul curente octet cu octet."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Blocare egress-IP OpenCode Zen",
+        "description": "Adaugă OpenCode Zen (opencode-zen) la familia implicită de blocare egress-IP, astfel încât o eroare 429 pe o conexiune Zen să aplice o perioadă de răcire și pentru fiecare conexiune Zen asociată care partajează același egress-IP. Dezactivat în mod implicit: Zen este diferențiat prin cheie și fiecare conexiune se răcește individual, exact ca înainte. O valoare explicită OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS are întotdeauna prioritate față de acest flag."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Reguli de eroare full-text OpenCode",
+        "description": "Permite regulilor de eroare integrate OpenCode (opencode-zen, opencode-go, opencode-cli) să facă potrivirea pe textul complet al erorii upstream, astfel încât markerii din corp precum organization_quota_exceeded sau \"monthly usage limit reached\" să clasifice o eroare 429 drept cotă epuizată cu o blocare la nivel de conexiune. Dezactivat în mod implicit: acele reguli văd doar codul de eroare structurat, iar un astfel de 429 rămâne o limitare de rată de scurtă durată, exact ca înainte."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Reguli de eroare full-text Cloudflare Workers AI",
+        "description": "Permite regulii de eroare integrate Cloudflare Workers AI să facă potrivirea pe textul complet al erorii upstream, astfel încât corpul 429 cu \"daily free allocation\" să fie clasificat drept cotă epuizată în loc de o limitare de rată de scurtă durată. Dezactivat în mod implicit: regula vede doar codul de eroare structurat, exact ca înainte."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Filtru de capabilități",
+        "description": "Respinge cererile înainte de expediere atunci când modelul țintă nu are capabilitățile necesare (vision, tools, structured output, context window). Protejează cererile directe către un singur furnizor care ocolesc filtrul de compatibilitate din stratul combo."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ignoră utilizarea fără preț în cotele USD",
+        "description": "Contorizează utilizarea modelelor fără preț ca fiind $0 în cotele de utilizare în USD per cheie, în loc să trateze cota ca fiind depășită. Dezactivat în mod prestabilit: un model fără preț sau un alias de rutare poate ascunde cheltuieli reale, astfel încât cota eșuează în mod închis."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Activează modulul OmniRoute Radar (ecranele de flux de catalog și sincronizarea). Dezactivat în mod prestabilit; activarea deblochează doar interfața de utilizator — sincronizarea datelor rămâne o opțiune separată de activare."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Control al capacităților endpoint-ului de model",
+        "description": "Impune etichetele de încredere ale endpoint-urilor de model (declarate de catalogul furnizorului, deduse dintr-un ID de model specializat sau setate de operator): respinge cu HTTP 400, înainte de expediere, o cerere trimisă către un endpoint pe care modelul nu îl deservește pe /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations și /v1/audio/*; ascunde din /v1/models modelele ale căror endpoint-uri etichetate nu au un adaptor OmniRoute; și răspunde cu 422 la testul de model din tabloul de bord pentru astfel de modele. Dezactivat în mod prestabilit: etichetele endpoint-urilor rămân informative, iar cererile sunt expediate exact ca înainte."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Transfer universal de context",
+        "description": "Generează și injectează rezumate ale conversației atunci când rutarea combo schimbă modelele. Dezactivează pentru a trata schimbările de model în mod independent și pentru a preveni cererile de transfer în fundal pentru toate combo-urile existente și viitoare."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Redare raționament",
+        "description": "Stochează în cache și redă raționamentul modelului în conversațiile multi-turn. Dezactivează pentru a opri stocarea și reinjectarea raționamentului."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Transport App-Server Codex",
+        "description": "Permite Codex să utilizeze transportul local app-server WebSocket JSON-RPC (codexTransport=app-server). Când este dezactivat, conexiunile configurate pentru app-server revin la celelalte moduri de transport ale Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Aliasuri de descoperire Claude Code",
+        "description": "Anunță identificatoarele oglindă claude/'<provider>'/'<model>' pe /v1/models, astfel încât descoperirea modelelor din gateway Claude Code să listeze modele care nu sunt Claude. Avertisment: dublează intrările din catalog pentru toți clienții atunci când este activat global."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Aliasuri pentru modele fără gândeală",
+        "description": "Comutator principal pentru aliasurile gateway no-think/'<provider>'/'<model>'. Activat (implicit): /v1/models anunță o variantă fără gândeală pentru fiecare model Claude eligibil capabil de gândeală, iar un id no-think/ trimis într-o cerere se rezolvă înapoi către modelul real cu raționare suprimată. Dezactivat: nu se anunță variante și un id no-think/ este tratat ca orice alt id de model necunoscut. Opțiunea de opt-in/opt-out per model ModelSpec.noThinkingAlias rămâne aplicabilă în timp ce acesta este activ."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Dezactivare variante de nivel de gândire",
+        "description": "Dezactivează generarea variantelor de nivel de gândire (de ex. -low, -medium, -high) în catalogul /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Benzi virtuale adaptive de admitere",
+        "description": "Activează benzile virtuale adaptive de admitere per-tenant pentru dispecerizarea furnizorilor (#9654): un vârf de trafic al unui tenant nu mai provoacă erori 503 altuia. Variabila de mediu OMNIROUTE_CHAT_VIRTUAL_LANES are prioritate față de această suprascriere din panoul de control; modificările intră în vigoare la repornirea serverului."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Oglinzi functionale de gateway",
+        "description": "Anunță identificatoarele oglindă '<gateway-alias>'/'<model>' pe /v1/models pentru modelele ale cărora proprietarul canonic nu are credențiale active, dar un gateway de passthrough cu credențiale active le redirecționează. Avertisment: adaugă intrări în catalog pentru toți clienții atunci când este activat global."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Sold agregator New-API",
+        "description": "Activează detectarea soldului pentru nodurile compatibile cu agregatoarele New-API / One-API / Sub2API. Când este activată, nodurile compatibile cu indicatorul de agregator setat își vor raporta soldul în tabloul de bord și în rutarea quota-preflight."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Ascunde conexiunile de căutare șterse",
+        "description": "Statisticile de căutare și căutările recente contorizează doar furnizorii care au încă o conexiune activă (furnizorii fără cheie, cum ar fi duckduckgo-free, sunt întotdeauna contorizați). Dacă este dezactivată, se păstrează fiecare rând de căutare reținut cu un ID de furnizor."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Insignă Free strictă",
+        "description": "Paginile furnizorilor din tabloul de bord: afișează insigna Free doar pentru semnalele pe care furnizorul le respectă — elimină euristica numelui afișat, câmpurile free non-booleene și sufixele :free pentru furnizorii înregistrați fără un plan gratuit documentat. Dacă este dezactivată, se păstrează regula istorică a insignei."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Pool-ul gol răspunde cu 503",
+        "description": "Când pool-ul de candidați al unui auto combo este deja gol înainte de rularea prefiltrului de tool-calling (fiecare țintă fiind omisă din cauza perioadelor de cooldown, blocărilor sau epuizării), răspunde cu 503 no_eligible_targets în loc de vechiul 400 \"No target supports tool calling\" capability_mismatch. Dezactivat în mod prestabilit: pool-ul gol păstrează vechiul 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Blocare moale neclară 401 Mistral",
+        "description": "Un 401 Mistral brut ('{\"detail\":\"Unauthorized\"}', fără semnal de autentificare explicit) este identic la nivel de octeți pentru o cheie revocată și pentru o cotă epuizată. Când este activat, un astfel de 401 răcește conexiunea în loc să o parkeze ca expirată, de maximum 3 ori într-o oră; următorul o va parca totuși ca expirată, astfel încât o cheie revocată converge. Dezactivat implicit: fiecare 401 Mistral brut parkează conexiunea ca expirată, ca înainte."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Curățare automată loturi și fișiere",
+        "description": "Permite procesului de curățare automată să șteargă joburile Batch API terminale (completed/failed/cancelled/expired) mai vechi decât OMNIROUTE_BATCH_RETENTION_DAYS, împreună cu punctele de verificare per linie, și să golească conținutul BLOB al fișierelor încărcate care au depășit propriul expires_at. Dezactivat în mod prestabilit: fiecare instalare existentă păstrează aceste date exact ca înainte, până când un operator activează opțiunea. Ruta DELETE /api/v1/batches/delete-completed declanșată de operator nu este afectată în niciun fel – este un contract API public separat și necondiționat."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Lease cont Antigravity",
+        "description": "Rezervă contul Antigravity selectat pe durata ciclului de viață de streaming al cererii care l-a preluat, astfel încât o reîncercare concurentă sau transferul de credențiale să nu poată selecta din nou un cont deja alocat unui stream în desfășurare. Rezervarea este limitată la domeniul (connection, callable upstream model), astfel încât un cont poate deservi în continuare două modele diferite simultan. Când toate conturile eligibile sunt deja alocate pentru acel model, cererea returnează un răspuns structurat 503 POOL_BUSY cu un Retry-After delimitat, în loc să supraaglomereze un cont ocupat. Dezactivat în mod prestabilit: selecția contului rămâne exact ca înainte și nu se efectuează nicio rezervare."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Curățare automată pași de combo perimați",
+        "description": "După o sincronizare reușită a modelelor cu un catalog live autoritar, elimină pașii de combo asociați modelelor pe care catalogul nu le mai conține, generând o înregistrare de audit pentru fiecare pas eliminat. Nu elimină niciodată pași la o sincronizare eșuată, degradată sau exclusiv gratuită (free-only) și nu golește niciodată un combo. Dezactivat în mod prestabilit: pașii perimați sunt doar semnalați."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Gândire rezumată Claude OAuth",
+        "description": "Permite unei cereri Claude OAuth care solicită gândire lizibilă (thinking.display \"summarized\") să renunțe la versiunea beta Anthropic redact-thinking-2026-02-12, care altfel determină Anthropic să returneze blocuri de gândire goale, doar cu semnătură. Dezactivat în mod prestabilit: acea versiune beta face parte din amprenta de rețea a Claude Code OAuth, astfel că cererile OAuth o păstrează neschimbată. Cererile Claude pe bază de cheie API acceptă deja gândirea rezumată fără acest flag; OMNIROUTE_REDACT_THINKING=false ajunge la OAuth numai atunci când acest flag este activat."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Reparare apel de instrument Kiro",
+        "description": "Atunci când un răspuns Kiro de tip streaming emite un wrapper tool_call malformat (lipsesc input.name sau input.arguments) înainte de orice ieșire vizibilă, îl suprimă și retrimite cererea o singură dată cu o instrucțiune corectivă în loc să încheie tura cu invalid_kiro_tool_call. Reîncercarea costă o cerere Kiro suplimentară; un al doilea eșec încheie tura cu kiro_tool_call_repair_retry_failed. Activat implicit. Setați pe false pentru ca tura să eșueze la primul wrapper malformat."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Niveluri de efort models.dev",
+        "description": "Utilizează nivelurile de efort de raționament publicate de models.dev (restrânse la vocabularul de efort cunoscut) atunci când nici o suprascriere a operatorului, nici registrul furnizorilor nu declară vreunul și tratează o listă de niveluri declarată goală drept „fără niveluri” în effort_tiers din /v1/models și în intersecțiile de niveluri combo. Dezactivat implicit: effort_tiers și supportedThinkingEfforts rezolvate rămân exact ca înainte."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Telemetrie cx sintetizată Arena",
+        "description": "Atașează un blob de interacțiune cu clientul cx sintetizat programatic (valoarea pe care arena.ai însăși o trimite pentru o pagină fără interacțiuni înregistrate) fiecărei cereri create-evaluation Arena (lmarena) care nu are un providerSpecificData.cx furnizat de operator. Dezactivat implicit: câmpul cx este un semnal anti-automatizare Arena, astfel încât OmniRoute transmite doar o valoare capturată de operator dintr-o sesiune reală de browser (providerSpecificData.cx) și, în caz contrar, nu trimite niciun cx. Beneficiu upstream nedovedit; activați doar dacă Arena începe să respingă cererile fără cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Compactare reactivă nativă Codex",
+        "description": "Permite ca trecerile de compactare a contextului reactive (pe bază de prag) și de ultimă instanță să rescrie, de asemenea, istoricele native Codex de tip passthrough (POST /v1/responses către furnizorul codex) atunci când depășesc bugetul de context, utilizând adaptorul Responses input[]. Dezactivat implicit: istoricele native Codex aparțin clientului Codex și nu sunt niciodată rescrise prin compactare; cererile supradimensionate continuă să eșueze la verificarea bugetului de context exact ca înainte. Necesită ca compresia globală să fie activată, iar modelul să nu fie exclus."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Fereastră de cotă: Respectare parcare delimitată",
+        "description": "Permite politicii de cotă per fereastră (pragurile de sesiune/săptămânale utilizate la selectarea contului) să respecte parcarea delimitată la epuizare: odată ce termenul-limită plafonat de parcare a trecut sau valoarea observată a cotei din cache este mai veche decât limita de parcare, fereastra încetează să mai excludă contul până la o nouă preluare a cotei. Dezactivat implicit: o fereastră stocată în cache continuă să blocheze pe baza ultimului procent raportat până la propriul său moment de resetare."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Generare de imagini: Sarcini de lungă durată",
+        "description": "Pentru generarea de imagini compatibilă cu OpenAI: utilizează timeoutul conexiunii (providerSpecificData.timeoutMs), altfel timeoutul central de preluare upstream (FETCH_TIMEOUT_MS, apoi REQUEST_TIMEOUT_MS, implicit 600 s) în locul bugetului fix de 120 s pentru imagini; finalizează cu 499 o cerere anulată de apelant; și permite modului Playground să primească sarcinile lungi de imagini ca flux SSE cu semnale de tip keepalive. Dezactivat în mod implicit: se aplică bugetul fix, iar anularea de către apelant nu este propagată. Termenul limită care acoperă citirea corpului răspunsului este întotdeauna activ."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Rafinări ale oglindirii catalogului",
+        "description": "Rafinează oglindirile claude/ discovery și functional-gateway pe /v1/models. Dezactivat în mod implicit: ambele treceri de oglindire se comportă exact ca înainte. Activat: oglindirile claude/ discovery acoperă, de asemenea, variantele de reasoning-effort listate (-low/-medium/-high/-xhigh), ignoră ID-urile auto/* încorporate pe care calea cererii nu le poate materializa și ignoră un alias deja listat; oglindirile functional-gateway ignoră combinațiile și ID-urile sintetizate de OmniRoute (claude/, no-think/), preiau proprietarul din owned_by, nu utilizează niciodată proprietarul drept propriul său gateway, ignoră gateway-urile dezactivate în blockedProviders și modelele din afara catalogului live de autoritate al unui gateway."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Sănătate proxy: Refuzul resetează seria de eșecuri",
+        "description": "În verificarea stării proxy-urilor, permite ca o verificare refuzată de țintă (401/403/429: proxy-ul a redirecționat, destinația a refuzat acest IP de ieșire) să reseteze seria de eșecuri consecutive ale proxy-ului, la fel ca o verificare deservită cu succes. Dezactivat în mod implicit: un refuz rămâne neutru și menține seria (#10654). Un răspuns 5xx rămâne neconcludent în ambele cazuri, iar un refuz nu elimină, nu dezactivează și nu reactivează niciodată un proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Imagini abonament Grok",
+        "description": "Înregistrează rutele de imagini xai-oauth (xao) și grok-cli și mapează calitatea OpenAI high/hd la xAI medium. Dezactivat în mod implicit: calea de imagini xAI bazată pe cheie API rămâne pe cererea existentă compatibilă cu OpenAI, iar rutele de abonament nu sunt înregistrate."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Descoperire live a modelelor xAI OAuth",
+        "description": "Preia catalogul live de modele xAI pentru conexiunile xai-oauth de la https://api.x.ai/v1/models utilizând tokenul bearer OAuth, în locul seed-ului static înghețat. Activat în mod implicit. Setează flag-ul pe false pentru a continua servirea seed-ului static. Erorile HTTP revin la seed în ruta de descoperire; getter-ul flag-ului în sine nu trimite cereri HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Intervenții de sistem la mijlocul conversației compatibile cu Anthropic",
+        "description": "Pe releele simple anthropic-compatible-* (passthrough claude → claude), păstrează intervențiile role:system de la mijlocul conversației în interiorul messages[] în loc să le ridice în parametrul de nivel superior system, astfel încât prefixul de prompt din cache să rămână stabil între intervenții. Se aplică doar atunci când clientul a trimis el însuși valoarea anthropic-beta mid-conversation-system-2026-04-07 (redirecționată upstream ca atare). Dezactivat în mod implicit: fiecare intervenție de sistem este ridicată exact ca înainte, deoarece releele care nu acceptă versiunea beta resping mesajele role:system cu 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Verificare a stării bazei de date: Amânare scanare la pornire",
+        "description": "Rulează verificarea integrității/stării DB de la pornire după ce serverul începe să accepte cereri (prin setImmediate), în loc să blocheze pornirea până la finalizarea acesteia. Dezactivat în mod implicit: pornirea se blochează la verificare exact ca înainte de #13717, astfel încât o bază de date coruptă este detectată înainte de a fi servită prima cerere. Activat: pornirea se finalizează imediat, iar verificarea (acum delimitată/paginată și, pentru o bază de date reală bazată pe fișiere, izolată într-un proces-copil care poate fi anulat) rulează imediat după."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Rutare prin catalogul publicat OpenCode",
+        "description": "Permite modelelor OpenCode Zen și OpenCode Go fără un endpoint de registru explicit să își preia suprafața de cerere (Responses pentru @ai-sdk/openai, Messages pentru @ai-sdk/anthropic) din catalogul publicat models.opencode.ai, citit în fundal la fiecare 6 ore. Dezactivat în mod implicit: endpoint-ul provine din euristica registrului exact ca înainte, iar catalogul nu este preluat niciodată."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Cereri automate: Ponderi ale capabilităților rezolvate",
+        "description": "Permite cererilor auto/* (resolveModelOrError și wrapperul de rutare automată) să construiască grupul de candidați cu capabilitățile rezolvate ale modelului (vision, reasoning, thinking) și scorurile de calitate observate, citite într-o singură trecere în masă, la fel ca în catalogul /v1/models. Dezactivat în mod implicit: ponderile instantaneului de la momentul cererii rămân exact ca înainte (capabilitățile se rezolvă la cerere și nu alimentează ponderile). Activat: aceste semnale alimentează ponderile instantaneului, astfel încât ponderile candidaților și, prin urmare, selecția se pot modifica."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Poartă de transport fără chei",
+        "description": "Păstrați noii furnizorului fără autentificare (no-auth) ale căror transporturi necesită un browser local (browserBacked) sau un CLI instalat local (isLocalCli) din afara grupului de candidați auto/*, astfel încât un membru blocat să nu poată bloca o cerere auto până la expirarea timpului de așteptare per țintă (#17036). Dezactivat în mod implicit: toți noii furnizori fără autentificare cu apelare de instrumente emulată rămân în grup exact ca înainte. Apelurile directe '<alias>'/'<model>' funcționează indiferent de acest lucru."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Redarea raționării inline",
+        "description": "Pentru modelele de gândire codebuddy-cn (familiile DeepSeek-V4 / Kimi-K2 care necesită redarea raționării), fiecare conținut de raționare asistent redat este inserat inline ca un bloc '<thought>' vizibil la începutul conținutului mesajului, astfel încât acest lucru să supraviețuiască unui gateway care elimină câmpul reasoning_content (#13632). Dezactivat în mod implicit: cererile codebuddy-cn sunt trimise neschimbate; însăși câmpul reasoning_content este păstrat întotdeauna."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Opriri de siguranță ale furnizorului: Terminale",
+        "description": "Păstrează o oprire explicită de siguranță a furnizorului (misalignment_policy_violation, content_policy_violation sau respingerea moștenită exactă 'blocked by our safety systems' etichetată provider_safety_rejection) ca un refuz terminal, la nivel de cerere: codul său este păstrat prin erorile HTTP, Responses, WebSocket și completed-stream, iar un combo se oprește la acesta în loc să reîncerce alte ținte, anulând sibling-urile admise (#17049). Dezactivat în mod implicit: aceste erori își păstrează gestionarea existentă, iar rutarea combo-ului rămâne neschimbată."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Starea acreditărilor: Retestarea conexiunilor dezactivate automat",
+        "description": "Permite scanării stării acreditărilor să retesteze conexiunile pe care gateway-ul le-a oprit de la sine (marcate cu autoDisabledAt; cel mult o dată la 6 ore fiecare și maximum 5 per scanare) și să reactiveze o conexiune atunci când retestarea acesteia reușește (#16190). Dezactivat în mod implicit: conexiunile oprite rămân dezactivate până când un operator le reactivează sau le retestează, exact ca înainte. Conexiunile dezactivate de operator și conexiunile oprite după o blocare permanentă nu sunt niciodată retestate."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Poartă de acreditări: Doar diagnostice de autentificare",
+        "description": "Restrânge poarta de acreditări a combo-ului, astfel încât o verificare eșuată a acreditărilor stocată în cache să blocheze o conexiune doar atunci când diagnosticul acesteia indică acreditări nevalide (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Eșecurile neconcludente (timeout-uri, limitări de rată, întreruperi, verificări neacceptate și erori de planificator netipizate) sunt tratate atunci ca necunoscute, iar conexiunea continuă să primească trafic. Dezactivat în mod implicit: orice eroare de verificare din cache blochează conexiunea pe durata TTL-ului din cache (5 minute)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Oprire la refuzul politicii de conținut",
+        "description": "Atunci când o țintă din combo răspunde cu un refuz exact legat de politica de conținut (cod sau tip cyber_policy / content_policy_violation), oprește combo-ul și returnează acel refuz chiar și atunci când țintele rămase sunt modele diferite, în loc să avansezi la următoarea țintă. Dezactivat în mod implicit: refuzul nu plasează niciodată contul în cooldown și nu declanșează disjunctorul furnizorului, iar combo-ul avansează la următoarea sa țintă exact ca înainte."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Reîncercare cooldown: Omite refuzurile 403/410",
+        "description": "Când toate conturile sunt în cooldown, iar cooldown-ul care se termină primul a fost cauzat de un 403 (acces refuzat) sau un 410 (dispărut), returnează imediat acel refuz în loc să aștepți expirarea cooldown-ului și să retrimiți cererea; un 403 de cotă la nivel de conexiune agentrouter care se reînnoiește este apoi salvat cu errorCode 429, astfel încât să rămână reîncercabil. Dezactivat în mod prestabilit: doar un 401 omite așteptarea, iar fiecare refuz este salvat cu statusul cu care a sosit."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politica bugetului pentru utilizare fără preț",
+        "description": "Cum tratează limitele zilnice/săptămânale în USD pe cheie utilizarea reușită pentru care furnizorul/modelul nu are o linie de preț. fail_closed (implicit) marchează fereastra ca depășită, astfel încât un cost necunoscut să nu poată trece peste un plafon strict. count_as_zero contabilizează acea utilizare ca $0 și continuă să aplice cheltuielile cu preț. Modelele fără preț sunt listate oricum pe pagina principală a tabloului de bord."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latență",
     "quota": "Cotă",
     "rangeWindow": "Fereastră {range}",
+    "timeRange": "Interval de timp",
     "runtimeHealthBlend": "mix runtime/stare de funcționare",
     "averageResponseTime": "timp mediu de răspuns",
     "worstQuota": "Cea mai critică cotă",
@@ -13923,7 +14500,11 @@
       "ok": "În general permisiv"
     },
     "allProviders": "Toți furnizorii",
-    "noApiKeyRequired": "Nu este necesar un API key"
+    "noApiKeyRequired": "Nu este necesar un API key",
+    "searchPlaceholder": "Caută model, furnizor…",
+    "searchAria": "Caută modele gratuite",
+    "filterProviderAria": "Filtrează după furnizor",
+    "keylessOnly": "Doar fără cheie"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot stare furnizor",
@@ -13994,7 +14575,11 @@
     "learnMore": "Aflați mai multe",
     "changelogLoadFailed": "Nu s-a putut încărca jurnalul de modificări. Vă rugăm să încercați din nou mai târziu.",
     "retry": "Reîncercați",
-    "viewFullHistory": "Vizualizați istoricul complet pe GitHub"
+    "viewFullHistory": "Vizualizați istoricul complet pe GitHub",
+    "title": "Noutăți și jurnal de modificări",
+    "description": "Anunțuri din partea echipei OmniRoute și cele mai recente note de lansare",
+    "viewLabel": "Vizualizează",
+    "loadingNews": "Se încarcă anunțurile..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Starea Circuit Breaker a Furnizorului",
       "lastUpdate": "Ultima actualizare: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Închis",
+      "breakerNotClosed": "Deschis sau semi-deschis"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Detalii de întreținere",
         "secondaryAction": "Starea Sistemului"
       }
+    },
+    "miniapp": {
+      "askAnything": "Întreabă orice…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} vizibile / {total} în total",
+    "modeLabel": "Mod de vizualizare",
+    "jumpToNow": "Salt la ora curentă; linia ACUM se resetează la poziția {position}%",
+    "laneReuse": "Reutilizarea rândurilor",
+    "laneReuseLabel": "Interval de reutilizare a rândurilor (minute)",
+    "laneReuseHint": "Solicitările care au același ID de conversație rămân pe același rând al cronologiei atât timp cât intervalul dintre ele este mai mic decât acest număr de minute.",
+    "laneReuseUnit": "min.",
+    "autoRefresh": "Reîmprospătare automată",
+    "autoRefreshLabel": "Interval de reîmprospătare automată (secunde)",
+    "autoRefreshHint": "Frecvența cu care cronologia preia din nou lista de solicitări de la server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Micșorează",
+    "zoomIn": "Mărește"
   },
   "metadata": {
     "compressionTitle": "Compresie",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Închideți"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Dezactivați generarea variantelor de nivel de gândire (de ex. -low, -medium, -high) în catalogul /v1/models.",
+  "teamCosts": {
+    "title": "Costurile echipei",
+    "subtitle": "Gestionează bugetele flexibile partajate și estimările de cost din catalog.",
+    "refresh": "Reîmprospătează",
+    "create": "Creează echipă",
+    "edit": "Editează echipa",
+    "archive": "Arhivează",
+    "selectTeam": "Echipe",
+    "searchTeams": "Caută echipe",
+    "statusFilter": "Starea echipei",
+    "active": "Activă",
+    "archived": "Arhivată · doar citire",
+    "allTeams": "Toate echipele",
+    "noTeams": "Nicio echipă potrivită.",
+    "selectHint": "Creează sau selectează o echipă pentru a vedea costurile.",
+    "loading": "Se încarcă costurile echipei…",
+    "budgetTitle": "Buget flexibil curent",
+    "budgetSubtitle": "Utilizare reușită confirmată · fereastră glisantă · independentă de datele raportului",
+    "archivedBudget": "Arhivată: aplicarea bugetului este inactivă. Rapoartele istorice rămân disponibile.",
+    "unlimited": "Nelimitat — niciun buget flexibil partajat configurat.",
+    "budgetUnavailable": "Starea bugetului nu este disponibilă. Reîmprospătează pentru a reîncerca.",
+    "used": "Utilizare reușită",
+    "maximum": "Maximul bugetului",
+    "remaining": "Rest cunoscut",
+    "resets": "Se resetează",
+    "unpricedBudget": "O parte din utilizarea reușită are preț necunoscut. Suma cunoscută este incompletă; aplicarea bugetului consideră această fereastră depășită.",
+    "overBudget": "Buget atins sau depășit · cu {amount} peste",
+    "reportTitle": "Raport de utilizare",
+    "reportSubtitle": "Toate încercările · estimare din catalog în USD, nu o factură · date UTC întregi",
+    "reportPeriod": "Perioada raportului",
+    "day1": "1 zi",
+    "day7": "7 zile",
+    "day30": "30 de zile",
+    "allTime": "Tot timpul",
+    "reportSpend": "Cheltuieli estimate ale raportului",
+    "requests": "Cereri",
+    "assignedKeys": "Chei atribuite",
+    "unpricedReport": "Acest raport conține prețuri necunoscute. Cheltuielile estimate sunt incomplete.",
+    "breakdown": "Cost pe cheie API",
+    "noUsage": "Nicio utilizare în această perioadă a raportului.",
+    "keyName": "Numele cheii API",
+    "tokens": "Tokeni de intrare + ieșire",
+    "unnamedKey": "Cheie fără nume sau ștearsă",
+    "unpriced": "Preț necunoscut",
+    "members": "Apartenență",
+    "memberSubtitle": "Schimbarea apartenenței păstrează cheltuielile istorice la echipa inițială.",
+    "searchKeys": "Caută chei sau proprietari actuali",
+    "chooseKey": "Alege o cheie API",
+    "unassigned": "Neatribuită",
+    "ownership": "Echipa de facturare curentă: {team}",
+    "assign": "Atribuie",
+    "remove": "Elimină",
+    "noMembers": "Niciun membru curent. Utilizarea istorică poate conta în continuare pentru buget.",
+    "assignedAt": "Atribuită la {date} (UTC)",
+    "name": "Numele echipei",
+    "description": "Descriere",
+    "enableBudget": "Activează bugetul flexibil partajat",
+    "amount": "Suma bugetului (USD)",
+    "duration": "Fereastra glisantă a bugetului",
+    "cancel": "Anulează",
+    "save": "Salvează",
+    "confirm": "Confirmă",
+    "transferTitle": "Confirmă transferul cheii",
+    "transferMessage": "Muți această cheie din „{source}” în „{destination}”? Cheltuielile istorice rămân la echipa inițială.",
+    "removeTitle": "Elimină atribuirea cheii",
+    "removeMessage": "Elimini această cheie din „{team}”? Cheltuielile istorice rămân în această echipă.",
+    "archiveTitle": "Arhivează echipa",
+    "archiveMessage": "Arhivezi „{team}”? Toate legăturile curente se închid și aplicarea bugetului se oprește. Rapoartele istorice rămân disponibile.",
+    "invalidName": "Introdu un nume (1–200 de caractere) și o descriere de cel mult 2.000 de caractere.",
+    "invalidAmount": "Introdu o sumă de buget finită, mai mare decât zero.",
+    "unauthorized": "Autentifică-te în panoul de administrare pentru a continua.",
+    "forbidden": "Nu ai permisiunea de a gestiona echipe. Datele introduse au fost păstrate.",
+    "notFound": "Această echipă sau atribuire nu mai există.",
+    "conflict": "Atribuirea sau echipa s-a schimbat. Reîmprospătează și confirmă proprietatea curentă înainte de a reîncerca.",
+    "failed": "Cererea a eșuat. Datele introduse au fost păstrate; încearcă din nou.",
+    "partialBudget": "Unele găleți zilnice păstrate se suprapun cu limita ferestrei și nu pot fi repartizate exact. Cheltuielile afișate sunt incomplete; alocația rămasă nu este disponibilă. Politica existentă a bugetului flexibil rămâne neschimbată."
+  },
   "connectionTest": {
     "title": "Mesaj de test",
     "description": "Trimite o solicitare reală prin acest cont. Aceasta utilizează o cantitate mică din cotă și poate porni o fereastră de utilizare, în funcție de furnizor.",
@@ -15073,5 +15753,118 @@
     "importButton": "Importă",
     "importFailed": "Importul a eșuat.",
     "importSuccess": "Au fost importate {connections} conturi și {nodes} noduri de furnizor; {skipped} omise."
+  },
+  "conversations": {
+    "title": "Conversații",
+    "countSummary": "{total, plural, one {# conversație} other {# conversații}} cu 2+ întrebări",
+    "autoRefreshTitle": "Frecvența la care această listă se reîncarcă de pe server.",
+    "autoRefresh": "Reîmprospătare automată",
+    "loading": "Se încarcă conversațiile...",
+    "colConversation": "Conversație",
+    "colTurns": "Ture",
+    "colContinuation": "Continuare",
+    "colLastModel": "Ultimul model",
+    "colProvider": "Furnizor",
+    "colStatus": "Stare",
+    "colLastSeen": "Văzut ultima oară",
+    "drawerTitle": "Conversație",
+    "prevConversation": "Conversația anterioară",
+    "nextConversation": "Conversația următoare",
+    "gotoLatestRequest": "Mergi la ultima cerere",
+    "goToBottom": "Mergi la final",
+    "statusInProgress": "În curs",
+    "continuationGenuineTitle": "Ultimul tur a utilizat previous_response_id și acesta s-a rezolvat pe server",
+    "continuationBadge": "continuire",
+    "stalledTitle": "Ultimul tur s-a încheiat fără stop și nimic nu a continuat de peste 5 minute",
+    "stalledBadge": "băgat în strânsori",
+    "noTurns": "Niciun tur înregistrat pentru această conversație."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Începe de la poziția curentă (omite jurnalele existente)",
+    "pageTitle": "Export jurnal",
+    "pageSubtitle": "Trim continuu jurnalele de apel din fipsa Jurnale către un magazin extern de analiză.",
+    "addDestination": "Adăugați destinație",
+    "scheduleTitle": "Programare",
+    "cronLabel": "Cron",
+    "notScheduled": "neprogramat",
+    "lastScheduledRun": "Ultima execuție programată",
+    "lastRunSummary": "{startedAt} — {status}, {rows} rânduri",
+    "never": "niciodată",
+    "highWaterMark": "Limită maximă pentru jurnalele de apel",
+    "rowPrefix": "rândul {id}",
+    "noDestinations": "Nicio destinație de export",
+    "noDestinationsHint": "Adăugați o destinație pentru a începe trimiterea registrelor de apeluri pe programul orar.",
+    "errLoadStatus": "Eșec la încărcarea stării de export",
+    "errSaveDestination": "Eșec la salvarea destinației",
+    "msgDestinationSaved": "Destinație salvată.",
+    "errConnectionTest": "Testul de conexiune a eșuat",
+    "msgRunInFlight": "O rulare pentru această destinație este deja în curs; nimic nu a fost trimis de două ori.",
+    "errExportRun": "Rularea de export a eșuat",
+    "errUpdateDestination": "Eșec la actualizarea destinației",
+    "errDeleteDestination": "Eșec la ștergerea destinației",
+    "deleteTitle": "Ștergeți destinația",
+    "deleteConfirm": "Ștergeți „{name}”? Cursorul de export va fi, de asemenea, eliminat, astfel încât, la re-adaugare, procesul va începe de la cel mai vechi jurnal de apel reținut.",
+    "statusDisabled": "Dezactivat",
+    "statusFailing": "Eșuat",
+    "statusHealthy": "Sănătos",
+    "statusNotRunYet": "Nu a fost rulat încă",
+    "typeNotInstalled": "Tipul nu este instalat",
+    "metaLine": "Ultima rulare {lastRun} · exportate {exported} rânduri · {pending} în așteptare · cursor {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Rulează acum",
+    "btnDisable": "Dezactivează",
+    "btnEnable": "Activează",
+    "btnEdit": "Editează",
+    "btnDelete": "Șterge"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Conturi CLIProxyAPI",
+    "cardSubtitle": "Status în doar lectură din API-ul de administrare autenticat",
+    "btnRefresh": "Reîmprospătează",
+    "listAria": "Starea conturilor CLIProxyAPI",
+    "noAccounts": "Nu s-au găsit conturi CLIProxyAPI.",
+    "loading": "Se încarcă starea conturilor…",
+    "stateReady": "Starea contului",
+    "stateDisabled": "CLIProxyAPI nu este instalat",
+    "stateMissingKey": "Cheia de administrare nu este configurată",
+    "stateUnreachable": "API de administrare este inaccesibil",
+    "stateUnauthorized": "Cheia de administrare a fost respinsă",
+    "stateUnsupported": "Această versiune de CLIProxyAPI nu expune starea contului",
+    "stateInvalidResponse": "API de administrare a returnat o răspuns nesuportat"
+  },
+  "darioPanel": {
+    "title": "Conturi Claude",
+    "description": "Autentificați Dario cu abonamentul dvs. Claude Pro/Max. Traficul este facturat din pool-ul abonamentului. Este necesar cel puțin un cont înainte ca Dario să poată direcționa cererile (până atunci /health raportează degradat).",
+    "noAccounts": "Niciun cont configurat încă.",
+    "importTitle": "Import din OmniRoute",
+    "importDescription": "Reutilizați tokenii OAuth ai unei conexiuni existente OmniRoute Claude în loc să vă autentificați din nou — saltează complet pasul de aprobare din browser.",
+    "importPendingTooltip": "Va fi activ odată ce o conexiune Claude există în OmniRoute.",
+    "btnImport": "Importă",
+    "btnImporting": "Se importă…",
+    "aliasPlaceholder": "alias (opțional)",
+    "btnStartLogin": "Pornește autentificarea",
+    "btnStarting": "Se pornește…",
+    "btnCompleteLogin": "Completează autentificarea",
+    "btnCompleting": "Se completează…",
+    "codePlaceholder": "cod#state sau cod brut",
+    "noticeImported": "Importat ca cont „{alias}” — Dario a repornat pentru a-l prelua.",
+    "noticeAdded": "Contul „{alias}” a fost adăugat.",
+    "expiresInHours": "expiră în ~{hours}h",
+    "expiresInMinutes": "expiră în ~{minutes}m",
+    "expiresAt": "expiră {date}",
+    "scopes": "{count, plural, one {# scop} other {# scopuri}}",
+    "btnRemove": "Elimină",
+    "btnRefresh": "Reîmprospătează",
+    "loginStep1": "1. Deschide acest URL în browser și aprobă accesul pentru contul <mono>{alias}</mono>:",
+    "pendingExpires": "Autentificarea în așteptare expiră {time}",
+    "loginStep2": "2. Lipește codul afișat de Anthropic:"
+  },
+  "miniapp": {
+    "title": "Aplicație Mini OmniRoute",
+    "errTelegramOnly": "Această pagină trebuie deschisă în interiorul aplicației Mini Telegram.",
+    "greeting": "👋 Salut {name}! Trimite un mesaj pentru a conversa prin poarta ta OmniRoute.",
+    "greetingFallbackName": "acolo",
+    "errNoReply": "⚠️ Niciun răspuns din partea poartei.",
+    "btnSend": "Trimite"
   }
 }

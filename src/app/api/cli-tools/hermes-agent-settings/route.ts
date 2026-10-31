@@ -113,7 +113,7 @@ async function writeAtomic(filePath: string, content: string, mode: number): Pro
 
 export async function GET(request: Request) {
   // cli-tools routes touch host config files — guard every handler with the shared auth.
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   try {
     const roles = await getCurrentHermesAgentRoles();
@@ -139,7 +139,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authError = await requireCliToolsAuth(request);
+  const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   let rawBody;

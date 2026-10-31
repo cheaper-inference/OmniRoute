@@ -25,8 +25,10 @@
     "confirm": "Sigurado ka ba?",
     "refresh": "I-refresh",
     "close": "Isara",
+    "dialogTitleFallback": "Diyalogo",
     "previousPage": "Nakaraang pahina",
     "nextPage": "Susunod na pahina",
+    "pagination": "Paginasyon",
     "capsLockOn": "Naka-on ang Caps Lock",
     "dismissNotification": "I-dismiss ang notification",
     "toggleColumns": "I-toggle ang mga column",
@@ -182,6 +184,7 @@
     "combos": "Mga Combo",
     "noModelsFound": "Walang nakitang mga model",
     "clear": "I-clear",
+    "clearFilters": "I-clear ang mga filter",
     "done": "Tapos na",
     "selectAll": "Piliin lahat",
     "unselectAll": "Alisin ang pagkakapili",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Ginagamit ng {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "I-preview",
     "batchFilePreviewTruncated": "Ipinapakita ang unang {shown} linya ({total} kabuuang linya)",
-    "batchFileDownloadFull": "I-download ang Buong File"
+    "batchFileDownloadFull": "I-download ang Buong File",
+    "tokensPageTitle": "Mga token",
+    "tokensPageDescription": "Magpadala ng mga token sa pagitan ng mga API key, magbahagi ng mga code ng imbitasyon, at kumonekta sa mga server ng komunidad.",
+    "tokensServerUrlLabel": "URL ng server"
   },
   "disabled": "Naka-disable",
   "featureFlagOmnirouteEmergencyFallbackDescription": "I-route ang mga request na naubusan ng budget sa emergency free fallback provider/model.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Ang proxy server ay itinigil o nagre-restart.",
     "expandSidebar": "Palawakin ang sidebar",
     "collapseSidebar": "I-collapse ang sidebar",
-    "themes": "Mga Tema",
-    "presetColors": "Mga sikat na kulay",
     "createTheme": "Gumawa ng tema",
     "chooseColor": "Pumili ng isang kulay",
-    "themeCoral": "Korales",
-    "themeBlue": "Asul",
-    "themeRed": "Pula",
-    "themeGreen": "Berde",
-    "themeViolet": "Lila",
-    "themeOrange": "Kahel",
-    "themeCyan": "Siyan",
     "cliToolsShort": "Mga Tool",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Sistema ng Tema",
     "whitelabelingDesc": "Paglalarawan ng Whitelabeling",
     "switchThemes": "Magpalit ng mga Tema",
-    "themeAccentDesc": "Paglalarawan ng Accent ng Tema",
     "uploadFavicon": "Mag-upload ng Favicon",
     "themeDark": "Madilim na Tema",
     "customLogoDesc": "Paglalarawan ng Custom na Logo",
     "sidebarVisibilityToggle": "Toggle ng Visibility ng Sidebar",
-    "themeAccent": "Accent ng Tema",
     "resetFavicon": "I-reset ang Favicon",
     "whitelabeling": "Paglalagay ng Sariling Branding",
     "darkMode": "Madilim na Mode",
@@ -1122,10 +1117,8 @@
     "customLogo": "Custom na Logo",
     "appearance": "Hitsura",
     "themeSelectionAria": "ARIA ng Pagpili ng Tema",
-    "themeCreate": "Gumawa ng Tema",
     "customFaviconDesc": "Paglalarawan ng Custom na Favicon",
     "logoPreview": "Preview ng Logo",
-    "themeCustom": "Custom na Tema",
     "hideHealthLogsDesc": "Paglalarawan sa Pagtatago ng mga Health Log",
     "faviconPreview": "Preview ng Favicon",
     "changelog": "Talaan ng mga Pagbabago",
@@ -1352,7 +1345,9 @@
       "open": "buksan",
       "close": "isara"
     },
-    "noResults": "Walang resulta"
+    "noResults": "Walang resulta",
+    "costsTeams": "Mga koponan",
+    "costsTeamsSubtitle": "Mga sentro ng gastos ng koponan"
   },
   "webhooks": {
     "title": "Mga Webhook",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 o @channelname",
       "chatIdHint": "Ang natatanging numerical identifier o pampublikong username ng chat/channel.",
       "tutorial": "Paano i-configure ang Telegram webhook:"
-    }
+    },
+    "copy": "Kopyahin",
+    "copied": "Nakopya!",
+    "expandDetails": "Ipakita ang mga detalye",
+    "collapseDetails": "Itago ang mga detalye"
   },
   "compliance": {
     "auditTitle": "Pag-audit",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Tawag (24h)",
     "mcpMetricSuccessRate": "Rate ng Tagumpay",
     "mcpMetricAvgDuration": "Karaniwang tagal",
-    "mcpMetricTopTool": "Nangungunang Kasangkapan"
-  },
-  "themesPage": {
-    "title": "Mga Tema",
-    "description": "Pumili ng preset na tema o gumawa ng sarili gamit ang iisang kulay",
-    "presetColors": "Mga sikat na kulay",
-    "customTheme": "Custom na tema",
-    "customThemeDesc": "I-click ang “Gumawa ng tema” at pumili ng isang kulay",
-    "createTheme": "Gumawa ng tema",
-    "activePreset": "Aktibong tema"
+    "mcpMetricTopTool": "Nangungunang Kasangkapan",
+    "dismissError": "Isara ang error"
   },
   "header": {
     "logout": "Mag-logout",
     "quickNavigation": "Mabilisang nav",
     "quickNavigationTitle": "Mabilisang nabigasyon (⌘K / Ctrl+K)",
     "openQuickNavigation": "Buksan ang mabilisang nabigasyon",
+    "openMenu": "Buksan ang menu",
+    "products": "Mga produkto ng Keak",
     "switchToLightMode": "Lumipat sa light mode",
     "switchToDarkMode": "Lumipat sa dark mode",
     "language": "Wika",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Compatible sa Anthropic",
     "media": "Midya",
     "mediaDescription": "Bumuo ng mga larawan, video, at musika",
-    "themes": "Mga Tema",
-    "themesDescription": "Pumili ng tema ng kulay para sa buong dashboard panel",
     "costsDescription": "Subaybayan ang paggastos, suriin ang mga trend, at pamahalaan ang iyong AI budget sa lahat ng provider",
     "cacheDescription": "Subaybayan ang kahusayan ng prompt cache ng provider at lokal na muling paggamit ng semantic response.",
     "limitsDescription": "I-configure ang mga rate limit at quota para sa bawat API key at provider",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Mga advanced na panuntunan sa payload, limitasyon sa request, at mga setting ng proxy API",
     "mitmProxyDescription": "I-configure ang mga setting ng MITM proxy para sa inspeksyon at pag-debug ng traffic",
     "oneProxyDescription": "I-configure ang mga setting ng 1Proxy para sa advanced na proxy chaining",
-    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool"
+    "omniSkillsDescription": "Mag-install at mamahala ng mga sandbox skill para sa awtomatikong prompt at pagpapagana ng tool",
+    "teamsDescription": "Mga pagtataya ng gastos ng koponan at pinagsasaluhang malambot na badyet"
   },
   "cloudSyncStatus": {
     "synced": "Na-sync",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Kopyahin ang iyong endpoint",
     "readinessStep4": "Magpadala ng pansubok na kahilingan",
     "readinessContinue": "Ipagpatuloy ang pag-setup",
-    "readinessDismiss": "Huwag munang ipakita"
+    "readinessDismiss": "Huwag munang ipakita",
+    "unpricedUsageTitle": "{count, plural, one {# modelo} other {# mga modelo}} na kamakailang ginamit ngunit walang naka-configure na presyo",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API key na may limit sa paggamit} other {# API keys na may limit sa paggamit}} ang gumamit ng mga modelong ito sa nakaraang 8 araw. Habang ang paggamit na iyon ay nasa loob ng pang-araw-araw o panglinggong panahon ng key, itinuturing na lampas sa quota ang key at binablok ang mga kahilingan nito (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ang paggamit na ito ay binibilang bilang $0 para sa mga limitasyon ng paggamit kada key (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# kahilingan} other {# mga kahilingan}}, {keys, plural, one {# limitadong key} other {# mga limitadong key}}",
+    "unpricedUsageMore": "…at {count} pa",
+    "unpricedUsageConfigure": "I-configure ang pagpepresyo",
+    "unpricedUsageDismiss": "Isara"
   },
   "analytics": {
     "title": "Analitika",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Mga napiling koneksyon lamang",
     "selectAtLeastOneConnection": "Pumili ng kahit isang koneksyon o piliin ang Lahat ng koneksyon.",
     "allConnectionsDesc": "Maaaring gumamit ang key na ito ng anumang aktibong koneksyon.",
-    "restrictedToConnections": "Limitado sa {count, plural, one {# koneksyon} other {# koneksyon}}."
+    "restrictedToConnections": "Limitado sa {count, plural, one {# koneksyon} other {# koneksyon}}.",
+    "preferredConnections": "Mga gustong koneksyon",
+    "preferredConnectionsDesc": "Pagkakasunod-sunod ng priyoridad bawat key. Kung hindi available ang isang gustong koneksyon, lilipat ang routing sa susunod na kwalipikado.",
+    "preferredConnectionsNone": "Walang nakatakdang kagustuhan — ginagamit ang default na routing strategy.",
+    "preferredConnectionsClear": "I-clear",
+    "removeSelection": "Alisin si {name}"
   },
   "auditLog": {
     "title": "Log ng Audit",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "I-configure ang Image→Text na tulay sa mga setting ng Modality Bridge",
     "sttBridgeCta": "I-configure ang Speech→Text na tulay sa mga setting ng Modality Bridge",
     "existingConnection": "Umiiral na koneksyon",
-    "openrouterSttDescription": "Ang mga modelo ng speech-to-text ng OpenRouter ay gumagamit ng iyong nakatakdang koneksyon sa OpenRouter. Walang hiwalay na kredensyal ang kinakailangan."
+    "openrouterSttDescription": "Ang mga modelo ng speech-to-text ng OpenRouter ay gumagamit ng iyong nakatakdang koneksyon sa OpenRouter. Walang hiwalay na kredensyal ang kinakailangan.",
+    "modalityTabsAria": "Uri ng media",
+    "serviceKindsAria": "Uri ng serbisyo"
   },
   "search": {
     "searchQuery": "Query sa Paghahanap",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Open Claw - Manu-manong Configuration",
     "clineManualConfiguration": "Manu-manong Configuration ng Cline",
     "kiloManualConfiguration": "Manu-manong Configuration ng Kilo Code",
+    "piManualConfiguration": "Pi - Manu-manong Configuration",
+    "piConfigInvalidTitle": "Pi models.json ay hindi nababasa",
+    "piOmnirouteConfigured": "OmniRoute ay na-configure bilang isang custom na provider ng Pi",
+    "piModelHelp": "Hindi awtomatikong natutuklasan ng Pi ang mga modelo para sa mga custom na endpoint — ang modelong pipiliin mo ay tahasang nakasulat sa models.json.",
+    "piManualConfigTitle": "O manu-manong i-edit ~/.pi/agent/models.json",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Pagkatapos ay simulan ang Pi at piliin ang omniroute provider. Itakda ang PI_CODING_AGENT_DIR upang ilipat ang buong direktoryo ng ahente.",
+    "piUnownedNote": "Ang entry na ito ay idinagdag sa labas ng OmniRoute (hal. Pi-gui's Custom endpoints). Ang pag-aaplay ay magpapatibay nito; Ang pag-reset ay nag-aalis lamang ng mga entry na isinulat OmniRoute.",
     "whenToUseLabel": "Kailan gagamitin",
     "openToolDocs": "Buksan ang tool docs",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Gamitin kapag kailangan mo ng magaan na terminal-native AI assistant para sa mga mabilisang gawain.",
       "hermes-agent": "Gamitin kapag kailangan mo ang Hermes Agent (ng Nousresearch) na may default, delegation, vision, at auxiliary na mga modelo na naka-route sa OmniRoute.",
+      "whycodes": "Gamitin kapag gusto mo ang WhyCodes bilang pangkalahatang awtonomong CLI agent (TUI, mga pinangalanang agent, memorya, swarm) na nakaturo sa OmniRoute.",
       "custom": "Gamitin para sa mga custom na pagpapatupad ng tool o generic na mga configuration na tugma sa OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI coding agent na may suporta sa custom provider",
       "droid": "AI Assistant ng Factory Droid",
       "openclaw": "Buksan ang Claw AI Assistant",
+      "openclaude": "CLI ng OpenClaude coding agent na may suporta sa provider na compatible sa OpenAI",
       "cline": "CLI ng Cline AI Coding Assistant",
       "kilo": "CLI ng Kilo Code AI Assistant",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI terminal na may suporta sa custom provider",
       "agent-deck": "Agent Deck na tagapag-orkestra ng maraming ahente",
       "5dive": "5dive — self-hosted fleet ng coding agents; isang auth profile ang nagtuturo sa kanilang lahat sa OmniRoute",
+      "whycodes": "Awtonomong CLI agent na WhyCodes na may base URL na tugma sa OpenAI",
       "zed": "Zed code editor — built-in na agent sa pamamagitan ng provider na compatible sa OpenAI"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Hindi Kilala",
     "cliproxyapiUpdate": "I-update",
     "cliproxyapiUpdateAvailable": "Available na Update: v{current} → v{latest}",
-    "cliproxyapiVersion": "Bersyon"
+    "cliproxyapiVersion": "Bersyon",
+    "piInstallTitle": "I-install ang Pi Coding Agent",
+    "piInstallInstructions": "I-install ang Pi CLI, pagkatapos ay bumalik dito para ikonekta ito sa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Gamitin ang URL na naaabot mula sa machine na nagpapatakbo ng Pi. Awtomatikong idinaragdag ang OpenAI-compatible /v1 endpoint.",
+    "piManualMergeHint": "Preview lang. Pagsamahin ang providers.omniroute entry na ito sa models.json para manatiling buo ang iyong iba pang provider at setting.",
+    "removeMapping": "Alisin ang mapping",
+    "customUrl": "Kuwentado URL",
+    "customEndpointAria": "Kuwentado endpoint",
+    "useDefaultKey": "Gumamit ng default key ng OmniRoute",
+    "mainModelAria": "Pangunahing model",
+    "manualConfigTitle": "Manual na konfigurasyon ng Grok Build"
   },
   "modelCatalog": {
     "title": "Mga Modelo at Combo",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "hal. 10",
     "testSelected": "Subukan ang napili ({count})",
     "testAllFiltered": "Subukan ang lahat ng na-filter ({count})",
+    "visibility": "Visibility ng model",
+    "allVisibility": "Nakikita at nakatago",
+    "visibleOnly": "Nakikita",
+    "hiddenOnly": "Nakatago",
+    "visibleColumn": "Nakikita",
+    "hideModel": "Itago ang {name} mula sa /v1/models",
+    "showModel": "Ipakita ang {name} sa /v1/models",
+    "hiddenBadge": "Nakatago",
+    "hideFiltered": "Itago ang mga na-filter ({count})",
+    "showFiltered": "Ipakita ang mga na-filter ({count})",
+    "visibilityCounts": "{visible} nakikita · {hidden} nakatago · {total} kabuuan",
+    "visibilityUpdateFailed": "Hindi na-update ang visibility ng model",
     "cancel": "Kanselahin",
     "clearResults": "I-clear ang mga resulta",
     "testing": "Sinusubukan...",
@@ -3397,16 +3438,53 @@
     "httpError": "Nabigo ang kahilingan na may HTTP {status}",
     "testFailedNoDetail": "Nabigo ang pagsusuri nang walang mensahe ng error",
     "additionalCapabilities": "Mga karagdagang kakayahan: {list}",
-    "comboRefMember": "Combo → {name}"
+    "comboRefMember": "Combo → {name}",
+    "keyAccessButton": "Access sa API key",
+    "allowedInKeys": "Pinapayagan sa: {count, plural, one {# key} other {# mga key}}",
+    "keysLoading": "Naglo-load ng mga API key…",
+    "keysRetry": "Subukang muli ang pag-load ng mga key",
+    "accessViaPattern": "sa pamamagitan ng {pattern}",
+    "accessBlocked": "Hinarang ng {pattern}",
+    "editKeyAccess": "I-edit ang access ng key",
+    "toggleKeyAccess": "Payagan ang {item} sa {name}",
+    "resultNetworkError": "Nabigo ang pagtatalaga",
+    "resultWouldEmptyModels": "Maiiwan ang key na ito na walang pinapayagang modelo — sa halip ay i-edit ang access sa key",
+    "resultWouldEmptyCombos": "Maiiwan ang key na ito na walang pinapayagang combo — sa halip ay i-edit ang access sa key",
+    "keyUpdatePending": "Kasalukuyan pang ina-update ang {name}. Subukang muli sa ilang sandali.",
+    "assignToKeys": "Italaga sa mga API key…",
+    "assignApply": "Ilapat ang mga pagbabago",
+    "assignComplete": "Na-update ang access sa API key",
+    "assignFailed": "Nabigo ang ilang update sa API key",
+    "assignNoChanges": "Walang binagong access sa API key",
+    "selectedAccessItems": "Mga napiling item: {count}",
+    "assignExcludedCombos": "{count, plural, one {# napiling row ng combo ay hindi modelo at lalaktawan dito} other {# napiling mga row ng combo ay hindi mga modelo at lalaktawan dito}}. Magtalaga ng mga combo mula sa tab na Combos.",
+    "assignActionAdd": "Idagdag",
+    "assignActionRemove": "Alisin",
+    "searchKeys": "Maghanap ng mga API key",
+    "selectApiKey": "Piliin ang API key na {name}",
+    "allModelsAccess": "Lahat ng modelo",
+    "allCombosAccess": "Lahat ng combo",
+    "modelAccessCount": "Mga modelo: {count}",
+    "comboAccessCount": "Mga combo: {count}",
+    "keyInactive": "Hindi aktibo",
+    "keyBanned": "Naka-ban",
+    "keyRevoked": "Binawi",
+    "switchRestrictedConfirm": "Ilipat ang key na ito sa pinaghihigpitang access: ang mga napiling item lamang ang papayagan",
+    "removeNoChangeHint": "Pinapayagan ng key na ito ang lahat; walang magiging pagbabago ang pag-alis ng mga napiling item",
+    "removeStaysAllowedHint": "Pinapayagan pa rin sa key na ito sa pamamagitan ng {patterns}",
+    "resultChanged": "Binago",
+    "resultUnchanged": "Walang pagbabago",
+    "resultSkipped": "Nilaktawan",
+    "resultNeedsSwitch": "Kailangang ilipat sa pinaghihigpitan"
   },
   "combos": {
-    "autoTosIncludeLabel": "Isama sa auto ang mga provider na may markang ToS: avoid",
-    "autoTosDescription": "Naka-off bilang default. Para ito sa lahat ng auto combo, hindi lang sa isang account. Hindi pinapagana ang opsyong ito kapag kumonekta ka sa provider.",
-    "autoTosSaveError": "Hindi ma-save ang patakaran sa ToS. Nakikita pa rin ang dating setting. Subukan muli.",
-    "autoTosLoadError": "Hindi ma-load ang patakaran sa ToS. Subukan muli bago ito baguhin.",
     "title": "Mga combo",
     "description": "Gumawa ng mga combo ng modelo na may weighted routing at fallback support",
     "autoCatalogTitle": "Catalog ng auto-routing",
+    "autoTosLoadError": "Hindi ma-load ang patakaran sa ToS. Subukan muli bago ito baguhin.",
+    "autoTosSaveError": "Hindi ma-save ang patakaran sa ToS. Nakikita pa rin ang dating setting. Subukan muli.",
+    "autoTosIncludeLabel": "Isama sa auto ang mga provider na may markang ToS: avoid",
+    "autoTosDescription": "Naka-off bilang default. Para ito sa lahat ng auto combo, hindi lang sa isang account. Hindi pinapagana ang opsyong ito kapag kumonekta ka sa provider.",
     "autoCatalogTemplateCount": "{count} na mga template",
     "autoCatalogDescription": "Ang mga built-in na auto/* combo ay dynamic na naresolba mula sa mga konektadong provider. Gamitin ang alinman sa mga ID na ito bilang field ng modelo — hindi kailangan ng setup.",
     "autoCatalogExpand": "Palawakin ang auto-routing catalog",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Error sa pag-update ng combo",
     "errorDeleting": "Error sa pagtanggal ng combo",
     "testFailed": "Nabigo ang kahilingan sa pagsubok",
+    "removeErrorModels": "I-delete ang {count} pumalyang model",
+    "removingErrorModels": "Inaalis…",
+    "errorModelsRemoved": "Naalis ang {count} pumalyang model mula sa combo",
+    "noErrorModelsFound": "Walang nahanap na pumalyang model sa sariling mga hakbang ng combo na ito",
+    "cannotRemoveAllModels": "Hindi maaaring alisin ang lahat ng model mula sa combo",
+    "removeErrorModelsConfirm": "Alisin ang {count} pumalyang model mula sa “{name}”? Hindi binibilang ang mga timeout at rate limit.",
     "failedToggle": "Nabigong i-toggle ang combo",
     "testResults": "Mga Resulta ng Pagsubok — {name}",
     "resolvedBy": "Nalutas ni:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Umakyat",
     "moveDown": "Ilipat pababa",
     "removeModel": "Alisin",
+    "testStep": "Subukan ang modelong ito",
+    "testStepRunning": "Sinusubukan…",
+    "testStepNotTestable": "Mga hakbang na may iisang modelo lang ang masusubukan",
     "saving": "Nagse-save...",
     "liveNoProviders": "Wala pang naobserbahang mga provider.",
     "liveFleetDataHint": "Dumarating ang data ng fleet sa pamamagitan ng mga live combo event.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Wala pang na-configure na mga combo.",
     "playgroundCreateFirst": "Gumawa muna ng isa",
     "weighted": "Natimbang",
+    "weightPercent": "Timbang (%)",
     "leastUsed": "Hindi gaanong nagamit",
     "costOpt": "Optimisado sa Gastos",
     "strategyGuideTitle": "Paano gamitin ang diskarteng ito",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# account} other {# account}}",
     "builderGlobalAdded": "Idinagdag",
     "builderGlobalAdd": "Magdagdag",
+    "clearSearch": "I-clear ang paghahanap",
     "manualModel": "Manwal na modelo",
     "manualModelInvalid": "Maglagay ng modelo bilang provider/model.",
     "manualModelUnknownProvider": "Hindi kilalang prefix ng provider.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Magdagdag ng combo reference",
     "builderPinnedAccount": "Naka-pin na Account",
     "builderLegacyEntry": "Legacy na entry",
+    "builderStaleModel": "Wala sa live na katalogo",
     "reviewName": "Pangalan",
     "reviewStrategy": "Estratehiya",
     "reviewSteps": "Mga Hakbang",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Minimum na haba ng nilalaman (mga char)",
     "responseValidationJsonPaths": "Mga pagsusuri sa JSON-path",
     "responseValidationAddCheck": "+ Magdagdag ng pagsusuri",
+    "responseValidationRemoveCheck": "Alisin ang pagsusuri",
+    "responseValidationPath": "Path ng JSON",
+    "responseValidationCondition": "Kondisyon",
+    "responseValidationValue": "Inaasahang halaga",
     "agentFeaturesSystemMessageOverride": "I-override ang mensahe ng system",
     "agentFeaturesSystemMessagePlaceholder": "Isa kang dalubhasang katulong...",
     "agentFeaturesSystemMessageHint": "Override ng mensahe ng system para sa mga ahente",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Kabuuang Bilang ng mga Entry",
     "type": "Uri",
-    "memoryEnabled": "Naka-enable ang memory"
+    "memoryEnabled": "Naka-enable ang memory",
+    "qdrantTutorialTitle": "Mabilisang tutorial: memory gamit ang Qdrant",
+    "qdrantTutorialIntro": "Iiimbak ng Qdrant ang mga vector at metadata ng mga memory upang makuha ang kaugnay na context. Hindi nito direkta na naipapabuti ang token savings; ang pagtipid ay indirect lamang, sa pamamagitan ng pag-iwas sa context na hindi kaugnay sa request.",
+    "qdrantTutorialStep1": "Protektahan ang server gamit ang HTTPS at API key bago itong gagamitin sa production.",
+    "qdrantTutorialStep2": "Ilagay ang host, port, collection, at isang modelo sa format ng provider/modelo na may naka-configure na credential.",
+    "qdrantTutorialStep3": "Ang dimension ng collection ay dapat lumapit sa dimension na ipinagbigay ng model. Ang umiiral na 2048-dimension na collection ay hindi tatanggap ng 1536-dimension embeddings.",
+    "qdrantTutorialStep4": "I-save, subukun ang koneksyon, at pagkatapos ay pumili ng test ng paghahanap. Sa pagka-positibo lamang ng lahat, payagan ang Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Credits: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Mga Kasanayan",
@@ -5288,7 +5390,8 @@
         "skipped": "naka-configure na",
         "failed": "nabigo"
       }
-    }
+    },
+    "stepProgress": "Progreso ng pag-setup"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Hindi kasama sa auto ang provider na ito bilang default",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "I-download ang template ng CSV",
     "importFromFileMoreErrors": "+{count} pa",
     "importFromFileSchemaHint": "Nakabatay sa posisyon ang mga column ng CSV: provider, name, apiKey, baseUrl (opsyonal), priority (opsyonal). Ang column na provider ay dapat isang umiiral na ID ng pinamamahalaang provider o ID ng nakarehistro nang node na compatible sa OpenAI/Anthropic — hindi gumagawa ang pag-import na ito ng mga bagong endpoint node.",
+    "importOAuthExport": "Mag-import ng OAuth export",
+    "oauthExportTitle": "Mag-import ng export mula sa account manager",
+    "oauthExportDescription": "Mag-upload ng plaintext na export mula sa isang account manager (hal. ang cloud-accounts export ng Antigravity Manager). Nire-refresh ang mga token sa server at nagiging OAuth na koneksyon ang bawat account — nire-refresh sa lugar ang mga duplicate.",
+    "oauthExportProviderLabel": "Tagapagbigay",
+    "oauthExportChoose": "Pumili ng file",
+    "oauthExportFileAria": "JSON file ng export ng account",
+    "oauthExportSchemaHint": "Tinatanggap: isang dokumentong may \"accounts\" na array, isang payak na array, o isang solong record. Maaaring nasa loob ng nested na token object ang mga token o direkta sa record.",
+    "oauthExportDetected": "{count} account ang natukoy",
+    "oauthExportSelectAll": "Piliin ang lahat ng account",
+    "oauthExportSelectAccount": "Piliin ang account {index}",
+    "oauthExportColEmail": "Email",
+    "oauthExportColProvider": "Tagapagbigay",
+    "oauthExportColRefresh": "Token sa pag-refresh",
+    "oauthExportNoEmail": "(walang email)",
+    "oauthExportYes": "oo",
+    "oauthExportNo": "hindi",
+    "oauthExportImporting": "Nag-i-import…",
+    "oauthExportImport": "I-import ang {count} account",
+    "oauthExportResult": "Na-import ang {imported}/{total} — {failed} ang nabigo",
+    "oauthExportParseError": "Walang mabasang account mula sa file na ito.",
+    "oauthExportUnknownError": "hindi kilalang error",
     "adaptaTutorial": {
       "title": "Paano ikonekta ang Adapta Web",
       "introPrefix": "Nag-a-authenticate ang Adapta sa pamamagitan ng Clerk. Ang token",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Lahat ng mga modelo ay nai-import na",
     "noNewModelsToImport": "Walang bagong modelo na i-import — lahat ng mga modelo ay nasa registry o custom na listahan na",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Nabigo ang pagtuklas ng modelo {time}",
     "skippingExistingModels": "Pinapalampas ang {count} na umiiral na mga modelo",
     "autoSync": "Awtomatikong Pag-sync",
     "autoSyncShort": "I-sync",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "hal. 131072",
     "contextWindowOverrideHint": "Manwal na itakda ang totoong context window (mga token) ng modelong ito kapag mali ang ulat ng provider. Mas nangingibabaw ito kaysa sa mga auto-detected/catalog na halaga at pinipigilan ang combo routing na alisin ang modelo.",
     "contextWindowOverrideInvalid": "Ang override sa context window ay dapat na isang positibong buong numero ng mga token",
+    "maxOutputTokenOverrideInvalid": "Ang override sa max output token ay dapat na isang positibong buong numero ng mga token",
     "visionCapableLabel": "May kakayahang vision",
     "visionCapableHint": "Manwal na markahan ang modelong ito bilang may kakayahang vision kapag hindi iniulat ng discovery metadata ng provider ang isang image input modality (karaniwan para sa mga self-hosted/lokal na backend).",
     "compatParamFiltersLabel": "Mga Param Filter",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Magdagdag ng override",
     "ccAliasLoadError": "Hindi na-load ang mga setting ng discovery-alias: {error}",
     "ccAliasSaveError": "Hindi na-save ang setting ng discovery-alias: {error}",
+    "cliVersionSectionTitle": "Na-advertise na bersyon ng CLI client",
+    "cliVersionEffectiveLabel": "Kasalukuyang ina-advertise",
+    "cliVersionSourceLabel": "Nalutas mula sa: {source}",
+    "cliVersionPinnedLabel": "Nakuha ang default: {pinned}",
+    "cliVersionSourceSettings": "override sa dashboard",
+    "cliVersionSourceEnv": "variable ng kapaligiran",
+    "cliVersionSourceDiscovered": "awtomatikong natuklasan ang pinakabagong release",
+    "cliVersionSourceDefault": "nakunan default",
+    "cliVersionInputLabel": "I-override ang bersyon",
+    "cliVersionInputPlaceholder": "I-override ang bersyon; blanko ang clear",
+    "cliVersionSaveButton": "I-save",
+    "cliVersionResetButton": "I-reset sa default",
+    "cliVersionLoadError": "Nabigong i-load ang mga setting ng bersyon CLI : {error}",
+    "cliVersionSaveError": "Nabigong i-save ang bersyon ng CLI : {error}",
+    "cliVersionLoadFailed": "Hindi ma-load ang kasalukuyang mga setting ng bersyon CLI.",
+    "cliVersionHintClaude": "Anthropic gates mas bagong Claude modelo sa Claude Code na bersyon ng client na nakikita nito. Ito ang bersyong ina-advertise OmniRoute sa bawat kahilingang nakatali sa Anthropic.",
+    "cliVersionCaveatClaude": "Caveat sa pagsingil: ang bersyon ng pagsingil ay '<version>'.'<build-revision>', at ang build revision ay isang hiwalay na nakunan na pare-pareho. Ang Advertising 2.1.260 ay nag-uulat ng 2.1.260.1e2, na hindi ipinapadala ng isang tunay na 2.1.260 binary.",
+    "cliVersionHintCodex": "OpenAI gates mas bagong mga modelo sa Codex client na bersyon na nakikita nito, halimbawa ang error: Ang 'gpt-6-astra' na modelo ay nangangailangan ng mas bagong bersyon ng Codex.",
+    "cliVersionCaveatCodex": "Inference caveat: ang isang bersyon na iniulat ng sarili mong tumatawag ay nakakatalo pa rin sa CODEX_CLIENT_VERSION env var, ngunit ang override na ito ay nakakatalo sa pareho, dahil ito ay tahasang layunin ng operator.",
     "compatUpstreamHeadersLabel": "Mga karagdagang upstream header",
     "compatUpstreamHeadersHint": "Setting na may mataas na pribilehiyo — nangangailangan ito ng kaparehong antas ng tiwala gaya ng pag-edit ng mga kredensyal sa provider API; mga pinagkakatiwalaang admin lamang ang dapat gumamit nito. Pinagsasama ito pagkatapos idagdag ng OmniRoute ang auth mula sa provider API key. Kung gumagamit ang isang custom header ng kaparehong pangalan ng isang umiiral na header (hal. Authorization), ganap na papalitan ng iyong value ang awtomatikong ginawang header (kabilang ang Bearer token) — ang inilagay mo lamang ang makikita ng upstream, hindi ang key mula sa mga setting. Maaaring magdulot ang maling configuration ng 401 o hindi gumaganang upstream auth. Isang row bawat header (hal. karagdagang Authentication para sa ilang gateway). I-hover o i-focus ang value upang i-preview. Nase-save ito kapag nawalan ng focus, nag-click sa labas, o isinara ang panel na ito.",
     "compatUpstreamHeaderName": "Pangalan ng header",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Label ng Format ng API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Rehiyon ng API: China",
-    "apiRegionHint": "Pahiwatig sa Rehiyon ng API",
-    "apiRegionInternational": "Rehiyon ng API: Internasyonal",
-    "apiRegionLabel": "Label ng Rehiyon ng API",
+    "apiRegionChina": "Pangunahing Lupain ng Tsina",
+    "apiRegionHint": "Piliin ang rehiyon ng endpoint na ginagamit para sa pag-access ng API at pagsubaybay ng quota.",
+    "apiRegionInternational": "Internasyonal",
+    "apiRegionLabel": "Rehiyon ng API",
     "apikey": "API key",
     "audio": "Audio",
     "audioProvidersHeading": "Heading ng mga Provider ng Audio",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Kapag naabot ng account na ito ang 5-oras na limitasyon sa paggamit at nag-alok ang Anthropic ng lane na may mas mababang priyoridad, tatanggapin ito ng OmniRoute at patuloy na magpapadala ng mga kahilingan gamit ang anthropic-usage-limit: slow hanggang sa mag-reset ang palugit, sa halip na pansamantalang ihinto ang koneksyon. Nalalapat pa rin ang lingguhang limitasyon at maaaring maghintay ang mga tugon hanggang magkaroon ng libreng kapasidad.",
     "claudeAutoLimitResetLabel": "Awtomatikong i-reset ang limitasyon ng session (isang beses bawat linggo)",
     "claudeAutoLimitResetDescription": "Kapag naabot ng account na ito ang 5-oras na limitasyon sa paggamit at may available na pag-reset ng limitasyon ng session, awtomatiko itong kukunin ng OmniRoute at susubukang muli nang buong bilis. Gagamitin nito ang minsan-kada-linggong pag-reset ng account at mabibilang pa rin ito sa lingguhang limitasyon.",
+    "codexPaidCreditsShort": "Mga dagdag na kredito",
+    "codexPaidCreditsToggleTitle": "Payagan ang mga bayad na kredito sa Codex kapag naubos ang quota ng subscription (maaaring may dagdag na singil)",
+    "codexPaidCreditsEnabled": "Pinagana ang mga bayad na kredito sa Codex (maaaring may dagdag na singil)",
+    "codexPaidCreditsDisabled": "Hindi pinagana ang mga bayad na kredito sa Codex",
+    "failedUpdateCodexPaidCredits": "Hindi ma-update ang patakaran sa mga bayad na kredito sa Codex",
+    "allowCodexPaidCreditsLabel": "Payagan ang mga bayad na kredito sa Codex",
+    "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon).",
     "disableCoolingDescription": "Laktawan ang transient cooldown para manatiling kwalipikado ang koneksyong ito kahit pagkatapos ng mga error na maaaring ma-recover (nalalapat pa rin ang mga terminal state tulad ng banned/expired).",
     "disableCoolingLabel": "I-disable ang cooldown para sa koneksyong ito",
     "bulkPasteAdded": "{count, plural, one {1 key ang naidagdag} other {# key ang naidagdag}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Kumuha ng API key sa monsterapi.ai",
       "moonshot": "Ikonekta ang Moonshot AI gamit ang isang API key.",
       "morph": "Libreng tier: 250K credits/buwan, $0",
+      "apmix": "Ikonekta ang Apmix gamit ang API key mula sa apmix.ai/dashboard — isang subscription, maraming modelo.",
       "nanogpt": "Ikonekta ang NanoGPT gamit ang isang API key.",
       "nebius": "~$1 trial credits sa pag-signup para sa pagsubok ng API",
       "nlpcloud": "Gumagamit ang NLP Cloud ng isang proprietary chatbot API sa halip na OpenAI chat/completions. Iniaangkop ng OmniRoute ang mga mensahe ng OpenAI sa input/context/history at nagbibigay ng lokal na catalog ng mga sinusuportahang chatbot na modelo.",
@@ -6620,7 +6773,7 @@
       "claude": "Ikonekta ang Claude Code gamit ang umiiral na OAuth flow.",
       "cline": "Ikonekta ang Cline gamit ang umiiral na OAuth flow.",
       "cursor": "Ikonekta ang Cursor IDE gamit ang umiiral na OAuth flow.",
-      "cursor-api": "Ikonekta ang Cursor gamit ang isang user API key (crsr_...) mula sa cursor.com/dashboard/api; hindi kailangan ng IDE session.",
+      "cursor-api": "Ikonekta ang Cursor gamit ang user API key (crsr_... o grok_...) mula sa cursor.com/dashboard/api; hindi na kailangan ng IDE session.",
       "github": "Ikonekta ang GitHub Copilot gamit ang umiiral na OAuth flow.",
       "gitlab-duo": "OAuth application na may ai_features + read_user scopes. I-configure ang GITLAB_DUO_OAUTH_CLIENT_ID at opsyonal ang GITLAB_DUO_OAUTH_CLIENT_SECRET sa OmniRoute instance na ito.",
       "kilocode": "Ikonekta ang Kilo Code gamit ang umiiral na OAuth flow.",
@@ -6628,8 +6781,7 @@
       "kiro": "Libreng tier: 50 credits/buwan (~25K–100K tokens). ⚠️ Ipinagbabawal ng Kiro ToS ang paggamit ng third-party proxy/harness.",
       "codex": "Ikonekta ang OpenAI Codex gamit ang umiiral na OAuth flow.",
       "qwen": "Ikonekta ang Qwen Code gamit ang umiiral na OAuth flow.",
-      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens",
-      "apmix": "Ikonekta ang Apmix gamit ang API key mula sa apmix.ai/dashboard — isang subscription, maraming modelo."
+      "github-models": "Gumawa ng GitHub PAT na may 'models: read' na scope sa github.com/settings/tokens"
     },
     "passthroughModelsDescription": "Tumatanggap ang {provider} ng mga provider-native na model ID. Mag-import mula sa /models o magdagdag ng mga custom na ID para sa pagruruta.",
     "bedrockModelsDescription": "Ang mga modelo ng Amazon Bedrock ay saklaw ng rehiyon ng AWS. Mag-import mula sa /models o magdagdag ng mga Bedrock model ID na pinagana sa napiling rehiyon.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Mga dagdag na kredito",
-    "codexPaidCreditsToggleTitle": "Payagan ang mga bayad na kredito sa Codex kapag naubos ang quota ng subscription (maaaring may dagdag na singil)",
-    "codexPaidCreditsEnabled": "Pinagana ang mga bayad na kredito sa Codex (maaaring may dagdag na singil)",
-    "codexPaidCreditsDisabled": "Hindi pinagana ang mga bayad na kredito sa Codex",
-    "failedUpdateCodexPaidCredits": "Hindi ma-update ang patakaran sa mga bayad na kredito sa Codex",
-    "allowCodexPaidCreditsLabel": "Payagan ang mga bayad na kredito sa Codex",
-    "allowCodexPaidCreditsDescription": "Payagan ang account na ito na gumamit ng mga bayad na kredito kapag umabot na sa itinakdang cutoff ang quota ng subscription nito. Kailangan ng mga magagamit na kredito ayon sa ulat ng OpenAI; maaaring may singil. Nalalapat pa rin ang mga limitasyon ng Spark at ang mga cooldown ng upstream. Sinusuri ang pagkakaroon ng mga kredito kahit hindi pinagana ang paunang pagsusuri ng quota, maliban kung ganap na naka-off ang lokal na pag-filter ng quota (parehong hindi pinagana ang paunang pagsusuri ng quota at ang patakaran sa limitasyon)."
+    "usedInComboTooltip": "Ginagamit sa {count} combo: {combos}",
+    "openComboTooltip": "Buksan ang Mga combo — ginagamit ng {combo}",
+    "claudeCodeRoutingTitle": "Upstream proxy routing para sa traffic ng Claude Code",
+    "routingNative": "Native",
+    "routingFallback": "Fallback",
+    "rerank": "Rerank",
+    "video": "Video",
+    "markFreeTierTitle": "Marka bilang free-tier (ipapakita kahit pinaghihiwalay ang mga modelo na may bayad)",
+    "codexTunnelTitle": "Koneksyon ng Codex tool",
+    "codexTunnelDescription": "Ang tunnel ay strictly outbound lamang. Ang mga local tools ay pinapagana pa rin ng Codex lamang, sa ilalim ng kanyang sandbox at patakaran ng pahintulot.",
+    "tunnelIdLabel": "Tunnel ID",
+    "tunnelRuntimeKeyLabel": "Runtime key ng tunnel",
+    "tunnelRuntimeKeyPlaceholder": "Susi ng runtime",
+    "tunnelRuntimeKeyHint": "Iniimbak nang naka-encrypt kasama ang cookie at hindi nilalagay sa mga log.",
+    "tunnelRuntimeKeyNewLabel": "Bagong tunnel runtime key",
+    "tunnelRuntimeKeyNewHint": "Ilagay lamang kasama ang sariwang cookie. Ang halaga ay iniimbak nang naka-encrypt.",
+    "chatgptConnectorLabel": "Custom na connector ng ChatGPT",
+    "doctorChecking": "Sinoo ang status…",
+    "doctorCheck": "Suriin ang status ng doctor",
+    "fallbackRetryBackendTitle": "Fallback na backend ng pag-uulit"
   },
   "settings": {
     "title": "Mga setting",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Piliin kung aling mga item sa sidebar ang ipapakita. Kapag Mahahalaga ang pinili, mananatiling nahahanap ang mga advanced na tool.",
     "hideHealthLogs": "Itago ang Health Check Logs",
     "hideHealthLogsDesc": "Kapag NAKA-ON, sugpuin ang mga mensahe ng [HealthCheck] sa server console",
-    "themeAccent": "Kulay ng tema",
-    "themeAccentDesc": "Pumili ng preset na kulay o gumawa ng sarili mong tema gamit ang isang kulay",
-    "themeCreate": "Gumawa ng tema",
-    "themeCustom": "Custom na tema",
-    "themeBlue": "Asul",
-    "themeRed": "Pula",
-    "themeGreen": "Berde",
-    "themeViolet": "Lila",
-    "themeOrange": "Kahel",
-    "themeCyan": "Siyan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "I-customize ang pangalan at logo ng application",
     "appName": "Pangalan ng Application",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Ngayon",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Path ng core binary",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opsyonal: sinusuri ang nabuo na file gamit ang core binary bago palitan ang inadopt na file. Iwanang blangko upang magpatuloy ang pagsulat sa tabi nito. Ginagawa ang directory kung wala pa."
+      "coreBinaryPathHelp": "Opsyonal: sinusuri ang nabuo na file gamit ang core binary bago palitan ang inadopt na file. Iwanang blangko upang magpatuloy ang pagsulat sa tabi nito. Ginagawa ang directory kung wala pa.",
+      "urlFeedlessHint": "Iwanang walang laman para sa isang subscription na puro tagapili: magtakda ng control URL sa ibaba, walang feed na kinukuha, na-refresh, o naka-bind."
     },
     "bulkHealthcheck": "Maramihang Pagsusuri sa Kalagayan",
     "bulkHealthcheckDesc": "Subukan ang lahat ng naka-configure na proxy gamit ang isang target na URL upang malaman kung alin ang gumagana.",
@@ -7706,6 +7862,7 @@
     "configured": "naka-configure",
     "none": "Wala",
     "modelOverrideValuePlaceholder": "Numerikong halaga",
+    "modelOverrideKey": "Key ng override",
     "modelOverrideReasoningEffortsPlaceholder": "Mga value sa English na pinaghihiwalay ng kuwit, hal. low, medium, high",
     "addKeyValue": "Magdagdag ng key value",
     "noModelOverrides": "Walang naka-configure na mga override para sa modelong ito.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Maaari mong i-override ang default na pagpepresyo para sa mga partikular na modelo. Mas inuuna ang mga custom na override kaysa sa awtomatikong natukoy na pagpepresyo.",
     "editPricing": "I-edit ang Pagpepresyo",
     "viewFullDetails": "Tingnan ang Buong Detalye",
-    "themeCoral": "Koral",
     "adaptiveVolumeRouting": "Adaptive na Pag-route ayon sa Dami",
     "adaptiveVolumeRoutingDesc": "Dinamikong i-scale ang mga koneksyon batay sa dami ng payload at pressure sa throughput.",
     "lkgpToggleTitle": "Huling Kilalang Gumaganang Provider (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Bawasan ang paggamit ng token sa pamamagitan ng pag-compress ng mga prompt bago ipadala ang mga ito sa mga provider",
     "autoCombosTitle": "Mga Auto Combo",
     "autoCombosDesc": "Payagan ang key na ito na gamitin ang mga built-in na auto/* combo, na awtomatikong pumipili ng modelo mula sa bawat naka-configure na provider",
+    "ccDiscoveryAliasesTitle": "Mga alias ng pagtuklas ng Claude Code",
+    "ccDiscoveryAliasesDesc": "I-advertise ang mga claude/... compatibility mirror para sa mga modelo at combo na maaari nang ma-access ng key na ito",
     "compressionGuidanceFullGuideLink": "Buong gabay sa compression",
     "compressionGuidanceShow": "Mga Detalye",
     "compressionGuidanceHide": "Itago ang mga detalye",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Porsiyento ng window",
     "compressionAdaptivePolicyAbsolute": "Nakapirming badyet ng token",
     "compressionOutputStylesDescription": "Mag-inject ng mga tagubilin sa paghubog ng tugon nang hindi muling isinusulat ang output ng provider. Malayang pagsamahin.",
+    "compressionOutputStylesPreviewNote": "Ang isang kahilingan ay nag-inject ng isang wika lamang: ang natukoy na wika, kung hindi ang unang pack. Ang mga bloke sa itaas ay ang mga variant ng per-pack, hindi isang pinagsamang iniksyon.",
     "mcpAccessibilityDescription": "Nililimitahan ang mga output ng MCP tool (hiwalay na store).",
     "compressionStylesTileSummary": "{tokens, number} na token ang na-save · {runs, plural, one {# run ang na-style} other {# na run ang na-style}}",
     "compressionStylesTileEmpty": "Wala pang na-style na mga run.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Koleksyon",
     "catalogVisibilityHint": "Maaari pa ring tawagin ang mga nakatagong model ID gamit ang parehong mga pahintulot sa pag-access.",
+    "exposeCombosOnly": "Ilista lamang ang mga combo sa /v1/models",
+    "exposeCombosOnlyDesc": "Makikita ng mga client na awtomatikong tumutuklas ng mga model ang iyong mga combo (at auto/* maliban kung nakatago) sa halip na ang mga raw na model ng provider. Patuloy na iruruta ang mga tahasang provider/model ID.",
     "catalogScopeTitle": "Listahan ng Models API",
     "catalogScopeDesc": "Kung ano ang inilalabas ng GET /v1/models para sa key na ito. Ang pagpapaliit ng listahan ay hindi kailanman nagbabago sa kung ano ang maaaring tawagin ng key.",
     "catalogScopeAll": "Pareho",
@@ -8918,7 +9079,9 @@
         "financial": "Pampinansiyal",
         "brazilian": "Pang-Brazil",
         "usa": "Estados Unidos",
-        "full": "Kumpleto"
+        "full": "Kumpleto",
+        "gdpr": "GDPR (Unyong Europeo)",
+        "popia": "POPIA (Timog Aprika)"
       },
       "builtinTypes": "Mga built-in na uri",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "Mga IPv4 address",
         "ipv6_address": "Mga IPv6 address",
         "aws_key": "Mga access key ng AWS",
-        "api_key_generic": "Mga API key at token"
+        "api_key_generic": "Mga API key at token",
+        "iban": "Mga numero ng bank account (IBAN)",
+        "eu_vat": "Mga numero ng VAT ng EU",
+        "es_dni_nie": "DNI / NIE ng Espanya",
+        "it_codice_fiscale": "Codice Fiscale ng Italya",
+        "pl_pesel": "PESEL ng Poland",
+        "nl_bsn": "BSN ng Netherlands",
+        "de_steuer_id": "Steuer-ID ng Alemanya",
+        "se_personnummer": "Personnummer ng Sweden",
+        "za_id": "Mga numero ng ID sa Timog Aprika",
+        "za_phone": "Mga numero ng telepono sa Timog Aprika",
+        "za_vat": "Mga numero ng VAT sa Timog Aprika",
+        "za_tax_ref": "Mga reperensya sa buwis sa Timog Aprika"
       },
       "customPatterns": "Mga custom na pattern",
       "customPatternsDesc": "Ang mga tugma ay papalitan ng [CUSTOM_REDACTED]. Hanggang {max} pattern. Tinatanggihan ang mga pattern na may panganib ng sakunang backtracking.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Pumasa",
     "tomlTestFailed": "Bumagsak",
     "tomlImportError": "Hindi maproseso ang RTK TOML file.",
-    "tomlFileReadError": "Hindi mabasa ang napiling TOML file."
+    "tomlFileReadError": "Hindi mabasa ang napiling TOML file.",
+    "viewMode": "Mode ng view"
   },
   "compressionEngineConfig": {
     "loading": "Naglo-load…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Mga language pack: {packs}",
     "dragToReorder": "I-drag upang muling isaayos ang hakbang",
     "engine": "Makina",
-    "intensity": "Tindi"
+    "intensity": "Tindi",
+    "compressionOverride": "Override sa compression"
   },
   "compressionStudio": {
     "noRun": "Walang available na compression run.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "nagwagi: {winner}",
     "encoder": "encoder",
     "bytes": "byte",
-    "tokensCl100k": "mga token (cl100k)"
+    "tokensCl100k": "mga token (cl100k)",
+    "studioViews": "Mga view ng Studio"
   },
   "omniglyph": {
     "preview": "Paunang tingin",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Ang mga mensaheng mas maikli kaysa dito ay hindi na-compress. Mas mababa = mas maraming compression.",
     "tooltipMinSavings": "I-compress lamang kung nakakatipid ito ng kahit gaano karaming token.",
     "ultraSettings": "Mga Ultra Setting",
-    "ultraSettingsDesc": "Semantic compression na pinapagana ng SLM"
+    "ultraSettingsDesc": "Semantic compression na pinapagana ng SLM",
+    "defaultLanguage": "Default na wika",
+    "viewMode": "Mode ng view"
   },
   "translator": {
     "title": "Tagasalin",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Nabigong i-transform ang stream"
   },
   "usage": {
+    "healthExtraUsageBypass": "Ubos na ang quota; pinapayagan ang dagdag na paggamit kaya nagpapatuloy ang serbisyo.",
+    "healthPaidCreditsBypass": "Ubos na ang quota; maaaring magpatuloy ang serbisyo gamit ang magagamit na bayad na kredito.",
+    "healthFilteringBypass": "Ubos na ang quota; naka-off ang lokal na pagsala ng quota kaya nagpapatuloy ang serbisyo.",
     "title": "Paggamit",
     "grokExtraUsageCredits": "Karagdagang Paggamit ng Mga Kredito",
     "grokAutoTopUp": "Awtomatikong Pagdaragdag",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Mga Limitasyon ng Provider",
     "noProviders": "Walang Nakakonektang Provider",
+    "quotaAuthRequired": "Kinakailangan ang pagpapatotoo—mag-sign in sa dashboard",
+    "quotaAuthRequiredHint": "Hindi ma-load ang mga koneksyon sa provider dahil nawawala o nag-expire na ang session sa dashboard. Mag-sign in at i-refresh upang makita ang iyong mga limitasyon sa quota.",
     "connectProvidersForQuota": "Kumonekta sa mga provider gamit ang OAuth upang subaybayan ang iyong mga limitasyon sa quota ng API at paggamit.",
     "accountsCount": "{count, plural, one {# account} other {# account}}",
     "filteredFromCount": "(na-filter mula sa {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Hindi alam",
     "statTotal": "Kabuuan",
-    "statCritical": "Kritikal",
-    "statAlert": "Alerto",
-    "statHealthy": "Maayos",
     "filterPurchaseTypeLabel": "Uri",
     "filterTierLabel": "Antas",
     "purchaseAll": "Lahat",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Huling na-refresh",
     "providerQuota": "Quota ng Provider",
     "providerQuotaHomeHint": "Live na status sa lahat ng nakakonektang account",
+    "claudeResetCreditDefaultTitle": "Pag-reset ng limit ng Claude",
+    "confirmRedeemClaudeResetCredit": "Ang pag-redeem ay agad na nagre-reset ng mga kwalipikadong limitasyon sa paggamit ng Claude at permanenteng gagamitin ang credit na ito.",
+    "claudeResetCreditsModalTitle": "Mga credit sa pag-reset ng Claude",
+    "claudeResetCreditsModalExplainer": "Mga available na credit sa pag-reset ng Claude at lingguhang pag-reset ng session para sa account na ito.",
     "codexPaidCreditsLabel": "Mga bayad na kredito sa Codex",
     "codexPaidCreditsAvailable": "Magagamit (hindi iniulat ang balanse)",
     "codexPaidCreditsUnavailable": "Hindi magagamit o naabot na ang limitasyon sa paggastos",
-    "codexPaidCreditsUnlimited": "Walang limitasyon"
+    "codexPaidCreditsUnlimited": "Walang limitasyon",
+    "healthAccountHint": "Batay sa mga kamakailang obserbasyon, hindi sa live na pagsubok. Pumili ng account para sa mga detalye.",
+    "healthRecovery": "Inaasahang pagbabalik",
+    "healthAvailable": "Magagamit",
+    "healthRestricted": "Bahagyang limitado",
+    "healthUnavailable": "Hindi magagamit",
+    "healthPeakHourProtection": "Proteksiyon sa oras ng matinding paggamit",
+    "healthCooldown": "Panahon ng paghihintay",
+    "healthQuotaExhausted": "Ubos na ang quota",
+    "healthOverview": "Pangkalahatang-ideya",
+    "layoutFull": "Buo",
+    "layoutCompact": "Siksik",
+    "healthQuotaError": "Hindi nabasa ang quota",
+    "healthNoRuntime": "Hindi available ang katayuan ng operasyon",
+    "healthPreviousSnapshot": "Nabigo ang huling pag-refresh; ipinapakita ang dating resulta",
+    "healthPreviousFailure": "Nabigo ang huling kahilingan; tapos na ang paghihintay",
+    "healthAwaitingSync": "Lumipas na ang oras ng pag-reset; naghihintay ng pag-sync",
+    "healthVerdictUnavailable": "Hindi makuha ang resulta ng pagsusuri ng availability; mga antas lang ng quota ang ipinapakita",
+    "healthSummaryFailed": "Hindi nabasa ang buod ng operasyon; maaaring kulang ang impormasyon ng lock ng modelo",
+    "healthRuntimeObserved": "Na-update ang katayuan {time}",
+    "healthQuotaObserved": "Naobserbahan ang quota {time}",
+    "healthOldestQuota": "Pinakalumang tala ng quota: {time}",
+    "healthRecoveryUnknown": "Hindi alam ang oras ng pagbawi",
+    "healthDetailsHint": "I-click para sa mga detalye at pagkilos",
+    "healthFiveHour": "5 oras",
+    "healthOverall": "Pangkalahatan",
+    "healthAction": "Kailangang kumilos",
+    "healthTitle": "Pagiging magagamit ng mga account",
+    "healthDrag": "I-drag upang ayusin ang mga provider",
+    "healthDragPosition": "{provider}, {count, plural, one {puwesto {position, number} sa #} other {puwesto {position, number} sa #}}",
+    "healthResetOrder": "Ibalik ang paunang ayos",
+    "healthPool": "Pangkat na {name}",
+    "healthOtherPool": "Parehong account · {pool}: {status} ({remaining} natitira)",
+    "healthIncluded": "{count, plural, one {Kasama ang # account na bahagyang nililimitahan} other {Kasama ang # mga account na bahagyang nililimitahan}}",
+    "healthBannerUnavailable": "{count, plural, one {Pansamantalang hindi magamit ang # account} other {Pansamantalang hindi magamit ang # mga account}}",
+    "healthBannerAvailable": "{count, plural, one {Magagamit ang # account} other {Magagamit ang lahat ng # account}}",
+    "healthLegendHide": "Itago ang paliwanag ng mga simbolo",
+    "healthLegendShow": "Ipakita ang paliwanag ng mga simbolo",
+    "healthLegendOk": "Buo = natitirang quota; bahagyang malinaw = nagamit.",
+    "healthLegendCooldown": "Ubos ang quota sa {window}. Buo = lumipas na paghihintay; bahagyang malinaw = natitirang paghihintay.",
+    "healthLegendAction": "Paso na ang pahintulot o ipinagbawal ang account; hindi maaayos sa paghihintay.",
+    "healthLegendPartial": "Magagamit pa. Dilaw na dulo = limitado ang modelo o pangkat.",
+    "healthWaited": "Naghintay na ng {percent}",
+    "healthWait": "{duration} pa (babalik sa {time})",
+    "healthFastest": "Pinakamaagang pagbabalik sa loob ng {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} magagamit} other {# / {active, number} magagamit}}",
+    "healthCd5": "5 oras · Panahon ng paghihintay",
+    "healthCdw": "Lingguhan · Panahon ng paghihintay",
+    "healthRecentSuccessBypass": "Pinapayagan ng pagruruta ang account na ito dahil may kahilingang nagtagumpay kamakailan.",
+    "healthPurchasedBalanceBypass": "Maaaring magpatuloy gamit ang biniling balanse kapag naubos ang kasamang quota.",
+    "healthCutoffAtRequest": "Sinusuri ang mga live na limitasyon ng quota kapag niruruta ang kahilingan."
   },
   "modals": {
     "waitingAuth": "Naghihintay ng Awtorisasyon",
@@ -11077,7 +11313,8 @@
       "message": "Mensahe",
       "error": "Error",
       "completion": "Pagkumpleto"
-    }
+    },
+    "statusFilter": "Katayuan"
   },
   "templateNames": {
     "simple-chat": "Simpleng Chat",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m ang nakalipas",
     "hoursAgo": "{hours}h ang nakalipas",
     "daysAgo": "{days}d ang nakalipas",
-    "entries": "Mga Entry"
+    "entries": "Mga Entry",
+    "viewSwitcherAria": "View ng cache"
   },
   "proxyConfigModal": {
     "levelGlobal": "Pangkalahatan",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "Hindi naka-configure ang GitLab Duo OAuth. Magrehistro ng isang OAuth application sa {applicationsUrl} na may redirect URI na {redirectUri} at mga scope na \"{scopes}\", pagkatapos ay itakda ang {clientIdEnv} (at opsyonal na {clientSecretEnv}) at i-restart.",
     "gitlabDuoSetupDescription": "Matapos mairehistro ang aplikasyon at ma-set ang mga env vars sa instance na ito ng OmniRoute, i-click ang Magpatuloy upang simulan ang OAuth login.",
     "continue": "Magpatuloy",
+    "copilotPolicyTitle": "Eksperimental na provider: ang katayuan ng patakaran ay hindi maliwanag",
+    "copilotPolicyLine1": "kumokonekta ang OmniRoute sa pamamagitan ng api.githubcopilot.com, na hindi nai-publish ng GitHub bilang pangkalahatang third-party na hinuha API. Ang pagsasamang ito ay pang-eksperimento at maaaring magbago nang walang abiso.",
+    "copilotPolicyLine2": "Tanging ang iyong sariling GitHub account ang maaaring konektado. Huwag kailanman magbahagi ng mga kredensyal, pool account, o subukang lumampas sa mga limitasyon ng iyong plano.",
+    "copilotPolicyLine3": "Ang mga gumagamit ng libre at Student plan ay tumatanggap lamang ng awtomatikong pagpili ng modelo. Ang iyong mga tuntunin sa Copilot plan at anumang limitasyon sa paggamit ay mananatiling responsibilidad mo.",
+    "copilotPolicyAcknowledge": "Naiintindihan ko, kumonekta",
     "tabPasteSetupToken": "Setup token",
     "claudeSetupTokenDescription": "Patakbuhin ang `claude setup-token` sa isang terminal at i-paste ang token na ipi-print nito. Valid ito sa loob ng isang taon at walang refresh token. Nagpapadala ang OmniRoute ng isang test request sa Anthropic bago ito i-save.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Higit pang mga pagkilos",
     "test": "Subukan",
     "edit": "I-edit",
     "delete": "Tanggalin",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Walang nakitang wastong mga entry. Suriin ang format at subukang muli.",
     "bulkImportSuccess": "Kumpleto na ang pag-import: {created} ginawa, {updated} na-update, {failed} ay nabigo",
     "bulkImportErrorLine": "Linya {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximum na 100 proxy bawat pag-import",
+    "bulkImportMaxExceeded": "Maximum na {max} proxy bawat pag-import",
     "bulkImportPreview": "Silipin",
     "clearAssignment": "(malinaw na takdang-aralin)",
     "bulkProxyAssignment": "Maramihang Pagtatalaga ng Proxy",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "limitasyon sa rate ng IP (429)",
     "poolSetAsideKindSlow": "mabagal na mga tugon",
     "poolSetAsideKindGeoBlocked": "binalaan ng rehiyon (403/451)",
+    "poolSetAsideKindOperatorReported": "outage na iniulat ng operator",
     "poolSetAsideUntil": "Balik sa pag-ikot {endsAt}",
     "poolSetAsideRepeat": "Isinantabi {count, plural, one {# beses} other {# beses}}",
     "poolUnknownAddress": "Hindi kilalang address",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "I-export ang Code",
     "exportShort": "I-export",
     "noStateToExport": "Walang available na estado ng playground na maaaring i-export.",
-    "closeExportModal": "Isara ang export modal",
     "close": "Isara",
     "exportRealKeyWarning": "Babala sa seguridad: na-block ang pag-export — may natukoy na totoong API key sa output. Paki-reset ang iyong API key at subukang muli.",
     "placeholderHintPrefix": "Palitan",
@@ -11808,7 +12052,8 @@
       "nextButton": "Susunod",
       "runButton": "Patakbuhin",
       "promptPlaceholder": "Ilagay ang iyong mensahe… (Enter para ipadala, Shift+Enter para sa bagong linya)"
-    }
+    },
+    "playgroundTabs": "Mga mode ng Playground"
   },
   "miniPlayground": {
     "endpoint": "Endpoint",
@@ -11879,7 +12124,8 @@
     "assistant": "Katulong",
     "errorLabel": "Kamalian",
     "requestFailed": "Nabigo ang kahilingan",
-    "stop": "Ihinto"
+    "stop": "Ihinto",
+    "messageInputAria": "Mensahe"
   },
   "requestLogger": {
     "recording": "Nagre-record",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} pag-ikot ng account",
       "resilienceRetried": "Inulit ang walang lamang turn",
       "resilienceContinued": "Itinuloy sa gitna ng stream",
-      "resilienceRecovered": "Naibalik ng isang resilience action"
-    }
+      "resilienceRecovered": "Naibalik ng isang resilience action",
+      "conversationContext": "Konteksto ng Pag-uusap",
+      "goToBottom": "Pumunta sa ibaba",
+      "liveRefreshOn": "Live na pag-refresh: naka-on",
+      "liveRefreshOff": "Live na pag-refresh: naka-off",
+      "liveRefresh": "Live na pag-refresh",
+      "continuesFromParent": "nagpapatuloy mula sa parent",
+      "continuesFrom": "Nagpapatuloy mula sa {id}",
+      "viewConversation": "tingnan ang pag-uusap",
+      "openConversation": "Buksan ang pag-uusap na {id}"
+    },
+    "tableLabel": "Mga log ng request",
+    "throughputPostFirstToken": "Pagkatapos ng unang token",
+    "throughputEndToEnd": "Mula simula hanggang dulo",
+    "throughputRate": "{value} token/seg",
+    "throughputExplanation": "Parehong rate ay gumagamit ng mas malaki sa bilang ng output at reasoning token. Ang pagkatapos ng unang token ay hindi kasama ang valid na TTFT; kung hindi, ginagamit nito ang buong tagal. Ang mula simula hanggang dulo ay palaging gumagamit ng buong tagal. Ang isang naka-buffer na tugon ay maaaring may mataas na burst delivery rate nang walang mas mabilis na henerasyon ng modelo."
   },
   "proxyLogger": {
     "filterAll": "Lahat",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Ipinagkaloob ng",
     "filterTraffic": "Trapiko",
     "filterTests": "Mga Pagsubok",
-    "filterSource": "Pinagmulan"
+    "filterSource": "Pinagmulan",
+    "tableLabel": "Mga log ng proxy",
+    "sortLogs": "Pagbukud-bukurin ang mga log"
   },
   "endpointOptions": {
     "speech": "Pagsasalita",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "NAUBOS NA",
     "statusAlerting": "NAG-AALERTO",
     "statusError": "ERROR",
-    "moreSuffix": "+{count} pa"
+    "moreSuffix": "+{count} pa",
+    "feedFilterLabel": "I-filter ang mga event"
   },
   "quotaShare": {
     "weightPercent": "Timbang %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Hindi nakagrupo",
     "ungroupedHint": "Ang mga pool na ito ay hindi nakatalaga sa isang kilalang grupo. I-edit ang isang pool upang ilipat ito sa isang totoong grupo.",
     "removeFailed": "Hindi maalis ang pool na ito.",
-    "dismiss": "Isara"
+    "dismiss": "Isara",
+    "allocationsHeading": "Mga alokasyon",
+    "wizardRemoveDimension": "Alisin ang dimensyon",
+    "wizardRemoveKey": "Alisin ang key"
   },
   "plugins": {
     "title": "Mga plugin",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Nabigo ang pag-update ng mga setting",
       "serviceRevealApiKey": "Ipinakita ni {actor} ang API key para sa {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Isara ang error"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Pumunta ngayon",
       "message": "Ang MITM Proxy ay nasa ilalim na ngayon ng AgentBridge.",
       "title": "Inilipat na ang pahinang ito"
-    }
+    },
+    "dnsOn": "Naka-on ang DNS",
+    "dnsOff": "Naka-off ang DNS",
+    "showServerSettings": "Ipakita ang mga setting ng server",
+    "hideServerSettings": "Itago ang mga setting ng server",
+    "upstreamCaTesting": "Sinusubukan…",
+    "removeMapping": "Alisin ang mapping",
+    "mappingSourcePlaceholder": "hal., gemini-3.6-flash-medium, o * para sa lahat ng walang mapping",
+    "mappingWildcardHint": "Gamitin ang * bilang source upang i-route sa pamamagitan ng OmniRoute ang bawat modelong walang tahasang mapping patungo sa napiling target. Palaging nangingibabaw ang eksaktong pagtutugma ng source kaysa sa *.",
+    "wizardDetectingModels": "Tinutukoy ang mga modelo mula sa naharang na trapiko...",
+    "wizardDetectedModels": "Nakakita ng {count, plural, one {# modelo} other {# modelo}} sa naharang na trapiko. Piliin ang mga gusto mong idagdag:",
+    "wizardSelectedModels": "Napili ang {count, plural, one {# modelo} other {# modelo}}. Ima-map mo ang mga ito sa mga modelo ng OmniRoute sa susunod na screen.",
+    "wizardAddModels": "Magdagdag ng {count, plural, one {# modelo} other {# modelo}}",
+    "wizardNoModelsDetected": "Wala pang natutukoy na modelo. Gamitin ang {agent} upang gumawa ng request, pagkatapos ay patakbuhin muli ang wizard na ito upang awtomatikong matukoy ang mga modelo mula sa trapiko.",
+    "wizardNoModelsHint": "O isara ang wizard na ito at manu-manong magdagdag ng mga mapping sa card ng agent."
   },
   "providerStats": {
     "unknownError": "Hindi alam na error",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Karaniwang TTFT",
     "avgTotal": "Karaniwang Kabuuan",
     "requestTelemetry": "Telemetry ng Kahilingan",
-    "requestTelemetryDescription": "Breakdown ng 7-phase pipeline (huling 5 minuto)"
+    "requestTelemetryDescription": "Breakdown ng 7-phase pipeline (huling 5 minuto)",
+    "title": "Mga istatistika ng provider",
+    "description": "Trapiko, latency, at mga rate ng tagumpay kada provider at kada modelo",
+    "combo": "Kombinasyon",
+    "toggleModels": "Ipakita ang mga modelo para sa {provider}",
+    "windowSince": "Mula {date}"
   },
   "relay": {
     "title": "Mga Serverless Relay Proxy",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Walang request body.",
     "noResponseBody": "Walang response body.",
     "formatted": "Naka-format",
-    "raw": "Hilaw"
+    "raw": "Hilaw",
+    "requestCount": "{count, plural, one {# request} other {# request}}",
+    "expandList": "Palawakin ang listahan",
+    "collapseList": "I-collapse ang listahan",
+    "snippetLanguage": "Wika ng snippet",
+    "headersTable": "Mga header",
+    "showSecrets": "Ipakita ang mga secret",
+    "maskSecrets": "Itago ang mga secret",
+    "llmNotAvailable": "Hindi available ang metadata ng LLM para sa request na ito.",
+    "llmStreamYes": "oo (SSE)",
+    "llmStreamNo": "hindi",
+    "llmTotalTokens": "Kabuuan: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "Mga CLI Code",
     "pageSubtitle": "Mga code tool na nakaturo sa OmniRoute",
     "searchPlaceholder": "Maghanap ng CLI…",
     "filterDetectionLabel": "Pagtukoy",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Hindi nahanap",
     "baseUrlAll": "Lahat",
     "baseUrlFull": "Kumpleto",
-    "baseUrlPartial": "Bahagya"
+    "baseUrlPartial": "Bahagya",
+    "title": "CLI Code"
   },
   "cliAgents": {
     "pageTitle": "Mga CLI Agent",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Proporsyon ng mga tawag na aktuwal na sinagot ng provider na ito sa nakalipas na 24 na oras. Ang gitling ay nangangahulugang napakakaunti ng trapikong pinangasiwaan nito upang matukoy ang rate.",
     "reliabilitySample": "Matagumpay ang {successes} sa {requests} tawag sa nakalipas na {hours} oras",
     "reliabilityTooFew": "{requests} tawag lang sa nakalipas na {hours} oras — masyadong kaunti para matukoy ang rate",
-    "reliabilityNoTraffic": "Walang naitalang tawag sa nakalipas na 24 oras"
+    "reliabilityNoTraffic": "Walang naitalang tawag sa nakalipas na 24 oras",
+    "categoryFilter": "Kategorya ng gawain"
   },
   "discovery": {
     "title": "Pagtuklas ng Provider",
@@ -13330,7 +13628,11 @@
     "method": "Paraan",
     "auth": "Pagpapatotoo",
     "feasibility": "Pagiging posible",
-    "models": "Mga Modelo"
+    "models": "Mga Modelo",
+    "provider": "Tagapagbigay",
+    "status": "Katayuan",
+    "endpoint": "Endpoint",
+    "actions": "Mga aksyon"
   },
   "noAuthProvider": {
     "title": "Hindi kailangan ng authentication",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Sariling proxy",
     "freeTierPause": "Na-pause ang model {model} (429), babalik sa {time}",
     "freeTierPauseProvider": "Na-pause (429), babalik sa {time}",
-    "freeTierPauseNote": "In-process na pagtigil sa instance na ito"
+    "freeTierPauseNote": "In-process na pagtigil sa instance na ito",
+    "proxyType": "Uri ng proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Isang nakatagong achievement ang naghihintay...",
         "criteria": "Kumpletuhin ang nakatagong achievement upang ipakita ang badge na ito."
       }
-    }
+    },
+    "leaderboardTitle": "Talaan ng mga nangunguna",
+    "leaderboardDescription": "Mga ranggo at nakamit sa lahat ng iyong API key",
+    "badgeLocked": "Naka-lock"
   },
   "featureFlags": {
     "title": "Mga Feature Flag",
@@ -13610,7 +13916,9 @@
       "disabled": "Naka-disable",
       "dual": "Dalawahan",
       "alias": "Alyas",
-      "canonical": "Kanonikal"
+      "canonical": "Kanonikal",
+      "fail_closed": "Harangan (fail_closed)",
+      "count_as_zero": "Ituring na $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Humihinto bilang 502 ang Protektadong-Priyoridad na Imprastraktura",
         "description": "Ibalik ang 502 sa halip na 503 kapag pinahinto ng isang priyoridad na target na may fallback para lamang sa quota ang kumbinasyon dahil sa isang sanhi na mapatutunayang hindi quota: isang bukas na circuit breaker ng provider o paglaktaw batay sa hinulaang latency."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Mga ID ng Account sa Log",
+        "description": "Kasama ang prefix ng account sa mga linya ng AUTH log (hal. \"Ginagamit ang account ni '<provider>': abc12345...\"). Disabled sa default upang ang mga identifier ng account ay nakatago sa mga log ng process na nakahati o multi-tenant. Hiwalay sa Debug Mode; ang pagpapalit sa Debug Mode ay hindi ipapakita ito."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "I-disable ang Password Login Kapag May OIDC",
+        "description": "Kapag naka-enable ang OIDC, i-disable ang password login upang makapag-authenticate lamang ang mga user sa pamamagitan ng OIDC Single Sign-On. Kapag naka-disable (default), parehong magagamit ang password login at OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Mga Remote Audio Provider Node",
+        "description": "Pahintulutan ang mga ruta ng /v1/audio/* na gumamit ng mga OpenAI-compatible na provider node na naka-host sa labas ng localhost. Naka-off bilang default — ang pag-route ng audio sa isang remote host ay nagbabago ng egress identity at dapat ay isang tahasang desisyon ng operator. Palaging pinapayagan at hindi apektado ang mga loopback node."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Mga Remote Rerank Provider Node",
+        "description": "Pahintulutan ang POST /v1/rerank (at ang rerank step ng memory engine, na tumatawag dito sa loopback) na gumamit ng mga OpenAI-compatible na provider node na naka-host sa labas ng localhost — isang LAN box o Tailscale peer na nagpapatakbo ng TEI, Infinity, vLLM, atbp. Naka-off bilang default — ang pag-route sa isang remote host ay nagbabago ng egress identity at dapat ay isang tahasang desisyon ng operator. Palaging pinapayagan at hindi apektado ang mga loopback node. Dapat ding pumasa ang mga remote node sa outbound URL policy ng provider."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Network Rotation Shared-Egress Guard",
+        "description": "Sa isang network exception (timeout, connection refused/reset) para sa isang multi-account rotation executor, kapag ang pumalyang account ay walang nakalaang proxy, maglapat ng maikling cooldown at laktawan ang iba pang mga account na walang proxy para sa nalalabing bahagi ng request sa halip na subukan muli ang bawat isa. Naka-on bilang default (ligtas: walang pagbabago sa egress IP, binabawasan lamang ang latency/panganib sa cooldown sa mga shared-egress account). I-disable upang ibalik ang agarang propagation sa unang proxy-less throw."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Laktawan ang mga Kamakailang Nabigong Proxy",
+        "description": "Itinitigil ng mga proxy pool at ng bawat-account na rotation ng opencode ang muling pag-serve ng proxy na kabibigo lang (tinanggihang TCP probe, o 429 na natanggap sa pamamagitan nito) para sa isang bawat-prosesong yugto na dumodoble sa bawat pag-ulit, hanggang sa maabot ang limitasyon. Walang isinusulat na status ng proxy; sa bawat kandidatong isinasantabi, hindi nagbabago ang pagpili. Naka-on bilang default: ang pagkakasunud-sunod ng pagpili ay eksaktong karaniwang rotation lamang kapag PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Pagkakasunud-sunod ng Shared Egress Pool",
+        "description": "Para sa mga provider na ang quota ay naka-bucket ayon sa egress address, iranggo ang miyembro ng pool na may parehong naobserbahang egress address ng isang kamakailang tinanggihang miyembro sa ilalim lamang ng maayos na mga miyembro. Pagkakasunud-sunod lamang, hindi kailanman ibinubukod. Nangangailangan ng PROXY_SKIP_RECENTLY_FAILED, na siyang gumagawa ng refusal signal na binabasa nito. Naka-off bilang default: ang pagkakasunud-sunod ng pagpili ay eksaktong karaniwang rotation."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Pag-log ng Attribution ng Rotation",
+        "description": "Itinatala ng rotation ng opencode kung aling account ang nag-serve o nilaktawan (mga naka-mask na ID lamang, hindi kailanman buong account ID) at iniuugnay ang mga entry sa log ng proxy sa kanilang kahilingan, upang maipagkaiba ng operator ang mga nilaktawang account mula sa mga hindi nagamit. Naka-off bilang default: walang karagdagang linya ng log, walang karagdagang column na isinusulat."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Obserbasyon sa Egress ng Proxy Pool",
+        "description": "Ipakita, sa ilalim ng isang proxy pool sa dashboard, kung ilang naobserbahang egress IP ang nag-serve sa mga miyembro nito sa nakaraang 24 h, kung ilang koneksyon ang gumamit sa mga ito, at ang pinakamaraming nakita sa likod ng isang IP. Read-only, kinakalkula mula sa log ng proxy, hindi kailanman ginagamit para sa routing. Naka-off bilang default: hindi nagbabago ang pool editor at null ang isinasagot ng observation route."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Egress ng Proxy Operator",
+        "description": "Tanggapin ang mga operator-pushed na may petsang naobserbahang address bawat miyembro ng pool at pagsamahin ang mga ito sa binasang journal para sa display at pagkakasunud-sunod ng pool. Naka-off bilang default: 404 ang isinasagot ng push route at eksaktong tulad ng dati ang gawi ng mga pagbasa sa pool."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Pag-ikot sa Pagka-stall ng OpenCode Responses",
+        "description": "Para sa OpenCode executor, bantayan ang unang body byte ng isang naka-stream na tugon ng Responses (window: RESPONSES_FIRST_BYTE_TIMEOUT_MS, default na 15000). Ang isang 2xx Responses stream na mananatiling tahimik lampas sa window ay ituturing na na-stall: isasailalim sa cooldown ang account at iikot ang kahilingan sa susunod na account nang isang beses; mabilis na magfe-fail ang pangalawang pagka-stall. Naka-off bilang default: pananatilihin ng mga na-stall na stream ang kasalukuyang paghihintay hanggang sa stream readiness timeout."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Pag-ikot sa user_blocked ng OpenCode",
+        "description": "Para sa OpenCode executor, kapag sumagot ang upstream ng 403 o 451 na may dalang pagtanggi na user_blocked (hindi geo block, hindi pagtanggi sa Cloudflare fingerprint), isailalim sa cooldown ang tinanggihang account at lumipat sa susunod na account nang hindi hihigit sa isang beses bawat kahilingan; ang pangalawang pagtanggi ay ibinabalik nang ganoon pa rin nang walang success mark. Naka-off bilang default: ang pag-iwas sa isang upstream user block ay maaaring magmukhang evasion at magpakalat ng flag sa buong fleet ng account, kaya ibinabalik ang pagtanggi nang walang pagbabago maliban kung mag-opt in ang operator."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Transient Failover Backoff ng OpenCode",
+        "description": "Para sa multi-account rotation ng OpenCode, mag-pause bago magpadala sa susunod na account kapag nabigo ang dalawang magkasunod na pagtatangka dahil sa isang pansamantalang upstream error (5xx o isang walang lamang 400 rejection). Nagsisimula ang pause sa 1.5s, dumodoble sa bawat karagdagang magkasunod na pagkabigo, nililimitahan sa 6s bawat pause at 10s bawat kahilingan, nilalaktawan kapag nadiskonekta ang client, at inilalabas ang failed response body bago maghintay. Naka-off bilang default: mananatiling agaran ang failover."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Pag-retry sa Pag-flush ng Empty Turn",
+        "description": "Sa mga naisaling streaming turn, kapag ang upstream turn ay walang dalang magagamit na nilalaman (reasoning-only na completion o walang kapaki-pakinabang na chunk), magsagawa ng may limitasyong mga retry sa pamamagitan ng karaniwang credential path (hanggang `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) bago may maipakita sa client. Naka-off bilang default: pinapanatili ng mga walang lamang turn ang kasalukuyang gawi (walang lamang 200 o empty-content na 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Pagbawi ng Sibling sa Empty Stream",
+        "description": "Claude/Codex streaming: pagkatapos ng unang lifecycle event, sandaling mag-probe (hanggang 1s / 64 KiB) para sa magagamit na output; ang isang stream na nagtatapos nang walang nilalaman ay magiging isang failure na empty_content na gagamit ng umiiral na may limitasyong retry sa isa pang kwalipikadong koneksyon (walang cooldown, walang model lockout), at ang mga round-robin combo ay hihinto sa muling pagsubok kapag nadiskonekta ang client. Itinuturing din ang refusal, pause_turn, at model_context_window_exceeded bilang mga lehitimong empty terminal sa loob ng probe. Naka-off bilang default: ang readiness, paghawak sa empty-content, at mga combo retry ay mananatiling eksakto tulad ng dati."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Probe sa Naantalang Output ng Stream",
+        "description": "Probe sa streaming output: pagkatapos ng unang 64 na naipasa na chunk, patuloy na mag-sample ng isang chunk sa bawat 16 para sa unang nakikitang output, upang ang output na nahuling magsimula ay magmarka pa rin sa stream bilang naglabas ng output. Ang isang solong 5xx pagkatapos ng puntong iyon ay mananatiling request-scoped sa halip na magtala ng lockout na para lang sa modelo, at ang firstOutputMs ay ibinabalik sa unang output chunk ng kasalukuyang sampling gap. Naka-off bilang default: ang unang 64 na naipasa na chunk lamang ang sinusuri, eksakto tulad ng dati."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "Maagang Paghinto sa 429 Rate-Limited ng OpenCode",
+        "description": "Para sa multi-account rotation ng OpenCode, ihinto ang wave ng account sa unang 429 na inuri bilang totoong rate limit (isang Retry-After header na maaaring i-parse, o isang body na nagsasaad ng limitasyon sa rate/paggamit) at ibalik ang upstream 429 na iyon nang walang pagbabago (status, body, mga Retry-After at quota header), sa halip na subukan ang bawat natitirang account. Ang mga hindi mauring 429 ay patuloy na iikot. Naka-off bilang default: limitado ang libreng tier bawat egress IP (#9611), kaya ang bawat 429 ay umiikot sa susunod na account, at ang isang naubos na wave ay nagbabalik ng huling upstream 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "Pag-park at Pag-resume ng OpenCode 429",
+        "description": "Para sa multi-account rotation ng OpenCode, i-park ang request pagkatapos ng paulit-ulit na panandaliang 429 (o isang bagong pool-strain marker) na may heartbeat, pagkatapos ay i-replay ang isang limitadong leg ng hanggang 3 magkakasunod na account sa halip na i-fan out ang buong fleet. Naka-off bilang default: ang bawat 429 ay umiikot sa susunod na account eksakto tulad ng dati."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Muling Pagsubok sa Pag-stall ng Kahandaan ng Stream",
+        "description": "Para sa mga streaming chat request, kapag nag-stall ang unang upstream body bago makabuo ng magagamit na event, magsagawa ng isang limitadong pangalawang pagtatangka sa pamamagitan ng parehong routing path na may parehong readiness budget at walang penalty sa account. Naka-off bilang default: ibinabagsak ng isang na-stall na unang body ang request nang walang retry."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "Muling Pagpili ng Pool para sa OpenCode 429",
+        "description": "Para sa multi-account rotation ng OpenCode, pagkatapos ng 429 mula sa isang egress-bucketed na provider sa isang account na walang proxy sa ilalim ng konteksto ng ambient pool, humiling sa connection pool ng isa pang miyembro para sa susunod na pagtatangka sa halip na subukang muli ang parehong egress address. Nag-aayos, hindi nagbubukod kailanman: pinapanatili ng isang naubos na pool ang kasalukuyang gawi. Naka-off bilang default: ang bawat 429 ay umiikot sa susunod na account eksakto tulad ng dati."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Client Fingerprint ng OpenCode v2",
+        "description": "Ipadala ang client fingerprint ng OpenCode v2 CLI sa mga request ng OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli at x-opencode-client cli, isang client User-Agent na pinapanatili lamang kapag ito ay isang 2.x OpenCode client, at sa mga gated free-tier na request ay walang x-opencode-request, ang session ay naka-mirror sa x-opencode-session-id/x-session-affinity/x-session-id, ang mga v2 CLI read/shell schema sa mga na-inject na placeholder tool at ang tool_choice na \"none\" ay inalis. Naka-off bilang default: pinapanatili ng bawat OpenCode request ang kasalukuyang identity, mga header, at body nang byte-for-byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Egress-IP Lockout ng OpenCode Zen",
+        "description": "Idagdag ang OpenCode Zen (opencode-zen) sa default na egress-IP lockout family, upang ang 429 sa isang koneksyon ng Zen ay magpalamig din sa bawat kaugnay na koneksyon ng Zen na nagbabahagi ng egress IP nito. Naka-off bilang default: naka-key ang Zen at bawat koneksyon ay nagpapalamig nang mag-isa, eksakto tulad ng dati. Ang isang tahasang value ng OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS ay palaging nangingibabaw sa flag na ito."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Mga Panuntunan sa Full-Text Error ng OpenCode",
+        "description": "Pahintulutan ang mga built-in na panuntunan sa error ng OpenCode (opencode-zen, opencode-go, opencode-cli) na mag-match sa buong upstream error text, upang mauri ng mga body marker tulad ng organization_quota_exceeded o \"monthly usage limit reached\" ang 429 bilang naubos na quota na may connection-scoped na lock. Naka-off bilang default: nakikita lamang ng mga panuntunang iyon ang structured error code at ang ganoong 429 ay nananatiling isang maikling rate limit, eksakto tulad ng dati."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Mga Panuntunan sa Full-Text Error ng Cloudflare Workers AI",
+        "description": "Pahintulutan ang built-in na panuntunan sa error ng Cloudflare Workers AI na mag-match sa buong upstream error text, upang ang 429 \"daily free allocation\" na body ay mauri bilang naubos na quota sa halip na isang maikling rate limit. Naka-off bilang default: nakikita lamang ng panuntunan ang structured error code, eksakto tulad ng dati."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Filter ng Kakayahan",
+        "description": "Tanggihan ang mga request bago i-dispatch kapag kulang ang target na modelo sa mga kinakailangang kakayahan (vision, tools, structured output, context window). Pinoprotektahan ang mga direktang single-provider request na lumalampas sa compatibility filter ng combo-layer."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ibalewala ang Paggamit na Walang Presyo sa mga USD Quota",
+        "description": "Bilangin ang paggamit ng mga modelong walang presyo bilang $0 sa bawat key na mga quota sa paggamit ng USD sa halip na ituring na lumampas na sa quota. Naka-off bilang default: maaaring itago ng isang modelong walang presyo o routing alias ang totoong nagastos, kaya nagfe-fail closed ang quota."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Paganahin ang OmniRoute Radar module (mga screen ng catalog feed at pag-sync). Naka-off bilang default; ina-unlock lamang ng pagpapagana ang UI — mananatiling hiwalay na opt-in ang pag-sync ng data."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Gate ng Kakayahan ng Model Endpoint",
+        "description": "Ipatupad ang mga pinagkakatiwalaang tag ng model endpoint (idineklara ng catalog ng provider, nahinuha mula sa isang specialty model id, o itinakda ng operator): tanggihan nang may HTTP 400 ang isang kahilingang ipinadala sa isang endpoint na hindi pinagsisilbihan ng modelo bago i-dispatch sa /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations at /v1/audio/*; itago mula sa /v1/models ang mga modelong ang mga naka-tag na endpoint ay walang OmniRoute adapter; at sagutin ng 422 ang dashboard model test para sa mga naturang modelo. Naka-off bilang default: mananatiling impormasyonal ang mga tag ng endpoint at idi-dispatch ang mga kahilingan tulad ng dati."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Pangkalahatang Pagpasa ng Konteksto",
+        "description": "Bumuo at mag-inject ng mga buod ng pag-uusap kapag nagpalit ng mga modelo ang combo routing. I-disable upang hiwalay na ituring ang mga pagpapalit ng modelo at pigilan ang mga kahilingan sa pagpasa sa background para sa lahat ng umiiral at hinaharap na combo."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Pag-replay ng Pangangatwiran",
+        "description": "I-cache at i-replay ang pangangatwiran ng modelo sa mga multi-turn na pag-uusap. I-disable upang ihinto ang pag-iimbak at muling pag-inject ng pangangatwiran."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Transport ng Codex App-Server",
+        "description": "Payagan ang Codex na gamitin ang lokal na app-server WebSocket JSON-RPC transport (codexTransport=app-server). Kapag naka-off, ang mga koneksyong nag-opt in sa app-server ay babalik sa iba pang mga transport ng Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Mga Alias ng Discovery ng Claude Code",
+        "description": "Ilanag ang mga claude/'<provider>'/'<model>' mirror id sa /v1/models para makita ng model discovery ng Claude Code gateway ang mga model na hindi Claude. Babala: dadoblingan ang mga entry sa katalog para sa lahat ng client kapag pinakita sa global."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Mga Alias ng No-Thinking Model",
+        "description": "Master switch para sa mga no-think/'<provider>'/'<model>' gateway aliases. On (default): ang /v1/models ay nag-a-advertise ng isang no-thinking variant para sa bawat naaccredited na kapable ng pag-iisip na Claude model, at ang naipadala na no-think/ id sa isang request ay babalik sa tunay na model na may naka-suppress na pagmumuno. Off: walang na-advertise variant at ang no-think/ id ay itinuturing na parang anumang ibang hindi kilalang model id. Ang opt-in/opt-out ng ModelSpec.noThinkingAlias para sa bawat model ay patuloy na nakailanman na ginagamit habang ito ay on."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "I-disable ang mga Thinking Level Variant",
+        "description": "I-disable ang pagbuo ng mga thinking level variant (hal. -low, -medium, -high) sa catalog ng /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Mga Adaptive Virtual Admission Lane",
+        "description": "Paganahin ang per-tenant na adaptive virtual admission lanes para sa provider dispatch (#9654): ang burst ng isang tenant ay hindi na magdudulot ng 503 sa isa pa. Mananaig ang OMNIROUTE_CHAT_VIRTUAL_LANES env var kaysa sa dashboard override na ito; magkakabisa ang mga pagbabago sa pag-restart ng server."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Mga Functional Gateway Mirrors",
+        "description": "Ilanag ang mga '<gateway-alias>'/'<model>' mirror id sa /v1/models para sa mga model na walang active credential ang kanong may-ari ngunit may passthrough gateway na may active credential na nagdadagdag ng ruta. Babala: dadagdag sa katalog para sa lahat ng client kapag pinakita sa global."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Balanse ng New-API Aggregator",
+        "description": "Paganahin ang pag-detect ng balanse para sa mga compatible node ng New-API / One-API / Sub2API aggregator. Kapag pinagana, iuulat ng mga compatible node na may nakatakdang aggregator flag ang kanilang balanse sa dashboard at quota-preflight routing."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Itago ang mga Na-delete na Search Connection",
+        "description": "Binibilang lamang ng search stats at kamakailang mga paghahanap ang mga provider na mayroon pa ring live connection (palaging binibilang ang mga keyless provider tulad ng duckduckgo-free). Kapag Naka-off, pinapanatili ang bawat search row na may provider id."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Mahigpit na Free Badge",
+        "description": "Mga page ng provider sa dashboard: ipakita lamang ang Free badge sa mga signal na kinikilala ng provider — inaalis ang display-name heuristic, mga non-boolean na free field, at mga :free suffix sa mga nakarehistrong provider na walang dokumentadong libreng tier. Kapag Naka-off, pinapanatili ang dating panuntunan sa badge."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Sumasagot ng 503 ang Empty Pool",
+        "description": "Kapag walang laman na ang candidate pool ng isang auto combo bago pa patakbuhin ang tool-calling pre-filter (nilaktawan ang bawat target dahil sa mga cooldown, lockout, o exhaustion), sumagot ng 503 no_eligible_targets sa halip na ang legacy na 400 \"No target supports tool calling\" capability_mismatch. Naka-off bilang default: pinapanatili ng empty pool ang legacy na 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral Ambiguous 401 Soft Lockout",
+        "description": "Ang siksik na Mistral 401 ('{\"detail\":\"Unauthorized\"}', walang espesipikong senyal ng auth) ay pare-pareho sa byte level para sa na-revoke na key at sa nasayang quota. Kapag na-enable, ang ganitong 401 ay pampipigil sa koneksyon imbes na itayo bilang expired, hanggang sa 3 beses sa loob ng isang oras; ang susunod na isa ay itatayo pa rin bilang expired, kaya ang na-revoke na key ay tutunaw. Off sa default: ang bawat siksik na Mistral 401 ay itatayo ang koneksyon bilang expired, tulad ng dati."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Auto-Cleanup ng Batch at File",
+        "description": "Pahintulutan ang awtomatikong cleanup sweep na magbura ng mga terminal (completed/failed/cancelled/expired) na Batch API job na mas luma sa OMNIROUTE_BATCH_RETENTION_DAYS, kasama ang kanilang mga per-line checkpoint, at linisin ang BLOB content ng mga na-upload na file na lampas na sa kanilang expires_at. Naka-off bilang default: pinapanatili ng bawat umiiral na install ang data na ito tulad ng dati hanggang sa mag-opt in ang isang operator. Hindi apektado ang ruta ng DELETE /api/v1/batches/delete-completed na pinapagana ng operator sa alinmang paraan -- isa itong hiwalay at walang kondisyong pampublikong kontrata ng API."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Lease ng Antigravity Account",
+        "description": "I-reserve ang napiling Antigravity account para sa streaming lifecycle ng request na pumili rito, upang ang isang sabay-sabay na retry o ang pagpasa ng kredensyal ay hindi na muling makapili ng account na nakalaan na sa isang in-flight stream. Naka-scope ang reservation sa (connection, callable upstream model), kaya maaari pa ring magsilbi ang isang account sa dalawang magkaibang modelo nang sabay. Kapag ang bawat kwalipikadong account ay naka-lease na para sa modelong iyon, magbabalik ang request ng isang structured na 503 POOL_BUSY na may bounded na Retry-After sa halip na sumiksik sa isang abalang account. Naka-off bilang default: nananatili ang pagpili ng account tulad ng dati, at walang ginagawang reservation."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Auto-Prune ng mga Lipas na Combo Step",
+        "description": "Pagkatapos ng matagumpay na pag-sync ng modelo sa isang authoritative na live catalog, alisin ang mga combo step na naka-pin sa mga modelong hindi na nakalista sa catalog, na may isang audit entry bawat inalis na hakbang. Hindi kailanman nagpu-prune sa isang nabigo, degraded, o free-only na pag-sync, at hindi kailanman nagbabakante ng isang combo. Naka-off bilang default: fino-flag lamang ang mga lipas na hakbang."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Summarized Thinking ng Claude OAuth",
+        "description": "Pahintulutan ang isang Claude OAuth request na humihiling ng nababasang pag-iisip (thinking.display \"summarized\") na i-drop ang redact-thinking-2026-02-12 Anthropic beta, na kung hindi ay magiging dahilan upang magbalik ang Anthropic ng mga blangko at signature-only na block ng pag-iisip. Naka-off bilang default: ang beta na iyon ay bahagi ng Claude Code OAuth wire fingerprint, kaya pinapanatili itong hindi binago ng mga OAuth request. Ang mga Claude request na gumagamit ng API-key ay sumusunod na sa summarized thinking nang wala ang flag na ito; ang OMNIROUTE_REDACT_THINKING=false ay dumarating lamang sa OAuth kapag naka-on ang flag na ito."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Pag-repair ng Kiro Tool Call",
+        "description": "Kapag ang isang streaming na tugon ng Kiro ay naglabas ng malformed na tool_call wrapper (nawawala ang input.name o input.arguments) bago ang anumang nakikitang output, i-suppress ito at muling ipadala ang request nang isang beses nang may corrective instruction sa halip na tapusin ang turn gamit ang invalid_kiro_tool_call. Nagkakahalaga ang retry ng isang karagdagang Kiro request; tatapusin ng pangalawang pagkabigo ang turn gamit ang kiro_tool_call_repair_retry_failed. Naka-on bilang default. I-set sa false upang i-fail ang turn sa unang malformed na wrapper."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Mga Effort Tier ng models.dev",
+        "description": "Gamitin ang mga reasoning effort tier na ipinapublish ng models.dev (nilimitahan sa kilalang effort vocabulary) kapag walang idineklara ang isang operator override o ang provider registry, at ituring ang isang idineklarang walang lamang listahan ng tier bilang \"walang mga tier\" sa /v1/models effort_tiers at mga combo tier intersection. Naka-off bilang default: mananatiling eksakto tulad ng dati ang effort_tiers at na-resolve na supportedThinkingEfforts."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Synthesized na cx Telemetry ng Arena",
+        "description": "Mag-attach ng isang synthesized na programmatic cx client-interaction blob (ang value na ipinapadala mismo ng arena.ai para sa isang page na walang naitalang interaksyon) sa bawat Arena (lmarena) create-evaluation request na walang ibinigay ng operator na providerSpecificData.cx. Naka-off bilang default: ang cx field ay isang anti-automation signal ng Arena, kaya ipinapasa lamang ng OmniRoute ang value na na-capture ng operator mula sa isang totoong browser session (providerSpecificData.cx) at kung hindi ay hindi magpapadala ng anumang cx. Hindi pa napatunayang benepisyo sa upstream; i-enable lamang kung magsimulang tanggihan ng Arena ang mga request na walang cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Reactive Compaction ng Native Codex",
+        "description": "Pahintulutan ang reactive (threshold) at last-resort context compaction passes na i-rewrite din ang mga native Codex passthrough history (POST /v1/responses sa codex provider) kapag lumampas ang mga ito sa context budget, gamit ang Responses input[] adapter. Naka-off bilang default: ang mga native Codex history ay pagmamay-ari ng Codex client at hindi kailanman nire-rewrite ng compaction; patuloy na mabibigo ang mga oversized na request sa pagsusuri ng context budget tulad ng dati. Kinakailangang naka-on ang global compression at hindi naka-exclude ang modelo."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Quota Window: Sundin ang Bounded Park",
+        "description": "Pahintulutan ang per-window na quota policy (mga threshold sa session/lingguhan na ginagamit sa pagpili ng account) na sundin ang bounded exhaustion park: kapag lumipas na ang deadline ng capped park, o mas luma ang naka-cache na obserbasyon ng quota kaysa sa park cap, hihinto ang window sa pag-exclude sa account hanggang sa magkaroon ng bagong pag-fetch ng quota. Naka-off bilang default: patuloy na magba-block ang isang naka-cache na window sa huling iniulat nitong porsyento hanggang sa sarili nitong oras ng pag-reset."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Pagbuo ng Larawan: Mahahabang Job",
+        "description": "Para sa OpenAI-compatible na pagbuo ng larawan: gamitin ang timeout ng koneksyon (providerSpecificData.timeoutMs), kung hindi ay ang central upstream fetch timeout (FETCH_TIMEOUT_MS, pagkatapos ay REQUEST_TIMEOUT_MS, default na 600 s) sa halip na ang nakapirming 120 s na badyet sa larawan; wakasan sa 499 ang isang request na kinansela ng caller; at payagan ang Playground na makatanggap ng mahahabang image job bilang isang SSE stream na may keepalive heartbeats. Naka-off bilang default: nalalapat ang nakapirming badyet at hindi ipinapasa ang pagkansela ng caller. Palaging naka-on ang deadline na sumasaklaw sa pagbasa ng response body."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Mga Pagpapahusay sa Catalog Mirror",
+        "description": "Pinuhin ang claude/ discovery at functional-gateway mirrors sa /v1/models. Naka-off bilang default: parehong gagana ang dalawang mirror pass gaya ng dati. Naka-on: sinasaklaw din ng claude/ discovery mirrors ang mga nakalistang variant ng reasoning-effort (-low/-medium/-high/-xhigh), nilalaktawan ang mga built-in na auto/* id na hindi kayang i-materialize ng request path, at nilalaktawan ang isang alias na nakalista na; nilalaktawan ng functional-gateway mirrors ang mga combo at OmniRoute-synthesized na id (claude/, no-think/), kinukuha ang may-ari mula sa owned_by, hindi kailanman ginagamit ang may-ari bilang sarili nitong gateway, nilalaktawan ang mga gateway na naka-disable sa blockedProviders at mga model na nasa labas ng authoritative live catalog ng isang gateway."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxy Health: Nire-reset ng Pagtanggi ang Failure Streak",
+        "description": "Sa proxy health sweep, hayaang i-reset ng probe na tinanggihan ng target (401/403/429: nai-relay ng proxy, tinanggihan ng destinasyon ang egress IP na ito) ang streak ng sunod-sunod na pagkabigo ng proxy, tulad ng isang na-serve na probe. Naka-off bilang default: mananatiling neutral ang pagtanggi at papanatilihin ang streak (#10654). Mananatiling hindi tiyak ang 5xx sa alinmang paraan, at ang pagtanggi ay hindi kailanman nag-aalis, nagdi-disable, o muling nag-a-activate ng proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Mga Larawan ng Grok Subscription",
+        "description": "Irehistro ang mga image route ng xai-oauth (xao) at grok-cli at i-map ang OpenAI quality na high/hd sa xAI medium. Naka-off bilang default: mananatili ang API-key na xAI image path sa umiiral na OpenAI-compatible na request at hindi irerehistro ang mga subscription route."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Live Model Discovery ng xAI OAuth",
+        "description": "Kunin ang live na catalog ng model ng xAI para sa mga koneksyon ng xai-oauth mula sa https://api.x.ai/v1/models gamit ang OAuth bearer token, sa halip na ang naka-freeze na static seed. Naka-on bilang default. Itakda ang flag sa false upang magpatuloy sa pag-serve ng static seed. Babalik sa seed ang mga pagkabigo sa HTTP sa discovery route; ang mismong getter ng flag ay hindi naglalabas ng HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Mga Anthropic-Compatible na Mid-Conversation System Turn",
+        "description": "Sa mga plain na anthropic-compatible-* relay (claude → claude passthrough), panatilihin ang mid-conversation role:system turns sa loob ng messages[] sa halip na i-hoist ang mga ito sa top-level na system parameter, upang manatiling stable ang naka-cache na prompt prefix sa bawat turn. Nalalapat lang kapag ang client mismo ang nagpadala ng mid-conversation-system-2026-04-07 anthropic-beta (ipinapasa sa upstream nang walang pagbabago). Naka-off bilang default: bawat system turn ay ini-hoist nang eksakto tulad ng dati, dahil ang mga relay na hindi sumusuporta sa beta ay nagtatakwil ng role:system messages na may 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB Health Check: Ipagpaliban ang Startup Scan",
+        "description": "Patakbuhin ang startup DB integrity/health check pagkatapos magsimulang tumanggap ng mga request ang server (sa pamamagitan ng setImmediate) sa halip na i-block ang startup hanggang sa makumpleto ito. Naka-off bilang default: nagba-block ang startup sa pagsusuri nang eksakto tulad ng bago ang #13717, kaya ang corrupt na database ay mahuhuli pa rin bago mai-serve ang unang request. Naka-on: agad na nagbabalik ang startup at ang pagsusuri (na ngayon ay bounded/paged at, para sa totoong file-backed DB, naka-isolate sa isang nakakanselang child process) ay tatakbo kaagad pagkatapos."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Routing ng Na-publish na Catalog ng OpenCode",
+        "description": "Pahintulutan ang mga modelong OpenCode Zen at OpenCode Go na walang hayagang registry endpoint na kunin ang kanilang request surface (Responses para sa @ai-sdk/openai, Messages para sa @ai-sdk/anthropic) mula sa na-publish na catalog ng models.opencode.ai, na binabasa sa background bawat 6 h. Naka-off bilang default: nagmumula ang endpoint sa registry heuristics nang eksakto tulad ng dati at hindi kailanman kinukuha ang catalog."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Mga Auto Request: Naresolbang Capability Weights",
+        "description": "Pahintulutan ang mga request na auto/* (resolveModelOrError at ang wrapper ng auto-routing) na buuin ang candidate pool gamit ang mga naresolbang kakayahan ng modelo (vision, reasoning, thinking) at mga naobserbahang score sa kalidad, na binabasa sa isang bulk pass tulad ng catalog na /v1/models. Naka-off bilang default: ang mga snapshot weight sa oras ng request ay mananatili nang eksakto tulad ng dati (nirereresolba kapag kailangan ang mga kakayahan at hindi ipinapasok sa mga weight). Naka-on: ipinapasok ang mga signal na iyon sa mga snapshot weight, kaya ang weights ng mga kandidato, at dahil dito ang pagpili, ay maaaring magbago."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Keyless Transport Gate",
+        "description": "I-hold ang mga provider na keyless (walang auth) na ang transport ay nangangailangan ng local browser (browserBacked) o lokal na naka-install na CLI (isLocalCli) sa pool ng auto/* candidates, upang hindi makapag-stall ang isang nakasabit na member sa isang auto request hanggang sa per-target timeout (#17036). default na off: bawat no-auth provider na may emulated tool calling ay nasa pool na parang dati. Gumagana pa rin ang direktang '<alias>'/'<model>' calls sa parehong paraan."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "Para sa mga codebuddy-cn thinking models (ang mga DeepSeek-V4 / Kimi-K2 families na nangangailangan ng reasoning replay), in-include ang bawat na replayed assistant reasoning_content bilang isang visible '<thought>' block sa unahan ng message content, upang manatipid ito kahit may gateway na bumabagsak sa reasoning_content field (#13632). default na off: ang mga codebuddy-cn requests ay ipinadala na walang pagbabago; ang sariling reasoning_content field ay palaging pinapanatili."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Mga Safety Stop ng Provider: Terminal",
+        "description": "Panatilihin ang isang tahasang safety stop ng provider (misalignment_policy_violation, content_policy_violation, o ang eksaktong lumang pagtanggi na 'blocked by our safety systems' na may label na provider_safety_rejection) bilang isang terminal, request-scoped na pagtanggi: pinapanatili ang code nito sa mga error sa HTTP, Responses, WebSocket, at completed-stream, at hihinto ang isang combo dito sa halip na subukang muli ang iba pang mga target, na nagkakansela sa mga tinanggap na sibling (#17049). Naka-off bilang default: pinapanatili ng mga error na ito ang kanilang umiiral na paghawak at hindi binabago ang pag-route ng combo."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Kalusugan ng Credential: Muling Subukan ang mga Awtomatikong Na-disable na Koneksyon",
+        "description": "Pahintulutan ang credential health sweep na muling subukan ang mga koneksyong kusa mismong pinatay ng gateway (minarkahang autoDisabledAt; nang hindi hihigit sa isang beses bawat 6 na oras bawat isa at 5 bawat sweep) at muling i-on ang isang koneksyon kapag pumasa ang muling pagsubok nito (#16190). Naka-off bilang default: mananatiling naka-off ang mga pinatay na koneksyon hanggang sa muling i-enable o i-retest ng isang operator ang mga ito, eksakto tulad ng dati. Ang mga koneksyong na-disable ng operator at mga koneksyong pinatay pagkatapos ng isang permanenteng ban ay hindi kailanman muling susubukan."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate: Mga Auth Diagnosis Lamang",
+        "description": "Pakitirin ang combo credential gate upang ang isang naka-cache na nabigong credential probe ay humarang lamang sa isang koneksyon kapag pinapatunayan ng diagnosis nito ang mga maling credential (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Ang mga hindi tiyak na pagkabigo (mga timeout, rate limit, outage, hindi suportadong probe, at mga untyped na scheduler error) ay ituturing bilang hindi alam at patuloy na makakatanggap ng trapiko ang koneksyon. Naka-off bilang default: hinaharangan ng anumang naka-cache na error sa probe ang koneksyon para sa TTL ng cache (5 minuto)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Huminto sa Pagtanggi sa Content-Policy",
+        "description": "Kapag sumagot ang isang target ng combo ng isang eksaktong pagtanggi sa content-policy (code o uri na cyber_policy / content_policy_violation), ihinto ang combo at ibalik ang pagtangging iyon kahit na magkakaibang modelo ang mga natitirang target, sa halip na magpatuloy sa susunod na target. Naka-off bilang default: hindi kailanman pinapalamig ng pagtanggi ang account o pinapagana ang provider breaker, at uusad ang combo sa susunod nitong target eksakto tulad ng dati."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Cooldown Retry: Laktawan ang mga Pagtangging 403/410",
+        "description": "Kapag ang bawat account ay nasa cooldown at ang cooldown na unang magtatapos ay sanhi ng 403 (tinanggihan ang access) o 410 (wala na), ibalik agad ang pagtangging iyon sa halip na hintaying matapos ang cooldown at muling ipadala ang kahilingan; ang isang nagre-renew na agentrouter connection-scoped quota 403 ay pananatilihin gamit ang errorCode 429 upang manatili itong puwedeng subukang muli. Naka-off bilang default: 401 lamang ang lumalaktaw sa paghihintay, at ang bawat pagtanggi ay pinananatili gamit ang status na kasama nitong dumating."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Patakaran sa Badyet para sa Hindi Naka-presyong Paggamit",
+        "description": "Kung paano tinatrato ng pang-araw-araw/panglinggong USD na mga limitasyon kada key ang matagumpay na paggamit kung ang provider/model ay walang hilera ng presyo. Ang fail_closed (karaniwan) ay minamarkahan ang panahon bilang nalampasan, kaya ang hindi kilalang gastos ay hindi kailanman makakalusot sa isang mahigpit na limitasyon. Ang count_as_zero ay binibilang ang paggamit na iyon bilang $0 at pinapanatili ang pagpapatupad ng binayarang gastos. Nakalista ang mga modelong walang presyo sa home page ng dashboard sa anumang kaso."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latency",
     "quota": "Kota",
     "rangeWindow": "{range} na window",
+    "timeRange": "Saklaw ng oras",
     "runtimeHealthBlend": "blend ng runtime/health",
     "averageResponseTime": "karaniwang oras ng pagtugon",
     "worstQuota": "Pinakamalalang quota",
@@ -13923,7 +14500,11 @@
       "ok": "Pangkalahatang permissive"
     },
     "allProviders": "Lahat ng provider",
-    "noApiKeyRequired": "Walang kinakailangang API key"
+    "noApiKeyRequired": "Walang kinakailangang API key",
+    "searchPlaceholder": "Maghanap ng model, provider…",
+    "searchAria": "Maghanap ng libreng mga model",
+    "filterProviderAria": "I-filter ayon sa provider",
+    "keylessOnly": "Keyless lamang"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot sa Kalusugan ng Provider",
@@ -13994,7 +14575,11 @@
     "learnMore": "Alamin pa",
     "changelogLoadFailed": "Hindi mai-load ang changelog. Pakisubukan muli mamaya.",
     "retry": "Subukan muli",
-    "viewFullHistory": "Tingnan ang buong history sa GitHub"
+    "viewFullHistory": "Tingnan ang buong history sa GitHub",
+    "title": "Balita at talaan ng mga pagbabago",
+    "description": "Mga anunsyo mula sa team ng OmniRoute at ang pinakabagong mga tala sa release",
+    "viewLabel": "Tingnan",
+    "loadingNews": "Nilo-load ang mga anunsyo..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Estado ng Circuit Breaker ng Provider",
       "lastUpdate": "Huling pag-update: {timestamp}",
       "uptimeMinutes": "{minutes}m",
-      "uptimeHoursMinutes": "{hours}h {minutes}m"
+      "uptimeHoursMinutes": "{hours}h {minutes}m",
+      "breakerClosed": "Sarado",
+      "breakerNotClosed": "Bukas o kalahating bukas"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Mga Detalye ng Pagpapanatili",
         "secondaryAction": "Katayuan ng Sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Magtanong ng kahit ano…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} ang nakikita / {total} ang kabuuan",
+    "modeLabel": "Mode ng pagtingin",
+    "jumpToNow": "Pumunta sa kasalukuyang oras; babalik ang linyang NGAYON sa posisyong {position}%",
+    "laneReuse": "Muling paggamit ng lane",
+    "laneReuseLabel": "Palugit sa muling paggamit ng lane (minuto)",
+    "laneReuseHint": "Ang mga request na may parehong conversation ID ay nananatili sa parehong hilera ng timeline hangga't mas maikli sa ganitong karaming minuto ang pagitan ng mga ito.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Awtomatikong pag-refresh",
+    "autoRefreshLabel": "Agwat ng awtomatikong pag-refresh (segundo)",
+    "autoRefreshHint": "Gaano kadalas muling kinukuha ng timeline ang listahan ng mga request mula sa server.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Mag-zoom out",
+    "zoomIn": "Mag-zoom in"
   },
   "metadata": {
     "compressionTitle": "Pagsisikip",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Isara"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Huwag paganahin ang pagbuo ng mga variant ng antas ng pag-iisip (hal. -low, -medium, -high) sa katalogong /v1/models.",
+  "teamCosts": {
+    "title": "Mga gastos ng koponan",
+    "subtitle": "Pamahalaan ang pinagsasaluhang malambot na badyet at mga pagtataya ng gastos sa katalogo.",
+    "refresh": "I-refresh",
+    "create": "Gumawa ng koponan",
+    "edit": "I-edit ang koponan",
+    "archive": "I-archive",
+    "selectTeam": "Mga koponan",
+    "searchTeams": "Maghanap ng mga koponan",
+    "statusFilter": "Katayuan ng koponan",
+    "active": "Aktibo",
+    "archived": "Naka-archive · read-only",
+    "allTeams": "Lahat ng koponan",
+    "noTeams": "Walang tumutugmang koponan.",
+    "selectHint": "Gumawa o pumili ng koponan para makita ang mga gastos.",
+    "loading": "Nilo-load ang mga gastos ng koponan…",
+    "budgetTitle": "Kasalukuyang malambot na badyet",
+    "budgetSubtitle": "Matagumpay na naitalang paggamit · gumagalaw na window · hindi nakadepende sa mga petsa ng ulat",
+    "archivedBudget": "Naka-archive: hindi aktibo ang pagpapatupad ng badyet. Mananatiling available ang mga makasaysayang ulat.",
+    "unlimited": "Walang limitasyon — walang naka-configure na pinagsasaluhang malambot na badyet.",
+    "budgetUnavailable": "Hindi available ang katayuan ng badyet. I-refresh para subukan muli.",
+    "used": "Matagumpay na paggamit",
+    "maximum": "Pinakamataas na badyet",
+    "remaining": "Alam na natitira",
+    "resets": "Magre-reset sa",
+    "unpricedBudget": "May hindi alam na presyo ang bahagi ng matagumpay na paggamit. Hindi kumpleto ang alam na kabuuan; itinuturing ng pagpapatupad ng badyet na lampas na ang window na ito.",
+    "overBudget": "Naabot o lumampas ang badyet · {amount} na sobra",
+    "reportTitle": "Ulat ng paggamit",
+    "reportSubtitle": "Lahat ng pagtatangka · pagtatayang batay sa katalogo sa USD, hindi invoice · buong petsa ng UTC",
+    "reportPeriod": "Panahon ng ulat",
+    "day1": "1 araw",
+    "day7": "7 araw",
+    "day30": "30 araw",
+    "allTime": "Buong panahon",
+    "reportSpend": "Tinatayang gastos ng ulat",
+    "requests": "Mga kahilingan",
+    "assignedKeys": "Mga nakatalagang key",
+    "unpricedReport": "May mga hindi alam na presyo ang ulat na ito. Hindi kumpleto ang tinatayang gastos.",
+    "breakdown": "Gastos ayon sa API key",
+    "noUsage": "Walang paggamit sa panahon ng ulat na ito.",
+    "keyName": "Pangalan ng API key",
+    "tokens": "Mga input + output token",
+    "unnamedKey": "Key na walang pangalan o binura",
+    "unpriced": "Hindi alam na presyo",
+    "members": "Pagiging miyembro",
+    "memberSubtitle": "Ang pagpapalit ng pagiging miyembro ay nag-iiwan ng makasaysayang gastos sa orihinal na koponan.",
+    "searchKeys": "Maghanap ng mga key o kasalukuyang may-ari",
+    "chooseKey": "Pumili ng API key",
+    "unassigned": "Hindi nakatalaga",
+    "ownership": "Kasalukuyang koponan sa pagsingil: {team}",
+    "assign": "Italaga",
+    "remove": "Alisin",
+    "noMembers": "Walang kasalukuyang miyembro. Maaaring mabilang pa rin sa badyet ang makasaysayang paggamit.",
+    "assignedAt": "Itinalaga noong {date} (UTC)",
+    "name": "Pangalan ng koponan",
+    "description": "Paglalarawan",
+    "enableBudget": "I-enable ang pinagsasaluhang malambot na badyet",
+    "amount": "Halaga ng badyet (USD)",
+    "duration": "Gumagalaw na window ng badyet",
+    "cancel": "Kanselahin",
+    "save": "I-save",
+    "confirm": "Kumpirmahin",
+    "transferTitle": "Kumpirmahin ang paglilipat ng key",
+    "transferMessage": "Ilipat ang key na ito mula sa “{source}” patungo sa “{destination}”? Mananatili sa orihinal na koponan ang makasaysayang gastos.",
+    "removeTitle": "Alisin ang pagtatalaga ng key",
+    "removeMessage": "Alisin ang key na ito mula sa “{team}”? Mananatili sa koponang ito ang makasaysayang gastos.",
+    "archiveTitle": "I-archive ang koponan",
+    "archiveMessage": "I-archive ang “{team}”? Magsasara ang lahat ng kasalukuyang ugnayan at titigil ang pagpapatupad ng badyet. Mananatiling available ang mga makasaysayang ulat.",
+    "invalidName": "Maglagay ng pangalan (1–200 character) at paglalarawang hindi hihigit sa 2,000 character.",
+    "invalidAmount": "Maglagay ng may hangganang halaga ng badyet na higit sa zero.",
+    "unauthorized": "Mag-sign in sa dashboard ng pamamahala para magpatuloy.",
+    "forbidden": "Wala kang pahintulot na pamahalaan ang mga koponan. Napanatili ang iyong input.",
+    "notFound": "Wala na ang koponan o pagtatalagang ito.",
+    "conflict": "Nagbago ang pagtatalaga o koponan. I-refresh at kumpirmahin ang kasalukuyang pagmamay-ari bago subukan muli.",
+    "failed": "Nabigo ang kahilingan. Napanatili ang iyong input; pakisubukan muli.",
+    "partialBudget": "Nag-o-overlap ang ilang napanatiling pang-araw-araw na bucket sa hangganan ng window at hindi ito mahahati nang eksakto. Hindi kumpleto ang ipinapakitang gastos; hindi available ang natitirang alokasyon. Hindi nagbabago ang umiiral na patakaran sa malambot na badyet."
+  },
   "connectionTest": {
     "title": "Mensahe para sa pagsubok",
     "description": "Magpadala ng isang totoong kahilingan gamit ang account na ito. Gumagamit ito ng kaunting quota at maaaring magsimula ng panahon ng paggamit, depende sa provider.",
@@ -15073,5 +15753,118 @@
     "importButton": "I-import",
     "importFailed": "Nabigo ang pag-import.",
     "importSuccess": "Na-import ang {connections} account at {nodes} provider node; nilaktawan ang {skipped}."
+  },
+  "conversations": {
+    "title": "Mga pag-uusap",
+    "countSummary": "{total, plural, one {# pag-uusap} other {# mga pag-uusap}} na may 2+ turns",
+    "autoRefreshTitle": "Gaano kadalas ang ulit na hahabol ng listahan ito mula sa server.",
+    "autoRefresh": "Awtomatikong pag-refresh",
+    "loading": "Nagla-load ng mga pag-uusap...",
+    "colConversation": "Kausapan",
+    "colTurns": "Mga Pagkakataon",
+    "colContinuation": "Pagpapatuloy",
+    "colLastModel": "Huling Modelo",
+    "colProvider": "Tagapagbigay",
+    "colStatus": "Katayuan",
+    "colLastSeen": "Huling Nakita",
+    "drawerTitle": "Kausapan",
+    "prevConversation": "Nakaraang kausapan",
+    "nextConversation": "Susunod na kausapan",
+    "gotoLatestRequest": "Pumunta sa pinakabagong request",
+    "goToBottom": "Pumunta sa pinakamababang bahagi",
+    "statusInProgress": "Nagtatagpo",
+    "continuationGenuineTitle": "Ginamit ng pinakabagong turn ang previous_response_id at naunawaan nito sa server-side",
+    "continuationBadge": "pagpapatuloy",
+    "stalledTitle": "Hindi natapos ng pinakabagong turn sa stop at wala nang patuloy para 5+ minuto",
+    "stalledBadge": "hinto",
+    "noTurns": "Walang naitalang turns para sa pag-uusaping ito."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Magsimula sa kasalukuyang posisyon (laktawan ang mga umiiral na log)",
+    "pageTitle": "Eksport ng tala",
+    "pageSubtitle": "Ipadala nang patuloy ang mga talaan ng tawon mula sa tab ng Talaan sa isang panlabas na analytics store.",
+    "addDestination": "Magdagdag ng destinasyon",
+    "scheduleTitle": "Kasunduan",
+    "cronLabel": "Cron",
+    "notScheduled": "hindi pa nakasaklaw sa kasunduan",
+    "lastScheduledRun": "Huling ginagawang kasunduan",
+    "lastRunSummary": "{startedAt} — {status}, {rows} mga linya",
+    "never": "hindi pa nangyari",
+    "highWaterMark": "Mataas na marka ng talaan ng tawon",
+    "rowPrefix": "linya {id}",
+    "noDestinations": "Wala pang layuning pwede i-export",
+    "noDestinationsHint": "Magdagdag ng layunin upang simulan ang pagpapadala ng mga log ng tawag ayon sa oras-oras na iskedyul.",
+    "errLoadStatus": "Hindi mai-load ang katayuan ng export",
+    "errSaveDestination": "Hindi nai-save ang layunin",
+    "msgDestinationSaved": "Nai-save ang layunin.",
+    "errConnectionTest": "Hindi pumasa ang pagsusuri ng koneksyon",
+    "msgRunInFlight": "May naganang export run sa layuning ito na; wala nang pinadala nang dalawang beses.",
+    "errExportRun": "Hindi pumasa ang export run",
+    "errUpdateDestination": "Hindi mai-update ang layunin",
+    "errDeleteDestination": "Hindi matatanggal ang layunin",
+    "deleteTitle": "Burahin ang destinasyon",
+    "deleteConfirm": "Burahin ang \"{name}\"? Tinatanggal din ang kanyang cursor ng export, kaya kung muling i-a-add, magmumula sa pinakalumaang tinatayang talaan ng tawag.",
+    "statusDisabled": "Hindi pinagana",
+    "statusFailing": "Hindi nagtagumpay",
+    "statusHealthy": "Maginhawa",
+    "statusNotRunYet": "Hindi pa ginaganap",
+    "typeNotInstalled": "Hindi na-install ang uri",
+    "metaLine": "Huling ginawa {lastRun} · i-export na {exported} na linya · {pending} ay namamatay · cursor {cursor}",
+    "btnTest": "Surihin",
+    "btnRunNow": "Ganapan na ngayon",
+    "btnDisable": "Pawarang",
+    "btnEnable": "Pahihintay",
+    "btnEdit": "I-edit",
+    "btnDelete": "Burahin"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Mga CLIProxyAPI account",
+    "cardSubtitle": "Status na read-only mula sa authenticated na management API",
+    "btnRefresh": "I-refresh",
+    "listAria": "Kalusugan ng CLIProxyAPI account",
+    "noAccounts": "Walang nakitang CLIProxyAPI account.",
+    "loading": "Nagla-load ng kalusugan ng account…",
+    "stateReady": "Kalusugan ng account",
+    "stateDisabled": "Hindi na-imbentaryo ang CLIProxyAPI",
+    "stateMissingKey": "Hindi pa nakakonfigura ang Management key",
+    "stateUnreachable": "Hindi maabot ang Management API",
+    "stateUnauthorized": "Tinahimik ang Management key",
+    "stateUnsupported": "Hindi ipinapakita ng bersyon ng CLIProxyAPI ang kalusugan ng account",
+    "stateInvalidResponse": "Naibalik ng Management API ang hindi suportadong sagot"
+  },
+  "darioPanel": {
+    "title": "Mga account ng Claude",
+    "description": "I-authenticate ang Dario gamit ang Claude Pro/Max subscription. Ibibilang sa subscription pool ang gamit. Kailangan ng kahit isang account bago ang Dario para sa routing ng mga request (hangga't ganun, ang /health ang nagsasabing degraded).",
+    "noAccounts": "Wala pang na-konfig na account.",
+    "importTitle": "I-import sa OmniRoute",
+    "importDescription": "Gamitin ang mga OAuth token ng umiralang koneksyon ng OmniRoute Claude sa halip na mag-log in muli — lalaktuan ang hakbang ng pag-approvals sa browser.",
+    "importPendingTooltip": "Magiging aktibo kapag may koneksyon na si Claude sa OmniRoute.",
+    "btnImport": "I-import",
+    "btnImporting": "In-i-import…",
+    "aliasPlaceholder": "alias (opsyonal)",
+    "btnStartLogin": "Simulan ang Login",
+    "btnStarting": "Nagsisimula…",
+    "btnCompleteLogin": "Kompletuhin ang Login",
+    "btnCompleting": "Nagkumpleto…",
+    "codePlaceholder": "code#estado o código simple",
+    "noticeImported": "Importado como cuenta \"{alias}\" — Dario lo reinició para recogerlo.",
+    "noticeAdded": "Se agregó la cuenta \"{alias}\".",
+    "expiresInHours": "vence en ~{hours}h",
+    "expiresInMinutes": "vence en ~{minutes}m",
+    "expiresAt": "vence {date}",
+    "scopes": "{count, plural, one {# alcance} other {# alcances}}",
+    "btnRemove": "Eliminar",
+    "btnRefresh": "Actualizar",
+    "loginStep1": "1. Abra esta URL en su navegador y apruebe el acceso para la cuenta <mono>{alias}</mono>:",
+    "pendingExpires": "Ang pending na login ay mag-expire {time}",
+    "loginStep2": "2. I-paste ang code na ipinakita ng Anthropic:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Ang pahinang ito ay dapat buksan sa loob ng Telegram Mini App.",
+    "greeting": "👋 Kumusta si {name}! Magpadala ng mensaheng chat sa pamamagitan ng iyong OmniRoute gateway.",
+    "greetingFallbackName": "doon",
+    "errNoReply": "⚠️ Walang sagot mula sa gateway.",
+    "btnSend": "Ipadala"
   }
 }

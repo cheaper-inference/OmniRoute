@@ -43,7 +43,7 @@ A2A נשלט באמצעות המתג **נקודות קצה → A2A** ומושב�
 
 ---
 
-## מתודות JSON-RPC 2.0
+## שיטות JSON-RPC 2.0
 
 ### `message/send` — ביצוע סינכרוני
 
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+עבור `smart-routing`, הערך `metadata.combo` הוא דריסה מפורשת של
+`metadata.model` עבור בקשת השער; הוא נשלח בתור `model` בפועל,
+ולא כשדה JSON מסוג `x-combo` שמתעלמים ממנו. אימות מפתח ה-API הרגיל של השער
+וההרשאה לכל יעד עדיין חלים. שילוב לא תקין או ריק נדחה.
+
+התוצאה חושפת את `requested_combo` (כוונת הקורא), את `dispatched_model`
+(בקשת השער בפועל), את `response_model` (תגובת השער) ואת
+`confirmed_combo`. השדה האחרון הוא `null`, אלא אם השער מזהה שילוב
+באופן מפורש. יומני ההחלטות של A2A מייחסים את הביצוע רק לשילוב
+שאושר, תוך שמירת בקשה שלא אושרה בתור `requestedCombo`.
+
 **תגובה:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — הזרמת SSE
 
-זהה ל־`message/send`, אך מחזירה אירועים שנשלחים מהשרת לצורך הזרמה בזמן אמת.
+זהה ל-`message/send`, אך מחזירה אירועים שנשלחים מהשרת לצורך הזרמה בזמן אמת.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — שאילתת סטטוס משימה
+### `tasks/get` — שאילתת מצב משימה
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## מיומנויות זמינות
 
-OmniRoute חושף 6 מיומנויות A2A המחוברות ב-`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. כל מודול מיומנות נמצא ב-`src/lib/a2a/skills/`.
+OmniRoute חושף 6 מיומנויות A2A מחווטות ב- `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. כל מודול מיומנות חי ב- `src/lib/a2a/skills/`.
 
-| מיומנות      | מזהה                 | תיאור                                                                                                                                         | תגיות                   | דוגמאות                             |
-| :----------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :---------------------------------- |
-| ניתוב חכם    | `smart-routing`      | מנתב הנחיה דרך הספק/השילוב המיטבי באמצעות מנוע השילובים והניקוד של OmniRoute                                                                  | ניתוב, ספקים            | "נתב הנחיה זו דרך המודל הטוב ביותר" |
-| ניהול מכסות  | `quota-management`   | מדווח על מצב המכסה של כל ספק ומסייע למשתמשים להחליט מתי להגביל קצב או להחליף ספק                                                              | מכסה, ספקים             | "בדוק את המכסה עבור anthropic"      |
-| גילוי ספקים  | `provider-discovery` | מציג את הספקים המותקנים לצד היכולות שלהם, סימוני מסלול חינמי וסטטוס OAuth                                                                     | ספקים, גילוי            | "אילו ספקים זמינים?"                |
-| ניתוח עלויות | `cost-analysis`      | מעריך את העלות של בקשה/שיחה על סמך הקטלוג והשימוש האחרון                                                                                      | עלות, שימוש             | "הערך את העלות של שיחה זו"          |
-| דוח תקינות   | `health-report`      | מרכז את מצב מפסק הזרם, תקופת ההמתנה והנעילה עבור כל ספק                                                                                       | תקינות, עמידות          | "הצג את מצב התקינות של כל הספקים"   |
-| הצגת יכולות  | `list-capabilities`  | מחזיר את קטלוג Agent Skills המלא, הכולל 45 רשומות (23 API +‏ 21 CLI +‏ 1 הגדרה), כטבלת markdown עם כתובות URL גולמיות של SKILL.md להזרקת הקשר | קטלוג, גילוי, מיומנויות | "הצג את כל היכולות של OmniRoute"    |
+| מְיוּמָנוּת     | ID                   | תֵאוּר                                                                                                                       | תגים                    | דוגמאות                                |
+| :-------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------- | :---------------------- | :------------------------------------- |
+| ניתוב חכם       | `smart-routing`      | מנתב הנחיה דרך ה- provider/combo האופטימלי באמצעות ניקוד + של מנוע המשולב של OmniRoute                                       | ניתוב, ספקים            | "נתב הודעה זו באמצעות הדגם הטוב ביותר" |
+| ניהול מכסות     | `quota-management`   | מדווח על מצב מכסה לכל ספק, עוזר למתקשרים להחליט מתי ל- throttle/switch                                                       | מכסה, ספקים             | "בדוק מכסה לאנתרופית"                  |
+| גילוי ספק       | `provider-discovery` | מפרט ספקים מותקנים עם יכולות, דגלים ברמה חופשית, סטטוס OAuth                                                                 | ספקים, גילוי            | "אילו ספקים זמינים?"                   |
+| ניתוח עלויות    | `cost-analysis`      | מעריך את העלות של request/conversation בהתחשב בקטלוג + השימוש האחרון                                                         | עלות, שימוש             | "הערכת עלות לשיחה זו"                  |
+| דו"ח בריאות     | `health-report`      | מצטבר מפסק זרם, קירור, מצב נעילה לכל ספק                                                                                     | בריאות, חוסן            | "הצג מצב בריאותי של כל הספקים"         |
+| רשימה של יכולות | `list-capabilities`  | מחזירה את הקטלוג המלא של 45 כניסות Agent Skills (23 API + 21 CLI + 1 config) כטבלת סימון עם SKILL.md URLs גולמית להזרקת הקשר | קטלוג, גילוי, מיומנויות | "רשום את כל יכולות OmniRoute "         |
 
-> יש לשמור את כרטיס הסוכן מסונכרן עם הקטלוג הפעיל הכולל 374 ספקים; מספרי הספקים ומטא-נתוני החינם/ללא אימות נלקחים ממרשם זמן הריצה.
+> יש לשמור על כרטיס הסוכן מיושר עם הקטלוג החי של ספקי 377; ספירת ספקים ומטא נתונים free/no-auth מקורם ברישום זמן הריצה.
 
-### פרטי המיומנות `list-capabilities`
+### פרט מיומנות `list-capabilities`
 
-המיומנות `list-capabilities` שימושית במיוחד לסוכנים חיצוניים שצריכים לגלות מה OmniRoute חושף לפני שליחת קריאות API. היא מחזירה ארטיפקט מובנה של טבלת markdown:
+מיומנות `list-capabilities` שימושית במיוחד עבור סוכנים חיצוניים שצריכים לגלות מה OmniRoute חושף לפני שליחת קריאות API. זה מחזיר חפץ טבלת סימון מובנה:
 
 ```
-| מזהה | שם | קטגוריה | תחום | נקודות קצה/פקודות | URL גולמי |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | אימות והפעלות | api | אימות | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-כל שורה כוללת את העמודה `rawUrl`, כדי שסוכנים יוכלו לאחזר מיד את SKILL.md המלא. השדה `metadata.totalSkills` משקף את גודל הקטלוג (45 כיום). מימוש: `src/lib/a2a/skills/listCapabilities.ts`. ראו גם [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+כל שורה כוללת את עמודת `rawUrl` כך שסוכנים יכולים להביא מיד את ה- SKILL.md המלא. שדה `metadata.totalSkills` משקף את גודל הקטלוג (45 היום). יישום: `src/lib/a2a/skills/listCapabilities.ts`. ראה גם [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -195,11 +199,11 @@ OmniRoute חושף 6 מיומנויות A2A המחוברות ב-`src/lib/a2a/tas
 
 ## הוספת מיומנות חדשה
 
-1. **יצירת קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **צרו קובץ מיומנות:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   יש לייצא פונקציה אסינכרונית `(task: A2ATask) => Promise<{ artifacts, metadata }>`. יש לפעול לפי המבנה של מיומנויות קיימות, כגון `smartRouting.ts`.
+   ייצאו פונקציה אסינכרונית `(task: A2ATask) => Promise<{ artifacts, metadata }>`. פעלו בהתאם למבנה של מיומנויות קיימות, כגון `smartRouting.ts`.
 
-2. **רישום המטפל:** בקובץ `src/lib/a2a/taskExecution.ts`, יש להוסיף רשומה אל `A2A_SKILL_HANDLERS`:
+2. **רשמו מטפל:** בתוך `src/lib/a2a/taskExecution.ts`, הוסיפו רשומה אל `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -211,7 +215,7 @@ OmniRoute חושף 6 מיומנויות A2A המחוברות ב-`src/lib/a2a/tas
    };
    ```
 
-3. **חשיפה בכרטיס הסוכן:** בקובץ `src/app/.well-known/agent.json/route.ts`, יש לצרף למערך `skills`:
+3. **חשפו בכרטיס הסוכן:** בתוך `src/lib/a2a/agentCardMetadata.ts` (המשותף ל־`/.well-known/agent.json` ול־`/.well-known/agent-card.json`), הוסיפו למערך `skills`:
 
    ```json
    {
@@ -223,9 +227,9 @@ OmniRoute חושף 6 מיומנויות A2A המחוברות ב-`src/lib/a2a/tas
    }
    ```
 
-4. **כתיבת בדיקות:** `tests/unit/a2a-<your-skill>.test.ts`. יש לכסות את התרחיש התקין ואת תרחיש השגיאה.
+4. **כתבו בדיקות:** `tests/unit/a2a-<your-skill>.test.ts`. כסו את התרחיש התקין ואת תרחיש השגיאה.
 
-5. **תיעוד** המיומנות החדשה בטבלה `Available Skills` שבקובץ זה.
+5. **תעדו** את המיומנות החדשה בטבלה `Available Skills` שבקובץ זה.
 
 ---
 
@@ -264,7 +268,7 @@ OmniRoute חושף 6 מיומנויות A2A המחוברות ב-`src/lib/a2a/tas
 
 ## דוגמאות אינטגרציה
 
-### Python (requests)
+### פייתון (בקשות)
 
 ```python
 import requests
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "שלום"}]
+        "messages": [{"role": "user", "content": "Hello"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (להביא)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "שלום" }],
+      messages: [{ role: "user", content: "Hello" }],
     },
   }),
 });

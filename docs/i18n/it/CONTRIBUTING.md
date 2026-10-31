@@ -180,17 +180,17 @@ node --import tsx/esm --test tests/unit/your-file.test.ts
 # Solo i test unitari interessati dalla modifica (stesso selettore TIA del controllo CI, #8084)
 npm run test:scoped            # modifiche nell'ultimo commit (o nell'albero di lavoro)
 npm run test:scoped:staged     # solo modifiche nell'area di staging — si abbina bene a un'esecuzione pre-commit
-npm run test:scoped:full       # prima ricostruisce la mappa del grafo delle importazioni (dopo aver aggiunto/spostato file)
-# L'uscita 1 + "run the full suite" indica che un file centrale (tsconfig, package.json, …) o un
-# file sorgente non mappato è cambiato — il selettore opera in sicurezza e non salta mai nulla silenziosamente.
+npm run test:scoped:full       # ricrea prima la mappa del grafo delle importazioni (dopo aver aggiunto/spostato file)
+# Codice di uscita 1 + "esegui l'intera suite" significa che è cambiato un file centrale (tsconfig, package.json, …)
+# o un sorgente non mappato — il selettore opera in sicurezza e non ignora mai nulla silenziosamente.
 
 # Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
 
-# Test E2E (richiedono Playwright)
+# Test E2E (richiede Playwright)
 npm run test:e2e
 
-# Test E2E dei client di protocollo (trasporti MCP, A2A)
+# E2E dei client di protocollo (trasporti MCP, A2A)
 npm run test:protocols:e2e
 
 # Test di compatibilità dell'ecosistema
@@ -204,16 +204,16 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Test rapido combinato, soggetto a controllo, con servizi upstream reali (richiede accesso VPS + crediti reali dei provider)
-# Contatta provider REALI — ha un piccolo costo. Non viene MAI eseguito nella CI. Viene ignorato senza errori in assenza del controllo.
-# Richiede: accesso ssh root@192.168.0.15 (acquisisce dalla VPS uno snapshot del DB in sola lettura).
+# Smoke test combinato controllato con upstream reali (richiede accesso VPS + crediti di provider reali)
+# Interroga provider REALI — ha un piccolo costo. Non viene MAI eseguito in CI. Viene ignorato senza errori in assenza dell'abilitazione.
+# Richiede: accesso ssh root@192.168.0.15 (carica dalla VPS uno snapshot del DB in sola lettura).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Test rapido live VPS di fase 3 — semplici script Node ESM che contattano direttamente il server live .15.
+# Smoke test live VPS della fase 3 — semplici script Node ESM, interrogano direttamente il server live .15.
 # Richiede: accesso ssh root@192.168.0.15 (le combinazioni vengono create/eliminate tramite SSH sqlite).
-# Contatta provider REALI (costo ridotto). Crea/elimina solo combinazioni __live_test__*. Non viene MAI eseguito nella CI.
+# Interroga provider REALI (costo ridotto). Crea/elimina solo combinazioni __live_test__*. Non viene MAI eseguito in CI.
 # REQUIRE_API_KEY=false su .15, quindi non è necessaria alcuna chiave API, ma rispetta COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY se impostate.
-npm run test:combo:live:vps              # 7 scenari HTTP (priorità/round-robin/ponderato/costo/fusione/automatico + integrità)
+npm run test:combo:live:vps              # 7 scenari HTTP (priorità/round-robin/ponderato/costo/fusione/automatico + stato)
 npm run test:combo:live:vps:failover     # aggiunge uno scenario reale di failover tra provider (8 in totale)
 ```
 
@@ -221,24 +221,25 @@ Note sulla copertura:
 
 - `npm run test:coverage` misura la copertura del codice sorgente per la suite principale di test unitari, esclude `tests/**` e include `open-sse/**`
 - Le pull request devono mantenere la soglia di copertura ad almeno il **60%** per istruzioni/righe/funzioni/rami
-- Se una PR modifica il codice di produzione in `src/`, `open-sse/`, `electron/` o `bin/`, deve aggiungere o aggiornare i test automatizzati nella stessa PR
+- Se una PR modifica codice di produzione in `src/`, `open-sse/`, `electron/` o `bin/`, deve aggiungere o aggiornare i test automatici nella stessa PR
 - `npm run coverage:report` mostra il rapporto dettagliato file per file dell'ultima esecuzione della copertura
-- `npm run test:coverage:legacy` mantiene la metrica precedente per il confronto storico
-- Consulta `docs/ops/COVERAGE_PLAN.md` per il piano graduale di miglioramento della copertura
+- `npm run test:coverage:legacy` conserva la metrica precedente per il confronto storico
+- Consulta `docs/ops/COVERAGE_PLAN.md` per la roadmap di miglioramento graduale della copertura
 
 ### Requisiti delle pull request
 
 Prima di aprire una PR, segui il
-[percorso ideale per contribuire](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) per eseguire il ciclo mirato relativo
+[Percorso consigliato per i contributi](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) per eseguire il ciclo mirato relativo
 alle modifiche apportate. La suite completa di test unitari (4 shard CI), Vitest, la soglia di copertura
-del **60%+** e la build di produzione sono responsabilità della CI — eseguirli localmente non fornisce
-alcuna informazione aggiuntiva rispetto ai controlli già effettuati sulla PR e, sui computer meno potenti,
+del **60%+** e la build di produzione sono responsabilità della CI: eseguirli localmente non fornisce
+alcuna informazione aggiuntiva rispetto ai controlli già eseguiti sulla PR e, sui computer meno potenti,
 può saturare l'host (#8084):
 
 - Esegui i file di test che coprono la modifica: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Esegui `npm run lint`
-- Includi o aggiorna i test automatizzati nella stessa PR ogni volta che cambia il codice di produzione
-- Includi nella descrizione della PR i file di test modificati o aggiunti quando cambia il codice di produzione
+- Includi o aggiorna i test automatici nella stessa PR ogni volta che cambia il codice di produzione
+- Nei file `node:test`, inserisci ogni `await` di primo livello (come `await import(...)`) prima del primo `test()` / `describe()`: con `--test-force-exit`, i test registrati successivamente potrebbero non essere mai eseguiti senza alcun avviso (#18045; regola applicata da `npm run check:test-tla-order`)
+- Quando cambia il codice di produzione, includi nella descrizione della PR i file di test modificati o aggiunti
 - Controlla il risultato di SonarQube sulla PR quando i secret del progetto sono configurati nella CI
 
 Stato attuale dei test: **122 file di test unitari** che coprono:
@@ -248,9 +249,9 @@ Stato attuale dei test: **122 file di test unitari** che coprono:
 - Cache semantica, idempotenza e monitoraggio dell'avanzamento
 - Operazioni sul database e schema (21 moduli DB)
 - Flussi OAuth e autenticazione
-- Convalida degli endpoint API (Zod v4)
+- Validazione degli endpoint API (Zod v4)
 - Strumenti del server MCP e applicazione degli ambiti
-- Sistemi di memoria e competenze
+- Sistemi di memoria e Skills
 
 ---
 

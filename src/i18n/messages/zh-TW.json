@@ -25,8 +25,10 @@
     "confirm": "你確定嗎？",
     "refresh": "重新整理",
     "close": "關閉",
+    "dialogTitleFallback": "對話方塊",
     "previousPage": "上一頁",
     "nextPage": "下一頁",
+    "pagination": "分頁",
     "capsLockOn": "Caps Lock 已開啟",
     "dismissNotification": "關閉通知",
     "toggleColumns": "切換欄位",
@@ -182,6 +184,7 @@
     "combos": "組合",
     "noModelsFound": "未找到 Model",
     "clear": "清除",
+    "clearFilters": "清除篩選條件",
     "done": "完成",
     "selectAll": "全選",
     "unselectAll": "取消全選",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "被 {count, plural, one {# 批次} other {# 批次}} 使用",
     "batchFilePreview": "預覽",
     "batchFilePreviewTruncated": "顯示前 {shown} 行（共 {total} 行）",
-    "batchFileDownloadFull": "下載完整檔案"
+    "batchFileDownloadFull": "下載完整檔案",
+    "tokensPageTitle": "權杖",
+    "tokensPageDescription": "在 API 金鑰之間傳送權杖、分享邀請碼並連線至社群伺服器。",
+    "tokensServerUrlLabel": "伺服器 URL"
   },
   "disabled": "已停用",
   "featureFlagOmnirouteEmergencyFallbackDescription": "將預算耗盡的請求路由到緊急免費備用提供者/模型。",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "代理伺服器已停止，或正在重啟。",
     "expandSidebar": "展開側邊欄",
     "collapseSidebar": "收起側邊欄",
-    "themes": "主題",
-    "presetColors": "熱門配色",
     "createTheme": "建立主題",
     "chooseColor": "選擇一種顏色",
-    "themeCoral": "珊瑚",
-    "themeBlue": "藍色",
-    "themeRed": "紅色",
-    "themeGreen": "綠色",
-    "themeViolet": "紫羅蘭",
-    "themeOrange": "橙色",
-    "themeCyan": "青色",
     "cliToolsShort": "工具",
     "cache": "快取",
     "cacheShort": "快取",
@@ -1103,12 +1100,10 @@
     "themeSystem": "主題系統",
     "whitelabelingDesc": "自定義品牌展示與主題外觀。",
     "switchThemes": "切換主題",
-    "themeAccentDesc": "選擇用於按鈕、連結和高亮狀態的強調色。",
     "uploadFavicon": "上傳 Favicon",
     "themeDark": "深色主題",
     "customLogoDesc": "上傳用於側邊欄和登入頁的自定義 Logo。",
     "sidebarVisibilityToggle": "側邊欄可見性開關",
-    "themeAccent": "主題強調色",
     "resetFavicon": "重置 Favicon",
     "whitelabeling": "白標",
     "darkMode": "深色模式",
@@ -1122,10 +1117,8 @@
     "customLogo": "自定義 Logo",
     "appearance": "外觀",
     "themeSelectionAria": "主題選擇",
-    "themeCreate": "建立主題",
     "customFaviconDesc": "上傳用於瀏覽器標籤頁的自定義 Favicon。",
     "logoPreview": "Logo 預覽",
-    "themeCustom": "自定義主題",
     "hideHealthLogsDesc": "隱藏健康檢查日誌說明",
     "faviconPreview": "Favicon 預覽",
     "changelog": "更新日誌",
@@ -1352,7 +1345,9 @@
       "open": "打開",
       "close": "關閉"
     },
-    "noResults": "沒有結果"
+    "noResults": "沒有結果",
+    "costsTeams": "團隊",
+    "costsTeamsSubtitle": "團隊成本中心"
   },
   "webhooks": {
     "title": "Webhook",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 或 @channelname",
       "chatIdHint": "聊天/頻道的唯一數字識別符號或公開使用者名稱。",
       "tutorial": "如何設定 Telegram Webhook："
-    }
+    },
+    "copy": "複製",
+    "copied": "已複製！",
+    "expandDetails": "顯示詳細資料",
+    "collapseDetails": "隱藏詳細資料"
   },
   "compliance": {
     "auditTitle": "審計",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "通話 (24小時)",
     "mcpMetricSuccessRate": "成功率",
     "mcpMetricAvgDuration": "平均持續時間",
-    "mcpMetricTopTool": "頂尖工具"
-  },
-  "themesPage": {
-    "title": "主題",
-    "description": "選擇預設主題，或僅用一種顏色建立自定義主題",
-    "presetColors": "熱門配色",
-    "customTheme": "自定義主題",
-    "customThemeDesc": "點選建立主題，然後選擇一種顏色",
-    "createTheme": "建立主題",
-    "activePreset": "當前主題"
+    "mcpMetricTopTool": "頂尖工具",
+    "dismissError": "關閉錯誤訊息"
   },
   "header": {
     "logout": "退出登入",
     "quickNavigation": "快速導覽",
     "quickNavigationTitle": "快速導覽（⌘K / Ctrl+K）",
     "openQuickNavigation": "開啟快速導覽",
+    "openMenu": "開啟選單",
+    "products": "Keak 產品",
     "switchToLightMode": "切換至淺色模式",
     "switchToDarkMode": "切換至深色模式",
     "language": "語言",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Anthropic 相容",
     "media": "媒體",
     "mediaDescription": "生成影像、影片和音樂",
-    "themes": "主題",
-    "themesDescription": "為整個儀表板選擇顏色主題",
     "costsDescription": "跟蹤支出，分析趨勢，管理所有 AI 提供者的預算",
     "cacheDescription": "監控提供者提示快取效率和本地語義回應複用。",
     "limitsDescription": "為每個 API 金鑰和提供者設定速率限制和配額",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "高階負載規則、請求限制和代理 API 設定",
     "mitmProxyDescription": "設定 MITM 代理設定以進行流量檢查和除錯",
     "oneProxyDescription": "設定 1Proxy 設定以實現高階代理鏈",
-    "omniSkillsDescription": "安裝和管理用於自動提示和工具執行的沙箱技能"
+    "omniSkillsDescription": "安裝和管理用於自動提示和工具執行的沙箱技能",
+    "teamsDescription": "團隊成本估算與共用軟預算"
   },
   "cloudSyncStatus": {
     "synced": "已同步",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "複製您的端點",
     "readinessStep4": "傳送測試請求",
     "readinessContinue": "繼續設定",
-    "readinessDismiss": "暫時略過"
+    "readinessDismiss": "暫時略過",
+    "unpricedUsageTitle": "{count, plural, other {# 個模型近期有用量，但尚未設定價格}}",
+    "unpricedUsageFailClosed": "{keys, plural, other {# 個設有用量限制的 API 金鑰}}在最近 8 天內使用過這些模型。只要這些用量仍在金鑰的每日或每週視窗內，該金鑰就會被視為超出配額，請求會被攔截（UNPRICED_USAGE_BUDGET_POLICY=fail_closed）。",
+    "unpricedUsageCountAsZero": "這些用量在計算各金鑰的用量限制時以 $0 計入（UNPRICED_USAGE_BUDGET_POLICY=count_as_zero）。",
+    "unpricedUsageModelStats": "{requests, plural, other {# 次請求}}，{keys, plural, other {# 個受限金鑰}}",
+    "unpricedUsageMore": "…另有 {count} 個",
+    "unpricedUsageConfigure": "設定定價",
+    "unpricedUsageDismiss": "關閉"
   },
   "analytics": {
     "title": "分析",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "僅限選取的連線",
     "selectAtLeastOneConnection": "請至少選取一個連線，或選擇「所有連線」。",
     "allConnectionsDesc": "此金鑰可使用任何作用中的連線。",
-    "restrictedToConnections": "僅限使用 {count, plural, one {# 個連線} other {# 個連線}}。"
+    "restrictedToConnections": "僅限使用 {count, plural, one {# 個連線} other {# 個連線}}。",
+    "preferredConnections": "偏好連線",
+    "preferredConnectionsDesc": "依金鑰設定的優先順序。若偏好連線無法使用，路由會改用下一個符合條件的連線。",
+    "preferredConnectionsNone": "未設定偏好 — 使用預設路由策略。",
+    "preferredConnectionsClear": "清除",
+    "removeSelection": "移除 {name}"
   },
   "auditLog": {
     "title": "稽核日誌",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "在模態橋設定中配置圖像→文本橋接",
     "sttBridgeCta": "在模態橋設定中配置語音→文本橋接器",
     "existingConnection": "現有連接",
-    "openrouterSttDescription": "OpenRouter 語音轉文字模型使用您配置的 OpenRouter 連接。無需單獨的憑證。"
+    "openrouterSttDescription": "OpenRouter 語音轉文字模型使用您配置的 OpenRouter 連接。無需單獨的憑證。",
+    "modalityTabsAria": "媒體類型",
+    "serviceKindsAria": "服務類型"
   },
   "search": {
     "searchQuery": "搜尋詞",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "OpenClaw - 手動設定",
     "clineManualConfiguration": "Cline - 手動設定",
     "kiloManualConfiguration": "Kilo - 手動設定",
+    "piManualConfiguration": "Pi - 手動配置",
+    "piConfigInvalidTitle": "Pi models.json無法讀取",
+    "piOmnirouteConfigured": "OmniRoute配置為 Pi 自訂提供程序",
+    "piModelHelp": "Pi 不會自動發現自訂端點—模型，您選擇的模型會明確寫入models.json 。",
+    "piManualConfigTitle": "或手動編輯~/.pi/agent/models.json",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "然後啟動 Pi 並選擇omniroute提供者。設定PI_CODING_AGENT_DIR以移動整個代理目錄。",
+    "piUnownedNote": "該條目是在OmniRoute之外添加的（例如 pi-gui 的自訂端點）。申請就會採納；重置僅刪除OmniRoute寫入的條目。",
     "whenToUseLabel": "何時使用",
     "openToolDocs": "開啟工具檔案",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "當您想要 Amp 簡寫工作流，但仍需要 OmniRoute 別名和路由規則支援時使用。",
       "hermes": "當您需要輕量級終端原生 AI 助手來處理快速任務時使用。",
       "hermes-agent": "需要使用 Hermes Agent (by Nousresearch) 時使用,預設、委派、視覺與輔助模型均通過 OmniRoute 路由。",
+      "whycodes": "需要將 WhyCodes 作為通用自主 CLI 代理(TUI、具名代理、記憶、swarm)並指向 OmniRoute 時使用。",
       "custom": "用於自定義工具實現或通用 OpenAI 相容設定。"
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI 程式代理，支援自訂提供者",
       "droid": "Factory Droid AI 助手",
       "openclaw": "OpenClaw AI 助手",
+      "openclaude": "支援 OpenAI 相容提供者的 OpenClaude 程式代理 CLI",
       "cline": "Cline AI 編碼助手 CLI",
       "kilo": "Kilo Code AI 助手 CLI",
       "qwen": "阿里巴巴 Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI 終端機，支援自訂提供者",
       "agent-deck": "Agent Deck 多代理協調器",
       "5dive": "5dive — 自架的編碼代理機群；一個認證設定檔即可將全部指向 OmniRoute",
+      "whycodes": "WhyCodes 自主 CLI 代理,使用相容 OpenAI 的 Base URL",
       "zed": "Zed 程式碼編輯器 — 透過 OpenAI 相容提供者使用內建代理"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "未知",
     "cliproxyapiUpdate": "更新",
     "cliproxyapiUpdateAvailable": "可用更新：v{current} → v{latest}",
-    "cliproxyapiVersion": "版本"
+    "cliproxyapiVersion": "版本",
+    "piInstallTitle": "安裝 Pi 編碼代理",
+    "piInstallInstructions": "安裝 Pi CLI，然後返回此處將其連接到OmniRoute。",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "使用可從運行 Pi 的機器存取的URL 。與 OpenAI 相容的 /v1 端點會自動新增。",
+    "piManualMergeHint": "僅預覽。將此providers.omniroute條目合併到models.json中，以便您的其他提供者和設定保持不變。",
+    "removeMapping": "移除對應",
+    "customUrl": "自訂 URL",
+    "customEndpointAria": "自訂端點",
+    "useDefaultKey": "使用 OmniRoute 預設金鑰",
+    "mainModelAria": "主模型",
+    "manualConfigTitle": "Grok Build 手動設定"
   },
   "modelCatalog": {
     "title": "模型與組合",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "例：10",
     "testSelected": "測試所選項目 ({count})",
     "testAllFiltered": "測試所有篩選項目 ({count})",
+    "visibility": "可見性",
+    "allVisibility": "可見與已隱藏",
+    "visibleOnly": "可見",
+    "hiddenOnly": "已隱藏",
+    "visibleColumn": "可見",
+    "hideModel": "從 /v1/models 隱藏 {name}",
+    "showModel": "在 /v1/models 顯示 {name}",
+    "hiddenBadge": "已隱藏",
+    "hideFiltered": "隱藏篩選結果 ({count})",
+    "showFiltered": "顯示篩選結果 ({count})",
+    "visibilityCounts": "{visible} 個可見 · {hidden} 個已隱藏 · 共 {total} 個",
+    "visibilityUpdateFailed": "更新模型可見性失敗",
     "cancel": "取消",
     "clearResults": "清除結果",
     "testing": "測試中...",
@@ -3397,16 +3438,53 @@
     "httpError": "請求失敗，HTTP {status}",
     "testFailedNoDetail": "測試失敗且無錯誤訊息",
     "additionalCapabilities": "其他功能：{list}",
-    "comboRefMember": "組合 → {name}"
+    "comboRefMember": "組合 → {name}",
+    "keyAccessButton": "API 金鑰存取權限",
+    "allowedInKeys": "允許於：{count, plural, one {# 個金鑰} other {# 個金鑰}}",
+    "keysLoading": "正在載入 API 金鑰…",
+    "keysRetry": "重試載入金鑰",
+    "accessViaPattern": "透過 {pattern}",
+    "accessBlocked": "受 {pattern} 阻擋",
+    "editKeyAccess": "編輯金鑰存取權限",
+    "toggleKeyAccess": "在 {name} 上允許 {item}",
+    "resultNetworkError": "指派失敗",
+    "resultWouldEmptyModels": "這會導致此金鑰沒有任何允許的模型 — 請改為編輯金鑰存取權限",
+    "resultWouldEmptyCombos": "這會導致此金鑰沒有任何允許的組合 — 請改為編輯金鑰存取權限",
+    "keyUpdatePending": "{name} 仍在更新中。請稍後再試。",
+    "assignToKeys": "指派至 API 金鑰…",
+    "assignApply": "套用變更",
+    "assignComplete": "API 金鑰存取權限已更新",
+    "assignFailed": "部分 API 金鑰更新失敗",
+    "assignNoChanges": "未變更任何 API 金鑰存取權限",
+    "selectedAccessItems": "已選取項目：{count}",
+    "assignExcludedCombos": "{count, plural, one {所選的 # 個組合列不是模型，在此將予略過} other {所選的 # 個組合列不是模型，在此將予略過}}。請從 Combos 分頁指派組合。",
+    "assignActionAdd": "新增",
+    "assignActionRemove": "移除",
+    "searchKeys": "搜尋 API 金鑰",
+    "selectApiKey": "選取 API 金鑰 {name}",
+    "allModelsAccess": "所有模型",
+    "allCombosAccess": "所有組合",
+    "modelAccessCount": "模型：{count}",
+    "comboAccessCount": "組合：{count}",
+    "keyInactive": "無效",
+    "keyBanned": "已封鎖",
+    "keyRevoked": "已撤銷",
+    "switchRestrictedConfirm": "將此金鑰切換為受限制存取：僅允許選取的項目",
+    "removeNoChangeHint": "此金鑰允許所有項目；移除選取的項目將不會產生任何變更",
+    "removeStaysAllowedHint": "仍透過 {patterns} 允許在此金鑰使用",
+    "resultChanged": "已變更",
+    "resultUnchanged": "無變更",
+    "resultSkipped": "已略過",
+    "resultNeedsSwitch": "需要切換為受限制"
   },
   "combos": {
+    "title": "組合",
+    "description": "建立支援權重路由與故障回退的模型組合",
+    "autoCatalogTitle": "自動路由目錄",
     "autoTosLoadError": "無法載入 ToS 政策。請重試後再進行變更。",
     "autoTosSaveError": "無法儲存 ToS 政策。仍顯示先前的設定，請重試。",
     "autoTosIncludeLabel": "在 auto 中納入標記為 ToS: avoid 的提供者",
     "autoTosDescription": "預設關閉。適用於所有 auto 組合，而非單一帳戶。連線至提供者不會啟用此選項。",
-    "title": "組合",
-    "description": "建立支援權重路由與故障回退的模型組合",
-    "autoCatalogTitle": "自動路由目錄",
     "autoCatalogTemplateCount": "{count} 個模板",
     "autoCatalogDescription": "內建 auto/* 組合，從已連線的提供者動態解析。直接將這些 ID 作為 model 欄位使用——無需設定。",
     "autoCatalogExpand": "展開自動路由目錄",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "更新組合時出錯",
     "errorDeleting": "刪除組合時出錯",
     "testFailed": "測試請求失敗",
+    "removeErrorModels": "刪除 {count} 個失敗模型",
+    "removingErrorModels": "正在刪除…",
+    "errorModelsRemoved": "已從組合中移除 {count} 個失敗模型",
+    "noErrorModelsFound": "在此組合自身的步驟中找不到失敗模型",
+    "cannotRemoveAllModels": "無法移除組合中的所有模型",
+    "removeErrorModelsConfirm": "要從「{name}」中移除 {count} 個失敗模型嗎？逾時和速率限制不計入在內。",
     "failedToggle": "切換組合狀態失敗",
     "testResults": "測試結果 — {name}",
     "resolvedBy": "最終由以下模型處理：",
@@ -3518,6 +3602,9 @@
     "moveUp": "上移",
     "moveDown": "下移",
     "removeModel": "移除",
+    "testStep": "測試此模型",
+    "testStepRunning": "測試中…",
+    "testStepNotTestable": "只能測試單一模型步驟",
     "saving": "儲存中...",
     "liveNoProviders": "尚未觀察到任何提供者。",
     "liveFleetDataHint": "艦隊資料經由即時 combo 事件送達。",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "尚未設定任何 combos。",
     "playgroundCreateFirst": "請先建立一個",
     "weighted": "加權",
+    "weightPercent": "權重（%）",
     "leastUsed": "最少使用",
     "costOpt": "成本最佳化",
     "strategyGuideTitle": "如何使用這種策略",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# 個帳戶} other {# 個帳戶}}",
     "builderGlobalAdded": "已添加",
     "builderGlobalAdd": "新增",
+    "clearSearch": "清除搜尋",
     "manualModel": "手動模型",
     "manualModelInvalid": "請按 provider/model 格式填寫。",
     "manualModelUnknownProvider": "未知的提供者字首。",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "新增組合引用步驟",
     "builderPinnedAccount": "固定帳戶",
     "builderLegacyEntry": "舊版條目",
+    "builderStaleModel": "不在即時目錄中",
     "reviewName": "名稱",
     "reviewStrategy": "策略",
     "reviewSteps": "步驟",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "最小內容長度（字元）",
     "responseValidationJsonPaths": "JSON 路徑檢查",
     "responseValidationAddCheck": "+ 新增檢查",
+    "responseValidationRemoveCheck": "移除檢查",
+    "responseValidationPath": "JSON 路徑",
+    "responseValidationCondition": "條件",
+    "responseValidationValue": "預期值",
     "agentFeaturesSystemMessageOverride": "系統訊息覆蓋",
     "agentFeaturesSystemMessagePlaceholder": "覆蓋通過此組合路由的所有請求的系統提示…",
     "agentFeaturesSystemMessageHint": "替換客戶端傳送的任何系統訊息。留空則透傳客戶端系統訊息。",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "總條目數",
     "type": "類型",
-    "memoryEnabled": "記憶體已啟用"
+    "memoryEnabled": "記憶體已啟用",
+    "qdrantTutorialTitle": "快速教學：用 Qdrant 做記憶",
+    "qdrantTutorialIntro": "Qdrant 儲存記憶的向量與元資料，用於檢索相關上下文。它並不直接壓縮 Token；節省是間接的——避免帶入與目前請求無關的上下文。",
+    "qdrantTutorialStep1": "在正式環境使用前，為伺服器設定 HTTPS 與 API Key。",
+    "qdrantTutorialStep2": "填寫主機、連接埠、集合，以及一個 provider/model 格式且已設定憑證的模型。",
+    "qdrantTutorialStep3": "集合維度必須與模型產出的維度一致。已有的 2048 維集合無法接收 1536 維的向量。",
+    "qdrantTutorialStep4": "先儲存、測試連線並執行搜尋測試，然後再啟用 Qdrant。",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "致謝：Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "技能",
@@ -5288,7 +5390,8 @@
         "skipped": "已配置",
         "failed": "失敗"
       }
-    }
+    },
+    "stepProgress": "設定進度"
   },
   "providers": {
     "tosAvoidNoticeTitle": "此提供者預設排除在 auto 之外",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "下載 CSV 範本",
     "importFromFileMoreErrors": "另有 {count} 個",
     "importFromFileSchemaHint": "CSV 欄位依位置排列：provider、name、apiKey、baseUrl（選填）、priority（選填）。provider 欄位必須是現有的受管理提供者 ID，或已註冊且與 OpenAI/Anthropic 相容的節點 ID；此匯入不會建立新的端點節點。",
+    "importOAuthExport": "匯入 OAuth 匯出檔",
+    "oauthExportTitle": "匯入帳號管理器匯出檔",
+    "oauthExportDescription": "上傳來自帳號管理器的明文匯出檔（例如 Antigravity Manager 的 cloud-accounts 匯出）。權杖會在伺服器端重新整理，每個帳號都會成為一個 OAuth 連線 — 重複的帳號會就地重新整理。",
+    "oauthExportProviderLabel": "提供者",
+    "oauthExportChoose": "選擇檔案",
+    "oauthExportFileAria": "帳號匯出 JSON 檔案",
+    "oauthExportSchemaHint": "接受：包含 \"accounts\" 陣列的文件、單純陣列或單一記錄。權杖可位於巢狀的 token 物件中，也可直接位於記錄上。",
+    "oauthExportDetected": "偵測到 {count} 個帳號",
+    "oauthExportSelectAll": "選取所有帳號",
+    "oauthExportSelectAccount": "選取帳號 {index}",
+    "oauthExportColEmail": "電子郵件",
+    "oauthExportColProvider": "提供者",
+    "oauthExportColRefresh": "重新整理權杖",
+    "oauthExportNoEmail": "（無電子郵件）",
+    "oauthExportYes": "是",
+    "oauthExportNo": "否",
+    "oauthExportImporting": "正在匯入…",
+    "oauthExportImport": "匯入 {count} 個帳號",
+    "oauthExportResult": "已匯入 {imported}/{total} — {failed} 個失敗",
+    "oauthExportParseError": "無法從此檔案讀取任何帳號。",
+    "oauthExportUnknownError": "未知錯誤",
     "adaptaTutorial": {
       "title": "如何連線 Adapta Web",
       "introPrefix": "Adapta 透過 Clerk 進行驗證。該令牌",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "所有模型已匯入",
     "noNewModelsToImport": "沒有新模型可匯入 — 所有模型已在登錄檔或自定義模型列表中",
     "localCatalogFallbackStatus": "無法取得提供者的模型清單——正在顯示內建目錄",
+    "discoveryDegradedStatus": "模型探索失敗 {time}",
     "skippingExistingModels": "跳過 {count} 個已有模型",
     "autoSync": "自動同步",
     "autoSyncShort": "同步",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "例如 131072",
     "contextWindowOverrideHint": "當提供者回報不正確時，手動設定此模型的實際上下文視窗（token）。此設定優先於自動偵測/目錄值，並可防止組合路由丟棄該模型。",
     "contextWindowOverrideInvalid": "上下文視窗覆寫值必須為正整數 token 數",
+    "maxOutputTokenOverrideInvalid": "最大輸出 token 覆寫值必須為正整數 token 數",
     "visionCapableLabel": "支援視覺",
     "visionCapableHint": "當提供者的探索中繼資料未回報圖片輸入模式時（常見於自託管/本地後端），手動將此模型標記為具備視覺能力。",
     "compatParamFiltersLabel": "參數過濾器",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "新增覆寫設定",
     "ccAliasLoadError": "無法載入探索別名設定：{error}",
     "ccAliasSaveError": "無法儲存探索別名設定：{error}",
+    "cliVersionSectionTitle": "公佈的CLI客戶端版本",
+    "cliVersionEffectiveLabel": "目前已發布廣告",
+    "cliVersionSourceLabel": "解自： {source}",
+    "cliVersionPinnedLabel": "捕獲的預設值： {pinned}",
+    "cliVersionSourceSettings": "儀表板覆蓋",
+    "cliVersionSourceEnv": "環境變數",
+    "cliVersionSourceDiscovered": "自動發現最新版本",
+    "cliVersionSourceDefault": "捕捉預設值",
+    "cliVersionInputLabel": "覆蓋版本",
+    "cliVersionInputPlaceholder": "覆蓋版本；空白清除",
+    "cliVersionSaveButton": "節省",
+    "cliVersionResetButton": "重設為預設值",
+    "cliVersionLoadError": "無法載入CLI版本設定： {error}",
+    "cliVersionSaveError": "無法保存CLI版本： {error}",
+    "cliVersionLoadFailed": "無法載入目前CLI版本設定。",
+    "cliVersionHintClaude": "Anthropic 在它看到的 Claude Code 用戶端版本上門更新了 Claude 模型。這是OmniRoute在每個 Anthropic 綁定請求上公佈的版本。",
+    "cliVersionCaveatClaude": "計費注意事項：計費版本是'<version>'。'<build-revision>'，建構版本是一個單獨的捕獲常數。廣告 2.1.260 報告 2.1.260.1e2，這不是真正的 2.1.260 二進位檔案所發送的內容。",
+    "cliVersionHintCodex": "OpenAI在它看到的Codex客戶端版本上控制較新的模型，例如錯誤： 'gpt-6-astra' 模型需要更新版本的Codex。",
+    "cliVersionCaveatCodex": "推理警告：您自己的呼叫者報告的版本仍然擊敗了CODEX_CLIENT_VERSION env var，但此覆蓋擊敗了兩者，因為它是明確的操作員意圖。",
     "compatUpstreamHeadersLabel": "上游額外請求頭",
     "compatUpstreamHeadersHint": "與修改廠商連線/API 設定同屬高許可權能力，僅可信管理員應使用。這些頭會在 OmniRoute 按廠商 API Key 自動加好鑑權頭之後再合併。若「名稱」與系統已加的頭相同（例如都叫 Authorization），則以你填的值為準，會整段替換自動那條（含 Bearer 權杖），上游請求裡不再使用面板裡儲存的金鑰來生成 Authorization。填錯可能導致 401，請謹慎。每個請求頭單獨一行；部分閘道器需要額外 Authentication 等可在此加。滑鼠移入或聚焦「值」可暫時看明文。點空白處、關閉本面板或切走焦點即儲存。",
     "compatUpstreamHeaderName": "請求頭名稱",
@@ -6055,9 +6200,9 @@
     "apiFormatLabel": "API 格式",
     "apiKeyOptionalHint": "如果上游不需要認證，可以留空 API key。",
     "apiKeyOptionalLabel": "API key（可選）",
-    "apiRegionChina": "中國區",
-    "apiRegionHint": "選擇此 Provider 的 API 區域。",
-    "apiRegionInternational": "國際區",
+    "apiRegionChina": "中國大陸",
+    "apiRegionHint": "選取用於 API 存取與配額追蹤的端點區域。",
+    "apiRegionInternational": "國際",
     "apiRegionLabel": "API 區域",
     "apikey": "API key",
     "audio": "音訊",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "當此帳戶達到 5 小時用量上限，且 Anthropic 提供較低優先順序的通道時，OmniRoute 會接受該通道，並持續使用 anthropic-usage-limit: slow 傳送請求，直到時間區間重設為止，而非讓連線進入冷卻。每週上限仍然適用，且回應可能需要等待閒置容量。",
     "claudeAutoLimitResetLabel": "自動重設工作階段上限（每週一次）",
     "claudeAutoLimitResetDescription": "當此帳戶達到 5 小時用量上限，且可重設工作階段上限時，OmniRoute 會自動使用該次重設並以完整速度重試。這會使用帳戶每週一次的重設機會，且用量仍會計入每週上限。",
+    "codexPaidCreditsShort": "額外額度",
+    "codexPaidCreditsToggleTitle": "訂閱配額用盡後允許使用付費 Codex 額度（可能產生額外費用）",
+    "codexPaidCreditsEnabled": "已啟用 Codex 付費額度（可能產生額外費用）",
+    "codexPaidCreditsDisabled": "已停用 Codex 付費額度",
+    "failedUpdateCodexPaidCredits": "更新 Codex 付費額度政策失敗",
+    "allowCodexPaidCreditsLabel": "允許使用付費 Codex 額度",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "跳過暫時冷卻，使此連線在可恢復錯誤後仍保持資格（已停用/已過期等終止狀態仍適用）。",
     "disableCoolingLabel": "對此連線停用冷卻",
     "bulkPasteAdded": "{count, plural, one {已新增 1 個 key} other {已新增 # 個 key}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "在 monsterapi.ai 取得 API 金鑰",
       "moonshot": "使用 API 金鑰連線 Moonshot AI。",
       "morph": "免費方案：每月 25 萬額度，$0 美元",
+      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。",
       "nanogpt": "使用 API 金鑰連線 NanoGPT。",
       "nebius": "註冊即贈約 $1 美元試用額度，供 API 測試使用",
       "nlpcloud": "NLP Cloud 使用專有的聊天機器人 API，而非 OpenAI chat/completions。OmniRoute 將 OpenAI 訊息轉換為 input/context/history，並提供支援的聊天機器人模型本地目錄。",
@@ -6620,7 +6773,7 @@
       "claude": "使用現有的 OAuth 流程連線 Claude Code。",
       "cline": "使用現有的 OAuth 流程連線 Cline。",
       "cursor": "使用現有的 OAuth 流程連線 Cursor IDE。",
-      "cursor-api": "使用 cursor.com/dashboard/api 中的使用者 API 金鑰（crsr_...）連線至 Cursor；不需要 IDE 工作階段。",
+      "cursor-api": "使用來自 cursor.com/dashboard/api 的使用者 API 金鑰（crsr_... 或 grok_...）連接 Cursor；無需 IDE 工作階段。",
       "github": "使用現有的 OAuth 流程連線 GitHub Copilot。",
       "gitlab-duo": "具有 ai_features + read_user 範圍的 OAuth 應用程式。在此 OmniRoute 實例上設定 GITLAB_DUO_OAUTH_CLIENT_ID 和可選的 GITLAB_DUO_OAUTH_CLIENT_SECRET。",
       "kilocode": "使用現有的 OAuth 流程連線 Kilo Code。",
@@ -6628,8 +6781,7 @@
       "kiro": "免費方案：每月 50 額度（約 2.5 萬至 10 萬 tokens）。⚠️ Kiro 服務條款禁止第三方代理/轉接使用。",
       "codex": "使用現有的 OAuth 流程連線 OpenAI Codex。",
       "qwen": "使用現有的 OAuth 流程連線 Qwen Code。",
-      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT",
-      "apmix": "使用來自 apmix.ai/dashboard 的 API 金鑰連接 Apmix — 一份訂閱，多個模型。"
+      "github-models": "在 github.com/settings/tokens 建立具有 'models: read' 範圍的 GitHub PAT"
     },
     "passthroughModelsDescription": "{provider} 接受提供者本機模型 ID。從 /models 匯入或新增用於路由的自定義 ID。",
     "bedrockModelsDescription": "Amazon Bedrock 模型的範圍按 AWS 區域劃分。從 /models 匯入或新增在所選區域中啟用的基岩模型 ID。",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "選填：每行一個 model=cap，與上游模型 ID 完全比對。超出的請求會在本機排隊；留空表示不設各模型上限。",
     "rateLimitOverridesModelConcurrencyInvalid": "無效的各模型並行項目「{entry}」——請使用 model=cap，其中 cap 為 1 到 {max} 的整數。",
-    "codexPaidCreditsShort": "額外額度",
-    "codexPaidCreditsToggleTitle": "訂閱配額用盡後允許使用付費 Codex 額度（可能產生額外費用）",
-    "codexPaidCreditsEnabled": "已啟用 Codex 付費額度（可能產生額外費用）",
-    "codexPaidCreditsDisabled": "已停用 Codex 付費額度",
-    "failedUpdateCodexPaidCredits": "更新 Codex 付費額度政策失敗",
-    "allowCodexPaidCreditsLabel": "允許使用付費 Codex 額度",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "已在 {count} 個組合中使用：{combos}",
+    "openComboTooltip": "開啟組合 — 由 {combo} 使用",
+    "claudeCodeRoutingTitle": "Claude Code 流量的上游代理路由方式",
+    "routingNative": "原生",
+    "routingFallback": "回退",
+    "rerank": "重新排序",
+    "video": "影片",
+    "markFreeTierTitle": "標記為免費檔（開啟隱藏付費模型後仍會顯示）",
+    "codexTunnelTitle": "Codex 工具連線",
+    "codexTunnelDescription": "隧道僅保持出站方向。本地工具仍只由 Codex 按其沙箱與批准政策執行。",
+    "tunnelIdLabel": "隧道 ID",
+    "tunnelRuntimeKeyLabel": "隧道執行時金鑰",
+    "tunnelRuntimeKeyPlaceholder": "執行時金鑰",
+    "tunnelRuntimeKeyHint": "與 Cookie 一起加密儲存，絕不寫入日誌。",
+    "tunnelRuntimeKeyNewLabel": "新的隧道執行時金鑰",
+    "tunnelRuntimeKeyNewHint": "僅與新的 Cookie 一起填寫。該值將加密儲存。",
+    "chatgptConnectorLabel": "ChatGPT 自訂連接器",
+    "doctorChecking": "正在檢查狀態…",
+    "doctorCheck": "檢查診斷狀態",
+    "fallbackRetryBackendTitle": "回退重試後端"
   },
   "settings": {
     "title": "設定",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "選擇要顯示的側邊欄項目。「基本項目」模式仍可透過搜尋找到進階工具。",
     "hideHealthLogs": "隱藏健康檢查日誌",
     "hideHealthLogsDesc": "開啟後，將抑制伺服器控制台中的 [HealthCheck] 訊息",
-    "themeAccent": "主題顏色",
-    "themeAccentDesc": "選擇預設顏色，或使用單一顏色建立你自己的主題",
-    "themeCreate": "建立主題",
-    "themeCustom": "自定義主題",
-    "themeBlue": "藍色",
-    "themeRed": "紅色",
-    "themeGreen": "綠色",
-    "themeViolet": "紫色",
-    "themeOrange": "橙色",
-    "themeCyan": "青色",
     "whitelabeling": "品牌定製",
     "whitelabelingDesc": "自定義應用名稱和 Logo",
     "appName": "應用名稱",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "現在",
       "coreConfigPath": "核心設定檔",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "絕對 .json 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
+      "coreConfigPathDesc": "絕對 .json/.yaml/.yml 路徑（副檔名小寫）。留空 = 不產生。每次同步會在已採用的檔案旁寫入 '<path>'.generated，絕不寫入該檔案本身。",
       "lastSwitchKind": "切換原因",
       "switchKind": {
         "ip_quota_429": "配額",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "套用方：{mode}",
       "coreBinaryPath": "核心二進位檔路徑",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "選用：在取代已採用的檔案前，先以核心二進位檔驗證產生的檔案。若要持續寫入其旁，請留空。目錄不存在時會自動建立。"
+      "coreBinaryPathHelp": "選用：在取代已採用的檔案前，先以核心二進位檔驗證產生的檔案。若要持續寫入其旁，請留空。目錄不存在時會自動建立。",
+      "urlFeedlessHint": "僅選擇器訂閱時請留空：於下方設定控制 URL，不會擷取、重新整理或綁定任何 feed。"
     },
     "bulkHealthcheck": "批次健康檢查",
     "bulkHealthcheckDesc": "針對目標 URL 測試所有已設定代理，找出可用代理。",
@@ -7706,6 +7862,7 @@
     "configured": "已設定",
     "none": "無",
     "modelOverrideValuePlaceholder": "數值",
+    "modelOverrideKey": "覆寫金鑰",
     "modelOverrideReasoningEffortsPlaceholder": "以英文逗號分隔，例如 low, medium, high",
     "addKeyValue": "新增鍵值",
     "noModelOverrides": "此模型未設定任何覆寫。",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "你可以覆蓋特定模型的預設定價。自定義覆蓋會優先於自動檢測到的定價。",
     "editPricing": "編輯定價",
     "viewFullDetails": "檢視完整詳情",
-    "themeCoral": "珊瑚色",
     "adaptiveVolumeRouting": "自適應流量路由",
     "adaptiveVolumeRoutingDesc": "根據即時負載量和吞吐壓力，動態調整各提供者連線承載的流量。",
     "lkgpToggleTitle": "最後已知良好提供者（LKGP）",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "在傳送給提供者之前壓縮提示詞，以減少 token 使用量",
     "autoCombosTitle": "自動組合",
     "autoCombosDesc": "允許此金鑰使用內建的 auto/* 組合，這些組合會自動從每個已設定的提供者中選擇模型",
+    "ccDiscoveryAliasesTitle": "Claude Code 探索別名",
+    "ccDiscoveryAliasesDesc": "針對此金鑰已可存取的模型與組合，公告 claude/... 相容性鏡像",
     "compressionGuidanceFullGuideLink": "完整壓縮指南",
     "compressionGuidanceShow": "詳細資訊",
     "compressionGuidanceHide": "隱藏詳細資訊",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "視窗百分比",
     "compressionAdaptivePolicyAbsolute": "絕對 token 預算",
     "compressionOutputStylesDescription": "注入回應塑形指令，無需改寫提供者輸出。可自由組合。",
+    "compressionOutputStylesPreviewNote": "請求僅注入一種語言：偵測到的語言，否則是第一個套件。上面的塊是每個包裝的變體，而不是組合注射。",
     "mcpAccessibilityDescription": "限定 MCP 工具輸出範圍（獨立儲存區）。",
     "compressionStylesTileSummary": "已節省 {tokens, number} 個權杖 · {runs, plural, one {# 次執行已套用樣式} other {# 次執行已套用樣式}}",
     "compressionStylesTileEmpty": "尚無已套用風格的執行。",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "主機",
     "qdrantCollection": "集合",
     "catalogVisibilityHint": "隱藏的模型 ID 仍可使用相同的存取權限呼叫。",
+    "exposeCombosOnly": "在 /v1/models 中僅列出組合",
+    "exposeCombosOnlyDesc": "自動探索模型的用戶端將看到你的組合（以及未隱藏的 auto/*），而非原始的提供者模型。明確的 provider/model ID 仍會正常路由。",
     "catalogScopeTitle": "Models API 列表",
     "catalogScopeDesc": "GET /v1/models 針對此金鑰所列出的內容。縮小列表範圍絕不會變更此金鑰可呼叫的模型。",
     "catalogScopeAll": "兩者",
@@ -8918,7 +9079,9 @@
         "financial": "金融",
         "brazilian": "巴西",
         "usa": "美國",
-        "full": "完整"
+        "full": "完整",
+        "gdpr": "GDPR（歐盟）",
+        "popia": "POPIA（南非）"
       },
       "builtinTypes": "內建類型",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4 位址",
         "ipv6_address": "IPv6 位址",
         "aws_key": "AWS 存取金鑰",
-        "api_key_generic": "API 金鑰與權杖"
+        "api_key_generic": "API 金鑰與權杖",
+        "iban": "IBAN 銀行帳號",
+        "eu_vat": "歐盟加值稅號",
+        "es_dni_nie": "西班牙 DNI / NIE",
+        "it_codice_fiscale": "義大利 Codice Fiscale",
+        "pl_pesel": "波蘭 PESEL",
+        "nl_bsn": "荷蘭 BSN",
+        "de_steuer_id": "德國 Steuer-ID",
+        "se_personnummer": "瑞典 personnummer",
+        "za_id": "南非身分證號碼",
+        "za_phone": "南非電話號碼",
+        "za_vat": "南非加值稅號",
+        "za_tax_ref": "南非稅務參考號"
       },
       "customPatterns": "自訂模式",
       "customPatternsDesc": "符合項目會被替換為 [CUSTOM_REDACTED]。最多 {max} 個模式。具有災難性回溯風險的模式會被拒絕。",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "通過",
     "tomlTestFailed": "失敗",
     "tomlImportError": "無法處理 RTK TOML 檔案。",
-    "tomlFileReadError": "無法讀取選取的 TOML 檔案。"
+    "tomlFileReadError": "無法讀取選取的 TOML 檔案。",
+    "viewMode": "檢視模式"
   },
   "compressionEngineConfig": {
     "loading": "載入中…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "語言包：{packs}",
     "dragToReorder": "拖曳以重新排序步驟",
     "engine": "引擎",
-    "intensity": "強度"
+    "intensity": "強度",
+    "compressionOverride": "壓縮覆寫"
   },
   "compressionStudio": {
     "noRun": "無可用的壓縮執行記錄。",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "勝出：{winner}",
     "encoder": "編碼器",
     "bytes": "位元組",
-    "tokensCl100k": "Token（cl100k）"
+    "tokensCl100k": "Token（cl100k）",
+    "studioViews": "Studio 檢視"
   },
   "omniglyph": {
     "preview": "預覽",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "比這短的訊息不會被壓縮。更低=更多壓縮。",
     "tooltipMinSavings": "僅當至少儲存這麼多權杖時才進行壓縮。",
     "ultraSettings": "超級設定",
-    "ultraSettingsDesc": "SLM 支援的語義壓縮"
+    "ultraSettingsDesc": "SLM 支援的語義壓縮",
+    "defaultLanguage": "預設語言",
+    "viewMode": "檢視模式"
   },
   "translator": {
     "title": "翻譯器",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "轉換串流失敗"
   },
   "usage": {
+    "healthExtraUsageBypass": "額度已用完；已允許額外用量，仍可繼續服務。",
+    "healthPaidCreditsBypass": "額度已用完；有可用的付費額度，仍可繼續服務。",
+    "healthFilteringBypass": "額度已用完；已關閉本機額度篩選，仍可繼續服務。",
     "title": "用量",
     "grokExtraUsageCredits": "額外使用積分",
     "grokAutoTopUp": "自動加值",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "提供者限制",
     "noProviders": "沒有連線提供者",
+    "quotaAuthRequired": "需要驗證身分 - 請登入控制台",
+    "quotaAuthRequiredHint": "由於控制台工作階段不存在或已過期，因此無法載入提供者連線。請登入並重新整理，以查看您的配額限制。",
     "connectProvidersForQuota": "通過 OAuth 連線提供者，以跟蹤 API 配額限制和使用情況。",
     "accountsCount": "{count, plural, one {# 個帳戶} other {# 個帳戶}}",
     "filteredFromCount": "（從 {count} 過濾）",
@@ -10046,9 +10231,6 @@
     "tierLite": "輕量",
     "tierUnknown": "未知",
     "statTotal": "總計",
-    "statCritical": "嚴重",
-    "statAlert": "警報",
-    "statHealthy": "健康",
     "filterPurchaseTypeLabel": "類型",
     "filterTierLabel": "層級",
     "purchaseAll": "全部",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "上次重新整理",
     "providerQuota": "提供者配額",
     "providerQuotaHomeHint": "已連線帳戶的即時狀態",
+    "claudeResetCreditDefaultTitle": "Claude 限額重設",
+    "confirmRedeemClaudeResetCredit": "兌換將立即重設符合條件的 Claude 使用限額，並永久消耗此點數。",
+    "claudeResetCreditsModalTitle": "Claude 重設點數",
+    "claudeResetCreditsModalExplainer": "此帳戶可用的 Claude 重設點數與每週工作階段重設次數。",
     "codexPaidCreditsLabel": "Codex 付費額度",
     "codexPaidCreditsAvailable": "可用（未回報餘額）",
     "codexPaidCreditsUnavailable": "無法使用或已達支出上限",
-    "codexPaidCreditsUnlimited": "無限"
+    "codexPaidCreditsUnlimited": "無限",
+    "healthAccountHint": "根據最近觀測判斷目前可用性，並非即時探測。選擇帳號查看詳情。",
+    "healthRecovery": "預計恢復時間",
+    "healthAvailable": "可用",
+    "healthRestricted": "部分受限",
+    "healthUnavailable": "不可用",
+    "healthPeakHourProtection": "尖峰時段保護",
+    "healthCooldown": "冷卻中",
+    "healthQuotaExhausted": "配額已用盡",
+    "healthOverview": "健康總覽",
+    "layoutFull": "完整",
+    "layoutCompact": "緊湊",
+    "healthQuotaError": "額度讀取失敗",
+    "healthNoRuntime": "無法取得執行狀態",
+    "healthPreviousSnapshot": "最近一次重新整理失敗，顯示上次結果",
+    "healthPreviousFailure": "上次請求失敗，冷卻已結束",
+    "healthAwaitingSync": "已過重設時間，等待下次同步",
+    "healthVerdictUnavailable": "暫時無法取得可用性結論，僅顯示額度",
+    "healthSummaryFailed": "執行狀態摘要讀取失敗，模型鎖定資訊可能缺漏",
+    "healthRuntimeObserved": "執行狀態於 {time}更新",
+    "healthQuotaObserved": "額度觀測於 {time}",
+    "healthOldestQuota": "最早額度快照 {time}",
+    "healthRecoveryUnknown": "恢復時間未知",
+    "healthDetailsHint": "點擊查看詳細資訊與操作",
+    "healthFiveHour": "5 小時",
+    "healthOverall": "整體",
+    "healthAction": "需要處理",
+    "healthTitle": "帳號可用性",
+    "healthDrag": "拖曳以重新排列提供者",
+    "healthDragPosition": "{provider}, {count, plural, other {第 {position, number} / # 位}}",
+    "healthResetOrder": "恢復預設順序",
+    "healthPool": "{name} 池",
+    "healthOtherPool": "同一帳號的{pool}：{status}（剩餘 {remaining}）",
+    "healthIncluded": "含 {count, number} 個部分受限",
+    "healthBannerUnavailable": "{count, number} 個帳號暫時無法使用",
+    "healthBannerAvailable": "全部 {count, number} 個帳號可用",
+    "healthLegendHide": "隱藏圖例",
+    "healthLegendShow": "顯示圖例",
+    "healthLegendOk": "實心 = 剩餘額度，半透明 = 已用額度",
+    "healthLegendCooldown": "{window}額度已用完；實心 = 已等待時間，半透明 = 剩餘等待時間",
+    "healthLegendAction": "授權失效或帳號遭封鎖，等待無法恢復",
+    "healthLegendPartial": "仍可使用，頂部黃帽 = 某個模型或模型池受限",
+    "healthWaited": "已等待 {percent}",
+    "healthWait": "還需 {duration}（{time} 恢復）",
+    "healthFastest": "最快 {duration} 後恢復",
+    "healthRatio": "{available, number} / {active, number} 可用",
+    "healthCd5": "5h 冷卻",
+    "healthCdw": "週冷卻",
+    "healthRecentSuccessBypass": "此帳號剛有請求成功，路由暫時放行。",
+    "healthPurchasedBalanceBypass": "方案內額度用盡後，仍可使用已購餘額。",
+    "healthCutoffAtRequest": "即時額度門檻會在路由請求時檢查。"
   },
   "modals": {
     "waitingAuth": "等待授權",
@@ -11077,7 +11313,8 @@
       "message": "訊息",
       "error": "錯誤",
       "completion": "完成"
-    }
+    },
+    "statusFilter": "狀態"
   },
   "templateNames": {
     "simple-chat": "簡單對話",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes} 分鐘前",
     "hoursAgo": "{hours} 小時前",
     "daysAgo": "{days} 天前",
-    "entries": "條目"
+    "entries": "條目",
+    "viewSwitcherAria": "快取檢視"
   },
   "proxyConfigModal": {
     "levelGlobal": "全域性",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth 尚未配置。在 {applicationsUrl} 註冊一個 OAuth 應用程式，使用重定向 URI {redirectUri} 和範圍 \"{scopes}\"，然後設置 {clientIdEnv}（可選地設置 {clientSecretEnv}）並重新啟動。",
     "gitlabDuoSetupDescription": "在應用程式註冊並在此 OmniRoute 實例上設置環境變數後，點擊繼續以開始 OAuth 登錄。",
     "continue": "繼續",
+    "copilotPolicyTitle": "實驗提供者：政策狀態不明確",
+    "copilotPolicyLine1": "OmniRoute透過 api.githubcopilot.com 連接， GitHub尚未將其發佈為通用第三方推理API。此整合是實驗性的，可能會發生更改，恕不另行通知。",
+    "copilotPolicyLine2": "只能連結您自己的GitHub帳戶。切勿共用憑證、池帳戶或嘗試超出您的方案限制。",
+    "copilotPolicyLine3": "免費和學生計劃用戶只能收到自動模型選擇。您的Copilot計畫條款和任何使用限制仍由您負責。",
+    "copilotPolicyAcknowledge": "我明白了，連接",
     "tabPasteSetupToken": "設定權杖",
     "claudeSetupTokenDescription": "在終端機中執行 `claude setup-token`，然後貼上它輸出的權杖。此權杖有效期為一年，沒有重新整理權杖。OmniRoute 會在儲存前向 Anthropic 發送一次測試請求。",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "健康狀態（24小時）",
     "tableUsage": "使用情況",
     "tableActions": "操作",
+    "moreActions": "更多動作",
     "test": "測試",
     "edit": "編輯",
     "delete": "刪除",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "未找到有效條目。請檢查格式後重試。",
     "bulkImportSuccess": "匯入完成：已建立 {created} 個，已更新 {updated} 個，失敗 {failed} 個",
     "bulkImportErrorLine": "第 {line} 行：{reason}",
-    "bulkImportMaxExceeded": "每次最多匯入 100 個代理",
+    "bulkImportMaxExceeded": "每次最多匯入 {max} 個代理",
     "bulkImportPreview": "預覽",
     "clearAssignment": "（明確分配）",
     "bulkProxyAssignment": "批次代理分配",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP 速率限制 (429)",
     "poolSetAsideKindSlow": "回應緩慢",
     "poolSetAsideKindGeoBlocked": "區域封鎖 (403/451)",
+    "poolSetAsideKindOperatorReported": "營運商回報的中斷",
     "poolSetAsideUntil": "{endsAt}恢復輪換",
     "poolSetAsideRepeat": "已擱置{count, plural, one {#次} other {#次}}",
     "poolUnknownAddress": "未知位址",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "匯出程式碼",
     "exportShort": "匯出",
     "noStateToExport": "沒有可匯出的 Playground 狀態。",
-    "closeExportModal": "關閉匯出模態框",
     "close": "關閉",
     "exportRealKeyWarning": "安全警告：匯出被阻止 — 輸出中檢測到真實的 API 金鑰。請重置您的 API 金鑰並重試。",
     "placeholderHintPrefix": "替換",
@@ -11808,7 +12052,8 @@
       "nextButton": "下一步",
       "runButton": "執行",
       "promptPlaceholder": "輸入您的訊息…（按 Enter 傳送，Shift+Enter 換行）"
-    }
+    },
+    "playgroundTabs": "Playground 模式"
   },
   "miniPlayground": {
     "endpoint": "端點",
@@ -11879,7 +12124,8 @@
     "assistant": "助理",
     "errorLabel": "錯誤",
     "requestFailed": "請求失敗",
-    "stop": "停止"
+    "stop": "停止",
+    "messageInputAria": "訊息"
   },
   "requestLogger": {
     "recording": "正在錄製",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "輪換帳戶{count}次",
       "resilienceRetried": "重試空輪次",
       "resilienceContinued": "在串流中途恢復",
-      "resilienceRecovered": "透過彈性操作恢復"
-    }
+      "resilienceRecovered": "透過彈性操作恢復",
+      "conversationContext": "對話脈絡",
+      "goToBottom": "前往底部",
+      "liveRefreshOn": "即時重新整理：開啟",
+      "liveRefreshOff": "即時重新整理：關閉",
+      "liveRefresh": "即時重新整理",
+      "continuesFromParent": "接續自父項目",
+      "continuesFrom": "接續自 {id}",
+      "viewConversation": "檢視對話",
+      "openConversation": "開啟對話 {id}"
+    },
+    "tableLabel": "請求日誌",
+    "throughputPostFirstToken": "首個權杖後",
+    "throughputEndToEnd": "端對端",
+    "throughputRate": "{value} 個權杖/秒",
+    "throughputExplanation": "兩種速率皆採用輸出與推理權杖數量中的較大值。首個權杖後速率會排除有效的 TTFT；否則會使用完整持續時間。端對端速率一律使用完整持續時間。緩衝回應可能具有較高的突發傳送速率，但不代表模型生成速度更快。"
   },
   "proxyLogger": {
     "filterAll": "全部",
@@ -12112,7 +12372,9 @@
     "colServedBy": "由...提供",
     "filterTraffic": "流量",
     "filterTests": "測試",
-    "filterSource": "來源"
+    "filterSource": "來源",
+    "tableLabel": "代理伺服器日誌",
+    "sortLogs": "排序日誌"
   },
   "endpointOptions": {
     "speech": "語音",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "已耗盡",
     "statusAlerting": "告警中",
     "statusError": "錯誤",
-    "moreSuffix": "+{count} 更多"
+    "moreSuffix": "+{count} 更多",
+    "feedFilterLabel": "篩選事件"
   },
   "quotaShare": {
     "weightPercent": "權重 %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "未分組",
     "ungroupedHint": "這些池未分配給已知組。編輯一個池以將其移動到真實組中。",
     "removeFailed": "無法移除此集區。",
-    "dismiss": "關閉"
+    "dismiss": "關閉",
+    "allocationsHeading": "配置",
+    "wizardRemoveDimension": "移除維度",
+    "wizardRemoveKey": "移除鍵"
   },
   "plugins": {
     "title": "外掛",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "設定更新失敗",
       "serviceRevealApiKey": "{actor} 揭露了 {target} 的 API 金鑰",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "關閉錯誤訊息"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "現在去",
       "message": "MITM Proxy 現在歸 AgentBridge 所有。",
       "title": "此頁面已移動"
-    }
+    },
+    "dnsOn": "DNS 已開啟",
+    "dnsOff": "DNS 已關閉",
+    "showServerSettings": "顯示伺服器設定",
+    "hideServerSettings": "隱藏伺服器設定",
+    "upstreamCaTesting": "測試中…",
+    "removeMapping": "移除對應",
+    "mappingSourcePlaceholder": "例如 gemini-3.6-flash-medium，或使用 * 代表所有未對應的模型",
+    "mappingWildcardHint": "使用 * 作為來源，將所有未明確對應的模型透過 OmniRoute 路由至選定的目標。完全相符的來源一律優先於 *。",
+    "wizardDetectingModels": "正在從攔截的流量中偵測模型...",
+    "wizardDetectedModels": "在攔截的流量中找到 {count, plural, one {# 個模型} other {# 個模型}}。請選取您要新增的模型：",
+    "wizardSelectedModels": "已選取 {count, plural, one {# 個模型} other {# 個模型}}。您將在下一個畫面中將其對應至 OmniRoute 模型。",
+    "wizardAddModels": "新增 {count, plural, one {# 個模型} other {# 個模型}}",
+    "wizardNoModelsDetected": "尚未偵測到任何模型。請使用 {agent} 發出請求，然後再次執行此精靈，以從流量中自動偵測模型。",
+    "wizardNoModelsHint": "或者關閉此精靈，並在代理程式卡片中手動新增對應。"
   },
   "providerStats": {
     "unknownError": "未知錯誤",
@@ -12685,7 +12966,12 @@
     "avgTtft": "平均 TTFT",
     "avgTotal": "平均總計",
     "requestTelemetry": "請求遙測",
-    "requestTelemetryDescription": "7 階段管線細項（過去 5 分鐘）"
+    "requestTelemetryDescription": "7 階段管線細項（過去 5 分鐘）",
+    "title": "提供者統計資料",
+    "description": "各提供者與各模型的流量、延遲及成功率",
+    "combo": "組合",
+    "toggleModels": "顯示 {provider} 的模型",
+    "windowSince": "自 {date}"
   },
   "relay": {
     "title": "無伺服器 Relay 代理",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "無請求主體。",
     "noResponseBody": "無回應主體。",
     "formatted": "格式化",
-    "raw": "原始"
+    "raw": "原始",
+    "requestCount": "{count, plural, one {# 個請求} other {# 個請求}}",
+    "expandList": "展開清單",
+    "collapseList": "收合清單",
+    "snippetLanguage": "程式碼片段語言",
+    "headersTable": "標頭",
+    "showSecrets": "顯示密鑰",
+    "maskSecrets": "遮蔽密鑰",
+    "llmNotAvailable": "此請求無可用的 LLM 中繼資料。",
+    "llmStreamYes": "是 (SSE)",
+    "llmStreamNo": "否",
+    "llmTotalTokens": "總計：{count} 個權杖"
   },
   "cliCommon": {
     "companion": {
@@ -12951,8 +13248,7 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI 程式碼的",
-    "pageSubtitle": "指向 OmniRoute 的程式碼工具",
+    "pageSubtitle": "把 Claude Code、Codex 等 CLI 程式工具指向 OmniRoute，享受额度感知路由、故障切换与多号负载均衡。",
     "searchPlaceholder": "搜尋 CLI…",
     "filterDetectionLabel": "檢測",
     "filterBaseUrlLabel": "基礎 URL",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "未找到",
     "baseUrlAll": "所有",
     "baseUrlFull": "完整",
-    "baseUrlPartial": "部分"
+    "baseUrlPartial": "部分",
+    "title": "CLI 程式工具接入"
   },
   "cliAgents": {
     "pageTitle": "CLI 代理",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "此提供者在過去 24 小時內實際回應的呼叫比例。破折號表示其處理的流量太少，無法計算成功率。",
     "reliabilitySample": "過去 {hours} 小時內，{requests} 次呼叫中有 {successes} 次成功",
     "reliabilityTooFew": "過去 {hours} 小時內僅有 {requests} 次呼叫——數量太少，無法計算成功率",
-    "reliabilityNoTraffic": "過去 24 小時內沒有呼叫記錄"
+    "reliabilityNoTraffic": "過去 24 小時內沒有呼叫記錄",
+    "categoryFilter": "任務類別"
   },
   "discovery": {
     "title": "提供者探索",
@@ -13330,7 +13628,11 @@
     "method": "方法",
     "auth": "驗證",
     "feasibility": "可行性",
-    "models": "模型"
+    "models": "模型",
+    "provider": "提供者",
+    "status": "狀態",
+    "endpoint": "端點",
+    "actions": "操作"
   },
   "noAuthProvider": {
     "title": "無需驗證",
@@ -13379,7 +13681,8 @@
     "ownProxy": "自有代理",
     "freeTierPause": "模型 {model} 已暫停 (429)，將於 {time} 恢復",
     "freeTierPauseProvider": "已暫停 (429)，將於 {time} 恢復",
-    "freeTierPauseNote": "此實例上的進程暫停"
+    "freeTierPauseNote": "此實例上的進程暫停",
+    "proxyType": "代理類型"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "一項隱藏成就等待著您...",
         "criteria": "完成隱藏成就以揭曉此徽章。"
       }
-    }
+    },
+    "leaderboardTitle": "排行榜",
+    "leaderboardDescription": "您所有 API 金鑰的排名與成就",
+    "badgeLocked": "已鎖定"
   },
   "featureFlags": {
     "title": "功能旗標",
@@ -13610,7 +13916,9 @@
       "disabled": "已停用",
       "dual": "雙重",
       "alias": "別名",
-      "canonical": "標準"
+      "canonical": "標準",
+      "fail_closed": "攔截 (fail_closed)",
+      "count_as_zero": "以 $0 計 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13726,7 +14034,7 @@
         "description": "啟用所有 CLI 用戶端的相容模式。"
       },
       "MODEL_ALIAS_COMPAT_ENABLED": {
-        "description": "啟用模型別名相容層。"
+        "description": "啟用模類型名相容層。"
       },
       "PRICING_SYNC_ENABLED": {
         "description": "自動同步定價資料。PRICING_SYNC_ENABLED 環境變數也必須為 true。"
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "受保護優先級基礎設施停止時回傳 502",
         "description": "當僅限配額備援的優先目標因可證明並非配額的原因（提供者斷路器開啟或預測性延遲略過）而停止組合時，回應 502 而非 503。"
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "記錄帳戶 ID 日誌",
+        "description": "在 AUTH 日誌行中包含帳戶字首（例如 \"Using '<provider>' account: abc12345...\"）。預設關閉，使帳戶識別符號在共享/多租戶程序日誌中被隱藏。與除錯模式相互獨立；開關除錯模式不會顯示此項。"
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "OIDC 啟用時禁用密碼登入",
+        "description": "啟用 OIDC 後禁用密碼登入，使用者只能透過 OIDC 單點登入認證。關閉（預設）時密碼登入和 OIDC 均可用。"
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "遠端音訊提供者節點",
+        "description": "允許 /v1/audio/* 路由使用部署在 localhost 之外的 OpenAI 相容提供者節點。預設關閉——把音訊路由到遠端主機會改變出口身份，必須由運維明確決定。迴環節點始終允許，不受影響。"
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "遠端 Rerank 提供者節點",
+        "description": "允許 POST /v1/rerank（以及記憶引擎內部經迴環呼叫它的重排步驟）使用部署在 localhost 之外的 OpenAI 相容提供者節點——例如執行 TEI、Infinity、vLLM 的區域網機器或 Tailscale 對端。預設關閉——路由到遠端主機會改變出口身份，必須由運維明確決定。迴環節點始終允許且不受影響。遠端節點還須透過提供者出站 URL 策略。"
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "輪換共享出口守衛",
+        "description": "多帳戶輪換執行器遇到網路異常（超時、連線拒絕/重置）時，若失敗帳戶沒有專用代理，施加短冷卻並在該請求的餘下部分跳過其他無代理帳戶，而不是逐個重試。預設開啟（安全：不改變出口 IP，只降低共享出口帳戶的延遲/冷卻風險）。關閉可恢復首個無代理丟擲時立即傳播。"
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "跳過近期失敗的代理",
+        "description": "代理池和 opencode 的按帳戶輪換在一段程序級時間內不再選用剛失敗的代理（TCP 探測被拒，或經它收到 429），該時間每次重複翻倍、有上限。不寫入任何代理狀態；所有候選都被擱置時選擇不變。預設開啟；PROXY_SKIP_RECENTLY_FAILED=false 時選擇順序與純輪換完全一致。"
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "共享出口池排序",
+        "description": "對按出口地址配額的提供者，把與近期被拒成員觀測到相同出口地址的池成員排在健康成員之後。只調順序，絕不排除。依賴 PROXY_SKIP_RECENTLY_FAILED 提供它讀取的拒絕訊號。預設關閉：選擇順序與純輪換完全一致。"
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "輪換歸因日誌",
+        "description": "opencode 輪換記錄由哪個帳戶服務或被跳過（僅脫敏 id，絕不記錄完整帳戶 id），並把代理日誌條目關聯到其請求，便於運維區分被跳過的帳戶和未使用的帳戶。預設關閉：不寫額外日誌行，不寫額外列。"
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "代理池出口觀測",
+        "description": "在儀表盤的代理池下展示最近 24 小時服務過其成員的觀測出口 IP 數量、使用它們的連線數，以及單個 IP 後最多承載的連線數。只讀，由代理日誌計算，絕不用於路由。預設關閉：池編輯器不變，觀測路由返回 null。"
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "運維推送出口觀測",
+        "description": "接受運維按池成員推送的帶日期觀測地址，與日誌讀取合併後用於展示和池排序。預設關閉：推送路由返回 404，池讀取行為與之前完全一致。"
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode Responses 停滯輪換",
+        "description": "對 OpenCode 執行器，監視流式 Responses 回覆的首個正文位元組（視窗：RESPONSES_FIRST_BYTE_TIMEOUT_MS，預設 15000）。超過視窗仍靜默的 2xx Responses 流視為停滯：冷卻該帳戶並把請求輪換到下一個帳戶一次；第二次停滯立即失敗。預設關閉：停滯的流保持現狀等待，直到流就緒超時。"
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked 輪換",
+        "description": "對 OpenCode 執行器，當上游返回帶 user_blocked 拒絕的 403 或 451（非地域封鎖、非 Cloudflare 指紋拒絕）時，冷卻被拒帳戶並輪換到下一個帳戶，每請求最多一次；第二次拒絕原樣返回且不記成功。預設關閉：繞過上游使用者封禁看起來像是規避行為，還會把標記擴散到整個帳戶艦隊，因此除非運維明確開啟，拒絕原樣返回。"
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode 瞬時故障切換退避",
+        "description": "對 OpenCode 多帳戶輪換，連續兩次嘗試因瞬時上游錯誤（5xx 或空 400 拒絕）失敗後，先暫停再派發到下一個帳戶。暫停從 1.5 秒起，每次連續失敗翻倍，每次暫停上限 6 秒、每請求上限 10 秒，客戶端斷開時跳過，等待前釋放失敗回應體。預設關閉：故障切換保持立即進行。"
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "空輪次沖刷重試",
+        "description": "對翻譯後的流式輪次，當上游輪次沒有可用內容（僅推理完成或零有效塊）時，在向客戶端暴露任何內容之前，經正常憑據路徑做有界重試（上限 STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX）。預設關閉：空輪次保持現狀（空 200 或空內容 502）。"
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "空流兄弟恢復",
+        "description": "Claude/Codex 流式：在首個生命週期事件後短暫探測（最多 1 秒 / 64 KiB）可用輸出；以無內容結束的流變為 empty_content 失敗，並把現有有界重試用在另一個合格連線上（不冷卻、不鎖定模型），round-robin 組合在客戶端斷開後停止重試。探測內還把 refusal、pause_turn 和 model_context_window_exceeded 視為合法的空終止。預設關閉：就緒、空內容處理和組合重試與之前完全一致。"
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "流遲到輸出探測",
+        "description": "流式輸出探測：前 64 個轉發塊之後，每 16 塊抽樣一塊檢查首個可見輸出，使遲到開始的輸出仍把流標記為已產出。此後出現的孤立 5xx 保持請求級，而不再記為模型級鎖定，firstOutputMs 回填為當前抽樣間隔內的首個輸出塊。預設關閉：只探測前 64 個轉發塊，與之前一致。"
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode 限流 429 提前停止",
+        "description": "對 OpenCode 多帳戶輪換，遇到首個被判定為真實限流的 429（帶可解析 Retry-After 頭，或正文指明速率/用量限制）時停止帳戶波次，並原樣返回該上游 429（狀態碼、正文、Retry-After 和配額頭），而不是試完所有剩餘帳戶。未分類的 429 繼續輪換。預設關閉：免費層按出口 IP 限流（#9611），每個 429 都輪換到下一帳戶，波次耗盡時返回最後一個上游 429。"
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 掛起恢復",
+        "description": "對 OpenCode 多帳戶輪換，在反覆出現瞬時 429（或新的池緊張標記）後帶心跳掛起請求，然後重放一段最多 3 個順序帳戶的有上限行程，而不是把整個艦隊扇出。預設關閉：每個 429 都輪換到下一帳戶，與之前一致。"
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "流就緒停滯重試",
+        "description": "對流式聊天請求，當首個上游正文在產出可用事件前停滯時，經同一路由路徑以相同就緒預算做一次有界的第二次嘗試，不懲罰帳戶。預設關閉：首個正文停滯直接判請求失敗，不重試。"
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 池重選",
+        "description": "對 OpenCode 多帳戶輪換，在環境池上下文下，無代理帳戶從按出口配額的提供者收到 429 後，向連線池請求另一個成員做下次嘗試，而不是重試同一出口地址。只排序，不排除：池耗盡時保持現狀。預設關閉：每個 429 都輪換到下一帳戶，與之前一致。"
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2 客戶端指紋",
+        "description": "在 OpenCode Zen/Go 請求上傳送 OpenCode v2 CLI 客戶端指紋（#16571）：User-Agent opencode/latest/<2.x>/cli 與 x-opencode-client cli；僅當客戶端 User-Agent 是 2.x OpenCode 客戶端時才保留它；在受門控的免費層請求上不發 x-opencode-request，會話映象到 x-opencode-session-id/x-session-affinity/x-session-id，注入的佔位工具使用 v2 CLI 的 read/shell schema，丟棄 \"none\" 的 tool_choice。預設關閉：每個 OpenCode 請求逐位元組保持現有身份、頭和正文。"
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen 出口 IP 鎖定",
+        "description": "把 OpenCode Zen（opencode-zen）加入預設出口 IP 鎖定家族，一個 Zen 連線上的 429 會同時冷卻共享其出口 IP 的所有兄弟 Zen 連線。預設關閉：Zen 按 key 隔離，各連線各自冷卻，與之前一致。顯式的 OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS 值始終優先於此標誌。"
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode 全文錯誤規則",
+        "description": "讓內建 OpenCode 錯誤規則（opencode-zen、opencode-go、opencode-cli）匹配上游錯誤全文，使 organization_quota_exceeded 或 \"monthly usage limit reached\" 等正文標記把 429 判定為配額耗盡並施加連線級鎖定。預設關閉：這些規則只看結構化錯誤碼，此類 429 仍是短限流，與之前一致。"
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI 全文錯誤規則",
+        "description": "讓內建 Cloudflare Workers AI 錯誤規則匹配上游錯誤全文，使 \"daily free allocation\" 正文的 429 判定為配額耗盡而非短限流。預設關閉：規則只看結構化錯誤碼，與之前一致。"
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "能力過濾器",
+        "description": "目標模型缺少所需能力（視覺、工具、結構化輸出、上下文視窗）時，在派發前拒絕請求。保護繞過組合層相容過濾器的直連單提供者請求。"
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "USD 配額忽略未定價用量",
+        "description": "在按 key 的 USD 用量配額中，把沒有價格的模型用量按 $0 計，而不是視為配額已超。預設關閉：未定價模型或路由別名可能隱藏真實花費，因此配額按失敗關閉處理。"
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "啟用 OmniRoute Radar 模組（目錄源訂閱與同步）。預設關閉；啟用只解鎖 UI——資料同步仍需單獨開啟。"
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "模型端點能力門",
+        "description": "強制校驗可信的模型端點標籤（由提供者目錄宣告、從特定模型 id 推斷、或由運維設定）：對模型不服務的端點，在 /v1/chat/completions、/v1/embeddings、/v1/rerank、/v1/images/generations、/v1/videos/generations、/v1/music/generations 和 /v1/audio/* 派發前以 HTTP 400 拒絕；在 /v1/models 中隱藏其標籤端點沒有 OmniRoute 介面卡的模型；對此類模型的儀表盤模型測試返回 422。預設關閉：端點標籤僅作資訊展示，請求派發與之前完全一致。"
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "通用上下文交接",
+        "description": "組合路由切換模型時生成並注入對話摘要。關閉則把模型切換視為相互獨立，併為所有現有和未來的組合阻止後台交接請求。"
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "推理重放",
+        "description": "在多輪對話間快取並重放模型推理。關閉則停止儲存和重新注入推理內容。"
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server 傳輸",
+        "description": "允許 Codex 使用本地 app-server WebSocket JSON-RPC 傳輸（codexTransport=app-server）。關閉時，選擇了 app-server 的連線回退到 Codex 的其他傳輸。"
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code 發現別名",
+        "description": "在 /v1/models 上公佈 claude/'<provider>'/'<model>' 映象 id，使 Claude Code 閘道器的模型發現能列出非 Claude 模型。警告：全域性啟用會讓所有客戶端的目錄條目翻倍。"
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "無思考模類型名",
+        "description": "no-think/'<provider>'/'<model>' 閘道器別名的總開關。開（預設）：/v1/models 為每個合格的帶思考能力 Claude 模型公佈一個無思考變體，請求中的 no-think/ id 解析回真實模型並抑制推理。關：不公佈變體，no-think/ id 按未知模型 id 處理。此開關開啟時，每個模型 ModelSpec.noThinkingAlias 的單獨選擇仍然有效。"
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "禁用思考檔位變體",
+        "description": "禁止在 /v1/models 目錄中生成思考檔位變體（如 -low、-medium、-high）。"
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "自適應虛擬准入通道",
+        "description": "為提供者派發啟用按租戶自適應的虛擬准入通道（#9654）：一個租戶的突發不再把另一個租戶打到 503。OMNIROUTE_CHAT_VIRTUAL_LANES 環境變數優先於此儀表盤開關；變更在伺服器重啟後生效。"
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "功能閘道器映象",
+        "description": "對規範屬主沒有活動憑據、但某個有活動憑據的透傳閘道器能路由的模型，在 /v1/models 上公佈 '<gateway-alias>'/'<model>' 映象 id。警告：全域性啟用會為所有客戶端增加目錄條目。"
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API 聚合餘額",
+        "description": "為 New-API / One-API / Sub2API 聚合相容節點啟用餘額檢測。啟用後，設定了聚合標記的相容節點會在儀表盤和配額預檢路由中報告餘額。"
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "隱藏已刪除搜尋連線",
+        "description": "搜尋統計和最近搜尋只統計仍有活連線的提供者（duckduckgo-free 等無 key 提供者始終計入）。關閉則保留所有帶提供者 id 的搜尋行。"
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "嚴格免費徽章",
+        "description": "儀表盤提供者頁：只在提供者認可的訊號上顯示 Free 徽章——去掉顯示名啟發式、非布林 free 欄位，以及無文件免費層的註冊提供者上的 :free 字尾。關閉則保持歷史徽章規則。"
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "自動組合：空池返回 503",
+        "description": "當自動組合的候選池在工具呼叫預過濾前已為空（所有目標都被冷卻、鎖定或耗盡跳過）時，返回 503 no_eligible_targets，而不是舊版 400 \"No target supports tool calling\" capability_mismatch。預設關閉：空池保持舊版 400。"
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral 含糊 401 軟鎖定",
+        "description": "裸 Mistral 401（'{\"detail\":\"Unauthorized\"}'，無明確認證訊號）在 key 被吊銷和配額耗盡時逐位元組相同。啟用後，此類 401 冷卻連線而不是按過期停放，一小時內最多 3 次；下一次仍按過期停放，使被吊銷的 key 最終收斂。預設關閉：每個裸 Mistral 401 都按過期停放，與之前一致。"
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Batch 與檔案自動清理",
+        "description": "讓自動清理掃描刪除早於 OMNIROUTE_BATCH_RETENTION_DAYS 的終態（已完成/失敗/取消/過期）Batch API 作業及其逐行檢查點，並清除超過各自 expires_at 的上傳檔案 BLOB 內容。預設關閉：在運維開啟前，每個現有部署完全保持這些資料不變。運維觸發的 DELETE /api/v1/batches/delete-completed 路由兩種情況下都不受影響——它是獨立、無條件的公開 API 契約。"
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity 帳戶租用",
+        "description": "把選中的 Antigravity 帳戶為挑選它的請求的流式生命週期保留，使併發重試或憑據交接不能重選已承諾給在飛流的帳戶。租用按（連線、可呼叫上游模型）限定範圍，一個帳戶仍可同時服務兩個不同模型。當該模型的所有合格帳戶都已租出時，請求返回帶有限 Retry-After 的結構化 503 POOL_BUSY，而不是堆到繁忙帳戶上。預設關閉：帳戶選擇與之前完全一致，不做任何保留。"
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "自動清理過期組合步驟",
+        "description": "對權威實時目錄的模型同步成功後，移除釘在目錄已不再列出的模型上的組合步驟，每個被移除步驟記一條審計。同步失敗、降級或僅免費層時絕不清理，也絕不清空組合。預設關閉：過期步驟只做標記。"
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth 摘要式思考",
+        "description": "讓請求可讀思考（thinking.display \"summarized\"）的 Claude OAuth 請求去掉 redact-thinking-2026-02-12 這個 Anthropic beta——否則 Anthropic 會返回空的、僅含簽名的思考塊。預設關閉：該 beta 是 Claude Code OAuth 線上指紋的一部分，OAuth 請求保持原樣。API key 的 Claude 請求無此標誌已支援摘要式思考；OMNIROUTE_REDACT_THINKING=false 也只在此標誌開啟時作用於 OAuth。"
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Kiro 工具呼叫修復",
+        "description": "當流式 Kiro 回應在任何可見輸出前發出畸形的 tool_call 包裝（缺 input.name 或 input.arguments）時，抑制它並用一條糾正指令重發請求一次，而不是以 invalid_kiro_tool_call 結束該輪。重試多花一次 Kiro 請求；第二次失敗以 kiro_tool_call_repair_retry_failed 結束該輪。預設開啟。設為 false 則在首個畸形包裝時直接失敗該輪。"
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev 思考檔位",
+        "description": "當運維未覆蓋且提供者登錄檔也未宣告時，使用 models.dev 公佈的推理檔位（收斂到已知檔位詞表），並把宣告的空檔位列表按\"無檔位\"處理，用於 /v1/models 的 effort_tiers 和組合檔位交集。預設關閉：effort_tiers 和解析出的 supportedThinkingEfforts 與之前完全一致。"
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena 合成 cx 遙測",
+        "description": "給每個沒有運維提供 providerSpecificData.cx 的 Arena（lmarena）create-evaluation 請求附帶一個合成的程式化 cx 客戶端互動 blob（即 arena.ai 自身對無記錄互動頁面傳送的值）。預設關閉：cx 欄位是 Arena 的反自動化訊號，因此 OmniRoute 只轉發運維從真實瀏覽器會話捕獲的值（providerSpecificData.cx），否則完全不傳送 cx。上游收益未經證實；僅當 Arena 開始拒絕無 cx 的請求時再啟用。"
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "原生 Codex 反應式壓縮",
+        "description": "讓反應式（閾值）和最後手段的上下文壓縮也能改寫原生 Codex 透傳歷史（POST /v1/responses 到 codex 提供者），當它們超出上下文預算時使用 Responses input[] 介面卡。預設關閉：原生 Codex 歷史歸 Codex 客戶端所有，永不被壓縮改寫；超大請求保持上下文預算檢查失敗，與之前一致。要求全域性壓縮已開啟且模型未被排除。"
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "配額視窗：遵守有界停放",
+        "description": "讓按視窗的配額策略（帳戶選擇使用的 session/周閾值）遵守有界耗盡停放：有上限的停放期限過後，或快取的配額觀測比停放上限更舊時，視窗停止排除該帳戶直到獲取新的配額。預設關閉：快取的視窗按其最後報告的百分比一直阻斷到自身重置時間。"
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "影象生成：長作業",
+        "description": "對 OpenAI 相容影象生成：使用連線的超時（providerSpecificData.timeoutMs），否則用中央上游 fetch 超時（FETCH_TIMEOUT_MS，再 REQUEST_TIMEOUT_MS，預設 600 秒），代替固定 120 秒影象預算；呼叫方取消的請求以 499 結束；讓 Playground 以帶保活心跳的 SSE 流接收長影象作業。預設關閉：應用固定預算且不傳播呼叫方取消。覆蓋回應體讀取的截止期限始終開啟。"
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "目錄映象細化",
+        "description": "細化 /v1/models 上的 claude/ 發現和功能閘道器映象。預設關閉：兩個映象通道與之前行為完全一致。開啟：claude/ 發現映象還覆蓋列出的推理檔位變體（-low/-medium/-high/-xhigh），跳過請求路徑無法實體化的內建 auto/* id，跳過已列出的別名；功能閘道器映象跳過組合和 OmniRoute 合成的 id（claude/、no-think/），從 owned_by 取屬主，絕不把屬主當自己的閘道器，跳過在 blockedProviders 中禁用的閘道器和不在閘道器權威實時目錄中的模型。"
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "代理健康：被拒重置失敗連擊",
+        "description": "在代理健康掃描中，讓目標拒絕的探測（401/403/429：代理轉發了，但目標拒絕了該出口 IP）像正常服務的探測一樣重置代理的連續失敗計數。預設關閉：拒絕保持中性並保留連擊（#10654）。5xx 兩種情況下都無結論，拒絕也絕不會移除、禁用或重新啟用代理。"
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok 訂閱影象",
+        "description": "註冊 xai-oauth（xao）和 grok-cli 影象路由，並把 OpenAI 質量 high/hd 對映為 xAI 的 medium。預設關閉：API key 的 xAI 影象路徑保持現有 OpenAI 相容請求，不註冊訂閱路由。"
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth 實時模型發現",
+        "description": "用 OAuth bearer token 從 https://api.x.ai/v1/models 為 xai-oauth 連線拉取實時 xAI 模型目錄，代替凍結的靜態種子。預設開啟。把標誌設為 false 則繼續用靜態種子。HTTP 失敗時發現路由回退到種子；標誌讀取本身不發 HTTP。"
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic 相容：對話中途 system 輪",
+        "description": "在普通 anthropic-compatible-* 中繼（claude → claude 透傳）上，把對話中途的 role:system 輪保留在 messages[] 裡，而不是提升到頂層 system 引數，使快取的提示詞字首跨輪穩定。僅當客戶端自己傳送了 mid-conversation-system-2026-04-07 這個 anthropic-beta 時生效（原樣轉發上游）。預設關閉：每個 system 輪與之前一樣提升，因為不支援該 beta 的中繼會以 400 拒絕 role:system 訊息。"
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "資料庫健康檢查：推遲啟動掃描",
+        "description": "把啟動時的資料庫完整性/健康檢查放到伺服器開始接收請求之後（經 setImmediate），而不是阻塞啟動直到完成。預設關閉：啟動與 #13717 之前一樣阻塞在檢查上，損壞的資料庫仍會在服務首個請求前被抓住。開啟：啟動立即返回，檢查（現在是有界/分頁的，對真實檔案型資料庫還在可取消的子程序中隔離）緊隨其後執行。"
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode 已釋出目錄路由",
+        "description": "讓沒有顯式註冊端點的 OpenCode Zen 和 OpenCode Go 模型從每 6 小時後台讀取的 models.opencode.ai 已釋出目錄獲取請求面（@ai-sdk/openai 用 Responses，@ai-sdk/anthropic 用 Messages）。預設關閉：端點與之前一樣來自登錄檔啟發式，且從不拉取該目錄。"
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Auto 請求：解析後能力權重",
+        "description": "讓 auto/* 請求（resolveModelOrError 和 auto 路由包裝）用解析出的模型能力（視覺、推理、思考）和觀測質量分構建候選池，像 /v1/models 目錄一樣一次批次讀取。預設關閉：請求時快照權重與之前完全一致（能力按需解析且不進入權重）。開啟：這些訊號進入快照權重，候選權重乃至選擇結果可能改變。"
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "自動組合：無 key 傳輸門",
+        "description": "把傳輸需要本地瀏覽器（browserBacked）或本地安裝 CLI（isLocalCli）的無 key（免認證）提供者擋在 auto/* 候選池外，避免卡住的成員把 auto 請求拖到單目標超時（#17036）。預設關閉：每個支援模擬工具呼叫的免認證提供者與之前一樣留在池中。直接 '<alias>'/'<model>' 呼叫兩種方式都可用。"
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN：內聯推理重放",
+        "description": "對需要推理重放的 codebuddy-cn 思考模型（DeepSeek-V4 / Kimi-K2 家族），把每個重放的 assistant reasoning_content 作為可見 '<thought>' 塊內聯到訊息內容前面，使其在丟棄 reasoning_content 欄位的閘道器下也能存活（#13632）。預設關閉：codebuddy-cn 請求原樣傳送；reasoning_content 欄位本身始終保留。"
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "提供者安全停止：終態",
+        "description": "把顯式的提供者安全停止（misalignment_policy_violation、content_policy_violation，或標記為 provider_safety_rejection 的精確舊文 'blocked by our safety systems' 拒絕）保持為終態、請求級拒絕：其程式碼在 HTTP、Responses、WebSocket 和已完成流錯誤中原樣保留，組合遇到它就停止而不再重試其他目標，並取消已准入的兄弟請求（#17049）。預設關閉：這些錯誤保持現有處理，組合路由不變。"
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "憑據健康：重測自動禁用的連線",
+        "description": "讓憑據健康掃描重測被閘道器自己關閉的連線（標記 autoDisabledAt；每個最多每 6 小時一次、每次掃描最多 5 個），重測透過就把連線切回開啟（#16190）。預設關閉：被關閉的連線保持關閉，直到運維重新啟用或重測，與之前一致。運維禁用的連線和永久封禁後關閉的連線絕不重測。"
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "憑據門：僅認證診斷",
+        "description": "收窄組合憑據門：快取的失敗憑據探測只在診斷證明是壞憑據（upstream_auth_error、auth_missing、token_expired、token_refresh_failed、reauth_required、account_deactivated、auth_required）時才阻斷連線。無結論的失敗（超時、限流、故障、不支援的探測和無類型的排程錯誤）按未知處理，連線繼續接收流量。預設關閉：任何快取的探測錯誤在快取 TTL（5 分鐘）內都阻斷連線。"
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "組合：遇內容策略拒絕即停",
+        "description": "當組合目標返回精確的內容策略拒絕（code 或 type 為 cyber_policy / content_policy_violation）時，停止組合並返回該拒絕，即使剩餘目標是不同模型，不再前進到下一目標。預設關閉：該拒絕不冷卻帳戶也不觸發提供者斷路器，組合與之前一樣前進到下一目標。"
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "冷卻重試：跳過 403/410 拒絕",
+        "description": "當所有帳戶都在冷卻、且最早結束的冷卻由 403（拒絕訪問）或 410（已刪除）引起時，立即返回該拒絕，而不是等冷卻結束再重發請求；續約中的 agentrouter 連線級配額 403 會以 errorCode 429 持久化，保持可重試。預設關閉：只有 401 跳過等待，每個拒絕都按到達時的狀態碼持久化。"
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "未定價用量的預算政策",
+        "description": "各金鑰的每日/每週 USD 限額，如何處理其提供者/模型沒有定價記錄的成功用量。fail_closed（預設）會將該視窗視為已超額，確保未知成本不會繞過硬性上限。count_as_zero 將這部分用量以 $0 計入，已定價的支出仍照常限制。無論採用哪種政策，未定價的模型都會顯示在儀表板首頁。"
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "延遲",
     "quota": "配額",
     "rangeWindow": "{range} 視窗",
+    "timeRange": "時間範圍",
     "runtimeHealthBlend": "執行時期/健康混合",
     "averageResponseTime": "平均回應時間",
     "worstQuota": "最差配額",
@@ -13923,7 +14500,11 @@
       "ok": "通常較為寬鬆"
     },
     "allProviders": "所有提供者",
-    "noApiKeyRequired": "不需要 API 金鑰"
+    "noApiKeyRequired": "不需要 API 金鑰",
+    "searchPlaceholder": "搜尋模型、提供者…",
+    "searchAria": "搜尋免費模型",
+    "filterProviderAria": "按提供者篩選",
+    "keylessOnly": "僅限免金鑰"
   },
   "providerHealthAutopilot": {
     "title": "提供者健康自動駕駛",
@@ -13994,7 +14575,11 @@
     "learnMore": "了解更多",
     "changelogLoadFailed": "無法載入變更日誌。請稍後再試。",
     "retry": "重試",
-    "viewFullHistory": "在 GitHub 上檢視完整歷史"
+    "viewFullHistory": "在 GitHub 上檢視完整歷史",
+    "title": "最新消息與變更日誌",
+    "description": "OmniRoute 團隊的公告與最新版本資訊",
+    "viewLabel": "檢視",
+    "loadingNews": "正在載入公告..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "提供者電路斷路器狀態",
       "lastUpdate": "最後更新：{timestamp}",
       "uptimeMinutes": "{minutes}分鐘",
-      "uptimeHoursMinutes": "{hours}小時 {minutes}分鐘"
+      "uptimeHoursMinutes": "{hours}小時 {minutes}分鐘",
+      "breakerClosed": "已關閉",
+      "breakerNotClosed": "開啟或半開啟"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "維護詳情",
         "secondaryAction": "系統狀態"
       }
+    },
+    "miniapp": {
+      "askAnything": "詢問任何問題…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP 工具",
     "scope": "作用域",
-    "apiKey": "API 金鑰"
+    "apiKey": "API 金鑰",
+    "visibleCount": "顯示 {visible} 筆／共 {total} 筆",
+    "modeLabel": "檢視模式",
+    "jumpToNow": "跳至目前時間，NOW 線將重設至 {position}% 的位置",
+    "laneReuse": "時間軸列重複使用",
+    "laneReuseLabel": "時間軸列重複使用時間範圍（分鐘）",
+    "laneReuseHint": "只要具有相同對話 ID 的請求之間的間隔少於此分鐘數，就會顯示在同一個時間軸列上。",
+    "laneReuseUnit": "分鐘",
+    "autoRefresh": "自動重新整理",
+    "autoRefreshLabel": "自動重新整理間隔（秒）",
+    "autoRefreshHint": "時間軸從伺服器重新擷取請求清單的頻率。",
+    "autoRefreshUnit": "秒",
+    "zoomOut": "縮小",
+    "zoomIn": "放大"
   },
   "metadata": {
     "compressionTitle": "壓縮",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "關閉"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "停用在 /v1/models 目錄中產生思考層級變體（例如 -low、-medium、-high）。",
+  "teamCosts": {
+    "title": "團隊成本",
+    "subtitle": "管理共用軟預算與目錄成本估算。",
+    "refresh": "重新整理",
+    "create": "建立團隊",
+    "edit": "編輯團隊",
+    "archive": "封存",
+    "selectTeam": "團隊",
+    "searchTeams": "搜尋團隊",
+    "statusFilter": "團隊狀態",
+    "active": "啟用中",
+    "archived": "已封存 · 唯讀",
+    "allTeams": "所有團隊",
+    "noTeams": "沒有符合的團隊。",
+    "selectHint": "建立或選擇團隊以檢視成本。",
+    "loading": "正在載入團隊成本…",
+    "budgetTitle": "目前軟預算",
+    "budgetSubtitle": "成功的已確認用量 · 滾動視窗 · 與報表日期無關",
+    "archivedBudget": "已封存：預算執行已停用。歷史報表仍可使用。",
+    "unlimited": "無限制 — 尚未設定共用軟預算。",
+    "budgetUnavailable": "無法取得預算狀態。請重新整理後重試。",
+    "used": "成功用量",
+    "maximum": "預算上限",
+    "remaining": "已知剩餘",
+    "resets": "重設時間",
+    "unpricedBudget": "部分成功用量的價格未知。已知總額並不完整；預算執行會將此視窗視為已超出。",
+    "overBudget": "預算已達到或超出 · 超出 {amount}",
+    "reportTitle": "用量報表",
+    "reportSubtitle": "所有嘗試 · 以 USD 計的目錄估算，並非發票 · 完整 UTC 日期",
+    "reportPeriod": "報表期間",
+    "day1": "1 天",
+    "day7": "7 天",
+    "day30": "30 天",
+    "allTime": "全部時間",
+    "reportSpend": "預估報表支出",
+    "requests": "請求數",
+    "assignedKeys": "已指派的金鑰",
+    "unpricedReport": "此報表包含價格未知的項目。預估支出並不完整。",
+    "breakdown": "各 API 金鑰成本",
+    "noUsage": "此報表期間沒有用量。",
+    "keyName": "API 金鑰名稱",
+    "tokens": "輸入 + 輸出 Token",
+    "unnamedKey": "未命名或已刪除的金鑰",
+    "unpriced": "價格未知",
+    "members": "成員資格",
+    "memberSubtitle": "變更成員資格後，歷史支出仍保留在原團隊。",
+    "searchKeys": "搜尋金鑰或目前擁有者",
+    "chooseKey": "選擇 API 金鑰",
+    "unassigned": "未指派",
+    "ownership": "目前的計費團隊：{team}",
+    "assign": "指派",
+    "remove": "移除",
+    "noMembers": "目前沒有成員。歷史用量仍可能計入預算。",
+    "assignedAt": "指派於 {date}（UTC）",
+    "name": "團隊名稱",
+    "description": "說明",
+    "enableBudget": "啟用共用軟預算",
+    "amount": "預算金額（USD）",
+    "duration": "滾動預算視窗",
+    "cancel": "取消",
+    "save": "儲存",
+    "confirm": "確認",
+    "transferTitle": "確認金鑰轉移",
+    "transferMessage": "要將此金鑰從「{source}」移至「{destination}」嗎？歷史支出仍保留在原團隊。",
+    "removeTitle": "移除金鑰指派",
+    "removeMessage": "要從「{team}」移除此金鑰嗎？歷史支出仍保留在此團隊。",
+    "archiveTitle": "封存團隊",
+    "archiveMessage": "要封存「{team}」嗎？所有目前的綁定都會關閉，預算執行也會停止。歷史報表仍可使用。",
+    "invalidName": "請輸入名稱（1–200 個字元）及不超過 2,000 個字元的說明。",
+    "invalidAmount": "請輸入大於零的有限預算金額。",
+    "unauthorized": "請登入管理儀表板以繼續。",
+    "forbidden": "您沒有管理團隊的權限。您輸入的內容已保留。",
+    "notFound": "此團隊或指派已不存在。",
+    "conflict": "指派或團隊已變更。請重新整理並確認目前的所有權後再重試。",
+    "failed": "請求失敗。您輸入的內容已保留，請重試。",
+    "partialBudget": "部分保留的每日分桶與視窗邊界重疊，無法精確分攤。顯示的支出並不完整；剩餘額度無法取得。現有的軟預算政策維持不變。"
+  },
   "connectionTest": {
     "title": "測試訊息",
     "description": "透過此帳戶傳送一個實際請求。這會使用少量配額，且視提供者而定，可能會啟動用量週期。",
@@ -15073,5 +15753,118 @@
     "importButton": "匯入",
     "importFailed": "匯入失敗。",
     "importSuccess": "已匯入 {connections} 個帳號與 {nodes} 個提供者節點;略過 {skipped} 個。"
+  },
+  "conversations": {
+    "title": "對話",
+    "countSummary": "{total, plural, other {# 則對話}}含 2 輪以上",
+    "autoRefreshTitle": "清單從伺服器重新拉取的頻率。",
+    "autoRefresh": "自動重新整理",
+    "loading": "正在載入對話…",
+    "colConversation": "對話",
+    "colTurns": "輪次",
+    "colContinuation": "接續",
+    "colLastModel": "最近模型",
+    "colProvider": "提供者",
+    "colStatus": "狀態",
+    "colLastSeen": "最近活躍",
+    "drawerTitle": "對話",
+    "prevConversation": "上一則對話",
+    "nextConversation": "下一則對話",
+    "gotoLatestRequest": "跳到最新請求",
+    "goToBottom": "回到底部",
+    "statusInProgress": "進行中",
+    "continuationGenuineTitle": "最後一輪使用了 previous_response_id 且已在伺服器端解析",
+    "continuationBadge": "接續",
+    "stalledTitle": "最後一輪未以 stop 結束，且 5 分鐘以上沒有後續",
+    "stalledBadge": "停滯",
+    "noTurns": "此對話沒有記錄到任何輪次。"
+  },
+  "logExport": {
+    "startFromCurrentPosition": "從目前位置開始（略過現有日誌）",
+    "pageTitle": "日誌匯出",
+    "pageSubtitle": "將「日誌」頁籤中的呼叫日誌持續推送到外部分析儲存。",
+    "addDestination": "新增目標",
+    "scheduleTitle": "排程計畫",
+    "cronLabel": "Cron",
+    "notScheduled": "未排程",
+    "lastScheduledRun": "最近一次排程執行",
+    "lastRunSummary": "{startedAt} — {status}，{rows} 列",
+    "never": "從未",
+    "highWaterMark": "呼叫日誌高水位線",
+    "rowPrefix": "第 {id} 列",
+    "noDestinations": "尚無匯出目標",
+    "noDestinationsHint": "新增一個目標，即可按每小時排程開始推送呼叫日誌。",
+    "errLoadStatus": "載入匯出狀態失敗",
+    "errSaveDestination": "儲存目標失敗",
+    "msgDestinationSaved": "目標已儲存。",
+    "errConnectionTest": "連線測試失敗",
+    "msgRunInFlight": "該目標已有一次匯出正在執行，未重複傳送。",
+    "errExportRun": "匯出執行失敗",
+    "errUpdateDestination": "更新目標失敗",
+    "errDeleteDestination": "刪除目標失敗",
+    "deleteTitle": "刪除目標",
+    "deleteConfirm": "確定刪除「{name}」嗎？其匯出游標也會一併移除，重新新增將從最早保留的呼叫日誌開始匯出。",
+    "statusDisabled": "已停用",
+    "statusFailing": "失敗中",
+    "statusHealthy": "正常",
+    "statusNotRunYet": "尚未執行",
+    "typeNotInstalled": "類型未安裝",
+    "metaLine": "最近執行 {lastRun} · 已匯出 {exported} 列 · {pending} 列待匯出 · 游標 {cursor}",
+    "btnTest": "測試",
+    "btnRunNow": "立即執行",
+    "btnDisable": "停用",
+    "btnEnable": "啟用",
+    "btnEdit": "編輯",
+    "btnDelete": "刪除"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI 帳戶",
+    "cardSubtitle": "來自已驗證管理 API 的唯讀狀態",
+    "btnRefresh": "重新整理",
+    "listAria": "CLIProxyAPI 帳戶健康狀態",
+    "noAccounts": "找不到 CLIProxyAPI 帳戶。",
+    "loading": "正在載入帳戶健康狀態…",
+    "stateReady": "帳戶健康狀態",
+    "stateDisabled": "未安裝 CLIProxyAPI",
+    "stateMissingKey": "未設定管理金鑰",
+    "stateUnreachable": "管理 API 無法連線",
+    "stateUnauthorized": "管理金鑰被拒絕",
+    "stateUnsupported": "此 CLIProxyAPI 版本不提供帳戶健康狀態",
+    "stateInvalidResponse": "管理 API 回傳了無法識別的回應"
+  },
+  "darioPanel": {
+    "title": "Claude 帳戶",
+    "description": "使用你的 Claude Pro/Max 訂閱為 Dario 驗證。流量計入你的訂閱額度池。Dario 至少需要接入一個帳戶才能路由請求（在此之前 /health 回報為降級）。",
+    "noAccounts": "尚未設定任何帳戶。",
+    "importTitle": "從 OmniRoute 匯入",
+    "importDescription": "重用 OmniRoute 中已有 Claude 連線的 OAuth 權杖，無需再次登入——完全跳過瀏覽器授權步驟。",
+    "importPendingTooltip": "OmniRoute 中存在 Claude 連線後即可使用。",
+    "btnImport": "匯入",
+    "btnImporting": "正在匯入…",
+    "aliasPlaceholder": "別名（選填）",
+    "btnStartLogin": "開始登入",
+    "btnStarting": "正在啟動…",
+    "btnCompleteLogin": "完成登入",
+    "btnCompleting": "正在完成…",
+    "codePlaceholder": "code#state 或純 code",
+    "noticeImported": "已匯入為帳戶「{alias}」——Dario 已重新啟動以生效。",
+    "noticeAdded": "帳戶「{alias}」已新增。",
+    "expiresInHours": "約 {hours} 小時後過期",
+    "expiresInMinutes": "約 {minutes} 分鐘後過期",
+    "expiresAt": "於 {date} 過期",
+    "scopes": "{count, plural, other {# 個權限範圍}}",
+    "btnRemove": "移除",
+    "btnRefresh": "重新整理",
+    "loginStep1": "1. 在瀏覽器中開啟此連結，為帳戶 <mono>{alias}</mono> 授權：",
+    "pendingExpires": "待完成的登入將於 {time} 過期",
+    "loginStep2": "2. 貼上 Anthropic 顯示的驗證碼："
+  },
+  "miniapp": {
+    "title": "OmniRoute 小程式",
+    "errTelegramOnly": "此頁面必須在 Telegram 小程式內開啟。",
+    "greeting": "👋 你好，{name}！發一則訊息即可透過你的 OmniRoute 閘道開始對話。",
+    "greetingFallbackName": "朋友",
+    "errNoReply": "⚠️ 閘道沒有回應。",
+    "btnSend": "傳送"
   }
 }

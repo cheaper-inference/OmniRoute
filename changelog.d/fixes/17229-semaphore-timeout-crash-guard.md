@@ -1,0 +1,1 @@
+- **fix(sse):** the process crash guard now treats an account-semaphore capacity rejection (`SEMAPHORE_TIMEOUT` / `SEMAPHORE_QUEUE_FULL`) that reaches `unhandledRejection` or `uncaughtException` as a handled capacity signal instead of exiting the gateway under load ([#17229](https://github.com/diegosouzapw/OmniRoute/pull/17229)) — thanks @minhlongs

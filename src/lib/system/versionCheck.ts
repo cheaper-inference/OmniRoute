@@ -33,7 +33,7 @@ const NPM_REGISTRY_LATEST_URL = "https://registry.npmjs.org/omniroute/latest";
  * surviving cause of "#4100 still not fixed" after the registry fallback shipped in v3.8.28.
  */
 const GITHUB_RELEASES_LATEST_URL =
-  "https://api.github.com/repos/diegosouzapw/OmniRoute/releases/latest";
+  "https://api.github.com/repos/cheaper-inference/OmniRoute/releases/latest";
 
 const LOOKUP_TIMEOUT_MS = 10_000;
 // Bound on the version-metadata responses, so a misdirected or hostile URL
@@ -126,6 +126,15 @@ function createCachedLookup<T>(defaultLookup: () => Promise<T | null>) {
 // server-only `child_process` import into the browser bundle. Re-exported here
 // for back-compat with existing server-side importers.
 export { normalizeVersion, isNewer } from "./versionCompare";
+
+/**
+ * Operator opt-out for every update check: the CLI exit notice (`bin/omniroute.mjs`) and the
+ * dashboard's `GET /api/system/version` lookup. Same semantics as the CLI — any non-empty
+ * value of `OMNIROUTE_NO_UPDATE_NOTIFIER` (including "0") disables the check.
+ */
+export function isUpdateCheckDisabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  return Boolean(env.OMNIROUTE_NO_UPDATE_NOTIFIER);
+}
 
 /**
  * Latest published version via the `npm` CLI (fast when npm is on PATH, e.g. source installs).

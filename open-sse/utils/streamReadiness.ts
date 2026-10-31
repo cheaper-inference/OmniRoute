@@ -3,6 +3,7 @@ import {
   hasTrustedEmptyTurn,
   inheritEmptyTurnPolicy,
 } from "./emptyTurnPolicy.ts";
+import { normalizeStreamFailurePayload, type StreamFailurePayload } from "./streamErrorFormat.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
 import {
@@ -46,6 +47,8 @@ export type StreamReadinessResult =
       upstreamDiagnostic?: string;
       code: string;
       type: string;
+      /** An actual upstream rejection, not a readiness stall eligible for a probe retry. */
+      upstreamFailure?: true;
     };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -212,7 +215,9 @@ export function hasUsefulStreamContent(text: string, options: UsefulContentOptio
     try {
       if (hasUsefulJsonPayload(JSON.parse(data), options.contentProbe === true)) return true;
     } catch {
-      if (data.length > 0) return true;
+      // A non-JSON `data:` line is not useful stream content: skip it and
+      // inspect the next line instead of failing the whole text.
+      continue;
     }
   }
 
@@ -228,6 +233,7 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
   "content_filter",
   "max_tokens",
   "tool_use",
+  "refusal",
 ]);
 
 // #16438 content probe only (EMPTY_STREAM_SIBLING_RECOVERY_ENABLED): Claude terminals
@@ -235,7 +241,6 @@ const LEGIT_EMPTY_TERMINAL_REASONS = new Set([
 // into a retryable empty_content failure. The default watcher keeps the set above.
 const CONTENT_PROBE_LEGIT_EMPTY_TERMINAL_REASONS: ReadonlySet<string> = new Set([
   ...LEGIT_EMPTY_TERMINAL_REASONS,
-  "refusal",
   "pause_turn",
   "model_context_window_exceeded",
 ]);
@@ -392,6 +397,44 @@ export function isReasoningProgressFrame(frame: string): boolean {
   return false;
 }
 
+// Bounded prefix match on the Responses compaction lifecycle event family
+// (today only `response.compaction.compacting` is observed in the wild).
+const COMPACTION_PROGRESS_TYPE_PATTERN = /^response\.compaction\./;
+
+/**
+ * #17826: a Responses remote-compaction progress frame (`event:
+ * response.compaction.compacting`). Compaction is upstream model work with no
+ * user-visible output, so it must restart the content-stall budget exactly
+ * like a reasoning frame — and never count as content, or a compaction-only
+ * stream would slip past the #8649 empty-output guard. The whole
+ * `response.compaction.*` family counts; the terminal variant carries the
+ * turn's compaction output and is already cleared as content by the normal
+ * content scan before this signal is consulted.
+ */
+export function isCompactionProgressFrame(frame: string): boolean {
+  if (!frame.includes("response.compaction.")) return false;
+  for (const line of frame.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (trimmed.startsWith("event:")) {
+      if (COMPACTION_PROGRESS_TYPE_PATTERN.test(trimmed.slice(6).trim())) return true;
+      continue;
+    }
+    if (!trimmed.startsWith("data:")) continue;
+    try {
+      const parsed: unknown = JSON.parse(trimmed.slice(5).trim());
+      if (
+        isRecord(parsed) &&
+        typeof parsed.type === "string" &&
+        COMPACTION_PROGRESS_TYPE_PATTERN.test(parsed.type)
+      )
+        return true;
+    } catch {
+      // non-JSON data lines carry no compaction signal
+    }
+  }
+  return false;
+}
+
 export type StreamContentWatcher = {
   /** Feed a decoded slice of the client-facing stream. Safe to call with partial frames. */
   note: (text: string) => void;
@@ -404,6 +447,12 @@ export type StreamContentWatcher = {
    * output. Grows while a reasoning model thinks without visible output.
    */
   reasoningProgress: () => number;
+  /**
+   * #17826: Responses compaction progress frames (isCompactionProgressFrame)
+   * seen before the first real output. Same contract as reasoningProgress —
+   * liveness only, never content.
+   */
+  compactionProgress: () => number;
   /** True once a terminal state was seen where emitting no content is valid. */
   sawLegitEmptyTerminal: () => boolean;
   /**
@@ -455,6 +504,7 @@ export function createStreamContentWatcher(
   let sse = false;
   let error = false;
   let progress = 0;
+  let compaction = 0;
 
   const inspect = (frame: string): void => {
     if (!frame) return;
@@ -462,6 +512,7 @@ export function createStreamContentWatcher(
     if (!error && frameHasStructuredStreamError(frame)) error = true;
     if (!content && hasUsefulStreamContent(frame, { contentProbe })) content = true;
     if (!content && isReasoningProgressFrame(frame)) progress += 1;
+    if (!content && isCompactionProgressFrame(frame)) compaction += 1;
     if (!normalStop) {
       for (const match of frame.matchAll(TERMINAL_REASON_PATTERN)) {
         const reasons = NORMAL_STOP_TERMINALS.get(match[1] ?? "");
@@ -501,6 +552,7 @@ export function createStreamContentWatcher(
     },
     sawContent: () => content,
     reasoningProgress: () => progress,
+    compactionProgress: () => compaction,
     sawLegitEmptyTerminal: () => legitEmpty,
     sawNormalStopTerminal: () => normalStop,
     sawSseFrame: () => sse,
@@ -513,6 +565,7 @@ type StreamReadinessSignalState = {
   dataLines: string[];
   pendingLine: string;
   upstreamDiagnostic: string | null;
+  cursorFailure?: StreamFailurePayload | null;
 };
 
 function resetCurrentEvent(state: StreamReadinessSignalState): void {
@@ -529,6 +582,13 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
 
   try {
     const payload: unknown = JSON.parse(data);
+    // Cursor emits classified terminal failures as chat chunks (with choices).
+    // Consume them at the existing pre-handoff boundary, not as readiness/success.
+    // Stop at the same first event as before; never probe a healthy stream ahead.
+    if (state.cursorFailure !== undefined && isRecord(payload) && isRecord(payload.error)) {
+      state.cursorFailure = normalizeStreamFailurePayload(payload);
+      return true;
+    }
     if (!state.upstreamDiagnostic && isRecord(payload) && isErrorOnlyStructuredPayload(payload)) {
       const error = payload.error;
       const rawMessage =
@@ -542,7 +602,12 @@ function processStreamReadinessEvent(state: StreamReadinessSignalState): boolean
     }
     return hasNonPingStructuredPayload(payload, eventType);
   } catch {
-    return data.length > 0;
+    // A non-JSON payload under data: (a proxy error page, a raw log line, a
+    // truncated fragment) is not a readiness signal. The previous non-empty
+    // tolerance released such garbage as a false 200; refusing it here lets a
+    // non-SSE text upstream fail with a classified error instead. Only a
+    // non-ping JSON payload under data: is a signal.
+    return false;
   }
 }
 
@@ -561,6 +626,13 @@ function processStreamReadinessLine(state: StreamReadinessSignalState, line: str
   if (trimmed.startsWith("data:")) {
     state.dataLines.push(trimmed.slice(5).trimStart());
   }
+
+  // Any other line outside data: is not a readiness signal. A structural SSE
+  // field (id: / retry:) carries no payload — `retry:` commonly opens a stream
+  // and some servers stamp `id:` on every frame including pings — so it must not
+  // release the gate. Keeping it refused also leaves a non-SSE text upstream (a
+  // raw HTML page, a bare log line) failing with a classified error instead of
+  // being replayed as a false 200.
   return false;
 }
 
@@ -745,6 +817,7 @@ export async function ensureStreamReadiness(
     dataLines: [],
     pendingLine: "",
     upstreamDiagnostic: null,
+    ...(options.provider === "cursor" ? { cursorFailure: null } : {}),
   };
   const startedAt = Date.now();
   const effectiveTimeoutMs = Math.max(0, Math.floor(options.timeoutMs));
@@ -1007,11 +1080,11 @@ export async function ensureStreamReadiness(
         continue;
       }
 
-      // Liveness extension: bytes arrived → connection is alive, not dead.
-      // Reset the deadline so slow-but-alive upstreams (reasoning warm-ups,
-      // keepalive-only phases) are not aborted.  The hard ceiling (maxDeadline)
-      // prevents unbounded waits and preserves the operator's fast-fail intent
-      // for truly dead connections.
+      // Liveness extension: only a chunk carrying a readiness signal or
+      // reasoning progress extends the deadline — the same "alive" test the
+      // gate below uses. Ping/keepalive-only chunks let the initial deadline
+      // run, so a ping-only upstream fails at the first deadline. The hard
+      // ceiling (maxDeadline) bounds the extension and is never raised here.
       // Parked streams: heartbeat comment frames suspend (freeze) the stall
       // deadline instead of extending it — the stall clock does not run
       // during the park. Data frames use the normal liveness path.
@@ -1021,7 +1094,10 @@ export async function ensureStreamReadiness(
         // Suspend: push the deadline forward by exactly the time spent
         // waiting, so the stall clock does not run during the park.
         deadline = Math.min(deadlineBeforeRead + (now - readStart), maxDeadline);
-      } else if (deadline < maxDeadline) {
+      } else if (
+        deadline < maxDeadline &&
+        (hasStreamReadinessSignal(decodedChunk) || isReasoningProgressFrame(decodedChunk))
+      ) {
         deadline = Math.min(now + effectiveTimeoutMs, maxDeadline);
         if (now - startedAt > effectiveTimeoutMs) {
           options.log?.debug?.(
@@ -1032,6 +1108,21 @@ export async function ensureStreamReadiness(
       }
 
       if (appendStreamReadinessSignal(readinessState, decodedChunk)) {
+        const failure = readinessState.cursorFailure;
+        if (failure) {
+          void reader.cancel(failure.message).catch(() => {});
+          const code = failure.code || "upstream_error";
+          const type = failure.type || "api_error";
+          return {
+            ok: false,
+            reason: sanitizeErrorMessage(failure.message),
+            classificationReason: failure.message,
+            upstreamFailure: true,
+            code,
+            type,
+            response: createErrorResponse(failure.status, failure.message, code, type),
+          };
+        }
         if (
           contentWatcher &&
           !contentWatcher.sawContent() &&

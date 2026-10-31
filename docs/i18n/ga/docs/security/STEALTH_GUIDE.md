@@ -16,68 +16,61 @@ Tá gnéithe ceilteachta ann ionas gur féidir le OmniRoute feidhmiú mar shrait
 
 ---
 
-## Sraith Méarlorgaireachta TLS
+## Ciseal Méarlorgaireachta TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Cruthaítear seisiúin mharthanacha `wreq-js` go leisciúil de réir scóip an chuntais agus an tseachfhreastalaí réitithe. Coimeádann linnte uile-phróisis `TlsClient` uasmhéid 128 seisiún a dhéanann aithris ar **Chrome 124 ar macOS** le haghaidh réamhtheachtaithe atá taobh thiar de Cloudflare. Teipeann `TlsClient.fetch()` go dúnta nuair nach bhfuil an t-am rite dúchasach ar fáil; féadfaidh glaoiteoir cúltaca lasmuigh den fhillteán seo a roghnú go sainráite.
+Cruthaítear seisiúin mharthanacha `wreq-js` go leisciúil de réir raon feidhme an chuntais agus an tseachfhreastalaí réitithe. Comhthiomsaíonn an `TlsClient` uile-phróisis uasmhéid 128 seisiún a dhéanann aithris ar **Chrome 124 ar macOS** le haghaidh seirbhísí réamhtheachtacha taobh thiar de Cloudflare. Teipeann `TlsClient.fetch()` ar bhealach dúnta nuair nach mbíonn an t-am rite dúchasach ar fáil; féadfaidh glaoiteoir cúlchiste lasmuigh den fhillteán seo a roghnú go sainráite.
 
 - Próifíl seisiúin: `browser: "chrome_124", os: "macos"`
-- Réiteach seachfhreastalaí (tosaíocht): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (i gcás íochtair freisin)
-- Teorainn ama: `TLS_CLIENT_TIMEOUT_MS` (faighte le hoidhreacht ó `FETCH_TIMEOUT_MS`, réamhshocrú 600000)
-- Tá Response `wreq-js` comhoiriúnach le fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Faireoir an chéad bhirt (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): réitíonn `TlsClient.fetch()`
-  a luaithe a thagann ceanntásca ón réamhtheachtaí, mar sin ní féidir le `TLS_CLIENT_TIMEOUT_MS` amháin
-  teorainn a chur le corp nach dtugann an chéad bheart choíche. Cuireann `guardTlsFirstByte()` an chéad
-  `read()` den chorp in aghaidh `TLS_FIRST_BYTE_WATCHDOG_MS` (réamhshocrú `10000`, díchumasaíonn `0` é);
-  ní dhéanann sé difear do chorp sláintiúil, ach cealaíonn corp stoptha léitheoir wreq agus ligeann sé do
-  loighic chúltaca TLS reatha `proxyFetch` titim ar aghaidh chuig an seoltóir díreach/seachfhreastalaí
-  (caitheann iarratas nach bhfuil sábháilte lena athsheinm, m.sh. POST le corp, earráid fós in ionad é a
-  atriail go ciúin).
+- Réiteach seachfhreastalaí (tosaíocht): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (na leaganacha cás íochtair freisin)
+- Teorainn ama: `TLS_CLIENT_TIMEOUT_MS` (faighte mar oidhreacht ó `FETCH_TIMEOUT_MS`, réamhshocrú 600000)
+- Tá Freagra `wreq-js` comhoiriúnach le fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Faireoir an chéad bheart (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): réitítear `TlsClient.fetch()`
+  a luaithe a thagann na ceanntásca réamhtheachtacha, mar sin ní féidir le `TLS_CLIENT_TIMEOUT_MS` amháin teorainn a chur le
+  corp nach dtugann an chéad bheart uaidh riamh. Cuireann `guardTlsFirstByte()` an chéad `read()` den chorp
+  i rás in aghaidh `TLS_FIRST_BYTE_WATCHDOG_MS` (réamhshocrú `10000`, díchumasaíonn `0` é); ní dhéantar difear do chorp
+  sláintiúil, agus cealaíonn corp stoptha léitheoir wreq agus ligeann sé don loighic chúlchiste TLS atá ann cheana in
+  `proxyFetch` leanúint ar aghaidh chuig an seoltóir díreach/seachfhreastalaí (caitheann iarratas nach bhfuil sábháilte
+  lena athsheinm, e.g. POST a bhfuil corp aige, earráid fós seachas atriail chiúin a dhéanamh).
 
 ### Iompar soláthraí fianán gréasáin — wreq-js 3.2.0
 
 Is é `open-sse/services/tlsClientBase.ts` an cuibheoir comhroinnte do na cúig iompar speisialaithe
-fianán gréasáin thíos. Roghnaíonn gach fillteán tanaí soláthraí próifíl brabhsálaí/OS. Úsáideann an
-cuibheoir an lódálaí aonair ama rite wreq agus an linn iompar in `open-sse/utils/tlsClient.ts`, agus
-eochair á socrú de réir próifíle + OS + seachfhreastalaí réitithe, agus úsáideann gach iarratas
-`cookieMode: "ephemeral"`. Dá bhrí sin, comhroinneann cuntais agus iarratais naisc ar leibhéal an
-iompair, ach ní chomhroinneann siad seisiún wreq ná próca fianán riamh.
+fianán gréasáin thíos. Roghnaíonn gach fillteán éadrom soláthraí próifíl brabhsálaí/OS. Úsáideann an cuibheoir
+an lódálaí aonair ama rite wreq agus an comhthiomsú iompair in `open-sse/utils/tlsClient.ts`, agus iad eochraithe de réir
+próifíle + OS + seachfhreastalaí réitithe, fad a úsáideann gach iarratas `cookieMode: "ephemeral"`. Dá bhrí sin,
+comhroinneann cuntais agus iarratais naisc ar leibhéal an iompair, ach ní chomhroinneann siad seisiún wreq ná stór fianán riamh.
 
-| Soláthraí  | Próifíl       | OS aithrise | Beartas EOF an tsrutha                  |
-| ---------- | ------------- | ----------- | --------------------------------------- |
-| Claude     | `chrome_146`  | Linux       | cuir `[DONE]` san áireamh               |
-| Perplexity | `firefox_148` | macOS       | cuir `event: end_of_stream` san áireamh |
-| Grok       | `chrome_146`  | Linux       | fág `[DONE]` as                         |
-| Notion     | `chrome_146`  | Windows     | cuir `[DONE]` san áireamh               |
-| LMArena    | `chrome_146`  | Windows     | gan fairtheoir; dún ar EOF dúchasach    |
+| Soláthraí  | Próifíl       | OS aithrise | Beartas EOF an tsrutha                   |
+| ---------- | ------------- | ----------- | ---------------------------------------- |
+| Claude     | `chrome_146`  | Linux       | cuir `[DONE]` san áireamh                |
+| Perplexity | `firefox_151` | macOS       | cuir `event: end_of_stream` san áireamh  |
+| Grok       | `chrome_146`  | Linux       | fág `[DONE]` as                          |
+| Notion     | `chrome_146`  | Windows     | cuir `[DONE]` san áireamh                |
+| LMArena    | `chrome_146`  | Windows     | gan mharcóir faire; dún ar EOF dúchasach |
 
-- Ídíonn sruthú `ReadableStream` dúchasach an fhreagra go díreach; ní chruthaítear comhad sealadach ná
-  taobhcharr.
-- Scrúdaítear suas le 256 beart tosaigh sula nochtar sruth. Maolaíonn soláthraithe SSE earráidí nach
-  earráidí SSE iad; mapálann Grok/LMArena dúshláin Cloudflare go `403` agus leathanaigh idirmheánacha
-  HTML go `502`.
-- Fanann teorainn ama dhúchasach an iarratais fillte i sprioc-am crua absalóideach JS. Déanann
-  crochadh an t-iompar próifíle/OS/seachfhreastalaí atá buailte amháin a neamhbhailíochtú agus a
-  dhúnadh sula n-athchruthaíonn an chéad iarratas eile é.
-- Is í tosaíocht réitigh an tseachfhreastalaí `proxyUrl` in aghaidh an ghlao → comhthéacs
-  cuntais/deais atá scóipeáilte don iarratas → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (le malairtí
-  cás íochtair san áireamh). Teipeann earráidí réitigh go dúnta seachas nasc díreach a sceitheadh.
-  Réitíonn LMArena d'aon ghnó i gcoinne `arena.ai`.
-- Tugann `byteResponse` URL `data:` ar ais a bhfuil cineál inneachair aige gan truailliú UTF-8.
-- Is iad na hearráidí `TlsClientUnavailableError` (pacáiste/breiseán gan fáil),
-  `TlsClientHangError` (sáraíodh an sprioc-am), agus `WreqTransportCapacityError` (cód earráide
-  comhroinnte thoilleadh an tseisiúin) nuair atá gach ceann de na 128 sliotán teoranta
-  próifíle/OS/seachfhreastalaí gníomhach nó á dhúnadh.
+- Ídíonn sruthú `ReadableStream` dúchasach an fhreagra go díreach; ní chruthaítear comhad sealadach ná seachcharr.
+- Scrúdaítear suas le 256 beart tosaigh sula nochtar sruth. Maolánaíonn soláthraithe SSE earráidí nach earráidí SSE iad;
+  mapálann Grok/LMArena dúshláin Cloudflare go `403` agus leathanaigh idirlinne HTML go `502`.
+- Fanann teorainn ama an iarratais dhúchasaigh fillte ag sprioc-am crua absalóideach JS. Má théann sé i bhfostú,
+  déantar neamhbhailí agus dúntar iompar na próifíle/OS/seachfhreastalaí lena mbaineann amháin sula n-athchruthaíonn
+  an chéad iarratas eile é.
+- Is í tosaíocht réitigh an tseachfhreastalaí ná `proxyUrl` in aghaidh an ghlao → comhthéacs cuntais/deais atá scópáilte don iarratas →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (na leaganacha cás íochtair san áireamh). Teipeann earráidí réitigh
+  ar bhealach dúnta seachas nasc díreach a ligean amach. Réitíonn LMArena in aghaidh `arena.ai` d'aon ghnó.
+- Tugann `byteResponse` URL `data:` ar ais a bhfuil cineál inneachair aige, gan truailliú UTF-8.
+- Is iad na hearráidí ná `TlsClientUnavailableError` (níl an pacáiste/breiseán ar fáil), `TlsClientHangError`
+  (sáraíodh an sprioc-am), agus `WreqTransportCapacityError` (cód earráide acmhainne an tseisiúin chomhroinnte)
+  nuair atá gach ceann de na 128 sliotán teoranta próifíle/OS/seachfhreastalaí gníomhach nó á dhúnadh.
 
-Fanann an seisiún cineálach `TlsClient` thuas speisialaithe do staid mharthanach fianán a fhaigheann
-tacaíocht ó bhrabhsálaí. Athúsáideann an dá chonair lódálaí modúil wreq amháin atá i dtaisce agus
-crúca saolré próisis amháin; fanann a linnte ar leithligh toisc go bhfuil a saolréanna fianán
-éagsúil d'aon ghnó.
+Fanann an seisiún cineálach `TlsClient` thuas speisialaithe do staid mharthanach fianán a bhfuil brabhsálaí mar thaca aici.
+Athúsáideann an dá chonair lódálaí modúil wreq taiscthe amháin agus crúca saolré próisis amháin; fanann a gcomhthiomsuithe
+ar leith toisc go bhfuil saolréanna a bhfianán difriúil d'aon ghnó.
 
-Tacaíonn an pacáiste pionnáilte leis na próifílí, ach féadfaidh glacadh WAF san fhíorshaol athrú go
-neamhspleách ar thástálacha conartha áitiúla. Bailíochtaigh athruithe méarloirg i gcoinne cuntais
-bheo atá údaraithe go sainráite sula maítear comhionannas le brabhsálaí réamhtheachtach.
+Tacaíonn an pacáiste pionnáilte leis na próifílí, ach is féidir le glacadh WAF iarbhír athrú go neamhspleách
+ar thástálacha conartha áitiúla. Bailíochtaigh athruithe méarloirg in aghaidh cuntais bheo atá údaraithe go sainráite
+sula maítear paireacht le brabhsálaí réamhtheachtach.
 
 ---
 

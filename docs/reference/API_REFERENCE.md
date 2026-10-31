@@ -31,6 +31,7 @@ For the focused OpenAI-compatible protocol and provider capability matrix, see
 - [WebSocket Streaming](#websocket-streaming)
 - [Quotas & Issues Reporting](#quotas--issues-reporting)
 - [Semantic Cache](#semantic-cache)
+- [CLIProxyAPI Management Compatibility](#cliproxyapi-management-compatibility)
 - [Dashboard & Management](#dashboard--management)
 - [Combo Management](#combo-management)
 - [Webhooks](#webhooks)
@@ -478,6 +479,48 @@ Authorization: Bearer your-api-key
 → Returns all chat, embedding, and image models + combos in OpenAI format
 ```
 
+### Model prices (`pricing`)
+
+An entry carries a `pricing` object when OmniRoute knows the model's price. The price comes
+from the pricing table that cost accounting uses: built-in defaults, synced prices, and
+overrides set through `/api/pricing`. These are list prices, so subscription providers also
+show a per-token price.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Fields                                                          | Unit                          | Notes                                                                                                                                      |
+| --------------------------------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD per token, decimal string | OpenRouter-compatible, never in exponent notation. The two cache fields appear only when there is a cache price.                           |
+| `input`, `output`, `cached`, `cache_creation`                   | USD per 1M tokens, number     | Fields from earlier catalog versions, kept for existing clients. `reasoning` and `long_context` also appear when the pricing row has them. |
+
+- **Combos** carry the price of their first visible target. Built-in `auto/*` combos pick a
+  target at request time, so they have no `pricing`.
+- **Free models** show `"0"` (and `0`) when their price is zero. A model with no pricing row
+  also shows `"0"` when the catalog marks it free (`free: true`) or the built-in free-model
+  catalog lists it.
+- **Unknown price:** the entry has no `pricing` key.
+- **Credit-metered providers** (such as Kiro) bill per request rather than per token. Their
+  entries keep the numeric per-1M fields they had before and carry no per-token string fields.
+- **Variants** (reasoning-effort ids, no-thinking aliases, discovery and gateway mirrors)
+  copy the price of the model they route to.
+- The fields carry base rates only. Long-context tiers (the numeric `long_context` field) and
+  service-tier multipliers (for example Codex fast or flex) do not change `prompt` or
+  `completion`.
+- The object is the same for every authentication style, including an Anthropic-style
+  request with `x-api-key` and `anthropic-version` (the response stays `{ "object": "list",
+"data": [...] }`). Implementation: `src/app/api/v1/models/catalogPricing.ts`.
+
 ### Model id prefixes (`?prefix=`)
 
 Most models are advertised under a **provider prefix**. Which prefix you get is controlled by
@@ -587,6 +630,82 @@ resolution, executor functions, request headers, and account data.
 
 Use this endpoint when a sidecar runs out-of-process and cannot import
 `open-sse/config/providerPluginManifestRegistry.ts` directly.
+
+---
+
+## ElevenLabs audio generation
+
+Configure an `elevenlabs` provider connection in OmniRoute with your ElevenLabs API key.
+Clients authenticate with their **OmniRoute** key (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+the gateway supplies the stored provider key as `xi-api-key`. Never send an ElevenLabs key
+as the gateway bearer token.
+
+| Method | Path                        | Response                                    | API key endpoint category |
+| ------ | --------------------------- | ------------------------------------------- | ------------------------- |
+| POST   | `/v1/sound-generation`      | Native audio bytes                          | `elevenlabs`              |
+| POST   | `/v1/music`                 | Native audio bytes                          | `music`                   |
+| POST   | `/v1/music/stream`          | Streaming audio bytes                       | `music`                   |
+| POST   | `/v1/music/detailed`        | Native multipart audio and composition plan | `music`                   |
+| POST   | `/v1/music/detailed/stream` | Native SSE metadata and audio chunks        | `music`                   |
+| POST   | `/v1/music/plan`            | JSON composition plan                       | `music`                   |
+
+These endpoints complement the existing `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` and `/v1/speech-to-text` routes. Native JSON fields
+and query parameters such as `output_format` and `enable_logging` are preserved.
+`/v1/music/detailed` responses retain their multipart boundaries; parse them as multipart.
+`/v1/music/detailed/stream` returns `text/event-stream` with composition metadata and
+base64 audio chunks in SSE events. All six routes support CORS preflight.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# A short sound effect. Duration: 0.5 to 30 seconds.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Music duration is expressed in milliseconds: 3000 to 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+Use `/v1/music/stream` with the same JSON body for incremental audio delivery. Composition
+accepts exactly one of `prompt` or `composition_plan`; `/v1/music/plan` requires `prompt`
+and optionally accepts `source_composition_plan`. The native schemas preserve additional
+provider fields so composition-plan versions and fine-tuning options reach ElevenLabs.
+
+The unified `/v1/music/generations` endpoint also accepts `elevenlabs/music_v1`,
+`elevenlabs/music_v2` and `elevenlabs/music_v2_5`. With an active ElevenLabs connection,
+these models are exposed by the music catalog. This endpoint returns
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. Its `duration` field is in
+seconds and maps to `music_length_ms`; an explicit `music_length_ms` takes precedence.
+`instrumental` maps to `force_instrumental`, with the native field taking precedence.
+Use the native streaming endpoints for streaming and the native composition endpoint
+for requests driven only by a composition plan.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+Endpoint, model, budget and connection restrictions apply before an upstream call. Native
+routes return upstream status codes and error bodies unchanged, including `402` for a plan
+restriction and `429` for a quota limit. The `character-cost`, `song-id`, `request-id` and `retry-after`
+headers are preserved when present. A free credit balance does not guarantee access to every
+music model, output format or API feature: ElevenLabs decides entitlement for each request.
+The unified endpoint preserves error status codes in OmniRoute's normalized error envelope.
+
+Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[music composition](https://elevenlabs.io/docs/api-reference/music/compose) and
+[streaming music details](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
@@ -755,14 +874,18 @@ and a key with the wrong type is dropped. Any other key is ignored, including au
 `stream` and `outputSchema`. The flat keys used by other providers (`cx`, `depth`, ...) work
 as before.
 
-| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                                            |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                 |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` merged over the default `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
 
 The generic fields always win: `query`, `max_results`, `filters` (domains), `country` and the
 topic derived from `search_type`. On Exa, `search_type: "news"` keeps `category: "news"`.
 Tavily also accepts `search_type: "finance"` (`topic: "finance"`).
+
+Firecrawl search cost is recorded per started block of 10 returned results, at $0.002 (2
+credits) a block and at least one block per call
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 results cost $0.004.
 
 The generic `time_range` now reaches both providers: Exa gets `startPublishedDate` (ISO
 timestamp) and Tavily gets `start_date` (`YYYY-MM-DD`). An explicit date in `provider_options`
@@ -771,9 +894,23 @@ overrides the mapped one.
 Exa results keep `id`, `highlight_scores`, `summary`, `subpages`, `entities` and `extras` in
 `provider_raw`. Tavily results keep `images` and `favicon`.
 
-Cost accounting is still the flat registry `costPerQuery`. Tavily bills
-`search_depth: "advanced"` at more credits per call, and that difference is not reflected in
-`usage.search_cost_usd`.
+Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for
+`deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+whether `depth` comes from `provider_options` or the connection's settings.
+
+Exa `type: "lite"` (Exa 3.0) accepts a smaller set of fields and rejects the whole request
+when any other field is set. For lite, `additionalQueries`, `systemPrompt` and every
+`contents` key except `text` and `highlights` are dropped before the call. The deprecated
+`subpages`, `subpageTarget`, `highlights.numSentences` and `highlights.highlightsPerUrl` are no
+longer forwarded.
+
+Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's
+own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the
+legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per
+returned result when `contents.summary` is set. Tavily is recorded at 1 credit ($0.008) for
+`search_depth` `basic`, `fast` and `ultra-fast`, and 2 credits ($0.016) for `advanced`
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). A call with
+`auto_parameters: true` that Tavily upgrades to advanced is still recorded at 1 credit.
 
 ---
 
@@ -891,6 +1028,27 @@ completion.
 | POST   | `/v1/issues/report` | Report a quota/key issuance failure to GitHub (requires `GITHUB_ISSUES_REPO` + token) |
 
 **Auth:** Bearer API key (`isAuthenticated`).
+
+### Quota session recovery (opt-in)
+
+A non-streaming `POST /v1/chat/completions` or `POST /v1/responses` that fails with a
+terminal quota error (`402`/`429`/`503` whose body says the quota or credits are exhausted)
+can be parked and replayed later instead of returning the error. The caller opts in per
+request with three headers:
+
+| Header                       | Value                                         |
+| ---------------------------- | --------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                        |
+| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
+| `x-omniroute-recovery-turn`  | turn id unique within the session (same rule) |
+
+Only `stream: false` turns with no tools, tool history or `previous_response_id`, and no
+`x-omniroute-connection` pin, are eligible, and `STORAGE_ENCRYPTION_KEY` must be set (the
+request is stored encrypted for up to 24 h). The response is then `202` with
+`recovery.poll`; poll `GET /v1/quota-recoveries/{id}` (`202` while pending, `200` with the
+recovered body when completed) or cancel with `DELETE`. Tickets are visible only to the API
+key that created them. A replay whose outcome is uncertain ends in `needs_confirmation`
+instead of being sent twice. Source: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1060,6 +1218,42 @@ Any request can bypass the cache regardless of key settings:
 ```
 X-OmniRoute-No-Cache: true
 ```
+
+---
+
+## CLIProxyAPI Management Compatibility
+
+OmniRoute answers the three [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI)
+management endpoints that usage dashboards call to read Claude and Codex subscription limits
+(for example T3 Code's `cliproxy` usage-limit source). Point the client's base URL at
+OmniRoute and use an API key with the `manage` scope as its management key. The routes are
+served at `/v0/management/*` and at `/api/v0/management/*`.
+
+| Method | Path                         | Description                                                                                                                                    |
+| ------ | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v0/management/auth-files`  | Claude and Codex OAuth connections as `{ files: [{ id, auth_index, provider, email, disabled, id_token }] }`. No tokens                        |
+| POST   | `/v0/management/api-call`    | Body `{ auth_index, method, url, header?, data? }`. Sends one allowlisted request with the account's token and returns `{ status_code, body }` |
+| POST   | `/v0/management/reset-quota` | Body `{ auth_index }`. Clears the connection cooldown, model lockouts and Codex per-scope cooldowns of one account                             |
+
+- `auth_index` is the OmniRoute connection id. `provider` is `claude` or `codex` (OAuth
+  connections only; the `anthropic` API-key provider is not listed). For Codex,
+  `id_token.chatgpt_account_id` is the stored workspace id and `plan_type` the stored plan.
+- `api-call` is not a generic proxy. It accepts only Claude `GET
+https://api.anthropic.com/api/oauth/usage` and Codex `GET
+https://chatgpt.com/backend-api/wham/usage`, `GET .../wham/rate-limit-reset-credits` and
+  `POST .../wham/rate-limit-reset-credits/consume`, each only for an account of the matching
+  provider. Anything else returns `403` without contacting the upstream. The caller's
+  `Authorization` header (including the `$TOKEN$` placeholder) is ignored: OmniRoute injects
+  the connection's access token, refreshing it first when it is near expiry, and forwards only
+  allowlisted headers (`anthropic-beta`; `OpenAI-Beta`, `Originator`, `Chatgpt-Account-Id`;
+  `Accept`, `Content-Type`). A missing `Chatgpt-Account-Id` defaults to the stored workspace id.
+  Requests time out after 15 seconds and use the connection's proxy.
+- `reset-quota` leaves terminal states (banned, expired, credits_exhausted) alone. An unknown
+  `auth_index` returns `404`.
+
+**Auth:** dashboard session or a `manage`-scoped API key, required even when login is disabled
+(the paths are in `ALWAYS_PROTECTED_API_PATHS`). Inference-only keys get `403`. Source:
+`src/lib/cliproxyCompat/managementApi.ts`.
 
 ---
 

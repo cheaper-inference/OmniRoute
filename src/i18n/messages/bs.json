@@ -1,4 +1,81 @@
 {
+  "teamCosts": {
+    "title": "Troškovi tima",
+    "subtitle": "Upravljajte zajedničkim mekim budžetima i procjenama troškova iz kataloga.",
+    "refresh": "Osvježi",
+    "create": "Kreiraj tim",
+    "edit": "Uredi tim",
+    "archive": "Arhiviraj",
+    "selectTeam": "Timovi",
+    "searchTeams": "Pretraži timove",
+    "statusFilter": "Status tima",
+    "active": "Aktivan",
+    "archived": "Arhiviran · samo za čitanje",
+    "allTeams": "Svi timovi",
+    "noTeams": "Nema odgovarajućih timova.",
+    "selectHint": "Kreirajte ili odaberite tim za prikaz troškova.",
+    "loading": "Učitavanje troškova tima…",
+    "budgetTitle": "Trenutni meki budžet",
+    "budgetSubtitle": "Uspješna zabilježena potrošnja · klizni prozor · nezavisno od datuma izvještaja",
+    "archivedBudget": "Arhiviran: provođenje budžeta je neaktivno. Historijski izvještaji ostaju dostupni.",
+    "unlimited": "Neograničeno — nije konfigurisan zajednički meki budžet.",
+    "budgetUnavailable": "Status budžeta nije dostupan. Osvježite za ponovni pokušaj.",
+    "used": "Uspješna potrošnja",
+    "maximum": "Maksimum budžeta",
+    "remaining": "Poznati ostatak",
+    "resets": "Resetuje se",
+    "unpricedBudget": "Dio uspješne potrošnje ima nepoznatu cijenu. Poznati zbir je nepotpun; provođenje budžeta ovaj prozor smatra prekoračenim.",
+    "overBudget": "Budžet dostignut ili prekoračen · {amount} preko",
+    "reportTitle": "Izvještaj o potrošnji",
+    "reportSubtitle": "Svi pokušaji · procjena iz kataloga u USD, nije račun · cijeli UTC datumi",
+    "reportPeriod": "Period izvještaja",
+    "day1": "1 dan",
+    "day7": "7 dana",
+    "day30": "30 dana",
+    "allTime": "Cijelo vrijeme",
+    "reportSpend": "Procijenjeni izdaci izvještaja",
+    "requests": "Zahtjevi",
+    "assignedKeys": "Dodijeljeni ključevi",
+    "unpricedReport": "Ovaj izvještaj sadrži nepoznate cijene. Procijenjeni izdaci su nepotpuni.",
+    "breakdown": "Trošak po API ključu",
+    "noUsage": "Nema potrošnje u ovom periodu izvještaja.",
+    "keyName": "Naziv API ključa",
+    "tokens": "Ulazni + izlazni tokeni",
+    "unnamedKey": "Neimenovani ili obrisani ključ",
+    "unpriced": "Nepoznata cijena",
+    "members": "Članstvo",
+    "memberSubtitle": "Promjena članstva zadržava historijske izdatke u originalnom timu.",
+    "searchKeys": "Pretraži ključeve ili trenutne vlasnike",
+    "chooseKey": "Odaberite API ključ",
+    "unassigned": "Nije dodijeljeno",
+    "ownership": "Trenutni tim za naplatu: {team}",
+    "assign": "Dodijeli",
+    "remove": "Ukloni",
+    "noMembers": "Nema trenutnih članova. Historijska potrošnja se i dalje može računati u budžet.",
+    "assignedAt": "Dodijeljeno {date} (UTC)",
+    "name": "Naziv tima",
+    "description": "Opis",
+    "enableBudget": "Omogući zajednički meki budžet",
+    "amount": "Iznos budžeta (USD)",
+    "duration": "Klizni prozor budžeta",
+    "cancel": "Otkaži",
+    "save": "Sačuvaj",
+    "confirm": "Potvrdi",
+    "transferTitle": "Potvrdite prijenos ključa",
+    "transferMessage": "Premjestiti ovaj ključ iz „{source}” u „{destination}”? Historijski izdaci ostaju u originalnom timu.",
+    "removeTitle": "Ukloni dodjelu ključa",
+    "removeMessage": "Ukloniti ovaj ključ iz „{team}”? Historijski izdaci ostaju u ovom timu.",
+    "archiveTitle": "Arhiviraj tim",
+    "archiveMessage": "Arhivirati „{team}”? Sve trenutne veze se zatvaraju i provođenje budžeta prestaje. Historijski izvještaji ostaju dostupni.",
+    "invalidName": "Unesite naziv (1–200 znakova) i opis od najviše 2000 znakova.",
+    "invalidAmount": "Unesite konačan iznos budžeta veći od nule.",
+    "unauthorized": "Prijavite se na upravljačku ploču za nastavak.",
+    "forbidden": "Nemate dozvolu za upravljanje timovima. Vaš unos je sačuvan.",
+    "notFound": "Ovaj tim ili dodjela više ne postoji.",
+    "conflict": "Dodjela ili tim su se promijenili. Osvježite i potvrdite trenutno vlasništvo prije ponovnog pokušaja.",
+    "failed": "Zahtjev nije uspio. Vaš unos je sačuvan; pokušajte ponovo.",
+    "partialBudget": "Neke zadržane dnevne korpe preklapaju se s granicom prozora i ne mogu se tačno raspodijeliti. Prikazani izdaci su nepotpuni; preostali iznos nije dostupan. Postojeća politika mekog budžeta ostaje nepromijenjena."
+  },
   "codexKeyServiceMode": {
     "title": "Režim usluge Codex za ovaj API ključ",
     "description": "Primjenjuje se na Codex zahtjeve, uključujući Codex modele unutar kombinacija. Prisilni režimi nadjačavaju klijenta, globalne postavke i zadane postavke veze. Ostali pružaoci usluga ostaju nepromijenjeni.",
@@ -25,8 +102,10 @@
     "confirm": "Da li ste",
     "refresh": "Osvježi",
     "close": "Zatvori",
+    "dialogTitleFallback": "Dijalog",
     "previousPage": "Prethodna stranica",
     "nextPage": "Sljedeća stranica",
+    "pagination": "Paginacija",
     "capsLockOn": "Caps Lock je uključen",
     "dismissNotification": "Zatvori obavijest",
     "toggleColumns": "Promijeni kolone",
@@ -182,6 +261,7 @@
     "combos": "Kombinacije",
     "noModelsFound": "Nema pronađenih modela",
     "clear": "Očisti",
+    "clearFilters": "Očisti filtere",
     "done": "Gotovo",
     "selectAll": "Odaberi sve",
     "unselectAll": "Poništi odabir svih",
@@ -998,7 +1078,10 @@
     "batchFileUsedByCount": "Korišteno od strane {count, plural, one {# batch-a} other {# batch-ova}}",
     "batchFilePreview": "Pregled",
     "batchFilePreviewTruncated": "Prikazane prve {shown} linije (ukupno {total} linija)",
-    "batchFileDownloadFull": "Preuzmi cijelu datoteku"
+    "batchFileDownloadFull": "Preuzmi cijelu datoteku",
+    "tokensPageTitle": "Tokeni",
+    "tokensPageDescription": "Šaljite tokene između API ključeva, dijelite pozivne kodove i povezujte servere zajednice.",
+    "tokensServerUrlLabel": "URL servera"
   },
   "disabled": "Onemogućeno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Usmjeri zahtjeve s iscrpljenim budžetom rute na hitni besplatni fallback provajder/model.",
@@ -1085,17 +1168,8 @@
     "serverDisconnectedMsg": "Proxy server je zaustavljen ili se ponovo pokreće.",
     "expandSidebar": "Proširi bočnu traku",
     "collapseSidebar": "Skupi bočnu traku",
-    "themes": "Teme",
-    "presetColors": "Popularne boje",
     "createTheme": "Kreiraj temu",
     "chooseColor": "Odaberi jednu boju",
-    "themeCoral": "Koralna",
-    "themeBlue": "Plava",
-    "themeRed": "Crvena",
-    "themeGreen": "Zelena",
-    "themeViolet": "Violetna",
-    "themeOrange": "Narandžasta",
-    "themeCyan": "Cijan",
     "cliToolsShort": "Alati",
     "cache": "Keš",
     "cacheShort": "Keš",
@@ -1103,12 +1177,10 @@
     "themeSystem": "Sistem tema",
     "whitelabelingDesc": "Opis brendiranja",
     "switchThemes": "Promijeni temu",
-    "themeAccentDesc": "Opis akcentne boje teme",
     "uploadFavicon": "Otpremi favicon",
     "themeDark": "Tamna tema",
     "customLogoDesc": "Opis prilagođenog logotipa",
     "sidebarVisibilityToggle": "Prekidač vidljivosti bočne trake",
-    "themeAccent": "Akcentna boja teme",
     "resetFavicon": "Resetuj favicon",
     "whitelabeling": "Brendiranje",
     "darkMode": "Tamni režim",
@@ -1122,10 +1194,8 @@
     "customLogo": "Prilagođeni logo",
     "appearance": "Izgled",
     "themeSelectionAria": "Aria za odabir teme",
-    "themeCreate": "Kreiraj temu",
     "customFaviconDesc": "Opis prilagođene favicon ikone",
     "logoPreview": "Pregled logotipa",
-    "themeCustom": "Prilagođena tema",
     "hideHealthLogsDesc": "Opis za sakrivanje zapisnika zdravlja",
     "faviconPreview": "Pregled favicon ikone",
     "changelog": "Promjene (Changelog)",
@@ -1352,7 +1422,9 @@
       "open": "otvori",
       "close": "zatvori"
     },
-    "noResults": "Nema rezultata"
+    "noResults": "Nema rezultata",
+    "costsTeams": "Timovi",
+    "costsTeamsSubtitle": "Troškovni centri timova"
   },
   "webhooks": {
     "title": "Webhookovi",
@@ -1485,7 +1557,11 @@
       "chatIdPlaceholder": "-100123456789 ili @channelname",
       "chatIdHint": "Jedinstveni numerički identifikator ili javno korisničko ime chata/kanala.",
       "tutorial": "Kako konfigurisati Telegram webhook:"
-    }
+    },
+    "copy": "Kopiraj",
+    "copied": "Kopirano!",
+    "expandDetails": "Prikaži detalje",
+    "collapseDetails": "Sakrij detalje"
   },
   "compliance": {
     "auditTitle": "Revizija",
@@ -1597,22 +1673,17 @@
     "mcpMetricCalls24h": "Pozivi (24h)",
     "mcpMetricSuccessRate": "Stopa uspjeha",
     "mcpMetricAvgDuration": "Prosječno trajanje",
-    "mcpMetricTopTool": "Najbolji alat"
-  },
-  "themesPage": {
-    "title": "Teme",
-    "description": "Odaberite unaprijed definiranu temu ili kreirajte svoju pomoću jedne boje",
-    "presetColors": "Popularne boje",
-    "customTheme": "Prilagođena tema",
-    "customThemeDesc": "Kliknite na kreiraj temu i odaberite jednu boju",
-    "createTheme": "Kreiraj temu",
-    "activePreset": "Aktivna tema"
+    "mcpMetricTopTool": "Najbolji alat",
+    "dismissError": "Odbaci grešku"
   },
   "header": {
+    "teamsDescription": "Procjene troškova tima i zajednički meki budžeti",
     "logout": "Odjavi se",
     "quickNavigation": "Brza navigacija",
     "quickNavigationTitle": "Brza navigacija (⌘K / Ctrl+K)",
     "openQuickNavigation": "Otvori brzu navigaciju",
+    "openMenu": "Otvori meni",
+    "products": "Keak proizvodi",
     "switchToLightMode": "Prebaci na svijetli način",
     "switchToDarkMode": "Prebaci na tamni način",
     "language": "Jezik",
@@ -1640,8 +1711,6 @@
     "anthropicCompatible": "Anthropic kompatibilno",
     "media": "Mediji",
     "mediaDescription": "Generišite slike, video zapise i muziku",
-    "themes": "Teme",
-    "themesDescription": "Odaberite temu boja za cijeli kontrolni panel",
     "costsDescription": "Pratite troškove, analizirajte trendove i upravljajte svojim AI budžetom kod svih provajdera",
     "cacheDescription": "Pratite efikasnost prompt cache-a provajdera i lokalno ponovno korištenje semantičkih odgovora.",
     "limitsDescription": "Konfigurišite ograničenja brzine (rate limits) i kvote po API ključu i provajderu",
@@ -1933,7 +2002,14 @@
     "readinessStep3": "Kopirajte svoj endpoint",
     "readinessStep4": "Pošaljite test zahtjev",
     "readinessContinue": "Nastavi sa podešavanjem",
-    "readinessDismiss": "Zatvori za sada"
+    "readinessDismiss": "Zatvori za sada",
+    "unpricedUsageTitle": "{count, plural, one {# model} other {# modela}} sa nedavnom upotrebom ali bez konfigurirane cijene",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API ključ s ograničenjem korištenja} other {# API ključeva s ograničenjem korištenja}} su koristili ove modele u posljednjih 8 dana. Dok je ta upotreba unutar dnevnog ili sedmičnog obračunskog perioda ključa, ključ se smatra prekoračenim i njegovi zahtjevi se blokiraju (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Ova upotreba se računa kao $0 prema ograničenjima upotrebe po ključu (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# zahtjev} other {# zahtjeva}}, {keys, plural, one {# ograničen ključ} other {# ograničena ključa}}",
+    "unpricedUsageMore": "…i još {count}",
+    "unpricedUsageConfigure": "Konfiguriraj cijene",
+    "unpricedUsageDismiss": "Zatvori"
   },
   "analytics": {
     "title": "Analitika",
@@ -2495,7 +2571,12 @@
     "onlySelectedConnections": "Samo odabrane konekcije",
     "selectAtLeastOneConnection": "Odaberite najmanje jednu konekciju ili odaberite Sve konekcije.",
     "allConnectionsDesc": "Ovaj ključ može koristiti bilo koju aktivnu konekciju.",
-    "restrictedToConnections": "Ograničeno na {count, plural, one {# konekciju} other {# konekcija}}."
+    "restrictedToConnections": "Ograničeno na {count, plural, one {# konekciju} other {# konekcija}}.",
+    "preferredConnections": "Preferirane konekcije",
+    "preferredConnectionsDesc": "Redoslijed prioriteta po ključu. Ako preferirana konekcija nije dostupna, rutiranje prelazi na sljedeću prihvatljivu.",
+    "preferredConnectionsNone": "Nije postavljena preferencija — koristi se zadana strategija rutiranja.",
+    "preferredConnectionsClear": "Očisti",
+    "removeSelection": "Ukloni {name}"
   },
   "auditLog": {
     "title": "Dnevnik revizije",
@@ -2607,7 +2688,9 @@
     "imageToTextBridgeCta": "Konfigurišite Image→Text most u Modality Bridge postavkama",
     "sttBridgeCta": "Konfigurišite Speech→Text most u postavkama Modality Bridge-a",
     "existingConnection": "Postojeća veza",
-    "openrouterSttDescription": "OpenRouter modeli za pretvaranje govora u tekst koriste vašu konfigurisanu OpenRouter vezu. Nisu potrebni posebni kredencijali."
+    "openrouterSttDescription": "OpenRouter modeli za pretvaranje govora u tekst koriste vašu konfigurisanu OpenRouter vezu. Nisu potrebni posebni kredencijali.",
+    "modalityTabsAria": "Vrsta medija",
+    "serviceKindsAria": "Vrsta usluge"
   },
   "search": {
     "searchQuery": "Upit za pretragu",
@@ -2963,6 +3046,14 @@
     "openClawManualConfiguration": "Open Claw - Ručna konfiguracija",
     "clineManualConfiguration": "Cline Ručna konfiguracija",
     "kiloManualConfiguration": "Kilo Code Ručna konfiguracija",
+    "piManualConfiguration": "Pi - ručna konfiguracija",
+    "piConfigInvalidTitle": "Pi models.json je nečitljiv",
+    "piOmnirouteConfigured": "OmniRoute je konfigurisan kao Pi prilagođeni provajder",
+    "piModelHelp": "Pi ne otkriva automatski modele za prilagođene krajnje tačke — model koji odaberete je eksplicitno upisan u models.json.",
+    "piManualConfigTitle": "Ili uredite ~/.pi/agent/models.json ručno",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Zatim pokrenite Pi i odaberite omniroute provajdera. Postavite PI_CODING_AGENT_DIR da premjesti cijeli direktorij agenta.",
+    "piUnownedNote": "Ovaj unos je dodat izvan OmniRoute (npr. prilagođene krajnje tačke pi-guija). Apliciranje će ga usvojiti; Resetovanje uklanja samo unose koje je OmniRoute napisao.",
     "whenToUseLabel": "Kada koristiti",
     "openToolDocs": "Otvori dokumentaciju alata",
     "toolUseCases": {
@@ -2982,6 +3073,7 @@
       "amp": "Koristite kada želite Amp shorthand radne tokove, ali i dalje trebate primjenu OmniRoute aliasa i pravila rutiranja.",
       "hermes": "Koristite kada vam je potreban lagani terminal-native AI asistent za brze zadatke.",
       "hermes-agent": "Koristite kada vam je potreban Hermes Agent (od Nousresearch) sa default, delegation, vision i auxiliary modelima rutiranim kroz OmniRoute.",
+      "whycodes": "Koristite kada želite WhyCodes kao autonomni CLI agent opće namjene (TUI, imenovani agenti, memorija, swarm) usmjeren na OmniRoute.",
       "custom": "Koristite za prilagođene implementacije alata ili generičke OpenAI-kompatibilne konfiguracije."
     },
     "toolDescriptions": {
@@ -2991,6 +3083,7 @@
       "grok-build": "xAI Grok Build TUI coding agent sa podrškom za prilagođene provajdere",
       "droid": "Factory Droid AI pomoćnik",
       "openclaw": "Open Claw AI pomoćnik",
+      "openclaude": "OpenClaude CLI agent za kodiranje s podrškom za OpenAI-kompatibilnog pružaoca",
       "cline": "Cline CLI AI pomoćnik za programiranje",
       "kilo": "Kilo Code CLI AI pomoćnik za programiranje",
       "qwen": "Alibaba Qwen Code CLI",
@@ -3022,6 +3115,7 @@
       "warp": "Warp AI terminal sa podrškom za prilagođene provajdere",
       "agent-deck": "Agent Deck orkestrator više agenata",
       "5dive": "5dive — self-hosted flota coding agenata; jedan auth profil sve njih usmjerava na OmniRoute",
+      "whycodes": "WhyCodes autonomni CLI agent s OpenAI-kompatibilnim osnovnim URL-om",
       "zed": "Zed uređivač koda — ugrađeni agent putem OpenAI-kompatibilnog provajdera"
     },
     "guides": {
@@ -3278,7 +3372,19 @@
     "cliproxyapiUnknown": "Nepoznato",
     "cliproxyapiUpdate": "Ažuriraj",
     "cliproxyapiUpdateAvailable": "Dostupno ažuriranje: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verzija"
+    "cliproxyapiVersion": "Verzija",
+    "piInstallTitle": "Instalirajte Pi Coding Agent",
+    "piInstallInstructions": "Instalirajte Pi CLI, a zatim se vratite ovdje da ga povežete sa OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Koristite URL dostupnu sa mašine na kojoj radi Pi. OpenAI-kompatibilna /v1 krajnja tačka se dodaje automatski.",
+    "piManualMergeHint": "Samo pregled. Spojite ovaj unos providers.omniroute u models.json tako da vaši drugi provajderi i postavke ostanu netaknuti.",
+    "removeMapping": "Ukloni mapiranje",
+    "customUrl": "Prilagođena URL",
+    "customEndpointAria": "Prilagođena tačka pristupa",
+    "useDefaultKey": "Koristite zadanu ključ za OmniRoute",
+    "mainModelAria": "Glavni model",
+    "manualConfigTitle": "Ručna konfiguracija Grok Build"
   },
   "modelCatalog": {
     "title": "Modeli i kombinacije",
@@ -3342,6 +3448,18 @@
     "maxMembersPlaceholder": "npr. 10",
     "testSelected": "Testiraj odabrano ({count})",
     "testAllFiltered": "Testiraj sve filtrirano ({count})",
+    "visibility": "Vidljivost",
+    "allVisibility": "Vidljivi i skriveni",
+    "visibleOnly": "Vidljivi",
+    "hiddenOnly": "Skriveni",
+    "visibleColumn": "Vidljiv",
+    "hideModel": "Sakrij {name} iz /v1/models",
+    "showModel": "Prikaži {name} u /v1/models",
+    "hiddenBadge": "Skriven",
+    "hideFiltered": "Sakrij filtrirane ({count})",
+    "showFiltered": "Prikaži filtrirane ({count})",
+    "visibilityCounts": "{visible} vidljivih · {hidden} skrivenih · {total} ukupno",
+    "visibilityUpdateFailed": "Ažuriranje vidljivosti modela nije uspjelo",
     "cancel": "Otkaži",
     "clearResults": "Očisti rezultate",
     "testing": "Testiranje...",
@@ -3397,16 +3515,53 @@
     "httpError": "Zahtjev nije uspio sa statusom HTTP {status}",
     "testFailedNoDetail": "Test nije uspio bez poruke o grešci",
     "additionalCapabilities": "Dodatne mogućnosti: {list}",
-    "comboRefMember": "Kombinacija → {name}"
+    "comboRefMember": "Kombinacija → {name}",
+    "keyAccessButton": "Pristup API ključu",
+    "allowedInKeys": "Dozvoljeno u: {count, plural, one {# ključu} few {# ključa} other {# ključeva}}",
+    "keysLoading": "Učitavanje API ključeva…",
+    "keysRetry": "Pokušaj ponovo učitati ključeve",
+    "accessViaPattern": "putem {pattern}",
+    "accessBlocked": "Blokirano od strane {pattern}",
+    "editKeyAccess": "Uredi pristup ključu",
+    "toggleKeyAccess": "Dozvoli {item} na {name}",
+    "resultNetworkError": "Dodjeljivanje nije uspjelo",
+    "resultWouldEmptyModels": "Ovo bi ostavilo ovaj ključ bez dozvoljenih modela — umjesto toga uredite pristup ključu",
+    "resultWouldEmptyCombos": "Ovo bi ostavilo ovaj ključ bez dozvoljenih kombinacija — umjesto toga uredite pristup ključu",
+    "keyUpdatePending": "{name} se još uvijek ažurira. Pokušajte ponovo za trenutak.",
+    "assignToKeys": "Dodijeli API ključevima…",
+    "assignApply": "Primijeni promjene",
+    "assignComplete": "Pristup API ključu ažuriran",
+    "assignFailed": "Neka ažuriranja API ključeva nisu uspjela",
+    "assignNoChanges": "Pristup API ključevima nije promijenjen",
+    "selectedAccessItems": "Odabrane stavke: {count}",
+    "assignExcludedCombos": "{count, plural, one {# odabrani red kombinacije nije model i ovdje će biti preskočen} few {# odabrana reda kombinacije nisu modeli i ovdje će biti preskočeni} other {# odabranih redova kombinacije nisu modeli i ovdje će biti preskočeni}}. Dodijelite kombinacije s kartice Combos.",
+    "assignActionAdd": "Dodaj",
+    "assignActionRemove": "Ukloni",
+    "searchKeys": "Pretraži API ključeve",
+    "selectApiKey": "Odaberi API ključ {name}",
+    "allModelsAccess": "Svi modeli",
+    "allCombosAccess": "Sve kombinacije",
+    "modelAccessCount": "Modeli: {count}",
+    "comboAccessCount": "Kombinacije: {count}",
+    "keyInactive": "Neaktivno",
+    "keyBanned": "Blokirano",
+    "keyRevoked": "Opozvano",
+    "switchRestrictedConfirm": "Prebaci ovaj ključ na ograničeni pristup: samo odabrane stavke će biti dozvoljene",
+    "removeNoChangeHint": "Ovaj ključ dozvoljava sve; uklanjanje odabranih stavki neće ništa promijeniti",
+    "removeStaysAllowedHint": "I dalje dozvoljeno na ovom ključu putem {patterns}",
+    "resultChanged": "Izmijenjeno",
+    "resultUnchanged": "Nema promjene",
+    "resultSkipped": "Preskočeno",
+    "resultNeedsSwitch": "Potrebno je prebaciti na ograničeni pristup"
   },
   "combos": {
+    "title": "Kombinacije",
+    "description": "Kreirajte kombinacije modela sa ponderisanim rutiranjem i podrškom za fallback",
+    "autoCatalogTitle": "Katalog auto-rutiranja",
     "autoTosLoadError": "Nije moguće učitati pravila uslova korištenja. Pokušajte ponovo prije izmjene.",
     "autoTosSaveError": "Nije moguće sačuvati pravila uslova korištenja. I dalje je prikazana prethodna postavka. Pokušajte ponovo.",
     "autoTosIncludeLabel": "Uključi u auto pružaoce označene sa ToS: avoid",
     "autoTosDescription": "Podrazumijevano je isključeno. Važi za sve auto kombinacije, ne samo za jedan račun. Povezivanje pružaoca ne uključuje ovu opciju.",
-    "title": "Kombinacije",
-    "description": "Kreirajte kombinacije modela sa ponderisanim rutiranjem i podrškom za fallback",
-    "autoCatalogTitle": "Katalog auto-rutiranja",
     "autoCatalogTemplateCount": "{count} šablona",
     "autoCatalogDescription": "Ugrađene auto/* kombinacije se dinamički rješavaju iz povezanih provajdera. Koristite bilo koji od ovih ID-eva kao polje modela — nije potrebna konfiguracija.",
     "autoCatalogExpand": "Proširi katalog auto-rutiranja",
@@ -3451,6 +3606,12 @@
     "errorUpdating": "Greška pri ažuriranju kombinacije",
     "errorDeleting": "Greška pri brisanju kombinacije",
     "testFailed": "Testni zahtjev nije uspio",
+    "removeErrorModels": "Izbriši neuspjele modele ({count})",
+    "removingErrorModels": "Uklanjanje…",
+    "errorModelsRemoved": "Uklonjeno neuspjelih modela iz kombinacije: {count}",
+    "noErrorModelsFound": "Među vlastitim koracima ove kombinacije nema neuspjelih modela",
+    "cannotRemoveAllModels": "Nije moguće ukloniti sve modele iz kombinacije",
+    "removeErrorModelsConfirm": "Ukloniti neuspjele modele ({count}) iz „{name}“? Istekla vremena i ograničenja brzine se ne računaju.",
     "failedToggle": "Neuspjelo prebacivanje kombinacije",
     "testResults": "Rezultati testa — {name}",
     "resolvedBy": "Razriješio:",
@@ -3518,6 +3679,9 @@
     "moveUp": "Pomjeri gore",
     "moveDown": "Pomjeri dolje",
     "removeModel": "Ukloni",
+    "testStep": "Testiraj ovaj model",
+    "testStepRunning": "Testiranje…",
+    "testStepNotTestable": "Mogu se testirati samo koraci s jednim modelom",
     "saving": "Spremanje.",
     "liveNoProviders": "Još uvijek nema uočenih providera.",
     "liveFleetDataHint": "Podaci o floti stižu putem live combo događaja.",
@@ -3559,6 +3723,7 @@
     "playgroundNoCombosYet": "Još uvijek nema konfigurisanih combo postavki.",
     "playgroundCreateFirst": "Prvo kreirajte jednu",
     "weighted": "Ponderirano",
+    "weightPercent": "Težina (%)",
     "leastUsed": "Najmanje korišteno",
     "costOpt": "Optimizacija troškova",
     "strategyGuideTitle": "Kako koristiti ovu strategiju",
@@ -3720,6 +3885,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# račun} other {# računa}}",
     "builderGlobalAdded": "Dodano",
     "builderGlobalAdd": "Dodaj",
+    "clearSearch": "Očisti pretragu",
     "manualModel": "Ručni model",
     "manualModelInvalid": "Unesite model u formatu provajder/model.",
     "manualModelUnknownProvider": "Nepoznat prefiks provajdera.",
@@ -3936,6 +4102,7 @@
     "builderComboRefStep": "Dodaj combo referencu",
     "builderPinnedAccount": "Zakačeni račun",
     "builderLegacyEntry": "Legacy unos",
+    "builderStaleModel": "Nije u aktivnom katalogu",
     "reviewName": "Naziv",
     "reviewStrategy": "Strategija",
     "reviewSteps": "Koraci",
@@ -3973,6 +4140,10 @@
     "responseValidationMinLength": "Minimalna dužina sadržaja (znakovi)",
     "responseValidationJsonPaths": "JSON-path provjere",
     "responseValidationAddCheck": "+ Dodaj provjeru",
+    "responseValidationRemoveCheck": "Ukloni provjeru",
+    "responseValidationPath": "JSON putanja",
+    "responseValidationCondition": "Uslov",
+    "responseValidationValue": "Očekivana vrijednost",
     "agentFeaturesSystemMessageOverride": "Nadjači sistemsku poruku",
     "agentFeaturesSystemMessagePlaceholder": "Vi ste stručni asistent...",
     "agentFeaturesSystemMessageHint": "Nadjačavanje sistemske poruke za agente",
@@ -4792,7 +4963,15 @@
     },
     "totalEntries": "Ukupno stavki",
     "type": "Tip",
-    "memoryEnabled": "Sjećanja omogućena"
+    "memoryEnabled": "Sjećanja omogućena",
+    "qdrantTutorialTitle": "Brzi tutorijal: memorija s Qdrantom",
+    "qdrantTutorialIntro": "Qdrant pohranjuje vektore i metapodatke memorije kako bi se mogao dobiti relevantan kontekst. Ne komprimira tokene izravno; ušteda je neizravna, izbjegavanjem konteksta koji nije povezan s zahtjevom.",
+    "qdrantTutorialStep1": "Zaštitite poslužitelj s HTTPS-om i API ključem prije produkcijske upotrebe.",
+    "qdrantTutorialStep2": "Unesite domaćin, port, zbirku i model u formatu pružatelj/model s konfiguriranom dozvolom.",
+    "qdrantTutorialStep3": "Dimenzija zborki mora odgovarati dimenziji koju generira model. Postojeća zbirka dimenzije 2048 ne prihvaća utrobljenja dimenzije 1536.",
+    "qdrantTutorialStep4": "Spremite, testirajte konekciju i izvršite test pretrage. Tek tada omogućite Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Zasluge: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Vještine",
@@ -5288,7 +5467,8 @@
         "skipped": "već konfigurisano",
         "failed": "neuspješno"
       }
-    }
+    },
+    "stepProgress": "Napredak postavljanja"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Ovaj pružalac je podrazumijevano isključen iz auto",
@@ -5329,6 +5509,27 @@
     "importFromFileDownloadTemplate": "Preuzmi CSV šablon",
     "importFromFileMoreErrors": "+{count} još",
     "importFromFileSchemaHint": "CSV kolone su pozicijske: provider, name, apiKey, baseUrl (opcionalno), priority (opcionalno). Kolona provider mora biti postojeći ID upravljanog pružaoca ili već registrovani OpenAI/Anthropic kompatibilni ID čvora — ovaj uvoz ne kreira nove endpoint čvorove.",
+    "importOAuthExport": "Uvezi OAuth izvoz",
+    "oauthExportTitle": "Uvezi izvoz iz upravitelja računa",
+    "oauthExportDescription": "Otpremite izvoz u običnom tekstu iz upravitelja računa (npr. cloud-accounts izvoz iz Antigravity Managera). Tokeni se osvježavaju na serveru i svaki račun postaje OAuth konekcija — duplikati se osvježavaju na licu mjesta.",
+    "oauthExportProviderLabel": "Pružalac usluga",
+    "oauthExportChoose": "Odaberi datoteku",
+    "oauthExportFileAria": "JSON datoteka izvoza računa",
+    "oauthExportSchemaHint": "Prihvaćeno: dokument s nizom \"accounts\", običan niz ili jedan zapis. Tokeni mogu biti u ugniježđenom objektu token ili direktno u zapisu.",
+    "oauthExportDetected": "Otkriveno računa: {count}",
+    "oauthExportSelectAll": "Odaberi sve račune",
+    "oauthExportSelectAccount": "Odaberi račun {index}",
+    "oauthExportColEmail": "E-pošta",
+    "oauthExportColProvider": "Pružalac usluga",
+    "oauthExportColRefresh": "Token za osvježavanje",
+    "oauthExportNoEmail": "(nema e-pošte)",
+    "oauthExportYes": "da",
+    "oauthExportNo": "ne",
+    "oauthExportImporting": "Uvoz u toku…",
+    "oauthExportImport": "Uvezi račune ({count})",
+    "oauthExportResult": "Uvezeno {imported}/{total} — neuspješno {failed}",
+    "oauthExportParseError": "Iz ove datoteke nije moguće pročitati nijedan račun.",
+    "oauthExportUnknownError": "nepoznata greška",
     "adaptaTutorial": {
       "title": "Kako povezati Adapta Web",
       "introPrefix": "Adapta se autentifikuje putem Clerk-a. Token",
@@ -5579,6 +5780,7 @@
     "allModelsAlreadyImported": "Svi modeli su već uvezeni",
     "noNewModelsToImport": "Nema novih modela za uvoz — svi modeli su već u registru ili listi prilagođenih modela",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Otkrivanje modela nije uspjelo {time}",
     "skippingExistingModels": "Preskaču se {count} postojećih modela",
     "autoSync": "Auto-sinkronizacija",
     "autoSyncShort": "Sinkronizuj",
@@ -5797,6 +5999,7 @@
     "contextWindowOverridePlaceholder": "npr. 131072",
     "contextWindowOverrideHint": "Ručno postavite stvarni prozor konteksta (tokeni) ovog modela kada provajder pogrešno prijavi. Ima prednost nad auto-detektovanim/kataloškim vrijednostima i sprečava da combo rutiranje izbaci model.",
     "contextWindowOverrideInvalid": "Prepisivanje prozora konteksta mora biti pozitivan cijeli broj tokena",
+    "maxOutputTokenOverrideInvalid": "Prepisivanje maksimalnih izlaznih tokena mora biti pozitivan cijeli broj tokena",
     "visionCapableLabel": "Podržava viziju",
     "visionCapableHint": "Ručno označite ovaj model kao onaj koji podržava viziju kada metapodaci provajdera ne prijave modalitet slika kao ulaz (uobičajeno za self-hosted/lokalne backend-e).",
     "compatParamFiltersLabel": "Filteri parametara",
@@ -5838,6 +6041,25 @@
     "ccAliasAddModelButton": "Dodaj preklapanje",
     "ccAliasLoadError": "Greška pri učitavanju postavki discovery-alias: {error}",
     "ccAliasSaveError": "Greška pri spremanju postavke discovery-alias: {error}",
+    "cliVersionSectionTitle": "Oglašena verzija CLI klijenta",
+    "cliVersionEffectiveLabel": "Trenutno se oglašava",
+    "cliVersionSourceLabel": "Riješeno od: {source}",
+    "cliVersionPinnedLabel": "Zadano snimljeno: {pinned}",
+    "cliVersionSourceSettings": "nadjačavanje kontrolne table",
+    "cliVersionSourceEnv": "varijabla okruženja",
+    "cliVersionSourceDiscovered": "automatski otkriveno najnovije izdanje",
+    "cliVersionSourceDefault": "uhvaćeno zadano",
+    "cliVersionInputLabel": "Poništi verziju",
+    "cliVersionInputPlaceholder": "Override version; blank se briše",
+    "cliVersionSaveButton": "Sačuvaj",
+    "cliVersionResetButton": "Vrati na zadano",
+    "cliVersionLoadError": "Učitavanje postavki verzije CLI nije uspjelo: {error}",
+    "cliVersionSaveError": "Nije uspjelo spremanje verzije CLI : {error}",
+    "cliVersionLoadFailed": "Nije moguće učitati trenutne postavke CLI verzije.",
+    "cliVersionHintClaude": "Anthropic kapije noviji Claude modeli na verziji klijenta Claude Code koju vidi. Ovo je verzija koju OmniRoute oglašava na svakom zahtjevu vezanom za antropo.",
+    "cliVersionCaveatClaude": "Upozorenje o naplati: verzija naplate je '<version>'.'<build-revision>', a revizija izgradnje je zasebna uhvaćena konstanta. Oglašavanje 2.1.260 prijavljuje 2.1.260.1e2, što nije ono što pravi 2.1.260 binarno šalje.",
+    "cliVersionHintCodex": "OpenAI otvara novije modele na Codex klijentskoj verziji koju vidi, na primjer grešku: 'gpt-6-astra' model zahtijeva noviju verziju Codex.",
+    "cliVersionCaveatCodex": "Upozorenje o zaključivanju: verzija koju vaš vlastiti pozivalac izvještava i dalje nadmašuje CODEX_CLIENT_VERSION env var, ali ovo nadjačavanje nadmašuje obje, jer je to eksplicitna namjera operatora.",
     "compatUpstreamHeadersLabel": "Dodatni upstream zaglavlja",
     "compatUpstreamHeadersHint": "Postavka visokih privilegija — isti nivo povjerenja kao i uređivanje API kredencijala provajdera; samo povjerljivi administratori je trebaju koristiti. Spaja se nakon što OmniRoute doda autentifikaciju iz API ključa provajdera. Ako prilagođeno zaglavlje koristi isto ime kao postojeće (npr. Authorization), vaša vrijednost potpuno zamjenjuje automatski generisano zaglavlje (uključujući Bearer token) — upstream vidi samo ono što ste upisali, a ne ključ iz postavki. Pogrešna konfiguracija može uzrokovati 401 ili prekinutu upstream autentifikaciju. Jedan red po zaglavlju (npr. dodatna Authentication za neke gateway-e). Pređite mišem ili fokusirajte vrijednost za pregled. Sprema se pri gubitku fokusa, kliku izvan ili zatvaranju ovog panela.",
     "compatUpstreamHeaderName": "Ime zaglavlja",
@@ -6055,10 +6277,10 @@
     "apiFormatLabel": "Oznaka API formata",
     "apiKeyOptionalHint": "Ostavite prazno ako vaše lokalne postavke ili provajder ne zahtijevaju autentifikaciju.",
     "apiKeyOptionalLabel": "API ključ (opcionalno)",
-    "apiRegionChina": "API regija Kina",
-    "apiRegionHint": "Napomena o API regiji",
-    "apiRegionInternational": "API regija Internacionalna",
-    "apiRegionLabel": "Oznaka API regije",
+    "apiRegionChina": "Kontinentalna Kina",
+    "apiRegionHint": "Odaberite regiju endpointa koja se koristi za API pristup i praćenje kvota.",
+    "apiRegionInternational": "Međunarodna",
+    "apiRegionLabel": "API regija",
     "apikey": "API ključ",
     "audio": "Zvuk",
     "audioProvidersHeading": "Naslov audio provajdera",
@@ -6628,7 +6850,7 @@
       "claude": "Povežite Claude Code pomoću postojećeg OAuth toka.",
       "cline": "Povežite Cline pomoću postojećeg OAuth toka.",
       "cursor": "Povežite Cursor IDE pomoću postojećeg OAuth toka.",
-      "cursor-api": "Povežite Cursor pomoću korisničkog API ključa (crsr_...) sa cursor.com/dashboard/api; IDE sesija nije potrebna.",
+      "cursor-api": "Povežite Cursor s korisničkim API ključem (crsr_... ili grok_...) sa cursor.com/dashboard/api; IDE sesija nije potrebna.",
       "github": "Povežite GitHub Copilot pomoću postojećeg OAuth toka.",
       "gitlab-duo": "OAuth aplikacija sa ai_features + read_user scope-ovima. Konfigurišite GITLAB_DUO_OAUTH_CLIENT_ID i opciono GITLAB_DUO_OAUTH_CLIENT_SECRET na ovoj OmniRoute instanci.",
       "kilocode": "Povežite Kilo Code pomoću postojećeg OAuth toka.",
@@ -6808,7 +7030,27 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
+    "usedInComboTooltip": "Koristi se u {count} combo konfiguracija: {combos}",
+    "openComboTooltip": "Otvori combo konfiguracije — koristi {combo}",
+    "claudeCodeRoutingTitle": "Ruteiranje usmjerenog proxija za promet Claude Code-a",
+    "routingNative": "Nativno",
+    "routingFallback": "Rezervno",
+    "rerank": "Rerank",
+    "video": "Vide",
+    "markFreeTierTitle": "Označi kao besplatni nivo (prikazuje se čak i kada su plaćeni modeli skriveni)",
+    "codexTunnelTitle": "Konekcija alata Codex",
+    "codexTunnelDescription": "Tunel ostaje strogo dolazni. Lokalni alati se i dalje pokreću isključivo putem Codexa, u skladu sa njegovim politikom izolacije i odobrenja.",
+    "tunnelIdLabel": "ID tunela",
+    "tunnelRuntimeKeyLabel": "Ključ za pokretanje tunela",
+    "tunnelRuntimeKeyPlaceholder": "Ključ za pokretanje",
+    "tunnelRuntimeKeyHint": "Čuva se šifrirano zajedno sa kolačićem i nikada se ne zapisuje u dnevnik.",
+    "tunnelRuntimeKeyNewLabel": "Novi ključ za pokretanje tunela",
+    "tunnelRuntimeKeyNewHint": "Unesite samo uz svježi kolačić. Vrijednost se čuva šifrirano.",
+    "chatgptConnectorLabel": "ChatGPT prilagođeni konektor",
+    "doctorChecking": "Provjeravanje statusa…",
+    "doctorCheck": "Provjeri status liječnika",
+    "fallbackRetryBackendTitle": "Pozadišni servis za ponavljanje u slučaju pada"
   },
   "settings": {
     "title": "Postavke",
@@ -7104,16 +7346,6 @@
     "settingsSidebarDesc": "Odaberite koje stavke bočne trake želite prikazati. Osnovno zadržava napredne alate pretraživima.",
     "hideHealthLogs": "Sakrij logove provjere zdravlja",
     "hideHealthLogsDesc": "Kada je UKLJUČENO, potiskuje [HealthCheck] poruke u konzoli servera",
-    "themeAccent": "Boja teme",
-    "themeAccentDesc": "Odaberite unaprijenjenu boju ili kreirajte vlastitu temu s jednom bojom",
-    "themeCreate": "Kreiraj temu",
-    "themeCustom": "Prilagođena tema",
-    "themeBlue": "Plava",
-    "themeRed": "Crvena",
-    "themeGreen": "Zelena",
-    "themeViolet": "Ljubičasta",
-    "themeOrange": "Narandžasta",
-    "themeCyan": "Cijan",
     "whitelabeling": "Brendiranje",
     "whitelabelingDesc": "Prilagodite naziv i logo aplikacije",
     "appName": "Naziv aplikacije",
@@ -7254,7 +7486,7 @@
       "nextSwitchNow": "Sada",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7497,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Putanja jezgrene binarne datoteke",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Opcionalno: provjerava generiranu datoteku jezgrenom binarnom datotekom prije zamjene usvojene datoteke. Prazno ostavlja pisanje pored nje. Direktorij se kreira ako nedostaje."
+      "coreBinaryPathHelp": "Opcionalno: provjerava generiranu datoteku jezgrenom binarnom datotekom prije zamjene usvojene datoteke. Prazno ostavlja pisanje pored nje. Direktorij se kreira ako nedostaje.",
+      "urlFeedlessHint": "Ostavite prazno za pretplatu samo sa selektorom: postavite kontrolni URL ispod, nijedan feed se ne preuzima, ne osvježava ne vezuje."
     },
     "bulkHealthcheck": "Masovna provjera zdravlja",
     "bulkHealthcheckDesc": "Testirajte sve konfigurisane proksije protiv ciljanog URL-a kako biste saznali koji rade.",
@@ -7706,6 +7939,7 @@
     "configured": "konfigurisano",
     "none": "Nijedan",
     "modelOverrideValuePlaceholder": "Numerička vrijednost",
+    "modelOverrideKey": "Ključ za nadjačavanje",
     "modelOverrideReasoningEffortsPlaceholder": "Engleski, razdvojeno zarezima, npr. Low, medium, high",
     "addKeyValue": "Dodaj vrijednost ključa",
     "noModelOverrides": "Nema konfigurisanih nadjačavanja za ovaj model.",
@@ -7754,7 +7988,6 @@
     "customPricingNote": "Možete nadjačati podrazumijevane cijene za specifične modele. Prilagođena nadjačanja imaju prioritet nad automatski detektovanim cijenama.",
     "editPricing": "Uredi cijene",
     "viewFullDetails": "Pogledaj pune detalje",
-    "themeCoral": "Coral",
     "adaptiveVolumeRouting": "Adaptivno rutiranje volumena",
     "adaptiveVolumeRoutingDesc": "Dinamički skalirajte veze na osnovu volumena payload-a i pritiska propusnosti.",
     "lkgpToggleTitle": "Posljednji poznati ispravni pružalac (LKGP)",
@@ -7849,6 +8082,8 @@
     "compressionDesc": "Smanjite potrošnju tokena kompresijom promptova prije slanja provajderima",
     "autoCombosTitle": "Auto kombinacije",
     "autoCombosDesc": "Dozvolite ovom ključu da koristi ugrađene auto/* kombinacije, koje automatski biraju model iz svakog konfiguriranog provajdera",
+    "ccDiscoveryAliasesTitle": "Claude Code aliasi za otkrivanje",
+    "ccDiscoveryAliasesDesc": "Objavljuj claude/... zrcala kompatibilnosti za modele i kombinacije kojima ovaj ključ već može pristupiti",
     "compressionGuidanceFullGuideLink": "Potpun vodič za kompresiju",
     "compressionGuidanceShow": "Detalji",
     "compressionGuidanceHide": "Sakrij detalje",
@@ -8222,6 +8457,7 @@
     "compressionAdaptivePolicyPercentage": "Postotak prozora",
     "compressionAdaptivePolicyAbsolute": "Apsolutni budžet tokena",
     "compressionOutputStylesDescription": "Ubaci instrukcije za oblikovanje odgovora bez ponovnog pisanja izlaza providera. Kombinuj slobodno.",
+    "compressionOutputStylesPreviewNote": "Zahtjev ubacuje samo jedan jezik: otkriveni jezik, inače prvi paket. Gore navedeni blokovi su varijante po pakovanju, a ne kombinovana injekcija.",
     "mcpAccessibilityDescription": "Ograničava MCP izlaze alata (zasebno skladište).",
     "compressionStylesTileSummary": "{tokens, number} tokena uštedano · {runs, plural, one {# stilizirano pokretanje} other {# stiliziranih pokretanja}}",
     "compressionStylesTileEmpty": "Još nema stiliziranih pokretanja.",
@@ -8799,6 +9035,8 @@
     "qdrantHost": "Host",
     "qdrantCollection": "Kolekcija",
     "catalogVisibilityHint": "Skriveni ID-jevi modela i dalje se mogu pozivati uz iste dozvole pristupa.",
+    "exposeCombosOnly": "Prikaži samo kombinacije u /v1/models",
+    "exposeCombosOnlyDesc": "Klijenti koji automatski otkrivaju modele vide vaše kombinacije (i auto/* osim ako nisu skrivene) umjesto sirovih modela provajdera. Eksplicitni provider/model ID-ovi i dalje se rutiraju.",
     "catalogScopeTitle": "Lista Models API-ja",
     "catalogScopeDesc": "Ono što GET /v1/models oglašava za ovaj ključ. Sužavanje liste nikada ne mijenja ono što ključ može pozvati.",
     "catalogScopeAll": "Oba",
@@ -8918,7 +9156,9 @@
         "financial": "Finansijski",
         "brazilian": "Brazilski",
         "usa": "SAD",
-        "full": "Potpuni"
+        "full": "Potpuni",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (južna Afrika)"
       },
       "builtinTypes": "Ugrađeni tipovi",
       "types": {
@@ -8932,7 +9172,19 @@
         "ip_address": "IPv4 adrese",
         "ipv6_address": "IPv6 adrese",
         "aws_key": "AWS pristupni ključevi",
-        "api_key_generic": "API ključevi i tokeni"
+        "api_key_generic": "API ključevi i tokeni",
+        "iban": "IBAN brojevi bankovnih računa",
+        "eu_vat": "EU VAT brojevi",
+        "es_dni_nie": "španjolski DNI / NIE",
+        "it_codice_fiscale": "Italijanski kodeks Fiscale",
+        "pl_pesel": "Poljski PESEL",
+        "nl_bsn": "holandski BSN",
+        "de_steuer_id": "njemački Steuer-ID",
+        "se_personnummer": "Swedish personnummer",
+        "za_id": "Južnoafrički ID brojevi",
+        "za_phone": "Južnoafrički brojevi telefona",
+        "za_vat": "Južnoafrički VAT brojevi",
+        "za_tax_ref": "Južnoafričke porezne reference"
       },
       "customPatterns": "Prilagođeni uzorci",
       "customPatternsDesc": "Podudaranja se zamjenjuju sa [CUSTOM_REDACTED]. Najviše {max} uzoraka. Uzorci s rizikom od katastrofalnog vraćanja se odbijaju.",
@@ -9034,7 +9286,8 @@
     "tomlTestPassed": "Prošlo",
     "tomlTestFailed": "Neuspjelo",
     "tomlImportError": "Nije bilo moguće obraditi RTK TOML fajl.",
-    "tomlFileReadError": "Nije bilo moguće pročitati odabrani TOML fajl."
+    "tomlFileReadError": "Nije bilo moguće pročitati odabrani TOML fajl.",
+    "viewMode": "Način prikaza"
   },
   "compressionEngineConfig": {
     "loading": "Učitavanje…",
@@ -9256,7 +9509,8 @@
     "languagePacksList": "Jezički paketi: {packs}",
     "dragToReorder": "Povucite za promjenu redoslijeda koraka",
     "engine": "Mehanizam",
-    "intensity": "Intenzitet"
+    "intensity": "Intenzitet",
+    "compressionOverride": "Nadjačavanje kompresije"
   },
   "compressionStudio": {
     "noRun": "Nema dostupnog pokretanja kompresije.",
@@ -9316,7 +9570,8 @@
     "encoderWinner": "pobjednik: {winner}",
     "encoder": "enkoder",
     "bytes": "bajtovi",
-    "tokensCl100k": "tokeni (cl100k)"
+    "tokensCl100k": "tokeni (cl100k)",
+    "studioViews": "Prikazi Studija"
   },
   "omniglyph": {
     "preview": "Pregled",
@@ -9522,7 +9777,9 @@
     "tooltipMinLength": "Poruke kraće od ovoga se ne kompresuju. Niže = više kompresije.",
     "tooltipMinSavings": "Kompresuj samo ako uštedi najmanje toliko tokena.",
     "ultraSettings": "Ultra postavke",
-    "ultraSettingsDesc": "Semantička kompresija zasnovana na SLM-u"
+    "ultraSettingsDesc": "Semantička kompresija zasnovana na SLM-u",
+    "defaultLanguage": "Zadani jezik",
+    "viewMode": "Način prikaza"
   },
   "translator": {
     "title": "Prevodilac",
@@ -9834,6 +10091,9 @@
     "streamTransformFailed": "Transformacija stream-a nije uspjela"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvota je iscrpljena; dodatna potrošnja je dozvoljena, pa se usluga nastavlja.",
+    "healthPaidCreditsBypass": "Kvota je iscrpljena; raspoloživi plaćeni krediti omogućavaju nastavak usluge.",
+    "healthFilteringBypass": "Kvota je iscrpljena; lokalno filtriranje kvota je isključeno, pa se usluga nastavlja.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
@@ -10001,6 +10261,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limiti provajdera",
     "noProviders": "Nijedan provajder nije povezan",
+    "quotaAuthRequired": "Potrebna je autentifikacija – prijavite se na kontrolnu ploču",
+    "quotaAuthRequiredHint": "Veze s pružaocima usluga nije bilo moguće učitati jer sesija kontrolne ploče nedostaje ili je istekla. Prijavite se i osvježite stranicu kako biste vidjeli ograničenja svojih kvota.",
     "connectProvidersForQuota": "Povežite se sa provajderima putem OAuth-a kako biste pratili svoje API kvote i potrošnju.",
     "accountsCount": "{count, plural, one {# račun} other {# računa}}",
     "filteredFromCount": "(filtrirano od {count})",
@@ -10050,9 +10312,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Nepoznato",
     "statTotal": "Ukupno",
-    "statCritical": "Kritično",
-    "statAlert": "Upozorenje",
-    "statHealthy": "Zdravo",
     "filterPurchaseTypeLabel": "Tip",
     "filterTierLabel": "Nivo",
     "purchaseAll": "Sve",
@@ -10290,7 +10549,61 @@
     "updatedShort": "Ažurirano",
     "lastRefreshed": "Posljednje osvježavanje",
     "providerQuota": "Kvota provajdera",
-    "providerQuotaHomeHint": "Status uživo kroz povezane račune"
+    "providerQuotaHomeHint": "Status uživo kroz povezane račune",
+    "claudeResetCreditDefaultTitle": "Reset Claude limita",
+    "confirmRedeemClaudeResetCredit": "Iskorištavanje odmah resetuje prihvatljive Claude limite korištenja i trajno troši ovaj kredit.",
+    "claudeResetCreditsModalTitle": "Claude krediti za reset",
+    "claudeResetCreditsModalExplainer": "Dostupni Claude krediti za reset i sedmični reseti sesija za ovaj račun.",
+    "healthAccountHint": "Na osnovu najnovijih opažanja, ne provjere uživo. Odaberite račun za detalje.",
+    "healthRecovery": "Očekivani oporavak",
+    "healthAvailable": "Dostupno",
+    "healthRestricted": "Djelimično ograničeno",
+    "healthUnavailable": "Nedostupno",
+    "healthPeakHourProtection": "Zaštita tokom vršnog opterećenja",
+    "healthCooldown": "Period čekanja",
+    "healthQuotaExhausted": "Kvota iscrpljena",
+    "healthOverview": "Pregled",
+    "layoutFull": "Puni",
+    "layoutCompact": "Kompaktni",
+    "healthQuotaError": "Čitanje kvote nije uspjelo",
+    "healthNoRuntime": "Radno stanje nije dostupno",
+    "healthPreviousSnapshot": "Posljednje osvježavanje nije uspjelo; prikazan je prethodni rezultat",
+    "healthPreviousFailure": "Posljednji zahtjev nije uspio; vrijeme čekanja je završeno",
+    "healthAwaitingSync": "Vrijeme resetovanja je prošlo; čeka se sinhronizacija",
+    "healthVerdictUnavailable": "Provjera dostupnosti nije dostupna; prikazuju se samo nivoi kvote",
+    "healthSummaryFailed": "Čitanje sažetka stanja nije uspjelo; zaključavanja modela mogu nedostajati",
+    "healthRuntimeObserved": "Stanje ažurirano {time}",
+    "healthQuotaObserved": "Kvota zabilježena {time}",
+    "healthOldestQuota": "Najstariji snimak kvote: {time}",
+    "healthRecoveryUnknown": "Vrijeme oporavka nije poznato",
+    "healthDetailsHint": "Kliknite za detalje i radnje",
+    "healthFiveHour": "5 sati",
+    "healthOverall": "Ukupna",
+    "healthAction": "Potrebna radnja",
+    "healthTitle": "Dostupnost računa",
+    "healthDrag": "Povucite za promjenu redoslijeda pružalaca",
+    "healthDragPosition": "{provider}, {count, plural, one {pozicija {position, number} od #} few {pozicija {position, number} od #} other {pozicija {position, number} od #}}",
+    "healthResetOrder": "Vrati zadani redoslijed",
+    "healthPool": "Grupa {name}",
+    "healthOtherPool": "Isti račun · {pool}: {status} (preostalo {remaining})",
+    "healthIncluded": "{count, plural, one {Uključuje # djelimično ograničen račun} few {Uključuje # djelimično ograničena računa} other {Uključuje # djelimično ograničenih računa}}",
+    "healthBannerUnavailable": "{count, plural, one {# račun privremeno nedostupan} few {# računa privremeno nedostupna} other {# računa privremeno nedostupno}}",
+    "healthBannerAvailable": "{count, plural, one {# račun dostupan} few {Sva # računa dostupna} other {Svih # računa dostupno}}",
+    "healthLegendHide": "Sakrij legendu",
+    "healthLegendShow": "Prikaži legendu",
+    "healthLegendOk": "Puno = preostala kvota; prozirno = potrošeno.",
+    "healthLegendCooldown": "Kvota za {window} potrošena. Puno = proteklo čekanje; prozirno = preostalo čekanje.",
+    "healthLegendAction": "Autorizacija je istekla ili račun je blokiran; čekanje ne pomaže.",
+    "healthLegendPartial": "Još upotrebljivo. Žuti vrh = ograničen model ili grupa.",
+    "healthWaited": "Proteklo čekanje: {percent}",
+    "healthWait": "Još {duration} (oporavak u {time})",
+    "healthFastest": "Najraniji oporavak za {duration}",
+    "healthRatio": "{available, plural, one {Dostupno # / {active, number}} few {Dostupno # / {active, number}} other {Dostupno # / {active, number}}}",
+    "healthCd5": "5 sati · Period čekanja",
+    "healthCdw": "Nedeljno · Period čekanja",
+    "healthRecentSuccessBypass": "Usmjeravanje dopušta ovaj račun jer je zahtjev nedavno uspio.",
+    "healthPurchasedBalanceBypass": "Kupljeni saldo omogućava nastavak nakon iscrpljenja uključene kvote.",
+    "healthCutoffAtRequest": "Pragovi kvote u stvarnom vremenu provjeravaju se pri usmjeravanju zahtjeva."
   },
   "modals": {
     "waitingAuth": "Čekanje autorizacije",
@@ -11077,7 +11390,8 @@
       "message": "Poruka",
       "error": "Greška",
       "completion": "Završetak"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Jednostavan chat",
@@ -11258,7 +11572,8 @@
     "minutesAgo": "prije {minutes}min",
     "hoursAgo": "prije {hours}h",
     "daysAgo": "prije {days}d",
-    "entries": "Unosi"
+    "entries": "Unosi",
+    "viewSwitcherAria": "Prikaz predmemorije"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globalno",
@@ -11371,6 +11686,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth nije konfigurisan. Registruj OAuth aplikaciju na {applicationsUrl} sa redirect URI {redirectUri} i scope-ovima \"{scopes}\", zatim postavi {clientIdEnv} (i opcionalno {clientSecretEnv}) i ponovo pokreni aplikaciju.",
     "gitlabDuoSetupDescription": "Nakon što je aplikacija registrovana i env varijable postavljene na ovoj OmniRoute instanci, klikni Nastavi kako bi započeo OAuth prijavu.",
     "continue": "Nastavi",
+    "copilotPolicyTitle": "Eksperimentalni dobavljač: status politike je dvosmislen",
+    "copilotPolicyLine1": "OmniRoute se povezuje preko api.githubcopilot.com, koji GitHub nije objavio kao opći zaključak treće strane API. Ova integracija je eksperimentalna i može se promijeniti bez prethodne najave.",
+    "copilotPolicyLine2": "Samo vaš vlastiti GitHub račun može biti povezan. Nikada nemojte dijeliti vjerodajnice, skupne račune niti pokušavajte prekoračiti ograničenja vašeg plana.",
+    "copilotPolicyLine3": "Korisnici besplatnog i studentskog plana dobijaju samo automatski odabir modela. Uslovi vašeg Copilot plana i sva ograničenja upotrebe ostaju vaša odgovornost.",
+    "copilotPolicyAcknowledge": "Razumijem, poveži se",
     "tabPasteSetupToken": "Token za postavljanje",
     "claudeSetupTokenDescription": "Pokrenite `claude setup-token` u terminalu i zalijepite token koji ispiše. Važi godinu dana i nema token za osvježavanje. OmniRoute šalje jedan testni zahtjev Anthropicu prije nego što ga sačuva.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11766,7 @@
     "tableHealth": "Zdravlje (24h)",
     "tableUsage": "Korištenje",
     "tableActions": "Akcije",
+    "moreActions": "Više radnji",
     "test": "Testiraj",
     "edit": "Uredi",
     "delete": "Obriši",
@@ -11525,7 +11846,7 @@
     "bulkImportNoValidEntries": "Nisu pronađeni validni unosi. Provjerite format i pokušajte ponovo.",
     "bulkImportSuccess": "Uvoz završen: {created} kreirano, {updated} ažurirano, {failed} neuspjelo",
     "bulkImportErrorLine": "Linija {line}: {reason}",
-    "bulkImportMaxExceeded": "Maksimalno 100 proxy-ja po uvozu",
+    "bulkImportMaxExceeded": "Maksimalno {max} proxy-ja po uvozu",
     "bulkImportPreview": "Pregled",
     "clearAssignment": "(obriši dodjelu)",
     "bulkProxyAssignment": "Masovna dodjela proxy-ja",
@@ -11586,6 +11907,7 @@
     "poolSetAsideKindIpQuota429": "ograničenje brzine po IP-u (429)",
     "poolSetAsideKindSlow": "spori odgovori",
     "poolSetAsideKindGeoBlocked": "regija blokirana (403/451)",
+    "poolSetAsideKindOperatorReported": "neispravnost prijavio operater",
     "poolSetAsideUntil": "Nazad u rotaciji {endsAt}",
     "poolSetAsideRepeat": "Sklonjeno {count, plural, one {# put} other {# puta}}",
     "poolUnknownAddress": "Nepoznata adresa",
@@ -11695,7 +12017,6 @@
     "exportCodeTitle": "Izvezi Kod",
     "exportShort": "Izvezi",
     "noStateToExport": "Nema dostupnog stanja playground-a za izvoz.",
-    "closeExportModal": "Zatvori modal za izvoz",
     "close": "Zatvori",
     "exportRealKeyWarning": "Sigurnosno upozorenje: izvoz blokiran — detektovan je stvarni API ključ u izlazu. Resetujte svoj API ključ i pokušajte ponovo.",
     "placeholderHintPrefix": "Zamijenite",
@@ -11808,7 +12129,8 @@
       "nextButton": "Dalje",
       "runButton": "Pokreni",
       "promptPlaceholder": "Unesite svoju poruku… (Enter za slanje, Shift+Enter za novi red)"
-    }
+    },
+    "playgroundTabs": "Načini rada Playgrounda"
   },
   "miniPlayground": {
     "endpoint": "Krajnja tačka",
@@ -11879,7 +12201,8 @@
     "assistant": "Asistent",
     "errorLabel": "Greška",
     "requestFailed": "Zahtjev nije uspio",
-    "stop": "Zaustavi"
+    "stop": "Zaustavi",
+    "messageInputAria": "Poruka"
   },
   "requestLogger": {
     "recording": "Snimanje",
@@ -12066,8 +12389,22 @@
       "resilienceRotations": "{count} rotacija naloga",
       "resilienceRetried": "Prazan krug ponovljen",
       "resilienceContinued": "Nastavljeno usred streama",
-      "resilienceRecovered": "Oporavljeno akcijom otpornosti"
-    }
+      "resilienceRecovered": "Oporavljeno akcijom otpornosti",
+      "conversationContext": "Kontekst razgovora",
+      "goToBottom": "Idi na dno",
+      "liveRefreshOn": "Osvježavanje uživo: uključeno",
+      "liveRefreshOff": "Osvježavanje uživo: isključeno",
+      "liveRefresh": "Osvježavanje uživo",
+      "continuesFromParent": "nastavlja se od nadređenog",
+      "continuesFrom": "Nastavlja se od {id}",
+      "viewConversation": "prikaži razgovor",
+      "openConversation": "Otvori razgovor {id}"
+    },
+    "tableLabel": "Zapisnici zahtjeva",
+    "throughputPostFirstToken": "Nakon prvog tokena",
+    "throughputEndToEnd": "Od početka do kraja",
+    "throughputRate": "{value} tokena/s",
+    "throughputExplanation": "Obje stope koriste veću vrijednost između broja izlaznih tokena i tokena zaključivanja. Stopa nakon prvog tokena isključuje važeći TTFT; u suprotnom koristi puno trajanje. Stopa od početka do kraja uvijek koristi puno trajanje. Baferisani odgovor može imati visoku stopu isporuke u rafalu bez brže generacije modela."
   },
   "proxyLogger": {
     "filterAll": "Sve",
@@ -12112,7 +12449,9 @@
     "colServedBy": "Posluženo od",
     "filterTraffic": "Saobraćaj",
     "filterTests": "Testovi",
-    "filterSource": "Izvor"
+    "filterSource": "Izvor",
+    "tableLabel": "Proxy zapisnici",
+    "sortLogs": "Sortiraj zapisnike"
   },
   "endpointOptions": {
     "speech": "Govor",
@@ -12197,7 +12536,8 @@
     "statusExhausted": "ISCRPLJENO",
     "statusAlerting": "UPOZORENJE",
     "statusError": "GREŠKA",
-    "moreSuffix": "+{count} još"
+    "moreSuffix": "+{count} još",
+    "feedFilterLabel": "Filtriraj događaje"
   },
   "quotaShare": {
     "weightPercent": "Težina %",
@@ -12364,7 +12704,10 @@
     "ungroupedTitle": "Negrupirano",
     "ungroupedHint": "Ovi pool-ovi nisu dodijeljeni poznatoj grupi. Uredi pool kako bi ga premjestio u stvarnu grupu.",
     "removeFailed": "Nije bilo moguće ukloniti ovaj pool.",
-    "dismiss": "Zatvori"
+    "dismiss": "Zatvori",
+    "allocationsHeading": "Raspodjele",
+    "wizardRemoveDimension": "Ukloni dimenziju",
+    "wizardRemoveKey": "Ukloni ključ"
   },
   "plugins": {
     "title": "Dodaci",
@@ -12522,7 +12865,8 @@
       "settingsUpdateFailed": "Ažuriranje postavki nije uspjelo",
       "serviceRevealApiKey": "{actor} je otkrio API ključ za {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Odbaci grešku"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12999,21 @@
       "goNow": "Idi sada",
       "message": "MITM Proxy se sada nalazi pod AgentBridge-om.",
       "title": "Ova stranica je pomjerena"
-    }
+    },
+    "dnsOn": "DNS uključen",
+    "dnsOff": "DNS isključen",
+    "showServerSettings": "Prikaži postavke servera",
+    "hideServerSettings": "Sakrij postavke servera",
+    "upstreamCaTesting": "Testiranje…",
+    "removeMapping": "Ukloni mapiranje",
+    "mappingSourcePlaceholder": "npr., gemini-3.6-flash-medium ili * za sve nemapirane",
+    "mappingWildcardHint": "Koristite * kao izvor da biste svaki model bez eksplicitnog mapiranja usmjerili kroz OmniRoute na odabrano odredište. Tačna podudaranja izvora uvijek imaju prednost nad *.",
+    "wizardDetectingModels": "Otkrivanje modela iz presretnutog saobraćaja...",
+    "wizardDetectedModels": "U presretnutom saobraćaju pronađeno je {count, plural, one {# model} other {# modela}}. Odaberite one koje želite dodati:",
+    "wizardSelectedModels": "Odabrano je {count, plural, one {# model} other {# modela}}. Na sljedećem ekranu ćete ih mapirati na OmniRoute modele.",
+    "wizardAddModels": "Dodaj {count, plural, one {# model} other {# modela}}",
+    "wizardNoModelsDetected": "Još nije otkriven nijedan model. Koristite {agent} da pošaljete zahtjev, a zatim ponovo pokrenite ovaj čarobnjak kako biste automatski otkrili modele iz saobraćaja.",
+    "wizardNoModelsHint": "Ili zatvorite ovaj čarobnjak i ručno dodajte mapiranja na kartici agenta."
   },
   "providerStats": {
     "unknownError": "Nepoznata greška",
@@ -12685,7 +13043,12 @@
     "avgTtft": "Prosječni TTFT",
     "avgTotal": "Prosječni ukupno",
     "requestTelemetry": "Telemetrija zahtjeva",
-    "requestTelemetryDescription": "Analiza pipeline-a u 7 faza (zadnjih 5 minuta)"
+    "requestTelemetryDescription": "Analiza pipeline-a u 7 faza (zadnjih 5 minuta)",
+    "title": "Statistika pružalaca usluga",
+    "description": "Saobraćaj, latencija i stope uspješnosti po pružaocu usluga i modelu",
+    "combo": "Kombinovano",
+    "toggleModels": "Prikaži modele za {provider}",
+    "windowSince": "Od {date}"
   },
   "relay": {
     "title": "Serverless Relay Proxy-ji",
@@ -12846,7 +13209,18 @@
     "noRequestBody": "Nema tijela zahtjeva.",
     "noResponseBody": "Nema tijela odgovora.",
     "formatted": "Formatirano",
-    "raw": "Sirovo"
+    "raw": "Sirovo",
+    "requestCount": "{count, plural, one {# zahtjev} other {# zahtjeva}}",
+    "expandList": "Proširi listu",
+    "collapseList": "Sažmi listu",
+    "snippetLanguage": "Jezik isječka koda",
+    "headersTable": "Zaglavlja",
+    "showSecrets": "Prikaži tajne",
+    "maskSecrets": "Maskiraj tajne",
+    "llmNotAvailable": "LLM metapodaci nisu dostupni za ovaj zahtjev.",
+    "llmStreamYes": "da (SSE)",
+    "llmStreamNo": "ne",
+    "llmTotalTokens": "Ukupno: {count} tokena"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13325,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI kodovi",
     "pageSubtitle": "Alati za kod koji pokazuju na OmniRoute",
     "searchPlaceholder": "Pretraži CLI…",
     "filterDetectionLabel": "Detekcija",
@@ -12961,7 +13334,8 @@
     "detectionNotFound": "Nije pronađeno",
     "baseUrlAll": "Sve",
     "baseUrlFull": "Potpuno",
-    "baseUrlPartial": "Djelomično"
+    "baseUrlPartial": "Djelomično",
+    "title": "Kod CLI-ja"
   },
   "cliAgents": {
     "pageTitle": "CLI agenti",
@@ -13305,7 +13679,8 @@
     "colReliabilityHelp": "Udio poziva na koje je ovaj provajder odgovorio u posljednjih 24 sata. Crtica znači da je opslužio premalo saobraćaja da se utvrdi stopa.",
     "reliabilitySample": "{successes} od {requests} poziva je uspjelo u posljednjih {hours}h",
     "reliabilityTooFew": "Samo {requests} poziva u posljednjih {hours}h — premalo za utvrđivanje stope",
-    "reliabilityNoTraffic": "Nema zabilježenih poziva u posljednjih 24h"
+    "reliabilityNoTraffic": "Nema zabilježenih poziva u posljednjih 24h",
+    "categoryFilter": "Kategorija zadatka"
   },
   "discovery": {
     "title": "Otkrivanje provajdera",
@@ -13330,7 +13705,11 @@
     "method": "Metoda",
     "auth": "Autentifikacija",
     "feasibility": "Izvodljivost",
-    "models": "Modeli"
+    "models": "Modeli",
+    "provider": "Pružalac usluge",
+    "status": "Status",
+    "endpoint": "Krajnja tačka",
+    "actions": "Radnje"
   },
   "noAuthProvider": {
     "title": "Autentifikacija nije potrebna",
@@ -13379,7 +13758,8 @@
     "ownProxy": "Vlastiti proxy",
     "freeTierPause": "Model {model} pauziran (429), vraća se u {time}",
     "freeTierPauseProvider": "Pauzirano (429), vraća se u {time}",
-    "freeTierPauseNote": "Pauza u procesu na ovoj instanci"
+    "freeTierPauseNote": "Pauza u procesu na ovoj instanci",
+    "proxyType": "Vrsta proxyja"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13932,10 @@
         "description": "Skriveno dostignuće vas čeka.",
         "criteria": "Završite skriveno dostignuće kako biste otkrili ovaj bedž."
       }
-    }
+    },
+    "leaderboardTitle": "Rang-lista",
+    "leaderboardDescription": "Rangiranja i postignuća za vaše API ključeve",
+    "badgeLocked": "Zaključano"
   },
   "featureFlags": {
     "title": "Zastavice funkcija",
@@ -13610,7 +13993,9 @@
       "disabled": "Onemogućeno",
       "dual": "Dualno",
       "alias": "Pseudonim",
-      "canonical": "Kanonički"
+      "canonical": "Kanonički",
+      "fail_closed": "Blokiraj (fail_closed)",
+      "count_as_zero": "Računaj kao $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14142,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Zaustavljanja infrastrukture sa zaštićenim prioritetom kao 502",
         "description": "Odgovori sa 502 umjesto 503 kada prioritetna meta samo za fallback kvote zaustavi combo iz razloga koji dokazivo nije kvota: otvoreni circuit breaker provajdera ili prediktivno preskakanje latencije."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "ID-je naloga u dnevniku",
+        "description": "Uključi prefiks naloga u linije dnevnika za AUTH (npr. \"Korišten je nalog '<provider>': abc12345...\"). Isključeno po zadanoj postavci kako bi se identifikatori naloga prikrili iz dijeljenih logova procesa s više zakupača. Neovisno o načinu debugovanja; promjena načina debugovanja ovo ne otkriva."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Onemogući prijavu lozinkom uz OIDC",
+        "description": "Kada je OIDC omogućen, onemogući prijavu lozinkom tako da se korisnici mogu autentificirati samo putem OIDC Single Sign-On-a. Kada je onemogućeno (podrazumijevano), dostupni su i prijava lozinkom i OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Udaljeni čvorovi audio provajdera",
+        "description": "Dozvoli rutama /v1/audio/* korištenje čvorova provajdera kompatibilnih s OpenAI-jem koji se nalaze izvan localhost-a. Podrazumijevano isključeno — usmjeravanje zvuka na udaljeni host mijenja izlazni identitet (egress identity) i mora biti izričita odluka operatera. Loopback čvorovi su uvijek dozvoljeni i na njih ovo ne utječe."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Udaljeni čvorovi rerank provajdera",
+        "description": "Dozvoli POST /v1/rerank (i koraku rerank-a unutar memorijskog mehanizma, koji ga poziva preko loopback-a) da koristi čvorove provajdera kompatibilne s OpenAI-jem koji se nalaze izvan localhost-a — LAN uređaj ili Tailscale peer koji pokreće TEI, Infinity, vLLM itd. Podrazumijevano isključeno — usmjeravanje na udaljeni host mijenja izlazni identitet (egress identity) i mora biti izričita odluka operatera. Loopback čvorovi su uvijek dozvoljeni i na njih ovo ne utječe. Udaljeni čvorovi također moraju proći politiku izlaznih URL-ova provajdera."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Zaštita dijeljenog izlaza pri mrežnoj rotaciji",
+        "description": "Prilikom mrežnog izuzetka (timeout, odbijena/resetovana veza) za izvršilac rotacije više računa, kada račun koji stvara grešku nema namjenski proxy, primijeni kratak period hlađenja (cooldown) i preskoči ostale račune bez proxyja za ostatak zahtjeva umjesto ponovnog pokušavanja sa svakim od njih. Podrazumijevano uključeno (sigurno: nema promjene izlaznog IP-a, samo smanjuje kašnjenje/rizik perioda hlađenja na računima s dijeljenim izlazom). Onemogućite kako biste vratili trenutno propagiranje pri prvom izuzetku bez proxyja."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Preskoči nedavno neuspjele proxyje",
+        "description": "Proxy poolovi i rotacija po računu u alatu opencode prestaju ponovo dodjeljivati proxy koji je upravo zabilježio neuspjeh (odbijena TCP provjera ili primljen 429 putem njega) tokom perioda po procesu koji se udvostručuje pri svakom ponavljanju, do određenog limita. Status proxyja se ne zapisuje; stavljanjem svakog kandidata na stranu odabir ostaje nepromijenjen. Uključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji samo uz PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Redoslijed poola sa zajedničkim izlazom",
+        "description": "Za pružaoce usluga čija se kvota raspoređuje prema izlaznoj adresi, rangira člana poola koji dijeli uočenu izlaznu adresu nedavno odbijenog člana neposredno ispod ispravnih članova. Mijenja se samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se očitava. Isključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Evidentiranje atribucije rotacije",
+        "description": "Opencode rotacija bilježi koji je račun poslužio ili bio preskočen (samo maskirani ID-jevi, nikada potpuni ID-jevi računa) i povezuje unose iz proxy loga s njihovim zahtjevom, kako bi operater mogao razlikovati preskočene račune od nekorištenih. Isključeno po zadanim postavkama: nema dodatnih linija u logu, niti se upisuju dodatne kolone."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Praćenje izlaznih adresa proxy poola",
+        "description": "Prikazuje, ispod proxy poola na kontrolnoj tabli, koliko je uočenih izlaznih IP adresa opsluživalo njegove članove tokom posljednja 24 h, koliko konekcija ih je koristilo i najveći broj zabilježen iza jedne IP adrese. Samo za čitanje, izračunato iz proxy loga, nikada se ne koristi za usmjeravanje. Isključeno po zadanim postavkama: uređivač poola ostaje nepromijenjen, a ruta za praćenje vraća null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Izlazne adrese operatera proxyja",
+        "description": "Prihvata datirane uočene adrese po članu poola koje šalje operater i spaja ih s očitanjima iz dnevnika radi prikaza i određivanja redoslijeda u poolu. Isključeno po zadanim postavkama: push ruta vraća 404, a očitanja poola ponašaju se tačno kao i ranije."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Rotacija pri zastoju OpenCode Responses",
+        "description": "Za OpenCode izvršilac, pratite prvi bajt tijela strimovanog Responses odgovora (vremenski okvir: RESPONSES_FIRST_BYTE_TIMEOUT_MS, zadano 15000). Responses tok sa 2xx statusom koji ostane neaktivan nakon isteka vremenskog okvira tretira se kao zaustavljen: nalog ulazi u period hlađenja, a zahtjev se rotira na sljedeći nalog jednom; drugi zastoj odmah prekida rad uz grešku. Zadano isključeno: zaustavljeni tokovi zadržavaju dosadašnje čekanje do isteka vremenskog ograničenja spremnosti toka."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked rotacija",
+        "description": "Za OpenCode izvršilac, kada uzvodni servis odgovori sa 403 ili 451 koji sadrži user_blocked odbijanje (nije geo-blokada niti odbijanje Cloudflare otiska prsta), stavite odbijeni nalog u period hlađenja i rotirajte na sljedeći nalog najviše jednom po zahtjevu; drugo odbijanje se vraća u izvornom obliku bez oznake uspjeha. Zadano isključeno: zaobilaženje uzvodne blokade korisnika može izgledati kao izbjegavanje pravila i proširiti oznaku na cijelu grupu naloga, stoga se odbijanje vraća nepromijenjeno osim ako operater to izričito ne omogući."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode odgoda pri privremenom prebacivanju",
+        "description": "Za OpenCode rotaciju između više naloga, pauzirajte prije slanja na sljedeći nalog čim dva uzastopna pokušaja ne uspiju zbog privremene uzvodne greške (5xx ili prazno 400 odbijanje). Pauza počinje od 1,5 s, udvostručuje se pri svakom sljedećem uzastopnom neuspjehu, ograničena je na 6 s po pauzi i 10 s po zahtjevu, preskače se kada se klijent odspoji, a tijelo neuspjelog odgovora se oslobađa prije čekanja. Zadano isključeno: prebacivanje ostaje trenutno."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Ponovni pokušaj za prazan krug pri slanju",
+        "description": "Kod prevedenih krugova strimovanja, kada uzvodni krug ne nosi upotrebljiv sadržaj (završetak koji sadrži samo razmišljanje ili nula korisnih dijelova), pokrenite ograničene ponovne pokušaje putem uobičajene putanje vjerodajnica (do `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) prije nego što se bilo šta prikaže klijentu. Zadano isključeno: prazni krugovi zadržavaju trenutno ponašanje (prazan 200 ili 502 sa praznim sadržajem)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Oporavak praznog toka putem srodne veze",
+        "description": "Claude/Codex strimovanje: nakon prvog događaja životnog ciklusa, kratko provjerite (do 1 s / 64 KiB) ima li upotrebljivog izlaza; tok koji se završi bez sadržaja postaje greška tipa empty_content koja troši postojeći ograničeni ponovni pokušaj na drugoj prihvatljivoj vezi (bez hlađenja, bez zaključavanja modela), a round-robin kombinacije prestaju s ponovnim pokušajima čim se klijent odspoji. Također tretira refusal, pause_turn i model_context_window_exceeded kao legitimne prazne završetke unutar provjere. Zadano isključeno: spremnost, obrada praznog sadržaja i kombinovani ponovni pokušaji ostaju potpuno isti kao i ranije."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Sonda za kasni izlaz strima",
+        "description": "Sonda za streaming izlaz: nakon prva 64 proslijeđena segmenta nastavi uzorkovati jedan od 16 segmenata za prvi vidljivi izlaz, tako da izlaz koji kasno počne i dalje označava da je strim emitovao izlaz. Usamljeni 5xx nakon te tačke ostaje na nivou zahtjeva umjesto evidentiranja blokade samo za model, a firstOutputMs se naknadno popunjava na prvi izlazni segment trenutnog intervala uzorkovanja. Podrazumijevano isključeno: ispituju se samo prva 64 proslijeđena segmenta, tačno kao i ranije."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode rano zaustavljanje pri 429 ograničenju stope",
+        "description": "Za OpenCode rotaciju s više računa, zaustavi val računa na prvom 429 odgovoru klasifikovanom kao stvarno ograničenje stope (Retry-After zaglavlje koje se može parsirati ili tijelo koje navodi ograničenje stope/upotrebe) i vrati taj upstream 429 nepromijenjen (status, tijelo, Retry-After i zaglavlja kvote), umjesto isprobavanja svakog preostalog računa. Neklasifikovani 429 odgovori nastavljaju rotaciju. Podrazumijevano isključeno: besplatni nivo je ograničen po egress IP adresi (#9611), pa svaki 429 rotira na sljedeći račun, a iscrpljeni val vraća posljednji upstream 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 parkiranje i nastavak",
+        "description": "Za OpenCode rotaciju s više računa, parkiraj zahtjev nakon uzastopnih prolaznih 429 grešaka (ili svježe oznake opterećenja bazena) uz heartbeat, a zatim ponovo pokreni jednu ograničenu dionicu od do 3 uzastopna računa umjesto slanja na čitavu flotu. Podrazumijevano isključeno: svaki 429 rotira na sljedeći račun tačno kao i ranije."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Ponovni pokušaj kod zastoja spremnosti strima",
+        "description": "Za streaming chat zahtjeve, kada prvo upstream tijelo zastane prije generisanja upotrebljivog događaja, pokreni jedan ograničeni drugi pokušaj putem iste rute s istim budžetom spremnosti i bez penalizacije računa. Podrazumijevano isključeno: zastoj prvog tijela prekida zahtjev bez ponovnog pokušaja."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 ponovni odabir bazena",
+        "description": "Za OpenCode rotaciju s više računa, nakon 429 odgovora od egress-bucketed provajdera na računu bez proxyja pod kontekstom ambijentalnog bazena, zatraži od bazena konekcija drugog člana za sljedeći pokušaj umjesto ponovnog pokušaja na istoj egress adresi. Raspoređuje, nikada ne isključuje: iscrpljeni bazen zadržava trenutno ponašanje. Podrazumijevano isključeno: svaki 429 rotira na sljedeći račun tačno kao i ranije."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Otisak OpenCode v2 klijenta",
+        "description": "Šalji otisak OpenCode v2 CLI klijenta pri OpenCode Zen/Go zahtjevima (#16571): User-Agent opencode/latest/<2.x>/cli i x-opencode-client cli, klijentski User-Agent zadržan samo kada je u pitanju 2.x OpenCode klijent, a na ograničenim besplatnim zahtjevima bez x-opencode-request, sesija preslikana na x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell sheme na umetnutim placeholder alatima i odbačen tool_choice od \"none\". Podrazumijevano isključeno: svaki OpenCode zahtjev zadržava trenutni identitet, zaglavlja i tijelo bajt po bajt."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Blokada izlaznog IP-a za OpenCode Zen",
+        "description": "Dodaj OpenCode Zen (opencode-zen) u zadanu grupu za blokadu izlaznog IP-a, tako da 429 na jednoj Zen konekciji također hladi svaku srodnu Zen konekciju koja dijeli njenu izlaznu IP adresu. Podrazumijevano isključeno: Zen je definisan ključem i svaka konekcija se hladi zasebno, tačno kao i ranije. Eksplicitna OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS vrijednost uvijek ima prednost nad ovom opcijom."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode pravila za greške na osnovu punog teksta",
+        "description": "Dozvoli ugrađenim OpenCode pravilima za greške (opencode-zen, opencode-go, opencode-cli) da se podudaraju sa punim tekstom uzvodne greške, tako da oznake u tijelu kao što su organization_quota_exceeded ili \"monthly usage limit reached\" klasifikuju 429 kao iscrpljenu kvotu sa zaključavanjem na nivou konekcije. Podrazumijevano isključeno: ova pravila vide samo strukturirani kod greške i takav 429 ostaje kratkotrajno ograničenje brzine, tačno kao i prije."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI pravila za greške na osnovu punog teksta",
+        "description": "Dozvoli ugrađenom Cloudflare Workers AI pravilu za greške da se podudara sa punim tekstom uzvodne greške, tako da se tijelo odgovora 429 \"daily free allocation\" klasifikuje kao iscrpljena kvota umjesto kratkotrajnog ograničenja brzine. Podrazumijevano isključeno: pravilo vidi samo strukturirani kod greške, tačno kao i prije."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Filter mogućnosti",
+        "description": "Odbij zahtjeve prije slanja kada ciljnom modelu nedostaju potrebne mogućnosti (vision, tools, structured output, context window). Štiti direktne zahtjeve prema pojedinačnom provajderu koji zaobilaze filter kompatibilnosti kombinovanog sloja."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Zanemari potrošnju bez cijene u USD kvotama",
+        "description": "Računaj potrošnju modela koji nemaju cijenu kao $0 u USD kvotama potrošnje po ključu umjesto tretiranja kvote kao prekoračene. Podrazumijevano isključeno: model bez cijene ili alias za rutiranje može sakriti stvarnu potrošnju, pa kvota blokira pristup radi sigurnosti."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Omogući modul OmniRoute Radar (ekrani sa feedom kataloga i sinhronizacija). Podrazumijevano isključeno; omogućavanje samo otključava korisnički interfejs — sinhronizacija podataka ostaje zasebna opcija koja zahtijeva aktivaciju."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Kontrola mogućnosti krajnje tačke modela",
+        "description": "Primijeni pouzdane oznake krajnjih tačaka modela (deklarisane u katalogu provajdera, izvedene iz ID-ja specijalizovanog modela ili postavljene od strane operatora): odbij zahtjev poslan na krajnju tačku koju model ne podržava sa HTTP 400 prije prosljeđivanja na /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations i /v1/audio/*; sakrij modele čije označene krajnje tačke nemaju OmniRoute adapter iz /v1/models; i odgovori sa 422 na test modela na kontrolnoj tabli za takve modele. Podrazumijevano isključeno: oznake krajnjih tačaka ostaju informativne, a zahtjevi se prosljeđuju tačno kao i prije."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Univerzalni prijenos konteksta",
+        "description": "Generiši i ubaci sažetke razgovora kada kombinovano rutiranje promijeni model. Onemogući da bi se promjene modela tretirale nezavisno i spriječili pozadinski zahtjevi za prijenos za sve postojeće i buduće kombinacije."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reprodukcija zaključivanja",
+        "description": "Keširaj i ponovo reproduciraj zaključivanje modela kroz razgovore u više krugova. Onemogući da bi se zaustavilo pohranjivanje i ponovno ubacivanje zaključivanja."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex App-Server transport",
+        "description": "Dozvoli Codexu da koristi lokalni app-server WebSocket JSON-RPC transport (codexTransport=app-server). Kada je isključeno, veze koje su odabrale app-server prebacuju se na druge Codexove transporte."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Alijsi za otkrivanje Claude Codea",
+        "description": "Oglasi oglede ID-jeve claude/'<provider>'/'<model>' putem /v1/models kako bi otkrivanje modela Claude Codea u upravljačkom prostoru prikazalo i modele koji nisu Claude modela. Upozorenje: kada je globalno omogućeno, dvostavi broječnike za sve klijente."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Alijsi za modele bez razmišljanja",
+        "description": "Glavni prekidač za alijse no-think/'<provider>'/'<model>' u upravljačkom prostoru. Uključeno (zadano): /v1/models oglašava varijantu bez razmišljanja za svaki odgovarajući Claude model s mogućnošću razmišljanja, a ID 'no-think/' poslan u zahtjevu se rješava natrag na pravi model s potisnutim razmišljanjem. Isključeno: varijante se ne oglašavaju, a ID 'no-think/' tretira se kao bilo koji drugi nepoznat modelni ID. Pojedinačno po modelu: ModelSpec.noThinkingAlias uključivanje/isključivanje i dalje vrijedi dok je ovo uključeno."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Onemogući varijante nivoa razmišljanja",
+        "description": "Onemogući generisanje varijanti nivoa razmišljanja (npr. -low, -medium, -high) u katalogu /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptivne virtuelne trake za prijem",
+        "description": "Omogući adaptivne virtuelne trake za prijem po zakupcu za prosljeđivanje provajderu (#9654): nagli porast saobraćaja jednog zakupca više ne uzrokuje grešku 503 za drugog. Varijabla okruženja OMNIROUTE_CHAT_VIRTUAL_LANES ima prednost nad ovim podešavanjem na kontrolnoj tabli; promjene stupaju na snagu nakon ponovnog pokretanja servera."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funkcionalna ogledala upravljačkog prostora",
+        "description": "Oglasi oglede ID-jeve '<gateway-alias>'/'<model>' putem /v1/models za modele čiji kanonski vlasnik nema aktivne povjerenice, ali ih upravljački prostor s prolaznim putem s aktivnim povjerenicama usmjerava. Upozorenje: dodaje stavke u katalog za sve klijente kada je globalno omogućeno."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Stanje New-API agregatora",
+        "description": "Omogućite detekciju stanja za čvorove kompatibilne s New-API / One-API / Sub2API agregatorima. Kada je omogućeno, kompatibilni čvorovi s postavljenom zastavicom agregatora prijavljivat će svoje stanje na kontrolnoj tabli i pri quota-preflight usmjeravanju."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Sakrij izbrisane veze pretrage",
+        "description": "Statistika pretrage i nedavne pretrage računaju samo provajdere koji još uvijek imaju aktivnu vezu (provajderi bez ključa kao što je duckduckgo-free se uvijek računaju). Isključeno zadržava svaki sačuvani red pretrage s ID-jem provajdera."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Stroga oznaka Free",
+        "description": "Stranice provajdera na kontrolnoj tabli: prikazuje oznaku Free samo na signalima koje provajder uvažava — odbacuje heuristiku naziva za prikaz, ne-booleovska free polja i sufikse :free kod registrovanih provajdera bez dokumentovanog besplatnog nivoa. Isključeno zadržava historijsko pravilo za oznaku."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Prazan pool odgovara sa 503",
+        "description": "Kada je pool kandidata za auto combo već prazan prije pokretanja predfiltera za pozivanje alata (svaki cilj preskočen zbog cooldowna, blokada ili iscrpljivanja), odgovori sa 503 no_eligible_targets umjesto naslijeđenog 400 \"No target supports tool calling\" capability_mismatch. Podrazumijevano isključeno: prazan pool zadržava naslijeđeni 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mekani zaključak za dvosmisleni kod 401 u Mistralu",
+        "description": "Goli Mistral kod 401 ('{\"detail\":\"Unauthorized\"}', bez eksplicitnog signala ovlaštenja) je bajt-po-bajt identičan za oduzetu ključ i za iscrpljenu kvotu. Kada je omogućeno, takav kod 401 hlađenje veze umjesto da je parkira kao isteklu, do 3 puta u satu; sljedeći će je parkirati kao isteklu, pa se oduzeti ključ konvergira. Isključeno po zadanoj postavci: svaki goli Mistral kod 401 parkira vezu kao isteklu, kao ranije."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Automatsko čišćenje za Batch i datoteke",
+        "description": "Omogućite da prolaz automatskog čišćenja obriše terminalne (completed/failed/cancelled/expired) Batch API poslove starije od OMNIROUTE_BATCH_RETENTION_DAYS, zajedno s njihovim kontrolnim tačkama po liniji, te očisti BLOB sadržaj učitanih datoteka kojima je prošao expires_at. Podrazumijevano isključeno: svaka postojeća instalacija zadržava ove podatke tačno kao i ranije dok ih operater ne omogući. Ruta DELETE /api/v1/batches/delete-completed koju pokreće operater ostaje nepromijenjena u oba slučaja — to je zaseban, bezuslovni javni API ugovor."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Zakup Antigravity računa",
+        "description": "Rezervišite odabrani Antigravity račun za životni ciklus strimovanja zahtjeva koji ga je odabrao, tako da istovremeni ponovni pokušaj ili primopredaja akreditiva ne mogu ponovo odabrati račun koji je već dodijeljen aktivnom strimu. Rezervacija je ograničena na opseg (connection, callable upstream model), tako da jedan račun i dalje može opsluživati dva različita modela istovremeno. Kada su svi kvalifikovani računi već zakupljeni za taj model, zahtjev vraća strukturirani 503 POOL_BUSY sa ograničenim Retry-After umjesto nagomilavanja na zauzeti račun. Podrazumijevano isključeno: odabir računa ostaje tačno kao i prije i rezervacija se ne vrši."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Automatsko uklanjanje zastarjelih Combo koraka",
+        "description": "Nakon uspješne sinhronizacije modela s mjerodavnim katalogom uživo, uklonite combo korake prikvačene na modele koje katalog više ne navodi, uz jedan revizijski zapis po uklonjenom koraku. Nikada ne uklanja korake pri neuspjeloj, degradiranoj ili sinhronizaciji samo besplatnih modela, i nikada ne prazni combo. Podrazumijevano isključeno: zastarjeli koraci se samo označavaju."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth sažeto razmišljanje",
+        "description": "Omogućite da Claude OAuth zahtjev koji traži čitljivo razmišljanje (thinking.display \"summarized\") izostavi redact-thinking-2026-02-12 Anthropic beta verziju, koja inače uzrokuje da Anthropic vraća prazne blokove razmišljanja koji sadrže samo potpis. Podrazumijevano isključeno: ta beta verzija je dio Claude Code OAuth wire otiska, tako da je OAuth zahtjevi zadržavaju nepromijenjenom. Claude zahtjevi putem API ključa već podržavaju sažeto razmišljanje bez ove zastavice; OMNIROUTE_REDACT_THINKING=false se također primjenjuje na OAuth samo kada je ova zastavica uključena."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Popravak Kiro poziva alata",
+        "description": "Kada streaming Kiro odgovor emituje neispravan tool_call omotač (nedostaje input.name ili input.arguments) prije bilo kakvog vidljivog izlaza, potisnite ga i ponovo pošaljite zahtjev jednom s korektivnim uputstvom umjesto završavanja poteza sa invalid_kiro_tool_call. Ponovni pokušaj košta jedan dodatni Kiro zahtjev; drugi neuspjeh završava potez sa kiro_tool_call_repair_retry_failed. Uključeno prema zadanim postavkama. Postavite na false kako bi potez bio prekinut pri prvom neispravnom omotaču."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "models.dev nivoi napora",
+        "description": "Koristite nivoe napora rasuđivanja koje objavljuje models.dev (sužene na poznati vokabular napora) kada ih ne navodi ni premošćavanje operatera niti registar provajdera, i tretirajte deklarisanu praznu listu nivoa kao \"nema nivoa\" u effort_tiers za /v1/models i presjecima kombinovanih nivoa. Isključeno prema zadanim postavkama: effort_tiers i razriješeni supportedThinkingEfforts ostaju tačno onakvi kakvi su bili ranije."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena sintetizovana cx telemetrija",
+        "description": "Priložite sintetizovani programski cx blob interakcije klijenta (vrijednost koju sam arena.ai šalje za stranicu bez zabilježene interakcije) svakom Arena (lmarena) create-evaluation zahtjevu koji nema providerSpecificData.cx koji je pružio operater. Isključeno prema zadanim postavkama: polje cx je Arena signal protiv automatizacije, pa OmniRoute prosljeđuje samo vrijednost koju je operater zabilježio iz stvarne sesije preglednika (providerSpecificData.cx), a u suprotnom uopšte ne šalje cx. Nedokazana uzvodna korist; omogućite samo ako Arena počne odbijati zahtjeve bez cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Reaktivno sažimanje izvornog Codexa",
+        "description": "Dozvolite da prolazi reaktivnog (prag) i sažimanja konteksta u krajnjoj nuždi (last-resort) takođe prepišu izvorne Codex prolazne historije (POST /v1/responses prema codex provajderu) kada prekorače budžet konteksta, koristeći Responses input[] adapter. Isključeno prema zadanim postavkama: izvorne Codex historije su u vlasništvu Codex klijenta i sažimanje ih nikada ne prepisuje; preveliki zahtjevi nastavljaju padati na provjeri budžeta konteksta tačno kao i ranije. Zahtijeva da je globalno komprimovanje uključeno i da model nije isključen."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Prozor kvote: Poštuj ograničeno parkiranje",
+        "description": "Dozvolite politici kvote po prozoru (pragovi po sesiji/sedmični pragovi koje koristi odabir računa) da uvaži ograničeno parkiranje iscrpljenosti: kada istekne ograničeni rok parkiranja, ili kada je keširano zapažanje kvote starije od gornje granice parkiranja, prozor prestaje isključivati račun sve do novog dohvatanja kvote. Isključeno prema zadanim postavkama: keširani prozor nastavlja blokirati na osnovu svog posljednjeg prijavljenog procenta sve do vlastitog vremena resetovanja."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Generisanje slika: dugotrajni poslovi",
+        "description": "Za generisanje slika kompatibilno sa OpenAI: koristite vremensko ograničenje konekcije (providerSpecificData.timeoutMs), u suprotnom centralno vremensko ograničenje dohvatanja sa uzvodnog servera (FETCH_TIMEOUT_MS, zatim REQUEST_TIMEOUT_MS, podrazumijevano 600 s) umjesto fiksnog budžeta od 120 s za slike; prekinite zahtjev koji je pozivalac otkazao kodom 499; i omogućite da Playground prima dugotrajne poslove slika kao SSE tok uz keepalive signale. Podrazumijevano isključeno: primjenjuje se fiksni budžet, a otkazivanje od strane pozivaoca se ne propagira. Krajnji rok koji pokriva čitanje tijela odgovora je uvijek uključen."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Poboljšanja zrcaljenja kataloga",
+        "description": "Doradite claude/ otkrivanje i functional-gateway zrcaljenja na /v1/models. Podrazumijevano isključeno: oba prolaza zrcaljenja ponašaju se tačno kao i prije. Uključeno: claude/ zrcaljenja otkrivanja također pokrivaju navedene varijante reasoning-effort (-low/-medium/-high/-xhigh), preskaču ugrađene auto/* ID-ove koje putanja zahtjeva ne može materijalizirati i preskaču već navedeni alijas; functional-gateway zrcaljenja preskaču kombinacije i OmniRoute-sintetizirane ID-ove (claude/, no-think/), preuzimaju vlasnika iz owned_by, nikada ne koriste vlasnika kao vlastiti gateway, preskaču gatewaye onemogućene u blockedProviders i modele izvan autoritativnog kataloga uživo tog gatewaya."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Zdravlje proxyja: Odbijanje resetuje niz neuspjeha",
+        "description": "U provjeri zdravlja proxyja, omogućite da proba koju je cilj odbio (401/403/429: proxy je proslijedio, odredište je odbilo ovaj izlazni IP) resetuje niz uzastopnih neuspjeha proxyja, poput poslužene probe. Podrazumijevano isključeno: odbijanje ostaje neutralno i zadržava niz (#10654). Status 5xx u oba slučaja ostaje neodređen, a odbijanje nikada ne uklanja, ne onemogućava niti ponovo aktivira proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Slike za Grok pretplatu",
+        "description": "Registrujte xai-oauth (xao) i grok-cli rute za slike i mapirajte OpenAI kvalitet high/hd na xAI medium. Podrazumijevano isključeno: putanja xAI slika putem API ključa ostaje na postojećem OpenAI-kompatibilnom zahtjevu i pretplatničke rute nisu registrovane."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth otkrivanje modela uživo",
+        "description": "Dohvatite ažurni xAI katalog modela uživo za xai-oauth konekcije sa https://api.x.ai/v1/models koristeći OAuth bearer token, umjesto zamrznutog statičkog seeda. Podrazumijevano uključeno. Postavite zastavicu na false da biste nastavili posluživati statički seed. HTTP neuspjesi se vraćaju na seed u ruti otkrivanja; sam getter zastavice ne šalje HTTP zahtjeve."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-kompatibilni sistemski potezi unutar razgovora",
+        "description": "Na običnim anthropic-compatible-* relejima (claude → claude prosljeđivanje), zadržite role:system poteze unutar razgovora unutar messages[] umjesto njihovog podizanja u sistemski parametar najvišeg nivoa, tako da keširani prefiks prompta ostane stabilan kroz poteze. Primjenjuje se samo kada je sam klijent poslao mid-conversation-system-2026-04-07 anthropic-beta (prosljeđuje se uzvodno u izvornom obliku). Isključeno prema zadanim postavkama: svaki sistemski potez se podiže tačno kao i prije, jer releji koji ne podržavaju beta verziju odbijaju role:system poruke s kodom 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Provjera stanja baze podataka: Odgodi skeniranje pri pokretanju",
+        "description": "Pokrenite provjeru integriteta/stanja baze podataka pri pokretanju nakon što server počne prihvatati zahtjeve (putem setImmediate) umjesto blokiranja pokretanja dok se ona ne završi. Isključeno prema zadanim postavkama: pokretanje se blokira na provjeri tačno kao i prije #13717, tako da se oštećena baza podataka i dalje otkriva prije nego što se obradi prvi zahtjev. Uključeno: pokretanje se odmah završava, a provjera (sada ograničena/paginirana i, za pravu bazu podataka zasnovanu na datoteci, izolovana u podređenom procesu koji se može otkazati) pokreće se odmah nakon toga."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Rutiranje objavljenog OpenCode kataloga",
+        "description": "Omogućite OpenCode Zen i OpenCode Go modelima bez eksplicitne krajnje tačke registra da preuzmu svoju površinu zahtjeva (Responses za @ai-sdk/openai, Messages za @ai-sdk/anthropic) iz objavljenog models.opencode.ai kataloga, koji se čita u pozadini svakih 6 h. Isključeno prema zadanim postavkama: krajnja tačka dolazi iz heuristike registra tačno kao i prije i katalog se nikada ne preuzima."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automatski zahtjevi: Razriješene težine mogućnosti",
+        "description": "Omogućite da auto/* zahtjevi (resolveModelOrError i omotač za automatsko rutiranje) izgrade skup kandidata s razriješenim mogućnostima modela (vision, reasoning, thinking) i zabilježenim ocjenama kvaliteta, pročitanim u jednom grupnom prolazu poput /v1/models kataloga. Isključeno prema zadanim postavkama: težine snimka u trenutku zahtjeva ostaju tačno kao i prije (mogućnosti se razrješavaju na zahtjev i ne utječu na težine). Uključeno: ti signali utječu na težine snimka, pa se težine kandidata, a samim tim i odabir, mogu promijeniti."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Ključni transportni portal",
+        "description": "Zadržava providere bez ključa (bez autifikacije) koji za prenošenje podataka trebaju lokalni pregledač (browserBacked) ili lokalno instaliranu komandnu liniju (isLocalCli) iz automatske (*/*) candidate pool, tako da zakašnjeli član ne može zadržati automatski zahtjev do isteka vremena po cilju (#17036). Isključeno po zadanoj: svaki providera bez autifikacije s emuliranim pozivima alata ostaje u poolu tačno kao ranije. Direktni pozivi '<alias>'/'<model>' rade na oba načina."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Replay logičkog razumijevanja",
+        "description": "Za modele codebuddy-cn s razmišljanjem (porodica DeepSeek-V4 / Kimi-K2 koji zahtijevaju replay logičkog razumijevanja), svaki replayed assistant reasoning_content se unosi kao vidljivi '<thought>' blok na početku sadržaja poruke, tako da preživi gateway koji odbacuje polje reasoning_content (#13632). Isključeno po zadanoj: codebuddy-cn zahtjevi se šalju nepromijenjeni; polje reasoning_content se uvijek čuva."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Sigurnosna zaustavljanja pružaoca usluge: Terminalno",
+        "description": "Zadržite izričito sigurnosno zaustavljanje pružaoca usluge (misalignment_policy_violation, content_policy_violation ili tačno zastarjelo odbijanje 'blocked by our safety systems' označeno kao provider_safety_rejection) kao terminalno odbijanje u opsegu zahtjeva: njegov kod se čuva kroz HTTP, Responses, WebSocket i completed-stream greške, a combo se zaustavlja na njemu umjesto ponovnog pokušaja s drugim ciljevima, otkazujući prihvaćene srodne zahtjeve (#17049). Podrazumijevano isključeno: ove greške zadržavaju postojeće rukovanje i usmjeravanje komboa ostaje nepromijenjeno."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Ispravnost akreditiva: Ponovno testiranje automatski onemogućenih veza",
+        "description": "Dozvolite provjeri ispravnosti akreditiva da ponovo testira veze koje je gateway sam isključio (označene sa autoDisabledAt; najviše jednom svakih 6 h pojedinačno i 5 po provjeri) i ponovo uključi vezu kada njeno ponovno testiranje uspije (#16190). Podrazumijevano isključeno: isključene veze ostaju isključene dok ih operater ponovo ne omogući ili ponovo ne testira, tačno kao i ranije. Veze koje je onemogućio operater i veze isključene nakon trajne zabrane se nikada ponovo ne testiraju."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Kontrola akreditiva: Samo dijagnoze autentifikacije",
+        "description": "Suzite kontrolu akreditiva komboa tako da keširana neuspjela provjera akreditiva blokira vezu samo kada njena dijagnoza potvrdi neispravne akreditive (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Neuvjerljivi neuspjesi (isteci vremenskog ograničenja, ograničenja stope, prekidi rada, nepodržane provjere i netipizirane greške raspoređivača) tada se tretiraju kao nepoznati i veza nastavlja primati saobraćaj. Podrazumijevano isključeno: svaka keširana greška provjere blokira vezu tokom trajanja keša (TTL od 5 minuta)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Zaustavljanje pri odbijanju zbog politike sadržaja",
+        "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",
+        "description": "Kada su svi računi u periodu hlađenja i period hlađenja koji prvi završava je uzrokovan statusom 403 (pristup odbijen) ili 410 (nestalo), odmah vrati to odbijanje umjesto čekanja da period hlađenja istekne i ponovnog slanja zahtjeva; obnavljajući agentrouter 403 za kvotu na nivou konekcije se zatim sprema uz errorCode 429 kako bi se mogao ponovo pokušati. Podrazumijevano isključeno: samo 401 preskače čekanje, a svako odbijanje se sprema sa statusom s kojim je stiglo."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Politika budžeta za neprocijenjenu upotrebu",
+        "description": "Kako dnevna/sedmična USD ograničenja po ključu tretiraju uspješnu upotrebu čiji provajder/model nema konfiguriranu cijenu. fail_closed (zadano) označava prozor kao prekoračen, pa nepoznat trošak ne može proći pored stroge granice. count_as_zero računa tu upotrebu kao $0 i nastavlja primjenjivati cjenovnu potrošnju. Neprocijenjeni modeli su ionako navedeni na početnoj stranici nadzorne ploče."
       }
     }
   },
@@ -13793,6 +14446,7 @@
     "latency": "Latencija",
     "quota": "Kvota",
     "rangeWindow": "prozor od {range}",
+    "timeRange": "Vremenski raspon",
     "runtimeHealthBlend": "blend runtime/zdravlja",
     "averageResponseTime": "prosječno vrijeme odgovora",
     "worstQuota": "Najgora kvota",
@@ -13923,7 +14577,11 @@
       "ok": "Uglavnom dozvoljeno"
     },
     "allProviders": "Svi provajderi",
-    "noApiKeyRequired": "API ključ nije potreban"
+    "noApiKeyRequired": "API ključ nije potreban",
+    "searchPlaceholder": "Pretraži model, provajder…",
+    "searchAria": "Pretraži besplatne modele",
+    "filterProviderAria": "Filteriraj po provajderu",
+    "keylessOnly": "Samo bez ključa"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot zdravlja provajdera",
@@ -13994,7 +14652,11 @@
     "learnMore": "Saznajte više",
     "changelogLoadFailed": "Nije bilo moguće učitati promjene. Pokušajte ponovo kasnije.",
     "retry": "Ponovi",
-    "viewFullHistory": "Pogledajte cijelu historiju na GitHub-u"
+    "viewFullHistory": "Pogledajte cijelu historiju na GitHub-u",
+    "title": "Novosti i dnevnik izmjena",
+    "description": "Obavještenja OmniRoute tima i najnovije bilješke o izdanjima",
+    "viewLabel": "Prikaži",
+    "loadingNews": "Učitavanje obavještenja..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15207,9 @@
       "circuitBreakerState": "Stanje prekidača provajdera",
       "lastUpdate": "Posljednje ažuriranje: {timestamp}",
       "uptimeMinutes": "{minutes}min",
-      "uptimeHoursMinutes": "{hours}h {minutes}min"
+      "uptimeHoursMinutes": "{hours}h {minutes}min",
+      "breakerClosed": "Zatvoreno",
+      "breakerNotClosed": "Otvoreno ili poluotvoreno"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15284,9 @@
         "primaryAction": "Detalji održavanja",
         "secondaryAction": "Status sistema"
       }
+    },
+    "miniapp": {
+      "askAnything": "Pitajte bilo šta…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15477,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP alat",
     "scope": "Opseg",
-    "apiKey": "API ključ"
+    "apiKey": "API ključ",
+    "visibleCount": "{visible} vidljivo / {total} ukupno",
+    "modeLabel": "Način prikaza",
+    "jumpToNow": "Skoči na trenutno vrijeme, linija SADA vraća se na poziciju {position}%",
+    "laneReuse": "Ponovna upotreba reda",
+    "laneReuseLabel": "Vremenski okvir za ponovnu upotrebu reda (minute)",
+    "laneReuseHint": "Zahtjevi koji dijele ID razgovora ostaju u istom redu vremenske linije sve dok je razmak između njih kraći od navedenog broja minuta.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatsko osvježavanje",
+    "autoRefreshLabel": "Interval automatskog osvježavanja (sekunde)",
+    "autoRefreshHint": "Koliko često vremenska linija ponovo dohvaća listu zahtjeva sa servera.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Umanji",
+    "zoomIn": "Uvećaj"
   },
   "metadata": {
     "compressionTitle": "Kompresija",
@@ -15073,5 +15753,118 @@
     "importButton": "Uvezi",
     "importFailed": "Uvoz nije uspio.",
     "importSuccess": "Uvezeno {connections} računa i {nodes} čvorova provajdera; preskočeno {skipped}."
+  },
+  "conversations": {
+    "title": "Razgovori",
+    "countSummary": "{total, plural, one {# razgovor} few {# razgovora} other {# razgovora}} s 2 ili više retorki",
+    "autoRefreshTitle": "Koliko često ova lista ponovo preuzima podatke sa servera.",
+    "autoRefresh": "Automatsko osvježavanje",
+    "loading": "Učitavanje razgovora...",
+    "colConversation": "Razgovor",
+    "colTurns": "Potezi",
+    "colContinuation": "Nastavak",
+    "colLastModel": "Posljednji model",
+    "colProvider": "Pružatelj",
+    "colStatus": "Status",
+    "colLastSeen": "Zadnje viđanje",
+    "drawerTitle": "Razgovor",
+    "prevConversation": "Prethodni razgovor",
+    "nextConversation": "Sljedeći razgovor",
+    "gotoLatestRequest": "Prijeđi na najzahtjev",
+    "goToBottom": "Prijeđi na dno",
+    "statusInProgress": "U toku",
+    "continuationGenuineTitle": "Najnoviji krug koristio previous_response_id i riješen je na serveru",
+    "continuationBadge": "nastavak",
+    "stalledTitle": "Najnoviji krug nije završen stopom i ništa se nije nastavilo 5+ minuta",
+    "stalledBadge": "zaglavljeno",
+    "noTurns": "Nema zabilježenih krugova za ovaj razgovor."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Počni od trenutne pozicije (preskoči postojeće zapise)",
+    "pageTitle": "Izvoz dnevnika",
+    "pageSubtitle": "Kontinuirano šaljite dnevnik poziva s kartice Dnevnik u vanjsku analitičku pohranu.",
+    "addDestination": "Dodaj odredište",
+    "scheduleTitle": "Raspored",
+    "cronLabel": "Cron",
+    "notScheduled": "nema rasporeda",
+    "lastScheduledRun": "Zadnji planirani pokret",
+    "lastRunSummary": "{startedAt} — {status}, {rows} redaka",
+    "never": "nikad",
+    "highWaterMark": "Vrhovna oznaka dnevnika poziva",
+    "rowPrefix": "redak {id}",
+    "noDestinations": "Nema odredišta za izvoz",
+    "noDestinationsHint": "Dodajte odredište za početak slanja dnevnika poziva na satnom rasporedu.",
+    "errLoadStatus": "Neuspjelo učitavanje statusa izvoza",
+    "errSaveDestination": "Neuspjelo spremanje odredišta",
+    "msgDestinationSaved": "Odredište sačuvano.",
+    "errConnectionTest": "Test povezivanja nije uspio",
+    "msgRunInFlight": "Pokretanje za ovo odredište je već u toku; ništa nije poslijano duplo.",
+    "errExportRun": "Izvoz se nije uspio",
+    "errUpdateDestination": "Neuspješno ažuriranje odredišta",
+    "errDeleteDestination": "Brisanje odredišta nije uspjelo",
+    "deleteTitle": "Obriši odredište",
+    "deleteConfirm": "Obriš \"{name}\"? Njegov kursor izvoza će također biti uklonjen, pa će ponovno dodavanje krenuti od najstarijeg zadržanog dnevnika poziva.",
+    "statusDisabled": "Onemogućeno",
+    "statusFailing": "Neuspješno",
+    "statusHealthy": "Zdravo",
+    "statusNotRunYet": "Još nije pokrenuto",
+    "typeNotInstalled": "Tip nije instaliran",
+    "metaLine": "Zadnje pokretanje {lastRun} · izvozeno redaka: {exported} · na čekanju: {pending} · kursor: {cursor}",
+    "btnTest": "Test",
+    "btnRunNow": "Pokreni odmah",
+    "btnDisable": "Onemogu",
+    "btnEnable": "Omogući",
+    "btnEdit": "Uredi",
+    "btnDelete": "Izbriši"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI računi",
+    "cardSubtitle": "Status samo za čitanje iz autentifikovanog administrativnog API-ja",
+    "btnRefresh": "Osvježi",
+    "listAria": "Stanje CLIProxyAPI računa",
+    "noAccounts": "Nisu pronađeni CLIProxyAPI računi.",
+    "loading": "Učitavanje stanja računa…",
+    "stateReady": "Stanje računa",
+    "stateDisabled": "CLIProxyAPI nije instaliran",
+    "stateMissingKey": "Ključ upravljanja nije konfigurisan",
+    "stateUnreachable": "API za upravljanje je nedostupan",
+    "stateUnauthorized": "Ključ za upravljanje je odbijen",
+    "stateUnsupported": "Ova verzija CLIProxyAPI ne izlaže stanje računa",
+    "stateInvalidResponse": "API za upravljanje vratio je nepodržani odgovor"
+  },
+  "darioPanel": {
+    "title": "Nalozi Claude",
+    "description": "Autentificirajte Dario putem svoje Claude Pro/Max pretplate. Saobraććeće se naplaćivati iz vaše pretplatične granice. Potrebno je barem jedan nalog prije nego što Dario može usmjeravati zahtjeve (do tada /health izvještava o degradiranoj funkcionalnosti).",
+    "noAccounts": "Još nema konfigurisanih naloga.",
+    "importTitle": "Uvoz iz OmniRoute",
+    "importDescription": "Ponovo iskoristite OAuth žetone postojeće Claude konekcije OmniRoute umjesto ponovnog prijava — potpuno preskače korak odobrenja u pregledniku.",
+    "importPendingTooltip": "Bit će aktivno čim u OmniRoute postoji Claude konekcija.",
+    "btnImport": "Uvoz",
+    "btnImporting": "Uvoz…",
+    "aliasPlaceholder": "pseudonim (nije obavezno)",
+    "btnStartLogin": "Započni prijavu",
+    "btnStarting": "Pokretanje…",
+    "btnCompleteLogin": "Završi prijavu",
+    "btnCompleting": "Završavanje…",
+    "codePlaceholder": "code#state ili samo code",
+    "noticeImported": "Uvezeno kao nalog \"{alias}\" — Dario je pokrenut ponovo da ga preuzme.",
+    "noticeAdded": "Nalog \"{alias}\" dodan.",
+    "expiresInHours": "istječe za ~{hours}h",
+    "expiresInMinutes": "istječe za ~{minutes}m",
+    "expiresAt": "istječe {date}",
+    "scopes": "{count, plural, one {# opseg} other {# opsega}}",
+    "btnRemove": "Ukloni",
+    "btnRefresh": "Osvježi",
+    "loginStep1": "1. Otvorite ovaj URL u pregledniku i odobrite pristup za nalog <mono>{alias}</mono>:",
+    "pendingExpires": "Prijava istječe {time}",
+    "loginStep2": "2. Zalijepite kod koji Anthropic prikazuje:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Ova stranica mora biti otvorena unutar Telegram Mini Appa.",
+    "greeting": "👋 Zdravo {name}! Pošaljite poruku da razgovarate kroz vaš OmniRoute gateway.",
+    "greetingFallbackName": "tu",
+    "errNoReply": "⚠️ Nema odgovora od gatewaya.",
+    "btnSend": "Pošalji"
   }
 }

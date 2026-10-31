@@ -25,8 +25,10 @@
     "confirm": "Är du säker?",
     "refresh": "Uppdatera",
     "close": "Stäng",
+    "dialogTitleFallback": "Dialogruta",
     "previousPage": "Föregående sida",
     "nextPage": "Nästa sida",
+    "pagination": "Sidnumrering",
     "capsLockOn": "Caps Lock är på",
     "dismissNotification": "Avvisa avisering",
     "toggleColumns": "Växla kolumner",
@@ -182,6 +184,7 @@
     "combos": "Kombinationer",
     "noModelsFound": "Inga modeller hittades",
     "clear": "Rensa",
+    "clearFilters": "Rensa filter",
     "done": "Klar",
     "selectAll": "Markera alla",
     "unselectAll": "Avmarkera alla",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Används av {count, plural, one {# batch} other {# batches}}",
     "batchFilePreview": "Förhandsgranskning",
     "batchFilePreviewTruncated": "Visar de första {shown} raderna ({total} totalt rader)",
-    "batchFileDownloadFull": "Ladda Ner Hela Filen"
+    "batchFileDownloadFull": "Ladda Ner Hela Filen",
+    "tokensPageTitle": "Tokens",
+    "tokensPageDescription": "Skicka tokens mellan API-nycklar, dela inbjudningskoder och anslut communityservrar.",
+    "tokensServerUrlLabel": "Server-URL"
   },
   "disabled": "Inaktiverad",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Dirigera anrop med förbrukad budget till den kostnadsfria reservleverantören/-modellen för nödfall.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Proxyservern har stoppats eller startar om.",
     "expandSidebar": "Expandera sidofältet",
     "collapseSidebar": "Dölj sidofältet",
-    "themes": "Teman",
-    "presetColors": "Populära färger",
     "createTheme": "Skapa tema",
     "chooseColor": "Välj en färg",
-    "themeCoral": "Korall",
-    "themeBlue": "Blå",
-    "themeRed": "Röd",
-    "themeGreen": "Grön",
-    "themeViolet": "Violett",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "cliToolsShort": "Verktyg",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Temasystem",
     "whitelabelingDesc": "Beskrivning av egen varumärkesprofilering",
     "switchThemes": "Byt tema",
-    "themeAccentDesc": "Beskrivning av temats accentfärg",
     "uploadFavicon": "Ladda upp favicon",
     "themeDark": "Mörkt tema",
     "customLogoDesc": "Beskrivning av anpassad logotyp",
     "sidebarVisibilityToggle": "Växla sidofältets synlighet",
-    "themeAccent": "Temats accentfärg",
     "resetFavicon": "Återställ favicon",
     "whitelabeling": "Egen varumärkesprofilering",
     "darkMode": "Mörkt läge",
@@ -1122,10 +1117,8 @@
     "customLogo": "Anpassad logotyp",
     "appearance": "Utseende",
     "themeSelectionAria": "ARIA-etikett för temaval",
-    "themeCreate": "Skapa tema",
     "customFaviconDesc": "Beskrivning av anpassad favicon",
     "logoPreview": "Förhandsvisning av logotyp",
-    "themeCustom": "Anpassat tema",
     "hideHealthLogsDesc": "Beskrivning av att dölja hälsologgar",
     "faviconPreview": "Förhandsvisning av favicon",
     "changelog": "Ändringslogg",
@@ -1352,7 +1345,9 @@
       "open": "öppna",
       "close": "stäng"
     },
-    "noResults": "Inga resultat"
+    "noResults": "Inga resultat",
+    "costsTeams": "Team",
+    "costsTeamsSubtitle": "Kostnadsställen för team"
   },
   "webhooks": {
     "title": "Webhookar",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 eller @channelname",
       "chatIdHint": "Den unika numeriska identifieraren eller det offentliga användarnamnet för chatten/kanalen.",
       "tutorial": "Så här konfigurerar du en Telegram-webhook:"
-    }
+    },
+    "copy": "Kopiera",
+    "copied": "Kopierat!",
+    "expandDetails": "Visa detaljer",
+    "collapseDetails": "Dölj detaljer"
   },
   "compliance": {
     "auditTitle": "Revision",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Samtal (24h)",
     "mcpMetricSuccessRate": "Framgångsfrekvens",
     "mcpMetricAvgDuration": "Genomsnittlig varaktighet",
-    "mcpMetricTopTool": "Toppverktyg"
-  },
-  "themesPage": {
-    "title": "Teman",
-    "description": "Välj ett förinställt tema eller skapa ett eget med en enda färg",
-    "presetColors": "Populära färger",
-    "customTheme": "Anpassat tema",
-    "customThemeDesc": "Klicka på skapa tema och välj en färg",
-    "createTheme": "Skapa tema",
-    "activePreset": "Aktivt tema"
+    "mcpMetricTopTool": "Toppverktyg",
+    "dismissError": "Avfärda fel"
   },
   "header": {
     "logout": "Logga ut",
     "quickNavigation": "Snabbnavigering",
     "quickNavigationTitle": "Snabbnavigering (⌘K / Ctrl+K)",
     "openQuickNavigation": "Öppna snabbnavigering",
+    "openMenu": "Öppna meny",
+    "products": "Keak-produkter",
     "switchToLightMode": "Växla till ljust läge",
     "switchToDarkMode": "Växla till mörkt läge",
     "language": "Språk",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Antropisk kompatibel",
     "media": "Media",
     "mediaDescription": "Generera bilder, videor och musik",
-    "themes": "Teman",
-    "themesDescription": "Välj ett färgtema för hela instrumentpanelen",
     "costsDescription": "Spåra utgifter, analysera trender och hantera din AI-budget för alla leverantörer",
     "cacheDescription": "Övervaka effektiviteten hos leverantörernas promptcache och lokal semantisk återanvändning av svar.",
     "limitsDescription": "Konfigurera hastighetsgränser och kvoter per API-nyckel och leverantör",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Avancerade nyttolastregler, gränser för förfrågningar och inställningar för proxy-API",
     "mitmProxyDescription": "Konfigurera MITM-proxyinställningar för trafikinspektion och felsökning",
     "oneProxyDescription": "Konfigurera 1Proxy-inställningar för avancerad proxykedjning",
-    "omniSkillsDescription": "Installera och hantera sandlådefärdigheter för automatiserad körning av prompter och verktyg"
+    "omniSkillsDescription": "Installera och hantera sandlådefärdigheter för automatiserad körning av prompter och verktyg",
+    "teamsDescription": "Teamkostnadsuppskattningar och delade mjuka budgetar"
   },
   "cloudSyncStatus": {
     "synced": "Synkroniserad",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Kopiera din slutpunkt",
     "readinessStep4": "Skicka en testförfrågan",
     "readinessContinue": "Fortsätt konfigurationen",
-    "readinessDismiss": "Avfärda tills vidare"
+    "readinessDismiss": "Avfärda tills vidare",
+    "unpricedUsageTitle": "{count, plural, one {# modell} other {# modeller}} med nylig användning men utan konfigurerat pris",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-nyckel med en användningsgräns} other {# API-nycklar med en användningsgräns}} använde dessa modeller de senaste 8 dagarna. Medan den användningen ligger inom en nyckels dagliga eller veckovisa period betraktas nyckeln som över kvoten och dess förfrågningar blockeras (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Denna användning räknas som $0 mot per-nyckel användningsgränser (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# begäran} other {# begäranden}}, {keys, plural, one {# begränsad nyckel} other {# begränsade nycklar}}",
+    "unpricedUsageMore": "…och {count} till",
+    "unpricedUsageConfigure": "Konfigurera prissättning",
+    "unpricedUsageDismiss": "Stäng"
   },
   "analytics": {
     "title": "Analys",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Endast valda anslutningar",
     "selectAtLeastOneConnection": "Välj minst en anslutning eller välj Alla anslutningar.",
     "allConnectionsDesc": "Den här nyckeln kan använda alla aktiva anslutningar.",
-    "restrictedToConnections": "Begränsad till {count, plural, one {# anslutning} other {# anslutningar}}."
+    "restrictedToConnections": "Begränsad till {count, plural, one {# anslutning} other {# anslutningar}}.",
+    "preferredConnections": "Föredragna anslutningar",
+    "preferredConnectionsDesc": "Prioritetsordning per nyckel. Om en föredragen anslutning inte är tillgänglig faller routningen tillbaka på nästa behöriga.",
+    "preferredConnectionsNone": "Ingen preferens angiven — standardstrategin för routning används.",
+    "preferredConnectionsClear": "Rensa",
+    "removeSelection": "Ta bort {name}"
   },
   "auditLog": {
     "title": "Revisionslogg",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Konfigurera Image→Text-bron i Inställningar för Modality Bridge",
     "sttBridgeCta": "Konfigurera tal→text-bryggan i inställningarna för Modality Bridge",
     "existingConnection": "Befintlig anslutning",
-    "openrouterSttDescription": "OpenRouter tal-till-text modeller använder din konfigurerade OpenRouter-anslutning. Ingen separat autentisering krävs."
+    "openrouterSttDescription": "OpenRouter tal-till-text modeller använder din konfigurerade OpenRouter-anslutning. Ingen separat autentisering krävs.",
+    "modalityTabsAria": "Medietyp",
+    "serviceKindsAria": "Tjänstetyp"
   },
   "search": {
     "searchQuery": "Sökfråga",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Öppna Claw - Manuell konfiguration",
     "clineManualConfiguration": "Cline manuell konfiguration",
     "kiloManualConfiguration": "Kilokod manuell konfiguration",
+    "piManualConfiguration": "Pi - Manuell konfiguration",
+    "piConfigInvalidTitle": "Pi models.json är oläslig",
+    "piOmnirouteConfigured": "OmniRoute är konfigurerad som en anpassad Pi-leverantör",
+    "piModelHelp": "Pi upptäcker inte automatiskt modeller för anpassade slutpunkter — modellen du väljer skrivs explicit in i models.json.",
+    "piManualConfigTitle": "Eller redigera ~/.pi/agent/models.json manuellt",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Starta sedan Pi och välj omniroute-leverantören. Ställ in PI_CODING_AGENT_DIR för att flytta hela agentkatalogen.",
+    "piUnownedNote": "Denna post lades till utanför OmniRoute (t.ex. pi-guis anpassade slutpunkter). Ansökan kommer att anta den; Återställ tar bara bort poster OmniRoute skrev.",
     "whenToUseLabel": "När du ska använda",
     "openToolDocs": "Öppna verktygsdokument",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Använd när du behöver en lätt terminalbaserad AI-assistent för snabba uppgifter.",
       "hermes-agent": "Använd när du behöver Hermes Agent (av Nousresearch) med standard-, delegations-, visions- och hjälpmodeller dirigerade genom OmniRoute.",
+      "whycodes": "Använd när du vill ha WhyCodes som en mångsidig autonom CLI-agent (TUI, namngivna agenter, minne, swarm) riktad mot OmniRoute.",
       "custom": "Använd för anpassade verktygsimplementeringar eller generiska OpenAI-kompatibla konfigurationer."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "xAI Grok Build TUI-kodningsagent med stöd för anpassad leverantör",
       "droid": "Factory Droid AI-assistent",
       "openclaw": "Öppna Claw AI Assistant",
+      "openclaude": "OpenClaude CLI-kodningsagent med stöd för OpenAI-kompatibel leverantör",
       "cline": "Cline AI-kodningsassistent för CLI",
       "kilo": "Kilokod AI Assistant CLI",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Warp AI-terminal med stöd för anpassad leverantör",
       "agent-deck": "Agent Deck multi-agent-orkestrerare",
       "5dive": "5dive — självhostad flotta av kodningsagenter; en auth-profil pekar dem alla mot OmniRoute",
+      "whycodes": "WhyCodes autonom CLI-agent med OpenAI-kompatibel bas-URL",
       "zed": "Zed-kodredigerare — inbyggd agent via en OpenAI-kompatibel leverantör"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Okänd",
     "cliproxyapiUpdate": "Uppdatera",
     "cliproxyapiUpdateAvailable": "Uppdatering tillgänglig: v{current} → v{latest}",
-    "cliproxyapiVersion": "Version"
+    "cliproxyapiVersion": "Version",
+    "piInstallTitle": "Installera Pi Coding Agent",
+    "piInstallInstructions": "Installera Pi CLI och gå sedan tillbaka hit för att ansluta den till OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Använd URL som kan nås från maskinen som kör Pi. Den OpenAI-kompatibla /v1-slutpunkten läggs till automatiskt.",
+    "piManualMergeHint": "Endast förhandsgranskning. Slå samman detta providers.omniroute-inträde till models.json så att dina andra leverantörer och inställningar förblir intakta.",
+    "removeMapping": "Ta bort mappning",
+    "customUrl": "Anpassad URL",
+    "customEndpointAria": "Anpassad ändpunkt",
+    "useDefaultKey": "Använd OmniRoutes standardsluta",
+    "mainModelAria": "Huvudmodell",
+    "manualConfigTitle": "Manuell konfiguration av Grok Build"
   },
   "modelCatalog": {
     "title": "Modeller & kombinationer",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "t.ex. 10",
     "testSelected": "Testa markerade ({count})",
     "testAllFiltered": "Testa alla filtrerade ({count})",
+    "visibility": "Synlighet",
+    "allVisibility": "Synliga och dolda",
+    "visibleOnly": "Synliga",
+    "hiddenOnly": "Dolda",
+    "visibleColumn": "Synlig",
+    "hideModel": "Dölj {name} från /v1/models",
+    "showModel": "Visa {name} i /v1/models",
+    "hiddenBadge": "Dold",
+    "hideFiltered": "Dölj filtrerade ({count})",
+    "showFiltered": "Visa filtrerade ({count})",
+    "visibilityCounts": "{visible} synliga · {hidden} dolda · {total} totalt",
+    "visibilityUpdateFailed": "Det gick inte att uppdatera modellens synlighet",
     "cancel": "Avbryt",
     "clearResults": "Rensa resultat",
     "testing": "Testar...",
@@ -3397,16 +3438,53 @@
     "httpError": "Förfrågan misslyckades med HTTP {status}",
     "testFailedNoDetail": "Testet misslyckades utan något felmeddelande",
     "additionalCapabilities": "Ytterligare förmågor: {list}",
-    "comboRefMember": "Kombination → {name}"
+    "comboRefMember": "Kombination → {name}",
+    "keyAccessButton": "API-nyckelåtkomst",
+    "allowedInKeys": "Tillåten i: {count, plural, one {# nyckel} other {# nycklar}}",
+    "keysLoading": "Läser in API-nycklar…",
+    "keysRetry": "Försök läsa in nycklar igen",
+    "accessViaPattern": "via {pattern}",
+    "accessBlocked": "Blockerad av {pattern}",
+    "editKeyAccess": "Redigera nyckelåtkomst",
+    "toggleKeyAccess": "Tillåt {item} på {name}",
+    "resultNetworkError": "Tilldelning misslyckades",
+    "resultWouldEmptyModels": "Skulle lämna denna nyckel utan tillåtna modeller — redigera nyckelåtkomst istället",
+    "resultWouldEmptyCombos": "Skulle lämna denna nyckel utan tillåtna kombinationer — redigera nyckelåtkomst istället",
+    "keyUpdatePending": "{name} uppdateras fortfarande. Försök igen om ett ögonblick.",
+    "assignToKeys": "Tilldela till API-nycklar…",
+    "assignApply": "Tillämpa ändringar",
+    "assignComplete": "API-nyckelåtkomst uppdaterad",
+    "assignFailed": "Vissa uppdateringar av API-nycklar misslyckades",
+    "assignNoChanges": "Ingen API-nyckelåtkomst ändrades",
+    "selectedAccessItems": "Valda objekt: {count}",
+    "assignExcludedCombos": "{count, plural, one {# vald kombinationsrad är inte en modell och kommer att hoppas över här} other {# valda kombinationsrader är inte modeller och kommer att hoppas över här}}. Tilldela kombinationer från fliken Combos.",
+    "assignActionAdd": "Lägg till",
+    "assignActionRemove": "Ta bort",
+    "searchKeys": "Sök API-nycklar",
+    "selectApiKey": "Välj API-nyckel {name}",
+    "allModelsAccess": "Alla modeller",
+    "allCombosAccess": "Alla kombinationer",
+    "modelAccessCount": "Modeller: {count}",
+    "comboAccessCount": "Kombinationer: {count}",
+    "keyInactive": "Inaktiv",
+    "keyBanned": "Spärrad",
+    "keyRevoked": "Återkallad",
+    "switchRestrictedConfirm": "Växla denna nyckel till begränsad åtkomst: endast de valda objekten kommer att tillåtas",
+    "removeNoChangeHint": "Denna nyckel tillåter allt; att ta bort valda objekt medför ingen förändring",
+    "removeStaysAllowedHint": "Fortfarande tillåten på denna nyckel via {patterns}",
+    "resultChanged": "Ändrad",
+    "resultUnchanged": "Ingen ändring",
+    "resultSkipped": "Överhoppad",
+    "resultNeedsSwitch": "Kräver växling till begränsad"
   },
   "combos": {
-    "autoTosIncludeLabel": "Inkludera leverantörer märkta ToS: avoid i auto",
-    "autoTosDescription": "Av som standard. Gäller alla auto-kombinationer, inte bara ett konto. Att ansluta en leverantör aktiverar inte det här alternativet.",
-    "autoTosSaveError": "Det gick inte att spara ToS-policyn. Den tidigare inställningen visas fortfarande. Försök igen.",
-    "autoTosLoadError": "Det gick inte att läsa in ToS-policyn. Försök igen innan du ändrar den.",
     "title": "Kombinationer",
     "description": "Skapa modellkombinationer med viktad routing och reservstöd",
     "autoCatalogTitle": "Katalog för automatisk routing",
+    "autoTosLoadError": "Det gick inte att läsa in ToS-policyn. Försök igen innan du ändrar den.",
+    "autoTosSaveError": "Det gick inte att spara ToS-policyn. Den tidigare inställningen visas fortfarande. Försök igen.",
+    "autoTosIncludeLabel": "Inkludera leverantörer märkta ToS: avoid i auto",
+    "autoTosDescription": "Av som standard. Gäller alla auto-kombinationer, inte bara ett konto. Att ansluta en leverantör aktiverar inte det här alternativet.",
     "autoCatalogTemplateCount": "{count} mallar",
     "autoCatalogDescription": "Inbyggda auto/*-kombinationer lösts dynamiskt från anslutna leverantörer. Använd något av dessa ID:n som modellfält – ingen installation behövs.",
     "autoCatalogExpand": "Utöka katalogen för automatisk routing",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Fel vid uppdatering av kombination",
     "errorDeleting": "Fel vid borttagning av kombination",
     "testFailed": "Testbegäran misslyckades",
+    "removeErrorModels": "Ta bort {count} misslyckade modell(er)",
+    "removingErrorModels": "Tar bort…",
+    "errorModelsRemoved": "{count} misslyckade modell(er) har tagits bort från kombinationen",
+    "noErrorModelsFound": "Inga misslyckade modeller hittades bland kombinationens egna steg",
+    "cannotRemoveAllModels": "Det går inte att ta bort alla modeller från kombinationen",
+    "removeErrorModelsConfirm": "Vill du ta bort {count} misslyckade modell(er) från ”{name}”? Tidsgränser och hastighetsbegränsningar räknas inte.",
     "failedToggle": "Det gick inte att växla kombination",
     "testResults": "Testresultat — {name}",
     "resolvedBy": "Löst av:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Flytta uppåt",
     "moveDown": "Flytta ner",
     "removeModel": "Ta bort",
+    "testStep": "Testa den här modellen",
+    "testStepRunning": "Testar…",
+    "testStepNotTestable": "Endast steg med en enda modell kan testas",
     "saving": "Sparar...",
     "liveNoProviders": "Inga leverantörer har observerats ännu.",
     "liveFleetDataHint": "Flottdata anländer via live-kombinationshändelser.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Inga kombor har konfigurerats ännu.",
     "playgroundCreateFirst": "Skapa en först",
     "weighted": "Viktad",
+    "weightPercent": "Vikt (%)",
     "leastUsed": "Minst använda",
     "costOpt": "Kostnadsoptimering",
     "strategyGuideTitle": "Så använder du den här strategin",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# konto} other {# konton}}",
     "builderGlobalAdded": "Tillagd",
     "builderGlobalAdd": "Lägg till",
+    "clearSearch": "Rensa sökning",
     "manualModel": "Manuell modell",
     "manualModelInvalid": "Ange en modell som provider/model.",
     "manualModelUnknownProvider": "Okänt leverantörsprefix.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Lägg till kombinationsreferens",
     "builderPinnedAccount": "Fäst konto",
     "builderLegacyEntry": "Äldre post",
+    "builderStaleModel": "Finns inte i livekatalogen",
     "reviewName": "Namn",
     "reviewStrategy": "Strategi",
     "reviewSteps": "Steg",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Minsta innehållslängd (tecken)",
     "responseValidationJsonPaths": "JSON-path-kontroller",
     "responseValidationAddCheck": "+ Lägg till kontroll",
+    "responseValidationRemoveCheck": "Ta bort kontroll",
+    "responseValidationPath": "JSON-sökväg",
+    "responseValidationCondition": "Villkor",
+    "responseValidationValue": "Förväntat värde",
     "agentFeaturesSystemMessageOverride": "Åsidosätt systemmeddelande",
     "agentFeaturesSystemMessagePlaceholder": "Du är en sakkunnig assistent...",
     "agentFeaturesSystemMessageHint": "Systemmeddelande åsidosättande för agenter",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Totalt antal poster",
     "type": "Typ",
-    "memoryEnabled": "Minne aktiverat"
+    "memoryEnabled": "Minne aktiverat",
+    "qdrantTutorialTitle": "Snabbguide: minne med Qdrant",
+    "qdrantTutorialIntro": "Qdrant lagrar vektorer och metadata för minnen så att relevant kontext kan hämtas. Det komprimerar inte direkt token; besparingarna är indirekta genom att undvika kontext som inte är relaterad till begäran.",
+    "qdrantTutorialStep1": "Säkrar servern med HTTPS och en API-nyckel innan produktionsanvändning.",
+    "qdrantTutorialStep2": "Ange värd, port, samling och en modell i leverantör/modell-format med konfigurerad inloggningsuppgift.",
+    "qdrantTutorialStep3": "Samlingens dimension måste matcha dimensionen som genereras av modellen. En befintlig samling med 2048 dimensioner accepterar inte inbäddningar på 1536 dimensioner.",
+    "qdrantTutorialStep4": "Spara, testa anslutningen och kör söktestet. Aktivera Qdrant först därefter.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Krediter: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Färdigheter",
@@ -5288,7 +5390,8 @@
         "skipped": "redan konfigurerad",
         "failed": "misslyckades"
       }
-    }
+    },
+    "stepProgress": "Konfigurationsförlopp"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Den här leverantören är som standard utesluten från auto",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Ladda ned CSV-mall",
     "importFromFileMoreErrors": "+{count} ytterligare",
     "importFromFileSchemaHint": "CSV-kolumnerna är positionsbaserade: provider, name, apiKey, baseUrl (valfritt), priority (valfritt). Kolumnen provider måste innehålla ett befintligt ID för en hanterad leverantör eller ett redan registrerat nod-ID som är kompatibelt med OpenAI/Anthropic — den här importen skapar inga nya slutpunktsnoder.",
+    "importOAuthExport": "Importera OAuth-export",
+    "oauthExportTitle": "Importera export från kontohanterare",
+    "oauthExportDescription": "Ladda upp en export i klartext från en kontohanterare (t.ex. cloud-accounts-exporten från Antigravity Manager). Token uppdateras på servern och varje konto blir en OAuth-anslutning — dubbletter uppdateras på plats.",
+    "oauthExportProviderLabel": "Leverantör",
+    "oauthExportChoose": "Välj fil",
+    "oauthExportFileAria": "JSON-fil med kontoexport",
+    "oauthExportSchemaHint": "Godkänns: ett dokument med en \"accounts\"-array, en ren array eller en enskild post. Token kan ligga i ett nästlat token-objekt eller direkt på posten.",
+    "oauthExportDetected": "{count} konto(n) hittades",
+    "oauthExportSelectAll": "Markera alla konton",
+    "oauthExportSelectAccount": "Markera konto {index}",
+    "oauthExportColEmail": "E-post",
+    "oauthExportColProvider": "Leverantör",
+    "oauthExportColRefresh": "Uppdateringstoken",
+    "oauthExportNoEmail": "(ingen e-post)",
+    "oauthExportYes": "ja",
+    "oauthExportNo": "nej",
+    "oauthExportImporting": "Importerar…",
+    "oauthExportImport": "Importera {count} konto(n)",
+    "oauthExportResult": "Importerade {imported}/{total} — {failed} misslyckades",
+    "oauthExportParseError": "Det gick inte att läsa några konton från den här filen.",
+    "oauthExportUnknownError": "okänt fel",
     "adaptaTutorial": {
       "title": "Hur du ansluter Adapta Web",
       "introPrefix": "Adapta autentiserar genom Clerk. Tokenen",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Alla modeller är redan importerade",
     "noNewModelsToImport": "Inga nya modeller att importera — alla modeller finns redan i registret eller listan över anpassade modeller",
     "localCatalogFallbackStatus": "Couldn't reach the provider's model list — showing the built-in catalog",
+    "discoveryDegradedStatus": "Modellupptäckt misslyckades {time}",
     "skippingExistingModels": "Hoppar över {count} befintliga modeller",
     "autoSync": "Automatisk synkronisering",
     "autoSyncShort": "Synkronisera",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "t.ex. 131072",
     "contextWindowOverrideHint": "Ställ in denna modells verkliga kontextfönster (tokens) manuellt när leverantören rapporterar fel. Går före automatiskt identifierade värden/katalogvärden och förhindrar att kombinationsdirigering tappar modellen.",
     "contextWindowOverrideInvalid": "Åsidosättning av kontextfönster måste vara ett positivt heltal tokens",
+    "maxOutputTokenOverrideInvalid": "Åsidosättning av maximalt antal utdatatoken måste vara ett positivt heltal tokens",
     "visionCapableLabel": "Vision-kapabel",
     "visionCapableHint": "Flagga denna modell manuellt som vision-kapabel när leverantörens identifieringsmetadata inte rapporterar modalitet för bildinmatning (vanligt för självhostade/lokala backends).",
     "compatParamFiltersLabel": "Parameterfilter",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Lägg till åsidosättning",
     "ccAliasLoadError": "Det gick inte att läsa in inställningarna för identifieringsalias: {error}",
     "ccAliasSaveError": "Det gick inte att spara inställningen för identifieringsalias: {error}",
+    "cliVersionSectionTitle": "Annonserad CLI -klientversion",
+    "cliVersionEffectiveLabel": "För närvarande annonseras",
+    "cliVersionSourceLabel": "Löst från: {source}",
+    "cliVersionPinnedLabel": "Inspelad standard: {pinned}",
+    "cliVersionSourceSettings": "åsidosätta instrumentpanelen",
+    "cliVersionSourceEnv": "miljövariabel",
+    "cliVersionSourceDiscovered": "automatiskt upptäckt senaste utgåvan",
+    "cliVersionSourceDefault": "fångad standard",
+    "cliVersionInputLabel": "Åsidosätt version",
+    "cliVersionInputPlaceholder": "Åsidosätt version; blankt rensas",
+    "cliVersionSaveButton": "Spara",
+    "cliVersionResetButton": "Återställ till standard",
+    "cliVersionLoadError": "Det gick inte att ladda CLI versionsinställningar: {error}",
+    "cliVersionSaveError": "Det gick inte att spara CLI versionen: {error}",
+    "cliVersionLoadFailed": "Det gick inte att ladda de aktuella CLI -versionsinställningarna.",
+    "cliVersionHintClaude": "Anthropic portar nyare Claude-modeller på Claude Code-klientversionen som den ser. Det här är versionen OmniRoute annonserar på varje antropisk förfrågan.",
+    "cliVersionCaveatClaude": "Faktureringsförbehåll: faktureringsversionen är '<version>'.'<build-revision>', och byggrevisionen är en separat infångad konstant. Advertising 2.1.260 rapporterar 2.1.260.1e2, vilket inte är vad en riktig 2.1.260 binär skickar.",
+    "cliVersionHintCodex": "OpenAI portar nyare modeller på Codex -klientversionen som den ser, till exempel felet: 'gpt-6-astra'-modellen kräver en nyare version av Codex.",
+    "cliVersionCaveatCodex": "Varning för slutledning: en version som din egen uppringare rapporterar slår fortfarande CODEX_CLIENT_VERSION env var, men denna åsidosättning slår båda, eftersom det är explicit operatörsavsikt.",
     "compatUpstreamHeadersLabel": "Extra headers till uppströmsservern",
     "compatUpstreamHeadersHint": "Inställning med höga behörigheter – samma tillitsnivå som vid redigering av leverantörens API-autentiseringsuppgifter. Endast betrodda administratörer bör använda den. Slås samman efter att OmniRoute har lagt till autentisering från leverantörens API-nyckel. Om en anpassad header har samma namn som en befintlig (t.ex. Authorization) ersätter ditt värde den automatiskt genererade headern helt (inklusive Bearer-token) – uppströmsservern ser endast det du angav, inte nyckeln från inställningarna. Felaktig konfiguration kan orsaka 401-fel eller bruten autentisering mot uppströmsservern. En rad per header (t.ex. extra Authentication för vissa gateways). Håll muspekaren över eller fokusera på värdet för att förhandsgranska det. Sparas när fokus lämnar fältet, vid klick utanför eller när den här panelen stängs.",
     "compatUpstreamHeaderName": "Headernamn",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Etikett för API-format",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "API-region Kina",
-    "apiRegionHint": "Tips för API-region",
-    "apiRegionInternational": "API-region internationell",
-    "apiRegionLabel": "Etikett för API-region",
+    "apiRegionChina": "Fastlandskina",
+    "apiRegionHint": "Välj slutpunktsregionen som används för API-åtkomst och kvotspårning.",
+    "apiRegionInternational": "Internationell",
+    "apiRegionLabel": "API-region",
     "apikey": "API-nyckel",
     "audio": "Ljud",
     "audioProvidersHeading": "Rubrik för ljudleverantörer",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "När det här kontot når sin användningsgräns på 5 timmar och Anthropic erbjuder kön med lägre prioritet, accepterar OmniRoute den och fortsätter att skicka förfrågningar med anthropic-usage-limit: slow tills tidsfönstret återställs, i stället för att låta anslutningen svalna. Veckogränsen gäller fortfarande och svar kan behöva vänta på ledig kapacitet.",
     "claudeAutoLimitResetLabel": "Återställ sessionsgränsen automatiskt (en gång i veckan)",
     "claudeAutoLimitResetDescription": "När det här kontot når sin användningsgräns på 5 timmar och en återställning av sessionsgränsen är tillgänglig, aktiverar OmniRoute den automatiskt och försöker igen med full hastighet. Detta använder kontots återställning som är tillgänglig en gång i veckan och räknas fortfarande mot veckogränsen.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Hoppa över den tillfälliga cooldown-perioden så att denna anslutning förblir tillgänglig även efter återställningsbara fel (slutgiltiga tillstånd som banned/expired gäller fortfarande).",
     "disableCoolingLabel": "Inaktivera cooldown för denna anslutning",
     "bulkPasteAdded": "{count, plural, one {1 nyckel tillagd} other {# nycklar tillagda}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Hämta API-nyckel på monsterapi.ai",
       "moonshot": "Anslut Moonshot AI med en API-nyckel.",
       "morph": "Gratisnivå: 250K krediter/månad, 0 $",
+      "apmix": "Anslut Apmix med en API-nyckel från apmix.ai/dashboard — en prenumeration, många modeller.",
       "nanogpt": "Anslut NanoGPT med en API-nyckel.",
       "nebius": "~1 $ i testkrediter vid registrering för API-testning",
       "nlpcloud": "NLP Cloud använder ett proprietärt chatbot-API istället för OpenAI chat/completions. OmniRoute anpassar OpenAI-meddelanden till indata/kontext/historik och exponerar en lokal katalog över chatbot-modeller som stöds.",
@@ -6620,7 +6773,7 @@
       "claude": "Anslut Claude Code med det befintliga OAuth-flödet.",
       "cline": "Anslut Cline med det befintliga OAuth-flödet.",
       "cursor": "Anslut Cursor IDE med det befintliga OAuth-flödet.",
-      "cursor-api": "Anslut Cursor med en API-nyckel för användare (crsr_...) från cursor.com/dashboard/api; ingen IDE-session behövs.",
+      "cursor-api": "Anslut Cursor med en användar-API-nyckel (crsr_... eller grok_...) från cursor.com/dashboard/api; ingen IDE-session behövs.",
       "github": "Anslut GitHub Copilot med det befintliga OAuth-flödet.",
       "gitlab-duo": "OAuth-applikation med ai_features + read_user-omfång. Konfigurera GITLAB_DUO_OAUTH_CLIENT_ID och valfritt GITLAB_DUO_OAUTH_CLIENT_SECRET på denna OmniRoute-instans.",
       "kilocode": "Anslut Kilo Code med det befintliga OAuth-flödet.",
@@ -6628,8 +6781,7 @@
       "kiro": "Gratisnivå: 50 krediter/månad (~25K–100K tokens). ⚠️ Kiros användarvillkor förbjuder användning av tredjepartsproxy/harness.",
       "codex": "Anslut OpenAI Codex med det befintliga OAuth-flödet.",
       "qwen": "Anslut Qwen Code med det befintliga OAuth-flödet.",
-      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens",
-      "apmix": "Anslut Apmix med en API-nyckel från apmix.ai/dashboard — en prenumeration, många modeller."
+      "github-models": "Skapa en GitHub PAT med omfånget 'models: read' på github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} accepterar leverantörsbaserade modell-ID:n. Importera från /models eller lägg till anpassade ID:n för routing.",
     "bedrockModelsDescription": "Amazon Bedrock-modeller omfattas av AWS-regionen. Importera från /models eller lägg till Bedrock-modell-ID:n aktiverade i den valda regionen.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
     "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Används i {count} kombination(er): {combos}",
+    "openComboTooltip": "Öppna Kombinationer — används av {combo}",
+    "claudeCodeRoutingTitle": "Upströmsproxyroutning för Claude Code-trafik",
+    "routingNative": "Inhemsk",
+    "routingFallback": "Reserv",
+    "rerank": "Rangordning",
+    "video": "Video",
+    "markFreeTierTitle": "Markera som gratisnivå (visas även när betalte modeller är dolda)",
+    "codexTunnelTitle": "Kodverktygsanslutning",
+    "codexTunnelDescription": "Tunneln håller strikt utåtriktat. Lokala verktyg utförs fortfarande endast av Codex, under dess sandbox- och godkännandepolicy.",
+    "tunnelIdLabel": "Tunnel-ID",
+    "tunnelRuntimeKeyLabel": "Tunnelns körningsnyckel",
+    "tunnelRuntimeKeyPlaceholder": "Körningsnyckel",
+    "tunnelRuntimeKeyHint": "Lagras krypterad tillsammans med cookie:et och skrivs aldrig till loggar.",
+    "tunnelRuntimeKeyNewLabel": "Ny tunnelkörrningsnyckel",
+    "tunnelRuntimeKeyNewHint": "Ange endast tillsammans med en ny cookie. Värdet lagras krypterat.",
+    "chatgptConnectorLabel": "ChatGPT anpassad koppling",
+    "doctorChecking": "Kontrollerar status…",
+    "doctorCheck": "Kontrollera läkarestatus",
+    "fallbackRetryBackendTitle": "Reserverad återförsöksbackend"
   },
   "settings": {
     "title": "Inställningar",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Välj vilka objekt som ska visas i sidofältet. Grundläggande gör att avancerade verktyg förblir sökbara.",
     "hideHealthLogs": "Dölj loggar för hälsokontroll",
     "hideHealthLogsDesc": "När PÅ, dämpa [HealthCheck]-meddelanden i serverkonsolen",
-    "themeAccent": "Temafärg",
-    "themeAccentDesc": "Välj en förinställd färg eller skapa ditt eget tema med en färg",
-    "themeCreate": "Skapa tema",
-    "themeCustom": "Anpassat tema",
-    "themeBlue": "Blå",
-    "themeRed": "Röd",
-    "themeGreen": "Grön",
-    "themeViolet": "Violett",
-    "themeOrange": "Orange",
-    "themeCyan": "Cyan",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Anpassa programmets namn och logotyp",
     "appName": "Programnamn",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Nu",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Applied by: {mode}",
       "coreBinaryPath": "Sökväg till kärnbinären",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Valfritt: verifierar den genererade filen med kärnbinären innan den antagna filen ersätts. Lämna tomt för att fortsätta skriva bredvid. Katalogen skapas om den saknas."
+      "coreBinaryPathHelp": "Valfritt: verifierar den genererade filen med kärnbinären innan den antagna filen ersätts. Lämna tomt för att fortsätta skriva bredvid. Katalogen skapas om den saknas.",
+      "urlFeedlessHint": "Lämna tomt för ett endast väljarbaserat abonnemang: ställ in en control URL nedan, ingen feed hämtas, uppdateras eller bindas."
     },
     "bulkHealthcheck": "Samlad hälsokontroll",
     "bulkHealthcheckDesc": "Testa alla konfigurerade proxyservrar mot en mål-URL för att se vilka som fungerar.",
@@ -7706,6 +7862,7 @@
     "configured": "konfigurerad",
     "none": "Ingen",
     "modelOverrideValuePlaceholder": "Numeriskt värde",
+    "modelOverrideKey": "Åsidosättningsnyckel",
     "modelOverrideReasoningEffortsPlaceholder": "Engelska, kommaseparerade, t.ex. low, medium, high",
     "addKeyValue": "Lägg till nyckelvärde",
     "noModelOverrides": "Inga åsidosättningar har konfigurerats för denna modell.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Du kan åsidosätta standardpriser för specifika modeller. Anpassade åsidosättningar har prioritet framför automatiskt identifierade priser.",
     "editPricing": "Redigera prissättning",
     "viewFullDetails": "Visa fullständiga detaljer",
-    "themeCoral": "Korall",
     "adaptiveVolumeRouting": "Adaptiv volymdirigering",
     "adaptiveVolumeRoutingDesc": "Skala anslutningar dynamiskt baserat på nyttolastvolym och genomströmningsbelastning.",
     "lkgpToggleTitle": "Senast fungerande leverantör (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Minska tokenanvändningen genom att komprimera prompter innan de skickas till leverantörer",
     "autoCombosTitle": "Automatiska kombinationer",
     "autoCombosDesc": "Tillåt att denna nyckel använder de inbyggda auto/*-kombinationerna, som automatiskt väljer en modell från varje konfigurerad leverantör",
+    "ccDiscoveryAliasesTitle": "Upptäcktsalias för Claude Code",
+    "ccDiscoveryAliasesDesc": "Annonsera claude/...-kompatibilitetsspeglar för modeller och kombinationer som denna nyckel redan kan komma åt",
     "compressionGuidanceFullGuideLink": "Fullständig komprimeringsguide",
     "compressionGuidanceShow": "Detaljer",
     "compressionGuidanceHide": "Dölj detaljer",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Procentandel av fönstret",
     "compressionAdaptivePolicyAbsolute": "Absolut tokenbudget",
     "compressionOutputStylesDescription": "Infoga instruktioner för svarsformning utan att skriva om leverantörens utdata. Kombinera fritt.",
+    "compressionOutputStylesPreviewNote": "En begäran injicerar endast ett språk: det upptäckta språket, annars det första paketet. Blocken ovan är per-pack-varianterna, inte en kombinerad injektion.",
     "mcpAccessibilityDescription": "Avgränsar MCP-verktygsutdata (separat lagring).",
     "compressionStylesTileSummary": "{tokens, number} tokens sparade · {runs, plural, one {# körning stylad} other {# körningar stylade}}",
     "compressionStylesTileEmpty": "Inga stylade körningar ännu.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Värd",
     "qdrantCollection": "Samling",
     "catalogVisibilityHint": "Dolda modell-ID:n kan fortfarande anropas med samma åtkomstbehörigheter.",
+    "exposeCombosOnly": "Visa endast kombinationer i /v1/models",
+    "exposeCombosOnlyDesc": "Klienter som upptäcker modeller automatiskt ser dina kombinationer (och auto/* om de inte är dolda) i stället för leverantörernas råa modeller. Explicita provider/model-id:n fortsätter att routas.",
     "catalogScopeTitle": "Modellista i API:et",
     "catalogScopeDesc": "Vad GET /v1/models visar för denna nyckel. Att begränsa listan ändrar aldrig vad nyckeln kan anropa.",
     "catalogScopeAll": "Båda",
@@ -8918,7 +9079,9 @@
         "financial": "Finansiell",
         "brazilian": "Brasiliansk",
         "usa": "USA",
-        "full": "Fullständig"
+        "full": "Fullständig",
+        "gdpr": "GDPR (EU)",
+        "popia": "POPIA (Sydafrika)"
       },
       "builtinTypes": "Inbyggda typer",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4-adresser",
         "ipv6_address": "IPv6-adresser",
         "aws_key": "AWS-åtkomstnycklar",
-        "api_key_generic": "API-nycklar och tokens"
+        "api_key_generic": "API-nycklar och tokens",
+        "iban": "IBAN bankkontonummer",
+        "eu_vat": "EU VAT -nummer",
+        "es_dni_nie": "Spanska DNI / NIE",
+        "it_codice_fiscale": "Italienska Codice Fiscale",
+        "pl_pesel": "polska PESEL",
+        "nl_bsn": "holländska BSN",
+        "de_steuer_id": "tyska Steuer-ID",
+        "se_personnummer": "Svenskt personnummer",
+        "za_id": "Sydafrikanska ID nummer",
+        "za_phone": "Sydafrikanska telefonnummer",
+        "za_vat": "Sydafrikanska VAT nummer",
+        "za_tax_ref": "Sydafrikanska skattereferenser"
       },
       "customPatterns": "Egna mönster",
       "customPatternsDesc": "Träffar ersätts med [CUSTOM_REDACTED]. Upp till {max} mönster. Mönster som riskerar katastrofal backtracking avvisas.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Lyckades",
     "tomlTestFailed": "Misslyckades",
     "tomlImportError": "Kunde inte bearbeta RTK TOML-filen.",
-    "tomlFileReadError": "Kunde inte läsa den valda TOML-filen."
+    "tomlFileReadError": "Kunde inte läsa den valda TOML-filen.",
+    "viewMode": "Visningsläge"
   },
   "compressionEngineConfig": {
     "loading": "Laddar…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Språkpaket: {packs}",
     "dragToReorder": "Dra för att ändra ordning på steg",
     "engine": "Motor",
-    "intensity": "Intensitet"
+    "intensity": "Intensitet",
+    "compressionOverride": "Åsidosättning av komprimering"
   },
   "compressionStudio": {
     "noRun": "Ingen komprimeringskörning tillgänglig.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "vinnare: {winner}",
     "encoder": "kodare",
     "bytes": "byte",
-    "tokensCl100k": "token (cl100k)"
+    "tokensCl100k": "token (cl100k)",
+    "studioViews": "Studiovyer"
   },
   "omniglyph": {
     "preview": "Förhandsgranskning",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Meddelanden kortare än detta komprimeras inte. Lägre = mer kompression.",
     "tooltipMinSavings": "Komprimera bara om det sparar åtminstone så många tokens.",
     "ultraSettings": "Ultrainställningar",
-    "ultraSettingsDesc": "SLM-driven semantisk komprimering"
+    "ultraSettingsDesc": "SLM-driven semantisk komprimering",
+    "defaultLanguage": "Standardspråk",
+    "viewMode": "Visningsläge"
   },
   "translator": {
     "title": "Översättare",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Misslyckades med att transformera strömmen"
   },
   "usage": {
+    "healthExtraUsageBypass": "Kvoten är slut; extra användning är tillåten, så tjänsten fortsätter.",
+    "healthPaidCreditsBypass": "Kvoten är slut; tillgängliga betalda krediter gör att tjänsten kan fortsätta.",
+    "healthFilteringBypass": "Kvoten är slut; lokal kvotfiltrering är avstängd, så tjänsten fortsätter.",
     "title": "Användning",
     "grokExtraUsageCredits": "Extra Användningskrediter",
     "grokAutoTopUp": "Automatisk Påfyllning",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Leverantörsgränser",
     "noProviders": "Inga leverantörer anslutna",
+    "quotaAuthRequired": "Autentisering krävs – logga in på kontrollpanelen",
+    "quotaAuthRequiredHint": "Leverantörsanslutningar kunde inte läsas in eftersom sessionen för kontrollpanelen saknas eller har löpt ut. Logga in och uppdatera sidan för att se dina kvotgränser.",
     "connectProvidersForQuota": "Anslut till leverantörer med OAuth för att spåra dina API-kvotgränser och användning.",
     "accountsCount": "{count, plural, one {# konto} other {# konton}}",
     "filteredFromCount": "(filtrerad från {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Lite",
     "tierUnknown": "Okänd",
     "statTotal": "Totalt",
-    "statCritical": "Kritisk",
-    "statAlert": "Varning",
-    "statHealthy": "Frisk",
     "filterPurchaseTypeLabel": "Typ",
     "filterTierLabel": "Nivå",
     "purchaseAll": "Alla",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Senast uppdaterad",
     "providerQuota": "Leverantörskvot",
     "providerQuotaHomeHint": "Livestatus för anslutna konton",
+    "claudeResetCreditDefaultTitle": "Återställning av Claude-gräns",
+    "confirmRedeemClaudeResetCredit": "Inlösen återställer omedelbart de berättigade Claude-användningsgränserna och förbrukar denna kredit permanent.",
+    "claudeResetCreditsModalTitle": "Claude-återställningskrediter",
+    "claudeResetCreditsModalExplainer": "Tillgängliga Claude-återställningskrediter och veckovisa sessionsåterställningar för detta konto.",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "healthAccountHint": "Baserat på senaste observationer, inte ett livetest. Välj ett konto för detaljer.",
+    "healthRecovery": "Förväntad återställning",
+    "healthAvailable": "Tillgänglig",
+    "healthRestricted": "Delvis begränsad",
+    "healthUnavailable": "Ej tillgänglig",
+    "healthPeakHourProtection": "Skydd under högtrafik",
+    "healthCooldown": "Väntetid",
+    "healthQuotaExhausted": "Kvoten är förbrukad",
+    "healthOverview": "Översikt",
+    "layoutFull": "Fullständig",
+    "layoutCompact": "Kompakt",
+    "healthQuotaError": "Kunde inte läsa kvoten",
+    "healthNoRuntime": "Driftstatus är inte tillgänglig",
+    "healthPreviousSnapshot": "Senaste uppdateringen misslyckades; visar föregående resultat",
+    "healthPreviousFailure": "Senaste begäran misslyckades; väntetiden är slut",
+    "healthAwaitingSync": "Återställningstiden har passerat; väntar på synkronisering",
+    "healthVerdictUnavailable": "Tillgänglighetskontrollen är inte tillgänglig; endast kvotnivåer visas",
+    "healthSummaryFailed": "Kunde inte läsa driftöversikten; modellås kan saknas",
+    "healthRuntimeObserved": "Status uppdaterad {time}",
+    "healthQuotaObserved": "Kvot observerad {time}",
+    "healthOldestQuota": "Äldsta kvotögonblicksbild: {time}",
+    "healthRecoveryUnknown": "Återhämtningstid okänd",
+    "healthDetailsHint": "Klicka för detaljer och åtgärder",
+    "healthFiveHour": "5 timmar",
+    "healthOverall": "Totalt",
+    "healthAction": "Åtgärd krävs",
+    "healthTitle": "Kontotillgänglighet",
+    "healthDrag": "Dra för att ordna leverantörer",
+    "healthDragPosition": "{provider}, {count, plural, one {position {position, number} av #} other {position {position, number} av #}}",
+    "healthResetOrder": "Återställ standardordning",
+    "healthPool": "{name}-pool",
+    "healthOtherPool": "Samma konto · {pool}: {status} ({remaining} kvar)",
+    "healthIncluded": "{count, plural, one {Varav # delvis begränsat konto} other {Varav # delvis begränsade konton}}",
+    "healthBannerUnavailable": "{count, plural, one {# konto är tillfälligt otillgängligt} other {# konton är tillfälligt otillgängliga}}",
+    "healthBannerAvailable": "{count, plural, one {# konto är tillgängligt} other {Alla # konton är tillgängliga}}",
+    "healthLegendHide": "Dölj teckenförklaring",
+    "healthLegendShow": "Visa teckenförklaring",
+    "healthLegendOk": "Solid = återstående kvot; genomskinlig = förbrukat.",
+    "healthLegendCooldown": "Kvoten för {window} är slut. Solid = förfluten väntetid; genomskinlig = kvarvarande väntetid.",
+    "healthLegendAction": "Behörighet har löpt ut eller kontot är spärrat; väntan hjälper inte.",
+    "healthLegendPartial": "Fortfarande användbart. Gul topp = modell eller pool begränsad.",
+    "healthWaited": "Väntat: {percent}",
+    "healthWait": "Ytterligare {duration} (återställning {time})",
+    "healthFastest": "Tidigaste återställning om {duration}",
+    "healthRatio": "{available, plural, one {# / {active, number} tillgängligt} other {# / {active, number} tillgängliga}}",
+    "healthCd5": "5 timmar · Väntetid",
+    "healthCdw": "Varje vecka · Väntetid",
+    "healthRecentSuccessBypass": "Routningen tillåter kontot eftersom en begäran nyligen lyckades.",
+    "healthPurchasedBalanceBypass": "Köpt saldo kan användas när den inkluderade kvoten är slut.",
+    "healthCutoffAtRequest": "Kvotgränser i realtid kontrolleras när en begäran routas."
   },
   "modals": {
     "waitingAuth": "Väntar på auktorisering",
@@ -11077,7 +11313,8 @@
       "message": "Meddelande",
       "error": "Fel",
       "completion": "Slutförande"
-    }
+    },
+    "statusFilter": "Status"
   },
   "templateNames": {
     "simple-chat": "Enkel chatt",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}m sedan",
     "hoursAgo": "{hours}t sedan",
     "daysAgo": "{days}d sedan",
-    "entries": "Poster"
+    "entries": "Poster",
+    "viewSwitcherAria": "Cachevy"
   },
   "proxyConfigModal": {
     "levelGlobal": "Global",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "GitLab Duo OAuth är inte konfigurerat. Registrera en OAuth-applikation på {applicationsUrl} med omdirigerings-URI {redirectUri} och behörigheter \"{scopes}\", ställ sedan in {clientIdEnv} (och valfritt {clientSecretEnv}) och starta om.",
     "gitlabDuoSetupDescription": "När applikationen är registrerad och miljövariablerna är inställda på denna OmniRoute-instans, klicka på Fortsätt för att påbörja OAuth-inloggningen.",
     "continue": "Fortsätt",
+    "copilotPolicyTitle": "Experimentell leverantör: policystatusen är tvetydig",
+    "copilotPolicyLine1": "OmniRoute ansluter via api.githubcopilot.com, som GitHub inte har publicerat som en allmän tredje parts slutledning API. Denna integration är experimentell och kan ändras utan föregående meddelande.",
+    "copilotPolicyLine2": "Endast ditt eget GitHub konto får anslutas. Dela aldrig inloggningsuppgifter, poolkonton eller försök att överskrida dina plangränser.",
+    "copilotPolicyLine3": "Användare av gratis- och studentplan får endast automatiskt modellval. Villkoren för din Copilot -plan och eventuella användningsbegränsningar förblir ditt ansvar.",
+    "copilotPolicyAcknowledge": "Jag förstår, anslut",
     "tabPasteSetupToken": "Installationstoken",
     "claudeSetupTokenDescription": "Kör `claude setup-token` i en terminal och klistra in token som skrivs ut. Den är giltig i ett år och har ingen uppdateringstoken. OmniRoute skickar en testbegäran till Anthropic innan den sparas.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Fler åtgärder",
     "test": "Testa",
     "edit": "Redigera",
     "delete": "Ta bort",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Inga giltiga poster hittades. Kontrollera formatet och försök igen.",
     "bulkImportSuccess": "Importen slutförd: {created} skapad, {updated} uppdaterad, {failed} misslyckades",
     "bulkImportErrorLine": "Rad {line}: {reason}",
-    "bulkImportMaxExceeded": "Max 100 fullmakter per import",
+    "bulkImportMaxExceeded": "Max {max} fullmakter per import",
     "bulkImportPreview": "Förhandsgranska",
     "clearAssignment": "(tydlig uppgift)",
     "bulkProxyAssignment": "Bulk proxytilldelning",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "IP-hastighetsbegränsning (429)",
     "poolSetAsideKindSlow": "långsamma svar",
     "poolSetAsideKindGeoBlocked": "regionsblockerad (403/451)",
+    "poolSetAsideKindOperatorReported": "avbrott rapporterat av operatör",
     "poolSetAsideUntil": "Tillbaka i rotation {endsAt}",
     "poolSetAsideRepeat": "Åsidosatt {count, plural, one {# gång} other {# gånger}}",
     "poolUnknownAddress": "Okänd adress",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Exportera kod",
     "exportShort": "Exportera",
     "noStateToExport": "Det finns inget tillstånd i playgrounden att exportera.",
-    "closeExportModal": "Stäng exportmodal",
     "close": "Stäng",
     "exportRealKeyWarning": "Säkerhetsvarning: export blockerad — en riktig API-nyckel upptäcktes i utdata. Återställ din API-nyckel och försök igen.",
     "placeholderHintPrefix": "Ersätt",
@@ -11808,7 +12052,8 @@
       "nextButton": "Nästa",
       "runButton": "Kör",
       "promptPlaceholder": "Skriv ditt meddelande… (Enter för att skicka, Shift+Enter för ny rad)"
-    }
+    },
+    "playgroundTabs": "Playground-lägen"
   },
   "miniPlayground": {
     "endpoint": "Slutpunkt",
@@ -11879,7 +12124,8 @@
     "assistant": "Assistent",
     "errorLabel": "Fel",
     "requestFailed": "Förfrågan misslyckades",
-    "stop": "Stoppa"
+    "stop": "Stoppa",
+    "messageInputAria": "Meddelande"
   },
   "requestLogger": {
     "recording": "Spelar in",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} kontorotationer",
       "resilienceRetried": "Tom tur försökt igen",
       "resilienceContinued": "Återupptaget mitt i strömmen",
-      "resilienceRecovered": "Återställt av en motståndskraftsåtgärd"
-    }
+      "resilienceRecovered": "Återställt av en motståndskraftsåtgärd",
+      "conversationContext": "Konversationskontext",
+      "goToBottom": "Gå längst ned",
+      "liveRefreshOn": "Liveuppdatering: på",
+      "liveRefreshOff": "Liveuppdatering: av",
+      "liveRefresh": "Liveuppdatering",
+      "continuesFromParent": "fortsätter från överordnad",
+      "continuesFrom": "Fortsätter från {id}",
+      "viewConversation": "visa konversation",
+      "openConversation": "Öppna konversation {id}"
+    },
+    "tableLabel": "Förfrågningsloggar",
+    "throughputPostFirstToken": "Efter första token",
+    "throughputEndToEnd": "End-to-end",
+    "throughputRate": "{value} tokens/sek",
+    "throughputExplanation": "Båda hastigheterna använder det största av antalet output- och reasoning-tokens. Efter första token bortser från en giltig TTFT; i övrigt används hela varaktigheten. End-to-end använder alltid hela varaktigheten. Ett buffrat svar kan ha en hög burst-leveranshastighet utan att modellgenereringen är snabbare."
   },
   "proxyLogger": {
     "filterAll": "Alla",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Serverad av",
     "filterTraffic": "Trafik",
     "filterTests": "Tester",
-    "filterSource": "Källa"
+    "filterSource": "Källa",
+    "tableLabel": "Proxyloggar",
+    "sortLogs": "Sortera loggar"
   },
   "endpointOptions": {
     "speech": "Tal",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "FÖRBRUKAD",
     "statusAlerting": "VARNING",
     "statusError": "FEL",
-    "moreSuffix": "+{count} fler"
+    "moreSuffix": "+{count} fler",
+    "feedFilterLabel": "Filtrera händelser"
   },
   "quotaShare": {
     "weightPercent": "Vikt %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Ogrupperade",
     "ungroupedHint": "Dessa pooler är inte tilldelade till en känd grupp. Redigera en pool för att flytta den till en riktig grupp.",
     "removeFailed": "Det gick inte att ta bort den här poolen.",
-    "dismiss": "Stäng"
+    "dismiss": "Stäng",
+    "allocationsHeading": "Tilldelningar",
+    "wizardRemoveDimension": "Ta bort dimension",
+    "wizardRemoveKey": "Ta bort nyckel"
   },
   "plugins": {
     "title": "Insticksprogram",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Uppdatering av inställningar misslyckades",
       "serviceRevealApiKey": "{actor} visade API-nyckel för {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Avfärda fel"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Gå nu",
       "message": "MITM-proxyn finns nu under AgentBridge.",
       "title": "Denna sida har flyttats"
-    }
+    },
+    "dnsOn": "DNS på",
+    "dnsOff": "DNS av",
+    "showServerSettings": "Visa serverinställningar",
+    "hideServerSettings": "Dölj serverinställningar",
+    "upstreamCaTesting": "Testar…",
+    "removeMapping": "Ta bort mappning",
+    "mappingSourcePlaceholder": "t.ex. gemini-3.6-flash-medium eller * för alla som saknar mappning",
+    "mappingWildcardHint": "Använd * som källa för att dirigera alla modeller utan en explicit mappning via OmniRoute till det valda målet. Exakta källmatchningar har alltid företräde framför *.",
+    "wizardDetectingModels": "Identifierar modeller från uppfångad trafik...",
+    "wizardDetectedModels": "Hittade {count, plural, one {# modell} other {# modeller}} i uppfångad trafik. Välj de som du vill lägga till:",
+    "wizardSelectedModels": "{count, plural, one {# modell har valts} other {# modeller har valts}}. Du mappar dem till OmniRoute-modeller på nästa skärm.",
+    "wizardAddModels": "Lägg till {count, plural, one {# modell} other {# modeller}}",
+    "wizardNoModelsDetected": "Inga modeller har identifierats än. Använd {agent} för att göra en förfrågan och kör sedan den här guiden igen för att automatiskt identifiera modeller från trafiken.",
+    "wizardNoModelsHint": "Eller stäng den här guiden och lägg till mappningar manuellt på agentkortet."
   },
   "providerStats": {
     "unknownError": "Okänt fel",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Genomsnittlig TTFT",
     "avgTotal": "Genomsnittlig total",
     "requestTelemetry": "Anropstelemetri",
-    "requestTelemetryDescription": "Uppdelning av 7-fas-pipeline (senaste 5 minuterna)"
+    "requestTelemetryDescription": "Uppdelning av 7-fas-pipeline (senaste 5 minuterna)",
+    "title": "Leverantörsstatistik",
+    "description": "Trafik, latens och lyckandefrekvens per leverantör och modell",
+    "combo": "Kombination",
+    "toggleModels": "Visa modeller för {provider}",
+    "windowSince": "Sedan {date}"
   },
   "relay": {
     "title": "Serverlösa relay-proxies",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Ingen request body.",
     "noResponseBody": "Ingen response body.",
     "formatted": "Formaterad",
-    "raw": "Rå"
+    "raw": "Rå",
+    "requestCount": "{count, plural, one {# förfrågan} other {# förfrågningar}}",
+    "expandList": "Expandera lista",
+    "collapseList": "Fäll ihop lista",
+    "snippetLanguage": "Språk för kodexempel",
+    "headersTable": "HTTP-huvuden",
+    "showSecrets": "Visa hemligheter",
+    "maskSecrets": "Maskera hemligheter",
+    "llmNotAvailable": "LLM-metadata är inte tillgängliga för den här förfrågan.",
+    "llmStreamYes": "ja (SSE)",
+    "llmStreamNo": "nej",
+    "llmTotalTokens": "Totalt: {count} token"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI-koder",
     "pageSubtitle": "Kodverktyg som pekar på OmniRoute",
     "searchPlaceholder": "Sök CLI…",
     "filterDetectionLabel": "Detektering",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Hittades inte",
     "baseUrlAll": "Alla",
     "baseUrlFull": "Fullständig",
-    "baseUrlPartial": "Delvis"
+    "baseUrlPartial": "Delvis",
+    "title": "CLI-kod"
   },
   "cliAgents": {
     "pageTitle": "CLI-agenter",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Andel anrop som den här leverantören faktiskt besvarade under de senaste 24 timmarna. Ett streck innebär att den hanterade för lite trafik för att en andel ska kunna anges.",
     "reliabilitySample": "{successes} av {requests} anrop lyckades under de senaste {hours} h",
     "reliabilityTooFew": "Endast {requests} anrop under de senaste {hours} h – för få för att ange en andel",
-    "reliabilityNoTraffic": "Inga anrop registrerade under de senaste 24 h"
+    "reliabilityNoTraffic": "Inga anrop registrerade under de senaste 24 h",
+    "categoryFilter": "Uppgiftskategori"
   },
   "discovery": {
     "title": "Leverantörssökning",
@@ -13330,7 +13628,11 @@
     "method": "Metod",
     "auth": "Autentisering",
     "feasibility": "Genomförbarhet",
-    "models": "Modeller"
+    "models": "Modeller",
+    "provider": "Leverantör",
+    "status": "Status",
+    "endpoint": "Slutpunkt",
+    "actions": "Åtgärder"
   },
   "noAuthProvider": {
     "title": "Ingen autentisering krävs",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Egen proxy",
     "freeTierPause": "Modellen {model} pausades (429), tillbaka {time}",
     "freeTierPauseProvider": "Pausat (429), tillbaka {time}",
-    "freeTierPauseNote": "Paus i processen på denna instans"
+    "freeTierPauseNote": "Paus i processen på denna instans",
+    "proxyType": "Proxytyp"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "En dold prestation väntar...",
         "criteria": "Slutför den dolda prestationen för att visa detta märke."
       }
-    }
+    },
+    "leaderboardTitle": "Topplista",
+    "leaderboardDescription": "Rankningar och prestationer för dina API-nycklar",
+    "badgeLocked": "Låst"
   },
   "featureFlags": {
     "title": "Funktionsflaggor",
@@ -13610,7 +13916,9 @@
       "disabled": "Inaktiverad",
       "dual": "Dubbel",
       "alias": "Alias",
-      "canonical": "Kanonisk"
+      "canonical": "Kanonisk",
+      "fail_closed": "Blockera (fail_closed)",
+      "count_as_zero": "Räkna som $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Infrastrukturstopp för skyddad prioritet som 502",
         "description": "Svara med 502 i stället för 503 när ett prioritetsmål med en reserv som endast används vid kvotfel stoppar kombinationen av en orsak som bevisligen inte är kvotrelaterad: en öppen kretsbrytare hos leverantören eller ett prediktivt latensbaserat överhopp."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Logga in kontoid",
+        "description": "Inkludera kontoprefix i AUTH-loggrader (t.ex. \"Använder '<provider>'-konto: abc12345...\"). Inaktiverat som standard så att kontoidentifierare redigeras från delade/multi-tenant-processloggar. Oberoende från felsläckningsläge; att växla felsläckningsläget exponerar inte detta."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Inaktivera lösenordsinloggning med OIDC",
+        "description": "När OIDC är aktiverat, inaktivera lösenordsinloggning så att användare endast kan autentisera via OIDC Single Sign-On. När inaktiverat (standard) är både lösenordsinloggning och OIDC tillgängliga."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Fjärra ljudleverantörsknutar",
+        "description": "Tillåt att /v1/audio/*-rutter använder OpenAI-kompatibla leverantörsknutar som är hostade utanför localhost. Inaktiverat som standard – att rutta ljud till en fjärrhost ändrar utgående identitet och måste vara ett explicit operatörsbeslut. Loopback-knutar är alltid tillåtna och påverkas inte."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Fjärra rerank-leverantörsknutar",
+        "description": "Tillåt att POST /v1/rerank (och minnesmotornets rerank-steg, som kallar det över loopback) använder OpenAI-kompatibla leverantörsknutar som är hostade utanför localhost – en LAN-boks eller Tailscale-granne som kör TEI, Infinity, vLLM, etc. Inaktiverat som standard – att rutta till en fjärrhost ändrar utgående identitet och måste vara ett explicit operatörsbeslut. Loopback-knutar är alltid tillåtna och påverkas inte. Fjärra knutar måste också klara leverantörens utgående URL-policy."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Nätverksrottering delat utgångsskydd",
+        "description": "Vid ett nätverksundantag (tidsgräns, koppling nekad/reset) för en multi-kontorotteringsutverkare, om det misslyckade kontot inte har en dedikerad proxy, tillämpa en kort cooldown och hoppa över andra proxy-lösa konton för resten av requesten i stället för att prova igen varje. Aktiverat som standard (säkert: ingen ändring av utgående IP, minskar endast latens/cooldown-risk på delade utgångskonton). Inaktivera för att återställa omedelbar propagation vid första proxy-lösa felet."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Hoppa över nyligen misslyckade proxyer",
+        "description": "Proxygrupper och per-kontorotation av opencode slutar servera en proxy som precis misslyckades (avvisad TCP-provning eller ett 429-fel som mottogs genom den) under en per-process tid som dubblas vid varje upprepning, upp till ett tak. Ingen proxystatus skrivs; om alla kandidater utesluts förblir valet oförändrat. Aktiveras som standard: urvalsordningen är exakt den vanliga rotationen men med PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Delad utgängspools ordning",
+        "description": "För leverantörer vars kvot bucketas efter utgångsadress, rangordna en poolmedlem som delar en nyligen avvisad medlems observerade utgångsadress direkt under friska medlemmar. Endast ordning, aldrig utesluten. Kräver PROXY_SKIP_RECENTLY_FAILED, som producerar avvisningssignalen den läser. Inaktiverad som standard: urvalsordningen är exakt den vanliga rotationen."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Loggning av rotationsattribuerings",
+        "description": "Opencodes rotation registrerar vilket konto som serverade eller hoppades över (endast maskerade id:n, aldrig kompletta kontoid:n) och länkar proxyloggposter till deras begäran, så att operatören kan skilja hoppade konton från oanvända. Inaktiverad som standard: inga extra loggrader, inga extra kolumner skrivna."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Observering av utgång från proxygrupp",
+        "description": "Visa, under en proxygrupp i dashbordet, hur många observerade utgångs-IP:er som serverade dess medlemmar under de senaste 24 timmar, hur många anslutningar som använde dem och vilka som sågs mest bakom en IP. Skrivskyddad, beräknad från proxyloggen, används aldrig för rutning. Inaktiverad som standard: poolredigeraren är oförändrad och observeringsrutet returnerar nullopp."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Proxyoperatörens utgång",
+        "description": "Acceptera adresser observerade av operatören per poolmedlem och dagstämplat och sammanfoga dem med journalläsningen för visning och poolordning. Inaktiverad som standard: pushrutet svarar 404 och poolläsningar beter sig exakt som tidigare."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "OpenCode svarspausrotation",
+        "description": "För OpenCode-exekveraren: övervaka den första byte i en strömmeddelande från ett Responses-svar (fönster: RESPONSES_FIRST_BYTE_TIMEOUT_MS, standard 15000). Ett 2xx-Responsessvare som är tyst efter fönstret anser avställt: kontot kyls ner och begäringen roteras till nästa konto en gång; en andra avstängning misslyckas snabbt. Av som standard: avställda strömmar fortsätter att vänta tills strömmandeshanteringstidgräns."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "OpenCode user_blocked-rotation",
+        "description": "För OpenCode-exekveraren: när en uppvärdstjänst svarar 403 eller 451 med en user_blocked-avslag (inte en geo-blockering, inte ett Cloudflare-fingerpromtåvägningsavslag), kyler den nektade kontot ner och roteras till nästa konto högst en gång per begäran; ett andra avslaget returneras som det är utan en lyckomarkering. Av som standard: att kringgå en uppvärdstjänst användarblockering kan se ut som undanträngning och sprida flaggan över kontoflottan, så avslaget returneras oförändrat om inte operatören väljer in."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "OpenCode tillfällig failover backoff",
+        "description": "För OpenCode-fler-kontorotation: pausar innan dispatch till nästa konto efter att två påföljande försök misslyckats med ett tillfälligt uppvärdstjänstfel (5xx eller ett tomt 400-avslag). Pausen börjar på 1,5 s, dubblas per ytterligare misslyckat påföljande försök, begränsas till 6 s per paus och 10 s per begäran, hoppas över om klienten kopplar upp sig, och misslyckats svarsinnehåll frigörs innan väntan. Av som standard: failover är omedelbar."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Rensa tom omgång omprovning",
+        "description": "Vid översatta strömmade omgångar, när en uppvärdstjänstomgång bär inte något användbart innehåll (bara anledningsskapt komplettering eller noll värdefulla block), utför begränsade omprovsförsök via den normala kreditvärdighetsvägen (upp till `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`) innan något exponeras för klienten. Av som standard: tomma omgångar behåller nuvarande beteende (tomt 200 eller tomt innehåll 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Tom ström systeråterhämtning",
+        "description": "Claude/Codex strömning: efter det första livscykels händelsen, kort proberar (upp till 1 s / 64 KiB) för användbar utdata; en ström som slutar utan innehåll blir ett empty_content-misslyckande som spenderar den befintliga begränsade omprovning på en annan kvalificerad anslutning (ingen nedkylning, ingen modell låsning), och round-robin kombinationer slutar omprova när klienten kopplar upp sig. Behandlar också avslag, pause_turn och model_context_window_exceeded som legitim tomma terminaler i prober. Av som standard: förberedhet, tomt innehåll hantering och kombinations omprovning förblir exakt som tidigare."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Stream Sen Output Prober",
+        "description": "Streamande utdataprober: efter de första 64 framsända chunkarna fortsätter att sticka prov i en chunk var 16:e för den första synliga utdatan, så att utdata som börjar sent ändå markerar strömmen som att den producerat utdata. En isolerad 5xx efter den punkten förblir då begärningsspecifik i stället för att registrera en modellbaserad lågning, och firstOutputMs efterfylls med den första utdatachunken i det aktuella provtagningsspetummet. Av som standard: endast de första 64 framsända chunkarna provas, exakt som tidigare."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode Rate-Begränsad 429 Tidig Stopp",
+        "description": "För OpenCode-flera-kontor rotation, stoppa kontovågen vid den första 429 som klassificeras som ett verkligt hastighetsbegränsande (en parsbar Retry-After-rubrik, eller en brödtext som nämner en hastighets/usage-begränsning) och returnera den uppvälsta 429 oförändrad (status, brödtext, Retry-After och kvotrubriker), i stället för att försöka med varje återstående konto. Oklassificerade 429:er fortsätter att rotera. Av som standard: den fria nischen är begränsad per utgående IP (#9611), så varje 429 roterar till nästa konto, och en uttömd våg returnerar den sista uppvälsta 429:en."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode 429 Parkera och Återuppta",
+        "description": "För OpenCode-flera-kontor rotation, parkera begärningen efter upprepnade tillfälliga 429:er (eller en ny pool-spänningsmarkör) med ett hjärtslag, och återuppspelar sedan en begränsad ben med upp till 3 sekventiella konton i stället för att sprida ut hela flottan. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Stream Klarhetsstagnation Återförsök",
+        "description": "För streamade chattbegärningar, när den första uppvälsta brödtexten stagnerar innan den producerar ett användbart händelse, utför ett begränsat andra försök via samma routing-spel med samma klarhetsbudget och ingen kontoböta. Av som standard: en stagnerad första brödtext misslyckar begärningen utan återförsök."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode 429 Pool Återval",
+        "description": "För OpenCode-flera-kontor rotation, efter en 429 från en utgångs-bucketad leverantör på ett proxyfritt konto under ett omgivande poolkontext, bea ansökningspoolen om en annan medlem för nästa försök i stället för att återförsöka samma utgångsadress. Ordning, exkluderar aldrig: en uttömd pool bibehåller det nuvarande beteendet. Av som standard: varje 429 roterar till nästa konto exakt som tidigare."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "OpenCode v2-klientfingerprint",
+        "description": "Skicka OpenCode v2 CLI-klientfingerver på OpenCode Zen/Go-begäranden (#16571): User-Agent opencode/latest/<2.x>/cli och x-opencode-client cli, en klient User-Agent som sparas endast när det är en 2.x OpenCode-klient, och på begränsade gratisschema-begäranden inget x-opencode-request, sessionen speglas på x-opencode-session-id/x-session-affinity/x-session-id, v2 CLI read/shell-scheman på injicerade placehållare-tools och ett tool_choice på \"none\" togs bort. Avstängt som standard: varje OpenCode-begärande behåller den nuvarande identiteten, behoven och kroppen byte för byte."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "OpenCode Zen Egress-IP-spärr",
+        "description": "Lägg till OpenCode Zen (opencode-zen) i familjen för standard egress-IP-spärr, så att en 429 på en Zen-anslutning även kyls alla syskon Zen-anslutningar som delar dess egress-IP. Avstängt som standard: Zen är nyckelförd och varje anslutning kyls ned för sig, precis som tidigare. Ett explicit värde för OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS alltid företräds detta flagga."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "OpenCode-felregler för fulltext",
+        "description": "Låt de inbyggda OpenCode-felreglerna (opencode-zen, opencode-go, opencode-cli) matcha hela det uppvälde feltexten, så att markörer i kroppen som organization_quota_exceeded eller \"monthly usage limit reached\" klassificerar en 429 som utsött kvot med en anslutningsomfattande sperr. Avstängt som standard: dessa regler ser bara den strukturerade felkoden och en sådan 429 förblir en kort tidsbegränsning, precis som tidigare."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Cloudflare Workers AI helskärmsfelregler",
+        "description": "Låt den inbyggda Cloudflare Workers AI-felregeln matcha hela det uppvälde feltexten, så att 429 \"daglig gratisallokering\" kroppen klassificeras som utsött kvot istället för en kort tidsbegränsning. Avstängt som standard: regeln ser bara den strukturerade felkoden, precis som tidigare."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Färdighetsfilter",
+        "description": "Avvisa begäranden innan utsläpp när målmallen saknar krävda förmågor (vision, verktyg, strukturerad utdata, kontextfönster). Skyddar direkta enskilda provider-begäranden som kringgår kombo-lagrets kompatibilitetsfilter."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Ignorera oanvänd prissättning i USD-quotor",
+        "description": "Räkna användning av modeller utan pris som $0 i USD-quotor per nyckel i stället för att behandla kvoten som uppfylld. Inaktiverad som standard: en oanvänd prissatt modell eller ruttalias kan dölja verkliga kostnader, så kvoten misslyckas säkert."
+      },
+      "RADAR_ENABLED": {
+        "label": "Radar",
+        "description": "Aktivera OmniRoute Radar-modulen (katalogflödesvisningar och synkronisering). Inaktiverad som standard; aktivering låser bara upp gränssnittet — datakommunikation är ett separat alternativ."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Gränssnitt för modelländpunktens funktioner",
+        "description": "Genomför betrodda modelländpunktstaggar (deklarerade i leverantörs katalogen, infererade från en specialmodell-id eller satta av operatören): avvisa en begäran skickad till en slutpunkt som modellen inte tjänar med HTTP 400 innan dispatch på /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations och /v1/audio/*; dölj modeller vars taggade slutpunkter inte har en OmniRoute-adaptrare från /v1/models; och svara på dashboardmodelltestet med 422 för sådana modeller. Inaktiverad som standard: slutpunktstaggar förblir informativa och begäranden dispatchas exakt som tidigare."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Universal Context Handoff",
+        "description": "Generera och injicera sammanfattningar av konversationer när combo-ruttning byter modeller. Inaktivera för att behandla modellväxlingar oberoende och förhindra bakgrundshandoverbegäranden för alla befintliga och framtida combos."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Reasoning Replay",
+        "description": "Cache och spela om modellresonering över flera vändningar i konversationer. Inaktivera för att sluta lagra och återinjicera resonering."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Codex app-server-transport",
+        "description": "Tillåt att Codex använder den lokala app-serverns WebSocket JSON-RPC-transport (codexTransport=app-server). När avstängt går anslutningar som valt app-server tillbaka till Codex andra transportvägar."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Claude Code upptäcktsalias",
+        "description": "Annonsera claude/'<provider>'/'<model>' spegla-id:er på /v1/models så att modelupptäckten i Claude Code gateway listar icke-Claude-modeller. Varning: dubblar katalogposterna för alla klienter när den är aktiverad globalt."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Modellalias utan tänk",
+        "description": "Huvudbrytare för gateway-aliasen no-think/'<provider>'/'<model>'. På (standard): /v1/models annonserar en no-thinking-variant för alla elegibla tänk-förmågor med Claude-modeller, och ett no-think/ id som skickas i en begäran löses tillbaka till den verkliga modellen med undertryckt resonemang. Av: inga varianter annonseras och ett no-think/ id behandlas som vilket okänt modell-id som helst. Det per-modell specifika ModelSpec.noThinkingAlias valfritt aktivering/inaktivering tillämpas fortfarande när detta är på."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Inaktivera tänknivåvarianter",
+        "description": "Inaktivera genereringen av tänknivåvarianter (t.ex. -low, -medium, -high) i /v1/models-katalogen."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Adaptiva virtuella admissionsrör",
+        "description": "Aktivera anpassbara virtuella admissionsrör per hyresgäst för provider-dispatch (#9654): en hyresgästs burst orsakar inte längre 503 för en annan. Miljvariabeln OMNIROUTE_CHAT_VIRTUAL_LANES har företräde framför detta dashboardöverskrivande; ändringar träder i kraft vid serverstart."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Funktionsella gateway-speglar",
+        "description": "Annonsera speglar-id:n '<gateway-alias>'/'<model>' på /v1/models för modeller vars kanoniska ägare inte har ett aktivt kreditiv men där en genomsläpningstrafik med ett aktivt kreditiv rätter dem. Varning: lägger till katalogposter för alla klienter när den aktiveras globalt."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "New-API-aggregatortillgång",
+        "description": "Aktivera tillgångsdetektering för New-API / One-API / Sub2API aggregatorkompatibla noder. När den är aktiverad rapporterar kompatibla noder med aggregatormärket sin tillgång i instrumentpanelen och kvotförhandsrutning."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Dölj raderade sökningar",
+        "description": "Sökstatistik och senaste sökningar räknar endast leverantörer som fortfarande har en levande anslutning (näckritfria leverantörer som duckduckgo-free räknas alltid). Av behåller varje bevarad sökrad med ett leverantörs-id."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Strikt gratismärkning",
+        "description": "Instrumentpanelens leverantörssidor: Visa gratismärkning endast på signaler som leverantören respekterar – bortser från heuristik för displaynamn, icke-booleana gratisfält och :free-suffix för registrerade leverantörer utan en dokumenterad gratisnivå. Av behåller den historiska märkningsregeln."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Auto Combo: Tomma pooler svarar 503",
+        "description": "När en auto combos kandidatpool redan är tom innan tool-anropningens förfilter körs (alla mål hoppas över av cooldown, låsningar eller uttömning), svara 503 no_eligible_targets istället för den legacy 400 \"No target supports tool calling\" capability_mismatch. Av som standard: den tomma poolen behåller den legacy 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Mistral tvetydig 401 mjuk låsning",
+        "description": "En vanlig Mistral 401 ('{\"detail\":\"Unauthorized\"}', utan explicit auktorisationssignal) är byteidentisk för en återskogen nyckel och för upprättad kvot. När aktiverat, sådant ett 401 svalkar anslutningen istället för att parkera den som utgången, upp till 3 gånger inom en timme; nästa parkerar den fortfarande som utgången, så en återskörd nyckel konvergerar. Avstängd som standard: varje vanlig Mistral 401 parkerar anslutningen som utgången, som tidigare."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Batch- och filautomatisk rengöring",
+        "description": "Låt den automatiska rengöringsrundan ta bort terminala (slutförda/misslyckade/avbrutna/utgångna) Batch API-jobb som är äldre än OMNIROUTE_BATCH_RETENTION_DAYS, tillsammans med deras checkpoint per rad, och rensa BLOB-innehållet för uppladdade filer efter deras egna expires_at. Avstängd som standard: varje befintlig installation behåller dessa data exakt som tidigare tills en operatör väljer att aktivera det. Operatörstartade DELETE /api/v1/batches/delete-completed-vägen påverkas inte heller – det är en separat, omissänningsbar offentlig API-kontrakt."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Antigravity-kontolease",
+        "description": "Reservera det valda Antigravity-kontot för streaminglivscykeln för den begäran som valde det, så att en samtidsgåta eller kreditöverlåtning inte kan återvälja ett konto som redan är åtaget till en pågående stream. Reservet är scopeat till (anslutning, anropbart upstream-modell), så ett konto kan fortfarande betjäna två olika modeller samtidigt. När alla kvalificerade konton redan är leasade för den modellen, returnerar begäran en strukturerad 503 POOL_BUSY med en begränsad Retry-After istället för att staplas på ett upptaget konto. Avstängd som standard: kontoutvalet förblir exakt som tidigare, och inget reservat tas."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Automatisk beskärning av uttjätna kombosteg",
+        "description": "Efter en lyckad synkronisering av modellen mot en auktoritativ livekatalog, ta bort kombostep som är fastsatta till modeller som katalogen inte längre listar, med en auditpost per borttaget steg. Beskar aldrig vid en misslyckad, nedsatt eller endast fri synkronisering, och tömmer aldrig en kombo. Avstängd som standard: uttjätna steg flaggas bara."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Claude OAuth sammanfattat tänkande",
+        "description": "Låt en Claude OAuth-begäran som begär läsbart tänkande (thinking.display \"summarized\") släppa den redigerade-tänkande-2026-02-12 Anthropic beta, vilket annars gör att Anthropic returnerar tomma, signatur-enskilda tänkanderamper. Avstängd som standard: den betan är en del av Claude Code OAuth wire-fingeravtrycket, så OAuth-begäranden behåller det oförändrat. API-nyckel-Claude-begäranden respekterar redan sammanfattat tänkande utan den flaggan; OMNIROUTE_REDACT_THINKING=false når endast OAuth när den här flaggan är på."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Reparation av Kiro-verktygsanrop",
+        "description": "När ett strömande Kiro-svar emitterar en felaktig tool_call-omslutning (saknar input.name eller input.arguments) före synlig utdata, undertryck den och skicka om förfrågan en gång med en korrektiverande instruktion i stället för att avsluta vändan med invalid_kiro_tool_call. Försöket kostar ett extra Kiro-anrop; ett andra misslyckande avslutar vändan med kiro_tool_call_repair_retry_failed. Aktiverad som standard. Sätt till false för att misslycka vändan vid den första felaktiga omslutningen."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Effort-nivåer i models.dev",
+        "description": "Använd resonerings-nivåerna (effort tiers) som models.dev publicerar (avsmalnade till den kända effort-terminologin) när varken en operatörsöverstyrning eller provider-registret deklarerar några, och behandla en deklarerad tom nivålista som \"inga nivåer\" i /v1/models effort_tiers och kombinerade nivåskärningar. Inaktiverad som standard: effort_tiers och resolverade supportedThinkingEfforts förblir exakt som innan."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Arena syntetiserad cx-telemetri",
+        "description": "Bifoga en syntetiserad programmatisk cx-klientinteraktionsblob (värdet som arena.ai själv skickar för en sida utan upptecknad interaktion) till varje Arena (lmarena) create-evaluation-förfrågan som saknar operatör-samtillhandahållen providerSpecificData.cx. Inaktiverad som standard: cx-fältet är en Arena-motsignaal mot automatisering, så OmniRoute skickar bara ett värde som operatören fångade från en real browser session (providerSpecificData.cx) och skickar annars ingen cx alls. Opåvisad upströmmande nytta; aktivera endast om Arena börjar avvisa förfrågningar utan cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Nativt Codex reaktivt komprimering",
+        "description": "Låt de reaktiva (tröskelbaserade) och sista utvägens kontextkomprimeringspassagen även skriva om nativa Codex passgenom-historiker (POST /v1/responses till codex-providern) när de överstiger budgeten för kontexten, med Responses input[]-adaptern. Inaktiverat som standard: nativa Codex-historiker ägs av Codex-klienten och skrivs aldrig om av komprimering; överdimensionerade förfrågningar fortsätter att misslycka kontextbudgetkontrollen exakt som innan. Kräver att global komprimering är på och att modellen inte är undantagen."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Kvotfönster: Följ begränsad parkering",
+        "description": "Låt kvotpolitiken per fönster (session/såkliga trösklar som används av kontoutväljningen) respektera den begränsade uttömningsparkeringen: när den takbegränsade parkeringsdeadline har passerat, eller den cachade kvotobservationen är äldre än parkeringskalet, slutar fönstret att utesluta kontot tills en ny kvotinhämtning. Inaktiverat som standard: ett cachat fönster fortsätter att blockera på sin senast rapporterade procentandel tills dess egen återställningstid."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Bildgenerering: Långvariga jobb",
+        "description": "För OpenAI-kompatibel bildgenerering: använd anslutningens timeout (providerSpecificData.timeoutMs) annars den centrala uppväljta fetch-timeouten (FETCH_TIMEOUT_MS, sedan REQUEST_TIMEOUT_MS, standard 600 s) istället för den fasta budgeten på 120 s för bilder; avsluta en begäran som kallaren avbröt med 499; och låt Playground ta emot långvariga bildjobb som en SSE-ström med keepalive-hjärtslag. Avaktiverat som standard: den fasta budgeten gäller och avbrott från kallelsen propageras inte. Fristen som täcker inläsningen av svarsbrädet är alltid aktiv."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Förbättringar för katalogspeglar",
+        "description": "Förbättra upptäckten av claude/ och de funktionella gateway-speglarna på /v1/models. Avaktiverat som standard: båda spegelgranskningarna beter sig exakt som tidigare. Aktiverat: upptäckten av claude/ speglar även de listade varianterna av resonansintensitet (-low/-medium/-high/-xhigh), hoppar över inbyggda auto/*-identifierare som begärningsvägen inte kan realisera och hoppar över ett alias som redan är listat; de funktionella gateway-speglarna hoppar över kombinationer och av OmniRoute syntetiserade identifierare (claude/, no-think/), tar ägaren från owned_by, använder aldrig ägaren som sin egen gateway, hoppar över gateways som är inaktiverade i blockedProviders och modeller utanför en gateways auktoritativa levande katalog."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Proxyhälsa: Avvisanden återställer misslyckandesträngen",
+        "description": "I granskningen av proxyhälsa, låt en avvisning från målet (401/403/429: proxyn vidarebefordrade, destinationen avvisade denna utåtgående IP) återställa proxyens sträng av påföljande misslyckanden, likt en levererad avhuggare. Avaktiverat som standard: ett avvisande förblir neutralt och bibehåller strängen (#10654). Ett 5xx förblir oskiljbart oavsett, och ett avvisande tar aldrig bort, inaktiverar eller återaktiverar en proxy."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Grok-abonnemangsbilder",
+        "description": "Registrera xai-oauth (xao) och grok-cli bildvägar och kartlägg OpenAI-kvalitet high/hd till xAI medium. Avaktiverat som standard: API-nyckelns xAI-bildväg förblir på den befintliga OpenAI-kompatibla begäran och abonnemangs rutorna registreras inte."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "xAI OAuth levande modellupptäckt",
+        "description": "Hämta den levande xAI-modellkatalogen för xai-oauth-anslutningar från https://api.x.ai/v1/models med hjälp av OAuth-bearertokenen, istället för den frusna statiska urvalen. Aktiverad som standard. Sätt flaggan till false för att fortsätta servera den statiska urvalen. HTTP-fel återfaller till urvalen i upptäcktsrutten; flaggans fåttare utför inte i sig HTTP."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-kompatibla mellan-samtal systemvändor",
+        "description": "På enkla anthropic-kompatibla-*-reläer (claude → claude direktgenomföring), behåll roll:system-vändor mellan samtalet inne i messages[] istället för att lyfta upp dem till det övergripande system-parametern, så att den cachade promptprefixen förblir stabil mellan vändor. Tillämpas endast när klienten själv skickade anthropic-beta: mellan-samtal-system-2026-04-07 (överförd uppströms som det är). Inaktiverat som standard: varje systemvändor lyfts upp exakt som tidigare, eftersom reläer som inte stödjer betan avvisar role:system-meddelanden med 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "DB hälsokontroll: Sjunka startskanning",
+        "description": "Kör den inledande DB-integritets/hälsokontrollen efter att servern har börjat acceptera begäranden (via setImmediate) istället för att blockera starten tills den är klar. Inaktiverat som standard: starten blockeras på kontrollen exakt som före #13717, så en korrupt databas fångas fortfarande innan den första begäran hanteras. Aktiverat: starten returnerar omedelbart och kontrollen (nu begränsad/sidat och, för en verklig filbaserad DB, isolerad i ett avbrytbart barnprocess) körs direkt därefter."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "OpenCode Publicerad Katalogruttning",
+        "description": "Låt OpenCode Zen- och OpenCode Go-modeller utan en explicit registernändpunkt ta sin begärningsyta (Responses för @ai-sdk/openai, Messages för @ai-sdk/anthropic) från den publicerade katalogen på models.opencode.ai, läs i bakgrunden var 6:e timme. Inaktiverat som standard: nändpunkten kommer från registern heuristiken exakt som tidigare och katalogen hämtas aldrig."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Automatiska begäranden: Återställda färdighetsvikter",
+        "description": "Låt automatiska /*-begäranden (resolveModelOrError och automatruttningsvårpet) bygga kandidapoolen med återställda modellfärdigheter (vision, resonering, tänka) och observerade kvalitetspoäng, läs i ett enskild bulkpass som /v1/models-katalogen. Inaktiverat som standard: viktarna för begärtillfällets snapshot förblir exakt som tidigare (färdigheter återställs på begäran och påverkar inte vikterna). Aktiverat: dessa signaler matar in snapshotviktarna, så kandidatviktarna, och därmed urvalet, kan ändras."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: Nyckelfri Transportport",
+        "description": "Håll ur nyckellosa (autentiseringen) leverantörer vars transport kräver en lokal webbläsare (browserBacked) eller ett lokalt installerat CLI (isLocalCli) ur automatiska /*-kandidapoolen, så att en hängd medlem inte kan fastlåsa en automatisk begäran tills timeout per mål (#17036). Inaktiverat som standard: varje no-auth-leverantör med emulerad verktygsanropning förblir i poolen exakt som tidigare. Direktanrop via '<alias>'/'<model>' fungerar oavsett."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline anslag",
+        "description": "För codebuddy-cn tankeprocessmodeller (familjerna DeepSeek-V4 / Kimi-K2 som kräver anslagsreplay) inlineas varje återgiven assistants reasoning_content som en synlig '<thought>'-block i början av meddelandets innehåll, så att den överlever en gateway som borttar fältet reasoning_content (#13632). Avstängt som standard: codebuddy-cn-begäranden skickas oförändrade; fältet reasoning_content själv bibehålls alltid."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Säkerhetsstopp för leverantör: Terminal",
+        "description": "Behåll ett explicit säkerhetsstopp för leverantör (misalignment_policy_violation, content_policy_violation, eller den exakta äldre vägningsbeträffningen 'blocked by our safety systems' med etiketten provider_safety_rejection) som ett terminalt, begärandespecifikt avslag: dess kod bibehålls genom HTTP-, Responses-, WebSocket- och strömavslut fel, och en combo stannar vid det istället för att återförsöka andra måltavlor, samt avbryter släppta syskon (#17049). Avstängt som standard: dessa fel behåller sin befintliga hantering och combo-rutningen förblir oförändrad."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Kvalitet för autentiseringsuppgifter: Omtesta automatiskt inaktiverade anslutningar",
+        "description": "Låt granskningen av kvaliteten på autentiseringsuppgifter omtesta anslutningar som gatewayn stängde av själv (markerade autoDisabledAt; högst en gång vart 6:e timme och 5 per granskning) och återaktivera en anslutning när dess omtest lyckas (#16190). Avstängt som standard: avstängda anslutningar förblir avstängda tills en operatör aktiverar eller omtestar dem, exakt som tidigare. Operatör-inaktiverade anslutningar och anslutningar som stängs av efter en permanent förbud återtestas aldrig."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Kvalitetsport för autentiseringsuppgifter: Endast diagnos av autentisering",
+        "description": "Förnya porten för combo-kvalitet för autentiseringsuppgifter så att en cachad misslyckad autentiseringssond blockerar en anslutning endast när dess diagnos bevisar felaktiga autentiseringsuppgifter (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Oavgjorda misslyckanden (timeouts, hastighetsgräns, avbrott, ostödda sonder och ospecifika schemaläggarfel) behandlas då som okända och anslutningen fortsätter att ta emot trafik. Avstängt som standard: fel på någon cachad sond blockerar anslutningen för cachets TTL (5 minuter)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Combo: Stoppa vid innehållspolitiskt avslag",
+        "description": "När en combo-måltavla svarar med ett exakt innehållspolitiskt avslag (kod eller typ cyber_policy / content_policy_violation), stoppa combo:n och returnera det avslaget även när återstående måltavlor är olika modeller, istället för att avancera till nästa måltavla. Avstängt som standard: avslaget svalkar aldrig kontot eller triggar leverantörens brytare, och combo:n avancera till sin nästa måltavla exakt som tidigare."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Avsiktning vid återförsök: Hoppa över 403/410-avvisanden",
+        "description": "När alla konton är i avsvällningsläge och den avsvällning som upphör först orsakades av ett 403 (tillträde nekat) eller ett 410 (borttaget) svar, returnera avvisandet omedelbart istället för att vänta ut avsvällningen och skicka om begäran; ett förnyat agentrouter-anslutningsspecifikt kvot 403 lagras då med errorCode 429 så att det förblir försökerbart. Avaktiverat som standard: endast ett 401 hoppar över väntan, och varje avvisande lagras med den status med vilken det mottogs."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Policy för oprissad användningsbudget",
+        "description": "Hur per-nyckel dagliga/veckovisa USD-gränser behandlar lyckad användning vars leverantör/modell inte har någon prisrad. fail_closed (standard) markerar perioden som överskriden, så att en okänd kostnad aldrig kan smyga förbi ett hårt tak. count_as_zero räknar den användningen som $0 och fortsätter att tillämpa den prissatta förbrukningen. Oprissatta modeller listas på instrumentpanelens startsida i båda fallen."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Latens",
     "quota": "Kvot",
     "rangeWindow": "{range}-fönster",
+    "timeRange": "Tidsintervall",
     "runtimeHealthBlend": "runtime-/hälsomix",
     "averageResponseTime": "genomsnittlig svarstid",
     "worstQuota": "Sämsta kvot",
@@ -13923,7 +14500,11 @@
       "ok": "Generellt tillåtande"
     },
     "allProviders": "Alla leverantörer",
-    "noApiKeyRequired": "Ingen API-nyckel krävs"
+    "noApiKeyRequired": "Ingen API-nyckel krävs",
+    "searchPlaceholder": "Sök efter modell, leverantör…",
+    "searchAria": "Sök efter gratis modeller",
+    "filterProviderAria": "Filtrera efter leverantör",
+    "keylessOnly": "Endast nyckelfria"
   },
   "providerHealthAutopilot": {
     "title": "Autopilot för leverantörshälsa",
@@ -13994,7 +14575,11 @@
     "learnMore": "Läs mer",
     "changelogLoadFailed": "Kunde inte läsa in ändringsloggen. Försök igen senare.",
     "retry": "Försök igen",
-    "viewFullHistory": "Visa fullständig historik på GitHub"
+    "viewFullHistory": "Visa fullständig historik på GitHub",
+    "title": "Nyheter och ändringslogg",
+    "description": "Meddelanden från OmniRoute-teamet och de senaste versionsanteckningarna",
+    "viewLabel": "Visa",
+    "loadingNews": "Läser in meddelanden..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Leverantörens Kretsbrytartillstånd",
       "lastUpdate": "Senaste uppdatering: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} tim {minutes} min"
+      "uptimeHoursMinutes": "{hours} tim {minutes} min",
+      "breakerClosed": "Stängd",
+      "breakerNotClosed": "Öppen eller halvöppen"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Underhållsdetaljer",
         "secondaryAction": "Systemstatus"
       }
+    },
+    "miniapp": {
+      "askAnything": "Fråga vad som helst…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} synliga / {total} totalt",
+    "modeLabel": "Visningsläge",
+    "jumpToNow": "Hoppa till aktuell tid. NU-linjen återställs till positionen {position} %",
+    "laneReuse": "Återanvändning av spår",
+    "laneReuseLabel": "Tidsfönster för återanvändning av spår (minuter)",
+    "laneReuseHint": "Förfrågningar som delar ett konversations-id ligger kvar på samma rad i tidslinjen så länge avståndet mellan dem är mindre än så här många minuter.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatisk uppdatering",
+    "autoRefreshLabel": "Intervall för automatisk uppdatering (sekunder)",
+    "autoRefreshHint": "Hur ofta tidslinjen hämtar listan över förfrågningar från servern på nytt.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Zooma ut",
+    "zoomIn": "Zooma in"
   },
   "metadata": {
     "compressionTitle": "Komprimering",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Stäng"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Inaktivera genereringen av varianter med olika tankenivåer (t.ex. -low, -medium, -high) i katalogen /v1/models.",
+  "teamCosts": {
+    "title": "Teamkostnader",
+    "subtitle": "Hantera delade mjuka budgetar och katalogens kostnadsuppskattningar.",
+    "refresh": "Uppdatera",
+    "create": "Skapa team",
+    "edit": "Redigera team",
+    "archive": "Arkivera",
+    "selectTeam": "Team",
+    "searchTeams": "Sök team",
+    "statusFilter": "Teamstatus",
+    "active": "Aktivt",
+    "archived": "Arkiverat · skrivskyddat",
+    "allTeams": "Alla team",
+    "noTeams": "Inga matchande team.",
+    "selectHint": "Skapa eller välj ett team för att se kostnader.",
+    "loading": "Läser in teamkostnader…",
+    "budgetTitle": "Nuvarande mjuk budget",
+    "budgetSubtitle": "Lyckad bokförd användning · glidande fönster · oberoende av rapportdatum",
+    "archivedBudget": "Arkiverat: budgetkontrollen är inaktiv. Historiska rapporter finns kvar.",
+    "unlimited": "Obegränsat – ingen delad mjuk budget har konfigurerats.",
+    "budgetUnavailable": "Budgetstatus är inte tillgänglig. Uppdatera för att försöka igen.",
+    "used": "Lyckad användning",
+    "maximum": "Budgetmaximum",
+    "remaining": "Känd återstod",
+    "resets": "Återställs",
+    "unpricedBudget": "En del av den lyckade användningen har okänt pris. Den kända summan är ofullständig; budgetkontrollen räknar fönstret som överskridet.",
+    "overBudget": "Budgeten nådd eller överskriden · {amount} över",
+    "reportTitle": "Användningsrapport",
+    "reportSubtitle": "Alla försök · katalogsuppskattning i USD, inte en faktura · hela UTC-datum",
+    "reportPeriod": "Rapportperiod",
+    "day1": "1 dag",
+    "day7": "7 dagar",
+    "day30": "30 dagar",
+    "allTime": "All tid",
+    "reportSpend": "Uppskattad rapportkostnad",
+    "requests": "Förfrågningar",
+    "assignedKeys": "Tilldelade nycklar",
+    "unpricedReport": "Rapporten innehåller okända priser. Den uppskattade kostnaden är ofullständig.",
+    "breakdown": "Kostnad per API-nyckel",
+    "noUsage": "Ingen användning under denna rapportperiod.",
+    "keyName": "API-nyckelns namn",
+    "tokens": "Indata- + utdatatokens",
+    "unnamedKey": "Namnlös eller borttagen nyckel",
+    "unpriced": "Okänt pris",
+    "members": "Medlemskap",
+    "memberSubtitle": "Ändrat medlemskap låter historiska utgifter ligga kvar hos det ursprungliga teamet.",
+    "searchKeys": "Sök nycklar eller nuvarande ägare",
+    "chooseKey": "Välj en API-nyckel",
+    "unassigned": "Ej tilldelad",
+    "ownership": "Nuvarande faktureringsteam: {team}",
+    "assign": "Tilldela",
+    "remove": "Ta bort",
+    "noMembers": "Inga nuvarande medlemmar. Historisk användning kan fortfarande räknas mot budgeten.",
+    "assignedAt": "Tilldelad {date} (UTC)",
+    "name": "Teamnamn",
+    "description": "Beskrivning",
+    "enableBudget": "Aktivera delad mjuk budget",
+    "amount": "Budgetbelopp (USD)",
+    "duration": "Glidande budgetfönster",
+    "cancel": "Avbryt",
+    "save": "Spara",
+    "confirm": "Bekräfta",
+    "transferTitle": "Bekräfta nyckelöverföring",
+    "transferMessage": "Flytta den här nyckeln från ”{source}” till ”{destination}”? Historiska utgifter ligger kvar hos det ursprungliga teamet.",
+    "removeTitle": "Ta bort nyckeltilldelning",
+    "removeMessage": "Ta bort den här nyckeln från ”{team}”? Historiska utgifter ligger kvar i det här teamet.",
+    "archiveTitle": "Arkivera team",
+    "archiveMessage": "Arkivera ”{team}”? Alla nuvarande kopplingar avslutas och budgetkontrollen upphör. Historiska rapporter finns kvar.",
+    "invalidName": "Ange ett namn (1–200 tecken) och en beskrivning på högst 2 000 tecken.",
+    "invalidAmount": "Ange ett ändligt budgetbelopp större än noll.",
+    "unauthorized": "Logga in på hanteringspanelen för att fortsätta.",
+    "forbidden": "Du har inte behörighet att hantera team. Din inmatning har sparats.",
+    "notFound": "Det här teamet eller den här tilldelningen finns inte längre.",
+    "conflict": "Tilldelningen eller teamet har ändrats. Uppdatera och bekräfta nuvarande ägarskap innan du försöker igen.",
+    "failed": "Begäran misslyckades. Din inmatning har sparats; försök igen.",
+    "partialBudget": "Vissa lagrade dagliga hinkar överlappar fönstergränsen och kan inte fördelas exakt. Visad kostnad är ofullständig; återstående utrymme är inte tillgängligt. Den befintliga policyn för mjuk budget är oförändrad."
+  },
   "connectionTest": {
     "title": "Testmeddelande",
     "description": "Skicka en riktig begäran via det här kontot. Detta använder en liten del av kvoten och kan starta ett användningsfönster, beroende på leverantören.",
@@ -15073,5 +15753,118 @@
     "importButton": "Importera",
     "importFailed": "Importen misslyckades.",
     "importSuccess": "Importerade {connections} konton och {nodes} leverantörsnoder; {skipped} hoppades över."
+  },
+  "conversations": {
+    "title": "Samtal",
+    "countSummary": "{total, plural, one {# samtal} other {# samtal}} med 2+ turer",
+    "autoRefreshTitle": "Hur ofta denna lista hämtas igen från servern.",
+    "autoRefresh": "Autouppdatering",
+    "loading": "Laddar samtal…",
+    "colConversation": "Samtal",
+    "colTurns": "Vändor",
+    "colContinuation": "Fortsättning",
+    "colLastModel": "Senaste modell",
+    "colProvider": "Tjänsteleverantör",
+    "colStatus": "Status",
+    "colLastSeen": "Senast sedd",
+    "drawerTitle": "Samtal",
+    "prevConversation": "Föregående samtal",
+    "nextConversation": "Nästa samtal",
+    "gotoLatestRequest": "Gå till senaste begäran",
+    "goToBottom": "Gå till botten",
+    "statusInProgress": "Pågår",
+    "continuationGenuineTitle": "Senaste vändan använde previous_response_id och den löstes serverbaserat",
+    "continuationBadge": "fortsättning",
+    "stalledTitle": "Senaste vändan slutade inte med stopp och inget har fortfortsätt i mer än 5 minuter",
+    "stalledBadge": "inställt",
+    "noTurns": "Inga vändor har registrerats för denna konversation."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Börja från aktuell position (hoppa över befintliga loggar)",
+    "pageTitle": "Exportera loggar",
+    "pageSubtitle": "Skicka kontinuerligt anropsloggar från fliken Loggar till ett externt analytics-lager.",
+    "addDestination": "Lägg till destination",
+    "scheduleTitle": "Schema",
+    "cronLabel": "Cron",
+    "notScheduled": "inte schemalagt",
+    "lastScheduledRun": "Senast schemalagd körning",
+    "lastRunSummary": "{startedAt} — {status}, {rows} rader",
+    "never": "aldrig",
+    "highWaterMark": "Högsta vattenstånd för anropsloggar",
+    "rowPrefix": "rad {id}",
+    "noDestinations": "Inga exportmål",
+    "noDestinationsHint": "Lägg till ett mål för att börja skicka anropsloggar enligt timtabellen.",
+    "errLoadStatus": "Misslyckades att ladda exportstatus",
+    "errSaveDestination": "Misslyckades att spara målet",
+    "msgDestinationSaved": "Målet sparade.",
+    "errConnectionTest": "Anslutningstestet misslyckades",
+    "msgRunInFlight": "En körning till detta mål är redan pågående; inget skickades dubbelt.",
+    "errExportRun": "Exportkörningen misslyckades",
+    "errUpdateDestination": "Misslyckades att uppdatera målet",
+    "errDeleteDestination": "Misslyckades att ta bort målet",
+    "deleteTitle": "Ta bort destination",
+    "deleteConfirm": "Ta bort \"{name}\"? Dess exportpekare tas också bort, så att du startar från det äldsta behållna anropet när du lägger till den igen.",
+    "statusDisabled": "Inaktiverad",
+    "statusFailing": "Misslyckad",
+    "statusHealthy": "Frisk",
+    "statusNotRunYet": "Har inte körts ännu",
+    "typeNotInstalled": "Typen är inte installerad",
+    "metaLine": "Senaste körning {lastRun} · exporterade {exported} rader · {pending} återskådande · pekare {cursor}",
+    "btnTest": "Testa",
+    "btnRunNow": "Kör nu",
+    "btnDisable": "Inaktivera",
+    "btnEnable": "Aktivera",
+    "btnEdit": "Redigera",
+    "btnDelete": "Ta bort"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "CLIProxyAPI-konton",
+    "cardSubtitle": "Läsläs status från den auktoriserade administrations-API:t",
+    "btnRefresh": "Uppdatera",
+    "listAria": "Hälsotillstånd för CLIProxyAPI-konton",
+    "noAccounts": "Inga CLIProxyAPI-konton hittades.",
+    "loading": "Laddar hälsotillstånd för konton…",
+    "stateReady": "Kontots hälsa",
+    "stateDisabled": "CLIProxyAPI är inte installerat",
+    "stateMissingKey": "Administrationsnyckeln är inte konfigurerad",
+    "stateUnreachable": "Administrations-API:et är ohållbart",
+    "stateUnauthorized": "Administrationsnyckeln avslogs",
+    "stateUnsupported": "Den här CLIProxyAPI-versionen exponerar inte kontots hälsa",
+    "stateInvalidResponse": "Administrations-API:et returnerade ett icke-stödat svar"
+  },
+  "darioPanel": {
+    "title": "Claude-konton",
+    "description": "Autentisera Dario med ditt Claude Pro/Max-abonnemang. Trafik debiteras din abonnemangspool. Minst ett konto krävs innan Dario kan dirigera förfrågningar (fram till dess rapporterar /health nedsatt prestanda).",
+    "noAccounts": "Inga konton är konfigurerade ännu.",
+    "importTitle": "Importera från OmniRoute",
+    "importDescription": "Återanvänd OAuth-token från en befintlig OmniRoute Claude-anslutning i stället för att logga in igen – hoppar helt över godkännandesteget i webbläsaren.",
+    "importPendingTooltip": "Vill vara aktiv när en Claude-anslutning finns i OmniRoute.",
+    "btnImport": "Importera",
+    "btnImporting": "Importerar…",
+    "aliasPlaceholder": "alias (valfritt)",
+    "btnStartLogin": "Starta inloggning",
+    "btnStarting": "Startar…",
+    "btnCompleteLogin": "Slutför inloggning",
+    "btnCompleting": "Slutför…",
+    "codePlaceholder": "kod#state eller ren kod",
+    "noticeImported": "Importerades som kontot \"{alias}\" — Dario startade om för att hämta det.",
+    "noticeAdded": "Kontot \"{alias}\" lades till.",
+    "expiresInHours": "upphör om ~{hours}t",
+    "expiresInMinutes": "upphör om ~{minutes}m",
+    "expiresAt": "upphör {date}",
+    "scopes": "{count, plural, one {# omfång} other {# omfång}}",
+    "btnRemove": "Ta bort",
+    "btnRefresh": "Uppdatera",
+    "loginStep1": "1. Öppna denna URL i webbläsaren och godkänn åtkomst för kontot <mono>{alias}</mono>:",
+    "pendingExpires": "Inloggning under pågående uppdateras {time}",
+    "loginStep2": "2. Klistra in koden som Anthropic visar:"
+  },
+  "miniapp": {
+    "title": "OmniRoute Mini App",
+    "errTelegramOnly": "Denna sida måste öppnas i Telegram Mini App.",
+    "greeting": "👋 Hej {name}! Skicka ett meddelande för att chatta via din OmniRoute-gateway.",
+    "greetingFallbackName": "där",
+    "errNoReply": "⚠️ Inget svar från gateway.",
+    "btnSend": "Skicka"
   }
 }

@@ -25,6 +25,7 @@ import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 
 export const dynamic = "force-dynamic";
@@ -241,7 +242,8 @@ async function postHandler(request: Request) {
     }
   }
 
-  const runUpscale = () => handleImageUpscale({ body, credentials: upscaleCredentials, log });
+  const runUpscale = () =>
+    handleImageUpscale({ body, credentials: upscaleCredentials, log, signal: request.signal });
 
   const result = await (creds.connectionId
     ? runWithProxyContext((proxyInfo?.proxy as never) || null, runUpscale).catch(
@@ -261,6 +263,11 @@ async function postHandler(request: Request) {
   if (result.success) {
     await clearRecoveredProviderState(credentialsResult);
     const costUsd = await calculateModalCost("image", provider, `${provider}/${model}`, { n: 1 });
+    recordModalCallCost(policy.apiKeyInfo?.id, {
+      provider,
+      model: `${provider}/${model}`,
+      costUsd,
+    });
     const headers = new Headers({ "Content-Type": "application/json" });
     attachOmniRouteMetaHeaders(headers, {
       provider,

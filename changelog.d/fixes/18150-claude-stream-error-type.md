@@ -1,0 +1,1 @@
+- **fix(sse):** Claude clients now get Anthropic error types (`api_error`, `rate_limit_error`, …) on translated stream error frames instead of the OpenAI-only `server_error` (#18150 — thanks @alican532).

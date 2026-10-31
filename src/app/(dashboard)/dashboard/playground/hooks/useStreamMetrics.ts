@@ -72,10 +72,8 @@ export function useStreamMetrics(modelPricing?: {
         finishedAt: null,
         tokensIn: 0,
         tokensOut: 0,
-        pricing: modelPricing
-          ? { ...modelPricing, estimated: true }
-          : undefined,
-      }),
+        pricing: modelPricing ? { ...modelPricing, estimated: true } : undefined,
+      })
     );
   }
 
@@ -89,10 +87,8 @@ export function useStreamMetrics(modelPricing?: {
     setMetrics(
       computeMetrics({
         ...refs.current,
-        pricing: modelPricing
-          ? { ...modelPricing, estimated: true }
-          : undefined,
-      }),
+        pricing: modelPricing ? { ...modelPricing, estimated: true } : undefined,
+      })
     );
   }
 
@@ -117,10 +113,8 @@ export function useStreamMetrics(modelPricing?: {
     setMetrics(
       computeMetrics({
         ...refs.current,
-        pricing: modelPricing
-          ? { ...modelPricing, estimated: true }
-          : undefined,
-      }),
+        pricing: modelPricing ? { ...modelPricing, estimated: true } : undefined,
+      })
     );
   }
 

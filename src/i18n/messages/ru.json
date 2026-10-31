@@ -25,8 +25,10 @@
     "confirm": "Вы уверены?",
     "refresh": "Обновить",
     "close": "Закрыть",
+    "dialogTitleFallback": "Диалоговое окно",
     "previousPage": "Предыдущая страница",
     "nextPage": "Следующая страница",
+    "pagination": "Пагинация",
     "capsLockOn": "Caps Lock включен",
     "dismissNotification": "Скрыть уведомление",
     "toggleColumns": "Переключить колонки",
@@ -182,6 +184,7 @@
     "combos": "Комбинации",
     "noModelsFound": "Модели не найдены",
     "clear": "Очистить",
+    "clearFilters": "Очистить фильтры",
     "done": "Готово",
     "selectAll": "Выбрать все",
     "unselectAll": "Снять выделение",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Используется {count, plural, one {# партия} other {# партий}}",
     "batchFilePreview": "Предварительный просмотр",
     "batchFilePreviewTruncated": "Показаны первые {shown} строки ({total} всего строк)",
-    "batchFileDownloadFull": "Скачать полный файл"
+    "batchFileDownloadFull": "Скачать полный файл",
+    "tokensPageTitle": "Токены",
+    "tokensPageDescription": "Передавайте токены между API-ключами, делитесь кодами приглашений и подключайте серверы сообщества.",
+    "tokensServerUrlLabel": "URL сервера"
   },
   "disabled": "Отключено",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Перенаправлять запросы при исчерпании бюджета на резервный бесплатный провайдер/модель.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Прокси-сервер остановлен или перезагружается.",
     "expandSidebar": "Развернуть боковую панель",
     "collapseSidebar": "Свернуть боковую панель",
-    "themes": "Темы",
-    "presetColors": "Популярные цвета",
     "createTheme": "Создать тему",
     "chooseColor": "Выберите один цвет",
-    "themeCoral": "Коралловый",
-    "themeBlue": "Синий",
-    "themeRed": "Красный",
-    "themeGreen": "Зелёный",
-    "themeViolet": "Фиолетовый",
-    "themeOrange": "Оранжевый",
-    "themeCyan": "Голубой",
     "cliToolsShort": "Инструменты",
     "cache": "Кэш",
     "cacheShort": "Кэш",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Система тем",
     "whitelabelingDesc": "Описание брендирования",
     "switchThemes": "Переключение тем",
-    "themeAccentDesc": "Описание акцентного цвета темы",
     "uploadFavicon": "Загрузить фавикон",
     "themeDark": "Тёмная тема",
     "customLogoDesc": "Описание пользовательского логотипа",
     "sidebarVisibilityToggle": "Переключатель видимости боковой панели",
-    "themeAccent": "Акцентный цвет темы",
     "resetFavicon": "Сбросить фавикон",
     "whitelabeling": "Брендирование",
     "darkMode": "Тёмный режим",
@@ -1122,10 +1117,8 @@
     "customLogo": "Пользовательский логотип",
     "appearance": "Внешний вид",
     "themeSelectionAria": "ARIA-метка выбора темы",
-    "themeCreate": "Создать тему",
     "customFaviconDesc": "Описание пользовательского фавикона",
     "logoPreview": "Предпросмотр логотипа",
-    "themeCustom": "Пользовательская тема",
     "hideHealthLogsDesc": "Описание скрытия журналов проверок работоспособности",
     "faviconPreview": "Предпросмотр фавикона",
     "changelog": "Журнал изменений",
@@ -1352,7 +1345,9 @@
       "open": "открыть",
       "close": "закрыть"
     },
-    "noResults": "Нет результатов"
+    "noResults": "Нет результатов",
+    "costsTeams": "Команды",
+    "costsTeamsSubtitle": "Центры затрат команд"
   },
   "webhooks": {
     "title": "Вебхуки",
@@ -1485,7 +1480,11 @@
       "chatIdPlaceholder": "-100123456789 или @channelname",
       "chatIdHint": "Уникальный числовой идентификатор или публичное имя пользователя чата/канала.",
       "tutorial": "Как настроить вебхук Telegram:"
-    }
+    },
+    "copy": "Копировать",
+    "copied": "Скопировано!",
+    "expandDetails": "Показать подробности",
+    "collapseDetails": "Скрыть подробности"
   },
   "compliance": {
     "auditTitle": "Аудит",
@@ -1597,22 +1596,16 @@
     "mcpMetricCalls24h": "Звонки (24 ч)",
     "mcpMetricSuccessRate": "Уровень успеха",
     "mcpMetricAvgDuration": "Средняя продолжительность",
-    "mcpMetricTopTool": "Лучший инструмент"
-  },
-  "themesPage": {
-    "title": "Темы",
-    "description": "Выбери готовую тему или создай свою из одного цвета",
-    "presetColors": "Популярные цвета",
-    "customTheme": "Своя тема",
-    "customThemeDesc": "Нажми создать тему и выбери один цвет",
-    "createTheme": "Создать тему",
-    "activePreset": "Активная тема"
+    "mcpMetricTopTool": "Лучший инструмент",
+    "dismissError": "Закрыть сообщение об ошибке"
   },
   "header": {
     "logout": "Выход из системы",
     "quickNavigation": "Быстрая навигация",
     "quickNavigationTitle": "Быстрая навигация (⌘K / Ctrl+K)",
     "openQuickNavigation": "Открыть быструю навигацию",
+    "openMenu": "Открыть меню",
+    "products": "Продукты Keak",
     "switchToLightMode": "Переключить на светлый режим",
     "switchToDarkMode": "Переключить на темный режим",
     "language": "Язык",
@@ -1640,8 +1633,6 @@
     "anthropicCompatible": "Антропная совместимость",
     "media": "Медиа",
     "mediaDescription": "Создание изображений, видео и музыки",
-    "themes": "Темы",
-    "themesDescription": "Выберите цветовую тему для всей панели",
     "costsDescription": "Отслеживайте расходы, анализируйте тенденции и управляйте бюджетом на ИИ по всем поставщикам",
     "cacheDescription": "Отслеживайте эффективность кэширования промптов у провайдеров и локального переиспользования ответов на основе семантического сходства.",
     "limitsDescription": "Настраивайте ограничения частоты запросов и квоты для каждого API-ключа и поставщика",
@@ -1713,7 +1704,8 @@
     "settingsAdvancedDescription": "Расширенные правила обработки полезной нагрузки, ограничения запросов и настройки API прокси-сервера",
     "mitmProxyDescription": "Настройка MITM-прокси для анализа трафика и отладки",
     "oneProxyDescription": "Настройка 1Proxy для расширенного построения цепочек прокси-серверов",
-    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов"
+    "omniSkillsDescription": "Установите и управляйте песочными навыками для автоматизированного выполнения запросов и инструментов",
+    "teamsDescription": "Оценки затрат команды и общие мягкие бюджеты"
   },
   "cloudSyncStatus": {
     "synced": "Синхронизировано",
@@ -1933,7 +1925,14 @@
     "readinessStep3": "Скопируйте конечную точку",
     "readinessStep4": "Отправьте тестовый запрос",
     "readinessContinue": "Продолжить настройку",
-    "readinessDismiss": "Пока скрыть"
+    "readinessDismiss": "Пока скрыть",
+    "unpricedUsageTitle": "{count, plural, one {# модель} few {# модели} many {# моделей} other {# моделей}} с недавней активностью, но без настроенной цены",
+    "unpricedUsageFailClosed": "{keys, plural, one {# API-ключ с ограничением использования} few {# API-ключа с ограничением использования} many {# API-ключей с ограничением использования} other {# API-ключей с ограничением использования}} использовали эти модели за последние 8 дней. Пока это использование попадает в ежедневное или недельное окно ключа, ключ считается превышающим квоту и его запросы блокируются (UNPRICED_USAGE_BUDGET_POLICY=fail_closed).",
+    "unpricedUsageCountAsZero": "Это использование засчитывается как $0 в счёт лимитов использования по ключу (UNPRICED_USAGE_BUDGET_POLICY=count_as_zero).",
+    "unpricedUsageModelStats": "{requests, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}, {keys, plural, one {# ключ с лимитом} few {# ключа с лимитом} many {# ключей с лимитом} other {# ключей с лимитом}}",
+    "unpricedUsageMore": "…и ещё {count}",
+    "unpricedUsageConfigure": "Настроить цены",
+    "unpricedUsageDismiss": "Закрыть"
   },
   "analytics": {
     "title": "Аналитика",
@@ -2495,7 +2494,12 @@
     "onlySelectedConnections": "Только выбранные подключения",
     "selectAtLeastOneConnection": "Выберите хотя бы одно подключение или вариант «Все подключения».",
     "allConnectionsDesc": "Этот ключ позволяет использовать любое активное подключение.",
-    "restrictedToConnections": "Доступ ограничен: {count, plural, one {# подключением} few {# подключениями} many {# подключениями} other {# подключения}}."
+    "restrictedToConnections": "Доступ ограничен: {count, plural, one {# подключением} few {# подключениями} many {# подключениями} other {# подключения}}.",
+    "preferredConnections": "Предпочтительные подключения",
+    "preferredConnectionsDesc": "Порядок приоритета для каждого ключа. Если предпочтительное подключение недоступно, маршрутизация переходит к следующему подходящему.",
+    "preferredConnectionsNone": "Предпочтение не задано — используется стратегия маршрутизации по умолчанию.",
+    "preferredConnectionsClear": "Очистить",
+    "removeSelection": "Удалить {name}"
   },
   "auditLog": {
     "title": "Журнал аудита",
@@ -2607,7 +2611,9 @@
     "imageToTextBridgeCta": "Настройте мост Изображение→Текст в настройках Моста Модальности",
     "sttBridgeCta": "Настройте мост Speech→Text в настройках Modality Bridge",
     "existingConnection": "Существующее соединение",
-    "openrouterSttDescription": "Модели распознавания речи OpenRouter используют ваше настроенное соединение OpenRouter. Отдельные учетные данные не требуются."
+    "openrouterSttDescription": "Модели распознавания речи OpenRouter используют ваше настроенное соединение OpenRouter. Отдельные учетные данные не требуются.",
+    "modalityTabsAria": "Тип медиа",
+    "serviceKindsAria": "Тип сервиса"
   },
   "search": {
     "searchQuery": "Поисковый запрос",
@@ -2963,6 +2969,14 @@
     "openClawManualConfiguration": "Открытый коготь — ручная настройка",
     "clineManualConfiguration": "Ручная настройка Cline",
     "kiloManualConfiguration": "Ручная настройка кода Kilo",
+    "piManualConfiguration": "Пи — ручная настройка",
+    "piConfigInvalidTitle": "Пи models.json не читается",
+    "piOmnirouteConfigured": "OmniRoute настроен как пользовательский поставщик Pi",
+    "piModelHelp": "Pi не выполняет автоматическое обнаружение моделей для пользовательских конечных точек — выбранная вами модель явно записывается в models.json.",
+    "piManualConfigTitle": "Или отредактируйте ~/.pi/agent/models.json вручную",
+    "piManualConfigSample": "'{\n  \"providers\": {\n    \"omniroute\": {\n      \"baseUrl\": \"http://127.0.0.1:20128/v1\",\n      \"api\": \"openai-completions\",\n      \"apiKey\": \"sk_omniroute\",\n      \"models\": [\n        { \"id\": \"auto/best-coding\", \"name\": \"OmniRoute best-coding\" }\n      ]\n    }\n  }\n}'",
+    "piManualConfigHint": "Затем запустите Pi и выберите провайдера omniroute. Установите PI_CODING_AGENT_DIR для перемещения всего каталога агента.",
+    "piUnownedNote": "Эта запись была добавлена за пределами OmniRoute (например, пользовательские конечные точки pi-gui). Подача заявления примет его; Сброс удаляет только записи, записанные OmniRoute.",
     "whenToUseLabel": "Когда использовать",
     "openToolDocs": "Открыть документацию по инструменту",
     "toolUseCases": {
@@ -2982,6 +2996,7 @@
       "amp": "Use when you want Amp CLI routed through OmniRoute with stable shorthand aliases and OpenAI-compatible setup.",
       "hermes": "Используйте, когда вам нужен легкий помощник с искусственным интеллектом, встроенный в терминал, для быстрых задач.",
       "hermes-agent": "Используйте, когда вам нужен Hermes Agent (от Nousresearch) с моделями по умолчанию, делегирования, видения и вспомогательными, маршрутизированными через OmniRoute.",
+      "whycodes": "Используйте, когда вам нужен WhyCodes как универсальный автономный CLI-агент (TUI, именованные агенты, память, swarm), направленный на OmniRoute.",
       "custom": "Используйте для пользовательских реализаций инструментов или общих конфигураций, совместимых с OpenAI."
     },
     "toolDescriptions": {
@@ -2991,6 +3006,7 @@
       "grok-build": "TUI-агент для кодинга xAI Grok Build с поддержкой кастомных провайдеров",
       "droid": "Искусственный интеллект заводского дроида",
       "openclaw": "Открытый ИИ-помощник когтя",
+      "openclaude": "CLI агента для кодинга OpenClaude с поддержкой OpenAI-совместимого провайдера",
       "cline": "Cline - CLI помощника по коду с ИИ",
       "kilo": "Интерфейс командной строки Kilo Code AI Assistant",
       "qwen": "Qwen Code CLI",
@@ -3022,6 +3038,7 @@
       "warp": "Терминал Warp AI с поддержкой кастомных провайдеров",
       "agent-deck": "Мультиагентный оркестратор Agent Deck",
       "5dive": "5dive — самостоятельно размещаемый флот агентов для кода; один auth-профиль направляет их всех в OmniRoute",
+      "whycodes": "Автономный CLI-агент WhyCodes с базовым URL, совместимым с OpenAI",
       "zed": "Редактор кода Zed — встроенный агент через OpenAI-совместимого провайдера"
     },
     "guides": {
@@ -3278,7 +3295,19 @@
     "cliproxyapiUnknown": "Неизвестно",
     "cliproxyapiUpdate": "Обновить",
     "cliproxyapiUpdateAvailable": "Доступно обновление: v{current} → v{latest}",
-    "cliproxyapiVersion": "Версия"
+    "cliproxyapiVersion": "Версия",
+    "piInstallTitle": "Установите агент Pi Coding",
+    "piInstallInstructions": "Установите Pi CLI, затем вернитесь сюда, чтобы подключить его к OmniRoute.",
+    "piInstallCommand": "npm install -g --ignore-scripts @earendil-works/pi-coding-agent",
+    "piEndpoint": "OmniRoute URL",
+    "piEndpointHelp": "Используйте URL доступный с машины, на которой работает Pi. Конечная точка /v1, совместимая с OpenAI, добавляется автоматически.",
+    "piManualMergeHint": "Только предварительный просмотр. Объедините эту запись providers.omniroute с models.json, чтобы другие ваши провайдеры и настройки остались нетронутыми.",
+    "removeMapping": "Удалить сопоставление",
+    "customUrl": "Пользовательский URL",
+    "customEndpointAria": "Пользовательский конечный пункт",
+    "useDefaultKey": "Использовать ключ по умолчанию OmniRoute",
+    "mainModelAria": "Основная модель",
+    "manualConfigTitle": "Ручная конфигурация сборки Grok"
   },
   "modelCatalog": {
     "title": "Модели и комбо",
@@ -3342,6 +3371,18 @@
     "maxMembersPlaceholder": "напр., 10",
     "testSelected": "Тестировать выбранные ({count})",
     "testAllFiltered": "Тестировать все отфильтрованные ({count})",
+    "visibility": "Видимость",
+    "allVisibility": "Видимые и скрытые",
+    "visibleOnly": "Видимые",
+    "hiddenOnly": "Скрытые",
+    "visibleColumn": "Виден",
+    "hideModel": "Скрыть {name} из /v1/models",
+    "showModel": "Показать {name} в /v1/models",
+    "hiddenBadge": "Скрыт",
+    "hideFiltered": "Скрыть отфильтрованные ({count})",
+    "showFiltered": "Показать отфильтрованные ({count})",
+    "visibilityCounts": "{visible} видимых · {hidden} скрытых · всего {total}",
+    "visibilityUpdateFailed": "Не удалось обновить видимость модели",
     "cancel": "Отмена",
     "clearResults": "Очистить результаты",
     "testing": "Тестирование...",
@@ -3397,16 +3438,53 @@
     "httpError": "Запрос завершился ошибкой HTTP {status}",
     "testFailedNoDetail": "Тест завершился сбоем без сообщения об ошибке",
     "additionalCapabilities": "Дополнительные возможности: {list}",
-    "comboRefMember": "Комбинация → {name}"
+    "comboRefMember": "Комбинация → {name}",
+    "keyAccessButton": "Доступ API-ключей",
+    "allowedInKeys": "Разрешено в: {count, plural, one {# ключе} few {# ключах} many {# ключах} other {# ключах}}",
+    "keysLoading": "Загрузка API-ключей…",
+    "keysRetry": "Повторить загрузку ключей",
+    "accessViaPattern": "через {pattern}",
+    "accessBlocked": "Заблокировано {pattern}",
+    "editKeyAccess": "Изменить доступ ключа",
+    "toggleKeyAccess": "Разрешить {item} для {name}",
+    "resultNetworkError": "Не удалось назначить",
+    "resultWouldEmptyModels": "У этого ключа не останется разрешенных моделей — вместо этого измените права доступа ключа",
+    "resultWouldEmptyCombos": "У этого ключа не останется разрешенных комбинаций — вместо этого измените права доступа ключа",
+    "keyUpdatePending": "{name} все еще обновляется. Повторите попытку чуть позже.",
+    "assignToKeys": "Назначить API-ключам…",
+    "assignApply": "Применить изменения",
+    "assignComplete": "Доступ API-ключей обновлен",
+    "assignFailed": "Не удалось обновить доступ для некоторых API-ключей",
+    "assignNoChanges": "Права доступа API-ключа не изменились",
+    "selectedAccessItems": "Выбрано элементов: {count}",
+    "assignExcludedCombos": "{count, plural, one {# выбранная строка комбинации не является моделью и будет пропущена} few {# выбранные строки комбинаций не являются моделями и будут пропущены} many {# выбранных строк комбинаций не являются моделями и будут пропущены} other {# выбранных строк комбинаций не являются моделями и будут пропущены}}. Назначайте комбинации на вкладке Combos.",
+    "assignActionAdd": "Добавить",
+    "assignActionRemove": "Удалить",
+    "searchKeys": "Поиск API-ключей",
+    "selectApiKey": "Выбрать API-ключ {name}",
+    "allModelsAccess": "Все модели",
+    "allCombosAccess": "Все комбинации",
+    "modelAccessCount": "Модели: {count}",
+    "comboAccessCount": "Комбинации: {count}",
+    "keyInactive": "Неактивен",
+    "keyBanned": "Заблокирован",
+    "keyRevoked": "Отозван",
+    "switchRestrictedConfirm": "Переключить этот ключ на ограниченный доступ: будут разрешены только выбранные элементы",
+    "removeNoChangeHint": "Этот ключ разрешает всё; удаление выбранных элементов ничего не изменит",
+    "removeStaysAllowedHint": "По-прежнему разрешено для этого ключа через {patterns}",
+    "resultChanged": "Изменено",
+    "resultUnchanged": "Без изменений",
+    "resultSkipped": "Пропущено",
+    "resultNeedsSwitch": "Требуется переключить на ограниченный доступ"
   },
   "combos": {
+    "title": "Комбо",
+    "description": "Создавайте комбинации моделей с взвешенной маршрутизацией и поддержкой резервного варианта.",
+    "autoCatalogTitle": "Каталог автомаршрутизации",
     "autoTosLoadError": "Не удалось загрузить политику ToS. Повторите попытку перед изменением.",
     "autoTosSaveError": "Не удалось сохранить политику ToS. По-прежнему отображается прежняя настройка. Повторите попытку.",
     "autoTosIncludeLabel": "Включать в auto провайдеров с отметкой ToS: avoid",
     "autoTosDescription": "По умолчанию выключено. Применяется ко всем комбинациям auto, а не только к одному аккаунту. Подключение провайдера не включает эту опцию.",
-    "title": "Комбо",
-    "description": "Создавайте комбинации моделей с взвешенной маршрутизацией и поддержкой резервного варианта.",
-    "autoCatalogTitle": "Каталог автомаршрутизации",
     "autoCatalogTemplateCount": "{count} шаблонов",
     "autoCatalogDescription": "Встроенные комбинации auto/* разрешаются динамически от подключенных провайдеров. Используйте любой из этих идентификаторов в качестве поля модели — настройка не требуется.",
     "autoCatalogExpand": "Развернуть каталог автотрассировки",
@@ -3451,6 +3529,12 @@
     "errorUpdating": "Ошибка обновления комбо",
     "errorDeleting": "Ошибка удаления комбо.",
     "testFailed": "Тестовый запрос не выполнен",
+    "removeErrorModels": "Удалить неудачные модели ({count})",
+    "removingErrorModels": "Удаление…",
+    "errorModelsRemoved": "Из комбо удалено неудачных моделей: {count}",
+    "noErrorModelsFound": "Среди собственных шагов этого комбо неудачных моделей не найдено",
+    "cannotRemoveAllModels": "Нельзя удалить все модели из комбо",
+    "removeErrorModelsConfirm": "Удалить неудачные модели ({count}) из «{name}»? Тайм-ауты и ограничения частоты не учитываются.",
     "failedToggle": "Не удалось переключить комбо.",
     "testResults": "Результаты теста — {name}",
     "resolvedBy": "Решено:",
@@ -3518,6 +3602,9 @@
     "moveUp": "Вверх",
     "moveDown": "Двигаться вниз",
     "removeModel": "Удалить",
+    "testStep": "Проверить эту модель",
+    "testStepRunning": "Проверка…",
+    "testStepNotTestable": "Проверять можно только шаги с одной моделью",
     "saving": "Сохранение...",
     "liveNoProviders": "Провайдеры пока не обнаружены.",
     "liveFleetDataHint": "Данные Fleet поступают через события combo в реальном времени.",
@@ -3559,6 +3646,7 @@
     "playgroundNoCombosYet": "Combo еще не настроены.",
     "playgroundCreateFirst": "Сначала создайте один",
     "weighted": "Взвешенный",
+    "weightPercent": "Вес (%)",
     "leastUsed": "Наименее используемый",
     "costOpt": "Оптимизация по стоимости",
     "strategyGuideTitle": "Как использовать эту стратегию",
@@ -3720,6 +3808,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# аккаунт} other {# аккаунтов}}",
     "builderGlobalAdded": "Добавлено",
     "builderGlobalAdd": "Добавить",
+    "clearSearch": "Очистить поиск",
     "manualModel": "Ручная модель",
     "manualModelInvalid": "Введите модель в формате provider/model.",
     "manualModelUnknownProvider": "Неизвестный префикс провайдера.",
@@ -3936,6 +4025,7 @@
     "builderComboRefStep": "Добавить ссылку на комбо",
     "builderPinnedAccount": "Закреплённая учётная запись",
     "builderLegacyEntry": "Устаревшая запись",
+    "builderStaleModel": "Нет в актуальном каталоге",
     "reviewName": "Название",
     "reviewStrategy": "Стратегия",
     "reviewSteps": "Шаги",
@@ -3973,6 +4063,10 @@
     "responseValidationMinLength": "Минимальная длина контента (символов)",
     "responseValidationJsonPaths": "Проверки JSON-path",
     "responseValidationAddCheck": "+ Добавить проверку",
+    "responseValidationRemoveCheck": "Удалить проверку",
+    "responseValidationPath": "Путь JSON",
+    "responseValidationCondition": "Условие",
+    "responseValidationValue": "Ожидаемое значение",
     "agentFeaturesSystemMessageOverride": "Переопределить системное сообщение",
     "agentFeaturesSystemMessagePlaceholder": "Вы профессиональный помощник...",
     "agentFeaturesSystemMessageHint": "Переопределение системных сообщений для агентов",
@@ -4792,7 +4886,15 @@
     },
     "totalEntries": "Всего записей",
     "type": "Тип",
-    "memoryEnabled": "Включена память"
+    "memoryEnabled": "Включена память",
+    "qdrantTutorialTitle": "Быстрый учебник: память с Qdrant",
+    "qdrantTutorialIntro": "Qdrant хранит векторы и метаданные памяти, чтобы можно было извлекать соответствующий контекст. Он не сжимает токены напрямую; экономия происходит косвенно, за счёт исключения из контекста информации, не относящейся к запросу.",
+    "qdrantTutorialStep1": "Защитите сервер с помощью HTTPS и ключа API перед использованием в production-среде.",
+    "qdrantTutorialStep2": "Введите хост, порт, коллекцию и модель в формате provider/model с настроенным учётным данными.",
+    "qdrantTutorialStep3": "Размерность коллекции должна соответствовать размерности, производимой моделью. Существующая коллекция с размерностью 2048 не принимает эмбеддинги с размерностью 1536.",
+    "qdrantTutorialStep4": "Сохраните, протестируйте соединение и запустите тест поиска. Только после этого включите Qdrant.",
+    "qdrantTutorialCode": "PUT /collections/my_memory\n'{'\n  \"vectors\": '{' \"size\": '<model-dimension>', \"distance\": \"Cosine\" '}'\n'}'",
+    "qdrantTutorialCredits": "Автор: Rafa Martins — rafacpti@gmail.com"
   },
   "skills": {
     "title": "Навыки",
@@ -5288,7 +5390,8 @@
         "skipped": "уже настроено",
         "failed": "не удалось"
       }
-    }
+    },
+    "stepProgress": "Ход настройки"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Этот провайдер по умолчанию исключён из auto",
@@ -5329,6 +5432,27 @@
     "importFromFileDownloadTemplate": "Скачать шаблон CSV",
     "importFromFileMoreErrors": "+ ещё {count}",
     "importFromFileSchemaHint": "Столбцы CSV являются позиционными: provider, name, apiKey, baseUrl (необязательно), priority (необязательно). Столбец provider должен содержать идентификатор существующего управляемого провайдера или уже зарегистрированного узла, совместимого с OpenAI/Anthropic. Этот импорт не создаёт новые узлы конечных точек.",
+    "importOAuthExport": "Импорт экспорта OAuth",
+    "oauthExportTitle": "Импорт экспорта из менеджера аккаунтов",
+    "oauthExportDescription": "Загрузите экспорт в виде открытого текста из менеджера аккаунтов (например, экспорт cloud-accounts из Antigravity Manager). Токены обновляются на сервере, и каждый аккаунт становится OAuth-подключением — дубликаты обновляются на месте.",
+    "oauthExportProviderLabel": "Поставщик",
+    "oauthExportChoose": "Выбрать файл",
+    "oauthExportFileAria": "JSON-файл экспорта аккаунтов",
+    "oauthExportSchemaHint": "Поддерживается: документ с массивом \"accounts\", просто массив или одна запись. Токены могут находиться во вложенном объекте token или прямо в записи.",
+    "oauthExportDetected": "Обнаружено аккаунтов: {count}",
+    "oauthExportSelectAll": "Выбрать все аккаунты",
+    "oauthExportSelectAccount": "Выбрать аккаунт {index}",
+    "oauthExportColEmail": "Эл. почта",
+    "oauthExportColProvider": "Поставщик",
+    "oauthExportColRefresh": "Токен обновления",
+    "oauthExportNoEmail": "(нет эл. почты)",
+    "oauthExportYes": "да",
+    "oauthExportNo": "нет",
+    "oauthExportImporting": "Импорт…",
+    "oauthExportImport": "Импортировать аккаунты ({count})",
+    "oauthExportResult": "Импортировано {imported}/{total} — с ошибкой: {failed}",
+    "oauthExportParseError": "Не удалось прочитать ни одного аккаунта из этого файла.",
+    "oauthExportUnknownError": "неизвестная ошибка",
     "adaptaTutorial": {
       "title": "Как подключить Adapta Web",
       "introPrefix": "Adapta выполняет аутентификацию через Clerk. Токен",
@@ -5579,6 +5703,7 @@
     "allModelsAlreadyImported": "Все модели уже импортированы",
     "noNewModelsToImport": "Нет новых моделей для импорта — все модели уже есть в реестре или списке пользовательских моделей",
     "localCatalogFallbackStatus": "Не удалось получить список моделей провайдера — показан встроенный каталог",
+    "discoveryDegradedStatus": "Не удалось обнаружить модель {time}",
     "skippingExistingModels": "Пропуск {count} существующих моделей",
     "autoSync": "Автосинхронизация",
     "autoSyncShort": "Синхронизация",
@@ -5797,6 +5922,7 @@
     "contextWindowOverridePlaceholder": "например, 131072",
     "contextWindowOverrideHint": "Укажите реальный размер контекстного окна модели (в токенах) вручную, если провайдер сообщает его некорректно. Имеет приоритет над автоопределением/каталогом и предотвращает исключение модели при комбинированной маршрутизации.",
     "contextWindowOverrideInvalid": "Переопределение контекстного окна должно быть положительным целым числом токенов",
+    "maxOutputTokenOverrideInvalid": "Переопределение максимального количества токенов вывода должно быть положительным целым числом токенов",
     "visionCapableLabel": "Поддержка Vision",
     "visionCapableHint": "Вручную пометьте эту модель как поддерживающую Vision, если метаданные обнаружения провайдера не сообщают о поддержке изображений на входе (часто встречается у локальных/self-hosted бэкендов).",
     "compatParamFiltersLabel": "Фильтры параметров",
@@ -5838,6 +5964,25 @@
     "ccAliasAddModelButton": "Добавить переопределение",
     "ccAliasLoadError": "Не удалось загрузить настройки псевдонимов обнаружения: {error}",
     "ccAliasSaveError": "Не удалось сохранить настройку псевдонима обнаружения: {error}",
+    "cliVersionSectionTitle": "Рекламируемая версия клиента CLI",
+    "cliVersionEffectiveLabel": "В настоящее время рекламируется",
+    "cliVersionSourceLabel": "Разрешено: {source}",
+    "cliVersionPinnedLabel": "Записано по умолчанию: {pinned}",
+    "cliVersionSourceSettings": "переопределение приборной панели",
+    "cliVersionSourceEnv": "переменная среды",
+    "cliVersionSourceDiscovered": "автоматически обнаружена последняя версия",
+    "cliVersionSourceDefault": "захвачено по умолчанию",
+    "cliVersionInputLabel": "Переопределить версию",
+    "cliVersionInputPlaceholder": "Переопределить версию; пустой очищается",
+    "cliVersionSaveButton": "Сохранять",
+    "cliVersionResetButton": "Сбросить настройки по умолчанию",
+    "cliVersionLoadError": "Не удалось загрузить настройки версии CLI : {error}",
+    "cliVersionSaveError": "Не удалось сохранить версию CLI : {error}",
+    "cliVersionLoadFailed": "Не удалось загрузить текущие настройки версии CLI.",
+    "cliVersionHintClaude": "Anthropic использует новые модели Claude в версии клиента Claude Code, которую он видит. Эту версию OmniRoute рекламирует при каждом запросе, связанном с Anthropic.",
+    "cliVersionCaveatClaude": "Предостережение по вопросам выставления счетов: платежная версия — '<version>'.'<build-revision>', а версия сборки — это отдельная записанная константа. Реклама 2.1.260 сообщает о 2.1.260.1e2, а это не то, что отправляет настоящий двоичный файл 2.1.260.",
+    "cliVersionHintCodex": "OpenAI блокирует новые модели в версии клиента Codex которую он видит, например, ошибка: модель 'gpt-6-astra' требует более новой версии Codex.",
+    "cliVersionCaveatCodex": "Предостережение по выводу: версия, о которой сообщает ваш собственный вызывающий объект, по-прежнему превосходит CODEX_CLIENT_VERSION env var, но это переопределение превосходит оба, поскольку это явное намерение оператора.",
     "compatUpstreamHeadersLabel": "Дополнительные заголовки upstream",
     "compatUpstreamHeadersHint": "Настройка с высоким уровнем доверия - тот же уровень, что и редактирование API-учётных данных провайдера; использовать только доверенным администраторам. Применяется после того, как OmniRoute добавит авторизацию из API-ключа провайдера. Если пользовательский заголовок совпадает по имени с уже существующим (например, Authorization), ваше значение полностью заменяет автоматически созданный заголовок (включая Bearer token) - upstream увидит только введённое вами значение, а не ключ из настроек. Ошибка настройки может привести к 401 или поломке upstream-аутентификации. По одной строке на заголовок (например, дополнительный Authentication для некоторых шлюзов). Наведите курсор или сфокусируйте поле, чтобы увидеть предпросмотр. Сохраняется при потере фокуса, клике вне поля или закрытии панели.",
     "compatUpstreamHeaderName": "Имя заголовка",
@@ -6055,10 +6200,10 @@
     "apiFormatLabel": "Метка формата API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Регион API: Китай",
-    "apiRegionHint": "Подсказка по региону API",
-    "apiRegionInternational": "Регион API: международный",
-    "apiRegionLabel": "Метка региона API",
+    "apiRegionChina": "Материковый Китай",
+    "apiRegionHint": "Выберите регион конечной точки, используемый для доступа к API и отслеживания квот.",
+    "apiRegionInternational": "Международный",
+    "apiRegionLabel": "Регион API",
     "apikey": "API-ключ",
     "audio": "Аудио",
     "audioProvidersHeading": "Заголовок раздела аудиопровайдеров",
@@ -6079,6 +6224,13 @@
     "claudeLowPriorityModeDescription": "Когда эта учётная запись достигает 5-часового лимита использования и Anthropic предлагает режим с пониженным приоритетом, OmniRoute принимает его и продолжает отправлять запросы с anthropic-usage-limit: slow до сброса окна вместо приостановки соединения. Недельный лимит по-прежнему действует, а ответы могут ожидать освобождения ресурсов.",
     "claudeAutoLimitResetLabel": "Автоматически сбрасывать лимит сеанса (раз в неделю)",
     "claudeAutoLimitResetDescription": "Когда эта учётная запись достигает 5-часового лимита использования и доступен сброс лимита сеанса, OmniRoute автоматически активирует его и повторяет запросы на полной скорости. При этом используется доступный раз в неделю сброс для учётной записи, а использование по-прежнему учитывается в недельном лимите.",
+    "codexPaidCreditsShort": "Доп. кредиты",
+    "codexPaidCreditsToggleTitle": "Разрешить платные кредиты Codex после исчерпания квоты подписки (возможны дополнительные списания)",
+    "codexPaidCreditsEnabled": "Платные кредиты Codex включены (возможны дополнительные списания)",
+    "codexPaidCreditsDisabled": "Платные кредиты Codex отключены",
+    "failedUpdateCodexPaidCredits": "Не удалось обновить политику платных кредитов Codex",
+    "allowCodexPaidCreditsLabel": "Разрешить платные кредиты Codex",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Пропускать временный кулдаун, чтобы это подключение оставалось доступным даже после устранимых ошибок (терминальные состояния, такие как banned/expired, по-прежнему применяются).",
     "disableCoolingLabel": "Отключить кулдаун для этого подключения",
     "bulkPasteAdded": "{count, plural, one {Добавлен 1 ключ} few {Добавлено # ключа} many {Добавлено # ключей} other {Добавлено # ключа}}",
@@ -6532,6 +6684,7 @@
       "monsterapi": "Получить API-ключ на monsterapi.ai",
       "moonshot": "Подключить Moonshot AI с помощью API-ключа.",
       "morph": "Бесплатный тариф: 250 тыс. кредитов/месяц, $0",
+      "apmix": "Подключите Apmix с API-ключом от apmix.ai/dashboard — одна подписка, много моделей.",
       "nanogpt": "Подключить NanoGPT с помощью API-ключа.",
       "nebius": "~ $1 пробных кредитов при регистрации для тестирования API",
       "nlpcloud": "NLP Cloud использует собственный API чат-бота вместо OpenAI chat/completions. OmniRoute адаптирует сообщения OpenAI к входным данным/контексту/истории и предоставляет локальный каталог поддерживаемых моделей чат-ботов.",
@@ -6628,8 +6781,7 @@
       "kiro": "Бесплатный тариф: 50 кредитов/месяц (~25K–100K токенов). ⚠️ Условия использования Kiro запрещают использование сторонних прокси/оболочек.",
       "codex": "Подключите OpenAI Codex с помощью существующего процесса OAuth.",
       "qwen": "Подключите Qwen Code с помощью существующего процесса OAuth.",
-      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens",
-      "apmix": "Подключите Apmix с API-ключом от apmix.ai/dashboard — одна подписка, много моделей."
+      "github-models": "Создайте GitHub PAT с областью доступа 'models: read' на github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} принимает собственные идентификаторы моделей поставщика. Импортируйте из /models или добавляйте собственные идентификаторы для маршрутизации.",
     "bedrockModelsDescription": "Модели Amazon Bedrock охватываются регионом AWS. Импортируйте из /models или добавьте идентификаторы моделей Bedrock, включенные в выбранном регионе.",
@@ -6802,13 +6954,26 @@
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Необязательно: одна запись model=cap в строке, сопоставляется с точным идентификатором upstream-модели. Лишние запросы ставятся в локальную очередь; пусто — без лимита по модели.",
     "rateLimitOverridesModelConcurrencyInvalid": "Недопустимая запись параллелизма по модели «{entry}» — используйте model=cap, где cap — целое число от 1 до {max}.",
-    "codexPaidCreditsShort": "Доп. кредиты",
-    "codexPaidCreditsToggleTitle": "Разрешить платные кредиты Codex после исчерпания квоты подписки (возможны дополнительные списания)",
-    "codexPaidCreditsEnabled": "Платные кредиты Codex включены (возможны дополнительные списания)",
-    "codexPaidCreditsDisabled": "Платные кредиты Codex отключены",
-    "failedUpdateCodexPaidCredits": "Не удалось обновить политику платных кредитов Codex",
-    "allowCodexPaidCreditsLabel": "Разрешить платные кредиты Codex",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "usedInComboTooltip": "Используется в комбо ({count}): {combos}",
+    "openComboTooltip": "Открыть Комбо — используется в {combo}",
+    "claudeCodeRoutingTitle": "Маршрутизация через прокси для трафика Claude Code",
+    "routingNative": "Нативный",
+    "routingFallback": "Резервный",
+    "rerank": "Переранжирование",
+    "video": "Видео",
+    "markFreeTierTitle": "Отметить как бесплатный тариф (показывается даже при скрытии платных моделей)",
+    "codexTunnelTitle": "Соединение инструмента Codex",
+    "codexTunnelDescription": "Туннель строго работает в исходящем направлении. Местные инструменты по-прежнему выполняются только Codex в соответствии с его политикой песочницы и одобрения.",
+    "tunnelIdLabel": "Идентификатор туннеля",
+    "tunnelRuntimeKeyLabel": "Ключ времени выполнения туннеля",
+    "tunnelRuntimeKeyPlaceholder": "Ключ времени выполнения",
+    "tunnelRuntimeKeyHint": "Хранится в зашифрованном виде вместе с файлом cookie и никогда не записывается в журналы.",
+    "tunnelRuntimeKeyNewLabel": "Новый ключ времени выполнения туннеля",
+    "tunnelRuntimeKeyNewHint": "Вводите только вместе с новым файлом cookie. Значение хранится в зашифрованном виде.",
+    "chatgptConnectorLabel": "Пользовательский коннектор ChatGPT",
+    "doctorChecking": "Проверка состояния…",
+    "doctorCheck": "Проверить состояние doctor",
+    "fallbackRetryBackendTitle": "Запасной сервер повторов"
   },
   "settings": {
     "title": "Настройки",
@@ -7104,16 +7269,6 @@
     "settingsSidebarDesc": "Выберите элементы для отображения на боковой панели. В режиме «Основное» расширенные инструменты остаются доступными через поиск.",
     "hideHealthLogs": "Скрыть журналы проверки работоспособности",
     "hideHealthLogsDesc": "Если включено, подавлять сообщения [HealthCheck] в консоли сервера.",
-    "themeAccent": "Цвет темы",
-    "themeAccentDesc": "Выберите готовый цвет или создайте свою тему из одного цвета",
-    "themeCreate": "Создать тему",
-    "themeCustom": "Своя тема",
-    "themeBlue": "Синий",
-    "themeRed": "Красный",
-    "themeGreen": "Зелёный",
-    "themeViolet": "Фиолетовый",
-    "themeOrange": "Оранжевый",
-    "themeCyan": "Голубой",
     "whitelabeling": "Брендинг",
     "whitelabelingDesc": "Настройте название приложения и логотип",
     "appName": "Название приложения",
@@ -7254,7 +7409,7 @@
       "nextSwitchNow": "Сейчас",
       "coreConfigPath": "Файл конфигурации ядра",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Абсолютный путь к .json (расширение в нижнем регистре). Пусто = не создавать. Каждая синхронизация записывает '<path>'.generated рядом с принятым файлом, но не в него.",
+      "coreConfigPathDesc": "Абсолютный путь к .json/.yaml/.yml (расширение в нижнем регистре). Пусто = не создавать. Каждая синхронизация записывает '<path>'.generated рядом с принятым файлом, но не в него.",
       "lastSwitchKind": "Причина переключения",
       "switchKind": {
         "ip_quota_429": "квота",
@@ -7265,7 +7420,8 @@
       "coreReloadAppliedBy": "Применено: {mode}",
       "coreBinaryPath": "Путь к основному исполняемому файлу",
       "coreBinaryPathPlaceholder": "/usr/bin/sing-box",
-      "coreBinaryPathHelp": "Необязательно: проверяет созданный файл основным исполняемым файлом перед заменой принятого файла. Оставьте пустым, чтобы продолжать запись рядом. Каталог создается, если отсутствует."
+      "coreBinaryPathHelp": "Необязательно: проверяет созданный файл основным исполняемым файлом перед заменой принятого файла. Оставьте пустым, чтобы продолжать запись рядом. Каталог создается, если отсутствует.",
+      "urlFeedlessHint": "Оставьте пустым для подписки только селектора: задайте ниже URL управления, лента не загружается, не обновляется и не привязывается."
     },
     "bulkHealthcheck": "Массовая проверка здоровья",
     "bulkHealthcheckDesc": "Проверьте все настроенные прокси по целевому URL, чтобы определить рабочие.",
@@ -7706,6 +7862,7 @@
     "configured": "настроено",
     "none": "Нет",
     "modelOverrideValuePlaceholder": "Числовое значение",
+    "modelOverrideKey": "Ключ переопределения",
     "modelOverrideReasoningEffortsPlaceholder": "Через запятую на английском, например: low, medium, high",
     "addKeyValue": "Добавить ключ-значение",
     "noModelOverrides": "Для этой модели не настроено переопределений.",
@@ -7754,7 +7911,6 @@
     "customPricingNote": "Вы можете переопределить цены по умолчанию для определенных моделей. Пользовательские переопределения имеют приоритет над ценами, определяемыми автоматически.",
     "editPricing": "Изменить цену",
     "viewFullDetails": "Посмотреть полную информацию",
-    "themeCoral": "Коралл",
     "adaptiveVolumeRouting": "Адаптивная маршрутизация по объёму",
     "adaptiveVolumeRoutingDesc": "Динамически масштабируйте соединения на основе объёма нагрузки и давления пропускной способности.",
     "lkgpToggleTitle": "Последний известный хороший провайдер (LKGP)",
@@ -7849,6 +8005,8 @@
     "compressionDesc": "Сокращайте расход токенов, сжимая промпты перед отправкой провайдерам",
     "autoCombosTitle": "Автокомбо",
     "autoCombosDesc": "Разрешить этому ключу использовать встроенные комбо auto/*, которые автоматически выбирают модель среди всех настроенных провайдеров",
+    "ccDiscoveryAliasesTitle": "Алиасы обнаружения Claude Code",
+    "ccDiscoveryAliasesDesc": "Анонсировать зеркала совместимости claude/... для моделей и комбо, к которым у этого ключа уже есть доступ",
     "compressionGuidanceFullGuideLink": "Полное руководство по сжатию",
     "compressionGuidanceShow": "Подробнее",
     "compressionGuidanceHide": "Скрыть подробности",
@@ -8222,6 +8380,7 @@
     "compressionAdaptivePolicyPercentage": "Процент контекстного окна",
     "compressionAdaptivePolicyAbsolute": "Абсолютный бюджет токенов",
     "compressionOutputStylesDescription": "Внедряйте инструкции по формированию ответов без перезаписи вывода провайдера. Комбинируйте свободно.",
+    "compressionOutputStylesPreviewNote": "Запрос вводит только один язык: обнаруженный язык, в противном случае — первый пакет. Вышеуказанные блоки представляют собой варианты для каждой упаковки, а не для комбинированной инъекции.",
     "mcpAccessibilityDescription": "Ограничивает область вывода инструментов MCP (отдельное хранилище).",
     "compressionStylesTileSummary": "{tokens, number} токенов сэкономлено · {runs, plural, one {# запуск стилизован} few {# запуска стилизовано} many {# запусков стилизовано} other {# запуска стилизовано}}",
     "compressionStylesTileEmpty": "Пока нет стилизованных запусков.",
@@ -8799,6 +8958,8 @@
     "qdrantHost": "Хост",
     "qdrantCollection": "Коллекция",
     "catalogVisibilityHint": "Скрытые идентификаторы моделей по-прежнему можно вызывать с теми же правами доступа.",
+    "exposeCombosOnly": "Показывать в /v1/models только комбо",
+    "exposeCombosOnlyDesc": "Клиенты, которые автоматически обнаруживают модели, увидят ваши комбо (и auto/*, если они не скрыты) вместо исходных моделей провайдеров. Явные идентификаторы provider/model по-прежнему маршрутизируются.",
     "catalogScopeTitle": "Список API моделей",
     "catalogScopeDesc": "Что GET /v1/models возвращает для этого ключа. Сокращение списка не влияет на то, какие модели может вызывать ключ.",
     "catalogScopeAll": "Оба варианта",
@@ -8918,7 +9079,9 @@
         "financial": "Финансовый",
         "brazilian": "Бразильский",
         "usa": "США",
-        "full": "Полный"
+        "full": "Полный",
+        "gdpr": "GDPR (ЕС)",
+        "popia": "POPIA (ЮАР)"
       },
       "builtinTypes": "Встроенные типы",
       "types": {
@@ -8932,7 +9095,19 @@
         "ip_address": "IPv4-адреса",
         "ipv6_address": "IPv6-адреса",
         "aws_key": "Ключи доступа AWS",
-        "api_key_generic": "API-ключи и токены"
+        "api_key_generic": "API-ключи и токены",
+        "iban": "Номера банковских счетов IBAN",
+        "eu_vat": "Номера плательщиков НДС в ЕС",
+        "es_dni_nie": "Испанские DNI / NIE",
+        "it_codice_fiscale": "Итальянский Codice Fiscale",
+        "pl_pesel": "Польский PESEL",
+        "nl_bsn": "Нидерландский BSN",
+        "de_steuer_id": "Немецкий Steuer-ID",
+        "se_personnummer": "Шведский personnummer",
+        "za_id": "Номера удостоверений личности ЮАР",
+        "za_phone": "Номера телефонов ЮАР",
+        "za_vat": "Номера НДС ЮАР",
+        "za_tax_ref": "Налоговые номера ЮАР"
       },
       "customPatterns": "Пользовательские шаблоны",
       "customPatternsDesc": "Совпадения заменяются на [CUSTOM_REDACTED]. До {max} шаблонов. Шаблоны с риском катастрофического бэктрекинга отклоняются.",
@@ -9034,7 +9209,8 @@
     "tomlTestPassed": "Пройдено",
     "tomlTestFailed": "Не пройдено",
     "tomlImportError": "Не удалось обработать файл RTK TOML.",
-    "tomlFileReadError": "Не удалось прочитать выбранный файл TOML."
+    "tomlFileReadError": "Не удалось прочитать выбранный файл TOML.",
+    "viewMode": "Режим просмотра"
   },
   "compressionEngineConfig": {
     "loading": "Загрузка…",
@@ -9256,7 +9432,8 @@
     "languagePacksList": "Языковые пакеты: {packs}",
     "dragToReorder": "Перетащите для изменения порядка шагов",
     "engine": "Движок",
-    "intensity": "Интенсивность"
+    "intensity": "Интенсивность",
+    "compressionOverride": "Переопределение сжатия"
   },
   "compressionStudio": {
     "noRun": "Нет доступных запусков сжатия.",
@@ -9316,7 +9493,8 @@
     "encoderWinner": "победитель: {winner}",
     "encoder": "кодировщик",
     "bytes": "байты",
-    "tokensCl100k": "токены (cl100k)"
+    "tokensCl100k": "токены (cl100k)",
+    "studioViews": "Представления Studio"
   },
   "omniglyph": {
     "preview": "Предпросмотр",
@@ -9522,7 +9700,9 @@
     "tooltipMinLength": "Сообщения короче этого значения не сжимаются. Ниже = больше сжатия.",
     "tooltipMinSavings": "Сжимайте только в том случае, если при этом сохраняется хотя бы столько же токенов.",
     "ultraSettings": "Ультра настройки",
-    "ultraSettingsDesc": "Семантическое сжатие на основе SLM"
+    "ultraSettingsDesc": "Семантическое сжатие на основе SLM",
+    "defaultLanguage": "Язык по умолчанию",
+    "viewMode": "Режим просмотра"
   },
   "translator": {
     "title": "Переводчик",
@@ -9834,6 +10014,9 @@
     "streamTransformFailed": "Не удалось преобразовать поток"
   },
   "usage": {
+    "healthExtraUsageBypass": "Квота исчерпана; дополнительное использование разрешено, поэтому обслуживание продолжается.",
+    "healthPaidCreditsBypass": "Квота исчерпана; доступные платные кредиты позволяют продолжить обслуживание.",
+    "healthFilteringBypass": "Квота исчерпана; локальная фильтрация квот отключена, поэтому обслуживание продолжается.",
     "title": "Использование",
     "grokExtraUsageCredits": "Дополнительные кредиты на использование",
     "grokAutoTopUp": "Авто пополнение",
@@ -9997,6 +10180,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Ограничения поставщика",
     "noProviders": "Ни один провайдер не подключен",
+    "quotaAuthRequired": "Требуется аутентификация — войдите в панель управления",
+    "quotaAuthRequiredHint": "Не удалось загрузить подключения провайдеров, поскольку сеанс панели управления отсутствует или истёк. Войдите в систему и обновите страницу, чтобы увидеть ограничения квот.",
     "connectProvidersForQuota": "Подключайтесь к поставщикам с помощью OAuth, чтобы отслеживать ограничения и использование квот API.",
     "accountsCount": "{count, plural, one {# аккаунт} few {# аккаунта} many {# аккаунтов} other {# аккаунта}}",
     "filteredFromCount": "(отфильтровано из {count})",
@@ -10046,9 +10231,6 @@
     "tierLite": "Лайт",
     "tierUnknown": "Неизвестно",
     "statTotal": "Итого",
-    "statCritical": "Критический",
-    "statAlert": "Предупреждение",
-    "statHealthy": "Здоровый",
     "filterPurchaseTypeLabel": "Тип",
     "filterTierLabel": "Уровень",
     "purchaseAll": "Все",
@@ -10287,10 +10469,64 @@
     "lastRefreshed": "Последнее обновление",
     "providerQuota": "Квота Провайдера",
     "providerQuotaHomeHint": "Живой статус по подключенным аккаунтам",
+    "claudeResetCreditDefaultTitle": "Сброс лимитов Claude",
+    "confirmRedeemClaudeResetCredit": "Активация мгновенно сбрасывает применимые лимиты использования Claude и безвозвратно расходует этот кредит.",
+    "claudeResetCreditsModalTitle": "Кредиты на сброс Claude",
+    "claudeResetCreditsModalExplainer": "Доступные кредиты на сброс Claude и еженедельные сбросы сессий для этого аккаунта.",
     "codexPaidCreditsLabel": "Платные кредиты Codex",
     "codexPaidCreditsAvailable": "Доступно (баланс не сообщается)",
     "codexPaidCreditsUnavailable": "Недоступно или достигнут лимит расходов",
-    "codexPaidCreditsUnlimited": "Безлимитно"
+    "codexPaidCreditsUnlimited": "Безлимитно",
+    "healthAccountHint": "По последним наблюдениям, без проверки в реальном времени. Выберите аккаунт для подробностей.",
+    "healthRecovery": "Ожидаемое восстановление",
+    "healthAvailable": "Доступно",
+    "healthRestricted": "Частично ограничено",
+    "healthUnavailable": "Недоступно",
+    "healthPeakHourProtection": "Защита в часы пик",
+    "healthCooldown": "Период ожидания",
+    "healthQuotaExhausted": "Квота исчерпана",
+    "healthOverview": "Обзор",
+    "layoutFull": "Полный",
+    "layoutCompact": "Компактный",
+    "healthQuotaError": "Ошибка чтения квоты",
+    "healthNoRuntime": "Рабочее состояние недоступно",
+    "healthPreviousSnapshot": "Последнее обновление не удалось; показан предыдущий результат",
+    "healthPreviousFailure": "Последний запрос не удался; ожидание завершено",
+    "healthAwaitingSync": "Время сброса прошло; ожидание синхронизации",
+    "healthVerdictUnavailable": "Проверка доступности недоступна; показаны только уровни квот",
+    "healthSummaryFailed": "Не удалось прочитать сводку состояния; блокировки моделей могут отсутствовать",
+    "healthRuntimeObserved": "Состояние обновлено {time}",
+    "healthQuotaObserved": "Квота получена {time}",
+    "healthOldestQuota": "Самый старый снимок квоты: {time}",
+    "healthRecoveryUnknown": "Время восстановления неизвестно",
+    "healthDetailsHint": "Нажмите для просмотра сведений и действий",
+    "healthFiveHour": "5 часов",
+    "healthOverall": "Общая",
+    "healthAction": "Требуется действие",
+    "healthTitle": "Доступность аккаунтов",
+    "healthDrag": "Перетащите для изменения порядка провайдеров",
+    "healthDragPosition": "{provider}, {count, plural, one {позиция {position, number} из #} few {позиция {position, number} из #} many {позиция {position, number} из #} other {позиция {position, number} из #}}",
+    "healthResetOrder": "Восстановить порядок по умолчанию",
+    "healthPool": "Пул {name}",
+    "healthOtherPool": "Тот же аккаунт · {pool}: {status} (осталось {remaining})",
+    "healthIncluded": "{count, plural, one {Включает # частично ограниченный аккаунт} few {Включает # частично ограниченных аккаунта} many {Включает # частично ограниченных аккаунтов} other {Включает # частично ограниченного аккаунта}}",
+    "healthBannerUnavailable": "{count, plural, one {# аккаунт временно недоступен} few {# аккаунта временно недоступны} many {# аккаунтов временно недоступны} other {# аккаунта временно недоступно}}",
+    "healthBannerAvailable": "{count, plural, one {# аккаунт доступен} few {Все # аккаунта доступны} many {Все # аккаунтов доступны} other {# аккаунта доступно}}",
+    "healthLegendHide": "Скрыть легенду",
+    "healthLegendShow": "Показать легенду",
+    "healthLegendOk": "Сплошное = оставшаяся квота; полупрозрачное = израсходовано.",
+    "healthLegendCooldown": "Квота за {window} исчерпана. Сплошное = прошедшее ожидание; полупрозрачное = оставшееся ожидание.",
+    "healthLegendAction": "Авторизация истекла или аккаунт заблокирован; ожидание не поможет.",
+    "healthLegendPartial": "Ещё доступен. Жёлтая верхушка = ограничена модель или пул.",
+    "healthWaited": "Ожидание пройдено: {percent}",
+    "healthWait": "Ещё {duration} (восстановление в {time})",
+    "healthFastest": "Ближайшее восстановление через {duration}",
+    "healthRatio": "{available, plural, one {Доступен # / {active, number}} few {Доступны # / {active, number}} many {Доступны # / {active, number}} other {Доступно # / {active, number}}}",
+    "healthCd5": "5 часов · Период ожидания",
+    "healthCdw": "Еженедельно · Период ожидания",
+    "healthRecentSuccessBypass": "Маршрутизация разрешает этот аккаунт, поскольку недавно запрос был успешным.",
+    "healthPurchasedBalanceBypass": "Купленный баланс позволяет продолжить после исчерпания включённой квоты.",
+    "healthCutoffAtRequest": "Пороги квоты в реальном времени проверяются при маршрутизации запроса."
   },
   "modals": {
     "waitingAuth": "Ожидание авторизации",
@@ -11077,7 +11313,8 @@
       "message": "Сообщение",
       "error": "Ошибка",
       "completion": "Завершение"
-    }
+    },
+    "statusFilter": "Статус"
   },
   "templateNames": {
     "simple-chat": "Простой чат",
@@ -11258,7 +11495,8 @@
     "minutesAgo": "{minutes}м назад",
     "hoursAgo": "{hours}ч назад",
     "daysAgo": "{days}д назад",
-    "entries": "Записи"
+    "entries": "Записи",
+    "viewSwitcherAria": "Просмотр кеша"
   },
   "proxyConfigModal": {
     "levelGlobal": "Глобальный",
@@ -11371,6 +11609,11 @@
     "gitlabDuoSetupMessage": "Не настроен Duo OAuth для GitLab. Зарегистрируйте OAuth-приложение по адресу {applicationsUrl} с URI перенаправления {redirectUri} и областями \"{scopes}\", затем установите {clientIdEnv} (и, при необходимости, {clientSecretEnv}) и перезапустите.",
     "gitlabDuoSetupDescription": "После регистрации приложения и настройки переменных окружения в этом экземпляре OmniRoute нажмите Продолжить, чтобы начать вход через OAuth.",
     "continue": "Продолжить",
+    "copilotPolicyTitle": "Экспериментальный провайдер: статус полиса неоднозначен",
+    "copilotPolicyLine1": "OmniRoute подключается через api.githubcopilot.com, который GitHub не опубликовал как общий сторонний вывод API. Эта интеграция является экспериментальной и может быть изменена без предварительного уведомления.",
+    "copilotPolicyLine2": "Можно подключить только вашу собственную учетную запись GitHub. Никогда не делитесь учетными данными, объединяйте учетные записи и не пытайтесь превысить ограничения вашего плана.",
+    "copilotPolicyLine3": "Пользователи бесплатного и студенческого плана получают только автоматический выбор модели. Условия вашего плана Copilot и любые ограничения на использование остаются под вашей ответственностью.",
+    "copilotPolicyAcknowledge": "Я понял, подключайся",
     "tabPasteSetupToken": "Токен настройки",
     "claudeSetupTokenDescription": "Выполните `claude setup-token` в терминале и вставьте выведенный токен. Он действует один год и не имеет токена обновления. Перед сохранением OmniRoute отправляет в Anthropic один тестовый запрос.",
     "claudeSetupTokenPlaceholder": "sk-ant-oat01-..."
@@ -11446,6 +11689,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Дополнительные действия",
     "test": "Проверить",
     "edit": "Изменить",
     "delete": "Удалить",
@@ -11525,7 +11769,7 @@
     "bulkImportNoValidEntries": "Действительные записи не найдены. Проверьте формат и повторите попытку.",
     "bulkImportSuccess": "Импорт завершен: {created} создан, {updated} обновлен, {failed} не выполнен.",
     "bulkImportErrorLine": "Строка {line}: {reason}",
-    "bulkImportMaxExceeded": "Максимум 100 прокси на один импорт",
+    "bulkImportMaxExceeded": "Максимум {max} прокси на один импорт",
     "bulkImportPreview": "Предварительный просмотр",
     "clearAssignment": "(четкое задание)",
     "bulkProxyAssignment": "Массовое назначение прокси",
@@ -11586,6 +11830,7 @@
     "poolSetAsideKindIpQuota429": "ограничение частоты по IP (429)",
     "poolSetAsideKindSlow": "медленные ответы",
     "poolSetAsideKindGeoBlocked": "заблокировано по региону (403/451)",
+    "poolSetAsideKindOperatorReported": "сбой, сообщенный оператором",
     "poolSetAsideUntil": "Снова в ротации {endsAt}",
     "poolSetAsideRepeat": "Отложен {count, plural, one {# раз} other {# раз}}",
     "poolUnknownAddress": "Неизвестный адрес",
@@ -11695,7 +11940,6 @@
     "exportCodeTitle": "Экспорт кода",
     "exportShort": "Экспорт",
     "noStateToExport": "Нет доступного состояния песочницы для экспорта.",
-    "closeExportModal": "Закрыть модальное окно экспорта",
     "close": "Закрыть",
     "exportRealKeyWarning": "Предупреждение о безопасности: экспорт заблокирован — в выводе был обнаружен реальный ключ API. Пожалуйста, сбросьте свой ключ API и попробуйте снова.",
     "placeholderHintPrefix": "Заменить",
@@ -11808,7 +12052,8 @@
       "nextButton": "Далее",
       "runButton": "Запустить",
       "promptPlaceholder": "Введите ваше сообщение… (Enter для отправки, Shift+Enter для новой строки)"
-    }
+    },
+    "playgroundTabs": "Режимы Playground"
   },
   "miniPlayground": {
     "endpoint": "Конечная точка",
@@ -11879,7 +12124,8 @@
     "assistant": "Ассистент",
     "errorLabel": "Ошибка",
     "requestFailed": "Запрос не удался",
-    "stop": "Остановить"
+    "stop": "Остановить",
+    "messageInputAria": "Сообщение"
   },
   "requestLogger": {
     "recording": "Запись",
@@ -12066,8 +12312,22 @@
       "resilienceRotations": "{count} ротаций аккаунта",
       "resilienceRetried": "Пустой ход повторён",
       "resilienceContinued": "Возобновлено в середине потока",
-      "resilienceRecovered": "Восстановлено действием устойчивости"
-    }
+      "resilienceRecovered": "Восстановлено действием устойчивости",
+      "conversationContext": "Контекст диалога",
+      "goToBottom": "Перейти вниз",
+      "liveRefreshOn": "Автообновление: включено",
+      "liveRefreshOff": "Автообновление: выключено",
+      "liveRefresh": "Автообновление",
+      "continuesFromParent": "продолжается от родительского элемента",
+      "continuesFrom": "Продолжается от {id}",
+      "viewConversation": "просмотреть диалог",
+      "openConversation": "Открыть диалог {id}"
+    },
+    "tableLabel": "Журналы запросов",
+    "throughputPostFirstToken": "После первого токена",
+    "throughputEndToEnd": "От начала до конца",
+    "throughputRate": "{value} токенов/с",
+    "throughputExplanation": "Оба показателя используют большее из значений количества выходных токенов и токенов рассуждения. «После первого токена» исключает корректный TTFT; в противном случае используется полная длительность. «От начала до конца» всегда использует полную длительность. Буферизованный ответ может иметь высокую пиковую скорость выдачи без более быстрой генерации модели."
   },
   "proxyLogger": {
     "filterAll": "Все",
@@ -12112,7 +12372,9 @@
     "colServedBy": "Обслуживается",
     "filterTraffic": "Трафик",
     "filterTests": "Тесты",
-    "filterSource": "Источник"
+    "filterSource": "Источник",
+    "tableLabel": "Журналы прокси-сервера",
+    "sortLogs": "Сортировать журналы"
   },
   "endpointOptions": {
     "speech": "Речь",
@@ -12197,7 +12459,8 @@
     "statusExhausted": "ИСЧЕРПАНА",
     "statusAlerting": "ТРЕБУЕТ ВНИМАНИЯ",
     "statusError": "ОШИБКА",
-    "moreSuffix": "+ещё {count}"
+    "moreSuffix": "+ещё {count}",
+    "feedFilterLabel": "Фильтровать события"
   },
   "quotaShare": {
     "weightPercent": "Вес %",
@@ -12364,7 +12627,10 @@
     "ungroupedTitle": "Не сгруппировано",
     "ungroupedHint": "Эти пулы не назначены известной группе. Отредактируйте пул, чтобы переместить его в реальную группу.",
     "removeFailed": "Не удалось удалить этот пул.",
-    "dismiss": "Закрыть"
+    "dismiss": "Закрыть",
+    "allocationsHeading": "Распределения",
+    "wizardRemoveDimension": "Удалить измерение",
+    "wizardRemoveKey": "Удалить ключ"
   },
   "plugins": {
     "title": "Плагины",
@@ -12522,7 +12788,8 @@
       "settingsUpdateFailed": "Не удалось обновить настройки",
       "serviceRevealApiKey": "{actor} раскрыл API-ключ для {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Закрыть сообщение об ошибке"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12922,21 @@
       "goNow": "Иди сейчас",
       "message": "MITM Proxy теперь находится под AgentBridge.",
       "title": "Эта страница была перемещена"
-    }
+    },
+    "dnsOn": "DNS включён",
+    "dnsOff": "DNS выключен",
+    "showServerSettings": "Показать настройки сервера",
+    "hideServerSettings": "Скрыть настройки сервера",
+    "upstreamCaTesting": "Тестирование…",
+    "removeMapping": "Удалить сопоставление",
+    "mappingSourcePlaceholder": "например, gemini-3.6-flash-medium или * для всех моделей без сопоставления",
+    "mappingWildcardHint": "Используйте * в качестве источника, чтобы направлять через OmniRoute к выбранной целевой модели все модели без явного сопоставления. Точное совпадение источника всегда имеет приоритет над *.",
+    "wizardDetectingModels": "Обнаружение моделей в перехваченном трафике...",
+    "wizardDetectedModels": "В перехваченном трафике найдена {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}. Выберите модели, которые хотите добавить:",
+    "wizardSelectedModels": "Выбрана {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}. На следующем экране вы сопоставите их с моделями OmniRoute.",
+    "wizardAddModels": "Добавить {count, plural, one {# модель} few {# модели} many {# моделей} other {# модели}}",
+    "wizardNoModelsDetected": "Модели пока не обнаружены. Выполните запрос с помощью {agent}, а затем снова запустите этот мастер, чтобы автоматически обнаружить модели в трафике.",
+    "wizardNoModelsHint": "Или закройте этот мастер и добавьте сопоставления вручную в карточке агента."
   },
   "providerStats": {
     "unknownError": "Неизвестная ошибка",
@@ -12685,7 +12966,12 @@
     "avgTtft": "Среднее TTFT",
     "avgTotal": "Среднее общее",
     "requestTelemetry": "Телеметрия запросов",
-    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)"
+    "requestTelemetryDescription": "Детализация 7-фазного конвейера (за последние 5 минут)",
+    "title": "Статистика провайдеров",
+    "description": "Трафик, задержка и доля успешных запросов по каждому провайдеру и каждой модели",
+    "combo": "Комбинация",
+    "toggleModels": "Показать модели для {provider}",
+    "windowSince": "С {date}"
   },
   "relay": {
     "title": "Бессерверные прокси-ретрансляторы",
@@ -12846,7 +13132,18 @@
     "noRequestBody": "Тело запроса отсутствует.",
     "noResponseBody": "Тело ответа отсутствует.",
     "formatted": "Форматированный",
-    "raw": "Необработанный"
+    "raw": "Необработанный",
+    "requestCount": "{count, plural, one {# запрос} few {# запроса} many {# запросов} other {# запроса}}",
+    "expandList": "Развернуть список",
+    "collapseList": "Свернуть список",
+    "snippetLanguage": "Язык фрагмента кода",
+    "headersTable": "Заголовки",
+    "showSecrets": "Показать секреты",
+    "maskSecrets": "Скрыть секреты",
+    "llmNotAvailable": "Метаданные LLM недоступны для этого запроса.",
+    "llmStreamYes": "да (SSE)",
+    "llmStreamNo": "нет",
+    "llmTotalTokens": "Всего: {count} токенов"
   },
   "cliCommon": {
     "companion": {
@@ -12951,7 +13248,6 @@
     }
   },
   "cliCode": {
-    "pageTitle": "CLI Кодов",
     "pageSubtitle": "Инструменты кода, указывающие на OmniRoute",
     "searchPlaceholder": "Поиск CLI…",
     "filterDetectionLabel": "Обнаружение",
@@ -12961,7 +13257,8 @@
     "detectionNotFound": "Не найдено",
     "baseUrlAll": "Все",
     "baseUrlFull": "Полный",
-    "baseUrlPartial": "Частичный"
+    "baseUrlPartial": "Частичный",
+    "title": "CLI-код"
   },
   "cliAgents": {
     "pageTitle": "CLI Агенты",
@@ -13305,7 +13602,8 @@
     "colReliabilityHelp": "Доля вызовов, на которые этот провайдер фактически ответил за последние 24 часа. Прочерк означает, что он обработал слишком мало трафика для определения показателя.",
     "reliabilitySample": "Успешно выполнено вызовов: {successes} из {requests} за последние {hours} ч",
     "reliabilityTooFew": "Всего {requests} вызовов за последние {hours} ч — слишком мало для определения показателя",
-    "reliabilityNoTraffic": "За последние 24 ч вызовов не зарегистрировано"
+    "reliabilityNoTraffic": "За последние 24 ч вызовов не зарегистрировано",
+    "categoryFilter": "Категория задачи"
   },
   "discovery": {
     "title": "Поиск провайдеров",
@@ -13330,7 +13628,11 @@
     "method": "Метод",
     "auth": "Аутентификация",
     "feasibility": "Реализуемость",
-    "models": "Модели"
+    "models": "Модели",
+    "provider": "Провайдер",
+    "status": "Статус",
+    "endpoint": "Конечная точка",
+    "actions": "Действия"
   },
   "noAuthProvider": {
     "title": "Аутентификация не требуется",
@@ -13379,7 +13681,8 @@
     "ownProxy": "Собственный прокси",
     "freeTierPause": "Модель {model} приостановлена (429), возврат в {time}",
     "freeTierPauseProvider": "Приостановлено (429), возврат в {time}",
-    "freeTierPauseNote": "Пауза в процессе на этом экземпляре"
+    "freeTierPauseNote": "Пауза в процессе на этом экземпляре",
+    "proxyType": "Тип прокси"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13855,10 @@
         "description": "Вас ждет скрытое достижение...",
         "criteria": "Выполните скрытое достижение, чтобы открыть этот значок."
       }
-    }
+    },
+    "leaderboardTitle": "Таблица лидеров",
+    "leaderboardDescription": "Рейтинги и достижения по вашим API-ключам",
+    "badgeLocked": "Заблокировано"
   },
   "featureFlags": {
     "title": "Флаги функций",
@@ -13610,7 +13916,9 @@
       "disabled": "Отключено",
       "dual": "Двойной",
       "alias": "Псевдоним",
-      "canonical": "Канонический"
+      "canonical": "Канонический",
+      "fail_closed": "Блокировать (fail_closed)",
+      "count_as_zero": "Зачислять как $0 (count_as_zero)"
     },
     "definitions": {
       "REQUIRE_API_KEY": {
@@ -13757,6 +14065,274 @@
       "PROTECTED_PRIORITY_INFRA_502_ENABLED": {
         "label": "Инфраструктурные остановки защищённого приоритета как 502",
         "description": "Отвечать кодом 502 вместо 503, когда приоритетная цель с резервным переключением только при исчерпании квоты останавливает комбинацию по причине, которая заведомо не связана с квотой: открытый автоматический выключатель провайдера или пропуск из-за прогнозируемой задержки."
+      },
+      "AUTH_LOG_INCLUDE_ACCOUNT_ID": {
+        "label": "Идентификаторы учётных записей",
+        "description": "Включать префикс учётной записи в строки журнала AUTH (например, «Используется аккаунт «'<provider>'»: abc12345...»). По умолчанию отключено, чтобы идентификаторы учётных записей не отображались в общих журналах процессов с мультиарендностью. Независимо от режима отладки; включение режима отладки не раскрывает эту настройку."
+      },
+      "OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN": {
+        "label": "Отключить вход по паролю с OIDC",
+        "description": "При включении OIDC отключить вход по паролю, чтобы пользователи могли аутентифицироваться только через OIDC Single Sign-On. При отключении (по умолчанию) доступны как вход по паролю, так и OIDC."
+      },
+      "AUDIO_REMOTE_PROVIDER_NODES": {
+        "label": "Узлы Удаленного Провайдера Аудио",
+        "description": "Разрешить маршрутам /v1/audio/* использовать узлы поставщиков, совместимые с OpenAI, размещённые вне localhost. По умолчанию отключено — маршрутизация аудио на удалённый хост изменяет исходящую идентичность и должно быть явным решением оператора. Узлы loopback всегда разрешены и не затрагиваются."
+      },
+      "RERANK_REMOTE_PROVIDER_NODES": {
+        "label": "Удалённые узлы поставщиков Rerank",
+        "description": "Разрешить POST /v1/rerank (а также шаг rerank в движке памяти, который вызывает его через loopback) использовать узлы поставщиков, совместимые с OpenAI, размещённые вне localhost — например, LANC-коробку или пир Tailscale, работающий с TEI, Infinity, vLLM и т. д. По умолчанию отключено — маршрутизация на удалённый хост изменяет исходящую идентичность и должно быть явным решением оператора. Узлы loopback всегда разрешены и не затрагиваются. Удалённые узлы также должны соответствовать политике исходящих URL поставщика."
+      },
+      "NETWORK_ROTATION_SHARED_EGRESS_GUARD": {
+        "label": "Защита от общих исходящих при ротации сети",
+        "description": "При сетевом исключении (тайм-аут, отклонение/сброс соединения) для исполнителя ротации с несколькими учётными записями, если у упавшей учётной записи нет выделенного прокси, применять короткую паузу и пропускать другие учётные записи без прокси до конца запроса вместо повторных попыток для каждой. По умолчанию включено (безопасно: нет изменения IP исходящих, только снижает риск задержки/паузы на общих исходящих учётных записях). Отключите, чтобы восстановить немедленное распространение при первом сбое без прокси."
+      },
+      "PROXY_SKIP_RECENTLY_FAILED": {
+        "label": "Пропускать недавно неудавшиеся прокси",
+        "description": "В пулах прокси и при ротации opencode на уровне учётных записей прокси, которая только что завершилась ошибкой (отказ TCP-проверки или получение кода 429 через неё), не предоставляется повторно на период, зависящий от процесса. Этот период удваивается с каждой повторной ошибкой, но не превышает заданного предела. Состояние прокси не записывается; если все кандидаты исключены, выбор остаётся без изменений. Включено по умолчанию: порядок выбора соответствует простому чередованию только в случае, если PROXY_SKIP_RECENTLY_FAILED=false."
+      },
+      "PROXY_POOL_SHARED_EGRESS_ORDER": {
+        "label": "Порядок Общего Пула Исходящего Трафика",
+        "description": "Для провайдеров, у которых квота сегментируется по адресу исходящего соединения, участнику пула, чей наблюдаемый исходящий адрес совпадает с адресом недавно отклонённого участника, назначается приоритет чуть ниже, чем у здоровых участников. Только порядок, без исключения. Требует PROXY_SKIP_RECENTLY_FAILED, который генерирует сигнал об отказе для чтения. Отключено по умолчанию: порядок выбора соответствует простому чередованию."
+      },
+      "ROTATION_ATTRIBUTION": {
+        "label": "Журналирование атрибуции ротации",
+        "description": "Ротация Opencode записывает, какая учётная запись обработала запрос или была пропущена (только маскированные идентификаторы, полные идентификаторы учётных записей никогда не записываются) и связывает записи журнала прокси с соответствующим запросом, что позволяет оператору отличать пропущенные учётные записи от неиспользуемых. Отключено по умолчанию: не записываются дополнительные строки журнала, не добавляются новые столбцы."
+      },
+      "PROXY_POOL_EGRESS_OBSERVATION": {
+        "label": "Наблюдение за исходящим соединением пула прокси",
+        "description": "Отображает в пуле прокси на панели управления количество наблюдаемых исходящих IP-адресов, через которые обрабатывались его участники за последние 24 часа, количество подключений, использующих их, и максимальное количество сессий за одним IP. Только чтение, вычисляется на основе журнала прокси и никогда не используется для маршрутизации. Отключено по умолчанию: редактор пула не меняется, а маршрут наблюдения возвращает null."
+      },
+      "PROXY_OPERATOR_EGRESS_ENABLED": {
+        "label": "Исходящее соединение оператора прокси",
+        "description": "Принимает адреса, которые оператор направляет с указанием даты для каждого участника пула, и объединяет их с записями журнала для отображения и порядка в пуле. Отключено по умолчанию: маршрут приёма запросов оператора возвращает 404, а чтение пула работает точно так же, как и ранее."
+      },
+      "OPENCODE_RESPONSES_STALL_ROTATION": {
+        "label": "Ротация при задержке ответов OpenCode",
+        "description": "Для исполнителя OpenCode отслеживается первый байт тела ответа на стримовые ответы Responses (окно: RESPONSES_FIRST_BYTE_TIMEOUT_MS, значение по умолчанию 15000). Поток Responses с кодом 2xx, оставшийся молчаливым сверх установленного окна, считается застрявшим: учётная запись временно отключается, и запрос переводится на следующую учётную запись один раз; вторая задержка приводит к быстрому отказу. Отключено по умолчанию: застрявшие потоки продолжают ждать до истечения тайм-аута готовности потока, как сейчас."
+      },
+      "OPENCODE_USER_BLOCKED_ROTATION": {
+        "label": "Отключение OpenCode user_blocked",
+        "description": "Для исполнителя OpenCode, когда вышестоящий узел возвращает ответ 403 или 451 с отказом user_blocked (не географический блок и не отклонение по отпечатку Cloudflare), охладите отклонённый аккаунт и переключитесь на следующий аккаунт не более одного раза на запрос; вторая попытка отклонения возвращается без изменений, без отметки об успехе. По умолчанию отключено: обход блока вышестоящего узла может выглядеть как уклонение и распространить флаг на все аккаунты, поэтому отказ возвращается без изменений, если оператор не включит эту функцию."
+      },
+      "OPENCODE_TRANSIENT_FAILOVER_BACKOFF": {
+        "label": "Пауза переключения на временные сбои OpenCode",
+        "description": "Для многосчётной ротации OpenCode перед переключением на следующий аккаунт вводится пауза, если две последовательные попытки завершились временной ошибкой вышестоящего узла (5xx или пустое отклонение 400). Пауза начинается с 1,5 с, удваивается при каждой следующей последовательной ошибке, ограничена 6 с на паузу и 10 с на запрос, пропускается при отключении клиента, а тело ответа об ошибке освобождается до ожидания. По умолчанию отключено: переключение на резервный аккаунт выполняется немедленно."
+      },
+      "FLUSH_EMPTY_RETRY_ENABLED": {
+        "label": "Повторная попытка при пустом ответе",
+        "description": "При потоковых ответах с переводом, если ответ вышестоящего узла не содержит полезного содержимого (только рассуждения или нулевое количество ценных блоков), выполняются ограниченные повторные попытки через обычный путь учетных данных (до `STREAM_RECOVERY.EMPTY_TURN_RETRY_MAX`), прежде чем что-либо будет показано клиенту. По умолчанию отключено: пустые ответы сохраняют текущее поведение (пустой 200 или пустое содержимое 502)."
+      },
+      "EMPTY_STREAM_SIBLING_RECOVERY_ENABLED": {
+        "label": "Восстановление пустого потока через резервные соединения",
+        "description": "Потоковая передача Claude/Codex: после первого события жизненного цикла проводится краткая проверка (до 1 с / 64 КиБ) на наличие полезного вывода; поток, завершающийся без содержимого, считается ошибкой empty_content и использует существующие ограниченные повторные попытки на другом подходящем соединении (без охлаждения и без блокировки модели), а ротация комбинаций прекращается при отключении клиента. Также отказы, pause_turn и model_context_window_exceeded считаются законными пустыми терминальными состояниями в ходе проверки. По умолчанию отключено: готовность, обработка пустого содержимого и повторные попытки комбинаций остаются без изменений."
+      },
+      "STREAM_LATE_OUTPUT_PROBE_ENABLED": {
+        "label": "Проверка позднего вывода потока",
+        "description": "Проверка вывода потока: после первых 64 перенаправленных чанков продолжать выборку одного чанка из 16 для поиска первого видимого вывода, чтобы вывод, начавшийся с задержкой, по-прежнему отмечал поток как выдавший данные. Одиночная ошибка 5xx после этого момента остается на уровне запроса вместо регистрации блокировки исключительно для модели, а значение firstOutputMs ретроспективно заполняется до первого чанка вывода в текущем интервале выборки. По умолчанию отключено: проверяются только первые 64 перенаправленных чанка, точно так же, как и раньше."
+      },
+      "OPENCODE_RATE_LIMITED_429_EARLY_STOP": {
+        "label": "OpenCode: ранняя остановка при 429 Rate-Limited",
+        "description": "Для ротации нескольких аккаунтов OpenCode: останавливать волну аккаунтов на первой ошибке 429, классифицированной как реальное ограничение частоты запросов (разбираемый заголовок Retry-After или тело с указанием лимита частоты/использования), и возвращать этот upstream-ответ 429 без изменений (статус, тело, заголовок Retry-After и заголовки квот) вместо перебора всех оставшихся аккаунтов. Неклассифицированные ошибки 429 продолжают ротацию. По умолчанию отключено: бесплатный тариф ограничен по исходящему IP (#9611), поэтому каждая ошибка 429 переключает на следующий аккаунт, а при исчерпании волны возвращается последний upstream-ответ 429."
+      },
+      "OPENCODE_PARK_AND_RESUME": {
+        "label": "OpenCode: парковка и возобновление при 429",
+        "description": "Для ротации нескольких аккаунтов OpenCode: парковать запрос с отправкой heartbeat после повторяющихся временных ошибок 429 (или свежего маркера перегрузки пула), затем повторно выполнять одну ограниченную цепочку до 3 последовательных аккаунтов вместо веерного опроса всего пула. По умолчанию отключено: каждая ошибка 429 переключает на следующий аккаунт точно так же, как и раньше."
+      },
+      "STREAM_READINESS_STALL_RETRY": {
+        "label": "Повторная попытка при зависании готовности потока",
+        "description": "Для потоковых чат-запросов: если первое тело ответа от апстрима зависает до отправки пригодного к использованию события, выполнить одну ограниченную вторую попытку по тому же маршруту с тем же бюджетом готовности и без штрафа для аккаунта. По умолчанию отключено: зависание первого тела ответа приводит к сбою запроса без повторной попытки."
+      },
+      "OPENCODE_POOL_RESELECT": {
+        "label": "OpenCode: повторный выбор из пула при 429",
+        "description": "Для ротации нескольких аккаунтов OpenCode: после получения 429 от провайдера с распределением по исходящим IP (egress-bucketed) на аккаунте без прокси в контексте общего пула запрашивать у пула соединений другого участника для следующей попытки вместо повторного обращения с тем же исходящим адресом. Упорядочивает, но никогда не исключает: исчерпанный пул сохраняет текущее поведение. По умолчанию отключено: каждая ошибка 429 переключает на следующий аккаунт точно так же, как и раньше."
+      },
+      "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED": {
+        "label": "Отпечаток клиента OpenCode v2",
+        "description": "Передавать отпечаток клиента OpenCode v2 CLI в запросах OpenCode Zen/Go (#16571): User-Agent opencode/latest/<2.x>/cli и заголовок x-opencode-client cli; пользовательский User-Agent сохраняется только если это клиент OpenCode 2.x; для ограниченных бесплатных тарифов не отправляется x-opencode-request; сессия дублируется в заголовки x-opencode-session-id, x-session-affinity и x-session-id; схемы чтения/оболочки v2 CLI на вставляемых заглуточных инструментах и tool_choice \"none\" удаляются. По умолчанию отключено: все запросы OpenCode сохраняют текущую идентификацию, заголовки и тело запроса без изменений."
+      },
+      "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED": {
+        "label": "Блокировка по исходящему IP для OpenCode Zen",
+        "description": "Добавить OpenCode Zen (opencode-zen) в семейство блокировок по умолчанию исходящего IP, чтобы 429 на одном подключении Zen приводил к охлаждению всех подключений Zen, использующих тот же исходящий IP. По умолчанию выключено: Zen привязан по ключу, и каждое подключение охлаждается независимо, как и раньше. Явное значение OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS всегда имеет приоритет над этим флажком."
+      },
+      "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Правила обработки ошибок полного текста для OpenCode",
+        "description": "Позволить встроенным правилам обработки ошибок OpenCode (opencode-zen, opencode-go, opencode-cli) сопоставлять полный текст ошибки от поставщика, чтобы маркеры в теле, такие как organization_quota_exceeded или \"monthly usage limit reached\", классифицировали 429 как исчерпанную квоту с блокировкой для конкретного подключения. По умолчанию выключено: эти правила видят только структурированный код ошибки, и такой 429 остаётся кратковременным ограничением скорости, как и раньше."
+      },
+      "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED": {
+        "label": "Правила обработки ошибок полного текста для Cloudflare Workers AI",
+        "description": "Позволить встроенному правилу обработки ошибок Cloudflare Workers AI сопоставлять полный текст ошибки от поставщика, чтобы тело 429 \"daily free allocation\" классифицировалось как исчерпанная квота, а не кратковременное ограничение скорости. По умолчанию выключено: правило видит только структурированный код ошибки, как и раньше."
+      },
+      "CAPABILITY_FILTER_ENABLED": {
+        "label": "Фильтр возможностей",
+        "description": "Отклонять запросы до отправки, если у целевой модели отсутствуют необходимые возможности (vision, tools, structured output, контекстное окно). Защищает прямые запросы к одному провайдеру, которые обходят фильтр совместимости комбинированного слоя."
+      },
+      "USAGE_LIMIT_IGNORE_UNPRICED": {
+        "label": "Игнорировать неоплаченное использование в квотах USD",
+        "description": "Считать использование моделей, для которых не указана цена, как $0 в квотах потребления в USD для каждого ключа, вместо того чтобы рассматривать квоту как превышенную. По умолчанию выключено: модель или псевдоним маршрутизации без цены могут скрыть фактические расходы, поэтому квота работает в режиме отказа на безопасную сторону (fail closed)."
+      },
+      "RADAR_ENABLED": {
+        "label": "Радар",
+        "description": "Включите модуль OmniRoute Radar (экраны каталога фидов и синхронизация). По умолчанию отключён; включение только активирует интерфейс — синхронизация данных остаётся отдельным опциональным параметром."
+      },
+      "MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED": {
+        "label": "Гейт возможностей модели Endpoint",
+        "description": "Принудительное применение доверенных тегов конечных точек моделей (объявленных в каталоге провайдера, выведенных из id специализированной модели или установленных оператором): отклонение запроса, отправленного в конечную точку, которую модель не обслуживает, с кодом HTTP 400 перед диспетчеризацией на /v1/chat/completions, /v1/embeddings, /v1/rerank, /v1/images/generations, /v1/videos/generations, /v1/music/generations и /v1/audio/*; скрытие моделей, у которых теги конечных точек не имеют адаптера OmniRoute, из /v1/models; и ответ на тест модели в приборной панели кодом 422 для таких моделей. По умолчанию отключено: теги конечных точек остаются справочными, а запросы диспетчеризуются точно так же, как и раньше."
+      },
+      "UNIVERSAL_CONTEXT_HANDOFF_ENABLED": {
+        "label": "Универсальная передача контекста",
+        "description": "Генерация и внедрение сводок разговоров при переключении моделей в комбинированной маршрутизации. Отключение для независимого обращения к переключениям моделей и предотвращения фоновых запросов на передачу для всех существующих и будущих комбинаций."
+      },
+      "REASONING_REPLAY_ENABLED": {
+        "label": "Повтор рассуждений",
+        "description": "Кеширование и повторное проигрывание рассуждений модели в многоходовых диалогах. Отключение для прекращения хранения и повторного внедрения рассуждений."
+      },
+      "OMNIROUTE_CODEX_APP_SERVER_ENABLED": {
+        "label": "Транспорт Codex App-Server",
+        "description": "Позволяет Codex использовать локальный транспорт WebSocket JSON-RPC приложения (codexTransport=app-server). Когда отключено, соединения, настроенные на app-server, переключаются на другие транспорты Codex."
+      },
+      "EXPOSE_CC_DISCOVERY_ALIASES": {
+        "label": "Псевдонимы обнаружения Claude Code",
+        "description": "Аннициировать идентификаторы зеркалирования claude/'<provider>'/'<model>' в /v1/models, чтобы при обнаружении моделей в шлюзе Claude Code перечислялись не-Claude модели. Предупреждение: при глобальном включении удваивает записи каталога для всех клиентов."
+      },
+      "NO_THINKING_ALIAS_ENABLED": {
+        "label": "Псевдонимы моделей без обдумывания",
+        "description": "Главный переключатель для псевдонимов шлюза no-think/'<provider>'/'<model>'. Включено (по умолчанию): /v1/models аннициирует вариант без обдумывания для каждой подходящей модели Claude с поддержкой обдумывания, а идентификатор no-think/, отправленный в запросе, разрешается в реальную модель с подавлением рассуждений. Выключено: варианты не аннициируются, а идентификатор no-think/ обрабатывается как любой другой неизвестный идентификатор модели. Пока включен этот переключатель, опциональное включение/отключение для отдельных моделей ModelSpec.noThinkingAlias по-прежнему применяется."
+      },
+      "OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS": {
+        "label": "Отключить варианты уровней обдумывания",
+        "description": "Отключить генерацию вариантов уровней обдумывания (например, -low, -medium, -high) в каталоге /v1/models."
+      },
+      "OMNIROUTE_CHAT_VIRTUAL_LANES": {
+        "label": "Адаптивные виртуальные линии допуска",
+        "description": "Включить адаптивные виртуальные линии допуска для каждого арендатора при диспетчеризации провайдеров (#9654): всплеск запросов одного арендатора больше не вызывает ошибку 503 у другого. Переменная окружения OMNIROUTE_CHAT_VIRTUAL_LANES имеет приоритет над этой переопределением на панели управления; изменения вступают в силу при перезапуске сервера."
+      },
+      "EXPOSE_FUNCTIONAL_GATEWAY_MIRRORS": {
+        "label": "Функциональные зеркала шлюза",
+        "description": "Аннициировать идентификаторы зеркалирования '<gateway-alias>'/'<model>' в /v1/models для моделей, у которых канонический владелец не имеет активных учетных данных, но сквозной шлюз с активными учетными данными маршрутизирует их. Предупреждение: при глобальном включении добавляет записи каталога для всех клиентов."
+      },
+      "NEWAPI_AGGREGATOR_BALANCE": {
+        "label": "Баланс агрегатора New-API",
+        "description": "Включите определение баланса для узлов, совместимых с агрегаторами New-API / One-API / Sub2API. При включении совместимые узлы с установленным флагом агрегатора будут сообщать о своем балансе в панель управления и при предварительной маршрутизации квот."
+      },
+      "SEARCH_STATS_HIDE_DELETED_CONNECTIONS": {
+        "label": "Скрыть удаленные поисковые соединения",
+        "description": "Статистика поиска и недавние поиски учитывают только провайдеров, у которых активно сохраняется соединение (провайдеры без ключей, такие как duckduckgo-free, всегда учитываются). Опция «Выкл» сохраняет каждую сохраненную строку поиска с идентификатором провайдера."
+      },
+      "FREE_BADGE_REQUIRES_PROVIDER_FREE_TIER": {
+        "label": "Строгий значок «Бесплатно»",
+        "description": "Страницы провайдеров на панели управления: значок «Бесплатно» отображается только на сигналах, которые поддерживаются провайдером, — отбрасываются эвристические значения отображаемого имени, непольевые поля free и суффиксы :free у зарегистрированных провайдеров без задокументированного бесплатного тарифа. Опция «Выкл» сохраняет историческое правило отображения значка."
+      },
+      "COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED": {
+        "label": "Автокомбо: пустой пул ответов кодом 503",
+        "description": "Если пул кандидатов автокомбо пуст еще до запуска предварительного фильтра по вызовам инструментов (все цели пропущены из-за пауз, блокировок или исчерпания лимитов), возвращайте код 503 no_eligible_targets вместо устаревшего кода 400 capability_mismatch (\"No target supports tool calling\"). По умолчанию выключено: пустой пул сохраняет устаревший код 400."
+      },
+      "MISTRAL_AMBIGUOUS_401_SOFT_LOCKOUT": {
+        "label": "Мягкая блокировка для неоднозначного ответа 401 Mistral",
+        "description": "Простой ответ Mistral 401 ('{\"detail\":\"Unauthorized\"}', без явного сигнала аутентификации) байт-в-байт идентичен для отозванного ключа и для исчерпанной квоты. При включении такой ответ 401 переводит соединение в состояние паузы, а не блокировки как просроченного, до 3 раз в течение часа; следующий такой ответ снова зафиксирует соединение как просроченное, что обеспечивает сходимость процесса для отозванных ключей. По умолчанию выключено: каждый простой ответ Mistral 401 фиксирует соединение как просроченное, как и ранее."
+      },
+      "BATCH_AND_FILE_AUTO_CLEANUP_ENABLED": {
+        "label": "Автоочистка Batch и файлов",
+        "description": "Позволяет процедуре автоматической очистки удалять терминальные (completed/failed/cancelled/expired) задачи Batch API старше OMNIROUTE_BATCH_RETENTION_DAYS вместе с их построчными чекпоинтами и удалять BLOB-содержимое загруженных файлов с истекшим expires_at. По умолчанию выключено: все существующие установки сохраняют эти данные точно так же, как и раньше, пока оператор явно не включит эту опцию. Вызываемый оператором маршрут DELETE /api/v1/batches/delete-completed работает независимо в любом случае — это отдельный, безусловный контракт публичного API."
+      },
+      "ANTIGRAVITY_ACCOUNT_LEASE_ENABLED": {
+        "label": "Аренда аккаунта Antigravity",
+        "description": "Резервировать выбранный аккаунт Antigravity на время жизненного цикла потоковой передачи запроса, который его выбрал, чтобы параллельный повтор или передача учетных данных не могли повторно выбрать аккаунт, уже занятый выполняющимся потоком. Область действия резервирования ограничена (connection, callable upstream model), поэтому один аккаунт все еще может одновременно обслуживать две разные модели. Если все подходящие аккаунты уже арендованы для этой модели, запрос возвращает структурированный ответ 503 POOL_BUSY с ограниченным Retry-After вместо создания очереди на занятом аккаунте. По умолчанию выключено: выбор аккаунтов работает точно так же, как и раньше, без резервирования."
+      },
+      "COMBO_AUTO_PRUNE_STALE_STEPS": {
+        "label": "Автоудаление устаревших шагов Combo",
+        "description": "После успешной синхронизации моделей с эталонным актуальным каталогом удалять шаги combo, привязанные к моделям, которые больше не значатся в каталоге, создавая одну запись аудита на каждый удаленный шаг. Очистка никогда не выполняется при неудачной, деградировавшей или ограниченной бесплатными моделями (free-only) синхронизации и никогда не опустошает combo полностью. По умолчанию выключено: устаревшие шаги только помечаются."
+      },
+      "CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED": {
+        "label": "Сводные рассуждения Claude OAuth",
+        "description": "Позволяет запросу Claude OAuth, запрашивающему читаемые рассуждения (thinking.display \"summarized\"), отключать бета-заголовок Anthropic redact-thinking-2026-02-12, из-за которого Anthropic иначе возвращает пустые блоки рассуждений, содержащие только подпись. По умолчанию выключено: этот бета-заголовок входит в сетевой отпечаток (wire fingerprint) Claude Code OAuth, поэтому запросы OAuth сохраняют его без изменений. Запросы к Claude с API-ключом уже поддерживают сводные рассуждения без этого флага; OMNIROUTE_REDACT_THINKING=false также применяется к OAuth только при включении этого флага."
+      },
+      "KIRO_TOOL_CALL_REPAIR_ENABLED": {
+        "label": "Исправление вызова инструмента Kiro",
+        "description": "Если стриминговый ответ Kiro формирует необработанный обёртку tool_call (отсутствуют input.name или input.arguments) до какого-либо видимого вывода, подавить его и отправить запрос повторно один раз с корректирующей инструкцией, а не завершать ход с ошибкой invalid_kiro_tool_call. Повторная отправка требует одного дополнительного запроса Kiro; вторая неудача завершит ход с ошибкой kiro_tool_call_repair_retry_failed. Включено по умолчанию. Установите значение false, чтобы завершать ход при первой ошибочной обёртке."
+      },
+      "MODELS_DEV_EFFORT_TIERS_ENABLED": {
+        "label": "Уровни усилий models.dev",
+        "description": "Использовать уровни усилий, публикуемые models.dev (ограниченные известным словарём усилий), если операторское переопределение и реестр провайдера не указывают таковых, и рассматривать пустой список объявленных уровней как «нет уровней» в effort_tiers и пересечениях комбинированных уровней /v1/models. Отключено по умолчанию: effort_tiers и разрешённые supportedThinkingEfforts остаются неизменными."
+      },
+      "LMARENA_SYNTHESIZED_CX_ENABLED": {
+        "label": "Телеметрия Arena Synthesized cx",
+        "description": "Добавлять синтетический программный blob клиентского взаимодействия cx (значение, которое arena.ai отправляет для страницы без записанного взаимодействия) к каждому запросу на создание оценки Arena (lmarena), не имеющему providerSpecificData.cx, предоставленного оператором. Отключено по умолчанию: поле cx является сигналом антиавтоматизации Arena, поэтому OmniRoute пересылает только значение, захваченное оператором из реального сеанса браузера (providerSpecificData.cx), и в противном случае не отправляет cx. Не доказанная выгода от вышестоящей системы; включайте только если Arena начнёт отклонять запросы без cx."
+      },
+      "NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED": {
+        "label": "Нативная реактивная компакция Codex",
+        "description": "Позволить реактивным (пороговым) и запасным проходам компактизации контекста переписывать нативные истории Codex в формате passthrough (POST /v1/responses к провайдеру codex), если они превышают бюджет контекста, используя адаптер Responses input[]. Отключено по умолчанию: нативные истории Codex принадлежат клиенту Codex и никогда не переписываются при компактизации; слишком большие запросы продолжают проваливать проверку бюджета контекста, как и раньше. Требует, чтобы глобальная компрессия была включена, и чтобы модель не была исключена."
+      },
+      "QUOTA_WINDOW_BOUNDED_PARK": {
+        "label": "Окно квоты: Уважение ограниченной блокировки",
+        "description": "Позволить политике квот на окно (пороговые значения сессии/недели, используемые для выбора учётной записи) уважать ограниченную блокировку истощения: после истечения ограниченного срока блокировки или если кэшированное наблюдение квоты старше ограничения блокировки, окно перестаёт исключать учётную запись до получения свежих данных о квоте. Отключено по умолчанию: кэшированное окно продолжает блокироваться на основе последнего отчёта о проценте до собственного времени сброса."
+      },
+      "IMAGE_GENERATION_LONG_JOBS": {
+        "label": "Генерация изображений: длительные задачи",
+        "description": "Для совместимой с OpenAI генерации изображений: используйте тайм-аут соединения (providerSpecificData.timeoutMs), в противном случае центральный тайм-аут получаемых данных от вышестоящего уровня (FETCH_TIMEOUT_MS, затем REQUEST_TIMEOUT_MS, по умолчанию 600 с) вместо фиксированного бюджета в 120 с для изображений; завершайте отменённый вызывающим запрос кодом 499; и позволяйте Playground получать длительные задачи по генерации изображений в виде SSE-потока с сигналами keepalive. По умолчанию отключено: применяется фиксированный бюджет, а отмена вызывающим не распространяется. Срока, охватывающая чтение тела ответа, всегда включена."
+      },
+      "CATALOG_MIRROR_REFINEMENTS_ENABLED": {
+        "label": "Улучшения зеркала каталога",
+        "description": "Улучшите обнаружение claude/ и зеркала функциональных шлюзов на /v1/models. По умолчанию отключено: оба этапа зеркалирования работают точно так же, как раньше. Включено: обнаружение claude/ в зеркалах также охватывает перечисленные варианты reasoning-effort (-low/-medium/-high/-xhigh), пропускает встроенные идентификаторы auto/*, которые не могут быть материализованы путём запроса, и пропускает уже перечисленный псевдоним; зеркала функциональных шлюзов пропускают комбинации и идентификаторы, синтезированные OmniRoute (claude/, no-think/), берут владельца из owned_by, никогда не используют владельца как его собственный шлюз, пропускают шлюзы, отключённые в blockedProviders, и модели вне авторитетного живого каталога шлюза."
+      },
+      "PROXY_HEALTH_BLOCKED_RESETS_STREAK": {
+        "label": "Здоровье прокси: сброс серии сбоев при отказе",
+        "description": "В обходе здоровья прокси позвольте зонду, если целевой сервер отказал (401/403/429: прокси переслал запрос, а назначение отказало в исходящем IP), сбросить серию непрерывных сбоев прокси, как при успешном зонде. По умолчанию отключено: отказ остаётся нейтральным и сохраняет серию (#10654). Ошибка 5xx в любом случае остаётся неопределённой, а отказ никогда не удаляет, не отключает и не активирует прокси."
+      },
+      "GROK_SUBSCRIPTION_IMAGES_ENABLED": {
+        "label": "Изображения по подписке Grok",
+        "description": "Зарегистрируйте маршруты для изображений xai-oauth (xao) и grok-cli и отобразите высокое качество/hd от OpenAI на medium от xAI. По умолчанию отключено: путь к API-ключу для изображений xAI остаётся на существующем совместимом с OpenAI запросе, а маршруты подписки не регистрируются."
+      },
+      "XAI_OAUTH_LIVE_MODEL_DISCOVERY": {
+        "label": "Обнаружение моделей xAI OAuth в реальном времени",
+        "description": "Получайте живой каталог моделей xAI для соединений xai-oauth с https://api.x.ai/v1/models с помощью OAuth-токена Bearer, вместо замороженной статической посевной базы. Включено по умолчанию. Установите флаг на false, чтобы продолжать отдавать статическую посевную базу. При сбоях HTTP в маршруте обнаружения выполняется возврат к посевной базе; сам getter флага не выполняет HTTP-запросы."
+      },
+      "ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM": {
+        "label": "Anthropic-совместимые системные сообщения в середине диалога",
+        "description": "На обычных anthropic-совместимых * релеях (пропуск claude → claude), сохраняйте сообщения с ролью role:system в середине диалога внутри массива messages[], а не выносите их в параметр system верхнего уровня, чтобы кэшированный префикс промпта оставался стабильным между ходами. Применяется только в том случае, если сам клиент отправил anthropic-beta mid-conversation-system-2026-04-07 (пересылаемый выше без изменений). По умолчанию выключено: каждое системное сообщение выносится точно так же, как и раньше, потому что релеи, не поддерживающие эту бета-функцию, отклоняют сообщения role:system с кодом 400."
+      },
+      "DB_HEALTHCHECK_STARTUP_DEFERRED_ENABLED": {
+        "label": "Проверка состояния БД: отложить стартовое сканирование",
+        "description": "Выполните стартовую проверку целостности/состояния БД после того, как сервер начнет принимать запросы (через setImmediate), вместо того чтобы блокировать запуск до её завершения. По умолчанию выключено: запуск блокируется ожиданием проверки точно так же, как и раньше в #13717, поэтому повреждённая база данных по-прежнему обнаруживается до обработки первого запроса. Включено: запуск завершается немедленно, а проверка (теперь с ограничением/постраничностью и, для реальной файловой БД, изолированная в отменяемый дочерний процесс) выполняется сразу после запуска."
+      },
+      "OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED": {
+        "label": "Маршрутизация опубликованного каталога OpenCode",
+        "description": "Позвольте моделям OpenCode Zen и OpenCode Go без явного конечного точа реестра получать поверхность их запросов (Responses для @ai-sdk/openai, Messages для @ai-sdk/anthropic) из опубликованного каталога models.opencode.ai, который читается в фоновом режиме каждые 6 часов. По умолчанию выключено: конечная точка берётся из эвристик реестра точно так же, как и раньше, и каталог никогда не запрашивается."
+      },
+      "AUTO_REQUEST_RESOLVED_CAPABILITIES": {
+        "label": "Автозапросы: разрешённые веса возможностей",
+        "description": "Позвольте запросам auto/* (resolveModelOrError и обёртка автомаршрутизации) формировать пул кандидатов с использованием разрешённых возможностей моделей (зрение, рассуждение, обдумывание) и наблюдаемых оценок качества, читаемых в одном пакетном проходе, подобно каталогу /v1/models. По умолчанию выключено: веса снимка на момент запроса остаются точно такими же, как и раньше (возможности разрешаются по требованию и не влияют на веса). Включено: эти сигналы влияют на веса снимка, поэтому веса кандидатов, а следовательно и выбор, могут измениться."
+      },
+      "AUTO_COMBO_KEYLESS_TRANSPORT_GATE": {
+        "label": "Auto-Combo: шлюз транспорта без ключей",
+        "description": "Исключите провайдеры без ключей (без авторизации), чей транспорт требует локального браузера (browserBacked) или локально установленного CLI (isLocalCli), из пула кандидатов auto/*, чтобы зависший член не мог заблокировать автозапрос до истечения таймаута на цель (#17036). По умолчанию выключено: каждый провайдер без авторизации с эмуляцией вызова инструментов остаётся в пуле точно так же, как и раньше. Прямые вызовы '<alias>'/'<model>' работают в любом случае."
+      },
+      "CODEBUDDY_CN_INLINE_REASONING": {
+        "label": "CodeBuddy CN: Inline Reasoning Replay",
+        "description": "Для моделей кода CodeBuddy CN (семейства DeepSeek-V4 / Kimi-K2, требующие воспроизведение логики рассуждений), размещайте содержимое каждого повторного рассуждения ассистента (reasoning_content) в виде видимого блока '<thought>' в начале содержимого сообщения. Это позволяет сохранять текст даже в шлюзах, которые отбрасывают поле reasoning_content (#13632). По умолчанию отключено: запросы CodeBuddy CN отправляются без изменений, а само поле reasoning_content всегда сохраняется."
+      },
+      "PROVIDER_SAFETY_STOPS_TERMINAL": {
+        "label": "Provider Safety Stops: Terminal",
+        "description": "Сохраняйте явный стоп безопасности провайдера (misalignment_policy_violation, content_policy_violation или точный устаревший отказ 'blocked by our safety systems', маркированный как provider_safety_rejection) как конечный отказ для запроса: его код сохраняется при ошибках HTTP, Responses, WebSocket и завершённых потоков, а комбинированный шлюз останавливается на нём, а не переключается на другие цели, отменяя принятые сёстры (#17049). По умолчанию отключено: эти ошибки сохраняют существующее обрабатывание, а маршрутизация комбинированного шлюза не меняется."
+      },
+      "CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED": {
+        "label": "Credential Health: Retest Auto-Disabled Connections",
+        "description": "Позвольте сканированию состояния учётных данных повторно тестировать соединения, которые шлюз отключил автоматически (отмеченные как autoDisabledAt; не чаще одного раза в 6 часов и 5 за сканирование), и включать их обратно, если повторный тест пройден (#16190). По умолчанию отключено: отключённые соединения остаются отключёнными, пока оператор не активирует их или не проведёт повторный тест, точно как раньше. Соединения, отключённые оператором, и соединения, отключённые после постоянного бан, никогда не подвергаются повторному тестированию."
+      },
+      "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY": {
+        "label": "Credential Gate: Auth Diagnoses Only",
+        "description": "Сужайте контрольную точку учётных данных комбинированного шлюза так, чтобы закэшированный неудачный зонд учётных данных блокировал соединение только в том случае, если его диагностика указывает на неисправность учётных данных (upstream_auth_error, auth_missing, token_expired, token_refresh_failed, reauth_required, account_deactivated, auth_required). Недостоверные сбои (таймауты, ограничения частоты, перебои, неподдерживаемые зонды и необработанные ошибки планировщика) считаются неизвестными, и соединение продолжает получать трафик. По умолчанию отключено: любая ошибка зонда из кэша блокирует соединение на время TTL кэша (5 минут)."
+      },
+      "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
+        "label": "Комбо: остановка при отказе по политике контента",
+        "description": "Если цель комбинированного шлюза отвечает точным отказом по политике контента (код или тип cyber_policy / content_policy_violation), остановите комбинированный шлюз и верните этот отказ, даже если оставшиеся цели — это другие модели, а не переходите к следующей цели. По умолчанию отключено: отказ никогда не охлаждает учётную запись и не срабатывает предохранитель провайдера, а комбинированный шлюз переходит к следующей цели именно так, как прежде."
+      },
+      "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
+        "label": "Повторная попытка во время ожидания: пропуск отказов 403/410",
+        "description": "Когда все аккаунты находятся в режиме ожидания, и минимальное оставшееся время ожидания было вызвано отказом 403 (отказ в доступе) или 410 (ресурс не существует), немедленно возвращаем этот отказ, не дожидаясь окончания ожидания и не отправляя запрос повторно; обновляемое соединение agentrouter с квотой 403 затем сохраняется с errorCode 429, что позволяет его повторять. По умолчанию выключено: ожидание пропускается только для кода 401, и каждый отказ сохраняется со своим исходным кодом статуса."
+      },
+      "UNPRICED_USAGE_BUDGET_POLICY": {
+        "label": "Политика бюджета для использования без цены",
+        "description": "Как ежедневные/недельные USD‑лимиты по ключу обрабатывают успешное использование, для которого у провайдера/модели нет строки с ценой. fail_closed (по умолчанию) помечает окно как превышенное, поэтому неизвестная стоимость никогда не сможет пройти мимо жёсткого лимита. count_as_zero считает такое использование равным $0 и продолжает применять ограничения к расходам, для которых задана цена. Модели без цены в любом случае отображаются на главной странице панели управления."
       }
     }
   },
@@ -13793,6 +14369,7 @@
     "latency": "Задержка",
     "quota": "Квота",
     "rangeWindow": "Окно: {range}",
+    "timeRange": "Диапазон времени",
     "runtimeHealthBlend": "сочетание показателей среды выполнения и состояния",
     "averageResponseTime": "среднее время ответа",
     "worstQuota": "Наихудшая квота",
@@ -13923,7 +14500,11 @@
       "ok": "В целом разрешительные"
     },
     "allProviders": "Все провайдеры",
-    "noApiKeyRequired": "Ключ API не требуется"
+    "noApiKeyRequired": "Ключ API не требуется",
+    "searchPlaceholder": "Поиск модели, провайдера…",
+    "searchAria": "Поиск бесплатных моделей",
+    "filterProviderAria": "Фильтр по провайдеру",
+    "keylessOnly": "Только без ключа"
   },
   "providerHealthAutopilot": {
     "title": "Автопилот состояния провайдеров",
@@ -13994,7 +14575,11 @@
     "learnMore": "Подробнее",
     "changelogLoadFailed": "Не удалось загрузить список изменений. Пожалуйста, попробуйте позже.",
     "retry": "Повторить",
-    "viewFullHistory": "Посмотреть полную историю на GitHub"
+    "viewFullHistory": "Посмотреть полную историю на GitHub",
+    "title": "Новости и журнал изменений",
+    "description": "Объявления команды OmniRoute и последние примечания к выпуску",
+    "viewLabel": "Просмотреть",
+    "loadingNews": "Загрузка объявлений..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +15130,9 @@
       "circuitBreakerState": "Состояние автоматического выключателя провайдера",
       "lastUpdate": "Последнее обновление: {timestamp}",
       "uptimeMinutes": "{minutes}м",
-      "uptimeHoursMinutes": "{hours}ч {minutes}м"
+      "uptimeHoursMinutes": "{hours}ч {minutes}м",
+      "breakerClosed": "Закрыто",
+      "breakerNotClosed": "Открыто или полуоткрыто"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +15207,9 @@
         "primaryAction": "Детали обслуживания",
         "secondaryAction": "Статус системы"
       }
+    },
+    "miniapp": {
+      "askAnything": "Спросите что угодно…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +15400,20 @@
     "mcp": "MCP",
     "mcpTool": "Инструмент MCP",
     "scope": "Область",
-    "apiKey": "API-ключ"
+    "apiKey": "API-ключ",
+    "visibleCount": "Отображается: {visible} / всего: {total}",
+    "modeLabel": "Режим просмотра",
+    "jumpToNow": "Перейти к текущему времени; линия «СЕЙЧАС» вернётся в позицию {position}%",
+    "laneReuse": "Повторное использование дорожки",
+    "laneReuseLabel": "Окно повторного использования дорожки (в минутах)",
+    "laneReuseHint": "Запросы с одинаковым идентификатором диалога остаются в одной строке временной шкалы, если интервал между ними не превышает указанного количества минут.",
+    "laneReuseUnit": "мин",
+    "autoRefresh": "Автообновление",
+    "autoRefreshLabel": "Интервал автообновления (в секундах)",
+    "autoRefreshHint": "Частота повторного получения списка запросов с сервера для временной шкалы.",
+    "autoRefreshUnit": "с",
+    "zoomOut": "Уменьшить масштаб",
+    "zoomIn": "Увеличить масштаб"
   },
   "metadata": {
     "compressionTitle": "Сжатие",
@@ -15014,6 +15617,83 @@
     "dismissAriaLabel": "Закрыть"
   },
   "featureFlagOmnirouteDisableThinkingLevelVariantsDescription": "Отключить создание вариантов уровней рассуждения (например, -low, -medium, -high) в каталоге /v1/models.",
+  "teamCosts": {
+    "title": "Затраты команды",
+    "subtitle": "Управляйте общими мягкими бюджетами и оценками затрат по каталогу.",
+    "refresh": "Обновить",
+    "create": "Создать команду",
+    "edit": "Изменить команду",
+    "archive": "Архивировать",
+    "selectTeam": "Команды",
+    "searchTeams": "Поиск команд",
+    "statusFilter": "Статус команды",
+    "active": "Активна",
+    "archived": "В архиве · только чтение",
+    "allTeams": "Все команды",
+    "noTeams": "Подходящих команд нет.",
+    "selectHint": "Создайте или выберите команду, чтобы увидеть затраты.",
+    "loading": "Загрузка затрат команды…",
+    "budgetTitle": "Текущий мягкий бюджет",
+    "budgetSubtitle": "Успешное зафиксированное использование · скользящее окно · не зависит от дат отчёта",
+    "archivedBudget": "В архиве: контроль бюджета неактивен. Исторические отчёты остаются доступными.",
+    "unlimited": "Без ограничений — общий мягкий бюджет не настроен.",
+    "budgetUnavailable": "Статус бюджета недоступен. Обновите, чтобы повторить.",
+    "used": "Успешное использование",
+    "maximum": "Максимум бюджета",
+    "remaining": "Известный остаток",
+    "resets": "Сбрасывается",
+    "unpricedBudget": "Для части успешного использования цена неизвестна. Известная сумма неполна; контроль бюджета считает это окно превышенным.",
+    "overBudget": "Бюджет достигнут или превышен · превышение на {amount}",
+    "reportTitle": "Отчёт об использовании",
+    "reportSubtitle": "Все попытки · оценка по каталогу в USD, не счёт · полные даты UTC",
+    "reportPeriod": "Период отчёта",
+    "day1": "1 день",
+    "day7": "7 дней",
+    "day30": "30 дней",
+    "allTime": "Всё время",
+    "reportSpend": "Оценочные расходы по отчёту",
+    "requests": "Запросы",
+    "assignedKeys": "Назначенные ключи",
+    "unpricedReport": "В этом отчёте есть неизвестные цены. Оценочные расходы неполны.",
+    "breakdown": "Затраты по API-ключам",
+    "noUsage": "Нет использования за этот период отчёта.",
+    "keyName": "Имя API-ключа",
+    "tokens": "Входные + выходные токены",
+    "unnamedKey": "Ключ без имени или удалён",
+    "unpriced": "Неизвестная цена",
+    "members": "Участие",
+    "memberSubtitle": "Смена участия оставляет исторические расходы в исходной команде.",
+    "searchKeys": "Поиск ключей или текущих владельцев",
+    "chooseKey": "Выберите API-ключ",
+    "unassigned": "Не назначен",
+    "ownership": "Текущая расчётная команда: {team}",
+    "assign": "Назначить",
+    "remove": "Удалить",
+    "noMembers": "Нет текущих участников. Историческое использование всё ещё может учитываться в бюджете.",
+    "assignedAt": "Назначен {date} (UTC)",
+    "name": "Название команды",
+    "description": "Описание",
+    "enableBudget": "Включить общий мягкий бюджет",
+    "amount": "Сумма бюджета (USD)",
+    "duration": "Скользящее окно бюджета",
+    "cancel": "Отмена",
+    "save": "Сохранить",
+    "confirm": "Подтвердить",
+    "transferTitle": "Подтвердите передачу ключа",
+    "transferMessage": "Переместить этот ключ из «{source}» в «{destination}»? Исторические расходы остаются в исходной команде.",
+    "removeTitle": "Удалить назначение ключа",
+    "removeMessage": "Удалить этот ключ из «{team}»? Исторические расходы остаются в этой команде.",
+    "archiveTitle": "Архивировать команду",
+    "archiveMessage": "Архивировать «{team}»? Все текущие привязки закрываются, контроль бюджета прекращается. Исторические отчёты остаются доступными.",
+    "invalidName": "Введите название (1–200 символов) и описание не длиннее 2000 символов.",
+    "invalidAmount": "Введите конечную сумму бюджета больше нуля.",
+    "unauthorized": "Войдите в панель управления, чтобы продолжить.",
+    "forbidden": "У вас нет прав на управление командами. Введённые данные сохранены.",
+    "notFound": "Эта команда или назначение больше не существует.",
+    "conflict": "Назначение или команда изменились. Обновите и подтвердите текущее владение, прежде чем повторить.",
+    "failed": "Запрос не выполнен. Введённые данные сохранены; повторите попытку.",
+    "partialBudget": "Некоторые сохранённые суточные корзины пересекают границу окна и не могут быть точно распределены. Показанные расходы неполны; оставшийся лимит недоступен. Действующая политика мягкого бюджета не изменилась."
+  },
   "connectionTest": {
     "title": "Тестовое сообщение",
     "description": "Отправить один реальный запрос через эту учётную запись. Это использует небольшую часть квоты и может запустить период учёта использования в зависимости от провайдера.",
@@ -15073,5 +15753,118 @@
     "importButton": "Импортировать",
     "importFailed": "Ошибка импорта.",
     "importSuccess": "Импортировано аккаунтов: {connections}, узлов провайдеров: {nodes}; пропущено: {skipped}."
+  },
+  "conversations": {
+    "title": "Разговоры",
+    "countSummary": "{total, plural, one {# разговор} other {# разговора}} с 2+ ходами",
+    "autoRefreshTitle": "Как часто этот список обновляется на сервере.",
+    "autoRefresh": "Автоматическое обновление",
+    "loading": "Загрузка разговоров...",
+    "colConversation": "Диалог",
+    "colTurns": "Ходы",
+    "colContinuation": "Продолжение",
+    "colLastModel": "Последняя модель",
+    "colProvider": "Поставщик",
+    "colStatus": "Статус",
+    "colLastSeen": "Видно до",
+    "drawerTitle": "Диалог",
+    "prevConversation": "Предыдущий диалог",
+    "nextConversation": "Следующий диалог",
+    "gotoLatestRequest": "Перейти к последнему запросу",
+    "goToBottom": "Перейти к низу",
+    "statusInProgress": "В процессе",
+    "continuationGenuineTitle": "Последний ход использовал previous_response_id и был обработан на стороне сервера",
+    "continuationBadge": "продолжение",
+    "stalledTitle": "Последний ход не завершился сценарием stop и ничего не продолжался в течение 5+ минут",
+    "stalledBadge": "зависание",
+    "noTurns": "Для этого диалога нет записанных ходов."
+  },
+  "logExport": {
+    "startFromCurrentPosition": "Начать с текущей позиции (пропустить существующие журналы)",
+    "pageTitle": "Экспорт журнала",
+    "pageSubtitle": "Непрерывно передавать журналы вызовов из вкладки «Журналы» во внешний аналитический хранилище.",
+    "addDestination": "Добавить пункт назначения",
+    "scheduleTitle": "Расписание",
+    "cronLabel": "Cron",
+    "notScheduled": "не запланировано",
+    "lastScheduledRun": "Последнее запланированное выполнение",
+    "lastRunSummary": "{startedAt} — {status}, {rows} строк",
+    "never": "никогда",
+    "highWaterMark": "Высокая отметка журналов вызовов",
+    "rowPrefix": "строка {id}",
+    "noDestinations": "Пункты назначения для экспорта отсутствуют",
+    "noDestinationsHint": "Добавьте пункт назначения, чтобы начать отправку журналов вызовов по часам.",
+    "errLoadStatus": "Не удалось загрузить статус экспорта",
+    "errSaveDestination": "Не удалось сохранить пункт назначения",
+    "msgDestinationSaved": "Пункт назначения сохранен.",
+    "errConnectionTest": "Тест соединения не удался",
+    "msgRunInFlight": "Для этого пункта назначения уже выполняется задача; ничего не отправлялось повторно.",
+    "errExportRun": "Ошибка выполнения экспорта",
+    "errUpdateDestination": "Не удалось обновить пункт назначения",
+    "errDeleteDestination": "Не удалось удалить пункт назначения",
+    "deleteTitle": "Удалить пункт назначения",
+    "deleteConfirm": "Удалить \"{name}\"? Курсор экспорта также будет удалён, поэтому при повторном добавлении экспорт начнётся с самого старого сохранённого журнала вызовов.",
+    "statusDisabled": "Отключено",
+    "statusFailing": "Ошибка",
+    "statusHealthy": "Нормально",
+    "statusNotRunYet": "Ещё не выполнялось",
+    "typeNotInstalled": "Тип не установлен",
+    "metaLine": "Последний запуск {lastRun} · экспортировано строк: {exported} · в ожидании: {pending} · курсор {cursor}",
+    "btnTest": "Тест",
+    "btnRunNow": "Выполнить сейчас",
+    "btnDisable": "Отключить",
+    "btnEnable": "Включить",
+    "btnEdit": "Редактировать",
+    "btnDelete": "Удалить"
+  },
+  "cliproxyHealth": {
+    "cardTitle": "Учёётные записи CLIProxyAPI",
+    "cardSubtitle": "Статус только для чтения из аутентифицированного API управления",
+    "btnRefresh": "Обновить",
+    "listAria": "Состояние учёётных записей CLIProxyAPI",
+    "noAccounts": "Учёётные записи CLIProxyAPI не найдены.",
+    "loading": "Загрузка состояния учёётных записей…",
+    "stateReady": "Состояние учетной записи",
+    "stateDisabled": "CLIProxyAPI не установлен",
+    "stateMissingKey": "Ключ управления не настроен",
+    "stateUnreachable": "API управления недоступно",
+    "stateUnauthorized": "Ключ управления отклонен",
+    "stateUnsupported": "Эта версия CLIProxyAPI не предоставляет сведения о состоянии учетной записи",
+    "stateInvalidResponse": "API управления вернуло неподдерживаемый ответ"
+  },
+  "darioPanel": {
+    "title": "Учетные записи Claude",
+    "description": "Аутентифицируйте Dario с помощью подписки Claude Pro/Max. Трафик будет тарифицироваться по вашему пулу подписки. Перед тем как Dario сможет маршрутизировать запросы, необходимо настроить хотя бы одну учетную запись (до этого /health будет сообщать о деградации).",
+    "noAccounts": "Учетные записи еще не настроены.",
+    "importTitle": "Импорт из OmniRoute",
+    "importDescription": "Используйте существующие токены OAuth из подключения Claude в OmniRoute, вместо повторного входа — полностью пропустите этап одобрения в браузере.",
+    "importPendingTooltip": "Станет активным, когда в OmniRoute появится подключение Claude.",
+    "btnImport": "Импорт",
+    "btnImporting": "Импорт…",
+    "aliasPlaceholder": "псевдоним (необязательно)",
+    "btnStartLogin": "Начать вход",
+    "btnStarting": "Начало…",
+    "btnCompleteLogin": "Завершить вход",
+    "btnCompleting": "Завершение…",
+    "codePlaceholder": "code#state или только code",
+    "noticeImported": "Импортировано как аккаунт \"{alias}\" — Dario был перезапущен, чтобы учесть изменения.",
+    "noticeAdded": "Аккаунт \"{alias}\" добавлен.",
+    "expiresInHours": "истекает примерно через {hours} ч.",
+    "expiresInMinutes": "истекает примерно через {minutes} мин.",
+    "expiresAt": "истекает {date}",
+    "scopes": "{count, plural, one {# область} other {# области}}",
+    "btnRemove": "Удалить",
+    "btnRefresh": "Обновить",
+    "loginStep1": "1. Откройте этот URL в браузере и разрешите доступ для аккаунта <mono>{alias}</mono>:",
+    "pendingExpires": "Срок действия ожидающего входа истекает через {time}",
+    "loginStep2": "2. Вставьте код, отображаемый Anthropic:"
+  },
+  "miniapp": {
+    "title": "Мини-приложение OmniRoute",
+    "errTelegramOnly": "Эта страница должна открываться внутри мини-приложения Telegram.",
+    "greeting": "👋 Привет, {name}! Отправьте сообщение для чата через ваш шлюз OmniRoute.",
+    "greetingFallbackName": "тут",
+    "errNoReply": "⚠️ Нет ответа от шлюза.",
+    "btnSend": "Отправить"
   }
 }

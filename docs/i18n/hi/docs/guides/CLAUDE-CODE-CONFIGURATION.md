@@ -48,15 +48,16 @@ resolve करता है (इसलिए `omniroute connect <vps>` और �
 
 ---
 
-## Discovery aliases — गैर-Claude मॉडलों को `/model` picker में दिखाएँ
+## डिस्कवरी एलियास — `/model` पिकर में गैर-Claude मॉडल दिखाना
 
-Claude Code का gateway model discovery केवल उन IDs को सूचीबद्ध करता है जो `claude`
-या `anthropic` से शुरू होती हैं, इसलिए `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` के साथ मूल
-`/model` picker सामान्यतः OmniRoute के **केवल** Claude/Anthropic मॉडल दिखाता है —
-`kimi/kimi-k2.6` या `glm/glm-5.2` कभी दिखाई नहीं देता, भले ही उसकी routing ठीक से होती हो।
+Claude Code की गेटवे मॉडल डिस्कवरी केवल उन्हीं ids को सूचीबद्ध करती है जो `claude`
+या `anthropic` से शुरू होती हैं, इसलिए `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+के साथ भी मूल `/model` पिकर सामान्य रूप से **केवल** OmniRoute के Claude/Anthropic
+मॉडल दिखाता है — कोई `kimi/kimi-k2.6` या `glm/glm-5.2` कभी नहीं दिखता, भले ही वह
+ठीक से रूट होता हो।
 
-OmniRoute किसी भी सक्षम मॉडल (और combo) को `claude/…` ID के अंतर्गत mirror कर सकता है, ताकि वह
-इस filter से गुज़रकर picker में दिखाई दे:
+OmniRoute किसी भी सक्षम मॉडल (और कॉम्बो) को `claude/…` id के अंतर्गत मिरर कर सकता
+है ताकि वह उस फ़िल्टर को पास करके पिकर में दिखाई दे:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,32 +65,42 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-जब आप Claude Code में इनमें से किसी एक को चुनते हैं, तो OmniRoute routing से पहले `claude/` wrapper
-हटाकर वास्तविक ID वापस प्राप्त कर लेता है — वास्तविक `claude/<real-claude-model>` ID
-(वास्तविक Claude OAuth provider) को हमेशा अपरिवर्तित रखा जाता है।
+जब आप Claude Code में इनमें से कोई एक चुनते हैं, तो OmniRoute रूटिंग से पहले
+`claude/` रैपर हटाकर असली id पर वापस कर देता है — किसी असली
+`claude/<real-claude-model>` id (वास्तविक Claude OAuth प्रदाता) को हमेशा अछूता
+छोड़ा जाता है।
 
-**यह डिफ़ॉल्ट रूप से बंद है** और एक तीन-स्तरीय gate द्वारा नियंत्रित होता है (सबसे विशिष्ट
-सेटिंग प्रभावी होती है), ताकि सामान्य OmniRoute उन clients के लिए अपने catalog को दोगुना न करे जो
-Claude Code का उपयोग नहीं करते:
+डिफ़ॉल्ट रूप से केवल बेस ids ही मिरर की जाती हैं। ऑप्ट-इन
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` फ़ीचर फ़्लैग चालू होने पर, कैटलॉग में पहले से
+सूचीबद्ध reasoning-effort वैरिएंट (जैसे `codex/gpt-6-sol-high`) भी किसी अन्य id की
+तरह मिरर किए जाते हैं, ताकि Claude Code कोई स्पष्ट effort स्तर चुन सके, और ऐसी
+बिल्ट-इन `auto/*` ids जिन्हें रिक्वेस्ट पाथ मैटेरियलाइज़ नहीं कर सकता, मिरर नहीं
+की जातीं। effort वैरिएंट सूचीबद्ध होते भी हैं या नहीं, यह अब भी
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` द्वारा नियंत्रित होता है — मिरर कभी भी
+ऐसा वैरिएंट नहीं जोड़ता जो बेस कैटलॉग में मौजूद न हो।
 
-| स्तर     | स्थान                                                                          |
-| -------- | ------------------------------------------------------------------------------ |
-| मॉडल     | Provider detail page → प्रति-मॉडल "Expose in Claude Code" toggle               |
-| Provider | Provider detail page → provider-level toggle (इसके सभी मॉडलों पर लागू)         |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (डिफ़ॉल्ट रूप से बंद) |
+**यह डिफ़ॉल्ट रूप से बंद होता है** और तीन-स्तरीय गेट द्वारा नियंत्रित होता है
+(सबसे विशिष्ट स्तर प्राथमिकता पाता है), ताकि साधारण OmniRoute उन क्लाइंट के लिए
+अपना कैटलॉग कभी दोगुना न करे जो Claude Code का उपयोग नहीं करते:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` environment variable global स्तर को बलपूर्वक चालू करता है
-और dashboard override पर प्राथमिकता लेता है (ऐसा होने पर Feature Flags screen
-"active via environment variable" नोट दिखाती है)। इसके बाद प्रति-provider और
-प्रति-मॉडल toggles इसे और परिष्कृत करते हैं — उदाहरण के लिए, global बंद + Kimi provider चालू होने पर
-केवल Kimi के मॉडल दिखाई देते हैं।
+| स्तर    | कहाँ                                                                       |
+| ------- | -------------------------------------------------------------------------- |
+| मॉडल    | प्रदाता विवरण पृष्ठ → प्रति-मॉडल "Expose in Claude Code" टॉगल              |
+| प्रदाता | प्रदाता विवरण पृष्ठ → प्रदाता-स्तरीय टॉगल (उसके सभी मॉडलों को कवर करता है) |
+| वैश्विक | सेटिंग्स → फ़ीचर फ़्लैग्स → `EXPOSE_CC_DISCOVERY_ALIASES` (डिफ़ॉल्ट बंद)   |
 
-> ⚠️ **गैर-Claude मॉडलों पर window mismatch।** Claude Code किसी भी ऐसी ID के लिए 200K context
-> window मानता है जिसे वह नहीं पहचानता (वह `/v1/models` से वास्तविक window नहीं पढ़ सकता)।
-> अधिक बड़ी window वाले मॉडल (जैसे Kimi K2 की 256K) के लिए,
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` को मॉडल की वास्तविक window से कम मान पर सेट करें, ताकि
-> auto-compaction समय से पहले शुरू न हो। ऊपर जनरेट की गई प्रोफ़ाइलें पहले से ही
-> प्रति मॉडल ऐसा करती हैं।
+`EXPOSE_CC_DISCOVERY_ALIASES` एनवायरनमेंट वेरिएबल वैश्विक स्तर को जबरन चालू कर
+देता है और डैशबोर्ड ओवरराइड पर प्राथमिकता रखता है (ऐसा होने पर फ़ीचर फ़्लैग्स
+स्क्रीन एक "active via environment variable" नोट दिखाती है)। प्रति-प्रदाता और
+प्रति-मॉडल टॉगल वहाँ से आगे परिष्कृत करते हैं — जैसे वैश्विक बंद + Kimi प्रदाता
+चालू करने पर केवल Kimi के मॉडल ही दिखते हैं।
+
+> ⚠️ **गैर-Claude मॉडलों पर विंडो असंगति।** Claude Code किसी भी अपरिचित id के लिए
+> 200K कॉन्टेक्स्ट विंडो मान लेता है (वह `/v1/models` से असली विंडो नहीं पढ़
+> सकता)। बड़ी विंडो वाले मॉडल (जैसे Kimi K2 की 256K) के लिए,
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` को मॉडल की असली विंडो से कम मान पर सेट करें
+> ताकि ऑटो-कॉम्पैक्शन समय से पहले ट्रिगर न हो। ऊपर बताई गई जनरेट की गई
+> प्रोफ़ाइलें यह पहले से ही प्रति-मॉडल करती हैं।
 
 ---
 

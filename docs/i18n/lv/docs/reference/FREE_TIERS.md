@@ -46,15 +46,16 @@ Lielākie **dokumentētie** apjoma nodrošinātāji: `mistral` 1.00B, `nara` 210
 
 ## 2026-06-17 atjauninājums — kas mainījies kopš 2026-06-05
 
-Visa kataloga atjaunināšanai tika veikta tīmekļa izpēte ar 50 aģentiem (oficiālā dokumentācija + pēdējo 7 dienu ziņas, pārbaudot arī pretrunīgu informāciju). Galvenais:
+50 aģentu tīmekļa izpētes posms (oficiālā dokumentācija + pēdējo 7 dienu jaunumi, ar pretdarbības metodi pārbaudīts) atsvaidzināja visu katalogu. Galvenās izmaiņas:
 
-- **Noņemti / nav bezmaksas līmeņa (2026):** `chutes` (bezmaksas līmenis pārtraukts 2026-03), `phind` (uzņēmums slēgts 2026-01), `kluster` (darbība izbeigta 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo bezmaksas piekļuve atsaukta 2026-05-24, Nemotron akcija beidzās 2026-06 — atkārtoti pārbaudīts 2026-06-18), `aimlapi` (bezmaksas līmenis apturēts — atkārtoti pārbaudīts 2026-06-18), `yi` (Yi-Light darbība izbeigta, maksa atbilstoši lietojumam — atkārtoti pārbaudīts 2026-06-18), `featherless-ai` (pašlaik nav bezmaksas līmeņa), `chipotle` (Chipotle „Pepper AI” — reversās inženierijas ceļā izpētītais `amelia.chipotle.com` Amelia tērzēšanas logrīks, ar kuru sazinājās nodrošinātājs, tagad atgriež 404 visos maršrutos, tostarp saknes maršrutā; aizmugursistēma izņemta no ekspluatācijas/pārvietota, apstiprināts 2026-09-15 — pilnībā noņemts no kataloga, #13131/#4037). `iflytek` / `sparkdesk` paliek sarakstā, taču tiem pievienota piezīme par pakalpojuma noteikumiem (Spark Lite ir bezmaksas; pakalpojuma noteikumi ierobežo starpniekservera/retranslācijas izmantošanu).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` darbība tika izbeigta 2026-06-01, un `2.5 Pro` pameta bezmaksas līmeni (2026-04); tagad bezmaksas līmenī ir **tikai Flash saime** (2.5/3/3.1/3.5 Flash + Gemma). Katalogā Flash saime tagad tiek **apvienota vienā kopfondā** (iepriekš rādītājs bija mākslīgi palielināts, atsevišķi skaitot katru variantu: 462M → 60M).
-- **Izlabotie skaitļi:** `cloudflare-ai` 122M → **30M** (faktiski 10k neironu dienā), `doubao` pārklasificēts par vienreizēju reģistrācijas kredītu (nevis periodisku), `llm7` 4M → **150M** (dokumentēti 5M marķieru dienā), `together` „-Free” galapunktu darbība pārtraukta → noņemts arī $25 reģistrācijas kredīts (nepieciešams vismaz $5 pirkums, nav bezmaksas izmēģinājuma), `longcat` Preview beidzies + Flash modeļu darbība izbeigta → tikai **LongCat-2.0**, pārklasificēts par vienreizēju **10M** marķieru reģistrācijas kredītu (pieejams tikai pēc KYC, nav periodisks).
-- **Atklāti jauni bezmaksas nodrošinātāji:** ⭐ **Kilo Code** (`kilo-gateway` — rotējoša „Auto Free” kopa: NVIDIA Nemotron 3 saime, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 rotējoši bezmaksas programmēšanas modeļi), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pastāvīgi bez maksas + 20M reģistrācijas bonuss) un `arcee-ai` Trinity Large Preview.
-- **Jauni godīgi līmeņi** (skatiet metodoloģiju): _pastāvīgi bezmaksas, bet neierobežota_ kategorija (reāla periodiska piekļuve bez saskaitāma marķieru ierobežojuma) un _iemaksas atbloķēts palielinājums_ (OpenRouter $10 → +24M/mēn.), kas abi norādīti **atsevišķi**, lai tie nekad nepalielinātu galveno rādītāju.
+- **Noņemti / vairs nav bezmaksas līmeņa (2026):** `chutes` (bezmaksas līmenis beidzās 2026-03), `phind` (uzņēmums beidza darbību 2026-01), `kluster` (darbība pārtraukta 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (MiMo bezmaksas piekļuve atcelta 2026-05-24, Nemotron akcija beidzās 2026-06 — atkārtoti pārbaudīts 2026-06-18), `aimlapi` (bezmaksas līmenis apturēts — atkārtoti pārbaudīts 2026-06-18), `yi` (Yi-Light izņemts no piedāvājuma, maksa pēc patēriņa — atkārtoti pārbaudīts 2026-06-18), `featherless-ai` (pašlaik nav bezmaksas līmeņa), `chipotle` (Chipotle "Pepper AI" — ar apgriezto inženieriju iegūtais `amelia.chipotle.com` Amelia tērzēšanas logrīks, ar kuru pakalpojumu sniedzējs sazinājās, tagad katrā maršrutā, tostarp saknē, atgriež 404; aizmugursistēma atslēgta/pārcelta, apstiprināts 2026-09-15 — pilnībā noņemts no kataloga, #13131/#4037). `iflytek` / `sparkdesk` paliek sarakstā, bet ar brīdinājuma piezīmi par lietošanas noteikumiem (Spark Lite ir bezmaksas; lietošanas noteikumi ierobežo starpniekserveru/releju izmantošanu).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` atslēgti 2026-06-01, bet `2.5 Pro` izgāja no bezmaksas līmeņa (2026-04); bezmaksas līmenis tagad ir **tikai Flash saimei** (2.5/3/3.1/3.5 Flash + Gemma). Katalogs tagad **apvieno vienā pūlā** Flash saimi (iepriekš skaits bija uzpūsts, katru variantu skaitot atsevišķi: 462M → 60M).
+- **Labotie skaitļi:** `cloudflare-ai` 122M → **30M** (reālie 10k neironu dienā), `doubao` pārklasificēts kā vienreizējs reģistrācijas kredīts (neatjaunojams), `llm7` 4M → **150M** (dokumentēti 5M žetonu dienā), `together` "-Free" galapunkti pārtraukti → $25 reģistrācijas kredīts arī noņemts (nepieciešams $5 minimālais pirkums, bezmaksas izmēģinājuma nav), `longcat` Preview beidzies + Flash modeļi izņemti no apgrozības → tikai **LongCat-2.0**, pārklasificēts kā vienreizējs **10M** žetonu reģistrācijas kredīts (pieejams pēc KYC verifikācijas, neatjaunojams).
+- **Poolside tiešās secināšanas pakalpojuma beigas (pārbaudīts 2026-10-20):** [oficiālā platforma](https://platform.poolside.ai/) paziņo par slēgšanu **2026-10-31** un aicina lietotājus lejupielādēt tās modeļus no Hugging Face pašmitināšanai. Tiešajam `poolside` pakalpojumu sniedzējam ir šis brīdinājums. Manuāli atlasītajā bezmaksas katalogā nav tiešu Poolside ierakstu; tā ar Poolside nosauktie ieraksti pieder `kilo-gateway`. Šis paziņojums neapstiprina to modeļu pieejamību, ko apkalpo Kilo, Cline, NVIDIA vai citas vārtejas, tāpēc šie ieraksti uz šā pamata netiek noņemti.
+- **Atklāti jauni bezmaksas pakalpojumu sniedzēji:** ⭐ **Kilo Code** (`kilo-gateway` — rotējoša "Auto Free" izlase: NVIDIA Nemotron 3 saime, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 rotējoši bezmaksas programmēšanas modeļi, atjaunināts 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash pastāvīgi bez maksas + 20M reģistrācijas bonuss) un `arcee-ai` Trinity Large Preview.
+- **Jauni godīgi līmeņi** (skatīt Metodoloģiju): kategorija _pastāvīgi-bezmaksas-bet-bez-griestiem_ (reāla regulāra piekļuve, nav žetonu griestu, ko skaitīt) un _depozīta-atbloķēšanas pastiprinājums_ (OpenRouter $10 → +24M/mēn.), abi parādīti **atsevišķi**, lai tie nekad neuzpūstu galveno skaitli.
 
-> Tālāk sniegtā detalizētā tabula par katru nodrošinātāju ir **2026-06-05 momentuzņēmums**; iepriekš norādītās izmaiņas to aizstāj. Aktuālais, kanoniskais avots ir katra modeļa katalogs `open-sse/config/freeModelCatalog.ts`.
+> Detalizētā tabula pa pakalpojumu sniedzējiem tālāk tekstā ir **2026-06-05 momentuzņēmums**; iepriekš minētās izmaiņas to aizstāj. Aktuālais, kanoniskais avots ir katalogs pa modeļiem `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -111,7 +112,7 @@ apzināti.
 ## Metodoloģija un atrunas
 
 - Skaitļi ir **augšējās robežas aplēses**, kas iegūtas tīmekļa izpētē no katra pakalpojumu sniedzēja dokumentētajiem bezmaksas līmeņa ierobežojumiem uz **2026-06-17**. Bezmaksas līmeņi pastāvīgi mainās — pirms paļaušanās uz kādu skaitli pārbaudiet to atkārtoti.
-- **Ko ieraksts patiesībā apliecina.** Nevienam ierakstam nav individuāla ticamības vērtējuma, un API tādu nenodrošina — uzskatiet katru iepriekš norādīto skaitli par vienādas, nenorādītas kvalitātes aplēsi. Divi fakti ir atšķirīgi, jo tie tiek manuāli pārvaldīti, nevis secināti: 44 ierakstiem ir neatkarīgi dokumentēts nepārkāpjams ierobežojums (39 no tiem ir xKiro rindas, kurām visām ir viena kopīga dienas kvota), un 12 ierakstiem ir informācija par uzvedņu izmantošanu apmācībai. `hardStopGuaranteed` tiek iestatīts tikai tad, ja paša pakalpojumu sniedzēja noteikumos ir teikts, ka bezmaksas kvotas pārsniegšanas gadījumā pieprasījums tiek noraidīts, nevis bez brīdinājuma sākta maksas iekasēšana, un avots ir norādīts komentārā blakus ierakstam; tā noklusējuma vērtība nekad nav `true`, un ierakstam, kuru neviens nav pārbaudījis, šī vērtība paliek neiestatīta. Tādēļ trūkstošs nepārkāpjama ierobežojuma karodziņš nozīmē „nav konstatēts”, nevis „ir zināms, ka tiks iekasēta maksa”. **STRICT režīms** (izvēles `freeAccessPolicy=strict` maršrutēšanas aizsargs) uzticas tikai ierakstiem ar šo karodziņu; visi pārējie bezmaksas līmeņi tiek izslēgti kā `no-hard-stop` (skatiet `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kad aizsargs filtrē kopu, operatoram redzamajā žurnālā tiek norādīts gan izslēgto vienību skaits, gan `no-hard-stop` īpatsvars tajā.
+- **Ko ieraksts patiesībā apliecina.** Nevienam ierakstam nav individuāla ticamības vērtējuma, un API tādu nenodrošina — uzskatiet katru iepriekš norādīto skaitli par vienādas, nenorādītas kvalitātes aplēsi. Divi fakti ir atšķirīgi, jo tie tiek manuāli pārvaldīti, nevis secināti: 44 ierakstiem ir neatkarīgi dokumentēts nepārkāpjams ierobežojums (39 no tiem ir xKiro rindas, kurām visām ir viena kopīga dienas kvota), un 20 ierakstiem ir informācija par uzvedņu izmantošanu apmācībai. `hardStopGuaranteed` tiek iestatīts tikai tad, ja paša pakalpojumu sniedzēja noteikumos ir teikts, ka bezmaksas kvotas pārsniegšanas gadījumā pieprasījums tiek noraidīts, nevis bez brīdinājuma sākta maksas iekasēšana, un avots ir norādīts komentārā blakus ierakstam; tā noklusējuma vērtība nekad nav `true`, un ierakstam, kuru neviens nav pārbaudījis, šī vērtība paliek neiestatīta. Tādēļ trūkstošs nepārkāpjama ierobežojuma karodziņš nozīmē „nav konstatēts”, nevis „ir zināms, ka tiks iekasēta maksa”. **STRICT režīms** (izvēles `freeAccessPolicy=strict` maršrutēšanas aizsargs) uzticas tikai ierakstiem ar šo karodziņu; visi pārējie bezmaksas līmeņi tiek izslēgti kā `no-hard-stop` (skatiet `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Kad aizsargs filtrē kopu, operatoram redzamajā žurnālā tiek norādīts gan izslēgto vienību skaits, gan `no-hard-stop` īpatsvars tajā.
 - `estMonthlyFreeTokens` = tikai ik mēnesi atjaunojamie tokeni. **Vienreizējie reģistrācijas kredīti neatjaunojas**, tādēļ to vērtība ir 0. Arī pārtrauktu līmeņu vērtība ir 0.
 - Dienas tokenu ierobežojums → `monthly = daily × 30`. Ja dokumentēts tikai RPD → `RPD × ~800 izvades tokenu × 30`. Ja norādīts tikai RPM/TPM (bez dienas ierobežojuma) → **bez ierobežojuma** (skatiet tālāk).
 - **Pastāvīgi bez maksas, bet bez publicēta tokenu ierobežojuma** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): šī ir reāla, periodiski atjaunojama bezmaksas piekļuve, ko ierobežo pieprasījumu ātrums/paralēlisms. Mēs to klasificējam kā `recurring-uncapped` un **nekad nepieskaitām kopsummai** — reizinājums `RPM × 24/7 × 30d` radītu izdomātu maksimālo robežu (mēs noraidām šādu skaitļu mākslīgu palielināšanu). Tie ir uzskaitīti, lai jūs zinātu par to esamību.
@@ -241,73 +242,73 @@ Vairums šajā jomā minēto „bezmaksas žetonu mēnesī” skaitļu ir katram
 
 ## Bezmaksas līmenis katram pakalpojumu sniedzējam (Bytez/Nous pārbaudīti 2026-10-15; atkārtoti auditētās rindas — 2026-09-02; pārējie — 2026-06-17)
 
-> Atkārtoti ģenerēts no modeļu kataloga (`open-sse/config/freeModelCatalog.ts`), noņemot dublikātus kopfondu līmenī. Kārtots pēc regulāri pieejamā stabilā tokenu skaita mēnesī. `uncapped*` = pastāvīgi bez maksas, bet bez publicēta tokenu ierobežojuma (ierobežots pieprasījumu biežums/vienlaicīgums) — reāla piekļuve, **netiek** pieskaitīta virsrakstā norādītajai kopsummai. `—` = tikai kredīti / bez atslēgas / nav izsakāms tokenos.
+> Atkārtoti ģenerēts no katra modeļa kataloga (`open-sse/config/freeModelCatalog.ts`), novēršot dublikātus kopīgo resursu kopu ietvaros. Sakārtots pēc regulāri pieejamā stabilā žetonu skaita mēnesī. `uncapped*` = pastāvīgi bez maksas, bet bez publicēta žetonu ierobežojuma (ierobežots pēc pieprasījumu biežuma/vienlaicīguma) — reāla piekļuve, kas **nav** iekļauta virsrakstā norādītajā kopsummā. `—` = tikai kredīti / bez atslēgas / nav izsakāms žetonu skaitā.
 
-| Nodrošinātājs    | Bezmaksas veids       | Regulāri tokeni/mēn. | Pirmā mēneša kredīts | Noteikumi   | Modeļi |
-| ---------------- | --------------------- | -------------------- | -------------------- | ----------- | ------ |
-| `mistral`        | periodisks            | ~1.00B               | —                    | piesardzīgi | 5      |
-| `nara`           | periodisks            | ~210M                | —                    | piesardzīgi | 8      |
-| `llm7`           | periodisks            | ~150M                | —                    | piesardzīgi | 4      |
-| `xkiro`          | periodisks            | ~150M                | —                    | piesardzīgi | 39     |
-| `longcat`        | vienreizējs           | —                    | 10M                  | piesardzīgi | 1      |
-| `cerebras`       | vienreizējs           | —                    | $5 kredīts           | piesardzīgi | 2      |
-| `cloudflare-ai`  | periodisks            | ~30M                 | —                    | piesardzīgi | 9      |
-| `groq`           | periodisks            | ~30M                 | —                    | piesardzīgi | 5      |
-| `api-airforce`   | periodisks            | ~24M                 | —                    | piesardzīgi | 7      |
-| `bluesminds`     | periodisks            | ~7M                  | —                    | neskaidri   | 22     |
-| `sambanova`      | periodisks            | ~6M                  | —                    | piesardzīgi | 5      |
-| `arcee-ai`       | periodisks            | ~5M                  | —                    | piesardzīgi | 1      |
-| `bazaarlink`     | periodisks            | ~4M                  | —                    | piesardzīgi | 32     |
-| `openrouter`     | periodisks            | ~1M                  | —                    | piesardzīgi | 1      |
-| `cohere`         | periodisks            | ~800K                | —                    | piesardzīgi | 6      |
-| `huggingchat`    | periodisks            | ~500K                | —                    | piesardzīgi | 4      |
-| `morph`          | periodisks            | ~400K                | —                    | labi        | 2      |
-| `huggingface`    | periodisks            | ~200K                | —                    | piesardzīgi | 6      |
-| `kiro`           | periodisks            | ~25K                 | —                    | izvairīties | 12     |
-| `glm-cn`         | bez ierobežojuma      | bez ierobežojuma\*   | ~20M                 | labi        | 4      |
-| `baidu`          | bez ierobežojuma      | bez ierobežojuma\*   | —                    | piesardzīgi | 1      |
-| `gemini`         | bez ierobežojuma      | bez ierobežojuma\*   | —                    | piesardzīgi | 4      |
-| `kilo-gateway`   | bez ierobežojuma      | bez ierobežojuma\*   | —                    | piesardzīgi | 7      |
-| `ollama-cloud`   | bez ierobežojuma      | bez ierobežojuma\*   | —                    | neskaidri   | 8      |
-| `opencode-zen`   | bez ierobežojuma      | bez ierobežojuma\*   | —                    | piesardzīgi | 6      |
-| `tencent`        | bez ierobežojuma      | bez ierobežojuma\*   | —                    | piesardzīgi | 1      |
-| `vertex`         | reģistrācijas kredīts | —                    | ~300M                | piesardzīgi | 10     |
-| `agentrouter`    | reģistrācijas kredīts | —                    | ~200M                | piesardzīgi | 4      |
-| `predibase`      | reģistrācijas kredīts | —                    | ~25M                 | piesardzīgi | 1      |
-| `doubao`         | reģistrācijas kredīts | —                    | ~15M                 | neskaidri   | 1      |
-| `ai21`           | reģistrācijas kredīts | —                    | ~10M                 | izvairīties | 2      |
-| `deepseek`       | reģistrācijas kredīts | —                    | ~5M                  | labi        | 2      |
-| `hyperbolic`     | reģistrācijas kredīts | —                    | ~5M                  | labi        | 8      |
-| `nscale`         | reģistrācijas kredīts | —                    | ~5M                  | piesardzīgi | 6      |
-| `bytez`          | kredīts (periodisks)  | —                    | nezināms             | neskaidri   | 1      |
-| `deepinfra`      | reģistrācijas kredīts | —                    | ~1M                  | piesardzīgi | 22     |
-| `fireworks`      | reģistrācijas kredīts | —                    | ~1M                  | izvairīties | 10     |
-| `nebius`         | reģistrācijas kredīts | —                    | ~1M                  | piesardzīgi | 1      |
-| `qoder`          | reģistrācijas kredīts | —                    | ~1M                  | piesardzīgi | 14     |
-| `scaleway`       | reģistrācijas kredīts | —                    | ~1M                  | labi        | 6      |
-| `novita`         | reģistrācijas kredīts | —                    | ~500K                | piesardzīgi | 1      |
-| `agy`            | bez atslēgas          | —                    | —                    | izvairīties | 16     |
-| `baichuan`       | bez atslēgas          | —                    | —                    | neskaidri   | 1      |
-| `blackbox`       | bez atslēgas          | —                    | —                    | izvairīties | 6      |
-| `coze`           | bez atslēgas          | —                    | —                    | izvairīties | 1      |
-| `duckduckgo-web` | bez atslēgas          | —                    | —                    | izvairīties | 6      |
-| `freemodel-dev`  | bez atslēgas          | —                    | —                    | nezināms    | 4      |
-| `friendliai`     | bez atslēgas          | —                    | —                    | izvairīties | 2      |
-| `iflytek`        | bez atslēgas          | —                    | —                    | izvairīties | 1      |
-| `inference-net`  | bez atslēgas          | —                    | —                    | piesardzīgi | 3      |
-| `liquid`         | bez atslēgas          | —                    | —                    | nezināms    | 1      |
-| `monsterapi`     | bez atslēgas          | —                    | —                    | neskaidri   | 1      |
-| `muse-spark-web` | bez atslēgas          | —                    | —                    | izvairīties | 3      |
-| `nlpcloud`       | bez atslēgas          | —                    | —                    | izvairīties | 1      |
-| `nvidia`         | bez atslēgas          | —                    | —                    | piesardzīgi | 13     |
-| `pollinations`   | bez atslēgas          | —                    | —                    | piesardzīgi | 31     |
-| `publicai`       | bez atslēgas          | —                    | —                    | piesardzīgi | 3      |
-| `reka`           | bez atslēgas          | —                    | —                    | piesardzīgi | 2      |
-| `sensenova`      | bez atslēgas          | —                    | —                    | piesardzīgi | 1      |
-| `sparkdesk`      | bez atslēgas          | —                    | —                    | piesardzīgi | 1      |
-| `stepfun`        | bez atslēgas          | —                    | —                    | labi        | 1      |
-| `t3-web`         | bez atslēgas          | —                    | —                    | izvairīties | 23     |
-| `uncloseai`      | bez atslēgas          | —                    | —                    | piesardzīgi | 3      |
+| Nodrošinātājs    | Bezmaksas veids       | Pastāvīgi tokeni/mēn. | Pirmā mēneša kredīts | Lietošanas noteikumi | Modeļi |
+| ---------------- | --------------------- | --------------------- | -------------------- | -------------------- | ------ |
+| `mistral`        | periodisks            | ~1.00B                | —                    | piesardzīgi          | 5      |
+| `nara`           | periodisks            | ~210M                 | —                    | piesardzīgi          | 8      |
+| `llm7`           | periodisks            | ~150M                 | —                    | piesardzīgi          | 4      |
+| `xkiro`          | periodisks            | ~150M                 | —                    | piesardzīgi          | 39     |
+| `longcat`        | vienreizējs           | —                     | 10M                  | piesardzīgi          | 1      |
+| `cerebras`       | vienreizējs           | —                     | $5 kredīts           | piesardzīgi          | 2      |
+| `cloudflare-ai`  | periodisks            | ~30M                  | —                    | piesardzīgi          | 9      |
+| `groq`           | periodisks            | ~30M                  | —                    | piesardzīgi          | 5      |
+| `api-airforce`   | periodisks            | ~24M                  | —                    | piesardzīgi          | 7      |
+| `bluesminds`     | periodisks            | ~7M                   | —                    | neskaidri            | 22     |
+| `sambanova`      | periodisks            | ~6M                   | —                    | piesardzīgi          | 5      |
+| `arcee-ai`       | periodisks            | ~5M                   | —                    | piesardzīgi          | 1      |
+| `bazaarlink`     | periodisks            | ~4M                   | —                    | piesardzīgi          | 32     |
+| `openrouter`     | periodisks            | ~1M                   | —                    | piesardzīgi          | 1      |
+| `cohere`         | periodisks            | ~800K                 | —                    | piesardzīgi          | 6      |
+| `huggingchat`    | periodisks            | ~500K                 | —                    | piesardzīgi          | 4      |
+| `morph`          | periodisks            | ~400K                 | —                    | kārtībā              | 2      |
+| `huggingface`    | periodisks            | ~200K                 | —                    | piesardzīgi          | 6      |
+| `kiro`           | periodisks            | ~25K                  | —                    | izvairīties          | 12     |
+| `glm-cn`         | bez ierobežojuma      | bez ierobežojuma\*    | ~20M                 | kārtībā              | 4      |
+| `baidu`          | bez ierobežojuma      | bez ierobežojuma\*    | —                    | piesardzīgi          | 1      |
+| `gemini`         | bez ierobežojuma      | bez ierobežojuma\*    | —                    | piesardzīgi          | 4      |
+| `kilo-gateway`   | bez ierobežojuma      | bez ierobežojuma\*    | —                    | piesardzīgi          | 7      |
+| `ollama-cloud`   | bez ierobežojuma      | bez ierobežojuma\*    | —                    | neskaidri            | 8      |
+| `opencode-zen`   | bez ierobežojuma      | bez ierobežojuma\*    | —                    | piesardzīgi          | 10     |
+| `tencent`        | bez ierobežojuma      | bez ierobežojuma\*    | —                    | piesardzīgi          | 1      |
+| `vertex`         | reģistrācijas kredīts | —                     | ~300M                | piesardzīgi          | 10     |
+| `agentrouter`    | reģistrācijas kredīts | —                     | ~200M                | piesardzīgi          | 4      |
+| `predibase`      | reģistrācijas kredīts | —                     | ~25M                 | piesardzīgi          | 1      |
+| `doubao`         | reģistrācijas kredīts | —                     | ~15M                 | neskaidri            | 1      |
+| `ai21`           | reģistrācijas kredīts | —                     | ~10M                 | izvairīties          | 2      |
+| `deepseek`       | reģistrācijas kredīts | —                     | ~5M                  | kārtībā              | 2      |
+| `hyperbolic`     | reģistrācijas kredīts | —                     | ~5M                  | kārtībā              | 8      |
+| `nscale`         | reģistrācijas kredīts | —                     | ~5M                  | piesardzīgi          | 6      |
+| `bytez`          | kredīts (periodisks)  | —                     | nezināms             | neskaidri            | 1      |
+| `deepinfra`      | reģistrācijas kredīts | —                     | ~1M                  | piesardzīgi          | 22     |
+| `fireworks`      | reģistrācijas kredīts | —                     | ~1M                  | izvairīties          | 10     |
+| `nebius`         | reģistrācijas kredīts | —                     | ~1M                  | piesardzīgi          | 1      |
+| `qoder`          | reģistrācijas kredīts | —                     | ~1M                  | piesardzīgi          | 14     |
+| `scaleway`       | reģistrācijas kredīts | —                     | ~1M                  | kārtībā              | 6      |
+| `novita`         | reģistrācijas kredīts | —                     | ~500K                | piesardzīgi          | 1      |
+| `agy`            | bez atslēgas          | —                     | —                    | izvairīties          | 16     |
+| `baichuan`       | bez atslēgas          | —                     | —                    | neskaidri            | 1      |
+| `blackbox`       | bez atslēgas          | —                     | —                    | izvairīties          | 6      |
+| `coze`           | bez atslēgas          | —                     | —                    | izvairīties          | 1      |
+| `duckduckgo-web` | bez atslēgas          | —                     | —                    | izvairīties          | 6      |
+| `freemodel-dev`  | bez atslēgas          | —                     | —                    | nezināms             | 4      |
+| `friendliai`     | bez atslēgas          | —                     | —                    | izvairīties          | 2      |
+| `iflytek`        | bez atslēgas          | —                     | —                    | izvairīties          | 1      |
+| `inference-net`  | bez atslēgas          | —                     | —                    | piesardzīgi          | 3      |
+| `liquid`         | bez atslēgas          | —                     | —                    | nezināms             | 1      |
+| `monsterapi`     | bez atslēgas          | —                     | —                    | neskaidri            | 1      |
+| `muse-spark-web` | bez atslēgas          | —                     | —                    | izvairīties          | 3      |
+| `nlpcloud`       | bez atslēgas          | —                     | —                    | izvairīties          | 1      |
+| `nvidia`         | bez atslēgas          | —                     | —                    | piesardzīgi          | 13     |
+| `pollinations`   | bez atslēgas          | —                     | —                    | piesardzīgi          | 31     |
+| `publicai`       | bez atslēgas          | —                     | —                    | piesardzīgi          | 3      |
+| `reka`           | bez atslēgas          | —                     | —                    | piesardzīgi          | 2      |
+| `sensenova`      | bez atslēgas          | —                     | —                    | piesardzīgi          | 1      |
+| `sparkdesk`      | bez atslēgas          | —                     | —                    | piesardzīgi          | 1      |
+| `stepfun`        | bez atslēgas          | —                     | —                    | labi                 | 1      |
+| `t3-web`         | bez atslēgas          | —                     | —                    | izvairīties          | 23     |
+| `uncloseai`      | bez atslēgas          | —                     | —                    | piesardzīgi          | 3      |
 
 ---
 

@@ -3,6 +3,9 @@
 import { useCallback } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import Icon from "@/shared/components/Icon";
+import Button from "@/shared/components/Button";
 
 // Lazy-load react-markdown to reduce initial bundle size.
 const ReactMarkdown = dynamic(() => import("react-markdown"), {
@@ -43,7 +46,7 @@ export function SkillPreviewPane({
 
   const handleCopyRawUrl = useCallback(async () => {
     if (!skillId) return;
-    const rawUrl = `https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/${skillId}/SKILL.md`;
+    const rawUrl = `https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/${skillId}/SKILL.md`;
     try {
       await navigator.clipboard.writeText(rawUrl);
     } catch {
@@ -52,7 +55,7 @@ export function SkillPreviewPane({
   }, [skillId]);
 
   const githubUrl = skillId
-    ? `https://github.com/diegosouzapw/OmniRoute/blob/main/skills/${skillId}/SKILL.md`
+    ? `https://github.com/cheaper-inference/OmniRoute/blob/main/skills/${skillId}/SKILL.md`
     : null;
 
   // Empty state
@@ -62,7 +65,7 @@ export function SkillPreviewPane({
         className="flex flex-col items-center justify-center h-full min-h-[300px] rounded-xl border border-dashed border-border bg-bg-subtle/30 p-8 text-center"
         data-testid="skill-preview-empty"
       >
-        <span className="material-symbols-outlined text-[32px] text-text-muted mb-3">article</span>
+        <Icon name="article" size={32} className="text-text-muted mb-3" />
         <p className="text-sm text-text-muted">{t("previewEmpty")}</p>
       </div>
     );
@@ -80,38 +83,42 @@ export function SkillPreviewPane({
         </span>
         <div className="flex items-center gap-1 shrink-0">
           {onRefresh && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon-sm"
               onClick={onRefresh}
               disabled={loading}
-              className="flex items-center gap-1 rounded px-2 py-1 text-xs text-text-muted hover:text-text-main hover:bg-bg-subtle transition-colors disabled:opacity-50"
+              className="text-text-muted hover:text-text-main"
               aria-label={t("refresh")}
             >
-              <span
-                className={`material-symbols-outlined text-[14px] ${loading ? "animate-spin" : ""}`}
-              >
-                refresh
-              </span>
-            </button>
+              <Icon name="refresh" size={14} className={loading ? "animate-spin" : undefined} />
+            </Button>
           )}
-          <button
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={() => void handleCopyRawUrl()}
             disabled={!skillId}
-            className="flex items-center gap-1 rounded px-2 py-1 text-xs text-text-muted hover:text-text-main hover:bg-bg-subtle transition-colors"
+            className="text-text-muted hover:text-text-main"
             title={t("copyUrl")}
             aria-label={t("copyUrl")}
           >
-            <span className="material-symbols-outlined text-[14px]">content_copy</span>
-          </button>
+            <Icon name="content_copy" size={14} />
+          </Button>
           {githubUrl && (
             <a
               href={githubUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 rounded px-2 py-1 text-xs text-text-muted hover:text-text-main hover:bg-bg-subtle transition-colors"
+              className={buttonVariants({
+                variant: "ghost",
+                size: "icon-sm",
+                className: "text-text-muted hover:text-text-main",
+              })}
               title={t("viewOnGithub")}
               aria-label={t("viewOnGithub")}
             >
-              <span className="material-symbols-outlined text-[14px]">open_in_new</span>
+              <Icon name="open_in_new" size={14} />
             </a>
           )}
         </div>
@@ -130,10 +137,10 @@ export function SkillPreviewPane({
           </div>
         ) : (
           <div
-            className="flex items-center gap-2 rounded-lg border border-red-300 bg-red-50 dark:bg-red-950/30 p-3 text-xs text-red-700 dark:text-red-400"
+            className="flex items-center gap-2 rounded-lg border border-error/30 bg-error/10 p-3 text-xs text-error"
             data-testid="skill-preview-error"
           >
-            <span className="material-symbols-outlined text-[16px]">error</span>
+            <Icon name="error" size={16} />
             {t("previewError")}
           </div>
         )}

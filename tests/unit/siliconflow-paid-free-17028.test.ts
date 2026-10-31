@@ -31,7 +31,9 @@ const formerlyMisclassifiedIds = [
 describe("#17028 SiliconFlow pay-as-you-go model protection", () => {
   it("retains honest release catalog counts and never counts SiliconFlow as statically uncapped", () => {
     const totals = computeFreeModelTotals();
-    assert.equal(totals.modelCount, 467);
+    // 471 → 484: #16325 added 13 onomeo free-catalog rows (one uncapped pool, not steady-monthly).
+    // 484 → 485: #16315 added the Token Harbor free route to its own uncapped pool.
+    assert.equal(totals.modelCount, 485);
     assert.equal(totals.poolCount, 34);
     assert.equal(totals.uncappedProviders.includes("siliconflow"), false);
   });
