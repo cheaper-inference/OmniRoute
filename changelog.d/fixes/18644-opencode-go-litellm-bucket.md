@@ -1,0 +1,1 @@
+- **fix(pricing):** OpenCode Go requests are priced from LiteLLM-synced pricing again; LiteLLM's `opencode_go` bucket was stored under a key no cost lookup reads, so every `opencode-go` request booked as unpriced $0 ([#18644](https://github.com/cheaper-inference/OmniRoute/pull/18644))
