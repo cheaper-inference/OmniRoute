@@ -51,6 +51,8 @@ interface AccountGate {
   queue: QueuedAcquire[];
   blockedUntil: number | null;
   cleanupTimer: ReturnType<typeof setTimeout> | null;
+  /** P0 FIX: Poison flag to prevent reuse after reset() */
+  reset?: boolean;
 }
 
 export interface AccountSemaphoreStatsEntry {
@@ -119,6 +121,7 @@ function ensureGate(key: string, maxConcurrency: number): AccountGate {
 }
 
 function isBlocked(gate: AccountGate): boolean {
+  if (gate.reset) return true;
   if (!gate.blockedUntil) return false;
   if (Date.now() >= gate.blockedUntil) {
     gate.blockedUntil = null;
@@ -202,7 +205,9 @@ function createCompositeReleaseFn(keys: string[]): () => void {
       const gate = gates.get(key);
       if (gate && gate.running > 0) gate.running--;
     }
-    drainQueues();
+    // P0 FIX: Only drain queues for the keys we just released (selective key drainage)
+    // Prevents releasing gate A from draining gate B's queue
+    drainQueuesForKeys(keys);
     for (const key of keys) {
       const gate = gates.get(key);
       if (gate && gate.running === 0 && gate.queue.length === 0) scheduleCleanup(key);
@@ -210,11 +215,39 @@ function createCompositeReleaseFn(keys: string[]): () => void {
   };
 }
 
+/**
+ * Drains queues only for requests that need at least one of the specified keys.
+ * This prevents cross-gate interference when releasing semaphores.
+ */
+function drainQueuesForKeys(keys: string[]): void {
+  let progressed = true;
+  while (progressed) {
+    progressed = false;
+    const candidates = [...queuedRequests];
+    for (const request of candidates) {
+      if (request.settled) continue;
+      // Only consider requests that need at least one of our released keys
+      const needsReleasedKey = request.keys.some((k) => keys.includes(k));
+      if (!needsReleasedKey) continue;
+      if (!canAcquire(request)) continue;
+      request.settled = true;
+      removeRequest(request);
+      for (const key of request.keys) gates.get(key)!.running++;
+      request.resolve(createCompositeReleaseFn(request.keys));
+      progressed = true;
+      break;
+    }
+  }
+}
+
 function drainQueues(): void {
   let progressed = true;
   while (progressed) {
     progressed = false;
-    for (const request of queuedRequests) {
+    // P0 FIX: Snapshot queuedRequests to avoid concurrent modification during iteration
+    // Multiple code paths (timeout, abort, release) can mutate the set while we iterate
+    const candidates = [...queuedRequests];
+    for (const request of candidates) {
       if (request.settled || !canAcquire(request)) continue;
       request.settled = true;
       removeRequest(request);
@@ -404,9 +437,20 @@ export function reset(key: string): void {
     removeRequest(request);
     rejections.push(request);
   }
-  gates.delete(key);
+  // P0 FIX: Mark gate as reset (poisoned) instead of immediate deletion
+  // This prevents race where acquireMany recreates gate while drainQueues runs
+  gate.reset = true;
+  gate.maxConcurrency = 0;
+  gate.blockedUntil = Date.now() + 86_400_000; // Block for 24h
   for (const request of rejections) request.reject(error);
-  drainQueues();
+  // Don't call drainQueues() — let natural drain handle it
+  // Schedule actual deletion after grace period
+  setTimeout(() => {
+    const g = gates.get(key);
+    if (g && g.reset && g.running === 0 && g.queue.length === 0) {
+      gates.delete(key);
+    }
+  }, 60_000).unref?.();
 }
 
 export function resetAll(): void {

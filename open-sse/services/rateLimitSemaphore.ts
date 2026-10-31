@@ -8,11 +8,10 @@
  * All state is in-memory — resets on server restart (by design, since rate-limit
  * windows are typically short-lived).
  */
-
 interface QueueItem {
   resolve: (release: () => void) => void;
   reject: (error: Error) => void;
-  timer: ReturnType<typeof setTimeout>;
+  timer: NodeJS.Timeout;
 }
 
 interface ModelGate {
@@ -20,6 +19,8 @@ interface ModelGate {
   max: number;
   queue: QueueItem[];
   rateLimitedUntil: number | null;
+  /** Tracked timeouts for cooldown drain to allow cleanup on shutdown. */
+  cooldownTimers?: NodeJS.Timeout[];
 }
 
 interface AcquireOptions {
@@ -58,6 +59,7 @@ function getGate(modelStr: string, maxConcurrency = 3): ModelGate {
       max: maxConcurrency,
       queue: [],
       rateLimitedUntil: null,
+      cooldownTimers: [],
     });
   }
   const gate = gates.get(modelStr)!;
@@ -195,13 +197,19 @@ export function markRateLimited(modelStr: string, cooldownMs: number): void {
   // A shorter cooldown must not shorten an active limit — keep the later expiry.
   gate.rateLimitedUntil = Math.max(gate.rateLimitedUntil ?? 0, Date.now() + cooldownMs);
 
-  // Schedule drain after cooldown expires
-  setTimeout(() => {
+  // Schedule drain after cooldown expires and track timer for cleanup
+  const timer = setTimeout(() => {
     if (gate.rateLimitedUntil && Date.now() >= gate.rateLimitedUntil) {
       gate.rateLimitedUntil = null;
       drainQueue(modelStr);
     }
+    // Remove from tracking after execution
+    if (gate.cooldownTimers) {
+      const idx = gate.cooldownTimers.indexOf(timer);
+      if (idx >= 0) gate.cooldownTimers.splice(idx, 1);
+    }
   }, cooldownMs + 50); // +50ms buffer
+  gate.cooldownTimers?.push(timer);
 }
 
 /**
@@ -234,6 +242,24 @@ export function resetAll(): void {
       clearTimeout(item.timer);
       item.reject(new Error("Semaphore reset"));
     }
+    // Clear all cooldown timers
+    if (gate.cooldownTimers) {
+      for (const timer of gate.cooldownTimers) {
+        clearTimeout(timer);
+      }
+    }
   }
   gates.clear();
+}
+
+/** Stops all rate limit cooldown timers. Useful for testing and graceful shutdown. */
+export function stopRateLimitTimers(): void {
+  for (const [, gate] of gates) {
+    if (gate.cooldownTimers) {
+      for (const timer of gate.cooldownTimers) {
+        clearTimeout(timer);
+      }
+      gate.cooldownTimers = [];
+    }
+  }
 }
