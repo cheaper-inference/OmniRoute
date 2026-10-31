@@ -16,6 +16,11 @@ coverage, and reconciliation steps.
 - **Node.js** `>=22.22.2 <23`, or `>=24.0.0 <27` (recommended: 24 LTS)
 - **npm** 10+
 
+> **Windows with Node 24:** use the current 24 LTS patch release (at least 24.20.0).
+> Earlier releases can abort after successful tests when `--test-force-exit` closes the
+> process. Node's [Windows libuv fix](https://github.com/nodejs/node/pull/61999) addresses
+> this runtime crash; keep the test assertions and runner exit checks enabled.
+
 > **npm v11+ users (Node 24+):** After `npm install`, verify native modules were installed:
 > `node -e "require('better-sqlite3')"`. If it fails with `MODULE_NOT_FOUND`,
 > run `npm approve-scripts better-sqlite3 && npm install`. See
