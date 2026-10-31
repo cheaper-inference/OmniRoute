@@ -1,4 +1,8 @@
-import { hasTrustedEmptyTurn, inheritEmptyTurnPolicy } from "./emptyTurnPolicy.ts";
+import {
+  getEmptyTurnDiagnostics,
+  hasTrustedEmptyTurn,
+  inheritEmptyTurnPolicy,
+} from "./emptyTurnPolicy.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
 import {
@@ -899,6 +903,10 @@ export async function ensureStreamReadiness(
           !hasTrustedEmptyTurn(response)
         ) {
           const reason = "Provider returned empty content";
+          options.log?.warn?.(
+            "STREAM",
+            `detector=readiness native=${JSON.stringify(getEmptyTurnDiagnostics(response))}`
+          );
           return {
             ok: false,
             reason,

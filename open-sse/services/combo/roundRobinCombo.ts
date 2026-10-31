@@ -83,6 +83,7 @@ import {
   toRetryAfterDisplayValue,
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
+import { getEmptyTurnDiagnostics } from "../../utils/emptyTurnPolicy.ts";
 import {
   TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
@@ -832,7 +833,8 @@ export async function handleRoundRobinCombo({
               releaseRejectedQualityResponse(rrClone, result);
               log.warn(
                 "COMBO-RR",
-                `${modelStr} returned 200 but failed quality check: ${quality.reason}`
+                `${modelStr} returned 200 but failed quality check: ${quality.reason}; ` +
+                  `detector=combo-quality native=${JSON.stringify(getEmptyTurnDiagnostics(result))}`
               );
               // #6692: same rationale as handleComboChat's quality-fail branch —
               // a quality-rejected 200 never marks the connection row unhealthy,
