@@ -3152,7 +3152,8 @@ export async function markAccountUnavailable(
     };
     const persistUnavailableState = options.persistUnavailableState !== false;
 
-    if (!persistUnavailableState) {
+    if (!persistUnavailableState && !terminalStatus) {
+      // Terminal account failures must persist even when a combo owns transient cooldowns.
       // Combo-managed transient failure (e.g. 429): keep the connection clean in
       // the DB, but record an in-memory model lockout so credential selection
       // skips this exact provider+connection+model while it cools down — other
