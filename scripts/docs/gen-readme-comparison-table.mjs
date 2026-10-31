@@ -9,7 +9,7 @@
 // the drawn text and the subset input for the embedded fonts. The canonical numbers stay in
 // <text>/<desc> because scripts/check/check-docs-counts-sync.mjs reads them from the raw file.
 // The table is a dated snapshot of each project's docs — cells are kept verbatim; only the
-// provider total follows the live code (377), which the counts gate enforces.
+// provider total follows the live code (380), which the counts gate enforces.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { buildFontFaceCss } from "./readme-fonts.mjs";

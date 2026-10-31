@@ -8,7 +8,7 @@ import {
   type CliVersionOverrides,
   type CliVersionSource,
   type CliVersionStatus,
-} from "@/shared/constants/cliVersions";
+} from "@omniroute/open-sse/config/cliVersions.ts";
 import {
   CLAUDE_CODE_CLIENT_VERSION,
   getClaudeCodeClientVersion,
@@ -25,7 +25,7 @@ import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 // GET / PUT the operator-set CLI client-version overrides that sit on top of the
 // CLAUDE_CODE_CLIENT_VERSION / CODEX_CLIENT_VERSION env vars and the captured
-// pins (src/shared/constants/cliVersions.ts).
+// pins (open-sse/config/cliVersions.ts).
 //
 // The response surfaces WHICH layer won (`source`) because the most common
 // support question about this subsystem is "why isn't my override taking

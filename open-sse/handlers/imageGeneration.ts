@@ -13,7 +13,7 @@ import {
 
 import { getImageProvider, parseImageModel } from "../config/imageRegistry.ts";
 import { handleGrokImageGeneration } from "./grokMedia.ts";
-import { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
+import { saveCallLog, saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 export { saveImageSuccessResult, saveImageErrorResult } from "./imageResult.ts";
 import { HTTP_STATUS } from "../config/constants.ts";
 import { applyAntigravityClientProfileHeaders } from "../services/antigravityClientProfile.ts";
@@ -22,7 +22,6 @@ import { kieExecutor } from "../executors/kie.ts";
 import { mapImageSize } from "../translator/image/sizeMapper.ts";
 import { getCodexClientVersion, getCodexUserAgent } from "../config/codexClient.ts";
 import { isCodexFreePlan } from "../executors/codex/tools.ts";
-import { saveCallLog } from "@/lib/usageDb";
 import { sleep } from "../utils/sleep.ts";
 import { normalizeImageBuffer } from "../utils/imageNormalize.ts";
 import {

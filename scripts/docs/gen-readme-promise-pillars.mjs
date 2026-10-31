@@ -36,7 +36,7 @@ export const PROMISE_PILLARS_COPY = {
     "RTK + Caveman stacked compression cuts",
     "15–95% of eligible tokens — ~89% average",
     "on tool-heavy sessions.",
-    "150+ providers with a free tier, 52 free",
+    "150+ providers with a free tier, 53 free",
     "forever — Qoder, Pollinations, Cloudflare,",
     "SiliconFlow… No card needed.",
     "37 CLI/agent integrations — Claude Code, Codex,",

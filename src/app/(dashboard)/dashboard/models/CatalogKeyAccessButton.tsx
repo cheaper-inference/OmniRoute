@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useId, useRef, useState, type RefObject } from "react";
-import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
+import { Switch } from "@omniroute/ui-kit/switch";
 import { Button } from "@/shared/components";
+import { cn } from "@/shared/utils/cn";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
   countKeysAllowing,
@@ -17,28 +18,7 @@ import {
 } from "./keyAccessAssignUtils";
 import type { ApiKeyAccessIndex } from "./useApiKeyAccessIndex";
 
-const POPOVER_WIDTH = 320;
-const POPOVER_MAX_HEIGHT = 320;
-const GAP = 4;
-
-type PopoverPosition = { top?: number; bottom?: number; right: number };
-
-/** Fixed coordinates next to the trigger, so the table's scroll container cannot clip it. */
-function popoverPosition(trigger: HTMLElement): PopoverPosition {
-  const rect = trigger.getBoundingClientRect();
-  const right = Math.max(
-    GAP,
-    Math.min(window.innerWidth - rect.right, window.innerWidth - POPOVER_WIDTH - GAP)
-  );
-  const fitsBelow = rect.bottom + GAP + POPOVER_MAX_HEIGHT <= window.innerHeight;
-  return fitsBelow || rect.top < POPOVER_MAX_HEIGHT
-    ? { top: rect.bottom + GAP, right }
-    : { bottom: window.innerHeight - rect.top + GAP, right };
-}
-
-function isInside(refs: RefObject<HTMLElement | null>[], node: EventTarget | null): boolean {
-  return node instanceof Node && refs.some((ref) => ref.current?.contains(node));
-}
+const POPOVER_GAP = 4;
 
 function keyAccessHint(
   access: ReturnType<typeof getModelAccess>,
@@ -103,77 +83,29 @@ function KeyAccessRow({
           </Link>
         )}
       </div>
-      <button
-        type="button"
-        role="switch"
+      <Switch
+        checked={access.allowed}
         aria-checked={access.allowed}
         aria-label={t("toggleKeyAccess", { item: id, name: accessKey.name })}
         aria-busy={pending || undefined}
         title={hint ?? undefined}
         disabled={disabled || lastItem}
-        className="rounded border border-border px-3 py-1 text-sm disabled:opacity-50 aria-busy:opacity-60"
-        onClick={() => void toggle()}
-      >
-        {access.allowed ? "✓" : "−"}
-      </button>
+        className={cn(
+          "ci-switch--compact",
+          (disabled || lastItem) && "opacity-50",
+          pending && "opacity-60"
+        )}
+        onCheckedChange={() => void toggle()}
+      />
     </div>
   );
 }
 
-function useKeyAccessPopoverEvents({
-  open,
-  setPosition,
-  container,
-  popover,
-  trigger,
-}: {
-  open: boolean;
-  setPosition: React.Dispatch<React.SetStateAction<PopoverPosition | null>>;
-  container: RefObject<HTMLDivElement | null>;
-  popover: RefObject<HTMLDivElement | null>;
-  trigger: RefObject<HTMLButtonElement | null>;
-}) {
-  useEffect(() => {
-    if (!open) return;
-    const close = (event: MouseEvent) => {
-      if (!isInside([container, popover], event.target)) setPosition(null);
-    };
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setPosition(null);
-        trigger.current?.focus();
-      }
-    };
-    const follow = () => {
-      if (trigger.current) setPosition(popoverPosition(trigger.current));
-    };
-    document.addEventListener("mousedown", close);
-    document.addEventListener("keydown", escape);
-    window.addEventListener("resize", follow);
-    window.addEventListener("scroll", follow, true);
-    return () => {
-      document.removeEventListener("mousedown", close);
-      document.removeEventListener("keydown", escape);
-      window.removeEventListener("resize", follow);
-      window.removeEventListener("scroll", follow, true);
-    };
-  }, [open, setPosition, container, popover, trigger]);
-}
 interface CatalogKeyAccessButtonProps {
   kind: AccessKind;
   id: string;
   providerId?: string;
   index: ApiKeyAccessIndex;
-}
-function useKeyAccessPopover() {
-  const popoverId = useId();
-  const [position, setPosition] = useState<PopoverPosition | null>(null);
-  const open = position !== null;
-  const container = useRef<HTMLDivElement>(null);
-  const popover = useRef<HTMLDivElement>(null);
-  const trigger = useRef<HTMLButtonElement>(null);
-  useKeyAccessPopoverEvents({ open, setPosition, container, popover, trigger });
-  return { popoverId, position, setPosition, open, container, popover, trigger };
 }
 export default function CatalogKeyAccessButton({
   kind,
@@ -183,72 +115,55 @@ export default function CatalogKeyAccessButton({
 }: CatalogKeyAccessButtonProps) {
   const t = useTranslations("modelCatalog");
   const cliTools = useTranslations("cliTools");
-  const { popoverId, position, setPosition, open, container, popover, trigger } =
-    useKeyAccessPopover();
   const now = index.checkedAt;
   const usableKeys = index.keys.filter((key) => isKeyUsable(key, now));
   return (
-    // React forwards focus events from the portal, so focus leaving both parts closes it.
-    <div
-      ref={container}
-      className="relative inline-block"
-      onBlur={(event) => {
-        if (open && !isInside([container, popover], event.relatedTarget)) setPosition(null);
-      }}
-    >
-      <button
-        ref={trigger}
-        type="button"
-        data-testid={`key-access-${kind}-${id}`}
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        aria-controls={open ? popoverId : undefined}
-        className="rounded px-2 py-1 text-xs text-primary hover:bg-primary/10"
-        onClick={() => {
-          setPosition(open || !trigger.current ? null : popoverPosition(trigger.current));
-          void index.ensureLoaded();
+    // The kit Popover portals to <body> (the table's scroll container cannot clip it) and owns
+    // positioning, Escape, outside dismissal and returning focus to the trigger.
+    <Popover>
+      <PopoverTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          data-testid={`key-access-${kind}-${id}`}
+          className="text-primary"
+          onClick={() => void index.ensureLoaded()}
+        >
+          {index.keys.length
+            ? t("allowedInKeys", {
+                count: countKeysAllowing(index.keys, kind, id, providerId, now),
+              })
+            : t("keyAccessButton")}
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent
+        aria-label={t("keyAccessButton")}
+        align="end"
+        sideOffset={POPOVER_GAP}
+        className="max-h-80 w-80 overflow-auto p-3 text-left"
+        // Focus stays where it was on open, and only focus leaving an element closes the panel:
+        // focus arriving from nowhere (a modal mounting elsewhere) is not the user leaving it.
+        onOpenAutoFocus={(event) => event.preventDefault()}
+        onFocusOutside={(event) => {
+          if (!event.detail.originalEvent.relatedTarget) event.preventDefault();
         }}
       >
-        {index.keys.length
-          ? t("allowedInKeys", {
-              count: countKeysAllowing(index.keys, kind, id, providerId, now),
-            })
-          : t("keyAccessButton")}
-      </button>
-      {open &&
-        createPortal(
-          <div
-            ref={popover}
-            id={popoverId}
-            role="dialog"
-            aria-label={t("keyAccessButton")}
-            tabIndex={-1}
-            style={{
-              position: "fixed",
-              ...position,
-              width: POPOVER_WIDTH,
-              maxHeight: POPOVER_MAX_HEIGHT,
-            }}
-            className="z-40 overflow-auto rounded-lg border border-border bg-surface p-3 text-left shadow-xl"
-          >
-            {index.loading && <p className="text-sm text-text-muted">{t("keysLoading")}</p>}
-            {index.error && <Button onClick={() => void index.refresh()}>{t("keysRetry")}</Button>}
-            {!index.loading && !index.error && usableKeys.length === 0 && (
-              <p className="text-sm text-text-muted">{cliTools("noApiKeysAvailable")}</p>
-            )}
-            {usableKeys.map((key) => (
-              <KeyAccessRow
-                key={key.id}
-                accessKey={key}
-                kind={kind}
-                id={id}
-                providerId={providerId}
-                index={index}
-              />
-            ))}
-          </div>,
-          document.body
+        {index.loading && <p className="text-sm text-text-muted">{t("keysLoading")}</p>}
+        {index.error && <Button onClick={() => void index.refresh()}>{t("keysRetry")}</Button>}
+        {!index.loading && !index.error && usableKeys.length === 0 && (
+          <p className="text-sm text-text-muted">{cliTools("noApiKeysAvailable")}</p>
         )}
-    </div>
+        {usableKeys.map((key) => (
+          <KeyAccessRow
+            key={key.id}
+            accessKey={key}
+            kind={kind}
+            id={id}
+            providerId={providerId}
+            index={index}
+          />
+        ))}
+      </PopoverContent>
+    </Popover>
   );
 }

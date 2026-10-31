@@ -22,6 +22,8 @@ export type RuntimeCompressionCombo = {
   languagePacks: string[];
   outputMode: boolean;
   outputModeIntensity: string;
+  /** Per-combo style selection; empty/undefined inherits the global panel. */
+  outputStyles?: CompressionConfig["outputStyles"];
 };
 
 export function isBuiltinStackedPipeline(

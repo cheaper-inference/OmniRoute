@@ -141,7 +141,7 @@ function identityFromUri(raw: string): string | null {
     .digest("hex");
 }
 
-function nodeIdentity(source: NodeSource): string | null {
+export function nodeIdentity(source: NodeSource): string | null {
   if (!source) return null;
   if (source.kind === "object") {
     if (!source.value || typeof source.value !== "object") return null;
