@@ -439,7 +439,40 @@ export async function sendAntigravityRequest(
     }
   }
 
+  // A 403 VALIDATION_REQUIRED carries Google's "verify your account" link. The client error
+  // envelope built from this response drops it (the link holds a continuation token), so it
+  // has to be stored here, while the raw body is still in hand (#16532 follow-up).
+  if (response.status === HTTP_STATUS.FORBIDDEN && credentials.connectionId) {
+    await rememberVerificationLink(provider, credentials.connectionId, response, log);
+  }
+
   return { response, finalHeaders };
+}
+
+async function rememberVerificationLink(
+  provider: string,
+  connectionId: string,
+  response: Response,
+  log: SafeAntigravityLog
+): Promise<void> {
+  try {
+    const rawBody = await response.clone().text();
+    // Lazy import: keeps the DB-backed recorder out of this module's static graph (same
+    // async ESM init-cycle concern as the ../antigravity.ts import above).
+    const { recordAntigravityVerificationUrl } =
+      await import("../../handlers/chatCore/antigravityVerificationState.ts");
+    await recordAntigravityVerificationUrl({
+      provider,
+      connectionId,
+      upstreamErrorBody: rawBody,
+      message: "",
+    });
+  } catch (err) {
+    log.warn(
+      "VERIFY",
+      `[Antigravity] Could not store the verification link: ${err instanceof Error ? err.name : "unknown error"}`
+    );
+  }
 }
 
 /**
