@@ -1,0 +1,1 @@
+- **feat(resilience):** opt-in `OMNIROUTE_EXECUTION_EXPIRATION_MS` scales the execution deadline for large non-streaming generations by `max_tokens` (~20ms/token, capped at 15 min), so a long non-stream decode is not killed at the base deadline mid-generation ([#18657](https://github.com/cheaper-inference/OmniRoute/pull/18657)) — thanks @jjxyxsjr
