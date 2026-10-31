@@ -200,9 +200,20 @@ export default function ComboDefaultsTab() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // The banner timer outlives the component: without a handle to clear it, a save
+  // that lands just before unmount fires a state update into a torn-down tree.
+  const statusTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    },
+    []
+  );
+
   const showStatus = (type: "success" | "error", message: string) => {
     setStatus({ type, message });
-    setTimeout(() => setStatus({ type: "", message: "" }), 2500);
+    if (statusTimerRef.current) clearTimeout(statusTimerRef.current);
+    statusTimerRef.current = setTimeout(() => setStatus({ type: "", message: "" }), 2500);
   };
 
   const syncGlobalRoutingSettings = async (patch: Record<string, unknown>) => {

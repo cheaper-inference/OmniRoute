@@ -20,6 +20,7 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { pathToFileURL } from "node:url";
 
 const DEFAULT_AUTHORITY = "https://login.microsoftonline.com";
 
@@ -409,6 +410,6 @@ async function main() {
   await handler(argv);
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   main().catch((error) => fail(`Unexpected error: ${error.message}`));
 }
