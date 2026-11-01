@@ -208,6 +208,18 @@ test("blocking one no-auth provider leaves the others usable", async () => {
   assert.equal(usable, true);
 });
 
+test("unblocking restores usability for the provider", async () => {
+  await resetStorage();
+  await settingsDb.updateSettings({ blockedProviders: ["uncloseai"] });
+  assert.equal(await hasUsableCredentialsForModel("unc/some-model"), false);
+  await settingsDb.updateSettings({ blockedProviders: [] });
+  assert.equal(
+    await hasUsableCredentialsForModel("unc/some-model"),
+    true,
+    "removing the block must restore the synthetic no-auth path"
+  );
+});
+
 test("keyed provider in blockedProviders is NOT excluded (dispatch ignores the list for keyed providers)", async () => {
   await resetStorage();
   await providersDb.createProviderConnection({
