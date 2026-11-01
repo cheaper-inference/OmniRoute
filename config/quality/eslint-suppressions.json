@@ -1088,11 +1088,6 @@
       "count": 1
     }
   },
-  "src/app/login/page.tsx": {
-    "@typescript-eslint/no-unused-vars": {
-      "count": 3
-    }
-  },
   "src/domain/assessment/assessor.ts": {
     "@typescript-eslint/no-unused-vars": {
       "count": 1

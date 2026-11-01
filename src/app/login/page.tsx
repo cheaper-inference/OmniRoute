@@ -13,7 +13,7 @@ import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
 import { Spinner } from "@/shared/components/Loading";
-import { AlertDescription, AlertTitle } from "@omniroute/ui-kit/alert";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { useRouter } from "next/navigation";
 import { withBasePath } from "@/shared/utils/basePath";
 
@@ -32,7 +32,7 @@ export default function LoginPage() {
   const router = useRouter();
 
   useEffect(() => {
-    const raf = requestAnimationFrame(() => setMounted(true));
+    requestAnimationFrame(() => setMounted(true));
     async function checkAuth() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -61,7 +61,7 @@ export default function LoginPage() {
           setOidcEnabled(false);
           setOidcDisablePasswordLogin(false);
         }
-      } catch (err) {
+      } catch {
         clearTimeout(timeoutId);
         setHasPassword(true);
         setSetupComplete(true);
@@ -96,7 +96,7 @@ export default function LoginPage() {
         }
         setError(data.error || t("invalidPassword"));
       }
-    } catch (err) {
+    } catch {
       setError(t("errorOccurredRetry"));
     } finally {
       setLoading(false);
@@ -106,20 +106,13 @@ export default function LoginPage() {
   const nodeWarningBanner =
     !nodeCompatible && nodeVersion ? (
       <div className="w-full max-w-lg mx-auto mb-6 animate-in fade-in slide-in-from-top-2 duration-500">
-        {/* Kit alert parts without the dismiss control: the Node warning is a permanent banner
-            (the kit Alert always renders a dismiss button — kit gap). */}
-        <div
-          role="alert"
-          data-slot="alert"
-          data-variant="critical"
-          className="ci-alert ci-alert--critical"
-        >
-          <span className="ci-alert__icon">
-            <Icon name="error" size={20} />
-          </span>
-          <div className="ci-alert__body">
-            <AlertTitle>{t("nodeIncompatibleTitle")}</AlertTitle>
-            <AlertDescription>
+        <Alert
+          variant="critical"
+          dismissible={false}
+          icon={<Icon name="error" size={20} />}
+          title={t("nodeIncompatibleTitle")}
+          description={
+            <>
               <p className="mb-3">{t("nodeIncompatibleDesc", { version: nodeVersion })}</p>
               <div className="rounded-control border border-border bg-bg-subtle px-4 py-3 font-mono text-sm">
                 <div className="mb-1 flex items-center gap-2 text-text-muted">
@@ -132,9 +125,9 @@ export default function LoginPage() {
                 <Icon name="info" size={14} />
                 {t("nodeIncompatibleHint")}
               </p>
-            </AlertDescription>
-          </div>
-        </div>
+            </>
+          }
+        />
       </div>
     ) : null;
   if (
