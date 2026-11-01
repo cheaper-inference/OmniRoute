@@ -1,0 +1,1 @@
+- Reject malformed or unowned Responses tool history before upstream dispatch instead of fabricating successful outputs.

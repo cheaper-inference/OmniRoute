@@ -28,3 +28,19 @@ export function coerceToolCallArguments(value: unknown): string {
     return "{}";
   }
 }
+
+export function coerceHistoricalToolCallArguments(value: unknown, callId: string): string {
+  if (value === undefined || value === null || value === "") return "{}";
+  if (typeof value !== "string") return coerceToolCallArguments(value);
+  try {
+    JSON.parse(value);
+    return value;
+  } catch {
+    const error = new Error(
+      `Historical tool call ${callId || "(unknown)"} has malformed arguments`
+    ) as Error & { statusCode: number; errorType: string };
+    error.statusCode = 400;
+    error.errorType = "invalid_tool_call_arguments";
+    throw error;
+  }
+}

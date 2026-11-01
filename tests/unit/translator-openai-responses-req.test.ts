@@ -908,42 +908,16 @@ test("Chat -> Responses normalizes reasoning_effort max to xhigh", () => {
   assert.equal((result as any).reasoning_effort, undefined);
 });
 
-test("Chat -> Responses filters orphan function_call_output items and leaves empty instructions when absent", () => {
-  const result = openaiToOpenAIResponsesRequest(
-    "gpt-4o",
-    {
-      messages: [
-        { role: "user", content: "Hello" },
-        { role: "tool", tool_call_id: "orphan", content: "skip" },
-        {
-          role: "assistant",
-          tool_calls: [
-            {
-              id: "call_2",
-              type: "function",
-              function: { name: "search", arguments: "{}" },
-            },
-          ],
-        },
-        { role: "tool", tool_call_id: "call_2", content: "found" },
-      ],
-    },
-    false,
-    null
-  );
-
-  assert.equal((result as any).instructions, "");
-  assert.equal(
-    (result as any).input.some((item) => item.call_id === "orphan"),
-    false
-  );
-  assert.equal(
-    (result as any).input.filter((item) => item.type === "function_call_output").length,
-    1
-  );
-  assert.equal(
-    (result as any).input.find((item) => item.type === "function_call_output").call_id,
-    "call_2"
+test("Chat -> Responses rejects orphan function_call_output items", () => {
+  assert.throws(
+    () =>
+      openaiToOpenAIResponsesRequest(
+        "gpt-4o",
+        { messages: [{ role: "tool", tool_call_id: "orphan", content: "skip" }] },
+        false,
+        null
+      ),
+    /does not match a local tool call/i
   );
 });
 

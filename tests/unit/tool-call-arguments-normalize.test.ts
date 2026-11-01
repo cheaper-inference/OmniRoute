@@ -159,9 +159,57 @@ test("Chat→Responses: deprecated function_call with object arguments is serial
         content: null,
         function_call: { name: "get_weather", arguments: { city: "SF" } },
       },
+      { role: "function", name: "get_weather", content: "done" },
     ],
   };
   const calls = responsesFunctionCalls(body);
   assert.equal(calls.length, 1);
   assert.equal(calls[0].arguments, '{"city":"SF"}');
+});
+
+test("Chat→Responses: supplied malformed nonempty arguments fail closed", () => {
+  for (const args of ["   ", '{"city":', "San Francisco"])
+    assert.throws(() => responsesFunctionCalls(chatBody(args)));
+});
+test("Chat→Responses: pending call does not synthesize an empty completed output", () => {
+  const body = chatBody("{}");
+  body.messages.pop();
+  const result = translateRequest(
+    "openai",
+    "openai-responses",
+    "gpt-4o",
+    body,
+    false,
+    {},
+    "openai"
+  ) as { input: Array<Record<string, unknown>> };
+  assert.equal(result.input.filter((item) => item.type === "function_call").length, 1);
+  assert.equal(result.input.filter((item) => item.type === "function_call_output").length, 0);
+});
+test("Chat→Responses: previous_response_id continuation preserves output without a local call", () => {
+  const body = {
+    model: "gpt-4o",
+    previous_response_id: "resp_prev",
+    messages: [{ role: "tool", tool_call_id: "call_remote", content: "done" }],
+  };
+  const result = translateRequest(
+    "openai",
+    "openai-responses",
+    "gpt-4o",
+    body,
+    false,
+    {},
+    "openai"
+  ) as { input: Array<Record<string, unknown>> };
+  assert.equal(result.input[0]?.call_id, "call_remote");
+});
+test("Chat→Responses: orphan output without previous_response_id fails closed", () => {
+  const body = {
+    model: "gpt-4o",
+    messages: [{ role: "tool", tool_call_id: "call_orphan", content: "done" }],
+  };
+  assert.throws(
+    () => translateRequest("openai", "openai-responses", "gpt-4o", body, false, {}, "openai"),
+    /does not match a local tool call/i
+  );
 });

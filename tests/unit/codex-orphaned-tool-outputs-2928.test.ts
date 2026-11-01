@@ -120,7 +120,7 @@ test("Codex preserves tool outputs linked to a remote previous_response_id", () 
   ]);
 });
 
-test("Codex leaves inputs without function_call_output items unchanged", () => {
+test("Codex leaves an unmatched function_call incomplete instead of fabricating output", () => {
   const input = [
     {
       type: "message",
@@ -130,9 +130,5 @@ test("Codex leaves inputs without function_call_output items unchanged", () => {
     { type: "function_call", call_id: "call_1", name: "read_file", arguments: "{}" },
   ];
 
-  assert.deepEqual(transform(input), [
-    input[0],
-    input[1],
-    { type: "function_call_output", call_id: "call_1", output: "" },
-  ]);
+  assert.deepEqual(transform(input), [input[0], input[1]]);
 });
