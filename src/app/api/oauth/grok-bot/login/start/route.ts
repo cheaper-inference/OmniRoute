@@ -13,8 +13,8 @@ async function requireOAuthAuth(request: Request) {
 
 /**
  * POST /api/oauth/grok-bot/login/start
- * Begin the Grok Bot deep-control login. The verifier stays server-side.
- * redirectTarget is "sand": a "cli" grant cannot call GrokBotService.
+ * Begin login using the shared Cursor authorization/session helpers.
+ * The verifier stays server-side.
  */
 export async function POST(request: Request) {
   const authResponse = await requireOAuthAuth(request);

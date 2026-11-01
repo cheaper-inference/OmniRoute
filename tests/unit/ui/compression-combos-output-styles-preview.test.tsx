@@ -86,10 +86,12 @@ describe("NamedCombosManager — output-style preview language", () => {
     const container = await render();
 
     // Default packs are ["en"], so the zh-gated row is not offered yet.
-    expect(container.querySelector('[data-testid="combo-output-style-toggle-terse-cjk"]')).toBeNull();
+    expect(
+      container.querySelector('[data-testid="combo-output-style-toggle-terse-cjk"]')
+    ).toBeNull();
 
-    const zhPack = Array.from(container.querySelectorAll("input[type=checkbox]")).find(
-      (box) => (box.closest("label")?.textContent ?? "").trim().startsWith("zh")
+    const zhPack = Array.from(container.querySelectorAll("input[type=checkbox]")).find((box) =>
+      (box.closest("label")?.textContent ?? "").trim().startsWith("zh")
     ) as HTMLInputElement;
     expect(zhPack).toBeTruthy();
     await act(async () => {

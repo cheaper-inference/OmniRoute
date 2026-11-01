@@ -23,11 +23,9 @@ import { emptyPresence, readPresence, statusOf, type Presence } from "./presence
 import { idle, isTerminal, reduce, type SessionState } from "./session";
 import { grokBotAccounts, grokBotRegions, statusKey } from "./regions";
 import {
-  AccountsPanel,
   ComputersPanel,
   ConsoleBar,
   ConversationPanel,
-  RosterPanel,
   SkillsPanel,
   type Translate,
 } from "./panels";
@@ -49,7 +47,6 @@ export default function GrokBotPage() {
   const t = useTranslations("grokBotPage");
   const regions = grokBotRegions((key) => t(key));
   const accountRegion = regions.find((region) => region.id === "accounts") ?? regions[0];
-  const rosterRegion = regions.find((region) => region.id === "roster") ?? regions[1];
   const conversationRegion = regions.find((region) => region.id === "conversation") ?? regions[2];
   const skillRegion = regions.find((region) => region.id === "skills") ?? regions[3];
   const computerRegion = regions.find((region) => region.id === "computers") ?? regions[4];
@@ -69,7 +66,6 @@ export default function GrokBotPage() {
   const [cards, setCards] = useState<TranscriptCard[]>([]);
   const [cardState, setCardState] = useState("");
   const [cardBusy, setCardBusy] = useState(false);
-  const [closedCards, setClosedCards] = useState<string[]>([]);
   const closedNow = useRef<string[]>([]);
   const [permissionState, setPermissionState] = useState("");
   const [historyUnavailable, setHistoryUnavailable] = useState(false);
@@ -116,13 +112,14 @@ export default function GrokBotPage() {
     setCards([]);
     setCardState("");
     setCardBusy(false);
-    setClosedCards([]);
     closedNow.current = [];
     setPermissionState("");
     setHistoryUnavailable(false);
   };
 
   const switchAccount = (id: string) => {
+    if (id === selectedAccount) return;
+    setRosterLoading(id !== "");
     setRoster([]);
     setComputers([]);
     setSelectedBot("");
@@ -137,12 +134,6 @@ export default function GrokBotPage() {
     setSkills([]);
     setRoutines([]);
     forgetConversation();
-    const resumed = resumeTranscript(
-      remembered.current,
-      selectedAccount,
-      agentId,
-      connectionUpdatedAt
-    );
     setMessages(shownByBot.current[`${selectedAccount}:${agentId}`] ?? []);
     setSelectedBot(agentId);
   };
@@ -165,10 +156,10 @@ export default function GrokBotPage() {
   useEffect(() => {
     if (!selectedAccount) return;
     const controller = new AbortController();
-    setRosterLoading(true);
     fetch(`/api/providers/${selectedAccount}/grok-bot`, { signal: controller.signal })
       .then((response) => (response.ok ? response.json() : { roster: [] }))
       .then((data) => {
+        if (controller.signal.aborted) return;
         setRoster(rosterEntries(data?.roster));
         setComputers(grokBotComputers(data));
         setConnectionUpdatedAt(
@@ -177,6 +168,7 @@ export default function GrokBotPage() {
       })
       .catch((error: unknown) => {
         if (error instanceof DOMException && error.name === "AbortError") return;
+        if (controller.signal.aborted) return;
         setRoster([]);
         setComputers([]);
       })
@@ -300,7 +292,7 @@ export default function GrokBotPage() {
       clearInterval(ageing);
       opened.abort();
     };
-  }, [selectedAccount, selectedBot, retryNonce]);
+  }, [selectedAccount, selectedBot, retryNonce, connectionUpdatedAt]);
 
   const postSend = (account: string, agentId: string, text: string, messageId: string) =>
     fetch(`/api/providers/${encodeURIComponent(account)}/grok-bot/send`, {
@@ -333,7 +325,6 @@ export default function GrokBotPage() {
     const identity = card.entryId;
     if (close && identity !== "") {
       closedNow.current = [...closedNow.current, identity];
-      setClosedCards(closedNow.current);
     }
     setCards((held) =>
       held.filter((item) => (item.entryId !== "" ? item.entryId : item.seq) !== identity)

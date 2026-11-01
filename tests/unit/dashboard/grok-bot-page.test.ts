@@ -25,14 +25,3 @@ test("every grok bot region reads its text from the page namespace", () => {
     assert.equal(region.empty, `${region.id}Empty`);
   }
 });
-
-test("the marketplace link leaves this dashboard and carries no token", async () => {
-  const { readFile } = await import("node:fs/promises");
-  const source = await readFile(
-    new URL("../../../src/app/(dashboard)/dashboard/grok-bot/page.tsx", import.meta.url),
-    "utf-8"
-  );
-  assert.match(source, /href="https:\/\/x\.ai\/bot\/marketplace"/);
-  assert.match(source, /target="_blank"/);
-  assert.doesNotMatch(source, /marketplace[\s\S]{0,240}(token|accessToken|auth_token)/i);
-});

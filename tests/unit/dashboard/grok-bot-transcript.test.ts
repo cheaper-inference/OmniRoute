@@ -533,13 +533,14 @@ test("the same words from the user and the bot stay two rows", () => {
 test("a mixed-role frame reuses each row's own id on the next frame", () => {
   const frame = [{ ...spoken("5", "ok"), role: "user" }, spoken("5", "ok")];
   let next = 0;
-  const named = frame.map((unused, index) => {
+  const named = Array.from(frame.keys(), (index) => {
     const result = localRowId([], frame, index, next, "acc:bot");
     next = result.next;
     return result.item;
   });
-  const replayed = frame.map(
-    (unused, index) => localRowId(named, frame, index, next, "acc:bot").item
+  const replayed = Array.from(
+    frame.keys(),
+    (index) => localRowId(named, frame, index, next, "acc:bot").item
   );
   assert.deepEqual(
     replayed.map((row) => row.entryId),

@@ -56,7 +56,7 @@ export interface CleanupSweeperOptions {
    * boot wiring uses the standard getAccessToken("grok-bot", ...) path.
    */
   refresh?(
-    credentials: { refreshToken?: string },
+    credentials: { refreshToken?: string; connectionId: string },
     log?: { warn?: (...args: unknown[]) => void } | undefined
   ): Promise<{ accessToken: string } | { error: string } | null>;
   now?(): number;
@@ -130,10 +130,12 @@ async function processItem(
   }
   const refresh =
     options.refresh ??
-    ((credentials: { refreshToken?: string }, l?: { warn?: (...args: unknown[]) => void }) =>
-      getAccessToken("grok-bot", credentials, l));
+    ((
+      credentials: { refreshToken?: string; connectionId: string },
+      l?: { warn?: (...args: unknown[]) => void }
+    ) => getAccessToken("grok-bot", credentials, l));
   const refreshed = await refresh(
-    { refreshToken: connection.refreshToken ?? undefined },
+    { refreshToken: connection.refreshToken ?? undefined, connectionId: item.connectionId },
     log ?? undefined
   );
   if (!refreshed || refreshed.error) {

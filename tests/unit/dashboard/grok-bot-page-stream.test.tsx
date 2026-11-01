@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import GrokBotPage from "@/app/(dashboard)/dashboard/grok-bot/page";
@@ -317,5 +317,124 @@ describe("Grok Bot page transcript wiring", () => {
     const deny = await screen.findByRole("button", { name: "Deny" });
     fireEvent.click(deny);
     await waitFor(() => expect(screen.queryByRole("button", { name: "Deny" })).toBeNull());
+  });
+});
+
+describe("Grok Bot account selection", () => {
+  it.each(["resolve", "reject"])("ignores a cancelled roster that later %ss", async (outcome) => {
+    let resolveOld!: (response: Response) => void;
+    let rejectOld!: (error: Error) => void;
+    let oldSignal: AbortSignal | null | undefined;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+        const url = String(input);
+        if (url === "/api/providers")
+          return Promise.resolve(
+            Response.json({
+              connections: [
+                { id: "old", name: "Old account", provider: "grok-bot" },
+                { id: "new", name: "New account", provider: "grok-bot" },
+              ],
+            })
+          );
+        if (url === "/api/providers/old/grok-bot") {
+          oldSignal = init?.signal;
+          return new Promise<Response>((resolve, reject) => {
+            resolveOld = resolve;
+            rejectOld = reject;
+          });
+        }
+        if (url === "/api/providers/new/grok-bot")
+          return Promise.resolve(
+            Response.json({
+              roster: [{ agentId: "new-bot", name: "New bot" }],
+              connectionUpdatedAt: "new-version",
+            })
+          );
+        throw new Error(`unexpected fetch: ${url}`);
+      })
+    );
+    page();
+    await screen.findByText("Old account");
+    const [account, bot] = screen.getAllByRole("combobox") as HTMLSelectElement[];
+    fireEvent.change(account, { target: { value: "old" } });
+    expect(bot.disabled).toBe(true);
+    fireEvent.change(account, { target: { value: "new" } });
+    await screen.findByText("New bot");
+    expect(oldSignal?.aborted).toBe(true);
+    expect(bot.disabled).toBe(false);
+    await act(async () => {
+      if (outcome === "resolve")
+        resolveOld(Response.json({ roster: [{ agentId: "old-bot", name: "Old bot" }] }));
+      else rejectOld(new Error("late transport failure"));
+      await flush();
+    });
+    expect(screen.queryByText("Old bot")).toBeNull();
+    expect(screen.queryByText("New bot")).not.toBeNull();
+    expect(bot.disabled).toBe(false);
+  });
+
+  it.each(["repeat", "interrupt"])("handles an account selection %s", async (action) => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((input: RequestInfo | URL) => {
+        const url = String(input);
+        if (url === "/api/providers")
+          return Promise.resolve(
+            Response.json({
+              connections: [
+                { id: "ready", name: "Ready account", provider: "grok-bot" },
+                { id: "pending", name: "Pending account", provider: "grok-bot" },
+              ],
+            })
+          );
+        if (url === "/api/providers/ready/grok-bot")
+          return Promise.resolve(
+            Response.json({
+              roster: [{ agentId: "ready-bot", name: "Ready bot" }],
+            })
+          );
+        if (url === "/api/providers/pending/grok-bot") return new Promise<Response>(() => {});
+        throw new Error(`unexpected fetch: ${url}`);
+      })
+    );
+    page();
+    await screen.findByText("Ready account");
+    const [account, bot] = screen.getAllByRole("combobox") as HTMLSelectElement[];
+    fireEvent.change(account, { target: { value: "ready" } });
+    await screen.findByText("Ready bot");
+    if (action === "repeat") {
+      fireEvent.change(account, { target: { value: "ready" } });
+      expect(screen.queryByText("Ready bot")).not.toBeNull();
+      expect(bot.disabled).toBe(false);
+      return;
+    }
+    fireEvent.change(account, { target: { value: "pending" } });
+    expect(bot.disabled).toBe(true);
+    fireEvent.change(account, { target: { value: "" } });
+    expect(bot.disabled).toBe(true);
+    expect(bot.options[0].text).toBe(messages.grokBotPage.rosterTitle);
+    expect(screen.queryByText("Ready bot")).toBeNull();
+  });
+});
+
+describe("Grok Bot marketplace navigation", () => {
+  it("renders a credential-free external link in a separate tab", async () => {
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      if (String(input) !== "/api/providers") throw new Error(`unexpected fetch: ${input}`);
+      return Response.json({ connections: [] });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    page();
+    await act(async () => {
+      await flush();
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Details" }));
+    const link = screen.getByRole("link", { name: "x.ai/bot/marketplace" });
+    expect(link.getAttribute("href")).toBe("https://x.ai/bot/marketplace");
+    expect(link.getAttribute("target")).toBe("_blank");
+    expect(link.getAttribute("rel")?.split(/\s+/)).toContain("noreferrer");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 });
