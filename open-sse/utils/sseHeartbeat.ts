@@ -63,7 +63,8 @@ function buildHeartbeatPayload(
         object: "chat.completion.chunk",
         created: Math.floor(Date.now() / 1000),
         model: opts.chunkModel ?? "keepalive",
-        choices: [{ index: 0, delta: {}, finish_reason: null }],
+        // Transport liveness must not initialize a client message before its role (#18410).
+        choices: [],
       };
       return `data: ${JSON.stringify(payload)}\n\n`;
     }

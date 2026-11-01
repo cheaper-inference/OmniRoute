@@ -26,10 +26,9 @@ import { readCodexPeekChunk, buildCodexTimeoutSafePassthroughBody } from "./code
 import { stripCodexPassthroughRejectedParams } from "./codex/stripPassthroughRejectedParams.ts";
 import {
   CODEX_CLI_RS_ORIGINATOR,
-  getCodexClientVersion,
-  getCodexClientVersionFromHeaders,
   getCodexUserAgent,
   normalizeCodexSessionId,
+  resolveCodexAdvertisedVersion,
 } from "../config/codexClient.ts";
 import type { KeyHealth } from "../services/apiKeyRotator.ts";
 import {
@@ -1213,8 +1212,8 @@ export class CodexExecutor extends BaseExecutor {
     // version (e.g. "The 'gpt-6-astra' model requires a newer version of Codex"),
     // so a hardcoded value silently rots whenever the user upgrades their CLI.
     // Falls back to the configured/default version when the caller sends none.
-    const clientVersion = getCodexClientVersionFromHeaders(clientHeaders);
-    headers.Version = clientVersion ?? getCodexClientVersion();
+    const clientVersion = resolveCodexAdvertisedVersion(clientHeaders);
+    headers.Version = clientVersion;
     setUserAgentHeader(headers, getCodexUserAgent(clientVersion));
 
     // Add workspace binding header if workspaceId is persisted

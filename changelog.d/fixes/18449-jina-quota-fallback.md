@@ -1,0 +1,1 @@
+- Continue automatic web-fetch fallback after Jina Reader returns HTTP402 for insufficient balance; preserve explicit-provider and authorization-error behavior.
