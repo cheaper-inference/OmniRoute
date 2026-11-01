@@ -84,6 +84,19 @@ function saveSnapshot(id: string, name: string, remaining: number) {
   });
 }
 
+function latestSnapshot(id: string, windowKey: string) {
+  const row = snapshots
+    .getLatestQuotaSnapshotsForConnection(id)
+    .map((snapshot) => snapshot as unknown as Record<string, unknown>)
+    .find((snapshot) => (snapshot.windowKey ?? snapshot.window_key) === windowKey);
+  assert.ok(row, `expected a durable snapshot for ${windowKey}`);
+  return row;
+}
+
+function snapshotCount(id: string) {
+  return snapshots.getQuotaSnapshots({ connectionId: id, since: iso(-86_400_000) }).length;
+}
+
 test.beforeEach((t) => {
   t.mock.timers.enable({ apis: ["Date"], now: NOW });
   t.mock.method(globalThis, "fetch", async () => {
@@ -448,4 +461,128 @@ test("non-Codex cached quota policy retains its existing behavior after five min
     }).blocked,
     true
   );
+});
+
+for (const policyEnabled of [true, false]) {
+  for (const [scope, model, session, weekly] of [
+    ["codex", NORMAL, "session", "weekly"],
+    ["spark", SPARK, "gpt_5_3_codex_spark_session", "gpt_5_3_codex_spark_weekly"],
+  ] as const) {
+    test(`unknown-first ${scope} cannot outrank a fresh denial (policy ${policyEnabled})`, async (t) => {
+      boundedParkFlag(t);
+      const c = await connection(policyEnabled, {
+        codexQuotaStateByScope: { [scope]: persisted(iso(-30_000)) },
+        codexExhaustedWindowByScope: { [scope]: "7d" },
+      });
+      assert.equal(cache.getQuotaCache(c.id), null);
+      cache.setQuotaCache(c.id, "codex", {
+        [session]: { ...quota(0), fractionReported: false },
+        [weekly]: { ...quota(0), fractionReported: false },
+      });
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", model), false);
+      cache.hydrateCodexQuotaCacheForRequest(c, model);
+      assert.equal(
+        cache.isQuotaExhaustedForRequest(c.id, "codex", model),
+        true,
+        "newer unknown timestamps must not outrank an actual fresh denial"
+      );
+      assert.equal(status(c.id, session).reachedThreshold, true);
+      assert.equal(status(c.id, weekly).reachedThreshold, true);
+      assert.equal(cache.getQuotaWindowObservation(c.id, weekly)?.observedAt, iso(-30_000));
+      assert.equal(auth.evaluateQuotaLimitPolicy("codex", c, model).blocked, policyEnabled);
+      assert.equal(
+        (await auth.getProviderCredentials("codex", null, [c.id], model)).allRateLimited,
+        true
+      );
+      t.mock.timers.setTime(NOW + TTL - 30_000);
+      assert.equal(cache.getQuotaWindowStatus(c.id, weekly), null);
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", model), false);
+      assert.equal(getQuotaCacheState().healthyUntil.has(c.id), false);
+    });
+  }
+}
+
+for (const start of ["cold", "warm", "warm repeated"] as const) {
+  for (const remaining of [0, 50]) {
+    test(`reported Codex ${remaining}% survives restart with ${start} stale snapshot`, async (t) => {
+      const c = await connection(false);
+      t.mock.timers.setTime(NOW - TTL * 2);
+      if (start === "cold") saveSnapshot(c.id, "weekly", remaining);
+      else cache.setQuotaCache(c.id, "codex", { weekly: quota(remaining) });
+      if (start === "warm repeated") {
+        for (let time = NOW - TTL * 2 + 60_000; time < NOW; time += 60_000) {
+          t.mock.timers.setTime(time);
+          cache.setQuotaCache(c.id, "codex", { weekly: quota(remaining) });
+        }
+      }
+      t.mock.timers.setTime(NOW);
+      if (start === "cold") cache.__clearForTests();
+      cache.setQuotaCache(c.id, "codex", { weekly: quota(remaining) });
+      assert.equal(status(c.id, "weekly").reachedThreshold, remaining === 0);
+      const saved = latestSnapshot(c.id, "weekly");
+      assert.equal(
+        saved.createdAt ?? saved.created_at,
+        iso(),
+        "a fresh reported observation must renew an expired durable snapshot"
+      );
+      cache.__clearForTests();
+      assert.equal(status(c.id, "weekly").remainingPercentage, remaining);
+      assert.equal(cache.getQuotaWindowObservation(c.id, "weekly")?.observedAt, iso());
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), remaining === 0);
+      t.mock.timers.setTime(NOW + TTL);
+      assert.equal(cache.getQuotaWindowStatus(c.id, "weekly"), null);
+    });
+  }
+}
+
+test("unchanged Codex snapshots deduplicate until exactly the freshness boundary", async (t) => {
+  const c = await connection(false);
+  cache.setQuotaCache(c.id, "codex", { weekly: quota(0) });
+  t.mock.timers.setTime(NOW + TTL - 1);
+  cache.setQuotaCache(c.id, "codex", { weekly: quota(0) });
+  assert.equal(snapshotCount(c.id), 1, "fresh same-reset snapshots must remain deduplicated");
+  t.mock.timers.setTime(NOW + TTL);
+  cache.setQuotaCache(c.id, "codex", { weekly: quota(0) });
+  assert.equal(snapshotCount(c.id), 2, "expired same-percentage snapshots need a fresh row");
+  cache.__clearForTests();
+  assert.equal(status(c.id, "weekly").reachedThreshold, true);
+  assert.equal(cache.getQuotaWindowObservation(c.id, "weekly")?.observedAt, iso(TTL));
+  t.mock.timers.setTime(NOW + TTL + 1);
+  cache.setQuotaCache(c.id, "codex", { weekly: quota(0) });
+  assert.equal(snapshotCount(c.id), 2);
+});
+
+for (const provider of ["codex", "openai"]) {
+  test(`${provider}: same percentage with changed reset preserves provider-specific dedup`, async (t) => {
+    const c = await connection(false);
+    cache.setQuotaCache(c.id, provider, { weekly: quota(0) });
+    t.mock.timers.setTime(NOW + 60_000);
+    cache.setQuotaCache(c.id, provider, { weekly: quota(0) });
+    assert.equal(snapshotCount(c.id), 1, "same percentage and reset must still deduplicate");
+    t.mock.timers.setTime(NOW + 120_000);
+    const changedReset = iso(7_200_000);
+    cache.setQuotaCache(c.id, provider, { weekly: quota(0, changedReset) });
+    const saved = latestSnapshot(c.id, "weekly");
+    assert.equal(
+      saved.nextResetAt ?? saved.next_reset_at,
+      provider === "codex" ? changedReset : iso(3_600_000),
+      "Codex reset changes must survive restart without changing generic dedup"
+    );
+    assert.equal(snapshotCount(c.id), provider === "codex" ? 2 : 1);
+    cache.__clearForTests();
+    assert.equal(
+      status(c.id, "weekly").resetAt,
+      provider === "codex" ? changedReset : iso(3_600_000)
+    );
+  });
+}
+
+test("non-Codex same-percentage snapshots keep the global no-op dedup after five minutes", async (t) => {
+  const c = await connection(false);
+  cache.setQuotaCache(c.id, "openai", { weekly: quota(0) });
+  t.mock.timers.setTime(NOW + TTL * 2);
+  cache.setQuotaCache(c.id, "openai", { weekly: quota(0) });
+  assert.equal(snapshotCount(c.id), 1);
+  const saved = latestSnapshot(c.id, "weekly");
+  assert.equal(saved.createdAt ?? saved.created_at, iso());
 });

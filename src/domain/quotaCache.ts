@@ -22,7 +22,11 @@ import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { safePercentage } from "@/shared/utils/formatting";
 import { isQuotaWindowBoundedParkEnabled } from "@/shared/utils/featureFlags";
-import { saveQuotaSnapshot, getLatestQuotaSnapshotsForConnection } from "@/lib/db/quotaSnapshots";
+import {
+  saveQuotaSnapshot,
+  getLatestQuotaSnapshotsForConnection,
+  isUnreportedQuotaSnapshot,
+} from "@/lib/db/quotaSnapshots";
 import { runQuotaSnapshotCleanup } from "./quotaSnapshotCleanup";
 import { recordProviderQuotaResetEventIfChanged } from "@/lib/db/quotaResetEvents";
 import {
@@ -377,7 +381,13 @@ function mergeCodexPersistedQuota(
   ] as const) {
     if (remaining === null) continue;
     const prior = entry.quotas[key];
-    if (prior && (prior.observedAt ?? entry.fetchedAt) >= observedAt) continue;
+    // A newer unknown fraction is not competing evidence against a reported observation.
+    if (
+      prior &&
+      prior.fractionReported !== false &&
+      (prior.observedAt ?? entry.fetchedAt) >= observedAt
+    )
+      continue;
     entry.quotas[key] = {
       remainingPercentage: exhaustedWindow === window ? 0 : remaining,
       resetAt: resetAt ?? null,
@@ -818,6 +828,7 @@ export function setQuotaCache(
   getState().cache.set(connectionId, entry);
 
   if (entry && rawQuotas) {
+    let codexSnapshots: ReturnType<typeof getLatestQuotaSnapshotsForConnection> | undefined;
     for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
       if (!quotaInfo || typeof quotaInfo !== "object") continue;
       const normalized = quotas[windowKey];
@@ -845,13 +856,37 @@ export function setQuotaCache(
       // (`entry.exhausted`). A connection with one 0% window and other non-zero
       // windows previously never flagged that window's row as exhausted.
       const windowExhausted = fractionReported && remainingPercentage <= 0;
-      // #4438 — only persist on the first observation or a real change.
-      if (
-        !quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) &&
-        prior?.quotas?.[windowKey]?.fractionReported === normalized.fractionReported
-      )
-        continue;
       try {
+        // #4438 stays unchanged for other providers. Codex also needs a fresh durable fact:
+        // a warm cache timestamp does not prove its deduplicated snapshot survived restart.
+        if (
+          !quotaSnapshotChanged(prior, windowKey, remainingPercentage, windowExhausted) &&
+          prior?.quotas?.[windowKey]?.fractionReported === normalized.fractionReported
+        ) {
+          if (provider !== "codex" || !fractionReported) continue;
+          codexSnapshots ??= getLatestQuotaSnapshotsForConnection(connectionId);
+          const snapshot = codexSnapshots.find((row) => {
+            const saved = row as unknown as Record<string, unknown>;
+            return (saved.windowKey ?? row.window_key) === windowKey;
+          });
+          const saved = snapshot as unknown as Record<string, unknown> | undefined;
+          const savedAt = saved
+            ? parseDate(String(saved.createdAt ?? saved.created_at ?? ""))
+            : null;
+          if (
+            snapshot &&
+            saved &&
+            savedAt !== null &&
+            savedAt <= Date.now() &&
+            Date.now() - savedAt < ACTIVE_TTL_MS &&
+            !isUnreportedQuotaSnapshot(snapshot) &&
+            Number(saved.remainingPercentage ?? saved.remaining_percentage) ===
+              remainingPercentage &&
+            Number(saved.isExhausted ?? saved.is_exhausted) === Number(windowExhausted) &&
+            (saved.nextResetAt ?? saved.next_reset_at ?? null) === normalized.resetAt
+          )
+            continue;
+        }
         saveQuotaSnapshot({
           provider,
           connection_id: connectionId,
