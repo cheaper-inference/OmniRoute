@@ -28,8 +28,6 @@ export {
   stripStaleForwardingHeaders,
 };
 
-import { normalizeHeaders } from "../../utils/headers.ts";
-
 import { FORMATS } from "../../translator/formats.ts";
 
 import { COLORS } from "../../utils/stream.ts";
@@ -315,9 +313,10 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     upstreamDiagnostic = pipelineOutcome.upstreamDiagnostic;
     if (pipelineOutcome.kind === "error") {
       providerResponse = pipelineOutcome.result.response;
-      providerUrl = "";
-      providerHeaders = normalizeHeaders(pipelineOutcome.result.response.headers);
-      finalBody = translatedBody;
+      const lastRequest = providerRequestCapture.latest();
+      providerUrl = lastRequest?.url;
+      providerHeaders = lastRequest?.headers;
+      finalBody = lastRequest?.body;
     } else {
       const result = {
         response: pipelineOutcome.response,
@@ -339,13 +338,17 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       clientRawRequest?.headers
     );
 
-    // Log target request (final request to provider)
-    reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
-    updatePendingScope(pendingScope, {
-      providerRequest: finalBody,
-      providerUrl,
-      stage: "provider_response_started",
-    });
+    // Keep the captured request on failure; outcome metadata may describe the response.
+    if (pipelineOutcome.kind === "response") {
+      reqLogger.logTargetRequest(providerUrl, providerHeaders, finalBody);
+      updatePendingScope(pendingScope, {
+        providerRequest: finalBody,
+        providerUrl,
+        stage: "provider_response_started",
+      });
+    } else {
+      updatePendingScope(pendingScope, { stage: "provider_response_started" });
+    }
     // Update rate limiter from response headers (learn limits dynamically)
     updateFromHeaders(
       provider,
@@ -405,7 +408,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       persistAttemptLogs({
         status: HTTP_STATUS.RATE_LIMITED,
         error: failureMessage,
-        providerRequest: finalBody || translatedBody,
+        providerRequest: providerRequestCapture.latest()?.body,
         clientResponse: buildErrorBody(HTTP_STATUS.RATE_LIMITED, failureMessage),
         claudeCacheMeta: claudePromptCacheLogMeta,
         cacheSource: "upstream",
@@ -500,7 +503,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
     persistAttemptLogs({
       status: failureStatus,
       error: safeFailureMessage,
-      providerRequest: finalBody || translatedBody,
+      providerRequest: providerRequestCapture.latest()?.body,
       // On a client-abort (AbortError), the client already disconnected before
       // we ever got here — this body is what we WOULD have sent, not what was
       // actually delivered. Logging it as `clientResponse` is misleading (the
@@ -1001,8 +1004,8 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       log?.debug?.("RETRY", `Antigravity quota reset in ${retrySeconds}s (${retryAfterMs}ms)`);
     }
 
-    // Log error with full request body for debugging
-    reqLogger.logError(new Error(message), finalBody || translatedBody);
+    // Log only a captured outgoing request body with provider errors.
+    reqLogger.logError(new Error(message), providerRequestCapture.latest()?.body);
     const persistedProviderErrorBody = logTerminalProviderResponse(
       reqLogger,
       provider,
@@ -1049,7 +1052,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             persistAttemptLogs({
               status: statusCode,
               error: safeErrMsg,
-              providerRequest: finalBody || translatedBody,
+              providerRequest: providerRequestCapture.latest()?.body,
               providerResponse: persistedProviderErrorBody,
               clientResponse: buildErrorBody(statusCode, errMsg),
               cacheSource: "upstream",
@@ -1081,7 +1084,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           persistAttemptLogs({
             status: statusCode,
             error: safeErrMsg,
-            providerRequest: finalBody || translatedBody,
+            providerRequest: providerRequestCapture.latest()?.body,
             providerResponse: persistedProviderErrorBody,
             clientResponse: buildErrorBody(statusCode, errMsg),
             cacheSource: "upstream",
@@ -1113,7 +1116,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         persistAttemptLogs({
           status: statusCode,
           error: safeErrMsg,
-          providerRequest: finalBody || translatedBody,
+          providerRequest: providerRequestCapture.latest()?.body,
           providerResponse: persistedProviderErrorBody,
           clientResponse: buildErrorBody(statusCode, errMsg),
           cacheSource: "upstream",
@@ -1170,7 +1173,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
             persistAttemptLogs({
               status: statusCode,
               error: safeErrMsg,
-              providerRequest: finalBody || translatedBody,
+              providerRequest: providerRequestCapture.latest()?.body,
               providerResponse: persistedProviderErrorBody,
               clientResponse: buildErrorBody(statusCode, errMsg),
               cacheSource: "upstream",
@@ -1202,7 +1205,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
           persistAttemptLogs({
             status: statusCode,
             error: safeErrMsg,
-            providerRequest: finalBody || translatedBody,
+            providerRequest: providerRequestCapture.latest()?.body,
             providerResponse: persistedProviderErrorBody,
             clientResponse: buildErrorBody(statusCode, errMsg),
             cacheSource: "upstream",
@@ -1234,7 +1237,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
         persistAttemptLogs({
           status: statusCode,
           error: safeErrMsg,
-          providerRequest: finalBody || translatedBody,
+          providerRequest: providerRequestCapture.latest()?.body,
           providerResponse: persistedProviderErrorBody,
           clientResponse: buildErrorBody(statusCode, errMsg),
           cacheSource: "upstream",
@@ -1266,7 +1269,7 @@ export async function runStreamingResponse(deps: StreamingDeps) {
       persistAttemptLogs({
         status: statusCode,
         error: safeErrMsg,
-        providerRequest: finalBody || translatedBody,
+        providerRequest: providerRequestCapture.latest()?.body,
         providerResponse: persistedProviderErrorBody,
         clientResponse: buildErrorBody(statusCode, errMsg),
         cacheSource: "upstream",
