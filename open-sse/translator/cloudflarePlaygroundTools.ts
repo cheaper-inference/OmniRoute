@@ -352,17 +352,23 @@ export function hasMalformedCfToolIntent(
   // name the caller does not declare, arguments that are not an object. Prose
   // that merely quotes a tool's schema (`{"name": "read", "description": …}`)
   // must not trigger a retry.
-  // The contract's `"type": "tool_call"` marker counts on its own: it is what a
-  // cut-off reply tends to keep while losing the rest (`{"type": "tool_call",
-  // "name": "re`), and without it such a turn reported no intent at all, so it
-  // was answered as plain text with the half-written call buried in it.
+  // Any `"type": "<value>"` pair counts: the contract marks calls with
+  // `"tool_call"`, and a wrong discriminator (`"shell"`, `"function"`) is the
+  // same intent botched, not prose. The trailing `[,}]` keeps it a JSON pair,
+  // so a sentence quoting a schema field does not count. Only consulted when
+  // the parser read no call, so a reply that carried a well-formed call is
+  // never retried.
   const jsonIntent =
     /"tool_calls"\s*:/.test(text) ||
-    /"type"\s*:\s*"tool_calls?"/i.test(text) ||
+    /"_nonce"\s*:/.test(text) ||
+    /"type"\s*:\s*"[^"]*"\s*[,}]/.test(text) ||
     (toolNames.some((name) =>
       new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
     ) &&
-      (/"arguments"\s*:/.test(text) || isStandaloneCfJsonText(text)));
+      (/"arguments"\s*:/.test(text) || isStandaloneCfJsonText(text))) ||
+    // A standalone JSON object carrying an arguments field but no readable
+    // name is a call that lost its envelope, not an answer.
+    (isStandaloneCfJsonText(text) && /"(arguments|args|parameters|input)"\s*:/.test(text));
 
   if (!opensABlock && !callIntent && !jsonIntent) return false;
 

@@ -320,7 +320,7 @@ interface CfJsonSpan {
 }
 
 /** Index just past the JSON value that opens at `start`, or -1 when unbalanced. */
-function matchJsonEnd(text: string, start: number): number {
+export function matchJsonEnd(text: string, start: number): number {
   const open = text[start];
   const close = open === "{" ? "}" : "]";
   let depth = 0;
@@ -449,6 +449,75 @@ const CF_JSON_CALL_TYPES = new Set(["tool_call", "tool_calls"]);
 /** True when the object carries the contract's `"type": "tool_call"` marker. */
 function isCfCallTypeValue(obj: Record<string, unknown>): boolean {
   return typeof obj.type === "string" && CF_JSON_CALL_TYPES.has(obj.type.trim().toLowerCase());
+}
+
+/** Envelope keys that mark a JSON value as a tool-call envelope attempt. */
+const CF_JSON_ENVELOPE_KEYS = new Set<string>([
+  ...CF_JSON_NAME_KEYS,
+  ...CF_JSON_ARG_KEYS,
+  "type",
+  "tool_calls",
+  "toolCalls",
+  "_nonce",
+]);
+
+/** Quoted-key pattern recognizing an envelope attempt in raw text. */
+const CF_JSON_ENVELOPE_KEY_SOURCE =
+  '"(type|name|tool|tool_name|toolName|arguments|args|parameters|input|tool_calls|toolCalls|_nonce)"\\s*:';
+
+/** True when the JSON value carries any tool-envelope key. */
+function cfJsonCarriesEnvelopeKeys(value: unknown): boolean {
+  if (Array.isArray(value)) return value.some((item) => cfJsonCarriesEnvelopeKeys(item));
+  if (!value || typeof value !== "object") return false;
+  const obj = value as Record<string, unknown>;
+  if (Object.keys(obj).some((key) => CF_JSON_ENVELOPE_KEYS.has(key))) return true;
+  const nested = obj.tool_calls ?? obj.toolCalls;
+  return nested !== undefined && cfJsonCarriesEnvelopeKeys(nested);
+}
+
+/** One whole-reply JSON envelope region and its parse status. */
+export interface CfJsonEnvelopeScan {
+  /** The region as the model wrote it (code fences stripped). */
+  raw: string;
+  /** The parsed value, or undefined when the region is not valid JSON. */
+  value: unknown | undefined;
+}
+
+/**
+ * The reply's whole-body JSON envelope, when the reply *is* — or tries to be —
+ * one: a bare call object, an array of them, or the OpenAI `tool_calls`
+ * wrapper. This is the executor's first gate. A reply that is a single JSON
+ * value cannot be a quoted schema or prose, so the envelope can be held to the
+ * contract field by field (`type` exactly `tool_call`, a declared `name`, an
+ * `arguments` object) — including envelopes the parser drops, such as
+ * `{"type": "shell", ...}` or a document cut off mid-object.
+ *
+ * Regions embedded in prose are deliberately NOT returned: those are read by
+ * the parser and, when unreadable, caught by the intent check, so gating them
+ * here would risk mistaking a schema example quoted mid-sentence for a call.
+ */
+export function scanCfJsonStandaloneEnvelope(text: string): CfJsonEnvelopeScan | null {
+  const body = cfJsonBody(text);
+  if (!/^[[{]/.test(body)) return null;
+
+  const end = matchJsonEnd(body, 0);
+  if (end === -1) {
+    // The document never closes — cut off mid-envelope when the raw text
+    // carries the contract's keys; a stray brace in prose is not one.
+    return new RegExp(CF_JSON_ENVELOPE_KEY_SOURCE).test(body)
+      ? { raw: body, value: undefined }
+      : null;
+  }
+  if (end !== body.length) return null; // prose follows a complete value — the parser's job
+
+  const value = parseCfJsonPayload(body);
+  if (value === null || value === undefined) {
+    // Balanced but unparseable (`{"type": }`) — a broken envelope attempt.
+    return new RegExp(CF_JSON_ENVELOPE_KEY_SOURCE).test(body)
+      ? { raw: body, value: undefined }
+      : null;
+  }
+  return cfJsonCarriesEnvelopeKeys(value) ? { raw: body, value } : null;
 }
 
 /** True when at least one argument key is a property the tool declares. */

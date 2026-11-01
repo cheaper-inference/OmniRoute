@@ -58,6 +58,7 @@ import {
   type CfParsedToolCall,
   type CfToolDef,
 } from "../translator/cloudflarePlaygroundTools.ts";
+import { scanCfJsonStandaloneEnvelope } from "../translator/cloudflarePlaygroundJson.ts";
 
 export const PLAYGROUND_URL = "https://playground.ai.cloudflare.com/";
 const PLAYGROUND_WS_BASE = "wss://playground.ai.cloudflare.com/agents/playground/";
@@ -193,56 +194,79 @@ function buildToolRetryReminder(
 }
 
 /**
- * Validate a parsed tool call object for required fields and correctness.
- * Returns null if valid, or a failure reason string if invalid.
+ * Reasons a reply's JSON envelope can fail the tool-call contract. Each maps
+ * to a targeted corrective reminder in buildToolRetryReminder.
  */
-function validateParsedToolCall(
-  call: unknown,
-  availableTools: CfToolDef[]
-):
+export type CfEnvelopeGateFailure =
   | "invalid_json"
   | "missing_type"
   | "wrong_type"
   | "missing_name"
   | "invalid_name"
-  | "missing_arguments"
-  | null {
-  // Must be a valid JSON object
-  if (!call || typeof call !== "object" || Array.isArray(call)) {
-    return "invalid_json";
-  }
+  | "missing_arguments";
 
-  const obj = call as Record<string, unknown>;
-
-  // Check type field exists and is exactly "tool_call"
-  if (!Object.hasOwn(obj, "type")) {
-    return "missing_type";
+/**
+ * Gate one raw envelope value — the bytes the model actually sent — against
+ * the contract shape `{"type": "tool_call", "name": <declared>, "arguments":
+ * {...}}`. Returns the first failed gate, or null when every gate passes.
+ * Arrays and the OpenAI `tool_calls` wrapper are gated element by element: one
+ * bad element fails the whole turn (all-or-nothing), matching the parser.
+ */
+export function gateCfEnvelopeValue(
+  value: unknown,
+  availableTools: CfToolDef[]
+): CfEnvelopeGateFailure | null {
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      const failure = gateCfEnvelopeValue(item, availableTools);
+      if (failure) return failure;
+    }
+    return null;
   }
-  if (obj.type !== "tool_call") {
-    return "wrong_type";
-  }
+  if (!value || typeof value !== "object") return "invalid_json";
+  const obj = value as Record<string, unknown>;
 
-  // Check name field exists, is non-null, and is a declared tool
+  // The OpenAI wrapper shape models reach for — gate the calls inside it.
+  const nested = obj.tool_calls ?? obj.toolCalls;
+  if (nested !== undefined) return gateCfEnvelopeValue(nested, availableTools);
+
+  // Gate 1 — `type` must exist and be exactly "tool_call".
+  if (!Object.hasOwn(obj, "type")) return "missing_type";
+  if (obj.type !== "tool_call") return "wrong_type";
+
+  // Gate 2 — `name` must be present and name a declared tool.
   if (!Object.hasOwn(obj, "name") || obj.name === null || obj.name === undefined) {
     return "missing_name";
   }
-  if (typeof obj.name !== "string") {
-    return "invalid_name";
-  }
-  const toolNames = new Set(availableTools.map((t) => t.name));
-  if (!toolNames.has(obj.name)) {
-    return "invalid_name";
-  }
+  if (typeof obj.name !== "string") return "invalid_name";
+  if (!availableTools.some((tool) => tool.name === obj.name)) return "invalid_name";
 
-  // Check arguments field exists and is a non-null object
+  // Gate 3 — `arguments` must be a non-null JSON object.
   if (!Object.hasOwn(obj, "arguments") || obj.arguments === null || obj.arguments === undefined) {
     return "missing_arguments";
   }
   if (typeof obj.arguments !== "object" || Array.isArray(obj.arguments)) {
     return "missing_arguments";
   }
-
   return null;
+}
+
+/**
+ * Gate the reply's whole-body JSON envelope, when it has one. A reply that is
+ * not (trying to be) a single JSON value is not gated here — tags, prose and
+ * embedded JSON are covered by the parser and the intent net, so a schema
+ * example quoted mid-sentence can never be mistaken for a call.
+ */
+export function gateCfStandaloneEnvelope(
+  text: string,
+  availableTools: CfToolDef[]
+): CfEnvelopeGateFailure | null {
+  const envelope = scanCfJsonStandaloneEnvelope(text);
+  if (!envelope) return null;
+  // The raw text is an envelope attempt that does not parse: broken or cut
+  // off mid-object.
+  if (envelope.value === undefined) return "invalid_json";
+  return gateCfEnvelopeValue(envelope.value, availableTools);
 }
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
@@ -800,38 +824,47 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     /**
-     * Turn one raw reply into tool calls, held to the nonce + argument-schema
-     * contract. Returns null if the reply expressed tool intent but failed
-     * validation (triggering a retry), or an empty array if no tool calls.
-     * Returns the accepted calls on success.
+     * Evaluate one raw reply against every tool-call gate. `retry` is the
+     * decision: any gate that fails sets it, and the executor re-asks the
+     * model with a reminder naming the exact failure. `calls` holds the
+     * accepted calls when every gate passed.
      */
-    const parseAttempt = (text: string): CfParsedToolCall[] | null => {
-      if (!hasTools) return [];
-      const parsed = parseCfToolCalls(text, availableTools, { nonce });
-      if (parsed.length === 0) {
-        // The real schemas matter: without them a nameless payload looks
-        // ambiguous and every such turn would be retried forever.
-        return hasMalformedCfToolIntent(text, toolNames, availableTools) ? null : [];
-      }
-      return finalizeCfToolCalls(parsed, tools, nonce);
-    };
+    const evaluateReply = (
+      text: string
+    ): {
+      calls: CfParsedToolCall[];
+      retry: boolean;
+      reason: CfEnvelopeGateFailure | "malformed_intent" | null;
+    } => {
+      if (!hasTools) return { calls: [], retry: false, reason: null };
 
-    /**
-     * Validate tool calls from the parser output. Checks each call for required
-     * fields (type, name, arguments) and correctness. Returns null if all valid,
-     * or a failure reason string for the first invalid call.
-     */
-    const validateToolCalls = (calls: CfParsedToolCall[]): string | null => {
-      for (const call of calls) {
-        // The parser returns objects with id, name, arguments - we need to check
-        // the original parsed format which should have type, name, arguments
-        const validation = validateParsedToolCall(
-          { type: "tool_call", name: call.name, arguments: JSON.parse(call.arguments) },
-          availableTools
-        );
-        if (validation) return validation;
+      // Gate A — a reply that *is* one JSON value must be a valid envelope:
+      // parseable, `type` exactly "tool_call", a declared `name`, an
+      // `arguments` object. This is what catches `{"type": "shell", ...}` and
+      // cut-off envelopes before the parser ever sees them.
+      const envelopeFailure = gateCfStandaloneEnvelope(text, availableTools);
+      if (envelopeFailure) return { calls: [], retry: true, reason: envelopeFailure };
+
+      // The parser reads every well-formed call — the XML tag ladder plus
+      // embedded JSON — and finalize holds it to the nonce binding and each
+      // tool's argument schema.
+      const parsed = parseCfToolCalls(text, availableTools, { nonce });
+      if (parsed.length > 0) {
+        const calls = finalizeCfToolCalls(parsed, tools, nonce);
+        // finalize returns null on any contract failure (replayed nonce,
+        // undeclared name, arguments failing the schema): intent without an
+        // executable call is a failed turn, not prose.
+        if (calls === null) return { calls: [], retry: true, reason: "malformed_intent" };
+        return { calls, retry: false, reason: null };
       }
-      return null;
+
+      // Gate B — tool intent the parser could not read: an open XML block, a
+      // `name(` call, a JSON envelope marker. Malformed XML-style calls retry
+      // here; prose returns as a plain answer.
+      if (hasMalformedCfToolIntent(text, toolNames, availableTools)) {
+        return { calls: [], retry: true, reason: "malformed_intent" };
+      }
+      return { calls: [], retry: false, reason: null };
     };
 
     const attemptMessages = (repairNote?: string) =>
@@ -850,34 +883,19 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
 
     let parser = attempt.parser;
     let timedOut = attempt.timedOut;
-    let toolCalls = parseAttempt(parser.text);
+    let gate = evaluateReply(parser.text);
 
-    // Retry loop for tool call validation failures (up to MAX_TOOL_RETRIES times)
+    // Retry loop: any failed gate re-asks the model (up to MAX_TOOL_RETRIES
+    // times, one fresh room each) with a reminder naming the exact failure.
     let retryCount = 0;
-    while (toolCalls === null && retryCount < MAX_TOOL_RETRIES) {
+    while (gate.retry && retryCount < MAX_TOOL_RETRIES) {
       retryCount++;
 
-      // Determine the failure reason for targeted reminder
-      let failureReason:
-        | "invalid_json"
-        | "missing_type"
-        | "wrong_type"
-        | "missing_name"
-        | "invalid_name"
-        | "missing_arguments"
-        | "malformed_intent" = "malformed_intent";
-
-      if (hasTools && parser.text) {
-        const parsed = parseCfToolCalls(parser.text, availableTools, { nonce });
-        if (parsed.length > 0) {
-          const validationFailure = validateToolCalls(parsed);
-          if (validationFailure) {
-            failureReason = validationFailure;
-          }
-        }
-      }
-
-      const reminder = buildToolRetryReminder(failureReason, availableTools, nonce);
+      const reminder = buildToolRetryReminder(
+        gate.reason ?? "malformed_intent",
+        availableTools,
+        nonce
+      );
       const retrySuffix = `-retry-${retryCount}`;
 
       await sleep(RETRY_DELAY_MS);
@@ -886,18 +904,14 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       if (retry.ok === true) {
         parser = retry.parser;
         timedOut = retry.timedOut;
-        toolCalls = parseAttempt(parser.text);
+        gate = evaluateReply(parser.text);
       } else {
-        toolCalls = [];
+        gate = { calls: [], retry: false, reason: null };
         break;
       }
     }
 
-    // A reply that carried tool intent but no readable call gets handled above
-    // via the retry loop. If still null after retries, treat as plain text.
-    if (toolCalls === null) {
-      toolCalls = [];
-    }
+    let toolCalls = gate.calls;
 
     // Retry if the current response ends with a colon (mid-sentence stop) and
     // no tool call was produced — the model stopped before finishing its answer.
@@ -907,7 +921,7 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       if (colonRetry.ok === true) {
         parser = colonRetry.parser;
         timedOut = colonRetry.timedOut;
-        toolCalls = parseAttempt(parser.text) ?? [];
+        toolCalls = evaluateReply(parser.text).calls;
       }
     }
 

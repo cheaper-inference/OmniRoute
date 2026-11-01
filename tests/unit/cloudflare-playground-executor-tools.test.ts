@@ -11,6 +11,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   CloudflarePlaygroundExecutor,
+  gateCfStandaloneEnvelope,
   toCfMessages,
   type CfTransport,
   type CfTransportConfig,
@@ -21,6 +22,7 @@ import {
   CF_MAX_MESSAGE_CHARS,
   cfMessageText,
   cfToolNonce,
+  type CfToolDef,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
 
 const identityFrame = JSON.stringify({
@@ -140,7 +142,7 @@ test('executor non-streaming: tool call with <tool name="..."> markup returns fi
 });
 
 test("executor non-streaming: a JSON envelope reply returns finish_reason=tool_calls", async () => {
-  const modelResponse = '{"name": "bash", "arguments": {"command": "ls -la"}}';
+  const modelResponse = '{"type": "tool_call", "name": "bash", "arguments": {"command": "ls -la"}}';
   const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
   const result = await executor.execute(
     executeArgs(
@@ -186,8 +188,8 @@ test("executor non-streaming: a JSON envelope reply returns finish_reason=tool_c
 
 test("executor non-streaming: a JSON array reply returns one tool call per element", async () => {
   const modelResponse =
-    '[{"name": "bash", "arguments": {"command": "ls"}}, ' +
-    '{"name": "bash", "arguments": {"command": "pwd"}}]';
+    '[{"type": "tool_call", "name": "bash", "arguments": {"command": "ls"}}, ' +
+    '{"type": "tool_call", "name": "bash", "arguments": {"command": "pwd"}}]';
   const executor = makeExecutor((chatId) => buildSuccessFrames(chatId, modelResponse));
   const result = await executor.execute(
     executeArgs(
@@ -900,4 +902,167 @@ test("executor repairs a <shell> tag when the client declared the tool as bash",
   assert.equal(parsed.choices[0].finish_reason, "tool_calls");
   assert.equal(parsed.choices[0].message.tool_calls?.[0].function.name, "bash");
   assert.equal(rooms.length, 2);
+});
+
+// ── Raw-envelope gates ────────────────────────────────────────────────────────
+// The gates run on the model's raw bytes for every reply — not only on
+// envelopes the parser already recognized. A reply that fails any gate is
+// retried with a reminder naming the exact failure.
+
+const GATE_TOOLS: CfToolDef[] = [
+  {
+    name: "read",
+    parameters: {
+      type: "object",
+      properties: { path: { type: "string" } },
+      required: ["path"],
+    },
+  },
+];
+
+test("gate: a wrong discriminator fails with wrong_type", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"type":"shell","arguments":{"command":"ls","timeout":30000}}',
+      GATE_TOOLS
+    ),
+    "wrong_type"
+  );
+});
+
+test("gate: a missing type fails with missing_type", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope('{"name": "read", "arguments": {"path": "a.py"}}', GATE_TOOLS),
+    "missing_type"
+  );
+});
+
+test("gate: a missing or undeclared name fails the name gate", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope('{"type": "tool_call", "arguments": {"path": "a.py"}}', GATE_TOOLS),
+    "missing_name"
+  );
+  assert.equal(
+    gateCfStandaloneEnvelope('{"type": "tool_call", "name": "nope", "arguments": {}}', GATE_TOOLS),
+    "invalid_name"
+  );
+});
+
+test("gate: missing, null, or non-object arguments fail the arguments gate", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope('{"type": "tool_call", "name": "read"}', GATE_TOOLS),
+    "missing_arguments"
+  );
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"type": "tool_call", "name": "read", "arguments": null}',
+      GATE_TOOLS
+    ),
+    "missing_arguments"
+  );
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"type": "tool_call", "name": "read", "arguments": "a.py"}',
+      GATE_TOOLS
+    ),
+    "missing_arguments"
+  );
+});
+
+test("gate: a cut-off or unparseable envelope fails with invalid_json", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope('{"type": "tool_call", "name": "re', GATE_TOOLS),
+    "invalid_json"
+  );
+  assert.equal(gateCfStandaloneEnvelope('{"type": }', GATE_TOOLS), "invalid_json");
+});
+
+test("gate: one bad element fails a whole multi-call array", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '[{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}, ' +
+        '{"type":"shell","arguments":{"command":"ls"}}]',
+      GATE_TOOLS
+    ),
+    "wrong_type"
+  );
+});
+
+test("gate: a complete contract envelope and the tool_calls wrapper pass", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}',
+      GATE_TOOLS
+    ),
+    null
+  );
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"tool_calls": [{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}]}',
+      GATE_TOOLS
+    ),
+    null
+  );
+});
+
+test("gate: prose, JSON answers and schema quotes are not envelopes", () => {
+  assert.equal(gateCfStandaloneEnvelope("Hello world!", GATE_TOOLS), null);
+  assert.equal(gateCfStandaloneEnvelope('{"answer": "42"}', GATE_TOOLS), null);
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      'Use {"name": "read", "description": "..."} as the schema.',
+      GATE_TOOLS
+    ),
+    null
+  );
+});
+
+// ── Wrong-discriminator retry, end to end ─────────────────────────────────────
+
+test('executor retries the live failure: {"type":"shell"} is wrong_type, not prose', async () => {
+  // The exact reply observed in session ses_eb656f116ffepjVSWIWPkY1fZ2: the
+  // model answered with type "shell" and no name. Before the raw-envelope gate
+  // the parser dropped it, the intent check missed it, and the turn shipped as
+  // text with the failed call buried in it.
+  const broken = '{"type":"shell","arguments":{"command":"ls -la","timeout":30000}}';
+  const fixed = '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "the wrong discriminator must be retried, not shipped as text");
+  assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
+});
+
+test("executor exhausts its retries on a persistently wrong discriminator", async () => {
+  const broken = '{"type":"shell","arguments":{"command":"ls -la","timeout":30000}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  // After three reminders the model's own words still reach the client.
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+  assert.equal(parsed.choices[0].message.content, broken);
+  assert.ok(!parsed.choices[0].message.tool_calls);
+  assert.equal(rooms.length, 4); // initial + 3 retries
 });
