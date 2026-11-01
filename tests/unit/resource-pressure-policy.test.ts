@@ -317,7 +317,6 @@ describe("resource pressure policy", () => {
     assert.equal(state.reason, "cgroup_high");
   });
 
-
   it("does not shed all traffic when memory.high only reclaims SQLite page cache", () => {
     const tracker = createResourcePressureTracker({
       ...fastThresholds,
