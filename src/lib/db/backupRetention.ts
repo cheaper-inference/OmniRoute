@@ -187,6 +187,15 @@ function collectPortableFamily(backupDir: string, name: string): BackupFamily | 
   }
 }
 
+function getRegularFileStat(filePath: string): fs.Stats | null {
+  try {
+    const stat = fs.lstatSync(filePath);
+    return stat.isFile() ? stat : null;
+  } catch {
+    return null;
+  }
+}
+
 export function collectBackupFamilies(backupDir: string): BackupFamily[] {
   if (!fs.existsSync(backupDir)) return [];
 
@@ -206,15 +215,8 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
       continue;
     }
     const base = getBackupFamilyBase(name);
-    const filePath = path.join(backupDir, name);
-
-    let stat;
-    try {
-      stat = fs.lstatSync(filePath);
-      if (!stat.isFile()) continue;
-    } catch {
-      continue;
-    }
+    const stat = getRegularFileStat(path.join(backupDir, name));
+    if (!stat) continue;
 
     const family = families.get(base) || {
       base,
