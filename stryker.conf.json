@@ -77,6 +77,7 @@
       "tests/unit/provider-breaker-combo-probe-slot-consumed-15698.test.ts",
       "tests/unit/provider-breaker-local-cooldown-refusal-15690.test.ts",
       "tests/unit/provider-safety-error-propagation.test.ts",
+      "tests/unit/devin-bridge-config-error-18019.test.ts",
       "tests/unit/devin-cli-fallback-spawn-local-only-15159.test.ts",
       "tests/unit/15633-groq-404-model-scope.test.ts",
       "tests/unit/check-error-helper-call-scope.test.ts",
