@@ -5095,6 +5095,7 @@ function ComboFormModal({
         selectedModel={null}
         addedModelValues={models.map((m) => m.model)}
         keepOpenOnSelect
+        includeWebTargets
       />
     </>
   );

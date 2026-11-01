@@ -25,6 +25,7 @@ import {
 } from "./modelSelectModalHelpers";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
+import { getWebComboTargets } from "@/shared/utils/webComboTargets";
 import {
   getModelCatalogSourceLabel,
   matchesModelCatalogQuery,
@@ -34,6 +35,7 @@ import {
   OAUTH_PROVIDERS,
   NOAUTH_PROVIDERS,
   APIKEY_PROVIDERS,
+  SEARCH_PROVIDERS,
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
 } from "@/shared/constants/providers";
@@ -50,6 +52,7 @@ const PROVIDER_ORDER = [
   ...Object.keys(OAUTH_PROVIDERS),
   ...Object.keys(NOAUTH_PROVIDERS),
   ...Object.keys(APIKEY_PROVIDERS),
+  ...Object.keys(SEARCH_PROVIDERS),
 ];
 
 type ModelSelectModalProps = {
@@ -90,6 +93,8 @@ type ModelSelectModalProps = {
   multiSelect?: boolean;
   showCombos?: boolean;
   alwaysIncludeProviders?: string[] | null;
+  /** Enable native search/fetch operations only for endpoint-agnostic combo pickers. */
+  includeWebTargets?: boolean;
   /**
    * When true, picking a model does NOT auto-close the modal — the caller must close
    * explicitly. A "Done" button is rendered in the modal footer so the user has a clear
@@ -118,6 +123,7 @@ export default function ModelSelectModal({
   multiSelect = false,
   showCombos = true,
   alwaysIncludeProviders = [],
+  includeWebTargets = false,
   keepOpenOnSelect = false,
 }: ModelSelectModalProps) {
   const t = useTranslations("common");
@@ -277,7 +283,7 @@ export default function ModelSelectModal({
   }, [isOpen, activeProviders]);
 
   const allProviders = useMemo(
-    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS }),
+    () => ({ ...OAUTH_PROVIDERS, ...NOAUTH_PROVIDERS, ...APIKEY_PROVIDERS, ...SEARCH_PROVIDERS }),
     []
   );
   const alwaysIncludeProvidersKey = Array.isArray(alwaysIncludeProviders)
@@ -440,7 +446,13 @@ export default function ModelSelectModal({
           };
         }
       } else {
-        const systemModels = getModelsByProviderId(providerId);
+        const webTargets = includeWebTargets ? getWebComboTargets(providerId) : [];
+        const systemModels = [
+          ...getModelsByProviderId(providerId).filter(
+            (model) => !webTargets.some((target) => target.id === model.id)
+          ),
+          ...webTargets,
+        ];
 
         // Merge system models with user-added custom models
         const systemEntries = systemModels
@@ -471,6 +483,7 @@ export default function ModelSelectModal({
             alias: alias,
             color: providerInfo.color,
             models: allModels,
+            isWebOperation: webTargets.length > 0,
           };
         }
       }
@@ -485,6 +498,7 @@ export default function ModelSelectModal({
     providerNodes,
     customModels,
     fetchedModels,
+    includeWebTargets,
     hiddenModelsByProvider,
   ]);
 
@@ -572,7 +586,10 @@ export default function ModelSelectModal({
 
   // Same combo-builder gate as Select All — CLI tool cards and other single-pick
   // callers should not grow provider checkboxes / a test toolbar.
-  const showProviderTestControls = keepOpenOnSelect && !multiSelect;
+  const showProviderTestControls =
+    keepOpenOnSelect &&
+    !multiSelect &&
+    Object.values(connectionFilteredGroups).some((group) => !group.isWebOperation);
 
   const workingModelsToSelect = useMemo(
     () =>
@@ -597,7 +614,12 @@ export default function ModelSelectModal({
   );
 
   const visibleProviderIds = useMemo(
-    () => listVisibleProviderIds(connectionFilteredGroups),
+    () =>
+      listVisibleProviderIds(
+        Object.fromEntries(
+          Object.entries(connectionFilteredGroups).filter(([, group]) => !group.isWebOperation)
+        )
+      ),
     [connectionFilteredGroups]
   );
 
@@ -695,7 +717,7 @@ export default function ModelSelectModal({
     const groups: Array<[string, Array<{ value?: string | null; id?: string | null }>]> =
       Object.entries(connectionFilteredGroups).map(([providerId, group]: [string, any]) => [
         providerId,
-        Array.isArray(group?.models) ? group.models : [],
+        !group.isWebOperation && Array.isArray(group?.models) ? group.models : [],
       ]);
 
     const targets = buildProviderTestTargets({
@@ -1030,7 +1052,7 @@ export default function ModelSelectModal({
                   providerSelected ? "ring-1 ring-inset ring-primary/35" : ""
                 }`}
               >
-                {showProviderTestControls ? (
+                {showProviderTestControls && !group.isWebOperation ? (
                   <Checkbox
                     checked={providerSelected}
                     onChange={() => handleToggleProviderForTest(providerId)}

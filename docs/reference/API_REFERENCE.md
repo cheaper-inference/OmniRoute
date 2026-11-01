@@ -870,6 +870,12 @@ Both `POST /v1/search` and `POST /v1/web/fetch` accept `model` as a saved combo 
 Use either `model` or an explicit `provider`; sending both returns `400`.
 Without either field, the existing automatic provider selection remains unchanged.
 
+Both the Combo Builder and its Add Model catalog expose native web-operation entries
+for connected providers, even when they have no LLM model list. Serper shows **Web search**;
+Tavily shows **Web search / Page extraction**, and fetch-only providers show **Page extraction**.
+Choose the entry and account as usual. A single Tavily entry serves both web endpoints;
+these operation entries are not added to chat-only client selectors or chat model probes.
+
 For example, create a **priority** combo named `shared-free` with these ordered targets:
 
 1. `openai/gpt-4o`

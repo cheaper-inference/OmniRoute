@@ -7,6 +7,7 @@ import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableMod
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getSyncedCapabilities } from "@/lib/modelsDevSync";
 import { getModelsByProviderId } from "@/shared/constants/models";
+import { getWebComboTargets } from "@/shared/utils/webComboTargets";
 import { getImageProvider } from "@omniroute/open-sse/config/imageRegistry.ts";
 import {
   getSpeechProvider,
@@ -206,7 +207,14 @@ function hasStaticMediaRoutingMetadata(model: ComboBuilderModelOption): boolean 
     model.source === "system" &&
     Boolean(
       model.supportedEndpoints?.some((endpoint) =>
-        ["images", "videos", "audio-speech", "audio-transcriptions"].includes(endpoint)
+        [
+          "images",
+          "videos",
+          "audio-speech",
+          "audio-transcriptions",
+          "search",
+          "web-fetch",
+        ].includes(endpoint)
       )
     )
   );
@@ -367,7 +375,7 @@ function addModelOption(
     // A custom row created before media metadata existed carries the form's
     // historical defaults (`chat-completions` + `["chat"]`).  Those defaults
     // are not an intentional reclassification and must not erase a same-id
-    // image/video/audio registry entry.  Keep explicit non-default custom
+    // image/video/audio/web registry entry. Keep explicit non-default custom
     // routing metadata authoritative, while still allowing all other custom
     // fields (display name, token limits, thinking support) to take precedence.
     const preserveStaticMediaRouting =
@@ -570,6 +578,9 @@ function buildModelOptions(
   }
 
   addStaticMediaModelOptions(modelMap, providerId);
+  for (const operation of getWebComboTargets(providerId)) {
+    addModelOption(modelMap, providerId, { ...operation, source: "system" });
+  }
 
   // #9485: static registry models can declare provider-specific effort tiers even
   // when a connection's synced row does not include supportedThinkingEfforts.
