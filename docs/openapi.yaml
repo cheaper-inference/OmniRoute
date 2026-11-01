@@ -1393,6 +1393,9 @@ paths:
         `xquik_search` resolve to the same provider.
         AnySearch (`anysearch-search`, aliases `anysearch` / `anysearch_search`)
         provides free fallback-only web search.
+        Alternatively, set `model` to a saved priority/fill-first combo name.
+        Only search-capable targets are attempted, in configured order.
+        `model` and `provider` are mutually exclusive.
       security:
         - BearerAuth: []
       requestBody:
@@ -1407,6 +1410,12 @@ paths:
                   type: string
                   minLength: 1
                   maxLength: 500
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
                 provider:
                   type: string
                   minLength: 1
@@ -15608,6 +15617,56 @@ paths:
       tags:
         - V1 Web
       summary: "POST web › fetch"
+      description: >-
+        Fetch a URL with an explicit provider, native automatic selection, or a saved
+        priority/fill-first combo in `model`. Mixed combos skip targets without a
+        fetch executor. `model` and `provider` are mutually exclusive.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [url]
+              properties:
+                url:
+                  type: string
+                  format: uri
+                model:
+                  type: string
+                  minLength: 1
+                  maxLength: 300
+                  description: Saved priority/fill-first combo name; mutually exclusive with provider.
+                  examples: [shared-free]
+                provider:
+                  type: string
+                  enum:
+                    [
+                      firecrawl,
+                      jina-reader,
+                      tavily-search,
+                      tinyfish,
+                      context7,
+                      nimble-search,
+                      anysearch-search,
+                      parallel-search,
+                    ]
+                format:
+                  type: string
+                  enum: [markdown, html, links, screenshot]
+                  default: markdown
+                depth:
+                  type: integer
+                  enum: [0, 1, 2]
+                  default: 0
+                wait_for_selector:
+                  type: string
+                  maxLength: 256
+                include_metadata:
+                  type: boolean
+                  default: false
       responses:
         "200":
           description: OK

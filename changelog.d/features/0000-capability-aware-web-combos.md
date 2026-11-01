@@ -1,0 +1,1 @@
+- **feat(routing):** accept saved combo names in `model` on `/v1/search` and `/v1/web/fetch` with priority/fill-first fallback. Mixed combinations skip incompatible web/chat targets before credential selection, preserving account pins and caller key scopes. Direct chat requests for dedicated search/fetch providers return actionable JSON errors. Related to #10274; fixes #17858.

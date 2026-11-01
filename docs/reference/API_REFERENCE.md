@@ -864,6 +864,48 @@ Web/search provider abstraction (Tavily, Brave, Exa, Serper, etc.).
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Search policy enforced via `enforceApiKeyPolicy`.
 
+### Named search/fetch combinations
+
+Both `POST /v1/search` and `POST /v1/web/fetch` accept `model` as a saved combo name.
+Use either `model` or an explicit `provider`; sending both returns `400`.
+Without either field, the existing automatic provider selection remains unchanged.
+
+For example, create a **priority** combo named `shared-free` with these ordered targets:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Then use the same name on each surface:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search considers Tavily then Serper; fetch considers Tavily then Jina Reader;
+chat skips the dedicated search/fetch providers and considers OpenAI. Compatibility
+comes from the search/fetch executor registries, not from words in a model name.
+Filtering precedes credential selection and dispatch, and never edits the saved combo.
+
+Web combinations support `priority` and `fill-first`. Other strategies return `400`
+rather than silently applying chat-specific synthesis or scoring to web results.
+The existing combo engine handles ordered fallback, including upstream quota failures,
+and retains step IDs, account pins, per-step account allowlists, nested references,
+caller connection/quota scopes and combo access policy. Results retain their native
+search/fetch schema, including the actual provider; `X-OmniRoute-Combo-Trace` identifies
+the routing decision. Unknown combos return `404`; inactive combos and combinations
+with no compatible targets return `400`.
+
+Each combo attempt uses one explicit provider. It cannot invoke the native automatic
+provider pool behind the combo's back. Explicit-provider requests retain their existing
+single-provider behavior. Direct chat requests targeting dedicated search/fetch providers
+return an actionable JSON `400` instead of falling through to an OpenAI-style executor.
+
 ### Exa and Tavily `provider_options`
 
 Exa and Tavily read provider-specific fields from a namespaced bag:
@@ -930,7 +972,10 @@ OmniRoute surfaces that as a `422` with a fixed message.
 
 **Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Policy enforced via `enforceApiKeyPolicy`.
 
-**Quota-aware fallback (#8297):** when no explicit `provider` is given, the pool
+Named combinations use the [`model` routing contract](#named-searchfetch-combinations)
+above, preserving fetch-specific options and responses.
+
+**Quota-aware fallback (#8297):** when neither `provider` nor `model` is given, the pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
 `parallel-search`) is
 walked in fixed

@@ -24,6 +24,7 @@ import {
 } from "./comboConfig.ts";
 import { getModelTimeoutMs } from "../config/providerModels.ts";
 import { getRegistryEntry } from "../config/providerRegistry.ts";
+import { projectComboForEndpoint } from "../../src/lib/combos/endpointCapabilities.ts";
 
 import { getHiddenModelsByProvider } from "@/models";
 import { getHiddenChatModels } from "../../src/lib/hiddenChatModels";
@@ -759,6 +760,24 @@ function resolveRegistryDeclaredTimeoutMs(provider: string, modelStr: string): n
  * one metadata-only log line for durability across restarts.
  */
 export async function handleComboChat(options: HandleComboChatOptions): Promise<Response> {
+  if (
+    (options.endpointCapability === "search" || options.endpointCapability === "web-fetch") &&
+    !["priority", "fill-first"].includes(options.combo.strategy || "priority")
+  ) {
+    return errorResponse(400, "Web endpoint combos support priority and fill-first strategies");
+  }
+  const projected = projectComboForEndpoint(
+    options.combo,
+    options.allCombos,
+    options.endpointCapability ?? "chat"
+  );
+  if (options.combo.models.length > 0 && projected.combo.models.length === 0) {
+    return errorResponse(
+      400,
+      `Combo has no compatible targets for ${options.endpointCapability ?? "chat"}`
+    );
+  }
+  options = { ...options, combo: projected.combo, allCombos: projected.allCombos };
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;
   const traceInvocationId =
@@ -810,6 +829,7 @@ async function handleComboChatInner({
   endpointPath = null,
   requestHeaders = null,
   invocationId,
+  endpointCapability = "chat",
 }: HandleComboChatOptions): Promise<Response> {
   hiddenModelsByProvider ??= await getHiddenChatModels();
   const comboCtx = createComboContext({ body, combo, settings, relayOptions, log });
@@ -890,7 +910,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (fusionDispatch) return fusionDispatch;
 
@@ -958,7 +978,7 @@ async function handleComboChatInner({
     sourceFormat,
     endpointPath,
     requestHeaders,
-    runCombo: handleComboChat,
+    runCombo: (nestedOptions) => handleComboChat({ ...nestedOptions, endpointCapability }),
   });
   if (runtimeUnitDispatch) return runtimeUnitDispatch;
 
