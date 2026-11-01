@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.ts";
 import { finalizeTranslatedRequest } from "../../open-sse/handlers/chatCore/translatedRequestFinalize.ts";
 import { FORMATS } from "../../open-sse/translator/formats.ts";
+import { getPendingById, getPendingRequests } from "../../src/lib/usage/usageHistory.ts";
 
 const harness = await createChatPipelineHarness("responses-tool-history-boundary");
 const { handleChat, buildRequest, resetStorage, seedConnection, settingsDb } = harness;
@@ -200,5 +201,154 @@ for (const stream of [false, true]) {
       "Codex executor always uses its streaming upstream transport"
     );
     assert.match(responseText, stream ? /response\.completed/ : /"status":"completed"/);
+  });
+}
+
+function chatPair(callId = privateCallId, outputId = callId, args: unknown = "{}") {
+  return [
+    { role: "user", content: "synthetic request" },
+    {
+      role: "assistant",
+      content: null,
+      tool_calls: [{ id: callId, type: "function", function: { name: "lookup", arguments: args } }],
+    },
+    { role: "tool", tool_call_id: outputId, content: "  exact output \n " },
+  ];
+}
+
+async function refused(body: Record<string, unknown>, native = false, provider = "codex") {
+  await seedConnection(provider, {
+    apiKey: "synthetic-integrity-key",
+    providerSpecificData: { planType: "plus" },
+  });
+  let attempts = 0;
+  globalThis.fetch = async () => {
+    attempts++;
+    return new Response(
+      'data: {"type":"response.completed","response":{"id":"resp_ok","object":"response","status":"completed","output":[]}}\n\ndata: [DONE]\n\n',
+      { status: 200, headers: { "content-type": "text/event-stream" } }
+    );
+  };
+  const pendingIds = [...getPendingById().keys()];
+  const counts = structuredClone(getPendingRequests());
+  const response = await handleChat(
+    buildRequest({
+      url: native ? "http://localhost/v1/responses" : "http://localhost/v1/chat/completions",
+      body: { model: `${provider}/gpt-5.6-sol`, ...body },
+    })
+  );
+  const text = await response.text();
+  assert.equal(response.status, 400);
+  assert.equal(attempts, 0, "invalid history must never reach transport");
+  assert.deepEqual([...getPendingById().keys()], pendingIds, "no pending owner may leak");
+  assert.deepEqual(
+    structuredClone(getPendingRequests()),
+    counts,
+    "pending counts must be unchanged"
+  );
+  assert.doesNotMatch(text, /private_argument|call_private_do_not_echo|exact output/);
+  return text;
+}
+
+for (const stream of [false, true]) {
+  test(`handler contains post-strip finalizer rejection and retires its pending owner stream=${stream}`, async () => {
+    await settingsDb.updateSettings({ responsesPreviousResponseIdMode: "strip" });
+    await refused(
+      {
+        stream,
+        previous_response_id: "resp_previous",
+        input: [
+          { type: "custom_tool_call_output", call_id: privateCallId, output: "private_argument" },
+        ],
+      },
+      true,
+      "chatgpt-web-codex"
+    );
+  });
+
+  test(`Chat pending history returns 400 without fabricated completion stream=${stream}`, async () => {
+    const messages = chatPair();
+    messages.pop();
+    assert.match(await refused({ stream, messages }), /missing its output/i);
+  });
+
+  test(`Chat deprecated malformed function_call arguments fail closed stream=${stream}`, async () => {
+    assert.match(
+      await refused({
+        stream,
+        messages: [
+          { role: "assistant", function_call: { name: "lookup", arguments: malformedArguments } },
+          { role: "function", name: "lookup", content: "ok" },
+        ],
+      }),
+      /malformed arguments/i
+    );
+  });
+
+  test(`Chat malformed arguments never echo opaque ids stream=${stream}`, async () => {
+    await refused({ stream, messages: chatPair(privateCallId, privateCallId, malformedArguments) });
+  });
+
+  test(`Chat orphan output never echoes opaque ids stream=${stream}`, async () => {
+    await refused({
+      stream,
+      messages: [{ role: "tool", tool_call_id: privateCallId, content: "private_argument" }],
+    });
+  });
+
+  test(`Chat mixed compacted orphan plus valid pair is explicitly refused stream=${stream}`, async () => {
+    const messages = chatPair();
+    messages.splice(1, 0, {
+      role: "tool",
+      tool_call_id: "compacted_orphan",
+      content: "unrelated output",
+    });
+    await refused({ stream, messages });
+  });
+
+  for (const [label, callId, outputId] of [
+    ["trim collision", " exact-id", "exact-id "],
+    ["clamp collision", "x".repeat(64) + "A", "x".repeat(64) + "B"],
+    ["overlong pair", "x".repeat(65), "x".repeat(65)],
+    ["blank ids", " ", " "],
+    ["control ids", "call\nid", "call\nid"],
+  ]) {
+    test(`Chat rejects ${label} before normalization stream=${stream}`, async () => {
+      await refused({ stream, messages: chatPair(callId, outputId) });
+    });
+  }
+
+  test(`Chat valid spaced ids and JSON scalar/array bytes reach wire unchanged stream=${stream}`, async () => {
+    await seedConnection("codex", {
+      apiKey: "synthetic-integrity-key",
+      providerSpecificData: { planType: "plus" },
+    });
+    for (const args of ['  { "q" : 1 }  ', " [1, 2] ", " 42 ", " null ", ' "text" ', " true "]) {
+      const messages = chatPair("  exact-id  ", "  exact-id  ", args);
+      let wire: Record<string, unknown> | undefined;
+      let attempts = 0;
+      globalThis.fetch = async (_url, init) => {
+        attempts++;
+        wire = JSON.parse(String(init?.body));
+        return new Response(
+          'data: {"type":"response.completed","response":{"id":"resp_ok","object":"response","status":"completed","output":[]}}\n\ndata: [DONE]\n\n',
+          { status: 200, headers: { "content-type": "text/event-stream" } }
+        );
+      };
+      const response = await handleChat(
+        buildRequest({ body: { model: "codex/gpt-5.6-sol", stream, messages } })
+      );
+      await response.text();
+      assert.equal(response.status, 200);
+      assert.equal(attempts, 1);
+      const input = wire?.input as Array<Record<string, unknown>>;
+      assert.equal(input.find((i) => i.type === "function_call")?.call_id, "  exact-id  ");
+      assert.equal(input.find((i) => i.type === "function_call")?.arguments, args);
+      assert.equal(input.find((i) => i.type === "function_call_output")?.call_id, "  exact-id  ");
+      assert.equal(
+        input.find((i) => i.type === "function_call_output")?.output,
+        "  exact output \n "
+      );
+    }
   });
 }

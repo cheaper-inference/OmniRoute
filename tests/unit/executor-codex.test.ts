@@ -667,12 +667,16 @@ test("CodexExecutor.transformRequest inserts missing function_call_output items"
     (item) => item.type === "function_call" && item.call_id === "call_missing_result"
   );
 
-  assert.equal(missingOutputIndex, functionCallIndex + 1);
-  assert.deepEqual(result.input[missingOutputIndex], {
-    type: "function_call_output",
+  // Historical test identity retained; missing outputs must no longer be invented.
+  assert.equal(missingOutputIndex, -1);
+  assert.ok(functionCallIndex >= 0, "the pending call must survive");
+  assert.deepEqual(result.input[functionCallIndex], {
+    type: "function_call",
     call_id: "call_missing_result",
-    output: "",
+    name: "read_file",
+    arguments: "{}",
   });
+  assert.equal(result.input[functionCallIndex + 1].role, "user");
 });
 
 test("CodexExecutor.transformRequest inserts missing custom_tool_call_output items (#8932)", () => {
@@ -708,12 +712,16 @@ test("CodexExecutor.transformRequest inserts missing custom_tool_call_output ite
       item.type === "custom_tool_call_output" && item.call_id === "call_missing_custom_result"
   );
 
-  assert.equal(missingOutputIndex, customCallIndex + 1);
-  assert.deepEqual(result.input[missingOutputIndex], {
-    type: "custom_tool_call_output",
+  // Historical test identity retained; absence is not successful completion.
+  assert.equal(missingOutputIndex, -1);
+  assert.ok(customCallIndex >= 0, "the pending custom call must survive");
+  assert.deepEqual(result.input[customCallIndex], {
+    type: "custom_tool_call",
     call_id: "call_missing_custom_result",
-    output: "",
+    name: "apply_patch",
+    input: "*** Begin Patch",
   });
+  assert.equal(result.input[customCallIndex + 1].role, "user");
 });
 
 test("CodexExecutor.transformRequest preserves native assistant commentary before mapping messages to input", () => {

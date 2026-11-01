@@ -25,7 +25,7 @@ function customOutput(call_id: unknown): Item {
   return { type: "custom_tool_call_output", call_id, output: "ok" };
 }
 
-for (const id of ["", "   ", null, 42]) {
+for (const id of ["", "   ", null, 42, "x".repeat(65), "call\nid"]) {
   test(`rejects malformed call_id ${JSON.stringify(id)}`, () => {
     assert.throws(
       () => validate([functionCall(id), functionOutput(id)]),

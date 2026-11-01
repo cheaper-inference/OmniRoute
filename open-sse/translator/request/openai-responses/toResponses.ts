@@ -9,11 +9,8 @@ import {
   requiresReasoningContentPresence,
 } from "../../../utils/reasoningPlaceholder.ts";
 import { getReadableReasoningValue } from "../../../utils/reasoningFields.ts";
-import { generateToolCallId } from "../../helpers/toolCallHelper.ts";
-import {
-  coerceHistoricalToolCallArguments,
-  coerceToolCallArguments,
-} from "../../helpers/toolArguments.ts";
+import { coerceHistoricalToolCallArguments } from "../../helpers/toolArguments.ts";
+import { requireResponsesCallId } from "../../helpers/responsesToolHistory.ts";
 import { chatStrictForResponses } from "../../helpers/toolStrict.ts";
 import {
   JsonRecord,
@@ -22,7 +19,6 @@ import {
   toRecord,
   toArray,
   toString,
-  clampCallId,
   imageUrlToText,
   normalizeVerbosity,
   normalizeResponsesReasoningEffort,
@@ -348,12 +344,9 @@ export function openaiToOpenAIResponsesRequest(
           }
           input.push({
             type: "function_call",
-            call_id: clampCallId(toString(toolCall.id).trim() || generateToolCallId()),
+            call_id: requireResponsesCallId(toolCall.id),
             name: fnName,
-            arguments: coerceHistoricalToolCallArguments(
-              fn.arguments,
-              toString(toolCall.id).trim()
-            ),
+            arguments: coerceHistoricalToolCallArguments(fn.arguments, ""),
             status: "completed",
           });
         }
@@ -366,9 +359,9 @@ export function openaiToOpenAIResponsesRequest(
         if (fnName) {
           input.push({
             type: "function_call",
-            call_id: clampCallId(`call_${fnName}`),
+            call_id: requireResponsesCallId(`call_${fnName}`),
             name: fnName,
-            arguments: coerceToolCallArguments(fc.arguments),
+            arguments: coerceHistoricalToolCallArguments(fc.arguments, ""),
             status: "completed",
           });
         }
@@ -379,7 +372,7 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "tool") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(toString(msg.tool_call_id).trim()),
+        call_id: requireResponsesCallId(msg.tool_call_id),
         output:
           typeof msg.content === "string"
             ? msg.content
@@ -399,46 +392,40 @@ export function openaiToOpenAIResponsesRequest(
     if (role === "function") {
       input.push({
         type: "function_call_output",
-        call_id: clampCallId(`call_${toString(msg.name).trim()}`),
+        call_id: requireResponsesCallId(`call_${toString(msg.name).trim()}`),
         output: typeof msg.content === "string" ? msg.content : String(msg.content ?? ""),
         status: "completed",
       });
     }
   }
 
-  // Filter orphaned function_call_output items (no matching function_call)
-  // This happens when Claude Code compaction removes messages but leaves tool results
+  // A compacted orphan is still supplied history. Reject it even alongside a
+  // valid local pair, rather than silently deleting the caller's tool output.
   const knownCallIds = new Set(
     input
-      .filter(
-        (item: { type?: string; call_id?: string }) => item.type === "function_call" && item.call_id
-      )
-      .map((item: { type?: string; call_id?: string }) => item.call_id)
+      .filter((item: JsonRecord) => item.type === "function_call")
+      .map((item: JsonRecord) => item.call_id)
   );
   const hasPreviousResponse =
     typeof root.previous_response_id === "string" && root.previous_response_id.trim() !== "";
-  const orphanFilteredInput = input.filter((item: { type?: string; call_id?: string }) => {
-    if (item.type === "function_call_output" && item.call_id) {
-      if (knownCallIds.has(item.call_id) || hasPreviousResponse) return true;
-      const error = new Error(
-        `Tool output ${item.call_id} does not match a local tool call`
-      ) as Error & { statusCode: number; errorType: string };
+  for (const item of input as JsonRecord[]) {
+    if (
+      item.type === "function_call_output" &&
+      !knownCallIds.has(item.call_id) &&
+      !hasPreviousResponse
+    ) {
+      const error = new Error("Tool output does not match a local tool call") as Error & {
+        statusCode: number;
+        errorType: string;
+      };
       error.statusCode = 400;
       error.errorType = "invalid_tool_call_output";
       throw error;
     }
-    return true;
-  });
-  result.input = orphanFilteredInput;
-
-  // Reject incomplete local history before dispatch. A remote continuation may
-  // legitimately provide outputs for calls retained by previous_response_id.
-  // Never synthesize a successful empty output: that falsely reports completion.
-  const pairedInput: JsonRecord[] = [];
-  for (const item of orphanFilteredInput as Array<{ type?: string; call_id?: string }>) {
-    pairedInput.push(item);
   }
-  result.input = pairedInput;
+  // Preserve pending calls without inventing completion. The handler validates
+  // complete history after continuation policy has selected the actual wire body.
+  result.input = input;
 
   // If no system message, keep empty instructions
   if (!hasSystemMessage) {

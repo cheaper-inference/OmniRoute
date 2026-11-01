@@ -1,1 +1,3 @@
-- Reject malformed or unowned Responses tool history before upstream dispatch instead of fabricating successful outputs.
+- Reject malformed or unowned Responses tool history before upstream dispatch instead of fabricating successful outputs, and retire pending requests on final policy rejection.
+- Preserve literal tool ownership IDs and valid JSON argument strings; reject overlong/invalid IDs and malformed historical arguments, including deprecated Chat function calls, without echoing private IDs or payloads.
+- Malformed-request behavior change: compacted orphan outputs are rejected with HTTP 400 even alongside a valid local pair, not silently discarded. Valid paired history and preserved previous-response continuations remain supported. Missing/null/empty historical arguments retain zero-argument compatibility; serializable nonstrings are still encoded once.

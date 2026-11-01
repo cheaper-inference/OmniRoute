@@ -10,7 +10,46 @@ import assert from "node:assert/strict";
 const { ensureToolCallIds } = await import("../../open-sse/translator/helpers/toolCallHelper.ts");
 const { coerceToolCallArguments } =
   await import("../../open-sse/translator/helpers/toolArguments.ts");
+const { coerceHistoricalToolCallArguments } =
+  await import("../../open-sse/translator/helpers/toolArguments.ts");
 const { translateRequest } = await import("../../open-sse/translator/index.ts");
+
+test("historical arguments reject unserializable supplied values without private details", () => {
+  const circular: Record<string, unknown> = {};
+  circular.self = circular;
+  for (const value of [
+    circular,
+    BigInt(1),
+    {
+      toJSON() {
+        throw new Error("private_argument");
+      },
+    },
+    {
+      toJSON() {
+        return undefined;
+      },
+    },
+  ]) {
+    assert.throws(
+      () => coerceHistoricalToolCallArguments(value, "private_call_id"),
+      (error: unknown) => {
+        assert.ok(error instanceof Error);
+        assert.match(error.message, /malformed arguments/i);
+        assert.doesNotMatch(error.message, /private_argument|private_call_id/);
+        return true;
+      }
+    );
+  }
+});
+
+test("historical zero-argument compatibility and serializable values remain supported", () => {
+  for (const value of [undefined, null, ""])
+    assert.equal(coerceHistoricalToolCallArguments(value, ""), "{}");
+  for (const value of [" 42 ", " null ", " [1,2] ", ' { "x":1 } '])
+    assert.equal(coerceHistoricalToolCallArguments(value, ""), value);
+  assert.equal(coerceHistoricalToolCallArguments({ x: 1 }, ""), '{"x":1}');
+});
 
 type ToolFn = { name: string; arguments?: unknown };
 

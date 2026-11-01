@@ -19,11 +19,20 @@ function invalid(message: string, errorType = "invalid_tool_call_output"): never
   throw error;
 }
 
-function requireCallId(item: JsonRecord): string {
-  if (typeof item.call_id !== "string" || item.call_id.trim() === "") {
-    invalid("Tool history item requires a valid non-blank call_id");
+// IDs are opaque ownership tokens, not presentation text. Validate without
+// trimming, truncating or generating a replacement that could match another call.
+export function requireResponsesCallId(value: unknown): string {
+  if (
+    typeof value !== "string" ||
+    value.trim() === "" ||
+    value.length > 64 ||
+    /[\u0000-\u001f\u007f]/.test(value)
+  ) {
+    invalid(
+      "Tool history item requires a valid non-blank call_id of at most 64 characters without controls"
+    );
   }
-  return item.call_id;
+  return value;
 }
 
 function expectedOutputType(callType: ToolCallType): ToolOutputType {
@@ -44,7 +53,7 @@ export function validateResponsesToolHistory(body: Record<string, unknown>): voi
       continue;
     }
 
-    const callId = requireCallId(item);
+    const callId = requireResponsesCallId(item.call_id);
     if (CALL_TYPES.has(type as ToolCallType)) {
       if (calls.has(callId)) invalid("Duplicate tool call_id in Responses input");
       if (type === "function_call") {

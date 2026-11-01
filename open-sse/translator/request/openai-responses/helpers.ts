@@ -34,9 +34,9 @@ export function toRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
-// The Responses API rejects call_id values longer than 64 characters (9router#396).
-// Clamp deterministically so a function_call and its matching function_call_output keep
-// the same id and stay paired through the orphaned-output filter below.
+// Legacy standalone utility retained for module compatibility. Do not use it
+// for historical request admission: clamping can merge distinct ownership IDs.
+// Chat/Responses history uses requireResponsesCallId instead.
 export const MAX_CALL_ID_LEN = 64;
 export function clampCallId(id: string): string {
   return id.length > MAX_CALL_ID_LEN ? id.slice(0, MAX_CALL_ID_LEN) : id;
