@@ -1,3 +1,8 @@
+import {
+  selectHttpResponse,
+  type HttpAttemptMetadata,
+  type HttpAttemptSelection,
+} from "../../utils/providerHttpAttempts.ts";
 // Pure-ish per-attempt request/result helpers for the Antigravity executor (#7408
 // complexity-gate decomposition): building + sending one upstream request, and
 // building the final non-streaming/streaming result. No host state of their own —
@@ -127,11 +132,20 @@ export function isAbortError(error: unknown): boolean {
 export async function fetchAntigravityWithReadinessTimeout(
   url: string,
   init: RequestInit,
-  timeoutMs = STREAM_READINESS_TIMEOUT_MS
+  timeoutMs = STREAM_READINESS_TIMEOUT_MS,
+  metadata?: HttpAttemptMetadata
 ): Promise<Response> {
   const boundedTimeoutMs = Math.max(0, Math.floor(timeoutMs));
   if (boundedTimeoutMs <= 0) {
-    return fetch(url, init);
+    return prl.observeProviderHttpSend(
+      metadata ?? {
+        provider: "antigravity",
+        model: "unknown",
+        connectionId: null,
+        endpoint: "antigravity_generate",
+      },
+      () => fetch(url, init)
+    );
   }
 
   const timeoutController = new AbortController();
@@ -145,7 +159,15 @@ export async function fetchAntigravityWithReadinessTimeout(
     : timeoutController.signal;
 
   try {
-    return await fetch(url, { ...init, signal: combinedSignal });
+    return await prl.observeProviderHttpSend(
+      metadata ?? {
+        provider: "antigravity",
+        model: "unknown",
+        connectionId: null,
+        endpoint: "antigravity_generate",
+      },
+      () => fetch(url, { ...init, signal: combinedSignal })
+    );
   } catch (error) {
     if (
       timeoutController.signal.aborted &&
@@ -326,7 +348,11 @@ export async function sendAntigravityRequest(
   retryAttempt: number,
   physicalSendCounter: { value: number },
   correlationId: string | null
-): Promise<{ response: Response; finalHeaders: Record<string, string> }> {
+): Promise<{
+  response: Response;
+  finalHeaders: Record<string, string>;
+  upstreamHttpSelection: HttpAttemptSelection | null;
+}> {
   const serializedRequest = serializeAntigravityRequest(provider, headers, transformedBody);
   let finalHeaders = serializedRequest.headers;
   const clientProfile = applyAntigravityClientProfileHeaders(
@@ -356,12 +382,22 @@ export async function sendAntigravityRequest(
   // The Antigravity request payload is finite JSON even when the response is streamed.
   // Keep the upload replayable instead of wrapping it in a one-shot ReadableStream; proxyFetch
   // can then use its normal replay/fallback path without retaining a duplex upload stream.
-  let response = await fetchAntigravityWithReadinessTimeout(url, {
-    method: "POST",
-    headers: finalHeaders,
-    body: serializedRequest.bodyString,
-    signal,
-  });
+  let response = await fetchAntigravityWithReadinessTimeout(
+    url,
+    {
+      method: "POST",
+      headers: finalHeaders,
+      body: serializedRequest.bodyString,
+      signal,
+    },
+    STREAM_READINESS_TIMEOUT_MS,
+    {
+      provider,
+      model: getRequestTargetModel(transformedBody),
+      connectionId: credentials.connectionId ?? null,
+      endpoint: "antigravity_generate",
+    }
+  );
 
   if (response.status === HTTP_STATUS.FORBIDDEN && finalHeaders["x-goog-user-project"]) {
     const retryHeaders = { ...finalHeaders };
@@ -373,12 +409,23 @@ export async function sendAntigravityRequest(
       "TELEMETRY",
       `[Antigravity] PhysicalSend - RequestId: ${correlationId ?? "none"}, URL: ${url}, Model: ${model}, PhysicalSend: ${retryPhysicalSendOrdinal}, RetryAttempt: ${retryAttempt}, Cause: x-goog-user-project-403`
     );
-    response = await fetchAntigravityWithReadinessTimeout(url, {
-      method: "POST",
-      headers: retryHeaders,
-      body: serializedRequest.bodyString,
-      signal,
-    });
+    response = await fetchAntigravityWithReadinessTimeout(
+      url,
+      {
+        method: "POST",
+        headers: retryHeaders,
+        body: serializedRequest.bodyString,
+        signal,
+      },
+      STREAM_READINESS_TIMEOUT_MS,
+      {
+        provider,
+        model: getRequestTargetModel(transformedBody),
+        connectionId: credentials.connectionId ?? null,
+        endpoint: "antigravity_generate",
+        retryReason: "quota_header_removed_after_403",
+      }
+    );
     finalHeaders = retryHeaders;
   }
 
@@ -427,19 +474,29 @@ export async function sendAntigravityRequest(
             `[Antigravity] PhysicalSend - RequestId: ${correlationId ?? "none"}, URL: ${url}, Model: ${reResolvedModel}, PhysicalSend: ${syncRetryPhysicalSendOrdinal}, RetryAttempt: ${retryAttempt}, Cause: reactive-sync-404`
           );
           // Same replayable fixed-body upload as the first send (no one-shot stream).
-          response = await fetchAntigravityWithReadinessTimeout(url, {
-            method: "POST",
-            headers: retryHeaders,
-            body: reSerialized.bodyString,
-            signal,
-          });
+          response = await fetchAntigravityWithReadinessTimeout(
+            url,
+            {
+              method: "POST",
+              headers: retryHeaders,
+              body: reSerialized.bodyString,
+              signal,
+            },
+            STREAM_READINESS_TIMEOUT_MS,
+            {
+              provider,
+              model: reResolvedModel,
+              connectionId: credentials.connectionId ?? null,
+              endpoint: "antigravity_generate",
+            }
+          );
           finalHeaders = retryHeaders;
         }
       }
     }
   }
 
-  return { response, finalHeaders };
+  return { response, finalHeaders, upstreamHttpSelection: selectHttpResponse(response) };
 }
 
 /**
@@ -482,12 +539,22 @@ export async function tryCreditsRetry(
       "TELEMETRY",
       `[Antigravity] PhysicalSend - RequestId: ${correlationId ?? "none"}, URL: ${url}, PhysicalSend: ${creditsPhysicalSendOrdinal}, Cause: google-one-ai-credits-retry`
     );
-    const creditsResp = await fetchAntigravityWithReadinessTimeout(url, {
-      method: "POST",
-      headers: finalCreditsHeaders,
-      body: serializedCreditsRequest.bodyString,
-      signal,
-    });
+    const creditsResp = await fetchAntigravityWithReadinessTimeout(
+      url,
+      {
+        method: "POST",
+        headers: finalCreditsHeaders,
+        body: serializedCreditsRequest.bodyString,
+        signal,
+      },
+      STREAM_READINESS_TIMEOUT_MS,
+      {
+        provider,
+        model: getRequestTargetModel(creditsBody),
+        connectionId: credentials.connectionId ?? null,
+        endpoint: "antigravity_generate",
+      }
+    );
     if (creditsResp.ok || creditsResp.status !== HTTP_STATUS.RATE_LIMITED) {
       log.info("AG_CREDITS", `Credits retry succeeded: ${creditsResp.status}`);
       if (!stream && creditsResp.body) {
@@ -507,6 +574,7 @@ export async function tryCreditsRetry(
       }
       return {
         response: creditsResp,
+        upstreamHttpSelection: selectHttpResponse(creditsResp),
         url,
         headers: finalCreditsHeaders,
         transformedBody: creditsBody,
@@ -567,6 +635,7 @@ export async function tryEmbedLongRetryAfter(
     });
     return {
       response: modifiedResponse,
+      upstreamHttpSelection: selectHttpResponse(response),
       url,
       headers: finalHeaders,
       transformedBody,
@@ -591,6 +660,7 @@ async function buildUpstreamErrorResult(
   const errorBody = buildAntigravityUpstreamError(response.status, response.statusText, rawBody);
   const upstreamDiagnostic = projectAntigravityValidationDiagnostic(response.status, rawBody);
   return {
+    upstreamHttpSelection: selectHttpResponse(response),
     response: new Response(JSON.stringify(errorBody), {
       status: response.status,
       headers: { "Content-Type": "application/json" },
@@ -645,6 +715,7 @@ async function buildNonStreamingExecuteOnceResult(
   // No body -- return as-is
   return {
     response,
+    upstreamHttpSelection: selectHttpResponse(response),
     url,
     headers: finalHeaders,
     transformedBody,
@@ -692,6 +763,7 @@ async function buildStreamingExecuteOnceResult(
     });
     return {
       response: tappedResponse,
+      upstreamHttpSelection: selectHttpResponse(response),
       url,
       headers: finalHeaders,
       transformedBody,
@@ -700,6 +772,7 @@ async function buildStreamingExecuteOnceResult(
 
   return {
     response,
+    upstreamHttpSelection: selectHttpResponse(response),
     url,
     headers: finalHeaders,
     transformedBody,

@@ -1,3 +1,7 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
 import type { getProviderCredentials } from "@/sse/services/auth.ts";
@@ -25,6 +29,7 @@ import { isTransientCodexCapacity429 } from "../../services/codexAccount/capacit
 
 export interface ChatCoreExecutorResult {
   response: Response;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   url: string;
   headers: Record<string, string>;
   transformedBody: unknown;
@@ -43,6 +48,7 @@ export interface ProviderExecutionPolicy {
 export type ProviderExecutionOutcome =
   | {
       kind: "response";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       response: Response;
       url: string;
       headers: Record<string, string>;
@@ -53,6 +59,7 @@ export type ProviderExecutionOutcome =
     }
   | {
       kind: "error";
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       result: ChatCoreErrorResult;
       providerUsage: ProviderLegUsage | null;
       upstreamDiagnostic?: Record<string, unknown>;
@@ -130,7 +137,12 @@ export interface ProviderExecutionPipelineInput {
   connection: PipelineConnectionContext;
   wire: PipelineWireState;
   state: PipelineStateHooks;
-  sendProviderAttempt: (model: string, allowDedup: boolean) => Promise<ChatCoreExecutorResult>;
+  upstreamHttpRejection?: HttpAttemptRejectionSlot;
+  sendProviderAttempt: (
+    model: string,
+    allowDedup: boolean,
+    rejection?: HttpAttemptRejectionSlot
+  ) => Promise<ChatCoreExecutorResult>;
   getLastOutboundBody?: (attempt: ChatCoreExecutorResult) => unknown;
   onSignatureFailure?: (failure: {
     status: number;
@@ -263,6 +275,7 @@ async function toOutcome(
       headers: attempt.headers,
       transformedBody: attempt.transformedBody,
       upstreamDiagnostic: attempt.upstreamDiagnostic,
+      upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
       model,
       connectionId,
     };
@@ -318,6 +331,7 @@ async function toOutcome(
     },
     providerUsage: null,
     upstreamDiagnostic: attempt.upstreamDiagnostic,
+    upstreamHttpSelection: attempt.upstreamHttpSelection ?? null,
     model,
     connectionId,
   };
@@ -348,7 +362,17 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state, sendProviderAttempt } = input;
+  const { policy, target, connection, wire, state } = input;
+  const sendProviderAttempt = async (model: string, allowDedup: boolean) => {
+    const rejection: HttpAttemptRejectionSlot = { selection: null };
+    if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
+    try {
+      return await input.sendProviderAttempt(model, allowDedup, rejection);
+    } catch (error) {
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejection.selection;
+      throw error;
+    }
+  };
   const maxAttempts = maxAttemptsFor(target.provider);
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
@@ -570,6 +594,8 @@ export async function runProviderExecutionPipeline(
           },
         });
       } catch (error) {
+        const rejectedSelection = input.upstreamHttpRejection?.selection ?? null;
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
         if (signatureFailure) {
           input.onSignatureFailure?.({
             status,
@@ -581,8 +607,10 @@ export async function runProviderExecutionPipeline(
             recoverySucceeded: false,
           });
         }
+        if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = rejectedSelection;
         throw error;
       }
+      if (input.upstreamHttpRejection) input.upstreamHttpRejection.selection = null;
       if (signatureFailure) {
         input.onSignatureFailure?.({
           status,
@@ -606,6 +634,7 @@ export async function runProviderExecutionPipeline(
             (signatureRecovery.execution.headers as Record<string, string>) ?? attempt.headers,
           transformedBody: signatureRecovery.execution.transformedBody ?? attempt.transformedBody,
           upstreamDiagnostic: signatureRecovery.execution.upstreamDiagnostic,
+          upstreamHttpSelection: signatureRecovery.execution.upstreamHttpSelection ?? null,
         };
         return toOutcome(
           lastAttempt,

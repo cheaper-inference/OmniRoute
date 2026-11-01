@@ -12205,6 +12205,10 @@
     "messageInputAria": "Message"
   },
   "requestLogger": {
+    "omittedHttpAttempts": "{count} HTTP sends not retained",
+    "upstreamStatus": "Upstream {status}",
+    "noHttpResponse": "No HTTP response observed",
+    "transportError": "Transport error",
     "recording": "Recording",
     "paused": "Paused",
     "pipelineLogsOn": "Pipeline logs on",
@@ -12288,6 +12292,8 @@
       "increase": "Increase interval"
     },
     "status": {
+      "recoveredAttemptsTitle": "Request recovered across {count} attempts",
+      "latestOutcomeFailed": "The latest request outcome failed",
       "inProgress": "In progress",
       "recoveredByRetry": "Recovered by retry",
       "goToParent": "Go to parent request",
@@ -12300,6 +12306,9 @@
     },
     "attempts": "attempts",
     "detail": {
+      "omittedHttpAttempts": "{count} HTTP sends not retained",
+      "noHttpResponse": "No HTTP response observed",
+      "transportError": "Transport error",
       "collapse": "Collapse {title}",
       "expand": "Expand {title}",
       "copyTitle": "Copy {title}",

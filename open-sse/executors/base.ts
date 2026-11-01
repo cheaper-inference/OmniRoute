@@ -1,3 +1,5 @@
+import { observeProviderHttpSend } from "../utils/providerRequestLogging.ts";
+import { selectHttpResponse, type HttpAttemptSelection } from "../utils/providerHttpAttempts.ts";
 import { HTTP_STATUS, FETCH_TIMEOUT_MS } from "../config/constants.ts";
 import { getApiKeyCodexServiceTier } from "../../src/lib/providers/codexApiKeyServiceMode";
 import { resolveProviderUserAgentOverride } from "./providerUserAgentOverride.ts";
@@ -290,6 +292,7 @@ export type ExecutorExecuteResult =
   | Response
   | {
       response: Response;
+      upstreamHttpSelection?: HttpAttemptSelection | null;
       url?: string;
       headers?: Record<string, string>;
       transformedBody?: unknown;
@@ -1000,7 +1003,19 @@ export class BaseExecutor {
               this.provider,
               model,
               requestCredentials,
-              (url, init) => dispatchGuarded(this.provider, url, init, requestCredentials)
+              (url, init) =>
+                observeProviderHttpSend(
+                  {
+                    provider: this.provider,
+                    model:
+                      typeof (serializedBody as Record<string, unknown> | null)?.model === "string"
+                        ? String((serializedBody as Record<string, unknown>).model)
+                        : model,
+                    connectionId: requestCredentials.connectionId ?? null,
+                    endpoint: "unknown",
+                  },
+                  () => dispatchGuarded(this.provider, url, init, requestCredentials)
+                )
             )(requestUrl, optionsWithSignal);
           } finally {
             if (timeoutId) clearTimeout(timeoutId);
@@ -1757,6 +1772,7 @@ export class BaseExecutor {
 
         return {
           response,
+          upstreamHttpSelection: selectHttpResponse(response),
           url,
           headers: finalHeaders,
           transformedBody: serializedBody,

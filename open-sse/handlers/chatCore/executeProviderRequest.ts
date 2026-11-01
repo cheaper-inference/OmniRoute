@@ -1,3 +1,7 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * One provider send. Lifted out of handleChatCore. The body is the tip
  * implementation; the only change is that closed-over request state arrives
@@ -66,6 +70,7 @@ import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.t
 import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   url?: string;
   transport?: string;
@@ -154,7 +159,8 @@ export type ExecuteProviderRequestDeps = {
 export async function executeProviderRequest(
   deps: ExecuteProviderRequestDeps,
   modelToCall: string = deps.effectiveModel,
-  allowDedup: boolean = false
+  allowDedup: boolean = false,
+  rejection?: HttpAttemptRejectionSlot
 ): Promise<ChatCoreExecutorResult> {
   const {
     agentGoalPolicy,
@@ -532,7 +538,8 @@ export async function executeProviderRequest(
                 // its 2xx stream, or null. Used both by the early-retry re-open (same body)
                 // and the mid-stream continuation (assistant-prefilled body).
                 const runUpstreamStream = async (
-                  body: unknown
+                  body: unknown,
+                  continuation = false
                 ): Promise<ReadableStream<Uint8Array> | null> => {
                   try {
                     assertManagedLeaseFence(attemptConnectionId);
@@ -569,6 +576,10 @@ export async function executeProviderRequest(
                     const retryOk =
                       retryRes.response.status >= 200 && retryRes.response.status < 300;
                     if (retryOk && retryRes.response.body) {
+                      if (res.upstreamHttpSelection)
+                        res.upstreamHttpSelection.current = continuation
+                          ? null
+                          : (retryRes.upstreamHttpSelection?.current ?? null);
                       return retryRes.response.body as ReadableStream<Uint8Array>;
                     }
                     await retryRes.response.body?.cancel().catch(() => {});
@@ -588,7 +599,7 @@ export async function executeProviderRequest(
                         assistantSoFar
                       );
                       return continuationBody
-                        ? runUpstreamStream(continuationBody)
+                        ? runUpstreamStream(continuationBody, true)
                         : Promise.resolve(null);
                     }
                   : undefined;
@@ -674,11 +685,17 @@ export async function executeProviderRequest(
         );
       }
       const contentType = (responseHeaders.get("content-type") || "").toLowerCase();
-      const payload = await readNonStreamingResponseBody(
-        rawResult.response,
-        contentType,
-        upstreamStream
-      );
+      let payload: string;
+      try {
+        payload = await readNonStreamingResponseBody(
+          rawResult.response,
+          contentType,
+          upstreamStream
+        );
+      } catch (error) {
+        if (rejection) rejection.selection = rawResult.upstreamHttpSelection ?? null;
+        throw error;
+      }
       // Use the exact execution credential selected for this request. Model capability
       // failures stay in routing telemetry; authoritative success only recovers this key.
       if (
@@ -726,7 +743,8 @@ export async function executeProviderRequest(
     if (dedupResult.wasDeduplicated) {
       log?.debug?.("DEDUP", `Joined in-flight request hash=${dedupHash}`);
     }
-    return materializeDeduplicatedExecutionResult(dedupResult.result);
+    const result = materializeDeduplicatedExecutionResult(dedupResult.result);
+    return dedupResult.wasDeduplicated ? { ...result, upstreamHttpSelection: null } : result;
   }
 
   return execute();

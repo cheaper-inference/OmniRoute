@@ -1,9 +1,11 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 import {
   executeWithAnthropicThinkingSignatureRecovery,
   isAnthropicThinkingSignatureError,
 } from "./passthroughHelpers.ts";
 
 type ProviderExecution = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   response: Response;
   url?: string;
   headers?: Headers | Record<string, string>;

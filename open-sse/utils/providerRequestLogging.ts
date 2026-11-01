@@ -1,4 +1,9 @@
 import { AsyncLocalStorage } from "node:async_hooks";
+import {
+  HttpAttemptCollector,
+  type HttpAttemptMetadata,
+  type HttpAttemptRef,
+} from "./providerHttpAttempts.ts";
 
 import { updatePendingScope, type PendingRequestScope } from "@/lib/usage/pendingRequestScope";
 
@@ -10,6 +15,7 @@ export type ProviderRequestPrepared = {
 };
 
 export type Capture = {
+  httpAttempts?: HttpAttemptCollector;
   capture: (request: ProviderRequestPrepared) => Promise<void> | void;
   body: (fallback: unknown) => unknown;
   latest?: () => ProviderRequestPrepared | null;
@@ -107,6 +113,10 @@ async function capturePreparedRequest(
     // value may echo request content, so never copy it into application logs.
     log?.warn?.("REQUEST_LOG", "Provider request logging hook failed");
   }
+}
+
+export function currentHttpAttemptCollector(): HttpAttemptCollector | undefined {
+  return captureState.context.getStore()?.capture?.httpAttempts;
 }
 
 export function captureCurrentProviderRequest(
@@ -285,6 +295,7 @@ export function createPreparedRequestLogger(
 ): Capture {
   let latest: ProviderRequestPrepared | null = null;
   return {
+    httpAttempts: new HttpAttemptCollector(),
     capture(request) {
       // Defense in depth: the ALS holder is already emptied when a dispatch settles, but
       // a direct call from a settled dispatch's async resource must not overwrite the
@@ -334,4 +345,34 @@ export function createPreparedRequestLogger(
       return latest;
     },
   };
+}
+
+/** Observe only an explicit inference boundary. The exact Response/exception passes through. */
+export async function observeProviderHttpSend(
+  metadata: HttpAttemptMetadata,
+  send: () => Promise<Response>
+): Promise<Response> {
+  const collector = currentHttpAttemptCollector();
+  let ref: HttpAttemptRef | null = null;
+  try {
+    ref = collector?.begin(metadata) ?? null;
+  } catch {
+    /* logging is best effort */
+  }
+  try {
+    const response = await send();
+    try {
+      if (ref && isProviderRequestCaptureActive()) collector?.complete(ref, response);
+    } catch {
+      /* logging is best effort */
+    }
+    return response;
+  } catch (error) {
+    try {
+      if (ref && isProviderRequestCaptureActive()) collector?.complete(ref, null);
+    } catch {
+      /* logging is best effort */
+    }
+    throw error;
+  }
 }

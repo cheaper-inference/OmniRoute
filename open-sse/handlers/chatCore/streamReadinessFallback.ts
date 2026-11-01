@@ -1,3 +1,4 @@
+import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 /**
  * chatCore stream-readiness fallback (bounded second attempt through the same routing path).
  *
@@ -34,27 +35,38 @@ export type ReadinessFallbackRequest = {
   providerUrl: unknown;
   providerHeaders: unknown;
   finalBody: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   translatedBody: unknown;
   executeProviderRequest: (
     model: string,
     allowDedup: boolean
-  ) => Promise<{ response?: Response; transformedBody?: unknown }>;
+  ) => Promise<{
+    response?: Response;
+    transformedBody?: unknown;
+    upstreamHttpSelection?: HttpAttemptSelection | null;
+  }>;
   providerRequestCapture: { body: (body: unknown) => unknown };
 };
 
 export type ReadinessFallbackSuccess = Extract<StreamReadinessResult, { ok: true }> & {
   providerResponse: Response;
   finalBody: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
 };
 
 export type ReadinessFallbackFailure = Extract<StreamReadinessResult, { ok: false }> & {
   providerResponse: Response;
   finalBody: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
 };
 
 export type ReadinessFallbackOutcome = ReadinessFallbackSuccess | ReadinessFallbackFailure;
 
-type RetryDispatch = { response?: Response; transformedBody?: unknown } | null;
+type RetryDispatch = {
+  response?: Response;
+  transformedBody?: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
+} | null;
 
 type RetryLeg = {
   retryResult: RetryDispatch;
@@ -118,13 +130,19 @@ async function finishRetryLeg(
     | "providerUrl"
     | "providerHeaders"
     | "providerRequestCapture"
+    | "upstreamHttpSelection"
   >
 ): Promise<ReadinessFallbackOutcome> {
   const fail = (
     readiness: StreamReadinessResult,
     response: Response,
     body: unknown
-  ): ReadinessFallbackOutcome => ({ ...readiness, providerResponse: response, finalBody: body });
+  ): ReadinessFallbackOutcome => ({
+    ...readiness,
+    providerResponse: response,
+    finalBody: body,
+    upstreamHttpSelection: args.upstreamHttpSelection ?? null,
+  });
   const { retryResponse } = leg;
 
   if (!retryResponse?.ok || !retryResponse.body || !ready) {
@@ -136,10 +154,18 @@ async function finishRetryLeg(
       (leg.retryResult?.transformedBody ?? args.translatedBody) as Record<string, unknown>
     );
     args.reqLogger.logTargetRequest(args.providerUrl, args.providerHeaders, nextBody);
-    return { ...ready, providerResponse: ready.response, finalBody: nextBody };
+    return {
+      ...ready,
+      providerResponse: ready.response,
+      finalBody: nextBody,
+      upstreamHttpSelection: leg.retryResult?.upstreamHttpSelection ?? null,
+    };
   }
   await ready.response.body?.cancel().catch(() => {});
-  return fail(ready, args.failedBody, args.finalBody);
+  return {
+    ...fail(ready, args.failedBody, args.finalBody),
+    upstreamHttpSelection: leg.retryResult?.upstreamHttpSelection ?? null,
+  };
 }
 
 export async function runReadinessFallback(
@@ -149,7 +175,12 @@ export async function runReadinessFallback(
     readiness: StreamReadinessResult,
     response: Response,
     body: unknown
-  ): ReadinessFallbackOutcome => ({ ...readiness, providerResponse: response, finalBody: body });
+  ): ReadinessFallbackOutcome => ({
+    ...readiness,
+    providerResponse: response,
+    finalBody: body,
+    upstreamHttpSelection: args.upstreamHttpSelection ?? null,
+  });
 
   if (args.failedReadiness.ok === true || args.failedReadiness.upstreamFailure)
     return fail(args.failedReadiness, args.failedBody, args.finalBody);
@@ -178,11 +209,16 @@ export type ReadinessFallbackContext = {
   providerUrl: unknown;
   providerHeaders: unknown;
   finalBody: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   translatedBody: unknown;
   executeProviderRequest: (
     model: string,
     allowDedup: boolean
-  ) => Promise<{ response?: Response; transformedBody?: unknown }>;
+  ) => Promise<{
+    response?: Response;
+    transformedBody?: unknown;
+    upstreamHttpSelection?: HttpAttemptSelection | null;
+  }>;
   providerRequestCapture: { body: (body: unknown) => unknown };
 };
 
@@ -195,12 +231,14 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
   readiness: StreamReadinessResult;
   providerResponse: Response;
   finalBody: unknown;
+  upstreamHttpSelection?: HttpAttemptSelection | null;
 }> {
   if (!isStreamReadinessStallRetryEnabled()) {
     return {
       readiness: ctx.streamReadiness,
       providerResponse: ctx.failedBody,
       finalBody: ctx.finalBody,
+      upstreamHttpSelection: ctx.upstreamHttpSelection ?? null,
     };
   }
   if (
@@ -212,6 +250,7 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
       readiness: ctx.streamReadiness,
       providerResponse: ctx.failedBody,
       finalBody: ctx.finalBody,
+      upstreamHttpSelection: ctx.upstreamHttpSelection ?? null,
     };
   }
   const outcome = await runReadinessFallback({
@@ -227,6 +266,7 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
     providerUrl: ctx.providerUrl,
     providerHeaders: ctx.providerHeaders,
     finalBody: ctx.finalBody,
+    upstreamHttpSelection: ctx.upstreamHttpSelection ?? null,
     translatedBody: ctx.translatedBody,
     executeProviderRequest: ctx.executeProviderRequest,
     providerRequestCapture: ctx.providerRequestCapture,
@@ -235,5 +275,6 @@ export async function maybeFallbackAfterReadiness(ctx: ReadinessFallbackContext)
     readiness: outcome,
     providerResponse: outcome.providerResponse,
     finalBody: outcome.finalBody,
+    upstreamHttpSelection: outcome.upstreamHttpSelection ?? null,
   };
 }

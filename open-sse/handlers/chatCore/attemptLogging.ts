@@ -1,3 +1,9 @@
+import { saveUpstreamHttpAttempt } from "@/lib/usage/callLogs";
+import { TRANSPORT_ERROR_LABEL, NO_RESPONSE_LABEL } from "@/shared/utils/upstreamHttp";
+import type {
+  HttpAttemptCollector,
+  HttpAttemptSelection,
+} from "../../utils/providerHttpAttempts.ts";
 /**
  * chatCore per-attempt logging persistence (Quality Gate v2 / Fase 9 — chatCore god-file
  * decomposition, #3501).
@@ -244,6 +250,7 @@ export function extractResponsesId(sourceFormat: unknown, clientResponse: unknow
 }
 
 export type PersistAttemptLogsArgs = {
+  upstreamHttpSelection?: HttpAttemptSelection | null;
   status: number;
   tokens?: unknown;
   usageEstimated?: boolean | null;
@@ -274,6 +281,7 @@ export type PersistAttemptLogsArgs = {
 };
 
 export type PersistAttemptLogsContext = {
+  httpAttempts?: HttpAttemptCollector;
   /** Per-attempt trace id — MUST match the id emitted in `request.started` so the live
    * dashboard can pair the terminal event and clear the topology node's active pulse. */
   traceId: string;
@@ -400,7 +408,59 @@ export function resolveRequestLifecycleEvent(input: {
   };
 }
 
+type HttpAttemptLogContext = Pick<
+  PersistAttemptLogsContext,
+  "httpAttempts" | "correlationId" | "traceId" | "noLogEnabled" | "apiKeyInfo" | "comboName"
+>;
+
+/** One synchronous seal shared by terminal logging and exits before stream handoff. */
+export function drainUpstreamHttpAttempts(
+  ctx: HttpAttemptLogContext,
+  args?: Pick<PersistAttemptLogsArgs, "upstreamHttpSelection" | "status" | "error">
+) {
+  try {
+    const observed = ctx.httpAttempts?.drain(
+      args?.upstreamHttpSelection ?? null,
+      args?.status,
+      args?.error
+    );
+    if (observed) {
+      for (const send of observed.records) {
+        if (send.id === observed.summary.send?.id) continue;
+        try {
+          saveUpstreamHttpAttempt({
+            timestamp: new Date(send.endedAt ?? send.cutoffAt ?? send.startedAt).toISOString(),
+            method: send.method,
+            path: send.endpoint,
+            status: send.status ?? 0,
+            model: send.model,
+            provider: send.provider,
+            connectionId: send.connectionId,
+            duration: send.durationMs ?? 0,
+            error:
+              send.outcome === "transport_error"
+                ? TRANSPORT_ERROR_LABEL
+                : send.outcome === "no_response_observed"
+                  ? NO_RESPONSE_LABEL
+                  : null,
+            correlationId: ctx.correlationId || ctx.traceId,
+            noLog: Boolean(ctx.noLogEnabled),
+            apiKeyId: ctx.apiKeyInfo?.id,
+            apiKeyName: ctx.apiKeyInfo?.name,
+            comboName: ctx.comboName,
+            upstreamHttp: { version: 1, groupId: observed.summary.groupId, role: "attempt", send },
+          }).catch(() => {});
+        } catch {}
+      }
+    }
+    return observed?.summary;
+  } catch {
+    return undefined;
+  }
+}
+
 export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAttemptLogsContext) {
+  const upstreamHttp = drainUpstreamHttpAttempts(ctx, args);
   const {
     status,
     tokens,
@@ -570,6 +630,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
   // nothing was published — the row stores NULL (no wait), never throws.
   const addedWait = readAddedWait();
   saveCallLog({
+    upstreamHttp: upstreamHttp?.total ? upstreamHttp : null,
     pendingRequestId: ctx.pendingRequestId,
     method: "POST",
     path: clientRawRequest?.endpoint || "/v1/chat/completions",

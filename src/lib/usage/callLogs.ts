@@ -1,3 +1,8 @@
+import {
+  parseUpstreamHttp,
+  UPSTREAM_HTTP_ATTEMPT,
+  type UpstreamHttpSummary,
+} from "@/shared/utils/upstreamHttp";
 /**
  * Structured call log management.
  *
@@ -380,6 +385,12 @@ function mapSummaryRow(row: CallLogSummaryRow) {
   const provider = row.provider;
   const nodeName = row.provider_node_name ?? null;
   const nodePrefix = row.provider_node_prefix ?? null;
+  const requestSummary = row.request_summary ? parseStoredPayload(row.request_summary) : null;
+  const upstreamHttp = parseUpstreamHttp(
+    requestSummary && typeof requestSummary === "object"
+      ? (requestSummary as Record<string, unknown>).upstreamHttp
+      : null
+  );
   return {
     id: row.id,
     timestamp: row.timestamp,
@@ -422,7 +433,8 @@ function mapSummaryRow(row: CallLogSummaryRow) {
     artifactRelPath: row.artifact_relpath,
     artifactSizeBytes: row.artifact_size_bytes,
     artifactSha256: row.artifact_sha256,
-    requestSummary: row.request_summary ? parseStoredPayload(row.request_summary) : null,
+    requestSummary,
+    upstreamHttp,
     hasRequestBody: toNumber(row.has_request_body) === 1,
     hasResponseBody: toNumber(row.has_response_body) === 1,
     hasPipelineDetails: toNumber(row.has_pipeline_details) === 1,
@@ -434,10 +446,10 @@ function mapSummaryRow(row: CallLogSummaryRow) {
   };
 }
 
-async function saveCallLogOperation(entry: any): Promise<void> {
+async function saveCallLogOperation(entry: any, metadataOnly = false): Promise<void> {
   let prepared: PreparedCallLogRow;
   try {
-    prepared = await buildCallLogRow(entry);
+    prepared = await buildCallLogRow(entry, metadataOnly);
   } catch (error) {
     logCallLogSaveFailure(error);
     return;
@@ -471,6 +483,7 @@ async function saveCallLogOperation(entry: any): Promise<void> {
 }
 
 type PreparedCallLogRow = {
+  metadataOnly: boolean;
   db: ReturnType<typeof getDbInstance>;
   logEntry: Record<string, unknown>;
   insertParams: Record<string, unknown>;
@@ -491,7 +504,7 @@ function logCallLogSaveFailure(error: unknown): void {
   );
 }
 
-async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
+async function buildCallLogRow(entry: any, metadataOnly = false): Promise<PreparedCallLogRow> {
   // Bind before any await: a reset must never redirect this request or its retry
   // into a replacement database (#12780). Closed handles fail normally.
   const db = getDbInstance();
@@ -501,7 +514,9 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // nor block the request-scoped context.
   const apiKeyId = entry.apiKeyId || apiKeyContext?.apiKeyId || null;
   const apiKeyName = entry.apiKeyName || apiKeyContext?.apiKeyName || null;
-  const connectionId = entry.connectionId || apiKeyContext?.connectionId || null;
+  const connectionId = metadataOnly
+    ? (entry.connectionId ?? null)
+    : entry.connectionId || apiKeyContext?.connectionId || null;
   const noLogEnabled = Boolean(entry.noLog) || (apiKeyId ? isNoLog(apiKeyId) : false);
 
   const protectedRequestBody = noLogEnabled ? null : protectPayloadForLog(entry.requestBody);
@@ -528,7 +543,7 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // payload the artifact will eventually hold (and the same
   // videoContentRemoved/fail-closed rules), so it is available the instant
   // this function is called. See responsesContinuationStore.ts.
-  if (typeof entry.responseId === "string" && entry.responseId.length > 0) {
+  if (!metadataOnly && typeof entry.responseId === "string" && entry.responseId.length > 0) {
     seedPendingContinuationState(
       entry.responseId,
       apiKeyId,
@@ -544,7 +559,7 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
   // around the attempt; null outside a store or when nothing was noted).
   // Read BEFORE any await: the ALS context is synchronous and later awaits
   // (resolveAccountName, artifact write) may cross async boundaries.
-  const resilienceActions = serializeResilienceActions();
+  const resilienceActions = metadataOnly ? null : serializeResilienceActions();
   const hasResilienceColumn = hasCallLogsColumn("resilience_actions");
 
   const account = await resolveAccountName(connectionId);
@@ -562,11 +577,9 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     entry.reasoningMeta !== null && typeof entry.reasoningMeta === "object"
       ? (entry.reasoningMeta as { encryptedSeen?: boolean; durationMs?: unknown })
       : null;
-  const reasoningObservation = resolveReasoningObservation(
-    tokensReasoning,
-    entry.responseBody,
-    streamReasoningMeta
-  );
+  const reasoningObservation = metadataOnly
+    ? { source: null, chars: null }
+    : resolveReasoningObservation(tokensReasoning, entry.responseBody, streamReasoningMeta);
   // Encrypted-reasoning observability (nullable, additive): stream-side
   // flag+duration win when present; the sink scan above already forced
   // source='encrypted' for opaque snapshots (duration NULL there).
@@ -618,11 +631,13 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     isSuccess && !noLogEnabled && !isNonTextRequest(entry.requestType, entry.path ?? entry.method);
   const renderedContent = measurableContent ? hasRenderedContent(clientVisibleBody) : null;
   const hasContent = renderedContent === null ? null : renderedContent ? 1 : 0;
-  const usageProvenance = resolveUsageProvenance({
-    usageEstimated: entry.usageEstimated === true,
-    tokens: entry.tokens,
-    isSuccess,
-  });
+  const usageProvenance = metadataOnly
+    ? null
+    : resolveUsageProvenance({
+        usageEstimated: entry.usageEstimated === true,
+        tokens: entry.tokens,
+        isSuccess,
+      });
   const logEntry = {
     id: typeof entry.id === "string" && entry.id.length > 0 ? entry.id : generateLogId(),
     timestamp: typeof entry.timestamp === "string" ? entry.timestamp : new Date().toISOString(),
@@ -688,10 +703,15 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     usageProvenance,
   };
 
+  const legacySummary = buildRequestSummary(logEntry.requestType, protectedRequestBody);
+  const upstreamHttp = parseUpstreamHttp(entry.upstreamHttp);
   const requestSummary = noLogEnabled
     ? null
-    : buildRequestSummary(logEntry.requestType, protectedRequestBody);
+    : upstreamHttp
+      ? JSON.stringify({ ...(legacySummary ? JSON.parse(legacySummary) : {}), upstreamHttp })
+      : legacySummary;
   const detailExpected =
+    !metadataOnly &&
     !noLogEnabled &&
     (protectedRequestBody !== null ||
       protectedResponseBody !== null ||
@@ -722,6 +742,7 @@ async function buildCallLogRow(entry: any): Promise<PreparedCallLogRow> {
     requestSummary,
   };
   return {
+    metadataOnly,
     db,
     logEntry,
     insertParams,
@@ -795,7 +816,7 @@ function insertCallLogRow(prepared: PreparedCallLogRow): void {
   // sink note: the sink is the unique consumer — reset only after a successful
   // INSERT, so a failed write (or a second persistence of the same
   // attempt) keeps the summary instead of silently writing NULL.
-  resetResilienceActions();
+  if (!prepared.metadataOnly) resetResilienceActions();
 }
 
 /** Write the inserted row's artifact and publish it, or make the row terminal missing. */
@@ -824,10 +845,10 @@ async function publishCallLogDetail(prepared: PreparedCallLogRow): Promise<void>
   scheduleCallLogRotation();
 }
 
-export function saveCallLog(entry: any): Promise<void> {
+export function saveCallLog(entry: any, metadataOnly = false): Promise<void> {
   // Usage is also needed by the live dashboard when disk history is disabled.
   // Retain only counters, never the request/response bodies from this entry.
-  if (entry?.tokens && typeof entry.tokens === "object") {
+  if (!metadataOnly && entry?.tokens && typeof entry.tokens === "object") {
     updateRequestTokensById(entry.pendingRequestId ?? entry.id, {
       in: getLoggedInputTokens(entry.tokens),
       out: getLoggedOutputTokens(entry.tokens),
@@ -839,13 +860,33 @@ export function saveCallLog(entry: any): Promise<void> {
   }
   if (!shouldPersistToDisk || callLogSavesClosing) return Promise.resolve();
 
-  const operation = saveCallLogOperation(entry);
+  const operation = saveCallLogOperation(entry, metadataOnly);
   pendingCallLogSaves.add(operation);
   void operation.then(
     () => pendingCallLogSaves.delete(operation),
     () => pendingCallLogSaves.delete(operation)
   );
   return operation;
+}
+
+export function saveUpstreamHttpAttempt(entry: {
+  timestamp: string;
+  method: string;
+  path: string;
+  status: number;
+  model: string;
+  provider: string;
+  connectionId: string | null;
+  duration: number;
+  error: string | null;
+  correlationId: string;
+  noLog: boolean;
+  upstreamHttp: UpstreamHttpSummary;
+  apiKeyId?: string | null;
+  apiKeyName?: string | null;
+  comboName?: unknown;
+}): Promise<void> {
+  return saveCallLog({ ...entry, requestType: UPSTREAM_HTTP_ATTEMPT }, true);
 }
 
 export async function waitForCallLogSaves(timeoutMs: number): Promise<boolean> {
@@ -917,7 +958,9 @@ export async function getCallLogs(filter: any = {}) {
 
   if (filter.status) {
     if (filter.status === "error") {
-      conditions.push("(cl.status >= 400 OR cl.error_summary IS NOT NULL)");
+      conditions.push(
+        "(cl.status >= 400 OR (cl.error_summary IS NOT NULL AND (cl.request_type IS NULL OR cl.request_type <> 'upstream_http_attempt' OR cl.error_summary <> 'No HTTP response observed')) OR (cl.request_type = 'upstream_http_attempt' AND cl.status = 0 AND cl.error_summary IS NULL))"
+      );
     } else if (filter.status === "ok") {
       conditions.push("cl.status >= 200 AND cl.status < 300");
     } else {
