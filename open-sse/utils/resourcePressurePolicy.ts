@@ -368,6 +368,7 @@ function isCacheDominatedHigh(
   const { currentBytes, highBytes, fileBytes, events } = signals.cgroup;
   const psi = signals.psi;
   if (
+    psiPressureDisabled() ||
     currentBytes == null ||
     highBytes == null ||
     fileBytes == null ||
