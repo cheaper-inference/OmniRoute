@@ -1,0 +1,1 @@
+- **fix(antigravity):** Keep default Antigravity and agy generation requests on the daily consumer endpoint instead of falling back to the regular host.
