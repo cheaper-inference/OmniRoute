@@ -5756,6 +5756,7 @@
     "filterError": "កំហុស",
     "filterBanned": "ត្រូវបានហាមឃាត់",
     "filterCreditsExhausted": "ឥណទានបានប្រើអស់",
+    "filterVerificationRequired": "ត្រូវការការផ្ទៀងផ្ទាត់",
     "accountSearchPlaceholder": "ស្វែងរកគណនី…",
     "noFilteredConnections": "គ្មានការតភ្ជាប់ណាមួយត្រូវនឹងតម្រងបច្ចុប្បន្នទេ។",
     "failedSetAlias": "មិនអាចកំណត់ឈ្មោះក្លែងបានទេ",

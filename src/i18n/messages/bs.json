@@ -5756,6 +5756,7 @@
     "filterError": "Greška",
     "filterBanned": "Banirano",
     "filterCreditsExhausted": "Krediti potrošeni",
+    "filterVerificationRequired": "Potrebna verifikacija",
     "accountSearchPlaceholder": "Pretraži račune…",
     "noFilteredConnections": "Nijedna veza ne odgovara trenutnom filteru.",
     "failedSetAlias": "Neuspjelo postavljanje aliasa",

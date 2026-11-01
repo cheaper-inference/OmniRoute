@@ -5679,6 +5679,7 @@
     "filterError": "S pogreškom",
     "filterBanned": "Zabranjene",
     "filterCreditsExhausted": "Iscrpljeni krediti",
+    "filterVerificationRequired": "Potrebna provjera",
     "accountSearchPlaceholder": "Pretraži račune…",
     "noFilteredConnections": "Nijedna veza ne odgovara trenutnom filtru.",
     "failedSetAlias": "Postavljanje aliasa nije uspjelo",

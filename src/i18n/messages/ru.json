@@ -5679,6 +5679,7 @@
     "filterError": "Ошибка",
     "filterBanned": "Заблокирован",
     "filterCreditsExhausted": "Кредиты исчерпаны",
+    "filterVerificationRequired": "Требуется подтверждение",
     "accountSearchPlaceholder": "Поиск аккаунтов…",
     "noFilteredConnections": "Нет подключений, соответствующих текущему фильтру.",
     "failedSetAlias": "Не удалось установить псевдоним",

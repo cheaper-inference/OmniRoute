@@ -5679,6 +5679,7 @@
     "filterError": "שגיאה",
     "filterBanned": "חסום",
     "filterCreditsExhausted": "קרדיטים אזלו",
+    "filterVerificationRequired": "נדרש אימות",
     "accountSearchPlaceholder": "חיפוש חשבונות…",
     "noFilteredConnections": "אין חיבורים התואמים למסנן הנוכחי.",
     "failedSetAlias": "הגדרת הכינוי נכשלה",

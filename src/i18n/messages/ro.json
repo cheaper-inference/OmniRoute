@@ -5679,6 +5679,7 @@
     "filterError": "Eroare",
     "filterBanned": "Blocat",
     "filterCreditsExhausted": "Credite epuizate",
+    "filterVerificationRequired": "Necesită verificare",
     "accountSearchPlaceholder": "Caută conturi…",
     "noFilteredConnections": "Nicio conexiune nu corespunde filtrului curent.",
     "failedSetAlias": "Nu s-a putut seta aliasul",

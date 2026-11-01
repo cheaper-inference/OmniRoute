@@ -5679,6 +5679,7 @@
     "filterError": "Kesalahan",
     "filterBanned": "Diblokir",
     "filterCreditsExhausted": "Kredit habis",
+    "filterVerificationRequired": "Perlu verifikasi",
     "accountSearchPlaceholder": "Cari akun…",
     "noFilteredConnections": "Tidak ada koneksi yang cocok dengan filter saat ini.",
     "failedSetAlias": "Gagal menyetel alias",

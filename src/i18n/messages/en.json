@@ -5756,6 +5756,7 @@
     "filterError": "Error",
     "filterBanned": "Banned",
     "filterCreditsExhausted": "Credits Exhausted",
+    "filterVerificationRequired": "Needs verification",
     "accountSearchPlaceholder": "Search accounts…",
     "noFilteredConnections": "No connections match the current filter.",
     "failedSetAlias": "Failed to set alias",

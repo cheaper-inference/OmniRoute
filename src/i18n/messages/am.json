@@ -5756,6 +5756,7 @@
     "filterError": "ስህተት",
     "filterBanned": "ታግዷል",
     "filterCreditsExhausted": "ክሬዲቶች አልቀዋል",
+    "filterVerificationRequired": "ማረጋገጫ ያስፈልጋል",
     "accountSearchPlaceholder": "መለያዎችን ፈልግ…",
     "noFilteredConnections": "ከአሁኑ ማጣሪያ ጋር የሚዛመዱ ግንኙነቶች የሉም።",
     "failedSetAlias": "ተለዋጭ ስሙን ማዘጋጀት አልተሳካም",

@@ -5756,6 +5756,7 @@
     "filterError": "Грешка",
     "filterBanned": "Блокиран",
     "filterCreditsExhausted": "Изчерпани кредити",
+    "filterVerificationRequired": "Изисква потвърждение",
     "accountSearchPlaceholder": "Търсене на акаунти…",
     "noFilteredConnections": "Няма връзки, съвпадащи с текущия филтър.",
     "failedSetAlias": "Неуспешно задаване на псевдоним",

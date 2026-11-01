@@ -5679,6 +5679,7 @@
     "filterError": "Feil",
     "filterBanned": "Blokkert",
     "filterCreditsExhausted": "Kreditter oppbrukt",
+    "filterVerificationRequired": "Krever bekreftelse",
     "accountSearchPlaceholder": "Søk i kontoer …",
     "noFilteredConnections": "Ingen tilkoblinger samsvarer med gjeldende filter.",
     "failedSetAlias": "Kunne ikke angi alias",

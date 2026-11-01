@@ -5679,6 +5679,7 @@
     "filterError": "பிழை",
     "filterBanned": "தடைசெய்யப்பட்டது",
     "filterCreditsExhausted": "கிரெடிட் தீர்ந்தது",
+    "filterVerificationRequired": "சரிபார்ப்பு தேவை",
     "accountSearchPlaceholder": "கணக்குகளைத் தேடவும்…",
     "noFilteredConnections": "தற்போதைய வடிகட்டியுடன் எந்த இணைப்புகளும் பொருந்தவில்லை.",
     "failedSetAlias": "மாற்றுப்பெயரை அமைக்க முடியவில்லை",

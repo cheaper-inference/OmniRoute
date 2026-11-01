@@ -5679,6 +5679,7 @@
     "filterError": "エラー",
     "filterBanned": "禁止",
     "filterCreditsExhausted": "クレジット切れ",
+    "filterVerificationRequired": "確認が必要",
     "accountSearchPlaceholder": "アカウントを検索…",
     "noFilteredConnections": "現在のフィルターに一致する接続はありません。",
     "failedSetAlias": "エイリアスの設定に失敗しました",

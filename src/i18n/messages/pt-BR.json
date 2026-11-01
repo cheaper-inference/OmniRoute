@@ -5679,6 +5679,7 @@
     "filterError": "Erro",
     "filterBanned": "Banido",
     "filterCreditsExhausted": "Créditos esgotados",
+    "filterVerificationRequired": "Verificação pendente",
     "accountSearchPlaceholder": "Pesquisar contas…",
     "noFilteredConnections": "Nenhuma conexão corresponde ao filtro atual.",
     "failedSetAlias": "Falha ao definir alias",

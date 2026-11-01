@@ -5679,6 +5679,7 @@
     "filterError": "Kļūda",
     "filterBanned": "Bloķēts",
     "filterCreditsExhausted": "Kredīti izlietoti",
+    "filterVerificationRequired": "Nepieciešama verifikācija",
     "accountSearchPlaceholder": "Meklēt kontus…",
     "noFilteredConnections": "Nav savienojumu, kas atbilst pašreizējam filtram.",
     "failedSetAlias": "Neizdevās iestatīt aizstājvārdu",

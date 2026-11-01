@@ -5756,6 +5756,7 @@
     "filterError": "خطأ",
     "filterBanned": "محظور",
     "filterCreditsExhausted": "نفدت الأرصدة",
+    "filterVerificationRequired": "يحتاج إلى تحقق",
     "accountSearchPlaceholder": "البحث في الحسابات…",
     "noFilteredConnections": "لا توجد اتصالات تطابق عامل التصفية الحالي.",
     "failedSetAlias": "فشل في تعيين الاسم المستعار",

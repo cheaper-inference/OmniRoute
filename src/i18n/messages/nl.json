@@ -5679,6 +5679,7 @@
     "filterError": "Fout",
     "filterBanned": "Geblokkeerd",
     "filterCreditsExhausted": "Tegoed op",
+    "filterVerificationRequired": "Verificatie vereist",
     "accountSearchPlaceholder": "Accounts zoeken…",
     "noFilteredConnections": "Geen verbindingen komen overeen met het huidige filter.",
     "failedSetAlias": "Kan alias niet instellen",

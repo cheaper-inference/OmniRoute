@@ -5679,6 +5679,7 @@
     "filterError": "Xato",
     "filterBanned": "Bloklangan",
     "filterCreditsExhausted": "Kreditlar tugagan",
+    "filterVerificationRequired": "Tasdiqlash talab qilinadi",
     "accountSearchPlaceholder": "Hisoblarni qidirish…",
     "noFilteredConnections": "Joriy filtrga mos ulanishlar yoʻq.",
     "failedSetAlias": "Taxallusni belgilab boʻlmadi",

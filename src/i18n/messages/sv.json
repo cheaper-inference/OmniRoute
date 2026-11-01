@@ -5679,6 +5679,7 @@
     "filterError": "Fel",
     "filterBanned": "Blockerad",
     "filterCreditsExhausted": "Krediter slut",
+    "filterVerificationRequired": "Kräver verifiering",
     "accountSearchPlaceholder": "Sök efter konton…",
     "noFilteredConnections": "Inga anslutningar matchar det aktuella filtret.",
     "failedSetAlias": "Det gick inte att ange alias",

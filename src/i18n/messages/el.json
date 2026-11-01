@@ -5679,6 +5679,7 @@
     "filterError": "Σφάλμα",
     "filterBanned": "Αποκλεισμένη",
     "filterCreditsExhausted": "Εξαντλημένες πιστώσεις",
+    "filterVerificationRequired": "Απαιτείται επαλήθευση",
     "accountSearchPlaceholder": "Αναζήτηση λογαριασμών…",
     "noFilteredConnections": "Καμία σύνδεση δεν αντιστοιχεί στο τρέχον φίλτρο.",
     "failedSetAlias": "Αποτυχία ορισμού ψευδωνύμου",

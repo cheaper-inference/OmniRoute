@@ -5756,6 +5756,7 @@
     "filterError": "ত্রুটি",
     "filterBanned": "নিষিদ্ধ",
     "filterCreditsExhausted": "ক্রেডিট শেষ",
+    "filterVerificationRequired": "যাচাই প্রয়োজন",
     "accountSearchPlaceholder": "অ্যাকাউন্ট খুঁজুন…",
     "noFilteredConnections": "বর্তমান ফিল্টারের সাথে কোনো সংযোগ মিলছে না।",
     "failedSetAlias": "alias সেট করা যায়নি",

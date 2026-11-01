@@ -5756,6 +5756,7 @@
     "filterError": "Xəta",
     "filterBanned": "Qadağan edilib",
     "filterCreditsExhausted": "Kreditlər bitib",
+    "filterVerificationRequired": "Doğrulama tələb olunur",
     "accountSearchPlaceholder": "Hesabları axtarın…",
     "noFilteredConnections": "Cari filtrə uyğun gələn heç bir bağlantı yoxdur.",
     "failedSetAlias": "Ləqəbi təyin etmək alınmadı",

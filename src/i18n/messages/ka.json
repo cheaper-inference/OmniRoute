@@ -5756,6 +5756,7 @@
     "filterError": "შეცდომა",
     "filterBanned": "დაბლოკილი",
     "filterCreditsExhausted": "კრედიტები ამოწურულია",
+    "filterVerificationRequired": "საჭიროებს დადასტურებას",
     "accountSearchPlaceholder": "ანგარიშების ძიება…",
     "noFilteredConnections": "მიმდინარე ფილტრს არცერთი კავშირი არ შეესაბამება.",
     "failedSetAlias": "ფსევდონიმის დაყენება ვერ მოხერხდა",

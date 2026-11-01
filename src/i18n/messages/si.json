@@ -5679,6 +5679,7 @@
     "filterError": "දෝෂය",
     "filterBanned": "තහනම් කර ඇත",
     "filterCreditsExhausted": "ක්රෙඩිට් අවසන් වී ඇත",
+    "filterVerificationRequired": "තහවුරු කිරීම අවශ්‍යයි",
     "accountSearchPlaceholder": "ගිණුම් සොයන්න…",
     "noFilteredConnections": "වත්මන් පෙරහනට ගැළපෙන සම්බන්ධතා නොමැත.",
     "failedSetAlias": "අන්වර්ථ නාමය සැකසීමට අසමත් විය",

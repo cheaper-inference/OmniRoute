@@ -5679,6 +5679,7 @@
     "filterError": "లోపం",
     "filterBanned": "నిషేధించబడింది",
     "filterCreditsExhausted": "క్రెడిట్‌లు అయిపోయాయి",
+    "filterVerificationRequired": "ధృవీకరణ అవసరం",
     "accountSearchPlaceholder": "ఖాతాలను శోధించండి…",
     "noFilteredConnections": "ప్రస్తుత ఫిల్టర్‌కు ఏ కనెక్షన్‌లు సరిపోలడం లేదు.",
     "failedSetAlias": "మారుపేరును సెట్ చేయడం విఫలమైంది",

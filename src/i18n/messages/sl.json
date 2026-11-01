@@ -5679,6 +5679,7 @@
     "filterError": "Napaka",
     "filterBanned": "Blokirano",
     "filterCreditsExhausted": "Krediti so porabljeni",
+    "filterVerificationRequired": "Potrebna potrditev",
     "accountSearchPlaceholder": "Išči račune…",
     "noFilteredConnections": "Nobena povezava ne ustreza trenutnemu filtru.",
     "failedSetAlias": "Vzdevka ni bilo mogoče nastaviti",

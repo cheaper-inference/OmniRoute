@@ -5679,6 +5679,7 @@
     "filterError": "خطا",
     "filterBanned": "مسدود",
     "filterCreditsExhausted": "اعتبار تمام‌شده",
+    "filterVerificationRequired": "نیازمند تأیید",
     "accountSearchPlaceholder": "جستوجوی حسابها…",
     "noFilteredConnections": "هیچ اتصالی با فیلتر فعلی مطابقت ندارد.",
     "failedSetAlias": "تنظیم نام مستعار ناموفق بود",

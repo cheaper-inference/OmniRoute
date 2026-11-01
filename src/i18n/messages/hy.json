@@ -5679,6 +5679,7 @@
     "filterError": "Սխալ",
     "filterBanned": "Արգելափակված",
     "filterCreditsExhausted": "Կրեդիտները սպառված են",
+    "filterVerificationRequired": "Պահանջվում է հաստատում",
     "accountSearchPlaceholder": "Որոնել հաշիվներ…",
     "noFilteredConnections": "Ոչ մի կապ չի համապատասխանում ընթացիկ զտիչին։",
     "failedSetAlias": "Չհաջողվեց սահմանել այլանունը",

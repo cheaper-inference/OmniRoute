@@ -5756,6 +5756,7 @@
     "filterError": "ਗਲਤੀ",
     "filterBanned": "ਪਾਬੰਦੀਸ਼ੁਦਾ",
     "filterCreditsExhausted": "ਕ੍ਰੈਡਿਟ ਖਤਮ ਹੋ ਗਏ",
+    "filterVerificationRequired": "ਪੁਸ਼ਟੀ ਦੀ ਲੋੜ ਹੈ",
     "accountSearchPlaceholder": "ਖਾਤੇ ਖੋਜੋ…",
     "noFilteredConnections": "ਕੋਈ ਕਨੈਕਸ਼ਨ ਮੌਜੂਦਾ ਫਿਲਟਰ ਨਾਲ ਮੇਲ ਨਹੀਂ ਖਾਂਦਾ।",
     "failedSetAlias": "ਉਪਨਾਮ ਸੈੱਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",

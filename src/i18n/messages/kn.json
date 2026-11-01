@@ -5679,6 +5679,7 @@
     "filterError": "ದೋಷ",
     "filterBanned": "ನಿಷೇಧಿಸಲಾಗಿದೆ",
     "filterCreditsExhausted": "ಕ್ರೆಡಿಟ್ಗಳು ಮುಗಿದಿವೆ",
+    "filterVerificationRequired": "ಪರಿಶೀಲನೆ ಅಗತ್ಯವಿದೆ",
     "accountSearchPlaceholder": "ಖಾತೆಗಳನ್ನು ಹುಡುಕಿ…",
     "noFilteredConnections": "ಪ್ರಸ್ತುತ ಫಿಲ್ಟರ್ಗೆ ಯಾವುದೇ ಸಂಪರ್ಕಗಳು ಹೊಂದಿಕೆಯಾಗುವುದಿಲ್ಲ.",
     "failedSetAlias": "ಉಪನಾಮವನ್ನು ಹೊಂದಿಸಲು ವಿಫಲವಾಗಿದೆ",

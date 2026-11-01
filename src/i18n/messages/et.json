@@ -5679,6 +5679,7 @@
     "filterError": "Viga",
     "filterBanned": "Blokeeritud",
     "filterCreditsExhausted": "Krediit on otsas",
+    "filterVerificationRequired": "Vajab kinnitamist",
     "accountSearchPlaceholder": "Otsi kontosid…",
     "noFilteredConnections": "Ükski ühendus ei vasta praegusele filtrile.",
     "failedSetAlias": "Aliase määramine ebaõnnestus",

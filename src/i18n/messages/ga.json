@@ -5679,6 +5679,7 @@
     "filterError": "Earráid",
     "filterBanned": "Toirmiscthe",
     "filterCreditsExhausted": "Creidmheasanna ídithe",
+    "filterVerificationRequired": "Fíorú ag teastáil",
     "accountSearchPlaceholder": "Cuardaigh cuntais…",
     "noFilteredConnections": "Ní mheaitseálann aon nasc an scagaire reatha.",
     "failedSetAlias": "Theip ar an alias a shocrú",
