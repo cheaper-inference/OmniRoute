@@ -67,7 +67,7 @@ export const OAUTH_PROVIDERS = {
     alias: "if",
     name: "Qoder",
     authHint:
-      "PAT (pt-): requires local qodercli; plain chat only, no caller tools, buffered streaming and a 45-second chat limit. HTTP keys use DashScope; browser OAuth requires administrator configuration.",
+      "Sign in with your browser account (device code flow) for direct streaming and caller tools. PAT (pt-) requires local qodercli. HTTP keys use DashScope.",
     icon: "water_drop",
     color: "#6366F1",
     subscriptionRisk: true,
