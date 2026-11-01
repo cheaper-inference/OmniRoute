@@ -308,9 +308,13 @@ export function classifyAdaptiveResourcePressureWithHistory(
   // the old behavior).
   if (highRatio?.severity === "critical") {
     const proof = hasKernelThrottleProof(signals, previousEvents);
+    // memory.high can throttle briefly while reclaiming SQLite's clean page
+    // cache. A few high counter increments alone must not reject every AI
+    // request when the anonymous working set and cgroup PSI are both low.
+    const cacheOnly = isCacheDominatedHigh(signals, thresholds, previousEvents);
     best = maxLevel(
       best,
-      proof === false ? { severity: "high", reason: "cgroup_high" } : highRatio
+      proof === false || cacheOnly ? { severity: "high", reason: "cgroup_high" } : highRatio
     );
   } else {
     best = maxLevel(best, highRatio);
@@ -349,12 +353,55 @@ function workingSetBytes(cgroup: ResourceSignals["cgroup"]): number | null {
   return cgroup.currentBytes - cgroup.fileBytes;
 }
 
+/**
+ * memory.events.high also counts short reclaim stalls on clean file cache.
+ * Treat them as advisory (high) rather than a global 503 only when the cache
+ * dominates, the working set is comfortably below memory.high, and local
+ * memory PSI confirms that reclaim is cheap. Missing/host-only PSI, a new
+ * memory.max event, or a significant stall all preserve the critical guard.
+ */
+function isCacheDominatedHigh(
+  signals: ResourceSignals,
+  thresholds: ResourcePressureThresholds,
+  previousEvents: ThrottleCounters | null = null
+): boolean {
+  const { currentBytes, highBytes, fileBytes, events } = signals.cgroup;
+  const psi = signals.psi;
+  if (
+    currentBytes == null ||
+    highBytes == null ||
+    fileBytes == null ||
+    currentBytes <= 0 ||
+    highBytes <= 0 ||
+    fileBytes <= 0 ||
+    fileBytes > currentBytes ||
+    events?.max == null ||
+    psi?.psiSource !== "cgroup" ||
+    psi.someAvg10 == null ||
+    psi.fullAvg10 == null
+  ) {
+    return false;
+  }
+  if (
+    fileBytes < currentBytes * 0.4 ||
+    currentBytes - fileBytes > highBytes * thresholds.recoveryRatio ||
+    psi.someAvg10 > 1 ||
+    psi.fullAvg10 > 1
+  ) {
+    return false;
+  }
+  return previousEvents?.max == null || events.max <= previousEvents.max;
+}
+
 function isRecovered(signals: ResourceSignals, thresholds: ResourcePressureThresholds): boolean {
   const cgroupWorkingSetBytes = workingSetBytes(signals.cgroup);
   const ratios: Array<readonly [number | null, number | null]> = [
     [signals.v8.heapUsedBytes, signals.v8.heapLimitBytes],
     [cgroupWorkingSetBytes, signals.cgroup.maxBytes],
-    [signals.cgroup.currentBytes, signals.cgroup.highBytes],
+    [
+      isCacheDominatedHigh(signals, thresholds) ? cgroupWorkingSetBytes : signals.cgroup.currentBytes,
+      signals.cgroup.highBytes,
+    ],
   ];
   if (
     ratios.some(
