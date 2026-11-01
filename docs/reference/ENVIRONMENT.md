@@ -1975,3 +1975,9 @@ Used by `open-sse/services/combo.ts` and `src/lib/quota/quotaScheduler.ts` for p
 | `TEMP` | inherited from the OS | Temporary directory passed through to the CLI when present. Normally leave unset in `.env`. |
 
 See [Rosebud](../providers/ROSEBUD.md).
+
+## Model synchronization diagnostics
+
+| Variable | Default | Source File | Description |
+| --- | --- | --- | --- |
+| `OMNIROUTE_MODEL_SYNC_TIMINGS` | `0` | `src/lib/providerModels/modelSyncTimings.ts` | Set to `1` to log phase timing, a generated request ID and success/error outcomes during model synchronization. Disabled for all other values. Logs omit request, account, catalog and error payloads. |
