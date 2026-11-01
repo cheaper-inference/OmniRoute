@@ -763,13 +763,30 @@ export function setQuotaCache(
     provider === "codex" ? omitCodexDisplayOnlyQuotas(reportedQuotas) : reportedQuotas;
   const quotas = normalizeConnectionQuotas(rawQuotas, provider);
   const modelQuotas = normalizeQuotas(rawModelQuotas);
-  if (provider === "codex") {
-    for (const quota of Object.values(quotas)) quota.observedAt = Date.now();
-  }
-  const exhausted = isExhausted(quotas);
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
   // redundant snapshot writes for idle connections whose quota didn't change.
-  const prior = getState().cache.get(connectionId);
+  const prior =
+    getState().cache.get(connectionId) ||
+    (provider === "codex" ? hydrateQuotaCacheFromSnapshots(connectionId) : null);
+  const retainedCodexWindows = new Set<string>();
+  if (provider === "codex") {
+    for (const [windowKey, quota] of Object.entries(quotas)) {
+      const previous = prior?.quotas[windowKey];
+      if (
+        quota.fractionReported === false &&
+        prior &&
+        previous &&
+        getQuotaWindowObservation(connectionId, windowKey) !== null
+      ) {
+        // Unknown telemetry cannot clear a reported fact or renew its observation clock.
+        quotas[windowKey] = { ...previous, observedAt: previous.observedAt ?? prior.fetchedAt };
+        retainedCodexWindows.add(windowKey);
+      } else {
+        quota.observedAt = Date.now();
+      }
+    }
+  }
+  const exhausted = isExhausted(quotas);
   // A telemetry-only refresh is not evidence that a real upstream 429 has
   // recovered. Keep its original timestamp so it can still expire normally.
   if (
@@ -804,7 +821,8 @@ export function setQuotaCache(
     for (const [windowKey, quotaInfo] of Object.entries(rawQuotas)) {
       if (!quotaInfo || typeof quotaInfo !== "object") continue;
       const normalized = quotas[windowKey];
-      if (!normalized) continue;
+      // Retaining an old fact is not a new observation, including in restart snapshots.
+      if (!normalized || retainedCodexWindows.has(windowKey)) continue;
       const { remainingPercentage } = normalized;
       const fractionReported = normalized.fractionReported !== false;
       if (fractionReported) {
@@ -1007,6 +1025,7 @@ export function getQuotaWindowStatus(
     }
   }
 
+  // Codex already expires each window by its own age/reset; a sibling's park is unrelated.
   return {
     remainingPercentage,
     usedPercentage,
@@ -1017,7 +1036,9 @@ export function getQuotaWindowStatus(
     // #17000 — opt-in (QUOTA_WINDOW_BOUNDED_PARK): a passed park deadline or an observation
     // older than the park cap no longer reaches the threshold.
     reachedThreshold:
-      windowExpired || window.fractionReported === false || isWindowParkReleased(entry, now)
+      windowExpired ||
+      window.fractionReported === false ||
+      (entry.provider !== "codex" && isWindowParkReleased(entry, now))
         ? false
         : remainingPercentage <= 0
           ? true

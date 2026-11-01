@@ -1,4 +1,4 @@
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -16,6 +16,7 @@ const snapshots = await import("../../src/lib/db/quotaSnapshots.ts");
 const cache = await import("../../src/domain/quotaCache.ts");
 const { getQuotaCacheState } = await import("../../src/domain/quotaCacheState.ts");
 const auth = await import("../../src/sse/services/auth.ts");
+const { isQuotaWindowBoundedParkEnabled } = await import("../../src/shared/utils/featureFlags.ts");
 
 const NOW = Date.parse("2026-11-01T12:00:00.000Z");
 const TTL = 5 * 60_000;
@@ -57,6 +58,17 @@ function status(id: string, name: string) {
   const result = cache.getQuotaWindowStatus(id, name);
   assert.ok(result, `expected an observed window: ${name}`);
   return result;
+}
+
+function boundedParkFlag(t: TestContext, enabled?: boolean) {
+  const prior = process.env.QUOTA_WINDOW_BOUNDED_PARK;
+  if (enabled === undefined) delete process.env.QUOTA_WINDOW_BOUNDED_PARK;
+  else process.env.QUOTA_WINDOW_BOUNDED_PARK = String(enabled);
+  t.after(() => {
+    if (prior === undefined) delete process.env.QUOTA_WINDOW_BOUNDED_PARK;
+    else process.env.QUOTA_WINDOW_BOUNDED_PARK = prior;
+  });
+  assert.equal(isQuotaWindowBoundedParkEnabled(), enabled ?? false, "confirm effective park flag");
 }
 
 function saveSnapshot(id: string, name: string, remaining: number) {
@@ -154,6 +166,111 @@ for (const policyEnabled of [true, false]) {
     assert.equal(selected.allRateLimited, true);
     assert.equal(status(c.id, "weekly").reachedThreshold, true);
     assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), true);
+  });
+}
+
+for (const policyEnabled of [true, false]) {
+  test(`unknown weekly observation cannot clear fresh child denial (policy ${policyEnabled})`, async (t) => {
+    boundedParkFlag(t);
+    const observedAt = iso(-30_000);
+    const c = await connection(policyEnabled, {
+      codexQuotaStateByScope: { codex: persisted(observedAt) },
+      codexExhaustedWindowByScope: { codex: "7d" },
+    });
+    cache.hydrateCodexQuotaCacheForRequest(c, NORMAL);
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), true);
+    for (const offset of [0, 60_000]) {
+      t.mock.timers.setTime(NOW + offset);
+      cache.setQuotaCache(c.id, "codex", {
+        weekly: { ...quota(0), fractionReported: false },
+      });
+      cache.hydrateCodexQuotaCacheForRequest(c, NORMAL);
+      assert.equal(
+        cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL),
+        true,
+        "unknown quota observation must not clear a fresh denial"
+      );
+      assert.equal(status(c.id, "weekly").reachedThreshold, true);
+      assert.equal(cache.getQuotaWindowObservation(c.id, "weekly")?.observedAt, observedAt);
+      assert.equal(auth.evaluateQuotaLimitPolicy("codex", c, NORMAL).blocked, policyEnabled);
+      const selected = await auth.getProviderCredentials("codex", null, [c.id], NORMAL);
+      assert.equal(selected.allRateLimited, true);
+    }
+    t.mock.timers.setTime(NOW + TTL - 30_000);
+    assert.equal(cache.getQuotaWindowStatus(c.id, "weekly"), null);
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), false);
+    assert.equal(getQuotaCacheState().healthyUntil.has(c.id), false, "expiry is not recovery");
+    cache.setQuotaCache(c.id, "codex", { weekly: quota(0) });
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), true);
+    cache.setQuotaCache(c.id, "codex", { weekly: quota(100) });
+    cache.hydrateCodexQuotaCacheForRequest(c, NORMAL);
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), false);
+  });
+}
+
+for (const restartBeforeUnknown of [false, true]) {
+  test(`unknown refresh cannot redate denial snapshots (restart first ${restartBeforeUnknown})`, async (t) => {
+    const c = await connection(false);
+    t.mock.timers.setTime(NOW - 30_000);
+    cache.setQuotaCache(c.id, "codex", {
+      weekly: quota(0),
+      gpt_5_3_codex_spark_session: quota(100),
+    });
+    t.mock.timers.setTime(NOW);
+    if (restartBeforeUnknown) cache.__clearForTests();
+    cache.setQuotaCache(c.id, "codex", { weekly: { ...quota(0), fractionReported: false } });
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), true);
+    assert.equal(cache.getQuotaWindowObservation(c.id, "weekly")?.observedAt, iso(-30_000));
+    cache.__clearForTests();
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), true);
+    assert.equal(cache.getQuotaWindowObservation(c.id, "weekly")?.observedAt, iso(-30_000));
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", SPARK), false);
+    t.mock.timers.setTime(NOW + TTL - 30_000);
+    assert.equal(cache.getQuotaWindowStatus(c.id, "weekly"), null);
+    assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", NORMAL), false);
+  });
+}
+
+for (const enabled of [false, true]) {
+  for (const expiredSpark of [true, false]) {
+    test(`park flag ${enabled}: expired ${expiredSpark ? "Spark" : "normal"} cannot release sibling`, async (t) => {
+      boundedParkFlag(t, enabled);
+      const c = await connection(true);
+      const expiredWindow = expiredSpark ? "gpt_5_3_codex_spark_session" : "session";
+      const freshWindow = expiredSpark ? "weekly" : "gpt_5_3_codex_spark_weekly";
+      const freshModel = expiredSpark ? NORMAL : SPARK;
+      const expiredModel = expiredSpark ? SPARK : NORMAL;
+      cache.setQuotaCache(c.id, "codex", {
+        [expiredWindow]: quota(0, iso(-1_000)),
+        [freshWindow]: quota(0),
+      });
+      assert.equal(status(c.id, expiredWindow).reachedThreshold, false);
+      assert.equal(
+        status(c.id, freshWindow).reachedThreshold,
+        true,
+        "another scope's expired park must not release this fresh denial"
+      );
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", freshModel), true);
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", expiredModel), false);
+      assert.equal(auth.evaluateQuotaLimitPolicy("codex", c, freshModel).blocked, true);
+      assert.equal(auth.evaluateQuotaLimitPolicy("codex", c, expiredModel).blocked, false);
+      t.mock.timers.setTime(NOW + TTL);
+      assert.equal(cache.getQuotaWindowStatus(c.id, freshWindow), null);
+      assert.equal(cache.isQuotaExhaustedForRequest(c.id, "codex", freshModel), false);
+    });
+  }
+
+  test(`park flag ${enabled}: non-Codex unknown and shared park behavior stay unchanged`, (t) => {
+    boundedParkFlag(t, enabled);
+    const id = `synthetic-non-codex-park-${enabled}`;
+    cache.setQuotaCache(id, "openai", {
+      session: quota(0, iso(-1_000)),
+      weekly: quota(0),
+    });
+    assert.equal(status(id, "weekly").reachedThreshold, !enabled);
+    cache.setQuotaCache(id, "openai", { weekly: { ...quota(0), fractionReported: false } });
+    assert.equal(status(id, "weekly").reachedThreshold, false);
+    assert.equal(cache.isQuotaExhaustedForRequest(id, "openai"), false);
   });
 }
 
