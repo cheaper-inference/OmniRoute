@@ -43,6 +43,7 @@ services:
     environment:
       - DATA_DIR=/app/data
       - REDIS_URL=redis://redis:6379
+      - PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES=${PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES:-70}
     ports:
       # Loopback-only by default. Override APP_BIND_HOST in .env to expose.
       - "${APP_BIND_HOST:-127.0.0.1}:${DASHBOARD_PORT:-20128}:${DASHBOARD_PORT:-20128}"
