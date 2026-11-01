@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Icon from "@/shared/components/Icon";
 
 interface UnpricedUsageModel {
   provider: string;
@@ -58,50 +60,44 @@ export default function UnpricedUsageBanner() {
   const hidden = report.models.length - listed.length;
 
   return (
-    <div
-      role={failClosed ? "alert" : "status"}
-      className={`flex items-start gap-3 rounded-lg border px-4 py-3 text-sm mb-4 ${
-        failClosed
-          ? "border-red-300 dark:border-red-500/30 bg-red-50 dark:bg-red-500/10 text-red-900 dark:text-red-200"
-          : "border-amber-300 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-amber-900 dark:text-amber-200"
-      }`}
-    >
-      <span className="material-symbols-outlined text-[18px] shrink-0 mt-0.5">price_change</span>
-      <div className="flex-1 min-w-0">
-        <p className="font-semibold">{t("unpricedUsageTitle", { count: report.models.length })}</p>
-        {(failClosed || countAsZero) && (
-          <p className="mt-0.5 opacity-80">
-            {failClosed
-              ? t("unpricedUsageFailClosed", { keys: report.limitedApiKeysAffected })
-              : t("unpricedUsageCountAsZero")}
-          </p>
-        )}
-        <ul className="mt-1.5 space-y-0.5 font-mono text-xs">
-          {listed.map((m) => (
-            <li key={`${m.provider}/${m.model}`}>
-              {m.provider}/{m.model}
-              <span className="opacity-70">
-                {" — "}
-                {t("unpricedUsageModelStats", { requests: m.requests, keys: m.limitedApiKeys })}
-              </span>
-            </li>
-          ))}
-          {hidden > 0 && (
-            <li className="opacity-70">{t("unpricedUsageMore", { count: hidden })}</li>
+    <Alert
+      variant={failClosed ? "critical" : "warning"}
+      className="mb-4"
+      icon={<Icon name="price_change" size={18} />}
+      title={t("unpricedUsageTitle", { count: report.models.length })}
+      description={
+        <>
+          {(failClosed || countAsZero) && (
+            <p>
+              {failClosed
+                ? t("unpricedUsageFailClosed", { keys: report.limitedApiKeysAffected })
+                : t("unpricedUsageCountAsZero")}
+            </p>
           )}
-        </ul>
-        <Link href="/dashboard/costs/pricing" className="mt-1.5 inline-block font-medium underline">
-          {t("unpricedUsageConfigure")}
-        </Link>
-      </div>
-      <button
-        type="button"
-        onClick={() => setDismissed(true)}
-        className="shrink-0 opacity-60 hover:opacity-100 transition-opacity ml-1"
-        aria-label={t("unpricedUsageDismiss")}
-      >
-        ✕
-      </button>
-    </div>
+          <ul className="mt-1.5 space-y-0.5 font-mono text-xs">
+            {listed.map((m) => (
+              <li key={`${m.provider}/${m.model}`}>
+                {m.provider}/{m.model}
+                <span className="opacity-70">
+                  {" — "}
+                  {t("unpricedUsageModelStats", { requests: m.requests, keys: m.limitedApiKeys })}
+                </span>
+              </li>
+            ))}
+            {hidden > 0 && (
+              <li className="opacity-70">{t("unpricedUsageMore", { count: hidden })}</li>
+            )}
+          </ul>
+          <Link
+            href="/dashboard/costs/pricing"
+            className="mt-1.5 inline-block font-medium underline"
+          >
+            {t("unpricedUsageConfigure")}
+          </Link>
+        </>
+      }
+      dismissLabel={t("unpricedUsageDismiss")}
+      onDismiss={() => setDismissed(true)}
+    />
   );
 }

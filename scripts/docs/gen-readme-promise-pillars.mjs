@@ -20,7 +20,7 @@ const NB = " ";
 export const PROMISE_PILLARS_COPY = {
   kicker: ["THE PROMISE"],
   headline: ["One endpoint. ", " Never stop building — OmniRoute picks ", "."],
-  headlineMarks: ["377 providers.", "the cheapest one that works"],
+  headlineMarks: ["380 providers.", "the cheapest one that works"],
   titles: [
     "Never hit limits",
     "Save up to 95% tokens",
@@ -30,13 +30,13 @@ export const PROMISE_PILLARS_COPY = {
     "Production-grade",
   ],
   bodies: [
-    "Auto-fallback across 377 providers in",
+    "Auto-fallback across 380 providers in",
     "milliseconds. Quota out? The next provider",
     "takes over while a healthy target remains.",
     "RTK + Caveman stacked compression cuts",
     "15–95% of eligible tokens — ~89% average",
     "on tool-heavy sessions.",
-    "150+ providers with a free tier, 52 free",
+    "150+ providers with a free tier, 53 free",
     "forever — Qoder, Pollinations, Cloudflare,",
     "SiliconFlow… No card needed.",
     "37 CLI/agent integrations — Claude Code, Codex,",
@@ -154,7 +154,7 @@ export async function renderReadmePromisePillars() {
     svgOpen({
       viewBox: `0 0 ${W} ${H}`,
       title:
-        "The OmniRoute promise: one endpoint and 377 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 52 recurring or keyless free-forever providers. Every tool works: 37 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 39,000+ static test declarations across 5,100+ tracked test files.",
+        "The OmniRoute promise: one endpoint and 380 providers. Six pillars. Resilient fallback: automatic routing continues while another healthy target is available. Save up to 95 percent of eligible tokens: RTK plus Caveman stacked compression averages about 89 percent on tool-heavy sessions. Zero dollars to start: 150+ providers with a free tier and 53 recurring or keyless free-forever providers. Every tool works: 37 CLI and agent integration records, including Claude Code, Codex, Cursor, Cline, Copilot and Antigravity, through one config. One endpoint: OpenAI, Claude, Gemini and Responses API translation at /v1. Production controls: circuit breakers, TLS stealth, MCP with 110 tools, A2A, memory, guardrails, evals, and 39,000+ static test declarations across 5,100+ tracked test files.",
       desc: "Animated promise card: six pillar tiles in reading order, with a soft highlight sweeping from tile to tile in a continuous cycle.",
       fontFaceCss: css,
     }) +
