@@ -75,7 +75,7 @@ export function getTurnExecutionSnapshot(key: string) {
   return { retryCount: active.retryCount, ageMs: Math.max(0, Date.now() - active.startedAt) };
 }
 
-export const TURN_WAIT_TIMEOUT_MS = 30_000;
+export const TURN_WAIT_TIMEOUT_MS = 60_000;
 export const TURN_WAIT_POLL_MS = 500;
 
 export type TurnExecutionWaitOptions = {
