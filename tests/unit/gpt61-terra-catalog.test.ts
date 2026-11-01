@@ -107,14 +107,14 @@ test("Terra API tools use Responses and retain none through max reasoning", () =
       },
       false,
       {}
-    );
-    assert.equal((request.reasoning as { effort: string }).effort, effort);
+    ) as { reasoning: { effort: string; summary?: string }; tools: Array<{ name: string }> };
+    assert.equal(request.reasoning.effort, effort);
     assert.equal(
-      (request.reasoning as { summary?: string }).summary,
+      request.reasoning.summary,
       undefined,
       "Terra must not receive an inferred Codex reasoning summary"
     );
-    assert.equal((request.tools as Array<{ name: string }>)[0].name, "test_tool");
+    assert.equal(request.tools[0].name, "test_tool");
   }
 });
 
