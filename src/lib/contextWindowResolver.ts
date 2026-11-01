@@ -1,9 +1,12 @@
 import { getAllSyncedAvailableModels, getSyncedAvailableModels } from "./db/models";
 import { getResolvedModelCapabilities } from "./modelCapabilities";
+import { createModelCapabilityResolutionSnapshot } from "./modelCapabilityResolutionSnapshot";
 import {
   getModelContextOverrideRecord,
+  listModelContextOverrides,
   setModelContextOverride,
   removeModelContextOverride,
+  type ModelContextOverride,
 } from "./db/modelContextOverrides";
 import { invalidateDbCache } from "./db/readCache";
 
@@ -188,6 +191,12 @@ export async function runContextWindowReconcile(
   // verdict map, which `getCatalogWindow` reads), so writes inside the pass do
   // not invalidate: one bump at the end. The comparisons below read the
   // override-free catalog and the override table directly, so they stay exact.
+  const snapshot = createModelCapabilityResolutionSnapshot();
+  const existingOverrides = new Map<string, ModelContextOverride>();
+  for (const entry of listModelContextOverrides()) {
+    existingOverrides.set(`${entry.provider}/${entry.modelId}`, entry);
+  }
+
   let changed = false;
   try {
     return await reconcileContextWindowsCooperative(discovered, {
@@ -195,12 +204,19 @@ export async function runContextWindowReconcile(
       // never feed back into the comparison that (re)writes it, or the reconciler
       // oscillates (write → equal → remove → differ → write ...).
       getCatalogWindow: (provider, modelId) =>
-        getResolvedModelCapabilities({ provider, model: modelId }, { persistedOverrides: false })
-          .contextWindow,
+        getResolvedModelCapabilities(
+          { provider, model: modelId },
+          { persistedOverrides: false },
+          snapshot
+        ).contextWindow,
       getExistingSource: (provider, modelId) =>
-        getModelContextOverrideRecord(provider, modelId)?.source ?? null,
+        existingOverrides.get(`${provider}/${modelId}`)?.source ??
+        getModelContextOverrideRecord(provider, modelId)?.source ??
+        null,
       getExistingWindow: (provider, modelId) =>
-        getModelContextOverrideRecord(provider, modelId)?.realContext ?? null,
+        existingOverrides.get(`${provider}/${modelId}`)?.realContext ??
+        getModelContextOverrideRecord(provider, modelId)?.realContext ??
+        null,
       writeAuto: (provider, modelId, window) => {
         if (
           setModelContextOverride(provider, modelId, window, "auto:discovery", {
@@ -208,10 +224,20 @@ export async function runContextWindowReconcile(
           })
         ) {
           changed = true;
+          existingOverrides.set(`${provider}/${modelId}`, {
+            provider,
+            modelId,
+            realContext: window,
+            source: "auto:discovery",
+            refreshedAt: new Date().toISOString(),
+          });
         }
       },
       removeOverride: (provider, modelId) => {
-        if (removeModelContextOverride(provider, modelId, { invalidate: false })) changed = true;
+        if (removeModelContextOverride(provider, modelId, { invalidate: false })) {
+          changed = true;
+          existingOverrides.delete(`${provider}/${modelId}`);
+        }
       },
     });
   } finally {
