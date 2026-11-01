@@ -1,0 +1,2 @@
+- **fix(sse):** Preserve independent `reasoning` and `reasoning_content` fields through streamed PII and credential redaction, and flush only buffered tails without replaying metadata or tool arguments. Refs #17291.
+- fix(sse): Retain raw credential fragments until safe boundaries, preserve overflow continuation for tokens/images/private keys, and fail closed at stream buffer limits instead of mixing choices (Refs #17291).
