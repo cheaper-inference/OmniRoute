@@ -199,11 +199,11 @@ JSON-RPC krajnja točka `/a2a` je kanonična A2A ulazna točka. Dolje navedene R
 
 ## Dodavanje nove vještine
 
-1. **Stvori datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Izradite datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezi asinkronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedi oblik postojećih vještina poput `smartRouting.ts`.
+   Izvezite asinkronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedite strukturu postojećih vještina kao što je `smartRouting.ts`.
 
-2. **Registriraj rukovatelj:** u `src/lib/a2a/taskExecution.ts`, dodaj unos u `A2A_SKILL_HANDLERS`:
+2. **Registrirajte rukovatelj:** u datoteci `src/lib/a2a/taskExecution.ts` dodajte unos u `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,21 +215,21 @@ JSON-RPC krajnja točka `/a2a` je kanonična A2A ulazna točka. Dolje navedene R
    };
    ```
 
-3. **Izloži u Agent Cardu:** u `src/app/.well-known/agent.json/route.ts`, dodaj u niz `skills`:
+3. **Izložite u kartici agenta:** u datoteci `src/lib/a2a/agentCardMetadata.ts` (koju zajednički koriste `/.well-known/agent.json` i `/.well-known/agent-card.json`) dodajte sljedeće u polje `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Kratki opis usmjeren na namjenu",
-     "tags": ["routing", "quota"],
-     "examples": ["Primjer poziva na prirodnom jeziku"]
+     "name": "Vaša vještina",
+     "description": "Kratak opis usmjeren na namjeru",
+     "tags": ["usmjeravanje", "kvota"],
+     "examples": ["Primjer pozivanja prirodnim jezikom"]
    }
    ```
 
-4. **Napiši testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrij sretan put + put s greškom.
+4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Obuhvatite uspješan scenarij i scenarij pogreške.
 
-5. **Dokumentiraj** novu vještinu u tablici `Dostupne vještine` ove datoteke.
+5. **Dokumentirajte** novu vještinu u tablici `Available Skills` u ovoj datoteci.
 
 ---
 

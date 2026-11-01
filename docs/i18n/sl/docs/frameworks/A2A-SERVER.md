@@ -201,9 +201,9 @@ Končna točka JSON-RPC `/a2a` je kanonična vstopna točka A2A. Spodnje končne
 
 1. **Ustvarite datoteko veščine:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvozite asinhrono funkcijo `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Upoštevajte obliko obstoječih veščin, kot je `smartRouting.ts`.
+   Izvozite asinhrono funkcijo `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Upoštevajte strukturo obstoječih veščin, kot je `smartRouting.ts`.
 
-2. **Registrirajte obravnavalnik:** v `src/lib/a2a/taskExecution.ts` dodajte vnos v `A2A_SKILL_HANDLERS`:
+2. **Registrirajte obravnavalnik:** v datoteki `src/lib/a2a/taskExecution.ts` dodajte vnos v `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ Končna točka JSON-RPC `/a2a` je kanonična vstopna točka A2A. Spodnje končne
    };
    ```
 
-3. **Objavite na kartici agenta:** v `src/app/.well-known/agent.json/route.ts` dodajte v polje `skills`:
+3. **Objavite v kartici agenta:** v datoteki `src/lib/a2a/agentCardMetadata.ts` (ki si jo delita `/.well-known/agent.json` in `/.well-known/agent-card.json`) dodajte v polje `skills`:
 
    ```json
    {
@@ -227,9 +227,9 @@ Končna točka JSON-RPC `/a2a` je kanonična vstopna točka A2A. Spodnje končne
    }
    ```
 
-4. **Napišite teste:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspešno pot in pot z napako.
+4. **Napišite teste:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspešen potek in potek z napako.
 
-5. **Dokumentirajte** novo veščino v tabeli `Razpoložljive veščine` v tej datoteki.
+5. **Dokumentirajte** novo veščino v tabeli `Available Skills` v tej datoteki.
 
 ---
 

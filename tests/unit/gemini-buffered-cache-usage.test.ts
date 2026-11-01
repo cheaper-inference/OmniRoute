@@ -14,6 +14,17 @@ type Usage = {
 };
 
 // Synthetic source-path SSE fixture, not a live upstream or full HTTP E2E test.
+function bufferedFrames(frames: Array<Record<string, unknown>>, preferredFormat: string) {
+  const rawSSE = `${frames.map((frame) => `data: ${JSON.stringify(frame)}\n\n`).join("")}data: [DONE]\n\n`;
+  const parsed = parseNonStreamingSSEPayload(rawSSE, preferredFormat, "gemini-2.5-flash");
+  assert.ok(parsed, "buffered parser must select a content parser");
+  assert.equal(parsed.body.object, "chat.completion");
+  assert.deepEqual(parsed.body.choices, [
+    { index: 0, message: { role: "assistant", content: "hello" }, finish_reason: "stop" },
+  ]);
+  return parsed;
+}
+
 function bufferedResponse(metadata: Record<string, number>, preferredFormat: string) {
   const frames = [
     { response: { candidates: [{ content: { parts: [{ text: "hello" }] } }] } },
@@ -24,14 +35,7 @@ function bufferedResponse(metadata: Record<string, number>, preferredFormat: str
       },
     },
   ];
-  const rawSSE = `${frames.map((frame) => `data: ${JSON.stringify(frame)}\n\n`).join("")}data: [DONE]\n\n`;
-  const parsed = parseNonStreamingSSEPayload(rawSSE, preferredFormat, "gemini-2.5-flash");
-  assert.ok(parsed, "buffered parser must select a content parser");
-  assert.equal(parsed.body.object, "chat.completion");
-  assert.deepEqual(parsed.body.choices, [
-    { index: 0, message: { role: "assistant", content: "hello" }, finish_reason: "stop" },
-  ]);
-  return parsed;
+  return bufferedFrames(frames, preferredFormat);
 }
 
 for (const format of [FORMATS.ANTIGRAVITY, FORMATS.GEMINI]) {
@@ -109,6 +113,92 @@ for (const format of [FORMATS.ANTIGRAVITY, FORMATS.GEMINI]) {
     const usage = parsed.body.usage as Usage;
     assert.equal(usage.total_tokens, 18024);
     assert.equal(usage.prompt_tokens_details?.cached_tokens, 17000);
+  });
+
+  test(`${format}: later omitted usage fields preserve the prior cumulative snapshot`, () => {
+    const parsed = bufferedFrames(
+      [
+        { response: { candidates: [{ content: { parts: [{ text: "hello" }] } }] } },
+        {
+          response: {
+            usageMetadata: {
+              promptTokenCount: 18020,
+              candidatesTokenCount: 4,
+              totalTokenCount: 18024,
+              cachedContentTokenCount: 17000,
+            },
+          },
+        },
+        { response: { candidates: [{ finishReason: "STOP" }], usageMetadata: {} } },
+      ],
+      format
+    );
+    assert.deepEqual(parsed.body.usage, {
+      prompt_tokens: 18020,
+      completion_tokens: 4,
+      total_tokens: 18024,
+      prompt_tokens_details: { cached_tokens: 17000 },
+    });
+  });
+
+  test(`${format}: malformed later usage numbers preserve prior valid token totals`, () => {
+    const parsed = bufferedFrames(
+      [
+        { response: { candidates: [{ content: { parts: [{ text: "hello" }] } }] } },
+        {
+          response: {
+            usageMetadata: {
+              promptTokenCount: 18020,
+              candidatesTokenCount: 4,
+              totalTokenCount: 18024,
+              cachedContentTokenCount: 17000,
+            },
+          },
+        },
+        {
+          response: {
+            candidates: [{ finishReason: "STOP" }],
+            usageMetadata: {
+              promptTokenCount: "18021",
+              candidatesTokenCount: Number.NaN,
+              totalTokenCount: Number.POSITIVE_INFINITY,
+              cachedContentTokenCount: -1,
+            },
+          },
+        },
+      ],
+      format
+    );
+    assert.deepEqual(parsed.body.usage, {
+      prompt_tokens: 18020,
+      completion_tokens: 4,
+      total_tokens: 18024,
+    });
+  });
+
+  test(`${format}: valid zero usage values remain authoritative`, () => {
+    const parsed = bufferedFrames(
+      [
+        { response: { candidates: [{ content: { parts: [{ text: "hello" }] } }] } },
+        {
+          response: {
+            usageMetadata: { promptTokenCount: 3, candidatesTokenCount: 2, totalTokenCount: 5 },
+          },
+        },
+        {
+          response: {
+            candidates: [{ finishReason: "STOP" }],
+            usageMetadata: { promptTokenCount: 0, candidatesTokenCount: 0, totalTokenCount: 0 },
+          },
+        },
+      ],
+      format
+    );
+    assert.deepEqual(parsed.body.usage, {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    });
   });
 }
 

@@ -215,15 +215,15 @@ OmniRoute раскрывает 6 навыков A2A, встроенных в `sr
    };
    ```
 
-3. **Добавьте в карточку агента:** в `src/app/.well-known/agent.json/route.ts` добавьте элемент в массив `skills`:
+3. **Добавьте в карточку агента:** в `src/lib/a2a/agentCardMetadata.ts` (общем для `/.well-known/agent.json` и `/.well-known/agent-card.json`) добавьте элемент в массив `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ваш навык",
-     "description": "Краткое описание, ориентированное на назначение",
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Пример вызова на естественном языке"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
