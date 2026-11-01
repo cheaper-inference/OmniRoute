@@ -103,6 +103,18 @@ function callItem(fixture: RequestFixture): JsonRecord {
   };
 }
 
+function expectedCallItem(namespace?: string): JsonRecord {
+  return {
+    id: "fc_18600",
+    type: "function_call",
+    call_id: "call_18600",
+    name: "read_file",
+    ...(namespace ? { namespace } : {}),
+    arguments: UPSTREAM_ARGUMENTS,
+    status: "completed",
+  };
+}
+
 function completedEvent(item: JsonRecord): JsonRecord {
   return {
     type: "response.completed",
@@ -173,6 +185,141 @@ async function runStream(
   assert.equal(completions.length, 1, "onComplete must report exactly one successful completion");
   assert.equal(completions[0].status, 200);
   return { output, frames: parseSse(output), completion: completions[0] };
+}
+
+const TEXTUAL_CALL_EPOCH_MS = 1_860_000_000_000;
+const TEXTUAL_CALL_ID = `call_${TEXTUAL_CALL_EPOCH_MS}_0`;
+
+type StreamResult = Awaited<ReturnType<typeof runStream>>;
+type CancellationExpectation = {
+  eventType: "response.cancelled" | "response.canceled";
+  responseId: string;
+  status: "cancelled" | "canceled";
+  error: JsonRecord;
+  metadata: JsonRecord;
+};
+
+async function withFixedTextualCallId<T>(action: () => Promise<T>): Promise<T> {
+  const originalNow = Date.now;
+  Date.now = () => TEXTUAL_CALL_EPOCH_MS;
+  try {
+    return await action();
+  } finally {
+    Date.now = originalNow;
+  }
+}
+
+function assertCancellationRestored(
+  result: StreamResult,
+  fixture: RequestFixture,
+  expected: CancellationExpectation
+): void {
+  const terminalFrames = result.frames.filter((frame) => frame.type === expected.eventType);
+  assert.equal(terminalFrames.length, 1, `the client must receive one ${expected.eventType} frame`);
+  const clientResponse = record(terminalFrames[0].response);
+  const expectedOutput = [expectedCallItem(fixture.namespace)];
+
+  assert.equal(clientResponse.id, expected.responseId);
+  assert.equal(clientResponse.object, "response");
+  assert.equal(clientResponse.model, "muse-test");
+  assert.equal(clientResponse.status, expected.status);
+  assert.deepEqual(clientResponse.error, expected.error);
+  assert.deepEqual(clientResponse.metadata, expected.metadata);
+  assert.deepEqual(clientResponse.output, expectedOutput);
+  assert.deepEqual(clientResponse.usage, EXPECTED_USAGE);
+  assert.equal(
+    result.output.includes(fixture.wireName),
+    false,
+    "client bytes must not leak aliases"
+  );
+  assert.equal(
+    result.output.includes(UPSTREAM_NAMESPACE),
+    false,
+    "client bytes must not leak the provider namespace"
+  );
+
+  const summary = record(record(result.completion.clientPayload).summary);
+  assert.equal(summary.id, expected.responseId);
+  assert.equal(summary.object, "response");
+  assert.equal(summary.model, "muse-test");
+  assert.equal(summary.status, expected.status);
+  assert.deepEqual(summary.error, expected.error);
+  assert.deepEqual(summary.metadata, expected.metadata);
+  assert.deepEqual(summary.output, expectedOutput);
+  assert.deepEqual(summary.usage, EXPECTED_USAGE);
+  const serializedSummary = JSON.stringify(summary);
+  assert.equal(serializedSummary.includes(fixture.wireName), false, "no alias in summary");
+  assert.equal(serializedSummary.includes(UPSTREAM_NAMESPACE), false, "no stale namespace");
+}
+
+function assertTextualConversionRestored(
+  result: StreamResult,
+  fixture: RequestFixture,
+  responseId: string,
+  metadata: JsonRecord
+): void {
+  const expectedItem: JsonRecord = {
+    id: TEXTUAL_CALL_ID,
+    type: "function_call",
+    call_id: TEXTUAL_CALL_ID,
+    name: "read_file",
+    ...(fixture.namespace ? { namespace: fixture.namespace } : {}),
+    arguments: UPSTREAM_ARGUMENTS,
+    status: "completed",
+  };
+  const added = result.frames.filter((frame) => frame.type === "response.output_item.added");
+  const argumentsDone = result.frames.filter(
+    (frame) => frame.type === "response.function_call_arguments.done"
+  );
+  const itemDone = result.frames.filter((frame) => frame.type === "response.output_item.done");
+  const completed = result.frames.filter((frame) => frame.type === "response.completed");
+
+  assert.equal(added.length, 1, "textual conversion must synthesize one added event");
+  assert.deepEqual(added[0], {
+    type: "response.output_item.added",
+    output_index: 0,
+    item: expectedItem,
+  });
+  assert.equal(argumentsDone.length, 1, "textual conversion must synthesize one arguments event");
+  assert.deepEqual(argumentsDone[0], {
+    type: "response.function_call_arguments.done",
+    item_id: TEXTUAL_CALL_ID,
+    output_index: 0,
+    arguments: UPSTREAM_ARGUMENTS,
+  });
+  assert.equal(itemDone.length, 1, "textual conversion must synthesize one done event");
+  assert.deepEqual(itemDone[0], {
+    type: "response.output_item.done",
+    output_index: 0,
+    item: expectedItem,
+  });
+  assert.equal(completed.length, 1, "the client must receive one completed snapshot");
+  const clientResponse = record(completed[0].response);
+  assert.equal(clientResponse.id, responseId);
+  assert.equal(clientResponse.status, "completed");
+  assert.deepEqual(clientResponse.metadata, metadata);
+  assert.deepEqual(clientResponse.output, [expectedItem]);
+  assert.deepEqual(clientResponse.usage, EXPECTED_USAGE);
+  assert.equal(
+    result.output.includes(fixture.wireName),
+    false,
+    "client bytes must not leak aliases"
+  );
+  assert.equal(
+    result.output.includes(UPSTREAM_NAMESPACE),
+    false,
+    "client bytes must not leak the provider namespace"
+  );
+
+  const summary = record(record(result.completion.clientPayload).summary);
+  assert.equal(summary.id, responseId);
+  assert.equal(summary.status, "completed");
+  assert.deepEqual(summary.metadata, metadata);
+  assert.deepEqual(summary.output, [expectedItem]);
+  assert.deepEqual(summary.usage, EXPECTED_USAGE);
+  const serializedSummary = JSON.stringify(summary);
+  assert.equal(serializedSummary.includes(fixture.wireName), false, "no alias in summary");
+  assert.equal(serializedSummary.includes(UPSTREAM_NAMESPACE), false, "no stale namespace");
 }
 
 function assertCleanChatArguments(frames: JsonRecord[], expectsNamedDelta: boolean): void {
@@ -339,8 +486,18 @@ test("delimited native response.done restores the client tool identity", async (
   const result = await runStream(fixture, [terminal], "passthrough");
   const done = result.frames.find((frame) => frame.type === "response.done");
   assert.ok(done);
-  assert.equal(records(record(done.response).output)[0].name, "read_file");
+  const clientResponse = record(done.response);
+  assert.equal(clientResponse.id, "resp_done");
+  assert.deepEqual(clientResponse.output, [expectedCallItem()]);
+  assert.deepEqual(clientResponse.usage, EXPECTED_USAGE);
   assert.equal(result.output.includes(fixture.wireName), false);
+
+  const summary = record(record(result.completion.clientPayload).summary);
+  assert.equal(summary.id, "resp_done");
+  assert.equal(summary.status, "completed");
+  assert.deepEqual(summary.output, [expectedCallItem()]);
+  assert.deepEqual(summary.usage, EXPECTED_USAGE);
+  assert.equal(JSON.stringify(summary).includes(fixture.wireName), false);
 });
 
 test("multiline EOF tail restores a namespaced response.done identity", async () => {
@@ -368,6 +525,183 @@ test("multiline EOF tail restores a namespaced response.done identity", async ()
   assert.equal(restored.namespace, "files");
   assert.equal(result.output.includes(fixture.wireName), false);
   assert.equal(result.output.includes(UPSTREAM_NAMESPACE), false);
+});
+
+test("delimited native response.cancelled restores flat identity and summary fields", async () => {
+  const fixture = makeRequestFixture();
+  const expected: CancellationExpectation = {
+    eventType: "response.cancelled",
+    responseId: "resp_cancelled_flat",
+    status: "cancelled",
+    error: {
+      type: "request_cancelled",
+      code: "client_cancelled",
+      message: "The client cancelled the request",
+    },
+    metadata: { request_id: "request_cancelled_flat", source: "native" },
+  };
+  const terminal = {
+    type: expected.eventType,
+    response: {
+      id: expected.responseId,
+      object: "response",
+      model: "muse-test",
+      status: expected.status,
+      error: expected.error,
+      metadata: expected.metadata,
+      output: [callItem(fixture)],
+      usage: { ...EXPECTED_USAGE },
+    },
+  };
+
+  const result = await runStream(fixture, [terminal], "passthrough");
+  assertCancellationRestored(result, fixture, expected);
+});
+
+test("multiline EOF-tail native response.canceled restores namespaced identity and summary fields", async () => {
+  const fixture = makeRequestFixture("files");
+  const expected: CancellationExpectation = {
+    eventType: "response.canceled",
+    responseId: "resp_canceled_namespaced_tail",
+    status: "canceled",
+    error: {
+      type: "request_canceled",
+      code: "upstream_canceled",
+      message: "The upstream canceled the request",
+    },
+    metadata: { request_id: "request_canceled_tail", source: "native-tail" },
+  };
+  const terminal = {
+    type: expected.eventType,
+    response: {
+      id: expected.responseId,
+      object: "response",
+      model: "muse-test",
+      status: expected.status,
+      error: expected.error,
+      metadata: expected.metadata,
+      output: [callItem(fixture)],
+      usage: { ...EXPECTED_USAGE },
+    },
+  };
+  const serialized = JSON.stringify(terminal);
+  const splitAt = serialized.indexOf('"response"');
+  assert.ok(splitAt > 0);
+  const rawInput =
+    `data: ${serialized.slice(0, splitAt)}` + NEWLINE + `data: ${serialized.slice(splitAt)}`;
+
+  const result = await runStream(fixture, [], "passthrough", false, rawInput);
+  assertCancellationRestored(result, fixture, expected);
+});
+
+test("native textual conversion restores flat generated events and terminal backfill", async () => {
+  const fixture = makeRequestFixture();
+  const responseId = "resp_textual_flat";
+  const metadata = { request_id: "request_textual_flat", source: "textual" };
+  const textualCall =
+    `[Tool call: ${fixture.wireName}]` + NEWLINE + `Arguments: ${UPSTREAM_ARGUMENTS}`;
+  const delta = {
+    type: "response.output_text.delta",
+    response_id: responseId,
+    item_id: "msg_textual_flat",
+    output_index: 0,
+    content_index: 0,
+    delta: textualCall,
+  };
+  const terminal = {
+    type: "response.completed",
+    response: {
+      id: responseId,
+      object: "response",
+      model: "muse-test",
+      status: "completed",
+      metadata,
+      output: [],
+      usage: { ...EXPECTED_USAGE },
+    },
+  };
+
+  const result = await withFixedTextualCallId(() =>
+    runStream(fixture, [delta, terminal], "passthrough")
+  );
+  assertTextualConversionRestored(result, fixture, responseId, metadata);
+});
+
+test("native textual conversion restores single-line EOF terminal backfill", async () => {
+  const fixture = makeRequestFixture();
+  const responseId = "resp_textual_flat_eof";
+  const metadata = { request_id: "request_textual_flat_eof", source: "textual-eof" };
+  const textualCall =
+    `[Tool call: ${fixture.wireName}]` + NEWLINE + `Arguments: ${UPSTREAM_ARGUMENTS}`;
+  const delta = {
+    type: "response.output_text.delta",
+    response_id: responseId,
+    item_id: "msg_textual_flat_eof",
+    output_index: 0,
+    content_index: 0,
+    delta: textualCall,
+  };
+  const terminal = {
+    type: "response.completed",
+    response: {
+      id: responseId,
+      object: "response",
+      model: "muse-test",
+      status: "completed",
+      metadata,
+      output: [],
+      usage: { ...EXPECTED_USAGE },
+    },
+  };
+  const rawInput =
+    `data: ${JSON.stringify(delta)}` + SSE_DELIMITER + `data: ${JSON.stringify(terminal)}`;
+
+  const result = await withFixedTextualCallId(() =>
+    runStream(fixture, [], "passthrough", false, rawInput)
+  );
+  assertTextualConversionRestored(result, fixture, responseId, metadata);
+});
+
+test("native textual conversion restores namespaced events and multiline EOF-tail backfill", async () => {
+  const fixture = makeRequestFixture("files");
+  const responseId = "resp_textual_namespaced_tail";
+  const metadata = { request_id: "request_textual_tail", source: "textual-tail" };
+  const textualCall =
+    `[Tool call: ${fixture.wireName}]` + NEWLINE + `Arguments: ${UPSTREAM_ARGUMENTS}`;
+  const delta = {
+    type: "response.output_text.delta",
+    response_id: responseId,
+    item_id: "msg_textual_namespaced_tail",
+    output_index: 0,
+    content_index: 0,
+    delta: textualCall,
+  };
+  const terminal = {
+    type: "response.completed",
+    response: {
+      id: responseId,
+      object: "response",
+      model: "muse-test",
+      status: "completed",
+      metadata,
+      output: [],
+      usage: { ...EXPECTED_USAGE },
+    },
+  };
+  const serializedTerminal = JSON.stringify(terminal);
+  const splitAt = serializedTerminal.indexOf('"response"');
+  assert.ok(splitAt > 0);
+  const rawInput =
+    `data: ${JSON.stringify(delta)}` +
+    SSE_DELIMITER +
+    `data: ${serializedTerminal.slice(0, splitAt)}` +
+    NEWLINE +
+    `data: ${serializedTerminal.slice(splitAt)}`;
+
+  const result = await withFixedTextualCallId(() =>
+    runStream(fixture, [], "passthrough", false, rawInput)
+  );
+  assertTextualConversionRestored(result, fixture, responseId, metadata);
 });
 
 for (const format of [FORMATS.OPENAI, FORMATS.CLAUDE]) {

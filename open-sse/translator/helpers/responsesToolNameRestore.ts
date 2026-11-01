@@ -10,6 +10,8 @@ const TERMINAL_EVENT_TYPES = new Set([
   "response.incomplete",
   "response.failed",
   "response.done",
+  "response.cancelled",
+  "response.canceled",
 ]);
 
 function toRecord(value: unknown): JsonRecord | null {

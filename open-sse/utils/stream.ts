@@ -353,9 +353,7 @@ function extractAllowedToolNames(body: unknown): Set<string> | null {
   const tools = record.tools;
   if (!Array.isArray(tools)) return null;
   const names = new Set<string>();
-  for (const tool of tools) {
-    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
-    const item = tool as JsonRecord;
+  const addName = (item: JsonRecord) => {
     const directName = typeof item.name === "string" ? item.name.trim() : "";
     const fn =
       item.function && typeof item.function === "object" && !Array.isArray(item.function)
@@ -364,6 +362,23 @@ function extractAllowedToolNames(body: unknown): Set<string> | null {
     const functionName = typeof fn?.name === "string" ? fn.name.trim() : "";
     const name = functionName || directName;
     if (name) names.add(name);
+  };
+  for (const tool of tools) {
+    if (!tool || typeof tool !== "object" || Array.isArray(tool)) continue;
+    const item = tool as JsonRecord;
+    if (item.type === "namespace" && Array.isArray(item.tools)) {
+      for (const child of item.tools) {
+        if (!child || typeof child !== "object" || Array.isArray(child)) continue;
+        const childRecord = child as JsonRecord;
+        // Namespace children without a discriminator follow the established
+        // function convention; explicit custom/server children stay excluded.
+        if (childRecord.type === undefined || childRecord.type === "function") {
+          addName(childRecord);
+        }
+      }
+      continue;
+    }
+    addName(item);
   }
   return names.size > 0 ? names : null;
 }
@@ -1726,6 +1741,13 @@ export function createSSEStream(options: StreamOptions = {}) {
                           passthroughHasToolCalls = true;
                           const responseToolCallEvents =
                             buildResponsesFunctionCallEvents(collectedToolCall);
+                          for (const event of responseToolCallEvents) {
+                            restoreResponsesToolNames(
+                              event,
+                              responsesToolAliasMap,
+                              requestToolIdentityMap
+                            );
+                          }
                           output = formatSSEDataEvents(responseToolCallEvents);
                           for (const event of responseToolCallEvents) {
                             clientPayloadCollector.push(event);
@@ -1739,6 +1761,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                         }
                         passthroughBufferedTextualToolCallContent = "";
                         parsed.delta = "";
+                        if (collectedToolCall) continue;
                       } else if (parsedCandidate?.kind === "partial") {
                         passthroughBufferedTextualToolCallContent = appendBoundedText(
                           passthroughBufferedTextualToolCallContent,
@@ -1925,8 +1948,8 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // call items through the shared shape-safe helper. The done and
                   // completed branches above already restored their own copies;
                   // this covers `response.output_item.added` plus the
-                  // `response.incomplete`/`response.failed`/`response.done`
-                  // terminal snapshots so a truncated or alternate terminal stream
+                  // `response.incomplete`/`response.failed`/`response.done` and
+                  // cancellation terminal snapshots so a truncated/alternate stream
                   // is restored too. The restoration mutates
                   // `parsed`, so a real change must be re-serialized; otherwise
                   // the client still receives the alias.
@@ -1934,7 +1957,9 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed.type === "response.output_item.added" ||
                     parsed.type === "response.incomplete" ||
                     parsed.type === "response.failed" ||
-                    parsed.type === "response.done"
+                    parsed.type === "response.done" ||
+                    parsed.type === "response.cancelled" ||
+                    parsed.type === "response.canceled"
                   ) {
                     if (
                       restoreResponsesToolNames(
@@ -1970,6 +1995,15 @@ export function createSSEStream(options: StreamOptions = {}) {
                     parsed = toResponsesCompletedWithToolCalls(parsed as JsonRecord, [
                       ...passthroughToolCalls.values(),
                     ]) as typeof parsed;
+                    if (
+                      restoreResponsesToolNames(
+                        parsed as JsonRecord,
+                        responsesToolAliasMap,
+                        requestToolIdentityMap
+                      )
+                    ) {
+                      responsesIdentityRestored = true;
+                    }
                   }
                   const stripped = stripResponsesLifecycleEcho(parsed);
                   // Belt-and-suspenders for #10156: filter the backfill buffer itself
@@ -2828,12 +2862,20 @@ export function createSSEStream(options: StreamOptions = {}) {
                 let bufferedResponsesCollected = false;
                 // Normalize numeric IDs for final buffered data: chunk (same as transform path)
                 if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
-                  const flushedParsed = bufferedPayload as JsonRecord;
+                  let flushedParsed = bufferedPayload as JsonRecord;
                   const flushedType =
                     typeof flushedParsed.type === "string" ? flushedParsed.type : "";
                   const isResponses = flushedType.startsWith("response.");
                   const isClaude = isClaudeEventPayload(flushedParsed);
                   if (isResponses) {
+                    const textualToolCallBackfilled =
+                      flushedType === "response.completed" && passthroughToolCalls.size > 0;
+                    if (textualToolCallBackfilled) {
+                      flushedParsed = toResponsesCompletedWithToolCalls(flushedParsed, [
+                        ...passthroughToolCalls.values(),
+                      ]) as JsonRecord;
+                      bufferedPayload = flushedParsed;
+                    }
                     const idsNormalized = normalizeResponsesSseIds(flushedParsed);
                     const usageNormalized = normalizeUsage(flushedParsed);
                     // #18600 — restore tool-name aliases on the final buffered
@@ -2844,7 +2886,12 @@ export function createSSEStream(options: StreamOptions = {}) {
                       responsesToolAliasMap,
                       requestToolIdentityMap
                     );
-                    if (idsNormalized || usageNormalized || identityRestored) {
+                    if (
+                      idsNormalized ||
+                      usageNormalized ||
+                      identityRestored ||
+                      textualToolCallBackfilled
+                    ) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
                     // The collector snapshots payloads immediately. Capture only

@@ -193,13 +193,15 @@ function handleResponsesTailPayload(
 
   // #18600 — restore provider tool-name aliases (and #7936 identities) on the
   // remaining tail event shapes: `output_item.added` and the
-  // `response.incomplete`/`response.failed`/`response.done` terminal snapshots.
+  // `response.incomplete`/`response.failed`/`response.done` and cancellation snapshots.
   // The output-item done and completed branches above restored their own copies.
   if (
     parsed.type === "response.output_item.added" ||
     parsed.type === "response.incomplete" ||
     parsed.type === "response.failed" ||
-    parsed.type === "response.done"
+    parsed.type === "response.done" ||
+    parsed.type === "response.cancelled" ||
+    parsed.type === "response.canceled"
   ) {
     responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
   }
@@ -209,6 +211,13 @@ function handleResponsesTailPayload(
   const outputPayload = textualToolCallBackfilled
     ? context.toResponsesCompletedWithToolCalls(parsed)
     : parsed;
+  if (textualToolCallBackfilled) {
+    responsesIdentityRestored =
+      context.restoreResponsesToolNames(outputPayload) || responsesIdentityRestored;
+    // processBufferedPassthroughLine collects `parsed` after this helper returns.
+    // Keep that snapshot identical to the merged/restored bytes emitted below.
+    Object.assign(parsed, outputPayload);
+  }
   const usageNormalized = normalizeResponsesCompletedUsage(outputPayload);
   const stripped = stripResponsesLifecycleEcho(outputPayload);
   const backfilled = backfillResponsesCompletedOutput(

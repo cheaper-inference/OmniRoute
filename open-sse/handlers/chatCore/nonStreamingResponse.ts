@@ -21,6 +21,7 @@ import {
 import {
   applyServerOwnedToolLoopIfNeeded,
   derivePostInjectionRequestIdentity,
+  finalizeServerOwnedFollowUpRequest,
   followUpLegInput,
 } from "../chatCore/serverOwnedToolLoopWire.ts";
 
@@ -547,6 +548,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
             },
           }
         );
+        const followUpFinalized = finalizeServerOwnedFollowUpRequest({
+          translatedBody: translatedBody as Record<string, unknown>,
+          provider,
+          targetFormat,
+        });
+        translatedBody = followUpFinalized.translatedBody;
         syncExecuteTranslatedBody(translatedBody);
         return runNonStreamingProviderLeg(
           followUpLegInput(
@@ -569,9 +576,9 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
               getCurrentConnectionId: () => getCurrentConnectionId() || undefined,
               effectiveModel: currentModel,
               translatedBody: translatedBody as Record<string, unknown>,
-              toolNameMap,
+              toolNameMap: followUpFinalized.toolNameMap,
               customToolNames,
-              requestToolIdentityMap,
+              requestToolIdentityMap: followUpFinalized.requestToolIdentityMap,
               reasoningCacheScope,
               reasoningReplayHistory,
               videoTranscriptSensitive: videoBridgeObserved,
