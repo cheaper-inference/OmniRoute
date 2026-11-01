@@ -1165,6 +1165,9 @@ export async function createVirtualAutoComboFromPrepared(
     case "smart":
       weights = { ...MODE_PACKS["quality-first"] };
       break;
+    case "agentic":
+      weights = { ...MODE_PACKS["quality-first"] };
+      break;
     case "lkgp":
       // LKGP is default for all auto variants, this variant just explicitly names it.
       // Use default weights.
@@ -1216,11 +1219,19 @@ export async function createVirtualAutoComboFromPrepared(
       ? {}
       : { freeAccessExclusion: candidate.freeAccessExclusion }),
   }));
+  const autoTaskType =
+    variant === "agentic" || spec?.category === "agentic"
+      ? "debugging"
+      : variant === "coding" || spec?.category === "coding"
+        ? "coding"
+        : undefined;
+
   const autoConfig = {
     candidatePool: providerPool,
     weights,
     explorationRate,
     routerStrategy,
+    ...(autoTaskType ? { taskType: autoTaskType } : {}),
     ...failClosedAutoConfig(spec),
   };
   // Chaos mode fans out to the top-N most stable models in parallel. Panel size

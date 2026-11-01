@@ -332,6 +332,7 @@ export async function resolveAutoStrategyOrder(
     slaPolicy,
     nadirConfig,
     accountPreferences,
+    taskType: configTaskType,
   } = parseAutoConfig(combo, eligibleTargets);
 
   // Per-request overrides (#6023 / #6024 / #6025 / #3470): X-OmniRoute-Budget,
@@ -401,6 +402,14 @@ export async function resolveAutoStrategyOrder(
     log
   );
 
+  const effectiveTaskType =
+    configTaskType ||
+    (combo.name?.startsWith("auto/agentic")
+      ? "debugging"
+      : combo.name?.startsWith("auto/coding")
+        ? "coding"
+        : taskType);
+
   const {
     sourceCandidates,
     candidates,
@@ -410,7 +419,7 @@ export async function resolveAutoStrategyOrder(
     targets: eligibleTargets,
     comboName: combo.name,
     body,
-    taskType,
+    taskType: effectiveTaskType,
     weights,
     sessionId: relayOptions?.sessionId,
     resetWindowConfig,
@@ -634,7 +643,7 @@ export async function resolveAutoStrategyOrder(
 
     log.info(
       "COMBO",
-      `Auto selection: ${selectedTarget?.modelStr || `${selectedProvider}/${selectedModel}`} | intent=${intent} task=${taskType} | strategy=${routingStrategy} | ${selectionReason}`
+      `Auto selection: ${selectedTarget?.modelStr || `${selectedProvider}/${selectedModel}`} | intent=${intent} task=${effectiveTaskType} | strategy=${routingStrategy} | ${selectionReason}`
     );
   } else {
     log.warn("COMBO", "Auto strategy has no candidates, keeping default ordering");

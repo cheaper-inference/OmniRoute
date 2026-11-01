@@ -229,8 +229,8 @@ export function selectProvider(
   // ── Intent classification (ClawRouter Feature #10/11) ────────────────────
   // When taskType is generic ('default'), attempt to classify the prompt intent
   // using the multilingual intentClassifier for better task fitness scoring.
-  let effectiveTaskType = taskType;
-  if ((taskType === "default" || taskType === "") && promptMessages?.length) {
+  let effectiveTaskType = (config as { taskType?: string }).taskType || taskType;
+  if ((effectiveTaskType === "default" || effectiveTaskType === "") && promptMessages?.length) {
     // Extract text from last user message for classification
     const lastUserMsg = [...promptMessages].reverse().find((m) => m.role === "user");
     if (lastUserMsg) {

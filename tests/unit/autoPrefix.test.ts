@@ -45,6 +45,12 @@ describe("parseAutoPrefix", () => {
     assert.strictEqual(result.variant, "smart");
   });
 
+  it('should return valid for "auto/agentic" with agentic variant', () => {
+    const result = parseAutoPrefix("auto/agentic");
+    assert.strictEqual(result.valid, true);
+    assert.strictEqual(result.variant, "agentic");
+  });
+
   it('should return valid for "auto/lkgp" with lkgp variant', () => {
     const result = parseAutoPrefix("auto/lkgp");
     assert.strictEqual(result.valid, true);
