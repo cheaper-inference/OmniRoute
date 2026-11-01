@@ -144,6 +144,9 @@ describe("API key list", () => {
       name: /View usage, limits and quota for Team key/,
     });
     expect(link.getAttribute("href")).toBe("/dashboard/api-manager/key-1");
+    // The retired icon font must not leave a text ligature in the row action.
+    expect(link.querySelector('svg[aria-hidden="true"]')).not.toBeNull();
+    expect(link.textContent).toBe("");
   });
 });
 

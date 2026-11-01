@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import type { ReactNode } from "react";
+import Icon from "@/shared/components/Icon";
 import { formatUsdCost } from "../../apiManagerPageUtils";
 
 export function formatCount(value: number, locale: string): string {
@@ -44,11 +45,8 @@ export function DetailsSection({
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 items-start gap-3">
           {icon && (
-            <span
-              className="material-symbols-outlined rounded-lg bg-bg p-2 text-[20px] text-text-muted"
-              aria-hidden="true"
-            >
-              {icon}
+            <span className="rounded-lg bg-bg p-2 text-text-muted">
+              <Icon name={icon} size={20} />
             </span>
           )}
           <div className="min-w-0">
@@ -120,11 +118,7 @@ export function StatusBadge({
     <span
       className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-medium ${BADGE_TONES[tone]}`}
     >
-      {icon && (
-        <span className="material-symbols-outlined text-[12px]" aria-hidden="true">
-          {icon}
-        </span>
-      )}
+      {icon && <Icon name={icon} size={12} />}
       {children}
     </span>
   );

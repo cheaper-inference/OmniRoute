@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 
 /** Row action that opens the per-key usage, limits and quota page. */
 export function ApiKeyDetailsLink({ keyId, keyName }: { keyId: string; keyName: string }) {
@@ -14,9 +15,7 @@ export function ApiKeyDetailsLink({ keyId, keyName }: { keyId: string; keyName: 
       title={label}
       aria-label={label}
     >
-      <span className="material-symbols-outlined text-[18px]" aria-hidden="true">
-        insights
-      </span>
+      <Icon name="query_stats" size={18} />
     </Link>
   );
 }

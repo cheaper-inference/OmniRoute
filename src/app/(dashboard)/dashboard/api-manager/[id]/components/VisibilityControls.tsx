@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Icon from "@/shared/components/Icon";
 import { safeApiErrorMessage, withVisibilityScopes } from "../apiKeyDetailsData";
 import type { KeyConfig } from "../apiKeyDetailsData";
 import { sendJson } from "../useApiKeyDetails";
@@ -44,9 +45,7 @@ function VisibilitySwitch({
             : "border-border bg-black/5 text-text-muted dark:bg-white/5"
         }`}
       >
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          {icon}
-        </span>
+        <Icon name={icon} size={14} />
         {checked ? tc("enabled") : tc("disabled")}
       </button>
     </div>
