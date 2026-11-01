@@ -1,0 +1,1 @@
+- **feat(providers):** add an Import auth modal for Antigravity: 1-click import of the local CLI login (`AGY_TOKEN_FILE`, Linux keyring, `~/.gemini/antigravity-cli/` and AgentControl profiles), single token file/paste and bulk JSON import ([#18181](https://github.com/cheaper-inference/OmniRoute/pull/18181)) — thanks @ziuus

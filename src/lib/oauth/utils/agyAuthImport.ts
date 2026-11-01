@@ -1,3 +1,10 @@
+import { execFile } from "child_process";
+import { promisify } from "util";
+import type { Dirent } from "fs";
+import fs from "fs/promises";
+import path from "path";
+import os from "os";
+
 import {
   getProviderConnections,
   createProviderConnection,
@@ -13,6 +20,8 @@ import {
   antigravityDegradedProjectState,
   antigravityPersistStatus,
 } from "@/lib/oauth/antigravityProjectGate";
+
+const execFileAsync = promisify(execFile);
 
 type JsonRecord = Record<string, unknown>;
 
@@ -285,4 +294,96 @@ export async function createConnectionFromAgyToken(
   });
 
   return { connection, created: true };
+}
+
+type DetectedAgyToken = { raw: unknown; source: string };
+
+const AGY_TOKEN_FILE_NAME = "antigravity-oauth-token";
+
+/** Read and parse a JSON token file; null when it is missing or not valid JSON. */
+async function readJsonFile(filePath: string): Promise<unknown> {
+  try {
+    return JSON.parse(await fs.readFile(filePath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
+async function detectFromFirstReadable(candidates: string[]): Promise<DetectedAgyToken | null> {
+  for (const candidate of candidates) {
+    const raw = await readJsonFile(candidate);
+    if (raw !== null) return { raw, source: candidate };
+  }
+  return null;
+}
+
+async function detectFromEnvOverride(): Promise<DetectedAgyToken | null> {
+  const override = process.env.AGY_TOKEN_FILE?.trim();
+  if (!override) return null;
+  const raw = await readJsonFile(override);
+  return raw === null ? null : { raw, source: "env:AGY_TOKEN_FILE" };
+}
+
+/** Linux Secret Service keyring entry, accepted only when it carries a refresh token. */
+async function detectFromSecretService(): Promise<DetectedAgyToken | null> {
+  if (process.platform !== "linux") return null;
+  try {
+    const { stdout } = await execFileAsync(
+      "secret-tool",
+      ["lookup", "service", "gemini", "username", "antigravity"],
+      { timeout: 3000 }
+    );
+    const parsed = toRecord(JSON.parse(stdout.trim()));
+    const hasRefresh = !!(toRecord(parsed.token).refresh_token || parsed.refresh_token);
+    return hasRefresh ? { raw: parsed, source: "secret-service" } : null;
+  } catch {
+    // secret-tool missing (ENOENT), no keyring entry, or a non-JSON secret.
+    return null;
+  }
+}
+
+async function detectFromAgentControlProfiles(home: string): Promise<DetectedAgyToken | null> {
+  const profilesDir = path.join(home, ".config", "agentcontrol", "profiles");
+  let entries: Dirent[];
+  try {
+    entries = await fs.readdir(profilesDir, { withFileTypes: true });
+  } catch {
+    return null;
+  }
+  const candidates = entries
+    .filter((ent) => ent.isDirectory())
+    .map((ent) =>
+      path.join(profilesDir, ent.name, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME)
+    );
+  return detectFromFirstReadable(candidates);
+}
+
+/**
+ * Detect locally stored Antigravity credentials, in order:
+ * 1. AGY_TOKEN_FILE environment variable override
+ * 2. Linux Secret Service keyring (secret-tool), only when it carries a refresh token
+ * 3. Default CLI token files (~/.gemini/antigravity-cli/antigravity-oauth-token)
+ * 4. Multi-profile token files (~/.config/agentcontrol/profiles/...)
+ *
+ * The Antigravity IDE `state.vscdb` store is deliberately not read: the shape of its
+ * `antigravityAuthStatus` entry is unverified and carries no confirmed OAuth refresh
+ * token, so importing it could store a connection that stops refreshing after ~1h.
+ */
+export async function detectLocalAgyTokenRaw(): Promise<DetectedAgyToken> {
+  const home = os.homedir();
+  const detected =
+    (await detectFromEnvOverride()) ??
+    (await detectFromSecretService()) ??
+    (await detectFromFirstReadable([
+      path.join(home, ".gemini", "antigravity-cli", AGY_TOKEN_FILE_NAME),
+      path.join(home, ".gemini", "antigravity", AGY_TOKEN_FILE_NAME),
+    ])) ??
+    (await detectFromAgentControlProfiles(home));
+  if (detected) return detected;
+
+  throw new AgyAuthFileError(
+    "No local Antigravity CLI login found. Run agy, sign in with Google, then try again.",
+    404,
+    "no_local_login"
+  );
 }

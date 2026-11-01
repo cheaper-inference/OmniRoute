@@ -458,7 +458,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       try {
         discovered = await fetchVolcPlanModels(volcPlanKind, cookie, csrf);
       } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
+        const message = sanitizeErrorMessage(err);
         await saveTimedCallLog({
           method: "POST",
           path: `/api/providers/${id}/sync-models`,
@@ -846,7 +846,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       sourceFormat: "-",
       connectionId: id,
       duration: Date.now() - start,
-      error: error.message || "Sync failed",
+      error: sanitizeErrorMessage(error) || "Sync failed",
       requestType: "model-sync",
       ...(channelLabel
         ? {

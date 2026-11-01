@@ -37,6 +37,9 @@
   "plugins": ["@stryker-mutator/tap-runner"],
   "tap": {
     "testFiles": [
+      "tests/unit/antigravity-argon-404.test.ts",
+      "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
+      "tests/unit/singbox-routes-local-only.test.ts",
       "tests/unit/muse-session-ownership.test.ts",
       "tests/unit/muse-empty-response-retry.test.ts",
       "tests/unit/deepseek-api-flash-vision.test.ts",
