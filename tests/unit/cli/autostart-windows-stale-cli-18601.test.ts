@@ -5,7 +5,13 @@ import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 const autostart = await import("../../../bin/cli/tray/autostart.mjs");
-const { buildWinVbsContent, rewriteWinVbsCliPath, refreshWinAutostartCliPath } = autostart;
+const {
+  buildWinVbsContent,
+  rewriteWinVbsCliPath,
+  refreshWinAutostartCliPath,
+  compareCliVersions,
+  isNpxCachePath,
+} = autostart;
 
 // #18601: the Startup VBS pins the real path of the CLI that enabled autostart.
 // pnpm installs each version under its own directory, so after an upgrade every
@@ -63,6 +69,42 @@ test("rewriteWinVbsCliPath round-trips the current buildWinVbsContent format", (
 test("rewriteWinVbsCliPath returns null for a VBS it did not write", () => {
   assert.equal(rewriteWinVbsCliPath('MsgBox "hello"\n', NEW_CLI), null);
   assert.equal(rewriteWinVbsCliPath("", NEW_CLI), null);
+});
+
+// The version/path comparisons are pure, so these run on every OS.
+test("compareCliVersions orders versions numerically, prereleases below their release", () => {
+  assert.equal(compareCliVersions("3.8.51", "3.8.52"), -1);
+  assert.equal(compareCliVersions("3.8.52", "3.8.51"), 1);
+  assert.equal(compareCliVersions("3.8.52", "3.8.52"), 0);
+  assert.equal(compareCliVersions("3.8.9", "3.8.10"), -1, "numeric, not lexical");
+  assert.equal(compareCliVersions("3.9.0", "3.10.0"), -1);
+  assert.equal(compareCliVersions("4.0.0", "3.99.99"), 1);
+  assert.equal(compareCliVersions("3.9.0-rc1", "3.9.0"), -1);
+  assert.equal(compareCliVersions("3.9.0", "3.9.0-rc1"), 1);
+  assert.equal(compareCliVersions("3.9.0-rc1", "3.9.0-rc2"), -1);
+  assert.equal(compareCliVersions("3.9.0-rc.2", "3.9.0-rc.10"), -1);
+  assert.equal(compareCliVersions("3.9.0-rc1", "3.8.99"), 1, "prerelease of a newer release");
+  assert.equal(compareCliVersions("3.9.0+build5", "3.9.0"), 0, "build metadata is ignored");
+});
+
+test("compareCliVersions returns null for anything that is not major.minor.patch", () => {
+  for (const bad of [null, undefined, "", "nightly", "3.8", "v3.8.52", "3.8.52.1", 3.8, {}]) {
+    assert.equal(compareCliVersions(bad, "3.8.52"), null, String(bad));
+    assert.equal(compareCliVersions("3.8.52", bad), null, String(bad));
+  }
+});
+
+test("isNpxCachePath matches an _npx path segment only", () => {
+  const cli = "node_modules\\omniroute\\bin\\omniroute.mjs";
+  const npx = "C:\\Users\\u\\AppData\\Local\\npm-cache\\_npx\\abc123";
+  assert.equal(isNpxCachePath(`${npx}\\${cli}`), true);
+  assert.equal(isNpxCachePath(`c:/users/u/appdata/local/npm-cache/_NPX/abc123/${cli}`), true);
+  assert.equal(isNpxCachePath(`C:\\Users\\u\\pnpm\\global\\5\\${cli}`), false);
+  assert.equal(
+    isNpxCachePath(`C:\\Users\\u\\my_npx_tools\\${cli}`),
+    false,
+    "segment, not substring"
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -128,6 +170,92 @@ test("refresh leaves a VBS alone when it already launches the same version", () 
     assert.equal(refreshWinAutostartCliPath({ cliPath: npmCli, vbsPath }), false);
     assert.equal(refreshWinAutostartCliPath({ cliPath: pnpmCli, vbsPath }), false);
     assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+  });
+});
+
+test("refresh never repoints autostart at an npx cache copy, even a newer one", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const installedCli = fakeInstall(dir, "pnpm", "3.8.52");
+    const npxCli = fakeInstall(dir, join("npm-cache", "_npx", "abc123"), "3.9.0");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    const vbs = buildWinVbsContent(installedCli);
+    writeFileSync(vbsPath, vbs);
+
+    assert.equal(refreshWinAutostartCliPath({ cliPath: npxCli, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+
+    // ...and not even to replace an install that was removed.
+    rmSync(join(dir, "pnpm"), { recursive: true, force: true });
+    assert.equal(refreshWinAutostartCliPath({ cliPath: npxCli, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+  });
+});
+
+test("refresh does not repoint a VBS at an older install (downgrade)", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const newerCli = fakeInstall(dir, "pnpm", "3.8.52");
+    const olderCli = fakeInstall(dir, "project", "3.8.40");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    const vbs = buildWinVbsContent(newerCli);
+    writeFileSync(vbsPath, vbs);
+
+    assert.equal(refreshWinAutostartCliPath({ cliPath: olderCli, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+  });
+});
+
+test("refresh settles on the newest of two coexisting installs instead of flip-flopping", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const pnpmCli = fakeInstall(dir, "pnpm", "3.8.52");
+    const npmCli = fakeInstall(dir, "npm", "3.8.53");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    writeFileSync(vbsPath, buildWinVbsContent(pnpmCli));
+
+    assert.equal(refreshWinAutostartCliPath({ cliPath: npmCli, vbsPath }), true);
+    const settled = readFileSync(vbsPath, "utf8");
+    assert.ok(execLineOf(settled).includes(`"${npmCli}"`));
+
+    // Serving the older copy, or the newer one again, leaves the file as it is.
+    assert.equal(refreshWinAutostartCliPath({ cliPath: pnpmCli, vbsPath }), false);
+    assert.equal(refreshWinAutostartCliPath({ cliPath: npmCli, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), settled);
+  });
+});
+
+test("refresh repoints from a prerelease to its release but not the other way round", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const rcCli = fakeInstall(dir, "rc", "3.9.0-rc1");
+    const releaseCli = fakeInstall(dir, "release", "3.9.0");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+    writeFileSync(vbsPath, buildWinVbsContent(releaseCli));
+    assert.equal(refreshWinAutostartCliPath({ cliPath: rcCli, vbsPath }), false);
+
+    writeFileSync(vbsPath, buildWinVbsContent(rcCli));
+    assert.equal(refreshWinAutostartCliPath({ cliPath: releaseCli, vbsPath }), true);
+    assert.ok(execLineOf(readFileSync(vbsPath, "utf8")).includes(`"${releaseCli}"`));
+  });
+});
+
+test("refresh leaves a VBS alone when either version cannot be parsed", () => {
+  if (process.platform !== "win32") return;
+  withTmp((dir) => {
+    const odd = fakeInstall(dir, "odd", "nightly");
+    const good = fakeInstall(dir, "good", "3.8.52");
+    const vbsPath = join(dir, "OmniRoute.vbs");
+
+    const vbs = buildWinVbsContent(odd);
+    writeFileSync(vbsPath, vbs);
+    assert.equal(refreshWinAutostartCliPath({ cliPath: good, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), vbs);
+
+    const goodVbs = buildWinVbsContent(good);
+    writeFileSync(vbsPath, goodVbs);
+    assert.equal(refreshWinAutostartCliPath({ cliPath: odd, vbsPath }), false);
+    assert.equal(readFileSync(vbsPath, "utf8"), goodVbs);
   });
 });
 
