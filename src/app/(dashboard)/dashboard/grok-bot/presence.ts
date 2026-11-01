@@ -42,33 +42,7 @@ export function readPresence(frame: unknown, nowMs: number): Partial<Presence> {
   const record = frame as { agentState?: unknown; boxState?: unknown };
   const out: Partial<Presence> = { lastFrameAtMs: nowMs };
 
-  const agentState = record.agentState;
-  if (agentState && typeof agentState === "object") {
-    const live = (agentState as { live?: unknown }).live;
-    if (Array.isArray(live)) {
-      out.lastLiveAtMs = nowMs;
-      out.running = live.flatMap((entry) => {
-        if (!entry || typeof entry !== "object") return [];
-        const item = entry as { agentId?: unknown; isRunning?: unknown };
-        if (typeof item.agentId !== "string" || item.isRunning !== true) return [];
-        return [item.agentId];
-      });
-      out.subagents = live.flatMap((entry) => {
-        if (!entry || typeof entry !== "object") return [];
-        const item = entry as { agentId?: unknown; hasRunningSubagents?: unknown };
-        if (typeof item.agentId !== "string" || item.hasRunningSubagents !== true) return [];
-        return [item.agentId];
-      });
-      const declared = live.flatMap((entry) => {
-        if (!entry || typeof entry !== "object") return [];
-        const item = entry as { staleAfterMs?: unknown };
-        return typeof item.staleAfterMs === "number" && item.staleAfterMs > 0
-          ? [item.staleAfterMs]
-          : [];
-      });
-      if (declared.length > 0) out.staleAfterMs = Math.min(...declared);
-    }
-  }
+  Object.assign(out, livePresence(record.agentState, nowMs));
 
   const boxState = record.boxState;
   if (boxState && typeof boxState === "object") {
@@ -79,6 +53,36 @@ export function readPresence(frame: unknown, nowMs: number): Partial<Presence> {
     }
   }
 
+  return out;
+}
+
+function livePresence(agentState: unknown, nowMs: number): Partial<Presence> {
+  if (!agentState || typeof agentState !== "object") return {};
+  const out: Partial<Presence> = {};
+  const live = (agentState as { live?: unknown }).live;
+  if (Array.isArray(live)) {
+    out.lastLiveAtMs = nowMs;
+    out.running = live.flatMap((entry) => {
+      if (!entry || typeof entry !== "object") return [];
+      const item = entry as { agentId?: unknown; isRunning?: unknown };
+      if (typeof item.agentId !== "string" || item.isRunning !== true) return [];
+      return [item.agentId];
+    });
+    out.subagents = live.flatMap((entry) => {
+      if (!entry || typeof entry !== "object") return [];
+      const item = entry as { agentId?: unknown; hasRunningSubagents?: unknown };
+      if (typeof item.agentId !== "string" || item.hasRunningSubagents !== true) return [];
+      return [item.agentId];
+    });
+    const declared = live.flatMap((entry) => {
+      if (!entry || typeof entry !== "object") return [];
+      const item = entry as { staleAfterMs?: unknown };
+      return typeof item.staleAfterMs === "number" && item.staleAfterMs > 0
+        ? [item.staleAfterMs]
+        : [];
+    });
+    if (declared.length > 0) out.staleAfterMs = Math.min(...declared);
+  }
   return out;
 }
 

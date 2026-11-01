@@ -5,9 +5,11 @@
  * Self-contained in open-sse (no import from src/).
  */
 
+import { resolvePublicCred } from "../../../utils/publicCreds.ts";
+
 const GROK_BOT_REFRESH_URL = "https://api2.cursor.sh/oauth/token";
 // Production desktop OAuth client identity for api2.cursor.sh.
-const GROK_BOT_OAUTH_CLIENT_ID = "KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB";
+const GROK_BOT_OAUTH_CLIENT_ID = resolvePublicCred("cursor_id");
 const REFRESH_TIMEOUT_MS = 15_000;
 const REFRESH_ATTEMPTS = 3;
 const REFRESH_RETRY_BASE_MS = 300;
@@ -64,7 +66,7 @@ export async function refreshGrokBotToken(
   const attempts = options.attempts ?? REFRESH_ATTEMPTS;
   const retryBaseMs = options.retryBaseMs ?? REFRESH_RETRY_BASE_MS;
 
-  let lastError: { error: string; code: string } | null = null;
+  let lastError: RefreshFailure | null = null;
 
   for (let attempt = 0; attempt < attempts; attempt += 1) {
     if (attempt > 0) {
@@ -82,64 +84,12 @@ export async function refreshGrokBotToken(
         signal: AbortSignal.timeout(REFRESH_TIMEOUT_MS),
       });
 
-      const text = await response.text();
-      let parsed: Record<string, unknown> = {};
-      try {
-        parsed = text ? (JSON.parse(text) as Record<string, unknown>) : {};
-      } catch {
-        /* leave empty — treated as upstream error below */
+      const outcome = await readRefreshOutcome(response, refreshToken, log, options);
+      if (outcome.retry && attempt < attempts - 1) {
+        lastError = outcome.result;
+        continue;
       }
-
-      if (!response.ok) {
-        const code =
-          typeof parsed.error === "string" ? (parsed.error as string) : `http_${response.status}`;
-        lastError = {
-          error: "refresh_http_error",
-          code: isRetryableRefreshStatus(response.status) ? "retryable_upstream" : code,
-        };
-        if (isRetryableRefreshStatus(response.status) && attempt < attempts - 1) continue;
-        if (lastError.code === "retryable_upstream") {
-          lastError = { error: "refresh_http_error", code: `http_${response.status}` };
-        }
-        return lastError;
-      }
-
-      if (parsed.shouldLogout === true) {
-        log?.info?.("TOKEN_REFRESH", "Grok Bot: shouldLogout=true — disabling account");
-        return { error: "unrecoverable_refresh_error", code: "account_should_logout" };
-      }
-
-      const accessToken = typeof parsed.access_token === "string" ? parsed.access_token : null;
-      if (!accessToken) {
-        lastError = { error: "refresh_malformed_response", code: "no_access_token" };
-        if (attempt < attempts - 1) continue;
-        return lastError;
-      }
-
-      const previousSub = decodeTokenSub(options.previousAccessToken);
-      const newSub = decodeTokenSub(accessToken);
-      if (previousSub && newSub && previousSub !== newSub) {
-        log?.error?.(
-          "TOKEN_REFRESH",
-          "Grok Bot: token subject changed across refresh — refusing to persist"
-        );
-        return { error: "unrecoverable_refresh_error", code: "account_subject_mismatch" };
-      }
-
-      const newRefreshToken =
-        typeof parsed.refresh_token === "string" && parsed.refresh_token.length > 0
-          ? parsed.refresh_token
-          : refreshToken;
-
-      const expiresIn =
-        typeof parsed.expires_in === "number" && Number.isFinite(parsed.expires_in)
-          ? (parsed.expires_in as number)
-          : null;
-      const expiresAt = expiresIn
-        ? new Date(Date.now() + expiresIn * 1000).toISOString()
-        : new Date(Date.now() + FALLBACK_TTL_MS).toISOString();
-
-      return { accessToken, refreshToken: newRefreshToken, expiresAt };
+      return outcome.result;
     } catch (err) {
       lastError = {
         error: "refresh_network_error",
@@ -151,4 +101,94 @@ export async function refreshGrokBotToken(
   }
 
   return lastError ?? { error: "refresh_unknown", code: "unknown" };
+}
+
+type RefreshFailure = {
+  error: string;
+  code: string;
+  accessToken?: never;
+  refreshToken?: never;
+  expiresAt?: never;
+};
+type RefreshLog = { error?: (...args: unknown[]) => void; info?: (...args: unknown[]) => void };
+type RefreshResult =
+  | { accessToken: string; refreshToken: string; expiresAt: string; error?: never; code?: never }
+  | RefreshFailure;
+type RefreshOutcome =
+  { result: RefreshFailure; retry: true } | { result: RefreshResult; retry: false };
+
+async function readRefreshOutcome(
+  response: Response,
+  refreshToken: string,
+  log: RefreshLog | undefined,
+  options: RefreshGrokBotTokenOptions
+): Promise<RefreshOutcome> {
+  const text = await response.text();
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = text ? (JSON.parse(text) as Record<string, unknown>) : {};
+  } catch {
+    /* Invalid JSON is handled as a missing access token or an HTTP error. */
+  }
+  if (!response.ok) {
+    const retry = isRetryableRefreshStatus(response.status);
+    const code = typeof parsed.error === "string" ? parsed.error : `http_${response.status}`;
+    const result = { error: "refresh_http_error", code: retry ? `http_${response.status}` : code };
+    return { result, retry };
+  }
+  return validateRefreshedCredentials(parsed, refreshToken, log, options.previousAccessToken);
+}
+
+function validateRefreshedCredentials(
+  parsed: Record<string, unknown>,
+  refreshToken: string,
+  log: RefreshLog | undefined,
+  previousAccessToken: string | null | undefined
+): RefreshOutcome {
+  if (parsed.shouldLogout === true) {
+    log?.info?.("TOKEN_REFRESH", "Grok Bot: shouldLogout=true — disabling account");
+    return {
+      result: { error: "unrecoverable_refresh_error", code: "account_should_logout" },
+      retry: false,
+    };
+  }
+  const accessToken = typeof parsed.access_token === "string" ? parsed.access_token : null;
+  if (!accessToken) {
+    return {
+      result: { error: "refresh_malformed_response", code: "no_access_token" },
+      retry: true,
+    };
+  }
+  const previousSub = decodeTokenSub(previousAccessToken);
+  const newSub = decodeTokenSub(accessToken);
+  if (previousSub && newSub && previousSub !== newSub) {
+    log?.error?.(
+      "TOKEN_REFRESH",
+      "Grok Bot: token subject changed across refresh — refusing to persist"
+    );
+    return {
+      result: { error: "unrecoverable_refresh_error", code: "account_subject_mismatch" },
+      retry: false,
+    };
+  }
+  return { result: refreshedCredentials(parsed, accessToken, refreshToken), retry: false };
+}
+
+function refreshedCredentials(
+  parsed: Record<string, unknown>,
+  accessToken: string,
+  refreshToken: string
+) {
+  const newRefreshToken =
+    typeof parsed.refresh_token === "string" && parsed.refresh_token.length > 0
+      ? parsed.refresh_token
+      : refreshToken;
+  const expiresIn =
+    typeof parsed.expires_in === "number" && Number.isFinite(parsed.expires_in)
+      ? parsed.expires_in
+      : null;
+  const expiresAt = expiresIn
+    ? new Date(Date.now() + expiresIn * 1000).toISOString()
+    : new Date(Date.now() + FALLBACK_TTL_MS).toISOString();
+  return { accessToken, refreshToken: newRefreshToken, expiresAt };
 }

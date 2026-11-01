@@ -146,86 +146,116 @@ function bounded(value: unknown, depth = 0): boolean {
   return entries.length <= 32 && entries.every((item) => bounded(item, depth + 1));
 }
 
+type CardIdentity = Pick<TranscriptCard, "seq" | "entryId">;
+
+function stringValue(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function connectorCard(
+  identity: CardIdentity,
+  source: Message | undefined,
+  type: string
+): TranscriptCard | null {
+  const name = type === "onepassword-connect" ? "1Password" : stringValue(source?.connector);
+  if (name === "") return null;
+  return {
+    ...identity,
+    kind: "connector",
+    name,
+    requestId: stringValue(source?.requestId),
+    action: stringValue(source?.variant, "connect"),
+  };
+}
+
+function widgetOption(option: unknown): Array<{ label: string; value: string }> {
+  if (typeof option === "string" && option !== "") return [{ label: option, value: option }];
+  if (!option || typeof option !== "object") return [];
+  const raw = option as { label?: unknown; value?: unknown };
+  const label = stringValue(raw.label);
+  return label === "" ? [] : [{ label, value: stringValue(raw.value, label) }];
+}
+
+function widgetCard(identity: CardIdentity, source: Message | undefined): TranscriptCard {
+  const raw = Array.isArray(source?.options) ? source.options : [];
+  return {
+    ...identity,
+    kind: "widget",
+    prompt: stringValue(source?.prompt),
+    options: raw.flatMap(widgetOption).slice(0, 12),
+    allowCustom: source?.allowCustom === true,
+    multiSelect: source?.multiSelect === true,
+    dismissOnMoveOn: source?.dismissOnMoveOn === true,
+  };
+}
+
+function emailCard(identity: CardIdentity, source: Message | undefined): TranscriptCard | null {
+  const to = Array.isArray(source?.draft?.to)
+    ? source.draft.to.filter((item) => typeof item === "string").join(", ")
+    : "";
+  const text = stringValue(source?.draft?.body);
+  return text === ""
+    ? null
+    : {
+        ...identity,
+        kind: "email",
+        from: stringValue(source?.draft?.from),
+        to,
+        subject: stringValue(source?.draft?.subject),
+        body: text,
+      };
+}
+
+function secretCard(identity: CardIdentity, source: Message | undefined): TranscriptCard | null {
+  const label = stringValue(source?.secretRequest?.label);
+  return label === "" ? null : { ...identity, kind: "secret", label };
+}
+function slackCard(identity: CardIdentity, source: Message | undefined): TranscriptCard | null {
+  const target = stringValue(source?.draft?.target);
+  return target === ""
+    ? null
+    : { ...identity, kind: "slack", target, body: stringValue(source?.draft?.body) };
+}
+
+function structuredCard(
+  identity: CardIdentity,
+  source: Message | undefined,
+  type: string
+): TranscriptCard | null {
+  switch (type) {
+    case "connector":
+    case "onepassword-connect":
+      return connectorCard(identity, source, type);
+    case "widget":
+      return widgetCard(identity, source);
+    case "secret-request":
+      return secretCard(identity, source);
+    case "email-draft":
+      return emailCard(identity, source);
+    case "slack-draft":
+      return slackCard(identity, source);
+    case "":
+    case "text":
+    case "local-tool-permission":
+      return null;
+    default:
+      return { ...identity, kind: "unknown", type };
+  }
+}
+
 function cardOf(entry: Entry, body: Body): TranscriptCard | null {
-  const seq = typeof entry.updatedSeq === "string" ? entry.updatedSeq : "";
-  const entryId = typeof entry.entryId === "string" ? entry.entryId : "";
-  const message = body.message;
-  const source = (typeof body.type === "string" ? body : message) as Message | undefined;
-  const type = typeof source?.type === "string" ? source.type : "";
+  const identity = { seq: stringValue(entry.updatedSeq), entryId: stringValue(entry.entryId) };
+  const source = (typeof body.type === "string" ? body : body.message) as Message | undefined;
+  const type = stringValue(source?.type);
   if (type === "attachment") {
-    const fileName = typeof message?.file_name === "string" ? message.file_name : "";
-    return fileName === "" ? null : { seq, entryId, kind: "attachment", fileName };
+    const fileName = stringValue(body.message?.file_name);
+    return fileName === "" ? null : { ...identity, kind: "attachment", fileName };
   }
   if (body.kind === "notice" || type === "notice") {
-    const text = typeof body.text === "string" ? body.text : "";
-    return text === "" ? null : { seq, entryId, kind: "notice", text };
+    const text = stringValue(body.text);
+    return text === "" ? null : { ...identity, kind: "notice", text };
   }
-  if (type === "connector" || type === "onepassword-connect") {
-    const name =
-      type === "onepassword-connect"
-        ? "1Password"
-        : typeof source?.connector === "string"
-          ? source.connector
-          : "";
-    const requestId = typeof source?.requestId === "string" ? source.requestId : "";
-    const action = typeof source?.variant === "string" ? source.variant : "connect";
-    return name === "" ? null : { seq, entryId, kind: "connector", name, requestId, action };
-  }
-  if (type === "widget") {
-    const raw = Array.isArray(source?.options) ? source.options : [];
-    const options = raw
-      .flatMap((option) => {
-        if (typeof option === "string" && option !== "") return [{ label: option, value: option }];
-        if (option && typeof option === "object") {
-          const label = typeof option.label === "string" ? option.label : "";
-          const value = typeof option.value === "string" ? option.value : label;
-          return label === "" ? [] : [{ label, value }];
-        }
-        return [];
-      })
-      .slice(0, 12);
-    return {
-      seq,
-      entryId,
-      kind: "widget",
-      prompt: typeof source?.prompt === "string" ? source.prompt : "",
-      options,
-      allowCustom: source?.allowCustom === true,
-      multiSelect: source?.multiSelect === true,
-      dismissOnMoveOn: source?.dismissOnMoveOn === true,
-    };
-  }
-  if (type === "secret-request") {
-    const label =
-      typeof source?.secretRequest?.label === "string" ? source.secretRequest.label : "";
-    return label === "" ? null : { seq, entryId, kind: "secret", label };
-  }
-  if (type === "email-draft") {
-    const to = Array.isArray(source?.draft?.to)
-      ? source.draft.to.filter((item) => typeof item === "string").join(", ")
-      : "";
-    const text = typeof source?.draft?.body === "string" ? source.draft.body : "";
-    return text === ""
-      ? null
-      : {
-          seq,
-          entryId,
-          kind: "email",
-          from: typeof source?.draft?.from === "string" ? source.draft.from : "",
-          to,
-          subject: typeof source?.draft?.subject === "string" ? source.draft.subject : "",
-          body: text,
-        };
-  }
-  if (type === "slack-draft") {
-    const target = typeof source?.draft?.target === "string" ? source.draft.target : "";
-    const text = typeof source?.draft?.body === "string" ? source.draft.body : "";
-    return target === "" ? null : { seq, entryId, kind: "slack", target, body: text };
-  }
-  if (type !== "" && type !== "text" && type !== "local-tool-permission") {
-    return { seq, entryId, kind: "unknown", type };
-  }
-  return null;
+  return structuredCard(identity, source, type);
 }
 
 function textOf(body: Body): string {
@@ -432,6 +462,82 @@ export function nextTranscriptRequest(
   };
 }
 
+function applyPermission(
+  permissions: PermissionRequest[],
+  item: Entry,
+  ask: Record<string, unknown>
+): void {
+  const requestId = stringValue(ask.requestId);
+  if (requestId === "") return;
+  const replaced = permissions.filter((held) => held.requestId !== requestId);
+  replaced.push({
+    seq: stringValue(item.updatedSeq),
+    entryId: stringValue(item.entryId),
+    requestId,
+    action: stringValue(ask.action),
+    target: stringValue(ask.target),
+    machineId: stringValue(ask.machineId),
+    status: stringValue(ask.status),
+  });
+  permissions.length = 0;
+  permissions.push(...replaced);
+}
+
+function upsertCard(cards: TranscriptCard[], card: TranscriptCard): void {
+  const held = cards.findIndex(
+    (current) => current.entryId !== "" && current.entryId === card.entryId
+  );
+  if (held >= 0) {
+    cards[held] = card;
+    return;
+  }
+  if (card.kind === "unknown") {
+    const index = cards.findIndex((current) => current.kind === "unknown");
+    if (index >= 0) {
+      cards[index] = card;
+      return;
+    }
+  }
+  cards.push(card);
+}
+
+function applyEntry(state: TranscriptState, item: Entry): void {
+  const seq = stringValue(item.updatedSeq);
+  state.cursor = bigger(state.cursor, seq);
+  const body = readBody(item);
+  if (!body || !bounded(body)) {
+    state.cards.push({
+      seq,
+      entryId: stringValue(item.entryId),
+      kind: "unknown",
+      type: "oversize",
+    });
+    return;
+  }
+  const ask = body.message?.type === "local-tool-permission" ? body.message.ask : null;
+  if (ask && typeof ask === "object") {
+    applyPermission(state.permissions, item, ask);
+    return;
+  }
+  const card = cardOf(item, body);
+  if (card) {
+    upsertCard(state.cards, card);
+    return;
+  }
+  // Rows are shown in both phases; sealing only changes the next request.
+  const text = textOf(body);
+  if (text !== "") {
+    state.visible.push({
+      seq,
+      entryId: stringValue(item.entryId),
+      role: roleOf(body, item.entryKind),
+      text,
+      clientNonce: stringValue(body.clientNonce),
+      streaming: body.isStreaming === true,
+    });
+  }
+}
+
 export function applyTranscriptFrame(state: TranscriptState, frame: unknown): TranscriptState {
   if (!frame || typeof frame !== "object") return state;
   const record = frame as {
@@ -441,79 +547,21 @@ export function applyTranscriptFrame(state: TranscriptState, frame: unknown): Tr
     rows?: { entries?: unknown };
   };
   const entries = Array.isArray(record.rows?.entries) ? record.rows.entries : [];
-  let cursor = state.cursor;
-  const visible = [...state.visible];
-  const cards = [...(state.cards ?? [])];
-  const permissions = [...state.permissions];
+  const next = {
+    cursor: state.cursor,
+    visible: [...state.visible],
+    cards: [...(state.cards ?? [])],
+    permissions: [...state.permissions],
+    sealed: state.sealed || record.heartbeat === true,
+    tooOld: record.cursorTooOld !== undefined,
+  };
   for (const entry of entries) {
     if (!entry || typeof entry !== "object") continue;
     const item = entry as Entry;
     if (typeof item.updatedSeq !== "string") continue;
-    cursor = bigger(cursor, item.updatedSeq);
-    const body = readBody(item);
-    if (!body || !bounded(body)) {
-      cards.push({
-        seq: item.updatedSeq,
-        entryId: typeof item.entryId === "string" ? item.entryId : "",
-        kind: "unknown",
-        type: "oversize",
-      });
-      continue;
-    }
-    const ask = body.message?.type === "local-tool-permission" ? body.message.ask : null;
-    if (ask && typeof ask === "object") {
-      const requestId = typeof ask.requestId === "string" ? ask.requestId : "";
-      if (requestId !== "") {
-        const replaced = permissions.filter((held) => held.requestId !== requestId);
-        replaced.push({
-          seq: item.updatedSeq,
-          entryId: typeof item.entryId === "string" ? item.entryId : "",
-          requestId,
-          action: typeof ask.action === "string" ? ask.action : "",
-          target: typeof ask.target === "string" ? ask.target : "",
-          machineId: typeof ask.machineId === "string" ? ask.machineId : "",
-          status: typeof ask.status === "string" ? ask.status : "",
-        });
-        permissions.length = 0;
-        permissions.push(...replaced);
-      }
-      continue;
-    }
-    const card = cardOf(item, body);
-    if (card) {
-      const held = cards.findIndex(
-        (current) => current.entryId !== "" && current.entryId === card.entryId
-      );
-      if (held >= 0) cards[held] = card;
-      else if (card.kind === "unknown") {
-        const index = cards.findIndex((current) => current.kind === "unknown");
-        if (index >= 0) cards[index] = card;
-        else cards.push(card);
-      } else cards.push(card);
-      continue;
-    }
-    // Rows are shown in both phases; `sealed` only decides when the snapshot
-    // request may be replaced by the live one.
-    const text = textOf(body);
-    if (text !== "") {
-      visible.push({
-        seq: item.updatedSeq,
-        entryId: typeof item.entryId === "string" ? item.entryId : "",
-        role: roleOf(body, item.entryKind),
-        text,
-        clientNonce: typeof body.clientNonce === "string" ? body.clientNonce : "",
-        streaming: body.isStreaming === true,
-      });
-    }
+    applyEntry(next, item);
   }
-  return {
-    cursor,
-    visible,
-    cards,
-    permissions,
-    sealed: state.sealed || record.heartbeat === true,
-    tooOld: record.cursorTooOld !== undefined,
-  };
+  return next;
 }
 
 /**

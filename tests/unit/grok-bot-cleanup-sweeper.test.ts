@@ -257,4 +257,25 @@ describe("grok bot cleanup sweeper", () => {
     await sweepGrokBotCleanupsOnce({ ...options, refresh: async () => null });
     assert.equal(readQueue().length, 1);
   });
+  it("retains a blocked connection item without refreshing or making RPCs, then retries", async () => {
+    enqueueCleanup(item({ rowId: "row-9" }));
+    const { options, made } = optionsFor({});
+    let refreshes = 0;
+    await sweepGrokBotCleanupsOnce({
+      ...options,
+      resolveConnection: async () => {
+        throw new Error("connection is leased");
+      },
+      refresh: async () => {
+        refreshes += 1;
+        return { accessToken: "at" };
+      },
+    });
+    assert.equal(readQueue().length, 1);
+    assert.equal(refreshes, 0);
+    assert.deepEqual(made.calls, []);
+    await sweepGrokBotCleanupsOnce(options);
+    assert.equal(readQueue().length, 0);
+    assert.equal(made.calls.filter((call) => call.method === "DeleteGrokBotAgent").length, 1);
+  });
 });

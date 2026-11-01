@@ -68,14 +68,7 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
     }
   } catch (error) {
     if (handlerFault) {
-      // The frame handler threw, not the transport: retrying would repeat the
-      // same fault forever, so the session ends here.
-      if (ctx.input.onFault) {
-        ctx.input.onFault(error);
-        ctx.stop();
-        return { kind: "stopped" };
-      }
-      throw error;
+      return frameHandlerFault(ctx, error);
     }
     kind = (error as { admission?: unknown })?.admission === true ? "admission" : "drop";
     // A read that rejects, a read that ends early and a read that goes silent are
@@ -91,6 +84,17 @@ async function attempt(ctx: Context, request: TranscriptCursor, fails: number): 
   const wait = ctx.input.retryWait(nextFails, Date.now() - openedAt, kind);
   if (wait < 0) return { kind: "stopped" };
   return { kind: "retry", cursor, fails: nextFails, wait };
+}
+
+function frameHandlerFault(ctx: Context, error: unknown): Outcome {
+  // The frame handler threw, not the transport: retrying would repeat the
+  // same fault forever, so the session ends here.
+  if (ctx.input.onFault) {
+    ctx.input.onFault(error);
+    ctx.stop();
+    return { kind: "stopped" };
+  }
+  throw error;
 }
 
 async function run(ctx: Context, request: TranscriptCursor, fails: number): Promise<void> {

@@ -1,3 +1,5 @@
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
+import { grokBotAgentSchema } from "@/shared/validation/grokBotSchemas";
 import { NextResponse } from "next/server";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { updateProviderConnection } from "@/lib/db/providers";
@@ -85,6 +87,9 @@ async function run(
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
+  }
   return run(id, "get");
 }
 
@@ -97,12 +102,11 @@ export async function postRoute(
   } = {}
 ) {
   const { id } = await params;
-  const body = (await request.json().catch(() => ({}))) as {
-    action?: string;
-    profile?: unknown;
-    skill?: unknown;
-    routine?: unknown;
-  };
+  const parsed = grokBotAgentSchema.safeParse(await request.json().catch(() => undefined));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid" }, { status: 400 });
+  }
+  const body = parsed.data;
   const payload = postPayload(body);
   return run(
     id,
@@ -116,11 +120,18 @@ export async function postRoute(
 }
 
 export async function POST(request: Request, context: { params: Promise<{ id: string }> }) {
+  const { id } = await context.params;
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
+  }
   return postRoute(request, context);
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
+  }
   const mode = new URL(request.url).searchParams.get("mode");
   return run(id, mode === "delete" ? "delete" : "unbind");
 }

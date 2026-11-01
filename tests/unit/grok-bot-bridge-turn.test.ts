@@ -1,15 +1,27 @@
-import { describe, it, beforeEach } from "node:test";
+import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 
-const { startBridgeTurn, BRIDGE_TOOL_NAME } =
+const { startBridgeTurn: startUntrackedBridgeTurn, BRIDGE_TOOL_NAME } =
   await import("../../open-sse/executors/grok-bot-bridge.ts");
 const { GrokBotBridgeRegistry } = await import("../../open-sse/services/grokBotBridgeRegistry.ts");
 
 describe("grok bot bridge turn (registry-backed)", () => {
   let registry: InstanceType<typeof GrokBotBridgeRegistry>;
+  let turns: Awaited<ReturnType<typeof startUntrackedBridgeTurn>>[];
+  async function startBridgeTurn(...args: Parameters<typeof startUntrackedBridgeTurn>) {
+    const turn = await startUntrackedBridgeTurn(...args);
+    turns.push(turn);
+    return turn;
+  }
 
   beforeEach(() => {
     registry = new GrokBotBridgeRegistry();
+    turns = [];
+  });
+
+  afterEach(() => {
+    for (const turn of turns) turn.close("cancel");
+    registry.reset();
   });
 
   async function postToolCall(port: number, nonce: string, challenge: string) {
@@ -230,6 +242,17 @@ describe("grok bot bridge turn (registry-backed)", () => {
     controller.abort();
     const found = registry.lookup(turn.nonce);
     assert.equal(found.kind, "closed-replay", "abort marks the nonce closing before any cleanup");
+  });
+
+  it("cancels a turn whose signal was aborted before listener startup", async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const turn = await startBridgeTurn({
+      publicBaseUrl: "https://bridge.example.com",
+      registry,
+      signal: controller.signal,
+    });
+    assert.equal(registry.lookup(turn.nonce).kind, "closed-replay");
   });
 
   it("registration refusal closes the server before the error returns", async () => {

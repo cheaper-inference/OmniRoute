@@ -2,6 +2,8 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { refreshGrokBotToken } from "../../open-sse/services/tokenRefresh/providers/grok-bot.ts";
 
+import { resolvePublicCred } from "../../open-sse/utils/publicCreds.ts";
+
 type FakeResponse = { status: number; body: unknown };
 
 function fakeFetch(responses: FakeResponse[]) {
@@ -93,7 +95,7 @@ describe("refreshGrokBotToken", () => {
     assert.equal(result.accessToken, "new-access");
     assert.equal(calls[0].url, "https://api2.cursor.sh/oauth/token");
     assert.deepEqual(calls[0].body, {
-      client_id: "KbZUR41cY7W6zRSdpSUJ7I7mLYBKOCmB",
+      client_id: resolvePublicCred("cursor_id"),
       grant_type: "refresh_token",
       refresh_token: "old-refresh",
     });
@@ -110,5 +112,50 @@ describe("refreshGrokBotToken", () => {
     });
     assert.equal(result.accessToken, "a");
     assert.equal(calls.length, 2);
+  });
+  for (const status of [429, 500, 502, 503, 504]) {
+    it(`preserves exhausted retry status ${status}`, async () => {
+      const { impl, calls } = fakeFetch([{ status, body: { error: "upstream_detail" } }]);
+      const result = await refreshGrokBotToken("r", undefined, null, {
+        fetchImpl: impl as unknown as typeof fetch,
+        retryBaseMs: 0,
+        attempts: 2,
+      });
+      assert.deepEqual(result, { error: "refresh_http_error", code: `http_${status}` });
+      assert.equal(calls.length, 2);
+    });
+  }
+  it("does not retry an unrecoverable HTTP error", async () => {
+    const { impl, calls } = fakeFetch([{ status: 401, body: { error: "invalid_grant" } }]);
+    assert.deepEqual(
+      await refreshGrokBotToken("r", undefined, null, {
+        fetchImpl: impl as unknown as typeof fetch,
+        retryBaseMs: 0,
+      }),
+      { error: "refresh_http_error", code: "invalid_grant" }
+    );
+    assert.equal(calls.length, 1);
+  });
+  it("retries malformed success responses before accepting a valid token", async () => {
+    const { impl, calls } = fakeFetch([
+      { status: 200, body: {} },
+      { status: 200, body: { access_token: "ok", refresh_token: "" } },
+    ]);
+    const result = await refreshGrokBotToken("old", undefined, null, {
+      fetchImpl: impl as unknown as typeof fetch,
+      retryBaseMs: 0,
+    });
+    assert.equal(result.accessToken, "ok");
+    assert.equal(result.refreshToken, "old");
+    assert.equal(calls.length, 2);
+  });
+  it("preserves the unknown result when the configured attempt budget is zero", async () => {
+    const result = await refreshGrokBotToken("r", undefined, null, {
+      attempts: 0,
+      fetchImpl: async () => {
+        throw new Error("must not fetch");
+      },
+    });
+    assert.deepEqual(result, { error: "refresh_unknown", code: "unknown" });
   });
 });

@@ -283,6 +283,25 @@ async function ensureAgent(
   return created;
 }
 
+async function editAgent(input: ManagerInput, current: AgentBinding): Promise<AgentBinding> {
+  switch (input.action) {
+    case "put-memory":
+      return putMemory(input, current);
+    case "add-skill":
+      return addSkill(input, current);
+    case "update-skill":
+      return updateSkill(input, current);
+    case "remove-skill":
+      return removeSkill(input, current);
+    case "set-routine":
+      return setRoutine(input, current);
+    case "remove-routine":
+      return removeRoutine(input, current);
+    default:
+      throw new Error("Unsupported Grok Bot agent edit");
+  }
+}
+
 export async function manageGrokBotAgent(input: ManagerInput): Promise<ManagerResult> {
   const data = { ...(input.connection.providerSpecificData ?? {}) };
   const current = savedAgent(data);
@@ -296,23 +315,13 @@ export async function manageGrokBotAgent(input: ManagerInput): Promise<ManagerRe
       if (current?.rowId) await input.rpc("DeleteGrokBotAgent", { id: current.rowId });
       await input.save(withoutAgent(data));
       return EMPTY_BINDING;
-    case "put-memory":
-      return putMemory(input, requireAgent(current));
-    case "add-skill":
-      return addSkill(input, requireAgent(current));
-    case "update-skill":
-      return updateSkill(input, requireAgent(current));
-    case "remove-skill":
-      return removeSkill(input, requireAgent(current));
-    case "set-routine":
-      return setRoutine(input, requireAgent(current));
-    case "remove-routine":
-      return removeRoutine(input, requireAgent(current));
     case "create":
       if (current) return current;
       return ensureAgent(input, data, current);
-    default:
+    case "recreate":
       return ensureAgent(input, data, current);
+    default:
+      return editAgent(input, requireAgent(current));
   }
 }
 

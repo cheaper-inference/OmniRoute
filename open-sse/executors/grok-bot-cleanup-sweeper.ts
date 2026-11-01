@@ -144,38 +144,8 @@ async function processItem(
   }
   const transport = options.transportFor(refreshed.accessToken);
 
-  let rowId = item.rowId;
-  if (!rowId) {
-    if (!item.agentId) {
-      dropItem(item, log, "neither roster row id nor agent id recorded");
-      return;
-    }
-    let roster: { agents?: { id?: string; agentId?: string }[] };
-    try {
-      roster = (await transport.rpc("ListGrokBotAgents", {})) as {
-        agents?: { id?: string; agentId?: string }[];
-      };
-    } catch {
-      return; // roster RPC failure is transient -- retry next sweep
-    }
-    const row = roster?.agents?.find((a) => a.agentId === item.agentId);
-    if (!row?.id) {
-      const record = absenceTracking.get(item.agentId) ?? { misses: 0, firstMissAt: now };
-      record.misses += 1;
-      absenceTracking.set(item.agentId, record);
-      const span = now - record.firstMissAt;
-      if (record.misses >= CLEANUP_ABSENT_MISS_THRESHOLD && span >= CLEANUP_ABSENT_SPAN_MS) {
-        dropItem(
-          item,
-          log,
-          `unresolved: agent absent from ${record.misses} consecutive roster lists over ${Math.round(span / 60000)}m (terminal)`
-        );
-      }
-      return;
-    }
-    absenceTracking.delete(item.agentId);
-    rowId = row.id;
-  }
+  const rowId = await resolveCleanupRowId(item, now, transport, log);
+  if (!rowId) return;
 
   try {
     await transport.rpc("DeleteGrokBotAgent", { id: rowId });
@@ -184,6 +154,45 @@ async function processItem(
   }
   removeFromQueue(item);
   if (item.agentId) absenceTracking.delete(item.agentId);
+}
+
+/** Resolve a roster id without treating a transient roster failure as deletion. */
+async function resolveCleanupRowId(
+  item: PendingCleanup,
+  now: number,
+  transport: SweeperTransport,
+  log: SweeperLog
+): Promise<string | undefined> {
+  if (item.rowId) return item.rowId;
+  if (!item.agentId) {
+    dropItem(item, log, "neither roster row id nor agent id recorded");
+    return;
+  }
+  let roster: { agents?: { id?: string; agentId?: string }[] };
+  try {
+    roster = (await transport.rpc("ListGrokBotAgents", {})) as {
+      agents?: { id?: string; agentId?: string }[];
+    };
+  } catch {
+    return; // roster RPC failure is transient -- retry next sweep
+  }
+  const row = roster?.agents?.find((a) => a.agentId === item.agentId);
+  if (!row?.id) {
+    const record = absenceTracking.get(item.agentId) ?? { misses: 0, firstMissAt: now };
+    record.misses += 1;
+    absenceTracking.set(item.agentId, record);
+    const span = now - record.firstMissAt;
+    if (record.misses >= CLEANUP_ABSENT_MISS_THRESHOLD && span >= CLEANUP_ABSENT_SPAN_MS) {
+      dropItem(
+        item,
+        log,
+        `unresolved: agent absent from ${record.misses} consecutive roster lists over ${Math.round(span / 60000)}m (terminal)`
+      );
+    }
+    return;
+  }
+  absenceTracking.delete(item.agentId);
+  return row.id;
 }
 
 export interface StartedCleanupSweeper {

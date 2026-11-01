@@ -47,24 +47,12 @@ export async function* readTranscriptStream(
     `/api/providers/${encodeURIComponent(account)}/grok-bot/transcript?${query}`,
     { signal }
   );
-  if (response.status === 409) {
-    // The grant is gone; retrying cannot help and six attempts of it look like
-    // a network fault to the user.
-    deps.onReauth?.();
-    throw new Error("transcript 409");
-  }
-  if (response.status === 429) {
-    // Another tab holds this connection's watch slots. That clears on its own,
-    // so it must not spend the snapshot's drop budget.
-    await sleep(ADMISSION_PAUSE_MS);
-    throw Object.assign(new Error("transcript 429"), { admission: true });
-  }
-  if (!response.ok || !response.body) throw new Error(`transcript ${response.status}`);
+  await validateResponse(response, sleep, deps.onReauth);
 
-  const reader = response.body.getReader();
+  const reader = response.body!.getReader();
   const decoder = new TextDecoder();
   let pending = "";
-  let event = "message";
+  const events = { kind: "message" };
   let bytes = 0;
   const started = now();
   for (;;) {
@@ -80,27 +68,51 @@ export async function* readTranscriptStream(
     pending += decoder.decode(value, { stream: true });
     const lines = pending.split("\n");
     pending = lines.pop() ?? "";
-    for (const line of lines) {
-      if (line.startsWith("event: ")) {
-        event = line.slice(7).trim();
-        continue;
-      }
-      if (!line.startsWith("data: ")) continue;
-      const kind = event;
-      event = "message";
-      if (kind === "error") {
-        // The route's failure notice carries an empty object; parsed as a frame
-        // it would reset the failure counters and the retry loop would never
-        // end.
-        throw new Error("transcript reported an error");
-      }
-      if (kind !== "message" && kind !== "connected" && kind !== "frame" && kind !== "terminal")
-        continue;
-      try {
-        yield JSON.parse(line.slice(6));
-      } catch {
-        /* skip a malformed line */
-      }
+    yield* parseEventLines(lines, events);
+  }
+}
+
+async function validateResponse(
+  response: Response,
+  sleep: (millis: number) => Promise<void>,
+  onReauth: StreamDeps["onReauth"]
+): Promise<void> {
+  if (response.status === 409) {
+    // The grant is gone; retrying cannot help and six attempts of it look like
+    // a network fault to the user.
+    onReauth?.();
+    throw new Error("transcript 409");
+  }
+  if (response.status === 429) {
+    // Another tab holds this connection's watch slots. That clears on its own,
+    // so it must not spend the snapshot's drop budget.
+    await sleep(ADMISSION_PAUSE_MS);
+    throw Object.assign(new Error("transcript 429"), { admission: true });
+  }
+  if (!response.ok || !response.body) throw new Error(`transcript ${response.status}`);
+}
+
+function* parseEventLines(lines: string[], events: { kind: string }): Generator<unknown> {
+  for (const line of lines) {
+    if (line.startsWith("event: ")) {
+      events.kind = line.slice(7).trim();
+      continue;
+    }
+    if (!line.startsWith("data: ")) continue;
+    const kind = events.kind;
+    events.kind = "message";
+    if (kind === "error") {
+      // The route's failure notice carries an empty object; parsed as a frame
+      // it would reset the failure counters and the retry loop would never
+      // end.
+      throw new Error("transcript reported an error");
+    }
+    if (kind !== "message" && kind !== "connected" && kind !== "frame" && kind !== "terminal")
+      continue;
+    try {
+      yield JSON.parse(line.slice(6));
+    } catch {
+      /* skip a malformed line */
     }
   }
 }

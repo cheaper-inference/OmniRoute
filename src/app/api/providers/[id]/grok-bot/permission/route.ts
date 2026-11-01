@@ -1,3 +1,5 @@
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
+import { grokBotPermissionSchema } from "@/shared/validation/grokBotSchemas";
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
@@ -17,22 +19,25 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!connection || connection.provider !== "grok-bot") {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
   }
+  const parsed = grokBotPermissionSchema.safeParse(await request.json().catch(() => undefined));
+  if (!parsed.success) {
+    return NextResponse.json({ error: "invalid" }, { status: 400 });
+  }
+  const incoming = parsed.data;
+
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
+  }
   const token = await grokBotToken(connection);
   if ("error" in token) {
     return NextResponse.json({ error: "reauth_required" }, { status: 409 });
   }
 
-  let incoming: Record<string, unknown> = {};
-  try {
-    incoming = (await request.json()) as Record<string, unknown>;
-  } catch {
-    return NextResponse.json({ error: "invalid" }, { status: 400 });
-  }
   const payload = permissionAnswer({
-    agentId: typeof incoming.agentId === "string" ? incoming.agentId : "",
-    entryId: typeof incoming.entryId === "string" ? incoming.entryId : "",
-    requestId: typeof incoming.requestId === "string" ? incoming.requestId : "",
-    resolution: typeof incoming.resolution === "string" ? incoming.resolution : "",
+    agentId: incoming.agentId,
+    entryId: incoming.entryId,
+    requestId: incoming.requestId,
+    resolution: incoming.resolution,
   });
   if (!payload) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });

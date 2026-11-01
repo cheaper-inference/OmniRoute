@@ -64,10 +64,15 @@ describe("Sidebar search/filter (#4013)", () => {
     // First import in this file pays the one-time cost of compiling Sidebar's
     // large transitive dependency graph (sidebarVisibility sections, icons, etc).
     const { default: Sidebar } = await import("@/shared/components/Sidebar");
+    const { SidebarProvider } = await import("@omniroute/ui-kit/sidebar");
     const container = makeContainer();
     root = createRoot(container);
     await act(async () => {
-      root!.render(<Sidebar />);
+      root!.render(
+        <SidebarProvider>
+          <Sidebar />
+        </SidebarProvider>
+      );
     });
 
     const input = container.querySelector('input[type="search"]');
@@ -76,10 +81,15 @@ describe("Sidebar search/filter (#4013)", () => {
 
   it("filters visible nav items down to those matching the typed query", async () => {
     const { default: Sidebar } = await import("@/shared/components/Sidebar");
+    const { SidebarProvider } = await import("@omniroute/ui-kit/sidebar");
     const container = makeContainer();
     root = createRoot(container);
     await act(async () => {
-      root!.render(<Sidebar />);
+      root!.render(
+        <SidebarProvider>
+          <Sidebar />
+        </SidebarProvider>
+      );
     });
 
     const linksBefore = container.querySelectorAll("nav a");

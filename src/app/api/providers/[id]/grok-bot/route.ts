@@ -1,3 +1,4 @@
+import { isConnectionUnavailableToAuxiliaryActivity } from "@/lib/exclusiveLeaseIsolation";
 import { NextResponse } from "next/server";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { getProviderConnectionById } from "@/lib/db/providers";
@@ -16,6 +17,9 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
   const connection = await getProviderConnectionById(id);
   if (!connection || connection.provider !== "grok-bot") {
     return NextResponse.json({ error: "not_found" }, { status: 404 });
+  }
+  if (await isConnectionUnavailableToAuxiliaryActivity(id)) {
+    return NextResponse.json({ error: "exclusive_lease_active" }, { status: 409 });
   }
   const token = await grokBotToken(connection);
   if ("error" in token) {

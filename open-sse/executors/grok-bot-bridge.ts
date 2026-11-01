@@ -1,4 +1,5 @@
 import { createServer, type Server } from "node:http";
+import { z } from "zod";
 import {
   LATEST_PROTOCOL_VERSION,
   SUPPORTED_PROTOCOL_VERSIONS,
@@ -14,6 +15,7 @@ import {
 } from "../services/grokBotBridgeRegistry";
 
 const BEARER_PREFIX = "Bearer ";
+const rpcEnvelopeSchema = z.object({}).passthrough();
 
 /**
  * Registry-backed Grok Bot tool bridge (frozen spec 2026-09-28, fable r20
@@ -51,7 +53,7 @@ type BridgeToolState = {
   used: boolean;
   calls: number;
   tools: AdvertisedTool[];
-  registry: GrokBotBridgeRegistry | null;
+  registry: GrokBotBridgeRegistry;
   // tools/call 进来时留下的名字和参数。响应仍回 ok，这里只是接住，
   // 还没有送回客户端。
   invocations: Array<{ name: string; arguments: unknown }>;
@@ -63,6 +65,89 @@ function jsonRpcResult(id: unknown, result: unknown): string {
 
 function jsonRpcError(id: unknown, code: number, message: string): string {
   return JSON.stringify({ jsonrpc: "2.0", id, error: { code, message } });
+}
+
+type BridgeRpcBody = {
+  jsonrpc?: string;
+  id?: unknown;
+  method?: string;
+  params?: { name?: string; protocolVersion?: string; arguments?: unknown };
+};
+
+function handleBridgeToolCall(
+  state: BridgeToolState,
+  body: BridgeRpcBody,
+  res: import("node:http").ServerResponse
+): void {
+  if (!state.tools.some((tool) => tool.name === body.params?.name)) {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(jsonRpcError(body.id, -32601, `unknown tool: ${String(body.params?.name)}`));
+    return;
+  }
+  state.calls += 1;
+  const args = body.params?.arguments ?? {};
+  const name = body.params?.name ?? "";
+  const already = state.invocations.some(
+    (call) => call.name === name && JSON.stringify(call.arguments) === JSON.stringify(args)
+  );
+  if (!already) {
+    state.invocations.push({ name, arguments: args });
+  }
+  const found = state.registry.lookup(state.nonce);
+  if (found.kind === "active") state.registry.holdUntilCap(found.entry);
+  res.writeHead(200, { "content-type": "application/json" });
+  res.end(
+    jsonRpcResult(body.id, {
+      content: [{ type: "text", text: "ok" }],
+    })
+  );
+}
+
+function dispatchBridgeRpc(
+  state: BridgeToolState,
+  body: BridgeRpcBody,
+  res: import("node:http").ServerResponse
+): void {
+  if (body.id === undefined) {
+    res.writeHead(202).end();
+    return;
+  }
+  if (body.method === "initialize") {
+    const requestedVersion = body.params?.protocolVersion;
+    const protocolVersion =
+      requestedVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
+        ? requestedVersion
+        : LATEST_PROTOCOL_VERSION;
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(
+      jsonRpcResult(body.id, {
+        protocolVersion,
+        capabilities: { tools: {} },
+        serverInfo: { name: "grok-bot-bridge", version: "1.0.0" },
+      })
+    );
+    return;
+  }
+  if (body.method === "ping") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(jsonRpcResult(body.id, {}));
+    return;
+  }
+  if (body.method === "tools/list") {
+    res.writeHead(200, { "content-type": "application/json" });
+    res.end(
+      jsonRpcResult(body.id, {
+        tools: state.tools,
+      })
+    );
+    return;
+  }
+  if (body.method === "tools/call") {
+    handleBridgeToolCall(state, body, res);
+    return;
+  }
+  res.writeHead(200, { "content-type": "application/json" });
+  res.end(jsonRpcError(body.id, -32601, `unknown method: ${String(body.method)}`));
 }
 
 function handleBridgeMcpRequest(
@@ -106,82 +191,17 @@ function handleBridgeMcpRequest(
   const chunks: Buffer[] = [];
   req.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
   req.on("end", () => {
-    let body: {
-      jsonrpc?: string;
-      id?: unknown;
-      method?: string;
-      params?: { name?: string; protocolVersion?: string; arguments?: unknown };
-    };
+    let body: BridgeRpcBody;
     try {
-      body = JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}") as typeof body;
+      body = rpcEnvelopeSchema.parse(
+        JSON.parse(Buffer.concat(chunks).toString("utf8") || "{}")
+      ) as BridgeRpcBody;
     } catch {
       res.writeHead(400, { "content-type": "application/json" });
       res.end(JSON.stringify({ error: "rejected" }));
       return;
     }
-    if (body.id === undefined) {
-      res.writeHead(202).end();
-      return;
-    }
-    if (body.method === "initialize") {
-      const requestedVersion = body.params?.protocolVersion;
-      const protocolVersion =
-        requestedVersion && SUPPORTED_PROTOCOL_VERSIONS.includes(requestedVersion)
-          ? requestedVersion
-          : LATEST_PROTOCOL_VERSION;
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(
-        jsonRpcResult(body.id, {
-          protocolVersion,
-          capabilities: { tools: {} },
-          serverInfo: { name: "grok-bot-bridge", version: "1.0.0" },
-        })
-      );
-      return;
-    }
-    if (body.method === "ping") {
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(jsonRpcResult(body.id, {}));
-      return;
-    }
-    if (body.method === "tools/list") {
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(
-        jsonRpcResult(body.id, {
-          tools: state.tools,
-        })
-      );
-      return;
-    }
-    if (body.method === "tools/call") {
-      if (!state.tools.some((tool) => tool.name === body.params?.name)) {
-        res.writeHead(200, { "content-type": "application/json" });
-        res.end(jsonRpcError(body.id, -32601, `unknown tool: ${String(body.params?.name)}`));
-        return;
-      }
-      state.calls += 1;
-      const args = body.params?.arguments ?? {};
-      const name = body.params?.name ?? "";
-      const already = state.invocations.some(
-        (call) => call.name === name && JSON.stringify(call.arguments) === JSON.stringify(args)
-      );
-      if (!already) {
-        state.invocations.push({ name, arguments: args });
-      }
-      if (state.registry) {
-        const found = state.registry.lookup(state.nonce);
-        if (found.kind === "active") state.registry.holdUntilCap(found.entry);
-      }
-      res.writeHead(200, { "content-type": "application/json" });
-      res.end(
-        jsonRpcResult(body.id, {
-          content: [{ type: "text", text: "ok" }],
-        })
-      );
-      return;
-    }
-    res.writeHead(200, { "content-type": "application/json" });
-    res.end(jsonRpcError(body.id, -32601, `unknown method: ${String(body.method)}`));
+    dispatchBridgeRpc(state, body, res);
   });
 }
 
@@ -220,30 +240,7 @@ export type StartBridgeTurnOptions = {
   tools?: AdvertisedTool[];
 };
 
-export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<StartedBridgeTurn> {
-  const registry = options.registry ?? getGrokBotBridgeRegistry();
-  const drainBudgetMs = options.drainBudgetMs ?? BRIDGE_DRAIN_BUDGET_MS;
-
-  // Lifecycle step 1: nonce and challenge before any bind.
-  const nonce = generateBridgeNonce();
-  const challenge = generateBridgeChallenge();
-  // The registry default clock is Date.now-based; createdAt must share that
-  // timebase for the registration-time cap re-check to be exact.
-  const createdAt = Date.now();
-
-  // Lifecycle step 2: create the listener and retain a destroy handle before
-  // any await, so the cap path can reach it even while the bind promise is
-  // unsettled. A destroy that lands before the bind resolves is re-applied
-  // idempotently once the listen callback fires.
-  const state: BridgeToolState = {
-    challenge,
-    nonce,
-    used: false,
-    calls: 0,
-    invocations: [],
-    tools: advertisedTools(options.tools),
-    registry: options.registry ?? null,
-  };
+async function listenForBridgeRequests(state: BridgeToolState) {
   const server: Server = createServer((req, res) => handleBridgeMcpRequest(state, req, res));
   let destroyed = false;
   const destroyServer = () => {
@@ -272,7 +269,30 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
   }
   const address = server.address();
   const port = typeof address === "object" && address ? address.port : 0;
+  return { port, destroyServer };
+}
 
+export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<StartedBridgeTurn> {
+  const registry = options.registry ?? getGrokBotBridgeRegistry();
+  const drainBudgetMs = options.drainBudgetMs ?? BRIDGE_DRAIN_BUDGET_MS;
+
+  // Lifecycle step 1: nonce and challenge before any bind.
+  const nonce = generateBridgeNonce();
+  const challenge = generateBridgeChallenge();
+  // The registry default clock is Date.now-based; createdAt must share that
+  // timebase for the registration-time cap re-check to be exact.
+  const createdAt = Date.now();
+
+  // Lifecycle step 2: create the listener and retain a destroy handle before
+  // any await, so the cap path can reach it even while the bind promise is
+  // unsettled. A destroy that lands before the bind resolves is re-applied
+  // idempotently once the listen callback fires.
+  const state = createBridgeToolState(challenge, nonce, options, registry);
+  const { port, destroyServer } = await listenForBridgeRequests(state);
+
+  const cancelTurn = () => {
+    registry.close(nonce, "cancel");
+  };
   let drainTimer: ReturnType<typeof setTimeout> | null = null;
   const armDrain = (entry: import("../services/grokBotBridgeRegistry").BridgeTurnEntry) => {
     drainTimer = setTimeout(() => {
@@ -305,7 +325,10 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
         destroyServer();
         options.onForcedAbort?.();
       },
-      onLocallyClosed: (reason) => options.onLocallyClosed?.(reason),
+      onLocallyClosed: (reason) => {
+        options.signal?.removeEventListener("abort", cancelTurn);
+        options.onLocallyClosed?.(reason);
+      },
     },
   });
   if ("reason" in registered) {
@@ -319,13 +342,8 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
   registeredEntry = registered.entry;
 
   if (options.signal) {
-    options.signal.addEventListener(
-      "abort",
-      () => {
-        registry.close(nonce, "cancel");
-      },
-      { once: true }
-    );
+    options.signal.addEventListener("abort", cancelTurn, { once: true });
+    if (options.signal.aborted) cancelTurn();
   }
 
   return {
@@ -343,5 +361,22 @@ export async function startBridgeTurn(options: StartBridgeTurnOptions): Promise<
     close(reason: BridgeCloseReason) {
       return registry.close(nonce, reason);
     },
+  };
+}
+
+function createBridgeToolState(
+  challenge: string,
+  nonce: string,
+  options: StartBridgeTurnOptions,
+  registry: GrokBotBridgeRegistry
+): BridgeToolState {
+  return {
+    challenge,
+    nonce,
+    used: false,
+    calls: 0,
+    invocations: [],
+    tools: advertisedTools(options.tools),
+    registry,
   };
 }

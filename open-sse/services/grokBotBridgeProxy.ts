@@ -166,8 +166,17 @@ export interface GrokBridgeRequestInput {
 }
 
 export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Promise<Response> {
-  const { request, upstreamPath, nonce, registry } = input;
+  const admitted = reserveBridgeRequest(input);
+  if (admitted instanceof Response) return admitted;
   const timeoutMs = input.timeoutMs ?? BRIDGE_PROXY_TIMEOUT_MS;
+  if (input.request.method === "GET") {
+    return openBridgeEventChannel(input.request, admitted, timeoutMs);
+  }
+  return forwardBridgePost(input.request, input.upstreamPath, admitted, timeoutMs);
+}
+
+function reserveBridgeRequest(input: GrokBridgeRequestInput): BridgeTurnEntry | Response {
+  const { request, nonce, registry } = input;
   if (request.method !== "GET" && request.method !== "POST") {
     return handleGrokBridgeMethodNotAllowed();
   }
@@ -209,79 +218,141 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     );
   }
 
-  // GET is only the server-to-client channel. Answering it here returns the
-  // SSE headers before any upstream dial, so a client that gives up when the
-  // first byte is late still sees the stream open. The same timeoutMs budget
-  // the POST path uses still bounds it. The local bridge GET carries no
-  // request data; POST is the path that must reach it.
-  if (request.method === "GET") {
-    const headers = new Headers({
-      "content-type": "text/event-stream",
-      "cache-control": "no-cache, no-transform",
-    });
-    const encoder = new TextEncoder();
-    const controller = new AbortController();
-    entry.inflight.add(controller);
-    const deadline = setTimeout(() => controller.abort(), timeoutMs);
-    deadline.unref?.();
-    const release = (sink: ReadableStreamDefaultController<Uint8Array> | null) => {
-      clearTimeout(deadline);
-      entry.inflight.delete(controller);
-      if (sink) {
-        try {
-          sink.close();
-        } catch {
-          /* already closed */
-        }
-      }
-    };
-    let stream: ReadableStream<Uint8Array>;
-    try {
-      stream = new ReadableStream<Uint8Array>({
-        start(sink) {
-          // Cursor sends mcp-protocol-version 2025-11-25 but still speaks the
-          // 2024-11-05 HTTP+SSE transport: it reads the first frame and, unless
-          // that frame is an `endpoint` event naming the POST path, closes the
-          // stream and never POSTs. A packet capture on the live bridge showed
-          // the 200 and the comment frame delivered, then a FIN one round trip
-          // later. The data is a path so the client resolves it against the
-          // connection origin, and it is built from the turn nonce so it does
-          // not depend on the request URL.
-          sink.enqueue(
-            encoder.encode(`event: endpoint\ndata: /grok-bridge/${entry.nonce}/mcp\n\n`)
-          );
-          sink.enqueue(encoder.encode(": connected\n\n"));
-          const timer = setInterval(() => {
-            if (controller.signal.aborted) return;
-            try {
-              sink.enqueue(encoder.encode(": keepalive\n\n"));
-            } catch {
-              clearInterval(timer);
-            }
-          }, 5000);
-          timer.unref?.();
-          controller.signal.addEventListener(
-            "abort",
-            () => {
-              clearInterval(timer);
-              release(sink);
-            },
-            { once: true }
-          );
-          request.signal.addEventListener("abort", () => controller.abort(), { once: true });
-        },
-        cancel() {
-          controller.abort();
-        },
-      });
-    } catch (err) {
-      clearTimeout(deadline);
-      entry.inflight.delete(controller);
-      throw err;
-    }
-    return new Response(stream, { status: 200, headers });
-  }
+  return entry;
+}
 
+// GET is only the server-to-client channel. Answering it here returns the
+// SSE headers before any upstream dial, so a client that gives up when the
+// first byte is late still sees the stream open. The same timeoutMs budget
+// the POST path uses still bounds it. The local bridge GET carries no
+// request data; POST is the path that must reach it.
+function openBridgeEventChannel(
+  request: Request,
+  entry: BridgeTurnEntry,
+  timeoutMs: number
+): Response {
+  const headers = new Headers({
+    "content-type": "text/event-stream",
+    "cache-control": "no-cache, no-transform",
+  });
+  const encoder = new TextEncoder();
+  const controller = new AbortController();
+  const onClientAbort = () => controller.abort(request.signal.reason);
+  entry.inflight.add(controller);
+  const deadline = setTimeout(() => controller.abort(), timeoutMs);
+  deadline.unref?.();
+  const release = (sink: ReadableStreamDefaultController<Uint8Array> | null) => {
+    clearTimeout(deadline);
+    entry.inflight.delete(controller);
+    request.signal.removeEventListener("abort", onClientAbort);
+    if (sink) {
+      try {
+        sink.close();
+      } catch {
+        /* already closed */
+      }
+    }
+  };
+  let stream: ReadableStream<Uint8Array>;
+  try {
+    stream = new ReadableStream<Uint8Array>({
+      start(sink) {
+        // Cursor sends mcp-protocol-version 2025-11-25 but still speaks the
+        // 2024-11-05 HTTP+SSE transport: it reads the first frame and, unless
+        // that frame is an `endpoint` event naming the POST path, closes the
+        // stream and never POSTs. A packet capture on the live bridge showed
+        // the 200 and the comment frame delivered, then a FIN one round trip
+        // later. The data is a path so the client resolves it against the
+        // connection origin, and it is built from the turn nonce so it does
+        // not depend on the request URL.
+        sink.enqueue(encoder.encode(`event: endpoint\ndata: /grok-bridge/${entry.nonce}/mcp\n\n`));
+        sink.enqueue(encoder.encode(": connected\n\n"));
+        const timer = setInterval(() => {
+          if (controller.signal.aborted) return;
+          try {
+            sink.enqueue(encoder.encode(": keepalive\n\n"));
+          } catch {
+            clearInterval(timer);
+          }
+        }, 5000);
+        timer.unref?.();
+        controller.signal.addEventListener(
+          "abort",
+          () => {
+            clearInterval(timer);
+            release(sink);
+          },
+          { once: true }
+        );
+        request.signal.addEventListener("abort", onClientAbort, { once: true });
+        if (request.signal.aborted) onClientAbort();
+      },
+      cancel() {
+        controller.abort();
+      },
+    });
+  } catch (err) {
+    clearTimeout(deadline);
+    entry.inflight.delete(controller);
+    throw err;
+  }
+  return new Response(stream, { status: 200, headers });
+}
+
+function upstreamRequestHeaders(request: Request): Headers {
+  // Allow only the authentication and MCP negotiation headers.
+  const headers = new Headers();
+  for (const name of ["authorization", "content-type", "accept", "mcp-protocol-version"]) {
+    const value = request.headers.get(name);
+    if (value !== null) headers.set(name, value);
+  }
+  if (request.method === "POST" && !headers.has("content-type")) {
+    headers.set("content-type", "application/json");
+  }
+  return headers;
+}
+
+async function forwardBridgeResponse(
+  upstream: Response,
+  deadline: number,
+  controller: AbortController,
+  cleanup: () => void
+): Promise<{ response: Response; streaming: boolean }> {
+  const responseHeaders = new Headers();
+  const contentType = upstream.headers.get("content-type");
+  if (contentType) responseHeaders.set("content-type", contentType);
+  if (upstream.body && contentType?.split(";")[0].trim() === "text/event-stream") {
+    responseHeaders.set("cache-control", "no-cache, no-transform");
+    const stream = relayEventStream(upstream.body, controller, cleanup);
+    const response = new Response(stream, { status: upstream.status, headers: responseHeaders });
+    return { response, streaming: true };
+  }
+  try {
+    const buffered = await readResponseCapped(upstream, deadline);
+    const responseBody = [204, 205, 304].includes(upstream.status)
+      ? null
+      : new Uint8Array(buffered);
+    return {
+      response: new Response(responseBody, { status: upstream.status, headers: responseHeaders }),
+      streaming: false,
+    };
+  } catch (error) {
+    return {
+      response:
+        error instanceof BridgeBodyTooLargeError
+          ? jsonError(502, "bad_gateway")
+          : jsonError(504, "gateway_timeout"),
+      streaming: false,
+    };
+  }
+}
+
+async function forwardBridgePost(
+  request: Request,
+  upstreamPath: string,
+  entry: BridgeTurnEntry,
+  timeoutMs: number
+): Promise<Response> {
   // Step 6: one monotonic budget covers the upload, response and live stream.
   const deadline = nowMs() + timeoutMs;
   const controller = new AbortController();
@@ -312,15 +383,7 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
     if (controller.signal.aborted || deadline <= nowMs()) {
       return jsonError(504, "gateway_timeout");
     }
-    // Allow only the authentication and MCP negotiation headers.
-    const headers = new Headers();
-    for (const name of ["authorization", "content-type", "accept", "mcp-protocol-version"]) {
-      const value = request.headers.get(name);
-      if (value !== null) headers.set(name, value);
-    }
-    if (request.method === "POST" && !headers.has("content-type")) {
-      headers.set("content-type", "application/json");
-    }
+    const headers = upstreamRequestHeaders(request);
     let upstream: Response;
     try {
       upstream = await fetch(`http://127.0.0.1:${entry.port}${upstreamPath}`, {
@@ -334,27 +397,9 @@ export async function handleGrokBridgeRequest(input: GrokBridgeRequestInput): Pr
         ? jsonError(504, "gateway_timeout")
         : jsonError(502, "bad_gateway");
     }
-    const responseHeaders = new Headers();
-    const contentType = upstream.headers.get("content-type");
-    if (contentType) responseHeaders.set("content-type", contentType);
-    if (upstream.body && contentType?.split(";")[0].trim() === "text/event-stream") {
-      responseHeaders.set("cache-control", "no-cache, no-transform");
-      const stream = relayEventStream(upstream.body, controller, cleanup);
-      const response = new Response(stream, { status: upstream.status, headers: responseHeaders });
-      streaming = true;
-      return response;
-    }
-    try {
-      const buffered = await readResponseCapped(upstream, deadline);
-      const responseBody = [204, 205, 304].includes(upstream.status)
-        ? null
-        : new Uint8Array(buffered);
-      return new Response(responseBody, { status: upstream.status, headers: responseHeaders });
-    } catch (error) {
-      return error instanceof BridgeBodyTooLargeError
-        ? jsonError(502, "bad_gateway")
-        : jsonError(504, "gateway_timeout");
-    }
+    const result = await forwardBridgeResponse(upstream, deadline, controller, cleanup);
+    streaming = result.streaming;
+    return result.response;
   } finally {
     if (!streaming) {
       cleanup();

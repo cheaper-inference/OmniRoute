@@ -33,6 +33,34 @@ async function syncToCloudIfEnabled(machineId: string) {
   }
 }
 
+async function completeLogin(
+  sessionId: string,
+  result: { accessToken: string; refreshToken: string }
+) {
+  const creds = credentialsFromCursorTokens(result.accessToken, result.refreshToken);
+  const accountEmail = await fetchGrokBotAccountEmail(result.accessToken);
+  const machineId = await getConsistentMachineId();
+  const connection = await persistGrokBotConnection({
+    ...creds,
+    email: accountEmail ?? creds.email,
+    machineId,
+  });
+
+  consumeCursorLoginSession(sessionId);
+
+  await syncToCloudIfEnabled(machineId);
+
+  return NextResponse.json({
+    status: "ok",
+    success: true,
+    connection: {
+      id: (connection as { id?: string })?.id,
+      provider: "grok-bot",
+      email: (connection as { email?: string })?.email ?? creds.email ?? null,
+    },
+  });
+}
+
 /**
  * POST /api/oauth/grok-bot/login/poll
  * One poll against the Cursor auth endpoint. The dashboard repeats until
@@ -83,28 +111,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const creds = credentialsFromCursorTokens(result.accessToken, result.refreshToken);
-    const accountEmail = await fetchGrokBotAccountEmail(result.accessToken);
-    const machineId = await getConsistentMachineId();
-    const connection = await persistGrokBotConnection({
-      ...creds,
-      email: accountEmail ?? creds.email,
-      machineId,
-    });
-
-    consumeCursorLoginSession(sessionId);
-
-    await syncToCloudIfEnabled(machineId);
-
-    return NextResponse.json({
-      status: "ok",
-      success: true,
-      connection: {
-        id: (connection as { id?: string })?.id,
-        provider: "grok-bot",
-        email: (connection as { email?: string })?.email ?? creds.email ?? null,
-      },
-    });
+    return await completeLogin(sessionId, result);
   } catch (error) {
     const message = sanitizeErrorMessage(error) || "Failed to poll Grok Bot login";
     return NextResponse.json({ error: message }, { status: 500 });

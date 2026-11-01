@@ -84,23 +84,31 @@ export function reduce(state: SessionState, event: SessionEvent): SessionState {
 
   if (event.type === "fault") return { phase: "lost", reason: "fault" };
 
-  if (state.phase === "opening") {
-    if (event.type === "cutover") return liveStart();
-    // A frame is progress: rows are arriving, so the snapshot is starting, not
-    // failing. Counting those closes as drops declared a conversation that was
-    // visibly filling in "could not be started".
-    if (event.type === "frame") return { ...state, drops: 0, holds: 0 };
-    if (event.type === "hold") {
-      // The server refused to admit a watch (another tab holds the slots). That
-      // is not a drop, so it must not spend the snapshot budget, but it still
-      // has to be bounded or the page waits on a refusal forever.
-      const holds = state.holds + 1;
-      return holds >= HOLD_LIMIT ? { phase: "stalled" } : { ...state, holds };
-    }
-    const drops = state.drops + 1;
-    return drops >= SNAPSHOT_DROPS ? { phase: "stalled" } : { ...state, drops };
-  }
+  return state.phase === "opening" ? reduceOpening(state, event) : reduceLive(state, event);
+}
 
+type ActiveEvent = Exclude<SessionEvent, { type: "select" } | { type: "fault" }>;
+type OpeningState = Extract<SessionState, { phase: "opening" }>;
+type LiveState = Extract<SessionState, { phase: "streaming" }>;
+
+function reduceOpening(state: OpeningState, event: ActiveEvent): SessionState {
+  if (event.type === "cutover") return liveStart();
+  // A frame is progress: rows are arriving, so the snapshot is starting, not
+  // failing. Counting those closes as drops declared a conversation that was
+  // visibly filling in "could not be started".
+  if (event.type === "frame") return { ...state, drops: 0, holds: 0 };
+  if (event.type === "hold") {
+    // The server refused to admit a watch (another tab holds the slots). That
+    // is not a drop, so it must not spend the snapshot budget, but it still
+    // has to be bounded or the page waits on a refusal forever.
+    const holds = state.holds + 1;
+    return holds >= HOLD_LIMIT ? { phase: "stalled" } : { ...state, holds };
+  }
+  const drops = state.drops + 1;
+  return drops >= SNAPSHOT_DROPS ? { phase: "stalled" } : { ...state, drops };
+}
+
+function reduceLive(state: LiveState, event: ActiveEvent): SessionState {
   if (event.type === "cutover") return liveStart();
   if (event.type === "frame") {
     return state.fails === 0 && state.holds === 0 ? state : { ...state, fails: 0, holds: 0 };

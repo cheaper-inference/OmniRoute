@@ -40,6 +40,7 @@ function bootHarness({
   failDb = false,
   connectionProvider = "grok-bot",
   missingConnection = false,
+  leased = false,
 } = {}) {
   const events: string[] = [];
   const warnings: unknown[][] = [];
@@ -139,6 +140,9 @@ function bootHarness({
         ? null
         : { provider: connectionProvider, refreshToken: "fixture-refresh-secret" };
     },
+  });
+  add("@/lib/exclusiveLeaseIsolation", {
+    isConnectionUnavailableToAuxiliaryActivity: async () => leased,
   });
   add("@/lib/db/combos", { getCombos: () => [] });
   add("@/lib/combos/modelNameCollision", { scanCombosForModelCollisions: () => [] });
@@ -402,3 +406,25 @@ for (const scenario of ["missing", "non-grok"] as const) {
     assertNoSecrets(h);
   });
 }
+
+test("an active exclusive lease retains queued cleanup without token refresh or remote dispatch", async () => {
+  const h = bootHarness({ leased: true });
+  const { boot } = await reachDb(h);
+  h.releaseDb();
+  await boot;
+  const q = queuedSweeper();
+  let remoteCalls = 0;
+  await q.sweeper.sweepGrokBotCleanupsOnce({
+    ...h.options(),
+    transportFor: () => {
+      remoteCalls++;
+      return { rpc: async () => undefined };
+    },
+  });
+  assert.equal(q.removed(), false);
+  assert.equal(h.events.includes("resolved"), false);
+  assert.equal(h.events.includes("refreshed"), false);
+  assert.equal(h.events.includes("persisted"), false);
+  assert.equal(remoteCalls, 0);
+  assertNoSecrets(h);
+});

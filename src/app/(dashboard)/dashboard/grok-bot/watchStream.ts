@@ -46,7 +46,7 @@ async function pump(input: {
   const encoder = new TextEncoder();
   const iterator = input.frames[Symbol.asyncIterator]();
   try {
-    for (;;) {
+    while (!input.upstream.signal.aborted) {
       const pressure = input.pressure();
       if (pressure === "abort") {
         input.upstream.abort();
@@ -58,11 +58,18 @@ async function pump(input: {
         continue;
       }
       const step = await iterator.next();
-      if (step.done) return;
+      if (step.done || input.upstream.signal.aborted) return;
       input.controller.enqueue(encoder.encode(`data: ${JSON.stringify(step.value)}\n\n`));
     }
   } catch {
-    input.controller.enqueue(encoder.encode(transcriptErrorFrame()));
+    if (!input.upstream.signal.aborted)
+      input.controller.enqueue(encoder.encode(transcriptErrorFrame()));
+  } finally {
+    try {
+      await iterator.return?.();
+    } catch {
+      /* abort/transport failure already handled */
+    }
   }
 }
 
@@ -76,47 +83,63 @@ export function watchStream(input: {
   pressure?: () => Backpressure;
 }): ReadableStream<Uint8Array> {
   const readFrames = input.frames ?? grokBotReadStream;
+  const upstream = new AbortController();
+  let released = false;
+  const finish = () => {
+    if (released) return;
+    released = true;
+    upstream.abort();
+    input.signal.removeEventListener("abort", onAbort);
+    input.release();
+  };
+  const onAbort = () => finish();
   return new ReadableStream<Uint8Array>(
     {
       async start(controller) {
-        const upstream = new AbortController();
-        const onAbort = () => upstream.abort();
         input.signal.addEventListener("abort", onAbort);
-        const gate = queueGate(controller);
-        const frames = readFrames({
-          accessToken: input.accessToken,
-          method: "WatchGrokBotTranscripts",
-          payload: {
-            cursors: [
-              {
-                agentId: input.agentId,
-                sessionId: "",
-                generation: 0,
-                afterUpdatedSeq: input.after,
-              },
-            ],
-          },
-          signal: upstream.signal,
-        });
+        if (input.signal.aborted) {
+          finish();
+          controller.close();
+          return;
+        }
         try {
+          const frames = readFrames({
+            accessToken: input.accessToken,
+            method: "WatchGrokBotTranscripts",
+            payload: {
+              cursors: [
+                {
+                  agentId: input.agentId,
+                  sessionId: "",
+                  generation: 0,
+                  afterUpdatedSeq: input.after,
+                },
+              ],
+            },
+            signal: upstream.signal,
+          });
           await pump({
             frames,
             controller,
             upstream,
-            pressure: input.pressure ?? gate,
+            pressure: input.pressure ?? queueGate(controller),
           });
+        } catch {
+          // The frame factory can throw before pump starts; never leak its error.
+          if (!upstream.signal.aborted) {
+            controller.enqueue(new TextEncoder().encode(transcriptErrorFrame()));
+          }
         } finally {
-          input.signal.removeEventListener("abort", onAbort);
-          input.release();
+          finish();
           try {
             controller.close();
           } catch {
-            /* already errored */
+            /* cancelled or already errored */
           }
         }
       },
       cancel() {
-        input.release();
+        finish();
       },
     },
     { highWaterMark: 0 }

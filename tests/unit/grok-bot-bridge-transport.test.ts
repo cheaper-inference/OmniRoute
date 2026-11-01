@@ -4,7 +4,11 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { LATEST_PROTOCOL_VERSION } from "@modelcontextprotocol/sdk/types.js";
 import { startBridgeTurn, BRIDGE_TOOL_NAME } from "../../open-sse/executors/grok-bot-bridge.ts";
-import { GrokBotBridgeRegistry } from "../../open-sse/services/grokBotBridgeRegistry.ts";
+import {
+  GrokBotBridgeRegistry,
+  getGrokBotBridgeRegistry,
+  bridgeAbsoluteCapMs,
+} from "../../open-sse/services/grokBotBridgeRegistry.ts";
 import { handleGrokBridgeRequest } from "../../open-sse/services/grokBotBridgeProxy.ts";
 import * as route from "../../src/app/grok-bridge/[nonce]/mcp/route.ts";
 
@@ -59,6 +63,73 @@ async function rpc(f: Awaited<ReturnType<typeof fixture>>, body: unknown) {
 }
 
 describe("Grok Bot MCP transport", () => {
+  it("rejects non-object MCP envelopes before dispatch", async () => {
+    const f = await fixture();
+    try {
+      for (const body of [null, [], "invalid", false, 1]) {
+        const response = await rpc(f, body);
+        assert.equal(response.status, 400);
+        assert.deepEqual(await response.json(), { error: "rejected" });
+      }
+    } finally {
+      f.turn.close("cancel");
+      f.registry.reset();
+    }
+  });
+
+  it("closes a GET channel when the client was already aborted", async () => {
+    const f = await fixture();
+    const abort = new AbortController();
+    abort.abort();
+    try {
+      const response = await proxyGet(f, abort.signal);
+      assert.equal(f.entry.inflight.size, 0);
+      const reader = response.body!.getReader();
+      while (!(await reader.read()).done) {
+        /* drain the initial endpoint frames */
+      }
+      reader.releaseLock();
+    } finally {
+      f.turn.close("cancel");
+      f.registry.reset();
+    }
+  });
+
+  it("keeps the default-registry turn alive to its absolute cap after a real tool call", async () => {
+    const registry = getGrokBotBridgeRegistry();
+    const turn = await startBridgeTurn({ publicBaseUrl: "https://bridge.example.test" });
+    try {
+      const found = registry.lookup(turn.nonce);
+      assert.equal(found.kind, "active");
+      if (found.kind !== "active") assert.fail("default turn must be registered");
+      const capAt = found.entry.createdAt + bridgeAbsoluteCapMs();
+      assert.ok(found.entry.expiryAt < capAt, "unused turn starts with an idle timeout");
+      const response = await fetch(
+        `http://127.0.0.1:${found.entry.port}/grok-bridge/${turn.nonce}/mcp`,
+        {
+          method: "POST",
+          headers: {
+            authorization: `Bearer ${turn.challenge}`,
+            "content-type": "application/json",
+          },
+          body: JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "tools/call",
+            params: { name: BRIDGE_TOOL_NAME },
+          }),
+          signal: AbortSignal.timeout(1500),
+        }
+      );
+      assert.equal(response.status, 200);
+      assert.deepEqual((await response.json()).result.content, [{ type: "text", text: "ok" }]);
+      assert.equal(found.entry.expiryAt, capAt);
+    } finally {
+      turn.close("cancel");
+      registry.reset();
+    }
+  });
+
   it("answers initialize, notification, ping and tools/list on a real loopback listener", async () => {
     const f = await fixture();
     try {

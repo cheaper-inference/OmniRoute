@@ -183,3 +183,137 @@ test("the abort listener is removed once the stream ends", async () => {
   assert.equal(added, 1);
   assert.equal(removed, 1, "a finished watch leaves no abort listener behind");
 });
+
+test("consumer cancellation aborts an active upstream and releases exactly once", async () => {
+  let upstream: AbortSignal | undefined;
+  let releases = 0;
+  const stream = watchStream({
+    accessToken: "synthetic",
+    agentId: "agent",
+    after: "0",
+    signal: new AbortController().signal,
+    release: () => {
+      releases++;
+    },
+    pressure: () => "read",
+    frames: (input) => {
+      upstream = input.signal;
+      return (async function* () {
+        await new Promise<void>((resolve) =>
+          input.signal?.addEventListener("abort", () => resolve(), { once: true })
+        );
+      })();
+    },
+  });
+  await stream.cancel();
+  await Promise.resolve();
+  assert.equal(upstream?.aborted, true);
+  assert.equal(releases, 1);
+});
+
+test("a pre-aborted request never opens an upstream stream and releases its slot", async () => {
+  const controller = new AbortController();
+  controller.abort();
+  let opened = 0;
+  let releases = 0;
+  const stream = watchStream({
+    accessToken: "synthetic",
+    agentId: "agent",
+    after: "0",
+    signal: controller.signal,
+    release: () => {
+      releases++;
+    },
+    frames: () => {
+      opened++;
+      return readerFrames([])();
+    },
+    pressure: () => "read",
+  });
+  await text(stream);
+  assert.equal(opened, 0);
+  assert.equal(releases, 1);
+});
+
+test("a synchronous upstream factory throw still releases and reports a safe error frame", async () => {
+  let releases = 0;
+  const stream = watchStream({
+    accessToken: "synthetic",
+    agentId: "agent",
+    after: "0",
+    signal: new AbortController().signal,
+    release: () => {
+      releases++;
+    },
+    frames: () => {
+      throw new Error("private upstream details");
+    },
+    pressure: () => "read",
+  });
+  const body = await text(stream);
+  assert.match(body, /event: error/);
+  assert.doesNotMatch(body, /private upstream details/);
+  assert.equal(releases, 1);
+});
+
+test("request abort stops upstream, releases once, and does not affect a different watch", async () => {
+  const request = new AbortController();
+  const watches = watchCounter();
+  const one = watchSlot(watches, "one")!;
+  const two = watchSlot(watches, "two")!;
+  let upstream: AbortSignal | undefined;
+  const stream = watchStream({
+    accessToken: "synthetic",
+    agentId: "agent",
+    after: "0",
+    signal: request.signal,
+    release: one,
+    pressure: () => "read",
+    frames: (input) => {
+      upstream = input.signal;
+      return (async function* () {
+        await new Promise<void>((resolve) =>
+          input.signal?.addEventListener("abort", () => resolve(), { once: true })
+        );
+      })();
+    },
+  });
+  request.abort();
+  await text(stream);
+  assert.equal(upstream?.aborted, true);
+  assert.equal(watches.size("one"), 0);
+  assert.equal(watches.size("two"), 1);
+  two();
+});
+
+test("cancel while paused closes the upstream iterator and frees only its own slot", async () => {
+  const watches = watchCounter();
+  const releaseOne = watchSlot(watches, "one")!;
+  const releaseTwo = watchSlot(watches, "two")!;
+  let closed = false;
+  let reads = 0;
+  const stream = watchStream({
+    accessToken: "synthetic",
+    agentId: "agent",
+    after: "0",
+    signal: new AbortController().signal,
+    release: releaseOne,
+    pressure: () => (++reads === 1 ? "read" : "pause"),
+    frames: async function* () {
+      try {
+        yield { seq: "1" };
+        yield { seq: "2" };
+      } finally {
+        closed = true;
+      }
+    },
+  });
+  const reader = stream.getReader();
+  await reader.read();
+  await reader.cancel();
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  assert.equal(closed, true);
+  assert.equal(watches.size("one"), 0);
+  assert.equal(watches.size("two"), 1);
+  releaseTwo();
+});

@@ -464,6 +464,22 @@ export class GrokBotBridgeRegistry {
         this.tombstones.delete(nonce);
       }
     }
+    this.promoteCappedClosures(now);
+    for (const [nonce, entry] of this.active) {
+      if (now >= entry.expiryAt) {
+        try {
+          this.close(nonce, "reaper-expiry");
+        } catch {
+          // A throwing hook must not kill the reaper timer callback (an
+          // uncaught timer exception takes down the process) or stall the
+          // reaper. The close claim itself is idempotent, so the entry is
+          // retried on the next sweep.
+        }
+      }
+    }
+  }
+
+  private promoteCappedClosures(now: number): void {
     for (const [nonce, entry] of this.activeClose) {
       if (now >= entry.createdAt + bridgeAbsoluteCapMs()) {
         this.activeClose.delete(nonce);
@@ -479,18 +495,6 @@ export class GrokBotBridgeRegistry {
           this.tombstones.set(nonce, entry);
         }
         // Tombstone list full: drop; replay at/after cap is `404` either way.
-      }
-    }
-    for (const [nonce, entry] of this.active) {
-      if (now >= entry.expiryAt) {
-        try {
-          this.close(nonce, "reaper-expiry");
-        } catch {
-          // A throwing hook must not kill the reaper timer callback (an
-          // uncaught timer exception takes down the process) or stall the
-          // reaper. The close claim itself is idempotent, so the entry is
-          // retried on the next sweep.
-        }
       }
     }
   }

@@ -14,7 +14,7 @@ export async function* readConnectFrames(
 ): AsyncGenerator<unknown> {
   const reader = stream.getReader();
   const decoder = new TextDecoder();
-  let pending = new Uint8Array(0);
+  let pending: Uint8Array = new Uint8Array(0);
   try {
     for (;;) {
       const { done, value } = await reader.read();
@@ -24,22 +24,12 @@ export async function* readConnectFrames(
       chunk.set(value, pending.length);
       pending = chunk;
       for (;;) {
-        if (pending.length < HEADER) break;
-        const length =
-          ((pending[1] << 24) | (pending[2] << 16) | (pending[3] << 8) | pending[4]) >>> 0;
-        if (pending.length < HEADER + length) break;
-        const flag = pending[0];
-        const frame = pending.subarray(HEADER, HEADER + length);
-        pending = pending.subarray(HEADER + length);
+        const complete = takeCompleteFrame(pending);
+        if (!complete) break;
+        const { flag, frame, remaining } = complete;
+        pending = remaining;
         if (flag & END_STREAM_FLAG) {
-          const trailer = JSON.parse(decoder.decode(frame)) as {
-            error?: { code?: string; message?: string };
-          } | null;
-          if (trailer?.error) {
-            throw new Error(
-              `connect stream error: ${trailer.error.code ?? ""} ${trailer.error.message ?? ""}`.trim()
-            );
-          }
+          throwTrailerError(decoder.decode(frame));
           return;
         }
         if (flag !== 0) continue;
@@ -49,4 +39,26 @@ export async function* readConnectFrames(
   } finally {
     reader.cancel().catch(() => {});
   }
+}
+
+/** Connect trailers carry stream-level failures even after successful HTTP headers. */
+function throwTrailerError(json: string): void {
+  const trailer = JSON.parse(json) as { error?: { code?: string; message?: string } } | null;
+  if (trailer?.error) {
+    throw new Error(
+      `connect stream error: ${trailer.error.code ?? ""} ${trailer.error.message ?? ""}`.trim()
+    );
+  }
+}
+
+/** Keep partial headers and payloads buffered until a whole frame is available. */
+function takeCompleteFrame(pending: Uint8Array) {
+  if (pending.length < HEADER) return null;
+  const length = ((pending[1] << 24) | (pending[2] << 16) | (pending[3] << 8) | pending[4]) >>> 0;
+  if (pending.length < HEADER + length) return null;
+  return {
+    flag: pending[0],
+    frame: pending.subarray(HEADER, HEADER + length),
+    remaining: pending.subarray(HEADER + length),
+  };
 }

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Button } from "@/shared/components";
+import { useEffect, useRef, useState } from "react";
+import { Button, Input } from "@/shared/components";
 
 type AgentBinding = {
   agentId: string | null;
@@ -13,7 +13,20 @@ type AgentBinding = {
   routines?: Array<{ id?: string | null }>;
 };
 
-export default function GrokBotAgentPanel({ connectionId }: { connectionId: string }) {
+/** Requests belong to one keyed connection editor, including Strict Mode remounts. */
+function useRequestOwnership() {
+  const lifetimeRef = useRef<AbortController | null>(null);
+  const requestVersionRef = useRef(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    lifetimeRef.current = controller;
+    return () => controller.abort();
+  }, []);
+  return { lifetimeRef, requestVersionRef };
+}
+
+function useAgentEditor({ connectionId }: { connectionId: string }) {
+  const ownership = useRequestOwnership();
   const [agent, setAgent] = useState<AgentBinding>({ agentId: null, rowId: null });
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -27,20 +40,62 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
   const [requestId, setRequestId] = useState(0);
   const endpoint = `/api/providers/${connectionId}/grok-bot-agent`;
 
-  function applyResponse(response: Response, body: AgentBinding & { error?: string }) {
-    if (!response.ok) {
-      setError(body.error ?? "Request failed");
-      return;
-    }
-    setError("");
-    setAgent(body);
-    setName(body.name ?? "");
-    setDescription(body.description ?? "");
-    setLoaded(true);
-  }
-
+  return {
+    ...ownership,
+    agent,
+    setAgent,
+    name,
+    setName,
+    description,
+    setDescription,
+    memoryText,
+    setMemoryText,
+    skillName,
+    setSkillName,
+    skillDescription,
+    setSkillDescription,
+    skillContent,
+    setSkillContent,
+    routineId,
+    setRoutineId,
+    loaded,
+    setLoaded,
+    error,
+    setError,
+    requestId,
+    setRequestId,
+    endpoint,
+  };
+}
+type Editor = ReturnType<typeof useAgentEditor>;
+function useAgentLoad(editor: Editor) {
+  const {
+    endpoint,
+    requestId,
+    requestVersionRef,
+    setError,
+    setAgent,
+    setName,
+    setDescription,
+    setLoaded,
+  } = editor;
   useEffect(() => {
     const controller = new AbortController();
+    const version = ++requestVersionRef.current;
+    const ownsRequest = () => !controller.signal.aborted && requestVersionRef.current === version;
+    function applyResponse(response: Response, body: AgentBinding & { error?: string }) {
+      if (!ownsRequest()) return;
+      if (!response.ok) {
+        setError(body.error ?? "Request failed");
+        return;
+      }
+      setError("");
+      setAgent(body);
+      setName(body.name ?? "");
+      setDescription(body.description ?? "");
+      setLoaded(true);
+    }
+
     const request = fetch(endpoint, { signal: controller.signal }).then(async (response) => ({
       response,
       body: (await response.json()) as AgentBinding & { error?: string },
@@ -48,28 +103,46 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
     void request.then(
       ({ response, body }) => applyResponse(response, body),
       () => {
-        if (!controller.signal.aborted) setError("Request failed");
+        if (ownsRequest()) setError("Request failed");
       }
     );
     return () => controller.abort();
-  }, [endpoint, requestId]);
-
-  async function send(
-    method: "POST" | "DELETE",
-    body?: {
-      action?: string;
-      profile?: { name: string; description: string } | string;
-      skill?: { name: string; description?: string; content?: string };
-      routine?: { id: string; enabled?: boolean };
-    },
-    mode?: string
-  ) {
+  }, [
+    endpoint,
+    requestId,
+    requestVersionRef,
+    setError,
+    setAgent,
+    setName,
+    setDescription,
+    setLoaded,
+  ]);
+}
+async function send(
+  editor: Editor,
+  method: "POST" | "DELETE",
+  body?: {
+    action?: string;
+    profile?: { name: string; description: string } | string;
+    skill?: { name: string; description?: string; content?: string };
+    routine?: { id: string; enabled?: boolean };
+  },
+  mode?: string
+) {
+  const { endpoint, lifetimeRef, requestVersionRef, setError, setAgent, setRequestId } = editor;
+  const signal = lifetimeRef.current?.signal;
+  if (!signal || signal.aborted) return;
+  const version = ++requestVersionRef.current;
+  const ownsRequest = () => !signal.aborted && requestVersionRef.current === version;
+  try {
     const response = await fetch(mode ? `${endpoint}?mode=${mode}` : endpoint, {
       method,
+      signal,
       headers: body ? { "content-type": "application/json" } : undefined,
       body: body ? JSON.stringify(body) : undefined,
     });
     const next = (await response.json()) as AgentBinding & { error?: string };
+    if (!ownsRequest()) return;
     if (!response.ok) {
       setError(next.error ?? "Request failed");
       return;
@@ -77,10 +150,15 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
     setError("");
     setAgent(next);
     setRequestId((value) => value + 1);
+  } catch {
+    if (ownsRequest()) setError("Request failed");
   }
+}
 
+function BindingSummary({ editor }: { editor: Editor }) {
+  const { agent } = editor;
   return (
-    <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border/40 pt-2">
+    <>
       <span className="text-xs text-text-muted">Agent: {agent.agentId ?? "none"}</span>
       <span className="text-xs text-text-muted">Row: {agent.rowId ?? "none"}</span>
       {(agent.memory ?? []).map((item, index) => (
@@ -98,13 +176,27 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
           Routine: {routine.id}
         </span>
       ))}
-      <input name="agentName" value={name} onChange={(event) => setName(event.target.value)} />
-      <input
+    </>
+  );
+}
+function MemoryEditor({ editor }: { editor: Editor }) {
+  const { name, setName, description, setDescription, memoryText, setMemoryText, loaded } = editor;
+  return (
+    <>
+      <Input
+        aria-label="Agent name"
+        name="agentName"
+        value={name}
+        onChange={(event) => setName(event.target.value)}
+      />
+      <Input
+        aria-label="Agent description"
         name="agentDescription"
         value={description}
         onChange={(event) => setDescription(event.target.value)}
       />
-      <input
+      <Input
+        aria-label="Memory"
         name="memoryText"
         value={memoryText}
         onChange={(event) => setMemoryText(event.target.value)}
@@ -114,21 +206,39 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         variant="ghost"
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
-        onClick={() => void send("POST", { action: "put-memory", profile: memoryText })}
+        onClick={() => void send(editor, "POST", { action: "put-memory", profile: memoryText })}
       >
         Save memory
       </Button>
-      <input
+    </>
+  );
+}
+function SkillEditor({ editor }: { editor: Editor }) {
+  const {
+    skillName,
+    setSkillName,
+    skillDescription,
+    setSkillDescription,
+    skillContent,
+    setSkillContent,
+    loaded,
+  } = editor;
+  return (
+    <>
+      <Input
+        aria-label="Skill name"
         name="skillName"
         value={skillName}
         onChange={(event) => setSkillName(event.target.value)}
       />
-      <input
+      <Input
+        aria-label="Skill description"
         name="skillDescription"
         value={skillDescription}
         onChange={(event) => setSkillDescription(event.target.value)}
       />
-      <input
+      <Input
+        aria-label="Skill content"
         name="skillContent"
         value={skillContent}
         onChange={(event) => setSkillContent(event.target.value)}
@@ -139,7 +249,7 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
         onClick={() =>
-          void send("POST", {
+          void send(editor, "POST", {
             action: "add-skill",
             skill: { name: skillName, description: skillDescription, content: skillContent },
           })
@@ -153,7 +263,7 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
         onClick={() =>
-          void send("POST", {
+          void send(editor, "POST", {
             action: "update-skill",
             skill: skillDescription
               ? { name: skillName, description: skillDescription, content: skillContent }
@@ -168,11 +278,21 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         variant="ghost"
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
-        onClick={() => void send("POST", { action: "remove-skill", skill: { name: skillName } })}
+        onClick={() =>
+          void send(editor, "POST", { action: "remove-skill", skill: { name: skillName } })
+        }
       >
         Remove skill
       </Button>
-      <input
+    </>
+  );
+}
+function RoutineEditor({ editor }: { editor: Editor }) {
+  const { routineId, setRoutineId, loaded } = editor;
+  return (
+    <>
+      <Input
+        aria-label="Routine ID"
         name="routineId"
         value={routineId}
         onChange={(event) => setRoutineId(event.target.value)}
@@ -183,7 +303,10 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
         onClick={() =>
-          void send("POST", { action: "set-routine", routine: { id: routineId, enabled: false } })
+          void send(editor, "POST", {
+            action: "set-routine",
+            routine: { id: routineId, enabled: false },
+          })
         }
       >
         Disable routine
@@ -193,17 +316,26 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         variant="ghost"
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
-        onClick={() => void send("POST", { action: "remove-routine", routine: { id: routineId } })}
+        onClick={() =>
+          void send(editor, "POST", { action: "remove-routine", routine: { id: routineId } })
+        }
       >
         Remove routine
       </Button>
-      {error ? <span className="text-xs text-red-500">{error}</span> : null}
+    </>
+  );
+}
+function AgentActions({ editor }: { editor: Editor }) {
+  const { name, description, loaded, error } = editor;
+  return (
+    <>
+      {error ? <span className="text-xs text-error">{error}</span> : null}
       <Button
         size="sm"
         variant="ghost"
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
-        onClick={() => void send("POST", { profile: { name, description } })}
+        onClick={() => void send(editor, "POST", { profile: { name, description } })}
       >
         Create
       </Button>
@@ -212,7 +344,9 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         variant="ghost"
         className="!h-7 !px-2 text-xs"
         disabled={!loaded}
-        onClick={() => void send("POST", { action: "recreate", profile: { name, description } })}
+        onClick={() =>
+          void send(editor, "POST", { action: "recreate", profile: { name, description } })
+        }
       >
         Recreate
       </Button>
@@ -220,18 +354,36 @@ export default function GrokBotAgentPanel({ connectionId }: { connectionId: stri
         size="sm"
         variant="ghost"
         className="!h-7 !px-2 text-xs"
-        onClick={() => void send("DELETE", undefined, "unbind")}
+        onClick={() => void send(editor, "DELETE", undefined, "unbind")}
       >
         Unbind
       </Button>
       <Button
         size="sm"
         variant="ghost"
-        className="!h-7 !px-2 text-xs text-red-500 hover:text-red-400"
-        onClick={() => void send("DELETE", undefined, "delete")}
+        className="!h-7 !px-2 text-xs text-error hover:text-error"
+        onClick={() => void send(editor, "DELETE", undefined, "delete")}
       >
         Delete remote
       </Button>
+    </>
+  );
+}
+function ConnectionAgentEditor({ connectionId }: { connectionId: string }) {
+  const editor = useAgentEditor({ connectionId });
+  useAgentLoad(editor);
+  return (
+    <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border/40 pt-2">
+      <BindingSummary editor={editor} />
+      <MemoryEditor editor={editor} />
+      <SkillEditor editor={editor} />
+      <RoutineEditor editor={editor} />
+      <AgentActions editor={editor} />
     </div>
   );
+}
+
+export default function GrokBotAgentPanel({ connectionId }: { connectionId: string }) {
+  // Changing connections discards every editor field before the new endpoint is usable.
+  return <ConnectionAgentEditor key={connectionId} connectionId={connectionId} />;
 }
