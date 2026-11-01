@@ -138,7 +138,7 @@ export function translateNonStreamingClientResponse(
   // ── Extract tool schemas for schema-aware translation ──────────────────────
   const finalBody = requestBody as Record<string, unknown> | null;
   let responseToolSchemas =
-    (clientResponseFormat === FORMATS.CLAUDE
+    (clientResponseFormat === FORMATS.CLAUDE || clientResponseFormat === FORMATS.OPENAI
       ? extractToolSchemaMap(input.clientRequestBody)
       : null) ?? extractToolSchemaMap(finalBody || responseBody);
   const restoresNativeResponses = responsePayloadFormat === FORMATS.OPENAI_RESPONSES;

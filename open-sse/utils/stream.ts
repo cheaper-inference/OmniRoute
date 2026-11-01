@@ -282,6 +282,27 @@ function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
 }
 
+function addRestoredResponsesToolSchemas(
+  schemas: Map<string, JsonRecord> | null,
+  aliases: ReadonlyMap<string, string> | null,
+  identities: ReadonlyMap<string, { namespace: string; name: string }> | null
+): Map<string, JsonRecord> | null {
+  if (!schemas) return null;
+
+  for (const [wireName, schema] of [...schemas]) {
+    const identity = identities?.get(wireName);
+    const alias = aliases?.get(wireName);
+    const restoredName =
+      identity && typeof identity.name === "string" && identity.name
+        ? identity.name
+        : typeof alias === "string" && alias
+          ? alias
+          : null;
+    if (restoredName && !schemas.has(restoredName)) schemas.set(restoredName, schema);
+  }
+  return schemas;
+}
+
 // #7936/#18600 — passthrough Responses call items are restored through the
 // shared shape-safe `restoreResponsesToolNames` helper (see the import above):
 // it resolves both the string alias ledger and the `{namespace, name}` identity
@@ -869,7 +890,14 @@ export function createSSEStream(options: StreamOptions = {}) {
           requestedThinking,
           accumulatedContent: "",
           accumulatedReasoning: "",
-          toolSchemas: extractToolSchemaMap(body),
+          // Responses events are restored to the client identity before response
+          // translation. Keep the same schema reachable under that restored name,
+          // while retaining the provider wire key for untouched event shapes.
+          toolSchemas: addRestoredResponsesToolSchemas(
+            extractToolSchemaMap(body),
+            targetFormat === FORMATS.OPENAI_RESPONSES ? responsesToolAliasMap : null,
+            targetFormat === FORMATS.OPENAI_RESPONSES ? requestToolIdentityMap : null
+          ),
           declaredToolNames: collectDeclaredToolNames(body),
           clientTools,
           customToolNames,
@@ -1897,14 +1925,16 @@ export function createSSEStream(options: StreamOptions = {}) {
                   // call items through the shared shape-safe helper. The done and
                   // completed branches above already restored their own copies;
                   // this covers `response.output_item.added` plus the
-                  // `response.incomplete`/`response.failed` terminal snapshots so
-                  // a truncated stream is restored too. The restoration mutates
+                  // `response.incomplete`/`response.failed`/`response.done`
+                  // terminal snapshots so a truncated or alternate terminal stream
+                  // is restored too. The restoration mutates
                   // `parsed`, so a real change must be re-serialized; otherwise
                   // the client still receives the alias.
                   if (
                     parsed.type === "response.output_item.added" ||
                     parsed.type === "response.incomplete" ||
-                    parsed.type === "response.failed"
+                    parsed.type === "response.failed" ||
+                    parsed.type === "response.done"
                   ) {
                     if (
                       restoreResponsesToolNames(
@@ -2795,7 +2825,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                 if (isClaudeEventPayload(bufferedPayload)) {
                   updateClaudeEmptyResponseLifecycle(claudeEmptyResponseLifecycle, bufferedPayload);
                 }
-                clientPayloadCollector.push(bufferedPayload);
+                let bufferedResponsesCollected = false;
                 // Normalize numeric IDs for final buffered data: chunk (same as transform path)
                 if (typeof bufferedPayload === "object" && !Array.isArray(bufferedPayload)) {
                   const flushedParsed = bufferedPayload as JsonRecord;
@@ -2817,6 +2847,11 @@ export function createSSEStream(options: StreamOptions = {}) {
                     if (idsNormalized || usageNormalized || identityRestored) {
                       output = `data: ${JSON.stringify(flushedParsed)}\n\n`;
                     }
+                    // The collector snapshots payloads immediately. Capture only
+                    // after identity restoration so completion/log summaries match
+                    // the bytes emitted for an unterminated Responses frame.
+                    clientPayloadCollector.push(flushedParsed);
+                    bufferedResponsesCollected = true;
                   } else if (!isClaude) {
                     const { changed: flushChanged, hasFinishReason } =
                       normalizeFinalOpenAIStreamChunk(flushedParsed, toolNameMap);
@@ -2829,6 +2864,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     }
                   }
                 }
+                if (!bufferedResponsesCollected) clientPayloadCollector.push(bufferedPayload);
               }
               if (!bufferedLine) output = passthroughEventPrefix.flush() || output;
               output = passthroughEventPrefix.prefixData(output, buffer);

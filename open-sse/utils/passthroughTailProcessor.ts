@@ -193,12 +193,13 @@ function handleResponsesTailPayload(
 
   // #18600 — restore provider tool-name aliases (and #7936 identities) on the
   // remaining tail event shapes: `output_item.added` and the
-  // `response.incomplete`/`response.failed` terminal snapshots. The done and
-  // completed branches above already restored their own copies.
+  // `response.incomplete`/`response.failed`/`response.done` terminal snapshots.
+  // The output-item done and completed branches above restored their own copies.
   if (
     parsed.type === "response.output_item.added" ||
     parsed.type === "response.incomplete" ||
-    parsed.type === "response.failed"
+    parsed.type === "response.failed" ||
+    parsed.type === "response.done"
   ) {
     responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
   }

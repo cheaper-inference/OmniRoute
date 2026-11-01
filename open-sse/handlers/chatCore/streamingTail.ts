@@ -30,6 +30,7 @@ import { ensureStreamReadiness } from "../../utils/streamReadiness.ts";
 import { resolveStreamReadinessTimeout } from "../../utils/streamReadinessPolicy.ts";
 import { maybeFallbackAfterReadiness } from "./streamReadinessFallback.ts";
 import { captureStreamReasoningForReplay } from "./streamReasoningCapture.ts";
+import { resolveStreamStateBody } from "./streamStateBody.ts";
 import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { resolveSuppressThinkClose } from "../../utils/thinkCloseMarker.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
@@ -686,10 +687,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     !isResponsesEndpoint &&
     !isDroidCLI;
   // Response arguments belong to the client's schema, before provider cloaking.
-  const streamStateBody =
-    clientResponseFormat === FORMATS.CLAUDE && Array.isArray(body?.tools)
-      ? { ...(finalBody || body), tools: body.tools }
-      : finalBody || body;
+  const streamStateBody = resolveStreamStateBody(clientResponseFormat, body, finalBody);
 
   // Client's explicit thinking intent (Anthropic Messages shape). Claude Code
   // sends `{type:"enabled"}` or `{type:"adaptive"}` to opt into relaying
