@@ -115,13 +115,11 @@
 4. Adaugă sau actualizează `tests/unit/ui/adapters/<name>.test.tsx`. Pentru un adaptor cu mulți apelanți, compară
    marcajul randat înainte și după modificare — schimbările de padding sau de wrapper se propagă pe fiecare ecran.
 
-## 5. Actualizarea kit-ului
+## 5. Actualizarea trusei
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` copiază `src/` din upstream la acel commit în
-`packages/ui-kit/src` și aplică singura transformare permisă (elimină sufixul `.js` din
-importurile relative). Apoi: revizuiește `git diff packages/ui-kit`, fă o trecere vizuală peste furnizori, setări, combinații,
-utilizare și endpoint-uri în ambele teme, rulează `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și
-deschide PR-ul cu changelog-ul din upstream.
+`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune. Fluxul de lucru săptămânal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) execută aceeași verificare și menține o problemă de urmărire deschisă în timp ce pinul este în urmă; repo-ul din amonte este privat, așa că fluxul de lucru are nevoie de un token numai pentru citire în secretul `UI_KIT_READ_TOKEN` și rămâne inert fără el.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copiază `src/` din amonte la acel commit (`latest` = cea mai nouă etichetă `v*` ) în `packages/ui-kit/src`, aplică transformarea unică permisă (elimină sufixul `.js` din importurile relative) și setează versiunea spațiului de lucru în `packages/ui-kit/package.json` și `package-lock.json` la cea din amonte. Apoi: revizuiți `git diff packages/ui-kit`, faceți o trecere vizuală asupra furnizorilor, setărilor, combo-urilor, utilizării și punctului final în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și deschideți PR cu jurnalul de modificări din amonte.
 
 ## 6. diagrame README
 

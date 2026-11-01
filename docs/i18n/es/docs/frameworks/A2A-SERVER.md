@@ -201,9 +201,9 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
 
 1. **Cree el archivo de la habilidad:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exporte una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la estructura de habilidades existentes como `smartRouting.ts`.
+   Exporte una función asíncrona `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Siga la estructura de las habilidades existentes, como `smartRouting.ts`.
 
-2. **Registre el controlador:** en `src/lib/a2a/taskExecution.ts`, añada una entrada a `A2A_SKILL_HANDLERS`:
+2. **Registre el manejador:** en `src/lib/a2a/taskExecution.ts`, añada una entrada a `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    };
    ```
 
-3. **Expóngala en la tarjeta del agente:** en `src/app/.well-known/agent.json/route.ts`, añádala al array `skills`:
+3. **Exponga la habilidad en la tarjeta del agente:** en `src/lib/a2a/agentCardMetadata.ts` (compartido por `/.well-known/agent.json` y `/.well-known/agent-card.json`), añádala al array `skills`:
 
    ```json
    {
@@ -227,7 +227,7 @@ El endpoint JSON-RPC `/a2a` es el punto de entrada canónico de A2A. Los siguien
    }
    ```
 
-4. **Escriba pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra el caso exitoso y el caso de error.
+4. **Escriba pruebas:** `tests/unit/a2a-<your-skill>.test.ts`. Cubra el flujo correcto y el flujo de error.
 
 5. **Documente** la nueva habilidad en la tabla `Available Skills` de este archivo.
 

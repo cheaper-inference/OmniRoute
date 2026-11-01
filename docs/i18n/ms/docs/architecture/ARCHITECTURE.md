@@ -360,165 +360,120 @@ Huraian mendalam: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ### A. Enjin Kombo Auto
 
-Kombo Auto secara dinamik memberikan skor dan memilih sasaran penghalaan semasa permintaan dibuat, dan bukannya
-bergantung pada takrif kombo statik. Ia menjadi asas kepada keluarga awalan model `auto/*`.
+Auto Combo menjaringkan dan memilih sasaran penghalaan secara dinamik pada masa permintaan, dan bukannya bergantung pada definisi kombo statik. Ia memberi kuasa kepada keluarga awalan model `auto/*`.
 
-- Titik masuk enjin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Penyelesai: `src/domain/comboResolver.ts` (pengesanan automatik awalan `auto/`)
+- Kemasukan enjin: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Penyelesai: `src/domain/comboResolver.ts` (pengesanan automatik awalan `auto/` )
 - Papan pemuka: `/dashboard/auto-combo`
-- Telemetri: jadual SQLite `auto_combo_decisions`
+- Telemetri: jadual `auto_combo_decisions` SQLite
 
 Keupayaan utama:
 
-- **20 strategi penghalaan** (keutamaan, berwajaran, isi dahulu, giliran bergilir, P2C, rawak,
-  paling kurang digunakan, dioptimumkan kos, peka tetapan semula, tetingkap tetapan semula, ruang lebihan, berwajaran kuota,
-  rawak ketat, **auto**, lkgp, dioptimumkan konteks, dioptimumkan cache, geganti konteks, **fusion**,
-  saluran paip) —
-  auto ialah penambahan utama dalam v3.8.0; `fusion` (pengagihan keluar panel + sintesis penilai,
-  `open-sse/services/fusion.ts`) ialah ciri baharu dalam v3.8.36.
-- **Pemarkahan 16 faktor**: kuota, kesihatan, kos songsang, kependaman songsang, kesesuaian tugas dan
-  sepuluh lagi. Jadual kanonik bagi faktor dan pemberat lalainya tersedia dalam
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — menyatakannya semula di sini akan
-  mewujudkan tempat kedua yang boleh menjadi lapuk.
-- **Kilang maya** mewujudkan kombo sementara apabila tiada kombo bernama yang sepadan,
-  dengan mendapatkan calon daripada sambungan penyedia aktif yang sihat.
-- **Awalan auto**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — setiap satu disokong oleh profil pemberat yang ditala.
-- **6 pek mod**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` dan `chaos-mode` — konfigurasi pemberat pratetap yang boleh dipanggil daripada
-  papan pemuka. (Jangan keliru dengan awalan `auto/*` di atas, yang merupakan
-  varian masa permintaan.)
+- **20 strategi laluan** (keutamaan, wajaran, isikan dahulu, round-robin, P2C, rawak, paling kurang digunakan, dioptimumkan kos, sedar semula, tetingkap set semula, ruang kepala, wajaran kuota, rawak ketat,** auto** , lkgp, dioptimumkan konteks, dioptimumkan cache, penyampai konteks,** gabungan** , saluran paip) — auto ialah tambahan tajuk dalam v3.8.0; `fusion` (sintesis hakim + kipas keluar panel, `open-sse/services/fusion.ts`) baharu dalam v3.8.36.
+- **Pemarkahan 16 faktor** : kuota, kesihatan, kos songsang, kependaman songsang, kesesuaian tugas dan sepuluh lagi. Jadual kanonik faktor dan pemberat lalainya tinggal dalam [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — yang menyatakannya semula di sini akan memberikannya tempat kedua untuk menjadi basi.
+- **Kilang maya** merealisasikan gabungan sementara apabila tiada kombo bernama padanan wujud, mendapatkan calon daripada sambungan penyedia aktif yang sihat.
+- **Awalan automatik** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — setiap satu disokong oleh profil berat yang ditala.
+- **6 pek mod** : konfigurasi berat pratetap `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` dan `chaos-mode` — boleh dipanggil dari papan pemuka. (Jangan dikelirukan dengan awalan `auto/*` di atas, yang merupakan varian masa permintaan.)
 
-Untuk butiran algoritma penuh (formula faktor, penalaan pemberat), lihat
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
+Untuk butiran algoritma penuh (formula faktor, penalaan berat), lihat [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md).
 
-### B. Ejen Awan
+### B. Agen Awan
 
-Ejen Awan membungkus platform ejen kod dihoskan pihak ketiga (Codex Cloud, Devin,
-Jules) di sebalik kitaran hayat tugas seragam yang disokong pangkalan data. Semua titik akhir penciptaan/pemeriksaan
-tugas memerlukan pengesahan pengurusan.
+Ejen Awan membungkus platform ejen kod yang dihoskan pihak ketiga (Codex Cloud, Devin, Jules) di belakang kitaran hayat tugasan yang disokong DB yang seragam. Semua titik akhir creation/inspection tugas memerlukan pengesahan pengurusan.
 
-- Akar modul: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, serta subdirektori setiap ejen di bawah `agents/`)
+- Akar modul: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, tambah subdirektori setiap ejen di bawah `agents/`)
 - Pelaksanaan setiap ejen: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Titik akhir awam: `/api/v1/agents/tasks/*` (senarai/cipta/dapatkan/batal)
+- Titik akhir awam: `/api/v1/agents/tasks/*` (list/create/get/cancel)
 - Titik akhir pengurusan: `/api/cloud/*` (peruntukan, status, kelompok)
 - Papan pemuka: `/dashboard/cloud-agents`
-- Storan: jadual `cloud_agent_tasks`
+- Penyimpanan: meja `cloud_agent_tasks`
 
-Untuk butiran peruntukan dan OAuth bagi setiap ejen, lihat
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
+Untuk peruntukan setiap ejen dan khusus OAuth, lihat [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md).
 
-### C. Pagar Keselamatan
+### C. Pengawal
 
-Modul pagar keselamatan ialah lapisan perisian tengah yang boleh dimuatkan semula secara langsung, yang memeriksa permintaan
-dan respons untuk PII, suntikan gesaan dan kandungan penglihatan yang tidak selamat. Pelanggaran
-menghentikan permintaan serta-merta dengan HTTP **503** berserta kod ralat berstruktur, yang membolehkan
-pemanggil hiliran mencuba semula atau mencabang.
+Modul guardrails ialah lapisan middleware boleh muat semula panas yang memeriksa permintaan dan respons untuk PII, suntikan segera dan kandungan penglihatan yang tidak selamat. Pelanggaran litar pintas permintaan dengan HTTP** 503** serta kod ralat berstruktur, membenarkan pemanggil hiliran mencuba semula atau bercabang.
 
-- Akar modul: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Muat semula langsung: pendaftar memantau perubahan konfigurasi dan membina semula rantaian setempat
-- Titik penyepaduan: kemasukan pengendali sembang, pengendali penjanaan imej, penyahjangkit respons
-- Kontrak HTTP: pelanggaran dipaparkan sebagai `503` dengan `error.code = "GUARDRAIL_VIOLATION"`
+- Akar modul: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Muat semula panas: pendaftaran memerhati perubahan konfigurasi dan membina semula rantaian di tempatnya
+- Mata wayar: kemasukan pengendali sembang, pengendali penjanaan imej, pembersih tindak balas
+- kontrak HTTP : pelanggaran muncul sebagai `503` dengan `error.code = "GUARDRAIL_VIOLATION"`
 
-Untuk pengarangan set peraturan dan penalaan ambang, lihat
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
+Untuk pengarangan set peraturan dan penalaan ambang, lihat [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md).
 
 ### D. Lapisan Domain
 
-Ruang nama `src/domain/` memusatkan keputusan dasar supaya pengendali laluan tidak
-perlu menyusun sendiri logik sekatan/bajet/sandaran.
+Ruang nama `src/domain/` memusatkan keputusan dasar supaya pengendali laluan tidak perlu memasang logik lockout/budget/fallback sendiri.
 
-- Enjin dasar: `src/domain/policyEngine.ts` — titik masuk tunggal untuk
-  penilaian prapelaksanaan (susunan sekatan → bajet → sandaran)
+- Enjin dasar: titik masuk tunggal `src/domain/policyEngine.ts` — untuk penilaian prapelaksanaan (pesanan sandaran → bajet → )
 - Peraturan kos: `src/domain/costRules.ts`
-- Dasar sandaran: `src/domain/fallbackPolicy.ts`
+- Dasar mundur: `src/domain/fallbackPolicy.ts`
 - Dasar sekatan: `src/domain/lockoutPolicy.ts`
-- Penghalaan berasaskan tag: `src/domain/tagRouter.ts`
-- Penyelesai kombo: `src/domain/comboResolver.ts` — menyelesaikan nama kombo, awalan auto/\*,
-  dan sasaran model kad bebas kepada pelan pelaksanaan konkrit
-- Penggabung peraturan sambungan/model: `src/domain/connectionModelRules.ts`
-- Syot kilat ketersediaan model: `src/domain/modelAvailability.ts`
-- Penjejakan tamat tempoh penyedia: `src/domain/providerExpiration.ts`
+- Penghalaan berasaskan teg: `src/domain/tagRouter.ts`
+- Penyelesai kombo: `src/domain/comboResolver.ts` — menyelesaikan nama kombo, awalan auto/\* dan sasaran model kad bebas kepada rancangan pelaksanaan konkrit
+- penyambung peraturan Connection/model : `src/domain/connectionModelRules.ts`
+- Gambar ketersediaan model: `src/domain/modelAvailability.ts`
+- Penjejakan tamat tempoh pembekal: `src/domain/providerExpiration.ts`
 - Cache kuota: `src/domain/quotaCache.ts`
 - Keadaan degradasi: `src/domain/degradation.ts`
 - Audit konfigurasi: `src/domain/configAudit.ts`
-- Pembina metadata respons OmniRoute: `src/domain/omnirouteResponseMeta.ts`
-- Subsistem penilaian: `src/domain/assessment/` — tugas penilaian berkala
+- pembina metadata tindak balas OmniRoute : `src/domain/omnirouteResponseMeta.ts`
+- Subsistem penilaian: kerja penilaian berkala `src/domain/assessment/` —
 
-### E. Saluran Paip Pengizinan
+### E. Saluran Paip Kebenaran
 
-Saluran paip pengizinan mengelaskan setiap permintaan masuk dan menggunakan
-rantaian dasar yang sesuai sebelum penghantaran.
+Saluran paip kebenaran mengklasifikasikan setiap permintaan yang masuk dan menggunakan rantaian dasar yang sesuai sebelum penghantaran.
 
-- Titik masuk saluran paip: `src/server/authz/pipeline.ts`
-- Pengelas permintaan: `src/server/authz/classify.ts` — membezakan laluan
-  keserasian awam daripada laluan pengurusan
+- Kemasukan saluran paip: `src/server/authz/pipeline.ts`
+- Pengelas permintaan: `src/server/authz/classify.ts` — membezakan laluan keserasian awam daripada laluan pengurusan
 - Inventori laluan awam: `src/shared/constants/publicApiRoutes.ts`
-- Dasar: `src/server/authz/policies/` — predikat yang boleh digubah
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth`, dll.)
+- Dasar: predikat boleh gubah `src/server/authz/policies/` — (`requireApiKey`, `requireManagement`, `requireFreshAuth`, dsb.)
 - Utiliti pengepala: `src/server/authz/headers.ts`
-- Pembantu penegasan: `src/server/authz/assertAuth.ts`
+- Penolong penegasan: `src/server/authz/assertAuth.ts`
 - Konteks permintaan: `src/server/authz/context.ts`
 
-Laluan awam berbanding laluan pengurusan ialah sempadan tegas: API ejen/tempoh bertenang dan
-mutasi penyedia memerlukan pengesahan pengurusan (HTTP 401 jika tiada).
+Laluan awam vs pengurusan ialah sempadan yang sukar: agent/cooldown APIs dan mutasi pembekal memerlukan pengesahan pengurusan (HTTP 401 jika tiada).
 
-Untuk peraturan pengelasan laluan yang lengkap, lihat
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
+Untuk peraturan pengelasan laluan penuh, lihat [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md).
 
-### F. FSM Aliran Kerja dan Penghala Peka Tugas
+### F. FSM Aliran Kerja dan Penghala Sedar Tugas
 
-Penghala berasaskan mesin keadaan terhingga yang dilapiskan di atas pemilihan kombo untuk mengarahkan
-trafik berdasarkan peringkat aliran kerja yang dikesan (perancangan, pelaksanaan,
-semakan) dan perkaitan tugas latar belakang.
+Penghala didorong mesin keadaan terhingga berlapis di atas pilihan kombo untuk mengarahkan trafik berdasarkan peringkat aliran kerja yang dikesan (perancangan, pelaksanaan, semakan) dan pertalian tugas latar belakang.
 
-- FSM aliran kerja: `open-sse/services/workflowFSM.ts`
-- Penghala peka tugas: `open-sse/services/taskAwareRouter.ts`
+- Aliran kerja FSM: `open-sse/services/workflowFSM.ts`
+- Penghala yang sedar tugas: `open-sse/services/taskAwareRouter.ts`
 - Pengesan tugas latar belakang: `open-sse/services/backgroundTaskDetector.ts`
 - Pengelas niat: `open-sse/services/intentClassifier.ts`
 
-Peralihan FSM disalurkan ke dalam pemarkahan Auto Combo, dengan kecenderungan kepada model yang lebih murah
-untuk tugas latar belakang/automasi dan kepada model yang lebih berkuasa untuk giliran
-perancangan/semakan interaktif.
+Peralihan FSM memberi masukan kepada pemarkahan Auto Combo, memihak kepada model yang lebih murah untuk tugasan background/automation dan ke arah model yang lebih kukuh untuk pusingan planning/review interaktif.
 
-### G. Daya Tahan Khusus Penyedia
+### G. Ketahanan Khusus Pembekal
 
-Beberapa penyedia menawarkan modul daya tahan dan penyamaran khusus yang memanfaatkan
-lapisan pemutus litar / tempoh bertenang sambungan / sekatan model global:
+Beberapa pembekal menghantar modul daya tahan dan siluman yang berdedikasi yang menyokong lapisan pemutus litar global / sambungan / lapisan kunci keluar model:
 
-- Enjin Antigravity 429: `open-sse/services/antigravity429Engine.ts` (menggilirkan
-  identiti, membersihkan pengepala respons, mengendalikan penjejakan kredit/versi melalui
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts`)
-- Dasar kuota ModelScope: `open-sse/services/modelscopePolicy.ts`
-- CCH Claude Code (Jabat Tangan Saluran Keserasian): `open-sse/services/claudeCodeCCH.ts`,
-  serta `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Pembentukan cap jari Claude Code: `open-sse/services/claudeCodeFingerprint.ts`
-- Pengaburan Claude Code: `open-sse/services/claudeCodeObfuscation.ts`
+- enjin Antigravity 429: `open-sse/services/antigravity429Engine.ts` (memusingkan identiti, menyental pengepala respons, memacu penjejakan credits/version melalui `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts`)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (belanjawan setiap permintaan huluan 429s merentasi semua hos, `ANTIGRAVITY_MAX_429_ATTEMPTS`; hantaran semula yang sama bagi badan yang ditolak akan dijawab secara setempat; `src/sse/handlers/chat.ts` tidak memulakan semula permintaan sedemikian melalui percubaan semula yang menyedari cooldown)
+- dasar kuota ModelScope : `open-sse/services/modelscopePolicy.ts`
+- Kod Claude CCH (Jabatan Tangan Saluran Keserasian): `open-sse/services/claudeCodeCCH.ts`, tambah `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Kod cap jari membentuk: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Kod kekeliruan: `open-sse/services/claudeCodeObfuscation.ts`
 
-Untuk panduan lengkap penyamaran dan panduan operasi, lihat
-`docs/security/STEALTH_GUIDE.md` (git; tidak dikompil ke dalam `/docs`).
+Untuk buku permainan siluman penuh dan panduan operasi, lihat `docs/security/STEALTH_GUIDE.md` (git; tidak disusun menjadi `/docs`).
 
-### H. Webhook, Cache Penaakulan, Cache Bacaan
+### H. Webhooks, Cache Penaakulan, Cache Baca
 
-- **Webhook** — penghantaran keluar untuk peristiwa penyedia/akaun/tugas.
+- **Webhooks** penghantaran keluar — untuk acara provider/account/task.
   - Penghantar: `src/lib/webhookDispatcher.ts`
-  - Storan: jadual SQLite `webhooks` (melalui `src/lib/db/webhooks.ts`)
-  - Papan pemuka: `/dashboard/webhooks` (langganan, rahsia, sejarah percubaan semula)
-  - Untuk taksonomi peristiwa dan semantik percubaan semula, lihat [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
-- **Cache Penaakulan** — blok penaakulan yang boleh dimainkan semula untuk penyedia yang mengeluarkan
-  token pemikiran (Claude, GLMT, dll.) supaya giliran berturutan boleh melangkau penaakulan semula.
-  - Lapisan DB: `src/lib/db/reasoningCache.ts`
+  - Penyimpanan: jadual `webhooks` SQLite (melalui `src/lib/db/webhooks.ts`)
+  - Papan pemuka: `/dashboard/webhooks` (langganan, rahsia, cuba semula sejarah)
+  - Untuk taksonomi peristiwa dan cuba semula semantik, lihat [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md).
+- **Cache Penaakulan** blok penaakulan boleh main semula — untuk penyedia yang mengeluarkan token pemikiran (Claude, GLMT, dsb.) jadi giliran berturut-turut boleh melangkau pemikiran semula.
+  - lapisan DB : `src/lib/db/reasoningCache.ts`
   - Lapisan perkhidmatan: `open-sse/services/reasoningCache.ts`
-  - Untuk semantik main semula, lihat [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
-- **Cache Bacaan** — cache respons jangka pendek yang dikunci mengikut tandatangan dan digunakan untuk
-  menggabungkan percubaan semula yang serupa daripada SDK huluan yang rosak.
-  - Lapisan DB: `src/lib/db/readCache.ts`
-  - Titik akhir statistik: `GET /api/cache/stats`, papan pemuka di `/dashboard/cache`
+  - Untuk semantik ulang tayang, lihat [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md).
+- **Baca Cache** cache respons jangka pendek — dikunci dengan tandatangan dan digunakan untuk meruntuhkan percubaan semula yang sama daripada SDKs hulu yang rosak.
+  - lapisan DB : `src/lib/db/readCache.ts`
+  - Titik akhir statistik: `GET /api/cache/stats`, papan pemuka dan `/dashboard/cache`
 
 ## 3) Lapisan Kegigihan
 

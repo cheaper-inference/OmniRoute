@@ -57,14 +57,11 @@
 4. `tests/unit/ui/adapters/<name>.test.tsx`ን ይጨምሩ ወይም ያዘምኑ። ብዙ ጠሪዎች (callers) ላሉት አዳፕተር፣ ከለውጡ
    በፊት እና በኋላ የተሰራውን ማርክአፕ ያወዳድሩ — የpadding ወይም የማጠቂያ (wrapper) ለውጦች ወደ እያንዳንዱ ማያ ገጽ ይስፋፋሉ።
 
-## 5. ኪቱን ማዘመን
+## 5. ኪት ማዘመን
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` በዚያ ኮሚት ላይ ያለውን የupstream `src/`ን ወደ
-`packages/ui-kit/src` ይቀድዋል እና ብቸኛውን የተፈቀደ ለውጥ (transformation) ይተግብራል (ከአንፃራዊ ኢምፖርቶች ላይ የ `.js`
-ቅጥያን ያስወግዳል)። ከዚያ፡ `git diff packages/ui-kit`ን ይገምግሙ፣ በሁለቱም ገጽታዎች (themes) አቅራቢዎች (providers)፣
-ቅንብሮች (settings)፣ ጥምረቶች (combos)፣ አጠቃቀም (usage) እና ኢንድፖይንት (endpoint) ላይ የዓይን ግምገማ ያድርጉ፣
-`npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui`ን ያሂዱ፣ እና PRን ከupstream የለውጥ መዝገብ
-(changelog) ጋር ይክፈቱ።
+`npm run check:ui-kit-upstream` በ `packages/ui-kit/UPSTREAM.md` ውስጥ የተሰካውን ስሪት ከአዲሱ `v*` መለያ ጋር ያወዳድራል እና ልቀቱ ሲወጣ የማመሳሰል ትዕዛዙን ያትማል። ሳምንታዊው `UI Kit upstream watch` የስራ ፍሰት (`.github/workflows/ui-kit-upstream-watch.yml`) ተመሳሳይ ፍተሻ ያካሂዳል እና ፒኑ ከኋላ እያለ አንድ የመከታተያ ጉዳይ ክፍት ያደርገዋል። ወደ ላይ ያለው ሪፖ ግላዊ ነው፣ ስለዚህ የስራ ፍሰቱ በ `UI_KIT_READ_TOKEN` ሚስጥር ውስጥ ተነባቢ-ብቻ ማስመሰያ ያስፈልገዋል እና ያለሱ ንቁ ሆኖ ይቆያል።
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` የላይኛውን `src/` በዛ ቁርጠኝነት ይገለብጣል (`latest` = the new `v*` tag) ወደ `packages/ui-kit/src`, ነጠላ የተፈቀደውን ለውጥ ይተገበራል (ከአንፃራዊ ማስመጣት የ `.js` ቅጥያ ይጥላል) እና የስራ ቦታ ሥሪቱን በ `packages/ui-kit/package.json` እና `package-lock.json` ወደ ላይኛው ያዘጋጃል። በመቀጠል `git diff packages/ui-kit` ይገምግሙ፣ በአቅራቢዎች፣ መቼቶች፣ ጥንብሮች፣ አጠቃቀም እና የመጨረሻ ነጥብ በሁለቱም ጭብጦች ላይ ያድርጉ፣ `npm run check:ui-kit-snapshot` እና `npm run test:vitest:ui` ን ያሂዱ እና PR ከላይ ባለው የለውጥ ሎግ ይክፈቱ።
 
 ## 6. README ንድፎችን
 

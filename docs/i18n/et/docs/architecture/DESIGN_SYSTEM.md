@@ -54,9 +54,11 @@
 3. Kit'i puuduste ümbersõidud asuvad adapteris (või `globals.css`-i kihis `@layer components`, kui parandus on stiililine), mitte kunagi kaustas `packages/ui-kit/src`.
 4. Lisa või uuenda faili `tests/unit/ui/adapters/<name>.test.tsx`. Paljude kutsujatega adapteri puhul võrdle renderdatud märgistust enne ja pärast muudatust — polsterduse või ümbrise muudatused levivad igale ekraanile.
 
-## 5. Kit'i uuendamine
+## 5. Komplekti värskendamine
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopeerib selle commit'i juures ülemvoo `src/` kausta `packages/ui-kit/src` ja rakendab ainsat lubatud teisendust (see eemaldab suhtelistelt importidelt `.js`-lõpu). Seejärel: vaata üle `git diff packages/ui-kit`, tee visuaalne läbivaatus lehtedel providers, settings, combos, usage ja endpoint mõlemas teemas, käivita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning ava PR koos ülemvoo muudatuste logiga.
+`npm run check:ui-kit-upstream` võrdleb `packages/ui-kit/UPSTREAM.md` kinnitatud versiooni ülesvoolu repo uusima `v*` sildiga ja prindib sünkroonimiskäsu, kui väljalase on välja antud. Iganädalane `UI Kit upstream watch` töövoog (`.github/workflows/ui-kit-upstream-watch.yml`) teostab sama kontrolli ja hoiab ühe jälgimisprobleemi avatuna, kui nööpnõel on taga; ülesvoolu repo on privaatne, seega vajab töövoog `UI_KIT_READ_TOKEN` saladuses kirjutuskaitstud luba ja jääb ilma selleta inertseks.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopeerib ülesvoolu `src/` sellel kinnitusel (`latest` = uusim `v*` silt) `packages/ui-kit/src`, rakendab ühe lubatud teisenduse (see jätab suhtelisest impordist välja `.js` järelliide) ja seab tööruumi versiooni `packages/ui-kit/package.json` ja `package-lock.json` ülesvoolu versiooniks. Seejärel vaadake üle `git diff packages/ui-kit`, tehke visuaalne ülekanne mõlema teema pakkujate, sätete, kombinatsioonide, kasutuse ja lõpp-punkti kohta, käivitage `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning avage PR ülesvoolu muudatuste logiga.
 
 ## 6. README diagrammid
 

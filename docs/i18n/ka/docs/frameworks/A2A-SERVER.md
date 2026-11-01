@@ -201,9 +201,9 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
 
 1. **შექმენით უნარის ფაილი:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   გაიტანეთ async ფუნქცია `(task: A2ATask) => Promise<{ artifacts, metadata }>`. მიჰყევით არსებული უნარების სტრუქტურას, მაგალითად `smartRouting.ts`.
+   გაიტანეთ async ფუნქცია `(task: A2ATask) => Promise<{ artifacts, metadata }>`. დაიცავით არსებული უნარების, მაგალითად `smartRouting.ts`-ის, სტრუქტურა.
 
-2. **დაარეგისტრირეთ დამმუშავებელი:** ფაილში `src/lib/a2a/taskExecution.ts` დაამატეთ ჩანაწერი `A2A_SKILL_HANDLERS`-ში:
+2. **დაარეგისტრირეთ დამმუშავებელი:** `src/lib/a2a/taskExecution.ts`-ში დაამატეთ ჩანაწერი `A2A_SKILL_HANDLERS`-ში:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
    };
    ```
 
-3. **გამოაჩინეთ აგენტის ბარათზე:** ფაილში `src/app/.well-known/agent.json/route.ts` დაამატეთ `skills` მასივს:
+3. **გამოაჩინეთ აგენტის ბარათში:** `src/lib/a2a/agentCardMetadata.ts`-ში (რომელსაც ერთობლივად იყენებს `/.well-known/agent.json` და `/.well-known/agent-card.json`) დაამატეთ `skills` მასივში:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC საბოლოო წერტილი `/a2a` არის A2A-ი
    }
    ```
 
-4. **დაწერეთ ტესტები:** `tests/unit/a2a-<your-skill>.test.ts`. დაფარეთ წარმატებული სცენარი + შეცდომის სცენარი.
+4. **დაწერეთ ტესტები:** `tests/unit/a2a-<your-skill>.test.ts`. დაფარეთ წარმატებული შესრულებისა და შეცდომის სცენარები.
 
-5. **დაადოკუმენტირეთ** ახალი უნარი ამ ფაილის `Available Skills` ცხრილში.
+5. **აღწერეთ დოკუმენტაციაში** ახალი უნარი ამ ფაილის `Available Skills` ცხრილში.
 
 ---
 

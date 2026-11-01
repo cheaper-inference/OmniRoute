@@ -118,9 +118,11 @@
 3. Kit eksiklerine yönelik geçici çözümler adaptörde yaşar (düzeltme bir stil ise `globals.css` içindeki `@layer components` katmanında), asla `packages/ui-kit/src` içinde değil.
 4. `tests/unit/ui/adapters/<name>.test.tsx` dosyasını ekleyin veya güncelleyin. Çok sayıda çağırana sahip bir adaptör için, değişiklikten önceki ve sonraki render edilmiş işaretlemeyi karşılaştırın — padding veya wrapper değişiklikleri her ekrana yayılır.
 
-## 5. Kit'i güncelleme
+## 5. Kitin güncellenmesi
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]`, upstream'deki o commit'e ait `src/` klasörünü `packages/ui-kit/src` içine kopyalar ve izin verilen tek dönüşümü uygular (göreli import'lardaki `.js` son ekini kaldırır). Ardından: `git diff packages/ui-kit` çıktısını inceleyin, her iki temada da providers, settings, combos, usage ve endpoint ekranlarında görsel bir tur yapın, `npm run check:ui-kit-snapshot` ve `npm run test:vitest:ui` komutlarını çalıştırın ve PR'ı upstream changelog ile birlikte açın.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` sabitlenen sürümü yukarı akış deposunun en yeni `v*` etiketiyle karşılaştırır ve bir sürüm çıktığında senkronizasyon komutunu yazdırır. Haftalık `UI Kit upstream watch` iş akışı (`.github/workflows/ui-kit-upstream-watch.yml`) aynı kontrolü çalıştırır ve pin gerideyken bir izleme sorununu açık tutar; yukarı akış deposu özeldir, bu nedenle iş akışının `UI_KIT_READ_TOKEN` sırrında salt okunur bir belirtecine ihtiyacı vardır ve onsuz atıl kalır.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` söz konusu taahhütteki yukarı akış `src/` (`latest` = en yeni `v*` etiketi) `packages/ui-kit/src` kopyalar, izin verilen tek dönüşümü uygular (göreli içe aktarmalardan `.js` sonekini çıkarır) ve `packages/ui-kit/package.json` ve `package-lock.json` çalışma alanı sürümünü yukarı akış sürümüne ayarlar. Ardından: `git diff packages/ui-kit` gözden geçirin, her iki temadaki sağlayıcılar, ayarlar, kombinasyonlar, kullanım ve uç noktalar hakkında görsel bir geçiş yapın, `npm run check:ui-kit-snapshot` ve `npm run test:vitest:ui` çalıştırın ve PR yukarı akış değişiklik günlüğüyle açın.
 
 ## 6. README diyagramları
 

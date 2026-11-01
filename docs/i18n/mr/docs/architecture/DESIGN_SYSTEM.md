@@ -58,11 +58,9 @@
 
 ## 5. किट अपडेट करणे
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` त्या कमिटवरील अपस्ट्रीम `src/` `packages/ui-kit/src` मध्ये
-कॉपी करते आणि परवानगी असलेले एकमेव रूपांतर लागू करते (ते रिलेटिव्ह इम्पोर्ट्समधून `.js` प्रत्यय काढून
-टाकते). नंतर: `git diff packages/ui-kit` चे पुनरावलोकन करा, दोन्ही थीममध्ये providers, settings, combos,
-usage आणि endpoint वर व्हिज्युअल तपासणी करा, `npm run check:ui-kit-snapshot` आणि `npm run test:vitest:ui`
-चालवा आणि अपस्ट्रीम चेंजलॉगसह PR उघडा.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` मध्ये पिन केलेल्या आवृत्तीची अपस्ट्रीम रेपोच्या सर्वात नवीन `v*` टॅगशी तुलना करते आणि जेव्हा प्रकाशन संपते तेव्हा सिंक कमांड प्रिंट करते. साप्ताहिक `UI Kit upstream watch` वर्कफ्लो (`.github/workflows/ui-kit-upstream-watch.yml`) समान तपासणी चालवते आणि पिन मागे असताना एक ट्रॅकिंग समस्या उघडे ठेवते; अपस्ट्रीम रेपो खाजगी आहे, त्यामुळे वर्कफ्लोला `UI_KIT_READ_TOKEN` सिक्रेटमध्ये केवळ-वाचनीय टोकन आवश्यक आहे आणि त्याशिवाय ते निष्क्रिय राहते.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` त्या कमिटवर अपस्ट्रीम `src/` कॉपी करते (`latest` = नवीनतम `v*` टॅग) `packages/ui-kit/src` मध्ये, सिंगल अनुमत ट्रान्सफॉर्मेशन लागू करते (हे सापेक्ष आयातींमधून `.js` प्रत्यय टाकते), आणि वर्कस्पेस आवृत्ती `packages/ui-kit/package.json` आणि `package-lock.json` मध्ये अपस्ट्रीमवर सेट करते. नंतर: `git diff packages/ui-kit` पुनरावलोकन करा, दोन्ही थीममध्ये प्रदाते, सेटिंग्ज, कॉम्बोज, वापर आणि एंडपॉइंटवर व्हिज्युअल पास करा, `npm run check:ui-kit-snapshot` आणि `npm run test:vitest:ui` चालवा आणि अपस्ट्रीम चेंजलॉगसह PR उघडा.
 
 ## 6. README आकृत्या
 

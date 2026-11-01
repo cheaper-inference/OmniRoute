@@ -53,9 +53,11 @@
 3. କିଟ୍ର ଅଭାବଗୁଡ଼ିକ ପାଇଁ workaround ଆଡାପ୍ଟରରେ ରହିବ (କିମ୍ବା ଯେତେବେଳେ ସମାଧାନଟି ଷ୍ଟାଇଲ୍, `globals.css` `@layer components` ଭିତରେ), କେବେ `packages/ui-kit/src` ରେ ନୁହେଁ ।
 4. `tests/unit/ui/adapters/<name>.test.tsx` ଯୋଡ଼ନ୍ତୁ କିମ୍ବା ଅଦ୍ୟତନ କରନ୍ତୁ । ଅନେକ caller ଥିବା ଆଡାପ୍ଟର ପାଇଁ, ପରିବର୍ତ୍ତନ ପୂର୍ବରୁ ଏବଂ ପରେ ରେଣ୍ଡର୍ ହୋଇଥିବା ମାର୍କଅପ୍ ତୁଳନା କରନ୍ତୁ — padding କିମ୍ବା wrapper ପରିବର୍ତ୍ତନ ପ୍ରତ୍ୟେକ ସ୍କ୍ରିନ୍କୁ ବ୍ୟାପିଯାଏ ।
 
-## 5. କିଟ୍ ଅଦ୍ୟତନ କରିବା
+## 5 କିଟ୍ ଅପଡେଟ୍ କରିବା \|
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ସେହି commit ରେ ଥିବା upstream `src/` କୁ `packages/ui-kit/src` ଭିତରକୁ କପି କରେ ଏବଂ ଏକମାତ୍ର ଅନୁମୋଦିତ ରୂପାନ୍ତର ପ୍ରୟୋଗ କରେ (ଏହା relative import ଗୁଡ଼ିକରୁ `.js` ପ୍ରତ୍ୟୟ କାଢ଼ିଦିଏ) । ତାପରେ: `git diff packages/ui-kit` ସମୀକ୍ଷା କରନ୍ତୁ, ଉଭୟ ଥିମ୍ରେ providers, settings, combos, usage ଏବଂ endpoint ଉପରେ ଭିଜୁଆଲ୍ ଯାଞ୍ଚ କରନ୍ତୁ, `npm run check:ui-kit-snapshot` ଏବଂ `npm run test:vitest:ui` ଚଲାନ୍ତୁ, ଏବଂ upstream changelog ସହିତ PR ଖୋଲନ୍ତୁ ।
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ରେ ପିନ୍ ହୋଇଥିବା ସଂସ୍କରଣକୁ ଅପଷ୍ଟ୍ରିମ୍ ରେପୋ ର ନୂତନ `v*` ଟ୍ୟାଗ୍ ସହିତ ତୁଳନା କରେ ଏବଂ ଏକ ରିଲିଜ୍ ବାହାରେ ସିଙ୍କ କମାଣ୍ଡ ପ୍ରିଣ୍ଟ୍ କରେ \| ସାପ୍ତାହିକ `UI Kit upstream watch` ୱାର୍କଫ୍ଲୋ (`.github/workflows/ui-kit-upstream-watch.yml`) ସମାନ ଯାଞ୍ଚ ଚଲାଇଥାଏ ଏବଂ ପିନ୍ ପଛରେ ଥିବାବେଳେ ଗୋଟିଏ ଟ୍ରାକିଂ ସମସ୍ୟା ଖୋଲା ରଖେ \| ଅପଷ୍ଟ୍ରିମ୍ ରେପୋ ବ୍ୟକ୍ତିଗତ ଅଟେ, ତେଣୁ ୱାର୍କଫ୍ଲୋ `UI_KIT_READ_TOKEN` ଗୁପ୍ତରେ କେବଳ ପଠନୀୟ ଟୋକେନ୍ ଆବଶ୍ୟକ କରେ ଏବଂ ଏହା ବିନା ନିଷ୍କ୍ରିୟ ରହିଥାଏ \|
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ସେହି ପ୍ରତିଶ୍ରୁତିରେ ଅପଷ୍ଟ୍ରିମ୍ `src/` କପି କରେ (`latest` = ନୂତନ `v*` ଟ୍ୟାଗ୍) `packages/ui-kit/src` ରେ, ଏକକ ଅନୁମତିପ୍ରାପ୍ତ ରୂପାନ୍ତରଣକୁ ପ୍ରୟୋଗ କରେ (ଏହା ଆପେକ୍ଷିକ ଆମଦାନୀରୁ `.js` ସଫିକ୍ସକୁ ଡ୍ରପ୍ କରେ), ଏବଂ କାର୍ଯ୍ୟକ୍ଷେତ୍ର ସଂସ୍କରଣକୁ `packages/ui-kit/package.json` ଏବଂ `package-lock.json` ରେ ଅପଷ୍ଟ୍ରିମ୍ ରେ ସେଟ୍ କରେ \| ତାପରେ: `git diff packages/ui-kit` ସମୀକ୍ଷା କରନ୍ତୁ, ପ୍ରଦାନକାରୀ, ସେଟିଂସମୂହ, କମ୍ବୋ, ବ୍ୟବହାର ଏବଂ ଶେଷ ପଏଣ୍ଟରେ ଉଭୟ ଭିଜୁଆଲ୍ ପାସ୍ କରନ୍ତୁ, `npm run check:ui-kit-snapshot` ଏବଂ `npm run test:vitest:ui` ଚଲାନ୍ତୁ, ଏବଂ ଅପଷ୍ଟ୍ରିମ୍ ଚେଞ୍ଜେଲଗ୍ ସହିତ PR ଖୋଲନ୍ତୁ \|
 
 ## 6। README ଚିତ୍ରଗୁଡ଼ିକ \|
 

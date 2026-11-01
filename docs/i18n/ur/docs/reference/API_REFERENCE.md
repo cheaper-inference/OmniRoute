@@ -843,47 +843,40 @@ OpenAI سے مطابقت رکھنے والی بیچ پروسیسنگ۔
 
 ---
 
-## سرچ API
+## API تلاش کریں۔
 
-ویب/سرچ فراہم کنندہ تجرید (Tavily، Brave، Exa، Serper وغیرہ)۔
+Web/search فراہم کنندہ خلاصہ (Tavily, Brave, Exa, Serper, etc.)
 
-| طریقہ | راستہ                  | تفصیل                                                                                         |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | ترتیب دیے گئے سرچ فراہم کنندگان اور صلاحیتوں کی فہرست                                         |
-| POST  | `/v1/search`           | سرچ استفسار چلائیں — باڈی کی توثیق `v1SearchSchema` سے ہوتی ہے، کیشنگ/یکجائی کو سپورٹ کرتا ہے |
-| GET   | `/v1/search/analytics` | ہر فراہم کنندہ کے لیے ہٹ/تاخیر/کیش کے اعداد و شمار                                            |
+| طریقہ | راستہ                  | تفصیل                                                                                                    |
+| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | ترتیب شدہ تلاش فراہم کنندگان کی + صلاحیتوں کی فہرست بنائیں                                               |
+| POST  | `/v1/search`           | ایک سرچ استفسار چلائیں — باڈی جس کی توثیق `v1SearchSchema` نے کی ہے، caching/coalescing کو سپورٹ کرتا ہے |
+| GET   | `/v1/search/analytics` | فی فراہم کنندہ hit/latency/cache اعدادوشمار                                                              |
 
-**توثیق:** Bearer API کلید (`extractApiKey` + `isValidApiKey`)۔ سرچ پالیسی کا نفاذ `enforceApiKeyPolicy` کے ذریعے کیا جاتا ہے۔
+**تصدیق:** بیئرر API کلید (`extractApiKey` + `isValidApiKey`)۔ تلاش کی پالیسی `enforceApiKeyPolicy` کے ذریعے نافذ کی گئی۔
 
-### Exa اور Tavily کے `provider_options`
+### Exa اور Tavily `provider_options`
 
-Exa اور Tavily، نام کی مخصوص حدود والے بیگ سے فراہم کنندہ کے لیے مخصوص فیلڈز پڑھتے ہیں:
-`provider_options.exa` (یا `provider_options["exa-search"]`) اور `provider_options.tavily`
-(یا `provider_options["tavily-search"]`)۔ صرف ذیل کی کلیدیں آگے بھیجی جاتی ہیں۔ ہر کلید کو
-`open-sse/handlers/search/providerOptionsPassthrough.ts` میں اس کے اپنے Zod اسکیما کے مطابق
-چیک کیا جاتا ہے، اور غلط قسم والی کلید کو خارج کر دیا جاتا ہے۔ توثیق، بنیادی URL،
-`stream` اور `outputSchema` سمیت کسی بھی دوسری کلید کو نظر انداز کیا جاتا ہے۔ دیگر فراہم کنندگان
-کے زیر استعمال فلیٹ کلیدیں (`cx`، `depth`، ...) پہلے کی طرح کام کرتی ہیں۔
+Exa اور Tavily نام کی جگہ والے بیگ سے فراہم کنندہ کے مخصوص فیلڈز کو پڑھیں: `provider_options.exa` (یا `provider_options["exa-search"]`) اور `provider_options.tavily` (یا `provider_options["tavily-search"]`)۔ صرف نیچے کی چابیاں آگے بھیجی جاتی ہیں۔ ہر ایک کو `open-sse/handlers/search/providerOptionsPassthrough.ts` میں اس کے اپنے Zod اسکیما کے خلاف چیک کیا جاتا ہے، اور غلط قسم والی کلید چھوڑ دی جاتی ہے۔ کسی بھی دوسری کلید کو نظر انداز کر دیا جاتا ہے، بشمول auth، base URL، `stream` اور `outputSchema`۔ دوسرے فراہم کنندگان (`cx`, `depth`, ...) کے ذریعے استعمال ہونے والی فلیٹ کیز پہلے کی طرح کام کرتی ہیں۔
 
-| فراہم کنندہ | بالائی سطح کی فیلڈز                                                                                                                                                                                                                                                                                                                                                       | ذیلی                                                                                                                                                                  |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`، `category`، `userLocation`، `moderation`، `additionalQueries`، `objective`، `systemPrompt`، `compliance` (فلیٹ ابتدائی اقدار)، `startPublishedDate`، `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` کو ڈیفالٹ `{ text: true, highlights: true }` پر ضم کیا جاتا ہے |
-| Tavily      | `search_depth`، `chunks_per_source`، `time_range`، `start_date`، `end_date`، `include_published_date`، `filter_by_published_date`، `include_answer`، `include_raw_content`، `include_images`، `include_image_descriptions`، `include_favicon`، `include_domains_mode`، `language`، `filter_by_language`، `auto_parameters`، `exact_match`، `include_usage`، `safe_search` | —                                                                                                                                                                     |
+| فراہم کرنے والا | ٹاپ لیول فیلڈز                                                                                                                                                                                                                                                                                                                                                            | نیسٹڈ                                                                                                                                        |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa             | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (فلیٹ پرائمیٹو) , `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` پہلے سے طے شدہ `{ text: true, highlights: true }` پر ضم ہوگیا۔ |
+| تاویلی          | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                            |
 
-عمومی فیلڈز کو ہمیشہ ترجیح حاصل ہوتی ہے: `query`، `max_results`، `filters` (ڈومینز)، `country` اور
-`search_type` سے اخذ کردہ موضوع۔ Exa پر، `search_type: "news"`، `category: "news"` کو برقرار رکھتا ہے۔
-Tavily، `search_type: "finance"` (`topic: "finance"`) کو بھی قبول کرتا ہے۔
+عام فیلڈز ہمیشہ جیتتے ہیں: `query`، `max_results`، `filters` (ڈومینز)، `country` اور `search_type` سے ماخوذ موضوع۔ Exa پر، `search_type: "news"` `category: "news"` رکھتا ہے۔ Tavily `search_type: "finance"` (`topic: "finance"`) کو بھی قبول کرتا ہے۔
 
-عمومی `time_range` اب دونوں فراہم کنندگان تک پہنچتا ہے: Exa کو `startPublishedDate` (ISO
-ٹائم اسٹیمپ) اور Tavily کو `start_date` (`YYYY-MM-DD`) ملتا ہے۔ `provider_options`
-میں واضح طور پر دی گئی تاریخ میپ کردہ تاریخ پر فوقیت رکھتی ہے۔
+فائر کرال تلاش کی لاگت 10 لوٹے گئے نتائج کے فی شروع شدہ بلاک میں، $0.002 (2 کریڈٹ) ایک بلاک اور کم از کم ایک بلاک فی کال ( [فائرکرول بلنگ](https://docs.firecrawl.dev/billing) ): 11 نتائج کی لاگت $0.004 ہے۔
 
-Exa کے نتائج، `id`، `highlight_scores`، `summary`، `subpages`، `entities` اور `extras` کو
-`provider_raw` میں برقرار رکھتے ہیں۔ Tavily کے نتائج `images` اور `favicon` کو برقرار رکھتے ہیں۔
+عام `time_range` اب دونوں فراہم کنندگان تک پہنچ جاتا ہے: Exa کو `startPublishedDate` (ISO ٹائم اسٹیمپ) اور Tavily کو `start_date` (`YYYY-MM-DD`) ملتا ہے۔ `provider_options` میں ایک واضح تاریخ میپ شدہ کو اوور رائیڈ کرتی ہے۔
 
-لاگت کا حساب اب بھی فلیٹ رجسٹری `costPerQuery` کے مطابق کیا جاتا ہے۔ Tavily،
-`search_depth: "advanced"` کے لیے ہر کال پر زیادہ کریڈٹس وصول کرتا ہے، اور یہ فرق
-`usage.search_cost_usd` میں ظاہر نہیں ہوتا۔
+Exa نتائج `id`, `highlight_scores`, `summary`, `subpages`, `entities` اور `extras` `provider_raw` میں رکھتے ہیں۔ Tavily کے نتائج `images` اور `favicon` برقرار رکھتے ہیں۔
+
+لنک اپ کی تلاش کی قیمت `depth` `fast` اور `standard` کے لیے $0.005 اور `deep` کے لیے $0.05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) ریکارڈ کی گئی ہے، چاہے `depth` `provider_options` سے آیا ہو یا کنکشن کی ترتیبات سے۔
+
+Exa `type: "lite"` (Exa 3.0) فیلڈز کے ایک چھوٹے سیٹ کو قبول کرتا ہے اور جب کوئی دوسرا فیلڈ سیٹ کیا جاتا ہے تو پوری درخواست کو مسترد کر دیتا ہے۔ لائٹ کے لیے، `additionalQueries`، `systemPrompt` اور `text` اور `highlights` کے علاوہ ہر `contents` کلید کال سے پہلے چھوڑ دی جاتی ہے۔ فرسودہ `subpages`، `subpageTarget`، `highlights.numSentences` اور `highlights.highlightsPerUrl` مزید آگے نہیں بھیجے جاتے ہیں۔
+
+لاگت کا حساب کتاب فلیٹ رجسٹری `costPerQuery` ہے، Exa کے علاوہ، جو Exa کی اپنی قیمتوں کی پیروی کرتا ہے: $0.007 فی کال `auto` (اور لیگیسی `fast`) کے لیے یا $0.004 `lite` (اور لیگیسی `instant`) کے لیے، جس میں 10 نتائج شامل ہیں۔ ہر مزید نتیجے کے لیے $0.001؛ اور $0.001 فی لوٹا ہوا نتیجہ جب `contents.summary` سیٹ ہو۔ Tavily کو `search_depth` `basic`، `fast` اور `ultra-fast` کے لیے 1 کریڈٹ ($0.008) اور `advanced` ( [Tavily API کریڈٹس](https://docs.tavily.com/documentation/api-credits) ) کے لیے 2 کریڈٹ ($0.016) پر ریکارڈ کیا گیا ہے۔ `auto_parameters: true` کے ساتھ ایک کال جسے Tavily ایڈوانس میں اپ گریڈ کرتا ہے اب بھی 1 کریڈٹ پر ریکارڈ کیا جاتا ہے۔
 
 ---
 

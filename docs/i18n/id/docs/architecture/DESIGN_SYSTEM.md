@@ -118,11 +118,9 @@
 
 ## 5. Memperbarui kit
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` menyalin `src/` upstream pada commit tersebut ke
-`packages/ui-kit/src` dan menerapkan satu-satunya transformasi yang diizinkan (menghapus akhiran `.js` dari
-impor relatif). Kemudian: tinjau `git diff packages/ui-kit`, lakukan pemeriksaan visual pada halaman
-penyedia, pengaturan, kombo, penggunaan, dan endpoint di kedua tema, jalankan
-`npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, lalu buka PR dengan changelog upstream.
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar. Alur kerja `UI Kit upstream watch` mingguan (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama dan membiarkan satu masalah pelacakan tetap terbuka saat pin berada di belakang; repo upstream bersifat pribadi, sehingga alur kerja memerlukan token baca-saja dalam rahasia `UI_KIT_READ_TOKEN` dan tetap inert tanpanya.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` upstream pada commit tersebut (`latest` = tag `v*` terbaru) ke `packages/ui-kit/src`, menerapkan transformasi tunggal yang diizinkan (ini menghilangkan akhiran `.js` dari impor relatif), dan menyetel versi ruang kerja di `packages/ui-kit/package.json` dan `package-lock.json` ke versi upstream. Kemudian: tinjau `git diff packages/ui-kit`, lakukan penyampaian visual pada penyedia, pengaturan, kombo, penggunaan dan titik akhir di kedua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan upstream.
 
 ## 6. diagram README
 

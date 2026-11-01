@@ -201,7 +201,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 
 1. **ایجاد فایل مهارت:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   یک تابع ناهمگام بهشکل `(task: A2ATask) => Promise<{ artifacts, metadata }>` صادر کنید. از ساختار مهارتهای موجود مانند `smartRouting.ts` پیروی کنید.
+   یک تابع ناهمگام با امضای `(task: A2ATask) => Promise<{ artifacts, metadata }>` صادر کنید. از ساختار مهارتهای موجود مانند `smartRouting.ts` پیروی کنید.
 
 2. **ثبت کنترلکننده:** در `src/lib/a2a/taskExecution.ts`، یک ورودی به `A2A_SKILL_HANDLERS` اضافه کنید:
 
@@ -215,7 +215,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
    };
    ```
 
-3. **ارائه در کارت عامل:** در `src/app/.well-known/agent.json/route.ts`، موردی را به آرایهٔ `skills` اضافه کنید:
+3. **ارائه در کارت عامل:** در `src/lib/a2a/agentCardMetadata.ts` (که بین `/.well-known/agent.json` و `/.well-known/agent-card.json` مشترک است)، مورد جدید را به آرایه `skills` اضافه کنید:
 
    ```json
    {
@@ -229,7 +229,7 @@ OmniRoute 6 مهارت A2A را در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HA
 
 4. **نوشتن آزمونها:** `tests/unit/a2a-<your-skill>.test.ts`. مسیر موفقیت و مسیر خطا را پوشش دهید.
 
-5. مهارت جدید را در جدول `Available Skills` این فایل **مستند کنید**.
+5. **مستندسازی** مهارت جدید در جدول `Available Skills` این فایل.
 
 ---
 

@@ -116,13 +116,11 @@
    o'zgarishdan oldin va keyingi render qilingan razmetkani solishtiring — padding yoki wrapper o'zgarishlari har
    bir ekranga tarqaladi.
 
-## 5. Kit'ni yangilash
+## 5. To'plamni yangilash
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` o'sha commit'dagi upstream `src/` ni `packages/ui-kit/src` ga
-nusxalaydi va ruxsat etilgan yagona transformatsiyani qo'llaydi (u nisbiy importlardan `.js` sufiksini olib
-tashlaydi). Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, providers, settings, combos, usage va endpoint
-sahifalarini har ikkala mavzuda vizual ko'zdan kechiring, `npm run check:ui-kit-snapshot` va
-`npm run test:vitest:ui` ni ishga tushiring hamda upstream changelog bilan PR oching.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ga biriktirilgan versiyani yuqoridagi reponing eng yangi `v*` yorlig'i bilan taqqoslaydi va reliz tugashi bilan sinxronlash buyrug'ini chop etadi. Haftalik `UI Kit upstream watch` ish jarayoni (`.github/workflows/ui-kit-upstream-watch.yml`) bir xil tekshirishni amalga oshiradi va pin orqasida turganda bitta kuzatuv muammosini ochiq qoldiradi; yuqoridagi repo shaxsiydir, shuning uchun ish jarayoni `UI_KIT_READ_TOKEN` sirida faqat o'qish uchun tokenga muhtoj va usiz inert qoladi.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` yuqoridagi `src/` o‘sha majburiyatda (`latest` = eng yangi `v*` tegi) `packages/ui-kit/src` ga ko‘chiradi, yagona ruxsat etilgan transformatsiyani qo‘llaydi (nisbiy importdan `.js` qo‘shimchasini olib tashlaydi) va ish maydonining `packages/ui-kit/package.json` va `package-lock.json` versiyasini yuqori oqimga o‘rnatadi. Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar, foydalanish va oxirgi nuqtani vizual tarzda o'tkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` ni ishga tushiring va yuqoridagi o'zgarishlar jurnali bilan PR oching.
 
 ## 6. README diagrammalar
 

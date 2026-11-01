@@ -57,13 +57,11 @@
 4. Ավելացրեք կամ թարմացրեք `tests/unit/ui/adapters/<name>.test.tsx`-ը: Բազմաթիվ կանչողներ (callers) ունեցող ադապտերի համար համեմատեք
    փոփոխությունից առաջ և հետո ռենդեր արված նշագծումը (markup). padding-ի կամ wrapper-ի փոփոխությունները տարածվում են բոլոր էկրանների վրա:
 
-## 5. Kit-ի թարմացում
+## 5. Կոմպլեկտի թարմացում
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]`-ը պատճենում է upstream `src/`-ը տվյալ commit-ի պահին
-`packages/ui-kit/src`-ի մեջ և կիրառում է միակ թույլատրված փոխակերպումը (այն հեռացնում է `.js` վերջածանցը
-հարաբերական import-ներից): Այնուհետև. դիտարկեք `git diff packages/ui-kit`-ը, տեսողական անցում կատարեք providers, settings, combos,
-usage և endpoint էկրաններով երկու թեմաներում, գործարկեք `npm run check:ui-kit-snapshot` և `npm run test:vitest:ui` և
-բացեք PR-ը՝ կցելով upstream changelog-ը:
+`npm run check:ui-kit-upstream` համեմատում է `packages/ui-kit/UPSTREAM.md` ում ամրացված տարբերակը վերընթաց ռեպո-ի նորագույն `v*` պիտակի հետ և տպում է համաժամացման հրամանը, երբ թողարկումը դուրս է գալիս: Շաբաթական `UI Kit upstream watch` աշխատանքային հոսքը (`.github/workflows/ui-kit-upstream-watch.yml`) կատարում է նույն ստուգումը և բաց է պահում հետագծման մեկ խնդիր, մինչ քորոցը ետևում է. վերին հոսքի ռեպո-ն մասնավոր է, ուստի աշխատանքային հոսքին անհրաժեշտ է միայն կարդալու նշան `UI_KIT_READ_TOKEN` գաղտնիքում և մնում է իներտ առանց դրա:
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` պատճենում է `src/` վերին հոսանքով այդ commit-ում (`latest` = նորագույն `v*` պիտակը) `packages/ui-kit/src` մեջ, կիրառում է մեկ թույլատրելի փոխակերպումը (այն հանում է `.js` վերջածանցը հարաբերական ներմուծումից) և աշխատանքային տարածքի տարբերակը `packages/ui-kit/package.json` ով և `package-lock.json` դնում է վերին հոսանքով: Այնուհետև՝ վերանայեք `git diff packages/ui-kit`, կատարեք տեսողական անցում պրովայդերների, կարգավորումների, կոմբինացիաների, օգտագործման և վերջնակետի վերաբերյալ երկու թեմաներում, գործարկեք `npm run check:ui-kit-snapshot` և `npm run test:vitest:ui` և բացեք PR վերին հոսքի փոփոխության լոգով:
 
 ## 6. README դիագրամներ
 

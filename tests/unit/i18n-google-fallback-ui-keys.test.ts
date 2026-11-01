@@ -167,3 +167,32 @@ test("the google engine skips the LLM entirely and needs no LLM variables", asyn
     else process.env.OMNIROUTE_TRANSLATION_ENGINE = prev;
   }
 });
+
+test("three consecutive non-quota LLM failures open the circuit; a success resets the count", async () => {
+  backendLib.resetLlmCircuit();
+  const locale = { code: "de", english: "German" };
+  let llmCalls = 0;
+  let fail = true;
+  const backend = {
+    model: "m",
+    callChat: async () => {
+      llmCalls++;
+      if (fail) throw new Error("timeout after 60000ms");
+      return "ok";
+    },
+    googleStrings: async (texts: string[]) => texts.map((t) => `G:${t}`),
+  };
+  await backendLib.translateString("a", locale, backend);
+  await backendLib.translateString("b", locale, backend);
+  assert.equal(backendLib.llmCircuit.open, false, "two failures are not enough");
+  fail = false;
+  await backendLib.translateString("c", locale, backend);
+  assert.equal(backendLib.llmCircuit.failures, 0, "a success resets the streak");
+  fail = true;
+  for (const t of ["d", "e", "f"]) await backendLib.translateString(t, locale, backend);
+  assert.equal(backendLib.llmCircuit.open, true, "three in a row open it");
+  const before = llmCalls;
+  assert.equal(await backendLib.translateString("g", locale, backend), "G:g");
+  assert.equal(llmCalls, before, "an open circuit skips the LLM");
+  backendLib.resetLlmCircuit();
+});

@@ -201,13 +201,13 @@ Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙ
 
 1. **Ƙirƙiri fayil ɗin ƙwarewa:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Fitar da aikin async mai sigar `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Bi tsarin ƙwarewar da ke akwai kamar `smartRouting.ts`.
+   Fitar da aikin async mai sigar `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Bi tsarin ƙwarewar da ake da su kamar `smartRouting.ts`.
 
-2. **Yi wa mai sarrafawa rajista:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
+2. **Yi rajistar mai sarrafawa:** a cikin `src/lib/a2a/taskExecution.ts`, ƙara shigarwa zuwa `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ƙwarewar da ke akwai
+     // ...ƙwarewar da ake da su
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Matsayar JSON-RPC ta `/a2a` ita ce babbar mashigar A2A. Matsayoyin REST da ke ƙ
    };
    ```
 
-3. **Bayyana a Katin Wakili:** a cikin `src/app/.well-known/agent.json/route.ts`, ƙara zuwa jerin `skills`:
+3. **Bayyana a cikin Katin Wakili:** a cikin `src/lib/a2a/agentCardMetadata.ts` (wanda `/.well-known/agent.json` da `/.well-known/agent-card.json` suke amfani da shi tare), ƙara zuwa jerin `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "Ƙwarewarku",
+     "description": "Taƙaitaccen bayani mai mayar da hankali kan manufa",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["Misalin kiran umarni ta harshen ɗan Adam"]
    }
    ```
 
-4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Gwada hanyar nasara da hanyar kuskure.
+4. **Rubuta gwaje-gwaje:** `tests/unit/a2a-<your-skill>.test.ts`. Gwada yanayin nasara + yanayin kuskure.
 
-5. **Rubuta bayanin** sabuwar ƙwarewar a teburin `Available Skills` na wannan fayil.
+5. **Rubuta bayanin** sabuwar ƙwarewar a cikin jadawalin `Available Skills` na wannan fayil.
 
 ---
 
@@ -266,7 +266,7 @@ an gabatar → ana aiki → an kammala
 
 ---
 
-## Misalan Haɗin Kai
+## Misalan Haɗawa
 
 ### Python (buƙatun)
 
