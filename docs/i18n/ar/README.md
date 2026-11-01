@@ -732,7 +732,7 @@ omniroute configure codex          # أيضًا: claude opencode qwen aider goos
 
 ### 🆓 مجاني إلى الأبد — $0، من دون بطاقة ائتمانالتحليل code>We need answer should preserve inline `hasFree` exactly yes. Did we violate "Never change text between backticks" kept. "HTML tags exact" We translated no attrs. Fine. But term "153 carrying metadata" Arabic. Need issue "catalog-marked" okay. Could translate alt? didn't. proper names. User asks only translated markdown. We have it. Ensure source says "free-budget catalog" maybe فهرس الميزانية المجانية. good. "recurring/keyless free-forever providers" translated perhaps recurring/without key. Fine. Check hidden issue: "Every major lab" lab singular each? okay.
 
-Need perhaps "380 AI Providers" translate AI to الذكاء الاصطناعي. Fine. No need alter closing div.
+Need perhaps "381 AI Providers" translate AI to الذكاء الاصطناعي. Fine. No need alter closing div.
 
 Final already.
 

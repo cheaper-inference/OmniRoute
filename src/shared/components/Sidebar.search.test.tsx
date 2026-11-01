@@ -40,6 +40,21 @@ describe("Sidebar search/filter (#4013)", () => {
     (
       globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
     ).IS_REACT_ACT_ENVIRONMENT = true;
+    // jsdom has no matchMedia; exercise the real provider in desktop mode.
+    // afterEach unmounts it before unstubAllGlobals restores the browser globals.
+    vi.stubGlobal(
+      "matchMedia",
+      vi.fn((query: string) => ({
+        matches: false,
+        media: query,
+        onchange: null,
+        addListener: vi.fn(),
+        removeListener: vi.fn(),
+        addEventListener: vi.fn(),
+        removeEventListener: vi.fn(),
+        dispatchEvent: vi.fn(() => true),
+      }))
+    );
     vi.stubGlobal(
       "fetch",
       vi.fn(async (url: string) => {
