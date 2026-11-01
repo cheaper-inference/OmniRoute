@@ -175,10 +175,14 @@ export function getCodexFastCostMultiplier(
     splitCodexReasoningSuffix(normalizeModelName(String(model || "")).toLowerCase()).baseModel
   );
   const compactModelKey = modelKey.replace(/-/g, "");
-  // Codex GPT-6 Fast is 2.5x Standard (https://developers.openai.com/codex/pricing).
+  // Codex purchased-credit Fast mode is 2x Standard for GPT-6.1 Terra.
+  // Preserve other models' established ratios in this focused catalog PR.
+  // https://learn.chatgpt.com/docs/pricing#token-rates
+  if (modelKey === "gpt-6.1-terra" || compactModelKey === "gpt6.1terra") return 2;
+  // Historical GPT-6 Fast multiplier for other catalog entries.
   if (
-    /^gpt-6(?:\.1)?-(?:astra|sol|luna)$/.test(modelKey) ||
-    /^gpt6(?:\.1)?(?:astra|sol|luna)$/.test(compactModelKey)
+    /^gpt-6(?:\.1)?-(?:astra|sol|terra|luna)$/.test(modelKey) ||
+    /^gpt6(?:\.1)?(?:astra|sol|terra|luna)$/.test(compactModelKey)
   ) {
     return 2.5;
   }

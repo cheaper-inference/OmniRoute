@@ -19,6 +19,14 @@ export const GPT_6_SOL_PRICING = {
   cache_creation: 2.5,
 };
 
+export const GPT_6_TERRA_PRICING = {
+  input: 1.0,
+  output: 5.0,
+  cached: 0.05,
+  reasoning: 5.0,
+  cache_creation: 1.25,
+};
+
 export const GPT_5_3_CODEX_PRICING = {
   input: 5.0,
   output: 20.0,
