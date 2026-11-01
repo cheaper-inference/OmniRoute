@@ -1212,6 +1212,7 @@ async function handleComboChatInner({
   const state: AttemptLoopState = {
     orderedTargets,
     fallbackCount: 0,
+    deadlineFailures: 0,
     recordedAttempts: 0,
     comboErrors: [],
     lastError: null,

@@ -179,6 +179,37 @@ export function clampGlobalAttempts(value: unknown): number {
   return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
 }
 
+/**
+ * Opt-in sub-budget for READINESS-DEADLINE failures across one combo run,
+ * controlled by OMNIROUTE_COMBO_MAX_DEADLINE_FAILURES. The global-attempts
+ * cap is calibrated for fast failures (429/5xx swap-outs that cost seconds);
+ * a stream-readiness deadline failure instead burns a full readiness window
+ * (tens of seconds to minutes) plus a heavyweight body re-dispatch each
+ * time, so a handful of them already multiplies user latency and gateway
+ * memory footprint while the combo rotates through every remaining target.
+ * Unset / 0 / invalid → 0 = disabled (the default: current rotation
+ * behavior, no behavior change). A positive integer caps how many
+ * readiness-deadline failures a single combo run tolerates before
+ * terminating with a clean 504 instead of rotating further.
+ */
+export function clampDeadlineFailureBudget(value: unknown): number {
+  if (value === undefined || value === null || value === "") return 0;
+  const n = Math.floor(Number(value));
+  if (!Number.isFinite(n) || n < 1) return 0;
+  return Math.min(n, MAX_GLOBAL_ATTEMPTS_HARD_CAP);
+}
+
+/**
+ * Classify a failed combo attempt as a stream-readiness deadline failure.
+ * Matches the stable STREAM_READINESS_TIMEOUT marker raised by the readiness
+ * watchdog (StreamReadinessReadTimeout) when no first non-ping SSE event
+ * arrives within the readiness window — distinct from fast upstream
+ * rejections (429/5xx) and from slow-but-alive streams.
+ */
+export function isReadinessDeadlineFailure(status: number, errorText: string): boolean {
+  return status === 504 && errorText.includes("STREAM_READINESS_TIMEOUT");
+}
+
 /** Minimum recorded requests before the predictive-TTFT breaker trusts the average. */
 export const PREDICTIVE_TTFT_MIN_SAMPLES = 5;
 
