@@ -1,0 +1,1 @@
+- **test(compression):** cover unchanged live-zone histories for both Chat Completions `messages` and Responses `input`, including frozen-prefix reuse, current request controls, and avoiding unnecessary compressor calls. This is regression coverage for existing source behavior, not a demonstrated fix for an upstream safety refusal.
