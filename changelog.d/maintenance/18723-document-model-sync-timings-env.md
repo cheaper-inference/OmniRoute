@@ -1,0 +1,1 @@
+- **maintenance(env):** document the opt-in `OMNIROUTE_MODEL_SYNC_TIMINGS` diagnostic flag in `.env.example` and `ENVIRONMENT.md`, un-redding the env/docs contract gate ([#18723](https://github.com/cheaper-inference/OmniRoute/pull/18723)) — thanks @jjxyxsjr
