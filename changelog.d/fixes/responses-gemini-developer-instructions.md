@@ -1,0 +1,1 @@
+- **fix(translator):** Preserve Responses developer instructions when translating requests to Gemini and Antigravity.
