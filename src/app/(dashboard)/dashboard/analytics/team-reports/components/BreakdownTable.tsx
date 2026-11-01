@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import type { ReportBreakdownRow } from "@/lib/usage/agentSessionReports";
+import Icon from "@/shared/components/Icon";
 import { fmtCompact, formatCost } from "@/shared/utils/formatting";
 
 import { formatDateTime, splitTokens } from "./format";
@@ -99,11 +100,7 @@ function SortableHeader({
         className="inline-flex items-center gap-1 hover:text-text-main"
       >
         {column.label}
-        {active && (
-          <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-            {sort.desc ? "arrow_downward" : "arrow_upward"}
-          </span>
-        )}
+        {active && <Icon name={sort.desc ? "arrow_downward" : "arrow_upward"} size={14} />}
       </button>
     </th>
   );

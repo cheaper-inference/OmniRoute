@@ -120,6 +120,9 @@ describe("Team Reports BreakdownTable", () => {
   it("sorts by cost descending first, then toggles and switches columns", () => {
     render();
     expect(firstColumn()).toEqual(["pricey", "(no project)", "cheap"]);
+    // The retired icon font must not hide the current sort direction.
+    const activeHeader = container.querySelector('th[aria-sort="descending"]');
+    expect(activeHeader?.querySelector('svg[aria-hidden="true"]')).toBeTruthy();
 
     clickHeader("Cost");
     expect(firstColumn()).toEqual(["cheap", "(no project)", "pricey"]);
