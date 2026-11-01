@@ -10,6 +10,7 @@ import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/util
 import {
   hasUsableCredentialsForModel,
   getUsableConnectionsForModel,
+  isBlockedNoAuthProvider,
 } from "./visionBridgeCredentials";
 import { isVisionBridgeForcedModel } from "@/shared/constants/visionBridgeDefaults";
 import { resolveProviderId } from "@/shared/constants/providers";
@@ -158,6 +159,12 @@ export interface VisionBridgeRouterDeps {
    * `hasUsableCredentials`: `node:test` has no supported ESM module-mocking.
    */
   isModelLocked?: (provider: string, connectionId: string, model: string) => boolean;
+  /**
+   * Blocked no-auth provider check, defaulting to
+   * `isBlockedNoAuthProvider`. Injectable for the same reason as
+   * `hasUsableCredentials`: `node:test` has no supported ESM module-mocking.
+   */
+  isBlockedNoAuthProvider?: (provider: string) => Promise<boolean>;
 }
 
 export interface VisionModelCatalog {
@@ -258,6 +265,15 @@ async function cachedModelRemainsAvailable(
   const registryModel = PROVIDER_MODELS[providerAlias]?.find((model) => model.id === modelId);
   if (!registryModel) return false;
 
+  // A pick cached before the operator blocked the provider must not keep
+  // serving it for the cache TTL: dispatch refuses a blocked no-auth provider
+  // outright, and getUsableConnectionsForModel's definitive empty set for one
+  // reads as "nothing known — usable" to the lockout check below. So
+  // revalidate blocked status here, mirroring the fresh-scan skip in
+  // getVisionCapableModels.
+  const isBlockedNoAuth = deps.isBlockedNoAuthProvider ?? isBlockedNoAuthProvider;
+  if (await isBlockedNoAuth(providerAlias)) return false;
+
   if (!(await isModelUsableGivenLockouts(providerAlias, modelId, deps))) return false;
 
   const catalog = await readActiveCatalog(providerAlias, deps);
@@ -278,9 +294,14 @@ async function getVisionCapableModels(
   deps: VisionBridgeRouterDeps = {}
 ): Promise<VisionModelCandidate[]> {
   const checkCreds = deps.hasUsableCredentials ?? hasUsableCredentialsForModel;
+  const isBlockedNoAuth = deps.isBlockedNoAuthProvider ?? isBlockedNoAuthProvider;
   const candidatesByProvider = await Promise.all(
     Object.entries(PROVIDER_MODELS).map(async ([providerAlias, models]) => {
       if (!Array.isArray(models)) return [];
+      // Dispatch refuses a blocked no-auth provider before any credential
+      // path, so it can never serve the describe call. Skip it before the
+      // per-model fan-out — no credential lookups, no candidates.
+      if (await isBlockedNoAuth(providerAlias)) return [];
       const visionModels = models.filter((model) => {
         if (!model?.id) return false;
         const fullModelId = `${providerAlias}/${model.id}`;
@@ -480,7 +501,8 @@ export async function getBestVisionModel(
 
   // A recent scan already proved nothing here is usable. Re-running it costs a
   // full PROVIDER_MODELS walk plus a credential lookup per candidate, all on
-  // the request path, and it cannot succeed until credentials change.
+  // the request path, and it cannot succeed until credentials or provider
+  // blocks change.
   const noCandidateUntil = noCandidateCache.get(cacheKey);
   if (noCandidateUntil !== undefined) {
     if (noCandidateUntil > Date.now()) return null;
