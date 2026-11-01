@@ -40,6 +40,55 @@ async function settleRefresh(runtime: ResourcePressureRuntime): Promise<void> {
 }
 
 describe("ResourcePressureRuntime stale-while-revalidate cache", () => {
+  it("advances opt-in self-restart for sampled absolute heap pressure", async () => {
+    let now = 0;
+    let scheduled: (() => void) | null = null;
+    const exits: number[] = [];
+    const runtime = createResourcePressureRuntime({
+      heapThresholdMb: null,
+      rssThresholdMb: null,
+      thresholds: { heapAbsoluteThresholdMb: 200, sustainedSamplesCritical: 2 },
+      nowMs: () => now,
+      staleAfterMs: 0,
+      schedule: (refresh) => {
+        scheduled = refresh;
+      },
+      sample: async () => signals(now, 201),
+      selfRestart: {
+        enabled: true,
+        afterMs: 1_000,
+        exitFn: (code) => {
+          exits.push(code);
+        },
+      },
+    });
+    const tick = async (atMs: number) => {
+      now = atMs;
+      runtime.check();
+      const refresh = scheduled;
+      scheduled = null;
+      assert.ok(refresh, "request schedules the native sampler");
+      refresh();
+      await runtime.whenRefreshSettled();
+    };
+    try {
+      await tick(0);
+      assert.equal(runtime.getObservation().state.severity, "normal");
+      await tick(1);
+      assert.equal(runtime.getObservation().state.reason, "v8_heap_absolute");
+      assert.equal(runtime.getObservation().state.severity, "critical");
+      assert.deepEqual(exits, [], "sustained exit budget starts only after critical transition");
+      await tick(1_000);
+      assert.deepEqual(exits, [], "not yet sustained for 1,000ms");
+      await tick(1_001);
+      assert.deepEqual(exits, [1]);
+      await tick(2_001);
+      assert.deepEqual(exits, [1], "exit is one-shot");
+    } finally {
+      runtime.dispose();
+    }
+  });
+
   it("does no proc/sys I/O in check(), while a cheap first-request heap breach sheds immediately", async () => {
     let slowSamples = 0;
     const runtime = createResourcePressureRuntime({

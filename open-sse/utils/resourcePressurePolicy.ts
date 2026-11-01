@@ -284,6 +284,14 @@ export function classifyAdaptiveResourcePressureWithHistory(
   previousEvents: ThrottleCounters | null = null
 ): RawLevel {
   let best: RawLevel = { severity: "normal", reason: "none" };
+  // The tracker uses this history-aware path, so honor the same explicit
+  // absolute heap fuse as the stateless classifier above.
+  if (
+    thresholds.heapAbsoluteThresholdMb != null &&
+    signals.v8.heapUsedBytes >= thresholds.heapAbsoluteThresholdMb * MB
+  ) {
+    best = maxLevel(best, { severity: "critical", reason: "v8_heap_absolute" });
+  }
   best = maxLevel(
     best,
     ratioLevel(signals.v8.heapUsedBytes, signals.v8.heapLimitBytes, thresholds, "v8_heap_ratio")

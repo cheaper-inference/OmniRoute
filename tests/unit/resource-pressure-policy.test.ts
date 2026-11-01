@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  classifyAdaptiveResourcePressure,
+  classifyAdaptiveResourcePressureWithHistory,
   createResourcePressureTracker,
   resolveResourcePressureThresholds,
   type PressureReason,
@@ -88,6 +90,52 @@ describe("resource pressure threshold validation", () => {
 });
 
 describe("resource pressure policy", () => {
+  it("honors the explicit absolute heap threshold in the history-aware classifier", () => {
+    const thresholds = resolveResourcePressureThresholds({ heapAbsoluteThresholdMb: 200 });
+    const signals = baseSignals({
+      v8: { heapUsedBytes: 200 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    const expected = { severity: "critical", reason: "v8_heap_absolute" };
+    assert.deepEqual(classifyAdaptiveResourcePressure(signals, thresholds), expected);
+    assert.deepEqual(classifyAdaptiveResourcePressureWithHistory(signals, thresholds), expected);
+  });
+
+  it("sustains absolute heap pressure until the existing recovery hysteresis clears", () => {
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      heapAbsoluteThresholdMb: 200,
+    });
+    const sample = (heapUsedMb: number) =>
+      baseSignals({ v8: { heapUsedBytes: heapUsedMb * MiB, heapLimitBytes: 1_000 * MiB } });
+    assert.equal(tracker.observe(sample(201)).severity, "normal", "first sample is provisional");
+    assert.equal(tracker.observe(sample(201)).severity, "critical", "second sample is sustained");
+    assert.equal(tracker.getState().reason, "v8_heap_absolute");
+    assert.equal(tracker.observe(sample(180)).severity, "critical", "below fuse is not recovered");
+    assert.equal(tracker.observe(sample(140)).severity, "critical", "first clean recovery sample");
+    assert.equal(tracker.observe(sample(140)).severity, "normal", "second clean recovery sample");
+  });
+
+  it("keeps explicit null absolute-heap policy and ratio-based pressure independent", () => {
+    const thresholds = resolveResourcePressureThresholds({ heapAbsoluteThresholdMb: null });
+    const belowRatio = baseSignals({
+      v8: { heapUsedBytes: 201 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    assert.deepEqual(classifyAdaptiveResourcePressureWithHistory(belowRatio, thresholds), {
+      severity: "normal",
+      reason: "none",
+    });
+    const tracker = createResourcePressureTracker({
+      ...fastThresholds,
+      heapAbsoluteThresholdMb: null,
+    });
+    const ratioCritical = baseSignals({
+      v8: { heapUsedBytes: 950 * MiB, heapLimitBytes: 1_000 * MiB },
+    });
+    tracker.observe(ratioCritical);
+    assert.equal(tracker.observe(ratioCritical).severity, "critical");
+    assert.equal(tracker.getState().reason, "v8_heap_ratio");
+  });
+
   it("does not let high then critical count as two critical samples", () => {
     const tracker = createResourcePressureTracker(fastThresholds);
     const high = baseSignals({
