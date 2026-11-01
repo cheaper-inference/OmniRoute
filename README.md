@@ -1,4 +1,4 @@
-<div align="center">
+https://github.com/cheaper-inference/OmniRoute.git<div align="center">
 
 <img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute Dashboard" width="820"/>
 
