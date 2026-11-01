@@ -92,6 +92,7 @@ import { readConnectionForCooldownGate } from "./executeTargetGates.ts";
 import { recordLkgpPin } from "./recordLkgpPin.ts";
 import {
   handlePreContentStreamRetry,
+  isProviderSafetyStreamFailure,
   qualityValidationFailure,
   remainderIsHomogeneous,
   shouldAbortOnInputBoundFailure,
@@ -475,6 +476,9 @@ export async function executeTargetAttempt(
           latencyMs: Date.now() - deps.startTime,
         });
         state.observeFailure(false, target.executionKey);
+        // #17049: an in-stream provider safety stop is terminal — no same-target retry,
+        // family sibling, or next target may replace it.
+        if (isProviderSafetyStreamFailure(quality)) return qualityValidationFailure(quality);
         if (handlePreContentStreamRetry(quality, retry, deps, modelStr)) {
           if (emptyStreamSiblingRecovery && quality.upstreamFailure?.emptyContent) {
             emptyTurnConnectionId = effectiveConnectionId || null;
