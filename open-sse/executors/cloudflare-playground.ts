@@ -59,6 +59,12 @@ import {
   type CfToolDef,
 } from "../translator/cloudflarePlaygroundTools.ts";
 import { scanCfJsonStandaloneEnvelope } from "../translator/cloudflarePlaygroundJson.ts";
+import { resolveDeclaredToolName } from "../translator/cloudflarePlaygroundNameResolution.ts";
+import {
+  getRequestedToolNames,
+  resolveRequestedToolName,
+  type RequestedToolName,
+} from "../translator/webTools.ts";
 
 export const PLAYGROUND_URL = "https://playground.ai.cloudflare.com/";
 const PLAYGROUND_WS_BASE = "wss://playground.ai.cloudflare.com/agents/playground/";
@@ -211,14 +217,22 @@ export type CfEnvelopeGateFailure =
  * {...}}`. Returns the first failed gate, or null when every gate passes.
  * Arrays and the OpenAI `tool_calls` wrapper are gated element by element: one
  * bad element fails the whole turn (all-or-nothing), matching the parser.
+ *
+ * Policy: the discriminator is contractual — exactly `"tool_call"` (leading /
+ * trailing whitespace is formatting, not a different value). The *name*, by
+ * contrast, is resolved the way the parser + finalize resolve it (case-
+ * insensitive, then fuzzy), because those normalizations are the system's own
+ * documented job; rejecting them would retry — and after three attempts drop —
+ * a call the executor would have executed.
  */
 export function gateCfEnvelopeValue(
   value: unknown,
-  availableTools: CfToolDef[]
+  availableTools: CfToolDef[],
+  requestedNames: RequestedToolName[] = []
 ): CfEnvelopeGateFailure | null {
   if (Array.isArray(value)) {
     for (const item of value) {
-      const failure = gateCfEnvelopeValue(item, availableTools);
+      const failure = gateCfEnvelopeValue(item, availableTools, requestedNames);
       if (failure) return failure;
     }
     return null;
@@ -228,18 +242,23 @@ export function gateCfEnvelopeValue(
 
   // The OpenAI wrapper shape models reach for — gate the calls inside it.
   const nested = obj.tool_calls ?? obj.toolCalls;
-  if (nested !== undefined) return gateCfEnvelopeValue(nested, availableTools);
+  if (nested !== undefined) return gateCfEnvelopeValue(nested, availableTools, requestedNames);
 
   // Gate 1 — `type` must exist and be exactly "tool_call".
   if (!Object.hasOwn(obj, "type")) return "missing_type";
-  if (obj.type !== "tool_call") return "wrong_type";
+  const type = typeof obj.type === "string" ? obj.type.trim() : obj.type;
+  if (type !== "tool_call") return "wrong_type";
 
-  // Gate 2 — `name` must be present and name a declared tool.
+  // Gate 2 — `name` must be present, hold a value, and resolve to a declared
+  // tool exactly the way parser + finalize resolve it.
   if (!Object.hasOwn(obj, "name") || obj.name === null || obj.name === undefined) {
     return "missing_name";
   }
-  if (typeof obj.name !== "string") return "invalid_name";
-  if (!availableTools.some((tool) => tool.name === obj.name)) return "invalid_name";
+  if (typeof obj.name !== "string" || !obj.name.trim()) return "invalid_name";
+  const declared =
+    resolveDeclaredToolName(obj.name, availableTools) ??
+    (requestedNames.length > 0 ? resolveRequestedToolName(obj.name, requestedNames) : null);
+  if (!declared) return "invalid_name";
 
   // Gate 3 — `arguments` must be a non-null JSON object.
   if (!Object.hasOwn(obj, "arguments") || obj.arguments === null || obj.arguments === undefined) {
@@ -259,14 +278,15 @@ export function gateCfEnvelopeValue(
  */
 export function gateCfStandaloneEnvelope(
   text: string,
-  availableTools: CfToolDef[]
+  availableTools: CfToolDef[],
+  requestedNames: RequestedToolName[] = []
 ): CfEnvelopeGateFailure | null {
   const envelope = scanCfJsonStandaloneEnvelope(text);
   if (!envelope) return null;
   // The raw text is an envelope attempt that does not parse: broken or cut
   // off mid-object.
   if (envelope.value === undefined) return "invalid_json";
-  return gateCfEnvelopeValue(envelope.value, availableTools);
+  return gateCfEnvelopeValue(envelope.value, availableTools, requestedNames);
 }
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
@@ -824,6 +844,13 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
     /**
+     * Declared tool names in the fuzzy resolver's shape — the same list
+     * finalize resolves against, so the gate and the executor can never
+     * disagree about whether a name is one of the declared tools.
+     */
+    const requestedNames = getRequestedToolNames(tools);
+
+    /**
      * Evaluate one raw reply against every tool-call gate. `retry` is the
      * decision: any gate that fails sets it, and the executor re-asks the
      * model with a reminder naming the exact failure. `calls` holds the
@@ -839,10 +866,11 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       if (!hasTools) return { calls: [], retry: false, reason: null };
 
       // Gate A — a reply that *is* one JSON value must be a valid envelope:
-      // parseable, `type` exactly "tool_call", a declared `name`, an
-      // `arguments` object. This is what catches `{"type": "shell", ...}` and
-      // cut-off envelopes before the parser ever sees them.
-      const envelopeFailure = gateCfStandaloneEnvelope(text, availableTools);
+      // parseable, `type` exactly "tool_call", a name that resolves to a
+      // declared tool, an `arguments` object. This is what catches
+      // `{"type": "shell", ...}` and cut-off envelopes before the parser ever
+      // sees them.
+      const envelopeFailure = gateCfStandaloneEnvelope(text, availableTools, requestedNames);
       if (envelopeFailure) return { calls: [], retry: true, reason: envelopeFailure };
 
       // The parser reads every well-formed call — the XML tag ladder plus

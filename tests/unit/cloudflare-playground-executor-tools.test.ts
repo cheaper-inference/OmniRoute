@@ -24,6 +24,7 @@ import {
   cfToolNonce,
   type CfToolDef,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
+import { getRequestedToolNames } from "../../open-sse/translator/webTools.ts";
 
 const identityFrame = JSON.stringify({
   name: "playground-test",
@@ -918,7 +919,20 @@ const GATE_TOOLS: CfToolDef[] = [
       required: ["path"],
     },
   },
+  {
+    name: "list-directory",
+    parameters: {
+      type: "object",
+      properties: { path: { type: "string" } },
+      required: ["path"],
+    },
+  },
 ];
+
+/** The same list finalize resolves names against. */
+const GATE_REQUESTED = getRequestedToolNames(
+  GATE_TOOLS.map((tool) => ({ type: "function", function: { name: tool.name } }))
+);
 
 test("gate: a wrong discriminator fails with wrong_type", () => {
   assert.equal(
@@ -1065,4 +1079,264 @@ test("executor exhausts its retries on a persistently wrong discriminator", asyn
   assert.equal(parsed.choices[0].message.content, broken);
   assert.ok(!parsed.choices[0].message.tool_calls);
   assert.equal(rooms.length, 4); // initial + 3 retries
+});
+
+// ── Adversarial gates: deliberately wrong envelopes ────────────────────────────
+
+test("gate: every wrong discriminator fails with wrong_type", () => {
+  const shapes = [
+    '{"type":"gun","name":"read","arguments":{"path":"a.py"}}',
+    '{"type":"shell","name":"read","arguments":{"path":"a.py"}}',
+    '{"type":"function","name":"read","arguments":{"path":"a.py"}}',
+    '{"type":"TOOL_CALL","name":"read","arguments":{"path":"a.py"}}',
+    '{"type":"tool_calls","name":"read","arguments":{"path":"a.py"}}',
+    '{"type":5,"name":"read","arguments":{"path":"a.py"}}',
+    '{"type":true,"name":"read","arguments":{"path":"a.py"}}',
+    '{"type":null,"name":"read","arguments":{"path":"a.py"}}',
+    '{"type":"","name":"read","arguments":{"path":"a.py"}}',
+  ];
+  for (const shape of shapes) {
+    assert.equal(gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED), "wrong_type", shape);
+  }
+});
+
+test("gate: a missing discriminator fails with missing_type", () => {
+  const shapes = [
+    '{"name": "read", "arguments": {"path": "a.py"}}',
+    '{"name": "read"}',
+    '{"arguments": {"path": "a.py"}}',
+    '{"tool_calls": [{"name": "read", "arguments": {"path": "a.py"}}]}',
+  ];
+  for (const shape of shapes) {
+    assert.equal(
+      gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED),
+      "missing_type",
+      shape
+    );
+  }
+});
+
+test("gate: whitespace padding on the discriminator is formatting, not failure", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '{"type": " tool_call ", "name": "read", "arguments": {"path": "a.py"}}',
+      GATE_TOOLS,
+      GATE_REQUESTED
+    ),
+    null
+  );
+});
+
+test("gate: names resolve exactly the way parser + finalize resolve them", () => {
+  const accept = [
+    '{"type":"tool_call","name":"Read","arguments":{"path":"a.py"}}', // case
+    '{"type":"tool_call","name":"read","arguments":{"path":"a.py"}}', // exact
+    '{"type":"tool_call","name":"list_directory","arguments":{"path":"/t"}}', // fuzzy: separators
+    '{"type":"tool_call","name":"list-directory","arguments":{"path":"/t"}}', // exact
+  ];
+  for (const shape of accept) {
+    assert.equal(gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED), null, shape);
+  }
+
+  const reject: Array<[string, string]> = [
+    ['{"type":"tool_call","name":"","arguments":{"path":"a.py"}}', "invalid_name"],
+    ['{"type":"tool_call","name":"   ","arguments":{"path":"a.py"}}', "invalid_name"],
+    ['{"type":"tool_call","name":123,"arguments":{"path":"a.py"}}', "invalid_name"],
+    ['{"type":"tool_call","name":true,"arguments":{"path":"a.py"}}', "invalid_name"],
+    ['{"type":"tool_call","name":null,"arguments":{"path":"a.py"}}', "missing_name"],
+    ['{"type":"tool_call","name":"nope-not-a-tool","arguments":{}}', "invalid_name"],
+  ];
+  for (const [shape, expected] of reject) {
+    assert.equal(gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED), expected, shape);
+  }
+});
+
+test("gate: arguments must be a non-null object, not an array or scalar", () => {
+  const shapes = [
+    '{"type":"tool_call","name":"read","arguments":[]}',
+    '{"type":"tool_call","name":"read","arguments":42}',
+    '{"type":"tool_call","name":"read","arguments":true}',
+    '{"type":"tool_call","name":"read","arguments":"{\\"path\\":\\"a.py\\"}"}',
+  ];
+  for (const shape of shapes) {
+    assert.equal(
+      gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED),
+      "missing_arguments",
+      shape
+    );
+  }
+});
+
+test("gate: cut-off and broken documents fail with invalid_json", () => {
+  const shapes = [
+    '{"type": "tool_call", "name": "read", "arguments": {"path":',
+    '[{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}},',
+    '{"type": }',
+    // The trailing-comma case is repaired to {"type": "tool_call"} which then
+    // correctly fails the name gate — so a truly unrepairable one instead:
+    '{"type": "tool_call", "name":',
+  ];
+  for (const shape of shapes) {
+    assert.equal(
+      gateCfStandaloneEnvelope(shape, GATE_TOOLS, GATE_REQUESTED),
+      "invalid_json",
+      shape
+    );
+  }
+});
+
+test("gate: a fenced contract envelope passes; prose-embedded ones are the parser's job", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '```json\n{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}\n```',
+      GATE_TOOLS,
+      GATE_REQUESTED
+    ),
+    null
+  );
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      'Send {"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}} when ready',
+      GATE_TOOLS,
+      GATE_REQUESTED
+    ),
+    null
+  );
+});
+
+test("gate: one bad element fails the whole array even when the rest pass", () => {
+  assert.equal(
+    gateCfStandaloneEnvelope(
+      '[{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}, ' +
+        '{"type": "tool_call", "name": "nope-not-a-tool", "arguments": {}}]',
+      GATE_TOOLS,
+      GATE_REQUESTED
+    ),
+    "invalid_name"
+  );
+});
+
+// ── Adversarial retries, end to end ───────────────────────────────────────────
+
+test('executor retries {"type":"gun"} and executes the corrected reply', async () => {
+  const broken = '{"type":"gun","name":"read","arguments":{"path":"a.py"}}';
+  const fixed = '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "a gun discriminator must be retried");
+});
+
+test("executor retries an envelope that dropped its type field", async () => {
+  const broken = '{"name": "read", "arguments": {"path": "a.py"}}';
+  const fixed = '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "a missing type must be retried");
+});
+
+test("executor retries an envelope whose _nonce is not this request's", async () => {
+  const broken =
+    '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}, "_nonce": "not-this-request"}';
+  const fixed = '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "a replayed nonce must be retried, not re-executed");
+});
+
+test("executor retries a botched envelope quoted inside prose", async () => {
+  // Gate A only reads whole-reply JSON, so this one must be caught by the
+  // intent net: the parser cannot read `type: "shell"`, and without the intent
+  // check the reply would ship as prose with the failed call buried in it.
+  const broken = 'Engine output: {"type":"shell","arguments":{"command":"ls"}} — what now?';
+  const fixed = '{"type": "tool_call", "name": "read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "an embedded botched envelope must be retried");
+});
+
+test("executor does not retry a capitalised but fully declared name", async () => {
+  // Case resolution is the system's job — retrying `Read` would drop a call
+  // the parser executes on the first attempt.
+  const reply = '{"type": "tool_call", "name": "Read", "arguments": {"path": "a.py"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, reply),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: Array<{ function: { name: string } }> };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.[0].function.name, "read");
+  assert.equal(rooms.length, 1, "a resolvable name must not trigger a retry");
+});
+
+test("executor treats a JSON answer as plain text — no retry", async () => {
+  const reply = '{"answer": "42"}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, reply),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+  assert.equal(parsed.choices[0].message.content, reply);
+  assert.ok(!parsed.choices[0].message.tool_calls);
+  assert.equal(rooms.length, 1, "a JSON answer is not a tool envelope");
 });

@@ -352,16 +352,16 @@ export function hasMalformedCfToolIntent(
   // name the caller does not declare, arguments that are not an object. Prose
   // that merely quotes a tool's schema (`{"name": "read", "description": …}`)
   // must not trigger a retry.
-  // Any `"type": "<value>"` pair counts: the contract marks calls with
-  // `"tool_call"`, and a wrong discriminator (`"shell"`, `"function"`) is the
-  // same intent botched, not prose. The trailing `[,}]` keeps it a JSON pair,
-  // so a sentence quoting a schema field does not count. Only consulted when
-  // the parser read no call, so a reply that carried a well-formed call is
-  // never retried.
+  // Any `"type": <scalar>` pair counts: the contract marks calls with
+  // `"tool_call"`, and a wrong discriminator (`"shell"`, `"gun"`, `5`) is the
+  // same intent botched, not prose. Anchored to `{` or `,` and a JSON scalar
+  // terminated by `,`/`}` so a sentence merely naming the `type` field does
+  // not count. Only consulted when the parser read no call, so a reply that
+  // carried a well-formed call is never retried.
   const jsonIntent =
     /"tool_calls"\s*:/.test(text) ||
     /"_nonce"\s*:/.test(text) ||
-    /"type"\s*:\s*"[^"]*"\s*[,}]/.test(text) ||
+    /[{\[,]\s*"type"\s*:\s*(?:"[^"]*"|[\d.]+|true|false|null)\s*[,}]/.test(text) ||
     (toolNames.some((name) =>
       new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
     ) &&

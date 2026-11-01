@@ -780,6 +780,25 @@ test("a multi-call array that lost one element is not partially executed", () =>
   assert.equal(hasMalformedCfToolIntent(text, ["bash", "read_file"], TEST_TOOLS), true);
 });
 
+test("hasMalformedCfToolIntent flags a wrong discriminator quoted mid-sentence", () => {
+  // The parser cannot read it (the type is not the contract's), so the intent
+  // net must — a botched envelope inside prose is still a failed call.
+  const text = 'Engine output was {"type":"shell","arguments":{"command":"ls"}} — what now?';
+  assert.equal(hasMalformedCfToolIntent(text, ["bash"], TEST_TOOLS), true);
+});
+
+test("hasMalformedCfToolIntent flags a non-string type discriminator", () => {
+  const text = 'It returned {"type":5,"arguments":{"command":"ls"}} as the reply.';
+  assert.equal(hasMalformedCfToolIntent(text, ["bash"], TEST_TOOLS), true);
+});
+
+test("hasMalformedCfToolIntent ignores prose that merely names the type field", () => {
+  // The type clause is anchored to JSON context (`{`/`,` before the key, a
+  // scalar value terminated by `,`/`}`), so schema talk stays prose.
+  const text = 'Every envelope needs a "type": field, then a "name": field, then arguments.';
+  assert.equal(hasMalformedCfToolIntent(text, ["bash"], TEST_TOOLS), false);
+});
+
 // ── hasMalformedCfToolIntent ──────────────────────────────────────────────────
 
 test("hasMalformedCfToolIntent returns false for clean text", () => {
