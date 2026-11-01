@@ -75,6 +75,57 @@ export function getTurnExecutionSnapshot(key: string) {
   return { retryCount: active.retryCount, ageMs: Math.max(0, Date.now() - active.startedAt) };
 }
 
+export const TURN_WAIT_TIMEOUT_MS = 30_000;
+export const TURN_WAIT_POLL_MS = 500;
+
+export type TurnExecutionWaitOptions = {
+  /** Upper bound on how long a duplicate waits for the in-flight turn to release. */
+  timeoutMs?: number;
+  /** Poll interval while waiting. */
+  pollMs?: number;
+  /** Client abort signal — a disconnected caller stops waiting immediately. */
+  signal?: AbortSignal | null;
+  /** Warn-channel logger receiving the duplicate-waiting notice. */
+  log?: { warn?: (tag: string, msg: string) => void } | null | undefined;
+  traceId?: string;
+};
+
+/**
+ * Acquires the turn slot, waiting out an in-flight duplicate instead of
+ * failing it immediately.
+ *
+ * Executing a duplicate's request path straight to a 409 turns a transient
+ * self-collision — executor/account-fallback retries re-entering chatCore
+ * with the caller's headers while the original turn is stuck on a slow
+ * upstream — into a fatal client-visible failure, and the 409 is then
+ * misread downstream as an account-level rate limit ("reset after Ns"),
+ * cooling down healthy accounts. Waiting keeps the guard's serialization
+ * guarantee without failing the duplicate; after the timeout the caller
+ * falls back to the 409 result as before.
+ */
+export async function acquireTurnExecutionWithWait(
+  key: string | null,
+  opts: TurnExecutionWaitOptions = {}
+): Promise<TurnExecutionAcquireResult> {
+  const turn = acquireTurnExecution(key);
+  if (turn.acquired) return turn;
+
+  const timeoutMs = opts.timeoutMs ?? TURN_WAIT_TIMEOUT_MS;
+  const pollMs = opts.pollMs ?? TURN_WAIT_POLL_MS;
+  const { signal, log, traceId } = opts;
+  log?.warn?.(
+    "TURN_GUARD",
+    `duplicate waiting cid=${traceId ?? "?"} retry=${turn.retryCount} ageMs=${turn.ageMs}`
+  );
+  const deadline = Date.now() + timeoutMs;
+  let current = turn;
+  while (!current.acquired && Date.now() < deadline && !signal?.aborted) {
+    await new Promise((resolve) => setTimeout(resolve, pollMs));
+    current = acquireTurnExecution(key);
+  }
+  return current;
+}
+
 export function clearTurnExecutionsForTesting(): void {
   activeTurns.clear();
 }
