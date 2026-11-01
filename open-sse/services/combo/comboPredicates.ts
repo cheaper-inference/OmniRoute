@@ -400,6 +400,15 @@ export function isAccountSemaphoreCapacityFailure(error?: {
   );
 }
 
+/** Process-wide shedding cannot recover by retrying another combo target. */
+export function isLocalProcessPressureResponse(response: Response, body: unknown): boolean {
+  if (response.status !== 503 || !body || typeof body !== "object") return false;
+  const error = (body as Record<string, unknown>).error;
+  if (!error || typeof error !== "object") return false;
+  const code = (error as Record<string, unknown>).code;
+  return code === "resource_pressure" || code === "heap_pressure";
+}
+
 export function isComboTargetTimeoutFailure(error?: {
   code?: string | null;
   type?: string | null;

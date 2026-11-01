@@ -64,6 +64,7 @@ import {
   isHedgeCancelledSentinel,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
+  isLocalProcessPressureResponse,
   toRecordedTarget,
   resolveDelayMs,
   isModelScoped400,
@@ -779,6 +780,11 @@ export async function executeTargetAttempt(
 
     const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
     const { errorText, errorBody, structuredError } = failure;
+    // Return the original verdict before retry hints, health or affinity mutations.
+    // The attempt loop treats this as fatal and cancels already-running hedges.
+    if (isLocalProcessPressureResponse(result, errorBody)) {
+      return { ok: false, response: result };
+    }
     const retryAfter = resolveAttemptRetryAfter(failure);
 
     // Track earliest retryAfter

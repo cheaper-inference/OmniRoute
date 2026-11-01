@@ -468,10 +468,15 @@ export async function dispatchWithCooldownRetry(opts: {
           dispatchPosition + 1 < dispatchIndices.length
         ) {
           const hedgeDelay = resolveDelayMs(deps.config.hedgeDelayMs, 500);
+          let hedgeTimer: ReturnType<typeof setTimeout> | undefined;
           const timeoutPromise = new Promise<void>((r) => {
-            setTimeout(r, hedgeDelay);
+            hedgeTimer = setTimeout(r, hedgeDelay);
           });
-          await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
+          try {
+            await Promise.race([task, globalPromise, timeoutPromise, loopSafetyPromise]);
+          } finally {
+            clearTimeout(hedgeTimer);
+          }
         } else {
           await Promise.race([task, globalPromise, loopSafetyPromise]);
         }
@@ -711,6 +716,7 @@ export async function dispatchWithCooldownRetry(opts: {
               }
             );
             if (compatFallbackResult) {
+              if (!compatFallbackResult.ok) return compatFallbackResult;
               recordComboRequest(deps.combo.name, null, {
                 success: true,
                 latencyMs: Date.now() - deps.startTime,
