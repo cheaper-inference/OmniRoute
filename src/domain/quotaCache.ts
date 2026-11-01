@@ -362,24 +362,30 @@ function remainingPercent(usage: unknown, limit: unknown): number | null {
 function mergeCodexPersistedQuota(
   entry: QuotaCacheEntry,
   scope: "codex" | "spark",
-  quotaState: CodexPersistedQuotaState
-): void {
+  quotaState: CodexPersistedQuotaState,
+  observedAt: number,
+  exhaustedWindow: "5h" | "7d" | null
+): boolean {
   const sessionKey = scope === "spark" ? CODEX_SPARK_QUOTA_SESSION : "session";
   const weeklyKey = scope === "spark" ? CODEX_SPARK_QUOTA_WEEKLY : "weekly";
   const sessionRemaining = remainingPercent(quotaState.usage5h, quotaState.limit5h);
   const weeklyRemaining = remainingPercent(quotaState.usage7d, quotaState.limit7d);
-  if (sessionRemaining !== null) {
-    entry.quotas[sessionKey] = {
-      remainingPercentage: sessionRemaining,
-      resetAt: quotaState.resetAt5h ?? null,
+  let changed = false;
+  for (const [key, remaining, resetAt, window] of [
+    [sessionKey, sessionRemaining, quotaState.resetAt5h, "5h"],
+    [weeklyKey, weeklyRemaining, quotaState.resetAt7d, "7d"],
+  ] as const) {
+    if (remaining === null) continue;
+    const prior = entry.quotas[key];
+    if (prior && (prior.observedAt ?? entry.fetchedAt) >= observedAt) continue;
+    entry.quotas[key] = {
+      remainingPercentage: exhaustedWindow === window ? 0 : remaining,
+      resetAt: resetAt ?? null,
+      observedAt,
     };
+    changed = true;
   }
-  if (weeklyRemaining !== null) {
-    entry.quotas[weeklyKey] = {
-      remainingPercentage: weeklyRemaining,
-      resetAt: quotaState.resetAt7d ?? null,
-    };
-  }
+  return changed;
 }
 
 /** Overlay one Codex child's persisted quota facts into the existing request cache. */
@@ -401,6 +407,11 @@ export function hydrateCodexQuotaCacheForRequest(
   if (account.kind !== "child") return;
   const hydration = getCodexChildQuotaHydration(account);
   if (!hydration.quotaState) return;
+  const observedAt = hydration.quotaState.observedAt
+    ? parseDate(hydration.quotaState.observedAt)
+    : null;
+  // Undated/future metadata is not a fresh observation and cannot supersede known facts.
+  if (observedAt === null || observedAt > Date.now()) return;
 
   const { cache } = getState();
   const entry = cache.get(connection.id) ||
@@ -409,29 +420,27 @@ export function hydrateCodexQuotaCacheForRequest(
       provider: connection.provider,
       quotas: {},
       modelQuotas: {},
-      fetchedAt: Date.now(),
+      fetchedAt: observedAt,
       exhausted: false,
       nextResetAt: null,
     };
-  mergeCodexPersistedQuota(entry, hydration.scope, hydration.quotaState);
-  let exhaustedResetAt: string | null = null;
-  if (hydration.exhaustedWindow) {
-    const windowName =
-      hydration.scope === "spark"
-        ? hydration.exhaustedWindow === "5h"
-          ? CODEX_SPARK_QUOTA_SESSION
-          : CODEX_SPARK_QUOTA_WEEKLY
-        : hydration.exhaustedWindow === "5h"
-          ? "session"
-          : "weekly";
-    const window = entry.quotas[windowName];
-    if (window) {
-      entry.quotas[windowName] = { ...window, remainingPercentage: 0 };
-      exhaustedResetAt = window.resetAt;
-    }
-  }
+  // A real windowless 429 must not be replaced by older persisted quota metadata.
+  if (entry.exhausted && Object.keys(entry.quotas).length === 0 && entry.fetchedAt >= observedAt)
+    return;
+  if (
+    !mergeCodexPersistedQuota(
+      entry,
+      hydration.scope,
+      hydration.quotaState,
+      observedAt,
+      hydration.exhaustedWindow
+    )
+  )
+    return;
   entry.exhausted = isExhausted(entry.quotas);
-  if (exhaustedResetAt) entry.nextResetAt = capParkWindow(exhaustedResetAt, Date.now());
+  entry.nextResetAt = entry.exhausted
+    ? capParkWindow(earliestResetAt(entry.quotas), observedAt)
+    : null;
   cache.set(connection.id, entry);
 }
 
@@ -440,19 +449,17 @@ function isCodexQuotaExhausted(
   entry: QuotaCacheEntry,
   requestedModel: string | null
 ): boolean {
-  if (!requestedModel) return entry.exhausted;
   const quotaNames = Object.keys(entry.quotas || {});
-  if (quotaNames.length === 0) return entry.exhausted;
-  const filterWindow = getCodexQuotaWindowFilterForModel(requestedModel);
-  const scopedWindowNames = quotaNames.filter((windowName) => filterWindow?.(windowName));
-  return (
-    scopedWindowNames.length > 0 &&
-    scopedWindowNames.every(
-      (windowName) =>
-        getQuotaWindowStatus(connectionId, windowName, DEFAULT_QUOTA_THRESHOLD_PERCENT)
-          ?.reachedThreshold
-    )
-  );
+  if (quotaNames.length === 0) {
+    const age = Date.now() - entry.fetchedAt;
+    return entry.exhausted && age >= 0 && age < EXHAUSTED_TTL_MS;
+  }
+  const filterWindow = requestedModel ? getCodexQuotaWindowFilterForModel(requestedModel) : null;
+  const statuses = quotaNames
+    .filter((windowName) => !requestedModel || filterWindow?.(windowName))
+    .map((windowName) => getQuotaWindowStatus(connectionId, windowName))
+    .filter((status) => status !== null);
+  return statuses.length > 0 && statuses.every((status) => status.reachedThreshold);
 }
 
 function isStandardQuotaExhausted(entry: QuotaCacheEntry, now: number): boolean {
@@ -715,6 +722,11 @@ export function isQuotaExhaustedForRequest(
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
   if (!entry) return false;
 
+  // Codex releases stale windows independently; another scope's reset cannot clear this one.
+  if (provider === "codex") {
+    return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+  }
+
   const now = Date.now();
   const advanced = advancedWindowResetAt(entry, now);
   if (advanced) {
@@ -727,10 +739,6 @@ export function isQuotaExhaustedForRequest(
       return isStandardQuotaExhausted(entry, now);
     }
     return isAntigravityQuotaExhausted(connectionId, entry, requestedModel);
-  }
-
-  if (provider === "codex") {
-    return isCodexQuotaExhausted(connectionId, entry, requestedModel);
   }
 
   if (resolveProviderId(provider) === "claude") {
@@ -755,6 +763,9 @@ export function setQuotaCache(
     provider === "codex" ? omitCodexDisplayOnlyQuotas(reportedQuotas) : reportedQuotas;
   const quotas = normalizeConnectionQuotas(rawQuotas, provider);
   const modelQuotas = normalizeQuotas(rawModelQuotas);
+  if (provider === "codex") {
+    for (const quota of Object.values(quotas)) quota.observedAt = Date.now();
+  }
   const exhausted = isExhausted(quotas);
   // #4438 — capture the prior entry BEFORE overwriting the cache so we can skip
   // redundant snapshot writes for idle connections whose quota didn't change.
@@ -892,7 +903,10 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
     if ((provider === "vertex" || provider === "vertex-partner") && windowKey === "spend") {
       fractionReported = false;
     }
+    const createdAtVal = camelSnapshot.createdAt ?? snapshot.created_at;
+    const createdAtMs = createdAtVal ? parseDate(createdAtVal) : null;
     quotas[windowKey] = {
+      ...(provider === "codex" ? { observedAt: createdAtMs ?? 0 } : {}),
       remainingPercentage: clampPercent(
         Number(camelSnapshot.remainingPercentage ?? snapshot.remaining_percentage ?? 0)
       ),
@@ -904,8 +918,6 @@ function hydrateQuotaCacheFromSnapshots(connectionId: string): QuotaCacheEntry |
     if (snapshotWindowDurationMs && snapshotWindowDurationMs > 0) {
       windowDurationMs = snapshotWindowDurationMs;
     }
-    const createdAtVal = camelSnapshot.createdAt ?? snapshot.created_at;
-    const createdAtMs = createdAtVal ? parseDate(createdAtVal) : null;
     if (createdAtMs !== null) fetchedAt = Math.max(fetchedAt, createdAtMs);
   }
 
@@ -936,6 +948,7 @@ export function isAccountQuotaExhausted(connectionId: string): boolean {
   if (isQuotaHealthy(connectionId)) return false;
   const entry = getState().cache.get(connectionId) || hydrateQuotaCacheFromSnapshots(connectionId);
   if (!entry) return false;
+  if (entry.provider === "codex") return isCodexQuotaExhausted(connectionId, entry, null);
   if (!entry.exhausted) return false;
 
   const now = Date.now();
@@ -973,6 +986,13 @@ export function getQuotaWindowStatus(
 
   const window = resolveQuotaWindow(entry.quotas, windowName);
   if (!window) return null;
+  const observedAt = window.observedAt ?? entry.fetchedAt;
+  // Expired Codex evidence is unknown, not a healthy override or proof of a reset.
+  if (
+    entry.provider === "codex" &&
+    (!Number.isFinite(observedAt) || observedAt > now || now - observedAt >= ACTIVE_TTL_MS)
+  )
+    return null;
 
   const remainingPercentage = clampPercent(window.remainingPercentage);
   const usedPercentage = clampPercent(100 - remainingPercentage);
@@ -1020,7 +1040,7 @@ export function getQuotaWindowObservation(
 
   const status = getQuotaWindowStatus(connectionId, windowName);
   if (!status) return null;
-  const observedDate = new Date(entry.fetchedAt);
+  const observedDate = new Date(window.observedAt ?? entry.fetchedAt);
 
   return {
     usedPercentage: status.usedPercentage,
