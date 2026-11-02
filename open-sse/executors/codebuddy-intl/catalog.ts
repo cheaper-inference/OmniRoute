@@ -88,82 +88,67 @@ function findModelArray(payload: unknown): unknown[] {
   return [];
 }
 
+/** A record plus the alias spellings to try on it, in precedence order. */
+type AliasLookup = readonly [JsonRecord, readonly string[]];
+
+function firstAlias<T>(
+  coerce: (value: unknown) => T | undefined,
+  ...lookups: AliasLookup[]
+): T | undefined {
+  for (const [record, keys] of lookups) {
+    for (const key of keys) {
+      const value = coerce(record[key]);
+      if (value !== undefined) return value;
+    }
+  }
+  return undefined;
+}
+
+const asNonEmptyString = (value: unknown) => asString(value) || undefined;
+
+/** The optional capability fields an entry declares, with undeclared ones left out. */
+function readCapabilityFields(entry: JsonRecord): Partial<CodeBuddyCatalogModel> {
+  const capabilities = firstRecord(entry.capabilities, entry.capability, entry.features);
+  const limits = firstRecord(entry.limits, entry.limit, capabilities.limits);
+  const reasoningKeys = ["reasoning", "supportsReasoning", "supports_reasoning"];
+  const visionKeys = ["vision", "supportsVision", "supports_vision"];
+  const fields = {
+    reasoning: firstAlias(asBoolean, [entry, reasoningKeys], [capabilities, reasoningKeys]),
+    vision: firstAlias(asBoolean, [entry, visionKeys], [capabilities, [...visionKeys, "image"]]),
+    toolCall: firstAlias(
+      asBoolean,
+      [entry, ["toolCall", "tool_call", "supportsToolCall", "supports_tool_call", "functionCall"]],
+      [capabilities, ["toolCall", "tool_call", "functionCall"]]
+    ),
+    maxTokens: firstAlias(
+      asNumber,
+      [entry, ["maxTokens", "max_tokens", "maxOutputTokens", "max_output_tokens"]],
+      [capabilities, ["maxTokens"]],
+      [limits, ["maxTokens", "max_tokens"]]
+    ),
+    contextWindow: firstAlias(
+      asNumber,
+      [entry, ["contextWindow", "context_window", "maxInputTokens", "max_input_tokens"]],
+      [capabilities, ["contextWindow", "context_window"]],
+      [limits, ["contextWindow", "context_window"]]
+    ),
+  };
+  return Object.fromEntries(
+    Object.entries(fields).filter(([, value]) => value !== undefined)
+  ) as Partial<CodeBuddyCatalogModel>;
+}
+
 function parseEntry(entry: unknown): CodeBuddyCatalogModel | null {
   if (!isRecord(entry)) return null;
 
-  const id =
-    asString(entry.id) ||
-    asString(entry.model) ||
-    asString(entry.modelId) ||
-    asString(entry.model_id);
+  const id = firstAlias(asNonEmptyString, [entry, ["id", "model", "modelId", "model_id"]]);
   if (!id) return null;
 
-  const capabilities = firstRecord(entry.capabilities, entry.capability, entry.features);
-  const limits = firstRecord(entry.limits, entry.limit, capabilities.limits);
-
-  const model: CodeBuddyCatalogModel = {
-    id,
-    name:
-      asString(entry.name) ||
-      asString(entry.displayName) ||
-      asString(entry.display_name) ||
-      asString(entry.label) ||
-      asString(entry.title) ||
-      id,
-  };
-
-  const reasoning =
-    asBoolean(entry.reasoning) ??
-    asBoolean(entry.supportsReasoning) ??
-    asBoolean(entry.supports_reasoning) ??
-    asBoolean(capabilities.reasoning) ??
-    asBoolean(capabilities.supportsReasoning) ??
-    asBoolean(capabilities.supports_reasoning);
-  if (reasoning !== undefined) model.reasoning = reasoning;
-
-  const vision =
-    asBoolean(entry.vision) ??
-    asBoolean(entry.supportsVision) ??
-    asBoolean(entry.supports_vision) ??
-    asBoolean(capabilities.vision) ??
-    asBoolean(capabilities.supportsVision) ??
-    asBoolean(capabilities.supports_vision) ??
-    asBoolean(capabilities.image);
-  if (vision !== undefined) model.vision = vision;
-
-  const toolCall =
-    asBoolean(entry.toolCall) ??
-    asBoolean(entry.tool_call) ??
-    asBoolean(entry.supportsToolCall) ??
-    asBoolean(entry.supports_tool_call) ??
-    asBoolean(entry.functionCall) ??
-    asBoolean(capabilities.toolCall) ??
-    asBoolean(capabilities.tool_call) ??
-    asBoolean(capabilities.functionCall);
-  if (toolCall !== undefined) model.toolCall = toolCall;
-
-  const maxTokens =
-    asNumber(entry.maxTokens) ??
-    asNumber(entry.max_tokens) ??
-    asNumber(entry.maxOutputTokens) ??
-    asNumber(entry.max_output_tokens) ??
-    asNumber(capabilities.maxTokens) ??
-    asNumber(limits.maxTokens) ??
-    asNumber(limits.max_tokens);
-  if (maxTokens !== undefined) model.maxTokens = maxTokens;
-
-  const contextWindow =
-    asNumber(entry.contextWindow) ??
-    asNumber(entry.context_window) ??
-    asNumber(entry.maxInputTokens) ??
-    asNumber(entry.max_input_tokens) ??
-    asNumber(capabilities.contextWindow) ??
-    asNumber(capabilities.context_window) ??
-    asNumber(limits.contextWindow) ??
-    asNumber(limits.context_window);
-  if (contextWindow !== undefined) model.contextWindow = contextWindow;
-
-  return model;
+  const name = firstAlias(asNonEmptyString, [
+    entry,
+    ["name", "displayName", "display_name", "label", "title"],
+  ]);
+  return { id, name: name ?? id, ...readCapabilityFields(entry) };
 }
 
 /** Parse a `/v3/config` payload into catalog entries. Never throws. */
