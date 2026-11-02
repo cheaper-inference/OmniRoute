@@ -355,6 +355,25 @@ export function isRequestScopedUpstreamFailure(error?: {
   );
 }
 
+/**
+ * A full per-account concurrency gate. It stays request-scoped (no lockout, no
+ * cooldown, no connection blame), but unlike the other request-scoped failures
+ * it is momentary, so the combo keeps its same-target retry for it: a slot can
+ * free up while the retry waits.
+ */
+export function isAccountSemaphoreCapacityFailure(error?: {
+  code?: string | null;
+  type?: string | null;
+}): boolean {
+  const code = typeof error?.code === "string" ? error.code.toLowerCase() : "";
+  const type = typeof error?.type === "string" ? error.type.toLowerCase() : "";
+  return (
+    code === "semaphore_timeout" ||
+    code === "semaphore_queue_full" ||
+    type === "account_semaphore_capacity"
+  );
+}
+
 export function isComboTargetTimeoutFailure(error?: {
   code?: string | null;
   type?: string | null;
@@ -632,13 +651,7 @@ export function isLocalQueueCapacityErrorBody(errorBody: unknown): boolean {
     code === "RATE_LIMIT_QUEUE_TIMEOUT" ||
     code === "RATE_LIMIT_QUEUE_FULL" ||
     code === "RATE_LIMIT_QUEUE_WEDGED" ||
-    // Account-semaphore capacity: the connection is healthy — the per-account
-    // concurrency gate is simply full for this moment. Same verdict as the
-    // limiter queue codes above: no cooldown, no rotation blame.
-    code === "SEMAPHORE_TIMEOUT" ||
-    code === "SEMAPHORE_QUEUE_FULL" ||
-    type === "local_queue_capacity" ||
-    type === "account_semaphore_capacity"
+    type === "local_queue_capacity"
   );
 }
 
