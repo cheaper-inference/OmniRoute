@@ -197,17 +197,17 @@ Der JSON-RPC-Endpunkt `/a2a` ist der kanonische A2A-Einstiegspunkt. Die folgende
 
 ---
 
-## Hinzufügen eines neuen Skills
+## Hinzufügen einer neuen Fähigkeit
 
-1. **Skill-Datei erstellen:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Fähigkeitsdatei erstellen:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Exportieren Sie eine asynchrone Funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Orientieren Sie sich an der Struktur vorhandener Skills wie `smartRouting.ts`.
+   Exportieren Sie eine asynchrone Funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Orientieren Sie sich an der Struktur vorhandener Fähigkeiten wie `smartRouting.ts`.
 
 2. **Handler registrieren:** Fügen Sie in `src/lib/a2a/taskExecution.ts` einen Eintrag zu `A2A_SKILL_HANDLERS` hinzu:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...vorhandene Skills
+     // ...vorhandene Fähigkeiten
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ Der JSON-RPC-Endpunkt `/a2a` ist der kanonische A2A-Einstiegspunkt. Die folgende
    };
    ```
 
-3. **Auf der Agent Card veröffentlichen:** Ergänzen Sie in `src/app/.well-known/agent.json/route.ts` das Array `skills`:
+3. **In der Agentenkarte veröffentlichen:** Fügen Sie in `src/lib/a2a/agentCardMetadata.ts` (gemeinsam verwendet von `/.well-known/agent.json` und `/.well-known/agent-card.json`) dem Array `skills` einen Eintrag hinzu:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Ihr Skill",
+     "name": "Ihre Fähigkeit",
      "description": "Kurze, absichtsorientierte Beschreibung",
      "tags": ["routing", "quota"],
-     "examples": ["Beispiel für einen natürlichsprachlichen Aufruf"]
+     "examples": ["Beispielaufruf in natürlicher Sprache"]
    }
    ```
 
-4. **Tests schreiben:** `tests/unit/a2a-<your-skill>.test.ts`. Decken Sie den Erfolgs- und den Fehlerfall ab.
+4. **Tests schreiben:** `tests/unit/a2a-<your-skill>.test.ts`. Decken Sie den Erfolgsfall und den Fehlerfall ab.
 
-5. **Dokumentieren Sie** den neuen Skill in der Tabelle `Available Skills` dieser Datei.
+5. **Dokumentieren Sie** die neue Fähigkeit in der Tabelle `Available Skills` dieser Datei.
 
 ---
 

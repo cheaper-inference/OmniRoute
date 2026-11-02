@@ -199,15 +199,15 @@ JSON-RPC վերջնակետը՝ `/a2a`, կանոնական A2A մուտքի կե
 
 ## Նոր հմտության ավելացում
 
-1. **Ստեղծեք հմտության ֆայլ․** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Ստեղծեք հմտության ֆայլը՝** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Արտահանեք `(task: A2ATask) => Promise<{ artifacts, metadata }>` ասինխրոն ֆունկցիա։ Հետևեք գոյություն ունեցող հմտությունների կառուցվածքին, օրինակ՝ `smartRouting.ts`։
+   Արտահանեք `(task: A2ATask) => Promise<{ artifacts, metadata }>` ասինքրոն ֆունկցիա։ Հետևեք առկա հմտությունների կառուցվածքին, օրինակ՝ `smartRouting.ts`։
 
-2. **Գրանցեք մշակիչը․** `src/lib/a2a/taskExecution.ts` ֆայլում գրառում ավելացրեք `A2A_SKILL_HANDLERS`-ում․
+2. **Գրանցեք մշակիչը՝** `src/lib/a2a/taskExecution.ts`-ում ավելացրեք գրառում `A2A_SKILL_HANDLERS`-ում՝
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...գոյություն ունեցող հմտությունները
+     // ...առկա հմտություններ
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,19 +215,19 @@ JSON-RPC վերջնակետը՝ `/a2a`, կանոնական A2A մուտքի կե
    };
    ```
 
-3. **Հրապարակեք Agent Card-ում․** `src/app/.well-known/agent.json/route.ts` ֆայլում ավելացրեք `skills` զանգվածին․
+3. **Ներկայացրեք Agent Card-ում՝** `src/lib/a2a/agentCardMetadata.ts`-ում (որը համօգտագործվում է `/.well-known/agent.json`-ի և `/.well-known/agent-card.json`-ի կողմից) ավելացրեք հետևյալը `skills` զանգվածում՝
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "Ձեր հմտությունը",
+     "description": "Կարճ, նպատակին միտված նկարագրություն",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["Բնական լեզվով կանչի օրինակ"]
    }
    ```
 
-4. **Գրեք թեստեր․** `tests/unit/a2a-<your-skill>.test.ts`։ Ընդգրկեք հաջող կատարման ուղին և սխալի ուղին։
+4. **Գրեք թեստեր՝** `tests/unit/a2a-<your-skill>.test.ts`։ Ընդգրկեք հաջող կատարման ուղին և սխալի ուղին։
 
 5. **Փաստաթղթավորեք** նոր հմտությունն այս ֆայլի `Available Skills` աղյուսակում։
 

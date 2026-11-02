@@ -196,17 +196,17 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
 
 ---
 
-## নতুন স্কিল যোগ করা
+## নতুন Skill যোগ করা
 
-1. **স্কিল ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Skill ফাইল তৈরি করুন:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   একটি async ফাংশন `(task: A2ATask) => Promise<{ artifacts, metadata }>` এক্সপোর্ট করুন। `smartRouting.ts`-এর মতো বিদ্যমান স্কিলগুলোর কাঠামো অনুসরণ করুন।
+   একটি async function `(task: A2ATask) => Promise<{ artifacts, metadata }>` export করুন। `smartRouting.ts`-এর মতো বিদ্যমান skills-এর কাঠামো অনুসরণ করুন।
 
-2. **হ্যান্ডলার নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি এন্ট্রি যোগ করুন:
+2. **Handler নিবন্ধন করুন:** `src/lib/a2a/taskExecution.ts`-এ `A2A_SKILL_HANDLERS`-এ একটি entry যোগ করুন:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...বিদ্যমান স্কিলগুলো
+     // ...বিদ্যমান skills
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -214,21 +214,21 @@ JSON-RPC এন্ডপয়েন্ট `/a2a` হলো প্রামা�
    };
    ```
 
-3. **Agent Card-এ প্রকাশ করুন:** `src/app/.well-known/agent.json/route.ts`-এ `skills` অ্যারেতে যোগ করুন:
+3. **Agent Card-এ প্রকাশ করুন:** `src/lib/a2a/agentCardMetadata.ts`-এ (`/.well-known/agent.json` এবং `/.well-known/agent-card.json` উভয়ের জন্য ব্যবহৃত), `skills` array-তে যোগ করুন:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
-     "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "name": "আপনার Skill",
+     "description": "সংক্ষিপ্ত, অভিপ্রায়-কেন্দ্রিক বিবরণ",
+     "tags": ["রাউটিং", "কোটা"],
+     "examples": ["স্বাভাবিক ভাষায় নমুনা invocation"]
    }
    ```
 
-4. **টেস্ট লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফলতার পথ + ত্রুটির পথ কভার করুন।
+4. **Tests লিখুন:** `tests/unit/a2a-<your-skill>.test.ts`। সফল path এবং error path উভয়ই অন্তর্ভুক্ত করুন।
 
-5. **এই ফাইলের `Available Skills` টেবিলে** নতুন স্কিলটি নথিভুক্ত করুন।
+5. **নথিভুক্ত করুন:** এই ফাইলের `Available Skills` table-এ নতুন skill-টি যোগ করুন।
 
 ---
 

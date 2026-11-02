@@ -201,9 +201,9 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
 
 1. **Opret færdighedsfil:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen i eksisterende færdigheder såsom `smartRouting.ts`.
+   Eksportér en asynkron funktion `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Følg strukturen for eksisterende færdigheder såsom `smartRouting.ts`.
 
-2. **Registrer handler:** Tilføj en post til `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
+2. **Registrér handler:** Tilføj en post i `A2A_SKILL_HANDLERS` i `src/lib/a2a/taskExecution.ts`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,7 +215,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    };
    ```
 
-3. **Eksponér på agentkortet:** Tilføj følgende til `skills`-arrayet i `src/app/.well-known/agent.json/route.ts`:
+3. **Eksponér i agentkortet:** Tilføj til arrayet `skills` i `src/lib/a2a/agentCardMetadata.ts` (som deles af `/.well-known/agent.json` og `/.well-known/agent-card.json`):
 
    ```json
    {
@@ -227,7 +227,7 @@ JSON-RPC-slutpunktet `/a2a` er det kanoniske A2A-indgangspunkt. REST-slutpunkter
    }
    ```
 
-4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk det vellykkede forløb samt fejlforløbet.
+4. **Skriv tests:** `tests/unit/a2a-<your-skill>.test.ts`. Dæk både det forventede forløb og fejlforløbet.
 
 5. **Dokumentér** den nye færdighed i tabellen `Available Skills` i denne fil.
 

@@ -197,17 +197,17 @@ JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačk
 
 ---
 
-## Dodavanje nove vештine
+## Додавање нове вештине
 
-1. **Kreirajte fajl vештine:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Направите датотеку вештине:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezite asinhronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Pratite oblik postojećih vештina kao što je `smartRouting.ts`.
+   Извезите асинхрону функцију `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Пратите структуру постојећих вештина, као што је `smartRouting.ts`.
 
-2. **Registrujte handler:** u `src/lib/a2a/taskExecution.ts`, dodajte stavku u `A2A_SKILL_HANDLERS`:
+2. **Региструјте обрађивач:** у датотеци `src/lib/a2a/taskExecution.ts` додајте ставку у `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...postojeće vештine
+     // ...постојеће вештине
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,21 +215,21 @@ JSON-RPC krajnja tačka `/a2a` je kanonska A2A ulazna tačka. REST krajnje tačk
    };
    ```
 
-3. **Prikažite u Agent Card-u:** u `src/app/.well-known/agent.json/route.ts`, dodajte u niz `skills`:
+3. **Објавите у картици агента:** у датотеци `src/lib/a2a/agentCardMetadata.ts` (коју заједнички користе `/.well-known/agent.json` и `/.well-known/agent-card.json`) додајте следеће у низ `skills`:
 
    ```json
    {
      "id": "your-skill",
      "name": "Your Skill",
-     "description": "Kratak opis fokusiran na nameru",
+     "description": "Brief, intent-focused description",
      "tags": ["routing", "quota"],
-     "examples": ["Primer pozivanja prirodnim jezikom"]
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
-4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrijte uspešan tok i tok sa greškom.
+4. **Напишите тестове:** `tests/unit/a2a-<your-skill>.test.ts`. Обухватите успешан сценарио и сценарио грешке.
 
-5. **Dokumentujte** novu vештinu u tabeli `Available Skills` u ovom fajlu.
+5. **Документујте** нову вештину у табели `Available Skills` у овој датотеци.
 
 ---
 

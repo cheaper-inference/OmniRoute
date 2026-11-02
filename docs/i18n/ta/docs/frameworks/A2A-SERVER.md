@@ -201,13 +201,13 @@ JSON-RPC முனைப்புள்ளி `/a2a` என்பது பி�
 
 1. **திறன் கோப்பை உருவாக்கவும்:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` என்ற async செயல்பாட்டை ஏற்றுமதி செய்யவும். `smartRouting.ts` போன்ற ஏற்கனவே உள்ள திறன்களின் வடிவத்தைப் பின்பற்றவும்.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` என்ற async செயல்பாட்டை export செய்யவும். `smartRouting.ts` போன்ற ஏற்கெனவே உள்ள திறன்களின் கட்டமைப்பைப் பின்பற்றவும்.
 
-2. **கையாளுநரைப் பதிவுசெய்யவும்:** `src/lib/a2a/taskExecution.ts` கோப்பில், `A2A_SKILL_HANDLERS`-க்கு ஓர் உள்ளீட்டைச் சேர்க்கவும்:
+2. **கையாளுநரைப் பதிவு செய்யவும்:** `src/lib/a2a/taskExecution.ts` கோப்பில், `A2A_SKILL_HANDLERS`-க்கு ஓர் உள்ளீட்டைச் சேர்க்கவும்:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...ஏற்கனவே உள்ள திறன்கள்
+     // ...ஏற்கெனவே உள்ள திறன்கள்
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -215,7 +215,7 @@ JSON-RPC முனைப்புள்ளி `/a2a` என்பது பி�
    };
    ```
 
-3. **முகவர் அட்டையில் வெளிப்படுத்தவும்:** `src/app/.well-known/agent.json/route.ts` கோப்பில், `skills` அணியில் இணைக்கவும்:
+3. **Agent Card-இல் வெளிப்படுத்தவும்:** `/.well-known/agent.json` மற்றும் `/.well-known/agent-card.json` ஆகியவற்றால் பகிர்ந்து பயன்படுத்தப்படும் `src/lib/a2a/agentCardMetadata.ts` கோப்பில், `skills` வரிசையில் பின்வருவதைச் சேர்க்கவும்:
 
    ```json
    {
@@ -227,9 +227,9 @@ JSON-RPC முனைப்புள்ளி `/a2a` என்பது பி�
    }
    ```
 
-4. **சோதனைகளை எழுதவும்:** `tests/unit/a2a-<your-skill>.test.ts`. வெற்றிப் பாதை + பிழைப் பாதை ஆகியவற்றை உள்ளடக்கவும்.
+4. **சோதனைகளை எழுதவும்:** `tests/unit/a2a-<your-skill>.test.ts`. வெற்றிகரமான பாதை மற்றும் பிழைப் பாதை இரண்டையும் உள்ளடக்கவும்.
 
-5. **இந்தக் கோப்பின் `Available Skills` அட்டவணையில் புதிய திறனை ஆவணப்படுத்தவும்.**
+5. இந்தக் கோப்பின் `Available Skills` அட்டவணையில் புதிய திறனை **ஆவணப்படுத்தவும்**.
 
 ---
 

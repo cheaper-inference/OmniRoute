@@ -199,9 +199,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
 
 1. **스킬 파일 생성:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` 형태의 비동기 함수를 내보냅니다. `smartRouting.ts`와 같은 기존 스킬의 구조를 따르세요.
+   비동기 함수 `(task: A2ATask) => Promise<{ artifacts, metadata }>`를 내보냅니다. `smartRouting.ts`와 같은 기존 스킬의 구조를 따르세요.
 
-2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts`의 `A2A_SKILL_HANDLERS`에 항목을 추가합니다.
+2. **핸들러 등록:** `src/lib/a2a/taskExecution.ts`에서 `A2A_SKILL_HANDLERS`에 항목을 추가합니다.
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -213,7 +213,7 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
    };
    ```
 
-3. **에이전트 카드에 공개:** `src/app/.well-known/agent.json/route.ts`의 `skills` 배열에 다음을 추가합니다.
+3. **Agent Card에 공개:** `src/lib/a2a/agentCardMetadata.ts`(`/.well-known/agent.json` 및 `/.well-known/agent-card.json`에서 공유됨)의 `skills` 배열에 다음을 추가합니다.
 
    ```json
    {
@@ -225,9 +225,9 @@ JSON-RPC 엔드포인트 `/a2a`는 표준 A2A 진입점입니다. 아래 REST �
    }
    ```
 
-4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 정상 경로와 오류 경로를 모두 다루세요.
+4. **테스트 작성:** `tests/unit/a2a-<your-skill>.test.ts`. 정상 경로와 오류 경로를 모두 다룹니다.
 
-5. 이 파일의 `Available Skills` 표에 새 스킬을 **문서화**하세요.
+5. 이 파일의 `Available Skills` 표에 새 스킬을 **문서화합니다**.
 
 ---
 
