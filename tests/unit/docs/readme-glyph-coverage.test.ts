@@ -166,5 +166,7 @@ for (const { name, out } of README_DIAGRAMS as Diagram[]) {
 
     const unused = [...faces.keys()].filter((k) => !used.has(k));
     assert.deepEqual(unused, [], `${out}: embedded faces no text node resolves to`);
+    assert.ok(faces.size <= 1, `${out}: the mono subset is the only face a diagram may embed`);
+    for (const key of faces.keys()) assert.equal(key, "CI Mono|500", `${out}: unexpected face`);
   });
 }

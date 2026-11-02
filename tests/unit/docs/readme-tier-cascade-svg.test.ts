@@ -27,6 +27,9 @@ test("the only embedded font is the mono subset for the endpoint URL, and nothin
   const svg = await renderTierCascade();
   assert.equal((svg.match(/@font-face/g) || []).length, 1);
   assert.ok(svg.includes('font-family:"CI Mono"'));
+  const style = svg.slice(svg.indexOf("<style>"), svg.indexOf("</style>"));
+  assert.doesNotMatch(style, /Switzer|CI Serif|CI Sans/, "the mono subset is the only face");
+  assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   // Reference-based "nothing external" check (review ruling R10): every place the renderer could
   // fetch from — element references, CSS url(), @import — must not carry an http(s) scheme, and
   // no script / foreignObject. Drawn text such as "http://localhost:20128/v1" is copy, not a

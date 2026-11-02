@@ -29,6 +29,9 @@ test("the committed free-tier-budget diagram is exactly what the generator produ
 test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderReadmeFreeTierBudget();
   assert.equal((svg.match(/@font-face/g) || []).length, 0);
+  const style = svg.slice(svg.indexOf("<style>"), svg.indexOf("</style>"));
+  assert.doesNotMatch(style, /font-family|Switzer/, "nothing here is text: no family to name");
+  assert.match(svg, /<use href="#g[0-9a-z]+"/, "the Switzer text is drawn as outlines");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
   assert.match(svg, /^<svg viewBox="0 0 1200 842" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");

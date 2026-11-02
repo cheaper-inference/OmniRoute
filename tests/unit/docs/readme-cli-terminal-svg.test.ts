@@ -28,6 +28,9 @@ test("the only embedded font is the mono subset for its terminal text, and nothi
   const svg = await renderCliTerminal();
   assert.equal((svg.match(/@font-face/g) || []).length, 1);
   assert.ok(svg.includes('font-family:"CI Mono"'));
+  const style = svg.slice(svg.indexOf("<style>"), svg.indexOf("</style>"));
+  assert.doesNotMatch(style, /Switzer|CI Serif|CI Sans/, "the mono subset is the only face");
+  assert.doesNotMatch(svg, /<use href="#g/, "a terminal is all code: nothing to outline");
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
   assert.match(svg, /^<svg viewBox="0 0 1200 350" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");

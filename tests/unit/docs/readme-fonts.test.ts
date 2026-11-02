@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
+import fontverter from "fontverter";
+import * as hb from "harfbuzzjs";
 import subsetFont from "subset-font";
 import {
   buildFontFaceCss,
@@ -28,6 +30,72 @@ test("buildFontFaceCss embeds one subset woff2 data URI for the code role", asyn
   );
   assert.ok(bytes.mono > 500 && bytes.mono < 20_000, `mono subset ${bytes.mono} bytes`);
   assert.doesNotMatch(css, /https?:\/\//);
+});
+
+// Opens what buildFontFaceCss actually embeds, to ask the subset itself what it carries.
+async function openEmbedded(text: string) {
+  const { css, bytes } = await buildFontFaceCss({ mono: text });
+  const base64 = css.match(/base64,([A-Za-z0-9+/=]+)\)/)?.[1] ?? "";
+  const woff2 = Buffer.from(base64, "base64");
+  const face = new hb.Face(new hb.Blob(await fontverter.convert(woff2, "sfnt")));
+  const font = new hb.Font(face);
+  const glyphOf = (char: string) => font.nominalGlyph(char.codePointAt(0) as number);
+  return {
+    css,
+    woff2,
+    declaredBytes: bytes.mono,
+    upem: face.upem,
+    has: (char: string) => Boolean(glyphOf(char)),
+    advance: (char: string) => font.glyphHAdvance(glyphOf(char) as number),
+  };
+}
+
+test("the embedded file really is woff2 of the size it reports", async () => {
+  const subset = await openEmbedded("npm i");
+  assert.equal(subset.woff2.subarray(0, 4).toString("latin1"), "wOF2");
+  assert.equal(subset.woff2.length, subset.declaredBytes);
+  assert.equal((subset.css.match(/data:/g) || []).length, 1, "one data: URI");
+});
+
+test("the subset carries the code characters a diagram keeps as text", async () => {
+  const subset = await openEmbedded("$ npm i -g omniroute\u00A0·…—{}");
+  assert.ok(subset.has("$"), "the prompt");
+  assert.ok(subset.has("g"), "a letter of the command");
+  assert.ok(subset.has("-"), "a flag");
+  assert.ok(subset.has("\u00A0"), "the NBSP runs that hold the terminal's columns");
+  assert.ok(subset.has("·"), "the separator of the ticker");
+  assert.ok(subset.has("…"), "the ellipsis of the footers");
+  assert.ok(subset.has("{") && subset.has("}"), "the code token");
+});
+
+test("the subset carries nothing it was not asked for", async () => {
+  const subset = await openEmbedded("npm");
+  assert.ok(subset.has("n"), "asked for");
+  assert.equal(subset.has("z"), false, "a letter the text does not use");
+  assert.equal(subset.has("N"), false, "the other case of one it does");
+  assert.equal(subset.has("0"), false, "a digit the text does not use");
+  assert.equal(subset.has("→"), false, "a drawn symbol");
+});
+
+test("what is embedded is the monospace code face, not a proportional one", async () => {
+  const subset = await openEmbedded("iWm");
+  assert.equal(subset.upem, 1000);
+  assert.equal(subset.advance("i"), 600, "IBM Plex Mono advances 0.6 em");
+  assert.equal(subset.advance("W"), subset.advance("i"));
+  assert.equal(subset.advance("m"), subset.advance("i"));
+  assert.equal(KIT_FACES.mono.weight, 500);
+});
+
+test("the subset follows the set of characters, not their order or repetition", async () => {
+  const once = await buildFontFaceCss({ mono: "abc" });
+  assert.equal((await buildFontFaceCss({ mono: "abcabc" })).css, once.css);
+  assert.equal((await buildFontFaceCss({ mono: "abc" })).css, once.css, "same input, same bytes");
+});
+
+test("the terminal's status dots cannot reach the subset: they are drawn", async () => {
+  await assert.rejects(buildFontFaceCss({ mono: "●" }), /U\+25CF/);
+  await assert.rejects(buildFontFaceCss({ mono: "○" }), /U\+25CB/);
+  await assert.rejects(buildFontFaceCss({ mono: "◒" }), /U\+25D2/);
 });
 
 test("a larger glyph set produces a larger subset (the subset really follows the text)", async () => {
