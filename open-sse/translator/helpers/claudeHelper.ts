@@ -5,6 +5,7 @@ import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 import { sanitizeToolId } from "./schemaCoercion.ts";
 import { isRestoredClaudeThinkingBlock } from "../../services/claudeThinkingStore.ts";
+import { getThinkingReplayOverride } from "./thinkingReplayMode.ts";
 
 export { NON_ANTHROPIC_THINKING_PLACEHOLDER } from "../../utils/reasoningPlaceholder.ts";
 
@@ -483,6 +484,16 @@ export function prepareClaudeRequest(
     !!provider && !!model && getModelTargetFormat(provider, model) === "claude";
   const supportsRedactedThinking = !isKimiCoding && (supportsPromptCaching || modelTargetsClaude);
 
+  // Per-node thinking-replay declaration (modelCompatOverrides entry field
+  // `thinkingReplay`) overrides the provider-prefix assumption:
+  //   "none" → synthesize nothing & leave replayed thinking blocks untouched
+  //   "text" → force the plain-text branch (upstream needs non-empty thinking text)
+  const thinkingReplayOverride = getThinkingReplayOverride(provider, model);
+  const redactedAllowed =
+    supportsRedactedThinking &&
+    thinkingReplayOverride !== "text" &&
+    thinkingReplayOverride !== "none";
+
   const systemBlocks = body.system;
   if (systemBlocks && Array.isArray(systemBlocks) && !preserveCacheControl) {
     body.system = systemBlocks.map((block, i) => {
@@ -709,8 +720,8 @@ export function prepareClaudeRequest(
         );
         if (
           latestHasExistingThinking &&
-          supportsRedactedThinking &&
-          latestHasGenuineThinkingSignature
+          (redactedAllowed || thinkingReplayOverride === "none") &&
+          (thinkingReplayOverride === "none" || latestHasGenuineThinkingSignature)
         ) {
           // Anthropic: skip all thinking-block rewrites entirely — the
           // blocks must remain verbatim (type, thinking, signature, data).
@@ -726,7 +737,7 @@ export function prepareClaudeRequest(
         // Anthropic-shape (the same value is reused across formats — see
         // claude-to-openai.ts:63 where openai tool_call.id = claude tool_use.id).
         const toolUseIds: string[] = [];
-        if (!supportsRedactedThinking) {
+        if (!redactedAllowed && thinkingReplayOverride !== "none") {
           for (const block of content) {
             if (block.type === "tool_use" && typeof block.id === "string") {
               toolUseIds.push(block.id);
@@ -765,7 +776,10 @@ export function prepareClaudeRequest(
               }
               delete block.data;
               delete block.signature;
-            } else if (supportsRedactedThinking) {
+            } else if (thinkingReplayOverride === "none") {
+              // declared no-precursor — leave the replayed block exactly as
+              // the client sent it
+            } else if (redactedAllowed) {
               block.type = "redacted_thinking";
               block.data = DEFAULT_THINKING_CLAUDE_SIGNATURE;
               delete block.thinking;
@@ -812,7 +826,9 @@ export function prepareClaudeRequest(
         // assistant turn's content[] needs a thinking block in front of any
         // tool_use. Use the same provider-aware shape selection as above.
         if (thinkingEnabled && !hasThinking && hasToolUse) {
-          if (supportsRedactedThinking) {
+          if (thinkingReplayOverride === "none") {
+            // declared no-precursor — synthesize nothing
+          } else if (redactedAllowed) {
             content.unshift({
               type: "redacted_thinking",
               data: DEFAULT_THINKING_CLAUDE_SIGNATURE,

@@ -22,6 +22,7 @@ import {
   openAiImagePartToClaudeBlock,
   normalizeToolResultImages,
 } from "./openai-to-claude/imageBlocks.ts";
+import { getThinkingReplayOverride } from "../helpers/thinkingReplayMode.ts";
 
 // Reasoning-effort levels Anthropic accepts on `output_config.effort`. Used to steer
 // adaptive-only Claude models (Opus 4.7+/Fable 5) without ever emitting a manual budget.
@@ -345,6 +346,11 @@ export function openaiToClaudeRequest(
   // block when thinking mode is active for THIS request — never unconditionally (#5945).
   const thinkingEnabledForRequest = !!result.thinking && result.thinking.type !== "disabled";
 
+  // Per-node thinking-replay declaration gates translator-side synthesis too:
+  // nodes declared thinkingReplay:"none"/"text" must not receive a fabricated
+  // redacted_thinking blob.
+  const thinkingReplayOverride = getThinkingReplayOverride(routedProvider, model);
+
   // Messages
   const systemParts: string[] = [];
 
@@ -394,7 +400,8 @@ export function openaiToClaudeRequest(
           model,
           disabled: credentials?._videoTranscriptSensitive === true,
         },
-        pendingToolUseIds
+        pendingToolUseIds,
+        thinkingReplayOverride
       );
       if (newRole === "assistant") {
         pendingToolUseIds = blocks.filter((b) => b.type === "tool_use").map((b) => String(b.id));
@@ -632,7 +639,8 @@ function getContentBlocksFromMessage(
   thinkingEnabledForRequest = false,
   isKimiCoding = false,
   thinkingBinding: { provider?: unknown; model?: unknown; disabled?: boolean } = {},
-  pendingToolUseIds: string[] = []
+  pendingToolUseIds: string[] = [],
+  thinkingReplayOverride: string | null = null
 ) {
   const blocks: ClaudeContentBlock[] = [];
 
@@ -647,7 +655,8 @@ function getContentBlocksFromMessage(
     // A nested `cache_control` is invalid inside `tool_result.content`; hoist it
     // onto the tool_result block. Also accept a marker already hoisted onto the
     // tool MESSAGE by filterToOpenAIFormat (openai-compat passthrough path).
-    const { content: hoistedContent, cacheControl } = hoistNestedToolResultCacheControl(toolContent);
+    const { content: hoistedContent, cacheControl } =
+      hoistNestedToolResultCacheControl(toolContent);
     const toolResultCacheControl =
       msg.cache_control !== undefined ? msg.cache_control : cacheControl;
     blocks.push({
@@ -852,7 +861,9 @@ function getContentBlocksFromMessage(
       msg.reasoning_content &&
       thinkingEnabledForRequest &&
       hasToolUseBlock &&
-      !hasThinkingBlock
+      !hasThinkingBlock &&
+      thinkingReplayOverride !== "none" &&
+      thinkingReplayOverride !== "text"
     ) {
       blocks.unshift({
         type: "redacted_thinking",
