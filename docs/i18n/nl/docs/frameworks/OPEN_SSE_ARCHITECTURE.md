@@ -486,15 +486,15 @@ Deze verwerkt:
 
 `open-sse/config/` bevat de configuratielaag:
 
-| Bestand                       | Doel                                             |
-| ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Chatmodel-register over de 375-providercatalogus |
-| `providerModels.ts`           | Modelaliassen, formaatmapping                    |
-| `constants.ts`                | Time-outs, limieten, statuscodes                 |
-| `defaultThinkingSignature.ts` | Standaard Claude thinking-signatuur              |
-| `modelStrip.ts` (in services) | Veldstripping per provider                       |
+| Bestand                       | Doel                                               |
+| ----------------------------- | -------------------------------------------------- |
+| `providerRegistry.ts`         | Chat-modelregistratie via de 377-providercatalogus |
+| `providerModels.ts`           | Modelaliassen, indelingstoewijzing                 |
+| `constants.ts`                | Time-outs, limieten, statuscodes                   |
+| `defaultThinkingSignature.ts` | Standaard Claude denkensignatuur                   |
+| `modelStrip.ts` (in diensten) | Veldstrippen per provider                          |
 
-### Providerregister-schema
+### Registerschema van provider
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-validatie bij het laden van de module zorgt ervoor dat alle providerconfiguraties geldig zijn.
+Zod validatie bij het laden van de module zorgt ervoor dat alle providerconfiguraties geldig zijn.
 
 ---
 

@@ -19,7 +19,7 @@ test("keeps a client-supplied budget instead of raising it to 4096 (#14888)", ()
   assert.equal(body.max_tokens, 512);
 });
 
-test("sets max_tokens floor when absent for a reasoning model", () => {
+test("does not inject a max_tokens ceiling when absent for a reasoning model (#17971)", () => {
   const executor = new DefaultExecutor("clinepass");
   const body = {
     model: "cline-pass/deepseek-v4-flash",
@@ -27,7 +27,7 @@ test("sets max_tokens floor when absent for a reasoning model", () => {
   } as Record<string, unknown>;
 
   executor.ensureThinkingBudget(body, "cline-pass/deepseek-v4-flash");
-  assert.equal(body.max_tokens, 4096);
+  assert.equal(body.max_tokens, undefined);
 });
 
 test("leaves an already-sufficient budget untouched", () => {

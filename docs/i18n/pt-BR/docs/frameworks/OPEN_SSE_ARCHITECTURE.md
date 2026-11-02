@@ -486,15 +486,15 @@ Isso processa:
 
 `open-sse/config/` contém a camada de configuração:
 
-| Arquivo                       | Finalidade                                                     |
-| ----------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registro de modelos de chat sobre o catálogo de 375 provedores |
-| `providerModels.ts`           | Aliases de modelos, mapeamento de formatos                     |
-| `constants.ts`                | Timeouts, limites, códigos de status                           |
-| `defaultThinkingSignature.ts` | Assinatura de pensamento padrão do Claude                      |
-| `modelStrip.ts` (em services) | Remoção de campos por provedor                                 |
+| Arquivo                       | Propósito                                                     |
+| ----------------------------- | ------------------------------------------------------------- |
+| `providerRegistry.ts`         | Registro de modelo de bate-papo no catálogo de 377 provedores |
+| `providerModels.ts`           | Aliases de modelo, mapeamento de formato                      |
+| `constants.ts`                | Tempos limite, limites, códigos de status                     |
+| `defaultThinkingSignature.ts` | Assinatura de pensamento Claude padrão                        |
+| `modelStrip.ts` (em serviços) | Remoção de campo por provedor                                 |
 
-### Esquema do Registro de Provedores
+### Esquema de registro de provedor
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A validação com Zod no carregamento do módulo garante que todas as configurações de provedores sejam válidas.
+A validação Zod no carregamento do módulo garante que todas as configurações do provedor sejam válidas.
 
 ---
 

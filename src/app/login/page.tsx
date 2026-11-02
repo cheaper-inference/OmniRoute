@@ -15,6 +15,7 @@ import Input from "@/shared/components/Input";
 import { Spinner } from "@/shared/components/Loading";
 import { AlertDescription, AlertTitle } from "@omniroute/ui-kit/alert";
 import { useRouter } from "next/navigation";
+import { withBasePath } from "@/shared/utils/basePath";
 
 export default function LoginPage() {
   const t = useTranslations("auth");
@@ -35,10 +36,9 @@ export default function LoginPage() {
     async function checkAuth() {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
-      const baseUrl = typeof window !== "undefined" ? window.location.origin : "";
 
       try {
-        const res = await fetch(`${baseUrl}/api/settings/require-login`, {
+        const res = await fetch("/api/settings/require-login", {
           signal: controller.signal,
         });
         clearTimeout(timeoutId);
@@ -48,7 +48,7 @@ export default function LoginPage() {
           if (data.nodeVersion) setNodeVersion(data.nodeVersion);
           if (data.nodeCompatible === false) setNodeCompatible(false);
           if (data.authenticated === true || data.requireLogin === false) {
-            window.location.href = "/dashboard";
+            window.location.href = withBasePath("/dashboard");
             return;
           }
           setHasPassword(!!data.hasPassword);
@@ -86,12 +86,12 @@ export default function LoginPage() {
 
       if (res.ok) {
         sessionStorage.setItem("omniroute_login_time", String(Date.now()));
-        window.location.href = "/dashboard";
+        window.location.href = withBasePath("/dashboard");
       } else {
         const data = await res.json();
         // (#521) If no password is set, redirect to onboarding instead of showing an error
         if (data.needsSetup) {
-          window.location.href = "/dashboard/onboarding";
+          window.location.href = withBasePath("/dashboard/onboarding");
           return;
         }
         setError(data.error || t("invalidPassword"));
@@ -258,7 +258,7 @@ export default function LoginPage() {
                     variant="primary"
                     icon="login"
                     className="w-full h-11 text-sm font-medium"
-                    onClick={() => (window.location.href = "/api/auth/oidc/login")}
+                    onClick={() => (window.location.href = withBasePath("/api/auth/oidc/login"))}
                   >
                     {t("continueWithOidc")}
                   </Button>
@@ -295,7 +295,9 @@ export default function LoginPage() {
                         variant="secondary"
                         icon="login"
                         className="w-full h-11 text-sm font-medium"
-                        onClick={() => (window.location.href = "/api/auth/oidc/login")}
+                        onClick={() =>
+                          (window.location.href = withBasePath("/api/auth/oidc/login"))
+                        }
                       >
                         {t("continueWithOidc")}
                       </Button>

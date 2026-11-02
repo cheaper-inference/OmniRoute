@@ -172,87 +172,88 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 
 ---
 
-## Ịgba Ule
+## Ịgba Nnwale
 
 ```bash
-# Ule niile (unit + vitest + ecosystem + e2e)
+# Nnwale niile (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Otu faịlụ ule (Node.js native test runner — ọtụtụ ule na-eji nke a)
+# Otu faịlụ nnwale (ngwa ịgba nnwale nke Node.js — ọtụtụ nnwale na-eji nke a)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Naanị ule unit mgbanwe gị metụtara (otu TIA selector ahụ dị ka CI gate, #8084)
+# Naanị nnwale unit ndị mgbanwe gị metụtara (otu onye-ahọpụta TIA ahụ dị ka ọnụ ụzọ CI, #8084)
 npm run test:scoped            # mgbanwe dị na commit ikpeazụ (ma ọ bụ working tree)
-npm run test:scoped:staged     # naanị mgbanwe e tinyere na stage — na-arụkọ ọrụ nke ọma na pre-commit run
-npm run test:scoped:full       # buru ụzọ wughachi import-graph map (mgbe ị gbakwụnyere/bugharịrị faịlụ)
-# Exit 1 + "run the full suite" pụtara na hub file (tsconfig, package.json, …) ma ọ bụ
-# source na-enweghị mapping gbanwere — selector na-adaba n'ụzọ nchekwa, ọ naghị ahapụ ihe n’ime nzuzo.
+npm run test:scoped:staged     # naanị mgbanwe ndị e mere staged — na-arụkọ ọrụ nke ọma na pre-commit
+npm run test:scoped:full       # buru ụzọ wughachi maapụ import-graph (mgbe ị gbakwunyere/kpụgharịrị faịlụ)
+# Exit 1 + "gbaa test suite zuru ezu" pụtara na faịlụ hub (tsconfig, package.json, …) ma ọ bụ
+# source na-enweghị mapping gbanwere — onye-ahọpụta ahụ na-akwụsị n'ụzọ nchekwa, ọ dịghị mgbe ọ na-amafe ihe na nzuzo.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (sava MCP, autoCombo, nchekwa nwa oge)
 npm run test:vitest
 
-# Ule E2E (Playwright dị mkpa)
+# Nnwale E2E (Playwright dị mkpa)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# E2E maka ndị ahịa protocol (ụzọ mbufe MCP, A2A)
 npm run test:protocols:e2e
 
-# Ule ndakọrịta ecosystem
+# Nnwale ndakọrịta ecosystem
 npm run test:ecosystem
 
-# Coverage gate: 60% statements/lines/functions/branches
+# Ọnụ ụzọ coverage: 60% nke statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Nlele lint + format
+# Nnyocha lint + format
 npm run lint
 npm run check
 
-# Gated real-upstream combo smoke (VPS access + ezigbo provider credits dị mkpa)
-# Ọ na-akpọ EZIGBO providers — ọ na-eri obere ego. Ọ DỊGHỊ mgbe ọ na-agba na CI. Ọ na-awụfe nke ọma ma gate adịghị.
-# Ihe dị mkpa: ohere ssh root@192.168.0.15 (ọ na-eweta read-only DB snapshot site na VPS).
+# Nnwale smoke nke combo na real-upstream nwere ọnụ ụzọ (ohere VPS + kredit ezigbo provider dị mkpa)
+# Ọ na-akpọ ezigbo providers — ọ na-efu ntakịrị. Ọ DỊGHỊ mgbe ọ na-agba na CI. Ọ na-amafe n'enweghị nsogbu ma ọ bụrụ na ọnụ ụzọ adịghị.
+# Ihe achọrọ: ohere ssh root@192.168.0.15 (ọ na-enweta snapshot DB read-only site na VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — script Node ESM nkịtị, na-akpọ live .15 server ozugbo.
-# Ihe dị mkpa: ohere ssh root@192.168.0.15 (a na-emepụta/akwatu combos site na SSH sqlite).
-# Ọ na-akpọ EZIGBO providers (obere ego). Ọ na-emepụta/ehichapụ naanị __live_test__* combos. Ọ DỊGHỊ mgbe ọ na-agba na CI.
-# REQUIRE_API_KEY=false na .15 ya mere API key adịghị mkpa, mana ọ na-asọpụrụ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ma ọ bụrụ na edobere ha.
+# Nnwale smoke live nke VPS Phase-3 — scripts Node ESM nkịtị, na-akpọ sava live .15 ozugbo.
+# Ihe achọrọ: ohere ssh root@192.168.0.15 (a na-emepụta/akwatu combos site na SSH sqlite).
+# Ọ na-akpọ ezigbo providers (obere ego). Ọ na-emepụta/ehichapụ naanị combos __live_test__*. Ọ DỊGHỊ mgbe ọ na-agba na CI.
+# REQUIRE_API_KEY=false na .15, ya mere API key adịghị mkpa, mana ọ na-asọpụrụ COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ma ọ bụrụ na e setịpụrụ ha.
 npm run test:combo:live:vps              # ọnọdụ HTTP 7 (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # na-agbakwụnye ezigbo ọnọdụ cross-provider failover (8 n’ozuzu)
+npm run test:combo:live:vps:failover     # na-agbakwunye ezigbo ọnọdụ failover gafee providers (8 n'ozuzu)
 ```
 
-Nkọwa coverage:
+Ndetu coverage:
 
-- `npm run test:coverage` na-atụ coverage nke source maka unit test suite bụ isi, na-ewepụ `tests/**`, ma tinye `open-sse/**`
-- Pull requests ga-edobe coverage gate na **60%+** statements/lines/functions/branches
-- Ọ bụrụ na PR agbanwee production code dị na `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/`, ọ ga-agbakwunye ma ọ bụ melite automated tests n’otu PR ahụ
-- `npm run coverage:report` na-ebipụta akụkọ zuru ezu faịlụ-kwa-faịlụ sitere na coverage run kachasị ọhụrụ
+- `npm run test:coverage` na-atụ coverage nke source maka test suite unit bụ isi, na-ewepụ `tests/**`, ma tinye `open-sse/**`
+- Pull requests ga-edobe ọnụ ụzọ coverage na **60%+** maka statements/lines/functions/branches
+- Ọ bụrụ na PR agbanwee production code dị na `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/`, ọ ga-agbakwunye ma ọ bụ melite nnwale akpaaka n'ime otu PR ahụ
+- `npm run coverage:report` na-ebipụta akụkọ zuru ezu nke faịlụ n'otu n'otu site na coverage run kachasị ọhụrụ
 - `npm run test:coverage:legacy` na-echekwa metric ochie maka ntụnyere akụkọ ihe mere eme
-- Lee `docs/ops/COVERAGE_PLAN.md` maka roadmap e kewara n’usoro iji meziwanye coverage
+- Lee `docs/ops/COVERAGE_PLAN.md` maka roadmap nke iji usoro nkebi meziwanye coverage
 
-### Ihe Pull Request Ga-Enwerịrị
+### Ihe Pull Request Ga-emerịrị
 
-Tupu imepee PR, jiri
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) gbaa focused loop maka
-ihe ị gbanwere. Unit suite zuru ezu (CI shards 4), Vitest, coverage gate **60%+**, na
-production build bụ ọrụ CI — ịgba ha na kọmputa nke gị anaghị enye ozi ọzọ PR
-checks agaghị enye gị, ma na igwe ndị pere mpe ọ nwere ike imeju host (#8084):
+Tupu imepe PR, jiri
+[Ụzọ Kasị Mma Maka Inye Aka](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) gbaa focused loop maka
+ihe ị gbanwere. Unit suite zuru ezu (CI shards 4), Vitest, ọnụ ụzọ coverage nke **60%+**, na
+production build bụ ọrụ CI — ịgba ha na kọmputa gị anaghị enye ozi ọ bụla ọzọ karịa nke PR
+checks ga-enyerịrị gị, ma n'igwe ndị pere mpe, ọ nwere ike iji ike host ahụ niile (#8084):
 
-- Gbaa faịlụ ule ndị na-ekpuchi mgbanwe gị: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Gbaa faịlụ nnwale ndị na-ekpuchi mgbanwe gị: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Gbaa `npm run lint`
-- Tinye ma ọ bụ melite automated tests n’otu PR ahụ mgbe ọ bụla production code gbanwere
-- Tinye faịlụ ule ndị gbanwere ma ọ bụ ndị agbakwunyere na nkọwa PR mgbe production code gbanwere
-- Lelee nsonaazụ SonarQube na PR mgbe ahaziri project secrets na CI
+- Tinye ma ọ bụ melite nnwale akpaaka n'ime otu PR ahụ mgbe ọ bụla production code gbanwere
+- N'ime faịlụ `node:test`, tinye `await` ọ bụla dị na top-level (dị ka `await import(...)`) tupu `test()` / `describe()` nke mbụ: n'okpuru `--test-force-exit`, nnwale ndị e debanyere aha mgbe nke ahụ gasịrị nwere ike ghara ịgba n'enweghị ọkwa ọ bụla (#18045; `npm run check:test-tla-order` na-amanye nke a)
+- Tinye faịlụ nnwale ndị gbanwere ma ọ bụ ndị agbakwunyere na nkọwa PR mgbe production code gbanwere
+- Lelee nsonaazụ SonarQube na PR mgbe a haziri project secrets na CI
 
-Ọnọdụ ule ugbu a: **faịlụ unit test 122** na-ekpuchi:
+Ọnọdụ nnwale ugbu a: **faịlụ nnwale unit 122** na-ekpuchi:
 
-- Provider translators na ntụgharị format
+- Ndị ntụgharị provider na ntụgharị format
 - Rate limiting, circuit breaker, na resilience
 - Semantic cache, idempotency, na progress tracking
-- Database operations na schema (DB modules 21)
+- Arụmọrụ database na schema (modul DB 21)
 - OAuth flows na authentication
-- Nkwado API endpoint (Zod v4)
-- Ngwaọrụ MCP server na mmanye scope
+- Nkwado endpoint API (Zod v4)
+- Ngwa sava MCP na mmanye scope
 - Sistemụ Memory na Skills
 
 ---

@@ -172,15 +172,15 @@ refactor(db): consolidate rate limit tables
 # تمام ٹیسٹس (یونٹ + vitest + ایکوسسٹم + e2e)
 npm run test:all
 
-# ایک ٹیسٹ فائل (Node.js کا مقامی ٹیسٹ رنر — زیادہ تر ٹیسٹس یہی استعمال کرتے ہیں)
+# واحد ٹیسٹ فائل (Node.js کا مقامی ٹیسٹ رنر — زیادہ تر ٹیسٹس یہی استعمال کرتے ہیں)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# صرف وہ یونٹ ٹیسٹس جو آپ کی تبدیلی سے متاثر ہوئے ہیں (CI گیٹ جیسا ہی TIA سلیکٹر، #8084)
-npm run test:scoped            # آخری commit (یا working tree) میں ہونے والی تبدیلیاں
-npm run test:scoped:staged     # صرف staged تبدیلیاں — pre-commit رن کے ساتھ بخوبی کام کرتا ہے
-npm run test:scoped:full       # پہلے import-graph میپ دوبارہ بنائیں (فائلیں شامل یا منتقل کرنے کے بعد)
+# صرف وہ یونٹ ٹیسٹس جو آپ کی تبدیلی سے متاثر ہوئے ہیں (وہی TIA سلیکٹر جو CI گیٹ میں ہے، #8084)
+npm run test:scoped            # آخری کمٹ (یا ورکنگ ٹری) میں ہونے والی تبدیلیاں
+npm run test:scoped:staged     # صرف اسٹیج کی گئی تبدیلیاں — پری کمٹ رن کے ساتھ موزوں
+npm run test:scoped:full       # پہلے امپورٹ گراف میپ دوبارہ بنائیں (فائلیں شامل/منتقل کرنے کے بعد)
 # Exit 1 + "مکمل سوٹ چلائیں" کا مطلب ہے کہ کوئی مرکزی فائل (tsconfig، package.json، …) یا کوئی
-# غیر نقشہ شدہ سورس تبدیل ہوا ہے — سلیکٹر محفوظ انداز میں ناکام ہوتا ہے، یہ کبھی خاموشی سے نظر انداز نہیں کرتا۔
+# غیر میپ شدہ سورس تبدیل ہوا ہے — سلیکٹر محفوظ انداز میں ناکام ہوتا ہے، یہ کبھی خاموشی سے ٹیسٹس نہیں چھوڑتا۔
 
 # Vitest (MCP سرور، autoCombo، کیش)
 npm run test:vitest
@@ -188,65 +188,66 @@ npm run test:vitest
 # E2E ٹیسٹس (Playwright درکار ہے)
 npm run test:e2e
 
-# پروٹوکول کلائنٹس E2E (MCP ٹرانسپورٹس، A2A)
+# پروٹوکول کلائنٹس کے E2E ٹیسٹس (MCP ٹرانسپورٹس، A2A)
 npm run test:protocols:e2e
 
 # ایکوسسٹم مطابقت کے ٹیسٹس
 npm run test:ecosystem
 
-# کوریج گیٹ: statements/lines/functions/branches کے لیے 60%
+# کوریج گیٹ: اسٹیٹمنٹس/لائنز/فنکشنز/برانچز کا 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + فارمیٹ کی جانچ
+# لنٹ + فارمیٹ کی جانچ
 npm run lint
 npm run check
 
-# گیٹ شدہ حقیقی upstream combo اسموک ٹیسٹ (VPS رسائی + حقیقی provider کریڈٹس درکار ہیں)
-# حقیقی providers کو استعمال کرتا ہے — معمولی لاگت آتی ہے۔ CI میں کبھی نہیں چلتا۔ گیٹ کے بغیر صاف طور پر نظر انداز ہو جاتا ہے۔
-# درکار ہے: ssh root@192.168.0.15 رسائی (VPS سے read-only DB snapshot حاصل کرتا ہے)۔
+# گیٹ شدہ حقیقی اپ اسٹریم کومبو اسموک (VPS رسائی + حقیقی فراہم کنندہ کریڈٹس درکار ہیں)
+# حقیقی فراہم کنندگان کو استعمال کرتا ہے — معمولی لاگت آتی ہے۔ CI میں کبھی نہیں چلتا۔ گیٹ کے بغیر صاف طور پر چھوڑ دیا جاتا ہے۔
+# درکار: ssh root@192.168.0.15 رسائی (VPS سے صرف پڑھنے کے قابل DB اسنیپ شاٹ حاصل کرتا ہے)۔
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
 # Phase-3 VPS لائیو اسموک — سادہ Node ESM اسکرپٹس، براہِ راست لائیو .15 سرور کو استعمال کرتے ہیں۔
-# درکار ہے: ssh root@192.168.0.15 رسائی (combos کو SSH sqlite کے ذریعے بنایا/ختم کیا جاتا ہے)۔
-# حقیقی providers کو استعمال کرتا ہے (معمولی لاگت)۔ صرف __live_test__* combos بناتا/حذف کرتا ہے۔ CI میں کبھی نہیں چلتا۔
-# .15 پر REQUIRE_API_KEY=false ہے، اس لیے API key درکار نہیں، لیکن سیٹ ہونے پر COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY کا احترام کرتا ہے۔
-npm run test:combo:live:vps              # 7 HTTP منظرنامے (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # ایک حقیقی cross-provider failover منظرنامہ شامل کرتا ہے (کل 8)
+# درکار: ssh root@192.168.0.15 رسائی (کومبوز SSH sqlite کے ذریعے بنائے/ختم کیے جاتے ہیں)۔
+# حقیقی فراہم کنندگان کو استعمال کرتا ہے (معمولی لاگت)۔ صرف __live_test__* کومبوز بناتا/حذف کرتا ہے۔ CI میں کبھی نہیں چلتا۔
+# .15 پر REQUIRE_API_KEY=false ہے، اس لیے کسی API کلید کی ضرورت نہیں، لیکن سیٹ ہونے کی صورت میں COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY کا لحاظ رکھتا ہے۔
+npm run test:combo:live:vps              # 7 HTTP منظرنامے (priority/round-robin/weighted/cost/fusion/auto + صحت)
+npm run test:combo:live:vps:failover     # ایک حقیقی کراس پرووائیڈر فیل اوور منظرنامہ شامل کرتا ہے (کل 8)
 ```
 
-کوریج سے متعلق نوٹس:
+کوریج کے نوٹس:
 
-- `npm run test:coverage` مرکزی یونٹ ٹیسٹ سوٹ کی سورس کوریج ماپتا ہے، `tests/**` کو خارج کرتا ہے، اور `open-sse/**` کو شامل کرتا ہے
-- Pull requests میں statements/lines/functions/branches کے لیے کوریج گیٹ **60%+** برقرار رہنا چاہیے
-- اگر کوئی PR `src/`، `open-sse/`، `electron/`، یا `bin/` میں production code تبدیل کرتا ہے، تو اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کرنا ضروری ہے
-- `npm run coverage:report` تازہ ترین کوریج رن کی تفصیلی، فائل بہ فائل رپورٹ دکھاتا ہے
-- `npm run test:coverage:legacy` تاریخی موازنے کے لیے پرانا میٹرک محفوظ رکھتا ہے
-- مرحلہ وار کوریج بہتری کے روڈمیپ کے لیے `docs/ops/COVERAGE_PLAN.md` دیکھیں
+- `npm run test:coverage` مرکزی یونٹ ٹیسٹ سوٹ کی سورس کوریج ناپتا ہے، `tests/**` کو خارج کرتا ہے، اور `open-sse/**` کو شامل کرتا ہے
+- پل ریکوئسٹس کے لیے اسٹیٹمنٹس/لائنز/فنکشنز/برانچز کا کوریج گیٹ **60%+** برقرار رکھنا ضروری ہے
+- اگر کوئی PR، `src/`، `open-sse/`، `electron/`، یا `bin/` میں پروڈکشن کوڈ تبدیل کرتا ہے، تو اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کرنا ضروری ہے
+- `npm run coverage:report` تازہ ترین کوریج رن کی تفصیلی فائل بہ فائل رپورٹ پرنٹ کرتا ہے
+- `npm run test:coverage:legacy` تاریخی موازنے کے لیے پرانی میٹرک محفوظ رکھتا ہے
+- کوریج میں مرحلہ وار بہتری کے روڈمیپ کے لیے `docs/ops/COVERAGE_PLAN.md` دیکھیں
 
-### Pull Request کے تقاضے
+### پل ریکوئسٹ کے تقاضے
 
 PR کھولنے سے پہلے، اپنی تبدیلی کے لیے مرکوز عمل چلانے کی خاطر
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) استعمال کریں۔ مکمل یونٹ سوٹ (4 CI shards)، Vitest، **60%+** کوریج گیٹ، اور
-production build کی ذمہ داری CI کی ہے — انہیں مقامی طور پر چلانے سے ایسی کوئی اضافی مفید معلومات حاصل نہیں ہوتیں جو PR
-کی جانچ پہلے ہی فراہم نہ کرے، اور چھوٹی مشینوں پر یہ host کو مکمل طور پر مصروف کر سکتا ہے (#8084):
+[شراکت کا معیاری راستہ](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) استعمال کریں۔ مکمل یونٹ سوٹ (4 CI شارڈز)، Vitest، **60%+** کوریج گیٹ، اور
+پروڈکشن بلڈ CI کی ذمہ داری ہیں — انہیں مقامی طور پر چلانے سے ایسی کوئی اضافی معلومات حاصل نہیں ہوتیں جو PR
+چیکس پہلے ہی فراہم نہ کریں، اور چھوٹی مشینوں پر یہ ہوسٹ کے وسائل کو مکمل طور پر مصروف کر سکتا ہے (#8084):
 
 - اپنی تبدیلی کا احاطہ کرنے والی ٹیسٹ فائلیں چلائیں: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` چلائیں
-- جب بھی production code تبدیل ہو، اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کریں
-- production code تبدیل ہونے پر PR کی تفصیل میں تبدیل یا شامل کی گئی ٹیسٹ فائلیں درج کریں
-- جب CI میں project secrets ترتیب دیے گئے ہوں تو PR پر SonarQube نتیجہ چیک کریں
+- جب بھی پروڈکشن کوڈ تبدیل ہو، اسی PR میں خودکار ٹیسٹس شامل یا اپ ڈیٹ کریں
+- `node:test` فائلوں میں، ہر اعلیٰ سطحی `await` (جیسے `await import(...)`) کو پہلے `test()` / `describe()` سے پہلے رکھیں: `--test-force-exit` کے تحت، اس کے بعد رجسٹر ہونے والے ٹیسٹس خاموشی سے کبھی نہ چلنے کا امکان رکھتے ہیں (#18045؛ `npm run check:test-tla-order` کے ذریعے نافذ)
+- جب پروڈکشن کوڈ تبدیل ہوا ہو تو تبدیل یا شامل کی گئی ٹیسٹ فائلیں PR کی تفصیل میں شامل کریں
+- جب پروجیکٹ سیکرٹس CI میں کنفیگر کیے گئے ہوں تو PR پر SonarQube کا نتیجہ چیک کریں
 
-موجودہ ٹیسٹ کی صورتِ حال: **122 یونٹ ٹیسٹ فائلیں** جو درج ذیل کا احاطہ کرتی ہیں:
+ٹیسٹس کی موجودہ حالت: **122 یونٹ ٹیسٹ فائلیں**، جو درج ذیل کا احاطہ کرتی ہیں:
 
-- Provider translators اور فارمیٹ کی تبدیلی
-- Rate limiting، circuit breaker، اور resilience
-- Semantic cache، idempotency، اور progress tracking
-- Database operations اور schema (21 DB ماڈیولز)
-- OAuth flows اور authentication
-- API endpoint validation (Zod v4)
-- MCP server tools اور scope enforcement
-- Memory اور Skills سسٹمز
+- فراہم کنندہ ٹرانسلیٹرز اور فارمیٹ کی تبدیلی
+- ریٹ لمٹنگ، سرکٹ بریکر، اور لچک پذیری
+- سیمنٹک کیش، آئیڈیمپوٹینسی، پیش رفت کی ٹریکنگ
+- ڈیٹابیس آپریشنز اور اسکیما (21 DB ماڈیولز)
+- OAuth فلوز اور توثیق
+- API اینڈ پوائنٹ کی توثیق (Zod v4)
+- MCP سرور ٹولز اور اسکوپ کا نفاذ
+- میموری اور اسکلز سسٹمز
 
 ---
 

@@ -82,6 +82,8 @@ async function run(mode: string, hedge = true) {
   await delay(80);
   return { response, dispatched, cancelled };
 }
+const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+
 test("hedges launch different models before sibling accounts, preserving indices", async () => {
   const r = await run("duplicates");
   assert.equal(await r.response.text(), "luna");
@@ -117,7 +119,6 @@ test("duplicate conflicts are not malformed request evidence", () => {
     true
   );
 });
-const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const log = { info: noop, warn: noop, error: noop, debug: noop };
 const overflow = () =>
   new Response(

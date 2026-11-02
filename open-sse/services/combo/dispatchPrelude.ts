@@ -474,14 +474,15 @@ export async function tryFusionDispatch(args: {
   }
   // #3378 (ported from upstream decolua/9router): every non-fusion combo
   // strategy runs candidates through filterTargetsByRequestCompatibility before
-  // dispatch, which excludes a target whose vision support cannot be *confirmed*
-  // `=== true` for an image-bearing request (#8332 — unknown is treated the same
-  // as unsupported, never silently forwarded). Fusion resolved its panel via the
+  // dispatch, which excludes a target whose vision support is explicitly false
+  // for an image-bearing request (#17289 relaxed #8332: unknown metadata is now
+  // tried after confirmed targets). Fusion resolved its panel via the
   // raw target list and skipped that filter entirely, so a panel member with an
   // unrecognized model id (capability lookup misses -> supportsVision !== true)
   // still received the unmodified image body while the panel silently lost a
-  // "confirmed vision" voice. Apply the same exclusion here so the fusion panel
-  // only fans an image request out to targets with confirmed vision support.
+  // "confirmed vision" voice. Fusion deliberately keeps the stricter #8332 rule
+  // (isVisionIncompatibleTarget: unknown is excluded too): a panel fan-out has no
+  // "last resort" tier, so the panel only receives targets with confirmed vision.
   const fusionRequirements = judgeFusionRequirements;
   const resolvedFusionTargets = fusionRequirements.requiresVision
     ? allResolvedFusionTargets.filter(

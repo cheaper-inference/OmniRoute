@@ -16,34 +16,34 @@ AgentBridge je posredniški strežnik MITM (Man-in-the-Middle oziroma »človek 
 
 ### Kaj je AgentBridge?
 
-Ko agent IDE (npr. GitHub Copilot, Cursor, Claude Code) izvede klic API, se neposredno poveže s ponudnikom umetne inteligence višje v verigi (OpenAI, Anthropic itd.). AgentBridge to povezavo prestreže transparentno na ravni TLS — brez potrebe po kakršni koli spremembi konfiguracije agenta — in zahtevo prepiše prek OmniRoute.
+Ko posrednik IDE (npr. koda GitHub Copilot, Cursor, Claude ) opravi klic API, se neposredno poveže z zgornjim ponudnikom AI (OpenAI, Anthropic itd.). AgentBridge to povezavo pregledno prestreže na ravni TLS — brez potrebe po kakršni koli spremembi konfiguracije agenta — in ponovno napiše zahtevo prek OmniRoute.
 
 To pomeni, da lahko:
 
-- **Preusmerite katerega koli agenta h kateremu koli ponudniku**: Copilot komunicira z OpenAI? Preusmerite ga na Anthropic Claude, Gemini ali katerega koli od 375 ponudnikov OmniRoute.
-- **Uporabite preslikave modelov**: `gemini-3-flash` → `claude-sonnet-4.7` transparentno na ravni obdelovalca.
-- **Opazujete ves promet agentov**: vsaka prestrežena zahteva je objavljena v [Pregledovalniku prometa](./TRAFFIC_INSPECTOR.md).
-- **Uporabite odpornost OmniRoute**: kombinirano usmerjanje, prekinitvena stikala, rezervne poti in sledenje stroškov delujejo tudi za promet agentov IDE.
+- **Preusmeri katerega koli agenta k kateremu koli ponudniku** : Copilot govori z OpenAI? Preusmerite ga na Anthropic Claude, Gemini ali katerega koli od 377 ponudnikov OmniRoute.
+- **Uporabite preslikave modelov** : `gemini-3-flash` → `claude-sonnet-4.7` pregledno na ravni upravljavca.
+- **Upoštevajte ves promet agentov** : vsaka prestrežena zahteva se objavi [prometnemu inšpektorju](./TRAFFIC_INSPECTOR.md).
+- **Uporabite odpornost OmniRoute** : kombinirano usmerjanje, odklopniki, nadomestni stroški in sledenje stroškov delujejo tudi za promet agentov IDE.
 
-### Pozicioniranje na trgu
+### Pozicioniranje proti trgu
 
-| Lastnost                  | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity               |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot            |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex              |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries            |    —    |    ✓     |        —        |             ✓             |
-| Claude Code               |    —    |    —     |        ✓        |             ✓             |
-| Open Code                 |    —    |    —     |        ✓        |             ✓             |
-| Trae                      |    —    |    —     |        —        |      🔍 Preiskujemo       |
-| Nadzorna plošča           |    ✓    |    ✗     |        ✗        |             ✓             |
-| Pregledovalnik prometa    |    ✗    |    ✗     |        ✓        |             ✓             |
-| Usmerjanje OmniRoute      |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI za preslikavo modelov  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Seznam obhodov            |    ✗    |    ✗     |        ✓        |             ✓             |
-| Certifikat CA višje ravni |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija              | 9usmerjevalnik | anti-api | llm-prestreznik | **OmniRoute AgentBridge** |
+| --------------------- | :------------: | :------: | :-------------: | :-----------------------: |
+| Antigravity           |       ✓        |    ✓     |        —        |             ✓             |
+| GitHub Copilot        |       ✓        |    ✓     |        —        |             ✓             |
+| Kiro (AWS)            |       ✓        |    ✓     |        —        |             ✓             |
+| OpenAI Codex          |       —        |    ✓     |        —        |             ✓             |
+| Cursor IDE            |       ✓        |    ✓     |        —        |             ✓             |
+| Zed Industries        |       —        |    ✓     |        —        |             ✓             |
+| koda Claude           |       —        |    —     |        ✓        |             ✓             |
+| Odpri kodo            |       —        |    —     |        ✓        |             ✓             |
+| Trae                  |       —        |    —     |        —        |       🔍 Preiskujem       |
+| Nadzorna plošča UI    |       ✓        |    ✗     |        ✗        |             ✓             |
+| Prometni inšpektor    |       ✗        |    ✗     |        ✓        |             ✓             |
+| OmniRoute usmerjanje  |       ✗        |    ✗     |        ✗        |             ✓             |
+| Preslikava modela UI  |       ✗        |    ✗     |        ✗        |             ✓             |
+| Obhodni seznam        |       ✗        |    ✗     |        ✓        |             ✓             |
+| Zgornji certifikat CA |       ✗        |    ✗     |        ✓        |             ✓             |
 
 ---
 

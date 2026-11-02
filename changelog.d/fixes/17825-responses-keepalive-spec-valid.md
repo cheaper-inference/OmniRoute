@@ -1,0 +1,1 @@
+- fix(responses): make the synthetic response.in_progress keepalive a complete, spec-valid event so Vercel AI SDK clients no longer abort the stream (#17825)

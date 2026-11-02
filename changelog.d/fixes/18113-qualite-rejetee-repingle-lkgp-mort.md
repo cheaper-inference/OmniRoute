@@ -1,0 +1,1 @@
+- **fix(combo):** Clear the stale provider pin after a quality-rejected 200 so the next request re-resolves ([#18113](https://github.com/cheaper-inference/OmniRoute/pull/18113)) — thanks @maxmad64bis

@@ -72,6 +72,16 @@ curl -i \
 
 Atslēga bez manage tvēruma (vai bez Bearer) atgriež `403 LOCAL_ONLY`. Blakus prefiksu `/api/cli-tools/runtime/*` apiet nav iespējams — skatiet [Maršrutu aizsardzības līmeņi — manage tvēruma izņēmums](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin pārbaude
+
+Pēc autentifikācijas katram pieprasījumam uz `/api/mcp/*` — transportiem un pārvaldības maršrutiem, piemēram, `status`, `tools`, `audit`, `restart` — tiek pārbaudīta `Origin` galvene neatkarīgi no izsaucēja (API atslēga, CLI marķieris, paneļa sesija vai anonīms loopback ar atspējotu pieteikšanos). Tā ir MCP Streamable HTTP specifikācijas prasītā aizsardzība pret DNS rebinding.
+
+- **Nav `Origin` galvenes** → atļauts. OmniRoute CLI, SDK un IDE klienti to nesūta.
+- **Atļauts `Origin`** → `localhost` / `127.0.0.1` / `[::1]` jebkurā portā vai paša OmniRoute publiskais origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, uzticama reversā starpniekservera pārsūtīts origin (`OMNIROUTE_TRUST_PROXY`, tikai ja base URL nav iestatīts) vai tieši izmantots loopback/LAN IP resursdators. Tikai `Host` galvene nekad nepadara origin uzticamu.
+- **Jebkurš cits `Origin`, ieskaitot `null`** → `403` ar JSON-RPC kļūdas pamattekstu: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Paneļa sesija ar derīgu CSRF marķieri joprojām tiek pieņemta, tāpat kā citu paneļa ierakstu gadījumā.
+
+Pārlūka MCP klientam aiz reversā starpniekservera nepieciešams `OMNIROUTE_PUBLIC_BASE_URL`; citiem origin atļauto sarakstu nav. CORS priekšpieprasījums (`OPTIONS`) netiek pārbaudīts pēc Origin; nākamais pieprasījums tiek.
+
 ## IDE konfigurācija
 
 Skatiet [MCP klienta konfigurācija](../guides/SETUP_GUIDE.md#mcp-client-configuration), lai iegūtu informāciju par Claude Desktop,

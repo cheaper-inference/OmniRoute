@@ -27,24 +27,24 @@ Secīgi:           1 - (1 - 0.80) * (1 - 0.46) = ietaupīti 89.2%
 Diapazons:        1 - (1 - 0.60..0.90) * (1 - 0.46) = ietaupīti 78.4-94.6%
 ```
 
-## Ko tas saspiež
+## Ko Tas Saspiež
 
-Iebūvētajā katalogā pašlaik ir iekļauti 49 filtri šādās kategorijās:
+Iebūvētais katalogs pašlaik ietver 56 filtrus šādās kategorijās:
 
-| Kategorija | Piemēri                                                       |
-| ---------- | ------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go testi, Cargo testi       |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, vispārīgi čaulas žurnāli                |
-| `docker`   | `docker ps`, Docker žurnāli                                   |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON izvade, steka izsekojumi, vispārīga izvades atkāpe       |
+| Kategorija | Piemēri                                                           |
+| ---------- | ----------------------------------------------------------------- |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`                 |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testi        |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
+| `shell`    | `ls`, `find`, `grep`, vispārīgi čaulas žurnāli                    |
+| `docker`   | `docker ps`, Docker žurnāli                                       |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                           |
+| `generic`  | JSON izvade, steka trasējumi, vispārīgs izvades rezerves variants |
 
 Detektors failā `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificē izvadi
-pirms filtra izvēles. Filtri var arī nodrošināt atbilstību pēc komandas parauga vai izvades regulārās izteiksmes, ja ar komandas
-klasi nepietiek.
+pirms filtru izvēles. Filtri var tikt saskaņoti arī pēc komandas šablona vai izvades regulārās
+izteiksmes, ja komandas klase vien nepietiek.
 
 ## Filtru noteikšana
 
@@ -352,15 +352,15 @@ node --import tsx/esm --test \
 
 ## Intensitātes līmeņi (v3.8.16+)
 
-RTK atbalsta **3 intensitātes līmeņus**, kas nodrošina kompromisu starp **saspiešanas agresivitāti** un **drošību**. Līmenis tiek iestatīts, izmantojot `config.intensity` dzinēja konfigurācijā.
+RTK atbalsta **3 intensitātes līmeņus**, kas līdzsvaro **kompresijas agresivitāti** un **drošību**. Līmenis tiek iestatīts ar `config.intensity` dzinēja konfigurācijā.
 
 ### 3 līmeņi
 
-| Līmenis                  | Saīsināšanas slieksnis | Pilnvarvienību ietaupījums | Risks     | Vispiemērotākais                          |
-| ------------------------ | ---------------------- | -------------------------- | --------- | ----------------------------------------- |
-| `minimal`                | 24 rindas katrā sadaļā | ~20-40%                    | Ļoti zems | Produkcijai ar kritiski svarīgu kontekstu |
-| `standard` (noklusējums) | 24 rindas katrā sadaļā | ~50-70%                    | Zems      | Ikdienas programmēšanas sesijām           |
-| `aggressive`             | 16 rindas katrā sadaļā | ~70-90%                    | Vidējs    | Ilgām sesijām, maksimālam ietaupījumam    |
+| Līmenis                  | Saīsināšanas slieksnis | Tokenu ietaupījums | Risks     | Vislabāk piemērots               |
+| ------------------------ | ---------------------- | ------------------ | --------- | -------------------------------- |
+| `minimal`                | 24 rindas sadaļā       | ~20-40%            | Ļoti zems | Produkcija ar kritisku kontekstu |
+| `standard` (noklusējums) | 24 rindas sadaļā       | ~50-70%            | Zems      | Ikdienas kodēšanas sesijas       |
+| `aggressive`             | 16 rindas sadaļā       | ~70-90%            | Vidējs    | Garas sesijas, maks. ietaupījums |
 
 ### Kur notiek saīsināšana
 
@@ -372,40 +372,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivizēta saīsināšana, vidusdaļas saturs tiek atmests.
+Tiek saglabātas gan katras sadaļas **sākums**, gan **beigas**; vidējā daļa tiek atmesta, kad iestājas saīsināšana.
 
-### Kas tiek saglabāts un kas tiek nogriezts
+### Kas paliek un kas tiek izgriezts
 
-| Saturs                                   | minimal       | standard      | aggressive    |
-| ---------------------------------------- | ------------- | ------------- | ------------- |
-| Kļūdas / steka trasējumi                 | ✅ saglabāti  | ✅ saglabāti  | ✅ saglabāti  |
-| Testu kļūmes                             | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
-| Būvējuma kļūdas                          | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
-| Veiksmīgi testi (detalizēti)             | ✅ saglabāti  | 🟡 sakļauti   | 🟡 sakļauti   |
-| Ikdienišķa izvade (informācijas žurnāli) | 🟡 sakļauta   | 🟡 sakļauta   | ❌ atmesta    |
-| Progresa joslas                          | 🟡 sakļautas  | ❌ atmestas   | ❌ atmestas   |
-| Reklāmkarogs / ASCII māksla              | 🟡 sakļauti   | ❌ atmesti    | ❌ atmesti    |
+| Saturs                        | minimal       | standard      | aggressive    |
+| ----------------------------- | ------------- | ------------- | ------------- |
+| Kļūdas / steka trasējumi      | ✅ saglabāti  | ✅ saglabāti  | ✅ saglabāti  |
+| Testu neveiksmes              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Būvēšanas kļūdas              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Veiksmīgie testi (detalizēti) | ✅ saglabāti  | 🟡 sakļauti   | 🟡 sakļauti   |
+| Rutīnas izvade (info žurnāli) | 🟡 sakļauta   | 🟡 sakļauta   | ❌ atmesta    |
+| Progresa joslas               | 🟡 sakļautas  | ❌ atmestas   | ❌ atmestas   |
+| Baneris / ASCII māksla        | 🟡 sakļauts   | ❌ atmests    | ❌ atmests    |
 
-### Piemērotās intensitātes izvēle
+### Pareizās intensitātes izvēle
 
 ```
-                  Vai konteksta zaudēšana būtu katastrofāla?
+              Vai konteksta zudums būtu katastrofāls?
                   │
-      ┌───────────┼───────────┐
-      │           │           │
-     JĀ          NĒ        NAV SKAIDRS
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
-      │      Cik kritiski    Vispirms izmēģiniet `standard`
-      │      svarīga ir      (darbojas 80% gadījumu)
-      │      caurlaidspēja?
+      ┌───────────┼────────────┐
+      │           │            │
+     JĀ          NĒ       NAV SKAIDRS
+      │           │            │
+      ▼           │            │
+   minimal        │            │
+      │           │            │
+      │           ▼            ▼
+      │      Cik kritiska    Vispirms izmēģiniet
+      │      ir caurlaid-    `standard`
+      │      spēja?          (der 80% gadījumu)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │     ZEMA      AUGSTA
+      │    ZEMA      AUGSTA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -415,7 +415,7 @@ Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivi
 
 ### Intensitātes konfigurēšana
 
-**Katrai kombinācijai** (kombinācijas konfigurācijā):
+**Katram combo** (combo konfigurācijā):
 
 ```json
 {
@@ -431,8 +431,8 @@ Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad tiek aktivi
 **Programmatiski**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ir
-`CompressionEngine`, un tam nav `updateConfig` metodes. Tā vietā atjauniniet dzinēja konfigurāciju,
-izmantojot reģistra palīgfunkciju:
+`CompressionEngine`, un tam nav `updateConfig` metodes. Tā vietā atjauniniet
+dzinēja konfigurāciju, izmantojot reģistra palīgfunkciju:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -440,16 +440,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ietekmes pārbaude
+### Efekta pārbaude
 
-Izmantojiet **verifikācijas vārteju** (skatiet tālāk), lai apstiprinātu, ka filtrs ir drošs izvēlētajā intensitātē:
+Izmantojiet **Verify Gate** (skatīt tālāk), lai pārliecinātos, ka filtrs ir drošs pie jūsu izvēlētās intensitātes:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtri neizturēja pārbaudi agresīvajā intensitātē");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

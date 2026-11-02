@@ -72,6 +72,16 @@ curl -i \
 
 Key na-enweghị `manage` (ma ọ bụ enweghị Bearer) na-eweghachi `403 LOCAL_ONLY`. E kpachapụrụ anya mee ka prefix ibe ya `/api/cli-tools/runtime/*` ghara inwe ike ịgafe mmachi ahụ — lee [Ọkwa Route Guard — Mwepu maka manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Nkwado Origin
+
+Mgbe nkwenye gasịrị, a na-enyocha isi `Origin` nke arịrịọ ọ bụla gaa na `/api/mcp/*` — transport na ụzọ nchịkwa dịka `status`, `tools`, `audit`, `restart` — n'agbanyeghị onye na-akpọ (igodo API, tokin CLI, nnọkọ dashboard, ma ọ bụ loopback na-enweghị aha mgbe agbanyụrụ nbanye). Nke a bụ nchebe DNS rebinding nke nkọwapụta MCP Streamable HTTP chọrọ.
+
+- **Enweghị isi `Origin`** → a kwadoro ya. OmniRoute CLI, SDK na ndị ahịa IDE anaghị eziga ya.
+- **`Origin` a kwadoro** → `localhost` / `127.0.0.1` / `[::1]` na port ọ bụla, ma ọ bụ origin ọha nke OmniRoute n'onwe ya: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin nke reverse proxy a tụkwasịrị obi zigara (`OMNIROUTE_TRUST_PROXY`, naanị mgbe edobeghị base URL), ma ọ bụ onye nnabata IP loopback/LAN a na-abanye ozugbo. Naanị isi `Host` anaghị eme ka origin ọ bụla bụrụ nke a tụkwasịrị obi.
+- **`Origin` ọ bụla ọzọ, gụnyere `null`** → `403` ya na ahụ njehie JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. A ka na-anabata nnọkọ dashboard nke na-egosi tokin CSRF ziri ezi, dịka ndị ọzọ dashboard na-ede.
+
+Onye ahịa MCP nke ihe nchọgharị a na-enye n'azụ reverse proxy chọrọ `OMNIROUTE_PUBLIC_BASE_URL`; enweghị ndepụta ikike maka origins ndị ọzọ. A naghị enyocha Origin na arịrịọ mbụ CORS (`OPTIONS`); a na-enyocha arịrịọ na-esote ya.
+
 ## Nhazi IDE
 
 Lee [Nhazi MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) maka nhazi Claude Desktop,

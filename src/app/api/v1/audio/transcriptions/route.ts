@@ -2,6 +2,7 @@
 export const maxDuration = 300;
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { handleAudioTranscription } from "@omniroute/open-sse/handlers/audioTranscription.ts";
+import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
 import {
   getProviderCredentialsWithQuotaPreflight,
   clearRecoveredProviderState,
@@ -207,6 +208,7 @@ async function transcribeWithModel(
     credentials,
     resolvedProvider: providerConfig,
     resolvedModel,
+    remoteMediaFetcher: fetchRemoteMedia,
   });
 
   const connectionId = (credentials as { connectionId?: string } | null)?.connectionId || undefined;

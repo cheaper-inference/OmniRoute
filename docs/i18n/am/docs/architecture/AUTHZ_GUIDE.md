@@ -17,43 +17,115 @@ OmniRoute እያንዳንዱን የAPI ጥያቄ የሚቆጣጠር፣ መንገ
 
 ### 1. API ቁልፍ (Bearer)
 
-ለ OpenAI/Anthropic/Gemini ተኳሃኝ የደንበኛ APIዎችና ቁልፉ `manage` ወሰን ሲኖረው ለተወሰኑ የአስተዳደር መንገዶች ያገለግላል።
+ለOpenAI/Anthropic/Gemini-ተኳሃኝ የደንበኛ APIዎች እና ቁልፉ የ`manage` ወሰን ሲኖረው ለጥቂት የአስተዳደር መስመሮች ያገለግላል።
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-የሚረጋገጠው በ`src/sse/services/auth.ts` ውስጥ ባሉ `isValidApiKey()` / `extractApiKey()` ሲሆን በ`src/shared/utils/apiAuth.ts` በኩል ዳግም ወደ ውጭ ይላካል። አረጋጋጩ `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` የአካባቢ ተለዋዋጮችንም እንደ ቋሚ የማለፊያ ቁልፎች ይቀበላል (issue #1350)።
+በ`src/sse/services/auth.ts` ውስጥ ባሉት `isValidApiKey()` / `extractApiKey()` የሚረጋገጥ ሲሆን፣ በ`src/shared/utils/apiAuth.ts` በኩል እንደገና ወደ ውጭ ይላካል። አረጋጋጩ የ`OMNIROUTE_API_KEY` / `ROUTER_API_KEY` የአካባቢ ተለዋዋጮችንም እንደ ቋሚ የማስተላለፊያ ቁልፎች ይቀበላል (ጉዳይ #1350)።
 
-### 2. የዳሽቦርድ ክፍለ-ጊዜ (auth_token cookie)
+### 2. የዳሽቦርድ ክፍለ ጊዜ (auth_token cookie)
 
-ለዳሽቦርድ ገጾችና ለአስተዳዳሪ ስራዎች ያገለግላል።
+ለዳሽቦርድ ገጾች እና ለአስተዳዳሪ ሥራዎች።
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-ኩኪው ክፍለ-ጊዜ የሚሆነው JWT ሲረጋገጥ **እና** `authenticated: true` ሲይዝ ብቻ ነው (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)። የኩኪውን እያንዳንዱ ተጠቃሚ — የዳሽቦርድ መንገድ ጠባቂ (`isDashboardSessionAuthenticated()`), የauthz ፓይፕላይን ማደስ, WebSocket handshake, live server, `/api/settings/require-login`, `/api/auth/status` — ሁሉም በዚህ ረዳት በኩል ይሄዳል።
-በ`JWT_SECRET` የተፈረሙ ሌሎች JWTዎችም አሉ — ለቁልፍ ያዢዎች `iss "omniroute" / aud "cursor-cli"` ቶከኖችን የሚያወጣው Cursor CLI passthrough ለምሳሌ — እነዚህ ግን ፈጽሞ ክፍለ-ጊዜ አይደሉም (#13298)።
+አንድ cookie እንደ ክፍለ ጊዜ የሚቆጠረው JWTው ሲረጋገጥ **እና** `authenticated: true` ሲይዝ ብቻ ነው
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)። እያንዳንዱ
+የcookieው ተጠቃሚ (የዳሽቦርድ መስመር ጠባቂ (`isDashboardSessionAuthenticated()`)፣ የauthz የሂደት መስመር እድሳት፣ WebSocket የመገናኛ ስምምነት፣ የቀጥታ
+አገልጋይ፣ `/api/settings/require-login`፣ `/api/auth/status`) በዚያ ረዳት በኩል ያልፋል።
+በ`JWT_SECRET` የተፈረሙ ሌሎች JWTዎችም አሉ — የCursor CLI ማስተላለፊያው
+ለቁልፍ ባለቤቶች `iss "omniroute" / aud "cursor-cli"` ቶከኖችን ያመነጫል — እነዚህም ፈጽሞ እንደ ክፍለ ጊዜዎች አይቆጠሩም
+(#13298)።
 
-የሚረጋገጠው በ`src/shared/utils/apiAuth.ts` ውስጥ ባለው `isDashboardSessionAuthenticated()` ነው። ፓይፕላይኑ JWT ከ30 ቀናት የህይወት ዘመኑ ውስጥ ከ7 ቀን ያነሰ ሲቀረው በራስ-ሰር ያድሰዋል።
+በ`src/shared/utils/apiAuth.ts` ውስጥ ባለው `isDashboardSessionAuthenticated()` ይረጋገጣል። በ30 ቀናት የቆይታ ጊዜው ውስጥ ከ7 ቀናት ያነሰ ጊዜ ሲቀረው የሂደት መስመሩ JWTውን በራስ-ሰር ያድሳል።
 
-ክፍለ-ጊዜ ከ30 ቀናቱ በፊትም ሊያበቃ ይችላል። ሁሉም ቶከን አውጪዎች በ`mintDashboardSessionToken` በኩል ያልፋሉ (የመውጫ ጊዜ `iat` እና መለያ `jti`)፤ አረጋጋጩም ሁለት ቅንብሮችን ይፈትሻል፦ የይለፍ ቃል ሲቀየር የሚዘጋጀው `sessionsValidAfter` — ከለውጡ በፊት የወጣ ማንኛውም ክፍለ-ጊዜ መረጋገጥ ያቆማል (የይለፍ ቃሉን የቀየረው አሳሽ አዲስ ኩኪ ያገኛል) — እና `POST /api/auth/logout` የወጣውን ክፍለ-ጊዜ `jti` የሚጨምርበት `revokedDashboardSessions`። በቀድሞ ልቀት የተሰሩ ክፍለ-ጊዜዎች ሁለቱንም ማስረጃ አይይዙም እና የመጀመሪያው የይለፍ ቃል ለውጥ እስኪደረግ ድረስ ይሰራሉ። ቅንብሮቹ ማንበብ ካልተቻሉ ክፍለ-ጊዜው አይታመንም።
+እያንዳንዱ ቶከን አመንጪ በ`mintDashboardSessionToken` (የተሰጠበት ጊዜ `iat` እና መለያ `jti`) በኩል ስለሚያልፍ እና አረጋጋጩ ሁለት ቅንብሮችን ስለሚፈትሽ፣ አንድ ክፍለ ጊዜ 30 ቀናቱ ከማለቃቸው በፊትም ሊያበቃ ይችላል፦ `sessionsValidAfter`፣ የይለፍ ቃል ሲቀየር የሚዋቀር ሲሆን ከዚያ በፊት የተሰጡ ሁሉም ክፍለ ጊዜዎች መረጋገጥ እንዲያቆሙ ያደርጋል (የይለፍ ቃሉን የቀየረው አሳሽ አዲስ cookie ያገኛል)፤ እና `revokedDashboardSessions`፣ `POST /api/auth/logout` ዘግቶ የወጣውን ክፍለ ጊዜ `jti` የሚጨምርበት ነው። በቀድሞ ልቀት የተመነጩ ክፍለ ጊዜዎች ከእነዚህ ይገባኛል ማረጋገጫዎች አንዱንም አይይዙም፣ እና የመጀመሪያው የይለፍ ቃል ለውጥ እስከሚደረግ ድረስ የሚሰሩ ሆነው ይቆያሉ። ቅንብሮቹ ሊነበቡ ካልቻሉ፣ ክፍለ ጊዜው አይታመንም።
 
-አንዳንድ የአስተዳደር መንገዶች **ሁለቱንም** ሁነታ ይቀበላሉ፦ ኩኪ ወይም `Bearer <key>`፣ የAPI ቁልፉ `manage` (ወይም `admin`) ወሰን ሲኖረው። "በAPI ጥሪዎች ሊዋቀር የሚችል" የስራ ፍሰት እንዲቻል ያደረገው ይሄ ነው፤ በv3.8 ተጨምሯል።
+አንዳንድ የአስተዳደር መስመሮች **ከሁለቱ አንዱን** ሁነታ ይቀበላሉ፦ cookie ወይም የAPI ቁልፉ የ`manage` (ወይም `admin`) ወሰን ሲኖረው `Bearer <key>`። ይህም በv3.8 የታከለውን «በAPI ጥሪዎች በኩል ሊዋቀር የሚችል» የሥራ ፍሰት ያስችላል።
 
-#### ተጨማሪ የOIDC መግቢያ በር (#6973)
+#### አማራጭ የOIDC መግቢያ መቆጣጠሪያ (#6973)
 
-የዳሽቦርድ አስተዳዳሪ መግቢያ ከነባሪው የይለፍ ቃል መግቢያ ጎን **በፍላጎት የሚነቃ** OIDC (OpenID Connect) ፍሰትንም ይደግፋል — የይለፍ ቃል መግቢያው በፍጹም አይወገድም፣ ተጨማሪ ብቻ ነው፦
+የዳሽቦርዱ የአስተዳዳሪ መግቢያ ከነባሪው የይለፍ ቃል መግቢያ ጎን ለጎን **በምርጫ የሚነቃ** የOIDC (OpenID Connect) ፍሰትንም ይደግፋል — የይለፍ ቃል መግቢያው ፈጽሞ አይወገድም፣ የሚደረገው ማሟላት ብቻ ነው፦
 
-- `settings.oidcEnabled === true` **እና** `oidcIssuer` / `oidcClientId` / `oidcClientSecret` ሁሉም ካልተዋቀሩ በቀር ተሰናክሏል (Settings → Auth)። ያለበለዚያ `GET /api/auth/oidc/login` `400` ይመልሳል።
-- `GET /api/auth/oidc/login` የ`authorization_endpoint`ን ከአውጪው `/.well-known/openid-configuration` ያገኛል (ካልተገኘ `<issuer>/authorize`ን ይጠቀማል)፣ የዳግም መላኪያ URI ን ከገቢው ጥያቄ ይገነባል (`x-forwarded-proto`ን ያከብራል)፣ እና በዘፈቀደ `state` ወደ IdP ያዞራል፤ `state` በ`httpOnly` `oidc_state` ኩኪ ውስጥ ይቀመጣል።
-- `GET /api/auth/oidc/callback` `state`ን ያረጋግጣል፣ የፈቀዳ ኮዱን ይለዋወጣል፣ እና የID ቶከኑን ፊርማ በአውጪው JWKS በኩል ያረጋግጣል (`jose`ው `createRemoteJWKSet`፣ በJWKS URI ተሸጎጦ) ከ`issuer`/`audience` ፍተሻዎች ጋር። `oidcAllowedSubjects` የተፈቀዱ ዝርዝር ግዴታ ነው፦ የቶከኑን `sub` ማስረጃ ወይም `email` ማስረጃ ያዛምዳል — የኢሜይል ማስረጃው የሚከበረው `email_verified === true` ሲሆን ብቻ ነው፣ ስለዚህ በIdP ላይ ያልተረጋገጠ ኢሜይል በፍጹም በበሩ ማለፍ አይችልም — ምንም ግቤት ከሌለ ግን ጥሪው ሁሉንም መግቢያ ውድቅ ያደርጋል (`not_configured`)።
-- ሲሳካ የይለፍ ቃል መግቢያው የሚያወጣውን **ተመሳሳይ** የ30 ቀን `auth_token` JWT ያወጣል (`src/app/api/auth/login/route.ts`)፣ ስለዚህ የተቀረው የዳሽቦርድ ክፍለ-ጊዜ ፓይፕላይን (ራስ-ማደስ፣ የኩኪ ባንዲራዎች) አይለወጥም — OIDC የሚቀይረው ኩኪው እንዴት እንደሚወጣ ብቻ ነው፣ የሚሰጠውን ፈቃድ አይደለም።
-- ሁሉም `oidc*` ቅንብሮች (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`) በ`SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`) ውስጥ ናቸው፦ የአስተዳዳሪውን የይለፍ ቃል እንደ `currentPassword` በጥያቄው አካል ካልላከ በቀር `PATCH /api/settings` `400 PASSWORD_REQUIRED` ይመልሳል (ትክክል ካልሆነ `401 PASSWORD_MISMATCH`)። `oidcDisablePasswordLogin` የይለፍ ቃል _መግባትን_ (`POST /api/auth/login`) ይከለክላል፣ ነገር ግን የተቀመጠውን የይለፍ ቃል ሃሽ ያቆያል፣ እና ዳግም ማረጋገጡ አሁንም `currentPassword`ን ከሃሹ ጋር ያወዳድራል።
-- `corsOrigins` እና `bruteForceProtection`ም በ`SECURITY_IMPACTING_SETTINGS_KEYS` ውስጥ ናቸው፦ ማንኛቸውም ከተላላ የመግቢያ መከላከያዎችን ያዳክማል፣ ስለዚህ ተመሳሳይ `currentPassword` ዳግም ማረጋገጥ ይጠይቃሉ (የSecurity ትሩ ይጠይቃል) እና የJSON ማስመጣቱ ያስወግዳቸዋል።
-- እያንዳንዱ የደህንነት-ፖሊሲ ቁልፍ — `SECURITY_IMPACTING_SETTINGS_KEYS` ግቤቶች፣ እያንዳንዱ `oidc*` ቁልፍ እና የዳሽቦርድ ክፍለ-ጊዜ ሁኔታ — በ`PATCH /api/settings` ላይ **ለኦፕሬተር ብቻ** ነው፦ `manage` ወሰን ያለው የAPI ቁልፍ ወይም `oma_` የመዳረሻ ቶከን ትክክለኛውን `currentPassword` ቢልክም በ`403` ውድቅ ይደረጋል፣ እና ውድቅ መደረጉ እንደ `settings.update_failed` ከ`reason: OPERATOR_REQUIRED` ጋር ኦዲት ይደረጋል (`src/lib/api/operatorCredential.ts` ውስጥ `requireOperatorCredential()`)። ተራ ቅንብሮች (ገጽታ፣ የማሳያ ምርጫዎች) ለ`manage` ቁልፍ ወይም ለ`admin` የመዳረሻ ቶከን ጽሁፍ ክፍት ሆነው ይቀጥላሉ። `/api/settings` ራሱን የሚቀይር ማንኛውም ለውጥ (እንዲሁም `/api/settings/require-login`) የ`admin` የመዳረሻ-ቶከን ወሰንም ይፈልጋል (`src/server/authz/accessScopes.ts` ውስጥ `ADMIN_MUTATION_EXACT_PATHS`፣ ትክክለኛ-መንገድ ማዛመድ)፤ `GET` `read` ሆኖ ይቀጥላል፣ ሌሎቹ `/api/settings/*` ንዑስ-መንገዶች (proxies፣ combo ነባሪዎች፣ model aliases፣ compression፣ purges…) በዘዴ-የሚገመት `write` ወሰናቸውን ይዘው ይቆያሉ።
-- `POST /api/settings/import-json` ያንን ዳግም ማረጋገጥ ይዘላል፣ ስለዚህ ከመፃፉ በፊት በ`IMPORT_STRIPPED_SETTINGS_KEYS` (ተመሳሳይ ፋይል) ውስጥ ያለውን ቁልፍ ሁሉ ያስወግዳል፦ የይለፍ ቃሉና `currentPassword`፣ እያንዳንዱ `SECURITY_IMPACTING_SETTINGS_KEYS` ግቤት፣ እና የዳሽቦርድ ክፍለ-ጊዜ ሁኔታ (`sessionsValidAfter`፣ `revokedDashboardSessions`)። ስለዚህ የቆየ ምትኬን ማስመጣት የይለፍ ቃል ለውጥ ወይም መውጣት ያበቃውን ክፍለ-ጊዜ መልሶ ማነቃቃት አይችልም።
+- `settings.oidcEnabled === true` **ካልሆነ** እና `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` ሁሉም ካልተዋቀሩ (Settings → Auth) በስተቀር
+  ተሰናክሏል። ካልሆነ `GET /api/auth/oidc/login` `400` ይመልሳል።
+- `GET /api/auth/oidc/login` ከአውጪው `/.well-known/openid-configuration`
+  ውስጥ `authorization_endpoint`ን ያገኛል (`<issuer>/authorize`ን እንደ
+  አማራጭ ይጠቀማል)፣ ከገቢው ጥያቄ (`x-forwarded-proto`ን ከግምት ውስጥ
+  በማስገባት) የማዞሪያ URIን ይገነባል፣ እና በ`httpOnly` `oidc_state`
+  ኩኪ ውስጥ የተከማቸ የዘፈቀደ `state` ይዞ ወደ IdP ያዞራል።
+- `GET /api/auth/oidc/callback` `state`ን ያረጋግጣል፣ የፈቃድ ኮዱን
+  ይለውጣል፣ እና የID ቶከኑን ፊርማ በአውጪው JWKS
+  (`jose`'s `createRemoteJWKSet`፣ ለእያንዳንዱ JWKS URI የተሸጎጠ) አማካኝነት
+  ከ`issuer`/`audience` ማረጋገጫዎች ጋር ያረጋግጣል። ወደ ዳሽቦርዱ
+  ለመግባት ባዶ ያልሆነ `oidcAllowedSubjects` ዝርዝር፣ የ`oidcAdmissionClaim`
+  ፖሊሲ ወይም ሁለቱም ያስፈልጋሉ። የተጠቃሚ ዝርዝሩ `sub` ወይም
+  `email`ን የሚያዛምደው `email_verified === true` ሲሆን ብቻ ነው።
+  አማራጭ የclaim ፖሊሲው በነጥብ የተለየ የID-token claim ዱካ (ለምሳሌ፣
+  `realm_access.roles`) እና ተቀባይነት ያላቸውን እሴቶች የያዘ array ይወስዳል፤
+  የተፈታው claim ቢያንስ አንድ ተቀባይነት ያለው እሴት የያዘ የstring
+  array መሆን አለበት። ሁለቱም ፖሊሲዎች ከተዋቀሩ ሁለቱም ማለፍ
+  አለባቸው። የጎደሉ/የተበላሹ claims መዳረሻን ይከለክላሉ፣ እና ከሁለቱ
+  ፖሊሲዎች አንዱም ከሌለ callback መግባትን (`not_configured`) አይቀበልም።
+  ነባር subject-ብቻ ውቅሮች ሳይለወጡ ይቀጥላሉ።
+- Keycloak በተለምዶ የrealm rolesን ወደ access tokens ያዛምዳል፤ የግድ
+  ወደ ID tokens አይደለም። የrealm role `admin`ን አስገዳጅ ለማድረግ፣
+  `realm_access.roles`ን በዚህ ደንበኛ **ID token** ውስጥ የሚያካትት
+  protocol mapper ያዋቅሩ፣ ከዚያ `oidcAdmissionClaim`ን
+  `{ "path": "realm_access.roles", "values": ["admin"] }` ያድርጉ።
+  role-ብቻ መግቢያን ከማንቃትዎ በፊት የዚህን ደንበኛ ትክክለኛ ID-token
+  claim ያረጋግጡ፤ መተግበሪያው የaccess-token rolesን አያነብም። በIdP
+  በኩል የሚደረግ የቶከን እምቢታ ይህን በመተግበሪያው በኩል የሚደረግ
+  ማረጋገጫ ሊያጠናክር ይችላል፣ ግን አይተካውም።
+- ሲሳካ፣ በpassword login (`src/app/api/auth/login/route.ts`) የሚሰጠውን
+  **ፍጹም ተመሳሳይ** የ30 ቀናት `auth_token` JWT ያመነጫል፤ ስለዚህ
+  የተቀረው የዳሽቦርድ session pipeline (ራስ-ሰር ማደስ፣ የኩኪ ምልክቶች)
+  አይለወጥም — OIDC የሚተካው ኩኪው የሚመነጭበትን መንገድ ብቻ ነው
+  እንጂ የሚሰጠውን ፈቃድ አይደለም። በIdP roles/groups ላይ የሚደረጉ
+  ለውጦች ነባር OmniRoute sessionsን ዋጋ አያሳጡም፤ logout፣ የይለፍ ቃል
+  ማዞር ወይም የsession ማብቂያ አሁንም የቆይታ ጊዜያቸውን ይቆጣጠራሉ።
+- እያንዳንዱ `oidc*` ቅንብር (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) በ`SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`) ውስጥ ይገኛል፤
+  የጥያቄው body የአስተዳደር የይለፍ ቃሉን እንደ `currentPassword`
+  ካልያዘ `PATCH /api/settings` `400 PASSWORD_REQUIRED`ን ይመልሳል (ስህተት
+  ከሆነ `401 PASSWORD_MISMATCH`)። `oidcDisablePasswordLogin` በይለፍ ቃል
+  _መግባትን_ (`POST /api/auth/login`) አይቀበልም፣ ነገር ግን የተከማቸውን
+  የይለፍ ቃል hash ያቆያል፣ እና ዳግም-ማረጋገጥ አሁንም
+  `currentPassword`ን ከእሱ ጋር ያረጋግጣል።
+- `corsOrigins` እና `bruteForceProtection` እንዲሁም በ`SECURITY_IMPACTING_SETTINGS_KEYS`
+  ውስጥ ይገኛሉ፤ ከሁለቱ አንዱን ማላላት የመግቢያ መከላከያዎችን
+  ያዳክማል፣ ስለዚህ ተመሳሳይ የ`currentPassword` ዳግም-ማረጋገጫን
+  ይጠይቃሉ (Security tab ይጠይቀዋል)፣ እና JSON import ያስወግዳቸዋል።
+- እያንዳንዱ የደህንነት-ፖሊሲ ቁልፍ — የ`SECURITY_IMPACTING_SETTINGS_KEYS`
+  entries፣ እያንዳንዱ `oidc*` ቁልፍ እና የዳሽቦርድ session state —
+  በ`PATCH /api/settings` ላይ **ለኦፕሬተር-ብቻ** ነው፤ manage-scoped API
+  key ወይም `oma_` access token ትክክለኛውን `currentPassword` ቢልክም
+  `403` ይመለስለታል፣ እና ይህ እምቢታ `settings.update_failed` በሚል
+  ከ`reason: OPERATOR_REQUIRED` ጋር በኦዲት ይመዘገባል
+  (`requireOperatorCredential()` በ`src/lib/api/operatorCredential.ts` ውስጥ)።
+  መደበኛ ቅንብሮች (ገጽታ፣ የማሳያ ምርጫዎች) በ`manage` key ወይም
+  `admin` access token መጻፍ ይቻላሉ። በ`/api/settings` ራሱ (እና
+  በ`/api/settings/require-login`) ላይ የሚደረግ እያንዳንዱ ለውጥ
+  የ`admin` access-token scopeንም ይፈልጋል (`ADMIN_MUTATION_EXACT_PATHS`
+  በ`src/server/authz/accessScopes.ts` ውስጥ፣ የexact-path ማዛመድ)፤ `GET`
+  `read` ሆኖ ይቆያል፣ እና ሌሎቹ የ`/api/settings/*` ንዑስ-መንገዶች
+  (proxies፣ combo defaults፣ model aliases፣ compression፣ purges…) በmethod
+  የሚወሰነውን `write` scope ይዘው ይቆያሉ።
+- `POST /api/settings/import-json` ያንን ዳግም-ማረጋገጫ ይዘላል፣ ስለዚህ
+  ከመጻፉ በፊት በ`IMPORT_STRIPPED_SETTINGS_KEYS` (በተመሳሳዩ ፋይል)
+  ውስጥ ያለውን እያንዳንዱን ቁልፍ ያስወግዳል፤ የይለፍ ቃሉን እና
+  `currentPassword`ን፣ እያንዳንዱን `SECURITY_IMPACTING_SETTINGS_KEYS`
+  entry፣ እና የዳሽቦርድ session state (`sessionsValidAfter`,
+  `revokedDashboardSessions`)። ስለዚህ የቆየ backupን import ማድረግ
+  በይለፍ ቃል ለውጥ ወይም በsign-out አስቀድሞ የተቋረጠ sessionን
+  እንደገና ማስነሳት አይችልም።
 
 ## የመንገድ ክፍሎች
 

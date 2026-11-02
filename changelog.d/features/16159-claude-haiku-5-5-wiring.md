@@ -1,0 +1,1 @@
+- **feat(providers):** complete `claude-haiku-5-5` catalog wiring across Anthropic, Claude OAuth, Bedrock, and Vertex registries with length-tiered pricing ($0.10/$0.50 per MTok, $0.50/$2.50 above 100k prompt tokens) and Haiku 4.5 family fallback ([#16159](https://github.com/diegosouzapw/OmniRoute/pull/16159)) — thanks @tuandinh0801

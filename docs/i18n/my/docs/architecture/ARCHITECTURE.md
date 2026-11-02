@@ -8,79 +8,78 @@
 
 _နောက်ဆုံးအပ်ဒိတ်လုပ်ထားသည့်ရက်: 2026-06-28_
 
-## အနှစ်ချုပ်
+## စီမံကိန်း၏အဓိကအချက်အလက်များ
 
-OmniRoute သည် Next.js ပေါ်တွင် တည်ဆောက်ထားသော local AI routing gateway နှင့် dashboard တစ်ခုဖြစ်သည်။
-၎င်းသည် OpenAI နှင့် ကိုက်ညီသော endpoint တစ်ခုတည်း (`/v1/*`) ကို ပံ့ပိုးပေးပြီး translation၊ fallback၊ token refresh နှင့် usage tracking တို့ဖြင့် upstream provider အများအပြားသို့ traffic ကို လမ်းကြောင်းခွဲပို့ပေးသည်။
+OmniRoute သည် Next.js ပေါ်တွင် တည်ဆောက်ထားသော ဒေသဆိုင်ရာ AI လမ်းကြောင်းနှင့် ဒက်ရှ်ဘုတ်တစ်ခုဖြစ်သည်။ ၎င်းသည် OpenAI-သဟဇာတရှိသော အဆုံးမှတ် (`/v1/*`) တစ်ခုတည်းကို ပံ့ပိုးပေးပြီး ဘာသာပြန်ခြင်း၊ တုံ့ပြန်ခြင်း၊ တိုကင်အသစ်ပြန်လည်ဆန်းသစ်ခြင်းနှင့် အသုံးပြုမှုခြေရာခံခြင်းတို့ဖြင့် ရေစီးကြောင်းဝန်ဆောင်မှုပေးသူအများအပြားကို လမ်းကြောင်းပေးသည်။
 
-အဓိက စွမ်းဆောင်ရည်များ-
+ပင်မစွမ်းရည်များ-
 
-- CLI/tools များအတွက် OpenAI နှင့် ကိုက်ညီသော API မျက်နှာပြင် (provider 375 ခု၊ executor module 156 ခု)
-- Provider format များအကြား request/response ဘာသာပြန်ပြောင်းလဲခြင်း
-- Model combo fallback (model အများအပြားပါဝင်သော အစီအစဉ်)
-- `compositeTiers` ဖြင့် runtime အစီအစဉ်သတ်မှတ်ထားသော ဖွဲ့စည်းပုံကျ combo အဆင့်များ (`provider + model + connection`)
-- Account အဆင့် fallback (provider တစ်ခုလျှင် account အများအပြား)
-- အဓိက chat လမ်းကြောင်းတွင် quota ကြိုတင်စစ်ဆေးခြင်းနှင့် quota ကို ထည့်သွင်းစဉ်းစားသော P2C account ရွေးချယ်ခြင်း
-- OAuth + API key ဖြင့် provider connection စီမံခန့်ခွဲခြင်း (OAuth provider module 27 ခု)
-- `/v1/embeddings` မှတစ်ဆင့် embedding ထုတ်လုပ်ခြင်း (provider 18 ခု)
-- `/v1/images/generations` မှတစ်ဆင့် ပုံထုတ်လုပ်ခြင်း (provider 10+ ခု၊ model 20+ ခု)
-- `/v1/audio/transcriptions` မှတစ်ဆင့် အသံမှ စာသားသို့ ကူးပြောင်းခြင်း (provider 18 ခု)
-- `/v1/audio/speech` မှတစ်ဆင့် စာသားမှ အသံသို့ ပြောင်းလဲခြင်း (built-in provider 24 ခု)
-- `/v1/videos/generations` မှတစ်ဆင့် ဗီဒီယိုထုတ်လုပ်ခြင်း (ComfyUI + SD WebUI)
-- `/v1/music/generations` မှတစ်ဆင့် တေးဂီတထုတ်လုပ်ခြင်း (ComfyUI)
-- `/v1/search` မှတစ်ဆင့် ဝဘ်ရှာဖွေခြင်း (provider 20 ခု)
-- `/v1/moderations` မှတစ်ဆင့် အကြောင်းအရာ စိစစ်ထိန်းသိမ်းခြင်း
-- `/v1/rerank` မှတစ်ဆင့် အဆင့်ပြန်စီခြင်း
-- Reasoning model များအတွက် think tag များကို ခွဲခြမ်းဖတ်ရှုခြင်း (`<think>...</think>`)
-- တင်းကျပ်သော OpenAI SDK compatibility အတွက် response ကို သန့်စင်ခြင်း
-- Provider များအကြား compatibility အတွက် role ပုံမှန်သတ်မှတ်ခြင်း (developer→system, system→user)
-- ဖွဲ့စည်းပုံကျ output ပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
-- Provider များ၊ key များ၊ alias များ၊ combo များ၊ setting များနှင့် pricing များအတွက် local persistence (DB module 122 ခု)
-- အသုံးပြုမှု/ကုန်ကျစရိတ် ခြေရာခံခြင်းနှင့် request logging
-- စက်ပစ္စည်းအများအပြား/state sync အတွက် ရွေးချယ်အသုံးပြုနိုင်သော cloud sync
-- API access control အတွက် IP allowlist/blocklist
-- Thinking budget စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
-- Global system prompt ထည့်သွင်းခြင်း
-- Session ခြေရာခံခြင်းနှင့် fingerprinting
-- Provider အလိုက် profile များပါဝင်သော account တစ်ခုချင်းစီအတွက် အဆင့်မြှင့် rate limiting
-- Provider ခံနိုင်ရည်ရှိမှုအတွက် circuit breaker pattern
-- Mutex locking ဖြင့် anti-thundering herd ကာကွယ်မှု
-- Signature အခြေပြု request deduplication cache
-- Domain layer- cost rule များ၊ fallback policy၊ lockout policy
-- Context Relay- account လှည့်လည်ပြောင်းလဲရာတွင် ဆက်လက်ချိတ်ဆက်မှုရှိစေရန် session handoff အနှစ်ချုပ်များ
-- Domain state persistence (fallback များ၊ budget များ၊ lockout များနှင့် circuit breaker များအတွက် SQLite write-through cache)
-- ဗဟိုချုပ်ကိုင်ထားသော request အကဲဖြတ်မှုအတွက် policy engine (lockout → budget → fallback)
-- p50/p95/p99 latency စုစည်းတွက်ချက်မှုပါဝင်သော request telemetry
-- `combo_execution_key` / `combo_step_id` မှတစ်ဆင့် combo target telemetry နှင့် ယခင် combo target ကျန်းမာရေးအခြေအနေ
-- အစမှအဆုံး tracing အတွက် Correlation ID (X-Request-Id)
-- API key တစ်ခုချင်းစီအလိုက် ပိတ်နိုင်သော compliance audit logging
-- LLM အရည်အသွေးအာမခံမှုအတွက် eval framework
-- အချိန်နှင့်တစ်ပြေးညီ provider circuit breaker အခြေအနေပါဝင်သော health dashboard
-- Transport 3 မျိုး (stdio/SSE/Streamable HTTP) ပါဝင်သော MCP Server (tool 110 ခု)
-- Skill များနှင့် task lifecycle ပါဝင်သော A2A Server (JSON-RPC 2.0 + SSE)
-- Memory system (ထုတ်ယူခြင်း၊ ထည့်သွင်းခြင်း၊ ပြန်လည်ရယူခြင်း၊ အနှစ်ချုပ်ခြင်း)
-- Skills system (registry၊ executor၊ sandbox၊ built-in skill များ)
-- Certificate စီမံခန့်ခွဲမှုနှင့် DNS ကိုင်တွယ်မှုပါဝင်သော MITM proxy
-- Prompt injection guard middleware
-- Caveman၊ RTK၊ stacked pipeline များ၊ compression combo များ၊ language pack များနှင့် analytics ပါဝင်သော prompt compression pipeline
-- ACP (Agent Communication Protocol) registry
-- Modular OAuth provider များ (`src/lib/oauth/providers/` အောက်ရှိ သီးခြား module 22 ခု)
-- Uninstall/full-uninstall script များ
-- OAuth environment ပြုပြင်ရေး action
-- OpenAI နှင့် ကိုက်ညီသော WS client များအတွက် WebSocket bridge (`/v1/ws`)
-- Sync token စီမံခန့်ခွဲမှု (ထုတ်ပေးခြင်း/ရုပ်သိမ်းခြင်း၊ ETag ဖြင့် version သတ်မှတ်ထားသော config bundle download)
-- GLM Thinking (`glmt`) ကို အပြည့်အဝ ပံ့ပိုးထားသော provider preset
-- Hybrid token ရေတွက်ခြင်း (provider ဘက်မှ `/messages/count_tokens` နှင့် ခန့်မှန်း fallback)
-- Model alias အလိုအလျောက် စတင်ထည့်သွင်းခြင်း (startup တွင် cross-proxy dialect normalization 30+ ခု)
-- SSRF guard၊ private URL ပိတ်ဆို့ခြင်းနှင့် ချိန်ညှိနိုင်သော retry ပါဝင်သည့် လုံခြုံသော outbound fetch
-- ချိန်ညှိနိုင်သော `requestRetry` နှင့် `maxRetryIntervalSec` ပါဝင်သည့် cooldown ကို ထည့်သွင်းစဉ်းစားသော chat retry များ
-- Startup တွင် Zod ဖြင့် runtime environment ကို အတည်ပြုခြင်း
-- Pagination၊ provider CRUD event များနှင့် SSRF ပိတ်ဆို့ခံရသော validation logging ပါဝင်သည့် compliance audit v2
+- CLI/tools အတွက် OpenAI-သဟဇာတဖြစ်သော API မျက်နှာပြင် (377 ဝန်ဆောင်မှုပေးသူ၊ 156 executor modules)
+- ပံ့ပိုးသူဖော်မတ်များမှတဆင့်Request/response ဘာသာပြန်ဆိုချက်
+- မော်ဒယ်ပေါင်းစည်းမှု နောက်ပြန်ဆုတ်ခြင်း (မော်ဒယ်လ်အစုံ)
+- `compositeTiers` ဖြင့် runtime အစီအစဉ်ဖြင့် ဖွဲ့စည်းထားသော ပေါင်းစပ်အဆင့်များ (`provider + model + connection`)
+- အကောင့်အဆင့် လှည့်ပြန်ခြင်း (ပံ့ပိုးသူ တစ်ဦးလျှင် အကောင့်များစွာ)
+- ပင်မချတ်လမ်းကြောင်းရှိ Quota preflight နှင့် quota-aware P2C အကောင့်ရွေးချယ်ခြင်း။
+- OAuth + API-သော့ပံ့ပိုးပေးသူချိတ်ဆက်မှုစီမံခန့်ခွဲမှု (27 OAuth ပံ့ပိုးပေးသူ modules)
+- `/v1/embeddings` (ဝန်ဆောင်မှုပေးသူ 18 ခု) မှတစ်ဆင့် မျိုးဆက်ကို မြှုပ်နှံထားသည်
+- `/v1/images/generations` မှတစ်ဆင့် ပုံထုတ်လုပ်ခြင်း (10 + ပံ့ပိုးပေးသူများ၊ 20 + မော်ဒယ်များ)
+- `/v1/audio/transcriptions` (ဝန်ဆောင်မှုပေးသူ 18 ဦး) မှတစ်ဆင့် အသံမှတ်တမ်းယူခြင်း
+- `/v1/audio/speech` (24 built-in ပံ့ပိုးပေးသူများ) မှတဆင့် စာသားမှစကားပြောခြင်း
+- `/v1/videos/generations` မှတဆင့်ဗီဒီယိုမျိုးဆက် (ComfyUI + SD WebUI)
+- `/v1/music/generations` (ComfyUI) မှတဆင့်ဂီတမျိုးဆက်
+- `/v1/search` (ပံ့ပိုးပေးသူ 20) မှတစ်ဆင့် ဝဘ်ရှာဖွေမှု
+- `/v1/moderations` မှတစ်ဆင့် ထိန်းညှိမှုများ
+- `/v1/rerank` မှတစ်ဆင့် အဆင့်သတ်မှတ်ခြင်း
+- ကျိုးကြောင်းဆင်ခြင်ခြင်းပုံစံများအတွက် tag parsing (`<think>...</think>`) ကိုစဉ်းစားပါ။
+- တင်းကျပ်သော OpenAI SDK လိုက်ဖက်ညီမှုအတွက် တုံ့ပြန်မှုသန့်ရှင်းရေး
+- ဝန်ဆောင်မှုပေးသူအချင်းချင်း လိုက်ဖက်ညီမှုအတွက် အခန်းကဏ္ဍပုံမှန်ဖြစ်စေခြင်း (ဆော့ဖ်ဝဲအင်ဂျင်နီယာ→ စနစ်၊ စနစ်→ အသုံးပြုသူ)
+- ဖွဲ့စည်းတည်ဆောက်ထားသော အထွက်နှုန်းပြောင်းလဲခြင်း (json_schema → Gemini responseSchema)
+- ဝန်ဆောင်မှုပေးသူများ၊ သော့များ၊ နာမည်တူများ၊ ပေါင်းစပ်မှုများ၊ ဆက်တင်များ၊ ဈေးနှုန်းများ (122 DB modules)
+- Usage/cost ခြေရာခံခြင်းနှင့် သစ်ခုတ်ခြင်းတောင်းဆိုခြင်း။
+- multi-device/state ထပ်တူပြုခြင်းအတွက် ရွေးချယ်နိုင်သော cloud ထပ်တူပြုခြင်း။
+- API ဝင်ရောက်ထိန်းချုပ်မှုအတွက်IP allowlist/blocklist
+- တွေးခေါ်ဘတ်ဂျက်စီမံခန့်ခွဲမှု (passthrough/auto/custom/adaptive)
+- ကမ္ဘာလုံးဆိုင်ရာစနစ်မျာ ထိုးဆေး
+- ဆက်ရှင်ခြေရာခံခြင်းနှင့် လက်ဗွေနှိပ်ခြင်း။
+- ဝန်ဆောင်မှုပေးသူ သီးသန့်ပရိုဖိုင်များဖြင့် အကောင့်တစ်ခုချင်းတိုးနှုန်း ကန့်သတ်ချက်
+- ပံ့ပိုးပေးသူ ခံနိုင်ရည်ရှိမှုအတွက် circuit breaker ပုံစံ
+- mutex လော့ခ်ချခြင်းဖြင့် မိုးခြိမ်းသံဆန့်ကျင်သော နွားများကို အကာအကွယ်ပေးသည်။
+- လက်မှတ်အခြေခံ တောင်းဆိုချက် ထုတ်ယူမှု ကက်ရှ်
+- ဒိုမိန်းအလွှာ- ကုန်ကျစရိတ်စည်းမျဉ်းများ၊ နောက်ပြန်ဆွဲမူဝါဒ၊ လော့ခ်ချမှုမူဝါဒ
+- Context Relay- အကောင့်လည်ပတ်မှုအဆက်မပြတ်အတွက် ဆက်ရှင်လက်လွှဲမှု အနှစ်ချုပ်
+- Domain state မြဲမြံမှု (နောက်ပြန်ဆုတ်မှုများအတွက်SQLite ကက်ရှ်မှတဆင့် စာရေးခြင်း၊ ဘတ်ဂျက်များ၊ လော့ခ်ချမှုများ၊ circuit breakers)
+- ဗဟိုမှတောင်းဆိုမှုအကဲဖြတ်ခြင်းအတွက် မူဝါဒအင်ဂျင် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှု)
+- p50/p95/p99 latency စုစည်းမှုဖြင့် telemetry ကိုတောင်းဆိုပါ။
+- ပေါင်းစပ်ပစ်မှတ် telemetry နှင့် `combo_execution_key` / `combo_step_id` မှတဆင့် သမိုင်းဝင် ပေါင်းစပ်ပစ်မှတ် ကျန်းမာရေး
+- အဆုံးမှအဆုံး ခြေရာခံခြင်းအတွက် ဆက်စပ် ID (X-Request-Id)
+- API သော့တစ်ခုလျှင် ဖယ်ထုတ်ခြင်းဖြင့် လိုက်နာမှု စာရင်းစစ်မှတ်တမ်း
+- LLM အရည်အသွေးအာမခံမှုအတွက် Eval မူဘောင်
+- အချိန်နှင့်တစ်ပြေးညီ ပံ့ပိုးပေးသူ circuit breaker အနေအထားပါရှိသော ကျန်းမာရေး ဒက်ရှ်ဘုတ်
+- ပို့ဆောင်မှု 3 ခု (stdio/SSE/Streamable HTTP) ပါသောMCP ဆာဗာ (ကိရိယာ 110)
+- ကျွမ်းကျင်မှုနှင့် အလုပ်သက်တမ်းစက်ဝန်းပါရှိသောA2A ဆာဗာ (JSON-RPC 2.0 + SSE)
+- မှတ်ဉာဏ်စနစ် (ထုတ်ယူခြင်း၊ ဆေးထိုးခြင်း၊ ပြန်လည်ထုတ်ယူခြင်း၊ အကျဉ်းချုပ်)
+- ကျွမ်းကျင်မှုစနစ် (registry၊ executor၊ sandbox၊ built-in ကျွမ်းကျင်မှုများ)
+- လက်မှတ်စီမံခန့်ခွဲမှုနှင့် DNS ကိုင်တွယ်မှုနှင့်အတူMITM proxy
+- Injection guard Middleware ကို အချက်ပြပါ။
+- Caveman၊ RTK၊ စုထားသောပိုက်လိုင်းများ၊ compression combos၊ language packs နှင့် ခွဲခြမ်းစိတ်ဖြာချက်များဖြင့် အချက်ပြခြင်း
+- ACP (Agent Communication Protocol) မှတ်ပုံတင်ခြင်း
+- Modular OAuth ပံ့ပိုးပေးသူများ ( `src/lib/oauth/providers/` အောက်တွင် တစ်ဦးချင်းစီ module 22 ခု)
+- Uninstall/full-uninstall ဇာတ်ညွှန်းများ
+- OAuth ပတ်ဝန်းကျင် ပြုပြင်ခြင်း လုပ်ဆောင်ချက်
+- OpenAI-သဟဇာတ WS clients (`/v1/ws`) အတွက်WebSocket တံတား
+- စင့်ခ်လုပ်ရန် တိုကင်စီမံခန့်ခွဲမှု (issue/revoke၊ ETag-ဗားရှင်းဖြင့် ပြုပြင်ထားသော အစုအဝေးကို ဒေါင်းလုဒ်လုပ်ခြင်း)
+- GLM Thinking (`glmt`) ပထမတန်းစားပံ့ပိုးပေးသူ ကြိုတင်သတ်မှတ်မှု
+- စပ်ဟပ်တိုကင်ရေတွက်ခြင်း (ခန့်မှန်းခြေပြန်ပြောင်းနှင့်အတူ ပံ့ပိုးသူဘက်မှ `/messages/count_tokens` )
+- မော်ဒယ်အမည်များ အလိုအလျောက်မျိုးစေ့ချခြင်း (စတင်ချိန်တွင် 30 + အပြန်အလှန် ပရောက်စီ ဒေသိယစကား ပုံမှန်ပြုလုပ်ခြင်း)
+- SSRF အစောင့်၊ သီးသန့် URL ပိတ်ဆို့ခြင်း၊ နှင့် ပြင်ဆင်သတ်မှတ်နိုင်သော ထပ်စမ်းခြင်းတို့ဖြင့် ဘေးကင်းသော အပြင်သို့ ထုတ်ယူပါ။
+- Cooldown-aware chat သည် configureable `requestRetry` နှင့် `maxRetryIntervalSec` ဖြင့် ပြန်ကြိုးစားသည်။
+- စတင်ချိန်တွင် Zod ဖြင့် runtime ပတ်ဝန်းကျင် validation
+- pagination၊ ပံ့ပိုးပေးသူ CRUD ဖြစ်ရပ်များနှင့် SSRF-ပိတ်ဆို့ထားသော တရားဝင်အထောက်အထားမှတ်တမ်းနှင့်အတူ လိုက်နာမှုစာရင်းစစ် v2
 
-အဓိက runtime model-
+အဓိက runtime မော်ဒယ်-
 
-- `src/app/api/*` အောက်ရှိ Next.js app route များသည် dashboard API များနှင့် compatibility API များ နှစ်မျိုးလုံးကို အကောင်အထည်ဖော်သည်
-- `src/sse/*` + `open-sse/*` ရှိ မျှဝေအသုံးပြုသော SSE/routing core သည် provider execution၊ translation၊ streaming၊ fallback နှင့် usage တို့ကို ကိုင်တွယ်သည်
+- `src/app/api/*` အောက်တွင်Next.js အက်ပ်လမ်းကြောင်းများကို ဒက်ရှ်ဘုတ် APIs နှင့် လိုက်ဖက်ညီသော APIs နှစ်ခုလုံးကို အကောင်အထည်ဖော်ပါ။
+- `src/sse/*` + `open-sse/*` ရှိ မျှဝေထားသော SSE/routing core သည် ဝန်ဆောင်မှုပေးသူကို စီမံဆောင်ရွက်ခြင်း၊ ဘာသာပြန်ဆိုခြင်း၊ တိုက်ရိုက်လွှင့်ခြင်း၊ လှည့်စားခြင်းနှင့် အသုံးပြုခြင်းကို ဆောင်ရွက်ပေးသည်
 
 ## ကိုးကားပုံကြမ်းများ
 
@@ -347,166 +346,124 @@ OmniRoute သည် စက်တွင်း၌ လည်ပတ်နေသေ�
 
 အသေးစိတ်လေ့လာရန်- `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## အဓိက Subsystem များ (v3.8.0)
+## အဓိကစနစ်ခွဲများ (v3.8.0)
 
 ### A. Auto Combo Engine
 
-Auto Combo သည် ပုံသေ combo သတ်မှတ်ချက်အပေါ် မှီခိုမည့်အစား request ပြုလုပ်ချိန်တွင် routing target များကို dynamic ပုံစံဖြင့် အမှတ်ပေးပြီး ရွေးချယ်သည်။ ၎င်းသည် `auto/*` model prefix family ကို လည်ပတ်စေသည်။
+Auto Combo သည် static combo အဓိပ္ပါယ်ဖွင့်ဆိုချက်အပေါ် အားကိုးမည့်အစား တောင်းဆိုသည့်အချိန်၌ လမ်းကြောင်းသတ်မှတ်သည့်ပန်းတိုင်များကို ဒိုင်းနမစ်အမှတ်ပေးပြီး ရွေးသည်။ ၎င်းသည် `auto/*` မော်ဒယ်ရှေ့ဆက်မိသားစုကို စွမ်းအားပေးသည်။
 
-- Engine entry: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Resolver: `src/domain/comboResolver.ts` (`auto/` prefix ကို အလိုအလျောက်ရှာဖွေခြင်း)
-- Dashboard: `/dashboard/auto-combo`
-- Telemetry: `auto_combo_decisions` SQLite table
+- အင်ဂျင်ဝင်ရောက်မှု- `open-sse/services/autoCombo/` (`autoComboEngine.ts`၊ `scoringEngine.ts`၊ `virtualFactory.ts`၊ `modePacks.ts`)
+- ဖြေရှင်းချက်- `src/domain/comboResolver.ts` ( `auto/` ရှေ့ဆက်ကို အလိုအလျောက် သိရှိခြင်း)
+- ဒက်ရှ်ဘုတ်- `/dashboard/auto-combo`
+- Telemetry: `auto_combo_decisions` SQLite ဇယား
 
-အဓိက လုပ်ဆောင်နိုင်စွမ်းများ:
+အဓိက စွမ်းဆောင်ရည်များ-
 
-- **routing strategy 20 မျိုး** (ဦးစားပေး၊ အလေးချိန်အလိုက်၊ ဦးစွာဖြည့်၊ အလှည့်ကျ၊ P2C၊ ကျပန်း၊
-  အသုံးပြုမှုအနည်းဆုံး၊ ကုန်ကျစရိတ်အကောင်းဆုံးဖြစ်အောင်ပြုလုပ်ထားသော၊ reset ကိုထည့်သွင်းစဉ်းစားသော၊ reset-window၊ headroom၊ quota-weighted၊
-  strict-random၊ **auto**၊ lkgp၊ context-optimized၊ cache-optimized၊ context-relay၊ **fusion**၊
-  pipeline) —
-  auto သည် v3.8.0 တွင် အဓိကထည့်သွင်းမှုဖြစ်သည်။ `fusion` (panel fan-out + judge synthesis၊
-  `open-sse/services/fusion.ts`) သည် v3.8.36 တွင် အသစ်ဖြစ်သည်။
-- **အချက် 16 ချက်ပါ အမှတ်ပေးစနစ်**: quota၊ health၊ ပြောင်းပြန်ကုန်ကျစရိတ်၊ ပြောင်းပြန် latency၊ task နှင့်ကိုက်ညီမှု၊
-  အခြားအချက်ဆယ်ချက်။ အချက်များနှင့် ၎င်းတို့၏ မူလအလေးချိန်များဆိုင်ရာ canonical table ကို
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) တွင် တွေ့နိုင်သည် — ဤနေရာတွင် ထပ်မံဖော်ပြခြင်းသည်
-  အချက်အလက်ဟောင်းသွားနိုင်သည့် ဒုတိယနေရာတစ်ခု ဖြစ်လာစေမည်။
-- **Virtual factory** သည် ကိုက်ညီသော အမည်ပေးထားသည့် combo မရှိသည့်အခါ ယာယီ combo များကို
-  ဖန်တီးပေးပြီး ကောင်းမွန်စွာအလုပ်လုပ်နေသော active provider connection များမှ candidate များကို ရယူသည်။
-- **Auto prefix များ**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — တစ်ခုချင်းစီကို ချိန်ညှိထားသော weight profile ဖြင့် ပံ့ပိုးထားသည်။
-- **mode pack 6 ခု**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` နှင့် `chaos-mode` — dashboard မှ ခေါ်ယူအသုံးပြုနိုင်သော ကြိုတင်သတ်မှတ်ထားသည့် weight configuration များဖြစ်သည်။
-  (၎င်းတို့ကို အထက်ပါ `auto/*` prefix များနှင့် မရောထွေးသင့်ပါ။ အထက်ပါ prefix များသည်
-  request ပြုလုပ်ချိန်တွင် အသုံးချသည့် မူကွဲများဖြစ်သည်။)
+- **လမ်းကြောင်း ဗျူဟာ 20** (ဦးစားပေး၊ အလေးချိန်၊ ပထမ၊ အဝိုင်း-ရိုဘင်၊ P2C၊ ကျပန်း၊ အသုံးအနည်းဆုံး၊ ကုန်ကျစရိတ်-အကောင်းဆုံးဖြစ်အောင်၊ ပြန်လည်သတ်မှတ်-သတိပြုမိ၊ ပြန်လည်သတ်မှတ်-ဝင်းဒိုး၊ headroom၊ ခွဲတမ်း-အလေးချိန်၊ တင်းကျပ်သောကျပန်း၊** အော်တို** , lkgp, context-optimized, cache-optimized, context-relay၊** ပေါင်းစပ်မှု** , pipeline) — auto သည် v3.8.0 တွင် ခေါင်းစီးအပြင်၊ `fusion` (panel fan-out + စီရင်ချက်ပေါင်းစပ်မှု၊ `open-sse/services/fusion.ts`) သည် v3.8.36 တွင် အသစ်ဖြစ်သည်။
+- **16-အချက် အမှတ်ပေး** : ခွဲတမ်း၊ ကျန်းမာရေး၊ ပြောင်းပြန် ကုန်ကျစရိတ်၊ ပြောင်းပြန်နေချိန်၊ အလုပ်နှင့် အံကိုက် နှင့် နောက်ထပ် ဆယ်ခု။ ကိန်းဂဏန်းဇယားများနှင့် ၎င်းတို့၏မူလအလေးများသည် [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — တွင်တည်ရှိပြီး ၎င်းအား ဤနေရာတွင် ပြန်လည်ဖော်ပြခြင်းက ၎င်းအား ပျက်သွားစေရန် ဒုတိယနေရာပေးမည်ဖြစ်သည်။
+- **စက်ရုံအတု** အမည်ပေးထားသည့် တွဲဆိုင်းများ မရှိသောအခါတွင် ပေါ်ပင်ပေါင်းစပ်မှုများ ပေါ်ပေါက်လာပြီး ကျန်းမာတက်ကြွသော ဝန်ဆောင်မှုပေးသူ ချိတ်ဆက်မှုများမှ ကိုယ်စားလှယ်လောင်းများကို ရင်းမြစ်ပေးသည်။
+- **အလိုအလျောက် ရှေ့ထွက်များ** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — တစ်ခုစီကို ချိန်ညှိထားသော အလေးချိန်ပရိုဖိုင်ဖြင့် ပံ့ပိုးထားသည်။
+- **6 မုဒ်အစုံ** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` နှင့် `chaos-mode` — ဒိုင်ခွက်မှ ခေါ်ဆိုနိုင်သော ကြိုတင်သတ်မှတ်ထားသော အလေးချိန် ဖွဲ့စည်းမှုပုံစံများ။ (တောင်းဆိုမှု-အချိန်မျိုးကွဲများဖြစ်သည့် အထက်ဖော်ပြပါ `auto/*` ရှေ့ဆက်များနှင့် မရောထွေးရပါ။)
 
-algorithm ဆိုင်ရာ အသေးစိတ်အပြည့်အစုံ (factor formula များ၊ weight ချိန်ညှိခြင်း) အတွက်
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ကို ကြည့်ပါ။
+အယ်လဂိုရီသမ်အသေးစိတ် (အချက်ဖော်မြူလာများ၊ အလေးချိန်ချိန်ညှိခြင်း) အပြည့်အစုံအတွက် [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ကြည့်ပါ။
 
-### B. Cloud Agents
+### B. Cloud အေးဂျင့်များ
 
-Cloud Agents သည် third-party hosted code-agent platform များ (Codex Cloud, Devin,
-Jules) ကို တူညီသော DB-backed task lifecycle နောက်ကွယ်တွင် ထုပ်ပိုးပေးသည်။ task ဖန်တီးခြင်း/စစ်ဆေးခြင်း
-endpoint အားလုံးအတွက် management authentication လိုအပ်သည်။
+Cloud Agents သည် ယူနီဖောင်း DB-ကျောထောက်နောက်ခံပြုထားသော လုပ်ငန်းဆောင်တာဘဝစက်ဝန်းနောက်ကွယ်တွင် ပြင်ပအဖွဲ့အစည်းမှ လက်ခံထားသော ကုဒ်အေးဂျင့်ပလပ်ဖောင်းများ (Codex Cloud၊ Devin၊ Jules) ကို ခြုံငုံထားသည်။ အလုပ် creation/inspection အဆုံးမှတ်များအားလုံးသည် စီမံခန့်ခွဲမှု စစ်မှန်ကြောင်းအထောက်အထား လိုအပ်သည်။
 
-- Module root: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts` နှင့် `agents/` အောက်ရှိ agent တစ်ခုချင်းစီဆိုင်ရာ subdirectory များ)
-- Agent တစ်ခုချင်းစီဆိုင်ရာ implementation များ: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Public endpoint များ: `/api/v1/agents/tasks/*` (စာရင်းပြုစု/ဖန်တီး/ရယူ/ပယ်ဖျက်)
-- Management endpoint များ: `/api/cloud/*` (provisioning၊ အခြေအနေ၊ batch)
-- Dashboard: `/dashboard/cloud-agents`
-- Storage: `cloud_agent_tasks` table
+- မော်ဂျူး အမြစ်- `src/lib/cloudAgent/` (`baseAgent.ts`၊ `registry.ts`၊ `api.ts`၊ `types.ts`၊ `db.ts`၊ အပေါင်း `agents/` အောက်တွင် တစ်ခုစီ ကိုယ်စားလှယ် လမ်းကြောင်းခွဲများ )
+- ကိုယ်စားလှယ်တစ်ဦးစီ အကောင်အထည်ဖော်မှုများ- `agents/codex/`၊ `agents/devin/`၊ `agents/jules/`
+- အများသူငှာ အဆုံးမှတ်များ- `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- စီမံခန့်ခွဲမှုအဆုံးမှတ်များ- `/api/cloud/*` (စီမံဆောင်ရွက်ပေးခြင်း၊ အခြေအနေ၊ အစုလိုက်)
+- ဒက်ရှ်ဘုတ်- `/dashboard/cloud-agents`
+- သိုလှောင်မှု- `cloud_agent_tasks` ဇယား
 
-Agent တစ်ခုချင်းစီ၏ provisioning နှင့် OAuth အသေးစိတ်များအတွက်
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ကို ကြည့်ပါ။
+ကိုယ်စားလှယ်တစ်ဦးစီ စီမံဆောင်ရွက်ပေးခြင်းနှင့် OAuth အတိအကျအတွက် [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ကြည့်ပါ။
 
 ### C. Guardrails
 
-guardrails module သည် request နှင့် response များတွင် PII၊ prompt injection နှင့် မလုံခြုံသော vision content များရှိမရှိ စစ်ဆေးသည့် hot-reload လုပ်နိုင်သော middleware layer ဖြစ်သည်။ ချိုးဖောက်မှုရှိပါက
-request ကို HTTP **503** နှင့် ဖွဲ့စည်းပုံတကျ error code တစ်ခုဖြင့် ချက်ချင်းရပ်တန့်စေပြီး
-downstream caller များက ထပ်မံကြိုးစားရန် သို့မဟုတ် လမ်းကြောင်းခွဲရန် ခွင့်ပြုသည်။
+guardrails module သည် PII၊ ချက်ခြင်းထိုးသွင်းခြင်းနှင့် မလုံခြုံသောအမြင်အာရုံအကြောင်းအရာအတွက် တောင်းဆိုမှုများနှင့် တုံ့ပြန်မှုများကို စစ်ဆေးသည့် hot-reloadable middleware အလွှာတစ်ခုဖြစ်သည်။ ချိုးဖောက်မှုများသည် HTTP ဖြင့် တောင်းဆိုမှုကို တိုတိုတုတ်တုတ်ဖြစ်စေသည်။** ၅၀၃** ထို့အပြင် အောက်ပိုင်းခေါ်ဆိုသူများကို ထပ်စမ်းကြည့်ရန် သို့မဟုတ် ဘဏ်ခွဲလုပ်ခွင့်ပေးသည့် ဖွဲ့စည်းပုံအမှားကုဒ်။
 
-- Module root: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Hot reload: registry သည် config ပြောင်းလဲမှုများကို စောင့်ကြည့်ပြီး chain ကို နေရာတင် ပြန်လည်တည်ဆောက်သည်
-- ချိတ်ဆက်သည့်နေရာများ: chat handler entry၊ image generation handler၊ response sanitizer
-- HTTP contract: ချိုးဖောက်မှုများကို `503` နှင့် `error.code = "GUARDRAIL_VIOLATION"` အဖြစ် ဖော်ပြသည်
+- မော်ဂျူးအမြစ်- `src/lib/guardrails/` (`base.ts`၊ `registry.ts`၊ `piiMasker.ts`၊ `promptInjection.ts`၊ `visionBridge.ts`၊ `visionBridgeHelpers.ts`)
+- ပြန်လည်စတင်ခြင်း- config အပြောင်းအလဲများအတွက် registry နာရီများသည် ကွင်းဆက်ကို နေရာ၌ ပြန်လည်တည်ဆောက်သည်။
+- Wire-in အမှတ်များ- ချက်တင်ကိုင်တွယ်သူ ဝင်ရောက်မှု၊ ရုပ်ပုံထုတ်လုပ်သည့် ကိုင်တွယ်ကိရိယာ၊ တုံ့ပြန်မှု သန့်စင်ဆေး
+- HTTP စာချုပ်- `503` နှင့် `error.code = "GUARDRAIL_VIOLATION"` အဖြစ် မျက်နှာပြင်ကို ချိုးဖောက်သည်။
 
-ruleset ရေးသားခြင်းနှင့် threshold ချိန်ညှိခြင်းအတွက်
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ကို ကြည့်ပါ။
+စည်းမျဉ်းသတ်မှတ်ရေးသားခြင်းနှင့် အဆင့်သတ်မှတ်ခြင်းအတွက် [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ကြည့်ပါ။
 
 ### D. Domain Layer
 
-`src/domain/` namespace သည် policy ဆုံးဖြတ်ချက်များကို ဗဟိုပြုထားသဖြင့် route handler များသည်
-lockout/budget/fallback logic ကို ကိုယ်တိုင် စုစည်းတည်ဆောက်ရန် မလိုအပ်ပါ။
+`src/domain/` namespace သည် မူဝါဒဆိုင်ရာ ဆုံးဖြတ်ချက်များကို ဗဟိုချုပ်ကိုင်ထားသောကြောင့် လမ်းကြောင်းကိုင်တွယ်သူများသည် lockout/budget/fallback logic ကို ၎င်းတို့ကိုယ်တိုင် စုဝေးနေရန် မလိုအပ်ပါ။
 
-- Policy engine: `src/domain/policyEngine.ts` — လုပ်ဆောင်မှုမစတင်မီ
-  အကဲဖြတ်ခြင်းအတွက် တစ်ခုတည်းသော entry point (lockout → budget → fallback အစီအစဉ်)
-- Cost rule များ: `src/domain/costRules.ts`
-- Fallback policy: `src/domain/fallbackPolicy.ts`
-- Lockout policy: `src/domain/lockoutPolicy.ts`
-- Tag-based routing: `src/domain/tagRouter.ts`
-- Combo resolver: `src/domain/comboResolver.ts` — combo အမည်များ၊ auto/\*
-  prefix များနှင့် wildcard model target များကို လက်တွေ့ execution plan များအဖြစ် ဖြေရှင်းပေးသည်
-- Connection/model rule joiner: `src/domain/connectionModelRules.ts`
-- Model availability snapshot များ: `src/domain/modelAvailability.ts`
-- Provider expiration tracking: `src/domain/providerExpiration.ts`
+- မူဝါဒအင်ဂျင်- `src/domain/policyEngine.ts` — အကြိုလုပ်ဆောင်မှုအကဲဖြတ်မှုအတွက် တစ်ခုတည်းသောဝင်ခွင့်အမှတ် ( → ဘတ်ဂျက် → ဆုတ်ယုတ်မှုအမိန့်စာ)
+- ကုန်ကျစရိတ်စည်းမျဉ်းများ- `src/domain/costRules.ts`
+- နောက်ပြန်ဆုတ်ရေးမူဝါဒ- `src/domain/fallbackPolicy.ts`
+- လော့ခ်ချခြင်းမူဝါဒ- `src/domain/lockoutPolicy.ts`
+- တဂ်အခြေခံလမ်းကြောင်း- `src/domain/tagRouter.ts`
+- ပေါင်းစပ်ဖြေရှင်းသူ- `src/domain/comboResolver.ts` — ပေါင်းစပ်အမည်များ၊ အလိုအလျောက်/\* ရှေ့ဆက်များနှင့် သင်္ကေတပုံစံပစ်မှတ်များကို ခိုင်မာသော အကောင်အထည်ဖော်မှုအစီအစဉ်များအတွက် ဖြေရှင်းသည်
+- Connection/model စည်းမျဉ်း joiner: `src/domain/connectionModelRules.ts`
+- မော်ဒယ်ရရှိနိုင်မှု လျှပ်တစ်ပြက်ပုံများ- `src/domain/modelAvailability.ts`
+- ဝန်ဆောင်မှုပေးသူ သက်တမ်းကုန်ဆုံးမှုကို ခြေရာခံခြင်း- `src/domain/providerExpiration.ts`
 - Quota cache: `src/domain/quotaCache.ts`
-- Degradation state: `src/domain/degradation.ts`
-- Configuration audit: `src/domain/configAudit.ts`
-- OmniRoute response metadata builder: `src/domain/omnirouteResponseMeta.ts`
-- Assessment subsystem: `src/domain/assessment/` — အချိန်မှန် အကဲဖြတ်သည့် job များ
+- ပျက်စီးခြင်းအခြေအနေ- `src/domain/degradation.ts`
+- ဖွဲ့စည်းမှုစာရင်းစစ်- `src/domain/configAudit.ts`
+- OmniRoute တုံ့ပြန်မှု မက်တာဒေတာ တည်ဆောက်သူ- `src/domain/omnirouteResponseMeta.ts`
+- အကဲဖြတ်စနစ်ခွဲ- `src/domain/assessment/` — အပိုင်းအလိုက် အကဲဖြတ်ခြင်းအလုပ်များ
 
-### E. Authorization Pipeline
+### E. ခွင့်ပြုချက် ပိုက်လိုင်း
 
-authorization pipeline သည် ဝင်လာသော request တိုင်းကို အမျိုးအစားခွဲပြီး dispatch မလုပ်မီ
-သင့်လျော်သော policy chain ကို အသုံးချသည်။
+ခွင့်ပြုချက်ပိုက်လိုင်းသည် ဝင်လာသည့် တောင်းဆိုမှုတိုင်းကို အမျိုးအစားခွဲကာ ဖြန့်ဝေခြင်းမပြုမီ သင့်လျော်သောမူဝါဒကွင်းဆက်ကို ကျင့်သုံးသည်။
 
-- Pipeline entry: `src/server/authz/pipeline.ts`
-- Request classifier: `src/server/authz/classify.ts` — public
-  compatibility route များနှင့် management route များကို ခွဲခြားသည်
-- Public route inventory: `src/shared/constants/publicApiRoutes.ts`
-- Policy များ: `src/server/authz/policies/` — ပေါင်းစပ်အသုံးပြုနိုင်သော predicate များ
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` စသည်)
-- Header utility များ: `src/server/authz/headers.ts`
-- Assertion helper: `src/server/authz/assertAuth.ts`
-- Request context: `src/server/authz/context.ts`
+- ပိုက်လိုင်းဝင်ရောက်မှု- `src/server/authz/pipeline.ts`
+- အမျိုးအစားခွဲရန် တောင်းဆိုခြင်း- `src/server/authz/classify.ts` — အများသူငှာ လိုက်ဖက်ညီသော လမ်းကြောင်းများကို စီမံခန့်ခွဲမှုလမ်းကြောင်းများနှင့် ခွဲခြားသည်။
+- အများသူငှာ လမ်းကြောင်းစာရင်း- `src/shared/constants/publicApiRoutes.ts`
+- မူဝါဒများ- `src/server/authz/policies/` — composable predicates (`requireApiKey`, `requireManagement`, `requireFreshAuth`, etc.)
+- ခေါင်းစီးအသုံးအဆောင်များ- `src/server/authz/headers.ts`
+- အခိုင်အမာကူညီသူ- `src/server/authz/assertAuth.ts`
+- အကြောင်းအရာ တောင်းဆိုချက်- `src/server/authz/context.ts`
 
-Public route နှင့် management route တို့အကြား ခွဲခြားမှုသည် မဖြတ်ကျော်ရသည့် အကန့်အသတ်ဖြစ်သည်။ agent/cooldown API များနှင့်
-provider ပြောင်းလဲမှုများအတွက် management auth လိုအပ်သည် (မပါရှိပါက HTTP 401)။
+အများသူငှာ နှင့် စီမံခန့်ခွဲမှုလမ်းကြောင်းများသည် ခက်ခဲသောနယ်နိမိတ်ဖြစ်သည်- agent/cooldown APIs နှင့် ဝန်ဆောင်မှုပေးသူ ဗီဇပြောင်းလဲမှုများသည် စီမံခန့်ခွဲမှုဆိုင်ရာ အထောက်အထား (HTTP 401) ပျောက်ဆုံးနေပါက လိုအပ်ပါသည်။
 
-route အမျိုးအစားခွဲခြားခြင်းဆိုင်ရာ စည်းမျဉ်းအပြည့်အစုံအတွက်
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ကို ကြည့်ပါ။
+လမ်းကြောင်း အမျိုးအစားခွဲခြင်း စည်းမျဉ်းအပြည့်အစုံအတွက် [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ကြည့်ပါ။
 
 ### F. Workflow FSM နှင့် Task-Aware Router
 
-တွေ့ရှိထားသော workflow အဆင့် (စီစဉ်ခြင်း၊ လုပ်ဆောင်ခြင်း၊
-ပြန်လည်သုံးသပ်ခြင်း) နှင့် background-task affinity အပေါ် အခြေခံ၍ traffic ကို လမ်းညွှန်ရန် combo ရွေးချယ်မှုအထက်တွင် အလွှာတစ်ခုအဖြစ် ထားရှိထားသော finite-state-machine ဖြင့် မောင်းနှင်သည့် router ဖြစ်သည်။
+ရှာဖွေတွေ့ရှိထားသော အလုပ်အသွားအလာအဆင့် (စီစဉ်ခြင်း၊ လုပ်ဆောင်ခြင်း၊ ပြန်လည်သုံးသပ်ခြင်း) နှင့် နောက်ခံ-လုပ်ငန်းစဥ်ဆက်စပ်မှုအပေါ် အခြေခံ၍ အသွားအလာကို တိုက်ရိုက်လုပ်ဆောင်ရန် ပေါင်းစပ်ရွေးချယ်မှုအပေါ်တွင် အလွှာလိုက် ကန့်သတ်-ပြည်နယ်-စက်မောင်းနှင်သည့်ရောက်တာတစ်ခု။
 
-- Workflow FSM: `open-sse/services/workflowFSM.ts`
-- လုပ်ဆောင်စရာကို သိရှိနားလည်သော router: `open-sse/services/taskAwareRouter.ts`
-- နောက်ခံလုပ်ဆောင်စရာ ရှာဖွေသတ်မှတ်ကိရိယာ: `open-sse/services/backgroundTaskDetector.ts`
-- ရည်ရွယ်ချက် အမျိုးအစားခွဲကိရိယာ: `open-sse/services/intentClassifier.ts`
+- အလုပ်အသွားအလာ FSM: `open-sse/services/workflowFSM.ts`
+- Task-aware router- `open-sse/services/taskAwareRouter.ts`
+- နောက်ခံလုပ်ဆောင်စရာ ရှာဖွေရေးကိရိယာ- `open-sse/services/backgroundTaskDetector.ts`
+- ရည်ရွယ်ချက် အမျိုးအစားခွဲခြင်း- `open-sse/services/intentClassifier.ts`
 
-FSM အခြေအနေကူးပြောင်းမှုများကို Auto Combo ၏ အမှတ်ပေးစနစ်ထဲသို့ ထည့်သွင်းပြီး၊
-နောက်ခံ/အလိုအလျောက်လုပ်ဆောင်စရာများအတွက် ကုန်ကျစရိတ်နည်းသော model များဘက်သို့လည်းကောင်း၊ အပြန်အလှန်တုံ့ပြန်မှုရှိသော
-အစီအစဉ်ရေးဆွဲခြင်း/သုံးသပ်ခြင်း turn များအတွက် ပိုမိုစွမ်းဆောင်ရည်ကောင်းသော model များဘက်သို့လည်းကောင်း ဦးစားပေးစေသည်။
+FSM အကူးအပြောင်းများသည် Auto Combo ၏ အမှတ်ပေးချက်များသို့ ဖြည့်သွင်းပြီး background/automation လုပ်ဆောင်စရာများအတွက် စျေးသက်သာသော မော်ဒယ်များဆီသို့ ဦးတည်ကာ အပြန်အလှန်အကျိုးသက်ရောက်သော planning/review အလှည့်များအတွက် ပိုမိုအားကောင်းသော မော်ဒယ်များဆီသို့ ဦးတည်ပေးပါသည်။
 
-### G. Provider အလိုက် ခံနိုင်ရည်ရှိမှု
+### G. ပံ့ပိုးပေးသူ-သတ်သတ်မှတ်မှတ် ခံနိုင်ရည်ရှိမှု
 
-Provider အချို့တွင် ကမ္ဘာလုံးဆိုင်ရာ circuit breaker / connection cooldown / model lockout အလွှာများနှင့်
-ပူးတွဲအလုပ်လုပ်သည့် သီးခြားခံနိုင်ရည်နှင့် stealth module များ ပါဝင်သည်-
+ဝန်ဆောင်မှုပေးသူအများအပြားသည် ကမ္ဘာလုံးဆိုင်ရာ circuit breaker / connection cooldown / model lockout layers တွင် ကျောထောက်နောက်ခံပြုထားသော ခံနိုင်ရည်ရှိမှုနှင့် ကိုယ်ပျောက် module များကို ပေးပို့သည်-
 
-- Antigravity 429 engine: `open-sse/services/antigravity429Engine.ts` (identity ကို
-  အလှည့်ကျပြောင်းခြင်း၊ response header များကို ရှင်းလင်းခြင်းနှင့် credits/version ခြေရာခံမှုကို
-  `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`,
-  `antigravityIdentity.ts`, `antigravityVersion.ts` တို့မှတစ်ဆင့် မောင်းနှင်ခြင်း)
-- ModelScope quota မူဝါဒ: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (လိုက်ဖက်ညီမှု Channel Handshake): `open-sse/services/claudeCodeCCH.ts`,
-  ထို့အပြင် `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`,
-  `claudeCodeToolRemapper.ts`
-- Claude Code fingerprint ပုံဖော်ခြင်း: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code မရှင်းလင်းအောင် ဖုံးကွယ်ခြင်း: `open-sse/services/claudeCodeObfuscation.ts`
+- Antigravity 429 အင်ဂျင်- `open-sse/services/antigravity429Engine.ts` (အထောက်အထားကို လှည့်ပတ်သည်၊ တုံ့ပြန်မှု ခေါင်းစီးများကို ပွတ်တိုက်သည်၊ credits/version ခြေရာခံခြင်းကို `antigravityCredits.ts`၊ `antigravityHeaderScrub.ts`၊ `antigravityHeaders.ts`၊ `antigravityIdentity.ts`၊ `antigravityVersion.ts` မှတဆင့် မောင်းနှင်သည်)
+- Antigravity 429 guard- `open-sse/services/antigravity429Guard.ts` (အိမ်ရှင်အားလုံးတွင်၊ `ANTIGRAVITY_MAX_429_ATTEMPTS`၏ အထက်ရေစီးကြောင်း 429s ၏ တောင်းဆိုချက်တစ်ခုအတွက် ဘတ်ဂျက်၊ ငြင်းဆိုထားသည့် ကိုယ်ထည်၏ ထပ်တူထပ်မျှ ပြန်လည်ပေးပို့မှုကို စက်တွင်းတွင် အဖြေပေးသည်၊ `src/sse/handlers/chat.ts` cooldown-aware ထပ်စမ်းကြည့်ခြင်းဖြင့် ထိုတောင်းဆိုမှုကို ပြန်လည်စတင်မည်မဟုတ်ပါ)
+- ModelScope ခွဲတမ်းမူဝါဒ- `open-sse/services/modelscopePolicy.ts`
+- Claude ကုဒ် CCH (လိုက်ဖက်ညီသော ချန်နယ် လက်ဆွဲနှုတ်ဆက်ခြင်း): `open-sse/services/claudeCodeCCH.ts`, အပေါင်း `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude ကုဒ် လက်ဗွေပုံဖော်ခြင်း- `open-sse/services/claudeCodeFingerprint.ts`
+- Claude Code obfuscation- `open-sse/services/claudeCodeObfuscation.ts`
 
-stealth လုပ်ဆောင်မှုအစီအစဉ်အပြည့်အစုံနှင့် လုပ်ငန်းလည်ပတ်မှုဆိုင်ရာ လမ်းညွှန်ချက်များအတွက်
-`docs/security/STEALTH_GUIDE.md` ကို ကြည့်ပါ (git တွင်သာရှိပြီး `/docs` ထဲသို့ compile မလုပ်ထားပါ)။
+ကိုယ်ပျောက်ကစားနည်းစာအုပ်နှင့် လုပ်ငန်းလည်ပတ်မှုလမ်းညွှန်ချက်အပြည့်အစုံအတွက် `docs/security/STEALTH_GUIDE.md` (git; `/docs` တွင်စုစည်းထားခြင်းမဟုတ်) ကိုကြည့်ပါ။
 
-### H. Webhook များ၊ Reasoning Cache၊ Read Cache
+### H. Webhooks၊ Reasoning Cache၊ Read Cache
 
-- **Webhook များ** — provider/account/task event များအတွက် အပြင်ဘက်သို့ ပေးပို့ခြင်း။
+- **Webhooks** provider/account/task ဖြစ်ရပ်များအတွက် — အပြင်သို့ ပို့ဆောင်ခြင်း။
   - Dispatcher: `src/lib/webhookDispatcher.ts`
-  - သိုလှောင်မှု: `webhooks` SQLite table (`src/lib/db/webhooks.ts` မှတစ်ဆင့်)
-  - Dashboard: `/dashboard/webhooks` (စာရင်းသွင်းမှုများ၊ secret များ၊ ပြန်လည်ကြိုးစားမှုမှတ်တမ်း)
-  - event အမျိုးအစားခွဲခြားမှုနှင့် ပြန်လည်ကြိုးစားမှုဆိုင်ရာ အဓိပ္ပာယ်သတ်မှတ်ချက်များအတွက် [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ကို ကြည့်ပါ။
-- **Reasoning Cache** — thinking token များ ထုတ်ပေးသည့် provider များအတွက်
-  ပြန်လည်အသုံးချနိုင်သော reasoning block များ (Claude, GLMT စသည်တို့) ဖြစ်ပြီး ဆက်တိုက် turn များတွင် ထပ်မံစဉ်းစားခြင်းကို ကျော်နိုင်စေသည်။
+  - သိုလှောင်မှု- `webhooks` SQLite ဇယား ( `src/lib/db/webhooks.ts` မှတဆင့်)
+  - ဒက်ရှ်ဘုတ်- `/dashboard/webhooks` (စာရင်းသွင်းမှုများ၊ လျှို့ဝှက်ချက်များ၊ ပြန်လည်ကြိုးစားမှုမှတ်တမ်း)
+  - ဖြစ်ရပ်အစီအစဥ်ခွဲခြားခြင်းနှင့် အဓိပ္ပါယ်ပြန်စမ်းခြင်းအတွက် [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) ကြည့်ပါ။
+- **Reasoning Cache** — replayable reasoning blocks for providers that emit thinking tokens (Claude, GLMT, etc.) so consecutive turns can skip re-thinking.
   - DB အလွှာ: `src/lib/db/reasoningCache.ts`
-  - Service အလွှာ: `open-sse/services/reasoningCache.ts`
-  - ပြန်လည်အသုံးချမှုဆိုင်ရာ အဓိပ္ပာယ်သတ်မှတ်ချက်များအတွက် [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ကို ကြည့်ပါ။
-- **Read Cache** — signature ဖြင့် key သတ်မှတ်ထားသည့် သက်တမ်းတို response cache ဖြစ်ပြီး
-  ချို့ယွင်းနေသော upstream SDK များမှ တူညီသည့် ပြန်လည်ကြိုးစားမှုများကို တစ်ခုတည်းအဖြစ် ပေါင်းစည်းရန် အသုံးပြုသည်။
+  - ဝန်ဆောင်မှုအလွှာ- `open-sse/services/reasoningCache.ts`
+  - အဓိပ္ပါယ်ပြန်ဖွင့်ရန်အတွက် [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) ကြည့်ပါ။
+- **Cache ကိုဖတ်ပါ။** — ခဏတာ တုံ့ပြန်မှု ကက်ရှ်ကို လက်မှတ်ဖြင့် သော့ခတ်ထားပြီး ကျိုးပဲ့နေသော SDKs မှ ထပ်တူထပ်မျှ ထပ်တူညီမှုများကို ဖျက်ရန် အသုံးပြုသည်။
   - DB အလွှာ: `src/lib/db/readCache.ts`
-  - စာရင်းအင်း endpoint: `GET /api/cache/stats`၊ dashboard မှာ `/dashboard/cache` တွင်ရှိသည်။
+  - စာရင်းအင်းအဆုံးမှတ်- `GET /api/cache/stats`၊ `/dashboard/cache` ရှိ ဒက်ရှ်ဘုတ်
 
 ## 3) တည်မြဲသိုလှောင်မှု အလွှာ
 

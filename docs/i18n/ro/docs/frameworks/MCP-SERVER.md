@@ -72,6 +72,16 @@ curl -i \
 
 O cheie fără domeniul manage (sau absența Bearer) returnează `403 LOCAL_ONLY`. Prefixul înrudit `/api/cli-tools/runtime/*` NU poate fi ocolit în mod intenționat — consultați [Nivelurile de protecție a rutelor — excepția pentru domeniul manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validarea Origin
+
+După autentificare, fiecare cerere către `/api/mcp/*` — transporturile și rutele de administrare precum `status`, `tools`, `audit`, `restart` — are antetul `Origin` validat, oricare ar fi apelantul (cheie API, token CLI, sesiune dashboard sau loopback anonim cu autentificarea dezactivată). Aceasta este protecția împotriva DNS rebinding cerută de specificația MCP Streamable HTTP.
+
+- **Fără antet `Origin`** → permis. CLI-ul OmniRoute, SDK-ul și clienții IDE nu îl trimit.
+- **`Origin` permis** → `localhost` / `127.0.0.1` / `[::1]` pe orice port sau originea publică a OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, originea transmisă de un reverse proxy de încredere (`OMNIROUTE_TRUST_PROXY`, doar când nu este setat un base URL) sau un host IP loopback/LAN accesat direct. Antetul `Host` singur nu face niciodată o origine de încredere.
+- **Orice alt `Origin`, inclusiv `null`** → `403` cu corp de eroare JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. O sesiune dashboard care prezintă un token CSRF valid este în continuare acceptată, ca la celelalte scrieri din dashboard.
+
+Un client MCP de browser servit în spatele unui reverse proxy are nevoie de `OMNIROUTE_PUBLIC_BASE_URL`; nu există listă de permisiuni pentru alte origini. Cererea preliminară CORS (`OPTIONS`) nu este verificată pentru Origin; cererea care urmează, da.
+
 ## Configurarea IDE-ului
 
 Consultați [Configurarea clientului MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) pentru configurarea Claude Desktop,
@@ -291,190 +301,195 @@ Atât transportul SSE, cât și transportul HTTP cu streaming sunt blocate pân�
 
 ## Autentificare și scope-uri
 
-Apelurile instrumentelor MCP citesc șirurile de scope-uri de la apelant. Această verificare este unul dintre cele trei
-spații de nume independente. Trecerea unei verificări nu implică trecerea celorlalte.
-Regulile sunt descrise în [Cele trei spații de nume pentru scope-uri](#three-scope-namespaces).
-Catalogul de instrumente este în [Scope-urile instrumentelor MCP](#mcp-tool-scopes).
+Apelurile de unelte MCP citesc șiruri de scope de la apelant. Această verificare este una dintre trei spații de nume independente. O trecere de la un verificator nu este o trecere de la celelalte.
+Regulile se găsesc în [Trei spații de nume pentru scope-uri](#three-scope-namespaces).
+Catalogul de unelte se află în [Scope-uri pentru unelte MCP](#mcp-tool-scopes).
 
-### Cele trei spații de nume pentru scope-uri
+### Trei spații de nume pentru scope-uri
 
-`manage` pe o cheie API, `read:compression` pe un instrument MCP și `read` pe un
-token de acces `oma_live_…` sunt trei permisiuni diferite. Apelanții care trimit un token de acces
-`read` către o rută de administrare care efectuează modificări primesc HTTP 403
+`manage` pe o cheie API, `read:compression` pe o unealtă MCP și `read` pe un
+token de acces `oma_live_…` sunt trei acorduri diferite. Apelanții care trimit un token de acces `read`
+la o rută de management care modifică date primesc HTTP 403
 `Access token scope 'read' is insufficient; 'write' required.`
-Această ierarhie este gestionată de `scopeSatisfies`. Aceasta nu consultă tabelul MCP, iar mecanismul de
-potrivire MCP nu o consultă.
+Acesta este rangul evaluat de `scopeSatisfies`. Acesta nu consultă tabelul MCP, iar
+potrivirea MCP nu îl consultă nici ea.
 
-| Spațiu de nume                   | Credențială                                                      | Mecanism de verificare               | Ce permite trecerea verificării                                        |
-| :------------------------------- | :--------------------------------------------------------------- | :----------------------------------- | :--------------------------------------------------------------------- |
-| Administrare prin cheia API      | `api_keys.scopes`                                                | `hasManageScope`                     | API-ul REST de administrare pentru cheia Bearer respectivă             |
-| Permisiune aditivă a cheii API   | aceeași matrice, un singur șir exact                             | funcția auxiliară menționată mai jos | Numai capabilitatea respectivă                                         |
-| Scope-uri ale instrumentelor MCP | aceeași matrice, altfel `_meta` MCP, apoi `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                       | Instrumentul respectiv, după activarea aplicării regulilor             |
-| Token de acces                   | `oma_live_…`                                                     | `scopeSatisfies`                     | Ruta de administrare a cărei metodă și cale necesită nivelul respectiv |
+| Spațiu de nume          | Credențial                                                                        | Verificator            | O trecere permite                                         |
+| :---------------------- | :-------------------------------------------------------------------------------- | :--------------------- | :-------------------------------------------------------- |
+| Management cu cheie API | `api_keys.scopes`                                                                 | `hasManageScope`       | REST de management pentru acea cheie Bearer               |
+| Aditiv cu cheie API     | același tablou, un singur șir exact                                               | helperul numit mai jos | Doar acea singură capacitate                              |
+| Scope-uri unelte MCP    | același tablou, altfel `_meta` MCP (doar HTTP/SSE), altfel `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | Acea unealtă, odată ce aplicarea este activă              |
+| Token de acces          | `oma_live_…`                                                                      | `scopeSatisfies`       | Ruta de management a cărei metodă și cale impun acel rang |
 
-Emiterea fiecărei credențiale este descrisă în
-[Autentificarea pentru administrare](../guides/MANAGEMENT-AUTH.md).
+Emiterea fiecărei credențiale este acoperită în
+[Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
-#### Scope-urile cheilor API
+#### Scope-urile unei chei API
 
-O singură matrice `api_keys.scopes` îndeplinește două roluri. Pentru acestea sunt utilizate funcții diferite.
+Un singur tablou `api_keys.scopes` alimentează două funcții. Ele folosesc funcții diferite.
 
-**REST de administrare.** `manage` și `admin` sunt membrii
+**REST de management.** `manage` și `admin` sunt membrii lui
 `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
-`hasManageScope` este funcția care autorizează rutele de administrare pentru cheia respectivă. `admin` oferă
-capabilități de administrare pe acele rute. Cuvântul `admin` de aici nu reprezintă
-nivelul tokenului de acces și nu se extinde în scope-uri ale instrumentelor MCP.
+`hasManageScope` este ceea ce autorizează rutele de management pentru acea cheie. `admin` este
+capabil de management pe acele rute. Cuvântul `admin` aici nu este
+rangul de token de acces și nu se extinde la scope-urile uneltelor MCP.
 
-**Șiruri aditive.** Fiecare este supus unui test de apartenență exactă și fiecare rămâne
-în afara `MANAGEMENT_API_KEY_SCOPES`.
+**Șiruri aditive.** Fiecare este un test de apartenență exactă, iar fiecare rămâne
+în afara lui `MANAGEMENT_API_KEY_SCOPES`.
 
-| Scope                          | Ce permite trecerea verificării                                                                                                                                            |
+| Scope                          | O trecere permite                                                                                                                                                          |
 | :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | Numai excepția LOCAL_ONLY pentru `/api/mcp/` din afara interfeței loopback (`hasMcpConnectOrManageScope`). O cheie cu `manage` sau `admin` trece și această verificare.    |
+| `mcp:connect`                  | Doar excepția LOCAL_ONLY `/api/mcp/` pentru apelurile non-loopback (`hasMcpConnectOrManageScope`). O cheie cu `manage` sau `admin` trece și ea prin acea excepție.         |
 | `self:usage`                   | `GET /api/v1/me/status` pentru această cheie (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` adaugă acest scope la creare (`normalizeSelfServiceScopesForCreate`). |
-| `self:account-quota`           | Cotele conturilor upstream din acel payload de stare (`src/lib/usage/apiKeySelfService.ts`). Ruta de stare necesită în continuare `self:usage`.                            |
-| `policy:bypass-provider-quota` | Apelurile de inferență ale acestei chei omit politica privind cota furnizorului (`hasProviderQuotaBypassScope` în `src/sse/handlers/chat.ts`).                             |
+| `self:account-quota`           | Cotele de cont din amonte, în interiorul acelui payload de status (`src/lib/usage/apiKeySelfService.ts`). Ruta de status tot cere `self:usage`.                            |
+| `policy:bypass-provider-quota` | Apelurile de inferență ale acestei chei evită politica de cotă a furnizorului (`hasProviderQuotaBypassScope` în `src/sse/handlers/chat.ts`).                               |
 
 #### Potrivirea
 
-Catalogul este tabelul din secțiunea [Scope-urile instrumentelor MCP](#mcp-tool-scopes). Nu considerați
-`MCP_SCOPE_LIST` din `src/shared/constants/mcpScopes.ts` drept acel catalog:
-acesta este subsetul tipizat inițial. Instrumentele adăugate ulterior declară scope-uri suplimentare alături de acesta
-(`read:notion`, `read:skills`, `read:local-corpus` și restul celor din tabel).
+Catalogul este tabelul de sub [Scope-uri pentru unelte MCP](#mcp-tool-scopes). Nu
+treat `MCP_SCOPE_LIST` din `src/shared/constants/mcpScopes.ts` drept acel catalog:
+este subansamblul tipizat inițial. Unelte ulterioare declară alte scope-uri alături de el
+(`read:notion`, `read:skills`, `read:local-corpus` și restul tabelului).
 
 `evaluateToolScopes` din `open-sse/mcp-server/scopeEnforcement.ts` permite un apel
-atunci când fiecare scope necesar corespunde unui scope acordat:
+atunci când fiecare scope necesar potrivește unui scope acordat:
 
-- `*` corespunde fiecărui scope necesar.
-- Un scope acordat care se termină cu `*` corespunde unui scope necesar care începe cu
-  prefixul aflat înaintea asteriscului. `read:*` corespunde lui `read:compression`.
-- Orice alt scope acordat corespunde numai șirului necesar identic.
+- `*` potrivește orice scope necesar.
+- Un scope acordat care se termină în `*` potrivește unui scope necesar care începe cu
+  prefixul de dinaintea stelei. `read:*` potrivește cu `read:compression`.
+- Orice alt scope acordat potrivește doar șirul necesar identic.
 
-O cheie ale cărei scope-uri sunt `["manage"]` nu trece verificarea `scopeMatches` pentru `read:compression`.
-Același apel eșuează pentru `admin`, `mcp:connect`, `read` și `write` atunci când acestea
-sunt singurele șiruri acordate. Nu există nicio ierarhie între scope-urile instrumentelor MCP,
-în afara caracterului `*` de la sfârșit.
+O cheie ale cărei scope-uri sunt `["manage"]` eșuează la `scopeMatches` pentru `read:compression`.
+Același apel eșuează și pentru `admin`, `mcp:connect`, `read` și `write` atunci când acestea
+sunt singurele șiruri acordate. Nu există ierarhie între scope-urile uneltelor MCP
+dincolo de `*` de la final.
 
-Aplicarea regulilor este dezactivată dacă `OMNIROUTE_MCP_ENFORCE_SCOPES` nu este `true` (valoarea implicită este
-`false`). Cât timp este dezactivată, `evaluateToolScopes` permite apelul și ignoră
-catalogul. Când este activată, HTTP utilizează `api_keys.scopes` ale cheii Bearer drept
-`authInfo` (consultați [Asocierea scope-urilor HTTP per cheie](#per-key-http-scope-binding-7895)).
-Când nu poate fi determinat niciun scope al cheii, setul acordat este preluat din `_meta` MCP, apoi din
+Aplicarea este dezactivată, cu excepția cazului în care `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (implicit
+`false`). Cât timp este dezactivată, `evaluateToolScopes` permite apelul și sare peste
+catalog. Când este activă, HTTP folosește `api_keys.scopes` al cheii Bearer drept
+`authInfo` (vezi [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
+Când nu se rezolvă niciun scope de cheie, mulțimea acordată revine la `_meta` MCP (onorat doar
+pentru apelanții HTTP/SSE, într-un context de autentificare HTTP; `_meta` al unui apelant stdio este ignorat
+deoarece clientul îl controlează și nu transportă nicio identitate per-apelant), apoi
 `OMNIROUTE_MCP_SCOPES`.
 
 #### Scope-urile tokenurilor de acces
 
-Tokenurile `oma_live_…` (`src/lib/accessTokens/scopes.ts`) conțin `read`, `write`
-sau `admin`. `scopeSatisfies` utilizează o ierarhie: `admin` include `write` și `read`, iar
-`write` include `read`. Scope-urile necunoscute nu oferă nicio permisiune.
+Tokenurile `oma_live_…` (`src/lib/accessTokens/scopes.ts`) transportă `read`, `write`
+sau `admin`. `scopeSatisfies` este un rang: `admin` acoperă `write` și `read`, iar
+`write` acoperă `read`. Scope-urile necunoscute nu acoperă nimic.
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) compară această
-ierarhie cu `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) compară acel
+rang cu `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
 
 - `GET`, `HEAD` și `OPTIONS` necesită `read`.
 - Orice altă metodă necesită `write`.
 - Căile din `ADMIN_SCOPE_PREFIXES` necesită `admin` pentru fiecare metodă. `/api/mcp`
-  se află pe acea listă, astfel încât nici măcar un token de acces `write` nu poate apela suprafața HTTP
-  MCP.
-- Căile din `ADMIN_MUTATION_PREFIXES` necesită `admin` numai pentru operațiile de modificare.
+  se află pe acea listă, așadar un token de acces `write` nu poate încă apela
+  suprafața HTTP MCP.
+- Căile din `ADMIN_MUTATION_PREFIXES` necesită `admin` doar pentru mutații.
 - Căile din `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
-  `/api/settings/require-login`) necesită `admin` numai pentru operațiile de modificare și numai pe
-  acea cale exactă — celelalte subrute `/api/settings/*` păstrează cerința `write`.
+  `/api/settings/require-login`) necesită `admin` doar pentru mutații și doar pe
+  acea cale exactă — celelalte sub-rute `/api/settings/*` păstrează `write`.
 
-`PATCH /api/keys/{id}` este o mutație și nu se află pe acele liste de administrare, astfel încât un token cu
-`read` primește 403
-`Domeniul tokenului de acces 'read' este insuficient; este necesar 'write'.`
-Un token de acces cu `write` sau `admin` îndeplinește cerințele acelei rute. Un JWT al panoului de control, tokenul machine-id al CLI-ului prin loopback și o cheie API cu `manage` sau `admin` urmează
-alte ramuri și nu sunt restricționate de acest rang.
+`PATCH /api/keys/{id}` este o mutație și nu figurează pe acele liste de admin, deci un
+token `read` primește 403
+`Access token scope 'read' is insufficient; 'write' required.`
+Un token de acces `write` sau `admin` satisface această rută. Un JWT de dashboard,
+tokenul machine-id al CLI-ului de buclă locală (loopback) și o cheie API cu `manage`
+sau `admin` urmează alte ramuri și nu sunt restrânse de acest rang.
 
-Un token de acces care trece de `scopeSatisfies` pentru `/api/mcp` a trecut doar de
-poarta de gestionare. Apelurile instrumentelor execută în continuare `scopeMatches` în raport cu domeniile
-cheii API. Rangul tokenului de acces nu este o intrare pentru `scopeMatches`.
+Un token de acces care trece `scopeSatisfies` pentru `/api/mcp` a depășit doar
+poarta de management. Apelurile instrumentelor execută în continuare `scopeMatches`
+față de scope-urile cheilor API. Rangul tokenului de acces nu intră ca
+intrare în `scopeMatches`.
 
-### Domeniile instrumentelor MCP
+### Scopuri pentru instrumentele MCP
 
-Aplicarea domeniilor este centralizată în `open-sse/mcp-server/scopeEnforcement.ts`.
-Fiecare instrument necesită domenii specifice:
+Aplicarea scope-urilor este centralizată în `open-sse/mcp-server/scopeEnforcement.ts`.
+Fiecare instrument necesită scope-uri specifice:
 
-| Domeniu de aplicare   | Instrumente                                                                                                                                                                             |
-| :-------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                       |
-| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                               |
-| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                                  |
-| `read:quota`          | `check_quota`                                                                                                                                                                           |
-| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                                  |
-| `read:models`         | `list_models_catalog`                                                                                                                                                                   |
-| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                           |
-| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                                   |
-| `write:budget`        | `set_budget_guard`                                                                                                                                                                      |
-| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                             |
-| `pricing:write`       | `sync_pricing`                                                                                                                                                                          |
-| `read:cache`          | `cache_stats`                                                                                                                                                                           |
-| `write:cache`         | `cache_flush`                                                                                                                                                                           |
-| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                              |
-| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                       |
-| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                                   |
-| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                        |
-| `write:notion`        | `notion_append_blocks`                                                                                                                                                                  |
-| `read:memory`         | `memory_search`                                                                                                                                                                         |
-| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                            |
-| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                      |
-| `write:skills`        | `skills_enable`                                                                                                                                                                         |
-| `execute:skills`      | `skills_execute`                                                                                                                                                                        |
-| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                        |
-| `read:tools`          | `omniroute_tool_search`                                                                                                                                                                 |
-| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                               |
-| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                        |
-| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                          |
-| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                      |
-| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                         |
-| `read:obsidian`       | 13 instrumente de citire — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 instrumente de scriere — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
-| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                       |
+| Scop                  | Instrumente                                                                                                                                                                        |
+| :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                                  |
+| `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                          |
+| `write:combos`        | `switch_combo`, `set_routing_strategy`                                                                                                                                             |
+| `read:quota`          | `check_quota`                                                                                                                                                                      |
+| `read:usage`          | `cost_report`, `get_session_snapshot`, `explain_route`                                                                                                                             |
+| `read:models`         | `list_models_catalog`                                                                                                                                                              |
+| `execute:completions` | `route_request`, `test_combo`                                                                                                                                                      |
+| `execute:search`      | `web_search`, `x_search`, `web_fetch`                                                                                                                                              |
+| `write:budget`        | `set_budget_guard`                                                                                                                                                                 |
+| `write:resilience`    | `set_resilience_profile`, `db_health_check`                                                                                                                                        |
+| `pricing:write`       | `sync_pricing`                                                                                                                                                                     |
+| `read:cache`          | `cache_stats`                                                                                                                                                                      |
+| `write:cache`         | `cache_flush`                                                                                                                                                                      |
+| `read:compression`    | `compression_status`, `list_compression_combos`, `compression_combo_stats`                                                                                                         |
+| `write:compression`   | `compression_configure`, `set_compression_engine`                                                                                                                                  |
+| `read:proxies`        | `oneproxy_fetch`, `oneproxy_rotate`, `oneproxy_stats`                                                                                                                              |
+| `read:notion`         | `notion_search`, `notion_get_page`, `notion_list_block_children`, `notion_query_database`, `notion_get_database`                                                                   |
+| `write:notion`        | `notion_append_blocks`                                                                                                                                                             |
+| `read:memory`         | `memory_search`                                                                                                                                                                    |
+| `write:memory`        | `memory_add`, `memory_clear`                                                                                                                                                       |
+| `read:skills`         | `skills_list`, `skills_executions`                                                                                                                                                 |
+| `write:skills`        | `skills_enable`                                                                                                                                                                    |
+| `execute:skills`      | `skills_execute`                                                                                                                                                                   |
+| `read:catalog`        | `agent_skills_list`, `agent_skills_get`, `agent_skills_coverage`                                                                                                                   |
+| `read:tools`          | `omniroute_tool_search`                                                                                                                                                            |
+| `read:radar`          | `omniroute_radar_catalog`                                                                                                                                                          |
+| `read:gamification`   | `gamification_profile`, `gamification_rank`, `gamification_leaderboard`, `gamification_badges`, `gamification_servers`, `gamification_anomalies`                                   |
+| `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                     |
+| `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                                 |
+| `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                    |
+| `read:obsidian`       | 13 unelte de citire — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 unelte de scriere — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
+| `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                                  |
 
-Sunt acceptate domenii cu metacaractere: `read:*` acordă toate domeniile de citire, iar `*` acordă acces complet.
+Scope-urile wildcard sunt suportate: `read:*` acordă toate scope-urile de citire, `*` acordă acces complet.
 
-### `mcp:connect` — capabilitate restrânsă pentru rută (#7895)
+### `mcp:connect` — capabilitate de rută restrânsă (#7895)
 
-Accesarea transportului HTTP/SSE MCP (`/api/mcp/*`) dintr-o adresă non-loopback necesită
-excepția LOCAL_ONLY pentru `/api/mcp/` (consultați `docs/security/ROUTE_GUARD_TIERS.md`). Istoric,
-acea excepție accepta doar o cheie API cu domeniu complet `manage`/`admin` — prea larg pentru un
-apelant care trebuie doar să comunice cu MCP. `src/shared/constants/managementScopes.ts` exportă acum
-`MCP_CONNECT_SCOPE = "mcp:connect"`: un domeniu aditiv și restrâns (urmând același precedent ca
-`SELF_USAGE_SCOPE`) care autorizează NUMAI eludarea restricției pentru `/api/mcp/` în
-`src/server/authz/policies/management.ts` — nu acordă acces la nicio altă rută de administrare
-și este exclus în mod deliberat din `MANAGEMENT_API_KEY_SCOPES`. O cheie care deține `manage`/`admin`
-trece în continuare prin excepție fără modificări; `mcp:connect` este o alternativă cu privilegii mai reduse pentru
-apelanții la distanță care folosesc exclusiv MCP, verificată prin `hasMcpConnectOrManageScope()`.
+Accesarea transportului MCP HTTP/SSE (`/api/mcp/*`) de la un apelant non-loopback necesită
+excepția LOCAL_ONLY `/api/mcp/` (vezi `docs/security/ROUTE_GUARD_TIERS.md`). Istoric,
+acea excepție accepta doar o cheie API cu scope `manage`/`admin` complet — prea larg pentru un
+apelant care trebuie doar să comunice prin MCP. `src/shared/constants/managementScopes.ts` exportă acum
+`MCP_CONNECT_SCOPE = "mcp:connect"`: un scope suplimentar și restrâns (același precedent ca
+`SELF_USAGE_SCOPE`) care autorizează DOAR bypass-ul `/api/mcp/` în
+`src/server/authz/policies/management.ts` — nu acordă niciun alt acces la rutele de management
+și este păstrat intenționat ÎN AFARA din `MANAGEMENT_API_KEY_SCOPES`. O cheie care deține `manage`/`admin`
+trece în continuare prin excepție fără modificări; `mcp:connect` este o alternativă cu privilegii mai
+reduse pentru apelanții remote exclusiv MCP, verificată prin `hasMcpConnectOrManageScope()`.
 
-### Asocierea domeniilor HTTP pentru fiecare cheie (#7895)
+### Legarea scope-urilor HTTP pe cheie (#7895)
 
-Prin HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` rezolvă acum valorile reale
-`api_keys.scopes` ale apelantului prin `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-și le transmite metodei `transport.handleRequest(req, { authInfo })` a SDK-ului MCP, astfel încât
-`extra.authInfo.scopes`, care ajunge la fiecare apel de instrument, să reflecte domeniile proprii ale cheii Bearer.
-`resolveCallerScopeContext()` din `scopeEnforcement.ts` acorda deja prioritate valorii `authInfo` față de
-`_meta` și rezerva bazată pe variabila de mediu `OMNIROUTE_MCP_SCOPES` — această modificare doar populează prima sursă,
-cea cu prioritatea cea mai mare, care anterior nu era alimentată prin HTTP. Când nu este rezolvată nicio cheie API
-(antet absent, cheie nevalidă), `authInfo` rămâne `undefined`, iar rezolvarea continuă prin lanțul
-existent `meta`/mediu, fără modificări. stdio nu are identitate pentru fiecare apelant (consultați
-`mcpCallerIdentity.ts`) și nu este afectat — rămâne pe lanțul de rezervă `_meta`/mediu.
+Prin HTTP/SSE, `open-sse/mcp-server/httpTransport.ts` rezolvă acum scope-urile reale ale
+apelantului (`api_keys.scopes`) prin `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
+și le transmite către `transport.handleRequest(req, { authInfo })` al SDK-ului MCP, astfel
+încât `extra.authInfo.scopes` care ajunge la fiecare apel de unealtă reflectă scope-urile
+proprii ale cheii Bearer. Funcția `resolveCallerScopeContext()` din `scopeEnforcement.ts`
+prioritiza deja `authInfo` față de rezerva `_meta` și cea a variabilei de mediu
+`OMNIROUTE_MCP_SCOPES` — această schimbare doar alimentează acea primă sursă, cu prioritatea
+cea mai mare, care anterior nu era alimentată prin HTTP. Când nu se rezolvă nicio cheie API
+(fără antet, cheie invalidă), `authInfo` rămâne `undefined`, iar rezolvarea revine la
+lanțul existent `meta`/mediu, fără modificări. stdio nu are identitate per apelant (vezi
+`mcpCallerIdentity.ts`) și nu este afectat de legarea pe cheie — sare peste pasul `_meta`
+(`_meta` este luat în considerare doar într-un context de autentificare HTTP, #15159) și
+rezolvă exclusiv din variabila de mediu `OMNIROUTE_MCP_SCOPES`.
 
-**Aplicarea este activată forțat pentru apelanții HTTP/SSE cu domenii restrânse, indiferent de
-`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Valoarea implicită `false` pentru `OMNIROUTE_MCP_ENFORCE_SCOPES` este sigură doar
-pentru fluxul local/stdio cu un singur operator, unde nu există o identitate individuală a apelantului în raport cu care
-să fie aplicate domeniile. `open-sse/mcp-server/server.ts::withScopeEnforcement()` activează necondiționat
-aplicarea domeniilor pentru fiecare instrument (`shouldForceScopeEnforcement()` din `scopeEnforcement.ts`)
-ori de câte ori `resolveCallerScopeContext()` a rezolvat
-`source === "authInfo"` (adică un antet HTTP Authorization real, specific fiecărei chei, exclusiv pentru HTTP/SSE) ȘI acea
-cheie nu deține domeniul complet `manage`/`admin`. Aceasta elimină vulnerabilitatea prin care o cheie care deține DOAR
-domeniul restrâns de eludare `mcp:connect` — documentat mai sus ca autorizând exclusiv excepția LOCAL_ONLY pentru
-`/api/mcp/` — ar fi putut, în caz contrar, să invoce fiecare instrument MCP după ce un operator
-activa accesul MCP la distanță/non-loopback, doar pentru că valoarea implicită furnizată pentru `OMNIROUTE_MCP_ENFORCE_SCOPES` este
-`false`. O cheie cu drepturi complete `manage`/`admin` prin HTTP și orice apelant stdio/local păstrează
-neschimbat comportamentul existent condiționat de `OMNIROUTE_MCP_ENFORCE_SCOPES`.
-
----
+**Aplicarea se impune pentru apelanții HTTP/SSE cu scope restrâns, indiferent de
+`OMNIROUTE_MCP_ENFORCE_SCOPES`.** Valoarea implicită `false` pentru `OMNIROUTE_MCP_ENFORCE_SCOPES`
+este sigură doar în fluxul local/stdio cu un singur operator, unde nu există o identitate per
+apelant față de care să se aplice scope-urile. `open-sse/mcp-server/server.ts::withScopeEnforcement()`
+activează necondiționat aplicarea scope-urilor per unealtă (`shouldForceScopeEnforcement()` în
+`scopeEnforcement.ts`) ori de câte ori `resolveCallerScopeContext()` a rezolvat
+`source === "authInfo"` (adică un antet HTTP Authorization real, per cheie, doar HTTP/SSE) ȘI
+acea cheie nu deține scope-ul complet `manage`/`admin`. Aceasta închide golul în care o cheie
+care deține DOAR scope-ul de bypass restrâns `mcp:connect` — documentat mai sus ca autorizând
+nimic în afară de excepția LOCAL_ONLY `/api/mcp/` — putea invoca toate uneltele MCP odată ce
+un operator a activat accesul MCP remote/non-loopback, doar pentru că `OMNIROUTE_MCP_ENFORCE_SCOPES`
+este livrat cu `false` în mod implicit. O cheie `manage`/`admin` completă prin HTTP, precum și
+fiecare apelant stdio/local, păstrează comportamentul existent, condiționat de
+`OMNIROUTE_MCP_ENFORCE_SCOPES`, fără modificări.
 
 ## Variabile de mediu
 
