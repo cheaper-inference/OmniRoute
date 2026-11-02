@@ -491,8 +491,11 @@ export function openaiToClaudeRequest(
 
         // Normalize input_schema: Anthropic requires `properties` when type is "object" (#595).
         // MCP tools (e.g. pencil, computer_use) may omit properties on object-type schemas.
-        const rawSchema: Record<string, unknown> = toolData.parameters ||
-          toolData.input_schema || { type: "object", properties: {}, required: [] };
+        const rawSchema = (toolData.parameters ||
+          toolData.input_schema || { type: "object", properties: {}, required: [] }) as Record<
+          string,
+          unknown
+        >;
         const withProperties =
           rawSchema.type === "object" && !rawSchema.properties
             ? { ...rawSchema, properties: {} }
