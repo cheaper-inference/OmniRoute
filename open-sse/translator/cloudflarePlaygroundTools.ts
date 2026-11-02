@@ -49,6 +49,7 @@ import {
 import {
   extractBalancedJson,
   isStandaloneCfJsonText,
+  matchJsonEnd,
   normalizeToolArguments,
   parseCfJsonCalls,
   stripCfJsonCalls,
@@ -358,16 +359,22 @@ export function hasMalformedCfToolIntent(
   // `"tool_call"`, and a wrong discriminator (`"shell"`, `"gun"`, `5`) is the
   // same intent botched, not prose. Anchored to `{` or `,` and a JSON scalar
   // terminated by `,`/`}` so a sentence merely naming the `type` field does
-  // not count. JSON-schema type keywords are excluded, so a tool schema quoted
-  // in prose (`{"name": "bash", "type": "object", ...}`) stays prose and does
-  // not burn the retries. Only consulted when the parser read no call, so a
-  // reply that carried a well-formed call is never retried.
+  // not count. Only consulted when the parser read no call, so a reply that
+  // carried a well-formed call is never retried.
+  // JSON-schema type keywords never count (`{"type": "string"}` quoted in prose).
+  // A quoted JSON *schema* is the exception: there `type` is a schema keyword
+  // (`{"name":"bash","type":"object","properties":{…}}`), so a reply carrying
+  // `properties` has its `type` pair ignored rather than read as a botched
+  // discriminator — quoting a schema is prose, and retrying it forever would
+  // starve the turn.
+  const quotedSchema = /"properties"\s*:/.test(text);
   const jsonIntent =
     /"tool_calls"\s*:/.test(text) ||
     /"_nonce"\s*:/.test(text) ||
-    /[{\[,]\s*"type"\s*:\s*(?:"(?!(?:object|string|number|integer|boolean|array|null)")[^"]*"|[\d.]+|true|false|null)\s*[,}]/.test(
-      text
-    ) ||
+    (!quotedSchema &&
+      /[{\[,]\s*"type"\s*:\s*(?:"(?!(?:object|string|number|integer|boolean|array|null)")[^"]*"|[\d.]+|true|false|null)\s*[,}]/.test(
+        text
+      )) ||
     (toolNames.some((name) =>
       new RegExp(`"name"\\s*:\\s*"${escapeRegex(name)}"`, "i").test(text)
     ) &&
@@ -390,6 +397,55 @@ export function hasMalformedCfToolIntent(
 }
 
 /**
+ * True when the reply *answers its own tool call*: it emits a `{"tool_result":
+ * ...}` object alongside — or instead of — the call itself.
+ *
+ * Only the harness can produce a tool result, so this shape means the model
+ * ran the tool in its head, invented the output, and stopped believing the
+ * round trip had already happened. Observed on gpt-oss-120b
+ * (session `ses_eb656f116ffepjVSWIWPkY1fZ2`): a fabricated `grep` result
+ * shipped next to the call with `finish_reason: "stop"` and the real tool
+ * never ran — the client saw a completed turn and the task silently stalled.
+ *
+ * Structural, not textual: a JSON object *keyed* `tool_result`. Prose merely
+ * naming the field (`"the tool_result field"`) is not fabrication.
+ */
+export function hasFabricatedCfToolResult(text: string): boolean {
+  if (!text || !text.includes("tool_result")) return false;
+  return /\{\s*"tool_result"\s*:/.test(text);
+}
+
+/**
+ * Remove fabricated `{"tool_result": ...}` objects from text. Used on the
+ * reasoning channel, where the JSON would otherwise be surfaced to the client
+ * as thinking and replayed into the next turn.
+ *
+ * Balanced-brace scanning (string aware) rather than a lazy regex: the payload
+ * nests objects and routinely contains `}` inside its own strings.
+ */
+export function stripCfToolResults(text: string): string {
+  if (!text || !text.includes("tool_result")) return text;
+
+  const opener = /\{\s*"tool_result"\s*:/g;
+  let out = "";
+  let cursor = 0;
+  let match = opener.exec(text);
+  while (match !== null) {
+    const start = match.index;
+    const end = matchJsonEnd(text, start);
+    if (end === -1) {
+      // Never closed (cut off mid-object) — drop the opener and everything
+      // after it rather than leaking a half-written object to the client.
+      return out + text.slice(cursor, start);
+    }
+    out += text.slice(cursor, end);
+    cursor = end;
+    opener.lastIndex = end;
+    match = opener.exec(text);
+  }
+  return out + text.slice(cursor);
+}
+
 /**
  * Models sometimes wrap the payload as `{"name": "shell", "arguments": {...}}`
  * instead of the raw argument object. Normalize both shapes.

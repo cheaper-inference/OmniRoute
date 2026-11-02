@@ -89,7 +89,14 @@ class FakeTransport implements CfTransport {
 }
 
 function makeExecutor(buildFrames: (chatId: string) => string[], fail?: CfTransportFailure) {
-  return new CloudflarePlaygroundExecutor((chatId) => new FakeTransport(buildFrames(chatId), fail));
+  // retryDelayMs: 0 — see makeSequencedExecutor: the 5 s production delay is
+  // asserted by its own constant test, not paid by every retry in this file.
+  return new CloudflarePlaygroundExecutor(
+    (chatId) => new FakeTransport(buildFrames(chatId), fail),
+    undefined,
+    undefined,
+    0
+  );
 }
 
 const executeArgs = (body: Record<string, unknown>, stream: boolean) =>
@@ -684,8 +691,18 @@ const READ_TOOLS = [
   },
 ];
 
-/** Transport that yields a different reply per attempt, recording each room id. */
-function makeSequencedExecutor(replies: Array<(chatId: string) => string[]>) {
+/**
+ * Transport that yields a different reply per attempt, recording each room id.
+ *
+ * `retryDelayMs: 0` is essential: the production delay is 5 s on purpose (the
+ * playground rate-limits per IP per minute), but paying it here would make the
+ * whole file cost `retries * 5 s` of wall clock. Exhaustion tests additionally
+ * pass `maxToolRetries` so the budget is exercised, not the clock.
+ */
+function makeSequencedExecutor(
+  replies: Array<(chatId: string) => string[]>,
+  maxToolRetries?: number
+) {
   const rooms: string[] = [];
   const executor = new CloudflarePlaygroundExecutor(
     (chatId) => {
@@ -694,7 +711,8 @@ function makeSequencedExecutor(replies: Array<(chatId: string) => string[]>) {
       return new FakeTransport(build(chatId));
     },
     undefined,
-    1 // keep the repair-retry delay out of the suite's wall clock
+    maxToolRetries,
+    0
   );
   return { executor, rooms };
 }
@@ -733,27 +751,29 @@ test("executor retries once in a fresh room when a tool-intent reply is unreadab
   assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
 });
 
-test("executor gives up after three repair retries instead of looping", async () => {
+test("executor fails loudly after exhausting its repair retries", async () => {
+  // A reply that never becomes a usable call must not ship as
+  // `finish_reason: "stop"` — that is what made a stalled turn look finished.
   const broken = "<read><path>a.py";
-  const { executor, rooms } = makeSequencedExecutor([
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-  ]);
+  const { executor, rooms } = makeSequencedExecutor(
+    [
+      (chatId) => buildSuccessFrames(chatId, broken),
+      (chatId) => buildSuccessFrames(chatId, broken),
+      (chatId) => buildSuccessFrames(chatId, broken),
+    ],
+    2 // retry budget of 2 → 1 initial + 2 repairs, asserted without the 5 s clock
+  );
 
-  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
-    choices: Array<{
-      message: { content: string | null; tool_calls?: unknown[] };
-      finish_reason: string;
-    }>;
-  };
+  const response = await (await executor.execute(readArgs({}))).response;
+  assert.equal(response.status, 502, "an unrecoverable tool call is an upstream failure");
+  const parsed = JSON.parse(await response.text()) as { error: { message: string; code: string } };
 
-  // The model's own words still reach the client; a 502 or a loop would be worse.
-  assert.equal(parsed.choices[0].finish_reason, "stop");
-  assert.equal(parsed.choices[0].message.content, broken);
-  assert.ok(!parsed.choices[0].message.tool_calls);
-  assert.equal(rooms.length, 4); // initial + 3 retries
+  assert.equal(parsed.error.code, "HTTP_502");
+  assert.match(parsed.error.message, /failed to produce a valid tool call/);
+  assert.match(parsed.error.message, /malformed_intent/);
+  // No stack trace, no raw exception text.
+  assert.ok(!parsed.error.message.includes("at "));
+  assert.equal(rooms.length, 3, "initial + exactly maxToolRetries repairs");
 });
 
 test("executor retries a cut-off multi-call reply instead of executing a prefix", async () => {
@@ -808,25 +828,23 @@ test("executor retries when a bound call's arguments violate the declared schema
 test("executor never executes a call bound to another request's nonce", async () => {
   // The replay case: stale envelopes from an earlier turn carry a nonce this
   // request never issued. Executing one would re-run a tool the user already
-  // answered.
+  // answered — so the reply is retried, and if it keeps replaying the stale
+  // nonce it fails instead of ever being executed.
   const stale = '<read>{"path": "a.py", "_nonce": "stale-nonce"}</read>';
-  const { executor, rooms } = makeSequencedExecutor([
-    (chatId) => buildSuccessFrames(chatId, stale),
-    (chatId) => buildSuccessFrames(chatId, stale),
-    (chatId) => buildSuccessFrames(chatId, stale),
-    (chatId) => buildSuccessFrames(chatId, stale),
-  ]);
+  const { executor, rooms } = makeSequencedExecutor(
+    [
+      (chatId) => buildSuccessFrames(chatId, stale),
+      (chatId) => buildSuccessFrames(chatId, stale),
+      (chatId) => buildSuccessFrames(chatId, stale),
+    ],
+    2
+  );
 
-  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
-    choices: Array<{
-      message: { content: string | null; tool_calls?: unknown[] };
-      finish_reason: string;
-    }>;
-  };
-
-  assert.equal(parsed.choices[0].finish_reason, "stop");
-  assert.ok(!parsed.choices[0].message.tool_calls);
-  assert.equal(rooms.length, 4); // initial + 3 retries
+  const response = await (await executor.execute(readArgs({}))).response;
+  assert.equal(response.status, 502, "a foreign-nonce call must never be executed");
+  const parsed = JSON.parse(await response.text()) as { error: { message: string } };
+  assert.match(parsed.error.message, /failed to produce a valid tool call/);
+  assert.equal(rooms.length, 3, "initial + exactly maxToolRetries repairs");
 });
 
 test("executor strips the nonce from a correctly bound call", async () => {
@@ -1064,25 +1082,52 @@ test('executor retries the live failure: {"type":"shell"} is wrong_type, not pro
 
 test("executor exhausts its retries on a persistently wrong discriminator", async () => {
   const broken = '{"type":"shell","arguments":{"command":"ls -la","timeout":30000}}';
-  const { executor, rooms } = makeSequencedExecutor([
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-    (chatId) => buildSuccessFrames(chatId, broken),
-  ]);
+  const { executor, rooms } = makeSequencedExecutor(
+    [
+      (chatId) => buildSuccessFrames(chatId, broken),
+      (chatId) => buildSuccessFrames(chatId, broken),
+      (chatId) => buildSuccessFrames(chatId, broken),
+    ],
+    2
+  );
 
-  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
-    choices: Array<{
-      message: { content: string | null; tool_calls?: unknown[] };
-      finish_reason: string;
-    }>;
-  };
+  const response = await (await executor.execute(readArgs({}))).response;
+  assert.equal(response.status, 502, "the wrong discriminator must never ship as prose");
+  const parsed = JSON.parse(await response.text()) as { error: { message: string; code: string } };
 
-  // After three reminders the model's own words still reach the client.
-  assert.equal(parsed.choices[0].finish_reason, "stop");
-  assert.equal(parsed.choices[0].message.content, broken);
-  assert.ok(!parsed.choices[0].message.tool_calls);
-  assert.equal(rooms.length, 4); // initial + 3 retries
+  assert.equal(parsed.error.code, "HTTP_502");
+  assert.match(parsed.error.message, /last failure: wrong_type/);
+  assert.match(parsed.error.message, /3 attempts/);
+  assert.equal(rooms.length, 3, "initial + exactly maxToolRetries repairs");
+});
+
+test("streaming exhaustion emits an error chunk before [DONE] instead of stopping", async () => {
+  // OpenCode always asks for stream: true, so this is the shape the operator
+  // actually sees. Before the error chunk the turn ended as a normal
+  // `finish_reason: "stop"` with the broken reply as content — indistinguishable
+  // from a completed answer.
+  const broken = '{"type":"shell","arguments":{"command":"ls"}}';
+  const { executor, rooms } = makeSequencedExecutor(
+    [(chatId) => buildSuccessFrames(chatId, broken)],
+    1
+  );
+
+  const raw = await (await executor.execute(readArgs({}, true))).response.text();
+  const chunks = parseSseChunks(raw);
+
+  const errorChunk = chunks.find((c) => c.error);
+  assert.ok(errorChunk, "expected an error chunk before the stream ends");
+  assert.equal(errorChunk.error.type, "tool_call_recovery_failed");
+  assert.equal(errorChunk.error.code, "HTTP_502");
+  assert.match(errorChunk.error.message, /failed to produce a valid tool call/);
+  assert.ok(!errorChunk.error.message.includes(" at "), "no stack frames in an SSE error");
+
+  const final = chunks[chunks.length - 1];
+  assert.equal(final.choices?.[0]?.finish_reason, "stop");
+  assert.equal(final.choices?.[0]?.delta?.content, undefined, "no broken reply is streamed out");
+  assert.ok(!chunks.some((c) => c.choices?.[0]?.delta?.content), "content never goes out");
+  assert.equal(raw.trimEnd().endsWith("data: [DONE]"), true);
+  assert.equal(rooms.length, 2, "initial + exactly maxToolRetries repairs");
 });
 
 // ── Adversarial gates: deliberately wrong envelopes ────────────────────────────
@@ -1343,4 +1388,209 @@ test("executor treats a JSON answer as plain text — no retry", async () => {
   assert.equal(parsed.choices[0].message.content, reply);
   assert.ok(!parsed.choices[0].message.tool_calls);
   assert.equal(rooms.length, 1, "a JSON answer is not a tool envelope");
+});
+
+// ── Reasoning-channel replies ────────────────────────────────────────────────
+//
+// The playground decides whether a reply lands on `text-delta` or
+// `reasoning-delta`, and gpt-oss-120b routinely puts the *whole* answer — tool
+// call included — on the reasoning channel with an empty text channel. The
+// gates used to read only `parser.text`, so those turns shipped as
+// `finish_reason: "stop"` with `content: null` and the call sitting unread in
+// the thinking block. Every test below therefore builds a reply whose text
+// channel is empty.
+
+/** The captured live payload (failers.txt) that motivated the channel fix. */
+const FAILERS_REASONING =
+  "We should inspect where FG.round_limit is defined. Search.\n" +
+  '{"type":"tool_call","name":"grep","arguments":{"pattern":"round_limit","path":"/tmp/dmc5_pvp_tu6.lua","limit":20}}' +
+  '{"tool_result":{"call_id":"call_2c3c3b9a","content":"Found 2 matches\\n  Line 5280: function init_fg_system()\\n"}}';
+
+const GREP_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "grep",
+      description: "Search a file",
+      parameters: {
+        type: "object",
+        properties: {
+          pattern: { type: "string" },
+          path: { type: "string" },
+          limit: { type: "number" },
+        },
+        required: ["pattern", "path"],
+      },
+    },
+  },
+];
+
+const grepArgs = (body: Record<string, unknown>, stream = false) =>
+  executeArgs(
+    {
+      model: "test-model",
+      messages: [{ role: "user", content: "find round_limit" }],
+      tools: GREP_TOOLS,
+      ...body,
+    },
+    stream
+  );
+
+test('executor "failers.txt": a reasoning-channel fabricated tool_result retries, then fails 502', async () => {
+  // Exact failure mode: call + invented grep result, both on `reasoning-delta`.
+  // The model ran the tool in its head and stopped; the real grep never ran.
+  const { executor, rooms } = makeSequencedExecutor(
+    [(chatId) => buildSuccessFrames(chatId, "", FAILERS_REASONING)],
+    2
+  );
+
+  const response = await (await executor.execute(grepArgs({}))).response;
+  assert.equal(response.status, 502, "a fabricated result must never be shipped as a stop");
+  const parsed = JSON.parse(await response.text()) as { error: { message: string; code: string } };
+  assert.equal(parsed.error.code, "HTTP_502");
+  assert.match(parsed.error.message, /last failure: fabricated_result/);
+  assert.equal(rooms.length, 3, "initial + exactly maxToolRetries repairs");
+});
+
+test('executor "failers.txt": streaming emits the fabrication failure as an error chunk', async () => {
+  const { executor } = makeSequencedExecutor(
+    [(chatId) => buildSuccessFrames(chatId, "", FAILERS_REASONING)],
+    1
+  );
+
+  const raw = await (await executor.execute(grepArgs({}, true))).response.text();
+  const chunks = parseSseChunks(raw);
+  const errorChunk = chunks.find((c) => c.error);
+
+  assert.ok(errorChunk, "expected an error chunk");
+  assert.equal(errorChunk.error.type, "tool_call_recovery_failed");
+  assert.match(errorChunk.error.message, /fabricated_result/);
+  assert.ok(
+    !chunks.some((c) => c.choices?.[0]?.delta?.content),
+    "the fabricated turn must not stream as content"
+  );
+  assert.ok(!JSON.stringify(chunks).includes("call_2c3c3b9a"), "fabricated payload never leaks");
+});
+
+test("executor reads a valid call that arrived only on the reasoning channel", async () => {
+  const envelope =
+    '{"type": "tool_call", "name": "grep", "arguments": {"pattern": "x", "path": "a.lua"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, "", `Let me check.\n${envelope}`),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(grepArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; reasoning_content?: string; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  const message = parsed.choices[0].message;
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(message.tool_calls?.length, 1, "the reasoning-only call must be executed");
+  assert.equal(message.content, null);
+  assert.ok(
+    !message.reasoning_content?.includes('"type": "tool_call"'),
+    "the executed envelope must not also be replayed as thinking"
+  );
+  assert.equal(rooms.length, 1, "a valid reasoning-only call is not a retry");
+});
+
+test('executor treats a reasoning-channel {"type":"shell"} as wrong_type, not prose', async () => {
+  const broken = '{"type":"shell","arguments":{"command":"ls -la","timeout":30000}}';
+  const fixed =
+    '{"type": "tool_call", "name": "grep", "arguments": {"pattern": "x", "path": "a.lua"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, "", broken),
+    (chatId) => buildSuccessFrames(chatId, "", fixed),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(grepArgs({}))).response.text()) as {
+    choices: Array<{ finish_reason: string; message: { tool_calls?: unknown[] } }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(rooms.length, 2, "the reasoning-channel envelope must be gated too");
+});
+
+test("executor promotes a reasoning-only prose answer to content instead of retrying", async () => {
+  // A finished task that ends with a summary and no tool call is a legitimate
+  // `stop`. The reasoning channel is all it has, so it must reach the client as
+  // content — not be retried as an empty response, not dropped as null.
+  const summary = "Done: the round counter now resets on every match.";
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, "", summary),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(grepArgs({}))).response.text()) as {
+    choices: Array<{
+      finish_reason: string;
+      message: { content: string | null; reasoning_content?: string };
+    }>;
+  };
+
+  assert.equal(rooms.length, 1, "prose is not a tool failure");
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+  assert.equal(parsed.choices[0].message.content, summary);
+  assert.ok(!parsed.choices[0].message.reasoning_content, "promoted reasoning is not duplicated");
+});
+
+test("executor retries a reply with no text, no reasoning and no call at all", async () => {
+  const { executor, rooms } = makeSequencedExecutor(
+    [(chatId) => buildSuccessFrames(chatId, "", "")],
+    1
+  );
+
+  const response = await (await executor.execute(grepArgs({}))).response;
+  assert.equal(response.status, 502, "a blank assistant message is not a finished turn");
+  const parsed = JSON.parse(await response.text()) as { error: { message: string } };
+  assert.match(parsed.error.message, /last failure: empty_response/);
+  assert.equal(rooms.length, 2);
+});
+
+test("executor gates the text channel first when both channels carry a call", async () => {
+  // Authoritative text: a stray tool-shaped thought in the reasoning channel
+  // must never override the real answer the model actually emitted as text.
+  const textCall =
+    '{"type": "tool_call", "name": "grep", "arguments": {"pattern": "alpha", "path": "a.lua"}}';
+  const strayCall =
+    '{"type": "tool_call", "name": "grep", "arguments": {"pattern": "beta", "path": "b.lua"}}';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, textCall, `Thinking about it: ${strayCall}`),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(grepArgs({}))).response.text()) as {
+    choices: Array<{
+      finish_reason: string;
+      message: { tool_calls?: Array<{ function: { arguments: string } }> };
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1, "one call, from the text channel");
+  assert.equal(
+    parsed.choices[0].message.tool_calls?.[0].function.arguments.includes("alpha"),
+    true
+  );
+  assert.equal(rooms.length, 1, "no retry: the authoritative channel already answered");
+});
+
+test("a 502 recovery failure body carries no stack or upstream text", async () => {
+  const { executor } = makeSequencedExecutor(
+    [(chatId) => buildSuccessFrames(chatId, "<read><path>a")],
+    1
+  );
+
+  const response = await (await executor.execute(readArgs({}))).response;
+  const raw = await response.text();
+
+  assert.equal(response.status, 502);
+  assert.ok(!raw.includes(" at "), "no stack frames");
+  assert.ok(!raw.includes("Error:"), "no raw exception wrapper");
+  assert.ok(!raw.includes("<read>"), "the broken reply is not echoed back");
+  const parsed = JSON.parse(raw) as { error: { message: string; type: string; code: string } };
+  assert.equal(parsed.error.type, "upstream_error");
+  assert.equal(parsed.error.code, "HTTP_502");
 });

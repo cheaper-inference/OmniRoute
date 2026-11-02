@@ -139,6 +139,7 @@ test("the retry delay still applies when the request is not aborted", async () =
       );
     },
     undefined,
+    undefined,
     60
   );
   const startedAt = Date.now();
