@@ -1,6 +1,7 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
+import { registerCredentialRefresher } from "@omniroute/open-sse/utils/registeredCredentialRefresher.ts";
 import { updateProviderConnection } from "@/lib/db/providers";
 import {
   captureCodexConnectionFence,
@@ -433,6 +434,8 @@ async function checkAndRefreshTokenInner(provider: string, credentials: any) {
 }
 
 // Local-specific: Refresh GitHub and Copilot tokens together
+registerCredentialRefresher(checkAndRefreshToken);
+
 export async function refreshGitHubAndCopilotTokens(credentials: any) {
   const newGitHubCredentials = await refreshGitHubToken(credentials.refreshToken, credentials);
   if (newGitHubCredentials?.accessToken) {
