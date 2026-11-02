@@ -101,7 +101,7 @@ describe("provider cached input reporting", () => {
         vi.unstubAllGlobals();
       }
     }
-  }, 1_000);
+  });
   it("renders recorded cache reads separately from original input and output", () => {
     const html = renderUsage(
       <UsageOverview
