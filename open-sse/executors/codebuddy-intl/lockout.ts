@@ -9,7 +9,7 @@
  * This module deliberately only PARSES. The freeze itself is applied by the
  * shared resilience path — `parseDetailedRetryHintFromJsonBody`
  * (`open-sse/services/retryAfterJson.ts`) reads the same `data.resetTime`
- * envelope, and `accountFallback` persists it on
+ * envelope for providers with `trustUpstreamResetDate`, and `accountFallback` persists it on
  * `provider_connections.rate_limited_until`, which `getProviderCredentials`
  * already honors. Implementing a second, executor-local freeze here would give
  * lockout two sources of truth that can disagree about when an account is

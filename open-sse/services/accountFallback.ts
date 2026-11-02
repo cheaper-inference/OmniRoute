@@ -110,6 +110,10 @@ export function upstreamResetDateIsAuthoritative(
   provider: string | null | undefined
 ): boolean {
   if (retryHintBypassesMaxCooldownMs(provenance)) return true;
+  return providerTrustsUpstreamResetDate(provider);
+}
+
+function providerTrustsUpstreamResetDate(provider: string | null | undefined): boolean {
   return Boolean(provider && getRegistryEntry(provider)?.trustUpstreamResetDate);
 }
 import {
@@ -543,9 +547,7 @@ function buildProviderProfile(
   // RegistryEntry.trustUpstreamResetDate). The connection-cooldown setting is
   // per CATEGORY, so without this a single provider could not opt in without
   // flipping the policy for every OAuth/API-key provider at once.
-  const trustsUpstreamResetDate = Boolean(
-    providerId && getRegistryEntry(providerId)?.trustUpstreamResetDate
-  );
+  const trustsUpstreamResetDate = providerTrustsUpstreamResetDate(providerId);
 
   return {
     baseCooldownMs: connectionCooldown.baseCooldownMs,
@@ -1852,7 +1854,13 @@ export function checkFallbackError(
       if (waitMs > 0) return { retryAfterMs: waitMs, provenance: "header" };
     }
 
-    const detailedJsonHint = parseDetailedRetryHintFromJsonBody(errorStr, MAX_PROVIDER_COOLDOWN_MS);
+    const detailedJsonHint = parseDetailedRetryHintFromJsonBody(
+      errorStr,
+      MAX_PROVIDER_COOLDOWN_MS,
+      {
+        readDataEnvelope: providerTrustsUpstreamResetDate(provider),
+      }
+    );
     if (detailedJsonHint) {
       return {
         retryAfterMs: detailedJsonHint.retryAfterMs,
