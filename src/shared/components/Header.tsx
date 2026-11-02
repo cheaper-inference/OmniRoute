@@ -80,6 +80,7 @@ const HEADER_DESCRIPTIONS: Partial<
   combos: "comboDescription",
   batch: "batchDescription",
   costs: "costsDescription",
+  "costs-teams": "teamsDescription",
   analytics: "analyticsDescription",
   cache: "cacheDescription",
   quota: "limitsDescription",

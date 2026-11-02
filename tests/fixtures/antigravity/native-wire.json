@@ -1,0 +1,45 @@
+{
+  "_comment": "Golden capture of the native Antigravity CLI (agy 1.4.4) on Windows x64. Values are copied verbatim from a mitmproxy capture except Authorization, which is replaced with a placeholder — never store a real bearer token here.",
+  "endpoint": "https://daily-cloudcode-pa.googleapis.com/v1internal:streamGenerateContent?alt=sse",
+  "requestHeaderOrder": [
+    "Accept-Encoding",
+    "Authorization",
+    "Content-Type",
+    "Host",
+    "Transfer-Encoding",
+    "User-Agent"
+  ],
+  "requestHeaders": {
+    "Accept-Encoding": "gzip",
+    "Authorization": "Bearer <redacted>",
+    "Content-Type": "application/json",
+    "Host": "daily-cloudcode-pa.googleapis.com",
+    "Transfer-Encoding": "chunked",
+    "User-Agent": "antigravity/cli/1.4.4 (aidev_client; os_type=windows; arch=amd64; cl=1003595037; auth_method=consumer)"
+  },
+  "forbiddenHeaders": ["Accept", "x-goog-user-project", "x-goog-api-client", "Client-Metadata"],
+  "envelopeFieldOrder": [
+    "project",
+    "requestId",
+    "request",
+    "model",
+    "userAgent",
+    "requestType"
+  ],
+  "requestFieldOrder": [
+    "contents",
+    "systemInstruction",
+    "tools",
+    "labels",
+    "generationConfig",
+    "sessionId"
+  ],
+  "loadCodeAssistMetadata": {
+    "ideType": "ANTIGRAVITY"
+  },
+  "platformTokens": {
+    "win32": { "osType": "windows", "arch": "amd64" },
+    "darwin": { "osType": "darwin", "arch": "arm64" },
+    "linux": { "osType": "linux", "arch": "amd64" }
+  }
+}

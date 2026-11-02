@@ -33,6 +33,7 @@ import EmptyState from "./EmptyState";
 import Input from "./Input";
 import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
+import RequestLogThroughput from "./RequestLogThroughput";
 import { copyToClipboard } from "@/shared/utils/clipboard";
 import { PROVIDER_COLORS, getProtocolColor } from "@/shared/constants/colors";
 import {
@@ -45,7 +46,7 @@ import {
 } from "@/shared/utils/formatting";
 import { getProviderDisplayLabel } from "@/shared/utils/providerDisplayLabel";
 import { mergeLogFilterOptions } from "@/shared/utils/logFilterOptions";
-import { buildLogTpsTitle, computeLogTps } from "@/shared/utils/logTps";
+import { computeLogTps } from "@/shared/utils/logTps";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import {
   computeLogsSignature,
@@ -97,12 +98,6 @@ function getLogTotalTokens(log) {
 // #13130: generation-time TPS (duration - TTFT, reasoning-aware); see logTps.ts.
 function getLogTps(log): number {
   return computeLogTps(log?.tokens?.out, log?.tokens?.reasoning, log?.duration, log?.ttft);
-}
-
-function formatTps(tps: number): string {
-  if (tps <= 0) return "—";
-  if (tps >= 100) return Math.round(tps).toLocaleString();
-  return tps.toFixed(1);
 }
 
 function getCacheSourceMeta(cacheSource: unknown) {
@@ -1664,25 +1659,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           {isActive ? (
                             <span className="text-[10px] text-text-muted">—</span>
                           ) : (
-                            (() => {
-                              const tps = getLogTps(log);
-                              const color =
-                                tps <= 0
-                                  ? "text-text-muted"
-                                  : tps >= 80
-                                    ? "text-success"
-                                    : tps >= 30
-                                      ? "text-info"
-                                      : "text-warning";
-                              return (
-                                <span
-                                  className={color}
-                                  title={buildLogTpsTitle(log, tps, formatDuration)}
-                                >
-                                  {formatTps(tps)}
-                                </span>
-                              );
-                            })()
+                            <RequestLogThroughput log={log} />
                           )}
                         </TableCell>
                       )}

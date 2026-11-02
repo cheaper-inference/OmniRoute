@@ -6,15 +6,15 @@
 
 අවසන් වරට යාවත්කාලීන කළේ: 2026-08-23
 
-OmniRoute, කැපවූ dashboard පිටු තුනක් පුරා බෙදා ඇති CLI මෙවලම් කාණ්ඩ තුනක් සමඟ ඒකාබද්ධ වේ:
+OmniRoute කැප වූ උපකරණ පුවරු පිටු තුනක් පුරා පැතිර ඇති CLI මෙවලම් කාණ්ඩ තුනක් සමඟ ඒකාබද්ධ වේ:
 
-| පිටුව          | Route                   | සංකල්පය                                                                           | ගණන            |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ඔබ OmniRoute වෙත යොමු කරන කේතකරණ මෙවලම් (Client → CLI → OmniRoute → Provider)     | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | ඔබ OmniRoute වෙත යොමු කරන ස්වයංක්රීය agents (එකම ප්රවාහය, පුළුල් විෂය පථයක්)      | 10             |
-| **ACP Agents** | `/dashboard/acp-agents` | OmniRoute විසින් stdio/ACP හරහා backend ලෙස ආරම්භ කරන CLIs (ප්රතිවිරුද්ධ ප්රවාහය) | registry බලන්න |
+| පිටුව              | මාර්ගය                  | සංකල්පය                                                                          | ගණන් කරන්න       |
+| ------------------ | ----------------------- | -------------------------------------------------------------------------------- | ---------------- |
+| **CLI කේතය**       | `/dashboard/cli-code`   | ඔබ OmniRoute වෙත යොමු කරන කේතීකරණ මෙවලම් (සේවාලාභී → CLI → OmniRoute → සපයන්නා)  | 26               |
+| **CLI නියෝජිතයන්** | `/dashboard/cli-agents` | ඔබ OmniRoute වෙත යොමු කරන ස්වයංක්‍රීය නියෝජිතයන් (එකම ප්‍රවාහය, පුළුල් විෂය පථය) | 11               |
+| **ACP නියෝජිතයන්** | `/dashboard/acp-agents` | CLIs OmniRoute stdio/ACP (ප්‍රතිලෝම ප්‍රවාහය) හරහා පසු අන්තයක් ලෙස බිහි කරයි     | රෙජිස්ට්රි බලන්න |
 
-පැරණි routes 308 හරහා redirect වේ: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+ලෙගසි මාර්ග 308 හරහා හරවා යවයි: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,12 +43,9 @@ ACP Agents (ප්රතිවිරුද්ධ ආරම්භක ප්රව
 
 ---
 
-## `setup-*` සමඟ ස්වයංක්රීයව වින්යාස කිරීම
+## `setup-*` සමඟ ස්වයංක්‍රීයව වින්‍යාස කරන්න
 
-එක් එක් මෙවලමේ වින්යාසය අතින් ලිවීමට ඔබට අවශ්ය නොවේ. ක්රියාත්මක වන
-OmniRoute එකකින් (දේශීය හෝ දුරස්ථ) **සජීවී** ආකෘති නාමාවලිය කියවා, ඔබේ
-යන්ත්රය මත අදාළ මෙවලමේම වින්යාසය ලියන `setup-*` විධානයක්, සහාය දක්වන සෑම
-CLI එකක් සඳහාම OmniRoute සමඟ සපයයි:
+ඔබ එක් එක් මෙවලම් වින්‍යාසය අතින් ලිවිය යුතු නැත. OmniRoute විසින් කියවන සහය දක්වන CLI එකකට `setup-*` විධානයක් යවයි** ජීවත් වෙනවා** ධාවනය වන OmniRoute (දේශීය හෝ දුරස්ථ) වෙතින් ආකෘති නාමාවලිය සහ ඔබේ යන්ත්‍රයේ මෙවලමෙහිම වින්‍යාසය ලියයි:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,59 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-සෑම එකක්ම `--remote <url> --api-key <key>` (දේශීය මෙවලමක් දුරස්ථ OmniRoute
-එකකට එරෙහිව වින්යාස කරන්න), `--dry-run` (කිසිවක් නොලියා පෙරදසුනක් බලන්න), සහ
-`--port` පිළිගනී. ආකෘති ස්වයං-සොයාගැනීම නොමැති මෙවලම් (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) `--model <id>` (සහ අන්තර්ක්රියාකාරී නොවන
-ධාවනයන් සඳහා `--yes`) ලබා ගනී. `$HOME` යටතේ නොලියන එකම ක්රමවේදය
-`setup-5dive` වේ: එය සමූහ සත්කාරකය මත root සතු සත්යාපන පැතිකඩක් ලිවීමෙන්
-5dive නියෝජිත සමූහයක් වින්යාස කරන බැවින්, එය `sudo` හරහා නැවත ක්රියාත්මක වන
-අතර එයට තමන්ගේම දුරස්ථ ප්රකාරයක් නොමැත. නිවැරදි පරිසර විචල්ය ඇතුළත් කර,
-කිසිදු වින්යාසයක් නොලියා CLI එකක් දියත් කිරීමට, පොදු
-`omniroute run <target>` දියත්කාරකය භාවිත කරන්න (claude, codex, aider, goose,
-opencode, qwen, gemini — ඉලක්ක සහ අන්වර්ථ `bin/cli/cli-manifest.mjs` වෙතින්
-ලැබේ); පැරණි එක් එක් මෙවලමට විශේෂිත `omniroute launch` (Claude Code) සහ
-`omniroute launch-codex` (Codex) දියත්කාරක තවමත් පවතී. Gemini CLI දියත් කිරීමට
-පමණක් සීමා වේ: එය `omniroute run` ඉලක්කයක් වුවද, එයට `setup-*`/`configure`
-ක්රමවේදයක් නොමැත.
+සෑම එකක්ම `--remote <url> --api-key <key>` (දුරස්ථ OmniRoute එරෙහිව දේශීය මෙවලමක් වින්‍යාස කරන්න), `--dry-run` (ලිවීමකින් තොරව පෙරදසුන) සහ `--port` පිළිගනී. ආකෘති ස්වයං-සොයාගැනීමක් නොමැති මෙවලම් (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) `--model <id>` (සහ අන්තර්ක්‍රියාකාරී නොවන ධාවන සඳහා `--yes` ) ගනී. `setup-5dive` යනු `$HOME` යටතේ නොලියන එක් වට්ටෝරුවකි : එය fleet host මත root හිමි auth පැතිකඩක් ලිවීමෙන් 5dive නියෝජිත සමූහයක් වින්‍යාස කරයි, එබැවින් එය `sudo` හරහා නැවත ක්‍රියාත්මක වන අතර එහිම දුරස්ථ මාදිලියක් නොමැත. නිවැරදි env එන්නත් කර කිසිදු වින්‍යාසයක් ලියා නොමැති CLI දියත් කිරීමට, සාමාන්‍ය `omniroute run <target>` දියත් කිරීම භාවිතා කරන්න (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — targets and aliases එන්න `bin/cli/cli-manifest.mjs`); ලෙගසි පර්-ටූල් දියත් කිරීම් `omniroute launch` (Claude කේතය) සහ `omniroute launch-codex` (Codex) පවතී. Gemini CLI දියත් කිරීමට පමණි: එය `omniroute run` ඉලක්කයක් වන නමුත් `setup-*`/`configure` වට්ටෝරුවක් නොමැත.
 
-> **සම්පූර්ණ යොමුව:** ප්රධාන වගුව — එක් එක් විධානය ලියන දේ, සෑම සලකුණක්ම,
-> දේශීය සහ දුරස්ථ භාවිතය අතර වෙනස, සහ `/v1` උපසර්ගයක් අවශ්ය මෙවලම් —
-> **[CLI ඒකාබද්ධකරණ](../guides/CLI-INTEGRATIONS.md)** තුළ ඇත.
+> **සම්පූර්ණ යොමුව:** ප්‍රධාන වගුව - සෑම විධානයක්ම ලියන දේ, සෑම ධජයක්ම, ප්‍රාදේශීය එදිරිව දුරස්ථ, සහ කුමන මෙවලම් සඳහා `/v1` උපසර්ගයක් අවශ්‍යද - ජීවත් වේ** [CLI ඒකාබද්ධ කිරීම්](../guides/CLI-INTEGRATIONS.md)** .
 
-### මේවා බහාලුමක් තුළ ධාවනය කිරීම
+### කන්ටේනරයක් ඇතුලේ මේවා දුවනවා
 
-OmniRoute බහාලුම තුළ ක්රියාත්මක කළ `setup-*` විධානයක් බහාලුමේම home වෙත
-ලියන අතර, සත්කාරකයේ කිසිදු CLI එකක් එය නොකියවයි; බහාලුම සමඟ එයද අතුරුදහන්
-වේ. OmniRoute මෙය හඳුනාගෙන, කිසිවක් ලිවීම වෙනුවට උපදෙස් සමඟ `2` තත්ත්වයෙන්
-පිටවේ. ඉදිරියට යාමට සහාය දක්වන ක්රම දෙකකි — CLI එක සත්කාරකය මත ස්ථාපනය කර
-බහාලුම වෙත `omniroute connect` භාවිත කිරීම, හෝ වින්යාස නාමාවලි bind-mount කර
-`CLI_CONFIG_HOME` සැකසීම (compose හි `host` පැතිකඩ). සෑම `setup-*` විධානයක්ම,
-එමෙන්ම `omniroute configure` සහ `omniroute config set`, බහාලුමේම CLI
-වින්යාස කිරීම ඔබ සැබවින්ම අදහස් කළ දෙය වන විට `--allow-container-write`
-පිළිගනී; සේවාදායකය සඳහා `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ද එයම
-කරයි. බලන්න:
-[Docker මාර්ගෝපදේශය → සත්කාරක CLI මෙවලම් වින්යාස කිරීම](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute කන්ටේනරය තුළ ක්‍රියාත්මක කරන ලද `setup-*` විධානයක් බහාලුම්කරුගේම නිවසට ලියයි, එය කිසිදු ධාරකයක් CLI කියවා නැති අතර එය බහාලුම සමඟ අතුරුදහන් වේ. OmniRoute එය හඳුනාගෙන ලිවීමට වඩා උපදෙස් සමඟ `2` වෙතින් පිටවෙයි. සහය දක්වන ක්‍රම දෙකක් ඉදිරියට - ධාරකයේ CLI ස්ථාපනය කර බහාලුමට `omniroute connect` ස්ථාපනය කරන්න, නැතහොත් වින්‍යාසය සවිකර `CLI_CONFIG_HOME` සකසන්න ( `host` පැතිකඩ රචනා කරන්න). සෑම `setup-*` විධානයක්ම, සහ `omniroute configure` සහ `omniroute config set`, බහාලුම්වලම CLIs වින්‍යාස කිරීමේදී `--allow-container-write` පිළිගන්නේ ඔබ සැබවින්ම අදහස් කළේ කුමක්ද යන්නයි; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` සේවාදායකය සඳහාද එයම කරයි. [Docker මාර්ගෝපදේශය බලන්න → සත්කාරක CLI මෙවලම් වින්‍යාස කිරීම](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-උපකරණ පුවරුවේ **යෙදවුම් අන්ත ලක්ෂ්යය** (`POST /api/cli-tools/apply`) ද එම
-ආරක්ෂණයම බලාත්මක කරයි: බහාලුමක් තුළදී, සත්කාරකයෙන් bind-mount කර නොමැති
-ඉලක්කයකට ලිවීමක් සිදු කළහොත්, ආරක්ෂිත දෝෂ පෙළ සහ `containerEphemeralTarget: true`
-සමඟ **`422`** පිළිතුරක් ලබා දෙයි; තවද සත්කාරක ක්රමවේදයක් ඇති මෙවලම් සඳහා
-(claude, codex, opencode, cline, kilo, continue), ඒ වෙනුවට සත්කාරකය මත
-ධාවනය කිරීමට `hostSetupCommand` එකක් (උදා. `omniroute setup-opencode`) ලබා
-දෙයි; කිසිවක් ලියනු නොලැබේ. බහාලුම් ප්රකාරයේදී `dryRun: true` තවදුරටත්
-ක්රියා කරන අතර, තැටිය ස්පර්ශ නොකර සංවේදී තොරතුරු වසන් කළ පෙරදසුනක් සහ
-ඉලක්ක මාර්ගය ආපසු ලබා දෙයි. පෙරදසුන් අන්තර්ගතය පිටපත් කිරීමට හෝ ආයාත කිරීමට
-සුදුසු අක්තපත්ර සහිත වින්යාසයක් නොවේ. මුල් මෙවලම/base URL/API key/ආකෘති
-ආදාන සමඟ සත්කාරකය මත යොදන්න, නැතහොත් දක්වා ඇති සත්කාරක-පාර්ශ්වීය පිහිටුවීම්
-විධානය භාවිත කරන්න. පෙරදසුන් ශීර්ෂය සහ ඉල්ලීම් ගිවිසුම සඳහා
-[CLI වින්යාස ආරක්ෂාව](../security/CLI-CONFIGURATION.md) බලන්න. මෙම හැසිරීම
-හිතාමතාම සකසා ඇති අතර,
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` මඟින් ප්රතිගමනවලට
-එරෙහිව ආරක්ෂා කර ඇත — ආරක්ෂණය ඉවත් කිරීමෙන් 422 දෝෂයක් කිසිවිටෙකත්
-"නිවැරදි" නොකරන්න.
+උපකරණ පුවරුව** අන්ත ලක්ෂ්‍යය යොදන්න** (`POST /api/cli-tools/apply`) එකම ආරක්‍ෂාව බලාත්මක කරයි: කන්ටේනරයක, ධාරක පිළිතුරු වලින් බන්ධනය නොවූ ඉලක්කයක් ලිවීම**`422`** `containerEphemeralTarget: true` සමඟ ආරක්ෂිත දෝෂ පෙළ සහ - සත්කාරක වට්ටෝරුවක් සහිත මෙවලම් සඳහා (ක්ලෝඩ්, කෝඩෙක්ස්, ඕපන්කෝඩ්, ක්ලයින්, කිලෝ, දිගටම) - ඒ වෙනුවට ධාරකය මත ධාවනය කිරීමට `hostSetupCommand` (උදා: `omniroute setup-opencode`); කිසිවක් ලියා නැත. `dryRun: true` බහාලුම් ආකාරයෙන් ක්‍රියා කරන අතර තැටිය ස්පර්ශ නොකර නැවත සකස් කරන ලද පෙරදසුන + ඉලක්ක මාර්ගයක් ලබා දෙයි. පෙරදසුන් අන්තර්ගතය පිටපත් කිරීමට හෝ ආයාත කිරීමට අක්තපත්‍ර සහිත වින්‍යාස කිරීමක් නොවේ. ධාරකයේ මුල් tool/base URL/API key/model යෙදවුම් සමඟ යොදන්න, නැතහොත් සඳහන් කර ඇති සත්කාරක පැත්තේ සැකසුම් විධානය භාවිතා කරන්න. පෙරදසුන් ශීර්ෂය සහ ඉල්ලීම් කොන්ත්‍රාත්තු සඳහා [CLI වින්‍යාස ආරක්ෂණය](../security/CLI-CONFIGURATION.md) බලන්න. මෙම හැසිරීම චේතනාන්විත වන අතර `tests/unit/api/cli-tools/apply-container-guard.test.ts` මගින් ප්‍රතිගාමී-ආරක්ෂා කරයි - කිසි විටෙක ආරක්ෂකයා ඉවත් කිරීමෙන් 422 "සවිකර" නොකරන්න.
 
 ---
 
@@ -151,59 +107,60 @@ OmniRoute බහාලුම තුළ ක්රියාත්මක කළ `se
 
 ---
 
-## 1. CLI Code හි නාමාවලිය (මෙවලම් 27ක්)
+## 1. CLI කේතයේ නාමාවලිය (මෙවලම් 27)
 
-`/dashboard/cli-code` තුළ දිස්වන සියලුම මෙවලම්. `baseUrlSupport: none` සහිත ඒවා අභිරුචි මූලික URL එකක් වෙනුවට MITM හෝ අතින් අනුගමනය කළ යුතු මාර්ගෝපදේශයක් හරහා සම්බන්ධ කර ඇත:
+`/dashboard/cli-code` හි දිස්වන සියලුම මෙවලම් . `baseUrlSupport: none` ඇති අය අභිරුචි පාදයක් වෙනුවට MITM හෝ අතින් මාර්ගෝපදේශයක් හරහා රැහැන්ගත කර ඇත URL
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id            | නම                          | වෙළෙන්දා                | baseUrlSupport | configType      | acpSpawnable |
+| ------------- | --------------------------- | ----------------------- | -------------- | --------------- | ------------ |
+| claude        | Claude කේතය                 | Anthropic               | පූර්ණ          | env             | ඇත්ත         |
+| කෝඩෙක්ස්      | OpenAI Codex CLI            | OpenAI                  | පූර්ණ          | චාරිත්රය        | ඇත්ත         |
+| zcode         | ZCode (GLM කේතීකරණ සැලැස්ම) | Z.ai                    | කිසිවක් නැත    | චාරිත්රය        | බොරු         |
+| ක්ලයින්       | Cline                       | OSS (හිටපු ක්ලෝඩ් දේව්) | පූර්ණ          | චාරිත්රය        | ඇත්ත         |
+| කිලෝ          | කිලෝ කේතය                   | කිලෝ-Org                | පූර්ණ          | චාරිත්රය        | බොරු         |
+| roo           | Roo කේතය                    | රූ (OSS)                | පූර්ණ          | මඟ පෙන්වීම      | බොරු         |
+| දිගටම         | දිගටම කරගෙන යන්න            | continue.dev            | පූර්ණ          | මඟ පෙන්වීම      | බොරු         |
+| සහායකයා       | ආධාරකරු                     | OSS (P. Gauthier)       | පූර්ණ          | මඟ පෙන්වීම      | ඇත්ත         |
+| ව්යාජය        | ForgeCode                   | Antinomy HQ             | පූර්ණ          | චාරිත්රය        | ඇත්ත         |
+| jcode         | jcode                       | 1jehuang (OSS)          | පූර්ණ          | චාරිත්රය        | බොරු         |
+| deepseek-tui  | DeepSeek TUI                | හන්ටර් බෝන් (OSS)       | පූර්ණ          | චාරිත්රය        | බොරු         |
+| codewhale     | CodeWhale                   | Hmbown (OSS)            | පූර්ණ          | චාරිත්රය        | බොරු         |
+| විවෘත කේතය    | OpenCode                    | විෂමතාව (හිටපු SST)     | පූර්ණ          | මඟ පෙන්වීම      | ඇත්ත         |
+| droid         | කර්මාන්තශාලා Droid          | කර්මාන්ත ශාලාව AI       | අර්ධ           | මඟ පෙන්වීම      | බොරු         |
+| සහායක නියමුවා | GitHub Copilot CLI          | GitHub/MS               | පූර්ණ          | චාරිත්රය        | බොරු         |
+| කර්සරය-ක්ලි   | Cursor CLI                  | ඕනෑම ගෝලයක්             | අර්ධ           | මඟ පෙන්වීම      | ඇත්ත         |
+| සුවඳයි        | Smelt                       | leonardcser (OSS)       | පූර්ණ          | චාරිත්රය        | බොරු         |
+| pi            | Pi (pi-coding-agent)        | M. Zechner (OSS)        | පූර්ණ          | චාරිත්රය        | බොරු         |
+| grok-build    | Grok ගොඩනැගීම               | xAI                     | පූර්ණ          | චාරිත්රය        | බොරු         |
+| පොඩි කරනවා    | පොඩි කරන්න                  | OSS (චමත්)              | පූර්ණ          | චාරිත්රය        | බොරු         |
+| qwen          | Qwen කේතය                   | Alibaba                 | පූර්ණ          | මඟ පෙන්වීම      | ඇත්ත         |
+| zed           | Zed                         | Zed කර්මාන්ත            | පූර්ණ          | මඟ පෙන්වීම      | බොරු         |
+| කර්සරය        | Cursor                      | ඕනෑම ගෝලයක්             | කිසිවක් නැත    | මඟ පෙන්වීම      | බොරු         |
+| antigravity   | Antigravity                 | Google                  | කිසිවක් නැත    | mitm            | බොරු         |
+| හර්මීස්       | හර්මීස්                     | Nous පර්යේෂණ            | කිසිවක් නැත    | මඟ පෙන්වීම      | බොරු         |
+| කිරෝ          | Kiro AI                     | Amazon                  | කිසිවක් නැත    | mitm            | බොරු         |
+| චාරිත්රය      | අභිරුචි CLI                 | —                       | පූර්ණ          | අභිරුචි සාදන්නා | බොරු         |
 
-`baseUrlSupport: "partial"` සහිත මෙවලම් උපකරණ පුවරු කාඩ්පතෙහි "⚠ අර්ධ මූලික URL" ලාංඡනයක් පෙන්වයි.
+`baseUrlSupport: "partial"` සහිත මෙවලම් උපකරණ පුවරුවේ කාඩ්පතෙහි "⚠ Base URL parcial" ලාංඡනයක් පෙන්වයි.
 ---
 
-## 2. CLI නියෝජිත නාමාවලිය (මෙවලම් 10ක්)
+## 2. CLI නියෝජිත නාමාවලිය (මෙවලම් 11)
 
-`/dashboard/cli-agents` තුළ දිස්වන ස්වයංක්රීය නියෝජිතයන්:
+`/dashboard/cli-agents` හි දිස්වන ස්වයංක්‍රීය නියෝජිතයන්:
 
-| id           | නම               | සැපයුම්කරු               | baseUrl සහාය | acp මඟින් ආරම්භ කළ හැකිද |
-| ------------ | ---------------- | ------------------------ | ------------ | ------------------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full         | false                    |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full         | true                     |
-| goose        | Goose            | Block / Linux Foundation | full         | true                     |
-| interpreter  | Open Interpreter | OSS                      | full         | true                     |
-| warp         | Warp AI          | Warp Inc.                | partial      | true                     |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full         | false                    |
-| omp          | Oh My Pi         | OSS                      | full         | true                     |
-| letta        | Letta CLI        | Letta                    | full         | false                    |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full         | false                    |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full         | false                    |
+| id                | නම                    | වෙළෙන්දා              | baseUrlSupport | acpSpawnable |
+| ----------------- | --------------------- | --------------------- | -------------- | ------------ |
+| හර්මීස් නියෝජිතයා | හර්මීස් නියෝජිතයා     | Nous පර්යේෂණ          | පූර්ණ          | බොරු         |
+| openclaw          | OpenClaw              | OSS (P. Steinberger)  | පූර්ණ          | ඇත්ත         |
+| පාත්තයා           | පාත්තයා               | බ්ලොක් / Linux පදනම   | පූර්ණ          | ඇත්ත         |
+| පරිවර්තකයා        | පරිවර්තකය විවෘත කරන්න | OSS                   | පූර්ණ          | ඇත්ත         |
+| warp              | Warp AI               | Warp Inc.             | අර්ධ           | ඇත්ත         |
+| නියෝජිත තට්ටුව    | නියෝජිත තට්ටුව        | asheshgoplani (OSS)   | පූර්ණ          | බොරු         |
+| omp               | අනේ මගේ පයි           | OSS                   | පූර්ණ          | ඇත්ත         |
+| letta             | Letta CLI             | ලෙට්ටා                | පූර්ණ          | බොරු         |
+| ප්රධාන නියෝජිතයා  | ප්‍රධාන නියෝජිතයා     | ප්‍රධාන බුද්ධිය (OSS) | පූර්ණ          | බොරු         |
+| 5 කිමිදීම         | 5 කිමිදීම             | OSS (5dive-ai)        | පූර්ණ          | බොරු         |
+| ඇයි කේත           | WhyCodes              | ඇයි සංස්ථාව           | පූර්ණ          | බොරු         |
 
 ---
 

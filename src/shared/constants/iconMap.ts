@@ -2,6 +2,7 @@ import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   AlarmClockPlus,
+  Anchor,
   AppWindow,
   Archive,
   ArrowDown,
@@ -357,6 +358,7 @@ import { ArrowBigUpDash, Blend } from "lucide-react";
  */
 export const ICON_MAP: Record<string, LucideIcon> = {
   // ── shell + primitives ──
+  anchor: Anchor,
   home: House,
   settings: Settings,
   search: Search,
