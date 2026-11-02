@@ -1,4 +1,4 @@
-import { toNumber } from "@/shared/utils/numeric";
+import { toNumber } from "../../utils/numeric.ts";
 import { hexId, type CodeBuddyOperationContext, type CodeBuddyRootContext } from "./context.ts";
 import { CODEBUDDY_INTL_CLI } from "./cliProfile.ts";
 
