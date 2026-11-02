@@ -1,0 +1,1 @@
+- **fix(antigravity):** skip the `x-goog-user-project` header when the request body carries the `aicode-consumers` default project, the same way the `test-project` / `project-id` placeholders already are ([#12499](https://github.com/diegosouzapw/OmniRoute/pull/12499)) — thanks @Abhishekchhetri020

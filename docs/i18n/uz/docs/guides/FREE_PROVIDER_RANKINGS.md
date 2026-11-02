@@ -14,17 +14,17 @@
 
 ## Bu nima
 
-OmniRoute 376 ta provayderni ro'yxatga oladi, shu jumladan **free/no-auth** deb belgilangan 155 ta katalog yozuvi (autentifikatsiyasiz, bepul tarifli OAuth yoki bepul tarifli API kaliti — [Bepul tariflar qo'llanmasi](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Bepul tariflar katalogi](../reference/FREE_TIERS.md)ga qarang). Ammo qiyin tomoni shundaki: bepul provayderlarning model sifati juda katta farq qiladi. Ilg'or modelni taqdim etuvchi autentifikatsiyasiz provayder kichik, eskirgan modelni taqdim etuvchi provayderdan ancha foydaliroq.
+OmniRoute 377 ta provayderni ro'yxatdan o'tkazadi, shu jumladan 155 ta katalog yozuvlari belgilangan**free/no-auth** (no-auth, free-tier OAuth yoki free-tier API key — [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Free Tiers katalogiga](../reference/FREE_TIERS.md) qarang). Qo'lga olish: bepul provayderlar model sifati bo'yicha juda farq qiladi. Chegaraviy modelga xizmat ko'rsatuvchi avtorizatsiyasiz provayder kichik eski modelga xizmat ko'rsatuvchidan ko'ra ancha foydalidir.
 
-**Free Provider Rankings** har bir bepul provayderning katalogini **Arena AI leaderboard** dagi **omma tomonidan yig'ilgan sifat ballari** (inson afzalliklariga asoslangan ELO — LMArena chatbot arenasining asosidagi g'oya bilan bir xil) bilan birlashtirish orqali "**qaysi bepul provayder menga eng yaxshi modelni beradi?**" savoliga javob beradi. Keyin provayderlar o'zlarining **eng yaxshi bepul modeli** kuchiga ko'ra reytinglanadi.
+**Bepul provayderlar reytingi** javoblar"** Qaysi bepul provayder menga eng yaxshi modelni beradi?** " bilan har bir bepul provayderning katalogiga qo'shilish orqali** olomon manbalaridan olingan sifat ballari** dan** Arena AI yetakchilar jadvali** (inson-afzal ELO, LMArena chatbot arenasining orqasida xuddi shu fikr). Keyin provayderlar ularning kuchiga qarab tartiblanadi** Eng yaxshi bepul model** .
 
-Reyting uchta real manbadan hisoblanadi:
+Reyting uchta haqiqiy manbadan hisoblanadi:
 
-1. Bepul provayderlar ro'yxatlari — `NOAUTH_PROVIDERS`, shuningdek `hasFree` deb belgilangan `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlari (`src/shared/constants/providers.ts`).
-2. Har bir provayderning provayder reestridagi model katalogi (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO sinxronizatsiya mexanizmi (`src/lib/arenaEloSync.ts`) tomonidan `model_intelligence` MB jadvalida saqlanadigan ELO-dan olingan vazifaga-moslik ballari.
+1. Bepul provayderlar ro'yxati - `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlari `hasFree` (`src/shared/constants/providers.ts`) bilan belgilanadi.
+2. Provayderlar reestridan (`open-sse/config/providerRegistry.ts`) har bir provayderning model katalogi.
+3. Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) tomonidan `model_intelligence` DB jadvalida saqlanadigan ELO-dan olingan vazifalarga mos ballar.
 
-Birlashtirish mantiqi `src/lib/freeProviderRankings.ts` faylida joylashgan.
+Qo'shilish mantig'i `src/lib/freeProviderRankings.ts` yashaydi.
 
 ---
 

@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Бесплатни AI мрежни пролаз
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никада не престајте да програмирате. Сваки AI алат → 376 провајдера — 150+ бесплатних — преко једне приступне тачке. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity повезани са БЕСПЛАТНИМ Claude / GPT / Gemini моделима уз аутоматско пребацивање. RTK + Caveman слојевита компресија штеди 15–95% токена (~89% у просеку) — никада не достижите ограничења. 376 AI провајдера · 150+ бесплатних нивоа · ~1,62 млрд. бесплатних токена месечно · 20 стратегија рутирања · почетак за $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Никада не престајте да програмирате. Сваки AI алат → 380 провајдера — 150+ бесплатних — преко једне приступне тачке. Claude Code, Codex, Cursor, Cline, Copilot и Antigravity повезани са БЕСПЛАТНИМ Claude / GPT / Gemini моделима уз аутоматско пребацивање. RTK + Caveman слојевита компресија штеди 15–95% токена (~89% у просеку) — никада не достижите ограничења. 380 AI провајдера · 150+ бесплатних нивоа · ~1,62 млрд. бесплатних токена месечно · 20 стратегија рутирања · почетак за $0."/>
 
 </div>
 
@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Мрежни пролаз наставља да расте
+## 📈 Гатеваи наставља да расте
 
 <div align="center">
 
-|                                         |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Провајдери                           |           352           |   **358**   |          376          |
-| 🧠 Јединствени ID-ови модела за ћаскање |          1320           |  **1374**   |         1475          |
-| 🖼️ Мост модалитета                      | 🆕 слика + звук + видео |      ✓      |           ✓           |
-| 📡 Бесплатни Radar каталог              |      🆕 уз пријаву      |      ✓      |           ✓           |
-| ⚖️ Распоређивање према квоти            |     🆕 дељење квоте     |      ✓      |           ✓           |
-| 📊 Телеметрија квоте                    |        🆕 уживо         |      ✓      |           ✓           |
-| 🧰 Режим без интерфејса                 |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Инфраструктура LTS гране             |            —            |      —      |   🆕 канали издања    |
-| 🔎 API за откривање модела              |            —            |      —      | 🆕 `/v1/models/query` |
+|                                  |          в3.8.50          | **в3.8.51** |       `v3.8.53+`        |
+| -------------------------------- | :-----------------------: | :---------: | :---------------------: |
+| 🌐 Провидерс                     |            352            |   **358**   |           380           |
+| 🧠 Јединствени модел ћаскања IDs |           1320            |  **1374**   |          1475           |
+| 🖼️ Модалити Бридге               | 🆕 висион + аудио + видео |      ✓      |            ✓            |
+| 📡 Радар бесплатни каталог       |         🆕 опт-ин         |      ✓      |            ✓            |
+| ⚖️ Планирање са свјесним квотама |      🆕 Куота-Схаре       |      ✓      |            ✓            |
+| 📊 Куота телеметрија             |          🆕 ливе          |      ✓      |            ✓            |
+| 🧰 Режим без главе               |             —             |      —      |  🆕 `serve --headless`  |
+| 🛤️ LTS раил инфра                |             —             |      —      | канали за ослобађање 🆕 |
+| 🔎 Откриће модела API            |             —             |      —      |  🆕 `/v1/models/query`  |
 
-**→ [План развоја](ROADMAP.md) — путовање граном ка `v3.9.0 LTS`**
+**→ [Мапа пута](ROADMAP.md) — вожња пругом до `v3.9.0 LTS`**
 
 </div>
 
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Функције</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Комбинације</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Добављачи</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Добављачи</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI и MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обећање — једна крајња тачка и 376 провајдера. Аутоматско пребацивање наставља усмеравање све док је доступно неко друго исправно одредиште. Шест стубова: поуздано пребацивање између 376 провајдера · до 95% уштеде токена за одговарајућа радна оптерећења · почетак за $0 уз више од 150 бесплатних пакета и 52 периодично бесплатног/трајно бесплатног провајдера без кључа · 37 CLI/агентских интеграција путем једне конфигурације · компатибилност са OpenAI, Claude, Gemini и Responses API на /v1 · продукционе контроле које обухватају прекидаче кола, TLS прикривање, MCP са 110 алата, A2A, меморију, заштитне механизме, евалуације и више од 56.000 декларација статичких тестова у преко 7.800 праћених тест-датотека."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Обећање — једна крајња тачка и 380 провајдера. Аутоматско пребацивање наставља усмеравање све док је доступно неко друго исправно одредиште. Шест стубова: поуздано пребацивање између 380 провајдера · до 95% уштеде токена за одговарајућа радна оптерећења · почетак за $0 уз више од 150 бесплатних пакета и 52 периодично бесплатног/трајно бесплатног провајдера без кључа · 37 CLI/агентских интеграција путем једне конфигурације · компатибилност са OpenAI, Claude, Gemini и Responses API на /v1 · продукционе контроле које обухватају прекидаче кола, TLS прикривање, MCP са 110 алата, A2A, меморију, заштитне механизме, евалуације и више од 56.000 декларација статичких тестова у преко 7.800 праћених тест-датотека."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="По чему се OmniRoute издваја — временски означен преглед функција у поређењу са 9router, OpenRouter, CLIProxyAPI и LiteLLM кроз 13 могућности. OmniRoute: 376 добављача, више од 150 уграђених бесплатних нивоа, 20 стратегија рутирања, компресија токена са 12 механизама, уграђени MCP сервер са 110 алата, A2A протокол за агенте, трајна меморија, заштитне мере, агенти у облаку, прикривање TLS отиска, Desktop/Termux/PWA и 67 локализација корисничког интерфејса. OmniRoute је лиценциран под MIT лиценцом и може се самостално хостовати. Могућности и бројеви конкурената могу се променити; погледајте повезану методологију."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="По чему се OmniRoute издваја — временски означен преглед функција у поређењу са 9router, OpenRouter, CLIProxyAPI и LiteLLM кроз 13 могућности. OmniRoute: 380 добављача, више од 150 уграђених бесплатних нивоа, 20 стратегија рутирања, компресија токена са 12 механизама, уграђени MCP сервер са 110 алата, A2A протокол за агенте, трајна меморија, заштитне мере, агенти у облаку, прикривање TLS отиска, Desktop/Termux/PWA и 67 локализација корисничког интерфејса. OmniRoute је лиценциран под MIT лиценцом и може се самостално хостовати. Могућности и бројеви конкурената могу се променити; погледајте повезану методологију."/>
 
 <sub>📊 Комплетна методологија и детаљи за сваку функцију у поређењу са 9router, OpenRouter, CLIProxyAPI и LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ Radar се користи по избору и подржава само GET. Om
 - **🖼️ Нови endpoint-и** — `/v1/ocr` (Mistral OCR) и `/v1/audio/translations` (Whisper-стил) заокружују медијску површину. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Генерисање слика / видеа / звука** — један API за медије: xAI Grok Imagine и Novita AI видео, ComfyUI, Magnific, Adobe Firefly, Segmind и говорни провајдери као што је ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Деплојмент и операције** — reverse-proxy `basePath`, аутоматска детекција језика прегледача, праћење уређаја по кључу, MITM поверење без root-а, zh-TW локализација. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Још провајдера и агената** — cloud агенти (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) са пријавом преко прегледача + OAuth, Ollama као картон првог реда, Claude Opus 5 и Sonnet 5, званично партнерство са Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и освежени каталог од **376 провајдера**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Још провајдера и агената** — cloud агенти (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) са пријавом преко прегледача + OAuth, Ollama као картон првог реда, Claude Opus 5 и Sonnet 5, званично партнерство са Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… и освежени каталог од **380 провајдера**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Транспарентност рутирања** — сваки одговор носи заглавље `X-OmniRoute-Decision` које именује стратегију/провајдера/кашњење који су га обслужили, нова `cache-optimized` combo стратегија + Auto-Combo фактор `cacheAffinity` враћају поновљене захтеве ка конекцији која држи кеширани префикс, а read-only endpoint `/v1/auto-combo/{channel}/candidates` излаже живи скуп кандидата неког `auto/*` канала. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Локалне перформансе и инфраструктура** — локални Redis на један клик, Cloudflare Workers / Deno Deploy relay деплојери, Bifrost и Mux као надгледане уграђене услуге. → [Уграђене услуге](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Још у пакету** — plugin фрејмворк + маркетплејс, Omni/Agent/GitHub skills фрејмворци, Obsidian vault интеграција (22 MCP алата), OpenAI-компатибилни Batch и Files API-ји, семантички кеш одговора, гамификација са ранг листама, ACP откривање агената (15 уграђених агената), заказани извоз логова у BigQuery, `auto/chaos` паралелно више-моделско fan-out, Telegram bot мост, верзијски менаџер унутар апликације и LMArena-ELO рангирања бесплатних провајдера. → [Документација](docs/README.md)
@@ -620,59 +620,58 @@ Radar се користи по избору и подржава само GET. Om
 
 <div align="center">
 
-## 🤖 Компатибилни CLI алати и агенти за кодирање
+## 🤖 Компатибилни CLIs и агенти за кодирање
 
-> Једна конфигурација — `http://localhost:20128/v1` — и **сваки** AI IDE или CLI ради на бесплатним и јефтиним моделима.
+> Једна конфигурација — `http://localhost:20128/v1` — и** сваки** AI IDE или CLI ради на бесплатним и јефтиним моделима.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Цоде </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Кило </td> зкг </b></sub><br/><sub> </sub></a>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Зоо Цоде </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Настави </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Аидер </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> јцоде </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Фацтори Дроид </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Смелт </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Пи </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Буилд </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Хермес Агент </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Гоосе </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Опен Интерпретер </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> деиин.аи </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ такође ради са</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>било којим алатом компатибилним са OpenAI-јем</b>
+<b>＋ такође ради са </b> · Агент Децк · Kiro · Цомманд Цоде · Antigravity · Windsurf · AMP · <b> било који ОпенАИ компатибилан алат </b>
 </div>
 
-<sub>📖 Подешавање по алату за свих 37 алата (27 CLI Code алата + 10 CLI агената) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode додатак → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Подешавање по алату за свих 38 алата (27 CLI кодова + 11 CLI агената) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode додатак → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Покрените било који подржани CLI преко OmniRoute-а једном командом** — без уписивања конфигурационих датотека,
-акредитиви се убацују засебно за сваки процес, а Qwen/Gemini добијају привремени изоловани матични директоријум:
+**Покрените било коју подржану CLI кроз OmniRoute једном командом** — нема написаних конфигурационих датотека, акредитиви се убацују по процесу, Qwen/Gemini добија изоловани дом за бацање:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -683,23 +682,21 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Или интерактивно изаберите добављача и модел и упишите сопствену конфигурацију алата:
-omniroute configure codex          # такође: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Свака команда поштује активни удаљени контекст (`omniroute connect <host>`), `--dry-run`
-приказује тачне променљиве окружења и аргументе без извршавања, а `--api-key-env NAME` спречава да тајне
-доспеју у историју ваше љуске. → [CLI интеграције](docs/guides/CLI-INTEGRATIONS.md)
+Свака команда поштује активни удаљени контекст (`omniroute connect <host>`), `--dry-run` прегледа тачан env/args без извршавања, а `--api-key-env NAME` чува тајне ван историје ваше шкољке. → [CLI Интегратионс](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 376 добављача AI услуга — 153 означена у каталогу као бесплатна
+## 🌐 380 добављача AI услуга — 153 означена у каталогу као бесплатна
 
 </div>
 
-> **376 регистрованих добављача** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске услуге, укључујући **153 са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 добављача / 3.059 различитих парова добављач–модел / 1.475 необрађених ID-ова модела**; засебни каталог бесплатних квота има **471 ред по моделу**, **34 обнављајуће групе квота** и **52 добављача који су трајно бесплатни, са обнављајућим квотама или без потребе за кључем**. Ово су намерно различити имениоци; дефиниције и прорачуни са уклоњеним дупликатима група налазе се у [Референци добављача](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
+> **380 регистрованих добављача** у канонским колекцијама за ћаскање, медије, претрагу, локалне и cloud агенте и системске услуге, укључујући **153 са метаподацима за откривање `hasFree: true`**. Регистар модела за ћаскање обухвата **239 добављача / 3.059 различитих парова добављач–модел / 1.475 необрађених ID-ова модела**; засебни каталог бесплатних квота има **471 ред по моделу**, **34 обнављајуће групе квота** и **52 добављача који су трајно бесплатни, са обнављајућим квотама или без потребе за кључем**. Ово су намерно различити имениоци; дефиниције и прорачуни са уклоњеним дупликатима група налазе се у [Референци добављача](docs/reference/PROVIDER_REFERENCE.md) и [Бесплатним нивоима](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -764,92 +761,80 @@ omniroute configure codex          # такође: claude opencode qwen aider go
 
 <div align="center">
 
-## 🖥️ Где OmniRoute ради — свуда
+## 🖥️ Где OmniRoute трчи — било где
 
 </div>
 
-> Иста апликација, ваш уређај, ваша правила. Од глобалне npm инсталације до **вашег телефона** путем Termux-а.
+> Иста апликација, ваша машина, ваша правила. Од глобалне нпм инсталације до** ваш телефон** преко Термук-а.
 
 <table>
-  <tr><th align="left">Платформа</th><th align="left">Инсталација</th><th align="left">Најважније</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (глобално)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Једна команда, било који ОС</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Више архитектура: <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Десктоп (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Изворни прозор + системска палета — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Трака менија (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Надгледа и аутоматски ажурира сервер — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>изворни <code>arm64</code></td><td align="left">Raspberry Pi, ARM сервери, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Ради <b>на вашем телефону</b>, непрекидно, без root приступа</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Додај на почетни екран"</td><td align="left">Преко целог екрана, ради ван мреже, може се инсталирати из прегледача</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode додатак</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Изворна OpenCode интеграција</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>инсталирајте проширење <b>OmniCopilot</b></td><td align="left">Сваки OmniRoute модел у изворном бирачу модела Copilot Chat-а — стабилној и Insiders верзији</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Из изворног кода</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Мењајте га, доприносите развоју</td></tr>
+  <tr><th align="left"> платформа </th><th align="left"> Инсталирај </th><th align="left"> Најважније </th></tr>
+  <tr><td align="left" nowrap>📦 <b> нпм (глобално)</b></td><td align="left" nowrap><code> инсталирај -g омнироуте </code></td><td align="left"> Једна команда, било која OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (глобално)</b></td><td align="left" nowrap><code> бун адд -g омнироуте </code></td><td align="left"> Исти архив регистра, брже инсталира </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> рун … diegosouzapw/omniroute</code></td><td align="left"> Мулти-арцх <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Радна површина (Electron)</b></td><td align="left" nowrap><code> нпм рун елецтрон:буилд </code></td><td align="left"> Изворни прозор + системска трака — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> менија (OmniRouteTray)</b></td><td align="left" nowrap><code> брев инсталл --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Надзире &amp; аутоматски ажурира сервер — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code> арм64 </code></td><td align="left"> Распберри Пи, ARM сервери, Аппле Силицон </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Андроид (Термук)</b></td><td align="left" nowrap><code> инсталл нодејс && нпк -y омнироуте </code></td><td align="left"> Покреће <b> на вашем телефону </b>, 24/7, без роот </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Додај на почетни екран"</td><td align="left"> екран, ван мреже, може се инсталирати из претраживача </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode додатак </b><code></td><td align="left" nowrap>omniroute/opencode-provider</code></td> Нативе <td align="left"></tr>OpenCode </td>
+  <tr><td align="left" nowrap>🤖 <b>VS Цоде Copilot Цхат </b></td><td align="left" nowrap> инсталирај <b>OmniCopilot</b> екстензију </td><td align="left"> Сваки OmniRoute модел у изворном Copilot бирачу ћаскања — стабилан &amp; Инсајдери </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Из извора </b></td><td align="left" nowrap><code> нпм инсталирај && нпм покрени дев </code><td align="left"></td> га, доприноси </td></tr>
 </table>
 
-<sub>📖 [Водич за Docker](docs/guides/DOCKER_GUIDE.md) · [Десктоп](electron/README.md) · [Системска палета у траци менија](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker водич](docs/guides/DOCKER_GUIDE.md) · [Десктоп](electron/README.md) · [трака менија](https://github.com/zoispag/omniroute-tray) · [Термук](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Ново: OmniRoute унутар изворног Copilot Chat-а у VS Code-у
+### 🧩 Ново: OmniRoute унутар VS -овог изворног Copilot ћаскања
 
 </div>
 
-> Без нове бочне траке и новог интерфејса за ћаскање — сваки модел који OmniRoute послужује појављује се директно у
-> **бирачу модела Copilot Chat-а који већ користите**. Од верзије VS Code 1.122, модели добављача раде
-> без пријављивања на GitHub или претплате на Copilot — агентски режим, позивање алата и рад са сликама,
-> бесплатно.
+> Нема нове бочне траке, нема новог ћаскања UI — сваки модел OmniRoute служи појављује се директно у**Copilot Бирач модела ћаскања који већ користите** . Од VS кода 1.122, модели провајдера раде без GitHub пријаве или Copilot претплате — режим агента, позивање алата и визија, бесплатно.
 
-Инсталирајте проширење **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, усмерите га
-ка свом OmniRoute серверу (подразумевано је `localhost:20128`), а затим отворите Copilot Chat → бирач модела
-→ **Управљај моделима…** → **OmniRoute**.
+Инсталирајте** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** проширење, усмерите га на ваш OmniRoute сервер (подразумевано на `localhost:20128`), а затим отворите Copilot Цхат → бирач модела →** Управљајте моделима…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Продавница</th><th align="left">Веза</th><th align="left">Ради са</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Инсталирај →</a></td><td align="left">VS Code — стабилна и Insiders верзија</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Инсталирај →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Продавница </th><th align="left"> Линк </th><th align="left"> Ради са </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Цоде Маркетплаце </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Инсталирај →</а ></тд >< тд алигн ="лево">VS Цоде — стабилан &amp; Инсајдери </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Отвори VSX регистар </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Инсталирај →</а ><</td> тд >< алигн ="лево">Cursor, Windsurf, ВСЦодиум, Тхеиа, цоде-сервер, Гитпод, Antigravity, Kiro</tr>
 </table>
 
-Унутар уређивача: отворите приказ **Extensions**, потражите **"OmniRoute"**, кликните на **Install**
-— ради на исти начин у обе продавнице. Изворни код, пријаве проблема и упутство за објављивање налазе се на
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Из уређивача: отворите** Екстензије** погледајте, претражите** "OmniRoute"** , кликните** Инсталирај** — ради на исти начин у обе продавнице. Извор, издања и приручник за објављивање уживо на [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Водич за VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — подешавање, шта бирач приказује, контролна табла у картици, решавање проблема</sub>
+<sub>📖 [VS Цоде Copilot Водич за ћаскање](docs/guides/VSCODE-COPILOT.md) — подешавање, шта приказује бирач, контролна табла у картици, решавање проблема </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Ново: OmniRouteTray — ваш мрежни пролаз у траци менија
+### 🎩 Ново: OmniRouteTray — ваш пролаз, који живи у траци менија
 
 </div>
 
-> `omniroute serve` најбоље ради када је стално укључен. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> претвара га у macOS апликацију у траци менија коју једном подесите и заборавите: покреће сервер, одржава га активним
-> након поновних покретања, ажурира га на лицу места и омогућава приступ тренутном буџету токена једним кликом — **без
-> остављања отвореног прозора терминала и без надгледања команде `npm install -g omniroute`.**
+> `omniroute serve` је најсрећнија када је увек укључена.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** претвара то у апликацију на траци менија за подеси и заборави за macOS: покреће сервер, одржава га живим током поновног покретања, ажурира га на месту и ставља буџет за живи токен на један клик -** нема отворен прозор терминала, нема `npm install -g omniroute` за чување деце.**
 
-Направљен помоћу [Tauri v2](https://v2.tauri.app/) (Rust језгро занемарљиве величине), испоручује се
-са сопственим потписаним Node 24 извршним окружењем и управља OmniRoute инсталацијом у власништву апликације, тако да никада није у сукобу са вашим
-глобалним `node`/`bun` окружењем. **Дели вашу постојећу `~/.omniroute/` конфигурацију и базу података** — тако да је то
-исти OmniRoute који већ користите, само са шеширом. 🎩
+Направљен са [Таури в2](https://v2.tauri.app/) (Руст језгро величине грешке заокруживања), испоручује сопствено потписано Ноде 24 рунтиме и управља инсталацијом OmniRoute у власништву апликације, тако да се никада не бори против вашег глобалног `node`/`bun`. То** дели вашу постојећу `~/.omniroute/` конфигурацију и базу података** — значи то је исти OmniRoute који већ трчиш, само са шеширом. 🎩
 
 <table>
-  <tr><th align="left">Шта ради</th><th align="left">Како</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Надгледа сервер</b></td><td align="left">Покреће <code>omniroute serve</code> и преузима већ покренуту инстанцу уместо да је дуплира</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Тренутна потрошња на први поглед</b></td><td align="left">Траке квота добављача, ограничења Claude сесије и недељна ограничења са одбројавањем до ресетовања, преглед трошкова за 30 дана</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Аутоматски се ажурира на лицу места</b></td><td align="left">Фазна инсталација, атомска замена, враћање на претходну верзију у случају неуспеха — увек на најновијем издању</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Покретање при пријављивању</b></td><td align="left">Опционо покретање при пријављивању; само системска палета, без иконе у Dock-у</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Дијагностика и евиденције</b></td><td align="left">Дијагностика једним кликом и приступ евиденцијама сервера</td></tr>
+  <tr><th align="left"> Шта ради </th><th align="left"> Како </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Надзире сервер </b></td><td align="left"> Појављује <code> омнироуте серве </code>, усваја већ покренуту инстанцу уместо да је дуплира </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Употреба уживо на први поглед </b></td><td align="left"> Траке квота добављача, Claude session/weekly ограничења са ресетовањем одбројавања, 30-дневна анализа трошкова </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Аутоматска ажурирања на месту </b></td><td align="left"> Постепена инсталација, атомска замена, враћање у случају грешке — увек на најновијем издању </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Покрени се приликом пријаве </b></td><td align="left"> Опционо покретање при пријави; само за лежиште, без иконе на прикључку </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Доцтор &amp; евидентира </b></td><td align="left"> Дијагностика једним кликом и приступ евиденцији сервера </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Радије бисте преузели апликацију? Преузмите најновији <code>.dmg</code> са странице
-<a href="https://github.com/zoispag/omniroute-tray/releases">Издања</a>. Изворни кôд, пријаве проблема и документација за
-изградњу доступни су на <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Пројекат заједнице који је направио <a href="https://github.com/zoispag">@zoispag</a> — није званично OmniRoute издање.</sub>
+<sub> Желите преузимање? Преузмите најновији <code>.дмг </code> са
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Издаје </a>. Извор, проблеми и израда
+документи живе на <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Пројекат заједнице од <a href="https://github.com/zoispag">@зоиспаг </a> — није званично издање OmniRoute.</sub>
 
 <br/>
 
@@ -1314,7 +1299,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 такође га
   <tr><td nowrap><b>Извршно окружење</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Језик</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> у <code>src/</code> и <code>open-sse/</code> (нула <code>any</code> у језгру од v2.0)</td></tr>
   <tr><td nowrap><b>Оквир</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL журналисање) + LowDB (JSON, наслеђе) — 147 доменских модула, 211 миграција</td></tr>
+  <tr><td nowrap><b>База података</b></td><td>better-sqlite3 (SQLite, WAL журналисање) + LowDB (JSON, наслеђе) — 147 доменских модула, 219 миграција</td></tr>
   <tr><td nowrap><b>Меморија</b></td><td>SQLite FTS5 пунотекст + int8-квантизовани векторски embedding-и, типизирано слабљење</td></tr>
   <tr><td nowrap><b>Шеме</b></td><td>Zod 4 — валидација улаза/излаза MCP алата + API уговори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

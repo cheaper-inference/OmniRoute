@@ -585,7 +585,8 @@ describe("Page Integration — combos page empty state", () => {
 
   it("should mask combo test result labels with the global email privacy toggle", () => {
     assert.match(src, /function TestResultsView/);
-    assert.match(src, /pickDisplayValue\(\[r\.label\], emailsVisible, r\.model\)/);
+    // #14944: each row leads with the model id and shows the (masked) account label beneath it.
+    assert.match(src, /pickDisplayValue\(\[r\.label\], emailsVisible, r\.label\)/);
   });
 });
 

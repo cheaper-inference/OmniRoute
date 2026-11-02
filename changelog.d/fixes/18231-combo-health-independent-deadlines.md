@@ -1,0 +1,1 @@
+- **fix(combo):** run every combo health probe with its own deadline instead of skipping remaining models after 180 seconds of accumulated elapsed time. Preserve the existing per-target aborts, request cancellation, sequential order, and bounded auto-combo sampling (#18231 - thanks @fabioKoruja00).

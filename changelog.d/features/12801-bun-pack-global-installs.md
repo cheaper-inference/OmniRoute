@@ -1,0 +1,1 @@
+- **feat(release):** `npm run bun:release` (`scripts/release/bun-pack.mjs`) packs the already-built `dist/` into an npm-compatible tarball with `bun pm pack` (falling back to `npm pack`) for bun-first global installs; the Next.js build and prepublish step stay on Node. Thanks to @opensource-elearning (#12801).

@@ -654,27 +654,29 @@ sudo systemctl enable --now omniroute-update.path
 Servis, başarısız bir çalıştırmanın döngüye girmemesi için çekme işleminden önce istek dosyasını kaldırır.
 `DOCKER_UPDATE_TRIGGER_FILE` olmadan pano, manuel komut akışını kullanmaya devam eder.
 
-## Kullanılabilirlik: varsayılan SQLite tek replikalıdır
+## Kullanılabilirlik: varsayılan SQLite tek kopyadır
 
-Standart Docker / Kubernetes OmniRoute, **bir Node işlemi + bir SQLite yazıcısından** oluşur. Bu topolojide yüksek kullanılabilirlik **desteklenmez**.
+Stok Docker / Kubernetes OmniRoute :** bir Düğüm süreci + bir SQLite yazıcı** . Yüksek kullanılabilirlik** desteklenmiyor** bu topoloji üzerinde.
 
-| Kısıtlama                                                        | Sonuç                                                                                                                                                                                                                                                                                                                                        |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Tek yazıcı                                                       | Aynı SQLite dosyasına karşı birden fazla replika **çalıştırmayın**. Bu, veritabanını bozar.                                                                                                                                                                                                                                                  |
-| Yeniden oluşturma / yeniden başlatma / HEALTHCHECK sonlandırması | Devam eden SSE bağlantıları, pano oturumları ve bellek içi durum için **tam kesinti**. Bağlı tüm istemcilerin bağlantısı kesilir. Uç noktanın boş olduğu zaman aralığındaki yeni istekler OmniRoute JSON'u yerine ters proxy'den **`502 Bad Gateway: Unknown error`** alır; istemciler bunu bir sağlayıcı arızasından ayırt edemez (#11015). |
-| `/healthz` ile aynı olay döngüsü                                 | Yoğun bir katalog veya sıkıştırma turu probe'ları geciktirebilir; kısa bir zaman aşımı bu durumda **tek** replikayı yeniden başlatır.                                                                                                                                                                                                        |
+| Kısıtlama                                           | Sonuçlar                                                                                                                                                                                                                                                                                          |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tek yazar                                           | Yapmak** Olumsuz** aynı SQLite dosyasında birden fazla kopya çalıştırın. Bu DB bozar.                                                                                                                                                                                                             |
+| Yeniden oluştur / yeniden başlat / HEALTHCHECK kill | **Tam kesinti** uçuş içi SSE, kontrol paneli oturumları ve bellek içi durum. Bağlı her istemci düşer. Boş uç nokta penceresi sırasında yeni istekler ters proxy alır**`502 Bad Gateway: Unknown error`** , OmniRoute JSON değil — istemciler bunu bir sağlayıcı hatasından ayırt edemez (#11015). |
+| `/healthz` ile aynı olay döngüsü                    | Meşgul bir katalog veya sıkıştırma işareti, araştırmaları geciktirebilir; kısa bir zaman aşımı ardından yeniden başlatır** sadece** kopya.                                                                                                                                                        |
 
-**Probe matrisi** (ayrıca bkz. [Kubernetes probe önerileri](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)):
+**Prob matrisi** (Ayrıca bkz. [Kubernetes araştırma önerileri](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
-| Probe                | Hedef                                                               | Kullanmayın                                                               |
-| -------------------- | ------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Liveness             | `PORT` üzerinde TCP (varsayılan `20128`) veya esnek HTTP `/healthz` | `/api/monitoring/health`                                                  |
-| Readiness            | HTTP `GET /healthz`                                                 | Olay döngüsünün yoğun olmasını çalışmama durumu sayan kısa zaman aşımları |
-| Ayrıntılı / insanlar | `/api/monitoring/health`                                            | Otomatik kubelet liveness                                                 |
+| Prob             | Hedef                                                       | Kullanma                                                            |
+| ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------- |
+| canlılık         | TCP `PORT` varsayılan `20128`) veya yumuşak HTTP `/healthz` | `/api/monitoring/health`                                            |
+| Hazırlık         | HTTP `GET /healthz`                                         | Olay döngüsü meşgulünü ölü olarak değerlendiren sıkı zaman aşımları |
+| Derin / insanlar | `/api/monitoring/health`                                    | Otomatik kubelet canlılığı                                          |
 
-**Yükseltmeler:** tüm oturumların kesilmesini bekleyin. Mümkünse istemcileri tahliye edin; varsayılan SQLite üzerinde sıralı güncelleme yoktur. Compose `restart: unless-stopped` ile Docker `HEALTHCHECK` birlikte, container Unhealthy olduğunda tek işlemi de değiştirir; etki alanı aynıdır.
+**Yükseltmeler:** Her oturumun düşmesini bekliyoruz. Mümkünse müşterileri boşaltın; varsayılan SQLite sürekli güncelleme yoktur. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` konteyner Sağlıksız olduğunda (aynı patlama yarıçapı) tek işlemin yerini alacaktır.
 
-**Tek replika** için Kubernetes parçacığı (Recreate gereklidir; tek bir SQLite dosyasına karşı `replicas` değerini artırmayın):
+Hazır bildirimler ve Helm grafiği `deploy/kubernetes/` ve `deploy/helm/omniroute/` yayında — [Kubernetes dağıtım kılavuzuna](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) bakın.
+
+Kubernetes snippet'i** tek kopya** (Yeniden oluşturma gereklidir; `replicas` bir SQLite dosyasına karşı yükseltmeyin):
 
 ```yaml
 spec:
@@ -701,9 +703,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` beklemesi, SIGTERM'den önce kube'un Service endpoint'lerini kaldırmasına olanak tanır; böylece **yeni** trafik kapanmakta olan sürece ulaşmaz. Devam eden `/v1/responses` SSE istekleri, ağır kabul lease'leri (#11015) aracılığıyla `SHUTDOWN_TIMEOUT_MS` süresine kadar (varsayılan 30 sn.) tamamlanır. Yine de sürece ulaşan yeni istekler `503` + `Retry-After: 5` alır. Yeni örnek Ready olana kadar Recreate stratejisinin neden olduğu endpoint'siz aralık, tam bir hizmet kesintisi olmaya devam eder — bu, SQLite topolojisinin sonucudur; hatalı bir probe yapılandırması değildir.
+`preStop` uyku, kube'nin SIGTERM önce Hizmet uç noktalarını bırakmasına izin verir, böylece** yeni** trafik ölme sürecine çarpmayı bırakır. Uçuş sırasındaki `/v1/responses` SSE ağır giriş kiralamaları (#11015) aracılığıyla `SHUTDOWN_TIMEOUT_MS` (varsayılan 30 saniye) kadar boşaltılır. Hala sürece ulaşan yeni istekler `503` + `Retry-After: 5` alır. Değiştirme Hazır olana kadar boş uç nokta boşluğunu yeniden oluştur, ciddi bir kesinti olmaya devam eder; bu, bir prob yanlış yapılandırması değil, SQLite topolojisidir.
 
-Harici Postgres / çok yazıcılı HA, belgelenmiş standart bir yol **değildir**. HA'ya ihtiyacınız varsa tek bir replica kullanın veya projenin ayrı olarak test edip belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışmaları [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) kapsamında yürütülmektedir. Bu özellik yayımlanana kadar **büyük** `/v1/responses` kapasitesini artırmanın desteklenen tek yolu, tek bir volume üzerinde `replicas > 1` kullanmak değil, N bağımsız süreç çalıştırmaktır (sonraki bölüm).
+Harici Postgres / çoklu yazarlı HA** Olumsuz** belgelenmiş bir stok yolu. HA ihtiyacınız varsa tek bir kopya tutun veya projenin ayrı olarak test ettiği ve belgelediği bir topolojiyi çalıştırın. Postgres/MySQL çalışması [#8075'te](https://github.com/diegosouzapw/OmniRoute/issues/8075) yaşıyor. O gemiye kadar çoğalmanın desteklenen tek yolu** büyük** `/v1/responses` kapasitesi, tek bir birimdeki `replicas > 1` değil, N bağımsız süreçtir (sonraki bölüm).
 
 ## Yatay ölçeklendirme: N bağımsız süreç
 

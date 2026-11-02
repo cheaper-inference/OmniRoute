@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — නොමිලේ AI ද්වාරය
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — කිසිදා කේතනය නවත්වන්න එපා. සෑම AI මෙවලමක්ම → සපයන්නන් 376ක් — නොමිලේ 150+ක් — එක් අන්ත ලක්ෂ්යයක් හරහා. Claude Code, Codex, Cursor, Cline, Copilot සහ Antigravity, ස්වයංක්රීය විකල්ප මාරුව සමඟ නොමිලේ Claude / GPT / Gemini වෙත. RTK + Caveman ස්ථරගත සම්පීඩනය ටෝකනවලින් 15–95%ක් (සාමාන්යයෙන් ~89%ක්) ඉතිරි කරයි — කිසිදා සීමාවලට ළඟා නොවන්න. AI සපයන්නන් 376ක් · නොමිලේ ස්ථර 150+ක් · මසකට නොමිලේ ටෝකන ~1.62Bක් · මාර්ගගත කිරීමේ උපායමාර්ග 20ක් · ආරම්භ කිරීමට $0යි."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — කිසිදා කේතනය නවත්වන්න එපා. සෑම AI මෙවලමක්ම → සපයන්නන් 380ක් — නොමිලේ 150+ක් — එක් අන්ත ලක්ෂ්යයක් හරහා. Claude Code, Codex, Cursor, Cline, Copilot සහ Antigravity, ස්වයංක්රීය විකල්ප මාරුව සමඟ නොමිලේ Claude / GPT / Gemini වෙත. RTK + Caveman ස්ථරගත සම්පීඩනය ටෝකනවලින් 15–95%ක් (සාමාන්යයෙන් ~89%ක්) ඉතිරි කරයි — කිසිදා සීමාවලට ළඟා නොවන්න. AI සපයන්නන් 380ක් · නොමිලේ ස්ථර 150+ක් · මසකට නොමිලේ ටෝකන ~1.62Bක් · මාර්ගගත කිරීමේ උපායමාර්ග 20ක් · ආරම්භ කිරීමට $0යි."/>
 
 </div>
 
@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway එක දිගටම වර්ධනය වේ
+## 📈 ද්වාරය වර්ධනය වෙමින් පවතී
 
 <div align="center">
 
-|                             |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 සැපයුම්කරුවන්            |            352             |   **358**   |          376          |
-| 🧠 අද්විතීය සංවාද ආකෘති IDs |            1320            |  **1374**   |         1475          |
-| 🖼️ මාදිලි පාලම              | 🆕 දෘශ්ය + ශ්රව්ය + වීඩියෝ |      ✓      |           ✓           |
-| 📡 Radar නොමිලේ නාමාවලිය    |   🆕 ස්වේච්ඡා-ඇතුළත්වීම    |      ✓      |           ✓           |
-| ⚖️ Quota-දැනුම්වත් කාලසටහන  |       🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Quota දුරස්ථ මිනුම්      |          🆕 සජීවී          |      ✓      |           ✓           |
-| 🧰 Headless මාදිලිය         |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail යටිතල් ව්යුහය   |             —              |      —      |   🆕 නිකුතු නාලිකා    |
-| 🔎 ආකෘති සොයාගැනීමේ API     |             —              |      —      | 🆕 `/v1/models/query` |
+|                                |            v3.8.50            | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------ | :---------------------------: | :---------: | :-------------------: |
+| 🌐 සපයන්නන්                    |              352              |   **358**   |          380          |
+| 🧠 අද්විතීය කතාබස් ආකෘතිය IDs  |             1320              |  **1374**   |         1475          |
+| 🖼️ මොඩලිටි පාලම                | 🆕 vision + ශ්‍රව්‍ය + වීඩියෝ |      ✓      |           ✓           |
+| 📡 රේඩාර් නොමිලේ නාමාවලිය      |           🆕 තේරීම            |      ✓      |           ✓           |
+| ⚖️ කෝටා-දැනුවත් උපලේඛනගත කිරීම |       🆕 කෝටාව-බෙදාගන්න       |      ✓      |           ✓           |
+| 📊 කෝටා ටෙලිමිතිය              |           🆕 සජීවී            |      ✓      |           ✓           |
+| 🧰 Headless මාදිලිය            |               —               |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS rail infra              |               —               |      —      | 🆕 මුදා හැරීමේ නාලිකා |
+| 🔎 ආදර්ශ සොයාගැනීම API         |               —               |      —      | 🆕 `/v1/models/query` |
 
-**→ [මාර්ග සිතියම](ROADMAP.md) — `v3.9.0 LTS` දෙසට rail එකේ ගමන් කරමින්**
+**→ [මාර්ග සිතියම](ROADMAP.md) - `v3.9.0 LTS` වෙත රේල් පීලි පැදීම**
 
 </div>
 
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ විශේෂාංග</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 සංයෝජන</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 සැපයුම්කරුවන්</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 සැපයුම්කරුවන්</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI සහ MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ සපයන්නන් 376ක්. වෙනත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබෙන අතරතුර ස්වයංක්රීය fallback රවුටිං දිගටම කරගෙන යයි. කුළුණු හයක්: සපයන්නන් 376 හරහා ඔරොත්තු දෙන fallback · සුදුසුකම් ලත් වැඩ ප්රමාණවලදී token ඉතිරිකිරීම් 95% දක්වා · නොමිලේ මට්ටම් 150+ සහ නිරන්තර/keyless සදාකාලික නොමිලේ සපයන්නන් 52ක් සමඟ $0 ට ආරම්භ කරන්න · එක් config එකක් හරහා CLI/agent ඒකාබද්ධ කිරීම් 37ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API අනුකූලතාව · circuit breakers, TLS stealth, MCP මෙවලම් 110, A2A, memory, guardrails, evals සහ නිරීක්ෂණය කරන test ගොනු 7,800+ හරහා ස්ථිර test ප්රකාශන 56,000+ ඇතුළු නිෂ්පාදන පාලන."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="පොරොන්දුව — එක් endpoint එකක් සහ සපයන්නන් 380ක්. වෙනත් සෞඛ්ය සම්පන්න ඉලක්කයක් තිබෙන අතරතුර ස්වයංක්රීය fallback රවුටිං දිගටම කරගෙන යයි. කුළුණු හයක්: සපයන්නන් 380 හරහා ඔරොත්තු දෙන fallback · සුදුසුකම් ලත් වැඩ ප්රමාණවලදී token ඉතිරිකිරීම් 95% දක්වා · නොමිලේ මට්ටම් 150+ සහ නිරන්තර/keyless සදාකාලික නොමිලේ සපයන්නන් 52ක් සමඟ $0 ට ආරම්භ කරන්න · එක් config එකක් හරහා CLI/agent ඒකාබද්ධ කිරීම් 37ක් · /v1 හි OpenAI, Claude, Gemini සහ Responses API අනුකූලතාව · circuit breakers, TLS stealth, MCP මෙවලම් 110, A2A, memory, guardrails, evals සහ නිරීක්ෂණය කරන test ගොනු 7,800+ හරහා ස්ථිර test ප්රකාශන 56,000+ ඇතුළු නිෂ්පාදන පාලන."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ combo එකක් සෑදීමට අවශ්ය නැත. ඔබේ ම�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute සුවිශේෂී කරන දෑ — හැකියාවන් 13ක් හරහා 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ කළ, නිශ්චිත දිනයකට අදාළ විශේෂාංග සැසඳීමකි. OmniRoute: සැපයුම්කරුවන් 376ක්, අන්තර්ගත නිදහස් මට්ටම් 150කට වැඩි ප්රමාණයක්, මාර්ගගත කිරීමේ උපායමාර්ග 20ක්, එන්ජින් 12ක ටෝකන් සම්පීඩනය, මෙවලම් 110ක් සහිත අන්තර්ගත MCP සේවාදායකයක්, A2A නියෝජිත ප්රොටෝකෝලය, ස්ථිර මතකය, ආරක්ෂක සීමා, ක්ලවුඩ් නියෝජිතයන්, TLS ඇඟිලි සලකුණු සැඟවීම, Desktop/Termux/PWA සහ i18n UI පෙදෙස් 67ක්. OmniRoute MIT බලපත්රලාභී වන අතර ස්වයං-සත්කාරක කළ හැකිය. තරඟකරුවන්ගේ හැකියාවන් සහ සංඛ්යා වෙනස් විය හැකිය; සබැඳි ක්රමවේදය බලන්න."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute සුවිශේෂී කරන දෑ — හැකියාවන් 13ක් හරහා 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ කළ, නිශ්චිත දිනයකට අදාළ විශේෂාංග සැසඳීමකි. OmniRoute: සැපයුම්කරුවන් 380ක්, අන්තර්ගත නිදහස් මට්ටම් 150කට වැඩි ප්රමාණයක්, මාර්ගගත කිරීමේ උපායමාර්ග 20ක්, එන්ජින් 12ක ටෝකන් සම්පීඩනය, මෙවලම් 110ක් සහිත අන්තර්ගත MCP සේවාදායකයක්, A2A නියෝජිත ප්රොටෝකෝලය, ස්ථිර මතකය, ආරක්ෂක සීමා, ක්ලවුඩ් නියෝජිතයන්, TLS ඇඟිලි සලකුණු සැඟවීම, Desktop/Termux/PWA සහ i18n UI පෙදෙස් 67ක්. OmniRoute MIT බලපත්රලාභී වන අතර ස්වයං-සත්කාරක කළ හැකිය. තරඟකරුවන්ගේ හැකියාවන් සහ සංඛ්යා වෙනස් විය හැකිය; සබැඳි ක්රමවේදය බලන්න."/>
 
 <sub>📊 සම්පූර්ණ ක්රමවේදය සහ 9router, OpenRouter, CLIProxyAPI සහ LiteLLM සමඟ එක් එක් විශේෂාංගය පිළිබඳ සවිස්තර සැසඳීම → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar භාවිතය තෝරාගත හැකි අතර එය GET �
 - **🖼️ නව endpoints** — `/v1/ocr` (Mistral OCR) සහ `/v1/audio/translations` (Whisper-විලාසයේ) මාධ්ය මතුපිට සම්පූර්ණ කරයි. → [API යොමුව](docs/reference/API_REFERENCE.md)
 - **🎨 රූප / වීඩියෝ / ශ්රව්ය උත්පාදනය** — මාධ්ය සඳහා එක් API එකක්: xAI Grok Imagine & Novita AI වීඩියෝ, ComfyUI, Magnific, Adobe Firefly, Segmind, සහ ElevenLabs වැනි කථන providers. → [API යොමුව](docs/reference/API_REFERENCE.md)
 - **🌍 යෙදවීම සහ මෙහෙයුම්** — reverse-proxy `basePath`, browser-භාෂා ස්වයං-හඳුනාගැනීම, per-key උපාංග නිරීක්ෂණය, root-less MITM trust, zh-TW දේශීයකරණය. → [පරිසරය](docs/reference/ENVIRONMENT.md)
-- **🤝 තවත් providers සහ agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login සමඟ Grok Build (xAI), Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi නිල හවුල්කාරිත්වය (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… සහ යාවත්කාලීන කළ **376-provider catalog** එකක්. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 තවත් providers සහ agents** — cloud agents (Codex Cloud, Cursor, Devin, Jules), browser + OAuth login සමඟ Grok Build (xAI), Ollama first-class card, Claude Opus 5 & Sonnet 5, Kimi නිල හවුල්කාරිත්වය (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… සහ යාවත්කාලීන කළ **380-provider catalog** එකක්. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 යොමු කිරීමේ විනිවිදභාවය** — සෑම ප්රතිචාරයක්ම එය සේවය කළ strategy/provider/latency නම් කරන `X-OmniRoute-Decision` header එකක් රැගෙන යයි, නව `cache-optimized` combo strategy එකක් + Auto-Combo `cacheAffinity` සාධකය නැවත නැවත එන ඉල්ලීම් cached prefix එක තබා ඇති connection එක වෙත යොමු කරයි, සහ read-only `/v1/auto-combo/{channel}/candidates` endpoint එකක් `auto/*` channel එකක සජීවී අපේක්ෂක සංචය හෙළි කරයි. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ දේශීය කාර්යසාධනය සහ යටිතල්හිතුම්** — එක්-ක්ලික් දේශීය Redis, Cloudflare Workers / Deno Deploy relay deploy කරන්නන්, අධීක්ෂණය කරන ලද කාවැද්දූ සේවාවන් ලෙස Bifrost සහ Mux. → [කාවැද්දූ සේවාවන්](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 පෙට්ටියේ තවත් දේ** — plugin රාමුව + marketplace, Omni/Agent/GitHub skills රාමු, Obsidian vault ඒකාබද්ධ කිරීම (MCP මෙවලම් 22ක්), OpenAI-අනුකූල Batch & Files APIs, අර්ථාධාරිත ප්රතිචාර cache, leaderboards සමඟ gamification, ACP agent සොයාගැනීම (බිල්ට්-ඉන් agents 15ක්), BigQuery වෙත උපලේඛිත log නිර්යාතය, `auto/chaos` සමාන්තර බහු-ආකෘති fan-out, Telegram bot පාලමක්, යෙදුම්-ඇතුළත අනුවාද කළමනාකරු සහ LMArena-ELO නොමිලේ-සපයන්නන්ගේ ශ්රේණිගත කිරීම්. → [ලියකියවිලි](docs/README.md)
@@ -612,59 +612,58 @@ Radar භාවිතය තෝරාගත හැකි අතර එය GET �
 
 <div align="center">
 
-## 🤖 අනුකූල CLI සහ කේතකරණ නියෝජිතයන්
+## 🤖 අනුකූල CLIs සහ කේතීකරණ නියෝජිතයන්
 
-> එක් වින්යාසයක් — `http://localhost:20128/v1` — සමඟ **සෑම** AI IDE හෝ CLI එකක්ම නොමිලේ සහ අඩු වියදම් ආකෘති මත ක්රියා කරයි.
+> එක් වින්යාසයක් - `http://localhost:20128/v1` - සහ** සෑම** AI IDE හෝ CLI නොමිලේ සහ අඩු වියදම් මාදිලි මත ධාවනය වේ.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude කේතය </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> කිලෝ කේතය </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> සත්වෝද්‍යාන කේතය </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> දිගටම </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> කර්මාන්තශාලා Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Smelt </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok ගොඩනඟන්න </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes නියෝජිත </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> ගූස්</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> විවෘත පරිවර්තකය </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ මේවා සමඟද ක්රියා කරයි</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>ඕනෑම OpenAI-අනුකූල මෙවලමක්</b>
+<b>＋ </b> · නියෝජිත තට්ටුව · Kiro · විධාන කේතය · Antigravity · Windsurf · AMP · <b> ඕනෑම OpenAI-අනුකූල මෙවලමක්</b> සමඟ ද ක්‍රියා කරයි
 </div>
 
-<sub>📖 මෙවලම් 37 සඳහාම මෙවලමකට-විශේෂිත සැකසුම (CLI Code 27ක් + CLI Agents 10ක්) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ප්ලගිනය → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 සියලුම මෙවලම් 38 සඳහා එක්-මෙවලම් සැකසුම (27 CLI කේතයේ + 11 CLI නියෝජිතයන්) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode ප්ලගිනය → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**එක් විධානයකින් OmniRoute හරහා සහාය දක්වන ඕනෑම CLI එකක් දියත් කරන්න** — වින්යාස ගොනු කිසිවක් ලියනු නොලැබේ,
-එක් එක් ක්රියාවලියට අක්තපත්ර ඇතුළු කෙරෙන අතර, Qwen/Gemini සඳහා තාවකාලික හුදකලා home එකක් ලැබේ:
+**එක් විධානයකින් OmniRoute හරහා ඕනෑම සහය දක්වන CLI දියත් කරන්න** — වින්‍යාස ගොනු ලියා නැත, ක්‍රියාවලියකට අක්තපත්‍ර එන්නත් කර ඇත, Qwen/Gemini ඉවතලන හුදකලා නිවසක් ලබා ගනී:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,23 +674,21 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# නැතහොත් අන්තර්ක්රියාකාරීව සැපයුම්කරු+ආකෘතිය තෝරා මෙවලමෙහිම වින්යාසය ලියන්න:
-omniroute configure codex          # මේවාද ඇත: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-සෑම විධානයක්ම සක්රිය දුරස්ථ සන්දර්භයට (`omniroute connect <host>`) අනුකූල වන අතර, `--dry-run`
-ක්රියාත්මක නොකර නිශ්චිත env/args පෙරදසුන් කරයි; `--api-key-env NAME` මඟින් රහස්
-ඔබේ shell ඉතිහාසයෙන් බැහැරව තබයි. → [CLI ඒකාබද්ධ කිරීම්](docs/guides/CLI-INTEGRATIONS.md)
+සෑම විධානයක්ම සක්‍රීය දුරස්ථ සන්දර්භයට ගරු කරයි (`omniroute connect <host>`), `--dry-run` ක්‍රියාත්මක නොකර නියම env/args පෙරදසුන් කරයි, සහ `--api-key-env NAME` ඔබේ කවච ඉතිහාසයෙන් රහස් තබා ගනී. → [CLI ඒකාබද්ධ කිරීම්](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 AI සපයන්නන් 376ක් — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153ක්
+## 🌐 AI සපයන්නන් 380ක් — නාමාවලියේ නොමිලේ ලෙස සලකුණු කළ 153ක්
 
 </div>
 
-> කැනොනිකල් කතාබස්, මාධ්ය, සෙවුම්, දේශීය, ක්ලවුඩ් නියෝජිත සහ පද්ධති එකතු පුරා **ලියාපදිංචි සපයන්නන් 376ක්** සිටින අතර, ඒවායින් **153ක් `hasFree: true` සොයාගැනීමේ පාරදත්ත දරයි**. කතාබස් ආකෘති රෙජිස්ට්රිය **සපයන්නන් 239ක් / එකිනෙකට වෙනස් සපයන්නා-ආකෘති යුගල 3,059ක් / අමු ආකෘති ID 1,475ක්** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියෙහි **එක් එක් ආකෘතිය සඳහා පේළි 471ක්**, **පුනරාවර්තන සංචිත 34ක්** සහ **පුනරාවර්තන/යතුරු රහිත සදාකාලික නොමිලේ සපයන්නන් 52ක්** ඇත. සැලසුම අනුව මේවා වෙනස් හරයන් වේ; අර්ථදැක්වීම් සහ සංචිත-අනුපිටපත් ඉවත් කළ ගණනය කිරීම් [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) තුළ ඇත.
+> කැනොනිකල් කතාබස්, මාධ්ය, සෙවුම්, දේශීය, ක්ලවුඩ් නියෝජිත සහ පද්ධති එකතු පුරා **ලියාපදිංචි සපයන්නන් 380ක්** සිටින අතර, ඒවායින් **153ක් `hasFree: true` සොයාගැනීමේ පාරදත්ත දරයි**. කතාබස් ආකෘති රෙජිස්ට්රිය **සපයන්නන් 239ක් / එකිනෙකට වෙනස් සපයන්නා-ආකෘති යුගල 3,059ක් / අමු ආකෘති ID 1,475ක්** ආවරණය කරයි; වෙනම නොමිලේ-අයවැය නාමාවලියෙහි **එක් එක් ආකෘතිය සඳහා පේළි 471ක්**, **පුනරාවර්තන සංචිත 34ක්** සහ **පුනරාවර්තන/යතුරු රහිත සදාකාලික නොමිලේ සපයන්නන් 52ක්** ඇත. සැලසුම අනුව මේවා වෙනස් හරයන් වේ; අර්ථදැක්වීම් සහ සංචිත-අනුපිටපත් ඉවත් කළ ගණනය කිරීම් [සපයන්නන් පිළිබඳ යොමුව](docs/reference/PROVIDER_REFERENCE.md) සහ [නොමිලේ මට්ටම්](docs/reference/FREE_TIERS.md) තුළ ඇත.
 
 <div align="center">
 
@@ -756,92 +753,80 @@ omniroute configure codex          # මේවාද ඇත: claude opencode qwe
 
 <div align="center">
 
-## 🖥️ OmniRoute ක්රියාත්මක වන්නේ කොතැනද — ඕනෑම තැනක
+## 🖥️ OmniRoute ධාවනය වන තැන - ඕනෑම තැනක
 
 </div>
 
-> එකම යෙදුම, ඔබේ යන්ත්රය, ඔබේ නීති. ගෝලීය npm ස්ථාපනයක සිට Termux හරහා **ඔබේ දුරකථනය** දක්වා.
+> එකම යෙදුම, ඔබේ යන්ත්‍රය, ඔබේ නීති. ගෝලීය npm ස්ථාපනයක සිට** ඔබගේ දුරකථනය** Termux හරහා.
 
 <table>
-  <tr><th align="left">වේදිකාව</th><th align="left">ස්ථාපනය</th><th align="left">විශේෂාංග</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (ගෝලීය)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">එක් විධානයක්, ඕනෑම මෙහෙයුම් පද්ධතියක්</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">බහු-ගෘහනිර්මාණ සහාය <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>ඩෙස්ක්ටොප් (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">ස්වදේශීය කවුළුව + පද්ධති තැටිය — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>මෙනු තීරුව (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">සේවාදායකය අධීක්ෂණය කර ස්වයංක්රීයව යාවත්කාලීන කරයි — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>ස්වදේශීය <code>arm64</code></td><td align="left">Raspberry Pi, ARM සේවාදායක, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left"><b>ඔබේ දුරකථනයේම</b> 24/7 ක්රියාත්මක වේ, root අවශ්ය නැත</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"මුල් තිරයට එක් කරන්න"</td><td align="left">පූර්ණ තිරය, නොබැඳි ක්රියාකාරිත්වය, බ්රවුසරයෙන් ස්ථාපනය කළ හැකිය</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode ප්ලගිනය</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">ස්වදේශීය OpenCode ඒකාබද්ධ කිරීම</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap><b>OmniCopilot</b> දිගුව ස්ථාපනය කරන්න</td><td align="left">ස්වදේශීය Copilot Chat තේරීම්කාරකය තුළ සෑම OmniRoute ආකෘතියක්ම — ස්ථාවර &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>මූලාශ්රයෙන්</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">වෙනස්කම් කරන්න, දායක වන්න</td></tr>
+  <tr><th align="left"> වේදිකාව </th><th align="left"> ස්ථාපනය කරන්න </th><th align="left"> ඉස්මතු කිරීම්</th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (ගෝලීය)</b></td><td align="left" nowrap><code> npm ස්ථාපනය -g omniroute </code></td><td align="left"> එක් විධානයක්, ඕනෑම OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (ගෝලීය)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> එකම රෙජිස්ට්‍රි ටාබෝල්, වේගවත්</td></tr> ස්ථාපනය කරයි
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> ඩෙස්ක්ටොප්</b>Electron)</b></td><td align="left" nowrap><code> npm ධාවනය ඉලෙක්ට්‍රෝනය </td> ගොඩනැගීම </code></td><td align="left"> ස්වදේශීය කවුළුව + </tr> තැටි — <b>Windows / macOS / Linux
+  <tr><td align="left" nowrap>🎩 <b> Menu </td> bar (OmniRouteTray)</b></td><td align="left" nowrap><code> brew ස්ථාපනය --cask zoispag/tap/omniroute-tray</code></td><td align="left"> අධීක්ෂණය &amp; ස්වයංක්‍රීයව සේවාදායකය යාවත්කාලීන කරයි</tr><b>macOS</b>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> ස්වදේශීය <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM සේවාදායකයන්, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg ස්ථාපනය nodejs && npx -y omniroute </code></td><td align="left"> ඔබේ දුරකථනයේ <b> ධාවනය </td></b>, 24/7, no </tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"මුල් තිරයට එක් කරන්න"</td><td align="left"> සම්පූර්ණ තිරය, නොබැඳි, බ්‍රව්සරය </td></tr> වෙතින් ස්ථාපනය කළ හැකිය
+  <tr><td align="left" nowrap>🧩 <b>OpenCode ප්ලගිනය </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> ස්වදේශීය OpenCode ඒකාබද්ධ කිරීම </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat </b></td><td align="left" nowrap> ස්ථාපනය <b>OmniCopilot zql </b> </td><td align="left"> ස්වදේශීය Copilot Chat picker හි ඇති සෑම OmniRoute </tr>— stable &amp; Insiders </td>
+  <tr><td align="left" nowrap>🛠️ <b> මූලාශ්‍රයෙන්</b></td><td align="left" nowrap><code> npm ස්ථාපනය කරන්න && npm ධාවනය කරන්න dev </code></td><td align="left"> එය මත හැක් කරන්න,</td></tr> දායක වන්න
 </table>
 
-<sub>📖 [Docker මාර්ගෝපදේශය](docs/guides/DOCKER_GUIDE.md) · [ඩෙස්ක්ටොප්](electron/README.md) · [මෙනු තීරු තැටිය](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker මාර්ගෝපදේශය](docs/guides/DOCKER_GUIDE.md) · [වැඩතලය](electron/README.md) · [මෙනු තීරු තැටිය](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 නව: VS Code හි ස්වදේශීය Copilot Chat තුළ OmniRoute
+### 🧩 නව: OmniRoute ඇතුළත VS කේතයේ ස්වදේශික Copilot කතාබස්
 
 </div>
 
-> නව පැති තීරුවක් නැත, නව සංවාද අතුරුමුහුණතක් නැත — OmniRoute සපයන සෑම ආකෘතියක්ම ඔබ දැනටමත් භාවිත කරන
-> **Copilot Chat ආකෘති තේරීම්කාරකය තුළම** දිස් වේ. VS Code 1.122 සිට, සපයන්නාගේ ආකෘති
-> GitHub පිවිසුමක් හෝ Copilot දායකත්වයක් නොමැතිව ක්රියා කරයි — නියෝජිත ප්රකාරය, මෙවලම් ඇමතීම සහ දෘශ්ය හැකියාවන්,
-> නොමිලේ.
+> නව පැති තීරුවක් නැත, නව කතාබස් UI නැත - සෑම මාදිලියක්ම OmniRoute සේවා සපයනු ලැබේ**Copilot Chat model picker ඔබ දැනටමත් භාවිතා කරයි** . VS කේතය 1.122 සිට, සපයන්නාගේ ආකෘති GitHub පුරනය වීමක් හෝ Copilot දායකත්වයක් නොමැතිව ක්‍රියා කරයි - නියෝජිත මාදිලිය, මෙවලම් ඇමතුම් සහ දැක්ම, නොමිලේ.
 
-**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** දිගුව ස්ථාපනය කර, එය
-ඔබේ OmniRoute සේවාදායකය වෙත යොමු කරන්න (පෙරනිමිය `localhost:20128`), ඉන්පසු Copilot Chat → ආකෘති තේරීම්කාරකය
-→ **ආකෘති කළමනාකරණය කරන්න…** → **OmniRoute** විවෘත කරන්න.
+ස්ථාපනය කරන්න** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** දිගුව, එය ඔබගේ OmniRoute සේවාදායකය වෙත යොමු කරන්න (පෙරනිමි `localhost:20128` වෙත ), ඉන්පසු Copilot Chat → මාදිලි පිකර් → විවෘත කරන්න** ආකෘති කළමනාකරණය කරන්න...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">ගබඩාව</th><th align="left">සබැඳිය</th><th align="left">ක්රියා කරන්නේ</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">ස්ථාපනය කරන්න →</a></td><td align="left">VS Code — ස්ථාවර &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">ස්ථාපනය කරන්න →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"></th></tr> සමඟ ක්‍රියා කරයි
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> ස්ථාපනය කරන්න →</a ></td >< td පෙළගස්වන්න ="වමට">VS කේතය —</tr>&amp; Insiders </td>
+  <tr><td align="left" nowrap>🔓 <b> විවෘත VSX රෙජිස්ට්‍රිය </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> ස්ථාපනය කරන්න →</a ></ Windsurf><>= වමට"CursorAntigravity</tr></td>Kiro
 </table>
 
-සංස්කාරකය තුළින්: **Extensions** දසුන විවෘත කර, **"OmniRoute"** සොයා, **ස්ථාපනය කරන්න** ක්ලික් කරන්න
-— ගබඩා දෙකෙහිම එකම ආකාරයෙන් ක්රියා කරයි. මූලාශ්රය, ගැටලු සහ ප්රකාශන ක්රියාපටිපාටිය
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot) හි ඇත.
+සංස්කාරකය ඇතුළත සිට: විවෘත කරන්න** දිගු** බලන්න, සොයන්න** "OmniRoute"** , ක්ලික් කරන්න** ස්ථාපනය කරන්න** - වෙළඳසැල් දෙකෙහිම එකම ආකාරයකින් ක්රියා කරයි. මූලාශ්‍රය, ගැටළු සහ ප්‍රකාශන ධාවන පොත සජීවීව [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [VS Code Copilot Chat මාර්ගෝපදේශය](docs/guides/VSCODE-COPILOT.md) — සැකසුම, තේරීම්කාරකය පෙන්වන දෑ, ටැබයක් තුළ උපකරණ පුවරුව, දෝෂ නිරාකරණය</sub>
+<sub>📖 [VS Code Copilot Chat guide](docs/guides/VSCODE-COPILOT.md) — පිහිටුවීම, පිකර් පෙන්වන දේ, dashboard-in-a-tab, දෝශ නිරාකරණ </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 නව: OmniRouteTray — මෙනු තීරුවේ පවතින ඔබේ ද්වාරය
+### 🎩 නව: OmniRouteTray — ඔබේ දොරටුව, මෙනු තීරුවේ ජීවත් වේ
 
 </div>
 
-> `omniroute serve` සැමවිටම ක්රියාත්මක වන විට වඩාත් හොඳින් ක්රියා කරයි. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> එය macOS සඳහා එක් වරක් සකසා අමතක කළ හැකි මෙනු තීරු යෙදුමක් බවට පත් කරයි: එය සේවාදායකය ආරම්භ කර, නැවත පණගැන්වීම්
-> අතරතුරත් එය ක්රියාත්මකව තබා, එය එම ස්ථානයේම යාවත්කාලීන කර, ඔබේ සජීවී ටෝකන් අයවැය එක් ක්ලික් කිරීමක දුරින් තබයි — **විවෘතව
-> තැබිය යුතු ටර්මිනල් කවුළුවක් නැත, රැකබලා ගත යුතු `npm install -g omniroute` ස්ථාපනයක් නැත.**
+> `omniroute serve` එය සැමවිටම ක්‍රියාත්මක වන විට වඩාත් සතුටු වේ.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** එය macOS සඳහා set-and-Forget menu-bar යෙදුමක් බවට පත් කරයි: එය සේවාදායකය ආරම්භ කරයි, නැවත පණගැන්වීම් හරහා එය සජීවීව තබා ගනී, එය යාවත්කාලීන කරයි, සහ ඔබේ සජීවී ටෝකන් අයවැය එක ක්ලික් එකකින් තබන්න -** ටර්මිනල් කවුළුවක් විවෘතව නැත, බබා බලාගැනීමට `npm install -g omniroute` නැත.**
 
-[Tauri v2](https://v2.tauri.app/) සමඟ නිර්මාණය කර ඇති මෙය (වටකිරීමේ දෝෂයක තරම් කුඩා Rust හරයක් සහිතව),
-තමන්ගේම අත්සන් කළ Node 24 ධාවන පරිසරයක් සමඟ නිකුත් වන අතර යෙදුමට අයත් OmniRoute ස්ථාපනයක් කළමනාකරණය කරයි; එබැවින් එය කිසිවිටෙකත් ඔබේ
-ගෝලීය `node`/`bun` සමඟ ගැටෙන්නේ නැත. එය **ඔබේ පවතින `~/.omniroute/` වින්යාසය සහ දත්ත සමුදාය බෙදාගනී** — ඒ නිසා එය
-ඔබ දැනටමත් ධාවනය කරන එකම OmniRoute ය, වෙනසකට ඇත්තේ තොප්පියක් පැළඳ සිටීම පමණි. 🎩
+[Tauri v2](https://v2.tauri.app/) (වටකුරු දෝෂයක ප්‍රමාණයේ රස්ට් හරයක්) සමඟින් ගොඩනගා ඇති එය එහිම අත්සන් කරන ලද Node 24 ධාවන කාලය නැව්ගත කරන අතර යෙදුම සතු OmniRoute ස්ථාපනයක් කළමනාකරණය කරයි, එබැවින් එය කිසි විටෙකත් ඔබේ ගෝලීය `node`/`bun` සමඟ සටන් නොකරයි. එය** ඔබගේ පවතින `~/.omniroute/` වින්‍යාසය සහ දත්ත සමුදාය බෙදා ගනී** — එබැවින් ඔබ දැනටමත් තොප්පියක් දමාගෙන ධාවනය කර ඇති OmniRoute එයම වේ. 🎩
 
 <table>
-  <tr><th align="left">එය කරන දේ</th><th align="left">කරන ආකාරය</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>සේවාදායකය අධීක්ෂණය කරයි</b></td><td align="left"><code>omniroute serve</code> ආරම්භ කරයි, එය අනුපිටපත් කිරීම වෙනුවට දැනටමත් ක්රියාත්මක වන අවස්ථාවක් භාරගනී</td></tr>
-  <tr><td align="left" nowrap>📊 <b>සජීවී භාවිතය එක් බැල්මකින්</b></td><td align="left">සපයන්නාගේ කෝටා තීරු, යළි සැකසීමේ ගණන් බැසීම් සහිත Claude සැසි/සතිපතා සීමා, දින 30ක පිරිවැය විශ්ලේෂණය</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>එම ස්ථානයේම ස්වයංක්රීයව යාවත්කාලීන කරයි</b></td><td align="left">අදියරගත ස්ථාපනය, පරමාණුක හුවමාරුව, අසාර්ථක වූ විට ආපසු පෙරළීම — සැමවිටම නවතම නිකුතුවේ</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>පිවිසීමේදී ආරම්භ කරන්න</b></td><td align="left">පිවිසීමේදී විකල්ප ආරම්භ කිරීම; තැටියේ පමණක්, dock නිරූපකයක් නැත</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>පරීක්ෂාව &amp; ලොග්</b></td><td align="left">එක් ක්ලික් කිරීමකින් රෝග විනිශ්චය සහ සේවාදායක ලොග් වෙත ප්රවේශය</td></tr>
+  <tr><th align="left"> එය කරන්නේ කුමක්ද </th><th align="left"> කෙසේද </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> සේවාදායකය අධීක්‍ෂණය කරයි</b></td><td align="left"> Spawns <code> omniroute serve </code>, එය </td></tr> අනුපිටපත් කිරීම වෙනුවට දැනටමත් ධාවනය වන අවස්ථාවක් අනුගමනය කරයි
+  <tr><td align="left" nowrap>📊 <b> බැලූ බැල්මට සජීවී භාවිතය </b></td><td align="left"> සපයන්නාගේ කෝටා තීරු, යළි පිහිටුවීමේ ගණන් කිරීම් සමඟ Claude session/weekly සීමාවන්, දින 30 පිරිවැය බිඳ වැටීම </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> ස්ථානයේ ස්වයං-යාවත්කාලීන කිරීම්</b></td><td align="left"> අදියර ස්ථාපනය, පරමාණු හුවමාරුව, අසාර්ථක වූ විට ආපසු හැරීම - සෑම විටම නවතම නිකුතුවේ</td></tr>
+  <tr><td align="left" nowrap>🚀 <b> පුරනය වීමේදී ආරම්භ කරන්න </b></td><td align="left"> ලොගින් වීමේදී විකල්ප දියත් කිරීම; tray-only, no dock icon </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; logs </b></td><td align="left"> එක්-ක්ලික් රෝග විනිශ්චය සහ සේවාදායක ලොග් ප්‍රවේශය </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>බාගත කිරීමක් කැමතිද? නවතම <code>.dmg</code> ගොනුව
-<a href="https://github.com/zoispag/omniroute-tray/releases">නිකුතු</a> වෙතින් ලබාගන්න. මූලාශ්ර කේතය, ගැටලු සහ ගොඩනැගීමේ
-ලේඛන <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a> හි ඇත.
-<br/>💛 <a href="https://github.com/zoispag">@zoispag</a> විසින් නිර්මාණය කළ ප්රජා ව්යාපෘතියකි — මෙය නිල OmniRoute නිකුතුවක් නොවේ.</sub>
+<sub> බාගත කිරීමට කැමතිද? නවතම <code>.dmg </code> ලබා ගන්න
+<a href="https://github.com/zoispag/omniroute-tray/releases"></a> නිකුත් කරයි. මූලාශ්රය, ගැටළු සහ ගොඩනැගීම
+docs <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a> හි ජීවත් වේ.
+<br/>💛 <a href="https://github.com/zoispag">@zoispag </a> විසින් ප්‍රජා ව්‍යාපෘතියක් — නිල OmniRoute නිකුතුවක් නොවේ.</sub>
 
 <br/>
 
@@ -1304,7 +1289,7 @@ Dashboard රහිත, headless runtime එකක් සඳහා Docker `base`
   <tr><td nowrap><b>ධාවන කාලය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <code>src/</code> සහ <code>open-sse/</code> හරහා <b>100% TypeScript</b> (v2.0 සිට මූලික කේතයේ <code>any</code> ශූන්යයි)</td></tr>
   <tr><td nowrap><b>රාමුව</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — වසම් මොඩියුල 147, සංක්රමණ 211</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — වසම් මොඩියුල 147, සංක්රමණ 219</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 සම්පූර්ණ-පෙළ සෙවීම + int8-ප්රමාණිකෘත දෛශික කාවැද්දීම්, වර්ගීකෘත ක්ෂය වීම</td></tr>
   <tr><td nowrap><b>යෝජනා ක්රම</b></td><td>Zod 4 — MCP මෙවලම් I/O වලංගු කිරීම + API ගිවිසුම්</td></tr>
   <tr><td nowrap><b>ප්රොටොකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
