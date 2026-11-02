@@ -131,8 +131,8 @@ function transformTypes(types) {
   return withNormalizedLineEndings(types, (text) => {
     let transformed = replaceUnique(
       text,
-      'import { t as MacroPluginOption } from "../options-aB6xV-d7.js";\nimport { NextConfig } from "next";',
-      'import { t as MacroPluginOption } from "../options-aB6xV-d7.js";\nimport type { ChokidarOptions } from "chokidar";\nimport { NextConfig } from "next";',
+      'import { NextConfig } from "next";',
+      'import type { ChokidarOptions } from "chokidar";\nimport { NextConfig } from "next";',
       "CreateMDXOptions imports"
     );
     transformed = replaceUnique(
