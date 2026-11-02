@@ -144,12 +144,27 @@ lastUpdated: 2026-10-27
 ## 5. Updating the kit
 
 `npm run check:ui-kit-upstream` compares the version pinned in `packages/ui-kit/UPSTREAM.md` with the
-newest `v*` tag of the upstream repo and prints the sync command when a release is out. The weekly
-`UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) runs the same check and
-keeps one tracking issue open while the pin is behind; the upstream repo is private, so the workflow needs
-a read-only token in the `UI_KIT_READ_TOKEN` secret. When it can't read upstream (no token, a token that
-stopped working, or GitHub unreachable) the run stays green but writes a warning and keeps one separate
-issue open, which closes itself once a later run can read upstream again.
+newest `v*` tag of the upstream repo and prints the sync command when a release is out.
+
+The daily `UI Kit upstream watch` workflow (`.github/workflows/ui-kit-upstream-watch.yml`) runs the same
+check. While the pin is behind, `scripts/ci/ui-kit-sync-pr.sh` keeps one sync PR open against the highest
+`release/vX.Y.Z` branch, on the rolling branch `chore/ui-kit-sync-latest`. It never merges: every kit
+release still needs a visual check on the local VPS. The branch is rebuilt when a newer release is out and
+left alone otherwise. An open PR with commits pushed by hand isn't overwritten, and a PR for a version
+that a maintainer closed unmerged stays closed until a newer release.
+
+When no PR can be opened (the target release is frozen, the PR has commits pushed by hand, the PR was
+closed, or no PR token is set) the workflow keeps one tracking issue open that says why.
+
+The workflow uses two secrets:
+
+- `secrets.UI_KIT_READ_TOKEN`: a read-only token for the private upstream repo. When the workflow can't
+  read upstream (no token, a token that stopped working, or GitHub unreachable) the run stays green but
+  writes a warning and keeps one separate issue open, which closes itself once a later run can read
+  upstream again.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: a fine-grained token on this repository with Contents and Pull requests
+  write access. The default `GITHUB_TOKEN` can't create PRs here, and a PR it opened wouldn't trigger CI.
+  Without this token the workflow only pushes the branch.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copies the upstream `src/` at that commit (`latest`
 = the newest `v*` tag) into `packages/ui-kit/src`, applies the single allowed transformation (it drops
