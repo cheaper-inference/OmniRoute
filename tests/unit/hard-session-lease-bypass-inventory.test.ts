@@ -147,6 +147,9 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // just used so clearAccountError() can wipe a stale lastError/testStatus — a
     // post-dispatch state read, not connection selection, so it stays class C.
     "open-sse/handlers/search/searchProxy.ts": 1,
+    // The deep research tool reads one connection by id to take its cookie and
+    // check its cooldown. The caller names the connection; this is not selection.
+    "open-sse/mcp-server/tools/perplexityResearch.ts": 1,
     // v3.8.50 back-merge additions (f95b03d7): combo routing infra and the
     // volcengine-plan binding/auto-sync services query connections the same
     // way as their classified siblings.
@@ -160,6 +163,8 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // getCachedProviderConnections() read cache (its getProviderConnections site is the one
     // already inventoried under src/lib/db/readCache.ts). Read-only state lookup, no dispatch, 1->0.
     "open-sse/services/tokenRefresh.ts": 1,
+    // Read-only adoption for the already-selected connection; it never selects an account.
+    "open-sse/services/tokenRefresh/passiveCodex.ts": 1,
     // #15138: per-account test message config/send — reads the row for its stored test model
     // and active flag; dispatch goes through runSingleModelTest, which refuses managed-lease
     // connections itself (class C).
@@ -224,6 +229,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/instrumentation-node.ts": 1,
     "src/lib/a2a/skills/providerDiscovery.ts": 1,
     "src/lib/chaos/chaosExecutor.ts": 1,
+    // #17999: CLIProxyAPI management compat (/v0/management/api-call) re-resolves the
+    // connection named by auth_index and sends the allowlisted usage request with its
+    // stored OAuth token, so it is a direct dispatch site (class B) and carries the
+    // exclusive-lease auxiliary fence (see auxiliaryIsolationSources below).
+    "src/lib/cliproxyCompat/managementApi.ts": 1,
     "src/lib/cloudAgent/api.ts": 1,
     "src/lib/cloudSync.ts": 1,
     "src/lib/combos/builderOptions.ts": 1,
@@ -240,6 +250,10 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     // #15485: the priority-0 move-to-top edit re-reads the row by id after reorderConnections (3 -> 4).
     "src/lib/db/providers.ts": 4,
     "src/lib/db/readCache.ts": 2,
+    // #16472: guarded session-affinity eviction resolves the failed connection's shared
+    // account identity before a compare-and-delete on the optional Redis store. Read-only
+    // identity lookup; it never selects a connection or dispatches (class C).
+    "src/lib/db/sessionAffinity/requestEviction.ts": 1,
     // Local embedding providers: reads the active rows only to build the allowlist of
     // connections whose default model does not conflict with the requested one; the
     // connection itself is still selected by getProviderCredentials (class C).
@@ -312,6 +326,11 @@ const EXPECTED: Record<InventoryKind, Record<string, number>> = {
     "src/lib/warmupScheduler.ts": 1,
     "src/shared/services/codexCatalogRevalidation.ts": 2,
     "src/shared/services/modelSyncScheduler.ts": 1,
+    // #15234: Muse session ownership lists the active muse-code OAuth connections only to
+    // pick/validate the session's owner account. It selects nothing for dispatch — every
+    // attempt still resolves credentials through the class-A path in chat.ts, pinned to that
+    // owner's connection id — so this is a state read (class C).
+    "src/sse/handlers/chat/museOwnership.ts": 1,
     "src/sse/handlers/chatHelpers.ts": 1,
     "src/sse/services/auth.ts": 4,
   },
@@ -350,6 +369,7 @@ const CLASSIFICATION: Record<InventoryKind, Record<string, BypassClass>> = {
         "open-sse/services/combo/executeTargetGates.ts",
         "open-sse/services/tokenRefresh.ts",
         "src/app/api/translator/send/route.ts",
+        "src/lib/cliproxyCompat/managementApi.ts",
         "src/lib/credentialHealth/scheduler.ts",
         "src/lib/modelValidation/runner.ts",
         "src/lib/providers/volcPlanAutoSyncBackfill.ts",
@@ -464,6 +484,7 @@ test("managed request surfaces are fenced centrally or rejected before independe
     "src/app/api/translator/send/route.ts",
     "src/app/api/translator/translate/route.ts",
     "src/lib/api/modelTestRunner.ts",
+    "src/lib/cliproxyCompat/managementApi.ts",
     "src/lib/modelValidation/runner.ts",
     "src/lib/services/quotaAutoPing.ts",
     "src/lib/services/quotaAutoPingManual.ts",

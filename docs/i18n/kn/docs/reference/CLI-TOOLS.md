@@ -4,17 +4,17 @@
 
 ---
 
-ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಿದ್ದು: 2026-08-23
+ಕೊನೆಯದಾಗಿ ನವೀಕರಿಸಲಾಗಿದೆ: 2026-08-23
 
-OmniRoute ಮೂರು ಪ್ರತ್ಯೇಕ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟಗಳಲ್ಲಿ ವಿಂಗಡಿಸಲಾದ ಮೂರು ವರ್ಗಗಳ CLI ಪರಿಕರಗಳೊಂದಿಗೆ ಏಕೀಕರಣಗೊಳ್ಳುತ್ತದೆ:
+ಮೂರು ಮೀಸಲಾದ ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಪುಟಗಳಲ್ಲಿ ಹರಡಿರುವ ಮೂರು ವರ್ಗಗಳ CLI ಪರಿಕರಗಳೊಂದಿಗೆOmniRoute ಸಂಯೋಜಿಸುತ್ತದೆ:
 
-| ಪುಟ            | ಮಾರ್ಗ                   | ಪರಿಕಲ್ಪನೆ                                                                                 | ಸಂಖ್ಯೆ               |
-| -------------- | ----------------------- | ----------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | ನೀವು OmniRoute ಕಡೆಗೆ ನಿರ್ದೇಶಿಸುವ ಕೋಡಿಂಗ್ ಪರಿಕರಗಳು (ಕ್ಲೈಂಟ್ → CLI → OmniRoute → ಪೂರೈಕೆದಾರ) | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | ನೀವು OmniRoute ಕಡೆಗೆ ನಿರ್ದೇಶಿಸುವ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್ಗಳು (ಅದೇ ಹರಿವು, ವಿಶಾಲ ವ್ಯಾಪ್ತಿ)           | 10                   |
-| **ACP Agents** | `/dashboard/acp-agents` | stdio/ACP ಮೂಲಕ OmniRoute ಬ್ಯಾಕೆಂಡ್ ಆಗಿ ಪ್ರಾರಂಭಿಸುವ CLIಗಳು (ವಿಲೋಮ ಹರಿವು)                   | ರಿಜಿಸ್ಟ್ರಿಯನ್ನು ನೋಡಿ |
+| ಪುಟ             | ಮಾರ್ಗ                   | ಪರಿಕಲ್ಪನೆ                                                                               | ಎಣಿಸಿ         |
+| --------------- | ----------------------- | --------------------------------------------------------------------------------------- | ------------- |
+| **CLI ಕೋಡ್ಗಳು** | `/dashboard/cli-code`   | ನೀವು OmniRoute ನಲ್ಲಿ ಸೂಚಿಸುವ ಕೋಡಿಂಗ್ ಪರಿಕರಗಳು (ಕ್ಲೈಂಟ್ → CLI → OmniRoute → ಪೂರೈಕೆದಾರರು) | 26            |
+| **CLI ಏಜೆಂಟ್**  | `/dashboard/cli-agents` | ನೀವು OmniRoute ನಲ್ಲಿ ಸೂಚಿಸುವ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್ಗಳು (ಅದೇ ಹರಿವು, ವಿಶಾಲ ವ್ಯಾಪ್ತಿ)             | 11            |
+| **ACP ಏಜೆಂಟ್**  | `/dashboard/acp-agents` | CLIs OmniRoute stdio/ACP ಮೂಲಕ ಬ್ಯಾಕೆಂಡ್ ಆಗಿ ಹೊರಹೊಮ್ಮುತ್ತದೆ (ರಿವರ್ಸ್ ಫ್ಲೋ)               | ನೋಂದಾವಣೆ ನೋಡಿ |
 
-ಹಳೆಯ ಮಾರ್ಗಗಳು 308 ಮೂಲಕ ಮರುನಿರ್ದೇಶಿಸುತ್ತವೆ: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+ಲೆಗಸಿ ಮಾರ್ಗಗಳು 308 ಮೂಲಕ ಮರುನಿರ್ದೇಶಿಸುತ್ತದೆ: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,12 +43,9 @@ ACP Agents (ವಿಲೋಮ ಪ್ರಾರಂಭ ಹರಿವು):
 
 ---
 
-## `setup-*` ಮೂಲಕ ಸ್ವಯಂ-ಕಾನ್ಫಿಗರ್ ಮಾಡಿ
+## `setup-*` ನೊಂದಿಗೆ ಸ್ವಯಂ ಕಾನ್ಫಿಗರ್ ಮಾಡಿ
 
-ಪ್ರತಿ ಉಪಕರಣದ ಕಾನ್ಫಿಗ್ ಅನ್ನು ನೀವು ಕೈಯಾರೆ ಬರೆಯಬೇಕಾಗಿಲ್ಲ. ಚಾಲನೆಯಲ್ಲಿರುವ
-OmniRoute (ಸ್ಥಳೀಯ ಅಥವಾ ರಿಮೋಟ್) ನಿಂದ **ಲೈವ್** ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ ಅನ್ನು ಓದಿ, ನಿಮ್ಮ
-ಗಣಕದಲ್ಲಿ ಉಪಕರಣದ ಸ್ವಂತ ಕಾನ್ಫಿಗ್ ಅನ್ನು ಬರೆಯುವಂತೆ, ಬೆಂಬಲಿತ ಪ್ರತಿಯೊಂದು CLI ಗಾಗಿ
-OmniRoute ಒಂದು `setup-*` ಕಮಾಂಡ್ ಅನ್ನು ಒದಗಿಸುತ್ತದೆ:
+ನೀವು ಪ್ರತಿಯೊಂದು ಉಪಕರಣದ ಸಂರಚನೆಯನ್ನು ಕೈಯಿಂದ ಬರೆಯಬೇಕಾಗಿಲ್ಲ. OmniRoute ಪ್ರತಿ ಬೆಂಬಲಿತ CLI ಗೆ `setup-*` ಆಜ್ಞೆಯನ್ನು ರವಾನಿಸುತ್ತದೆ ಅದು ಓದುತ್ತದೆ** ಬದುಕುತ್ತಾರೆ** ಚಾಲನೆಯಲ್ಲಿರುವ OmniRoute (ಸ್ಥಳೀಯ ಅಥವಾ ರಿಮೋಟ್) ನಿಂದ ಮಾಡೆಲ್ ಕ್ಯಾಟಲಾಗ್ ಮತ್ತು ನಿಮ್ಮ ಗಣಕದಲ್ಲಿ ಉಪಕರಣದ ಸ್ವಂತ ಸಂರಚನೆಯನ್ನು ಬರೆಯುತ್ತದೆ:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,61 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-ಪ್ರತಿಯೊಂದೂ `--remote <url> --api-key <key>` (ರಿಮೋಟ್ OmniRoute ಗೆ ವಿರುದ್ಧವಾಗಿ
-ಸ್ಥಳೀಯ ಉಪಕರಣವನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ), `--dry-run` (ಬರೆಯದೆ ಪೂರ್ವವೀಕ್ಷಿಸಿ), ಮತ್ತು
-`--port` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಸ್ವಯಂಚಾಲಿತ ಮಾದರಿ ಅನ್ವೇಷಣೆಯಿಲ್ಲದ ಉಪಕರಣಗಳು (Cline,
-Kilo, Roo, Goose, Aider, Qwen, 5dive) `--model <id>` ಅನ್ನು (ಮತ್ತು
-ಸಂವಾದಾತ್ಮಕವಲ್ಲದ ಚಾಲನೆಗಳಿಗಾಗಿ `--yes` ಅನ್ನು) ಸ್ವೀಕರಿಸುತ್ತವೆ. `$HOME` ಅಡಿಯಲ್ಲಿ
-ಬರೆಯದ ಏಕೈಕ ವಿಧಾನ `setup-5dive` ಆಗಿದೆ: ಇದು ಫ್ಲೀಟ್ ಹೋಸ್ಟ್ನಲ್ಲಿ root ಮಾಲೀಕತ್ವದ
-ದೃಢೀಕರಣ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬರೆಯುವ ಮೂಲಕ 5dive ಏಜೆಂಟ್ ಫ್ಲೀಟ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್
-ಮಾಡುತ್ತದೆ; ಆದ್ದರಿಂದ ಇದು `sudo` ಮೂಲಕ ಮರು-ಕಾರ್ಯಗತಗೊಳ್ಳುತ್ತದೆ ಮತ್ತು ತನ್ನದೇ ಆದ
-ರಿಮೋಟ್ ಮೋಡ್ ಅನ್ನು ಹೊಂದಿಲ್ಲ. ಸರಿಯಾದ env ಅನ್ನು ಸೇರಿಸಿ, ಯಾವುದೇ ಕಾನ್ಫಿಗ್ ಅನ್ನು
-ಬರೆಯದೆಯೇ CLI ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು, ಸಾಮಾನ್ಯ `omniroute run <target>` ಲಾಂಚರ್
-ಬಳಸಿ (claude, codex, aider, goose, opencode, qwen, gemini — ಟಾರ್ಗೆಟ್ಗಳು ಮತ್ತು
-ಅಲಿಯಾಸ್ಗಳು `bin/cli/cli-manifest.mjs` ನಿಂದ ಬರುತ್ತವೆ); ಹಳೆಯ ಪ್ರತ್ಯೇಕ-ಉಪಕರಣ
-ಲಾಂಚರ್ಗಳಾದ `omniroute launch` (Claude Code) ಮತ್ತು `omniroute launch-codex`
-(Codex) ಇನ್ನೂ ಲಭ್ಯವಿವೆ. Gemini CLI ಕೇವಲ ಲಾಂಚ್ಗೆ ಮಾತ್ರ: ಅದು ಒಂದು
-`omniroute run` ಟಾರ್ಗೆಟ್ ಆಗಿದೆ, ಆದರೆ ಯಾವುದೇ `setup-*`/`configure` ವಿಧಾನವನ್ನು
-ಹೊಂದಿಲ್ಲ.
+ಪ್ರತಿಯೊಂದೂ `--remote <url> --api-key <key>` (ರಿಮೋಟ್ OmniRoute ವಿರುದ್ಧ ಸ್ಥಳೀಯ ಸಾಧನವನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಿ), `--dry-run` (ಬರೆಯದೆ ಪೂರ್ವವೀಕ್ಷಣೆ) ಮತ್ತು `--port` ಸ್ವೀಕರಿಸುತ್ತದೆ. ಮಾದರಿ ಸ್ವಯಂ-ಶೋಧನೆಯಿಲ್ಲದ ಪರಿಕರಗಳು (Cline, ಕಿಲೋ, ರೂ, ಗೂಸ್, ಐಡರ್, Qwen, 5 ಡೈವ್, WhyCodes) `--model <id>` (ಮತ್ತು ಸಂವಾದಾತ್ಮಕವಲ್ಲದ ರನ್ಗಳಿಗೆ `--yes` ) ತೆಗೆದುಕೊಳ್ಳುತ್ತವೆ. `setup-5dive` ಎಂಬುದು `$HOME` ಅಡಿಯಲ್ಲಿ ಬರೆಯದ ಒಂದು ಪಾಕವಿಧಾನವಾಗಿದೆ: ಇದು ಫ್ಲೀಟ್ ಹೋಸ್ಟ್ನಲ್ಲಿ ರೂಟ್-ಮಾಲೀಕತ್ವದ ದೃಢೀಕರಣ ಪ್ರೊಫೈಲ್ ಅನ್ನು ಬರೆಯುವ ಮೂಲಕ 5 ಡೈವ್ ಏಜೆಂಟ್ ಫ್ಲೀಟ್ ಅನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡುತ್ತದೆ, ಆದ್ದರಿಂದ ಇದು `sudo` ಮೂಲಕ ಮರು-ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ ಮತ್ತು ತನ್ನದೇ ಆದ ರಿಮೋಟ್ ಮೋಡ್ ಅನ್ನು ಹೊಂದಿಲ್ಲ. ಬಲ ಎನ್ವಿ ಇಂಜೆಕ್ಟ್ ಮಾಡಲಾದ ಮತ್ತು ಯಾವುದೇ ಸಂರಚನೆಯನ್ನು ಬರೆಯದೆ CLI ಪ್ರಾರಂಭಿಸಲು, ಜೆನೆರಿಕ್ `omniroute run <target>` ಲಾಂಚರ್ ಅನ್ನು ಬಳಸಿ (ಕ್ಲಾಡ್, ಕೋಡೆಕ್ಸ್, ಐಡರ್, ಗೂಸ್, ಓಪನ್ಕೋಡ್, ಕ್ವೆನ್, ಜೆಮಿನಿ, ವೈಕೋಡ್ಗಳು - ಗುರಿಗಳು ಮತ್ತು ಅಲಿಯಾಸ್ಗಳು `bin/cli/cli-manifest.mjs` ನಿಂದ ಬರುತ್ತವೆ); ಲೆಗಸಿ ಪರ್-ಟೂಲ್ ಲಾಂಚರ್ಗಳು `omniroute launch` (Claude ಕೋಡ್) ಮತ್ತು `omniroute launch-codex` (Codex) ಲಭ್ಯವಿವೆ. Gemini CLI ಲಾಂಚ್-ಮಾತ್ರ: ಇದು `omniroute run` ಗುರಿಯಾಗಿದೆ ಆದರೆ ಯಾವುದೇ `setup-*`/`configure` ಪಾಕವಿಧಾನವನ್ನು ಹೊಂದಿಲ್ಲ.
 
-> **ಸಂಪೂರ್ಣ ಉಲ್ಲೇಖ:** ಪ್ರಧಾನ ಕೋಷ್ಟಕ — ಪ್ರತಿಯೊಂದು ಕಮಾಂಡ್ ಏನನ್ನು ಬರೆಯುತ್ತದೆ,
-> ಪ್ರತಿಯೊಂದು ಫ್ಲ್ಯಾಗ್, ಸ್ಥಳೀಯ ಮತ್ತು ರಿಮೋಟ್ ನಡುವಿನ ವ್ಯತ್ಯಾಸ, ಹಾಗೂ ಯಾವ
-> ಉಪಕರಣಗಳಿಗೆ `/v1` ಸಫಿಕ್ಸ್ ಅಗತ್ಯವಿದೆ — ಇವೆಲ್ಲವೂ
-> **[CLI ಏಕೀಕರಣಗಳು](../guides/CLI-INTEGRATIONS.md)** ಪುಟದಲ್ಲಿವೆ.
+> **ಪೂರ್ಣ ಉಲ್ಲೇಖ:** ಮಾಸ್ಟರ್ ಟೇಬಲ್ - ಪ್ರತಿ ಆಜ್ಞೆಯು ಏನು ಬರೆಯುತ್ತದೆ, ಪ್ರತಿ ಫ್ಲ್ಯಾಗ್, ಸ್ಥಳೀಯ ವಿರುದ್ಧ ರಿಮೋಟ್ ಮತ್ತು ಯಾವ ಸಾಧನಗಳು `/v1` ಪ್ರತ್ಯಯವನ್ನು ಬಯಸುತ್ತವೆ - ವಾಸಿಸುತ್ತವೆ** [CLI ಸಂಯೋಜನೆಗಳು](../guides/CLI-INTEGRATIONS.md)** .
 
-### ಇವುಗಳನ್ನು ಕಂಟೈನರ್ನೊಳಗೆ ಚಲಾಯಿಸುವುದು
+### ಕಂಟೇನರ್ ಒಳಗೆ ಇವುಗಳನ್ನು ಓಡಿಸುವುದು
 
-OmniRoute ಕಂಟೈನರ್ನೊಳಗೆ ಕಾರ್ಯಗತಗೊಳಿಸಲಾದ `setup-*` ಕಮಾಂಡ್, ಕಂಟೈನರ್ನ ಸ್ವಂತ
-ಹೋಮ್ಗೆ ಬರೆಯುತ್ತದೆ; ಅದನ್ನು ಯಾವುದೇ ಹೋಸ್ಟ್ CLI ಓದುವುದಿಲ್ಲ ಮತ್ತು ಕಂಟೈನರ್ ಜೊತೆಗೆ
-ಅದು ಕಣ್ಮರೆಯಾಗುತ್ತದೆ. OmniRoute ಇದನ್ನು ಪತ್ತೆಮಾಡಿ, ಬರೆಯುವ ಬದಲು ಸೂಚನೆಗಳೊಂದಿಗೆ
-`2` ಸ್ಥಿತಿಯಲ್ಲಿ ನಿರ್ಗಮಿಸುತ್ತದೆ. ಮುಂದುವರಿಯಲು ಬೆಂಬಲಿತ ಎರಡು ಮಾರ್ಗಗಳಿವೆ — CLI ಅನ್ನು
-ಹೋಸ್ಟ್ನಲ್ಲಿ ಸ್ಥಾಪಿಸಿ ಮತ್ತು ಕಂಟೈನರ್ಗೆ `omniroute connect` ಮಾಡಿ, ಅಥವಾ ಕಾನ್ಫಿಗ್
-ಡೈರೆಕ್ಟರಿಗಳನ್ನು bind-mount ಮಾಡಿ ಮತ್ತು `CLI_CONFIG_HOME` ಅನ್ನು ಹೊಂದಿಸಿ (compose
-`host` ಪ್ರೊಫೈಲ್). ಕಂಟೈನರ್ನ ಸ್ವಂತ CLI ಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದೇ ನಿಮ್ಮ ನಿಜವಾದ
-ಉದ್ದೇಶವಾಗಿದ್ದರೆ, ಪ್ರತಿಯೊಂದು `setup-*` ಕಮಾಂಡ್ ಜೊತೆಗೆ `omniroute configure` ಮತ್ತು
-`omniroute config set` ಸಹ `--allow-container-write` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತವೆ;
-ಸರ್ವರ್ಗಾಗಿ `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ಅದೇ ಕೆಲಸವನ್ನು
-ಮಾಡುತ್ತದೆ. ನೋಡಿ:
-[Docker ಮಾರ್ಗದರ್ಶಿ → ಹೋಸ್ಟ್ CLI ಉಪಕರಣಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡುವುದು](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute ಕಂಟೇನರ್ ಒಳಗೆ ಕಾರ್ಯಗತಗೊಳಿಸಲಾದ `setup-*` ಆಜ್ಞೆಯು ಕಂಟೇನರ್ನ ಸ್ವಂತ ಮನೆಗೆ ಬರೆಯುತ್ತದೆ, ಅದನ್ನು ಯಾವುದೇ ಹೋಸ್ಟ್ CLI ಓದುವುದಿಲ್ಲ ಮತ್ತು ಅದು ಕಂಟೇನರ್ನೊಂದಿಗೆ ಕಣ್ಮರೆಯಾಗುತ್ತದೆ. OmniRoute ಅದನ್ನು ಪತ್ತೆ ಮಾಡುತ್ತದೆ ಮತ್ತು ಬರೆಯುವ ಬದಲು ಸೂಚನೆಗಳೊಂದಿಗೆ `2` ನಿಂದ ನಿರ್ಗಮಿಸುತ್ತದೆ. ಎರಡು ಬೆಂಬಲಿತ ಮಾರ್ಗಗಳು ಮುಂದಕ್ಕೆ - ಹೋಸ್ಟ್ನಲ್ಲಿ CLI ಅನ್ನು ಇನ್ಸ್ಟಾಲ್ ಮಾಡಿ ಮತ್ತು ಕಂಟೇನರ್ಗೆ `omniroute connect`, ಅಥವಾ config dirs ಅನ್ನು ಬೈಂಡ್-ಮೌಂಟ್ ಮಾಡಿ ಮತ್ತು `CLI_CONFIG_HOME` ಹೊಂದಿಸಿ ( `host` ಪ್ರೊಫೈಲ್ ಅನ್ನು ಕಂಪೋಸ್ ಮಾಡಿ). ಪ್ರತಿಯೊಂದು `setup-*` ಆಜ್ಞೆಯು, ಜೊತೆಗೆ `omniroute configure` ಮತ್ತು `omniroute config set`, ಕಂಟೇನರ್ನ ಸ್ವಂತ CLIs ಕಾನ್ಫಿಗರ್ ಮಾಡುವಾಗ ನೀವು ನಿಜವಾಗಿ ಅರ್ಥಮಾಡಿಕೊಂಡಿರುವುದು `--allow-container-write` ಸ್ವೀಕರಿಸುತ್ತದೆ; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ಸರ್ವರ್ಗೆ ಅದೇ ರೀತಿ ಮಾಡುತ್ತದೆ. [Docker ಮಾರ್ಗದರ್ಶಿ ನೋಡಿ → ಹೋಸ್ಟ್ CLI ಪರಿಕರಗಳನ್ನು ಕಾನ್ಫಿಗರ್ ಮಾಡಲಾಗುತ್ತಿದೆ](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-ಡ್ಯಾಶ್ಬೋರ್ಡ್ನ **ಅನ್ವಯಿಸುವ ಎಂಡ್ಪಾಯಿಂಟ್** (`POST /api/cli-tools/apply`) ಸಹ
-ಅದೇ ನಿರ್ಬಂಧವನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತದೆ: ಕಂಟೈನರ್ನಲ್ಲಿ, ಹೋಸ್ಟ್ನಿಂದ bind-mount
-ಮಾಡದ ಟಾರ್ಗೆಟ್ಗೆ ಬರೆಯಲು ಪ್ರಯತ್ನಿಸಿದಾಗ, ಅದು ಸುರಕ್ಷಿತ ದೋಷ ಪಠ್ಯದೊಂದಿಗೆ
-**`422`** ಮತ್ತು `containerEphemeralTarget: true` ಅನ್ನು ಉತ್ತರಿಸುತ್ತದೆ; ಜೊತೆಗೆ
-ಹೋಸ್ಟ್ ವಿಧಾನವಿರುವ ಉಪಕರಣಗಳಿಗಾಗಿ (claude, codex, opencode, cline, kilo,
-continue), ಹೋಸ್ಟ್ನಲ್ಲಿ ಚಲಾಯಿಸಲು ಒಂದು `hostSetupCommand` (ಉದಾ.
-`omniroute setup-opencode`) ಅನ್ನು ನೀಡುತ್ತದೆ; ಯಾವುದನ್ನೂ ಬರೆಯಲಾಗುವುದಿಲ್ಲ.
-ಕಂಟೈನರ್ ಮೋಡ್ನಲ್ಲಿ `dryRun: true` ಕಾರ್ಯನಿರ್ವಹಿಸುವುದನ್ನು ಮುಂದುವರಿಸುತ್ತದೆ ಮತ್ತು
-ಡಿಸ್ಕ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸದೆ ಪರಿಷ್ಕೃತ ಪೂರ್ವವೀಕ್ಷಣೆ + ಟಾರ್ಗೆಟ್ ಪಥವನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ.
-ಪೂರ್ವವೀಕ್ಷಣೆಯ ವಿಷಯವು ನಕಲಿಸಲು ಅಥವಾ ಆಮದು ಮಾಡಲು ಬಳಸಬಹುದಾದ ರುಜುವಾತುಗಳನ್ನು ಹೊಂದಿರುವ
-ಕಾನ್ಫಿಗರೇಶನ್ ಅಲ್ಲ. ಮೂಲ ಉಪಕರಣ/base URL/API key/model ಇನ್ಪುಟ್ಗಳೊಂದಿಗೆ ಹೋಸ್ಟ್ನಲ್ಲಿ
-ಅನ್ವಯಿಸಿ, ಅಥವಾ ಸೂಚಿಸಲಾದ ಹೋಸ್ಟ್-ಸೈಡ್ ಸೆಟಪ್ ಕಮಾಂಡ್ ಅನ್ನು ಬಳಸಿ. ಪೂರ್ವವೀಕ್ಷಣೆ ಹೆಡರ್
-ಮತ್ತು ವಿನಂತಿ ಒಪ್ಪಂದಕ್ಕಾಗಿ [CLI ಕಾನ್ಫಿಗರೇಶನ್ ಭದ್ರತೆ](../security/CLI-CONFIGURATION.md)
-ನೋಡಿ. ಈ ನಡವಳಿಕೆ ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿದ್ದು,
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` ಮೂಲಕ ರಿಗ್ರೆಷನ್ ವಿರುದ್ಧ
-ರಕ್ಷಿಸಲಾಗಿದೆ — ನಿರ್ಬಂಧವನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ `422` ಅನ್ನು ಎಂದಿಗೂ "ಸರಿಪಡಿಸಬೇಡಿ".
+ಡ್ಯಾಶ್ಬೋರ್ಡ್ ನ** ಅಂತಿಮ ಬಿಂದುವನ್ನು ಅನ್ವಯಿಸಿ** (`POST /api/cli-tools/apply`) ಅದೇ ಸಿಬ್ಬಂದಿಯನ್ನು ಜಾರಿಗೊಳಿಸುತ್ತದೆ: ಕಂಟೇನರ್ನಲ್ಲಿ, ಹೋಸ್ಟ್ ಉತ್ತರಗಳಿಂದ ಗುರಿಯನ್ನು ಬಂಧಿಸದಿರುವ ಒಂದು ಬರಹ**`422`** `containerEphemeralTarget: true` ನೊಂದಿಗೆ ಸುರಕ್ಷಿತ ದೋಷ ಪಠ್ಯ ಮತ್ತು - ಹೋಸ್ಟ್ ಪಾಕವಿಧಾನವನ್ನು ಹೊಂದಿರುವ ಪರಿಕರಗಳಿಗಾಗಿ (ಕ್ಲಾಡ್, ಕೋಡೆಕ್ಸ್, ಓಪನ್ಕೋಡ್, ಕ್ಲೈನ್, ಕಿಲೋ, ಕಂಟಿನ್ಯೂ) - ಬದಲಿಗೆ ಹೋಸ್ಟ್ನಲ್ಲಿ ಚಲಾಯಿಸಲು `hostSetupCommand` (ಉದಾ `omniroute setup-opencode`); ಏನನ್ನೂ ಬರೆಯಲಾಗಿಲ್ಲ. `dryRun: true` ಕಂಟೇನರ್ ಮೋಡ್ನಲ್ಲಿ ಕೆಲಸ ಮಾಡುತ್ತಿರುತ್ತದೆ ಮತ್ತು ಡಿಸ್ಕ್ ಅನ್ನು ಸ್ಪರ್ಶಿಸದೆಯೇ ಪರಿಷ್ಕೃತ ಪೂರ್ವವೀಕ್ಷಣೆ + ಗುರಿ ಮಾರ್ಗವನ್ನು ಹಿಂತಿರುಗಿಸುತ್ತದೆ. ಪೂರ್ವವೀಕ್ಷಣೆ ವಿಷಯವು ನಕಲಿಸಲು ಅಥವಾ ಆಮದು ಮಾಡಲು ರುಜುವಾತು-ಬೇರಿಂಗ್ ಕಾನ್ಫಿಗರೇಶನ್ ಅಲ್ಲ. ಹೋಸ್ಟ್ನಲ್ಲಿ ಮೂಲ tool/base URL/API key/model ಇನ್ಪುಟ್ಗಳೊಂದಿಗೆ ಅನ್ವಯಿಸಿ ಅಥವಾ ಸೂಚಿಸಲಾದ ಹೋಸ್ಟ್-ಸೈಡ್ ಸೆಟಪ್ ಆಜ್ಞೆಯನ್ನು ಬಳಸಿ. ಪೂರ್ವವೀಕ್ಷಣೆ ಹೆಡರ್ ಮತ್ತು ವಿನಂತಿ ಒಪ್ಪಂದಕ್ಕಾಗಿ [CLI ಕಾನ್ಫಿಗರೇಶನ್ ಭದ್ರತೆಯನ್ನು](../security/CLI-CONFIGURATION.md) ನೋಡಿ. ಈ ನಡವಳಿಕೆಯು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿದೆ ಮತ್ತು `tests/unit/api/cli-tools/apply-container-guard.test.ts` ನಿಂದ ಹಿಮ್ಮೆಟ್ಟುವಿಕೆಯಿಂದ ರಕ್ಷಿಸಲ್ಪಟ್ಟಿದೆ - ಗಾರ್ಡ್ ಅನ್ನು ತೆಗೆದುಹಾಕುವ ಮೂಲಕ 422 ಅನ್ನು ಎಂದಿಗೂ "ಫಿಕ್ಸ್" ಮಾಡಬೇಡಿ.
 
 ---
 
@@ -153,59 +107,60 @@ CLI ಕಮಾಂಡ್ ಮೇಲ್ಮೈಗಳಿಗೆ `bin/cli/cli-manifest.m
 
 ---
 
-## 1. CLI Code ನ ಪರಿಕರ ಪಟ್ಟಿ (27 ಪರಿಕರಗಳು)
+## 1. CLI ಕೋಡ್ನ ಕ್ಯಾಟಲಾಗ್ (27 ಪರಿಕರಗಳು)
 
-`/dashboard/cli-code` ನಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುವ ಎಲ್ಲಾ ಪರಿಕರಗಳು. `baseUrlSupport: none` ಹೊಂದಿರುವವುಗಳನ್ನು ಕಸ್ಟಮ್ ಬೇಸ್ URL ಬದಲಿಗೆ MITM ಅಥವಾ ಕೈಪಿಡಿ ಮಾರ್ಗದರ್ಶಿಯ ಮೂಲಕ ಸಂಪರ್ಕಿಸಲಾಗಿದೆ:
+`/dashboard/cli-code` ನಲ್ಲಿ ಕಂಡುಬರುವ ಎಲ್ಲಾ ಉಪಕರಣಗಳು . `baseUrlSupport: none` ಹೊಂದಿರುವವರು ಕಸ್ಟಮ್ ಬೇಸ್ URL ಬದಲಿಗೆ MITM ಅಥವಾ ಹಸ್ತಚಾಲಿತ ಮಾರ್ಗದರ್ಶಿ ಮೂಲಕ ವೈರ್ ಮಾಡಲಾಗುತ್ತದೆ:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| ಐಡಿ            | ಹೆಸರು                     | ಮಾರಾಟಗಾರ               | baseUrlSupport | configType     | acpSpawnable |
+| -------------- | ------------------------- | ---------------------- | -------------- | -------------- | ------------ |
+| ಕ್ಲಾಡ್         | Claude ಕೋಡ್               | Anthropic              | ಪೂರ್ಣ          | env            | ನಿಜ          |
+| ಕೋಡೆಕ್ಸ್       | OpenAI Codex CLI          | OpenAI                 | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ನಿಜ          |
+| zcode          | ZCode (GLM ಕೋಡಿಂಗ್ ಯೋಜನೆ) | Z.ai                   | ಯಾವುದೂ ಇಲ್ಲ    | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಕ್ಲೈನ್         | Cline                     | OSS (ಮಾಜಿ-ಕ್ಲಾಡ್ ದೇವ್) | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ನಿಜ          |
+| ಕಿಲೋ           | ಕಿಲೋ ಕೋಡ್                 | ಕಿಲೋ-ಆರ್ಗ್             | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ರೂ             | ರೂ ಕೋಡ್                   | ರೂ (OSS)               | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಮುಂದುವರಿಸಿ     | ಮುಂದುವರಿಸಿ                | continue.dev           | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಸಹಾಯಕ          | ಐಡರ್                      | OSS (ಪಿ. ಗೌಥಿಯರ್)      | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ನಿಜ          |
+| ಫೋರ್ಜ್         | ForgeCode                 | ಆಂಟಿನೋಮಿ HQ            | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ನಿಜ          |
+| jcode          | jcode                     | 1ಜೆಹುವಾಂಗ್ (OSS)       | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| deepseek-tui   | DeepSeek TUI              | ಹಂಟರ್ ಬೌನ್ (OSS)       | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಕೋಡ್ವೇಲ್       | CodeWhale                 | ಹುಂಬೌನ್ (OSS)          | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಓಪನ್ಕೋಡ್       | OpenCode                  | ಅಸಂಗತತೆ (ಮಾಜಿ-SST)     | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ನಿಜ          |
+| ಡ್ರಾಯಿಡ್       | ಫ್ಯಾಕ್ಟರಿ ಡ್ರಾಯಿಡ್        | ಕಾರ್ಖಾನೆ AI            | ಭಾಗಶಃ          | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಸಹಪೈಲಟ್        | GitHub Copilot CLI        | GitHub/MS              | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಕರ್ಸರ್-ಕ್ಲೈ    | Cursor CLI                | ಯಾವುದೇಗೋಳ              | ಭಾಗಶಃ          | ಮಾರ್ಗದರ್ಶಿ     | ನಿಜ          |
+| ಸ್ಮೆಲ್ಟ್       | ಸ್ಮೆಲ್ಟ್                  | ಲಿಯೊನಾರ್ಡ್ಸೆಸರ್ (OSS)  | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಪೈ             | ಪೈ (ಪೈ-ಕೋಡಿಂಗ್-ಏಜೆಂಟ್)    | M. ಝೆಕ್ನರ್ (OSS)       | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಗ್ರೋಕ್-ಬಿಲ್ಡ್  | Grok ಬಿಲ್ಡ್               | xAI                    | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಕ್ರಷ್          | ಕ್ರಷ್                     | OSS (ಮೋಡಿ)             | ಪೂರ್ಣ          | ಪದ್ಧತಿ         | ಸುಳ್ಳು       |
+| ಕ್ವೆನ್         | Qwen ಕೋಡ್                 | Alibaba                | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ನಿಜ          |
+| zed            | Zed                       | Zed ಇಂಡಸ್ಟ್ರೀಸ್        | ಪೂರ್ಣ          | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಕರ್ಸರ್         | Cursor                    | ಯಾವುದೇಗೋಳ              | ಯಾವುದೂ ಇಲ್ಲ    | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಗುರುತ್ವ ವಿರೋಧಿ | Antigravity               | Google                 | ಯಾವುದೂ ಇಲ್ಲ    | mitm           | ಸುಳ್ಳು       |
+| ಹರ್ಮ್ಸ್        | ಹರ್ಮ್ಸ್                   | ನೌಸ್ ಸಂಶೋಧನೆ           | ಯಾವುದೂ ಇಲ್ಲ    | ಮಾರ್ಗದರ್ಶಿ     | ಸುಳ್ಳು       |
+| ಕಿರೋ           | Kiro AI                   | Amazon                 | ಯಾವುದೂ ಇಲ್ಲ    | mitm           | ಸುಳ್ಳು       |
+| ಪದ್ಧತಿ         | ಕಸ್ಟಮ್ CLI                | —                      | ಪೂರ್ಣ          | ಕಸ್ಟಮ್-ಬಿಲ್ಡರ್ | ಸುಳ್ಳು       |
 
-`baseUrlSupport: "partial"` ಹೊಂದಿರುವ ಪರಿಕರಗಳು ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕಾರ್ಡ್ನಲ್ಲಿ "⚠ ಭಾಗಶಃ ಬೇಸ್ URL" ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ.
+`baseUrlSupport: "partial"` ಜೊತೆಗಿನ ಪರಿಕರಗಳು ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕಾರ್ಡ್ನಲ್ಲಿ "⚠ ಬೇಸ್ URL ಪಾರ್ಶಿಯಲ್" ಎಂಬ ಬ್ಯಾಡ್ಜ್ ಅನ್ನು ತೋರಿಸುತ್ತವೆ.
 ---
 
-## 2. CLI ಏಜೆಂಟ್ಗಳ ಕ್ಯಾಟಲಾಗ್ (10 ಪರಿಕರಗಳು)
+## 2. CLI ಏಜೆಂಟ್ಸ್ ಕ್ಯಾಟಲಾಗ್ (11 ಉಪಕರಣಗಳು)
 
-`/dashboard/cli-agents` ನಲ್ಲಿ ಕಾಣಿಸಿಕೊಳ್ಳುವ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್ಗಳು:
+`/dashboard/cli-agents` ನಲ್ಲಿ ಕಂಡುಬರುವ ಸ್ವಾಯತ್ತ ಏಜೆಂಟ್:
 
-| id           | ಹೆಸರು            | ಪೂರೈಕೆದಾರ                | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| ಐಡಿ            | ಹೆಸರು                 | ಮಾರಾಟಗಾರ                 | baseUrlSupport | acpSpawnable |
+| -------------- | --------------------- | ------------------------ | -------------- | ------------ |
+| ಹರ್ಮ್ಸ್ ಏಜೆಂಟ್ | ಹರ್ಮ್ಸ್ ಏಜೆಂಟ್        | ನೌಸ್ ಸಂಶೋಧನೆ             | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
+| ತೆರೆದ ಉಗುರು    | OpenClaw              | OSS (ಪಿ. ಸ್ಟೀನ್ಬರ್ಗರ್)   | ಪೂರ್ಣ          | ನಿಜ          |
+| ಹೆಬ್ಬಾತು       | ಹೆಬ್ಬಾತು              | ಬ್ಲಾಕ್ / Linux ಫೌಂಡೇಶನ್  | ಪೂರ್ಣ          | ನಿಜ          |
+| ವ್ಯಾಖ್ಯಾನಕಾರ   | ಇಂಟರ್ಪ್ರಿಟರ್ ತೆರೆಯಿರಿ | OSS                      | ಪೂರ್ಣ          | ನಿಜ          |
+| ವಾರ್ಪ್         | Warp AI               | Warp Inc.                | ಭಾಗಶಃ          | ನಿಜ          |
+| ಏಜೆಂಟ್-ಡೆಕ್    | ಏಜೆಂಟ್ ಡೆಕ್           | ಅಶೇಷಗೋಪ್ಲಾನಿ (OSS)       | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
+| omp            | ಓ ಮೈ ಪೈ               | OSS                      | ಪೂರ್ಣ          | ನಿಜ          |
+| ಲೆಟ್ಟಾ         | ಲೆಟ್ಟಾ CLI            | ಲೆಟ್ಟಾ                   | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
+| ಪ್ರಧಾನ ಏಜೆಂಟ್  | ಪ್ರಧಾನ ಏಜೆಂಟ್         | ಪ್ರಧಾನ ಬುದ್ಧಿಶಕ್ತಿ (OSS) | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
+| 5 ಡೈವ್         | 5 ಡೈವ್                | OSS (5dive-AI)           | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
+| ಏಕೆ ಸಂಕೇತಗಳು   | WhyCodes              | ಏಕೆ ಕಾರ್ಪೊರೇಷನ್          | ಪೂರ್ಣ          | ಸುಳ್ಳು       |
 
 ---
 

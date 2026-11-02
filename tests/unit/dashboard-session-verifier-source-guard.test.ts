@@ -22,6 +22,8 @@ const VERIFIERS = [
 const ALLOWED_JWT_VERIFY_FILES = [
   "src/shared/utils/dashboardSessionToken.ts",
   "src/app/api/auth/oidc/callback/route.ts",
+  // Entra ID tokens on /v1/* (#14665): RS256 against Microsoft's JWKS, never the auth_token cookie.
+  "src/server/authz/entra/verifyToken.ts",
 ];
 
 for (const rel of VERIFIERS) {

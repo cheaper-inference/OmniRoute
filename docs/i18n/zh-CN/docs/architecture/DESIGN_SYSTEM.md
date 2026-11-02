@@ -4,13 +4,7 @@
 
 ---
 
-> **状态：** 仪表盘基于 **Keak CI UI Kit**（`@keak/cheaper-inference-ui-kit`）构建，以 vendor 方式
-> 作为工作区 `packages/ui-kit` 引入（包名 `@omniroute/ui-kit`；上游快照固定在
-> `packages/ui-kit/UPSTREAM.md` 中，并由 `npm run check:ui-kit-snapshot` 守护）。浅色（Light）是规范
-> 主题；默认偏好为 `system`。强调色为 Keak 青柠色（`--ci-color-accent`）。Inter
-> （letter-spacing 0，`--ci-letter-spacing-ui`）是 UI 字体族，Instrument Serif 仅用于大号稀疏的
-> 展示性文字（`.ci-dashboard-display`），IBM Plex Mono 用于代码——全部通过
-> `src/app/globals.css` 顶部的 `@fontsource/*` 导入实现自托管。每个图标都是 Lucide 字形。
+> **地位：**仪表板是建立在**Keak CI UI套件**(`@keak/cheaper-inference-ui-kit`)，作为工作区`packages/ui-kit` (`@omniroute/ui-kit`；上游快照固定在`packages/ui-kit/UPSTREAM.md`中并由`npm run check:ui-kit-snapshot`保护) 提供。光是典型的主题；默认首选项是`system`。口音是 Keak 酸橙 (`--ci-color-accent`)。 Switzer 是UI、显示和代码文本（`--ci-font-ui`； `--ci-font-display`和`--ci-font-mono`解析为它）的单一系列，由套件本身自托管（`packages/ui-kit/src/ci-fonts.css`，由`ci-tokens.css`导入）。每个图标都是 Lucide 字形。
 
 ## 1. 内容所在位置
 
@@ -24,26 +18,13 @@
 
 ## 2. 规则
 
-1. 只用 token，绝不使用字面值。有意保留的例外：始终为深色主题的控制台终端，以及
-   `STATUS_HEX`（`src/shared/constants/statusColors.ts`）——它是 kit 状态色板解析后的 hex 镜像，供确实需要字面 hex 值的调用方使用。分类色板已不再是例外：它们通过
-   `src/shared/utils/categoricalPalette.ts` 依托于 kit 的五个图表 token（`--color-chart-1..5`），路由策略则通过
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`；ReactFlow 的边和编排画布读取感知主题的 `--orch-status-*` 变量（`src/shared/components/flow/edgeStyles.ts`）。
-2. 绝不手动修改 `packages/ui-kit/src`：使用 `scripts/dev/sync-ui-kit.sh <commit>` 进行同步；
-   pre-commit 关卡 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）会在任何字节与锁定的上游提交不一致时失败（当上游克隆——`UI_KIT_CLONE` 或 `_references/cheaper-inference-ui-kit`——不存在时，它会跳过并给出警告）。当 kit 缺少某些功能时，在适配器或页面中绕过它，并向上游提出需求。
-3. kit 的默认文本是英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——只要 kit 组件渲染文本，就通过
-   `useTranslations(...)` 传入翻译后的字符串。
-4. Tailwind 工具类优先于 kit 组件类（kit 声明了
-   `@layer theme, base, components, utilities`，其规则位于 `components` 层）——工具类用于间距和布局，而不是用来给 kit 组件重新着色。
-5. 标题：页面和区块标题使用 `.ci-heading`（Inter 字体，无字距调整）；`.ci-dashboard-display`
-   （Instrument Serif 字体）仅用于大而稀疏的展示性文本，例如错误页面的状态码。
-6. `tests/unit/dashboard-kit-sweep.test.ts` 守护着 kit 的采用情况：`src/app` 和 `src/shared/components` 下不允许出现 Material 连字 span；
-   在 dashboard 目录树（`src/app/(dashboard)` 和
-   `src/shared/components`）中，除列出的例外（`Select` 适配器的原生分支、
-   `RequestLoggerDetail`）外，不允许出现原生 `<select>`、`<textarea>` 或 `<table>`，也不允许手写的
-   `role="dialog"`；其中每个原生 `<button>` 或 `<input>` 都需要一条包含
-   `kit-exception:`（附原因）的注释，且注释结束位置最多在其上方 3 行；调色板色相和 `dark:` 变体只允许出现在测试列出的文件中。
-7. 在提交 PR 前验证两种主题和 390 px 视口（截图）；`tests/e2e/a11y.spec.ts` 会运行
-   axe。
+1. 令牌，绝不是字面意思。特意保留的例外：始终黑暗的控制台终端和`STATUS_HEX` (`src/shared/constants/statusColors.ts`)，工具包状态调色板的解析十六进制镜像，供需要文字十六进制的调用者使用。分类调色板不再例外：它们依赖于套件的五个图表标记（`--color-chart-1..5`）到`src/shared/utils/categoricalPalette.ts` ，以及用于路由策略的`src/app/(dashboard)/dashboard/combos/strategyPalette.ts`； ReactFlow边缘和编排画布读取主题感知的`--orch-status-*`变量 (`src/shared/components/flow/edgeStyles.ts`)。
+2. 切勿手动修补`packages/ui-kit/src` ：与`scripts/dev/sync-ui-kit.sh <commit>`同步；预提交门`npm run check:ui-kit-snapshot` (`.husky/pre-commit`) 在与固定的上游提交不同的任何字节上失败（当上游克隆`UI_KIT_CLONE`或`_references/cheaper-inference-ui-kit`不存在时，它会跳过并发出警告）。当套件缺少某些内容时，请在适配器或屏幕中解决它并向上游询问。
+3. 套件文本默认为英语（`label = "Loading"`、 `loadingLabel = "Loading table"`...） - 每当套件组件呈现文本时，都会从`useTranslations(...)`传递翻译后的字符串。
+4. Tailwind 实用程序胜过套件组件类（套件声明`@layer theme, base, components, utilities`及其规则位于`components`中）——使用实用程序进行间距和布局，而不是重新着色套件组件。
+5. 标题： `.ci-heading`用于页面和章节标题； `.ci-dashboard-display`仅适用于大而稀疏的显示文本，例如错误页面状态代码。两者都使用瑞士语。
+6. `tests/unit/dashboard-kit-sweep.test.ts`保护套件采用： `src/app`或`src/shared/components`下无材料结扎跨度；在仪表板树（`src/app/(dashboard)`和`src/shared/components`）中，没有原始`<select>`、 `<textarea>`或`<table>` ，并且在列出的例外之外没有手工制作的`role="dialog"` （ `Select`适配器的本机分支`RequestLoggerDetail`）；每个原始`<button>`或`<input>`都需要一个包含`kit-exception:` （带有原因）的注释，最多在其上方 3 行结束；调色板色调和`dark:`变体仅在测试列出的文件中。
+7. 在PR之前验证两个主题和 390 px 视口（屏幕截图）； `tests/e2e/a11y.spec.ts`运行斧头。
 
 ## 3. 添加页面
 
@@ -71,20 +52,22 @@
 3. 针对 kit 缺陷的变通方案放在适配器中（如果修复的是样式，则放在 `globals.css` 的 `@layer components` 中），绝不放在 `packages/ui-kit/src` 中。
 4. 添加或更新 `tests/unit/ui/adapters/<name>.test.tsx`。对于调用方众多的适配器，要比较变更前后渲染出的标记——内边距或包裹元素的变化会扩散到每个界面。
 
-## 5. 更新 kit
+## 5. 更新套件
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` 将上游该提交处的 `src/` 复制到 `packages/ui-kit/src`，并应用唯一允许的转换（去掉相对导入的 `.js` 后缀）。然后：检查 `git diff packages/ui-kit`，在两种主题下对 providers、settings、combos、usage 和 endpoint 页面做一次视觉走查，运行 `npm run check:ui-kit-snapshot` 和 `npm run test:vitest:ui`，并附上上游变更日志提交 PR。
+`npm run check:ui-kit-upstream`将`packages/ui-kit/UPSTREAM.md`中固定的版本与上游存储库的最新`v*`标签进行比较，并在发布时打印同步命令。每周`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 运行相同的检查，并在 pin 落后时保持一个跟踪问题处于打开状态；上游存储库是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的只读令牌，并且在没有它的情况下保持惰性。
 
-## 6. README 图表
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`将该提交处的上游`src/` （`latest` =最新的`v*`标记）复制到`packages/ui-kit/src`中，应用单个允许的转换（它从相对导入中删除`.js`后缀），并将`packages/ui-kit/package.json`和`package-lock.json`中的工作区版本设置为上游版本。然后：查看`git diff packages/ui-kit`，对两个主题中的提供程序、设置、组合、用法和端点进行可视化传递，运行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，并使用上游变更日志打开PR 。
 
-根目录 `README.md` 嵌入的十二张图表（`docs/diagrams/*.svg`）是将 kit 应用于静态图片的产物，它们是生成的，而非手工绘制：13 个生成器文件位于 `scripts/docs/gen-readme-*.mjs`（十二张图表加上 `gen-readme-diagrams.mjs` 驱动脚本），另有 12 个过期性测试位于 `tests/unit/docs/readme-*-svg.test.ts`，每张图表一个，每个测试都将已提交的文件与其生成器的输出逐字节比较（任务 `test-unit`）。
+## README图
 
-- **令牌。** `scripts/docs/readme-diagram-theme.mjs` 从 `packages/ui-kit/src/ci-tokens.css` 复制调色板（由 `tests/unit/docs/readme-diagram-theme.test.ts` 与该文件锚定校验），并在 kit 字体上定义文本角色——Instrument Serif 用于展示标题，Inter 用于 UI 文本，IBM Plex Mono 用于数字和代码，与 `src/app/globals.css` 为仪表盘加载的 `@fontsource` 包相同。浅色值位于 `:root`，深色值位于文件内的 `prefers-color-scheme: dark` 之后，因此每张图片在 GitHub 上都会跟随查看者的配色方案。
-- **字体。** `scripts/docs/readme-fonts.mjs` 将这些 woff2 文件子集化为每张图表实际绘制的字形，并以 `@font-face` `data:` URI 的形式嵌入——这是 kit 排版进入 README 图片的唯一途径，因为 GitHub Markdown 不携带 CSS，且 camo 代理会阻止所有外部请求。这些子集仅包含拉丁字符；回退到系统字体栈的符号字形在 `SYMBOL_FALLBACKS` 中逐一放行，任何其他未覆盖的字形都会抛出错误。
-- **重新生成。** `npm run docs:readme-diagrams` 按 README 顺序重写全部十二张图表，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`；`free-tier-budget` 需要 `node --import tsx/esm`，因为它的数字来自 `open-sse/config/freeModelCatalog.ts` 中的实时目录加载器；目录变更对 CI 的影响见 `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`）。将生成器与 SVG 一起提交。
-- **验证。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` 以 GitHub 提供图片的方式渲染文件（一个 `<img>` 标签、camo 的 `Content-Security-Policy`、`image/svg+xml`），捕获浅色和深色各一帧，并报告页面发出的外部字体请求（必须为 0）。
-- **体积预算。** 每个文件低于 200 KB（每个过期性测试都会断言这一点）；500 KB 是任何 README 图片的硬性上限（SVG studio 校验器的规则）。
-- **文案不变，数字以门禁为准。** 品牌重塑改变的是字体和调色板，而非文字：每个生成器将其图表的文案保存在 `*_COPY` 常量中（或从实时目录构建），它既是绘制的文本，也是字体子集化的输入。权威数字保留在 `<text>` 节点中，由 `check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）读取；该门禁所读取图表的过期性测试还会在生成的文件上运行其校验器，因此与代码不一致的数字会导致测试失败——要修复门禁读取的数据源，绝不要改生成器中的数字。
+根`README.md`嵌入的 12 个图表 (`docs/diagrams/*.svg`) 是应用于静态图像的套件，它们是生成的，而不是手工绘制的： `scripts/docs/gen-readme-*.mjs`上的 13 个生成器文件（12 个图表加上`gen-readme-diagrams.mjs`驱动程序）和`tests/unit/docs/readme-*-svg.test.ts`上的 12 个过时测试，每个图表一个，每个字节将提交的文件与其生成器的输出（作业`test-unit`）进行比较。
+
+- **代币。** `scripts/docs/readme-diagram-theme.mjs`从`packages/ui-kit/src/ci-tokens.css`复制调色板（通过`tests/unit/docs/readme-diagram-theme.test.ts`固定在该文件上），并在`@fontsource`包中定义套件早期界面上的文本角色 - 用于显示的 Instrument Serif、用于UI文本的 Inter、用于图形和代码的IBM Plex Mono（仪表板本身从套件 0.0.66 开始使用套件的 Switzer）。文件内的亮值位于`:root`上，暗值位于`prefers-color-scheme: dark`后面，因此每个图像都遵循查看者在GitHub上的方案。
+- **字体。** `scripts/docs/readme-fonts.mjs`将这些 woff2 文件子集到每个图绘制的字形，并将它们嵌入为`@font-face` `data:` URIs - 这是套件排版到达README图像的唯一方法，因为GitHub Markdown 不携带CSS并且迷彩代理会阻止每个外部获取。这些子集仅包含拉丁语； `SYMBOL_FALLBACKS`中允许回退到系统堆栈的符号字形，以及任何其他未覆盖的字形抛出。
+- **再生。** `npm run docs:readme-diagrams`按README顺序重写所有 12 个文件，并为每个文件打印一行及其大小。单个生成器也可以独立运行（`node scripts/docs/gen-readme-<name>.mjs`； `free-tier-budget`需要`node --import tsx/esm`因为它的数据来自`open-sse/config/freeModelCatalog.ts`中的实时目录加载器；目录更改的CI结果位于`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`中）。将生成器和SVG一起提交。
+- **证明。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>`以GitHub服务的方式渲染文件（ `<img>`标签、camo 的`Content-Security-Policy`、 `image/svg+xml`），捕获浅色和深色框架并报告页面发出的外部字体请求（必须为 0）。
+- **预算。**每个文件低于 200 个KB （每个过时测试都断言这一点）； 500 KB是任何README镜像的硬上限（ SVG studio 验证器的规则）。
+- **复制不变，从门开始计数。**品牌重塑改变了类型和调色板，而不是单词：每个生成器在`*_COPY`常量中携带其图表的副本（或从实时目录构建它），该常量既是绘制的文本又是字体子集输入。规范数字保留在`<text>`节点中，由`check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) 读取；门读取的图表的陈旧性测试也在生成的文件上运行其验证器，因此与代码漂移的数字无法通过测试 - 修复门读取的源，而不是生成器中的数字。
 
 ## 7. 参考索引
 
