@@ -1,7 +1,10 @@
+import { createHash } from "node:crypto";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import {
   getCodexAutospendCount,
+  getCodexAutospendKeyGenerations,
   setCodexAutospendCount,
+  setCodexAutospendKeyGenerations,
   utcDayKey,
 } from "@/lib/db/codexResetCreditAutospend";
 import { getSettings, resolveProxyForConnection } from "@/lib/db/settings";
@@ -90,9 +93,7 @@ export interface CodexAutospendFailure {
 }
 
 export type CodexAutospendSkipReason =
-  | "opt_in_off"
-  | "no_expiring_credit"
-  | "daily_cap_reached";
+  "opt_in_off" | "connection_inactive" | "no_expiring_credit" | "daily_cap_reached";
 
 export interface CodexAutospendResult {
   /** Credits that were actually redeemed (or confirmed as already redeemed). */
@@ -559,10 +560,10 @@ export async function consumeCodexResetCredit(
  * Redeem one credit upstream WITHOUT the post-consume quota refresh.
  *
  * `consumeCodexResetCredit` owns the operator-facing path (one redemption, then a
- * full limits refresh + cooldown release). The auto-spend sweep redeems several
- * credits in a single tick, so it calls this lower-level primitive and lets the
- * already-running quota refresh observe the result instead of paying for one
- * upstream usage read per credit. The wire request is identical either way:
+ * full limits refresh + cooldown release). The auto-spend sweep can redeem several
+ * credits in a single tick, so it calls this lower-level primitive and runs the
+ * refresh + cooldown release once per connection after its loop instead of paying
+ * for one upstream usage read per credit. The wire request is identical either way:
  * same URL, same `{ redeem_request_id, credit_id }` body, same auth retry.
  */
 async function redeemCodexResetCredit(
@@ -573,11 +574,7 @@ async function redeemCodexResetCredit(
   const connection = await loadCodexConnection(connectionId);
   const normalizedCreditId =
     typeof creditId === "string" && creditId.trim().length > 0 ? creditId.trim() : undefined;
-  const { response } = await consumeWithAuthRetry(
-    connection,
-    idempotencyKey,
-    normalizedCreditId
-  );
+  const { response } = await consumeWithAuthRetry(connection, idempotencyKey, normalizedCreditId);
   const payload = await readResponsePayload(response);
 
   if (!response.ok) {
@@ -632,11 +629,42 @@ function isAutospendEnabledFor(config: CodexAutospendConfig, connectionId: strin
   return config.connections[connectionId] === true;
 }
 
-function autospendIdempotencyKey(connectionId: string, creditId: string): string {
-  // Deterministic on purpose: a retry (same tick, next tick, or after a crash)
-  // replays the identical `redeem_request_id`, so upstream dedupes the consume
-  // instead of burning a second credit.
-  return `auto-spend:${connectionId}:${creditId}`;
+/**
+ * Upstream refusals that prove the attempt spent nothing, so a later attempt may use a new
+ * `redeem_request_id`. Anything else (network error, 5xx, unknown body) is ambiguous and must
+ * keep the same id so upstream can dedupe it.
+ */
+const AUTOSPEND_DEFINITE_REFUSALS = new Set(["nothing_to_reset", "no_credit"]);
+
+/**
+ * Deterministic on purpose: a retry (same tick, next tick, or after a crash) replays the
+ * identical `redeem_request_id`, so upstream dedupes the consume instead of burning a second
+ * credit.
+ *
+ * Two upstream behaviours are unverified, so the key is safe under either answer:
+ * - Shape: the dashboard modal always sends `crypto.randomUUID()`, and whether upstream accepts
+ *   anything else is unknown. The key therefore has the same v4 UUID shape, derived by hash.
+ * - Failure memoization: if upstream replays a stored `nothing_to_reset` for a known id, a credit
+ *   retried under one fixed id could never be spent once the window does exhaust. `generation`
+ *   moves on after a definite refusal only (see AUTOSPEND_DEFINITE_REFUSALS), which costs nothing
+ *   when upstream does not memoize failures.
+ */
+function autospendIdempotencyKey(
+  connectionId: string,
+  creditId: string,
+  generation: number
+): string {
+  const hex = createHash("sha256")
+    .update(`auto-spend:${connectionId}:${creditId}:${generation}`)
+    .digest("hex");
+  const variant = ((Number.parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
+  return [
+    hex.slice(0, 8),
+    hex.slice(8, 12),
+    `4${hex.slice(13, 16)}`,
+    `${variant}${hex.slice(17, 20)}`,
+    hex.slice(20, 32),
+  ].join("-");
 }
 
 function hoursUntilExpiry(credit: CodexResetCredit, nowMs: number): number | null {
@@ -646,8 +674,45 @@ function hoursUntilExpiry(credit: CodexResetCredit, nowMs: number): number | nul
   return (expiresAtMs - nowMs) / 3_600_000;
 }
 
-async function readAutospendSpendCount(connectionId: string, nowMs: number): Promise<number> {
-  return getCodexAutospendCount(connectionId, utcDayKey(nowMs));
+/**
+ * Same follow-up as the manual redeem: refresh the limits, which releases a Codex child whose
+ * windows recovered, then release the matching in-memory model lockouts. Without it the credit is
+ * gone and the account stays out of rotation until the old cooldown lapses. The credit is already
+ * spent, so a failure here is logged and never reclassifies the redemption.
+ */
+async function refreshLimitsAndReleaseCooldown(connectionId: string): Promise<void> {
+  try {
+    const refreshed = await fetchAndPersistProviderLimits(connectionId, "manual", {
+      allowRotatingRefresh: true,
+    });
+    await releaseCodexCooldownAfterResetCredit(connectionId, refreshed.usage);
+  } catch (error) {
+    console.warn(
+      `[CodexResetCredits] Post auto-spend refresh failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+    );
+  }
+}
+
+function persistAutospendGenerations(
+  connectionId: string,
+  generations: Record<string, number>,
+  liveCreditIds: string[],
+  refusedCreditIds: string[]
+): void {
+  if (refusedCreditIds.length === 0) return;
+  const next: Record<string, number> = {};
+  for (const creditId of liveCreditIds) {
+    const generation = (generations[creditId] ?? 0) + (refusedCreditIds.includes(creditId) ? 1 : 0);
+    if (generation > 0) next[creditId] = generation;
+  }
+  // Bookkeeping only: if this fails the next tick reuses the old id, which is no worse than today.
+  try {
+    setCodexAutospendKeyGenerations(connectionId, next);
+  } catch (error) {
+    console.warn(
+      `[CodexResetCredits] Auto-spend key rotation failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
+    );
+  }
 }
 
 /**
@@ -660,11 +725,16 @@ async function readAutospendSpendCount(connectionId: string, nowMs: number): Pro
  * - Only credits whose `expiresAt` lands inside `horizonHours` (default 24 h)
  *   are candidates; the soonest-expiring one is redeemed first (the same FEFO
  *   order the dashboard modal shows).
+ * - Skips a connection the operator disabled or that was auto-disabled (`isActive: false`).
  * - Never throws: a rejected redemption (`nothing_to_reset`, `no_credit`, …) is
  *   reported per credit so the surrounding quota refresh is unaffected.
+ * - `nothing_to_reset` is account-level, so the first one ends the loop: the other
+ *   candidates would get the same answer.
  * - Bounded by `maxPerDay` per connection, tracked in `key_value` (no migration).
  * - Reuses the exact manual wire request; only the `redeem_request_id` is
- *   derived (`auto-spend:<connectionId>:<creditId>`) instead of a UI UUID.
+ *   derived by `autospendIdempotencyKey` instead of a random UI UUID.
+ * - After a redemption it refreshes limits and releases the cooldown once per
+ *   connection, like the manual path.
  */
 export async function spendExpiringResetCredits(
   connectionId: string,
@@ -686,12 +756,16 @@ export async function spendExpiringResetCredits(
     }
 
     const nowMs = now();
-    const spentToday = await readAutospendSpendCount(connectionId, nowMs);
+    const spentToday = getCodexAutospendCount(connectionId, utcDayKey(nowMs));
     if (spentToday >= config.maxPerDay) {
       return { ...empty, skipped: "daily_cap_reached" };
     }
 
     const connection = await loadCodexConnection(connectionId);
+    if (connection.isActive === false) {
+      return { ...empty, skipped: "connection_inactive" };
+    }
+
     const refreshedConnection = await refreshCodexConnectionIfNeeded(connection);
     let response = await fetchResetCredits(refreshedConnection);
     if (response.status === 401 || response.status === 403) {
@@ -722,6 +796,8 @@ export async function spendExpiringResetCredits(
 
     const spent: CodexAutospendSpent[] = [];
     const failed: CodexAutospendFailure[] = [];
+    const generations = getCodexAutospendKeyGenerations(connectionId);
+    const refusedCreditIds: string[] = [];
     let remainingBudget = config.maxPerDay - spentToday;
 
     for (const credit of candidates) {
@@ -729,7 +805,7 @@ export async function spendExpiringResetCredits(
       try {
         const outcome = await redeemCodexResetCredit(
           connectionId,
-          autospendIdempotencyKey(connectionId, credit.id),
+          autospendIdempotencyKey(connectionId, credit.id, generations[credit.id] ?? 0),
           credit.id
         );
         spent.push({ creditId: credit.id, outcome });
@@ -738,8 +814,17 @@ export async function spendExpiringResetCredits(
         const code =
           error instanceof CodexResetCreditError ? error.code : "codex_reset_credit_failed";
         failed.push({ creditId: credit.id, code });
+        if (AUTOSPEND_DEFINITE_REFUSALS.has(code)) refusedCreditIds.push(credit.id);
+        if (code === "nothing_to_reset") break;
       }
     }
+
+    persistAutospendGenerations(
+      connectionId,
+      generations,
+      candidates.map((credit) => credit.id),
+      refusedCreditIds
+    );
 
     if (spent.length > 0) {
       invalidateCodexQuotaCache(connectionId);
@@ -752,6 +837,7 @@ export async function spendExpiringResetCredits(
           `[CodexResetCredits] Auto-spend counter update failed for ${connectionId}: ${sanitizeErrorMessage(error)}`
         );
       }
+      await refreshLimitsAndReleaseCooldown(connectionId);
     }
 
     return { spent, failed, considered };

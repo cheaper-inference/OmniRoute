@@ -346,13 +346,18 @@ export const updateSettingsSchema = z.object({
     .optional(),
   // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
   // master switch (default false in src/lib/db/settings.ts); `connections` narrows
-  // it to specific provider_connections ids (empty map = every eligible Codex
-  // connection); `maxPerDay` caps redemptions per connection per calendar day and
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
   // `horizonHours` sets how close to expiry a credit must be to be spendable.
   codexSpendExpiringResetCredits: z
     .object({
       enabled: z.boolean().optional(),
-      horizonHours: z.number().int().min(1).max(24 * 30).optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
       maxPerDay: z.number().int().min(1).max(50).optional(),
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })

@@ -58,6 +58,23 @@ test("runCodexAutospendTick spends for every Codex OAuth connection when enabled
   assert.deepEqual(calls, ["conn-1", "conn-2"]);
 });
 
+test("runCodexAutospendTick asks only for active Codex OAuth connections", async () => {
+  const { deps } = makeDeps({
+    settings: { codexSpendExpiringResetCredits: { enabled: true } },
+  });
+  const filters: Array<Record<string, unknown>> = [];
+
+  await scheduler.runCodexAutospendTick({
+    ...deps,
+    getProviderConnections: async (filter: Record<string, unknown>) => {
+      filters.push(filter);
+      return [];
+    },
+  });
+
+  assert.deepEqual(filters, [{ provider: "codex", authType: "oauth", isActive: true }]);
+});
+
 test("runCodexAutospendTick keeps going when one connection throws", async () => {
   const { deps, calls } = makeDeps({
     settings: { codexSpendExpiringResetCredits: { enabled: true } },

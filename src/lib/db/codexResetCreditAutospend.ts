@@ -8,12 +8,17 @@
  * `maxPerDay` ceiling resets once per UTC day — the same notion of "day" the
  * rest of the quota bookkeeping uses.
  *
+ * A second namespace holds, per connection, how many times each credit's
+ * `redeem_request_id` moved on after a definite upstream refusal
+ * (see `autospendIdempotencyKey` in src/lib/usage/codexResetCredits.ts).
+ *
  * Kept in `src/lib/db/` per Hard Rule #5: no raw SQL outside domain modules.
  */
 
 import { getDbInstance } from "./core";
 
 const AUTOSPEND_NAMESPACE = "codexResetCreditAutospend";
+const AUTOSPEND_KEY_GENERATION_NAMESPACE = "codexResetCreditAutospendKeyGeneration";
 
 type DbLike = {
   prepare: (sql: string) => {
@@ -78,10 +83,48 @@ export function setCodexAutospendCount(
   );
 }
 
+/** creditId -> key generation for this connection. Unknown credits are generation 0. */
+export function getCodexAutospendKeyGenerations(connectionId: string): Record<string, number> {
+  const db = getDbInstance() as unknown as DbLike;
+  const row = db
+    .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
+    .get(AUTOSPEND_KEY_GENERATION_NAMESPACE, connectionId) as { value?: string } | undefined;
+  if (!row?.value) return {};
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = toRecord(JSON.parse(row.value));
+  } catch {
+    return {};
+  }
+
+  const generations: Record<string, number> = {};
+  for (const [creditId, value] of Object.entries(parsed)) {
+    const generation = Number(value);
+    if (Number.isFinite(generation) && generation > 0) {
+      generations[creditId] = Math.trunc(generation);
+    }
+  }
+  return generations;
+}
+
+/** Replace the stored generations; the caller keeps only credits that are still listed. */
+export function setCodexAutospendKeyGenerations(
+  connectionId: string,
+  generations: Record<string, number>
+): void {
+  const db = getDbInstance() as unknown as DbLike;
+  db.prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)").run(
+    AUTOSPEND_KEY_GENERATION_NAMESPACE,
+    connectionId,
+    JSON.stringify(generations)
+  );
+}
+
+/** Drop all auto-spend bookkeeping of a deleted connection. */
 export function deleteCodexAutospendCount(connectionId: string): void {
   const db = getDbInstance() as unknown as DbLike;
-  db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(
-    AUTOSPEND_NAMESPACE,
-    connectionId
-  );
+  const statement = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
+  statement.run(AUTOSPEND_NAMESPACE, connectionId);
+  statement.run(AUTOSPEND_KEY_GENERATION_NAMESPACE, connectionId);
 }

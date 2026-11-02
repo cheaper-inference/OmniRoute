@@ -12,6 +12,8 @@
  *   false in src/lib/db/settings.ts) plus the per-connection allowlist.
  * - `maxPerDay` ceiling per connection (UTC day) so a bug cannot drain an
  *   account.
+ * - Only active connections: the tick filters on `isActive` and the spend path
+ *   re-checks it, so a disabled or auto-disabled account is never spent on.
  * - Deterministic `redeem_request_id` per credit, so a retry never double-spends.
  * - Never runs in the request hot path.
  *
@@ -88,6 +90,7 @@ export async function runCodexAutospendTick(
     const connections = await deps.getProviderConnections({
       provider: "codex",
       authType: "oauth",
+      isActive: true,
     });
 
     for (const connection of connections) {
