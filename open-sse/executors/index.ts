@@ -224,6 +224,13 @@ const CHAT_UNSUPPORTED_CLOUD_AGENT_PROVIDERS = new Set(["jules"]);
 const CHAT_UNSUPPORTED_SEARCH_PROVIDERS = new Set(Object.keys(SEARCH_PROVIDERS));
 
 export async function getExecutor(provider: string): Promise<BaseExecutor> {
+  if (provider === "typesafe") {
+    const error = new Error(
+      "TypeSafe only supports decision inference; use /v1/systemone instead of chat completions"
+    );
+    (error as Error & { status?: number }).status = 400;
+    throw error;
+  }
   assertMicrosoftDesignerWebProviderAvailable(provider);
   assertRuntimeProviderAvailable(provider);
   assertCommonChatGptWebProviderAvailable(provider);

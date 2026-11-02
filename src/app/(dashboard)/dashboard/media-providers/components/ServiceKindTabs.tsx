@@ -6,6 +6,7 @@ import type { ServiceKind } from "@/shared/constants/providers";
 
 const KIND_ICON: Record<ServiceKind, string> = {
   llm: "chat",
+  decision: "fact_check",
   embedding: "data_object",
   image: "image",
   imageToText: "image_search",
@@ -31,6 +32,7 @@ interface ServiceKindTabsProps {
  */
 export function ServiceKindTabs({ kinds, activeKind, onSelect, className }: ServiceKindTabsProps) {
   const t = useTranslations("media");
+  const tEndpoint = useTranslations("endpoint");
 
   if (kinds.length <= 1) return null;
 
@@ -43,7 +45,7 @@ export function ServiceKindTabs({ kinds, activeKind, onSelect, className }: Serv
       onChange={(next) => onSelect(next as ServiceKind)}
       options={kinds.map((kind) => ({
         value: kind,
-        label: t(`kinds.${kind}`),
+        label: kind === "decision" ? tEndpoint("categorySystemOne") : t(`kinds.${kind}`),
         icon: KIND_ICON[kind] ?? "category",
       }))}
     />

@@ -23,12 +23,12 @@ test("typesafe is registered as an API-key specialty provider with no chat servi
   const entry = APIKEY_PROVIDERS.typesafe;
   assert.ok(entry, "typesafe must exist in APIKEY_PROVIDERS");
   assert.equal(entry.id, TYPESAFE_PROVIDER_ID);
-  assert.deepEqual(entry.serviceKinds, []);
+  assert.deepEqual(entry.serviceKinds, ["decision"]);
   assert.match(String(entry.authHint || ""), /Bearer/i);
 });
 
 test("typesafe has no chat registry models and no static catalog", () => {
-  assert.equal(getRegistryEntry(TYPESAFE_PROVIDER_ID), null);
+  assert.deepEqual(getRegistryEntry(TYPESAFE_PROVIDER_ID)?.models ?? [], []);
   assert.equal(getStaticModelsForProvider(TYPESAFE_PROVIDER_ID), undefined);
   assert.deepEqual(getProviderModels(TYPESAFE_PROVIDER_ID), []);
 });

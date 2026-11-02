@@ -514,6 +514,51 @@ export const v1ClassifySchema = z
   })
   .catchall(z.unknown());
 
+const systemOneTextSchema = z.union([
+  z.string(),
+  z.record(z.string(), z.unknown()),
+  z.array(z.unknown()),
+  z.null(),
+]);
+const systemOneQuestionSchema = z.discriminatedUnion("type", [
+  z
+    .object({
+      type: z.literal("noul"),
+      instructions: systemOneTextSchema.optional(),
+      criteria: z
+        .object({ true: systemOneTextSchema.optional(), false: systemOneTextSchema.optional() })
+        .optional(),
+    })
+    .catchall(z.unknown()),
+  z
+    .object({
+      type: z.literal("choice"),
+      instructions: systemOneTextSchema.optional(),
+      criteria: z
+        .record(z.string().min(1), systemOneTextSchema)
+        .refine((value) => Object.keys(value).length > 0, "criteria must not be empty"),
+    })
+    .catchall(z.unknown()),
+  z
+    .object({
+      type: z.literal("score"),
+      instructions: systemOneTextSchema.optional(),
+      criteria: z.array(systemOneTextSchema).min(1),
+    })
+    .catchall(z.unknown()),
+]);
+
+// POST /v1/systemone — common decision envelope; transport limits are backend-specific.
+export const v1SystemOneSchema = z
+  .object({
+    model: modelIdSchema,
+    state: z.union([nonEmptyStringSchema, z.record(z.string(), z.unknown()), z.array(z.unknown())]),
+    questions: z
+      .record(z.string().min(1), systemOneQuestionSchema)
+      .refine((value) => Object.keys(value).length > 0, "questions must not be empty"),
+  })
+  .catchall(z.unknown());
+
 // POST /v1/segment — Jina segmenter (segment.jina.ai).
 export const v1SegmentSchema = z
   .object({

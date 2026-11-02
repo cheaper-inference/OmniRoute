@@ -171,7 +171,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
   // by any future System One passthrough (#13987).
   typesafe: {
     id: "typesafe",
-    serviceKinds: [],
+    serviceKinds: ["decision"],
     alias: "typesafe",
     name: "TypeSafe AI",
     icon: "psychology",
@@ -179,7 +179,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     textIcon: "TS",
     website: "https://docs.typesafe.ai",
     authHint:
-      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time.",
+      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time. On /v1/systemone, send typesafe/jev-latest to use this key: a bare jev-latest goes through OpenRouter.",
     apiHint:
       "TypeSafe System One answers typed questions (noul / choice / score) against a state. OmniRoute does not expose TypeSafe models in chat pickers or combos.",
   },

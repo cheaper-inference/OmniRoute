@@ -41,7 +41,7 @@ export interface SyncedAvailableModel {
   supportsVision?: boolean;
   dimensions?: number;
   supportedInputTypes?: string[];
-  modelType?: "chat" | "embedding" | "image" | "rerank";
+  modelType?: "chat" | "embedding" | "image" | "rerank" | "decision";
 }
 
 export type SyncedAvailableModelInput = Omit<SyncedAvailableModel, "source"> & {
@@ -145,7 +145,7 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
         }
       : {}),
     ...(typeof record.modelType === "string"
-      ? { modelType: record.modelType as "chat" | "embedding" | "image" | "rerank" }
+      ? { modelType: record.modelType as SyncedAvailableModel["modelType"] }
       : {}),
   };
 }

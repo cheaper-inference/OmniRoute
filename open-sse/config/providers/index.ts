@@ -294,7 +294,10 @@ import { daoxeProvider } from "./registry/daoxe/index.ts";
 import { gisooProvider } from "./registry/gisoo/index.ts";
 import { demonrouteProvider } from "./registry/demonroute/index.ts";
 
+import { typesafeProvider } from "./registry/typesafe/index.ts";
+
 export const REGISTRY: Record<string, RegistryEntry> = {
+  typesafe: typesafeProvider,
   aimlapi: aimlapiProvider,
   "mlx-gemma": mlxGemmaProvider,
   "mlx-qwen": mlxQwenProvider,

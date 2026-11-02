@@ -15,7 +15,7 @@ export type LocalSyncedEndpointRoute = {
 
 export async function resolveLocalSyncedEndpointRoute(
   modelStr: string,
-  endpoint: "embeddings" | "images"
+  endpoint: "embeddings" | "images" | "systemone"
 ): Promise<LocalSyncedEndpointRoute | null> {
   const slashIndex = modelStr.indexOf("/");
   if (slashIndex <= 0 || slashIndex === modelStr.length - 1) return null;

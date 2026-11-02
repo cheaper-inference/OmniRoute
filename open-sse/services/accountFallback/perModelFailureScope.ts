@@ -129,5 +129,10 @@ export function hasPerModelFailureScope(
   if (hasPerModelQuota(provider, model, connectionPassthroughModels)) return true;
   if (typeof connectionPassthroughModels === "boolean") return connectionPassthroughModels;
   if (!provider) return false;
-  return resolveProviderId(provider) === "claude";
+  const canonical = resolveProviderId(provider);
+  // One TypeSafe key serves every Jev release, so a 404 names a mistyped or retired model
+  // id, not the key. TypeSafe is not a passthrough gateway (it cannot route arbitrary
+  // models), and its 429/5xx stay account-wide.
+  if (status === 404 && canonical === "typesafe") return true;
+  return canonical === "claude";
 }

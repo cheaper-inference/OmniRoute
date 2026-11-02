@@ -25,6 +25,7 @@ import { MUSIC_PROVIDERS } from "./musicRegistry.ts";
 import { IMAGE_PROVIDERS } from "./imageRegistryData.ts";
 import { EMBEDDING_PROVIDERS } from "./embeddingRegistry.ts";
 import { OCR_PROVIDERS } from "./ocrRegistry.ts";
+import { SYSTEMONE_BACKENDS } from "./systemOneRegistry.ts";
 
 /** Media kinds whose provider membership is defined by a backend registry. */
 export const MEDIA_KIND_REGISTRIES = {
@@ -35,6 +36,7 @@ export const MEDIA_KIND_REGISTRIES = {
   image: IMAGE_PROVIDERS,
   embedding: EMBEDDING_PROVIDERS,
   ocr: OCR_PROVIDERS,
+  decision: SYSTEMONE_BACKENDS,
 } as const satisfies Record<string, Record<string, unknown>>;
 
 export type RegistryMediaKind = keyof typeof MEDIA_KIND_REGISTRIES;
