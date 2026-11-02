@@ -8,7 +8,7 @@
  * to roughly once per user per apiKeyHelper refresh.
  */
 
-import { createHash } from "node:crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import * as log from "@/sse/utils/logger";
 import { getSsoShadowSecret, provisionSsoIdentity } from "@/lib/db/ssoIdentities";
 import { getEntraConfig } from "./config";
@@ -48,9 +48,8 @@ export function resetSsoResolutionCache(): void {
 }
 
 function hashToken(token: string): string {
-  // Cache key, not a password hash — the input is a signed JWT. Hashing keeps
-  // raw bearer tokens from sitting in memory as Map keys.
-  return createHash("sha256").update(token).digest("hex"); // nosemgrep: insufficient-password-hash
+  // Hashing keeps raw bearer JWTs from sitting in memory as Map keys.
+  return opaqueTokenFingerprint(token);
 }
 
 function pruneCache(): void {
