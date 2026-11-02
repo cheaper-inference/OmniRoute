@@ -482,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## ማዋቀሪያ
+## ማዋቀር
 
-`open-sse/config/` የማዋቀሪያ ንብርብሩን ይዟል፡
+`open-sse/config/` የማዋቀሪያውን ንብርብር ይይዛል፡-
 
-| ፋይል                             | ዓላማ                              |
-| ------------------------------- | -------------------------------- |
-| `providerRegistry.ts`           | ከ375 አቅራቢዎች ዝርዝር ላይ የቻት-ሞዴል ምዝገባ |
-| `providerModels.ts`             | የሞዴል ተለዋዋጭ ስሞች፣ የቅርጸት ካርታ        |
-| `constants.ts`                  | የጊዜ ማብቂያዎች፣ ገደቦች፣ የሁኔታ ኮዶች       |
-| `defaultThinkingSignature.ts`   | ነባሪው የClaude አስተሳሰብ ፊርማ          |
-| `modelStrip.ts` (በservices ውስጥ) | በአቅራቢ ደረጃ የመስኮች ማጥፋት             |
+| ፋይል                           | ዓላማ                              |
+| ----------------------------- | -------------------------------- |
+| `providerRegistry.ts`         | በ377 አቅራቢ ካታሎግ ላይ የውይይት-ሞዴል መዝገብ |
+| `providerModels.ts`           | የሞዴል ተለዋጭ ስሞች፣ የቅርጸት ካርታ         |
+| `constants.ts`                | የጊዜ ማብቂያዎች፣ ገደቦች፣ የሁኔታ ኮዶች       |
+| `defaultThinkingSignature.ts` | ነባሪ Claude አስተሳሰብ ፊርማ            |
+| `modelStrip.ts` (በአገልግሎት ውስጥ) | በአቅራቢው መስክ ማራገፍ                  |
 
-### የአቅራቢ ምዝገባ ስኬማ
+### የአቅራቢዎች መዝገብ ቤት እቅድ
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-የZod ማረጋገጫ በሞጁል ጭነት ጊዜ ሁሉም የአቅራቢ ማዋቀሪያዎች ትክክል መሆናቸውን ያረጋግጣል።
+Zod በሞጁል ጭነት ማረጋገጥ ሁሉም የአቅራቢዎች ውቅሮች ትክክለኛ መሆናቸውን ያረጋግጣል።
 
 ---
 

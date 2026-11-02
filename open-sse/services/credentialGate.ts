@@ -16,8 +16,21 @@
 import {
   isCredentialHealthy,
   isCredentialStale,
+  getCredentialHealth,
+  INVALID_CREDENTIAL_DIAGNOSES,
   getCredentialHealthSummary,
 } from "@/lib/credentialHealth/cache";
+
+// Only fixed, internal diagnostic codes may appear in gate skip logs. A valid
+// enum-shaped but unrecognized upstream payload must never be logged verbatim.
+const SAFE_INCONCLUSIVE_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
+  "upstream_ambiguous_auth_or_quota",
+  "provider_error",
+  "runtime_error",
+  "validation_error",
+  "unsupported",
+  "unknown",
+]);
 
 export interface CredentialGateResult {
   /** true = healthy, false = skip (bad), undefined = unknown */
@@ -46,9 +59,20 @@ export function checkCredentialGate(
   const healthy = isCredentialHealthy(connectionId);
 
   if (healthy === false) {
+    const rawType = getCredentialHealth(connectionId)?.lastErrorType;
+    // A valid-looking code could still carry untrusted provider content.
+    // Only emit exact internal diagnosis enum values; never raw probe errors.
+    const diagnosis =
+      typeof rawType === "string" &&
+      (INVALID_CREDENTIAL_DIAGNOSES.has(rawType) || SAFE_INCONCLUSIVE_PROBE_DIAGNOSES.has(rawType))
+        ? rawType
+        : "unknown";
+    const knownBad = INVALID_CREDENTIAL_DIAGNOSES.has(diagnosis);
+    const verdict = knownBad ? "has known-bad credentials" : "has a failed health probe";
+    const prefix = `Credential gate: ${modelStr} — connection ${connectionId}`;
     return {
       allowed: false,
-      reason: `Credential gate: ${modelStr} — connection ${connectionId} has known-bad credentials (skipping)`,
+      reason: `${prefix} ${verdict} (diagnosis: ${diagnosis}; skipping)`,
     };
   }
 

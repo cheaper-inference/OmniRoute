@@ -484,17 +484,17 @@ Dabei werden folgende Elemente verarbeitet:
 
 ## Konfiguration
 
-`open-sse/config/` enthält die Konfigurationsschicht:
+`open-sse/config/` enthält die Konfigurationsebene:
 
-| Datei                         | Zweck                                                   |
-| ----------------------------- | ------------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-Modell-Registry über den Katalog mit 375 Providern |
-| `providerModels.ts`           | Modell-Aliase, Format-Mapping                           |
-| `constants.ts`                | Timeouts, Limits, Statuscodes                           |
-| `defaultThinkingSignature.ts` | Standard-Thinking-Signatur für Claude                   |
-| `modelStrip.ts` (in services) | Provider-spezifisches Entfernen von Feldern             |
+| Datei                                 | Zweck                                                   |
+| ------------------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`                 | Chat-Modell-Registrierung über den 377-Anbieter-Katalog |
+| `providerModels.ts`                   | Modellaliase, Formatzuordnung                           |
+| `constants.ts`                        | Timeouts, Limits, Statuscodes                           |
+| `defaultThinkingSignature.ts`         | Standard- Claude -Thinking-Signatur                     |
+| `modelStrip.ts` (in Dienstleistungen) | Feldentfernung pro Anbieter                             |
 
-### Provider-Registry-Schema
+### Schema der Anbieterregistrierung
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Die Zod-Validierung beim Laden des Moduls stellt sicher, dass alle Provider-Konfigurationen gültig sind.
+Zod Validierung beim Laden des Moduls stellt sicher, dass alle Anbieterkonfigurationen gültig sind.
 
 ---
 

@@ -126,6 +126,30 @@ async function buildGatewayLiveCatalogCheck(
 }
 
 /**
+ * The `claude/<id>` discovery-mirror pass, gated 3 levels deep (global > provider >
+ * model). The per-key `allowCcDiscoveryAliases` gate is applied by the caller.
+ */
+function appendCcMirrorsWhenEnabled(
+  models: Array<Record<string, any>>,
+  mirrorRefinements: boolean
+): Array<Record<string, any>> {
+  const ccAliasGlobal = isCcAliasGlobalEnabled();
+  const ccAliasSettings = getCcAliasSettingsBulk();
+  if (!ccAliasGlobal && ccAliasSettings.providers.size === 0 && ccAliasSettings.models.size === 0) {
+    return models;
+  }
+  return appendCcDiscoveryAliases(
+    models,
+    buildCcAliasPredicate({
+      global: ccAliasGlobal,
+      providers: ccAliasSettings.providers,
+      models: ccAliasSettings.models,
+    }),
+    { refined: mirrorRefinements, isResolvableAutoId: isResolvableBuiltinAutoId }
+  );
+}
+
+/**
  * Post-filter chain applied AFTER the API-key filter, so variants and mirrors are
  * only derived from models the caller may actually see.
  *
@@ -146,6 +170,7 @@ export async function applyCatalogPostFilters(
     authorizeSyntheticModel?: CatalogVariantAuthorizer;
     /** Combo targets and node prefixes for the per-entry `pricing` object. */
     pricing?: CatalogPricingContext;
+    allowCcDiscoveryAliases?: boolean;
   }
 ): Promise<Array<Record<string, any>>> {
   const yieldTurn = (): Promise<void> => new Promise((resolve) => setImmediate(resolve));
@@ -215,23 +240,15 @@ export async function applyCatalogPostFilters(
   // see ccDiscoveryAliases.ts) and default-off. Deliberately NOT filtered by model
   // `type` here — non-chat entries (embedding/image/etc.) get a mirror too; the
   // gate itself (default-off + explicit opt-in) is the operator's filter, not a
-  // hardcoded type allowlist.
+  // hardcoded type allowlist. The per-key flag is an outer listing gate and defaults
+  // on for backward compatibility. This pass receives the already-authorized rows,
+  // so enabling aliases can never introduce a model/combo the key could not see.
   // CATALOG_MIRROR_REFINEMENTS_ENABLED (default off): resolved once per build. Off keeps
   // both mirror passes exactly as before; on mirrors claude/ effort variants, drops
   // mirrors that cannot resolve, and checks gateways against what they will receive.
   const mirrorRefinements = isCatalogMirrorRefinementsEnabled();
-  const ccAliasGlobal = isCcAliasGlobalEnabled();
-  const ccAliasSettings = getCcAliasSettingsBulk();
-  if (ccAliasGlobal || ccAliasSettings.providers.size > 0 || ccAliasSettings.models.size > 0) {
-    finalModels = appendCcDiscoveryAliases(
-      finalModels,
-      buildCcAliasPredicate({
-        global: ccAliasGlobal,
-        providers: ccAliasSettings.providers,
-        models: ccAliasSettings.models,
-      }),
-      { refined: mirrorRefinements, isResolvableAutoId: isResolvableBuiltinAutoId }
-    );
+  if (ctx.allowCcDiscoveryAliases !== false) {
+    finalModels = appendCcMirrorsWhenEnabled(finalModels, mirrorRefinements);
   }
 
   // Advertise `<gateway-alias>/<id>` functional-gateway mirrors so discovery

@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — Next.js na aplikasyon
+## `src/` — Next.js application
 
 ```
 src/
-├── app/                 # App Router (mga page + API route + status page + landing page)
-├── lib/                 # Mga pangunahing library / module ng domain (80 subdirectory + ~70 top-level na file)
-├── domain/              # Purong lohika ng domain (policy engine, fallback, gastos, lockout, comboResolver, assessment)
-├── server/              # Mga module para lamang sa server (authz pipeline, cors, auth middleware) — hindi maaaring i-import mula sa client
-├── shared/              # Pinagsasaluhan ng server at client kung ligtas (mga constant, type, validation, contract, utility)
-├── i18n/                # next-intl config + message JSON para sa bawat locale (67 locale)
-├── middleware/          # Next.js middleware (pagdaragdag ng impormasyon sa request, pagtukoy ng locale)
-├── mitm/                # Core ng MITM proxy: pagbuo/pag-install ng certificate, mga handler, target, inspector, mask, passthrough
-│   ├── handlers/        # 9 na IDE-agent handler class na nag-e-extend sa MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Layer ng pagkuha ng trapiko: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Pandugtong ng model adapter (legacy shim)
-├── scripts/             # Mga maintenance script sa loob ng tree (hal., backfillAggregation)
-├── sse/                 # Mga legacy na SSE handler/service (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Legacy na in-memory store (unti-unting pinapalitan ng src/lib/db)
-├── types/               # Mga pinagsasaluhang TS type file
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
 ├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
-├── instrumentation-node.ts  # Instrumentation para lamang sa Node
+├── instrumentation-node.ts  # Node-only instrumentation
 └── proxy.ts             # HTTP-proxy entry shim
 ```
 
 ### `src/app/` — App Router (Next.js 16)
 
-| Landas                                                                       | Layunin                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Pampublikong API na compatible sa OpenAI (~25 sub-route: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers, atbp.)                                                                                                                 |
-| `app/api/v1beta/`                                                            | Mga endpoint ng API na istilong Gemini                                                                                                                                                                                                                                                                                     |
-| `app/api/playground/`                                                        | Mga route ng Playground Studio: `improve-prompt/` (POST — tagapagsulat muli ng prompt gamit ang LLM), `presets/` (GET listahan / POST gumawa), `presets/[id]/` (GET / PUT / DELETE) — tingnan ang `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
-| `app/api/` (hindi v1)                                                        | Mga route para sa pamamahala/admin (~60 directory: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, atbp.)                                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 route (kontrol sa server, estado/DNS/mappings ng agent, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Tingnan ang `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                 |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ route (requests, sessions, hosts, capture-modes, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Tingnan ang `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                     |
-| `app/a2a/`                                                                   | Pasukan ng A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                  |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (pagtuklas)                                                                                                                                                                                                                                                                                                 |
-| `app/(dashboard)/dashboard/`                                                 | Mga page ng Dashboard UI (50+ seksyon, ~118 page.tsx file: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity, atbp.)                                                                                                                                      |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 tab: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — tingnan ang `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                         |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plano 21): `page.tsx` (shell na may 3 tab), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Page ng dashboard ng AgentBridge — card ng server, 9 na card ng agent, setup wizard, pagmamapa ng modelo, listahan ng bypass. i18n PT-BR + EN. Tingnan ang `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                               |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Page ng dashboard ng Traffic Inspector — hatiang DevTools, 7 tab ng detalye, 4 na toggle ng capture mode, recorder ng session, pagkukulay ayon sa konteksto. i18n PT-BR + EN. Tingnan ang `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                          |
-| `app/(dashboard)/dashboard/activity/`                                        | Pahina ng feed ng aktibidad (Group B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — tingnan ang `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Pahina ng Pagbabahagi ng Quota (Group B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pahina ng configuration ng provider plan (Group B): `page.tsx` + `ProviderPlanConfigClient.tsx` — pag-override sa mga dimensyon ng quota para sa bawat koneksyon                                                                                                                                                           |
-| `app/docs/`                                                                  | Naka-embed na viewer ng dokumentasyon (nire-render ang `docs/*.md`)                                                                                                                                                                                                                                                        |
-| `app/landing/`                                                               | Landing page para sa marketing                                                                                                                                                                                                                                                                                             |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Mga pahinang nauugnay sa auth                                                                                                                                                                                                                                                                                              |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | Mga pahina ng HTTP error                                                                                                                                                                                                                                                                                                   |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Mga static/status na pahina                                                                                                                                                                                                                                                                                                |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Root layout, home, PWA manifest, global CSS                                                                                                                                                                                                                                                                                |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Mga boundary ng error                                                                                                                                                                                                                                                                                                      |
+| Daan                                                                         | Layunin                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `app/api/v1/`                                                                | Pampublikong OpenAI-compat API (~ 25 sub-ruta: chat, pagkumpleto, pag-embed, file, batch, audio, mga larawan, video, musika, rerank, moderation, paghahanap, ws, ahente, account, provider, atbp.)                                                                                                                 |
+| `app/api/v1beta/`                                                            | Gemini-style API endpoints                                                                                                                                                                                                                                                                                         |
+| `app/api/playground/`                                                        | Mga ruta ng Playground Studio: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — tingnan `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                          |
+| `app/api/` (hindi v1)                                                        | mga ruta Management/admin (~ 60 na direktoryo: mga provider, combo, setting, mcp, a2a, evals, memory, kasanayan, webhooks, pagsunod, katatagan, pagsubaybay, mga tunnel, cli-tool, atbp.)                                                                                                                          |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ruta (kontrol ng server, ahente state/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Tingnan `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                 |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + na ruta (mga kahilingan, session, host, capture-mode, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Tingnan ang `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                       |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 entry point (`POST /a2a`)                                                                                                                                                                                                                                                                         |
+| `app/.well-known/agent.json/`                                                | A2A Agent Card (pagtuklas)                                                                                                                                                                                                                                                                                         |
+| `app/(dashboard)/dashboard/`                                                 | Mga pahina ng dashboard UI (50 + na seksyon, ~ 118 page.tsx na file: mga provider, combo, setting, memory, kasanayan, webhook, eval, audit, batch, cache, gastos, kalusugan, system, aktibidad, atbp.)                                                                                                             |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 tab: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — tingnan `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                     |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (3-tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard page — server card, 9 agent card, setup wizard, model mapping, bypass list. i18n PT-BR + EN. Tingnan ang `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                   |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pahina ng dashboard ng Traffic Inspector — DevTools split, 7 tab na detalye, 4 na toggle ng capture mode, recorder ng session, colorization ng konteksto. i18n PT-BR + EN. Tingnan ang `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                     |
+| `app/(dashboard)/dashboard/activity/`                                        | Page ng feed ng aktibidad (Group B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — tingnan `docs/architecture/MONITORING_SECTIONS.md`                                                                                                  |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Pahina ng Pagbabahagi ng Quota (Pangkat B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                            |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Page ng config ng provider plan (Group B): `page.tsx` + `ProviderPlanConfigClient.tsx` — mga dimensyon ng quota sa bawat override ng koneksyon                                                                                                                                                                     |
+| `app/docs/`                                                                  | Naka-embed na viewer ng dokumentasyon (nag-render ng `docs/*.md`)                                                                                                                                                                                                                                                  |
+| `app/landing/`                                                               | landing page sa marketing                                                                                                                                                                                                                                                                                          |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Mga page na may kaugnayan sa auth                                                                                                                                                                                                                                                                                  |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP mga pahina ng error                                                                                                                                                                                                                                                                                           |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status mga pahina                                                                                                                                                                                                                                                                                           |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Layout ng ugat, tahanan, PWA manifest, global CSS                                                                                                                                                                                                                                                                  |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Mga hangganan ng error                                                                                                                                                                                                                                                                                             |
 
-### `src/lib/` — Mga pangunahing library (~50 module)
+### `src/lib/` — Mga pangunahing aklatan (~ 50 modules)
 
-| Module                                   | Layunin                                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `a2a/`                                   | Tagapamahala ng gawain para sa A2A protocol, mga kasanayan (5), streaming                                                                                                                                                                                                                                                            |
-| `acp/`                                   | Registry ng CLI Agent (lokal na pagtuklas ng CLI — tingnan ang `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                           |
-| `api/`                                   | Mga nakabahaging helper ng API (`requireManagementAuth`, validation)                                                                                                                                                                                                                                                                 |
-| `auth/`                                  | Session, pag-hash ng password, validation ng token                                                                                                                                                                                                                                                                                   |
-| `batches/`                               | Mga handler ng OpenAI Batches API                                                                                                                                                                                                                                                                                                    |
-| `catalog/`                               | Zod validation ng catalog ng provider + pagtukoy sa capability                                                                                                                                                                                                                                                                       |
-| `cloudAgent/`                            | Mga Cloud Agent (Codex Cloud, Devin, Jules) — tingnan ang `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                           |
-| `combos/`                                | Pagtukoy sa combo + mga helper sa muling pagsasaayos                                                                                                                                                                                                                                                                                 |
-| `audit/`                                 | Mga helper ng activity feed: `highLevelActions.ts` (allowlist + `isHighLevelAction()`), `activityIcons.ts` (mapa ng aksiyon → icon/pandiwa), `timeline.ts` (groupByDay/relativeTime) — tingnan ang `docs/architecture/MONITORING_SECTIONS.md`                                                                                        |
-| `compliance/`                            | Log ng audit + audit ng provider — tingnan ang `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                         |
-| `compression/`                           | Pandikit ng compression engine (matatagpuan ang mga engine sa `open-sse/services/compression/`)                                                                                                                                                                                                                                      |
-| `config/`                                | Mga helper ng runtime config                                                                                                                                                                                                                                                                                                         |
-| `db/`                                    | 120+ domain DB module + 168 migration (palaging dumaan dito para sa SQLite)                                                                                                                                                                                                                                                          |
-| `quota/`                                 | Quota Sharing Engine: `dimensions.ts` (mga uri/Zod), `types.ts` (interface ng QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — tingnan ang `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Client ng katalogo ng libreng modelo ng Radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — tingnan ang `docs/frameworks/RADAR.md`                                                                                                                                   |
-| `display/`                               | Mga helper sa pag-format ng UI (gastos, latency, atbp.)                                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | Mga helper ng serbisyo sa embeddings                                                                                                                                                                                                                                                                                                 |
-| `env/`                                   | Pag-parse at pag-validate ng environment variable                                                                                                                                                                                                                                                                                    |
-| `evals/`                                 | Framework ng eval (mga suite, runner, runtime) — tingnan ang `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                              |
-| `guardrails/`                            | PII masker, prompt injection, vision bridge — tingnan ang `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                              |
-| `jobs/`                                  | Mga background job (tulad ng cron)                                                                                                                                                                                                                                                                                                   |
-| `memory/`                                | Memorya ng pag-uusap (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — tingnan ang `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                 |
-| `memory/embedding/`                      | Multi-source embedding layer: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plano 21)                                                                                                                                                                                       |
-| `memory/vectorStore.ts`                  | Wrapper ng sqlite-vec v0.1.9 — brute-force na KNN + hybrid RRF (FTS5 + vector, k=60). Lazy-init, maayos na bumababa ang functionality kapag hindi available ang sqlite-vec. (plano 21)                                                                                                                                               |
-| `memory/reindex.ts`                      | `runReindexBatch()` — pinoproseso sa background ang mga memoryang may `needs_reindex=1`; tinatawag ng `POST /api/memory/reindex` at ng lazy-backfill path. (plano 21)                                                                                                                                                                |
-| `monitoring/`                            | Mga health check, pag-emit ng metrics                                                                                                                                                                                                                                                                                                |
-| `oauth/`                                 | Mga OAuth/import flow para sa 22 provider module (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                         |
-| `plugins/`                               | Registry ng plugin                                                                                                                                                                                                                                                                                                                   |
-| `promptCache/`                           | Mga breakpoint ng prompt cache na istilong Anthropic                                                                                                                                                                                                                                                                                 |
-| `skills/`                                | Framework ng skills (built-in + marketplace + SkillsSH) — tingnan ang `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                    |
-| `playground/`                            | Mga shared helper ng Playground Studio: `codeExport.ts` (generator ng curl/Python/TS), `promptImprover.ts` (tagabuo ng meta-prompt), `streamMetrics.ts` (purong TTFT/TPS), `types.ts` (talahanayan ng pagpepresyo) — tingnan ang `docs/frameworks/PLAYGROUND_STUDIO.md`                                                              |
-| `webhookDispatcher.ts`                   | Paghahatid ng HMAC webhook — tingnan ang `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Mga tagapamahala ng tunnel — tingnan ang `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                 |
-| `cloudSync.ts`, `initCloudSync.ts`       | Opsyonal na cloud sync ng state                                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | Re-export barrel para sa mga db module (walang lohika — mga re-export lamang)                                                                                                                                                                                                                                                        |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Pag-cache ng request + idempotency                                                                                                                                                                                                                                                                                                   |
-| (~30 pang top-level na file)             | Mga espesyal na helper (logEnv, modelsDevSync, piiSanitizer, atbp.)                                                                                                                                                                                                                                                                  |
+| Module                                           | Layunin                                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                           | A2A protocol task manager, mga kasanayan (5), streaming                                                                                                                                                                                                                                                                     |
+| `acp/`                                           | CLI Agent Registry (lokal na pagtuklas ng CLI — tingnan `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                         |
+| `api/`                                           | Mga nakabahaging API helper (`requireManagementAuth`, validation)                                                                                                                                                                                                                                                           |
+| `auth/`                                          | Session, pag-hash ng password, pagpapatunay ng token                                                                                                                                                                                                                                                                        |
+| `batches/`                                       | OpenAI Mga batch ng mga humahawak API                                                                                                                                                                                                                                                                                       |
+| `catalog/`                                       | Katalogo ng provider ng Zod validation + capability resolution                                                                                                                                                                                                                                                              |
+| `cloudAgent/`                                    | Mga Ahente ng Ulap (Codex Cloud, Devin, Jules) — tingnan `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                   |
+| `combos/`                                        | Combo resolution + muling ayusin ang mga katulong                                                                                                                                                                                                                                                                           |
+| `audit/`                                         | Mga katulong sa feed ng aktibidad: `highLevelActions.ts` (allowlist + `isHighLevelAction()`), `activityIcons.ts` (action → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — tingnan ang `docs/architecture/MONITORING_SECTIONS.md`                                                                                 |
+| `compliance/`                                    | Audit log + provider audit — tingnan ang `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                      |
+| `compression/`                                   | Compression engine glue (ang mga makina ay nakatira sa `open-sse/services/compression/`)                                                                                                                                                                                                                                    |
+| `config/`                                        | Mga katulong sa runtime config                                                                                                                                                                                                                                                                                              |
+| `db/`                                            | 120 + domain DB modules + 168 migrations (palaging dumaan dito para sa SQLite)                                                                                                                                                                                                                                              |
+| `quota/`                                         | Quota Sharing Engine: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — tingnan `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                         | Radar free-model catalog client: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — tingnan `docs/frameworks/RADAR.md`                                                                                                                                            |
+| `display/`                                       | mga katulong sa pag-format ng UI (gastos, latency, atbp.)                                                                                                                                                                                                                                                                   |
+| `embeddings/`                                    | Mga katulong sa serbisyo ng pag-embed                                                                                                                                                                                                                                                                                       |
+| `env/`                                           | Env variable parsing + validation                                                                                                                                                                                                                                                                                           |
+| `evals/`                                         | Eval framework (mga suite, runner, runtime) — tingnan `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                            |
+| `guardrails/`                                    | PII masker, agarang iniksyon, vision bridge — tingnan `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                         |
+| `jobs/`                                          | Mga trabaho sa background (tulad ng cron)                                                                                                                                                                                                                                                                                   |
+| `memory/`                                        | Memorya ng pag-uusap (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — tingnan `docs/frameworks/MEMORY.md`                                                                                                                                                                                                            |
+| `memory/embedding/`                              | Multi-source embedding layer: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                               |
+| `memory/vectorStore.ts`                          | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, degradefully kapag hindi available ang sqlite-vec. (plano 21)                                                                                                                                                                  |
+| `memory/reindex.ts`                              | `runReindexBatch()` — nagpoproseso ng mga alaala na may `needs_reindex=1` sa background; tinatawag ng `POST /api/memory/reindex` at lazy-backfill path. (plano 21)                                                                                                                                                          |
+| `monitoring/`                                    | Mga pagsusuri sa kalusugan, paglabas ng mga sukatan                                                                                                                                                                                                                                                                         |
+| `oauth/`                                         | OAuth/import flows para sa 22 provider modules (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, xaider, zqa, zqa, zqa, zqa, zqa                                                           |
+| `plugins/`                                       | Plugin na pagpapatala                                                                                                                                                                                                                                                                                                       |
+| `promptCache/`                                   | Mga breakpoint sa cache ng antropiko na istilong prompt                                                                                                                                                                                                                                                                     |
+| `skills/`                                        | Framework ng mga kasanayan (built-in na + marketplace + SkillsSH) — tingnan `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                     |
+| `playground/`                                    | Nagbahagi ang Playground Studio ng mga katulong: `codeExport.ts` (curl/Python/TS generator), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (pricing table) — tingnan `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                     |
+| `webhookDispatcher.ts`                           | HMAC webhook delivery — tingnan ang `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts`         | Mga tagapamahala ng tunel - tingnan `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                             |
+| `cloudSync.ts`, `initCloudSync.ts`               | Opsyonal na cloud sync ng estado                                                                                                                                                                                                                                                                                            |
+| `localDb.ts`                                     | Muling i-export ang bariles para sa mga db module (walang lohika - muling pag-export lamang)                                                                                                                                                                                                                                |
+| `cacheLayer.ts`, `idempotencyLayer.ts`           | Humiling ng pag-cache + idempotency                                                                                                                                                                                                                                                                                         |
+| (~ 30 higit pang nangungunang antas ng mga file) | Mga dalubhasang katulong (logEnv, modelsDevSync, piiSanitizer, atbp.)                                                                                                                                                                                                                                                       |
 
-### `src/lib/db/` — Database (147 module + 208 migration)
+### `src/lib/db/` — Database (147 modules + 208 migrations)
 
-| Subdir                    | Layunin                                                                                                                                                                            |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton na may WAL journaling                                                                                                                                  |
-| `db/migrations/`          | Mga may bersyong SQL file (idempotent, transactional). Idinaragdag ng `073_memory_vec.sql` ang `memory_vec_meta` + `needs_reindex` column (plano 21).                              |
-| `db/playgroundPresets.ts` | CRUD module para sa mga preset ng Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
-| `db/memoryVec.ts`         | CRUD para sa `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, atbp. (plano 21)                  |
-| `db/<domain>.ts`          | Isang module sa bawat domain: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache, atbp. |
+| Subdir                    | Layunin                                                                                                                                                                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton na may WAL journaling                                                                                                                                        |
+| `db/migrations/`          | Mga bersyong SQL file (idempotent, transactional). `073_memory_vec.sql` ay nagdaragdag `memory_vec_meta` + `needs_reindex` column (plano 21).                                            |
+| `db/playgroundPresets.ts` | CRUD module para sa mga preset ng Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)       |
+| `db/memoryVec.ts`         | CRUD para sa `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, atbp. (plan 21)                         |
+| `db/<domain>.ts`          | Isang module sa bawat domain: mga provider, combo, apiKeys, user, session, paggamit, audit log, webhooks, kasanayan, memory_entry, cloud_agent_tasks, evals* \* , reasoning_cache, atbp. |
 
 ### `src/domain/`
 
 | Module                 | Layunin                                               |
 | ---------------------- | ----------------------------------------------------- |
-| `policy.ts`            | Policy engine                                         |
+| `policy.ts`            | Engine ng patakaran                                   |
 | `fallbackPolicy.ts`    | Fallback decision tree                                |
 | `costRules.ts`         | Mga panuntunan sa pagkalkula ng gastos                |
-| `lockoutPolicy.ts`     | Patakaran sa pag-lockout ng modelo/koneksyon          |
-| `tagRouter.ts`         | Routing batay sa tag                                  |
-| `comboResolver.ts`     | Pagresolba ng combo (ginagamit ng combo engine)       |
-| `modelAvailability.ts` | Pagsusuri ng availability ng bawat modelo             |
-| `assessment/`          | Pagtatasa ng modelo (Yugto 1 ng RFC-AUTO-ASSESSMENT ) |
+| `lockoutPolicy.ts`     | patakaran sa lockout Model/connection                 |
+| `tagRouter.ts`         | Pagruruta na nakabatay sa tag                         |
+| `comboResolver.ts`     | Combo resolution (ginagamit ng combo engine)          |
+| `modelAvailability.ts` | Pagsusuri sa availability ng bawat modelo             |
+| `assessment/`          | Pagtatasa ng modelo (Phase 1 ng RFC-AUTO-ASSESSMENT ) |
 
 ### `src/server/`
 
-| Module   | Layunin                                                                                                        |
-| -------- | -------------------------------------------------------------------------------------------------------------- |
-| `authz/` | Pipeline ng awtorisasyon: `classify` → `policies` → `enforce` — tingnan ang `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | Configuration ng CORS                                                                                          |
-| `auth/`  | Middleware ng session                                                                                          |
+| Module   | Layunin                                                                                                    |
+| -------- | ---------------------------------------------------------------------------------------------------------- |
+| `authz/` | Pipeline ng awtorisasyon: `classify` → `policies` → `enforce` — tingnan `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | pagsasaayos CORS                                                                                           |
+| `auth/`  | Session middleware                                                                                         |
 
 ### `src/shared/`
 
-| Module                           | Layunin                                                                                                                      |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | API ng component ng dashboard: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan ang `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → mga component ng Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **375 provider** na may Zod validation (pinagmumulan ng katotohanan)                                                         |
-| `constants/cliTools.ts`          | Registry ng external na CLI tool                                                                                             |
-| `constants/routingStrategies.ts` | **20 diskarte sa routing** na may mga priyoridad                                                                             |
-| `constants/publicApiRoutes.ts`   | Mga route na nangangailangan ng Bearer auth (kumpara sa management auth)                                                     |
-| `constants/upstreamHeaders.ts`   | Denylist ng header para sa mga upstream request                                                                              |
-| `validation/schemas.ts`          | ~80 Zod schema (iisang pinagmumulan ng katotohanan para sa mga API contract)                                                 |
-| `validation/helpers.ts`          | Mga helper para sa Zod validation (`validateBody`, atbp.)                                                                    |
-| `types/`                         | Mga nakabahaging TS type                                                                                                     |
-| `contracts/`                     | Mga pampublikong API contract (ginagamit ng `files:` sa `package.json`)                                                      |
-| `utils/circuitBreaker.ts`        | Circuit breaker ng provider (tingnan ang `docs/architecture/RESILIENCE_GUIDE.md`)                                            |
-| `utils/apiAuth.ts`               | Pagpapatunay ng API key, pagsusuri ng scope                                                                                  |
-| `utils/fetchTimeout.ts`          | Mga wrapper ng timeout/abort para sa upstream fetch                                                                          |
-| `utils/releaseNotes.ts`          | Parser ng closed v2/legacy announcement, localization, at pag-dismiss ayon sa ID                                             |
+| Module                           | Layunin                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `components/`                    | Dashboard component API: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
+| `constants/providers.ts`         | **377 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
+| `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
+| `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
+| `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |
+| `constants/upstreamHeaders.ts`   | Header denylist para sa upstream na mga kahilingan                                                                 |
+| `validation/schemas.ts`          | ~ 80 Zod schemas (iisang pinagmumulan ng katotohanan para sa mga kontrata API )                                    |
+| `validation/helpers.ts`          | mga katulong sa pagpapatunay ng Zod (`validateBody`, atbp.)                                                        |
+| `types/`                         | Mga nakabahaging uri TS                                                                                            |
+| `contracts/`                     | Mga pampublikong kontrata API (ginagamit ng `files:` sa `package.json`)                                            |
+| `utils/circuitBreaker.ts`        | Tagapagbigay ng circuit breaker (tingnan `docs/architecture/RESILIENCE_GUIDE.md`)                                  |
+| `utils/apiAuth.ts`               | API key validation, scope checking                                                                                 |
+| `utils/fetchTimeout.ts`          | Timeout/abort wrapper para sa upstream fetch                                                                       |
+| `utils/releaseNotes.ts`          | Isinara ang v2/legacy announcement parser, localization at ID dismissal                                            |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Pampublikong Dokumentasyon (7 root file + 17 subdirectory)
+## `docs/` — Public Documentation (7 root file + 17 subdirs)
 
-### Mga gabay sa pinakamataas na antas
+### Mga gabay sa nangungunang antas
 
-| Dokumento                   | Layunin                                                                                            |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Pangkalahatang arkitektura, mapa ng subsystem, saklaw ng dashboard                                 |
-| `CODEBASE_DOCUMENTATION.md` | Sanggunian sa engineering: mga directory, module, convention                                       |
-| `FEATURES.md`               | Matrix ng feature na may mga highlight ng v3.8                                                     |
-| `USER_GUIDE.md`             | Manwal ng end user (setup, mga model, combo, CLI, audio, atbp.)                                    |
-| `API_REFERENCE.md`          | Sanggunian ng API endpoint na may modelo ng authentication                                         |
-| `openapi.yaml`              | OpenAPI 3.0 specification (121 path)                                                               |
-| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                             |
-| `ENVIRONMENT.md`            | Lahat ng env var (~800 ang dokumentado, ~3,050 linya sa `.env.example`)                            |
-| `TROUBLESHOOTING.md`        | Mga karaniwang error + mga kilalang isyu sa v3.8.0                                                 |
-| `RELEASE_CHECKLIST.md`      | Kumpletong daloy ng release (skills, husky, conventional commits, deploy)                          |
-| `COVERAGE_PLAN.md`          | Mga layunin sa coverage at kasalukuyang kalagayan                                                  |
-| `FREE_TIERS.md`             | Piniling mga free-tier provider (48+ libre + 11 OAuth)                                             |
-| `CLI-TOOLS.md`              | Mga external CLI integration + Internal OmniRoute CLI                                              |
-| `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locale                                                |
-| `UNINSTALL.md`              | Mga hakbang para sa malinis na pag-uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na catalog ng 375 provider (muling buuin: `npm run gen:provider-reference`) |
+| Dok                         | Layunin                                                                                   |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Mataas na antas ng arkitektura, mapa ng subsystem, ibabaw ng dashboard                    |
+| `CODEBASE_DOCUMENTATION.md` | Sanggunian sa engineering: mga direktoryo, module, mga kumbensyon                         |
+| `FEATURES.md`               | Feature matrix na may mga highlight ng v3.8                                               |
+| `USER_GUIDE.md`             | Manual ng end-user (setup, mga modelo, combo, CLIs, audio, atbp.)                         |
+| `API_REFERENCE.md`          | API endpoint reference na may modelo ng auth                                              |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 path)                                                               |
+| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                    |
+| `ENVIRONMENT.md`            | Lahat ng env vars (~ 800 documented, ~ 3,050 lines `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | Mga karaniwang error + v3.8.0 kilalang isyu                                               |
+| `RELEASE_CHECKLIST.md`      | Full release flow (skills, husky, conventional commits, deploy)                           |
+| `COVERAGE_PLAN.md`          | Mga layunin sa saklaw at kasalukuyang estado                                              |
+| `FREE_TIERS.md`             | Mga na-curate na free-tier na provider (48 + libreng + 11 OAuth)                          |
+| `CLI-TOOLS.md`              | Panlabas CLI integrations + Panloob OmniRoute CLI                                         |
+| `I18N.md`                   | i18n architecture, pagdaragdag ng isang wika, 67 locale                                   |
+| `UNINSTALL.md`              | Linisin ang mga hakbang sa pag-uninstall                                                  |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 377 providers (regen: `npm run gen:provider-reference`) |
 
-### Masusing pagtalakay sa mga subsystem
+### Subsystem deep-dive
 
-| Dokumento                                     | Layunin                                                                                 |
-| --------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP server: 110 tool, 3 transport, 33 saklaw, mga REST endpoint                         |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 na skill, mga REST helper, agent card                             |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Pinag-isang gabay: A2A vs ACP vs Cloud Agents                                           |
-| `CLOUD_AGENT.md`                              | Orchestration ng Codex Cloud / Devin / Jules                                            |
-| `SKILLS.md`                                   | Framework ng skill (built-in + marketplace + SkillsSH + sandbox)                        |
-| `RADAR.md`                                    | Overlay ng catalog ng libreng model ng Radar (`RADAR_ENABLED`, naka-off bilang default) |
-| `MEMORY.md`                                   | Sistema ng memory (SQLite FTS5 + Qdrant)                                                |
-| `EVALS.md`                                    | Framework ng eval (mga suite, run, rubric)                                              |
-| `GUARDRAILS.md`                               | PII masker, prompt injection, vision bridge                                             |
-| `COMPLIANCE.md`                               | Audit log, retention, opsyong hindi gumamit ng noLog                                    |
-| `WEBHOOKS.md`                                 | Paghahatid ng webhook na nilagdaan gamit ang HMAC                                       |
-| `REASONING_REPLAY.md`                         | Hybrid memory/SQLite cache para sa `reasoning_content`                                  |
-| `AUTHZ_GUIDE.md`                              | Pipeline ng authorization (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + pag-lockout ng model                                       |
-| `docs/security/STEALTH_GUIDE.md` (git lamang) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM certificate                         |
-| `AUTO-COMBO.md`                               | Auto Combo engine (16-factor scoring, 6 na mode pack, virtual factory)                  |
+| Dok                                         | Layunin                                                                     |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP server: 110 tool, 3 transport, 33 scope, REST endpoint                  |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 na kasanayan, REST helper, agent card                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Pinag-isang gabay: A2A vs ACP vs Cloud Agents                               |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules orkestrasyon                                    |
+| `SKILLS.md`                                 | Framework ng mga kasanayan (built-in na + marketplace + SkillsSH + sandbox) |
+| `RADAR.md`                                  | Radar free-model catalog overlay (`RADAR_ENABLED`, naka-off bilang default) |
+| `MEMORY.md`                                 | Sistema ng memorya (SQLite FTS5 + Qdrant)                                   |
+| `EVALS.md`                                  | Eval framework (mga suite, run, rubrics)                                    |
+| `GUARDRAILS.md`                             | PII masker, agarang iniksyon, tulay ng paningin                             |
+| `COMPLIANCE.md`                             | Audit log, retention, noLog opt-out                                         |
+| `WEBHOOKS.md`                               | Paghahatid ng webhook na nilagdaan ng HMAC                                  |
+| `REASONING_REPLAY.md`                       | Hybrid memory/SQLite cache para `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                            | Pipeline ng awtorisasyon (`classify` → `policies` → `enforce`)              |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + model lockout                                  |
+| `docs/security/STEALTH_GUIDE.md` (git lang) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                    |
+| `AUTO-COMBO.md`                             | Auto Combo engine (16-factor scoring, 6 mode pack, virtual factory)         |
 
-### Kompresyon
+### Compression
 
-| Dokumento                       | Layunin                                                |
+| Dok                             | Layunin                                                |
 | ------------------------------- | ------------------------------------------------------ |
 | `COMPRESSION_GUIDE.md`          | Pangkalahatang-ideya ng mga compression mode + roadmap |
-| `COMPRESSION_ENGINES.md`        | Mga Caveman + RTK engine, registry contract            |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON schema ng Caveman rule pack                       |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Imbentaryo ng rule pack para sa bawat wika             |
-| `RTK_COMPRESSION.md`            | Declarative pipeline ng RTK (49 na filter)             |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, kontrata sa pagpapatala          |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                          |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Imbentaryo ng pack ng panuntunan sa bawat wika         |
+| `RTK_COMPRESSION.md`            | RTK declarative pipeline (56 na mga filter)            |
 
-### Pag-deploy
+### Deployment
 
-| Doc                          | Layunin                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Pagbuo ng Docker, mga profile (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Pangkalahatang deployment sa VM/VPS (Ubuntu/Debian + nginx + systemd)    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Deployment sa Fly.io (kasalukuyang nasa Chinese lamang)                  |
-| `TERMUX_GUIDE.md`            | Headless na Android sa pamamagitan ng Termux                             |
-| `PWA_GUIDE.md`               | Pag-install ng Progressive Web App + service worker                      |
-| `ELECTRON_GUIDE.md`          | Pagbuo + pag-sign + pamamahagi ng desktop app                            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                   |
-| `PROXY_GUIDE.md`             | 4-level na outbound proxy + 1proxy marketplace                           |
+| Dok                          | Layunin                                                              |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, mga profile (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generic na pag-deploy VM/VPS (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Pag-deploy ng Fly.io (kasalukuyang Chinese-only)                     |
+| `TERMUX_GUIDE.md`            | Walang ulo ang Android sa pamamagitan ng Termux                      |
+| `PWA_GUIDE.md`               | Progressive Web App install + service worker                         |
+| `ELECTRON_GUIDE.md`          | Bumuo ang desktop app + sign + distribute                            |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
+| `PROXY_GUIDE.md`             | 4-level na outbound proxy + 1proxy marketplace                       |
 
 ### Mga subdirectory
 
-| Subdir                | Layunin                                                                                                                                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mga lokal na salin ng dokumentasyon (41 locale)                                                                                                                                                                                                 |
-| `docs/screenshots/`   | Mga image asset para sa mga gabay                                                                                                                                                                                                               |
-| `_tasks/superpowers/` | Mga plano/spec mula sa superpowers (`writing-plans`/`brainstorming`) + pananaliksik — nakahiwalay at may sariling versioning na repo, naka-gitignore sa pangunahing tree. Tingnan ang CLAUDE.md → "Mga Artifact ng Pagpaplano at Pananaliksik". |
+| Subdir                | Layunin                                                                                                                                                                                                                          |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Mga lokal na pagsasalin ng doc (41 lokal)                                                                                                                                                                                        |
+| `docs/screenshots/`   | Mga asset ng larawan para sa mga gabay                                                                                                                                                                                           |
+| `_tasks/superpowers/` | Plans/specs mula sa mga superpower (`writing-plans`/`brainstorming`) + research — nakahiwalay, hiwalay na bersyon na repo, gitignored ng pangunahing puno. Tingnan ang CLAUDE.md → "Mga Artifact sa Pagpaplano at Pananaliksik". |
 
 ---
 

@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve request-complexity hints when selecting the primary auto-combo model, matching the complexity signal already used for fallback ranking. ([#18104](https://github.com/cheaper-inference/OmniRoute/pull/18104)) — thanks @xc0derx

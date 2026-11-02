@@ -14,36 +14,36 @@ AgentBridge는 IDE AI 에이전트의 HTTPS 트래픽을 가로채 OmniRoute의 
 
 ## §1 개요
 
-### AgentBridge란?
+### AgentBridge 란 무엇입니까?
 
-IDE 에이전트(예: GitHub Copilot, Cursor, Claude Code)가 API 호출을 수행할 때, 업스트림 AI 제공자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge는 에이전트 설정 변경 없이 TLS 수준에서 해당 연결을 투명하게 가로채어, 요청을 OmniRoute를 통해 재작성합니다.
+IDE 에이전트(예: GitHub Copilot, Cursor, Claude 코드)가 API 호출을 수행하면 업스트림 AI 공급자(OpenAI, Anthropic 등)에 직접 연결됩니다. AgentBridge 에이전트 구성 변경 없이 TLS 수준에서 해당 연결을 투명하게 가로채고 OmniRoute 통해 요청을 다시 작성합니다.
 
-이를 통해 다음이 가능합니다:
+이는 다음을 수행할 수 있음을 의미합니다.
 
-- **모든 에이전트를 모든 제공자로 재라우팅**: Copilot이 OpenAI와 통신하고 있나요? Anthropic Claude, Gemini 또는 OmniRoute의 375개 제공자 중 어디로든 리디렉션할 수 있습니다.
-- **모델 매핑 적용**: `gemini-3-flash` → `claude-sonnet-4.7`을 핸들러 수준에서 투명하게 매핑합니다.
-- **모든 에이전트 트래픽 관찰**: 가로챈 모든 요청이 [Traffic Inspector](./TRAFFIC_INSPECTOR.md)에 게시됩니다.
-- **OmniRoute 복원력 적용**: 콤보 라우팅, 서킷 브레이커, 폴백, 비용 추적이 IDE 에이전트 트래픽에도 동일하게 작동합니다.
+- **모든 에이전트를 모든 제공업체로 재라우팅** : Copilot OpenAI 와 대화 중인가요? Anthropic Claude, Gemini 또는 OmniRoute 의 377 공급자로 리디렉션하세요.
+- **모델 매핑 적용** : `gemini-3-flash` → `claude-sonnet-4.7` 핸들러 수준에서 투명하게 수행됩니다.
+- **모든 에이전트 트래픽 관찰** : 차단된 모든 요청은 [Traffic Inspector](./TRAFFIC_INSPECTOR.md) 에 게시됩니다.
+- **OmniRoute 탄력성 적용** : IDE 에이전트 트래픽에 대한 콤보 라우팅, 회로 차단기, 폴백 및 비용 추적 작업도 수행됩니다.
 
-### 시장 내 포지셔닝
+### 포지셔닝 대 시장
 
-| 기능               | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------ | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity        |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot     |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)         |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex       |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE         |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries     |    —    |    ✓     |        —        |             ✓             |
-| Claude Code        |    —    |    —     |        ✓        |             ✓             |
-| Open Code          |    —    |    —     |        ✓        |             ✓             |
-| Trae               |    —    |    —     |        —        |        🔍 조사 중         |
-| 대시보드 UI        |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector  |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute 라우팅   |    ✗    |    ✗     |        ✗        |             ✓             |
-| 모델 매핑 UI       |    ✗    |    ✗     |        ✗        |             ✓             |
-| 우회(Bypass) 목록  |    ✗    |    ✗     |        ✓        |             ✓             |
-| 업스트림 CA 인증서 |    ✗    |    ✗     |        ✓        |             ✓             |
+| 특징               | 9라우터 | 안티 API | llm-인터셉터 | **OmniRoute AgentBridge** |
+| ------------------ | :-----: | :------: | :----------: | :-----------------------: |
+| Antigravity        |    ✓    |    ✓     |      —       |             ✓             |
+| GitHub Copilot     |    ✓    |    ✓     |      —       |             ✓             |
+| Kiro (AWS)         |    ✓    |    ✓     |      —       |             ✓             |
+| OpenAI Codex       |    —    |    ✓     |      —       |             ✓             |
+| Cursor IDE         |    ✓    |    ✓     |      —       |             ✓             |
+| Zed 산업           |    —    |    ✓     |      —       |             ✓             |
+| Claude 코드        |    —    |    —     |      ✓       |             ✓             |
+| 오픈코드           |    —    |    —     |      ✓       |             ✓             |
+| 트레이             |    —    |    —     |      —       |        🔍 조사 중         |
+| 대시보드 UI        |    ✓    |    ✗     |      ✗       |             ✓             |
+| 교통 조사관        |    ✗    |    ✗     |      ✓       |             ✓             |
+| OmniRoute 라우팅   |    ✗    |    ✗     |      ✗       |             ✓             |
+| 모델 매핑 UI       |    ✗    |    ✗     |      ✗       |             ✓             |
+| 우회 목록          |    ✗    |    ✗     |      ✓       |             ✓             |
+| 업스트림 CA 인증서 |    ✗    |    ✗     |      ✓       |             ✓             |
 
 ---
 

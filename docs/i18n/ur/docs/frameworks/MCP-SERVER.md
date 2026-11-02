@@ -72,6 +72,16 @@ curl -i \
 
 غیر `manage` کلید (یا Bearer کے بغیر) `403 LOCAL_ONLY` واپس کرتی ہے۔ متوازی پریفکس `/api/cli-tools/runtime/*` کو دانستہ طور پر بائی پاس نہیں کیا جا سکتا — دیکھیے [روٹ گارڈ کے درجات — manage اسکوپ کے لیے استثنا](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)۔
 
+### Origin کی توثیق
+
+تصدیق کے بعد `/api/mcp/*` کی ہر درخواست — ٹرانسپورٹس اور `status`, `tools`, `audit`, `restart` جیسے انتظامی راستوں — کے `Origin` ہیڈر کی توثیق کی جاتی ہے، چاہے کال کرنے والا کوئی بھی ہو (API کلید، CLI ٹوکن، ڈیش بورڈ سیشن، یا لاگ اِن بند ہونے پر گمنام loopback)۔ یہ وہ DNS rebinding تحفظ ہے جو MCP Streamable HTTP تفصیل لازم کرتی ہے۔
+
+- **کوئی `Origin` ہیڈر نہیں** ← اجازت ہے۔ OmniRoute CLI، SDK اور IDE کلائنٹس اسے نہیں بھیجتے۔
+- **اجازت یافتہ `Origin`** ← کسی بھی پورٹ پر `localhost` / `127.0.0.1` / `[::1]`، یا خود OmniRoute کا عوامی origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، کسی قابلِ اعتماد ریورس پراکسی کا فارورڈ کردہ origin (`OMNIROUTE_TRUST_PROXY`، صرف جب base URL مقرر نہ ہو)، یا براہِ راست رسائی والا loopback/LAN IP ہوسٹ۔ صرف `Host` ہیڈر کبھی کسی origin کو قابلِ اعتماد نہیں بناتا۔
+- **`null` سمیت کوئی بھی دوسرا `Origin`** ← JSON-RPC خرابی باڈی کے ساتھ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`۔ درست CSRF ٹوکن پیش کرنے والا ڈیش بورڈ سیشن، دیگر ڈیش بورڈ تحریروں کی طرح، اب بھی قبول کیا جاتا ہے۔
+
+ریورس پراکسی کے پیچھے پیش کیے جانے والے براؤزر MCP کلائنٹ کو `OMNIROUTE_PUBLIC_BASE_URL` درکار ہے؛ دوسرے origins کے لیے کوئی اجازت فہرست نہیں۔ CORS پیشگی درخواست (`OPTIONS`) کی Origin جانچ نہیں ہوتی؛ اس کے بعد آنے والی درخواست کی ہوتی ہے۔
+
 ## IDE کنفیگریشن
 
 Claude Desktop، Cursor، Cline، اور ہم آہنگ MCP کلائنٹس کے سیٹ اپ کے لیے [MCP کلائنٹ کنفیگریشن](../guides/SETUP_GUIDE.md#mcp-client-configuration) دیکھیں۔

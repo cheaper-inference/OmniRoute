@@ -484,17 +484,17 @@ Dan jittratta:
 
 ## Konfigurazzjoni
 
-`open-sse/config/` fiha s-saff tal-konfigurazzjoni:
+`open-sse/config/` iżomm is-saff tal-konfigurazzjoni:
 
-| Fajl                           | Għan                                                          |
-| ------------------------------ | ------------------------------------------------------------- |
-| `providerRegistry.ts`          | Reġistru tal-mudelli ta' chat fuq il-katalgu ta' 375 fornitur |
-| `providerModels.ts`            | Alias tal-mudelli, mapping tal-format                         |
-| `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                          |
-| `defaultThinkingSignature.ts`  | Firma default tal-ħsieb ta' Claude                            |
-| `modelStrip.ts` (fis-services) | Tneħħija ta' kampijiet għal kull fornitur                     |
+| Fajl                           | Għan                                                         |
+| ------------------------------ | ------------------------------------------------------------ |
+| `providerRegistry.ts`          | Reġistru tal-mudell taċ-chat fuq il-katalgu ta' 377 fornitur |
+| `providerModels.ts`            | Psewdonimi tal-mudell, mapping tal-format                    |
+| `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                         |
+| `defaultThinkingSignature.ts`  | Default Claude thinking firma                                |
+| `modelStrip.ts` (fis-servizzi) | Tqaxxir tal-kamp għal kull fornitur                          |
 
-### Skema tar-Reġistru tal-Fornituri
+### Skema tar-Reġistru tal-Fornitur
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Il-validazzjoni ta' Zod waqt it-tagħbija tal-modulu tiżgura li l-konfigurazzjonijiet kollha tal-fornituri huma validi.
+Il-validazzjoni Zod fit-tagħbija tal-modulu tiżgura l-konfigurazzjonijiet kollha tal-fornitur huma validi.
 
 ---
 

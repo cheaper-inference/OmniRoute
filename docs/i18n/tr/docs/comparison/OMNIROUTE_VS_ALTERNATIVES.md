@@ -37,13 +37,13 @@ Popüler açık kaynak AI yönlendiricileriyle tarafsız özellik karşılaştı
 | **Tünel desteği (Cloudflared, Tailscale, Ngrok)**   |                      ✅                      |       ❌        |        n/a        |    n/a     |
 | **Lisans**                                          |                     MIT                      |       MIT       |     tescilli      |  tescilli  |
 
-## OmniRoute ne zaman seçilmeli
+## OmniRoute ne zaman seçilmeli?
 
-- Kendi sunucunuzda barındırıyorsunuz ve **maksimum sağlayıcı kapsamı** istiyorsunuz (375 sağlayıcı, 155 ücretsiz/kimlik doğrulamasız katalog girdisi)
-- **Yerleşik bir MCP sunucusuna** ihtiyacınız var (araç olarak sunulan LLM araçları, bellek, yetenekler)
-- Ajanlar arası (agent-to-agent) iş akışları için **A2A protokolüne** ihtiyacınız var
-- Yukarı akış CAPTCHA'ları tarafından tespit edilmekten kaçınmak için **parmak izi gizliliği** (JA3/JA4) istiyorsunuz
-- SaaS faturası olmadan **kurumsal özelliklere** (koruma rayları, değerlendirmeler, denetim izi) ihtiyacınız var
+- Kendini barındırıyorsun ve istiyorsun** maksimum sağlayıcı kapsamı** (377 sağlayıcı, 155 free/no-auth katalog girişi)
+- ihtiyacın var** yerleşik MCP sunucusu** (LLM araçları, hafıza, araç olarak ortaya çıkan beceriler)
+- ihtiyacın var**A2A protokolü** temsilciden temsilciye iş akışları için
+- Sen istiyorsun** parmak izi gizliliği** (JA3/JA4) yukarı akışlı CAPTCHAs tarafından tespit edilmekten kaçınmak için
+- ihtiyacın var** kurumsal özellikler** (korkuluklar, değerlendirmeler, denetim izi) SaaS tasarısı olmadan
 
 ## LiteLLM ne zaman tercih edilmeli?
 

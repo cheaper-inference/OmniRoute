@@ -27,13 +27,12 @@ host edilən runner-lərdə işlədiyi üçün Turbopack slotu vaxtın böyük h
 | swap       | 16 GB                             | `omniroute-113-5` swap söndürülmüş halda (`MemorySwapMax=0`) işləyir, buna görə nəzarətdən çıxan yığma serveri swap etməyə məcbur etmək əvəzinə öz limitində dayandırılır                                                                                                                                                                                                                                                           |
 | `/tmp`     | **12 GB tmpfs = RAM**             | burada saxlanılan hər şey yaddaş tutur; qalıqlar 3 saatdan sonra təmizlənir                                                                                                                                                                                                                                                                                                                                                         |
 | CPU        | 32 nüvədə load 60 müşahidə edilib | kvotalardan əvvəl bir Turbopack yığması (~1166 % CPU) və eyni serverdəki coverage test dəsti digər listener-lərin heartbeat siqnallarını resurs çatışmazlığına məruz qoyurdu (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                                  |
-| runner-lər | **6 listener**                    | 4 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` deaktiv edilib (`systemctl enable --now` onlardan birini yenidən aktivləşdirir)                                                                                                                                                                                                                                                                                     |
+| runner-lər | **7 listener** (2026-10-28)       | 5 OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` həm də `omni-build` daşıyır; `omniroute-113-3/-4/-8` repodan silinib (2026-10-28)                                                                                                                                                                                                                                                                                            |
 
 Limitlər hər unit-in `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` faylında yerləşir
 (əvvəlki dəyərlər `override.conf.bak-20261018` kimi saxlanılıb) və
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` vasitəsilə canlı tətbiq edilib — restart edilməyib, buna görə də
-işləyən heç bir job-a toxunulmayıb. Etiketlər də runner API-si vasitəsilə
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+işləyən heç bir job-a toxunulmayıb. Etiketlər də runner API-si vasitəsilə (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`) canlı dəyişdirilir.
 
 ## Təmizləyicini quraşdırın (bir dəfə, serverdə)
@@ -42,7 +41,7 @@ işləyən heç bir job-a toxunulmayıb. Etiketlər də runner API-si vasitəsil
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): hər 30 dəqiqədən bir, jurnalı /var/log/runner-janitor.log faylına yaz
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` tələb olunur: təmizləyici yolu silməzdən əvvəl açıq faylların bir anlıq görüntüsü ilə
@@ -121,8 +120,9 @@ runner-ı və yalnız boş olduqda** yenidən başladın.
   2026-10-18 tarixinədək `MemoryHigh=4G` dəyərinə malik idi — promptfoo yığması orada 54 dəqiqə ərzində
   yaddaşı təkrar-təkrar geri almaqla irəliləmişdi; 8 GB məhdudlaşdırmanı aradan qaldırır.
 - **Qəsdən daha az listener.** 2026-08-29 tarixində dörd OmniRoute vahidi deaktiv edildi — hər əlavə
-  listener yuxarıdakı yaddaş büdcəsinin daha bir istifadəçisidir. Təmizləyicinin yuxarı həddi 6-dır (cron daxilində `MAX_ACTIVE_RUNNERS=6`): o,
-  maşındakı hər `Runner.Listener` prosesini sayır və OmniHeuris + OmniMind bizim dörd prosesimizə daha ikisini əlavə edir.
+  listener yuxarıdakı yaddaş büdcəsinin daha bir istifadəçisidir. Təmizləyicinin yuxarı həddi 8-dir (cron daxilində `MAX_ACTIVE_RUNNERS=8`): o,
+  maşındakı hər `Runner.Listener` prosesini sayır və OmniHeuris + OmniMind bizim beş prosesimizə daha ikisini əlavə edir.
+- **Unit və Vitest tapşırıqları host edilən runner-lərdə qalır.** `ci.yml` unit shard-larını və Vitest tapşırığını `[self-hosted, omni-ci]` üzərinə yalnız `vars.USE_VPS_TEST_RUNNER` repo dəyişəni `true` olduqda göndərir, o zaman da yalnız eyni repodan gələn `pull_request` icraları üçün; fork-lar, `merge_group` və push-lar `ubuntu-latest` üzərində qalır (`tests/unit/vps-runner-variable-scope.test.ts`). Dəyişən `false` vəziyyətindədir. 2026-10-28 tarixində üç 4 nüvəli `omni-ci` listener-i `npm ci` üçün 250–270 s sərf etdi və hər unit shard-ı 30 dəqiqəlik tapşırıq limitinə çatdı; host edilən shard üçün bu, ~634 s idi, server isə 17–24 yükündə idi. Listener-lər silindi. Unit shard-ı üçün ölçüləndirilmiş listener-lər olmadan dəyişəni yenidən aktivləşdirməyin.
 - **Hər hansı runner məşğul olduğu müddətdə `/tmp` və ya `_work` qovluğunu heç vaxt əl ilə təmizləməyin.**
   Yoxlama ilə silmə arasında fasilə olan yoxla-sonra-sil əməliyyatı 2026-08-27 tarixində aktiv Build tapşırığının
   `_work` qovluğunu itirməsinə səbəb olmuşdu. Təmizləyici yoxlamanı və silməni bir addımda həyata keçirir;
@@ -136,8 +136,7 @@ runner-ı və yalnız boş olduqda** yenidən başladın.
 
 ## Host edilən zolaq (GitHub tərəfindən host edilən icraçılar)
 
-Hesab **Pro** planındadır: **eyni vaxtda 40 host edilən tapşırıq**; bu limit hər bir PR yoxlaması,
-push ilə işə düşən hər bir iş axını və CodeQL-in standart konfiqurasiyası arasında paylaşılır.
+Repo `cheaper-inference` təşkilatına məxsusdur və **Team** planındadır: **eyni vaxtda 60 host edilən tapşırıq**; bu limit təşkilatdakı hər bir repo, hər bir PR yoxlaması, push ilə işə düşən hər bir iş axını və CodeQL-in standart konfiqurasiyası arasında paylaşılır. Aşağıdakı rəqəmlər **Pro** planında (eyni vaxtda 40 host edilən tapşırıq) ölçülüb.
 2026-10-18 tarixində birləşdirmə kampaniyası zamanı (`release/v3.8.52` üzərində saatda təxminən
 10 birləşdirmə) aparılan ölçmələr: **24 saatda 2,500 iş axını icrası yaradıldı**, 6 saat ərzində
 budağa 44 push edildi, PR yoxlamaları saatlarla gözlədiyi və PR-lər onlarsız birləşdirildiyi halda
