@@ -20,6 +20,11 @@ open-sse/config/freeModelCatalog.data.ts
 skills/*/SKILL.md
 skills/*/references/*.md
 
+# Third-party skill content vendored into contrib/claude-plugins/<plugin>/ from a pinned
+# upstream commit. Keep it byte-identical to upstream so `diff -r` stays clean on resync.
+contrib/claude-plugins/*/SKILL.md
+contrib/claude-plugins/*/references/**
+
 # check:changelog-integrity compares release bullets against the base as exact
 # strings. Prettier normalizes markdown emphasis inside them (*from* -> _from_)
 # and re-wraps table rows, so any PR that stages CHANGELOG.md would "lose" base
