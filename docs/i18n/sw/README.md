@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Lango la AI Lisilolipishwa
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 376 — 150+ bila malipo — kupitia kituo kimoja. Claude Code, Codex, Cursor, Cline, Copilot na Antigravity kwenda kwenye Claude / GPT / Gemini BILA MALIPO kwa uhamishaji kiotomatiki inaposhindikana. Mfinyazo wa tabaka wa RTK + Caveman huokoa 15–95% ya tokeni (~89% kwa wastani) — usifikie kamwe vikomo. Watoa huduma 376 wa AI · viwango 150+ visivyolipishwa · ~tokeni bilioni 1.62 bila malipo kwa mwezi · mikakati 20 ya uelekezaji · $0 kuanza."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Usiache kamwe kuandika msimbo. Kila zana ya AI → watoa huduma 380 — 150+ bila malipo — kupitia kituo kimoja. Claude Code, Codex, Cursor, Cline, Copilot na Antigravity kwenda kwenye Claude / GPT / Gemini BILA MALIPO kwa uhamishaji kiotomatiki inaposhindikana. Mfinyazo wa tabaka wa RTK + Caveman huokoa 15–95% ya tokeni (~89% kwa wastani) — usifikie kamwe vikomo. Watoa huduma 380 wa AI · viwango 150+ visivyolipishwa · ~tokeni bilioni 1.62 bila malipo kwa mwezi · mikakati 20 ya uelekezaji · $0 kuanza."/>
 
 </div>
 
@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway Inaendelea Kukua
+## 📈 Lango Linaendelea Kukua
 
 <div align="center">
 
-|                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Watoa huduma                                 |           352            |   **358**   |          376          |
-| 🧠 Vitambulisho vya kipekee vya modeli za gumzo |           1320           |  **1374**   |         1475          |
-| 🖼️ Daraja la Modali                             | 🆕 maono + sauti + video |      ✓      |           ✓           |
-| 📡 Katalogi ya bure ya Radar                    |       🆕 kujiunga        |      ✓      |           ✓           |
-| ⚖️ Upangaji unaozingatia kiwango                |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria ya kiwango                        |     🆕 moja kwa moja     |      ✓      |           ✓           |
-| 🧰 Hali ya headless                             |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Miundombinu ya reli ya LTS                   |            —             |      —      |  🆕 chaneli za toleo  |
-| 🔎 API ya ugunduzi wa modeli                    |            —             |      —      | 🆕 `/v1/models/query` |
+|                                   |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 Watoa huduma                   |           352            |   **358**   |          380          |
+| 🧠 Muundo wa kipekee wa gumzo IDs |           1320           |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                | 🆕 maono + audio + video |      ✓      |           ✓           |
+| 📡 orodha ya bure ya rada         |        🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Ratiba ya kufahamu Quota       |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Kiwango cha telemetry          |         🆕 live          |      ✓      |           ✓           |
+| 🧰 hali isiyo na kichwa           |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS infra reli                 |            —             |      —      |   🆕 kutolewa njia    |
+| 🔎 Ugunduzi wa mfano API          |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Ramani ya maendeleo](ROADMAP.md) — tukisafiri kwa reli kuelekea `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) - kupanda reli hadi `v3.9.0 LTS`**
 
 </div>
 
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Vipengele</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Mchanganyiko</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Watoa huduma</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 376. Urejeshaji wa kiotomatiki huendelea kuelekeza wakati lengo lingine lenye afya linapatikana. Nguzo sita: urejeshaji thabiti katika watoa huduma 376 · hadi 95% ya uokoaji wa token kwenye kazi zinazofaa · $0 kuanza na ngazi 150+ za bure na watoa huduma 52 wa bure-milele wanaorudia/bila key · miunganisho 37 ya CLI/agent kupitia config moja · uoanifu wa OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji ikiwa ni pamoja na circuit breakers, TLS stealth, zana 110 za MCP, A2A, kumbukumbu, guardrails, evals na maazimio 56,000+ ya majaribio tuli katika faili 7,800+ za majaribio zinazofuatiliwa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ahadi — Endpoint moja na watoa huduma 380. Urejeshaji wa kiotomatiki huendelea kuelekeza wakati lengo lingine lenye afya linapatikana. Nguzo sita: urejeshaji thabiti katika watoa huduma 380 · hadi 95% ya uokoaji wa token kwenye kazi zinazofaa · $0 kuanza na ngazi 150+ za bure na watoa huduma 52 wa bure-milele wanaorudia/bila key · miunganisho 37 ya CLI/agent kupitia config moja · uoanifu wa OpenAI, Claude, Gemini na Responses API kwenye /v1 · vidhibiti vya uzalishaji ikiwa ni pamoja na circuit breakers, TLS stealth, zana 110 za MCP, A2A, kumbukumbu, guardrails, evals na maazimio 56,000+ ya majaribio tuli katika faili 7,800+ za majaribio zinazofuatiliwa."/>
 
 <br/>
 <br/>
@@ -441,7 +441,7 @@ Mikakati yote **20** — changanya na kulinganisha kwa kila hatua ya combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachofanya OmniRoute kuwa tofauti — muhtasari wa vipengele wa tarehe maalumu ukilinganisha na 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 376, viwango 150+ vya bure vilivyojengewa ndani, mikakati 20 ya uelekezaji, ufinyazaji wa tokeni kwa injini 12, seva ya MCP iliyojengewa ndani yenye zana 110, itifaki ya mawakala ya A2A, kumbukumbu endelevu, vizuizi vya usalama, mawakala wa wingu, ufichaji wa alama za utambulisho za TLS, Desktop/Termux/PWA na lugha 67 za kiolesura cha i18n. OmniRoute ina leseni ya MIT na inaweza kupangishwa binafsi. Uwezo na idadi za washindani zinaweza kubadilika; angalia mbinu iliyounganishwa."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kinachofanya OmniRoute kuwa tofauti — muhtasari wa vipengele wa tarehe maalumu ukilinganisha na 9router, OpenRouter, CLIProxyAPI na LiteLLM katika uwezo 13. OmniRoute: watoa huduma 380, viwango 150+ vya bure vilivyojengewa ndani, mikakati 20 ya uelekezaji, ufinyazaji wa tokeni kwa injini 12, seva ya MCP iliyojengewa ndani yenye zana 110, itifaki ya mawakala ya A2A, kumbukumbu endelevu, vizuizi vya usalama, mawakala wa wingu, ufichaji wa alama za utambulisho za TLS, Desktop/Termux/PWA na lugha 67 za kiolesura cha i18n. OmniRoute ina leseni ya MIT na inaweza kupangishwa binafsi. Uwezo na idadi za washindani zinaweza kubadilika; angalia mbinu iliyounganishwa."/>
 
 <sub>📊 Mbinu kamili &amp; maelezo ya kila kipengele ikilinganishwa na 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -536,7 +536,7 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 - **🖼️ Endpoints mpya** — `/v1/ocr` (Mistral OCR) na `/v1/audio/translations` (mtindo wa Whisper) hukamilisha uso wa midia. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Uzalishaji wa picha / video / sauti** — API moja kwa midia: xAI Grok Imagine na video ya Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind, na watoa huduma wa usemi kama ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Usambazaji na uendeshaji** — `basePath` ya proxy-ya-nyuma, utambuzi wa kiotomatiki wa lugha ya kivinjari, ufuatiliaji wa kifaa kwa kila ufunguo, uaminifu wa MITM bila root, ujanibishaji wa zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Watoa huduma na maajenti zaidi** — maajenti wa wingu (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) yenye kivinjari + kuingia kwa OAuth, kadi ya daraja la kwanza ya Ollama, Claude Opus 5 na Sonnet 5, ushirikiano rasmi wa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… na **katalogi ya watoa huduma 376** iliyohuishwa. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Watoa huduma na maajenti zaidi** — maajenti wa wingu (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) yenye kivinjari + kuingia kwa OAuth, kadi ya daraja la kwanza ya Ollama, Claude Opus 5 na Sonnet 5, ushirikiano rasmi wa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… na **katalogi ya watoa huduma 380** iliyohuishwa. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Uwazi wa uelekezaji** — kila jibu hubeba kichwa cha `X-OmniRoute-Decision` kinachotaja mkakati/mtoa huduma/uwezekano wa kuchelewa ulioihudumia, mkakati mpya wa combo wa `cache-optimized` + kipengele cha `cacheAffinity` cha Auto-Combo hurudisha maombi ya kurudia kwenye muunganisho unaoshikilia kiambishi awali kilichohifadhiwa, na endpoint ya kusoma pekee ya `/v1/auto-combo/{channel}/candidates` hufichua kundi la wagombea hai la chaneli ya `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Utendaji wa ndani na miundombinu** — Redis ya ndani kwa mbofyo mmoja, wasambazaji wa relay wa Cloudflare Workers / Deno Deploy, Bifrost na Mux kama huduma zilizoingizwa zinazosimamiwa. → [Huduma Zilizoingizwa](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Pia ndani ya sanduku** — mfumo wa programu-jalizi + soko, mifumo ya ujuzi ya Omni/Agent/GitHub, uunganishaji wa vault ya Obsidian (zana 22 za MCP), APIs za Batch na Files zinazoendana na OpenAI, akiba ya majibu ya kimantiki, mchezo wa kugawanya pointi na bodi za viongozi, ugunduzi wa mawakala wa ACP (mawakala 15 waliojengwa ndani), usafirishaji wa kumbukumbu kwa ratiba kwenda BigQuery, `auto/chaos` usambazaji sambamba wa modeli nyingi, daraja la bot la Telegram, msimamizi wa toleo ndani ya programu na viwango vya watoa huduma bila malipo vya LMArena-ELO. → [Nyaraka](docs/README.md)
@@ -545,59 +545,58 @@ Radar ni ya kujiunga kwa hiari na hutumia GET pekee. Kiteja cha OmniRoute hakipa
 
 <div align="center">
 
-## 🤖 CLI na Mawakala wa Uandishi wa Msimbo Wanaooana
+## 🤖 Sambamba CLIs Mawakala wa Usimbaji
 
-> Usanidi mmoja — `http://localhost:20128/v1` — na **kila** IDE au CLI ya AI hutumia modeli zisizolipishwa na za gharama nafuu.
+> Usanidi mmoja - `http://localhost:20128/v1` - na** kila** AI IDE au CLI hutumika kwa miundo isiyolipishwa na ya gharama nafuu.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Kanuni </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> wa Kilo </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Zoo Code </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Endelea </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Kiwanda cha Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b></b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Jenga </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Hermes </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Goose </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Mkalimani Fungua </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ pia hufanya kazi na</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>zana yoyote inayooana na OpenAI</b>
+<b>＋ pia inafanya kazi na </b> · Sitaha ya Wakala · Kiro · Msimbo wa Amri · Antigravity · Windsurf · AMP · <b> zana yoyote inayolingana na OpenAI </b>
 </div>
 
-<sub>📖 Usanidi wa kila zana kwa zana zote 37 (CLI Code 27 + CLI Agents 10) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Programu-jalizi ya OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 usanidi wa zana kwa zana zote 38 (27 CLI Code's + 11 CLI Agents) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Zindua CLI yoyote inayotumika kupitia OmniRoute kwa amri moja** — hakuna faili za usanidi zinazoandikwa,
-vitambulisho vinaingizwa kwa kila mchakato, na Qwen/Gemini hupata saraka ya nyumbani ya muda iliyotengwa:
+**Zindua CLI yoyote inayoungwa mkono kupitia OmniRoute kwa amri moja** - hakuna faili za usanidi zilizoandikwa, vitambulisho hudungwa kwa kila mchakato, Qwen/Gemini pata nyumba iliyotengwa ya kutupa:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -608,23 +607,21 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Au chagua mtoa huduma+modeli kwa mwingiliano na uandike usanidi wa zana yenyewe:
-omniroute configure codex          # pia: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Kila amri huheshimu muktadha amilifu wa mbali (`omniroute connect <host>`), `--dry-run`
-huonyesha mapema env/args kamili bila kutekeleza, na `--api-key-env NAME` huzuia siri
-kuhifadhiwa katika historia ya shell yako. → [Miunganisho ya CLI](docs/guides/CLI-INTEGRATIONS.md)
+Kila amri inaheshimu muktadha amilifu wa mbali (`omniroute connect <host>`), `--dry-run` hakiki env/args kamili bila kutekeleza, na `--api-key-env NAME` huhifadhi siri kwenye historia yako ya ganda. → [CLI Ushirikiano](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 Watoa Huduma 376 wa AI — 153 Waliotiwa Alama kwenye Katalogi kuwa Bila Malipo
+## 🌐 Watoa Huduma 380 wa AI — 153 Waliotiwa Alama kwenye Katalogi kuwa Bila Malipo
 
 </div>
 
-> **Watoa huduma 376 waliosajiliwa** katika mikusanyo rasmi ya gumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, ikiwemo **153 yenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya modeli za gumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho ghafi 1,475 vya modeli**; katalogi tofauti ya bajeti zisizolipishwa ina **safu 471 kwa kila modeli**, **makundi 34 yanayojirudia** na **watoa huduma 52 wa kudumu bila malipo wanaojirudia/wasiohitaji ufunguo**. Hivi vina vigawanyaji tofauti kimakusudi; ufafanuzi na hesabu zilizoondolewa marudio ya makundi zinapatikana katika [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
+> **Watoa huduma 380 waliosajiliwa** katika mikusanyo rasmi ya gumzo, midia, utafutaji, ya ndani, mawakala wa wingu na mfumo, ikiwemo **153 yenye metadata ya ugunduzi ya `hasFree: true`**. Sajili ya modeli za gumzo inajumuisha **watoa huduma 239 / jozi 3,059 tofauti za mtoa huduma na modeli / vitambulisho ghafi 1,475 vya modeli**; katalogi tofauti ya bajeti zisizolipishwa ina **safu 471 kwa kila modeli**, **makundi 34 yanayojirudia** na **watoa huduma 52 wa kudumu bila malipo wanaojirudia/wasiohitaji ufunguo**. Hivi vina vigawanyaji tofauti kimakusudi; ufafanuzi na hesabu zilizoondolewa marudio ya makundi zinapatikana katika [Marejeleo ya Watoa Huduma](docs/reference/PROVIDER_REFERENCE.md) na [Viwango vya Bila Malipo](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -689,92 +686,80 @@ kuhifadhiwa katika historia ya shell yako. → [Miunganisho ya CLI](docs/guides/
 
 <div align="center">
 
-## 🖥️ OmniRoute Huendeshwa Wapi — Popote
+## 🖥️ Ambapo OmniRoute Inaendeshwa - Popote
 
 </div>
 
-> Programu ileile, mashine yako, sheria zako. Kuanzia usakinishaji wa kimataifa wa npm hadi **simu yako** kupitia Termux.
+> Programu sawa, mashine yako, sheria zako. Kutoka kwa usakinishaji wa npm wa kimataifa hadi** simu yako** kupitia Termux.
 
 <table>
-  <tr><th align="left">Jukwaa</th><th align="left">Usakinishaji</th><th align="left">Vipengele muhimu</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (kimataifa)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Amri moja, mfumo wowote wa uendeshaji</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Miundio mingi <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Kompyuta ya mezani (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Dirisha asilia + trei ya mfumo — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Upau wa menyu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Husimamia &amp; kusasisha seva kiotomatiki — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>asilia <code>arm64</code></td><td align="left">Raspberry Pi, seva za ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Huendeshwa <b>kwenye simu yako</b>, saa 24/7, bila root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ongeza kwenye Skrini ya Mwanzo"</td><td align="left">Skrini nzima, nje ya mtandao, inaweza kusakinishwa kutoka kwenye kivinjari</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Programu-jalizi ya OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Muunganisho asilia wa OpenCode</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>sakinisha kiendelezi cha <b>OmniCopilot</b></td><td align="left">Kila modeli ya OmniRoute katika kiteuzi asilia cha Copilot Chat — toleo thabiti &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Kutoka kwenye msimbo chanzo</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Ifanyie marekebisho, changia</td></tr>
+  <tr><th align="left"></th><th align="left"> Sakinisha </th><th align="left"> Vivutio </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (kimataifa)</b></td><td align="left" nowrap><code> npm install -g omniroute </code></td><td align="left"> Amri moja, OS yoyote </td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (kimataifa)</b></td><td align="left" nowrap><code> bun ongeza -g omniroute </code></td><td align="left"> Usajili ule ule, usakinishaji haraka </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker kukimbia … diegosouzapw/omniroute</code></td><td align="left"> Multi-arch <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> Eneo-kazi (Electron)</b></td><td align="left" nowrap><code> npm endesha elektroni:jenga </code></td><td align="left"> Dirisha la asili trei ya mfumo + — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> menyu (OmniRouteTray)</b></td><td align="left" nowrap><code> brew sakinisha --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Inasimamia &amp; kusasisha seva kiotomatiki — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap> asili <code> arm64 </code></td><td align="left"> Raspberry Pi, ARM za zqm, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg sakinisha nodejs && npx -y omniroute </code></td><td align="left"> Inaendesha <b> kwenye simu yako </b>, 24/7, hakuna mizizi </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Ongeza kwenye Skrini ya Nyumbani"</td><td align="left"> Skrini nzima, nje ya mtandao, inaweza kusakinishwa kutoka kwa kivinjari </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode programu-jalizi </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left"> Ujumuishaji wa asili OpenCode </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Msimbo Copilot </b></td><td align="left" nowrap> sakinisha <b>OmniCopilot</b> kiendelezi </td><td align="left"> Kila modeli OmniRoute katika kichagua gumzo Copilot asili - &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Kutoka chanzo </b></td><td align="left" nowrap><code> npm kufunga && npm run dev </code></td><td align="left"> Hack juu yake, kuchangia </td></tr>
 </table>
 
-<sub>📖 [Mwongozo wa Docker](docs/guides/DOCKER_GUIDE.md) · [Kompyuta ya mezani](electron/README.md) · [Trei ya upau wa menyu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Mwongozo](docs/guides/DOCKER_GUIDE.md) · [Eneo-kazi](electron/README.md) · [Trei ya menyu ya upau](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Mpya: OmniRoute ndani ya Copilot Chat asilia ya VS Code
+### 🧩 Mpya: OmniRoute ndani ya VS Code ya Copilot Gumzo
 
 </div>
 
-> Hakuna upau mpya wa pembeni, hakuna kiolesura kipya cha gumzo — kila modeli inayotolewa na OmniRoute huonekana moja kwa moja kwenye
-> **kiteuzi cha modeli cha Copilot Chat ambacho tayari unatumia**. Tangu VS Code 1.122, modeli za watoa huduma hufanya kazi
-> bila kuingia kwa akaunti ya GitHub au kuwa na usajili wa Copilot — hali ya ajenti, uitaji wa zana na uwezo wa kuona, bila
-> malipo.
+> Hakuna utepe mpya, hakuna gumzo UI mpya - kila muundo OmniRoute unaotumika huonekana moja kwa moja**Copilot Kiteuzi cha kielelezo cha Gumzo ambacho tayari unatumia** . Tangu Msimbo wa VS 1.122, miundo ya watoa huduma hufanya kazi bila kuingia kwa GitHub au usajili wa Copilot - hali ya wakala, kupiga simu kwa zana na kuona, bila malipo.
 
-Sakinisha kiendelezi cha **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, kielekeze
-kwenye seva yako ya OmniRoute (chaguo-msingi ni `localhost:20128`), kisha fungua Copilot Chat → kiteuzi cha modeli
-→ **Dhibiti Modeli…** → **OmniRoute**.
+Sakinisha** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** kiendelezi, kielekeze kwenye seva yako OmniRoute (chaguo-msingi hadi `localhost:20128`), kisha ufungue Copilot Chat → kichagua mfano →** Dhibiti Miundo...** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Duka</th><th align="left">Kiungo</th><th align="left">Hufanya kazi na</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Sakinisha →</a></td><td align="left">VS Code — toleo thabiti &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Sakinisha →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Link </th><th align="left"> Inafanya kazi na </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Msimbo wa Soko </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Sakinisha →</a ></td >< td ="kushoto"> Msimbo wa VS — zqp &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Usajili wa VSX </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> Sakinisha →</a ></td >< td ="kushoto">Cursor, Windsurf, VSCodium, Theia,</tr>-server, Antigravity, Kiro...</td>
 </table>
 
-Kutoka ndani ya kihariri: fungua mwonekano wa **Viendelezi**, tafuta **"OmniRoute"**, bofya **Sakinisha**
-— hufanya kazi kwa njia ileile kwenye maduka yote mawili. Msimbo chanzo, masuala na mwongozo wa uchapishaji vinapatikana kwenye
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Kutoka ndani ya mhariri: fungua faili ya** Viendelezi** tazama, tafuta** "OmniRoute"** , bofya** Sakinisha** - inafanya kazi kwa njia sawa kwenye duka zote mbili. Chanzo, matoleo na kijitabu cha uchapishaji cha moja kwa moja [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Mwongozo wa VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — usanidi, kile ambacho kiteuzi huonyesha, dashibodi ndani ya kichupo, utatuzi wa matatizo</sub>
+<sub>📖 [VS Msimbo wa Copilot Mwongozo wa gumzo](docs/guides/VSCODE-COPILOT.md) — sanidi, kile kichagua kinaonyesha, dashibodi-katika-kichupo, utatuzi wa </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Mpya: OmniRouteTray — lango lako, likiishi kwenye upau wa menyu
+### 🎩 Mpya: OmniRouteTray - lango lako, unaishi katika upau wa menyu
 
 </div>
 
-> `omniroute serve` hufanya kazi vyema zaidi ikiwa imewashwa kila wakati. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> hubadilisha hilo kuwa programu ya upau wa menyu ya macOS unayosanidi na kuisahau: huanzisha seva, huiweka ikiendelea kufanya kazi
-> baada ya kuwasha upya, huisasisha papo hapo, na kuweka bajeti yako ya tokeni ya moja kwa moja umbali wa mbofyo mmoja — **hakuna
-> dirisha la terminal linaloachwa wazi, hakuna `npm install -g omniroute` ya kuendelea kusimamia.**
+> `omniroute serve` huwa na furaha zaidi inapowashwa kila wakati.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** hugeuza hiyo kuwa programu ya upau wa menyu ya kuweka-na-kusahau kwa macOS: huanzisha seva, huiweka hai katika kuwashwa upya, kuisasisha mahali pake, na kuweka bajeti yako ya tokeni ya moja kwa moja kwa mbofyo mmoja tu -** hakuna dirisha la mwisho lililoachwa wazi, hakuna `npm install -g omniroute` ya kumtunza mtoto.**
 
-Imeundwa kwa [Tauri v2](https://v2.tauri.app/) (kiini cha Rust chenye ukubwa mdogo sana), inakuja
-na mazingira yake ya utekelezaji ya Node 24 yaliyotiwa sahihi na inasimamia usakinishaji wa OmniRoute unaomilikiwa na programu, kwa hivyo haigongani kamwe na
-`node`/`bun` yako ya kimataifa. **Inashiriki usanidi na hifadhidata yako iliyopo ya `~/.omniroute/`** — kwa hivyo ni
-OmniRoute ileile ambayo tayari unaendesha, lakini sasa ikiwa imevaa kofia. 🎩
+Imeundwa kwa [Tauri v2](https://v2.tauri.app/) (Kiini cha kutu chenye ukubwa wa hitilafu ya kuzungusha), husafirisha muda wake wa utekelezaji wa Node 24 na kudhibiti usakinishaji OmniRoute unaomilikiwa na programu, kwa hivyo haitapigana kamwe na `node`/`bun` yako ya kimataifa. Ni** inashiriki usanidi wako wa `~/.omniroute/` na hifadhidata** - kwa hivyo ni OmniRoute sawa tayari kukimbia, tu na kofia. 🎩
 
 <table>
-  <tr><th align="left">Inachofanya</th><th align="left">Jinsi inavyofanya</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Husimamia seva</b></td><td align="left">Huanzisha <code>omniroute serve</code>, hutumia instansi ambayo tayari inaendeshwa badala ya kuiunda mara mbili</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Matumizi ya moja kwa moja kwa muhtasari</b></td><td align="left">Pau za mgao wa watoa huduma, vikomo vya vipindi vya Claude/kila wiki pamoja na vihesabio vya muda hadi kuwekwa upya, uchanganuzi wa gharama za siku 30</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Hujisasisha kiotomatiki papo hapo</b></td><td align="left">Usakinishaji wa hatua kwa hatua, ubadilishaji atomiki, kurejesha toleo la awali ikishindikana — daima kwenye toleo jipya zaidi</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Anza wakati wa kuingia</b></td><td align="left">Uzinduzi wa hiari wakati wa kuingia; trei pekee, hakuna ikoni ya dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Uchunguzi &amp; kumbukumbu</b></td><td align="left">Uchunguzi kwa mbofyo mmoja na ufikiaji wa kumbukumbu za seva</td></tr>
+  <tr><th align="left"> Inafanya nini </th><th align="left"> Jinsi </th></tr>
+  <tr><td align="left" nowrap>🟢 <b> Inasimamia seva </b></td><td align="left"> Spawns <code> omniroute serve </code>, inachukua mfano unaoendeshwa tayari badala ya kuiga nakala </td></tr>
+  <tr><td align="left" nowrap>📊 <b> Matumizi ya moja kwa moja kwa muhtasari </b></td><td align="left"> pau za upendeleo wa watoa huduma, Claude session/weekly mipaka na vihesabu vilivyowekwa upya, uchanganuzi wa gharama ya siku 30 </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Usasishaji otomatiki umewekwa </b></td><td align="left"> Usakinishaji kwa hatua, ubadilishanaji wa atomiki, urejeshaji wa kushindwa - kila mara kwenye toleo jipya zaidi </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Anza kwa kuingia </b></td><td align="left"> Uzinduzi wa hiari wakati wa kuingia; trei pekee, hakuna ikoni ya kizimbani </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Daktari &amp; kumbukumbu </b></td><td align="left"> uchunguzi wa bofya moja na ufikiaji wa kumbukumbu ya seva </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Unapendelea kupakua? Pakua <code>.dmg</code> ya hivi karibuni kutoka
-<a href="https://github.com/zoispag/omniroute-tray/releases">Matoleo</a>. Msimbo chanzo, masuala na nyaraka za
-ujenzi zinapatikana katika <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Mradi wa jamii ulioundwa na <a href="https://github.com/zoispag">@zoispag</a> — si toleo rasmi la OmniRoute.</sub>
+<sub> unapendelea upakuaji? Pata toleo jipya zaidi <code>.dmg </code> kutoka
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Imetolewa </a>. Chanzo, masuala na kujenga
+hati zinaishi <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Mradi wa jumuiya wa <a href="https://github.com/zoispag">@zoispag </a> - sio toleo rasmi OmniRoute.</sub>
 
 <br/>
 
@@ -1238,7 +1223,7 @@ Vipimo kanoniki mnamo 2026-10-18: **video 1.976 za kipekee** · **mara 20.220.28
   <tr><td nowrap><b>Mazingira ya utekelezaji</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lugha</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> katika <code>src/</code> na <code>open-sse/</code> (hakuna <code>any</code> katika msingi tangu v2.0)</td></tr>
   <tr><td nowrap><b>Mfumo</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa kumbukumbu wa WAL) + LowDB (urithi wa JSON) — moduli 147 za kikoa, uhamishaji 211</td></tr>
+  <tr><td nowrap><b>Hifadhidata</b></td><td>better-sqlite3 (SQLite, uandishi wa kumbukumbu wa WAL) + LowDB (urithi wa JSON) — moduli 147 za kikoa, uhamishaji 219</td></tr>
   <tr><td nowrap><b>Kumbukumbu</b></td><td>Utafutaji wa maandishi kamili wa SQLite FTS5 + upachikaji wa vekta uliokadiriwa kwa int8, upunguzaji wenye aina maalum</td></tr>
   <tr><td nowrap><b>Skima</b></td><td>Zod 4 — uthibitishaji wa I/O wa zana za MCP + mikataba ya API</td></tr>
   <tr><td nowrap><b>Itifaki</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

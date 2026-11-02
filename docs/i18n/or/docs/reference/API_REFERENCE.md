@@ -826,47 +826,40 @@ OpenAI-ସୁସଙ୍ଗତ ବ୍ୟାଚ୍ ପ୍ରକ୍ରିୟାକ�
 
 ---
 
-## ସନ୍ଧାନ API
+## API ସନ୍ଧାନ କରନ୍ତୁ \|
 
-Web/ସନ୍ଧାନ ପ୍ରଦାନକାରୀ ଅବସ୍ତ୍ରାକ୍ସନ୍ (Tavily, Brave, Exa, Serper ଇତ୍ୟାଦି)।
+Web/search ପ୍ରଦାନକାରୀ ଅବକ୍ଷୟ (ଟାଭିଲି, ସାହସୀ, ଏକ୍ସା, ସର୍ପର୍, ଇତ୍ୟାଦି) \|
 
-| ପଦ୍ଧତି | ପଥ                     | ବର୍ଣ୍ଣନା                                                                                 |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | ବିନ୍ୟାସିତ ସନ୍ଧାନ ପ୍ରଦାନକାରୀମାନଙ୍କର ତାଲିକା + କ୍ଷମତାଗୁଡ଼ିକ                                 |
-| POST   | `/v1/search`           | ଏକ ସନ୍ଧାନ କ୍ୱେରୀ ଚଲାନ୍ତୁ — ବଡି `v1SearchSchema` ଦ୍ୱାରା ବୈଧୀକୃତ, କ୍ୟାଶିଂ/କୋଆଲେସିଂ ସମର୍ଥିତ |
-| GET    | `/v1/search/analytics` | ପ୍ରତି-ପ୍ରଦାନକାରୀ ହିଟ୍/ଲେଟେନ୍ସି/କ୍ୟାଶ୍ ପରିସଂଖ୍ୟାନ                                         |
+| ପଦ୍ଧତି | ପଥ                     | ବର୍ଣ୍ଣନା                                                                                        |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | ବିନ୍ୟାସିତ ସନ୍ଧାନ ପ୍ରଦାନକାରୀ + କ୍ଷମତା ତାଲିକା କରନ୍ତୁ \|                                           |
+| POST   | `/v1/search`           | `v1SearchSchema` ଦ୍ୱାରା ବ valid ଧ ହୋଇଥିବା ଏକ ସନ୍ଧାନ — ଚଲାନ୍ତୁ, caching/coalescing ସମର୍ଥନ କରେ \| |
+| GET    | `/v1/search/analytics` | ପ୍ରତି-ପ୍ରଦାନକାରୀ hit/latency/cache ପରିସଂଖ୍ୟାନ \|                                                |
 
-**ପ୍ରମାଣୀକରଣ:** Bearer API କୀ (`extractApiKey` + `isValidApiKey`)। ସନ୍ଧାନ ନୀତି `enforceApiKeyPolicy` ମାଧ୍ୟମରେ ପ୍ରୟୋଗ କରାଯାଏ।
+**Auth:** ଧାରକ API କି (`extractApiKey` + `isValidApiKey`) \| `enforceApiKeyPolicy` ମାଧ୍ୟମରେ ବାଧ୍ୟତାମୂଳକ ସନ୍ଧାନ ନୀତି \|
 
-### Exa ଏବଂ Tavily `provider_options`
+### ଏକ୍ସା ଏବଂ ଟାଭିଲି `provider_options`
 
-Exa ଏବଂ Tavily ଏକ ନେମସ୍ପେସ୍ଯୁକ୍ତ ବ୍ୟାଗ୍ରୁ ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ ଫିଲ୍ଡଗୁଡ଼ିକ ପଢ଼ନ୍ତି:
-`provider_options.exa` (କିମ୍ବା `provider_options["exa-search"]`) ଏବଂ `provider_options.tavily`
-(କିମ୍ବା `provider_options["tavily-search"]`)। କେବଳ ନିମ୍ନରେ ଥିବା କୀଗୁଡ଼ିକୁ ଫରୱାର୍ଡ କରାଯାଏ। ପ୍ରତ୍ୟେକଟିକୁ
-`open-sse/handlers/search/providerOptionsPassthrough.ts` ରେ ଥିବା ତାହାର ନିଜସ୍ୱ Zod ସ୍କିମା ବିପରୀତରେ
-ଯାଞ୍ଚ କରାଯାଏ, ଏବଂ ଭୁଲ୍ ପ୍ରକାର ଥିବା କୌଣସି କୀକୁ ବାଦ ଦିଆଯାଏ। auth, base URL,
-`stream` ଏବଂ `outputSchema` ସମେତ ଅନ୍ୟ ଯେକୌଣସି କୀକୁ ଅଣଦେଖା କରାଯାଏ। ଅନ୍ୟ ପ୍ରଦାନକାରୀମାନେ ବ୍ୟବହାର କରୁଥିବା ଫ୍ଲାଟ୍ କୀଗୁଡ଼ିକ (`cx`, `depth`, ...) ପୂର୍ବପରି
-କାମ କରେ।
+Exa ଏବଂ Tavily ଏକ ନାମ ସ୍ଥାନିତ ବ୍ୟାଗରୁ ପ୍ରଦାନକାରୀ-ନିର୍ଦ୍ଦିଷ୍ଟ କ୍ଷେତ୍ରଗୁଡିକ ପ read ନ୍ତି: `provider_options.exa` (କିମ୍ବା `provider_options["exa-search"]`) ଏବଂ `provider_options.tavily` (କିମ୍ବା `provider_options["tavily-search"]`) \| କେବଳ ନିମ୍ନରେ ଥିବା ଚାବିଗୁଡ଼ିକୁ ଅଗ୍ରଗାମୀ କରାଯାଏ \| ପ୍ରତ୍ୟେକଟି `open-sse/handlers/search/providerOptionsPassthrough.ts` ରେ ନିଜର Zod ସ୍କିମା ବିରୁଦ୍ଧରେ ଯାଞ୍ଚ କରାଯାଏ, ଏବଂ ଭୁଲ ପ୍ରକାର ସହିତ ଏକ ଚାବି ଛାଡି ଦିଆଗଲା \| Auth, base URL, `stream` ଏବଂ `outputSchema` ସହିତ ଅନ୍ୟ କ key ଣସି ଚାବିକୁ ଅଣଦେଖା କରାଯାଏ \| ଅନ୍ୟ ପ୍ରଦାନକାରୀଙ୍କ ଦ୍ୱାରା ବ୍ୟବହୃତ ଫ୍ଲାଟ କିଗୁଡ଼ିକ (`cx`, `depth`, ...) ପୂର୍ବ ପରି କାମ କରେ \|
 
-| ପ୍ରଦାନକାରୀ | ଶୀର୍ଷ-ସ୍ତରୀୟ ଫିଲ୍ଡଗୁଡ଼ିକ                                                                                                                                                                                                                                                                                                                                                  | ନେଷ୍ଟେଡ୍                                                                                                                                                           |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ଫ୍ଲାଟ୍ ପ୍ରିମିଟିଭ୍ଗୁଡ଼ିକ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ଡିଫଲ୍ଟ `{ text: true, highlights: true }` ଉପରେ ମର୍ଜ୍ କରାଯାଏ |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                  |
+| ପ୍ରଦାନକାରୀ \| | ଶୀର୍ଷ ସ୍ତରୀୟ କ୍ଷେତ୍ରଗୁଡିକ \|                                                                                                                                                                                                                                                                                                                                              | ନଷ୍ଟେଡ୍ \|                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa           | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ଫ୍ଲାଟ ପ୍ରାଥମିକ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ଡିଫଲ୍ଟ `{ text: true, highlights: true }` ଉପରେ ମିଶ୍ରିତ \| |
+| ଟାଭିଲି \|     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                       |
 
-ଜେନେରିକ୍ ଫିଲ୍ଡଗୁଡ଼ିକ ସର୍ବଦା ପ୍ରାଧାନ୍ୟ ପାଆନ୍ତି: `query`, `max_results`, `filters` (ଡୋମେନ୍ଗୁଡ଼ିକ), `country` ଏବଂ
-`search_type` ରୁ ନିର୍ଦ୍ଧାରିତ ବିଷୟ। Exa ରେ, `search_type: "news"` ବ୍ୟବହାର କଲେ `category: "news"` ଅପରିବର୍ତ୍ତିତ ରହେ।
-Tavily ମଧ୍ୟ `search_type: "finance"` (`topic: "finance"`) ଗ୍ରହଣ କରେ।
+ଜେନେରିକ୍ ଫିଲ୍ଡ ସବୁବେଳେ ଜିତେ: `query`, `max_results`, `filters` (ଡୋମେନ୍), `country` ଏବଂ `search_type` ରୁ ଉତ୍ପନ୍ନ ବିଷୟ \| Exa ରେ, `search_type: "news"` `category: "news"` ରଖେ \| ଟାଭିଲି `search_type: "finance"` (`topic: "finance"`) କୁ ମଧ୍ୟ ଗ୍ରହଣ କରେ \|
 
-ଜେନେରିକ୍ `time_range` ବର୍ତ୍ତମାନ ଉଭୟ ପ୍ରଦାନକାରୀଙ୍କ ପାଖରେ ପହଞ୍ଚେ: Exa `startPublishedDate` (ISO
-ଟାଇମ୍ଷ୍ଟାମ୍ପ) ପାଏ ଏବଂ Tavily `start_date` (`YYYY-MM-DD`) ପାଏ। `provider_options` ରେ ଥିବା ଏକ ସ୍ପଷ୍ଟ ତାରିଖ
-ମ୍ୟାପ୍ କରାଯାଇଥିବା ତାରିଖକୁ ଓଭର୍ରାଇଡ୍ କରେ।
+Fire 0.002 (2 କ୍ରେଡିଟ୍) ରେ ଗୋଟିଏ ବ୍ଲକ୍ ଏବଂ କଲ୍ ପାଇଁ ଅତି କମରେ ଗୋଟିଏ ବ୍ଲକ୍ ( [ଫାୟାର୍କ୍ରାଲ୍ ବିଲିଂ](https://docs.firecrawl.dev/billing) ) ରେ ଫାୟାର୍କ୍ରାଲ୍ ସର୍ଚ୍ଚ ମୂଲ୍ୟ 10 ଟି ପ୍ରତ୍ୟାବର୍ତ୍ତିତ ଫଳାଫଳର ପ୍ରାରମ୍ଭ ବ୍ଲକ୍ ରେକର୍ଡ କରାଯାଇଛି: 11 ଫଳାଫଳର ମୂଲ୍ୟ $ 0.004 \|
 
-Exa ଫଳାଫଳଗୁଡ଼ିକ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` କୁ
-`provider_raw` ରେ ରଖେ। Tavily ଫଳାଫଳଗୁଡ଼ିକ `images` ଏବଂ `favicon` କୁ ରଖେ।
+ଜେନେରିକ୍ `time_range` ବର୍ତ୍ତମାନ ଉଭୟ ପ୍ରଦାନକାରୀଙ୍କ ନିକଟରେ ପହଞ୍ଚିଛି: Exa `startPublishedDate` (ISO timestamp) ଏବଂ ଟାଭିଲି `start_date` (`YYYY-MM-DD`) ପାଇଥାଏ \| `provider_options` ରେ ଏକ ସ୍ପଷ୍ଟ ତାରିଖ ମ୍ୟାପ୍ ହୋଇଥିବା ଏକକୁ ନବଲିଖନ କରେ \|
 
-ଖର୍ଚ୍ଚ ହିସାବ ଏବେ ମଧ୍ୟ ଫ୍ଲାଟ୍ ରେଜିଷ୍ଟ୍ରି `costPerQuery` ଅଟେ। Tavily ପ୍ରତ୍ୟେକ କଲ୍ ପାଇଁ
-`search_depth: "advanced"` ଉପରେ ଅଧିକ କ୍ରେଡିଟ୍ ବିଲ୍ କରେ, ଏବଂ ସେହି ପାର୍ଥକ୍ୟ
-`usage.search_cost_usd` ରେ ପ୍ରତିଫଳିତ ହୁଏ ନାହିଁ।
+Exa ଫଳାଫଳ `id`, `highlight_scores`, `summary`, `subpages`, `entities` ଏବଂ `extras` `provider_raw` ରେ ରଖେ \| ଟାଭିଲି ଫଳାଫଳ `images` ଏବଂ `favicon` ରଖେ \|
+
+ଲିଙ୍କଅପ୍ ସନ୍ଧାନ ମୂଲ୍ୟ `depth` `fast` ଏବଂ `standard` ପାଇଁ $ 0.005 ଏବଂ `deep` ( [ଲିଙ୍କଅପ୍ ମୂଲ୍ୟ](https://docs.linkup.so/pages/documentation/development/pricing) ) ପାଇଁ $ 0.05 ରେକର୍ଡ କରାଯାଇଛି, `depth` `provider_options` ରୁ ହେଉ କିମ୍ବା ସଂଯୋଗର ସେଟିଂସମୂହ \|
+
+Exa `type: "lite"` (Exa 3.0) ଏକ ଛୋଟ କ୍ଷେତ୍ରର ସେଟ୍ ଗ୍ରହଣ କରେ ଏବଂ ଅନ୍ୟ କ field ଣସି କ୍ଷେତ୍ର ସେଟ୍ ହେବାପରେ ସମଗ୍ର ଅନୁରୋଧକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରେ \| ଲାଇଟ୍ ପାଇଁ, `additionalQueries`, `systemPrompt` ଏବଂ `text` ଏବଂ `highlights` ବ୍ୟତୀତ ପ୍ରତ୍ୟେକ `contents` କି କଲ୍ ପୂର୍ବରୁ ଡ୍ରପ୍ ହୋଇଯାଏ \| ପୁରୁଣା `subpages`, `subpageTarget`, `highlights.numSentences` ଏବଂ `highlights.highlightsPerUrl` ଆଉ ଅଗ୍ରଗାମୀ ନୁହେଁ \|
+
+ମୂଲ୍ୟ ହିସାବ ହେଉଛି ଫ୍ଲାଟ ରେଜିଷ୍ଟ୍ରି `costPerQuery`, Exa ବ୍ୟତୀତ, ଯାହା Exa ର ନିଜସ୍ୱ ମୂଲ୍ୟ ଅନୁସରଣ କରେ: `auto` ପାଇଁ କଲ୍ ପାଇଁ $ 0.007 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `fast`) କିମ୍ବା `lite` ପାଇଁ $ 0.004 (ଏବଂ ଉତ୍ତରାଧିକାରୀ `instant`), 10 ଫଳାଫଳକୁ ଅନ୍ତର୍ଭୁକ୍ତ କରେ; ପ୍ରତ୍ୟେକ ପରବର୍ତ୍ତୀ ଫଳାଫଳ ପାଇଁ $ 0.001; ଏବଂ `contents.summary` ସେଟ୍ ହେବାବେଳେ ଫେରସ୍ତ ଫଳାଫଳ ପାଇଁ $ 0.001 \| `search_depth` `basic`, `fast` ଏବଂ `ultra-fast` ପାଇଁ ଟାଭିଲି 1 କ୍ରେଡିଟ୍ ($ 0.008) ଏବଂ `advanced` ( [Tavily API କ୍ରେଡିଟ୍](https://docs.tavily.com/documentation/api-credits) ) ପାଇଁ 2 କ୍ରେଡିଟ୍ ($ 0.016) ରେକର୍ଡ କରାଯାଇଛି \| `auto_parameters: true` ସହିତ ଏକ କଲ ଯାହା ଟାଭିଲି ଉନ୍ନତକୁ ଅପଗ୍ରେଡ୍ କରେ ତଥାପି 1 କ୍ରେଡିଟ୍ ରେ ରେକର୍ଡ ହୋଇଛି \|
 
 ---
 

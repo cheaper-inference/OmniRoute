@@ -111,150 +111,150 @@ OmniRoute/
 
 ---
 
-## `src/` — កម្មវិធី Next.js
+## `src/` - កម្មវិធី Next.js
 
 ```
 src/
-├── app/                 # App Router (ទំព័រ + ផ្លូវ API + ទំព័រស្ថានភាព + ទំព័រដើម)
-├── lib/                 # បណ្ណាល័យស្នូល / ម៉ូឌុលដែន (ថតរងចំនួន 80 + ឯកសារកម្រិតកំពូលប្រហែល 70)
-├── domain/              # តក្កវិជ្ជាដែនសុទ្ធ (ម៉ាស៊ីនគោលការណ៍, ការបម្រុងជំនួស, ថ្លៃចំណាយ, ការចាក់សោ, comboResolver, ការវាយតម្លៃ)
-├── server/              # ម៉ូឌុលសម្រាប់តែម៉ាស៊ីនមេ (ខ្សែដំណើរការ authz, cors, middleware ផ្ទៀងផ្ទាត់អត្តសញ្ញាណ) — មិនអាច import ពី client បានទេ
-├── shared/              # ប្រើរួមគ្នារវាង server និង client នៅកន្លែងដែលមានសុវត្ថិភាព (ថេរ, ប្រភេទ, ការផ្ទៀងផ្ទាត់, កិច្ចសន្យា, ឧបករណ៍ប្រើប្រាស់)
-├── i18n/                # ការកំណត់រចនាសម្ព័ន្ធ next-intl + សារ JSON តាម locale នីមួយៗ (67 locales)
-├── middleware/          # middleware របស់ Next.js (ការបន្ថែមទិន្នន័យទៅសំណើ, ការរកឃើញ locale)
-├── mitm/                # ស្នូលប្រូកស៊ី MITM៖ ការបង្កើត/ដំឡើងវិញ្ញាបនបត្រ, កម្មវិធីដោះស្រាយ, គោលដៅ, ឧបករណ៍ត្រួតពិនិត្យ, របាំង, ការបញ្ជូនឆ្លងកាត់
-│   ├── handlers/        # ថ្នាក់កម្មវិធីដោះស្រាយ IDE-agent ចំនួន 9 ដែលពង្រីកពី MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # ស្រទាប់ចាប់យកចរាចរណ៍៖ buffer (រង្វង់ក្នុងអង្គចងចាំ), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # កូដតភ្ជាប់អាដាប់ទ័រម៉ូដែល (shim ចាស់)
-├── scripts/             # ស្គ្រីបថែទាំនៅក្នុងមែកធាង (ឧ. backfillAggregation)
-├── sse/                 # កម្មវិធីដោះស្រាយ/សេវា SSE ចាស់ (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # ឃ្លាំងក្នុងអង្គចងចាំចាស់ (កំពុងត្រូវបានបញ្ឈប់ជាបណ្តើរៗ ដើម្បីប្រើ src/lib/db)
-├── types/               # ឯកសារប្រភេទ TS ដែលប្រើរួមគ្នា
-├── instrumentation.ts   # hook តេឡេមេទ្រីរបស់ Next.js (browser + edge)
-├── instrumentation-node.ts  # instrumentation សម្រាប់តែ Node
-└── proxy.ts             # shim ច្រកចូល HTTP-proxy
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — រ៉ោតទ័រកម្មវិធី (Next.js 16)
 
-| Path                                                                         | គោលបំណង                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | OpenAI-compat API សាធារណៈ (~25 ផ្លូវរង៖ ការជជែក ការបំពេញ អាំងប៊ែដឌីង ឯកសារ បាច់ អូឌីយ៉ូ រូបភាព វីដេអូ តន្ត្រី ការរៀបលំដាប់ឡើងវិញ ការត្រួតពិនិត្យមាតិកា ការស្វែងរក ws ភ្នាក់ងារ គណនី អ្នកផ្តល់សេវា ជាដើម)                                                                                                                 |
-| `app/api/v1beta/`                                                            | ចំណុចបញ្ចប់ API តាមរចនាប័ទ្ម Gemini                                                                                                                                                                                                                                                                                      |
-| `app/api/playground/`                                                        | ផ្លូវរបស់ Playground Studio៖ `improve-prompt/` (POST — ឧបករណ៍សរសេរប្រូមឡើងវិញដោយ LLM), `presets/` (GET បញ្ជី / POST បង្កើត), `presets/[id]/` (GET / PUT / DELETE) — សូមមើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                        |
-| `app/api/` (មិនមែន v1)                                                       | ផ្លូវគ្រប់គ្រង/អ្នកគ្រប់គ្រងប្រព័ន្ធ (~60 ថត៖ អ្នកផ្តល់សេវា បន្សំ ការកំណត់ mcp, a2a, ការវាយតម្លៃ អង្គចងចាំ ជំនាញ webhooks អនុលោមភាព ភាពធន់ ការត្រួតពិនិត្យ tunnels, cli-tools ជាដើម)                                                                                                                                     |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ផ្លូវ (ការគ្រប់គ្រងម៉ាស៊ីនមេ ស្ថានភាពភ្នាក់ងារ/DNS/ការផ្គូផ្គង ការរំលង វិញ្ញាបនបត្រ upstream-CA)។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/AGENTBRIDGE.md §7`។                                                                                                                      |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ផ្លូវ (សំណើ សម័យ ម៉ាស៊ីន ក្រាបម៉ូដ នាំចេញ ws)។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md §8`។                                                                                                                                                       |
-| `app/a2a/`                                                                   | ចំណុចចូល A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                                  |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (ការរកឃើញ)                                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | ទំព័រ UI ផ្ទាំងគ្រប់គ្រង (50+ ផ្នែក, ~118 ឯកសារ page.tsx៖ អ្នកផ្តល់សេវា បន្សំ ការកំណត់ អង្គចងចាំ ជំនាញ webhooks ការវាយតម្លៃ សវនកម្ម បាច់ ឃ្លាំងសម្ងាត់ ការចំណាយ សុខភាពប្រព័ន្ធ ប្រព័ន្ធ សកម្មភាព ជាដើម)                                                                                                                  |
-| `app/(dashboard)/dashboard/search-tools/`                                    | UI របស់ Search Tools Studio (3 ផ្ទាំង៖ Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — សូមមើល `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                    |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ផែនការ 21)៖ `page.tsx` (សែលមាន 3 ផ្ទាំង), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | ទំព័រផ្ទាំងគ្រប់គ្រង AgentBridge — កាតម៉ាស៊ីនមេ កាតភ្នាក់ងារ 9 កម្មវិធីជំនួយការដំឡើង ការផ្គូផ្គងម៉ូដែល និងបញ្ជីរំលង។ i18n PT-BR + EN។ សូមមើល `docs/frameworks/AGENTBRIDGE.md`។                                                                                                                                           |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ទំព័រផ្ទាំងគ្រប់គ្រង Traffic Inspector — DevTools បំបែកជា 2 ផ្នែក ផ្ទាំងព័ត៌មានលម្អិត 7 ប៊ូតុងបិទបើកម៉ូដចាប់យក 4 ឧបករណ៍កត់ត្រាសម័យ និងការដាក់ពណ៌តាមបរិបទ។ i18n PT-BR + EN។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md`។                                                                                                |
-| `app/(dashboard)/dashboard/activity/`                                        | ទំព័រមតិព័ត៌មានសកម្មភាព (ក្រុម B): `page.tsx` (ម៉ាស៊ីនបម្រើ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — សូមមើល `docs/architecture/MONITORING_SECTIONS.md`                                                                                                     |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | ទំព័រចែករំលែកកូតា (ក្រុម B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ទំព័រកំណត់រចនាសម្ព័ន្ធគម្រោងរបស់អ្នកផ្តល់សេវា (ក្រុម B): `page.tsx` + `ProviderPlanConfigClient.tsx` — វិមាត្រកូតាដែលកំណត់ជំនួសតាមការតភ្ជាប់នីមួយៗ                                                                                                                                                                       |
-| `app/docs/`                                                                  | កម្មវិធីមើលឯកសារដែលបានបង្កប់ (បង្ហាញ `docs/*.md`)                                                                                                                                                                                                                                                                        |
-| `app/landing/`                                                               | ទំព័រចុះចតផ្នែកទីផ្សារ                                                                                                                                                                                                                                                                                                   |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | ទំព័រពាក់ព័ន្ធនឹងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ                                                                                                                                                                                                                                                                                |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | ទំព័រកំហុស HTTP                                                                                                                                                                                                                                                                                                          |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ទំព័រឋិតិវន្ត/ស្ថានភាព                                                                                                                                                                                                                                                                                                   |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ប្លង់ឫស ទំព័រដើម បញ្ជីកំណត់ PWA និង CSS សកល                                                                                                                                                                                                                                                                              |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ព្រំដែនកំហុស                                                                                                                                                                                                                                                                                                             |
+| ផ្លូវ                                                                        | គោលបំណង                                                                                                                                                                                                                                                                                                               |
+| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | សាធារណៈ OpenAI-compat API (~ 25 ផ្លូវរង៖ ការជជែក ការបំពេញ ការបង្កប់ ឯកសារ បណ្តុំ អូឌីយ៉ូ រូបភាព វីដេអូ តន្ត្រី ចំណាត់ថ្នាក់ឡើងវិញ ការសម្របសម្រួល ការស្វែងរក ws ភ្នាក់ងារ គណនី អ្នកផ្តល់សេវា ។ល។)                                                                                                                      |
+| `app/api/v1beta/`                                                            | ចំណុចបញ្ចប់ API រចនាប័ទ្ម Gemini                                                                                                                                                                                                                                                                                      |
+| `app/api/playground/`                                                        | ផ្លូវស្ទូឌីយោសួនកុមារ៖ `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — មើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                         |
+| `app/api/` (មិនមែន v1)                                                       | Management/admin routes (~ 60 directory: providers, combos, settings, mcp, a2a, evals, memory, skill, webhooks, compliance, resilience, monitoring, tunnels, cli-tools, etc.)                                                                                                                                         |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ផ្លូវ (ការគ្រប់គ្រងម៉ាស៊ីនមេ, ភ្នាក់ងារ state/DNS/mappings, ផ្លូវវាង, វិញ្ញាបនប័ត្រ, ឡើង-CA) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/AGENTBRIDGE.md §7`។                                                                                                                      |
+| `app/api/tools/traffic-inspector/`                                           | អធិការចរាចរណ៍ REST + WS API — 16 ផ្លូវ + (សំណើ, វគ្គ, ម៉ាស៊ីន, របៀបចាប់យក, នាំចេញ, ws) ។ LOCAL_ONLY + SPAWN_CAPABLE។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md §8`។                                                                                                                                                |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 ចំណុចចូល (`POST /a2a`)                                                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | កាតភ្នាក់ងារ A2A (ការរកឃើញ)                                                                                                                                                                                                                                                                                           |
+| `app/(dashboard)/dashboard/`                                                 | ទំព័រ Dashboard UI (ផ្នែក 50 +, ~ 118 page.tsx ឯកសារ៖ អ្នកផ្តល់សេវា, បន្សំ, ការកំណត់, អង្គចងចាំ, ជំនាញ, webhooks, evals, សវនកម្ម, បាច់, ឃ្លាំងសម្ងាត់, ការចំណាយ, សុខភាព, ប្រព័ន្ធ, សកម្មភាព។ល។)                                                                                                                       |
+| `app/(dashboard)/dashboard/search-tools/`                                    | ស្វែងរកឧបករណ៍ស្ទូឌីយោ UI (3 ផ្ទាំង៖ Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — មើល `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (ផែនការ 21): `page.tsx` (សែល 3 ផ្ទាំង), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | ទំព័រផ្ទាំងគ្រប់គ្រង AgentBridge — កាតម៉ាស៊ីនមេ, កាតភ្នាក់ងារ 9, អ្នកជំនួយការដំឡើង, ការធ្វើផែនទីគំរូ, បញ្ជីរំលង។ i18n PT-BR + EN។ សូមមើល `docs/frameworks/AGENTBRIDGE.md`។                                                                                                                                            |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ទំព័រផ្ទាំងគ្រប់គ្រងរបស់អធិការចរាចរណ៍ — DevTools បំបែក, 7 ផ្ទាំងលម្អិត, បិទបើករបៀបចាប់យក 4, កម្មវិធីថតសម័យ, ការកំណត់ពណ៌បរិបទ។ i18n PT-BR + EN។ សូមមើល `docs/frameworks/TRAFFIC_INSPECTOR.md`។                                                                                                                         |
+| `app/(dashboard)/dashboard/activity/`                                        | ទំព័រមតិព័ត៌មានសកម្មភាព (ក្រុម B)៖ `page.tsx` (ម៉ាស៊ីនមេ) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — មើល `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | ទំព័រចែករំលែកកូតា (ក្រុមខ)៖ `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                               |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | ទំព័រកំណត់រចនាសម្ព័ន្ធផែនការអ្នកផ្តល់សេវា (ក្រុម B)៖ `page.tsx` + `ProviderPlanConfigClient.tsx` — ទំហំកូតាក្នុងមួយការបដិសេធការតភ្ជាប់                                                                                                                                                                                |
+| `app/docs/`                                                                  | កម្មវិធីមើលឯកសារដែលបានបង្កប់ (បង្ហាញ `docs/*.md`)                                                                                                                                                                                                                                                                     |
+| `app/landing/`                                                               | ទំព័រចុះចតទីផ្សារ                                                                                                                                                                                                                                                                                                     |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | ទំព័រដែលទាក់ទងនឹងការផ្ទៀងផ្ទាត់                                                                                                                                                                                                                                                                                       |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ទំព័រកំហុស                                                                                                                                                                                                                                                                                                       |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | ទំព័រ Static/status                                                                                                                                                                                                                                                                                                   |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | ប្លង់ឫស, ផ្ទះ, PWA manifest, CSS សកល                                                                                                                                                                                                                                                                                  |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ព្រំដែនកំហុស                                                                                                                                                                                                                                                                                                          |
 
-### `src/lib/` — បណ្ណាល័យស្នូល (~50 ម៉ូឌុល)
+### `src/lib/` — បណ្ណាល័យស្នូល (~ 50 modules)
 
-| ម៉ូឌុល                                   | គោលបំណង                                                                                                                                                                                                                                                                                                                       |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | កម្មវិធីគ្រប់គ្រងកិច្ចការពិធីការ A2A, ជំនាញ (5), ការស្ទ្រីម                                                                                                                                                                                                                                                                   |
-| `acp/`                                   | បញ្ជីចុះឈ្មោះភ្នាក់ងារ CLI (ការរកឃើញ CLI ក្នុងមូលដ្ឋាន — សូមមើល `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                   |
-| `api/`                                   | ឧបករណ៍ជំនួយ API រួម (`requireManagementAuth`, ការផ្ទៀងផ្ទាត់សុពលភាព)                                                                                                                                                                                                                                                          |
-| `auth/`                                  | សម័យ, ការធ្វើ hash ពាក្យសម្ងាត់, ការផ្ទៀងផ្ទាត់សុពលភាព token                                                                                                                                                                                                                                                                  |
-| `batches/`                               | កម្មវិធីដោះស្រាយ OpenAI Batches API                                                                                                                                                                                                                                                                                           |
-| `catalog/`                               | ការផ្ទៀងផ្ទាត់សុពលភាព Zod សម្រាប់កាតាឡុកអ្នកផ្តល់សេវា + ការកំណត់សមត្ថភាព                                                                                                                                                                                                                                                      |
-| `cloudAgent/`                            | ភ្នាក់ងារ Cloud (Codex Cloud, Devin, Jules) — សូមមើល `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
-| `combos/`                                | ការដោះស្រាយ Combo + ឧបករណ៍ជំនួយសម្រាប់រៀបលំដាប់ឡើងវិញ                                                                                                                                                                                                                                                                         |
-| `audit/`                                 | ឧបករណ៍ជំនួយមតិព័ត៌មានសកម្មភាព៖ `highLevelActions.ts` (បញ្ជីអនុញ្ញាត + `isHighLevelAction()`), `activityIcons.ts` (ការផ្គូផ្គងសកម្មភាព → រូបតំណាង/កិរិយាសព្ទ), `timeline.ts` (groupByDay/relativeTime) — សូមមើល `docs/architecture/MONITORING_SECTIONS.md`                                                                     |
-| `compliance/`                            | កំណត់ហេតុសវនកម្ម + សវនកម្មអ្នកផ្តល់សេវា — សូមមើល `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                |
-| `compression/`                           | ស្រទាប់តភ្ជាប់ម៉ាស៊ីនបង្ហាប់ (ម៉ាស៊ីនស្ថិតនៅក្នុង `open-sse/services/compression/`)                                                                                                                                                                                                                                           |
-| `config/`                                | ឧបករណ៍ជំនួយការកំណត់រចនាសម្ព័ន្ធពេលដំណើរការ                                                                                                                                                                                                                                                                                    |
-| `db/`                                    | ម៉ូឌុល DB តាមដែនចំនួន 120+ + ការផ្លាស់ប្តូរគ្រោងទិន្នន័យចំនួន 168 (សម្រាប់ SQLite ត្រូវឆ្លងកាត់ទីនេះជានិច្ច)                                                                                                                                                                                                                  |
-| `quota/`                                 | ម៉ាស៊ីនចែករំលែកកូតា៖ `dimensions.ts` (ប្រភេទ/Zod), `types.ts` (ចំណុចប្រទាក់ QuotaStore), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — សូមមើល `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | កម្មវិធី client សម្រាប់កាតាឡុកម៉ូដែលឥតគិតថ្លៃរបស់ Radar៖ `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — សូមមើល `docs/frameworks/RADAR.md`                                                                                                                       |
-| `display/`                               | ឧបករណ៍ជំនួយសម្រាប់ធ្វើទ្រង់ទ្រាយ UI (ថ្លៃចំណាយ ភាពយឺតយ៉ាវ ជាដើម)                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | ឧបករណ៍ជំនួយសម្រាប់សេវា embeddings                                                                                                                                                                                                                                                                                             |
-| `env/`                                   | ការញែកអថេរបរិស្ថាន + ការផ្ទៀងផ្ទាត់                                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | គ្រោងការណ៍វាយតម្លៃ (សំណុំសាកល្បង កម្មវិធីដំណើរការ បរិស្ថានពេលដំណើរការ) — សូមមើល `docs/frameworks/EVALS.md`                                                                                                                                                                                                                    |
-| `guardrails/`                            | ឧបករណ៍បិទបាំង PII ការការពារការបញ្ចូល prompt ព្យាបាទ និងស្ពាន vision — សូមមើល `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                    |
-| `jobs/`                                  | កិច្ចការផ្ទៃខាងក្រោយ (ដូច cron)                                                                                                                                                                                                                                                                                               |
-| `memory/`                                | អង្គចងចាំសម្រាប់ការសន្ទនា (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant កម្រិតទី 2) — សូមមើល `docs/frameworks/MEMORY.md`                                                                                                                                                                                                      |
-| `memory/embedding/`                      | ស្រទាប់ embedding ពហុប្រភព៖ `index.ts` (ឧបករណ៍ដោះស្រាយ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ផែនការ 21)                                                                                                                                                                           |
-| `memory/vectorStore.ts`                  | wrapper សម្រាប់ sqlite-vec v0.1.9 — KNN brute-force + hybrid RRF (FTS5 + vector, k=60)។ ចាប់ផ្ដើមតាមតម្រូវការ ហើយបន្ថយមុខងារដោយរលូននៅពេល sqlite-vec មិនអាចប្រើបាន។ (ផែនការ 21)                                                                                                                                                |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ដំណើរការអង្គចងចាំដែលមាន `needs_reindex=1` នៅផ្ទៃខាងក្រោយ; ត្រូវបានហៅដោយ `POST /api/memory/reindex` និងផ្លូវ lazy-backfill។ (ផែនការ 21)                                                                                                                                                                  |
-| `monitoring/`                            | ការត្រួតពិនិត្យសុខភាពប្រព័ន្ធ និងការបញ្ចេញ metrics                                                                                                                                                                                                                                                                            |
-| `oauth/`                                 | លំហូរ OAuth/នាំចូលសម្រាប់ម៉ូឌុល provider ចំនួន 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                 |
-| `plugins/`                               | បញ្ជីចុះឈ្មោះ plugin                                                                                                                                                                                                                                                                                                          |
-| `promptCache/`                           | ចំណុចបំបែក prompt cache បែប Anthropic                                                                                                                                                                                                                                                                                         |
-| `skills/`                                | គ្រោងការណ៍ Skills (មានស្រាប់ + marketplace + SkillsSH) — សូមមើល `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                   |
-| `playground/`                            | ឧបករណ៍ជំនួយរួមសម្រាប់ Playground Studio៖ `codeExport.ts` (កម្មវិធីបង្កើត curl/Python/TS), `promptImprover.ts` (កម្មវិធីបង្កើត meta-prompt), `streamMetrics.ts` (TTFT/TPS សុទ្ធ), `types.ts` (តារាងតម្លៃ) — សូមមើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                      |
-| `webhookDispatcher.ts`                   | ការបញ្ជូន webhook ដោយប្រើ HMAC — សូមមើល `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                         |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | កម្មវិធីគ្រប់គ្រង tunnel — សូមមើល `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                 |
-| `cloudSync.ts`, `initCloudSync.ts`       | ការធ្វើសមកាលកម្មស្ថានភាពជាមួយ cloud ជាជម្រើស                                                                                                                                                                                                                                                                                  |
-| `localDb.ts`                             | Barrel សម្រាប់នាំចេញឡើងវិញនូវម៉ូឌុល db (គ្មានតក្កវិជ្ជា — នាំចេញឡើងវិញប៉ុណ្ណោះ)                                                                                                                                                                                                                                               |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | ការរក្សាទុក request ក្នុង cache + idempotency                                                                                                                                                                                                                                                                                 |
-| (ឯកសារកម្រិតកំពូលប្រហែល 30 ផ្សេងទៀត)     | ឧបករណ៍ជំនួយឯកទេស (logEnv, modelsDevSync, piiSanitizer ជាដើម)                                                                                                                                                                                                                                                                  |
+| ម៉ូឌុល                                   | គោលបំណង                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | កម្មវិធីគ្រប់គ្រងភារកិច្ចពិធីការ A2A ជំនាញ (5) ការផ្សាយ                                                                                                                                                                                                                                                                    |
+| `acp/`                                   | ការចុះឈ្មោះភ្នាក់ងារ CLI (ការរកឃើញ CLI ក្នុងតំបន់ — សូមមើល `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                     |
+| `api/`                                   | ចែករំលែកជំនួយ API (`requireManagementAuth`, validation )                                                                                                                                                                                                                                                                   |
+| `auth/`                                  | វគ្គ ការដាក់លេខសម្ងាត់ សុពលភាពសញ្ញាសម្ងាត់                                                                                                                                                                                                                                                                                 |
+| `batches/`                               | OpenAI Batches អ្នកដោះស្រាយ API                                                                                                                                                                                                                                                                                            |
+| `catalog/`                               | កាតាឡុកអ្នកផ្តល់សេវា Zod សុពលភាពដំណោះស្រាយសមត្ថភាព +                                                                                                                                                                                                                                                                       |
+| `cloudAgent/`                            | ភ្នាក់ងារពពក (Codex Cloud, Devin, Jules) — សូមមើល `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                         |
+| `combos/`                                | ដំណោះស្រាយបន្សំ + ជំនួយការតម្រៀបឡើងវិញ                                                                                                                                                                                                                                                                                     |
+| `audit/`                                 | ជំនួយការចិញ្ចឹមសកម្មភាព៖ `highLevelActions.ts` (បញ្ជីអនុញ្ញាត + `isHighLevelAction()`), `activityIcons.ts` (សកម្មភាព → icon/verb ផែនទី), `timeline.ts` (groupByDay/relativeTime) — មើល `docs/architecture/MONITORING_SECTIONS.md`                                                                                          |
+| `compliance/`                            | កំណត់ហេតុសវនកម្ម + សវនកម្មអ្នកផ្តល់សេវា — សូមមើល `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                             |
+| `compression/`                           | កាវម៉ាស៊ីនបង្ហាប់ (ម៉ាស៊ីនរស់នៅក្នុង `open-sse/services/compression/`)                                                                                                                                                                                                                                                     |
+| `config/`                                | កម្មវិធីជំនួយកំណត់រចនាសម្ព័ន្ធពេលដំណើរការ                                                                                                                                                                                                                                                                                  |
+| `db/`                                    | 120 + domain DB modules + 168 migrations (តែងតែឆ្លងកាត់ទីនេះសម្រាប់ SQLite)                                                                                                                                                                                                                                                |
+| `quota/`                                 | ម៉ាស៊ីនចែករំលែកកូតា៖ `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interface ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — សូមមើល `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | ម៉ាស៊ីនភ្ញៀវកាតាឡុកម៉ូដែលឥតគិតថ្លៃរ៉ាដា៖ `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — មើល `docs/frameworks/RADAR.md`                                                                                                                                       |
+| `display/`                               | ជំនួយការធ្វើទ្រង់ទ្រាយ UI (តម្លៃ ភាពយឺតយ៉ាវ។ល។)                                                                                                                                                                                                                                                                            |
+| `embeddings/`                            | អ្នកជំនួយសេវាកម្មបង្កប់                                                                                                                                                                                                                                                                                                    |
+| `env/`                                   | ការផ្ទៀងផ្ទាត់ + អថេរ env                                                                                                                                                                                                                                                                                                  |
+| `evals/`                                 | ក្របខ័ណ្ឌ Eval (ឈុត, អ្នករត់, ពេលរត់) — សូមមើល `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                  |
+| `guardrails/`                            | របាំង PII, ការចាក់ភ្លាមៗ, ស្ពានចក្ខុវិស័យ — សូមមើល `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                           |
+| `jobs/`                                  | ការងារផ្ទៃខាងក្រោយ (ដូច cron)                                                                                                                                                                                                                                                                                              |
+| `memory/`                                | អង្គចងចាំសន្ទនា (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — សូមមើល `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                 |
+| `memory/embedding/`                      | ស្រទាប់បង្កប់ប្រភពច្រើន៖ `index.ts` (អ្នកដោះស្រាយ), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (ផែនការ 21)                                                                                                                                                                             |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60) ។ Lazy-init ធ្វើឱ្យខូចគុណភាពនៅពេលដែល sqlite-vec មិនអាចប្រើបាន។ (ផែនការ ២១)                                                                                                                                                                |
+| `memory/reindex.ts`                      | `runReindexBatch()` - ដំណើរការការចងចាំជាមួយ `needs_reindex=1` នៅក្នុងផ្ទៃខាងក្រោយ; ហៅដោយ `POST /api/memory/reindex` និង lazy-backfill path ។ (ផែនការ ២១)                                                                                                                                                                   |
+| `monitoring/`                            | ការពិនិត្យសុខភាព ការបំភាយម៉ែត្រ                                                                                                                                                                                                                                                                                            |
+| `oauth/`                                 | OAuth/import ហូរសម្រាប់ម៉ូឌុលអ្នកផ្តល់សេវាចំនួន 22 (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference-traauth, qoder, zed)                                                                  |
+| `plugins/`                               | បញ្ជីឈ្មោះកម្មវិធីជំនួយ                                                                                                                                                                                                                                                                                                    |
+| `promptCache/`                           | ចំណុចបំបែកឃ្លាំងសម្ងាត់ប្រអប់បញ្ចូលក្នុងរចនាប័ទ្ម Anthropic                                                                                                                                                                                                                                                                |
+| `skills/`                                | ក្របខ័ណ្ឌជំនាញ (ទីផ្សារ + ភ្ជាប់មកជាមួយ + SkillsSH) — សូមមើល `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                   |
+| `playground/`                            | Playground Studio ចែករំលែកជំនួយ៖ `codeExport.ts` (curl/Python/TS generator), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (តារាងតម្លៃ) — សូមមើល `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                        |
+| `webhookDispatcher.ts`                   | ការចែកចាយ HMAC webhook — សូមមើល `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                              |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | អ្នកគ្រប់គ្រងផ្លូវរូងក្រោមដី — សូមមើល `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                          |
+| `cloudSync.ts`, `initCloudSync.ts`       | ការធ្វើសមកាលកម្មពពកស្រេចចិត្តនៃរដ្ឋ                                                                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | នាំចេញធុងឡើងវិញសម្រាប់ម៉ូឌុល db (គ្មានតក្កវិជ្ជា - នាំចេញឡើងវិញតែប៉ុណ្ណោះ)                                                                                                                                                                                                                                                 |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | ស្នើសុំភាពគ្មានសមត្ថភាព + ឃ្លាំងសម្ងាត់                                                                                                                                                                                                                                                                                    |
+| (~ 30 ឯកសារកម្រិតកំពូលបន្ថែមទៀត)         | អ្នកជំនួយឯកទេស (logEnv, modelDevSync, piiSanitizer ។ល។)                                                                                                                                                                                                                                                                    |
 
-### `src/lib/db/` — មូលដ្ឋានទិន្នន័យ (147 ម៉ូឌុល + 208 migrations)
+### `src/lib/db/` — មូលដ្ឋានទិន្នន័យ (147 ម៉ូឌុល + 208 ការធ្វើចំណាកស្រុក)
 
-| ថតរង                      | គោលបំណង                                                                                                                                                                              |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `db/core.ts`              | Singleton `getDbInstance()` ដែលមាន WAL journaling                                                                                                                                    |
-| `db/migrations/`          | ឯកសារ SQL ដែលមានកំណែ (idempotent និង transactional)។ `073_memory_vec.sql` បន្ថែម `memory_vec_meta` + ជួរឈរ `needs_reindex` (ផែនការ 21)។                                              |
-| `db/playgroundPresets.ts` | ម៉ូឌុល CRUD សម្រាប់ preset របស់ Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)     |
-| `db/memoryVec.ts`         | CRUD សម្រាប់ `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` ជាដើម (ផែនការ 21)                    |
-| `db/<domain>.ts`          | មួយម៉ូឌុលសម្រាប់ domain នីមួយៗ៖ providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache ជាដើម។ |
+| រង                        | គោលបំណង                                                                                                                                                                                         |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | `getDbInstance()` singleton ជាមួយ WAL journaling                                                                                                                                                |
+| `db/migrations/`          | ឯកសារ SQL ដែលបានធ្វើកំណែទម្រង់ (impotent, ប្រតិបត្តិការ) ។ `073_memory_vec.sql` បន្ថែមជួរឈរ `memory_vec_meta` + `needs_reindex` (ផែនការ 21) ។                                                   |
+| `db/playgroundPresets.ts` | ម៉ូឌុល CRUD សម្រាប់ការកំណត់ជាមុន Playground Studio (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)               |
+| `db/memoryVec.ts`         | CRUD សម្រាប់ `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` ជាដើម (ផែនការ 21)                               |
+| `db/<domain>.ts`          | ម៉ូឌុលមួយក្នុងមួយដែន៖ អ្នកផ្តល់សេវា បន្សំ apiKeys អ្នកប្រើប្រាស់ វគ្គ ការប្រើប្រាស់ កំណត់ហេតុសវនកម្ម បណ្តាញទំពក់ ជំនាញ មេម៉ូរី ធាតុចូល ពពក អេហ្សិន_កិច្ចការ អេវ៉ាល* \* , reasoning_cache ជាដើម។ |
 
 ### `src/domain/`
 
-| ម៉ូឌុល                 | គោលបំណង                                                  |
-| ---------------------- | -------------------------------------------------------- |
-| `policy.ts`            | ម៉ាស៊ីនគោលការណ៍                                          |
-| `fallbackPolicy.ts`    | មែកធាងសេចក្តីសម្រេចចិត្ត fallback                        |
-| `costRules.ts`         | ច្បាប់គណនាថ្លៃចំណាយ                                      |
-| `lockoutPolicy.ts`     | គោលការណ៍ lockout សម្រាប់ model/connection                |
-| `tagRouter.ts`         | ការកំណត់ផ្លូវដោយផ្អែកលើ tag                              |
-| `comboResolver.ts`     | ការដោះស្រាយ combo (ប្រើដោយម៉ាស៊ីន combo)                 |
-| `modelAvailability.ts` | ការត្រួតពិនិត្យភាពអាចប្រើបានសម្រាប់ model នីមួយៗ         |
-| `assessment/`          | ការវាយតម្លៃ model (ដំណាក់កាលទី 1 នៃ RFC-AUTO-ASSESSMENT) |
+| ម៉ូឌុល                 | គោលបំណង                                                |
+| ---------------------- | ------------------------------------------------------ |
+| `policy.ts`            | ម៉ាស៊ីនគោលនយោបាយ                                       |
+| `fallbackPolicy.ts`    | ដើមឈើការសម្រេចចិត្តធ្លាក់ចុះ                           |
+| `costRules.ts`         | ច្បាប់នៃការគណនាថ្លៃដើម                                 |
+| `lockoutPolicy.ts`     | គោលនយោបាយចាក់សោរ Model/connection                      |
+| `tagRouter.ts`         | ការកំណត់ផ្លូវដែលមានមូលដ្ឋានលើស្លាក                     |
+| `comboResolver.ts`     | ដំណោះស្រាយបន្សំ (ប្រើដោយម៉ាស៊ីនបន្សំ)                  |
+| `modelAvailability.ts` | ពិនិត្យភាពអាចរកបានតាមម៉ូដែល                            |
+| `assessment/`          | ការវាយតម្លៃគំរូ (ដំណាក់កាលទី 1 នៃ RFC-AUTO-ASSESSMENT) |
 
 ### `src/server/`
 
-| ម៉ូឌុល   | គោលបំណង                                                                                              |
-| -------- | ---------------------------------------------------------------------------------------------------- |
-| `authz/` | ដំណើរការផ្តល់សិទ្ធិ៖ `classify` → `policies` → `enforce` — សូមមើល `docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | ការកំណត់រចនាសម្ព័ន្ធ CORS                                                                            |
-| `auth/`  | Middleware សម្រាប់ session                                                                           |
+| ម៉ូឌុល   | គោលបំណង                                                                                           |
+| -------- | ------------------------------------------------------------------------------------------------- |
+| `authz/` | បំពង់ការអនុញ្ញាត៖ `classify` → `policies` → `enforce` — សូមមើល `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | ការកំណត់រចនាសម្ព័ន្ធ CORS                                                                         |
+| `auth/`  | ឧបករណ៍កណ្តាលសម័យ                                                                                  |
 
 ### `src/shared/`
 
-| ម៉ូឌុល                           | គោលបំណង                                                                                                 |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `components/`                    | API សមាសភាគផ្ទាំងគ្រប់គ្រង៖ អាដាប់ទ័រលើ `packages/ui-kit` — សូមមើល `docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`៖ ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → សមាសភាគ Lucide (`<Icon>`)                                  |
-| `constants/providers.ts`         | **អ្នកផ្តល់សេវា 376** ជាមួយការផ្ទៀងផ្ទាត់ Zod (ប្រភពត្រឹមត្រូវតែមួយ)                                    |
-| `constants/cliTools.ts`          | បញ្ជីចុះឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                         |
-| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20** ជាមួយអាទិភាព                                                              |
-| `constants/publicApiRoutes.ts`   | ផ្លូវដែលតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់ Bearer (ធៀបនឹងការផ្ទៀងផ្ទាត់សម្រាប់ការគ្រប់គ្រង)                     |
-| `constants/upstreamHeaders.ts`   | បញ្ជីហាមឃាត់បឋមកថាសម្រាប់សំណើ upstream                                                                  |
-| `validation/schemas.ts`          | គ្រោងការណ៍ Zod ប្រហែល 80 (ប្រភពត្រឹមត្រូវតែមួយសម្រាប់កិច្ចសន្យា API)                                    |
-| `validation/helpers.ts`          | ឧបករណ៍ជំនួយផ្ទៀងផ្ទាត់ Zod (`validateBody` ជាដើម)                                                       |
-| `types/`                         | ប្រភេទ TS ដែលប្រើរួមគ្នា                                                                                |
-| `contracts/`                     | កិច្ចសន្យា API សាធារណៈ (ប្រើប្រាស់ដោយ `files:` ក្នុង `package.json`)                                    |
-| `utils/circuitBreaker.ts`        | Circuit breaker របស់អ្នកផ្តល់សេវា (សូមមើល `docs/architecture/RESILIENCE_GUIDE.md`)                      |
-| `utils/apiAuth.ts`               | ការផ្ទៀងផ្ទាត់ API key និងការត្រួតពិនិត្យវិសាលភាព                                                       |
-| `utils/fetchTimeout.ts`          | Wrapper សម្រាប់ timeout/abort នៃ upstream fetch                                                         |
-| `utils/releaseNotes.ts`          | កម្មវិធីញែកសេចក្តីប្រកាស v2/legacy ដែលបានបិទ ការធ្វើមូលដ្ឋានីយកម្ម និងការមិនបង្ហាញ ID                   |
+| ម៉ូឌុល                           | គោលបំណង                                                                                                  |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `components/`                    | សមាសធាតុផ្ទាំងគ្រប់គ្រង API: អាដាប់ទ័រលើ `packages/ui-kit` — សូមមើល `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: ឈ្មោះរូបតំណាងដែលប្រើដោយអេក្រង់ → Lucide components (`<Icon>`)                                |
+| `constants/providers.ts`         | **អ្នកផ្គត់ផ្គង់ 377** ជាមួយនឹងការបញ្ជាក់ Zod (ប្រភពនៃការពិត)                                            |
+| `constants/cliTools.ts`          | បញ្ជីឈ្មោះឧបករណ៍ CLI ខាងក្រៅ                                                                             |
+| `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវចំនួន 20** ជាមួយនឹងអាទិភាព                                                       |
+| `constants/publicApiRoutes.ts`   | ផ្លូវដែលទាមទារសិទ្ធិ Bearer (ទល់នឹងការគ្រប់គ្រង)                                                         |
+| `constants/upstreamHeaders.ts`   | បញ្ជីបដិសេធបឋមកថាសម្រាប់សំណើខាងលើ                                                                        |
+| `validation/schemas.ts`          | ~ 80 Zod គ្រោងការណ៍ (ប្រភពតែមួយនៃសេចក្តីពិតសម្រាប់កិច្ចសន្យា API )                                       |
+| `validation/helpers.ts`          | ជំនួយការបញ្ជាក់Zod (`validateBody` ជាដើម)                                                                |
+| `types/`                         | ប្រភេទ TS ដែលបានចែករំលែក                                                                                 |
+| `contracts/`                     | កិច្ចសន្យា API សាធារណៈ (ប្រើប្រាស់ដោយ `files:` ក្នុង `package.json`)                                     |
+| `utils/circuitBreaker.ts`        | ឧបករណ៍បំលែងសៀគ្វីអ្នកផ្តល់សេវា (សូមមើល `docs/architecture/RESILIENCE_GUIDE.md`)                          |
+| `utils/apiAuth.ts`               | API សុពលភាពសោ, ការត្រួតពិនិត្យវិសាលភាព                                                                   |
+| `utils/fetchTimeout.ts`          | Timeout/abort wrappers សម្រាប់ការទៅយកទឹក                                                                 |
+| `utils/releaseNotes.ts`          | បានបិទកម្មវិធីញែកសេចក្តីប្រកាស v2/legacy ការធ្វើមូលដ្ឋានីយកម្ម និងការបណ្តេញចេញ ID                        |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — ឯកសារសាធារណៈ (ឯកសារ root 7 + ថតរង 17)
+## `docs/` - ឯកសារសាធារណៈ (ឯកសារជា root 7 + 17 subdirs)
 
-### មគ្គុត្ទេសក៍កម្រិតកំពូល
+### មគ្គុទ្ទេសក៍កម្រិតកំពូល
 
-| Doc                         | Purpose                                                                                              |
-| --------------------------- | ---------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ស្ថាបត្យកម្មកម្រិតខ្ពស់ ផែនទីប្រព័ន្ធរង ផ្ទៃ dashboard                                               |
-| `CODEBASE_DOCUMENTATION.md` | ឯកសារយោងវិស្វកម្ម៖ ថតឯកសារ ម៉ូឌុល អនុសញ្ញា                                                           |
-| `FEATURES.md`               | តារាងមុខងារជាមួយចំណុចលេចធ្លោ v3.8                                                                    |
-| `USER_GUIDE.md`             | សៀវភៅណែនាំអ្នកប្រើប្រាស់ (ការដំឡើង ម៉ូដែល combo CLI សំឡេង ជាដើម)                                     |
-| `API_REFERENCE.md`          | ឯកសារយោង endpoint API ជាមួយម៉ូដែល auth                                                               |
-| `openapi.yaml`              | ស្មៀន OpenAPI 3.0 (paths 121)                                                                        |
-| `SETUP_GUIDE.md`            | វិធីសាស្ត្រដំឡើង (npm, npx, Docker, Electron, Termux, source)                                        |
-| `ENVIRONMENT.md`            | អថេរ env ទាំងអស់ (~800 បានកត់ត្រាឯកសារ, ~3,050 បន្ទាត់ `.env.example`)                               |
-| `TROUBLESHOOTING.md`        | កំហុសញឹកញាប់ + បញ្ហាដែលស្គាល់ក្នុង v3.8.0                                                            |
-| `RELEASE_CHECKLIST.md`      | លំហូរ release ពេញលេញ (skills, husky, conventional commits, deploy)                                   |
-| `COVERAGE_PLAN.md`          | គោលដៅ coverage និងស្ថានភាពបច្ចុប្បន្ន                                                                |
-| `FREE_TIERS.md`             | អ្នកផ្តល់សេវា free-tier ដែលបានជ្រើសរើស (48+ ឥតគិតថ្លៃ + 11 OAuth)                                    |
-| `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + CLI OmniRoute ខាងក្នុង                                                    |
-| `I18N.md`                   | ស្ថាបត្យកម្ម i18n ការបន្ថែមភាសា locales 67                                                           |
-| `UNINSTALL.md`              | ជំហាន uninstall យ៉ាងស្អាត                                                                            |
-| `PROVIDER_REFERENCE.md`     | កាតាឡុកអ្នកផ្តល់សេវា 376 **បង្កើតដោយស្វ័យប្រវត្តិ** (បង្កើតឡើងវិញ៖ `npm run gen:provider-reference`) |
+| បណ្ឌិត                      | គោលបំណង                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ស្ថាបត្យកម្មកម្រិតខ្ពស់ ផែនទីប្រព័ន្ធរង ផ្ទៃតាប្លូ                                                |
+| `CODEBASE_DOCUMENTATION.md` | ឯកសារយោងវិស្វកម្ម៖ ថត ម៉ូឌុល អនុសញ្ញា                                                             |
+| `FEATURES.md`               | លក្ខណៈពិសេសម៉ាទ្រីសជាមួយនឹងការបន្លិច v3.8                                                         |
+| `USER_GUIDE.md`             | សៀវភៅណែនាំអ្នកប្រើប្រាស់ចុងក្រោយ (ការដំឡើង ម៉ូដែល បន្សំ CLIs អូឌីយ៉ូ ។ល។)                         |
+| `API_REFERENCE.md`          | API endpoint reference with auth model                                                            |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 ផ្លូវ)                                                                      |
+| `SETUP_GUIDE.md`            | ដំឡើងវិធីសាស្រ្ត (npm, npx, Docker, Electron, Termux, ប្រភព)                                      |
+| `ENVIRONMENT.md`            | env vars ទាំងអស់ (~ 800 ចងក្រងជាឯកសារ ~ 3,050 បន្ទាត់ `.env.example`)                             |
+| `TROUBLESHOOTING.md`        | កំហុសទូទៅ + v3.8.0 បញ្ហាដែលគេស្គាល់                                                               |
+| `RELEASE_CHECKLIST.md`      | លំហូរចេញពេញលេញ (ជំនាញ, husky, ការប្តេជ្ញាចិត្តសាមញ្ញ, ដាក់ពង្រាយ)                                 |
+| `COVERAGE_PLAN.md`          | គោលដៅគ្របដណ្តប់ និងស្ថានភាពបច្ចុប្បន្ន                                                            |
+| `FREE_TIERS.md`             | អ្នកផ្តល់សេវាថ្នាក់ឥតគិតថ្លៃដែលបានជ្រើសរើស (48 + ឥតគិតថ្លៃ + 11 OAuth)                            |
+| `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + ខាងក្នុង OmniRoute CLI                                                 |
+| `I18N.md`                   | ស្ថាបត្យកម្ម i18n បន្ថែមភាសា 67 មូលដ្ឋាន                                                          |
+| `UNINSTALL.md`              | សម្អាតជំហានលុបការដំឡើង                                                                            |
+| `PROVIDER_REFERENCE.md`     | **បង្កើតដោយស្វ័យប្រវត្តិ** កាតាឡុករបស់អ្នកផ្តល់សេវា 377 (regen: `npm run gen:provider-reference`) |
 
-### ការស្រាវជ្រាវស៊ីជម្រៅប្រព័ន្ធរង
+### ប្រព័ន្ធរងការជ្រមុជទឹកជ្រៅ
 
-| Doc                                             | Purpose                                                                     |
-| ----------------------------------------------- | --------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                 | ម៉ាស៊ីនមេ MCP៖ tools 110, transports 3, scopes 33, endpoints REST           |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, skills 6, helpers REST, agent card                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                      | មគ្គុត្ទេសក៍រួម៖ A2A ធៀបនឹង ACP ធៀបនឹង Cloud Agents                         |
-| `CLOUD_AGENT.md`                                | Orchestration សម្រាប់ Codex Cloud / Devin / Jules                           |
-| `SKILLS.md`                                     | ក្របខ័ណ្ឌ Skills (built-in + marketplace + SkillsSH + sandbox)              |
-| `RADAR.md`                                      | Overlay កាតាឡុកម៉ូដែលឥតគិតថ្លៃ Radar (`RADAR_ENABLED`, បិទជាលំនាំដើម)       |
-| `MEMORY.md`                                     | ប្រព័ន្ធ memory (SQLite FTS5 + Qdrant)                                      |
-| `EVALS.md`                                      | ក្របខ័ណ្ឌ Eval (suites, runs, rubrics)                                      |
-| `GUARDRAILS.md`                                 | ឧបករណ៍បិទបាំង PII, prompt injection, vision bridge                          |
-| `COMPLIANCE.md`                                 | កំណត់ហេតុសវនកម្ម, retention, noLog opt-out                                  |
-| `WEBHOOKS.md`                                   | ការដឹកជញ្ជូន webhook ដែលចុះហត្ថលេខា HMAC                                    |
-| `REASONING_REPLAY.md`                           | Cache ចម្រុះ memory/SQLite សម្រាប់ `reasoning_content`                      |
-| `AUTHZ_GUIDE.md`                                | Pipeline ការអនុញ្ញាត (`classify` → `policies` → `enforce`)                  |
-| `RESILIENCE_GUIDE.md`                           | Circuit breaker + cooldown + ការចាក់សោម៉ូដែល                                |
-| `docs/security/STEALTH_GUIDE.md` (git ប៉ុណ្ណោះ) | TLS fingerprinting (JA3/JA4), Claude Code CCH, វិញ្ញាបនបត្រ MITM            |
-| `AUTO-COMBO.md`                                 | ម៉ាស៊ីន Auto Combo (ការដាក់ពិន្ទុ 16 កត្តា, កញ្ចប់ mode 6, virtual factory) |
+| បណ្ឌិត                                    | គោលបំណង                                                                  |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                           | ម៉ាស៊ីនមេMCP : ឧបករណ៍ 110, ការដឹកជញ្ជូន 3, វិសាលភាព 33, ចំណុចបញ្ចប់ REST |
+| `A2A-SERVER.md`                           | A2A v0.3: JSON-RPC, 6 ជំនាញ, ជំនួយ REST, កាតភ្នាក់ងារ                    |
+| `AGENT_PROTOCOLS_GUIDE.md`                | មគ្គុទ្ទេសក៍បង្រួបបង្រួម៖ A2A vs ACP vs Cloud Agents                     |
+| `CLOUD_AGENT.md`                          | Codex Cloud / Devin / Jules orchestration                                |
+| `SKILLS.md`                               | ក្របខ័ណ្ឌជំនាញ (ដែលភ្ជាប់មកជាមួយនៅក្នុងទីផ្សារ + + SkillsSH + sandbox)   |
+| `RADAR.md`                                | ការត្រួតលើកាតាឡុកគំរូឥតគិតថ្លៃរ៉ាដា (`RADAR_ENABLED` បិទតាមលំនាំដើម)     |
+| `MEMORY.md`                               | ប្រព័ន្ធអង្គចងចាំ (SQLite FTS5 + Qdrant)                                 |
+| `EVALS.md`                                | ក្របខ័ណ្ឌ Eval (ឈុត ការរត់ រូបិយវត្ថុ)                                   |
+| `GUARDRAILS.md`                           | របាំងមុខ PII, ការចាក់ភ្លាមៗ, ស្ពានចក្ខុវិស័យ                             |
+| `COMPLIANCE.md`                           | កំណត់ហេតុសវនកម្ម ការរក្សាទុក ការជ្រើសយក noLog                            |
+| `WEBHOOKS.md`                             | ការចែកចាយ webhook ដែលបានចុះហត្ថលេខា HMAC                                 |
+| `REASONING_REPLAY.md`                     | ឃ្លាំងសម្ងាត់ memory/SQLite កូនកាត់សម្រាប់ `reasoning_content`           |
+| `AUTHZ_GUIDE.md`                          | បំពង់ផ្តល់សិទ្ធិ (`classify` → `policies` → `enforce`)                   |
+| `RESILIENCE_GUIDE.md`                     | ឧបករណ៍បំបែកសៀគ្វី + cooldown + ម៉ូដែលចាក់សោ                              |
+| `docs/security/STEALTH_GUIDE.md` (តែ git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                 |
+| `AUTO-COMBO.md`                           | ម៉ាស៊ីនបន្សំស្វ័យប្រវត្តិ (ពិន្ទុ 16 កត្តា កញ្ចប់របៀប 6 រោងចក្រនិម្មិត)  |
 
 ### ការបង្ហាប់
 
-| Doc                             | Purpose                                    |
-| ------------------------------- | ------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | ទិដ្ឋភាពទូទៅនៃ mode បង្ហាប់ + roadmap      |
-| `COMPRESSION_ENGINES.md`        | ម៉ាស៊ីន Caveman + RTK, កិច្ចសន្យា registry |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON schema សម្រាប់កញ្ចប់ច្បាប់ Caveman    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | បញ្ជីកញ្ចប់ច្បាប់តាមភាសានីមួយៗ             |
-| `RTK_COMPRESSION.md`            | Pipeline declarative របស់ RTK (filters 56) |
+| បណ្ឌិត                          | គោលបំណង                                      |
+| ------------------------------- | -------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | ទិដ្ឋភាពទូទៅនៃរបៀបបង្ហាប់ + ផែនទីបង្ហាញផ្លូវ |
+| `COMPRESSION_ENGINES.md`        | ម៉ាស៊ីន Caveman + RTK, កិច្ចសន្យាចុះបញ្ជី    |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                |
+| `COMPRESSION_LANGUAGE_PACKS.md` | សារពើភ័ណ្ឌកញ្ចប់ច្បាប់ជាភាសា                 |
+| `RTK_COMPRESSION.md`            | បំពង់បង្ហូរប្រកាស RTK (56 តម្រង)             |
 
-### ការដាក់ពង្រីក
+### ការដាក់ពង្រាយ
 
-| ឯកសារ                        | គោលបំណង                                                               |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | ការ build Docker, profiles (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ការ deploy VM/VPS ទូទៅ (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | ការ deploy Fly.io (បច្ចុប្បន្នមានតែជាភាសាចិន)                         |
-| `TERMUX_GUIDE.md`            | Android headless តាមរយៈ Termux                                        |
-| `PWA_GUIDE.md`               | ការដំឡើង Progressive Web App + service worker                         |
-| `ELECTRON_GUIDE.md`          | ការ build + sign + ចែកចាយកម្មវិធី Desktop                             |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | proxy ចេញ 4 កម្រិត + ទីផ្សារ 1proxy                                   |
+| បណ្ឌិត                       | គោលបំណង                                                         |
+| ---------------------------- | --------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, ទម្រង់ (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | ការដាក់ពង្រាយ VM/VPS ទូទៅ (Ubuntu/Debian + nginx + systemd)     |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | ការដាក់ពង្រាយ Fly.io (បច្ចុប្បន្នសម្រាប់តែចិន)                  |
+| `TERMUX_GUIDE.md`            | ប្រព័ន្ធប្រតិបត្តិការ Android គ្មានក្បាលតាមរយៈ Termux           |
+| `PWA_GUIDE.md`               | Progressive Web App ដំឡើងបុគ្គលិកសេវាកម្ម +                     |
+| `ELECTRON_GUIDE.md`          | កម្មវិធីកុំព្យូទ័របង្កើត + sign + ចែកចាយ                        |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
+| `PROXY_GUIDE.md`             | 4-level outbound proxy + 1proxy marketplace                     |
 
 ### ថតរង
 
-| ថតរង                  | គោលបំណង                                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ការបកប្រែឯកសារជាភាសាក្នុងស្រុក (41 ភាសា)                                                                                                                                                                         |
-| `docs/screenshots/`   | ធនធានរូបភាពសម្រាប់មគ្គុទ្ទេសក៍                                                                                                                                                                                   |
-| `_tasks/superpowers/` | ផែនការ/specs ពី superpowers (`writing-plans`/`brainstorming`) + ការស្រាវជ្រាវ — ដាច់ដោយឡែក, repo មាន version ដាច់ដោយឡែក, ត្រូវបាន gitignore ដោយ main tree។ សូមមើល CLAUDE.md → "ផលិតកម្មផែនការ និងការស្រាវជ្រាវ"។ |
+| រង                    | គោលបំណង                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ការបកប្រែឯកសារដែលបានធ្វើមូលដ្ឋានីយកម្ម (41 មូលដ្ឋាន)                                                                                                                                                    |
+| `docs/screenshots/`   | ទ្រព្យសម្បត្តិរូបភាពសម្រាប់មគ្គុទ្ទេសក៍                                                                                                                                                                 |
+| `_tasks/superpowers/` | Plans/specs ពីប្រទេសមហាអំណាច (`writing-plans`/`brainstorming`) + ការស្រាវជ្រាវ — ដាច់ដោយឡែក កំណែដាច់ដោយឡែកពីគ្នា ដែលមិនអើពើដោយមែកធាងសំខាន់។ សូមមើល CLAUDE.md → "ការធ្វើផែនការ និងស្រាវជ្រាវវត្ថុបុរាណ"។ |
 
 ---
 

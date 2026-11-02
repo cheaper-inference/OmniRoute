@@ -12,29 +12,15 @@
 
 ## Was es ist
 
-OmniRoute registriert 376 Anbieter, darunter 155 Katalogeinträge mit der Markierung **free/no-auth**
-(no-auth,
-Free-Tier-OAuth oder Free-Tier-API-Schlüssel — siehe den
-[Leitfaden zu kostenlosen Kontingenten](../getting-started/FREE-TIERS-GUIDE.md) und das vollständige
-[Verzeichnis der kostenlosen Kontingente](../reference/FREE_TIERS.md)). Der Haken: Kostenlose Anbieter
-variieren enorm in der Modellqualität. Ein No-Auth-Anbieter, der ein Frontier-Modell bereitstellt,
-ist weitaus nützlicher als einer, der ein kleines Legacy-Modell anbietet.
+OmniRoute registriert 377 Anbieter, davon 155 markierte Katalogeinträge**free/no-auth** (no-auth, Free-Tier OAuth oder Free-Tier API -Schlüssel – siehe [Leitfaden zu Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) und das vollständige [Free Tiers-Verzeichnis](../reference/FREE_TIERS.md) ). Der Haken: Bei kostenlosen Anbietern gibt es große Unterschiede in der Modellqualität. Ein Anbieter ohne Authentifizierung, der ein Frontier-Modell bedient, ist weitaus nützlicher als einer, der ein kleines Legacy-Modell bedient.
 
-**Free Provider Rankings** beantwortet die Frage „**Welcher kostenlose Anbieter bietet mir das beste Modell?**“,
-indem der Katalog jedes kostenlosen Anbieters mit **Crowd-sourced-Qualitätsbewertungen** aus der
-**Arena-AI-Bestenliste** verknüpft wird (ELO basierend auf menschlichen Präferenzen, dieselbe Idee
-wie hinter der LMArena-Chatbot-Arena). Die Anbieter werden anschließend nach der Stärke ihres
-**besten kostenlosen Modells** eingestuft.
+**Kostenlose Anbieter-Rankings** Antworten“** Welcher kostenlose Anbieter bietet mir das beste Modell?** " indem Sie sich dem Katalog jedes kostenlosen Anbieters anschließen** Crowdsourcing-Qualitätsbewertungen** aus dem** Arena AI -Rangliste** (human-preference ELO, die gleiche Idee hinter der LMArena-Chatbot-Arena). Die Anbieter werden dann nach ihrer Stärke eingestuft** bestes kostenloses Modell** .
 
 Das Ranking wird aus drei realen Quellen berechnet:
 
-1. Den Listen der kostenlosen Anbieter — `NOAUTH_PROVIDERS`, sowie `OAUTH_PROVIDERS`- /
-   `APIKEY_PROVIDERS`-Einträgen mit der Markierung `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Dem Modellkatalog jedes Anbieters aus der Anbieter-Registry
-   (`open-sse/config/providerRegistry.ts`).
-3. Aus ELO abgeleiteten Task-Fit-Scores, die von der Arena-ELO-Sync-Engine
-   (`src/lib/arenaEloSync.ts`) in der DB-Tabelle `model_intelligence` gespeichert werden.
+1. Der kostenlose Anbieter listet — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` -Einträge mit der Kennzeichnung `hasFree` (`src/shared/constants/providers.ts`) auf.
+2. Der Modellkatalog jedes Anbieters aus der Anbieterregistrierung (`open-sse/config/providerRegistry.ts`).
+3. Von ELO abgeleitete Task-Fit-Scores, die von der Arena ELO Synchronisierungs-Engine (`src/lib/arenaEloSync.ts`) in der `model_intelligence` DB Tabelle gespeichert werden.
 
 Die Join-Logik befindet sich in `src/lib/freeProviderRankings.ts`.
 

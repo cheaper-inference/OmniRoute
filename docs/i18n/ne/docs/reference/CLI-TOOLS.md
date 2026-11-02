@@ -4,17 +4,17 @@
 
 ---
 
-अन्तिम अद्यावधिक: 2026-08-23
+पछिल्लो पटक अपडेट गरिएको: २०२६-०८-२३
 
-OmniRoute तीनवटा समर्पित ड्यासबोर्ड पृष्ठहरूमा विभाजित CLI उपकरणका तीन श्रेणीसँग एकीकृत हुन्छ:
+OmniRoute तीन समर्पित ड्यासबोर्ड पृष्ठहरूमा फैलिएको CLI उपकरणहरूको तीन कोटीहरूसँग एकीकृत हुन्छ:
 
-| पृष्ठ          | रुट                     | अवधारणा                                                                                        | सङ्ख्या              |
-| -------------- | ----------------------- | ---------------------------------------------------------------------------------------------- | -------------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | तपाईंले OmniRoute तर्फ निर्देशित गर्ने कोडिङ उपकरणहरू (क्लाइन्ट → CLI → OmniRoute → प्रदायक)   | 26                   |
-| **CLI Agents** | `/dashboard/cli-agents` | तपाईंले OmniRoute तर्फ निर्देशित गर्ने स्वायत्त एजेन्टहरू (उही प्रवाह, अझ व्यापक कार्यक्षेत्र) | 10                   |
-| **ACP Agents** | `/dashboard/acp-agents` | OmniRoute ले stdio/ACP मार्फत ब्याकएन्डका रूपमा सुरु गर्ने CLI हरू (उल्टो प्रवाह)              | रजिस्ट्री हेर्नुहोस् |
+| पृष्ठ             | रुट                     | अवधारणा                                                                            | गणना गर्नुहोस्       |
+| ----------------- | ----------------------- | ---------------------------------------------------------------------------------- | -------------------- |
+| **CLI कोडको**     | `/dashboard/cli-code`   | कोडिङ उपकरण तपाईंले OmniRoute मा देखाउनुहुन्छ (ग्राहक → CLI → OmniRoute → प्रदायक) | 26                   |
+| **CLI एजेन्टहरू** | `/dashboard/cli-agents` | स्वायत्त एजेन्टहरू तपाईंले OmniRoute मा औंल्याउनुहुन्छ (उही प्रवाह, फराकिलो दायरा) | 11                   |
+| **ACP एजेन्टहरू** | `/dashboard/acp-agents` | CLIs जुन OmniRoute stdio/ACP (रिभर्स फ्लो) मार्फत ब्याकइन्डको रूपमा उत्पन्न हुन्छ  | रजिस्ट्री हेर्नुहोस् |
 
-पुराना रुटहरू 308 मार्फत रिडाइरेक्ट हुन्छन्: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`।
+लिगेसी मार्गहरू 308 मार्फत रिडिरेक्ट हुन्छन्: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`।
 
 ---
 
@@ -43,11 +43,9 @@ ACP Agents (उल्टो रूपमा सुरु हुने प्र�
 
 ---
 
-## `setup-*` मार्फत स्वतः कन्फिगर गर्नुहोस्
+## `setup-*` सँग स्वतः कन्फिगर गर्नुहोस्
 
-तपाईंले प्रत्येक उपकरणको कन्फिगरेसन हातैले लेख्नुपर्दैन। OmniRoute ले समर्थित प्रत्येक CLI का लागि एउटा `setup-*`
-आदेश उपलब्ध गराउँछ, जसले चलिरहेको OmniRoute (स्थानीय वा रिमोट) बाट **प्रत्यक्ष** मोडेल क्याटलग पढ्छ
-र तपाईंको मेसिनमा उपकरणको आफ्नै कन्फिगरेसन लेख्छ:
+तपाईले प्रत्येक उपकरणको कन्फिगरेसन हातले लेख्नु पर्दैन। OmniRoute ले समर्थित CLI प्रति `setup-*` आदेश पठाउँछ जुन पढ्छ** लाइभ** चलिरहेको OmniRoute (स्थानीय वा रिमोट) बाट मोडेल क्याटलग र तपाईंको मेसिनमा उपकरणको आफ्नै कन्फिगरेसन लेख्छ:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,51 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-प्रत्येकले `--remote <url> --api-key <key>` (रिमोट OmniRoute विरुद्ध स्थानीय उपकरण कन्फिगर गर्न),
-`--dry-run` (नलेखी पूर्वावलोकन गर्न), र `--port` स्वीकार गर्छ। मोडेल स्वतः-पत्ता लगाउने सुविधा नभएका
-उपकरणहरू (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ले `--model <id>` (र अन्तर्क्रियारहित
-रनहरूका लागि `--yes`) लिन्छन्। `setup-5dive` नै `$HOME` अन्तर्गत नलेख्ने एकमात्र रेसिपी हो:
-यसले फ्लीट होस्टमा root-स्वामित्व भएको प्रमाणीकरण प्रोफाइल लेखेर 5dive एजेन्ट फ्लीट कन्फिगर गर्छ,
-त्यसैले यो `sudo` मार्फत पुनः कार्यान्वयन हुन्छ र यसको आफ्नै रिमोट मोड हुँदैन। सही env इन्जेक्ट गरेर
-र कुनै पनि कन्फिगरेसन नलेखी CLI सुरु गर्न, सामान्य
-`omniroute run <target>` लन्चर प्रयोग गर्नुहोस् (claude, codex, aider, goose, opencode, qwen,
-gemini — लक्ष्यहरू र उपनामहरू `bin/cli/cli-manifest.mjs` बाट आउँछन्); पुराना प्रति-उपकरण
-लन्चरहरू `omniroute launch` (Claude Code) र `omniroute launch-codex`
-(Codex) अझै उपलब्ध छन्। Gemini CLI लन्च-मात्र हो: यो `omniroute run`
-को लक्ष्य हो तर यसमा `setup-*`/`configure` रेसिपी छैन।
+प्रत्येकले `--remote <url> --api-key <key>` (रिमोट OmniRoute विरुद्ध स्थानीय उपकरण कन्फिगर गर्नुहोस्), `--dry-run` (लेखन बिना पूर्वावलोकन), र `--port` स्वीकार गर्दछ। मोडेल स्वत: खोज बिनाका उपकरणहरू (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) ले `--model <id>` (र गैर-अन्तर्क्रियात्मक रनहरूको लागि `--yes` ) लिन्छन्। `setup-5dive` एउटा नुस्खा हो जसले `$HOME` अन्तर्गत लेख्दैन: यसले फ्लीट होस्टमा रूट-स्वामित्व भएको प्रमाणीकरण प्रोफाइल लेखेर 5dive एजेन्ट फ्लीट कन्फिगर गर्दछ, त्यसैले यो `sudo` मार्फत पुन: कार्यान्वयन हुन्छ र यसको आफ्नै कुनै रिमोट मोड छैन। दायाँ env इन्जेक्ट गरिएको र कुनै पनि कन्फिगरेसन नलेखिएको CLI सुरु गर्न, जेनेरिक `omniroute run <target>` लन्चर प्रयोग गर्नुहोस् (claude, codex, aider, goose, opencode, qwen, gemini, Whycodes — लक्ष्य र उपनामहरू `bin/cli/cli-manifest.mjs` बाट आउँछन्); लिगेसी प्रति-उपकरण लन्चरहरू `omniroute launch` (Claude कोड) र `omniroute launch-codex` (Codex) उपलब्ध छन्। Gemini CLI लन्च-मात्र हो: यो एक `omniroute run` लक्ष्य हो तर कुनै `setup-*`/`configure` रेसिपी छैन।
 
-> **पूर्ण सन्दर्भ:** मुख्य तालिका — प्रत्येक आदेशले के लेख्छ, प्रत्येक फ्ल्याग,
-> स्थानीय बनाम रिमोट, र कुन उपकरणलाई `/v1` प्रत्यय चाहिन्छ — यहाँ उपलब्ध छ:
-> **[CLI एकीकरणहरू](../guides/CLI-INTEGRATIONS.md)**।
+> **पूर्ण सन्दर्भ:** मास्टर टेबल — प्रत्येक आदेशले के लेख्छ, प्रत्येक झण्डा, स्थानीय बनाम रिमोट, र कुन उपकरणहरू `/v1` प्रत्यय चाहन्छन् — यसमा रहन्छ** [CLI एकीकरण](../guides/CLI-INTEGRATIONS.md)** ।
 
-### यी आदेशहरू कन्टेनरभित्र चलाउँदा
+### यी कन्टेनर भित्र चलाउँदै
 
-OmniRoute कन्टेनरभित्र कार्यान्वयन गरिएको `setup-*` आदेशले कन्टेनरकै home मा लेख्छ,
-जुन कुनै पनि होस्ट CLI ले पढ्दैन र कन्टेनरसँगै हराउँछ। OmniRoute ले यो अवस्था पत्ता लगाउँछ र
-लेख्नुको सट्टा निर्देशनहरूसहित `2` मा निस्कन्छ। अगाडि बढ्ने दुईवटा समर्थित तरिकाहरू छन् —
-होस्टमा CLI स्थापना गरेर कन्टेनरसँग `omniroute connect` गर्नुहोस्, वा कन्फिग डाइरेक्टरीहरू
-bind-mount गरेर `CLI_CONFIG_HOME` सेट गर्नुहोस् (compose को `host` प्रोफाइल)। कन्टेनरकै
-CLI हरू कन्फिगर गर्नु वास्तवमै तपाईंको उद्देश्य हो भने, प्रत्येक `setup-*` आदेशका साथै
-`omniroute configure` र `omniroute config set` ले
-`--allow-container-write` स्वीकार गर्छन्; सर्भरका लागि `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`
-ले पनि त्यही काम गर्छ। हेर्नुहोस्:
-[Docker मार्गदर्शिका → होस्ट CLI उपकरणहरू कन्फिगर गर्ने](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker)।
+OmniRoute कन्टेनर भित्र कार्यान्वयन गरिएको `setup-*` आदेशले कन्टेनरको आफ्नै घरमा लेख्छ, जुन कुनै पनि होस्ट CLI ले पढ्दैन र जुन कन्टेनरसँगै गायब हुन्छ। OmniRoute ले त्यो पत्ता लगाउँछ र `2` लेख्नुको सट्टा निर्देशनहरूको साथ बाहिर निस्कन्छ। अगाडि दुई समर्थित तरिकाहरू - होस्टमा CLI स्थापना गर्नुहोस् र कन्टेनरमा `omniroute connect`, वा कन्फिग डाइरहरू बाइन्ड-माउन्ट गर्नुहोस् र `CLI_CONFIG_HOME` (कम्पोज `host` प्रोफाइल) सेट गर्नुहोस्। प्रत्येक `setup-*` आदेश, थप `omniroute configure` र `omniroute config set`, कन्टेनरको आफ्नै CLIs कन्फिगर गर्दा `--allow-container-write` स्वीकार गर्दछ तपाईंले वास्तवमा भन्न खोज्नु भएको हो; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` सर्भरको लागि पनि गर्छ। [Docker गाइड → होस्ट CLI उपकरणहरू कन्फिगर गर्दै](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker) हेर्नुहोस्।
 
-ड्यासबोर्डको **apply endpoint** (`POST /api/cli-tools/apply`) ले पनि उही सुरक्षा नियम लागू गर्छ:
-कन्टेनरमा, लक्ष्य होस्टबाट bind-mount गरिएको छैन भने लेख्ने अनुरोधले **`422`** सहित
-`containerEphemeralTarget: true`, सुरक्षित त्रुटि पाठ र — होस्ट रेसिपी भएका उपकरणहरूका लागि
-(claude, codex, opencode, cline, kilo, continue) — होस्टमा चलाउनुपर्ने `hostSetupCommand`
-(जस्तै `omniroute setup-opencode`) फर्काउँछ; केही पनि लेखिँदैन। `dryRun: true` ले कन्टेनर
-मोडमा पनि काम गरिरहन्छ र डिस्कलाई नछोई संवेदनशील विवरण हटाइएको पूर्वावलोकन + लक्ष्य पथ
-फर्काउँछ। पूर्वावलोकन सामग्री प्रतिलिपि वा आयात गर्न मिल्ने प्रमाणपत्र-युक्त कन्फिगरेसन होइन।
-मूल उपकरण/base URL/API key/model इनपुटहरू प्रयोग गरेर होस्टमा apply गर्नुहोस्, वा उल्लेख गरिएको
-होस्ट-साइड setup आदेश प्रयोग गर्नुहोस्। पूर्वावलोकन header र अनुरोध contract का लागि
-[CLI कन्फिगरेसन सुरक्षा](../security/CLI-CONFIGURATION.md) हेर्नुहोस्। यो व्यवहार
-जानाजानी राखिएको हो र
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` द्वारा regression विरुद्ध सुरक्षित गरिएको छ —
-guard हटाएर `422` लाई कहिल्यै "ठीक" नगर्नुहोस्।
+ड्यासबोर्डको** अन्तिम बिन्दु लागू गर्नुहोस्** (`POST /api/cli-tools/apply`) ले उही गार्ड लागू गर्दछ: कन्टेनरमा, एउटा लेख जसको लक्ष्य होस्ट उत्तरहरूबाट बाइन्ड-माउन्ट गरिएको छैन।**`422`** `containerEphemeralTarget: true` को साथ, सुरक्षित त्रुटि पाठ र — होस्ट रेसिपी (क्लाउड, कोडेक्स, ओपनकोड, क्लाइन, किलो, जारी) भएका उपकरणहरूका लागि — एक `hostSetupCommand` (जस्तै `omniroute setup-opencode`) होस्टमा चलाउनको लागि; केहि लेखिएको छैन। `dryRun: true` कन्टेनर मोडमा काम गरिरहन्छ र डिस्कलाई नछोइकन + लक्ष्य मार्ग रिडेक्ट गरिएको पूर्वावलोकन फर्काउँछ। पूर्वावलोकन सामग्री प्रतिलिपि वा आयात गर्न प्रमाण-असर कन्फिगरेसन होइन। होस्टमा मूल tool/base URL/API key/model इनपुटहरूसँग लागू गर्नुहोस्, वा संकेत गरिएको होस्ट-साइड सेटअप आदेश प्रयोग गर्नुहोस्। पूर्वावलोकन हेडर र अनुरोध अनुबंधको लागि [CLI कन्फिगरेसन सुरक्षा](../security/CLI-CONFIGURATION.md) हेर्नुहोस्। यो व्यवहार जानाजानी हो र `tests/unit/api/cli-tools/apply-container-guard.test.ts` द्वारा प्रतिगमन-सुरक्षित छ - गार्ड हटाएर 422 लाई कहिल्यै "फिक्स" नगर्नुहोस्।
 
 ---
 
@@ -179,22 +144,23 @@ guard हटाएर `422` लाई कहिल्यै "ठीक" नग�
 `baseUrlSupport: "partial"` भएका उपकरणहरूले ड्यासबोर्ड कार्डमा "⚠ आंशिक Base URL" ब्याज देखाउँछन्।
 ---
 
-## 2. CLI एजेन्टहरूको सूची (१० उपकरण)
+## 2. CLI एजेन्ट क्याटलग (११ उपकरण)
 
-`/dashboard/cli-agents` मा देखिने स्वायत्त एजेन्टहरू:
+`/dashboard/cli-agents` मा देखा पर्ने स्वायत्त एजेन्टहरू:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| आईडी          | नाम               | विक्रेता               | baseUrlSupport | acpSpawnable |
+| ------------- | ----------------- | ---------------------- | -------------- | ------------ |
+| hermes-एजेन्ट | हर्मीस एजेन्ट     | Nous अनुसन्धान         | पूर्ण          | गलत          |
+| ओपन क्लाउ     | OpenClaw          | OSS (P. Steinberger)   | पूर्ण          | सत्य         |
+| हंस           | हंस               | ब्लक / Linux फाउन्डेशन | पूर्ण          | सत्य         |
+| अनुवादक       | दोभाषे खोल्नुहोस् | OSS                    | पूर्ण          | सत्य         |
+| ताना          | Warp AI           | Warp Inc.              | आंशिक          | सत्य         |
+| एजेन्ट डेक    | एजेन्ट डेक        | अशेषगोपलानी (OSS)      | पूर्ण          | गलत          |
+| omp           | ओ मेरो पाई        | OSS                    | पूर्ण          | सत्य         |
+| letta         | हुन CLI           | लेटा                   | पूर्ण          | गलत          |
+| प्रमुख एजेन्ट | प्राइम एजेन्ट     | प्रधान बुद्धि (OSS)    | पूर्ण          | गलत          |
+| 5 डुबाइ       | 5 डुबाइ           | OSS (5dive-ai)         | पूर्ण          | गलत          |
+| किन कोडहरू    | WhyCodes          | किन निगम               | पूर्ण          | गलत          |
 
 ---
 

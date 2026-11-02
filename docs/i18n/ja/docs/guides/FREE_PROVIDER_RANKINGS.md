@@ -11,32 +11,19 @@
 
 ---
 
-## 概要
+## それは何ですか
 
-OmniRoute には 376 のプロバイダーが登録されており、そのうち 155 のカタログエントリが **無料/認証不要 (free/no-auth)** としてマークされています
-(認証不要、無料枠の OAuth、または無料枠の API キー — 詳しくは
-[無料枠ガイド](../getting-started/FREE-TIERS-GUIDE.md) および完全版の
-[無料枠ディレクトリ](../reference/FREE_TIERS.md) を参照)。ただし注意点があります: 無料プロバイダーはモデルの品質が
-大きく異なるということです。フロンティアモデルを提供する認証不要のプロバイダーは、
-小さなレガシーモデルを提供するプロバイダーよりもはるかに有用です。
+OmniRoute 、マークされた 155 のカタログ エントリを含む 377 のプロバイダーを登録します**free/no-auth** (認証なし、無料層OAuth、または無料層APIキー —[無料利用枠ガイド](../getting-started/FREE-TIERS-GUIDE.md)および完全な[無料利用枠ディレクトリ](../reference/FREE_TIERS.md)を参照してください)。問題点は、無料プロバイダーはモデルの品質が大きく異なることです。フロンティア モデルを提供する非認証プロバイダーは、小規模なレガシー モデルを提供するプロバイダーよりもはるかに便利です。
 
-**無料プロバイダーランキング (Free Provider Rankings)** は、「**どの無料プロバイダーが最良のモデルを提供してくれるか?**」
-という問いに答えるもので、各無料プロバイダーのカタログと、
-**Arena AI リーダーボード**(人間の好みに基づく ELO。LMArena チャットボットアリーナと
-同じ考え方)の **クラウドソーシングによる品質スコア** を結合します。
-プロバイダーは、その **最良の無料モデル** の強さによってランク付けされます。
+**無料プロバイダーランキング**と答える**最適なモデルを提供してくれる無料プロバイダーはどれですか?** 「各無料プロバイダーのカタログに参加することで、**クラウドソーシングによる品質スコア**からの**アリーナAIリーダーボード**(人間の好みELO、LMArena チャットボット アリーナの背後にある同じアイデア)。プロバイダーはその強さによってランク付けされます。**最高の無料モデル**。
 
-ランキングは 3 つの実際のソースから計算されます:
+ランキングは 3 つの実際のソースから計算されます。
 
-1. 無料プロバイダーのリスト — `NOAUTH_PROVIDERS`、および `hasFree` フラグが付いた
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` のエントリ
-   (`src/shared/constants/providers.ts`)。
-2. プロバイダーレジストリから取得する各プロバイダーのモデルカタログ
-   (`open-sse/config/providerRegistry.ts`)。
-3. Arena ELO 同期エンジン (`src/lib/arenaEloSync.ts`) によって `model_intelligence` DB テーブルに
-   保存される、ELO 由来のタスク適合スコア。
+1. 無料プロバイダーのリスト — `NOAUTH_PROVIDERS`、および`hasFree` (`src/shared/constants/providers.ts`) のフラグが付けられた`OAUTH_PROVIDERS` / `APIKEY_PROVIDERS`エントリ。
+2. プロバイダー レジストリ (`open-sse/config/providerRegistry.ts`) からの各プロバイダーのモデル カタログ。
+3. Arena ELO同期エンジン (`src/lib/arenaEloSync.ts`) によって`model_intelligence` DBテーブルに保存された ELO 由来のタスクフィット スコア。
 
-結合ロジックは `src/lib/freeProviderRankings.ts` にあります。
+結合ロジックは`src/lib/freeProviderRankings.ts`にあります。
 
 ---
 
