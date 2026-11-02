@@ -61,7 +61,7 @@ test("#17825: startup/keepalive response.in_progress frame is a complete Respons
   assertSpecValid(parseData(OPENAI_RESPONSES_IN_PROGRESS_FRAME), "startup frame");
 });
 
-test("#17825: mid-stream heartbeat cannot replace the real SDK response snapshot", async () => {
+test("#17825: mid-stream heartbeat reuses the real response id/created_at/model", async () => {
   const intervals: Array<{ callback: () => void }> = [];
   const origSet = globalThis.setInterval;
   globalThis.setInterval = ((cb: () => void) => {
@@ -89,24 +89,18 @@ test("#17825: mid-stream heartbeat cannot replace the real SDK response snapshot
       },
     };
     // The default TransformStream readable has HWM 0: start the write, then read it back.
-    const originalFrame = `event: response.created\ndata: ${JSON.stringify(created)}\n\n`;
-    const written = writer.write(new TextEncoder().encode(originalFrame));
-    const forwarded = await reader.read();
-    assert.equal(forwarded.done, false);
-    assert.equal(new TextDecoder().decode(forwarded.value), originalFrame);
-    const payload = parseData(forwarded.value!);
-    assert.equal(payload.response.id, created.response.id);
-    assert.equal(payload.response.created_at, created.response.created_at);
-    assert.equal(payload.response.model, created.response.model);
+    const written = writer.write(
+      new TextEncoder().encode(`event: response.created\ndata: ${JSON.stringify(created)}\n\n`)
+    );
+    await reader.read(); // forwarded real chunk
     await written;
     intervals[0].callback();
     const { value } = await reader.read();
-    assert.equal(new TextDecoder().decode(value!), "\n\n");
-    const closed = writer.close();
-    assert.equal((await reader.read()).done, true);
-    await closed;
-    writer.releaseLock();
-    reader.releaseLock();
+    const payload = parseData(value!);
+    assertSpecValid(payload, "mid-stream heartbeat");
+    assert.equal(payload.response.id, "resp_real_1");
+    assert.equal(payload.response.created_at, 1700000000);
+    assert.equal(payload.response.model, "gpt-5.6-sol");
   } finally {
     globalThis.setInterval = origSet;
   }

@@ -14171,6 +14171,10 @@
         "label": "共享出口池排序",
         "description": "对按出口地址配额的提供者，把与近期被拒成员观测到相同出口地址的池成员排在健康成员之后。只调顺序，绝不排除。依赖 PROXY_SKIP_RECENTLY_FAILED 提供它读取的拒绝信号。默认关闭：选择顺序与纯轮换完全一致。"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "轮换归因日志",
         "description": "opencode 轮换记录由哪个账户服务或被跳过（仅脱敏 id，绝不记录完整账户 id），并把代理日志条目关联到其请求，便于运维区分被跳过的账户和未使用的账户。默认关闭：不写额外日志行，不写额外列。"
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "组合：遇内容策略拒绝即停",
         "description": "当组合目标返回精确的内容策略拒绝（code 或 type 为 cyber_policy / content_policy_violation）时，停止组合并返回该拒绝，即使剩余目标是不同模型，不再前进到下一目标。默认关闭：该拒绝不冷却账户也不触发提供者断路器，组合与之前一样前进到下一目标。"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "冷却重试：跳过 403/410 拒绝",

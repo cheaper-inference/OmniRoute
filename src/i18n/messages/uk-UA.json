@@ -14094,6 +14094,10 @@
         "label": "Порядок спільного пулу виходу в мережу",
         "description": "Для провайдерів, квота яких розподіляється за IP-адресами виходу в мережу, розміщуйте члена пулу, який спільно з нещодавно відхиленим членом має спостережуваний IP виходу в мережу, трохи нижче за здоровими членами. Лише порядок, ніколи не виключається. Потребує PROXY_SKIP_RECENTLY_FAILED, який генерує сигнал відхилень, з якого здійснюється читання. Вимкнено за замовчуванням: порядок вибору є точною звичайною ротацією."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Журналювання призначення ротації",
         "description": "Ротація opencode фіксує, який акаунт обслугував або був пропущений (лише маскувані ідентифікатори, ніколи повні ідентифікатори акаунтів), та пов'язує журнали проксі з їхнім запитом, щоб оператор міг відрізнити пропущені акаунти від невикористаних. Вимкнено за замовчуванням: додаткові рядки журналу не пишуться, додаткові стовпці не додаються."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Комбо: Зупинитися на відмові щодо політики контенту",
         "description": "Якщо ціль комбо відповідає точною відмовою щодо політики контенту (код або тип cyber_policy / content_policy_violation), зупиніть комбо та поверніть цю відмову, навіть якщо решта цілей — інші моделі, замість переходу до наступної цілі. Вимкнено за замовчуванням: відмова ніколи не охолоджує акаунт і не спрацьовує запобіжний розривник провайдера, а комбо переходить до наступної цілі точно так, як раніше."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторна спроба після паузи: пропуск відхилень 403/410",

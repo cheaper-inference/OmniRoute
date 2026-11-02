@@ -14094,6 +14094,10 @@
         "label": "Urutan Pool Egress Bersama",
         "description": "Untuk penyedia yang kuotanya dikelompokkan berdasarkan alamat egress, urutkan anggota pool yang berbagi alamat egress teramati dari anggota yang baru saja ditolak tepat di bawah anggota yang sehat. Hanya urutan, tidak pernah dikecualikan. Memerlukan PROXY_SKIP_RECENTLY_FAILED, yang menghasilkan sinyal penolakan yang dibacanya. Nonaktif secara default: urutan pemilihan sama persis dengan rotasi biasa."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Pencatatan Log Atribusi Rotasi",
         "description": "Rotasi opencode mencatat akun mana yang melayani atau dilewati (hanya ID tersamar, tidak pernah ID akun lengkap) dan menautkan entri log proksi ke permintaannya, sehingga operator dapat membedakan akun yang dilewati dari yang tidak digunakan. Nonaktif secara default: tidak ada baris log tambahan, tidak ada kolom tambahan yang ditulis."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Berhenti saat Penolakan Kebijakan Konten",
         "description": "Ketika target combo merespons dengan penolakan kebijakan konten yang persis (kode atau jenis cyber_policy / content_policy_violation), hentikan combo dan kembalikan penolakan tersebut meskipun target yang tersisa adalah model yang berbeda, alih-alih beralih ke target berikutnya. Nonaktif secara default: penolakan tersebut tidak pernah menerapkan cooldown pada akun atau memicu breaker penyedia, dan combo beralih ke target berikutnya persis seperti sebelumnya."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Coba Ulang Cooldown: Lewati Penolakan 403/410",

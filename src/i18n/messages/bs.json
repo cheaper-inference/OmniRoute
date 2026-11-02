@@ -14171,6 +14171,10 @@
         "label": "Redoslijed poola sa zajedničkim izlazom",
         "description": "Za pružaoce usluga čija se kvota raspoređuje prema izlaznoj adresi, rangira člana poola koji dijeli uočenu izlaznu adresu nedavno odbijenog člana neposredno ispod ispravnih članova. Mijenja se samo redoslijed, nikada se ne isključuje. Zahtijeva PROXY_SKIP_RECENTLY_FAILED, koji generiše signal odbijanja koji se očitava. Isključeno po zadanim postavkama: redoslijed odabira je identičan običnoj rotaciji."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidentiranje atribucije rotacije",
         "description": "Opencode rotacija bilježi koji je račun poslužio ili bio preskočen (samo maskirani ID-jevi, nikada potpuni ID-jevi računa) i povezuje unose iz proxy loga s njihovim zahtjevom, kako bi operater mogao razlikovati preskočene račune od nekorištenih. Isključeno po zadanim postavkama: nema dodatnih linija u logu, niti se upisuju dodatne kolone."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Zaustavljanje pri odbijanju zbog politike sadržaja",
         "description": "Kada cilj komboa odgovori tačnim odbijanjem zbog politike sadržaja (kod ili tip cyber_policy / content_policy_violation), zaustavite combo i vratite to odbijanje čak i kada su preostali ciljevi različiti modeli, umjesto prelaska na sljedeći cilj. Podrazumijevano isključeno: odbijanje nikada ne hladi nalog niti aktivira prekidač pružaoca usluge, a combo prelazi na svoj sljedeći cilj tačno kao i ranije."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovni pokušaj tokom hlađenja: Preskoči odbijanja 403/410",

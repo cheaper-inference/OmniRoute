@@ -14171,6 +14171,10 @@
         "label": "លំដាប់អាង Egress រួមគ្នា",
         "description": "សម្រាប់ក្រុមហ៊ុនផ្ដល់សេវាដែលកូតារបស់ពួកគេត្រូវបានបែងចែកតាមអាសយដ្ឋាន egress ចាត់ថ្នាក់សមាជិកអាងដែលចែករំលែកអាសយដ្ឋាន egress ដែលបានសង្កេតឃើញរបស់សមាជិកដែលទើបតែត្រូវបានបដិសេធ ឱ្យស្ថិតនៅខាងក្រោមកម្រិតសមាជិកដែលមានសុខភាពល្អ។ ប្តូរតែលំដាប់ប៉ុណ្ណោះ មិនដែលដកចេញឡើយ។ ត្រូវការ PROXY_SKIP_RECENTLY_FAILED ដែលបង្កើតសញ្ញាបដិសេធដែលវាអាន។ បិទតាមលំនាំដើម៖ លំដាប់នៃការជ្រើសរើសគឺដូចគ្នាបេះបិទទៅនឹងការបង្វិលធម្មតា។"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ការកត់ត្រាកំណត់ហេតុបញ្ជាក់ការបង្វិល",
         "description": "ការបង្វិលរបស់ Opencode កត់ត្រាថាគណនីណាបានបម្រើការ ឬត្រូវបានរំលង (លេខសម្គាល់ដែលបានបិទបាំងប៉ុណ្ណោះ មិនដែលមានលេខសម្គាល់គណនីពេញលេញឡើយ) និងភ្ជាប់ធាតុចូលកំណត់ហេតុប្រូកស៊ីទៅនឹងសំណើរបស់ពួកគេ ដូច្នេះប្រតិបត្តិករអាចបែងចែកគណនីដែលត្រូវបានរំលងចេញពីគណនីដែលមិនបានប្រើប្រាស់។ បិទតាមលំនាំដើម៖ គ្មានបន្ទាត់កំណត់ហេតុបន្ថែម និងគ្មានជួរឈរបន្ថែមត្រូវបានកត់ត្រាឡើយ។"
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo៖ បញ្ឈប់នៅពេលមានការបដិសេធគោលការណ៍ខ្លឹមសារ",
         "description": "នៅពេលគោលដៅ combo ឆ្លើយតបមកវិញនូវការបដិសេធគោលការណ៍ខ្លឹមសារជាក់លាក់ (code ឬ type cyber_policy / content_policy_violation) សូមបញ្ឈប់ combo ហើយប្រគល់ការបដិសេធនោះត្រឡប់មកវិញ ទោះបីជាគោលដៅដែលនៅសល់ជាម៉ូដែលផ្សេងគ្នាក៏ដោយ ជាជាងបន្តទៅកាន់គោលដៅបន្ទាប់។ បិទតាមលំនាំដើម៖ ការបដិសេធមិនដែលធ្វើឱ្យគណនីផ្អាក ឬកាត់ផ្តាច់ provider breaker ឡើយ ហើយ combo នឹងបន្តទៅកាន់គោលដៅបន្ទាប់របស់វាដូចពីមុនទាំងស្រុង។"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown Retry: រំលងការបដិសេធ 403/410",

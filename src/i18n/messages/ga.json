@@ -14094,6 +14094,10 @@
         "label": "Ord Linne d'Aschur Comhroinnte",
         "description": "I gcás soláthraithe a ndéantar a gcuóta a bhuicéadú de réir seoladh aschuir, rangaigh ball linne a roinneann seoladh aschuir breathnaithe de chuid ball ar diúltaíodh dó le déanaí díreach faoi bhun ball folláin. Ord amháin, ní eisiatar riamh é. Teastaíonn PROXY_SKIP_RECENTLY_FAILED uaidh, rud a tháirgeann an comhartha diúltaithe a léann sé. Múchta de réir réamhshocraithe: is ionann ord an roghnaithe agus an ghnáthuainíocht go díreach."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logáil Sannacháin Uainíochta",
         "description": "Taifeadann uainíocht opencode cén cuntas a d'fhreastail nó a scipeáladh (aitheantais mhascaithe amháin, gan aitheantais iomlána cuntais riamh) agus nascann sí iontrálacha loga seachfhreastalaí lena n-iarratas, ionas gur féidir leis an oibreoir cuntais a scipeáladh a idirdhealú ó chuntais nár úsáideadh. Múchta de réir réamhshocraithe: ní scríobhtar aon línte loga breise ná colúin bhreise."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Teaglaim: Stop ar Dhiúltú Pholasaí Ábhair",
         "description": "Nuair a fhreagraíonn sprioc theaglaime le diúltú beacht pholasaí ábhair (cód nó cineál cyber_policy / content_policy_violation), stop an teaglaim agus seol an diúltú sin ar ais fiú nuair is samhlacha difriúla iad na spriocanna atá fágtha, in ionad dul ar aghaidh go dtí an chéad sprioc eile. Múchta de réir réamhshocraithe: ní chuireann an diúltú fuarú ar an gcuntas riamh ná ní thuraisíonn sé scoradán an tsoláthraí, agus téann an teaglaim ar aghaidh go dtí an chéad sprioc eile díreach mar a bhí roimhe seo."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atriail Tréimhse Fuaraigh: Scipeáil Diúltuithe 403/410",

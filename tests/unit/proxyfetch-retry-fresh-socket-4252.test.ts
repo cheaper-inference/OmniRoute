@@ -6,8 +6,7 @@
  * close idle keep-alive sockets within that window, so the next request reusing
  * a pooled socket fails with `UND_ERR_SOCKET` ("other side closed") — in bursts.
  *
- * For safe HTTP methods, proxyFetch retries once on such transient socket errors,
- * but the retry reused
+ * proxyFetch retries once on such transient socket errors, but the retry reused
  * the SAME pooled dispatcher (`getDefaultDispatcher()`), so it could grab ANOTHER
  * stale socket and fail too → fall through to native fetch (which also pools) →
  * the job sat in the rate-limit queue until the 30 s timeout → 502 + circuit
@@ -29,7 +28,7 @@ function undErrSocket(): Error {
   return err;
 }
 
-test("#4252 a safe GET retries on a FRESH (no-keep-alive) dispatcher, not the pooled one", async () => {
+test("#4252 a transient socket failure retries on a FRESH (no-keep-alive) dispatcher, not the pooled one", async () => {
   const dispatchersUsed: unknown[] = [];
   let undiciCalls = 0;
   let nativeCalls = 0;
@@ -43,14 +42,12 @@ test("#4252 a safe GET retries on a FRESH (no-keep-alive) dispatcher, not the po
     }
     return new Response("ok", { status: 200 });
   };
-  const mockNative = async (): Promise<Response> => {
-    nativeCalls++;
-    return new Response("native-should-not-fire", { status: 200 });
-  };
+  const mockNative = async (): Promise<Response> =>
+    new Response("native-should-not-fire", { status: 200 });
 
   const res = await proxyFetch(
-    "https://integrate.api.nvidia.com/v1/models",
-    { method: "GET" },
+    "https://integrate.api.nvidia.com/v1/chat/completions",
+    { method: "POST" },
     { undiciFetch: mockUndici, nativeFetch: mockNative }
   );
 

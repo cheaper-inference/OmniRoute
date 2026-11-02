@@ -14094,6 +14094,10 @@
         "label": "Koplietotās izejošās plūsmas pūla secība",
         "description": "Pakalpojumu sniedzējiem, kuru kvota tiek grupēta pēc izejošās adreses, ierindot pūla dalībnieku, kuram ir kopīga novērotā izejošā adrese ar nesen noraidītu dalībnieku, tieši aiz veselajiem dalībniekiem. Tikai secība, nekad netiek izslēgts. Nepieciešams PROXY_SKIP_RECENTLY_FAILED, kas nodrošina noraidījuma signālu tā nolasīšanai. Pēc noklusējuma izslēgts: atlases secība precīzi atbilst parastajai rotācijai."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotācijas atribūcijas reģistrēšana",
         "description": "Opencode rotācija reģistrē, kurš konts apkalpoja pieprasījumu vai tika izlaists (tikai maskēti ID, nekad pilni kontu ID), un sasaista starpniekservera žurnāla ierakstus ar to pieprasījumu, lai operators varētu atšķirt izlaistos kontus no neizmantotajiem. Pēc noklusējuma izslēgts: netiek rakstītas papildu žurnāla rindas vai kolonnas."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: apstāties satura politikas atteikuma gadījumā",
         "description": "Kad combo mērķis atbild ar precīzu satura politikas atteikumu (kods vai tips cyber_policy / content_policy_violation), apturēt combo un atgriezt šo atteikumu pat tad, ja atlikušie mērķi ir citi modeļi, nevis pāriet pie nākamā mērķa. Pēc noklusējuma izslēgts: atteikums nekad neatvēsina kontu un neiedarbina pakalpojumu sniedzēja slēdzi, un combo pāriet pie nākamā mērķa tieši tāpat kā iepriekš."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Atdzišanas atkārtošana: izlaist 403/410 atteikumus",

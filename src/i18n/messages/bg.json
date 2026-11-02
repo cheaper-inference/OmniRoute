@@ -14171,6 +14171,10 @@
         "label": "Подредба на пул със споделен egress адрес",
         "description": "За доставчици, чиято квота се разпределя по egress адрес, член на пула, споделящ наблюдавания egress адрес на наскоро отказал член, се класира непосредствено под изправните членове. Засяга само подредбата, никога не се изключва. Изисква PROXY_SKIP_RECENTLY_FAILED, която генерира четения сигнал за отказ. Изключено по подразбиране: редът на избор съответства точно на стандартната ротация."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Логване на атрибуцията на ротацията",
         "description": "Ротацията на opencode записва кой акаунт е обслужил заявка или е бил пропуснат (само маскирани идентификатори, никога пълни идентификатори на акаунти) и свързва записите в дневника на проксито със съответната им заявка, така че операторът да може да различи пропуснатите акаунти от неизползваните. Изключено по подразбиране: не се записват допълнителни редове или допълнителни колони в дневника."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Комбинация: Спиране при отказ поради политика за съдържанието",
         "description": "Когато цел от комбинацията отговори с точен отказ поради политика за съдържанието (код или тип cyber_policy / content_policy_violation), спира комбинацията и връща този отказ, дори когато останалите цели са различни модели, вместо да преминава към следващата цел. Изключено по подразбиране: отказът никога не поставя акаунта в режим на охлаждане и не задейства прекъсвача на доставчика, а комбинацията преминава към следващата си цел точно както преди."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Повторен опит при период на изчакване: Пропускане на откази 403/410",

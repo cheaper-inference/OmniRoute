@@ -14094,6 +14094,10 @@
         "label": "סדר מאגר לפי כתובת יציאה משותפת",
         "description": "עבור ספקים שהמכסה שלהם מחולקת לפי כתובת יציאה, דרג חבר מאגר שחולק את כתובת היציאה הנצפית של חבר שנדחה לאחרונה מיד מתחת לחברים תקינים. שינוי סדר בלבד, לעולם לא מוחרג. דורש את PROXY_SKIP_RECENTLY_FAILED, המפיק את אות הדחייה שהוא קורא. מושבת כברירת מחדל: סדר הבחירה זהה בדיוק לרוטציה הרגילה."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "תיעוד שיוך ברוטציה",
         "description": "רוטציית opencode מתעדת איזה חשבון שירת או דולג (מזהים מוסווים בלבד, לעולם לא מזהי חשבון מלאים) ומקשרת רשומות יומן פרוקסי לבקשה שלהן, כך שהמפעיל יכול להבדיל בין חשבונות שדולגו לחשבונות שלא היו בשימוש. מושבת כברירת מחדל: לא נכתבות שורות יומן נוספות, ולא נכתבות עמודות נוספות."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: עצירה בעקבות סירוב של מדיניות תוכן",
         "description": "כאשר יעד combo משיב עם סירוב מדויק של מדיניות תוכן (קוד או סוג cyber_policy / content_policy_violation), עצור את ה-combo והחזר סירוב זה גם כאשר היעדים הנותרים הם מודלים שונים, במקום להתקדם ליעד הבא. מושבת כברירת מחדל: הסירוב לעולם אינו מכניס את החשבון לתקופת צינון ואינו מפעיל את ה-breaker של הספק, וה-combo ממשיך ליעד הבא שלו בדיוק כמו בעבר."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ניסיון חוזר בתקופת צינון: דילוג על סירובי 403/410",

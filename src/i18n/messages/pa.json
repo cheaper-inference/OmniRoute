@@ -14171,6 +14171,10 @@
         "label": "ਸਾਂਝਾ ਐਗਰੈੱਸ ਪੂਲ ਕ੍ਰਮ",
         "description": "ਉਨ੍ਹਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਦਾ ਕੋਟਾ ਐਗਰੈੱਸ ਪਤੇ ਅਨੁਸਾਰ ਨਿਰਧਾਰਤ ਕੀਤਾ ਗਿਆ ਹੈ, ਹਾਲ ਹੀ ਵਿੱਚ ਅਸਵੀਕਾਰ ਕੀਤੇ ਗਏ ਮੈਂਬਰ ਦੇ ਦੇਖੇ ਗਏ ਐਗਰੈੱਸ ਪਤੇ ਨੂੰ ਸਾਂਝਾ ਕਰਨ ਵਾਲੇ ਪੂਲ ਮੈਂਬਰ ਨੂੰ ਤੰਦਰੁਸਤ ਮੈਂਬਰਾਂ ਤੋਂ ਤੁਰੰਤ ਹੇਠਾਂ ਦਰਜਾ ਦਿਓ। ਸਿਰਫ਼ ਕ੍ਰਮਬੱਧ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਕਦੇ ਬਾਹਰ ਨਹੀਂ ਕੱਢਿਆ ਜਾਂਦਾ। PROXY_SKIP_RECENTLY_FAILED ਦੀ ਲੋੜ ਹੈ, ਜੋ ਅਸਵੀਕਾਰਤਾ ਸਿਗਨਲ ਤਿਆਰ ਕਰਦਾ ਹੈ ਜਿਸਨੂੰ ਇਹ ਪੜ੍ਹਦਾ ਹੈ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਚੋਣ ਕ੍ਰਮ ਬਿਲਕੁਲ ਸਧਾਰਨ ਰੋਟੇਸ਼ਨ ਹੁੰਦਾ ਹੈ।"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "ਰੋਟੇਸ਼ਨ ਐਟਰੀਬਿਊਸ਼ਨ ਲੌਗਿੰਗ",
         "description": "Opencode ਰੋਟੇਸ਼ਨ ਰਿਕਾਰਡ ਕਰਦੀ ਹੈ ਕਿ ਕਿਸ ਖਾਤੇ ਨੇ ਸੇਵਾ ਦਿੱਤੀ ਜਾਂ ਕਿਸਨੂੰ ਛੱਡਿਆ ਗਿਆ ਸੀ (ਸਿਰਫ਼ ਮਾਸਕ ਕੀਤੀਆਂ ID, ਕਦੇ ਵੀ ਪੂਰੀਆਂ ਖਾਤਾ ID ਨਹੀਂ) ਅਤੇ ਪ੍ਰੌਕਸੀ ਲੌਗ ਐਂਟਰੀਆਂ ਨੂੰ ਉਨ੍ਹਾਂ ਦੀ ਬੇਨਤੀ ਨਾਲ ਜੋੜਦੀ ਹੈ, ਤਾਂ ਜੋ ਓਪਰੇਟਰ ਛੱਡੇ ਗਏ ਖਾਤਿਆਂ ਨੂੰ ਨਾ-ਵਰਤੇ ਖਾਤਿਆਂ ਤੋਂ ਵੱਖਰਾ ਪਛਾਣ ਸਕੇ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ: ਕੋਈ ਵਾਧੂ ਲੌਗ ਲਾਈਨਾਂ ਨਹੀਂ, ਕੋਈ ਵਾਧੂ ਕਾਲਮ ਨਹੀਂ ਲਿਖੇ ਜਾਂਦੇ।"
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "ਕੰਬੋ: ਸਮੱਗਰੀ-ਨੀਤੀ ਅਸਵੀਕਾਰ 'ਤੇ ਰੋਕੋ",
         "description": "ਜਦੋਂ ਕੋਈ ਕੰਬੋ ਟਾਰਗੇਟ ਇੱਕ ਸਟੀਕ ਸਮੱਗਰੀ-ਨੀਤੀ ਅਸਵੀਕਾਰ (ਕੋਡ ਜਾਂ ਕਿਸਮ cyber_policy / content_policy_violation) ਨਾਲ ਜਵਾਬ ਦਿੰਦਾ ਹੈ, ਤਾਂ ਅਗਲੇ ਟਾਰਗੇਟ 'ਤੇ ਜਾਣ ਦੀ ਬਜਾਏ ਕੰਬੋ ਨੂੰ ਰੋਕੋ ਅਤੇ ਉਹ ਅਸਵੀਕਾਰ ਵਾਪਸ ਕਰੋ, ਭਾਵੇਂ ਬਾਕੀ ਬਚੇ ਟਾਰਗੇਟ ਵੱਖ-ਵੱਖ ਮਾਡਲ ਹੋਣ। ਪੂਰਵ-ਨਿਰਧਾਰਤ ਤੌਰ 'ਤੇ ਬੰਦ: ਅਸਵੀਕਾਰ ਕਦੇ ਵੀ ਖਾਤੇ ਨੂੰ ਕੂਲ ਨਹੀਂ ਕਰਦਾ ਜਾਂ ਪ੍ਰੋਵਾਈਡਰ ਬ੍ਰੇਕਰ ਨੂੰ ਟ੍ਰਿਪ ਨਹੀਂ ਕਰਦਾ, ਅਤੇ ਕੰਬੋ ਬਿਲਕੁਲ ਪਹਿਲਾਂ ਵਾਂਗ ਆਪਣੇ ਅਗਲੇ ਟਾਰਗੇਟ ਵੱਲ ਵਧਦਾ ਹੈ।"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "ਕੂਲਡਾਊਨ ਮੁੜ-ਕੋਸ਼ਿਸ਼: 403/410 ਅਸਵੀਕਾਰੀਆਂ ਨੂੰ ਛੱਡੋ",

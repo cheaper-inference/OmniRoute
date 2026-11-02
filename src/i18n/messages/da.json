@@ -14171,6 +14171,10 @@
         "label": "Puljerækkefølge for delt egress",
         "description": "For udbydere, hvis kvote er opdelt efter egress-adresse, rangeres et puljemedlem, der deler et nyligt afvist medlems observerede egress-adresse, lige under sunde medlemmer. Kun rækkefølge, ekskluderes aldrig. Kræver PROXY_SKIP_RECENTLY_FAILED, som genererer det afvisningssignal, den aflæser. Deaktiveret som standard: udvælgelsesrækkefølgen er nøjagtig den almindelige rotation."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Logning af rotationsattribuering",
         "description": "Opencode-rotation registrerer, hvilken konto der betjente eller blev sprunget over (kun maskerede id'er, aldrig fulde konto-id'er), og forbinder proxylogposter med deres anmodning, så operatøren kan skelne mellem overspringede konti og ubrugte. Deaktiveret som standard: ingen ekstra loglinjer, ingen ekstra kolonner skrives."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Stop ved afvisning på grund af indholdspolitik",
         "description": "Når et combo-mål svarer med en præcis afvisning på grund af indholdspolitik (kode eller type cyber_policy / content_policy_violation), skal comboen stoppe og returnere denne afvisning, selv når de resterende mål er andre modeller, i stedet for at gå videre til næste mål. Deaktiveret som standard: afvisningen afkøler aldrig kontoen eller udløser udbyderafbryderen, og comboen går videre til sit næste mål præcis som før."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Genforsøg ved nedkøling: Spring 403/410-afvisninger over",

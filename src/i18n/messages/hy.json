@@ -14094,6 +14094,10 @@
         "label": "Համատեղ ելքային փուլի հերթականություն",
         "description": "Այն մատակարարների համար, որոնց քվոտան բաշխվում է ըստ ելքային հասցեների, փուլի այն անդամին, որը կիսում է վերջերս մերժված անդամի նկատված ելքային հասցեն, դասակարգել անմիջապես առողջ անդամներից ցածր: Միայն դասակարգում, երբեք չի բացառվում: Պահանջում է PROXY_SKIP_RECENTLY_FAILED, որը գեներացնում է վերջինիս կողմից ընթերցվող մերժման ազդանշանը: Լռելյայն անջատված է. ընտրության կարգը ճշգրիտ սովորական ռոտացիան է:"
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Ռոտացիայի վերագրման մատյանագրում",
         "description": "Opencode-ի ռոտացիան գրանցում է, թե որ հաշիվն է սպասարկել կամ բաց թողնվել (միայն քողարկված id-ներ, երբեք ոչ հաշվի ամբողջական id-ներ) և կապում է պրոքսիի մատյանի գրառումներն իրենց հարցման հետ, որպեսզի օպերատորը կարողանա տարբերակել բաց թողնված հաշիվները չօգտագործվածներից: Լռելյայն անջատված է. մատյանի հավելյալ տողեր և հավելյալ սյունակներ չեն գրվում:"
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo. Կանգառ բովանդակության քաղաքականության մերժման դեպքում",
         "description": "Երբ combo-ի թիրախը պատասխանում է բովանդակության քաղաքականության հստակ մերժմամբ (cyber_policy / content_policy_violation կոդով կամ տեսակով), կանգնեցնել combo-ն և վերադարձնել այդ մերժումը նույնիսկ այն դեպքում, երբ մնացած թիրախները տարբեր մոդելներ են՝ հաջորդ թիրախին անցնելու փոխարեն։ Լռելյայն անջատված է. մերժումը երբեք չի սառեցնում հաշիվը կամ չի ակտիվացնում provider breaker-ը, իսկ combo-ն առաջ է շարժվում դեպի իր հաջորդ թիրախը՝ ճիշտ ինչպես նախկինում։"
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Սառեցման կրկնափորձ. բաց թողնել 403/410 մերժումները",

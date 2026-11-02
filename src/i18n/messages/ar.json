@@ -14171,6 +14171,10 @@
         "label": "ترتيب مجمّع الخروج المشترك",
         "description": "بالنسبة للمزودين الذين تُقسّم حصتهم حسب عنوان الخروج، يتم تصنيف عضو المجمّع الذي يتشارك عنوان خروج مرصود لعضو تم رفضه مؤخرًا أسفل الأعضاء السليمين مباشرة. ترتيب فقط، دون استبعاد أبدًا. يتطلب تفعيل PROXY_SKIP_RECENTLY_FAILED الذي ينتج إشارة الرفض التي يعتمد عليها. معطّل افتراضيًا: ترتيب التحديد مطابق تمامًا للتدوير العادي."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "تسجيل إسناد التدوير",
         "description": "يسجل تدوير Opencode الحساب الذي تمت خدمته أو تخطيه (معرّفات مقنّعة فقط، دون معرّفات الحسابات الكاملة مطلقًا) ويربط إدخالات سجل البروكسي بطلبها، ليتمكن المشغّل من تمييز الحسابات التي تم تخطيها عن الحسابات غير المستخدمة. معطّل افتراضيًا: لا تتم كتابة أسطر سجلات إضافية، ولا أعمدة إضافية."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "كومبو: التوقف عند رفض سياسة المحتوى",
         "description": "عندما يستجيب هدف كومبو برفض صريح لسياسة المحتوى (الرمز أو النوع cyber_policy / content_policy_violation)، يتم إيقاف الكومبو وإرجاع هذا الرفض حتى إذا كانت الأهداف المتبقية نماذج مختلفة، بدلاً من الانتقال إلى الهدف التالي. معطّل افتراضيًا: لا يؤدي الرفض مطلقًا إلى تهدئة الحساب أو تفعيل قاطع دائرة المزود، وينتقل الكومبو إلى هدفه التالي تمامًا كما كان في السابق."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "إعادة المحاولة أثناء التهدئة: تخطي حالات رفض 403/410",

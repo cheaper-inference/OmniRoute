@@ -14171,6 +14171,10 @@
         "label": "საერთო გამავალი პულის თანმიმდევრობა",
         "description": "იმ პროვაიდერებისთვის, რომელთა კვოტაც დაჯგუფებულია გამავალი მისამართის მიხედვით, პულის იმ წევრს, რომელიც იზიარებს ახლახან უარყოფილი წევრის დაფიქსირებულ გამავალ მისამართს, ანიჭებს რიგითობას უშუალოდ გამართული წევრების ქვემოთ. იცვლება მხოლოდ თანმიმდევრობა, არასოდეს გამოირიცხება. საჭიროებს PROXY_SKIP_RECENTLY_FAILED-ს, რომელიც აგენერირებს უარყოფის სიგნალს, რომელსაც ის კითხულობს. გამორთულია ნაგულისხმევად: შერჩევის თანმიმდევრობა ჩვეულებრივი როტაციის იდენტურია."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "როტაციის ატრიბუციის ლოგირება",
         "description": "Opencode-ის როტაცია იწერს, თუ რომელმა ანგარიშმა მოემსახურა მოთხოვნას ან რომელი გამოიტოვა (მხოლოდ მასკირებული ID-ები, არასდროს ანგარიშის სრული ID-ები) და აკავშირებს პროქსის ლოგის ჩანაწერებს მათ შესაბამის მოთხოვნასთან, რათა ოპერატორმა შეძლოს გამოტოვებული ანგარიშების გამოუყენებლებისგან გარჩევა. გამორთულია ნაგულისხმევად: არ იწერება დამატებითი ლოგის სტრიქონები და დამატებითი სვეტები."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: შეჩერება Content-Policy-ის უარზე",
         "description": "როდესაც combo სამიზნე პასუხობს ზუსტი content-policy უარით (კოდი ან ტიპი cyber_policy / content_policy_violation), შეაჩერეთ combo და დააბრუნეთ ეს უარი მაშინაც კი, როდესაც დარჩენილი სამიზნეები სხვა მოდელებია, შემდეგ სამიზნეზე გადასვლის ნაცვლად. ნაგულისხმევად გამორთულია: უარი არასოდეს გადაიყვანს ანგარიშს cooldown-ში და არ ააქტიურებს provider breaker-ს, ხოლო combo გადადის მის შემდეგ სამიზნეზე ზუსტად ისე, როგორც ადრე."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Cooldown-ის განმეორებითი ცდა: 403/410 უარყოფების გამოტოვება",

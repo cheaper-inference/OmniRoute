@@ -14094,6 +14094,10 @@
         "label": "මාර්ග ඉවත් වීමේ පිළිවෙල",
         "description": "මාර්ග ඉවත් වීම් අනුව ඉක්මන් කළ සැපයුම්කරු සඳහා, ඉක්මන් කළ සාමාන්‍යයක් සමඟ නිරීක්ෂණය කරන ලද මාර්ග ඉවත් වීම් ලක්ෂ්‍යය හෙළි කරන සාමාන්‍යයක් උරමක් කිරීම ඉක්මන් කිරීම. අනුපිළිවෙල පමණි, ඉවත් කිරීමක් නොවේ. PROXY_SKIP_RECENTLY_FAILED අවශ්‍ය වේ, එය අනුපිළිවෙල පාලනය කරයි. පෙරනිමියෙන් අක්‍රියයි: තේරීමේ අනුපිළිවෙල වඩාත් ප්‍රබලයි."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "පිළිවෙල මාලිමා ලිපිනය",
         "description": "ප්‍රායෝගික එකකෝඩ් එකේ පිළිවෙල තේරීමේ ගිනුම ලිපිනය කරයි (අඳුනුම් ලකුණු පමණි, සම්පූර්ණ ගිනුම් අඳුනුම් ලකුණු නොවේ) සහ ක්‍රමීකරණ ලිපිගතීන් ඉල්ලීම් වලට සම්බන්ධ කරයි, මෙමගින් මාලිම්පාලකයා වැලඳුණු ගිනුම් අසමාල ගිනුම්වලින් වෙනස් කළ හැකිය. පෙරනිමියෙන් අක්‍රියයි: අතිරේක ලිපිගතීන් නොමැත, අතිරේක තීරු ලිපිනය නොමැත."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: අන්තර්ගත ප්‍රතිපත්ති ප්‍රතික්ෂේපයකදී නවත්වන්න",
         "description": "combo ඉලක්කයක කතුවරයන් එකෙහි විවිධ ආදර්ශ ආරක්ෂක ක්‍රියාවකින් මතභා ස්‍රෝයානයක් (කෝඩ් හෝ විඳි cyber_policy / content_policy_violation) දැනුම් දෙන විට, ඉතිරි ඉලක්ක අලෙවියන් වෙනස් ආදර්ශ වුවත්, combo එක නවත්වන්න සහ එම මතභා ස්‍රෝයානය ආපතා කන්න, අනුප්‍රාප්තිවක් එවකරම ඊළඟ ඉලක්කයට යන අවස්ථාවට සරියටම තබා ගැනීම. පෙරනිමියෙන් අක්‍රියයි: මතභා ස්‍රෝයානය කිසිදා වරායකට උරුම නොකරන අතර, provider breaker එකක් ඉවැද්දර නොකරයි, සහ combo එක පෙර පරිද්ථ සේ ඊළඟ ඉලක්කයට යයි."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "සිසිලන කාලයේ නැවත උත්සාහය: 403/410 ප්‍රතික්ෂේප මඟ හරින්න",

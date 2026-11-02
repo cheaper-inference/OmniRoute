@@ -14094,6 +14094,10 @@
         "label": "Jaetun egress-poolin järjestys",
         "description": "Palveluntarjoajille, joiden kiintiöt on ryhmitelty egress-osoitteen mukaan, sijoita poolin jäsen, jolla on sama havaittu egress-osoite kuin äskettäin hylätyllä jäsenellä, heti terveiden jäsenten alapuolelle. Vaikuttaa vain järjestykseen, ei koskaan sulje pois. Vaatii asetuksen PROXY_SKIP_RECENTLY_FAILED, joka tuottaa sen lukeman hylkäyssignaalin. Oletuksena poissa käytöstä: valintajärjestys vastaa täysin tavallista rotaatiota."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotaation kohdistuslokitus",
         "description": "Opencoden rotaatio tallentaa, mikä tili palveli tai ohitettiin (vain maskatut tunnisteet, ei koskaan täysiä tilitunnisteita) ja linkittää välityspalvelinlokin merkinnät pyyntöönsä, jotta operaattori voi erottaa ohitetut tilit käyttämättömistä. Oletuksena poissa käytöstä: ylimääräisiä lokirivejä tai sarakkeita ei kirjoiteta."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Combo: Pysäytä sisältökäytännön hylkäykseen",
         "description": "Kun combo-kohde vastaa täsmällisellä sisältökäytännön hylkäyksellä (koodi tai tyyppi cyber_policy / content_policy_violation), pysäytä combo ja palauta kyseinen hylkäys myös silloin, kun jäljellä olevat kohteet ovat eri malleja, sen sijaan että siirryttäisiin seuraavaan kohteeseen. Oletusarvoisesti poissa käytöstä: hylkäys ei koskaan aseta tiliä jäähdytystilaan tai laukaise palveluntarjoajan katkaisinta, ja combo siirtyy seuraavaan kohteeseensa aivan kuten ennenkin."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Jäähtymisajan uudelleenyritys: Ohita 403/410-hylkäykset",

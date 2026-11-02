@@ -14171,6 +14171,10 @@
         "label": "Paylaşılan Egress Hovuzunun Sırası",
         "description": "Kvotası egress ünvanına görə qruplaşdırılan təminatçılar üçün, son vaxtlar rədd edilmiş üzvün müşahidə olunan egress ünvanını paylaşan hovuz üzvünü sağlam üzvlərdən dərhal aşağıda sıralayın. Yalnız sıralama üçündür, heç vaxt istisna edilmir. Oxuduğu imtina siqnalını yaradan PROXY_SKIP_RECENTLY_FAILED tələb olunur. Defolt olaraq qeyri-aktivdir: seçim sırası adi rotasiya ilə tamamilə eynidir."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Rotasiya Aidiyyətinin Loqlanması",
         "description": "Opencode rotasiyası hansı hesabın xidmət göstərdiyini və ya ötürüldüyünü qeydə alır (yalnız maskalanmış ID-lər, heç vaxt tam hesab ID-ləri deyil) və proksi loq qeydlərini onların sorğusuna bağlayır ki, operator ötürülmüş hesabları istifadə edilməyənlərdən fərqləndirə bilsin. Defolt olaraq qeyri-aktivdir: əlavə loq sətri yazılmır, əlavə sütun daxil edilmir."
@@ -14402,6 +14406,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombo: Məzmun Siyasətinə Görə İmtina Zamanı Dayandır",
         "description": "Kombo hədəfi dəqiq məzmun siyasəti imtinası ilə cavab verdikdə (kod və ya növü cyber_policy / content_policy_violation), növbəti hədəfə keçmək əvəzinə, komboyu dayandırın və qalan hədəflər fərqli modellər olsa belə, həmin imtina cavabını qaytarın. Defolt olaraq qeyri-aktivdir: rədd cavabı heç vaxt hesabı soyutmur və ya provayder kəsicisini işə salmır və kombo əvvəlki kimi növbəti hədəfinə keçir."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Soyuma Təkrar Cəhdi: 403/410 İmtinalarını Keç",

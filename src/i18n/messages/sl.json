@@ -14094,6 +14094,10 @@
         "label": "Vrstni red skupnega izhodnega seznama",
         "description": "Za ponudnike, za katere se kvota obsega po izhodni naslovu, vrsti člane seznama, ki delijo opažen izhodni naslov nedavno zavrnjenega člena, neposredno pod zdravimi člani. Samo vrstni red, nikoli izključitev. Potrebuje PROXY_SKIP_RECENTLY_FAILED, ki ustvari signal zavrnitve, ki ga bere. Privzeto je izklopljeno: vrstni red izbiranja je prav rotacija."
       },
+      "PROXY_STRICT_POST_REPLAY_ENABLED": {
+        "label": "__MISSING__:Proxy Fetch: Strict POST Replay",
+        "description": "__MISSING__:For a non-idempotent request (POST, PUT, PATCH, DELETE), resend after a transport error (fresh socket, proxy fallback, native fallback) only when the error proves nothing was sent: ECONNREFUSED, ENOTFOUND, EAI_AGAIN, ENETUNREACH or a connect timeout. A socket error after the write can mean the upstream accepted the request, so a resend could generate and bill it twice. Off by default: a replayable body is resent once on any transport error, which also recovers a stale pooled socket."
+      },
       "ROTATION_ATTRIBUTION": {
         "label": "Evidenje pripisovanja rotacije",
         "description": "Opencode rotacija zabeleži, kateri račun je služil ali bil preskočen (le maskirani id-ji, nikoli polni id-ji uporabniških računov) in poveže vnose dnevniških posrednikov z njihovo zahtevo, da operater lahko razlikuje preskočene račune od neneuporabljenih. Privzeto je izklopljeno: nobeni dodatni vrstice dnevnička, nobene dodatne pisane vrstice."
@@ -14325,6 +14329,10 @@
       "CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED": {
         "label": "Kombinacija: Ustavi se pri zavrnitvi politike vsebine",
         "description": "Ko kombinacijski cilj odgovori s točno zavrnitvijo politike vsebine (koda ali tip cyber_policy / content_policy_violation), ustavi kombinacijo in vrni to zavrnitev, tudi če so preostali cilji različni modeli, namesto napredovanja na naslednji cilj. Privzeto je izklopljeno: zavrnitev nikoli ne ohladi računa ali sproži varnostnega prekinitva ponudnika, kombinacija pa napreduje na svoj naslednji cilj natanko kot prej."
+      },
+      "RESPONSES_TRANSPORT_KEEPALIVE_ENABLED": {
+        "label": "__MISSING__:Responses: Transport-Only Keepalive",
+        "description": "__MISSING__:Send Responses keepalives as a blank line instead of a response.in_progress event, so a synthetic snapshot can never replace the real response in the official SDK. A blank line dispatches no SSE event, so a client watchdog that resets only on events would not be reset during a long silent phase. Off by default: timers send the spec-valid response.in_progress event."
       },
       "COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED": {
         "label": "Ponovna poskusa po čakanju: Preskoči zavrge 403/410",
