@@ -207,9 +207,8 @@ interface OpenAIMessage {
 }
 
 interface AdaptaPart {
-  type: "text" | "step-start";
-  text?: string;
-  state?: string;
+  type: "text";
+  text: string;
 }
 
 interface AdaptaMessage {
@@ -256,7 +255,7 @@ export function buildAdaptaMessages(
   for (const msg of rest) {
     if (msg.role !== "user" && msg.role !== "assistant") continue;
     const text = extractText(msg.content);
-    if (!text.trim() && msg.role !== "assistant") continue;
+    if (!text.trim()) continue;
 
     const id = crypto.randomUUID();
 

@@ -9,7 +9,20 @@ export const adapta_webProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   models: [
-    { id: "adapta-one", name: "ONE Smart (via Adapta)", toolCalling: false },
+    {
+      id: "adapta-one",
+      name: "ONE Smart (via Adapta)",
+      toolCalling: false,
+      // Pre-catalog ids stay routable: on the tip they all resolved to Adapta's ONE.
+      aliases: [
+        "adapta-gpt",
+        "adapta-claude",
+        "adapta-gemini",
+        "adapta-grok",
+        "adapta-deepseek",
+        "adapta-llama",
+      ],
+    },
     { id: "adapta-gpt-6-luna", name: "GPT-6 Luna (via Adapta)", toolCalling: false },
     { id: "adapta-claude-5-5-haiku", name: "Claude 5.5 Haiku (via Adapta)", toolCalling: false },
     { id: "adapta-claude-5-5-sonnet", name: "Claude 5.5 Sonnet (via Adapta)", toolCalling: false },
