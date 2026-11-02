@@ -25,10 +25,10 @@ process.env.OMNIROUTE_PLUGINS_DIR = path.join(fixtureDir, "plugins");
 process.env.OMNIROUTE_MIGRATIONS_DIR = fixtureDir;
 
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/225_proxy_payload_traffic.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/223_proxy_payload_traffic.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixtureDir, "225_proxy_payload_traffic.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixtureDir, "223_proxy_payload_traffic.sql"), sql, "utf8");
 fs.writeFileSync(
   path.join(fixtureDir, "206_codex_wakeup_tasks.sql"),
   "CREATE TABLE incoming_206 (id INTEGER PRIMARY KEY);",
@@ -62,6 +62,11 @@ fs.writeFileSync(
 fs.writeFileSync(
   path.join(fixtureDir, "217_quota_recovery_tickets.sql"),
   "CREATE TABLE incoming_217 (id INTEGER PRIMARY KEY);",
+  "utf8"
+);
+fs.writeFileSync(
+  path.join(fixtureDir, "218_proxy_subscription_mirror_urls.sql"),
+  "CREATE TABLE incoming_218 (id INTEGER PRIMARY KEY);",
   "utf8"
 );
 // All state paths are isolated before loading the real migration orchestrator.
@@ -108,7 +113,7 @@ test(
   "traffic migration upgrades fresh and published ledgers without losing counters",
   { timeout: 3000 },
   () => {
-    const publishedSlots = ["206", "207", "213", "214", "215", "217", "225"];
+    const publishedSlots = ["206", "207", "213", "214", "215", "217", "218", "223"];
     for (let mask = 0; mask < 1 << publishedSlots.length; mask++) {
       const versions = publishedSlots.filter((_, index) => mask & (1 << index));
       const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
@@ -128,7 +133,7 @@ test(
             "INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES (?, ?, ?)"
           ).run(version, "proxy_payload_traffic", "fixture-applied");
         }
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 7 : 8);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 8 : 9);
         assert.deepEqual(
           db.prepare("SELECT version, name FROM _omniroute_migrations ORDER BY version").all(),
           [
@@ -139,7 +144,8 @@ test(
             { version: "215", name: "team_cost_centers" },
             { version: "216", name: "team_cost_shapes" },
             { version: "217", name: "quota_recovery_tickets" },
-            { version: "225", name: "proxy_payload_traffic" },
+            { version: "218", name: "proxy_subscription_mirror_urls" },
+            { version: "223", name: "proxy_payload_traffic" },
           ],
           `canonical ledger after ${versions.join(",") || "fresh"} startup`
         );
@@ -164,7 +170,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '225'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version = '223'")
                 .get() as {
                 applied_at: string;
               }
@@ -172,7 +178,7 @@ test(
             "fixture-applied"
           );
         }
-        for (const version of ["206", "207", "213", "214", "215", "216", "217"]) {
+        for (const version of ["206", "207", "213", "214", "215", "216", "217", "218"]) {
           assert.ok(
             db
               .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
@@ -188,6 +194,36 @@ test(
   }
 );
 
+test("traffic migration preserves the previously published higher slot", { timeout: 1000 }, () => {
+  const db = createNodeSqliteAdapterFromDatabase(new DatabaseSync(":memory:"), ":memory:");
+  try {
+    db.exec(sql);
+    db.exec(`CREATE TABLE _omniroute_migrations (
+      version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
+    );
+    INSERT INTO _omniroute_migrations VALUES ('225', 'proxy_payload_traffic', 'fixture-applied');
+    INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
+      VALUES ('direct', 'direct', 9, 'start', 'update');`);
+    runMigrations(db, { isNewDb: true });
+    assert.equal(
+      (db.prepare("SELECT attempts FROM proxy_payload_traffic").get() as { attempts: number })
+        .attempts,
+      9
+    );
+    assert.equal(
+      (
+        db.prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='225'").get() as {
+          applied_at: string;
+        }
+      ).applied_at,
+      "fixture-applied"
+    );
+    assert.equal(runMigrations(db, { isNewDb: true }), 0);
+  } finally {
+    db.close();
+  }
+});
+
 test(
   "an occupied canonical slot fails without rewriting unknown history or traffic rows",
   { timeout: 1000 },
@@ -199,11 +235,11 @@ test(
       version TEXT PRIMARY KEY, name TEXT NOT NULL, applied_at TEXT NOT NULL DEFAULT (datetime('now'))
     );
     INSERT INTO _omniroute_migrations (version, name) VALUES
-      ('225', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
+      ('223', 'unrelated_migration'), ('207', 'proxy_payload_traffic');
     INSERT INTO proxy_payload_traffic (route_key, route_kind, attempts, started_at, updated_at)
       VALUES ('direct', 'direct', 9, 'start', 'update');`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 225 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 223 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before
