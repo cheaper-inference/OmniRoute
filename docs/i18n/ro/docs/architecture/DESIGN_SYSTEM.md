@@ -117,7 +117,16 @@
 
 ## 5. Actualizarea trusei
 
-`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune. Fluxul de lucru săptămânal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) execută aceeași verificare și menține o problemă de urmărire deschisă în timp ce pinul este în urmă; repo-ul din amonte este privat, deci fluxul de lucru are nevoie de un token doar pentru citire în secretul `UI_KIT_READ_TOKEN`. Când nu poate citi în amonte (nici un token, un token care a încetat să funcționeze sau GitHub inaccesibil), rularea rămâne verde, dar scrie un avertisment și menține deschisă o problemă separată, care se închide singură odată ce o rulare ulterioară poate citi din nou în amonte.
+`npm run check:ui-kit-upstream` compară versiunea fixată în `packages/ui-kit/UPSTREAM.md` cu cea mai nouă etichetă `v*` a depozitului din amonte și tipărește comanda de sincronizare atunci când este disponibilă o versiune.
+
+Fluxul de lucru zilnic `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) rulează aceeași verificare. În timp ce pinul este în urmă, `scripts/ci/ui-kit-sync-pr.sh` menține un PR sincronizat deschis față de cea mai înaltă ramură `release/vX.Y.Z`, pe ramura rulantă `chore/ui-kit-sync-latest`. Nu se îmbină niciodată: fiecare lansare de kit are nevoie de o verificare vizuală a VPS local. Ramura este reconstruită când apare o versiune mai nouă și este lăsată în pace în caz contrar. Un PR deschis cu commit-uri împinse manual nu este suprascris, iar un PR pentru o versiune pe care un întreținător a închis-o nefusionată rămâne închis până la o versiune mai nouă.
+
+Când nu poate fi deschis niciun PR (ediția țintă este înghețată, PR are commit-uri împinse manual, PR a fost închis sau nu este setat niciun simbol PR ), fluxul de lucru păstrează deschisă o problemă de urmărire care spune de ce.
+
+Fluxul de lucru folosește două secrete:
+
+- `secrets.UI_KIT_READ_TOKEN`: un token numai pentru citire pentru depozitul privat din amonte. Când fluxul de lucru nu poate citi în amonte (nici un token, un token care a încetat să funcționeze sau GitHub inaccesibil), rularea rămâne verde, dar scrie un avertisment și menține deschisă o problemă separată, care se închide singură odată ce o rulare ulterioară poate citi din nou în amonte.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un token cu granulație fină pe acest depozit cu acces la scriere la conținut și la solicitări Pull. `GITHUB_TOKEN` implicit nu poate crea PRs aici, iar un PR pe care l-a deschis nu ar declanșa CI. Fără acest simbol, fluxul de lucru împinge doar ramura.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copiază `src/` din amonte la acel commit (`latest` = cea mai nouă etichetă `v*` ) în `packages/ui-kit/src`, aplică transformarea unică permisă (elimină sufixul `.js` din importurile relative) și setează versiunea spațiului de lucru în `packages/ui-kit/package.json` și `package-lock.json` la cea din amonte. Apoi: revizuiți `git diff packages/ui-kit`, faceți o trecere vizuală asupra furnizorilor, setărilor, combo-urilor, utilizării și punctului final în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui` și deschideți PR cu jurnalul de modificări din amonte.
 

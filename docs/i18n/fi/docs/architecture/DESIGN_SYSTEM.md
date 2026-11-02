@@ -114,7 +114,16 @@ variant="primary"` on kitin `default`-nappi (`--ci-button-primary-*`: kääntein
 
 ## 5. Sarjan päivittäminen
 
-`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu. Viikoittainen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen ja pitää yhden seurantaongelman auki, kun nasta on takana. ylävirran repo on yksityinen, joten työnkulku tarvitsee vain luku -tunnuksen `UI_KIT_READ_TOKEN` salaisessa salassa. Kun se ei pysty lukemaan ylävirtaa (ei merkkiä, merkkiä, joka lakkasi toimimasta, tai GitHub ei ole tavoitettavissa), ajo pysyy vihreänä, mutta kirjoittaa varoituksen ja pitää yhden erillisen ongelman auki, joka sulkeutuu, kun myöhempi ajo voi lukea vastavirtaan uudelleen.
+`npm run check:ui-kit-upstream` vertaa `packages/ui-kit/UPSTREAM.md` kiinnitettyä versiota ylävirran repon uusimpaan `v*` tunnisteeseen ja tulostaa synkronointikomennon, kun julkaisu on julkaistu.
+
+Päivittäinen `UI Kit upstream watch` -työnkulku (`.github/workflows/ui-kit-upstream-watch.yml`) suorittaa saman tarkistuksen. Kun tappi on takana, `scripts/ci/ui-kit-sync-pr.sh` pitää yhden synkronoinnin PR auki korkeinta `release/vX.Y.Z` haaraa vasten, vierivällä haaralla `chore/ui-kit-sync-latest`. Se ei koskaan sulaudu yhteen: jokainen sarjan julkaisu vaatii silti visuaalisen tarkistuksen paikallisessa VPS ssä. Haara rakennetaan uudelleen, kun uudempi julkaisu on julkaistu ja jätetään muuten yksin. Avoin PR jossa on käsin työnnetty sitoumus, ei kirjoiteta päälle, ja PR versiolle, jonka ylläpitäjä sulki yhdistämättä, pysyy suljettuna uudempaan julkaisuun asti.
+
+Kun PR ei voida avata (kohdejulkaisu on jäädytetty, PR on sitoumuksia työnnetty käsin, PR on suljettu tai PR -tunnusta ei ole asetettu), työnkulku pitää yhden seurantaongelman auki, mikä kertoo miksi.
+
+Työnkulku käyttää kahta salaisuutta:
+
+- `secrets.UI_KIT_READ_TOKEN`: vain luku -token yksityiselle ylävirran repolle. Kun työnkulku ei pysty lukemaan ylävirtaa (ei merkkiä, merkkiä, joka lakkasi toimimasta, tai GitHub ei ole tavoitettavissa), ajo pysyy vihreänä, mutta kirjoittaa varoituksen ja pitää yhden erillisen ongelman auki, joka sulkeutuu, kun myöhempi ajo voi lukea vastavirtaan uudelleen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: hienojakoinen merkki tässä arkiston Sisältö- ja Pull-pyynnöillä kirjoitusoikeuksilla. Oletusarvoinen `GITHUB_TOKEN` ei voi luoda PRs tähän, ja sen avaama PR ei laukaisi CI. Ilman tätä merkkiä työnkulku vain työntää haaraa.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopioi ylävirran `src/` kyseisessä vahvistuksessa (`latest` = uusin `v*` tunniste) `packages/ui-kit/src` ksi, käyttää yksittäistä sallittua muunnosta (poistaa `.js` liitteen suhteellisista tuonnista) ja asettaa työtilan version `packages/ui-kit/package.json` :ssa ja `package-lock.json` ssä ylävirran versioksi. Sitten: tarkista `git diff packages/ui-kit`, tee visuaalinen välitys palveluntarjoajille, asetuksille, yhdistelmälle, käytölle ja päätepisteelle molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ja avaa PR ylävirran muutoslokin avulla.
 

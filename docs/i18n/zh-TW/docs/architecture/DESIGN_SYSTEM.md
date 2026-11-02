@@ -108,7 +108,16 @@
 
 ## 5. 更新套件
 
-`npm run check:ui-kit-upstream`將`packages/ui-kit/UPSTREAM.md`中固定的版本與上游儲存庫的最新`v*`標籤進行比較，並在發佈時列印同步命令。每週`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 執行相同的檢查，並在 pin 落後時保持一個追蹤問題處於開啟狀態；上游儲存庫是私有的，因此工作流程需要`UI_KIT_READ_TOKEN`秘密中的唯讀令牌。當它無法讀取上游（沒有令牌、停止工作的令牌或GitHub無法存取）時，運行保持綠色，但會寫入一條警告並保持一個單獨的問題打開，一旦稍後的運行可以再次讀取上游，該問題就會自行關閉。
+`npm run check:ui-kit-upstream`將`packages/ui-kit/UPSTREAM.md`中固定的版本與上游儲存庫的最新`v*`標籤進行比較，並在發佈時列印同步命令。
+
+每日`UI Kit upstream watch`工作流程 (`.github/workflows/ui-kit-upstream-watch.yml`) 執行相同的檢查。當 pin 位於後面時， `scripts/ci/ui-kit-sync-pr.sh`會在滾動分支`chore/ui-kit-sync-latest`上針對最高`release/vX.Y.Z`分支保持一個同步PR開啟。它永遠不會合併：每個套件版本仍然需要對本地VPS進行目視檢查。當新版本發佈時，分支會被重建，否則就不會發生。手動提交的開放PR不會被覆蓋，並且維護者關閉未合併的版本的PR將保持關閉狀態，直到新版本發布。
+
+當無法開啟PR時（目標版本被凍結、 PR已手動提交、 PR已關閉或未設定PR令牌），工作流程會保持一個追蹤問題處於開啟狀態，並說明原因。
+
+這個工作流程使用兩個秘密：
+
+- `secrets.UI_KIT_READ_TOKEN`：私有上游儲存庫的唯讀令牌。當工作流程無法讀取上游（沒有令牌、令牌停止工作或GitHub無法存取）時，運行將保持綠色，但會寫入一條警告並保持一個單獨的問題處於開啟狀態，一旦稍後的運行可以再次讀取上游，該問題就會自行關閉。
+- `secrets.UI_KIT_SYNC_PR_TOKEN`：此儲存庫上的細粒度令牌，具有內容和拉取請求寫入權限。預設的`GITHUB_TOKEN`不能在這裡建立PRs ，而且它開啟的PR不會觸發CI。如果沒有此令牌，工作流程只會推送分支。
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]`將該提交處的上游`src/` （`latest` =最新的`v*`標記）複製到`packages/ui-kit/src`中，應用單一允許的轉換（它從相對導入中刪除`.js`後綴），並將`packages/ui-kit/package.json`和`package-lock.json`中的工作區版本設定為上游版本。然後：檢視`git diff packages/ui-kit`，對兩個主題中的提供者、設定、組合、用法和端點進行視覺化傳遞，運行`npm run check:ui-kit-snapshot`和`npm run test:vitest:ui`，並使用上游變更日誌開啟PR 。
 

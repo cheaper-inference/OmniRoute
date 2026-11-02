@@ -54,7 +54,16 @@
 
 ## 5. Kitin yenilənməsi
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` də bərkidilmiş versiyanı yuxarı repo-nun ən yeni `v*` teqi ilə müqayisə edir və buraxılış bitdikdə sinxronizasiya əmrini çap edir. Həftəlik `UI Kit upstream watch` iş axını (`.github/workflows/ui-kit-upstream-watch.yml`) eyni yoxlamanı həyata keçirir və pin arxada olarkən bir izləmə məsələsini açıq saxlayır; yuxarı repo özəldir, ona görə də iş axınına `UI_KIT_READ_TOKEN` sirrində yalnız oxumaq üçün işarə lazımdır. O, yuxarı axını oxuya bilməyəndə (token yoxdur, işləməyi dayandırmış işarə və ya GitHub əlçatmazdır) qaçış yaşıl qalır, lakin xəbərdarlıq yazır və bir ayrı məsələni açıq saxlayır, bu da sonrakı qaçış yuxarı axını təkrar oxuya bildikdə özünü bağlayır.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` də bərkidilmiş versiyanı yuxarı repo-nun ən yeni `v*` teqi ilə müqayisə edir və buraxılış bitdikdə sinxronizasiya əmrini çap edir.
+
+Gündəlik `UI Kit upstream watch` iş axını (`.github/workflows/ui-kit-upstream-watch.yml`) eyni yoxlamanı həyata keçirir. Sancaq arxada olarkən, `scripts/ci/ui-kit-sync-pr.sh` `chore/ui-kit-sync-latest` yuvarlanan budaqda ən yüksək `release/vX.Y.Z` budağına qarşı bir sinxronizasiya PR açıq saxlayır. O, heç vaxt birləşmir: hər dəst buraxılışı hələ də yerli VPS üzərində vizual yoxlamaya ehtiyac duyur. Daha yeni buraxılış çıxdıqda filial yenidən qurulur və əks halda tək qalır. Əl ilə itələnən açıq PR üzərinə yazılmır və qoruyucunun bağlandığı, birləşdirilməmiş versiya üçün PR daha yeni buraxılışa qədər bağlı qalır.
+
+Heç bir PR açılmadıqda (hədəf buraxılış dondurulduqda, PR əl ilə itələdi, PR bağlandı və ya heç bir PR nişanı təyin olunmadı) iş axını səbəbini bildirən bir izləmə məsələsini açıq saxlayır.
+
+İş prosesi iki sirrdən istifadə edir:
+
+- `secrets.UI_KIT_READ_TOKEN`: şəxsi yuxarı repo üçün yalnız oxuna bilən işarədir. İş axını yuxarı axını oxuya bilmədikdə (token yoxdur, işləməyi dayandıran işarə və ya GitHub əlçatmazdır) qaçış yaşıl qalır, lakin xəbərdarlıq yazır və bir ayrı məsələni açıq saxlayır, bu da sonrakı qaçış yuxarı axını təkrar oxuya bildikdə özünü bağlayır.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: Məzmun və Çəkmə sorğuları yazma girişi olan bu depoda incə dənəli işarədir. Defolt `GITHUB_TOKEN` burada PRs yarada bilməz və onun açdığı PR CI işə salmaz. Bu işarə olmadan iş axını yalnız filialı itələyir.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` həmin öhdəçilikdə yuxarı axın `src/` (`latest` = ən yeni `v*` teq) `packages/ui-kit/src` ə kopyalayır, tək icazə verilən transformasiyanı tətbiq edir (nisbi idxaldan `.js` şəkilçisini çıxarır) və iş sahəsinin `packages/ui-kit/package.json` və `package-lock.json` versiyasını yuxarı axına təyin edir. Sonra: `git diff packages/ui-kit` nəzərdən keçirin, hər iki mövzuda provayderlər, parametrlər, kombinasiyalar, istifadə və son nöqtə haqqında vizual keçid edin, `npm run check:ui-kit-snapshot` və `npm run test:vitest:ui` işə salın və yuxarı axın dəyişiklik jurnalı ilə PR açın.
 

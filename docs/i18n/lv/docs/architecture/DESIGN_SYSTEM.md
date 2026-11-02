@@ -111,7 +111,16 @@ gen:icon-map` izdrukā lietotos nosaukumus, kuru kartē nav (`tests/unit/icon-ma
 
 ## 5. Komplekta atjaunināšana
 
-`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots. Iknedēļas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi un atstāj vienu izsekošanas problēmu atvērtu, kamēr tapa ir aiz muguras; augšupējais repo ir privāts, tāpēc darbplūsmai ir nepieciešams tikai lasāms pilnvaras `UI_KIT_READ_TOKEN` noslēpumā. Ja tas nevar nolasīt augšup pa straumi (nav pilnvaras, marķieris, kas pārtrauca darboties, vai GitHub nav sasniedzams), izpilde paliek zaļa, bet raksta brīdinājumu un atstāj atvērtu vienu atsevišķu problēmu, kas pati aizveras, tiklīdz vēlāk palaišana atkal var lasīt augšup pa straumi.
+`npm run check:ui-kit-upstream` salīdzina `packages/ui-kit/UPSTREAM.md` piesprausto versiju ar jaunāko iepriekšējā repo `v*` tagu un izdrukā sinhronizācijas komandu, kad laidiens ir izdots.
+
+Ikdienas `UI Kit upstream watch` darbplūsma (`.github/workflows/ui-kit-upstream-watch.yml`) veic to pašu pārbaudi. Kamēr tapa ir aiz muguras, `scripts/ci/ui-kit-sync-pr.sh` saglabā vienu sinhronizācijas PR atvērtu pret augstāko `release/vX.Y.Z` zaru, uz ritošā zara `chore/ui-kit-sync-latest`. Tas nekad nesaplūst: katram komplekta laidienam joprojām ir nepieciešama vietējā VPS vizuāla pārbaude. Filiāle tiek pārbūvēta, kad tiek izlaista jaunāka versija, un pretējā gadījumā tā tiek atstāta atsevišķi. Atvērts PR ar manuāli nospiestām saistībām netiek pārrakstīts, un PR versijai, kuru uzturētājs aizvērts nesapludināts, paliek aizvērts līdz jaunākam laidienam.
+
+Ja nevar atvērt nevienu PR (mērķa laidiens ir iesaldēts, PR ir nospiests ar roku, PR ir aizvērts vai nav iestatīts PR pilnvaras), darbplūsmā paliek atvērta viena izsekošanas problēma, kurā norādīts, kāpēc.
+
+Darbplūsmā tiek izmantoti divi noslēpumi:
+
+- `secrets.UI_KIT_READ_TOKEN`: tikai lasāms pilnvaras privātajam augšupējam repo. Ja darbplūsmu nevar nolasīt augšup pa straumi (nav marķiera, marķieris, kas pārtrauca darboties, vai GitHub nav sasniedzams), izpilde paliek zaļa, bet raksta brīdinājumu un paliek atvērta viena atsevišķa problēma, kas pati aizveras, tiklīdz vēlāk palaišana atkal var lasīt augšup.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smalks marķieris šajā repozitorijā ar satura un izvilkšanas pieprasījumiem rakstīšanas piekļuvei. Noklusējuma `GITHUB_TOKEN` nevar izveidot PRs šeit, un PR ko tas atvērts, neizraisītu CI. Bez šī marķiera darbplūsma tikai nospiež filiāli.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopē augšupvērsto `src/` šajā apstiprinājumā (`latest` = jaunākais `v*` tags) `packages/ui-kit/src`, lieto vienu atļauto transformāciju (atmet `.js` sufiksu no relatīvā importa) un iestata darbvietas versiju `packages/ui-kit/package.json` un `package-lock.json` uz augšupējo versiju. Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārskatiet pakalpojumu sniedzējus, iestatījumus, kombinācijas, lietojumu un beigu punktu abās tēmās, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un atveriet PR, izmantojot augšējo izmaiņu žurnālu.
 

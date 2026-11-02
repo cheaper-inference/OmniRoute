@@ -118,7 +118,16 @@
 
 ## 5. To'plamni yangilash
 
-`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ga biriktirilgan versiyani yuqoridagi reponing eng yangi `v*` yorlig'i bilan taqqoslaydi va reliz tugashi bilan sinxronlash buyrug'ini chop etadi. Haftalik `UI Kit upstream watch` ish jarayoni (`.github/workflows/ui-kit-upstream-watch.yml`) bir xil tekshirishni amalga oshiradi va pin orqasida turganda bitta kuzatuv muammosini ochiq qoldiradi; yuqoridagi repo shaxsiydir, shuning uchun ish jarayoni `UI_KIT_READ_TOKEN` sirida faqat o'qish uchun tokenga muhtoj. Agar u yuqoriga qarab oʻqiy olmasa (token yoʻq, ishlamay qolgan token yoki GitHub ulanib boʻlmasa) yugurish yashil boʻlib qoladi, lekin ogohlantirish yozadi va bitta alohida sonni ochiq qoldiradi, keyingi ishga tushirish yuqori oqimda yana oʻqishi mumkin boʻlgandan keyin oʻzini yopib qoʻyadi.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` ga biriktirilgan versiyani yuqoridagi reponing eng yangi `v*` yorlig'i bilan taqqoslaydi va reliz tugashi bilan sinxronlash buyrug'ini chop etadi.
+
+Kundalik `UI Kit upstream watch` ish jarayoni (`.github/workflows/ui-kit-upstream-watch.yml`) bir xil tekshiruvni amalga oshiradi. PIN orqada turganda, `scripts/ci/ui-kit-sync-pr.sh` bitta sinxronlash PR eng yuqori `release/vX.Y.Z` shoxiga, `chore/ui-kit-sync-latest` aylanma novdasiga qarshi ochiq holda ushlab turadi. U hech qachon birlashtirilmaydi: har bir to'plam hali ham mahalliy VPS ni vizual tekshirishga muhtoj. Yangi versiya chiqqanda filial qayta quriladi va aks holda yolg'iz qoladi. Qo'lda bosilgan majburiyatlari bo'lgan ochiq PR ustiga yozilmaydi va saqlovchi yopilgan birlashtirilmagan versiya uchun PR yangiroq versiyaga qadar yopiq qoladi.
+
+Hech qanday PR ochilmaganda (maqsadli versiya muzlatilgan, PR qo‘l bilan bosilgan, PR yopilgan yoki PR tokeni o‘rnatilmagan) ish jarayoni nima uchun ekanligini ko‘rsatadigan bitta kuzatuv muammosini ochiq qoldiradi.
+
+Ish jarayoni ikkita sirdan foydalanadi:
+
+- `secrets.UI_KIT_READ_TOKEN`: yuqori oqim repo uchun faqat o‘qish uchun mo‘ljallangan token. Ish oqimi yuqori oqimda oʻqiy olmasa (token yoʻq, ishlamay qolgan token yoki GitHub kirish imkoni boʻlmasa) ishga tushirish yashil boʻlib qoladi, lekin ogohlantirish yozadi va bitta alohida masala ochiq qoladi, bu esa keyingi ishga tushirish yuqori oqimni qayta oʻqishi mumkin boʻlgandan keyin oʻzini yopib qoʻyadi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: ushbu omborda Contents and Pull so'rovlarini yozish uchun ruxsatga ega nozik token. Standart `GITHUB_TOKEN` bu yerda PRs yarata olmaydi va u ochilgan PR CI ishga tushirmaydi. Ushbu belgisiz ish jarayoni faqat filialni itaradi.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` yuqoridagi `src/` o‘sha majburiyatda (`latest` = eng yangi `v*` tegi) `packages/ui-kit/src` ga ko‘chiradi, yagona ruxsat etilgan transformatsiyani qo‘llaydi (nisbiy importdan `.js` qo‘shimchasini olib tashlaydi) va ish maydonining `packages/ui-kit/package.json` va `package-lock.json` versiyasini yuqori oqimga o‘rnatadi. Keyin: `git diff packages/ui-kit` ni ko'rib chiqing, ikkala mavzuda provayderlar, sozlamalar, kombinatsiyalar, foydalanish va oxirgi nuqtani vizual tarzda o'tkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` ni ishga tushiring va yuqoridagi o'zgarishlar jurnali bilan PR oching.
 

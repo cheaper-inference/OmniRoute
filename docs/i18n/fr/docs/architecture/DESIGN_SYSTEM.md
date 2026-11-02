@@ -119,7 +119,16 @@
 
 ## 5. Mise à jour du kit
 
-`npm run check:ui-kit-upstream` compare la version épinglée dans `packages/ui-kit/UPSTREAM.md` avec la balise `v*` la plus récente du dépôt en amont et imprime la commande de synchronisation lorsqu'une version est publiée. Le flux de travail hebdomadaire `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) exécute la même vérification et maintient un problème de suivi ouvert pendant que la broche est en retard ; le dépôt en amont est privé, le workflow a donc besoin d'un jeton en lecture seule dans le secret `UI_KIT_READ_TOKEN`. Lorsqu'il ne peut pas lire en amont (pas de jeton, un jeton qui a cessé de fonctionner ou GitHub inaccessible), l'exécution reste verte mais écrit un avertissement et garde un problème distinct ouvert, qui se ferme une fois qu'une exécution ultérieure peut à nouveau lire en amont.
+`npm run check:ui-kit-upstream` compare la version épinglée dans `packages/ui-kit/UPSTREAM.md` avec la balise `v*` la plus récente du dépôt en amont et imprime la commande de synchronisation lorsqu'une version est publiée.
+
+Le flux de travail quotidien `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) exécute la même vérification. Pendant que la broche est derrière, `scripts/ci/ui-kit-sync-pr.sh` garde une synchronisation PR ouverte contre la branche `release/vX.Y.Z` la plus élevée, sur la branche roulante `chore/ui-kit-sync-latest`. Il ne fusionne jamais : chaque version de kit nécessite toujours une vérification visuelle sur le VPS local. La branche est reconstruite lorsqu'une version plus récente est disponible et laissée seule sinon. Un PR ouvert avec des commits poussés manuellement n'est pas écrasé, et un PR pour une version qu'un responsable a fermée sans fusion reste fermé jusqu'à une version plus récente.
+
+Lorsqu'aucun PR ne peut être ouvert (la version cible est gelée, le PR a des validations poussées à la main, le PR a été fermé ou aucun jeton PR n'est défini), le flux de travail garde un problème de suivi ouvert qui explique pourquoi.
+
+Le workflow utilise deux secrets :
+
+- `secrets.UI_KIT_READ_TOKEN`: un jeton en lecture seule pour le dépôt privé en amont. Lorsque le flux de travail ne peut pas lire en amont (pas de jeton, un jeton qui a cessé de fonctionner ou GitHub inaccessible), l'exécution reste verte mais écrit un avertissement et garde un problème distinct ouvert, qui se ferme une fois qu'une exécution ultérieure peut à nouveau lire en amont.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un jeton à granularité fine sur ce référentiel avec un accès en écriture au contenu et aux requêtes Pull. Le `GITHUB_TOKEN` par défaut ne peut pas créer PRs ici, et un PR ouvert ne déclencherait pas CI. Sans ce jeton, le workflow ne fait que pousser la branche.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copie le `src/` en amont au niveau de ce commit (`latest` = la balise `v*` la plus récente) dans `packages/ui-kit/src`, applique la seule transformation autorisée (il supprime le suffixe `.js` des importations relatives) et définit la version de l'espace de travail dans `packages/ui-kit/package.json` et `package-lock.json` sur celle en amont. Ensuite : examinez `git diff packages/ui-kit`, effectuez une transmission visuelle des fournisseurs, des paramètres, des combos, de l'utilisation et du point de terminaison dans les deux thèmes, exécutez `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui` et ouvrez le PR avec le journal des modifications en amont.
 

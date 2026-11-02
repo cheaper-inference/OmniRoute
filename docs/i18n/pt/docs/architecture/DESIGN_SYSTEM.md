@@ -116,7 +116,16 @@
 
 ## 5.º Atualizando o kit
 
-`npm run check:ui-kit-upstream` compara a versão fixada em `packages/ui-kit/UPSTREAM.md` com a tag `v*` mais recente do repositório upstream e imprime o comando de sincronização quando uma versão é lançada. O fluxo de trabalho semanal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) executa a mesma verificação e mantém um problema de rastreio aberto enquanto o pin está atrasado; o repositório upstream é privado, pelo que o fluxo de trabalho necessita de um token de leitura apenas no segredo `UI_KIT_READ_TOKEN`. Quando não é possível ler o upstream (sem token, um token que deixou de funcionar ou GitHub inacessível), a execução permanece verde, mas escreve um aviso e mantém aberto um problema separado, que se fecha quando uma execução posterior pode ler o upstream novamente.
+`npm run check:ui-kit-upstream` compara a versão fixada em `packages/ui-kit/UPSTREAM.md` com a tag `v*` mais recente do repositório upstream e imprime o comando de sincronização quando uma versão é lançada.
+
+O fluxo de trabalho diário `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) executa a mesma verificação. Enquanto o pino está atrás, `scripts/ci/ui-kit-sync-pr.sh` mantém uma sincronização PR aberta no ramo `release/vX.Y.Z` mais alto, no ramo rolante `chore/ui-kit-sync-latest`. Nunca se funde: cada lançamento de kit ainda precisa de uma verificação visual no VPS local. O branch é reconstruído quando é lançada uma versão mais recente e, caso contrário, é posto de lado. Um PR aberto com commits enviados manualmente não é sobrescrito, e um PR para uma versão que um mantenedor fechou sem fusão permanece fechado até uma versão mais recente.
+
+Quando nenhum PR pode ser aberto (a versão de destino está congelada, o PR tem commits enviados manualmente, o PR foi fechado ou nenhum token PR está definido), o fluxo de trabalho mantém um problema de rastreio aberto que diz porquê.
+
+O fluxo de trabalho utiliza dois segredos:
+
+- `secrets.UI_KIT_READ_TOKEN`: um token de leitura apenas para o repositório privado upstream. Quando o fluxo de trabalho não consegue ler o upstream (sem token, um token que deixou de funcionar ou GitHub inacessível), a execução permanece verde, mas escreve um aviso e mantém aberto um problema separado, que se fecha quando uma execução posterior pode ler o upstream novamente.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: um token refinado neste repositório com acesso de escrita de pedidos de conteúdo e pull. O `GITHUB_TOKEN` padrão não pode criar PRs aqui, e um PR aberto não dispararia CI. Sem este token, o workflow apenas envia push para a branch.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copia o `src/` upstream nesse commit (`latest` = a tag `v*` mais recente) em `packages/ui-kit/src`, aplica a única transformação permitida (elimina o sufixo `.js` das importações relativas) e define a versão do espaço de trabalho em `packages/ui-kit/package.json` e `package-lock.json` para o upstream. De seguida: reveja `git diff packages/ui-kit`, faça uma passagem visual sobre os fornecedores, configurações, combos, utilização e endpoint em ambos os temas, execute `npm run check:ui-kit-snapshot` e `npm run test:vitest:ui` e abra o PR com o changelog upstream.
 

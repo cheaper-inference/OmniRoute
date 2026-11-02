@@ -118,7 +118,16 @@
 
 ## 5. Aktualizácia súpravy
 
-`npm run check:ui-kit-upstream` porovná verziu pripnutú v `packages/ui-kit/UPSTREAM.md` s najnovšou značkou `v*` upstream repo a vypíše príkaz synchronizácie, keď vyjde vydanie. Týždenný pracovný postup `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) vykonáva rovnakú kontrolu a udržiava jeden problém so sledovaním otvorený, kým je špendlík pozadu; upstream repo je súkromný, takže pracovný tok potrebuje token iba na čítanie v tajomstve `UI_KIT_READ_TOKEN`. Keď nemôže čítať upstream (žiadny token, token, ktorý prestal fungovať alebo GitHub nedostupné), cyklus zostane zelený, ale zapíše varovanie a ponechá otvorený jeden samostatný problém, ktorý sa sám zatvorí, keď neskôr bude môcť znova čítať proti prúdu.
+`npm run check:ui-kit-upstream` porovná verziu pripnutú v `packages/ui-kit/UPSTREAM.md` s najnovšou značkou `v*` upstream repo a vypíše príkaz synchronizácie, keď vyjde vydanie.
+
+Denný pracovný tok `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) vykonáva rovnakú kontrolu. Kým je kolík za, `scripts/ci/ui-kit-sync-pr.sh` ponecháva jeden synchronizačný PR otvorený proti najvyššej vetve `release/vX.Y.Z`, na pohyblivej vetve `chore/ui-kit-sync-latest`. Nikdy sa nezlúči: každé vydanie súpravy stále potrebuje vizuálnu kontrolu na miestnom VPS. Pobočka je prestavaná, keď vyjde novšie vydanie a inak sa ponechá sama. Otvorené PR s odovzdaním odovzdaným ručne sa neprepíše a PR pre verziu, ktorú správca zatvoril nezlúčenú, zostane zatvorená až do novšieho vydania.
+
+Keď nie je možné otvoriť žiadne PR (cieľové vydanie je zmrazené, PR sa odovzdali ručne, PR bolo zatvorené alebo nie je nastavený žiadny token PR ), pracovný postup ponecháva jeden problém sledovania otvorený, ktorý hovorí prečo.
+
+Pracovný postup používa dve tajomstvá:
+
+- `secrets.UI_KIT_READ_TOKEN`: token len na čítanie pre súkromné upstream repo. Keď pracovný tok nemôže čítať upstream (žiadny token, token, ktorý prestal fungovať alebo GitHub nedostupný), spustenie zostane zelené, ale zapíše varovanie a ponechá otvorený jeden samostatný problém, ktorý sa sám zatvorí, keď neskôr bude môcť znova čítať proti prúdu.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: jemnozrnný token v tomto úložisku s požiadavkami Contents and Pull na zápis. Predvolené `GITHUB_TOKEN` tu nemôže vytvoriť PRs a PR ktoré otvorí, nespustí CI. Bez tohto tokenu pracovný postup iba tlačí vetvu.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` skopíruje upstream `src/` pri tomto odovzdaní (`latest` = najnovšia značka `v*` ) do `packages/ui-kit/src`, použije jednu povolenú transformáciu (vypustí príponu `.js` z relatívnych importov) a nastaví verziu pracovného priestoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Potom: skontrolujte `git diff packages/ui-kit`, urobte vizuálny prechod na poskytovateľov, nastavenia, kombá, použitie a koncový bod v oboch témach, spustite `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otvorte PR pomocou upstream changelogu.
 

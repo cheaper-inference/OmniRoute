@@ -56,7 +56,16 @@
 
 ## 5. Komplekti värskendamine
 
-`npm run check:ui-kit-upstream` võrdleb `packages/ui-kit/UPSTREAM.md` kinnitatud versiooni ülesvoolu repo uusima `v*` sildiga ja prindib sünkroonimiskäsu, kui väljalase on välja antud. Iganädalane `UI Kit upstream watch` töövoog (`.github/workflows/ui-kit-upstream-watch.yml`) teostab sama kontrolli ja hoiab ühe jälgimisprobleemi avatuna, kui nööpnõel on taga; ülesvoolu repo on privaatne, nii et töövoog vajab `UI_KIT_READ_TOKEN` saladuses kirjutuskaitstud luba. Kui see ei saa ülesvoolu lugeda (ei ole luba, token, mis lakkas töötamast või GitHub pole kättesaamatu), jääb käitamine roheliseks, kuid kirjutab hoiatuse ja jätab lahti ühe eraldi probleemi, mis sulgub, kui hilisem käitamine saab uuesti ülesvoolu lugeda.
+`npm run check:ui-kit-upstream` võrdleb `packages/ui-kit/UPSTREAM.md` kinnitatud versiooni ülesvoolu repo uusima `v*` sildiga ja prindib sünkroonimiskäsu, kui väljalase on välja antud.
+
+Igapäevane `UI Kit upstream watch` töövoog (`.github/workflows/ui-kit-upstream-watch.yml`) teostab sama kontrolli. Kui tihvt on taga, hoiab `scripts/ci/ui-kit-sync-pr.sh` ühe sünkroonimise PR avatud kõrgeima `release/vX.Y.Z` haruga, veereval harul `chore/ui-kit-sync-latest`. See ei sulandu kunagi: iga komplekti väljalase vajab siiski kohaliku VPS visuaalset kontrolli. Filiaal ehitatakse uuesti üles, kui uuem väljalase on välja antud ja muidu jäetakse üksi. Avatud PR käsitsi lükatud tagatistega ei kirjutata üle ja PR versiooni jaoks, mille hooldaja suleb ühendamata, jääb suletuks kuni uuema väljalaskeni.
+
+Kui ühtki PR ei saa avada (sihtväljalase on külmutatud, PR on käsitsi lükatud, PR suleti või PR -luba pole määratud), jääb töövoog avatuks ühe jälgimisprobleemi, mis ütleb põhjuse.
+
+Töövoog kasutab kahte saladust:
+
+- `secrets.UI_KIT_READ_TOKEN`: kirjutuskaitstud luba privaatse ülesvoolu repo jaoks. Kui töövoog ei saa ülesvoolu lugeda (ei ole luba, token, mis lakkas töötamast või GitHub pole kättesaamatu), jääb käitamine roheliseks, kuid kirjutab hoiatuse ja jätab lahti ühe eraldi probleemi, mis sulgub, kui hilisem käitamine saab uuesti ülesvoolu lugeda.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: peeneteraline märk selles hoidlas koos sisu- ja tõmbetaotlustega. Vaikimisi `GITHUB_TOKEN` ei saa siin PRs luua ja selle avatud PR ei käivita CI. Ilma selle märgita lükkab töövoog ainult haru.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopeerib ülesvoolu `src/` sellel kinnitusel (`latest` = uusim `v*` silt) `packages/ui-kit/src`, rakendab ühe lubatud teisenduse (see jätab suhtelisest impordist välja `.js` järelliide) ja seab tööruumi versiooni `packages/ui-kit/package.json` ja `package-lock.json` ülesvoolu versiooniks. Seejärel vaadake üle `git diff packages/ui-kit`, tehke visuaalne ülekanne mõlema teema pakkujate, sätete, kombinatsioonide, kasutuse ja lõpp-punkti kohta, käivitage `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning avage PR ülesvoolu muudatuste logiga.
 

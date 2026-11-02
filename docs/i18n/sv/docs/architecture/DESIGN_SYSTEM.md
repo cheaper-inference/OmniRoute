@@ -119,7 +119,16 @@
 
 ## 5. Uppdatera satsen
 
-`npm run check:ui-kit-upstream` jämför versionen som är fäst i `packages/ui-kit/UPSTREAM.md` med den senaste `v*` taggen i uppströmsrepo och skriver ut synkkommandot när en release är ute. Det veckovisa `UI Kit upstream watch` -arbetsflödet (`.github/workflows/ui-kit-upstream-watch.yml`) kör samma kontroll och håller ett spårningsproblem öppet medan stiftet är bakom; uppströmsrepo är privat, så arbetsflödet behöver en skrivskyddad token i `UI_KIT_READ_TOKEN` hemligheten. När den inte kan läsa uppströms (ingen token, en token som slutat fungera eller GitHub oåtkomlig) förblir körningen grön men skriver en varning och håller en separat fråga öppen, som stänger sig själv när en senare körning kan läsas uppströms igen.
+`npm run check:ui-kit-upstream` jämför versionen som är fäst i `packages/ui-kit/UPSTREAM.md` med den senaste `v*` taggen i uppströmsrepo och skriver ut synkkommandot när en release är ute.
+
+Det dagliga `UI Kit upstream watch` -arbetsflödet (`.github/workflows/ui-kit-upstream-watch.yml`) kör samma kontroll. Medan stiftet är bakom, håller `scripts/ci/ui-kit-sync-pr.sh` en sync PR öppen mot den högsta `release/vX.Y.Z` -grenen, på den rullande grenen `chore/ui-kit-sync-latest`. Det går aldrig samman: varje kitversion behöver fortfarande en visuell kontroll av den lokala VPS. Grenen byggs om när en nyare release är ute och lämnas ifred annars. En öppen PR med commits som skjuts för hand skrivs inte över, och en PR för en version som en underhållare stängde osammanfogad förblir stängd tills en nyare version.
+
+När ingen PR kan öppnas (målfrigivningen är fryst, PR har commits som skjutits för hand, PR stängdes eller ingen PR token är inställd) håller arbetsflödet ett spårningsproblem öppet som säger varför.
+
+Arbetsflödet använder två hemligheter:
+
+- `secrets.UI_KIT_READ_TOKEN`: en skrivskyddad token för den privata uppströmsrepo. När arbetsflödet inte kan läsa uppströms (ingen token, en token som slutat fungera eller GitHub oåtkomlig) förblir körningen grön men skriver en varning och håller ett separat problem öppet, som stänger sig själv när en senare körning kan läsas uppströms igen.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: en finkornig token på det här arkivet med skrivåtkomst för innehåll och drag. Standard `GITHUB_TOKEN` kan inte skapa PRs här, och en PR som den öppnade skulle inte trigga CI. Utan denna token driver arbetsflödet bara grenen.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopierar uppströms- `src/` vid den commit (`latest` = den senaste `v*` taggen) till `packages/ui-kit/src`, tillämpar den enda tillåtna transformationen (den tar bort `.js` suffixet från relativa importer) och ställer in arbetsyteversionen i `packages/ui-kit/package.json` och `package-lock.json` till den uppströms. Sedan: granska `git diff packages/ui-kit`, gör ett visuellt pass på leverantörer, inställningar, kombinationer, användning och slutpunkt i båda teman, kör `npm run check:ui-kit-snapshot` och `npm run test:vitest:ui` och öppna PR med uppströmsändringsloggen.
 

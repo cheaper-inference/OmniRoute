@@ -118,7 +118,16 @@
 
 ## 5. Memperbarui kit
 
-`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar. Alur kerja `UI Kit upstream watch` mingguan (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama dan membiarkan satu masalah pelacakan tetap terbuka saat pin berada di belakang; repo upstream bersifat pribadi, sehingga alur kerja memerlukan token baca-saja dalam rahasia `UI_KIT_READ_TOKEN`. Ketika tidak dapat membaca upstream (tidak ada token, token yang berhenti berfungsi, atau GitHub tidak dapat dijangkau) proses tetap hijau tetapi menulis peringatan dan membiarkan satu masalah terpisah tetap terbuka, yang akan menutup sendiri setelah proses selanjutnya dapat membaca upstream lagi.
+`npm run check:ui-kit-upstream` membandingkan versi yang disematkan di `packages/ui-kit/UPSTREAM.md` dengan tag `v*` terbaru dari repo upstream dan mencetak perintah sinkronisasi ketika rilis keluar.
+
+Alur kerja `UI Kit upstream watch` harian (`.github/workflows/ui-kit-upstream-watch.yml`) menjalankan pemeriksaan yang sama. Saat pin berada di belakang, `scripts/ci/ui-kit-sync-pr.sh` menjaga satu sinkronisasi PR tetap terbuka terhadap cabang `release/vX.Y.Z` tertinggi, pada cabang bergulir `chore/ui-kit-sync-latest`. Itu tidak pernah menyatu: setiap rilis kit masih memerlukan pemeriksaan visual pada VPS lokal. Cabang dibangun kembali ketika rilis yang lebih baru keluar dan dibiarkan begitu saja. PR terbuka dengan komit yang didorong dengan tangan tidak akan ditimpa, dan PR untuk versi yang ditutup oleh pengelola, tidak digabungkan, tetap ditutup hingga rilis yang lebih baru.
+
+Ketika tidak ada PR yang dapat dibuka (rilis target dibekukan, PR telah melakukan commit dengan tangan, PR ditutup, atau tidak ada token PR yang disetel) alur kerja membiarkan satu masalah pelacakan tetap terbuka dan menjelaskan alasannya.
+
+Alur kerjanya menggunakan dua rahasia:
+
+- `secrets.UI_KIT_READ_TOKEN`: token read-only untuk repo upstream pribadi. Ketika alur kerja tidak dapat membaca upstream (tidak ada token, token yang berhenti bekerja, atau GitHub tidak dapat dijangkau), proses tetap hijau namun menulis peringatan dan membiarkan satu masalah terpisah tetap terbuka, yang akan menutup sendiri setelah proses berikutnya dapat membaca upstream lagi.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: token terperinci pada repositori ini dengan Konten dan permintaan Tarik akses tulis. `GITHUB_TOKEN` default tidak dapat membuat PRs di sini, dan PR yang dibuka tidak akan memicu CI. Tanpa token ini, alur kerja hanya mendorong cabang.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` menyalin `src/` upstream pada commit tersebut (`latest` = tag `v*` terbaru) ke `packages/ui-kit/src`, menerapkan transformasi tunggal yang diizinkan (ini menghilangkan akhiran `.js` dari impor relatif), dan menyetel versi ruang kerja di `packages/ui-kit/package.json` dan `package-lock.json` ke versi upstream. Kemudian: tinjau `git diff packages/ui-kit`, lakukan penyampaian visual pada penyedia, pengaturan, kombo, penggunaan dan titik akhir di kedua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, dan buka PR dengan log perubahan upstream.
 

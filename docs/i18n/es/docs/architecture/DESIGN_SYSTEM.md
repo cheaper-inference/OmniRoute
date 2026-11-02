@@ -124,7 +124,16 @@
 
 ## 5. Actualización del kit
 
-`npm run check:ui-kit-upstream` compara la versión fijada en `packages/ui-kit/UPSTREAM.md` con la etiqueta `v*` más nueva del repositorio ascendente e imprime el comando de sincronización cuando sale una versión. El flujo de trabajo semanal `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) ejecuta la misma verificación y mantiene abierto un problema de seguimiento mientras el pin está detrás; el repositorio ascendente es privado, por lo que el flujo de trabajo necesita un token de solo lectura en el secreto `UI_KIT_READ_TOKEN`. Cuando no puede leer en sentido ascendente (sin token, un token que dejó de funcionar o GitHub inalcanzable), la ejecución permanece en verde pero escribe una advertencia y mantiene abierto un problema separado, que se cierra una vez que una ejecución posterior puede leer en sentido ascendente nuevamente.
+`npm run check:ui-kit-upstream` compara la versión fijada en `packages/ui-kit/UPSTREAM.md` con la etiqueta `v*` más nueva del repositorio ascendente e imprime el comando de sincronización cuando sale una versión.
+
+El flujo de trabajo diario `UI Kit upstream watch` (`.github/workflows/ui-kit-upstream-watch.yml`) ejecuta la misma verificación. Mientras el pin está detrás, `scripts/ci/ui-kit-sync-pr.sh` mantiene un PR de sincronización abierto contra la rama `release/vX.Y.Z` más alta, en la rama rodante `chore/ui-kit-sync-latest`. Nunca se fusiona: cada lanzamiento de kit aún necesita una verificación visual en el VPS local. La rama se reconstruye cuando sale una versión más reciente y, de lo contrario, se deja sola. Un PR abierto con confirmaciones enviadas manualmente no se sobrescribe, y un PR para una versión que un mantenedor cerró sin fusionar permanece cerrado hasta una versión más reciente.
+
+Cuando no se puede abrir ningún PR (la versión de destino está congelada, el PR tiene confirmaciones enviadas manualmente, el PR se cerró o no se establece ningún token PR ), el flujo de trabajo mantiene abierto un problema de seguimiento que indica el motivo.
+
+El flujo de trabajo utiliza dos secretos:
+
+- `secrets.UI_KIT_READ_TOKEN`: un token de solo lectura para el repositorio ascendente privado. Cuando el flujo de trabajo no puede leer en sentido ascendente (sin token, un token que dejó de funcionar o GitHub inaccesible), la ejecución permanece verde pero escribe una advertencia y mantiene abierto un problema separado, que se cierra solo una vez que una ejecución posterior puede leer en sentido ascendente nuevamente.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: un token detallado en este repositorio con acceso de escritura a contenidos y solicitudes de extracción. El `GITHUB_TOKEN` predeterminado no puede crear PRs aquí, y un PR que abrió no activaría CI. Sin este token, el flujo de trabajo solo impulsa la rama.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` copia el `src/` ascendente en esa confirmación (`latest` = la etiqueta `v*` más nueva) en `packages/ui-kit/src`, aplica la única transformación permitida (elimina el sufijo `.js` de las importaciones relativas) y establece la versión del espacio de trabajo en `packages/ui-kit/package.json` y `package-lock.json` en la versión ascendente. Luego: revise `git diff packages/ui-kit`, haga un repaso visual de los proveedores, configuraciones, combinaciones, uso y punto final en ambos temas, ejecute `npm run check:ui-kit-snapshot` y `npm run test:vitest:ui`, y abra PR con el registro de cambios ascendente.
 

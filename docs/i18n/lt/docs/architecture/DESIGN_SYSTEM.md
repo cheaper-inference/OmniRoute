@@ -120,7 +120,16 @@
 
 ## 5. Komplekto atnaujinimas
 
-`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas. Savaitinė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą ir palieka vieną sekimo problemą atidarytą, kol kaištis yra už nugaros; prieš srovę esantis atpirkimas yra privatus, todėl darbo eigai reikia tik skaitymo prieigos rakto `UI_KIT_READ_TOKEN` paslaptyje. Kai jis negali nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), paleidimas lieka žalias, bet įrašo įspėjimą ir palieka atvirą atskirą problemą, kuri užsidaro, kai vėlesnis paleidimas vėl gali nuskaityti prieš srovę.
+`npm run check:ui-kit-upstream` lygina `packages/ui-kit/UPSTREAM.md` prisegtą versiją su naujausia `v*` žyma prieš srovę ir išspausdina sinchronizavimo komandą, kai išleidžiamas leidimas.
+
+Kasdieninė `UI Kit upstream watch` darbo eiga (`.github/workflows/ui-kit-upstream-watch.yml`) atlieka tą patį patikrinimą. Kol kaištis yra už nugaros, `scripts/ci/ui-kit-sync-pr.sh` išlaiko vieną sinchronizavimo PR atvirktį prieš aukščiausią `release/vX.Y.Z` šaką, slenkančią atšaką `chore/ui-kit-sync-latest`. Jis niekada nesusilieja: kiekvieną rinkinio leidimą vis tiek reikia vizualiai patikrinti vietinį VPS. Filialas atkuriamas, kai išleidžiamas naujesnis leidimas, o kitu atveju paliekama ramybėje. Atviras PR su įpareigojimais, stumiamais ranka, neperrašomas, o PR versijai, kurią prižiūrėtojas uždarė nesujungęs, lieka uždarytas iki naujesnės leidimo.
+
+Kai negalima atidaryti jokios PR (tikslinis leidimas užšaldytas, PR įvykdymai nustumiami ranka, PR buvo uždarytas arba nenustatytas PR prieigos raktas), darbo eiga lieka atvira viena sekimo problema, kurioje nurodoma, kodėl.
+
+Darbo eiga naudoja dvi paslaptis:
+
+- `secrets.UI_KIT_READ_TOKEN`: tik skaitomas prieigos raktas, skirtas privačiam atpirkimui prieš srautą. Kai darbo eigos nepavyksta nuskaityti prieš srovę (nėra prieigos rakto, nustojo veikti arba GitHub nepasiekiamas), vykdymas lieka žalias, bet įrašomas įspėjimas ir lieka atvira viena atskira problema, kuri užsidaro, kai vėlesnis paleidimas gali vėl nuskaityti prieš srovę.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: smulkus tokenas šioje saugykloje su turinio ir ištraukimo užklausomis rašyti. Numatytasis `GITHUB_TOKEN` negali sukurti PRs čia, o atidarytas PR nesuaktyvins CI. Be šio prieigos rakto darbo eiga tik stumia šaką.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` nukopijuoja prieš srovę esantį `src/` to įpareigojimo metu (`latest` = naujausia `v*` žyma) į `packages/ui-kit/src`, taiko vieną leistiną transformaciją (atmeta `.js` priesagą iš santykinių importų) ir nustato darbo srities versiją `packages/ui-kit/package.json` ir `package-lock.json` į ankstesnę. Tada: peržiūrėkite `git diff packages/ui-kit`, atlikite abiejų temų teikėjų, nustatymų, kombinacijų, naudojimo ir galutinio taško vaizdinį perdavimą, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` ir atidarykite PR naudodami išankstinį pakeitimų žurnalą.
 

@@ -117,7 +117,16 @@
 
 ## 5. Ažuriranje kompleta
 
-`npm run check:ui-kit-upstream` upoređuje verziju zakačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repo-a i ispisuje naredbu za sinhronizaciju kada izdanje izađe. Sedmični `UI Kit upstream watch` radni tok (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru i drži jedan problem praćenja otvorenim dok je pin iza; upstream repo je privatan, tako da je za radni tok potreban token samo za čitanje u `UI_KIT_READ_TOKEN` tajni. Kada ne može čitati uzvodno (bez tokena, token koji je prestao raditi ili GitHub nedostupan), izvođenje ostaje zeleno, ali piše upozorenje i drži jedno zasebno pitanje otvorenim, koje se zatvara jednom kada kasnije pokretanje može ponovo čitati uzvodno.
+`npm run check:ui-kit-upstream` upoređuje verziju zakačenu u `packages/ui-kit/UPSTREAM.md` s najnovijom `v*` oznakom uzvodnog repo-a i ispisuje naredbu za sinhronizaciju kada izdanje izađe.
+
+Dnevni `UI Kit upstream watch` radni tok (`.github/workflows/ui-kit-upstream-watch.yml`) pokreće istu provjeru. Dok je pin iza, `scripts/ci/ui-kit-sync-pr.sh` drži jednu sinkronizaciju PR otvorenom prema najvišoj `release/vX.Y.Z` grani, na kotrljajućoj grani `chore/ui-kit-sync-latest`. Nikada se ne spaja: svako izdanje kompleta još uvijek treba vizualnu provjeru lokalnog VPS. Grana se obnavlja kada izađe novije izdanje, a inače se ostavlja sama. Otvoreni PR sa urezivanja gurnutim rukom se ne prepisuje, a PR za verziju u kojoj održavatelj zatvoren nespojen ostaje zatvoren do novijeg izdanja.
+
+Kada se PR ne može otvoriti (ciljno izdanje je zamrznuto, PR ima urezivanje gurnuto ručno, PR je zatvoren ili nije postavljen PR token), tok posla drži otvoren jedan problem praćenja koji govori zašto.
+
+Tok posla koristi dvije tajne:
+
+- `secrets.UI_KIT_READ_TOKEN`: token samo za čitanje za privatni upstream repo. Kada tok posla ne može čitati uzvodno (bez tokena, token koji je prestao raditi ili GitHub nedostupan), izvođenje ostaje zeleno, ali piše upozorenje i drži jedno zasebno pitanje otvorenim, koje se zatvara jednom kada kasnije pokretanje može ponovo čitati uzvodno.
+- `secrets.UI_KIT_SYNC_PR_TOKEN`: fino zrnati token na ovom spremištu sa sadržajem i pristupom za povlačenje zahtjeva za pisanje. Zadani `GITHUB_TOKEN` ne može stvoriti PRs ovdje, a PR je otvorio ne bi pokrenuo CI. Bez ovog tokena tok posla samo gura granu.
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` kopira uzvodni `src/` kod tog urezivanja (`latest` = najnoviji `v*` tag) u `packages/ui-kit/src`, primjenjuje jednu dozvoljenu transformaciju (ispušta `.js` sufiks iz relativnog uvoza) i postavlja verziju radnog prostora u `packages/ui-kit/package.json` i `package-lock.json` na onu uzvodnu. Zatim: pregledajte `git diff packages/ui-kit`, izvršite vizualni pregled dobavljača, postavki, kombinacija, upotrebe i krajnje točke u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` i otvorite PR sa upstream dnevnikom promjena.
 
