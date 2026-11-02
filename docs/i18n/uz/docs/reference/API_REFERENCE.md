@@ -784,48 +784,40 @@ bekor qilish va yaratishdagi `input_file_id` tekshiruvi). `GET /v1/batches` anon
 
 ---
 
-## Qidiruv API’si
+## Qidiruv API
 
-Veb/qidiruv provayderlari abstraksiyasi (Tavily, Brave, Exa, Serper va boshqalar).
+Web/search provayderi abstraktsiyasi (Tavily, Brave, Exa, Serper va boshqalar).
 
-| Metod | Yo‘l                   | Tavsif                                                                                                                        |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Sozlangan qidiruv provayderlari va ularning imkoniyatlari ro‘yxati                                                            |
-| POST  | `/v1/search`           | Qidiruv so‘rovini bajaradi — so‘rov tanasi `v1SearchSchema` orqali tekshiriladi, keshlash/birlashtirishni qo‘llab-quvvatlaydi |
-| GET   | `/v1/search/analytics` | Har bir provayder bo‘yicha natija/kechikish/kesh statistikasi                                                                 |
+| Usul | Yo'l                   | Tavsif                                                                                                                      |
+| ---- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | Konfiguratsiya qilingan qidiruv provayderlarining + imkoniyatlarini ro'yxatlang                                             |
+| POST | `/v1/search`           | `v1SearchSchema` tomonidan tasdiqlangan — tanasi qidiruv so'rovini ishga tushiring , caching/coalescing qo'llab-quvvatlaydi |
+| GET  | `/v1/search/analytics` | Har bir provayder bo'yicha hit/latency/cache statistikasi                                                                   |
 
-**Autentifikatsiya:** Bearer API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali qo‘llanadi.
+**Muallif:** Tashuvchi API kaliti (`extractApiKey` + `isValidApiKey`). Qidiruv siyosati `enforceApiKeyPolicy` orqali amalga oshiriladi.
 
 ### Exa va Tavily `provider_options`
 
-Exa va Tavily provayderga xos maydonlarni nomlar makoni bilan ajratilgan to‘plamdan o‘qiydi:
-`provider_options.exa` (yoki `provider_options["exa-search"]`) va `provider_options.tavily`
-(yoki `provider_options["tavily-search"]`). Faqat quyidagi kalitlar uzatiladi. Ularning har biri
-`open-sse/handlers/search/providerOptionsPassthrough.ts` ichidagi o‘z Zod sxemasi orqali
-tekshiriladi va noto‘g‘ri turdagi kalit olib tashlanadi. Boshqa har qanday kalit, jumladan
-autentifikatsiya, bazaviy URL, `stream` va `outputSchema` e’tiborsiz qoldiriladi. Boshqa
-provayderlar ishlatadigan yassi kalitlar (`cx`, `depth`, ...) avvalgidek ishlaydi.
+Exa va Tavily provayderga xos maydonlarni nomlar boʻshligʻidagi sumkadan oʻqiydi: `provider_options.exa` (yoki `provider_options["exa-search"]`) va `provider_options.tavily` (yoki `provider_options["tavily-search"]`). Faqat quyidagi tugmalar yo'naltiriladi. Ularning har biri `open-sse/handlers/search/providerOptionsPassthrough.ts` da o'zining Zod sxemasi bilan tekshiriladi va noto'g'ri turdagi kalit tushiriladi. Boshqa har qanday kalit e'tiborga olinmaydi, jumladan auth, base URL, `stream` va `outputSchema`. Boshqa provayderlar (`cx`, `depth`, ...) foydalanadigan tekis kalitlar avvalgidek ishlaydi.
 
-| Provayder | Yuqori darajadagi maydonlar                                                                                                                                                                                                                                                                                                                                               | Ichki                                                                                                                                                                     |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (yassi sodda qiymatlar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                        | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` ustiga birlashtiriladi |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                         |
+| Provayder | Yuqori darajadagi maydonlar                                                                                                                                                                                                                                                                                                                                               | Oʻrnatilgan                                                                                                                                     |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (tekis ibtidoiylar), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` standart `{ text: true, highlights: true }` ustida birlashtirildi |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-Umumiy maydonlar har doim ustunlikka ega: `query`, `max_results`, `filters` (domenlar), `country`
-va `search_type`dan hosil qilingan topic. Exa’da `search_type: "news"` qiymati
-`category: "news"`ni saqlab qoladi. Tavily `search_type: "finance"`ni ham qabul qiladi
-(`topic: "finance"`).
+Umumiy maydonlar har doim g'alaba qozonadi: `query`, `max_results`, `filters` (domenlar), `country` va `search_type` dan olingan mavzu. Exa da `search_type: "news"` `category: "news"` saqlaydi. Tavily `search_type: "finance"` (`topic: "finance"`) ni ham qabul qiladi.
 
-Umumiy `time_range` endi ikkala provayderga ham uzatiladi: Exa `startPublishedDate`ni (ISO
-vaqt belgisi), Tavily esa `start_date`ni (`YYYY-MM-DD`) oladi. `provider_options` ichida
-aniq ko‘rsatilgan sana moslashtirilgan sana o‘rnini bosadi.
+Firecrawl qidiruv narxi 10 ta qaytarilgan natijadan iborat boshlangan blok uchun, har bir qo‘ng‘iroq uchun $0,002 (2 kredit) va kamida bitta blok ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ) miqdorida qayd etiladi: 11 ta natija $0,004 turadi.
 
-Exa natijalari `id`, `highlight_scores`, `summary`, `subpages`, `entities` va `extras`ni
-`provider_raw` ichida saqlab qoladi. Tavily natijalari `images` va `favicon`ni saqlab qoladi.
+Umumiy `time_range` endi ikkala provayderga ham yetib boradi: Exa `startPublishedDate` (ISO vaqt tamg‘asi) va Tavily `start_date` (`YYYY-MM-DD`) oladi. `provider_options` -dagi aniq sana xaritadagini bekor qiladi.
 
-Xarajatlarni hisobga olish hanuz `costPerQuery` yassi reyestri orqali amalga oshiriladi.
-Tavily `search_depth: "advanced"` uchun har bir chaqiruvda ko‘proq kredit hisoblaydi,
-ammo bu farq `usage.search_cost_usd`da aks ettirilmaydi.
+Exa natijalari `id`, `highlight_scores`, `summary`, `subpages`, `entities` `extras` ni `provider_raw` da saqlaydi. Tavily natijalari `images` va `favicon` saqlaydi.
+
+Linkup qidiruv narxi `depth` `fast` va `standard` uchun $0,005 va `deep` uchun $0,05 ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` dan keladimi yoki ulanish sozlamalaridan qatʼiy nazar qayd etiladi.
+
+Exa `type: "lite"` (Exa 3.0) kichikroq maydonlar to'plamini qabul qiladi va boshqa maydon o'rnatilganda butun so'rovni rad etadi. Lite uchun `additionalQueries`, `systemPrompt` va `text` va `highlights` dan tashqari barcha `contents` tugmalari qo'ng'iroqdan oldin tushiriladi. Eskirgan `subpages`, `subpageTarget`, `highlights.numSentences` va `highlights.highlightsPerUrl` endi boshqa uzatilmaydi.
+
+Xarajatlarni hisobga olish `costPerQuery` tekis registrdir, Exa-dan tashqari, Exa-ning o'z narxiga amal qiladi: `auto` (va eski `fast`) uchun har bir qo'ng'iroq uchun $0,007 yoki `lite` (va eski `instant`) uchun $0,004, 10 ta natijani qamrab oladi; Har bir keyingi natija uchun $0,001; va `contents.summary` o'rnatilganda qaytarilgan natija uchun $0,001. Tavily `search_depth` `basic`, `fast` va `ultra-fast` uchun 1 kredit ($0,008) va `advanced` ( [Tavily API kreditlari](https://docs.tavily.com/documentation/api-credits) ) uchun 2 kredit ($0,016) da qayd etilgan. Tavily ilg'or darajaga ko'taradigan `auto_parameters: true` bilan qo'ng'iroq hali ham 1 kreditda qayd etiladi.
 
 ---
 

@@ -1,0 +1,1 @@
+- **fix(stream):** a stream interrupted after content is delivered ends with its explicit failure terminal instead of a silent truncation ([#18094](https://github.com/cheaper-inference/OmniRoute/pull/18094)) — thanks @maxmad64bis
