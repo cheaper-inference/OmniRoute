@@ -547,7 +547,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          ref: ${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha }}
+          ref: ${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}
           fetch-depth: 0
           persist-credentials: false
 

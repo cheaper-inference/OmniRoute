@@ -124,6 +124,16 @@ test("main-green consumes hosted suites run on main's resolved commit", () => {
   );
 });
 
+test("main-green stays on main when resolve-main produced no commit", () => {
+  const steps = workflow.jobs["main-green"].steps ?? [];
+  const checkout = steps.find((s) => s.uses?.startsWith("actions/checkout@"));
+  // An empty ref makes actions/checkout use the workflow's own ref, i.e. the release tip.
+  assert.equal(
+    checkout?.with?.ref,
+    "${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}"
+  );
+});
+
 test("a suite job reports its name, exit code and first failure line", () => {
   assert.deepEqual(suiteResult("unit-3", "0", "ℹ pass 10"), {
     name: "unit-3",
