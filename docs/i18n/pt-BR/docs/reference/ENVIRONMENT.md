@@ -1423,6 +1423,19 @@ Permite que os usuários relatem problemas diretamente pelo Dashboard.
 
 ---
 
+## Manter o serviço ativo no plano gratuito do Render
+
+O Render coloca um serviço web gratuito em repouso após 15 minutos sem tráfego de entrada ([limites dos serviços gratuitos](https://render.com/docs/free)). O inicializador standalone (`scripts/dev/run-standalone.mjs`, usado pela imagem Docker) pode fazer requisições periódicas à URL pública do serviço. O envio periódico fica desativado sem uma URL, registra a ativação e, depois, apenas as mudanças no resultado das requisições. As requisições não seguem redirecionamentos.
+
+| Variável                     | Valor padrão                      | Descrição                                                                                                                                                                                                |
+| ---------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Ativado quando uma URL é definida | `0`, `false`, `off` ou `no` desativa o mecanismo de ping. Desative-o nos planos pagos se as requisições periódicas forem desnecessárias.                                                                 |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`             | URL pública de base. O Render fornece `RENDER_EXTERNAL_URL` para serviços web e sites estáticos; consulte a [referência de variáveis de ambiente](https://render.com/docs/environment-variables).        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`          | Deve começar com `/` e resolver para a mesma origem da URL de base. Uma URL ou um caminho inválido desativa o mecanismo de ping e emite um aviso.                                                        |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                             | Segundos entre requisições; a primeira requisição é feita após 60 segundos. O valor obtido pela análise deve estar entre `30` e `2147483`, inclusive; valores inválidos ou fora do intervalo usam `180`. |
+
+Um serviço em execução durante um mês completo de 31 dias consome 744 horas de instância. Compare esse consumo com a cota gratuita atual do Render, compartilhada no espaço de trabalho.
+
 ## Cenários de Implantação
 
 Para obter orientações de SRE sobre o backend de relay (comportamento de ts/bifrost/auto, posicionamento de 9router em comparação com CLIProxyAPI e estratégia de fallback para alta vazão), consulte [Estratégia de Backend de Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

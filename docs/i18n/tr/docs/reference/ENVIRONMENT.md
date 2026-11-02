@@ -1394,6 +1394,19 @@ Kullanıcıların sorunları doğrudan Dashboard üzerinden bildirmesine olanak 
 
 ---
 
+## Render ücretsiz katmanında hizmeti etkin tutma
+
+Render, 15 dakika boyunca gelen trafik almayan ücretsiz bir web hizmetini uykuya alır ([ücretsiz hizmet sınırları](https://render.com/docs/free)). Bağımsız başlatıcı (Docker imajının kullandığı `scripts/dev/run-standalone.mjs`) hizmetin genel URL'sine düzenli aralıklarla istek gönderebilir. URL belirtilmediğinde mekanizma kapalı kalır; etkinleştirildiğini günlüğe yazar, ardından yalnızca istek sonuçlarındaki değişiklikleri bildirir. İstekler yönlendirmeleri izlemez.
+
+| Değişken                     | Varsayılan               | Açıklama                                                                                                                                                                                                     |
+| ---------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | URL ayarlandığında etkin | `0`, `false`, `off` veya `no` ping mekanizmasını devre dışı bırakır. Düzenli istekler gereksizse ücretli planlarda mekanizmayı kapatın.                                                                      |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | Genel temel URL. Render, web hizmetleri ve statik siteler için `RENDER_EXTERNAL_URL` sağlar; [ortam değişkenleri başvurusuna](https://render.com/docs/environment-variables) bakın.                          |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | `/` ile başlamalı ve temel URL ile aynı kökene (origin) çözümlenmelidir. Geçersiz bir URL veya yol, bir uyarıyla ping mekanizmasını devre dışı bırakır.                                                      |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | İstekler arasındaki saniye sayısı; ilk istek 60 saniye sonra gönderilir. Ayrıştırılan değer, sınırlar dahil `30` ile `2147483` arasında olmalıdır; geçersiz veya aralık dışı değerler için `180` kullanılır. |
+
+31 günlük bir ay boyunca çalışan hizmet, 744 örnek saati tüketir. Bu kullanımı, çalışma alanının tamamında paylaşılan güncel Render ücretsiz kotasıyla karşılaştırın.
+
 ## Dağıtım Senaryoları
 
 Aktarım arka ucu SRE rehberliği (`ts`/`bifrost`/`auto` davranışı, 9router ile CLIProxyAPI konumlandırması ve yüksek aktarım hızlı yedek stratejisi) için [Aktarım Arka Ucu Stratejisi](/docs/reference/RELAY_BACKEND_STRATEGY.md) belgesine bakın.

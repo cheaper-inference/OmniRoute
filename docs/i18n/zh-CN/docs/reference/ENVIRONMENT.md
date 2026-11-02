@@ -1371,6 +1371,19 @@ Adobe Firefly Web 提供者的浏览器驱动会话刷新
 
 ---
 
+## Render 免费套餐保活
+
+Render 会在免费 Web 服务连续 15 分钟没有入站流量后让其进入休眠状态（[免费服务限制](https://render.com/docs/free)）。独立启动器（Docker 镜像使用的 `scripts/dev/run-standalone.mjs`）可以定期请求服务的公开 URL。未配置 URL 时，保活机制保持关闭；启用时会记录日志，此后仅在请求结果发生变化时报告。请求不会跟随重定向。
+
+| 变量                         | 默认值                   | 说明                                                                                                                                          |
+| ---------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | 配置 URL 后启用          | `0`、`false`、`off` 或 `no` 会禁用保活机制。如果付费套餐不需要定期请求，请将其关闭。                                                          |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | 公开的基础 URL。Render 为 Web 服务和静态网站提供 `RENDER_EXTERNAL_URL`；请参阅[环境变量参考](https://render.com/docs/environment-variables)。 |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | 必须以 `/` 开头，并且解析后的地址必须与基础 URL 同源。无效的 URL 或路径会禁用保活机制并发出警告。                                             |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | 请求之间的间隔秒数；首次请求在 60 秒后执行。解析后的值必须在 `30` 到 `2147483` 之间，包含边界值；无效或超出范围的值会回退到 `180`。           |
+
+服务在一个有 31 天的月份中持续运行会消耗 744 实例小时。请将此用量与 Render 当前的免费额度进行比较；该额度由整个工作区共享。
+
 ## 部署场景
 
 有关中继后端的 SRE 指南（ts/bifrost/auto 行为、9router 与 CLIProxyAPI 的部署位置，以及高吞吐量回退策略），请参阅[中继后端策略](/docs/reference/RELAY_BACKEND_STRATEGY.md)。

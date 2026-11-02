@@ -1393,6 +1393,19 @@ Leiskite naudotojams pranešti apie problemas tiesiogiai iš valdymo skydelio.
 
 ---
 
+## Paslaugos aktyvumo palaikymas nemokamame Render plane
+
+Render sustabdo nemokamą žiniatinklio paslaugą, jei 15 minučių nėra įeinančio srauto ([nemokamų paslaugų apribojimai](https://render.com/docs/free)). Atskira paleidyklė (`scripts/dev/run-standalone.mjs`, naudojama Docker atvaizde) gali periodiškai siųsti užklausas į viešą paslaugos URL. Be URL ji lieka išjungta, įjungus tai įrašo į žurnalą, o vėliau praneša tik apie užklausų rezultatų pasikeitimus. Užklausos neseka peradresavimų.
+
+| Kintamasis                   | Numatytoji reikšmė          | Aprašas                                                                                                                                                                                                  |
+| ---------------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Įjungta, kai nustatytas URL | `0`, `false`, `off` arba `no` išjungia periodinių užklausų siuntimą. Mokamuose planuose jį išjunkite, jei periodinių užklausų nereikia.                                                                  |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`       | Viešas bazinis URL. Render pateikia `RENDER_EXTERNAL_URL` žiniatinklio paslaugoms ir statinėms svetainėms; žr. jo [aplinkos kintamųjų žinyną](https://render.com/docs/environment-variables).            |
+| `SELF_PING_PATH`             | `/api/monitoring/health`    | Turi prasidėti `/` ir būti išsprendžiamas į tą pačią kilmę kaip bazinis URL. Netinkamas URL arba kelias išjungia periodinių užklausų siuntimą ir pateikia įspėjimą.                                      |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                       | Sekundės tarp užklausų; pirmoji užklausa vykdoma po 60 sekundžių. Išanalizuota reikšmė turi būti nuo `30` iki `2147483` imtinai; netinkamoms arba už intervalo ribų esančioms reikšmėms naudojama `180`. |
+
+Visą 31 dienos mėnesį veikianti paslauga sunaudoja 744 egzemplioriaus valandas. Palyginkite šį naudojimą su dabartine nemokama Render kvota, bendra visai darbo sričiai.
+
 ## Diegimo scenarijai
 
 Dėl perdavimo serverio SRE gairių (`ts`/`bifrost`/`auto` veikimo, `9router` ir `CLIProxyAPI` išdėstymo bei didelio pralaidumo atsarginės strategijos) žr. [Perdavimo serverio strategiją](/docs/reference/RELAY_BACKEND_STRATEGY.md).

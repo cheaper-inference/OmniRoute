@@ -1408,6 +1408,19 @@ Payagan ang mga user na direktang mag-ulat ng mga isyu mula sa Dashboard.
 
 ---
 
+## Pagpapanatiling Aktibo ng Serbisyo sa Libreng Plano ng Render
+
+Pansamantalang pinapatigil ng Render ang isang libreng web service pagkaraan ng 15 minuto na walang papasok na trapiko ([mga limitasyon ng libreng serbisyo](https://render.com/docs/free)). Maaaring pana-panahong magpadala ng request sa pampublikong URL ng serbisyo ang standalone launcher (`scripts/dev/run-standalone.mjs`, na ginagamit ng Docker image). Nananatili itong naka-off kapag walang URL, nagla-log kapag pinagana, at pagkatapos ay nag-uulat lamang ng mga pagbabago sa kinalabasan ng request. Hindi sinusundan ng mga request ang mga redirect.
+
+| Variable                     | Default na halaga                     | Paglalarawan                                                                                                                                                                                                                                          |
+| ---------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Naka-enable kapag may nakatakdang URL | Dini-disable ng `0`, `false`, `off`, o `no` ang pinger. I-disable ito sa mga bayad na plano kung hindi kailangan ang mga pana-panahong request.                                                                                                       |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`                 | Pampublikong base URL. Ibinibigay ng Render ang `RENDER_EXTERNAL_URL` para sa mga web service at static na site; tingnan ang [sanggunian nito para sa mga environment variable](https://render.com/docs/environment-variables).                       |
+| `SELF_PING_PATH`             | `/api/monitoring/health`              | Dapat magsimula sa `/` at tumukoy sa parehong origin ng base URL. Dini-disable ng invalid na URL o path ang pinger at naglalabas ng babala.                                                                                                           |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                                 | Bilang ng segundo sa pagitan ng mga request; tatakbo ang unang request pagkalipas ng 60 segundo. Ang na-parse na halaga ay dapat mula `30` hanggang `2147483`, kasama ang mga hangganan; babalik sa `180` ang mga invalid o wala sa saklaw na halaga. |
+
+Ang serbisyong tumatakbo sa buong buwan na may 31 araw ay gumagamit ng 744 oras ng instance. Ihambing ang paggamit na iyon sa kasalukuyang libreng quota ng Render, na pinagsasaluhan sa buong workspace.
+
 ## Mga Sitwasyon sa Deployment
 
 Para sa gabay ng SRE sa relay backend (gawi ng ts/bifrost/auto, paglalagay ng 9router kumpara sa CLIProxyAPI, at fallback strategy para sa mataas na throughput), tingnan ang [Diskarte sa Relay Backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).

@@ -1398,6 +1398,19 @@ Ermöglicht Benutzern, Probleme direkt über das Dashboard zu melden.
 
 ---
 
+## Render-Dienste im kostenlosen Tarif aktiv halten
+
+Render versetzt einen kostenlosen Webdienst nach 15 Minuten ohne eingehenden Datenverkehr in den Ruhezustand ([Grenzen kostenloser Dienste](https://render.com/docs/free)). Der eigenständige Starter (`scripts/dev/run-standalone.mjs`, vom Docker-Image verwendet) kann regelmäßig Anfragen an die öffentliche URL des Dienstes senden. Ohne URL bleibt diese Funktion ausgeschaltet. Die Aktivierung wird protokolliert; anschließend werden nur Änderungen im Ergebnis der Anfragen gemeldet. Die Anfragen folgen keinen Weiterleitungen.
+
+| Variable                     | Standardwert                         | Beschreibung                                                                                                                                                                                                                                              |
+| ---------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Aktiviert, wenn eine URL gesetzt ist | `0`, `false`, `off` oder `no` deaktiviert den Anfrageversand. Deaktivieren Sie ihn bei kostenpflichtigen Tarifen, wenn regelmäßige Anfragen nicht erforderlich sind.                                                                                      |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`                | Öffentliche Basis-URL. Render stellt `RENDER_EXTERNAL_URL` für Webdienste und statische Websites bereit; siehe die [Referenz der Umgebungsvariablen](https://render.com/docs/environment-variables).                                                      |
+| `SELF_PING_PATH`             | `/api/monitoring/health`             | Muss mit `/` beginnen und zu einer Adresse mit demselben Ursprung wie die Basis-URL aufgelöst werden. Eine ungültige URL oder ein ungültiger Pfad deaktiviert den Anfrageversand mit einer Warnung.                                                       |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                                | Sekunden zwischen den Anfragen; die erste Anfrage erfolgt nach 60 Sekunden. Der eingelesene Wert muss zwischen `30` und `2147483` einschließlich beider Grenzen liegen; bei ungültigen Werten oder Werten außerhalb dieses Bereichs wird `180` verwendet. |
+
+Ein Dienst, der während eines ganzen Monats mit 31 Tagen läuft, verbraucht 744 Instanzstunden. Vergleichen Sie diesen Verbrauch mit dem aktuellen kostenlosen Kontingent von Render, das im gesamten Workspace gemeinsam genutzt wird.
+
 ## Bereitstellungsszenarien
 
 SRE-Hinweise zum Relay-Backend (Verhalten von ts/bifrost/auto, Platzierung von 9router gegenüber CLIProxyAPI und Rückfallstrategie für hohen Durchsatz) finden Sie unter [Relay-Backend-Strategie](/docs/reference/RELAY_BACKEND_STRATEGY.md).

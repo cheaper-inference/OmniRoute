@@ -1408,6 +1408,19 @@ Foydalanuvchilarga muammolar haqida bevosita Boshqaruv panelidan xabar berish im
 
 ---
 
+## Render bepul tarifida xizmatni faol saqlash
+
+Render kiruvchi trafik boʻlmasa, 15 daqiqadan soʻng bepul veb-xizmatni uyqu holatiga oʻtkazadi ([bepul xizmat cheklovlari](https://render.com/docs/free)). Mustaqil ishga tushirgich (Docker tasviri ishlatadigan `scripts/dev/run-standalone.mjs`) xizmatning ommaviy URL manziliga vaqti-vaqti bilan soʻrov yuborishi mumkin. URL koʻrsatilmasa, bu mexanizm oʻchiq qoladi; yoqilganini jurnalga yozadi, keyin esa faqat soʻrov natijasidagi oʻzgarishlarni xabar qiladi. Soʻrovlar qayta yoʻnaltirishlarga ergashmaydi.
+
+| Oʻzgaruvchi                  | Standart qiymat            | Tavsif                                                                                                                                                                                                                                                  |
+| ---------------------------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | URL oʻrnatilganda yoqiladi | `0`, `false`, `off` yoki `no` ping mexanizmini oʻchiradi. Davriy soʻrovlar kerak boʻlmasa, pullik tariflarda uni oʻchiring.                                                                                                                             |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`      | Ommaviy asosiy URL. Render veb-xizmatlar va statik saytlar uchun `RENDER_EXTERNAL_URL` ni taqdim etadi; [muhit oʻzgaruvchilari maʼlumotnomasiga](https://render.com/docs/environment-variables) qarang.                                                 |
+| `SELF_PING_PATH`             | `/api/monitoring/health`   | `/` bilan boshlanishi va manzil yechilganda asosiy URL bilan bir xil manbaga (origin) ega boʻlishi kerak. Notoʻgʻri URL yoki yoʻl ping mexanizmini ogohlantirish bilan oʻchiradi.                                                                       |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                      | Soʻrovlar orasidagi soniyalar; dastlabki soʻrov 60 soniyadan keyin yuboriladi. Tahlil qilingan qiymat `30` dan `2147483` gacha, chegaralar ham kirgan holda, boʻlishi kerak; notoʻgʻri yoki oraliqdan tashqaridagi qiymatlar oʻrniga `180` ishlatiladi. |
+
+31 kunlik oy davomida uzluksiz ishlaydigan xizmat 744 instansiya soatini sarflaydi. Bu sarfni butun ish maydoni boʻylab umumiy boʻlgan Renderʼning joriy bepul kvotasi bilan solishtiring.
+
 ## Joylashtirish ssenariylari
 
 Relay backend uchun SRE koʻrsatmalari (`ts`/`bifrost`/`auto` xatti-harakati, 9router va CLIProxyAPI joylashuvi hamda yuqori oʻtkazuvchanlikdagi zaxira strategiyasi) uchun [Relay Backend strategiyasi](/docs/reference/RELAY_BACKEND_STRATEGY.md) sahifasiga qarang.

@@ -1431,6 +1431,19 @@ Benarkan pengguna melaporkan isu secara langsung daripada Dashboard.
 
 ---
 
+## Mengekalkan Perkhidmatan Aktif pada Pelan Percuma Render
+
+Render menghentikan sementara perkhidmatan web percuma selepas 15 minit tanpa trafik masuk ([had perkhidmatan percuma](https://render.com/docs/free)). Pelancar kendiri (`scripts/dev/run-standalone.mjs`, yang digunakan oleh imej Docker) boleh membuat permintaan berkala ke URL awam perkhidmatan. Ia kekal dimatikan tanpa URL, merekodkan apabila diaktifkan, kemudian hanya melaporkan perubahan hasil permintaan. Permintaan tidak mengikuti pengalihan.
+
+| Pemboleh ubah                | Nilai lalai                       | Penerangan                                                                                                                                                                                                                            |
+| ---------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Diaktifkan apabila URL ditetapkan | `0`, `false`, `off` atau `no` menyahaktifkan pinger. Nyahaktifkannya pada pelan berbayar jika permintaan berkala tidak diperlukan.                                                                                                    |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`             | URL asas awam. Render menyediakan `RENDER_EXTERNAL_URL` untuk perkhidmatan web dan laman statik; lihat [rujukan pemboleh ubah persekitarannya](https://render.com/docs/environment-variables).                                        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`          | Mesti bermula dengan `/` dan diselesaikan kepada origin yang sama dengan URL asas. URL atau laluan yang tidak sah menyahaktifkan pinger dengan amaran.                                                                                |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                             | Sela antara permintaan dalam saat; permintaan pertama berjalan selepas 60 saat. Nilai yang telah dihuraikan mesti dalam julat `30` hingga `2147483`, termasuk kedua-dua had; nilai tidak sah atau di luar julat kembali kepada `180`. |
+
+Perkhidmatan yang berjalan sepanjang bulan dengan 31 hari menggunakan 744 jam instans. Bandingkan penggunaan itu dengan kuota percuma Render semasa, yang dikongsi dalam ruang kerja.
+
 ## Senario Penggunaan
 
 Untuk panduan SRE bahagian belakang geganti (tingkah laku ts/bifrost/auto, penempatan 9router berbanding CLIProxyAPI, dan strategi sandaran daya pemprosesan tinggi), lihat [Strategi Bahagian Belakang Geganti](/docs/reference/RELAY_BACKEND_STRATEGY.md).

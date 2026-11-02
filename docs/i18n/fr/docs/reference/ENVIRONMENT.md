@@ -1405,6 +1405,19 @@ Permet aux utilisateurs de signaler des problèmes directement depuis le tableau
 
 ---
 
+## Maintenir le service actif sur l’offre gratuite de Render
+
+Render met en veille un service web gratuit après 15 minutes sans trafic entrant ([limites des services gratuits](https://render.com/docs/free)). Le lanceur autonome (`scripts/dev/run-standalone.mjs`, utilisé par l’image Docker) peut envoyer périodiquement des requêtes à l’URL publique du service. Sans URL, cette fonction reste désactivée. Son activation est consignée dans le journal, puis seuls les changements de résultat des requêtes sont signalés. Les requêtes ne suivent pas les redirections.
+
+| Variable                     | Valeur par défaut                 | Description                                                                                                                                                                                                                    |
+| ---------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | Activé lorsqu’une URL est définie | `0`, `false`, `off` ou `no` désactive l’envoi de requêtes. Désactivez-le sur les offres payantes si les requêtes périodiques ne sont pas nécessaires.                                                                          |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`             | URL de base publique. Render fournit `RENDER_EXTERNAL_URL` pour les services web et les sites statiques ; consultez sa [référence des variables d’environnement](https://render.com/docs/environment-variables).               |
+| `SELF_PING_PATH`             | `/api/monitoring/health`          | Doit commencer par `/` et se résoudre en une adresse de même origine que l’URL de base. Une URL ou un chemin non valide désactive l’envoi de requêtes avec un avertissement.                                                   |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                             | Nombre de secondes entre les requêtes ; la première requête s’exécute après 60 secondes. La valeur analysée doit aller de `30` à `2147483`, bornes incluses ; les valeurs non valides ou hors plage sont remplacées par `180`. |
+
+Un service fonctionnant pendant tout un mois de 31 jours consomme 744 heures d’instance. Comparez cette consommation au quota gratuit actuel de Render, partagé à l’échelle de l’espace de travail.
+
 ## Scénarios de déploiement
 
 Pour obtenir des recommandations SRE sur le backend de relais (comportement ts/bifrost/auto, positionnement de 9router par rapport à CLIProxyAPI et stratégie de repli à haut débit), consultez [Stratégie du backend de relais](/docs/reference/RELAY_BACKEND_STRATEGY.md).

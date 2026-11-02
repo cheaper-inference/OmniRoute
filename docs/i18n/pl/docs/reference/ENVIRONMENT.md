@@ -1405,6 +1405,19 @@ Umożliwia użytkownikom zgłaszanie problemów bezpośrednio z Panelu.
 
 ---
 
+## Utrzymywanie aktywności w darmowym planie Render
+
+Render usypia bezpłatną usługę webową po 15 minutach bez ruchu przychodzącego ([ograniczenia bezpłatnych usług](https://render.com/docs/free)). Samodzielny skrypt uruchamiający (`scripts/dev/run-standalone.mjs`, używany przez obraz Docker) może okresowo wysyłać żądania pod publiczny URL usługi. Mechanizm pozostaje wyłączony, jeśli nie podano URL; zapisuje w logu włączenie, a następnie tylko zmiany wyniku żądań. Żądania nie podążają za przekierowaniami.
+
+| Zmienna                      | Wartość domyślna           | Opis                                                                                                                                                                                                                              |
+| ---------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Włączony po ustawieniu URL | `0`, `false`, `off` lub `no` wyłącza mechanizm pingowania. Wyłącz go w planach płatnych, jeśli okresowe żądania są zbędne.                                                                                                        |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`      | Bazowy publiczny URL. Render udostępnia `RENDER_EXTERNAL_URL` dla usług webowych i witryn statycznych; zobacz [opis zmiennych środowiskowych](https://render.com/docs/environment-variables).                                     |
+| `SELF_PING_PATH`             | `/api/monitoring/health`   | Musi zaczynać się od `/` i po rozwiązaniu adresu wskazywać to samo źródło (origin) co bazowy URL. Nieprawidłowy URL lub ścieżka wyłącza mechanizm pingowania i powoduje ostrzeżenie.                                              |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                      | Liczba sekund między żądaniami; pierwsze żądanie jest wysyłane po 60 sekundach. Odczytana wartość musi mieścić się w zakresie od `30` do `2147483` włącznie; wartości nieprawidłowe lub spoza zakresu są zastępowane przez `180`. |
+
+Usługa działająca przez cały miesiąc liczący 31 dni zużywa 744 godziny instancji. Porównaj to zużycie z aktualnym bezpłatnym limitem Render, współdzielonym przez cały obszar roboczy.
+
 ## Scenariusze wdrożenia
 
 Wytyczne SRE dotyczące zaplecza przekaźnika (zachowanie ts/bifrost/auto, umiejscowienie 9router względem CLIProxyAPI oraz strategia awaryjna dla dużej przepustowości) zawiera dokument [Strategia zaplecza przekaźnika](/docs/reference/RELAY_BACKEND_STRATEGY.md).

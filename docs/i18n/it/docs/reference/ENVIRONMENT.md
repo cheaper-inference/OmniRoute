@@ -1420,6 +1420,19 @@ Consente agli utenti di segnalare problemi direttamente dalla Dashboard.
 
 ---
 
+## Mantenere attivo il servizio nel piano gratuito di Render
+
+Render sospende un servizio web gratuito dopo 15 minuti senza traffico in ingresso ([limiti dei servizi gratuiti](https://render.com/docs/free)). Il launcher standalone (`scripts/dev/run-standalone.mjs`, utilizzato dall’immagine Docker) può inviare periodicamente richieste all’URL pubblico del servizio. Rimane disattivato in assenza di un URL, registra l’attivazione e successivamente segnala solo i cambiamenti nell’esito delle richieste. Le richieste non seguono i reindirizzamenti.
+
+| Variabile                    | Valore predefinito               | Descrizione                                                                                                                                                                                                              |
+| ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | Attivo quando è impostato un URL | `0`, `false`, `off` o `no` disattivano il pinger. Disattivalo sui piani a pagamento se le richieste periodiche non servono.                                                                                              |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`            | URL pubblico di base. Render fornisce `RENDER_EXTERNAL_URL` per i servizi web e i siti statici; consulta il suo [riferimento delle variabili d’ambiente](https://render.com/docs/environment-variables).                 |
+| `SELF_PING_PATH`             | `/api/monitoring/health`         | Deve iniziare con `/` e risolversi sulla stessa origine dell’URL di base. Un URL o un percorso non valido disattiva il pinger con un avviso.                                                                             |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                            | Secondi tra le richieste; la prima richiesta viene eseguita dopo 60 secondi. Il valore interpretato deve essere compreso tra `30` e `2147483`, estremi inclusi; valori non validi o fuori intervallo ripristinano `180`. |
+
+Un servizio in esecuzione per l’intero mese di 31 giorni consuma 744 ore di istanza. Confronta tale utilizzo con la quota gratuita attuale di Render, condivisa nell’area di lavoro.
+
 ## Scenari di distribuzione
 
 Per indicazioni SRE sul backend relay (comportamento di ts/bifrost/auto, posizionamento di 9router rispetto a CLIProxyAPI e strategia di fallback per throughput elevato), consulta [Strategia del backend relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

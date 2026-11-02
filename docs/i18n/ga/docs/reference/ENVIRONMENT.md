@@ -1400,6 +1400,19 @@ Lig d’úsáideoirí fadhbanna a thuairisciú go díreach ón Deais.
 
 ---
 
+## Seirbhís a choinneáil beo ar shraith saor in aisce Render
+
+Cuireann Render seirbhís ghréasáin saor in aisce ina codladh tar éis 15 nóiméad gan trácht isteach ([teorainneacha na seirbhíse saor in aisce](https://render.com/docs/free)). Is féidir leis an tosaitheoir neamhspleách (`scripts/dev/run-standalone.mjs`, a úsáideann íomhá Docker) iarratais thréimhsiúla a sheoladh chuig URL poiblí na seirbhíse. Fanann an ghné seo múchta mura bhfuil URL socraithe. Déantar a gníomhachtú a thaifeadadh sa loga; ina dhiaidh sin, ní thuairiscítear ach athruithe ar thoradh na n-iarratas. Ní leanann na hiarratais atreoruithe.
+
+| Athróg                       | Réamhshocrú                        | Cur síos                                                                                                                                                                                                                                          |
+| ---------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Cumasaithe nuair atá URL socraithe | Cuireann `0`, `false`, `off` nó `no` an seoltóir iarratas as feidhm. Díchumasaigh é ar phleananna íoctha mura bhfuil gá le hiarratais thréimhsiúla.                                                                                               |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`              | Bun-URL poiblí. Soláthraíonn Render `RENDER_EXTERNAL_URL` do sheirbhísí gréasáin agus do shuíomhanna statacha; féach an [tagairt do athróga timpeallachta](https://render.com/docs/environment-variables).                                        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`           | Caithfidh sé tosú le `/` agus seoladh a thabhairt a bhfuil an bunús céanna aige leis an mbun-URL. Díchumasaíonn URL nó cosán neamhbhailí an seoltóir iarratas agus tugtar rabhadh.                                                                |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                              | Soicindí idir iarratais; seoltar an chéad iarratas tar éis 60 soicind. Caithfidh an luach parsáilte a bheith ó `30` go `2147483`, agus an dá theorainn san áireamh; cuirtear `180` in ionad luachanna neamhbhailí nó luachanna lasmuigh den raon. |
+
+Ídíonn seirbhís a ritheann ar feadh míosa iomláine de 31 lá 744 uair an chloig d’ásc. Cuir an úsáid sin i gcomparáid le cuóta reatha saor in aisce Render, atá roinnte ar fud an spáis oibre.
+
 ## Cásanna Imscartha
 
 Le haghaidh treorach SRE don inneall sealaíochta (iompar ts/bifrost/auto, suíomh 9router i gcomparáid le CLIProxyAPI, agus straitéis chúltaca d’ardtréchur), féach [Straitéis an Innill Sealaíochta](/docs/reference/RELAY_BACKEND_STRATEGY.md).

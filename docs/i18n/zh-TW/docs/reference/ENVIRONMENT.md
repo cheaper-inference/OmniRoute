@@ -1376,6 +1376,19 @@ Adobe Firefly 網頁提供者的瀏覽器驅動工作階段重新整理功能
 
 ---
 
+## Render 免費方案保活
+
+Render 會在免費 Web 服務連續 15 分鐘沒有傳入流量後，讓服務進入休眠狀態（[免費服務限制](https://render.com/docs/free)）。獨立啟動器（Docker 映像使用的 `scripts/dev/run-standalone.mjs`）可以定期請求服務的公開 URL。未設定 URL 時，保活機制會保持關閉；啟用時會記錄日誌，之後只在請求結果改變時回報。請求不會跟隨重新導向。
+
+| 變數                         | 預設值                   | 說明                                                                                                                                          |
+| ---------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | 設定 URL 後啟用          | `0`、`false`、`off` 或 `no` 會停用保活機制。若付費方案不需要定期請求，請將其關閉。                                                            |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | 公開的基底 URL。Render 為 Web 服務與靜態網站提供 `RENDER_EXTERNAL_URL`；請參閱[環境變數參考](https://render.com/docs/environment-variables)。 |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | 必須以 `/` 開頭，而且解析後的位址必須與基底 URL 同源。無效的 URL 或路徑會停用保活機制並發出警告。                                             |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | 請求之間的間隔秒數；首次請求在 60 秒後執行。解析後的值必須介於 `30` 與 `2147483` 之間，包含邊界值；無效或超出範圍的值會回退至 `180`。         |
+
+服務在一個有 31 天的月份中持續執行，會消耗 744 執行個體小時。請將此用量與 Render 目前的免費額度比較；此額度由整個工作區共用。
+
 ## 部署情境
 
 如需中繼後端的 SRE 指引（ts/bifrost/auto 行為、9router 與 CLIProxyAPI 的部署位置，以及高吞吐量的備援策略），請參閱[中繼後端策略](/docs/reference/RELAY_BACKEND_STRATEGY.md)。

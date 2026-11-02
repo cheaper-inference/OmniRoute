@@ -1427,6 +1427,19 @@ Ippermetti lill-utenti jirrapportaw problemi direttament mid-Dashboard.
 
 ---
 
+## Żamma tas-Servizz Attiv fil-Pjan B’Xejn ta’ Render
+
+Render iwaqqaf servizz web b’xejn wara 15-il minuta mingħajr traffiku dieħel ([limiti tas-servizzi b’xejn](https://render.com/docs/free)). Il-launcher awtonomu (`scripts/dev/run-standalone.mjs`, użat mill-immaġni Docker) jista’ jibgħat talbiet perjodiċi lill-URL pubbliku tas-servizz. Jibqa’ mitfi mingħajr URL, jirreġistra meta jiġi attivat, u wara jirrapporta biss bidliet fir-riżultat tat-talbiet. It-talbiet ma jsegwux ridirezzjonijiet.
+
+| Varjabbli                    | Valur awtomatiku                | Deskrizzjoni                                                                                                                                                                                         |
+| ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Attivat meta jkun issettjat URL | `0`, `false`, `off` jew `no` jitfu l-pinger. Itfih fuq pjanijiet bi ħlas jekk it-talbiet perjodiċi mhumiex meħtieġa.                                                                                 |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`           | URL bażi pubbliku. Render jipprovdi `RENDER_EXTERNAL_URL` għal servizzi web u siti statiċi; ara r-[referenza tiegħu għall-varjabbli tal-ambjent](https://render.com/docs/environment-variables).     |
+| `SELF_PING_PATH`             | `/api/monitoring/health`        | Għandu jibda b’`/` u jissolva għall-istess oriġini bħall-URL bażi. URL jew mogħdija mhux valida titfi l-pinger bi twissija.                                                                          |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                           | Sekondi bejn it-talbiet; l-ewwel talba ssir wara 60 sekonda. Il-valur interpretat irid ikun minn `30` sa `2147483`, inklużi ż-żewġ limiti; valuri mhux validi jew barra l-medda jerġgħu jużaw `180`. |
+
+Servizz li jaħdem matul xahar sħiħ ta’ 31 jum jikkonsma 744 siegħa ta’ istanza. Qabbel dak l-użu mal-kwota attwali b’xejn ta’ Render, li tinqasam fl-ispazju tax-xogħol.
+
 ## Xenarji ta’ Distribuzzjoni
 
 Għal gwida SRE dwar il-backend tar-relay (l-imġiba ta’ ts/bifrost/auto, it-tqegħid ta’ 9router meta mqabbel ma’ CLIProxyAPI, u l-istrateġija ta’ fallback għal throughput għoli), ara [Strateġija tal-Backend tar-Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

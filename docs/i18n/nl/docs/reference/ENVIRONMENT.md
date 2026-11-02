@@ -1427,6 +1427,19 @@ Sta gebruikers toe om problemen rechtstreeks vanuit het Dashboard te melden.
 
 ---
 
+## Keep-alive voor het gratis abonnement van Render
+
+Render zet een gratis webservice stil na 15 minuten zonder inkomend verkeer ([limieten voor gratis services](https://render.com/docs/free)). De zelfstandige launcher (`scripts/dev/run-standalone.mjs`, gebruikt door de Docker-image) kan periodiek verzoeken naar de openbare URL van de service sturen. Zonder URL blijft dit uitgeschakeld; bij inschakeling wordt een logmelding gemaakt en daarna worden alleen veranderingen in het resultaat van verzoeken gemeld. Verzoeken volgen geen omleidingen.
+
+| Variabele                    | Standaardwaarde                       | Beschrijving                                                                                                                                                                                                                               |
+| ---------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | Ingeschakeld als een URL is ingesteld | `0`, `false`, `off` of `no` schakelt de pinger uit. Schakel deze bij betaalde abonnementen uit als periodieke verzoeken niet nodig zijn.                                                                                                   |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`                 | Openbare basis-URL. Render levert `RENDER_EXTERNAL_URL` voor webservices en statische sites; zie de [referentie voor omgevingsvariabelen](https://render.com/docs/environment-variables).                                                  |
+| `SELF_PING_PATH`             | `/api/monitoring/health`              | Moet beginnen met `/` en uitkomen op dezelfde origin als de basis-URL. Een ongeldige URL of een ongeldig pad schakelt de pinger uit met een waarschuwing.                                                                                  |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                                 | Aantal seconden tussen verzoeken; het eerste verzoek wordt na 60 seconden uitgevoerd. De geparste waarde moet tussen `30` en `2147483` liggen, inclusief de grenzen; ongeldige waarden of waarden buiten dit bereik vallen terug op `180`. |
+
+Een service die een volledige maand van 31 dagen draait, verbruikt 744 instantie-uren. Vergelijk dat verbruik met de huidige gratis limiet van Render, die binnen de werkruimte wordt gedeeld.
+
 ## Implementatiescenario's
 
 Voor SRE-richtlijnen voor de relaybackend (gedrag van ts/bifrost/auto, plaatsing van 9router versus CLIProxyAPI en een terugvalstrategie voor hoge doorvoer), zie [Strategie voor de relaybackend](/docs/reference/RELAY_BACKEND_STRATEGY.md).

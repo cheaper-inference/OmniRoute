@@ -1431,6 +1431,19 @@ Lehetővé teszi a felhasználók számára, hogy közvetlenül az irányítópu
 
 ---
 
+## A szolgáltatás ébren tartása a Render ingyenes csomagjában
+
+A Render alvó állapotba helyezi az ingyenes webszolgáltatást, ha 15 percig nincs bejövő forgalom ([az ingyenes szolgáltatás korlátai](https://render.com/docs/free)). Az önálló indító (`scripts/dev/run-standalone.mjs`, amelyet a Docker-kép használ) rendszeresen kéréseket küldhet a szolgáltatás nyilvános URL-jére. URL nélkül ez a funkció kikapcsolva marad. Bekapcsoláskor naplóbejegyzést ír, ezt követően csak a kérések eredményének változásait jelzi. A kérések nem követik az átirányításokat.
+
+| Változó                      | Alapértelmezés                     | Leírás                                                                                                                                                                                                                                          |
+| ---------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Bekapcsolva, ha van beállított URL | A `0`, `false`, `off` vagy `no` érték kikapcsolja a kérésküldőt. Fizetős csomagokban kapcsolja ki, ha nincs szükség időszakos kérésekre.                                                                                                        |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`              | Nyilvános alap-URL. A Render webszolgáltatásokhoz és statikus webhelyekhez biztosítja a `RENDER_EXTERNAL_URL` változót; lásd a [környezeti változók leírását](https://render.com/docs/environment-variables).                                   |
+| `SELF_PING_PATH`             | `/api/monitoring/health`           | Az értéknek `/` jellel kell kezdődnie, és az alap-URL-lel azonos eredetű címre kell feloldódnia. Érvénytelen URL vagy útvonal esetén a kérésküldő figyelmeztetés mellett kikapcsol.                                                             |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                              | A kérések közötti idő másodpercben; az első kérés 60 másodperc elteltével fut le. Az értelmezett értéknek `30` és `2147483` között kell lennie, mindkét határt beleértve; érvénytelen vagy tartományon kívüli érték esetén `180` lesz érvényes. |
+
+Egy teljes, 31 napos hónapban folyamatosan futó szolgáltatás 744 példányórát használ fel. Hasonlítsa össze ezt a felhasználást a Render jelenlegi ingyenes keretével, amely a teljes munkaterületen közösen használható.
+
 ## Üzembe helyezési forgatókönyvek
 
 A relay backend SRE-útmutatásért (ts/bifrost/auto viselkedés, a 9router és a CLIProxyAPI elhelyezése, valamint a nagy áteresztőképességű tartalékstratégia) lásd: [Relay backend stratégia](/docs/reference/RELAY_BACKEND_STRATEGY.md).

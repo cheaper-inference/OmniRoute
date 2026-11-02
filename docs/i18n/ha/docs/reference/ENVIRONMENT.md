@@ -1397,6 +1397,19 @@ Ba masu amfani damar kai rahoton matsaloli kai tsaye daga Dashboard.
 
 ---
 
+## Ci gaba da kunna sabis a tsarin kyauta na Render
+
+Render yana sa sabis ɗin yanar gizo na kyauta ya shiga yanayin barci bayan mintuna 15 ba tare da zirga-zirgar shigowa ba ([iyakokin sabis na kyauta](https://render.com/docs/free)). Mai ƙaddamarwa mai zaman kansa (`scripts/dev/run-standalone.mjs`, wanda hoton Docker yake amfani da shi) na iya aika buƙatu lokaci-lokaci zuwa URL ɗin jama’a na sabis. Wannan aikin yana kasancewa a kashe idan babu URL. Ana rubuta kunna shi a rajista, sannan ana ba da rahoton canje-canje kawai a sakamakon buƙatu. Buƙatun ba sa bin umarnin tura su zuwa wani adireshi.
+
+| Ma’auni                      | Ƙimar asali               | Bayani                                                                                                                                                                                                                                         |
+| ---------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | A kunne idan an saita URL | `0`, `false`, `off` ko `no` yana kashe mai aika buƙatun. Kashe shi a tsare-tsaren biyan kuɗi idan ba a buƙatar buƙatu lokaci-lokaci.                                                                                                           |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`     | URL na tushe na jama’a. Render yana samar da `RENDER_EXTERNAL_URL` ga sabis na yanar gizo da shafukan da ba sa canzawa; duba [jagorar ma’aunan muhalli](https://render.com/docs/environment-variables).                                        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`  | Dole ya fara da `/` kuma ya warware zuwa adireshi mai asali ɗaya da URL na tushe. URL ko hanya marar inganci yana kashe mai aika buƙatun tare da gargaɗi.                                                                                      |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                     | Tazarar buƙatu a cikin daƙiƙu; buƙata ta farko tana gudana bayan daƙiƙu 60. Ƙimar da aka karanta dole ta kasance daga `30` zuwa `2147483`, tare da haɗa iyakokin biyu; ana amfani da `180` idan ƙimar ba ta da inganci ko ta fita daga zangon. |
+
+Sabis da yake aiki a duk wata mai kwanaki 31 yana cin sa’o’in instance 744. Kwatanta wannan amfani da rabon kyauta na Render na yanzu, wanda ake rabawa a duk sararin aiki.
+
 ## Yanayin Turawa
 
 Don jagorar SRE ta backend na relay (halayen ts/bifrost/auto, wurin sanya 9router idan aka kwatanta da CLIProxyAPI, da dabarar komawa madadin yayin yawan zirga-zirga), duba [Dabarar Backend na Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

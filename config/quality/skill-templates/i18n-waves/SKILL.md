@@ -150,6 +150,13 @@ fora não consomem tentativa), **commit + push por doc**; verifica o drift final
 `WAVE END processed=N failed=M`. Não adota hashes automaticamente: alteração mecânica
 por formatação exige revisão e rehash restrito com prova, separado da execução da onda.
 
+Antes de fechar os hashes e caches do lote, aplique o formatador aos arquivos alterados
+conforme a configuração e as exclusões reais da candidata. Se um hook normal mudar os
+bytes depois da validação, confira o diff: a prova anterior não cobre esses bytes novos.
+Comprove a equivalência quando a mudança for só de formato, atualize apenas as folhas
+derivadas dos documentos revisados e rode novamente o drift estrito. Preserve a revisão
+semântica, os timestamps e os registros não selecionados; o hook não autoriza adoção global.
+
 **Como esperar.** `Bash` em background:
 
 ```bash

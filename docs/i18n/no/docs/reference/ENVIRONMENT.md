@@ -1422,6 +1422,19 @@ La brukere rapportere problemer direkte fra dashbordet.
 
 ---
 
+## Hold tjenesten aktiv på gratisnivået til Render
+
+Render stanser en gratis nettjeneste etter 15 minutter uten innkommende trafikk ([begrensninger for gratistjenester](https://render.com/docs/free)). Den frittstående starteren (`scripts/dev/run-standalone.mjs`, brukt av Docker-imaget) kan sende periodiske forespørsler til tjenestens offentlige URL. Den forblir avslått uten en URL, logger når den aktiveres, og rapporterer deretter bare endringer i forespørselsresultatet. Forespørslene følger ikke omdirigeringer.
+
+| Variabel                     | Standardverdi                 | Beskrivelse                                                                                                                                                                                                                      |
+| ---------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Aktivert når en URL er angitt | `0`, `false`, `off` eller `no` slår av pingfunksjonen. Slå den av på betalte abonnementer hvis periodiske forespørsler ikke er nødvendige.                                                                                       |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`         | Offentlig basis-URL. Render oppgir `RENDER_EXTERNAL_URL` for nettjenester og statiske nettsteder; se [referansen for miljøvariabler](https://render.com/docs/environment-variables).                                             |
+| `SELF_PING_PATH`             | `/api/monitoring/health`      | Må begynne med `/` og løses til samme origin som basis-URL-en. En ugyldig URL eller sti deaktiverer pingfunksjonen med en advarsel.                                                                                              |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                         | Sekunder mellom forespørslene; den første forespørselen kjøres etter 60 sekunder. Den tolkede verdien må være fra og med `30` til og med `2147483`; ugyldige verdier eller verdier utenfor intervallet faller tilbake til `180`. |
+
+En tjeneste som kjører gjennom en hel måned med 31 dager, bruker 744 instanstimer. Sammenlign dette forbruket med den gjeldende gratiskvoten til Render, som deles i arbeidsområdet.
+
 ## Distribusjonsscenarioer
 
 For SRE-veiledning for relay-backend (ts/bifrost/auto-atferd, plassering av 9router kontra CLIProxyAPI og reservestrategi for høy gjennomstrømning), se [Strategi for relay-backend](/docs/reference/RELAY_BACKEND_STRATEGY.md).

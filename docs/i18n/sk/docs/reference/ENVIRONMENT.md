@@ -1397,6 +1397,19 @@ Umožnite používateľom nahlasovať problémy priamo z ovládacieho panela.
 
 ---
 
+## Udržiavanie aktivity v bezplatnom programe Render
+
+Render uspí bezplatnú webovú službu po 15 minútach bez prichádzajúcej prevádzky ([obmedzenia bezplatných služieb](https://render.com/docs/free)). Samostatný spúšťací skript (`scripts/dev/run-standalone.mjs`, používaný obrazom Docker) môže pravidelne odosielať požiadavky na verejnú URL služby. Bez URL zostáva mechanizmus vypnutý; zaznamená zapnutie a potom hlási iba zmeny výsledku požiadaviek. Požiadavky nenasledujú presmerovania.
+
+| Premenná                     | Predvolená hodnota       | Popis                                                                                                                                                                                                            |
+| ---------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Zapnuté po nastavení URL | `0`, `false`, `off` alebo `no` vypne mechanizmus pingovania. V platených programoch ho vypnite, ak pravidelné požiadavky nie sú potrebné.                                                                        |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | Základná verejná URL. Render poskytuje `RENDER_EXTERNAL_URL` pre webové služby a statické stránky; pozrite si [referenciu premenných prostredia](https://render.com/docs/environment-variables).                 |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | Musí začínať znakom `/` a po vyhodnotení adresy mať rovnaký pôvod (origin) ako základná URL. Neplatná URL alebo cesta vypne mechanizmus pingovania a vypíše upozornenie.                                         |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | Počet sekúnd medzi požiadavkami; prvá požiadavka sa vykoná po 60 sekundách. Hodnota po spracovaní musí byť od `30` do `2147483` vrátane; neplatné hodnoty alebo hodnoty mimo rozsahu sa nahradia hodnotou `180`. |
+
+Služba bežiaca počas celého mesiaca s 31 dňami spotrebuje 744 hodín inštancie. Porovnajte túto spotrebu s aktuálnou bezplatnou kvótou Render, ktorú zdieľa celý pracovný priestor.
+
 ## Scenáre nasadenia
 
 Usmernenia SRE pre backend relay (správanie ts/bifrost/auto, umiestnenie 9router oproti CLIProxyAPI a stratégia záložného riešenia pre vysokú priepustnosť) nájdete v dokumente [Stratégia backendu relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

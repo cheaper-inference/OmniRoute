@@ -1390,6 +1390,19 @@ Uporabnikom omogočite prijavljanje težav neposredno z nadzorne plošče.
 
 ---
 
+## Ohranjanje aktivnosti v brezplačnem paketu Render
+
+Render uspava brezplačno spletno storitev po 15 minutah brez dohodnega prometa ([omejitve brezplačnih storitev](https://render.com/docs/free)). Samostojni zaganjalnik (`scripts/dev/run-standalone.mjs`, ki ga uporablja slika Docker) lahko redno pošilja zahteve na javni URL storitve. Brez URL-ja ostane mehanizem izklopljen; zabeleži vklop, nato pa poroča samo o spremembah izida zahtev. Zahteve ne sledijo preusmeritvam.
+
+| Spremenljivka                | Privzeta vrednost                | Opis                                                                                                                                                                                                                   |
+| ---------------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Vklopljeno, ko je nastavljen URL | `0`, `false`, `off` ali `no` izklopi mehanizem pinganja. V plačljivih paketih ga izklopite, če redne zahteve niso potrebne.                                                                                            |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`            | Osnovni javni URL. Render zagotavlja `RENDER_EXTERNAL_URL` za spletne storitve in statična spletna mesta; glejte [referenco okoljskih spremenljivk](https://render.com/docs/environment-variables).                    |
+| `SELF_PING_PATH`             | `/api/monitoring/health`         | Začeti se mora z `/` in se razrešiti v isti izvor (origin) kot osnovni URL. Neveljaven URL ali pot izklopi mehanizem pinganja in sproži opozorilo.                                                                     |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                            | Število sekund med zahtevami; prva zahteva se izvede po 60 sekundah. Razčlenjena vrednost mora biti med `30` in `2147483`, vključno z mejama; neveljavne vrednosti ali vrednosti zunaj razpona se nadomestijo z `180`. |
+
+Storitev, ki deluje ves mesec z 31 dnevi, porabi 744 ur instance. To porabo primerjajte s trenutno brezplačno kvoto Render, ki si jo deli celoten delovni prostor.
+
 ## Scenariji uvajanja
 
 Za smernice SRE za posredniško zaledje (obnašanje ts/bifrost/auto, umestitev 9router v primerjavi s CLIProxyAPI in strategijo nadomestnega delovanja pri visoki prepustnosti) glejte [Strategija posredniškega zaledja](/docs/reference/RELAY_BACKEND_STRATEGY.md).

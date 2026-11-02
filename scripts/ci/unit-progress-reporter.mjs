@@ -1,5 +1,6 @@
 import { closeSync, mkdirSync, openSync, writeSync } from "node:fs";
 import { join, relative, resolve, sep } from "node:path";
+import { createUnitDiagnostics, diagnosticIdentity } from "./unit-diagnostics.mjs";
 
 const PREFIX = "[unit-progress] ";
 const PHASES = new Set(["primary", "dashboard", "serial"]);
@@ -14,6 +15,7 @@ function identity(environment) {
     sha: keep("GITHUB_SHA", /^[0-9a-f]{40}$/),
     runId: keep("GITHUB_RUN_ID", /^\d+$/),
     runAttempt: keep("GITHUB_RUN_ATTEMPT", /^\d+$/),
+    ...diagnosticIdentity(environment),
   };
 }
 
@@ -37,7 +39,10 @@ function artifactSink(cwd, metadata) {
     mkdirSync(directory, { recursive: true });
     const shard = (metadata.shard || "unknown").replace("/", "-of-");
     descriptor = openSync(
-      join(directory, `${metadata.phase}-${shard}-${process.pid}.jsonl`),
+      join(
+        directory,
+        `${metadata.phase}-${shard}-${metadata.invocationId || "unbound"}-${process.pid}.jsonl`
+      ),
       "wx",
       0o600
     );
@@ -67,7 +72,7 @@ function artifactSink(cwd, metadata) {
   };
 }
 
-/** Observe file wrappers only; never change test selection, signals, or exit codes. */
+/** Metadata-only diagnostics; never change test selection, signals, or exit codes. */
 export async function* createUnitProgressReporter(source, options = {}) {
   const cwd = options.cwd || process.cwd();
   const metadata = identity(options.environment || process.env);
@@ -76,11 +81,12 @@ export async function* createUnitProgressReporter(source, options = {}) {
   const sink = options.sink || artifactSink(cwd, metadata);
   const active = new Map();
   const completed = new Set();
+  const diagnostics = createUnitDiagnostics(cwd);
   const startedAt = now();
   let startedFiles = 0;
   let timer;
   const record = (event, extra = {}) => ({
-    schemaVersion: 1,
+    schemaVersion: 2,
     event,
     ...metadata,
     at: new Date(now()).toISOString(),
@@ -118,6 +124,8 @@ export async function* createUnitProgressReporter(source, options = {}) {
       }
       if (received.result.done) break;
       const event = received.result.value;
+      const failure = diagnostics.observe(event);
+      if (failure) sink.write(record("test-failure", failure));
       const file = wrapperFile(event, cwd);
       if (file && event.type === "test:dequeue" && !active.has(file) && !completed.has(file)) {
         active.set(file, now());
@@ -136,7 +144,13 @@ export async function* createUnitProgressReporter(source, options = {}) {
       }
       next = iterator.next().then((result) => ({ result }));
     }
-    const end = snapshot("phase-end");
+    const end = {
+      ...snapshot("phase-end"),
+      diagnostics: diagnostics.snapshot({
+        activeFiles: active.size,
+        artifactWriteFailed: Boolean(sink.failed),
+      }),
+    };
     sink.write(end);
     yield line(end);
   } finally {

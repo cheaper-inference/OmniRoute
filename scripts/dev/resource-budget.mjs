@@ -56,7 +56,7 @@ function usage() {
     "usage:",
     "  resource-budget.mjs reserve --common-dir DIR --reserve-bytes N --floor-bytes N --purpose LABEL --owner-pid PID [--json]",
     "  resource-budget.mjs status --common-dir DIR [--json]",
-    "  resource-budget.mjs check --common-dir DIR --lease ID.TOKEN [--json]",
+    "  resource-budget.mjs check --common-dir DIR --lease ID.TOKEN [--mode headroom|running] [--json]",
     "  resource-budget.mjs resize --common-dir DIR --lease ID.TOKEN --reserve-bytes N [--json]",
     "  resource-budget.mjs transfer-owner --common-dir DIR --lease ID.TOKEN --owner-pid PID [--json]",
     "  resource-budget.mjs release --common-dir DIR --lease ID.TOKEN [--json]",
@@ -67,7 +67,7 @@ function usage() {
 const OPTION_NAMES = {
   reserve: "common-dir reserve-bytes floor-bytes purpose owner-pid json",
   status: "common-dir json",
-  check: "common-dir lease json",
+  check: "common-dir lease mode json",
   resize: "common-dir lease reserve-bytes json",
   "transfer-owner": "common-dir lease owner-pid json",
   release: "common-dir lease json",
@@ -303,6 +303,30 @@ function highestFloor(leases, candidate = 0n) {
 export function evaluateAdmission({ available, reserved, requested, floor }) {
   const remaining = available - reserved - requested;
   return { allowed: remaining >= floor, remaining };
+}
+
+// Admission and default checks protect all reservations as remaining headroom.
+// An authenticated running workload may consume its own reservation; other
+// reservations and the highest floor stay fully protected. This is not a quota.
+export function evaluateLeaseCheck({ available, reserved, ownReserved, floor, mode = "headroom" }) {
+  if (mode !== "headroom" && mode !== "running") {
+    throw new CliError("--mode must be headroom or running", EXIT_USAGE);
+  }
+  if (
+    typeof available !== "bigint" ||
+    [reserved, ownReserved, floor].some((value) => typeof value !== "bigint" || value < 0n) ||
+    ownReserved > reserved
+  ) {
+    throw new CliError("invalid lease capacity accounting", EXIT_STATE);
+  }
+  const chargedReserved = mode === "running" ? reserved - ownReserved : reserved;
+  const admission = evaluateAdmission({
+    available,
+    reserved: chargedReserved,
+    requested: 0n,
+    floor,
+  });
+  return { ...admission, chargedReserved };
 }
 
 function parseMilliseconds(value, name, fallback) {
@@ -831,7 +855,14 @@ function checkLocked(options, paths) {
   const available = availableBytes(paths.commonDir);
   const reserved = sumReserved(ledger.leases);
   const floor = highestFloor(ledger.leases);
-  const admission = evaluateAdmission({ available, reserved, requested: 0n, floor });
+  const mode = options.optional("mode") ?? "headroom";
+  const admission = evaluateLeaseCheck({
+    available,
+    reserved,
+    ownReserved: BigInt(lease.reservedBytes),
+    floor,
+    mode,
+  });
   if (!admission.allowed) {
     throw new CliError(
       `capacity check denied: available=${available} reserved=${reserved} floor=${floor}`,
@@ -842,6 +873,9 @@ function checkLocked(options, paths) {
     {
       checked: id,
       identity: classification.identity,
+      mode,
+      chargedReservedBytes: admission.chargedReserved.toString(),
+      effectiveFloorBytes: floor.toString(),
       reservedBytes: lease.reservedBytes,
       floorBytes: lease.floorBytes,
       remainingBytes: admission.remaining.toString(),

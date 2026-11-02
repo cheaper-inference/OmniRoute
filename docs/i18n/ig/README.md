@@ -1305,7 +1305,7 @@ Metrik iwu na 2026-10-18: **vidiyo pụrụ iche 1.976** · **nlele amaara 20.22
   <tr><td nowrap><b>Gbaa ọsọ</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Asụsụ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> n'ime <code>src/</code> na <code>open-sse/</code> niile (enweghị <code>any</code> na isi sistemụ kemgbe v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modul ngalaba 147, mbugharị 219</td></tr>
+  <tr><td nowrap><b>Ebe nchekwa data</b></td><td>better-sqlite3 (SQLite, ndekọ WAL) + LowDB (JSON ochie) — modul ngalaba 147, mbugharị 220</td></tr>
   <tr><td nowrap><b>Ebe nchekwa echiche</b></td><td>Ọchụchọ ederede zuru ezu nke SQLite FTS5 + embeddings vector e mere quantization int8, mbelata nwere ụdị</td></tr>
   <tr><td nowrap><b>Schema</b></td><td>Zod 4 — nkwado izi ezi I/O nke ngwa MCP + nkwekọrịta API</td></tr>
   <tr><td nowrap><b>Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

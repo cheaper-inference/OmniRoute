@@ -1394,6 +1394,19 @@ Fún àwọn aṣàmúlò láyè láti jabo àwọn ìṣòro tààrà láti Das
 
 ---
 
+## Jíjẹ́ kí iṣẹ́ máa ṣiṣẹ́ lórí ètò ọ̀fẹ́ Render
+
+Render máa ń fi iṣẹ́ wẹẹbu ọ̀fẹ́ sí ipò oorun lẹ́yìn ìṣẹ́jú 15 tí kò bá sí ìṣàn dátà tí ń wọlé ([àwọn ààlà iṣẹ́ ọ̀fẹ́](https://render.com/docs/free)). Ètò ìbẹ̀rẹ̀ adádúró (`scripts/dev/run-standalone.mjs`, tí àwòrán Docker ń lò) lè máa fi ìbéèrè ṣọwọ́ sí URL gbangba iṣẹ́ náà ní àkókò dé àkókò. Ètò ìfiránṣẹ́ yìí wà ní pípa bí URL kò bá sí; ó ń kọ sí àkọsílẹ̀ nígbà tí a bá mú un ṣiṣẹ́, lẹ́yìn náà ó ń ròyìn kìkì àyípadà nínú àbájáde àwọn ìbéèrè. Àwọn ìbéèrè kì í tẹ̀lé àtúndarí.
+
+| Oníyípadà                    | Iye àiyipada                    | Àlàyé                                                                                                                                                                                                                  |
+| ---------------------------- | ------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Ó ń ṣiṣẹ́ nígbà tí a bá ṣètò URL | `0`, `false`, `off` tàbí `no` máa ń pa ètò ping. Pa á lórí àwọn ètò tí a ń sanwó fún bí àwọn ìbéèrè àtìgbàdégbà kò bá pọndandan.                                                                                       |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`           | URL ìpìlẹ̀ tó hàn sí gbangba. Render ń pèsè `RENDER_EXTERNAL_URL` fún àwọn iṣẹ́ wẹẹbu àti àwọn ojúlé wẹẹbu static; wo [ìtọ́kasí àwọn oníyípadà àyíká](https://render.com/docs/environment-variables).                     |
+| `SELF_PING_PATH`             | `/api/monitoring/health`        | Ó gbọdọ̀ bẹ̀rẹ̀ pẹ̀lú `/`, kí àdírẹ́sì tí a bá yanjú sì ní orísun (origin) kan náà pẹ̀lú URL ìpìlẹ̀. URL tàbí ọ̀nà tí kò tọ́ máa ń pa ètò ping pẹ̀lú ìkìlọ̀.                                                                      |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                           | Ìwọ̀n ìṣẹ́jú-àáyá láàárín àwọn ìbéèrè; ìbéèrè àkọ́kọ́ máa ń lọ lẹ́yìn ìṣẹ́jú-àáyá 60. Iye tí a rí lẹ́yìn ìtúpalẹ̀ gbọdọ̀ wà láti `30` dé `2147483`, pẹ̀lú àwọn ààlà méjèèjì; iye tí kò tọ́ tàbí tó kọjá ààlà máa ń padà sí `180`. |
+
+Iṣẹ́ tí ó ń ṣiṣẹ́ jálẹ̀ oṣù tí ó ní ọjọ́ 31 máa ń lo wákàtí instance 744. Fi lílò yẹn wé ìpín lílò ọ̀fẹ́ Render ti lọ́wọ́lọ́wọ́, tí a pín ká gbogbo àyè iṣẹ́.
+
 ## Àwọn Ìlànà Ìmúṣiṣẹ́
 
 Fún ìtọ́sọ́nà SRE ti backend relay (ìhùwàsí ts/bifrost/auto, ìṣètò 9router ní ìfiwéra pẹ̀lú CLIProxyAPI, àti ọgbọ́n fallback fún ìṣàn-gíga), wo [Ọgbọ́n Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

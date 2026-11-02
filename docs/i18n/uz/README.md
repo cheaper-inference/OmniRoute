@@ -1308,7 +1308,7 @@ bitta port orqali xizmat koʻrsatiladi, shuning uchun hozircha faqat CLI uchun a
   <tr><td nowrap><b>Ishlash muhiti</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Til</b></td><td>TypeScript 6.0 — <code>src/</code> va <code>open-sse/</code> bo‘ylab <b>100% TypeScript</b> (v2.0 dan beri asosiy qismda <code>any</code> umuman yo‘q)</td></tr>
   <tr><td nowrap><b>Freymvork</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (eski JSON) — 147 ta domen moduli, 219 ta migratsiya</td></tr>
+  <tr><td nowrap><b>Ma’lumotlar bazasi</b></td><td>better-sqlite3 (SQLite, WAL jurnallash) + LowDB (eski JSON) — 147 ta domen moduli, 220 ta migratsiya</td></tr>
   <tr><td nowrap><b>Xotira</b></td><td>SQLite FTS5 to‘liq matnli qidiruvi + int8-kvantlangan vektorli embeddinglar, tiplashtirilgan eskirish</td></tr>
   <tr><td nowrap><b>Sxemalar</b></td><td>Zod 4 — MCP vositalarining kirish/chiqish ma’lumotlarini tekshirish + API shartnomalari</td></tr>
   <tr><td nowrap><b>Protokollar</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

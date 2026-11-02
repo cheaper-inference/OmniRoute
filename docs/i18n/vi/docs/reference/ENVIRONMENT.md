@@ -1424,6 +1424,19 @@ Cho phép người dùng báo cáo sự cố trực tiếp từ Dashboard.
 
 ---
 
+## Duy trì hoạt động trên gói miễn phí của Render
+
+Render đưa dịch vụ web miễn phí về trạng thái ngủ sau 15 phút không có lưu lượng truy cập vào ([giới hạn của dịch vụ miễn phí](https://render.com/docs/free)). Trình khởi chạy độc lập (`scripts/dev/run-standalone.mjs`, được image Docker sử dụng) có thể định kỳ gửi yêu cầu đến URL công khai của dịch vụ. Cơ chế này vẫn tắt khi không có URL, ghi log lúc được bật, sau đó chỉ báo cáo những thay đổi về kết quả yêu cầu. Các yêu cầu không đi theo chuyển hướng.
+
+| Biến                         | Mặc định                 | Mô tả                                                                                                                                                                                                      |
+| ---------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Bật khi đã đặt URL       | `0`, `false`, `off` hoặc `no` sẽ tắt cơ chế ping. Hãy tắt cơ chế này trên các gói trả phí nếu không cần gửi yêu cầu định kỳ.                                                                               |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | URL cơ sở công khai. Render cung cấp `RENDER_EXTERNAL_URL` cho dịch vụ web và trang web tĩnh; xem [tài liệu tham chiếu biến môi trường](https://render.com/docs/environment-variables).                    |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | Phải bắt đầu bằng `/` và sau khi phân giải phải có cùng nguồn gốc (origin) với URL cơ sở. URL hoặc đường dẫn không hợp lệ sẽ tắt cơ chế ping và đưa ra cảnh báo.                                           |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | Số giây giữa các yêu cầu; yêu cầu đầu tiên được gửi sau 60 giây. Giá trị sau khi phân tích phải nằm từ `30` đến `2147483`, bao gồm cả hai giới hạn; giá trị không hợp lệ hoặc ngoài phạm vi sẽ dùng `180`. |
+
+Một dịch vụ chạy suốt tháng có 31 ngày sẽ tiêu thụ 744 giờ chạy instance. Hãy so sánh mức sử dụng đó với hạn mức miễn phí hiện tại của Render, được dùng chung trong toàn bộ không gian làm việc.
+
 ## Các kịch bản triển khai
 
 Để biết hướng dẫn SRE cho backend chuyển tiếp (hành vi ts/bifrost/auto, vị trí triển khai 9router so với CLIProxyAPI và chiến lược dự phòng cho thông lượng cao), hãy xem [Chiến lược backend chuyển tiếp](/docs/reference/RELAY_BACKEND_STRATEGY.md).

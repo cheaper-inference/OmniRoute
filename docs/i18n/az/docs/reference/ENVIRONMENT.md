@@ -1406,6 +1406,19 @@ onları dəyişdirmək mühit dəyişəni ilə yox, kod düzəlişi ilə mümkü
 
 ---
 
+## Render-in pulsuz planında xidməti aktiv saxlamaq
+
+Render daxil olan trafik olmadan 15 dəqiqə keçdikdən sonra pulsuz veb xidmətini yuxu rejiminə keçirir ([pulsuz xidmət məhdudiyyətləri](https://render.com/docs/free)). Müstəqil başladıcı (Docker obrazının istifadə etdiyi `scripts/dev/run-standalone.mjs`) vaxtaşırı xidmətin ictimai URL-inə sorğu göndərə bilər. URL olmadıqda bu sorğuların göndərilməsi söndürülmüş qalır. Aktivləşdirildikdə bunu jurnala yazır, sonra yalnız sorğuların nəticələrindəki dəyişiklikləri bildirir. Sorğular yönləndirmələri izləmir.
+
+| Dəyişən                      | Standart dəyər               | Təsvir                                                                                                                                                                                                                                   |
+| ---------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | URL təyin edildikdə aktivdir | `0`, `false`, `off` və ya `no` sorğu göndəricisini söndürür. Dövri sorğular lazım deyilsə, ödənişli planlarda onu söndürün.                                                                                                              |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`        | İctimai əsas URL. Render veb xidmətləri və statik saytlar üçün `RENDER_EXTERNAL_URL` təqdim edir; [mühit dəyişənləri arayışına](https://render.com/docs/environment-variables) baxın.                                                    |
+| `SELF_PING_PATH`             | `/api/monitoring/health`     | `/` ilə başlamalı və əsas URL ilə eyni mənbəyə aid ünvana həll olunmalıdır. Etibarsız URL və ya yol sorğu göndəricisini xəbərdarlıqla söndürür.                                                                                          |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                        | Sorğular arasındakı saniyələr; ilk sorğu 60 saniyədən sonra göndərilir. Təhlil edilmiş dəyər hər iki sərhəd daxil olmaqla `30` ilə `2147483` arasında olmalıdır; etibarsız və ya aralıqdan kənar dəyərlər əvəzinə `180` istifadə olunur. |
+
+31 günlük ay boyunca işləyən xidmət 744 instansiya saatı sərf edir. Bu istifadəni Render-in bütün iş sahəsi üzrə paylaşılan cari pulsuz limiti ilə müqayisə edin.
+
 ## Yerləşdirmə Ssenariləri
 
 Relay backend üçün SRE təlimatları (`ts`/`bifrost`/`auto` davranışı, 9router və CLIProxyAPI yerləşdirilməsi, eləcə də yüksək ötürmə qabiliyyətli ehtiyat strategiyası) üçün [Relay Backend Strategiyasına](/docs/reference/RELAY_BACKEND_STRATEGY.md) baxın.

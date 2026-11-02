@@ -1385,6 +1385,19 @@ Kwe ka ndị ọrụ nwee ike ịkọ nsogbu ozugbo site na Dashboard.
 
 ---
 
+## Idobe Ọrụ Ka Ọ Na-arụ na Atụmatụ Render N’efu
+
+Render na-akwụsị ọrụ weebụ n’efu mgbe nkeji 15 gafere na-enweghị okporo ụzọ data na-abata ([oke ọrụ n’efu](https://render.com/docs/free)). Ihe mmalite nọọrọ onwe ya (`scripts/dev/run-standalone.mjs`, nke onyonyo Docker na-eji) nwere ike iziga arịrịọ ugboro ugboro n’oge a kara aka na URL ọha nke ọrụ ahụ. Ọ na-anọgide agbanyụghị ma URL adịghị, na-edekọ mgbe a gbanyere ya, ma emesịa na-akọ naanị mgbanwe na nsonaazụ arịrịọ. Arịrịọ anaghị eso ntụgharị gaa adreesị ọzọ.
+
+| Ihe na-agbanwe               | Uru ndabara                   | Nkọwa                                                                                                                                                                                                          |
+| ---------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | A na-agbanye mgbe edobere URL | `0`, `false`, `off` ma ọ bụ `no` na-agbanyụ ọrụ iziga ping. Gbanyụọ ya na atụmatụ a na-akwụ ụgwọ ma ọ bụrụ na arịrịọ a na-eziga n’oge a kara aka adịghị mkpa.                                                  |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`         | URL ntọala ọha. Render na-enye `RENDER_EXTERNAL_URL` maka ọrụ weebụ na saịtị kwụ ọtọ; lee [ntụaka ya maka ihe na-agbanwe na gburugburu](https://render.com/docs/environment-variables).                        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`      | Ọ ga-amalite na `/` ma dozie gaa n’otu origin dị ka URL ntọala. URL ma ọ bụ ụzọ na-adịghị irè na-agbanyụ ọrụ iziga ping ma nye ịdọ aka ná ntị.                                                                 |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                         | Sekọnd dị n’etiti arịrịọ; arịrịọ mbụ na-agba mgbe sekọnd 60 gachara. Uru a gụpụtara ga-adị site na `30` ruo `2147483`, gụnyere ókè abụọ ahụ; uru na-adịghị irè ma ọ bụ nọ n’èzí ókè ahụ na-alaghachi na `180`. |
+
+Ọrụ na-agba n’oge niile nke ọnwa nwere ụbọchị 31 na-eji awa instans 744. Tụnyere ojiji ahụ na oke ojiji n’efu nke Render dị ugbu a, nke a na-ekekọrịta n’ofe oghere ọrụ.
+
 ## Ọnọdụ Mbuga
 
 Maka ntuziaka SRE nke backend relay (omume ts/bifrost/auto, ebe a ga-edowe 9router ma e jiri ya tụnyere CLIProxyAPI, na atụmatụ ndabere maka oke ọsọ mbufe), lee [Atụmatụ Backend Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

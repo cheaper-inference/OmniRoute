@@ -1400,6 +1400,19 @@ Omogućite korisnicima prijavljivanje problema izravno s nadzorne ploče.
 
 ---
 
+## Održavanje usluge aktivnom na besplatnom planu Rendera
+
+Render uspavljuje besplatnu web-uslugu nakon 15 minuta bez dolaznog prometa ([ograničenja besplatne usluge](https://render.com/docs/free)). Samostalni pokretač (`scripts/dev/run-standalone.mjs`, koji upotrebljava Docker slika) može povremeno slati zahtjeve na javni URL usluge. Bez URL-a ta funkcija ostaje isključena. Uključivanje se zapisuje u dnevnik, a nakon toga prijavljuju se samo promjene u ishodu zahtjeva. Zahtjevi ne slijede preusmjeravanja.
+
+| Varijabla                    | Zadana vrijednost                | Opis                                                                                                                                                                                                                                |
+| ---------------------------- | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Uključeno kada je URL postavljen | `0`, `false`, `off` ili `no` isključuje slanje zahtjeva. Isključite ga na plaćenim planovima ako periodični zahtjevi nisu potrebni.                                                                                                 |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`            | Javni osnovni URL. Render pruža `RENDER_EXTERNAL_URL` za web-usluge i statičke stranice; pogledajte [referencu varijabli okruženja](https://render.com/docs/environment-variables).                                                 |
+| `SELF_PING_PATH`             | `/api/monitoring/health`         | Mora počinjati znakom `/` i razriješiti se u adresu istog podrijetla kao osnovni URL. Neispravan URL ili putanja isključuje slanje zahtjeva uz upozorenje.                                                                          |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                            | Broj sekundi između zahtjeva; prvi zahtjev izvršava se nakon 60 sekundi. Parsirana vrijednost mora biti od `30` do `2147483`, uključujući obje granice; neispravne vrijednosti ili vrijednosti izvan raspona zamjenjuju se s `180`. |
+
+Usluga koja radi tijekom cijelog mjeseca od 31 dana troši 744 sata instance. Usporedite tu potrošnju s trenutačnom besplatnom kvotom Rendera, koja se dijeli u cijelom radnom prostoru.
+
 ## Scenariji implementacije
 
 Za SRE smjernice za pozadinski sustav releja (ponašanje ts/bifrost/auto, pozicioniranje 9router u odnosu na CLIProxyAPI i strategiju zamjenskog rješenja za veliku propusnost) pogledajte [Strategija pozadinskog sustava releja](/docs/reference/RELAY_BACKEND_STRATEGY.md).

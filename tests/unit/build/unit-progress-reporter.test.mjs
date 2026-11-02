@@ -71,9 +71,9 @@ test("records isolated file boundaries without test descriptions, output or erro
   ]);
   assert.deepEqual(
     result.records.map((record) => record.event),
-    ["phase-start", "file-start", "file-end", "phase-end"]
+    ["phase-start", "file-start", "test-failure", "file-end", "phase-end"]
   );
-  assert.equal(result.records[2].passed, false);
+  assert.equal(result.records.find((record) => record.event === "file-end").passed, false);
   assert.equal(result.output.at(-1).startedFiles, 1);
   assert.equal(result.output.at(-1).completedFiles, 1);
   assert.deepEqual(result.output.at(-1).activeFiles, []);
@@ -153,6 +153,8 @@ for (const fail of [false, true]) {
     assert.equal(frames.at(-1).event, "phase-end");
     assert.equal(frames.at(-1).startedFiles, 1);
     assert.equal(frames.at(-1).completedFiles, 1);
+    assert.equal(frames.at(-1).diagnostics.evidenceState, "COMPLETE");
+    assert.equal(frames.at(-1).diagnostics.summary.success, !fail);
     assert.doesNotMatch(observed.stderr, /PRIVATE_TEST_NAME/);
   });
 }

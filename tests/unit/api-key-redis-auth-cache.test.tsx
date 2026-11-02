@@ -28,6 +28,7 @@ vi.stubEnv("NODE_ENV", "production");
 vi.stubEnv("OMNIROUTE_DISABLE_REDIS_AUTH_CACHE", undefined);
 const core = await import("@/lib/db/core");
 const apiKeys = await import("@/lib/db/apiKeys");
+core.getDbInstance();
 // Regeneration lazily loads the real audit module; prepare that dependency too.
 await import("@/lib/compliance");
 await import("@/shared/utils/apiKey");

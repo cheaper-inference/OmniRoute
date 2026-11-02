@@ -1403,6 +1403,19 @@ to maiņai nepieciešama koda labošana, nevis vides mainīgais:
 
 ---
 
+## Pakalpojuma darbības uzturēšana Render bezmaksas plānā
+
+Render aptur bezmaksas tīmekļa pakalpojumu pēc 15 minūtēm bez ienākošās datplūsmas ([bezmaksas pakalpojumu ierobežojumi](https://render.com/docs/free)). Patstāvīgais palaidējs (`scripts/dev/run-standalone.mjs`, ko izmanto Docker attēls) var periodiski sūtīt pieprasījumus uz pakalpojuma publisko URL. Bez URL tas paliek izslēgts, ieslēgšanu ieraksta žurnālā un pēc tam ziņo tikai par pieprasījumu rezultātu izmaiņām. Pieprasījumi neseko pāradresācijām.
+
+| Mainīgais                    | Noklusējuma vērtība          | Apraksts                                                                                                                                                                                                                   |
+| ---------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Ieslēgts, ja ir norādīts URL | `0`, `false`, `off` vai `no` izslēdz periodisko pieprasījumu sūtītāju. Maksas plānos izslēdziet to, ja periodiski pieprasījumi nav vajadzīgi.                                                                              |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`        | Publiskais bāzes URL. Render nodrošina `RENDER_EXTERNAL_URL` tīmekļa pakalpojumiem un statiskām vietnēm; skatiet tā [vides mainīgo uzziņu](https://render.com/docs/environment-variables).                                 |
+| `SELF_PING_PATH`             | `/api/monitoring/health`     | Jāsākas ar `/` un jāatrisinās uz to pašu izcelsmi kā bāzes URL. Nederīgs URL vai ceļš izslēdz periodisko pieprasījumu sūtītāju un izvada brīdinājumu.                                                                      |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                        | Sekundes starp pieprasījumiem; pirmais pieprasījums tiek veikts pēc 60 sekundēm. Parsētajai vērtībai jābūt no `30` līdz `2147483`, ieskaitot abas robežas; nederīgu vai ārpus diapazona esošu vērtību vietā izmanto `180`. |
+
+Pakalpojums, kas darbojas visu 31 dienas mēnesi, patērē 744 instances stundas. Salīdziniet šo patēriņu ar pašreizējo Render bezmaksas kvotu, kas tiek koplietota darbvietā.
+
 ## Izvietošanas scenāriji
 
 Norādījumus releja aizmugursistēmas SRE vajadzībām (ts/bifrost/auto darbība, 9router un CLIProxyAPI izvietojums, kā arī augstas caurlaidspējas atkāpšanās stratēģija) skatiet sadaļā [Releja aizmugursistēmas stratēģija](/docs/reference/RELAY_BACKEND_STRATEGY.md).

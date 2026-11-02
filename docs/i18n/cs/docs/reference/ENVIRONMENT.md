@@ -1395,6 +1395,19 @@ Umožňuje uživatelům hlásit problémy přímo z Dashboardu.
 
 ---
 
+## Udržování služby aktivní v bezplatném tarifu Render
+
+Render uspí bezplatnou webovou službu po 15 minutách bez příchozího provozu ([omezení bezplatné služby](https://render.com/docs/free)). Samostatný spouštěč (`scripts/dev/run-standalone.mjs`, používaný obrazem Dockeru) může pravidelně odesílat požadavky na veřejnou URL služby. Bez URL zůstává toto odesílání vypnuté. Při zapnutí se zapíše zpráva do protokolu; poté se hlásí pouze změny výsledků požadavků. Požadavky nenásledují přesměrování.
+
+| Proměnná                     | Výchozí hodnota                 | Popis                                                                                                                                                                                                    |
+| ---------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Zapnuto, pokud je nastavena URL | Hodnota `0`, `false`, `off` nebo `no` vypne odesílání požadavků. U placených tarifů je vypněte, pokud pravidelné požadavky nejsou potřeba.                                                               |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`           | Veřejná základní URL. Render poskytuje `RENDER_EXTERNAL_URL` pro webové služby a statické weby; viz [referenční příručka proměnných prostředí](https://render.com/docs/environment-variables).           |
+| `SELF_PING_PATH`             | `/api/monitoring/health`        | Musí začínat znakem `/` a vyhodnotit se na adresu se stejným původem jako základní URL. Neplatná URL nebo cesta vypne odesílání požadavků s varováním.                                                   |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                           | Počet sekund mezi požadavky; první požadavek se provede po 60 sekundách. Zpracovaná hodnota musí být od `30` do `2147483` včetně; neplatné hodnoty nebo hodnoty mimo rozsah se nahrazují hodnotou `180`. |
+
+Služba běžící po celý měsíc o 31 dnech spotřebuje 744 hodin instance. Porovnejte tuto spotřebu s aktuálním bezplatným přídělem Renderu, který je sdílen v celém pracovním prostoru.
+
 ## Scénáře nasazení
 
 Pokyny pro SRE týkající se backendu relay (chování ts/bifrost/auto, umístění 9router oproti CLIProxyAPI a záložní strategie pro vysokou propustnost) naleznete v dokumentu [Strategie backendu relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

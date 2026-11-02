@@ -1316,7 +1316,7 @@ port-இல் ஒரே process மூலம் வழங்கப்படு�
   <tr><td nowrap><b>இயக்கச் சூழல்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் மையப் பகுதியில் <code>any</code> எதுவுமில்லை)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL பதிவேடு) + LowDB (JSON மரபமைப்பு) — 147 களத் தொகுதிகள், 219 இடம்பெயர்வுகள்</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL பதிவேடு) + LowDB (JSON மரபமைப்பு) — 147 களத் தொகுதிகள், 220 இடம்பெயர்வுகள்</td></tr>
   <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-அளவீடாக்கப்பட்ட திசையன் உட்பொதிவுகள், வகையிடப்பட்ட சிதைவு</td></tr>
   <tr><td nowrap><b>திட்டவரைகள்</b></td><td>Zod 4 — MCP கருவி உள்ளீடு/வெளியீடு சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

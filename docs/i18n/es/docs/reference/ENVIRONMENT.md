@@ -1422,6 +1422,19 @@ Permite a los usuarios informar de problemas directamente desde el panel de cont
 
 ---
 
+## Mantener activo el servicio en el plan gratuito de Render
+
+Render pone en reposo un servicio web gratuito tras 15 minutos sin tráfico entrante ([límites del servicio gratuito](https://render.com/docs/free)). El lanzador independiente (`scripts/dev/run-standalone.mjs`, utilizado por la imagen de Docker) puede enviar solicitudes periódicas a la URL pública del servicio. Sin una URL, esta función permanece desactivada. Registra su activación y después informa únicamente de los cambios en el resultado de las solicitudes. Las solicitudes no siguen redirecciones.
+
+| Variable                     | Valor predeterminado                 | Descripción                                                                                                                                                                                                                 |
+| ---------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Activado cuando se configura una URL | `0`, `false`, `off` o `no` desactiva el envío de solicitudes. Desactívalo en los planes de pago si las solicitudes periódicas no son necesarias.                                                                            |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`                | URL base pública. Render proporciona `RENDER_EXTERNAL_URL` para servicios web y sitios estáticos; consulta su [referencia de variables de entorno](https://render.com/docs/environment-variables).                          |
+| `SELF_PING_PATH`             | `/api/monitoring/health`             | Debe comenzar con `/` y resolverse a una dirección del mismo origen que la URL base. Una URL o una ruta no válida desactiva el envío de solicitudes con una advertencia.                                                    |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                                | Segundos entre solicitudes; la primera solicitud se ejecuta después de 60 segundos. El valor analizado debe estar entre `30` y `2147483`, ambos incluidos; los valores no válidos o fuera de rango se sustituyen por `180`. |
+
+Un servicio que funciona durante un mes completo de 31 días consume 744 horas de instancia. Compara ese consumo con la cuota gratuita actual de Render, compartida a escala del espacio de trabajo.
+
 ## Escenarios de despliegue
 
 Para obtener orientación de SRE sobre el backend de relé (comportamiento de ts/bifrost/auto, ubicación de 9router frente a CLIProxyAPI y estrategia de respaldo para alto rendimiento), consulta [Estrategia del backend de relé](/docs/reference/RELAY_BACKEND_STRATEGY.md).

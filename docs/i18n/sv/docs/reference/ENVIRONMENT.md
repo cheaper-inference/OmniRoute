@@ -1427,6 +1427,19 @@ Tillåt användare att rapportera problem direkt från instrumentpanelen.
 
 ---
 
+## Håll tjänsten aktiv i Renders kostnadsfria nivå
+
+Render försätter en kostnadsfri webbtjänst i viloläge efter 15 minuter utan inkommande trafik ([begränsningar för kostnadsfria tjänster](https://render.com/docs/free)). Det fristående startskriptet (`scripts/dev/run-standalone.mjs`, som används av Docker-avbildningen) kan regelbundet skicka anrop till tjänstens publika URL. Funktionen förblir avstängd utan en URL, loggar när den aktiveras och rapporterar därefter bara ändringar i anropens utfall. Anropen följer inte omdirigeringar.
+
+| Variabel                     | Standardvärde                    | Beskrivning                                                                                                                                                                                            |
+| ---------------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | Aktiverad när en URL har angetts | `0`, `false`, `off` eller `no` stänger av pingfunktionen. Stäng av den på betalda planer om regelbundna anrop inte behövs.                                                                             |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`            | Publik bas-URL. Render tillhandahåller `RENDER_EXTERNAL_URL` för webbtjänster och statiska webbplatser; se [referensen för miljövariabler](https://render.com/docs/environment-variables).             |
+| `SELF_PING_PATH`             | `/api/monitoring/health`         | Måste börja med `/` och lösas till samma ursprung (origin) som bas-URL:en. En ogiltig URL eller sökväg stänger av pingfunktionen och ger en varning.                                                   |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                            | Sekunder mellan anrop; det första anropet görs efter 60 sekunder. Det tolkade värdet måste ligga från `30` till och med `2147483`; ogiltiga värden eller värden utanför intervallet ersätts med `180`. |
+
+En tjänst som körs under en hel månad med 31 dagar förbrukar 744 instanstimmar. Jämför förbrukningen med Renders aktuella kostnadsfria tilldelning, som delas av hela arbetsytan.
+
 ## Driftsättningsscenarier
 
 För SRE-vägledning om reläserverdelen (beteendet för ts/bifrost/auto, placering av 9router kontra CLIProxyAPI och reservstrategi för hög genomströmning), se [Strategi för reläserverdelen](/docs/reference/RELAY_BACKEND_STRATEGY.md).

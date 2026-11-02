@@ -1410,6 +1410,19 @@ Salli käyttäjien ilmoittaa ongelmista suoraan Dashboardista.
 
 ---
 
+## Palvelun pitäminen aktiivisena Renderin ilmaisessa palvelutasossa
+
+Render siirtää ilmaisen verkkopalvelun lepotilaan, kun saapuvaa liikennettä ei ole ollut 15 minuuttiin ([ilmaisen palvelun rajoitukset](https://render.com/docs/free)). Erillinen käynnistin (`scripts/dev/run-standalone.mjs`, jota Docker-levykuva käyttää) voi lähettää säännöllisesti pyyntöjä palvelun julkiseen URL-osoitteeseen. Ilman URL-osoitetta toiminto pysyy pois käytöstä. Käyttöönotto kirjataan lokiin, ja sen jälkeen raportoidaan vain pyyntöjen tulosten muutokset. Pyynnöt eivät seuraa uudelleenohjauksia.
+
+| Muuttuja                     | Oletusarvo                           | Kuvaus                                                                                                                                                                                                                               |
+| ---------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `SELF_PING_ENABLED`          | Käytössä, kun URL-osoite on asetettu | `0`, `false`, `off` tai `no` poistaa pyyntöjen lähettäjän käytöstä. Poista se käytöstä maksullisissa palvelupaketeissa, jos säännölliset pyynnöt ovat tarpeettomia.                                                                  |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`                | Julkinen perus-URL. Render tarjoaa muuttujan `RENDER_EXTERNAL_URL` verkkopalveluille ja staattisille sivustoille; katso [ympäristömuuttujien viitedokumentaatio](https://render.com/docs/environment-variables).                     |
+| `SELF_PING_PATH`             | `/api/monitoring/health`             | Sen on alettava merkillä `/` ja muodostettava osoite, jolla on sama alkuperä kuin perus-URL-osoitteella. Virheellinen URL-osoite tai polku poistaa pyyntöjen lähettäjän käytöstä ja antaa varoituksen.                               |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                                | Pyyntöjen väli sekunteina; ensimmäinen pyyntö suoritetaan 60 sekunnin kuluttua. Jäsennetyn arvon on oltava välillä `30`–`2147483`, rajat mukaan lukien; virheelliset tai sallitun alueen ulkopuoliset arvot korvataan arvolla `180`. |
+
+Koko 31 päivän kuukauden ajan toimiva palvelu kuluttaa 744 instanssituntia. Vertaa tätä käyttöä Renderin nykyiseen ilmaiseen kiintiöön, joka jaetaan koko työtilan kesken.
+
 ## Käyttöönottoskenaariot
 
 Välityspalvelimen taustajärjestelmän SRE-ohjeet (ts/bifrost/auto-toiminta, 9routerin ja CLIProxyAPI:n sijoittelu sekä suuren suoritustehon varastrategia) ovat kohdassa [Välityspalvelimen taustajärjestelmästrategia](/docs/reference/RELAY_BACKEND_STRATEGY.md).

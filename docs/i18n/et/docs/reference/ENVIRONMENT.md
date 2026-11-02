@@ -1423,6 +1423,19 @@ Võimaldab kasutajatel teatada probleemidest otse töölaualt.
 
 ---
 
+## Renderi tasuta paketi teenuse aktiivsena hoidmine
+
+Render viib tasuta veebiteenuse puhkerežiimi, kui 15 minuti jooksul pole saabuvat liiklust ([tasuta teenuse piirangud](https://render.com/docs/free)). Eraldiseisev käivitaja (`scripts/dev/run-standalone.mjs`, mida kasutab Dockeri tõmmis) saab perioodiliselt saata päringuid teenuse avalikule URL-ile. Ilma URL-ita jääb see funktsioon välja lülitatuks. Sisselülitamine logitakse ja seejärel teatatakse ainult päringute tulemuste muutustest. Päringud ei järgi ümbersuunamisi.
+
+| Muutuja                      | Vaikeväärtus                 | Kirjeldus                                                                                                                                                                                                                                           |
+| ---------------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Lubatud, kui URL on määratud | `0`, `false`, `off` või `no` lülitab päringute saatmise välja. Tasulistes pakettides lülitage see välja, kui perioodilisi päringuid pole vaja.                                                                                                      |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`        | Avalik baas-URL. Render pakub veebiteenuste ja staatiliste saitide jaoks muutujat `RENDER_EXTERNAL_URL`; vaadake [keskkonnamuutujate viidet](https://render.com/docs/environment-variables).                                                        |
+| `SELF_PING_PATH`             | `/api/monitoring/health`     | Peab algama märgiga `/` ja lahenema baas-URL-iga sama päritoluga aadressiks. Vigane URL või tee lülitab päringute saatmise välja ning annab hoiatuse.                                                                                               |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                        | Sekundid päringute vahel; esimene päring tehakse 60 sekundi pärast. Parsitud väärtus peab olema vahemikus `30` kuni `2147483`, mõlemad piirid kaasa arvatud; vigaste või vahemikust väljaspool olevate väärtuste asemel kasutatakse väärtust `180`. |
+
+Terve 31-päevase kuu töötav teenus kasutab 744 instantsitundi. Võrrelge seda kasutust Renderi praeguse tasuta mahuga, mida jagatakse kogu tööruumi ulatuses.
+
 ## Juurutusstsenaariumid
 
 Relee tagasüsteemi SRE-juhised (ts/bifrost/auto käitumine, 9routeri ja CLIProxyAPI paigutus ning suure läbilaskevõimega varustrateegia) leiate dokumendist [Relee tagasüsteemi strateegia](/docs/reference/RELAY_BACKEND_STRATEGY.md).

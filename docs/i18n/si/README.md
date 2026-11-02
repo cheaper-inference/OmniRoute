@@ -1307,7 +1307,7 @@ process එක මඟින් සපයන බැවින්, දැනට ව
   <tr><td nowrap><b>ධාවන පරිසරය</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>භාෂාව</b></td><td>TypeScript 6.0 — <code>src/</code> සහ <code>open-sse/</code> පුරා <b>100% TypeScript</b> (v2.0 සිට මූලික කොටසෙහි <code>any</code> කිසිවක් නැත)</td></tr>
   <tr><td nowrap><b>රාමුව</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL ජර්නල්කරණය) + LowDB (පැරණි JSON) — වසම් මොඩියුල 147ක්, සංක්රමණ 219ක්</td></tr>
+  <tr><td nowrap><b>දත්ත සමුදාය</b></td><td>better-sqlite3 (SQLite, WAL ජර්නල්කරණය) + LowDB (පැරණි JSON) — වසම් මොඩියුල 147ක්, සංක්රමණ 220ක්</td></tr>
   <tr><td nowrap><b>මතකය</b></td><td>SQLite FTS5 පූර්ණ-පෙළ + int8-ක්වොන්ටීකරණය කළ දෛශික කාවැද්දීම්, වර්ගගත ක්ෂය වීම</td></tr>
   <tr><td nowrap><b>ක්රමලේඛ</b></td><td>Zod 4 — MCP මෙවලම් ආදාන/ප්රතිදාන වලංගුකරණය + API ගිවිසුම්</td></tr>
   <tr><td nowrap><b>ප්රොටෝකෝල</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

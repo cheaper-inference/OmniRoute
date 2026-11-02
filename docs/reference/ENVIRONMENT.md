@@ -1443,6 +1443,24 @@ Allow users to report issues directly from the Dashboard.
 
 ---
 
+## Render Free-Tier Keep-Alive
+
+Render spins down a free web service after 15 minutes without inbound traffic
+([free-service limits](https://render.com/docs/free)). The standalone launcher
+(`scripts/dev/run-standalone.mjs`, used by the Docker image) can periodically request
+the service's public URL. It stays off without a URL, logs when enabled, then reports
+only changes in request outcome. Requests do not follow redirects.
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `SELF_PING_ENABLED` | Enabled when a URL is set | `0`, `false`, `off` or `no` disables the pinger. Disable it on paid plans if periodic requests are unnecessary. |
+| `SELF_PING_URL` | `RENDER_EXTERNAL_URL` | Public base URL. Render provides `RENDER_EXTERNAL_URL` for web services and static sites; see its [environment-variable reference](https://render.com/docs/environment-variables). |
+| `SELF_PING_PATH` | `/api/monitoring/health` | Must start with `/` and resolve to the same origin as the base URL. An invalid URL or path disables the pinger with a warning. |
+| `SELF_PING_INTERVAL_SECONDS` | `180` | Seconds between requests; the first request runs after 60 seconds. The parsed value must be from `30` through `2147483`; invalid or out-of-range values fall back to `180`. |
+
+A service running throughout a 31-day month consumes 744 instance hours. Compare
+that usage with Render's current free allowance, shared across the workspace.
+
 ## Deployment Scenarios
 
 For relay backend SRE guidance (ts/bifrost/auto behavior, 9router vs CLIProxyAPI placement, and high-throughput fallback strategy), see [Relay Backend Strategy](/docs/reference/RELAY_BACKEND_STRATEGY.md).

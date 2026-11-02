@@ -1417,6 +1417,19 @@ Ruhusu watumiaji kuripoti matatizo moja kwa moja kutoka kwenye Dashboard.
 
 ---
 
+## Kudumisha huduma ikiwa hai kwenye mpango wa bure wa Render
+
+Render huweka huduma ya wavuti ya bure katika hali ya kupumzika baada ya dakika 15 bila trafiki inayoingia ([mipaka ya huduma za bure](https://render.com/docs/free)). Kizindua kinachojitegemea (`scripts/dev/run-standalone.mjs`, kinachotumiwa na taswira ya Docker) kinaweza kutuma maombi mara kwa mara kwa URL ya umma ya huduma. Utaratibu huu hubaki umezimwa bila URL, huandika kumbukumbu unapowashwa, kisha huripoti mabadiliko ya matokeo ya maombi pekee. Maombi hayafuati uelekezaji upya.
+
+| Kigezo                       | Thamani chaguomsingi     | Maelezo                                                                                                                                                                                                                     |
+| ---------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Huwashwa URL inapowekwa  | `0`, `false`, `off` au `no` huzima utaratibu wa ping. Uzime kwenye mipango ya kulipia ikiwa maombi ya mara kwa mara hayahitajiki.                                                                                           |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`    | URL ya msingi ya umma. Render hutoa `RENDER_EXTERNAL_URL` kwa huduma za wavuti na tovuti tuli; angalia [rejeleo la vigezo vya mazingira](https://render.com/docs/environment-variables).                                    |
+| `SELF_PING_PATH`             | `/api/monitoring/health` | Lazima ianze na `/` na itatuliwe kuwa na asili (origin) sawa na URL ya msingi. URL au njia isiyo halali huzima utaratibu wa ping na kutoa onyo.                                                                             |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                    | Sekunde kati ya maombi; ombi la kwanza hutumwa baada ya sekunde 60. Thamani iliyochanganuliwa lazima iwe kuanzia `30` hadi `2147483`, ikijumuisha mipaka yote; thamani zisizo halali au zilizo nje ya masafa hutumia `180`. |
+
+Huduma inayofanya kazi katika mwezi mzima wenye siku 31 hutumia saa 744 za instance. Linganisha matumizi hayo na kiwango cha sasa cha matumizi ya bure cha Render, kinachoshirikiwa katika eneo lote la kazi.
+
 ## Matukio ya Usambazaji
 
 Kwa mwongozo wa SRE wa backend ya relay (tabia ya ts/bifrost/auto, uwekaji wa 9router dhidi ya CLIProxyAPI, na mkakati wa dharura wa kiwango cha juu cha upitishaji), angalia [Mkakati wa Backend ya Relay](/docs/reference/RELAY_BACKEND_STRATEGY.md).

@@ -1415,6 +1415,19 @@ Permiteți utilizatorilor să raporteze probleme direct din Panoul de control.
 
 ---
 
+## Menținerea serviciului activ în planul gratuit Render
+
+Render pune în repaus un serviciu web gratuit după 15 minute fără trafic de intrare ([limitele serviciilor gratuite](https://render.com/docs/free)). Lansatorul autonom (`scripts/dev/run-standalone.mjs`, folosit de imaginea Docker) poate trimite periodic cereri către URL-ul public al serviciului. Mecanismul rămâne oprit dacă nu este specificat un URL, înregistrează activarea, apoi raportează doar schimbările rezultatului cererilor. Cererile nu urmează redirecționările.
+
+| Variabilă                    | Valoare implicită              | Descriere                                                                                                                                                                                                        |
+| ---------------------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SELF_PING_ENABLED`          | Activat când este setat un URL | `0`, `false`, `off` sau `no` dezactivează mecanismul de ping. Dezactivați-l în planurile plătite dacă cererile periodice nu sunt necesare.                                                                       |
+| `SELF_PING_URL`              | `RENDER_EXTERNAL_URL`          | URL-ul public de bază. Render furnizează `RENDER_EXTERNAL_URL` pentru servicii web și site-uri statice; consultați [referința variabilelor de mediu](https://render.com/docs/environment-variables).             |
+| `SELF_PING_PATH`             | `/api/monitoring/health`       | Trebuie să înceapă cu `/` și să se rezolve la aceeași origine ca URL-ul de bază. Un URL sau o cale nevalidă dezactivează mecanismul de ping și generează un avertisment.                                         |
+| `SELF_PING_INTERVAL_SECONDS` | `180`                          | Secunde între cereri; prima cerere este trimisă după 60 de secunde. Valoarea rezultată din parsare trebuie să fie între `30` și `2147483`, inclusiv; valorile nevalide sau în afara intervalului revin la `180`. |
+
+Un serviciu care rulează pe toată durata unei luni de 31 de zile consumă 744 de ore de instanță. Comparați acest consum cu alocarea gratuită curentă Render, partajată în întregul spațiu de lucru.
+
 ## Scenarii de implementare
 
 Pentru recomandări SRE privind backendul releu (comportamentul ts/bifrost/auto, amplasarea 9router față de CLIProxyAPI și strategia de rezervă pentru debit ridicat), consultați [Strategia backendului releu](/docs/reference/RELAY_BACKEND_STRATEGY.md).
