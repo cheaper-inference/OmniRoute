@@ -81,7 +81,7 @@ export function usePresets(): UsePresets {
         setLoading(false);
       }
     },
-    [list],
+    [list]
   );
 
   const update = useCallback(
@@ -111,7 +111,7 @@ export function usePresets(): UsePresets {
         setLoading(false);
       }
     },
-    [list],
+    [list]
   );
 
   const remove = useCallback(
@@ -136,7 +136,7 @@ export function usePresets(): UsePresets {
         setLoading(false);
       }
     },
-    [list],
+    [list]
   );
 
   return {

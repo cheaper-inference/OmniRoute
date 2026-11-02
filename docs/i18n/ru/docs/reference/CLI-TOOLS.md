@@ -4,17 +4,17 @@
 
 ---
 
-Последнее обновление: 2026-08-23
+Последнее обновление: 23 августа 2026 г.
 
-OmniRoute интегрируется с тремя категориями CLI-инструментов, представленными на трёх отдельных страницах панели управления:
+OmniRoute интегрируется с тремя категориями инструментов CLI, распределенными по трем выделенным страницам информационной панели:
 
-| Страница       | Маршрут                 | Концепция                                                                               | Количество |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------------- | ---------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Инструменты разработки, направляемые в OmniRoute (Клиент → CLI → OmniRoute → Провайдер) | 26         |
-| **CLI Agents** | `/dashboard/cli-agents` | Автономные агенты, направляемые в OmniRoute (тот же поток, более широкая область задач) | 10         |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI, которые OmniRoute запускает как бэкенд через stdio/ACP (обратный поток)            | см. реестр |
+| Страница       | Маршрут                 | Концепция                                                                                                | Считать           |
+| -------------- | ----------------------- | -------------------------------------------------------------------------------------------------------- | ----------------- |
+| **код CLI**    | `/dashboard/cli-code`   | Инструменты кодирования, которые вы указываете на OmniRoute (клиент → CLI → OmniRoute → поставщик)       | 26                |
+| **Агенты CLI** | `/dashboard/cli-agents` | Автономные агенты, которые вы указываете на OmniRoute (тот же процесс, более широкая область применения) | 11                |
+| **Агенты ACP** | `/dashboard/acp-agents` | CLIs что OmniRoute создается как бэкэнд через stdio/ACP (обратный поток)                                 | посмотреть реестр |
 
-Устаревшие маршруты перенаправляются с кодом 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Устаревшие маршруты перенаправляются через 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -45,7 +45,7 @@ ACP Agents (обратный поток запуска):
 
 ## Автоматическая настройка с помощью `setup-*`
 
-Вам не нужно вручную создавать конфигурацию каждого инструмента. OmniRoute предоставляет команду `setup-*` для каждого поддерживаемого CLI. Она считывает **актуальный** каталог моделей из запущенного экземпляра OmniRoute (локального или удалённого) и записывает собственную конфигурацию инструмента на вашем компьютере:
+Вам не нужно писать конфигурацию каждого инструмента вручную. OmniRoute отправляет команду `setup-*` для каждого поддерживаемого CLI, которая считывает** жить** каталог моделей из работающего OmniRoute (локального или удаленного) и записывает собственную конфигурацию инструмента на ваш компьютер:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -53,19 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Каждая команда принимает `--remote <url> --api-key <key>` (настройка локального инструмента для работы с удалённым OmniRoute), `--dry-run` (предварительный просмотр без записи) и `--port`. Для инструментов без автоматического обнаружения моделей (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) используется `--model <id>` (а для неинтерактивного запуска — также `--yes`). `setup-5dive` — единственный сценарий, который не записывает данные в `$HOME`: он настраивает парк агентов 5dive, записывая на узле парка принадлежащий пользователю root профиль аутентификации, поэтому повторно запускается через `sudo` и не имеет собственного удалённого режима. Чтобы запустить CLI с подставленными нужными переменными окружения, вообще не записывая конфигурацию, используйте универсальный запускатель `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini — цели и псевдонимы определяются в `bin/cli/cli-manifest.mjs`); устаревшие запускатели для отдельных инструментов `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) по-прежнему доступны. Gemini CLI поддерживает только запуск: он является целью `omniroute run`, но для него нет сценария `setup-*`/`configure`.
+Каждый из них поддерживает `--remote <url> --api-key <key>` (настройка локального инструмента для удаленного OmniRoute), `--dry-run` (предварительный просмотр без записи) и `--port`. Инструменты без автоматического обнаружения модели (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) принимают `--model <id>` (и `--yes` для неинтерактивных запусков). `setup-5dive` - это единственный рецепт, который не пишет под `$HOME`: он настраивает флот агентов 5dive, записывая профиль аутентификации, принадлежащий root, на хосте флота, поэтому он повторно выполняется через `sudo` и не имеет собственного удаленного режима. Чтобы запустить CLI с правильным введенным окружением и вообще без написания конфигурации, используйте общий модуль запуска `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, Gemini,Whycodes — цели и псевдонимы берутся из `bin/cli/cli-manifest.mjs`); устаревшие средства запуска для каждого инструмента `omniroute launch` (Claude Code) и `omniroute launch-codex` (Codex) остаются доступными. Gemini CLI предназначен только для запуска: это цель `omniroute run` но у него нет рецепта `setup-*`/`configure`.
 
-> **Полная справочная информация:** основная таблица — что записывает каждая команда, все флаги, локальный и удалённый режимы, а также инструменты, которым требуется суффикс `/v1`, — находится в разделе
-> **[Интеграции CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Полная ссылка:** главная таблица — что записывает каждая команда, каждый флаг, локальный или удаленный, и каким инструментам нужен суффикс `/v1` — находится в** [Интеграция CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### Запуск этих команд внутри контейнера
+### Запуск их внутри контейнера
 
-Команда `setup-*`, выполненная внутри контейнера OmniRoute, записывает данные в домашний каталог самого контейнера, который не используется ни одним CLI на хосте и исчезает вместе с контейнером. OmniRoute обнаруживает это и завершает работу с кодом `2`, выводя инструкции вместо записи данных. Поддерживаются два варианта дальнейших действий: установить CLI на хосте и выполнить `omniroute connect` для подключения к контейнеру либо подключить каталоги конфигурации через bind mount и задать `CLI_CONFIG_HOME` (профиль compose `host`). Каждая команда `setup-*`, а также `omniroute configure` и `omniroute config set`, принимает `--allow-container-write`, если вы действительно намерены настроить собственные CLI контейнера; переменная `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` выполняет ту же задачу для сервера. См.
-[Руководство по Docker → Настройка инструментов CLI на хосте](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Команда `setup-*`, выполняемая внутри контейнера OmniRoute записывает в собственный дом контейнера, который не читается ни одним хостом CLI и который исчезает вместе с контейнером. OmniRoute обнаруживает это и завершает работу `2` с инструкциями, а не с записью. Два поддерживаемых способа продвижения вперед — установить CLI на хосте и `omniroute connect` в контейнере или смонтировать конфигурационные каталоги и установить `CLI_CONFIG_HOME` (составной профиль `host` ). Каждая команда `setup-*`, а также `omniroute configure` и `omniroute config set` принимает `--allow-container-write` при настройке собственного CLIs контейнера — это то, что вы на самом деле имели в виду; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` делает то же самое для сервера. См. [Руководство Docker → Настройка инструментов CLI хоста](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Эндпоинт применения** панели управления (`POST /api/cli-tools/apply`) обеспечивает ту же защиту: в контейнере попытка записи в целевой каталог, не подключённый с хоста через bind mount, получает ответ **`422`** с `containerEphemeralTarget: true`, безопасным текстом ошибки и — для инструментов, имеющих сценарий настройки на хосте (claude, codex, opencode, cline, kilo, continue), — командой `hostSetupCommand` (например, `omniroute setup-opencode`), которую следует выполнить на хосте; при этом ничего не записывается. `dryRun: true` продолжает работать в режиме контейнера и возвращает отредактированный предварительный просмотр и целевой путь, не обращаясь к диску. Содержимое предварительного просмотра не является конфигурацией с учётными данными, которую можно скопировать или импортировать. Выполните применение на хосте с исходными данными инструмента, базового URL, ключа API и модели либо используйте указанную команду настройки на стороне хоста. О заголовке предварительного просмотра и контракте запроса см. в разделе [Безопасность конфигурации CLI](../security/CLI-CONFIGURATION.md). Такое поведение является намеренным и защищено от регрессий тестом `tests/unit/api/cli-tools/apply-container-guard.test.ts` — никогда не «исправляйте» ошибку 422 удалением этой защиты.
+Приборная панель** применить конечную точку** (`POST /api/cli-tools/apply`) обеспечивает ту же защиту: в контейнере отвечает запись, цель которой не привязана к хосту.**`422`** с `containerEphemeralTarget: true`, безопасным текстом ошибки и — для инструментов с рецептом хоста (claude, codex, opencode, cline, kilo, continue) — вместо этого `hostSetupCommand` (например, `omniroute setup-opencode`) для запуска на хосте; ничего не написано. `dryRun: true` продолжает работать в режиме контейнера и возвращает отредактированный целевой путь + для предварительного просмотра, не касаясь диска. Содержимое предварительного просмотра не является конфигурацией с учетными данными для копирования или импорта. Примените исходные входы tool/base URL/API key/model на хосте или используйте указанную команду настройки на стороне хоста. См. [безопасность конфигурации CLI](../security/CLI-CONFIGURATION.md) для заголовка предварительного просмотра и контракта запроса. Такое поведение является преднамеренным и защищено регрессией `tests/unit/api/cli-tools/apply-container-guard.test.ts` — никогда не «исправляйте» ошибку 422, удаляя защиту.
 
 ---
 
@@ -110,57 +109,58 @@ omniroute setup-5dive        omniroute setup-zed
 
 ## 1. Каталог CLI Code (27 инструментов)
 
-Все инструменты, представленные в `/dashboard/cli-code`. Инструменты с `baseUrlSupport: none` подключаются через MITM или настраиваются вручную по инструкции вместо использования собственного базового URL:
+Все инструменты, которые появляются в `/dashboard/cli-code`. Те, у кого есть `baseUrlSupport: none`, подключаются через MITM или руководство вместо пользовательской базы URL:
 
-| id           | название                | поставщик           | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| идентификатор  | имя                           | продавец              | baseUrlSupport | тип конфигурации                    | acpSpawnable |
+| -------------- | ----------------------------- | --------------------- | -------------- | ----------------------------------- | ------------ |
+| Клод           | Claude код                    | Anthropic             | полный         | окружение                           | истинный     |
+| кодекс         | OpenAI Codex CLI              | OpenAI                | полный         | обычай                              | истинный     |
+| z-код          | ZCode (план кодирования GLM ) | З.ай                  | никто          | обычай                              | ЛОЖЬ         |
+| клин           | Cline                         | OSS (экс-Клод Дев)    | полный         | обычай                              | истинный     |
+| килограмм      | Код килограмма                | Кило-Орг              | полный         | обычай                              | ЛОЖЬ         |
+| ру             | Кодекс Ру                     | Ру (OSS)              | полный         | гид                                 | ЛОЖЬ         |
+| продолжать     | Продолжать                    | continue.dev          | полный         | гид                                 | ЛОЖЬ         |
+| помощник       | Айдер                         | OSS (П. Готье)        | полный         | гид                                 | истинный     |
+| ковать         | ForgeCode                     | Антиномия HQ          | полный         | обычай                              | истинный     |
+| jcode          | jcode                         | 1джехуан (OSS)        | полный         | обычай                              | ЛОЖЬ         |
+| DeepSeek-Туи   | DeepSeek TUI                  | Хантер Баун (OSS)     | полный         | обычай                              | ЛОЖЬ         |
+| кодовый кит    | CodeWhale                     | Хмбаун (OSS)          | полный         | обычай                              | ЛОЖЬ         |
+| открытый код   | OpenCode                      | Аномалия (бывшая SST) | полный         | гид                                 | истинный     |
+| дроид          | Заводской дроид               | Фабрика AI            | частичный      | гид                                 | ЛОЖЬ         |
+| второй пилот   | GitHub Copilot CLI            | GitHub/MS             | полный         | обычай                              | ЛОЖЬ         |
+| курсор-кли     | Cursor CLI                    | Любая сфера           | частичный      | гид                                 | истинный     |
+| пахло          | Корюшка                       | Леонардсер (OSS)      | полный         | обычай                              | ЛОЖЬ         |
+| пи             | Пи (агент пи-кодирования)     | М. Зехнер (OSS)       | полный         | обычай                              | ЛОЖЬ         |
+| грок-билд      | Grok Сборка                   | xAI                   | полный         | обычай                              | ЛОЖЬ         |
+| раздавить      | Раздавить                     | OSS (Очарование)      | полный         | обычай                              | ЛОЖЬ         |
+| qwen           | Qwen код                      | Alibaba               | полный         | гид                                 | истинный     |
+| Зед            | Zed                           | Zed Industries        | полный         | гид                                 | ЛОЖЬ         |
+| курсор         | Cursor                        | Любая сфера           | никто          | гид                                 | ЛОЖЬ         |
+| антигравитация | Antigravity                   | Google                | никто          | митм                                | ЛОЖЬ         |
+| Гермес         | Гермес                        | Ноус Исследования     | никто          | гид                                 | ЛОЖЬ         |
+| Киро           | Kiro AI                       | Amazon                | никто          | митм                                | ЛОЖЬ         |
+| обычай         | Пользовательский CLI          | —                     | полный         | строитель по индивидуальному заказу | ЛОЖЬ         |
 
-Для инструментов с `baseUrlSupport: "partial"` на карточке в панели управления отображается значок «⚠ Частичная поддержка базового URL».
+Инструменты с `baseUrlSupport: "partial"` отображают значок «⚠ Base URL parcial» на карточке панели мониторинга.
 ---
 
-## 2. Каталог CLI-агентов (10 инструментов)
+## 2. Каталог агентов CLI (11 инструментов)
 
-Автономные агенты, представленные в `/dashboard/cli-agents`:
+Автономные агенты, которые появляются в `/dashboard/cli-agents`:
 
-| id           | название         | поставщик                | поддержка base URL | запуск через ACP |
-| ------------ | ---------------- | ------------------------ | ------------------ | ---------------- |
-| hermes-agent | Hermes Agent     | Nous Research            | full               | false            |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full               | true             |
-| goose        | Goose            | Block / Linux Foundation | full               | true             |
-| interpreter  | Open Interpreter | OSS                      | full               | true             |
-| warp         | Warp AI          | Warp Inc.                | partial            | true             |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full               | false            |
-| omp          | Oh My Pi         | OSS                      | full               | true             |
-| letta        | Letta CLI        | Letta                    | full               | false            |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full               | false            |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full               | false            |
+| идентификатор     | имя                 | продавец               | baseUrlSupport | acpSpawnable |
+| ----------------- | ------------------- | ---------------------- | -------------- | ------------ |
+| Гермес-агент      | Агент Гермеса       | Ноус Исследования      | полный         | ЛОЖЬ         |
+| открытый коготь   | OpenClaw            | OSS (П. Стейнбергер)   | полный         | истинный     |
+| Гусь              | Гусь                | Блок / Фонд Linux      | полный         | истинный     |
+| устный переводчик | Открытый переводчик | OSS                    | полный         | истинный     |
+| деформировать     | Warp AI             | Warp Inc.              | частичный      | истинный     |
+| агент-колода      | Агент Дек           | ашешгоплани (OSS)      | полный         | ЛОЖЬ         |
+| омп               | О, мой Пи           | OSS                    | полный         | истинный     |
+| Летта             | Летта CLI           | Летта                  | полный         | ЛОЖЬ         |
+| главный агент     | Главный агент       | Высший интеллект (OSS) | полный         | ЛОЖЬ         |
+| 5 погружений      | 5 погружений        | OSS (5dive-ai)         | полный         | ЛОЖЬ         |
+| почему коды       | WhyCodes            | Почему корпорация      | полный         | ЛОЖЬ         |
 
 ---
 

@@ -175,17 +175,17 @@ Rozsahy (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Spúšťanie testov
 
 ```bash
-# Všetky testy (unit + vitest + ecosystem + e2e)
+# Všetky testy (jednotkové + vitest + ekosystémové + e2e)
 npm run test:all
 
 # Jeden testovací súbor (natívny testovací nástroj Node.js — používa ho väčšina testov)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Iba jednotkové testy ovplyvnené vašou zmenou (rovnaký selektor TIA ako v kontrolnom mechanizme CI, #8084)
+# Iba jednotkové testy ovplyvnené vašou zmenou (rovnaký selektor TIA ako v kontrolnom bode CI, #8084)
 npm run test:scoped            # zmeny v poslednom commite (alebo v pracovnom strome)
-npm run test:scoped:staged     # iba zmeny v stagingu — dobre sa dopĺňa so spustením pred commitom
-npm run test:scoped:full       # najprv znova zostaví mapu grafu importov (po pridaní/presunutí súborov)
-# Návratový kód 1 + „run the full suite“ znamená, že sa zmenil centrálny súbor (tsconfig, package.json, …)
+npm run test:scoped:staged     # iba pripravené zmeny — vhodné na spustenie pred commitom
+npm run test:scoped:full       # najskôr znova zostaví mapu grafu importov (po pridaní/presunutí súborov)
+# Ukončenie s kódom 1 + „spustite celý balík“ znamená, že sa zmenil centrálny súbor (tsconfig, package.json, …)
 # alebo nenamapovaný zdroj — selektor bezpečne zlyhá a nikdy nič potichu nepreskočí.
 
 # Vitest (server MCP, autoCombo, vyrovnávacia pamäť)
@@ -194,13 +194,13 @@ npm run test:vitest
 # Testy E2E (vyžadujú Playwright)
 npm run test:e2e
 
-# E2E protokolových klientov (transporty MCP, A2A)
+# E2E klientov protokolu (transporty MCP, A2A)
 npm run test:protocols:e2e
 
 # Testy kompatibility ekosystému
 npm run test:ecosystem
 
-# Kontrola pokrytia: 60 % príkazov/riadkov/funkcií/vetiev
+# Kontrolný bod pokrytia: 60 % príkazov/riadkov/funkcií/vetiev
 npm run test:coverage
 npm run coverage:report
 
@@ -208,49 +208,50 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Podmienený smoke test kombinácie so skutočnými upstream službami (vyžaduje prístup k VPS + reálne kredity poskytovateľov)
+# Kontrolovaný smoke test kombinácií so skutočnými upstream službami (vyžaduje prístup k VPS + kredity skutočných poskytovateľov)
 # Používa SKUTOČNÝCH poskytovateľov — niečo málo stojí. NIKDY sa nespúšťa v CI. Bez povolenia sa korektne preskočí.
-# Vyžaduje: prístup ssh root@192.168.0.15 (načíta snapshot databázy iba na čítanie z VPS).
+# Vyžaduje: prístup ssh root@192.168.0.15 (načíta z VPS snímku databázy iba na čítanie).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Živý smoke test VPS fázy 3 — bežné skripty Node ESM, ktoré pristupujú priamo k živému serveru .15.
+# Živý smoke test VPS fázy 3 — obyčajné skripty Node ESM, ktoré používajú priamo živý server .15.
 # Vyžaduje: prístup ssh root@192.168.0.15 (kombinácie sa vytvárajú/odstraňujú cez SSH sqlite).
-# Používa SKUTOČNÝCH poskytovateľov (malé náklady). Vytvára/odstraňuje iba kombinácie __live_test__*. NIKDY sa nespúšťa v CI.
-# Na .15 je REQUIRE_API_KEY=false, takže kľúč API nie je potrebný, ale ak sú nastavené COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, rešpektuje ich.
-npm run test:combo:live:vps              # 7 scenárov HTTP (priorita/round-robin/vážený/náklady/fúzia/automatický + stav)
+# Používa SKUTOČNÝCH poskytovateľov (nízke náklady). Vytvára/odstraňuje iba kombinácie __live_test__*. NIKDY sa nespúšťa v CI.
+# Na .15 je REQUIRE_API_KEY=false, takže kľúč API nie je potrebný, no rešpektuje COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, ak sú nastavené.
+npm run test:combo:live:vps              # 7 scenárov HTTP (priorita/round-robin/váženie/náklady/fúzia/automatický režim + stav)
 npm run test:combo:live:vps:failover     # pridáva skutočný scenár prepnutia medzi poskytovateľmi pri zlyhaní (spolu 8)
 ```
 
 Poznámky k pokrytiu:
 
-- `npm run test:coverage` meria pokrytie zdrojového kódu pre hlavnú sadu jednotkových testov, vylučuje `tests/**` a zahŕňa `open-sse/**`
-- Pull requesty musia zachovať kontrolu pokrytia na úrovni **60 % alebo viac** pre príkazy/riadky/funkcie/vetvy
-- Ak PR mení produkčný kód v `src/`, `open-sse/`, `electron/` alebo `bin/`, musí v rovnakom PR pridať alebo aktualizovať automatizované testy
-- `npm run coverage:report` vypíše podrobnú správu po jednotlivých súboroch z posledného spustenia merania pokrytia
+- `npm run test:coverage` meria pokrytie zdrojového kódu pre hlavný balík jednotkových testov, vylučuje `tests/**` a zahŕňa `open-sse/**`
+- Pull requesty musia zachovať kontrolný bod pokrytia na úrovni **60 %+** príkazov/riadkov/funkcií/vetiev
+- Ak PR mení produkčný kód v `src/`, `open-sse/`, `electron/` alebo `bin/`, musí v tom istom PR pridať alebo aktualizovať automatizované testy
+- `npm run coverage:report` vypíše podrobný prehľad po jednotlivých súboroch z posledného spustenia merania pokrytia
 - `npm run test:coverage:legacy` zachováva staršiu metriku na historické porovnanie
-- Plán postupného zlepšovania pokrytia nájdete v `docs/ops/COVERAGE_PLAN.md`
+- Fázový plán zlepšovania pokrytia nájdete v `docs/ops/COVERAGE_PLAN.md`
 
-### Požiadavky na Pull Request
+### Požiadavky na pull request
 
 Pred otvorením PR použite
-[odporúčaný postup prispievania](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) a spustite cielený cyklus pre
-vykonané zmeny. Za úplnú sadu jednotkových testov (4 časti CI), Vitest, kontrolu pokrytia na úrovni **60 % alebo viac** a
-produkčné zostavenie zodpovedá CI — ich lokálne spustenie neposkytuje žiadne ďalšie informácie, ktoré by vám
-už neposkytli kontroly PR, a na slabších počítačoch môže preťažiť hostiteľa (#8084):
+[Odporúčaný postup prispievania](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) na spustenie cieleného cyklu pre
+to, čo ste zmenili. Za celý balík jednotkových testov (4 časti CI), Vitest, kontrolný bod pokrytia **60 %+** a
+produkčné zostavenie zodpovedá CI — ich lokálne spustenie neposkytuje žiadne ďalšie informácie, ktoré by
+vám už neposkytli kontroly PR, a na slabších počítačoch môže vyčerpať prostriedky hostiteľa (#8084):
 
 - Spustite testovacie súbory, ktoré pokrývajú vašu zmenu: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Spustite `npm run lint`
 - Pri každej zmene produkčného kódu zahrňte alebo aktualizujte automatizované testy v rovnakom PR
+- V súboroch `node:test` umiestnite každý `await` najvyššej úrovne (napríklad `await import(...)`) pred prvý `test()` / `describe()`: pri použití `--test-force-exit` sa testy zaregistrované za ním nemusia potichu vôbec spustiť (#18045; vynucuje sa pomocou `npm run check:test-tla-order`)
 - Ak sa zmenil produkčný kód, uveďte zmenené alebo pridané testovacie súbory v opise PR
-- Ak sú tajné hodnoty projektu nakonfigurované v CI, skontrolujte výsledok SonarQube v PR
+- Keď sú v CI nakonfigurované tajné údaje projektu, skontrolujte výsledok SonarQube v PR
 
 Aktuálny stav testov: **122 súborov jednotkových testov**, ktoré pokrývajú:
 
-- Translátory poskytovateľov a konverziu formátov
+- Prekladače poskytovateľov a konverziu formátov
 - Obmedzovanie frekvencie požiadaviek, istič a odolnosť
-- Sémantickú vyrovnávaciu pamäť, idempotenciu a sledovanie priebehu
-- Databázové operácie a schému (21 modulov DB)
-- Toky OAuth a autentifikáciu
+- Sémantickú vyrovnávaciu pamäť, idempotentnosť a sledovanie priebehu
+- Databázové operácie a schému (21 databázových modulov)
+- Toky OAuth a overovanie totožnosti
 - Overovanie koncových bodov API (Zod v4)
 - Nástroje servera MCP a vynucovanie rozsahov
 - Systémy Memory a Skills

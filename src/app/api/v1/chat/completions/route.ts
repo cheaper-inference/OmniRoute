@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
-import { callCloudWithMachineId } from "@/shared/utils/cloud";
 import { handleChat } from "@/sse/handlers/chat";
 import { logAdmissionRejection } from "@/sse/handlers/admissionRejectionLog";
 import { generateRequestId } from "@/shared/utils/requestId";
@@ -45,6 +44,19 @@ import {
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
 import { ensureSemanticCacheDbBridge } from "@/lib/cache/semanticCacheDbBridge";
+import { maybeQueueQuotaSessionRecovery } from "@/lib/quota/quotaSessionRecovery";
+import {
+  getBifrostRoutingConfig,
+  resolveRelayRoutingBackend,
+  shouldTryBifrostForRequest,
+  getActiveBifrostCooldown,
+  recordBifrostFailure,
+  clearBifrostFailure,
+  getRoutingFallbackHeader,
+  getRoutingFallbackReasonHeader,
+} from "@/shared/services/bifrost/bifrostRouting";
+import { dispatchToBifrost } from "@/shared/services/bifrost/bifrostClient";
+import { gateBifrostFastPath } from "@/shared/services/bifrost/bifrostFastPathGate";
 
 let initPromise = null;
 
@@ -317,6 +329,71 @@ export async function POST(request) {
       request.headers.get("x-correlation-id")
     );
 
+    // Bifrost Go sidecar fast-path routing check
+    const relayBackend = resolveRelayRoutingBackend();
+    const bifrostConfig = getBifrostRoutingConfig();
+    let fallbackHeaderValue: string | undefined = undefined;
+
+    if (parsedBodyIsRecord && bifrostConfig) {
+      const bifrostDecision = shouldTryBifrostForRequest(relayBackend, bifrostConfig, parsedBody);
+
+      if (bifrostDecision.tryBifrost) {
+        const cooldown =
+          relayBackend === "auto" ? getActiveBifrostCooldown(bifrostConfig.baseUrl) : null;
+        // The sidecar answers before handleChat(), which owns the API-key policy
+        // (allowedModels, budget, schedule, rate limit): gate it first, or a disabled
+        // key would be served with the server's BIFROST_API_KEY. Skipped during a
+        // cooldown, where handleChat() serves (and polices) the request itself.
+        const fastPathGate = cooldown
+          ? null
+          : await gateBifrostFastPath(request, parsedBody as Record<string, unknown>);
+        if (fastPathGate?.rejection) {
+          return finishAdmission(fastPathGate.rejection);
+        }
+        if (cooldown) {
+          fallbackHeaderValue = `bifrost-cooldown; remaining=${cooldown.remainingMs}`;
+        } else if (fastPathGate && !fastPathGate.allow) {
+          fallbackHeaderValue = "bifrost-ineligible";
+        } else {
+          try {
+            const bifrostResult = await dispatchToBifrost({
+              request,
+              body: parsedBody as Record<string, unknown>,
+              config: bifrostConfig,
+            });
+
+            if (bifrostResult.statusCode < 500) {
+              clearBifrostFailure(bifrostConfig.baseUrl);
+              return finishAdmission(
+                withCompressionHeaderEcho(bifrostResult.response, compressionRequestHeader)
+              );
+            }
+
+            // Bifrost returned 5xx -> trip circuit cooldown & fall through to native handleChat
+            recordBifrostFailure(bifrostConfig.baseUrl, `http_${bifrostResult.statusCode}`);
+            fallbackHeaderValue = "bifrost-error";
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            recordBifrostFailure(bifrostConfig.baseUrl, message);
+            fallbackHeaderValue = "bifrost-error";
+          }
+        }
+      }
+    }
+
+    const applyFallbackHeaders = (res: Response) => {
+      if (!bifrostConfig) return res;
+      const fallbackHeader = getRoutingFallbackHeader(relayBackend, bifrostConfig);
+      if (fallbackHeader || fallbackHeaderValue) {
+        res.headers.set("X-Routing-Fallback", fallbackHeaderValue || fallbackHeader || "bifrost");
+        const reasonCode = getRoutingFallbackReasonHeader(fallbackHeaderValue);
+        if (reasonCode) {
+          res.headers.set("X-Routing-Fallback-Reason", reasonCode);
+        }
+      }
+      return res;
+    };
+
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
       const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
@@ -339,14 +416,26 @@ export async function POST(request) {
         extraHeaders: { "X-Correlation-Id": reqId },
         deadlineController: routeDeadlineController,
       });
-      return withCompressionHeaderEcho(streamedResponse, compressionRequestHeader);
+      return withCompressionHeaderEcho(
+        applyFallbackHeaders(streamedResponse),
+        compressionRequestHeader
+      );
     }
 
+    const handlerResponse = await handleChat(
+      request,
+      null,
+      parsedBody,
+      callerCorrelationId ?? undefined
+    );
+    const recoveryResponse = await maybeQueueQuotaSessionRecovery({
+      request,
+      body: parsedBody,
+      response: handlerResponse,
+      endpoint: "chat/completions",
+    });
     return finishAdmission(
-      withCompressionHeaderEcho(
-        await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined),
-        compressionRequestHeader
-      )
+      withCompressionHeaderEcho(applyFallbackHeaders(recoveryResponse), compressionRequestHeader)
     );
   } catch (error) {
     admission.lease?.release();

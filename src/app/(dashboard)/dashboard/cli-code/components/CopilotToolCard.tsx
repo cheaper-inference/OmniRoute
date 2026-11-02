@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Icon from "@/shared/components/Icon";
 import { Card, Button } from "@/shared/components";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
+import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
 import { matchesSearch } from "@/shared/utils/turkishText";
+import { cn } from "@/shared/utils/cn";
+import Checkbox from "@/shared/components/Checkbox";
+import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 
 /**
  * GitHub Copilot Configuration Generator
@@ -172,8 +179,11 @@ export default function CopilotToolCard({
   return (
     <Card padding="sm" className="overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between hover:cursor-pointer" onClick={onToggle}>
-        <div className="flex items-center gap-3">
+      <div
+        className={cn("flex items-center justify-between hover:cursor-pointer", CARD_TOGGLE_CLASS)}
+        {...cardToggleProps(isExpanded, onToggle)}
+      >
+        <div className="flex min-w-0 items-center gap-3">
           <div className="size-8 rounded-lg flex items-center justify-center shrink-0">
             <Image
               src={tool.image || "/providers/copilot.svg"}
@@ -190,19 +200,19 @@ export default function CopilotToolCard({
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="font-medium text-sm">{tool.name}</h3>
-              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                <span className="size-1.5 rounded-full bg-blue-500" />
+              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 text-[11px] font-medium rounded-full bg-info/10 text-info">
+                <span className="size-1.5 rounded-full bg-info" />
                 {t("guide")}
               </span>
             </div>
             <p className="text-xs text-text-muted truncate">{t("toolDescriptions.copilot")}</p>
           </div>
         </div>
-        <span
-          className={`material-symbols-outlined text-text-muted text-[20px] transition-transform ${isExpanded ? "rotate-180" : ""}`}
-        >
-          expand_more
-        </span>
+        <Icon
+          name="expand_more"
+          size={20}
+          className={cn("text-text-muted transition-transform", isExpanded && "rotate-180")}
+        />
       </div>
 
       {/* Expanded content */}
@@ -210,24 +220,22 @@ export default function CopilotToolCard({
         <div className="mt-6 pt-6 border-t border-border">
           <div className="flex flex-col gap-5">
             {/* Info box */}
-            <div className="flex items-start gap-3 p-3 bg-blue-500/10 border border-blue-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-blue-500 text-lg">info</span>
-              <div className="text-sm text-blue-700 dark:text-blue-300">
+            <div className="flex items-start gap-3 p-3 bg-info/10 border border-info/30 rounded-lg">
+              <Icon name="info" size={18} className="text-info" />
+              <div className="text-sm text-info">
                 <p className="font-medium">{t("copilotConfigGenerator")}</p>
                 <p className="mt-1 text-xs opacity-80">
                   {t("copilotGeneratorDescriptionPrefix")}{" "}
-                  <code className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">
-                    chatLanguageModels.json
-                  </code>{" "}
+                  <code className="px-1 py-0.5 rounded bg-bg-subtle">chatLanguageModels.json</code>{" "}
                   {t("copilotGeneratorDescriptionSuffix")}
                 </p>
               </div>
             </div>
 
             {/* Version compatibility warning */}
-            <div className="flex items-start gap-3 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-              <span className="material-symbols-outlined text-yellow-500 text-lg">warning</span>
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">
+            <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+              <Icon name="warning" size={18} className="text-warning" />
+              <p className="text-xs text-warning">
                 {t.rich("copilotCompatibilityWarning", {
                   vscode: (chunks) => <strong>{chunks}</strong>,
                   copilot: (chunks) => <strong>{chunks}</strong>,
@@ -247,17 +255,17 @@ export default function CopilotToolCard({
                   </div>
                   <span className="font-medium text-sm">{t("copilotApiKey")}</span>
                 </div>
-                <select
+                <Select
                   value={selectedApiKeyId}
                   onChange={(e) => handleApiKeyChange(e.target.value)}
-                  className="w-full px-3 py-2 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  aria-label={t("copilotApiKey")}
                 >
                   {apiKeys.map((key: any) => (
                     <option key={key.id} value={key.id}>
                       {key.key}
                     </option>
                   ))}
-                </select>
+                </Select>
               </div>
             )}
 
@@ -279,115 +287,90 @@ export default function CopilotToolCard({
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button
-                    onClick={selectAll}
-                    className="px-2 py-1 text-xs bg-bg-secondary hover:bg-bg-tertiary rounded border border-border transition-colors"
-                  >
+                  <Button variant="outline" size="sm" onClick={selectAll} className="text-xs">
                     {t("selectAll")}
-                  </button>
-                  <button
-                    onClick={deselectAll}
-                    className="px-2 py-1 text-xs bg-bg-secondary hover:bg-bg-tertiary rounded border border-border transition-colors"
-                  >
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={deselectAll} className="text-xs">
                     {t("clear")}
-                  </button>
+                  </Button>
                 </div>
               </div>
 
               {/* Search filter */}
               <div className="mb-2">
-                <input
-                  type="text"
+                <Input
                   value={searchFilter}
                   onChange={(e) => setSearchFilter(e.target.value)}
                   placeholder={t("copilotFilterModelsPlaceholder")}
-                  className="w-full px-3 py-1.5 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
+                  aria-label={t("copilotFilterModelsPlaceholder")}
+                  icon="search"
                 />
               </div>
 
               {!modelsLoaded && allModels.length === 0 ? (
                 <div className="flex items-center gap-2 p-3 text-text-muted text-sm">
-                  <span className="material-symbols-outlined animate-spin text-base">
-                    progress_activity
-                  </span>
+                  <Icon name="progress_activity" size={16} className="animate-spin" />
                   <span>{t("loadingModels")}</span>
                 </div>
               ) : availableModels.length === 0 && allModels.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                  <span className="material-symbols-outlined text-yellow-500 text-lg">warning</span>
-                  <p className="text-sm text-yellow-600 dark:text-yellow-400">
-                    {t("noActiveProviders")}
-                  </p>
+                <div className="flex items-center gap-2 p-3 bg-warning/10 border border-warning/30 rounded-lg">
+                  <Icon name="warning" size={18} className="text-warning" />
+                  <p className="text-sm text-warning">{t("noActiveProviders")}</p>
                 </div>
               ) : (
-                <div className="max-h-64 overflow-y-auto rounded-lg border border-border bg-bg-secondary">
+                <CheckboxGroup
+                  aria-label={t("copilotSelectModels", {
+                    selected: selectedModels.size,
+                    total: availableModels.length,
+                  })}
+                  className="max-h-64 overflow-y-auto rounded-lg border border-border bg-bg-subtle"
+                >
                   {availableModels.map((model) => (
-                    <label
+                    <Checkbox
                       key={model.value}
-                      className="flex items-center gap-3 px-3 py-2 hover:bg-bg-tertiary cursor-pointer border-b border-border last:border-0 transition-colors"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={selectedModels.has(model.value)}
-                        onChange={() => toggleModel(model.value)}
-                        className="rounded border-border text-primary accent-[#1F6FEB]"
-                      />
-                      <span className="text-sm font-mono truncate">{model.label}</span>
-                    </label>
+                      checked={selectedModels.has(model.value)}
+                      onChange={() => toggleModel(model.value)}
+                      className="px-3 py-2 hover:bg-surface-2 border-b border-border last:border-0"
+                      label={<span className="text-sm font-mono truncate">{model.label}</span>}
+                    />
                   ))}
-                </div>
+                </CheckboxGroup>
               )}
             </div>
 
             {/* Step 4: Advanced options (collapsible) */}
             <details className="group">
               <summary className="flex items-center gap-2 cursor-pointer text-sm text-text-muted hover:text-text-main transition-colors">
-                <span className="material-symbols-outlined text-base group-open:rotate-90 transition-transform">
-                  chevron_right
-                </span>
+                <Icon
+                  name="chevron_right"
+                  size={16}
+                  className="group-open:rotate-90 transition-transform"
+                />
                 {t("advancedOptions")}
               </summary>
               <div className="mt-3 grid grid-cols-2 gap-3 pl-6">
-                <div>
-                  <label className="text-xs text-text-muted block mb-1">
-                    {t("copilotMaxInputTokens")}
-                  </label>
-                  <input
-                    type="number"
-                    value={maxInputTokens}
-                    onChange={(e) => setMaxInputTokens(Number(e.target.value) || 128000)}
-                    className="w-full px-3 py-1.5 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs text-text-muted block mb-1">
-                    {t("copilotMaxOutputTokens")}
-                  </label>
-                  <input
-                    type="number"
-                    value={maxOutputTokens}
-                    onChange={(e) => setMaxOutputTokens(Number(e.target.value) || 16000)}
-                    className="w-full px-3 py-1.5 bg-bg-secondary rounded-lg text-sm border border-border focus:outline-none focus:ring-1 focus:ring-primary/50"
-                  />
-                </div>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={toolCalling}
-                    onChange={(e) => setToolCalling(e.target.checked)}
-                    className="rounded border-border accent-[#1F6FEB]"
-                  />
-                  <span className="text-sm">{t("copilotToolCalling")}</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={vision}
-                    onChange={(e) => setVision(e.target.checked)}
-                    className="rounded border-border accent-[#1F6FEB]"
-                  />
-                  <span className="text-sm">{t("vision")}</span>
-                </label>
+                <Input
+                  label={t("copilotMaxInputTokens")}
+                  type="number"
+                  value={maxInputTokens}
+                  onChange={(e) => setMaxInputTokens(Number(e.target.value) || 128000)}
+                />
+                <Input
+                  label={t("copilotMaxOutputTokens")}
+                  type="number"
+                  value={maxOutputTokens}
+                  onChange={(e) => setMaxOutputTokens(Number(e.target.value) || 16000)}
+                />
+                <Checkbox
+                  checked={toolCalling}
+                  onChange={(e) => setToolCalling(e.target.checked)}
+                  label={t("copilotToolCalling")}
+                />
+                <Checkbox
+                  checked={vision}
+                  onChange={(e) => setVision(e.target.checked)}
+                  label={t("vision")}
+                />
               </div>
             </details>
 
@@ -411,23 +394,25 @@ export default function CopilotToolCard({
                     size="sm"
                     onClick={() => handleCopy(generateConfig(), "config")}
                   >
-                    <span className="material-symbols-outlined text-[14px] mr-1">
-                      {copiedField === "config" ? "check" : "content_copy"}
-                    </span>
+                    <Icon
+                      name={copiedField === "config" ? "check" : "content_copy"}
+                      size={14}
+                      className="mr-1"
+                    />
                     {copiedField === "config" ? t("copied") : t("copyConfig")}
                   </Button>
                 </div>
-                <pre className="p-4 bg-bg-secondary rounded-lg border border-border overflow-x-auto max-h-80">
+                <pre className="p-4 bg-bg-subtle rounded-lg border border-border overflow-x-auto max-h-80">
                   <code className="text-xs font-mono whitespace-pre text-text-main">
                     {generateConfig()}
                   </code>
                 </pre>
 
                 {/* Usage instructions */}
-                <div className="mt-3 p-3 bg-bg-secondary rounded-lg border border-border">
+                <div className="mt-3 p-3 bg-bg-subtle rounded-lg border border-border">
                   <p className="text-xs text-text-muted">
                     <span className="font-medium text-text-main">{t("copilotPasteInto")} </span>
-                    <code className="px-1 py-0.5 rounded bg-black/5 dark:bg-white/10">
+                    <code className="px-1 py-0.5 rounded bg-bg-subtle">
                       ~/.config/Code/User/chatLanguageModels.json
                     </code>
                   </p>

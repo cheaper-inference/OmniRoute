@@ -1,7 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-const { sanitizeOpenAITool, sanitizeOpenAITools } =
+const { sanitizeOpenAITool, sanitizeOpenAITools, flattenOpenAIToolRootAnyOf } =
   await import("../../open-sse/services/toolSchemaSanitizer.ts");
 
 describe("toolSchemaSanitizer", () => {
@@ -455,10 +455,222 @@ describe("toolSchemaSanitizer", () => {
       assert.deepEqual(out[1].function.parameters.properties.n, { type: "string" });
     });
   });
+
+  describe("flattenOpenAIToolRootAnyOf", () => {
+    it("merges root anyOf object branches into one object (not an empty schema)", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            anyOf: [
+              {
+                type: "object",
+                properties: { path: { type: "string" }, mode: { type: "string" } },
+                required: ["path"],
+              },
+              {
+                type: "object",
+                properties: { scope: { type: "string" }, mode: { type: "integer" } },
+                required: ["scope"],
+              },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      const params = out[0].function.parameters;
+      assert.equal(params.anyOf, undefined);
+      assert.deepEqual(params.properties, {
+        path: { type: "string" },
+        mode: { type: "string" },
+        scope: { type: "string" },
+      });
+      assert.notDeepEqual(params, {});
+    });
+
+    it("keeps the first definition when branches declare the same property with different types", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            anyOf: [
+              { type: "object", properties: { mode: { type: "string" } } },
+              { type: "object", properties: { mode: { type: "integer" } } },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0].function.parameters.properties.mode, { type: "string" });
+    });
+
+    it("keeps the root's own property definition over a conflicting branch definition", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            type: "object",
+            properties: { mode: { type: "string" } },
+            anyOf: [{ properties: { mode: { type: "integer" }, extra: { type: "string" } } }],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0].function.parameters.properties, {
+        mode: { type: "string" },
+        extra: { type: "string" },
+      });
+    });
+
+    it("requires only the intersection of the branches' required lists (anyOf = either branch)", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            anyOf: [
+              {
+                type: "object",
+                properties: { path: { type: "string" }, id: { type: "string" } },
+                required: ["path", "id"],
+              },
+              {
+                type: "object",
+                properties: { scope: { type: "string" }, id: { type: "string" } },
+                required: ["scope", "id"],
+              },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0].function.parameters.required, ["id"]);
+    });
+
+    it("does not require arguments that only one anyOf branch needs", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            anyOf: [
+              {
+                type: "object",
+                properties: { path: { type: "string" } },
+                required: ["path"],
+              },
+              {
+                type: "object",
+                properties: { scope: { type: "string" } },
+                required: ["scope"],
+              },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.equal(out[0].function.parameters.required, undefined);
+    });
+
+    it("a branch without required makes nothing required; root-level required is preserved", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            type: "object",
+            properties: { base: { type: "string" } },
+            required: ["base"],
+            anyOf: [
+              { properties: { a: { type: "string" } }, required: ["a"] },
+              { properties: { b: { type: "string" } } },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0].function.parameters.required, ["base"]);
+    });
+
+    it("keeps root anyOf when a branch is not object-compatible (no silent widening)", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            anyOf: [
+              { type: "object", properties: { path: { type: "string" } } },
+              { type: "string" },
+            ],
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0], tool);
+    });
+
+    it("leaves a non-array root anyOf untouched", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: { anyOf: "not-an-array" },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.deepEqual(out[0], tool);
+    });
+
+    it("does not throw when the merged schema lacks properties or required", () => {
+      const ce1 = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: { anyOf: [{ required: ["a"] }, { required: ["b"] }] },
+        },
+      };
+      const out1 = flattenOpenAIToolRootAnyOf([ce1]);
+      // Either branch satisfies the anyOf, so neither "a" nor "b" may be required on its own.
+      assert.deepEqual(out1[0].function.parameters, { type: "object" });
+
+      const ce2 = {
+        type: "function",
+        function: {
+          name: "y",
+          parameters: { anyOf: [{ properties: { a: { type: "string" } } }] },
+        },
+      };
+      const out2 = flattenOpenAIToolRootAnyOf([ce2]);
+      assert.deepEqual(out2[0].function.parameters, {
+        properties: { a: { type: "string" } },
+        type: "object",
+      });
+    });
+
+    it("leaves a schema without anyOf byte-for-byte identical", () => {
+      const tool = {
+        type: "function",
+        function: {
+          name: "x",
+          parameters: {
+            type: "object",
+            properties: { a: { type: "string" } },
+            required: ["a"],
+            additionalProperties: false,
+          },
+        },
+      };
+      const out = flattenOpenAIToolRootAnyOf([tool]);
+      assert.equal(out[0], tool);
+    });
+  });
 });
 
 describe("root type coercion (#6359)", () => {
-  it("coerces root `type: null` to \"object\" (Codex codex_app__automation_update reproduction)", () => {
+  it('coerces root `type: null` to "object" (Codex codex_app__automation_update reproduction)', () => {
     const tool = {
       type: "function",
       function: {
@@ -475,7 +687,7 @@ describe("root type coercion (#6359)", () => {
     assert.deepEqual(out.function.parameters.properties.schedule, { type: "string" });
   });
 
-  it("adds `type: \"object\"` when the root schema has properties but no type", () => {
+  it('adds `type: "object"` when the root schema has properties but no type', () => {
     const tool = {
       type: "function",
       function: { name: "x", parameters: { properties: { a: { type: "number" } } } },
@@ -506,10 +718,13 @@ describe("root type coercion (#6359)", () => {
     assert.equal(out.function.parameters.type, undefined);
   });
 
-  it("leaves an explicit root `type: \"object\"` untouched", () => {
+  it('leaves an explicit root `type: "object"` untouched', () => {
     const tool = {
       type: "function",
-      function: { name: "w", parameters: { type: "object", properties: { b: { type: "boolean" } } } },
+      function: {
+        name: "w",
+        parameters: { type: "object", properties: { b: { type: "boolean" } } },
+      },
     };
     const out = sanitizeOpenAITool(tool);
     assert.equal(out.function.parameters.type, "object");

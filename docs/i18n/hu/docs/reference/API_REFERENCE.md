@@ -351,7 +351,7 @@ Content-Type: application/json
 
 Az elérhető szolgáltatók közé tartozik az OpenAI (GPT Image 2), az xAI (Grok Image), a Together AI (FLUX), a Fireworks AI, a Nebius (FLUX), a Hyperbolic, a NanoBanana, az **OpenRouter**, a **ZenMux**, az SD WebUI (helyi) és a ComfyUI (helyi).
 
-Az `n` darab képet ad vissza a `data[]` tömbben. Azon szolgáltatók esetében, amelyek upstream API-ja hívásonként egy képet ad vissza
+Az `n` paraméter `n` darab képet ad vissza a `data[]` tömbben. Azon szolgáltatók esetében, amelyek upstream API-ja hívásonként egy képet ad vissza
 (Black Forest Labs, Stability AI, Leonardo, Ideogram, Haiper, Hyperbolic, Magnific/Freepik,
 NVIDIA NIM, Cloudflare Workers AI), `n` külön upstream hívás történik, amelyek közül legfeljebb 4 lehet folyamatban egyszerre. A
 rögzített `seed` értékét a rendszer a hívás indexével növeli (`seed`, `seed + 1`, …), így a képek különböznek, de
@@ -451,15 +451,57 @@ alapértelmezett értéke pedig `us-central1`. Mindkét feloldás az `open-sse/h
 GET /v1/models
 Authorization: Bearer your-api-key
 
-→ Az összes csevegési, beágyazási és képmodellt, valamint kombinációt visszaadja OpenAI-formátumban
+→ Visszaadja az összes csevegési, beágyazási és képmodellt, valamint kombinációt OpenAI-formátumban
 ```
+
+### Modellárak (`pricing`)
+
+Egy bejegyzés akkor tartalmaz `pricing` objektumot, ha az OmniRoute ismeri a modell árát. Az ár
+a költségelszámoláshoz használt ártáblából származik: a beépített alapértékekből, a szinkronizált árakból és
+az `/api/pricing` használatával beállított felülírásokból. Ezek listaárak, ezért az előfizetéses szolgáltatók is
+megjelenítenek tokenenkénti árat.
+
+```json
+"pricing": {
+  "prompt": "0.000005",
+  "completion": "0.000025",
+  "input_cache_read": "0.0000005",
+  "input_cache_write": "0.00000625",
+  "input": 5,
+  "output": 25,
+  "cached": 0.5,
+  "cache_creation": 6.25
+}
+```
+
+| Mezők                                                           | Mértékegység                      | Megjegyzések                                                                                                                                                                     |
+| --------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prompt`, `completion`, `input_cache_read`, `input_cache_write` | USD/token, decimális karakterlánc | OpenRouter-kompatibilis, soha nem exponenciális jelöléssel. A két gyorsítótármező csak akkor jelenik meg, ha van gyorsítótárazási ár.                                            |
+| `input`, `output`, `cached`, `cache_creation`                   | USD/1 millió token, szám          | A katalógus korábbi verzióiból származó mezők, a meglévő kliensek támogatása érdekében megőrizve. A `reasoning` és a `long_context` is megjelenik, ha az ársor tartalmazza őket. |
+
+- A **kombinációk** az első látható célpontjuk árát tartalmazzák. A beépített `auto/*` kombinációk a
+  kérés időpontjában választanak célpontot, ezért nincs `pricing` mezőjük.
+- Az **ingyenes modellek** esetében az ár nulla, ezért `"0"` (és `0`) jelenik meg. Az ársor nélküli modelleknél
+  szintén `"0"` jelenik meg, ha a katalógus ingyenesként jelöli őket (`free: true`), vagy ha szerepelnek a beépített
+  ingyenesmodell-katalógusban.
+- **Ismeretlen ár:** a bejegyzés nem tartalmaz `pricing` kulcsot.
+- A **kreditalapú elszámolást használó szolgáltatók** (például a Kiro) tokenek helyett kérésenként számláznak. A
+  bejegyzéseik megtartják a korábbi numerikus, egymillió tokenre vonatkozó mezőket, és nem tartalmaznak tokenenkénti árat megadó karakterláncmezőket.
+- A **változatok** (következtetési erőfeszítést jelölő azonosítók, gondolkodás nélküli aliasok, felderítési és átjárótükrök)
+  annak a modellnek az árát másolják, amelyhez az útválasztásuk vezet.
+- A mezők csak az alapdíjakat tartalmazzák. A hosszú kontextusra vonatkozó ársávok (a numerikus `long_context` mező) és
+  a szolgáltatási szintek szorzói (például Codex fast vagy flex) nem módosítják a `prompt` vagy
+  `completion` értékét.
+- Az objektum minden hitelesítési módnál azonos, beleértve az Anthropic-stílusú,
+  `x-api-key` és `anthropic-version` fejléceket tartalmazó kéréseket is (a válasz továbbra is `{ "object": "list",
+"data": [...] }`). Megvalósítás: `src/app/api/v1/models/catalogPricing.ts`.
 
 ### Modellazonosító-előtagok (`?prefix=`)
 
-A legtöbb modell **szolgáltatói előtaggal** jelenik meg. A kapott előtagot a
-`MODELS_CATALOG_PREFIX_MODE` funkciójelző szabályozza, és ez **kérésenként** felülírható egy
-lekérdezési paraméterrel — ez akkor hasznos, ha egy kliens letisztult listát szeretne anélkül,
-hogy mindenki más számára módosítaná a teljes kiszolgálóra érvényes beállítást:
+A legtöbb modellt **szolgáltatói előtaggal** teszik közzé. A kapott előtagot a
+`MODELS_CATALOG_PREFIX_MODE` funkciójelző szabályozza, és kérésenként felülírható egy
+lekérdezési paraméterrel — ez hasznos olyan kliensek számára, amelyek letisztult listát szeretnének anélkül, hogy mindenki más számára módosítanák a kiszolgálószintű
+beállítást:
 
 ```bash
 GET /v1/models?prefix=alias        # modellenként egy azonosító — a rövid alias-előtag
@@ -467,46 +509,45 @@ GET /v1/models?prefix=dual         # mindkét forma (a kiszolgáló alapértelme
 GET /v1/models?prefix=canonical    # csak a teljes szolgáltatóazonosító-előtag
 ```
 
-| Mód         | Kibocsátott azonosítók                                   | Megjegyzések                                                                                                                                                                                                          |
-| ----------- | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `dual`      | `cc/claude-sonnet-4-6` **és** `claude/claude-sonnet-4-6` | **Alapértelmezett.** Mindkét azonosító ugyanahhoz a modellhez irányít; ez biztosítja, hogy a bármelyik formát rögzítetten használó klienskonfigurációk továbbra is működjenek. Nagyjából megkétszerezi a katalógust.  |
-| `alias`     | `cc/claude-sonnet-4-6`                                   | Modellenként egy bejegyzés. A külön aliassal nem rendelkező szolgáltatók bejegyzése továbbra is megjelenik, így semmi sem vész el.                                                                                    |
-| `canonical` | `claude/claude-sonnet-4-6`                               | Modellenként egy bejegyzés a teljes szolgáltatóazonosító-előtag alatt. A külön aliassal nem rendelkező szolgáltatók (például `antigravity/…`, `agy/…`) egyetlen azonosítója itt is megjelenik, így semmi sem vész el. |
+| Mód         | Kibocsátott azonosítók                                   | Megjegyzések                                                                                                                                                                                                              |
+| ----------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `dual`      | `cc/claude-sonnet-4-6` **és** `claude/claude-sonnet-4-6` | **Alapértelmezett.** Mindkét azonosító ugyanahhoz a modellhez irányít; azért maradt meg, hogy a bármelyik formát rögzítetten használó klienskonfigurációk továbbra is működjenek. Körülbelül megkétszerezi a katalógust.  |
+| `alias`     | `cc/claude-sonnet-4-6`                                   | Modellenként egy bejegyzés. A különálló aliassal nem rendelkező szolgáltatók bejegyzései továbbra is megjelennek, így semmi sem vész el.                                                                                  |
+| `canonical` | `claude/claude-sonnet-4-6`                               | Modellenként egy bejegyzés a teljes szolgáltatóazonosító-előtag alatt. A különálló aliassal nem rendelkező szolgáltatók (például `antigravity/…`, `agy/…`) egyetlen azonosítója itt is megjelenik, így semmi sem vész el. |
 
-A `dual` módban megjelenő tükörbejegyzés a lekérdezési paraméter nélkül is felismerhető: egy,
-az elsődleges azonosítóra mutató `parent` mezőt tartalmaz.
+A `dual` módú tükör a lekérdezési paraméter nélkül is felismerhető: rendelkezik egy `parent`
+mezővel, amely az elsődleges azonosítóra mutat.
 
 A modellválasztót megjelenítő klienseknek a `?prefix=alias` paramétert kell kérniük — ezt teszi az
 [OmniCopilot VS Code-bővítmény](../guides/VSCODE-COPILOT.md) is.
 
 ### Felderítési szűrők (`?capability=`, `?min_context=`, `?kind=`, `?q=`)
 
-A `GET /v1/models` opcionálisan használható felderítési szűrőket fogad el. Egyikük megadása
-nélkül a válasz változatlan marad. Ezek a hívó számára már látható katalógust szűkítik
-(először az API-kulcs jogosultságai érvényesülnek), és az OpenAI-stílusú `limit` / `after`
-lapozás előtt futnak le:
+A `GET /v1/models` támogatja a külön bekapcsolható felderítési szűrőket. Ezek egyike nélkül a válasz
+változatlan marad. A szűrők a hívó számára már látható katalógust szűkítik (először az API-kulcs engedélyei érvényesülnek),
+és az OpenAI-stílusú `limit` / `after` lapozás előtt futnak le:
 
 ```bash
 GET /v1/models?capability=vision&capability=tool_calling   # minden felsorolt képességnek igaznak kell lennie
 GET /v1/models?capability=vision,reasoning&min_context=200000
-GET /v1/models?kind=embedding                              # a katalógus `type` értéke; az e nélküli sorok `chat` típusúak
+GET /v1/models?kind=embedding                              # a katalógus `type` mezője; az e nélküli sorok `chat` típusúak
 GET /v1/models?q=sonnet&limit=10                           # kis- és nagybetűktől független egyezés az azonosítóban vagy a névben
 ```
 
 | Paraméter     | Értékek                                                                                             |
 | ------------- | --------------------------------------------------------------------------------------------------- |
 | `capability`  | `attachment`, `reasoning`, `structured_output`, `temperature`, `thinking`, `tool_calling`, `vision` |
-| `min_context` | nemnegatív egész szám, összehasonlítva a `context_length` értékével                                 |
+| `min_context` | nemnegatív egész szám, a `context_length` értékével összehasonlítva                                 |
 | `kind`        | `chat`, `audio`, `embedding`, `image`, `moderation`, `music`, `rerank`, `video`                     |
 | `q`           | 1–200 karakter                                                                                      |
 
 Ismeretlen érték, illetve nem nemnegatív egész számként megadott `min_context` (például `1.5`)
-esetén HTTP `400` válasz érkezik, és az üzenet felsorolja az érvényes értékeket. Megvalósítás:
+esetén a válasz HTTP `400`, az üzenet pedig felsorolja az érvényes értékeket. Implementáció:
 `src/app/api/v1/models/catalogFilters.ts`.
 
-### Modell-szűkített lista (`POST /v1/models/query`)
+### Modellek szűkített listája (`POST /v1/models/query`)
 
-A `POST /v1/models/query` rövid, determinisztikus listát ad vissza ugyanabból a katalógusból,
+A `POST /v1/models/query` ugyanabból a katalógusból ad vissza egy rövid, determinisztikus listát,
 ugyanolyan hitelesítéssel és kulcsonkénti láthatósággal, mint a `GET /v1/models`:
 
 ```bash
@@ -520,39 +561,45 @@ Content-Type: application/json
 → { "object": "list", "data": [ ...models ] }
 ```
 
-Minden mező opcionális. A `capabilities` és az `exclude` tömböt vagy vesszővel elválasztott
-karakterláncot fogad el; a `max_output` értékét a rendszer a `max_output_tokens` értékével
-hasonlítja össze. Az eredmények rendezése először az `owned_by`, majd az `id` szerint történik.
-A `limit` alapértelmezett értéke `20`, a `100` feletti értékeket pedig `100`-ra korlátozza a
-rendszer. Érvénytelen JSON, ismeretlen mező vagy érvénytelen érték esetén HTTP `400` válasz érkezik.
+Minden mező opcionális. A `capabilities` és az `exclude` tömböt vagy vesszővel elválasztott karakterláncot
+fogad el; a `max_output` a `max_output_tokens` értékével lesz összehasonlítva. Az eredmények először
+az `owned_by`, majd az `id` szerint vannak rendezve. A `limit` alapértelmezett értéke `20`, a `100`
+feletti értékek pedig `100`-ra vannak korlátozva. Érvénytelen JSON, ismeretlen mező vagy érvénytelen
+érték esetén a válasz HTTP `400`.
 
 ### Egyenként elrejtett csevegési modellek
 
-A szolgáltatói oldalán **Hidden** jelöléssel ellátott modell kimarad a katalógusból, és explicit
-kérés esetén HTTP `404` / `model_not_found` hibával kerül elutasításra. Az ellenőrzés a feloldott
-szolgáltatót és modellt használja, beleértve a szolgáltatói aliasokat, a kompatibilis szolgáltatók
-csomópont-előtagjait és a kapcsolat alapértelmezéseit. Egy kombináció kihagyja a rejtett
-célpontokat, és használhat egy látható testvérmodellt; ha nem marad végrehajtható célpont,
-ugyanazt a hibakódot adja vissza. A modell láthatóvá tétele a következő kéréskor lép életbe.
-A kizárólag képekre vonatkozó láthatósági felülbírálások nem rejtik el az azonos ID-jű
-csevegési modellt.
+A szolgáltatói oldalán **Rejtett** jelöléssel ellátott modellek nem szerepelnek a katalógusban, és
+explicit kérésük esetén a rendszer HTTP `404` / `model_not_found` hibával utasítja el őket. Az ellenőrzés
+a feloldott szolgáltatót és modellt használja, beleértve a szolgáltatói aliasokat, a kompatibilis
+szolgáltatók csomópont-előtagjait és a kapcsolat alapértelmezett értékeit. Egy kombináció kihagyja a
+rejtett célokat, és használhat egy látható testvérmodellt; ha nem marad végrehajtható cél, ugyanazt a
+hibakódot adja vissza. A rejtettség feloldása a következő kéréskor lép életbe. A csak képekre vonatkozó
+láthatósági felülbírálások nem rejtik el az azonos azonosítójú csevegési modellt.
 
 Ez az egyedi modellbeállítás elkülönül a
 [modellközzétételi engedélyezési/tiltási listáktól](../routing/MODEL_EXPOSURE_LIST.md), amelyek a
-katalógusban való megjelenést és az automatikus útválasztás jelöltjeit szűrik, miközben
-megőrzik az explicit továbbítást. Az API-kulcs modelljogosultságai továbbra is egymástól
-függetlenül érvényesülnek. A katalóguselőtag alapértelmezett módja továbbra is `dual`.
+katalógusban való megjelenítést és az automatikus útválasztás jelöltjeit szűrik, miközben megtartják
+az explicit továbbítást. Az API-kulcsok modellengedélyei továbbra is ettől függetlenül érvényesek.
+A katalógus alapértelmezett előtagmódja továbbra is `dual`.
 
 ### Gondolkodás nélküli modellváltozatok
 
-A gondolkodásra képes Claude-modellek esetében a `/v1/models` egy **gondolkodás nélküli**
-változatot is közzétesz, amelynek azonosítója a `claude-3-omniroute-no-thinking/` előtaggal kezdődik:
+A gondolkodásra képes Claude-modellekhez a `/v1/models` egy **gondolkodás nélküli** változatot is
+meghirdet, amelynek azonosítója a `claude-3-omniroute-no-thinking/` előtaggal kezdődik:
 
 ```
 claude-3-omniroute-no-thinking/<provider>/<model>
 ```
 
-Ennek az azonosítónak a kiválasztása (például egy olyan Claude Code-konfigurációban, amely mindig csatol egy `thinking` blokkot) a valódi `<provider>/<model>` értékre oldódik fel, letiltott következtetéssel — a `/v1/messages` útvonalon `thinking:{type:"disabled"}` beállítással, a `/v1/chat/completions` útvonalon pedig a `reasoning`/`reasoning_effort` mezők elhagyásával. A változat csak azoknál a Claude-modellcsaládba tartozó modelleknél jelenik meg, amelyek támogatják a gondolkodást, **és** elfogadják a `disabled` értéket (így például a kizárólag adaptív modellek, amelyek elutasítják a `disabled` értéket, ki vannak zárva). Az üzemeltetők modellenként kényszeríthetik a változat be- vagy kikapcsolását a `ModelSpec.noThinkingAlias` használatával.
+Ennek az azonosítónak a kiválasztása (például egy olyan Claude Code-konfigurációban, amely mindig
+csatol egy `thinking` blokkot) visszafejtődik a valódi `<provider>/<model>` modellre, elnyomott
+következtetési funkcióval — a `/v1/messages` útvonalon `thinking:{type:"disabled"}`, a
+`/v1/chat/completions` útvonalon pedig a `reasoning`/`reasoning_effort` mezők elhagyásával. A változat
+csak azoknál a Claude-családba tartozó modelleknél szerepel a listán, amelyek támogatják a gondolkodást,
+**és** elfogadják a `disabled` értéket (így például a kizárólag adaptív modellek, amelyek elutasítják a
+`disabled` értéket, ki vannak zárva). Az üzemeltetők modellenként kényszeríthetik ki a változat be- vagy
+kikapcsolását a `ModelSpec.noThinkingAlias` használatával.
 
 ---
 
@@ -565,6 +612,82 @@ GET /api/v1/provider-plugin-manifest
 Visszaadja a Bifrost, a CLIProxyAPI és a jövőbeli sidecar útválasztók által használt, JSON-biztos szolgáltatói bővítménymanifesztet. A válasz a TypeScript szolgáltatói regiszterből jön létre, és szándékosan nem tartalmaz OAuth-kliens-titkokat, futásidejű környezetfeloldást, végrehajtó függvényeket, kérésfejléceket és fiókadatokat.
 
 Ezt a végpontot akkor használja, ha egy sidecar folyamaton kívül fut, és nem tudja közvetlenül importálni az `open-sse/config/providerPluginManifestRegistry.ts` fájlt.
+
+---
+
+## ElevenLabs hanggenerálás
+
+Hozzon létre egy `elevenlabs` szolgáltatói kapcsolatot az OmniRoute-ban az ElevenLabs API-kulcsával.
+Az ügyfelek az **OmniRoute**-kulcsukkal hitelesítenek (`Authorization: Bearer $OMNIROUTE_API_KEY`);
+a gateway a tárolt szolgáltatói kulcsot `xi-api-key` fejlécként adja át. Soha ne küldjön ElevenLabs-kulcsot
+gateway bearer tokenként.
+
+| Metódus | Útvonal                     | Válasz                                   | API-kulcs végpont-kategória |
+| ------- | --------------------------- | ---------------------------------------- | --------------------------- |
+| POST    | `/v1/sound-generation`      | Natív hangbájtok                         | `elevenlabs`                |
+| POST    | `/v1/music`                 | Natív hangbájtok                         | `music`                     |
+| POST    | `/v1/music/stream`          | Streamelt hangbájtok                     | `music`                     |
+| POST    | `/v1/music/detailed`        | Natív multipart hang és kompozíciós terv | `music`                     |
+| POST    | `/v1/music/detailed/stream` | Natív SSE-metaadatok és hangdarabok      | `music`                     |
+| POST    | `/v1/music/plan`            | JSON kompozíciós terv                    | `music`                     |
+
+Ezek a végpontok kiegészítik a meglévő `/v1/audio/speech`, `/v1/audio/transcriptions`,
+`/v1/voices`, `/v1/text-to-speech/{voiceId}` és `/v1/speech-to-text` útvonalakat. A natív JSON-mezők
+és lekérdezési paraméterek, például az `output_format` és az `enable_logging`, megmaradnak.
+A `/v1/music/detailed` válaszai megtartják a multipart határolóikat; multipartként dolgozza fel őket.
+A `/v1/music/detailed/stream` `text/event-stream` választ ad kompozíciós metaadatokkal és
+base64 hangdarabokkal SSE-eseményekben. Mind a hat útvonal támogatja a CORS preflightot.
+
+```bash
+export OMNIROUTE_BASE_URL="http://localhost:20128"
+export OMNIROUTE_API_KEY="your-omniroute-api-key"
+
+# A short sound effect. Duration: 0.5 to 30 seconds.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/sound-generation?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"A single soft bell chime","duration_seconds":1,"model_id":"eleven_text_to_sound_v2"}' \
+  --output effect.mp3
+
+# Music duration is expressed in milliseconds: 3000 to 600000.
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music?output_format=mp3_44100_128" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"prompt":"Gentle instrumental piano","music_length_ms":10000,"force_instrumental":true,"model_id":"music_v1"}' \
+  --output music.mp3
+```
+
+A fokozatos hangkézbesítéshez használja a `/v1/music/stream` végpontot ugyanazzal a JSON-törzzsel. A kompozíció
+pontosan egyet fogad el a `prompt` és a `composition_plan` közül; a `/v1/music/plan` megköveteli a `prompt` mezőt,
+és opcionálisan elfogadja a `source_composition_plan` mezőt. A natív sémák megőrzik a további
+szolgáltatói mezőket, így a kompozíciós terv verziói és a finomhangolási beállítások eljutnak az ElevenLabshez.
+
+Az egységes `/v1/music/generations` végpont az `elevenlabs/music_v1`,
+`elevenlabs/music_v2` és `elevenlabs/music_v2_5` modelleket is elfogadja. Aktív ElevenLabs-kapcsolat esetén
+ezeket a modelleket a zenei katalógus is megjeleníti. Ez a végpont a következőt adja vissza:
+`{"created":...,"data":[{"b64_json":"...","format":"mp3"}]}`. A `duration` mezője
+másodpercben értendő, és a `music_length_ms` mezőre képeződik le; egy kifejezetten megadott `music_length_ms` elsőbbséget élvez.
+Az `instrumental` a `force_instrumental` mezőre képeződik le, a natív mező elsőbbségével.
+Streameléshez a natív streamelő végpontokat, kizárólag kompozíciós tervre épülő kérésekhez
+pedig a natív kompozíciós végpontot használja.
+
+```bash
+curl --fail-with-body "$OMNIROUTE_BASE_URL/v1/music/generations" \
+  -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"model":"elevenlabs/music_v1","prompt":"Gentle instrumental piano","duration":10,"instrumental":true}'
+```
+
+A végpont-, modell-, költségkeret- és kapcsolati korlátozások még az upstream hívás előtt érvényesülnek. A natív
+útvonalak változatlanul adják vissza az upstream állapotkódokat és hibatörzseket, beleértve a `402` kódot a
+csomagkorlátozásnál és a `429` kódot a kvótakorlátnál. A `character-cost`, `song-id`, `request-id` és `retry-after`
+fejlécek megmaradnak, ha jelen vannak. Az ingyenes kreditegyenleg nem garantál hozzáférést minden
+zenei modellhez, kimeneti formátumhoz vagy API-funkcióhoz: az ElevenLabs kérésenként dönt a jogosultságról.
+Az egységes végpont megőrzi a hibaállapot-kódokat az OmniRoute normalizált hibaburkolatában.
+
+Upstream szerződések: [hangeffektusok](https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert),
+[zenei kompozíció](https://elevenlabs.io/docs/api-reference/music/compose) és
+[streamelt zenei részletek](https://elevenlabs.io/docs/api-reference/music/compose-detailed-stream).
 
 ---
 
@@ -711,47 +834,40 @@ A `GET /v1/batches` a névtelen hívót `401` válasszal utasítja el még akkor
 
 ---
 
-## Search API
+## Keresés API
 
-Webes/keresési szolgáltatók absztrakciós rétege (Tavily, Brave, Exa, Serper stb.).
+Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Metódus | Útvonal                | Leírás                                                                                                                 |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | A konfigurált keresési szolgáltatók és képességeik listázása                                                           |
-| POST    | `/v1/search`           | Keresési lekérdezés futtatása — a törzset a `v1SearchSchema` ellenőrzi, támogatja a gyorsítótárazást és az összevonást |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti találati, késleltetési és gyorsítótár-statisztikák                                                   |
+| Módszer | Útvonal                | Leírás                                                        |
+| ------- | ---------------------- | ------------------------------------------------------------- |
+| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit |
+| POST    | `/v1/search`           | `v1SearchSchema` le caching/coalescing keresési —             |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika               |
 
-**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A keresési házirendet az `enforceApiKeyPolicy` kényszeríti ki.
+**Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
 
 ### Exa és Tavily `provider_options`
 
-Az Exa és a Tavily a szolgáltatóspecifikus mezőket egy névtérrel ellátott tárolóból olvassa:
-`provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily`
-(vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket
-a saját Zod-sémája alapján ellenőrzi az `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-és a helytelen típusú kulcsokat elveti. Minden más kulcs figyelmen kívül marad, beleértve a hitelesítést, az alap URL-t,
-valamint a `stream` és az `outputSchema` mezőket. A más szolgáltatók által használt egyszerű kulcsok (`cx`, `depth`, ...) továbbra is
-a korábbiak szerint működnek.
+Az Exa és a Tavily beolvassa a szolgáltató-specifikus mezőket egy névteres táskából: `provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily` (vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket ellenőrzik a saját Zod sémájával `open-sse/handlers/search/providerOptionsPassthrough.ts` ben, és egy nem megfelelő típusú kulcs kerül kidobásra. Minden más kulcs figyelmen kívül marad, beleértve az auth, base URL, `stream` és `outputSchema`. A más szolgáltatók által használt lapos billentyűk (`cx`, `depth`, ...) a korábbiak szerint működnek.
 
-| Szolgáltató | Felső szintű mezők                                                                                                                                                                                                                                                                                                                                                        | Beágyazott                                                                                                                                                                         |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (egyszerű primitív értékek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}`, az alapértelmezett `{ text: true, highlights: true }` értékekkel egyesítve |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                                  |
+| Szolgáltató | Legfelső szintű mezők                                                                                                                                                                                                                                                                                                                                                     | Beágyazott                                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` egyesült az alapértelmezett `{ text: true, highlights: true }` vel |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
 
-Mindig az általános mezők élveznek elsőbbséget: `query`, `max_results`, `filters` (domainek), `country`, valamint a
-`search_type` alapján származtatott téma. Az Exa esetében a `search_type: "news"` megtartja a `category: "news"` értéket.
-A Tavily a `search_type: "finance"` értéket is elfogadja (`topic: "finance"`).
+Mindig az általános mezők nyernek: `query`, `max_results`, `filters` (domains), `country` és a `search_type` ből származó téma. Az Exa-n a `search_type: "news"` megtartja `category: "news"`. Tavily `search_type: "finance"` (`topic: "finance"`) is elfogadja.
 
-Az általános `time_range` mostantól mindkét szolgáltatóhoz eljut: az Exa a `startPublishedDate` (ISO-
-időbélyeg), a Tavily pedig a `start_date` (`YYYY-MM-DD`) mezőt kapja. A `provider_options` között kifejezetten megadott dátum
-felülírja a leképezett értéket.
+A Firecrawl keresési költsége 10 visszaadott eredmény elindított blokkjára vonatkozik, blokkonként 0,002 USD (2 kredit) és hívásonként legalább egy blokk ( [Firecrawl-számlázás](https://docs.firecrawl.dev/billing) ): 11 találat 0,004 USD-ba kerül.
 
-Az Exa-találatok megőrzik az `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` mezőket a
-`provider_raw` mezőben. A Tavily-találatok megőrzik az `images` és `favicon` mezőket.
+Az általános `time_range` mostantól mindkét szolgáltatót eléri: Exa `startPublishedDate` (ISO timestamp), Tavily pedig `start_date` (`YYYY-MM-DD`) kap. Az explicit dátum `provider_options` ben felülírja a leképezett dátumot.
 
-A költségelszámolás továbbra is az egyszerű `costPerQuery` nyilvántartáson alapul. A Tavily a
-`search_depth: "advanced"` használata esetén hívásonként több kreditet számláz, és ez a különbség nem jelenik meg a
-`usage.search_cost_usd` értékében.
+Az exa eredmények `id`, `highlight_scores`, `summary`, `subpages`, `entities` és `extras` `provider_raw` ben tartják . A Tavily eredmények `images` és `favicon` maradnak.
+
+A linkup keresési költsége 0,005 USD `depth` `fast` és `standard`, és 0,05 USD `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) esetében, függetlenül attól, hogy `depth` `provider_options` ből vagy a kapcsolat beállításaiból származik.
+
+Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
+
+A költségelszámolás a `costPerQuery` lapos nyilvántartás, kivéve az Exa esetében, amely az Exa saját árait követi: 0,007 USD hívásonként `auto` (és az örökölt `fast`) esetében vagy 0,004 USD `lite` (és az örökölt `instant`) esetében, amely 10 eredményt takar; 0,001 USD minden további eredményért; és 0,001 USD visszaadott eredményenként, ha `contents.summary` be van állítva. A Tavily 1 kreditet (0,008 USD) `search_depth` `basic`, `fast` és `ultra-fast` esetében, és 2 kreditet ($ 0,016) `advanced` esetében ( [Tavily API kredit](https://docs.tavily.com/documentation/api-credits) ). A `auto_parameters: true` folytatott hívást, amelyet Tavily haladó szintre frissít, továbbra is 1 kredittel rögzítenek.
 
 ---
 

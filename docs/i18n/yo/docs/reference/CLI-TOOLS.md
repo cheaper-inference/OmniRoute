@@ -4,17 +4,17 @@
 
 ---
 
-Ìgbà ìkẹyìn tí a ṣe àfikún: 2026-08-23
+kẹhin imudojuiwọn: 2026-08-23
 
-OmniRoute ń ṣepọ̀ pẹ̀lú ẹ̀ka mẹ́ta ti àwọn irinṣẹ́ CLI tí a pín káàkiri ojúewé dashboard mẹ́ta tí a yà sọ́tọ̀:
+OmniRoute ṣepọ pẹlu awọn ẹka mẹta ti awọn irinṣẹ CLI tan kaakiri awọn oju-iwe dasibodu igbẹhin mẹta:
 
-| Ojúewé             | Route                   | Èrò àkànṣe                                                                      | Iye         |
-| ------------------ | ----------------------- | ------------------------------------------------------------------------------- | ----------- |
-| **Àwọn CLI Code**  | `/dashboard/cli-code`   | Àwọn irinṣẹ́ kóòdù tí o tọ́ka sí OmniRoute (Client → CLI → OmniRoute → Provider)  | 26          |
-| **Àwọn CLI Agent** | `/dashboard/cli-agents` | Àwọn agent aládàáṣe tí o tọ́ka sí OmniRoute (ìṣàn kan náà, ààlà tó gbòòrò sí i)  | 10          |
-| **Àwọn ACP Agent** | `/dashboard/acp-agents` | Àwọn CLI tí OmniRoute ń dá sílẹ̀ gẹ́gẹ́ bí backend nípasẹ̀ stdio/ACP (ìṣàn òdìkejì) | wo registry |
+| Oju-iwe            | Ona                     | Erongba                                                                           | Ka             |
+| ------------------ | ----------------------- | --------------------------------------------------------------------------------- | -------------- |
+| **CLI koodu**      | `/dashboard/cli-code`   | Awọn irinṣẹ ifaminsi ti o tọka si OmniRoute (Onibara → CLI → OmniRoute → Olupese) | 26             |
+| **CLI Awọn aṣoju** | `/dashboard/cli-agents` | Awọn aṣoju adase ti o tọka si OmniRoute (sisan kanna, iwọn to gbooro)             | 11             |
+| **ACP Awọn aṣoju** | `/dashboard/acp-agents` | CLIs ti OmniRoute spawn bi ẹhin nipasẹ stdio/ACP (sisan yiyipada)                 | wo iforukọsilẹ |
 
-Àwọn route àtijọ́ ń ṣe àtúndarí nípasẹ̀ 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Awọn ipa-ọna Legacy ṣe àtúnjúwe nipasẹ 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,12 +43,9 @@ Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose /
 
 ---
 
-## Ṣètò láìfọwọ́ṣe pẹ̀lú `setup-*`
+## Tunto aifọwọyi pẹlu `setup-*`
 
-O kò nílò láti kọ àtòjọ-ètò irinṣẹ́ kọ̀ọ̀kan pẹ̀lú ọwọ́. OmniRoute ní àṣẹ `setup-*`
-kan fún CLI kọ̀ọ̀kan tí a ṣe àtìlẹ́yìn fún, èyí tí ó máa ń ka àkójọ àwọn model tí ó
-wà ní **àsìkò gidi** láti inú OmniRoute tí ń ṣiṣẹ́ (ní ẹ̀rọ agbègbè tàbí ní ọ̀nà jíjìn),
-tí yóò sì kọ àtòjọ-ètò ti irinṣẹ́ náà sí orí ẹ̀rọ rẹ:
+O ko ni lati kọ atunto irinṣẹ kọọkan pẹlu ọwọ. OmniRoute gbe aṣẹ `setup-*` kan fun CLI atilẹyin ti o ka awọn** gbe** Katalogi awoṣe lati OmniRoute ti nṣiṣẹ (agbegbe tabi latọna jijin) ati kọ atunto ti ara ẹrọ lori ẹrọ rẹ:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -56,55 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Ọ̀kọ̀ọ̀kan gba `--remote <url> --api-key <key>` (láti ṣètò irinṣẹ́ agbègbè kan
-láti ṣiṣẹ́ pẹ̀lú OmniRoute jíjìn), `--dry-run` (láti ṣe àyẹ̀wò ṣáájú láìkọ nǹkan),
-àti `--port`. Àwọn irinṣẹ́ tí kò ní ìṣàwárí model aládàáṣiṣẹ́ (Cline, Kilo, Roo,
-Goose, Aider, Qwen, 5dive) gba `--model <id>` (àti `--yes` fún ìṣiṣẹ́ tí kò nílò
-ìbáṣepọ̀). `setup-5dive` ni ìlànà kan ṣoṣo tí kì í kọ sábẹ́ `$HOME`: ó máa ń ṣètò
-ọ̀wọ́ àwọn agent 5dive nípa kíkọ profile ìfàṣẹ̀sí tí root ní sí orí host ọ̀wọ́ náà,
-nítorí náà ó tún máa ń ṣiṣẹ́ ara rẹ̀ nípasẹ̀ `sudo`, kò sì ní mode jíjìn tirẹ̀.
-Láti ṣe ìfilọ́lẹ̀ CLI kan pẹ̀lú env tó yẹ tí a fi sínú rẹ̀ láìkọ àtòjọ-ètò kankan
-rárá, lo olùfilọ́lẹ̀ gbogbogbò `omniroute run <target>` (claude, codex, aider,
-goose, opencode, qwen, gemini — àwọn target àti alias wá láti
-`bin/cli/cli-manifest.mjs`); àwọn olùfilọ́lẹ̀ àtọwọ́dọ́wọ́ fún irinṣẹ́ kọ̀ọ̀kan,
-`omniroute launch` (Claude Code) àti `omniroute launch-codex` (Codex), ṣì wà.
-Gemini CLI jẹ́ ti ìfilọ́lẹ̀ nìkan: ó jẹ́ target `omniroute run`, ṣùgbọ́n kò ní
-ìlànà `setup-*`/`configure`.
+Olukuluku gba `--remote <url> --api-key <key>` (tunto ohun elo agbegbe kan lodi si OmniRoute latọna jijin), `--dry-run` (awotẹlẹ laisi kikọ), ati `--port`. Awọn irinṣẹ laisi wiwa aifọwọyi awoṣe (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) gba `--model <id>` (ati `--yes` fun awọn ṣiṣe ti kii ṣe ibaraenisepo). `setup-5dive` jẹ ohunelo kan ti ko kọ labẹ `$HOME`: o tunto ọkọ oju-omi titobi aṣoju 5dive kan nipa kikọ profaili auth-ini root lori agbalejo ọkọ oju-omi titobi, nitorinaa o tun-execs nipasẹ `sudo` ati pe ko ni ipo jijin ti tirẹ. Lati ṣe ifilọlẹ CLI kan pẹlu itasi env ọtun ati pe ko si atunto ti a kọ rara, lo ifilọlẹ jeneriki `omniroute run <target>` (claude, codex, aider, Gussi, opencode, qwen, gemini, whycodes — awọn ibi-afẹde ati awọn inagijẹ wa lati `bin/cli/cli-manifest.mjs`); awọn ifilọlẹ ohun-elo fun ohun-elo `omniroute launch` (koodu Claude ) ati `omniroute launch-codex` (Codex) wa. Gemini CLI jẹ ifilọlẹ-nikan: o jẹ ibi-afẹde `omniroute run` ṣugbọn ko ni ilana `setup-*`/`configure`.
 
-> **Ìtọ́kasí kíkún:** tábìlì àkọ́kọ́ — ohun tí àṣẹ kọ̀ọ̀kan ń kọ, gbogbo flag,
-> agbègbè ní ìfiwéra pẹ̀lú jíjìn, àti àwọn irinṣẹ́ wo ló nílò àsẹ̀yìn `/v1` — wà
-> nínú **[Àwọn Ìṣọ̀kan CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Itọkasi ni kikun:** tabili titunto si - kini aṣẹ kọọkan kọ, gbogbo asia, agbegbe la latọna jijin, ati awọn irinṣẹ wo ni o fẹ suffix `/v1` - ngbe ni** [CLI Integration](../guides/CLI-INTEGRATIONS.md)** .
 
-### Ṣíṣe àwọn wọ̀nyí nínú container kan
+### Ṣiṣe awọn wọnyi ni inu apoti kan
 
-Àṣẹ `setup-*` tí a ṣiṣẹ́ nínú container OmniRoute yóò kọ sínú home ti container
-náà fúnra rẹ̀, èyí tí kò sí CLI host kankan tí yóò kà, tí yóò sì pòórá pẹ̀lú
-container náà. OmniRoute máa ń ṣàwárí èyí, yóò sì jáde pẹ̀lú `2` àti àwọn ìtọ́sọ́nà
-dípò kí ó kọ nǹkan. Ọ̀nà méjì tí a ṣe àtìlẹ́yìn fún láti tẹ̀síwájú ni — fi CLI sí
-orí host, kí o sì lo `omniroute connect` láti sopọ̀ mọ́ container náà, tàbí
-ṣe bind-mount àwọn config dirs, kí o sì ṣètò `CLI_CONFIG_HOME` (profile `host`
-ti compose). Gbogbo àṣẹ `setup-*`, pẹ̀lú `omniroute configure` àti
-`omniroute config set`, gba `--allow-container-write` nígbà tí ohun tí o fẹ́
-gan-an ni láti ṣètò àwọn CLI ti container náà fúnra rẹ̀;
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ṣe ohun kan náà fún server náà.
-Wo [Ìtọ́sọ́nà Docker → Ṣíṣètò àwọn irinṣẹ́ CLI host](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+Aṣẹ `setup-*` ti a ṣe ninu apoti OmniRoute ti kọwe sinu ile tirẹ, eyiti ko si CLI agbalejo ti o ka ati eyiti o padanu pẹlu apoti naa. OmniRoute ṣe awari iyẹn ati jade kuro `2` pẹlu awọn ilana dipo kikọ. Awọn ọna atilẹyin meji siwaju - fi sori ẹrọ CLI sori agbalejo ati `omniroute connect` si apo eiyan naa, tabi dipọ awọn dirs atunto ki o ṣeto `CLI_CONFIG_HOME` (ṣajọ profaili `host` ). Gbogbo aṣẹ `setup-*`, pẹlu `omniroute configure` ati `omniroute config set`, gba `--allow-container-write` nigba tito leto CLIs tirẹ ni ohun ti o tumọ si gangan; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` ṣe kanna fun olupin naa. Wo [Docker Itọsọna → Ṣiṣeto awọn irinṣẹ CLI agbalejo](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Apply endpoint** ti dashboard (`POST /api/cli-tools/apply`) ń fi ààbò kan náà
-múlò: nínú container kan, ìkọ̀wé tí target rẹ̀ kò jẹ́ bind-mounted láti host yóò
-dáhùn pẹ̀lú **`422`**, `containerEphemeralTarget: true`, ọ̀rọ̀ àṣìṣe tó ní ààbò,
-àti — fún àwọn irinṣẹ́ tó ní ìlànà host (claude, codex, opencode, cline, kilo,
-continue) — `hostSetupCommand` kan (fún àpẹẹrẹ, `omniroute setup-opencode`) láti
-ṣiṣẹ́ lórí host dípò bẹ́ẹ̀; kò sí ohun tí a ó kọ. `dryRun: true` ṣì ń ṣiṣẹ́ ní mode
-container, ó sì ń dá àyẹ̀wò ṣáájú tí a ti yọ ìsọfúnni kókó kúrò nínú rẹ̀ padà,
-pẹ̀lú path target, láìfọwọ́ kan disk. Àkóónú àyẹ̀wò ṣáájú kì í ṣe àtòjọ-ètò tó ní
-ẹ̀rí ìdánimọ̀ tí a lè ṣe àdàkọ tàbí import. Ṣe apply pẹ̀lú àwọn ìwọlé irinṣẹ́/base
-URL/API key/model ìpilẹ̀ṣẹ̀ lórí host, tàbí lo àṣẹ ìṣètò lórí host tí a tọ́ka sí.
-Wo [Ààbò àtòjọ-ètò CLI](../security/CLI-CONFIGURATION.md) fún header àyẹ̀wò ṣáájú
-àti àdéhùn request. Ìhùwàsí yìí jẹ́ èyí tí a mọ̀ọ́mọ̀ ṣe, a sì ń dáàbò bò ó lọ́wọ́
-regression pẹ̀lú `tests/unit/api/cli-tools/apply-container-guard.test.ts` —
-má ṣe “ṣàtúnṣe” 422 láé nípa yíyọ guard náà kúrò.
+Dasibodu naa** waye endpoint** (`POST /api/cli-tools/apply`) fi agbara mu iṣọ kanna: ninu apoti kan, kikọ ti ibi-afẹde rẹ ko ni dipọ lati ọdọ agbalejo awọn idahun**`422`** pẹlu `containerEphemeralTarget: true`, ọrọ aṣiṣe ailewu ati - fun awọn irinṣẹ pẹlu ohunelo ogun (claude, codex, opencode, cline, kilo, continue) — a `hostSetupCommand` (eg `omniroute setup-opencode`) lati ṣiṣe lori ogun dipo; ko si ohun ti a kọ. `dryRun: true` n ṣiṣẹ ni ipo eiyan ati dapada atunyẹwo atunyẹwo + ọna ibi-afẹde laisi fọwọkan disk. Akoonu Awotẹlẹ kii ṣe atunto ti o ni ẹri lati daakọ tabi gbe wọle. Waye pẹlu awọn igbewọle tool/base URL/API key/model atilẹba lori agbalejo naa, tabi lo aṣẹ iṣeto ẹgbẹ-ogun ti itọkasi. Wo [aabo iṣeto CLI](../security/CLI-CONFIGURATION.md) fun akọsori awotẹlẹ ati iwe adehun ibeere. Ihuwasi yii jẹ imomose ati ifasilẹyin-iṣọ nipasẹ `tests/unit/api/cli-tools/apply-container-guard.test.ts` — rara “fix” 422 kan nipa yiyọ oluso naa kuro.
 
 ---
 
@@ -147,59 +107,60 @@ ojú-ọ̀nà kan láì ṣàfikún rẹ̀ sí àwọn yòókù yóò mú kí à
 
 ---
 
-## 1. Àkójọ Kóòdù CLI (irinṣẹ́ 27)
+## 1. Katalogi koodu CLI (awọn irinṣẹ 27)
 
-Gbogbo irinṣẹ́ tó hàn nínú `/dashboard/cli-code`. Àwọn tó ní `baseUrlSupport: none` ni a so nípasẹ̀ MITM tàbí ìtọ́sọ́nà àfọwọ́ṣe dípò URL ìpìlẹ̀ àkànṣe kan:
+Gbogbo awọn irinṣẹ ti o han ni `/dashboard/cli-code`. Awọn ti o ni `baseUrlSupport: none` jẹ ti firanṣẹ nipasẹ MITM tabi itọsọna afọwọṣe dipo ipilẹ aṣa URL:
 
-| id           | orúkọ                   | olùpèsè             | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id          | oruko                      | ataja                 | baseUrlSupport | configTpe | acpSpawnable |
+| ----------- | -------------------------- | --------------------- | -------------- | --------- | ------------ |
+| claude      | Claude koodu               | Anthropic             | kun            | env       | ooto         |
+| codex       | OpenAI Codex CLI           | OpenAI                | kun            | aṣa       | ooto         |
+| zcode       | ZCode ( Eto Ifaminsi GLM ) | Z.ai                  | ko si          | aṣa       | eke          |
+| ila         | Cline                      | OSS (Claude Dev tẹlẹ) | kun            | aṣa       | ooto         |
+| kilo        | Kilo koodu                 | Kilo-Org              | kun            | aṣa       | eke          |
+| ro          | Roo Code                   | Roo (OSS)             | kun            | itọnisọna | eke          |
+| tesiwaju    | Tesiwaju                   | tesiwaju.dev          | kun            | itọnisọna | eke          |
+| oluranlowo  | Oluranlowo                 | OSS (P. Gauthier)     | kun            | itọnisọna | ooto         |
+| ayederu     | ForgeCode                  | Antinomy HQ           | kun            | aṣa       | ooto         |
+| jcode       | jcode                      | 1jehuang (OSS)        | kun            | aṣa       | eke          |
+| ijinle-tui  | DeepSeek TUI               | Hunter Bown (OSS)     | kun            | aṣa       | eke          |
+| codewhale   | CodeWhale                  | Hmbown (OSS)          | kun            | aṣa       | eke          |
+| ṣii koodu   | OpenCode                   | Anomaly (tẹlẹ-SST)    | kun            | itọnisọna | ooto         |
+| Duroidi     | Duroidi ile-iṣẹ            | Ile-iṣẹ AI            | apa kan        | itọnisọna | eke          |
+| atukọ       | GitHub Copilot CLI         | GitHub/MS             | kun            | aṣa       | eke          |
+| kọsọ-cli    | Cursor CLI                 | Ibikibi               | apa kan        | itọnisọna | ooto         |
+| yo          | Syo                        | leonardcser (OSS)     | kun            | aṣa       | eke          |
+| pi          | Pi (pi-ifaminsi-aṣoju)     | M. Zechner (OSS)      | kun            | aṣa       | eke          |
+| grok-kọ     | Grok Kọ                    | xAI                   | kun            | aṣa       | eke          |
+| fifun pa    | Fifun pa                   | OSS (Ẹwa)             | kun            | aṣa       | eke          |
+| qwen        | Qwen koodu                 | Alibaba               | kun            | itọnisọna | ooto         |
+| zed         | Zed                        | Zed Industries        | kun            | itọnisọna | eke          |
+| ikọrisi     | Cursor                     | Ibikibi               | ko si          | itọnisọna | eke          |
+| antigravity | Antigravity                | Google                | ko si          | mimi      | eke          |
+| Hermes      | Hermes                     | Nous Iwadi            | ko si          | itọnisọna | eke          |
+| kiro        | Kiro AI                    | Amazon                | ko si          | mimi      | eke          |
+| aṣa         | Aṣa CLI                    | —                     | kun            | aṣa-Akole | eke          |
 
-Àwọn irinṣẹ́ tó ní `baseUrlSupport: "partial"` máa ńṣàfihàn báàjì "⚠ URL ìpìlẹ̀ apá kan" lórí káàdì dásíbọ́ọ̀dù náà.
+Awọn irinṣẹ pẹlu `baseUrlSupport: "partial"` ṣe afihan baaji “⚠ Base URL parcial” ninu kaadi dasibodu naa.
 ---
 
-## 2. Àkójọ Àwọn Aṣojú CLI (irinṣẹ́ 10)
+## 2. Katalogi Awọn aṣoju CLI (awọn irinṣẹ 11)
 
-Àwọn aṣojú aládàáṣe tí ó hàn nínú `/dashboard/cli-agents`:
+Awọn aṣoju adase ti o han ni `/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| id                | oruko           | ataja                      | baseUrlSupport | acpSpawnable |
+| ----------------- | --------------- | -------------------------- | -------------- | ------------ |
+| Hermes-aṣoju      | Hermes Aṣoju    | Nous Iwadi                 | kun            | eke          |
+| ìmọlẹ             | OpenClaw        | OSS (P. Steinberger)       | kun            | ooto         |
+| gussi             | Goose           | Àkọsílẹ / Linux Foundation | kun            | ooto         |
+| onitumọ           | Ṣii Onitumọ     | OSS                        | kun            | ooto         |
+| jagunjagun        | Warp AI         | Warp Inc.                  | apa kan        | ooto         |
+| oluranlowo-dekini | Dekini Aṣoju    | asheshgoplani (OSS)        | kun            | eke          |
+| omp               | Oh Mi Pi        | OSS                        | kun            | ooto         |
+| letta             | Letta CLI       | Letta                      | kun            | eke          |
+| akọkọ-aṣoju       | Alakoso Alakoso | Oloye Oloye (OSS)          | kun            | eke          |
+| 5di omi           | 5di omi         | OSS (5dive-ai)             | kun            | eke          |
+| whycodes          | WhyCodes        | Kí nìdí Corporation        | kun            | eke          |
 
 ---
 

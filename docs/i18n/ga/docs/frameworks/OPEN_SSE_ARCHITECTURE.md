@@ -486,15 +486,15 @@ Láimhseálann sé seo:
 
 Coinníonn `open-sse/config/` an ciseal cumraíochta:
 
-| Comhad                        | Cuspóir                                                   |
-| ----------------------------- | --------------------------------------------------------- |
-| `providerRegistry.ts`         | Clárlann shamhlacha comhrá thar an gcatalóg 375 soláthraí |
-| `providerModels.ts`           | Ailiasanna samhla, mapáil formáide                        |
-| `constants.ts`                | Teorainneacha ama, teorainneacha, códanna stádais         |
-| `defaultThinkingSignature.ts` | Síniú smaoinimh réamhshocraithe Claude                    |
-| `modelStrip.ts` (in services) | Baint réimsí in aghaidh an tsoláthraí                     |
+| Comhad                        | Cuspóir                                            |
+| ----------------------------- | -------------------------------------------------- |
+| `providerRegistry.ts`         | Clár comhrá samhail thar an gcatalóg 377-soláthraí |
+| `providerModels.ts`           | Ailiasanna múnla, mapáil formáide                  |
+| `constants.ts`                | Amanna ama, teorainneacha, cóid stádais            |
+| `defaultThinkingSignature.ts` | Síniú smaoineamh Claude réamhshocraithe            |
+| `modelStrip.ts` (i seirbhísí) | Bearradh páirce in aghaidh an tsoláthraí           |
 
-### Scéimre na Clárlainne Soláthraithe
+### Scéimre Chlárlann Soláthraí
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Cinntíonn bailíochtú Zod ag am luchtaithe an mhodúil go bhfuil gach cumraíocht soláthraí bailí.
+Cinntíonn bailíochtú Zod ar ualach modúil go bhfuil gach cumraíocht soláthraí bailí.
 
 ---
 

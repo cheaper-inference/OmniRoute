@@ -484,15 +484,15 @@ Celui-ci gère :
 
 ## Configuration
 
-`open-sse/config/` contient la couche de configuration :
+`open-sse/config/` contient la couche de configuration :
 
-| Fichier                         | Rôle                                                               |
-| ------------------------------- | ------------------------------------------------------------------ |
-| `providerRegistry.ts`           | Registre des modèles de chat sur le catalogue des 375 fournisseurs |
-| `providerModels.ts`             | Alias de modèles, correspondance de formats                        |
-| `constants.ts`                  | Délais d'expiration, limites, codes de statut                      |
-| `defaultThinkingSignature.ts`   | Signature de réflexion Claude par défaut                           |
-| `modelStrip.ts` (dans services) | Suppression de champs par fournisseur                              |
+| Déposer                             | But                                                              |
+| ----------------------------------- | ---------------------------------------------------------------- |
+| `providerRegistry.ts`               | Registre de modèles de chat sur le catalogue de 377 fournisseurs |
+| `providerModels.ts`                 | Alias de modèle, mappage de format                               |
+| `constants.ts`                      | Délais d'attente, limites, codes d'état                          |
+| `defaultThinkingSignature.ts`       | Signature de réflexion Claude par défaut                         |
+| `modelStrip.ts` (dans les services) | Suppression des champs par fournisseur                           |
 
 ### Schéma du registre des fournisseurs
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-La validation Zod au chargement du module garantit que toutes les configurations de fournisseurs sont valides.
+La validation Zod lors du chargement du module garantit que toutes les configurations du fournisseur sont valides.
 
 ---
 

@@ -16,16 +16,16 @@ Ang AgentBridge ay ang MITM (Man-in-the-Middle) proxy ng OmniRoute na humaharang
 
 ### Ano ang AgentBridge?
 
-Kapag ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code) ay gumagawa ng API call, direkta itong kumokonekta sa upstream AI provider (OpenAI, Anthropic, atbp.). Hinaharang ng AgentBridge ang koneksyong iyon nang transparent sa antas ng TLS — nang hindi nangangailangan ng anumang pagbabago sa configuration ng agent — at muling isinulat ang request sa pamamagitan ng OmniRoute.
+Kapag ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code) ay tumawag ng API, direktang kumokonekta ito sa upstream AI provider (OpenAI, Anthropic, atbp.). Hinaharang AgentBridge ang koneksyon na iyon nang malinaw sa antas TLS — nang hindi nangangailangan ng anumang pagbabago sa configuration ng ahente — at muling isinusulat ang kahilingan sa pamamagitan ng OmniRoute.
 
-Ibig sabihin nito, maaari mong:
+Nangangahulugan ito na maaari mong:
 
-- **I-reroute ang anumang agent sa anumang provider**: Ang Copilot ay nakikipag-usap sa OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 375 provider ng OmniRoute.
-- **Mag-apply ng model mappings**: `gemini-3-flash` → `claude-sonnet-4.7` nang transparent sa antas ng handler.
-- **Obserbahan ang lahat ng traffic ng agent**: ang bawat naharang na request ay nai-publish sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **I-apply ang resilience ng OmniRoute**: gumagana rin ang combo routing, circuit breakers, fallbacks, at cost tracking para sa traffic ng IDE agent.
+- **I-rerouting ang sinumang ahente sa alinmang provider** : kinakausap ni Copilot si OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 377 provider ng OmniRoute.
+- **Ilapat ang mga pagmamapa ng modelo** : `gemini-3-flash` → `claude-sonnet-4.7` nang malinaw sa antas ng handler.
+- **Obserbahan ang lahat ng trapiko ng ahente** : bawat naharang na kahilingan ay nai-publish sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Ilapat ang OmniRoute resilience** : combo routing, circuit breaker, fallbacks, at cost tracking work para din sa trapiko IDE agent.
 
-### Posisyon kumpara sa merkado
+### Pagpoposisyon kumpara sa merkado
 
 | Tampok               | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
 | -------------------- | :-----: | :------: | :-------------: | :-----------------------: |
@@ -34,14 +34,14 @@ Ibig sabihin nito, maaari mong:
 | Kiro (AWS)           |    ✓    |    ✓     |        —        |             ✓             |
 | OpenAI Codex         |    —    |    ✓     |        —        |             ✓             |
 | Cursor IDE           |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries       |    —    |    ✓     |        —        |             ✓             |
+| Zed Industriya       |    —    |    ✓     |        —        |             ✓             |
 | Claude Code          |    —    |    —     |        ✓        |             ✓             |
-| Open Code            |    —    |    —     |        ✓        |             ✓             |
-| Trae                 |    —    |    —     |        —        |    🔍 Iniimbestigahan     |
+| Buksan ang Code      |    —    |    —     |        ✓        |             ✓             |
+| Trae                 |    —    |    —     |        —        |     🔍 Nag-iimbestiga     |
 | Dashboard UI         |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector    |    ✗    |    ✗     |        ✓        |             ✓             |
-| Routing ng OmniRoute |    ✗    |    ✗     |        ✗        |             ✓             |
-| UI ng model mapping  |    ✗    |    ✗     |        ✗        |             ✓             |
+| Inspektor ng Trapiko |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute pagruruta  |    ✗    |    ✗     |        ✗        |             ✓             |
+| Model mapping UI     |    ✗    |    ✗     |        ✗        |             ✓             |
 | Listahan ng bypass   |    ✗    |    ✗     |        ✓        |             ✓             |
 | Upstream CA cert     |    ✗    |    ✗     |        ✓        |             ✓             |
 

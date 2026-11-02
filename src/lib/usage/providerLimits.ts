@@ -32,6 +32,10 @@ import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
 import { mergeProviderLimitsCacheEntry, toProviderLimitsCacheEntry } from "./providerLimitsCache";
 import { getCredentialRefreshExecutor } from "@omniroute/open-sse/executors/credential.ts";
 import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
+import {
+  fetchAndSeedClaudeResetCreditUsage,
+  withClaudeResetCreditCount,
+} from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import {
@@ -75,6 +79,9 @@ const PROVIDER_LIMITS_APIKEY_PROVIDERS = new Set([
   "nan",
   "apmix",
   "deepseek",
+  // StepFun account balance (GET /v1/accounts; base-URL override selects
+  // China vs international platform — same override the chat path honors)
+  "stepfun",
   "xiaomi-mimo",
   "vertex",
   "vertex-partner",
@@ -710,18 +717,71 @@ async function syncClaudeExtraUsageStateIfNeeded(
   };
 }
 
-/** Persist Antigravity tier from live loadCodeAssist on quota refresh (not only OAuth). */
-async function syncAntigravitySubscriptionIfNeeded(
+const AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS = ["gemini-4*", "*argon*"] as const;
+
+/** Ineligible: flag the account and append the auto-managed Argon exclusions (keeps operator ones). */
+function markArgonIneligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== false) {
+    nextPsd.hasArgon = false;
+    changed = true;
+  }
+
+  const existing = Array.isArray(psd.excludedModels)
+    ? psd.excludedModels.filter((m): m is string => typeof m === "string")
+    : [];
+  const missing = AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS.filter(
+    (pattern) => !existing.includes(pattern)
+  );
+  if (missing.length > 0) {
+    nextPsd.excludedModels = [...existing, ...missing];
+    changed = true;
+  }
+  return changed;
+}
+
+/** Eligible: flag the account and strip only the auto-managed Argon exclusions. */
+function markArgonEligible(
+  psd: Record<string, unknown>,
+  nextPsd: Record<string, unknown>
+): boolean {
+  let changed = false;
+  if (psd.hasArgon !== true) {
+    nextPsd.hasArgon = true;
+    changed = true;
+  }
+
+  if (!Array.isArray(psd.excludedModels)) return changed;
+  const autoSet = new Set<string>(AUTO_MANAGED_ARGON_EXCLUSION_PATTERNS);
+  const filtered = psd.excludedModels.filter((m) => typeof m !== "string" || !autoSet.has(m));
+  if (filtered.length !== psd.excludedModels.length) {
+    nextPsd.excludedModels = filtered;
+    changed = true;
+  }
+  return changed;
+}
+
+export function applyAntigravityArgonEligibilityToPsd(
+  psd: Record<string, unknown>,
+  hasArgon: unknown
+): { nextPsd: Record<string, unknown>; changed: boolean } {
+  const nextPsd: Record<string, unknown> = { ...psd };
+  if (typeof hasArgon !== "boolean") return { nextPsd, changed: false };
+  const changed = hasArgon ? markArgonEligible(psd, nextPsd) : markArgonIneligible(psd, nextPsd);
+  return { nextPsd, changed };
+}
+
+/** Copy tier, plan and a newly discovered projectId from loadCodeAssist into nextPsd. */
+function applyAntigravitySubscriptionInfoToPsd(
   connection: ProviderConnectionLike,
-  usage: JsonRecord
-): Promise<ProviderConnectionLike> {
-  if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
-
+  usage: JsonRecord,
+  psd: JsonRecord,
+  nextPsd: JsonRecord
+): { changed: boolean; nextProjectId?: string } {
   const subscriptionInfo = usage.subscriptionInfo;
-  if (!subscriptionInfo) return connection;
-
-  const psd = (connection.providerSpecificData || {}) as JsonRecord;
-  const nextPsd: JsonRecord = { ...psd };
   let changed = false;
 
   const tierId = extractCodeAssistOnboardTierId(subscriptionInfo);
@@ -746,11 +806,35 @@ async function syncAntigravitySubscriptionIfNeeded(
     subscriptionInfo as Record<string, unknown>
   );
   const storedProjectId = getStoredAntigravityProjectId(connection);
-  let nextProjectId: string | undefined;
   if (discoveredProjectId && !storedProjectId) {
     nextPsd.projectId = discoveredProjectId;
-    nextProjectId = discoveredProjectId;
-    changed = true;
+    return { changed: true, nextProjectId: discoveredProjectId };
+  }
+  return { changed };
+}
+
+/** Persist Antigravity tier from live loadCodeAssist and Argon eligibility on quota refresh (not only OAuth). */
+async function syncAntigravitySubscriptionIfNeeded(
+  connection: ProviderConnectionLike,
+  usage: JsonRecord
+): Promise<ProviderConnectionLike> {
+  if (connection.provider !== "antigravity" && connection.provider !== "agy") return connection;
+  if (!usage.subscriptionInfo && typeof usage.hasArgon !== "boolean") return connection;
+
+  const psd = (connection.providerSpecificData || {}) as JsonRecord;
+  let nextPsd: JsonRecord = { ...psd };
+  const subscriptionResult = usage.subscriptionInfo
+    ? applyAntigravitySubscriptionInfoToPsd(connection, usage, psd, nextPsd)
+    : { changed: false };
+  let changed = subscriptionResult.changed;
+  const nextProjectId = subscriptionResult.nextProjectId;
+
+  if (typeof usage.hasArgon === "boolean") {
+    const argonResult = applyAntigravityArgonEligibilityToPsd(nextPsd, usage.hasArgon);
+    if (argonResult.changed) {
+      nextPsd = argonResult.nextPsd;
+      changed = true;
+    }
   }
 
   if (!changed) return connection;
@@ -907,7 +991,11 @@ export async function fetchLiveProviderLimits(connectionId: string): Promise<{
 
 async function fetchLiveProviderLimitsWithOptions(
   connectionId: string,
-  options: { forceRefresh?: boolean; allowRotatingRefresh?: boolean } = {}
+  options: {
+    forceRefresh?: boolean;
+    allowRotatingRefresh?: boolean;
+    includeResetCredits?: boolean;
+  } = {}
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -984,9 +1072,9 @@ async function fetchLiveProviderLimitsWithOptions(
           allowRotatingRefresh: true,
           force: true,
         });
-        if (forced.refreshed) {
+        if (forced.refreshed || forced.adopted) {
           conn = forced.connection;
-          await syncToCloudIfEnabled();
+          if (forced.refreshed) await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
             (await getUsageForProvider(conn as unknown as JsonRecord, options)) as JsonRecord,
@@ -995,6 +1083,11 @@ async function fetchLiveProviderLimitsWithOptions(
         }
       }
 
+      // Only the dashboard's on-demand refresh lists credits; background polls keep
+      // their base usage request and never trigger reset-credit activity.
+      if (options.includeResetCredits && conn.provider === "claude" && conn.accessToken) {
+        await fetchAndSeedClaudeResetCreditUsage(conn.id, conn.accessToken);
+      }
       connection = conn;
       return { usage: usageData };
     });
@@ -1081,14 +1174,19 @@ async function fetchLiveProviderLimitsWithOptions(
 
   return {
     connection,
-    usage: result.usage,
+    // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
+    // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
+    usage:
+      connection.provider === "claude"
+        ? withClaudeResetCreditCount(connection.id, result.usage)
+        : result.usage,
   };
 }
 
 export async function fetchAndPersistProviderLimits(
   connectionId: string,
   source: SyncSource = "manual",
-  opts: { allowRotatingRefresh?: boolean } = {}
+  opts: { allowRotatingRefresh?: boolean; includeResetCredits?: boolean } = {}
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
@@ -1097,6 +1195,7 @@ export async function fetchAndPersistProviderLimits(
   const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
+    includeResetCredits: opts.includeResetCredits,
   });
   const newCache = toProviderLimitsCacheEntry(usage, source);
   const previous = getProviderLimitsCache(connectionId);
@@ -1105,12 +1204,24 @@ export async function fetchAndPersistProviderLimits(
   // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
   // Serve the prior entry instead; only successful fetches update the cache.
   if (cache === previous && newCache.message) {
+    // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
+    // so a cached count — e.g. from before a redeem — must not come back through here.
+    const isClaude = connection.provider === "claude";
+    const bankedResetCredits = isClaude ? newCache.bankedResetCredits : previous.bankedResetCredits;
+    let served = previous;
+    if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
+      const { bankedResetCredits: _cached, ...rest } = previous;
+      served = setProviderLimitsCache(
+        connectionId,
+        bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
+      );
+    }
     const staleUsage: JsonRecord = {
       ...usage,
       quotas: previous.quotas,
       modelQuotas: previous.modelQuotas,
       plan: previous.plan ?? usage.plan ?? null,
-      bankedResetCredits: previous.bankedResetCredits,
+      bankedResetCredits,
       paidCredits: previous.paidCredits,
       billing: previous.billing,
       message: null,
@@ -1118,7 +1229,8 @@ export async function fetchAndPersistProviderLimits(
       _staleSince: previous.fetchedAt,
       _staleReason: newCache.message,
     };
-    return { connection, usage: staleUsage, cache: previous };
+    if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
+    return { connection, usage: staleUsage, cache: served };
   }
 
   const mergedUsage: JsonRecord = {

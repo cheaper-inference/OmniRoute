@@ -36,6 +36,7 @@ export type UsageQuota = {
   quotaSource?:
     "retrieveUserQuota" | "retrieveUserQuotaSummary" | "fetchAvailableModels" | "localUsageHistory";
   displayName?: string;
+  isPercentageOnly?: boolean;
   details?: Array<{
     name: string;
     used: number;

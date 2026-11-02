@@ -730,7 +730,10 @@ health and cost keep deciding which account.
 
 `OMNIROUTE_NADIR_API_KEY` and `OMNIROUTE_NADIR_BASE_URL` are env fallbacks for the two
 strings. `baseUrl` is only needed for a self-hosted Nadir (a trailing `/v1` is tolerated).
-Keyless calls land on Nadir's anonymous tier, which is rate-limited per IP.
+Keyless calls land on Nadir's anonymous tier, which is rate-limited per IP. With a key
+([create one](https://app.getnadir.com/dashboard/api-keys)), each decision is
+logged to your Nadir dashboard. Full setup and verification:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
 What leaves the box: the last user message's text (first 16k characters), the candidate
 model ids and a `source: "omniroute"` channel tag. No system prompt, history, tools or

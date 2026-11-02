@@ -30,9 +30,12 @@ for (const rel of CARD_FILES) {
       !src.includes("hover:bg-white/[0.01]"),
       `${rel} still uses the near-invisible 1% hover (dark)`
     );
+    // KEA-7886: a migrated card uses the kit's subtle-surface token, which already resolves
+    // the visible light/dark tint the legacy `hover:bg-black/5` + `hover:bg-white/5` pair gave.
     assert.ok(
-      src.includes("hover:bg-black/5") && src.includes("hover:bg-white/5"),
-      `${rel} should use a visible hover background (hover:bg-*/5)`
+      (src.includes("hover:bg-black/5") && src.includes("hover:bg-white/5")) ||
+        src.includes("hover:bg-bg-subtle"),
+      `${rel} should use a visible hover background (hover:bg-*/5 or hover:bg-bg-subtle)`
     );
     assert.ok(
       src.includes("hover:border-primary/40"),

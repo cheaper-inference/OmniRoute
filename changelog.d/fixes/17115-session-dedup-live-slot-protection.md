@@ -1,0 +1,1 @@
+- **fix(compression):** Preserve every current-turn message across exact, intra-message, and fuzzy session deduplication while continuing to compress completed history.

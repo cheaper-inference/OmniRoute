@@ -21,9 +21,7 @@ export default function TokenCostCounter({ tokensIn, tokensOut, costUsd }: Token
     <span className="text-xs text-text-muted flex items-center gap-1 font-mono">
       {tokensIn > 0 && <span>{tokensIn}↑</span>}
       {tokensOut > 0 && <span>{tokensOut}↓</span>}
-      {costUsd !== null && costUsd > 0 && (
-        <span>· ${costUsd.toFixed(4)} (estimated)</span>
-      )}
+      {costUsd !== null && costUsd > 0 && <span>· ${costUsd.toFixed(4)} (estimated)</span>}
     </span>
   );
 }

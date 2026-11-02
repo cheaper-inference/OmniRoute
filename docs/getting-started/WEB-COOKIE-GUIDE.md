@@ -224,6 +224,23 @@ Recopy your credentials from a fresh authenticated request before troubleshootin
 
 ---
 
+## ChatGPT Web Fails With "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+The credential is fine — that error comes from the bridge, not from the session. chatgpt.com assigns its
+module ids per deployment, and the bridge used to pin the id of the Sentinel helper it instantiates, so a
+chatgpt.com rebuild that renamed the helper broke every turn while the cookie stayed valid. Re-authorizing
+the connection cannot fix it.
+
+Builds that resolve the module through the page's own runtime pin no id and do not hit this. If you see the
+error, upgrade OmniRoute and rerun the connection check.
+
+---
+
 # Provider Example
 
 For a complete provider-specific walkthrough, see:

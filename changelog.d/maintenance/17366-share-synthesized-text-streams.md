@@ -1,0 +1,1 @@
+- **refactor(sse):** the GitLab Duo and NLPCloud executors now share one `buildSynthesizedTextStream()` for their synthetic OpenAI text completion streams (role chunk, content chunk, stop chunk, `[DONE]`) instead of two identical copies; wire output is unchanged ([#17366](https://github.com/diegosouzapw/OmniRoute/pull/17366) - thanks @JxnLexn)

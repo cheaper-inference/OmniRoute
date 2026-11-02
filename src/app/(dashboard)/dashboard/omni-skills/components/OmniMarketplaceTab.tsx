@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 import { Card } from "@/shared/components";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
 
@@ -52,7 +54,9 @@ export function OmniMarketplaceTab({
       if (!res.ok) {
         setMpError((data as { error?: string }).error || t("marketplaceError"));
       } else {
-        setMpResults(Array.isArray(data) ? data : (data as { skills?: MarketplaceSkill[] }).skills || []);
+        setMpResults(
+          Array.isArray(data) ? data : (data as { skills?: MarketplaceSkill[] }).skills || []
+        );
       }
     } catch (err) {
       setMpError(err instanceof Error ? err.message : t("marketplaceError"));
@@ -147,23 +151,26 @@ export function OmniMarketplaceTab({
           . {t("changeInSettings")}
         </p>
         <div className="flex gap-2 mb-4">
-          <input
+          <Input
             type="text"
+            icon="search"
             value={skillsProvider === "skillsmp" ? mpQuery : shQuery}
             onChange={(e) =>
-              skillsProvider === "skillsmp" ? setMpQuery(e.target.value) : setShQuery(e.target.value)
+              skillsProvider === "skillsmp"
+                ? setMpQuery(e.target.value)
+                : setShQuery(e.target.value)
             }
             onKeyDown={(e) =>
               e.key === "Enter" &&
               (skillsProvider === "skillsmp" ? searchMarketplace() : searchSkillsSh())
             }
             placeholder={t("searchMarketplacePlaceholder")}
-            className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm focus:outline-none focus:ring-1 focus:ring-violet-500"
+            aria-label={t("searchMarketplacePlaceholder")}
+            className="flex-1"
           />
-          <button
+          <Button
             onClick={() => (skillsProvider === "skillsmp" ? searchMarketplace() : searchSkillsSh())}
             disabled={skillsProvider === "skillsmp" ? mpLoading : shLoading}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50 transition-colors"
           >
             {skillsProvider === "skillsmp"
               ? mpLoading
@@ -172,10 +179,10 @@ export function OmniMarketplaceTab({
               : shLoading
                 ? t("searching")
                 : t("searchMarketplace")}
-          </button>
+          </Button>
         </div>
         {(skillsProvider === "skillsmp" ? mpError : shError) && (
-          <div className="p-3 rounded-lg bg-red-500/10 text-red-400 text-sm mb-4">
+          <div className="p-3 rounded-lg bg-error/10 text-error text-sm mb-4">
             {skillsProvider === "skillsmp" ? mpError : shError}
           </div>
         )}
@@ -190,13 +197,13 @@ export function OmniMarketplaceTab({
                   <h4 className="font-semibold">{skill.name}</h4>
                   <p className="text-sm text-text-muted mt-1">{skill.description}</p>
                 </div>
-                <button
+                <Button
+                  size="sm"
                   onClick={() => installFromMarketplace(skill)}
                   disabled={mpInstallingId === skill.name}
-                  className="px-4 py-1.5 text-sm font-medium rounded-lg bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50 transition-colors"
                 >
                   {mpInstallingId === skill.name ? t("installing") : t("installSkillButton")}
-                </button>
+                </Button>
               </div>
             </Card>
           ))}
@@ -214,13 +221,13 @@ export function OmniMarketplaceTab({
                     {skill.source} · {skill.installs.toLocaleString()} {t("installs")}
                   </p>
                 </div>
-                <button
+                <Button
+                  size="sm"
                   onClick={() => installFromSkillsSh(skill)}
                   disabled={shInstallingId === skill.id}
-                  className="px-4 py-1.5 text-sm font-medium rounded-lg bg-violet-500 text-white hover:bg-violet-600 disabled:opacity-50 transition-colors"
                 >
                   {shInstallingId === skill.id ? t("installing") : t("installSkillButton")}
-                </button>
+                </Button>
               </div>
             </Card>
           ))}

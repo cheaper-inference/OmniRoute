@@ -24,9 +24,9 @@ import ProviderUsdCostModal from "./ProviderUsdCostModal";
 import type { CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
 const STATUS_BORDER: Record<CardStatus, string> = {
-  critical: "#ef4444",
-  alert: "#eab308",
-  ok: "#22c55e",
+  critical: "var(--color-error)",
+  alert: "var(--color-warning)",
+  ok: "var(--color-success)",
   empty: "transparent",
 };
 
@@ -42,6 +42,7 @@ interface QuotaCardProps {
         billing?: ProviderBillingStatus | null;
         raw?: {
           billing?: ProviderBillingStatus | null;
+          bankedResetCredits?: number;
           quotaGroups?: Array<Record<string, unknown>>;
           paidCredits?: CodexPaidCredits;
           speed?: unknown;
@@ -140,7 +141,10 @@ export default function QuotaCard({
   const hasStaleData = !!quota?.stale;
   const displayRefreshedAt = quota?.stale?.since || refreshedAt;
   const canEditCutoff = computeCanEditCutoff(quotas);
-  const canRedeemResetCredit = computeCanRedeemResetCredit(connection.provider, quotas);
+  const canRedeemResetCredit = computeCanRedeemResetCredit(connection.provider, quotas, {
+    raw: quota?.raw,
+    authType: connection.authType,
+  });
 
   return (
     <Card

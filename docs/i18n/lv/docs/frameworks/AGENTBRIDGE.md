@@ -16,34 +16,34 @@ AgentBridge ir OmniRoute MITM (Man-in-the-Middle — starpnieka) starpniekserver
 
 ### Kas ir AgentBridge?
 
-Kad IDE aģents (piem., GitHub Copilot, Cursor, Claude Code) veic API izsaukumu, tas izveido savienojumu tieši ar upstream AI pakalpojumu sniedzēju (OpenAI, Anthropic u.c.). AgentBridge šo savienojumu pārķer caurspīdīgi TLS līmenī — neprasot nekādas aģenta konfigurācijas izmaiņas — un pārraksta pieprasījumu caur OmniRoute.
+Kad IDE aģents (piemēram, GitHub Copilot, Cursor, Claude kods) veic API zvanu, tas tieši savienojas ar augšupējo AI nodrošinātāju (OpenAI, Anthropic utt.). AgentBridge pārtver šo savienojumu pārskatāmi TLS līmenī — bez nepieciešamības mainīt aģenta konfigurāciju — un pārraksta pieprasījumu, izmantojot OmniRoute.
 
 Tas nozīmē, ka jūs varat:
 
-- **Pāradresēt jebkuru aģentu uz jebkuru pakalpojumu sniedzēju**: Copilot sazinās ar OpenAI? Pāradresējiet to uz Anthropic Claude, Gemini vai jebkuru no OmniRoute 375 pakalpojumu sniedzējiem.
-- **Lietot modeļu kartējumus**: `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
-- **Vērot visu aģentu trafiku**: katrs pārķertais pieprasījums tiek publicēts [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
-- **Lietot OmniRoute noturību**: kombinētā maršrutēšana, ķēdes pārtraucēji, rezerves maršruti un izmaksu izsekošana darbojas arī IDE aģentu trafikā.
+- **Pārorientējiet jebkuru aģentu uz jebkuru pakalpojumu sniedzēju** : Copilot runā ar OpenAI? Novirziet to uz Anthropic Claude, Gemini vai kādu no OmniRoute 377 pakalpojumu sniedzējiem.
+- **Izmantojiet modeļu kartējumus** : `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
+- **Ievērojiet visu aģentu satiksmi** : katrs pārtvertais pieprasījums tiek publicēts [satiksmes inspektoram](./TRAFFIC_INSPECTOR.md).
+- **Pielietojiet OmniRoute elastību** : kombinētā maršrutēšana, automātiskie slēdži, atkāpšanās un izmaksu izsekošanas darbi arī IDE aģentu datplūsmai.
 
-### Pozicionējums salīdzinājumā ar tirgu
+### Pozicionēšana pret tirgu
 
-| Funkcija                | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity             |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot          |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)              |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex            |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE              |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries          |    —    |    ✓     |        —        |             ✓             |
-| Claude Code             |    —    |    —     |        ✓        |             ✓             |
-| Open Code               |    —    |    —     |        ✓        |             ✓             |
-| Trae                    |    —    |    —     |        —        |     🔍 Notiek izpēte      |
-| Informācijas paneļa UI  |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector       |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute maršrutēšana  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Modeļu kartēšanas UI    |    ✗    |    ✗     |        ✗        |             ✓             |
-| Apiešanas saraksts      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA sertifikāts |    ✗    |    ✗     |        ✓        |             ✓             |
+| Funkcija                | 9 maršrutētājs | anti-api | llm-pārtvērējs | **OmniRoute AgentBridge** |
+| ----------------------- | :------------: | :------: | :------------: | :-----------------------: |
+| Antigravity             |       ✓        |    ✓     |       —        |             ✓             |
+| GitHub Copilot          |       ✓        |    ✓     |       —        |             ✓             |
+| Kiro (AWS)              |       ✓        |    ✓     |       —        |             ✓             |
+| OpenAI Codex            |       —        |    ✓     |       —        |             ✓             |
+| Cursor IDE              |       ✓        |    ✓     |       —        |             ✓             |
+| Zed Industries          |       —        |    ✓     |       —        |             ✓             |
+| Claude kods             |       —        |    —     |       ✓        |             ✓             |
+| Atvērt kodu             |       —        |    —     |       ✓        |             ✓             |
+| Trae                    |       —        |    —     |       —        |      🔍 Izmeklēšana       |
+| Informācijas panelis UI |       ✓        |    ✗     |       ✗        |             ✓             |
+| Satiksmes inspektors    |       ✗        |    ✗     |       ✓        |             ✓             |
+| OmniRoute maršrutēšana  |       ✗        |    ✗     |       ✗        |             ✓             |
+| Modeļu kartēšana UI     |       ✗        |    ✗     |       ✗        |             ✓             |
+| Apvedceļu saraksts      |       ✗        |    ✗     |       ✓        |             ✓             |
+| Augšup CA sert          |       ✗        |    ✗     |       ✓        |             ✓             |
 
 ---
 

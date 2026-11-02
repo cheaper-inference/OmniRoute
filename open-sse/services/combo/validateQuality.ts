@@ -636,11 +636,13 @@ export async function validateResponseQuality(
             // A first-party Claude empty turn with an ordinary stop is a valid
             // response. Require the final message_stop and NO opened blocks:
             // an empty start/stop block (#1382) or content_filter still fails over.
+            // A refusal is final on any provider: the client must see it.
             if (
-              permitsEmptyTurn() &&
               sse.hasMessageStop &&
               !sse.hasContentBlock &&
-              (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")
+              (sse.stopReason === "refusal" ||
+                (permitsEmptyTurn() &&
+                  (sse.stopReason === "end_turn" || sse.stopReason === "stop_sequence")))
             ) {
               return { valid: true, clonedResponse: buildReplayResponse(reader) };
             }

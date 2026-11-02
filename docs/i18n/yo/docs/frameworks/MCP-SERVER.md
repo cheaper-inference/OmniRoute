@@ -72,6 +72,16 @@ curl -i \
 
 Key tí kò ní `manage` (tàbí tí kò ní Bearer) máa dá `403 LOCAL_ONLY` padà. A kò mọ̀ọ́mọ̀ gba àkọ́lé ìbátan `/api/cli-tools/runtime/*` láàyè láti kọjá ààlà yìí — wo [Àwọn Ipele Route Guard — ààyè àkànṣe manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Ìjẹ́rìísí Origin
+
+Lẹ́yìn ìfọwọ́sí, gbogbo ìbéèrè sí `/api/mcp/*` — àwọn transport àti àwọn ọ̀nà ìṣàkóso bíi `status`, `tools`, `audit`, `restart` — ni a máa ń ṣàyẹ̀wò àkọlé `Origin` wọn, ẹnikẹ́ni tó bá ń pè é (kọ́kọ́rọ́ API, àmì CLI, ìgbà dashboard, tàbí loopback aláìlórúkọ nígbà tí a pa wíwọlé). Èyí ni ààbò DNS rebinding tí ìlànà MCP Streamable HTTP béèrè.
+
+- **Kò sí àkọlé `Origin`** → a gbà á láàyè. OmniRoute CLI, SDK àti àwọn oníbàárà IDE kì í fi í ránṣẹ́.
+- **`Origin` tí a gbà láàyè** → `localhost` / `127.0.0.1` / `[::1]` lórí port èyíkéyìí, tàbí origin gbangba ti OmniRoute fúnra rẹ̀: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin tí reverse proxy tí a gbẹ́kẹ̀lé fi ránṣẹ́ (`OMNIROUTE_TRUST_PROXY`, kìkì nígbà tí a kò ṣètò base URL), tàbí agbàlejò IP loopback/LAN tí a wọlé sí tààrà. Àkọlé `Host` nìkan kì yóò sọ origin kankan di ẹni tí a gbẹ́kẹ̀lé láéláé.
+- **`Origin` mìíràn èyíkéyìí, pẹ̀lú `null`** → `403` pẹ̀lú ara àṣìṣe JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Ìgbà dashboard tí ó fi àmì CSRF tó tọ́ hàn ṣì máa ń jẹ́ títẹ́wọ́gbà, bí ti àwọn kíkọ dashboard mìíràn.
+
+Oníbàárà MCP aṣàwákiri tí a ń pèsè lẹ́yìn reverse proxy nílò `OMNIROUTE_PUBLIC_BASE_URL`; kò sí àkójọ ìgbàláàyè fún àwọn origin mìíràn. A kì í ṣàyẹ̀wò Origin nínú ìbéèrè ìṣáájú CORS (`OPTIONS`); a máa ń ṣàyẹ̀wò ìbéèrè tó tẹ̀lé e.
+
 ## Ìṣètò IDE
 
 Wo [Ìṣètò Oníbàárà MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) fún ìṣètò Claude Desktop,

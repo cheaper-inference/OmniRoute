@@ -21,7 +21,7 @@ function CatalogBulkProgress({ running, progress }: { running: boolean; progress
   if (running) {
     return (
       <div className="flex items-center gap-3">
-        <div className="h-2 w-32 overflow-hidden rounded-full bg-black/10 dark:bg-white/10 sm:w-48">
+        <div className="h-2 w-32 overflow-hidden rounded-full bg-border sm:w-48">
           <div
             className="h-full bg-primary transition-all duration-300"
             style={{ width: `${percent}%` }}
@@ -46,6 +46,43 @@ function CatalogBulkProgress({ running, progress }: { running: boolean; progress
   ) : null;
 }
 
+/** Hide/show every filtered model; omitted when the catalog has no visibility data. */
+export interface CatalogVisibilityActions {
+  hideCount: number;
+  showCount: number;
+  busy: boolean;
+  onHideFiltered: () => void;
+  onShowFiltered: () => void;
+}
+
+function CatalogVisibilityButtons({ actions }: { actions: CatalogVisibilityActions }) {
+  const t = useTranslations("modelCatalog");
+  return (
+    <>
+      <Button
+        variant="secondary"
+        size="sm"
+        icon="visibility_off"
+        disabled={actions.hideCount === 0 || actions.busy}
+        onClick={actions.onHideFiltered}
+        data-testid="hide-filtered-btn"
+      >
+        {t("hideFiltered", { count: actions.hideCount })}
+      </Button>
+      <Button
+        variant="secondary"
+        size="sm"
+        icon="visibility"
+        disabled={actions.showCount === 0 || actions.busy}
+        onClick={actions.onShowFiltered}
+        data-testid="show-filtered-btn"
+      >
+        {t("showFiltered", { count: actions.showCount })}
+      </Button>
+    </>
+  );
+}
+
 export default function CatalogBulkActionBar({
   selectedCount,
   filteredCount,
@@ -56,6 +93,8 @@ export default function CatalogBulkActionBar({
   onTestFiltered,
   onCancel,
   onClearResults,
+  onAssign,
+  visibilityActions,
 }: {
   selectedCount: number;
   filteredCount: number;
@@ -66,12 +105,25 @@ export default function CatalogBulkActionBar({
   onTestFiltered: () => void;
   onCancel: () => void;
   onClearResults: () => void;
+  onAssign?: () => void;
+  visibilityActions?: CatalogVisibilityActions;
 }) {
   const t = useTranslations("modelCatalog");
 
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-black/[0.01] px-4 py-2.5 dark:bg-white/[0.01]">
+    <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-bg-subtle px-4 py-2.5">
       <div className="flex flex-wrap items-center gap-2">
+        {onAssign && (
+          <Button
+            variant="secondary"
+            size="sm"
+            data-testid="assign-keys-btn"
+            disabled={selectedCount === 0 || running}
+            onClick={onAssign}
+          >
+            {t("assignToKeys")}
+          </Button>
+        )}
         <Button
           variant="secondary"
           size="sm"
@@ -107,6 +159,8 @@ export default function CatalogBulkActionBar({
             {t("clearResults")}
           </Button>
         )}
+
+        {visibilityActions && <CatalogVisibilityButtons actions={visibilityActions} />}
       </div>
 
       <CatalogBulkProgress running={running} progress={progress} />
