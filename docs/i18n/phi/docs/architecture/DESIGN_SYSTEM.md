@@ -4,7 +4,7 @@
 
 ---
 
-> **Katayuan:** ang dashboard ay binuo sa** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ibinebenta bilang workspace `packages/ui-kit` (`@omniroute/ui-kit`; ang upstream snapshot ay naka-pin sa `packages/ui-kit/UPSTREAM.md` at binabantayan ng `npm run check:ui-kit-snapshot`). Ang liwanag ay ang kanonikal na tema; ang default na kagustuhan ay `system`. Ang impit ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang nag-iisang pamilya para sa UI, display at code text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Ang bawat icon ay isang Lucide glyph.
+> **Katayuan:** ang dashboard ay binuo sa** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), ibinebenta bilang workspace `packages/ui-kit` (`@omniroute/ui-kit`; ang upstream snapshot ay naka-pin sa `packages/ui-kit/UPSTREAM.md` at binabantayan ng `npm run check:ui-kit-snapshot`). Ang liwanag ay ang kanonikal na tema; ang default na kagustuhan ay `system`. Ang impit ay Keak lime (`--ci-color-accent`). Ang Switzer ay ang nag-iisang pamilya para sa UI, display at code text (`--ci-font-ui`; `--ci-font-display` at `--ci-font-mono` resolve to it), self-hosted ng kit mismo (`packages/ui-kit/src/ci-fonts.css`, na-import ng `ci-tokens.css`). Scripts Switzer lacks fall through glyph by glyph (`src/app/globals.css`): Inter para sa Cyrillic, Greek at Vietnamese at, sa ilalim lang `html[dir="rtl"]`, Vazirmatn para sa Arabic script. Ang bawat icon ay isang Lucide glyph.
 
 ## 1. Saan matatagpuan ang mga bagay
 

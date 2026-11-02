@@ -4,7 +4,7 @@
 
 ---
 
-> **Статус:** приборная панель построена на** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), представленный как рабочая область `packages/ui-kit` (`@omniroute/ui-kit`; восходящий снимок закреплен в `packages/ui-kit/UPSTREAM.md` и защищен `npm run check:ui-kit-snapshot`). Свет — каноническая тема; предпочтение по умолчанию — `system`. Акцент — кеак-лайм (`--ci-color-accent`). Switzer — это единое семейство для UI, отображения и текста кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешают его), размещаемое самим комплектом (`packages/ui-kit/src/ci-fonts.css`, импортированное `ci-tokens.css`). Каждая иконка представляет собой глиф Люцида.
+> **Статус:** приборная панель построена на** Комплект Keak CI UI** (`@keak/cheaper-inference-ui-kit`), представленный как рабочая область `packages/ui-kit` (`@omniroute/ui-kit`; восходящий снимок закреплен в `packages/ui-kit/UPSTREAM.md` и защищен `npm run check:ui-kit-snapshot`). Свет — каноническая тема; предпочтение по умолчанию — `system`. Акцент — кеак-лайм (`--ci-color-accent`). Switzer — это единое семейство для UI, отображения и текста кода (`--ci-font-ui`; `--ci-font-display` и `--ci-font-mono` разрешают его), размещаемое самим комплектом (`packages/ui-kit/src/ci-fonts.css`, импортированное `ci-tokens.css`). Скрипты, которых нет у Switzer, проходят глиф за глифом (`src/app/globals.css`): Inter для кириллицы, греческого и вьетнамского языка и, только под `html[dir="rtl"]`, Vazirmatn для арабского алфавита. Каждая иконка представляет собой глиф Люцида.
 
 ## 1. Где что находится
 

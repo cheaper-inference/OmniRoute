@@ -4,7 +4,7 @@
 
 ---
 
-> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`これに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。すべてのアイコンは Lucide グリフです。
+> **状態：**ダッシュボードは上に構築されています**Keak CI UIキット**(`@keak/cheaper-inference-ui-kit`)、ワークスペース`packages/ui-kit` (`@omniroute/ui-kit`; 上流のスナップショットは`packages/ui-kit/UPSTREAM.md`に固定され、 `npm run check:ui-kit-snapshot`によって保護されます) として販売されます。光は標準的なテーマです。デフォルトの設定は`system`です。アクセントはキークライム（`--ci-color-accent`）です。 Switzer は、 UI、表示およびコード テキスト (`--ci-font-ui`; `--ci-font-display`および`--ci-font-mono`それに解決されます) の単一ファミリーであり、キット自体 (`packages/ui-kit/src/ci-fonts.css`、 `ci-tokens.css`によってインポート) によって自己ホストされます。スイスには、グリフごとのフォールスルーグリフ (`src/app/globals.css`) がありません。キリル文字、ギリシャ語、ベトナム語の Inter、および`html[dir="rtl"]`の下でのみ、アラビア文字の Vazirmatn です。すべてのアイコンは Lucide グリフです。
 
 ## 1. どこに何があるか
 

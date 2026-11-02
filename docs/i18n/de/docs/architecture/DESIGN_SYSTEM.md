@@ -4,7 +4,7 @@
 
 ---
 
-> **Status:** Das Armaturenbrett ist auf dem aufgebaut** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), angeboten als Workspace `packages/ui-kit` (`@omniroute/ui-kit`; der Upstream-Snapshot ist in `packages/ui-kit/UPSTREAM.md` gepinnt und wird von `npm run check:ui-kit-snapshot` geschützt). Licht ist das kanonische Thema; Die Standardeinstellung ist `system`. Der Akzent ist Keak-Limette (`--ci-color-accent`). Switzer ist die einzelne Familie für UI, Anzeige- und Codetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). Jedes Symbol ist eine Lucide-Glyphe.
+> **Status:** Das Armaturenbrett ist auf dem aufgebaut** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), angeboten als Workspace `packages/ui-kit` (`@omniroute/ui-kit`; der Upstream-Snapshot ist in `packages/ui-kit/UPSTREAM.md` gepinnt und wird von `npm run check:ui-kit-snapshot` geschützt). Licht ist das kanonische Thema; Die Standardeinstellung ist `system`. Der Akzent ist Keak-Limette (`--ci-color-accent`). Switzer ist die einzelne Familie für UI, Anzeige- und Codetext (`--ci-font-ui`; `--ci-font-display` und `--ci-font-mono` lösen sich darauf auf), die vom Kit selbst selbst gehostet wird (`packages/ui-kit/src/ci-fonts.css`, importiert von `ci-tokens.css`). In der Schweiz fehlen Schriftarten, die Glyphe für Glyphe (`src/app/globals.css`) durchgehen: Inter für Kyrillisch, Griechisch und Vietnamesisch und, nur unter `html[dir="rtl"]`, Vazirmatn für arabische Schrift. Jedes Symbol ist eine Lucide-Glyphe.
 
 ## 1. Wo sich alles befindet
 
