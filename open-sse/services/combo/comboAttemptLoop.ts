@@ -49,7 +49,7 @@ import {
   waitForCooldownAwareRetry,
 } from "../../../src/sse/services/cooldownAwareRetry.ts";
 import { toRetryAfterDisplayValue } from "./validateQuality.ts";
-import { finalizeComboTrace, finishComboTrace } from "./decisionTrace.ts";
+import { finalizeComboTrace } from "./decisionTrace.ts";
 import { isRetryAfterEligibleStatus } from "./unavailableRetryGate.ts";
 import { withQuotaExhaustionClassification } from "./quotaExhaustion.ts";
 import {
@@ -231,10 +231,20 @@ export async function dispatchWithCooldownRetry(opts: {
 
   try {
     for (let setTry = 0; setTry <= extra.maxSetRetries; setTry++) {
-      // #1731: Per-set-iteration set of providers whose quota is fully exhausted.
-      // Reset each retry so providers excluded in a previous attempt get another chance.
-      state.exhaustedProviders = new Set<string>();
-      state.exhaustedConnections = new Set<string>();
+      // Durable exhaustion (quota, credits, auth) survives the set boundary: a
+      // provider or connection whose quota is gone stays skipped on the next
+      // set. Transient failures (rate limit, connection error) are replayed.
+      // The request sets receive a COPY of the durable sets — never the same
+      // Set instance — so a transient mark written during this set can never
+      // be reported as durable on the next one.
+      const durableProviders =
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedProviders ?? new Set<string>());
+      const durableConnections =
+        setTry === 0 ? new Set<string>() : (state.durableExhaustedConnections ?? new Set<string>());
+      state.durableExhaustedProviders = durableProviders;
+      state.durableExhaustedConnections = durableConnections;
+      state.exhaustedProviders = new Set<string>(durableProviders);
+      state.exhaustedConnections = new Set<string>(durableConnections);
       state.transientRateLimitedProviders = new Set<string>();
       state.skippedForCircuitOpen = false;
       state.earliestCircuitOpenRetryMs = 0;
@@ -541,17 +551,12 @@ export async function dispatchWithCooldownRetry(opts: {
       }
 
       // A resolved fatal response also sets anySuccess to stop dispatching.
-      // Record its actual HTTP status, not an unconditional success.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
       if (anySuccess) {
         const response = await globalPromise;
-        finishComboTrace(deps.traceInvocationId, { status: response.status });
         return response;
       }
 
-      // #10681: finalize the decision trace (global timeout).
-      finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status: 504 });
       // Global combo timeout: return aggregated error immediately, skipping set retries.
       if (state.comboExpired) {
         const summary = buildRedactedSummary(state.comboErrors);
@@ -671,7 +676,6 @@ export async function dispatchWithCooldownRetry(opts: {
       // All set retries exhausted — return the final error
       // #10681: finalize the decision trace (all targets failed or skipped).
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status: 503 });
       if (!state.lastStatus) {
         if (state.recordedAttempts === 0) {
           // #6238: every compat-kept target was skipped as unavailable and NONE
@@ -867,9 +871,8 @@ export async function dispatchWithCooldownRetry(opts: {
         }
       }
 
-      // #10681: finalize the decision trace with the aggregated terminal status.
+      // #10681: finalize the decision trace after cooldown retries are exhausted.
       finalizeComboTrace(deps.traceInvocationId, state.orderedTargets);
-      finishComboTrace(deps.traceInvocationId, { status });
       // Retry-after decoration is separate from the wait decision above: only
       // rate-limit-class final statuses may carry a `(reset after ...)` suffix
       // (see unavailableRetryGate.ts — do not stitch a peer target's window onto

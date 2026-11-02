@@ -145,7 +145,7 @@ export function claudeToOpenAIRequest(model, body, stream, credentials: unknown 
 
   // Max tokens
   if (body.max_tokens) {
-    result.max_tokens = adjustMaxTokens(body);
+    result.max_tokens = adjustMaxTokens(body, { honorExplicitCap: true });
   }
 
   // Temperature

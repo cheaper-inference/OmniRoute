@@ -115,6 +115,56 @@ describe("compressToolResults", () => {
     assert.equal(result.applied, false);
     assert.equal(result.body.messages![0].content, "x".repeat(1500));
   });
+  // A head-only cut deletes the lines an agent is about to edit, so it rebuilds the anchor from
+  // memory and the edit is rejected as stale.
+  it("keeps the tail of a long line-addressed tool result so its anchors survive", () => {
+    const lines = Array.from(
+      { length: 95 },
+      (_, i) => `${i + 1}:ab|export function getQueue${i + 1}(wid: string): QueuedMutation[] {`
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.includes(`${lines[0]}`), "first line must survive the cut");
+    assert.ok(content.includes(`${lines[94]}`), "last line must survive the cut");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.length < lines.join("\n").length);
+  });
+
+  // The tail must fit its share of the cap: rounding the tail start back to a newline made long
+  // lines (minified JS, JSONL, long log lines) overshoot maxToolLength by up to one whole line.
+  it("keeps a long-line tool result within the cap when it keeps the tail", () => {
+    const lines = Array.from({ length: 50 }, (_, i) =>
+      `${String(i + 1).padStart(2, "0")}:`.padEnd(200, "x")
+    );
+    const body = { messages: [{ role: "tool", content: lines.join("\n") }] };
+    const result = compressToolResults(body);
+    assert.equal(result.applied, true);
+    const content = result.body.messages![0].content as string;
+    assert.ok(content.length <= 2000 + 64, `output is ${content.length} chars, cap is 2000`);
+    assert.ok(content.startsWith("01:"), "the head of the result must survive the cut");
+    assert.ok(content.includes(`\n${lines[49]}\n`), "the last line survives whole");
+    assert.match(content, /\.\.\. \[\d+ lines elided\] \.\.\./);
+    assert.ok(content.endsWith("...[truncated]"), "the trailing truncation marker stays");
+  });
+
+  it("falls back to the head-only cut when no complete line fits the tail budget", () => {
+    for (const [count, width] of [
+      [30, 1000],
+      [11, 20000],
+    ]) {
+      const original = Array.from({ length: count }, (_, i) => `${i + 1}:`.padEnd(width, "y"));
+      const body = { messages: [{ role: "tool", content: original.join("\n") }] };
+      const result = compressToolResults(body);
+      assert.equal(result.applied, true);
+      const content = result.body.messages![0].content as string;
+      const label = `${count} lines x ${width}`;
+      assert.ok(content.length <= 2000 + 64, `${label}: output is ${content.length} chars`);
+      assert.ok(content.startsWith("1:"), `${label}: the head must survive the cut`);
+      assert.doesNotMatch(content, /lines elided/, `${label}: no partial tail line is kept`);
+    }
+  });
 
   it("reads OMNIROUTE_LITE_MAX_TOOL_LENGTH when no option is passed", () => {
     const previous = process.env.OMNIROUTE_LITE_MAX_TOOL_LENGTH;

@@ -38,11 +38,11 @@ OWASP-ın ümumi xəbərdarlığını ("joker işarəli CORS = istənilən sayt 
 
 Bu, hətta `CORS_ALLOW_ALL=true` olduqda belə, hər səth üçün aşağıdakı mənaya gəlir:
 
-| Səth                                     | Autentifikasiya mexanizmi    | Joker işarəli CORS-un təsiri                                                                                                                                                                                                                               |
-| ---------------------------------------- | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| İdarəetmə paneli / MANAGEMENT `/api/*`   | Kuki sessiyası               | Mənşə geri qaytarılır, lakin **`Allow-Credentials` olmadan** brauzer etimadnaməli oxumanı **bloklayır**. Zərərli domenlərarası sayt autentifikasiya olunmuş idarəetmə paneli cavablarınızı **oxuya bilməz** və sessiya kukisi ifşa olunmur.                |
-| Müştəri API-si `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` başlığı | Onsuz da **dizayn etibarilə** icazəlidir (`relaxForTokenAuth`): brauzerlər `Authorization`/`x-api-key` başlıqlarını heç vaxt avtomatik əlavə etmir, buna görə hücumçunun səhifəsi sizin açarınızı təqdim edə bilməz. `CORS_ALLOW_ALL` bunu genişləndirmir. |
-| İctimai, yalnız oxuma (`/api/health`, …) | Yoxdur                       | Həssas deyil; joker işarə zərərsizdir.                                                                                                                                                                                                                     |
+| Səth                                     | Autentifikasiya mexanizmi    | Joker işarəli CORS-un təsiri                                                                                                                                                                                                                                                                                                                                                                                         |
+| ---------------------------------------- | ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| İdarəetmə paneli / MANAGEMENT `/api/*`   | Kuki sessiyası               | Mənşə geri qaytarılır, lakin **`Allow-Credentials` olmadan** brauzer etimadnaməli oxumanı **bloklayır**. Zərərli domenlərarası sayt autentifikasiya olunmuş idarəetmə paneli cavablarınızı **oxuya bilməz** və sessiya kukisi ifşa olunmur.                                                                                                                                                                          |
+| Müştəri API-si `/v1/*`, `/v1beta/*`      | Bearer / `x-api-key` başlığı | Onsuz da **dizayn etibarilə** icazəlidir (`relaxForTokenAuth`): brauzerlər `Authorization`/`x-api-key` başlıqlarını heç vaxt avtomatik əlavə etmir, buna görə hücumçunun səhifəsi sizin açarınızı təqdim edə bilməz. Mənşənin geri qaytarılması yalnız təqdim olunan açar təsdiqləndikdə tətbiq olunur; anonim cavablar (`REQUIRE_API_KEY=false`) icazə siyahısına tabe qalır. `CORS_ALLOW_ALL` bunu genişləndirmir. |
+| İctimai, yalnız oxuma (`/api/health`, …) | Yoxdur                       | Həssas deyil; joker işarə zərərsizdir.                                                                                                                                                                                                                                                                                                                                                                               |
 
 Beləliklə, `CORS_ALLOW_ALL=true` parametrinin **qalıq** məruz qalması bunlarla məhdudlaşır: (a) artıq autentifikasiya tələb etməyən məlumatların etimadnaməsiz domenlərarası **oxunması** və (b) idarəetmə marşrutlarında CORS **ilkin sorğusunun keçməsinə** icazə verilməsi — həmin marşrutlar yenə də domenlərarası səhifənin təqdim edə bilməyəcəyi autentifikasiya tələb edir. Ortaq CORS yolunda bu, sessiyanın ələ keçirilməsi və ya etimadnamənin oğurlanması vektoru **deyil**.
 
@@ -95,10 +95,22 @@ bölməsində təyin edilə bilər.
   avtomatik olaraq əlavə etmir. CORS burada əhəmiyyətli maneə deyil — maneə API
   açarıdır — buna görə də brauzer və Electron klientlərinin onsuz da giriş hüququna
   malik olduqları cavabları oxuya bilməsi üçün bu səth qəsdən sərbəstdir.
+  Yumşaldılmış geri qaytarma başlığın sadəcə mövcudluğuna deyil, təsdiqlənmiş açara əsaslanır: `REQUIRE_API_KEY=false` sorğuya anonim xidmət etdikdə onun uğurlu cavabı standart olaraq qapalı icazə siyahısına tabe qalır. Autentifikasiya imtinaları (401) oxuna bilən qalır ki, klientlər ləğv edilmiş və ya səhv yazılmış açarı göstərə bilsinlər (#5242): pipeline-ın öz 401 cavabı mənşənin geri qaytarılmasını saxlayır, pipeline sorğuya anonim kimi xidmət etdikdən sonra açarı özü rədd edən marşrut isə (idarəetmə autentifikasiyası konfiqurasiya edildikdə `/v1/models` və `/v1beta/models`, sahibə aid `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` və auto-combo namizəd marşrutları) həmin 401 cavabına `credentialRejectionHeaders()` vasitəsilə geri qaytarmanı əlavə edir. Geri qaytarma marşrutun onlardan hansını yoxlamasından deyil, sorğunun etimadnamə başlığı (`Authorization`, `x-api-key`, `x-goog-api-key` və ya `auth_token` kukisi) daşımasından asılıdır və heç vaxt `Access-Control-Allow-Credentials` ilə birlikdə göndərilmir; cavabın gövdəsi sabit xəta zərfidir. `/api/v1/` altında `requireManagementAuth()` ilə qorunan idarəetmə marşrutları (`/api/v1/management/*`, `/api/v1/registered-keys`) geri qaytarmanı əlavə etmir: `REQUIRE_API_KEY=false` olduqda onların 401/403 cavabları domenlərarası oxuna bilməz.
 - **Cookie sessiyası (idarəetmə paneli):** qapalı qalmanı təmin edən standart seçimlə
   **və** ortaq yolda `Access-Control-Allow-Credentials` başlığının olmaması ilə
   qorunur. İdarəetmə/idarəetmə paneli mənbələrini hər hansı sərbəst
   konfiqurasiyadan kənarda saxlayın; onlar tam olaraq qapalı qalmalıdır.
+
+## WebSocket əl sıxışmaları (`/v1/responses`, `/v1/ws`)
+
+Brauzerlər WebSocket-ə CORS tətbiq etmir, buna görə də inferensiya nəticəsini qaytaran WebSocket nəqliyyatları əl sıxışmasının `Origin` başlığını özləri yoxlayır (`src/server/origin/wsOrigin.ts`): Responses WebSocket-i (`/v1/responses`) və OmniRoute `npm start` / `npm run dev` ilə işlədikdə `/v1/chat/completions`, `/v1/messages` və `/v1/responses` cavablarını kadrlar şəklində ötürən `/v1/ws` və `/api/v1/ws` körpüsü. Körpü qərar üçün `/api/v1/ws?handshake=1` ünvanına müraciət edir və həmin marşrut yoxlamanı icra etməyibsə, bağlantının yüksəldilməsindən imtina edir. Əl sıxışması aşağıdakı hallarda qəbul edilir:
+
+- `Origin` başlığı yoxdursa (Codex CLI, SDK-lar və brauzer olmayan digər klientlər);
+- `Origin` yuxarıdakı icazə siyahısı tərəfindən qəbul edilirsə (`CORS_ALLOWED_ORIGINS`, `corsOrigins` parametri, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- `Origin` OmniRoute-un öz ictimai mənşələrindən biridirsə (konfiqurasiya edilmiş ictimai əsas URL, etibarlı proksinin yönləndirdiyi mənşə və ya IP literalı yaxud `localhost` kimi göstərilmiş birbaşa loopback/LAN hostu — idarəetmə panelinin dəyişiklik yoxlamasının istifadə etdiyi eyni namizədlər); və ya
+- HTTP `/v1/*` səthində olduğu kimi etibarlı API açarı daşıyırsa.
+
+Qalan hər şey `403 ws_origin_forbidden` alır. İdarəetmə panelinin sessiya kukisi yad `Origin` üçün istisna yaratmır, çünki brauzer onu istənilən səhifənin soketinə əlavə edir. Başqa portdakı `localhost` eyni mənşə sayılmır; belə inkişaf mənşələrini `CORS_ALLOWED_ORIGINS` siyahısına əlavə edin.
 
 ## Nümunə: OmniRoute qarşısında əks proksi
 
@@ -131,6 +143,7 @@ Brauzer üçün icazə verilən mənbələri proksidə deyil, OmniRoute-da (`COR
 | İdarəetmə panelində xəbərdarlıq banneri                   | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | CORS Allowed Origins sahəsi                               | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | Hər marşrut üzrə Cloud-Agent CORS-u (istisna)             | `src/lib/cloudAgent/api.ts`                                          |
+| WebSocket əl sıxışmasında `Origin` yoxlaması              | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Həmçinin baxın
 

@@ -374,21 +374,65 @@ export function geminiToClaudeResponse(chunk, state) {
   // ── Usage metadata ─────────────────────────────────────────────
   const usageMeta = response.usageMetadata || chunk.usageMetadata;
   if (usageMeta && typeof usageMeta === "object") {
+    const previousUsage = state.usage;
+    const previousRawInput =
+      (previousUsage?.input_tokens ?? 0) + (previousUsage?.cache_read_input_tokens ?? 0);
     const inputTokens =
-      typeof usageMeta.promptTokenCount === "number" ? usageMeta.promptTokenCount : 0;
+      typeof usageMeta.promptTokenCount === "number" &&
+      Number.isFinite(usageMeta.promptTokenCount) &&
+      usageMeta.promptTokenCount >= 0
+        ? usageMeta.promptTokenCount
+        : previousRawInput;
     const candidatesTokens =
-      typeof usageMeta.candidatesTokenCount === "number" ? usageMeta.candidatesTokenCount : 0;
+      typeof usageMeta.candidatesTokenCount === "number" &&
+      Number.isFinite(usageMeta.candidatesTokenCount) &&
+      usageMeta.candidatesTokenCount >= 0
+        ? usageMeta.candidatesTokenCount
+        : (previousUsage?.output_tokens ?? 0);
     const thoughtsTokens =
-      typeof usageMeta.thoughtsTokenCount === "number" ? usageMeta.thoughtsTokenCount : 0;
+      typeof usageMeta.thoughtsTokenCount === "number" &&
+      Number.isFinite(usageMeta.thoughtsTokenCount) &&
+      usageMeta.thoughtsTokenCount >= 0
+        ? usageMeta.thoughtsTokenCount
+        : 0;
+    const hasCachedCount = Object.prototype.hasOwnProperty.call(
+      usageMeta,
+      "cachedContentTokenCount"
+    );
+    const reportedCachedTokens = usageMeta.cachedContentTokenCount;
     const cachedTokens =
-      typeof usageMeta.cachedContentTokenCount === "number" ? usageMeta.cachedContentTokenCount : 0;
+      typeof reportedCachedTokens === "number" &&
+      Number.isFinite(reportedCachedTokens) &&
+      reportedCachedTokens >= 0 &&
+      reportedCachedTokens <= inputTokens
+        ? reportedCachedTokens
+        : undefined;
+    const previousCachedTokens = previousUsage?.cache_read_input_tokens;
+    const effectiveCachedTokens =
+      cachedTokens ??
+      (!hasCachedCount &&
+      typeof previousCachedTokens === "number" &&
+      previousCachedTokens <= inputTokens
+        ? previousCachedTokens
+        : undefined);
+
+    state.cacheEvidence = hasCachedCount
+      ? cachedTokens === undefined
+        ? "invalid"
+        : cachedTokens > 0
+          ? "hit"
+          : "miss"
+      : "unreported";
 
     state.usage = {
-      input_tokens: Math.max(0, inputTokens - cachedTokens),
+      input_tokens: Math.max(
+        0,
+        inputTokens - (typeof effectiveCachedTokens === "number" ? effectiveCachedTokens : 0)
+      ),
       output_tokens: candidatesTokens + thoughtsTokens,
     };
-    if (cachedTokens > 0) {
-      state.usage.cache_read_input_tokens = cachedTokens;
+    if (typeof effectiveCachedTokens === "number") {
+      state.usage.cache_read_input_tokens = effectiveCachedTokens;
     }
   }
 
