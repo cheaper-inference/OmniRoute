@@ -159,34 +159,34 @@ API ключовете с всякакъв обхват и токените за
 пътя за възстановяване и могат да зададат парола без нея, тъй като и двете са свързани с хоста, на който принадлежи
 директорията с данни.
 
-## Конвейер
+## Тръбопровод
 
 ```
-Входяща заявка → src/proxy.ts
-  → runAuthzPipeline() в src/server/authz/pipeline.ts
-    1. Премахване на доверените вътрешни заглавки (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Генериране на идентификатор на заявката, класифициране на маршрута чрез classifyRoute()
-    3. Ако pathname == "/" → пренасочване към /dashboard
-    4. Ако се извършва изчакване за плавно спиране и /api/* → 503
-    5. Ако методът не е GET и маршрутът е /api/* → проверка чрез защитата checkBodySize()
-    6. Ако методът е OPTIONS → CORS предварителна заявка 204
-    7. Ако options.enforce == false → пропускане със заглавки за класа на маршрута
-    8. В противен случай: POLICIES[routeClass].evaluate(ctx)
-       - разрешаване → задаване на x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
-       - отхвърляне → JSON грешка с correlation_id (страници на таблото → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Доверените вътрешни заглавки (дефинирани в `src/server/authz/headers.ts`) се **премахват от входящите заявки** преди класифицирането — клиентите не могат предварително да задават `x-omniroute-auth-*`, за да се представят за друг субект.
+Надеждни вътрешни заглавки (дефинирани в `src/server/authz/headers.ts`) са** премахнати от входящи заявки** преди класификация — клиентите не могат да попълват предварително `x-omniroute-auth-*` за да се представят за субект.
 
-### Договори на политиките
+### Договори за полици
 
 Всеки клас маршрут има политика в `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — винаги връща `allow({ kind: "anonymous", id: "anonymous" })`.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer и го валидира чрез `validateApiKey()`. Преминава към анонимен достъп само когато ефективният флаг за функционалност `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се определя чрез `isRequireApiKeyEnabled()` (`замяна от флаг за функционалност в БД > process.env.REQUIRE_API_KEY > стойност по подразбиране`), така че флаговете за функционалност в таблото и променливите на средата да управляват последователно `/api/v1/*`, `/api/v1beta/*` и псевдонимите; при грешка в определянето достъпът се отказва. Разрешава заявки със сесия на таблото към клиентски API маршрути (включително `/api/v1/models`, използван от каталога с модели на таблото).
-- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото, вътрешни заявки за синхронизиране на модели (съпоставяни с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло проверката, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато е предоставен Bearer токен, но той е невалиден, и 401 във всички останали случаи. Освен това прилага нивата за защита на маршрутите (LOCAL_ONLY / ALWAYS_PROTECTED) преди който и да е клон за автентикация — вижте [Нива за защита на маршрутите](../security/ROUTE_GUARD_TIERS.md). Пътищата LOCAL_ONLY в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (понастоящем: `/api/mcp/`) могат да бъдат достъпвани извън loopback интерфейса, когато Bearer ключът има обхват `manage`; всички останали пътища LOCAL_ONLY остават строго ограничени до loopback независимо от обхвата.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — извлича Bearer, валидира чрез `validateApiKey()`. Преминава към анонимен само когато флагът за ефективна функция `REQUIRE_API_KEY` е деактивиран. Ефективният флаг се разрешава чрез `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`), така че флаговете на функциите на таблото за управление и променливите на средата управляват `/api/v1/*`, `/api/v1beta/*` и псевдонимите последователно; неуспешно затваряне на резолвера. Позволява заявки за сесия на таблото за клиентски API маршрути (включително `/api/v1/models`, използван от каталога на модела на таблото). Когато Entra ID SSO е активиран, носител, който структурно е Entra токен (три base64url сегмента, `RS*` alg, `kid`) се обработва от SSO клона** преди** `validateApiKey()` и неговата присъда е окончателна — той никога не попада в пътя на ключа на API или клона за деградиране до анонимен, така че прекъсването на доставчик на идентичност не може да стане отворен достъп. Статичните API ключове не са засегнати. Вижте [Entra ID SSO](../security/ENTRA_SSO.md).
+- **`managementPolicy`** (`policies/management.ts`) — приема сесия на таблото за управление, вътрешни заявки за синхронизиране на модели (съвпадащи с `/api/providers/[name]/(sync-models|models)`) или пропуска изцяло, ако `isAuthRequired()` върне false. Връща 403 (`AUTH_001`), когато токенът на носител е наличен, но е невалиден, 401 в противен случай. Също така налага нивата за защита на маршрута (LOCAL_ONLY / ALWAYS_PROTECTED) преди всеки клон за удостоверяване — вижте [Нивата за защита на маршрута](../security/ROUTE_GUARD_TIERS.md). LOCAL_ONLY пътеките в `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (днес: `/api/mcp/`) могат да бъдат достъпни от non-loopback, когато носещият ключ носи `manage` обхвата; всички останали LOCAL_ONLY пътища остават стриктно обратно независимо от обхвата.
 
-Успешната политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }`. Обработчиците надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts`, вместо да изпълняват повторно логиката за автентикация.
+Успешна политика връща `AuthSubject` с `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Манипулаторите надолу по веригата могат да го прочетат чрез `assertAuth(request, "CLIENT_API")` в `src/server/authz/assertAuth.ts` вместо да изпълняват повторно логиката за удостоверяване.
 
 ## Списък с публични маршрути
 
@@ -346,23 +346,23 @@ API ключовете съдържат масив `scopes` (съхранява�
 
 ## Отстраняване на грешки
 
-Конвейерът винаги добавя към отговорите:
+Тръбопроводът винаги подпечатва отговорите с:
 
 ```
-x-request-id:               <идентификатор за корелация, повтарян в телата на грешките>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-При удостоверени заявки заглавките на заявката към upstream (от страната на обработчика) включват също:
+За удостоверени заявки заглавките на заявките нагоре (от страна на манипулатора) също включват:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<последните-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (незадължително)
-x-omniroute-auth-scopes:    списък, разделен със запетаи
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-Използвайте `assertAuth(req, expectedClass)` в обработчиците — тя хвърля `AuthzAssertionError` с код `AUTHZ_NOT_INITIALIZED`, ако междинният софтуер е бил заобиколен (полезно за откриване на регресии в конфигурацията при тестове).
+Използвайте `assertAuth(req, expectedClass)` вътрешни манипулатори — той хвърля `AuthzAssertionError` с код `AUTHZ_NOT_INITIALIZED` ако междинният софтуер е бил заобиколен (полезно за улавяне на регресии в конфигурацията при тестове).
 
 ## Вижте също
 
