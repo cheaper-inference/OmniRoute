@@ -1,9 +1,5 @@
 import { hasSelfAccountQuotaScope, hasSelfUsageScope } from "@/shared/constants/selfServiceScopes";
 import { supportsProviderQuota } from "@/shared/utils/providerQuotaVisibility";
-import type {
-  ApiKeyUsageLimitMetadata,
-  ApiKeyUsageLimitStatus,
-} from "@/lib/usage/apiKeyUsageLimits";
 
 type JsonRecord = Record<string, unknown>;
 type DateLike = number | string | Date | null | undefined;
@@ -13,10 +9,6 @@ interface ApiKeySelfServiceMetadata {
   name: string;
   scopes: string[];
   allowedConnections: string[];
-  usageLimitEnabled?: boolean;
-  dailyUsageLimitUsd?: number | null;
-  weeklyUsageLimitUsd?: number | null;
-  fiveHourUsageLimitUsd?: number | null;
 }
 
 interface StatementLike {
@@ -44,10 +36,6 @@ type CheckBudgetFn = (apiKeyId: string) => unknown;
 type GetDbInstanceFn = () => DbLike;
 type GetProviderConnectionByIdFn = (connectionId: string) => Promise<unknown>;
 type GetProviderConnectionsFn = (filters?: Record<string, unknown>) => Promise<unknown[]>;
-type GetApiKeyUsageLimitStatusFn = (
-  metadata: ApiKeyUsageLimitMetadata,
-  deps?: { now?: () => number }
-) => Promise<ApiKeyUsageLimitStatus>;
 type FetchAndPersistProviderLimitsFn = (
   connectionId: string,
   source: "manual"
@@ -61,7 +49,6 @@ interface ApiKeySelfServiceDeps {
   getProviderConnectionById?: GetProviderConnectionByIdFn;
   getProviderConnections?: GetProviderConnectionsFn;
   fetchAndPersistProviderLimits?: FetchAndPersistProviderLimitsFn;
-  getApiKeyUsageLimitStatus?: GetApiKeyUsageLimitStatusFn;
 }
 
 interface TokenTotals {
@@ -372,74 +359,7 @@ async function resolveAccountQuotas(metadata: ApiKeySelfServiceMetadata, deps: R
   );
 }
 
-function usageLimitWindow(
-  limitUsd: number | null | undefined,
-  spentUsd: number | undefined,
-  periodStartAt: DateLike,
-  resetAt: DateLike,
-  exceeded: boolean | undefined
-) {
-  const limit = typeof limitUsd === "number" && limitUsd > 0 ? roundNumber(limitUsd) : null;
-  const usedUsd = roundNumber(toNumber(spentUsd));
-  return {
-    limitUsd: limit,
-    usedUsd,
-    remainingUsd: limit === null ? null : roundNumber(Math.max(limit - usedUsd, 0)),
-    usedPercent: limit === null ? null : roundNumber((usedUsd / limit) * 100, 2),
-    periodStartAt: isoOrNull(periodStartAt),
-    resetAt: isoOrNull(resetAt),
-    exceeded: exceeded === true,
-  };
-}
-
-/** Per-key USD windows (rolling 5 h, daily, weekly) — only for keys with usage limits on. */
-async function resolveUsageLimits(
-  metadata: ApiKeySelfServiceMetadata,
-  deps: ApiKeySelfServiceDeps,
-  now: () => number
-) {
-  if (metadata.usageLimitEnabled !== true) return undefined;
-  const getStatus =
-    deps.getApiKeyUsageLimitStatus ??
-    (await import("@/lib/usage/apiKeyUsageLimits")).getApiKeyUsageLimitStatus;
-  const status = await getStatus(
-    {
-      id: metadata.id,
-      allowedConnections: metadata.allowedConnections,
-      usageLimitEnabled: true,
-      dailyUsageLimitUsd: metadata.dailyUsageLimitUsd ?? null,
-      weeklyUsageLimitUsd: metadata.weeklyUsageLimitUsd ?? null,
-      fiveHourUsageLimitUsd: metadata.fiveHourUsageLimitUsd ?? null,
-    },
-    { now }
-  );
-  return {
-    currency: "USD",
-    fiveHour: usageLimitWindow(
-      status.fiveHourLimitUsd,
-      status.fiveHourSpentUsd,
-      status.fiveHourWindowStartIso,
-      status.fiveHourResetAtIso,
-      status.fiveHourExceeded
-    ),
-    daily: usageLimitWindow(
-      status.dailyLimitUsd,
-      status.dailySpentUsd,
-      status.dailyWindowStartIso,
-      status.dailyResetAtIso,
-      status.dailyExceeded
-    ),
-    weekly: usageLimitWindow(
-      status.weeklyLimitUsd,
-      status.weeklySpentUsd,
-      status.weeklyWindowStartIso,
-      status.weeklyResetAtIso,
-      status.weeklyExceeded
-    ),
-  };
-}
-
-type RequiredDeps = Required<Omit<ApiKeySelfServiceDeps, "getApiKeyUsageLimitStatus">>;
+type RequiredDeps = Required<ApiKeySelfServiceDeps>;
 
 async function normalizeDeps(deps: ApiKeySelfServiceDeps): Promise<RequiredDeps> {
   const costRules =
@@ -486,7 +406,6 @@ export async function buildApiKeySelfServiceStatus(
   );
   const accountQuotas = await resolveAccountQuotas(metadata, resolvedDeps);
   const accountQuota = accountQuotas && accountQuotas.length === 1 ? accountQuotas[0] : undefined;
-  const limits = await resolveUsageLimits(metadata, deps, resolvedDeps.now);
 
   return {
     apiKey: {
@@ -499,7 +418,6 @@ export async function buildApiKeySelfServiceStatus(
         periodStartAt: cost.periodStartAt,
         ...tokens,
       },
-      ...(limits !== undefined && { limits }),
     },
     ...(accountQuotas !== undefined && { accountQuotas }),
     ...(accountQuota !== undefined && { accountQuota }),

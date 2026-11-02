@@ -307,7 +307,8 @@ test("usage text builders add a 5-hour block only when a 5h limit is configured"
   );
 });
 
-test("GET /v1/me/status reports the 5h window for a self:usage key with usage limits on", async () => {
+test("GET /v1/me/status adds no usage.limits shape for a key with a 5h limit", async () => {
+  // Owner decision: the 5h window reaches this route only as a limits[] entry once #14771 lands.
   await priceOneDollarPerMillion();
   const created = await apiKeysDb.createApiKey("Status Key", "machine-five-hour-04", [
     "self:usage",
@@ -318,8 +319,7 @@ test("GET /v1/me/status reports the 5h window for a self:usage key with usage li
     weeklyUsageLimitUsd: 40,
   });
   apiKeysDb.clearApiKeyCaches();
-  const spentAtMs = Date.now() - HOUR_MS;
-  await spend(created.id, 500_000, new Date(spentAtMs).toISOString());
+  await spend(created.id, 500_000, new Date(Date.now() - HOUR_MS).toISOString());
 
   const route = await import("../../src/app/api/v1/me/status/route.ts");
   const response = await route.GET(
@@ -328,26 +328,9 @@ test("GET /v1/me/status reports the 5h window for a self:usage key with usage li
     })
   );
   assert.equal(response.status, 200);
-  const body = (await response.json()) as {
-    usage: {
-      limits?: {
-        currency: string;
-        fiveHour: Record<string, unknown>;
-        daily: Record<string, unknown>;
-        weekly: Record<string, unknown>;
-      };
-    };
-  };
-  assert.ok(body.usage.limits, "usage.limits is present when usage limits are enabled");
-  assert.equal(body.usage.limits.currency, "USD");
-  assert.equal(body.usage.limits.fiveHour.limitUsd, 2);
-  assert.equal(body.usage.limits.fiveHour.usedUsd, 0.5);
-  assert.equal(body.usage.limits.fiveHour.remainingUsd, 1.5);
-  assert.equal(body.usage.limits.fiveHour.usedPercent, 25);
-  assert.equal(body.usage.limits.fiveHour.exceeded, false);
-  assert.equal(body.usage.limits.fiveHour.resetAt, new Date(spentAtMs + 5 * HOUR_MS).toISOString());
-  assert.equal(body.usage.limits.weekly.limitUsd, 40);
-  assert.equal(body.usage.limits.daily.limitUsd, null);
+  const body = (await response.json()) as { usage: Record<string, unknown> };
+  assert.equal("limits" in body.usage, false);
+  assert.equal(JSON.stringify(body).includes("fiveHour"), false);
 });
 
 test("GET /v1/me/status omits usage.limits when usage limits are off", async () => {
