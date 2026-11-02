@@ -53,84 +53,122 @@ interface SystemOneUpstreamResponse {
   message?: string;
 }
 
+function parseUpstreamBody(text: string): SystemOneUpstreamResponse | null {
+  try {
+    return text ? (JSON.parse(text) as SystemOneUpstreamResponse) : null;
+  } catch {
+    return { error: text.slice(0, 500) };
+  }
+}
+
+function upstreamErrorMessage(parsed: SystemOneUpstreamResponse | null): string | undefined {
+  const { message, error } = parsed ?? {};
+  return message || (typeof error === "string" ? error : error?.message);
+}
+
+function buildSuccessResponse(
+  parsed: SystemOneUpstreamResponse | null,
+  meta: { provider: string; model: string; cost: unknown; startTime: number }
+): Response {
+  const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
+  attachOmniRouteMetaHeaders(headers, {
+    provider: meta.provider,
+    model: meta.model,
+    costUsd: typeof meta.cost === "number" ? meta.cost : 0,
+    latencyMs: Date.now() - meta.startTime,
+    requestId: generateRequestId(),
+  });
+  return new Response(JSON.stringify(parsed), { status: 200, headers });
+}
+
+function postDecision(options: SystemOneProxyOptions, token: string): Promise<Response> {
+  const fetchImpl: typeof fetch = options.fetchImpl ?? fetch;
+  return fetchImpl(options.target.upstreamUrl, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({
+      model: options.target.upstreamModel,
+      state: options.body.state,
+      questions: options.body.questions,
+    }),
+  });
+}
+
+function logDecisionCall(
+  options: SystemOneProxyOptions,
+  outcome: {
+    status: number;
+    ok: boolean;
+    model: string;
+    usage: SystemOneUpstreamResponse["usage"];
+    error: string;
+    startTime: number;
+  }
+): void {
+  saveCallLog({
+    method: "POST",
+    path: options.path,
+    status: outcome.status,
+    model: outcome.model,
+    provider: options.target.provider,
+    duration: Date.now() - outcome.startTime,
+    tokens: {
+      prompt_tokens: outcome.usage?.input_tokens ?? 0,
+      completion_tokens: outcome.usage?.output_tokens ?? 0,
+    },
+    connectionId: options.credentials?.connectionId || null,
+    ...(outcome.ok ? {} : { error: outcome.error }),
+  }).catch(() => {});
+}
+
+function resolveAnsweredModel(
+  parsed: SystemOneUpstreamResponse | null,
+  options: SystemOneProxyOptions
+): string {
+  const upstreamModel = typeof parsed?.model === "string" ? parsed.model : "";
+  return upstreamModel || options.requestedModel || options.target.provider;
+}
+
 export async function handleSystemOneProxy(options: SystemOneProxyOptions): Promise<Response> {
   const startTime = Date.now();
   const provider = options.target.provider;
   const token = options.credentials?.apiKey || options.credentials?.accessToken;
-  const connectionId = options.credentials?.connectionId || null;
 
   if (!token) {
     return errorResponse(401, `No active credentials for provider: ${provider}`);
   }
 
-  const fetchImpl: typeof fetch = options.fetchImpl ?? fetch;
-
   try {
-    const res = await fetchImpl(options.target.upstreamUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        model: options.target.upstreamModel,
-        state: options.body.state,
-        questions: options.body.questions,
-      }),
-    });
-
+    const res = await postDecision(options, token);
     const text = await res.text();
-    let parsed: SystemOneUpstreamResponse | null = null;
-    try {
-      parsed = text ? (JSON.parse(text) as SystemOneUpstreamResponse) : null;
-    } catch {
-      parsed = { error: text.slice(0, 500) };
-    }
-
+    const parsed = parseUpstreamBody(text);
     const usage = res.ok ? parsed?.usage : undefined;
-    const answeredModel =
-      (typeof parsed?.model === "string" && parsed.model) || options.requestedModel || provider;
+    const answeredModel = resolveAnsweredModel(parsed, options);
+    const upstreamError = upstreamErrorMessage(parsed);
 
-    saveCallLog({
-      method: "POST",
-      path: options.path,
+    logDecisionCall(options, {
       status: res.status,
+      ok: res.ok,
       model: answeredModel,
-      provider,
-      duration: Date.now() - startTime,
-      tokens: {
-        prompt_tokens: usage?.input_tokens ?? 0,
-        completion_tokens: usage?.output_tokens ?? 0,
-      },
-      connectionId,
-      ...(res.ok
-        ? {}
-        : {
-            error:
-              parsed?.message ||
-              (typeof parsed?.error === "string" ? parsed.error : parsed?.error?.message) ||
-              text.slice(0, 500),
-          }),
-    }).catch(() => {});
+      usage,
+      error: upstreamError || text.slice(0, 500),
+      startTime,
+    });
 
     if (!res.ok) {
-      const message =
-        parsed?.message ||
-        (typeof parsed?.error === "string" ? parsed.error : parsed?.error?.message) ||
-        `Provider returned HTTP ${res.status}`;
-      return errorResponse(res.status, message);
+      return errorResponse(res.status, upstreamError || `Provider returned HTTP ${res.status}`);
     }
 
-    const headers = new Headers({ ...CORS_HEADERS, "Content-Type": "application/json" });
-    attachOmniRouteMetaHeaders(headers, {
+    return buildSuccessResponse(parsed, {
       provider,
       model: answeredModel,
-      costUsd: typeof usage?.cost === "number" ? usage.cost : 0,
-      latencyMs: Date.now() - startTime,
-      requestId: generateRequestId(),
+      cost: usage?.cost,
+      startTime,
     });
-    return new Response(JSON.stringify(parsed), { status: 200, headers });
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     return errorResponse(500, `System One request failed: ${message}`);
