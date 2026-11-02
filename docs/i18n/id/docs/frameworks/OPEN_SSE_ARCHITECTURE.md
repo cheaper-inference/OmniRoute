@@ -484,15 +484,15 @@ Ini menangani:
 
 ## Konfigurasi
 
-`open-sse/config/` memuat lapisan konfigurasi:
+`open-sse/config/` memegang lapisan konfigurasi:
 
-| Berkas                        | Tujuan                                           |
-| ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Registri model chat di atas katalog 375 penyedia |
-| `providerModels.ts`           | Alias model, pemetaan format                     |
-| `constants.ts`                | Timeout, batas, kode status                      |
-| `defaultThinkingSignature.ts` | Tanda tangan thinking Claude default             |
-| `modelStrip.ts` (di services) | Penghapusan field per penyedia                   |
+| Mengajukan                      | Tujuan                                              |
+| ------------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`           | Registri model obrolan melalui katalog penyedia 377 |
+| `providerModels.ts`             | Alias model, pemetaan format                        |
+| `constants.ts`                  | Batas waktu, batasan, kode status                   |
+| `defaultThinkingSignature.ts`   | Tanda tangan pemikiran Claude default               |
+| `modelStrip.ts` (dalam layanan) | Pengupasan lapangan per penyedia                    |
 
 ### Skema Registri Penyedia
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validasi Zod saat pemuatan modul memastikan semua konfigurasi penyedia valid.
+validasi Zod saat memuat modul memastikan semua konfigurasi penyedia valid.
 
 ---
 

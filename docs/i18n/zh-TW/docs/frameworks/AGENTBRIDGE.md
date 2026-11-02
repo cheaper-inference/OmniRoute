@@ -12,38 +12,38 @@ AgentBridge 是 OmniRoute 的 MITM（中間人）代理，可攔截來自 IDE AI
 
 ---
 
-## §1 概覽
+## §1 概述
 
-### 什麼是 AgentBridge?
+### AgentBridge是什麼？
 
-當 IDE 代理(例如 GitHub Copilot、Cursor、Claude Code)發出 API 呼叫時,它會直接連線到上游 AI 提供者(OpenAI、Anthropic 等)。AgentBridge 會在 TLS 層級透明地攔截該連線——無需變更任何代理設定——並透過 OmniRoute 重寫請求。
+當IDE代理程式（例如GitHub Copilot、 Cursor、 Claude程式碼）進行API呼叫時，它直接連接到上游AI提供者（OpenAI、 Anthropic等）。 AgentBridge在TLS層級透明地攔截該連線（無需更改任何代理設定）並透過OmniRoute重寫請求。
 
-這代表您可以:
+這意味著您可以：
 
-- **將任何代理重新導向至任何提供者**:Copilot 正在與 OpenAI 通訊?將它重新導向至 Anthropic Claude、Gemini,或 OmniRoute 的 375 家提供者中的任何一家。
-- **套用模型對應**:`gemini-3-flash` → `claude-sonnet-4.7`,在處理器層級透明地進行。
-- **觀察所有代理流量**:每個被攔截的請求都會發布到[流量檢查器](./TRAFFIC_INSPECTOR.md)。
-- **套用 OmniRoute 的韌性功能**:組合路由、斷路器、備援與成本追蹤同樣適用於 IDE 代理流量。
+- **將任何代理重新路由到任何提供者**: Copilot與OpenAI交談？將其重定向到Anthropic Claude、 Gemini或OmniRoute的 377 個提供者中的任何一個。
+- **應用模型映射**: `gemini-3-flash` → `claude-sonnet-4.7`在處理程序層級透明。
+- **觀察所有代理流量**：每個攔截的請求都會發佈到[Traffic Inspector](./TRAFFIC_INSPECTOR.md) 。
+- **應用OmniRoute彈性**：組合路由、斷路器、後備和成本追蹤也適用於IDE代理流量。
 
-### 市場定位比較
+### 定位與市場
 
-| 功能           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| -------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity    |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)     |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex   |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE     |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries |    —    |    ✓     |        —        |             ✓             |
-| Claude Code    |    —    |    —     |        ✓        |             ✓             |
-| Open Code      |    —    |    —     |        ✓        |             ✓             |
-| Trae           |    —    |    —     |        —        |         🔍 調查中         |
-| 儀表板 UI      |    ✓    |    ✗     |        ✗        |             ✓             |
-| 流量檢查器     |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute 路由 |    ✗    |    ✗     |        ✗        |             ✓             |
-| 模型對應 UI    |    ✗    |    ✗     |        ✗        |             ✓             |
-| 略過清單       |    ✗    |    ✗     |        ✓        |             ✓             |
-| 上游 CA 憑證   |    ✗    |    ✗     |        ✓        |             ✓             |
+| 特徵           | 9路由器 | 反API | llm攔截器 | **OmniRoute AgentBridge** |
+| -------------- | :-----: | :---: | :-------: | :-----------------------: |
+| Antigravity    |    ✓    |   ✓   |     —     |             ✓             |
+| GitHub Copilot |    ✓    |   ✓   |     —     |             ✓             |
+| Kiro (AWS)     |    ✓    |   ✓   |     —     |             ✓             |
+| OpenAI Codex   |    —    |   ✓   |     —     |             ✓             |
+| Cursor IDE     |    ✓    |   ✓   |     —     |             ✓             |
+| Zed實業        |    —    |   ✓   |     —     |             ✓             |
+| Claude代碼     |    —    |   —   |     ✓     |             ✓             |
+| 開放程式碼     |    —    |   —   |     ✓     |             ✓             |
+| 特雷           |    —    |   —   |     —     |          🔍調查           |
+| 儀表板UI       |    ✓    |   ✗   |     ✗     |             ✓             |
+| 交通督察       |    ✗    |   ✗   |     ✓     |             ✓             |
+| OmniRoute路由  |    ✗    |   ✗   |     ✗     |             ✓             |
+| 模型映射UI     |    ✗    |   ✗   |     ✗     |             ✓             |
+| 繞過列表       |    ✗    |   ✗   |     ✓     |             ✓             |
+| 上游CA證書     |    ✗    |   ✗   |     ✓     |             ✓             |
 
 ---
 

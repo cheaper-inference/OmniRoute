@@ -57,11 +57,11 @@ devido a um facto concreto da implementação:
 
 Isto significa o seguinte para cada superfície, mesmo com `CORS_ALLOW_ALL=true`:
 
-| Superfície                          | Mecanismo de autenticação      | Efeito do CORS universal                                                                                                                                                                                                                      |
-| ----------------------------------- | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Painel / GESTÃO `/api/*`            | Sessão com cookie              | A origem é devolvida, mas **sem `Allow-Credentials`** o browser **bloqueia** a leitura com credenciais. Um site malicioso de outra origem **não consegue ler** as respostas autenticadas do seu painel e o cookie de sessão não é exposto.    |
-| API de cliente `/v1/*`, `/v1beta/*` | Cabeçalho Bearer / `x-api-key` | Já é permissiva **por conceção** (`relaxForTokenAuth`): os browsers nunca anexam automaticamente `Authorization`/`x-api-key`, pelo que a página de um atacante não consegue fornecer a sua chave. `CORS_ALLOW_ALL` não amplia esta exposição. |
-| Leitura pública (`/api/health`, …)  | Nenhum                         | Não contém dados sensíveis; o caráter universal é inofensivo.                                                                                                                                                                                 |
+| Superfície                          | Mecanismo de autenticação      | Efeito do CORS universal                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Painel / GESTÃO `/api/*`            | Sessão com cookie              | A origem é devolvida, mas **sem `Allow-Credentials`** o browser **bloqueia** a leitura com credenciais. Um site malicioso de outra origem **não consegue ler** as respostas autenticadas do seu painel e o cookie de sessão não é exposto.                                                                                                                                                             |
+| API de cliente `/v1/*`, `/v1beta/*` | Cabeçalho Bearer / `x-api-key` | Já é permissiva **por conceção** (`relaxForTokenAuth`): os browsers nunca anexam automaticamente `Authorization`/`x-api-key`, pelo que a página de um atacante não consegue fornecer a sua chave. A reflexão da origem só se aplica quando a chave apresentada foi validada; as respostas anónimas (`REQUIRE_API_KEY=false`) mantêm a lista de permissões. `CORS_ALLOW_ALL` não amplia esta exposição. |
+| Leitura pública (`/api/health`, …)  | Nenhum                         | Não contém dados sensíveis; o caráter universal é inofensivo.                                                                                                                                                                                                                                                                                                                                          |
 
 Assim, a exposição **residual** de `CORS_ALLOW_ALL=true` limita-se a: (a)
 **leituras** entre origens sem credenciais de dados que já não exigem autenticação e (b)
@@ -123,10 +123,50 @@ reiniciar.
   automaticamente. O CORS não constitui uma barreira significativa neste caso — a chave de API é a
   barreira —, motivo pelo qual esta superfície é intencionalmente permissiva, para que os clientes
   de browser e Electron possam ler respostas às quais já têm direito.
+  A reflexão permissiva da origem segue a chave validada, e não a mera presença do
+  cabeçalho: quando `REQUIRE_API_KEY=false` serve um pedido de forma anónima, a sua
+  resposta bem-sucedida mantém a lista de permissões fechada por predefinição. As
+  rejeições de autenticação (401) continuam legíveis para que os clientes possam
+  assinalar uma chave revogada ou mal escrita (#5242): o 401 da própria pipeline mantém
+  a reflexão, e uma rota que recusa a chave por si mesma depois de a pipeline a ter
+  servido como anónima (`/v1/models` e `/v1beta/models` com autenticação de gestão
+  configurada, as rotas com âmbito de proprietário `/v1/files`, `/v1/batches`,
+  `/v1/media`, `/v1/session-leases` e as rotas de candidatos do auto-combo) acrescenta a
+  reflexão a esse 401 através de `credentialRejectionHeaders()`. A reflexão depende de o
+  pedido transportar um cabeçalho de credenciais (`Authorization`, `x-api-key`,
+  `x-goog-api-key` ou o cookie `auth_token`), e não de qual deles a rota verificou, e
+  nunca é acompanhada de `Access-Control-Allow-Credentials`; o corpo é um envelope de
+  erro fixo. As rotas de gestão sob `/api/v1/` protegidas por `requireManagementAuth()`
+  (`/api/v1/management/*`, `/api/v1/registered-keys`) não acrescentam a reflexão: com
+  `REQUIRE_API_KEY=false`, os respetivos 401/403 não são legíveis entre origens.
 - **Sessão com cookies (o painel):** protegida pela predefinição de bloqueio em caso de falha **e**
   pela ausência de `Access-Control-Allow-Credentials` no caminho partilhado. Mantenha
   as origens de gestão/do painel fora de qualquer configuração permissiva; estas devem permanecer
   estritamente bloqueadas em caso de falha.
+
+## Handshakes de WebSocket (`/v1/responses`, `/v1/ws`)
+
+Os browsers não aplicam CORS ao WebSocket, pelo que os transportes WebSocket que
+devolvem resultados de inferência verificam eles próprios a `Origin` do handshake
+(`src/server/origin/wsOrigin.ts`): o WebSocket de Responses (`/v1/responses`) e, quando
+o OmniRoute é executado através de `npm start` / `npm run dev`, a ponte `/v1/ws` e
+`/api/v1/ws`, que transmite `/v1/chat/completions`, `/v1/messages` e `/v1/responses`
+como frames. A ponte pede o veredicto a `/api/v1/ws?handshake=1` e recusa o upgrade
+a menos que essa rota tenha executado a verificação. Um handshake é aceite quando:
+
+- não tem cabeçalho `Origin` (Codex CLI, SDKs e outros clientes que não são browsers);
+- a `Origin` é admitida pela lista de permissões acima (`CORS_ALLOWED_ORIGINS`, a
+  definição `corsOrigins`, `CORS_ORIGIN`, `CORS_ALLOW_ALL`);
+- a `Origin` é uma das origens públicas do próprio OmniRoute (o URL base público
+  configurado, a origem reencaminhada por um proxy de confiança ou um anfitrião
+  loopback/LAN direto indicado como endereço IP literal ou `localhost` — os mesmos
+  candidatos utilizados pela verificação de mutações do painel); ou
+- transporta uma chave de API válida, tal como na superfície HTTP `/v1/*`.
+
+Tudo o resto recebe `403 ws_origin_forbidden`. Um cookie de sessão do painel não
+isenta uma `Origin` externa, porque o browser anexa-o ao socket de qualquer página.
+`localhost` noutra porta não é tratado como a mesma origem; adicione essas origens de
+desenvolvimento a `CORS_ALLOWED_ORIGINS`.
 
 ## Exemplo: proxy inverso à frente do OmniRoute
 
@@ -162,6 +202,7 @@ separador Segurança), e não no proxy.
 | Faixa de aviso do painel                             | `src/app/(dashboard)/dashboard/settings/components/AuthzSection.tsx` |
 | Campo Origens CORS permitidas                        | `src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx`  |
 | CORS por rota do Cloud-Agent (a exceção)             | `src/lib/cloudAgent/api.ts`                                          |
+| Verificação da `Origin` no handshake de WebSocket    | `src/server/origin/wsOrigin.ts`                                      |
 
 ## Ver também
 

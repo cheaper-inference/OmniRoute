@@ -8,79 +8,78 @@
 
 _Oxirgi yangilanish: 2026-06-28_
 
-## Qisqacha mazmun
+## Kirish; qisqa Umumiy ma'lumot
 
-OmniRoute — Next.js asosida yaratilgan mahalliy AI yoʻnaltirish shlyuzi va boshqaruv paneli.
-U yagona OpenAI-mos soʻnggi nuqtani (`/v1/*`) taqdim etadi hamda tarjima qilish, zaxira variantiga oʻtish, tokenlarni yangilash va foydalanishni kuzatish imkoniyatlari bilan trafikni bir nechta yuqori oqim provayderlari boʻylab yoʻnaltiradi.
+OmniRoute - Next.js-da qurilgan mahalliy AI marshrutlash shlyuzi va asboblar paneli. U yagona OpenAI-ga mos keladigan so'nggi nuqtani (`/v1/*`) taqdim etadi va tarjima, qaytarish, tokenni yangilash va foydalanishni kuzatish bilan bir nechta yuqori oqim provayderlari bo'ylab trafikni yo'naltiradi.
 
-Asosiy imkoniyatlar:
+Asosiy qobiliyatlar:
 
-- CLI/vositalar uchun OpenAI-mos API interfeysi (375 ta provayder, 156 ta bajaruvchi modul)
-- Provayder formatlari oʻrtasida soʻrov/javoblarni tarjima qilish
-- Modellar kombinatsiyasi boʻyicha zaxira variantiga oʻtish (koʻp modelli ketma-ketlik)
-- `compositeTiers` orqali bajarilish vaqtida tartiblanadigan tuzilmaviy kombinatsiya bosqichlari (`provider + model + connection`)
-- Hisob darajasida zaxira variantiga oʻtish (har bir provayder uchun bir nechta hisob)
-- Asosiy chat jarayonida kvotani dastlabki tekshirish va kvotani hisobga oluvchi P2C hisob tanlovi
-- OAuth + API kaliti asosida provayder ulanishlarini boshqarish (27 ta OAuth provayder moduli)
-- `/v1/embeddings` orqali embeddinglar yaratish (18 ta provayder)
-- `/v1/images/generations` orqali tasvirlar yaratish (10+ ta provayder, 20+ ta model)
-- `/v1/audio/transcriptions` orqali audio transkripsiyasi (18 ta provayder)
-- `/v1/audio/speech` orqali matnni nutqqa aylantirish (24 ta ichki provayder)
+- CLI/tools uchun OpenAI-mos API yuzasi (377 provayder, 156 ijrochi modul)
+- provayder formatlari bo'ylab Request/response tarjimasi
+- Model kombinatsiyasi (ko'p modelli ketma-ketlik)
+- Strukturaviy kombinatsiyalangan qadamlar (`provider + model + connection`) `compositeTiers` tomonidan ish vaqti tartibi
+- Hisob darajasidagi zaxira (har bir provayder uchun bir nechta hisob)
+- Asosiy chat yoʻlida kvotadan oldingi parvoz va kvotadan xabardor P2C hisobini tanlash
+- OAuth + API-kalit provayderi ulanishini boshqarish (27 OAuth provayder moduli)
+- `/v1/embeddings` orqali oʻrnatish yaratish (18 ta provayder)
+- `/v1/images/generations` orqali tasvir yaratish (10 + provayder, 20 + model)
+- `/v1/audio/transcriptions` orqali audio transkripsiya (18 ta provayder)
+- `/v1/audio/speech` orqali matndan nutqqa (24 ta o'rnatilgan provayder)
 - `/v1/videos/generations` orqali video yaratish (ComfyUI + SD WebUI)
-- `/v1/music/generations` orqali musiqa yaratish (ComfyUI)
+- `/v1/music/generations` (ComfyUI) orqali musiqa yaratish
 - `/v1/search` orqali veb-qidiruv (20 ta provayder)
-- `/v1/moderations` orqali moderatsiya
-- `/v1/rerank` orqali qayta reytinglash
-- Mulohaza yurituvchi modellar uchun fikrlash teglarini (`<think>...</think>`) tahlil qilish
-- OpenAI SDK bilan qatʼiy muvofiqlik uchun javoblarni tozalash
-- Provayderlararo muvofiqlik uchun rollarni meʼyorlashtirish (developer→system, system→user)
-- Tuzilmaviy chiqishni oʻzgartirish (json_schema → Gemini responseSchema)
-- Provayderlar, kalitlar, taxalluslar, kombinatsiyalar, sozlamalar va narxlar uchun mahalliy doimiy saqlash (122 ta DB moduli)
-- Foydalanish/xarajatlarni kuzatish va soʻrovlarni jurnalga yozish
-- Bir nechta qurilma/holatni sinxronlashtirish uchun ixtiyoriy bulutli sinxronlash
-- API kirishini boshqarish uchun IP ruxsat roʻyxati/bloklash roʻyxati
-- Fikrlash budjetini boshqarish (oʻzgarishsiz uzatish/avtomatik/maxsus/moslashuvchan)
-- Global tizim soʻrovini kiritish
-- Seanslarni kuzatish va raqamli iz yaratish
-- Provayderga xos profillarga ega har bir hisob uchun kengaytirilgan tezlikni cheklash
-- Provayderlar bardoshliligi uchun avtomatik uzgich andozasi
-- Mutex bloklash yordamida keskin bir vaqtdagi soʻrovlardan himoyalanish
-- Imzoga asoslangan soʻrovlarni takrorlanishdan tozalash keshi
-- Domen qatlami: xarajat qoidalari, zaxira variantiga oʻtish siyosati, bloklash siyosati
-- Kontekst relesi: hisoblarni almashtirishda uzluksizlikni taʼminlash uchun seansni topshirish xulosalari
-- Domen holatini doimiy saqlash (zaxira variantlari, budjetlar, bloklashlar va avtomatik uzgichlar uchun SQLite darhol yoziladigan keshi)
-- Soʻrovlarni markazlashgan holda baholash uchun siyosat mexanizmi (bloklash → budjet → zaxira variantiga oʻtish)
-- p50/p95/p99 kechikishlarini umumlashtiruvchi soʻrov telemetriyasi
-- `combo_execution_key` / `combo_step_id` orqali kombinatsiya maqsadi telemetriyasi va kombinatsiya maqsadining tarixiy holati
-- Uchidan uchigacha kuzatish uchun korrelyatsiya identifikatori (X-Request-Id)
-- Har bir API kaliti boʻyicha voz kechish imkoniyatiga ega muvofiqlik auditi jurnali
-- LLM sifatini taʼminlash uchun baholash tizimi
-- Provayder avtomatik uzgichlarining real vaqt holatini koʻrsatuvchi salomatlik boshqaruv paneli
-- 3 ta transportga (stdio/SSE/Streamable HTTP) ega MCP serveri (110 ta vosita)
-- Koʻnikmalar va vazifalarning hayot sikliga ega A2A serveri (JSON-RPC 2.0 + SSE)
-- Xotira tizimi (ajratib olish, kiritish, qayta topish, umumlashtirish)
-- Koʻnikmalar tizimi (reyestr, bajaruvchi, izolyatsiyalangan muhit, ichki ko‘nikmalar)
-- Sertifikatlarni boshqarish va DNS bilan ishlash imkoniyatiga ega MITM proksi
-- Soʻrovga zararli koʻrsatma kiritilishidan himoyalovchi oraliq dastur
-- Caveman, RTK, qatlamlangan konveyerlar, siqish kombinatsiyalari, til paketlari va tahlil imkoniyatlariga ega soʻrovni siqish konveyeri
-- ACP (Agent Communication Protocol) reyestri
-- Modulli OAuth provayderlari (`src/lib/oauth/providers/` ichidagi 22 ta alohida modul)
-- Oʻchirish/toʻliq oʻchirish skriptlari
-- OAuth muhitini tiklash amali
-- OpenAI-mos WS mijozlari uchun WebSocket koʻprigi (`/v1/ws`)
-- Sinxronlash tokenlarini boshqarish (chiqarish/bekor qilish, ETag versiyalangan konfiguratsiya toʻplamini yuklab olish)
-- Birinchi darajali GLM Thinking (`glmt`) provayder shabloni
-- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens`, hisoblash imkoni boʻlmaganda taxminiy baholash)
-- Model taxalluslarini avtomatik boshlangʻich toʻldirish (ishga tushishda 30+ ta proksilararo dialektni meʼyorlashtirish)
-- SSRF himoyasi, shaxsiy URL manzillarini bloklash va sozlanadigan qayta urinish imkoniyatiga ega xavfsiz chiquvchi soʻrov
-- Sozlanadigan `requestRetry` va `maxRetryIntervalSec` bilan sovish davrini hisobga oluvchi chat qayta urinishlari
-- Ishga tushishda Zod yordamida bajarilish muhitini tekshirish
-- Sahifalash, provayder CRUD hodisalari va SSRF sababli bloklangan tekshiruvlarni jurnalga yozishga ega muvofiqlik auditi v2
+- `/v1/moderations` orqali moderatsiyalar
+- `/v1/rerank` orqali qayta tartiblash
+- Fikrlash modellari uchun tegni tahlil qilish (`<think>...</think>`) haqida o'ylang
+- Qattiq OpenAI SDK muvofiqligi uchun javob sanitarizatsiyasi
+- Provayderlararo muvofiqligi uchun rolni normallashtirish (ishlab chiquvchi → tizimi, tizim → foydalanuvchisi)
+- Strukturaviy chiqish konvertatsiyasi (json_schema → Gemini respondSchema)
+- Provayderlar, kalitlar, taxalluslar, kombinatsiyalar, sozlamalar, narxlar uchun mahalliy barqarorlik (122 DB moduli)
+- Usage/cost kuzatuvi va so'rovlar jurnali
+- multi-device/state sinxronlash uchun ixtiyoriy bulutli sinxronlash
+- API kirishni boshqarish uchun IP allowlist/blocklist
+- Byudjetni o'ylash (passthrough/auto/custom/adaptive)
+- Global tizim tezkor in'ektsiya
+- Seansni kuzatish va barmoq izlari
+- Provayderga xos profillar bilan har bir hisob uchun kengaytirilgan tarif chegarasi
+- Provayderning chidamliligi uchun o'chirgich namunasi
+- Muteks qulflash bilan momaqaldiroqqa qarshi poda himoyasi
+- Imzoga asoslangan so'rovni deuplikatsiya keshi
+- Domen qatlami: xarajat qoidalari, zaxira siyosati, blokirovka siyosati
+- Kontekst relayi: hisob aylanishining uzluksizligi uchun sessiyani topshirish xulosalari
+- Domen holatining barqarorligi (qaytarilishlar, byudjetlar, blokirovkalar, o'chirgichlar uchun SQLite yozish keshi)
+- Markazlashtirilgan soʻrovni baholash uchun siyosat mexanizmi (lokaut → byudjeti → zaxirasi)
+- p50/p95/p99 kechikish yig‘indisi bilan telemetriyani so‘rang
+- `combo_execution_key` / `combo_step_id` orqali birlashtirilgan maqsadli telemetriya va tarixiy kombinatsiyalangan maqsadli sog'liq
+- Oxir-oqibat kuzatish uchun korrelyatsiya ID (X-Request-Id).
+- Har bir API kalitidan voz kechish bilan muvofiqlik auditi jurnali
+- LLM sifatini ta'minlash uchun asosni baholash
+- Haqiqiy vaqtda provayderning o'chirgich holatiga ega sog'liqni saqlash paneli
+- 3 ta transportga ega MCP Server (110 ta asbob) (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) ko'nikmalar va vazifalarning hayot aylanishiga ega
+- Xotira tizimi (ekstraktsiya, in'ektsiya, qidirish, umumlashtirish)
+- Ko'nikmalar tizimi (ro'yxatga olish kitobi, ijrochi, sandbox, o'rnatilgan ko'nikmalar)
+- sertifikat boshqaruvi va DNS bilan ishlash bilan MITM proksi
+- Tezkor in'ektsiya himoyasi o'rta dasturi
+- Caveman, RTK, stacked pipelines, siqish kombinatsiyalari, til paketlari va tahlillar bilan tezkor siqish quvur liniyasi
+- ACP (Agent Communication Protocol) registri
+- Modulli OAuth provayderlari ( `src/lib/oauth/providers/` ostida 22 ta individual modul)
+- Uninstall/full-uninstall skriptlari
+- OAuth muhitini ta'mirlash harakati
+- OpenAI-ga mos keladigan WS mijozlari uchun WebSocket ko'prigi (`/v1/ws`)
+- Sinxronlash tokenini boshqarish (issue/revoke, ETag versiyasidagi konfiguratsiya paketini yuklab olish)
+- GLM Thinking (`glmt`) birinchi darajali provayder oldindan o'rnatilgan
+- Gibrid tokenlarni hisoblash (provayder tomonidagi `/messages/count_tokens` hisob-kitobi bilan)
+- Model taxallusni avtomatik ekish (boshlang‘ichda 30 + o‘zaro proksi dialektini normallashtirish)
+- SSRF himoyasi, shaxsiy URL blokirovkasi va sozlanishi mumkin bo'lgan qayta urinish bilan xavfsiz chiqish
+- Sozlanishi mumkin bo'lgan `requestRetry` va `maxRetryIntervalSec` bilan sovish vaqtini hisobga olgan holda chat qayta uriladi
+- Ishga tushganda Zod bilan ish vaqti muhitini tekshirish
+- Sahifalar, provayder CRUD hodisalari va SSRF tomonidan bloklangan tekshirish jurnali bilan muvofiqlik auditi v2.
 
-Asosiy bajarilish modeli:
+Asosiy ish vaqti modeli:
 
-- `src/app/api/*` ostidagi Next.js ilova marshrutlari boshqaruv paneli API’larini ham, muvofiqlik API’larini ham amalga oshiradi
-- `src/sse/*` + `open-sse/*` ichidagi umumiy SSE/yoʻnaltirish yadrosi provayder bajarilishini, tarjima qilishni, oqimli uzatishni, zaxira variantiga oʻtishni va foydalanishni boshqaradi
+- `src/app/api/*` ostidagi Next.js ilova marshrutlari asboblar paneli APIs va moslik APIs ham amalga oshiradi
+- `src/sse/*` + `open-sse/*` -dagi umumiy SSE/routing yadrosi provayderning bajarilishi, tarjimasi, strimingi, qaytarilishi va foydalanishini boshqaradi.
 
 ## Maʼlumotnoma diagrammalari
 
@@ -359,153 +358,122 @@ Batafsil maʼlumot: `docs/frameworks/EMBEDDED-SERVICES.md`
 
 ## Asosiy quyi tizimlar (v3.8.0)
 
-### A. Auto Combo mexanizmi
+### A. Avtomatik kombinatsiyalangan dvigatel
 
-Auto Combo statik combo taʼrifiga tayanish o‘rniga, so‘rov vaqtida marshrutlash maqsadlarini dinamik ravishda baholaydi va tanlaydi. U `auto/*` model prefikslari oilasini taʼminlaydi.
+Avtomatik kombinatsiya statik kombinatsiya ta'rifiga tayanmasdan, so'rov vaqtida marshrutlash maqsadlarini dinamik ravishda baholaydi va tanlaydi. `auto/*` model prefikslari oilasini quvvatlaydi.
 
-- Mexanizm kirish nuqtasi: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- Aniqlovchi: `src/domain/comboResolver.ts` (`auto/` prefiksini avtomatik aniqlash)
+- Dvigatelga kirish: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- Resolver: `src/domain/comboResolver.ts` ( `auto/` prefiksini avtomatik aniqlash)
 - Boshqaruv paneli: `/dashboard/auto-combo`
 - Telemetriya: `auto_combo_decisions` SQLite jadvali
 
-Asosiy imkoniyatlar:
+Asosiy qobiliyatlar:
 
-- **20 ta marshrutlash strategiyasi** (ustuvorlik, vaznli, avval to‘ldirish, navbatma-navbat, P2C, tasodifiy,
-  eng kam ishlatilgan, xarajat bo‘yicha optimallashtirilgan, qayta tiklanishni hisobga oluvchi, qayta tiklanish oynasi, zaxira sig‘imi, kvota bo‘yicha vaznlangan,
-  qatʼiy tasodifiy, **auto**, lkgp, kontekst bo‘yicha optimallashtirilgan, kesh bo‘yicha optimallashtirilgan, kontekstni uzatish, **fusion**,
-  konveyer) —
-  auto — v3.8.0 dagi asosiy yangilik; `fusion` (panelga parallel tarqatish + hakam sintezi,
-  `open-sse/services/fusion.ts`) esa v3.8.36 da qo‘shilgan.
-- **16 omilli baholash**: kvota, holat, teskari xarajat, teskari kechikish, vazifaga moslik va
-  yana o‘nta omil. Omillar va ularning standart vaznlari bo‘yicha asosiy jadval
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ichida joylashgan — uni bu yerda takrorlash
-  eskirib qolishi mumkin bo‘lgan yana bir nusxani yaratadi.
-- **Virtual fabrika** mos keluvchi nomlangan combo mavjud bo‘lmaganda, nomzodlarni sog‘lom va faol provayder ulanishlaridan olib, vaqtinchalik combo obyektlarini yaratadi.
-- **Avtomatik prefikslar**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — har biri moslashtirilgan vazn profiliga asoslangan.
-- **6 ta rejim to‘plami**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` va `chaos-mode` — boshqaruv panelidan ishga tushiriladigan oldindan sozlangan vazn konfiguratsiyalari.
-  (Ularni yuqoridagi, so‘rov vaqtida qo‘llanadigan variantlar bo‘lgan `auto/*` prefikslari bilan adashtirmang.)
+- **20 marshrutlash strategiyasi** (prioritet, og'irlashtirilgan, birinchi bo'lib to'ldirish, round-robin, P2C, tasodifiy, eng kam foydalanilgan, xarajat optimallashtirilgan, qayta o'rnatish, qayta o'rnatish-oyna, bo'sh joy, kvotaga asoslangan, qat'iy-tasodifiy,** avto** , lkgp, kontekst-optimallashtirilgan, kesh-optimallashtirilgan, kontekst-rele,** sintez** , quvur liniyasi) — auto - v3.8.0 da sarlavha qo'shilishi; `fusion` (panel fan-out + judge sintezi, `open-sse/services/fusion.ts`) v3.8.36 da yangi.
+- **16 faktorli ball** : kvota, sog'liq, teskari xarajat, teskari kechikish, vazifa mosligi va yana o'nta. Omillarning kanonik jadvali va ularning standart og'irliklari [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — yashaydi, uni bu erda qayta ko'rib chiqsak, eskirib ketish uchun ikkinchi o'rinni beradi.
+- **Virtual zavod** mos keladigan nomli kombinatsiya mavjud bo'lmaganda vaqtinchalik kombinatsiyalarni amalga oshiradi va sog'lom faol provayder ulanishlaridan nomzodlarni oladi.
+- **Avtomatik prefikslar** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — har biri sozlangan vazn profili bilan taʼminlangan.
+- **6 rejim to'plami** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` va `chaos-mode` — oldindan o‘rnatilgan vazn konfiguratsiyalari asboblar panelidan chaqirilishi mumkin. (Yuqoridagi `auto/*` prefikslari bilan adashtirmaslik kerak, ular so'rov vaqti variantlari.)
 
-Algoritmga oid to‘liq tafsilotlar (omil formulalari, vaznlarni sozlash) uchun
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ga qarang.
+To'liq algoritmik tafsilot (omil formulalari, vaznni sozlash) uchun [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) qarang.
 
-### B. Cloud Agents
+### B. Bulutli agentlar
 
-Cloud Agents uchinchi tomonning xost qilingan kod agenti platformalarini (Codex Cloud, Devin,
-Jules) maʼlumotlar bazasi bilan qo‘llab-quvvatlanadigan yagona vazifa hayotiy sikli ortida birlashtiradi. Vazifalarni yaratish/tekshirish
-uchun barcha endpointlar boshqaruv autentifikatsiyasini talab qiladi.
+Cloud Agents uchinchi tomon tomonidan joylashtirilgan kod-agent platformalarini (Codex Cloud, Devin, Jules) yagona JB tomonidan qo'llab-quvvatlanadigan vazifalarning hayot aylanishi ortida o'rab oladi. Barcha vazifa creation/inspection so'nggi nuqtalari boshqaruv autentifikatsiyasini talab qiladi.
 
-- Modul ildizi: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`, shuningdek `agents/` ostidagi har bir agentga tegishli quyi kataloglar)
-- Har bir agentga tegishli implementatsiyalar: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- Ommaviy endpointlar: `/api/v1/agents/tasks/*` (ro‘yxatlash/yaratish/olish/bekor qilish)
-- Boshqaruv endpointlari: `/api/cloud/*` (resurslarni tayyorlash, holat, to‘plamli operatsiyalar)
+- Modul ildizi: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, plus `agents/` ostidagi har bir agent uchun quyi kataloglari)
+- Har bir agentni amalga oshirish: `agents/codex/`, `agents/devin/`, `agents/jules/`
+- Umumiy yakuniy nuqtalar: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- Boshqaruvning so'nggi nuqtalari: `/api/cloud/*` (ta'minlash, holat, to'plam)
 - Boshqaruv paneli: `/dashboard/cloud-agents`
 - Saqlash: `cloud_agent_tasks` jadvali
 
-Har bir agent uchun resurslarni tayyorlash va OAuth tafsilotlari haqida
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) ga qarang.
+Har bir agent ta'minoti va OAuth xususiyatlari uchun [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) qarang.
 
-### C. Himoya cheklovlari
+### C. Qo'riqchilar
 
-Himoya cheklovlari moduli PII, prompt injeksiyasi va xavfli vizual kontentni aniqlash uchun so‘rovlar
-va javoblarni tekshiradigan, dinamik qayta yuklanadigan middleware qatlamidir. Qoidabuzarliklar
-so‘rovni HTTP **503** hamda tuzilmali xato kodi bilan darhol to‘xtatadi, bu esa
-quyi oqimdagi chaqiruvchilarga qayta urinish yoki boshqa tarmoqqa o‘tish imkonini beradi.
+Qo'riqchi moduli PII, tezkor in'ektsiya va xavfli ko'rish tarkibiga bo'lgan so'rovlar va javoblarni tekshiradigan, qayta yuklanadigan o'rta dastur qatlamidir. Buzilishlar so'rovni HTTP bilan qisqa tutashuvga olib keladi** 503** qo'shimcha ravishda quyi oqimdagi qo'ng'iroq qiluvchilarga qayta urinib ko'rish yoki bo'linish imkonini beruvchi tuzilgan xato kodi.
 
-- Modul ildizi: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- Dinamik qayta yuklash: reyestr konfiguratsiya o‘zgarishlarini kuzatadi va zanjirni joyida qayta quradi
-- Ulanish nuqtalari: chat ishlov beruvchisining kirish qismi, tasvir yaratish ishlov beruvchisi, javob sanitizatori
-- HTTP shartnomasi: qoidabuzarliklar `error.code = "GUARDRAIL_VIOLATION"` bilan birga `503` sifatida qaytariladi
+- Modul ildizi: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- Issiq qayta yuklash: ro'yxatga olish kitobi konfiguratsiya o'zgarishlarini kuzatib boradi va zanjirni joyida tiklaydi
+- Ulanish nuqtalari: chatga ishlov beruvchiga kirish, tasvir yaratish ishlovchisi, javobni tozalash vositasi
+- HTTP shartnomasi: buzilishlar `error.code = "GUARDRAIL_VIOLATION"` bilan `503` sifatida yuzaga keladi
 
-Qoidalar to‘plamini yaratish va chegara qiymatlarini sozlash haqida
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) ga qarang.
+Qoidalar toʻplamini yaratish va chegarani sozlash uchun [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) qarang.
 
 ### D. Domen qatlami
 
-`src/domain/` nomlar makoni siyosatga oid qarorlarni markazlashtiradi, shu sababli marshrut ishlov beruvchilari
-bloklash/byudjet/zaxira mantiqini mustaqil ravishda yig‘ishi shart emas.
+`src/domain/` nom maydoni siyosat qarorlarini markazlashtiradi, shuning uchun marshrutni qayta ishlovchilar lockout/budget/fallback mantiqini o'zlari yig'ishlari shart emas.
 
-- Siyosat mexanizmi: `src/domain/policyEngine.ts` — bajarishdan oldingi
-  baholash uchun yagona kirish nuqtasi (bloklash → byudjet → zaxira tartibi)
-- Xarajat qoidalari: `src/domain/costRules.ts`
-- Zaxira siyosati: `src/domain/fallbackPolicy.ts`
+- Siyosat mexanizmi: ijrodan oldin baholash uchun `src/domain/policyEngine.ts` — yagona kirish nuqtasi (lokavt → byudjeti → zaxira buyurtmasi)
+- Narx qoidalari: `src/domain/costRules.ts`
+- Qayta tiklash siyosati: `src/domain/fallbackPolicy.ts`
 - Bloklash siyosati: `src/domain/lockoutPolicy.ts`
-- Teglarga asoslangan marshrutlash: `src/domain/tagRouter.ts`
-- Combo aniqlovchisi: `src/domain/comboResolver.ts` — combo nomlari, auto/\*
-  prefikslari va universal model maqsadlarini aniq bajarish rejalariga aylantiradi
-- Ulanish/model qoidalarini birlashtiruvchi: `src/domain/connectionModelRules.ts`
-- Model mavjudligi oniy tasvirlari: `src/domain/modelAvailability.ts`
-- Provayder amal qilish muddati kuzatuvi: `src/domain/providerExpiration.ts`
+- Tegga asoslangan marshrutlash: `src/domain/tagRouter.ts`
+- Combo-resolver: `src/domain/comboResolver.ts` — kombinatsiyalangan nomlar, auto/\* prefikslari va joker belgilar model maqsadlarini aniq bajarish rejalariga hal qiladi.
+- Connection/model qoidasini birlashtiruvchi: `src/domain/connectionModelRules.ts`
+- Model mavjudligi haqidagi lavhalar: `src/domain/modelAvailability.ts`
+- Provayderning amal qilish muddatini kuzatish: `src/domain/providerExpiration.ts`
 - Kvota keshi: `src/domain/quotaCache.ts`
 - Degradatsiya holati: `src/domain/degradation.ts`
 - Konfiguratsiya auditi: `src/domain/configAudit.ts`
-- OmniRoute javob metamaʼlumotlari yaratuvchisi: `src/domain/omnirouteResponseMeta.ts`
-- Baholash quyi tizimi: `src/domain/assessment/` — davriy baholash vazifalari
+- OmniRoute javob metadata quruvchisi: `src/domain/omnirouteResponseMeta.ts`
+- Baholash quyi tizimi: `src/domain/assessment/` — davriy baholash ishlari
 
-### E. Avtorizatsiya konveyeri
+### E. Avtorizatsiya quvuri
 
-Avtorizatsiya konveyeri har bir kiruvchi so‘rovni tasniflaydi va uni uzatishdan oldin
-tegishli siyosatlar zanjirini qo‘llaydi.
+Avtorizatsiya quvuri har bir kiruvchi so'rovni tasniflaydi va jo'natishdan oldin tegishli siyosat zanjirini qo'llaydi.
 
-- Konveyer kirish nuqtasi: `src/server/authz/pipeline.ts`
-- So‘rov tasniflagichi: `src/server/authz/classify.ts` — ommaviy
-  moslik marshrutlarini boshqaruv marshrutlaridan ajratadi
-- Ommaviy marshrutlar ro‘yxati: `src/shared/constants/publicApiRoutes.ts`
-- Siyosatlar: `src/server/authz/policies/` — birlashtiriladigan predikatlar
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` va boshqalar)
-- Sarlavha yordamchi vositalari: `src/server/authz/headers.ts`
+- Quvur liniyasiga kirish: `src/server/authz/pipeline.ts`
+- So'rov klassifikatori: `src/server/authz/classify.ts` — umumiy muvofiqlik yo'nalishlarini boshqaruv yo'nalishlaridan ajratib turadi
+- Umumiy marshrut inventarizatsiyasi: `src/shared/constants/publicApiRoutes.ts`
+- Qoidalar: `src/server/authz/policies/` — tuziladigan predikatlar (`requireApiKey`, `requireManagement`, `requireFreshAuth` va boshqalar)
+- Sarlavha yordam dasturlari: `src/server/authz/headers.ts`
 - Tasdiqlash yordamchisi: `src/server/authz/assertAuth.ts`
-- So‘rov konteksti: `src/server/authz/context.ts`
+- So'rov konteksti: `src/server/authz/context.ts`
 
-Ommaviy va boshqaruv marshrutlari o‘rtasida qatʼiy chegara mavjud: agent/cooldown API’lari va
-provayder mutatsiyalari boshqaruv autentifikatsiyasini talab qiladi (mavjud bo‘lmasa, HTTP 401).
+Ommaviy va boshqaruv marshrutlari qattiq chegara hisoblanadi: agent/cooldown APIs va provayder mutatsiyalari boshqaruv authini talab qiladi (agar yoʻq boʻlsa HTTP 401).
 
-Marshrutlarni tasniflashning to‘liq qoidalari uchun
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) ga qarang.
+To'liq marshrutni tasniflash qoidalari uchun [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) qarang.
 
-### F. Ish jarayoni FSM’i va vazifani hisobga oluvchi marshrutizator
+### F. Workflow FSM va Task-Aware Router
 
-Aniqlangan ish jarayoni bosqichi (rejalashtirish, bajarish,
-ko‘rib chiqish) va fon vazifalariga moslik asosida trafikni yo‘naltirish uchun combo tanlovidan yuqorida joylashgan,
-chekli holatlar mashinasi boshqaruvidagi marshrutizator.
+Aniqlangan ish jarayoni bosqichi (rejalashtirish, bajarish, ko'rib chiqish) va fon vazifalari yaqinligi asosida trafikni yo'naltirish uchun kombinatsiyalangan tanlovdan yuqori qatlamli cheklangan holatli mashinaga boshqariladigan marshrutizator.
 
-- Ish jarayoni FSM’i: `open-sse/services/workflowFSM.ts`
+- Ish jarayoni FSM: `open-sse/services/workflowFSM.ts`
 - Vazifadan xabardor router: `open-sse/services/taskAwareRouter.ts`
-- Fon vazifalari detektori: `open-sse/services/backgroundTaskDetector.ts`
-- Niyat klassifikatori: `open-sse/services/intentClassifier.ts`
+- Fon vazifasi detektori: `open-sse/services/backgroundTaskDetector.ts`
+- Niyat tasniflagichi: `open-sse/services/intentClassifier.ts`
 
-FSM o‘tishlari Auto Combo’ning baholash tizimiga uzatiladi va fon/avtomatlashtirish vazifalari uchun arzonroq modellarga, interaktiv rejalashtirish/tekshirish bosqichlari uchun esa kuchliroq modellarga ustunlik beradi.
+FSM o'tishlari background/automation vazifalari uchun arzonroq modellarga va interaktiv planning/review burilishlari uchun kuchliroq modellarga yo'naltirilgan Auto Combo reytingiga kiradi.
 
-### G. Provayderga xos barqarorlik
+### G. Provayderga xos chidamlilik
 
-Bir nechta provayderlar global avtomatik uzgich / ulanishni kutish davri / modelni bloklash qatlamlari asosida ishlaydigan maxsus barqarorlik va yashirinlik modullarini taqdim etadi:
+Bir nechta provayderlar global o'chirgich / ulanishni sovutish / model blokirovkasi qatlamlarida qayta tiklanadigan moslashuvchanlik va yashirin modullarni etkazib beradi:
 
-- Antigravity 429 mexanizmi: `open-sse/services/antigravity429Engine.ts` (identifikatsiyani almashtiradi, javob sarlavhalarini tozalaydi, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` orqali kreditlar/versiyalar kuzatuvini boshqaradi)
+- Antigravity 429 dvigateli: `open-sse/services/antigravity429Engine.ts` (identifikatsiyani aylantiradi, javob sarlavhalarini tozalaydi, `antigravityCredits.ts`, `antigravityHeaderScrub.ts`, `antigravityHeaders.ts`, `antigravityIdentity.ts`, `antigravityVersion.ts` orqali credits/version kuzatuvini boshqaradi)
+- Antigravity 429 guard: `open-sse/services/antigravity429Guard.ts` (barcha xostlar bo‘yicha yuqori oqim 429-larning har bir so‘rov byudjeti, `ANTIGRAVITY_MAX_429_ATTEMPTS`; rad etilgan korpusning bir xil qayta jo‘natishiga mahalliy darajada javob beriladi; `src/sse/handlers/chat.ts` sovutish vaqtini hisobga olgan holda qayta urinish orqali bunday so‘rovni qayta ishga tushirmaydi)
 - ModelScope kvota siyosati: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (Moslik kanali qo‘l siqishuvi): `open-sse/services/claudeCodeCCH.ts`, shuningdek `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
-- Claude Code raqamli izini shakllantirish: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code obfuskatsiyasi: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude kodi CCH (Moslik kanali bilan qo‘l siqish): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude Code barmoq izini shakllantirish: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude kodini xiralashtirish: `open-sse/services/claudeCodeObfuscation.ts`
 
-Yashirinlik bo‘yicha to‘liq qo‘llanma va operatsion ko‘rsatmalar uchun `docs/security/STEALTH_GUIDE.md` fayliga qarang (git’da; `/docs` tarkibiga kompilyatsiya qilinmaydi).
+To'liq yashirin o'yin kitobi va operatsion qo'llanma uchun `docs/security/STEALTH_GUIDE.md` (git; `/docs` ga to'planmagan) ga qarang.
 
-### H. Vebhuklar, mulohazalar keshi, o‘qish keshi
+### H. Webhooks, Reading keshi, o'qish keshi
 
-- **Vebhuklar** — provayder/hisob/vazifa hodisalari uchun tashqi jo‘natish.
+- **Webhuklar** provider/account/task voqealari uchun — chiquvchi jo'natma.
   - Dispetcher: `src/lib/webhookDispatcher.ts`
-  - Saqlash: `webhooks` SQLite jadvali (`src/lib/db/webhooks.ts` orqali)
+  - Saqlash: `webhooks` SQLite jadvali ( `src/lib/db/webhooks.ts` orqali)
   - Boshqaruv paneli: `/dashboard/webhooks` (obunalar, sirlar, qayta urinishlar tarixi)
-  - Hodisalar tasnifi va qayta urinish semantikasi uchun [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) fayliga qarang.
-- **Mulohazalar keshi** — fikrlash tokenlarini chiqaradigan provayderlar (Claude, GLMT va boshqalar) uchun qayta ijro etiladigan mulohaza bloklari; ular yordamida ketma-ket bosqichlarda qayta fikrlashni o‘tkazib yuborish mumkin.
-  - MB qatlami: `src/lib/db/reasoningCache.ts`
+  - Voqealar taksonomiyasi va semantikasini qayta ko'rib chiqish uchun [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) qarang.
+- **Fikrlash keshi** fikrlash belgilarini (Claude, GLMT va boshqalar) chiqaradigan provayderlar uchun — qayta o'ynaladigan fikrlash bloklari, shuning uchun ketma-ket aylanishlar qayta o'ylashni o'tkazib yuborishi mumkin.
+  - DB qatlami: `src/lib/db/reasoningCache.ts`
   - Xizmat qatlami: `open-sse/services/reasoningCache.ts`
-  - Qayta ijro semantikasi uchun [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) fayliga qarang.
-- **O‘qish keshi** — imzo bo‘yicha kalitlanadigan va nosoz yuqori oqim SDK’laridan keladigan bir xil qayta urinishlarni birlashtirish uchun ishlatiladigan qisqa muddatli javoblar keshi.
-  - MB qatlami: `src/lib/db/readCache.ts`
-  - Statistika so‘nggi nuqtasi: `GET /api/cache/stats`, boshqaruv paneli: `/dashboard/cache`
+  - Takrorlash semantikasi uchun [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) qarang.
+- **Keshni o'qing** — qisqa muddatli javob keshi imzo bilan kalitlangan va buzilgan yuqori oqim SDKs dan bir xil qayta urinishlarni yopish uchun ishlatiladi.
+  - DB qatlami: `src/lib/db/readCache.ts`
+  - Statistikaning yakuniy nuqtasi: `GET /api/cache/stats`, asboblar paneli va `/dashboard/cache`
 
 ## 3) Saqlash qatlami
 

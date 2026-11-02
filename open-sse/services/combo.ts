@@ -153,6 +153,7 @@ import {
 } from "./combo/autoConnectionScope.ts";
 import { resolveComboTargetPipeline } from "./combo/targetResolution.ts";
 import { dispatchWithCooldownRetry } from "./combo/comboAttemptLoop.ts";
+import { resolveHeldTruncatedResponse } from "./combo/truncatedStreamFailover.ts";
 import { evaluateExecuteTargetGates } from "./combo/executeTargetGates.ts";
 import { executeTargetAttempt } from "./combo/executeTargetAttempt.ts";
 import type { AttemptLoopDeps, AttemptLoopState } from "./combo/attemptLoopTypes.ts";
@@ -1318,7 +1319,10 @@ async function handleComboChatInner({
   }
 
   try {
-    return await dispatchWithCooldownRetry({ state, deps, extra });
+    return resolveHeldTruncatedResponse(
+      state,
+      await dispatchWithCooldownRetry({ state, deps, extra })
+    );
   } finally {
     quotaShareConcurrencyRelease?.();
     // #11371: release the in-flight slot quota-share ordering reserved for its

@@ -29,21 +29,22 @@ Caveman इनपुट: 46% बचत
 
 ## यसले के कम्प्रेस गर्छ
 
-बिल्ट-इन क्याटलगमा हाल यी वर्गहरूमा 49 फिल्टरहरू समावेश छन्:
+बिल्ट-इन क्याटालगमा हाल यी कोटीहरूअन्तर्गत 56 वटा फिल्टरहरू उपलब्ध छन्:
 
-| वर्ग      | उदाहरणहरू                                                         |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go परीक्षणहरू, Cargo परीक्षणहरू |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, सामान्य शेल लगहरू                           |
-| `docker`  | `docker ps`, Docker लगहरू                                         |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | JSON आउटपुट, स्ट्याक ट्रेसहरू, सामान्य आउटपुट फलब्याक             |
+| कोटी      | उदाहरणहरू                                                       |
+| --------- | --------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`               |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo परीक्षणहरू |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx   |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler   |
+| `shell`   | `ls`, `find`, `grep`, सामान्य सेल लगहरू                         |
+| `docker`  | `docker ps`, Docker लगहरू                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                         |
+| `generic` | JSON आउटपुट, स्ट्याक ट्रेसहरू, सामान्य आउटपुट फलब्याक           |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` मा रहेको डिटेक्टरले फिल्टर चयन गर्नुअघि
-आउटपुट वर्गीकरण गर्छ। कमाण्ड वर्ग पर्याप्त नभएमा फिल्टरहरूले कमाण्ड ढाँचा वा आउटपुट regex का आधारमा पनि मिलान गर्न सक्छन्।
+`open-sse/services/compression/engines/rtk/commandDetector.ts` मा रहेको डिटेक्टरले फिल्टर
+छनोट गर्नुअघि आउटपुटको वर्गीकरण गर्छ। कमाण्ड क्लास पर्याप्त नभएको अवस्थामा फिल्टरहरूले
+कमाण्ड ढाँचा वा आउटपुट regex बाट पनि मिलान गर्न सक्छन्।
 
 ## फिल्टर रिजोल्युसन
 
@@ -349,19 +350,19 @@ node --import tsx/esm --test \
 
 ## तीव्रता स्तरहरू (v3.8.16+)
 
-RTK ले **compression aggressiveness** र **safety** बीच सन्तुलन मिलाउने **3 intensity levels** समर्थन गर्छ। स्तर engine config मा रहेको `config.intensity` मार्फत सेट गरिन्छ।
+RTK ले **कम्प्रेसन आक्रामकता** र **सुरक्षा** बीच सम्झौता गर्ने **3 तीव्रता स्तरहरू** समर्थन गर्छ। यो स्तर engine config मा `config.intensity` मार्फत सेट गरिन्छ।
 
-### 3 स्तरहरू
+### 3 वटा स्तरहरू
 
-| स्तर                        | काटछाँट सीमा               | Token बचत | जोखिम      | यसका लागि उपयुक्त                   |
-| --------------------------- | -------------------------- | --------- | ---------- | ----------------------------------- |
-| `minimal`                   | प्रत्येक खण्डमा 24 पङ्क्ति | ~20-40%   | अत्यन्त कम | महत्त्वपूर्ण सन्दर्भसहित production |
-| `standard` (पूर्वनिर्धारित) | प्रत्येक खण्डमा 24 पङ्क्ति | ~50-70%   | कम         | दैनिक coding sessions               |
-| `aggressive`                | प्रत्येक खण्डमा 16 पङ्क्ति | ~70-90%   | मध्यम      | लामो sessions, अधिकतम बचत           |
+| स्तर                        | छोट्याउने थ्रेसहोल्ड | टोकन बचत | जोखिम   | कुनका लागि उपयुक्त                 |
+| --------------------------- | -------------------- | -------- | ------- | ---------------------------------- |
+| `minimal`                   | प्रति सेक्सन 24 लाइन | ~20-40%  | धेरै कम | महत्वपूर्ण context भएको production |
+| `standard` (पूर्वनिर्धारित) | प्रति सेक्सन 24 लाइन | ~50-70%  | कम      | दैनिक कोडिङ सत्रहरू                |
+| `aggressive`                | प्रति सेक्सन 16 लाइन | ~70-90%  | मध्यम   | लामा सत्रहरू, अधिकतम बचत           |
 
-### काटछाँट कहाँ हुन्छ
+### छोट्याउने कार्य कहाँ हुन्छ
 
-काटछाँट सीमाले `lineFilter.ts` लाई प्रभाव पार्छ:
+छोट्याउने थ्रेसहोल्डले `lineFilter.ts` लाई असर गर्छ:
 
 ```ts
 // open-sse/services/compression/engines/rtk/index.ts:329-330 बाट
@@ -369,39 +370,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-प्रत्येक खण्डको **सुरु** र **अन्त्य** दुवै सुरक्षित राखिन्छन्; काटछाँट सुरु भएपछि बीचको सामग्री हटाइन्छ।
+प्रत्येक सेक्सनको **सुरुको भाग (head)** र **अन्त्यको भाग (tail)** दुवै संरक्षित गरिन्छ; छोट्याउने कार्य लागू हुँदा बीचको सामग्री हटाइन्छ।
 
-### के बाँकी रहन्छ र के काटिन्छ
+### के रहन्छ र के हटाइन्छ
 
-| सामग्री                   | minimal     | standard    | aggressive  |
-| ------------------------- | ----------- | ----------- | ----------- |
-| Errors / stack traces     | ✅ सुरक्षित | ✅ सुरक्षित | ✅ सुरक्षित |
-| Test failures             | ✅ सुरक्षित | ✅ सुरक्षित | ✅ सुरक्षित |
-| Build errors              | ✅ सुरक्षित | ✅ सुरक्षित | ✅ सुरक्षित |
-| Test passes (verbose)     | ✅ सुरक्षित | 🟡 सङ्कुचित | 🟡 सङ्कुचित |
-| नियमित output (info logs) | 🟡 सङ्कुचित | 🟡 सङ्कुचित | ❌ हटाइने   |
-| Progress bars             | 🟡 सङ्कुचित | ❌ हटाइने   | ❌ हटाइने   |
-| Banner / ASCII art        | 🟡 सङ्कुचित | ❌ हटाइने   | ❌ हटाइने   |
+| सामग्री                      | minimal     | standard    | aggressive  |
+| ---------------------------- | ----------- | ----------- | ----------- |
+| त्रुटिहरू / stack trace हरू  | ✅ संरक्षित | ✅ संरक्षित | ✅ संरक्षित |
+| परीक्षण असफलताहरू            | ✅ संरक्षित | ✅ संरक्षित | ✅ संरक्षित |
+| build त्रुटिहरू              | ✅ संरक्षित | ✅ संरक्षित | ✅ संरक्षित |
+| परीक्षण सफलताहरू (verbose)   | ✅ संरक्षित | 🟡 संकुचित  | 🟡 संकुचित  |
+| नियमित आउटपुट (info log हरू) | 🟡 संकुचित  | 🟡 संकुचित  | ❌ हटाइएको  |
+| progress bar हरू             | 🟡 संकुचित  | ❌ हटाइएको  | ❌ हटाइएको  |
+| ब्यानर / ASCII art           | 🟡 संकुचित  | ❌ हटाइएको  | ❌ हटाइएको  |
 
-### सही तीव्रता छनोट गर्ने
+### उपयुक्त तीव्रता छान्ने
 
 ```
-                  सन्दर्भ गुमाउनु विनाशकारी हुन्छ?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     हुन्छ       हुँदैन      निश्चित छैन
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      throughput     पहिले `standard`
-      │      कति महत्त्वपूर्ण छ? प्रयास गर्नुहोस्
-      │           │          (80% अवस्थामा
-      │      ┌────┴────┐     काम गर्छ)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
+      │      ┌────┴────┐
       │      │         │
-      │      कम       उच्च
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -409,9 +410,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### तीव्रता कन्फिगर गर्ने
+### तीव्रता कन्फिगर गर्दै
 
-**प्रत्येक combo का लागि** (combo config मा):
+**प्रति-combo** (combo config मा):
 
 ```json
 {
@@ -424,11 +425,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**प्रोग्राममार्फत**:
+**प्रोग्रामेटिक रूपमा**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) एउटा
-`CompressionEngine` हो र यसमा `updateConfig` method छैन। यसको सट्टा registry helper
-मार्फत engine को config अद्यावधिक गर्नुहोस्:
+`CompressionEngine` हो र यसमा `updateConfig` method छैन। यसको सट्टा registry
+helper मार्फत engine को config अपडेट गर्नुहोस्:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -436,9 +437,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### प्रभाव प्रमाणीकरण गर्ने
+### प्रभाव प्रमाणित गर्दै
 
-तपाईंले छनोट गरेको तीव्रतामा तपाईंको filter सुरक्षित छ भनेर पुष्टि गर्न **प्रमाणीकरण गेट** (तल हेर्नुहोस्) प्रयोग गर्नुहोस्:
+तपाईंले छान्नुभएको तीव्रतामा तपाईंको filter सुरक्षित छ भनी पुष्टि गर्न **Verify Gate** (तल हेर्नुहोस्) प्रयोग गर्नुहोस्:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

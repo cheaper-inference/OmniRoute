@@ -37,13 +37,13 @@
 | **Àtìlẹ́yìn tunnel (Cloudflared, Tailscale, Ngrok)**  |                    ✅                    |       ❌       |        n/a        |   n/a    |
 | **Ìwé-aṣẹ**                                          |                   MIT                    |      MIT       |     ìnínìkan      | ìnínìkan |
 
-## Nígbà tí a yẹ kí a yan OmniRoute
+## Nigbati lati yan OmniRoute
 
-- O ń ṣe alele fúnra rẹ (self-host) tí o sì fẹ́ **ìbòmọ́lù àwọn ọlùpèsè tó pọ̀ jù lọ** (àwọn ọlùpèsè 375, àwọn kíkọ sí àtòkà ọ̀fẹ́/láì ní ìfàṣẹsìlẹ̀ 155)
-- O nílò **MCP server tí a fi kọ́ sínú** (àwọn irinṣẹ́ LLM, ìrántí, àti àwọn ògbón tí a ṣàfihàn gẹ́gẹ́ bí irinṣẹ́)
-- O nílò **ìlànà A2A** fún àwọn ìṣàn iṣẹ́ láti aṣojú-sí-aṣojú
-- O fẹ́ **ìfarapamọ́ ìtẹ̀ka** (JA3/JA4) láti yẹra fún ìmọ̀rírí nípasẹ̀ àwọn CAPTCHA àgàmọ̀ (upstream)
-- O nílò **àwọn ẹ̀yà iṣẹ́ ilé-iṣẹ́ ńlá** (àwọn ìdíwọ́ ààbò, àwọn àyẹ̀wò, ọ̀nà ìtòlẹ́sẹẹsẹ̀ ìṣe) láì sí owó orí SaaS
+- O ara-ogun ati ki o fẹ** o pọju agbegbe olupese** (awọn olupese 377, awọn titẹ sii katalogi 155 free/no-auth )
+- O nilo a** olupin MCP ti a ṣe sinu** (awọn irinṣẹ LLM, iranti, awọn ọgbọn ti a fi han bi awọn irinṣẹ)
+- O nilo**A2A Ilana** fun aṣoju-si-aṣoju workflows
+- O fẹ** lilọ ni ifura ika** (JA3/JA4) lati yago fun wiwa nipasẹ CAPTCHAs oke
+- O nilo** kekeke awọn ẹya ara ẹrọ** (guardrails, evals, se ayewo itọpa) lai a SaaS owo
 
 ## Ìgbà tí ó yẹ kí o yan LiteLLM
 

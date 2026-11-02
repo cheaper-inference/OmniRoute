@@ -484,17 +484,17 @@ U quyidagilarni boshqaradi:
 
 ## Konfiguratsiya
 
-`open-sse/config/` konfiguratsiya qatlamini oʻz ichiga oladi:
+`open-sse/config/` konfiguratsiya qatlamini saqlaydi:
 
-| Fayl                              | Maqsad                                                   |
-| --------------------------------- | -------------------------------------------------------- |
-| `providerRegistry.ts`             | 375 provayderli katalog asosidagi chat-modellar registri |
-| `providerModels.ts`               | Model taxalluslari, formatlarni xaritalash               |
-| `constants.ts`                    | Kutish vaqtlari, cheklovlar, status kodlari              |
-| `defaultThinkingSignature.ts`     | Standart Claude fikrlash imzosi                          |
-| `modelStrip.ts` (services ichida) | Har bir provayder uchun maydonlarni olib tashlash        |
+| Fayl                          | Maqsad                                              |
+| ----------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`         | 377 provayder katalogi bo'yicha chat-model registri |
+| `providerModels.ts`           | Model taxalluslari, formatni xaritalash             |
+| `constants.ts`                | Vaqt tugashi, chegaralar, holat kodlari             |
+| `defaultThinkingSignature.ts` | Standart Claude fikrlash imzosi                     |
+| `modelStrip.ts` (xizmatlarda) | Har bir provayder uchun maydonni tozalash           |
 
-### Provayder Registri Sxemasi
+### Provayder reestri sxemasi
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Modul yuklanish paytida Zod validatsiyasi barcha provayder konfiguratsiyalarining toʻgʻriligini ta’minlaydi.
+modul yuklanganda Zod tekshiruvi barcha provayder konfiguratsiyasining haqiqiyligini ta'minlaydi.
 
 ---
 
