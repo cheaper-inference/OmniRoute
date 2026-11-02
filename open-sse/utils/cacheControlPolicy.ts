@@ -20,6 +20,7 @@ import type { RoutingStrategyValue } from "../../src/shared/constants/routingStr
  * Cache control preservation modes
  */
 export type CacheControlMode = "auto" | "always" | "never";
+export type GeminiPromptCacheMode = "off" | "implicit";
 
 /**
  * Cache control settings from the database
@@ -229,13 +230,27 @@ export function isClaudeCodeClient(userAgent: string | null | undefined): boolea
 export function providerSupportsCaching(
   provider: string | null | undefined,
   targetFormat?: string | null,
-  connectionCacheOverride?: ConnectionCacheOverride | null
+  connectionCacheOverride?: ConnectionCacheOverride | null,
+  model?: string | null
 ): boolean {
+  if (!provider) return false;
+  const providerId = provider.toLowerCase();
+  if (providerId === "antigravity" || providerId === "agy") {
+    // Antigravity carries Gemini, Claude, and GPT models. Only Gemini models
+    // are in this release's implicit-cache scope.
+    const modelSegments = String(model ?? "")
+      .toLowerCase()
+      .split("/")
+      .filter(Boolean);
+    if (!modelSegments.some((segment) => segment.startsWith("gemini-"))) return false;
+    if (typeof connectionCacheOverride?.supportsPromptCaching === "boolean") {
+      return connectionCacheOverride.supportsPromptCaching;
+    }
+    return true;
+  }
   if (typeof connectionCacheOverride?.supportsPromptCaching === "boolean") {
     return connectionCacheOverride.supportsPromptCaching;
   }
-  if (!provider) return false;
-  const providerId = provider.toLowerCase();
   // Vertex is a mixed-format provider. Only its Anthropic Claude path accepts
   // cache_control; Gemini and OpenAI-format partner models use other mechanisms.
   if (providerId === "vertex" || providerId === "vertex-partner") {
@@ -284,6 +299,7 @@ export function shouldPreserveCacheControl({
   userAgent,
   targetProvider,
   targetFormat,
+  targetModel,
   settings,
   connectionCacheOverride,
 }: {
@@ -292,6 +308,7 @@ export function shouldPreserveCacheControl({
   comboStrategy?: RoutingStrategyValue | null;
   targetProvider: string | null | undefined;
   targetFormat?: string | null;
+  targetModel?: string | null;
   settings?: CacheControlSettings;
   connectionCacheOverride?: ConnectionCacheOverride | null;
 }): boolean {
@@ -309,7 +326,12 @@ export function shouldPreserveCacheControl({
   }
 
   // …talking to a provider that supports prompt caching.
-  return providerSupportsCaching(targetProvider, targetFormat, connectionCacheOverride);
+  return providerSupportsCaching(
+    targetProvider,
+    targetFormat,
+    connectionCacheOverride,
+    targetModel
+  );
 }
 
 /**

@@ -6,13 +6,13 @@
 
 Ultima actualizare: 2026-08-23
 
-OmniRoute se integrează cu trei categorii de instrumente CLI, distribuite în trei pagini dedicate ale panoului de control:
+OmniRoute se integrează cu trei categorii de instrumente CLI răspândite în trei pagini de bord dedicate:
 
-| Pagină         | Rută                    | Concept                                                                                      | Număr          |
-| -------------- | ----------------------- | -------------------------------------------------------------------------------------------- | -------------- |
-| **CLI Code's** | `/dashboard/cli-code`   | Instrumente de programare direcționate către OmniRoute (Client → CLI → OmniRoute → Furnizor) | 26             |
-| **CLI Agents** | `/dashboard/cli-agents` | Agenți autonomi direcționați către OmniRoute (același flux, domeniu mai larg)                | 10             |
-| **ACP Agents** | `/dashboard/acp-agents` | CLI-uri lansate de OmniRoute ca backend prin stdio/ACP (flux invers)                         | vezi registrul |
+| Pagină           | Traseu                  | Concept                                                                               | Conta          |
+| ---------------- | ----------------------- | ------------------------------------------------------------------------------------- | -------------- |
+| **Codurile CLI** | `/dashboard/cli-code`   | Instrumente de codare către OmniRoute (Client → CLI → OmniRoute → Provider)           | 26             |
+| **CLI Agenti**   | `/dashboard/cli-agents` | Agenți autonomi pe care îi îndreptați spre OmniRoute (același flux, domeniu mai larg) | 11             |
+| **ACP Agenti**   | `/dashboard/acp-agents` | CLIs care OmniRoute apare ca backend prin stdio/ACP (flux invers)                     | vezi registrul |
 
 Rutele vechi redirecționează prin 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
@@ -43,11 +43,9 @@ ACP Agents (flux invers de lansare):
 
 ---
 
-## Configurare automată cu `setup-*`
+## Configurați automat cu `setup-*`
 
-Nu trebuie să scrieți manual configurația fiecărui instrument. OmniRoute oferă câte o comandă `setup-*`
-pentru fiecare CLI acceptat, care citește catalogul **activ** de modele dintr-o instanță
-OmniRoute aflată în execuție (locală sau la distanță) și scrie configurația instrumentului pe sistemul dvs.:
+Nu trebuie să scrieți manual configurația fiecărui instrument. OmniRoute livrează o comandă `setup-*` pentru CLI acceptat care citește** trăi** catalog de modele dintr-un OmniRoute care rulează (local sau la distanță) și scrie configurația proprie a instrumentului pe mașina dvs.:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-Fiecare acceptă `--remote <url> --api-key <key>` (configurează un instrument local pentru o
-instanță OmniRoute la distanță), `--dry-run` (previzualizare fără scriere) și `--port`. Instrumentele
-fără detectare automată a modelelor (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) acceptă
-`--model <id>` (și `--yes` pentru execuții neinteractive). `setup-5dive` este singura
-procedură care nu scrie sub `$HOME`: aceasta configurează o flotă de agenți 5dive prin
-scrierea unui profil de autentificare deținut de root pe gazda flotei, astfel că se execută din nou prin `sudo`
-și nu are un mod propriu pentru acces la distanță. Pentru a lansa un CLI cu
-variabilele de mediu corecte injectate și fără a scrie nicio configurație, utilizați lansatorul generic
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — țintele și aliasurile provin din `bin/cli/cli-manifest.mjs`); lansatoarele
-vechi, specifice fiecărui instrument, `omniroute launch` (Claude Code) și `omniroute launch-codex`
-(Codex), rămân disponibile. Gemini CLI poate fi doar lansat: este o țintă `omniroute run`,
-dar nu are nicio procedură `setup-*`/`configure`.
+Fiecare acceptă `--remote <url> --api-key <key>` (configurați un instrument local față de un OmniRoute la distanță), `--dry-run` (previzualizare fără scriere) și `--port`. Instrumentele fără descoperire automată a modelului (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) iau `--model <id>` (și `--yes` pentru rulări non-interactive). `setup-5dive` este singura rețetă care nu scrie sub `$HOME`: configurează o flotă de agent 5dive prin scrierea unui profil de autentificare deținut de rădăcină pe gazda flotei, astfel încât reexecută prin `sudo` și nu are un mod la distanță propriu. Pentru a lansa un CLI cu env-ul corect injectat și fără nicio configurație scrisă, utilizați lansatorul generic `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini, whycodes — țintele și aliasurile provin de la `bin/cli/cli-manifest.mjs`); lansatoarele moștenite per instrument `omniroute launch` (Claude Code) și `omniroute launch-codex` (Codex) rămân disponibile. Gemini CLI este doar pentru lansare: este o țintă `omniroute run` dar nu are rețetă `setup-*`/`configure`.
 
-> **Referință completă:** tabelul principal — ce scrie fiecare comandă, toate opțiunile,
-> modurile local și la distanță și instrumentele care necesită sufixul `/v1` — se află în
-> **[Integrări CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **Referință completă:** tabelul principal - ce scrie fiecare comandă, fiecare steag, local vs la distanță și ce instrumente doresc un sufix `/v1` - locuiește în** [CLI Integrari](../guides/CLI-INTEGRATIONS.md)** .
 
-### Executarea acestora într-un container
+### Rularea acestora într-un container
 
-O comandă `setup-*` executată în containerul OmniRoute scrie în directorul personal
-al containerului, pe care niciun CLI de pe gazdă nu îl citește și care dispare odată cu
-containerul. OmniRoute detectează această situație și încheie execuția cu codul `2`, afișând instrucțiuni în loc
-să scrie. Există două soluții acceptate — instalați CLI-ul pe gazdă și utilizați
-`omniroute connect` pentru conectarea la container sau montați prin bind directoarele de configurare și setați
-`CLI_CONFIG_HOME` (profilul compose `host`). Fiecare comandă `setup-*`, precum și
-`omniroute configure` și `omniroute config set`, acceptă
-`--allow-container-write` atunci când intenția este într-adevăr să configurați CLI-urile proprii
-ale containerului; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` are același efect pentru
-server. Consultați
-[Ghidul Docker → Configurarea instrumentelor CLI de pe gazdă](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+O comandă `setup-*` executată în interiorul containerului OmniRoute scrie în propria casă a containerului, pe care nu o citește CLI gazdă și care dispare odată cu containerul. OmniRoute detectează asta și iese din `2` cu instrucțiuni, în loc să scrie. Două moduri acceptate înainte — instalați CLI pe gazdă și `omniroute connect` pe container sau bind-mount dirs-urile de configurare și setați `CLI_CONFIG_HOME` (profilul `host` compus). Fiecare comandă `setup-*`, plus `omniroute configure` și `omniroute config set`, acceptă `--allow-container-write` atunci când configurați propriul CLIs al containerului este ceea ce v-ați referit de fapt; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` face același lucru pentru server. Consultați [Ghidul Docker → Configurarea instrumentelor CLI gazdă](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**Endpointul de aplicare** al panoului de control (`POST /api/cli-tools/apply`) impune
-aceeași protecție: într-un container, o scriere a cărei țintă nu este montată prin bind de pe
-gazdă returnează **`422`** cu `containerEphemeralTarget: true`, textul sigur al erorii
-și — pentru instrumentele care au o procedură pentru gazdă (claude, codex, opencode, cline,
-kilo, continue) — un `hostSetupCommand` (de exemplu, `omniroute setup-opencode`) care trebuie executat
-în schimb pe gazdă; nu se scrie nimic. `dryRun: true` continuă să funcționeze în modul container
-și returnează o previzualizare cu datele sensibile mascate + calea țintă, fără a modifica discul. Conținutul
-previzualizării nu este o configurație care conține credențiale și care să poată fi copiată sau importată. Aplicați
-pe gazdă folosind valorile inițiale pentru instrument/adresa URL de bază/cheia API/model sau utilizați comanda indicată
-de configurare pe gazdă. Consultați [Securitatea configurării CLI](../security/CLI-CONFIGURATION.md)
-pentru antetul previzualizării și contractul cererii. Acest comportament este
-intenționat și protejat împotriva regresiilor prin
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nu „remediați” niciodată o eroare 422
-prin eliminarea protecției.
+Al tabloului de bord** aplicați punctul final** (`POST /api/cli-tools/apply`) impune aceeași pază: într-un container, o scriere a cărei țintă nu este legată de gazdă răspunde**`422`** cu `containerEphemeralTarget: true`, textul de eroare sigur și — pentru instrumentele cu o rețetă gazdă (claude, codex, opencode, cline, kilo, continue) — un `hostSetupCommand` (ex. `omniroute setup-opencode`) pentru a rula în schimb pe gazdă; nu este scris nimic. `dryRun: true` continuă să funcționeze în modul container și returnează o cale țintă + de previzualizare redactată fără a atinge discul. Previzualizarea conținutului nu este o configurație care poartă acreditări pentru a copia sau a importa. Aplicați cu intrările originale tool/base URL/API key/model pe gazdă sau utilizați comanda indicată de configurare pe partea gazdă. Consultați [securitatea configurației CLI](../security/CLI-CONFIGURATION.md) pentru antetul de previzualizare și solicitarea contractului. Acest comportament este intenționat și protejat de regresie de către `tests/unit/api/cli-tools/apply-container-guard.test.ts` — nu „remediați” niciodată un 422 prin eliminarea protecției.
 
 ---
 
@@ -146,59 +108,60 @@ loc să permită apariția silențioasă a divergențelor.
 
 ---
 
-## 1. Catalogul CLI Code (27 de instrumente)
+## 1. Catalogul codului CLI (27 de instrumente)
 
-Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport: none` sunt conectate prin MITM sau printr-un ghid manual, în locul unui URL de bază personalizat:
+Toate instrumentele care apar în `/dashboard/cli-code`. Cele cu `baseUrlSupport: none` sunt conectate prin MITM sau un ghid manual în loc de o bază personalizată URL:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id             | nume                            | vânzător            | baseUrlSupport | configType             | acpSpawnable |
+| -------------- | ------------------------------- | ------------------- | -------------- | ---------------------- | ------------ |
+| claude         | Codul Claude                    | Anthropic           | deplin         | înv                    | adevărat     |
+| codex          | OpenAI Codex CLI                | OpenAI              | deplin         | personalizat           | adevărat     |
+| zcode          | ZCode (plan de codificare GLM ) | Z.ai                | nici unul      | personalizat           | fals         |
+| clin           | Cline                           | OSS (ex-Claude Dev) | deplin         | personalizat           | adevărat     |
+| kilogram       | Cod Kilo                        | Kilo-Org            | deplin         | personalizat           | fals         |
+| roo            | Cod Roo                         | Roo (OSS)           | deplin         | ghid                   | fals         |
+| continua       | Continua                        | continua.dev        | deplin         | ghid                   | fals         |
+| ajutator       | Aider                           | OSS (P. Gauthier)   | deplin         | ghid                   | adevărat     |
+| forja          | ForgeCode                       | Antinomie HQ        | deplin         | personalizat           | adevărat     |
+| jcode          | jcode                           | 1jehuang (OSS)      | deplin         | personalizat           | fals         |
+| deepseek-tui   | DeepSeek TUI                    | Hunter Bown (OSS)   | deplin         | personalizat           | fals         |
+| codbalenă      | CodeWhale                       | Hmbown (OSS)        | deplin         | personalizat           | fals         |
+| cod deschis    | OpenCode                        | Anomalie (ex-SST)   | deplin         | ghid                   | adevărat     |
+| droid          | Droid de fabrică                | Fabrica AI          | parţial        | ghid                   | fals         |
+| copilotul      | GitHub Copilot CLI              | GitHub/MS           | deplin         | personalizat           | fals         |
+| cursor-cli     | Cursor CLI                      | Oricare sferă       | parţial        | ghid                   | adevărat     |
+| mirosit        | Mirosit                         | leonardcser (OSS)   | deplin         | personalizat           | fals         |
+| pi             | Pi (agent de codificare pi)     | M. Zechner (OSS)    | deplin         | personalizat           | fals         |
+| grok-build     | Grok Build                      | xAI                 | deplin         | personalizat           | fals         |
+| zdrobi         | Zdrobi                          | OSS (farmec)        | deplin         | personalizat           | fals         |
+| qwen           | Codul Qwen                      | Alibaba             | deplin         | ghid                   | adevărat     |
+| zed            | Zed                             | Zed Industries      | deplin         | ghid                   | fals         |
+| cursor         | Cursor                          | Oricare sferă       | nici unul      | ghid                   | fals         |
+| antigravitație | Antigravity                     | Google              | nici unul      | mitm                   | fals         |
+| hermes         | Hermes                          | Nous Research       | nici unul      | ghid                   | fals         |
+| kiro           | Kiro AI                         | Amazon              | nici unul      | mitm                   | fals         |
+| personalizat   | CLI personalizat                | —                   | deplin         | constructor la comandă | fals         |
 
-Instrumentele cu `baseUrlSupport: "partial"` afișează insigna „⚠ URL de bază parțial” pe cardul din panoul de control.
+Instrumentele cu `baseUrlSupport: "partial"` arată o insignă „⚠ Base URL parcial” în cardul tabloului de bord.
 ---
 
-## 2. Catalogul agenților CLI (10 instrumente)
+## 2. Catalogul agenților CLI (11 instrumente)
 
 Agenți autonomi care apar în `/dashboard/cli-agents`:
 
-| id           | nume             | furnizor                 | suport baseUrl | poate fi lansat prin ACP |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false                    |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true                     |
-| goose        | Goose            | Block / Linux Foundation | full           | true                     |
-| interpreter  | Open Interpreter | OSS                      | full           | true                     |
-| warp         | Warp AI          | Warp Inc.                | partial        | true                     |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false                    |
-| omp          | Oh My Pi         | OSS                      | full           | true                     |
-| letta        | Letta CLI        | Letta                    | full           | false                    |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false                    |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false                    |
+| id              | nume               | vânzător               | baseUrlSupport | acpSpawnable |
+| --------------- | ------------------ | ---------------------- | -------------- | ------------ |
+| hermes-agent    | Agent Hermes       | Nous Research          | deplin         | fals         |
+| gheare deschisă | OpenClaw           | OSS (P. Steinberger)   | deplin         | adevărat     |
+| gâscă           | Gâscă              | Fundația Block / Linux | deplin         | adevărat     |
+| interpret       | Deschide Interpret | OSS                    | deplin         | adevărat     |
+| urzeală         | Warp AI            | Warp Inc.              | parţial        | adevărat     |
+| agent-deck      | Agent Deck         | ashgoplani (OSS)       | deplin         | fals         |
+| omp             | Oh, Pi al meu      | OSS                    | deplin         | adevărat     |
+| letta           | Letta CLI          | Letta                  | deplin         | fals         |
+| agent principal | Agent principal    | Intelectul prim (OSS)  | deplin         | fals         |
+| 5 scufundare    | 5 scufundare       | OSS (5dive-ai)         | deplin         | fals         |
+| de ce coduri    | WhyCodes           | De ce Corporation      | deplin         | fals         |
 
 ---
 

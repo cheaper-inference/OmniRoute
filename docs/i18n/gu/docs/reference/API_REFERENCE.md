@@ -830,47 +830,40 @@ OpenAI-સુસંગત બૅચ પ્રક્રિયા.
 
 ---
 
-## શોધ API
+## API શોધો
 
-વેબ/શોધ પ્રદાતા એબ્સ્ટ્રેક્શન (Tavily, Brave, Exa, Serper વગેરે).
+Web/search પ્રદાતા એબ્સ્ટ્રેક્શન (Tavily, Brave, Exa, Serper, વગેરે).
 
-| પદ્ધતિ | પાથ                    | વર્ણન                                                                                                |
-| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | ગોઠવેલા શોધ પ્રદાતાઓ + ક્ષમતાઓની સૂચિ                                                                |
-| POST   | `/v1/search`           | શોધ ક્વેરી ચલાવો — બોડીનું `v1SearchSchema` દ્વારા માન્યકરણ થાય છે, કૅશિંગ/કોએલેસિંગને સપોર્ટ કરે છે |
-| GET    | `/v1/search/analytics` | પ્રત્યેક પ્રદાતા મુજબ હિટ/લેટન્સી/કૅશ આંકડા                                                          |
+| પદ્ધતિ | પાથ                    | વર્ણન                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | રૂપરેખાંકિત શોધ પ્રદાતાઓની + ક્ષમતાઓની સૂચિ બનાવો                                          |
+| POST   | `/v1/search`           | `v1SearchSchema` દ્વારા માન્ય — બોડી શોધ ક્વેરી ચલાવો, caching/coalescing ને સપોર્ટ કરે છે |
+| GET    | `/v1/search/analytics` | પ્રતિ-પ્રદાતા hit/latency/cache આંકડા                                                      |
 
-**પ્રમાણીકરણ:** Bearer API કી (`extractApiKey` + `isValidApiKey`). શોધ નીતિ `enforceApiKeyPolicy` દ્વારા લાગુ કરવામાં આવે છે.
+**ઓથ:** બેરર API કી (`extractApiKey` + `isValidApiKey`). શોધ નીતિ `enforceApiKeyPolicy` દ્વારા લાગુ કરવામાં આવી છે.
 
 ### Exa અને Tavily `provider_options`
 
-Exa અને Tavily નેમસ્પેસવાળા બૅગમાંથી પ્રદાતા-વિશિષ્ટ ફીલ્ડ વાંચે છે:
-`provider_options.exa` (અથવા `provider_options["exa-search"]`) અને `provider_options.tavily`
-(અથવા `provider_options["tavily-search"]`). ફક્ત નીચેની કી જ ફોરવર્ડ કરવામાં આવે છે. દરેક કીને
-`open-sse/handlers/search/providerOptionsPassthrough.ts` માં તેના પોતાના Zod સ્કીમા સામે
-તપાસવામાં આવે છે, અને ખોટા પ્રકારવાળી કી કાઢી નાખવામાં આવે છે. પ્રમાણીકરણ, બેઝ URL,
-`stream` અને `outputSchema` સહિત અન્ય કોઈપણ કીને અવગણવામાં આવે છે. અન્ય પ્રદાતાઓ દ્વારા વપરાતી ફ્લૅટ કી (`cx`, `depth`, ...)
-પહેલાની જેમ કાર્ય કરે છે.
+Exa અને Tavily નેમસ્પેસવાળી બેગમાંથી પ્રદાતા-વિશિષ્ટ ફીલ્ડ્સ વાંચો: `provider_options.exa` (અથવા `provider_options["exa-search"]`) અને `provider_options.tavily` (અથવા `provider_options["tavily-search"]`). ફક્ત નીચેની કી ફોરવર્ડ કરવામાં આવી છે. દરેકને `open-sse/handlers/search/providerOptionsPassthrough.ts` માં તેની પોતાની Zod સ્કીમા સામે તપાસવામાં આવે છે, અને ખોટા પ્રકાર સાથેની કી છોડી દેવામાં આવે છે. auth, base URL, `stream` અને `outputSchema` સહિત કોઈપણ અન્ય કીને અવગણવામાં આવે છે. અન્ય પ્રદાતાઓ (`cx`, `depth`, ...) દ્વારા ઉપયોગમાં લેવાતી ફ્લેટ કીઓ પહેલાની જેમ કામ કરે છે.
 
-| પ્રદાતા | ટોચના સ્તરનાં ફીલ્ડ                                                                                                                                                                                                                                                                                                                                                       | નેસ્ટેડ                                                                                                                                                                     |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ફ્લૅટ પ્રિમિટિવ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` ને ડિફૉલ્ટ `{ text: true, highlights: true }` પર મર્જ કરવામાં આવે છે |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| પ્રદાતા | ટોચના-સ્તરના ક્ષેત્રો                                                                                                                                                                                                                                                                                                                                                     | નેસ્ટેડ                                                                                                                               |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| એક્ઝા   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (સપાટ આદિમ), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                    | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ડિફોલ્ટ `{ text: true, highlights: true }` પર મર્જ થયું |
+| તવીલી   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-સામાન્ય ફીલ્ડ હંમેશાં પ્રાધાન્ય મેળવે છે: `query`, `max_results`, `filters` (ડોમેન), `country` અને
-`search_type` પરથી મેળવેલો વિષય. Exa પર, `search_type: "news"` દ્વારા `category: "news"` જાળવી રાખવામાં આવે છે.
-Tavily `search_type: "finance"` (`topic: "finance"`) પણ સ્વીકારે છે.
+સામાન્ય ક્ષેત્રો હંમેશા જીતે છે: `query`, `max_results`, `filters` (ડોમેન્સ), `country` અને `search_type` માંથી મેળવેલ વિષય. Exa પર, `search_type: "news"` `category: "news"` રાખે છે. Tavily `search_type: "finance"` (`topic: "finance"`) પણ સ્વીકારે છે.
 
-સામાન્ય `time_range` હવે બંને પ્રદાતાઓ સુધી પહોંચે છે: Exa ને `startPublishedDate` (ISO
-ટાઇમસ્ટૅમ્પ) અને Tavily ને `start_date` (`YYYY-MM-DD`) મળે છે. `provider_options` માં સ્પષ્ટ રીતે આપેલી તારીખ
-મેપ કરેલી તારીખને ઓવરરાઇડ કરે છે.
+ફાયરક્રોલ શોધ ખર્ચ 10 પાછલા પરિણામોના પ્રારંભ બ્લોક દીઠ રેકોર્ડ કરવામાં આવે છે, $0.002 (2 ક્રેડિટ) એક બ્લોક અને ઓછામાં ઓછા એક બ્લોક દીઠ કોલ ( [ફાયરક્રોલ બિલિંગ](https://docs.firecrawl.dev/billing) ): 11 પરિણામોની કિંમત $0.004 છે.
 
-Exa પરિણામો `id`, `highlight_scores`, `summary`, `subpages`, `entities` અને `extras` ને
-`provider_raw` માં જાળવી રાખે છે. Tavily પરિણામો `images` અને `favicon` ને જાળવી રાખે છે.
+સામાન્ય `time_range` હવે બંને પ્રદાતાઓ સુધી પહોંચે છે: Exa ને `startPublishedDate` (ISO ટાઇમસ્ટેમ્પ) મળે છે અને Tavily ને `start_date` (`YYYY-MM-DD`) મળે છે. `provider_options` માં સ્પષ્ટ તારીખ મેપ કરેલ તારીખને ઓવરરાઇડ કરે છે.
 
-ખર્ચની ગણતરી હજુ પણ ફ્લૅટ રજિસ્ટ્રી `costPerQuery` છે. Tavily દરેક કૉલ માટે
-`search_depth: "advanced"` પર વધુ ક્રેડિટ વસૂલે છે, અને તે તફાવત
-`usage.search_cost_usd` માં પ્રતિબિંબિત થતો નથી.
+Exa પરિણામો `id`, `highlight_scores`, `summary`, `subpages`, `entities` અને `extras` ને `provider_raw` માં રાખે છે. Tavily પરિણામો `images` અને `favicon` રાખે છે.
+
+લિંકઅપ શોધ કિંમત `depth` `fast` અને `standard` માટે $0.005 અને `deep` ( [Linkup કિંમત નિર્ધારણ](https://docs.linkup.so/pages/documentation/development/pricing) ) માટે $0.05 રેકોર્ડ કરવામાં આવી છે, પછી ભલે `depth` `provider_options` અથવા કનેક્શનની સેટિંગ્સમાંથી આવે.
+
+Exa `type: "lite"` (Exa 3.0) ફીલ્ડના નાના સેટને સ્વીકારે છે અને જ્યારે અન્ય કોઈ ફીલ્ડ સેટ કરવામાં આવે ત્યારે સમગ્ર વિનંતીને નકારી કાઢે છે. લાઇટ માટે, `additionalQueries`, `systemPrompt` અને `text` અને `highlights` સિવાયની દરેક `contents` કી કૉલ પહેલાં છોડી દેવામાં આવે છે. નાપસંદ કરેલ `subpages`, `subpageTarget`, `highlights.numSentences` અને `highlights.highlightsPerUrl` હવે ફોરવર્ડ કરવામાં આવશે નહીં.
+
+કોસ્ટ એકાઉન્ટિંગ એ ફ્લેટ રજિસ્ટ્રી `costPerQuery` છે, Exa સિવાય, જે Exa ની પોતાની કિંમતોને અનુસરે છે: `auto` (અને લેગસી `fast`) માટે $0.007 અથવા `lite` (અને લેગસી `instant`) માટે $0.004, 10 પરિણામોને આવરી લે છે; દરેક વધુ પરિણામ માટે $0.001; અને જ્યારે `contents.summary` સેટ કરેલ હોય ત્યારે પરત કરેલા પરિણામ દીઠ $0.001. Tavily `search_depth` `basic`, `fast` અને `ultra-fast` માટે 1 ક્રેડિટ ($0.008) અને `advanced` ( [Tavily API ક્રેડિટ્સ](https://docs.tavily.com/documentation/api-credits) ) માટે 2 ક્રેડિટ ($0.016) પર નોંધાયેલ છે. `auto_parameters: true` સાથેનો કોલ કે જે Tavily એડવાન્સ્ડમાં અપગ્રેડ કરે છે તે હજુ પણ 1 ક્રેડિટ પર રેકોર્ડ કરવામાં આવે છે.
 
 ---
 
