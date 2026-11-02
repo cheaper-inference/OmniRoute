@@ -277,6 +277,16 @@ export function sanitizeConnectionModelMap(value: unknown): SanitizeModelMapResu
   return { sanitized: Object.keys(map).length === 0 ? null : map, rejected };
 }
 
+export function requireSanitizedConnectionModelMap(value: unknown): Record<string, string> | null {
+  const result = sanitizeConnectionModelMap(value);
+  if (result.rejected.length > 0) {
+    throw new Error(
+      `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
+    );
+  }
+  return result.sanitized;
+}
+
 export function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" ? value : null;
 }

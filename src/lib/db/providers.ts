@@ -44,7 +44,7 @@ import {
   withNullableNotesAndModelMap,
   normalizeBooleanColumn,
   sanitizeRateLimitOverrides,
-  sanitizeConnectionModelMap,
+  requireSanitizedConnectionModelMap,
   serializeJsonField,
   toRecord,
   sanitizeQuotaWindowThresholds,
@@ -784,13 +784,7 @@ export async function createProviderConnection(data: JsonRecord) {
   }
 
   if ("modelMap" in connection) {
-    const result = sanitizeConnectionModelMap(connection.modelMap);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    connection.modelMap = result.sanitized;
+    connection.modelMap = requireSanitizedConnectionModelMap(connection.modelMap);
   }
 
   _insertConnectionRow(db, encryptConnectionFields({ ...connection }));
@@ -1009,6 +1003,9 @@ export async function updateProviderConnection(
   data: JsonRecord,
   opts?: ProviderConnectionUpdateOpts
 ) {
+  if ("modelMap" in data) {
+    data = { ...data, modelMap: requireSanitizedConnectionModelMap(data.modelMap) };
+  }
   const db = getDbInstance() as unknown as DbLike;
   const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
   if (!existing) return null;
@@ -1070,15 +1067,6 @@ export async function updateProviderConnection(
       );
     }
     merged.rateLimitOverrides = result.sanitized;
-  }
-  if ("modelMap" in merged) {
-    const result = sanitizeConnectionModelMap(merged.modelMap);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist modelMap with rejected keys: ${result.rejected.join(", ")}`
-      );
-    }
-    merged.modelMap = result.sanitized;
   }
   const existingRecord = toRecord(existing);
 
