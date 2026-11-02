@@ -12,22 +12,17 @@
 
 ## Kas tas ir
 
-OmniRoute ir reģistrēti 376 pakalpojumu sniedzēji, tostarp 155 kataloga ieraksti ar atzīmi **free/no-auth** (no-auth, bezmaksas līmeņa OAuth vai bezmaksas līmeņa API atslēga — skatiet [Bezmaksas līmeņu ceļvedi](../getting-started/FREE-TIERS-GUIDE.md) un pilno [Bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md)). Bet ir viens "bet": bezmaksas pakalpojumu sniedzēju modeļu kvalitāte krasi atšķiras. No-auth pakalpojumu sniedzējs, kas piedāvā vadošo (frontier) modeli, ir daudz noderīgāks nekā tāds, kas piedāvā mazu, novecojušu modeli.
+OmniRoute reģistrē 377 pakalpojumu sniedzējus, tostarp ir atzīmēti 155 kataloga ieraksti**free/no-auth** (bez autorizācijas, brīvā līmeņa OAuth vai brīvā līmeņa API atslēga — skatiet [bezmaksas līmeņu rokasgrāmatu](../getting-started/FREE-TIERS-GUIDE.md) un pilnu [bezmaksas līmeņu direktoriju](../reference/FREE_TIERS.md) ). Rezultāts: bezmaksas pakalpojumu sniedzēji ļoti atšķiras modeļu kvalitātes ziņā. Pakalpojumu sniedzējs bez autorizācijas, kas apkalpo robežmodeli, ir daudz noderīgāks nekā tāds, kas apkalpo nelielu mantoto modeli.
 
-**Bezmaksas pakalpojumu sniedzēju reitings** atbild uz jautājumu "**kurš bezmaksas pakalpojumu sniedzējs man dod labāko modeli?**", apvienojot katra bezmaksas pakalpojumu sniedzēja katalogu ar **kopienas iesniegtiem kvalitātes vērtējumiem** no **Arena AI leaderboard** (uz cilvēku vēlmēm balstīts ELO — tā pati ideja, kas ir LMArena čatbotu arēnas pamatā). Pēc tam pakalpojumu sniedzēji tiek sarindoti atbilstoši sava **labākā bezmaksas modeļa** stiprumam.
+**Bezmaksas pakalpojumu sniedzēju klasifikācija** atbildes"** kurš bezmaksas pakalpojumu sniedzējs man piedāvā labāko modeli?** ", pievienojoties katra bezmaksas pakalpojumu sniedzēja katalogam ar** pūļa kvalitātes rādītāji** no** Arēnas AI līderu saraksts** (cilvēka izvēle ELO, tā pati ideja ir LMArena chatbot arēnā). Pēc tam pakalpojumu sniedzēji tiek sarindoti pēc to stipruma** labākais bezmaksas modelis** .
 
 Reitings tiek aprēķināts no trim reāliem avotiem:
 
-1. Bezmaksas pakalpojumu sniedzēju saraksti — `NOAUTH_PROVIDERS`, kā arī `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ieraksti ar karodziņu `hasFree`
-   (`src/shared/constants/providers.ts`).
-2. Katra pakalpojumu sniedzēja modeļu katalogs no pakalpojumu sniedzēju reģistra
-   (`open-sse/config/providerRegistry.ts`).
-3. No ELO atvasinātie uzdevumu atbilstības rādītāji, ko Arena ELO sinhronizācijas
-   dzinējs saglabā `model_intelligence` datubāzes tabulā
-   (`src/lib/arenaEloSync.ts`).
+1. Bezmaksas pakalpojumu sniedzēju saraksti — `NOAUTH_PROVIDERS`, kā arī `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ieraksti ir atzīmēti kā `hasFree` (`src/shared/constants/providers.ts`).
+2. Katra pakalpojumu sniedzēja modeļu katalogs no pakalpojumu sniedzēju reģistra (`open-sse/config/providerRegistry.ts`).
+3. No ELO atvasināti uzdevumu piemērotības rādītāji, ko `model_intelligence` DB tabulā saglabā Arena ELO sinhronizācijas dzinējs (`src/lib/arenaEloSync.ts`).
 
-Apvienošanas loģika atrodas `src/lib/freeProviderRankings.ts`.
+Savienojuma loģika dzīvo `src/lib/freeProviderRankings.ts`.
 
 ---
 

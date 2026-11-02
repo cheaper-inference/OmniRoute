@@ -27,7 +27,7 @@ import { restoreDeclaredToolName } from "../services/declaredToolCasing.ts";
 import { extractReplayableResponsesReasoningText } from "../services/reasoningInputPolicy.ts";
 import { sanitizeToolId } from "../translator/helpers/schemaCoercion.ts";
 import { stripEmptyOptionalToolArgs } from "../translator/response/openai-responses/pureHelpers.ts";
-import { toNumber as toFiniteNumber } from "../../src/shared/utils/numeric.ts";
+import { toNumber as toFiniteNumber } from "../utils/numeric.ts";
 import { geminiExtraUsageCounts } from "../translator/response/geminiUsageMetadata.ts";
 import {
   extractThinkingFromContent,

@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { NextResponse } from "next/server";
 import {
   applyCorsHeaders,
+  credentialRejectionCorsHeaders,
   getCorsStatus,
   resolveAllowedOrigin,
   setRuntimeAllowedOrigins,
@@ -319,5 +320,37 @@ describe("cors/origins.STATIC_CORS_HEADERS", () => {
     const allowedHeaders = STATIC_CORS_HEADERS["Access-Control-Allow-Headers"];
     assert.match(allowedHeaders, /X-OmniRoute-Lease-Owner/i);
     assert.match(allowedHeaders, /X-OmniRoute-Lease-Generation/i);
+  });
+});
+
+describe("cors/origins.credentialRejectionCorsHeaders (#5242)", () => {
+  const origin = "https://app.example";
+
+  it("echoes the Origin for a request that presents a token credential", () => {
+    for (const headers of [
+      { authorization: "Bearer junk" },
+      { "x-api-key": "junk" },
+      { "x-goog-api-key": "junk" },
+    ]) {
+      const req = new Request("http://localhost/v1/models", { headers: { ...headers, origin } });
+      assert.deepEqual(credentialRejectionCorsHeaders(req), {
+        "Access-Control-Allow-Origin": origin,
+        Vary: "Origin",
+      });
+    }
+  });
+
+  it("adds nothing without a credential, without an Origin, or for a preflight", () => {
+    const noCredential = new Request("http://localhost/v1/models", { headers: { origin } });
+    const noOrigin = new Request("http://localhost/v1/models", {
+      headers: { authorization: "Bearer junk" },
+    });
+    const preflight = new Request("http://localhost/v1/models", {
+      method: "OPTIONS",
+      headers: { origin, "access-control-request-method": "GET" },
+    });
+    assert.deepEqual(credentialRejectionCorsHeaders(noCredential), {});
+    assert.deepEqual(credentialRejectionCorsHeaders(noOrigin), {});
+    assert.deepEqual(credentialRejectionCorsHeaders(preflight), {});
   });
 });

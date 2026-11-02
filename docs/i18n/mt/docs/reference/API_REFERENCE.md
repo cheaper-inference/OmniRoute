@@ -828,47 +828,40 @@ min jagħmel sejħa mingħajr sessjoni (irkupru, tħassir, kanċellazzjoni, u l-
 
 ---
 
-## API tat-Tiftix
+## Fittex API
 
-Astrazzjoni tal-fornituri tal-web/tiftix (Tavily, Brave, Exa, Serper, eċċ.).
+Web/search fornitur estrazzjoni (Tavily, Brave, Exa, Serper, eċċ.).
 
-| Metodu | Mogħdija               | Deskrizzjoni                                                                                              |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati flimkien mal-kapaċitajiet tagħhom                               |
-| POST   | `/v1/search`           | Eżegwixxi query ta’ tiftix — il-korp jiġi vvalidat minn `v1SearchSchema`, u jappoġġja caching/koalesċenza |
-| GET    | `/v1/search/analytics` | Statistika ta’ hits/latency/cache għal kull fornitur                                                      |
+| Metodu | Mogħdija               | Deskrizzjoni                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Elenka l-fornituri tat-tiftix konfigurati + kapaċitajiet                                          |
+| POST   | `/v1/search`           | Mexxi mistoqsija ta' tfittxija — body validat minn `v1SearchSchema`, jappoġġja caching/coalescing |
+| GET    | `/v1/search/analytics` | Per-provider hit/latency/cache stats                                                              |
 
-**Awtentikazzjoni:** Ċavetta API Bearer (`extractApiKey` + `isValidApiKey`). Il-politika tat-tiftix tiġi infurzata permezz ta’ `enforceApiKeyPolicy`.
+**Awth:** Bearer API key (`extractApiKey` + `isValidApiKey`). Politika ta' tfittxija infurzata permezz `enforceApiKeyPolicy`.
 
-### `provider_options` ta’ Exa u Tavily
+### Exa u Tavily `provider_options`
 
-Exa u Tavily jaqraw oqsma speċifiċi għall-fornitur minn kontenitur b’namespace:
-`provider_options.exa` (jew `provider_options["exa-search"]`) u `provider_options.tavily`
-(jew `provider_options["tavily-search"]`). Jintbagħtu biss iċ-ċwievet ta’ hawn taħt. Kull waħda
-tiġi ċċekkjata mal-iskema Zod tagħha stess f’`open-sse/handlers/search/providerOptionsPassthrough.ts`,
-u ċavetta bit-tip żbaljat titneħħa. Kwalunkwe ċavetta oħra tiġi injorata, inklużi l-awtentikazzjoni, il-URL bażi,
-`stream` u `outputSchema`. Iċ-ċwievet ċatti użati minn fornituri oħra (`cx`, `depth`, ...) jaħdmu
-bħal qabel.
+Exa u Tavily jaqraw oqsma speċifiċi għall-fornitur minn borża spazjata bl-isem: `provider_options.exa` (jew `provider_options["exa-search"]`) u `provider_options.tavily` (jew `provider_options["tavily-search"]`). Iċ-ċwievet ta' hawn taħt biss jintbagħtu. Kull wieħed huwa ċċekkjat mal-iskema Zod tiegħu stess `open-sse/handlers/search/providerOptionsPassthrough.ts`, u ċavetta bit-tip ħażin tinżel. Kwalunkwe ċavetta oħra tiġi injorata, inklużi auth, base URL, `stream` u `outputSchema`. Iċ-ċwievet ċatti użati minn fornituri oħra (`cx`, `depth`, ...) jaħdmu bħal qabel.
 
-| Fornitur | Oqsma tal-ogħla livell                                                                                                                                                                                                                                                                                                                                                    | Imbejta                                                                                                                                                                   |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (valuri primittivi ċatti), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` magħqud fuq il-valur predefinit `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                         |
+| Fornitur | Oqsma tal-ogħla livell                                                                                                                                                                                                                                                                                                                                                    | Nedjati                                                                                                                               |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` magħquda fuq `{ text: true, highlights: true }` default |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-L-oqsma ġeneriċi dejjem jieħdu preċedenza: `query`, `max_results`, `filters` (dominji), `country` u s-
-suġġett derivat minn `search_type`. Fuq Exa, `search_type: "news"` iżomm `category: "news"`.
-Tavily jaċċetta wkoll `search_type: "finance"` (`topic: "finance"`).
+L-oqsma ġeneriċi dejjem jirbħu: `query`, `max_results`, `filters` (dominji), `country` u s-suġġett derivat minn `search_type`. Fuq Exa, `search_type: "news"` iżomm `category: "news"`. Tavily jaċċetta wkoll `search_type: "finance"` (`topic: "finance"`).
 
-Il-`time_range` ġeneriku issa jasal għand iż-żewġ fornituri: Exa jirċievi `startPublishedDate` (timestamp
-ISO) u Tavily jirċievi `start_date` (`YYYY-MM-DD`). Data espliċita f’`provider_options`
-tieħu preċedenza fuq dik immappjata.
+L-ispiża tat-tfittxija Firecrawl hija rreġistrata għal kull blokka mibdija ta’ 10 riżultati rritornati, għal $0.002 (2 krediti) blokka u mill-inqas blokka waħda għal kull sejħa ( [Billing Firecrawl](https://docs.firecrawl.dev/billing) ): 11-il riżultat jiswew $0.004.
 
-Ir-riżultati ta’ Exa jżommu `id`, `highlight_scores`, `summary`, `subpages`, `entities` u `extras` f’
-`provider_raw`. Ir-riżultati ta’ Tavily jżommu `images` u `favicon`.
+Iż- `time_range` ġeneriku issa jilħaq iż-żewġ fornituri: Exa gets `startPublishedDate` (ISO timestamp ) u Tavily gets `start_date` (`YYYY-MM-DD`). Data espliċita `provider_options` tipprevali dik mappata.
 
-Il-kontabbiltà tal-ispejjeż tibqa’ r-reġistru ċatt `costPerQuery`. Tavily jiffattura
-`search_depth: "advanced"` b’aktar krediti għal kull sejħa, u dik id-differenza mhijiex riflessa f’
-`usage.search_cost_usd`.
+Ir-riżultati Exa jżommu `id`, `highlight_scores`, `summary`, `subpages`, `entities` u `extras` `provider_raw`. Ir-riżultati tavily iżommu `images` u `favicon`.
+
+L-ispiża tat-tfittxija tal-linkup hija rreġistrata għal $0.005 għal `depth` `fast` u `standard` u $0.05 għal `deep` ( [prezzijiet tal-Linkup](https://docs.linkup.so/pages/documentation/development/pricing) ), kemm jekk `depth` ġej minn `provider_options` jew mis-settings tal-konnessjoni.
+
+Exa `type: "lite"` (Exa 3.0) jaċċetta sett iżgħar ta' oqsma u jirrifjuta t-talba kollha meta jkun issettjat kwalunkwe qasam ieħor. Għal lite, `additionalQueries`, `systemPrompt` u kull ċavetta `contents` ħlief `text` u `highlights` jintefgħu qabel is-sejħa. `subpages`, `subpageTarget`, `highlights.numSentences` u `highlights.highlightsPerUrl` deprecati m'għadhomx jintbagħtu.
+
+Il-kontabilità tal-ispejjeż hija r-reġistru ċatt `costPerQuery`, ħlief għal Exa, li jsegwi l-ipprezzar ta 'Exa stess: $0.007 għal kull sejħa għal `auto` (u l-legacy `fast`) jew $0.004 għal `lite` (u l-legacy `instant`), li jkopri 10 riżultati; $0.001 għal kull riżultat ieħor; u $0.001 għal kull riżultat ritornat meta `contents.summary` huwa stabbilit. Tavily huwa rreġistrat f'kreditu 1 ($0.008) għal `search_depth` `basic`, `fast` u `ultra-fast`, u 2 krediti ($0.016) għal `advanced` ( [krediti Tavily API](https://docs.tavily.com/documentation/api-credits) ). Sejħa `auto_parameters: true` li Tavily jaġġorna għal avvanzat għadha rreġistrata bi kreditu 1.
 
 ---
 

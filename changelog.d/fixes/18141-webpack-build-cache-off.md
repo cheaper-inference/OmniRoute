@@ -1,0 +1,1 @@
+- **fix(build):** production webpack builds no longer write the webpack persistent cache, which added about 2.5 GB of peak build memory at a 6144 MB heap cap; set `OMNIROUTE_WEBPACK_BUILD_CACHE=1` (or `--build-arg OMNIROUTE_WEBPACK_BUILD_CACHE=1` for Docker) to keep it for faster repeat builds ([#18141](https://github.com/diegosouzapw/OmniRoute/pull/18141)) — thanks @HouMinXi

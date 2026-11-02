@@ -115,146 +115,146 @@ OmniRoute/
 
 ```
 src/
-├── app/                 # App Router (sahifalar + API marshrutlari + holat sahifalari + boshlangʻich sahifa)
-├── lib/                 # Asosiy kutubxonalar / domen modullari (80 ta quyi katalog + yuqori darajadagi ~70 ta fayl)
-├── domain/              # Sof domen mantigʻi (siyosat mexanizmi, zaxira mexanizmi, xarajat, bloklash, comboResolver, baholash)
-├── server/              # Faqat serverga oid modullar (avtorizatsiya konveyeri, cors, autentifikatsiya middleware’i) — mijoz tomonidan import qilib boʻlmaydi
-├── shared/              # Xavfsiz boʻlgan hollarda server va mijoz oʻrtasida umumiy (konstantalar, turlar, validatsiya, kontraktlar, yordamchi vositalar)
-├── i18n/                # next-intl konfiguratsiyasi + har bir lokal uchun xabarlar JSON’i (67 ta lokal)
-├── middleware/          # Next.js middleware’i (soʻrovni boyitish, lokalni aniqlash)
-├── mitm/                # MITM proksi yadrosi: sertifikat yaratish/oʻrnatish, ishlov beruvchilar, nishonlar, inspektor, niqoblar, oʻzgartirmasdan uzatish
-│   ├── handlers/        # MitmHandlerBase’ni kengaytiruvchi 9 ta IDE-agent ishlov beruvchi klassi (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
-│   └── inspector/       # Trafikni yozib olish qatlami: bufer (xotiradagi halqali), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model adapterini bogʻlovchi qatlam (eskirgan shim)
-├── scripts/             # Daraxt ichidagi texnik xizmat skriptlari (masalan, backfillAggregation)
-├── sse/                 # Eskirgan SSE ishlov beruvchilari/xizmatlari (chat.ts, chatHelpers.ts, services/auth.ts)
-├── store/               # Eskirgan xotira ichidagi saqlash ombori (src/lib/db foydasiga bosqichma-bosqich bekor qilinmoqda)
-├── types/               # Umumiy TS tur fayllari
-├── instrumentation.ts   # Next.js telemetriya hook’i (brauzer + edge)
-├── instrumentation-node.ts  # Faqat Node uchun instrumentatsiya
-└── proxy.ts             # HTTP-proksi kirish shim’i
+├── app/                 # App Router (pages + API routes + status pages + landing)
+├── lib/                 # Core libraries / domain modules (80 subdirs + ~70 top-level files)
+├── domain/              # Pure domain logic (policy engine, fallback, cost, lockout, comboResolver, assessment)
+├── server/              # Server-only modules (authz pipeline, cors, auth middleware) — cannot import from client
+├── shared/              # Shared between server and client where safe (constants, types, validation, contracts, utils)
+├── i18n/                # next-intl config + per-locale message JSON (67 locales)
+├── middleware/          # Next.js middleware (request enrichment, locale detection)
+├── mitm/                # MITM proxy core: cert gen/install, handlers, targets, inspector, masks, passthrough
+│   ├── handlers/        # 9 IDE-agent handler classes extending MitmHandlerBase (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   └── inspector/       # Traffic capture layer: buffer (in-memory ring), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
+├── models/              # Model adapter glue (legacy shim)
+├── scripts/             # In-tree maintenance scripts (e.g., backfillAggregation)
+├── sse/                 # Legacy SSE handlers/services (chat.ts, chatHelpers.ts, services/auth.ts)
+├── store/               # Legacy in-memory store (being phased out for src/lib/db)
+├── types/               # Shared TS type files
+├── instrumentation.ts   # Next.js telemetry hook (browser + edge)
+├── instrumentation-node.ts  # Node-only instrumentation
+└── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — App Router (Next.js 16)
+### `src/app/` — Ilova Router (Next.js 16)
 
-| Yoʻl                                                                         | Maqsad                                                                                                                                                                                                                                                                                                                         |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `app/api/v1/`                                                                | Ommaviy OpenAI-mos API (~25 ta quyi yoʻnalish: chat, completions, embeddings, files, batches, audio, images, videos, music, rerank, moderations, search, ws, agents, accounts, providers va boshqalar)                                                                                                                         |
-| `app/api/v1beta/`                                                            | Gemini uslubidagi API soʻnggi nuqtalari                                                                                                                                                                                                                                                                                        |
-| `app/api/playground/`                                                        | Playground Studio yoʻnalishlari: `improve-prompt/` (POST — LLM promptini qayta yozuvchi), `presets/` (GET roʻyxat / POST yaratish), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` fayliga qarang                                                                                               |
-| `app/api/` (v1 emas)                                                         | Boshqaruv/administrator yoʻnalishlari (~60 ta katalog: providers, combos, settings, mcp, a2a, evals, memory, skills, webhooks, compliance, resilience, monitoring, tunnels, cli-tools va boshqalar)                                                                                                                            |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 ta yoʻnalish (server boshqaruvi, agent holati/DNS/moslashtirishlar, chetlab oʻtish, sertifikat, yuqori oqim CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` ga qarang.                                                                                                          |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ ta yoʻnalish (soʻrovlar, seanslar, xostlar, yozib olish rejimlari, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` ga qarang.                                                                                                                        |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 kirish nuqtasi (`POST /a2a`)                                                                                                                                                                                                                                                                                  |
-| `app/.well-known/agent.json/`                                                | A2A Agent Card (aniqlash)                                                                                                                                                                                                                                                                                                      |
-| `app/(dashboard)/dashboard/`                                                 | Boshqaruv paneli UI sahifalari (50+ ta boʻlim, ~118 ta page.tsx fayli: providers, combos, settings, memory, skills, webhooks, evals, audit, batch, cache, costs, health, system, activity va boshqalar)                                                                                                                        |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ta ichki oyna: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` fayliga qarang                                                                                                                                                                |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (21-reja): `page.tsx` (3 ta ichki oynali qobiq), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge boshqaruv paneli sahifasi — server kartasi, 9 ta agent kartasi, sozlash ustasi, model moslashtirish, chetlab oʻtish roʻyxati. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` fayliga qarang.                                                                                                                    |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector boshqaruv paneli sahifasi — DevTools boʻlingan koʻrinishi, 7 ta tafsilot ichki oynasi, 4 ta yozib olish rejimi almashtirgichi, seans yozuvchisi, kontekstni rang bilan ajratish. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` fayliga qarang.                                                     |
-| `app/(dashboard)/dashboard/activity/`                                        | Faollik tasmasi sahifasi (B guruhi): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` ga qarang                                                                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotani ulashish sahifasi (B guruhi): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                              |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Provayder tarif rejasini sozlash sahifasi (B guruhi): `page.tsx` + `ProviderPlanConfigClient.tsx` — har bir ulanish uchun kvota o‘lchamlarini qayta belgilash                                                                                                                                                                  |
-| `app/docs/`                                                                  | Ichki hujjatlar ko‘ruvchisi (`docs/*.md` fayllarini ko‘rsatadi)                                                                                                                                                                                                                                                                |
-| `app/landing/`                                                               | Marketing bosh sahifasi                                                                                                                                                                                                                                                                                                        |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Autentifikatsiyaga oid sahifalar                                                                                                                                                                                                                                                                                               |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP xatolik sahifalari                                                                                                                                                                                                                                                                                                        |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Statik/holat sahifalari                                                                                                                                                                                                                                                                                                        |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Ildiz maketi, bosh sahifa, PWA manifesti, global CSS                                                                                                                                                                                                                                                                           |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Xatolik chegaralari                                                                                                                                                                                                                                                                                                            |
+| Yo'l                                                                         | Maqsad                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | Ommaviy OpenAI-compat API (~ 25 kichik marshrutlar: chat, yakunlash, joylashtirish, fayllar, partiyalar, audio, tasvirlar, videolar, musiqa, qayta tartiblash, moderatsiyalar, qidiruv, ws, agentlar, hisoblar, provayderlar va boshqalar)                                                  |
+| `app/api/v1beta/`                                                            | Gemini uslubidagi API so'nggi nuqtalari                                                                                                                                                                                                                                                     |
+| `app/api/playground/`                                                        | Playground Studio marshrutlari: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                          |
+| `app/api/` (v1 bo'lmagan)                                                    | Management/admin marshrutlari (~ 60 kataloglari: provayderlar, kombinatsiyalar, sozlamalar, mcp, a2a, baholashlar, xotira, ko'nikmalar, veb-huklar, muvofiqlik, chidamlilik, monitoring, tunnellar, cli-vositalar va boshqalar)                                                             |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marshrut (server boshqaruvi, agent state/DNS/mappings, aylanib o‘tish, sertifikat, yuqori oqim-CA). LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` qarang.                                                                                       |
+| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 + marshrut (so‘rovlar, seanslar, xostlar, suratga olish rejimlari, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Qarang `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                         |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 kirish nuqtasi (`POST /a2a`)                                                                                                                                                                                                                                               |
+| `app/.well-known/agent.json/`                                                | A2A agent kartasi (kashfiyot)                                                                                                                                                                                                                                                               |
+| `app/(dashboard)/dashboard/`                                                 | Boshqaruv paneli UI sahifalari (50 + bo'limlari, ~ 118 page.tsx fayllari: provayderlar, kombinatsiyalar, sozlamalar, xotira, ko'nikmalar, veb-huklar, baholashlar, audit, to'plam, kesh, xarajatlar, sog'liq, tizim, faoliyat va boshqalar)                                                 |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 ta yorliq: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                |
+| `app/(dashboard)/dashboard/memory/`                                          | Xotira studiyasi (21-reja): `page.tsx` (3-tabli qobiq), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEng) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge asboblar paneli sahifasi — server kartasi, 9 ta agent kartasi, sozlash ustasi, modelni xaritalash, chetlab o‘tish ro‘yxati. i18n PT-BR + EN. `docs/frameworks/AGENTBRIDGE.md` qarang.                                                                                           |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector boshqaruv paneli sahifasi — DevTools split, 7 ta batafsil yorliq, 4 ta suratga olish rejimini almashtirish, seans yozuvchisi, kontekstni ranglash. i18n PT-BR + EN. `docs/frameworks/TRAFFIC_INSPECTOR.md` qarang.                                                        |
+| `app/(dashboard)/dashboard/activity/`                                        | Faoliyat tasma sahifasi (B guruhi): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` qarang                                                                             |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvota almashish sahifasi (B guruhi): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                            |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Provayder rejasini sozlash sahifasi (B guruhi): `page.tsx` + `ProviderPlanConfigClient.tsx` — ulanishni bekor qilish uchun kvota o‘lchamlari                                                                                                                                                |
+| `app/docs/`                                                                  | O'rnatilgan hujjatlarni ko'rish vositasi ( `docs/*.md` ko'rsatadi)                                                                                                                                                                                                                          |
+| `app/landing/`                                                               | Marketing ochilish sahifasi                                                                                                                                                                                                                                                                 |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Mualliflik bilan bog'liq sahifalar                                                                                                                                                                                                                                                          |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP xato sahifalari                                                                                                                                                                                                                                                                        |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status sahifalari                                                                                                                                                                                                                                                                    |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Ildiz tartibi, uy, PWA manifest, global CSS                                                                                                                                                                                                                                                 |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Xato chegaralari                                                                                                                                                                                                                                                                            |
 
-### `src/lib/` — Asosiy kutubxonalar (~50 ta modul)
+### `src/lib/` — Asosiy kutubxonalar (~ 50 modul)
 
-| Modul                                    | Maqsadi                                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokoli vazifalar menejeri, ko‘nikmalar (5), oqimli uzatish                                                                                                                                                                                                                                                                            |
-| `acp/`                                   | CLI agentlar reyestri (mahalliy CLI vositalarini aniqlash — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` fayliga qarang)                                                                                                                                                                                                                       |
-| `api/`                                   | Umumiy API yordamchi vositalari (`requireManagementAuth`, tekshirish)                                                                                                                                                                                                                                                                        |
-| `auth/`                                  | Sessiya, parolni xeshlash, tokenni tekshirish                                                                                                                                                                                                                                                                                                |
-| `batches/`                               | OpenAI Batches API ishlov beruvchilari                                                                                                                                                                                                                                                                                                       |
-| `catalog/`                               | Provayder katalogini Zod yordamida tekshirish + imkoniyatlarni aniqlash                                                                                                                                                                                                                                                                      |
-| `cloudAgent/`                            | Bulutli agentlar (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` fayliga qarang                                                                                                                                                                                                                                               |
-| `combos/`                                | Kombinatsiyalarni aniqlash + qayta tartiblash yordamchi vositalari                                                                                                                                                                                                                                                                           |
-| `audit/`                                 | Faoliyat lentasi yordamchi vositalari: `highLevelActions.ts` (ruxsat etilganlar ro‘yxati + `isHighLevelAction()`), `activityIcons.ts` (harakat → ikonka/fe’l xaritasi), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` fayliga qarang                                                                  |
-| `compliance/`                            | Audit jurnali + provayder auditi — `docs/security/COMPLIANCE.md` fayliga qarang                                                                                                                                                                                                                                                              |
-| `compression/`                           | Siqish mexanizmini bog‘lash qatlami (mexanizmlar `open-sse/services/compression/` ichida joylashgan)                                                                                                                                                                                                                                         |
-| `config/`                                | Ishlash vaqti konfiguratsiyasi yordamchi vositalari                                                                                                                                                                                                                                                                                          |
-| `db/`                                    | 120+ ta sohaga oid MB moduli + 168 ta migratsiya (SQLite bilan ishlashda doimo shu qatlamdan foydalaning)                                                                                                                                                                                                                                    |
-| `quota/`                                 | Kvotani taqsimlash mexanizmi: `dimensions.ts` (turlar/Zod), `types.ts` (QuotaStore interfeysi), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` fayliga qarang |
-| `radar/`                                 | Radar bepul modellar katalogi mijozi: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` fayliga qarang                                                                                                                                                 |
-| `display/`                               | UI formatlash yordamchilari (xarajat, kechikish va boshqalar)                                                                                                                                                                                                                                                                                |
-| `embeddings/`                            | Embeddinglar xizmati yordamchilari                                                                                                                                                                                                                                                                                                           |
-| `env/`                                   | Muhit o‘zgaruvchilarini tahlil qilish + tekshirish                                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | Baholash freymvorki (to‘plamlar, ishga tushiruvchi, bajarilish muhiti) — `docs/frameworks/EVALS.md` fayliga qarang                                                                                                                                                                                                                           |
-| `guardrails/`                            | PII maskalovchi, prompt inyeksiyasi, ko‘rish ko‘prigi — `docs/security/GUARDRAILS.md` fayliga qarang                                                                                                                                                                                                                                         |
-| `jobs/`                                  | Fon vazifalari (cron-ga o‘xshash)                                                                                                                                                                                                                                                                                                            |
-| `memory/`                                | Suhbat xotirasi (SQLite FTS5 + sqlite-vec gibrid RRF + Qdrant 2-daraja) — `docs/frameworks/MEMORY.md` fayliga qarang                                                                                                                                                                                                                         |
-| `memory/embedding/`                      | Ko‘p manbali embedding qatlami: `index.ts` (rezolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (21-reja)                                                                                                                                                                                              |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 o‘rami — KNN to‘liq qidiruvi + gibrid RRF (FTS5 + vektor, k=60). Kechiktirib ishga tushiriladi, sqlite-vec mavjud bo‘lmaganda barqaror ravishda soddalashtirilgan rejimga o‘tadi. (21-reja)                                                                                                                                |
-| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` bo‘lgan xotiralarni fonda qayta ishlaydi; `POST /api/memory/reindex` va kechiktirilgan to‘ldirish yo‘li tomonidan chaqiriladi. (21-reja)                                                                                                                                                             |
-| `monitoring/`                            | Holat tekshiruvlari, metrikalarni chiqarish                                                                                                                                                                                                                                                                                                  |
-| `oauth/`                                 | 22 ta provayder moduli uchun OAuth/import jarayonlari (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                            |
-| `plugins/`                               | Plaginlar reyestri                                                                                                                                                                                                                                                                                                                           |
-| `promptCache/`                           | Anthropic uslubidagi prompt keshi nazorat nuqtalari                                                                                                                                                                                                                                                                                          |
-| `skills/`                                | Ko‘nikmalar freymvorki (o‘rnatilgan + marketpleys + SkillsSH) — `docs/frameworks/SKILLS.md` fayliga qarang                                                                                                                                                                                                                                   |
-| `playground/`                            | Playground Studio umumiy yordamchilari: `codeExport.ts` (curl/Python/TS generatori), `promptImprover.ts` (meta-prompt tuzuvchisi), `streamMetrics.ts` (sof TTFT/TPS), `types.ts` (narxlash jadvali) — `docs/frameworks/PLAYGROUND_STUDIO.md` ga qarang                                                                                       |
-| `webhookDispatcher.ts`                   | HMAC webhook yetkazib berish — `docs/frameworks/WEBHOOKS.md` ga qarang                                                                                                                                                                                                                                                                       |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel boshqaruvchilari — `docs/ops/TUNNELS_GUIDE.md` ga qarang                                                                                                                                                                                                                                                                              |
-| `cloudSync.ts`, `initCloudSync.ts`       | Holatni ixtiyoriy bulut bilan sinxronlash                                                                                                                                                                                                                                                                                                    |
-| `localDb.ts`                             | Maʼlumotlar bazasi modullari uchun qayta eksport barrel fayli (mantiq yoʻq — faqat qayta eksportlar)                                                                                                                                                                                                                                         |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | Soʻrovlarni keshlash + idempotentlik                                                                                                                                                                                                                                                                                                         |
-| (yuqori darajadagi yana ~30 ta fayl)     | Maxsus yordamchilar (logEnv, modelsDevSync, piiSanitizer va boshqalar)                                                                                                                                                                                                                                                                       |
+| Modul                                    | Maqsad                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A protokoli vazifa menejeri, ko'nikmalar (5), oqim                                                                                                                                                                                                                                                                      |
+| `acp/`                                   | CLI Agent Registry (mahalliy CLI kashfiyoti - `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` ga qarang)                                                                                                                                                                                                                       |
+| `api/`                                   | Umumiy API yordamchilari (`requireManagementAuth`, tekshirish)                                                                                                                                                                                                                                                            |
+| `auth/`                                  | Seans, parolni xeshlash, tokenni tekshirish                                                                                                                                                                                                                                                                               |
+| `batches/`                               | OpenAI To'plamlar API ishlov beruvchilari                                                                                                                                                                                                                                                                                 |
+| `catalog/`                               | Provayder katalogi Zod validation + imkoniyatlarini o'lchamlari                                                                                                                                                                                                                                                           |
+| `cloudAgent/`                            | Bulutli agentlar (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` qarang                                                                                                                                                                                                                                    |
+| `combos/`                                | Combo resolution + reorder helpers                                                                                                                                                                                                                                                                                        |
+| `audit/`                                 | Faoliyat tasmasi yordamchilari: `highLevelActions.ts` (ruxsat berilganlar ro‘yxati + `isHighLevelAction()`), `activityIcons.ts` (harakat → icon/verb xaritasi), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` qarang                                                               |
+| `compliance/`                            | Audit jurnali + provayder auditi — `docs/security/COMPLIANCE.md` ga qarang                                                                                                                                                                                                                                                |
+| `compression/`                           | Dvigatelni siqish uchun elim (dvigatellar `open-sse/services/compression/` yashaydi)                                                                                                                                                                                                                                      |
+| `config/`                                | Ish vaqti konfiguratsiyasi yordamchilari                                                                                                                                                                                                                                                                                  |
+| `db/`                                    | 120 + domeni DB modullari + 168 migratsiya ( SQLite uchun har doim shu yerdan o'ting)                                                                                                                                                                                                                                     |
+| `quota/`                                 | Kvota almashish mexanizmi: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore interfeysi), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Radar bepul modelli katalog mijozi: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                               |
+| `display/`                               | UI formatlash yordamchilari (narx, kechikish va boshqalar)                                                                                                                                                                                                                                                                |
+| `embeddings/`                            | O'rnatish xizmati yordamchilari                                                                                                                                                                                                                                                                                           |
+| `env/`                                   | Env o'zgaruvchini tahlil qilish + tekshiruvi                                                                                                                                                                                                                                                                              |
+| `evals/`                                 | Baholash ramkasi (suitlar, yuguruvchi, ish vaqti) - `docs/frameworks/EVALS.md` qarang                                                                                                                                                                                                                                     |
+| `guardrails/`                            | PII maskasi, tezkor in'ektsiya, ko'rish ko'prigi - `docs/security/GUARDRAILS.md` ga qarang                                                                                                                                                                                                                                |
+| `jobs/`                                  | Fondagi ishlar (cron kabi)                                                                                                                                                                                                                                                                                                |
+| `memory/`                                | Suhbat xotirasi (SQLite FTS5 + sqlite-vec gibrid RRF + Qdrant 2-tier) — `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                       |
+| `memory/embedding/`                      | Ko‘p manbali o‘rnatish qatlami: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (reja 21)                                                                                                                                                                           |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + gibrid RRF (FTS5 + vektor, k = 60). Lazy-init, sqlite-vec mavjud bo'lmaganda yaxshi yomonlashadi. (21-reja)                                                                                                                                                                 |
+| `memory/reindex.ts`                      | `runReindexBatch()` — fonda `needs_reindex=1` bilan xotiralarni qayta ishlaydi; `POST /api/memory/reindex` va dangasa to'ldirish yo'li bilan chaqiriladi. (21-reja)                                                                                                                                                       |
+| `monitoring/`                            | Salomatlik tekshiruvlari, emissiya ko'rsatkichlari                                                                                                                                                                                                                                                                        |
+| `oauth/`                                 | 22 ta provayder modullari uchun OAuth/import oqimlari (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-kodlash, kiro, qoaue, ochiq, zed-hosted, zed)                                                               |
+| `plugins/`                               | Plagin ro'yxatga olish kitobi                                                                                                                                                                                                                                                                                             |
+| `promptCache/`                           | Antropik uslubdagi tezkor kesh cheklash nuqtalari                                                                                                                                                                                                                                                                         |
+| `skills/`                                | Ko'nikmalar tizimi (o'rnatilgan + bozori + SkillsSH) — `docs/frameworks/SKILLS.md` ga qarang                                                                                                                                                                                                                              |
+| `playground/`                            | Playground Studio umumiy yordamchilari: `codeExport.ts` (curl/Python/TS generatori), `promptImprover.ts` (meta-prompt quruvchi), `streamMetrics.ts` (sof TTFT/TPS), `types.ts` (narxlar jadvali) — `docs/frameworks/PLAYGROUND_STUDIO.md` qarang.                                                                         |
+| `webhookDispatcher.ts`                   | HMAC webhook yetkazib berish — `docs/frameworks/WEBHOOKS.md` ga qarang                                                                                                                                                                                                                                                    |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tunnel menejerlari - `docs/ops/TUNNELS_GUIDE.md` ga qarang                                                                                                                                                                                                                                                                |
+| `cloudSync.ts`, `initCloudSync.ts`       | Ixtiyoriy bulut holatini sinxronlash                                                                                                                                                                                                                                                                                      |
+| `localDb.ts`                             | JB modullari uchun barrelni qayta eksport qilish (mantiqsiz - faqat reeksport)                                                                                                                                                                                                                                            |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | + idempotency keshlashni so'rang                                                                                                                                                                                                                                                                                          |
+| (~ 30 ta yuqori darajadagi fayllar)      | Maxsus yordamchilar (logEnv, modelsDevSync, piiSanitizer va boshqalar)                                                                                                                                                                                                                                                    |
 
-### `src/lib/db/` — Maʼlumotlar bazasi (147 ta modul + 208 ta migratsiya)
+### `src/lib/db/` — Maʼlumotlar bazasi (147 modul + 208 migratsiya)
 
-| Quyi katalog              | Maqsad                                                                                                                                                                                                                                      |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL jurnallashga ega `getDbInstance()` singleton obyekti                                                                                                                                                                                    |
-| `db/migrations/`          | Versiyalangan SQL fayllari (idempotent, tranzaksiyali). `073_memory_vec.sql` fayli `memory_vec_meta` + `needs_reindex` ustunini qoʻshadi (21-reja).                                                                                         |
-| `db/playgroundPresets.ts` | Playground Studio andozalari uchun CRUD moduli (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                                               |
-| `db/memoryVec.ts`         | `memory_vec_meta` uchun CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` va boshqalar (21-reja)                                                                        |
-| `db/<domain>.ts`          | Har bir domen uchun bittadan modul: provayderlar, kombinatsiyalar, API kalitlari, foydalanuvchilar, sessiyalar, foydalanish, audit*log, webhooklar, koʻnikmalar, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache va boshqalar. |
+| Subdir                    | Maqsad                                                                                                                                                                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL jurnali bilan `getDbInstance()` singleton                                                                                                                                                                                      |
+| `db/migrations/`          | Versiyalangan SQL fayllari (idempotent, tranzaksiya). `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` qo'shadi (reja 21).                                                                                                 |
+| `db/playgroundPresets.ts` | Playground Studio oldindan sozlashlari uchun CRUD moduli (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                            |
+| `db/memoryVec.ts`         | `memory_vec_meta` uchun CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` va boshqalar (21-reja)                                                               |
+| `db/<domain>.ts`          | Har bir domenga bitta modul: provayderlar, kombinatsiyalar, apiKeys, foydalanuvchilar, seanslar, foydalanish, audit jurnali, webhooks, malakalar, xotira_entries, cloud_agent_tasks, baholashlar* \* , mantiqiy_kesh va boshqalar. |
 
 ### `src/domain/`
 
-| Modul                  | Maqsad                                                                 |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `policy.ts`            | Siyosat mexanizmi                                                      |
-| `fallbackPolicy.ts`    | Zaxira variantini tanlash qarorlar daraxti                             |
-| `costRules.ts`         | Xarajatlarni hisoblash qoidalari                                       |
-| `lockoutPolicy.ts`     | Model/ulanishni bloklash siyosati                                      |
-| `tagRouter.ts`         | Teglarga asoslangan marshrutlash                                       |
-| `comboResolver.ts`     | Kombinatsiyani aniqlash (kombinatsiya mexanizmi tomonidan ishlatiladi) |
-| `modelAvailability.ts` | Har bir model uchun mavjudlikni tekshirish                             |
-| `assessment/`          | Modelni baholash (RFC-AUTO-ASSESSMENT hujjatining 1-bosqichi)          |
+| Modul                  | Maqsad                                                    |
+| ---------------------- | --------------------------------------------------------- |
+| `policy.ts`            | Siyosat mexanizmi                                         |
+| `fallbackPolicy.ts`    | Qayta qarorlar daraxti                                    |
+| `costRules.ts`         | Xarajatlarni hisoblash qoidalari                          |
+| `lockoutPolicy.ts`     | Model/connection blokirovka siyosati                      |
+| `tagRouter.ts`         | Tegga asoslangan marshrutlash                             |
+| `comboResolver.ts`     | Kombo o'lchamlari (kombo dvigatel tomonidan qo'llaniladi) |
+| `modelAvailability.ts` | Har bir model mavjudligini tekshirish                     |
+| `assessment/`          | Modelni baholash (RFC-AUTO-ASSESSMENTning 1-bosqichi)     |
 
 ### `src/server/`
 
-| Modul    | Maqsad                                                                                                      |
-| -------- | ----------------------------------------------------------------------------------------------------------- |
-| `authz/` | Avtorizatsiya konveyeri: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` ga qarang |
-| `cors/`  | CORS konfiguratsiyasi                                                                                       |
-| `auth/`  | Sessiya oraliq dasturiy taʼminoti                                                                           |
+| Modul    | Maqsad                                                                                             |
+| -------- | -------------------------------------------------------------------------------------------------- |
+| `authz/` | Avtorizatsiya quvuri: `classify` → `policies` → `enforce` — zqf `docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS konfiguratsiyasi                                                                              |
+| `auth/`  | Seans o'rta dasturi                                                                                |
 
 ### `src/shared/`
 
-| Modul                            | Maqsadi                                                                                                                       |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `components/`                    | Boshqaruv paneli komponentlari APIʼsi: `packages/ui-kit` ustidagi adapterlar — `docs/architecture/DESIGN_SYSTEM.md` ga qarang |
-| `constants/iconMap.ts`           | `ICON_MAP`: ekranlarda ishlatiladigan ikonka nomlari → Lucide komponentlari (`<Icon>`)                                        |
-| `constants/providers.ts`         | Zod validatsiyasiga ega **376 ta provayder** (asosiy ishonchli manba)                                                         |
-| `constants/cliTools.ts`          | Tashqi CLI vositalari reyestri                                                                                                |
-| `constants/routingStrategies.ts` | Ustuvorliklarga ega **20 ta marshrutlash strategiyasi**                                                                       |
-| `constants/publicApiRoutes.ts`   | Bearer autentifikatsiyasini (boshqaruv autentifikatsiyasidan farqli ravishda) talab qiladigan marshrutlar                     |
-| `constants/upstreamHeaders.ts`   | Yuqori oqim soʻrovlari uchun sarlavhalar taqiqlangan roʻyxati                                                                 |
-| `validation/schemas.ts`          | ~80 ta Zod sxemasi (API shartnomalari uchun yagona ishonchli manba)                                                           |
-| `validation/helpers.ts`          | Zod validatsiya yordamchilari (`validateBody` va boshqalar)                                                                   |
-| `types/`                         | Umumiy TS turlari                                                                                                             |
-| `contracts/`                     | Ochiq API shartnomalari (`package.json` ichidagi `files:` tomonidan foydalaniladi)                                            |
-| `utils/circuitBreaker.ts`        | Provayderning avtomatik uzgichi (`docs/architecture/RESILIENCE_GUIDE.md` ga qarang)                                           |
-| `utils/apiAuth.ts`               | API kalitini tekshirish, vakolat doirasini tekshirish                                                                         |
-| `utils/fetchTimeout.ts`          | Yuqori oqimdagi fetch uchun vaqt tugashi/bekor qilish oʻramlari                                                               |
-| `utils/releaseNotes.ts`          | Yopilgan v2/eskirgan eʼlonlar tahlilchisi, mahalliylashtirish va ID boʻyicha bekor qilish                                     |
+| Modul                            | Maqsad                                                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `components/`                    | Boshqaruv paneli komponenti API: `packages/ui-kit` orqali adapterlar — `docs/architecture/DESIGN_SYSTEM.md` qarang |
+| `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tomonidan ishlatiladigan piktogramma nomlari → Lucide komponentlari (`<Icon>`)                |
+| `constants/providers.ts`         | **377 ta provayder** Zod validation bilan (haqiqat manbai)                                                         |
+| `constants/cliTools.ts`          | Tashqi CLI vositalari reestri                                                                                      |
+| `constants/routingStrategies.ts` | **20 marshrutlash strategiyasi** ustuvorliklar bilan                                                               |
+| `constants/publicApiRoutes.ts`   | Bearer (boshqaruvga qarshi) autentsiyasi talab qilinadigan marshrutlar                                             |
+| `constants/upstreamHeaders.ts`   | Yuqori oqim soʻrovlari uchun sarlavha rad etish roʻyxati                                                           |
+| `validation/schemas.ts`          | ~ 80 Zod sxemalari ( API shartnomalari uchun yagona haqiqat manbai)                                                |
+| `validation/helpers.ts`          | Zod tekshirish yordamchilari (`validateBody` va boshqalar)                                                         |
+| `types/`                         | Umumiy TS turlari                                                                                                  |
+| `contracts/`                     | Ommaviy API shartnomalari ( `files:` tomonidan `package.json` iste'mol qilinadi)                                   |
+| `utils/circuitBreaker.ts`        | Provayderning elektron to'xtatuvchisi (qarang: `docs/architecture/RESILIENCE_GUIDE.md`)                            |
+| `utils/apiAuth.ts`               | API kalitini tekshirish, qamrovni tekshirish                                                                       |
+| `utils/fetchTimeout.ts`          | Yuqori oqim uchun Timeout/abort o'ramlari                                                                          |
+| `utils/releaseNotes.ts`          | Yopiq v2/legacy e'lonni tahlil qilish, mahalliylashtirish va ID ishdan bo'shatish                                  |
 
 ---
 
@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Ommaviy hujjatlar (7 ta ildiz fayli + 17 ta ichki katalog)
+## `docs/` — Ommaviy hujjatlar (7 ta asosiy fayl + 17 subdir)
 
 ### Yuqori darajadagi qo'llanmalar
 
-| Hujjat                      | Maqsad                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Yuqori darajadagi arxitektura, subsistemalar xaritasi, boshqaruv paneli yuzasi                        |
-| `CODEBASE_DOCUMENTATION.md` | Muhandislik qo'llanmasi: kataloglar, modullar, konvensiyalar                                          |
-| `FEATURES.md`               | v3.8 yangiliklari bilan imkoniyatlar matritsasi                                                       |
-| `USER_GUIDE.md`             | Yakuniy foydalanuvchi qo'llanmasi (sozlash, modellar, kombolar, CLI'lar, audio va boshq.)             |
-| `API_REFERENCE.md`          | Autentifikatsiya modeli bilan API endpointlari qo'llanmasi                                            |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsiyasi (121 ta yo'l)                                                           |
-| `SETUP_GUIDE.md`            | O'rnatish usullari (npm, npx, Docker, Electron, Termux, manba kodi)                                   |
-| `ENVIRONMENT.md`            | Barcha muhit o'zgaruvchilari (~800 tasi hujjatlashtirilgan, ~3,050 qator `.env.example`)              |
-| `TROUBLESHOOTING.md`        | Keng tarqalgan xatolar + v3.8.0 dagi ma'lum muammolar                                                 |
-| `RELEASE_CHECKLIST.md`      | To'liq reliz jarayoni (skill'lar, husky, conventional commits, joylashtirish)                         |
-| `COVERAGE_PLAN.md`          | Qamrov maqsadlari va joriy holat                                                                      |
-| `FREE_TIERS.md`             | Tanlangan bepul tarifli provayderlar (48+ bepul + 11 OAuth)                                           |
-| `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                     |
-| `I18N.md`                   | i18n arxitekturasi, til qo'shish, 67 ta lokal                                                         |
-| `UNINSTALL.md`              | Toza o'chirish qadamlari                                                                              |
-| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 376 ta provayder katalogi (qayta yaratish: `npm run gen:provider-reference`) |
+| Dok                         | Maqsad                                                                                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Yuqori darajadagi arxitektura, quyi tizim xaritasi, asboblar paneli yuzasi                       |
+| `CODEBASE_DOCUMENTATION.md` | Muhandislik ma'lumotnomasi: kataloglar, modullar, konventsiyalar                                 |
+| `FEATURES.md`               | V3.8 diqqatga sazovor joylari bilan xususiyat matritsasi                                         |
+| `USER_GUIDE.md`             | Yakuniy foydalanuvchi qo'llanmasi (sozlash, modellar, kombinatsiyalar, CLIs, audio va boshqalar) |
+| `API_REFERENCE.md`          | auth modeli bilan API so'nggi nuqta havolasi                                                     |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsiyasi (121 yo'l)                                                         |
+| `SETUP_GUIDE.md`            | O'rnatish usullari (npm, npx, Docker, Electron, Termux, manba)                                   |
+| `ENVIRONMENT.md`            | Barcha env variantlari (~ 800 hujjatlashtirilgan, ~ 3050 satr `.env.example`)                    |
+| `TROUBLESHOOTING.md`        | Umumiy xatolar + v3.8.0 ma'lum muammolar                                                         |
+| `RELEASE_CHECKLIST.md`      | To'liq chiqarish oqimi (ko'nikmalar, husky, an'anaviy topshiriqlar, tarqatish)                   |
+| `COVERAGE_PLAN.md`          | Qamrov maqsadlari va hozirgi holati                                                              |
+| `FREE_TIERS.md`             | Tanlangan bepul provayderlar (48 + bepul + 11 OAuth)                                             |
+| `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + Ichki OmniRoute CLI                                                |
+| `I18N.md`                   | i18n arxitekturasi, til qoʻshish, 67 ta mahalliy til                                             |
+| `UNINSTALL.md`              | O'chirish bosqichlarini tozalang                                                                 |
+| `PROVIDER_REFERENCE.md`     | **Avtomatik yaratilgan** 377 ta provayderlar katalogi (regen: `npm run gen:provider-reference`)  |
 
-### Subsistemalar bo'yicha chuqur tahlillar
+### Quyi tizim chuqur sho'ng'idi
 
-| Hujjat                                       | Maqsad                                                                            |
-| -------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | MCP serveri: 110 ta vosita, 3 ta transport, 33 ta skop, REST endpointlar          |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ta skill, REST yordamchilari, agent kartasi                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Yagona qo'llanma: A2A vs ACP vs Cloud Agents                                      |
-| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orkestratsiyasi                                       |
-| `SKILLS.md`                                  | Skills freymvorki (ichki + marketplace + SkillsSH + sandbox)                      |
-| `RADAR.md`                                   | Radar bepul model katalogi qoplama (`RADAR_ENABLED`, sukut bo'yicha o'chiq)       |
-| `MEMORY.md`                                  | Xotira tizimi (SQLite FTS5 + Qdrant)                                              |
-| `EVALS.md`                                   | Eval freymvorki (to'plamlar, ishga tushirishlar, rubrikalar)                      |
-| `GUARDRAILS.md`                              | PII maskirovkasi, prompt inʼeksiyasi, vision ko'prigi                             |
-| `COMPLIANCE.md`                              | Audit jurnali, saqlash muddati, noLog opt-out                                     |
-| `WEBHOOKS.md`                                | HMAC imzoli webhook yetkazib berish                                               |
-| `REASONING_REPLAY.md`                        | `reasoning_content` uchun gibrid xotira/SQLite kesh                               |
-| `AUTHZ_GUIDE.md`                             | Avtorizatsiya quvuri (`classify` → `policies` → `enforce`)                        |
-| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + model blokirovkasi                                   |
-| `docs/security/STEALTH_GUIDE.md` (faqat git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM sertifikati                   |
-| `AUTO-COMBO.md`                              | Auto Combo dvigateli (16 faktorli baholash, 6 ta rejim to'plami, virtual fabrika) |
+| Dok                                          | Maqsad                                                                              |
+| -------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | MCP serveri: 110 ta asbob, 3 ta transport, 33 ta soha, REST so'nggi nuqtalari       |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ta malaka, REST yordamchilari, agent kartasi                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Birlashtirilgan qo'llanma: A2A va ACP va bulutli agentlar                           |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orkestratsiyasi                                         |
+| `SKILLS.md`                                  | Ko'nikmalar tizimi (o'rnatilgan + bozori + SkillsSH + sandbox)                      |
+| `RADAR.md`                                   | Radar bepul modelli katalog qoplamasi (`RADAR_ENABLED`, sukut bo'yicha o'chirilgan) |
+| `MEMORY.md`                                  | Xotira tizimi (SQLite FTS5 + Qdrant)                                                |
+| `EVALS.md`                                   | Baholash ramkasi (to'plamlar, yugurishlar, rubrikalar)                              |
+| `GUARDRAILS.md`                              | PII maskasi, tezkor in'ektsiya, ko'rish ko'prigi                                    |
+| `COMPLIANCE.md`                              | Audit jurnali, saqlash, noLogni rad etish                                           |
+| `WEBHOOKS.md`                                | HMAC imzolangan veb-huk yetkazib berish                                             |
+| `REASONING_REPLAY.md`                        | `reasoning_content` uchun gibrid memory/SQLite kesh                                 |
+| `AUTHZ_GUIDE.md`                             | Avtorizatsiya quvuri (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                        | O'chirish to'xtatuvchisi + sovutish + modeli blokirovkasi                           |
+| `docs/security/STEALTH_GUIDE.md` (faqat git) | TLS barmoq izlari (JA3/JA4), Claude Code CCH, MITM sertifikati                      |
+| `AUTO-COMBO.md`                              | Auto Combo dvigateli (16 faktorli reyting, 6 rejimli to'plamlar, virtual zavod)     |
 
 ### Siqish
 
-| Hujjat                          | Maqsad                                                 |
-| ------------------------------- | ------------------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Siqish rejimlariga umumiy nuqtai nazar + yo'l xaritasi |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK dvigatellari, reestr shartnomasi         |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman qoida to'plami JSON sxemasi                    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Til bo'yicha qoida to'plamlari inventarizatsiyasi      |
-| `RTK_COMPRESSION.md`            | RTK deklarativ quvuri (56 ta filtr)                    |
+| Dok                             | Maqsad                                                  |
+| ------------------------------- | ------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Siqish rejimlarining umumiy ko'rinishi + yo'l xaritasi  |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK dvigatellari, ro'yxatga olish shartnomasi |
+| `COMPRESSION_RULES_FORMAT.md`   | G'or odami qoidalari to'plami JSON sxemasi              |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Har bir til uchun qoidalar to'plami inventarizatsiyasi  |
+| `RTK_COMPRESSION.md`            | RTK deklarativ quvur liniyasi (56 filtr)                |
 
 ### Joylashtirish
 
-| Hujjat                       | Maqsad                                                             |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Docker build, profillar (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Umumiy VM/VPS joylashtirish (Ubuntu/Debian + nginx + systemd)      |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io joylashtirish (hozircha faqat xitoycha)                     |
-| `TERMUX_GUIDE.md`            | Termux orqali Android headless rejimi                              |
-| `PWA_GUIDE.md`               | Progressive Web App oʻrnatish + service worker                     |
-| `ELECTRON_GUIDE.md`          | Ish stoli ilovasini yigʻish + imzolash + tarqatish                 |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
-| `PROXY_GUIDE.md`             | 4 darajali chiquvchi proksi + 1proxy marketplace                   |
+| Dok                          | Maqsad                                                              |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker qurish, profillar (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Umumiy VM/VPS joylashuvi (Ubuntu/Debian + nginx + systemd)          |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-ni joylashtirish (hozirda faqat Xitoy uchun)                 |
+| `TERMUX_GUIDE.md`            | Termux orqali Android boshsiz                                       |
+| `PWA_GUIDE.md`               | Progressive Web App o'rnatish + xizmat xodimi                       |
+| `ELECTRON_GUIDE.md`          | Ish stoli ilovasini yaratish + belgisi + tarqatish                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale                                     |
+| `PROXY_GUIDE.md`             | 4-darajali chiquvchi proksi-server + 1proksi bozori                 |
 
-### Ichki kataloglar
+### Kichik kataloglar
 
-| Ichki katalog         | Maqsad                                                                                                                                                                                                                                               |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mahalliylashtirilgan hujjat tarjimalari (41 lokal)                                                                                                                                                                                                   |
-| `docs/screenshots/`   | Qo'llanmalar uchun rasm fayllari                                                                                                                                                                                                                     |
-| `_tasks/superpowers/` | Superpowers'dan olingan rejalar/spetsifikatsiyalar (`writing-plans`/`brainstorming`) + tadqiqot — izolyatsiya qilingan, alohida versiyalangan repo, asosiy daraxt tomonidan gitignore qilingan. Qarang: CLAUDE.md → "Planning & Research Artifacts". |
+| Subdir                | Maqsad                                                                                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Hujjatlarning mahalliy tarjimalari (41 ta til)                                                                                                                                                                                |
+| `docs/screenshots/`   | Qo'llanmalar uchun tasvir aktivlari                                                                                                                                                                                           |
+| `_tasks/superpowers/` | super kuchlardan Plans/specs (`writing-plans`/`brainstorming`) + tadqiqoti — izolyatsiya qilingan, alohida versiyali repo, asosiy daraxt tomonidan gitignored. Qarang: CLAUDE.md → “Rejalashtirish va tadqiqot artefaktlari”. |
 
 ---
 
