@@ -60,13 +60,11 @@
    మార్పుకు ముందు మరియు తర్వాత రెండర్ చేయబడిన markup ని పోల్చండి — padding లేదా wrapper మార్పులు ప్రతి స్క్రీన్కు
    వ్యాపిస్తాయి.
 
-## 5. Kit ని అప్డేట్ చేయడం
+## 5. కిట్ను నవీకరిస్తోంది
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ఆ commit వద్ద ఉన్న upstream `src/` ని `packages/ui-kit/src` లోకి కాపీ
-చేస్తుంది మరియు అనుమతించబడిన ఏకైక transformation ని వర్తింపజేస్తుంది (ఇది relative imports నుండి `.js` suffix ని
-తొలగిస్తుంది). తర్వాత: `git diff packages/ui-kit` ని సమీక్షించండి, రెండు థీమ్లలో providers, settings, combos,
-usage మరియు endpoint పై విజువల్ పరీక్ష చేయండి, `npm run check:ui-kit-snapshot` మరియు `npm run test:vitest:ui` రన్
-చేయండి, మరియు upstream changelog తో PR ని ఓపెన్ చేయండి.
+`npm run check:ui-kit-upstream` `packages/ui-kit/UPSTREAM.md` లో పిన్ చేయబడిన సంస్కరణను అప్స్ట్రీమ్ రెపో యొక్క సరికొత్త `v*` ట్యాగ్తో సరిపోల్చుతుంది మరియు విడుదల ముగిసినప్పుడు సమకాలీకరణ ఆదేశాన్ని ముద్రిస్తుంది. వారంవారీ `UI Kit upstream watch` వర్క్ఫ్లో (`.github/workflows/ui-kit-upstream-watch.yml`) అదే తనిఖీని అమలు చేస్తుంది మరియు పిన్ వెనుకగా ఉన్నప్పుడు ఒక ట్రాకింగ్ సమస్యను తెరిచి ఉంచుతుంది; అప్స్ట్రీమ్ రెపో ప్రైవేట్గా ఉంటుంది, కాబట్టి వర్క్ఫ్లోకి `UI_KIT_READ_TOKEN` రహస్యంలో చదవడానికి మాత్రమే టోకెన్ అవసరం మరియు అది లేకుండా జడగా ఉంటుంది.
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ఆ కమిట్లోని అప్స్ట్రీమ్ `src/` కాపీ చేస్తుంది (`latest` = సరికొత్త `v*` ట్యాగ్) `packages/ui-kit/src`, ఒకే అనుమతించబడిన పరివర్తనను వర్తింపజేస్తుంది (ఇది సంబంధిత దిగుమతుల నుండి `.js` ప్రత్యయాన్ని తగ్గిస్తుంది), మరియు వర్క్స్పేస్ వెర్షన్ను `packages/ui-kit/package.json` మరియు `package-lock.json` అప్స్ట్రీమ్కు సెట్ చేస్తుంది. తర్వాత: `git diff packages/ui-kit` సమీక్షించండి, ప్రొవైడర్లు, సెట్టింగ్లు, కాంబోలు, యూసేజ్ మరియు ఎండ్పాయింట్పై రెండు థీమ్లలో విజువల్ పాస్ చేయండి, `npm run check:ui-kit-snapshot` మరియు `npm run test:vitest:ui` రన్ చేయండి మరియు అప్స్ట్రీమ్ చేంజ్లాగ్తో PR తెరవండి.
 
 ## 6. README రేఖాచిత్రాలు
 

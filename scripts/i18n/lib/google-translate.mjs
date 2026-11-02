@@ -28,7 +28,11 @@ const DEFAULT_ENDPOINT = "https://translate.googleapis.com/translate_a/t";
 const OFFICIAL_ENDPOINT = "https://translation.googleapis.com/language/translate/v2";
 const BATCH_CHARS = 4500;
 const BATCH_ITEMS = 100;
-const MAX_TRIES = 5;
+// The keyless endpoint drops ~1% of requests with a connection reset ("fetch failed") under a
+// 66-locale run (2026-10-28: 13 of 132 locales once, 1 of 198 another time); seven tries with a
+// capped, jittered backoff (~1 min in total) ride that out instead of failing the locale.
+const MAX_TRIES = 7;
+const MAX_BACKOFF_MS = 20000;
 
 // OmniRoute locale code → Google language code (identity when absent).
 const GOOGLE_LANG = {
@@ -611,7 +615,8 @@ async function requestBatch(htmlList, target, { fetchImpl, apiKey, timeoutMs, ba
         (err?.status ?? 0) >= 500 ||
         /fetch failed|ECONN|ENOTFOUND|network/i.test(String(err?.cause ?? err?.message));
       if (!retryable || attempt === MAX_TRIES) break;
-      await sleep(backoffMs * 2 ** (attempt - 1));
+      const wait = Math.min(MAX_BACKOFF_MS, backoffMs * 2 ** (attempt - 1));
+      await sleep(wait + Math.floor(Math.random() * Math.min(wait, 1000) * 0.25));
     } finally {
       clearTimeout(timer);
     }

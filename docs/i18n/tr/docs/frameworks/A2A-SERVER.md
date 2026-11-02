@@ -199,17 +199,17 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
 
 ---
 
-## Yeni Bir Yetenek Ekleme
+## Yeni Bir Beceri Ekleme
 
-1. **Yetenek dosyasını oluşturun:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Beceri dosyasını oluşturun:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   `(task: A2ATask) => Promise<{ artifacts, metadata }>` biçiminde bir async fonksiyon dışa aktarın. `smartRouting.ts` gibi mevcut yeteneklerin yapısını izleyin.
+   `(task: A2ATask) => Promise<{ artifacts, metadata }>` biçiminde bir async fonksiyon dışa aktarın. `smartRouting.ts` gibi mevcut becerilerin yapısını izleyin.
 
-2. **İşleyiciyi kaydedin:** `src/lib/a2a/taskExecution.ts` içinde `A2A_SKILL_HANDLERS` öğesine bir girdi ekleyin:
+2. **İşleyiciyi kaydedin:** `src/lib/a2a/taskExecution.ts` dosyasında `A2A_SKILL_HANDLERS` içine bir girdi ekleyin:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
-     // ...mevcut yetenekler
+     // ...mevcut beceriler
      "your-skill": async (task) => {
        const skillModule = await import("./skills/yourSkill");
        return skillModule.executeYourSkill(task);
@@ -217,21 +217,21 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
    };
    ```
 
-3. **Agent Card içinde kullanıma sunun:** `src/app/.well-known/agent.json/route.ts` içinde `skills` dizisine ekleyin:
+3. **Agent Card'da kullanıma sunun:** `src/lib/a2a/agentCardMetadata.ts` dosyasında (`/.well-known/agent.json` ve `/.well-known/agent-card.json` tarafından paylaşılır), `skills` dizisine şunu ekleyin:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Yeteneğiniz",
-     "description": "Kısa, amaca odaklı açıklama",
-     "tags": ["yönlendirme", "kota"],
-     "examples": ["Örnek doğal dil çağrısı"]
+     "name": "Your Skill",
+     "description": "Brief, intent-focused description",
+     "tags": ["routing", "quota"],
+     "examples": ["Sample natural-language invocation"]
    }
    ```
 
 4. **Testleri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Başarılı senaryoyu ve hata senaryosunu kapsayın.
 
-5. Yeni yeteneği bu dosyadaki `Kullanılabilir Yetenekler` tablosunda **belgeleyin**.
+5. **Yeni beceriyi** bu dosyanın `Available Skills` tablosunda belgeleyin.
 
 ---
 

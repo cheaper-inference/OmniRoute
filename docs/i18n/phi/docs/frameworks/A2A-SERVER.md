@@ -215,21 +215,21 @@ Ang JSON-RPC endpoint na `/a2a` ang kanonikal na A2A entry point. Nagbibigay ang
    };
    ```
 
-3. **Ilantad sa Agent Card:** sa `src/app/.well-known/agent.json/route.ts`, idagdag sa dulo ng `skills` array:
+3. **Ilantad sa Agent Card:** sa `src/lib/a2a/agentCardMetadata.ts` (na parehong ginagamit ng `/.well-known/agent.json` at `/.well-known/agent-card.json`), idagdag sa dulo ng array na `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "Iyong Skill",
+     "description": "Maikli at nakatuon sa layuning paglalarawan",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["Halimbawang invocation sa natural na wika"]
    }
    ```
 
-4. **Sumulat ng mga test:** `tests/unit/a2a-<your-skill>.test.ts`. Saklawin ang matagumpay na path + error path.
+4. **Sumulat ng mga test:** `tests/unit/a2a-<your-skill>.test.ts`. Saklawin ang happy path + error path.
 
-5. **Idokumento** ang bagong skill sa talahanayang `Available Skills` ng file na ito.
+5. **Idokumento** ang bagong skill sa table na `Available Skills` ng file na ito.
 
 ---
 

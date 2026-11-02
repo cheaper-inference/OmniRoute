@@ -104,13 +104,11 @@
 4. បន្ថែម ឬធ្វើបច្ចុប្បន្នភាព `tests/unit/ui/adapters/<name>.test.tsx`។ សម្រាប់ adapter ដែលមាន caller ច្រើន សូមប្រៀបធៀប
    markup ដែលបាន render នៅមុន និងក្រោយការផ្លាស់ប្តូរ — ការផ្លាស់ប្តូរ padding ឬ wrapper រាលដាលទៅគ្រប់ screen ទាំងអស់។
 
-## 5. ការធ្វើបច្ចុប្បន្នភាព kit
+## 5. ការធ្វើបច្ចុប្បន្នភាពឧបករណ៍
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` ចម្លង `src/` ពី upstream នៅ commit នោះ ចូលទៅក្នុង
-`packages/ui-kit/src` ហើយអនុវត្តការបំប្លែងតែមួយដែលត្រូវបានអនុញ្ញាត (វាដក suffix `.js` ចេញពី
-relative import)។ បន្ទាប់មក៖ ពិនិត្យ `git diff packages/ui-kit` ធ្វើការត្រួតពិនិត្យមើលដោយផ្ទាល់លើ providers, settings, combos,
-usage និង endpoint ក្នុង theme ទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយ
-បើក PR ជាមួយនឹង changelog ពី upstream។
+`npm run check:ui-kit-upstream` ប្រៀបធៀបកំណែដែលបានខ្ទាស់ក្នុង `packages/ui-kit/UPSTREAM.md` ជាមួយនឹងស្លាក `v*` ថ្មីបំផុតនៃ repo ខាងលើ ហើយបោះពុម្ពពាក្យបញ្ជាធ្វើសមកាលកម្ម នៅពេលការចេញផ្សាយចេញ។ លំហូរការងារ `UI Kit upstream watch` ប្រចាំសប្តាហ៍ (`.github/workflows/ui-kit-upstream-watch.yml`) ដំណើរការការត្រួតពិនិត្យដូចគ្នា និងរក្សាបញ្ហាតាមដានមួយបើកចំហខណៈពេលដែលម្ជុលនៅពីក្រោយ។ repo ខាងលើមានលក្ខណៈឯកជន ដូច្នេះលំហូរការងារត្រូវការសញ្ញាសម្ងាត់ដែលអាចអានបានតែនៅក្នុង `UI_KIT_READ_TOKEN` សម្ងាត់ ហើយនៅដដែលដោយគ្មានវា។
+
+`scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` ចម្លង `src/` ខាងលើនៅឯការប្តេជ្ញាចិត្តនោះ (`latest` = ស្លាក `v*` ថ្មីបំផុត) ទៅជា `packages/ui-kit/src` អនុវត្តការផ្លាស់ប្តូរដែលបានអនុញ្ញាតតែមួយ (វាទម្លាក់បច្ច័យ `.js` ពីការនាំចូលដែលទាក់ទង) និងកំណត់កំណែកន្លែងធ្វើការនៅក្នុង `packages/ui-kit/package.json` និង `package-lock.json` ទៅផ្នែកខាងលើ។ បន្ទាប់មក៖ ពិនិត្យមើល `git diff packages/ui-kit` ធ្វើវិចារណញាណលើអ្នកផ្តល់សេវា ការកំណត់ បន្សំ ការប្រើប្រាស់ និងចំណុចបញ្ចប់នៅក្នុងស្បែកទាំងពីរ ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយបើក PR ជាមួយនឹងការផ្លាស់ប្តូរកម្រិតខ្ពស់។
 
 ## 6. ដ្យាក្រាម README
 

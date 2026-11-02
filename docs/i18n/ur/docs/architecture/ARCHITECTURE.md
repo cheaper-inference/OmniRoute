@@ -356,163 +356,124 @@ OmniRoute مقامی طور پر چلنے والے AI ٹول پراسیسز کو
 
 تفصیلی جائزہ: `docs/frameworks/EMBEDDED-SERVICES.md`
 
-## بڑے ذیلی نظام (v3.8.0)
+## بڑے سب سسٹمز (v3.8.0)
 
 ### A. آٹو کومبو انجن
 
-آٹو کومبو درخواست کے وقت روٹنگ اہداف کو متحرک طور پر اسکور کرکے منتخب کرتا ہے، بجائے اس کے کہ
-کسی جامد کومبو تعریف پر انحصار کرے۔ یہ `auto/*` ماڈل پری فکس فیملی کو تقویت دیتا ہے۔
+آٹو کومبو متحرک طور پر اسکور کرتا ہے اور درخواست کے وقت روٹنگ کے اہداف کو چنتا ہے، بجائے اس کے کہ جامد کومبو تعریف پر انحصار کیا جائے۔ یہ `auto/*` ماڈل پریفکس فیملی کو طاقت دیتا ہے۔
 
-- انجن کا نقطۂ آغاز: `open-sse/services/autoCombo/` (`autoComboEngine.ts`,
-  `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
-- ریزالور: `src/domain/comboResolver.ts` (`auto/` پری فکس کی خودکار شناخت)
+- انجن کا اندراج: `open-sse/services/autoCombo/` (`autoComboEngine.ts`, `scoringEngine.ts`, `virtualFactory.ts`, `modePacks.ts`)
+- حل کرنے والا: `src/domain/comboResolver.ts` ( `auto/` سابقے کا خود بخود پتہ لگانا)
 - ڈیش بورڈ: `/dashboard/auto-combo`
 - ٹیلی میٹری: `auto_combo_decisions` SQLite ٹیبل
 
-اہم صلاحیتیں:
+کلیدی صلاحیتیں:
 
-- **20 روٹنگ حکمتِ عملیاں** (priority, weighted, fill-first, round-robin, P2C, random,
-  least-used, cost-optimized, reset-aware, reset-window, headroom, quota-weighted,
-  strict-random, **auto**, lkgp, context-optimized, cache-optimized, context-relay, **fusion**,
-  pipeline) —
-  auto، v3.8.0 میں نمایاں اضافہ ہے؛ `fusion` (پینل فین آؤٹ + جج سنتھیسس،
-  `open-sse/services/fusion.ts`) v3.8.36 میں نیا ہے۔
-- **16 عوامل پر مبنی اسکورنگ**: کوٹا، صحت، معکوس لاگت، معکوس تاخیر، کام سے مطابقت اور
-  مزید دس عوامل۔ عوامل اور ان کے طے شدہ اوزان کی مستند جدول
-  [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) میں موجود ہے — اسے یہاں دوبارہ بیان کرنے سے
-  اس کے متروک ہونے کے لیے ایک دوسری جگہ بن جائے گی۔
-- **ورچوئل فیکٹری** اس وقت عارضی کومبوز تخلیق کرتی ہے جب کوئی مماثل نام والا کومبو
-  موجود نہ ہو، اور امیدوار صحت مند فعال پرووائیڈر کنکشنز سے حاصل کیے جاتے ہیں۔
-- **آٹو پری فکسز**: `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`,
-  `auto/smart`, `auto/lkgp` — ہر ایک کو حسبِ ضرورت ترتیب دیے گئے وزن کے پروفائل کی معاونت حاصل ہے۔
-- **6 موڈ پیکس**: `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`,
-  `reliability-first` اور `chaos-mode` — پہلے سے طے شدہ وزن کی کنفیگریشنز جنہیں
-  ڈیش بورڈ سے استعمال کیا جا سکتا ہے۔ (انہیں اوپر دیے گئے `auto/*` پری فکسز کے ساتھ خلط ملط نہ کریں، جو
-  درخواست کے وقت کی مختلف صورتیں ہیں۔)
+- **20 روٹنگ کی حکمت عملی** (ترجیح، وزن والا، پہلے بھرنے والا، راؤنڈ-رابن، P2C، بے ترتیب، کم سے کم استعمال شدہ، لاگت کے لیے بہتر، دوبارہ ترتیب دینے سے آگاہ، دوبارہ ترتیب دینے والی ونڈو، ہیڈ روم، کوٹہ وزنی، سخت بے ترتیب،** آٹو** , lkgp، سیاق و سباق سے بہتر بنایا گیا، کیشے سے بہتر بنایا گیا، سیاق و سباق سے متعلق ریلے،** فیوژن** , پائپ لائن) — آٹو v3.8.0 میں سرخی کا اضافہ ہے۔ `fusion` (پینل فین آؤٹ + جج ترکیب، `open-sse/services/fusion.ts`) v3.8.36 میں نیا ہے۔
+- **16 فیکٹر اسکورنگ** : کوٹہ، صحت، الٹا لاگت، الٹا تاخیر، ٹاسک فٹ اور مزید دس۔ عوامل اور ان کے پہلے سے طے شدہ وزن کا کینونیکل جدول [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) — میں رہتا ہے اسے یہاں پر بحال کرنے سے اسے باسی ہونے کے لئے دوسرا مقام ملے گا۔
+- **ورچوئل فیکٹری** جب کوئی مماثل نامی کومبو موجود نہ ہو، تو صحت مند فعال فراہم کنندہ کنکشنز سے امیدواروں کو سورس کر کے عارضی کمبوز کو حقیقت بناتا ہے۔
+- **خودکار سابقے** : `auto/coding`, `auto/cheap`, `auto/fast`, `auto/offline`, `auto/smart`, `auto/lkgp` — ہر ایک کو ٹیونڈ ویٹ پروفائل کی حمایت حاصل ہے۔
+- **6 موڈ پیک** : `ship-fast`, `cost-saver`, `quality-first`, `offline-friendly`, `reliability-first` اور `chaos-mode` — پیش سیٹ وزن کی کنفیگریشنز ڈیش بورڈ سے کال کی جا سکتی ہیں۔ (مندرجہ بالا `auto/*` سابقے کے ساتھ الجھن میں نہ پڑیں، جو درخواست کے وقت کی مختلف حالتیں ہیں۔)
 
-الگورتھم کی مکمل تفصیل (عوامل کے فارمولے، وزن کی ٹیوننگ) کے لیے،
-[`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) دیکھیں۔
+الگورتھم کی مکمل تفصیل کے لیے (فیکٹر فارمولے، وزن کی ترتیب)، دیکھیں [`docs/routing/AUTO-COMBO.md`](../routing/AUTO-COMBO.md) ۔
 
 ### B. کلاؤڈ ایجنٹس
 
-کلاؤڈ ایجنٹس فریقِ ثالث کے ہوسٹ کردہ کوڈ ایجنٹ پلیٹ فارمز (Codex Cloud، Devin،
-Jules) کو یکساں، DB سے تقویت یافتہ ٹاسک لائف سائیکل کے پیچھے یکجا کرتا ہے۔ ٹاسک بنانے/معائنہ کرنے کے
-تمام اینڈ پوائنٹس کے لیے مینجمنٹ توثیق درکار ہے۔
+کلاؤڈ ایجنٹ تیسرے فریق کے میزبان کوڈ ایجنٹ پلیٹ فارمز (Codex Cloud, Devin, Jules) کو یکساں DB کی حمایت یافتہ ٹاسک لائف سائیکل کے پیچھے لپیٹ دیتے ہیں۔ تمام ٹاسک creation/inspection اینڈ پوائنٹس کو مینجمنٹ کی توثیق کی ضرورت ہوتی ہے۔
 
-- ماڈیول روٹ: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`,
-  `types.ts`, `db.ts`، نیز `agents/` کے تحت ہر ایجنٹ کی ذیلی ڈائریکٹریاں)
-- ہر ایجنٹ کے نفاذ: `agents/codex/`, `agents/devin/`, `agents/jules/`
-- عوامی اینڈ پوائنٹس: `/api/v1/agents/tasks/*` (فہرست/تخلیق/حصول/منسوخی)
-- مینجمنٹ اینڈ پوائنٹس: `/api/cloud/*` (فراہمی، حیثیت، بیچ)
+- ماڈیول روٹ: `src/lib/cloudAgent/` (`baseAgent.ts`, `registry.ts`, `api.ts`, `types.ts`, `db.ts`, علاوہ فی ایجنٹ ذیلی ڈائریکٹریز `agents/` کے تحت )
+- فی ایجنٹ کے نفاذ: `agents/codex/`، `agents/devin/`، `agents/jules/`
+- عوامی اختتامی نکات: `/api/v1/agents/tasks/*` (list/create/get/cancel)
+- مینجمنٹ اینڈ پوائنٹس: `/api/cloud/*` (فراہم، حیثیت، بیچ)
 - ڈیش بورڈ: `/dashboard/cloud-agents`
-- اسٹوریج: `cloud_agent_tasks` ٹیبل
+- ذخیرہ: `cloud_agent_tasks` ٹیبل
 
-ہر ایجنٹ کی فراہمی اور OAuth کی مخصوص تفصیلات کے لیے،
-[`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) دیکھیں۔
+فی ایجنٹ کی فراہمی اور OAuth تفصیلات کے لیے، [`docs/frameworks/CLOUD_AGENT.md`](../frameworks/CLOUD_AGENT.md) دیکھیں۔
 
-### C. حفاظتی پابندیاں
+### C. گارڈریلز
 
-حفاظتی پابندیوں کا ماڈیول ایک ہاٹ ری لوڈ ہونے والی مڈل ویئر پرت ہے جو PII، پرامپٹ انجیکشن،
-اور غیر محفوظ بصری مواد کے لیے درخواستوں اور جوابات کا معائنہ کرتی ہے۔ خلاف ورزیاں
-HTTP **503** اور ایک منظم ایرر کوڈ کے ساتھ درخواست کو فوری طور پر روک دیتی ہیں، جس سے
-بعد کے کالرز دوبارہ کوشش یا متبادل شاخ اختیار کر سکتے ہیں۔
+گارڈریلز ماڈیول ایک گرم دوبارہ لوڈ کرنے کے قابل مڈل ویئر پرت ہے جو PII، فوری انجیکشن، اور غیر محفوظ وژن مواد کے لیے درخواستوں اور جوابات کا معائنہ کرتا ہے۔ خلاف ورزیاں HTTP کے ساتھ درخواست کو شارٹ سرکٹ کرتی ہیں۔** 503** نیز ایک منظم ایرر کوڈ، جو نیچے کی طرف کال کرنے والوں کو دوبارہ کوشش کرنے یا برانچ کرنے کی اجازت دیتا ہے۔
 
-- ماڈیول روٹ: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`,
-  `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
-- ہاٹ ری لوڈ: رجسٹری کنفیگریشن میں تبدیلیوں پر نظر رکھتی ہے اور اسی جگہ چین کو دوبارہ بناتی ہے
-- انضمام کے مقامات: چیٹ ہینڈلر کا آغاز، امیج جنریشن ہینڈلر، ریسپانس سینیٹائزر
-- HTTP معاہدہ: خلاف ورزیاں `503` کی صورت میں `error.code = "GUARDRAIL_VIOLATION"` کے ساتھ ظاہر ہوتی ہیں
+- ماڈیول جڑ: `src/lib/guardrails/` (`base.ts`, `registry.ts`, `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`)
+- ہاٹ ری لوڈ: رجسٹری ترتیب میں تبدیلیوں کو دیکھتی ہے اور چین کو جگہ پر دوبارہ بناتی ہے۔
+- وائر ان پوائنٹس: چیٹ ہینڈلر انٹری، امیج جنریشن ہینڈلر، رسپانس سینیٹائزر
+- HTTP معاہدہ: خلاف ورزیوں کی سطح `error.code = "GUARDRAIL_VIOLATION"` کے ساتھ `503` کے طور پر
 
-قواعد مرتب کرنے اور حدوں کی ٹیوننگ کے لیے،
-[`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) دیکھیں۔
+اصولوں کی تصنیف اور حد کی ترتیب کے لیے، [`docs/security/GUARDRAILS.md`](../security/GUARDRAILS.md) دیکھیں۔
 
 ### D. ڈومین پرت
 
-`src/domain/` نیم اسپیس پالیسی کے فیصلوں کو مرکزی بناتی ہے تاکہ روٹ ہینڈلرز کو
-لاک آؤٹ/بجٹ/فال بیک منطق خود یکجا نہ کرنی پڑے۔
+`src/domain/` نام کی جگہ پالیسی فیصلوں کو مرکزی بناتی ہے لہذا روٹ ہینڈلرز کو خود lockout/budget/fallback منطق کو جمع کرنے کی ضرورت نہیں ہے۔
 
-- پالیسی انجن: `src/domain/policyEngine.ts` — عمل درآمد سے پہلے
-  جائزے کے لیے واحد نقطۂ آغاز (لاک آؤٹ → بجٹ → فال بیک ترتیب)
-- لاگت کے قواعد: `src/domain/costRules.ts`
+- پالیسی انجن: `src/domain/policyEngine.ts` — سنگل انٹری پوائنٹ برائے عمل درآمد سے پہلے کی تشخیص (لاک آؤٹ → بجٹ → فال بیک آرڈرنگ)
+- لاگت کے اصول: `src/domain/costRules.ts`
 - فال بیک پالیسی: `src/domain/fallbackPolicy.ts`
 - لاک آؤٹ پالیسی: `src/domain/lockoutPolicy.ts`
 - ٹیگ پر مبنی روٹنگ: `src/domain/tagRouter.ts`
-- کومبو ریزالور: `src/domain/comboResolver.ts` — کومبو ناموں، auto/\*
-  پری فکسز، اور وائلڈ کارڈ ماڈل اہداف کو ٹھوس عملی منصوبوں میں حل کرتا ہے
-- کنکشن/ماڈل رول جوائنر: `src/domain/connectionModelRules.ts`
-- ماڈل دستیابی کے اسنیپ شاٹس: `src/domain/modelAvailability.ts`
-- پرووائیڈر کی میعاد ختم ہونے کی ٹریکنگ: `src/domain/providerExpiration.ts`
-- کوٹا کیش: `src/domain/quotaCache.ts`
+- کومبو حل کرنے والا: `src/domain/comboResolver.ts` — کامبو ناموں، آٹو/\* سابقہ جات، اور وائلڈ کارڈ ماڈل کے اہداف کو ٹھوس عملدرآمد کے منصوبوں کو حل کرتا ہے
+- Connection/model قاعدہ جوڑنے والا: `src/domain/connectionModelRules.ts`
+- ماڈل کی دستیابی کے اسنیپ شاٹس: `src/domain/modelAvailability.ts`
+- فراہم کنندہ کی میعاد ختم ہونے سے باخبر رہنا: `src/domain/providerExpiration.ts`
+- کوٹہ کیش: `src/domain/quotaCache.ts`
 - تنزلی کی حالت: `src/domain/degradation.ts`
 - کنفیگریشن آڈٹ: `src/domain/configAudit.ts`
-- OmniRoute ریسپانس میٹا ڈیٹا بلڈر: `src/domain/omnirouteResponseMeta.ts`
-- اسیسمنٹ ذیلی نظام: `src/domain/assessment/` — متواتر جائزے کے جابز
+- OmniRoute جواب میٹا ڈیٹا بلڈر: `src/domain/omnirouteResponseMeta.ts`
+- تشخیص کا ذیلی نظام: `src/domain/assessment/` — متواتر تشخیص کی نوکریاں
 
-### E. اجازت دہی پائپ لائن
+### E. اجازت دینے والی پائپ لائن
 
-اجازت دہی پائپ لائن ہر آنے والی درخواست کی درجہ بندی کرتی ہے اور اسے روانہ کرنے سے پہلے
-مناسب پالیسی چین لاگو کرتی ہے۔
+اجازت دینے والی پائپ لائن ہر آنے والی درخواست کی درجہ بندی کرتی ہے اور ڈسپیچ سے پہلے مناسب پالیسی چین کا اطلاق کرتی ہے۔
 
-- پائپ لائن کا نقطۂ آغاز: `src/server/authz/pipeline.ts`
-- درخواست کی درجہ بندی کرنے والا: `src/server/authz/classify.ts` — عوامی
-  مطابقتی روٹس کو مینجمنٹ روٹس سے ممتاز کرتا ہے
-- عوامی روٹس کی فہرست: `src/shared/constants/publicApiRoutes.ts`
-- پالیسیاں: `src/server/authz/policies/` — قابلِ ترکیب شرائط
-  (`requireApiKey`, `requireManagement`, `requireFreshAuth` وغیرہ)
-- ہیڈر یوٹیلیٹیز: `src/server/authz/headers.ts`
-- اسیرشن ہیلپر: `src/server/authz/assertAuth.ts`
-- درخواست کا سیاق: `src/server/authz/context.ts`
+- پائپ لائن اندراج: `src/server/authz/pipeline.ts`
+- درجہ بندی کی درخواست کریں: `src/server/authz/classify.ts` — عوامی مطابقت کے راستوں کو انتظامی راستوں سے ممتاز کرتا ہے
+- عوامی راستے کی انوینٹری: `src/shared/constants/publicApiRoutes.ts`
+- پالیسیاں: `src/server/authz/policies/` — کمپوز ایبل پیشن گوئی (`requireApiKey`، `requireManagement`، `requireFreshAuth`، وغیرہ)
+- ہیڈر کی افادیت: `src/server/authz/headers.ts`
+- دعوی مددگار: `src/server/authz/assertAuth.ts`
+- سیاق و سباق کی درخواست کریں: `src/server/authz/context.ts`
 
-عوامی اور مینجمنٹ روٹس کے درمیان ایک قطعی حد ہے: ایجنٹ/کول ڈاؤن APIs اور
-پرووائیڈر میں تبدیلیوں کے لیے مینجمنٹ توثیق درکار ہے (موجود نہ ہونے پر HTTP 401)۔
+عوامی بمقابلہ انتظامی راستے ایک سخت حد ہیں: agent/cooldown APIs اور فراہم کنندہ کے تغیرات کے لیے انتظامی تصدیق کی ضرورت ہوتی ہے (HTTP 401 اگر غائب ہو)۔
 
-روٹس کی درجہ بندی کے مکمل قواعد کے لیے،
-[`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) دیکھیں۔
+مکمل راستے کی درجہ بندی کے قواعد کے لیے، [`docs/architecture/AUTHZ_GUIDE.md`](./AUTHZ_GUIDE.md) دیکھیں۔
 
-### F. ورک فلو FSM اور ٹاسک سے آگاہ راؤٹر
+### F. ورک فلو FSM اور Task-Aware Router
 
-کومبو انتخاب کے اوپر موجود ایک محدود حالت مشین سے چلنے والا راؤٹر، جو
-شناخت شدہ ورک فلو مرحلے (منصوبہ بندی، عمل درآمد،
-جائزہ) اور پس منظر کے ٹاسک سے وابستگی کی بنیاد پر ٹریفک کی سمت متعین کرتا ہے۔
+کامبو سلیکشن کے اوپر لیئرڈ ایک محدود ریاستی مشین سے چلنے والا راؤٹر پتہ چلا ورک فلو اسٹیج (منصوبہ بندی، عمل درآمد، جائزہ) اور بیک گراؤنڈ ٹاسک سے تعلق کی بنیاد پر براہ راست ٹریفک کے لیے۔
 
 - ورک فلو FSM: `open-sse/services/workflowFSM.ts`
-- ٹاسک سے آگاہ راؤٹر: `open-sse/services/taskAwareRouter.ts`
-- پسِ منظر ٹاسک ڈیٹیکٹر: `open-sse/services/backgroundTaskDetector.ts`
+- ٹاسک سے آگاہ روٹر: `open-sse/services/taskAwareRouter.ts`
+- بیک گراؤنڈ ٹاسک ڈیٹیکٹر: `open-sse/services/backgroundTaskDetector.ts`
 - ارادے کی درجہ بندی کرنے والا: `open-sse/services/intentClassifier.ts`
 
-FSM کی منتقلیاں Auto Combo کی اسکورنگ میں شامل ہوتی ہیں، جو پسِ منظر/خودکاری کے ٹاسکس کے لیے کم قیمت ماڈلز اور انٹرایکٹو منصوبہ بندی/جائزے کے مراحل کے لیے زیادہ طاقتور ماڈلز کی جانب ترجیح بڑھاتی ہیں۔
+FSM ٹرانزیشنز آٹو کومبو کے اسکورنگ میں شامل ہوتے ہیں، background/automation کاموں کے لیے سستے ماڈلز اور انٹرایکٹو planning/review موڑ کے لیے مضبوط ماڈلز کی طرف متوجہ ہوتے ہیں۔
 
-### G. پرووائیڈر کے لحاظ سے لچک پذیری
+### G. فراہم کنندہ کے لیے مخصوص لچک
 
-کئی پرووائیڈرز مخصوص لچک پذیری اور اسٹیلتھ ماڈیولز فراہم کرتے ہیں جو عالمی سرکٹ بریکر / کنکشن کول ڈاؤن / ماڈل لاک آؤٹ تہوں کے ساتھ منسلک ہو کر کام کرتے ہیں:
+کئی فراہم کنندگان مخصوص لچک اور اسٹیلتھ ماڈیول بھیجتے ہیں جو عالمی سرکٹ بریکر/ کنکشن کولڈاؤن/ ماڈل لاک آؤٹ لیئرز پر پگی بیک کرتے ہیں:
 
-- Antigravity 429 انجن: `open-sse/services/antigravity429Engine.ts` (شناخت تبدیل کرتا ہے، ریسپانس ہیڈرز صاف کرتا ہے، اور کریڈٹس/ورژن کی ٹریکنگ کو
-  `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`،
-  `antigravityIdentity.ts`، `antigravityVersion.ts` کے ذریعے چلاتا ہے)
+- Antigravity 429 انجن: `open-sse/services/antigravity429Engine.ts` (شناخت کو گھماتا ہے، جوابی ہیڈر کو جھاڑتا ہے، `antigravityCredits.ts`، `antigravityHeaderScrub.ts`، `antigravityHeaders.ts`، `antigravityIdentity.ts`، `antigravityVersion.ts` کے ذریعے credits/version ٹریکنگ چلاتا ہے)
+- Antigravity 429 گارڈ: `open-sse/services/antigravity429Guard.ts` (تمام میزبانوں میں اپ اسٹریم 429s کا فی درخواست بجٹ، `ANTIGRAVITY_MAX_429_ATTEMPTS`؛ انکار شدہ باڈی کی ایک جیسی دوبارہ بھیجنے کا مقامی طور پر جواب دیا جاتا ہے؛ `src/sse/handlers/chat.ts` ایسی درخواست کو کولڈاؤن سے آگاہ دوبارہ کوشش کے ذریعے دوبارہ شروع نہیں کرتا ہے)
 - ModelScope کوٹہ پالیسی: `open-sse/services/modelscopePolicy.ts`
-- Claude Code CCH (مطابقتی چینل ہینڈ شیک): `open-sse/services/claudeCodeCCH.ts`،
-  نیز `claudeCodeCompatible.ts`، `claudeCodeConstraints.ts`، `claudeCodeExtraRemap.ts`،
-  `claudeCodeToolRemapper.ts`
-- Claude Code فنگرپرنٹ کی تشکیل: `open-sse/services/claudeCodeFingerprint.ts`
-- Claude Code ابہام سازی: `open-sse/services/claudeCodeObfuscation.ts`
+- Claude کوڈ CCH (مطابقت چینل ہینڈ شیک): `open-sse/services/claudeCodeCCH.ts`, plus `claudeCodeCompatible.ts`, `claudeCodeConstraints.ts`, `claudeCodeExtraRemap.ts`, `claudeCodeToolRemapper.ts`
+- Claude کوڈ فنگر پرنٹ کی تشکیل: `open-sse/services/claudeCodeFingerprint.ts`
+- Claude کوڈ obfuscation: `open-sse/services/claudeCodeObfuscation.ts`
 
-مکمل اسٹیلتھ حکمتِ عملی اور عملی رہنمائی کے لیے
-`docs/security/STEALTH_GUIDE.md` دیکھیں (git؛ `/docs` میں کمپائل نہیں کی گئی)۔
+مکمل اسٹیلتھ پلے بک اور آپریشنل رہنمائی کے لیے، `docs/security/STEALTH_GUIDE.md` (git؛ `/docs` میں مرتب نہیں کیا گیا) دیکھیں۔
 
-### H. ویب ہُکس، استدلالی کیش، ریڈ کیش
+### H. Webhooks، Reasoning Cache، Read Cache
 
-- **ویب ہُکس** — پرووائیڈر/اکاؤنٹ/ٹاسک ایونٹس کی بیرونی ترسیل۔
-  - ڈسپیچر: `src/lib/webhookDispatcher.ts`
-  - اسٹوریج: `webhooks` SQLite ٹیبل (`src/lib/db/webhooks.ts` کے ذریعے)
-  - ڈیش بورڈ: `/dashboard/webhooks` (سبسکرپشنز، سیکرٹس، دوبارہ کوشش کی سرگزشت)
-  - ایونٹس کی درجہ بندی اور دوبارہ کوشش کے اصولوں کے لیے [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) دیکھیں۔
-- **استدلالی کیش** — ایسے پرووائیڈرز کے لیے دوبارہ چلائے جا سکنے والے استدلالی بلاکس جو تفکری ٹوکنز خارج کرتے ہیں (Claude، GLMT، وغیرہ)، تاکہ مسلسل مراحل میں دوبارہ سوچنے کی ضرورت نہ رہے۔
-  - DB تہہ: `src/lib/db/reasoningCache.ts`
-  - سروس تہہ: `open-sse/services/reasoningCache.ts`
-  - دوبارہ چلانے کے اصولوں کے لیے [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) دیکھیں۔
-- **ریڈ کیش** — مختصر مدتی ریسپانس کیش جس کی کلید سگنیچر پر مبنی ہوتی ہے اور جسے خراب upstream SDKs سے آنے والی یکساں دوبارہ کوششوں کو یکجا کرنے کے لیے استعمال کیا جاتا ہے۔
-  - DB تہہ: `src/lib/db/readCache.ts`
-  - اعدادوشمار کا اینڈپوائنٹ: `GET /api/cache/stats`، ڈیش بورڈ `/dashboard/cache` پر ہے
+- **ویب ہکس** — provider/account/task واقعات کے لیے آؤٹ باؤنڈ ڈسپیچ۔
+  - بھیجنے والا: `src/lib/webhookDispatcher.ts`
+  - ذخیرہ: `webhooks` SQLite ٹیبل ( `src/lib/db/webhooks.ts` کے ذریعے)
+  - ڈیش بورڈ: `/dashboard/webhooks` (سبسکرپشنز، راز، دوبارہ کوشش کی تاریخ)
+  - واقعہ کی درجہ بندی اور دوبارہ کوشش کرنے کے لیے، [`docs/frameworks/WEBHOOKS.md`](../frameworks/WEBHOOKS.md) دیکھیں۔
+- **Reasoning Cache** — ری پلے ایبل ریجننگ بلاکس فراہم کرنے والوں کے لیے جو سوچ ٹوکن (Claude, GLMT, وغیرہ) خارج کرتے ہیں تاکہ لگاتار موڑ دوبارہ سوچنا چھوڑ سکیں۔
+  - DB پرت: `src/lib/db/reasoningCache.ts`
+  - سروس پرت: `open-sse/services/reasoningCache.ts`
+  - ری پلے سیمنٹکس کے لیے، [`docs/routing/REASONING_REPLAY.md`](../routing/REASONING_REPLAY.md) دیکھیں۔
+- **کیشے پڑھیں** — قلیل المدت رسپانس کیشے کو دستخط کے ذریعے کلید کیا جاتا ہے اور ٹوٹے ہوئے upstream SDKs سے ایک جیسی دوبارہ کوششوں کو ختم کرنے کے لیے استعمال کیا جاتا ہے۔
+  - DB پرت: `src/lib/db/readCache.ts`
+  - اعدادوشمار کا اختتامی نقطہ: `GET /api/cache/stats`، `/dashboard/cache` پر ڈیش بورڈ
 
 ## 3) مستقل ذخیرہ کاری کی تہہ
 
