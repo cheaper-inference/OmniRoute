@@ -1,4 +1,4 @@
--- 223: Add notes and model_map to provider_connections
+-- 227: Add notes and model_map to provider_connections
 -- notes: free-form operator text for connection details, billing notes, or account metadata.
 -- model_map: JSON-encoded dictionary { [requestedModel: string]: string } mapping requested model to actual upstream model.
 
