@@ -6,7 +6,8 @@ name: UI Kit upstream watch
 # issue open while we are behind (closed automatically when the pin catches up).
 #
 # The upstream repo (keak-ai/cheaper-inference-ui-kit) is private: the job needs a read-only token
-# in the `UI_KIT_READ_TOKEN` secret. Without it the check reports "unknown" and does nothing.
+# in the `UI_KIT_READ_TOKEN` secret. When the check can't read upstream it reports "unknown": the
+# run stays green but warns, and keeps ONE issue open until a later run can read upstream again.
 
 on:
   schedule:
@@ -40,6 +41,50 @@ jobs:
           node scripts/check/check-ui-kit-upstream.mjs --json > ui-kit-upstream.json
           cat ui-kit-upstream.json
           echo "state=$(node -p "require('./ui-kit-upstream.json').state")" >> "$GITHUB_OUTPUT"
+      - name: Warn about and track an unreadable upstream
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATE: ${{ steps.check.outputs.state }}
+        run: |
+          set -euo pipefail
+          if [ "$STATE" = "unknown" ]; then
+            DETAIL=$(node -p "require('./ui-kit-upstream.json').detail")
+            echo "::warning title=UI Kit upstream watch::$DETAIL"
+            echo "**UI Kit upstream watch:** state is \`unknown\`, so new kit releases aren't being tracked. $DETAIL" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # Triage may prefix an issue title ("fix: ..."), so match the end of the title. `in:title`
+          # is a looser phrase search, so it can't decide this on its own. No `|| echo ""` here: a
+          # failed lookup has to fail the step, not look like "no issue open" and open a duplicate.
+          NO_TOKEN_TITLE="UI Kit upstream watch can't run: UI_KIT_READ_TOKEN isn't set"
+          UNREADABLE_TITLE="UI Kit upstream watch can't read upstream"
+          OPEN=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
+            --search "in:title \"UI Kit upstream watch can't\"" --limit 100 --json number,title \
+            | jq -r --arg a "$NO_TOKEN_TITLE" --arg b "$UNREADABLE_TITLE" \
+              '.[] | select((.title | endswith($a)) or (.title | endswith($b))) | .number')
+          if [ "$STATE" != "unknown" ]; then
+            for NUMBER in $OPEN; do
+              gh issue close "$NUMBER" --repo "$GITHUB_REPOSITORY" --reason completed \
+                --comment "The watch can read upstream again (state: $STATE)."
+            done
+          elif [ -n "$OPEN" ]; then
+            echo "Already tracked in: $(echo "$OPEN" | sed 's/^/#/' | paste -sd ' ' -)" >> "$GITHUB_STEP_SUMMARY"
+          else
+            REASON=$(node -p "require('./ui-kit-upstream.json').reason")
+            REPO=$(node -p "require('./ui-kit-upstream.json').repo")
+            # Only a token that really is unset gets the title that says so.
+            TITLE="$UNREADABLE_TITLE"
+            if [ "$REASON" = "no-token" ]; then TITLE="$NO_TOKEN_TITLE"; fi
+            {
+              echo "$DETAIL"
+              echo
+              echo "Until this is fixed, no issue opens when \`$REPO\` gets a new release. \`npm run check:ui-kit-upstream\` still works locally with your git credentials."
+              echo
+              echo "The watch needs a read-only token for that repo in the \`UI_KIT_READ_TOKEN\` secret. This issue closes itself on the next run that can read upstream."
+              echo
+              echo "Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+            } > access-body.md
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --body-file access-body.md
+          fi
       - name: Open or close the tracking issue
         if: ${{ steps.check.outputs.state != 'unknown' }}
         env:

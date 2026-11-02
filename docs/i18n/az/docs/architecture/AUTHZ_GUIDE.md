@@ -131,34 +131,34 @@ tamamlanır:
 
 Bəzi `MANAGEMENT` əməliyyatları **yalnız operator üçündür**: `manage` açarı kifayət etmir. Saxlanılan etimadnamələrin ixracı (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı məlumatların üzərinə ehtiyat nüsxəsinin bərpası (`dryRun=true` daxil olmaqla `POST /api/db-backups/import`, identifikatora görə bərpa `POST /api/db-backups` və `POST /api/settings/import-json`) və bərpa nöqtələrinin məhv edilməsi (`DELETE /api/db-backups` təmizləməsi və `PATCH /api/db-backups`, çünki saxladığı saxlama müddəti hər ehtiyat nüsxəsindən sonrakı avtomatik təmizləməni idarə edir) idarəetmə paneli sessiyası, yerli CLI subyekti və ya söndürülmüş giriş tələb edir. Sinxronizasiya tokeni vermək (`POST /api/sync/tokens`) və `admin` CLI giriş tokeni vermək (`POST /api/cli/tokens`) bütün giriş rejimlərində idarəetmə paneli sessiyası və ya yerli CLI subyekti tələb edir. İstənilən əhatəli API açarları və `oma_` giriş tokenləri operator etimadnaməsi deyil: tələb olunduqda `403` alırlar. Yoxlama `src/lib/api/operatorCredential.ts`-dədir (`resolveOperatorCredential()` / `requireOperatorCredential()`). Giriş parametrlərinin dəyişdirilməsi də yalnız operator üçündür: parol mövcud olduqdan sonra `POST /api/settings/require-login` (idarəetmə parolunu təyin etmək / `requireLogin`-i dəyişmək) yalnız bu etimadnamələri qəbul edir — ilk quraşdırma bootstrap pəncərəsi (hələ parol yoxdursa) dəyişməz qalır — və idarəetmə paneli sessiyası parolu əvəz etmək üçün `currentPassword` göndərməlidir (yoxdursa və ya səhvdirsə `403`, `settings.update_failed` kimi audit olunur). Yerli CLI və girişi söndürülmüş instansiya bərpa yolunu saxlayır və parolu onsuz təyin edə bilər, çünki ikisi də məlumat qovluğuna sahib olan hosta bağlıdır.
 
-## Konveyer
+## Boru kəməri
 
 ```
-Daxil olan sorğu → src/proxy.ts
-  → src/server/authz/pipeline.ts daxilində runAuthzPipeline()
-    1. Etibarlı daxili başlıqları sil (x-omniroute-auth-*, x-omniroute-route-class)
-    2. Sorğu identifikatoru yarat, marşrutu classifyRoute() vasitəsilə təsnif et
-    3. Əgər pathname == "/" olarsa → /dashboard ünvanına yönləndir
-    4. Boşaltma rejimindədirsə (nizamlı dayandırma) və /api/* olarsa → 503
-    5. GET olmayan /api/* sorğusudursa → checkBodySize() qoruyucusunu yoxla
-    6. Əgər OPTIONS olarsa → CORS ilkin sorğusuna 204 cavabı ver
-    7. Əgər options.enforce == false olarsa → marşrut sinfi başlıqları ilə dəyişiklik etmədən ötür
-    8. Əks halda: POLICIES[routeClass].evaluate(ctx)
-       - icazə ver  → x-omniroute-auth-{kind,id,label,scopes} əlavə et → NextResponse.next()
-       - rədd et → correlation_id ilə JSON xətası (idarə paneli səhifələri → 302 /login)
+Incoming request → src/proxy.ts
+  → runAuthzPipeline() in src/server/authz/pipeline.ts
+    1. Strip trusted internal headers (x-omniroute-auth-*, x-omniroute-route-class)
+    2. Generate request id, classify route via classifyRoute()
+    3. If pathname == "/" → redirect /dashboard
+    4. If draining (graceful shutdown) and /api/* → 503
+    5. If non-GET /api/* → checkBodySize() guard
+    6. If OPTIONS → CORS preflight 204
+    7. If options.enforce == false → pass-through with route-class headers
+    8. Otherwise: POLICIES[routeClass].evaluate(ctx)
+       - allow  → stamp x-omniroute-auth-{kind,id,label,scopes} → NextResponse.next()
+       - reject → JSON error w/ correlation_id (dashboard pages → 302 /login)
 ```
 
-Etibarlı daxili başlıqlar (`src/server/authz/headers.ts` daxilində müəyyən edilib) təsnifatdan əvvəl **daxil olan sorğulardan silinir** — müştərilər subyekti təqlid etmək üçün `x-omniroute-auth-*` başlıqlarını əvvəlcədən təyin edə bilməzlər.
+Etibarlı daxili başlıqlar ( `src/server/authz/headers.ts` ilə müəyyən edilir) bunlardır** daxil olan sorğulardan məhrum edilmişdir** təsnifatdan əvvəl — müştəriləri subyekti təqlid etmək üçün `x-omniroute-auth-*` əvvəlcədən doldura bilməzlər.
 
 ### Siyasət müqavilələri
 
-Hər marşrut sinfinin `src/server/authz/policies/` daxilində bir siyasəti var:
+Hər bir marşrut sinfinin `src/server/authz/policies/`-da siyasəti var:
 
 - **`publicPolicy`** (`policies/public.ts`) — həmişə `allow({ kind: "anonymous", id: "anonymous" })` qaytarır.
-- **`clientApiPolicy`** (`policies/clientApi.ts`) — Bearer açarını çıxarır və `validateApiKey()` vasitəsilə doğrulayır. Yalnız effektiv `REQUIRE_API_KEY` funksiya bayrağı deaktiv olduqda anonim girişə keçid edir. Effektiv bayraq `isRequireApiKeyEnabled()` vasitəsilə müəyyən edilir (`DB funksiya bayrağı əvəzləməsi > process.env.REQUIRE_API_KEY > standart dəyər`), beləliklə, İdarə Panelindəki Funksiya Bayraqları və mühit dəyişənləri `/api/v1/*`, `/api/v1beta/*` və aliasları ardıcıl şəkildə idarə edir; həlledici xətaları zamanı giriş bağlı saxlanılır. Müştəri API-si marşrutlarında idarə paneli sessiyası ilə edilən sorğulara icazə verir (idarə panelinin model kataloqu tərəfindən istifadə edilən `/api/v1/models` daxil olmaqla).
-- **`managementPolicy`** (`policies/management.ts`) — idarə paneli sessiyasını, daxili model sinxronlaşdırma sorğularını (`/api/providers/[name]/(sync-models|models)` ilə uyğunlaşdırılır) qəbul edir və ya `isAuthRequired()` false qaytardıqda yoxlamanı tamamilə ötürür. Bearer tokeni təqdim edildikdə, lakin etibarsız olduqda 403 (`AUTH_001`), əks halda isə 401 qaytarır. Həmçinin hər hansı autentifikasiya şaxəsindən əvvəl marşrut qoruyucusu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) tətbiq edir — baxın: [Marşrut Qoruyucusu Səviyyələri](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` daxilindəki LOCAL_ONLY yollarına (hazırda: `/api/mcp/`) Bearer açarı `manage` əhatə dairəsinə malik olduqda loopback olmayan ünvanlardan giriş mümkündür; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq yalnız loopback üçün əlçatan qalır.
+- **`clientApiPolicy`** (`policies/clientApi.ts`) — Daşıyıcını çıxarır, `validateApiKey()` vasitəsilə təsdiq edir. Yalnız effektiv `REQUIRE_API_KEY` funksiyasının bayrağı deaktiv edildikdə anonimə keçir. Effektiv bayraq `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) vasitəsilə həll edilir, beləliklə, İdarə Paneli Xüsusiyyətləri Bayraqlar və mühit dəyişənləri `/api/v1/*`, `/api/v1beta/*` və ləqəbləri ardıcıl olaraq idarə edir; həlledici uğursuzluqlar bağlandı. Müştəri API marşrutları üzrə (o cümlədən tablosuna model kataloqu tərəfindən istifadə edilən `/api/v1/models`) panel-sessiya sorğularına icazə verir. Entra ID SSO aktivləşdirildikdə, struktur olaraq Entra tokeni (üç base64url seqmenti, `RS*` alg, `kid`) olan Daşıyıcı SSO filialı tərəfindən idarə olunur.** əvvəl** `validateApiKey()` və onun hökmü yekun — o, heç vaxt API açarı yoluna və ya degraddan anonim filiala düşmür, ona görə də identifikasiya provayderinin kəsilməsi açıq girişə çevrilə bilməz. Statik API düymələri təsirlənmir. [Entra ID SSO](../security/ENTRA_SSO.md) baxın.
+- **`managementPolicy`** (`policies/management.ts`) — tablosuna seansı, daxili model sinxronizasiya sorğularını qəbul edir ( `/api/providers/[name]/(sync-models|models)` ilə uyğun gəlir) və ya `isAuthRequired()` yalnış qaytardıqda tamamilə ötür. Daşıyıcı nişanı mövcud olduqda, lakin etibarsız olduqda 403 (`AUTH_001`) qaytarır, əks halda 401. Həmçinin marşrut qoruyucu səviyyələrini (LOCAL_ONLY / ALWAYS_PROTECTED) hər hansı auth filialından əvvəl tətbiq edir — Baxın [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md). `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` da (bu gün: `/api/mcp/`) LOCAL_ONLY yollarına Daşıyıcı açarı `manage` əhatə dairəsini daşıdıqda qeyri-döngüdən daxil ola bilər; bütün digər LOCAL_ONLY yolları əhatə dairəsindən asılı olmayaraq ciddi geri dönmə olaraq qalır.
 
-Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, anonymous }` olan `AuthSubject` qaytarır. Aşağı axındakı işləyicilər autentifikasiya məntiqini yenidən icra etmək əvəzinə onu `src/server/authz/assertAuth.ts` daxilindəki `assertAuth(request, "CLIENT_API")` vasitəsilə oxuya bilərlər.
+Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }` ilə `AuthSubject` qaytarır. Aşağı axın işləyiciləri auth məntiqini yenidən işə salmaq əvəzinə onu `src/server/authz/assertAuth.ts` -də `assertAuth(request, "CLIENT_API")` vasitəsilə oxuya bilər.
 
 ## Açıq marşrutların siyahısı
 
@@ -307,23 +307,23 @@ Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxuma
 
 ## Sazlama
 
-Konveyer cavablara həmişə aşağıdakı başlıqları əlavə edir:
+Boru kəməri həmişə cavabları möhürləyir:
 
 ```
-x-request-id:               <korrelyasiya identifikatoru, xəta gövdələrində təkrarlanır>
+x-request-id:               <correlation id, echoed in error bodies>
 x-omniroute-route-class:    PUBLIC | CLIENT_API | MANAGEMENT
 ```
 
-Autentifikasiya edilmiş sorğular üçün yuxarı axındakı (işləyici tərəfindəki) sorğu başlıqlarına həmçinin aşağıdakılar daxildir:
+Doğrulanmış sorğular üçün yuxarı (işləyici tərəfi) sorğu başlıqlarına da daxildir:
 
 ```
-x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous
-x-omniroute-auth-id:        key_<son-4> | "dashboard" | "anonymous"
-x-omniroute-auth-label:     (ixtiyari)
-x-omniroute-auth-scopes:    vergüllə ayrılmış siyahı
+x-omniroute-auth-kind:      client_api_key | dashboard_session | management_key | anonymous | sso_user
+x-omniroute-auth-id:        key_<last-4> | "dashboard" | "anonymous" | <entra-oid>
+x-omniroute-auth-label:     (optional)
+x-omniroute-auth-scopes:    comma-separated list
 ```
 
-İşləyicilərin daxilində `assertAuth(req, expectedClass)` istifadə edin — aralıq proqram təminatı keçildikdə o, `AUTHZ_NOT_INITIALIZED` kodu ilə `AuthzAssertionError` xətası yaradır (testlərdə konfiqurasiya reqressiyalarını aşkar etmək üçün faydalıdır).
+İşləyicilərin içərisində `assertAuth(req, expectedClass)` istifadə edin — əgər ara proqram yan keçibsə, `AuthzAssertionError` kodunu `AUTHZ_NOT_INITIALIZED` ilə atır (testlərdə konfiqurasiya reqressiyalarını tutmaq üçün faydalıdır).
 
 ## Həmçinin baxın
 
