@@ -865,26 +865,11 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
-    const userParts = contents.find((c) => c.role === "user")?.parts;
-    let firstUserText: string | null = null;
-    if (Array.isArray(userParts)) {
-      for (const part of userParts) {
-        if (
-          part &&
-          typeof part === "object" &&
-          "text" in part &&
-          typeof (part as { text?: unknown }).text === "string"
-        ) {
-          firstUserText = (part as { text: string }).text;
-          break;
-        }
-      }
-    }
     const identity = buildAntigravityEnvelopeIdentity({
       isClaude,
+      credentials,
       sessionIdFallback:
         typeof normalizedRequest?.sessionId === "string" ? normalizedRequest.sessionId : undefined,
-      firstUserText,
     });
 
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);

@@ -15,17 +15,15 @@ export interface AntigravityEnvelopeIdentity {
 
 export function buildAntigravityEnvelopeIdentity(args: {
   isClaude: boolean;
+  credentials?: AntigravityCredentialsLike | null;
   sessionIdFallback?: string | null;
-  firstUserText?: string | null;
 }): AntigravityEnvelopeIdentity {
   const agentId = crypto.randomUUID();
   const trajectoryId = crypto.randomUUID();
   const step = 2;
   const requestId = `agent/${agentId}/${Date.now()}/${trajectoryId}/${step}`;
 
-  const fallback = toNonEmptyString(args.sessionIdFallback);
-  const derived = fallback ? null : deriveAntigravitySessionId(args.firstUserText);
-  const sessionId = fallback || derived || generateAntigravitySessionId();
+  const sessionId = getAntigravitySessionId(args.credentials, args.sessionIdFallback);
 
   const isClaudeStr = String(Boolean(args.isClaude));
   const labels: Record<string, string> = {

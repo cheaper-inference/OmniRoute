@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import {
   buildAntigravityEnvelopeIdentity,
-  deriveAntigravitySessionId,
+  getAntigravitySessionId,
 } from "../../open-sse/services/antigravityIdentity.ts";
 import { AntigravityExecutor } from "../../open-sse/executors/antigravity.ts";
 
@@ -10,8 +10,8 @@ describe("Part A - Antigravity Envelope Identity and Labels", () => {
   it("buildAntigravityEnvelopeIdentity produces expected requestId, labels, and session fallback", () => {
     const identityClaude = buildAntigravityEnvelopeIdentity({
       isClaude: true,
+      credentials: { email: "user@example.com" },
       sessionIdFallback: "custom-session-123",
-      firstUserText: "Hello there",
     });
 
     assert.match(
@@ -28,12 +28,10 @@ describe("Part A - Antigravity Envelope Identity and Labels", () => {
     });
     assert.equal("model_enum" in identityClaude.labels, false);
 
-    const identityGemini = buildAntigravityEnvelopeIdentity({
-      isClaude: false,
-      firstUserText: "First prompt",
-    });
+    const credentials = { email: "user@example.com" };
+    const identityGemini = buildAntigravityEnvelopeIdentity({ isClaude: false, credentials });
     assert.match(identityGemini.requestId, /^agent\/[0-9a-f-]{36}\/\d+\/[0-9a-f-]{36}\/2$/);
-    assert.equal(identityGemini.sessionId, deriveAntigravitySessionId("First prompt"));
+    assert.equal(identityGemini.sessionId, getAntigravitySessionId(credentials));
     assert.deepEqual(identityGemini.labels, {
       last_step_index: "1",
       trajectory_id: identityGemini.requestId.split("/")[3],
