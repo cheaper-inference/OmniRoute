@@ -18,12 +18,19 @@ import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
  * The latch only records which windows/credits already produced a toast, so a
  * page reload does not re-toast them. No upstream call, no quota consumed;
  * management auth is used because it is a persisted dashboard setting.
+ * DELETE is the operator's reset: the next evaluation alerts on everything again.
  */
 
 export const dynamic = "force-dynamic";
 
+// Far above a real fleet (connections x windows + live credits); the hook prunes the rest.
+const MAX_LATCH_ENTRIES = 5000;
+
 const latchSchema = z.object({
-  latch: z.record(z.string().max(200), z.number().finite()).optional(),
+  latch: z
+    .record(z.string().max(200), z.number().finite())
+    .refine((latch) => Object.keys(latch).length <= MAX_LATCH_ENTRIES)
+    .optional(),
 });
 
 export async function GET(request: Request) {

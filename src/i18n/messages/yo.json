@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Auto-Ping fún Quota Codex",
     "codexAutoPingDesc": "Yan láti tan án fún ìsopọ̀ kọ̀ọ̀kan: ó máa ń fi ìbéèrè kékeré kan ránṣẹ́ lẹ́sẹ̀kẹsẹ̀ lẹ́yìn tí fèrèsé session Codex bá tún bẹ̀rẹ̀, kí ó má bàa tutù nígbà tí o bá nílò rẹ̀.",
     "codexAutoPingWarning": "Ó máa ń lo díẹ̀ lára quota Codex gidi ní gbogbo ping. Ó wà ní pípa ní àìfọwọ́yí — tan án fún àwọn ìsopọ̀ tí o gbára lé gan-an nìkan.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Ìmúdójúìwọ̀n ètò Codex Auto-Ping kùnà",
     "codexAutoPingToggleAria": "Tan tàbí pa Codex quota auto-ping fún {connection}",
     "codexWakeups": {

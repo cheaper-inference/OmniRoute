@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Awtomatikong Pag-ping ng Quota ng Codex",
     "codexAutoPingDesc": "Opsyonal sa bawat koneksyon: nagpapadala ng napakaliit na request kaagad pagkatapos mag-reset ang window ng session ng Codex para handa na ito kapag kailangan mo.",
     "codexAutoPingWarning": "Gumagamit ng kaunting aktuwal na quota ng Codex sa bawat pag-ping. Naka-off bilang default — i-enable lamang para sa mga koneksyong aktibo mong ginagamit.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Nabigong i-update ang setting ng Awtomatikong Pag-ping ng Codex",
     "codexAutoPingToggleAria": "I-toggle ang awtomatikong pag-ping ng quota ng Codex para sa {connection}",
     "codexWakeups": {

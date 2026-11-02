@@ -4,94 +4,210 @@
  * useQuotaWindowAlerts — wires the pure alert evaluators
  * (`quotaWindowAlerts.ts`) to the toast channel.
  *
- * Deliberately client-side and cheap: it runs off the quota snapshot the
- * dashboard already polls (every 5 min, cache-only), so it adds zero upstream
- * requests and no server work. Dedupe is a ref (per session) seeded from the
- * persisted latch, so a reload does not re-toast windows that already alerted.
+ * Opt-in (`settings.codexQuotaAlerts.enabled`, default false). While it is off the
+ * only cost is reading the setting once on mount: no latch read, no credit listing,
+ * no toast, no write.
  *
- * Opt-in: when `enabled` is false (the default) both evaluators return [] and
- * nothing is written to the store or the DB.
+ * While it is on:
+ * - Window alerts run off the quota snapshot the dashboard already polls and add
+ *   no request.
+ * - Credit alerts need expiry dates, which the usage poll does not carry (it only
+ *   has the banked count). So Codex accounts with banked credits are listed at most
+ *   once per `RESET_CREDIT_LIST_INTERVAL_MS` while the page is visible. Listing is a
+ *   read: it spends no quota and no credit.
+ * - The latch is persisted whenever it changes, recovery included, so a window that
+ *   recovered before a reload can alert again on its next drop.
  */
 
-import { useCallback, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
+import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import {
-  collectQuotaWindowAlerts,
-  collectResetCreditExpiryAlerts,
+  evaluateQuotaAlerts,
+  selectConnectionsWithBankedCredits,
+  type ConnectionSnapshot,
   type QuotaAlertLatch,
+  type ResetCreditLike,
 } from "./quotaWindowAlerts";
+import { formatQuotaLabel, getResetCreditEndpoint } from "./utils";
+
+export const RESET_CREDIT_LIST_INTERVAL_MS = 60 * 60 * 1000;
+const RESET_CREDIT_WAKE_INTERVAL_MS = 5 * 60 * 1000;
+const REQUEST_TIMEOUT_MS = 8000;
+const QUOTA_ALERT_LATCH_URL = "/api/settings/quota-alert-latch";
+
+interface AlertConnection {
+  id: string;
+  provider?: string;
+  isActive?: boolean;
+  name?: string;
+  displayName?: string;
+  email?: string;
+}
 
 interface UseQuotaWindowAlertsOptions {
-  enabled: boolean;
-  quotaSnapshot: Record<string, { provider?: string; quotas?: unknown[] }>;
-  expiringCredits: Record<string, Array<{ creditId?: unknown; expiresAt?: unknown }>>;
-  /** Persisted latch, loaded once by the caller. */
-  initialLatch?: QuotaAlertLatch;
-  /** Persist the latch after each evaluation. */
-  persistLatch?: (latch: QuotaAlertLatch) => void;
+  quotaSnapshot: Record<string, ConnectionSnapshot>;
+  connections: AlertConnection[];
+  emailsVisible: boolean;
+}
+
+/**
+ * `latch` stays null until the opt-in is confirmed and the persisted latch is read. Any
+ * failed read therefore keeps the alerts silent instead of re-toasting everything.
+ */
+function useQuotaAlertOptIn(): QuotaAlertLatch | null {
+  const [latch, setLatch] = useState<QuotaAlertLatch | null>(null);
+
+  useEffect(() => {
+    let alive = true;
+    const load = async () => {
+      try {
+        const settingsResponse = await fetchWithTimeout("/api/settings", {
+          timeoutMs: REQUEST_TIMEOUT_MS,
+        });
+        const settings = settingsResponse.ok ? await settingsResponse.json() : null;
+        if (settings?.codexQuotaAlerts?.enabled !== true) return;
+
+        const latchResponse = await fetchWithTimeout(QUOTA_ALERT_LATCH_URL, {
+          timeoutMs: REQUEST_TIMEOUT_MS,
+        });
+        const data = latchResponse.ok ? await latchResponse.json() : null;
+        if (alive && data?.latch && typeof data.latch === "object") setLatch(data.latch);
+      } catch {
+        /* keep the default: alerts stay off */
+      }
+    };
+    void load();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  return latch;
+}
+
+function useExpiringResetCredits(
+  active: boolean,
+  connections: AlertConnection[],
+  quotaSnapshot: Record<string, ConnectionSnapshot>
+): Record<string, ResetCreditLike[]> {
+  const [credits, setCredits] = useState<Record<string, ResetCreditLike[]>>({});
+  const lastListedAtRef = useRef<Record<string, number>>({});
+  // A joined key, so a new snapshot object holding the same accounts does not restart the timer.
+  const eligibleKey = active
+    ? selectConnectionsWithBankedCredits(connections, quotaSnapshot).join("\n")
+    : "";
+
+  useEffect(() => {
+    if (!eligibleKey) return;
+    let alive = true;
+    const listDueConnections = async () => {
+      if (document.visibilityState === "hidden") return;
+      for (const connectionId of eligibleKey.split("\n")) {
+        const lastListedAt = lastListedAtRef.current[connectionId] ?? 0;
+        if (Date.now() - lastListedAt < RESET_CREDIT_LIST_INTERVAL_MS) continue;
+        lastListedAtRef.current[connectionId] = Date.now();
+        try {
+          const response = await fetchWithTimeout(
+            `${getResetCreditEndpoint("codex")}?connectionId=${encodeURIComponent(connectionId)}`,
+            { timeoutMs: REQUEST_TIMEOUT_MS, cache: "no-store" }
+          );
+          const data = response.ok ? await response.json() : null;
+          if (alive && Array.isArray(data?.credits)) {
+            setCredits((previous) => ({ ...previous, [connectionId]: data.credits }));
+          }
+        } catch {
+          /* the account is listed again after the interval */
+        }
+      }
+    };
+    void listDueConnections();
+    const timer = setInterval(() => void listDueConnections(), RESET_CREDIT_WAKE_INTERVAL_MS);
+    return () => {
+      alive = false;
+      clearInterval(timer);
+    };
+  }, [eligibleKey]);
+
+  return credits;
+}
+
+function persistLatch(latch: QuotaAlertLatch): void {
+  void fetch(QUOTA_ALERT_LATCH_URL, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ latch }),
+  }).catch(() => {
+    /* persistence is best-effort; the in-memory latch still dedupes this session */
+  });
 }
 
 export function useQuotaWindowAlerts({
-  enabled,
   quotaSnapshot,
-  expiringCredits,
-  initialLatch,
-  persistLatch,
-}: UseQuotaWindowAlertsOptions) {
+  connections,
+  emailsVisible,
+}: UseQuotaWindowAlertsOptions): void {
   const t = useTranslations("usage");
-  const notify = useNotificationStore();
-  const latchRef = useRef<QuotaAlertLatch>({ ...(initialLatch ?? {}) });
-  const seededRef = useRef(initialLatch !== undefined);
-  const snapshotRef = useRef(quotaSnapshot);
-  const creditsRef = useRef(expiringCredits);
+  const notifyError = useNotificationStore((store) => store.error);
+  const notifyWarning = useNotificationStore((store) => store.warning);
+  const persistedLatch = useQuotaAlertOptIn();
+  const expiringCredits = useExpiringResetCredits(
+    persistedLatch !== null,
+    connections,
+    quotaSnapshot
+  );
+  // Seeded once from the persisted copy, then this ref owns the state: re-seeding would
+  // resurrect entries the evaluator just cleared on recovery.
+  const latchRef = useRef<QuotaAlertLatch | null>(null);
 
-  // `initialLatch` arrives asynchronously from GET /api/settings/quota-alert-latch.
-  // Seed once when it lands, then let the ref own the state — re-seeding on every
-  // render would resurrect entries the evaluator just cleared on recovery.
-  if (!seededRef.current && initialLatch !== undefined) {
-    latchRef.current = { ...initialLatch };
-    seededRef.current = true;
-  }
-
-  // Keep the refs fresh without re-running the effect on every poll identity
-  // change (the polling hooks return new objects each time).
-  snapshotRef.current = quotaSnapshot;
-  creditsRef.current = expiringCredits;
-
-  const evaluate = useCallback(() => {
-    if (!enabled) return;
-
+  useEffect(() => {
+    if (persistedLatch === null) return;
+    latchRef.current ??= { ...persistedLatch };
     const latch = latchRef.current;
-    const windowAlerts = collectQuotaWindowAlerts(snapshotRef.current as never, latch, {
-      enabled: true,
+
+    const { windowAlerts, creditAlerts, changed } = evaluateQuotaAlerts({
+      latch,
+      quotaSnapshot,
+      expiringCredits,
+      liveConnectionIds: connections.map((connection) => connection.id),
     });
-    const creditAlerts = collectResetCreditExpiryAlerts(creditsRef.current as never, latch, {
-      enabled: true,
-    });
+
+    const titleFor = (connectionId: string) => {
+      const connection = connections.find((candidate) => candidate.id === connectionId);
+      const account = connection
+        ? pickDisplayValue(
+            [connection.name, connection.displayName, connection.email],
+            emailsVisible,
+            connection.provider
+          )
+        : null;
+      return account ? `${t("quotaAlertTitle")} · ${account}` : t("quotaAlertTitle");
+    };
 
     for (const alert of windowAlerts) {
       const message = t("quotaAlertWindowLow", {
-        window: alert.windowName,
+        window: alert.displayName || formatQuotaLabel(alert.windowName),
         remaining: Math.round(alert.remainingPercentage ?? 0),
       });
-      if (alert.severity === "critical") notify.error(message, t("quotaAlertTitle"));
-      else notify.warning(message, t("quotaAlertTitle"));
+      if (alert.severity === "critical") notifyError(message, titleFor(alert.connectionId));
+      else notifyWarning(message, titleFor(alert.connectionId));
     }
 
     for (const alert of creditAlerts) {
-      notify.warning(
-        t("quotaAlertCreditExpiring", { credit: alert.creditId ?? "" }),
-        t("quotaAlertTitle")
-      );
+      notifyWarning(t("quotaAlertCreditExpiring"), titleFor(alert.connectionId));
     }
 
-    if ((windowAlerts.length > 0 || creditAlerts.length > 0) && persistLatch) {
-      persistLatch({ ...latch });
-    }
-  }, [enabled, notify, persistLatch, t]);
-
-  useEffect(() => {
-    evaluate();
-  }, [evaluate, quotaSnapshot, expiringCredits]);
+    if (changed) persistLatch({ ...latch });
+  }, [
+    connections,
+    emailsVisible,
+    expiringCredits,
+    notifyError,
+    notifyWarning,
+    persistedLatch,
+    quotaSnapshot,
+    t,
+  ]);
 }

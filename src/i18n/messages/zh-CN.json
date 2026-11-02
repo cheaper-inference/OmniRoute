@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex 配额自动 Ping",
     "codexAutoPingDesc": "按连接选择加入：在 Codex 会话窗口重置后立即发送一个小请求，这样您需要时它不会是冷状态。",
     "codexAutoPingWarning": "每次 ping 会消耗少量真实 Codex 配额。默认关闭 — 仅在您主动依赖的连接上启用。",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "更新 Codex 自动 Ping 设置失败",
     "codexAutoPingToggleAria": "切换 {connection} 的 Codex 配额自动 Ping",
     "codexWakeups": {

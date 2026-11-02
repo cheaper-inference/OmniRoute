@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "ការផ្ញើ Ping ដោយស្វ័យប្រវត្តិសម្រាប់កូតា Codex",
     "codexAutoPingDesc": "ជ្រើសរើសបើកសម្រាប់ការតភ្ជាប់នីមួយៗ៖ ផ្ញើសំណើតូចមួយភ្លាមៗបន្ទាប់ពីចន្លោះពេលនៃសម័យ Codex ត្រូវបានកំណត់ឡើងវិញ ដើម្បីកុំឱ្យវានៅស្ថានភាពត្រជាក់នៅពេលអ្នកត្រូវការវា។",
     "codexAutoPingWarning": "ប្រើប្រាស់កូតា Codex ពិតប្រាកដមួយចំនួនតូចរាល់ពេល ping។ បិទតាមលំនាំដើម — បើកតែសម្រាប់ការតភ្ជាប់ដែលអ្នកពឹងផ្អែកយ៉ាងសកម្មប៉ុណ្ណោះ។",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "មិនអាចធ្វើបច្ចុប្បន្នភាពការកំណត់ Codex Auto-Ping បានទេ",
     "codexAutoPingToggleAria": "បិទ/បើកការផ្ញើ ping កូតា Codex ដោយស្វ័យប្រវត្តិសម្រាប់ {connection}",
     "codexWakeups": {

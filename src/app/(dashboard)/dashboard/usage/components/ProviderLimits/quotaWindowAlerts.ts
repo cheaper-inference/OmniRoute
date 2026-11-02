@@ -9,11 +9,17 @@
  *   for hours must produce ONE alert, not one per poll — that is what the
  *   `seen` latch is for. The latch clears when the window recovers, so a later
  *   drop alerts again.
+ * - One step up does alert again: a window latched at warning alerts once more
+ *   when it reaches critical, then stays quiet.
  * - Latch state is a plain serialisable object: the caller persists it in
  *   `key_value` (client dedupe survives a reload) or keeps it in a ref.
  * - Nothing here fires when the feature is disabled (default) — the caller
  *   passes `{ enabled }` and this returns no alerts.
  */
+
+import type { QuotaAlertLatch } from "@/shared/types/quotaAlerts";
+
+export type { QuotaAlertLatch };
 
 const CRITICAL_REMAINING_PERCENT = 15;
 const WARNING_REMAINING_PERCENT = 35;
@@ -29,16 +35,12 @@ export interface QuotaWindowAlert {
   severity: QuotaAlertSeverity;
   connectionId: string;
   windowName: string;
+  /** The provider's own label for this window, when it reports one. */
+  displayName?: string;
   remainingPercentage?: number;
   creditId?: string;
   expiresAt?: string;
 }
-
-/**
- * Latch map: alert key → the remaining percentage that produced the alert.
- * Serialisable on purpose (persisted straight into `key_value`).
- */
-export type QuotaAlertLatch = Record<string, number>;
 
 export interface QuotaAlertOptions {
   enabled?: boolean;
@@ -48,6 +50,11 @@ export interface QuotaAlertOptions {
 
 interface QuotaLike {
   name?: unknown;
+  displayName?: unknown;
+  used?: unknown;
+  total?: unknown;
+  creditCount?: unknown;
+  remaining?: unknown;
   remainingPercentage?: unknown;
   staleAfterReset?: unknown;
   isResetCredits?: unknown;
@@ -55,7 +62,7 @@ interface QuotaLike {
   unlimited?: unknown;
 }
 
-interface ConnectionSnapshot {
+export interface ConnectionSnapshot {
   provider?: string;
   quotas?: QuotaLike[];
 }
@@ -65,26 +72,30 @@ function severityFor(remaining: number): QuotaAlertSeverity {
 }
 
 /**
- * A quota row is a *window* only when it reports a real percentage AND is not
- * a credit balance, an unlimited bucket, or a window already past its reset
- * (which `quotaParsing` zeroes out — alerting on that would page the operator
- * about a window that just rolled over).
+ * A quota row is a *window* only when a real percentage can be read from it AND
+ * it is not a credit balance, an unlimited bucket, or a window already past its
+ * reset (which `quotaParsing` zeroes out — alerting on that would page the
+ * operator about a window that just rolled over).
+ *
+ * Not every provider sends `remainingPercentage`: Codex windows arrive as
+ * `{ used, total: 100 }`, so the percentage is derived the same way the quota
+ * cards derive it (`getQuotaRemainingPercentage`).
  */
-function isAlertableWindow(quota: QuotaLike): number | null {
+function alertableRemainingPercent(quota: QuotaLike): number | null {
   if (!quota || typeof quota !== "object") return null;
   if (quota.isResetCredits === true || quota.isCredits === true) return null;
   if (quota.unlimited === true) return null;
   if (quota.staleAfterReset === true) return null;
 
-  const remaining = Number(quota.remainingPercentage);
-  if (!Number.isFinite(remaining)) return null;
-  return remaining;
-}
+  if (quota.remainingPercentage !== undefined && quota.remainingPercentage !== null) {
+    const reported = Number(quota.remainingPercentage);
+    return Number.isFinite(reported) ? reported : null;
+  }
 
-function thresholdFor(remaining: number): number {
-  return remaining <= CRITICAL_REMAINING_PERCENT
-    ? CRITICAL_REMAINING_PERCENT
-    : WARNING_REMAINING_PERCENT;
+  const total = Number(quota.total);
+  const used = Number(quota.used ?? 0);
+  if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(used)) return null;
+  return Math.max(0, Math.min(100, Math.round(((total - used) / total) * 100)));
 }
 
 /**
@@ -106,33 +117,35 @@ export function collectQuotaWindowAlerts(
     if (allowedProviders && !allowedProviders.has(String(connection.provider ?? ""))) continue;
 
     for (const quota of connection.quotas ?? []) {
-      const remaining = isAlertableWindow(quota);
+      const remaining = alertableRemainingPercent(quota);
       if (remaining === null) continue;
 
       const windowName = String(quota.name ?? "");
       if (!windowName) continue;
 
       const key = `${connectionId}:${windowName}`;
-      const threshold = thresholdFor(remaining);
-      const belowThreshold = remaining <= threshold;
       const latched = Object.prototype.hasOwnProperty.call(latch, key);
 
-      if (!belowThreshold) {
+      if (remaining > WARNING_REMAINING_PERCENT) {
         // Recovery clears the latch so a later drop can alert again.
         if (latched) delete latch[key];
         continue;
       }
 
-      // Already alerted for this window: stay quiet until it recovers.
-      if (latched) continue;
+      const severity = severityFor(remaining);
+      // Already alerted at this level: stay quiet until it recovers or gets worse.
+      if (latched && (severity !== "critical" || severityFor(latch[key]) === "critical")) continue;
 
       latch[key] = remaining;
       alerts.push({
         key,
         kind: "below_threshold",
-        severity: severityFor(remaining),
+        severity,
         connectionId,
         windowName,
+        ...(typeof quota.displayName === "string" && quota.displayName
+          ? { displayName: quota.displayName }
+          : {}),
         remainingPercentage: remaining,
       });
     }
@@ -141,7 +154,12 @@ export function collectQuotaWindowAlerts(
   return alerts;
 }
 
+/**
+ * `selectionToken` is what the credits list route returns; `creditId` stays accepted
+ * for callers that already hold the id.
+ */
 export interface ResetCreditLike {
+  selectionToken?: unknown;
   creditId?: unknown;
   expiresAt?: unknown;
 }
@@ -165,7 +183,7 @@ export function collectResetCreditExpiryAlerts(
 
   for (const [connectionId, credits] of Object.entries(creditsByConnection ?? {})) {
     for (const credit of credits ?? []) {
-      const creditId = String(credit?.creditId ?? "").trim();
+      const creditId = String(credit?.selectionToken ?? credit?.creditId ?? "").trim();
       const expiresAt = typeof credit?.expiresAt === "string" ? credit.expiresAt : null;
       if (!creditId || !expiresAt) continue;
 
@@ -178,7 +196,7 @@ export function collectResetCreditExpiryAlerts(
       if (remainingMs > horizonMs) continue;
 
       const key = `${connectionId}:credit:${creditId}`;
-      if (Object.prototype.hasOwnProperty.call(latch, key)) continue;
+      if (latch[key] === expiresAtMs) continue;
 
       latch[key] = expiresAtMs;
       alerts.push({
@@ -196,11 +214,60 @@ export function collectResetCreditExpiryAlerts(
   return alerts;
 }
 
-/** Drop latch entries for connections/credits that are no longer present. */
-export function pruneQuotaAlertLatch(latch: QuotaAlertLatch, liveKeys: Set<string>): void {
+/**
+ * Keep the persisted latch bounded: drop entries of deleted connections and of credits
+ * already past their expiry. An empty `liveConnectionIds` means "not loaded yet" and keeps
+ * every connection entry, because a partial list must not re-arm alerts that already fired.
+ */
+export function pruneQuotaAlertLatch(
+  latch: QuotaAlertLatch,
+  liveConnectionIds: readonly string[],
+  nowMs: number
+): void {
   for (const key of Object.keys(latch)) {
-    if (!liveKeys.has(key)) delete latch[key];
+    if (key.includes(":credit:") && latch[key] <= nowMs) {
+      delete latch[key];
+      continue;
+    }
+    if (liveConnectionIds.length === 0) continue;
+    if (!liveConnectionIds.some((id) => key.startsWith(`${id}:`))) delete latch[key];
   }
+}
+
+/** One evaluation pass. `changed` is true whenever the latch must be persisted, recovery included. */
+export function evaluateQuotaAlerts(input: {
+  latch: QuotaAlertLatch;
+  quotaSnapshot: Record<string, ConnectionSnapshot>;
+  expiringCredits: Record<string, ResetCreditLike[]>;
+  liveConnectionIds: readonly string[];
+  now?: () => number;
+}): { windowAlerts: QuotaWindowAlert[]; creditAlerts: QuotaWindowAlert[]; changed: boolean } {
+  const { latch, quotaSnapshot, expiringCredits, liveConnectionIds } = input;
+  const now = input.now ?? Date.now;
+  const before = JSON.stringify(latch);
+  const windowAlerts = collectQuotaWindowAlerts(quotaSnapshot, latch);
+  const creditAlerts = collectResetCreditExpiryAlerts(expiringCredits, latch, { now });
+  pruneQuotaAlertLatch(latch, liveConnectionIds, now());
+  return { windowAlerts, creditAlerts, changed: JSON.stringify(latch) !== before };
+}
+
+/**
+ * Codex accounts the snapshot reports as holding banked credits. The usage poll only
+ * carries the count, so these are the only accounts worth listing for expiry dates.
+ */
+export function selectConnectionsWithBankedCredits(
+  connections: ReadonlyArray<{ id: string; provider?: string; isActive?: boolean }>,
+  quotaSnapshot: Record<string, ConnectionSnapshot>
+): string[] {
+  return connections
+    .filter((connection) => connection.provider === "codex" && connection.isActive !== false)
+    .filter((connection) =>
+      (quotaSnapshot[connection.id]?.quotas ?? []).some(
+        (quota) =>
+          quota?.isResetCredits === true && Number(quota.creditCount ?? quota.remaining ?? 0) > 0
+      )
+    )
+    .map((connection) => connection.id);
 }
 
 export const QUOTA_ALERT_THRESHOLDS = {

@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Автопинг квоты Codex",
     "codexAutoPingDesc": "Включается отдельно для каждого подключения: сразу после сброса окна сессии Codex отправляется небольшой запрос, чтобы сессия не была «холодной», когда она вам понадобится.",
     "codexAutoPingWarning": "Каждый пинг расходует небольшую часть реальной квоты Codex. По умолчанию отключено — включайте только для подключений, которые вы активно используете.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Не удалось обновить настройку автопинга Codex",
     "codexAutoPingToggleAria": "Переключить автопинг квоты Codex для {connection}",
     "codexWakeups": {

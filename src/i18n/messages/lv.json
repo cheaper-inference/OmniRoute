@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex kvotas automātiskā pinga sūtīšana",
     "codexAutoPingDesc": "Iespējojams katram savienojumam atsevišķi: tūlīt pēc Codex sesijas loga atiestatīšanas nosūta nelielu pieprasījumu, lai tas nebūtu neaktīvs, kad jums tas ir nepieciešams.",
     "codexAutoPingWarning": "Katrā pinga reizē patērē nelielu daļu faktiskās Codex kvotas. Pēc noklusējuma izslēgts — iespējojiet tikai tiem savienojumiem, kurus aktīvi izmantojat.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Neizdevās atjaunināt Codex automātiskā pinga iestatījumu",
     "codexAutoPingToggleAria": "Pārslēgt Codex kvotas automātiskā pinga sūtīšanu savienojumam {connection}",
     "codexWakeups": {

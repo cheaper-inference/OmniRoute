@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Nnyocha-akpaaka Oke Codex",
     "codexAutoPingDesc": "A na-ahọrọ ya iche maka njikọ ọ bụla: ọ na-eziga obere arịrịọ ozugbo windo nnọkọ Codex malitegharịrị ka ọ ghara ịdị oyi mgbe ịchọrọ ya.",
     "codexAutoPingWarning": "Ọ na-eri obere oke Codex n'ezie na ping ọ bụla. Agbanyụghị ya na ndabara — gbanye ya naanị maka njikọ ndị ị na-adabere na ha mgbe niile.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Imelite ntọala Codex Auto-Ping kụrụ afọ n'ala",
     "codexAutoPingToggleAria": "Gbanye ma ọ bụ gbanyụọ Codex quota auto-ping maka {connection}",
     "codexWakeups": {

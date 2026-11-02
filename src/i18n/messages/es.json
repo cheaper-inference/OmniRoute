@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Ping automático de cuota de Codex",
     "codexAutoPingDesc": "Activación opcional por conexión: envía una pequeña solicitud justo después de que se restablezca una ventana de sesión de Codex para evitar un arranque en frío cuando la necesites.",
     "codexAutoPingWarning": "Consume una pequeña cantidad de cuota real de Codex con cada ping. Está desactivado de forma predeterminada; actívalo solo para las conexiones de las que dependas activamente.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "No se pudo actualizar la configuración del ping automático de Codex",
     "codexAutoPingToggleAria": "Activar o desactivar el ping automático de cuota de Codex para {connection}",
     "codexWakeups": {

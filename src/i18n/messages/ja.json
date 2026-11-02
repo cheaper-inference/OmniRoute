@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codexクォータ自動Ping",
     "codexAutoPingDesc": "接続ごとのオプトイン設定：Codexセッションのウィンドウがリセットされた直後に小さなリクエストを送信し、必要なときにコールド状態にならないようにします。",
     "codexAutoPingWarning": "Pingのたびに実際のCodexクォータを少量消費します。デフォルトではオフです。常用する接続に対してのみ有効にしてください。",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex自動Ping設定の更新に失敗しました",
     "codexAutoPingToggleAria": "{connection}のCodexクォータ自動Pingを切り替える",
     "codexWakeups": {

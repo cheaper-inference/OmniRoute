@@ -195,3 +195,171 @@ test("keeps separate latches per connection and window", () => {
   assert.equal(found.length, 2);
   assert.notEqual(found[0].key, found[1].key);
 });
+
+const parsing =
+  await import("../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaParsing.ts");
+
+/** Same shape `open-sse/services/codexUsageQuotas.ts` produces: no `remainingPercentage`. */
+function codexUsage(sessionUsedPercent: number) {
+  const resetAt = new Date(Date.now() + 3_600_000).toISOString();
+  return {
+    quotas: {
+      session: {
+        used: sessionUsedPercent,
+        total: 100,
+        remaining: 100 - sessionUsedPercent,
+        resetAt,
+        unlimited: false,
+      },
+      weekly: { used: 10, total: 100, remaining: 90, resetAt, unlimited: false },
+    },
+    bankedResetCredits: 2,
+  };
+}
+
+test("a real parsed Codex snapshot alerts on a low window", () => {
+  const quotas = parsing.parseQuotaData("codex", codexUsage(90));
+  const found = alerts.collectQuotaWindowAlerts({ "conn-1": { quotas } }, {});
+
+  assert.equal(found.length, 1);
+  assert.equal(found[0].windowName, "session");
+  assert.equal(found[0].severity, "critical");
+  assert.equal(found[0].remainingPercentage, 10);
+});
+
+test("a real parsed Codex snapshot stays quiet above the warning threshold", () => {
+  const quotas = parsing.parseQuotaData("codex", codexUsage(20));
+
+  assert.deepEqual(alerts.collectQuotaWindowAlerts({ "conn-1": { quotas } }, {}), []);
+});
+
+test("a warning window alerts once more when it reaches critical", () => {
+  const seen = {};
+
+  const warning = alerts.collectQuotaWindowAlerts(
+    snapshot([quota({ remainingPercentage: 30 })]),
+    seen
+  );
+  assert.equal(warning[0].severity, "warning");
+
+  const critical = alerts.collectQuotaWindowAlerts(
+    snapshot([quota({ remainingPercentage: 10 })]),
+    seen
+  );
+  assert.equal(critical.length, 1);
+  assert.equal(critical[0].severity, "critical");
+
+  // Critical is the top: bouncing inside it, or back to warning, stays quiet.
+  for (const remainingPercentage of [5, 20, 12]) {
+    assert.deepEqual(
+      alerts.collectQuotaWindowAlerts(snapshot([quota({ remainingPercentage })]), seen),
+      []
+    );
+  }
+});
+
+test("a credit from the list route (selectionToken) alerts", () => {
+  const soon = new Date(Date.now() + 6 * 3_600_000).toISOString();
+  const found = alerts.collectResetCreditExpiryAlerts(
+    { "conn-1": [{ selectionToken: "token-1", expiresAt: soon }] },
+    {}
+  );
+
+  assert.equal(found.length, 1);
+  assert.equal(found[0].key, "conn-1:credit:token-1");
+});
+
+test("a re-issued credit with a new expiry alerts again", () => {
+  const seen = {};
+  const first = new Date(Date.now() + 6 * 3_600_000).toISOString();
+  const second = new Date(Date.now() + 12 * 3_600_000).toISOString();
+
+  alerts.collectResetCreditExpiryAlerts(
+    { "conn-1": [{ selectionToken: "t", expiresAt: first }] },
+    seen
+  );
+  const found = alerts.collectResetCreditExpiryAlerts(
+    { "conn-1": [{ selectionToken: "t", expiresAt: second }] },
+    seen
+  );
+
+  assert.equal(found.length, 1);
+});
+
+test("evaluateQuotaAlerts reports a change on recovery, not only on a new alert", () => {
+  const latch = {};
+  const drop = alerts.evaluateQuotaAlerts({
+    latch,
+    quotaSnapshot: snapshot([quota({ remainingPercentage: 10 })]),
+    expiringCredits: {},
+    liveConnectionIds: ["conn-1"],
+  });
+  assert.equal(drop.windowAlerts.length, 1);
+  assert.equal(drop.changed, true);
+
+  const steady = alerts.evaluateQuotaAlerts({
+    latch,
+    quotaSnapshot: snapshot([quota({ remainingPercentage: 10 })]),
+    expiringCredits: {},
+    liveConnectionIds: ["conn-1"],
+  });
+  assert.equal(steady.changed, false);
+
+  const recovered = alerts.evaluateQuotaAlerts({
+    latch,
+    quotaSnapshot: snapshot([quota({ remainingPercentage: 95 })]),
+    expiringCredits: {},
+    liveConnectionIds: ["conn-1"],
+  });
+  assert.equal(recovered.windowAlerts.length, 0);
+  assert.equal(recovered.changed, true);
+  assert.deepEqual(latch, {});
+});
+
+test("pruneQuotaAlertLatch drops deleted connections and expired credits only", () => {
+  const nowMs = 1_000_000;
+  const latch = {
+    "live:session": 10,
+    "gone:session": 10,
+    "live:credit:expired": nowMs - 1,
+    "live:credit:pending": nowMs + 1,
+  };
+
+  alerts.pruneQuotaAlertLatch(latch, ["live"], nowMs);
+
+  assert.deepEqual(latch, { "live:session": 10, "live:credit:pending": nowMs + 1 });
+});
+
+test("pruneQuotaAlertLatch keeps connection entries until the list has loaded", () => {
+  const latch = { "conn-1:session": 10 };
+
+  alerts.pruneQuotaAlertLatch(latch, [], 0);
+
+  assert.deepEqual(latch, { "conn-1:session": 10 });
+});
+
+test("selectConnectionsWithBankedCredits picks active Codex accounts holding credits", () => {
+  const quotas = parsing.parseQuotaData("codex", codexUsage(10));
+  const noCredits = parsing.parseQuotaData("codex", {
+    ...codexUsage(10),
+    bankedResetCredits: 0,
+  });
+
+  const selected = alerts.selectConnectionsWithBankedCredits(
+    [
+      { id: "with-credits", provider: "codex" },
+      { id: "without-credits", provider: "codex" },
+      { id: "inactive", provider: "codex", isActive: false },
+      { id: "other-provider", provider: "claude" },
+      { id: "not-loaded", provider: "codex" },
+    ],
+    {
+      "with-credits": { quotas },
+      "without-credits": { quotas: noCredits },
+      inactive: { quotas },
+      "other-provider": { quotas },
+    }
+  );
+
+  assert.deepEqual(selected, ["with-credits"]);
+});

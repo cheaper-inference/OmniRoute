@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex-kvóta automatikus pingelése",
     "codexAutoPingDesc": "Kapcsolatonként engedélyezhető: közvetlenül egy Codex-munkamenet időablakának alaphelyzetbe állása után apró kérést küld, hogy ne hidegen induljon, amikor szükséged van rá.",
     "codexAutoPingWarning": "Minden ping kis mennyiségű valódi Codex-kvótát használ fel. Alapértelmezés szerint ki van kapcsolva — csak azoknál a kapcsolatoknál engedélyezd, amelyekre aktívan támaszkodsz.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Nem sikerült frissíteni a Codex automatikus pingelésének beállítását",
     "codexAutoPingToggleAria": "A Codex-kvóta automatikus pingelésének be- vagy kikapcsolása ehhez: {connection}",
     "codexWakeups": {

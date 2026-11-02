@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Ping Otomatis Kuota Codex",
     "codexAutoPingDesc": "Aktifkan per koneksi: mengirim permintaan kecil tepat setelah jendela sesi Codex diatur ulang agar siap saat Anda membutuhkannya.",
     "codexAutoPingWarning": "Menghabiskan sedikit kuota Codex aktual pada setiap ping. Dinonaktifkan secara bawaan — aktifkan hanya untuk koneksi yang benar-benar Anda andalkan.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Gagal memperbarui pengaturan Ping Otomatis Codex",
     "codexAutoPingToggleAria": "Aktifkan/nonaktifkan ping otomatis kuota Codex untuk {connection}",
     "codexWakeups": {

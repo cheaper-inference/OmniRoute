@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Ping Awtomatiku tal-Kwota ta’ Codex",
     "codexAutoPingDesc": "Attivazzjoni volontarja għal kull konnessjoni: jibgħat talba żgħira eżatt wara li tiġġedded tieqa ta’ sessjoni Codex, sabiex Codex ikun lest meta jkollok bżonnu.",
     "codexAutoPingWarning": "Jikkonsma ammont żgħir mill-kwota reali ta’ Codex ma’ kull ping. Huwa diżattivat b’mod predefinit — attivah biss għal konnessjonijiet li tuża regolarment.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Ma rnexxiex jiġi aġġornat l-issettjar tal-Ping Awtomatiku ta’ Codex",
     "codexAutoPingToggleAria": "Aqleb il-ping awtomatiku tal-kwota ta’ Codex għal {connection}",
     "codexWakeups": {

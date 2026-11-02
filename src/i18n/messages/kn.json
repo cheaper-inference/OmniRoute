@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex ಕೋಟಾ ಸ್ವಯಂ-ಪಿಂಗ್",
     "codexAutoPingDesc": "ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಆಯ್ಕೆಮಾಡಿ ಸಕ್ರಿಯಗೊಳಿಸಬಹುದು: Codex ಸೆಷನ್ ವಿಂಡೋ ಮರುಹೊಂದಿದ ತಕ್ಷಣ ಒಂದು ಅತಿ ಸಣ್ಣ ವಿನಂತಿಯನ್ನು ಕಳುಹಿಸುತ್ತದೆ, ಆದ್ದರಿಂದ ನಿಮಗೆ ಅಗತ್ಯವಾದಾಗ ಅದು ಕೋಲ್ಡ್ ಸ್ಥಿತಿಯಲ್ಲಿರುವುದಿಲ್ಲ.",
     "codexAutoPingWarning": "ಪ್ರತಿ ಪಿಂಗ್ನಲ್ಲಿ ನೈಜ Codex ಕೋಟಾದ ಸ್ವಲ್ಪ ಪ್ರಮಾಣವನ್ನು ಬಳಸುತ್ತದೆ. ಪೂರ್ವನಿಯೋಜಿತವಾಗಿ ಆಫ್ ಆಗಿರುತ್ತದೆ — ನೀವು ಸಕ್ರಿಯವಾಗಿ ಅವಲಂಬಿಸುವ ಸಂಪರ್ಕಗಳಿಗೆ ಮಾತ್ರ ಸಕ್ರಿಯಗೊಳಿಸಿ.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex ಸ್ವಯಂ-ಪಿಂಗ್ ಸೆಟ್ಟಿಂಗ್ ಅನ್ನು ನವೀಕರಿಸಲು ವಿಫಲವಾಗಿದೆ",
     "codexAutoPingToggleAria": "{connection} ಗಾಗಿ Codex ಕೋಟಾ ಸ್ವಯಂ-ಪಿಂಗ್ ಅನ್ನು ಟಾಗಲ್ ಮಾಡಿ",
     "codexWakeups": {

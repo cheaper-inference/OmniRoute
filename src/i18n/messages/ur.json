@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex کوٹا آٹو پنگ",
     "codexAutoPingDesc": "ہر کنکشن کے لیے اختیاری: Codex سیشن ونڈو ری سیٹ ہونے کے فوراً بعد ایک مختصر درخواست بھیجتا ہے تاکہ ضرورت کے وقت یہ کولڈ نہ ہو۔",
     "codexAutoPingWarning": "ہر پنگ پر حقیقی Codex کوٹے کی معمولی مقدار استعمال ہوتی ہے۔ بطور ڈیفالٹ بند ہے — صرف ان کنکشنز کے لیے فعال کریں جن پر آپ واقعی انحصار کرتے ہیں۔",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex آٹو پنگ کی ترتیب اپ ڈیٹ کرنے میں ناکامی",
     "codexAutoPingToggleAria": "{connection} کے لیے Codex کوٹا آٹو پنگ ٹوگل کریں",
     "codexWakeups": {

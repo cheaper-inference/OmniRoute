@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "פינג אוטומטי למכסת Codex",
     "codexAutoPingDesc": "הפעלה לפי בחירה עבור כל חיבור: שולח בקשה זעירה מיד לאחר איפוס חלון ההפעלה של Codex, כדי שלא יהיה במצב קר כשתזדקקו לו.",
     "codexAutoPingWarning": "צורך כמות קטנה ממכסת Codex האמיתית בכל פינג. מושבת כברירת מחדל — יש להפעיל רק עבור חיבורים שאתם מסתמכים עליהם באופן פעיל.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "עדכון הגדרת הפינג האוטומטי של Codex נכשל",
     "codexAutoPingToggleAria": "הפעלה או השבתה של פינג אוטומטי למכסת Codex עבור {connection}",
     "codexWakeups": {

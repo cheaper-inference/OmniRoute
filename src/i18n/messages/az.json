@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex kvotası üçün avtomatik ping",
     "codexAutoPingDesc": "Hər bağlantı üçün ayrıca aktivləşdirilir: Codex sessiya pəncərəsi sıfırlandıqdan dərhal sonra kiçik bir sorğu göndərir ki, ehtiyacınız olduqda əvvəlcədən isinmiş olsun.",
     "codexAutoPingWarning": "Hər ping zamanı az miqdarda real Codex kvotası sərf olunur. Defolt olaraq söndürülüb — yalnız aktiv şəkildə istifadə etdiyiniz bağlantılar üçün qoşun.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex avtomatik ping ayarını yeniləmək alınmadı",
     "codexAutoPingToggleAria": "{connection} üçün Codex kvotasının avtomatik pingini aktiv və ya deaktiv edin",
     "codexWakeups": {

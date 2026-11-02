@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Automatický ping kvóty Codex",
     "codexAutoPingDesc": "Možnosť zapnutia pre každé pripojenie: odošle malú požiadavku hneď po obnovení okna relácie Codex, aby bolo pripojenie pripravené, keď ho budete potrebovať.",
     "codexAutoPingWarning": "Pri každom pingu spotrebuje malé množstvo skutočnej kvóty Codex. Predvolene vypnuté — povoľte iba pre pripojenia, na ktoré sa aktívne spoliehate.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Nepodarilo sa aktualizovať nastavenie automatického pingu Codex",
     "codexAutoPingToggleAria": "Prepnúť automatický ping kvóty Codex pre {connection}",
     "codexWakeups": {

@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "پینگ خودکار سهمیه Codex",
     "codexAutoPingDesc": "فعالسازی اختیاری برای هر اتصال: بلافاصله پس از بازنشانی پنجره نشست Codex، یک درخواست کوچک ارسال میکند تا هنگام نیاز در حالت سرد نباشد.",
     "codexAutoPingWarning": "هر پینگ مقدار کمی از سهمیه واقعی Codex را مصرف میکند. بهطور پیشفرض خاموش است — فقط برای اتصالهایی فعال کنید که فعالانه به آنها متکی هستید.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "بهروزرسانی تنظیم پینگ خودکار Codex ناموفق بود",
     "codexAutoPingToggleAria": "تغییر وضعیت پینگ خودکار سهمیه Codex برای {connection}",
     "codexWakeups": {

@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex Quota အလိုအလျောက် Ping",
     "codexAutoPingDesc": "ချိတ်ဆက်မှုတစ်ခုချင်းစီအလိုက် ရွေးချယ်ဖွင့်နိုင်သည်။ Codex session window ပြန်လည်စတင်ပြီးသည်နှင့် တောင်းဆိုမှုအသေးစားတစ်ခု ပေးပို့သောကြောင့် လိုအပ်ချိန်တွင် cold ဖြစ်မနေပါ။",
     "codexAutoPingWarning": "Ping တစ်ကြိမ်စီတွင် အမှန်တကယ် Codex quota အနည်းငယ်ကို သုံးစွဲသည်။ မူလအတိုင်း ပိတ်ထားပြီး သင် အမှန်တကယ် အားကိုးအသုံးပြုသည့် ချိတ်ဆက်မှုများအတွက်သာ ဖွင့်ပါ။",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex အလိုအလျောက် Ping ဆက်တင်ကို အပ်ဒိတ်လုပ်၍ မရပါ",
     "codexAutoPingToggleAria": "{connection} အတွက် Codex quota အလိုအလျောက် Ping ကို ဖွင့်/ပိတ်ရန်",
     "codexWakeups": {

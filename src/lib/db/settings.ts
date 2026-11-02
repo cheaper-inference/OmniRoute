@@ -315,12 +315,12 @@ export async function getSettings() {
     // connection on, since pinging burns a small amount of real quota (Hard Rule #20
     // spirit: never mutate/consume on the operator's behalf by default).
     codexAutoPing: { connections: {} },
-    // Opt-in dashboard alerts for quota windows and reset credits about to
-    // expire. Purely client-side toasts: no upstream call, no consumption. Off
-    // by default so nobody gets paged until they ask for it.
-    codexQuotaAlerts: { enabled: false },
     // #8848: opt-in per-connection Claude proactive warmup (empty = off for everyone).
     claudeWarmup: { connections: {} },
+    // Opt-in dashboard toasts for low quota windows and reset credits about to expire.
+    // Consumes nothing: while on, the Usage page lists a Codex account's banked credits
+    // hourly (a read) for their expiry. Off by default so nobody gets paged until they ask.
+    codexQuotaAlerts: { enabled: false },
     // Operator-set CLI client-version overrides for the Claude Code / Codex
     // identity presets (open-sse/config/cliVersions.ts). Empty record = no
     // override: resolution falls back to the env var, then the captured pin.

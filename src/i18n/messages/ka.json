@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex-ის კვოტის ავტომატური პინგი",
     "codexAutoPingDesc": "სურვილისამებრ, თითოეული კავშირისთვის: Codex-ის სესიის ფანჯრის განულებისთანავე აგზავნის მცირე მოთხოვნას, რათა საჭიროებისას სისტემა ცივი არ იყოს.",
     "codexAutoPingWarning": "ყოველი პინგი მოიხმარს Codex-ის რეალური კვოტის მცირე რაოდენობას. ნაგულისხმევად გამორთულია — ჩართეთ მხოლოდ იმ კავშირებისთვის, რომლებსაც აქტიურად ეყრდნობით.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex-ის ავტომატური პინგის პარამეტრის განახლება ვერ მოხერხდა",
     "codexAutoPingToggleAria": "Codex-ის კვოტის ავტომატური პინგის გადართვა კავშირისთვის {connection}",
     "codexWakeups": {

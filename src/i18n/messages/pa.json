@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex ਕੋਟਾ ਆਟੋ-ਪਿੰਗ",
     "codexAutoPingDesc": "ਹਰ ਕਨੈਕਸ਼ਨ ਲਈ ਚੋਣਵਾਂ: Codex ਸੈਸ਼ਨ ਵਿੰਡੋ ਰੀਸੈੱਟ ਹੋਣ ਤੋਂ ਤੁਰੰਤ ਬਾਅਦ ਇੱਕ ਛੋਟੀ ਜਿਹੀ ਬੇਨਤੀ ਭੇਜਦਾ ਹੈ, ਤਾਂ ਜੋ ਲੋੜ ਪੈਣ ਵੇਲੇ ਇਹ ਕੋਲਡ ਨਾ ਹੋਵੇ।",
     "codexAutoPingWarning": "ਹਰੇਕ ਪਿੰਗ 'ਤੇ ਅਸਲ Codex ਕੋਟੇ ਦੀ ਥੋੜ੍ਹੀ ਮਾਤਰਾ ਵਰਤਦਾ ਹੈ। ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ — ਸਿਰਫ਼ ਉਹਨਾਂ ਕਨੈਕਸ਼ਨਾਂ ਲਈ ਸਮਰੱਥ ਕਰੋ ਜਿਨ੍ਹਾਂ 'ਤੇ ਤੁਸੀਂ ਸਰਗਰਮੀ ਨਾਲ ਨਿਰਭਰ ਕਰਦੇ ਹੋ।",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex ਆਟੋ-ਪਿੰਗ ਸੈਟਿੰਗ ਅੱਪਡੇਟ ਕਰਨ ਵਿੱਚ ਅਸਫਲ",
     "codexAutoPingToggleAria": "{connection} ਲਈ Codex ਕੋਟਾ ਆਟੋ-ਪਿੰਗ ਟੌਗਲ ਕਰੋ",
     "codexWakeups": {

@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "የCodex ኮታ ራስ-ሰር ፒንግ",
     "codexAutoPingDesc": "ለእያንዳንዱ ግንኙነት በፈቃድ የሚነቃ፦ የCodex ክፍለ ጊዜ መስኮት እንደገና ከተጀመረ በኋላ ወዲያውኑ አነስተኛ ጥያቄ ይልካል፣ በሚያስፈልግዎት ጊዜ ያልተዘጋጀ እንዳይሆን።",
     "codexAutoPingWarning": "እያንዳንዱ ፒንግ አነስተኛ መጠን ያለውን ትክክለኛ የCodex ኮታ ይጠቀማል። በነባሪነት ጠፍቷል — በንቃት ለሚመኩባቸው ግንኙነቶች ብቻ ያንቁት።",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "የCodex ራስ-ሰር ፒንግ ቅንብርን ማዘመን አልተሳካም",
     "codexAutoPingToggleAria": "ለ{connection} የCodex ኮታ ራስ-ሰር ፒንግን አብራ/አጥፋ",
     "codexWakeups": {

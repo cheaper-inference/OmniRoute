@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex 配額自動 Ping",
     "codexAutoPingDesc": "可為每個連線選擇啟用：在 Codex 工作階段視窗重設後立即傳送一個極小的請求，避免在您需要使用時處於冷啟動狀態。",
     "codexAutoPingWarning": "每次 Ping 都會消耗少量實際 Codex 配額。預設關閉——請只為您經常仰賴的連線啟用。",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "無法更新 Codex 自動 Ping 設定",
     "codexAutoPingToggleAria": "切換 {connection} 的 Codex 配額自動 Ping",
     "codexWakeups": {

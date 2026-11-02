@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Codex కోటా ఆటో-పింగ్",
     "codexAutoPingDesc": "ప్రతి కనెక్షన్కు ఎంపిక చేసుకోవచ్చు: Codex సెషన్ విండో రీసెట్ అయిన వెంటనే ఒక చిన్న అభ్యర్థనను పంపుతుంది, తద్వారా మీకు అవసరమైనప్పుడు అది సిద్ధంగా ఉంటుంది.",
     "codexAutoPingWarning": "ప్రతి పింగ్కు కొద్దిపాటి వాస్తవ Codex కోటా వినియోగించబడుతుంది. డిఫాల్ట్గా ఆఫ్లో ఉంటుంది — మీరు చురుకుగా ఆధారపడే కనెక్షన్లకు మాత్రమే ప్రారంభించండి.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex ఆటో-పింగ్ సెట్టింగ్ను నవీకరించడం విఫలమైంది",
     "codexAutoPingToggleAria": "{connection} కోసం Codex కోటా ఆటో-పింగ్ను టాగుల్ చేయండి",
     "codexWakeups": {

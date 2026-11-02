@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "اختبار حصة Codex تلقائيًا",
     "codexAutoPingDesc": "خيار لكل اتصال: يرسل طلبًا صغيرًا مباشرةً بعد إعادة ضبط نافذة جلسة Codex كي يكون الاتصال جاهزًا عند الحاجة.",
     "codexAutoPingWarning": "يستهلك كل اختبار قدرًا صغيرًا من حصة Codex الفعلية. الخيار معطل افتراضيًا؛ فعّله فقط للاتصالات التي تعتمد عليها.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "فشل تحديث إعداد Codex Auto-Ping",
     "codexAutoPingToggleAria": "تبديل اختبار حصة Codex التلقائي للاتصال {connection}",
     "codexWakeups": {

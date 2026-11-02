@@ -12,7 +12,7 @@
  */
 
 import { getDbInstance } from "./core";
-import type { QuotaAlertLatch } from "@/app/(dashboard)/dashboard/usage/components/ProviderLimits/quotaWindowAlerts";
+import type { QuotaAlertLatch } from "@/shared/types/quotaAlerts";
 
 const QUOTA_ALERT_LATCH_NAMESPACE = "quotaAlertLatch";
 const QUOTA_ALERT_LATCH_KEY = "state";

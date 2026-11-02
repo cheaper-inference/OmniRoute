@@ -8552,6 +8552,10 @@
     "codexAutoPingTitle": "Samodejno preverjanje kvote Codex",
     "codexAutoPingDesc": "Omogočanje za posamezno povezavo: takoj po ponastavitvi časovnega okna seje Codex pošlje majhno zahtevo, da seja ni neaktivna, ko jo potrebujete.",
     "codexAutoPingWarning": "Vsako preverjanje porabi majhen del dejanske kvote Codex. Privzeto je izklopljeno — omogočite ga le za povezave, na katere se aktivno zanašate.",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Nastavitve samodejnega preverjanja Codex ni bilo mogoče posodobiti",
     "codexAutoPingToggleAria": "Preklopi samodejno preverjanje kvote Codex za {connection}",
     "codexWakeups": {

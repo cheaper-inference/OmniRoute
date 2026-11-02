@@ -8629,6 +8629,10 @@
     "codexAutoPingTitle": "Codex কোটা অটো-পিং",
     "codexAutoPingDesc": "প্রতি সংযোগে অপ্ট-ইন: Codex সেশন উইন্ডো রিসেট হওয়ার ঠিক পরে একটি ক্ষুদ্র অনুরোধ পাঠায়, যাতে প্রয়োজনের সময় এটি কোল্ড না থাকে।",
     "codexAutoPingWarning": "প্রতিটি পিংয়ে অল্প পরিমাণ প্রকৃত Codex কোটা ব্যবহৃত হয়। ডিফল্টভাবে বন্ধ—শুধু যেসব সংযোগের ওপর আপনি সক্রিয়ভাবে নির্ভর করেন, সেগুলোর জন্য এটি চালু করুন।",
+    "codexQuotaAlertsTitle": "__MISSING__:Quota alerts",
+    "codexQuotaAlertsDesc": "__MISSING__:Opt-in: a toast on the Usage page when a quota window drops below 35% or 15%, and when a Codex reset credit is within 24 hours of expiring.",
+    "codexQuotaAlertsHint": "__MISSING__:While this is on, the open Usage page lists the banked credits of each Codex account that has any, at most once an hour, to read their expiry dates. Listing consumes no quota and no credit.",
+    "codexQuotaAlertsSaveError": "__MISSING__:Could not save the quota alerts setting",
     "codexAutoPingSaveError": "Codex অটো-পিং সেটিং আপডেট করা যায়নি",
     "codexAutoPingToggleAria": "{connection}-এর জন্য Codex কোটা অটো-পিং টগল করুন",
     "codexWakeups": {
