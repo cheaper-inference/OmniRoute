@@ -8,7 +8,7 @@ import {
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 // The committed terminal demo must be exactly what the generator produces, carry the kit mono
-// face inline, draw every string it subsets, keep the counts gate's numbers readable as text
+// face inline, keep every string as text, keep the counts gate's numbers readable as text
 // and declare both palettes with no literal color escaping the theme. Same staleness contract
 // as tests/unit/docs/readme-hero-svg.test.ts.
 
@@ -24,9 +24,8 @@ test("the committed cli-terminal diagram is exactly what the generator produces"
   );
 });
 
-test("the terminal embeds the kit mono face only (1 face) and nothing external", async () => {
+test("the only embedded font is the mono subset for its terminal text, and nothing is external", async () => {
   const svg = await renderCliTerminal();
-  // One role is passed to buildFontFaceCss: mono — a terminal draws nothing else.
   assert.equal((svg.match(/@font-face/g) || []).length, 1);
   assert.ok(svg.includes('font-family:"CI Mono"'));
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
@@ -34,7 +33,7 @@ test("the terminal embeds the kit mono face only (1 face) and nothing external",
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
-test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+test("every copy string stays in the file as text", async () => {
   const svg = await renderCliTerminal();
   for (const s of Object.values(CLI_TERMINAL_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);

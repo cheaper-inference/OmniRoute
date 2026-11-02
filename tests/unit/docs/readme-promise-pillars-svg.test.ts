@@ -7,8 +7,7 @@ import {
 } from "../../../scripts/docs/gen-readme-promise-pillars.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
-// The committed six-pillar promise card must be exactly what the generator produces, carry the
-// UI kit fonts inline, draw every string it subsets, keep the counts gate's numbers readable as
+// The committed six-pillar promise card must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as
 // text and declare both palettes with no literal color escaping the theme. Same staleness
 // contract as tests/unit/docs/readme-hero-svg.test.ts.
 
@@ -24,13 +23,10 @@ test("the committed promise-pillars diagram is exactly what the generator produc
   );
 });
 
-test("the diagram embeds the three kit faces (ui, uiBold, mono) and nothing external", async () => {
+test("the only embedded font is the mono subset for the command footer, and nothing is external", async () => {
   const svg = await renderReadmePromisePillars();
-  // ui + uiBold + mono: no display face is drawn here.
-  assert.equal((svg.match(/@font-face/g) || []).length, 3);
-  for (const fam of ["CI Sans", "CI Mono"]) {
-    assert.ok(svg.includes(`font-family:"${fam}"`), fam);
-  }
+  assert.equal((svg.match(/@font-face/g) || []).length, 1);
+  assert.ok(svg.includes('font-family:"CI Mono"'));
   assert.doesNotMatch(
     svg,
     /(href|src|xlink:href)=["']https?:|url\(["']?https?:|@import|<script|<foreignObject/
@@ -39,7 +35,7 @@ test("the diagram embeds the three kit faces (ui, uiBold, mono) and nothing exte
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
-test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+test("every copy string stays in the file as text", async () => {
   const svg = await renderReadmePromisePillars();
   for (const s of Object.values(PROMISE_PILLARS_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);

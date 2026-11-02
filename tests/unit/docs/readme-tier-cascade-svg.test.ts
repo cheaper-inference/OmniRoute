@@ -7,8 +7,7 @@ import {
 } from "../../../scripts/docs/gen-readme-tier-cascade.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
-// The committed tier cascade must be exactly what the generator produces, carry the UI kit
-// fonts inline, draw every string it subsets, keep the counts gate's numbers readable as text
+// The committed tier cascade must be exactly what the generator produces, draw the kit type as outlines, keep every string as text, keep the counts gate's numbers readable as text
 // and declare both palettes. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const FILE = "docs/diagrams/tier-cascade.svg";
@@ -24,13 +23,10 @@ test("the committed tier cascade is exactly what the generator produces", async 
   );
 });
 
-test("the cascade embeds the kit faces it uses (display, uiBold, mono) and nothing external", async () => {
+test("the only embedded font is the mono subset for the endpoint URL, and nothing is external", async () => {
   const svg = await renderTierCascade();
-  // Three roles are passed to buildFontFaceCss: display (Instrument Serif), uiBold, mono.
-  assert.equal((svg.match(/@font-face/g) || []).length, 3);
-  for (const fam of ["CI Serif", "CI Sans", "CI Mono"]) {
-    assert.ok(svg.includes(`font-family:"${fam}"`), fam);
-  }
+  assert.equal((svg.match(/@font-face/g) || []).length, 1);
+  assert.ok(svg.includes('font-family:"CI Mono"'));
   // Reference-based "nothing external" check (review ruling R10): every place the renderer could
   // fetch from — element references, CSS url(), @import — must not carry an http(s) scheme, and
   // no script / foreignObject. Drawn text such as "http://localhost:20128/v1" is copy, not a
@@ -43,7 +39,7 @@ test("the cascade embeds the kit faces it uses (display, uiBold, mono) and nothi
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
-test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+test("every copy string stays in the file as text", async () => {
   const svg = await renderTierCascade();
   for (const s of Object.values(TIER_CASCADE_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);

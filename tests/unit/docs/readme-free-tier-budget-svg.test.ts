@@ -10,7 +10,7 @@ import {
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
 // The committed free-tier budget card must be exactly what the generator produces from the live
-// catalog, carry the UI kit fonts inline, draw every string it subsets, keep the counts gate's
+// catalog, draw the kit type as outlines, keep every string as text, keep the counts gate's
 // numbers readable as text and declare both palettes with no literal color escaping the theme.
 // Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
@@ -26,19 +26,15 @@ test("the committed free-tier-budget diagram is exactly what the generator produ
   );
 });
 
-test("the diagram embeds the four kit faces and nothing external", async () => {
+test("no font is embedded (every string is outlined) and nothing is external", async () => {
   const svg = await renderReadmeFreeTierBudget();
-  // display (the headline figure) + ui + uiBold + mono.
-  assert.equal((svg.match(/@font-face/g) || []).length, 4);
-  for (const fam of ["CI Serif", "CI Sans", "CI Mono"]) {
-    assert.ok(svg.includes(`font-family:"${fam}"`), fam);
-  }
+  assert.equal((svg.match(/@font-face/g) || []).length, 0);
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
   assert.match(svg, /^<svg viewBox="0 0 1200 842" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
-test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+test("every copy string stays in the file as text", async () => {
   const svg = await renderReadmeFreeTierBudget();
   for (const s of Object.values(buildFreeTierBudgetCopy()).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);

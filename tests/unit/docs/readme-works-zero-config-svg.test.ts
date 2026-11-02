@@ -6,8 +6,7 @@ import {
   WORKS_ZERO_CONFIG_COPY,
 } from "../../../scripts/docs/gen-readme-works-zero-config.mjs";
 
-// The committed three-step strip must be exactly what the generator produces, carry the UI
-// kit fonts inline, draw every string it subsets and declare both palettes with no literal
+// The committed three-step strip must be exactly what the generator produces, draw the kit type as outlines, keep every string as text and declare both palettes with no literal
 // color escaping the theme. Same staleness contract as tests/unit/docs/readme-hero-svg.test.ts.
 
 const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -22,19 +21,16 @@ test("the committed works-zero-config diagram is exactly what the generator prod
   );
 });
 
-test("the diagram embeds the three kit faces (ui, uiBold, mono) and nothing external", async () => {
+test("the only embedded font is the mono subset for the commands and URLs, and nothing is external", async () => {
   const svg = await renderReadmeWorksZeroConfig();
-  // ui + uiBold + mono: no display face is drawn here.
-  assert.equal((svg.match(/@font-face/g) || []).length, 3);
-  for (const fam of ["CI Sans", "CI Mono"]) {
-    assert.ok(svg.includes(`font-family:"${fam}"`), fam);
-  }
+  assert.equal((svg.match(/@font-face/g) || []).length, 1);
+  assert.ok(svg.includes('font-family:"CI Mono"'));
   assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
   assert.match(svg, /^<svg viewBox="0 0 1200 430" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
 
-test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+test("every copy string stays in the file as text", async () => {
   const svg = await renderReadmeWorksZeroConfig();
   for (const s of Object.values(WORKS_ZERO_CONFIG_COPY).flat()) {
     assert.ok(svg.includes(esc(s)), `string not drawn: ${s}`);
