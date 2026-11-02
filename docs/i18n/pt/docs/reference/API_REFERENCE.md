@@ -851,47 +851,40 @@ autores de chamadas sem sessão (obtenção, eliminação, cancelamento e verifi
 
 ---
 
-## API de Pesquisa
+## Procurar API
 
-Abstração de fornecedores de pesquisa Web (Tavily, Brave, Exa, Serper, etc.).
+abstração do fornecedor Web/search (Tavily, Brave, Exa, Serper, etc.).
 
-| Método | Caminho                | Descrição                                                                                       |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Lista os fornecedores de pesquisa configurados e as respetivas capacidades                      |
-| POST   | `/v1/search`           | Executa uma consulta de pesquisa — corpo validado por `v1SearchSchema`, suporta cache/agregação |
-| GET    | `/v1/search/analytics` | Estatísticas de acertos/latência/cache por fornecedor                                           |
+| Método | Percurso               | Descrição                                                                                         |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Listar recursos + dos fornecedores de pesquisa configurados                                       |
+| POST   | `/v1/search`           | Execute uma consulta de pesquisa — body validada por `v1SearchSchema`, suporta caching/coalescing |
+| GET    | `/v1/search/analytics` | Estatísticas hit/latency/cache por fornecedor                                                     |
 
-**Autenticação:** chave de API Bearer (`extractApiKey` + `isValidApiKey`). A política de pesquisa é aplicada através de `enforceApiKeyPolicy`.
+**Autenticação:** Chave API do portador (`extractApiKey` + `isValidApiKey`). Política de investigação aplicada via `enforceApiKeyPolicy`.
 
-### `provider_options` do Exa e do Tavily
+### Exa e Tavily `provider_options`
 
-O Exa e o Tavily leem campos específicos do fornecedor a partir de um objeto com espaço de nomes:
-`provider_options.exa` (ou `provider_options["exa-search"]`) e `provider_options.tavily`
-(ou `provider_options["tavily-search"]`). Apenas as chaves abaixo são encaminhadas. Cada uma é
-verificada através do respetivo esquema Zod em `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-e uma chave com o tipo errado é descartada. Qualquer outra chave é ignorada, incluindo autenticação, URL base,
-`stream` e `outputSchema`. As chaves simples utilizadas por outros fornecedores (`cx`, `depth`, ...) continuam a funcionar
-como anteriormente.
+Exa e Tavily lêem campos específicos do fornecedor de um pacote com namespace: `provider_options.exa` (ou `provider_options["exa-search"]`) e `provider_options.tavily` (ou `provider_options["tavily-search"]`). Apenas as chaves abaixo são encaminhadas. Cada um é verificado em relação ao seu próprio esquema Zod em `open-sse/handlers/search/providerOptionsPassthrough.ts` e uma chave com o tipo errado é descartada. Qualquer outra chave é ignorada, incluindo auth, base URL, `stream` e `outputSchema`. As chaves simples utilizadas por outros fornecedores (`cx`, `depth`, ...) funcionam como anteriormente.
 
-| Fornecedor | Campos de nível superior                                                                                                                                                                                                                                                                                                                                                  | Aninhados                                                                                                                                                                 |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitivos simples), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                           | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` combinados sobre a predefinição `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                         |
+| Provedor | Campos de nível superior                                                                                                                                                                                                                                                                                                                                                  | Aninhado                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa.     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitivas planas), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fundido com o `{ text: true, highlights: true }` padrão |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
 
-Os campos genéricos têm sempre precedência: `query`, `max_results`, `filters` (domínios), `country` e o
-tópico derivado de `search_type`. No Exa, `search_type: "news"` mantém `category: "news"`.
-O Tavily também aceita `search_type: "finance"` (`topic: "finance"`).
+Vencem sempre os campos genéricos: `query`, `max_results`, `filters` (domínios), `country` e o tópico derivado de `search_type`. No Exa, `search_type: "news"` mantém `category: "news"`. Tavily também aceita `search_type: "finance"` (`topic: "finance"`).
 
-O `time_range` genérico é agora transmitido a ambos os fornecedores: o Exa recebe `startPublishedDate` (carimbo de data/hora
-ISO) e o Tavily recebe `start_date` (`YYYY-MM-DD`). Uma data explícita em `provider_options`
-substitui a data mapeada.
+O custo da pesquisa Firecrawl é registado por bloco iniciado de 10 resultados devolvidos, em 0,002 dólares (2 créditos) por bloco e pelo menos um bloco por chamada ( [facturação Firecrawl](https://docs.firecrawl.dev/billing) ): 11 resultados custam 0,004 dólares.
 
-Os resultados do Exa mantêm `id`, `highlight_scores`, `summary`, `subpages`, `entities` e `extras` em
-`provider_raw`. Os resultados do Tavily mantêm `images` e `favicon`.
+O `time_range` genérico chega agora a ambos os fornecedores: Exa obtém `startPublishedDate` (ISO timestamp) e Tavily obtém `start_date` (`YYYY-MM-DD`). Uma data explícita em `provider_options` substitui a data mapeada.
 
-A contabilização de custos continua a utilizar o registo simples `costPerQuery`. O Tavily cobra
-mais créditos por chamada com `search_depth: "advanced"`, e essa diferença não se reflete em
-`usage.search_cost_usd`.
+Os resultados do Exa mantêm `id`, `highlight_scores`, `summary`, `subpages`, `entities` e `extras` em `provider_raw`. Os resultados Tavily mantêm `images` e `favicon`.
+
+O custo da pesquisa de linkup está registado em 0,005 dólares para `depth` `fast` e `standard` e 0,05 dólares para `deep` ( [linkup price](https://docs.linkup.so/pages/documentation/development/pricing) ), independentemente de `depth` vir `provider_options` ou das definições da ligação.
+
+O Exa `type: "lite"` (Exa 3.0) aceita um conjunto mais pequeno de campos e rejeita todo o pedido quando qualquer outro campo é definido. Para Lite, `additionalQueries`, `systemPrompt` e todas as teclas `contents` exceto `text` e `highlights` são descartadas antes da chamada. Os obsoletos `subpages`, `subpageTarget`, `highlights.numSentences` e `highlights.highlightsPerUrl` já não são encaminhados.
+
+A contabilidade de custos é o registo simples `costPerQuery`, exceto para o Exa, que segue o próprio preço do Exa: 0,007 dólares por chamada para `auto` (e o legado `fast`) ou 0,004 dólares para `lite` (e o legado `instant`), cobrindo 10 resultados; 0,001 dólares por cada resultado adicional; e 0,001 dólares por resultado devolvido quando `contents.summary` estiver definido. Tavily está registado em 1 crédito (0,008 dólares) para `search_depth` `basic`, `fast` e `ultra-fast`, e 2 créditos (0,016 dólares) para `advanced` ( [créditos Tavily API](https://docs.tavily.com/documentation/api-credits) ). Uma chamada com `auto_parameters: true` que Tavily atualiza para avançado ainda está registada com 1 crédito.
 
 ---
 

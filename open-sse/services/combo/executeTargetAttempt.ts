@@ -17,13 +17,7 @@ import {
   recordProviderSuccess,
   selectLockoutCooldownMs,
 } from "../accountFallback.ts";
-import {
-  errorResponse,
-  isContentPolicyRefusalComboStopEnabled,
-  logRetryHintUnreadable,
-  parseRetryAfterHeader,
-  readProseRetryAfter,
-} from "../../utils/error.ts";
+import { errorResponse, isContentPolicyRefusalComboStopEnabled } from "../../utils/error.ts";
 import { recordComboFailure, clearComboFailureTracking } from "./failureTracker.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
 import { recordComboRequest, getComboMetrics } from "../comboMetrics.ts";
@@ -72,6 +66,7 @@ import {
   isModelScoped400,
   requestScopedReplayKey,
 } from "./comboPredicates.ts";
+import { isInstanceDraining as isDraining } from "../../utils/drainStatus.ts";
 import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
 import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
@@ -84,7 +79,11 @@ import {
 } from "./validateQuality.ts";
 import { isTrustedEmptyTurn } from "./emptyTurnTrust.ts";
 import {
-  isQuotaExhaustionResponse,
+  isTruncatedComboAttempt,
+  recordTruncatedStreamAttempt,
+} from "./truncatedStreamFailover.ts";
+import {
+  isQuotaExhaustionFailure,
   recordQuotaExhaustionClassification,
 } from "./quotaExhaustion.ts";
 import { markAccountExhaustedFromCredits } from "../../../src/domain/quotaCache.ts";
@@ -101,7 +100,7 @@ import {
 } from "./executeTargetClassify.ts";
 import type { CompressionMode } from "../compression/types.ts";
 import type { ExecuteTargetResult, ExecuteTargetAttemptOptions } from "./attemptLoopTypes.ts";
-import type { ComboErrorBody, ComboRetryAfter } from "./types.ts";
+import { readAttemptFailure, resolveAttemptRetryAfter } from "./attemptFailure.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
@@ -360,6 +359,19 @@ export async function executeTargetAttempt(
 
     // Success — validate response quality before returning
     if (result.ok) {
+      // #18460 follow-up — a cut buffered stream is a retryable attempt failure.
+      if (isTruncatedComboAttempt(result, deps, protectedPriorityTarget)) {
+        recordTruncatedStreamAttempt({
+          result,
+          modelStr,
+          provider,
+          targetIndex: i,
+          target,
+          state,
+          deps,
+        });
+        return null;
+      }
       const selectedConnectionId =
         result.headers?.get("X-OmniRoute-Selected-Connection-Id") ||
         result.headers?.get("x-omniroute-selected-connection-id") ||
@@ -394,6 +406,17 @@ export async function executeTargetAttempt(
         // unhealthy, so the sticky pin's lazy headroom recheck would never
         // catch it either — release it here, on the failing response.
         deps.releaseStickyPinOnFailure(deps.sticky.messageHash, effectiveConnectionId);
+        // #919: a quality-rejected 200 leaves the same stale LKGP pin as a
+        // classic failure — clear it so the next request re-resolves.
+        deps.clearStaleLKGP(
+          deps.combo.name,
+          target.executionKey,
+          deps.combo.id,
+          deps.log,
+          "COMBO",
+          undefined,
+          target
+        );
         recordComboRequest(deps.combo.name, modelStr, {
           success: false,
           latencyMs: Date.now() - deps.startTime,
@@ -712,51 +735,9 @@ export async function executeTargetAttempt(
       return { ok: true, response: result };
     }
 
-    // Extract error info from response
-    let errorText = result.statusText || "";
-    let errorBody: ComboErrorBody = null;
-    let retryAfter: ComboRetryAfter | null = null;
-    let bodyText = "";
-    try {
-      const cloned = result.clone();
-      try {
-        const text = await cloned.text();
-        bodyText = text;
-        if (text) {
-          errorText = text.substring(0, 500);
-          errorBody = JSON.parse(text);
-          const parsedError = errorBody?.error;
-          errorText =
-            (typeof parsedError === "object" && parsedError?.message) ||
-            (typeof parsedError === "string" ? parsedError : null) ||
-            errorBody?.message ||
-            errorText;
-          // Nested retry hints (live incident 1784457764961-73): reset_at (ISO,
-          // buildErrorBody) is unambiguous and preferred; retry_after is ISO from
-          // buildModelCooldownBody but integer SECONDS from buildErrorBody — coerce
-          // a number to an instant before it can out-race an ISO sibling in the
-          // earliest-retryAfter comparison below. reset_seconds is the last resort.
-          const nestedError = typeof parsedError === "object" ? parsedError : null;
-          const nestedRetryAfterRaw = nestedError?.retry_after ?? null;
-          const nestedResetSeconds = nestedError?.reset_seconds ?? null;
-          retryAfter =
-            errorBody?.retryAfter ||
-            nestedError?.reset_at ||
-            (typeof nestedRetryAfterRaw === "number" && nestedRetryAfterRaw > 0
-              ? new Date(Date.now() + nestedRetryAfterRaw * 1000).toISOString()
-              : nestedRetryAfterRaw) ||
-            (typeof nestedResetSeconds === "number" && nestedResetSeconds > 0
-              ? new Date(Date.now() + nestedResetSeconds * 1000).toISOString()
-              : null);
-        }
-      } catch {
-        logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "unparseable body");
-      }
-    } catch {
-      logRetryHintUnreadable(deps.log, "COMBO", modelStr, result.status, "clone failed");
-    }
-    retryAfter ||= readProseRetryAfter(bodyText); // #13672 opt-in prose retry hints
-    retryAfter ||= parseRetryAfterHeader(result.headers); // header-only shapes (quota-reset-timing)
+    const failure = await readAttemptFailure(result, { log: deps.log, modelStr });
+    const { errorText, errorBody, structuredError } = failure;
+    const retryAfter = resolveAttemptRetryAfter(failure);
 
     // Track earliest retryAfter
     if (
@@ -764,15 +745,6 @@ export async function executeTargetAttempt(
       (!state.earliestRetryAfter || new Date(retryAfter) < new Date(state.earliestRetryAfter))
     ) {
       state.earliestRetryAfter = retryAfter;
-    }
-
-    // Normalize error text
-    if (typeof errorText !== "string") {
-      try {
-        errorText = JSON.stringify(errorText);
-      } catch {
-        errorText = String(errorText);
-      }
     }
 
     if (isProviderCircuitOpenResult(result, errorText)) {
@@ -856,25 +828,6 @@ export async function executeTargetAttempt(
     // treated as local to that target and the combo continues to the next target.
     // Error classification is retained only for retry/cooldown pacing; it must
     // not decide whether fallback happens, including for generic 400 responses.
-    const rawError = errorBody?.error;
-    const structuredError =
-      rawError && typeof rawError === "object"
-        ? {
-            // Upstream JSON may carry a numeric `code`/`type` (e.g. {"code":40001}).
-            // Coerce to string if present instead of discarding, so downstream string
-            // ops (.toLowerCase, .startsWith) can run safely without type crashes.
-            code:
-              (rawError as Record<string, unknown>).code !== undefined &&
-              (rawError as Record<string, unknown>).code !== null
-                ? String((rawError as Record<string, unknown>).code)
-                : undefined,
-            type:
-              (rawError as Record<string, unknown>).type !== undefined &&
-              (rawError as Record<string, unknown>).type !== null
-                ? String((rawError as Record<string, unknown>).type)
-                : undefined,
-          }
-        : undefined;
     const scopedFailure = isScopedFailure(result, errorText, structuredError);
 
     // #8375: input-bound request-scoped failures (context_length_exceeded) are
@@ -889,7 +842,12 @@ export async function executeTargetAttempt(
     // only holds within a homogeneous same-model pool).
     // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
     // stops the combo even with different models remaining.
-    const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
+    const remainderHomogeneous =
+      remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
+      // Earlier heterogeneous attempts can still be pending in a hedge.
+      // Preserve suffix short-circuiting for serial dispatch.
+      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
+        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,
@@ -945,6 +903,7 @@ export async function executeTargetAttempt(
     const {
       target: targetWithConnection,
       providerExhausted,
+      durableExhaustion,
       isModelScopedClaudeQuota,
       isConnectionScopedClaudeQuota,
       modelScopedClaudeCooldownMs,
@@ -954,6 +913,17 @@ export async function executeTargetAttempt(
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
     // rather than waiting for the next turn's lazy headroom/status recheck.
+    // Record the durable exhaustion so the next set retry skips the same
+    // provider or connection instead of replaying a dead call.
+    if (durableExhaustion) {
+      if (durableExhaustion.scope === "connection") {
+        (state.durableExhaustedConnections ??= new Set()).add(
+          `${durableExhaustion.provider}:${durableExhaustion.connectionId}`
+        );
+      } else {
+        (state.durableExhaustedProviders ??= new Set()).add(durableExhaustion.provider);
+      }
+    }
     deps.releaseStickyPinOnFailure(deps.sticky.messageHash, targetWithConnection.connectionId);
     if (
       providerExhausted ||
@@ -1069,7 +1039,13 @@ export async function executeTargetAttempt(
         error: errorText,
         isProxyUnreachable: structuredError?.code === "proxy_unreachable",
         providerCircuitOpen: isProviderCircuitOpenResult(result, errorText),
-      })
+      }) &&
+      // A graceful shutdown tears provider clients down under in-flight requests:
+      // the resulting 5xx is evidence about OUR shutdown, not about provider
+      // health. Opening the whole-provider circuit on it makes every later
+      // request skip a healthy provider. A genuine upstream 5xx outside a
+      // shutdown still trips the breaker exactly as before.
+      !isDraining()
     ) {
       const isQueueTimeout =
         errorText.includes("RATE_LIMIT_QUEUE_TIMEOUT") ||
@@ -1081,7 +1057,7 @@ export async function executeTargetAttempt(
       });
     }
 
-    const quotaExhausted = await isQuotaExhaustionResponse(result, provider, rawModel, profile);
+    const quotaExhausted = isQuotaExhaustionFailure(failure, provider, rawModel, profile);
     recordQuotaExhaustionClassification(result, quotaExhausted);
     // Balance exhaustion is upstream truth about credits, and it outranks the
     // stored snapshot — which can be hours stale and still claim headroom. Mark
@@ -1294,7 +1270,10 @@ export async function executeTargetAttempt(
       provider !== "unknown" &&
       !scopedFailure &&
       !isModelScopedClaudeQuota &&
-      !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel))
+      !((result.status === 500 || result.status === 429) && hasPerModelQuota(provider, rawModel)) &&
+      // Same rationale as the provider breaker above: a failure raised by our
+      // own shutdown must not cool the provider down for every later request.
+      !isDraining()
     ) {
       recordProviderCooldown(
         provider,

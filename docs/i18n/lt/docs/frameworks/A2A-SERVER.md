@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Prieinami įgūdžiai
+## Galimi įgūdžiai
 
-OmniRoute atveria 6 A2A įgūdžius, prijungtus `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kiekvieno įgūdžio modulis yra `src/lib/a2a/skills/`.
+OmniRoute atskleidžia 6 A2A įgūdžius, prijungtus prie `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kiekvienas įgūdžių modulis yra `src/lib/a2a/skills/`.
 
-| Įgūdis                  | ID                   | Aprašymas                                                                                                                                                       | Žymos                      | Pavyzdžiai                                      |
-| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------------- |
-| Išmanusis maršrutavimas | `smart-routing`      | Nukreipia užklausą per optimaliausią teikėją/kombinaciją, naudojant OmniRoute kombinacijų variklį + vertinimą balais                                            | routing, providers         | „Nukreipkite šią užklausą per geriausią modelį“ |
-| Kvotų valdymas          | `quota-management`   | Praneša apie kiekvieno teikėjo kvotų būseną, padeda kvietėjams nuspręsti, kada riboti srautą arba persijungti                                                   | quota, providers           | „Patikrinkite anthropic kvotą“                  |
-| Teikėjų aptikimas       | `provider-discovery` | Išvardija įdiegtus teikėjus su jų galimybėmis, nemokamo plano žymėmis ir OAuth būsena                                                                           | providers, discovery       | „Kokie teikėjai prieinami?“                     |
-| Išlaidų analizė         | `cost-analysis`      | Įvertina užklausos/pokalbio kainą pagal katalogą + naujausią naudojimą                                                                                          | cost, usage                | „Įvertinkite šio pokalbio kainą“                |
-| Būklės ataskaita        | `health-report`      | Apibendrina grandinės pertraukiklio (circuit breaker), atvėsimo (cooldown) ir blokavimo (lockout) būsenas kiekvienam teikėjui                                   | health, resilience         | „Rodykite visų teikėjų būklę“                   |
-| Galimybių sąrašas       | `list-capabilities`  | Grąžina visą 45 įrašų agentų įgūdžių katalogą (23 API + 21 CLI + 1 konfigūraciją) kaip markdown lentelę su neapdorotomis (raw) SKILL.md URL konteksto įterpimui | catalog, discovery, skills | „Išvardykite visas OmniRoute galimybes“         |
+| Įgūdis                        | ID                   | Aprašymas                                                                                                                                             | Žymos                          | Pavyzdžiai                                     |
+| :---------------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :--------------------------------------------- |
+| Išmanusis maršruto parinkimas | `smart-routing`      | Nukreipia raginimą per optimalų provider/combo naudodamas OmniRoute kombinuotą variklio + įvertinimą                                                  | maršruto parinkimas, tiekėjai  | „Route this prompt per the best model“         |
+| Kvotų valdymas                | `quota-management`   | Praneša apie paslaugų teikėjo kvotos būseną, padeda skambinantiems nuspręsti, kada throttle/switch                                                    | kvota, tiekėjai                | „Patikrinti antropinių gyvūnų kvotą“           |
+| Teikėjo atradimas             | `provider-discovery` | Sąrašas įdiegtų paslaugų teikėjų su galimybėmis, laisvos pakopos vėliavėlėmis, OAuth būsena                                                           | teikėjai, atradimas            | "Kokie teikėjai yra prieinami?"                |
+| Išlaidų analizė               | `cost-analysis`      | Apskaičiuota request/conversation kaina, atsižvelgiant į katalogo + pastarąjį naudojimą                                                               | kaina, naudojimas              | „Apskaičiuota šio pokalbio kaina“              |
+| Sveikatos ataskaita           | `health-report`      | Agregatai grandinės pertraukiklis, aušinimas, blokavimo būsena kiekvienam teikėjui                                                                    | sveikata, atsparumas           | „Rodyti visų paslaugų teikėjų sveikatos būklę“ |
+| Galimybių sąrašas             | `list-capabilities`  | Pateikiamas visas 45 įrašų Agent Skills katalogas (23 API + 21 CLI + 1 config) kaip sumažinimo lentelė su neapdorotu SKILL.md URLs kontekstui įterpti | katalogas, atradimas, įgūdžiai | "Išvardykite visas OmniRoute galimybes"        |
 
-> Agent Card turėtų būti nuolat suderinama su tiesioginiu 375 teikėjų katalogu; teikėjų skaičiai bei metaduomenys apie nemokamą prieigą / prieigą be autentifikacijos gaunami iš vykdymo laiko registro.
+> Agento kortelė turi būti suderinta su tiesioginiu 377 teikėjų katalogu; teikėjų skaičius ir free/no-auth metaduomenys gaunami iš vykdymo laiko registro.
 
-### `list-capabilities` įgūdžio detalės
+### `list-capabilities` įgūdžių detalė
 
-`list-capabilities` įgūdis ypač naudingas išoriniams agentams, kuriems prieš siunčiant API užklausas reikia sužinoti, ką atveria OmniRoute. Jis grąžina struktūrizuotą markdown lentelės artefaktą:
+`list-capabilities` įgūdis ypač naudingas išoriniams agentams, kuriems reikia išsiaiškinti, ką OmniRoute atskleidžia prieš siųsdami API skambučius. Jis grąžina struktūrinį žymėjimo lentelės artefaktą:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ OmniRoute atveria 6 A2A įgūdžius, prijungtus `src/lib/a2a/taskExecution.ts::A
 ...
 ```
 
-Kiekviena eilutė apima `rawUrl` stulpelį, kad agentai galėtų iškart gauti visą SKILL.md. Laukas `metadata.totalSkills` atspindi katalogo dydį (šiandien – 45). Įgyvendinimas: `src/lib/a2a/skills/listCapabilities.ts`. Taip pat žr. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kiekvienoje eilutėje yra `rawUrl` stulpelis, todėl agentai gali iš karto gauti visą SKILL.md. `metadata.totalSkills` laukas atspindi katalogo dydį (šiandien 45). Įgyvendinimas: `src/lib/a2a/skills/listCapabilities.ts`. Taip pat žr [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -268,7 +268,7 @@ pateikta → vykdoma → užbaigta
 
 ## Integravimo pavyzdžiai
 
-### Python (`requests`)
+### Python (užklausos)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (`fetch`)
+### TypeScript (paimti)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

@@ -74,9 +74,13 @@ describe("Profile accessibility semantics", () => {
     const container = mountProfile();
     await waitForLoad(container);
 
-    const heading = container.querySelector("h1");
-    expect(heading?.textContent).toBe("profile");
-    expect(heading?.classList.contains("lg:hidden")).toBe(true);
+    // One page heading, owned by the kit PageHeader so the shell title steps aside (P12).
+    const headings = container.querySelectorAll("h1");
+    expect(headings).toHaveLength(1);
+    expect(headings[0].textContent).toBe("profile");
+    expect(headings[0].classList.contains("ci-page-header__title")).toBe(true);
+    expect(headings[0].closest(".ci-page-header")?.getAttribute("data-compact")).toBe("true");
+    expect(headings[0].classList.contains("sr-only")).toBe(false);
     const progress = container.querySelector('[role="progressbar"]');
     expect(progress?.getAttribute("aria-label")).toBe("levelProgress");
     expect(progress?.getAttribute("aria-valuemin")).toBe("0");

@@ -16,40 +16,40 @@ Các tính năng ẩn mình tồn tại để OmniRoute có thể hoạt động
 
 ---
 
-## Lớp Nhận diện Dấu vân tay TLS
+## Lớp nhận diện dấu vân tay TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Các phiên `wreq-js` duy trì lâu dài được tạo theo nhu cầu cho từng phạm vi tài khoản và proxy đã phân giải. `TlsClient` dùng chung toàn tiến trình quản lý một pool tối đa 128 phiên giả lập **Chrome 124 trên macOS** cho các thượng nguồn nằm sau Cloudflare. `TlsClient.fetch()` dừng an toàn khi runtime native không khả dụng; bên gọi có thể chủ động chọn một phương án dự phòng bên ngoài wrapper này.
+Các phiên `wreq-js` lâu dài được tạo theo cơ chế lazy cho từng phạm vi tài khoản và proxy đã phân giải. `TlsClient` trên toàn tiến trình tạo nhóm tối đa 128 phiên giả lập **Chrome 124 trên macOS** cho các upstream nằm sau Cloudflare. `TlsClient.fetch()` từ chối kết nối khi runtime native không khả dụng; bên gọi có thể chủ động chọn phương án dự phòng bên ngoài wrapper này.
 
 - Hồ sơ phiên: `browser: "chrome_124", os: "macos"`
 - Phân giải proxy (theo mức ưu tiên): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (bao gồm cả dạng chữ thường)
-- Thời gian chờ: `TLS_CLIENT_TIMEOUT_MS` (kế thừa từ `FETCH_TIMEOUT_MS`, mặc định 600000)
+- Thời gian chờ: `TLS_CLIENT_TIMEOUT_MS` (kế thừa từ `FETCH_TIMEOUT_MS`, mặc định là 600000)
 - Response của `wreq-js` tương thích với fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Cơ chế giám sát byte đầu tiên (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` phân giải ngay khi nhận được các header từ thượng nguồn, vì vậy chỉ riêng `TLS_CLIENT_TIMEOUT_MS` không thể giới hạn một phần thân không bao giờ trả về byte đầu tiên. `guardTlsFirstByte()` cho lần `read()` đầu tiên của phần thân chạy đua với `TLS_FIRST_BYTE_WATCHDOG_MS` (mặc định `10000`, đặt thành `0` để vô hiệu hóa); phần thân hoạt động bình thường không bị ảnh hưởng, trong khi phần thân bị đình trệ sẽ khiến trình đọc wreq bị hủy và cho phép logic dự phòng TLS hiện có của `proxyFetch` chuyển tiếp sang bộ điều phối trực tiếp/proxy (một yêu cầu không an toàn khi phát lại, chẳng hạn như POST có phần thân, vẫn sẽ phát sinh lỗi thay vì được âm thầm thử lại).
+- Bộ giám sát byte đầu tiên (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` hoàn tất ngay khi nhận được các header từ upstream, vì vậy chỉ riêng `TLS_CLIENT_TIMEOUT_MS` không thể giới hạn một body không bao giờ trả về byte đầu tiên. `guardTlsFirstByte()` cho lần `read()` đầu tiên của body chạy đua với `TLS_FIRST_BYTE_WATCHDOG_MS` (mặc định là `10000`, đặt thành `0` để vô hiệu hóa); body hoạt động bình thường không bị ảnh hưởng, còn body bị đình trệ sẽ khiến trình đọc wreq bị hủy và cho phép logic dự phòng TLS hiện có của `proxyFetch` chuyển sang bộ điều phối trực tiếp/proxy (một yêu cầu không an toàn để phát lại, ví dụ như một yêu cầu POST có body, vẫn sẽ ném lỗi thay vì được âm thầm thử lại).
 
-### Phương thức truyền tải của nhà cung cấp dùng cookie web — wreq-js 3.2.0
+### Phương thức truyền tải của nhà cung cấp web-cookie — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` là adapter dùng chung cho năm phương thức truyền tải chuyên biệt dùng cookie web bên dưới. Mỗi wrapper nhà cung cấp tối giản chọn một hồ sơ trình duyệt/hệ điều hành. Adapter sử dụng trình tải runtime wreq duy nhất và pool truyền tải trong `open-sse/utils/tlsClient.ts`, được định danh theo hồ sơ + hệ điều hành + proxy đã phân giải, trong khi mọi yêu cầu đều sử dụng `cookieMode: "ephemeral"`. Do đó, các tài khoản và yêu cầu dùng chung kết nối ở cấp truyền tải nhưng không bao giờ dùng chung phiên wreq hoặc kho cookie.
+`open-sse/services/tlsClientBase.ts` là adapter dùng chung cho năm phương thức truyền tải web-cookie chuyên biệt bên dưới. Mỗi wrapper mỏng của nhà cung cấp chọn một hồ sơ trình duyệt/HĐH. Adapter sử dụng trình nạp runtime wreq duy nhất và nhóm phương thức truyền tải trong `open-sse/utils/tlsClient.ts`, được định danh theo hồ sơ + HĐH + proxy đã phân giải, trong khi mọi yêu cầu đều sử dụng `cookieMode: "ephemeral"`. Do đó, các tài khoản và yêu cầu dùng chung kết nối ở cấp độ truyền tải nhưng không bao giờ dùng chung phiên wreq hoặc kho cookie.
 
-| Nhà cung cấp | Hồ sơ         | Hệ điều hành giả lập | Chính sách EOF của luồng                   |
-| ------------ | ------------- | -------------------- | ------------------------------------------ |
-| Claude       | `chrome_146`  | Linux                | bao gồm `[DONE]`                           |
-| Perplexity   | `firefox_148` | macOS                | bao gồm `event: end_of_stream`             |
-| Grok         | `chrome_146`  | Linux                | loại trừ `[DONE]`                          |
-| Notion       | `chrome_146`  | Windows              | bao gồm `[DONE]`                           |
-| LMArena      | `chrome_146`  | Windows              | không có dấu kết thúc; đóng khi native EOF |
+| Nhà cung cấp | Hồ sơ         | HĐH giả lập | Chính sách EOF của luồng               |
+| ------------ | ------------- | ----------- | -------------------------------------- |
+| Claude       | `chrome_146`  | Linux       | bao gồm `[DONE]`                       |
+| Perplexity   | `firefox_151` | macOS       | bao gồm `event: end_of_stream`         |
+| Grok         | `chrome_146`  | Linux       | loại trừ `[DONE]`                      |
+| Notion       | `chrome_146`  | Windows     | bao gồm `[DONE]`                       |
+| LMArena      | `chrome_146`  | Windows     | không có sentinel; đóng khi native EOF |
 
-- Quá trình truyền trực tiếp sử dụng `ReadableStream` của phản hồi native; không tạo tệp tạm hoặc tiến trình sidecar.
-- Tối đa 256 byte đầu tiên được kiểm tra trước khi công khai luồng. Các nhà cung cấp SSE sẽ lưu vào bộ đệm các lỗi không phải SSE; Grok/LMArena ánh xạ các thử thách Cloudflare thành `403` và các trang trung gian HTML thành `502`.
-- Thời gian chờ của yêu cầu native vẫn được bao bọc bởi một thời hạn cứng tuyệt đối của JS. Khi xảy ra treo, chỉ phương thức truyền tải tương ứng với hồ sơ/hệ điều hành/proxy bị vô hiệu hóa và đóng lại trước khi được tạo lại ở yêu cầu tiếp theo.
-- Thứ tự ưu tiên phân giải proxy là `proxyUrl` theo từng lần gọi → ngữ cảnh tài khoản/dashboard trong phạm vi yêu cầu → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (bao gồm các biến thể chữ thường). Lỗi phân giải sẽ dừng an toàn thay vì làm rò rỉ một kết nối trực tiếp. LMArena chủ đích phân giải dựa trên `arena.ai`.
-- `byteResponse` trả về một URL `data:` được định kiểu nội dung mà không gây hỏng UTF-8.
-- Các lỗi gồm `TlsClientUnavailableError` (package/addon không khả dụng), `TlsClientHangError` (vượt quá thời hạn) và `WreqTransportCapacityError` (mã lỗi dung lượng phiên dùng chung) khi toàn bộ 128 vị trí hồ sơ/hệ điều hành/proxy có giới hạn đang hoạt động hoặc đang đóng.
+- Quá trình truyền phát sử dụng trực tiếp `ReadableStream` của response native; không tạo tệp tạm hoặc sidecar.
+- Tối đa 256 byte đầu tiên được kiểm tra trước khi cung cấp luồng. Các nhà cung cấp SSE lưu vào bộ đệm các lỗi không phải SSE; Grok/LMArena ánh xạ các thử thách Cloudflare thành `403` và các trang HTML trung gian thành `502`.
+- Thời gian chờ của yêu cầu native vẫn được bao bọc bởi một thời hạn cứng tuyệt đối của JS. Khi bị treo, chỉ phương thức truyền tải tương ứng với hồ sơ/HĐH/proxy bị vô hiệu hóa và đóng lại trước khi yêu cầu tiếp theo tái tạo nó.
+- Mức ưu tiên phân giải proxy là `proxyUrl` theo từng lệnh gọi → ngữ cảnh tài khoản/bảng điều khiển theo phạm vi yêu cầu → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (bao gồm các biến thể chữ thường). Lỗi phân giải sẽ từ chối kết nối thay vì làm rò rỉ kết nối trực tiếp. LMArena chủ ý phân giải dựa trên `arena.ai`.
+- `byteResponse` trả về URL `data:` có kiểu nội dung phù hợp mà không làm hỏng UTF-8.
+- Các lỗi gồm `TlsClientUnavailableError` (gói/addon không khả dụng), `TlsClientHangError` (vượt quá thời hạn) và `WreqTransportCapacityError` (mã lỗi dung lượng phiên dùng chung) khi cả 128 khe hồ sơ/HĐH/proxy bị giới hạn đều đang hoạt động hoặc đang đóng.
 
-Phiên `TlsClient` chung ở trên vẫn được chuyên biệt hóa cho trạng thái cookie duy trì lâu dài do trình duyệt hỗ trợ. Cả hai luồng xử lý đều tái sử dụng một trình tải mô-đun wreq được lưu vào bộ nhớ đệm và hook vòng đời tiến trình; các pool của chúng vẫn tách biệt vì thời gian tồn tại cookie được thiết kế khác nhau.
+Phiên `TlsClient` chung ở trên vẫn được chuyên biệt hóa cho trạng thái cookie lâu dài do trình duyệt hỗ trợ. Cả hai luồng đều tái sử dụng một trình nạp mô-đun wreq đã lưu vào bộ nhớ đệm và một hook vòng đời tiến trình; các nhóm của chúng vẫn tách biệt vì vòng đời cookie được chủ ý thiết kế khác nhau.
 
-Các hồ sơ này được package đã ghim hỗ trợ, nhưng khả năng được WAF thực tế chấp nhận có thể thay đổi độc lập với các bài kiểm thử hợp đồng cục bộ. Hãy xác thực các thay đổi dấu vân tay bằng một tài khoản thực đã được cấp quyền rõ ràng trước khi tuyên bố đạt mức tương đương với trình duyệt thượng nguồn.
+Các hồ sơ được gói đã ghim hỗ trợ, nhưng mức độ chấp nhận thực tế của WAF có thể thay đổi độc lập với các kiểm thử hợp đồng cục bộ. Hãy xác thực các thay đổi về dấu vân tay bằng một tài khoản trực tiếp được ủy quyền rõ ràng trước khi tuyên bố đạt mức tương đương với trình duyệt upstream.
 
 ---
 

@@ -51,6 +51,8 @@ import ComboContextLengthField from "./ComboContextLengthField";
 import ComboRrLegibilityFields from "./ComboRrLegibilityFields";
 import { persistConnectionAwareExpansion, persistStickyRoundRobinLimit } from "./comboRrLegibility";
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
+import { collectRemovableFailedStepIds, type ComboTestResultLike } from "./removeFailedComboModels";
+import { useRemoveFailedComboModels } from "./useRemoveFailedComboModels";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 import { ROUTING_STRATEGIES } from "@/shared/constants/routingStrategies";
@@ -79,12 +81,19 @@ import {
 } from "@/lib/combos/builderDraft";
 import { normalizeComboConfigMode } from "@/shared/constants/comboConfigMode";
 import AutoComboCatalog from "./AutoComboCatalog";
-import { AutoComboTruncatedNote, getI18nOrFallback } from "./comboPageHelpers";
+import ComboHeaderActions from "./ComboHeaderActions";
+import {
+  AutoComboTruncatedNote,
+  getComboStepKindLabel,
+  getI18nOrFallback,
+} from "./comboPageHelpers";
+import ComboStepTestButton from "./ComboStepTestButton";
 import KimiComboPresetCard from "./KimiComboPresetCard";
 import { KIMI_CODING_PRESET, hasKimiCodingPreset } from "./kimiComboPreset";
 import BuilderIntelligentStep from "./BuilderIntelligentStep";
 import IntelligentComboPanel from "./IntelligentComboPanel";
 import { ComboSortSelect } from "./ComboSortSelect";
+import { StaleModelBadge, buildStaleModelSet, isStaleComboStep } from "./StaleModelBadge";
 import {
   sortComboStepsSync,
   sortComboStepsByScore,
@@ -108,6 +117,7 @@ import { resolveProviderAlias } from "@omniroute/open-sse/services/providerAlias
 import { resolveServerErrorMessage } from "@/lib/api/serverErrorMessage";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
+import { strategyBadgeClass } from "./strategyPalette";
 
 const ModelSelectModal = dynamic(() => import("@/shared/components/ModelSelectModal"), {
   ssr: false,
@@ -600,22 +610,9 @@ function getStrategyDescription(t, strategy) {
   );
 }
 
-// Categorical strategy hues from the kit chart palette (--ci-chart-*) plus the status tokens;
-// chart-1 (lime) is skipped because lime text is unreadable on the light surface.
-const STRATEGY_BADGE_CLASS = {
-  weighted: "bg-warning/15 text-warning",
-  "round-robin": "bg-chart-4/15 text-chart-4",
-  "context-relay": "bg-chart-5/15 text-chart-5",
-  random: "bg-chart-3/15 text-chart-3",
-  "least-used": "bg-chart-2/15 text-chart-2",
-  "cost-optimized": "bg-success/15 text-success",
-  "reset-aware": "bg-chart-5/15 text-chart-5",
-  "fill-first": "bg-warning/15 text-warning",
-  p2c: "bg-chart-3/15 text-chart-3",
-};
-
+// Strategy badge colour: one shared palette on the kit chart tokens (strategyPalette.ts, P8).
 function getStrategyBadgeClass(strategy) {
-  return STRATEGY_BADGE_CLASS[strategy] || "bg-info/15 text-info";
+  return strategyBadgeClass(strategy);
 }
 
 function moveArrayItem(items, fromIndex, toIndex) {
@@ -1003,6 +1000,7 @@ function CombosPageContent() {
         await fetchData();
         setEditingCombo(null);
         notify.success(t("comboUpdated"));
+        return true;
       } else {
         const err = await res.json();
         notify.error(err.error?.message || err.error || t("failedUpdate"));
@@ -1010,6 +1008,7 @@ function CombosPageContent() {
     } catch {
       notify.error(t("errorUpdating"));
     }
+    return false;
   };
 
   const handleComboCreated = async (comboId: string) => {
@@ -1085,6 +1084,18 @@ function CombosPageContent() {
       notify.error(t("testFailed"));
     }
   };
+
+  const { removing: removingErrorModels, removeFailedModels: handleRemoveErrorModels } =
+    useRemoveFailedComboModels({
+      combo: combos.find((c) => c.name === testingCombo),
+      updateCombo: handleUpdate,
+      onRemoved: () => {
+        setTestResults(null);
+        setTestingCombo(null);
+      },
+      notify,
+      t,
+    });
 
   const handleToggleCombo = async (combo) => {
     const newActive = combo.isActive === false ? true : false;
@@ -1243,9 +1254,7 @@ function CombosPageContent() {
                 {getI18nOrFallback(t, "usageGuideShow", "Show guide")}
               </Button>
             )}
-            <Button icon="add" onClick={() => setShowCreateModal(true)}>
-              {t("createCombo")}
-            </Button>
+            <ComboHeaderActions onImported={fetchData} onCreate={() => setShowCreateModal(true)} />
           </>
         }
       />
@@ -1437,7 +1446,11 @@ function CombosPageContent() {
           }}
           title={t("testResults", { name: testingCombo })}
         >
-          <TestResultsView results={testResults} />
+          <TestResultsView
+            results={testResults}
+            onRemoveErrorModels={handleRemoveErrorModels}
+            removingErrorModels={removingErrorModels}
+          />
         </Modal>
       )}
 
@@ -2018,7 +2031,128 @@ function ComboCardInner({
 }
 const ComboCard = memo(ComboCardInner);
 
-function TestResultsView({ results }) {
+function comboTestStatusTone(status: string | undefined) {
+  if (status === "ok") return "text-success";
+  if (status === "skipped") return "text-text-muted";
+  return "text-error";
+}
+
+type ComboTestResultRowData = ComboTestResultLike & {
+  model?: string;
+  label?: string | null;
+  connectionId?: string | null;
+  error?: string;
+  latencyMs?: number;
+};
+
+function ComboTestResultRow({
+  result: r,
+  emailsVisible,
+}: {
+  result: ComboTestResultRowData;
+  emailsVisible: boolean;
+}) {
+  const displayLabel = r.label ? pickDisplayValue([r.label], emailsVisible, r.label) : null;
+  const accountStr = r.connectionId ? `acct ${r.connectionId.slice(0, 8)}` : "dynamic account";
+  const tone = comboTestStatusTone(r.status);
+
+  return (
+    <div
+      title={r.error || undefined}
+      className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-bg-subtle"
+    >
+      <Icon
+        name={r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"}
+        size={14}
+        className={cn("shrink-0", tone)}
+      />
+      <div className="min-w-0 flex-1">
+        <code className="font-mono font-medium block truncate text-text-main">{r.model}</code>
+        <div className="mt-0.5 text-[10px] text-text-muted truncate">
+          {displayLabel ? `${displayLabel} · ` : ""}
+          {accountStr}
+        </div>
+        {r.error && (
+          <p className="mt-2 whitespace-pre-wrap break-words text-error">
+            {r.statusCode ? `HTTP ${r.statusCode}: ` : ""}
+            {r.error}
+          </p>
+        )}
+      </div>
+      {r.latencyMs !== undefined && (
+        <span className="text-text-muted shrink-0">{r.latencyMs}ms</span>
+      )}
+      <span className={cn("text-[10px] uppercase font-medium shrink-0", tone)}>{r.status}</span>
+    </div>
+  );
+}
+
+function ComboTestResolvedBy({ results, emailsVisible }: { results: any; emailsVisible: boolean }) {
+  if (!results.resolvedBy) return null;
+  const target = results.resolvedByTarget;
+  return (
+    <div className="flex items-center gap-2 text-sm">
+      <Icon name="check_circle" size={18} className="text-success" />
+      <div className="min-w-0">
+        <div>
+          First healthy target in combo order:{" "}
+          <code className="text-xs bg-success/10 text-success px-1.5 py-0.5 rounded font-mono">
+            {results.resolvedBy}
+          </code>
+        </div>
+        {target?.connectionId || target?.label ? (
+          <div className="mt-1 text-xs text-text-muted">
+            {target?.label
+              ? pickDisplayValue([target.label], emailsVisible, target.label)
+              : target?.connectionId
+                ? `account ${target.connectionId.slice(0, 8)}`
+                : "dynamic account"}
+            {target?.connectionId && target?.label
+              ? ` (acct ${target.connectionId.slice(0, 8)})`
+              : ""}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function RemoveFailedModelsButton({
+  count,
+  removing,
+  onClick,
+}: {
+  count: number;
+  removing: boolean;
+  onClick: () => void;
+}) {
+  const t = useTranslations("combos");
+  return (
+    <div className="mt-3 pt-3 border-t border-border">
+      <Button
+        variant="danger"
+        fullWidth
+        icon="delete_sweep"
+        loading={removing}
+        disabled={removing}
+        onClick={onClick}
+      >
+        {removing ? t("removingErrorModels") : t("removeErrorModels", { count })}
+      </Button>
+    </div>
+  );
+}
+
+function TestResultsView({
+  results,
+  onRemoveErrorModels,
+  removingErrorModels,
+}: {
+  // Untyped JSON from POST /api/combos/test (the pre-existing view took it untyped too).
+  results: any;
+  onRemoveErrorModels?: (failedStepIds: string[]) => void;
+  removingErrorModels?: boolean;
+}) {
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
 
   if (results.error) {
@@ -2030,6 +2164,8 @@ function TestResultsView({ results }) {
     );
   }
 
+  const failedStepIds = collectRemovableFailedStepIds(results.results);
+
   return (
     <div className="flex flex-col gap-2">
       <p className="text-xs text-text-muted">
@@ -2037,80 +2173,18 @@ function TestResultsView({ results }) {
         or fallback order.
       </p>
       <AutoComboTruncatedNote results={results} />
-      {results.resolvedBy && (
-        <div className="flex items-center gap-2 text-sm">
-          <Icon name="check_circle" size={18} className="text-success" />
-          <div className="min-w-0">
-            <div>
-              First healthy target in combo order:{" "}
-              <code className="text-xs bg-success/10 text-success px-1.5 py-0.5 rounded">
-                {results.resolvedBy}
-              </code>
-            </div>
-            {results.resolvedByTarget?.connectionId || results.resolvedByTarget?.stepId ? (
-              <div className="mt-1 text-xs text-text-muted">
-                {results.resolvedByTarget?.connectionId
-                  ? `account ${results.resolvedByTarget.connectionId.slice(0, 8)}`
-                  : "dynamic account"}
-                {results.resolvedByTarget?.stepId
-                  ? ` · step ${results.resolvedByTarget.stepId}`
-                  : ""}
-              </div>
-            ) : null}
-          </div>
-        </div>
-      )}
+      <ComboTestResolvedBy results={results} emailsVisible={emailsVisible} />
       {results.results?.map((r, i) => (
-        <div
-          key={i}
-          title={r.error || undefined}
-          className="flex items-center gap-2 text-xs px-2 py-1.5 rounded bg-bg-subtle"
-        >
-          <Icon
-            name={
-              r.status === "ok" ? "check_circle" : r.status === "skipped" ? "skip_next" : "error"
-            }
-            size={14}
-            className={cn(
-              "shrink-0",
-              r.status === "ok"
-                ? "text-success"
-                : r.status === "skipped"
-                  ? "text-text-muted"
-                  : "text-error"
-            )}
-          />
-          <div className="min-w-0 flex-1">
-            <code className="font-mono block truncate">
-              {pickDisplayValue([r.label], emailsVisible, r.model)}
-            </code>
-            {r.connectionId || r.stepId ? (
-              <div className="mt-0.5 text-[10px] text-text-muted">
-                {r.connectionId ? `acct ${r.connectionId.slice(0, 8)}` : "dynamic account"}
-                {r.stepId ? ` · ${r.stepId}` : ""}
-              </div>
-            ) : null}
-            {r.error && (
-              <p className="mt-2 whitespace-pre-wrap break-words text-error">
-                {r.statusCode ? `HTTP ${r.statusCode}: ` : ""}
-                {r.error}
-              </p>
-            )}
-          </div>
-          {r.latencyMs !== undefined && <span className="text-text-muted">{r.latencyMs}ms</span>}
-          <span
-            className={`text-[10px] uppercase font-medium ${
-              r.status === "ok"
-                ? "text-success"
-                : r.status === "skipped"
-                  ? "text-text-muted"
-                  : "text-error"
-            }`}
-          >
-            {r.status}
-          </span>
-        </div>
+        <ComboTestResultRow key={i} result={r} emailsVisible={emailsVisible} />
       ))}
+
+      {failedStepIds.length > 0 && onRemoveErrorModels && (
+        <RemoveFailedModelsButton
+          count={failedStepIds.length}
+          removing={!!removingErrorModels}
+          onClick={() => onRemoveErrorModels(failedStepIds)}
+        />
+      )}
     </div>
   );
 }
@@ -2172,6 +2246,7 @@ function ComboFormModal({
   const [modelAliases, setModelAliases] = useState({});
   const [providerNodes, setProviderNodes] = useState([]);
   const [builderOptions, setBuilderOptions] = useState({ providers: [], comboRefs: [] });
+  const [staleModels, setStaleModels] = useState<Set<string>>(() => new Set());
   const [builderLoading, setBuilderLoading] = useState(false);
   const [builderProviderId, setBuilderProviderId] = useState("");
   const [builderModelId, setBuilderModelId] = useState("");
@@ -2538,9 +2613,11 @@ function ComboFormModal({
         providers: builderData.providers || [],
         comboRefs: builderData.comboRefs || [],
       });
+      setStaleModels(buildStaleModelSet(builderData.staleComboRefs));
     } catch (error) {
       console.error("Error fetching modal data:", error);
       setBuilderOptions({ providers: [], comboRefs: [] });
+      setStaleModels(new Set());
     } finally {
       setBuilderLoading(false);
     }
@@ -3850,31 +3927,22 @@ function ComboFormModal({
 
                       {/* Model display */}
                       <div className="flex-1 min-w-0 px-1">
-                        <div className="text-xs text-text-main truncate">
-                          {formatModelDisplay(entry)}
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <div className="text-xs text-text-main truncate">
+                            {formatModelDisplay(entry)}
+                          </div>
+                          {isStaleComboStep(entry, staleModels) && (
+                            <StaleModelBadge
+                              label={getI18nOrFallback(
+                                t,
+                                "builderStaleModel",
+                                "Not in live catalog"
+                              )}
+                            />
+                          )}
                         </div>
                         <div className="text-[10px] text-text-muted truncate">
-                          {entry.kind === "combo-ref"
-                            ? getI18nOrFallback(t, "builderComboRefStep", "Nested combo reference")
-                            : entry.kind === "provider-wildcard"
-                              ? getI18nOrFallback(
-                                  t,
-                                  "builderProviderWildcard",
-                                  "All matching provider models"
-                                )
-                              : entry.connectionId
-                                ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                : entry.providerId
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderDynamicAccountShort",
-                                      "Dynamic account"
-                                    )
-                                  : getI18nOrFallback(
-                                      t,
-                                      "builderLegacyEntry",
-                                      "Legacy model entry"
-                                    )}
+                          {getComboStepKindLabel(t, entry)}
                         </div>
                       </div>
 
@@ -3932,6 +4000,8 @@ function ComboFormModal({
                           <Icon name="arrow_downward" size={12} />
                         </Button>
                       </div>
+
+                      <ComboStepTestButton entry={entry} />
 
                       {/* Remove */}
                       <Button
@@ -4938,31 +5008,7 @@ function ComboFormModal({
                               {formatModelDisplay(entry)}
                             </p>
                             <p className="text-[10px] text-text-muted mt-0.5">
-                              {entry.kind === "combo-ref"
-                                ? getI18nOrFallback(
-                                    t,
-                                    "builderComboRefStep",
-                                    "Nested combo reference"
-                                  )
-                                : entry.kind === "provider-wildcard"
-                                  ? getI18nOrFallback(
-                                      t,
-                                      "builderProviderWildcard",
-                                      "All matching provider models"
-                                    )
-                                  : entry.connectionId
-                                    ? getI18nOrFallback(t, "builderPinnedAccount", "Pinned account")
-                                    : entry.providerId
-                                      ? getI18nOrFallback(
-                                          t,
-                                          "builderDynamicAccountShort",
-                                          "Dynamic account"
-                                        )
-                                      : getI18nOrFallback(
-                                          t,
-                                          "builderLegacyEntry",
-                                          "Legacy model entry"
-                                        )}
+                              {getComboStepKindLabel(t, entry)}
                               {strategy === "weighted" && entry.weight > 0
                                 ? ` · ${entry.weight}%`
                                 : ""}

@@ -849,47 +849,40 @@ anropare utan session (hämtning, borttagning, avbrytning och kontrollen av `inp
 
 ---
 
-## Sök-API
+## Sök API
 
-Abstraktion för webb-/sökleverantörer (Tavily, Brave, Exa, Serper osv.).
+Web/search -leverantörsabstraktion (Tavily, Brave, Exa, Serper, etc.).
 
-| Metod | Sökväg                 | Beskrivning                                                                                         |
-| ----- | ---------------------- | --------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Lista konfigurerade sökleverantörer och funktioner                                                  |
-| POST  | `/v1/search`           | Kör en sökfråga — begärandetexten valideras av `v1SearchSchema`, stöder cachelagring/sammanslagning |
-| GET   | `/v1/search/analytics` | Statistik per leverantör för träffar/latens/cache                                                   |
+| Metod | Väg                    | Beskrivning                                                                     |
+| ----- | ---------------------- | ------------------------------------------------------------------------------- |
+| GET   | `/v1/search`           | Lista konfigurerade sökleverantörers + funktioner                               |
+| POST  | `/v1/search`           | Kör en sökfråga — body validerad av `v1SearchSchema`, stöder caching/coalescing |
+| GET   | `/v1/search/analytics` | hit/latency/cache -statistik per leverantör                                     |
 
-**Autentisering:** Bearer-API-nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicyn tillämpas via `enforceApiKeyPolicy`.
+**Auth:** Bärare API nyckel (`extractApiKey` + `isValidApiKey`). Sökpolicy tillämpas via `enforceApiKeyPolicy`.
 
 ### Exa och Tavily `provider_options`
 
-Exa och Tavily läser leverantörsspecifika fält från en namngiven samling:
-`provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily`
-(eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en
-kontrolleras mot sitt eget Zod-schema i `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-och en nyckel med fel typ tas bort. Alla andra nycklar ignoreras, inklusive autentisering, bas-URL,
-`stream` och `outputSchema`. De platta nycklar som används av andra leverantörer (`cx`, `depth`, ...) fungerar
-som tidigare.
+Exa och Tavily läser leverantörsspecifika fält från en namnavståndspåse: `provider_options.exa` (eller `provider_options["exa-search"]`) och `provider_options.tavily` (eller `provider_options["tavily-search"]`). Endast nycklarna nedan vidarebefordras. Var och en kontrolleras mot sitt eget Zod schema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, och en nyckel med fel typ släpps. Alla andra nyckelr ignoreras, inklusive auth, base URL, `stream` och `outputSchema`. De platta nycklarna som används av andra leverantörer (`cx`, `depth`, ...) fungerar som tidigare.
 
-| Leverantör | Fält på toppnivå                                                                                                                                                                                                                                                                                                                                                          | Kapslade                                                                                                                                                                    |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiva värden), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                      | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` sammanfogas ovanpå standardvärdet `{ text: true, highlights: true }` |
-| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                                           |
+| Leverantör | Fält på högsta nivå                                                                                                                                                                                                                                                                                                                                                       | Kapslad                                                                                                                                     |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (platta primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` slogs samman över standard `{ text: true, highlights: true }` |
+| Tavily     | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
 
-De generiska fälten har alltid företräde: `query`, `max_results`, `filters` (domäner), `country` och det
-ämne som härleds från `search_type`. För Exa behåller `search_type: "news"` värdet `category: "news"`.
-Tavily accepterar även `search_type: "finance"` (`topic: "finance"`).
+De generiska fälten vinner alltid: `query`, `max_results`, `filters` (domäner), `country` och ämnet som härrör från `search_type`. På Exa behåller `search_type: "news"` `category: "news"`. Tavily accepterar också `search_type: "finance"` (`topic: "finance"`).
 
-Det generiska `time_range` når nu båda leverantörerna: Exa får `startPublishedDate` (ISO-
-tidsstämpel) och Tavily får `start_date` (`YYYY-MM-DD`). Ett explicit datum i `provider_options`
-åsidosätter det mappade datumet.
+Firecrawl-sökningskostnaden registreras per startat block av 10 returnerade resultat, 0,002 USD (2 poäng) per block och minst ett block per samtal ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultat kostar 0,004 USD.
 
-Exa-resultat behåller `id`, `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i
-`provider_raw`. Tavily-resultat behåller `images` och `favicon`.
+Den generiska `time_range` når nu båda leverantörerna: Exa får `startPublishedDate` (ISO timestamp) och Tavily får `start_date` (`YYYY-MM-DD`). Ett explicit datum i `provider_options` åsidosätter det mappade.
 
-Kostnadsredovisningen använder fortfarande det platta registret `costPerQuery`. Tavily debiterar
-fler krediter per anrop för `search_depth: "advanced"`, och den skillnaden återspeglas inte i
-`usage.search_cost_usd`.
+Exa-resultat håller `id`, `highlight_scores`, `summary`, `subpages`, `entities` och `extras` i `provider_raw`. Tavily resultat behåller `images` och `favicon`.
+
+Kostnaden för länksökning registreras till $0,005 för `depth` `fast` och `standard` och $0,05 för `deep` ( [Linkup-prissättning](https://docs.linkup.so/pages/documentation/development/pricing) ), oavsett om `depth` kommer från `provider_options` eller anslutningens inställningar.
+
+Exa `type: "lite"` (Exa 3.0) accepterar en mindre uppsättning fält och avvisar hela begäran när något annat fält är inställt. För lite släpps `additionalQueries`, `systemPrompt` och varje `contents` knapp utom `text` och `highlights` före samtalet. De föråldrade `subpages`, `subpageTarget`, `highlights.numSentences` och `highlights.highlightsPerUrl` vidarebefordras inte längre.
+
+Kostnadsredovisning är det platta registret `costPerQuery`, förutom Exa, som följer Exas egen prissättning: 0,007 $ per samtal för `auto` (och den äldre `fast`) eller 0,004 $ för `lite` (och den äldre `instant`), som täcker 10 resultat; $0,001 för varje ytterligare resultat; och $0,001 per returnerat resultat när `contents.summary` är inställt. Tavily registreras till 1 poäng ($0,008) för `search_depth` `basic`, `fast` och `ultra-fast`, och 2 poäng ($0,016) för `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Ett samtal med `auto_parameters: true` som Tavily uppgraderar till avancerad spelas fortfarande in med 1 poäng.
 
 ---
 

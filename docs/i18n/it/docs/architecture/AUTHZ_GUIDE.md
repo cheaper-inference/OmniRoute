@@ -17,82 +17,114 @@ OmniRoute dispone di una pipeline di autorizzazione consapevole del percorso che
 
 ### 1. Chiave API (Bearer)
 
-Utilizzata per le API client compatibili con OpenAI, Anthropic e Gemini e per alcune route di gestione quando la chiave possiede lo scope `manage`.
+Utilizzata per le API client compatibili con OpenAI/Anthropic/Gemini e per alcune route di gestione quando la chiave dispone dell'ambito `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Validata da `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts` e riesportata tramite `src/shared/utils/apiAuth.ts`. Il validatore accetta anche le variabili d'ambiente `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` come chiavi di passthrough persistenti (issue #1350).
+Convalidata da `isValidApiKey()` / `extractApiKey()` in `src/sse/services/auth.ts` e riesportata tramite `src/shared/utils/apiAuth.ts`. Il validatore accetta anche le variabili d'ambiente `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` come chiavi passthrough persistenti (issue #1350).
 
 ### 2. Sessione della dashboard (cookie auth_token)
 
-Per le pagine della dashboard e le operazioni amministrative.
+Per le pagine della dashboard e le operazioni di amministrazione.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
 Un cookie è una sessione solo quando il JWT viene verificato **e** contiene `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Ogni consumatore del cookie (la route guard della dashboard (`isDashboardSessionAuthenticated()`), l'aggiornamento della pipeline di autorizzazione, l'handshake WebSocket, il server live, `/api/settings/require-login`, `/api/auth/status`) passa da questo helper. Esistono altri JWT firmati con `JWT_SECRET`, come i token `iss "omniroute" / aud "cursor-cli"` emessi dal passthrough della Cursor CLI per i possessori di chiavi, ma non sono mai sessioni (#13298).
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Ogni
+componente che utilizza il cookie (guardia delle route della dashboard (`isDashboardSessionAuthenticated()`), aggiornamento della pipeline di autorizzazione, handshake WebSocket, server
+live, `/api/settings/require-login`, `/api/auth/status`) passa attraverso questo helper.
+Esistono altri JWT firmati con `JWT_SECRET`: il passthrough della CLI Cursor genera
+token `iss "omniroute" / aud "cursor-cli"` per i possessori di chiavi, che non sono mai sessioni
+(#13298).
 
-Verificato da `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. La pipeline aggiorna automaticamente il JWT quando restano meno di 7 giorni dei suoi 30 di validità.
+Verificata da `isDashboardSessionAuthenticated()` in `src/shared/utils/apiAuth.ts`. La pipeline aggiorna automaticamente il JWT quando restano meno di 7 giorni della sua durata di 30 giorni.
 
-Una sessione può anche terminare prima dei suoi 30 giorni: ogni emittente passa da `mintDashboardSessionToken` (con data di emissione `iat` e identificatore `jti`), e il verificatore controlla due impostazioni: `sessionsValidAfter`, impostata da un cambio di password in modo che ogni sessione emessa prima smetta di essere valida (il browser che ha cambiato la password riceve un cookie nuovo), e `revokedDashboardSessions`, a cui `POST /api/auth/logout` aggiunge il `jti` della sessione chiusa. Le sessioni emesse da una release più vecchia non hanno nessuno di questi claim e restano valide fino al primo cambio di password. Se le impostazioni non possono essere lette, la sessione non è considerata attendibile.
+Una sessione può anche terminare prima dei 30 giorni, perché ogni componente che la genera passa attraverso `mintDashboardSessionToken` (un timestamp di emissione `iat` e un ID `jti`) e il verificatore controlla due impostazioni: `sessionsValidAfter`, impostata in seguito a una modifica della password affinché tutte le sessioni emesse in precedenza smettano di essere verificate (il browser in cui è stata modificata la password riceve un nuovo cookie), e `revokedDashboardSessions`, a cui `POST /api/auth/logout` aggiunge il `jti` della sessione disconnessa. Le sessioni generate da una versione precedente non contengono nessuna delle due claim e rimangono valide fino alla prima modifica della password. Se non è possibile leggere le impostazioni, la sessione non viene considerata attendibile.
 
-Alcune route di gestione accettano **una delle due** modalità: cookie OPPURE `Bearer <key>` quando la chiave API possiede lo scope `manage` (o `admin`). È ciò che abilita il flusso «configurabile tramite chiamate API» introdotto nella v3.8.
+Alcune route di gestione accettano **entrambe** le modalità: cookie OPPURE `Bearer <key>` quando la chiave API dispone dell'ambito `manage` (o `admin`). Questo è ciò che abilita il flusso di lavoro «configurabile tramite chiamate API» aggiunto nella v3.8.
 
-#### Accesso OIDC opzionale (#6973)
+#### Controllo di accesso OIDC opzionale (#6973)
 
-L'accesso amministrativo alla dashboard supporta anche un flusso OIDC (OpenID Connect) **opzionale**, affiancato all'accesso predefinito con password. L'accesso con password non viene mai rimosso, viene solo integrato:
+L'accesso amministrativo alla dashboard supporta anche un flusso OIDC (OpenID Connect) **facoltativo**
+insieme all'accesso predefinito tramite password: l'accesso tramite password non viene mai rimosso, ma solo
+integrato:
 
-- Disabilitato, a meno che `settings.oidcEnabled === true` **e** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` siano tutti configurati (Impostazioni → Auth).
-  `GET /api/auth/oidc/login` restituisce `400` altrimenti.
-- `GET /api/auth/oidc/login` individua l'`authorization_endpoint` dal
-  `/.well-known/openid-configuration` dell'issuer (in mancanza, usa `<issuer>/authorize`),
-  costruisce la redirect URI a partire dalla richiesta in ingresso (tenendo conto di
-  `x-forwarded-proto`) e reindirizza all'IdP con uno `state` casuale memorizzato in un cookie
-  `oidc_state` con `httpOnly`.
-- `GET /api/auth/oidc/callback` valida `state`, scambia il codice di autorizzazione e verifica
-  la firma dell'ID token tramite il JWKS dell'issuer (`createRemoteJWKSet` di `jose`, memorizzato
-  in cache per URI JWKS) con i controlli di `issuer`/`audience`. La allowlist
-  `oidcAllowedSubjects` è obbligatoria: confronta il claim `sub` del token oppure il suo claim
-  `email`. Il claim email viene considerato solo quando `email_verified === true`, quindi un'email
-  non verificata presso l'IdP non può mai superare il controllo. Senza voci, il callback rifiuta
-  ogni accesso (`not_configured`).
-- In caso di successo emette **esattamente lo stesso** JWT `auth_token` di 30 giorni emesso dall'accesso
-  con password (`src/app/api/auth/login/route.ts`), quindi il resto della pipeline di sessione
-  della dashboard (aggiornamento automatico, flag del cookie) rimane invariato. OIDC sostituisce
-  solo il modo in cui il cookie viene ottenuto, non ciò che concede.
-- Tutte le impostazioni `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`, `oidcIssuer`,
-  `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`, `oidcRedirectPath`, `oidcScopes`)
-  sono in `SECURITY_IMPACTING_SETTINGS_KEYS` (`src/shared/constants/securityImpactingSettings.ts`):
-  `PATCH /api/settings` risponde con `400 PASSWORD_REQUIRED` a meno che il corpo non contenga la
-  password di gestione come `currentPassword` (`401 PASSWORD_MISMATCH` se errata).
-  `oidcDisablePasswordLogin` impedisce l'_accesso_ con password (`POST /api/auth/login`) ma
-  conserva l'hash della password, e la riautenticazione continua a verificare `currentPassword`
-  rispetto ad esso.
-- Anche `corsOrigins` e `bruteForceProtection` sono in `SECURITY_IMPACTING_SETTINGS_KEYS`:
-  allentarne uno dei due indebolisce le difese dell'accesso, quindi richiedono la stessa
-  riautenticazione con `currentPassword` (la scheda Sicurezza la chiede) e l'import JSON li scarta.
-- Ogni chiave di policy di sicurezza (le voci di `SECURITY_IMPACTING_SETTINGS_KEYS`, ogni chiave
-  `oidc*` e lo stato della sessione della dashboard) è **riservata all'operatore** su
-  `PATCH /api/settings`: una chiave API con scope `manage` o un token di accesso `oma_` riceve
-  `403` anche quando invia il `currentPassword` corretto, e il rifiuto viene registrato come
-  `settings.update_failed` con `reason: OPERATOR_REQUIRED` (`requireOperatorCredential()` in
-  `src/lib/api/operatorCredential.ts`). Le impostazioni ordinarie (tema, preferenze di visualizzazione)
-  restano modificabili con una chiave `manage` o un token di accesso `admin`. Ogni modifica di
-  `/api/settings` stesso (e di `/api/settings/require-login`) richiede inoltre lo scope del token di
-  accesso `admin` (`ADMIN_MUTATION_EXACT_PATHS` in `src/server/authz/accessScopes.ts`, corrispondenza
-  esatta del percorso). `GET` resta `read`, mentre le altre sotto-route `/api/settings/*` (proxy,
-  default delle combo, alias dei modelli, compressione, pulizie…) mantengono lo scope `write`
-  dedotto dal metodo.
-- `POST /api/settings/import-json` salta questa riautenticazione, quindi elimina ogni chiave di
-  `IMPORT_STRIPPED_SETTINGS_KEYS` (stesso file) prima di scrivere: la password e `currentPassword`,
-  ogni voce di `SECURITY_IMPACTING_SETTINGS_KEYS` e lo stato della sessione della dashboard
-  (`sessionsValidAfter`, `revokedDashboardSessions`). Importare un backup più vecchio non può
-  quindi riportare in vita una sessione che un cambio di password o un logout avevano già chiuso.
+- Disabilitato a meno che `settings.oidcEnabled === true` **e** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` siano tutti configurati (Impostazioni → Autenticazione).
+  In caso contrario, `GET /api/auth/oidc/login` restituisce `400`.
+- `GET /api/auth/oidc/login` rileva `authorization_endpoint` da
+  `/.well-known/openid-configuration` dell'emittente (con fallback a
+  `<issuer>/authorize`), crea l'URI di reindirizzamento dalla richiesta in arrivo
+  (tenendo conto di `x-forwarded-proto`) e reindirizza all'IdP con un valore `state`
+  casuale memorizzato in un cookie `oidc_state` `httpOnly`.
+- `GET /api/auth/oidc/callback` convalida `state`, scambia il codice di autorizzazione
+  e verifica la firma del token ID tramite il JWKS dell'emittente
+  (`createRemoteJWKSet` di `jose`, memorizzato nella cache per URI JWKS), con controlli
+  di `issuer`/`audience`. L'accesso alla dashboard richiede un elenco
+  `oidcAllowedSubjects` non vuoto, una policy `oidcAdmissionClaim` o entrambi. L'elenco
+  dei soggetti confronta `sub` oppure `email` solo quando `email_verified === true`.
+  La policy opzionale per i claim accetta il percorso di un claim del token ID
+  separato da punti (ad esempio, `realm_access.roles`) e un array di valori accettati;
+  il claim risolto deve essere un array di stringhe contenente almeno un valore
+  accettato. Se sono configurate entrambe le policy, entrambe devono essere
+  soddisfatte. I claim mancanti o non validi causano un rifiuto e, in assenza di
+  entrambe le policy, il callback rifiuta l'accesso (`not_configured`). Le
+  configurazioni esistenti basate unicamente sul soggetto continuano a funzionare
+  senza modifiche.
+- Normalmente Keycloak mappa i ruoli realm nei token di accesso, ma non necessariamente
+  nei token ID. Per richiedere il ruolo realm `admin`, configurare per questo client
+  un protocol mapper che includa `realm_access.roles` nel relativo **token ID**, quindi
+  impostare `oidcAdmissionClaim` su `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  Verificare il claim effettivo del token ID per questo client prima di abilitare
+  l'accesso basato unicamente sul ruolo; l'applicazione non legge i ruoli dal token
+  di accesso. Il rifiuto del token lato IdP può integrare, ma non sostituire, questo
+  controllo lato applicazione.
+- In caso di successo, genera **esattamente lo stesso** JWT `auth_token` di 30 giorni
+  emesso dall'accesso con password (`src/app/api/auth/login/route.ts`), quindi il resto
+  della pipeline di sessione della dashboard (aggiornamento automatico, flag dei
+  cookie) rimane invariato: OIDC sostituisce solo il modo in cui viene generato il
+  cookie, non ciò che esso autorizza. Le modifiche ai ruoli/gruppi dell'IdP non
+  invalidano le sessioni OmniRoute esistenti; la disconnessione, la rotazione della
+  password o la scadenza della sessione continuano a determinarne la durata.
+- Ogni impostazione `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) è inclusa in `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  risponde con `400 PASSWORD_REQUIRED` a meno che il corpo non contenga la password
+  di gestione come `currentPassword` (`401 PASSWORD_MISMATCH` quando è errata).
+  `oidcDisablePasswordLogin` impedisce l'_accesso_ con password (`POST /api/auth/login`),
+  ma mantiene l'hash della password memorizzato e la nuova autenticazione continua
+  a verificare `currentPassword` rispetto a esso.
+- Anche `corsOrigins` e `bruteForceProtection` sono inclusi in `SECURITY_IMPACTING_SETTINGS_KEYS`:
+  rendere meno restrittivo uno dei due indebolisce le difese dell'accesso, pertanto
+  richiedono la stessa nuova autenticazione tramite `currentPassword` (la scheda
+  Sicurezza lo richiede) e l'importazione JSON li rimuove.
+- Ogni chiave delle policy di sicurezza — le voci di `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  ogni chiave `oidc*` e lo stato della sessione della dashboard — è riservata
+  **esclusivamente all'operatore** su `PATCH /api/settings`: una chiave API con ambito
+  di gestione o un token di accesso `oma_` viene rifiutato con `403` anche quando
+  invia il valore `currentPassword` corretto, e il rifiuto viene registrato nell'audit
+  come `settings.update_failed` con `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` in `src/lib/api/operatorCredential.ts`).
+  Le impostazioni ordinarie (tema, preferenze di visualizzazione) restano modificabili
+  con una chiave `manage` o un token di accesso `admin`. Ogni modifica di
+  `/api/settings` stesso (e di `/api/settings/require-login`) richiede inoltre l'ambito
+  `admin` del token di accesso (`ADMIN_MUTATION_EXACT_PATHS` in
+  `src/server/authz/accessScopes.ts`, corrispondenza esatta del percorso);
+  `GET` rimane `read`, mentre le altre sotto-route `/api/settings/*` (proxy,
+  impostazioni predefinite delle combinazioni, alias dei modelli, compressione,
+  eliminazioni…) mantengono l'ambito `write` dedotto dal metodo.
+- `POST /api/settings/import-json` ignora questa nuova autenticazione, quindi rimuove
+  ogni chiave in `IMPORT_STRIPPED_SETTINGS_KEYS` (stesso file) prima della scrittura:
+  la password e `currentPassword`, ogni voce di `SECURITY_IMPACTING_SETTINGS_KEYS` e
+  lo stato della sessione della dashboard (`sessionsValidAfter`,
+  `revokedDashboardSessions`). L'importazione di un backup precedente non può quindi
+  riattivare una sessione già terminata da una modifica della password o da una
+  disconnessione.
 
 ## Classi di route
 

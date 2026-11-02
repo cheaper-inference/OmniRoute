@@ -1,0 +1,1 @@
+- **fix(combo):** with `outputLimitAdvisory` on, the context-window check sizes each target's output by its own known output limit instead of the full `max_tokens`, so an oversized `max_tokens` no longer demotes a declared primary whose capped reply fits its window ([#17958](https://github.com/diegosouzapw/OmniRoute/pull/17958)) — thanks @HouMinXi

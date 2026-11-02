@@ -9,36 +9,14 @@
  *
  * @module lib/db/cleanup/backupPrune
  */
-import { createHash } from "crypto";
 import fs from "fs";
 import path from "path";
 
+import { hashFileSync } from "../backupFileHash";
 import { tryOpenSync } from "../adapters/driverFactory";
 import type { SqliteAdapter } from "../adapters/types";
 import { pruneBackupDirectory, resolveDbBackupRetention } from "../backupRetention";
 import { DB_BACKUPS_DIR, DATA_DIR, getDbInstance } from "../core";
-
-/**
- * Hash a file with SHA-256. Local copy of the migration snapshot helper: importing
- * it from the migration runner would pull its logger chain into this module.
- */
-function hashFileSync(filePath: string): string {
-  const hash = createHash("sha256");
-  const fd = fs.openSync(filePath, "r");
-  const buffer = Buffer.allocUnsafe(1024 * 1024);
-  let position = 0;
-  try {
-    while (true) {
-      const bytesRead = fs.readSync(fd, buffer, 0, buffer.length, position);
-      if (bytesRead === 0) break;
-      hash.update(buffer.subarray(0, bytesRead));
-      position += bytesRead;
-    }
-  } finally {
-    fs.closeSync(fd);
-  }
-  return hash.digest("hex");
-}
 
 /**
  * Resolve the SHA of the pre-migration snapshot the current migration would reuse,

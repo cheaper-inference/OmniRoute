@@ -25,6 +25,13 @@
 
 import { createHash } from "node:crypto";
 
+/**
+ * Why the live catalog was not used: a code of the closed vocabulary, or an
+ * HTTP status. Never a message, a body or an URL — the reason is published to
+ * the operator, so it must not carry what the upstream sent.
+ */
+type DiscoveryFailure = { status?: number; code?: string };
+
 import { v4 as uuidv4 } from "uuid";
 
 import {
@@ -101,6 +108,8 @@ export type KiroModelsResult = {
   models: KiroModel[];
   /** "api" = live discovery; "fallback" = static catalog (offline/unauthed/error). */
   source: "api" | "fallback";
+  /** Why the live catalog was not used — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 };
 
 /**
@@ -256,7 +265,8 @@ export type FetchKiroModelsOptions = {
 };
 
 function toFallbackResult(
-  fallbackModels: Array<{ id: string; name?: string }> | undefined
+  fallbackModels: Array<{ id: string; name?: string }> | undefined,
+  failure?: DiscoveryFailure
 ): KiroModelsResult {
   const models = (fallbackModels || [])
     .map((model) => {
@@ -269,7 +279,7 @@ function toFallbackResult(
       };
     })
     .filter((model): model is KiroModel => Boolean(model));
-  return { models, source: "fallback" };
+  return { models, source: "fallback", ...(failure ? { failure } : {}) };
 }
 
 function buildKiroFingerprintHeaders(providerSpecificData: unknown, accessToken: string) {
@@ -318,12 +328,16 @@ function cacheKey(accessToken: string, providerSpecificData: unknown): string {
   return createHash("sha256").update(`kiro:${authMethod}:${seed}`).digest("hex");
 }
 
+/**
+ * One discovery attempt: either the live models, or the reason the attempt
+ * produced none. The reason is a code or an HTTP status — never a message.
+ */
 async function tryFetchModels(
   fetchImpl: typeof fetch,
   url: string,
   accessToken: string,
   providerSpecificData: unknown
-): Promise<KiroModel[] | null> {
+): Promise<{ models: KiroModel[]; failure?: DiscoveryFailure }> {
   try {
     const response = await fetchImpl(url, {
       method: "GET",
@@ -332,12 +346,13 @@ async function tryFetchModels(
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    if (!response.ok) return null;
+    if (!response.ok) return { models: [], failure: { status: response.status } };
     const data = await response.json();
     const models = expandKiroModels(data);
-    return models.length > 0 ? models : null;
+    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
+    return { models };
   } catch {
-    return null;
+    return { models: [], failure: {} };
   }
 }
 
@@ -358,7 +373,7 @@ export async function fetchKiroAvailableModels(
 
   const token = toNonEmptyString(accessToken);
   if (!token) {
-    return toFallbackResult(fallbackModels);
+    return toFallbackResult(fallbackModels, { code: "NO_CREDENTIAL" });
   }
 
   const key = cacheKey(token, providerSpecificData);
@@ -370,19 +385,22 @@ export async function fetchKiroAvailableModels(
   const region = resolveKiroRegion(providerSpecificData);
   const endpoints = buildKiroModelsEndpoints(region);
   const profileArn = toNonEmptyString(asRecord(providerSpecificData).profileArn);
+  // The first attempt that produced no model explains the fallback.
+  let failure: DiscoveryFailure | undefined;
 
   // Pass 1: origin-only (works for Builder ID / social / IdC).
   for (const base of endpoints) {
-    const models = await tryFetchModels(
+    const attempt = await tryFetchModels(
       fetchImpl,
       `${base}?origin=AI_EDITOR`,
       token,
       providerSpecificData
     );
-    if (models) {
-      catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models });
-      return { models, source: "api" };
+    if (attempt.models.length > 0) {
+      catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models: attempt.models });
+      return { models: attempt.models, source: "api" };
     }
+    failure = failure ?? attempt.failure;
   }
 
   // Pass 2: retry with profileArn (desktop accounts that require it) on the
@@ -390,14 +408,15 @@ export async function fetchKiroAvailableModels(
   // profileArn can 403.
   if (profileArn) {
     const url = `${endpoints[0]}?origin=AI_EDITOR&profileArn=${encodeURIComponent(profileArn)}`;
-    const models = await tryFetchModels(fetchImpl, url, token, providerSpecificData);
-    if (models) {
-      catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models });
-      return { models, source: "api" };
+    const attempt = await tryFetchModels(fetchImpl, url, token, providerSpecificData);
+    if (attempt.models.length > 0) {
+      catalogCache.set(key, { expiresAt: Date.now() + CACHE_TTL_MS, models: attempt.models });
+      return { models: attempt.models, source: "api" };
     }
+    failure = failure ?? attempt.failure;
   }
 
-  return toFallbackResult(fallbackModels);
+  return toFallbackResult(fallbackModels, failure ?? { code: "EMPTY_CATALOG" });
 }
 
 export function clearKiroModelCache(): void {

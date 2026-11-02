@@ -170,18 +170,18 @@ Mawanda (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Kuendesha Majaribio
 
 ```bash
-# Majaribio yote (unit + vitest + ecosystem + e2e)
+# Majaribio yote (unit + vitest + mfumo ikolojia + e2e)
 npm run test:all
 
-# Faili moja ya jaribio (kiendesha majaribio asili cha Node.js — majaribio mengi hutumia hiki)
+# Faili moja ya majaribio (kiendesha majaribio asilia cha Node.js — majaribio mengi hutumia hiki)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Majaribio ya unit pekee yaliyoathiriwa na mabadiliko yako (kiteuzi sawa cha TIA kama kizuizi cha CI, #8084)
-npm run test:scoped            # mabadiliko katika commit ya mwisho (au mti wa kazi)
-npm run test:scoped:staged     # mabadiliko yaliyowekwa kwenye staging pekee — huendana vizuri na utekelezaji wa pre-commit
-npm run test:scoped:full       # kwanza jenga upya ramani ya grafu ya import (baada ya kuongeza/kuhamisha faili)
-# Exit 1 + "run the full suite" humaanisha faili ya kitovu (tsconfig, package.json, …) au chanzo
-# kisichowekwa kwenye ramani kilibadilika — kiteuzi hushindwa kwa usalama, hakiruki chochote kimyakimya.
+# Majaribio ya unit yaliyoathiriwa tu na mabadiliko yako (kiteuzi sawa cha TIA na kizuizi cha CI, #8084)
+npm run test:scoped            # mabadiliko katika commit ya mwisho (au working tree)
+npm run test:scoped:staged     # mabadiliko yaliyowekwa kwenye staging pekee — hufanya kazi vizuri na utekelezaji wa pre-commit
+npm run test:scoped:full       # jenga upya ramani ya grafu ya import kwanza (baada ya kuongeza/kuhamisha faili)
+# Exit 1 + "run the full suite" inamaanisha faili kitovu (tsconfig, package.json, …) au chanzo
+# kisicho kwenye ramani kilibadilika — kiteuzi hushindwa kwa usalama, hakiruki majaribio kimya kimya.
 
 # Vitest (seva ya MCP, autoCombo, cache)
 npm run test:vitest
@@ -189,13 +189,13 @@ npm run test:vitest
 # Majaribio ya E2E (yanahitaji Playwright)
 npm run test:e2e
 
-# E2E ya viteja vya itifaki (usafirishaji wa MCP, A2A)
+# E2E ya wateja wa itifaki (usafirishaji wa MCP, A2A)
 npm run test:protocols:e2e
 
-# Majaribio ya uoanifu wa mfumo-ikolojia
+# Majaribio ya uoanifu wa mfumo ikolojia
 npm run test:ecosystem
 
-# Kizuizi cha coverage: 60% ya statements/lines/functions/branches
+# Kizuizi cha coverage: 60% ya taarifa/mistari/vitendaji/matawi
 npm run test:coverage
 npm run coverage:report
 
@@ -203,48 +203,49 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Jaribio la haraka la combo halisi ya upstream lililowekewa kizuizi (linahitaji ufikiaji wa VPS + salio halisi la mtoa huduma)
-# Huwasiliana na watoa huduma HALISI — hugharimu kiasi kidogo. HALITEKELEZWI KAMWE kwenye CI. Hurukwa bila hitilafu bila kizuizi.
-# Linahitaji: ufikiaji wa ssh root@192.168.0.15 (hupakia snapshot ya DB ya kusoma pekee kutoka VPS).
+# Jaribio la msingi la combo lililodhibitiwa kwa upstream halisi (linahitaji ufikiaji wa VPS + salio halisi la watoa huduma)
+# Hufikia watoa huduma HALISI — hugharimu kiasi kidogo. KAMWE haliendeshwi katika CI. Hurukwa kwa usahihi bila kizuizi.
+# Inahitaji: ufikiaji wa ssh root@192.168.0.15 (huchota snapshot ya DB ya kusoma tu kutoka VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Jaribio la moja kwa moja la VPS la awamu ya 3 — hati za kawaida za Node ESM, huwasiliana moja kwa moja na seva hai ya .15.
-# Linahitaji: ufikiaji wa ssh root@192.168.0.15 (combo huundwa/huondolewa kupitia SSH sqlite).
-# Huwasiliana na watoa huduma HALISI (gharama ndogo). Huunda/hufuta combo za __live_test__* pekee. HALITEKELEZWI KAMWE kwenye CI.
-# REQUIRE_API_KEY=false kwenye .15 kwa hivyo hakuna ufunguo wa API unaohitajika, lakini huzingatia COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ikiwa vimewekwa.
-npm run test:combo:live:vps              # hali 7 za HTTP (priority/round-robin/weighted/cost/fusion/auto + health)
+# Jaribio hai la msingi la VPS la Awamu ya 3 — script za kawaida za Node ESM, hufikia seva hai ya .15 moja kwa moja.
+# Inahitaji: ufikiaji wa ssh root@192.168.0.15 (combo huundwa/huondolewa kupitia SSH sqlite).
+# Hufikia watoa huduma HALISI (gharama ndogo). Huunda/hufuta combo za __live_test__* pekee. KAMWE haliendeshwi katika CI.
+# REQUIRE_API_KEY=false kwenye .15 kwa hivyo hakuna API key inayohitajika, lakini huheshimu COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ikiwa zimewekwa.
+npm run test:combo:live:vps              # hali 7 za HTTP (priority/round-robin/weighted/cost/fusion/auto + afya)
 npm run test:combo:live:vps:failover     # huongeza hali halisi ya failover kati ya watoa huduma (jumla 8)
 ```
 
 Maelezo ya coverage:
 
 - `npm run test:coverage` hupima coverage ya chanzo kwa mkusanyiko mkuu wa majaribio ya unit, huondoa `tests/**`, na hujumuisha `open-sse/**`
-- Pull request lazima zidumishe kizuizi cha coverage cha **60%+** kwa statements/lines/functions/branches
-- Ikiwa PR inabadilisha msimbo wa uzalishaji katika `src/`, `open-sse/`, `electron/`, au `bin/`, lazima iongeze au isasishe majaribio ya kiotomatiki katika PR hiyo hiyo
-- `npm run coverage:report` huchapisha ripoti ya kina ya kila faili kutoka katika utekelezaji wa hivi karibuni wa coverage
-- `npm run test:coverage:legacy` huhifadhi kipimo cha zamani kwa ajili ya ulinganisho wa kihistoria
-- Tazama `docs/ops/COVERAGE_PLAN.md` kwa ramani ya hatua kwa hatua ya kuboresha coverage
+- Pull request lazima zidumishe kizuizi cha coverage cha **60%+** cha taarifa/mistari/vitendaji/matawi
+- Ikiwa PR inabadilisha msimbo wa production katika `src/`, `open-sse/`, `electron/`, au `bin/`, lazima iongeze au isasishe majaribio ya kiotomatiki katika PR hiyo hiyo
+- `npm run coverage:report` huchapisha ripoti ya kina ya kila faili kutoka kwenye utekelezaji wa hivi karibuni wa coverage
+- `npm run test:coverage:legacy` huhifadhi kipimo cha zamani kwa ulinganisho wa kihistoria
+- Tazama `docs/ops/COVERAGE_PLAN.md` kwa ramani ya utekelezaji ya kuboresha coverage kwa awamu
 
 ### Mahitaji ya Pull Request
 
 Kabla ya kufungua PR, tumia
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kuendesha mzunguko uliolenga
-kile ulichobadilisha. Mkusanyiko kamili wa majaribio ya unit (sehemu 4 za CI), Vitest, kizuizi cha coverage cha **60%+**, na
-build ya uzalishaji ni jukumu la CI — kuviendesha ndani ya mazingira yako hakuongezi taarifa yoyote ambayo ukaguzi wa PR
-hautakupa tayari, na kwenye mashine ndogo kunaweza kujaza kabisa rasilimali za host (#8084):
+[Golden Path ya Uchangiaji](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kuendesha mzunguko unaolenga
+ulichobadilisha. Mkusanyiko kamili wa majaribio ya unit (shard 4 za CI), Vitest, kizuizi cha coverage cha **60%+**, na
+build ya production ni jukumu la CI — kuyaendesha ndani ya mazingira yako hakuongezi taarifa ambayo ukaguzi wa PR
+hautakupa tayari, na kwenye mashine ndogo kunaweza kutumia rasilimali zote za host (#8084):
 
-- Endesha faili za majaribio zinazohusiana na mabadiliko yako: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Endesha faili za majaribio zinazoshughulikia mabadiliko yako: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Endesha `npm run lint`
-- Jumuisha au sasisha majaribio ya kiotomatiki katika PR hiyo hiyo kila msimbo wa uzalishaji unapobadilika
-- Jumuisha faili za majaribio zilizobadilishwa au kuongezwa katika maelezo ya PR wakati msimbo wa uzalishaji umebadilika
-- Kagua matokeo ya SonarQube kwenye PR wakati siri za mradi zimesanidiwa katika CI
+- Jumuisha au sasisha majaribio ya kiotomatiki katika PR hiyo hiyo kila msimbo wa production unapobadilika
+- Katika faili za `node:test`, weka kila `await` ya kiwango cha juu (kama vile `await import(...)`) kabla ya `test()` / `describe()` ya kwanza: chini ya `--test-force-exit`, majaribio yaliyosajiliwa baada yake yanaweza kutotekelezwa kabisa bila onyo (#18045; inatekelezwa na `npm run check:test-tla-order`)
+- Jumuisha faili za majaribio zilizobadilishwa au kuongezwa katika maelezo ya PR wakati msimbo wa production umebadilika
+- Angalia matokeo ya SonarQube kwenye PR wakati siri za mradi zimesanidiwa katika CI
 
 Hali ya sasa ya majaribio: **faili 122 za majaribio ya unit** zinazoshughulikia:
 
-- Vigeuzi vya watoa huduma na ubadilishaji wa umbizo
+- Vitafsiri vya watoa huduma na ubadilishaji wa umbizo
 - Uzuiaji wa kasi, circuit breaker, na ustahimilivu
 - Cache ya kisemantiki, idempotency, ufuatiliaji wa maendeleo
-- Operesheni za hifadhidata na schema (moduli 21 za DB)
+- Operesheni za database na schema (moduli 21 za DB)
 - Mitiririko ya OAuth na uthibitishaji
 - Uthibitishaji wa endpoint za API (Zod v4)
 - Zana za seva ya MCP na utekelezaji wa scope

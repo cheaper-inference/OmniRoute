@@ -226,3 +226,27 @@ export async function verifyAgainstIndexEntry(entry, nodeModulesDir) {
   }
   return errors.length === 0 ? { ok: true } : { ok: false, errors };
 }
+
+/** Hash archives without buffering large native-runtime packs in memory. */
+export async function archiveChecksum(file) {
+  const hash = createHash("sha256");
+  for await (const chunk of createReadStream(file)) hash.update(chunk);
+  return hash.digest("hex");
+}
+
+/** The bundle index selects a basename, never an arbitrary filesystem path. */
+export function packArchiveName(entry) {
+  const name = entry.tarball ?? `optional-pack-${entry.name}.tar.gz`;
+  if (!/^optional-pack-[a-z0-9-]+\.tar\.gz$/.test(name)) {
+    throw new Error("invalid optional pack archive name");
+  }
+  return name;
+}
+
+/** Legacy indexes have member checksums only; new archives carry both layers. */
+export async function verifyArchiveChecksum(entry, file) {
+  if (entry.sha256 === undefined) return;
+  if (!/^[a-f0-9]{64}$/.test(entry.sha256) || (await archiveChecksum(file)) !== entry.sha256) {
+    throw new Error(`optional pack archive checksum mismatch: ${entry.name}`);
+  }
+}

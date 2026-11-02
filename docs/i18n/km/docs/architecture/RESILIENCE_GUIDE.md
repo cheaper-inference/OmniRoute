@@ -62,148 +62,160 @@ OmniRoute មានយន្តការភាពធន់ (resilience) បី�
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}` ។
 ការការពារ regression: `tests/unit/provider-cooldown-window-gate.test.ts` ។
 
-## ២. Connection Cooldown
+## 2. ពេលផ្អាកបណ្តោះអាសន្ននៃការភ្ជាប់
 
-**វិសាលភាព (Scope):** ការតភ្ជាប់/គណនី/key របស់ provider តែមួយ។
+**វិសាលភាព:** ការភ្ជាប់/គណនី/កូនសោតែមួយរបស់អ្នកផ្តល់សេវា។
 
-**គោលបំណង:** រំលង key ដែលមានបញ្ហាមួយ ខណៈដែលការតភ្ជាប់ផ្សេងទៀតសម្រាប់ provider ដដែលនៅតែបន្តបម្រើសេវា។
-
-**ការអនុវត្ត (Implementation):**
-
-- សម្គាល់ថាមិនអាចប្រើបាន: `src/sse/services/auth.ts::markAccountUnavailable()`
-- ការជ្រើសរើស: `getProviderCredentials*` នៅក្នុងឯកសារដដែល
-- ការគណនា cooldown: `open-sse/services/accountFallback.ts::checkFallbackError()`
-- ការកំណត់: `src/lib/resilience/settings.ts`
-
-**Fields សម្រាប់ការតភ្ជាប់នីមួយៗ:**
-
-- `rateLimitedUntil` — timestamp ដែល cooldown ផុតកំណត់
-- `testStatus: "unavailable"`
-- `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — ចំនួនរាប់ exponential backoff
-
-**Cooldowns លំនាំដើម:**
-
-- OAuth base: 5s
-- API-key base: 3s
-- API-key 429: ផ្តល់អាទិភាពដល់ `Retry-After`/reset headers/reset text ដែលអាច parse បានពី upstream
-- Backoff: `baseCooldownMs * 2 ** failureIndex`
-
-**ការការពារ anti-thundering-herd:** ការពារកុំឱ្យ failures ដែលកើតឡើងក្នុងពេលដំណាលគ្នា ពង្រីក cooldown លើសកំណត់ ឬបង្កើន `backoffLevel` ទ្វេដង។
-
-**Concurrency-limit 429s មិនឡើងតាម backoff ladder ទេ។** `429` ដែល body របស់វារាយការណ៍ពី
-concurrency limit ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`) មានន័យថាគណនីនៅមានសុខភាពល្អ ប៉ុន្តែកំពុងរវល់។
-`checkFallbackError()` ត្រឡប់ហេតុផល `concurrency_limited`: fail over ទៅការតភ្ជាប់បន្ទាប់ភ្លាមៗ ដាក់
-cooldown ការតភ្ជាប់នេះជាមួយ `CONCURRENCY_LIMIT_COOLDOWN_MS` ថេរ (1s) ឬ
-upstream retry hint រក្សា `backoffLevel` ឱ្យនៅដដែល ហើយកំណត់ `skipProviderBreaker`។
-Quota body ដែលច្បាស់លាស់នៅតែឈ្នះ ដូច្នេះ body ដែលក៏ត្រូវនឹង quota pattern ផងដែរ នៅតែជា quota
-verdict។ ការរកឃើញ: `looksLikeConcurrencyLimit()` នៅក្នុង `src/shared/utils/classify429.ts`។
-verdict: `open-sse/services/accountFallback/concurrencyLimit429.ts`។ `classify429()` (`FailureKind` របស់
-breaker) មិនផ្លាស់ប្តូរ ហើយនៅតែអាន `rate_limit` សម្រាប់ body ទាំងនេះ។
-
-**Stream content stalls មិនដាក់ cooldown គណនីទេ។** នៅពេលដែល content-stall watchdog
-(`open-sse/utils/streamHandler.ts`) បោះបង់ stream ដែលមិនបានផ្ញើ model output ណាមួយក្នុង
-ពេលវេលាកំណត់ `markAccountUnavailable()` កត់ត្រា error នៅលើការតភ្ជាប់ ប៉ុន្តែមិនកំណត់
-cooldown ទេ: stall នោះជារបស់ request នោះតែម្តង ជារឿយៗជា reasoning turn វែងដែលមិនទាន់មាន
-output នៅឡើយ។ អ្នកប្រតិបត្តិការអាចជ្រើសរើសបើកវិញជាមួយ `resilienceSettings.streamStallCooldown.enabled`
-(លំនាំដើម `false`)។
-
-**Reasoning frames ចាប់ផ្តើម content-stall budget ឡើងវិញ។** ម៉ូដែល reasoning អាចគិតជា
-នាទីមុនពេល token ដំបូងដែលអាចមើលឃើញ: Claude ផ្ញើ stream `thinking_delta` frames ដែល
-thinking text អាចទទេ ហើយ Responses API ផ្ញើ stream reasoning item មួយបន្ទាប់ពី
-មួយទៀត។ `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ស្គាល់
-frames ទាំងនេះ ហើយ watchdog ចាប់ផ្តើម budget របស់វាឡើងវិញនៅលើ frame នីមួយៗ ជំនួសឱ្យការបោះបង់
-turn នោះ។ ពួកវានៅតែមិនមែនជា model output ដូច្នេះ turn ដែលបញ្ចប់ដោយមានតែ reasoning នៅតែ
-ត្រូវបានរាយការណ៍ថាទទេ ហើយ turn ដែលឈប់ reasoning ហើយផ្ញើតែ heartbeats នៅតែបង្កឱ្យ
-watchdog ធ្វើការ។
-
-Binary `reasoningContentEvent` frames របស់ Kiro ដែលមាន signature មិនទទេ រក្សា
-សកម្មភាព reasoning នេះឆ្លងកាត់ executor ជា `reasoning_content` delta ទទេ។ Signature នោះ
-មិនត្រូវបាន forward ទេ។ Metadata, frames មិនពេញលេញ និង signatures ទទេ មិនចាប់ផ្តើម
-content budget ឡើងវិញទេ។ active-stream timeout ឯករាជ្យ និង client cancellation នៅតែ
-មានអនុភាព (`open-sse/executors/kiro/reasoning.ts`)។
-
-**ស្ថានភាពចុងក្រោយ (Terminal states — មិនមែនជា cooldowns):**
-
-- `banned` — កំណត់ដោយការរកឃើញ banned-keyword / account-ban (សូមមើល [BAN_DETECTION](../security/BAN_DETECTION.md)) និងដោយការបដិសេធ per-request ពី upstream បីដងជាប់គ្នា (`request_rejected` ឧ. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ការបដិសេធតែម្តងគ្រាន់តែដាក់ cooldown ការតភ្ជាប់ប៉ុណ្ណោះ
-- `expired` (ប្តូរទៅជាស្ថានភាពចុងក្រោយបន្ទាប់ពីការព្យាយាមម្តងទៀតដែលមានដែនកំណត់ — `EXPIRED_RETRY_MAX = 3` ជាមួយ exponential backoff — ដូច្នេះ OAuth errors បណ្តោះអាសន្នអាចជាដោយខ្លួនឯងបាន មុនពេលគណនីត្រូវបានបិទជាអចិន្ត្រៃយ៍)
-- `credits_exhausted`
-
-ស្ថានភាពទាំងនេះនៅរហូតដល់ credentials ផ្លាស់ប្តូរ ឬអ្នកប្រតិបត្តិការ reset ពួកវា។ កុំសរសេរជាន់ស្ថានភាពចុងក្រោយដោយស្ថានភាព cooldown បណ្តោះអាសន្ន។
-
-**Lazy recovery:** នៅពេលដែល `rateLimitedUntil` កន្លងផុតទៅ ការតភ្ជាប់ក្លាយជាមានសិទ្ធិឡើងវិញ។ នៅពេលប្រើប្រាស់ដោយជោគជ័យ `clearAccountError()` សម្អាត error fields ទាំងអស់។
-
-### Claude OAuth usage wall: lower-priority lane + session-limit reset
-
-**វិសាលភាព:** ការតភ្ជាប់ Claude subscription (OAuth) មួយ។ លក្ខណៈពិសេសទាំងពីរគឺ **opt-in ក្នុង
-ការតភ្ជាប់នីមួយៗ** (Edit connection → Claude section → `lowPriorityMode` / `autoLimitReset` នៅក្នុង
-`providerSpecificData` ទាំងពីរមានលំនាំដើមបិទ) ហើយឆ្លុះបញ្ចាំងពី commands `/low-priority` និង
-`/limit-reset` របស់ Claude Code (wire contract ដែលបានចាប់យកពី Claude Code 2.1.263)។
+**គោលបំណង:** រំលងកូនសោដែលមានបញ្ហាមួយ ខណៈដែលការភ្ជាប់ផ្សេងទៀតសម្រាប់អ្នកផ្តល់សេវាដដែលនៅតែបន្តបម្រើ។
 
 **ការអនុវត្ត:**
 
-- State machine + response classification: `open-sse/services/claudeLowPriority.ts`
-- Reset status/claim client: `open-sse/services/claudeLimitReset.ts`
-- Executor hook (header injection + same-account retry): `open-sse/executors/base.ts::execute()`
-- Opt-in persistence: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- សម្គាល់ថាមិនអាចប្រើបាន: `src/sse/services/auth.ts::markAccountUnavailable()`
+- ការជ្រើសរើស: `getProviderCredentials*` ក្នុងឯកសារដដែល
+- ការគណនាពេលផ្អាក: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- ការកំណត់: `src/lib/resilience/settings.ts`
 
-**Trigger:** 5-hour usage wall — `429` ដែល headers របស់វាមាន
+**វាលសម្រាប់ការភ្ជាប់នីមួយៗ:**
+
+- `rateLimitedUntil` — ស្លាកពេលវេលារហូតដល់ពេលផ្អាកផុតកំណត់
+- `testStatus: "unavailable"`
+- `lastError`, `lastErrorType`, `errorCode`
+- `backoffLevel` — ចំនួនកម្រិត backoff អ៊ិចស្ប៉ូណង់ស្ស៊ែល
+
+**ពេលផ្អាកលំនាំដើម:**
+
+- មូលដ្ឋាន OAuth: 5 វិនាទី
+- មូលដ្ឋាន API-key: 3 វិនាទី
+- API-key 429: ផ្តល់អាទិភាពដល់ `Retry-After`/ក្បាលសាឡើងវិញ (reset headers)/អត្ថបទសាឡើងវិញដែលអាចញ៉ាំងបាន ពីខាងលើ
+- Backoff: `baseCooldownMs * 2 ** failureIndex`
+
+**ការការពារប្រឆាំងនឹង thundering-herd:** ការពារកុំឱ្យការបរាជ័យកើតឡើងព្រមគ្នាបន្លាយពេលផ្អាកលើសកំណត់ ឬបន្ថែម `backoffLevel` ទ្វេដង។
+
+**429 ដែលកំណត់ចំនួនស្របគ្នា មិនឡើងតាមជណ្តើរ backoff ទេ។** `429` ដែលខ្លួនសារាបញ្ជាក់ពីដែនកំណត់ចំនួនស្របគ្នា ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) មានន័យថាគណនីនៅមានសុខភាពល្អ ប៉ុន្តែកំពុងរវល់។
+`checkFallbackError()` ត្រឡប់ហេតុផល `concurrency_limited`: ប្តូរទៅការភ្ជាប់បន្ទាប់ភ្លាមៗ ផ្អាកការភ្ជាប់នេះរយៈពេលថេរ `CONCURRENCY_LIMIT_COOLDOWN_MS` (1 វិនាទី) ឬតាមសញ្ញាណែនាំពេលព្យាយាមឡើងវិញពីខាងលើ រក្សា `backoffLevel` មិនផ្លាស់ប្តូរ ហើយកំណត់ `skipProviderBreaker`។ ខ្លួនសារាដែលបញ្ជាក់ពី quota យ៉ាងច្បាស់នៅតែឈ្នះ ដូច្នេះខ្លួនសារដែលក៏ត្រូវនឹងលំនាំ quota ផងដែរ នៅតែជាការវិនិច្ឆ័យ quota។ ការរកឃើញ: `looksLikeConcurrencyLimit()` ក្នុង `src/shared/utils/classify429.ts`;
+ការវិនិច្ឆ័យ: `open-sse/services/accountFallback/concurrencyLimit429.ts`។ `classify429()` (`FailureKind` របស់ breaker) មិនបានផ្លាស់ប្តូរ ហើយនៅតែអានថា `rate_limit` សម្រាប់ខ្លួនសាទាំងនេះ។
+
+**ការរាំងស្ទះមាតិកាស្ទ្រីម មិនផ្អាកគណនីទេ។** នៅពេលដែល watchdog ការរាំងស្ទះមាតិកា
+(`open-sse/utils/streamHandler.ts`) បោះបង់ស្ទ្រីមមួយដែលមិនបានផ្ញើលទ្ធផលម៉ូដែលទាន់ពេលវេលា `markAccountUnavailable()` កត់ត្រាកំហុសលើការភ្ជាប់ ប៉ុន្តែមិនកំណត់ពេលផ្អាកទេ: ការរាំងស្ទះនោះជារបស់សំណើនោះ ជាញឹកញាប់បំផុតគឺជាជុំវិចារណាវែងដែលមិនទាន់មានលទ្ធផល។ អ្នកប្រតិបត្តិអាចជ្រើសចូលរួមម្តងទៀតជាមួយ `resilienceSettings.streamStallCooldown.enabled`
+(លំនាំដើម `false`)។
+
+**សញ្ញារយៈពេលពន្យារដែលជ្រើសចូលរួមសម្រាប់ការជ្រើសរើសគណនី `p2c`។** ការព្យាយាមដែលបានបញ្ជូននីមួយៗកត់ត្រាពេលវេលារហូតដល់បៃដំបូង និងលទ្ធផល តាមការភ្ជាប់ (និងតាមការភ្ជាប់ + ម៉ូដែល) ក្នុងបង្អួចរំកិលក្នុងអង្គចងចាំ: គំរូ 20 ចុងក្រោយក្នុងរយៈពេល 15 នាទី
+(`open-sse/services/connectionLatencyTracker.ts`, កត់ត្រាពី `safeLogEvents()` ក្នុង `src/sse/handlers/chatHelpers.ts`)។ នៅពេល `resilienceSettings.p2cLatency.weight` ខ្ពស់ជាង `0`
+(ជួរ 0-20, លំនាំដើម `0` = បិទ) `compareP2CConnections()` ក្នុង `src/sse/services/auth.ts` បន្ថែមពិន្ទុរហូតដល់ `weight` ចំណុចឱ្យគូបណ្តុះបណ្តាល់នីមួយៗនៃគូនោះ។ ពាក់កណ្តាលនៃពិន្ទុនោះមកពីរយៈពេលពន្យារជាសមាមាត្របើប្រៀបនឹងគូបណ្តុះបណ្តាល់ដែលលឿនជាង (យឺតជាងទ្វេដង ទទួលបានពាក់កណ្តាលពេញលេញ) ហើយពាក់កណ្តាលទៀតមកពីអត្រាកំហុសរំកិល។ ធាតុនេះអនុវត្តតែពេលដែលគូបណ្តុះបណ្តាល់ទាំងពីរមានគំរូយ៉ាងហោចណាស់ 3 ដូច្នេះគណនីថ្មីមិនត្រូវបានដាក់ទោស ហើយពិន្ទុអតិបរមារបស់វានៅទាបជាងការដាក់ទោស quota-បានបិទ និង quota-អស់។ វាមិនបន្ថែមសៀគ្វីផ្ទាល់ខ្លួនទេ: គណនីដែលបរាជ័យនៅតែត្រូវបានគ្រប់គ្រងដោយស្រទាប់ពេលផ្អាក ការចាក់សោ និង breaker។ កំណត់វាជាមួយ `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`។
+
+**ស៊ុមវិចារណៈចាប់ផ្តើមថវិកាការរាំងស្ទះមាតិកាឡើងវិញ។** ម៉ូដែលវិចារណៈអាចគិតជាច្រើននាទីមុននិមិត្តសញ្ញាដំបូងដែលមើលឃើញ: Claude ស្ទ្រីមស៊ុម `thinking_delta` ដែលអត្ថបទគិតរបស់វាអាចនៅទទេ ហើយ Responses API ស្ទ្រីមធាតុវិចារណៈមួយបន្ទាប់ពីមួយ។ `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) ស្គាល់ស៊ុមទាំងនេះ ហើយ watchdog ចាប់ផ្តើមថវិការបស់វាឡើងវិញលើស៊ុមនីមួយៗ ជំនួសឱ្យការបោះបង់ជុំនោះ។ ពួកវានៅតែមិនមែនជាលទ្ធផលម៉ូដែលទេ ដូច្នេះជុំដែលបញ្ចប់ដោយការវិចារណៈតែប៉ុណ្ណោះនៅតែត្រូវបានរាយការណ៍ថាទទេ ហើយជុំដែលបញ្ឈប់ការវិចារណៈ ហើយផ្ញើតែសញ្ញា heartbeat នៅតែបង្កឱ្យ watchdog ដំណើរការ។
+
+ស៊ុម `reasoningContentEvent` ពីប្រភេទ binary របស់ Kiro ដែលមានហត្ថលេខាមិនទទេ រក្សាសកម្មភាពវិចារណៈនេះតាមរយៈ executor ជាបំរែបំរួល `reasoning_content` ទទេ។ ហត្ថលេខាមិនត្រូវបានបញ្ជូនបន្តទេ។ ទិន្នន័យមេតា ស៊ុមមិនពេញលេញ និងហត្ថលេខាទទេ មិនចាប់ផ្តើមថវិកាមាតិកាឡើងវិញទេ; ពេលវេលាផុតកំណត់នៃស្ទ្រីមសកម្មឯករាជ្យ និងការបោះបង់របស់អតិថិជននៅតែអនុវត្ត (`open-sse/executors/kiro/reasoning.ts`)។
+
+**ស្ថានភាពចុងក្រោយ (មិនមែនពេលផ្អាក):**
+
+- `banned` — កំណត់ដោយការរកឃើញពាក្យគន្លឹះដែលបានហាមឃាត់ / ការរកឃើញការហាមឃាត់គណនី (មើល [BAN_DETECTION](../security/BAN_DETECTION.md)) និងដោយការបដិសេធសំណើក្នុងមួយពេលពីខាងលើបីដងជាប់គ្នា (`request_rejected`, ឧ. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ការបដិសេធតែមួយគ្រាប់ផ្អាកការភ្ជាប់បណ្តោះអាសន្នប៉ុណ្ណោះ
+- `expired` (ប្តូរទៅជាចុងក្រោយបន្ទាប់ពីការព្យាយាមឡើងវិញដែលមានដែនកំណត់ — `EXPIRED_RETRY_MAX = 3` ជាមួយ backoff អ៊ិចស្ប៉ូណង់ស្ស៊ែល — ដូច្នេះកំហុស OAuth បណ្តោះអាសន្នអាចព្យាបាលខ្លួនឯងបាន មុនពេលគណនីត្រូវបានបិទជាអចិន្ត្រៃយ៍)
+- `credits_exhausted`
+
+ស្ថានភាពទាំងនេះនៅរហូតដល់ព័ត៌មានសម្គាល់ខ្លួនផ្លាស់ប្តូរ ឬអ្នកប្រតិបត្តិកំណត់ឡើងវិញ។ កុំសរសេរជាន់ស្ថានភាពចុងក្រោយដោយស្ថានភាពផ្អាកបណ្តោះអាសន្ន។
+
+**ការស្តារឡើងវិញបែប lazy:** នៅពេល `rateLimitedUntil` កន្លងផុតទៅ ការភ្ជាប់មានសិទ្ធិឡើងវិញ។ នៅពេលប្រើប្រាស់ដោយជោគជ័យ `clearAccountError()` សម្អាតវាលកំហុសទាំងអស់។
+
+### ជញ្ជាំងការប្រើប្រាស់ Claude OAuth: គន្លងអាទិភាពទាបជាង + ការកំណត់ដែនកំណត់សម័យឡើងវិញ
+
+**វិសាលភាព:** ការភ្ជាប់ការជាវប្រចាំ Claude (OAuth) តែមួយ។ លក្ខណៈពិសេសទាំងពីរគឺ **ជ្រើសចូលរួមតាមការភ្ជាប់នីមួយៗ**
+(កែសម្រួលការភ្ជាប់ → ផ្នែក Claude → `lowPriorityMode` / `autoLimitReset` ក្នុង
+`providerSpecificData`, លំនាំដើមបិទទាំងពីរ) ហើយឆ្លុះបញ្ចាំងពាក្យបញ្ជា `/low-priority` និង
+`/limit-reset` របស់ Claude Code (កិច្ចសន្យាខ្សែត្រូវបានចាប់យកពី Claude Code 2.1.263)។
+
+**ការអនុវត្ត:**
+
+- ម៉ាស៊ីនស្ថានភាព + ការចាត់ថ្នាក់ការឆ្លើយតប៖ `open-sse/services/claudeLowPriority.ts`
+- ម៉ាស៊ីនភ្ញៀវសម្រាប់ស្ថានភាព/ការទាមទារកំណត់ឡើងវិញ៖ `open-sse/services/claudeLimitReset.ts`
+- ហុករបស់កម្មវិធីប្រតិបត្តិ (ការបញ្ចូលបឋមកថា + ការព្យាយាមឡើងវិញដោយប្រើគណនីដដែល)៖ `open-sse/executors/base.ts::execute()`
+- ការរក្សាទុកតាមការជ្រើសរើស៖ `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+
+**កត្តាបង្ក៖** កម្រិតទប់ស្កាត់ការប្រើប្រាស់រយៈពេល 5 ម៉ោង — `429` ដែលបឋមកថារបស់វាមាន
 `anthropic-ratelimit-unified-status: rejected` ហើយនៅពេលគណនីមានសិទ្ធិ
-`anthropic-ratelimit-unified-slow-offer: treatment`។ គ្មានអ្វីត្រូវបានផ្ញើមុនពេល wall
-429 ដំបូងនោះទេ។ burst 429 ដែលគ្មាន unified headers ឆ្លងកាត់ផ្លូវ cooldown ធម្មតា។
+`anthropic-ratelimit-unified-slow-offer: treatment`។ គ្មានអ្វីត្រូវបានផ្ញើមុនពេលជួបកម្រិតទប់ស្កាត់
+429 ដំបូងនោះទេ។ 429 ជាបន្តបន្ទាប់ដែលគ្មានបឋមកថារួម នឹងឆ្លងកាត់ផ្លូវរយៈពេលសម្រាកធម្មតា។
 
-**Lower-priority lane** (`lowPriorityMode`):
+**ផ្លូវអាទិភាពទាប** (`lowPriorityMode`)៖
 
-- នៅពេលជួប wall 429 executor ទទួលយកការផ្តល់ជូន ហើយព្យាយាមម្តងទៀតភ្លាមៗជាមួយគណនី**ដដែល** ដោយប្រើ `anthropic-usage-limit: slow`; lane នៅតែសកម្មរហូតដល់ `anthropic-ratelimit-unified-reset` ដែលបានប្រកាស (+60s grace) ហើយរាល់សំណើនៅក្នុងរយៈពេលនោះសុទ្ធតែមាន header នោះ។ 429 ដែលត្រូវបានចាប់យកមិនដែលទៅដល់ `handleChatCore` ទេ ដូច្នេហការតភ្ជាប់ **មិន** ត្រូវបានដាក់ក្នុង cooldown ហើយក៏មិនត្រូវបានបង្វែរចេញដែរ។
-- `anthropic-ratelimit-unified-slow-status` នៅលើការឆ្លើយតបពេលក្រោយៗ៖ `active` / `not_needed` រក្សា lane ទុក; `slot_busy` (429) ឬ `529` រង់ចាំតាម `anthropic-ratelimit-unified-slow-retry-after` របស់ server (លំនាំដើម 20s, clamp 5–600s, ±30% jitter) រួចព្យាយាមម្តងទៀត ដោយមានដែនកំណត់ពី `anthropic-ratelimit-unified-slow-max-wait` (លំនាំដើម 20 នាទី, clamp 1 នាទី–6 ម៉ោង) — លើសពីនោះ lane បញ្ចប់ ហើយ cool-off រយៈពេល 10 នាទីរារាំងការទទួលយកឡើងវិញ។ ការរង់ចាំក៏ត្រូវបានកំណត់បន្ថែមដោយពេលវេលាដែលនៅសល់នៃ timeout ចាប់ផ្តើម upstream ផ្ទាល់របស់សំណើ (`resolveFetchStartTimeout`, 10 នាទីជាលំនាំដើម) ដកនឹង margin 5 វិនាទី៖ បើគ្មានការកំណត់នោះទេ max-wait លំនាំដើម 20 នាទីនឹងរស់នៅលើសអាយុកាលរបស់សំណើ ហើយការ sleep នឹងត្រូវបានបោះបង់កណ្តាលការរង់ចាំ បង្ហាញ `TimeoutError` ជំនួសឱ្យការបញ្ចប់ `max_wait` យ៉ាងស្រួលបួល + cool-off។
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, ការ rollover របស់ 5h-window ឬ `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ដែលបញ្ចប់វាជា `extra_usage` លើស្ថានភាពណាមួយ ព្រោះ overage ដែលបង់ប្រាក់ឥឡូវនេះគ្របដណ្តប់ wall) បញ្ចប់ lane; បន្ទាប់មកការឆ្លើយតបហូរទៅផ្លូវ cooldown ធម្មតា។ `budget_exhausted` ត្រូវបានចងចាំរហូតដល់ការ reset ថវិកាដែលបានប្រកាស (≤ 8 ថ្ងៃ)។
-- ការពិនិត្យ wall ដំណើរការបន្ទាប់ពីការព្យាយាមម្តងទៀត intra-attempt ដែលដឹកនាំដោយ 400 របស់ executor ផ្ទាល់ (ការកែសម្រួល context, thinking/effort clamps, param auto-learn) ដូច្នេហ wall 429 ដែលបង្ហាញខ្លួនតែនៅលើការព្យាយាមម្តងទៀតមួយក្នុងចំណោមទាំងនោះនៅតែត្រូវបានចាប់យក ជំនួសឱ្យការទៅដល់ផ្លូវ cooldown។
-- ស្ថានភាពគឺនៅក្នុង memory ក្នុងមួយការតភ្ជាប់ (ការ restart មានតម្លៃ wall 429 បន្ថែមមួយដើម្បីទទួលយកឡើងវិញ)។
+- នៅពេលជួប 429 នៃកម្រិតទប់ស្កាត់ កម្មវិធីប្រតិបត្តិទទួលយកការផ្តល់ជូន ហើយព្យាយាមឡើងវិញភ្លាមៗដោយប្រើគណនី
+  **ដដែល** ជាមួយ `anthropic-usage-limit: slow`។ ផ្លូវនេះនៅតែសកម្មរហូតដល់
+  `anthropic-ratelimit-unified-reset` ដែលបានប្រកាស (+រយៈពេលអនុគ្រោះ 60 វិនាទី) ហើយរាល់សំណើក្នុងចន្លោះពេលនោះ
+  មានបឋមកថានេះ។ 429 ដែលត្រូវបានស្ទាក់ចាប់ មិនទៅដល់ `handleChatCore` ទេ ដូច្នេះការតភ្ជាប់
+  **មិន** ត្រូវបានដាក់ឱ្យសម្រាក ហើយក៏មិនត្រូវបានប្តូរចេញដែរ។
+- `anthropic-ratelimit-unified-slow-status` នៅលើការឆ្លើយតបបន្ទាប់ៗ៖ `active` / `not_needed`
+  រក្សាផ្លូវនេះឱ្យសកម្ម។ `slot_busy` (429) ឬ `529` រង់ចាំរយៈពេល
+  `anthropic-ratelimit-unified-slow-retry-after` របស់ម៉ាស៊ីនមេ (លំនាំដើម 20 វិនាទី កំណត់ក្នុងចន្លោះ 5–600 វិនាទី និងមាន jitter ±30%)
+  រួចព្យាយាមឡើងវិញ ដោយត្រូវបានកម្រិតតាម `anthropic-ratelimit-unified-slow-max-wait` (លំនាំដើម 20 នាទី កំណត់ក្នុងចន្លោះ
+  1 នាទី–6 ម៉ោង) — បើលើសពីនោះ ផ្លូវនេះនឹងបញ្ចប់ ហើយរយៈពេលសម្រាក 10 នាទីនឹងរារាំងការទទួលយកឡើងវិញ។ រយៈពេល
+  រង់ចាំក៏ត្រូវបានកម្រិតបន្ថែមដោយរយៈពេលដែលនៅសល់ពីពេលអស់កំណត់សម្រាប់ចាប់ផ្តើមអាប់ស្ទ្រីមរបស់សំណើផ្ទាល់
+  (`resolveFetchStartTimeout`, លំនាំដើម 10 នាទី) ដករឹម 5 វិនាទី៖ បើគ្មានកម្រិតនេះ
+  ពេលរង់ចាំអតិបរមាលំនាំដើម 20 នាទីនឹងយូរជាងអាយុកាលសំណើ ហើយការផ្អាកនឹងត្រូវបានបោះបង់
+  ខណៈកំពុងរង់ចាំ ដោយបង្ហាញ `TimeoutError` ជំនួសឱ្យការបញ្ចប់ `max_wait` ដោយរលូន + រយៈពេលសម្រាក។
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible` ការចាប់ផ្តើមវដ្តបង្អួច 5 ម៉ោងថ្មី ឬ
+  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ដែលបញ្ចប់វាជា
+  `extra_usage` នៅគ្រប់ស្ថានភាព ព្រោះការប្រើប្រាស់លើសដែលបានបង់ប្រាក់ឥឡូវគ្របដណ្តប់កម្រិតទប់ស្កាត់) នឹងបញ្ចប់ផ្លូវនេះ។ បន្ទាប់មក
+  ការឆ្លើយតបនឹងបន្តទៅផ្លូវរយៈពេលសម្រាកធម្មតា។ `budget_exhausted` ត្រូវបានចងចាំរហូតដល់
+  ពេលកំណត់ថវិកាឡើងវិញដែលបានប្រកាស (≤ 8 ថ្ងៃ)។
+- ការត្រួតពិនិត្យកម្រិតទប់ស្កាត់ដំណើរការបន្ទាប់ពីការព្យាយាមឡើងវិញនៅក្នុងការព្យាយាមតែមួយរបស់កម្មវិធីប្រតិបត្តិ ដែលបង្កដោយ 400 (ការកែសម្រួល
+  បរិបទ ការកម្រិតការគិត/កម្រិតការខិតខំ និងការរៀនប៉ារ៉ាម៉ែត្រដោយស្វ័យប្រវត្តិ) ដូច្នេះ 429 នៃកម្រិតទប់ស្កាត់ដែលទើបលេចឡើង
+  នៅលើការព្យាយាមឡើងវិញណាមួយក្នុងចំណោមនោះ នៅតែត្រូវបានស្ទាក់ចាប់ ជំនួសឱ្យការទៅដល់ផ្លូវរយៈពេលសម្រាក។
+- ស្ថានភាពត្រូវបានរក្សាទុកក្នុងអង្គចងចាំតាមការតភ្ជាប់នីមួយៗ (ការចាប់ផ្តើមឡើងវិញបង្កឱ្យមាន 429 នៃកម្រិតទប់ស្កាត់បន្ថែមមួយ ដើម្បីទទួលយកឡើងវិញ)។
 
-**Session-limit reset** (`autoLimitReset`, ត្រូវបានសាកល្បងមុន lane នៅពេលទាំងពីរបើក):
+**ការកំណត់ដែនកំណត់សម័យឡើងវិញ** (`autoLimitReset`, ត្រូវបានសាកល្បងមុនផ្លូវខាងលើ នៅពេលទាំងពីរត្រូវបានបើក)៖
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → block `juniper_tide`; នៅពេល `arm: "reset"` និង `available: true`, `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ជាមួយ `{ "program": "juniper_tide" }` (organization UUID ពី `providerSpecificData.organizationUUID`, bootstrap fallback)។
-- `result: reset|not_limited` → សំណើត្រូវបានព្យាយាមម្តងទៀតនៅល្បឿនពេញលេញ (គ្មាន slow header)។ `already_used` / `not_offered` ចងចាំ `next_available_at` (លំនាំដើមមួយសប្តាហ៍); ការបរាជ័យណាមួយ back off 15 នាទី។ ការ reset គឺម្តងក្នុងមួយសប្តាហ៍ ហើយនៅតែរាប់បញ្ចូលក្នុងដែនកំណត់ប្រចាំសប្តាហ៍។
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → ប្លុក `juniper_tide`។
+  នៅពេល `arm: "reset"` និង `available: true`,
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` ជាមួយ
+  `{ "program": "juniper_tide" }` (UUID របស់អង្គការពី
+  `providerSpecificData.organizationUUID` និងប្រើជម្រើសបម្រុង bootstrap)។
+- `result: reset|not_limited` → សំណើត្រូវបានព្យាយាមឡើងវិញក្នុងល្បឿនពេញលេញ (គ្មានបឋមកថាល្បឿនយឺត)។
+  `already_used` / `not_offered` រក្សាទុក `next_available_at` ក្នុងអង្គចងចាំ (លំនាំដើមមួយសប្តាហ៍)។ រាល់
+  ការបរាជ័យនឹងរង់ចាំថយក្រោយ 15 នាទី។ ការកំណត់ឡើងវិញអាចធ្វើបានម្តងក្នុងមួយសប្តាហ៍ ហើយនៅតែរាប់បញ្ចូលក្នុង
+  ដែនកំណត់ប្រចាំសប្តាហ៍។
 
-ការការពារ regression៖ `tests/unit/claude-low-priority-mode.test.ts`,
+ការការពារប្រឆាំងនឹងការថយក្រោយ៖ `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`។
 
-### Session affinity (#7274)
+### ភាពជាប់ទាក់ទងនៃសម័យ (#7274)
 
-**វិសាលភាព៖** client session មួយ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ជាប់ជាមួយការតភ្ជាប់មួយ សម្រាប់ provider **ណាមួយ**។
+**វិសាលភាព៖** សម័យម៉ាស៊ីនភ្ញៀវមួយ (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` header) ត្រូវបានភ្ជាប់ថេរទៅការតភ្ជាប់មួយ សម្រាប់អ្នកផ្តល់សេវា
+**ណាមួយ**។
 
-**គោលបំណង៖** រក្សា agent ពហុជុំ (Claude Code, aider, custom agents) ឱ្យនៅលើគណនីដដែលនៅទូទាំងសំណើ ដើម្បីកាត់បន្ថយការបាត់បង់ context ឆ្លងគណនី និង cold-start 429 ដែលកើតម្តងហើយម្តងទៀតនៅលើ provider ដែលមានស្ថានភាព session ក្នុងមួយគណនី។
+**គោលបំណង៖** រក្សាភ្នាក់ងារដែលធ្វើអន្តរកម្មច្រើនវគ្គ (Claude Code, aider, ភ្នាក់ងារផ្ទាល់ខ្លួន) ឱ្យប្រើគណនីដដែលនៅគ្រប់សំណើ ដោយកាត់បន្ថយការបាត់បង់បរិបទឆ្លងគណនី និង 429 ពីការចាប់ផ្តើមត្រជាក់ដដែលៗ នៅលើអ្នកផ្តល់សេវាដែលមានស្ថានភាពសម័យតាមគណនី។
 
 **ការអនុវត្ត៖**
 
-- ការដោះស្រាយ TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- ការជ្រើសរើស/បង្កើត pin: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- ការទាញយក header (ទូទៅ សម្រាប់ provider ណាមួយ): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- តារាង pin ដែលបានរក្សាទុក: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- ការកំណត់៖ `sessionAffinityTtlMs` (TTL សកលគិតជា ms, `0` បិទ) — `src/lib/db/settings.ts`។ បានប្តូរឈ្មោះពី `codexSessionAffinityTtlMs` ដែលសម្រាប់តែ Codex ដោយ migration `124_generic_session_affinity_ttl.sql` ដែលផ្ទេរ Codex TTL ដែលបានកំណត់ពីមុនណាមួយទៅជាលំនាំដើមថ្មី។
+- ការកំណត់ TTL៖ `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
+- ការជ្រើសរើស/បង្កើតការភ្ជាប់ថេរ៖ `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- ការស្រង់បឋមកថា (ទូទៅ សម្រាប់អ្នកផ្តល់សេវាណាមួយ)៖ `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- តារាងការភ្ជាប់ថេរដែលបានរក្សាទុក៖ `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- ការកំណត់៖ `sessionAffinityTtlMs` (TTL សកលគិតជាមិល្លីវិនាទី `0` បិទដំណើរការ) — `src/lib/db/settings.ts`។ វាត្រូវបានប្តូរឈ្មោះពី `codexSessionAffinityTtlMs` ដែលសម្រាប់តែ Codex តាមរយៈការផ្ទេរទិន្នន័យ `124_generic_session_affinity_ttl.sql` ដែលយក TTL របស់ Codex ដែលបានកំណត់ពីមុនមកធ្វើជាតម្លៃលំនាំដើមថ្មី។
 
-មុន #7274 `resolveSessionAffinityTtlMs()` បានចេញដោយផ្ទាល់ទៅ `0` សម្រាប់រាល់ provider លើកលែងតែ `codex` ដូច្នេហការកំណត់ TTL (និង session headers) មិនមានឥទ្ធិពលនៅកន្លែងណាផ្សេងទៀតទេ ទោះបីជាយន្តការ pinning និងការទាញយក header មិនអាស្រ័យលើ provider រួចហើយក្តី។ ការជួសជុលបានដក early-return នោះចេញ; TTL ឥឡូវនេះអនុវត្តស្មើៗគ្នាចំពោះរាល់ provider នៅពេលត្រូវបានកំណត់ជាសកលឱ្យលើសពី `0`។
+មុន #7274, `resolveSessionAffinityTtlMs()` បញ្ចប់ភ្លាមៗដោយបង្ខំ ហើយត្រឡប់ `0` សម្រាប់អ្នកផ្តល់សេវាទាំងអស់ លើកលែងតែ `codex` ដូច្នេះការកំណត់ TTL (និងបឋមកថាសម័យ) មិនមានឥទ្ធិពលនៅកន្លែងផ្សេងទៀតទេ ទោះបីជាយន្តការភ្ជាប់ថេរ និងការស្រង់បឋមកថាមានលក្ខណៈឯករាជ្យពីអ្នកផ្តល់សេវារួចហើយក៏ដោយ។ ការកែតម្រូវបានដកការត្រឡប់មុនពេលនោះចេញ។ ឥឡូវនេះ TTL អនុវត្តដូចគ្នាចំពោះអ្នកផ្តល់សេវាទាំងអស់ នៅពេលកំណត់ជាសកលឱ្យលើស `0`។
 
-header session-affinity ទាំងបីមិនដែលត្រូវបានបញ្ជូនទៅ upstream ទេ — executor បង្កើត upstream headers របស់ខ្លួនឯងពីសូន្យ ជំនួសឱ្យការបញ្ជូន client headers តាមផ្ទាល់ ដូច្នេហវានៅតែជា correlation id ខាងក្នុងប៉ុណ្ណោះ។
+បឋមកថាភាពជាប់ទាក់ទងនៃសម័យទាំងបី មិនដែលត្រូវបានបញ្ជូនបន្តទៅអាប់ស្ទ្រីមទេ — កម្មវិធីប្រតិបត្តិបង្កើតបឋមកថាអាប់ស្ទ្រីមរបស់ខ្លួនពីដំបូង ជំនួសឱ្យការបញ្ជូនបឋមកថារបស់ម៉ាស៊ីនភ្ញៀវបន្ត ដូច្នេះវានៅតែជាលេខសម្គាល់សម្រាប់ភ្ជាប់ទំនាក់ទំនងផ្ទៃក្នុងប៉ុណ្ណោះ។
 
-### Exclusive managed session connection leases
+### ការជួលផ្តាច់មុខសម្រាប់ការតភ្ជាប់សម័យដែលបានគ្រប់គ្រង
 
-**វិសាលភាព៖** client/session HTTP ដែលគ្រប់គ្រងសកម្មមួយជាម្ចាស់ការតភ្ជាប់ OmniRoute ដែលមានសិទ្ធិមួយ។
+**វិសាលភាព៖** ម៉ាស៊ីនភ្ញៀវ/សម័យ HTTP ដែលបានគ្រប់គ្រង និងកំពុងសកម្មមួយ កាន់កាប់ការតភ្ជាប់ OmniRoute ដែលមានសិទ្ធិមួយ។
 
-**គោលបំណង៖** ផ្តល់ការកាន់កាប់ការតភ្ជាប់ដោយផ្តាច់មុខយ៉ាងធន់សម្រាប់ client ដែលត្រូវការរបាំង routing រឹងនៅទូទាំងសំណើ។ នេះខុសពី session affinity ដែលជាចំណូលចិត្តបន្តភាពបែបទន់៖ lease ផ្តាច់មុខរក្សាទុកស្ថានភាពវដ្តជីវិតនៅក្នុង SQLite អនុវត្តភាពតែមួយគត់របស់ម្ចាស់សកម្មសកល និងការតភ្ជាប់សកម្ម ហើយបដិសេធ generation ដែលហួសសម័យមុនការបញ្ជូនទៅ provider។
+**គោលបំណង៖** ផ្តល់ភាពជាម្ចាស់ការតភ្ជាប់ផ្តាច់មុខដែលមានភាពធន់ សម្រាប់ម៉ាស៊ីនភ្ញៀវដែលត្រូវការរបាំងរឹងមាំសម្រាប់ការកំណត់ផ្លូវ
+ឆ្លងកាត់សំណើនានា។ នេះខុសពីភាពជាប់ទាក់ទងនៃសម័យ ដែលជាចំណូលចិត្តទន់សម្រាប់រក្សាភាពបន្ត៖
+ការជួលផ្តាច់មុខរក្សាទុកស្ថានភាពវដ្តជីវិតក្នុង SQLite អនុវត្តភាពតែមួយគត់ជាសកលសម្រាប់ម្ចាស់សកម្ម និង
+ការតភ្ជាប់សកម្ម ហើយបដិសេធជំនាន់ហួសសម័យ មុនពេលបញ្ជូនទៅអ្នកផ្តល់សេវា។
 
-មុខងារនេះគឺ opt-in ក្នុងមួយ API key។ key ដែលគ្រប់គ្រងត្រូវតែមាន scope `lease:exclusive` និងបញ្ជី `allowedConnections` ដែលច្បាស់លាស់មិនទទេ។ HTTP client ណាមួយក៏អាចប្រើ lifecycle endpoint បាន; មិនត្រូវការឈ្មោះ client, user-agent, provider, OAuth method ឬ model ទេ។ lease កាន់កាប់ការតភ្ជាប់ មិនមែន model ទេ ដូច្នេហការផ្លាស់ប្តូរ model រក្សាទុកការចងភ្ជាប់ ខណៈពេលដែលការតភ្ជាប់នៅតែមានសិទ្ធិធម្មតា។ ច្បាប់ model, quota, health, cooldown និង allowlist ធម្មតានៅតែមានអំណាចជាចុងក្រោយ ហើយអាចផ្លាស់ប្តូរ generation ដដែលទៅការតភ្ជាប់ដែលមានសិទ្ធិទំនេរផ្សេងទៀត។
+មុខងារនេះជា opt-in សម្រាប់ API key នីមួយៗ។ Managed key ត្រូវតែមាន scope `lease:exclusive` និងបញ្ជី `allowedConnections` ដែលបានបញ្ជាក់ច្បាស់លាស់ និងមិនទទេ។ HTTP client ណាមួយក៏អាចប្រើ lifecycle endpoint បានដែរ; មិនទាមទារ client name, user-agent, provider, OAuth method ឬ model ណាមួយទេ។ Lease ជាម្ចាស់ connection មិនមែន model ទេ ដូច្នេះការផ្លាស់ប្តូរ model នៅតែរក្សា binding ខណៈពេលដែល connection នៅតែ eligible ជាធម្មតា។ ច្បាប់ model, quota, health, cooldown និង allowlist ធម្មតានៅតែមានអំណាចចុងក្រោយ ហើយអាចផ្លាស់ទី generation ដដែលទៅកាន់ connection ដែលទំនេរ និង eligible ផ្សេងទៀត។
 
-វដ្តជីវិត (lifecycle) គឺ `POST /api/v1/session-leases` ដែលមានសកម្មភាព JSON `acquire`, `renew` និង `release`។ សំណើ inference ដែលត្រូវបានគ្រប់គ្រង (managed) បង្ហាញតម្លៃមិនស្រដាក់ (opaque) `X-OmniRoute-Lease-Owner` និង `X-OmniRoute-Lease-Generation` ដែលត្រឹមត្រូវជាក់លាក់។ ម្ចាស់ (owner) ប្រើ `vlo_` តាមដោយតួអក្សរ base64url ចំនួន 43 តួ; មានតែ hash SHA-256 របស់វាទេដែលត្រូវបានរក្សាទុក។ រាល់ dispatch fence ចុងក្រោយទាំងអស់ក៏ចង (bind) នូវ API key ID ដែលបានផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ និង connection ID ដែលសកម្មផងដែរ។ Header គ្រប់គ្រង lease ត្រូវបានដកចេញពី log ពី snapshot សំណើដែលត្រូវបានរក្សាទុក និង header របស់ upstream executor។
+Lifecycle គឺ `POST /api/v1/session-leases` ជាមួយនឹង JSON actions `acquire`, `renew` និង `release`។ Managed inference requests បង្ហាញតម្លៃ opaque `X-OmniRoute-Lease-Owner` និង `X-OmniRoute-Lease-Generation` ដែលត្រឹមត្រូវ។ Owner ប្រើ `vlo_` តាមក្រោយដោយតួអក្សរ base64url ចំនួន 43; មានតែ SHA-256 hash របស់វាប៉ុណ្ណោះដែលត្រូវបានរក្សាទុក។ Final dispatch fence នីមួយៗក៏ចងភ្ជាប់ authenticated API key ID និង active connection ID ផងដែរ។ Lease control headers ត្រូវបានដកចេញពី logs, request snapshots ដែលបានរក្សាទុក និង upstream executor headers។
 
-បើ routing ធម្មតាមាន candidate ដែលត្រូវបានគ្រប់គ្រង និងមានសិទ្ធិ ប៉ុន្តែ candidate ទំនេរទាំងអស់ត្រូវបានកាន់កាប់ដោយ active lease របស់អ្នកដទៃ (foreign) OmniRoute ត្រឡប់ HTTP `429` កូដ lease-capacity-unavailable ស្ថានភាព waiting-for-capacity និង `Retry-After` ដែលមានព្រំដែន ដែលបានបង្កើតចេញពីការផុតកំណត់ដែលពាក់ព័ន្ធឆាប់បំផុត។ ការគ្មានសិទ្ធិជ្រើសរើសធម្មតា (empty eligibility) មិនមែនជា lease contention ទេ ហើយនៅតែរក្សាអត្ថន័យ error របស់ routing ដែលមានស្រាប់។
+ប្រសិនបើ ordinary routing មាន managed candidates ដែល eligible ប៉ុន្តែ candidate ទំនេរទាំងអស់ត្រូវបានកាន់កាប់ដោយ foreign active lease នោះ OmniRoute នឹងត្រឡប់ HTTP `429`, កូដ lease-capacity-unavailable, ស្ថានភាព waiting-for-capacity និង `Retry-After` ដែលមានដែនកំណត់ ដោយគណនាចេញពីការផុតកំណត់ដែលពាក់ព័ន្ធឆាប់បំផុត។ Empty eligibility ធម្មតាមិនមែនជា lease contention ទេ ហើយរក្សា routing error semantics ដែលមានស្រាប់របស់វា។
 
-យន្តការពាក់ព័ន្ធនៅតែដាច់ដោយឡែកពីគ្នា៖
+យន្តការពាក់ព័ន្ធនៅតែដាច់ដោយឡែកពីគ្នា:
 
-- OAuth session occupancy គឺជា soft distribution ក្នុង process (process-local) សម្រាប់គណនី OAuth។
-- Account semaphore ផ្តល់ permit សម្រាប់ request concurrency ហើយបញ្ចប់នៅពេលសំណើបញ្ចប់។
-- Exclusive managed session lease គឺជាភាពជាម្ចាស់លើជីវចលដែលធន់ (durable) ជាមួយនឹង generation fence។
+- OAuth session occupancy គឺជា soft distribution ក្នុង process សម្រាប់ OAuth accounts។
+- Account semaphores ផ្តល់ request-concurrency permits ហើយបញ្ចប់នៅពេលដែល request បញ្ចប់។
+- Exclusive managed session leases គឺជា lifecycle ownership ដែលធន់ ជាមួយនឹង generation fence។
 
 ---
 

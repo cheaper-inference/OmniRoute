@@ -1,9 +1,6 @@
 import path from "node:path";
 import { ensureCliConfigWriteAllowed, getCliConfigPaths } from "../../shared/services/cliRuntime";
-import {
-  fetchModelSyncInternal,
-  getModelSyncInternalBaseUrl,
-} from "../../shared/services/modelSyncScheduler";
+import { loadProfileCatalog } from "./profileCatalog";
 import { isFeatureFlagEnabled } from "../../shared/utils/featureFlags";
 
 type SyncResult =
@@ -27,15 +24,6 @@ function isAutoSyncEnabled() {
   return isFeatureFlagEnabled("OMNIROUTE_AUTO_SYNC_CODEX_PROFILES");
 }
 
-function forwardAuthHeaders(request: Request): Record<string, string> {
-  const headers: Record<string, string> = {};
-  const cookie = request.headers.get("cookie");
-  const authorization = request.headers.get("authorization");
-  if (cookie) headers.cookie = cookie;
-  if (authorization) headers.authorization = authorization;
-  return headers;
-}
-
 export async function autoSyncCodexProfilesFromLiveCatalog(
   request: Request,
   reason: string
@@ -49,20 +37,11 @@ export async function autoSyncCodexProfilesFromLiveCatalog(
     return { ok: false, skipped: true, reason: writeGuard };
   }
 
-  const baseUrl = getModelSyncInternalBaseUrl().replace(/\/$/, "");
-  const res = await fetchModelSyncInternal(`${baseUrl}/v1/models`, {
-    headers: forwardAuthHeaders(request),
-    redirect: "error",
-    signal: AbortSignal.timeout(10_000),
-  });
-
-  if (!res.ok) {
-    return { ok: false, skipped: true, reason: `catalog_http_${res.status}` };
+  const catalog = await loadProfileCatalog(request);
+  if (catalog.ok === false) {
+    return { ok: false, skipped: true, reason: catalog.reason };
   }
-
-  const body = await res.json();
-  const candidateModels = Array.isArray(body) ? body : body.data || body.models || [];
-  const models = Array.isArray(candidateModels) ? candidateModels : [];
+  const { models } = catalog;
   const codexPaths = getCliConfigPaths("codex");
   if (!codexPaths?.config) {
     return { ok: false, skipped: true, reason: "codex_config_path_unavailable" };

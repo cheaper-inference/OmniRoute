@@ -806,47 +806,40 @@ POST /v1/providers/{provider}/images/generations
 
 ---
 
-## 搜索 API
+## 搜索API
 
-Web/搜索提供者抽象层（Tavily、Brave、Exa、Serper 等）。
+Web/search提供者抽象（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 路径                   | 描述                                                            |
-| ---- | ---------------------- | --------------------------------------------------------------- |
-| GET  | `/v1/search`           | 列出已配置的搜索提供者及其功能                                  |
-| POST | `/v1/search`           | 执行搜索查询——请求体由 `v1SearchSchema` 验证，支持缓存/请求合并 |
-| GET  | `/v1/search/analytics` | 各提供者的命中率/延迟/缓存统计信息                              |
+| 方法 | 小路                   | 描述                                                              |
+| ---- | ---------------------- | ----------------------------------------------------------------- |
+| GET  | `/v1/search`           | 列出配置的搜索提供者+功能                                         |
+| POST | `/v1/search`           | 运行由`v1SearchSchema`验证的搜索查询—主体，支持caching/coalescing |
+| GET  | `/v1/search/analytics` | 每个提供者的hit/latency/cache统计数据                             |
 
-**身份验证：** Bearer API 密钥（`extractApiKey` + `isValidApiKey`）。搜索策略通过 `enforceApiKeyPolicy` 强制执行。
+**授权：**承载API密钥 (`extractApiKey` + `isValidApiKey`)。通过`enforceApiKeyPolicy`强制执行搜索策略。
 
-### Exa 和 Tavily 的 `provider_options`
+### Exa 和 Tavily `provider_options`
 
-Exa 和 Tavily 从带命名空间的配置集合中读取提供者特定字段：
-`provider_options.exa`（或 `provider_options["exa-search"]`）以及 `provider_options.tavily`
-（或 `provider_options["tavily-search"]`）。仅转发下列键。每个键都会根据
-`open-sse/handlers/search/providerOptionsPassthrough.ts` 中各自的 Zod 模式进行检查，
-类型错误的键将被丢弃。任何其他键都会被忽略，包括身份验证、基础 URL、
-`stream` 和 `outputSchema`。其他提供者使用的扁平键（`cx`、`depth` 等）仍按
-原方式工作。
+Exa 和 Tavily 从命名空间包中读取特定于提供者的字段： `provider_options.exa` （或`provider_options["exa-search"]`）和`provider_options.tavily` （或`provider_options["tavily-search"]`）。仅转发以下密钥。每个密钥都会根据`open-sse/handlers/search/providerOptionsPassthrough.ts`中自己的Zod模式进行检查，并删除类型错误的密钥。任何其他键都会被忽略，包括 auth、base URL、 `stream`和`outputSchema`。其他提供者（`cx`、 `depth`等）使用的平面密钥与以前一样工作。
 
-| 提供者 | 顶层字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套字段                                                                                                                                                      |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平原始值）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, subpages, subpageTarget, livecrawlTimeout, maxAgeHours}` 会合并到默认值 `{ text: true, highlights: true }` 之上 |
-| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                                             |
+| 提供者 | 顶级字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套                                                                                                                          |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| 埃克萨 | `type`、 `category`、 `userLocation`、 `moderation`、 `additionalQueries`、 `objective`、 `systemPrompt`、 `compliance` （平面基元）、 `startPublishedDate`、 `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`合并到默认的`{ text: true, highlights: true }`上 |
+| 塔维利 | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                             |
 
-通用字段始终具有优先权：`query`、`max_results`、`filters`（域名）、`country`，以及从
-`search_type` 派生的主题。在 Exa 上，`search_type: "news"` 会保留 `category: "news"`。
-Tavily 还接受 `search_type: "finance"`（`topic: "finance"`）。
+通用字段总是获胜： `query`、 `max_results`、 `filters` （域）、 `country`和从`search_type`派生的主题。在 Exa 上， `search_type: "news"`保留`category: "news"`。 Tavily 还接受`search_type: "finance"` (`topic: "finance"`)。
 
-通用的 `time_range` 现在会传递到两个提供者：Exa 获取 `startPublishedDate`（ISO
-时间戳），Tavily 获取 `start_date`（`YYYY-MM-DD`）。`provider_options` 中显式指定的日期
-会覆盖映射得到的日期。
+Firecrawl 搜索成本记录为每个启动块（包含 10 个返回结果），每个块为 0.002 美元（2 个积分），并且每次调用至少一个块（ [Firecrawl 计费](https://docs.firecrawl.dev/billing)）：11 个结果的成本为 0.004 美元。
 
-Exa 结果会在 `provider_raw` 中保留 `id`、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras`。
-Tavily 结果会保留 `images` 和 `favicon`。
+通用`time_range`现在到达两个提供者：Exa 获取`startPublishedDate` （ISO时间戳），Tavily 获取`start_date` （`YYYY-MM-DD`）。 `provider_options`中的明确日期会覆盖映射的日期。
 
-成本核算仍使用扁平注册表 `costPerQuery`。Tavily 对
-`search_depth: "advanced"` 的每次调用收取更多额度，但这种差异不会反映在
-`usage.search_cost_usd` 中。
+Exa 结果将`id`、 `highlight_scores`、 `summary`、 `subpages`、 `entities`和`extras`保留在`provider_raw`中。总体结果保留`images`和`favicon`。
+
+Linkup search cost is recorded at $0.005 for `depth` `fast` and `standard` and $0.05 for `deep` ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)), whether `depth` comes from `provider_options` or the connection's settings.
+
+Exa `type: "lite"` (Exa 3.0) 接受较小的字段集，并在设置任何其他字段时拒绝整个请求。对于 lite， `additionalQueries`、 `systemPrompt`和除`text`和`highlights`之外的每个`contents`键在调用之前都会被删除。已弃用的`subpages`、 `subpageTarget`、 `highlights.numSentences`和`highlights.highlightsPerUrl`不再转发。
+
+Cost accounting is the flat registry `costPerQuery`, except for Exa, which follows Exa's own pricing: $0.007 per call for `auto` (and the legacy `fast`) or $0.004 for `lite` (and the legacy `instant`), covering 10 results; $0.001 for each further result; and $0.001 per returned result when `contents.summary` is set. Tavily is recorded at 1 credit ($0.008) for `search_depth` `basic`, `fast` and `ultra-fast`, and 2 credits ($0.016) for `advanced` ([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). A call with `auto_parameters: true` that Tavily upgrades to advanced is still recorded at 1 credit.
 
 ---
 
@@ -1566,10 +1559,10 @@ GET /api/telemetry/summary
 ## 预算
 
 ```bash
-# 获取所有 API 密钥的预算状态
+# Get budget status for all API keys
 GET /api/usage/budget
 
-# 设置或更新预算
+# Set or update a budget
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1583,7 +1576,7 @@ Content-Type: application/json
 }
 ```
 
-> **模式说明**（`setBudgetSchema`）：`apiKeyId` 为必填项；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一个必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 结构会返回 `400 Bad Request`。
+> **模式注释**(`setBudgetSchema`): `apiKeyId`为必填项； `dailyLimitUsd`、 `weeklyLimitUsd`或`monthlyLimitUsd`中至少之一必须大于零。可选字段： `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。旧版`{keyId, limit, period}`形状返回`400 Bad Request`。
 
 ## 令牌限制
 
