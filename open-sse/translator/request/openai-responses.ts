@@ -87,7 +87,11 @@ function toolOutputContentToString(output: unknown): string {
  * can carry them to the downstream model — the `tool` message itself is
  * text-only on Chat Completions, which is why the placeholder exists (#8459).
  */
-function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
+function toolOutputImagesToChatParts(
+  output: unknown,
+  droppedImages: Set<unknown>,
+  toolCallId: string
+): JsonRecord[] {
   if (!Array.isArray(output)) return [];
   const images: JsonRecord[] = [];
   for (const item of output) {
@@ -96,6 +100,13 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     if (rec.type !== "input_image") continue;
     const url = toString(rec.image_url);
     if (!url) continue;
+    if (droppedImages.has(item)) {
+      images.push({
+        type: "text",
+        text: `[Earlier tool output image omitted to bound request size (tool_call_id: ${toolCallId})]`,
+      });
+      continue;
+    }
     const part: JsonRecord = { type: "image_url", image_url: { url } };
     if (rec.detail !== undefined) {
       (part.image_url as JsonRecord).detail = rec.detail;
@@ -103,6 +114,63 @@ function toolOutputImagesToChatParts(output: unknown): JsonRecord[] {
     images.push(part);
   }
   return images;
+}
+
+function positiveIntEnv(raw: string | undefined, fallback: number): number {
+  const parsed = Number(raw);
+  return Number.isInteger(parsed) && parsed > 0 ? parsed : fallback;
+}
+
+/**
+ * #18684: every turn re-sends all historical tool-output images, so a long session
+ * grows the Chat request without bound until the upstream rejects the body. Keep the
+ * newest images that fit the count and byte budget and return the older ones to omit.
+ */
+function selectDroppedToolOutputImages(inputItems: unknown[]): Set<unknown> {
+  const maxCount = positiveIntEnv(process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_COUNT, 16);
+  const maxBytes = positiveIntEnv(
+    process.env.OMNIROUTE_TOOL_OUTPUT_IMAGE_MAX_BYTES,
+    20 * 1024 * 1024
+  );
+  const images: { part: unknown; bytes: number }[] = [];
+  for (const itemValue of inputItems) {
+    const item = toRecord(itemValue);
+    const itemType = toString(item.type);
+    const output =
+      itemType === "function_call_output" || itemType === "custom_tool_call_output"
+        ? item.output
+        : toString(item.role) === "tool" && (itemType === "message" || !itemType)
+          ? item.content
+          : undefined;
+    if (!Array.isArray(output)) continue;
+    for (const part of output) {
+      const rec = toRecord(part);
+      if (rec.type !== "input_image") continue;
+      const url = toString(rec.image_url);
+      if (url) images.push({ part, bytes: url.length });
+    }
+  }
+
+  const dropped = new Set<unknown>();
+  let kept = 0;
+  let keptBytes = 0;
+  let totalBytes = 0;
+  for (let i = images.length - 1; i >= 0; i--) {
+    const { part, bytes } = images[i];
+    totalBytes += bytes;
+    if (dropped.size === 0 && kept < maxCount && keptBytes + bytes <= maxBytes) {
+      kept++;
+      keptBytes += bytes;
+    } else {
+      dropped.add(part);
+    }
+  }
+  if (dropped.size > 0) {
+    console.warn(
+      `TOOL_OUTPUT_IMAGE_CAP kept=${kept} dropped=${dropped.size} bytesBefore=${totalBytes} bytesAfter=${keptBytes}`
+    );
+  }
+  return dropped;
 }
 
 function appendReasoningContent(current: unknown, next: string): string {
@@ -290,6 +358,7 @@ export function openaiResponsesToOpenAIRequest(
     rawInputItems.length === 0
       ? [{ type: "message", role: "user", content: [{ type: "input_text", text: "..." }] }]
       : rawInputItems;
+  const droppedToolImages = selectDroppedToolOutputImages(inputItems);
   for (const itemValue of inputItems) {
     const item = toRecord(itemValue);
 
@@ -324,12 +393,17 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       if (toString(item.role) === "tool") {
+        const toolCallId = claimToolCallId(item.tool_call_id);
         messages.push({
           role: "tool",
-          tool_call_id: claimToolCallId(item.tool_call_id),
+          tool_call_id: toolCallId,
           content: toolOutputContentToString(item.content),
         });
-        const roleToolImages = toolOutputImagesToChatParts(item.content);
+        const roleToolImages = toolOutputImagesToChatParts(
+          item.content,
+          droppedToolImages,
+          toolCallId
+        );
         if (roleToolImages.length > 0) {
           messages.push({ role: "user", content: roleToolImages });
         }
@@ -472,14 +546,15 @@ export function openaiResponsesToOpenAIRequest(
       }
 
       // Add tool result immediately
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: claimToolCallId(item.call_id),
+        tool_call_id: toolCallId,
         content: toolOutputContentToString(item.output),
       });
       // #14111: Chat Completions `tool` content is text-only, so a following
       // multimodal user message carries the output's images to vision models.
-      const toolImages = toolOutputImagesToChatParts(item.output);
+      const toolImages = toolOutputImagesToChatParts(item.output, droppedToolImages, toolCallId);
       if (toolImages.length > 0) {
         messages.push({ role: "user", content: toolImages });
       }
@@ -548,12 +623,17 @@ export function openaiResponsesToOpenAIRequest(
       } catch {
         // Not JSON — keep the raw output as the tool content.
       }
+      const toolCallId = claimToolCallId(item.call_id);
       messages.push({
         role: "tool",
-        tool_call_id: claimToolCallId(item.call_id),
+        tool_call_id: toolCallId,
         content: toolContent,
       });
-      const customToolImages = toolOutputImagesToChatParts(item.output);
+      const customToolImages = toolOutputImagesToChatParts(
+        item.output,
+        droppedToolImages,
+        toolCallId
+      );
       if (customToolImages.length > 0) {
         messages.push({ role: "user", content: customToolImages });
       }
