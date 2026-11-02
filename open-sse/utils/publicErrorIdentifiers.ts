@@ -297,6 +297,7 @@ const SAFE_PUBLIC_ERROR_IDENTIFIERS = new Set([
   "upstream_empty_response",
   "upstream_error",
   "upstream_protocol_error",
+  "upstream_request_cancelled",
   "upstream_response_error",
   "upstream_response_failed",
   "upstream_server_error",

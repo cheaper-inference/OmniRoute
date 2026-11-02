@@ -194,6 +194,7 @@ export default Plugin.define({
       resolved.managementReadToken === undefined
     );
     const fetchCombosSafe = async (): Promise<SourceResult<OmniRouteRawCombo[]>> => {
+      if (resolved.combos === false) return { ok: true, value: [] };
       // Opt-in models source: the combo rows already arrive in /v1/models,
       // so /api/combos is not requested at all (default "api" keeps it).
       if (usesModelsComboSource(resolved)) return { ok: true, value: [] };

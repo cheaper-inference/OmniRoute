@@ -4,17 +4,17 @@
 
 ---
 
-עודכן לאחרונה: 2026-08-23
+עדכון אחרון: 23-08-2026
 
-OmniRoute משתלב עם שלוש קטגוריות של כלי CLI, הפרוסות על פני שלושה דפי לוח בקרה ייעודיים:
+OmniRoute משתלב עם שלוש קטגוריות של כלי CLI הפרוסות על פני שלושה דפי לוח מחוונים ייעודיים:
 
-| דף            | נתיב                    | עיקרון                                                              | כמות      |
-| ------------- | ----------------------- | ------------------------------------------------------------------- | --------- |
-| **קוד CLI**   | `/dashboard/cli-code`   | כלי פיתוח שמופנים אל OmniRoute (לקוח ← CLI ← OmniRoute ← ספק)       | 26        |
-| **סוכני CLI** | `/dashboard/cli-agents` | סוכנים אוטונומיים שמופנים אל OmniRoute (אותה זרימה, היקף רחב יותר)  | 10        |
-| **סוכני ACP** | `/dashboard/acp-agents` | כלי CLI ש-OmniRoute מפעיל כצד אחורי באמצעות stdio/ACP (זרימה הפוכה) | ראו רישום |
+| עַמוּד      | מַסלוּל                 | מוּשָׂג                                                               | לִסְפּוֹר |
+| ----------- | ----------------------- | --------------------------------------------------------------------- | --------- |
+| **קוד CLI** | `/dashboard/cli-code`   | כלי קידוד שאתה מצביע על OmniRoute (לקוח → CLI → OmniRoute → ספק)      | 26        |
+| **CLI**     | `/dashboard/cli-agents` | סוכנים אוטונומיים שאתה מצביע על OmniRoute (אותה זרימה, היקף רחב יותר) | 11        |
+| **ACP**     | `/dashboard/acp-agents` | CLIs ש- OmniRoute מולידה כ-backend דרך stdio/ACP (זרימה הפוכה)        | ראה רישום |
 
-נתיבים ישנים מופנים מחדש באמצעות 308: `/dashboard/cli-tools` ← `/dashboard/cli-code`,‏ `/dashboard/agents` ← `/dashboard/acp-agents`.
+נתיבים מדור קודם דרך 308: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -43,11 +43,9 @@ Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose /
 
 ---
 
-## הגדרה אוטומטית באמצעות `setup-*`
+## קבע תצורה אוטומטית עם `setup-*`
 
-אין צורך לכתוב ידנית את התצורה של כל כלי. OmniRoute כולל פקודת `setup-*`
-לכל CLI נתמך, שקוראת את קטלוג המודלים **הפעיל** ממופע OmniRoute פועל
-(מקומי או מרוחק) וכותבת במחשב שלכם את התצורה הייעודית של הכלי:
+אתה לא צריך לכתוב את התצורה של כל כלי ביד. OmniRoute שולחת פקודת `setup-*` לכל CLI נתמכת שקוראת את** לִחיוֹת** קטלוג דגמים מ- OmniRoute פועל (מקומי או מרוחק) וכותב את התצורה של הכלי עצמו במחשב שלך:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
@@ -55,54 +53,18 @@ omniroute setup-cline        omniroute setup-kilo         omniroute setup-contin
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
 omniroute setup-5dive        omniroute setup-zed
+omniroute setup-whycodes
 ```
 
-כל אחת מהפקודות מקבלת את `--remote <url> --api-key <key>` (להגדרת כלי מקומי מול
-OmniRoute מרוחק), את `--dry-run` (תצוגה מקדימה ללא כתיבה) ואת `--port`. כלים
-ללא גילוי אוטומטי של מודלים (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) מקבלים
-את `--model <id>` (וכן `--yes` להרצות לא־אינטראקטיביות). הפקודה `setup-5dive` היא
-המתכון היחיד שאינו כותב תחת `$HOME`: היא מגדירה מערך סוכני 5dive באמצעות
-כתיבת פרופיל אימות בבעלות root במארח המערך, ולכן היא מפעילה את עצמה מחדש דרך `sudo`
-ואין לה מצב מרוחק משלה. כדי להפעיל CLI עם משתני הסביבה
-המתאימים מוזרקים, מבלי לכתוב תצורה כלל, השתמשו במפעיל הכללי
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
-gemini — היעדים והכינויים מגיעים מ־`bin/cli/cli-manifest.mjs`); המפעילים
-הוותיקים הייעודיים לכל כלי, `omniroute launch` (Claude Code) ו־`omniroute launch-codex`
-(Codex), עדיין זמינים. Gemini CLI זמין להפעלה בלבד: הוא יעד של `omniroute run`,
-אך אין לו מתכון `setup-*`/`configure`.
+כל אחד מקבל `--remote <url> --api-key <key>` (הגדר כלי מקומי נגד OmniRoute מרוחק), `--dry-run` (תצוגה מקדימה ללא כתיבה) ו- `--port`. כלים ללא גילוי אוטומטי של דגם (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive, WhyCodes) לוקחים `--model <id>` (ו- `--yes` לריצות לא אינטראקטיביות). `setup-5dive` הוא המתכון היחיד שלא כותב תחת `$HOME`: הוא מגדיר צי סוכנים של 5dive על ידי כתיבת פרופיל אישור בבעלות שורש על מארח הצי, כך שהוא פועל מחדש דרך `sudo` ואין לו מצב מרוחק משלו. כדי להפעיל CLI עם ה-env הנכון מוזרק וללא תצורה כתובה כלל, השתמש במפעיל `omniroute run <target>` הגנרי (claude, codex, aider, goose, opencode, qwen, gemini, whycodes - מטרות וכינויים מגיעים מ- `bin/cli/cli-manifest.mjs`); המשגרים מדור קודם לכל כלי `omniroute launch` (Claude Code) ו- `omniroute launch-codex` (Codex) נשארים זמינים. Gemini CLI הוא השקה בלבד: הוא יעד `omniroute run` אך אין לו מתכון `setup-*`/`configure`.
 
-> **הפניה מלאה:** הטבלה הראשית — מה כל פקודה כותבת, כל הדגלים,
-> עבודה מקומית לעומת מרוחקת, ואילו כלים דורשים סיומת `/v1` — נמצאת ב־
-> **[שילובי CLI](../guides/CLI-INTEGRATIONS.md)**.
+> **התייחסות מלאה:** הטבלה הראשית - מה כל פקודה כותבת, כל דגל, מקומי לעומת מרחוק, ואיזה כלים רוצים סיומת `/v1` - חיה בו** [שילובי CLI](../guides/CLI-INTEGRATIONS.md)** .
 
-### הפעלת פקודות אלה בתוך קונטיינר
+### הפעלת אלה בתוך מיכל
 
-פקודת `setup-*` שמופעלת בתוך הקונטיינר של OmniRoute כותבת אל ספריית הבית
-של הקונטיינר עצמו, שאף CLI במארח אינו קורא ושתיעלם יחד עם
-הקונטיינר. OmniRoute מזהה זאת ויוצא עם קוד `2` והוראות, במקום
-לכתוב. קיימות שתי דרכים נתמכות להתקדם — להתקין את ה־CLI במארח
-ולהפעיל `omniroute connect` אל הקונטיינר, או לעגן את ספריות התצורה ולהגדיר
-את `CLI_CONFIG_HOME` (פרופיל compose בשם `host`). כל פקודת `setup-*`, וכן
-`omniroute configure` ו־`omniroute config set`, מקבלות את
-`--allow-container-write` כאשר הכוונה היא אכן להגדיר את כלי ה־CLI של הקונטיינר
-עצמו; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` מבצע את אותה פעולה עבור
-השרת. ראו
-[מדריך Docker ← הגדרת כלי CLI של המארח](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+פקודת `setup-*` שמבוצעת בתוך הקונטיינר OmniRoute כותבת לתוך הבית של הקונטיינר עצמו, שאף CLI לא קורא אותה ונעלמת עם הקונטיינר. OmniRoute מזהה את זה ויוצאת מ- `2` עם הוראות במקום כתיבה. שתי דרכים נתמכות קדימה - התקן את ה- CLI על המארח ו- `omniroute connect` ל-container, או התקן את ה-Bind-mount של ה-config dirs והגדר `CLI_CONFIG_HOME` (פרופיל ה-compose `host` ). כל פקודת `setup-*`, בתוספת `omniroute configure` ו- `omniroute config set`, מקבלת `--allow-container-write` כאשר אתה מגדיר את ה- CLIs של המיכל עצמו. `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` עושה את אותו הדבר עבור השרת. ראה [מדריך Docker → הגדרת כלי CLI של מארח](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-**נקודת הקצה להחלה** של לוח הבקרה (`POST /api/cli-tools/apply`) אוכפת את
-אותה הגנה: בקונטיינר, פעולת כתיבה שהיעד שלה אינו מעוגן מהמארח
-מחזירה **`422`** עם `containerEphemeralTarget: true`, טקסט השגיאה הבטוח
-ו—עבור הכלים שיש להם מתכון למארח (claude, codex, opencode, cline,
-kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-opencode`) שיש להפעיל
-במארח במקום זאת; דבר אינו נכתב. `dryRun: true` ממשיך לפעול במצב קונטיינר
-ומחזיר תצוגה מקדימה מצונזרת ואת נתיב היעד, מבלי לגעת בדיסק. תוכן התצוגה
-המקדימה אינו תצורה המכילה פרטי גישה המיועדת להעתקה או לייבוא. בצעו את ההחלה
-במארח עם ערכי הכלי/כתובת ה־URL הבסיסית/מפתח ה־API/המודל המקוריים, או השתמשו
-בפקודת ההגדרה המצוינת עבור המארח. ראו [אבטחת תצורת CLI](../security/CLI-CONFIGURATION.md)
-למידע על כותרת התצוגה המקדימה וחוזה הבקשה. התנהגות זו היא
-מכוונת ומוגנת מפני רגרסיות באמצעות
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — לעולם אל "תתקנו" שגיאת 422
-באמצעות הסרת ההגנה.
+של לוח המחוונים** להחיל נקודת קצה** (`POST /api/cli-tools/apply`) אוכף את אותו שמירה: בקונטיינר עונה כתיבה שהמטרה שלו אינה מותאמת ל-bind מהמארח**`422`** עם `containerEphemeralTarget: true`, טקסט השגיאה הבטוח ו - עבור הכלים עם מתכון מארח ( claude , codex , opencode , cline , kilo , continue ) - `hostSetupCommand` (למשל `omniroute setup-opencode`) להפעלה על המארח במקום זאת; שום דבר לא כתוב. `dryRun: true` ממשיך לעבוד במצב קונטיינר ומחזיר נתיב יעד + בתצוגה מקדימה ערוכה מבלי לגעת בדיסק. תוכן תצוגה מקדימה אינו תצורה נושאת אישורים להעתקה או ייבוא. החל עם כניסות tool/base URL/API key/model המקוריות על המארח, או השתמש בפקודת ההגדרה המצוינת בצד המארח. ראה [אבטחת תצורת CLI](../security/CLI-CONFIGURATION.md) עבור כותרת התצוגה המקדימה וחוזה הבקשה. התנהגות זו היא מכוונת ומוגנת ברגרסיה על ידי `tests/unit/api/cli-tools/apply-container-guard.test.ts` - לעולם אל "תתקן" 422 על ידי הסרת השמירה.
 
 ---
 
@@ -182,22 +144,23 @@ kilo, continue)—גם `hostSetupCommand` (לדוגמה, `omniroute setup-openco
 כלים עם `baseUrlSupport: "partial"` מציגים תג "⚠ כתובת URL בסיסית חלקית" בכרטיס שבלוח הבקרה.
 ---
 
-## 2. קטלוג סוכני CLI (10 כלים)
+## 2. קטלוג סוכני CLI (11 כלים)
 
-סוכנים אוטונומיים המופיעים ב-`/dashboard/cli-agents`:
+סוכנים אוטונומיים המופיעים ב- `/dashboard/cli-agents`:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
-| ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
-| goose        | Goose            | Block / Linux Foundation | full           | true         |
-| interpreter  | Open Interpreter | OSS                      | full           | true         |
-| warp         | Warp AI          | Warp Inc.                | partial        | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
-| omp          | Oh My Pi         | OSS                      | full           | true         |
-| letta        | Letta CLI        | Letta                    | full           | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
+| תְעוּדַת זֶהוּת | שֵׁם            | מוֹכֵר                   | baseUrlSupport | acpSpawnable |
+| --------------- | --------------- | ------------------------ | -------------- | ------------ |
+| הרמס-סוכן       | סוכן הרמס       | Nous Research            | מָלֵא          | שֶׁקֶר       |
+| openclaw        | OpenClaw        | OSS (פ. שטיינברגר)       | מָלֵא          | נָכוֹן       |
+| אווז            | אווז            | Block / Linux Foundation | מָלֵא          | נָכוֹן       |
+| מְתוּרגְמָן     | פתח את המתורגמן | OSS                      | מָלֵא          | נָכוֹן       |
+| לְעַקֵם         | Warp AI         | Warp Inc.                | חֶלקִי         | נָכוֹן       |
+| סוכן-סיפון      | הסוכן דק        | אששגופלני (OSS)          | מָלֵא          | שֶׁקֶר       |
+| אומפ            | אוי פיי שלי     | OSS                      | מָלֵא          | נָכוֹן       |
+| letta           | לטה CLI         | לטה                      | מָלֵא          | שֶׁקֶר       |
+| סוכן ראשי       | סוכן ראשי       | ראש אינטלקט (OSS)        | מָלֵא          | שֶׁקֶר       |
+| 5 צלילה         | 5 צלילה         | OSS (5dive-ai)           | מָלֵא          | שֶׁקֶר       |
+| קודים למה       | WhyCodes        | למה תאגיד                | מָלֵא          | שֶׁקֶר       |
 
 ---
 

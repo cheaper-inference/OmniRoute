@@ -11,23 +11,19 @@
 
 ---
 
-## 簡介
+## 它是什麼
 
-OmniRoute 註冊了 376 家提供者，其中包括 155 個標記為 **free/no-auth** 的目錄項目（no-auth、免費方案 OAuth 或免費方案 API 金鑰——請參閱[免費方案指南](../getting-started/FREE-TIERS-GUIDE.md)與完整的[免費方案目錄](../reference/FREE_TIERS.md)）。但問題在於：免費提供者的模型品質差異極大。一家提供前沿模型的 no-auth 提供者，遠比提供小型舊模型的提供者來得實用。
+OmniRoute註冊了 377 個提供者，其中 155 個目錄條目已標記為**free/no-auth** （無身份驗證、免費層OAuth或免費層API密鑰 — 請參閱[免費套餐指南](../getting-started/FREE-TIERS-GUIDE.md)和完整的[免費套餐目錄](../reference/FREE_TIERS.md)）。問題是：免費提供者的模型品質差異很大。為前沿模型提供服務的無身份驗證提供者比為小型遺留模型提供服務的提供者有用得多。
 
-**免費提供者排名（Free Provider Rankings）**透過將每個免費提供者的目錄，與來自 **Arena AI 排行榜**的**群眾外包品質分數**（人類偏好 ELO，與 LMArena 聊天機器人競技場背後的概念相同）進行聯結，回答「**哪家免費提供者能提供最佳模型？**」這個問題。接著再依據各家**最佳免費模型**的實力對提供者進行排名。
+**免費提供者排名**答案”**哪個免費提供者為我提供了最好的模型？** 「透過加入每個免費提供者的目錄**眾包品質分數**從**競技場AI排行榜**（人類偏好ELO，LMArena 聊天機器人競技場背後的想法相同）。然後根據提供者的實力對提供者進行排名**最佳免費模型**。
 
-此排名由三個真實來源計算得出：
+該排名是根據三個真實來源計算的：
 
-1. 免費提供者清單——`NOAUTH_PROVIDERS`，加上標記為 `hasFree` 的
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` 項目
-   （`src/shared/constants/providers.ts`）。
-2. 來自提供者註冊表
-   （`open-sse/config/providerRegistry.ts`）的各家提供者模型目錄。
-3. 由 Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）儲存在 `model_intelligence`
-   資料表中的 ELO 衍生任務適配分數。
+1. 免費提供者清單 — `NOAUTH_PROVIDERS`，以及標記為`hasFree` (`src/shared/constants/providers.ts`) 的`OAUTH_PROVIDERS` / `APIKEY_PROVIDERS`條目。
+2. 來自提供者註冊表 (`open-sse/config/providerRegistry.ts`) 的每個提供者的模型目錄。
+3. ELO 衍生的任務適合度分數由 Arena ELO同步引擎 (`src/lib/arenaEloSync.ts`) 儲存在`model_intelligence` DB表中。
 
-聯結邏輯位於 `src/lib/freeProviderRankings.ts`。
+連接邏輯位於`src/lib/freeProviderRankings.ts`。
 
 ---
 

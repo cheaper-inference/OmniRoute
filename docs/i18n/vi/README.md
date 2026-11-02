@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Cổng AI Miễn phí
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không bao giờ ngừng lập trình. Mọi công cụ AI → 376 nhà cung cấp — hơn 150 miễn phí — thông qua một điểm cuối duy nhất. Kết nối Claude Code, Codex, Cursor, Cline, Copilot & Antigravity với Claude / GPT / Gemini MIỄN PHÍ cùng khả năng tự động chuyển đổi dự phòng. Nén kết hợp RTK + Caveman giúp tiết kiệm 15–95% token (trung bình ~89%) — không bao giờ chạm giới hạn. 376 nhà cung cấp AI · hơn 150 gói miễn phí · ~1,62 tỷ token miễn phí/tháng · 20 chiến lược định tuyến · bắt đầu với $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Không bao giờ ngừng lập trình. Mọi công cụ AI → 380 nhà cung cấp — hơn 150 miễn phí — thông qua một điểm cuối duy nhất. Kết nối Claude Code, Codex, Cursor, Cline, Copilot & Antigravity với Claude / GPT / Gemini MIỄN PHÍ cùng khả năng tự động chuyển đổi dự phòng. Nén kết hợp RTK + Caveman giúp tiết kiệm 15–95% token (trung bình ~89%) — không bao giờ chạm giới hạn. 380 nhà cung cấp AI · hơn 150 gói miễn phí · ~1,62 tỷ token miễn phí/tháng · 20 chiến lược định tuyến · bắt đầu với $0."/>
 
 </div>
 
@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Cổng kết nối không ngừng mở rộng
+## 📈 Cổng tiếp tục phát triển
 
 <div align="center">
 
-|                             |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Nhà cung cấp             |            352            |   **358**   |          376          |
-| 🧠 ID mô hình chat duy nhất |           1320            |  **1374**   |         1475          |
-| 🖼️ Cầu nối phương thức      | 🆕 vision + audio + video |      ✓      |           ✓           |
-| 📡 Danh mục miễn phí Radar  |     🆕 chọn tham gia      |      ✓      |           ✓           |
-| ⚖️ Lập lịch theo hạn mức    |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Đo lường hạn mức         |       🆕 trực tiếp        |      ✓      |           ✓           |
-| 🧰 Chế độ headless          |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Hạ tầng đường ray LTS    |             —             |      —      | 🆕 các kênh phát hành |
-| 🔎 API khám phá mô hình     |             —             |      —      | 🆕 `/v1/models/query` |
+|                                     |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
+| ----------------------------------- | :----------------------------: | :---------: | :-------------------: |
+| nhà cung cấp 🌐                     |              352               |   **358**   |          380          |
+| 🧠 Mô hình trò chuyện độc đáo IDs   |              1320              |  **1374**   |         1475          |
+| Cầu phương thức 🖼️                  | 🆕 tầm nhìn + âm thanh + video |      ✓      |           ✓           |
+| Danh mục miễn phí 📡 Radar          |        chọn tham gia 🆕        |      ✓      |           ✓           |
+| lập kế hoạch nhận biết hạn ngạch ⚖️ |      chia sẻ hạn ngạch 🆕      |      ✓      |           ✓           |
+| đo từ xa hạn ngạch 📊               |          🆕 trực tiếp          |      ✓      |           ✓           |
+| 🧰 Chế độ không đầu                 |               —                |      —      | 🆕 `serve --headless` |
+| cơ sở hạ tầng đường sắt 🛤️ LTS      |               —                |      —      |   kênh phát hành 🆕   |
+| 🔎 Khám phá mô hình API             |               —                |      —      | 🆕 `/v1/models/query` |
 
-**→ [Lộ trình](ROADMAP.md) — tiến dọc đường ray tới `v3.9.0 LTS`**
+**[Lộ trình](ROADMAP.md)→ — đi đường sắt đến `v3.9.0 LTS`**
 
 </div>
 
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Tính năng</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combo</a></td>
-    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Nhà cung cấp</a></td>
+    <td align="center"><a href="#-380-ai-providers--153-catalog-marked-free">🌐 Nhà cung cấp</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời cam kết — Một endpoint và 376 nhà cung cấp. Tự động dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu lành mạnh khác. Sáu trụ cột: dự phòng linh hoạt trên 376 nhà cung cấp · tiết kiệm token lên tới 95% trên các khối lượng công việc đủ điều kiện · khởi đầu với $0 nhờ 150+ gói miễn phí và 52 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa · 37 tích hợp CLI/agent thông qua một cấu hình · tương thích OpenAI, Claude, Gemini và Responses API tại /v1 · các kiểm soát cấp production bao gồm circuit breaker, TLS stealth, MCP 110 công cụ, A2A, bộ nhớ, guardrail, đánh giá và 56.000+ khai báo kiểm thử tĩnh trên 7.800+ tệp kiểm thử được theo dõi."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lời cam kết — Một endpoint và 380 nhà cung cấp. Tự động dự phòng giúp duy trì định tuyến khi vẫn còn một mục tiêu lành mạnh khác. Sáu trụ cột: dự phòng linh hoạt trên 380 nhà cung cấp · tiết kiệm token lên tới 95% trên các khối lượng công việc đủ điều kiện · khởi đầu với $0 nhờ 150+ gói miễn phí và 52 nhà cung cấp miễn phí vĩnh viễn định kỳ/không cần khóa · 37 tích hợp CLI/agent thông qua một cấu hình · tương thích OpenAI, Claude, Gemini và Responses API tại /v1 · các kiểm soát cấp production bao gồm circuit breaker, TLS stealth, MCP 110 công cụ, A2A, bộ nhớ, guardrail, đánh giá và 56.000+ khai báo kiểm thử tĩnh trên 7.800+ tệp kiểm thử được theo dõi."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Tất cả **20** chiến lược — kết hợp tùy ý theo từng bước c�
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều làm nên sự khác biệt của OmniRoute — bản tổng hợp tính năng tại một thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 năng lực. OmniRoute: 376 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, nén token bằng 12 công cụ, máy chủ MCP tích hợp với 110 công cụ, giao thức tác nhân A2A, bộ nhớ liên tục, các biện pháp bảo vệ, tác nhân đám mây, ẩn danh vân tay TLS, Desktop/Termux/PWA và giao diện hỗ trợ 67 ngôn ngữ i18n. OmniRoute được cấp phép theo MIT và có thể tự lưu trữ. Các năng lực và số liệu của đối thủ có thể thay đổi; hãy xem phương pháp luận được liên kết."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Điều làm nên sự khác biệt của OmniRoute — bản tổng hợp tính năng tại một thời điểm so với 9router, OpenRouter, CLIProxyAPI và LiteLLM trên 13 năng lực. OmniRoute: 380 nhà cung cấp, tích hợp sẵn hơn 150 gói miễn phí, 20 chiến lược định tuyến, nén token bằng 12 công cụ, máy chủ MCP tích hợp với 110 công cụ, giao thức tác nhân A2A, bộ nhớ liên tục, các biện pháp bảo vệ, tác nhân đám mây, ẩn danh vân tay TLS, Desktop/Termux/PWA và giao diện hỗ trợ 67 ngôn ngữ i18n. OmniRoute được cấp phép theo MIT và có thể tự lưu trữ. Các năng lực và số liệu của đối thủ có thể thay đổi; hãy xem phương pháp luận được liên kết."/>
 
 <sub>📊 Phương pháp luận đầy đủ &amp; chi tiết theo từng tính năng so với 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 - **🖼️ Endpoint mới** — `/v1/ocr` (Mistral OCR) và `/v1/audio/translations` (kiểu Whisper) hoàn thiện bề mặt media. → [Tham chiếu API](docs/reference/API_REFERENCE.md)
 - **🎨 Tạo hình ảnh / video / âm thanh** — một API cho media: video xAI Grok Imagine & Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind và các provider giọng nói như ElevenLabs. → [Tham chiếu API](docs/reference/API_REFERENCE.md)
 - **🌍 Triển khai & vận hành** — `basePath` reverse-proxy, tự động phát hiện ngôn ngữ trình duyệt, theo dõi thiết bị theo từng key, tin cậy MITM không cần root, bản địa hóa zh-TW. → [Môi trường](docs/reference/ENVIRONMENT.md)
-- **🤝 Nhiều provider & agent hơn** — agent đám mây (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với đăng nhập bằng trình duyệt + OAuth, card hạng nhất cho Ollama, Claude Opus 5 & Sonnet 5, quan hệ đối tác chính thức với Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… và **danh mục 376 provider** được làm mới. → [Provider](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Nhiều provider & agent hơn** — agent đám mây (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) với đăng nhập bằng trình duyệt + OAuth, card hạng nhất cho Ollama, Claude Opus 5 & Sonnet 5, quan hệ đối tác chính thức với Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… và **danh mục 380 provider** được làm mới. → [Provider](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Minh bạch định tuyến** — mọi phản hồi mang header `X-OmniRoute-Decision` nêu tên chiến lược/provider/độ trễ đã phục vụ nó, một chiến lược combo `cache-optimized` mới + yếu tố `cacheAffinity` của Auto-Combo định tuyến các yêu cầu lặp lại về kết nối đang giữ prefix đã cache, và endpoint chỉ đọc `/v1/auto-combo/{channel}/candidates` hiển thị pool ứng viên trực tiếp của kênh `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Hiệu năng & hạ tầng cục bộ** — Redis cục bộ một cú nhấp, trình triển khai relay Cloudflare Workers / Deno Deploy, Bifrost & Mux dưới dạng dịch vụ nhúng được giám sát. → [Dịch vụ nhúng](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Còn có trong gói** — khung plugin + marketplace, các khung kỹ năng Omni/Agent/GitHub, tích hợp Obsidian vault (22 công cụ MCP), API Batch & Files tương thích OpenAI, bộ nhớ đệm phản hồi ngữ nghĩa, trò chơi hóa với bảng xếp hạng, khám phá tác nhân ACP (15 tác nhân tích hợp sẵn), xuất log theo lịch lên BigQuery, `auto/chaos` fan-out song song đa mô hình, cầu nối bot Telegram, trình quản lý phiên bản trong ứng dụng và bảng xếp hạng nhà cung cấp miễn phí theo LMArena-ELO. → [Tài liệu](docs/README.md)
@@ -612,59 +612,58 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 
 <div align="center">
 
-## 🤖 Các CLI & tác nhân lập trình tương thích
+## 🤖 Tương thích CLIs & Đại lý mã hóa
 
-> Một cấu hình — `http://localhost:20128/v1` — và **mọi** IDE hoặc CLI AI đều chạy được với các mô hình miễn phí & chi phí thấp.
+> Một cấu hình — `http://localhost:20128/v1` — và** mọi** AI IDE hoặc CLI chạy trên các mô hình miễn phí và chi phí thấp.
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Mã </b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b> Kilo </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b> Mã sở thú </b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b> Tiếp tục </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b> Aider </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Nhà máy Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b> Mùi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Xây dựng </b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b> Đặc vụ Hermes </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b> Ngỗng </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b> Phiên dịch mở </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ cũng hoạt động với</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>mọi công cụ tương thích với OpenAI</b>
+<b>＋ cũng hoạt động với </b> · Agent Deck · Kiro · Mã lệnh · Antigravity · Windsurf · AMP · <b> bất kỳ công cụ tương thích OpenAI nào </b>
 </div>
 
-<sub>📖 Thiết lập riêng cho từng công cụ trong tổng số 37 công cụ (27 CLI Code + 10 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 Plugin OpenCode → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖 Thiết lập mỗi công cụ cho tất cả 38 công cụ (27 CLI Code's + 11 CLI Agent) → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode plugin → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**Khởi chạy bất kỳ CLI nào được hỗ trợ thông qua OmniRoute chỉ bằng một lệnh** — không ghi tệp cấu hình,
-thông tin xác thực được chèn riêng cho từng tiến trình, Qwen/Gemini sử dụng thư mục home cô lập dùng một lần:
+**Khởi chạy bất kỳ CLI được hỗ trợ nào thông qua OmniRoute bằng một lệnh** — không có tập tin cấu hình nào được ghi, thông tin đăng nhập được đưa vào mỗi quy trình, Qwen/Gemini có được một ngôi nhà biệt lập:
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,23 +674,21 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# Hoặc chọn nhà cung cấp+mô hình theo cách tương tác và ghi cấu hình riêng của công cụ:
-omniroute configure codex          # cũng hỗ trợ: claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-Mọi lệnh đều tuân theo ngữ cảnh từ xa đang hoạt động (`omniroute connect <host>`), `--dry-run`
-cho phép xem trước chính xác các biến môi trường/đối số mà không thực thi, còn `--api-key-env NAME` giúp thông tin bí mật
-không xuất hiện trong lịch sử shell của bạn. → [Tích hợp CLI](docs/guides/CLI-INTEGRATIONS.md)
+Mọi lệnh đều tôn vinh bối cảnh từ xa đang hoạt động (`omniroute connect <host>`), `--dry-run` xem trước env/args chính xác mà không cần thực thi và `--api-key-env NAME` giữ bí mật khỏi lịch sử shell của bạn. tích hợp → [CLI](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 376 Nhà cung cấp AI — 153 nhà cung cấp được đánh dấu miễn phí trong danh mục
+## 🌐 380 Nhà cung cấp AI — 153 nhà cung cấp được đánh dấu miễn phí trong danh mục
 
 </div>
 
-> **376 nhà cung cấp đã đăng ký** trong các bộ sưu tập chính thức về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, bao gồm **153 nhà cung cấp mang siêu dữ liệu khám phá `hasFree: true`**. Registry mô hình trò chuyện bao gồm **239 nhà cung cấp / 3.059 cặp nhà cung cấp-mô hình riêng biệt / 1.475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **471 hàng theo mô hình**, **34 nhóm hạn mức định kỳ** và **52 nhà cung cấp miễn phí vĩnh viễn theo định kỳ/không cần khóa**. Các mẫu số này khác nhau theo chủ đích; các định nghĩa và phép tính đã loại bỏ trùng lặp giữa các nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
+> **380 nhà cung cấp đã đăng ký** trong các bộ sưu tập chính thức về trò chuyện, phương tiện, tìm kiếm, cục bộ, tác nhân đám mây và hệ thống, bao gồm **153 nhà cung cấp mang siêu dữ liệu khám phá `hasFree: true`**. Registry mô hình trò chuyện bao gồm **239 nhà cung cấp / 3.059 cặp nhà cung cấp-mô hình riêng biệt / 1.475 ID mô hình thô**; danh mục ngân sách miễn phí riêng biệt có **471 hàng theo mô hình**, **34 nhóm hạn mức định kỳ** và **52 nhà cung cấp miễn phí vĩnh viễn theo định kỳ/không cần khóa**. Các mẫu số này khác nhau theo chủ đích; các định nghĩa và phép tính đã loại bỏ trùng lặp giữa các nhóm nằm trong [Tài liệu tham khảo về nhà cung cấp](docs/reference/PROVIDER_REFERENCE.md) và [Các gói miễn phí](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -756,92 +753,80 @@ không xuất hiện trong lịch sử shell của bạn. → [Tích hợp CLI](
 
 <div align="center">
 
-## 🖥️ OmniRoute Chạy Ở Đâu — Mọi Nơi
+## 🖥️ Nơi OmniRoute chạy — Mọi nơi
 
 </div>
 
-> Cùng một ứng dụng, máy của bạn, quy tắc của bạn. Từ cài đặt npm toàn cục đến **điện thoại của bạn** thông qua Termux.
+> Cùng một ứng dụng, máy của bạn, quy tắc của bạn. Từ cài đặt npm toàn cầu đến** điện thoại của bạn** thông qua Termux.
 
 <table>
-  <tr><th align="left">Nền tảng</th><th align="left">Cài đặt</th><th align="left">Điểm nổi bật</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm (toàn cục)</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">Một lệnh, mọi hệ điều hành</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">Đa kiến trúc <b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>Máy tính để bàn (Electron)</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">Cửa sổ gốc + khay hệ thống — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>Thanh menu (OmniRouteTray)</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">Giám sát &amp; tự động cập nhật máy chủ — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code>arm64</code> nguyên bản</td><td align="left">Raspberry Pi, máy chủ ARM, Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android (Termux)</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">Chạy <b>trên điện thoại của bạn</b>, 24/7, không cần root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Thêm vào màn hình chính"</td><td align="left">Toàn màn hình, ngoại tuyến, có thể cài đặt từ trình duyệt</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>Plugin OpenCode</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">Tích hợp OpenCode nguyên bản</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>cài đặt tiện ích mở rộng <b>OmniCopilot</b></td><td align="left">Mọi mô hình OmniRoute trong bộ chọn Copilot Chat nguyên bản — bản ổn định &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>Từ mã nguồn</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">Tùy biến, đóng góp</td></tr>
+  <tr><th align="left"> Nền tảng </th><th align="left"> Cài đặt </th><th align="left"> Điểm nổi bật </th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm (toàn cầu)</b></td><td align="left" nowrap><code> npm cài đặt -g omniroute </code></td><td align="left"> Một lệnh, bất kỳ OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun (toàn cầu)</b></td><td align="left" nowrap><code> bun add -g omniroute </code></td><td align="left"> Cùng một tarball đăng ký, cài đặt nhanh hơn </td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker chạy … diegosouzapw/omniroute</code></td><td align="left"> Nhiều vòm <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b> để bàn (Electron)</b></td><td align="left" nowrap><code> npm run electron:build </code></td><td align="left"> hệ thống cửa sổ gốc + — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b> Thanh menu (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left"> Giám sát &amp; tự động cập nhật máy chủ — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap><code> arm64 </code></td><td align="left"> Raspberry Pi, ARM chủ zqm, Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg cài đặt nodejs && npx -y omniroute </code></td><td align="left"> Chạy <b> trên điện thoại của bạn </b>, 24/7, không cần root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"Thêm vào màn hình chính"</td><td align="left"> Toàn màn hình, ngoại tuyến, có thể cài đặt từ trình duyệt </td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode plugin </b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode hợp </td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Mã Copilot Trò chuyện </b></td><td align="left" nowrap> cài đặt <b>OmniCopilot</b> mở rộng </td><td align="left"> Mọi mô hình OmniRoute trong bộ chọn trò chuyện Copilot gốc — &amp; ổn định Người dùng nội bộ </td></tr>
+  <tr><td align="left" nowrap>🛠️ <b> Từ nguồn </b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left"> Hack vào nó, đóng góp </td></tr>
 </table>
 
-<sub>📖 [Hướng dẫn Docker](docs/guides/DOCKER_GUIDE.md) · [Máy tính để bàn](electron/README.md) · [Khay thanh menu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker Hướng dẫn](docs/guides/DOCKER_GUIDE.md) · [Máy tính để bàn](electron/README.md) · [Khay thanh menu](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 Mới: OmniRoute bên trong Copilot Chat nguyên bản của VS Code
+### 🧩 Mới: OmniRoute bên trong Trò chuyện Copilot gốc của Mã VS
 
 </div>
 
-> Không có thanh bên mới, không có giao diện trò chuyện mới — mọi mô hình do OmniRoute cung cấp đều xuất hiện ngay trong
-> **bộ chọn mô hình Copilot Chat mà bạn đã sử dụng**. Kể từ VS Code 1.122, các mô hình của nhà cung cấp hoạt động
-> mà không cần đăng nhập GitHub hoặc đăng ký Copilot — chế độ tác nhân, gọi công cụ và thị giác, hoàn toàn
-> miễn phí.
+> Không có thanh bên mới, không có UI trò chuyện mới - mọi mẫu OmniRoute phục vụ đều hiển thị ngay trong** Bộ chọn mô hình trò chuyện Copilot bạn đã sử dụng** . Kể từ Mã VS 1.122, các mô hình nhà cung cấp hoạt động mà không cần đăng nhập GitHub hoặc đăng ký Copilot — chế độ đại lý, gọi công cụ và tầm nhìn, miễn phí.
 
-Cài đặt tiện ích mở rộng **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**, trỏ tiện ích
-đến máy chủ OmniRoute của bạn (mặc định là `localhost:20128`), sau đó mở Copilot Chat → bộ chọn mô hình
-→ **Quản lý mô hình…** → **OmniRoute**.
+Cài đặt** [OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** tiện ích mở rộng, trỏ nó vào máy chủ OmniRoute của bạn (mặc định là `localhost:20128`), sau đó mở bộ chọn mô hình Copilot Trò chuyện → →** Quản lý mô hình…** →**OmniRoute** .
 
 <table>
-  <tr><th align="left">Cửa hàng</th><th align="left">Liên kết</th><th align="left">Hoạt động với</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">Cài đặt →</a></td><td align="left">VS Code — bản ổn định &amp; Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">Cài đặt →</a></td><td align="left">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
+  <tr><th align="left"> Store </th><th align="left"> Liên kết </th><th align="left"> Hoạt động với </th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace </b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot"> Cài đặt →</a ></td >< td Align ="left">VS Code — stable &amp; Insiders </td></tr>
+  <tr><td align="left" nowrap>🔓 <b> Mở VSX Đăng ký zqf </b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot"> đặt →</a ></td >< td căn chỉnh ="trái">Cursor, Windsurf, VSCodium, Theia, code-server, Gitpod, Antigravity, Kiro…</td></tr>
 </table>
 
-Từ bên trong trình soạn thảo: mở chế độ xem **Tiện ích mở rộng**, tìm kiếm **"OmniRoute"**, nhấp vào **Cài đặt**
-— hoạt động theo cùng một cách trên cả hai cửa hàng. Mã nguồn, các vấn đề và tài liệu quy trình phát hành nằm tại
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
+Từ bên trong trình chỉnh sửa: mở** Tiện ích mở rộng** xem, tìm kiếm** "OmniRoute"** , bấm vào** Cài đặt** - hoạt động theo cách tương tự trên cả hai cửa hàng. Nguồn, các vấn đề và sổ tay xuất bản trực tiếp tại [diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot).
 
-<sub>📖 [Hướng dẫn VS Code Copilot Chat](docs/guides/VSCODE-COPILOT.md) — thiết lập, nội dung bộ chọn hiển thị, bảng điều khiển trong một tab, khắc phục sự cố</sub>
+<sub>📖 [VS Mã Copilot Hướng dẫn trò chuyện](docs/guides/VSCODE-COPILOT.md) — thiết lập, nội dung bộ chọn hiển thị, bảng thông tin trong tab, khắc phục sự cố </sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩 Mới: OmniRouteTray — cổng kết nối của bạn, nằm ngay trên thanh menu
+### 🎩 Mới: OmniRouteTray — cổng của bạn, sống trong thanh menu
 
 </div>
 
-> `omniroute serve` hoạt động tốt nhất khi luôn được bật. **[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> biến việc đó thành một ứng dụng thanh menu chỉ cần thiết lập một lần trên macOS: ứng dụng khởi động máy chủ, duy trì hoạt động
-> sau khi khởi động lại, cập nhật tại chỗ và giúp bạn xem ngân sách token trực tiếp chỉ với một cú nhấp chuột — **không
-> cần để cửa sổ dòng lệnh mở, không cần trông chừng `npm install -g omniroute`.**
+> `omniroute serve` hạnh phúc nhất khi nó luôn bật.** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)** biến nó thành một ứng dụng thanh menu có thể cài đặt và quên cho macOS: nó khởi động máy chủ, duy trì hoạt động trong suốt quá trình khởi động lại, cập nhật tại chỗ và đặt ngân sách mã thông báo trực tiếp của bạn chỉ bằng một cú nhấp chuột —** không có cửa sổ đầu cuối nào được mở, không có `npm install -g omniroute` để trông trẻ.**
 
-Được xây dựng bằng [Tauri v2](https://v2.tauri.app/) (lõi Rust nhỏ đến mức có thể xem như sai số làm tròn), ứng dụng đi kèm
-môi trường chạy Node 24 đã được ký riêng và quản lý bản cài đặt OmniRoute thuộc sở hữu của ứng dụng, vì vậy không bao giờ xung đột với
-`node`/`bun` toàn cục của bạn. Ứng dụng **dùng chung cấu hình và cơ sở dữ liệu `~/.omniroute/` hiện có của bạn** — vì vậy đây vẫn là
-OmniRoute mà bạn đang chạy, chỉ là được đội thêm một chiếc mũ. 🎩
+Được xây dựng bằng [Tauri v2](https://v2.tauri.app/) (lõi Rust có kích thước bằng một lỗi làm tròn), nó vận chuyển thời gian chạy Node 24 đã ký của riêng mình và quản lý cài đặt OmniRoute do ứng dụng sở hữu, do đó, nó không bao giờ chống lại `node`/`bun` toàn cầu của bạn. Nó** chia sẻ cấu hình và cơ sở dữ liệu `~/.omniroute/` hiện có của bạn** — vậy thì đó chính là OmniRoute mà bạn đã chạy, chỉ với một chiếc mũ trên đầu. 🎩
 
 <table>
-  <tr><th align="left">Chức năng</th><th align="left">Cách thức</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>Giám sát máy chủ</b></td><td align="left">Khởi tạo <code>omniroute serve</code>, tiếp quản phiên bản đang chạy thay vì tạo bản trùng lặp</td></tr>
-  <tr><td align="left" nowrap>📊 <b>Xem nhanh mức sử dụng trực tiếp</b></td><td align="left">Thanh hạn mức nhà cung cấp, giới hạn phiên/hàng tuần của Claude kèm đếm ngược thời gian đặt lại, phân tích chi phí trong 30 ngày</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>Tự động cập nhật tại chỗ</b></td><td align="left">Cài đặt theo giai đoạn, hoán đổi nguyên tử, hoàn tác khi thất bại — luôn sử dụng bản phát hành mới nhất</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>Khởi động khi đăng nhập</b></td><td align="left">Tùy chọn khởi chạy khi đăng nhập; chỉ hiển thị ở khay, không có biểu tượng trên dock</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>Chẩn đoán &amp; nhật ký</b></td><td align="left">Chẩn đoán chỉ với một cú nhấp chuột và truy cập nhật ký máy chủ</td></tr>
+  <tr><th align="left"> Nó làm gì </th><th align="left"></tr></th> thế nào
+  <tr><td align="left" nowrap>🟢 <b> Giám sát máy chủ </b></td><td align="left"> Sinh ra <code> omniroute phục vụ </code>, sử dụng một phiên bản đã chạy thay vì sao chép nó </td></tr>
+  <tr><td align="left" nowrap>📊 <b> lược về cách sử dụng trực tiếp </b></td><td align="left"> Thanh hạn ngạch của nhà cung cấp, giới hạn Claude session/weekly với đếm ngược đặt lại, phân tích chi phí trong 30 ngày </td></tr>
+  <tr><td align="left" nowrap>🔄 <b> Tự động cập nhật tại chỗ </b></td><td align="left"> Cài đặt theo giai đoạn, hoán đổi nguyên tử, khôi phục khi thất bại — luôn có trên bản phát hành mới nhất </td></tr>
+  <tr><td align="left" nowrap>🚀 <b> Bắt đầu đăng nhập </b></td><td align="left"> chạy tùy chọn khi đăng nhập; chỉ có khay, không có biểu tượng dock </td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Doctor &amp; ghi nhật ký </b></td><td align="left"> Chẩn đoán bằng một cú nhấp chuột và truy cập nhật ký máy chủ </td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>Muốn tải xuống? Hãy lấy tệp <code>.dmg</code> mới nhất từ
-<a href="https://github.com/zoispag/omniroute-tray/releases">Bản phát hành</a>. Mã nguồn, các vấn đề và tài liệu
-hướng dẫn build có tại <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
-<br/>💛 Một dự án cộng đồng của <a href="https://github.com/zoispag">@zoispag</a> — không phải là bản phát hành OmniRoute chính thức.</sub>
+<sub> Thích tải xuống? Lấy <code>.dmg </code> mới nhất từ
+<a href="https://github.com/zoispag/omniroute-tray/releases"> Phát hành </a>. Nguồn, vấn đề và xây dựng
+tài liệu trực tiếp tại <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>.
+<br/>💛 Một dự án cộng đồng của <a href="https://github.com/zoispag">@zoispag </a> - không phải là bản phát hành OmniRoute chính thức.</sub>
 
 <br/>
 
@@ -1302,7 +1287,7 @@ Số liệu chuẩn vào 2026-10-18: **1.976 video duy nhất** · **20.220.289 
   <tr><td nowrap><b>Môi trường chạy</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Ngôn ngữ</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> trên toàn bộ <code>src/</code> và <code>open-sse/</code> (không còn <code>any</code> trong phần lõi kể từ v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 module nghiệp vụ, 211 bản migration</td></tr>
+  <tr><td nowrap><b>Cơ sở dữ liệu</b></td><td>better-sqlite3 (SQLite, ghi nhật ký WAL) + LowDB (JSON kế thừa) — 147 module nghiệp vụ, 219 bản migration</td></tr>
   <tr><td nowrap><b>Bộ nhớ</b></td><td>SQLite FTS5 toàn văn + vector embedding lượng tử hóa int8, suy giảm có kiểu (typed decay)</td></tr>
   <tr><td nowrap><b>Lược đồ</b></td><td>Zod 4 — kiểm tra dữ liệu vào/ra của công cụ MCP + hợp đồng API</td></tr>
   <tr><td nowrap><b>Giao thức</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

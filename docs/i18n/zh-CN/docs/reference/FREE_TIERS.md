@@ -44,17 +44,18 @@
 
 ---
 
-## 2026-06-17 更新——自 2026-06-05 以来有哪些变化
+## 2026-06-17 刷新 —— 自 2026-06-05 以来的变更
 
-通过 50 个智能体进行了一轮 Web 调研（官方文档 + 最近 7 天的新闻，并经过对抗性验证），全面更新了整个目录。重点如下：
+一次由 50 个智能体执行的网络调研(官方文档 + 最近 7 天的新闻,经对抗性验证)刷新了整个目录。要点如下:
 
-- **已移除 / 无免费层级（2026）：** `chutes`（免费层级于 2026-03 结束）、`phind`（公司于 2026-01 关闭）、`kluster`（于 2026-06-09 停止服务 → MITO）、`gitlawb` + `gitlawb-gmi`（MiMo 免费权限于 2026-05-24 被撤销，Nemotron 促销于 2026-06 结束——已于 2026-06-18 重新验证）、`aimlapi`（免费层级暂停——已于 2026-06-18 重新验证）、`yi`（Yi-Light 已退役，改为按量付费——已于 2026-06-18 重新验证）、`featherless-ai`（目前无免费层级）、`chipotle`（Chipotle 的“Pepper AI”——该提供者所连接的、经逆向工程得到的 `amelia.chipotle.com` Amelia 聊天组件目前在所有路由上均返回 404，包括根路由；后端已停用或迁移，于 2026-09-15 确认——已从目录中完全移除，#13131/#4037）。`iflytek` / `sparkdesk` 仍保留在列表中，但附有服务条款注意事项（Spark Lite 免费；服务条款限制代理/中继用途）。
-- **Gemini**——`2.0 Flash` / `2.0 Flash-Lite` 于 2026-06-01 停用，`2.5 Pro` 于 2026-04 退出免费层级；目前免费层级**仅包含 Flash 系列**（2.5/3/3.1/3.5 Flash + Gemma）。目录现在会**合并计算** Flash 系列（此前分别计算每个变体，导致数据虚高：462M → 60M）。
-- **已修正的数据：** `cloudflare-ai` 122M → **30M**（实际为每天 10k Neurons）、`doubao` 被重新归类为一次性注册额度（并非周期性额度）、`llm7` 4M → **150M**（文档注明每天 5M tokens）、`together` 的“-Free”端点已停止提供 → $25 注册额度也已移除（要求最低购买 $5，无免费试用）、`longcat` Preview 已结束且 Flash 模型已退役 → 仅保留 **LongCat-2.0**，并重新归类为一次性 **10M**-token 注册额度（需通过 KYC，并非周期性额度）。
-- **新发现的免费提供者：** ⭐ **Kilo Code**（`kilo-gateway`——轮换的“Auto Free”集合：NVIDIA Nemotron 3 系列、StepFun、Poolside、Nex-N2-Pro）、⭐ **OpenCode Zen**（`opencode-zen`——10 个轮换的免费编程模型，已于 2026-10-20 更新）、⭐ **Z.AI / Zhipu**（`glm-cn`——GLM-4-Flash / 4.5-Flash / 4.7-Flash 永久免费 + 20M 注册奖励），以及 `arcee-ai` Trinity Large Preview。
-- **新的如实分类层级**（参见“方法论”）：一个_永久免费但无明确上限_的类别（提供真正的周期性访问权限，但没有可计入的 token 上限），以及一个_充值解锁增益_（OpenRouter $10 → 每月额外 +24M）；两者均**单独**展示，因此绝不会虚增核心统计数据。
+- **已移除 / 无免费套餐(2026 年):** `chutes`(免费套餐于 2026-03 终止)、`phind`(公司于 2026-01 倒闭)、`kluster`(2026-06-09 停止服务 → MITO)、`gitlawb` + `gitlawb-gmi`(MiMo 免费额度于 2026-05-24 被撤销,Nemotron 促销活动于 2026-06 结束 —— 已于 2026-06-18 重新核实)、`aimlapi`(免费套餐已暂停 —— 已于 2026-06-18 重新核实)、`yi`(Yi-Light 已下线,转为按量付费 —— 已于 2026-06-18 重新核实)、`featherless-ai`(当前无免费套餐)、`chipotle`(Chipotle 的 "Pepper AI" —— 该提供者所对接的、通过逆向工程接入的 `amelia.chipotle.com` Amelia 聊天组件,现在所有路由(包括根路径)均返回 404;后端已停用/迁移,确认于 2026-09-15 —— 已从目录中完全移除,#13131/#4037)。`iflytek` / `sparkdesk` 仍保留在列表中,但附有服务条款(ToS)警示说明(Spark Lite 免费;但其 ToS 限制代理/中转使用)。
+- **Gemini** —— `2.0 Flash` / `2.0 Flash-Lite` 于 2026-06-01 停服,`2.5 Pro` 退出了免费套餐(2026-04);免费套餐现在**仅限 Flash 系列**(2.5/3/3.1/3.5 Flash + Gemma)。目录现在将 Flash 系列**合并计算**(此前按各变体分别计数导致数字虚高:462M → 60M)。
+- **数字修正:** `cloudflare-ai` 122M → **30M**(实际为每天 1 万 Neurons)、`doubao` 重新归类为一次性注册赠额(非周期性)、`llm7` 4M → **150M**(文档记载为每天 5M tokens)、`together` "-Free" 端点已停用 → 25 美元注册赠额也一并移除(需最低充值 5 美元,无免费试用)、`longcat` Preview 已结束 + Flash 模型已下线 → 仅剩 **LongCat-2.0**,重新归类为一次性 **10M** token 注册赠额(需 KYC 验证,非周期性)。
+- **Poolside 直连推理服务即将终止(核实于 2026-10-20):** [官方平台](https://platform.poolside.ai/)宣布将于 **2026-10-31** 关停,并引导用户从 Hugging Face 下载其模型进行自托管。直连的 `poolside` 提供者已附上此警告。人工维护的免费目录中没有 Poolside 直连条目;其中以 Poolside 命名的条目均属于 `kilo-gateway`。该公告并不能确定 Kilo、Cline、NVIDIA 或其他网关所提供模型的可用性,因此这些条目不会据此被移除。
+- **新发现的免费提供者:** ⭐ **Kilo Code**(`kilo-gateway` —— 轮换的 "Auto Free" 模型集:NVIDIA Nemotron 3 系列、StepFun、Poolside、Nex-N2-Pro)、⭐ **OpenCode Zen**(`opencode-zen` —— 10 个轮换的免费编程模型,刷新于 2026-10-20)、⭐ **Z.AI / Zhipu**(`glm-cn` —— GLM-4-Flash / 4.5-Flash / 4.7-Flash 永久免费 + 20M 注册奖励),以及 `arcee-ai` Trinity Large Preview。
+- **新增的诚实分级**(参见方法论):一个_永久免费但无上限_类别(真实的周期性访问,没有可统计的 token 上限)和一个_充值解锁加成_(OpenRouter 充值 10 美元 → 每月 +24M),两者均**单独**展示,绝不会虚增头条数字。
 
-> 下方详细的逐提供者表格是 **2026-06-05 快照**；上述变更优先于该快照。当前有效的权威来源是逐模型目录 `open-sse/config/freeModelCatalog.ts`。
+> 下文中详细的按提供者表格是 **2026-06-05 快照**;以上述变更内容为准。实时的权威数据源是按模型划分的目录 `open-sse/config/freeModelCatalog.ts`。
 
 ---
 

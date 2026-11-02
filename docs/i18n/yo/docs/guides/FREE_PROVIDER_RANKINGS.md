@@ -11,31 +11,19 @@
 
 ---
 
-## Ohun Tó Jẹ́
+## Kini O Jẹ
 
-OmniRoute forúkọsilẹ̀ àwọn olùpèsè 376, pẹ̀lú àwọn ìkọsílẹ̀ kátálógì 155 tí a fìdí **ọ́fẹ́/no-auth**
-mọ́lẹ̀ (no-auth, OAuth ìpele-ọ̀fẹ́, tàbí kìlé API ìpele-ọ̀fẹ́ — wo
-[Ìtọ́nisọ́nà Àwọn Ìpele Ọ̀fẹ́](../getting-started/FREE-TIERS-GUIDE.md) àti
-[àkópọ̀ Àwọn Ìpele Ọ̀fẹ́](../reference/FREE_TIERS.md) kíkún). Kókó ọ̀rọ̀ rẹ̀ ni: àwọn olùpèsè ọ̀fẹ́
-yàtọ̀ síra nínú didára awoṣe. Olùpèsè no-auth kan tó ń pèsè awoṣe ìwájú wúlò jù ẹ̀yìn tó ń pèsè
-awoṣe àtijọ́ kékeré lọ.
+OmniRoute forukọsilẹ awọn olupese 377, pẹlu awọn titẹ sii katalogi 155 ti samisi**free/no-auth** (ko si-auth, OAuth-ọfẹ, tabi bọtini API ipele-ọfẹ — wo [Itọsọna Tiers Ọfẹ](../getting-started/FREE-TIERS-GUIDE.md) ati [itọsọna Awọn ipele Ọfẹ](../reference/FREE_TIERS.md) ni kikun). Awọn apeja: awọn olupese ọfẹ yatọ pupọ ni didara awoṣe. Olupese ti kii ṣe iwe-aṣẹ ti n ṣiṣẹ awoṣe aala jẹ iwulo pupọ diẹ sii ju ọkan ti n ṣiṣẹ awoṣe injogun kekere kan.
 
-**Àwọn Ipò Olùpèsè Ọ̀fẹ́** dáhùn ìbéèrè "**olùpèsè ọ̀fẹ́ wo ló ń fún mi ní awoṣe tó dára jù?**" nípa
-dídarapọ̀ kátálógì olùpèsè ọ̀fẹ́ kọ̀ọ̀kan pẹ̀lú **àwọn kóòsì didára tí ọ̀pọ̀ ènìyàn pèsè** láti
-**tábìlì-ipò Arena AI** (ELO ìfẹ́ran ènìyàn, èròjà kannáà tó wà lẹ́yìn àyíká chatbot LMArena). Lẹ́yìn
-náà ni a fi àwọn olùpèsè pamọ́ gẹ́gẹ́ bí agbára **awoṣe ọ̀fẹ́ tó dára jù** wọn ṣe rí.
+**Awọn ipo Olupese Ọfẹ** idahun"** eyi ti free olupese yoo fun mi ti o dara ju awoṣe?** "nipa didapọ mọ katalogi olupese ọfẹ kọọkan pẹlu** enia-orisun didara ikun** lati awọn** Arena AI olori** (eniyan-ààyò ELO, kanna agutan sile LMArena chatbot arena). Awọn olupese lẹhinna wa ni ipo nipasẹ agbara ti wọn** ti o dara ju free awoṣe** .
 
-A ṣe ìṣirò ipò náà láti orísun tòótọ́ mẹ́ta:
+A ṣe iṣiro ipo naa lati awọn orisun gidi mẹta:
 
-1. Àwọn àtòjọ olùpèsè ọ̀fẹ́ — `NOAUTH_PROVIDERS`, àti àwọn ìkọsílẹ̀ `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` tí a fi àmì `hasFree` mọ́lẹ̀
-   (`src/shared/constants/providers.ts`).
-2. Kátálógì àwọn awoṣe olùpèsè kọ̀ọ̀kan láti ìforúkọsilẹ̀ olùpèsè
-   (`open-sse/config/providerRegistry.ts`).
-3. Àwọn kóòsì ìbámu-iṣẹ́ tí a yọ láti ELO tí a pamọ́ sínú tábìlì DB `model_intelligence` nípasẹ
-   ẹ̀rọ ìṣàmuromísi Arena ELO (`src/lib/arenaEloSync.ts`).
+1. Awọn atokọ Olupese ọfẹ - `NOAUTH_PROVIDERS`, pẹlu awọn titẹ sii `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` ti asia ti `hasFree` (`src/shared/constants/providers.ts`).
+2. Katalogi awoṣe olupese kọọkan lati iforukọsilẹ olupese (`open-sse/config/providerRegistry.ts`).
+3. Awọn ikun ibamu-ṣiṣe-ṣiṣe ti ELO ti a fipamọ sinu tabili `model_intelligence` DB nipasẹ ẹrọ amuṣiṣẹpọ Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Ògíjọ́ dídarapọ̀ náà wà nínú `src/lib/freeProviderRankings.ts`.
+Imọye idapọmọra n gbe ni `src/lib/freeProviderRankings.ts`.
 
 ---
 

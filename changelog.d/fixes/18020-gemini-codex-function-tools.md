@@ -1,0 +1,1 @@
+- **fix(providers):** Gemini requests with native `web_search` now retain caller function tools; native search remains available when no function declarations are present, and is dropped (with a warning log) when function declarations are present.
