@@ -29,6 +29,7 @@ import {
 // the watchdog must track upstream byte activity instead. Ported from
 // decolua/9router#1243.
 const DEFAULT_STREAM_STALL_TIMEOUT_MS = STREAM_IDLE_TIMEOUT_MS;
+const SSE_EVENT_BOUNDARY = new TextEncoder().encode("\n\n");
 
 type StreamController = ReturnType<typeof createStreamController>;
 
@@ -729,8 +730,7 @@ export function createDisconnectAwareStream(
               );
               try {
                 // Isolate generated failure from any unfinished provider data.
-                if (!terminalWatcher.atBoundary())
-                  controller.enqueue(new TextEncoder().encode("\n\n"));
+                if (!terminalWatcher.atBoundary()) controller.enqueue(SSE_EVENT_BOUNDARY);
                 for (const chunk of buildStreamErrorChunks(
                   silentClose.reason,
                   502,
@@ -786,7 +786,7 @@ export function createDisconnectAwareStream(
           const statusCode = getErrorStatusCode(error);
 
           try {
-            if (!terminalWatcher.atBoundary()) controller.enqueue(new TextEncoder().encode("\n\n"));
+            if (!terminalWatcher.atBoundary()) controller.enqueue(SSE_EVENT_BOUNDARY);
             for (const chunk of buildStreamErrorChunks(
               errorMsg,
               statusCode,

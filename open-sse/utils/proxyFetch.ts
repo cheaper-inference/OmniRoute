@@ -386,6 +386,53 @@ function isAmbiguousFailureReplaySafe(
   );
 }
 
+// Transport errors raised while still connecting: no request byte left this host, so a resend
+// cannot deliver the request twice, whatever the method. ETIMEDOUT stays out because it can also
+// fire on an established socket after the body was written.
+const PRE_SEND_ERROR_CODES = new Set([
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ENETUNREACH",
+  "UND_ERR_CONNECT_TIMEOUT",
+]);
+
+function isPreSendConnectionError(error: unknown): boolean {
+  let current = error;
+  for (let depth = 0; depth < 4 && current && typeof current === "object"; depth++) {
+    const { code, cause } = current as { code?: unknown; cause?: unknown };
+    if (typeof code === "string" && PRE_SEND_ERROR_CODES.has(code)) return true;
+    current = cause;
+  }
+  return false;
+}
+
+function isStrictPostReplayEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("PROXY_STRICT_POST_REPLAY_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy resend policy
+    return false;
+  }
+}
+
+/**
+ * Whether this transport error allows another delivery attempt (fresh socket, proxy fallback or
+ * native fallback). A consumed body can never be resent. With PROXY_STRICT_POST_REPLAY_ENABLED on
+ * (default off), a non-idempotent request also needs proof that nothing was sent: a socket error
+ * after the write can mean the upstream accepted the request, and a resend generates and bills it
+ * twice. Off, a replayable body is resent, which is what recovers a stale pooled socket (#4252).
+ */
+function canResendAfterTransportError(
+  input: RequestInfo | URL,
+  options: FetchWithDispatcherOptions,
+  error: unknown
+): boolean {
+  if (requestHasNonReplayableBody(input, options)) return false;
+  if (!isStrictPostReplayEnabled()) return true;
+  return isAmbiguousFailureReplaySafe(input, options) || isPreSendConnectionError(error);
+}
+
 function getEffectiveSignal(
   input: RequestInfo | URL,
   options: FetchWithDispatcherOptions
@@ -787,10 +834,9 @@ async function patchedFetchUnrecorded(
     // Direct undici path: bound response-start, fresh-socket retry, and body guard.
     const directOptions = { ...options, signal: getEffectiveSignal(input, options) };
     const hasNonReplayableBody = requestHasNonReplayableBody(input, options);
-    // A transport error can arrive after the origin accepted the whole body.
-    // Replayable bytes alone do not make a generation request safe to resend.
-    const canReplayAmbiguousFailure = isAmbiguousFailureReplaySafe(input, options);
-    const maxAttempts = canReplayAmbiguousFailure ? 2 : 1;
+    // Method gating covers response-start ambiguity; connection-error retries remain below.
+    const canReplayResponseStartTimeout = isAmbiguousFailureReplaySafe(input, options);
+    const maxAttempts = hasNonReplayableBody ? 1 : 2;
     const _undiciDirect =
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
     const _nativeFallback =
@@ -833,12 +879,12 @@ async function patchedFetchUnrecorded(
                 : getRetryDispatcher(hostnameForDispatcher),
           },
           _undiciDirect,
-          timeoutFor(attempt === 0 && canReplayAmbiguousFailure ? 0 : 1)
+          timeoutFor(attempt === 0 && canReplayResponseStartTimeout ? 0 : 1)
         );
       } catch (dispatcherError) {
         if (isCallerAbort(dispatcherError, directOptions.signal)) throw dispatcherError;
         if (isDirectResponseStartTimeout(dispatcherError)) {
-          if (attempt === 0 && maxAttempts > 1 && canReplayAmbiguousFailure) {
+          if (attempt === 0 && maxAttempts > 1 && canReplayResponseStartTimeout) {
             console.warn(
               `[ProxyFetch] Direct response-start timeout (${timeoutFor(0)}ms) on pooled dispatcher — retrying on fresh no-keep-alive dispatcher: ${targetHostForLogs}`
             );
@@ -855,6 +901,8 @@ async function patchedFetchUnrecorded(
           );
           throw dispatcherError;
         }
+        // Read before tagging: the tag overwrites the transport code the policy reads.
+        const canResend = canResendAfterTransportError(input, options, dispatcherError);
         // Retry/fallback only for connection errors, never HTTP errors.
         tagProxyUnreachable(dispatcherError);
         const errCode = (dispatcherError as { code?: unknown })?.code;
@@ -871,20 +919,21 @@ async function patchedFetchUnrecorded(
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR")
         ) {
-          if (attempt === 0 && maxAttempts > 1) {
+          if (attempt === 0 && canResend) {
             // Retry after a short fixed backoff on a fresh socket.
             lastDispatcherError = dispatcherError;
             await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
             continue;
           }
-          if (!canReplayAmbiguousFailure) {
+          if (!canResend) {
+            const reason = hasNonReplayableBody
+              ? "non-replayable request body"
+              : "request may already have been delivered";
             const detail = describeFallbackFailure(
               describeFetchCause(dispatcherError),
-              hasNonReplayableBody
-                ? "skipped: non-replayable request body"
-                : "skipped: request method is not safe to replay"
+              `skipped: ${reason}`
             );
-            console.warn(`[ProxyFetch] skipping unsafe native fetch fallback: ${detail}`);
+            console.warn(`[ProxyFetch] skipping native fetch fallback, ${reason}: ${detail}`);
             if (dispatcherError instanceof Error) {
               (dispatcherError as Error & { proxyFetchDetail?: string }).proxyFetchDetail = detail;
             }
@@ -991,7 +1040,8 @@ async function patchedFetchUnrecorded(
     // connections again.
     const _undiciRelay =
       deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
-    const maxRelayAttempts = isAmbiguousFailureReplaySafe(input, options) ? 2 : 1;
+    const hasNonReplayableRelayBody = requestHasNonReplayableBody(input, options);
+    const maxRelayAttempts = hasNonReplayableRelayBody ? 1 : 2;
     const relayUrl = `https://${vc.host}`;
     let lastRelayError: unknown = null;
     for (let attempt = 0; attempt < maxRelayAttempts; attempt++) {
@@ -1038,7 +1088,12 @@ async function patchedFetchUnrecorded(
           msg.includes("ECONNREFUSED") ||
           (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
           msg.includes("UND_ERR");
-        if (attempt === 0 && maxRelayAttempts > 1 && isTransportFailure) {
+        if (
+          attempt === 0 &&
+          maxRelayAttempts > 1 &&
+          isTransportFailure &&
+          canResendAfterTransportError(input, options, relayError)
+        ) {
           lastRelayError = relayError;
           // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
           // FRESH no-keep-alive RELAY_RETRY_AGENT (connections: 1, keepAliveTimeout:
@@ -1109,7 +1164,8 @@ async function patchedFetchUnrecorded(
   // of killing all idle sockets after 1ms or surfacing a bare 502.
   const _undiciProxy =
     deps.undiciFetch ?? (undiciFetch as unknown as (...args: unknown[]) => Promise<Response>);
-  const maxProxyAttempts = isAmbiguousFailureReplaySafe(input, options) ? 2 : 1;
+  const hasNonReplayableProxyBody = requestHasNonReplayableBody(input, options);
+  const maxProxyAttempts = hasNonReplayableProxyBody ? 1 : 2;
   let lastProxyError: unknown = null;
   for (let attempt = 0; attempt < maxProxyAttempts; attempt++) {
     try {
@@ -1130,7 +1186,12 @@ async function patchedFetchUnrecorded(
         msg.includes("ECONNREFUSED") ||
         (typeof errCode === "string" && errCode.startsWith("UND_ERR")) ||
         msg.includes("UND_ERR");
-      if (attempt === 0 && maxProxyAttempts > 1 && isTransportFailure) {
+      if (
+        attempt === 0 &&
+        maxProxyAttempts > 1 &&
+        isTransportFailure &&
+        canResendAfterTransportError(input, options, error)
+      ) {
         lastProxyError = error;
         // #9158: fixed OMNIROUTE_RETRY_BACKOFF_MS backoff — the retry uses a
         // fresh no-keep-alive dispatcher (getProxyRetryDispatcher), so the old

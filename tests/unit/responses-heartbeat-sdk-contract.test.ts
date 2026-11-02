@@ -6,6 +6,12 @@ import {
   type HeartbeatShape,
 } from "../../open-sse/utils/sseHeartbeat.ts";
 
+// The blank-line keepalive these tests pin is opt-in (default: response.in_progress).
+process.env.RESPONSES_TRANSPORT_KEEPALIVE_ENABLED = "true";
+test.after(() => {
+  delete process.env.RESPONSES_TRANSPORT_KEEPALIVE_ENABLED;
+});
+
 type Packet = Record<string, unknown>;
 const frame = (packet: Packet) => `data: ${JSON.stringify(packet)}\n\n`;
 const encode = (text: string) => new TextEncoder().encode(text);

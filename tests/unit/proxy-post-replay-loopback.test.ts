@@ -6,7 +6,13 @@ import proxyFetch, { runWithProxyContext } from "../../open-sse/utils/proxyFetch
 import { clearDispatcherCache } from "../../open-sse/utils/proxyDispatcher.ts";
 import { resetDbInstance } from "../../src/lib/db/core.ts";
 
-test.after(() => resetDbInstance());
+// The accepted-generation guarantee below is the opt-in strict policy.
+const STRICT_FLAG = "PROXY_STRICT_POST_REPLAY_ENABLED";
+process.env[STRICT_FLAG] = "true";
+test.after(() => {
+  delete process.env[STRICT_FLAG];
+  resetDbInstance();
+});
 
 type ObservedRequest = { method: string; body: string };
 async function withProxy<T>(

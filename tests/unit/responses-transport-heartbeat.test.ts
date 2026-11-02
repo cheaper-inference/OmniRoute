@@ -3,6 +3,12 @@ import test from "node:test";
 import OpenAI from "openai";
 import { createSseHeartbeatTransform } from "../../open-sse/utils/sseHeartbeat.ts";
 
+// The blank-line keepalive these tests pin is opt-in (default: response.in_progress).
+process.env.RESPONSES_TRANSPORT_KEEPALIVE_ENABLED = "true";
+test.after(() => {
+  delete process.env.RESPONSES_TRANSPORT_KEEPALIVE_ENABLED;
+});
+
 const response = {
   id: "resp_heartbeat_owned_by_upstream",
   object: "response",

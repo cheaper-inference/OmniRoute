@@ -5,7 +5,11 @@
  * @changes
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
-import { buildResponsesInProgressPayload } from "./responsesKeepaliveFrame.ts";
+import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  buildResponsesInProgressPayload,
+  createResponsesInProgressTracker,
+} from "./responsesKeepaliveFrame.ts";
 
 const HEARTBEAT_ENCODER = new TextEncoder();
 // #14330 / #15202 / #17825: the keepalive must be a complete, spec-valid Responses event
@@ -17,7 +21,22 @@ export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
 /** Transport liveness without inventing a response identity or lifecycle event. */
 export const RESPONSES_KEEPALIVE_FRAME = HEARTBEAT_ENCODER.encode("\n\n");
 
-/** Legacy application-event frame. Timers must use RESPONSES_KEEPALIVE_FRAME instead. */
+/**
+ * Responses keepalive shape (RESPONSES_TRANSPORT_KEEPALIVE_ENABLED, default off). Off, timers send
+ * the spec-valid response.in_progress event, as they always did. On, they send only a blank line,
+ * which a synthetic snapshot cannot replace in the official SDK, but which also dispatches no SSE
+ * event, so a client watchdog that resets only on events would not be reset.
+ */
+export function isResponsesTransportKeepaliveEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("RESPONSES_TRANSPORT_KEEPALIVE_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the response.in_progress keepalive
+    return false;
+  }
+}
+
+/** Shared Responses API heartbeat frame for early and mid-stream keepalives. */
 export const OPENAI_RESPONSES_IN_PROGRESS_FRAME = HEARTBEAT_ENCODER.encode(
   OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD
 );
@@ -50,15 +69,13 @@ export function shapeForClientFormat(
 
 function buildHeartbeatPayload(
   shape: HeartbeatShape,
-  opts: { chunkId?: string; chunkModel?: string } = {}
+  opts: { chunkId?: string; chunkModel?: string; responsesPayload?: () => string } = {}
 ): string {
   switch (shape) {
     case HEARTBEAT_SHAPES.ANTHROPIC_PING:
       return 'event: ping\ndata: {"type":"ping"}\n\n';
     case HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS:
-      // A synthetic snapshot can replace the official SDK's real response,
-      // including completed output. Empty SSE lines dispatch no application event.
-      return "\n\n";
+      return opts.responsesPayload?.() ?? OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD;
     case HEARTBEAT_SHAPES.OPENAI_CHUNK: {
       const payload = {
         id: opts.chunkId ?? "chatcmpl-keepalive",
@@ -119,6 +136,10 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
+  const isResponsesShape = shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
+  const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
+  const responsesTracker =
+    isResponsesShape && !transportOnly ? createResponsesInProgressTracker() : null;
   let atEventBoundary = true;
   let lineHasBytes = false;
   let pendingCR = false;
@@ -158,7 +179,17 @@ export function createSseHeartbeatTransform({
         if (!atEventBoundary) return;
         try {
           controller.enqueue(
-            HEARTBEAT_ENCODER.encode(buildHeartbeatPayload(shape, { chunkId, chunkModel }))
+            transportOnly
+              ? RESPONSES_KEEPALIVE_FRAME
+              : HEARTBEAT_ENCODER.encode(
+                  buildHeartbeatPayload(shape, {
+                    chunkId,
+                    chunkModel,
+                    responsesPayload: responsesTracker
+                      ? () => responsesTracker.payload()
+                      : undefined,
+                  })
+                )
           );
         } catch {
           stop();
@@ -174,6 +205,7 @@ export function createSseHeartbeatTransform({
 
     transform(chunk, controller) {
       noteFraming(chunk);
+      responsesTracker?.observe(chunk);
       controller.enqueue(chunk);
     },
 
