@@ -38,6 +38,7 @@ function bootHarness({
   failSweeper = false,
   persistSuccess = true,
   failDb = false,
+  failPrefixScan = false,
   connectionProvider = "grok-bot",
   missingConnection = false,
   leased = false,
@@ -146,6 +147,12 @@ function bootHarness({
   });
   add("@/lib/db/combos", { getCombos: () => [] });
   add("@/lib/combos/modelNameCollision", { scanCombosForModelCollisions: () => [] });
+  add("@/lib/providers/providerPrefixCollision", {
+    warnProviderPrefixCollisionsAtBoot: async () => {
+      events.push("prefix-scanned");
+      if (failPrefixScan) throw new Error("prefix scan unavailable");
+    },
+  });
   add("@/lib/admissionVirtualLanes", { warmAdaptiveVirtualLanesIntoRuntime: noop });
   add("@/lib/db/settings", { getSettings: () => settings });
   add("@/lib/config/runtimeSettings", { applyRuntimeSettings: () => [] });
@@ -161,6 +168,9 @@ function bootHarness({
   });
   add("@/lib/modelAliasSeed", {
     seedDefaultModelAliases: () => ({ applied: [], skipped: [], removed: [], failed: [] }),
+  });
+  add("@/lib/env/backgroundServices", {
+    isBackgroundServicesDisabled: () => disabled,
   });
   add("@omniroute/open-sse/config/cliVersions.ts", {
     hydrateCliVersionOverrides: (value: unknown) => {
@@ -246,9 +256,12 @@ test("Grok cleanup waits for DB readiness and preserves release CLI/quota boot",
   const h = bootHarness();
   const { boot } = await reachDb(h);
   assert.ok(!h.events.includes("sweeper"), "must not start cleanup while DB is pending");
+  assert.ok(!h.events.includes("prefix-scanned"), "must not scan prefixes while DB is pending");
   h.releaseDb();
   await boot;
   assert.ok(h.events.indexOf("db-ready") < h.events.indexOf("sweeper"));
+  assert.equal(h.events.filter((event) => event === "prefix-scanned").length, 1);
+  assert.ok(h.events.indexOf("db-ready") < h.events.indexOf("prefix-scanned"));
   assert.ok(h.events.includes("cli-hydrated"));
   assert.ok(h.events.includes("quota-recovery"));
   assert.equal(h.events.at(-1), "ready");
@@ -262,9 +275,24 @@ test("disabled background services skip Grok and quota recovery, not CLI hydrati
   await boot;
   assert.ok(!h.events.includes("sweeper"));
   assert.ok(!h.events.includes("quota-recovery"));
+  assert.equal(h.events.filter((event) => event === "prefix-scanned").length, 1);
   assert.ok(h.events.includes("cli-hydrated"));
   assert.equal(h.events.at(-1), "ready");
   assert.deepEqual(h.warnings, []);
+});
+
+test("provider-prefix scan failure warns without blocking remaining boot work", async () => {
+  const h = bootHarness({ failPrefixScan: true });
+  const { boot } = await reachDb(h);
+  h.releaseDb();
+  await boot;
+  assert.equal(h.events.filter((event) => event === "prefix-scanned").length, 1);
+  assert.ok(h.events.includes("cli-hydrated"));
+  assert.ok(h.events.includes("quota-recovery"));
+  assert.equal(h.events.at(-1), "ready");
+  assert.deepEqual(h.warnings, [
+    ["[STARTUP] Could not scan provider-prefix collisions (non-fatal)."],
+  ]);
 });
 
 test("Grok startup failure remains non-fatal", async () => {
@@ -368,6 +396,7 @@ test("fatal DB initialization prevents Grok startup and server readiness", async
   h.releaseDb();
   await assert.rejects(boot, /driver unavailable/);
   assert.ok(!h.events.includes("sweeper"));
+  assert.ok(!h.events.includes("prefix-scanned"));
   assert.ok(!h.events.includes("ready"));
   assert.equal(h.warnings.length, 1);
 });
