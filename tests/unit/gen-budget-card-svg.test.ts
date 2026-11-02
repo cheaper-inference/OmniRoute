@@ -7,6 +7,13 @@ import test from "node:test";
 
 import { computeFreeModelTotals } from "@omniroute/open-sse/config/freeModelCatalog.ts";
 
+import {
+  buildBudgetCardCopy,
+  renderBudgetCard,
+} from "../../scripts/research/gen-budget-card-svg.mjs";
+
+const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
 const fmt = (n: number) => (n >= 1e9 ? (n / 1e9).toFixed(2) + "B" : Math.round(n / 1e6) + "M");
 
 test(
@@ -75,3 +82,41 @@ test(
     );
   }
 );
+
+test("the card embeds the four kit faces and nothing external", async () => {
+  const svg = await renderBudgetCard();
+  // display (title, stat figures) + ui + uiBold + mono.
+  assert.equal((svg.match(/@font-face/g) || []).length, 4);
+  for (const family of ["CI Serif", "CI Sans", "CI Mono"]) {
+    assert.ok(svg.includes(`font-family:"${family}"`), family);
+  }
+  assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
+  assert.match(svg, /^<svg viewBox="0 0 1200 \d+" [^>]*role="img"/);
+  assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
+});
+
+test("every drawn string is part of the subset input (no missing glyphs)", async () => {
+  const svg = await renderBudgetCard();
+  for (const s of Object.values(buildBudgetCardCopy()).flat()) {
+    assert.ok(svg.includes(esc(s as string)), `string not drawn: ${s}`);
+  }
+});
+
+test("the figures stay readable as <text> in the raw file", async () => {
+  const svg = await renderBudgetCard();
+  const t = computeFreeModelTotals();
+  const text = (s: string) =>
+    new RegExp(`<text [^>]*>${s.replace(/[.*+?^$\{\}()|[\]\\]/g, "\\$&")}</text>`);
+  assert.match(svg, text(`~${fmt(t.steadyRecurringTokens)}`));
+  assert.match(svg, text(`~${fmt(t.firstMonthRealisticTokens)}`));
+  assert.match(svg, text(buildBudgetCardCopy().meta[0]));
+  assert.doesNotMatch(svg, /<image/);
+});
+
+test("light and dark palettes are both declared and no literal color escapes the theme", async () => {
+  const svg = await renderBudgetCard();
+  assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
+  assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  const body = svg.slice(svg.indexOf("</style>"));
+  assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
+});
