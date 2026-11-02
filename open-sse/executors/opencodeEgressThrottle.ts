@@ -846,12 +846,18 @@ export function _setSuspectRandForTest(rand: (() => number) | null): void {
 export function lastResort429<A extends RotatableAccount>(
   accounts: A[],
   cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
-  ...args: (Set<string> | string)[]
+  ...refusedHere: Set<string>[]
 ) {
-  // The trailing string (when present) is the model, not another refused-keys set.
-  const tail = args[args.length - 1];
-  const refusedHere = (typeof tail === "string" ? args.slice(0, -1) : args) as Set<string>[];
-  const model = typeof tail === "string" ? tail : undefined;
+  return lastResort429ForModel(undefined, accounts, cursor, ...refusedHere);
+}
+
+/** {@link lastResort429} for a request whose quota refusals are scoped to `model`. */
+export function lastResort429ForModel<A extends RotatableAccount>(
+  model: string | null | undefined,
+  accounts: A[],
+  cursor: { nextAccountIdx: number; lastHealthyFingerprint?: string },
+  ...refusedHere: Set<string>[]
+) {
   let spent = false;
   const isOpen = (account: A): boolean => {
     const key = proxyKeyOf(account.proxy);

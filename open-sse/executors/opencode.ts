@@ -114,6 +114,7 @@ import { isProxyAvoided } from "../utils/proxyRefusalMemory.ts";
 import * as egressPacing from "./opencodeEgressThrottle.ts";
 import {
   isNetworkRotationSharedEgressGuardEnabled,
+  isProxyRefusalModelScopeEnabled,
   isProxySkipRecentlyFailedEnabled,
   isRotationAttributionEnabled,
   isOpencodeUserBlockedRotationEnabled,
@@ -971,15 +972,17 @@ export class OpencodeExecutor extends BaseExecutor {
       // through the accounts is the retry). Avoids an unbounded loop on a
       // persistently malformed upstream.
       const emptyRejectionBudget = accounts.length === 1 ? 1 : 0;
+      // Opt-in: off, nothing below names a model and quota refusals cover the whole egress.
+      const refusalModel = isProxyRefusalModelScopeEnabled() ? input.model : undefined;
       // Request-local: geo/transient + 429 no-replay keys, one last resort after a 429.
       const geoTriedProxyKeys = new Set<string>(),
         rateLimitedProxyKeys = new Set<string>(),
-        spare = egressPacing.lastResort429(
+        spare = egressPacing.lastResort429ForModel(
+          refusalModel,
           accounts,
           this,
           geoTriedProxyKeys,
-          rateLimitedProxyKeys,
-          input.model
+          rateLimitedProxyKeys
         );
       // (PROXY_SKIP_RECENTLY_FAILED, default on): members the provider just refused
       // (received refusal or refused TCP probe) are skipped. =false = plain rotation.
@@ -1029,7 +1032,7 @@ export class OpencodeExecutor extends BaseExecutor {
       const appliedEgress = egressPacing.createAppliedEgressTracker(
         this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
         resolveProxyForRequest,
-        input.model
+        refusalModel
       );
       const { readAppliedKey, keyOfMember, noteRefused } = appliedEgress;
 
@@ -1041,15 +1044,16 @@ export class OpencodeExecutor extends BaseExecutor {
           // stays eligible (preserves the plain round-robin first pick).
           const memberKey = keyOfMember(a);
           if (a.proxy === null) {
-            if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, input.model))
+            if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, refusalModel))
               return false;
             return !directTried || geoTriedProxyKeys.size === 0;
           }
-          if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, input.model)) return false;
+          if (skipRecentlyFailed && isProxyAvoided(memberKey, undefined, refusalModel))
+            return false;
           const k = proxyKeyOf(a.proxy);
           return k !== null && !geoTriedProxyKeys.has(k) && !rateLimitedProxyKeys.has(k);
         };
-        let account = this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, input.model);
+        let account = this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, refusalModel);
         if (attributionOn) {
           const nowMs = Date.now();
           for (const a of accounts) {
@@ -1147,7 +1151,7 @@ export class OpencodeExecutor extends BaseExecutor {
           requestPacing,
           account,
           isProxiedCandidate,
-          () => this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, input.model),
+          () => this.pickAccountWith(accounts, isProxiedCandidate, keyOfMember, refusalModel),
           input.signal,
           readAppliedKey
         );
@@ -1313,7 +1317,7 @@ export class OpencodeExecutor extends BaseExecutor {
                   {
                     execute: (i: ExecuteInput) =>
                       super.execute(i) as Promise<ExecutorExecuteResult & { response: Response }>,
-                    markSuccess: (a: ScopedAccount) => markSuccess(a, input.model),
+                    markSuccess: (a: ScopedAccount) => markSuccess(a, refusalModel),
                     sleep: parkSleepCounting,
                     accounts,
                     replayKeyOfMember: keyOfMember,
@@ -1470,7 +1474,7 @@ export class OpencodeExecutor extends BaseExecutor {
                     runWithProxyContext(account.proxy, () =>
                       super.execute({ ...retryInput, skipUpstreamRetry: true })
                     ) as Promise<HttpExecuteResult>,
-                  noteServed: (a) => noteResponseServed(a as typeof account, input.model),
+                  noteServed: (a) => noteResponseServed(a as typeof account, refusalModel),
                 }
               );
             }
@@ -1501,7 +1505,7 @@ export class OpencodeExecutor extends BaseExecutor {
             }
             // A 400 carrying a real error (or non-empty content): propagate
             // immediately, untouched — same as before this change.
-            markOutcome(account, result.response, input.model);
+            markOutcome(account, result.response, refusalModel);
             if (attributionOn && skippedCooldown.size > 0) {
               this.logSkippedCooldownAccounts(log, cid, skippedCooldown);
             }
@@ -1509,7 +1513,7 @@ export class OpencodeExecutor extends BaseExecutor {
           }
 
           egressPacing.observePacingSuccess(requestPacing, result.response.ok);
-          markOutcome(account, result.response, input.model);
+          markOutcome(account, result.response, refusalModel);
           if (attributionOn && skippedCooldown.size > 0) {
             this.logSkippedCooldownAccounts(log, cid, skippedCooldown);
           }

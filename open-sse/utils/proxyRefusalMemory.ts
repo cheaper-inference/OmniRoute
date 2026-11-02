@@ -223,12 +223,18 @@ export function proxyEgressKey(proxy: unknown): string | null {
   }
 }
 
-// The model dimension is optional: when the caller knows which model just
-// failed it is appended, so one model's quota 429 does not set aside the
-// whole egress for every other model. When it is absent the key is
-// byte-identical to the model-less form (exact fallback).
+// The model dimension is optional and only the quota kind has one: when the caller knows
+// which model just hit a quota 429 it is appended, so one model's refusal does not set
+// aside the whole egress for every other model. Egress-health kinds always stay model-less.
+// NUL cannot occur in an egress key or a model id, so a scoped id never aliases another.
+// When the model is absent the id is byte-identical to the model-less form.
+const MODEL_SCOPED_KIND: ProxyRefusalKind = "ip_quota_429";
+const MODEL_SEPARATOR = "\u0000";
+
 function entryId(key: string, kind: ProxyRefusalKind, model?: string | null): string {
-  return model ? `${kind} ${key} ${model}` : `${kind} ${key}`;
+  return model && kind === MODEL_SCOPED_KIND
+    ? `${kind} ${key}${MODEL_SEPARATOR}${model}`
+    : `${kind} ${key}`;
 }
 
 /**
@@ -273,6 +279,7 @@ function insertState(
   const id = entryId(key, kind, model);
   memory.delete(id);
   memory.set(id, { streak, until: nowMs + periodMs, seq: ++store.seq.value });
+  if (model && kind === MODEL_SCOPED_KIND) store.modelScopedSeen = true;
   if (memory.size > MAX_ENTRIES) {
     const oldest = memory.keys().next().value;
     if (oldest !== undefined) memory.delete(oldest);
@@ -298,25 +305,56 @@ function readState(
   return state;
 }
 
+// Every model-scoped state of one (key, kind), dropped once stale like readState. Skips the
+// scan until something was actually written with a model.
+function readModelScopedStates(
+  key: string,
+  kind: ProxyRefusalKind,
+  nowMs: number
+): Array<{ id: string; state: RefusalState }> {
+  if (!store.modelScopedSeen || kind !== MODEL_SCOPED_KIND) return [];
+  const prefix = `${kind} ${key}${MODEL_SEPARATOR}`;
+  const found: Array<{ id: string; state: RefusalState }> = [];
+  for (const [id, state] of memory) {
+    if (!id.startsWith(prefix)) continue;
+    if (nowMs - state.until >= 2 * REFUSAL_POLICIES[kind].maxMs) memory.delete(id);
+    else found.push({ id, state });
+  }
+  return found;
+}
+
+// One state answering for several: a newer entry that already ended must not hide an older one
+// still in force. Keeps the end and streak of the set-aside lasting longest, and the newest seq.
+function mergeStates(
+  states: Array<RefusalState | undefined>,
+  nowMs: number
+): RefusalState | undefined {
+  const present = states.filter((state): state is RefusalState => state !== undefined);
+  if (present.length <= 1) return present[0];
+  const newestSeq = Math.max(...present.map((state) => state.seq));
+  const inForce = present.filter((state) => state.until > nowMs);
+  if (inForce.length === 0) return present.find((state) => state.seq === newestSeq);
+  const longest = inForce.reduce((a, b) => (b.until > a.until ? b : a));
+  const seq = Math.max(...inForce.map((state) => state.seq));
+  return { streak: longest.streak, until: longest.until, seq };
+}
+
 /**
- * Read the set-aside still in force for a (key, kind), honoring the model
- * dimension. A model-less read returns the model-less entry (current behavior).
- * A model-scoped read returns the LATEST of the model-scoped entry and the
- * model-less entry: the model-less kinds (transport, slow, unreachable, geo,
- * operator) are shared by every model, while a model-scoped quota refusal must
- * not hide them.
+ * The set-aside in force for a (key, kind), as this reader may see it. A reader that names a
+ * model sees that model's entry and the model-less one, so model-less kinds and writers are never
+ * hidden from it. A reader with no model (pool rotation, park and replay, admin visibility,
+ * selector trigger, health sweep) cares about the egress as a whole and sees every model's entry.
  */
-function readStateAnyModel(
+function readVisibleState(
   key: string,
   kind: ProxyRefusalKind,
   nowMs: number,
   model?: string | null
 ): RefusalState | undefined {
-  const scoped = readState(key, kind, nowMs, model);
-  if (model == null || model === "") return scoped;
-  const shared = readState(key, kind, nowMs, undefined);
-  if (scoped === undefined || shared === undefined) return scoped ?? shared;
-  return shared.seq > scoped.seq ? shared : scoped;
+  const shared = readState(key, kind, nowMs);
+  if (model) return mergeStates([readState(key, kind, nowMs, model), shared], nowMs);
+  const scoped = readModelScopedStates(key, kind, nowMs).map(({ state }) => state);
+  return scoped.length === 0 ? shared : mergeStates([shared, ...scoped], nowMs);
 }
 
 /**
@@ -335,7 +373,13 @@ export function noteProxyRefusal(
   const periodMs = insertState(key, kind, nowMs, model);
   if (periodMs < 0) return null;
   const streak = (before?.streak ?? 0) + 1;
-  notifyProxyTransition({ key, kind, periodMs, until: nowMs + periodMs });
+  notifyProxyTransition({
+    key,
+    kind,
+    periodMs,
+    until: nowMs + periodMs,
+    ...(model && kind === MODEL_SCOPED_KIND ? { model } : {}),
+  });
   console.warn(
     `[ProxyRefusalMemory] set aside ${describeEgressForLog(key)} kind=${kind} periodMs=${periodMs} streak=${streak}` +
       (model ? ` model=${model}` : "")
@@ -366,15 +410,14 @@ export function noteProxyMemberRefusal(
   return periodMs;
 }
 
-/** The proxy answered again: end its period now, keep the streak so a repeat doubles. */
-export function noteProxyRecovered(
-  key: string | null,
+// End one state's period now, keeping its streak so a repeat doubles.
+function endSetAside(
+  key: string,
   kind: ProxyRefusalKind,
-  nowMs: number = Date.now(),
+  state: RefusalState | undefined,
+  nowMs: number,
   model?: string | null
 ): void {
-  if (key === null) return;
-  const state = readState(key, kind, nowMs, model);
   if (!state || state.until <= nowMs) return;
   const policy = REFUSAL_POLICIES[kind];
   const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
@@ -386,7 +429,29 @@ export function noteProxyRecovered(
   state.until = nowMs;
 }
 
-/** A response came back through this proxy: forget every refusal kind for it. */
+/**
+ * The proxy answered again: end its period now, keep the streak so a repeat doubles. With no
+ * model this is egress-level proof (the health sweep's probe), so it ends every model's entry of
+ * this kind, exactly what it ended before entries had a model. With a model it ends only that one.
+ */
+export function noteProxyRecovered(
+  key: string | null,
+  kind: ProxyRefusalKind,
+  nowMs: number = Date.now(),
+  model?: string | null
+): void {
+  if (key === null) return;
+  endSetAside(key, kind, readState(key, kind, nowMs, model), nowMs, model);
+  if (model) return;
+  for (const { id, state } of readModelScopedStates(key, kind, nowMs)) {
+    endSetAside(key, kind, state, nowMs, id.slice(id.indexOf(MODEL_SEPARATOR) + 1));
+  }
+}
+
+/**
+ * A response came back through this proxy: forget every refusal kind for it. A success says
+ * nothing about another model's quota, so model-scoped entries only clear for the model served.
+ */
 export function noteProxyServed(key: string | null, model?: string | null): void {
   if (key === null) return;
   for (const kind of REFUSAL_KINDS) memory.delete(entryId(key, kind));
@@ -414,7 +479,7 @@ export function proxySetAsideSeq(
   if (key === null || memory.size === 0) return null;
   let latest: number | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readStateAnyModel(key, kind, nowMs, model);
+    const state = readVisibleState(key, kind, nowMs, model);
     if (state && state.until > nowMs && (latest === null || state.seq > latest)) {
       latest = state.seq;
     }
@@ -467,7 +532,7 @@ export function snapshotProxySetAside(
   model?: string | null
 ): ProxySetAsideSnapshot | null {
   if (key === null || memory.size === 0) return null;
-  return snapshotLatestSetAside((kind) => readStateAnyModel(key, kind, nowMs, model), nowMs);
+  return snapshotLatestSetAside((kind) => readVisibleState(key, kind, nowMs, model), nowMs);
 }
 
 /**
@@ -493,7 +558,7 @@ export function proxySetAsideStatus(
   let quotaOnly = true;
   let endsAt = 0;
   for (const kind of REFUSAL_KINDS) {
-    const state = readStateAnyModel(key, kind, nowMs, model);
+    const state = readVisibleState(key, kind, nowMs, model);
     if (!state || state.until <= nowMs) continue;
     found = true;
     if (kind !== "ip_quota_429") quotaOnly = false;
@@ -617,6 +682,7 @@ export function hasProxyRefusals(): boolean {
 /** Test-only: forget everything. */
 export function __resetProxyRefusalMemoryForTesting(): void {
   memory.clear();
+  store.modelScopedSeen = false;
 }
 
 /**
