@@ -2,6 +2,11 @@ import { FORMATS } from "../../translator/formats.ts";
 import { isVerifiedNativeCodexRequest } from "../../config/codexIdentity.ts";
 import { isClaudeCodeCompatibleProvider } from "../../services/claudeCodeCompatible.ts";
 import { downgradeRestoredClaudeThinking } from "../../services/claudeThinkingStore.ts";
+import {
+  disableManualThinkingWithoutFinalBlock,
+  type ClaudeRequestBody,
+} from "../../translator/helpers/claudeHelper.ts";
+import { getModelTargetFormat } from "../../config/providerModels.ts";
 import { DEFAULT_THINKING_CLAUDE_SIGNATURE } from "../../config/defaultThinkingSignature.ts";
 import { isResponsesEndpointPath } from "../../utils/responsesEndpoint.ts";
 import { mergeClientAnthropicBeta } from "../../config/anthropicHeaders.ts";
@@ -161,7 +166,7 @@ export function shouldUseNativeOpenAICompatibleResponsesPassthrough({
  */
 export function redactPassthroughThinkingSignatures(
   messages: unknown,
-  _signature: string
+  _signature?: string
 ): unknown {
   // Signed blocks stay verbatim; only blocks Anthropic never issued are dropped (#12917).
   return dropUnsignedPassthroughThinkingBlocks(messages);
@@ -228,6 +233,7 @@ export function dropUnsignedPassthroughThinkingBlocks(messages: unknown): unknow
 
 type ThinkingSignatureError = {
   provider?: string | null;
+  model?: string | null;
   status?: number | null;
   message?: string | null;
 };
@@ -255,12 +261,19 @@ function hasBlock(message: MessageLike | null | undefined, type: string): boolea
  */
 export function isAnthropicThinkingSignatureError({
   provider,
+  model,
   status,
   message,
 }: ThinkingSignatureError): boolean {
+  // Same upstream set that prepareClaudeRequest treats as signature-validating: Anthropic
+  // itself, Vertex Claude, and any registry model whose targetFormat is "claude" (GitHub
+  // Copilot claude-*, opencode-go claude-target models, ...).
   const isAnthropicTarget =
     provider === "claude" ||
-    (typeof provider === "string" && provider.startsWith("anthropic-compatible-"));
+    provider === "vertex" ||
+    provider === "vertex-partner" ||
+    (typeof provider === "string" && provider.startsWith("anthropic-compatible-")) ||
+    (!!provider && !!model && getModelTargetFormat(provider, model) === "claude");
   if (!isAnthropicTarget || status !== 400 || typeof message !== "string") return false;
 
   return /invalid\s+[`'\"]?signature[`'\"]?\s+in\s+[`'\"]?thinking[`'\"]?\s+block/i.test(message);
@@ -330,10 +343,8 @@ function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
  * a valid Anthropic request shape (#17324/#17344 — re-injecting the
  * fabricated placeholder re-triggers the same 400). Earlier assistant turns
  * also drop store-restored blocks: Anthropic flags the modified message by
- * cache warmth, not recency (#17324 recurrence 2026-10-27). Under manual
- * extended thinking a tool_use turn keeps the #5312 placeholder instead
- * (that mode requires a thinking precursor). Returns the original body
- * reference when there is nothing safe to recover.
+ * cache warmth, not recency (#17324 recurrence 2026-10-27). Returns the
+ * original body reference when there is nothing safe to recover.
  */
 export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
@@ -379,12 +390,9 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
       return { ...message, content: content as typeof message.content };
     }
 
-    // Manual extended thinking keeps the same precursor rule on earlier turns in the
-    // active cycle: the mode rejects a tool_use turn with no thinking block, so those
-    // get the #5312 placeholder back (mirrors thinkingSignatureRecovery's semantics).
-    const downgraded = downgradeRestoredClaudeThinking(message.content, {
-      keepToolUsePlaceholder: manualThinking,
-    });
+    // Inject nothing on earlier turns either (#18036): only the final tool_use turn needs
+    // a precursor under manual thinking, and the guard above keeps that one intact.
+    const downgraded = downgradeRestoredClaudeThinking(message.content);
     if (downgraded) {
       changed = true;
       return { ...message, content: downgraded as typeof message.content };
@@ -393,7 +401,9 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   });
 
   if (!changed) return body;
-  return { ...record, messages: recoveredMessages } as T;
+  const recovered = { ...record, messages: recoveredMessages } as ClaudeRequestBody;
+  disableManualThinkingWithoutFinalBlock(recovered);
+  return recovered as T;
 }
 
 /**
@@ -404,8 +414,8 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
  * still-open cycle keeps its thinking blocks. A trailing unresolved assistant
  * `tool_use` turn is protected as well. The one exception inside that cycle is a
  * block OmniRoute itself restored from claudeThinkingStore (the client never sent
- * it): it is swapped back to the #5312 `redacted_thinking` placeholder and
- * forgotten, so a rejected restored signature is still recoverable.
+ * it): it is dropped and forgotten, so a rejected restored signature is still
+ * recoverable. Manual thinking is disabled if that leaves the final tool turn bare.
  *
  * This helper is intentionally NOT used eagerly. Normal same-model requests must
  * retain their thinking history, cache shape, and current-model semantics.
@@ -447,15 +457,12 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
   }
 
   let changed = false;
-  const manualExtendedThinking = isManualExtendedThinking(record);
   const recoveredMessages = messages.map((message, index) => {
     if (!message || message.role !== "assistant" || !Array.isArray(message.content)) {
       return message;
     }
     if (protectedAssistantIndexes.has(index)) {
-      const downgraded = downgradeRestoredClaudeThinking(message.content, {
-        keepToolUsePlaceholder: manualExtendedThinking,
-      });
+      const downgraded = downgradeRestoredClaudeThinking(message.content);
       if (!downgraded) return message;
       changed = true;
       return { ...message, content: downgraded as typeof message.content };
@@ -468,7 +475,9 @@ export function stripHistoricalThinkingForSignatureRecovery<T>(body: T): T {
   });
 
   if (!changed) return body;
-  return { ...record, messages: recoveredMessages } as T;
+  const recovered = { ...record, messages: recoveredMessages } as ClaudeRequestBody;
+  disableManualThinkingWithoutFinalBlock(recovered);
+  return recovered as T;
 }
 
 type SignatureRecoveryExecution<T> = {
@@ -480,6 +489,7 @@ type SignatureRecoveryExecution<T> = {
 /** Execute the normal body once, then perform at most one exact-error recovery. */
 export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
   provider?: string | null;
+  model?: string | null;
   body: unknown;
   execute: (body: unknown) => Promise<T>;
   getError: (
@@ -495,7 +505,12 @@ export async function executeWithAnthropicThinkingSignatureRecovery<T>(args: {
     return { result: first, retried: false, recoveryBody: null };
   }
 
-  const errorArgs = { provider: args.provider, status: failure.status, message: failure.message };
+  const errorArgs = {
+    provider: args.provider,
+    model: args.model,
+    status: failure.status,
+    message: failure.message,
+  };
   let recoveryBody: unknown;
   if (isAnthropicThinkingSignatureError(errorArgs)) {
     recoveryBody = stripHistoricalThinkingForSignatureRecovery(args.body);
