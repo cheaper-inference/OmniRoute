@@ -26,10 +26,10 @@ Object.assign(process.env, {
   OMNIROUTE_MIGRATIONS_DIR: fixture,
 });
 const sql = fs.readFileSync(
-  new URL("../../src/lib/db/migrations/223_daily_cached_input.sql", import.meta.url),
+  new URL("../../src/lib/db/migrations/224_daily_cached_input.sql", import.meta.url),
   "utf8"
 );
-fs.writeFileSync(path.join(fixture, "223_daily_cached_input.sql"), sql, "utf8");
+fs.writeFileSync(path.join(fixture, "224_daily_cached_input.sql"), sql, "utf8");
 for (const [version, name] of [
   ["206", "codex_wakeup_tasks"],
   ["213", "api_key_preferred_connections"],
@@ -38,6 +38,7 @@ for (const [version, name] of [
   ["216", "team_cost_shapes"],
   ["217", "quota_recovery_tickets"],
   ["218", "proxy_subscription_mirror_urls"],
+  ["223", "call_logs_queue_wait_ms"],
 ]) {
   fs.writeFileSync(
     path.join(fixture, `${version}_${name}.sql`),
@@ -67,7 +68,7 @@ test(
   "cached migration rehomes published ledgers and preserves unknown history",
   { timeout: 3000 },
   () => {
-    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223"];
+    const publishedSlots = ["206", "213", "214", "215", "217", "218", "223", "224"];
     for (let mask = 0; mask < 1 << publishedSlots.length; mask++) {
       const versions = publishedSlots.filter((_, index) => mask & (1 << index));
       const db = makeDb();
@@ -81,7 +82,7 @@ test(
             "INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES (?,?,?)"
           ).run(version, "daily_cached_input", "fixture-applied");
         }
-        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 7 : 8);
+        assert.equal(runMigrations(db, { isNewDb: true }), versions.length ? 8 : 9);
         assert.deepEqual(
           db.prepare("SELECT version,name FROM _omniroute_migrations ORDER BY version").all(),
           [
@@ -92,7 +93,8 @@ test(
             { version: "216", name: "team_cost_shapes" },
             { version: "217", name: "quota_recovery_tickets" },
             { version: "218", name: "proxy_subscription_mirror_urls" },
-            { version: "223", name: "daily_cached_input" },
+            { version: "223", name: "call_logs_queue_wait_ms" },
+            { version: "224", name: "daily_cached_input" },
           ]
         );
         assert.deepEqual(db.prepare("SELECT * FROM daily_usage_summary").all(), [
@@ -102,7 +104,7 @@ test(
           assert.equal(
             (
               db
-                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='223'")
+                .prepare("SELECT applied_at FROM _omniroute_migrations WHERE version='224'")
                 .get() as {
                 applied_at: string;
               }
@@ -110,7 +112,7 @@ test(
             "fixture-applied"
           );
         }
-        for (const version of ["206", "213", "214", "215", "216", "217", "218"]) {
+        for (const version of ["206", "213", "214", "215", "216", "217", "218", "223"]) {
           assert.ok(
             db
               .prepare("SELECT name FROM sqlite_master WHERE type='table' AND name=?")
@@ -126,11 +128,13 @@ test(
   }
 );
 
-test("cached migration preserves the already published higher slot", { timeout: 1000 }, () => {
+test("cached migration preserves published 224 alongside canonical 223", { timeout: 1000 }, () => {
   const db = makeDb();
   try {
     db.exec(sql);
     db.exec("UPDATE daily_usage_summary SET total_cache_read_tokens=60");
+    db.exec(`INSERT INTO _omniroute_migrations (version,name,applied_at)
+      VALUES ('223','call_logs_queue_wait_ms','canonical-applied')`);
     db.prepare("INSERT INTO _omniroute_migrations (version,name,applied_at) VALUES (?,?,?)").run(
       "224",
       "daily_cached_input",
@@ -153,6 +157,14 @@ test("cached migration preserves the already published higher slot", { timeout: 
       ).applied_at,
       "fixture-applied"
     );
+    assert.equal(
+      (
+        db.prepare("SELECT name FROM _omniroute_migrations WHERE version='223'").get() as {
+          name: string;
+        }
+      ).name,
+      "call_logs_queue_wait_ms"
+    );
     assert.equal(runMigrations(db, { isNewDb: true }), 0);
   } finally {
     db.close();
@@ -167,10 +179,10 @@ test(
     try {
       db.exec(sql);
       db.exec(`INSERT INTO _omniroute_migrations (version,name) VALUES
-      ('206','daily_cached_input'),('223','unrelated_migration');
+      ('206','daily_cached_input'),('224','unrelated_migration');
       UPDATE daily_usage_summary SET total_cache_read_tokens=60;`);
       const before = db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all();
-      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 223 is occupied/);
+      assert.throws(() => runMigrations(db, { isNewDb: true }), /target version 224 is occupied/);
       assert.deepEqual(
         db.prepare("SELECT * FROM _omniroute_migrations ORDER BY version").all(),
         before

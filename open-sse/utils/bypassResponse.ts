@@ -223,6 +223,9 @@ export function createStreamingResponse(sourceFormat, model, text?: string) {
         "Content-Type": "text/event-stream",
         "Cache-Control": "no-cache",
         Connection: "keep-alive",
+        // Synthetic SSE built here bypasses the central response-header path,
+        // so carry the no-buffering instruction explicitly.
+        "X-Accel-Buffering": "no",
       },
     }),
   };
