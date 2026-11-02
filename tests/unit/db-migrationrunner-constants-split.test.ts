@@ -70,14 +70,14 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 // ── large tables — count + shape + spot-checks (corruption guard) ─────────────
 
 describe("migrationRunner/constants — large-table integrity", () => {
-  it("RENAMED_MIGRATION_COMPATIBILITY has 45 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 45);
+  it("RENAMED_MIGRATION_COMPATIBILITY has 46 well-formed entries", () => {
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 46);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.fromName === "proxy_payload_traffic"),
-      ["206", "207", "213", "214", "215", "217"].map((fromVersion) => ({
+      ["206", "207", "213", "214", "215", "217", "218"].map((fromVersion) => ({
         fromVersion,
         fromName: "proxy_payload_traffic",
-        toVersion: "225",
+        toVersion: "223",
         toName: "proxy_payload_traffic",
       }))
     );
