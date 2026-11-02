@@ -10313,6 +10313,7 @@
     "confirmRedeemResetCredit": "O resgate redefine imediatamente as janelas de uso elegíveis e consome este crédito de forma permanente.",
     "confirmRedeemResetCreditButton": "Resgatar crédito",
     "resetCreditRedeemed": "Redefinição resgatada",
+    "resetCreditAlreadyRedeemed": "Este crédito já havia sido resgatado. Nenhum novo reset foi aplicado.",
     "resetCreditRedeemFailed": "Falha ao resgatar crédito de redefinição",
     "glmResetCreditsModalTitle": "Cartões de redefinição do GLM Coding Plan",
     "glmResetCreditsModalExplainer": "Os cartões de redefinição estão ordenados por expiração. Escolha a janela de 5 horas ou semanal que deseja redefinir.",

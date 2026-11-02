@@ -10358,6 +10358,7 @@
     "confirmRedeemResetCredit": "O resgate repõe imediatamente as janelas de utilização elegíveis e consome permanentemente este crédito.",
     "confirmRedeemResetCreditButton": "Resgatar crédito",
     "resetCreditRedeemed": "Reposição resgatada",
+    "resetCreditAlreadyRedeemed": "Este crédito já tinha sido resgatado. Nenhuma nova reposição foi aplicada.",
     "resetCreditRedeemFailed": "Falha ao resgatar o crédito de reposição",
     "glmResetCreditsModalTitle": "Cartões de reposição do GLM Coding Plan",
     "glmResetCreditsModalExplainer": "Os cartões de reposição são ordenados por data de expiração. Escolha o período de 5 horas ou semanal que pretende repor.",

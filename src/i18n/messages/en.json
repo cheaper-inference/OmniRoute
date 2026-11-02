@@ -10394,6 +10394,7 @@
     "confirmRedeemResetCredit": "Redeeming immediately resets the eligible usage windows and permanently consumes this credit.",
     "confirmRedeemResetCreditButton": "Redeem credit",
     "resetCreditRedeemed": "Reset redeemed",
+    "resetCreditAlreadyRedeemed": "This credit was already redeemed. No new reset was applied.",
     "resetCreditRedeemFailed": "Failed to redeem reset credit",
     "glmResetCreditsModalTitle": "GLM Coding Plan reset cards",
     "glmResetCreditsModalExplainer": "Reset cards are ordered by expiration. Choose the 5-hour or weekly window you want to reset.",
