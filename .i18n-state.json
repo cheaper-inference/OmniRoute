@@ -9596,11 +9596,11 @@
           "updated_at": "2026-11-02T16:14:30.423Z"
         },
         "kn": {
-          "source_hash": "445fd67df18da94f5c88f1394f59c21b2d77a0f5625352ce54b1a14e75782db0",
-          "target_hash": "c2b2776a5bd2d4f51b4025f74fdeffa884d6feac282160f2c85026fa793f0c9b",
+          "source_hash": "dcb4e31d851965b04ea2e1c608685a8ac1984a1f57f4804342d0681ec7574b18",
+          "target_hash": "68eb36d3868d34b35a46dff40dabef461fc022af97cdea61e13d0672ecfd9f12",
           "section_hashes": [
             "0d13968e0788",
-            "54071cabead5",
+            "d1834c178143",
             "864a5ef2d51a",
             "012373a7ffc8",
             "4533265d5c2b",
@@ -9639,7 +9639,7 @@
             "e9a2c22593a2",
             "f5e0bf887df9"
           ],
-          "updated_at": "2026-10-28T19:47:13.956Z"
+          "updated_at": "2026-11-02T16:28:37.803Z"
         },
         "ml": {
           "source_hash": "dcb4e31d851965b04ea2e1c608685a8ac1984a1f57f4804342d0681ec7574b18",
