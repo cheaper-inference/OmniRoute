@@ -486,13 +486,13 @@ Tas apstrādā:
 
 `open-sse/config/` satur konfigurācijas slāni:
 
-| Fails                          | Mērķis                                                                    |
-| ------------------------------ | ------------------------------------------------------------------------- |
-| `providerRegistry.ts`          | Tērzēšanas modeļa reģistrs, izmantojot 377 pakalpojumu sniedzēju katalogu |
-| `providerModels.ts`            | Modeļu aizstājvārdi, formātu kartēšana                                    |
-| `constants.ts`                 | Taimauti, ierobežojumi, statusa kodi                                      |
-| `defaultThinkingSignature.ts`  | Noklusējuma Claude domāšanas paraksts                                     |
-| `modelStrip.ts` (pakalpojumos) | Lauku noņemšana katram pakalpojumu sniedzējam                             |
+| Fails                          | Mērķis                                                        |
+| ------------------------------ | ------------------------------------------------------------- |
+| `providerRegistry.ts`          | Tērzēšanas modeļa reģistrs 380 pakalpojumu sniedzēju katalogā |
+| `providerModels.ts`            | Modeļu aizstājvārdi, formātu kartēšana                        |
+| `constants.ts`                 | Taimauti, ierobežojumi, statusa kodi                          |
+| `defaultThinkingSignature.ts`  | Noklusējuma Claude domāšanas paraksts                         |
+| `modelStrip.ts` (pakalpojumos) | Lauku noņemšana katram pakalpojumu sniedzējam                 |
 
 ### Pakalpojumu sniedzēja reģistra shēma
 
