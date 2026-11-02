@@ -26,17 +26,19 @@ const typeMarkers = [
   "watcher?: Pick<ChokidarOptions, 'ignored'>;",
 ];
 
-function parseDependencyRoot(argumentsToParse) {
-  if (argumentsToParse.length === 0) return repositoryRoot;
-  if (
-    argumentsToParse.length === 2 &&
-    argumentsToParse[0] === "--root" &&
-    argumentsToParse[1].length > 0
-  )
-    return resolve(argumentsToParse[1]);
-  throw new Error(
-    "Usage: node scripts/build/apply-fumadocs-mdx-patch.mjs [--root <dependency-root>]"
-  );
+const usage =
+  "Usage: node scripts/build/apply-fumadocs-mdx-patch.mjs [--postinstall] [--root <dependency-root>]";
+
+function parseArguments(argumentsToParse) {
+  const remaining = [...argumentsToParse];
+  const postinstallIndex = remaining.indexOf("--postinstall");
+  const postinstall = postinstallIndex !== -1;
+  if (postinstall) remaining.splice(postinstallIndex, 1);
+
+  if (remaining.length === 0) return { dependencyRoot: repositoryRoot, postinstall };
+  if (remaining.length === 2 && remaining[0] === "--root" && remaining[1].length > 0)
+    return { dependencyRoot: resolve(remaining[1]), postinstall };
+  throw new Error(usage);
 }
 
 function countOccurrences(text, value) {
@@ -196,72 +198,92 @@ function replaceBothFiles({ sourcePath, typePath, source, types, temporaryDirect
   }
 }
 
-const dependencyRoot = parseDependencyRoot(process.argv.slice(2));
-const nodeModulesRoot = join(dependencyRoot, "node_modules");
-const packageRoot = join(nodeModulesRoot, "fumadocs-mdx");
-const packagePath = join(packageRoot, "package.json");
+function applyPatch(dependencyRoot, postinstall) {
+  const nodeModulesRoot = join(dependencyRoot, "node_modules");
+  const packageRoot = join(nodeModulesRoot, "fumadocs-mdx");
+  const packagePath = join(packageRoot, "package.json");
 
-if (!existsSync(packagePath)) {
-  console.log(`fumadocs-mdx is not installed under ${dependencyRoot}; skipping watcher patch.`);
-  process.exit(0);
-}
+  if (!existsSync(packagePath)) {
+    // A devDependency: every global `npm i -g omniroute` lands here, so say nothing on that path.
+    if (!postinstall)
+      console.log(`fumadocs-mdx is not installed under ${dependencyRoot}; skipping watcher patch.`);
+    return;
+  }
 
-const resolvedNodeModulesRoot = realpathSync(nodeModulesRoot);
-const resolvedPackageRoot = realpathSync(packageRoot);
-assertPathInside(resolvedNodeModulesRoot, resolvedPackageRoot, "fumadocs-mdx package");
-const resolvedPackageMetadataPath = resolvePatchTarget(
-  resolvedPackageRoot,
-  ["package.json"],
-  "fumadocs-mdx package metadata"
-);
-const packageMetadata = JSON.parse(readFileSync(resolvedPackageMetadataPath, "utf8"));
-if (packageMetadata.version !== expectedVersion)
-  throw new Error(`fumadocs-mdx ${expectedVersion} is required; found ${packageMetadata.version}`);
+  const resolvedNodeModulesRoot = realpathSync(nodeModulesRoot);
+  const resolvedPackageRoot = realpathSync(packageRoot);
+  assertPathInside(resolvedNodeModulesRoot, resolvedPackageRoot, "fumadocs-mdx package");
+  const resolvedPackageMetadataPath = resolvePatchTarget(
+    resolvedPackageRoot,
+    ["package.json"],
+    "fumadocs-mdx package metadata"
+  );
+  const packageMetadata = JSON.parse(readFileSync(resolvedPackageMetadataPath, "utf8"));
+  if (packageMetadata.version !== expectedVersion)
+    throw new Error(
+      `fumadocs-mdx ${expectedVersion} is required; found ${packageMetadata.version}`
+    );
 
-const sourcePath = resolvePatchTarget(
-  resolvedPackageRoot,
-  ["dist", "next", "index.js"],
-  "Fumadocs source"
-);
-const typePath = resolvePatchTarget(
-  resolvedPackageRoot,
-  ["dist", "next", "index.d.ts"],
-  "Fumadocs type declaration"
-);
-
-const source = readFileSync(sourcePath, "utf8");
-const types = readFileSync(typePath, "utf8");
-const sourceState = classification(source, sourceMarkers);
-const typeState = classification(types, typeMarkers);
-
-if (sourceState === "patched" && typeState === "patched") {
-  console.log(`fumadocs-mdx ${expectedVersion} watcher patch is already applied.`);
-  process.exit(0);
-}
-if (sourceState !== "unpatched" || typeState !== "unpatched")
-  throw new Error(
-    "fumadocs-mdx is partially patched; restore both target files from a clean 15.4.6 installation before retrying."
+  const sourcePath = resolvePatchTarget(
+    resolvedPackageRoot,
+    ["dist", "next", "index.js"],
+    "Fumadocs source"
+  );
+  const typePath = resolvePatchTarget(
+    resolvedPackageRoot,
+    ["dist", "next", "index.d.ts"],
+    "Fumadocs type declaration"
   );
 
-const transformedSource = transformSource(source);
-const transformedTypes = transformTypes(types);
-if (
-  classification(transformedSource, sourceMarkers) !== "patched" ||
-  classification(transformedTypes, typeMarkers) !== "patched"
-)
-  throw new Error("Fumadocs watcher patch transformation did not produce every required marker.");
+  const source = readFileSync(sourcePath, "utf8");
+  const types = readFileSync(typePath, "utf8");
+  const sourceState = classification(source, sourceMarkers);
+  const typeState = classification(types, typeMarkers);
 
-const temporaryDirectory = mkdtempSync(join(resolvedNodeModulesRoot, ".fumadocs-mdx-patch-"));
-try {
-  replaceBothFiles({
-    sourcePath,
-    typePath,
-    source: transformedSource,
-    types: transformedTypes,
-    temporaryDirectory,
-  });
-} finally {
-  rmSync(temporaryDirectory, { recursive: true, force: true });
+  if (sourceState === "patched" && typeState === "patched") {
+    console.log(`fumadocs-mdx ${expectedVersion} watcher patch is already applied.`);
+    return;
+  }
+  if (sourceState !== "unpatched" || typeState !== "unpatched")
+    throw new Error(
+      "fumadocs-mdx is partially patched; restore both target files from a clean 15.4.6 installation before retrying."
+    );
+
+  const transformedSource = transformSource(source);
+  const transformedTypes = transformTypes(types);
+  if (
+    classification(transformedSource, sourceMarkers) !== "patched" ||
+    classification(transformedTypes, typeMarkers) !== "patched"
+  )
+    throw new Error("Fumadocs watcher patch transformation did not produce every required marker.");
+
+  const temporaryDirectory = mkdtempSync(join(resolvedNodeModulesRoot, ".fumadocs-mdx-patch-"));
+  try {
+    replaceBothFiles({
+      sourcePath,
+      typePath,
+      source: transformedSource,
+      types: transformedTypes,
+      temporaryDirectory,
+    });
+  } finally {
+    rmSync(temporaryDirectory, { recursive: true, force: true });
+  }
+
+  console.log(`Applied fumadocs-mdx ${expectedVersion} watcher patch.`);
 }
 
-console.log(`Applied fumadocs-mdx ${expectedVersion} watcher patch.`);
+const { dependencyRoot, postinstall } = parseArguments(process.argv.slice(2));
+
+try {
+  applyPatch(dependencyRoot, postinstall);
+} catch (error) {
+  // This bridge only spares the dev watcher some file descriptors, which is not worth a failed
+  // `npm ci` after a dependency bump. Every check above runs before the first write, so the install
+  // keeps an intact, unpatched Fumadocs. `npm run patch:fumadocs-mdx` still fails on the same error.
+  if (!postinstall) throw error;
+  console.warn(
+    `[fumadocs-mdx patch] skipped: ${error.message} The dev watcher keeps watching docs/i18n; ` +
+      "run `npm run patch:fumadocs-mdx` for the failure."
+  );
+}

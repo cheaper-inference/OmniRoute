@@ -1,0 +1,1 @@
+- **fix(docs):** `npm run dev` keeps `docs/i18n` out of the Fumadocs MDX watcher through a version-pinned `fumadocs-mdx` patch, which reduces file-descriptor pressure. Set `OMNIROUTE_MDX_WATCH_I18N=1` to watch translations. A patch failure during install only warns ([#18383](https://github.com/cheaper-inference/OmniRoute/pull/18383) — thanks @ahmedgo17390)

@@ -191,6 +191,8 @@ export const PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS: string[] = [
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/wreqJsNative.mjs",
   "scripts/build/postinstall.mjs",
+  // Run by the package.json postinstall script, right after scripts/build/postinstall.mjs.
+  "scripts/build/apply-fumadocs-mdx-patch.mjs",
   // Imported by scripts/build/postinstall.mjs to pick the better-sqlite3 prebuild target.
   "scripts/build/betterSqlitePrebuildTarget.mjs",
   "scripts/build/postinstallSupport.mjs",
@@ -308,6 +310,8 @@ export const PACK_ARTIFACT_REQUIRED_PATHS: string[] = [
   "package.json",
   "scripts/build/native-binary-compat.mjs",
   "scripts/build/postinstall.mjs",
+  // A missing script would fail the postinstall of every end-user install (MODULE_NOT_FOUND).
+  "scripts/build/apply-fumadocs-mdx-patch.mjs",
   "scripts/build/postinstallSupport.mjs",
   "scripts/build/colocateOptionals.mjs",
   "scripts/build/runtime-env.mjs",

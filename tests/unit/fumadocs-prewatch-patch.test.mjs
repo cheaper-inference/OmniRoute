@@ -19,6 +19,18 @@ const { FSWatcher } = await import(
   pathToFileURL(join(dependencyRoot, "node_modules", "chokidar", "index.js")).href
 );
 
+// `npm ci --ignore-scripts` leaves Fumadocs unpatched. The version test below still catches a bump
+// the patcher does not target, so skipping these two only hides the expected unpatched state.
+const unpatchedTreeSkip = nextSource.includes("init(isDev, core, options.watcher)")
+  ? false
+  : "fumadocs-mdx is not patched in this install (--ignore-scripts?); run `npm run patch:fumadocs-mdx`";
+
+// Budgets for the real-watcher tests. They share the machine with the test:unit shard, and a
+// loaded box needs far longer than an idle one, so these only bound a real hang.
+const REAL_FUMADOCS_TIMEOUT_MS = 30_000;
+const WATCHER_WAIT_MS = 15_000;
+const WATCHER_POLL_MS = 50;
+
 const originalSource = `const defaultPageExtensions = [
 \t"mdx",
 \t"md"
@@ -73,8 +85,8 @@ async function createPatchFixture({
   };
 }
 
-function applyPatch(fixtureRoot) {
-  return spawnSync(process.execPath, [patchScript, "--root", fixtureRoot], {
+function applyPatch(fixtureRoot, ...flags) {
+  return spawnSync(process.execPath, [patchScript, ...flags, "--root", fixtureRoot], {
     encoding: "utf8",
   });
 }
@@ -101,8 +113,8 @@ function hasPathBelow(watched, target) {
 function waitForReady(watcher) {
   return new Promise((resolveReady, rejectReady) => {
     const timeout = setTimeout(
-      () => rejectReady(new Error("watcher did not become ready within two seconds")),
-      2_000
+      () => rejectReady(new Error(`watcher did not become ready within ${WATCHER_WAIT_MS} ms`)),
+      WATCHER_WAIT_MS
     );
     watcher.once("ready", () => {
       clearTimeout(timeout);
@@ -112,11 +124,11 @@ function waitForReady(watcher) {
 }
 
 async function waitForCondition(condition, description) {
-  for (let attempt = 0; attempt < 40; attempt += 1) {
+  for (let waited = 0; waited < WATCHER_WAIT_MS; waited += WATCHER_POLL_MS) {
     if (condition()) return;
-    await delay(50);
+    await delay(WATCHER_POLL_MS);
   }
-  throw new Error(`${description} within two seconds`);
+  throw new Error(`${description} within ${WATCHER_WAIT_MS} ms`);
 }
 
 async function initializeFumadocs({ configPath, outDir, watcher }) {
@@ -146,28 +158,41 @@ async function initializeFumadocs({ configPath, outDir, watcher }) {
   }
 }
 
-test("Fumadocs configures custom ignores before its first watcher.add", () => {
-  const constructorIndex = nextSource.indexOf(
-    "ignored: [core.outDir, ...toArray(watcherOptions?.ignored)]"
-  );
-  const firstAddIndex = nextSource.indexOf("watcher.add(core.configPath)");
-  const devServerIndex = nextSource.indexOf("async function devServer()");
-  const developmentGateIndex = nextSource.indexOf("if (dev) ready.then(devServer");
+test("the installed fumadocs-mdx is the version the patcher targets", async () => {
+  const installed = JSON.parse(await readFile(join(fumadocsRoot, "package.json"), "utf8"));
+  const manifest = JSON.parse(await readFile(join(repositoryRoot, "package.json"), "utf8"));
+  const [, target] = /const expectedVersion = "([^"]+)"/.exec(patchApplier);
 
-  assert.ok(constructorIndex >= 0, "merged ignored list is passed to FSWatcher");
-  assert.match(nextSource, /init\(isDev, core, options\.watcher\)/);
-  assert.match(nextSource, /function init\(dev, core, watcherOptions\)/);
-  assert.ok(firstAddIndex >= 0, "Fumadocs still registers the config path");
-  assert.ok(
-    constructorIndex < firstAddIndex,
-    "ignore configuration precedes the first watcher.add"
-  );
-  assert.ok(
-    devServerIndex >= 0 && developmentGateIndex > devServerIndex,
-    "production does not construct the development watcher"
-  );
-  assert.match(nextTypes, /watcher\?: Pick<ChokidarOptions, 'ignored'>/);
+  assert.equal(installed.version, target);
+  assert.equal(manifest.devDependencies["fumadocs-mdx"], target, "the root spec stays pinned");
 });
+
+test(
+  "Fumadocs configures custom ignores before its first watcher.add",
+  { skip: unpatchedTreeSkip },
+  () => {
+    const constructorIndex = nextSource.indexOf(
+      "ignored: [core.outDir, ...toArray(watcherOptions?.ignored)]"
+    );
+    const firstAddIndex = nextSource.indexOf("watcher.add(core.configPath)");
+    const devServerIndex = nextSource.indexOf("async function devServer()");
+    const developmentGateIndex = nextSource.indexOf("if (dev) ready.then(devServer");
+
+    assert.ok(constructorIndex >= 0, "merged ignored list is passed to FSWatcher");
+    assert.match(nextSource, /init\(isDev, core, options\.watcher\)/);
+    assert.match(nextSource, /function init\(dev, core, watcherOptions\)/);
+    assert.ok(firstAddIndex >= 0, "Fumadocs still registers the config path");
+    assert.ok(
+      constructorIndex < firstAddIndex,
+      "ignore configuration precedes the first watcher.add"
+    );
+    assert.ok(
+      devServerIndex >= 0 && developmentGateIndex > devServerIndex,
+      "production does not construct the development watcher"
+    );
+    assert.match(nextTypes, /watcher\?: Pick<ChokidarOptions, 'ignored'>/);
+  }
+);
 
 test("development excludes an absolute normalized docs/i18n path by default", () => {
   const projectRoot = join(tmpdir(), "fumadocs-prewatch-project", "nested", "..");
@@ -367,6 +392,99 @@ test("the patch applier rejects a partial state without mutating either target",
   }
 });
 
+test("the postinstall mode warns and exits 0 instead of failing the install", async (t) => {
+  const cases = [
+    {
+      name: "version mismatch",
+      options: { version: "15.4.7" },
+      reason: /fumadocs-mdx 15\.4\.6 is required; found 15\.4\.7/,
+    },
+    {
+      name: "anchor drift",
+      options: {
+        source: originalSource.replace(
+          "pending = init(isDev, core);",
+          "pending = go(isDev, core);"
+        ),
+      },
+      reason: /anchor must occur exactly once/,
+    },
+    {
+      name: "partial patch",
+      options: {
+        source: originalSource.replace(
+          "pending = init(isDev, core);",
+          "pending = init(isDev, core, options.watcher);"
+        ),
+      },
+      reason: /partially patched/,
+    },
+  ];
+
+  for (const { name, options, reason } of cases) {
+    await t.test(name, async () => {
+      const fixture = await createPatchFixture(options);
+      try {
+        const before = await Promise.all([
+          readFile(fixture.sourcePath, "utf8"),
+          readFile(fixture.typePath, "utf8"),
+        ]);
+        const result = applyPatch(fixture.fixtureRoot, "--postinstall");
+        const after = await Promise.all([
+          readFile(fixture.sourcePath, "utf8"),
+          readFile(fixture.typePath, "utf8"),
+        ]);
+
+        assert.equal(result.status, 0, result.stderr);
+        assert.match(result.stderr, /\[fumadocs-mdx patch\] skipped:/);
+        assert.match(result.stderr, reason);
+        assert.deepEqual(after, before, "the install keeps an intact Fumadocs");
+      } finally {
+        await rm(fixture.fixtureRoot, { recursive: true, force: true });
+      }
+    });
+  }
+});
+
+test("the postinstall mode applies the patch on the expected version", async () => {
+  const fixture = await createPatchFixture();
+
+  try {
+    const result = applyPatch(fixture.fixtureRoot, "--postinstall");
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /Applied fumadocs-mdx 15\.4\.6 watcher patch/);
+    assert.match(await readFile(fixture.sourcePath, "utf8"), /options\.watcher/);
+  } finally {
+    await rm(fixture.fixtureRoot, { recursive: true, force: true });
+  }
+});
+
+test("the postinstall mode stays silent when fumadocs-mdx is not installed", async () => {
+  const emptyRoot = await mkdtemp(join(tmpdir(), "fumadocs-prewatch-global-"));
+
+  try {
+    const result = applyPatch(emptyRoot, "--postinstall");
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, "");
+    assert.equal(result.stderr, "");
+  } finally {
+    await rm(emptyRoot, { recursive: true, force: true });
+  }
+});
+
+test("the postinstall script and the published files agree on the patcher", async () => {
+  const manifest = JSON.parse(await readFile(join(repositoryRoot, "package.json"), "utf8"));
+  const { PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS, PACK_ARTIFACT_REQUIRED_PATHS } =
+    await import("../../scripts/build/pack-artifact-policy.ts");
+  const script = "scripts/build/apply-fumadocs-mdx-patch.mjs";
+
+  assert.match(manifest.scripts.postinstall, /apply-fumadocs-mdx-patch\.mjs --postinstall$/);
+  assert.doesNotMatch(manifest.scripts["patch:fumadocs-mdx"], /--postinstall/);
+  assert.ok(manifest.files.includes(script), "package.json files ships the patcher");
+  assert.ok(PACK_ARTIFACT_ROOT_ALLOWED_EXACT_PATHS.includes(script), "the tarball may contain it");
+  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(script), "the tarball must contain it");
+});
+
 test("the patch applier rejects a package symlink that escapes node_modules", async () => {
   const fixture = await createPatchFixture();
   const externalRoot = await mkdtemp(join(tmpdir(), "fumadocs-prewatch-external-"));
@@ -508,7 +626,7 @@ test(
 
 test(
   "the real Fumadocs initialization path preconfigures custom ignores",
-  { timeout: 5_000 },
+  { timeout: REAL_FUMADOCS_TIMEOUT_MS, skip: unpatchedTreeSkip },
   async () => {
     const fixtureRoot = await mkdtemp(join(dependencyRoot, ".fumadocs-init-"));
     const docsRoot = join(fixtureRoot, "docs");
@@ -620,12 +738,10 @@ test("real Chokidar excludes custom and core paths while retaining default behav
     );
 
     await writeFile(englishFile, "# English update\n");
-    for (
-      let attempt = 0;
-      attempt < 20 && !events.some(({ file }) => file === englishFile);
-      attempt += 1
-    )
-      await delay(50);
+    await waitForCondition(
+      () => events.some(({ file }) => file === englishFile),
+      "English Markdown did not emit a watcher event"
+    );
     assert.ok(
       events.some(({ file }) => file === englishFile),
       "English Markdown emits a watcher event"

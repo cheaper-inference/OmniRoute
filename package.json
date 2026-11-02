@@ -308,7 +308,7 @@
     "test:all": "npm run test:unit && npm run test:vitest && npm run test:vitest:ui && npm run test:ecosystem && npm run test:e2e",
     "check": "npm run lint && npm run test",
     "prepublishOnly": "npm run build:cli-api && npm run build:cli && npm run check:pack-artifact",
-    "postinstall": "node scripts/build/postinstall.mjs && node scripts/build/apply-fumadocs-mdx-patch.mjs",
+    "postinstall": "node scripts/build/postinstall.mjs && node scripts/build/apply-fumadocs-mdx-patch.mjs --postinstall",
     "patch:fumadocs-mdx": "node scripts/build/apply-fumadocs-mdx-patch.mjs",
     "uninstall": "node scripts/build/uninstall.mjs",
     "uninstall:full": "node scripts/build/uninstall.mjs --full",

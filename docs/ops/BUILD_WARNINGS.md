@@ -53,9 +53,10 @@ OmniRoute temporarily applies a version-specific `fumadocs-mdx@15.4.6` patch dur
 installation. It supplies a development-only watcher ignore before Fumadocs registers its
 directories, keeping `docs/i18n` out of the default MDX watch tree. This is a bridge until
 Fumadocs provides an official watcher-ignore API; do not upgrade `fumadocs-mdx` without
-regenerating and validating the version-specific patch.
+regenerating and validating the version-specific patch. The bridge has no effect on production
+builds, and Docker or `--ignore-scripts` installs do not apply it.
 
-Arabic translation edits therefore require a manual browser refresh by default. Set
+Translation edits therefore require a manual browser refresh by default. Set
 `OMNIROUTE_MDX_WATCH_I18N=1` to restore translation watching when actively authoring those
 files. That opt-in may substantially increase file-descriptor pressure on large translation
 trees.
@@ -67,8 +68,11 @@ trees.
 - If an installation is forcibly interrupted while applying the patch, stop every installer
   using that dependency tree and perform a clean reinstall. Do not manually repair or
   partially overwrite Fumadocs distribution files.
-- Treat a patch-version mismatch or patch-applier failure as an installation failure. Keep
-  the dependency tree unchanged until a clean reinstall has completed successfully.
+- A patch-version mismatch or patch-applier failure during `npm install` / `npm ci` prints a
+  `[fumadocs-mdx patch] skipped` warning and the install continues: the dev watcher then watches
+  `docs/i18n` as it did before the bridge. Run `npm run patch:fumadocs-mdx` to see the failure with
+  a non-zero exit. `tests/unit/fumadocs-prewatch-patch.test.mjs` also fails when the installed
+  version is not the one the patcher targets, so a bump cannot lose the patch silently.
 
 ## Runtime configuration messages during static generation
 
