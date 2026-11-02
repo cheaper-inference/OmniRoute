@@ -47,6 +47,7 @@ import type {
 import { randomUUID } from "crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { makeExecutorErrorResult as makeErrorResult } from "../utils/error.ts";
 import { connectObscuraBrowser } from "../services/obscura.ts";
 import type { Browser, Page } from "playwright";
@@ -89,15 +90,20 @@ const CHAT_TIMEOUT_MS = 120_000;
 const BLOCKED_MESSAGE =
   "Cloudflare Playground blocked the headless browser (fingerprint check). Set CLOUDFLARE_PLAYGROUND_CHROME_PATH to a full desktop Chrome binary and retry.";
 
+/** Opt-in: the larger retry budget and the hard failure once it is exhausted. */
+export const STRICT_TOOL_RECOVERY_FLAG = "CLOUDFLARE_PLAYGROUND_STRICT_TOOL_RECOVERY_ENABLED";
+
+/** Retry attempts for tool call validation failures with the flag off. */
+export const DEFAULT_TOOL_RETRIES = 3;
+
 /**
- * Maximum number of retry attempts for tool call validation failures.
+ * Retry attempts for tool call validation failures with the flag on.
  *
  * Each retry is a *fresh* playground room carrying a corrective reminder that
  * names the exact gate that failed, so the budget is what a drifting model
  * gets before the turn is declared unrecoverable (see the hard failure after
- * the loop — a turn that never produced a call is no longer silently shipped
- * as `finish_reason: "stop"`). Exported so tests can assert the production
- * budget without paying it in wall clock.
+ * the loop). Exported so tests can assert the production budget without paying
+ * it in wall clock.
  */
 export const MAX_TOOL_RETRIES = 10;
 
@@ -1037,7 +1043,9 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
 
     let gate = gateReply(parser, timedOut);
 
-    const maxToolRetries = this.maxToolRetries ?? MAX_TOOL_RETRIES;
+    const strictToolRecovery = isRegisteredFeatureFlagEnabled(STRICT_TOOL_RECOVERY_FLAG);
+    const maxToolRetries =
+      this.maxToolRetries ?? (strictToolRecovery ? MAX_TOOL_RETRIES : DEFAULT_TOOL_RETRIES);
 
     // Retry loop: any failed gate re-asks the model (up to maxToolRetries
     // times, one fresh room each) with a reminder naming the exact failure.
@@ -1093,21 +1101,23 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     }
 
     /**
-     * Hard failure: the model was re-asked `maxToolRetries` times and still
-     * never produced a usable call. Returning its last broken reply as
-     * `finish_reason: "stop"` is what made OpenCode appear to stop mid-task
-     * with no error at all — the client had no way to tell a finished turn
-     * from an unrecoverable one. Non-streaming reports it as HTTP 502 (which
-     * OmniRoute's fallback treats as a retryable upstream failure, so the
-     * router can move the request to another provider); streaming has already
-     * committed 200, so it emits an error chunk before `[DONE]`.
+     * Hard failure, only with the flag on: the model was re-asked
+     * `maxToolRetries` times and still never produced a usable call. Returning
+     * its last broken reply as `finish_reason: "stop"` is what made OpenCode
+     * appear to stop mid-task with no error at all — the client had no way to
+     * tell a finished turn from an unrecoverable one. Non-streaming reports it
+     * as HTTP 502 (which OmniRoute's fallback treats as a retryable upstream
+     * failure, so the router can move the request to another provider);
+     * streaming has already committed 200, so it emits an error chunk before
+     * `[DONE]`. With the flag off the last reply is returned as an answer.
      *
      * A reply that legitimately has no call — prose, a promoted summary — has
-     * `retry: false` and never reaches this branch.
+     * `retry: false` and never reaches this branch, and neither does a request
+     * the client abandoned, whose retries were cut short rather than exhausted.
      */
     let recoveryFailure: { message: string; failure: CfToolGateFailure; attempts: number } | null =
       null;
-    if (gate.retry && gate.reason) {
+    if (strictToolRecovery && gate.retry && gate.reason && !signal?.aborted) {
       const failure = gate.reason;
       const attempts = 1 + retryCount;
       recoveryFailure = {
