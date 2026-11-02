@@ -1123,7 +1123,11 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: runPackArtifactGate,
-        timeout: 20 * 60 * 1000,
+        // Covers build:cli + check:pack-artifact. Measured 2026-10-31 on an idle runner and a
+        // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
+        // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
+        // into a visible failure (same reasoning as the integration ceiling above).
+        timeout: 40 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
