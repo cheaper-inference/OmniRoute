@@ -108,6 +108,8 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 - [`POST /api/v1/music/generations`](references/endpoints.md#post-apiv1musicgenerations)
 - [`GET /api/v1/providers/{provider}/limits`](references/endpoints.md#get-apiv1providersproviderlimits)
 - [`PUT /api/v1/providers/{provider}/limits`](references/endpoints.md#put-apiv1providersproviderlimits)
+- [`GET /api/v1/quota-recoveries/{id}`](references/endpoints.md#get-apiv1quota-recoveriesid)
+- [`DELETE /api/v1/quota-recoveries/{id}`](references/endpoints.md#delete-apiv1quota-recoveriesid)
 - [`GET /api/v1/quotas/check`](references/endpoints.md#get-apiv1quotascheck)
 - [`GET /api/v1/registered-keys`](references/endpoints.md#get-apiv1registered-keys)
 - [`POST /api/v1/registered-keys`](references/endpoints.md#post-apiv1registered-keys)

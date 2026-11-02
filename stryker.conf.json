@@ -495,6 +495,7 @@
       "tests/unit/responses-passthrough-openai-compatible.test.ts",
       "tests/unit/retry-after-provenance.test.ts",
       "tests/unit/rotation-config-omniroute.test.ts",
+      "tests/unit/rotation-config-provider-cooldown.test.ts",
       "tests/unit/route-explainability.test.ts",
       "tests/unit/route-guard-acp-agents-local-only.test.ts",
       "tests/unit/route-guard-cli-tools-settings-local-only.test.ts",
@@ -682,7 +683,10 @@
       "tests/unit/chat-antigravity-429-budget.test.ts",
       "tests/unit/combo-retry-cut-stream.test.ts",
       "tests/unit/combo/combo-set-retry-durable-exhaustion.test.ts",
-      "tests/unit/sse-cut-tool-call-arguments.test.ts"
+      "tests/unit/sse-cut-tool-call-arguments.test.ts",
+      "tests/unit/antigravity-argon-404.test.ts",
+      "tests/unit/combo/combo-resilience-no-provider-state.test.ts",
+      "tests/unit/singbox-routes-local-only.test.ts"
     ],
     "nodeArgs": [
       "--import",
